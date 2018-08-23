@@ -65,6 +65,10 @@ static const char CURRENT_SNAPSHOT_SELECTED_ICON_NAME[] = "current_snapshot_sele
 static const char INVALID_SNAPSHOT_ICON_NAME[] = "invalid_snapshot";
 static const char INVALID_SNAPSHOT_SELECTED_ICON_NAME[] = "invalid_snapshot_selected";
 
+static constexpr char kDefaultBootItemName[] = "Quickboot";
+static constexpr char kDefaultBootFileBackedTitleName[] =
+            "Quickboot auto-saved. Other snapshots:";
+
 static SaveSnapshotOnExit getSaveOnExitChoice();
 static void setSaveOnExitChoice(SaveSnapshotOnExit choice);
 
@@ -72,10 +76,10 @@ static void setSaveOnExitChoice(SaveSnapshotOnExit choice);
 bool userSettingIsDontSaveSnapshot() {
     return getSaveOnExitChoice() == SaveSnapshotOnExit::Never;
 }
-
 // A class for items in the QTreeWidget.
 class SnapshotPage::WidgetSnapshotItem : public QTreeWidgetItem {
     public:
+
         // ctor for a top-level item
         WidgetSnapshotItem(const QString&   fileName,
                            const QString&   logicalName,
@@ -103,7 +107,7 @@ class SnapshotPage::WidgetSnapshotItem : public QTreeWidgetItem {
         //     mFileName(fileName),
         //     mDateTime(dateTime)
         // {
-        //     mParentName = parentItem->data(COLUMN_NAME, Qt::DisplayRole).toString();
+        //     mParentName = parentItem->logicalName();
         //     setText(COLUMN_NAME, logicalName);
         // }
 
@@ -131,6 +135,10 @@ class SnapshotPage::WidgetSnapshotItem : public QTreeWidgetItem {
         QDateTime dateTime() const {
             return mDateTime;
         }
+        QString logicalName() const {
+            return data(COLUMN_NAME, Qt::DisplayRole).toString();
+        }
+
         bool isValid() const {
             return mIsValid;
         }
@@ -188,15 +196,6 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
                                mInfoPanelSmallGeo.width(),
                                mInfoPanelSmallGeo.y() + mInfoPanelSmallGeo.height() - previewGeo.y());
 
-    // Save QuickBoot snapshot on exit
-    QString avdNameWithUnderscores(android_hw->avd_name);
-
-    if (fc::isEnabled(fc::QuickbootFileBacked)) {
-        mUi->saveOnExitTitle->setText(QString(tr("Auto-save emulator state?")));
-    } else {
-        mUi->saveOnExitTitle->setText(QString(tr("Save quick-boot state on exit for AVD: "))
-                + avdNameWithUnderscores.replace('_', ' '));
-    }
 
     SaveSnapshotOnExit saveOnExitChoice = getSaveOnExitChoice();
     changeUiFromSaveOnExitSetting(saveOnExitChoice);
@@ -207,6 +206,7 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
 
     // In file-backed Quickboot, the 'save now' button is always disabled.
     if (fc::isEnabled(fc::QuickbootFileBacked)) {
+        mUi->saveOnExitTitle->setText(QString(tr("Auto-save current state to Quickboot")));
 
         // Migrate "Ask" users to "Always"
         if (saveOnExitChoice == SaveSnapshotOnExit::Ask) {
@@ -239,7 +239,17 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
         if (android::base::isRestartDisabled()) {
             mUi->saveQuickBootOnExit->setEnabled(false);
         }
+
+        if (saveOnExitChoice == SaveSnapshotOnExit::Always) {
+            mUi->noneAvailableLabel->setText(QString(tr("Auto-saving Quickboot state...")));
+        }
     } else {
+        // Save QuickBoot snapshot on exit
+        QString avdNameWithUnderscores(android_hw->avd_name);
+
+        mUi->saveOnExitTitle->setText(QString(tr("Save quick-boot state on exit for AVD: "))
+                + avdNameWithUnderscores.replace('_', ' '));
+
         // Enable SAVE NOW if we won't overwrite the state on exit
         mUi->saveQuickBootNowButton->setEnabled(saveOnExitChoice != SaveSnapshotOnExit::Always);
 
@@ -318,7 +328,7 @@ void SnapshotPage::deleteSnapshot(const WidgetSnapshotItem* theItem) {
         return;
     }
 
-    QString logicalName = theItem->data(COLUMN_NAME, Qt::DisplayRole).toString();
+    QString logicalName = theItem->logicalName();
     QString fileName = theItem->fileName();
 
     QMessageBox msgBox(QMessageBox::Question,
@@ -361,7 +371,7 @@ void SnapshotPage::editSnapshot(const WidgetSnapshotItem* theItem) {
 
     dialogLayout->addWidget(new QLabel(tr("Name")));
     QLineEdit* nameEdit = new QLineEdit(this);
-    QString oldName = theItem->data(COLUMN_NAME, Qt::DisplayRole).toString();
+    QString oldName = theItem->logicalName();
     nameEdit->setText(oldName);
     nameEdit->selectAll();
     dialogLayout->addWidget(nameEdit);
@@ -715,7 +725,7 @@ void SnapshotPage::updateAfterSelectionChanged() {
         mAllowDelete = false;
         mAllowTake = !mIsStandAlone;
     } else {
-        QString logicalName = theItem->data(COLUMN_NAME, Qt::DisplayRole).toString();
+        QString logicalName = theItem->logicalName();
         simpleName = theItem->fileName();
 
         System::FileSize snapSize = android::snapshot::folderSize(simpleName.toStdString());
@@ -740,10 +750,13 @@ void SnapshotPage::updateAfterSelectionChanged() {
                                        tr("(unknown)"),
                                    simpleName,
                                    descriptionString);
-            mAllowLoad = true;
-            mAllowDelete = true;
+
+            bool isFileBacked = theItem->logicalName() == kDefaultBootFileBackedTitleName;
+
+            mAllowLoad = !isFileBacked;
+            mAllowDelete = !isFileBacked;
             // Cannot edit the default snapshot
-            mAllowEdit = simpleName != Quickboot::kDefaultBootSnapshot;
+            mAllowEdit = !isFileBacked && (simpleName != Quickboot::kDefaultBootSnapshot);
             mAllowTake = mAllowEdit || !mIsStandAlone;
         } else {
             // Invalid snapshot directory
@@ -1055,7 +1068,6 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
     int nItems = 0;
     bool anItemIsSelected = false;
     for (const QString& fileName : snapshotList) {
-
         Snapshot theSnapshot(fileName.toStdString().c_str());
 
         const emulator_snapshot::Snapshot* protobuf = theSnapshot.getGeneralInfo();
@@ -1065,6 +1077,14 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
              theSnapshot.checkValid(
                 false /* don't write out the error code to protobuf; we just want
                          to check validity here */));
+
+        // bug: 113037359
+        // Don't auto-invalidate quickboot snapshot
+        // when switching to file-backed Quickboot from older version.
+        if (fc::isEnabled(fc::QuickbootFileBacked) &&
+            fileName == Quickboot::kDefaultBootSnapshot) {
+            snapshotIsValid = true;
+        }
 
         if (!snapshotIsValid && deleteInvalidsChoice != DeleteInvalidSnapshots::No) {
             invalidSnapshotNames.append(fileName);
@@ -1091,7 +1111,11 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
         QTreeWidget* displayWidget;
         if (fileName == Quickboot::kDefaultBootSnapshot) {
             // Use the "default" section of the display.
-            logicalName = "QuickBoot";
+            if (fc::isEnabled(fc::QuickbootFileBacked)) {
+                logicalName = kDefaultBootFileBackedTitleName;
+            } else {
+                logicalName = kDefaultBootItemName;
+            }
             displayWidget = mUi->defaultSnapshotDisplay;
         } else {
             // Use the regular section of the display.

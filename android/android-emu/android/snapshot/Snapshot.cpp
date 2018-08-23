@@ -336,7 +336,7 @@ struct {
          avdInfo_getEncryptionKeyImagePath},
 };
 
-static constexpr int kVersion = 23;
+static constexpr int kVersion = 26;
 static constexpr int kMaxSaveStatsHistory = 10;
 
 base::StringView Snapshot::dataDir(const char* name) {

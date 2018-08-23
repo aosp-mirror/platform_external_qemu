@@ -13,7 +13,7 @@
  */
 
 #include "qemu/osdep.h"
-#include "net/trace.h"
+#include "trace.h"
 #include "net/colo.h"
 
 uint32_t connection_key_hash(const void *opaque)
@@ -43,11 +43,11 @@ int parse_packet_early(Packet *pkt)
 {
     int network_length;
     static const uint8_t vlan[] = {0x81, 0x00};
-    uint8_t *data = pkt->data;
+    uint8_t *data = pkt->data + pkt->vnet_hdr_len;
     uint16_t l3_proto;
     ssize_t l2hdr_len = eth_get_l2_hdr_length(data);
 
-    if (pkt->size < ETH_HLEN) {
+    if (pkt->size < ETH_HLEN + pkt->vnet_hdr_len) {
         trace_colo_proxy_main("pkt->size < ETH_HLEN");
         return 1;
     }
@@ -73,13 +73,21 @@ int parse_packet_early(Packet *pkt)
     }
 
     network_length = pkt->ip->ip_hl * 4;
-    if (pkt->size < l2hdr_len + network_length) {
+    if (pkt->size < l2hdr_len + network_length + pkt->vnet_hdr_len) {
         trace_colo_proxy_main("pkt->size < network_header + network_length");
         return 1;
     }
     pkt->transport_header = pkt->network_header + network_length;
 
     return 0;
+}
+
+void extract_ip_and_port(uint32_t tmp_ports, ConnectionKey *key, Packet *pkt)
+{
+        key->src = pkt->ip->ip_src;
+        key->dst = pkt->ip->ip_dst;
+        key->src_port = ntohs(tmp_ports >> 16);
+        key->dst_port = ntohs(tmp_ports & 0xffff);
 }
 
 void fill_connection_key(Packet *pkt, ConnectionKey *key)
@@ -97,17 +105,11 @@ void fill_connection_key(Packet *pkt, ConnectionKey *key)
     case IPPROTO_SCTP:
     case IPPROTO_UDPLITE:
         tmp_ports = *(uint32_t *)(pkt->transport_header);
-        key->src = pkt->ip->ip_src;
-        key->dst = pkt->ip->ip_dst;
-        key->src_port = ntohs(tmp_ports & 0xffff);
-        key->dst_port = ntohs(tmp_ports >> 16);
+        extract_ip_and_port(tmp_ports, key, pkt);
         break;
     case IPPROTO_AH:
         tmp_ports = *(uint32_t *)(pkt->transport_header + 4);
-        key->src = pkt->ip->ip_src;
-        key->dst = pkt->ip->ip_dst;
-        key->src_port = ntohs(tmp_ports & 0xffff);
-        key->dst_port = ntohs(tmp_ports >> 16);
+        extract_ip_and_port(tmp_ports, key, pkt);
         break;
     default:
         break;
@@ -136,6 +138,8 @@ Connection *connection_new(ConnectionKey *key)
     conn->processing = false;
     conn->offset = 0;
     conn->syn_flag = 0;
+    conn->pack = 0;
+    conn->sack = 0;
     g_queue_init(&conn->primary_list);
     g_queue_init(&conn->secondary_list);
 
@@ -153,13 +157,21 @@ void connection_destroy(void *opaque)
     g_slice_free(Connection, conn);
 }
 
-Packet *packet_new(const void *data, int size)
+Packet *packet_new(const void *data, int size, int vnet_hdr_len)
 {
     Packet *pkt = g_slice_new(Packet);
 
     pkt->data = g_memdup(data, size);
     pkt->size = size;
     pkt->creation_ms = qemu_clock_get_ms(QEMU_CLOCK_HOST);
+    pkt->vnet_hdr_len = vnet_hdr_len;
+    pkt->tcp_seq = 0;
+    pkt->tcp_ack = 0;
+    pkt->seq_end = 0;
+    pkt->header_size = 0;
+    pkt->payload_size = 0;
+    pkt->offset = 0;
+    pkt->flags = 0;
 
     return pkt;
 }

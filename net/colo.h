@@ -43,6 +43,17 @@ typedef struct Packet {
     int size;
     /* Time of packet creation, in wall clock ms */
     int64_t creation_ms;
+    /* Get vnet_hdr_len from filter */
+    uint32_t vnet_hdr_len;
+    uint32_t tcp_seq; /* sequence number */
+    uint32_t tcp_ack; /* acknowledgement number */
+    /* the sequence number of the last byte of the packet */
+    uint32_t seq_end;
+    uint8_t header_size;  /* the header length */
+    uint16_t payload_size; /* the payload length */
+    /* record the payload offset(the length that has been compared) */
+    uint16_t offset;
+    uint8_t flags; /* Flags(aka Control bits) */
 } Packet;
 
 typedef struct ConnectionKey {
@@ -62,6 +73,12 @@ typedef struct Connection {
     /* flag to enqueue unprocessed_connections */
     bool processing;
     uint8_t ip_proto;
+    /* record the sequence number that has been compared */
+    uint32_t compare_seq;
+    /* the maximum of acknowledgement number in primary_list queue */
+    uint32_t pack;
+    /* the maximum of acknowledgement number in secondary_list queue */
+    uint32_t sack;
     /* offset = secondary_seq - primary_seq */
     tcp_seq  offset;
     /*
@@ -74,6 +91,7 @@ typedef struct Connection {
 uint32_t connection_key_hash(const void *opaque);
 int connection_key_equal(const void *opaque1, const void *opaque2);
 int parse_packet_early(Packet *pkt);
+void extract_ip_and_port(uint32_t tmp_ports, ConnectionKey *key, Packet *pkt);
 void fill_connection_key(Packet *pkt, ConnectionKey *key);
 void reverse_connection_key(ConnectionKey *key);
 Connection *connection_new(ConnectionKey *key);
@@ -82,7 +100,7 @@ Connection *connection_get(GHashTable *connection_track_table,
                            ConnectionKey *key,
                            GQueue *conn_list);
 void connection_hashtable_reset(GHashTable *connection_track_table);
-Packet *packet_new(const void *data, int size);
+Packet *packet_new(const void *data, int size, int vnet_hdr_len);
 void packet_destroy(void *opaque, void *user_data);
 
 #endif /* QEMU_COLO_PROXY_H */

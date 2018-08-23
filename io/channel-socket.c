@@ -20,9 +20,10 @@
 
 #include "qemu/osdep.h"
 #include "qapi/error.h"
+#include "qapi/qapi-visit-sockets.h"
 #include "io/channel-socket.h"
 #include "io/channel-watch.h"
-#include "io/trace.h"
+#include "trace.h"
 #include "qapi/clone-visitor.h"
 
 #define SOCKET_MAX_FDS 16
@@ -140,7 +141,7 @@ int qio_channel_socket_connect_sync(QIOChannelSocket *ioc,
     int fd;
 
     trace_qio_channel_socket_connect_sync(ioc, addr);
-    fd = socket_connect(addr, errp, NULL, NULL);
+    fd = socket_connect(addr, errp);
     if (fd < 0) {
         trace_qio_channel_socket_connect_fail(ioc);
         return -1;
@@ -173,7 +174,8 @@ void qio_channel_socket_connect_async(QIOChannelSocket *ioc,
                                       SocketAddress *addr,
                                       QIOTaskFunc callback,
                                       gpointer opaque,
-                                      GDestroyNotify destroy)
+                                      GDestroyNotify destroy,
+                                      GMainContext *context)
 {
     QIOTask *task = qio_task_new(
         OBJECT(ioc), callback, opaque, destroy);
@@ -187,7 +189,8 @@ void qio_channel_socket_connect_async(QIOChannelSocket *ioc,
     qio_task_run_in_thread(task,
                            qio_channel_socket_connect_worker,
                            addrCopy,
-                           (GDestroyNotify)qapi_free_SocketAddress);
+                           (GDestroyNotify)qapi_free_SocketAddress,
+                           context);
 }
 
 
@@ -232,7 +235,8 @@ void qio_channel_socket_listen_async(QIOChannelSocket *ioc,
                                      SocketAddress *addr,
                                      QIOTaskFunc callback,
                                      gpointer opaque,
-                                     GDestroyNotify destroy)
+                                     GDestroyNotify destroy,
+                                     GMainContext *context)
 {
     QIOTask *task = qio_task_new(
         OBJECT(ioc), callback, opaque, destroy);
@@ -245,7 +249,8 @@ void qio_channel_socket_listen_async(QIOChannelSocket *ioc,
     qio_task_run_in_thread(task,
                            qio_channel_socket_listen_worker,
                            addrCopy,
-                           (GDestroyNotify)qapi_free_SocketAddress);
+                           (GDestroyNotify)qapi_free_SocketAddress,
+                           context);
 }
 
 
@@ -307,7 +312,8 @@ void qio_channel_socket_dgram_async(QIOChannelSocket *ioc,
                                     SocketAddress *remoteAddr,
                                     QIOTaskFunc callback,
                                     gpointer opaque,
-                                    GDestroyNotify destroy)
+                                    GDestroyNotify destroy,
+                                    GMainContext *context)
 {
     QIOTask *task = qio_task_new(
         OBJECT(ioc), callback, opaque, destroy);
@@ -321,7 +327,8 @@ void qio_channel_socket_dgram_async(QIOChannelSocket *ioc,
     qio_task_run_in_thread(task,
                            qio_channel_socket_dgram_worker,
                            data,
-                           qio_channel_socket_dgram_worker_free);
+                           qio_channel_socket_dgram_worker_free,
+                           context);
 }
 
 
@@ -340,10 +347,11 @@ qio_channel_socket_accept(QIOChannelSocket *ioc,
     cioc->fd = qemu_accept(ioc->fd, (struct sockaddr *)&cioc->remoteAddr,
                            &cioc->remoteAddrLen);
     if (cioc->fd < 0) {
-        trace_qio_channel_socket_accept_fail(ioc);
         if (errno == EINTR) {
             goto retry;
         }
+        error_setg_errno(errp, errno, "Unable to accept connection");
+        trace_qio_channel_socket_accept_fail(ioc);
         goto error;
     }
 

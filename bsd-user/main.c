@@ -25,7 +25,6 @@
 #include "qemu/config-file.h"
 #include "qemu/path.h"
 #include "qemu/help_option.h"
-/* For tb_lock */
 #include "cpu.h"
 #include "exec/exec-all.h"
 #include "tcg.h"
@@ -33,7 +32,6 @@
 #include "qemu/envlist.h"
 #include "exec/log.h"
 #include "trace/control.h"
-#include "glib-compat.h"
 
 int singlestep;
 unsigned long mmap_min_addr;
@@ -620,9 +618,10 @@ void cpu_loop(CPUSPARCState *env)
             break;
         case EXCP_DEBUG:
             {
-                int sig;
-
-                sig = gdb_handlesig(cs, TARGET_SIGTRAP);
+#if 0
+                int sig =
+#endif
+                gdb_handlesig(cs, TARGET_SIGTRAP);
 #if 0
                 if (sig)
                   {
@@ -650,7 +649,7 @@ void cpu_loop(CPUSPARCState *env)
 
 static void usage(void)
 {
-    printf("qemu-" TARGET_NAME " version " QEMU_VERSION QEMU_PKGVERSION
+    printf("qemu-" TARGET_NAME " version " QEMU_FULL_VERSION
            "\n" QEMU_COPYRIGHT "\n"
            "usage: qemu-" TARGET_NAME " [options] program [arguments...]\n"
            "BSD CPU emulator (compiled for %s emulation)\n"
@@ -686,6 +685,8 @@ static void usage(void)
            "    -E var1=val2 -E var2=val2 -U LD_PRELOAD -U LD_DEBUG\n"
            "Note that if you provide several changes to single variable\n"
            "last change will stay in effect.\n"
+           "\n"
+           QEMU_HELP_BOTTOM "\n"
            ,
            TARGET_NAME,
            interp_prefix,
@@ -722,6 +723,7 @@ int main(int argc, char **argv)
 {
     const char *filename;
     const char *cpu_model;
+    const char *cpu_type;
     const char *log_file = NULL;
     const char *log_mask = NULL;
     struct target_pt_regs regs1, *regs = &regs1;
@@ -744,10 +746,7 @@ int main(int argc, char **argv)
     qemu_init_cpu_list();
     module_call_init(MODULE_INIT_QOM);
 
-    if ((envlist = envlist_create()) == NULL) {
-        (void) fprintf(stderr, "Unable to allocate envlist\n");
-        exit(1);
-    }
+    envlist = envlist_create();
 
     /* add current environment into the list */
     for (wrk = environ; *wrk != NULL; wrk++) {
@@ -785,10 +784,7 @@ int main(int argc, char **argv)
                 usage();
         } else if (!strcmp(r, "ignore-environment")) {
             envlist_free(envlist);
-            if ((envlist = envlist_create()) == NULL) {
-                (void) fprintf(stderr, "Unable to allocate envlist\n");
-                exit(1);
-            }
+            envlist = envlist_create();
         } else if (!strcmp(r, "U")) {
             r = argv[optind++];
             if (envlist_unsetenv(envlist, r) != 0)
@@ -905,11 +901,8 @@ int main(int argc, char **argv)
     tcg_exec_init(0);
     /* NOTE: we need to init the CPU at this stage to get
        qemu_host_page_size */
-    cpu = cpu_init(cpu_model);
-    if (!cpu) {
-        fprintf(stderr, "Unable to find CPU definition\n");
-        exit(1);
-    }
+    cpu_type = parse_cpu_model(cpu_model);
+    cpu = cpu_create(cpu_type);
     env = cpu->env_ptr;
 #if defined(TARGET_SPARC) || defined(TARGET_PPC)
     cpu_reset(cpu);
@@ -956,10 +949,10 @@ int main(int argc, char **argv)
     }
 
     for (wrk = target_environ; *wrk; wrk++) {
-        free(*wrk);
+        g_free(*wrk);
     }
 
-    free(target_environ);
+    g_free(target_environ);
 
     if (qemu_loglevel_mask(CPU_LOG_PAGE)) {
         qemu_log("guest_base  0x%lx\n", guest_base);
@@ -985,7 +978,8 @@ int main(int argc, char **argv)
     /* Now that we've loaded the binary, GUEST_BASE is fixed.  Delay
        generating the prologue until now so that the prologue can take
        the real value of GUEST_BASE into account.  */
-    tcg_prologue_init(&tcg_ctx);
+    tcg_prologue_init(tcg_ctx);
+    tcg_region_init();
 
     /* build Task State */
     memset(ts, 0, sizeof(TaskState));

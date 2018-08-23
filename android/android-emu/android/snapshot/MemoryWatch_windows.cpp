@@ -205,7 +205,9 @@ private:
 bool MemoryAccessWatch::isSupported() {
 
     if (!android::featurecontrol::isEnabled(
-            android::featurecontrol::WindowsOnDemandSnapshotLoad)) {
+            android::featurecontrol::WindowsOnDemandSnapshotLoad) ||
+        android::featurecontrol::isEnabled(
+            android::featurecontrol::QuickbootFileBacked)) {
         return false;
     }
 

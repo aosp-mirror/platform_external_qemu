@@ -875,11 +875,13 @@ void GLEScontext::postLoadRestoreCtx() {
     GLenum err = 0;
     do {
         err = dispatcher.glGetError();
+#ifdef _DEBUG
         if (err) {
             fprintf(stderr,
                     "warning: get GL error %d while restoring a snapshot\n",
                     err);
         }
+#endif
     } while (err != 0);
 }
 

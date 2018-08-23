@@ -34,12 +34,13 @@
 #include "qapi/error.h"
 #include "sysemu/sysemu.h"
 #include "qemu/main-loop.h"
-#include "util/trace.h"
+#include "trace.h"
 #include "qemu/sockets.h"
 #include "qemu/cutils.h"
 
 /* this must come after including "trace.h" */
 #include <shlobj.h>
+#include <psapi.h>
 
 void *qemu_oom_check(void *ptr)
 {
@@ -67,7 +68,9 @@ void *qemu_memalign(size_t alignment, size_t size)
     return qemu_oom_check(qemu_try_memalign(alignment, size));
 }
 
-void *qemu_anon_ram_alloc(size_t size, uint64_t *align)
+bool insufficientMemMessage = false;
+
+void *qemu_anon_ram_alloc(size_t size, uint64_t *align, bool shared)
 {
     void *ptr;
 
@@ -75,6 +78,58 @@ void *qemu_anon_ram_alloc(size_t size, uint64_t *align)
        has 64Kb granularity, but at least it guarantees us that the
        memory is page aligned. */
     ptr = VirtualAlloc(NULL, size, MEM_COMMIT, PAGE_READWRITE);
+
+    // On failure, check the commit size.
+    if (!ptr) {
+        bool notEnoughCommit = false;
+        bool shouldTryAgain = false;
+        SIZE_T commitTotalBytes, commitLimitBytes;
+        const double oneMbBytes = 1048576.0;
+        const double safetyFactor = 1.2;
+        double totalMb, limitMb, neededMb, remainingMb;
+
+        PERFORMANCE_INFORMATION pi = { sizeof(pi) };
+
+        if (!GetPerformanceInfo(&pi, sizeof(pi))) {
+            fprintf(stderr, "ERROR: GetPerformanceInfo() failed.\n");
+            return ptr;
+        }
+
+        commitTotalBytes = pi.PageSize * pi.CommitTotal;
+        commitLimitBytes = pi.PageSize * pi.CommitLimit;
+
+        totalMb = commitTotalBytes / oneMbBytes;
+        limitMb = commitLimitBytes / oneMbBytes;
+        neededMb = size / oneMbBytes;
+        remainingMb = limitMb - totalMb;
+
+        if (neededMb * 1.2 > limitMb - totalMb) {
+            fprintf(stderr,
+                "ERROR: Insufficient RAM free for launching emulator.\n"
+                "Please free up memory (close other programs and files),\n"
+                "or decrease the AVD RAM size and try again.\n"
+                "Stats:\n"
+                "    Currently committed: %f MB\n"
+                "    Commit limit: %f MB\n"
+                "    Remaining: %f MB\n"
+                "    Needed: %f MB\n"
+                "For more info, see the Emulator Troubleshooting website:\n"
+                "https://developer.android.com/studio/run/emulator-troubleshooting#windows_free_ram_and_commit_charge\n"
+                "under \"Windows: Free RAM and commit charge\".",
+                totalMb,
+                limitMb,
+                remainingMb,
+                neededMb);
+            insufficientMemMessage = true;
+            return ptr;
+        } else {
+            // Maybe things cleared up. Try again.
+            ptr = VirtualAlloc(NULL, size, MEM_COMMIT, PAGE_READWRITE);
+            trace_qemu_anon_ram_alloc(size, ptr);
+            return ptr;
+        }
+    }
+
     trace_qemu_anon_ram_alloc(size, ptr);
     return ptr;
 }
@@ -438,10 +493,8 @@ static int poll_rest(gboolean poll_msgs, HANDLE *handles, gint nhandles,
         if (timeout == 0 && nhandles > 1) {
             /* Remove the handle that fired */
             int i;
-            if (ready < nhandles - 1) {
-                for (i = ready - WAIT_OBJECT_0 + 1; i < nhandles; i++) {
-                    handles[i-1] = handles[i];
-                }
+            for (i = ready - WAIT_OBJECT_0 + 1; i < nhandles; i++) {
+                handles[i-1] = handles[i];
             }
             nhandles--;
             recursed_result = poll_rest(FALSE, handles, nhandles, fds, nfds, 0);
@@ -551,30 +604,6 @@ void os_mem_prealloc(int fd, char *area, size_t memory, int smp_cpus,
     for (i = 0; i < memory / pagesize; i++) {
         memset(area + pagesize * i, 0, 1);
     }
-}
-
-
-/* XXX: put correct support for win32 */
-int qemu_read_password(char *buf, int buf_size)
-{
-    int c, i;
-
-    printf("Password: ");
-    fflush(stdout);
-    i = 0;
-    for (;;) {
-        c = getchar();
-        if (c < 0) {
-            buf[i] = '\0';
-            return -1;
-        } else if (c == '\n') {
-            break;
-        } else if (i < (buf_size - 1)) {
-            buf[i++] = c;
-        }
-    }
-    buf[i] = '\0';
-    return 0;
 }
 
 

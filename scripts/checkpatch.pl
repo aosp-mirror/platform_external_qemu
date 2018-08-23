@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 # (c) 2001, Dave Jones. (the file handling bit)
 # (c) 2005, Joel Schopp <jschopp@austin.ibm.com> (the ugly bit)
 # (c) 2007,2008, Andy Whitcroft <apw@uk.ibm.com> (new conditions, test suite)
@@ -6,9 +6,12 @@
 # Licensed under the terms of the GNU GPL License version 2
 
 use strict;
+use warnings;
 
 my $P = $0;
 $P =~ s@.*/@@g;
+
+our $SrcFile    = qr{\.(?:h|c|cpp|s|S|pl|py|sh)$};
 
 my $V = '0.31';
 
@@ -17,11 +20,12 @@ use Getopt::Long qw(:config no_auto_abbrev);
 my $quiet = 0;
 my $tree = 1;
 my $chk_signoff = 1;
-my $chk_patch = 1;
+my $chk_patch = undef;
+my $chk_branch = undef;
 my $tst_only;
 my $emacs = 0;
 my $terse = 0;
-my $file = 0;
+my $file = undef;
 my $no_warnings = 0;
 my $summary = 1;
 my $mailback = 0;
@@ -34,14 +38,19 @@ sub help {
 	my ($exitcode) = @_;
 
 	print << "EOM";
-Usage: $P [OPTION]... [FILE]...
+Usage:
+
+    $P [OPTION]... [FILE]...
+    $P [OPTION]... [GIT-REV-LIST]
+
 Version: $V
 
 Options:
   -q, --quiet                quiet
   --no-tree                  run without a kernel tree
   --no-signoff               do not check for 'Signed-off-by' line
-  --patch                    treat FILE as patchfile (default)
+  --patch                    treat FILE as patchfile
+  --branch                   treat args as GIT revision list
   --emacs                    emacs compile window format
   --terse                    one line per report
   -f, --file                 treat FILE as regular source file
@@ -68,6 +77,7 @@ GetOptions(
 	'tree!'		=> \$tree,
 	'signoff!'	=> \$chk_signoff,
 	'patch!'	=> \$chk_patch,
+	'branch!'	=> \$chk_branch,
 	'emacs!'	=> \$emacs,
 	'terse!'	=> \$terse,
 	'f|file!'	=> \$file,
@@ -90,6 +100,48 @@ my $exit = 0;
 if ($#ARGV < 0) {
 	print "$P: no input files\n";
 	exit(1);
+}
+
+if (!defined $chk_branch && !defined $chk_patch && !defined $file) {
+	$chk_branch = $ARGV[0] =~ /.\.\./ ? 1 : 0;
+	$file = $ARGV[0] =~ /$SrcFile/ ? 1 : 0;
+	$chk_patch = $chk_branch || $file ? 0 : 1;
+} elsif (!defined $chk_branch && !defined $chk_patch) {
+	if ($file) {
+		$chk_branch = $chk_patch = 0;
+	} else {
+		$chk_branch = $ARGV[0] =~ /.\.\./ ? 1 : 0;
+		$chk_patch = $chk_branch ? 0 : 1;
+	}
+} elsif (!defined $chk_branch && !defined $file) {
+	if ($chk_patch) {
+		$chk_branch = $file = 0;
+	} else {
+		$chk_branch = $ARGV[0] =~ /.\.\./ ? 1 : 0;
+		$file = $chk_branch ? 0 : 1;
+	}
+} elsif (!defined $chk_patch && !defined $file) {
+	if ($chk_branch) {
+		$chk_patch = $file = 0;
+	} else {
+		$file = $ARGV[0] =~ /$SrcFile/ ? 1 : 0;
+		$chk_patch = $file ? 0 : 1;
+	}
+} elsif (!defined $chk_branch) {
+	$chk_branch = $chk_patch || $file ? 0 : 1;
+} elsif (!defined $chk_patch) {
+	$chk_patch = $chk_branch || $file ? 0 : 1;
+} elsif (!defined $file) {
+	$file = $chk_patch || $chk_branch ? 0 : 1;
+}
+
+if (($chk_patch && $chk_branch) ||
+    ($chk_patch && $file) ||
+    ($chk_branch && $file)) {
+	die "Only one of --file, --branch, --patch is permitted\n";
+}
+if (!$chk_patch && !$chk_branch && !$file) {
+	die "One of --file, --branch, --patch is required\n";
 }
 
 my $dbg_values = 0;
@@ -212,6 +264,8 @@ our @typeList = (
 	qr{${Ident}_handler},
 	qr{${Ident}_handler_fn},
 	qr{target_(?:u)?long},
+	qr{hwaddr},
+	qr{xml${Ident}},
 );
 
 # This can be modified by sub possible.  Since it can be empty, be careful
@@ -250,32 +304,66 @@ $chk_signoff = 0 if ($file);
 my @rawlines = ();
 my @lines = ();
 my $vname;
-for my $filename (@ARGV) {
-	my $FILE;
-	if ($file) {
-		open($FILE, '-|', "diff -u /dev/null $filename") ||
-			die "$P: $filename: diff failed - $!\n";
-	} elsif ($filename eq '-') {
-		open($FILE, '<&STDIN');
-	} else {
-		open($FILE, '<', "$filename") ||
-			die "$P: $filename: open failed - $!\n";
-	}
-	if ($filename eq '-') {
-		$vname = 'Your patch';
-	} else {
-		$vname = $filename;
-	}
-	while (<$FILE>) {
+if ($chk_branch) {
+	my @patches;
+	my $HASH;
+	open($HASH, "-|", "git", "log", "--format=%H", $ARGV[0]) ||
+		die "$P: git log --format=%H $ARGV[0] failed - $!\n";
+
+	while (<$HASH>) {
 		chomp;
-		push(@rawlines, $_);
+		push @patches, $_;
 	}
-	close($FILE);
-	if (!process($filename)) {
-		$exit = 1;
+
+	close $HASH;
+
+	die "$P: no revisions returned for revlist '$chk_branch'\n"
+	    unless @patches;
+
+	for my $hash (@patches) {
+		my $FILE;
+		open($FILE, '-|', "git", "show", $hash) ||
+			die "$P: git show $hash - $!\n";
+		$vname = $hash;
+		while (<$FILE>) {
+			chomp;
+			push(@rawlines, $_);
+		}
+		close($FILE);
+		if (!process($hash)) {
+			$exit = 1;
+		}
+		@rawlines = ();
+		@lines = ();
 	}
-	@rawlines = ();
-	@lines = ();
+} else {
+	for my $filename (@ARGV) {
+		my $FILE;
+		if ($file) {
+			open($FILE, '-|', "diff -u /dev/null $filename") ||
+				die "$P: $filename: diff failed - $!\n";
+		} elsif ($filename eq '-') {
+			open($FILE, '<&STDIN');
+		} else {
+			open($FILE, '<', "$filename") ||
+				die "$P: $filename: open failed - $!\n";
+		}
+		if ($filename eq '-') {
+			$vname = 'Your patch';
+		} else {
+			$vname = $filename;
+		}
+		while (<$FILE>) {
+			chomp;
+			push(@rawlines, $_);
+		}
+		close($FILE);
+		if (!process($filename)) {
+			$exit = 1;
+		}
+		@rawlines = ();
+		@lines = ();
+	}
 }
 
 exit($exit);
@@ -1336,12 +1424,33 @@ sub process {
 			$rpt_cleaners = 1;
 		}
 
-# check we are in a valid source file if not then ignore this hunk
-		next if ($realfile !~ /\.(h|c|cpp|s|S|pl|py|sh)$/);
+# checks for trace-events files
+		if ($realfile =~ /trace-events$/ && $line =~ /^\+/) {
+			if ($rawline =~ /%[-+ 0]*#/) {
+				ERROR("Don't use '#' flag of printf format ('%#') in " .
+				      "trace-events, use '0x' prefix instead\n" . $herecurr);
+			} else {
+				my $hex =
+					qr/%[-+ *.0-9]*([hljztL]|ll|hh)?(x|X|"\s*PRI[xX][^"]*"?)/;
 
-#90 column limit
+				# don't consider groups splitted by [.:/ ], like 2A.20:12ab
+				my $tmpline = $rawline;
+				$tmpline =~ s/($hex[.:\/ ])+$hex//g;
+
+				if ($tmpline =~ /(?<!0x)$hex/) {
+					ERROR("Hex numbers must be prefixed with '0x'\n" .
+					      $herecurr);
+				}
+			}
+		}
+
+# check we are in a valid source file if not then ignore this hunk
+		next if ($realfile !~ /$SrcFile/);
+
+#90 column limit; exempt URLs, if no other words on line
 		if ($line =~ /^\+/ &&
 		    !($line =~ /^\+\s*"[^"]*"\s*(?:\s*|,|\)\s*;)\s*$/) &&
+		    !($rawline =~ /^[^[:alnum:]]*https?:\S*$/) &&
 		    $length > 80)
 		{
 			if ($length > 90) {
@@ -1513,6 +1622,11 @@ sub process {
 						"$here\n$ctx\n$rawlines[$ctx_ln - 1]\n");
 				}
 			}
+		}
+
+# 'do ... while (0/false)' only makes sense in macros, without trailing ';'
+		if ($line =~ /while\s*\((0|false)\);/) {
+			ERROR("suspicious ; after while (0)\n" . $herecurr);
 		}
 
 # Check relative indent for conditionals and blocks.
@@ -2239,8 +2353,21 @@ sub process {
 			}
 		}
 
-# check for missing bracing round if etc
-		if ($line =~ /(^.*)\bif\b/ && $line !~ /\#\s*if/) {
+# check for missing bracing around if etc
+		if ($line =~ /(^.*)\b(?:if|while|for)\b/ &&
+			$line !~ /\#\s*if/) {
+			my $allowed = 0;
+
+			# Check the pre-context.
+			if ($line =~ /(\}.*?)$/) {
+				my $pre = $1;
+
+				if ($line !~ /else/) {
+					print "APW: ALLOWED: pre<$pre> line<$line>\n"
+						if $dbg_adv_apw;
+					$allowed = 1;
+				}
+			}
 			my ($level, $endln, @chunks) =
 				ctx_statement_full($linenr, $realcnt, 1);
                         if ($dbg_adv_apw) {
@@ -2249,7 +2376,6 @@ sub process {
                                 if $#chunks >= 1;
                         }
 			if ($#chunks >= 0 && $level == 0) {
-				my $allowed = 0;
 				my $seen = 0;
 				my $herectx = $here . "\n";
 				my $ln = $linenr - 1;
@@ -2293,7 +2419,7 @@ sub process {
                                             $allowed = 1;
 					}
 				}
-				if ($seen != ($#chunks + 1)) {
+				if ($seen != ($#chunks + 1) && !$allowed) {
 					ERROR("braces {} are necessary for all arms of this statement\n" . $herectx);
 				}
 			}
@@ -2368,8 +2494,11 @@ sub process {
 
 # no volatiles please
 		my $asm_volatile = qr{\b(__asm__|asm)\s+(__volatile__|volatile)\b};
-		if ($line =~ /\bvolatile\b/ && $line !~ /$asm_volatile/) {
-			ERROR("Use of volatile is usually wrong: see Documentation/volatile-considered-harmful.txt\n" . $herecurr);
+		if ($line =~ /\bvolatile\b/ && $line !~ /$asm_volatile/ &&
+                    $line !~ /sig_atomic_t/ &&
+                    !ctx_has_comment($first_line, $linenr)) {
+			my $msg = "Use of volatile is usually wrong, please add a comment\n" . $herecurr;
+                        ERROR($msg);
 		}
 
 # warn about #if 0
@@ -2468,9 +2597,18 @@ sub process {
 			ERROR("__func__ should be used instead of gcc specific __FUNCTION__\n"  . $herecurr);
 		}
 
+# recommend g_path_get_* over g_strdup(basename/dirname(...))
+		if ($line =~ /\bg_strdup\s*\(\s*(basename|dirname)\s*\(/) {
+			WARN("consider using g_path_get_$1() in preference to g_strdup($1())\n" . $herecurr);
+		}
+
 # recommend qemu_strto* over strto* for numeric conversions
 		if ($line =~ /\b(strto[^kd].*?)\s*\(/) {
 			ERROR("consider using qemu_$1 in preference to $1\n" . $herecurr);
+		}
+# recommend sigaction over signal for portability, when establishing a handler
+		if ($line =~ /\bsignal\s*\(/ && !($line =~ /SIG_(?:IGN|DFL)/)) {
+			ERROR("use sigaction to establish signal handlers; signal is not portable\n" . $herecurr);
 		}
 # check for module_init(), use category-specific init macros explicitly please
 		if ($line =~ /^module_init\s*\(/) {
@@ -2492,7 +2630,6 @@ sub process {
 				SCSIBusInfo|
 				SCSIReqOps|
 				Spice[A-Z][a-zA-Z0-9]*Interface|
-				TPMDriverOps|
 				USBDesc[A-Z][a-zA-Z0-9]*|
 				VhostOps|
 				VMStateDescription|
@@ -2528,9 +2665,14 @@ sub process {
 				error_setg_file_open|
 				error_set|
 				error_prepend|
+				warn_reportf_err|
 				error_reportf_err|
 				error_vreport|
-				error_report}x;
+				warn_vreport|
+				info_vreport|
+				error_report|
+				warn_report|
+				info_report}x;
 
 	if ($rawline =~ /\b(?:$qemu_error_funcs)\s*\(.*\".*\\n/) {
 		ERROR("Error messages should not contain newlines\n" . $herecurr);
@@ -2570,6 +2712,27 @@ sub process {
 		}
 		if ($line =~ /\bbzero\(/) {
 			ERROR("use memset() instead of bzero()\n" . $herecurr);
+		}
+		my $non_exit_glib_asserts = qr{g_assert_cmpstr|
+						g_assert_cmpint|
+						g_assert_cmpuint|
+						g_assert_cmphex|
+						g_assert_cmpfloat|
+						g_assert_true|
+						g_assert_false|
+						g_assert_nonnull|
+						g_assert_null|
+						g_assert_no_error|
+						g_assert_error|
+						g_test_assert_expected_messages|
+						g_test_trap_assert_passed|
+						g_test_trap_assert_stdout|
+						g_test_trap_assert_stdout_unmatched|
+						g_test_trap_assert_stderr|
+						g_test_trap_assert_stderr_unmatched}x;
+		if ($realfile !~ /^tests\// &&
+			$line =~ /\b(?:$non_exit_glib_asserts)\(/) {
+			ERROR("Use g_assert or g_assert_not_reached\n". $herecurr);
 		}
 	}
 

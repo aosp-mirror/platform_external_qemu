@@ -287,6 +287,17 @@ bool bitmap_test_and_clear_atomic(unsigned long *map, long start, long nr)
     return dirty != 0;
 }
 
+void bitmap_copy_and_clear_atomic(unsigned long *dst, unsigned long *src,
+                                  long nr)
+{
+    while (nr > 0) {
+        *dst = atomic_xchg(src, 0);
+        dst++;
+        src++;
+        nr -= BITS_PER_LONG;
+    }
+}
+
 #define ALIGN_MASK(x,mask)      (((x)+(mask))&~(mask))
 
 /**
@@ -343,4 +354,51 @@ int slow_bitmap_intersects(const unsigned long *bitmap1,
         }
     }
     return 0;
+}
+
+long slow_bitmap_count_one(const unsigned long *bitmap, long nbits)
+{
+    long k, lim = nbits / BITS_PER_LONG, result = 0;
+
+    for (k = 0; k < lim; k++) {
+        result += ctpopl(bitmap[k]);
+    }
+
+    if (nbits % BITS_PER_LONG) {
+        result += ctpopl(bitmap[k] & BITMAP_LAST_WORD_MASK(nbits));
+    }
+
+    return result;
+}
+
+static void bitmap_to_from_le(unsigned long *dst,
+                              const unsigned long *src, long nbits)
+{
+    long len = BITS_TO_LONGS(nbits);
+
+#ifdef HOST_WORDS_BIGENDIAN
+    long index;
+
+    for (index = 0; index < len; index++) {
+# if HOST_LONG_BITS == 64
+        dst[index] = bswap64(src[index]);
+# else
+        dst[index] = bswap32(src[index]);
+# endif
+    }
+#else
+    memcpy(dst, src, len * sizeof(unsigned long));
+#endif
+}
+
+void bitmap_from_le(unsigned long *dst, const unsigned long *src,
+                    long nbits)
+{
+    bitmap_to_from_le(dst, src, nbits);
+}
+
+void bitmap_to_le(unsigned long *dst, const unsigned long *src,
+                  long nbits)
+{
+    bitmap_to_from_le(dst, src, nbits);
 }

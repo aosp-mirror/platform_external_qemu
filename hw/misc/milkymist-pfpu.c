@@ -25,7 +25,7 @@
 #include "qemu/osdep.h"
 #include "hw/hw.h"
 #include "hw/sysbus.h"
-#include "hw/misc/trace.h"
+#include "trace.h"
 #include "qemu/log.h"
 #include "qemu/error-report.h"
 #include <math.h>

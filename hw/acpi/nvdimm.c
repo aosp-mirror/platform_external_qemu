@@ -138,6 +138,8 @@ struct NvdimmNfitMemDev {
 } QEMU_PACKED;
 typedef struct NvdimmNfitMemDev NvdimmNfitMemDev;
 
+#define ACPI_NFIT_MEM_NOT_ARMED     (1 << 3)
+
 /*
  * NVDIMM Control Region Structure
  *
@@ -236,14 +238,14 @@ static void
 nvdimm_build_structure_spa(GArray *structures, DeviceState *dev)
 {
     NvdimmNfitSpa *nfit_spa;
-    uint64_t addr = object_property_get_int(OBJECT(dev), PC_DIMM_ADDR_PROP,
-                                            NULL);
-    uint64_t size = object_property_get_int(OBJECT(dev), PC_DIMM_SIZE_PROP,
-                                            NULL);
-    uint32_t node = object_property_get_int(OBJECT(dev), PC_DIMM_NODE_PROP,
-                                            NULL);
+    uint64_t addr = object_property_get_uint(OBJECT(dev), PC_DIMM_ADDR_PROP,
+                                             NULL);
+    uint64_t size = object_property_get_uint(OBJECT(dev), PC_DIMM_SIZE_PROP,
+                                             NULL);
+    uint32_t node = object_property_get_uint(OBJECT(dev), PC_DIMM_NODE_PROP,
+                                             NULL);
     int slot = object_property_get_int(OBJECT(dev), PC_DIMM_SLOT_PROP,
-                                            NULL);
+                                       NULL);
 
     nfit_spa = acpi_data_push(structures, sizeof(*nfit_spa));
 
@@ -284,8 +286,9 @@ static void
 nvdimm_build_structure_memdev(GArray *structures, DeviceState *dev)
 {
     NvdimmNfitMemDev *nfit_memdev;
-    uint64_t size = object_property_get_int(OBJECT(dev), PC_DIMM_SIZE_PROP,
-                                            NULL);
+    NVDIMMDevice *nvdimm = NVDIMM(OBJECT(dev));
+    uint64_t size = object_property_get_uint(OBJECT(dev), PC_DIMM_SIZE_PROP,
+                                             NULL);
     int slot = object_property_get_int(OBJECT(dev), PC_DIMM_SLOT_PROP,
                                             NULL);
     uint32_t handle = nvdimm_slot_to_handle(slot);
@@ -312,6 +315,10 @@ nvdimm_build_structure_memdev(GArray *structures, DeviceState *dev)
 
     /* Only one interleave for PMEM. */
     nfit_memdev->interleave_ways = cpu_to_le16(1);
+
+    if (nvdimm->unarmed) {
+        nfit_memdev->flags |= cpu_to_le16(ACPI_NFIT_MEM_NOT_ARMED);
+    }
 }
 
 /*
@@ -338,9 +345,10 @@ static void nvdimm_build_structure_dcr(GArray *structures, DeviceState *dev)
     nfit_dcr->revision_id = cpu_to_le16(1 /* Current Revision supported
                                              in ACPI 6.0 is 1. */);
     nfit_dcr->serial_number = cpu_to_le32(sn);
-    nfit_dcr->fic = cpu_to_le16(0x201 /* Format Interface Code. See Chapter
-                                         2: NVDIMM Device Specific Method
-                                         (DSM) in DSM Spec Rev1.*/);
+    nfit_dcr->fic = cpu_to_le16(0x301 /* Format Interface Code:
+                                         Byte addressable, no energy backed.
+                                         See ACPI 6.2, sect 5.2.25.6 and
+                                         JEDEC Annex L Release 3. */);
 }
 
 static GArray *nvdimm_build_device_structure(void)

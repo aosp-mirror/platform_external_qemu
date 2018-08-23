@@ -123,21 +123,26 @@ extern bool use_idiv_instructions;
 #define TCG_TARGET_HAS_mulsh_i32        0
 #define TCG_TARGET_HAS_div_i32          use_idiv_instructions
 #define TCG_TARGET_HAS_rem_i32          0
+#define TCG_TARGET_HAS_goto_ptr         1
+#define TCG_TARGET_HAS_direct_jump      0
 
 enum {
     TCG_AREG0 = TCG_REG_R6,
 };
 
+#define TCG_TARGET_DEFAULT_MO (0)
+
 static inline void flush_icache_range(uintptr_t start, uintptr_t stop)
 {
-#if QEMU_GNUC_PREREQ(4, 1)
     __builtin___clear_cache((char *) start, (char *) stop);
-#else
-    register uintptr_t _beg __asm("a1") = start;
-    register uintptr_t _end __asm("a2") = stop;
-    register uintptr_t _flg __asm("a3") = 0;
-    __asm __volatile__ ("swi 0x9f0002" : : "r" (_beg), "r" (_end), "r" (_flg));
-#endif
 }
+
+/* not defined -- call should be eliminated at compile time */
+void tb_target_set_jmp_target(uintptr_t, uintptr_t, uintptr_t);
+
+#ifdef CONFIG_SOFTMMU
+#define TCG_TARGET_NEED_LDST_LABELS
+#endif
+#define TCG_TARGET_NEED_POOL_LABELS
 
 #endif

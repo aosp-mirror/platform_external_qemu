@@ -64,7 +64,7 @@ static BOOL WINAPI qemu_ctrl_handler(DWORD type)
     if (ctrlc_handler) {
         (*ctrlc_handler)();
     } else {
-        qemu_system_shutdown_request();
+        qemu_system_shutdown_request(SHUTDOWN_CAUSE_HOST_SIGNAL);
     }
     fflush(stdout);
     fflush(stderr);

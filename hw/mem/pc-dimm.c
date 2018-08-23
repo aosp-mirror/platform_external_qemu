@@ -20,13 +20,14 @@
 
 #include "qemu/osdep.h"
 #include "hw/mem/pc-dimm.h"
+#include "hw/mem/nvdimm.h"
 #include "qapi/error.h"
 #include "qemu/config-file.h"
 #include "qapi/visitor.h"
 #include "qemu/range.h"
 #include "sysemu/numa.h"
 #include "sysemu/kvm.h"
-#include "hw/mem/trace.h"
+#include "trace.h"
 #include "hw/virtio/vhost.h"
 
 typedef struct pc_dimms_capacity {
@@ -46,7 +47,8 @@ void pc_dimm_memory_plug(DeviceState *dev, MemoryHotplugState *hpms,
     uint64_t existing_dimms_capacity = 0;
     uint64_t addr;
 
-    addr = object_property_get_int(OBJECT(dimm), PC_DIMM_ADDR_PROP, &local_err);
+    addr = object_property_get_uint(OBJECT(dimm),
+                                    PC_DIMM_ADDR_PROP, &local_err);
     if (local_err) {
         goto out;
     }
@@ -73,7 +75,7 @@ void pc_dimm_memory_plug(DeviceState *dev, MemoryHotplugState *hpms,
         goto out;
     }
 
-    object_property_set_int(OBJECT(dev), addr, PC_DIMM_ADDR_PROP, &local_err);
+    object_property_set_uint(OBJECT(dev), addr, PC_DIMM_ADDR_PROP, &local_err);
     if (local_err) {
         goto out;
     }
@@ -108,7 +110,6 @@ void pc_dimm_memory_plug(DeviceState *dev, MemoryHotplugState *hpms,
 
     memory_region_add_subregion(&hpms->mr, addr - hpms->base, mr);
     vmstate_register_ram(vmstate_mr, dev);
-    numa_set_mem_node_id(addr, memory_region_size(mr), dimm->node);
 
 out:
     error_propagate(errp, local_err);
@@ -121,7 +122,6 @@ void pc_dimm_memory_unplug(DeviceState *dev, MemoryHotplugState *hpms,
     PCDIMMDeviceClass *ddc = PC_DIMM_GET_CLASS(dimm);
     MemoryRegion *vmstate_mr = ddc->get_vmstate_memory_region(dimm);
 
-    numa_unset_mem_node_id(dimm->addr, memory_region_size(mr), dimm->node);
     memory_region_del_subregion(&hpms->mr, mr);
     vmstate_unregister_ram(vmstate_mr, dev);
 }
@@ -135,7 +135,7 @@ static int pc_existing_dimms_capacity_internal(Object *obj, void *opaque)
         DeviceState *dev = DEVICE(obj);
 
         if (dev->realized) {
-            (*size) += object_property_get_int(obj, PC_DIMM_SIZE_PROP,
+            (*size) += object_property_get_uint(obj, PC_DIMM_SIZE_PROP,
                 cap->errp);
         }
 
@@ -158,43 +158,9 @@ uint64_t pc_existing_dimms_capacity(Error **errp)
     return cap.size;
 }
 
-int qmp_pc_dimm_device_list(Object *obj, void *opaque)
+uint64_t get_plugged_memory_size(void)
 {
-    MemoryDeviceInfoList ***prev = opaque;
-
-    if (object_dynamic_cast(obj, TYPE_PC_DIMM)) {
-        DeviceState *dev = DEVICE(obj);
-
-        if (dev->realized) {
-            MemoryDeviceInfoList *elem = g_new0(MemoryDeviceInfoList, 1);
-            MemoryDeviceInfo *info = g_new0(MemoryDeviceInfo, 1);
-            PCDIMMDeviceInfo *di = g_new0(PCDIMMDeviceInfo, 1);
-            DeviceClass *dc = DEVICE_GET_CLASS(obj);
-            PCDIMMDevice *dimm = PC_DIMM(obj);
-
-            if (dev->id) {
-                di->has_id = true;
-                di->id = g_strdup(dev->id);
-            }
-            di->hotplugged = dev->hotplugged;
-            di->hotpluggable = dc->hotpluggable;
-            di->addr = dimm->addr;
-            di->slot = dimm->slot;
-            di->node = dimm->node;
-            di->size = object_property_get_int(OBJECT(dimm), PC_DIMM_SIZE_PROP,
-                                               NULL);
-            di->memdev = object_get_canonical_path(OBJECT(dimm->hostmem));
-
-            info->u.dimm.data = di;
-            elem->value = info;
-            elem->next = NULL;
-            **prev = elem;
-            *prev = &elem->next;
-        }
-    }
-
-    object_child_foreach(obj, qmp_pc_dimm_device_list, opaque);
-    return 0;
+    return pc_existing_dimms_capacity(&error_abort);
 }
 
 static int pc_dimm_slot2bitmap(Object *obj, void *opaque)
@@ -272,6 +238,57 @@ static int pc_dimm_built_list(Object *obj, void *opaque)
     return 0;
 }
 
+MemoryDeviceInfoList *qmp_pc_dimm_device_list(void)
+{
+    GSList *dimms = NULL, *item;
+    MemoryDeviceInfoList *list = NULL, *prev = NULL;
+
+    object_child_foreach(qdev_get_machine(), pc_dimm_built_list, &dimms);
+
+    for (item = dimms; item; item = g_slist_next(item)) {
+        PCDIMMDevice *dimm = PC_DIMM(item->data);
+        Object *obj = OBJECT(dimm);
+        MemoryDeviceInfoList *elem = g_new0(MemoryDeviceInfoList, 1);
+        MemoryDeviceInfo *info = g_new0(MemoryDeviceInfo, 1);
+        PCDIMMDeviceInfo *di = g_new0(PCDIMMDeviceInfo, 1);
+        bool is_nvdimm = object_dynamic_cast(obj, TYPE_NVDIMM);
+        DeviceClass *dc = DEVICE_GET_CLASS(obj);
+        DeviceState *dev = DEVICE(obj);
+
+        if (dev->id) {
+            di->has_id = true;
+            di->id = g_strdup(dev->id);
+        }
+        di->hotplugged = dev->hotplugged;
+        di->hotpluggable = dc->hotpluggable;
+        di->addr = dimm->addr;
+        di->slot = dimm->slot;
+        di->node = dimm->node;
+        di->size = object_property_get_uint(obj, PC_DIMM_SIZE_PROP, NULL);
+        di->memdev = object_get_canonical_path(OBJECT(dimm->hostmem));
+
+        if (!is_nvdimm) {
+            info->u.dimm.data = di;
+            info->type = MEMORY_DEVICE_INFO_KIND_DIMM;
+        } else {
+            info->u.nvdimm.data = di;
+            info->type = MEMORY_DEVICE_INFO_KIND_NVDIMM;
+        }
+        elem->value = info;
+        elem->next = NULL;
+        if (prev) {
+            prev->next = elem;
+        } else {
+            list = elem;
+        }
+        prev = elem;
+    }
+
+    g_slist_free(dimms);
+
+    return list;
+}
+
 uint64_t pc_dimm_get_free_addr(uint64_t address_space_start,
                                uint64_t address_space_size,
                                uint64_t *hint, uint64_t align, uint64_t size,
@@ -313,9 +330,9 @@ uint64_t pc_dimm_get_free_addr(uint64_t address_space_start,
     /* find address range that will fit new DIMM */
     for (item = list; item; item = g_slist_next(item)) {
         PCDIMMDevice *dimm = item->data;
-        uint64_t dimm_size = object_property_get_int(OBJECT(dimm),
-                                                     PC_DIMM_SIZE_PROP,
-                                                     errp);
+        uint64_t dimm_size = object_property_get_uint(OBJECT(dimm),
+                                                      PC_DIMM_SIZE_PROP,
+                                                      errp);
         if (errp && *errp) {
             goto out;
         }
@@ -349,50 +366,32 @@ static Property pc_dimm_properties[] = {
     DEFINE_PROP_UINT32(PC_DIMM_NODE_PROP, PCDIMMDevice, node, 0),
     DEFINE_PROP_INT32(PC_DIMM_SLOT_PROP, PCDIMMDevice, slot,
                       PC_DIMM_UNASSIGNED_SLOT),
+    DEFINE_PROP_LINK(PC_DIMM_MEMDEV_PROP, PCDIMMDevice, hostmem,
+                     TYPE_MEMORY_BACKEND, HostMemoryBackend *),
     DEFINE_PROP_END_OF_LIST(),
 };
 
 static void pc_dimm_get_size(Object *obj, Visitor *v, const char *name,
                              void *opaque, Error **errp)
 {
-    int64_t value;
+    uint64_t value;
     MemoryRegion *mr;
     PCDIMMDevice *dimm = PC_DIMM(obj);
     PCDIMMDeviceClass *ddc = PC_DIMM_GET_CLASS(obj);
 
-    mr = ddc->get_memory_region(dimm);
+    mr = ddc->get_memory_region(dimm, errp);
+    if (!mr) {
+        return;
+    }
     value = memory_region_size(mr);
 
-    visit_type_int(v, name, &value, errp);
-}
-
-static void pc_dimm_check_memdev_is_busy(Object *obj, const char *name,
-                                      Object *val, Error **errp)
-{
-    Error *local_err = NULL;
-
-    if (host_memory_backend_is_mapped(MEMORY_BACKEND(val))) {
-        char *path = object_get_canonical_path_component(val);
-        error_setg(&local_err, "can't use already busy memdev: %s", path);
-        g_free(path);
-    } else {
-        qdev_prop_allow_set_link_before_realize(obj, name, val, &local_err);
-    }
-
-    error_propagate(errp, local_err);
+    visit_type_uint64(v, name, &value, errp);
 }
 
 static void pc_dimm_init(Object *obj)
 {
-    PCDIMMDevice *dimm = PC_DIMM(obj);
-
-    object_property_add(obj, PC_DIMM_SIZE_PROP, "int", pc_dimm_get_size,
+    object_property_add(obj, PC_DIMM_SIZE_PROP, "uint64", pc_dimm_get_size,
                         NULL, NULL, NULL, &error_abort);
-    object_property_add_link(obj, PC_DIMM_MEMDEV_PROP, TYPE_MEMORY_BACKEND,
-                             (Object **)&dimm->hostmem,
-                             pc_dimm_check_memdev_is_busy,
-                             OBJ_PROP_LINK_UNREF_ON_RELEASE,
-                             &error_abort);
 }
 
 static void pc_dimm_realize(DeviceState *dev, Error **errp)
@@ -402,6 +401,11 @@ static void pc_dimm_realize(DeviceState *dev, Error **errp)
 
     if (!dimm->hostmem) {
         error_setg(errp, "'" PC_DIMM_MEMDEV_PROP "' property is not set");
+        return;
+    } else if (host_memory_backend_is_mapped(dimm->hostmem)) {
+        char *path = object_get_canonical_path_component(OBJECT(dimm->hostmem));
+        error_setg(errp, "can't use already busy memdev: %s", path);
+        g_free(path);
         return;
     }
     if (((nb_numa_nodes > 0) && (dimm->node >= nb_numa_nodes)) ||
@@ -426,9 +430,14 @@ static void pc_dimm_unrealize(DeviceState *dev, Error **errp)
     host_memory_backend_set_mapped(dimm->hostmem, false);
 }
 
-static MemoryRegion *pc_dimm_get_memory_region(PCDIMMDevice *dimm)
+static MemoryRegion *pc_dimm_get_memory_region(PCDIMMDevice *dimm, Error **errp)
 {
-    return host_memory_backend_get_memory(dimm->hostmem, &error_abort);
+    if (!dimm->hostmem) {
+        error_setg(errp, "'" PC_DIMM_MEMDEV_PROP "' property must be set");
+        return NULL;
+    }
+
+    return host_memory_backend_get_memory(dimm->hostmem, errp);
 }
 
 static MemoryRegion *pc_dimm_get_vmstate_memory_region(PCDIMMDevice *dimm)

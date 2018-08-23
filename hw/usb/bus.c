@@ -6,7 +6,7 @@
 #include "qemu/error-report.h"
 #include "sysemu/sysemu.h"
 #include "monitor/monitor.h"
-#include "hw/usb/trace.h"
+#include "trace.h"
 #include "qemu/cutils.h"
 
 static void usb_bus_dev_print(Monitor *mon, DeviceState *qdev, int indent);
@@ -341,9 +341,7 @@ static USBDevice *usb_try_create_simple(USBBus *bus, const char *name,
     object_property_set_bool(OBJECT(dev), true, "realized", &err);
     if (err) {
         error_propagate(errp, err);
-        error_prepend(errp, "Failed to initialize USB device '%s': ",
-                      name);
-        object_unparent(OBJECT(dev));
+        error_prepend(errp, "Failed to initialize USB device '%s': ", name);
         return NULL;
     }
     return dev;
@@ -407,8 +405,10 @@ void usb_register_companion(const char *masterbus, USBPort *ports[],
 void usb_port_location(USBPort *downstream, USBPort *upstream, int portnr)
 {
     if (upstream) {
-        snprintf(downstream->path, sizeof(downstream->path), "%s.%d",
-                 upstream->path, portnr);
+        int l = snprintf(downstream->path, sizeof(downstream->path), "%s.%d",
+                         upstream->path, portnr);
+        /* Max string is nn.nn.nn.nn.nn, which fits in 16 bytes */
+        assert(l < sizeof(downstream->path));
         downstream->hubcount = upstream->hubcount + 1;
     } else {
         snprintf(downstream->path, sizeof(downstream->path), "%d", portnr);
@@ -556,28 +556,6 @@ int usb_device_detach(USBDevice *dev)
 
     usb_detach(port);
     dev->attached = false;
-    return 0;
-}
-
-int usb_device_delete_addr(int busnr, int addr)
-{
-    USBBus *bus;
-    USBPort *port;
-    USBDevice *dev;
-
-    bus = usb_bus_find(busnr);
-    if (!bus)
-        return -1;
-
-    QTAILQ_FOREACH(port, &bus->used, next) {
-        if (port->dev->addr == addr)
-            break;
-    }
-    if (!port)
-        return -1;
-    dev = port->dev;
-
-    object_unparent(OBJECT(dev));
     return 0;
 }
 
@@ -762,9 +740,7 @@ static void usb_set_attached(Object *obj, bool value, Error **errp)
 
     if (value) {
         usb_device_attach(dev, &err);
-        if (err) {
-            error_propagate(errp, err);
-        }
+        error_propagate(errp, err);
     } else {
         usb_device_detach(dev);
     }

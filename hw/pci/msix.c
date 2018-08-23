@@ -22,6 +22,7 @@
 #include "hw/xen/xen.h"
 #include "qemu/range.h"
 #include "qapi/error.h"
+#include "trace.h"
 
 #define MSIX_CAP_LENGTH 12
 
@@ -131,10 +132,14 @@ static void msix_handle_mask_update(PCIDevice *dev, int vector, bool was_masked)
     }
 }
 
+static bool msix_masked(PCIDevice *dev)
+{
+    return dev->config[dev->msix_cap + MSIX_CONTROL_OFFSET] & MSIX_MASKALL_MASK;
+}
+
 static void msix_update_function_masked(PCIDevice *dev)
 {
-    dev->msix_function_masked = !msix_enabled(dev) ||
-        (dev->config[dev->msix_cap + MSIX_CONTROL_OFFSET] & MSIX_MASKALL_MASK);
+    dev->msix_function_masked = !msix_enabled(dev) || msix_masked(dev);
 }
 
 /* Handle MSI-X capability config write. */
@@ -148,6 +153,8 @@ void msix_write_config(PCIDevice *dev, uint32_t addr,
     if (!msix_present(dev) || !range_covers_byte(addr, len, enable_pos)) {
         return;
     }
+
+    trace_msix_write_config(dev->name, msix_enabled(dev), msix_masked(dev));
 
     was_masked = dev->msix_function_masked;
     msix_update_function_masked(dev);
@@ -295,7 +302,7 @@ int msix_init(struct PCIDevice *dev, unsigned short nentries,
         return -EINVAL;
     }
 
-    cap = pci_add_capability2(dev, PCI_CAP_ID_MSIX,
+    cap = pci_add_capability(dev, PCI_CAP_ID_MSIX,
                               cap_pos, MSIX_CAP_LENGTH, errp);
     if (cap < 0) {
         return cap;
@@ -432,7 +439,7 @@ void msix_save(PCIDevice *dev, QEMUFile *f)
     }
 
     qemu_put_buffer(f, dev->msix_table, n * PCI_MSIX_ENTRY_SIZE);
-    qemu_put_buffer(f, dev->msix_pba, (n + 7) / 8);
+    qemu_put_buffer(f, dev->msix_pba, DIV_ROUND_UP(n, 8));
 }
 
 /* Should be called after restoring the config space. */
@@ -447,7 +454,7 @@ void msix_load(PCIDevice *dev, QEMUFile *f)
 
     msix_clear_all_vectors(dev);
     qemu_get_buffer(f, dev->msix_table, n * PCI_MSIX_ENTRY_SIZE);
-    qemu_get_buffer(f, dev->msix_pba, (n + 7) / 8);
+    qemu_get_buffer(f, dev->msix_pba, DIV_ROUND_UP(n, 8));
     msix_update_function_masked(dev);
 
     for (vector = 0; vector < n; vector++) {

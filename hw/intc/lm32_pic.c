@@ -20,10 +20,9 @@
 #include "qemu/osdep.h"
 
 #include "hw/hw.h"
-#include "hw/i386/pc.h"
 #include "monitor/monitor.h"
 #include "hw/sysbus.h"
-#include "hw/intc/trace.h"
+#include "trace.h"
 #include "hw/lm32/lm32_pic.h"
 #include "hw/intc/intc.h"
 

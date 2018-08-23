@@ -16,12 +16,17 @@
 #include "android/base/ContiguousRangeMapper.h"
 #include "android/base/EintrWrapper.h"
 #include "android/base/files/MemStream.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/files/preadwrite.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/base/Profiler.h"
 #include "android/base/Stopwatch.h"
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/Decompressor.h"
+#include "android/snapshot/interface.h"
+#include "android/snapshot/PathUtils.h"
 #include "android/utils/debug.h"
+#include "android/utils/path.h"
 
 #include <algorithm>
 #include <atomic>
@@ -31,6 +36,7 @@
 using android::base::ContiguousRangeMapper;
 using android::base::ScopedMemoryProfiler;
 using android::base::MemStream;
+using android::base::PathUtils;
 using android::base::Stopwatch;
 
 namespace android {
@@ -39,6 +45,9 @@ namespace snapshot {
 void RamLoader::FileIndex::clear() {
     decltype(pages)().swap(pages);
     decltype(blocks)().swap(blocks);
+}
+
+RamLoader::RamBlockStructure::~RamBlockStructure() {
 }
 
 RamLoader::RamLoader(base::StdioStream&& stream,
@@ -79,6 +88,7 @@ RamLoader::~RamLoader() {
         }
         assert(hasError() || !mAccessWatch);
     }
+    mIndex.clear();
 }
 
 RamLoader::RamBlockStructure RamLoader::getRamBlockStructure() const {
@@ -131,17 +141,6 @@ bool RamLoader::start(bool isQuickboot) {
     if (!readIndex()) {
         mHasError = true;
         return false;
-    }
-
-    if (mIsQuickboot &&
-        nonzero(mIndex.flags & IndexFlags::SeparateBackingStore)) {
-       // we are using a file-backed RAM to load; return early.
-       mEndTime = base::System::get()->getHighResTimeUs();
-#if SNAPSHOT_PROFILE > 1
-       printf("File-backed RAM load complete in %.03f ms\n",
-              (mEndTime - mStartTime) / 1000.0);
-#endif
-       return true;
     }
 
     if (!mAccessWatch) {
@@ -267,6 +266,7 @@ bool RamLoader::readIndex() {
     mIndex.flags = IndexFlags(stream.getBe32());
     const bool compressed = nonzero(mIndex.flags & IndexFlags::CompressedPages);
     auto pageCount = stream.getBe32();
+
     mIndex.pages.reserve(pageCount);
     int64_t runningFilePos = 8;
     int32_t prevPageSizeOnDisk = 0;
@@ -311,7 +311,91 @@ void RamLoader::readBlockPages(base::Stream* stream,
     const auto blockIndex = std::distance(mIndex.blocks.begin(), blockIt);
 
     const auto blockPagesCount = stream->getBe32();
+    const auto blockPageSizeFromSave = stream->getBe32();
+
+    uint32_t savedFlags = stream->getBe32();
+    std::string savedMemPath = stream->getString();
+
     FileIndex::Block& block = *blockIt;
+
+    // No need to load readonly ram blocks, since they will
+    // be initialized the same way (or we will bump snapshot protocol version)
+    if (block.ramBlock.readonly) return;
+
+    // Now query the ram block flags from the stream,
+    // and compare with the actual loaded ram block.
+    uint32_t activeFlags = block.ramBlock.flags;
+    std::string activeMemPath = block.ramBlock.path;
+
+    // Ram block was a file mapping, and current emulator session is using the
+    // same file. No need to do anything more, even if we mapped privately in
+    // this session instead of shared.
+    if ((savedFlags & SNAPSHOT_RAM_MAPPED_SHARED) &&
+        (activeFlags & SNAPSHOT_RAM_MAPPED) &&
+        savedMemPath == activeMemPath) {
+        return;
+    }
+
+    // If the current session does not have a mapped file, or its mapped file
+    // is different from the current one, we need to do some kind of normal RAM
+    // load.
+    if ((savedFlags & SNAPSHOT_RAM_MAPPED_SHARED) &&
+        (!(activeFlags & SNAPSHOT_RAM_MAPPED) ||
+         ((activeFlags & SNAPSHOT_RAM_MAPPED) &&
+         savedMemPath != activeMemPath))) {
+
+        auto ramFilePath = PathUtils::join(getSnapshotBaseDir(), savedMemPath);
+
+        auto ramFilePtr = fopen(ramFilePath.c_str(), "rb");
+
+        if (!ramFilePtr) {
+            mHasError = true;
+            return;
+        }
+
+        base::StdioStream ramFileStream(ramFilePtr, base::StdioStream::kOwner);
+
+        int ramFileFd = fileno(ramFileStream.get());
+
+        uint8_t* hostPtr = block.ramBlock.hostPtr;
+        uint64_t totalSz = block.ramBlock.totalSize;
+
+        static constexpr size_t readChunkSize = 16 * 1048576;
+
+        for (size_t i = 0; i < totalSz; i += readChunkSize) {
+            HANDLE_EINTR(base::pread(ramFileFd, hostPtr + i, readChunkSize, i));
+        }
+
+        // Mark that we loaded this directly
+        // from file backing, which is nonstandard.
+        mLoadedFromFileBacking = true;
+
+        // Close the file and delete it right away,
+        // so we don't get some weird invalid thing
+        ramFileStream.close();
+
+        path_delete_file(ramFilePath.c_str());
+        return;
+    }
+
+    // In the case where the ram block did not have a file mapping, but our
+    // current session does have a file mapping i.e., !(savedFlags &
+    // SNAPSHOT_RAM_MAPPED_SHARED) && (activeFlags & SNAPSHOT_RAM_MAPPED) just
+    // load normally (continue without doing anything different)...
+    //
+    // except in the cases when not using an mprotect-like accessor,
+    // which is all eager RAM loads, which happen quite a lot.
+    // Then we might leave nonzero pages in ram.img that really should be zero.
+    // To be safe, just zero initialize the whole thing.
+    if (!(savedFlags & SNAPSHOT_RAM_MAPPED_SHARED) &&
+        (activeFlags & SNAPSHOT_RAM_MAPPED)) {
+        memset(block.ramBlock.hostPtr, 0x0, block.ramBlock.totalSize);
+        mLoadedToFileBacking = true;
+        // Make the page size consistent as well.
+        block.ramBlock.pageSize = blockPageSizeFromSave;
+        mPageSize = block.ramBlock.pageSize;
+    }
+
     auto pageIt = mIndex.pages.end();
     block.pagesBegin = pageIt;
     mIndex.pages.resize(mIndex.pages.size() + blockPagesCount);
@@ -666,6 +750,7 @@ bool RamLoader::readAllPages() {
 #if SNAPSHOT_PROFILE > 1
     auto startTime = base::System::get()->getHighResTimeUs();
 #endif
+
     if (nonzero(mIndex.flags & IndexFlags::CompressedPages) && !mAccessWatch) {
         startDecompressor();
     }

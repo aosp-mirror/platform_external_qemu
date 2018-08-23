@@ -63,8 +63,8 @@ class TestSingleDrive(iotests.QMPTestCase):
     def test_stream_intermediate(self):
         self.assert_no_active_block_jobs()
 
-        self.assertNotEqual(qemu_io('-f', 'raw', '-c', 'map', backing_img),
-                            qemu_io('-f', iotests.imgfmt, '-c', 'map', mid_img),
+        self.assertNotEqual(qemu_io('-f', 'raw', '-rU', '-c', 'map', backing_img),
+                            qemu_io('-f', iotests.imgfmt, '-rU', '-c', 'map', mid_img),
                             'image file map matches backing file before streaming')
 
         result = self.vm.qmp('block-stream', device='mid', job_id='stream-mid')
@@ -86,21 +86,20 @@ class TestSingleDrive(iotests.QMPTestCase):
         result = self.vm.qmp('block-stream', device='drive0')
         self.assert_qmp(result, 'return', {})
 
-        result = self.vm.qmp('block-job-pause', device='drive0')
-        self.assert_qmp(result, 'return', {})
+        self.pause_job('drive0', wait=False)
+        self.vm.resume_drive('drive0')
+        self.pause_wait('drive0')
 
-        time.sleep(1)
         result = self.vm.qmp('query-block-jobs')
         offset = self.dictpath(result, 'return[0]/offset')
 
-        time.sleep(1)
+        time.sleep(0.5)
         result = self.vm.qmp('query-block-jobs')
         self.assert_qmp(result, 'return[0]/offset', offset)
 
         result = self.vm.qmp('block-job-resume', device='drive0')
         self.assert_qmp(result, 'return', {})
 
-        self.vm.resume_drive('drive0')
         self.wait_until_completed()
 
         self.assert_no_active_block_jobs()
@@ -114,7 +113,7 @@ class TestSingleDrive(iotests.QMPTestCase):
         self.assert_no_active_block_jobs()
 
         # The image map is empty before the operation
-        empty_map = qemu_io('-f', iotests.imgfmt, '-c', 'map', test_img)
+        empty_map = qemu_io('-f', iotests.imgfmt, '-rU', '-c', 'map', test_img)
 
         # This is a no-op: no data should ever be copied from the base image
         result = self.vm.qmp('block-stream', device='drive0', base=mid_img)
@@ -147,11 +146,15 @@ class TestSingleDrive(iotests.QMPTestCase):
         result = self.vm.qmp('block-stream', device='nonexistent')
         self.assert_qmp(result, 'error/class', 'GenericError')
 
+    def test_job_id_missing(self):
+        result = self.vm.qmp('block-stream', device='mid')
+        self.assert_qmp(result, 'error/class', 'GenericError')
+
 
 class TestParallelOps(iotests.QMPTestCase):
     num_ops = 4 # Number of parallel block-stream operations
     num_imgs = num_ops * 2 + 1
-    image_len = num_ops * 1024 * 1024
+    image_len = num_ops * 512 * 1024
     imgs = []
 
     def setUp(self):
@@ -171,14 +174,14 @@ class TestParallelOps(iotests.QMPTestCase):
                      '-o', 'backing_file=%s' % self.imgs[i-1], self.imgs[i])
 
         # Put data into the images we are copying data from
-        for i in range(self.num_imgs / 2):
-            img_index = i * 2 + 1
-            # Alternate between 512k and 1M.
+        odd_img_indexes = [x for x in reversed(range(self.num_imgs)) if x % 2 == 1]
+        for i in range(len(odd_img_indexes)):
+            # Alternate between 256KB and 512KB.
             # This way jobs will not finish in the same order they were created
-            num_kb = 512 + 512 * (i % 2)
+            num_kb = 256 + 256 * (i % 2)
             qemu_io('-f', iotests.imgfmt,
-                    '-c', 'write -P %d %d %d' % (i, i*1024*1024, num_kb * 1024),
-                    self.imgs[img_index])
+                    '-c', 'write -P 0xFF %dk %dk' % (i * 512, num_kb),
+                    self.imgs[odd_img_indexes[i]])
 
         # Attach the drive to the VM
         self.vm = iotests.VM()
@@ -197,8 +200,8 @@ class TestParallelOps(iotests.QMPTestCase):
 
         # Check that the maps don't match before the streaming operations
         for i in range(2, self.num_imgs, 2):
-            self.assertNotEqual(qemu_io('-f', iotests.imgfmt, '-c', 'map', self.imgs[i]),
-                                qemu_io('-f', iotests.imgfmt, '-c', 'map', self.imgs[i-1]),
+            self.assertNotEqual(qemu_io('-f', iotests.imgfmt, '-rU', '-c', 'map', self.imgs[i]),
+                                qemu_io('-f', iotests.imgfmt, '-rU', '-c', 'map', self.imgs[i-1]),
                                 'image file map matches backing file before streaming')
 
         # Create all streaming jobs
@@ -282,10 +285,6 @@ class TestParallelOps(iotests.QMPTestCase):
         result = self.vm.qmp('block-stream', device='node6', base=self.imgs[4], job_id='stream-node6-v2')
         self.assert_qmp(result, 'error/class', 'GenericError')
 
-        # This fails because block-commit needs to block node6, the overlay of the 'top' image
-        result = self.vm.qmp('block-stream', device='node7', base=self.imgs[5], job_id='stream-node6-v3')
-        self.assert_qmp(result, 'error/class', 'GenericError')
-
         # This fails because block-commit currently blocks the active layer even if it's not used
         result = self.vm.qmp('block-stream', device='drive0', base=self.imgs[5], job_id='stream-drive0')
         self.assert_qmp(result, 'error/class', 'GenericError')
@@ -317,12 +316,14 @@ class TestParallelOps(iotests.QMPTestCase):
         self.wait_until_completed(drive='commit-drive0')
 
     # Test a block-stream and a block-commit job in parallel
-    def test_stream_commit(self):
+    # Here the stream job is supposed to finish quickly in order to reproduce
+    # the scenario that triggers the bug fixed in 3d5d319e1221 and 1a63a907507
+    def test_stream_commit_1(self):
         self.assertLessEqual(8, self.num_imgs)
         self.assert_no_active_block_jobs()
 
         # Stream from node0 into node2
-        result = self.vm.qmp('block-stream', device='node2', job_id='node2')
+        result = self.vm.qmp('block-stream', device='node2', base_node='node0', job_id='node2')
         self.assert_qmp(result, 'return', {})
 
         # Commit from the active layer into node3
@@ -347,12 +348,44 @@ class TestParallelOps(iotests.QMPTestCase):
 
         self.assert_no_active_block_jobs()
 
+    # This is similar to test_stream_commit_1 but both jobs are slowed
+    # down so they can run in parallel for a little while.
+    def test_stream_commit_2(self):
+        self.assertLessEqual(8, self.num_imgs)
+        self.assert_no_active_block_jobs()
+
+        # Stream from node0 into node4
+        result = self.vm.qmp('block-stream', device='node4', base_node='node0', job_id='node4', speed=1024*1024)
+        self.assert_qmp(result, 'return', {})
+
+        # Commit from the active layer into node5
+        result = self.vm.qmp('block-commit', device='drive0', base=self.imgs[5], speed=1024*1024)
+        self.assert_qmp(result, 'return', {})
+
+        # Wait for all jobs to be finished.
+        pending_jobs = ['node4', 'drive0']
+        while len(pending_jobs) > 0:
+            for event in self.vm.get_qmp_events(wait=True):
+                if event['event'] == 'BLOCK_JOB_COMPLETED':
+                    node_name = self.dictpath(event, 'data/device')
+                    self.assertTrue(node_name in pending_jobs)
+                    self.assert_qmp_absent(event, 'data/error')
+                    pending_jobs.remove(node_name)
+                if event['event'] == 'BLOCK_JOB_READY':
+                    self.assert_qmp(event, 'data/device', 'drive0')
+                    self.assert_qmp(event, 'data/type', 'commit')
+                    self.assert_qmp_absent(event, 'data/error')
+                    self.assertTrue('drive0' in pending_jobs)
+                    self.vm.qmp('block-job-complete', device='drive0')
+
+        self.assert_no_active_block_jobs()
+
     # Test the base_node parameter
     def test_stream_base_node_name(self):
         self.assert_no_active_block_jobs()
 
-        self.assertNotEqual(qemu_io('-f', iotests.imgfmt, '-c', 'map', self.imgs[4]),
-                            qemu_io('-f', iotests.imgfmt, '-c', 'map', self.imgs[3]),
+        self.assertNotEqual(qemu_io('-f', iotests.imgfmt, '-rU', '-c', 'map', self.imgs[4]),
+                            qemu_io('-f', iotests.imgfmt, '-rU', '-c', 'map', self.imgs[3]),
                             'image file map matches backing file before streaming')
 
         # Error: the base node does not exist
@@ -422,8 +455,8 @@ class TestQuorum(iotests.QMPTestCase):
         if not iotests.supports_quorum():
             return
 
-        self.assertNotEqual(qemu_io('-f', iotests.imgfmt, '-c', 'map', self.children[0]),
-                            qemu_io('-f', iotests.imgfmt, '-c', 'map', self.backing[0]),
+        self.assertNotEqual(qemu_io('-f', iotests.imgfmt, '-rU', '-c', 'map', self.children[0]),
+                            qemu_io('-f', iotests.imgfmt, '-rU', '-c', 'map', self.backing[0]),
                             'image file map matches backing file before streaming')
 
         self.assert_no_active_block_jobs()
@@ -665,6 +698,7 @@ class TestENOSPC(TestErrors):
                 if event['event'] == 'BLOCK_JOB_ERROR':
                     self.assert_qmp(event, 'data/device', 'drive0')
                     self.assert_qmp(event, 'data/operation', 'read')
+                    error = True
 
                     result = self.vm.qmp('query-block-jobs')
                     self.assert_qmp(result, 'return[0]/paused', True)
@@ -675,9 +709,11 @@ class TestENOSPC(TestErrors):
                     self.assert_qmp(result, 'return', {})
 
                     result = self.vm.qmp('query-block-jobs')
+                    if result == {'return': []}:
+                        # Race; likely already finished. Check.
+                        continue
                     self.assert_qmp(result, 'return[0]/paused', False)
                     self.assert_qmp(result, 'return[0]/io-status', 'ok')
-                    error = True
                 elif event['event'] == 'BLOCK_JOB_COMPLETED':
                     self.assertTrue(error, 'job completed unexpectedly')
                     self.assert_qmp(event, 'data/type', 'stream')
@@ -791,13 +827,14 @@ class TestSetSpeed(iotests.QMPTestCase):
 
         self.assert_no_active_block_jobs()
 
+        self.vm.pause_drive('drive0')
         result = self.vm.qmp('block-stream', device='drive0')
         self.assert_qmp(result, 'return', {})
 
         result = self.vm.qmp('block-job-set-speed', device='drive0', speed=-1)
         self.assert_qmp(result, 'error/class', 'GenericError')
 
-        self.cancel_and_wait()
+        self.cancel_and_wait(resume=True)
 
 if __name__ == '__main__':
     iotests.main(supported_fmts=['qcow2', 'qed'])

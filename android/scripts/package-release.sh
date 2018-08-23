@@ -368,6 +368,10 @@ OPT_NO_TESTS=
 option_register_var "--no-tests" OPT_NO_TESTS \
        "Do not run tests after build completes."
 
+OPT_TRACE=
+option_register_var "--trace" OPT_TRACE \
+       "Enable tracing"
+
 package_builder_register_options
 aosp_prebuilts_dir_register_options
 prebuilts_dir_register_option
@@ -703,6 +707,9 @@ build_darwin_binaries_on () {
     if [ "$OPT_NO_STRIP" ]; then
         var_append DARWIN_BUILD_FLAGS "--no-strip"
     fi
+    if [ "$OPT_TRACE" ]; then
+        var_append DARWIN_BUILD_FLAGS "--trace"
+    fi
     if [ "$OPT_SYMBOLS" ]; then
         var_append DARWIN_BUILD_FLAGS "--symbols"
     fi
@@ -778,6 +785,10 @@ fi
 
 if [ "$OPT_NO_STRIP" ]; then
     var_append REBUILD_FLAGS "--no-strip"
+fi
+
+if [ "$OPT_TRACE" ]; then
+    var_append REBUILD_FLAGS "--trace"
 fi
 
 if [ "$OPT_SYMBOLS" ]; then

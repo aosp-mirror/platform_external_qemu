@@ -28,7 +28,6 @@
 #include "hw/hw.h"
 #include "hw/sysbus.h"
 #include "hw/boards.h"
-#include "sysemu/char.h"
 #include "qemu/log.h"
 #include "qapi/error.h"
 #include "hw/xen/xen_backend.h"
@@ -43,10 +42,9 @@ BusState *xen_sysbus;
 /* ------------------------------------------------------------- */
 
 /* public */
-xc_interface *xen_xc = NULL;
-xenforeignmemory_handle *xen_fmem = NULL;
 struct xs_handle *xenstore = NULL;
 const char *xen_protocol;
+bool xen_feature_grant_copy;
 
 /* private */
 static int debug;
@@ -149,7 +147,7 @@ static struct XenDevice *xen_be_get_xendev(const char *type, int dom, int dev,
         qdev_unplug(DEVICE(xendev), NULL);
         return NULL;
     }
-    fcntl(xenevtchn_fd(xendev->evtchndev), F_SETFD, FD_CLOEXEC);
+    qemu_set_cloexec(xenevtchn_fd(xendev->evtchndev));
 
     if (ops->flags & DEVOPS_FLAG_NEED_GNTDEV) {
         xendev->gnttabdev = xengnttab_open(NULL, 0);
@@ -522,6 +520,8 @@ void xenstore_update_fe(char *watch, struct XenDevice *xendev)
 
 int xen_be_init(void)
 {
+    xengnttab_handle *gnttabdev;
+
     xenstore = xs_daemon_open();
     if (!xenstore) {
         xen_pv_printf(NULL, 0, "can't connect to xenstored\n");
@@ -533,6 +533,14 @@ int xen_be_init(void)
     if (xen_xc == NULL || xen_fmem == NULL) {
         /* Check if xen_init() have been called */
         goto err;
+    }
+
+    gnttabdev = xengnttab_open(NULL, 0);
+    if (gnttabdev != NULL) {
+        if (xengnttab_grant_copy(gnttabdev, 0, NULL) == 0) {
+            xen_feature_grant_copy = true;
+        }
+        xengnttab_close(gnttabdev);
     }
 
     xen_sysdev = qdev_create(NULL, TYPE_XENSYSDEV);
@@ -556,7 +564,7 @@ static void xen_set_dynamic_sysbus(void)
     ObjectClass *oc = object_get_class(machine);
     MachineClass *mc = MACHINE_CLASS(oc);
 
-    mc->has_dynamic_sysbus = true;
+    machine_class_allow_dynamic_sysbus_dev(mc, TYPE_XENSYSDEV);
 }
 
 int xen_be_register(const char *type, struct XenDevOps *ops)
@@ -585,6 +593,9 @@ void xen_be_register_common(void)
     xen_be_register("console", &xen_console_ops);
     xen_be_register("vkbd", &xen_kbdmouse_ops);
     xen_be_register("qdisk", &xen_blkdev_ops);
+#ifdef CONFIG_VIRTFS
+    xen_be_register("9pfs", &xen_9pfs_ops);
+#endif
 #ifdef CONFIG_USB_LIBUSB
     xen_be_register("qusb", &xen_usb_ops);
 #endif
@@ -618,6 +629,8 @@ static void xendev_class_init(ObjectClass *klass, void *data)
 
     dc->props = xendev_properties;
     set_bit(DEVICE_CATEGORY_MISC, dc->categories);
+    /* xen-backend devices can be plugged/unplugged dynamically */
+    dc->user_creatable = true;
 }
 
 static const TypeInfo xendev_type_info = {

@@ -20,6 +20,23 @@
 #include <sys/vfs.h>
 #endif
 
+#ifdef _WIN32
+static uint64_t windowsGetFilePageSize() {
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo(&sysinfo);
+    // Use dwAllocationGranularity
+    // as that is what we need to align
+    // the pointer to (64k on most systems)
+    return (uint64_t)sysinfo.dwAllocationGranularity;
+}
+#endif
+
+#ifdef __APPLE__
+static uint64_t macOSGetFilePageSize() {
+    return getpagesize();
+}
+#endif
+
 size_t qemu_fd_getpagesize(int fd)
 {
 #ifdef CONFIG_LINUX
@@ -35,9 +52,21 @@ size_t qemu_fd_getpagesize(int fd)
             return fs.f_bsize;
         }
     }
+#ifdef __sparc__
+    /* SPARC Linux needs greater alignment than the pagesize */
+    return QEMU_VMALLOC_ALIGN;
+#endif
+    return getpagesize();
 #endif
 
-    return getpagesize();
+#ifdef _WIN32
+    return windowsGetFilePageSize();
+#endif
+
+#ifdef __APPLE__
+    return macOSGetFilePageSize();
+#endif
+
 }
 
 size_t qemu_mempath_getpagesize(const char *mem_path)
@@ -60,13 +89,26 @@ size_t qemu_mempath_getpagesize(const char *mem_path)
         /* It's hugepage, return the huge page size */
         return fs.f_bsize;
     }
+#ifdef __sparc__
+    /* SPARC Linux needs greater alignment than the pagesize */
+    return QEMU_VMALLOC_ALIGN;
 #endif
 
     return getpagesize();
+#endif
+
+#ifdef _WIN32
+    return windowsGetFilePageSize();
+#endif
+
+#ifdef __APPLE__
+    return macOSGetFilePageSize();
+#endif
 }
 
 void *qemu_ram_mmap(int fd, size_t size, size_t align, bool shared)
 {
+#ifndef _WIN32
     /*
      * Note: this always allocates at least one extra page of virtual address
      * space, even if size is already aligned.
@@ -123,12 +165,46 @@ void *qemu_ram_mmap(int fd, size_t size, size_t align, bool shared)
     }
 
     return ptr1;
+#else
+    size_t total = size + align;
+
+    HANDLE fileMapping =
+        CreateFileMapping(
+            (HANDLE)_get_osfhandle(fd),
+            NULL, // security attribs
+            PAGE_READWRITE,
+            (uint32_t)(((uint64_t)(size + align)) >> 32),
+            (uint32_t)(size + align),
+            NULL);
+
+    if (!fileMapping) {
+        return MAP_FAILED;
+    }
+
+    void* ptr =
+        MapViewOfFile(
+            fileMapping,   // handle to map object
+            shared ?  FILE_MAP_ALL_ACCESS : FILE_MAP_COPY, // read/write permission
+            0, 0, 0);
+
+    CloseHandle(fileMapping);
+
+    if (!ptr) {
+        return MAP_FAILED;
+    }
+
+    return ptr;
+#endif
 }
 
 void qemu_ram_munmap(void *ptr, size_t size)
 {
+#ifndef _WIN32
     if (ptr) {
         /* Unmap both the RAM block and the guard page */
         munmap(ptr, size + getpagesize());
     }
+#else
+    UnmapViewOfFile(ptr);
+#endif
 }

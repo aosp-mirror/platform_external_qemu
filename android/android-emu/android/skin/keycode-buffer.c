@@ -35,7 +35,7 @@ void skin_keycode_buffer_flush(SkinKeycodeBuffer* keycodes) {
     if (keycodes->keycode_count > 0) {
         if (VERBOSE_CHECK(keys)) {
             int  nn;
-            printf(">> KEY");
+            printf(">> %s KEY", __func__);
             for (nn = 0; nn < keycodes->keycode_count; nn++) {
                 int  code = keycodes->keycodes[nn];
                 printf(" [0x%03x,%s]",

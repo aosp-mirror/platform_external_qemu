@@ -25,8 +25,9 @@
 #ifndef HW_VGA_INT_H
 #define HW_VGA_INT_H
 
-#include "hw/hw.h"
+#include "exec/ioport.h"
 #include "exec/memory.h"
+#include "ui/console.h"
 
 #define ST01_V_RETRACE      0x08
 #define ST01_DISP_ENABLE    0x01
@@ -94,6 +95,7 @@ typedef struct VGACommonState {
     uint32_t vram_size;
     uint32_t vram_size_mb; /* property */
     uint32_t vbe_size;
+    uint32_t vbe_size_mask;
     uint32_t latch;
     bool has_chain4_alias;
     MemoryRegion chain4_alias;

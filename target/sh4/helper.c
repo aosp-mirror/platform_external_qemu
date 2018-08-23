@@ -21,6 +21,7 @@
 #include "cpu.h"
 #include "exec/exec-all.h"
 #include "exec/log.h"
+#include "sysemu/sysemu.h"
 
 #if !defined(CONFIG_USER_ONLY)
 #include "hw/sh4/sh_intc.h"
@@ -33,7 +34,7 @@ void superh_cpu_do_interrupt(CPUState *cs)
     cs->exception_index = -1;
 }
 
-int superh_cpu_handle_mmu_fault(CPUState *cs, vaddr address, int rw,
+int superh_cpu_handle_mmu_fault(CPUState *cs, vaddr address, int size, int rw,
                                 int mmu_idx)
 {
     SuperHCPU *cpu = SUPERH_CPU(cs);
@@ -92,7 +93,14 @@ void superh_cpu_do_interrupt(CPUState *cs)
 
     if (env->sr & (1u << SR_BL)) {
         if (do_exp && cs->exception_index != 0x1e0) {
-            cs->exception_index = 0x000; /* masked exception -> reset */
+            /* In theory a masked exception generates a reset exception,
+               which in turn jumps to the reset vector. However this only
+               works when using a bootloader. When using a kernel and an
+               initrd, they need to be reloaded and the program counter
+               should be loaded with the kernel entry point.
+               qemu_system_reset_request takes care of that.  */
+            qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
+            return;
         }
         if (do_irq && !env->in_sleep) {
             return; /* masked */
@@ -163,15 +171,14 @@ void superh_cpu_do_interrupt(CPUState *cs)
     env->spc = env->pc;
     env->sgr = env->gregs[15];
     env->sr |= (1u << SR_BL) | (1u << SR_MD) | (1u << SR_RB);
+    env->lock_addr = -1;
 
-    if (env->flags & (DELAY_SLOT | DELAY_SLOT_CONDITIONAL)) {
+    if (env->flags & DELAY_SLOT_MASK) {
         /* Branch instruction should be executed again before delay slot. */
 	env->spc -= 2;
 	/* Clear flags for exception/interrupt routine. */
-	env->flags &= ~(DELAY_SLOT | DELAY_SLOT_CONDITIONAL | DELAY_SLOT_TRUE);
+        env->flags &= ~DELAY_SLOT_MASK;
     }
-    if (env->flags & DELAY_SLOT_CLEARME)
-        env->flags = 0;
 
     if (do_exp) {
         env->expevt = cs->exception_index;
@@ -422,7 +429,7 @@ static int get_physical_address(CPUSH4State * env, target_ulong * physical,
         if (!(env->sr & (1u << SR_MD))
 	    && (address < 0xe0000000 || address >= 0xe4000000)) {
 	    /* Unauthorized access in user mode (only store queues are available) */
-	    fprintf(stderr, "Unauthorized access\n");
+            qemu_log_mask(LOG_GUEST_ERROR, "Unauthorized access\n");
 	    if (rw == 0)
 		return MMU_DADDR_ERROR_READ;
 	    else if (rw == 1)
@@ -451,7 +458,7 @@ static int get_physical_address(CPUSH4State * env, target_ulong * physical,
     return get_mmu_address(env, physical, prot, address, rw, access_type);
 }
 
-int superh_cpu_handle_mmu_fault(CPUState *cs, vaddr address, int rw,
+int superh_cpu_handle_mmu_fault(CPUState *cs, vaddr address, int size, int rw,
                                 int mmu_idx)
 {
     SuperHCPU *cpu = SUPERH_CPU(cs);
@@ -865,8 +872,16 @@ int cpu_sh4_is_cached(CPUSH4State * env, target_ulong addr)
 bool superh_cpu_exec_interrupt(CPUState *cs, int interrupt_request)
 {
     if (interrupt_request & CPU_INTERRUPT_HARD) {
-        superh_cpu_do_interrupt(cs);
-        return true;
+        SuperHCPU *cpu = SUPERH_CPU(cs);
+        CPUSH4State *env = &cpu->env;
+
+        /* Delay slots are indivisible, ignore interrupts */
+        if (env->flags & DELAY_SLOT_MASK) {
+            return false;
+        } else {
+            superh_cpu_do_interrupt(cs);
+            return true;
+        }
     }
     return false;
 }

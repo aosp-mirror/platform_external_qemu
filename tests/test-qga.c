@@ -5,6 +5,8 @@
 #include <sys/un.h>
 
 #include "libqtest.h"
+#include "qapi/qmp/qdict.h"
+#include "qapi/qmp/qlist.h"
 
 typedef struct {
     char *test_dir;
@@ -46,7 +48,7 @@ static void qga_watch(GPid pid, gint status, gpointer user_data)
 }
 
 static void
-fixture_setup(TestFixture *fixture, gconstpointer data)
+fixture_setup(TestFixture *fixture, gconstpointer data, gchar **envp)
 {
     const gchar *extra_arg = data;
     GError *error = NULL;
@@ -67,7 +69,7 @@ fixture_setup(TestFixture *fixture, gconstpointer data)
     g_shell_parse_argv(cmd, NULL, &argv, &error);
     g_assert_no_error(error);
 
-    g_spawn_async(fixture->test_dir, argv, NULL,
+    g_spawn_async(fixture->test_dir, argv, envp,
                   G_SPAWN_SEARCH_PATH|G_SPAWN_DO_NOT_REAP_CHILD,
                   NULL, NULL, &fixture->pid, &error);
     g_assert_no_error(error);
@@ -146,14 +148,30 @@ static void test_qga_sync_delimited(gconstpointer fix)
     QDict *ret;
     gchar *cmd;
 
-    cmd = g_strdup_printf("%c{'execute': 'guest-sync-delimited',"
-                          " 'arguments': {'id': %u } }", 0xff, r);
+    cmd = g_strdup_printf("\xff{'execute': 'guest-sync-delimited',"
+                          " 'arguments': {'id': %u } }", r);
     qmp_fd_send(fixture->fd, cmd);
     g_free(cmd);
 
-    v = read(fixture->fd, &c, 1);
-    g_assert_cmpint(v, ==, 1);
-    g_assert_cmpint(c, ==, 0xff);
+    /*
+     * Read and ignore garbage until resynchronized.
+     *
+     * Note that the full reset sequence would involve checking the
+     * response of guest-sync-delimited and repeating the loop if
+     * 'id' field of the response does not match the 'id' field of
+     * the request. Testing this fully would require inserting
+     * garbage in the response stream and is left as a future test
+     * to implement.
+     *
+     * TODO: The server shouldn't emit so much garbage (among other
+     * things, it loudly complains about the client's \xff being
+     * invalid JSON, even though it is a documented part of the
+     * handshake.
+     */
+    do {
+        v = read(fixture->fd, &c, 1);
+        g_assert_cmpint(v, ==, 1);
+    } while (c != 0xff);
 
     ret = qmp_fd_receive(fixture->fd);
     g_assert_nonnull(ret);
@@ -172,8 +190,19 @@ static void test_qga_sync(gconstpointer fix)
     QDict *ret;
     gchar *cmd;
 
-    cmd = g_strdup_printf("%c{'execute': 'guest-sync',"
-                          " 'arguments': {'id': %u } }", 0xff, r);
+    /*
+     * TODO guest-sync is inherently limited: we cannot distinguish
+     * failure caused by reacting to garbage on the wire prior to this
+     * command, from failure of this actual command. Clients are
+     * supposed to be able to send a raw '\xff' byte to at least
+     * re-synchronize the server's parser prior to this command, but
+     * we are not in a position to test that here because (at least
+     * for now) it causes the server to issue an error message about
+     * invalid JSON. Testing of '\xff' handling is done in
+     * guest-sync-delimited instead.
+     */
+    cmd = g_strdup_printf("{'execute': 'guest-sync',"
+                          " 'arguments': {'id': %u } }", r);
     ret = qmp_fd(fixture->fd, cmd);
     g_free(cmd);
 
@@ -268,8 +297,8 @@ static void test_qga_get_vcpus(gconstpointer fix)
     /* check there is at least a cpu */
     list = qdict_get_qlist(ret, "return");
     entry = qlist_first(list);
-    g_assert(qdict_haskey(qobject_to_qdict(entry->value), "online"));
-    g_assert(qdict_haskey(qobject_to_qdict(entry->value), "logical-id"));
+    g_assert(qdict_haskey(qobject_to(QDict, entry->value), "online"));
+    g_assert(qdict_haskey(qobject_to(QDict, entry->value), "logical-id"));
 
     QDECREF(ret);
 }
@@ -289,10 +318,10 @@ static void test_qga_get_fsinfo(gconstpointer fix)
     list = qdict_get_qlist(ret, "return");
     entry = qlist_first(list);
     if (entry) {
-        g_assert(qdict_haskey(qobject_to_qdict(entry->value), "name"));
-        g_assert(qdict_haskey(qobject_to_qdict(entry->value), "mountpoint"));
-        g_assert(qdict_haskey(qobject_to_qdict(entry->value), "type"));
-        g_assert(qdict_haskey(qobject_to_qdict(entry->value), "disk"));
+        g_assert(qdict_haskey(qobject_to(QDict, entry->value), "name"));
+        g_assert(qdict_haskey(qobject_to(QDict, entry->value), "mountpoint"));
+        g_assert(qdict_haskey(qobject_to(QDict, entry->value), "type"));
+        g_assert(qdict_haskey(qobject_to(QDict, entry->value), "disk"));
     }
 
     QDECREF(ret);
@@ -334,8 +363,9 @@ static void test_qga_get_memory_blocks(gconstpointer fix)
         entry = qlist_first(list);
         /* newer versions of qga may return empty list without error */
         if (entry) {
-            g_assert(qdict_haskey(qobject_to_qdict(entry->value), "phys-index"));
-            g_assert(qdict_haskey(qobject_to_qdict(entry->value), "online"));
+            g_assert(qdict_haskey(qobject_to(QDict, entry->value),
+                                  "phys-index"));
+            g_assert(qdict_haskey(qobject_to(QDict, entry->value), "online"));
         }
     }
 
@@ -356,7 +386,7 @@ static void test_qga_network_get_interfaces(gconstpointer fix)
     /* check there is at least an interface */
     list = qdict_get_qlist(ret, "return");
     entry = qlist_first(list);
-    g_assert(qdict_haskey(qobject_to_qdict(entry->value), "name"));
+    g_assert(qdict_haskey(qobject_to(QDict, entry->value), "name"));
 
     QDECREF(ret);
 }
@@ -615,72 +645,13 @@ static void test_qga_get_time(gconstpointer fix)
     QDECREF(ret);
 }
 
-static void test_qga_set_time(gconstpointer fix)
-{
-    const TestFixture *fixture = fix;
-    QDict *ret;
-    int64_t current, time;
-    gchar *cmd;
-
-    /* get current time */
-    ret = qmp_fd(fixture->fd, "{'execute': 'guest-get-time'}");
-    g_assert_nonnull(ret);
-    qmp_assert_no_error(ret);
-    current = qdict_get_int(ret, "return");
-    g_assert_cmpint(current, >, 0);
-    QDECREF(ret);
-
-    /* set some old time */
-    ret = qmp_fd(fixture->fd, "{'execute': 'guest-set-time',"
-                 " 'arguments': { 'time': 1000 } }");
-    g_assert_nonnull(ret);
-    qmp_assert_no_error(ret);
-    QDECREF(ret);
-
-    /* check old time */
-    ret = qmp_fd(fixture->fd, "{'execute': 'guest-get-time'}");
-    g_assert_nonnull(ret);
-    qmp_assert_no_error(ret);
-    time = qdict_get_int(ret, "return");
-    g_assert_cmpint(time / 1000, <, G_USEC_PER_SEC * 10);
-    QDECREF(ret);
-
-    /* set back current time */
-    cmd = g_strdup_printf("{'execute': 'guest-set-time',"
-                          " 'arguments': { 'time': %" PRId64 " } }",
-                          current + time * 1000);
-    ret = qmp_fd(fixture->fd, cmd);
-    g_free(cmd);
-    g_assert_nonnull(ret);
-    qmp_assert_no_error(ret);
-    QDECREF(ret);
-}
-
-static void test_qga_fstrim(gconstpointer fix)
-{
-    const TestFixture *fixture = fix;
-    QDict *ret;
-    QList *list;
-    const QListEntry *entry;
-
-    ret = qmp_fd(fixture->fd, "{'execute': 'guest-fstrim',"
-                 " arguments: { minimum: 4194304 } }");
-    g_assert_nonnull(ret);
-    qmp_assert_no_error(ret);
-    list = qdict_get_qlist(ret, "return");
-    entry = qlist_first(list);
-    g_assert(qdict_haskey(qobject_to_qdict(entry->value), "paths"));
-
-    QDECREF(ret);
-}
-
 static void test_qga_blacklist(gconstpointer data)
 {
     TestFixture fix;
     QDict *ret, *error;
     const gchar *class, *desc;
 
-    fixture_setup(&fix, "-b guest-ping,guest-get-time");
+    fixture_setup(&fix, "-b guest-ping,guest-get-time", NULL);
 
     /* check blacklist */
     ret = qmp_fd(fix.fd, "{'execute': 'guest-ping'}");
@@ -804,30 +775,6 @@ static void test_qga_fsfreeze_status(gconstpointer fix)
     QDECREF(ret);
 }
 
-static void test_qga_fsfreeze_and_thaw(gconstpointer fix)
-{
-    const TestFixture *fixture = fix;
-    QDict *ret;
-    const gchar *status;
-
-    ret = qmp_fd(fixture->fd, "{'execute': 'guest-fsfreeze-freeze'}");
-    g_assert_nonnull(ret);
-    qmp_assert_no_error(ret);
-    QDECREF(ret);
-
-    ret = qmp_fd(fixture->fd, "{'execute': 'guest-fsfreeze-status'}");
-    g_assert_nonnull(ret);
-    qmp_assert_no_error(ret);
-    status = qdict_get_try_str(ret, "return");
-    g_assert_cmpstr(status, ==, "frozen");
-    QDECREF(ret);
-
-    ret = qmp_fd(fixture->fd, "{'execute': 'guest-fsfreeze-thaw'}");
-    g_assert_nonnull(ret);
-    qmp_assert_no_error(ret);
-    QDECREF(ret);
-}
-
 static void test_qga_guest_exec(gconstpointer fix)
 {
     const TestFixture *fixture = fix;
@@ -909,6 +856,60 @@ static void test_qga_guest_exec_invalid(gconstpointer fix)
     QDECREF(ret);
 }
 
+static void test_qga_guest_get_osinfo(gconstpointer data)
+{
+    TestFixture fixture;
+    const gchar *str;
+    gchar *cwd, *env[2];
+    QDict *ret, *val;
+
+    cwd = g_get_current_dir();
+    env[0] = g_strdup_printf(
+        "QGA_OS_RELEASE=%s%ctests%cdata%ctest-qga-os-release",
+        cwd, G_DIR_SEPARATOR, G_DIR_SEPARATOR, G_DIR_SEPARATOR);
+    env[1] = NULL;
+    g_free(cwd);
+    fixture_setup(&fixture, NULL, env);
+
+    ret = qmp_fd(fixture.fd, "{'execute': 'guest-get-osinfo'}");
+    g_assert_nonnull(ret);
+    qmp_assert_no_error(ret);
+
+    val = qdict_get_qdict(ret, "return");
+
+    str = qdict_get_try_str(val, "id");
+    g_assert_nonnull(str);
+    g_assert_cmpstr(str, ==, "qemu-ga-test");
+
+    str = qdict_get_try_str(val, "name");
+    g_assert_nonnull(str);
+    g_assert_cmpstr(str, ==, "QEMU-GA");
+
+    str = qdict_get_try_str(val, "pretty-name");
+    g_assert_nonnull(str);
+    g_assert_cmpstr(str, ==, "QEMU Guest Agent test");
+
+    str = qdict_get_try_str(val, "version");
+    g_assert_nonnull(str);
+    g_assert_cmpstr(str, ==, "Test 1");
+
+    str = qdict_get_try_str(val, "version-id");
+    g_assert_nonnull(str);
+    g_assert_cmpstr(str, ==, "1");
+
+    str = qdict_get_try_str(val, "variant");
+    g_assert_nonnull(str);
+    g_assert_cmpstr(str, ==, "Unit test \"'$`\\ and \\\\ etc.");
+
+    str = qdict_get_try_str(val, "variant-id");
+    g_assert_nonnull(str);
+    g_assert_cmpstr(str, ==, "unit-test");
+
+    QDECREF(ret);
+    g_free(env[0]);
+    fixture_tear_down(&fixture, NULL);
+}
+
 int main(int argc, char **argv)
 {
     TestFixture fix;
@@ -916,7 +917,7 @@ int main(int argc, char **argv)
 
     setlocale (LC_ALL, "");
     g_test_init(&argc, &argv, NULL);
-    fixture_setup(&fix, NULL);
+    fixture_setup(&fix, NULL, NULL);
 
     g_test_add_data_func("/qga/sync-delimited", &fix, test_qga_sync_delimited);
     g_test_add_data_func("/qga/sync", &fix, test_qga_sync);
@@ -945,13 +946,8 @@ int main(int argc, char **argv)
     g_test_add_data_func("/qga/guest-exec", &fix, test_qga_guest_exec);
     g_test_add_data_func("/qga/guest-exec-invalid", &fix,
                          test_qga_guest_exec_invalid);
-
-    if (g_getenv("QGA_TEST_SIDE_EFFECTING")) {
-        g_test_add_data_func("/qga/fsfreeze-and-thaw", &fix,
-                             test_qga_fsfreeze_and_thaw);
-        g_test_add_data_func("/qga/set-time", &fix, test_qga_set_time);
-        g_test_add_data_func("/qga/fstrim", &fix, test_qga_fstrim);
-    }
+    g_test_add_data_func("/qga/guest-get-osinfo", &fix,
+                         test_qga_guest_get_osinfo);
 
     ret = g_test_run();
 

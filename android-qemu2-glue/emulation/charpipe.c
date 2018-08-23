@@ -12,7 +12,7 @@
 #include "android/utils/cbuffer.h"
 #include "android/utils/debug.h"
 #include "qemu/osdep.h"
-#include "sysemu/char.h"
+#include "chardev/char-fe.h"
 
 #define DEBUG 0
 
@@ -404,7 +404,7 @@ static void charbuffer_finalize(Object* obj) {
     cbuf->endpoint = NULL;
 
     if (cbuf->endpoint != NULL) {
-        qemu_chr_delete(cbuf->endpoint);
+        object_unparent(OBJECT(cbuf->endpoint));
         cbuf->endpoint = NULL;
     }
 

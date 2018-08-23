@@ -18,7 +18,7 @@
 
 extern "C" {
 #include "qemu/osdep.h"
-#include "migration/migration.h"
+#include "migration/compression.h"
 }
 
 #include "lz4.h"
