@@ -69,8 +69,7 @@ bool stat64_add32_carry(Stat64 *s, uint32_t low, uint32_t high);
 static inline void stat64_init(Stat64 *s, uint64_t value)
 {
     /* This is not guaranteed to be atomic! */
-    *s = (Stat64){
-        .low = (uint32_t)value, .high = (uint32_t)(value >> 32), .lock = 0};
+    *s = (Stat64) { .low = value, .high = value >> 32, .lock = 0 };
 }
 
 static inline void stat64_add(Stat64 *s, uint64_t value)

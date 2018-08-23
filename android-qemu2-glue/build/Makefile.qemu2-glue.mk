@@ -21,7 +21,6 @@ LOCAL_SRC_FILES := \
     base/async/Looper.cpp \
     base/files/QemuFileStream.cpp \
     display.cpp \
-    drive-share.cpp \
     emulation/android_pipe_device.cpp \
     emulation/charpipe.c \
     emulation/CharSerialLine.cpp \
