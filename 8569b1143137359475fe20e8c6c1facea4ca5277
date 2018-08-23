@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b992821c_c778c327",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-23T21:35:33Z",
+      "side": 1,
+      "message": "please cache the result in the first call, AFAIK that\u0027s a linear scan over the linked list.\nyou actually only need to call the qemu_fund_opts() once out of the outer loop",
+      "range": {
+        "startLine": 147,
+        "startChar": 19,
+        "endLine": 148,
+        "endChar": 65
+      },
+      "revId": "8569b1143137359475fe20e8c6c1facea4ca5277",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
