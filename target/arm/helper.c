@@ -1,5 +1,6 @@
 #include "qemu/osdep.h"
-#include "target/arm/trace.h"
+#include "target/arm/idau.h"
+#include "trace.h"
 #include "cpu.h"
 #include "internals.h"
 #include "exec/gdbstub.h"
@@ -15,21 +16,42 @@
 #include <zlib.h> /* For crc32 */
 #include "exec/semihost.h"
 #include "sysemu/kvm.h"
+#include "fpu/softfloat.h"
 
 #define ARM_CPU_FREQ 1000000000 /* FIXME: 1 GHz, should be configurable */
 
 #ifndef CONFIG_USER_ONLY
+/* Cacheability and shareability attributes for a memory access */
+typedef struct ARMCacheAttrs {
+    unsigned int attrs:8; /* as in the MAIR register encoding */
+    unsigned int shareability:2; /* as in the SH field of the VMSAv8-64 PTEs */
+} ARMCacheAttrs;
+
 static bool get_phys_addr(CPUARMState *env, target_ulong address,
-                          int access_type, ARMMMUIdx mmu_idx,
+                          MMUAccessType access_type, ARMMMUIdx mmu_idx,
                           hwaddr *phys_ptr, MemTxAttrs *attrs, int *prot,
-                          target_ulong *page_size, uint32_t *fsr,
-                          ARMMMUFaultInfo *fi);
+                          target_ulong *page_size,
+                          ARMMMUFaultInfo *fi, ARMCacheAttrs *cacheattrs);
 
 static bool get_phys_addr_lpae(CPUARMState *env, target_ulong address,
-                               int access_type, ARMMMUIdx mmu_idx,
+                               MMUAccessType access_type, ARMMMUIdx mmu_idx,
                                hwaddr *phys_ptr, MemTxAttrs *txattrs, int *prot,
-                               target_ulong *page_size_ptr, uint32_t *fsr,
-                               ARMMMUFaultInfo *fi);
+                               target_ulong *page_size_ptr,
+                               ARMMMUFaultInfo *fi, ARMCacheAttrs *cacheattrs);
+
+/* Security attributes for an address, as returned by v8m_security_lookup. */
+typedef struct V8M_SAttributes {
+    bool ns;
+    bool nsc;
+    uint8_t sregion;
+    bool srvalid;
+    uint8_t iregion;
+    bool irvalid;
+} V8M_SAttributes;
+
+static void v8m_security_lookup(CPUARMState *env, uint32_t address,
+                                MMUAccessType access_type, ARMMMUIdx mmu_idx,
+                                V8M_SAttributes *sattrs);
 
 /* Definitions for the PMCCNTR and PMCR registers */
 #define PMCRD   0x8
@@ -44,15 +66,16 @@ static int vfp_gdb_get_reg(CPUARMState *env, uint8_t *buf, int reg)
     /* VFP data registers are always little-endian.  */
     nregs = arm_feature(env, ARM_FEATURE_VFP3) ? 32 : 16;
     if (reg < nregs) {
-        stfq_le_p(buf, env->vfp.regs[reg]);
+        stq_le_p(buf, *aa32_vfp_dreg(env, reg));
         return 8;
     }
     if (arm_feature(env, ARM_FEATURE_NEON)) {
         /* Aliases for Q regs.  */
         nregs += 16;
         if (reg < nregs) {
-            stfq_le_p(buf, env->vfp.regs[(reg - 32) * 2]);
-            stfq_le_p(buf + 8, env->vfp.regs[(reg - 32) * 2 + 1]);
+            uint64_t *q = aa32_vfp_qreg(env, reg - 32);
+            stq_le_p(buf, q[0]);
+            stq_le_p(buf + 8, q[1]);
             return 16;
         }
     }
@@ -70,14 +93,15 @@ static int vfp_gdb_set_reg(CPUARMState *env, uint8_t *buf, int reg)
 
     nregs = arm_feature(env, ARM_FEATURE_VFP3) ? 32 : 16;
     if (reg < nregs) {
-        env->vfp.regs[reg] = ldfq_le_p(buf);
+        *aa32_vfp_dreg(env, reg) = ldq_le_p(buf);
         return 8;
     }
     if (arm_feature(env, ARM_FEATURE_NEON)) {
         nregs += 16;
         if (reg < nregs) {
-            env->vfp.regs[(reg - 32) * 2] = ldfq_le_p(buf);
-            env->vfp.regs[(reg - 32) * 2 + 1] = ldfq_le_p(buf + 8);
+            uint64_t *q = aa32_vfp_qreg(env, reg - 32);
+            q[0] = ldq_le_p(buf);
+            q[1] = ldq_le_p(buf + 8);
             return 16;
         }
     }
@@ -94,9 +118,12 @@ static int aarch64_fpu_gdb_get_reg(CPUARMState *env, uint8_t *buf, int reg)
     switch (reg) {
     case 0 ... 31:
         /* 128 bit FP register */
-        stfq_le_p(buf, env->vfp.regs[reg * 2]);
-        stfq_le_p(buf + 8, env->vfp.regs[reg * 2 + 1]);
-        return 16;
+        {
+            uint64_t *q = aa64_vfp_qreg(env, reg);
+            stq_le_p(buf, q[0]);
+            stq_le_p(buf + 8, q[1]);
+            return 16;
+        }
     case 32:
         /* FPSR */
         stl_p(buf, vfp_get_fpsr(env));
@@ -115,9 +142,12 @@ static int aarch64_fpu_gdb_set_reg(CPUARMState *env, uint8_t *buf, int reg)
     switch (reg) {
     case 0 ... 31:
         /* 128 bit FP register */
-        env->vfp.regs[reg * 2] = ldfq_le_p(buf);
-        env->vfp.regs[reg * 2 + 1] = ldfq_le_p(buf + 8);
-        return 16;
+        {
+            uint64_t *q = aa64_vfp_qreg(env, reg);
+            q[0] = ldq_le_p(buf);
+            q[1] = ldq_le_p(buf + 8);
+            return 16;
+        }
     case 32:
         /* FPSR */
         vfp_set_fpsr(env, ldl_p(buf));
@@ -485,7 +515,7 @@ static void contextidr_write(CPUARMState *env, const ARMCPRegInfo *ri,
 {
     ARMCPU *cpu = arm_env_get_cpu(env);
 
-    if (raw_read(env, ri) != value && !arm_feature(env, ARM_FEATURE_MPU)
+    if (raw_read(env, ri) != value && !arm_feature(env, ARM_FEATURE_PMSA)
         && !extended_addresses_enabled(env)) {
         /* For VMSA (when not using the LPAE long descriptor page table
          * format) this register includes the ASID, so do a TLB flush.
@@ -571,9 +601,9 @@ static void tlbiall_nsnh_write(CPUARMState *env, const ARMCPRegInfo *ri,
     CPUState *cs = ENV_GET_CPU(env);
 
     tlb_flush_by_mmuidx(cs,
-                        (1 << ARMMMUIdx_S12NSE1) |
-                        (1 << ARMMMUIdx_S12NSE0) |
-                        (1 << ARMMMUIdx_S2NS));
+                        ARMMMUIdxBit_S12NSE1 |
+                        ARMMMUIdxBit_S12NSE0 |
+                        ARMMMUIdxBit_S2NS);
 }
 
 static void tlbiall_nsnh_is_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -582,9 +612,9 @@ static void tlbiall_nsnh_is_write(CPUARMState *env, const ARMCPRegInfo *ri,
     CPUState *cs = ENV_GET_CPU(env);
 
     tlb_flush_by_mmuidx_all_cpus_synced(cs,
-                                        (1 << ARMMMUIdx_S12NSE1) |
-                                        (1 << ARMMMUIdx_S12NSE0) |
-                                        (1 << ARMMMUIdx_S2NS));
+                                        ARMMMUIdxBit_S12NSE1 |
+                                        ARMMMUIdxBit_S12NSE0 |
+                                        ARMMMUIdxBit_S2NS);
 }
 
 static void tlbiipas2_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -605,7 +635,7 @@ static void tlbiipas2_write(CPUARMState *env, const ARMCPRegInfo *ri,
 
     pageaddr = sextract64(value << 12, 0, 40);
 
-    tlb_flush_page_by_mmuidx(cs, pageaddr, (1 << ARMMMUIdx_S2NS));
+    tlb_flush_page_by_mmuidx(cs, pageaddr, ARMMMUIdxBit_S2NS);
 }
 
 static void tlbiipas2_is_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -621,7 +651,7 @@ static void tlbiipas2_is_write(CPUARMState *env, const ARMCPRegInfo *ri,
     pageaddr = sextract64(value << 12, 0, 40);
 
     tlb_flush_page_by_mmuidx_all_cpus_synced(cs, pageaddr,
-                                             (1 << ARMMMUIdx_S2NS));
+                                             ARMMMUIdxBit_S2NS);
 }
 
 static void tlbiall_hyp_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -629,7 +659,7 @@ static void tlbiall_hyp_write(CPUARMState *env, const ARMCPRegInfo *ri,
 {
     CPUState *cs = ENV_GET_CPU(env);
 
-    tlb_flush_by_mmuidx(cs, (1 << ARMMMUIdx_S1E2));
+    tlb_flush_by_mmuidx(cs, ARMMMUIdxBit_S1E2);
 }
 
 static void tlbiall_hyp_is_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -637,7 +667,7 @@ static void tlbiall_hyp_is_write(CPUARMState *env, const ARMCPRegInfo *ri,
 {
     CPUState *cs = ENV_GET_CPU(env);
 
-    tlb_flush_by_mmuidx_all_cpus_synced(cs, (1 << ARMMMUIdx_S1E2));
+    tlb_flush_by_mmuidx_all_cpus_synced(cs, ARMMMUIdxBit_S1E2);
 }
 
 static void tlbimva_hyp_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -646,7 +676,7 @@ static void tlbimva_hyp_write(CPUARMState *env, const ARMCPRegInfo *ri,
     CPUState *cs = ENV_GET_CPU(env);
     uint64_t pageaddr = value & ~MAKE_64BIT_MASK(0, 12);
 
-    tlb_flush_page_by_mmuidx(cs, pageaddr, (1 << ARMMMUIdx_S1E2));
+    tlb_flush_page_by_mmuidx(cs, pageaddr, ARMMMUIdxBit_S1E2);
 }
 
 static void tlbimva_hyp_is_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -656,7 +686,7 @@ static void tlbimva_hyp_is_write(CPUARMState *env, const ARMCPRegInfo *ri,
     uint64_t pageaddr = value & ~MAKE_64BIT_MASK(0, 12);
 
     tlb_flush_page_by_mmuidx_all_cpus_synced(cs, pageaddr,
-                                             (1 << ARMMMUIdx_S1E2));
+                                             ARMMMUIdxBit_S1E2);
 }
 
 static const ARMCPRegInfo cp_reginfo[] = {
@@ -2135,32 +2165,60 @@ static CPAccessResult ats_access(CPUARMState *env, const ARMCPRegInfo *ri,
 }
 
 static uint64_t do_ats_write(CPUARMState *env, uint64_t value,
-                             int access_type, ARMMMUIdx mmu_idx)
+                             MMUAccessType access_type, ARMMMUIdx mmu_idx)
 {
     hwaddr phys_addr;
     target_ulong page_size;
     int prot;
-    uint32_t fsr;
     bool ret;
     uint64_t par64;
+    bool format64 = false;
     MemTxAttrs attrs = {};
     ARMMMUFaultInfo fi = {};
+    ARMCacheAttrs cacheattrs = {};
 
-    ret = get_phys_addr(env, value, access_type, mmu_idx,
-                        &phys_addr, &attrs, &prot, &page_size, &fsr, &fi);
-    if (extended_addresses_enabled(env)) {
-        /* fsr is a DFSR/IFSR value for the long descriptor
-         * translation table format, but with WnR always clear.
-         * Convert it to a 64-bit PAR.
+    ret = get_phys_addr(env, value, access_type, mmu_idx, &phys_addr, &attrs,
+                        &prot, &page_size, &fi, &cacheattrs);
+
+    if (is_a64(env)) {
+        format64 = true;
+    } else if (arm_feature(env, ARM_FEATURE_LPAE)) {
+        /*
+         * ATS1Cxx:
+         * * TTBCR.EAE determines whether the result is returned using the
+         *   32-bit or the 64-bit PAR format
+         * * Instructions executed in Hyp mode always use the 64bit format
+         *
+         * ATS1S2NSOxx uses the 64bit format if any of the following is true:
+         * * The Non-secure TTBCR.EAE bit is set to 1
+         * * The implementation includes EL2, and the value of HCR.VM is 1
+         *
+         * ATS1Hx always uses the 64bit format (not supported yet).
          */
+        format64 = arm_s1_regime_using_lpae_format(env, mmu_idx);
+
+        if (arm_feature(env, ARM_FEATURE_EL2)) {
+            if (mmu_idx == ARMMMUIdx_S12NSE0 || mmu_idx == ARMMMUIdx_S12NSE1) {
+                format64 |= env->cp15.hcr_el2 & HCR_VM;
+            } else {
+                format64 |= arm_current_el(env) == 2;
+            }
+        }
+    }
+
+    if (format64) {
+        /* Create a 64-bit PAR */
         par64 = (1 << 11); /* LPAE bit always set */
         if (!ret) {
             par64 |= phys_addr & ~0xfffULL;
             if (!attrs.secure) {
                 par64 |= (1 << 9); /* NS */
             }
-            /* We don't set the ATTR or SH fields in the PAR. */
+            par64 |= (uint64_t)cacheattrs.attrs << 56; /* ATTR */
+            par64 |= cacheattrs.shareability << 7; /* SH */
         } else {
+            uint32_t fsr = arm_fi_to_lfsc(&fi);
+
             par64 |= 1; /* F */
             par64 |= (fsr & 0x3f) << 1; /* FS */
             /* Note that S2WLK and FSTAGE are always zero, because we don't
@@ -2185,6 +2243,8 @@ static uint64_t do_ats_write(CPUARMState *env, uint64_t value,
                 par64 |= (1 << 9); /* NS */
             }
         } else {
+            uint32_t fsr = arm_fi_to_sfsc(&fi);
+
             par64 = ((fsr & (1 << 10)) >> 5) | ((fsr & (1 << 12)) >> 6) |
                     ((fsr & 0xf) << 1) | 1;
         }
@@ -2194,7 +2254,7 @@ static uint64_t do_ats_write(CPUARMState *env, uint64_t value,
 
 static void ats_write(CPUARMState *env, const ARMCPRegInfo *ri, uint64_t value)
 {
-    int access_type = ri->opc2 & 1;
+    MMUAccessType access_type = ri->opc2 & 1 ? MMU_DATA_STORE : MMU_DATA_LOAD;
     uint64_t par64;
     ARMMMUIdx mmu_idx;
     int el = arm_current_el(env);
@@ -2253,7 +2313,7 @@ static void ats_write(CPUARMState *env, const ARMCPRegInfo *ri, uint64_t value)
 static void ats1h_write(CPUARMState *env, const ARMCPRegInfo *ri,
                         uint64_t value)
 {
-    int access_type = ri->opc2 & 1;
+    MMUAccessType access_type = ri->opc2 & 1 ? MMU_DATA_STORE : MMU_DATA_LOAD;
     uint64_t par64;
 
     par64 = do_ats_write(env, value, access_type, ARMMMUIdx_S2NS);
@@ -2273,7 +2333,7 @@ static CPAccessResult at_s1e2_access(CPUARMState *env, const ARMCPRegInfo *ri,
 static void ats_write64(CPUARMState *env, const ARMCPRegInfo *ri,
                         uint64_t value)
 {
-    int access_type = ri->opc2 & 1;
+    MMUAccessType access_type = ri->opc2 & 1 ? MMU_DATA_STORE : MMU_DATA_LOAD;
     ARMMMUIdx mmu_idx;
     int secure = arm_is_secure_below_el3(env);
 
@@ -2385,7 +2445,7 @@ static uint64_t pmsav7_read(CPUARMState *env, const ARMCPRegInfo *ri)
         return 0;
     }
 
-    u32p += env->cp15.c6_rgnr;
+    u32p += env->pmsav7.rnr[M_REG_NS];
     return *u32p;
 }
 
@@ -2399,21 +2459,9 @@ static void pmsav7_write(CPUARMState *env, const ARMCPRegInfo *ri,
         return;
     }
 
-    u32p += env->cp15.c6_rgnr;
+    u32p += env->pmsav7.rnr[M_REG_NS];
     tlb_flush(CPU(cpu)); /* Mappings may have changed - purge! */
     *u32p = value;
-}
-
-static void pmsav7_reset(CPUARMState *env, const ARMCPRegInfo *ri)
-{
-    ARMCPU *cpu = arm_env_get_cpu(env);
-    uint32_t *u32p = *(uint32_t **)raw_ptr(env, ri);
-
-    if (!u32p) {
-        return;
-    }
-
-    memset(u32p, 0, sizeof(*u32p) * cpu->pmsav7_dregion);
 }
 
 static void pmsav7_rgnr_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -2433,22 +2481,30 @@ static void pmsav7_rgnr_write(CPUARMState *env, const ARMCPRegInfo *ri,
 }
 
 static const ARMCPRegInfo pmsav7_cp_reginfo[] = {
+    /* Reset for all these registers is handled in arm_cpu_reset(),
+     * because the PMSAv7 is also used by M-profile CPUs, which do
+     * not register cpregs but still need the state to be reset.
+     */
     { .name = "DRBAR", .cp = 15, .crn = 6, .opc1 = 0, .crm = 1, .opc2 = 0,
       .access = PL1_RW, .type = ARM_CP_NO_RAW,
       .fieldoffset = offsetof(CPUARMState, pmsav7.drbar),
-      .readfn = pmsav7_read, .writefn = pmsav7_write, .resetfn = pmsav7_reset },
+      .readfn = pmsav7_read, .writefn = pmsav7_write,
+      .resetfn = arm_cp_reset_ignore },
     { .name = "DRSR", .cp = 15, .crn = 6, .opc1 = 0, .crm = 1, .opc2 = 2,
       .access = PL1_RW, .type = ARM_CP_NO_RAW,
       .fieldoffset = offsetof(CPUARMState, pmsav7.drsr),
-      .readfn = pmsav7_read, .writefn = pmsav7_write, .resetfn = pmsav7_reset },
+      .readfn = pmsav7_read, .writefn = pmsav7_write,
+      .resetfn = arm_cp_reset_ignore },
     { .name = "DRACR", .cp = 15, .crn = 6, .opc1 = 0, .crm = 1, .opc2 = 4,
       .access = PL1_RW, .type = ARM_CP_NO_RAW,
       .fieldoffset = offsetof(CPUARMState, pmsav7.dracr),
-      .readfn = pmsav7_read, .writefn = pmsav7_write, .resetfn = pmsav7_reset },
+      .readfn = pmsav7_read, .writefn = pmsav7_write,
+      .resetfn = arm_cp_reset_ignore },
     { .name = "RGNR", .cp = 15, .crn = 6, .opc1 = 0, .crm = 2, .opc2 = 0,
       .access = PL1_RW,
-      .fieldoffset = offsetof(CPUARMState, cp15.c6_rgnr),
-      .writefn = pmsav7_rgnr_write },
+      .fieldoffset = offsetof(CPUARMState, pmsav7.rnr[M_REG_NS]),
+      .writefn = pmsav7_rgnr_write,
+      .resetfn = arm_cp_reset_ignore },
     REGINFO_SENTINEL
 };
 
@@ -2596,9 +2652,9 @@ static void vttbr_write(CPUARMState *env, const ARMCPRegInfo *ri,
     /* Accesses to VTTBR may change the VMID so we must flush the TLB.  */
     if (raw_read(env, ri) != value) {
         tlb_flush_by_mmuidx(cs,
-                            (1 << ARMMMUIdx_S12NSE1) |
-                            (1 << ARMMMUIdx_S12NSE0) |
-                            (1 << ARMMMUIdx_S2NS));
+                            ARMMMUIdxBit_S12NSE1 |
+                            ARMMMUIdxBit_S12NSE0 |
+                            ARMMMUIdxBit_S2NS);
         raw_write(env, ri, value);
     }
 }
@@ -2957,12 +3013,12 @@ static void tlbi_aa64_vmalle1_write(CPUARMState *env, const ARMCPRegInfo *ri,
 
     if (arm_is_secure_below_el3(env)) {
         tlb_flush_by_mmuidx(cs,
-                            (1 << ARMMMUIdx_S1SE1) |
-                            (1 << ARMMMUIdx_S1SE0));
+                            ARMMMUIdxBit_S1SE1 |
+                            ARMMMUIdxBit_S1SE0);
     } else {
         tlb_flush_by_mmuidx(cs,
-                            (1 << ARMMMUIdx_S12NSE1) |
-                            (1 << ARMMMUIdx_S12NSE0));
+                            ARMMMUIdxBit_S12NSE1 |
+                            ARMMMUIdxBit_S12NSE0);
     }
 }
 
@@ -2974,12 +3030,12 @@ static void tlbi_aa64_vmalle1is_write(CPUARMState *env, const ARMCPRegInfo *ri,
 
     if (sec) {
         tlb_flush_by_mmuidx_all_cpus_synced(cs,
-                                            (1 << ARMMMUIdx_S1SE1) |
-                                            (1 << ARMMMUIdx_S1SE0));
+                                            ARMMMUIdxBit_S1SE1 |
+                                            ARMMMUIdxBit_S1SE0);
     } else {
         tlb_flush_by_mmuidx_all_cpus_synced(cs,
-                                            (1 << ARMMMUIdx_S12NSE1) |
-                                            (1 << ARMMMUIdx_S12NSE0));
+                                            ARMMMUIdxBit_S12NSE1 |
+                                            ARMMMUIdxBit_S12NSE0);
     }
 }
 
@@ -2995,18 +3051,18 @@ static void tlbi_aa64_alle1_write(CPUARMState *env, const ARMCPRegInfo *ri,
 
     if (arm_is_secure_below_el3(env)) {
         tlb_flush_by_mmuidx(cs,
-                            (1 << ARMMMUIdx_S1SE1) |
-                            (1 << ARMMMUIdx_S1SE0));
+                            ARMMMUIdxBit_S1SE1 |
+                            ARMMMUIdxBit_S1SE0);
     } else {
         if (arm_feature(env, ARM_FEATURE_EL2)) {
             tlb_flush_by_mmuidx(cs,
-                                (1 << ARMMMUIdx_S12NSE1) |
-                                (1 << ARMMMUIdx_S12NSE0) |
-                                (1 << ARMMMUIdx_S2NS));
+                                ARMMMUIdxBit_S12NSE1 |
+                                ARMMMUIdxBit_S12NSE0 |
+                                ARMMMUIdxBit_S2NS);
         } else {
             tlb_flush_by_mmuidx(cs,
-                                (1 << ARMMMUIdx_S12NSE1) |
-                                (1 << ARMMMUIdx_S12NSE0));
+                                ARMMMUIdxBit_S12NSE1 |
+                                ARMMMUIdxBit_S12NSE0);
         }
     }
 }
@@ -3017,7 +3073,7 @@ static void tlbi_aa64_alle2_write(CPUARMState *env, const ARMCPRegInfo *ri,
     ARMCPU *cpu = arm_env_get_cpu(env);
     CPUState *cs = CPU(cpu);
 
-    tlb_flush_by_mmuidx(cs, (1 << ARMMMUIdx_S1E2));
+    tlb_flush_by_mmuidx(cs, ARMMMUIdxBit_S1E2);
 }
 
 static void tlbi_aa64_alle3_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -3026,7 +3082,7 @@ static void tlbi_aa64_alle3_write(CPUARMState *env, const ARMCPRegInfo *ri,
     ARMCPU *cpu = arm_env_get_cpu(env);
     CPUState *cs = CPU(cpu);
 
-    tlb_flush_by_mmuidx(cs, (1 << ARMMMUIdx_S1E3));
+    tlb_flush_by_mmuidx(cs, ARMMMUIdxBit_S1E3);
 }
 
 static void tlbi_aa64_alle1is_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -3042,17 +3098,17 @@ static void tlbi_aa64_alle1is_write(CPUARMState *env, const ARMCPRegInfo *ri,
 
     if (sec) {
         tlb_flush_by_mmuidx_all_cpus_synced(cs,
-                                            (1 << ARMMMUIdx_S1SE1) |
-                                            (1 << ARMMMUIdx_S1SE0));
+                                            ARMMMUIdxBit_S1SE1 |
+                                            ARMMMUIdxBit_S1SE0);
     } else if (has_el2) {
         tlb_flush_by_mmuidx_all_cpus_synced(cs,
-                                            (1 << ARMMMUIdx_S12NSE1) |
-                                            (1 << ARMMMUIdx_S12NSE0) |
-                                            (1 << ARMMMUIdx_S2NS));
+                                            ARMMMUIdxBit_S12NSE1 |
+                                            ARMMMUIdxBit_S12NSE0 |
+                                            ARMMMUIdxBit_S2NS);
     } else {
           tlb_flush_by_mmuidx_all_cpus_synced(cs,
-                                              (1 << ARMMMUIdx_S12NSE1) |
-                                              (1 << ARMMMUIdx_S12NSE0));
+                                              ARMMMUIdxBit_S12NSE1 |
+                                              ARMMMUIdxBit_S12NSE0);
     }
 }
 
@@ -3061,7 +3117,7 @@ static void tlbi_aa64_alle2is_write(CPUARMState *env, const ARMCPRegInfo *ri,
 {
     CPUState *cs = ENV_GET_CPU(env);
 
-    tlb_flush_by_mmuidx_all_cpus_synced(cs, (1 << ARMMMUIdx_S1E2));
+    tlb_flush_by_mmuidx_all_cpus_synced(cs, ARMMMUIdxBit_S1E2);
 }
 
 static void tlbi_aa64_alle3is_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -3069,7 +3125,7 @@ static void tlbi_aa64_alle3is_write(CPUARMState *env, const ARMCPRegInfo *ri,
 {
     CPUState *cs = ENV_GET_CPU(env);
 
-    tlb_flush_by_mmuidx_all_cpus_synced(cs, (1 << ARMMMUIdx_S1E3));
+    tlb_flush_by_mmuidx_all_cpus_synced(cs, ARMMMUIdxBit_S1E3);
 }
 
 static void tlbi_aa64_vae1_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -3086,12 +3142,12 @@ static void tlbi_aa64_vae1_write(CPUARMState *env, const ARMCPRegInfo *ri,
 
     if (arm_is_secure_below_el3(env)) {
         tlb_flush_page_by_mmuidx(cs, pageaddr,
-                                 (1 << ARMMMUIdx_S1SE1) |
-                                 (1 << ARMMMUIdx_S1SE0));
+                                 ARMMMUIdxBit_S1SE1 |
+                                 ARMMMUIdxBit_S1SE0);
     } else {
         tlb_flush_page_by_mmuidx(cs, pageaddr,
-                                 (1 << ARMMMUIdx_S12NSE1) |
-                                 (1 << ARMMMUIdx_S12NSE0));
+                                 ARMMMUIdxBit_S12NSE1 |
+                                 ARMMMUIdxBit_S12NSE0);
     }
 }
 
@@ -3106,7 +3162,7 @@ static void tlbi_aa64_vae2_write(CPUARMState *env, const ARMCPRegInfo *ri,
     CPUState *cs = CPU(cpu);
     uint64_t pageaddr = sextract64(value << 12, 0, 56);
 
-    tlb_flush_page_by_mmuidx(cs, pageaddr, (1 << ARMMMUIdx_S1E2));
+    tlb_flush_page_by_mmuidx(cs, pageaddr, ARMMMUIdxBit_S1E2);
 }
 
 static void tlbi_aa64_vae3_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -3120,7 +3176,7 @@ static void tlbi_aa64_vae3_write(CPUARMState *env, const ARMCPRegInfo *ri,
     CPUState *cs = CPU(cpu);
     uint64_t pageaddr = sextract64(value << 12, 0, 56);
 
-    tlb_flush_page_by_mmuidx(cs, pageaddr, (1 << ARMMMUIdx_S1E3));
+    tlb_flush_page_by_mmuidx(cs, pageaddr, ARMMMUIdxBit_S1E3);
 }
 
 static void tlbi_aa64_vae1is_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -3133,12 +3189,12 @@ static void tlbi_aa64_vae1is_write(CPUARMState *env, const ARMCPRegInfo *ri,
 
     if (sec) {
         tlb_flush_page_by_mmuidx_all_cpus_synced(cs, pageaddr,
-                                                 (1 << ARMMMUIdx_S1SE1) |
-                                                 (1 << ARMMMUIdx_S1SE0));
+                                                 ARMMMUIdxBit_S1SE1 |
+                                                 ARMMMUIdxBit_S1SE0);
     } else {
         tlb_flush_page_by_mmuidx_all_cpus_synced(cs, pageaddr,
-                                                 (1 << ARMMMUIdx_S12NSE1) |
-                                                 (1 << ARMMMUIdx_S12NSE0));
+                                                 ARMMMUIdxBit_S12NSE1 |
+                                                 ARMMMUIdxBit_S12NSE0);
     }
 }
 
@@ -3149,7 +3205,7 @@ static void tlbi_aa64_vae2is_write(CPUARMState *env, const ARMCPRegInfo *ri,
     uint64_t pageaddr = sextract64(value << 12, 0, 56);
 
     tlb_flush_page_by_mmuidx_all_cpus_synced(cs, pageaddr,
-                                             (1 << ARMMMUIdx_S1E2));
+                                             ARMMMUIdxBit_S1E2);
 }
 
 static void tlbi_aa64_vae3is_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -3159,7 +3215,7 @@ static void tlbi_aa64_vae3is_write(CPUARMState *env, const ARMCPRegInfo *ri,
     uint64_t pageaddr = sextract64(value << 12, 0, 56);
 
     tlb_flush_page_by_mmuidx_all_cpus_synced(cs, pageaddr,
-                                             (1 << ARMMMUIdx_S1E3));
+                                             ARMMMUIdxBit_S1E3);
 }
 
 static void tlbi_aa64_ipas2e1_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -3181,7 +3237,7 @@ static void tlbi_aa64_ipas2e1_write(CPUARMState *env, const ARMCPRegInfo *ri,
 
     pageaddr = sextract64(value << 12, 0, 48);
 
-    tlb_flush_page_by_mmuidx(cs, pageaddr, (1 << ARMMMUIdx_S2NS));
+    tlb_flush_page_by_mmuidx(cs, pageaddr, ARMMMUIdxBit_S2NS);
 }
 
 static void tlbi_aa64_ipas2e1is_write(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -3197,7 +3253,7 @@ static void tlbi_aa64_ipas2e1is_write(CPUARMState *env, const ARMCPRegInfo *ri,
     pageaddr = sextract64(value << 12, 0, 48);
 
     tlb_flush_page_by_mmuidx_all_cpus_synced(cs, pageaddr,
-                                             (1 << ARMMMUIdx_S2NS));
+                                             ARMMMUIdxBit_S2NS);
 }
 
 static CPAccessResult aa64_zva_access(CPUARMState *env, const ARMCPRegInfo *ri,
@@ -3258,6 +3314,11 @@ static void sctlr_write(CPUARMState *env, const ARMCPRegInfo *ri,
         return;
     }
 
+    if (arm_feature(env, ARM_FEATURE_PMSA) && !cpu->has_mpu) {
+        /* M bit is RAZ/WI for PMSA with no MPU implemented */
+        value &= ~SCTLR_M;
+    }
+
     raw_write(env, ri, value);
     /* ??? Lots of these bits are not implemented.  */
     /* This may enable/disable the MMU, so do a TLB flush.  */
@@ -3297,10 +3358,12 @@ static const ARMCPRegInfo v8_cp_reginfo[] = {
       .writefn = aa64_daif_write, .resetfn = arm_cp_reset_ignore },
     { .name = "FPCR", .state = ARM_CP_STATE_AA64,
       .opc0 = 3, .opc1 = 3, .opc2 = 0, .crn = 4, .crm = 4,
-      .access = PL0_RW, .readfn = aa64_fpcr_read, .writefn = aa64_fpcr_write },
+      .access = PL0_RW, .type = ARM_CP_FPU | ARM_CP_SUPPRESS_TB_END,
+      .readfn = aa64_fpcr_read, .writefn = aa64_fpcr_write },
     { .name = "FPSR", .state = ARM_CP_STATE_AA64,
       .opc0 = 3, .opc1 = 3, .opc2 = 1, .crn = 4, .crm = 4,
-      .access = PL0_RW, .readfn = aa64_fpsr_read, .writefn = aa64_fpsr_write },
+      .access = PL0_RW, .type = ARM_CP_FPU | ARM_CP_SUPPRESS_TB_END,
+      .readfn = aa64_fpsr_read, .writefn = aa64_fpsr_write },
     { .name = "DCZID_EL0", .state = ARM_CP_STATE_AA64,
       .opc0 = 3, .opc1 = 3, .opc2 = 7, .crn = 0, .crm = 0,
       .access = PL0_R, .type = ARM_CP_NO_RAW,
@@ -3716,7 +3779,14 @@ static void hcr_write(CPUARMState *env, const ARMCPRegInfo *ri, uint64_t value)
 
     if (arm_feature(env, ARM_FEATURE_EL3)) {
         valid_mask &= ~HCR_HCD;
-    } else {
+    } else if (cpu->psci_conduit != QEMU_PSCI_CONDUIT_SMC) {
+        /* Architecturally HCR.TSC is RES0 if EL3 is not implemented.
+         * However, if we're using the SMC PSCI conduit then QEMU is
+         * effectively acting like EL3 firmware and so the guest at
+         * EL2 should retain the ability to prevent EL1 from being
+         * able to make SMC calls into the ersatz firmware, so in
+         * that case HCR.TSC should be read/write.
+         */
         valid_mask &= ~HCR_TSC;
     }
 
@@ -4200,6 +4270,111 @@ static const ARMCPRegInfo debug_lpae_cp_reginfo[] = {
     REGINFO_SENTINEL
 };
 
+/* Return the exception level to which SVE-disabled exceptions should
+ * be taken, or 0 if SVE is enabled.
+ */
+static int sve_exception_el(CPUARMState *env)
+{
+#ifndef CONFIG_USER_ONLY
+    unsigned current_el = arm_current_el(env);
+
+    /* The CPACR.ZEN controls traps to EL1:
+     * 0, 2 : trap EL0 and EL1 accesses
+     * 1    : trap only EL0 accesses
+     * 3    : trap no accesses
+     */
+    switch (extract32(env->cp15.cpacr_el1, 16, 2)) {
+    default:
+        if (current_el <= 1) {
+            /* Trap to PL1, which might be EL1 or EL3 */
+            if (arm_is_secure(env) && !arm_el_is_aa64(env, 3)) {
+                return 3;
+            }
+            return 1;
+        }
+        break;
+    case 1:
+        if (current_el == 0) {
+            return 1;
+        }
+        break;
+    case 3:
+        break;
+    }
+
+    /* Similarly for CPACR.FPEN, after having checked ZEN.  */
+    switch (extract32(env->cp15.cpacr_el1, 20, 2)) {
+    default:
+        if (current_el <= 1) {
+            if (arm_is_secure(env) && !arm_el_is_aa64(env, 3)) {
+                return 3;
+            }
+            return 1;
+        }
+        break;
+    case 1:
+        if (current_el == 0) {
+            return 1;
+        }
+        break;
+    case 3:
+        break;
+    }
+
+    /* CPTR_EL2.  Check both TZ and TFP.  */
+    if (current_el <= 2
+        && (env->cp15.cptr_el[2] & (CPTR_TFP | CPTR_TZ))
+        && !arm_is_secure_below_el3(env)) {
+        return 2;
+    }
+
+    /* CPTR_EL3.  Check both EZ and TFP.  */
+    if (!(env->cp15.cptr_el[3] & CPTR_EZ)
+        || (env->cp15.cptr_el[3] & CPTR_TFP)) {
+        return 3;
+    }
+#endif
+    return 0;
+}
+
+static void zcr_write(CPUARMState *env, const ARMCPRegInfo *ri,
+                      uint64_t value)
+{
+    /* Bits other than [3:0] are RAZ/WI.  */
+    raw_write(env, ri, value & 0xf);
+}
+
+static const ARMCPRegInfo zcr_el1_reginfo = {
+    .name = "ZCR_EL1", .state = ARM_CP_STATE_AA64,
+    .opc0 = 3, .opc1 = 0, .crn = 1, .crm = 2, .opc2 = 0,
+    .access = PL1_RW, .type = ARM_CP_SVE | ARM_CP_FPU,
+    .fieldoffset = offsetof(CPUARMState, vfp.zcr_el[1]),
+    .writefn = zcr_write, .raw_writefn = raw_write
+};
+
+static const ARMCPRegInfo zcr_el2_reginfo = {
+    .name = "ZCR_EL2", .state = ARM_CP_STATE_AA64,
+    .opc0 = 3, .opc1 = 4, .crn = 1, .crm = 2, .opc2 = 0,
+    .access = PL2_RW, .type = ARM_CP_SVE | ARM_CP_FPU,
+    .fieldoffset = offsetof(CPUARMState, vfp.zcr_el[2]),
+    .writefn = zcr_write, .raw_writefn = raw_write
+};
+
+static const ARMCPRegInfo zcr_no_el2_reginfo = {
+    .name = "ZCR_EL2", .state = ARM_CP_STATE_AA64,
+    .opc0 = 3, .opc1 = 4, .crn = 1, .crm = 2, .opc2 = 0,
+    .access = PL2_RW, .type = ARM_CP_SVE | ARM_CP_FPU,
+    .readfn = arm_cp_read_zero, .writefn = arm_cp_write_ignore
+};
+
+static const ARMCPRegInfo zcr_el3_reginfo = {
+    .name = "ZCR_EL3", .state = ARM_CP_STATE_AA64,
+    .opc0 = 3, .opc1 = 6, .crn = 1, .crm = 2, .opc2 = 0,
+    .access = PL3_RW, .type = ARM_CP_SVE | ARM_CP_FPU,
+    .fieldoffset = offsetof(CPUARMState, vfp.zcr_el[3]),
+    .writefn = zcr_write, .raw_writefn = raw_write
+};
+
 void hw_watchpoint_update(ARMCPU *cpu, int n)
 {
     CPUARMState *env = &cpu->env;
@@ -4520,6 +4695,33 @@ static void define_debug_regs(ARMCPU *cpu)
     }
 }
 
+/* We don't know until after realize whether there's a GICv3
+ * attached, and that is what registers the gicv3 sysregs.
+ * So we have to fill in the GIC fields in ID_PFR/ID_PFR1_EL1/ID_AA64PFR0_EL1
+ * at runtime.
+ */
+static uint64_t id_pfr1_read(CPUARMState *env, const ARMCPRegInfo *ri)
+{
+    ARMCPU *cpu = arm_env_get_cpu(env);
+    uint64_t pfr1 = cpu->id_pfr1;
+
+    if (env->gicv3state) {
+        pfr1 |= 1 << 28;
+    }
+    return pfr1;
+}
+
+static uint64_t id_aa64pfr0_read(CPUARMState *env, const ARMCPRegInfo *ri)
+{
+    ARMCPU *cpu = arm_env_get_cpu(env);
+    uint64_t pfr0 = cpu->id_aa64pfr0;
+
+    if (env->gicv3state) {
+        pfr0 |= 1 << 24;
+    }
+    return pfr0;
+}
+
 void register_cp_regs_for_features(ARMCPU *cpu)
 {
     /* Register all the coprocessor registers based on feature bits */
@@ -4544,10 +4746,14 @@ void register_cp_regs_for_features(ARMCPU *cpu)
               .opc0 = 3, .opc1 = 0, .crn = 0, .crm = 1, .opc2 = 0,
               .access = PL1_R, .type = ARM_CP_CONST,
               .resetvalue = cpu->id_pfr0 },
+            /* ID_PFR1 is not a plain ARM_CP_CONST because we don't know
+             * the value of the GIC field until after we define these regs.
+             */
             { .name = "ID_PFR1", .state = ARM_CP_STATE_BOTH,
               .opc0 = 3, .opc1 = 0, .crn = 0, .crm = 1, .opc2 = 1,
-              .access = PL1_R, .type = ARM_CP_CONST,
-              .resetvalue = cpu->id_pfr1 },
+              .access = PL1_R, .type = ARM_CP_NO_RAW,
+              .readfn = id_pfr1_read,
+              .writefn = arm_cp_write_ignore },
             { .name = "ID_DFR0", .state = ARM_CP_STATE_BOTH,
               .opc0 = 3, .opc1 = 0, .crn = 0, .crm = 1, .opc2 = 2,
               .access = PL1_R, .type = ARM_CP_CONST,
@@ -4616,7 +4822,7 @@ void register_cp_regs_for_features(ARMCPU *cpu)
         define_arm_cp_regs(cpu, v6k_cp_reginfo);
     }
     if (arm_feature(env, ARM_FEATURE_V7MP) &&
-        !arm_feature(env, ARM_FEATURE_MPU)) {
+        !arm_feature(env, ARM_FEATURE_PMSA)) {
         define_arm_cp_regs(cpu, v7mp_cp_reginfo);
     }
     if (arm_feature(env, ARM_FEATURE_V7)) {
@@ -4663,10 +4869,15 @@ void register_cp_regs_for_features(ARMCPU *cpu)
          * define new registers here.
          */
         ARMCPRegInfo v8_idregs[] = {
+            /* ID_AA64PFR0_EL1 is not a plain ARM_CP_CONST because we don't
+             * know the right value for the GIC field until after we
+             * define these regs.
+             */
             { .name = "ID_AA64PFR0_EL1", .state = ARM_CP_STATE_AA64,
               .opc0 = 3, .opc1 = 0, .crn = 0, .crm = 4, .opc2 = 0,
-              .access = PL1_R, .type = ARM_CP_CONST,
-              .resetvalue = cpu->id_aa64pfr0 },
+              .access = PL1_R, .type = ARM_CP_NO_RAW,
+              .readfn = id_aa64pfr0_read,
+              .writefn = arm_cp_write_ignore },
             { .name = "ID_AA64PFR1_EL1", .state = ARM_CP_STATE_AA64,
               .opc0 = 3, .opc1 = 0, .crn = 0, .crm = 4, .opc2 = 1,
               .access = PL1_R, .type = ARM_CP_CONST,
@@ -4860,8 +5071,8 @@ void register_cp_regs_for_features(ARMCPU *cpu)
             { .name = "VPIDR", .state = ARM_CP_STATE_AA32,
               .cp = 15, .opc1 = 4, .crn = 0, .crm = 0, .opc2 = 0,
               .access = PL2_RW, .accessfn = access_el3_aa32ns,
-              .resetvalue = cpu->midr,
-              .fieldoffset = offsetof(CPUARMState, cp15.vpidr_el2) },
+              .resetvalue = cpu->midr, .type = ARM_CP_ALIAS,
+              .fieldoffset = offsetoflow32(CPUARMState, cp15.vpidr_el2) },
             { .name = "VPIDR_EL2", .state = ARM_CP_STATE_AA64,
               .opc0 = 3, .opc1 = 4, .crn = 0, .crm = 0, .opc2 = 0,
               .access = PL2_RW, .resetvalue = cpu->midr,
@@ -4869,8 +5080,8 @@ void register_cp_regs_for_features(ARMCPU *cpu)
             { .name = "VMPIDR", .state = ARM_CP_STATE_AA32,
               .cp = 15, .opc1 = 4, .crn = 0, .crm = 0, .opc2 = 5,
               .access = PL2_RW, .accessfn = access_el3_aa32ns,
-              .resetvalue = vmpidr_def,
-              .fieldoffset = offsetof(CPUARMState, cp15.vmpidr_el2) },
+              .resetvalue = vmpidr_def, .type = ARM_CP_ALIAS,
+              .fieldoffset = offsetoflow32(CPUARMState, cp15.vmpidr_el2) },
             { .name = "VMPIDR_EL2", .state = ARM_CP_STATE_AA64,
               .opc0 = 3, .opc1 = 4, .crn = 0, .crm = 0, .opc2 = 5,
               .access = PL2_RW,
@@ -4970,7 +5181,7 @@ void register_cp_regs_for_features(ARMCPU *cpu)
         }
     }
 
-    if (arm_feature(env, ARM_FEATURE_MPU)) {
+    if (arm_feature(env, ARM_FEATURE_PMSA)) {
         if (arm_feature(env, ARM_FEATURE_V6)) {
             /* PMSAv6 not implemented */
             assert(arm_feature(env, ARM_FEATURE_V7));
@@ -5132,7 +5343,7 @@ void register_cp_regs_for_features(ARMCPU *cpu)
             define_arm_cp_regs(cpu, id_pre_v8_midr_cp_reginfo);
         }
         define_arm_cp_regs(cpu, id_cp_reginfo);
-        if (!arm_feature(env, ARM_FEATURE_MPU)) {
+        if (!arm_feature(env, ARM_FEATURE_PMSA)) {
             define_one_arm_cp_reg(cpu, &id_tlbtr_reginfo);
         } else if (arm_feature(env, ARM_FEATURE_V7)) {
             define_one_arm_cp_reg(cpu, &id_mpuir_reginfo);
@@ -5231,11 +5442,18 @@ void register_cp_regs_for_features(ARMCPU *cpu)
         }
         define_one_arm_cp_reg(cpu, &sctlr);
     }
-}
 
-ARMCPU *cpu_arm_init(const char *cpu_model)
-{
-    return ARM_CPU(cpu_generic_init(TYPE_ARM_CPU, cpu_model));
+    if (arm_feature(env, ARM_FEATURE_SVE)) {
+        define_one_arm_cp_reg(cpu, &zcr_el1_reginfo);
+        if (arm_feature(env, ARM_FEATURE_EL2)) {
+            define_one_arm_cp_reg(cpu, &zcr_el2_reginfo);
+        } else {
+            define_one_arm_cp_reg(cpu, &zcr_no_el2_reginfo);
+        }
+        if (arm_feature(env, ARM_FEATURE_EL3)) {
+            define_one_arm_cp_reg(cpu, &zcr_el3_reginfo);
+        }
+    }
 }
 
 void arm_cpu_register_gdb_regs_for_features(ARMCPU *cpu)
@@ -5876,6 +6094,40 @@ uint32_t HELPER(v7m_mrs)(CPUARMState *env, uint32_t reg)
     return 0;
 }
 
+void HELPER(v7m_bxns)(CPUARMState *env, uint32_t dest)
+{
+    /* translate.c should never generate calls here in user-only mode */
+    g_assert_not_reached();
+}
+
+void HELPER(v7m_blxns)(CPUARMState *env, uint32_t dest)
+{
+    /* translate.c should never generate calls here in user-only mode */
+    g_assert_not_reached();
+}
+
+uint32_t HELPER(v7m_tt)(CPUARMState *env, uint32_t addr, uint32_t op)
+{
+    /* The TT instructions can be used by unprivileged code, but in
+     * user-only emulation we don't have the MPU.
+     * Luckily since we know we are NonSecure unprivileged (and that in
+     * turn means that the A flag wasn't specified), all the bits in the
+     * register must be zero:
+     *  IREGION: 0 because IRVALID is 0
+     *  IRVALID: 0 because NS
+     *  S: 0 because NS
+     *  NSRW: 0 because NS
+     *  NSR: 0 because NS
+     *  RW: 0 because unpriv and A flag not set
+     *  R: 0 because unpriv and A flag not set
+     *  SRVALID: 0 because NS
+     *  MRVALID: 0 because unpriv and A flag not set
+     *  SREGION: 0 becaus SRVALID is 0
+     *  MREGION: 0 because MRVALID is 0
+     */
+    return 0;
+}
+
 void switch_mode(CPUARMState *env, int mode)
 {
     ARMCPU *cpu = arm_env_get_cpu(env);
@@ -6032,65 +6284,475 @@ uint32_t arm_phys_excp_target_el(CPUState *cs, uint32_t excp_idx,
     return target_el;
 }
 
-static void v7m_push(CPUARMState *env, uint32_t val)
+static bool v7m_stack_write(ARMCPU *cpu, uint32_t addr, uint32_t value,
+                            ARMMMUIdx mmu_idx, bool ignfault)
 {
-    CPUState *cs = CPU(arm_env_get_cpu(env));
+    CPUState *cs = CPU(cpu);
+    CPUARMState *env = &cpu->env;
+    MemTxAttrs attrs = {};
+    MemTxResult txres;
+    target_ulong page_size;
+    hwaddr physaddr;
+    int prot;
+    ARMMMUFaultInfo fi;
+    bool secure = mmu_idx & ARM_MMU_IDX_M_S;
+    int exc;
+    bool exc_secure;
 
-    env->regs[13] -= 4;
-    stl_phys(cs->as, env->regs[13], val);
+    if (get_phys_addr(env, addr, MMU_DATA_STORE, mmu_idx, &physaddr,
+                      &attrs, &prot, &page_size, &fi, NULL)) {
+        /* MPU/SAU lookup failed */
+        if (fi.type == ARMFault_QEMU_SFault) {
+            qemu_log_mask(CPU_LOG_INT,
+                          "...SecureFault with SFSR.AUVIOL during stacking\n");
+            env->v7m.sfsr |= R_V7M_SFSR_AUVIOL_MASK | R_V7M_SFSR_SFARVALID_MASK;
+            env->v7m.sfar = addr;
+            exc = ARMV7M_EXCP_SECURE;
+            exc_secure = false;
+        } else {
+            qemu_log_mask(CPU_LOG_INT, "...MemManageFault with CFSR.MSTKERR\n");
+            env->v7m.cfsr[secure] |= R_V7M_CFSR_MSTKERR_MASK;
+            exc = ARMV7M_EXCP_MEM;
+            exc_secure = secure;
+        }
+        goto pend_fault;
+    }
+    address_space_stl_le(arm_addressspace(cs, attrs), physaddr, value,
+                         attrs, &txres);
+    if (txres != MEMTX_OK) {
+        /* BusFault trying to write the data */
+        qemu_log_mask(CPU_LOG_INT, "...BusFault with BFSR.STKERR\n");
+        env->v7m.cfsr[M_REG_NS] |= R_V7M_CFSR_STKERR_MASK;
+        exc = ARMV7M_EXCP_BUS;
+        exc_secure = false;
+        goto pend_fault;
+    }
+    return true;
+
+pend_fault:
+    /* By pending the exception at this point we are making
+     * the IMPDEF choice "overridden exceptions pended" (see the
+     * MergeExcInfo() pseudocode). The other choice would be to not
+     * pend them now and then make a choice about which to throw away
+     * later if we have two derived exceptions.
+     * The only case when we must not pend the exception but instead
+     * throw it away is if we are doing the push of the callee registers
+     * and we've already generated a derived exception. Even in this
+     * case we will still update the fault status registers.
+     */
+    if (!ignfault) {
+        armv7m_nvic_set_pending_derived(env->nvic, exc, exc_secure);
+    }
+    return false;
 }
 
-static uint32_t v7m_pop(CPUARMState *env)
+static bool v7m_stack_read(ARMCPU *cpu, uint32_t *dest, uint32_t addr,
+                           ARMMMUIdx mmu_idx)
 {
-    CPUState *cs = CPU(arm_env_get_cpu(env));
-    uint32_t val;
+    CPUState *cs = CPU(cpu);
+    CPUARMState *env = &cpu->env;
+    MemTxAttrs attrs = {};
+    MemTxResult txres;
+    target_ulong page_size;
+    hwaddr physaddr;
+    int prot;
+    ARMMMUFaultInfo fi;
+    bool secure = mmu_idx & ARM_MMU_IDX_M_S;
+    int exc;
+    bool exc_secure;
+    uint32_t value;
 
-    val = ldl_phys(cs->as, env->regs[13]);
-    env->regs[13] += 4;
-    return val;
+    if (get_phys_addr(env, addr, MMU_DATA_LOAD, mmu_idx, &physaddr,
+                      &attrs, &prot, &page_size, &fi, NULL)) {
+        /* MPU/SAU lookup failed */
+        if (fi.type == ARMFault_QEMU_SFault) {
+            qemu_log_mask(CPU_LOG_INT,
+                          "...SecureFault with SFSR.AUVIOL during unstack\n");
+            env->v7m.sfsr |= R_V7M_SFSR_AUVIOL_MASK | R_V7M_SFSR_SFARVALID_MASK;
+            env->v7m.sfar = addr;
+            exc = ARMV7M_EXCP_SECURE;
+            exc_secure = false;
+        } else {
+            qemu_log_mask(CPU_LOG_INT,
+                          "...MemManageFault with CFSR.MUNSTKERR\n");
+            env->v7m.cfsr[secure] |= R_V7M_CFSR_MUNSTKERR_MASK;
+            exc = ARMV7M_EXCP_MEM;
+            exc_secure = secure;
+        }
+        goto pend_fault;
+    }
+
+    value = address_space_ldl(arm_addressspace(cs, attrs), physaddr,
+                              attrs, &txres);
+    if (txres != MEMTX_OK) {
+        /* BusFault trying to read the data */
+        qemu_log_mask(CPU_LOG_INT, "...BusFault with BFSR.UNSTKERR\n");
+        env->v7m.cfsr[M_REG_NS] |= R_V7M_CFSR_UNSTKERR_MASK;
+        exc = ARMV7M_EXCP_BUS;
+        exc_secure = false;
+        goto pend_fault;
+    }
+
+    *dest = value;
+    return true;
+
+pend_fault:
+    /* By pending the exception at this point we are making
+     * the IMPDEF choice "overridden exceptions pended" (see the
+     * MergeExcInfo() pseudocode). The other choice would be to not
+     * pend them now and then make a choice about which to throw away
+     * later if we have two derived exceptions.
+     */
+    armv7m_nvic_set_pending(env->nvic, exc, exc_secure);
+    return false;
 }
 
-/* Switch to V7M main or process stack pointer.  */
-static void switch_v7m_sp(CPUARMState *env, bool new_spsel)
+/* Return true if we're using the process stack pointer (not the MSP) */
+static bool v7m_using_psp(CPUARMState *env)
 {
-    uint32_t tmp;
-    bool old_spsel = env->v7m.control & R_V7M_CONTROL_SPSEL_MASK;
+    /* Handler mode always uses the main stack; for thread mode
+     * the CONTROL.SPSEL bit determines the answer.
+     * Note that in v7M it is not possible to be in Handler mode with
+     * CONTROL.SPSEL non-zero, but in v8M it is, so we must check both.
+     */
+    return !arm_v7m_is_handler_mode(env) &&
+        env->v7m.control[env->v7m.secure] & R_V7M_CONTROL_SPSEL_MASK;
+}
 
-    if (old_spsel != new_spsel) {
-        tmp = env->v7m.other_sp;
-        env->v7m.other_sp = env->regs[13];
-        env->regs[13] = tmp;
+/* Write to v7M CONTROL.SPSEL bit for the specified security bank.
+ * This may change the current stack pointer between Main and Process
+ * stack pointers if it is done for the CONTROL register for the current
+ * security state.
+ */
+static void write_v7m_control_spsel_for_secstate(CPUARMState *env,
+                                                 bool new_spsel,
+                                                 bool secstate)
+{
+    bool old_is_psp = v7m_using_psp(env);
 
-        env->v7m.control = deposit32(env->v7m.control,
-                                     R_V7M_CONTROL_SPSEL_SHIFT,
-                                     R_V7M_CONTROL_SPSEL_LENGTH, new_spsel);
+    env->v7m.control[secstate] =
+        deposit32(env->v7m.control[secstate],
+                  R_V7M_CONTROL_SPSEL_SHIFT,
+                  R_V7M_CONTROL_SPSEL_LENGTH, new_spsel);
+
+    if (secstate == env->v7m.secure) {
+        bool new_is_psp = v7m_using_psp(env);
+        uint32_t tmp;
+
+        if (old_is_psp != new_is_psp) {
+            tmp = env->v7m.other_sp;
+            env->v7m.other_sp = env->regs[13];
+            env->regs[13] = tmp;
+        }
     }
 }
 
-static uint32_t arm_v7m_load_vector(ARMCPU *cpu)
+/* Write to v7M CONTROL.SPSEL bit. This may change the current
+ * stack pointer between Main and Process stack pointers.
+ */
+static void write_v7m_control_spsel(CPUARMState *env, bool new_spsel)
+{
+    write_v7m_control_spsel_for_secstate(env, new_spsel, env->v7m.secure);
+}
+
+void write_v7m_exception(CPUARMState *env, uint32_t new_exc)
+{
+    /* Write a new value to v7m.exception, thus transitioning into or out
+     * of Handler mode; this may result in a change of active stack pointer.
+     */
+    bool new_is_psp, old_is_psp = v7m_using_psp(env);
+    uint32_t tmp;
+
+    env->v7m.exception = new_exc;
+
+    new_is_psp = v7m_using_psp(env);
+
+    if (old_is_psp != new_is_psp) {
+        tmp = env->v7m.other_sp;
+        env->v7m.other_sp = env->regs[13];
+        env->regs[13] = tmp;
+    }
+}
+
+/* Switch M profile security state between NS and S */
+static void switch_v7m_security_state(CPUARMState *env, bool new_secstate)
+{
+    uint32_t new_ss_msp, new_ss_psp;
+
+    if (env->v7m.secure == new_secstate) {
+        return;
+    }
+
+    /* All the banked state is accessed by looking at env->v7m.secure
+     * except for the stack pointer; rearrange the SP appropriately.
+     */
+    new_ss_msp = env->v7m.other_ss_msp;
+    new_ss_psp = env->v7m.other_ss_psp;
+
+    if (v7m_using_psp(env)) {
+        env->v7m.other_ss_psp = env->regs[13];
+        env->v7m.other_ss_msp = env->v7m.other_sp;
+    } else {
+        env->v7m.other_ss_msp = env->regs[13];
+        env->v7m.other_ss_psp = env->v7m.other_sp;
+    }
+
+    env->v7m.secure = new_secstate;
+
+    if (v7m_using_psp(env)) {
+        env->regs[13] = new_ss_psp;
+        env->v7m.other_sp = new_ss_msp;
+    } else {
+        env->regs[13] = new_ss_msp;
+        env->v7m.other_sp = new_ss_psp;
+    }
+}
+
+void HELPER(v7m_bxns)(CPUARMState *env, uint32_t dest)
+{
+    /* Handle v7M BXNS:
+     *  - if the return value is a magic value, do exception return (like BX)
+     *  - otherwise bit 0 of the return value is the target security state
+     */
+    uint32_t min_magic;
+
+    if (arm_feature(env, ARM_FEATURE_M_SECURITY)) {
+        /* Covers FNC_RETURN and EXC_RETURN magic */
+        min_magic = FNC_RETURN_MIN_MAGIC;
+    } else {
+        /* EXC_RETURN magic only */
+        min_magic = EXC_RETURN_MIN_MAGIC;
+    }
+
+    if (dest >= min_magic) {
+        /* This is an exception return magic value; put it where
+         * do_v7m_exception_exit() expects and raise EXCEPTION_EXIT.
+         * Note that if we ever add gen_ss_advance() singlestep support to
+         * M profile this should count as an "instruction execution complete"
+         * event (compare gen_bx_excret_final_code()).
+         */
+        env->regs[15] = dest & ~1;
+        env->thumb = dest & 1;
+        HELPER(exception_internal)(env, EXCP_EXCEPTION_EXIT);
+        /* notreached */
+    }
+
+    /* translate.c should have made BXNS UNDEF unless we're secure */
+    assert(env->v7m.secure);
+
+    switch_v7m_security_state(env, dest & 1);
+    env->thumb = 1;
+    env->regs[15] = dest & ~1;
+}
+
+void HELPER(v7m_blxns)(CPUARMState *env, uint32_t dest)
+{
+    /* Handle v7M BLXNS:
+     *  - bit 0 of the destination address is the target security state
+     */
+
+    /* At this point regs[15] is the address just after the BLXNS */
+    uint32_t nextinst = env->regs[15] | 1;
+    uint32_t sp = env->regs[13] - 8;
+    uint32_t saved_psr;
+
+    /* translate.c will have made BLXNS UNDEF unless we're secure */
+    assert(env->v7m.secure);
+
+    if (dest & 1) {
+        /* target is Secure, so this is just a normal BLX,
+         * except that the low bit doesn't indicate Thumb/not.
+         */
+        env->regs[14] = nextinst;
+        env->thumb = 1;
+        env->regs[15] = dest & ~1;
+        return;
+    }
+
+    /* Target is non-secure: first push a stack frame */
+    if (!QEMU_IS_ALIGNED(sp, 8)) {
+        qemu_log_mask(LOG_GUEST_ERROR,
+                      "BLXNS with misaligned SP is UNPREDICTABLE\n");
+    }
+
+    saved_psr = env->v7m.exception;
+    if (env->v7m.control[M_REG_S] & R_V7M_CONTROL_SFPA_MASK) {
+        saved_psr |= XPSR_SFPA;
+    }
+
+    /* Note that these stores can throw exceptions on MPU faults */
+    cpu_stl_data(env, sp, nextinst);
+    cpu_stl_data(env, sp + 4, saved_psr);
+
+    env->regs[13] = sp;
+    env->regs[14] = 0xfeffffff;
+    if (arm_v7m_is_handler_mode(env)) {
+        /* Write a dummy value to IPSR, to avoid leaking the current secure
+         * exception number to non-secure code. This is guaranteed not
+         * to cause write_v7m_exception() to actually change stacks.
+         */
+        write_v7m_exception(env, 1);
+    }
+    switch_v7m_security_state(env, 0);
+    env->thumb = 1;
+    env->regs[15] = dest;
+}
+
+static uint32_t *get_v7m_sp_ptr(CPUARMState *env, bool secure, bool threadmode,
+                                bool spsel)
+{
+    /* Return a pointer to the location where we currently store the
+     * stack pointer for the requested security state and thread mode.
+     * This pointer will become invalid if the CPU state is updated
+     * such that the stack pointers are switched around (eg changing
+     * the SPSEL control bit).
+     * Compare the v8M ARM ARM pseudocode LookUpSP_with_security_mode().
+     * Unlike that pseudocode, we require the caller to pass us in the
+     * SPSEL control bit value; this is because we also use this
+     * function in handling of pushing of the callee-saves registers
+     * part of the v8M stack frame (pseudocode PushCalleeStack()),
+     * and in the tailchain codepath the SPSEL bit comes from the exception
+     * return magic LR value from the previous exception. The pseudocode
+     * opencodes the stack-selection in PushCalleeStack(), but we prefer
+     * to make this utility function generic enough to do the job.
+     */
+    bool want_psp = threadmode && spsel;
+
+    if (secure == env->v7m.secure) {
+        if (want_psp == v7m_using_psp(env)) {
+            return &env->regs[13];
+        } else {
+            return &env->v7m.other_sp;
+        }
+    } else {
+        if (want_psp) {
+            return &env->v7m.other_ss_psp;
+        } else {
+            return &env->v7m.other_ss_msp;
+        }
+    }
+}
+
+static bool arm_v7m_load_vector(ARMCPU *cpu, int exc, bool targets_secure,
+                                uint32_t *pvec)
 {
     CPUState *cs = CPU(cpu);
     CPUARMState *env = &cpu->env;
     MemTxResult result;
-    hwaddr vec = env->v7m.vecbase + env->v7m.exception * 4;
-    uint32_t addr;
+    uint32_t addr = env->v7m.vecbase[targets_secure] + exc * 4;
+    uint32_t vector_entry;
+    MemTxAttrs attrs = {};
+    ARMMMUIdx mmu_idx;
+    bool exc_secure;
 
-    addr = address_space_ldl(cs->as, vec,
-                             MEMTXATTRS_UNSPECIFIED, &result);
-    if (result != MEMTX_OK) {
-        /* Architecturally this should cause a HardFault setting HSFR.VECTTBL,
-         * which would then be immediately followed by our failing to load
-         * the entry vector for that HardFault, which is a Lockup case.
-         * Since we don't model Lockup, we just report this guest error
-         * via cpu_abort().
-         */
-        cpu_abort(cs, "Failed to read from exception vector table "
-                  "entry %08x\n", (unsigned)vec);
+    mmu_idx = arm_v7m_mmu_idx_for_secstate_and_priv(env, targets_secure, true);
+
+    /* We don't do a get_phys_addr() here because the rules for vector
+     * loads are special: they always use the default memory map, and
+     * the default memory map permits reads from all addresses.
+     * Since there's no easy way to pass through to pmsav8_mpu_lookup()
+     * that we want this special case which would always say "yes",
+     * we just do the SAU lookup here followed by a direct physical load.
+     */
+    attrs.secure = targets_secure;
+    attrs.user = false;
+
+    if (arm_feature(env, ARM_FEATURE_M_SECURITY)) {
+        V8M_SAttributes sattrs = {};
+
+        v8m_security_lookup(env, addr, MMU_DATA_LOAD, mmu_idx, &sattrs);
+        if (sattrs.ns) {
+            attrs.secure = false;
+        } else if (!targets_secure) {
+            /* NS access to S memory */
+            goto load_fail;
+        }
     }
-    return addr;
+
+    vector_entry = address_space_ldl(arm_addressspace(cs, attrs), addr,
+                                     attrs, &result);
+    if (result != MEMTX_OK) {
+        goto load_fail;
+    }
+    *pvec = vector_entry;
+    return true;
+
+load_fail:
+    /* All vector table fetch fails are reported as HardFault, with
+     * HFSR.VECTTBL and .FORCED set. (FORCED is set because
+     * technically the underlying exception is a MemManage or BusFault
+     * that is escalated to HardFault.) This is a terminal exception,
+     * so we will either take the HardFault immediately or else enter
+     * lockup (the latter case is handled in armv7m_nvic_set_pending_derived()).
+     */
+    exc_secure = targets_secure ||
+        !(cpu->env.v7m.aircr & R_V7M_AIRCR_BFHFNMINS_MASK);
+    env->v7m.hfsr |= R_V7M_HFSR_VECTTBL_MASK | R_V7M_HFSR_FORCED_MASK;
+    armv7m_nvic_set_pending_derived(env->nvic, ARMV7M_EXCP_HARD, exc_secure);
+    return false;
 }
 
-static void v7m_exception_taken(ARMCPU *cpu, uint32_t lr)
+static bool v7m_push_callee_stack(ARMCPU *cpu, uint32_t lr, bool dotailchain,
+                                  bool ignore_faults)
+{
+    /* For v8M, push the callee-saves register part of the stack frame.
+     * Compare the v8M pseudocode PushCalleeStack().
+     * In the tailchaining case this may not be the current stack.
+     */
+    CPUARMState *env = &cpu->env;
+    uint32_t *frame_sp_p;
+    uint32_t frameptr;
+    ARMMMUIdx mmu_idx;
+    bool stacked_ok;
+
+    if (dotailchain) {
+        bool mode = lr & R_V7M_EXCRET_MODE_MASK;
+        bool priv = !(env->v7m.control[M_REG_S] & R_V7M_CONTROL_NPRIV_MASK) ||
+            !mode;
+
+        mmu_idx = arm_v7m_mmu_idx_for_secstate_and_priv(env, M_REG_S, priv);
+        frame_sp_p = get_v7m_sp_ptr(env, M_REG_S, mode,
+                                    lr & R_V7M_EXCRET_SPSEL_MASK);
+    } else {
+        mmu_idx = core_to_arm_mmu_idx(env, cpu_mmu_index(env, false));
+        frame_sp_p = &env->regs[13];
+    }
+
+    frameptr = *frame_sp_p - 0x28;
+
+    /* Write as much of the stack frame as we can. A write failure may
+     * cause us to pend a derived exception.
+     */
+    stacked_ok =
+        v7m_stack_write(cpu, frameptr, 0xfefa125b, mmu_idx, ignore_faults) &&
+        v7m_stack_write(cpu, frameptr + 0x8, env->regs[4], mmu_idx,
+                        ignore_faults) &&
+        v7m_stack_write(cpu, frameptr + 0xc, env->regs[5], mmu_idx,
+                        ignore_faults) &&
+        v7m_stack_write(cpu, frameptr + 0x10, env->regs[6], mmu_idx,
+                        ignore_faults) &&
+        v7m_stack_write(cpu, frameptr + 0x14, env->regs[7], mmu_idx,
+                        ignore_faults) &&
+        v7m_stack_write(cpu, frameptr + 0x18, env->regs[8], mmu_idx,
+                        ignore_faults) &&
+        v7m_stack_write(cpu, frameptr + 0x1c, env->regs[9], mmu_idx,
+                        ignore_faults) &&
+        v7m_stack_write(cpu, frameptr + 0x20, env->regs[10], mmu_idx,
+                        ignore_faults) &&
+        v7m_stack_write(cpu, frameptr + 0x24, env->regs[11], mmu_idx,
+                        ignore_faults);
+
+    /* Update SP regardless of whether any of the stack accesses failed.
+     * When we implement v8M stack limit checking then this attempt to
+     * update SP might also fail and result in a derived exception.
+     */
+    *frame_sp_p = frameptr;
+
+    return !stacked_ok;
+}
+
+static void v7m_exception_taken(ARMCPU *cpu, uint32_t lr, bool dotailchain,
+                                bool ignore_stackfaults)
 {
     /* Do the "take the exception" parts of exception entry,
      * but not the pushing of state to the stack. This is
@@ -6098,57 +6760,185 @@ static void v7m_exception_taken(ARMCPU *cpu, uint32_t lr)
      */
     CPUARMState *env = &cpu->env;
     uint32_t addr;
+    bool targets_secure;
+    int exc;
+    bool push_failed = false;
 
+    armv7m_nvic_get_pending_irq_info(env->nvic, &exc, &targets_secure);
+
+    if (arm_feature(env, ARM_FEATURE_V8)) {
+        if (arm_feature(env, ARM_FEATURE_M_SECURITY) &&
+            (lr & R_V7M_EXCRET_S_MASK)) {
+            /* The background code (the owner of the registers in the
+             * exception frame) is Secure. This means it may either already
+             * have or now needs to push callee-saves registers.
+             */
+            if (targets_secure) {
+                if (dotailchain && !(lr & R_V7M_EXCRET_ES_MASK)) {
+                    /* We took an exception from Secure to NonSecure
+                     * (which means the callee-saved registers got stacked)
+                     * and are now tailchaining to a Secure exception.
+                     * Clear DCRS so eventual return from this Secure
+                     * exception unstacks the callee-saved registers.
+                     */
+                    lr &= ~R_V7M_EXCRET_DCRS_MASK;
+                }
+            } else {
+                /* We're going to a non-secure exception; push the
+                 * callee-saves registers to the stack now, if they're
+                 * not already saved.
+                 */
+                if (lr & R_V7M_EXCRET_DCRS_MASK &&
+                    !(dotailchain && (lr & R_V7M_EXCRET_ES_MASK))) {
+                    push_failed = v7m_push_callee_stack(cpu, lr, dotailchain,
+                                                        ignore_stackfaults);
+                }
+                lr |= R_V7M_EXCRET_DCRS_MASK;
+            }
+        }
+
+        lr &= ~R_V7M_EXCRET_ES_MASK;
+        if (targets_secure || !arm_feature(env, ARM_FEATURE_M_SECURITY)) {
+            lr |= R_V7M_EXCRET_ES_MASK;
+        }
+        lr &= ~R_V7M_EXCRET_SPSEL_MASK;
+        if (env->v7m.control[targets_secure] & R_V7M_CONTROL_SPSEL_MASK) {
+            lr |= R_V7M_EXCRET_SPSEL_MASK;
+        }
+
+        /* Clear registers if necessary to prevent non-secure exception
+         * code being able to see register values from secure code.
+         * Where register values become architecturally UNKNOWN we leave
+         * them with their previous values.
+         */
+        if (arm_feature(env, ARM_FEATURE_M_SECURITY)) {
+            if (!targets_secure) {
+                /* Always clear the caller-saved registers (they have been
+                 * pushed to the stack earlier in v7m_push_stack()).
+                 * Clear callee-saved registers if the background code is
+                 * Secure (in which case these regs were saved in
+                 * v7m_push_callee_stack()).
+                 */
+                int i;
+
+                for (i = 0; i < 13; i++) {
+                    /* r4..r11 are callee-saves, zero only if EXCRET.S == 1 */
+                    if (i < 4 || i > 11 || (lr & R_V7M_EXCRET_S_MASK)) {
+                        env->regs[i] = 0;
+                    }
+                }
+                /* Clear EAPSR */
+                xpsr_write(env, 0, XPSR_NZCV | XPSR_Q | XPSR_GE | XPSR_IT);
+            }
+        }
+    }
+
+    if (push_failed && !ignore_stackfaults) {
+        /* Derived exception on callee-saves register stacking:
+         * we might now want to take a different exception which
+         * targets a different security state, so try again from the top.
+         */
+        v7m_exception_taken(cpu, lr, true, true);
+        return;
+    }
+
+    if (!arm_v7m_load_vector(cpu, exc, targets_secure, &addr)) {
+        /* Vector load failed: derived exception */
+        v7m_exception_taken(cpu, lr, true, true);
+        return;
+    }
+
+    /* Now we've done everything that might cause a derived exception
+     * we can go ahead and activate whichever exception we're going to
+     * take (which might now be the derived exception).
+     */
     armv7m_nvic_acknowledge_irq(env->nvic);
-    switch_v7m_sp(env, 0);
+
+    /* Switch to target security state -- must do this before writing SPSEL */
+    switch_v7m_security_state(env, targets_secure);
+    write_v7m_control_spsel(env, 0);
+    arm_clear_exclusive(env);
     /* Clear IT bits */
     env->condexec_bits = 0;
     env->regs[14] = lr;
-    addr = arm_v7m_load_vector(cpu);
     env->regs[15] = addr & 0xfffffffe;
     env->thumb = addr & 1;
 }
 
-static void v7m_push_stack(ARMCPU *cpu)
+static bool v7m_push_stack(ARMCPU *cpu)
 {
     /* Do the "set up stack frame" part of exception entry,
      * similar to pseudocode PushStack().
+     * Return true if we generate a derived exception (and so
+     * should ignore further stack faults trying to process
+     * that derived exception.)
      */
+    bool stacked_ok;
     CPUARMState *env = &cpu->env;
     uint32_t xpsr = xpsr_read(env);
+    uint32_t frameptr = env->regs[13];
+    ARMMMUIdx mmu_idx = core_to_arm_mmu_idx(env, cpu_mmu_index(env, false));
 
     /* Align stack pointer if the guest wants that */
-    if ((env->regs[13] & 4) && (env->v7m.ccr & R_V7M_CCR_STKALIGN_MASK)) {
-        env->regs[13] -= 4;
-        xpsr |= 0x200;
+    if ((frameptr & 4) &&
+        (env->v7m.ccr[env->v7m.secure] & R_V7M_CCR_STKALIGN_MASK)) {
+        frameptr -= 4;
+        xpsr |= XPSR_SPREALIGN;
     }
-    /* Switch to the handler mode.  */
-    v7m_push(env, xpsr);
-    v7m_push(env, env->regs[15]);
-    v7m_push(env, env->regs[14]);
-    v7m_push(env, env->regs[12]);
-    v7m_push(env, env->regs[3]);
-    v7m_push(env, env->regs[2]);
-    v7m_push(env, env->regs[1]);
-    v7m_push(env, env->regs[0]);
+
+    frameptr -= 0x20;
+
+    /* Write as much of the stack frame as we can. If we fail a stack
+     * write this will result in a derived exception being pended
+     * (which may be taken in preference to the one we started with
+     * if it has higher priority).
+     */
+    stacked_ok =
+        v7m_stack_write(cpu, frameptr, env->regs[0], mmu_idx, false) &&
+        v7m_stack_write(cpu, frameptr + 4, env->regs[1], mmu_idx, false) &&
+        v7m_stack_write(cpu, frameptr + 8, env->regs[2], mmu_idx, false) &&
+        v7m_stack_write(cpu, frameptr + 12, env->regs[3], mmu_idx, false) &&
+        v7m_stack_write(cpu, frameptr + 16, env->regs[12], mmu_idx, false) &&
+        v7m_stack_write(cpu, frameptr + 20, env->regs[14], mmu_idx, false) &&
+        v7m_stack_write(cpu, frameptr + 24, env->regs[15], mmu_idx, false) &&
+        v7m_stack_write(cpu, frameptr + 28, xpsr, mmu_idx, false);
+
+    /* Update SP regardless of whether any of the stack accesses failed.
+     * When we implement v8M stack limit checking then this attempt to
+     * update SP might also fail and result in a derived exception.
+     */
+    env->regs[13] = frameptr;
+
+    return !stacked_ok;
 }
 
 static void do_v7m_exception_exit(ARMCPU *cpu)
 {
     CPUARMState *env = &cpu->env;
-    uint32_t type;
+    CPUState *cs = CPU(cpu);
+    uint32_t excret;
     uint32_t xpsr;
     bool ufault = false;
-    bool return_to_sp_process = false;
-    bool return_to_handler = false;
+    bool sfault = false;
+    bool return_to_sp_process;
+    bool return_to_handler;
     bool rettobase = false;
+    bool exc_secure = false;
+    bool return_to_secure;
 
-    /* We can only get here from an EXCP_EXCEPTION_EXIT, and
-     * arm_v7m_do_unassigned_access() enforces the architectural rule
-     * that jumps to magic addresses don't have magic behaviour unless
-     * we're in Handler mode (compare pseudocode BXWritePC()).
+    /* If we're not in Handler mode then jumps to magic exception-exit
+     * addresses don't have magic behaviour. However for the v8M
+     * security extensions the magic secure-function-return has to
+     * work in thread mode too, so to avoid doing an extra check in
+     * the generated code we allow exception-exit magic to also cause the
+     * internal exception and bring us here in thread mode. Correct code
+     * will never try to do this (the following insn fetch will always
+     * fault) so we the overhead of having taken an unnecessary exception
+     * doesn't matter.
      */
-    assert(env->v7m.exception != 0);
+    if (!arm_v7m_is_handler_mode(env)) {
+        return;
+    }
 
     /* In the spec pseudocode ExceptionReturn() is called directly
      * from BXWritePC() and gets the full target PC value including
@@ -6157,26 +6947,53 @@ static void do_v7m_exception_exit(ARMCPU *cpu)
      * the target value up between env->regs[15] and env->thumb in
      * gen_bx(). Reconstitute it.
      */
-    type = env->regs[15];
+    excret = env->regs[15];
     if (env->thumb) {
-        type |= 1;
+        excret |= 1;
     }
 
     qemu_log_mask(CPU_LOG_INT, "Exception return: magic PC %" PRIx32
                   " previous exception %d\n",
-                  type, env->v7m.exception);
+                  excret, env->v7m.exception);
 
-    if (extract32(type, 5, 23) != extract32(-1, 5, 23)) {
+    if ((excret & R_V7M_EXCRET_RES1_MASK) != R_V7M_EXCRET_RES1_MASK) {
         qemu_log_mask(LOG_GUEST_ERROR, "M profile: zero high bits in exception "
-                      "exit PC value 0x%" PRIx32 " are UNPREDICTABLE\n", type);
+                      "exit PC value 0x%" PRIx32 " are UNPREDICTABLE\n",
+                      excret);
+    }
+
+    if (arm_feature(env, ARM_FEATURE_M_SECURITY)) {
+        /* EXC_RETURN.ES validation check (R_SMFL). We must do this before
+         * we pick which FAULTMASK to clear.
+         */
+        if (!env->v7m.secure &&
+            ((excret & R_V7M_EXCRET_ES_MASK) ||
+             !(excret & R_V7M_EXCRET_DCRS_MASK))) {
+            sfault = 1;
+            /* For all other purposes, treat ES as 0 (R_HXSR) */
+            excret &= ~R_V7M_EXCRET_ES_MASK;
+        }
     }
 
     if (env->v7m.exception != ARMV7M_EXCP_NMI) {
-        /* Auto-clear FAULTMASK on return from other than NMI */
-        env->daif &= ~PSTATE_F;
+        /* Auto-clear FAULTMASK on return from other than NMI.
+         * If the security extension is implemented then this only
+         * happens if the raw execution priority is >= 0; the
+         * value of the ES bit in the exception return value indicates
+         * which security state's faultmask to clear. (v8M ARM ARM R_KBNF.)
+         */
+        if (arm_feature(env, ARM_FEATURE_M_SECURITY)) {
+            exc_secure = excret & R_V7M_EXCRET_ES_MASK;
+            if (armv7m_nvic_raw_execution_priority(env->nvic) >= 0) {
+                env->v7m.faultmask[exc_secure] = 0;
+            }
+        } else {
+            env->v7m.faultmask[M_REG_NS] = 0;
+        }
     }
 
-    switch (armv7m_nvic_complete_irq(env->nvic, env->v7m.exception)) {
+    switch (armv7m_nvic_complete_irq(env->nvic, env->v7m.exception,
+                                     exc_secure)) {
     case -1:
         /* attempt to exit an exception that isn't active */
         ufault = true;
@@ -6195,84 +7012,331 @@ static void do_v7m_exception_exit(ARMCPU *cpu)
         g_assert_not_reached();
     }
 
-    switch (type & 0xf) {
-    case 1: /* Return to Handler */
-        return_to_handler = true;
-        break;
-    case 13: /* Return to Thread using Process stack */
-        return_to_sp_process = true;
-        /* fall through */
-    case 9: /* Return to Thread using Main stack */
-        if (!rettobase &&
-            !(env->v7m.ccr & R_V7M_CCR_NONBASETHRDENA_MASK)) {
+    return_to_handler = !(excret & R_V7M_EXCRET_MODE_MASK);
+    return_to_sp_process = excret & R_V7M_EXCRET_SPSEL_MASK;
+    return_to_secure = arm_feature(env, ARM_FEATURE_M_SECURITY) &&
+        (excret & R_V7M_EXCRET_S_MASK);
+
+    if (arm_feature(env, ARM_FEATURE_V8)) {
+        if (!arm_feature(env, ARM_FEATURE_M_SECURITY)) {
+            /* UNPREDICTABLE if S == 1 or DCRS == 0 or ES == 1 (R_XLCP);
+             * we choose to take the UsageFault.
+             */
+            if ((excret & R_V7M_EXCRET_S_MASK) ||
+                (excret & R_V7M_EXCRET_ES_MASK) ||
+                !(excret & R_V7M_EXCRET_DCRS_MASK)) {
+                ufault = true;
+            }
+        }
+        if (excret & R_V7M_EXCRET_RES0_MASK) {
             ufault = true;
         }
-        break;
-    default:
-        ufault = true;
+    } else {
+        /* For v7M we only recognize certain combinations of the low bits */
+        switch (excret & 0xf) {
+        case 1: /* Return to Handler */
+            break;
+        case 13: /* Return to Thread using Process stack */
+        case 9: /* Return to Thread using Main stack */
+            /* We only need to check NONBASETHRDENA for v7M, because in
+             * v8M this bit does not exist (it is RES1).
+             */
+            if (!rettobase &&
+                !(env->v7m.ccr[env->v7m.secure] &
+                  R_V7M_CCR_NONBASETHRDENA_MASK)) {
+                ufault = true;
+            }
+            break;
+        default:
+            ufault = true;
+        }
+    }
+
+    if (sfault) {
+        env->v7m.sfsr |= R_V7M_SFSR_INVER_MASK;
+        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_SECURE, false);
+        v7m_exception_taken(cpu, excret, true, false);
+        qemu_log_mask(CPU_LOG_INT, "...taking SecureFault on existing "
+                      "stackframe: failed EXC_RETURN.ES validity check\n");
+        return;
     }
 
     if (ufault) {
         /* Bad exception return: instead of popping the exception
          * stack, directly take a usage fault on the current stack.
          */
-        env->v7m.cfsr |= R_V7M_CFSR_INVPC_MASK;
-        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_USAGE);
-        v7m_exception_taken(cpu, type | 0xf0000000);
+        env->v7m.cfsr[env->v7m.secure] |= R_V7M_CFSR_INVPC_MASK;
+        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_USAGE, env->v7m.secure);
+        v7m_exception_taken(cpu, excret, true, false);
         qemu_log_mask(CPU_LOG_INT, "...taking UsageFault on existing "
                       "stackframe: failed exception return integrity check\n");
         return;
     }
 
-    /* Switch to the target stack.  */
-    switch_v7m_sp(env, return_to_sp_process);
-    /* Pop registers.  */
-    env->regs[0] = v7m_pop(env);
-    env->regs[1] = v7m_pop(env);
-    env->regs[2] = v7m_pop(env);
-    env->regs[3] = v7m_pop(env);
-    env->regs[12] = v7m_pop(env);
-    env->regs[14] = v7m_pop(env);
-    env->regs[15] = v7m_pop(env);
-    if (env->regs[15] & 1) {
-        qemu_log_mask(LOG_GUEST_ERROR,
-                      "M profile return from interrupt with misaligned "
-                      "PC is UNPREDICTABLE\n");
-        /* Actual hardware seems to ignore the lsbit, and there are several
-         * RTOSes out there which incorrectly assume the r15 in the stack
-         * frame should be a Thumb-style "lsbit indicates ARM/Thumb" value.
+    /* Set CONTROL.SPSEL from excret.SPSEL. Since we're still in
+     * Handler mode (and will be until we write the new XPSR.Interrupt
+     * field) this does not switch around the current stack pointer.
+     */
+    write_v7m_control_spsel_for_secstate(env, return_to_sp_process, exc_secure);
+
+    switch_v7m_security_state(env, return_to_secure);
+
+    {
+        /* The stack pointer we should be reading the exception frame from
+         * depends on bits in the magic exception return type value (and
+         * for v8M isn't necessarily the stack pointer we will eventually
+         * end up resuming execution with). Get a pointer to the location
+         * in the CPU state struct where the SP we need is currently being
+         * stored; we will use and modify it in place.
+         * We use this limited C variable scope so we don't accidentally
+         * use 'frame_sp_p' after we do something that makes it invalid.
          */
-        env->regs[15] &= ~1U;
+        uint32_t *frame_sp_p = get_v7m_sp_ptr(env,
+                                              return_to_secure,
+                                              !return_to_handler,
+                                              return_to_sp_process);
+        uint32_t frameptr = *frame_sp_p;
+        bool pop_ok = true;
+        ARMMMUIdx mmu_idx;
+
+        mmu_idx = arm_v7m_mmu_idx_for_secstate_and_priv(env, return_to_secure,
+                                                        !return_to_handler);
+
+        if (!QEMU_IS_ALIGNED(frameptr, 8) &&
+            arm_feature(env, ARM_FEATURE_V8)) {
+            qemu_log_mask(LOG_GUEST_ERROR,
+                          "M profile exception return with non-8-aligned SP "
+                          "for destination state is UNPREDICTABLE\n");
+        }
+
+        /* Do we need to pop callee-saved registers? */
+        if (return_to_secure &&
+            ((excret & R_V7M_EXCRET_ES_MASK) == 0 ||
+             (excret & R_V7M_EXCRET_DCRS_MASK) == 0)) {
+            uint32_t expected_sig = 0xfefa125b;
+            uint32_t actual_sig = ldl_phys(cs->as, frameptr);
+
+            if (expected_sig != actual_sig) {
+                /* Take a SecureFault on the current stack */
+                env->v7m.sfsr |= R_V7M_SFSR_INVIS_MASK;
+                armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_SECURE, false);
+                v7m_exception_taken(cpu, excret, true, false);
+                qemu_log_mask(CPU_LOG_INT, "...taking SecureFault on existing "
+                              "stackframe: failed exception return integrity "
+                              "signature check\n");
+                return;
+            }
+
+            pop_ok =
+                v7m_stack_read(cpu, &env->regs[4], frameptr + 0x8, mmu_idx) &&
+                v7m_stack_read(cpu, &env->regs[4], frameptr + 0x8, mmu_idx) &&
+                v7m_stack_read(cpu, &env->regs[5], frameptr + 0xc, mmu_idx) &&
+                v7m_stack_read(cpu, &env->regs[6], frameptr + 0x10, mmu_idx) &&
+                v7m_stack_read(cpu, &env->regs[7], frameptr + 0x14, mmu_idx) &&
+                v7m_stack_read(cpu, &env->regs[8], frameptr + 0x18, mmu_idx) &&
+                v7m_stack_read(cpu, &env->regs[9], frameptr + 0x1c, mmu_idx) &&
+                v7m_stack_read(cpu, &env->regs[10], frameptr + 0x20, mmu_idx) &&
+                v7m_stack_read(cpu, &env->regs[11], frameptr + 0x24, mmu_idx);
+
+            frameptr += 0x28;
+        }
+
+        /* Pop registers */
+        pop_ok = pop_ok &&
+            v7m_stack_read(cpu, &env->regs[0], frameptr, mmu_idx) &&
+            v7m_stack_read(cpu, &env->regs[1], frameptr + 0x4, mmu_idx) &&
+            v7m_stack_read(cpu, &env->regs[2], frameptr + 0x8, mmu_idx) &&
+            v7m_stack_read(cpu, &env->regs[3], frameptr + 0xc, mmu_idx) &&
+            v7m_stack_read(cpu, &env->regs[12], frameptr + 0x10, mmu_idx) &&
+            v7m_stack_read(cpu, &env->regs[14], frameptr + 0x14, mmu_idx) &&
+            v7m_stack_read(cpu, &env->regs[15], frameptr + 0x18, mmu_idx) &&
+            v7m_stack_read(cpu, &xpsr, frameptr + 0x1c, mmu_idx);
+
+        if (!pop_ok) {
+            /* v7m_stack_read() pended a fault, so take it (as a tail
+             * chained exception on the same stack frame)
+             */
+            v7m_exception_taken(cpu, excret, true, false);
+            return;
+        }
+
+        /* Returning from an exception with a PC with bit 0 set is defined
+         * behaviour on v8M (bit 0 is ignored), but for v7M it was specified
+         * to be UNPREDICTABLE. In practice actual v7M hardware seems to ignore
+         * the lsbit, and there are several RTOSes out there which incorrectly
+         * assume the r15 in the stack frame should be a Thumb-style "lsbit
+         * indicates ARM/Thumb" value, so ignore the bit on v7M as well, but
+         * complain about the badly behaved guest.
+         */
+        if (env->regs[15] & 1) {
+            env->regs[15] &= ~1U;
+            if (!arm_feature(env, ARM_FEATURE_V8)) {
+                qemu_log_mask(LOG_GUEST_ERROR,
+                              "M profile return from interrupt with misaligned "
+                              "PC is UNPREDICTABLE on v7M\n");
+            }
+        }
+
+        if (arm_feature(env, ARM_FEATURE_V8)) {
+            /* For v8M we have to check whether the xPSR exception field
+             * matches the EXCRET value for return to handler/thread
+             * before we commit to changing the SP and xPSR.
+             */
+            bool will_be_handler = (xpsr & XPSR_EXCP) != 0;
+            if (return_to_handler != will_be_handler) {
+                /* Take an INVPC UsageFault on the current stack.
+                 * By this point we will have switched to the security state
+                 * for the background state, so this UsageFault will target
+                 * that state.
+                 */
+                armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_USAGE,
+                                        env->v7m.secure);
+                env->v7m.cfsr[env->v7m.secure] |= R_V7M_CFSR_INVPC_MASK;
+                v7m_exception_taken(cpu, excret, true, false);
+                qemu_log_mask(CPU_LOG_INT, "...taking UsageFault on existing "
+                              "stackframe: failed exception return integrity "
+                              "check\n");
+                return;
+            }
+        }
+
+        /* Commit to consuming the stack frame */
+        frameptr += 0x20;
+        /* Undo stack alignment (the SPREALIGN bit indicates that the original
+         * pre-exception SP was not 8-aligned and we added a padding word to
+         * align it, so we undo this by ORing in the bit that increases it
+         * from the current 8-aligned value to the 8-unaligned value. (Adding 4
+         * would work too but a logical OR is how the pseudocode specifies it.)
+         */
+        if (xpsr & XPSR_SPREALIGN) {
+            frameptr |= 4;
+        }
+        *frame_sp_p = frameptr;
     }
-    xpsr = v7m_pop(env);
-    xpsr_write(env, xpsr, 0xfffffdff);
-    /* Undo stack alignment.  */
-    if (xpsr & 0x200)
-        env->regs[13] |= 4;
+    /* This xpsr_write() will invalidate frame_sp_p as it may switch stack */
+    xpsr_write(env, xpsr, ~XPSR_SPREALIGN);
 
     /* The restored xPSR exception field will be zero if we're
      * resuming in Thread mode. If that doesn't match what the
-     * exception return type specified then this is a UsageFault.
+     * exception return excret specified then this is a UsageFault.
+     * v7M requires we make this check here; v8M did it earlier.
      */
-    if (return_to_handler == (env->v7m.exception == 0)) {
-        /* Take an INVPC UsageFault by pushing the stack again. */
-        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_USAGE);
-        env->v7m.cfsr |= R_V7M_CFSR_INVPC_MASK;
-        v7m_push_stack(cpu);
-        v7m_exception_taken(cpu, type | 0xf0000000);
+    if (return_to_handler != arm_v7m_is_handler_mode(env)) {
+        /* Take an INVPC UsageFault by pushing the stack again;
+         * we know we're v7M so this is never a Secure UsageFault.
+         */
+        bool ignore_stackfaults;
+
+        assert(!arm_feature(env, ARM_FEATURE_V8));
+        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_USAGE, false);
+        env->v7m.cfsr[env->v7m.secure] |= R_V7M_CFSR_INVPC_MASK;
+        ignore_stackfaults = v7m_push_stack(cpu);
+        v7m_exception_taken(cpu, excret, false, ignore_stackfaults);
         qemu_log_mask(CPU_LOG_INT, "...taking UsageFault on new stackframe: "
                       "failed exception return integrity check\n");
         return;
     }
 
     /* Otherwise, we have a successful exception exit. */
+    arm_clear_exclusive(env);
     qemu_log_mask(CPU_LOG_INT, "...successful exception return\n");
+}
+
+static bool do_v7m_function_return(ARMCPU *cpu)
+{
+    /* v8M security extensions magic function return.
+     * We may either:
+     *  (1) throw an exception (longjump)
+     *  (2) return true if we successfully handled the function return
+     *  (3) return false if we failed a consistency check and have
+     *      pended a UsageFault that needs to be taken now
+     *
+     * At this point the magic return value is split between env->regs[15]
+     * and env->thumb. We don't bother to reconstitute it because we don't
+     * need it (all values are handled the same way).
+     */
+    CPUARMState *env = &cpu->env;
+    uint32_t newpc, newpsr, newpsr_exc;
+
+    qemu_log_mask(CPU_LOG_INT, "...really v7M secure function return\n");
+
+    {
+        bool threadmode, spsel;
+        TCGMemOpIdx oi;
+        ARMMMUIdx mmu_idx;
+        uint32_t *frame_sp_p;
+        uint32_t frameptr;
+
+        /* Pull the return address and IPSR from the Secure stack */
+        threadmode = !arm_v7m_is_handler_mode(env);
+        spsel = env->v7m.control[M_REG_S] & R_V7M_CONTROL_SPSEL_MASK;
+
+        frame_sp_p = get_v7m_sp_ptr(env, true, threadmode, spsel);
+        frameptr = *frame_sp_p;
+
+        /* These loads may throw an exception (for MPU faults). We want to
+         * do them as secure, so work out what MMU index that is.
+         */
+        mmu_idx = arm_v7m_mmu_idx_for_secstate(env, true);
+        oi = make_memop_idx(MO_LE, arm_to_core_mmu_idx(mmu_idx));
+        newpc = helper_le_ldul_mmu(env, frameptr, oi, 0);
+        newpsr = helper_le_ldul_mmu(env, frameptr + 4, oi, 0);
+
+        /* Consistency checks on new IPSR */
+        newpsr_exc = newpsr & XPSR_EXCP;
+        if (!((env->v7m.exception == 0 && newpsr_exc == 0) ||
+              (env->v7m.exception == 1 && newpsr_exc != 0))) {
+            /* Pend the fault and tell our caller to take it */
+            env->v7m.cfsr[env->v7m.secure] |= R_V7M_CFSR_INVPC_MASK;
+            armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_USAGE,
+                                    env->v7m.secure);
+            qemu_log_mask(CPU_LOG_INT,
+                          "...taking INVPC UsageFault: "
+                          "IPSR consistency check failed\n");
+            return false;
+        }
+
+        *frame_sp_p = frameptr + 8;
+    }
+
+    /* This invalidates frame_sp_p */
+    switch_v7m_security_state(env, true);
+    env->v7m.exception = newpsr_exc;
+    env->v7m.control[M_REG_S] &= ~R_V7M_CONTROL_SFPA_MASK;
+    if (newpsr & XPSR_SFPA) {
+        env->v7m.control[M_REG_S] |= R_V7M_CONTROL_SFPA_MASK;
+    }
+    xpsr_write(env, 0, XPSR_IT);
+    env->thumb = newpc & 1;
+    env->regs[15] = newpc & ~1;
+
+    qemu_log_mask(CPU_LOG_INT, "...function return successful\n");
+    return true;
 }
 
 static void arm_log_exception(int idx)
 {
     if (qemu_loglevel_mask(CPU_LOG_INT)) {
         const char *exc = NULL;
+        static const char * const excnames[] = {
+            [EXCP_UDEF] = "Undefined Instruction",
+            [EXCP_SWI] = "SVC",
+            [EXCP_PREFETCH_ABORT] = "Prefetch Abort",
+            [EXCP_DATA_ABORT] = "Data Abort",
+            [EXCP_IRQ] = "IRQ",
+            [EXCP_FIQ] = "FIQ",
+            [EXCP_BKPT] = "Breakpoint",
+            [EXCP_EXCEPTION_EXIT] = "QEMU v7M exception exit",
+            [EXCP_KERNEL_TRAP] = "QEMU intercept of kernel commpage",
+            [EXCP_HVC] = "Hypervisor Call",
+            [EXCP_HYP_TRAP] = "Hypervisor Trap",
+            [EXCP_SMC] = "Secure Monitor Call",
+            [EXCP_VIRQ] = "Virtual IRQ",
+            [EXCP_VFIQ] = "Virtual FIQ",
+            [EXCP_SEMIHOST] = "Semihosting call",
+            [EXCP_NOCP] = "v7M NOCP UsageFault",
+            [EXCP_INVSTATE] = "v7M INVSTATE UsageFault",
+        };
 
         if (idx >= 0 && idx < ARRAY_SIZE(excnames)) {
             exc = excnames[idx];
@@ -6284,46 +7348,237 @@ static void arm_log_exception(int idx)
     }
 }
 
+static bool v7m_read_half_insn(ARMCPU *cpu, ARMMMUIdx mmu_idx,
+                               uint32_t addr, uint16_t *insn)
+{
+    /* Load a 16-bit portion of a v7M instruction, returning true on success,
+     * or false on failure (in which case we will have pended the appropriate
+     * exception).
+     * We need to do the instruction fetch's MPU and SAU checks
+     * like this because there is no MMU index that would allow
+     * doing the load with a single function call. Instead we must
+     * first check that the security attributes permit the load
+     * and that they don't mismatch on the two halves of the instruction,
+     * and then we do the load as a secure load (ie using the security
+     * attributes of the address, not the CPU, as architecturally required).
+     */
+    CPUState *cs = CPU(cpu);
+    CPUARMState *env = &cpu->env;
+    V8M_SAttributes sattrs = {};
+    MemTxAttrs attrs = {};
+    ARMMMUFaultInfo fi = {};
+    MemTxResult txres;
+    target_ulong page_size;
+    hwaddr physaddr;
+    int prot;
+
+    v8m_security_lookup(env, addr, MMU_INST_FETCH, mmu_idx, &sattrs);
+    if (!sattrs.nsc || sattrs.ns) {
+        /* This must be the second half of the insn, and it straddles a
+         * region boundary with the second half not being S&NSC.
+         */
+        env->v7m.sfsr |= R_V7M_SFSR_INVEP_MASK;
+        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_SECURE, false);
+        qemu_log_mask(CPU_LOG_INT,
+                      "...really SecureFault with SFSR.INVEP\n");
+        return false;
+    }
+    if (get_phys_addr(env, addr, MMU_INST_FETCH, mmu_idx,
+                      &physaddr, &attrs, &prot, &page_size, &fi, NULL)) {
+        /* the MPU lookup failed */
+        env->v7m.cfsr[env->v7m.secure] |= R_V7M_CFSR_IACCVIOL_MASK;
+        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_MEM, env->v7m.secure);
+        qemu_log_mask(CPU_LOG_INT, "...really MemManage with CFSR.IACCVIOL\n");
+        return false;
+    }
+    *insn = address_space_lduw_le(arm_addressspace(cs, attrs), physaddr,
+                                 attrs, &txres);
+    if (txres != MEMTX_OK) {
+        env->v7m.cfsr[M_REG_NS] |= R_V7M_CFSR_IBUSERR_MASK;
+        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_BUS, false);
+        qemu_log_mask(CPU_LOG_INT, "...really BusFault with CFSR.IBUSERR\n");
+        return false;
+    }
+    return true;
+}
+
+static bool v7m_handle_execute_nsc(ARMCPU *cpu)
+{
+    /* Check whether this attempt to execute code in a Secure & NS-Callable
+     * memory region is for an SG instruction; if so, then emulate the
+     * effect of the SG instruction and return true. Otherwise pend
+     * the correct kind of exception and return false.
+     */
+    CPUARMState *env = &cpu->env;
+    ARMMMUIdx mmu_idx;
+    uint16_t insn;
+
+    /* We should never get here unless get_phys_addr_pmsav8() caused
+     * an exception for NS executing in S&NSC memory.
+     */
+    assert(!env->v7m.secure);
+    assert(arm_feature(env, ARM_FEATURE_M_SECURITY));
+
+    /* We want to do the MPU lookup as secure; work out what mmu_idx that is */
+    mmu_idx = arm_v7m_mmu_idx_for_secstate(env, true);
+
+    if (!v7m_read_half_insn(cpu, mmu_idx, env->regs[15], &insn)) {
+        return false;
+    }
+
+    if (!env->thumb) {
+        goto gen_invep;
+    }
+
+    if (insn != 0xe97f) {
+        /* Not an SG instruction first half (we choose the IMPDEF
+         * early-SG-check option).
+         */
+        goto gen_invep;
+    }
+
+    if (!v7m_read_half_insn(cpu, mmu_idx, env->regs[15] + 2, &insn)) {
+        return false;
+    }
+
+    if (insn != 0xe97f) {
+        /* Not an SG instruction second half (yes, both halves of the SG
+         * insn have the same hex value)
+         */
+        goto gen_invep;
+    }
+
+    /* OK, we have confirmed that we really have an SG instruction.
+     * We know we're NS in S memory so don't need to repeat those checks.
+     */
+    qemu_log_mask(CPU_LOG_INT, "...really an SG instruction at 0x%08" PRIx32
+                  ", executing it\n", env->regs[15]);
+    env->regs[14] &= ~1;
+    switch_v7m_security_state(env, true);
+    xpsr_write(env, 0, XPSR_IT);
+    env->regs[15] += 4;
+    return true;
+
+gen_invep:
+    env->v7m.sfsr |= R_V7M_SFSR_INVEP_MASK;
+    armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_SECURE, false);
+    qemu_log_mask(CPU_LOG_INT,
+                  "...really SecureFault with SFSR.INVEP\n");
+    return false;
+}
+
 void arm_v7m_cpu_do_interrupt(CPUState *cs)
 {
     ARMCPU *cpu = ARM_CPU(cs);
     CPUARMState *env = &cpu->env;
     uint32_t lr;
+    bool ignore_stackfaults;
 
     arm_log_exception(cs->exception_index);
-
-    lr = 0xfffffff1;
-    if (env->v7m.control & R_V7M_CONTROL_SPSEL_MASK) {
-        lr |= 4;
-    }
-    if (env->v7m.exception == 0)
-        lr |= 8;
 
     /* For exceptions we just mark as pending on the NVIC, and let that
        handle it.  */
     switch (cs->exception_index) {
     case EXCP_UDEF:
-        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_USAGE);
-        env->v7m.cfsr |= R_V7M_CFSR_UNDEFINSTR_MASK;
+        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_USAGE, env->v7m.secure);
+        env->v7m.cfsr[env->v7m.secure] |= R_V7M_CFSR_UNDEFINSTR_MASK;
         break;
     case EXCP_NOCP:
-        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_USAGE);
-        env->v7m.cfsr |= R_V7M_CFSR_NOCP_MASK;
+        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_USAGE, env->v7m.secure);
+        env->v7m.cfsr[env->v7m.secure] |= R_V7M_CFSR_NOCP_MASK;
         break;
     case EXCP_INVSTATE:
-        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_USAGE);
-        env->v7m.cfsr |= R_V7M_CFSR_INVSTATE_MASK;
+        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_USAGE, env->v7m.secure);
+        env->v7m.cfsr[env->v7m.secure] |= R_V7M_CFSR_INVSTATE_MASK;
         break;
     case EXCP_SWI:
         /* The PC already points to the next instruction.  */
-        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_SVC);
+        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_SVC, env->v7m.secure);
         break;
     case EXCP_PREFETCH_ABORT:
     case EXCP_DATA_ABORT:
-        /* TODO: if we implemented the MPU registers, this is where we
-         * should set the MMFAR, etc from exception.fsr and exception.vaddress.
+        /* Note that for M profile we don't have a guest facing FSR, but
+         * the env->exception.fsr will be populated by the code that
+         * raises the fault, in the A profile short-descriptor format.
          */
-        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_MEM);
+        switch (env->exception.fsr & 0xf) {
+        case M_FAKE_FSR_NSC_EXEC:
+            /* Exception generated when we try to execute code at an address
+             * which is marked as Secure & Non-Secure Callable and the CPU
+             * is in the Non-Secure state. The only instruction which can
+             * be executed like this is SG (and that only if both halves of
+             * the SG instruction have the same security attributes.)
+             * Everything else must generate an INVEP SecureFault, so we
+             * emulate the SG instruction here.
+             */
+            if (v7m_handle_execute_nsc(cpu)) {
+                return;
+            }
+            break;
+        case M_FAKE_FSR_SFAULT:
+            /* Various flavours of SecureFault for attempts to execute or
+             * access data in the wrong security state.
+             */
+            switch (cs->exception_index) {
+            case EXCP_PREFETCH_ABORT:
+                if (env->v7m.secure) {
+                    env->v7m.sfsr |= R_V7M_SFSR_INVTRAN_MASK;
+                    qemu_log_mask(CPU_LOG_INT,
+                                  "...really SecureFault with SFSR.INVTRAN\n");
+                } else {
+                    env->v7m.sfsr |= R_V7M_SFSR_INVEP_MASK;
+                    qemu_log_mask(CPU_LOG_INT,
+                                  "...really SecureFault with SFSR.INVEP\n");
+                }
+                break;
+            case EXCP_DATA_ABORT:
+                /* This must be an NS access to S memory */
+                env->v7m.sfsr |= R_V7M_SFSR_AUVIOL_MASK;
+                qemu_log_mask(CPU_LOG_INT,
+                              "...really SecureFault with SFSR.AUVIOL\n");
+                break;
+            }
+            armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_SECURE, false);
+            break;
+        case 0x8: /* External Abort */
+            switch (cs->exception_index) {
+            case EXCP_PREFETCH_ABORT:
+                env->v7m.cfsr[M_REG_NS] |= R_V7M_CFSR_IBUSERR_MASK;
+                qemu_log_mask(CPU_LOG_INT, "...with CFSR.IBUSERR\n");
+                break;
+            case EXCP_DATA_ABORT:
+                env->v7m.cfsr[M_REG_NS] |=
+                    (R_V7M_CFSR_PRECISERR_MASK | R_V7M_CFSR_BFARVALID_MASK);
+                env->v7m.bfar = env->exception.vaddress;
+                qemu_log_mask(CPU_LOG_INT,
+                              "...with CFSR.PRECISERR and BFAR 0x%x\n",
+                              env->v7m.bfar);
+                break;
+            }
+            armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_BUS, false);
+            break;
+        default:
+            /* All other FSR values are either MPU faults or "can't happen
+             * for M profile" cases.
+             */
+            switch (cs->exception_index) {
+            case EXCP_PREFETCH_ABORT:
+                env->v7m.cfsr[env->v7m.secure] |= R_V7M_CFSR_IACCVIOL_MASK;
+                qemu_log_mask(CPU_LOG_INT, "...with CFSR.IACCVIOL\n");
+                break;
+            case EXCP_DATA_ABORT:
+                env->v7m.cfsr[env->v7m.secure] |=
+                    (R_V7M_CFSR_DACCVIOL_MASK | R_V7M_CFSR_MMARVALID_MASK);
+                env->v7m.mmfar[env->v7m.secure] = env->exception.vaddress;
+                qemu_log_mask(CPU_LOG_INT,
+                              "...with CFSR.DACCVIOL and MMFAR 0x%x\n",
+                              env->v7m.mmfar[env->v7m.secure]);
+                break;
+            }
+            armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_MEM,
+                                    env->v7m.secure);
+            break;
+        }
         break;
     case EXCP_BKPT:
         if (semihosting_enabled()) {
@@ -6338,20 +7593,62 @@ void arm_v7m_cpu_do_interrupt(CPUState *cs)
                 return;
             }
         }
-        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_DEBUG);
+        armv7m_nvic_set_pending(env->nvic, ARMV7M_EXCP_DEBUG, false);
         break;
     case EXCP_IRQ:
         break;
     case EXCP_EXCEPTION_EXIT:
-        do_v7m_exception_exit(cpu);
-        return;
+        if (env->regs[15] < EXC_RETURN_MIN_MAGIC) {
+            /* Must be v8M security extension function return */
+            assert(env->regs[15] >= FNC_RETURN_MIN_MAGIC);
+            assert(arm_feature(env, ARM_FEATURE_M_SECURITY));
+            if (do_v7m_function_return(cpu)) {
+                return;
+            }
+        } else {
+            do_v7m_exception_exit(cpu);
+            return;
+        }
+        break;
     default:
         cpu_abort(cs, "Unhandled exception 0x%x\n", cs->exception_index);
         return; /* Never happens.  Keep compiler happy.  */
     }
 
-    v7m_push_stack(cpu);
-    v7m_exception_taken(cpu, lr);
+    if (arm_feature(env, ARM_FEATURE_V8)) {
+        lr = R_V7M_EXCRET_RES1_MASK |
+            R_V7M_EXCRET_DCRS_MASK |
+            R_V7M_EXCRET_FTYPE_MASK;
+        /* The S bit indicates whether we should return to Secure
+         * or NonSecure (ie our current state).
+         * The ES bit indicates whether we're taking this exception
+         * to Secure or NonSecure (ie our target state). We set it
+         * later, in v7m_exception_taken().
+         * The SPSEL bit is also set in v7m_exception_taken() for v8M.
+         * This corresponds to the ARM ARM pseudocode for v8M setting
+         * some LR bits in PushStack() and some in ExceptionTaken();
+         * the distinction matters for the tailchain cases where we
+         * can take an exception without pushing the stack.
+         */
+        if (env->v7m.secure) {
+            lr |= R_V7M_EXCRET_S_MASK;
+        }
+    } else {
+        lr = R_V7M_EXCRET_RES1_MASK |
+            R_V7M_EXCRET_S_MASK |
+            R_V7M_EXCRET_DCRS_MASK |
+            R_V7M_EXCRET_FTYPE_MASK |
+            R_V7M_EXCRET_ES_MASK;
+        if (env->v7m.control[M_REG_NS] & R_V7M_CONTROL_SPSEL_MASK) {
+            lr |= R_V7M_EXCRET_SPSEL_MASK;
+        }
+    }
+    if (!arm_v7m_is_handler_mode(env)) {
+        lr |= R_V7M_EXCRET_MODE_MASK;
+    }
+
+    ignore_stackfaults = v7m_push_stack(cpu);
+    v7m_exception_taken(cpu, lr, false, ignore_stackfaults);
     qemu_log_mask(CPU_LOG_INT, "... as %d\n", env->v7m.exception);
 }
 
@@ -6615,7 +7912,6 @@ static void arm_cpu_do_interrupt_aarch32(CPUState *cs)
         offset = 0;
         break;
     case EXCP_BKPT:
-        env->exception.fsr = 2;
         /* Fall through to prefetch abort.  */
     case EXCP_PREFETCH_ABORT:
         A32_BANKED_CURRENT_REG_SET(env, ifsr, env->exception.fsr);
@@ -6975,27 +8271,15 @@ static inline uint32_t regime_el(CPUARMState *env, ARMMMUIdx mmu_idx)
     case ARMMMUIdx_S1SE1:
     case ARMMMUIdx_S1NSE0:
     case ARMMMUIdx_S1NSE1:
+    case ARMMMUIdx_MPrivNegPri:
+    case ARMMMUIdx_MUserNegPri:
+    case ARMMMUIdx_MPriv:
+    case ARMMMUIdx_MUser:
+    case ARMMMUIdx_MSPrivNegPri:
+    case ARMMMUIdx_MSUserNegPri:
+    case ARMMMUIdx_MSPriv:
+    case ARMMMUIdx_MSUser:
         return 1;
-    default:
-        g_assert_not_reached();
-    }
-}
-
-/* Return true if this address translation regime is secure */
-static inline bool regime_is_secure(CPUARMState *env, ARMMMUIdx mmu_idx)
-{
-    switch (mmu_idx) {
-    case ARMMMUIdx_S12NSE0:
-    case ARMMMUIdx_S12NSE1:
-    case ARMMMUIdx_S1NSE0:
-    case ARMMMUIdx_S1NSE1:
-    case ARMMMUIdx_S1E2:
-    case ARMMMUIdx_S2NS:
-        return false;
-    case ARMMMUIdx_S1E3:
-    case ARMMMUIdx_S1SE0:
-    case ARMMMUIdx_S1SE1:
-        return true;
     default:
         g_assert_not_reached();
     }
@@ -7011,6 +8295,24 @@ static inline uint32_t regime_sctlr(CPUARMState *env, ARMMMUIdx mmu_idx)
 static inline bool regime_translation_disabled(CPUARMState *env,
                                                ARMMMUIdx mmu_idx)
 {
+    if (arm_feature(env, ARM_FEATURE_M)) {
+        switch (env->v7m.mpu_ctrl[regime_is_secure(env, mmu_idx)] &
+                (R_V7M_MPU_CTRL_ENABLE_MASK | R_V7M_MPU_CTRL_HFNMIENA_MASK)) {
+        case R_V7M_MPU_CTRL_ENABLE_MASK:
+            /* Enabled, but not for HardFault and NMI */
+            return mmu_idx & ARM_MMU_IDX_M_NEGPRI;
+        case R_V7M_MPU_CTRL_ENABLE_MASK | R_V7M_MPU_CTRL_HFNMIENA_MASK:
+            /* Enabled for all cases */
+            return false;
+        case 0:
+        default:
+            /* HFNMIENA set and ENABLE clear is UNPREDICTABLE, but
+             * we warned about that in armv7m_nvic.c when the guest set it.
+             */
+            return true;
+        }
+    }
+
     if (mmu_idx == ARMMMUIdx_S2NS) {
         return (env->cp15.hcr_el2 & HCR_VM) == 0;
     }
@@ -7032,6 +8334,17 @@ static inline TCR *regime_tcr(CPUARMState *env, ARMMMUIdx mmu_idx)
     return &env->cp15.tcr_el[regime_el(env, mmu_idx)];
 }
 
+/* Convert a possible stage1+2 MMU index into the appropriate
+ * stage 1 MMU index
+ */
+static inline ARMMMUIdx stage_1_mmu_idx(ARMMMUIdx mmu_idx)
+{
+    if (mmu_idx == ARMMMUIdx_S12NSE0 || mmu_idx == ARMMMUIdx_S12NSE1) {
+        mmu_idx += (ARMMMUIdx_S1NSE0 - ARMMMUIdx_S12NSE0);
+    }
+    return mmu_idx;
+}
+
 /* Returns TBI0 value for current regime el */
 uint32_t arm_regime_tbi0(CPUARMState *env, ARMMMUIdx mmu_idx)
 {
@@ -7039,11 +8352,9 @@ uint32_t arm_regime_tbi0(CPUARMState *env, ARMMMUIdx mmu_idx)
     uint32_t el;
 
     /* For EL0 and EL1, TBI is controlled by stage 1's TCR, so convert
-       * a stage 1+2 mmu index into the appropriate stage 1 mmu index.
-       */
-    if (mmu_idx == ARMMMUIdx_S12NSE0 || mmu_idx == ARMMMUIdx_S12NSE1) {
-        mmu_idx += ARMMMUIdx_S1NSE0;
-    }
+     * a stage 1+2 mmu index into the appropriate stage 1 mmu index.
+     */
+    mmu_idx = stage_1_mmu_idx(mmu_idx);
 
     tcr = regime_tcr(env, mmu_idx);
     el = regime_el(env, mmu_idx);
@@ -7062,11 +8373,9 @@ uint32_t arm_regime_tbi1(CPUARMState *env, ARMMMUIdx mmu_idx)
     uint32_t el;
 
     /* For EL0 and EL1, TBI is controlled by stage 1's TCR, so convert
-       * a stage 1+2 mmu index into the appropriate stage 1 mmu index.
-       */
-    if (mmu_idx == ARMMMUIdx_S12NSE0 || mmu_idx == ARMMMUIdx_S12NSE1) {
-        mmu_idx += ARMMMUIdx_S1NSE0;
-    }
+     * a stage 1+2 mmu index into the appropriate stage 1 mmu index.
+     */
+    mmu_idx = stage_1_mmu_idx(mmu_idx);
 
     tcr = regime_tcr(env, mmu_idx);
     el = regime_el(env, mmu_idx);
@@ -7112,9 +8421,7 @@ static inline bool regime_using_lpae_format(CPUARMState *env,
  * on whether the long or short descriptor format is in use. */
 bool arm_s1_regime_using_lpae_format(CPUARMState *env, ARMMMUIdx mmu_idx)
 {
-    if (mmu_idx == ARMMMUIdx_S12NSE0 || mmu_idx == ARMMMUIdx_S12NSE1) {
-        mmu_idx += ARMMMUIdx_S1NSE0;
-    }
+    mmu_idx = stage_1_mmu_idx(mmu_idx);
 
     return regime_using_lpae_format(env, mmu_idx);
 }
@@ -7124,6 +8431,10 @@ static inline bool regime_is_user(CPUARMState *env, ARMMMUIdx mmu_idx)
     switch (mmu_idx) {
     case ARMMMUIdx_S1SE0:
     case ARMMMUIdx_S1NSE0:
+    case ARMMMUIdx_MUser:
+    case ARMMMUIdx_MSUser:
+    case ARMMMUIdx_MUserNegPri:
+    case ARMMMUIdx_MSUserNegPri:
         return true;
     default:
         return false;
@@ -7348,7 +8659,6 @@ static bool get_level1_table_address(CPUARMState *env, ARMMMUIdx mmu_idx,
 /* Translate a S1 pagetable walk through S2 if needed.  */
 static hwaddr S1_ptw_translate(CPUARMState *env, ARMMMUIdx mmu_idx,
                                hwaddr addr, MemTxAttrs txattrs,
-                               uint32_t *fsr,
                                ARMMMUFaultInfo *fi)
 {
     if ((mmu_idx == ARMMMUIdx_S1NSE0 || mmu_idx == ARMMMUIdx_S1NSE1) &&
@@ -7359,8 +8669,9 @@ static hwaddr S1_ptw_translate(CPUARMState *env, ARMMMUIdx mmu_idx,
         int ret;
 
         ret = get_phys_addr_lpae(env, addr, 0, ARMMMUIdx_S2NS, &s2pa,
-                                 &txattrs, &s2prot, &s2size, fsr, fi);
+                                 &txattrs, &s2prot, &s2size, fi, NULL);
         if (ret) {
+            assert(fi->type != ARMFault_None);
             fi->s2addr = addr;
             fi->stage2 = true;
             fi->s1ptw = true;
@@ -7379,57 +8690,71 @@ static hwaddr S1_ptw_translate(CPUARMState *env, ARMMMUIdx mmu_idx,
  * (but not if it was for a debug access).
  */
 static uint32_t arm_ldl_ptw(CPUState *cs, hwaddr addr, bool is_secure,
-                            ARMMMUIdx mmu_idx, uint32_t *fsr,
-                            ARMMMUFaultInfo *fi)
+                            ARMMMUIdx mmu_idx, ARMMMUFaultInfo *fi)
 {
     ARMCPU *cpu = ARM_CPU(cs);
     CPUARMState *env = &cpu->env;
     MemTxAttrs attrs = {};
+    MemTxResult result = MEMTX_OK;
     AddressSpace *as;
+    uint32_t data;
 
     attrs.secure = is_secure;
     as = arm_addressspace(cs, attrs);
-    addr = S1_ptw_translate(env, mmu_idx, addr, attrs, fsr, fi);
+    addr = S1_ptw_translate(env, mmu_idx, addr, attrs, fi);
     if (fi->s1ptw) {
         return 0;
     }
     if (regime_translation_big_endian(env, mmu_idx)) {
-        return address_space_ldl_be(as, addr, attrs, NULL);
+        data = address_space_ldl_be(as, addr, attrs, &result);
     } else {
-        return address_space_ldl_le(as, addr, attrs, NULL);
+        data = address_space_ldl_le(as, addr, attrs, &result);
     }
+    if (result == MEMTX_OK) {
+        return data;
+    }
+    fi->type = ARMFault_SyncExternalOnWalk;
+    fi->ea = arm_extabort_type(result);
+    return 0;
 }
 
 static uint64_t arm_ldq_ptw(CPUState *cs, hwaddr addr, bool is_secure,
-                            ARMMMUIdx mmu_idx, uint32_t *fsr,
-                            ARMMMUFaultInfo *fi)
+                            ARMMMUIdx mmu_idx, ARMMMUFaultInfo *fi)
 {
     ARMCPU *cpu = ARM_CPU(cs);
     CPUARMState *env = &cpu->env;
     MemTxAttrs attrs = {};
+    MemTxResult result = MEMTX_OK;
     AddressSpace *as;
+    uint64_t data;
 
     attrs.secure = is_secure;
     as = arm_addressspace(cs, attrs);
-    addr = S1_ptw_translate(env, mmu_idx, addr, attrs, fsr, fi);
+    addr = S1_ptw_translate(env, mmu_idx, addr, attrs, fi);
     if (fi->s1ptw) {
         return 0;
     }
     if (regime_translation_big_endian(env, mmu_idx)) {
-        return address_space_ldq_be(as, addr, attrs, NULL);
+        data = address_space_ldq_be(as, addr, attrs, &result);
     } else {
-        return address_space_ldq_le(as, addr, attrs, NULL);
+        data = address_space_ldq_le(as, addr, attrs, &result);
     }
+    if (result == MEMTX_OK) {
+        return data;
+    }
+    fi->type = ARMFault_SyncExternalOnWalk;
+    fi->ea = arm_extabort_type(result);
+    return 0;
 }
 
 static bool get_phys_addr_v5(CPUARMState *env, uint32_t address,
-                             int access_type, ARMMMUIdx mmu_idx,
+                             MMUAccessType access_type, ARMMMUIdx mmu_idx,
                              hwaddr *phys_ptr, int *prot,
-                             target_ulong *page_size, uint32_t *fsr,
+                             target_ulong *page_size,
                              ARMMMUFaultInfo *fi)
 {
     CPUState *cs = CPU(arm_env_get_cpu(env));
-    int code;
+    int level = 1;
     uint32_t table;
     uint32_t desc;
     int type;
@@ -7443,11 +8768,14 @@ static bool get_phys_addr_v5(CPUARMState *env, uint32_t address,
     /* Lookup l1 descriptor.  */
     if (!get_level1_table_address(env, mmu_idx, &table, address)) {
         /* Section translation fault if page walk is disabled by PD0 or PD1 */
-        code = 5;
+        fi->type = ARMFault_Translation;
         goto do_fault;
     }
     desc = arm_ldl_ptw(cs, table, regime_is_secure(env, mmu_idx),
-                       mmu_idx, fsr, fi);
+                       mmu_idx, fi);
+    if (fi->type != ARMFault_None) {
+        goto do_fault;
+    }
     type = (desc & 3);
     domain = (desc >> 5) & 0x0f;
     if (regime_el(env, mmu_idx) == 1) {
@@ -7458,21 +8786,20 @@ static bool get_phys_addr_v5(CPUARMState *env, uint32_t address,
     domain_prot = (dacr >> (domain * 2)) & 3;
     if (type == 0) {
         /* Section translation fault.  */
-        code = 5;
+        fi->type = ARMFault_Translation;
         goto do_fault;
     }
+    if (type != 2) {
+        level = 2;
+    }
     if (domain_prot == 0 || domain_prot == 2) {
-        if (type == 2)
-            code = 9; /* Section domain fault.  */
-        else
-            code = 11; /* Page domain fault.  */
+        fi->type = ARMFault_Domain;
         goto do_fault;
     }
     if (type == 2) {
         /* 1Mb section.  */
         phys_addr = (desc & 0xfff00000) | (address & 0x000fffff);
         ap = (desc >> 10) & 3;
-        code = 13;
         *page_size = 1024 * 1024;
     } else {
         /* Lookup l2 entry.  */
@@ -7484,10 +8811,13 @@ static bool get_phys_addr_v5(CPUARMState *env, uint32_t address,
             table = (desc & 0xfffff000) | ((address >> 8) & 0xffc);
         }
         desc = arm_ldl_ptw(cs, table, regime_is_secure(env, mmu_idx),
-                           mmu_idx, fsr, fi);
+                           mmu_idx, fi);
+        if (fi->type != ARMFault_None) {
+            goto do_fault;
+        }
         switch (desc & 3) {
         case 0: /* Page translation fault.  */
-            code = 7;
+            fi->type = ARMFault_Translation;
             goto do_fault;
         case 1: /* 64k page.  */
             phys_addr = (desc & 0xffff0000) | (address & 0xffff);
@@ -7510,7 +8840,7 @@ static bool get_phys_addr_v5(CPUARMState *env, uint32_t address,
                     /* UNPREDICTABLE in ARMv5; we choose to take a
                      * page translation fault.
                      */
-                    code = 7;
+                    fi->type = ARMFault_Translation;
                     goto do_fault;
                 }
             } else {
@@ -7523,29 +8853,29 @@ static bool get_phys_addr_v5(CPUARMState *env, uint32_t address,
             /* Never happens, but compiler isn't smart enough to tell.  */
             abort();
         }
-        code = 15;
     }
     *prot = ap_to_rw_prot(env, mmu_idx, ap, domain_prot);
     *prot |= *prot ? PAGE_EXEC : 0;
     if (!(*prot & (1 << access_type))) {
         /* Access permission fault.  */
+        fi->type = ARMFault_Permission;
         goto do_fault;
     }
     *phys_ptr = phys_addr;
     return false;
 do_fault:
-    *fsr = code | (domain << 4);
+    fi->domain = domain;
+    fi->level = level;
     return true;
 }
 
 static bool get_phys_addr_v6(CPUARMState *env, uint32_t address,
-                             int access_type, ARMMMUIdx mmu_idx,
+                             MMUAccessType access_type, ARMMMUIdx mmu_idx,
                              hwaddr *phys_ptr, MemTxAttrs *attrs, int *prot,
-                             target_ulong *page_size, uint32_t *fsr,
-                             ARMMMUFaultInfo *fi)
+                             target_ulong *page_size, ARMMMUFaultInfo *fi)
 {
     CPUState *cs = CPU(arm_env_get_cpu(env));
-    int code;
+    int level = 1;
     uint32_t table;
     uint32_t desc;
     uint32_t xn;
@@ -7562,17 +8892,20 @@ static bool get_phys_addr_v6(CPUARMState *env, uint32_t address,
     /* Lookup l1 descriptor.  */
     if (!get_level1_table_address(env, mmu_idx, &table, address)) {
         /* Section translation fault if page walk is disabled by PD0 or PD1 */
-        code = 5;
+        fi->type = ARMFault_Translation;
         goto do_fault;
     }
     desc = arm_ldl_ptw(cs, table, regime_is_secure(env, mmu_idx),
-                       mmu_idx, fsr, fi);
+                       mmu_idx, fi);
+    if (fi->type != ARMFault_None) {
+        goto do_fault;
+    }
     type = (desc & 3);
     if (type == 0 || (type == 3 && !arm_feature(env, ARM_FEATURE_PXN))) {
         /* Section translation fault, or attempt to use the encoding
          * which is Reserved on implementations without PXN.
          */
-        code = 5;
+        fi->type = ARMFault_Translation;
         goto do_fault;
     }
     if ((type == 1) || !(desc & (1 << 18))) {
@@ -7584,13 +8917,13 @@ static bool get_phys_addr_v6(CPUARMState *env, uint32_t address,
     } else {
         dacr = env->cp15.dacr_s;
     }
+    if (type == 1) {
+        level = 2;
+    }
     domain_prot = (dacr >> (domain * 2)) & 3;
     if (domain_prot == 0 || domain_prot == 2) {
-        if (type != 1) {
-            code = 9; /* Section domain fault.  */
-        } else {
-            code = 11; /* Page domain fault.  */
-        }
+        /* Section or Page domain fault */
+        fi->type = ARMFault_Domain;
         goto do_fault;
     }
     if (type != 1) {
@@ -7608,7 +8941,6 @@ static bool get_phys_addr_v6(CPUARMState *env, uint32_t address,
         ap = ((desc >> 10) & 3) | ((desc >> 13) & 4);
         xn = desc & (1 << 4);
         pxn = desc & 1;
-        code = 13;
         ns = extract32(desc, 19, 1);
     } else {
         if (arm_feature(env, ARM_FEATURE_PXN)) {
@@ -7618,11 +8950,14 @@ static bool get_phys_addr_v6(CPUARMState *env, uint32_t address,
         /* Lookup l2 entry.  */
         table = (desc & 0xfffffc00) | ((address >> 10) & 0x3fc);
         desc = arm_ldl_ptw(cs, table, regime_is_secure(env, mmu_idx),
-                           mmu_idx, fsr, fi);
+                           mmu_idx, fi);
+        if (fi->type != ARMFault_None) {
+            goto do_fault;
+        }
         ap = ((desc >> 4) & 3) | ((desc >> 7) & 4);
         switch (desc & 3) {
         case 0: /* Page translation fault.  */
-            code = 7;
+            fi->type = ARMFault_Translation;
             goto do_fault;
         case 1: /* 64k page.  */
             phys_addr = (desc & 0xffff0000) | (address & 0xffff);
@@ -7638,7 +8973,6 @@ static bool get_phys_addr_v6(CPUARMState *env, uint32_t address,
             /* Never happens, but compiler isn't smart enough to tell.  */
             abort();
         }
-        code = 15;
     }
     if (domain_prot == 3) {
         *prot = PAGE_READ | PAGE_WRITE | PAGE_EXEC;
@@ -7646,15 +8980,17 @@ static bool get_phys_addr_v6(CPUARMState *env, uint32_t address,
         if (pxn && !regime_is_user(env, mmu_idx)) {
             xn = 1;
         }
-        if (xn && access_type == 2)
+        if (xn && access_type == MMU_INST_FETCH) {
+            fi->type = ARMFault_Permission;
             goto do_fault;
+        }
 
         if (arm_feature(env, ARM_FEATURE_V6K) &&
                 (regime_sctlr(env, mmu_idx) & SCTLR_AFE)) {
             /* The simplified model uses AP[0] as an access control bit.  */
             if ((ap & 1) == 0) {
                 /* Access flag fault.  */
-                code = (code == 15) ? 6 : 3;
+                fi->type = ARMFault_AccessFlag;
                 goto do_fault;
             }
             *prot = simple_ap_to_rw_prot(env, mmu_idx, ap >> 1);
@@ -7666,6 +9002,7 @@ static bool get_phys_addr_v6(CPUARMState *env, uint32_t address,
         }
         if (!(*prot & (1 << access_type))) {
             /* Access permission fault.  */
+            fi->type = ARMFault_Permission;
             goto do_fault;
         }
     }
@@ -7679,18 +9016,10 @@ static bool get_phys_addr_v6(CPUARMState *env, uint32_t address,
     *phys_ptr = phys_addr;
     return false;
 do_fault:
-    *fsr = code | (domain << 4);
+    fi->domain = domain;
+    fi->level = level;
     return true;
 }
-
-/* Fault type for long-descriptor MMU fault reporting; this corresponds
- * to bits [5..2] in the STATUS field in long-format DFSR/IFSR.
- */
-typedef enum {
-    translation_fault = 1,
-    access_fault = 2,
-    permission_fault = 3,
-} MMUFaultType;
 
 /*
  * check_s2_mmu_setup
@@ -7760,16 +9089,46 @@ static bool check_s2_mmu_setup(ARMCPU *cpu, bool is_aa64, int level,
     return true;
 }
 
+/* Translate from the 4-bit stage 2 representation of
+ * memory attributes (without cache-allocation hints) to
+ * the 8-bit representation of the stage 1 MAIR registers
+ * (which includes allocation hints).
+ *
+ * ref: shared/translation/attrs/S2AttrDecode()
+ *      .../S2ConvertAttrsHints()
+ */
+static uint8_t convert_stage2_attrs(CPUARMState *env, uint8_t s2attrs)
+{
+    uint8_t hiattr = extract32(s2attrs, 2, 2);
+    uint8_t loattr = extract32(s2attrs, 0, 2);
+    uint8_t hihint = 0, lohint = 0;
+
+    if (hiattr != 0) { /* normal memory */
+        if ((env->cp15.hcr_el2 & HCR_CD) != 0) { /* cache disabled */
+            hiattr = loattr = 1; /* non-cacheable */
+        } else {
+            if (hiattr != 1) { /* Write-through or write-back */
+                hihint = 3; /* RW allocate */
+            }
+            if (loattr != 1) { /* Write-through or write-back */
+                lohint = 3; /* RW allocate */
+            }
+        }
+    }
+
+    return (hiattr << 6) | (hihint << 4) | (loattr << 2) | lohint;
+}
+
 static bool get_phys_addr_lpae(CPUARMState *env, target_ulong address,
-                               int access_type, ARMMMUIdx mmu_idx,
+                               MMUAccessType access_type, ARMMMUIdx mmu_idx,
                                hwaddr *phys_ptr, MemTxAttrs *txattrs, int *prot,
-                               target_ulong *page_size_ptr, uint32_t *fsr,
-                               ARMMMUFaultInfo *fi)
+                               target_ulong *page_size_ptr,
+                               ARMMMUFaultInfo *fi, ARMCacheAttrs *cacheattrs)
 {
     ARMCPU *cpu = arm_env_get_cpu(env);
     CPUState *cs = CPU(cpu);
     /* Read an LPAE long-descriptor translation table. */
-    MMUFaultType fault_type = translation_fault;
+    ARMFaultType fault_type = ARMFault_Translation;
     uint32_t level;
     uint32_t epd = 0;
     int32_t t0sz, t1sz;
@@ -7879,7 +9238,7 @@ static bool get_phys_addr_lpae(CPUARMState *env, target_ulong address,
         ttbr_select = 1;
     } else {
         /* in the gap between the two regions, this is a Translation fault */
-        fault_type = translation_fault;
+        fault_type = ARMFault_Translation;
         goto do_fault;
     }
 
@@ -7965,7 +9324,7 @@ static bool get_phys_addr_lpae(CPUARMState *env, target_ulong address,
         ok = check_s2_mmu_setup(cpu, aarch64, startlevel,
                                 inputsize, stride);
         if (!ok) {
-            fault_type = translation_fault;
+            fault_type = ARMFault_Translation;
             goto do_fault;
         }
         level = startlevel;
@@ -7999,8 +9358,8 @@ static bool get_phys_addr_lpae(CPUARMState *env, target_ulong address,
         descaddr |= (address >> (stride * (4 - level))) & indexmask;
         descaddr &= ~7ULL;
         nstable = extract32(tableattrs, 4, 1);
-        descriptor = arm_ldq_ptw(cs, descaddr, !nstable, mmu_idx, fsr, fi);
-        if (fi->s1ptw) {
+        descriptor = arm_ldq_ptw(cs, descaddr, !nstable, mmu_idx, fi);
+        if (fi->type != ARMFault_None) {
             goto do_fault;
         }
 
@@ -8051,7 +9410,7 @@ static bool get_phys_addr_lpae(CPUARMState *env, target_ulong address,
     /* Here descaddr is the final physical address, and attributes
      * are all in attrs.
      */
-    fault_type = access_fault;
+    fault_type = ARMFault_AccessFlag;
     if ((attrs & (1 << 8)) == 0) {
         /* Access flag */
         goto do_fault;
@@ -8069,7 +9428,7 @@ static bool get_phys_addr_lpae(CPUARMState *env, target_ulong address,
         *prot = get_S1prot(env, mmu_idx, aarch64, ap, ns, xn, pxn);
     }
 
-    fault_type = permission_fault;
+    fault_type = ARMFault_Permission;
     if (!(*prot & (1 << access_type))) {
         goto do_fault;
     }
@@ -8081,13 +9440,28 @@ static bool get_phys_addr_lpae(CPUARMState *env, target_ulong address,
          */
         txattrs->secure = false;
     }
+
+    if (cacheattrs != NULL) {
+        if (mmu_idx == ARMMMUIdx_S2NS) {
+            cacheattrs->attrs = convert_stage2_attrs(env,
+                                                     extract32(attrs, 0, 4));
+        } else {
+            /* Index into MAIR registers for cache attributes */
+            uint8_t attrindx = extract32(attrs, 0, 3);
+            uint64_t mair = env->cp15.mair_el[regime_el(env, mmu_idx)];
+            assert(attrindx <= 7);
+            cacheattrs->attrs = extract64(mair, attrindx * 8, 8);
+        }
+        cacheattrs->shareability = extract32(attrs, 6, 2);
+    }
+
     *phys_ptr = descaddr;
     *page_size_ptr = page_size;
     return false;
 
 do_fault:
-    /* Long-descriptor format IFSR/DFSR value */
-    *fsr = (1 << 9) | (fault_type << 2) | level;
+    fi->type = fault_type;
+    fi->level = level;
     /* Tag the error as S2 for failed S1 PTW at S2 or ordinary S2.  */
     fi->stage2 = fi->s1ptw || (mmu_idx == ARMMMUIdx_S2NS);
     return true;
@@ -8097,23 +9471,82 @@ static inline void get_phys_addr_pmsav7_default(CPUARMState *env,
                                                 ARMMMUIdx mmu_idx,
                                                 int32_t address, int *prot)
 {
-    *prot = PAGE_READ | PAGE_WRITE;
-    switch (address) {
-    case 0xF0000000 ... 0xFFFFFFFF:
-        if (regime_sctlr(env, mmu_idx) & SCTLR_V) { /* hivecs execing is ok */
+    if (!arm_feature(env, ARM_FEATURE_M)) {
+        *prot = PAGE_READ | PAGE_WRITE;
+        switch (address) {
+        case 0xF0000000 ... 0xFFFFFFFF:
+            if (regime_sctlr(env, mmu_idx) & SCTLR_V) {
+                /* hivecs execing is ok */
+                *prot |= PAGE_EXEC;
+            }
+            break;
+        case 0x00000000 ... 0x7FFFFFFF:
             *prot |= PAGE_EXEC;
+            break;
         }
-        break;
-    case 0x00000000 ... 0x7FFFFFFF:
-        *prot |= PAGE_EXEC;
-        break;
+    } else {
+        /* Default system address map for M profile cores.
+         * The architecture specifies which regions are execute-never;
+         * at the MPU level no other checks are defined.
+         */
+        switch (address) {
+        case 0x00000000 ... 0x1fffffff: /* ROM */
+        case 0x20000000 ... 0x3fffffff: /* SRAM */
+        case 0x60000000 ... 0x7fffffff: /* RAM */
+        case 0x80000000 ... 0x9fffffff: /* RAM */
+            *prot = PAGE_READ | PAGE_WRITE | PAGE_EXEC;
+            break;
+        case 0x40000000 ... 0x5fffffff: /* Peripheral */
+        case 0xa0000000 ... 0xbfffffff: /* Device */
+        case 0xc0000000 ... 0xdfffffff: /* Device */
+        case 0xe0000000 ... 0xffffffff: /* System */
+            *prot = PAGE_READ | PAGE_WRITE;
+            break;
+        default:
+            g_assert_not_reached();
+        }
+    }
+}
+
+static bool pmsav7_use_background_region(ARMCPU *cpu,
+                                         ARMMMUIdx mmu_idx, bool is_user)
+{
+    /* Return true if we should use the default memory map as a
+     * "background" region if there are no hits against any MPU regions.
+     */
+    CPUARMState *env = &cpu->env;
+
+    if (is_user) {
+        return false;
     }
 
+    if (arm_feature(env, ARM_FEATURE_M)) {
+        return env->v7m.mpu_ctrl[regime_is_secure(env, mmu_idx)]
+            & R_V7M_MPU_CTRL_PRIVDEFENA_MASK;
+    } else {
+        return regime_sctlr(env, mmu_idx) & SCTLR_BR;
+    }
+}
+
+static inline bool m_is_ppb_region(CPUARMState *env, uint32_t address)
+{
+    /* True if address is in the M profile PPB region 0xe0000000 - 0xe00fffff */
+    return arm_feature(env, ARM_FEATURE_M) &&
+        extract32(address, 20, 12) == 0xe00;
+}
+
+static inline bool m_is_system_region(CPUARMState *env, uint32_t address)
+{
+    /* True if address is in the M profile system region
+     * 0xe0000000 - 0xffffffff
+     */
+    return arm_feature(env, ARM_FEATURE_M) && extract32(address, 29, 3) == 0x7;
 }
 
 static bool get_phys_addr_pmsav7(CPUARMState *env, uint32_t address,
-                                 int access_type, ARMMMUIdx mmu_idx,
-                                 hwaddr *phys_ptr, int *prot, uint32_t *fsr)
+                                 MMUAccessType access_type, ARMMMUIdx mmu_idx,
+                                 hwaddr *phys_ptr, int *prot,
+                                 ARMMMUFaultInfo *fi)
 {
     ARMCPU *cpu = arm_env_get_cpu(env);
     int n;
@@ -8122,7 +9555,15 @@ static bool get_phys_addr_pmsav7(CPUARMState *env, uint32_t address,
     *phys_ptr = address;
     *prot = 0;
 
-    if (regime_translation_disabled(env, mmu_idx)) { /* MPU disabled */
+    if (regime_translation_disabled(env, mmu_idx) ||
+        m_is_ppb_region(env, address)) {
+        /* MPU disabled or M profile PPB access: use default memory map.
+         * The other case which uses the default memory map in the
+         * v7M ARM ARM pseudocode is exception vector reads from the vector
+         * table. In QEMU those accesses are done in arm_v7m_load_vector(),
+         * which always does a direct read using address_space_ldl(), rather
+         * than going via this function, so we don't need to check that here.
+         */
         get_phys_addr_pmsav7_default(env, mmu_idx, address, prot);
     } else { /* MPU enabled */
         for (n = (int)cpu->pmsav7_dregion - 1; n >= 0; n--) {
@@ -8137,16 +9578,18 @@ static bool get_phys_addr_pmsav7(CPUARMState *env, uint32_t address,
             }
 
             if (!rsize) {
-                qemu_log_mask(LOG_GUEST_ERROR, "DRSR.Rsize field can not be 0");
+                qemu_log_mask(LOG_GUEST_ERROR,
+                              "DRSR[%d]: Rsize field cannot be 0\n", n);
                 continue;
             }
             rsize++;
             rmask = (1ull << rsize) - 1;
 
             if (base & rmask) {
-                qemu_log_mask(LOG_GUEST_ERROR, "DRBAR %" PRIx32 " misaligned "
-                              "to DRSR region size, mask = %" PRIx32,
-                              base, rmask);
+                qemu_log_mask(LOG_GUEST_ERROR,
+                              "DRBAR[%d]: 0x%" PRIx32 " misaligned "
+                              "to DRSR region size, mask = 0x%" PRIx32 "\n",
+                              n, base, rmask);
                 continue;
             }
 
@@ -8183,9 +9626,10 @@ static bool get_phys_addr_pmsav7(CPUARMState *env, uint32_t address,
                 }
             }
             if (rsize < TARGET_PAGE_BITS) {
-                qemu_log_mask(LOG_UNIMP, "No support for MPU (sub)region"
-                              "alignment of %" PRIu32 " bits. Minimum is %d\n",
-                              rsize, TARGET_PAGE_BITS);
+                qemu_log_mask(LOG_UNIMP,
+                              "DRSR[%d]: No support for MPU (sub)region size of"
+                              " %" PRIu32 " bytes. Minimum is %d.\n",
+                              n, (1 << rsize), TARGET_PAGE_SIZE);
                 continue;
             }
             if (srdis) {
@@ -8195,15 +9639,20 @@ static bool get_phys_addr_pmsav7(CPUARMState *env, uint32_t address,
         }
 
         if (n == -1) { /* no hits */
-            if (cpu->pmsav7_dregion &&
-                (is_user || !(regime_sctlr(env, mmu_idx) & SCTLR_BR))) {
+            if (!pmsav7_use_background_region(cpu, mmu_idx, is_user)) {
                 /* background fault */
-                *fsr = 0;
+                fi->type = ARMFault_Background;
                 return true;
             }
             get_phys_addr_pmsav7_default(env, mmu_idx, address, prot);
         } else { /* a MPU hit! */
             uint32_t ap = extract32(env->pmsav7.dracr[n], 8, 3);
+            uint32_t xn = extract32(env->pmsav7.dracr[n], 12, 1);
+
+            if (m_is_system_region(env, address)) {
+                /* System space is always execute never */
+                xn = 1;
+            }
 
             if (is_user) { /* User mode AP bit decoding */
                 switch (ap) {
@@ -8218,10 +9667,17 @@ static bool get_phys_addr_pmsav7(CPUARMState *env, uint32_t address,
                 case 6:
                     *prot |= PAGE_READ | PAGE_EXEC;
                     break;
+                case 7:
+                    /* for v7M, same as 6; for R profile a reserved value */
+                    if (arm_feature(env, ARM_FEATURE_M)) {
+                        *prot |= PAGE_READ | PAGE_EXEC;
+                        break;
+                    }
+                    /* fall through */
                 default:
                     qemu_log_mask(LOG_GUEST_ERROR,
-                                  "Bad value for AP bits in DRACR %"
-                                  PRIx32 "\n", ap);
+                                  "DRACR[%d]: Bad value for AP bits: 0x%"
+                                  PRIx32 "\n", n, ap);
                 }
             } else { /* Priv. mode AP bits decoding */
                 switch (ap) {
@@ -8236,32 +9692,337 @@ static bool get_phys_addr_pmsav7(CPUARMState *env, uint32_t address,
                 case 6:
                     *prot |= PAGE_READ | PAGE_EXEC;
                     break;
+                case 7:
+                    /* for v7M, same as 6; for R profile a reserved value */
+                    if (arm_feature(env, ARM_FEATURE_M)) {
+                        *prot |= PAGE_READ | PAGE_EXEC;
+                        break;
+                    }
+                    /* fall through */
                 default:
                     qemu_log_mask(LOG_GUEST_ERROR,
-                                  "Bad value for AP bits in DRACR %"
-                                  PRIx32 "\n", ap);
+                                  "DRACR[%d]: Bad value for AP bits: 0x%"
+                                  PRIx32 "\n", n, ap);
                 }
             }
 
             /* execute never */
-            if (env->pmsav7.dracr[n] & (1 << 12)) {
+            if (xn) {
                 *prot &= ~PAGE_EXEC;
             }
         }
     }
 
-    *fsr = 0x00d; /* Permission fault */
+    fi->type = ARMFault_Permission;
+    fi->level = 1;
     return !(*prot & (1 << access_type));
 }
 
+static bool v8m_is_sau_exempt(CPUARMState *env,
+                              uint32_t address, MMUAccessType access_type)
+{
+    /* The architecture specifies that certain address ranges are
+     * exempt from v8M SAU/IDAU checks.
+     */
+    return
+        (access_type == MMU_INST_FETCH && m_is_system_region(env, address)) ||
+        (address >= 0xe0000000 && address <= 0xe0002fff) ||
+        (address >= 0xe000e000 && address <= 0xe000efff) ||
+        (address >= 0xe002e000 && address <= 0xe002efff) ||
+        (address >= 0xe0040000 && address <= 0xe0041fff) ||
+        (address >= 0xe00ff000 && address <= 0xe00fffff);
+}
+
+static void v8m_security_lookup(CPUARMState *env, uint32_t address,
+                                MMUAccessType access_type, ARMMMUIdx mmu_idx,
+                                V8M_SAttributes *sattrs)
+{
+    /* Look up the security attributes for this address. Compare the
+     * pseudocode SecurityCheck() function.
+     * We assume the caller has zero-initialized *sattrs.
+     */
+    ARMCPU *cpu = arm_env_get_cpu(env);
+    int r;
+    bool idau_exempt = false, idau_ns = true, idau_nsc = true;
+    int idau_region = IREGION_NOTVALID;
+
+    if (cpu->idau) {
+        IDAUInterfaceClass *iic = IDAU_INTERFACE_GET_CLASS(cpu->idau);
+        IDAUInterface *ii = IDAU_INTERFACE(cpu->idau);
+
+        iic->check(ii, address, &idau_region, &idau_exempt, &idau_ns,
+                   &idau_nsc);
+    }
+
+    if (access_type == MMU_INST_FETCH && extract32(address, 28, 4) == 0xf) {
+        /* 0xf0000000..0xffffffff is always S for insn fetches */
+        return;
+    }
+
+    if (idau_exempt || v8m_is_sau_exempt(env, address, access_type)) {
+        sattrs->ns = !regime_is_secure(env, mmu_idx);
+        return;
+    }
+
+    if (idau_region != IREGION_NOTVALID) {
+        sattrs->irvalid = true;
+        sattrs->iregion = idau_region;
+    }
+
+    switch (env->sau.ctrl & 3) {
+    case 0: /* SAU.ENABLE == 0, SAU.ALLNS == 0 */
+        break;
+    case 2: /* SAU.ENABLE == 0, SAU.ALLNS == 1 */
+        sattrs->ns = true;
+        break;
+    default: /* SAU.ENABLE == 1 */
+        for (r = 0; r < cpu->sau_sregion; r++) {
+            if (env->sau.rlar[r] & 1) {
+                uint32_t base = env->sau.rbar[r] & ~0x1f;
+                uint32_t limit = env->sau.rlar[r] | 0x1f;
+
+                if (base <= address && limit >= address) {
+                    if (sattrs->srvalid) {
+                        /* If we hit in more than one region then we must report
+                         * as Secure, not NS-Callable, with no valid region
+                         * number info.
+                         */
+                        sattrs->ns = false;
+                        sattrs->nsc = false;
+                        sattrs->sregion = 0;
+                        sattrs->srvalid = false;
+                        break;
+                    } else {
+                        if (env->sau.rlar[r] & 2) {
+                            sattrs->nsc = true;
+                        } else {
+                            sattrs->ns = true;
+                        }
+                        sattrs->srvalid = true;
+                        sattrs->sregion = r;
+                    }
+                }
+            }
+        }
+
+        /* The IDAU will override the SAU lookup results if it specifies
+         * higher security than the SAU does.
+         */
+        if (!idau_ns) {
+            if (sattrs->ns || (!idau_nsc && sattrs->nsc)) {
+                sattrs->ns = false;
+                sattrs->nsc = idau_nsc;
+            }
+        }
+        break;
+    }
+}
+
+static bool pmsav8_mpu_lookup(CPUARMState *env, uint32_t address,
+                              MMUAccessType access_type, ARMMMUIdx mmu_idx,
+                              hwaddr *phys_ptr, MemTxAttrs *txattrs,
+                              int *prot, ARMMMUFaultInfo *fi, uint32_t *mregion)
+{
+    /* Perform a PMSAv8 MPU lookup (without also doing the SAU check
+     * that a full phys-to-virt translation does).
+     * mregion is (if not NULL) set to the region number which matched,
+     * or -1 if no region number is returned (MPU off, address did not
+     * hit a region, address hit in multiple regions).
+     */
+    ARMCPU *cpu = arm_env_get_cpu(env);
+    bool is_user = regime_is_user(env, mmu_idx);
+    uint32_t secure = regime_is_secure(env, mmu_idx);
+    int n;
+    int matchregion = -1;
+    bool hit = false;
+
+    *phys_ptr = address;
+    *prot = 0;
+    if (mregion) {
+        *mregion = -1;
+    }
+
+    /* Unlike the ARM ARM pseudocode, we don't need to check whether this
+     * was an exception vector read from the vector table (which is always
+     * done using the default system address map), because those accesses
+     * are done in arm_v7m_load_vector(), which always does a direct
+     * read using address_space_ldl(), rather than going via this function.
+     */
+    if (regime_translation_disabled(env, mmu_idx)) { /* MPU disabled */
+        hit = true;
+    } else if (m_is_ppb_region(env, address)) {
+        hit = true;
+    } else if (pmsav7_use_background_region(cpu, mmu_idx, is_user)) {
+        hit = true;
+    } else {
+        for (n = (int)cpu->pmsav7_dregion - 1; n >= 0; n--) {
+            /* region search */
+            /* Note that the base address is bits [31:5] from the register
+             * with bits [4:0] all zeroes, but the limit address is bits
+             * [31:5] from the register with bits [4:0] all ones.
+             */
+            uint32_t base = env->pmsav8.rbar[secure][n] & ~0x1f;
+            uint32_t limit = env->pmsav8.rlar[secure][n] | 0x1f;
+
+            if (!(env->pmsav8.rlar[secure][n] & 0x1)) {
+                /* Region disabled */
+                continue;
+            }
+
+            if (address < base || address > limit) {
+                continue;
+            }
+
+            if (hit) {
+                /* Multiple regions match -- always a failure (unlike
+                 * PMSAv7 where highest-numbered-region wins)
+                 */
+                fi->type = ARMFault_Permission;
+                fi->level = 1;
+                return true;
+            }
+
+            matchregion = n;
+            hit = true;
+
+            if (base & ~TARGET_PAGE_MASK) {
+                qemu_log_mask(LOG_UNIMP,
+                              "MPU_RBAR[%d]: No support for MPU region base"
+                              "address of 0x%" PRIx32 ". Minimum alignment is "
+                              "%d\n",
+                              n, base, TARGET_PAGE_BITS);
+                continue;
+            }
+            if ((limit + 1) & ~TARGET_PAGE_MASK) {
+                qemu_log_mask(LOG_UNIMP,
+                              "MPU_RBAR[%d]: No support for MPU region limit"
+                              "address of 0x%" PRIx32 ". Minimum alignment is "
+                              "%d\n",
+                              n, limit, TARGET_PAGE_BITS);
+                continue;
+            }
+        }
+    }
+
+    if (!hit) {
+        /* background fault */
+        fi->type = ARMFault_Background;
+        return true;
+    }
+
+    if (matchregion == -1) {
+        /* hit using the background region */
+        get_phys_addr_pmsav7_default(env, mmu_idx, address, prot);
+    } else {
+        uint32_t ap = extract32(env->pmsav8.rbar[secure][matchregion], 1, 2);
+        uint32_t xn = extract32(env->pmsav8.rbar[secure][matchregion], 0, 1);
+
+        if (m_is_system_region(env, address)) {
+            /* System space is always execute never */
+            xn = 1;
+        }
+
+        *prot = simple_ap_to_rw_prot(env, mmu_idx, ap);
+        if (*prot && !xn) {
+            *prot |= PAGE_EXEC;
+        }
+        /* We don't need to look the attribute up in the MAIR0/MAIR1
+         * registers because that only tells us about cacheability.
+         */
+        if (mregion) {
+            *mregion = matchregion;
+        }
+    }
+
+    fi->type = ARMFault_Permission;
+    fi->level = 1;
+    return !(*prot & (1 << access_type));
+}
+
+
+static bool get_phys_addr_pmsav8(CPUARMState *env, uint32_t address,
+                                 MMUAccessType access_type, ARMMMUIdx mmu_idx,
+                                 hwaddr *phys_ptr, MemTxAttrs *txattrs,
+                                 int *prot, ARMMMUFaultInfo *fi)
+{
+    uint32_t secure = regime_is_secure(env, mmu_idx);
+    V8M_SAttributes sattrs = {};
+
+    if (arm_feature(env, ARM_FEATURE_M_SECURITY)) {
+        v8m_security_lookup(env, address, access_type, mmu_idx, &sattrs);
+        if (access_type == MMU_INST_FETCH) {
+            /* Instruction fetches always use the MMU bank and the
+             * transaction attribute determined by the fetch address,
+             * regardless of CPU state. This is painful for QEMU
+             * to handle, because it would mean we need to encode
+             * into the mmu_idx not just the (user, negpri) information
+             * for the current security state but also that for the
+             * other security state, which would balloon the number
+             * of mmu_idx values needed alarmingly.
+             * Fortunately we can avoid this because it's not actually
+             * possible to arbitrarily execute code from memory with
+             * the wrong security attribute: it will always generate
+             * an exception of some kind or another, apart from the
+             * special case of an NS CPU executing an SG instruction
+             * in S&NSC memory. So we always just fail the translation
+             * here and sort things out in the exception handler
+             * (including possibly emulating an SG instruction).
+             */
+            if (sattrs.ns != !secure) {
+                if (sattrs.nsc) {
+                    fi->type = ARMFault_QEMU_NSCExec;
+                } else {
+                    fi->type = ARMFault_QEMU_SFault;
+                }
+                *phys_ptr = address;
+                *prot = 0;
+                return true;
+            }
+        } else {
+            /* For data accesses we always use the MMU bank indicated
+             * by the current CPU state, but the security attributes
+             * might downgrade a secure access to nonsecure.
+             */
+            if (sattrs.ns) {
+                txattrs->secure = false;
+            } else if (!secure) {
+                /* NS access to S memory must fault.
+                 * Architecturally we should first check whether the
+                 * MPU information for this address indicates that we
+                 * are doing an unaligned access to Device memory, which
+                 * should generate a UsageFault instead. QEMU does not
+                 * currently check for that kind of unaligned access though.
+                 * If we added it we would need to do so as a special case
+                 * for M_FAKE_FSR_SFAULT in arm_v7m_cpu_do_interrupt().
+                 */
+                fi->type = ARMFault_QEMU_SFault;
+                *phys_ptr = address;
+                *prot = 0;
+                return true;
+            }
+        }
+    }
+
+    return pmsav8_mpu_lookup(env, address, access_type, mmu_idx, phys_ptr,
+                             txattrs, prot, fi, NULL);
+}
+
 static bool get_phys_addr_pmsav5(CPUARMState *env, uint32_t address,
-                                 int access_type, ARMMMUIdx mmu_idx,
-                                 hwaddr *phys_ptr, int *prot, uint32_t *fsr)
+                                 MMUAccessType access_type, ARMMMUIdx mmu_idx,
+                                 hwaddr *phys_ptr, int *prot,
+                                 ARMMMUFaultInfo *fi)
 {
     int n;
     uint32_t mask;
     uint32_t base;
     bool is_user = regime_is_user(env, mmu_idx);
+
+    if (regime_translation_disabled(env, mmu_idx)) {
+        /* MPU disabled.  */
+        *phys_ptr = address;
+        *prot = PAGE_READ | PAGE_WRITE | PAGE_EXEC;
+        return false;
+    }
 
     *phys_ptr = address;
     for (n = 7; n >= 0; n--) {
@@ -8278,11 +10039,11 @@ static bool get_phys_addr_pmsav5(CPUARMState *env, uint32_t address,
         }
     }
     if (n < 0) {
-        *fsr = 2;
+        fi->type = ARMFault_Background;
         return true;
     }
 
-    if (access_type == 2) {
+    if (access_type == MMU_INST_FETCH) {
         mask = env->cp15.pmsav5_insn_ap;
     } else {
         mask = env->cp15.pmsav5_data_ap;
@@ -8290,11 +10051,13 @@ static bool get_phys_addr_pmsav5(CPUARMState *env, uint32_t address,
     mask = (mask >> (n * 4)) & 0xf;
     switch (mask) {
     case 0:
-        *fsr = 1;
+        fi->type = ARMFault_Permission;
+        fi->level = 1;
         return true;
     case 1:
         if (is_user) {
-            *fsr = 1;
+            fi->type = ARMFault_Permission;
+            fi->level = 1;
             return true;
         }
         *prot = PAGE_READ | PAGE_WRITE;
@@ -8310,7 +10073,8 @@ static bool get_phys_addr_pmsav5(CPUARMState *env, uint32_t address,
         break;
     case 5:
         if (is_user) {
-            *fsr = 1;
+            fi->type = ARMFault_Permission;
+            fi->level = 1;
             return true;
         }
         *prot = PAGE_READ;
@@ -8320,12 +10084,100 @@ static bool get_phys_addr_pmsav5(CPUARMState *env, uint32_t address,
         break;
     default:
         /* Bad permission.  */
-        *fsr = 1;
+        fi->type = ARMFault_Permission;
+        fi->level = 1;
         return true;
     }
     *prot |= PAGE_EXEC;
     return false;
 }
+
+/* Combine either inner or outer cacheability attributes for normal
+ * memory, according to table D4-42 and pseudocode procedure
+ * CombineS1S2AttrHints() of ARM DDI 0487B.b (the ARMv8 ARM).
+ *
+ * NB: only stage 1 includes allocation hints (RW bits), leading to
+ * some asymmetry.
+ */
+static uint8_t combine_cacheattr_nibble(uint8_t s1, uint8_t s2)
+{
+    if (s1 == 4 || s2 == 4) {
+        /* non-cacheable has precedence */
+        return 4;
+    } else if (extract32(s1, 2, 2) == 0 || extract32(s1, 2, 2) == 2) {
+        /* stage 1 write-through takes precedence */
+        return s1;
+    } else if (extract32(s2, 2, 2) == 2) {
+        /* stage 2 write-through takes precedence, but the allocation hint
+         * is still taken from stage 1
+         */
+        return (2 << 2) | extract32(s1, 0, 2);
+    } else { /* write-back */
+        return s1;
+    }
+}
+
+/* Combine S1 and S2 cacheability/shareability attributes, per D4.5.4
+ * and CombineS1S2Desc()
+ *
+ * @s1:      Attributes from stage 1 walk
+ * @s2:      Attributes from stage 2 walk
+ */
+static ARMCacheAttrs combine_cacheattrs(ARMCacheAttrs s1, ARMCacheAttrs s2)
+{
+    uint8_t s1lo = extract32(s1.attrs, 0, 4), s2lo = extract32(s2.attrs, 0, 4);
+    uint8_t s1hi = extract32(s1.attrs, 4, 4), s2hi = extract32(s2.attrs, 4, 4);
+    ARMCacheAttrs ret;
+
+    /* Combine shareability attributes (table D4-43) */
+    if (s1.shareability == 2 || s2.shareability == 2) {
+        /* if either are outer-shareable, the result is outer-shareable */
+        ret.shareability = 2;
+    } else if (s1.shareability == 3 || s2.shareability == 3) {
+        /* if either are inner-shareable, the result is inner-shareable */
+        ret.shareability = 3;
+    } else {
+        /* both non-shareable */
+        ret.shareability = 0;
+    }
+
+    /* Combine memory type and cacheability attributes */
+    if (s1hi == 0 || s2hi == 0) {
+        /* Device has precedence over normal */
+        if (s1lo == 0 || s2lo == 0) {
+            /* nGnRnE has precedence over anything */
+            ret.attrs = 0;
+        } else if (s1lo == 4 || s2lo == 4) {
+            /* non-Reordering has precedence over Reordering */
+            ret.attrs = 4;  /* nGnRE */
+        } else if (s1lo == 8 || s2lo == 8) {
+            /* non-Gathering has precedence over Gathering */
+            ret.attrs = 8;  /* nGRE */
+        } else {
+            ret.attrs = 0xc; /* GRE */
+        }
+
+        /* Any location for which the resultant memory type is any
+         * type of Device memory is always treated as Outer Shareable.
+         */
+        ret.shareability = 2;
+    } else { /* Normal memory */
+        /* Outer/inner cacheability combine independently */
+        ret.attrs = combine_cacheattr_nibble(s1hi, s2hi) << 4
+                  | combine_cacheattr_nibble(s1lo, s2lo);
+
+        if (ret.attrs == 0x44) {
+            /* Any location for which the resultant memory type is Normal
+             * Inner Non-cacheable, Outer Non-cacheable is always treated
+             * as Outer Shareable.
+             */
+            ret.shareability = 2;
+        }
+    }
+
+    return ret;
+}
+
 
 /* get_phys_addr - get the physical address for this virtual address
  *
@@ -8350,13 +10202,14 @@ static bool get_phys_addr_pmsav5(CPUARMState *env, uint32_t address,
  * @attrs: set to the memory transaction attributes to use
  * @prot: set to the permissions for the page containing phys_ptr
  * @page_size: set to the size of the page containing phys_ptr
- * @fsr: set to the DFSR/IFSR value on failure
+ * @fi: set to fault info if the translation fails
+ * @cacheattrs: (if non-NULL) set to the cacheability/shareability attributes
  */
 static bool get_phys_addr(CPUARMState *env, target_ulong address,
-                          int access_type, ARMMMUIdx mmu_idx,
+                          MMUAccessType access_type, ARMMMUIdx mmu_idx,
                           hwaddr *phys_ptr, MemTxAttrs *attrs, int *prot,
-                          target_ulong *page_size, uint32_t *fsr,
-                          ARMMMUFaultInfo *fi)
+                          target_ulong *page_size,
+                          ARMMMUFaultInfo *fi, ARMCacheAttrs *cacheattrs)
 {
     if (mmu_idx == ARMMMUIdx_S12NSE0 || mmu_idx == ARMMMUIdx_S12NSE1) {
         /* Call ourselves recursively to do the stage 1 and then stage 2
@@ -8366,10 +10219,11 @@ static bool get_phys_addr(CPUARMState *env, target_ulong address,
             hwaddr ipa;
             int s2_prot;
             int ret;
+            ARMCacheAttrs cacheattrs2 = {};
 
             ret = get_phys_addr(env, address, access_type,
-                                mmu_idx + ARMMMUIdx_S1NSE0, &ipa, attrs,
-                                prot, page_size, fsr, fi);
+                                stage_1_mmu_idx(mmu_idx), &ipa, attrs,
+                                prot, page_size, fi, cacheattrs);
 
             /* If S1 fails or S2 is disabled, return early.  */
             if (ret || regime_translation_disabled(env, ARMMMUIdx_S2NS)) {
@@ -8380,16 +10234,23 @@ static bool get_phys_addr(CPUARMState *env, target_ulong address,
             /* S1 is done. Now do S2 translation.  */
             ret = get_phys_addr_lpae(env, ipa, access_type, ARMMMUIdx_S2NS,
                                      phys_ptr, attrs, &s2_prot,
-                                     page_size, fsr, fi);
+                                     page_size, fi,
+                                     cacheattrs != NULL ? &cacheattrs2 : NULL);
             fi->s2addr = ipa;
             /* Combine the S1 and S2 perms.  */
             *prot &= s2_prot;
+
+            /* Combine the S1 and S2 cache attributes, if needed */
+            if (!ret && cacheattrs != NULL) {
+                *cacheattrs = combine_cacheattrs(*cacheattrs, cacheattrs2);
+            }
+
             return ret;
         } else {
             /*
              * For non-EL2 CPUs a stage1+stage2 translation is just stage 1.
              */
-            mmu_idx += ARMMMUIdx_S1NSE0;
+            mmu_idx = stage_1_mmu_idx(mmu_idx);
         }
     }
 
@@ -8412,40 +10273,56 @@ static bool get_phys_addr(CPUARMState *env, target_ulong address,
         }
     }
 
-    /* pmsav7 has special handling for when MPU is disabled so call it before
-     * the common MMU/MPU disabled check below.
-     */
-    if (arm_feature(env, ARM_FEATURE_MPU) &&
-        arm_feature(env, ARM_FEATURE_V7)) {
+    if (arm_feature(env, ARM_FEATURE_PMSA)) {
+        bool ret;
         *page_size = TARGET_PAGE_SIZE;
-        return get_phys_addr_pmsav7(env, address, access_type, mmu_idx,
-                                    phys_ptr, prot, fsr);
+
+        if (arm_feature(env, ARM_FEATURE_V8)) {
+            /* PMSAv8 */
+            ret = get_phys_addr_pmsav8(env, address, access_type, mmu_idx,
+                                       phys_ptr, attrs, prot, fi);
+        } else if (arm_feature(env, ARM_FEATURE_V7)) {
+            /* PMSAv7 */
+            ret = get_phys_addr_pmsav7(env, address, access_type, mmu_idx,
+                                       phys_ptr, prot, fi);
+        } else {
+            /* Pre-v7 MPU */
+            ret = get_phys_addr_pmsav5(env, address, access_type, mmu_idx,
+                                       phys_ptr, prot, fi);
+        }
+        qemu_log_mask(CPU_LOG_MMU, "PMSA MPU lookup for %s at 0x%08" PRIx32
+                      " mmu_idx %u -> %s (prot %c%c%c)\n",
+                      access_type == MMU_DATA_LOAD ? "reading" :
+                      (access_type == MMU_DATA_STORE ? "writing" : "execute"),
+                      (uint32_t)address, mmu_idx,
+                      ret ? "Miss" : "Hit",
+                      *prot & PAGE_READ ? 'r' : '-',
+                      *prot & PAGE_WRITE ? 'w' : '-',
+                      *prot & PAGE_EXEC ? 'x' : '-');
+
+        return ret;
     }
 
+    /* Definitely a real MMU, not an MPU */
+
     if (regime_translation_disabled(env, mmu_idx)) {
-        /* MMU/MPU disabled.  */
+        /* MMU disabled. */
         *phys_ptr = address;
         *prot = PAGE_READ | PAGE_WRITE | PAGE_EXEC;
         *page_size = TARGET_PAGE_SIZE;
         return 0;
     }
 
-    if (arm_feature(env, ARM_FEATURE_MPU)) {
-        /* Pre-v7 MPU */
-        *page_size = TARGET_PAGE_SIZE;
-        return get_phys_addr_pmsav5(env, address, access_type, mmu_idx,
-                                    phys_ptr, prot, fsr);
-    }
-
     if (regime_using_lpae_format(env, mmu_idx)) {
-        return get_phys_addr_lpae(env, address, access_type, mmu_idx, phys_ptr,
-                                  attrs, prot, page_size, fsr, fi);
+        return get_phys_addr_lpae(env, address, access_type, mmu_idx,
+                                  phys_ptr, attrs, prot, page_size,
+                                  fi, cacheattrs);
     } else if (regime_sctlr(env, mmu_idx) & SCTLR_XP) {
-        return get_phys_addr_v6(env, address, access_type, mmu_idx, phys_ptr,
-                                attrs, prot, page_size, fsr, fi);
+        return get_phys_addr_v6(env, address, access_type, mmu_idx,
+                                phys_ptr, attrs, prot, page_size, fi);
     } else {
-        return get_phys_addr_v5(env, address, access_type, mmu_idx, phys_ptr,
-                                prot, page_size, fsr, fi);
+        return get_phys_addr_v5(env, address, access_type, mmu_idx,
+                                    phys_ptr, prot, page_size, fi);
     }
 }
 
@@ -8454,7 +10331,7 @@ static bool get_phys_addr(CPUARMState *env, target_ulong address,
  * fsr with ARM DFSR/IFSR fault register format value on failure.
  */
 bool arm_tlb_fill(CPUState *cs, vaddr address,
-                  int access_type, int mmu_idx, uint32_t *fsr,
+                  MMUAccessType access_type, int mmu_idx,
                   ARMMMUFaultInfo *fi)
 {
     ARMCPU *cpu = ARM_CPU(cs);
@@ -8465,8 +10342,9 @@ bool arm_tlb_fill(CPUState *cs, vaddr address,
     int ret;
     MemTxAttrs attrs = {};
 
-    ret = get_phys_addr(env, address, access_type, mmu_idx, &phys_addr,
-                        &attrs, &prot, &page_size, fsr, fi);
+    ret = get_phys_addr(env, address, access_type,
+                        core_to_arm_mmu_idx(env, mmu_idx), &phys_addr,
+                        &attrs, &prot, &page_size, fi, NULL);
     if (!ret) {
         /* Map a single [sub]page.  */
         phys_addr &= TARGET_PAGE_MASK;
@@ -8488,13 +10366,13 @@ hwaddr arm_cpu_get_phys_page_attrs_debug(CPUState *cs, vaddr addr,
     target_ulong page_size;
     int prot;
     bool ret;
-    uint32_t fsr;
     ARMMMUFaultInfo fi = {};
+    ARMMMUIdx mmu_idx = core_to_arm_mmu_idx(env, cpu_mmu_index(env, false));
 
     *attrs = (MemTxAttrs) {};
 
-    ret = get_phys_addr(env, addr, 0, cpu_mmu_index(env, false), &phys_addr,
-                        attrs, &prot, &page_size, &fsr, &fi);
+    ret = get_phys_addr(env, addr, 0, mmu_idx, &phys_addr,
+                        attrs, &prot, &page_size, &fi, NULL);
 
     if (ret) {
         return -1;
@@ -8513,37 +10391,112 @@ uint32_t HELPER(v7m_mrs)(CPUARMState *env, uint32_t reg)
     case 0 ... 7: /* xPSR sub-fields */
         mask = 0;
         if ((reg & 1) && el) {
-            mask |= 0x000001ff; /* IPSR (unpriv. reads as zero) */
+            mask |= XPSR_EXCP; /* IPSR (unpriv. reads as zero) */
         }
         if (!(reg & 4)) {
-            mask |= 0xf8000000; /* APSR */
+            mask |= XPSR_NZCV | XPSR_Q; /* APSR */
         }
         /* EPSR reads as zero */
         return xpsr_read(env) & mask;
         break;
     case 20: /* CONTROL */
-        return env->v7m.control;
+        return env->v7m.control[env->v7m.secure];
+    case 0x94: /* CONTROL_NS */
+        /* We have to handle this here because unprivileged Secure code
+         * can read the NS CONTROL register.
+         */
+        if (!env->v7m.secure) {
+            return 0;
+        }
+        return env->v7m.control[M_REG_NS];
     }
 
     if (el == 0) {
         return 0; /* unprivileged reads others as zero */
     }
 
+    if (arm_feature(env, ARM_FEATURE_M_SECURITY)) {
+        switch (reg) {
+        case 0x88: /* MSP_NS */
+            if (!env->v7m.secure) {
+                return 0;
+            }
+            return env->v7m.other_ss_msp;
+        case 0x89: /* PSP_NS */
+            if (!env->v7m.secure) {
+                return 0;
+            }
+            return env->v7m.other_ss_psp;
+        case 0x8a: /* MSPLIM_NS */
+            if (!env->v7m.secure) {
+                return 0;
+            }
+            return env->v7m.msplim[M_REG_NS];
+        case 0x8b: /* PSPLIM_NS */
+            if (!env->v7m.secure) {
+                return 0;
+            }
+            return env->v7m.psplim[M_REG_NS];
+        case 0x90: /* PRIMASK_NS */
+            if (!env->v7m.secure) {
+                return 0;
+            }
+            return env->v7m.primask[M_REG_NS];
+        case 0x91: /* BASEPRI_NS */
+            if (!env->v7m.secure) {
+                return 0;
+            }
+            return env->v7m.basepri[M_REG_NS];
+        case 0x93: /* FAULTMASK_NS */
+            if (!env->v7m.secure) {
+                return 0;
+            }
+            return env->v7m.faultmask[M_REG_NS];
+        case 0x98: /* SP_NS */
+        {
+            /* This gives the non-secure SP selected based on whether we're
+             * currently in handler mode or not, using the NS CONTROL.SPSEL.
+             */
+            bool spsel = env->v7m.control[M_REG_NS] & R_V7M_CONTROL_SPSEL_MASK;
+
+            if (!env->v7m.secure) {
+                return 0;
+            }
+            if (!arm_v7m_is_handler_mode(env) && spsel) {
+                return env->v7m.other_ss_psp;
+            } else {
+                return env->v7m.other_ss_msp;
+            }
+        }
+        default:
+            break;
+        }
+    }
+
     switch (reg) {
     case 8: /* MSP */
-        return (env->v7m.control & R_V7M_CONTROL_SPSEL_MASK) ?
-            env->v7m.other_sp : env->regs[13];
+        return v7m_using_psp(env) ? env->v7m.other_sp : env->regs[13];
     case 9: /* PSP */
-        return (env->v7m.control & R_V7M_CONTROL_SPSEL_MASK) ?
-            env->regs[13] : env->v7m.other_sp;
+        return v7m_using_psp(env) ? env->regs[13] : env->v7m.other_sp;
+    case 10: /* MSPLIM */
+        if (!arm_feature(env, ARM_FEATURE_V8)) {
+            goto bad_reg;
+        }
+        return env->v7m.msplim[env->v7m.secure];
+    case 11: /* PSPLIM */
+        if (!arm_feature(env, ARM_FEATURE_V8)) {
+            goto bad_reg;
+        }
+        return env->v7m.psplim[env->v7m.secure];
     case 16: /* PRIMASK */
-        return (env->daif & PSTATE_I) != 0;
+        return env->v7m.primask[env->v7m.secure];
     case 17: /* BASEPRI */
     case 18: /* BASEPRI_MAX */
-        return env->v7m.basepri;
+        return env->v7m.basepri[env->v7m.secure];
     case 19: /* FAULTMASK */
-        return (env->daif & PSTATE_F) != 0;
+        return env->v7m.faultmask[env->v7m.secure];
     default:
+    bad_reg:
         qemu_log_mask(LOG_GUEST_ERROR, "Attempt to read unknown special"
                                        " register %d\n", reg);
         return 0;
@@ -8567,6 +10520,82 @@ void HELPER(v7m_msr)(CPUARMState *env, uint32_t maskreg, uint32_t val)
         return;
     }
 
+    if (arm_feature(env, ARM_FEATURE_M_SECURITY)) {
+        switch (reg) {
+        case 0x88: /* MSP_NS */
+            if (!env->v7m.secure) {
+                return;
+            }
+            env->v7m.other_ss_msp = val;
+            return;
+        case 0x89: /* PSP_NS */
+            if (!env->v7m.secure) {
+                return;
+            }
+            env->v7m.other_ss_psp = val;
+            return;
+        case 0x8a: /* MSPLIM_NS */
+            if (!env->v7m.secure) {
+                return;
+            }
+            env->v7m.msplim[M_REG_NS] = val & ~7;
+            return;
+        case 0x8b: /* PSPLIM_NS */
+            if (!env->v7m.secure) {
+                return;
+            }
+            env->v7m.psplim[M_REG_NS] = val & ~7;
+            return;
+        case 0x90: /* PRIMASK_NS */
+            if (!env->v7m.secure) {
+                return;
+            }
+            env->v7m.primask[M_REG_NS] = val & 1;
+            return;
+        case 0x91: /* BASEPRI_NS */
+            if (!env->v7m.secure) {
+                return;
+            }
+            env->v7m.basepri[M_REG_NS] = val & 0xff;
+            return;
+        case 0x93: /* FAULTMASK_NS */
+            if (!env->v7m.secure) {
+                return;
+            }
+            env->v7m.faultmask[M_REG_NS] = val & 1;
+            return;
+        case 0x94: /* CONTROL_NS */
+            if (!env->v7m.secure) {
+                return;
+            }
+            write_v7m_control_spsel_for_secstate(env,
+                                                 val & R_V7M_CONTROL_SPSEL_MASK,
+                                                 M_REG_NS);
+            env->v7m.control[M_REG_NS] &= ~R_V7M_CONTROL_NPRIV_MASK;
+            env->v7m.control[M_REG_NS] |= val & R_V7M_CONTROL_NPRIV_MASK;
+            return;
+        case 0x98: /* SP_NS */
+        {
+            /* This gives the non-secure SP selected based on whether we're
+             * currently in handler mode or not, using the NS CONTROL.SPSEL.
+             */
+            bool spsel = env->v7m.control[M_REG_NS] & R_V7M_CONTROL_SPSEL_MASK;
+
+            if (!env->v7m.secure) {
+                return;
+            }
+            if (!arm_v7m_is_handler_mode(env) && spsel) {
+                env->v7m.other_ss_psp = val;
+            } else {
+                env->v7m.other_ss_msp = val;
+            }
+            return;
+        }
+        default:
+            break;
+        }
+    }
+
     switch (reg) {
     case 0 ... 7: /* xPSR sub-fields */
         /* only APSR is actually writable */
@@ -8574,60 +10603,163 @@ void HELPER(v7m_msr)(CPUARMState *env, uint32_t maskreg, uint32_t val)
             uint32_t apsrmask = 0;
 
             if (mask & 8) {
-                apsrmask |= 0xf8000000; /* APSR NZCVQ */
+                apsrmask |= XPSR_NZCV | XPSR_Q;
             }
             if ((mask & 4) && arm_feature(env, ARM_FEATURE_THUMB_DSP)) {
-                apsrmask |= 0x000f0000; /* APSR GE[3:0] */
+                apsrmask |= XPSR_GE;
             }
             xpsr_write(env, val, apsrmask);
         }
         break;
     case 8: /* MSP */
-        if (env->v7m.control & R_V7M_CONTROL_SPSEL_MASK) {
+        if (v7m_using_psp(env)) {
             env->v7m.other_sp = val;
         } else {
             env->regs[13] = val;
         }
         break;
     case 9: /* PSP */
-        if (env->v7m.control & R_V7M_CONTROL_SPSEL_MASK) {
+        if (v7m_using_psp(env)) {
             env->regs[13] = val;
         } else {
             env->v7m.other_sp = val;
         }
         break;
-    case 16: /* PRIMASK */
-        if (val & 1) {
-            env->daif |= PSTATE_I;
-        } else {
-            env->daif &= ~PSTATE_I;
+    case 10: /* MSPLIM */
+        if (!arm_feature(env, ARM_FEATURE_V8)) {
+            goto bad_reg;
         }
+        env->v7m.msplim[env->v7m.secure] = val & ~7;
+        break;
+    case 11: /* PSPLIM */
+        if (!arm_feature(env, ARM_FEATURE_V8)) {
+            goto bad_reg;
+        }
+        env->v7m.psplim[env->v7m.secure] = val & ~7;
+        break;
+    case 16: /* PRIMASK */
+        env->v7m.primask[env->v7m.secure] = val & 1;
         break;
     case 17: /* BASEPRI */
-        env->v7m.basepri = val & 0xff;
+        env->v7m.basepri[env->v7m.secure] = val & 0xff;
         break;
     case 18: /* BASEPRI_MAX */
         val &= 0xff;
-        if (val != 0 && (val < env->v7m.basepri || env->v7m.basepri == 0))
-            env->v7m.basepri = val;
-        break;
-    case 19: /* FAULTMASK */
-        if (val & 1) {
-            env->daif |= PSTATE_F;
-        } else {
-            env->daif &= ~PSTATE_F;
+        if (val != 0 && (val < env->v7m.basepri[env->v7m.secure]
+                         || env->v7m.basepri[env->v7m.secure] == 0)) {
+            env->v7m.basepri[env->v7m.secure] = val;
         }
         break;
+    case 19: /* FAULTMASK */
+        env->v7m.faultmask[env->v7m.secure] = val & 1;
+        break;
     case 20: /* CONTROL */
-        switch_v7m_sp(env, (val & R_V7M_CONTROL_SPSEL_MASK) != 0);
-        env->v7m.control = val & (R_V7M_CONTROL_SPSEL_MASK |
-                                  R_V7M_CONTROL_NPRIV_MASK);
+        /* Writing to the SPSEL bit only has an effect if we are in
+         * thread mode; other bits can be updated by any privileged code.
+         * write_v7m_control_spsel() deals with updating the SPSEL bit in
+         * env->v7m.control, so we only need update the others.
+         * For v7M, we must just ignore explicit writes to SPSEL in handler
+         * mode; for v8M the write is permitted but will have no effect.
+         */
+        if (arm_feature(env, ARM_FEATURE_V8) ||
+            !arm_v7m_is_handler_mode(env)) {
+            write_v7m_control_spsel(env, (val & R_V7M_CONTROL_SPSEL_MASK) != 0);
+        }
+        env->v7m.control[env->v7m.secure] &= ~R_V7M_CONTROL_NPRIV_MASK;
+        env->v7m.control[env->v7m.secure] |= val & R_V7M_CONTROL_NPRIV_MASK;
         break;
     default:
+    bad_reg:
         qemu_log_mask(LOG_GUEST_ERROR, "Attempt to write unknown special"
                                        " register %d\n", reg);
         return;
     }
+}
+
+uint32_t HELPER(v7m_tt)(CPUARMState *env, uint32_t addr, uint32_t op)
+{
+    /* Implement the TT instruction. op is bits [7:6] of the insn. */
+    bool forceunpriv = op & 1;
+    bool alt = op & 2;
+    V8M_SAttributes sattrs = {};
+    uint32_t tt_resp;
+    bool r, rw, nsr, nsrw, mrvalid;
+    int prot;
+    ARMMMUFaultInfo fi = {};
+    MemTxAttrs attrs = {};
+    hwaddr phys_addr;
+    ARMMMUIdx mmu_idx;
+    uint32_t mregion;
+    bool targetpriv;
+    bool targetsec = env->v7m.secure;
+
+    /* Work out what the security state and privilege level we're
+     * interested in is...
+     */
+    if (alt) {
+        targetsec = !targetsec;
+    }
+
+    if (forceunpriv) {
+        targetpriv = false;
+    } else {
+        targetpriv = arm_v7m_is_handler_mode(env) ||
+            !(env->v7m.control[targetsec] & R_V7M_CONTROL_NPRIV_MASK);
+    }
+
+    /* ...and then figure out which MMU index this is */
+    mmu_idx = arm_v7m_mmu_idx_for_secstate_and_priv(env, targetsec, targetpriv);
+
+    /* We know that the MPU and SAU don't care about the access type
+     * for our purposes beyond that we don't want to claim to be
+     * an insn fetch, so we arbitrarily call this a read.
+     */
+
+    /* MPU region info only available for privileged or if
+     * inspecting the other MPU state.
+     */
+    if (arm_current_el(env) != 0 || alt) {
+        /* We can ignore the return value as prot is always set */
+        pmsav8_mpu_lookup(env, addr, MMU_DATA_LOAD, mmu_idx,
+                          &phys_addr, &attrs, &prot, &fi, &mregion);
+        if (mregion == -1) {
+            mrvalid = false;
+            mregion = 0;
+        } else {
+            mrvalid = true;
+        }
+        r = prot & PAGE_READ;
+        rw = prot & PAGE_WRITE;
+    } else {
+        r = false;
+        rw = false;
+        mrvalid = false;
+        mregion = 0;
+    }
+
+    if (env->v7m.secure) {
+        v8m_security_lookup(env, addr, MMU_DATA_LOAD, mmu_idx, &sattrs);
+        nsr = sattrs.ns && r;
+        nsrw = sattrs.ns && rw;
+    } else {
+        sattrs.ns = true;
+        nsr = false;
+        nsrw = false;
+    }
+
+    tt_resp = (sattrs.iregion << 24) |
+        (sattrs.irvalid << 23) |
+        ((!sattrs.ns) << 22) |
+        (nsrw << 21) |
+        (nsr << 20) |
+        (rw << 19) |
+        (r << 18) |
+        (sattrs.srvalid << 17) |
+        (mrvalid << 16) |
+        (sattrs.sregion << 8) |
+        mregion;
+
+    return tt_resp;
 }
 
 #endif
@@ -8994,6 +11126,7 @@ uint32_t HELPER(vfp_get_fpscr)(CPUARMState *env)
             | (env->vfp.vec_stride << 20);
     i = get_float_exception_flags(&env->vfp.fp_status);
     i |= get_float_exception_flags(&env->vfp.standard_fp_status);
+    i |= get_float_exception_flags(&env->vfp.fp_status_f16);
     fpscr |= vfp_exceptbits_from_host(i);
     return fpscr;
 }
@@ -9051,16 +11184,31 @@ void HELPER(vfp_set_fpscr)(CPUARMState *env, uint32_t val)
             break;
         }
         set_float_rounding_mode(i, &env->vfp.fp_status);
+        set_float_rounding_mode(i, &env->vfp.fp_status_f16);
     }
-    if (changed & (1 << 24)) {
-        set_flush_to_zero((val & (1 << 24)) != 0, &env->vfp.fp_status);
-        set_flush_inputs_to_zero((val & (1 << 24)) != 0, &env->vfp.fp_status);
+    if (changed & FPCR_FZ16) {
+        bool ftz_enabled = val & FPCR_FZ16;
+        set_flush_to_zero(ftz_enabled, &env->vfp.fp_status_f16);
+        set_flush_inputs_to_zero(ftz_enabled, &env->vfp.fp_status_f16);
     }
-    if (changed & (1 << 25))
-        set_default_nan_mode((val & (1 << 25)) != 0, &env->vfp.fp_status);
+    if (changed & FPCR_FZ) {
+        bool ftz_enabled = val & FPCR_FZ;
+        set_flush_to_zero(ftz_enabled, &env->vfp.fp_status);
+        set_flush_inputs_to_zero(ftz_enabled, &env->vfp.fp_status);
+    }
+    if (changed & FPCR_DN) {
+        bool dnan_enabled = val & FPCR_DN;
+        set_default_nan_mode(dnan_enabled, &env->vfp.fp_status);
+        set_default_nan_mode(dnan_enabled, &env->vfp.fp_status_f16);
+    }
 
+    /* The exception flags are ORed together when we read fpscr so we
+     * only need to preserve the current state in one of our
+     * float_status values.
+     */
     i = vfp_exceptbits_to_host(val);
     set_float_exception_flags(i, &env->vfp.fp_status);
+    set_float_exception_flags(0, &env->vfp.fp_status_f16);
     set_float_exception_flags(0, &env->vfp.standard_fp_status);
 }
 
@@ -9177,8 +11325,10 @@ CONV_ITOF(vfp_##name##to##p, fsz, sign) \
 CONV_FTOI(vfp_to##name##p, fsz, sign, ) \
 CONV_FTOI(vfp_to##name##z##p, fsz, sign, _round_to_zero)
 
+FLOAT_CONVS(si, h, 16, )
 FLOAT_CONVS(si, s, 32, )
 FLOAT_CONVS(si, d, 64, )
+FLOAT_CONVS(ui, h, 16, u)
 FLOAT_CONVS(ui, s, 32, u)
 FLOAT_CONVS(ui, d, 64, u)
 
@@ -9261,6 +11411,8 @@ VFP_CONV_FIX_A64(sq, s, 32, 64, int64)
 VFP_CONV_FIX(uh, s, 32, 32, uint16)
 VFP_CONV_FIX(ul, s, 32, 32, uint32)
 VFP_CONV_FIX_A64(uq, s, 32, 64, uint64)
+VFP_CONV_FIX_A64(sl, h, 16, 32, int32)
+VFP_CONV_FIX_A64(ul, h, 16, 32, uint32)
 #undef VFP_CONV_FIX
 #undef VFP_CONV_FIX_FLOAT
 #undef VFP_CONV_FLOAT_FIX_ROUND
@@ -9268,9 +11420,9 @@ VFP_CONV_FIX_A64(uq, s, 32, 64, uint64)
 /* Set the current fp rounding mode and return the old one.
  * The argument is a softfloat float_round_ value.
  */
-uint32_t HELPER(set_rmode)(uint32_t rmode, CPUARMState *env)
+uint32_t HELPER(set_rmode)(uint32_t rmode, void *fpstp)
 {
-    float_status *fp_status = &env->vfp.fp_status;
+    float_status *fp_status = fpstp;
 
     uint32_t prev_rmode = get_float_rounding_mode(fp_status);
     set_float_rounding_mode(rmode, fp_status);
@@ -9394,80 +11546,75 @@ float32 HELPER(rsqrts_f32)(float32 a, float32 b, CPUARMState *env)
  * int->float conversions at run-time.  */
 #define float64_256 make_float64(0x4070000000000000LL)
 #define float64_512 make_float64(0x4080000000000000LL)
+#define float16_maxnorm make_float16(0x7bff)
 #define float32_maxnorm make_float32(0x7f7fffff)
 #define float64_maxnorm make_float64(0x7fefffffffffffffLL)
 
 /* Reciprocal functions
  *
  * The algorithm that must be used to calculate the estimate
- * is specified by the ARM ARM, see FPRecipEstimate()
+ * is specified by the ARM ARM, see FPRecipEstimate()/RecipEstimate
  */
 
-static float64 recip_estimate(float64 a, float_status *real_fp_status)
+/* See RecipEstimate()
+ *
+ * input is a 9 bit fixed point number
+ * input range 256 .. 511 for a number from 0.5 <= x < 1.0.
+ * result range 256 .. 511 for a number from 1.0 to 511/256.
+ */
+
+static int recip_estimate(int input)
 {
-    /* These calculations mustn't set any fp exception flags,
-     * so we use a local copy of the fp_status.
-     */
-    float_status dummy_status = *real_fp_status;
-    float_status *s = &dummy_status;
-    /* q = (int)(a * 512.0) */
-    float64 q = float64_mul(float64_512, a, s);
-    int64_t q_int = float64_to_int64_round_to_zero(q, s);
-
-    /* r = 1.0 / (((double)q + 0.5) / 512.0) */
-    q = int64_to_float64(q_int, s);
-    q = float64_add(q, float64_half, s);
-    q = float64_div(q, float64_512, s);
-    q = float64_div(float64_one, q, s);
-
-    /* s = (int)(256.0 * r + 0.5) */
-    q = float64_mul(q, float64_256, s);
-    q = float64_add(q, float64_half, s);
-    q_int = float64_to_int64_round_to_zero(q, s);
-
-    /* return (double)s / 256.0 */
-    return float64_div(int64_to_float64(q_int, s), float64_256, s);
+    int a, b, r;
+    assert(256 <= input && input < 512);
+    a = (input * 2) + 1;
+    b = (1 << 19) / a;
+    r = (b + 1) >> 1;
+    assert(256 <= r && r < 512);
+    return r;
 }
 
-/* Common wrapper to call recip_estimate */
-static float64 call_recip_estimate(float64 num, int off, float_status *fpst)
-{
-    uint64_t val64 = float64_val(num);
-    uint64_t frac = extract64(val64, 0, 52);
-    int64_t exp = extract64(val64, 52, 11);
-    uint64_t sbit;
-    float64 scaled, estimate;
+/*
+ * Common wrapper to call recip_estimate
+ *
+ * The parameters are exponent and 64 bit fraction (without implicit
+ * bit) where the binary point is nominally at bit 52. Returns a
+ * float64 which can then be rounded to the appropriate size by the
+ * callee.
+ */
 
-    /* Generate the scaled number for the estimate function */
-    if (exp == 0) {
+static uint64_t call_recip_estimate(int *exp, int exp_off, uint64_t frac)
+{
+    uint32_t scaled, estimate;
+    uint64_t result_frac;
+    int result_exp;
+
+    /* Handle sub-normals */
+    if (*exp == 0) {
         if (extract64(frac, 51, 1) == 0) {
-            exp = -1;
-            frac = extract64(frac, 0, 50) << 2;
+            *exp = -1;
+            frac <<= 2;
         } else {
-            frac = extract64(frac, 0, 51) << 1;
+            frac <<= 1;
         }
     }
 
-    /* scaled = '0' : '01111111110' : fraction<51:44> : Zeros(44); */
-    scaled = make_float64((0x3feULL << 52)
-                          | extract64(frac, 44, 8) << 44);
+    /* scaled = UInt('1':fraction<51:44>) */
+    scaled = deposit32(1 << 8, 0, 8, extract64(frac, 44, 8));
+    estimate = recip_estimate(scaled);
 
-    estimate = recip_estimate(scaled, fpst);
-
-    /* Build new result */
-    val64 = float64_val(estimate);
-    sbit = 0x8000000000000000ULL & val64;
-    exp = off - exp;
-    frac = extract64(val64, 0, 52);
-
-    if (exp == 0) {
-        frac = 1ULL << 51 | extract64(frac, 1, 51);
-    } else if (exp == -1) {
-        frac = 1ULL << 50 | extract64(frac, 2, 50);
-        exp = 0;
+    result_exp = exp_off - *exp;
+    result_frac = deposit64(0, 44, 8, estimate);
+    if (result_exp == 0) {
+        result_frac = deposit64(result_frac >> 1, 51, 1, 1);
+    } else if (result_exp == -1) {
+        result_frac = deposit64(result_frac >> 2, 50, 2, 1);
+        result_exp = 0;
     }
 
-    return make_float64(sbit | (exp << 52) | frac);
+    *exp = result_exp;
+
+    return result_frac;
 }
 
 static bool round_to_inf(float_status *fpst, bool sign_bit)
@@ -9486,18 +11633,63 @@ static bool round_to_inf(float_status *fpst, bool sign_bit)
     g_assert_not_reached();
 }
 
+float16 HELPER(recpe_f16)(float16 input, void *fpstp)
+{
+    float_status *fpst = fpstp;
+    float16 f16 = float16_squash_input_denormal(input, fpst);
+    uint32_t f16_val = float16_val(f16);
+    uint32_t f16_sign = float16_is_neg(f16);
+    int f16_exp = extract32(f16_val, 10, 5);
+    uint32_t f16_frac = extract32(f16_val, 0, 10);
+    uint64_t f64_frac;
+
+    if (float16_is_any_nan(f16)) {
+        float16 nan = f16;
+        if (float16_is_signaling_nan(f16, fpst)) {
+            float_raise(float_flag_invalid, fpst);
+            nan = float16_maybe_silence_nan(f16, fpst);
+        }
+        if (fpst->default_nan_mode) {
+            nan =  float16_default_nan(fpst);
+        }
+        return nan;
+    } else if (float16_is_infinity(f16)) {
+        return float16_set_sign(float16_zero, float16_is_neg(f16));
+    } else if (float16_is_zero(f16)) {
+        float_raise(float_flag_divbyzero, fpst);
+        return float16_set_sign(float16_infinity, float16_is_neg(f16));
+    } else if (float16_abs(f16) < (1 << 8)) {
+        /* Abs(value) < 2.0^-16 */
+        float_raise(float_flag_overflow | float_flag_inexact, fpst);
+        if (round_to_inf(fpst, f16_sign)) {
+            return float16_set_sign(float16_infinity, f16_sign);
+        } else {
+            return float16_set_sign(float16_maxnorm, f16_sign);
+        }
+    } else if (f16_exp >= 29 && fpst->flush_to_zero) {
+        float_raise(float_flag_underflow, fpst);
+        return float16_set_sign(float16_zero, float16_is_neg(f16));
+    }
+
+    f64_frac = call_recip_estimate(&f16_exp, 29,
+                                   ((uint64_t) f16_frac) << (52 - 10));
+
+    /* result = sign : result_exp<4:0> : fraction<51:42> */
+    f16_val = deposit32(0, 15, 1, f16_sign);
+    f16_val = deposit32(f16_val, 10, 5, f16_exp);
+    f16_val = deposit32(f16_val, 0, 10, extract64(f64_frac, 52 - 10, 10));
+    return make_float16(f16_val);
+}
+
 float32 HELPER(recpe_f32)(float32 input, void *fpstp)
 {
     float_status *fpst = fpstp;
     float32 f32 = float32_squash_input_denormal(input, fpst);
     uint32_t f32_val = float32_val(f32);
-    uint32_t f32_sbit = 0x80000000ULL & f32_val;
-    int32_t f32_exp = extract32(f32_val, 23, 8);
+    bool f32_sign = float32_is_neg(f32);
+    int f32_exp = extract32(f32_val, 23, 8);
     uint32_t f32_frac = extract32(f32_val, 0, 23);
-    float64 f64, r64;
-    uint64_t r64_val;
-    int64_t r64_exp;
-    uint64_t r64_frac;
+    uint64_t f64_frac;
 
     if (float32_is_any_nan(f32)) {
         float32 nan = f32;
@@ -9514,30 +11706,27 @@ float32 HELPER(recpe_f32)(float32 input, void *fpstp)
     } else if (float32_is_zero(f32)) {
         float_raise(float_flag_divbyzero, fpst);
         return float32_set_sign(float32_infinity, float32_is_neg(f32));
-    } else if ((f32_val & ~(1ULL << 31)) < (1ULL << 21)) {
+    } else if (float32_abs(f32) < (1ULL << 21)) {
         /* Abs(value) < 2.0^-128 */
         float_raise(float_flag_overflow | float_flag_inexact, fpst);
-        if (round_to_inf(fpst, f32_sbit)) {
-            return float32_set_sign(float32_infinity, float32_is_neg(f32));
+        if (round_to_inf(fpst, f32_sign)) {
+            return float32_set_sign(float32_infinity, f32_sign);
         } else {
-            return float32_set_sign(float32_maxnorm, float32_is_neg(f32));
+            return float32_set_sign(float32_maxnorm, f32_sign);
         }
     } else if (f32_exp >= 253 && fpst->flush_to_zero) {
         float_raise(float_flag_underflow, fpst);
         return float32_set_sign(float32_zero, float32_is_neg(f32));
     }
 
+    f64_frac = call_recip_estimate(&f32_exp, 253,
+                                   ((uint64_t) f32_frac) << (52 - 23));
 
-    f64 = make_float64(((int64_t)(f32_exp) << 52) | (int64_t)(f32_frac) << 29);
-    r64 = call_recip_estimate(f64, 253, fpst);
-    r64_val = float64_val(r64);
-    r64_exp = extract64(r64_val, 52, 11);
-    r64_frac = extract64(r64_val, 0, 52);
-
-    /* result = sign : result_exp<7:0> : fraction<51:29>; */
-    return make_float32(f32_sbit |
-                        (r64_exp & 0xff) << 23 |
-                        extract64(r64_frac, 29, 24));
+    /* result = sign : result_exp<7:0> : fraction<51:29> */
+    f32_val = deposit32(0, 31, 1, f32_sign);
+    f32_val = deposit32(f32_val, 23, 8, f32_exp);
+    f32_val = deposit32(f32_val, 0, 23, extract64(f64_frac, 52 - 23, 23));
+    return make_float32(f32_val);
 }
 
 float64 HELPER(recpe_f64)(float64 input, void *fpstp)
@@ -9545,12 +11734,9 @@ float64 HELPER(recpe_f64)(float64 input, void *fpstp)
     float_status *fpst = fpstp;
     float64 f64 = float64_squash_input_denormal(input, fpst);
     uint64_t f64_val = float64_val(f64);
-    uint64_t f64_sbit = 0x8000000000000000ULL & f64_val;
-    int64_t f64_exp = extract64(f64_val, 52, 11);
-    float64 r64;
-    uint64_t r64_val;
-    int64_t r64_exp;
-    uint64_t r64_frac;
+    bool f64_sign = float64_is_neg(f64);
+    int f64_exp = extract64(f64_val, 52, 11);
+    uint64_t f64_frac = extract64(f64_val, 0, 52);
 
     /* Deal with any special cases */
     if (float64_is_any_nan(f64)) {
@@ -9571,80 +11757,119 @@ float64 HELPER(recpe_f64)(float64 input, void *fpstp)
     } else if ((f64_val & ~(1ULL << 63)) < (1ULL << 50)) {
         /* Abs(value) < 2.0^-1024 */
         float_raise(float_flag_overflow | float_flag_inexact, fpst);
-        if (round_to_inf(fpst, f64_sbit)) {
-            return float64_set_sign(float64_infinity, float64_is_neg(f64));
+        if (round_to_inf(fpst, f64_sign)) {
+            return float64_set_sign(float64_infinity, f64_sign);
         } else {
-            return float64_set_sign(float64_maxnorm, float64_is_neg(f64));
+            return float64_set_sign(float64_maxnorm, f64_sign);
         }
     } else if (f64_exp >= 2045 && fpst->flush_to_zero) {
         float_raise(float_flag_underflow, fpst);
         return float64_set_sign(float64_zero, float64_is_neg(f64));
     }
 
-    r64 = call_recip_estimate(f64, 2045, fpst);
-    r64_val = float64_val(r64);
-    r64_exp = extract64(r64_val, 52, 11);
-    r64_frac = extract64(r64_val, 0, 52);
+    f64_frac = call_recip_estimate(&f64_exp, 2045, f64_frac);
 
-    /* result = sign : result_exp<10:0> : fraction<51:0> */
-    return make_float64(f64_sbit |
-                        ((r64_exp & 0x7ff) << 52) |
-                        r64_frac);
+    /* result = sign : result_exp<10:0> : fraction<51:0>; */
+    f64_val = deposit64(0, 63, 1, f64_sign);
+    f64_val = deposit64(f64_val, 52, 11, f64_exp);
+    f64_val = deposit64(f64_val, 0, 52, f64_frac);
+    return make_float64(f64_val);
 }
 
 /* The algorithm that must be used to calculate the estimate
  * is specified by the ARM ARM.
  */
-static float64 recip_sqrt_estimate(float64 a, float_status *real_fp_status)
+
+static int do_recip_sqrt_estimate(int a)
 {
-    /* These calculations mustn't set any fp exception flags,
-     * so we use a local copy of the fp_status.
-     */
-    float_status dummy_status = *real_fp_status;
-    float_status *s = &dummy_status;
-    float64 q;
-    int64_t q_int;
+    int b, estimate;
 
-    if (float64_lt(a, float64_half, s)) {
-        /* range 0.25 <= a < 0.5 */
-
-        /* a in units of 1/512 rounded down */
-        /* q0 = (int)(a * 512.0);  */
-        q = float64_mul(float64_512, a, s);
-        q_int = float64_to_int64_round_to_zero(q, s);
-
-        /* reciprocal root r */
-        /* r = 1.0 / sqrt(((double)q0 + 0.5) / 512.0);  */
-        q = int64_to_float64(q_int, s);
-        q = float64_add(q, float64_half, s);
-        q = float64_div(q, float64_512, s);
-        q = float64_sqrt(q, s);
-        q = float64_div(float64_one, q, s);
+    assert(128 <= a && a < 512);
+    if (a < 256) {
+        a = a * 2 + 1;
     } else {
-        /* range 0.5 <= a < 1.0 */
-
-        /* a in units of 1/256 rounded down */
-        /* q1 = (int)(a * 256.0); */
-        q = float64_mul(float64_256, a, s);
-        int64_t q_int = float64_to_int64_round_to_zero(q, s);
-
-        /* reciprocal root r */
-        /* r = 1.0 /sqrt(((double)q1 + 0.5) / 256); */
-        q = int64_to_float64(q_int, s);
-        q = float64_add(q, float64_half, s);
-        q = float64_div(q, float64_256, s);
-        q = float64_sqrt(q, s);
-        q = float64_div(float64_one, q, s);
+        a = (a >> 1) << 1;
+        a = (a + 1) * 2;
     }
-    /* r in units of 1/256 rounded to nearest */
-    /* s = (int)(256.0 * r + 0.5); */
+    b = 512;
+    while (a * (b + 1) * (b + 1) < (1 << 28)) {
+        b += 1;
+    }
+    estimate = (b + 1) / 2;
+    assert(256 <= estimate && estimate < 512);
 
-    q = float64_mul(q, float64_256,s );
-    q = float64_add(q, float64_half, s);
-    q_int = float64_to_int64_round_to_zero(q, s);
+    return estimate;
+}
 
-    /* return (double)s / 256.0;*/
-    return float64_div(int64_to_float64(q_int, s), float64_256, s);
+
+static uint64_t recip_sqrt_estimate(int *exp , int exp_off, uint64_t frac)
+{
+    int estimate;
+    uint32_t scaled;
+
+    if (*exp == 0) {
+        while (extract64(frac, 51, 1) == 0) {
+            frac = frac << 1;
+            *exp -= 1;
+        }
+        frac = extract64(frac, 0, 51) << 1;
+    }
+
+    if (*exp & 1) {
+        /* scaled = UInt('01':fraction<51:45>) */
+        scaled = deposit32(1 << 7, 0, 7, extract64(frac, 45, 7));
+    } else {
+        /* scaled = UInt('1':fraction<51:44>) */
+        scaled = deposit32(1 << 8, 0, 8, extract64(frac, 44, 8));
+    }
+    estimate = do_recip_sqrt_estimate(scaled);
+
+    *exp = (exp_off - *exp) / 2;
+    return extract64(estimate, 0, 8) << 44;
+}
+
+float16 HELPER(rsqrte_f16)(float16 input, void *fpstp)
+{
+    float_status *s = fpstp;
+    float16 f16 = float16_squash_input_denormal(input, s);
+    uint16_t val = float16_val(f16);
+    bool f16_sign = float16_is_neg(f16);
+    int f16_exp = extract32(val, 10, 5);
+    uint16_t f16_frac = extract32(val, 0, 10);
+    uint64_t f64_frac;
+
+    if (float16_is_any_nan(f16)) {
+        float16 nan = f16;
+        if (float16_is_signaling_nan(f16, s)) {
+            float_raise(float_flag_invalid, s);
+            nan = float16_maybe_silence_nan(f16, s);
+        }
+        if (s->default_nan_mode) {
+            nan =  float16_default_nan(s);
+        }
+        return nan;
+    } else if (float16_is_zero(f16)) {
+        float_raise(float_flag_divbyzero, s);
+        return float16_set_sign(float16_infinity, f16_sign);
+    } else if (f16_sign) {
+        float_raise(float_flag_invalid, s);
+        return float16_default_nan(s);
+    } else if (float16_is_infinity(f16)) {
+        return float16_zero;
+    }
+
+    /* Scale and normalize to a double-precision value between 0.25 and 1.0,
+     * preserving the parity of the exponent.  */
+
+    f64_frac = ((uint64_t) f16_frac) << (52 - 10);
+
+    f64_frac = recip_sqrt_estimate(&f16_exp, 44, f64_frac);
+
+    /* result = sign : result_exp<4:0> : estimate<7:0> : Zeros(2) */
+    val = deposit32(0, 15, 1, f16_sign);
+    val = deposit32(val, 10, 5, f16_exp);
+    val = deposit32(val, 2, 8, extract64(f64_frac, 52 - 8, 8));
+    return make_float16(val);
 }
 
 float32 HELPER(rsqrte_f32)(float32 input, void *fpstp)
@@ -9652,13 +11877,10 @@ float32 HELPER(rsqrte_f32)(float32 input, void *fpstp)
     float_status *s = fpstp;
     float32 f32 = float32_squash_input_denormal(input, s);
     uint32_t val = float32_val(f32);
-    uint32_t f32_sbit = 0x80000000 & val;
-    int32_t f32_exp = extract32(val, 23, 8);
+    uint32_t f32_sign = float32_is_neg(f32);
+    int f32_exp = extract32(val, 23, 8);
     uint32_t f32_frac = extract32(val, 0, 23);
     uint64_t f64_frac;
-    uint64_t val64;
-    int result_exp;
-    float64 f64;
 
     if (float32_is_any_nan(f32)) {
         float32 nan = f32;
@@ -9684,32 +11906,13 @@ float32 HELPER(rsqrte_f32)(float32 input, void *fpstp)
      * preserving the parity of the exponent.  */
 
     f64_frac = ((uint64_t) f32_frac) << 29;
-    if (f32_exp == 0) {
-        while (extract64(f64_frac, 51, 1) == 0) {
-            f64_frac = f64_frac << 1;
-            f32_exp = f32_exp-1;
-        }
-        f64_frac = extract64(f64_frac, 0, 51) << 1;
-    }
 
-    if (extract64(f32_exp, 0, 1) == 0) {
-        f64 = make_float64(((uint64_t) f32_sbit) << 32
-                           | (0x3feULL << 52)
-                           | f64_frac);
-    } else {
-        f64 = make_float64(((uint64_t) f32_sbit) << 32
-                           | (0x3fdULL << 52)
-                           | f64_frac);
-    }
+    f64_frac = recip_sqrt_estimate(&f32_exp, 380, f64_frac);
 
-    result_exp = (380 - f32_exp) / 2;
-
-    f64 = recip_sqrt_estimate(f64, s);
-
-    val64 = float64_val(f64);
-
-    val = ((result_exp & 0xff) << 23)
-        | ((val64 >> 29)  & 0x7fffff);
+    /* result = sign : result_exp<4:0> : estimate<7:0> : Zeros(15) */
+    val = deposit32(0, 31, 1, f32_sign);
+    val = deposit32(val, 23, 8, f32_exp);
+    val = deposit32(val, 15, 8, extract64(f64_frac, 52 - 8, 8));
     return make_float32(val);
 }
 
@@ -9718,11 +11921,9 @@ float64 HELPER(rsqrte_f64)(float64 input, void *fpstp)
     float_status *s = fpstp;
     float64 f64 = float64_squash_input_denormal(input, s);
     uint64_t val = float64_val(f64);
-    uint64_t f64_sbit = 0x8000000000000000ULL & val;
-    int64_t f64_exp = extract64(val, 52, 11);
+    bool f64_sign = float64_is_neg(f64);
+    int f64_exp = extract64(val, 52, 11);
     uint64_t f64_frac = extract64(val, 0, 52);
-    int64_t result_exp;
-    uint64_t result_frac;
 
     if (float64_is_any_nan(f64)) {
         float64 nan = f64;
@@ -9744,75 +11945,41 @@ float64 HELPER(rsqrte_f64)(float64 input, void *fpstp)
         return float64_zero;
     }
 
-    /* Scale and normalize to a double-precision value between 0.25 and 1.0,
-     * preserving the parity of the exponent.  */
+    f64_frac = recip_sqrt_estimate(&f64_exp, 3068, f64_frac);
 
-    if (f64_exp == 0) {
-        while (extract64(f64_frac, 51, 1) == 0) {
-            f64_frac = f64_frac << 1;
-            f64_exp = f64_exp - 1;
-        }
-        f64_frac = extract64(f64_frac, 0, 51) << 1;
-    }
-
-    if (extract64(f64_exp, 0, 1) == 0) {
-        f64 = make_float64(f64_sbit
-                           | (0x3feULL << 52)
-                           | f64_frac);
-    } else {
-        f64 = make_float64(f64_sbit
-                           | (0x3fdULL << 52)
-                           | f64_frac);
-    }
-
-    result_exp = (3068 - f64_exp) / 2;
-
-    f64 = recip_sqrt_estimate(f64, s);
-
-    result_frac = extract64(float64_val(f64), 0, 52);
-
-    return make_float64(f64_sbit |
-                        ((result_exp & 0x7ff) << 52) |
-                        result_frac);
+    /* result = sign : result_exp<4:0> : estimate<7:0> : Zeros(44) */
+    val = deposit64(0, 61, 1, f64_sign);
+    val = deposit64(val, 52, 11, f64_exp);
+    val = deposit64(val, 44, 8, extract64(f64_frac, 52 - 8, 8));
+    return make_float64(val);
 }
 
 uint32_t HELPER(recpe_u32)(uint32_t a, void *fpstp)
 {
-    float_status *s = fpstp;
-    float64 f64;
+    /* float_status *s = fpstp; */
+    int input, estimate;
 
     if ((a & 0x80000000) == 0) {
         return 0xffffffff;
     }
 
-    f64 = make_float64((0x3feULL << 52)
-                       | ((int64_t)(a & 0x7fffffff) << 21));
+    input = extract32(a, 23, 9);
+    estimate = recip_estimate(input);
 
-    f64 = recip_estimate(f64, s);
-
-    return 0x80000000 | ((float64_val(f64) >> 21) & 0x7fffffff);
+    return deposit32(0, (32 - 9), 9, estimate);
 }
 
 uint32_t HELPER(rsqrte_u32)(uint32_t a, void *fpstp)
 {
-    float_status *fpst = fpstp;
-    float64 f64;
+    int estimate;
 
     if ((a & 0xc0000000) == 0) {
         return 0xffffffff;
     }
 
-    if (a & 0x80000000) {
-        f64 = make_float64((0x3feULL << 52)
-                           | ((uint64_t)(a & 0x7fffffff) << 21));
-    } else { /* bits 31-30 == '01' */
-        f64 = make_float64((0x3fdULL << 52)
-                           | ((uint64_t)(a & 0x3fffffff) << 22));
-    }
+    estimate = do_recip_sqrt_estimate(extract32(a, 23, 9));
 
-    f64 = recip_sqrt_estimate(f64, fpst);
-
-    return 0x80000000 | ((float64_val(f64) >> 21) & 0x7fffffff);
+    return deposit32(0, 23, 9, estimate);
 }
 
 /* VFPv4 fused multiply-accumulate */
@@ -9923,4 +12090,157 @@ uint32_t HELPER(crc32c)(uint32_t acc, uint32_t val, uint32_t bytes)
 
     /* Linux crc32c converts the output to one's complement.  */
     return crc32c(acc, buf, bytes) ^ 0xffffffff;
+}
+
+/* Return the exception level to which FP-disabled exceptions should
+ * be taken, or 0 if FP is enabled.
+ */
+static inline int fp_exception_el(CPUARMState *env)
+{
+#ifndef CONFIG_USER_ONLY
+    int fpen;
+    int cur_el = arm_current_el(env);
+
+    /* CPACR and the CPTR registers don't exist before v6, so FP is
+     * always accessible
+     */
+    if (!arm_feature(env, ARM_FEATURE_V6)) {
+        return 0;
+    }
+
+    /* The CPACR controls traps to EL1, or PL1 if we're 32 bit:
+     * 0, 2 : trap EL0 and EL1/PL1 accesses
+     * 1    : trap only EL0 accesses
+     * 3    : trap no accesses
+     */
+    fpen = extract32(env->cp15.cpacr_el1, 20, 2);
+    switch (fpen) {
+    case 0:
+    case 2:
+        if (cur_el == 0 || cur_el == 1) {
+            /* Trap to PL1, which might be EL1 or EL3 */
+            if (arm_is_secure(env) && !arm_el_is_aa64(env, 3)) {
+                return 3;
+            }
+            return 1;
+        }
+        if (cur_el == 3 && !is_a64(env)) {
+            /* Secure PL1 running at EL3 */
+            return 3;
+        }
+        break;
+    case 1:
+        if (cur_el == 0) {
+            return 1;
+        }
+        break;
+    case 3:
+        break;
+    }
+
+    /* For the CPTR registers we don't need to guard with an ARM_FEATURE
+     * check because zero bits in the registers mean "don't trap".
+     */
+
+    /* CPTR_EL2 : present in v7VE or v8 */
+    if (cur_el <= 2 && extract32(env->cp15.cptr_el[2], 10, 1)
+        && !arm_is_secure_below_el3(env)) {
+        /* Trap FP ops at EL2, NS-EL1 or NS-EL0 to EL2 */
+        return 2;
+    }
+
+    /* CPTR_EL3 : present in v8 */
+    if (extract32(env->cp15.cptr_el[3], 10, 1)) {
+        /* Trap all FP ops to EL3 */
+        return 3;
+    }
+#endif
+    return 0;
+}
+
+void cpu_get_tb_cpu_state(CPUARMState *env, target_ulong *pc,
+                          target_ulong *cs_base, uint32_t *pflags)
+{
+    ARMMMUIdx mmu_idx = core_to_arm_mmu_idx(env, cpu_mmu_index(env, false));
+    int fp_el = fp_exception_el(env);
+    uint32_t flags;
+
+    if (is_a64(env)) {
+        int sve_el = sve_exception_el(env);
+        uint32_t zcr_len;
+
+        *pc = env->pc;
+        flags = ARM_TBFLAG_AARCH64_STATE_MASK;
+        /* Get control bits for tagged addresses */
+        flags |= (arm_regime_tbi0(env, mmu_idx) << ARM_TBFLAG_TBI0_SHIFT);
+        flags |= (arm_regime_tbi1(env, mmu_idx) << ARM_TBFLAG_TBI1_SHIFT);
+        flags |= sve_el << ARM_TBFLAG_SVEEXC_EL_SHIFT;
+
+        /* If SVE is disabled, but FP is enabled,
+           then the effective len is 0.  */
+        if (sve_el != 0 && fp_el == 0) {
+            zcr_len = 0;
+        } else {
+            int current_el = arm_current_el(env);
+
+            zcr_len = env->vfp.zcr_el[current_el <= 1 ? 1 : current_el];
+            zcr_len &= 0xf;
+            if (current_el < 2 && arm_feature(env, ARM_FEATURE_EL2)) {
+                zcr_len = MIN(zcr_len, 0xf & (uint32_t)env->vfp.zcr_el[2]);
+            }
+            if (current_el < 3 && arm_feature(env, ARM_FEATURE_EL3)) {
+                zcr_len = MIN(zcr_len, 0xf & (uint32_t)env->vfp.zcr_el[3]);
+            }
+        }
+        flags |= zcr_len << ARM_TBFLAG_ZCR_LEN_SHIFT;
+    } else {
+        *pc = env->regs[15];
+        flags = (env->thumb << ARM_TBFLAG_THUMB_SHIFT)
+            | (env->vfp.vec_len << ARM_TBFLAG_VECLEN_SHIFT)
+            | (env->vfp.vec_stride << ARM_TBFLAG_VECSTRIDE_SHIFT)
+            | (env->condexec_bits << ARM_TBFLAG_CONDEXEC_SHIFT)
+            | (arm_sctlr_b(env) << ARM_TBFLAG_SCTLR_B_SHIFT);
+        if (!(access_secure_reg(env))) {
+            flags |= ARM_TBFLAG_NS_MASK;
+        }
+        if (env->vfp.xregs[ARM_VFP_FPEXC] & (1 << 30)
+            || arm_el_is_aa64(env, 1)) {
+            flags |= ARM_TBFLAG_VFPEN_MASK;
+        }
+        flags |= (extract32(env->cp15.c15_cpar, 0, 2)
+                  << ARM_TBFLAG_XSCALE_CPAR_SHIFT);
+    }
+
+    flags |= (arm_to_core_mmu_idx(mmu_idx) << ARM_TBFLAG_MMUIDX_SHIFT);
+
+    /* The SS_ACTIVE and PSTATE_SS bits correspond to the state machine
+     * states defined in the ARM ARM for software singlestep:
+     *  SS_ACTIVE   PSTATE.SS   State
+     *     0            x       Inactive (the TB flag for SS is always 0)
+     *     1            0       Active-pending
+     *     1            1       Active-not-pending
+     */
+    if (arm_singlestep_active(env)) {
+        flags |= ARM_TBFLAG_SS_ACTIVE_MASK;
+        if (is_a64(env)) {
+            if (env->pstate & PSTATE_SS) {
+                flags |= ARM_TBFLAG_PSTATE_SS_MASK;
+            }
+        } else {
+            if (env->uncached_cpsr & PSTATE_SS) {
+                flags |= ARM_TBFLAG_PSTATE_SS_MASK;
+            }
+        }
+    }
+    if (arm_cpu_data_is_big_endian(env)) {
+        flags |= ARM_TBFLAG_BE_DATA_MASK;
+    }
+    flags |= fp_el << ARM_TBFLAG_FPEXC_EL_SHIFT;
+
+    if (arm_v7m_is_handler_mode(env)) {
+        flags |= ARM_TBFLAG_HANDLER_MASK;
+    }
+
+    *pflags = flags;
+    *cs_base = 0;
 }

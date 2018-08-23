@@ -14,6 +14,7 @@
 #include "qapi/error.h"
 #include "qapi/qmp/qdict.h"
 #include "qapi/qmp/qstring.h"
+#include "qemu/option.h"
 #include "block/block_int.h"
 
 #define NULL_OPT_LATENCY "latency-ns"
@@ -29,11 +30,6 @@ static QemuOptsList runtime_opts = {
     .name = "null",
     .head = QTAILQ_HEAD_INITIALIZER(runtime_opts.head),
     .desc = {
-        {
-            .name = "filename",
-            .type = QEMU_OPT_STRING,
-            .help = "",
-        },
         {
             .name = BLOCK_OPT_SIZE,
             .type = QEMU_OPT_SIZE,
@@ -53,6 +49,30 @@ static QemuOptsList runtime_opts = {
         { /* end of list */ }
     },
 };
+
+static void null_co_parse_filename(const char *filename, QDict *options,
+                                   Error **errp)
+{
+    /* This functions only exists so that a null-co:// filename is accepted
+     * with the null-co driver. */
+    if (strcmp(filename, "null-co://")) {
+        error_setg(errp, "The only allowed filename for this driver is "
+                         "'null-co://'");
+        return;
+    }
+}
+
+static void null_aio_parse_filename(const char *filename, QDict *options,
+                                    Error **errp)
+{
+    /* This functions only exists so that a null-aio:// filename is accepted
+     * with the null-aio driver. */
+    if (strcmp(filename, "null-aio://")) {
+        error_setg(errp, "The only allowed filename for this driver is "
+                         "'null-aio://'");
+        return;
+    }
+}
 
 static int null_file_open(BlockDriverState *bs, QDict *options, int flags,
                           Error **errp)
@@ -91,8 +111,7 @@ static coroutine_fn int null_co_common(BlockDriverState *bs)
     BDRVNullState *s = bs->opaque;
 
     if (s->latency_ns) {
-        co_aio_sleep_ns(bdrv_get_aio_context(bs), QEMU_CLOCK_REALTIME,
-                        s->latency_ns);
+        qemu_co_sleep_ns(QEMU_CLOCK_REALTIME, s->latency_ns);
     }
     return 0;
 }
@@ -204,22 +223,23 @@ static int null_reopen_prepare(BDRVReopenState *reopen_state,
     return 0;
 }
 
-static int64_t coroutine_fn null_co_get_block_status(BlockDriverState *bs,
-                                                     int64_t sector_num,
-                                                     int nb_sectors, int *pnum,
-                                                     BlockDriverState **file)
+static int coroutine_fn null_co_block_status(BlockDriverState *bs,
+                                             bool want_zero, int64_t offset,
+                                             int64_t bytes, int64_t *pnum,
+                                             int64_t *map,
+                                             BlockDriverState **file)
 {
     BDRVNullState *s = bs->opaque;
-    off_t start = sector_num * BDRV_SECTOR_SIZE;
+    int ret = BDRV_BLOCK_OFFSET_VALID;
 
-    *pnum = nb_sectors;
+    *pnum = bytes;
+    *map = offset;
     *file = bs;
 
     if (s->read_zeroes) {
-        return BDRV_BLOCK_OFFSET_VALID | start | BDRV_BLOCK_ZERO;
-    } else {
-        return BDRV_BLOCK_OFFSET_VALID | start;
+        ret |= BDRV_BLOCK_ZERO;
     }
+    return ret;
 }
 
 static void null_refresh_filename(BlockDriverState *bs, QDict *opts)
@@ -232,7 +252,7 @@ static void null_refresh_filename(BlockDriverState *bs, QDict *opts)
                  bs->drv->format_name);
     }
 
-    qdict_put(opts, "driver", qstring_from_str(bs->drv->format_name));
+    qdict_put_str(opts, "driver", bs->drv->format_name);
     bs->full_open_options = opts;
 }
 
@@ -242,6 +262,7 @@ static BlockDriver bdrv_null_co = {
     .instance_size          = sizeof(BDRVNullState),
 
     .bdrv_file_open         = null_file_open,
+    .bdrv_parse_filename    = null_co_parse_filename,
     .bdrv_close             = null_close,
     .bdrv_getlength         = null_getlength,
 
@@ -250,7 +271,7 @@ static BlockDriver bdrv_null_co = {
     .bdrv_co_flush_to_disk  = null_co_flush,
     .bdrv_reopen_prepare    = null_reopen_prepare,
 
-    .bdrv_co_get_block_status   = null_co_get_block_status,
+    .bdrv_co_block_status   = null_co_block_status,
 
     .bdrv_refresh_filename  = null_refresh_filename,
 };
@@ -261,6 +282,7 @@ static BlockDriver bdrv_null_aio = {
     .instance_size          = sizeof(BDRVNullState),
 
     .bdrv_file_open         = null_file_open,
+    .bdrv_parse_filename    = null_aio_parse_filename,
     .bdrv_close             = null_close,
     .bdrv_getlength         = null_getlength,
 
@@ -269,7 +291,7 @@ static BlockDriver bdrv_null_aio = {
     .bdrv_aio_flush         = null_aio_flush,
     .bdrv_reopen_prepare    = null_reopen_prepare,
 
-    .bdrv_co_get_block_status   = null_co_get_block_status,
+    .bdrv_co_block_status   = null_co_block_status,
 
     .bdrv_refresh_filename  = null_refresh_filename,
 };
