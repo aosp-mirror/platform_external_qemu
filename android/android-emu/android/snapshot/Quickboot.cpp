@@ -557,3 +557,7 @@ bool androidSnapshot_getQuickbootChoice() {
 
     return res;
 }
+
+extern "C" const char* android_get_quick_boot_name() {
+    return android::snapshot::Quickboot::kDefaultBootSnapshot;
+}
