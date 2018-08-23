@@ -21,8 +21,10 @@
 #include "hw/sysbus.h"
 #include "hw/boards.h"
 #include "hw/i386/x86-iommu.h"
+#include "hw/i386/pc.h"
+#include "qapi/error.h"
 #include "qemu/error-report.h"
-#include "hw/i386/trace.h"
+#include "trace.h"
 
 void x86_iommu_iec_register_notifier(X86IOMMUState *iommu,
                                      iec_notify_fn fn, void *data)
@@ -80,7 +82,18 @@ static void x86_iommu_realize(DeviceState *dev, Error **errp)
 {
     X86IOMMUState *x86_iommu = X86_IOMMU_DEVICE(dev);
     X86IOMMUClass *x86_class = X86_IOMMU_GET_CLASS(dev);
+    MachineState *ms = MACHINE(qdev_get_machine());
+    MachineClass *mc = MACHINE_GET_CLASS(ms);
+    PCMachineState *pcms =
+        PC_MACHINE(object_dynamic_cast(OBJECT(ms), TYPE_PC_MACHINE));
     QLIST_INIT(&x86_iommu->iec_notifiers);
+
+    if (!pcms || !pcms->bus) {
+        error_setg(errp, "Machine-type '%s' not supported by IOMMU",
+                   mc->name);
+        return;
+    }
+
     if (x86_class->realize) {
         x86_class->realize(dev, errp);
     }
@@ -88,55 +101,23 @@ static void x86_iommu_realize(DeviceState *dev, Error **errp)
     x86_iommu_set_default(X86_IOMMU_DEVICE(dev));
 }
 
+static Property x86_iommu_properties[] = {
+    DEFINE_PROP_BOOL("intremap", X86IOMMUState, intr_supported, false),
+    DEFINE_PROP_BOOL("device-iotlb", X86IOMMUState, dt_supported, false),
+    DEFINE_PROP_BOOL("pt", X86IOMMUState, pt_supported, true),
+    DEFINE_PROP_END_OF_LIST(),
+};
+
 static void x86_iommu_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
     dc->realize = x86_iommu_realize;
-}
-
-static bool x86_iommu_intremap_prop_get(Object *o, Error **errp)
-{
-    X86IOMMUState *s = X86_IOMMU_DEVICE(o);
-    return s->intr_supported;
-}
-
-static void x86_iommu_intremap_prop_set(Object *o, bool value, Error **errp)
-{
-    X86IOMMUState *s = X86_IOMMU_DEVICE(o);
-    s->intr_supported = value;
-}
-
-static bool x86_iommu_device_iotlb_prop_get(Object *o, Error **errp)
-{
-    X86IOMMUState *s = X86_IOMMU_DEVICE(o);
-    return s->dt_supported;
-}
-
-static void x86_iommu_device_iotlb_prop_set(Object *o, bool value, Error **errp)
-{
-    X86IOMMUState *s = X86_IOMMU_DEVICE(o);
-    s->dt_supported = value;
-}
-
-static void x86_iommu_instance_init(Object *o)
-{
-    X86IOMMUState *s = X86_IOMMU_DEVICE(o);
-
-    /* By default, do not support IR */
-    s->intr_supported = false;
-    object_property_add_bool(o, "intremap", x86_iommu_intremap_prop_get,
-                             x86_iommu_intremap_prop_set, NULL);
-    s->dt_supported = false;
-    object_property_add_bool(o, "device-iotlb",
-                             x86_iommu_device_iotlb_prop_get,
-                             x86_iommu_device_iotlb_prop_set,
-                             NULL);
+    dc->props = x86_iommu_properties;
 }
 
 static const TypeInfo x86_iommu_info = {
     .name          = TYPE_X86_IOMMU_DEVICE,
     .parent        = TYPE_SYS_BUS_DEVICE,
-    .instance_init = x86_iommu_instance_init,
     .instance_size = sizeof(X86IOMMUState),
     .class_init    = x86_iommu_class_init,
     .class_size    = sizeof(X86IOMMUClass),

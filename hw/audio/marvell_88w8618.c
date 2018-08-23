@@ -13,6 +13,7 @@
 #include "hw/sysbus.h"
 #include "hw/hw.h"
 #include "hw/i2c/i2c.h"
+#include "hw/audio/wm8750.h"
 #include "audio/audio.h"
 
 #define MP_AUDIO_SIZE           0x00001000
@@ -292,7 +293,7 @@ static void mv88w8618_audio_class_init(ObjectClass *klass, void *data)
     dc->vmsd = &mv88w8618_audio_vmsd;
     dc->props = mv88w8618_audio_properties;
     /* Reason: pointer property "wm8750" */
-    dc->cannot_instantiate_with_device_add_yet = true;
+    dc->user_creatable = false;
 }
 
 static const TypeInfo mv88w8618_audio_info = {

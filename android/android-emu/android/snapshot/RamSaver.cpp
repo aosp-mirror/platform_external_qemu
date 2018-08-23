@@ -14,6 +14,7 @@
 #include "android/base/ContiguousRangeMapper.h"
 #include "android/base/Profiler.h"
 #include "android/base/Stopwatch.h"
+#include "android/base/EintrWrapper.h"
 #include "android/base/files/FileShareOpen.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/files/preadwrite.h"
@@ -157,6 +158,7 @@ RamSaver::RamSaver(const std::string& fileName,
 
 RamSaver::~RamSaver() {
     join();
+    mIndex.clear();
 }
 
 void RamSaver::registerBlock(const RamBlock& block) {
@@ -167,20 +169,17 @@ void RamSaver::savePage(int64_t blockOffset,
                         int64_t /*pageOffset*/,
                         int32_t /*pageSize*/) {
 
-    // Don't save any pages if in Async
-    // (we assume a separate async saving mechanism, such as
-    // having a separate backing store)
-    if (nonzero(mFlags & RamSaver::Flags::Async)) return;
-
     if (mLastBlockIndex < 0) {
         mLastBlockIndex = 0;
 #if SNAPSHOT_PROFILE > 1
         printf("From ctor to first savePage: %.03f\n",
-               (mSystem->getHighResTimeUs() - mStartTime) / 1000.0);
+                (mSystem->getHighResTimeUs() - mStartTime) / 1000.0);
 #endif
     }
+
     assert(!mIndex.blocks.empty());
     assert(mLastBlockIndex >= 0 && mLastBlockIndex < int(mIndex.blocks.size()));
+
     if (blockOffset !=
         mIndex.blocks[size_t(mLastBlockIndex)].ramBlock.startOffset) {
         mLastBlockIndex = int(std::distance(
@@ -194,6 +193,19 @@ void RamSaver::savePage(int64_t blockOffset,
     }
 
     auto& block = mIndex.blocks[size_t(mLastBlockIndex)];
+
+    if (block.ramBlock.readonly) {
+        // No need to save this block as it's readonly
+        return;
+    }
+
+    if ((block.ramBlock.flags & SNAPSHOT_RAM_MAPPED_SHARED) &&
+        nonzero(mFlags & RamSaver::Flags::Async)) {
+        // No need to save this block as it's mapped as shared
+        // and we are in async saving mode.
+        return;
+    }
+
     if (block.pages.empty()) {
         // First time we see a page for this block - save all its pages now.
         auto& ramBlock = block.ramBlock;
@@ -525,6 +537,24 @@ void RamSaver::writeIndex() {
             stream.putByte(uint8_t(id.size()));
             stream.write(id.data(), id.size());
             stream.putBe32(uint32_t(b.pages.size()));
+            stream.putBe32(uint32_t(b.ramBlock.pageSize));
+
+            if (nonzero(mFlags & RamSaver::Flags::Async)) {
+                stream.putBe32(b.ramBlock.flags);
+                stream.putString(b.ramBlock.path);
+            } else {
+                stream.putBe32(0);
+                stream.putString("");
+            }
+
+            if (b.ramBlock.readonly) {
+                continue;
+            }
+
+            if ((b.ramBlock.flags & SNAPSHOT_RAM_MAPPED_SHARED) &&
+                nonzero(mFlags & RamSaver::Flags::Async)) {
+                continue;
+            }
 
             for (const FileIndex::Block::Page& page : b.pages) {
                 stream.putPackedNum(uint64_t(
@@ -567,7 +597,7 @@ void RamSaver::writeIndex() {
         base::pwrite(mStreamFd, stream.buffer().data(), stream.buffer().size(),
                      mIndex.startPosInFile);
         setFileSize(mStreamFd, int64_t(mDiskSize));
-        fseeko64(mStream.get(), 0, SEEK_SET);
+        HANDLE_EINTR(fseeko64(mStream.get(), 0, SEEK_SET));
         mStream.putBe64(uint64_t(mIndex.startPosInFile));
         mHasError = ferror(mStream.get()) != 0;
         mStream.close();

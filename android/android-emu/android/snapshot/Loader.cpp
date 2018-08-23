@@ -181,6 +181,14 @@ void Loader::synchronize(bool isOnExit) {
             mRamLoader->invalidateGaps();
         }
 
+        // If we transitioned from file backed to non-file-backed, we will
+        // need to rewrite the index and cannot use a previous index.
+        // Otherwise, there will be a lot of confusing cases to handle.
+        if (mRamLoader->didSwitchFileBacking()) {
+            mRamLoader.clear();
+            return;
+        }
+
         if (!mRamLoader->hasGaps()) {
             const auto ram = fopen(
                     PathUtils::join(mSnapshot.dataDir(), kRamFileName).c_str(), "rb");
@@ -192,6 +200,7 @@ void Loader::synchronize(bool isOnExit) {
                     RamLoader::Flags::LoadIndexOnly,
                     mRamLoader->getRamBlockStructure());
         }
+
     }
 }
 

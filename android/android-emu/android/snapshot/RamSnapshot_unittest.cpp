@@ -52,15 +52,19 @@ TEST_F(RamSnapshotTest, SimpleRandom) {
     for (int i = 0; i < numTrials; i++) {
         auto testRam = generateRandomRam(numPages, zeroPageChance, i);
 
+        auto blockForTest =
+            makeRam("testRam", testRam.data(), (int64_t)testRam.size());
+
         saveRamSingleBlock(RamSaver::Flags::Compress,
-                           {"testRam", 0x0, testRam.data(), (int64_t)testRam.size(),
-                            kTestingPageSize},
+                           blockForTest,
                            ramPath);
 
         TestRamBuffer testRamOut(numPages * kTestingPageSize);
-        loadRamSingleBlock({"testRam", 0x0, testRamOut.data(),
-                            (int64_t)testRamOut.size(), kTestingPageSize},
-                           ramPath);
+
+        auto blockForTestOutput =
+            makeRam("testRam", testRamOut.data(), (int64_t)testRamOut.size());
+
+        loadRamSingleBlock(blockForTestOutput, ramPath);
 
         EXPECT_EQ(testRam, testRamOut);
     }
@@ -76,22 +80,24 @@ TEST_F(RamSnapshotTest, IncrementalSaveRandomNoChanges) {
     for (int i = 0; i < numTrials; i++) {
         auto testRam = generateRandomRam(numPages, zeroPageChance, i);
 
+        auto blockForTest =
+            makeRam("testRam", testRam.data(), (int64_t)testRam.size());
+
         saveRamSingleBlock(RamSaver::Flags::Compress,
-                           {"testRam", 0x0, testRam.data(), (int64_t)testRam.size(),
-                            kTestingPageSize},
+                           blockForTest,
                            ramPath);
 
         incrementalSaveSingleBlock(RamSaver::Flags::Compress,
-                {"testRam", 0x0, testRam.data(),
-                (int64_t)testRam.size(), kTestingPageSize},
-                {"testRam", 0x0, testRam.data(),
-                (int64_t)testRam.size(), kTestingPageSize},
-                ramPath);
+                                   blockForTest,
+                                   blockForTest,
+                                   ramPath);
 
         TestRamBuffer testRamOut(numPages * kTestingPageSize);
-        loadRamSingleBlock({"testRam", 0x0, testRamOut.data(),
-                            (int64_t)testRamOut.size(), kTestingPageSize},
-                           ramPath);
+
+        auto blockForTestOutput =
+            makeRam("testRam", testRamOut.data(), (int64_t)testRamOut.size());
+
+        loadRamSingleBlock(blockForTestOutput, ramPath);
 
         EXPECT_EQ(testRam, testRamOut);
     }
@@ -109,6 +115,9 @@ TEST_F(RamSnapshotTest, IncrementalSaveRandom) {
         auto ramToLoad = generateRandomRam(numPages, zeroPageChance, i);
         auto ramToSave = ramToLoad;
 
+        auto blockForLoad =
+            makeRam("testRam", ramToLoad.data(), (int64_t)ramToLoad.size());
+
         saveRamSingleBlock(RamSaver::Flags::Compress,
                            {"testRam", 0x0, ramToLoad.data(), (int64_t)ramToLoad.size(),
                             kTestingPageSize},
@@ -116,17 +125,19 @@ TEST_F(RamSnapshotTest, IncrementalSaveRandom) {
 
         randomMutateRam(ramToSave, noChangeChance, zeroPageChance, i);
 
+        auto blockForSave =
+            makeRam("testRam", ramToSave.data(), (int64_t)ramToSave.size());
+
         incrementalSaveSingleBlock(RamSaver::Flags::Compress,
-                {"testRam", 0x0, ramToLoad.data(),
-                (int64_t)ramToLoad.size(), kTestingPageSize},
-                {"testRam", 0x0, ramToSave.data(),
-                (int64_t)ramToSave.size(), kTestingPageSize},
-                ramPath);
+                                   blockForLoad,
+                                   blockForSave,
+                                   ramPath);
 
         TestRamBuffer testRamOut(numPages * kTestingPageSize);
-        loadRamSingleBlock({"testRam", 0x0, testRamOut.data(),
-                            (int64_t)testRamOut.size(), kTestingPageSize},
-                           ramPath);
+        auto blockForTestOutput =
+            makeRam("testRam", testRamOut.data(), (int64_t)testRamOut.size());
+
+        loadRamSingleBlock(blockForTestOutput, ramPath);
 
         EXPECT_EQ(ramToSave, testRamOut);
     }

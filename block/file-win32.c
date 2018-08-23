@@ -25,15 +25,15 @@
 #include "qemu/osdep.h"
 #include "qapi/error.h"
 #include "qemu/cutils.h"
-#include "qemu/timer.h"
 #include "block/block_int.h"
 #include "qemu/module.h"
+#include "qemu/option.h"
 #include "block/raw-aio.h"
-#include "block/trace.h"
+#include "trace.h"
 #include "block/thread-pool.h"
 #include "qemu/iov.h"
+#include "qapi/qmp/qdict.h"
 #include "qapi/qmp/qstring.h"
-#include "qapi/util.h"
 #include <windows.h>
 #include <winioctl.h>
 #include "sysemu/os-win32.h"
@@ -305,12 +305,7 @@ static void raw_parse_flags(int flags, bool use_aio, int *access_flags,
 static void raw_parse_filename(const char *filename, QDict *options,
                                Error **errp)
 {
-    /* The filename does not have to be prefixed by the protocol name, since
-     * "file" is the default protocol; therefore, the return value of this
-     * function call can be ignored. */
-    strstart(filename, "file:", &filename);
-
-    qdict_put_obj(options, "filename", QOBJECT(qstring_from_str(filename)));
+    bdrv_parse_filename_strip_prefix(filename, "file:", options);
 }
 
 static QemuOptsList raw_runtime_opts = {
@@ -337,8 +332,8 @@ static bool get_aio_option(QemuOpts *opts, int flags, Error **errp)
 
     aio_default = (flags & BDRV_O_NATIVE_AIO) ? BLOCKDEV_AIO_OPTIONS_NATIVE
                                               : BLOCKDEV_AIO_OPTIONS_THREADS;
-    aio = qapi_enum_parse(BlockdevAioOptions_lookup, qemu_opt_get(opts, "aio"),
-                          BLOCKDEV_AIO_OPTIONS__MAX, aio_default, errp);
+    aio = qapi_enum_parse(&BlockdevAioOptions_lookup, qemu_opt_get(opts, "aio"),
+                          aio_default, errp);
 
     switch (aio) {
     case BLOCKDEV_AIO_OPTIONS_NATIVE:
@@ -369,6 +364,12 @@ static int raw_open(BlockDriverState *bs, QDict *options, int flags,
     qemu_opts_absorb_qdict(opts, options, &local_err);
     if (local_err) {
         error_propagate(errp, local_err);
+        ret = -EINVAL;
+        goto fail;
+    }
+
+    if (qdict_get_try_bool(options, "locking", false)) {
+        error_setg(errp, "locking=on is not supported on Windows");
         ret = -EINVAL;
         goto fail;
     }
@@ -503,11 +504,18 @@ static void raw_close(BlockDriverState *bs)
     }
 }
 
-static int raw_truncate(BlockDriverState *bs, int64_t offset)
+static int raw_truncate(BlockDriverState *bs, int64_t offset,
+                        PreallocMode prealloc, Error **errp)
 {
     BDRVRawState *s = bs->opaque;
     LONG low, high;
     DWORD dwPtrLow;
+
+    if (prealloc != PREALLOC_MODE_OFF) {
+        error_setg(errp, "Unsupported preallocation mode '%s'",
+                   PreallocMode_str(prealloc));
+        return -ENOTSUP;
+    }
 
     low = offset;
     high = offset >> 32;
@@ -518,11 +526,11 @@ static int raw_truncate(BlockDriverState *bs, int64_t offset)
      */
     dwPtrLow = SetFilePointer(s->hfile, low, &high, FILE_BEGIN);
     if (dwPtrLow == INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR) {
-        fprintf(stderr, "SetFilePointer error: %lu\n", GetLastError());
+        error_setg_win32(errp, GetLastError(), "SetFilePointer error");
         return -EIO;
     }
     if (SetEndOfFile(s->hfile) == 0) {
-        fprintf(stderr, "SetEndOfFile error: %lu\n", GetLastError());
+        error_setg_win32(errp, GetLastError(), "SetEndOfFile error");
         return -EIO;
     }
     return 0;
@@ -586,9 +594,40 @@ static int64_t raw_get_allocated_file_size(BlockDriverState *bs)
     return st.st_size;
 }
 
-static int raw_create(const char *filename, QemuOpts *opts, Error **errp)
+static int raw_co_create(BlockdevCreateOptions *options, Error **errp)
 {
+    BlockdevCreateOptionsFile *file_opts;
     int fd;
+
+    assert(options->driver == BLOCKDEV_DRIVER_FILE);
+    file_opts = &options->u.file;
+
+    if (file_opts->has_preallocation) {
+        error_setg(errp, "Preallocation is not supported on Windows");
+        return -EINVAL;
+    }
+    if (file_opts->has_nocow) {
+        error_setg(errp, "nocow is not supported on Windows");
+        return -EINVAL;
+    }
+
+    fd = qemu_open(file_opts->filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY,
+                   0644);
+    if (fd < 0) {
+        error_setg_errno(errp, errno, "Could not create file");
+        return -EIO;
+    }
+    set_sparse(fd);
+    ftruncate(fd, file_opts->size);
+    qemu_close(fd);
+
+    return 0;
+}
+
+static int coroutine_fn raw_co_create_opts(const char *filename, QemuOpts *opts,
+                                           Error **errp)
+{
+    BlockdevCreateOptions options;
     int64_t total_size = 0;
 
     strstart(filename, "file:", &filename);
@@ -597,18 +636,17 @@ static int raw_create(const char *filename, QemuOpts *opts, Error **errp)
     total_size = ROUND_UP(qemu_opt_get_size_del(opts, BLOCK_OPT_SIZE, 0),
                           BDRV_SECTOR_SIZE);
 
-    fd = qemu_open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY,
-                   0644);
-    if (fd < 0) {
-        error_setg_errno(errp, errno, "Could not create file");
-        return -EIO;
-    }
-    set_sparse(fd);
-    ftruncate(fd, total_size);
-    qemu_close(fd);
-    return 0;
+    options = (BlockdevCreateOptions) {
+        .driver     = BLOCKDEV_DRIVER_FILE,
+        .u.file     = {
+            .filename           = (char *) filename,
+            .size               = total_size,
+            .has_preallocation  = false,
+            .has_nocow          = false,
+        },
+    };
+    return raw_co_create(&options, errp);
 }
-
 
 static QemuOptsList raw_create_opts = {
     .name = "raw-create-opts",
@@ -632,7 +670,7 @@ BlockDriver bdrv_file = {
     .bdrv_file_open     = raw_open,
     .bdrv_refresh_limits = raw_probe_alignment,
     .bdrv_close         = raw_close,
-    .bdrv_create        = raw_create,
+    .bdrv_co_create_opts = raw_co_create_opts,
     .bdrv_has_zero_init = bdrv_has_zero_init_1,
 
     .bdrv_aio_readv     = raw_aio_readv,
@@ -708,10 +746,7 @@ static int hdev_probe_device(const char *filename)
 static void hdev_parse_filename(const char *filename, QDict *options,
                                 Error **errp)
 {
-    /* The prefix is optional, just as for "file". */
-    strstart(filename, "host_device:", &filename);
-
-    qdict_put_obj(options, "filename", QOBJECT(qstring_from_str(filename)));
+    bdrv_parse_filename_strip_prefix(filename, "host_device:", options);
 }
 
 static int hdev_open(BlockDriverState *bs, QDict *options, int flags,

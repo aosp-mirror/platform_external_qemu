@@ -26,16 +26,18 @@
 #include "qapi/error.h"
 #include "qemu/cutils.h"
 #include "qemu/error-report.h"
-#include "qemu/timer.h"
-#include "qemu/log.h"
 #include "block/block_int.h"
 #include "qemu/module.h"
-#include "block/trace.h"
+#include "qemu/option.h"
+#include "trace.h"
 #include "block/thread-pool.h"
 #include "qemu/iov.h"
 #include "block/raw-aio.h"
-#include "qapi/util.h"
+#include "qapi/qmp/qdict.h"
 #include "qapi/qmp/qstring.h"
+
+#include "scsi/pr-manager.h"
+#include "scsi/constants.h"
 
 #if defined(__APPLE__) && (__MACH__)
 #include <paths.h>
@@ -132,8 +134,15 @@ do { \
 
 #define MAX_BLOCKSIZE	4096
 
+/* Posix file locking bytes. Libvirt takes byte 0, we start from higher bytes,
+ * leaving a few more bytes for its future use. */
+#define RAW_LOCK_PERM_BASE             100
+#define RAW_LOCK_SHARED_BASE           200
+
 typedef struct BDRVRawState {
     int fd;
+    int lock_fd;
+    bool use_lock;
     int type;
     int open_flags;
     size_t buf_align;
@@ -141,6 +150,10 @@ typedef struct BDRVRawState {
     QEMUTimer flush_timer;
     bool flush_timer_running;
 #endif
+
+    /* The current permissions. */
+    uint64_t perm;
+    uint64_t shared_perm;
 
 #ifdef CONFIG_XFS
     bool is_xfs:1;
@@ -152,6 +165,8 @@ typedef struct BDRVRawState {
     bool page_cache_inconsistent:1;
     bool has_fallocate;
     bool needs_alignment;
+
+    PRManager *pr_mgr;
 } BDRVRawState;
 
 typedef struct BDRVRawReopenState {
@@ -389,12 +404,7 @@ static void raw_parse_flags(int bdrv_flags, int *open_flags)
 static void raw_parse_filename(const char *filename, QDict *options,
                                Error **errp)
 {
-    /* The filename does not have to be prefixed by the protocol name, since
-     * "file" is the default protocol; therefore, the return value of this
-     * function call can be ignored. */
-    strstart(filename, "file:", &filename);
-
-    qdict_put_obj(options, "filename", QOBJECT(qstring_from_str(filename)));
+    bdrv_parse_filename_strip_prefix(filename, "file:", options);
 }
 
 static QemuOptsList raw_runtime_opts = {
@@ -411,6 +421,16 @@ static QemuOptsList raw_runtime_opts = {
             .type = QEMU_OPT_STRING,
             .help = "host AIO implementation (threads, native)",
         },
+        {
+            .name = "locking",
+            .type = QEMU_OPT_STRING,
+            .help = "file locking mode (on/off/auto, default: auto)",
+        },
+        {
+            .name = "pr-manager",
+            .type = QEMU_OPT_STRING,
+            .help = "id of persistent reservation manager object (default: none)",
+        },
         { /* end of list */ }
     },
 };
@@ -422,9 +442,11 @@ static int raw_open_common(BlockDriverState *bs, QDict *options,
     QemuOpts *opts;
     Error *local_err = NULL;
     const char *filename = NULL;
+    const char *str;
     BlockdevAioOptions aio, aio_default;
     int fd, ret;
     struct stat st;
+    OnOffAuto locking;
 
     opts = qemu_opts_create(&raw_runtime_opts, NULL, 0, &error_abort);
     qemu_opts_absorb_qdict(opts, options, &local_err);
@@ -445,14 +467,54 @@ static int raw_open_common(BlockDriverState *bs, QDict *options,
     aio_default = (bdrv_flags & BDRV_O_NATIVE_AIO)
                   ? BLOCKDEV_AIO_OPTIONS_NATIVE
                   : BLOCKDEV_AIO_OPTIONS_THREADS;
-    aio = qapi_enum_parse(BlockdevAioOptions_lookup, qemu_opt_get(opts, "aio"),
-                          BLOCKDEV_AIO_OPTIONS__MAX, aio_default, &local_err);
+    aio = qapi_enum_parse(&BlockdevAioOptions_lookup,
+                          qemu_opt_get(opts, "aio"),
+                          aio_default, &local_err);
     if (local_err) {
         error_propagate(errp, local_err);
         ret = -EINVAL;
         goto fail;
     }
     s->use_linux_aio = (aio == BLOCKDEV_AIO_OPTIONS_NATIVE);
+
+    locking = qapi_enum_parse(&OnOffAuto_lookup,
+                              qemu_opt_get(opts, "locking"),
+                              ON_OFF_AUTO_AUTO, &local_err);
+    if (local_err) {
+        error_propagate(errp, local_err);
+        ret = -EINVAL;
+        goto fail;
+    }
+    switch (locking) {
+    case ON_OFF_AUTO_ON:
+        s->use_lock = true;
+        if (!qemu_has_ofd_lock()) {
+            fprintf(stderr,
+                    "File lock requested but OFD locking syscall is "
+                    "unavailable, falling back to POSIX file locks.\n"
+                    "Due to the implementation, locks can be lost "
+                    "unexpectedly.\n");
+        }
+        break;
+    case ON_OFF_AUTO_OFF:
+        s->use_lock = false;
+        break;
+    case ON_OFF_AUTO_AUTO:
+        s->use_lock = qemu_has_ofd_lock();
+        break;
+    default:
+        abort();
+    }
+
+    str = qemu_opt_get(opts, "pr-manager");
+    if (str) {
+        s->pr_mgr = pr_manager_lookup(str, &local_err);
+        if (local_err) {
+            error_propagate(errp, local_err);
+            ret = -EINVAL;
+            goto fail;
+        }
+    }
 
     s->open_flags = open_flags;
     raw_parse_flags(bdrv_flags, &s->open_flags);
@@ -468,6 +530,21 @@ static int raw_open_common(BlockDriverState *bs, QDict *options,
         goto fail;
     }
     s->fd = fd;
+
+    s->lock_fd = -1;
+    if (s->use_lock) {
+        fd = qemu_open(filename, s->open_flags);
+        if (fd < 0) {
+            ret = -errno;
+            error_setg_errno(errp, errno, "Could not open '%s' for locking",
+                             filename);
+            qemu_close(s->fd);
+            goto fail;
+        }
+        s->lock_fd = fd;
+    }
+    s->perm = 0;
+    s->shared_perm = BLK_PERM_ALL;
 
 #ifdef CONFIG_LINUX_AIO
      /* Currently Linux does AIO only for files opened with O_DIRECT */
@@ -488,7 +565,6 @@ static int raw_open_common(BlockDriverState *bs, QDict *options,
 
     s->has_discard = true;
     s->has_write_zeroes = true;
-    bs->supported_zero_flags = BDRV_REQ_MAY_UNMAP;
     if ((bs->open_flags & BDRV_O_NOCACHE) != 0) {
         s->needs_alignment = true;
     }
@@ -560,6 +636,161 @@ static int raw_open(BlockDriverState *bs, QDict *options, int flags,
 
     s->type = FTYPE_FILE;
     return raw_open_common(bs, options, flags, 0, errp);
+}
+
+typedef enum {
+    RAW_PL_PREPARE,
+    RAW_PL_COMMIT,
+    RAW_PL_ABORT,
+} RawPermLockOp;
+
+#define PERM_FOREACH(i) \
+    for ((i) = 0; (1ULL << (i)) <= BLK_PERM_ALL; i++)
+
+/* Lock bytes indicated by @perm_lock_bits and @shared_perm_lock_bits in the
+ * file; if @unlock == true, also unlock the unneeded bytes.
+ * @shared_perm_lock_bits is the mask of all permissions that are NOT shared.
+ */
+static int raw_apply_lock_bytes(BDRVRawState *s,
+                                uint64_t perm_lock_bits,
+                                uint64_t shared_perm_lock_bits,
+                                bool unlock, Error **errp)
+{
+    int ret;
+    int i;
+
+    PERM_FOREACH(i) {
+        int off = RAW_LOCK_PERM_BASE + i;
+        if (perm_lock_bits & (1ULL << i)) {
+            ret = qemu_lock_fd(s->lock_fd, off, 1, false);
+            if (ret) {
+                error_setg(errp, "Failed to lock byte %d", off);
+                return ret;
+            }
+        } else if (unlock) {
+            ret = qemu_unlock_fd(s->lock_fd, off, 1);
+            if (ret) {
+                error_setg(errp, "Failed to unlock byte %d", off);
+                return ret;
+            }
+        }
+    }
+    PERM_FOREACH(i) {
+        int off = RAW_LOCK_SHARED_BASE + i;
+        if (shared_perm_lock_bits & (1ULL << i)) {
+            ret = qemu_lock_fd(s->lock_fd, off, 1, false);
+            if (ret) {
+                error_setg(errp, "Failed to lock byte %d", off);
+                return ret;
+            }
+        } else if (unlock) {
+            ret = qemu_unlock_fd(s->lock_fd, off, 1);
+            if (ret) {
+                error_setg(errp, "Failed to unlock byte %d", off);
+                return ret;
+            }
+        }
+    }
+    return 0;
+}
+
+/* Check "unshared" bytes implied by @perm and ~@shared_perm in the file. */
+static int raw_check_lock_bytes(BDRVRawState *s,
+                                uint64_t perm, uint64_t shared_perm,
+                                Error **errp)
+{
+    int ret;
+    int i;
+
+    PERM_FOREACH(i) {
+        int off = RAW_LOCK_SHARED_BASE + i;
+        uint64_t p = 1ULL << i;
+        if (perm & p) {
+            ret = qemu_lock_fd_test(s->lock_fd, off, 1, true);
+            if (ret) {
+                char *perm_name = bdrv_perm_names(p);
+                error_setg(errp,
+                           "Failed to get \"%s\" lock",
+                           perm_name);
+                g_free(perm_name);
+                error_append_hint(errp,
+                                  "Is another process using the image?\n");
+                return ret;
+            }
+        }
+    }
+    PERM_FOREACH(i) {
+        int off = RAW_LOCK_PERM_BASE + i;
+        uint64_t p = 1ULL << i;
+        if (!(shared_perm & p)) {
+            ret = qemu_lock_fd_test(s->lock_fd, off, 1, true);
+            if (ret) {
+                char *perm_name = bdrv_perm_names(p);
+                error_setg(errp,
+                           "Failed to get shared \"%s\" lock",
+                           perm_name);
+                g_free(perm_name);
+                error_append_hint(errp,
+                                  "Is another process using the image?\n");
+                return ret;
+            }
+        }
+    }
+    return 0;
+}
+
+static int raw_handle_perm_lock(BlockDriverState *bs,
+                                RawPermLockOp op,
+                                uint64_t new_perm, uint64_t new_shared,
+                                Error **errp)
+{
+    BDRVRawState *s = bs->opaque;
+    int ret = 0;
+    Error *local_err = NULL;
+
+    if (!s->use_lock) {
+        return 0;
+    }
+
+    if (bdrv_get_flags(bs) & BDRV_O_INACTIVE) {
+        return 0;
+    }
+
+    assert(s->lock_fd > 0);
+
+    switch (op) {
+    case RAW_PL_PREPARE:
+        ret = raw_apply_lock_bytes(s, s->perm | new_perm,
+                                   ~s->shared_perm | ~new_shared,
+                                   false, errp);
+        if (!ret) {
+            ret = raw_check_lock_bytes(s, new_perm, new_shared, errp);
+            if (!ret) {
+                return 0;
+            }
+        }
+        op = RAW_PL_ABORT;
+        /* fall through to unlock bytes. */
+    case RAW_PL_ABORT:
+        raw_apply_lock_bytes(s, s->perm, ~s->shared_perm, true, &local_err);
+        if (local_err) {
+            /* Theoretically the above call only unlocks bytes and it cannot
+             * fail. Something weird happened, report it.
+             */
+            error_report_err(local_err);
+        }
+        break;
+    case RAW_PL_COMMIT:
+        raw_apply_lock_bytes(s, new_perm, ~new_shared, true, &local_err);
+        if (local_err) {
+            /* Theoretically the above call only unlocks bytes and it cannot
+             * fail. Something weird happened, report it.
+             */
+            error_report_err(local_err);
+        }
+        break;
+    }
+    return ret;
 }
 
 static int raw_reopen_prepare(BDRVReopenState *state,
@@ -1160,6 +1391,9 @@ static ssize_t handle_aiocb_write_zeroes(RawPosixAIOData *aiocb)
 #if defined(CONFIG_FALLOCATE) || defined(CONFIG_XFS)
     BDRVRawState *s = aiocb->bs->opaque;
 #endif
+#ifdef CONFIG_FALLOCATE
+    int64_t len;
+#endif
 
     if (aiocb->aio_type & QEMU_AIO_BLKDEV) {
         return handle_aiocb_write_zeroes_block(aiocb);
@@ -1202,7 +1436,10 @@ static ssize_t handle_aiocb_write_zeroes(RawPosixAIOData *aiocb)
 #endif
 
 #ifdef CONFIG_FALLOCATE
-    if (s->has_fallocate && aiocb->aio_offset >= bdrv_getlength(aiocb->bs)) {
+    /* Last resort: we are trying to extend the file with zeroed data. This
+     * can be done via fallocate(fd, 0) */
+    len = bdrv_getlength(aiocb->bs);
+    if (s->has_fallocate && len >= 0 && aiocb->aio_offset >= len) {
         int ret = do_fallocate(s->fd, 0, aiocb->aio_offset, aiocb->aio_nbytes);
         if (ret == 0 || ret != -ENOTSUP) {
             return ret;
@@ -1306,7 +1543,7 @@ static int aio_worker(void *arg)
 
 static int paio_submit_co(BlockDriverState *bs, int fd,
                           int64_t offset, QEMUIOVector *qiov,
-                          int count, int type)
+                          int bytes, int type)
 {
     RawPosixAIOData *acb = g_new(RawPosixAIOData, 1);
     ThreadPool *pool;
@@ -1315,22 +1552,22 @@ static int paio_submit_co(BlockDriverState *bs, int fd,
     acb->aio_type = type;
     acb->aio_fildes = fd;
 
-    acb->aio_nbytes = count;
+    acb->aio_nbytes = bytes;
     acb->aio_offset = offset;
 
     if (qiov) {
         acb->aio_iov = qiov->iov;
         acb->aio_niov = qiov->niov;
-        assert(qiov->size == count);
+        assert(qiov->size == bytes);
     }
 
-    trace_paio_submit_co(offset, count, type);
+    trace_paio_submit_co(offset, bytes, type);
     pool = aio_get_thread_pool(bdrv_get_aio_context(bs));
     return thread_pool_submit_co(pool, aio_worker, acb);
 }
 
 static BlockAIOCB *paio_submit(BlockDriverState *bs, int fd,
-        int64_t offset, QEMUIOVector *qiov, int count,
+        int64_t offset, QEMUIOVector *qiov, int bytes,
         BlockCompletionFunc *cb, void *opaque, int type)
 {
     RawPosixAIOData *acb = g_new(RawPosixAIOData, 1);
@@ -1340,7 +1577,7 @@ static BlockAIOCB *paio_submit(BlockDriverState *bs, int fd,
     acb->aio_type = type;
     acb->aio_fildes = fd;
 
-    acb->aio_nbytes = count;
+    acb->aio_nbytes = bytes;
     acb->aio_offset = offset;
 
     if (qiov) {
@@ -1349,7 +1586,7 @@ static BlockAIOCB *paio_submit(BlockDriverState *bs, int fd,
         assert(qiov->size == acb->aio_nbytes);
     }
 
-    trace_paio_submit(acb, opaque, offset, count, type);
+    trace_paio_submit(acb, opaque, offset, bytes, type);
     pool = aio_get_thread_pool(bdrv_get_aio_context(bs));
     return thread_pool_submit_aio(pool, aio_worker, acb, cb, opaque);
 }
@@ -1446,26 +1683,161 @@ static void raw_close(BlockDriverState *bs)
         qemu_close(s->fd);
         s->fd = -1;
     }
+    if (s->lock_fd >= 0) {
+        qemu_close(s->lock_fd);
+        s->lock_fd = -1;
+    }
 }
 
-static int raw_truncate(BlockDriverState *bs, int64_t offset)
+/**
+ * Truncates the given regular file @fd to @offset and, when growing, fills the
+ * new space according to @prealloc.
+ *
+ * Returns: 0 on success, -errno on failure.
+ */
+static int raw_regular_truncate(int fd, int64_t offset, PreallocMode prealloc,
+                                Error **errp)
+{
+    int result = 0;
+    int64_t current_length = 0;
+    char *buf = NULL;
+    struct stat st;
+
+    if (fstat(fd, &st) < 0) {
+        result = -errno;
+        error_setg_errno(errp, -result, "Could not stat file");
+        return result;
+    }
+
+    current_length = st.st_size;
+    if (current_length > offset && prealloc != PREALLOC_MODE_OFF) {
+        error_setg(errp, "Cannot use preallocation for shrinking files");
+        return -ENOTSUP;
+    }
+
+    switch (prealloc) {
+#ifdef CONFIG_POSIX_FALLOCATE
+    case PREALLOC_MODE_FALLOC:
+        /*
+         * Truncating before posix_fallocate() makes it about twice slower on
+         * file systems that do not support fallocate(), trying to check if a
+         * block is allocated before allocating it, so don't do that here.
+         */
+        if (offset != current_length) {
+            result = -posix_fallocate(fd, current_length, offset - current_length);
+            if (result != 0) {
+                /* posix_fallocate() doesn't set errno. */
+                error_setg_errno(errp, -result,
+                                 "Could not preallocate new data");
+            }
+        } else {
+            result = 0;
+        }
+        goto out;
+#endif
+    case PREALLOC_MODE_FULL:
+    {
+        int64_t num = 0, left = offset - current_length;
+        off_t seek_result;
+
+        /*
+         * Knowing the final size from the beginning could allow the file
+         * system driver to do less allocations and possibly avoid
+         * fragmentation of the file.
+         */
+        if (ftruncate(fd, offset) != 0) {
+            result = -errno;
+            error_setg_errno(errp, -result, "Could not resize file");
+            goto out;
+        }
+
+        buf = g_malloc0(65536);
+
+        seek_result = lseek(fd, current_length, SEEK_SET);
+        if (seek_result < 0) {
+            result = -errno;
+            error_setg_errno(errp, -result,
+                             "Failed to seek to the old end of file");
+            goto out;
+        }
+
+        while (left > 0) {
+            num = MIN(left, 65536);
+            result = write(fd, buf, num);
+            if (result < 0) {
+                result = -errno;
+                error_setg_errno(errp, -result,
+                                 "Could not write zeros for preallocation");
+                goto out;
+            }
+            left -= result;
+        }
+        if (result >= 0) {
+            result = fsync(fd);
+            if (result < 0) {
+                result = -errno;
+                error_setg_errno(errp, -result,
+                                 "Could not flush file to disk");
+                goto out;
+            }
+        }
+        goto out;
+    }
+    case PREALLOC_MODE_OFF:
+        if (ftruncate(fd, offset) != 0) {
+            result = -errno;
+            error_setg_errno(errp, -result, "Could not resize file");
+        }
+        return result;
+    default:
+        result = -ENOTSUP;
+        error_setg(errp, "Unsupported preallocation mode: %s",
+                   PreallocMode_str(prealloc));
+        return result;
+    }
+
+out:
+    if (result < 0) {
+        if (ftruncate(fd, current_length) < 0) {
+            error_report("Failed to restore old file length: %s",
+                         strerror(errno));
+        }
+    }
+
+    g_free(buf);
+    return result;
+}
+
+static int raw_truncate(BlockDriverState *bs, int64_t offset,
+                        PreallocMode prealloc, Error **errp)
 {
     BDRVRawState *s = bs->opaque;
     struct stat st;
+    int ret;
 
     if (fstat(s->fd, &st)) {
-        return -errno;
+        ret = -errno;
+        error_setg_errno(errp, -ret, "Failed to fstat() the file");
+        return ret;
     }
 
     if (S_ISREG(st.st_mode)) {
-        if (ftruncate(s->fd, offset) < 0) {
-            return -errno;
+        return raw_regular_truncate(s->fd, offset, prealloc, errp);
+    }
+
+    if (prealloc != PREALLOC_MODE_OFF) {
+        error_setg(errp, "Preallocation mode '%s' unsupported for this "
+                   "non-regular file", PreallocMode_str(prealloc));
+        return -ENOTSUP;
+    }
+
+    if (S_ISCHR(st.st_mode) || S_ISBLK(st.st_mode)) {
+        if (offset > raw_getlength(bs)) {
+            error_setg(errp, "Cannot grow device files");
+            return -EINVAL;
         }
-    } else if (S_ISCHR(st.st_mode) || S_ISBLK(st.st_mode)) {
-       if (offset > raw_getlength(bs)) {
-           return -EINVAL;
-       }
     } else {
+        error_setg(errp, "Resizing this file is not supported");
         return -ENOTSUP;
     }
 
@@ -1652,34 +2024,25 @@ static int64_t raw_get_allocated_file_size(BlockDriverState *bs)
     return (int64_t)st.st_blocks * 512;
 }
 
-static int raw_create(const char *filename, QemuOpts *opts, Error **errp)
+static int raw_co_create(BlockdevCreateOptions *options, Error **errp)
 {
+    BlockdevCreateOptionsFile *file_opts;
     int fd;
     int result = 0;
-    int64_t total_size = 0;
-    bool nocow = false;
-    PreallocMode prealloc;
-    char *buf = NULL;
-    Error *local_err = NULL;
 
-    strstart(filename, "file:", &filename);
+    /* Validate options and set default values */
+    assert(options->driver == BLOCKDEV_DRIVER_FILE);
+    file_opts = &options->u.file;
 
-    /* Read out options */
-    total_size = ROUND_UP(qemu_opt_get_size_del(opts, BLOCK_OPT_SIZE, 0),
-                          BDRV_SECTOR_SIZE);
-    nocow = qemu_opt_get_bool(opts, BLOCK_OPT_NOCOW, false);
-    buf = qemu_opt_get_del(opts, BLOCK_OPT_PREALLOC);
-    prealloc = qapi_enum_parse(PreallocMode_lookup, buf,
-                               PREALLOC_MODE__MAX, PREALLOC_MODE_OFF,
-                               &local_err);
-    g_free(buf);
-    if (local_err) {
-        error_propagate(errp, local_err);
-        result = -EINVAL;
-        goto out;
+    if (!file_opts->has_nocow) {
+        file_opts->nocow = false;
+    }
+    if (!file_opts->has_preallocation) {
+        file_opts->preallocation = PREALLOC_MODE_OFF;
     }
 
-    fd = qemu_open(filename, O_RDWR | O_CREAT | O_TRUNC | O_BINARY,
+    /* Create file */
+    fd = qemu_open(file_opts->filename, O_RDWR | O_CREAT | O_TRUNC | O_BINARY,
                    0644);
     if (fd < 0) {
         result = -errno;
@@ -1687,7 +2050,7 @@ static int raw_create(const char *filename, QemuOpts *opts, Error **errp)
         goto out;
     }
 
-    if (nocow) {
+    if (file_opts->nocow) {
 #ifdef __linux__
         /* Set NOCOW flag to solve performance issue on fs like btrfs.
          * This is an optimisation. The FS_IOC_SETFLAGS ioctl return value
@@ -1702,71 +2065,10 @@ static int raw_create(const char *filename, QemuOpts *opts, Error **errp)
 #endif
     }
 
-    switch (prealloc) {
-#ifdef CONFIG_POSIX_FALLOCATE
-    case PREALLOC_MODE_FALLOC:
-        /*
-         * Truncating before posix_fallocate() makes it about twice slower on
-         * file systems that do not support fallocate(), trying to check if a
-         * block is allocated before allocating it, so don't do that here.
-         */
-        result = -posix_fallocate(fd, 0, total_size);
-        if (result != 0) {
-            /* posix_fallocate() doesn't set errno. */
-            error_setg_errno(errp, -result,
-                             "Could not preallocate data for the new file");
-        }
-        break;
-#endif
-    case PREALLOC_MODE_FULL:
-    {
-        /*
-         * Knowing the final size from the beginning could allow the file
-         * system driver to do less allocations and possibly avoid
-         * fragmentation of the file.
-         */
-        if (ftruncate(fd, total_size) != 0) {
-            result = -errno;
-            error_setg_errno(errp, -result, "Could not resize file");
-            goto out_close;
-        }
-
-        int64_t num = 0, left = total_size;
-        buf = g_malloc0(65536);
-
-        while (left > 0) {
-            num = MIN(left, 65536);
-            result = write(fd, buf, num);
-            if (result < 0) {
-                result = -errno;
-                error_setg_errno(errp, -result,
-                                 "Could not write to the new file");
-                break;
-            }
-            left -= result;
-        }
-        if (result >= 0) {
-            result = fsync(fd);
-            if (result < 0) {
-                result = -errno;
-                error_setg_errno(errp, -result,
-                                 "Could not flush new file to disk");
-            }
-        }
-        g_free(buf);
-        break;
-    }
-    case PREALLOC_MODE_OFF:
-        if (ftruncate(fd, total_size) != 0) {
-            result = -errno;
-            error_setg_errno(errp, -result, "Could not resize file");
-        }
-        break;
-    default:
-        result = -EINVAL;
-        error_setg(errp, "Unsupported preallocation mode: %s",
-                   PreallocMode_lookup[prealloc]);
-        break;
+    result = raw_regular_truncate(fd, file_opts->size, file_opts->preallocation,
+                                  errp);
+    if (result < 0) {
+        goto out_close;
     }
 
 out_close:
@@ -1776,6 +2078,46 @@ out_close:
     }
 out:
     return result;
+}
+
+static int coroutine_fn raw_co_create_opts(const char *filename, QemuOpts *opts,
+                                           Error **errp)
+{
+    BlockdevCreateOptions options;
+    int64_t total_size = 0;
+    bool nocow = false;
+    PreallocMode prealloc;
+    char *buf = NULL;
+    Error *local_err = NULL;
+
+    /* Skip file: protocol prefix */
+    strstart(filename, "file:", &filename);
+
+    /* Read out options */
+    total_size = ROUND_UP(qemu_opt_get_size_del(opts, BLOCK_OPT_SIZE, 0),
+                          BDRV_SECTOR_SIZE);
+    nocow = qemu_opt_get_bool(opts, BLOCK_OPT_NOCOW, false);
+    buf = qemu_opt_get_del(opts, BLOCK_OPT_PREALLOC);
+    prealloc = qapi_enum_parse(&PreallocMode_lookup, buf,
+                               PREALLOC_MODE_OFF, &local_err);
+    g_free(buf);
+    if (local_err) {
+        error_propagate(errp, local_err);
+        return -EINVAL;
+    }
+
+    options = (BlockdevCreateOptions) {
+        .driver     = BLOCKDEV_DRIVER_FILE,
+        .u.file     = {
+            .filename           = (char *) filename,
+            .size               = total_size,
+            .has_preallocation  = true,
+            .preallocation      = prealloc,
+            .has_nocow          = true,
+            .nocow              = nocow,
+        },
+    };
+    return raw_co_create(&options, errp);
 }
 
 /*
@@ -1810,7 +2152,12 @@ static int find_allocation(BlockDriverState *bs, off_t start,
     if (offs < 0) {
         return -errno;          /* D3 or D4 */
     }
-    assert(offs >= start);
+
+    if (offs < start) {
+        /* This is not a valid return by lseek().  We are safe to just return
+         * -EIO in this case, and we'll treat it like D4. */
+        return -EIO;
+    }
 
     if (offs > start) {
         /* D2: in hole, next data at offs */
@@ -1842,7 +2189,12 @@ static int find_allocation(BlockDriverState *bs, off_t start,
     if (offs < 0) {
         return -errno;          /* D1 and (H3 or H4) */
     }
-    assert(offs >= start);
+
+    if (offs < start) {
+        /* This is not a valid return by lseek().  We are safe to just return
+         * -EIO in this case, and we'll treat it like H4. */
+        return -EIO;
+    }
 
     if (offs > start) {
         /*
@@ -1864,25 +2216,24 @@ static int find_allocation(BlockDriverState *bs, off_t start,
 }
 
 /*
- * Returns the allocation status of the specified sectors.
+ * Returns the allocation status of the specified offset.
  *
- * If 'sector_num' is beyond the end of the disk image the return value is 0
- * and 'pnum' is set to 0.
+ * The block layer guarantees 'offset' and 'bytes' are within bounds.
  *
- * 'pnum' is set to the number of sectors (including and immediately following
- * the specified sector) that are known to be in the same
+ * 'pnum' is set to the number of bytes (including and immediately following
+ * the specified offset) that are known to be in the same
  * allocated/unallocated state.
  *
- * 'nb_sectors' is the max value 'pnum' should be set to.  If nb_sectors goes
- * beyond the end of the disk image it will be clamped.
+ * 'bytes' is the max value 'pnum' should be set to.
  */
-static int64_t coroutine_fn raw_co_get_block_status(BlockDriverState *bs,
-                                                    int64_t sector_num,
-                                                    int nb_sectors, int *pnum,
-                                                    BlockDriverState **file)
+static int coroutine_fn raw_co_block_status(BlockDriverState *bs,
+                                            bool want_zero,
+                                            int64_t offset,
+                                            int64_t bytes, int64_t *pnum,
+                                            int64_t *map,
+                                            BlockDriverState **file)
 {
-    off_t start, data = 0, hole = 0;
-    int64_t total_size;
+    off_t data = 0, hole = 0;
     int ret;
 
     ret = fd_open(bs);
@@ -1890,62 +2241,59 @@ static int64_t coroutine_fn raw_co_get_block_status(BlockDriverState *bs,
         return ret;
     }
 
-    start = sector_num * BDRV_SECTOR_SIZE;
-    total_size = bdrv_getlength(bs);
-    if (total_size < 0) {
-        return total_size;
-    } else if (start >= total_size) {
-        *pnum = 0;
-        return 0;
-    } else if (start + nb_sectors * BDRV_SECTOR_SIZE > total_size) {
-        nb_sectors = DIV_ROUND_UP(total_size - start, BDRV_SECTOR_SIZE);
+    if (!want_zero) {
+        *pnum = bytes;
+        *map = offset;
+        *file = bs;
+        return BDRV_BLOCK_DATA | BDRV_BLOCK_OFFSET_VALID;
     }
 
-    ret = find_allocation(bs, start, &data, &hole);
+    ret = find_allocation(bs, offset, &data, &hole);
     if (ret == -ENXIO) {
         /* Trailing hole */
-        *pnum = nb_sectors;
+        *pnum = bytes;
         ret = BDRV_BLOCK_ZERO;
     } else if (ret < 0) {
         /* No info available, so pretend there are no holes */
-        *pnum = nb_sectors;
+        *pnum = bytes;
         ret = BDRV_BLOCK_DATA;
-    } else if (data == start) {
-        /* On a data extent, compute sectors to the end of the extent,
+    } else if (data == offset) {
+        /* On a data extent, compute bytes to the end of the extent,
          * possibly including a partial sector at EOF. */
-        *pnum = MIN(nb_sectors, DIV_ROUND_UP(hole - start, BDRV_SECTOR_SIZE));
+        *pnum = MIN(bytes, hole - offset);
         ret = BDRV_BLOCK_DATA;
     } else {
-        /* On a hole, compute sectors to the beginning of the next extent.  */
-        assert(hole == start);
-        *pnum = MIN(nb_sectors, (data - start) / BDRV_SECTOR_SIZE);
+        /* On a hole, compute bytes to the beginning of the next extent.  */
+        assert(hole == offset);
+        *pnum = MIN(bytes, data - offset);
         ret = BDRV_BLOCK_ZERO;
     }
+    *map = offset;
     *file = bs;
-    return ret | BDRV_BLOCK_OFFSET_VALID | start;
+    return ret | BDRV_BLOCK_OFFSET_VALID;
 }
 
 static coroutine_fn BlockAIOCB *raw_aio_pdiscard(BlockDriverState *bs,
-    int64_t offset, int count,
+    int64_t offset, int bytes,
     BlockCompletionFunc *cb, void *opaque)
 {
     BDRVRawState *s = bs->opaque;
 
-    return paio_submit(bs, s->fd, offset, NULL, count,
+    return paio_submit(bs, s->fd, offset, NULL, bytes,
                        cb, opaque, QEMU_AIO_DISCARD);
 }
 
 static int coroutine_fn raw_co_pwrite_zeroes(
     BlockDriverState *bs, int64_t offset,
-    int count, BdrvRequestFlags flags)
+    int bytes, BdrvRequestFlags flags)
 {
     BDRVRawState *s = bs->opaque;
 
     if (!(flags & BDRV_REQ_MAY_UNMAP)) {
-        return paio_submit_co(bs, s->fd, offset, NULL, count,
+        return paio_submit_co(bs, s->fd, offset, NULL, bytes,
                               QEMU_AIO_WRITE_ZEROES);
     } else if (s->discard_zeroes) {
-        return paio_submit_co(bs, s->fd, offset, NULL, count,
+        return paio_submit_co(bs, s->fd, offset, NULL, bytes,
                               QEMU_AIO_DISCARD);
     }
     return -ENOTSUP;
@@ -1956,7 +2304,6 @@ static int raw_get_info(BlockDriverState *bs, BlockDriverInfo *bdi)
     BDRVRawState *s = bs->opaque;
 
     bdi->unallocated_blocks_are_zero = s->discard_zeroes;
-    bdi->can_write_zeroes_with_unmap = s->discard_zeroes;
     return 0;
 }
 
@@ -1983,6 +2330,25 @@ static QemuOptsList raw_create_opts = {
     }
 };
 
+static int raw_check_perm(BlockDriverState *bs, uint64_t perm, uint64_t shared,
+                          Error **errp)
+{
+    return raw_handle_perm_lock(bs, RAW_PL_PREPARE, perm, shared, errp);
+}
+
+static void raw_set_perm(BlockDriverState *bs, uint64_t perm, uint64_t shared)
+{
+    BDRVRawState *s = bs->opaque;
+    raw_handle_perm_lock(bs, RAW_PL_COMMIT, perm, shared, NULL);
+    s->perm = perm;
+    s->shared_perm = shared;
+}
+
+static void raw_abort_perm_update(BlockDriverState *bs)
+{
+    raw_handle_perm_lock(bs, RAW_PL_ABORT, 0, 0, NULL);
+}
+
 BlockDriver bdrv_file = {
     .format_name = "file",
     .protocol_name = "file",
@@ -1995,9 +2361,10 @@ BlockDriver bdrv_file = {
     .bdrv_reopen_commit = raw_reopen_commit,
     .bdrv_reopen_abort = raw_reopen_abort,
     .bdrv_close = raw_close,
-    .bdrv_create = raw_create,
+    .bdrv_co_create = raw_co_create,
+    .bdrv_co_create_opts = raw_co_create_opts,
     .bdrv_has_zero_init = bdrv_has_zero_init_1,
-    .bdrv_co_get_block_status = raw_co_get_block_status,
+    .bdrv_co_block_status = raw_co_block_status,
     .bdrv_co_pwrite_zeroes = raw_co_pwrite_zeroes,
 
     .bdrv_co_preadv         = raw_co_preadv,
@@ -2013,7 +2380,9 @@ BlockDriver bdrv_file = {
     .bdrv_get_info = raw_get_info,
     .bdrv_get_allocated_file_size
                         = raw_get_allocated_file_size,
-
+    .bdrv_check_perm = raw_check_perm,
+    .bdrv_set_perm   = raw_set_perm,
+    .bdrv_abort_perm_update = raw_abort_perm_update,
     .create_opts = &raw_create_opts,
 };
 
@@ -2186,10 +2555,7 @@ static int check_hdev_writable(BDRVRawState *s)
 static void hdev_parse_filename(const char *filename, QDict *options,
                                 Error **errp)
 {
-    /* The prefix is optional, just as for "file". */
-    strstart(filename, "host_device:", &filename);
-
-    qdict_put_obj(options, "filename", QOBJECT(qstring_from_str(filename)));
+    bdrv_parse_filename_strip_prefix(filename, "host_device:", options);
 }
 
 static bool hdev_is_sg(BlockDriverState *bs)
@@ -2278,7 +2644,7 @@ static int hdev_open(BlockDriverState *bs, QDict *options, int flags,
             goto hdev_open_Mac_error;
         }
 
-        qdict_put(options, "filename", qstring_from_str(bsd_path));
+        qdict_put_str(options, "filename", bsd_path);
 
 hdev_open_Mac_error:
         g_free(mediaType);
@@ -2336,6 +2702,15 @@ static BlockAIOCB *hdev_aio_ioctl(BlockDriverState *bs,
     if (fd_open(bs) < 0)
         return NULL;
 
+    if (req == SG_IO && s->pr_mgr) {
+        struct sg_io_hdr *io_hdr = buf;
+        if (io_hdr->cmdp[0] == PERSISTENT_RESERVE_OUT ||
+            io_hdr->cmdp[0] == PERSISTENT_RESERVE_IN) {
+            return pr_manager_execute(s->pr_mgr, bdrv_get_aio_context(bs),
+                                      s->fd, io_hdr, cb, opaque);
+        }
+    }
+
     acb = g_new(RawPosixAIOData, 1);
     acb->bs = bs;
     acb->aio_type = QEMU_AIO_IOCTL;
@@ -2359,7 +2734,7 @@ static int fd_open(BlockDriverState *bs)
 }
 
 static coroutine_fn BlockAIOCB *hdev_aio_pdiscard(BlockDriverState *bs,
-    int64_t offset, int count,
+    int64_t offset, int bytes,
     BlockCompletionFunc *cb, void *opaque)
 {
     BDRVRawState *s = bs->opaque;
@@ -2367,12 +2742,12 @@ static coroutine_fn BlockAIOCB *hdev_aio_pdiscard(BlockDriverState *bs,
     if (fd_open(bs) < 0) {
         return NULL;
     }
-    return paio_submit(bs, s->fd, offset, NULL, count,
+    return paio_submit(bs, s->fd, offset, NULL, bytes,
                        cb, opaque, QEMU_AIO_DISCARD|QEMU_AIO_BLKDEV);
 }
 
 static coroutine_fn int hdev_co_pwrite_zeroes(BlockDriverState *bs,
-    int64_t offset, int count, BdrvRequestFlags flags)
+    int64_t offset, int bytes, BdrvRequestFlags flags)
 {
     BDRVRawState *s = bs->opaque;
     int rc;
@@ -2382,17 +2757,17 @@ static coroutine_fn int hdev_co_pwrite_zeroes(BlockDriverState *bs,
         return rc;
     }
     if (!(flags & BDRV_REQ_MAY_UNMAP)) {
-        return paio_submit_co(bs, s->fd, offset, NULL, count,
+        return paio_submit_co(bs, s->fd, offset, NULL, bytes,
                               QEMU_AIO_WRITE_ZEROES|QEMU_AIO_BLKDEV);
     } else if (s->discard_zeroes) {
-        return paio_submit_co(bs, s->fd, offset, NULL, count,
+        return paio_submit_co(bs, s->fd, offset, NULL, bytes,
                               QEMU_AIO_DISCARD|QEMU_AIO_BLKDEV);
     }
     return -ENOTSUP;
 }
 
-static int hdev_create(const char *filename, QemuOpts *opts,
-                       Error **errp)
+static int coroutine_fn hdev_co_create_opts(const char *filename, QemuOpts *opts,
+                                            Error **errp)
 {
     int fd;
     int ret = 0;
@@ -2439,6 +2814,16 @@ static int hdev_create(const char *filename, QemuOpts *opts,
         ret = -ENOSPC;
     }
 
+    if (!ret && total_size) {
+        uint8_t buf[BDRV_SECTOR_SIZE] = { 0 };
+        int64_t zero_size = MIN(BDRV_SECTOR_SIZE, total_size);
+        if (lseek(fd, 0, SEEK_SET) == -1) {
+            ret = -errno;
+        } else {
+            ret = qemu_write_full(fd, buf, zero_size);
+            ret = ret == zero_size ? 0 : -errno;
+        }
+    }
     qemu_close(fd);
     return ret;
 }
@@ -2455,7 +2840,7 @@ static BlockDriver bdrv_host_device = {
     .bdrv_reopen_prepare = raw_reopen_prepare,
     .bdrv_reopen_commit  = raw_reopen_commit,
     .bdrv_reopen_abort   = raw_reopen_abort,
-    .bdrv_create         = hdev_create,
+    .bdrv_co_create_opts = hdev_co_create_opts,
     .create_opts         = &raw_create_opts,
     .bdrv_co_pwrite_zeroes = hdev_co_pwrite_zeroes,
 
@@ -2472,6 +2857,9 @@ static BlockDriver bdrv_host_device = {
     .bdrv_get_info = raw_get_info,
     .bdrv_get_allocated_file_size
                         = raw_get_allocated_file_size,
+    .bdrv_check_perm = raw_check_perm,
+    .bdrv_set_perm   = raw_set_perm,
+    .bdrv_abort_perm_update = raw_abort_perm_update,
     .bdrv_probe_blocksizes = hdev_probe_blocksizes,
     .bdrv_probe_geometry = hdev_probe_geometry,
 
@@ -2485,10 +2873,7 @@ static BlockDriver bdrv_host_device = {
 static void cdrom_parse_filename(const char *filename, QDict *options,
                                  Error **errp)
 {
-    /* The prefix is optional, just as for "file". */
-    strstart(filename, "host_cdrom:", &filename);
-
-    qdict_put_obj(options, "filename", QOBJECT(qstring_from_str(filename)));
+    bdrv_parse_filename_strip_prefix(filename, "host_cdrom:", options);
 }
 #endif
 
@@ -2577,7 +2962,7 @@ static BlockDriver bdrv_host_cdrom = {
     .bdrv_reopen_prepare = raw_reopen_prepare,
     .bdrv_reopen_commit  = raw_reopen_commit,
     .bdrv_reopen_abort   = raw_reopen_abort,
-    .bdrv_create         = hdev_create,
+    .bdrv_co_create_opts = hdev_co_create_opts,
     .create_opts         = &raw_create_opts,
 
 
@@ -2708,7 +3093,7 @@ static BlockDriver bdrv_host_cdrom = {
     .bdrv_reopen_prepare = raw_reopen_prepare,
     .bdrv_reopen_commit  = raw_reopen_commit,
     .bdrv_reopen_abort   = raw_reopen_abort,
-    .bdrv_create        = hdev_create,
+    .bdrv_co_create_opts = hdev_co_create_opts,
     .create_opts        = &raw_create_opts,
 
     .bdrv_co_preadv         = raw_co_preadv,
