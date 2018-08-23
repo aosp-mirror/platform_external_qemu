@@ -22,7 +22,6 @@
 #ifndef QEMU_HAX_H
 #define QEMU_HAX_H
 
-#include "config-host.h"
 #include "qemu-common.h"
 
 int hax_sync_vcpus(void);
@@ -39,6 +38,7 @@ bool hax_gpa_protection_supported(void);
 void hax_cpu_synchronize_state(CPUState *cpu);
 void hax_cpu_synchronize_post_reset(CPUState *cpu);
 void hax_cpu_synchronize_post_init(CPUState *cpu);
+void hax_cpu_synchronize_pre_loadvm(CPUState *cpu);
 
 void* hax_gpa2hva(uint64_t gpa, bool* found);
 int hax_hva2gpa(void* hva, uint64_t length, int array_size,

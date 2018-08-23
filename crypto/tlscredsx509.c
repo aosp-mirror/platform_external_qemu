@@ -24,7 +24,7 @@
 #include "crypto/secret.h"
 #include "qapi/error.h"
 #include "qom/object_interfaces.h"
-#include "crypto/trace.h"
+#include "trace.h"
 
 
 #ifdef CONFIG_GNUTLS

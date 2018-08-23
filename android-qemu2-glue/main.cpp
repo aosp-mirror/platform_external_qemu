@@ -48,6 +48,7 @@
 #include "android/process_setup.h"
 #include "android/recording/screen-recorder.h"
 #include "android/session_phase_reporter.h"
+#include "android/snapshot/interface.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_io.h"
@@ -833,11 +834,63 @@ extern "C" int main(int argc, char** argv) {
     if (opts->audio && !strcmp(opts->audio, "none"))
         args.add("-no-audio");
 
-    // Generic snapshots command line option
+    bool badSnapshots = false;
+
+    // Check situations where snapshots should be turned off
+    {
+        // Just dont' use snapshots on 32 bit - crashes galore
+        badSnapshots = badSnapshots || (System::get()->getProgramBitness() == 32);
+
+        // Bad generic snapshots command line option
+        if (opts->snapshot && opts->snapshot[0] == '\0') {
+            opts->snapshot = nullptr;
+            opts->no_snapshot_load = true;
+            opts->no_snapshot_save = true;
+            badSnapshots = true;
+        } else if (opts->snapshot) {
+            // Never save snapshot on exit if we are booting with a snapshot;
+            // it will overwrite quickboot state
+            opts->no_snapshot_save = true;
+        }
+
+        if (badSnapshots) {
+            feature_set_enabled_override(kFeature_FastSnapshotV1, false);
+            feature_set_enabled_override(kFeature_QuickbootFileBacked, false);
+        }
+    }
 
     if (opts->snapshot && feature_is_enabled(kFeature_FastSnapshotV1)) {
         if (!opts->no_snapshot_load) {
             args.add2("-loadvm", opts->snapshot);
+        }
+    }
+
+    bool useQuickbootRamFile =
+        feature_is_enabled(kFeature_QuickbootFileBacked) &&
+        !opts->snapshot;
+
+    if (useQuickbootRamFile) {
+        ScopedCPtr<const char> memPath(
+            androidSnapshot_prepareAutosave(hw->hw_ramSize, nullptr));
+
+        if (memPath) {
+            args.add2("-mem-path", memPath.get());
+
+            bool mapAsShared =
+                !opts->read_only &&
+                !opts->snapshot &&
+                !opts->no_snapshot_save &&
+                androidSnapshot_getQuickbootChoice();
+
+            if (mapAsShared) {
+                args.add("-mem-file-shared");
+                androidSnapshot_setRamFileDirty(nullptr, true);
+            }
+        } else {
+            fprintf(stderr, "Warning: could not initialize Quickboot RAM file. "
+                            "Please ensure enough disk space for the guest RAM size "
+                            "(%d MB) along with a safety factor.\n", hw->hw_ramSize);
+            feature_set_enabled_override(kFeature_QuickbootFileBacked, false);
         }
     }
 

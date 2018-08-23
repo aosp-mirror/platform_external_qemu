@@ -24,7 +24,7 @@
 #include "qemu/osdep.h"
 #include "qapi/error.h"
 #include "hw/hw.h"
-#include "hw/audio/audio.h"
+#include "hw/audio/soundhw.h"
 #include "audio/audio.h"
 #include "hw/isa/isa.h"
 #include "gusemu.h"
@@ -53,7 +53,7 @@ typedef struct GUSState {
     uint32_t freq;
     uint32_t port;
     int pos, left, shift, irqs;
-    GUSsample *mixbuf;
+    int16_t *mixbuf;
     uint8_t himem[1024 * 1024 + 32 + 4096];
     int samples;
     SWVoiceOut *voice;
@@ -241,6 +241,12 @@ static void gus_realizefn (DeviceState *dev, Error **errp)
     IsaDmaClass *k;
     struct audsettings as;
 
+    s->isa_dma = isa_get_dma(isa_bus_from_device(d), s->emu.gusdma);
+    if (!s->isa_dma) {
+        error_setg(errp, "ISA controller does not support DMA");
+        return;
+    }
+
     AUD_register_card ("gus", &s->card);
 
     as.freq = s->freq;
@@ -272,7 +278,6 @@ static void gus_realizefn (DeviceState *dev, Error **errp)
     isa_register_portio_list(d, &s->portio_list2, (s->port + 0x100) & 0xf00,
                              gus_portio_list2, s, "gus");
 
-    s->isa_dma = isa_get_dma(isa_bus_from_device(d), s->emu.gusdma);
     k = ISADMA_GET_CLASS(s->isa_dma);
     k->register_channel(s->isa_dma, s->emu.gusdma, GUS_read_DMA, s);
     s->emu.himemaddr = s->himem;

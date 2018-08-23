@@ -26,7 +26,7 @@
 #include "exec/memory.h"
 #include "qemu/queue.h"
 #include "hw/sysbus.h"
-#include "hw/vfio/trace.h"
+#include "trace.h"
 #include "hw/platform-bus.h"
 #include "sysemu/kvm.h"
 
@@ -120,11 +120,11 @@ static int vfio_set_trigger_eventfd(VFIOINTp *intp,
     *pfd = event_notifier_get_fd(intp->interrupt);
     qemu_set_fd_handler(*pfd, (IOHandler *)handler, NULL, intp);
     ret = ioctl(vbasedev->fd, VFIO_DEVICE_SET_IRQS, irq_set);
-    g_free(irq_set);
     if (ret < 0) {
         error_report("vfio: Failed to set trigger eventfd: %m");
         qemu_set_fd_handler(*pfd, NULL, NULL, NULL);
     }
+    g_free(irq_set);
     return ret;
 }
 
@@ -561,7 +561,7 @@ static int vfio_base_device_init(VFIODevice *vbasedev, Error **errp)
     /* @sysfsdev takes precedence over @host */
     if (vbasedev->sysfsdev) {
         g_free(vbasedev->name);
-        vbasedev->name = g_strdup(basename(vbasedev->sysfsdev));
+        vbasedev->name = g_path_get_basename(vbasedev->sysfsdev);
     } else {
         if (!vbasedev->name || strchr(vbasedev->name, '/')) {
             error_setg(errp, "wrong host device name");
@@ -640,7 +640,10 @@ static void vfio_platform_realize(DeviceState *dev, Error **errp)
     int i, ret;
 
     vbasedev->type = VFIO_DEVICE_TYPE_PLATFORM;
+    vbasedev->dev = dev;
     vbasedev->ops = &vfio_platform_ops;
+
+    qemu_mutex_init(&vdev->intp_mutex);
 
     trace_vfio_platform_realize(vbasedev->sysfsdev ?
                                 vbasedev->sysfsdev : vbasedev->name,

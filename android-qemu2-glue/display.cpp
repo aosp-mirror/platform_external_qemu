@@ -21,6 +21,7 @@
 
 extern "C" {
 #include "qemu/osdep.h"
+#include "qemu/module.h"
 #include "sysemu/sysemu.h"
 #include "ui/console.h"
 }
@@ -229,17 +230,14 @@ bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
     return true;
 }
 
-extern "C" void sdl_display_early_init(int opengl) {
-    if (opengl == 1 && android_hw->hw_arc) {
+extern "C" void sdl_display_early_init(DisplayOptions* opts) {
+    if (opts->gl && android_hw->hw_arc) {
         display_opengl = 1;
     }
 }
 
-extern "C" bool sdl_display_init(DisplayState* ds,
-                                 int full_screen,
-                                 int no_frame) {
-    (void)full_screen;
-    (void)no_frame;
+extern "C" int sdl_display_init(DisplayState* ds, DisplayOptions* opts) {
+    (void)opts;
 
     EmulatorWindow* const emulator = emulator_window_get();
     if (emulator->opts->no_window) {
@@ -248,3 +246,17 @@ extern "C" bool sdl_display_init(DisplayState* ds,
 
     return android_display_init(ds, qframebuffer_fifo_get());
 }
+
+static QemuDisplay qemu_display_android = {
+    .type       = DISPLAY_TYPE_SDL,
+    .early_init = sdl_display_early_init,
+    .init       = sdl_display_init,
+};
+
+static void register_android_ui(void)
+{
+    qemu_display_register(&qemu_display_android);
+}
+
+type_init(register_android_ui);
+

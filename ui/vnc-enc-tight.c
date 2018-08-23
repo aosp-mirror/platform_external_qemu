@@ -44,7 +44,6 @@
 #endif
 
 #include "qemu/bswap.h"
-#include "qapi/qmp/qint.h"
 #include "vnc.h"
 #include "vnc-enc-tight.h"
 #include "vnc-palette.h"
@@ -980,7 +979,7 @@ static int send_mono_rect(VncState *vs, int x, int y,
     }
 #endif
 
-    bytes = ((w + 7) / 8) * h;
+    bytes = (DIV_ROUND_UP(w, 8)) * h;
 
     vnc_write_u8(vs, (stream | VNC_TIGHT_EXPLICIT_FILTER) << 4);
     vnc_write_u8(vs, VNC_TIGHT_FILTER_PALETTE);
