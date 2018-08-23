@@ -1,0 +1,69 @@
+// Copyright (c) 2014-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[platformCreateSurface_win32,platformCreateSurface_win32]]
+
+=== Win32 Platform
+
+[open,refpage='vkCreateWin32SurfaceKHR',desc='Create a slink:VkSurfaceKHR object for an Win32 native window',type='protos']
+--
+
+To create a sname:VkSurfaceKHR object for a Win32 window, call:
+
+include::../../api/protos/vkCreateWin32SurfaceKHR.txt[]
+
+  * pname:instance is the instance to associate the surface with.
+  * pname:pCreateInfo is a pointer to an instance of the
+    sname:VkWin32SurfaceCreateInfoKHR structure containing parameters
+    affecting the creation of the surface object.
+  * pname:pAllocator is the allocator used for host memory allocated for the
+    surface object when there is no more specific allocator available (see
+    <<memory-allocation,Memory Allocation>>).
+  * pname:pSurface points to a slink:VkSurfaceKHR handle in which the
+    created surface object is returned.
+
+include::../../validity/protos/vkCreateWin32SurfaceKHR.txt[]
+--
+
+[open,refpage='VkWin32SurfaceCreateInfoKHR',desc='Structure specifying parameters of a newly created Win32 surface object',type='structs']
+--
+
+The sname:VkWin32SurfaceCreateInfoKHR structure is defined as:
+
+include::../../api/structs/VkWin32SurfaceCreateInfoKHR.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is reserved for future use.
+  * pname:hinstance and pname:hwnd are the Win32 code:HINSTANCE and
+    code:HWND for the window to associate the surface with.
+
+.Valid Usage
+****
+  * [[VUID-VkWin32SurfaceCreateInfoKHR-hinstance-01307]]
+    pname:hinstance must: be a valid Win32 code:HINSTANCE.
+  * [[VUID-VkWin32SurfaceCreateInfoKHR-hwnd-01308]]
+    pname:hwnd must: be a valid Win32 code:HWND.
+****
+
+include::../../validity/structs/VkWin32SurfaceCreateInfoKHR.txt[]
+--
+
+With Win32, pname:minImageExtent, pname:maxImageExtent, and
+pname:currentExtent must: always equal the window size.
+
+The pname:currentExtent of a Win32 surface must: have both pname:width and
+pname:height greater than 0, or both of them 0.
+
+[NOTE]
+.Note
+====
+Due to above restrictions, it is only possible to create a new swapchain on
+this platform with pname:imageExtent being equal to the current size of the
+window.
+
+The window size may: become [eq]#(0, 0)# on this platform (e.g. when the
+window is minimized), and so a swapchain cannot: be created until the size
+changes.
+====

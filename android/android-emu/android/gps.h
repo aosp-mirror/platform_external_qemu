@@ -28,11 +28,15 @@ extern void  android_gps_send_nmea( const char*  sentence );
 // Inputs: latitude:        Degrees
 //         longitude:       Degrees
 //         metersElevation: Meters above sea level
+//         speedKnots:      Speed in knots
+//         headingDegrees:  Heading -180..+360, 0=north, 90=east
 //         nSatellites:     Number of satellites used
 //         time:            UTC, in the format provided
 //                          by gettimeofday()
 extern void  android_gps_send_location(double latitude, double longitude,
-                                       double metersElevation, int nSatellites,
+                                       double metersElevation,
+                                       double speedKnots, double headingDegrees,
+                                       int nSatellites,
                                        const struct timeval *time);
 
 ////////////////////////////////////////////////////////////
