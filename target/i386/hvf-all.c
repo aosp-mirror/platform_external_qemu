@@ -895,7 +895,7 @@ again:
         int r  = hv_vcpu_run(cpu->hvf_fd);
 
         if (r) {
-            qemu_abort("%s: %ld: run failed with %x\n", rip, r);
+            qemu_abort("%s: %ld: run failed with %x\n", __func__, rip, r);
         }
 
         /* handle VMEXIT */
