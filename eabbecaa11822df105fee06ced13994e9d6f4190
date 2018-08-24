@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "95d80d2e_cbdcb022",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-08-24T21:07:44Z",
+      "side": 1,
+      "message": "bool wasVmRunning \u003d runstate_is_running() !\u003d 0;\nvm_stop(RUN_STATE_SAVE_VM);\nif (wasVmRunning) {\n    vm_start();\n}\n\nDo we want to run do these things under a lock to prevent race conditions?",
+      "range": {
+        "startLine": 255,
+        "startChar": 4,
+        "endLine": 258,
+        "endChar": 35
+      },
+      "revId": "eabbecaa11822df105fee06ced13994e9d6f4190",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "66eddf63_3d38cb4f",
+        "filename": "memory.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 952,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-08-24T21:07:44Z",
+      "side": 1,
+      "message": "maybe \"for\" will fit here little bit better than \"while\"?",
+      "range": {
+        "startLine": 952,
+        "startChar": 4,
+        "endLine": 952,
+        "endChar": 9
+      },
+      "revId": "eabbecaa11822df105fee06ced13994e9d6f4190",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
