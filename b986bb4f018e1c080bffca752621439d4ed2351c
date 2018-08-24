@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "767c363d_58ed81b6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-24T03:59:06Z",
+      "side": 1,
+      "message": "Can you put the specific path relative to $ANDROID_SDK_ROOT where VerifiedBootparams.textproto will be found in the shipping system image?\n\nIf distributed with the system image, I had expected that it be somewhere in an AVD-specific folder or the system image folder, and not necessarily the user directory.",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 26
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d0f0844c_bb27f084",
+        "filename": "android/android-emu/android/verified-boot/load_config.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-24T03:59:06Z",
+      "side": 1,
+      "message": "Is the final param index displayed intended to be 0 or 1 based? The comment for param_idx makes me think the error log will show up 0-based, but the implementation is saying it is getting 1-based.",
+      "range": {
+        "startLine": 84,
+        "startChar": 37,
+        "endLine": 88,
+        "endChar": 43
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cbf329b2_77ac1f60",
+        "filename": "android/android-emu/android/verified-boot/load_config.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-24T03:59:06Z",
+      "side": 1,
+      "message": "parameter",
+      "range": {
+        "startLine": 171,
+        "startChar": 10,
+        "endLine": 171,
+        "endChar": 19
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6fd138c2_ca771449",
+        "filename": "android/android-emu/android/verified-boot/load_config.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-24T03:59:06Z",
+      "side": 1,
+      "message": "This looks like when we ship the system image, and run the emulator from the AVD manager, or from command line with -avd \u003cavdname\u003e, it will look in ~/.android/ for the parameters. Is this intended?\n\nI thought it would be found either in $ANDROID_SDK_ROOT/system-images/android-28/google_apis/x86_64/VerifiedBootParams.textproto or ~/.android/avd/api28.avd/VerifiedBootParams.textproto.\n\nI\u0027m asking b/c if we have multiple different system images with different verified boot parameters on the system, it kind of looks like it would be overwritten or stale, since theres\u0027 only one ~/.android.",
+      "range": {
+        "startLine": 239,
+        "startChar": 12,
+        "endLine": 239,
+        "endChar": 53
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "12606651_5ce3eb64",
+        "filename": "android/android-emu/android/verified-boot/load_config.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-24T03:59:06Z",
+      "side": 1,
+      "message": "Are we going to use this in a non C++ .c file?\n\nIf this will be included in only C++ files (is this right?) android/utils/compiler.h and ANDROID_(BEGIN|END)_HEADER are not needed, only the #pragma once.",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 20
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3105e326_d591b576",
+        "filename": "android/android-emu/android/verified-boot/load_config.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-24T03:59:06Z",
+      "side": 1,
+      "message": "OK and CouldNotOpenFile look like they are sharing the same value. Is this intended?",
+      "range": {
+        "startLine": 25,
+        "startChar": 4,
+        "endLine": 27,
+        "endChar": 32
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f6cc312d_1b215762",
+        "filename": "android/android-emu/android/verified-boot/load_config.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-24T03:59:06Z",
+      "side": 1,
+      "message": "Awesome, thanks for the detailed docs here :)",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 14
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d073a31b_7bfbc747",
+        "filename": "android/android-emu/android/verified-boot/load_config.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-24T03:59:06Z",
+      "side": 1,
+      "message": "nit: Delete \u0027when\u0027? Or change to \"when we\"",
+      "range": {
+        "startLine": 52,
+        "startChar": 3,
+        "endLine": 52,
+        "endChar": 8
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
