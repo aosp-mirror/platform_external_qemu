@@ -250,6 +250,7 @@ OPTION_HELP=no
 OPTION_STRIP=yes
 OPTION_CRASHUPLOAD=NONE
 OPTION_MINGW=no
+OPTION_WINDOWS_MSVC=no
 OPTION_GLES=
 OPTION_SDK_REV=
 OPTION_SYMBOLS=no
@@ -309,7 +310,19 @@ for opt do
 
   --debug) OPTION_DEBUG=yes; OPTION_STRIP=no
   ;;
-  --mingw) OPTION_MINGW=yes
+  --mingw)
+    # TODO(joshuaduong): deprecate building with mingw otherwise we'll have to
+    # build windows emulator w/o QtWebEngine.
+    if [ "$OPTION_WINDOWS_MSVC" = "yes" ] ; then
+      panic "Choose either mingw or windows-msvc, not both."
+    fi
+    OPTION_MINGW=yes
+  ;;
+  --windows-msvc)
+    if [ "$OPTION_MINGW" = "yes" ] ; then
+      panic "Choose either mingw or windows-msvc, not both."
+    fi
+    OPTION_WINDOWS_MSVC=yes
   ;;
   --sanitizer=*) OPTION_SANITIZER=$optarg
   ;;
@@ -395,7 +408,8 @@ EOF
     echo "  --gles=angle                Build the OpenGLES to ANGLE wrapper"
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"
     echo "  --out-dir=<path>            Use specific output directory [objs/]"
-    echo "  --mingw                     Build Windows executable on Linux"
+    echo "  --mingw                     Build Windows executable on Linux using mingw"
+    echo "  --windows-msvc              Build Windows executable on Linux using Windows SDK + clang (only 64-bit for now)"
     echo "  --verbose                   Verbose configuration"
     echo "  --debug                     Build debug version of the emulator"
     echo "  --sanitizer=[...]           Build with LLVM sanitizer (sanitizer=[address, thread])"
@@ -411,7 +425,7 @@ EOF
 fi
 
 # Check asan support
-[ "$OPTION_SANITIZER" != "no" ] && [ "$OPTION_MINGW" = "yes" ] && panic "Asan is not supported under windows"
+[ "$OPTION_SANITIZER" != "no" ] && ([ "$OPTION_MINGW" = "yes" ] || [ "$OPTION_WINDOWS_MSVC" = "yes" ]) && panic "Asan is not supported under windows"
 
 if [ "$OPTION_AOSP_PREBUILTS_DIR" ]; then
     if [ ! -d "$OPTION_AOSP_PREBUILTS_DIR"/gcc -a \
@@ -532,6 +546,33 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
     HOST_TAG=$HOST_OS-$HOST_ARCH
 fi
 
+if [ "$OPTION_WINDOWS_MSVC" = "yes" ] ; then
+    # Are we on Linux ?
+    # TODO(joshuaduong): maybe mac too, or windows + cygwin
+    log "Windows-msvc      : Checking for Linux host"
+    if [ "$HOST_OS" != "linux" ] ; then
+        echo "Sorry, but windows-msvc compilation is only supported on Linux !"
+        exit 1
+    fi
+    TEST_SHELL=wine
+    WINE_CMD=$(which wine 2>/dev/null || true)
+    if [ -z "$WINE_CMD" ]; then
+        echo "${RED}WARNING: Wine is not installed on this machine!! Unit tests will be ignored and will not run!!${RESET}"
+        TEST_SHELL="true ||"
+    fi
+    WIN_SDK_FLAGS="$GEN_SDK_FLAGS --host=windows_msvc-x86_64"
+    "$GEN_SDK" $WIN_SDK_FLAGS "$SDK_TOOLCHAIN_DIR" || panic "Cannot generate SDK toolchain!"
+    BINPREFIX=$("$GEN_SDK" $WIN_SDK_FLAGS --print=binprefix "$SDK_TOOLCHAIN_DIR")
+    CC="$SDK_TOOLCHAIN_DIR/${BINPREFIX}clang"
+    CXX="$SDK_TOOLCHAIN_DIR/${BINPREFIX}clang++"
+    LD=$CC
+    WINDRES=$SDK_TOOLCHAIN_DIR/${BINPREFIX}windres
+    AR="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ar"
+    OBJCOPY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}objcopy"
+    HOST_OS=windows_msvc
+    HOST_TAG=$HOST_OS-$HOST_ARCH
+fi
+
 # Try to find the GLES emulation headers and libraries automatically
 GLES_DIR=android/android-emugl
 if [ ! -d "$GLES_DIR" ]; then
@@ -594,7 +635,7 @@ case "$HOST_OS" in
     ;;
     freebsd) PROBE_OSS=yes;
     ;;
-    windows) PROBE_WINAUDIO=yes
+    windows*) PROBE_WINAUDIO=yes
     ;;
 esac
 
@@ -778,7 +819,7 @@ feature_check_header HAVE_MACHINE_BSWAP_H "<machine/bswap.h>"
 feature_check_header HAVE_FNMATCH_H       "<fnmatch.h>"
 
 # check for Mingw version.
-if [ "$HOST_OS" = "windows" ]; then
+if [ "$HOST_OS" = "windows" ] && [ "$OPTION_MINGW" = "yes" ]; then
 log "Mingw      : Probing for GCC version."
 GCC_VERSION=$($CC -v 2>&1 | awk '$1 == "gcc" && $2 == "version" { print $3; }')
 GCC_MAJOR=$(echo "$GCC_VERSION" | cut -f1 -d.)
@@ -853,6 +894,9 @@ cc_type () {
 
 PREBUILT_ARCHS=
 case $HOST_OS in
+    windows_msvc)
+        PREBUILT_ARCHS="x86_64"
+        ;;
     windows)
         PREBUILT_ARCHS="x86 x86_64"
         ;;
@@ -898,7 +942,7 @@ ANGLE_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/ANGLE
 if [ -d $ANGLE_PREBUILTS_DIR ]; then
     ANGLE_HOST=$HOST_OS
     case $ANGLE_HOST in
-        windows)
+        windows*)
             ANGLE_SUFFIX=.dll
             ;;
         linux)
@@ -907,7 +951,7 @@ if [ -d $ANGLE_PREBUILTS_DIR ]; then
         *)
     esac
     # Windows only (for now)
-    if [ "$ANGLE_HOST" = "windows" ]; then
+    if [[ "$ANGLE_HOST" = "windows"* ]]; then
         log "Copying ANGLE prebuilt libraries from $ANGLE_PREBUILTS_DIR"
         for LIBNAME in libEGL libGLESv2 d3dcompiler_47; do # GLESv2 only for now
             for ANGLE_ARCH in $PREBUILT_ARCHS; do
@@ -940,7 +984,7 @@ if [ -d $SWIFTSHADER_PREBUILTS_DIR ]; then
     SWIFTSHADER_PREFIX=lib
     SWIFTSHADER_HOST=$HOST_OS
     case $SWIFTSHADER_HOST in
-        windows)
+        windows*)
             SWIFTSHADER_SUFFIX=.dll
             ;;
         darwin)
@@ -991,7 +1035,7 @@ if [ -d $VULKAN_PREBUILTS_DIR ]; then
         VULKAN_MOCK_ICD_FILE=VkICD_mock_icd.json
 
         case $VULKAN_HOST in
-            windows)
+            windows*)
                 VULKAN_LOADER_LIB=vulkan-1.dll
                 VULKAN_MOCK_ICD_LIB=VkICD_mock_icd.dll
                 ;;
@@ -1035,7 +1079,7 @@ MESA_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/mesa
 if [ [ -d $MESA_PREBUILTS_DIR ] && [ "$OPTION_AEMU64_ONLY" == "no" ] ]; then
     log "Copying Mesa prebuilt libraries from $MESA_PREBUILTS_DIR"
     case $HOST_OS in
-        windows)
+        windows*)
             MESA_LIBNAME=opengl32.dll
             ;;
         linux)
@@ -1076,7 +1120,7 @@ for QT_ARCH in $PREBUILT_ARCHS; do
         continue
     fi
     case $HOST_OS in
-        windows) QT_DLL_FILTER="*.dll";;
+        windows*) QT_DLL_FILTER="*.dll";;
         darwin) QT_DLL_FILTER="*.dylib";;
         *) QT_DLL_FILTER="*.so*";;
     esac
@@ -1087,7 +1131,7 @@ for QT_ARCH in $PREBUILT_ARCHS; do
     for QT_LIB in $QT_LIBS; do
         QT_LIB=${QT_LIB#./}
         QT_DST_LIB=$QT_LIB
-        if [ "$HOST_OS" = "windows" ]; then
+        if [[ "$HOST_OS" = "windows"* ]]; then
             # NOTE: On Windows, the prebuilt libraries are placed under
             # $PREBUILTS/qt/bin, not $PREBUILTS/qt/lib, ensure that they
             # are always copied to $OUT_DIR/lib[64]/qt/lib/.
@@ -1103,7 +1147,7 @@ for E2FS_ARCH in $PREBUILT_ARCHS; do
     # NOTE: in windows only 32-bit binaries are available, so we'll copy the
     # 32-bit executables to the bin64/ directory to cover all our bases
     case $HOST_OS in
-        windows) E2FS_SRCDIR=$E2FSPROGS_PREBUILTS_DIR/$HOST_OS-x86;;
+        windows*) E2FS_SRCDIR=$E2FSPROGS_PREBUILTS_DIR/$HOST_OS-x86;;
         *) E2FS_SRCDIR=$E2FSPROGS_PREBUILTS_DIR/$HOST_OS-$E2FS_ARCH;;
     esac
 
@@ -1428,7 +1472,7 @@ echo "#define CONFIG_BLOCK_DELAYED_FLUSH  1" >> $config_h
 echo "#define CONFIG_LIVE_BLOCK_MIGRATION 1" >> $config_h
 
 case "$HOST_OS" in
-    windows)
+    windows*)
         echo "#define CONFIG_WIN32  1" >> $config_h
         ;;
     *)
@@ -1456,7 +1500,7 @@ case "$HOST_OS" in
 esac
 
 # the -nand-limits options can only work on non-windows systems
-if [ "$HOST_OS" != "windows" ] ; then
+if [[ "$HOST_OS" != "windows"* ]] ; then
     echo "#define CONFIG_NAND_LIMITS  1" >> $config_h
 fi
 echo "#define QEMU_VERSION    \"0.10.50\"" >> $config_h
@@ -1471,7 +1515,7 @@ case "$HOST_OS" in
     freebsd) CONFIG_OS=FREEBSD
              BSD=1
     ;;
-    windows) CONFIG_OS=WIN32
+    windows*) CONFIG_OS=WIN32
     ;;
     *) CONFIG_OS=$HOST_OS
 esac

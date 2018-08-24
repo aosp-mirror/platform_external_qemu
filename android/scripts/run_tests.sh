@@ -103,7 +103,7 @@ darwin_min_version () {
 
 # List all executables to check later.
 EXECUTABLES="emulator emulator64-arm emulator64-x86"
-if [ "$TARGET_OS" = "windows" ]; then
+if [[ "$TARGET_OS" = "windows"* ]]; then
     EXE_SUFFIX=.exe
     EXECUTABLES="$EXECUTABLES emulator-arm emulator-x86"
 fi
@@ -111,22 +111,22 @@ fi
 # Define EXPECTED_32BIT_FILE_TYPE and EXPECTED_64BIT_FILE_TYPE depending
 # on the current target platform. Then EXPECTED_EMULATOR_BITNESS and
 # EXPECTED_EMULATOR_FILE_TYPE accordingly.
-if [ "$TARGET_OS" = "windows" ]; then
+if [[ "$TARGET_OS" = "windows"* ]]; then
     EXPECTED_32BIT_FILE_TYPE="PE32 executable \(console\) Intel 80386"
     EXPECTED_64BIT_FILE_TYPE="PE32\+ executable \(console\) x86-64"
     EXPECTED_EMULATOR_BITNESS=32
     EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_32BIT_FILE_TYPE
-    TARGET_OS=windows
 elif [ "$TARGET_OS" = "darwin" ]; then
     EXPECTED_64BIT_FILE_TYPE="Mach-O 64-bit executable x86_64"
     EXPECTED_EMULATOR_BITNESS=64
     EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
-    TARGET_OS=darwin
-else
+  elif [ "$TARGET_OS" = "linux" ]; then
     EXPECTED_64BIT_FILE_TYPE="ELF 64-bit LSB +executable, x86-64"
     EXPECTED_EMULATOR_BITNESS=64
     EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
-    TARGET_OS=linux
+  else
+    echo "FAIL: Unsupported target platform: [$TARGET_OS]"
+    FAILURES="$FAILURES out-dir-config-make"
 fi
 
 
@@ -204,7 +204,7 @@ fi
 
 # Check that the windows executables all have icons.
 # First need to locate the windres tool.
-if [ "$TARGET_OS" = "windows" ]; then
+if [[ "$TARGET_OS" = "windows"* ]]; then
     log "Checking windows executables icons."
     if [ ! -f "$CONFIG_MAKE" ]; then
         echo "FAIL: Could not find \$CONFIG_MAKE !?"
@@ -220,12 +220,12 @@ if [ "$TARGET_OS" = "windows" ]; then
             EXEC=${EXEC}.exe
             if [ ! -f "$OPT_OUT"/$EXEC ]; then
                 warn "FAIL: Missing windows executable: $EXEC"
-                FAILURES="$FAILURES windows-$EXEC"
+                FAILURES="$FAILURES $TARGET_OS-$EXEC"
             else
                 NUM_ICONS=$($WINDRES --input-format=coff --output-format=rc $OPT_OUT/$EXEC | grep RT_ICON | wc -l)
                 if [ "$NUM_ICONS" != "$EXPECTED_ICONS" ]; then
                     warn "FAIL: Invalid icon count in $EXEC ($NUM_ICONS, expected $EXPECTED_ICONS)"
-                    FAILURES="$FAILURES windows-$EXEC-icons"
+                    FAILURES="$FAILURES $TARGET_OS-$EXEC-icons"
                 fi
             fi
         done

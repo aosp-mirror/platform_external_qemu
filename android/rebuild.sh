@@ -14,6 +14,7 @@ PROGDIR=$(dirname "$0")
 VERBOSE=1
 
 MINGW=
+WINDOWS_MSVC=
 NO_TESTS=
 OUT_DIR=objs
 HELP=
@@ -27,7 +28,16 @@ for OPT; do
             ANDROID_EMULATOR_PREBUILTS_DIR=${OPT##--aosp-prebuilts-dir=}
             ;;
         --mingw)
+            if [ "$WINDOWS_MSVC" ]; then
+              panic "Choose either mingw or windows-msvc, not both."
+            fi
             MINGW=true
+            ;;
+        --windows-msvc)
+            if [ "$MINGW" ]; then
+              panic "Choose either mingw or windows-msvc, not both."
+            fi
+            WINDOWS_MSVC=true
             ;;
         --verbose)
             VERBOSE=$(( $VERBOSE + 1 ))
@@ -118,6 +128,7 @@ run make -j$HOST_NUM_CPUS BUILD_OBJS_DIR="$OUT_DIR" ||
 if [ -z "$NO_TESTS" ]; then
     # Let's not run all the tests parallel..
    run android/scripts/run_tests.sh --verbose --verbose --out-dir=$OUT_DIR --jobs=1
+
 else
     echo "Ignoring unit tests suite."
 fi
