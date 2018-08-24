@@ -30,6 +30,7 @@ public:
 
     void interrupt();
 
+    bool hasRamLoader() const { return mRamLoader; }
     RamLoader& ramLoader() { return *mRamLoader; }
     ITextureLoaderPtr textureLoader() const;
 
