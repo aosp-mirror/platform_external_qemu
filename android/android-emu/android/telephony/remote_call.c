@@ -75,7 +75,11 @@ remote_number_string_to_port( const char*  number )
     len = strlen(number);
     if (len > 0 && number[len-1] == ';')
         len--;
-    if (len == 11 && !strncmp(number, get_phone_number_prefix(), 7))
+    if (len > 0 && number[0] == '+') {
+        len--;
+        temp++;
+    }
+    if (len == 11 && !strncmp(temp, get_phone_number_prefix(), 7))
         temp += 7;
     num = strtol( temp, &end, 10 );
 
