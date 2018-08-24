@@ -214,6 +214,30 @@
     },
     {
       "key": {
+        "uuid": "7415022a_23a9bf81",
+        "filename": "android/android-emu/android/verified-boot/load_config.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2018-08-24T20:48:45Z",
+      "side": 1,
+      "message": "I\u0027m leaning toward my current solution, which is to have the caller (main.cpp), provide the path, probably by using avd/info.h\n\nIf you don\u0027t mind, I\u0027d like to do the actual integration into main in a separate CL.  Then the enable/rollback patch can be just a few lines of code.",
+      "parentUuid": "857c66fb_3268fd54",
+      "range": {
+        "startLine": 239,
+        "startChar": 12,
+        "endLine": 239,
+        "endChar": 53
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "12606651_5ce3eb64",
         "filename": "android/android-emu/android/verified-boot/load_config.h",
         "patchSetId": 5
