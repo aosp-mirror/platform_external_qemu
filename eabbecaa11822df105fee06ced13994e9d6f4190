@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "b8a407cc_66943006",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-08-24T23:39:41Z",
+      "side": 1,
+      "message": "Thank you.",
+      "parentUuid": "5a83e22d_c66f06f6",
+      "range": {
+        "startLine": 255,
+        "startChar": 4,
+        "endLine": 258,
+        "endChar": 35
+      },
+      "revId": "eabbecaa11822df105fee06ced13994e9d6f4190",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "66eddf63_3d38cb4f",
         "filename": "memory.c",
         "patchSetId": 16
