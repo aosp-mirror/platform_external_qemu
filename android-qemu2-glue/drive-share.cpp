@@ -283,6 +283,28 @@ static std::string initDrivePath(const char* id,
     }
 }
 
+static void mirrorTmpCache(const char* dst, const char* src) {
+    // Cache image doesn't work well with bdrv_snapshot_create.
+    // It complaints when loading a snapshot.
+    // Thus we directly copy the qcow2 file.
+    // TODO (yahan@): figure out why
+    path_copy_file(dst, src);
+    QDict *options = qdict_new();
+    qdict_put(options, "driver", qstring_from_str(QCOW2_SUFFIX));
+    Error *local_err = NULL;
+    BlockBackend *blk = blk_new_open(dst,
+            NULL, options, BDRV_O_RDWR | BDRV_O_NO_BACKING,
+            &local_err);
+    if (!blk) {
+        error_report("Could not open '%s': ", dst);
+    } else {
+        BlockDriverState* bs = blk_bs(blk);
+        bdrv_change_backing_file(bs,
+                android_hw->disk_cachePartition_path, NULL);
+        blk_unref(blk);
+    }
+}
+
 // This is for C-style function pointer
 extern "C" {
 static int drive_init(void* opaque, QemuOpts* opts, Error** errp) {
@@ -316,26 +338,8 @@ static int drive_init(void* opaque, QemuOpts* opts, Error** errp) {
                     blk_unref(blkNew);
                 }
             } else {
-                // Cache image doesn't work well with bdrv_snapshot_create.
-                // It complaints when loading a snapshot.
-                // Thus we directly copy the qcow2 file.
-                // TODO (yahan@): figure out why
-                path_copy_file(path.c_str(),
+                mirrorTmpCache(path.c_str(),
                         sDriveShare->srcImagePaths[id].c_str());
-                QDict *options = qdict_new();
-                qdict_put(options, "driver", qstring_from_str(QCOW2_SUFFIX));
-                Error *local_err = NULL;
-                BlockBackend *blk = blk_new_open(path.c_str(),
-                        NULL, options, BDRV_O_RDWR | BDRV_O_NO_BACKING,
-                        &local_err);
-                if (!blk) {
-                    error_report("Could not open '%s': ", path.c_str());
-                } else {
-                    BlockDriverState* bs = blk_bs(blk);
-                    bdrv_change_backing_file(bs,
-                            android_hw->disk_cachePartition_path, NULL);
-                    blk_unref(blk);
-                }
             }
         }
     }
@@ -359,7 +363,8 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
     BlockDriverState* oldbs = blk_bs(blk);
     AioContext* aioCtx = bdrv_get_aio_context(oldbs);
     aio_context_acquire(aioCtx);
-    if (needCreateTmp(id, param->shareMode)) {
+    bool isCache = !strcmp(id, "cache");
+    if (needCreateTmp(id, param->shareMode) && !isCache) {
         bdrv_flush(oldbs);
         // Set the base file to use the snapshot
         int res = bdrv_snapshot_goto(oldbs, snapshotName, errp);
@@ -372,8 +377,13 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
     }
     blk_remove_bs(blk);
     aio_context_release(aioCtx);
-
     std::string path = initDrivePath(id, param->shareMode);
+    if (needCreateTmp(id, param->shareMode) && isCache) {
+        mirrorTmpCache(path.c_str(),
+                    sDriveShare->srcImagePaths[id].c_str());
+    }
+
+    // Mount the drive
     qemu_opt_set(opts, "file", path.c_str(), errp);
 
     // Setup qemu opts for the drive.
@@ -384,7 +394,6 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
     // because it should have been renamed in the first time of initialization.)
     QDict* bs_opts = qdict_new();
     qemu_opts_to_qdict(opts, bs_opts);
-    const char* file = qemu_opt_get(opts, "file");
     QemuOpts* legacy_opts =
             qemu_opts_create(&qemu_legacy_drive_opts, NULL, 0, nullptr);
     qemu_opts_absorb_qdict(legacy_opts, bs_opts, errp);
@@ -403,13 +412,13 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
                           read_only ? "on" : "off");
     qdict_del(bs_opts, "id");
 
-    BlockDriverState* bs = bdrv_open(file, nullptr, bs_opts, 0, errp);
+    BlockDriverState* bs = bdrv_open(path.c_str(), nullptr, bs_opts, 0, errp);
     if (!bs) {
-        error_setg(errp, "drive %s open failure", file);
+        error_setg(errp, "drive %s open failure", path.c_str());
         return 1;
     }
 
-    if (needCreateTmp(id, param->shareMode)) {
+    if (needCreateTmp(id, param->shareMode) && !isCache) {
         // fake an empty snapshot
         // We don't worry if it fails.
         createEmptySnapshot(bs, param->snapshotName);
