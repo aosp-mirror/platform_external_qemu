@@ -209,6 +209,11 @@ void RamSaver::savePage(int64_t blockOffset,
     if (block.pages.empty()) {
         // First time we see a page for this block - save all its pages now.
         auto& ramBlock = block.ramBlock;
+
+        // bug: 113126623
+        // TODO: Figure out how to deal with pages sizes != 4k
+        ramBlock.pageSize = kDefaultPageSize;
+
         assert(ramBlock.totalSize % ramBlock.pageSize == 0);
         auto numPages = int32_t(ramBlock.totalSize / ramBlock.pageSize);
         mIndex.blocks[size_t(mLastBlockIndex)].pages.resize(size_t(numPages));
