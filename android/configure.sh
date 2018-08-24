@@ -562,7 +562,7 @@ if [ "$OPTION_WINDOWS_MSVC" = "yes" ] ; then
     WINDRES=$SDK_TOOLCHAIN_DIR/${BINPREFIX}windres
     AR="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ar"
     OBJCOPY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}objcopy"
-    HOST_OS=windows
+    HOST_OS=windows_msvc
     HOST_TAG=$HOST_OS-$HOST_ARCH
 fi
 
@@ -627,6 +627,8 @@ case "$HOST_OS" in
     linux) PROBE_ALSA=yes; PROBE_OSS=yes; PROBE_ESD=yes; PROBE_PULSEAUDIO=yes;
     ;;
     freebsd) PROBE_OSS=yes;
+    ;;
+    windows_msvc) PROBE_WINAUDIO=yes;
     ;;
     windows) PROBE_WINAUDIO=yes
     ;;
@@ -873,6 +875,9 @@ cc_type () {
 
 PREBUILT_ARCHS=
 case $HOST_OS in
+    windows_msvc)
+        PREBUILT_ARCTS="x86_64"
+        ;;
     windows)
         PREBUILT_ARCHS="x86 x86_64"
         ;;
@@ -892,7 +897,7 @@ ANGLE_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/ANGLE
 if [ -d $ANGLE_PREBUILTS_DIR ]; then
     ANGLE_HOST=$HOST_OS
     case $ANGLE_HOST in
-        windows)
+        windows*)
             ANGLE_SUFFIX=.dll
             ;;
         linux)
@@ -901,7 +906,7 @@ if [ -d $ANGLE_PREBUILTS_DIR ]; then
         *)
     esac
     # Windows only (for now)
-    if [ "$ANGLE_HOST" = "windows" ]; then
+    if [[ "$ANGLE_HOST" = "windows"* ]]; then
         log "Copying ANGLE prebuilt libraries from $ANGLE_PREBUILTS_DIR"
         for LIBNAME in libEGL libGLESv2 d3dcompiler_47; do # GLESv2 only for now
             for ANGLE_ARCH in $PREBUILT_ARCHS; do
@@ -934,7 +939,7 @@ if [ -d $SWIFTSHADER_PREBUILTS_DIR ]; then
     SWIFTSHADER_PREFIX=lib
     SWIFTSHADER_HOST=$HOST_OS
     case $SWIFTSHADER_HOST in
-        windows)
+        windows*)
             SWIFTSHADER_SUFFIX=.dll
             ;;
         darwin)
@@ -973,7 +978,7 @@ MESA_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/mesa
 if [ -d $MESA_PREBUILTS_DIR ] && [ "$OPTION_AEMU64_ONLY" == "no"]; then
     log "Copying Mesa prebuilt libraries from $MESA_PREBUILTS_DIR"
     case $HOST_OS in
-        windows)
+        windows*)
             MESA_LIBNAME=opengl32.dll
             ;;
         linux)
@@ -1014,7 +1019,7 @@ for QT_ARCH in $PREBUILT_ARCHS; do
         continue
     fi
     case $HOST_OS in
-        windows) QT_DLL_FILTER="*.dll";;
+        windows*) QT_DLL_FILTER="*.dll";;
         darwin) QT_DLL_FILTER="*.dylib";;
         *) QT_DLL_FILTER="*.so*";;
     esac
@@ -1025,7 +1030,7 @@ for QT_ARCH in $PREBUILT_ARCHS; do
     for QT_LIB in $QT_LIBS; do
         QT_LIB=${QT_LIB#./}
         QT_DST_LIB=$QT_LIB
-        if [ "$HOST_OS" = "windows" ]; then
+        if [[ "$HOST_OS" = "windows"* ]]; then
             # NOTE: On Windows, the prebuilt libraries are placed under
             # $PREBUILTS/qt/bin, not $PREBUILTS/qt/lib, ensure that they
             # are always copied to $OUT_DIR/lib[64]/qt/lib/.
@@ -1041,7 +1046,7 @@ for E2FS_ARCH in $PREBUILT_ARCHS; do
     # NOTE: in windows only 32-bit binaries are available, so we'll copy the
     # 32-bit executables to the bin64/ directory to cover all our bases
     case $HOST_OS in
-        windows) E2FS_SRCDIR=$E2FSPROGS_PREBUILTS_DIR/$HOST_OS-x86;;
+        windows*) E2FS_SRCDIR=$E2FSPROGS_PREBUILTS_DIR/$HOST_OS-x86;;
         *) E2FS_SRCDIR=$E2FSPROGS_PREBUILTS_DIR/$HOST_OS-$E2FS_ARCH;;
     esac
 
@@ -1356,7 +1361,7 @@ echo "#define CONFIG_BLOCK_DELAYED_FLUSH  1" >> $config_h
 echo "#define CONFIG_LIVE_BLOCK_MIGRATION 1" >> $config_h
 
 case "$HOST_OS" in
-    windows)
+    windows*)
         echo "#define CONFIG_WIN32  1" >> $config_h
         ;;
     *)
@@ -1384,7 +1389,7 @@ case "$HOST_OS" in
 esac
 
 # the -nand-limits options can only work on non-windows systems
-if [ "$HOST_OS" != "windows" ] ; then
+if [[ "$HOST_OS" != "windows"* ]] ; then
     echo "#define CONFIG_NAND_LIMITS  1" >> $config_h
 fi
 echo "#define QEMU_VERSION    \"0.10.50\"" >> $config_h
@@ -1399,7 +1404,7 @@ case "$HOST_OS" in
     freebsd) CONFIG_OS=FREEBSD
              BSD=1
     ;;
-    windows) CONFIG_OS=WIN32
+    windows*) CONFIG_OS=WIN32
     ;;
     *) CONFIG_OS=$HOST_OS
 esac

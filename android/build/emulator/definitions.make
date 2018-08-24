@@ -502,6 +502,7 @@ endef
 
 GEN_ENTRIES_MODE_darwin := _symbols
 GEN_ENTRIES_MODE_windows := def
+GEN_ENTRIES_MODE_windows_msvc := def
 GEN_ENTRIES_MODE_linux := sym
 
 EXPORTED_SYMBOL_LIST_windows :=
