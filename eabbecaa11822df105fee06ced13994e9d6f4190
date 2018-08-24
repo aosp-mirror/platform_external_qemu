@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5a83e22d_c66f06f6",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-24T23:35:57Z",
+      "side": 1,
+      "message": "the very first line in this function takes the BQL",
+      "parentUuid": "95d80d2e_cbdcb022",
+      "range": {
+        "startLine": 255,
+        "startChar": 4,
+        "endLine": 258,
+        "endChar": 35
+      },
+      "revId": "eabbecaa11822df105fee06ced13994e9d6f4190",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "66eddf63_3d38cb4f",
         "filename": "memory.c",
         "patchSetId": 16
