@@ -422,10 +422,15 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
 }
 
 static std::string getReadSnapshotFileName() {
+    const char* kReadSnapshotFileName = "read-snapshot.txt";
     char* avdPath = path_getAvdContentPath(android_hw->avd_name);
-    std::string baseSnapshotFileName(avdPath);
-    free(avdPath);
-    return baseSnapshotFileName + PATH_SEP "read-snapshot.txt";
+    if (avdPath) {
+        std::string baseSnapshotFileName(avdPath);
+        free(avdPath);
+        return baseSnapshotFileName + PATH_SEP + kReadSnapshotFileName;
+    } else {
+        return kReadSnapshotFileName;
+    }
 }
 
 static bool isBaseOnDifferentSnapshot(const char* snapshot_name) {
