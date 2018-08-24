@@ -96,7 +96,8 @@ build_angle_package () {
     run python scripts/bootstrap.py &&
 
     # Sync the appropriate build files
-    run gclient sync &&
+    # The first sync fails, however the second will work
+    run gclient sync || run gclient sync &&
 
     # ninja is provided for each platform in the previously cloned depot_tools
     run ninja -C out/Debug
