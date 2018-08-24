@@ -211,7 +211,8 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
                  auto snapshot = static_cast<Snapshotter*>(opaque);
 
                  auto& loader = snapshot->mLoader;
-                 if (!loader || loader->status() != OperationStatus::Ok) {
+                 if (!loader || loader->status() != OperationStatus::Ok ||
+                     !loader->hasRamLoader()) {
                      return;
                  }
 
