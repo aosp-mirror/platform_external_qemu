@@ -250,6 +250,7 @@ OPTION_HELP=no
 OPTION_STRIP=yes
 OPTION_CRASHUPLOAD=NONE
 OPTION_MINGW=no
+OPTION_WINDOWS_MSVC=no
 OPTION_GLES=
 OPTION_SDK_REV=
 OPTION_SYMBOLS=no
@@ -306,7 +307,19 @@ for opt do
 
   --debug) OPTION_DEBUG=yes; OPTION_STRIP=no
   ;;
-  --mingw) OPTION_MINGW=yes
+  --mingw)
+    # TODO(joshuaduong): deprecate building with mingw otherwise we'll have to
+    # build windows emulator w/o QtWebEngine.
+    if [ "$OPTION_WINDOWS_MSVC" = "yes" ] ; then
+      panic "Choose either mingw or windows-msvc, not both."
+    fi
+    OPTION_MINGW=yes
+  ;;
+  --windows-msvc)
+    if [ "$OPTION_MINGW" = "yes" ] ; then
+      panic "Choose either mingw or windows-msvc, not both."
+    fi
+    OPTION_WINDOWS_MSVC=yes
   ;;
   --sanitizer=*) OPTION_SANITIZER=$optarg
   ;;
@@ -391,7 +404,8 @@ EOF
     echo "  --gles=angle                Build the OpenGLES to ANGLE wrapper"
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"
     echo "  --out-dir=<path>            Use specific output directory [objs/]"
-    echo "  --mingw                     Build Windows executable on Linux"
+    echo "  --mingw                     Build Windows executable on Linux using mingw"
+    echo "  --windows-msvc              Build Windows executable on Linux using Windows SDK + clang (only 64-bit for now)"
     echo "  --verbose                   Verbose configuration"
     echo "  --debug                     Build debug version of the emulator"
     echo "  --sanitizer=[...]           Build with LLVM sanitizer (sanitizer=[address, thread])"
@@ -406,7 +420,7 @@ EOF
 fi
 
 # Check asan support
-[ "$OPTION_SANITIZER" != "no" ] && [ "$OPTION_MINGW" = "yes" ] && panic "Asan is not supported under windows"
+[ "$OPTION_SANITIZER" != "no" ] && ([ "$OPTION_MINGW" = "yes" ] || [ "$OPTION_WINDOWS_MSVC" = "yes" ]) && panic "Asan is not supported under windows"
 
 if [ "$OPTION_AOSP_PREBUILTS_DIR" ]; then
     if [ ! -d "$OPTION_AOSP_PREBUILTS_DIR"/gcc -a \
@@ -517,6 +531,33 @@ if [ "$OPTION_MINGW" = "yes" ] ; then
     BINPREFIX=$("$GEN_SDK" $WIN_SDK_FLAGS --print=binprefix "$SDK_TOOLCHAIN_DIR")
     CC="$SDK_TOOLCHAIN_DIR/${BINPREFIX}gcc"
     CXX="$SDK_TOOLCHAIN_DIR/${BINPREFIX}g++"
+    LD=$CC
+    WINDRES=$SDK_TOOLCHAIN_DIR/${BINPREFIX}windres
+    AR="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ar"
+    OBJCOPY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}objcopy"
+    HOST_OS=windows
+    HOST_TAG=$HOST_OS-$HOST_ARCH
+fi
+
+if [ "$OPTION_WINDOWS_MSVC" = "yes" ] ; then
+    # Are we on Linux ?
+    # TODO(joshuaduong): maybe mac too, or windows + cygwin
+    log "Windows-msvc      : Checking for Linux host"
+    if [ "$HOST_OS" != "linux" ] ; then
+        echo "Sorry, but windows-msvc compilation is only supported on Linux !"
+        exit 1
+    fi
+    TEST_SHELL=wine
+    WINE_CMD=$(which wine 2>/dev/null || true)
+    if [ -z "$WINE_CMD" ]; then
+        echo "${RED}WARNING: Wine is not installed on this machine!! Unit tests will be ignored and will not run!!${RESET}"
+        TEST_SHELL="true ||"
+    fi
+    WIN_SDK_FLAGS="$GEN_SDK_FLAGS --host=windows_msvc-x86_64"
+    "$GEN_SDK" $WIN_SDK_FLAGS "$SDK_TOOLCHAIN_DIR" || panic "Cannot generate SDK toolchain!"
+    BINPREFIX=$("$GEN_SDK" $WIN_SDK_FLAGS --print=binprefix "$SDK_TOOLCHAIN_DIR")
+    CC="$SDK_TOOLCHAIN_DIR/${BINPREFIX}clang"
+    CXX="$SDK_TOOLCHAIN_DIR/${BINPREFIX}clang++"
     LD=$CC
     WINDRES=$SDK_TOOLCHAIN_DIR/${BINPREFIX}windres
     AR="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ar"
@@ -757,7 +798,7 @@ feature_check_header HAVE_MACHINE_BSWAP_H "<machine/bswap.h>"
 feature_check_header HAVE_FNMATCH_H       "<fnmatch.h>"
 
 # check for Mingw version.
-if [ "$HOST_OS" = "windows" ]; then
+if [ "$HOST_OS" = "windows" ] && [ "$OPTION_MINGW" = "yes" ]; then
 log "Mingw      : Probing for GCC version."
 GCC_VERSION=$($CC -v 2>&1 | awk '$1 == "gcc" && $2 == "version" { print $3; }')
 GCC_MAJOR=$(echo "$GCC_VERSION" | cut -f1 -d.)
