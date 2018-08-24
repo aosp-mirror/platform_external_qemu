@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "43ba57bc_cea65718",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2018-08-24T17:20:23Z",
+      "side": 1,
+      "message": "I updated the comment.  Please let me know if that is not what you had in mind.",
+      "parentUuid": "767c363d_58ed81b6",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 26
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d0f0844c_bb27f084",
         "filename": "android/android-emu/android/verified-boot/load_config.cpp",
         "patchSetId": 5
@@ -45,6 +69,30 @@
       "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "555ce948_cdb1d1ee",
+        "filename": "android/android-emu/android/verified-boot/load_config.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2018-08-24T17:20:23Z",
+      "side": 1,
+      "message": "The intent is that the caller provides a zero indexed parameter and the function makes it one indexed for the user.  This is to make the caller\u0027s job easier.  I changed the comment a bit to hopefully clarify.  Let me know if you think a different wording would be clearer.",
+      "parentUuid": "d0f0844c_bb27f084",
+      "range": {
+        "startLine": 84,
+        "startChar": 37,
+        "endLine": 88,
+        "endChar": 43
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "52f18fbe_cb0d9b3b",
+        "filename": "android/android-emu/android/verified-boot/load_config.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2018-08-24T17:20:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cbf329b2_77ac1f60",
+      "range": {
+        "startLine": 171,
+        "startChar": 10,
+        "endLine": 171,
+        "endChar": 19
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6fd138c2_ca771449",
         "filename": "android/android-emu/android/verified-boot/load_config.cpp",
         "patchSetId": 5
@@ -82,6 +154,30 @@
       "writtenOn": "2018-08-24T03:59:06Z",
       "side": 1,
       "message": "This looks like when we ship the system image, and run the emulator from the AVD manager, or from command line with -avd \u003cavdname\u003e, it will look in ~/.android/ for the parameters. Is this intended?\n\nI thought it would be found either in $ANDROID_SDK_ROOT/system-images/android-28/google_apis/x86_64/VerifiedBootParams.textproto or ~/.android/avd/api28.avd/VerifiedBootParams.textproto.\n\nI\u0027m asking b/c if we have multiple different system images with different verified boot parameters on the system, it kind of looks like it would be overwritten or stale, since theres\u0027 only one ~/.android.",
+      "range": {
+        "startLine": 239,
+        "startChar": 12,
+        "endLine": 239,
+        "endChar": 53
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8747f221_f44ef6d5",
+        "filename": "android/android-emu/android/verified-boot/load_config.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2018-08-24T17:20:23Z",
+      "side": 1,
+      "message": "This is a misunderstanding on my part.  My intent was to look in the same directory as the system images (e.g. $ANDROID_SDK_ROOT/system-images/android-28/google_apis/x86_64/VerifiedBootParams.textproto)\n\nI\u0027m not sure what API call should be used to get this although it seems like adding a method to android/android-emu/android/avd/info.h would follow an existing pattern.  Since info.h methods require a AvdInfo* object, it might be best to change this API to take a path and leave the path finding to the caller (e.g. main) who has a AvdInfo* object on-hand.  I\u0027ll make the change but please me know if you have other suggestions.",
+      "parentUuid": "6fd138c2_ca771449",
       "range": {
         "startLine": 239,
         "startChar": 12,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "dfb08159_677ca7da",
+        "filename": "android/android-emu/android/verified-boot/load_config.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2018-08-24T17:20:23Z",
+      "side": 1,
+      "message": "Thank you for explaining.  I was not sure under what contexts this was needed.",
+      "parentUuid": "12606651_5ce3eb64",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 20
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3105e326_d591b576",
         "filename": "android/android-emu/android/verified-boot/load_config.h",
         "patchSetId": 5
@@ -137,6 +257,30 @@
       "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "16946aa2_3e268e89",
+        "filename": "android/android-emu/android/verified-boot/load_config.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2018-08-24T17:20:23Z",
+      "side": 1,
+      "message": "That was an error.  Thanks for noting it!",
+      "parentUuid": "3105e326_d591b576",
+      "range": {
+        "startLine": 25,
+        "startChar": 4,
+        "endLine": 27,
+        "endChar": 32
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "bf054f20_7d001177",
+        "filename": "android/android-emu/android/verified-boot/load_config.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2018-08-24T17:20:23Z",
+      "side": 1,
+      "message": "Thanks :)",
+      "parentUuid": "f6cc312d_1b215762",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 14
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d073a31b_7bfbc747",
         "filename": "android/android-emu/android/verified-boot/load_config.h",
         "patchSetId": 5
@@ -183,6 +351,30 @@
       "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f4eead14_f788f6de",
+        "filename": "android/android-emu/android/verified-boot/load_config.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2018-08-24T17:20:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d073a31b_7bfbc747",
+      "range": {
+        "startLine": 52,
+        "startChar": 3,
+        "endLine": 52,
+        "endChar": 8
+      },
+      "revId": "b986bb4f018e1c080bffca752621439d4ed2351c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
