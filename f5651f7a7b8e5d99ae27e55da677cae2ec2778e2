@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9344d55c_94d81bd9",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-25T00:11:02Z",
+      "side": 1,
+      "message": "I don\u0027t see if this gets freed anywhere. Should it?",
+      "range": {
+        "startLine": 292,
+        "startChar": 11,
+        "endLine": 292,
+        "endChar": 18
+      },
+      "revId": "f5651f7a7b8e5d99ae27e55da677cae2ec2778e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
