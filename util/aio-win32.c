@@ -216,6 +216,7 @@ bool aio_prepare(AioContext *ctx)
     }
 
     if (polled_count == 0) {
+        qemu_lockcnt_dec(&ctx->list_lock);
         return false;
     }
 
