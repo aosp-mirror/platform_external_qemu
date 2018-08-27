@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "android/base/Compiler.h"
+#include "android/base/ContiguousRangeMapper.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/MemoryHints.h"
 #include "android/base/synchronization/Lock.h"
@@ -23,8 +24,51 @@
 #include <sys/types.h>
 #endif
 
+using android::base::ContiguousRangeMapper;
+using android::base::LazyInstance;
+
 namespace android {
 namespace base {
+
+// Assumes is aligned to page size and the whole page is there.
+// Explicitly copies to an intermediate buffer---even if we emit asm
+// that reads and writes the same address, it could get skipped as
+// a no-op from the POV of the operating system.
+static constexpr size_t kTouchBufferSize = 16 * 1048576;
+
+class MemoryTouchBuffer {
+public:
+
+    MemoryTouchBuffer() {
+        mBuffer.resize(kTouchBufferSize);
+    }
+
+    char* ptr() { return mBuffer.data(); }
+
+private:
+    std::vector<char> mBuffer;
+};
+
+static LazyInstance<MemoryTouchBuffer> sTouchBuffer = LAZY_INSTANCE_INIT;
+
+static void rewriteMemory(void* toRewrite, uint64_t length) {
+
+    ContiguousRangeMapper rewriter([](uintptr_t start, uintptr_t size) {
+        char* staging = sTouchBuffer->ptr();
+
+        memcpy(staging, (uint8_t*)start, size);
+        memcpy((uint8_t*)start, staging, size);
+        if (memcmp(staging, (uint8_t*)start, size)) {
+            fprintf(stderr, "%s: goofed\n", __func__);
+        }
+    }, kTouchBufferSize);
+
+    uint8_t* start = (uint8_t*)toRewrite;
+
+    for (uint64_t i = 0; i < length; i += kTouchBufferSize) {
+        rewriter.add((uintptr_t)start + i, std::min(length - i, (uint64_t)kTouchBufferSize));
+    }
+}
 
 bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
 #ifdef _WIN32
@@ -46,11 +90,15 @@ bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
         VirtualUnlock(start, length);
         VirtualUnlock(start, length);
         return true;
+    case MemoryHint::Touch:
+        rewriteMemory(start, length);
+        return true;
     case MemoryHint::Normal:
         return true;
     // TODO: Find some way to implement those on Windows
     case MemoryHint::Random:
     case MemoryHint::Sequential:
+        return true;
     default:
         return true;
     }
@@ -88,6 +136,9 @@ bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
             break;
         case MemoryHint::Sequential:
             asAdviseFlag = MADV_SEQUENTIAL;
+            break;
+        case MemoryHint::Touch:
+            rewriteMemory(start, length);
             break;
         default:
             break;
