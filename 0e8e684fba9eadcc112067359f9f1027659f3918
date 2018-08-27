@@ -22,6 +22,30 @@
       "revId": "0e8e684fba9eadcc112067359f9f1027659f3918",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "48aee21a_bbb47603",
+        "filename": "android/android-emu/android/base/testing/ResultMatchers.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-27T15:28:24Z",
+      "side": 1,
+      "message": "PrintToString can handle any type, just like EXPECT_EQ():\n\n* If there is an operator\u003c\u003c(ostream, type) or a PrintTo method, that will be called to pretty-print the data.\n* Otherwise, it will show the binary representation of the data.",
+      "parentUuid": "c4f92aee_22a3ba06",
+      "range": {
+        "startLine": 27,
+        "startChar": 24,
+        "endLine": 27,
+        "endChar": 68
+      },
+      "revId": "0e8e684fba9eadcc112067359f9f1027659f3918",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
