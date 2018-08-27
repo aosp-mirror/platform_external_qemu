@@ -677,6 +677,8 @@ LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
 
 LOCAL_SRC_FILES := \
+  android/automation/AutomationController_unittest.cpp \
+  android/automation/AutomationEventSink_unittest.cpp \
   android/avd/util_unittest.cpp \
   android/avd/util_wrapper_unittest.cpp \
   android/base/ArraySize_unittest.cpp \

@@ -15,7 +15,9 @@
  */
 
 #include "android/virtualscene/SceneCamera.h"
+#include "android/automation/AutomationController.h"
 #include "android/hw-sensors.h"
+#include "android/physics/PhysicalModel.h"
 #include "android/utils/debug.h"
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -89,11 +91,18 @@ void SceneCamera::setAspectRatio(float aspectRatio) {
 }
 
 void SceneCamera::update() {
+    // Note: when getting the transform, we always update the current time
+    //       so that consumers of this transform get the most up-to-date
+    //       value possible, and so that transform timestamps progress even when
+    //       sensors are not polling.
+    automation::AutomationController::tryAdvanceTime();
+
     int64_t timestamp;
     glm::vec3 position;
     glm::vec3 rotationEuler;
-    android_physical_model_get_transform(&position.x, &position.y, &position.z,
-            &rotationEuler.x, &rotationEuler.y, &rotationEuler.z, &timestamp);
+    physicalModel_getTransform(android_physical_model_instance(), &position.x,
+                               &position.y, &position.z, &rotationEuler.x,
+                               &rotationEuler.y, &rotationEuler.z, &timestamp);
 
     const glm::mat4 rotationMat = glm::eulerAngleXYZ(
             glm::radians(rotationEuler.x), glm::radians(rotationEuler.y),

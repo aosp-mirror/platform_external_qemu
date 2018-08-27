@@ -15,14 +15,39 @@
 #pragma once
 
 #include "android/base/Compiler.h"
+#include "android/base/Result.h"
+#include "android/base/async/Looper.h"
 
-namespace android {
+#include <memory>
+
+// Forward declarations;
+typedef struct PhysicalModel PhysicalModel;
+
+namespace android { 
 namespace automation {
 
-// Controls recording and playback of emulator automation events.
+typedef android::base::Looper::DurationNs DurationNs;
 
 // Forward declarations.
 class AutomationEventSink;
+
+enum class StartError {
+    InvalidFilename,
+    FileOpenError,
+    AlreadyStarted,
+    InternalError,
+    PlaybackFileCorrupt
+};
+using StartResult = base::Result<void, StartError>;
+std::ostream& operator<<(std::ostream& os, const StartError& value);
+
+enum class StopError { NotStarted };
+using StopResult = base::Result<void, StopError>;
+std::ostream& operator<<(std::ostream& os, const StopError& value);
+
+//
+// Controls recording and playback of emulator automation events.
+//
 
 class AutomationController {
 protected:
@@ -30,14 +55,49 @@ protected:
 
     // AutomationController is a singleton, use get() to get an instance.
     AutomationController() = default;
-    virtual ~AutomationController() = default;
 
 public:
-    // Get the global instance of the AutomationController.
+    virtual ~AutomationController() = default;
+
+    // Initialize the AutomationController, called in qemu-setup.cpp.
+    static void initialize();
+
+    // Get the global instance of the AutomationController.  Asserts if called
+    // before initialize().
     static AutomationController& get();
+
+    // Create an instance of the Looper for test usage.
+    static std::unique_ptr<AutomationController> createForTest(
+            PhysicalModel* physicalModel,
+            base::Looper* looper);
+
+    // Advance the time if the AutomationController has been created.
+    static void tryAdvanceTime();
 
     // Get the event sink for recording automation events.
     virtual AutomationEventSink& getEventSink() = 0;
+
+    // Reset the current state and cancel any recordings or playback.
+    // Called on snapshot restore, since playback cannot be trivially resumed.
+    virtual void reset() = 0;
+
+    // Advance the state and process any playback events.
+    // Note that it is *not safe* to call this from a PhysicalModel callback.
+    //
+    // Returns the current time.
+    virtual DurationNs advanceTime() = 0;
+
+    // Start a recording to a file.
+    virtual StartResult startRecording(android::base::StringView filename) = 0;
+
+    // Stops a recording to a file.
+    virtual StopResult stopRecording() = 0;
+
+    // Start a playback from a file.
+    virtual StartResult startPlayback(android::base::StringView filename) = 0;
+
+    // Stop playback from a file.
+    virtual StopResult stopPlayback() = 0;
 };
 
 }  // namespace automation

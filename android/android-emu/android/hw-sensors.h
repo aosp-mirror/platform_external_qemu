@@ -16,9 +16,11 @@
 #include "android/utils/compiler.h"
 
 #include <stdint.h>
+#include <math.h>
 
 /* forward declaration */
 struct QAndroidPhysicalStateAgent;
+typedef struct PhysicalModel PhysicalModel;
 
 ANDROID_BEGIN_HEADER
 
@@ -30,11 +32,29 @@ extern void  android_hw_sensors_init( void );
 extern void android_hw_sensors_init_remote_controller( void );
 
 /* struct for use in sensor values */
-typedef struct vec3 {
-  float x;
-  float y;
-  float z;
-} vec3;
+struct vec3 {
+    float x;
+    float y;
+    float z;
+
+#ifdef __cplusplus
+    bool operator==(const vec3& rhs) const {
+        const float kEpsilon = 0.00001f;
+
+        const double diffX = fabs(x - rhs.x);
+        const double diffY = fabs(y - rhs.y);
+        const double diffZ = fabs(z - rhs.z);
+        return (diffX < kEpsilon && diffY < kEpsilon && diffZ < kEpsilon);
+    }
+
+    bool operator!=(const vec3& rhs) const {
+        return !(*this == rhs);
+    }
+#endif  // __cplusplus
+};
+
+typedef struct vec3 vec3;
+
 
 /* NOTE: Sensor status Error definition, It will be used in the Sensors Command
  *       part in android-qemu1-glue/console.c. Details:
@@ -150,16 +170,13 @@ extern int64_t android_sensors_get_time_offset();
 /* Get the current sensor delay (determines update rate) */
 extern int32_t android_sensors_get_delay_ms();
 
+/* Get the physical model instance. */
+extern PhysicalModel* android_physical_model_instance();
+
 /* Get physical model values */
 extern int android_physical_model_get(
     int physical_parameter, float* out_a, float* out_b, float* out_c,
     ParameterValueType parameter_value_type);
-
-/* Getter for simulatenous physical rotation and translation */
-extern int android_physical_model_get_transform(
-    float* out_translation_x, float* out_translation_y, float* out_translation_z,
-    float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
-    int64_t* out_timestamp);
 
 /* Set physical model target values */
 extern int android_physical_model_set(
@@ -178,16 +195,10 @@ extern int android_physical_model_get_parameter_id_from_name(
 extern const char* android_physical_model_get_parameter_name_from_id(
     int physical_parameter_id );
 
-// Start recording physical changes to the specified file.
-extern int android_physical_model_record(const char* file_name);
-
-// Start playing back physical changes from the specified file.
-extern int android_physical_model_playback(const char* file_name);
-
 // Start recording ground truth to the specified file.
 extern int android_physical_model_record_ground_truth(const char* file_name);
 
-// Stop all active recording and playback.
-extern int android_physical_model_stop_record_and_playback();
+// Stop recording ground truth.
+extern int android_physical_model_stop_recording();
 
 ANDROID_END_HEADER
