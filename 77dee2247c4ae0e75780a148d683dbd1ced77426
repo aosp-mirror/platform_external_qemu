@@ -25,6 +25,98 @@
     },
     {
       "key": {
+        "uuid": "90eb320a_962b7707",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/marshaling.py",
+        "patchSetId": 40
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-27T18:51:21Z",
+      "side": 1,
+      "message": "nit: spaces",
+      "range": {
+        "startLine": 115,
+        "startChar": 0,
+        "endLine": 115,
+        "endChar": 8
+      },
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b9aa30f4_a047b86f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/marshaling.py",
+        "patchSetId": 40
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-27T18:51:21Z",
+      "side": 1,
+      "message": "nit: spaces",
+      "range": {
+        "startLine": 200,
+        "startChar": 0,
+        "endLine": 200,
+        "endChar": 34
+      },
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fa90aea2_12cdaea2",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/marshaling.py",
+        "patchSetId": 40
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-27T18:51:21Z",
+      "side": 1,
+      "message": "nit: spaces",
+      "range": {
+        "startLine": 227,
+        "startChar": 0,
+        "endLine": 227,
+        "endChar": 34
+      },
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b322d3e_efb54c1f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/testing.py",
+        "patchSetId": 40
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-27T18:51:21Z",
+      "side": 1,
+      "message": "nit: spaces",
+      "range": {
+        "startLine": 128,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 8
+      },
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3e7ac3c2_7d08e63d",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/Android.mk",
         "patchSetId": 40
