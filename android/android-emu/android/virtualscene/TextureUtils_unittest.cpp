@@ -123,7 +123,7 @@ static void loadGoldenBmp(StringView filename, TextureUtils::Result* result) {
     int width = *reinterpret_cast<int*>(&header[0x12]);
     int height = *reinterpret_cast<int*>(&header[0x16]);
 
-    SCOPED_TRACE(testing::Message()
+    SCOPED_TRACE(::testing::Message()
                  << "dataPos=" << dataPos << ", imageSize=" << imageSize
                  << ", bitsPerPixel=" << bitsPerPixel << ", width=" << width
                  << ", height=" << height);
@@ -204,7 +204,7 @@ static void compareSumOfSquaredDifferences(const std::vector<uint8_t>& image,
     }
 }
 
-class TextureUtilLoad : public testing::TestWithParam<ImageTestParam> {};
+class TextureUtilLoad : public ::testing::TestWithParam<ImageTestParam> {};
 
 // Compare loaded images with golden versions.
 TEST_P(TextureUtilLoad, Compare) {
@@ -215,9 +215,9 @@ TEST_P(TextureUtilLoad, Compare) {
     loadImage(param.filename, &image);
     loadGoldenBmp(param.goldenFilename, &golden);
 
-    SCOPED_TRACE(testing::Message()
-                 << "image=" << testing::PrintToString(image) << "\n"
-                 << " golden=" << testing::PrintToString(golden));
+    SCOPED_TRACE(::testing::Message()
+                 << "image=" << ::testing::PrintToString(image) << "\n"
+                 << " golden=" << ::testing::PrintToString(golden));
 
     ASSERT_EQ(golden.mWidth, image.mWidth);
     ASSERT_EQ(golden.mHeight, image.mHeight);
@@ -250,7 +250,7 @@ TEST(TextureUtilsBasic, InvalidPNG) {
 INSTANTIATE_TEST_CASE_P(
         TextureUtils,
         TextureUtilLoad,
-        testing::Values(
+        ::testing::Values(
                 ImageTestParam("gray_alpha.png", "gray_alpha_golden.bmp"),
                 ImageTestParam("gray.png", "gray_golden.bmp"),
                 ImageTestParam("indexed_alpha.png", "indexed_alpha_golden.bmp"),

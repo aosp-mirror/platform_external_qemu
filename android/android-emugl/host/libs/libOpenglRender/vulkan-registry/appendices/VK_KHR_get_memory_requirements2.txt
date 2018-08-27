@@ -1,0 +1,75 @@
+// Copyright (c) 2016-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+include::meta/VK_KHR_get_memory_requirements2.txt[]
+
+*Last Modified Date*::
+    2017-09-05
+*IP Status*::
+    No known IP claims.
+*Interactions and External Dependencies*::
+  - Promoted to Vulkan 1.1 Core
+*Contributors*::
+  - Jason Ekstrand, Intel
+  - Jeff Bolz, NVIDIA
+  - Jesse Hall, Google
+
+This extension provides new entry points to query memory requirements of
+images and buffers in a way that can be easily extended by other extensions,
+without introducing any further entry points.
+The Vulkan 1.0 slink:VkMemoryRequirements and
+slink:VkSparseImageMemoryRequirements structures do not include a
+pname:sType/pname:pNext, this extension wraps them in new structures with
+pname:sType/pname:pNext so an application can query a chain of memory
+requirements structures by constructing the chain and letting the
+implementation fill them in.
+A new command is added for each ftext:vkGet*MemoryRequrements command in
+core Vulkan 1.0.
+
+=== New Object Types
+
+None.
+
+=== New Enum Constants
+
+  * Extending elink:VkStructureType:
+  ** ename:VK_STRUCTURE_TYPE_BUFFER_MEMORY_REQUIREMENTS_INFO_2_KHR
+  ** ename:VK_STRUCTURE_TYPE_IMAGE_MEMORY_REQUIREMENTS_INFO_2_KHR
+  ** ename:VK_STRUCTURE_TYPE_IMAGE_SPARSE_MEMORY_REQUIREMENTS_INFO_2_KHR
+  ** ename:VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2_KHR
+  ** ename:VK_STRUCTURE_TYPE_SPARSE_IMAGE_MEMORY_REQUIREMENTS_2_KHR
+
+=== New Enums
+
+None.
+
+=== New Structures
+
+  * slink:VkBufferMemoryRequirementsInfo2KHR
+  * slink:VkImageMemoryRequirementsInfo2KHR
+  * slink:VkImageSparseMemoryRequirementsInfo2KHR
+  * slink:VkMemoryRequirements2KHR
+  * slink:VkSparseImageMemoryRequirements2KHR
+
+=== New Functions
+
+  * flink:vkGetImageMemoryRequirements2KHR
+  * flink:vkGetBufferMemoryRequirements2KHR
+  * flink:vkGetImageSparseMemoryRequirements2KHR
+
+=== Promotion to Vulkan 1.1
+
+All functionality in this extension is included in core Vulkan 1.1, with the
+KHR suffix omitted.
+The original type, enum and command names are still available as aliases of
+the core functionality.
+
+=== Issues
+
+None.
+
+=== Version History
+
+ * Revision 1, 2017-03-23 (Jason Ekstrand)
+   - Internal revisions

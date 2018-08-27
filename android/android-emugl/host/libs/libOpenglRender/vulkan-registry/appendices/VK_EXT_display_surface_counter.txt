@@ -1,0 +1,44 @@
+include::meta/VK_EXT_display_surface_counter.txt[]
+
+*Last Modified Date*::
+    2016-12-13
+*IP Status*::
+    No known IP claims.
+*Contributors*::
+  - Pierre Boudier, NVIDIA
+  - James Jones, NVIDIA
+  - Damien Leone, NVIDIA
+  - Pierre-Loup Griffais, Valve
+  - Daniel Vetter, Intel
+
+This is extension defines a vertical blanking period counter associated with
+display surfaces.
+It provides a mechanism to query support for such a counter from a
+slink:VkSurfaceKHR object.
+
+=== New Enum Constants
+
+  * Extending elink:VkStructureType:
+  ** ename:VK_STRUCTURE_TYPE_SURFACE_CAPABILITIES_2_EXT
+
+=== New Enums
+
+  * elink:VkSurfaceCounterFlagsEXT
+  * elink:VkSurfaceCounterFlagBitsEXT
+
+=== New Structures
+
+  * slink:VkSurfaceCapabilities2EXT
+
+=== New Functions
+
+  * flink:vkGetPhysicalDeviceSurfaceCapabilities2EXT
+
+=== Issues
+
+None.
+
+=== Version History
+
+ * Revision 1, 2016-12-13 (James Jones)
+   - Initial draft

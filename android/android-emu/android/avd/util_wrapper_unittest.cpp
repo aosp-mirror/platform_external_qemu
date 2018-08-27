@@ -27,7 +27,7 @@ TEST(AvdUtilWrapper, emulator_path_getSdkRoot) {
   ASSERT_TRUE(sys.pathIsDir("/tmp/Sdk"));
 
   sys.setLauncherDirectory(".");
-  sys.setCurrentDirectoryForTesting("/tmp/Sdk/tools");
+  sys.setCurrentDirectory("/tmp/Sdk/tools");
 
   char* sdk = path_getSdkRoot();
   EXPECT_TRUE(sdk != nullptr);

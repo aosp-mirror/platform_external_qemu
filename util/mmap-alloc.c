@@ -173,7 +173,7 @@ void *qemu_ram_mmap(int fd, size_t size, size_t align, bool shared)
             (HANDLE)_get_osfhandle(fd),
             NULL, // security attribs
             PAGE_READWRITE,
-            0,
+            (uint32_t)(((uint64_t)(size + align)) >> 32),
             (uint32_t)(size + align),
             NULL);
 

@@ -9,8 +9,13 @@
 LOCAL_PATH := $(EMULATOR_GTEST_SOURCES_DIR)
 
 common_SRC_FILES := \
-    src/gtest-all.cc \
-    src/gtest_main.cc
+    googletest/src/gtest-all.cc \
+    googlemock/src/gmock-all.cc \
+    googlemock/src/gmock_main.cc
+
+common_INCLUDES := \
+    $(LOCAL_PATH)/googletest/include \
+    $(LOCAL_PATH)/googlemock/include
 
 common_CFLAGS := -O0 -Wno-unused-variable
 
@@ -19,10 +24,16 @@ ifneq (windows,$(BUILD_TARGET_OS))
 endif
 
 $(call emugl-begin-static-library,libemugl_gtest)
+
 LOCAL_SRC_FILES := $(common_SRC_FILES)
 LOCAL_CFLAGS += $(common_CFLAGS)
+LOCAL_C_INCLUDES := \
+    $(common_INCLUDES) \
+    $(LOCAL_PATH)/googletest \
+    $(LOCAL_PATH)/googlemock
+
 LOCAL_CPP_EXTENSION := .cc
-$(call emugl-export,C_INCLUDES,$(LOCAL_PATH)/include)
+$(call emugl-export,C_INCLUDES,$(LOCAL_C_INCLUDES))
 $(call emugl-export,LDLIBS,$(common_LDLIBS))
 $(call emugl-end-module)
 
@@ -30,9 +41,12 @@ ifdef FIRST_INCLUDE
     $(call emugl-begin-host-static-library,libemugl_gtest_host)
     LOCAL_SRC_FILES := $(common_SRC_FILES)
     LOCAL_CFLAGS += $(common_CFLAGS)
-    LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
+    LOCAL_C_INCLUDES := \
+        $(common_INCLUDES) \
+        $(LOCAL_PATH)/googletest \
+        $(LOCAL_PATH)/googlemock
     LOCAL_CPP_EXTENSION := .cc
-    $(call emugl-export,C_INCLUDES,$(LOCAL_PATH)/include)
+    $(call emugl-export,C_INCLUDES,$(LOCAL_C_INCLUDES))
     $(call emugl-export,LDLIBS,$(common_LDLIBS) -lpthread)
     $(call emugl-end-module)
 endif

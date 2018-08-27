@@ -328,6 +328,16 @@ public:
 #endif  // !_WIN32
     }
 
+    bool setCurrentDirectory(StringView directory) override {
+#if defined(_WIN32)
+        Win32UnicodeString directory_unicode(directory);
+        return SetCurrentDirectoryW(directory_unicode.c_str());
+#else   // !_WIN32
+        char currentDir[PATH_MAX];
+        return chdir(c_str(directory)) == 0;
+#endif  // !_WIN32
+    }
+
     const std::string& getLauncherDirectory() const override {
         if (mLauncherDir.empty()) {
             std::string launcherDirEnv = envGet("ANDROID_EMULATOR_LAUNCHER_DIR");

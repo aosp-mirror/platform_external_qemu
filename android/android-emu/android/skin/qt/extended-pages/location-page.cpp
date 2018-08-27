@@ -35,15 +35,22 @@ using android::base::LazyInstance;
 
 static constexpr double kGplexLon = -122.084;
 static constexpr double kGplexLat =   37.422;
+static constexpr double kGplexAlt =    5.0; // Meters
+static constexpr double MAX_SPEED =  666.0; // Arbitrary (~speed of sound in knots)
 
 static double getHeading(double startLat, double startLon, double endLat, double endLon);
+static double getDistanceNm(double startLat, double startLon, double endLat, double endLon);
 static void sendLocationToDevice();
 static void getDeviceLocation(double* pLatitude, double* pLongitude, double* pAltitude);
 static void getDeviceLocationFromSettings(double* pOutLatitude,
                                           double* pOutLongitude,
                                           double* pOutAltitude);
+static void getDeviceVelocity(double* speed, double* heading);
+static void putdeviceVelocity(double speed, double heading);
 
 static const QAndroidLocationAgent* sLocationAgent = nullptr;
+static double sDeviceSpeed = 0.0; // Knots
+static double sDeviceHeading = 0.0; // Degrees 0=north, 90=east
 
 static void updateThreadLoop();
 
@@ -60,8 +67,8 @@ struct LocationPageGlobals {
 static LazyInstance<LocationPageGlobals> sGlobals = LAZY_INSTANCE_INIT;
 
 static void updateThreadLoop() {
-    // Update the location every 10 seconds, until we exit
-    static constexpr int sleepMicrosec = 10 * 1000 * 1000;
+    // Update the location every second, until we exit
+    static constexpr int sleepMicrosec = 1 * 1000 * 1000;
     AutoLock lock(sGlobals->updateThreadLock);
     auto now = android::base::System::get()->getUnixTimeUs();
     auto wakeTime = now + sleepMicrosec;
@@ -116,8 +123,6 @@ LocationPage::LocationPage(QWidget *parent) :
     double curLat, curLon, curAlt;
     getDeviceLocation(&curLat, &curLon, &curAlt);
     updateDisplayedLocation(curLat, curLon, curAlt);
-    mPreviousLat = curLat;
-    mPreviousLon = curLon;
 
     mUi->loc_altitudeInput->setText(QString::number(curAlt, 'f', 1));
     mUi->loc_latitudeInput->setValue(curLat);
@@ -261,8 +266,6 @@ void LocationPage::on_loc_sendPointButton_clicked() {
     altitude = mUi->loc_altitudeInput->text().toDouble();
     updateDisplayedLocation(lat, lon, altitude);
 
-    mPreviousLat = lat;
-    mPreviousLon = lon;
     sGlobals->updateThreadCv.signalAndUnlock(&lock);
 }
 
@@ -468,6 +471,7 @@ void LocationPage::locationPlaybackStop()
     mUi->loc_pathTable->setEditTriggers(QAbstractItemView::DoubleClicked |
                                                 QAbstractItemView::EditKeyPressed |
                                                 QAbstractItemView::AnyKeyPressed);
+    putdeviceVelocity(0.0, 0.0);
     mNowPlaying = false;
 }
 
@@ -507,11 +511,28 @@ void LocationPage::timeout() {
     theItem = mUi->loc_pathTable->item(mRowToSend, 3);
     double alt = theItem->text().toDouble(&cellOK);
 
-    double direction = getHeading(mPreviousLat, mPreviousLon, lat, lon);
-    emit targetHeadingChanged(direction);
+    // Get the speed and direction to the next point
+    double speed = 0.0;
+    double direction = 0.0;
+    double deltaTimeSec = 0.0;
+    int nextRow = mRowToSend + 1;
+    if (nextRow < mUi->loc_pathTable->rowCount()) {
+        theItem = mUi->loc_pathTable->item(nextRow, 0);
+        deltaTimeSec = theItem->text().toDouble() / (mUi->loc_playbackSpeed->currentIndex() + 1);
+        theItem = mUi->loc_pathTable->item(nextRow, 1);
+        double nextLat = theItem->text().toDouble(&cellOK);
+        theItem = mUi->loc_pathTable->item(nextRow, 2);
+        double nextLon = theItem->text().toDouble(&cellOK);
+        double distance = getDistanceNm(lat, lon, nextLat, nextLon);
+        double deltaTimeHours = deltaTimeSec / (60.0 * 60.0);
+        if (deltaTimeHours > 0.0) {
+            speed = std::min(distance / deltaTimeHours, MAX_SPEED);
+        }
+        direction = getHeading(lat, lon, nextLat, nextLon);
+    }
+    putdeviceVelocity(speed, direction);
 
-    mPreviousLat = lat;
-    mPreviousLon = lon;
+    emit targetHeadingChanged(direction);
 
     // Update the appearance of the table:
     // 1. Clear the "play arrow" icon from the previous point, if necessary.
@@ -533,18 +554,15 @@ void LocationPage::timeout() {
     sGlobals->updateThreadCv.signalAndUnlock(&lock);
 
     // Go on to the next row
-    mRowToSend++;
+    mRowToSend = nextRow;
     if (mRowToSend >= mUi->loc_pathTable->rowCount()) {
         // No more to send. Same as clicking Stop.
         locationPlaybackStop();
     } else {
         // Set a timer for when this row should be sent
-        theItem = mUi->loc_pathTable->item(mRowToSend, 0);
-        double dTime = theItem->text().toDouble();
-        int mSec = dTime * 1000.0;
+        int mSec = deltaTimeSec * 1000.0;
         if (mSec < 0) mSec = 0;
-        mTimer.setInterval(
-                mSec / static_cast<double>(mUi->loc_playbackSpeed->currentIndex() + 1));
+        mTimer.setInterval(mSec);
         mTimer.start();
     }
 }
@@ -666,7 +684,7 @@ static void getDeviceLocationFromSettings(double* pOutLatitude,
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
         *pOutLatitude = avdSpecificSettings.value(Ui::Settings::PER_AVD_LATITUDE, kGplexLat).toDouble();
         *pOutLongitude = avdSpecificSettings.value(Ui::Settings::PER_AVD_LONGITUDE, kGplexLon).toDouble();
-        *pOutAltitude = avdSpecificSettings.value(Ui::Settings::PER_AVD_ALTITUDE, 0.0).toDouble();
+        *pOutAltitude = avdSpecificSettings.value(Ui::Settings::PER_AVD_ALTITUDE, kGplexAlt).toDouble();
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
@@ -675,7 +693,7 @@ static void getDeviceLocationFromSettings(double* pOutLatitude,
         *pOutLongitude = settings.value(Ui::Settings::LOCATION_RECENT_LONGITUDE,
                                      kGplexLon).toDouble();
         *pOutAltitude  = settings.value(Ui::Settings::LOCATION_RECENT_ALTITUDE,
-                                     0.0).toDouble();
+                                     kGplexAlt).toDouble();
     }
 }
 
@@ -714,6 +732,18 @@ static void getDeviceLocation(double* pLatitude, double* pLongitude, double* pAl
     }
 }
 
+// Get the current speed and direction
+static void getDeviceVelocity(double* speed, double* heading) {
+    *speed = sDeviceSpeed;
+    *heading = sDeviceHeading;
+}
+
+// Set the current speed and direction
+static void putdeviceVelocity(double speed, double heading) {
+    sDeviceSpeed = speed;
+    sDeviceHeading = heading;
+}
+
 // Send a GPS location to the device
 static void sendLocationToDevice() {
     if (sLocationAgent && sLocationAgent->gpsSendLoc) {
@@ -723,9 +753,13 @@ static void sendLocationToDevice() {
         double altitude;
         getDeviceLocation(&latitude, &longitude, &altitude);
 
+        double speed;   // Knots
+        double heading; // Degrees
+        getDeviceVelocity(&speed, &heading);
+
         timeval timeVal = {};
         gettimeofday(&timeVal, nullptr);
-        sLocationAgent->gpsSendLoc(latitude, longitude, altitude, 4, &timeVal);
+        sLocationAgent->gpsSendLoc(latitude, longitude, altitude, speed, heading, 4, &timeVal);
     }
 }
 
@@ -800,4 +834,35 @@ static double getHeading(double startLat, double startLon, double endLat, double
                 - ( sin(startLatRadians) * cos(endLatRadians) * cos(deltaLonRadians) );
 
     return (atan2(aa, bb) * 180.0 / M_PI);
+}
+
+// Determine the distance between two locations on earth.
+// All inputs are in degrees.
+// The output is in nautical miles(!)
+//
+// The Haversine formula is
+//     a = sin^2(dLat/2) + cos(lat1) * cos(lat2) * sin^2(dLon/2)
+//     c = 2 * atan2( sqrt(a), sqrt(1-a) )
+//     dist = radius * c
+static double getDistanceNm(double startLat, double startLon, double endLat, double endLon) {
+    double startLatRadians = startLat * M_PI / 180.0;
+    double startLonRadians = startLon * M_PI / 180.0;
+    double endLatRadians   = endLat   * M_PI / 180.0;
+    double endLonRadians   = endLon   * M_PI / 180.0;
+
+    double deltaLatRadians = endLatRadians - startLatRadians;
+    double deltaLonRadians = endLonRadians - startLonRadians;
+
+    double sinDeltaLatBy2 = sin(deltaLatRadians / 2.0);
+    double sinDeltaLonBy2 = sin(deltaLonRadians / 2.0);
+
+    double termA =   sinDeltaLatBy2 * sinDeltaLatBy2
+                   + cos(startLatRadians) * cos(endLatRadians) * sinDeltaLonBy2 * sinDeltaLonBy2;
+    double termC = 2.0 * atan2(sqrt(termA), sqrt(1.0 - termA));
+
+    constexpr double earthRadius = 3440.; // Nautical miles
+
+    double dist = earthRadius * termC;
+
+    return dist;
 }

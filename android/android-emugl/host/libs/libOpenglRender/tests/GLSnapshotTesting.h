@@ -32,30 +32,6 @@ struct GlValues {
     std::vector<GLfloat> floats;
 };
 
-struct GlSampleCoverage {
-    GLclampf value;
-    GLboolean invert;
-};
-
-struct GlStencilFunc {
-    GLenum func;
-    GLint ref;
-    GLuint mask;
-};
-
-struct GlStencilOp {
-    GLenum sfail;
-    GLenum dpfail;
-    GLenum dppass;
-};
-
-struct GlBlendFunc {
-    GLenum srcRGB;
-    GLenum dstRGB;
-    GLenum srcAlpha;
-    GLenum dstAlpha;
-};
-
 struct GlBufferData {
     GLsizeiptr size;
     GLvoid* bytes;
@@ -109,6 +85,10 @@ static const GLenum kGLES2BlendFuncs[] = {GL_ZERO,
                                           GL_CONSTANT_ALPHA,
                                           GL_ONE_MINUS_CONSTANT_ALPHA,
                                           GL_SRC_ALPHA_SATURATE};
+
+// Valid GENERATE_MIPMAP_HINT values
+static const GLenum kGLES2GenerateMipmapHints[] = {GL_DONT_CARE, GL_FASTEST,
+                                                   GL_NICEST};
 
 // Returns a string useful for failure messages describing |enumValue|.
 std::string describeGlEnum(GLenum enumValue);

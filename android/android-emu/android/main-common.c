@@ -1148,7 +1148,12 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
 
     // enforce CDD minimums
     int minRam = 32;
-    if (avdInfo_getApiLevel(avd) >= 21) {
+    if (avdInfo_getApiLevel(avd) >= 26) {
+        // bug: 112664026
+        // This isn't a CDD minimum, but could be a source of why
+        // people think the emulator is slow recently.
+        minRam = 1536;
+    } else if (avdInfo_getApiLevel(avd) >= 21) {
         if (guest_is_32_bit) {
             // TODO: adjust min based on screen size, wear, 23+
             // android wear min is actually 416 but most people boot phones

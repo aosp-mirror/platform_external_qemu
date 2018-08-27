@@ -95,29 +95,6 @@ static GLenum sGetUnsizedColorBufferFormat(GLenum format) {
     }
 }
 // static
-int sGetBytesPerPixel(GLenum p_internalFormat) {
-    switch (p_internalFormat) {
-        case GL_RGB:
-            return 3;
-        case GL_RGB565_OES:
-            return 2;
-        case GL_RGBA:
-        case GL_RGB5_A1_OES:
-        case GL_RGBA4_OES:
-            return 4;
-        case GL_UNSIGNED_INT_10_10_10_2_OES:
-            return 4;
-        case GL_RGB10_A2:
-            return 4;
-        case GL_RGBA16F:
-            return 8;
-        case GL_LUMINANCE:
-            return 2;
-        default:
-            return 3;
-    }
-}
-
 ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  int p_width,
                                  int p_height,
@@ -129,125 +106,86 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     GLenum texFormat = 0;
 
     GLenum pixelType = GL_UNSIGNED_BYTE;
+    int bytesPerPixel = 3;
     switch (p_internalFormat) {
         case GL_RGB:
             texFormat = GL_RGB;
+            bytesPerPixel = 3;
             break;
 
-        case GL_RGB565_OES:  // and GL_RGB565
+        case GL_RGB565_OES: // and GL_RGB565
             // Still say "GL_RGB" for compatibility
             // with older drivers
             texFormat = GL_RGB;
             pixelType = GL_UNSIGNED_SHORT_5_6_5;
+            bytesPerPixel = 2;
             break;
 
         case GL_RGBA:
         case GL_RGB5_A1_OES:
         case GL_RGBA4_OES:
             texFormat = GL_RGBA;
+            bytesPerPixel = 4;
             break;
 
         case GL_UNSIGNED_INT_10_10_10_2_OES:
             texFormat = GL_RGBA;
             pixelType = GL_UNSIGNED_SHORT;
+            bytesPerPixel = 4;
             break;
 
         case GL_RGB10_A2:
             texFormat = GL_RGBA;
             pixelType = GL_UNSIGNED_INT_2_10_10_10_REV;
+            bytesPerPixel = 4;
             break;
 
         case GL_RGBA16F:
             texFormat = GL_RGBA;
             pixelType = GL_HALF_FLOAT;
+            bytesPerPixel = 8;
             break;
 
         case GL_LUMINANCE:
             texFormat = GL_LUMINANCE;
             pixelType = GL_UNSIGNED_SHORT;
+            bytesPerPixel = 2;
             break;
         default:
             fprintf(stderr, "ColorBuffer::create invalid format 0x%x\n",
                     p_internalFormat);
             return NULL;
     }
-    ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
-    cb->m_width = p_width;
-    cb->m_height = p_height;
-    cb->m_internalFormat = p_internalFormat;
-    cb->m_format = texFormat;
-    cb->m_type = pixelType;
-    cb->m_frameworkFormat = p_frameworkFormat;
-    cb->m_fastBlitSupported = fastBlitSupported;
-
-    return cb;
-}
-
-ColorBuffer::ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper)
-    : m_display(display), m_helper(helper), mHndl(hndl) {}
-
-ColorBuffer::~ColorBuffer() {
-    if (isIntialized()) {
-        RecursiveScopedHelperContext context(m_helper);
-        if (m_blitEGLImage) {
-            s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
-        }
-        if (m_eglImage) {
-            s_egl.eglDestroyImageKHR(m_display, m_eglImage);
-        }
-
-        if (m_fbo) {
-            s_gles2.glDeleteFramebuffers(1, &m_fbo);
-        }
-
-        if (m_yuv_conversion_fbo) {
-            s_gles2.glDeleteFramebuffers(1, &m_yuv_conversion_fbo);
-        }
-
-        m_yuv_converter.reset();
-
-        GLuint tex[2] = {m_tex, m_blitTex};
-        s_gles2.glDeleteTextures(2, tex);
-
-        delete m_resizer;
-    }
-}
-
-bool ColorBuffer::isIntialized() {
-    return m_eglImage && m_blitEGLImage;
-}
-
-void ColorBuffer::initialize() {
-    if (isIntialized())
-        return;
-
-    int bytesPerPixel = sGetBytesPerPixel(m_internalFormat);
-    const unsigned long bufsize =
-            ((unsigned long)bytesPerPixel) * m_width * m_height;
+    const unsigned long bufsize = ((unsigned long)bytesPerPixel) * p_width
+            * p_height;
     android::base::ScopedCPtr<char> initialImage(
                 static_cast<char*>(::malloc(bufsize)));
     if (!initialImage) {
         fprintf(stderr,
                 "error: failed to allocate initial memory for ColorBuffer "
                 "of size %dx%dx%d (%lu KB)\n",
-                m_width, m_height, bytesPerPixel * 8, bufsize / 1024);
-        return;
+                p_width, p_height, bytesPerPixel * 8, bufsize / 1024);
+        return nullptr;
     }
     memset(initialImage.get(), 0xff, bufsize);
 
-    RecursiveScopedHelperContext context(m_helper);
+    RecursiveScopedHelperContext context(helper);
     if (!context.isOk()) {
-        return;
+        return NULL;
     }
+
+    ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
+
     GLint prevUnpackAlignment;
     s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpackAlignment);
     s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    s_gles2.glGenTextures(1, &m_tex);
-    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+    s_gles2.glGenTextures(1, &cb->m_tex);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
 
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, m_internalFormat, m_width, m_height,
-                         0, m_format, m_type, initialImage.get());
+    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, p_internalFormat, p_width, p_height,
+                         0, texFormat, pixelType,
+                         initialImage.get());
     initialImage.reset();
 
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -258,46 +196,87 @@ void ColorBuffer::initialize() {
     //
     // create another texture for that colorbuffer for blit
     //
-    s_gles2.glGenTextures(1, &m_blitTex);
-    s_gles2.glBindTexture(GL_TEXTURE_2D, m_blitTex);
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, m_internalFormat, m_width, m_height,
-                         0, m_format, m_type, NULL);
+    s_gles2.glGenTextures(1, &cb->m_blitTex);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_blitTex);
+    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, p_internalFormat, p_width, p_height,
+                         0, texFormat, pixelType, NULL);
 
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    m_eglImage = s_egl.eglCreateImageKHR(
-            m_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
-            (EGLClientBuffer)SafePointerFromUInt(m_tex), NULL);
+    cb->m_width = p_width;
+    cb->m_height = p_height;
+    cb->m_internalFormat = p_internalFormat;
+    cb->m_format = texFormat;
+    cb->m_type = pixelType;
 
-    m_blitEGLImage = s_egl.eglCreateImageKHR(
-            m_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
-            (EGLClientBuffer)SafePointerFromUInt(m_blitTex), NULL);
+    cb->m_eglImage = s_egl.eglCreateImageKHR(
+            p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
+            (EGLClientBuffer)SafePointerFromUInt(cb->m_tex), NULL);
 
-    m_resizer = new TextureResize(m_width, m_height);
-    switch (m_frameworkFormat) {
+    cb->m_blitEGLImage = s_egl.eglCreateImageKHR(
+            p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
+            (EGLClientBuffer)SafePointerFromUInt(cb->m_blitTex), NULL);
+
+    cb->m_resizer = new TextureResize(p_width, p_height);
+
+    cb->m_frameworkFormat = p_frameworkFormat;
+    switch (cb->m_frameworkFormat) {
         case FRAMEWORK_FORMAT_GL_COMPATIBLE:
             break;
         case FRAMEWORK_FORMAT_YV12:
         case FRAMEWORK_FORMAT_YUV_420_888:
-            m_yuv_converter.reset(
-                    new YUVConverter(m_width, m_height, m_frameworkFormat));
+            cb->m_yuv_converter.reset(
+                    new YUVConverter(p_width, p_height, cb->m_frameworkFormat));
             break;
         default:
             break;
     }
+
+    cb->m_fastBlitSupported = fastBlitSupported;
+
     // desktop GL only: use GL_UNSIGNED_INT_8_8_8_8_REV for faster readback.
     if (emugl::getRenderer() == SELECTED_RENDERER_HOST) {
 #define GL_UNSIGNED_INT_8_8_8_8           0x8035
 #define GL_UNSIGNED_INT_8_8_8_8_REV       0x8367
-        m_asyncReadbackType = GL_UNSIGNED_INT_8_8_8_8_REV;
+        cb->m_asyncReadbackType = GL_UNSIGNED_INT_8_8_8_8_REV;
     }
 
     s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
 
     s_gles2.glFinish();
+    return cb;
+}
+
+ColorBuffer::ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper)
+    : m_display(display), m_helper(helper), mHndl(hndl) {}
+
+ColorBuffer::~ColorBuffer() {
+    RecursiveScopedHelperContext context(m_helper);
+
+    if (m_blitEGLImage) {
+        s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
+    }
+    if (m_eglImage) {
+        s_egl.eglDestroyImageKHR(m_display, m_eglImage);
+    }
+
+    if (m_fbo) {
+        s_gles2.glDeleteFramebuffers(1, &m_fbo);
+    }
+
+    if (m_yuv_conversion_fbo) {
+        s_gles2.glDeleteFramebuffers(1, &m_yuv_conversion_fbo);
+    }
+
+    m_yuv_converter.reset();
+
+    GLuint tex[2] = {m_tex, m_blitTex};
+    s_gles2.glDeleteTextures(2, tex);
+
+    delete m_resizer;
 }
 
 void ColorBuffer::readPixels(int x,
@@ -315,7 +294,6 @@ void ColorBuffer::readPixels(int x,
     p_format = sGetUnsizedColorBufferFormat(p_format);
 
     touch();
-    initialize();
     if (bindFbo(&m_fbo, m_tex)) {
         GLint prevAlignment = 0;
         s_gles2.glGetIntegerv(GL_PACK_ALIGNMENT, &prevAlignment);
@@ -328,6 +306,7 @@ void ColorBuffer::readPixels(int x,
 
 void ColorBuffer::reformat(GLint internalformat,
                            GLenum format, GLenum type) {
+
     format = sGetUnsizedColorBufferFormat(format);
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
@@ -371,7 +350,7 @@ void ColorBuffer::subUpdate(int x,
     }
 
     touch();
-    initialize();
+
     p_format = sGetUnsizedColorBufferFormat(p_format);
 
     if (m_needFormatCheck) {
@@ -416,7 +395,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
     }
 
     touch();
-    initialize();
+
     if (m_fastBlitSupported) {
         s_egl.eglBlitFromCurrentReadBufferANDROID(m_display, m_eglImage);
         m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
@@ -568,16 +547,15 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
 }
 
 bool ColorBuffer::bindToTexture() {
+    if (!m_eglImage) {
+        return false;
+    }
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
     if (!tInfo->currContext.get()) {
         return false;
     }
     touch();
-    initialize();
 
-    if (!m_eglImage) {
-        return false;
-    }
     if (tInfo->currContext->clientVersion() > GLESApi_CM) {
         s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
     } else {
@@ -595,7 +573,6 @@ bool ColorBuffer::bindToRenderbuffer() {
         return false;
     }
     touch();
-    initialize();
     if (tInfo->currContext->clientVersion() > GLESApi_CM) {
         s_gles2.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES,
                                                        m_eglImage);
@@ -607,7 +584,6 @@ bool ColorBuffer::bindToRenderbuffer() {
 }
 
 GLuint ColorBuffer::scale() {
-    initialize();
     return m_resizer->update(m_tex);
 }
 
@@ -618,14 +594,12 @@ void ColorBuffer::waitSync() {
 }
 
 bool ColorBuffer::post(GLuint tex, float rotation, float dx, float dy) {
-    initialize();
     // NOTE: Do not call m_helper->setupContext() here!
     waitSync();
     return m_helper->getTextureDraw()->draw(tex, rotation, dx, dy);
 }
 
 bool ColorBuffer::postWithOverlay(GLuint tex, float rotation, float dx, float dy) {
-    initialize();
     // NOTE: Do not call m_helper->setupContext() here!
     waitSync();
     return m_helper->getTextureDraw()->drawWithOverlay(tex, rotation, dx, dy);
@@ -637,7 +611,7 @@ void ColorBuffer::readback(unsigned char* img) {
         return;
     }
     touch();
-    initialize();
+
     waitSync();
 
     if (bindFbo(&m_fbo, m_tex)) {
@@ -652,7 +626,7 @@ void ColorBuffer::readbackAsync(GLuint buffer) {
         return;
     }
     touch();
-    initialize();
+
     waitSync();
 
     if (bindFbo(&m_fbo, m_tex)) {
@@ -669,7 +643,7 @@ void ColorBuffer::readbackAsync(GLuint buffer1, GLuint buffer2, unsigned char* i
         return;
     }
     touch();
-    initialize();
+
     waitSync();
 
     if (bindFbo(&m_fbo, m_tex)) {
@@ -698,6 +672,8 @@ void ColorBuffer::onSave(android::base::Stream* stream) {
     stream->putBe32(static_cast<uint32_t>(m_height));
     stream->putBe32(static_cast<uint32_t>(m_internalFormat));
     stream->putBe32(static_cast<uint32_t>(m_frameworkFormat));
+    // for debug
+    assert(m_eglImage && m_blitEGLImage);
     stream->putBe32(reinterpret_cast<uintptr_t>(m_eglImage));
     stream->putBe32(reinterpret_cast<uintptr_t>(m_blitEGLImage));
 }
@@ -723,6 +699,7 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
     cb->mNeedRestore = true;
     cb->m_eglImage = eglImage;
     cb->m_blitEGLImage = blitEGLImage;
+    assert(eglImage && blitEGLImage);
     cb->m_width = width;
     cb->m_height = height;
     cb->m_internalFormat = internalFormat;
@@ -732,8 +709,6 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
 }
 
 void ColorBuffer::restore() {
-    if (!isIntialized())
-        return;
     RecursiveScopedHelperContext context(m_helper);
     s_gles2.glGenTextures(1, &m_tex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);

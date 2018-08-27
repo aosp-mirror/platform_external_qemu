@@ -21,7 +21,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/vec3.hpp>
 
-#include "android/automation/proto/automation.pb.h"
+#include "android/automation/AutomationEventSink.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/system/System.h"
@@ -165,6 +165,12 @@ public:
     int record(const char* filename);
 
     /*
+     * Start recording physical model ground truth to the given file.
+     * Returns 0 if successful.
+     */
+    int recordGroundTruth(const char* filename);
+
+    /*
      * Play a recording from the given file.
      * Returns 0 if successful.
      */
@@ -172,9 +178,13 @@ public:
 
     /*
      * Stop the current recording or playback of physical state changes.
-     * Returns 0 if successful.
      */
-    int stopRecordAndPlayback();
+    void stopRecordAndPlayback();
+
+    /*
+     * Stop recording the ground truth.
+     */
+    void stopRecordGroundTruth();
 
 private:
 
@@ -284,6 +294,7 @@ private:
     pb::Time mNextPlaybackCommandTime;
     pb::PhysicalModelEvent mNextPlaybackCommand;
     std::unique_ptr<StdioStream> mRecordingAndPlaybackStream;
+    std::unique_ptr<StdioStream> mGroundTruthStream;
 
     const uint32_t kPlaybackFileVersion = 1;
 
@@ -767,6 +778,13 @@ void PhysicalModelImpl::getTransform(
     *out_rotation_y = rotation.y;
     *out_rotation_z = rotation.z;
     *out_timestamp = mModelTimeNs;
+
+    if (mGroundTruthStream) {
+        fprintf(mGroundTruthStream->get(), "%" PRId64 " %f %f %f %f %f %f\n",
+                *out_timestamp, *out_translation_x, *out_translation_y,
+                *out_translation_z, *out_rotation_x, *out_rotation_y,
+                *out_rotation_z);
+    }
 }
 
 void PhysicalModelImpl::setPhysicalStateAgent(
@@ -983,6 +1001,36 @@ int PhysicalModelImpl::record(const char* filename) {
     mPlaybackState = PLAYBACK_STATE_RECORDING;
     mPlaybackAndRecordingStartTimeNs = mModelTimeNs;
     mRecordingAndPlaybackStream->putBe32(kPlaybackFileVersion);
+    automation::AutomationEventSink::get().registerStream(
+            mRecordingAndPlaybackStream.get(),
+            automation::StreamEncoding::BinaryPbChunks);
+    return 0;
+}
+
+int PhysicalModelImpl::recordGroundTruth(const char* filename) {
+    stopRecordGroundTruth();
+
+    if (!filename) {
+        E("%s: Must specify filename for writing.  Physical Motion will not be "
+          "recorded.",
+          __FUNCTION__, filename);
+        return -1;
+    }
+
+    std::string path = filename;
+    if (!PathUtils::isAbsolute(path)) {
+        path = PathUtils::join(System::get()->getHomeDirectory(), filename);
+    }
+
+    mGroundTruthStream.reset(
+            new StdioStream(fopen(path.c_str(), "wb"), StdioStream::kOwner));
+    if (!mGroundTruthStream.get()) {
+        E("%s: Error unable to open file %s for writing.  "
+          "Physical motion ground truth will not be recorded.",
+          __FUNCTION__, filename);
+        return -1;
+    }
+
     return 0;
 }
 
@@ -1027,11 +1075,20 @@ int PhysicalModelImpl::playback(const char* filename) {
     return 0;
 }
 
-int PhysicalModelImpl::stopRecordAndPlayback() {
+void PhysicalModelImpl::stopRecordAndPlayback() {
+    if (mRecordingAndPlaybackStream &&
+        mPlaybackState == PLAYBACK_STATE_RECORDING) {
+        automation::AutomationEventSink::get().unregisterStream(
+                mRecordingAndPlaybackStream.get());
+    }
     mRecordingAndPlaybackStream.reset(nullptr);
     mPlaybackState = PLAYBACK_STATE_NONE;
     mPlaybackAndRecordingStartTimeNs = 0;
-    return 0;
+    stopRecordGroundTruth();
+}
+
+void PhysicalModelImpl::stopRecordGroundTruth() {
+    mGroundTruthStream.reset(nullptr);
 }
 
 #define SET_TARGET_FUNCTION_NAME(x) setTarget##x
@@ -1091,25 +1148,18 @@ template <typename ValueType>
 void PhysicalModelImpl::generateEvent(PhysicalParameter type,
                    PhysicalInterpolation mode,
                    ValueType value) {
-    if (mPlaybackState != PLAYBACK_STATE_RECORDING) {
-        return;
-    }
+    // TODO(jwmcglynn): For recordings we need some way to save the initial
+    // state.
+    pb::Time time;
+    time.set_timestamp(mModelTimeNs - mPlaybackAndRecordingStartTimeNs);
 
-    pb::RecordedEvent event;
-    event.set_stream_type(pb::RecordedEvent_StreamType_PHYSICAL_MODEL);
-    event.mutable_event_time()->set_timestamp(mModelTimeNs -
-                                              mPlaybackAndRecordingStartTimeNs);
+    pb::PhysicalModelEvent command;
+    command.set_type(toProto(type));
+    command.set_interpolation_method(toProto(mode));
+    setProtoValue(&command, value);
 
-    pb::PhysicalModelEvent* command = event.mutable_physical_model();
-    command->set_type(toProto(type));
-    command->set_interpolation_method(toProto(mode));
-    setProtoValue(command, value);
-
-    assert(mRecordingAndPlaybackStream.get());
-    std::string encodedProto;
-    if (event.SerializeToString(&encodedProto)) {
-        mRecordingAndPlaybackStream->putString(encodedProto);
-    }
+    automation::AutomationEventSink::get().recordPhysicalModelEvent(time,
+                                                                    command);
 }
 
 void PhysicalModelImpl::tick(void* opaque, LoopTimer* unused) {
@@ -1277,10 +1327,21 @@ int physicalModel_playback(PhysicalModel* model, const char* filename) {
     return -1;
 }
 
+int physicalModel_recordGroundTruth(PhysicalModel* model,
+                                    const char* filename) {
+    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
+    if (impl != nullptr) {
+        return impl->recordGroundTruth(filename);
+    }
+    return -1;
+}
+
 int physicalModel_stopRecordAndPlayback(PhysicalModel* model) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
-        return impl->stopRecordAndPlayback();
+        impl->stopRecordAndPlayback();
+        impl->stopRecordGroundTruth();
+        return 0;
     }
     return -1;
 }

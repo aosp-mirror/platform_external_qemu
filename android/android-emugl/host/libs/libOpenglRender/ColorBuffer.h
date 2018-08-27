@@ -139,6 +139,11 @@ public:
                                Helper* helper,
                                bool fastBlitSupported);
 
+    // Sometimes things happen and we need to reformat the GL texture
+    // used. This function replaces the format of the underlying texture
+    // with the internalformat / format / type combination specified.
+    void reformat(GLint internalformat, GLenum format, GLenum type);
+
     // Destructor.
     ~ColorBuffer();
 
@@ -226,12 +231,6 @@ public:
 private:
     ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper);
     void waitSync();
-    bool isIntialized();
-    void initialize();
-    // Sometimes things happen and we need to reformat the GL texture
-    // used. This function replaces the format of the underlying texture
-    // with the internalformat / format / type combination specified.
-    void reformat(GLint internalformat, GLenum format, GLenum type);
 
 private:
     GLuint m_tex = 0;

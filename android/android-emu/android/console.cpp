@@ -2525,7 +2525,9 @@ do_geo_fix( ControlClient  client, char*  args )
         location_agent_qt_settings_func(params[GEO_LAT], params[GEO_LONG], altitude);
     }
     client->global->location_agent->gpsSendLoc(params[GEO_LAT], params[GEO_LONG],
-                                               altitude, n_satellites, &tVal);
+                                               altitude,
+                                               0.0, 0.0, // Speed and heading
+                                               n_satellites, &tVal);
 
     return 0;
 }
@@ -2764,38 +2766,42 @@ static const CommandDefRec sensor_commands[] =
 /********************************************************************************************/
 
 
-/* start recording physical state changes to the given file. */
-static int
-do_physics_record( ControlClient client, char* args ) {
+// Start recording physical state changes to the given file.
+static int do_physics_record(ControlClient client, char* args) {
     return android_physical_model_record(args);
 }
 
-/* start playing physical state changes from the given file. */
-static int
-do_physics_play( ControlClient client, char* args ) {
+// Start playing physical state changes from the given file.
+static int do_physics_play(ControlClient client, char* args) {
     return android_physical_model_playback(args);
 }
 
-/* stop the current recording or playback of physical state changes. */
-static int
-do_physics_stop( ControlClient client, char* args ) {
+// Start recording of ground truth to the given file.
+static int do_physics_record_ground_truth(ControlClient client, char* args) {
+    return android_physical_model_record_ground_truth(args);
+}
+
+// Stop the current recording or playback of physical state changes.
+static int do_physics_stop(ControlClient client, char* args) {
     return android_physical_model_stop_record_and_playback();
 }
 
-/* Physics commands for record/playback physics state. */
-static const CommandDefRec physics_commands[] =
-{
+// Physics commands for record/playback physics state.
+static const CommandDefRec physics_commands[] = {
     { "record", "start recording physical state changes.",
       "'record <filename>': start recording physical state changes to the given file.\r\n",
-      NULL, do_physics_record, NULL },
+      nullptr, do_physics_record, nullptr },
     { "play", "start playing physical state changes.",
       "'play <filename>': start playing physical state changes from the given file.\r\n",
-      NULL, do_physics_play, NULL },
+      nullptr, do_physics_play, nullptr },
+    { "record-gt", "start recording ground truth of the physical model's 6dof poses",
+      "'record-gt <filename>': start recording of ground truth to the given file.\r\n",
+      nullptr, do_physics_record_ground_truth, nullptr },
     { "stop", "stop recording or playing back physical state changes.",
       "'stop': stop the current recording or playback of physical state changes.\r\n",
-      NULL, do_physics_stop, NULL },
+      nullptr, do_physics_stop, nullptr },
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
+    { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr }
 };
 
 /********************************************************************************************/

@@ -16,6 +16,8 @@
 
 #pragma once
 
+ANDROID_BEGIN_HEADER
+
 /*
  * Encapsulates exchange protocol between the sensor emulator, and an application
  * running on an Android device that provides sensor values, and is connected to
@@ -59,3 +61,5 @@ extern int sensors_port_enable_sensor(AndroidSensorsPort* asp, const char* name)
  *  Zero on success, failure otherwise.
  */
 extern int sensors_port_disable_sensor(AndroidSensorsPort* asp, const char* name);
+
+ANDROID_END_HEADER
