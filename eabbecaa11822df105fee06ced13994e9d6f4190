@@ -73,6 +73,75 @@
     },
     {
       "key": {
+        "uuid": "19409563_6dcbaec6",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 2330,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-27T21:37:11Z",
+      "side": 1,
+      "message": "I recommend stricter argument parsing:\n\nif (args \u0026\u0026 strcmp(args, \"1\") \u003d\u003d 0) {\n    shared \u003d true;\n} else if (args \u0026\u0026 strcmp(args, \"0\") \u003d\u003d 0) {\n    shared \u003d false;\n} else {\n    control_write(\n            client,\n            \"KO: Argument missing, try \u0027avd snapshot remap \u003cauto-save\u003e\u0027\\r\\n\");\n    return -1;\n}",
+      "range": {
+        "startLine": 2326,
+        "startChar": 4,
+        "endLine": 2330,
+        "endChar": 5
+      },
+      "revId": "eabbecaa11822df105fee06ced13994e9d6f4190",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bd4036fb_bb3d6e15",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 2332,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-27T21:37:11Z",
+      "side": 1,
+      "message": "I recommend writing an error out with a KO if this fails.",
+      "range": {
+        "startLine": 2332,
+        "startChar": 9,
+        "endLine": 2332,
+        "endChar": 16
+      },
+      "revId": "eabbecaa11822df105fee06ced13994e9d6f4190",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "71c3655e_0cf1276b",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 2362,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-27T21:37:11Z",
+      "side": 1,
+      "message": "spelling: deactivate",
+      "range": {
+        "startLine": 2362,
+        "startChar": 29,
+        "endLine": 2362,
+        "endChar": 38
+      },
+      "revId": "eabbecaa11822df105fee06ced13994e9d6f4190",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "66eddf63_3d38cb4f",
         "filename": "memory.c",
         "patchSetId": 16
@@ -89,6 +158,29 @@
         "startChar": 4,
         "endLine": 952,
         "endChar": 9
+      },
+      "revId": "eabbecaa11822df105fee06ced13994e9d6f4190",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "efb71d59_f7c5e58f",
+        "filename": "memory.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 970,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-27T21:37:11Z",
+      "side": 1,
+      "message": "Nit: The code style appears to put the { on the next line for functions.",
+      "range": {
+        "startLine": 968,
+        "startChar": 0,
+        "endLine": 970,
+        "endChar": 21
       },
       "revId": "eabbecaa11822df105fee06ced13994e9d6f4190",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
