@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4f92aee_22a3ba06",
+        "filename": "android/android-emu/android/base/testing/ResultMatchers.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T15:22:32Z",
+      "side": 1,
+      "message": "What types can be put here?",
+      "range": {
+        "startLine": 27,
+        "startChar": 24,
+        "endLine": 27,
+        "endChar": 68
+      },
+      "revId": "0e8e684fba9eadcc112067359f9f1027659f3918",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
