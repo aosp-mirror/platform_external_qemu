@@ -42,6 +42,24 @@
     },
     {
       "key": {
+        "uuid": "cf6b78c7_8d60590f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 3397,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T18:21:49Z",
+      "side": 1,
+      "message": "No, it\u0027s unintentional, thanks for catching that! Currently I don\u0027t try to write into void* outputs assuming they they are one of those pNext pointers that aren\u0027t supported, but this version should support void* outputs that refer to actual data. Probably if there is a \"length\" associated with a void*, we should special case that and stream length * sizeof(uint8_t) in that case (unless it should be sizeof(something else) which would probably need to be an api specific special case).",
+      "parentUuid": "af3d2d90_4983709b",
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3b0343f4_d7f29c3c",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
         "patchSetId": 40
@@ -53,6 +71,24 @@
       "writtenOn": "2018-08-27T17:51:24Z",
       "side": 1,
       "message": "No handling of pData pointer here. Is that intentional?",
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c13e2b71_2572fff0",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 3481,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T18:21:49Z",
+      "side": 1,
+      "message": "Thanks for catching this as well; similar issue here as the pData above.",
+      "parentUuid": "3b0343f4_d7f29c3c",
       "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -76,6 +112,24 @@
     },
     {
       "key": {
+        "uuid": "e93550a8_f9775146",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 4011,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T18:21:49Z",
+      "side": 1,
+      "message": "Nice catch! Could the information about ignoring parameters be inferred mechanically from the xml? If not, we\u0027d have to think about how to insert \u0026\u0026 specialCase",
+      "parentUuid": "ba53574f_35ad5e19",
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a9c6cbcb_4447eb61",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.h",
         "patchSetId": 40
@@ -93,6 +147,24 @@
     },
     {
       "key": {
+        "uuid": "4f96e534_5d272863",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.h",
+        "patchSetId": 40
+      },
+      "lineNbr": 4777,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T18:21:49Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a9c6cbcb_4447eb61",
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2812b684_9185d9b0",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/guest/goldfish_vk_frontend.cpp",
         "patchSetId": 40
@@ -104,6 +176,24 @@
       "writtenOn": "2018-08-27T17:51:24Z",
       "side": 1,
       "message": "Where is the vkStream instantiated?",
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b477be19_66f4cf0c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/guest/goldfish_vk_frontend.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T18:21:49Z",
+      "side": 1,
+      "message": "This part is still WIP, but the plan is to make VulkanStream an abstract class that makes it easier to test these functions and to run them in the real driver.\n\nI was wondering if you\u0027d be interested in giving a bit more feedback on the concrete plan for instantiating this for the guest:\n\nIt is to associate, in the guest, a virtual device for transmitting data + fd with each guest _process_ that uses Vulkan. Since there could be multiple guest threads, this is a multiple producer single consumer situation. So we don\u0027t want fence create vs. wait commands in particular to get re-ordered. From the spec:\n\nhttps://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkWaitForFences.html\n\nit doesnt say much about \u0027externally synchronized\u0027.\n\nI guess I\u0027d be assuming that for real drivers, there is never create or reset fences at the same time as \"starting\" a vkFenceWait command. That way, we can ensure that the create / reset / waits are sent to the stream in the same order they were issued. so it would be sufficient for ordering purposes to have a global lock on the stream any time the guest issues an API call.\n\nBut we might need to allow for somewhat relaxed locking in vkWaitForFences, or simulate resetting with a condition variable in the guest, since we might need to allow fences to be reset while the vkFenceWait call is actually in its wait stage.\n\nIs this right?",
+      "parentUuid": "2812b684_9185d9b0",
       "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
