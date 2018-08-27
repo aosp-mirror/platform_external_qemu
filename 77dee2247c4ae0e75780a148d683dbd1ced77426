@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "a697afb2_f253287a",
+        "filename": "android/android-emu/android/snapshot/Loader.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-27T18:26:54Z",
+      "side": 1,
+      "message": "this looks like debug code from another CL?",
+      "range": {
+        "startLine": 180,
+        "startChar": 12,
+        "endLine": 180,
+        "endChar": 69
+      },
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3e7ac3c2_7d08e63d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/Android.mk",
+        "patchSetId": 40
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-27T18:26:54Z",
+      "side": 1,
+      "message": "nit: mixing tap and spaces",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 8,
+        "endChar": 4
+      },
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7baec75a_cbbf29a0",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
         "patchSetId": 40
