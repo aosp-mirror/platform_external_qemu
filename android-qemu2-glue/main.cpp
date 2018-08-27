@@ -384,23 +384,6 @@ private:
         return args;
     }
 
-    static void cloneQcow2IfNeeded(const char* filePath,
-            const char** clonedPath,
-            bool * isCloned) {
-        *isCloned = false;
-        *clonedPath = filePath;
-        if (!is_multi_instance) return;
-        android::base::StringView ext = android::base::PathUtils::extension(
-                filePath);
-        if (ext != ".qcow2") {
-            return;
-        }
-        TempFile* tmpFile = tempfile_create_with_ext(".qcow2");
-        *clonedPath = tempfile_path(tmpFile);
-        path_copy_file(*clonedPath, filePath);
-        *isCloned = true;
-    }
-
     android::ParameterList createPartionParameters(ImageType type,
                                                    bool writable) {
         int apiLevel = avdInfo_getApiLevel(m_avd);
@@ -482,21 +465,18 @@ private:
             case IMAGE_TYPE_CACHE:
                 filePath = m_hw->disk_cachePartition_path;
                 bufferString = StringFormat("%s.qcow2", filePath);
-                cloneQcow2IfNeeded(bufferString.c_str(), &qcow2Path, &needClone);
-                driveParam += StringFormat("index=%d,id=cache,file=%s",
-                                           m_driveIndex++, qcow2Path);
-                if (needClone) driveParam += ",need-rebase";
+                driveParam +=
+                        StringFormat("index=%d,id=cache,file=%s",
+                                     m_driveIndex++, bufferString.c_str());
                 deviceParam = StringFormat("%s,drive=cache",
                                            kTarget.storageDeviceType);
                 break;
             case IMAGE_TYPE_USER_DATA:
                 filePath = m_hw->disk_dataPartition_path;
                 bufferString = StringFormat("%s.qcow2", filePath);
-                cloneQcow2IfNeeded(bufferString.c_str(), &qcow2Path,
-                        &needClone);
-                driveParam += StringFormat("index=%d,id=userdata,file=%s",
-                                           m_driveIndex++, qcow2Path);
-                if (needClone) driveParam += ",need-rebase";
+                driveParam +=
+                        StringFormat("index=%d,id=userdata,file=%s",
+                                     m_driveIndex++, bufferString.c_str());
                 deviceParam = StringFormat("%s,drive=userdata",
                                            kTarget.storageDeviceType);
                 break;
@@ -505,12 +485,9 @@ private:
                     strcmp(m_hw->hw_sdCard_path, "")) {
                     filePath = m_hw->hw_sdCard_path;
                     bufferString = StringFormat("%s.qcow2", filePath);
-                    cloneQcow2IfNeeded(bufferString.c_str(), &qcow2Path,
-                            &needClone);
                     driveParam +=
                             StringFormat("index=%d,id=sdcard,file=%s",
-                                         m_driveIndex++, qcow2Path);
-                    if (needClone) driveParam += ",need-rebase";
+                                         m_driveIndex++, bufferString.c_str());
                     deviceParam = StringFormat("%s,drive=sdcard",
                                                kTarget.storageDeviceType);
                 } else {
@@ -524,12 +501,9 @@ private:
                     strcmp(m_hw->disk_encryptionKeyPartition_path, "")) {
                     filePath = m_hw->disk_encryptionKeyPartition_path;
                     bufferString = StringFormat("%s.qcow2", filePath);
-                    cloneQcow2IfNeeded(bufferString.c_str(), &qcow2Path,
-                            &needClone);
                     driveParam +=
                             StringFormat("index=%d,id=encrypt,file=%s",
-                                         m_driveIndex++, qcow2Path);
-                    if (needClone) driveParam += ",need-rebase";
+                                         m_driveIndex++, bufferString.c_str());
                     deviceParam = StringFormat("%s,drive=encrypt",
                                                kTarget.storageDeviceType);
                 } else {
@@ -745,6 +719,7 @@ extern "C" int main(int argc, char** argv) {
         coreHwIniPath = tempfile_path(tempIni);
         is_multi_instance = true;
         opts->no_snapshot_save = true;
+        args.add("-read-only");
     } else if (filelock_create_timeout(coreHwIniPath, 2000) == NULL) {
         /* The AVD is already in use, we still support this as an
          * experimental feature. Use a temporary hardware-qemu.ini
@@ -834,7 +809,30 @@ extern "C" int main(int argc, char** argv) {
     if (opts->audio && !strcmp(opts->audio, "none"))
         args.add("-no-audio");
 
-    // Generic snapshots command line option
+    bool badSnapshots = false;
+
+    // Check situations where snapshots should be turned off
+    {
+        // Just dont' use snapshots on 32 bit - crashes galore
+        badSnapshots = badSnapshots || (System::get()->getProgramBitness() == 32);
+
+        // Bad generic snapshots command line option
+        if (opts->snapshot && opts->snapshot[0] == '\0') {
+            opts->snapshot = nullptr;
+            opts->no_snapshot_load = true;
+            opts->no_snapshot_save = true;
+            badSnapshots = true;
+        } else if (opts->snapshot) {
+            // Never save snapshot on exit if we are booting with a snapshot;
+            // it will overwrite quickboot state
+            opts->no_snapshot_save = true;
+        }
+
+        if (badSnapshots) {
+            feature_set_enabled_override(kFeature_FastSnapshotV1, false);
+            feature_set_enabled_override(kFeature_QuickbootFileBacked, false);
+        }
+    }
 
     if (opts->snapshot && feature_is_enabled(kFeature_FastSnapshotV1)) {
         if (!opts->no_snapshot_load) {
@@ -848,23 +846,25 @@ extern "C" int main(int argc, char** argv) {
 
     if (useQuickbootRamFile) {
         ScopedCPtr<const char> memPath(
-            androidSnapshot_initRamFilePath(hw->hw_ramSize, nullptr));
+            androidSnapshot_prepareAutosave(hw->hw_ramSize, nullptr));
 
         if (memPath) {
             args.add2("-mem-path", memPath.get());
 
             bool mapAsShared =
                 !opts->read_only &&
+                !opts->snapshot &&
                 !opts->no_snapshot_save &&
                 androidSnapshot_getQuickbootChoice();
 
             if (mapAsShared) {
                 args.add("-mem-file-shared");
+                androidSnapshot_setRamFileDirty(nullptr, true);
             }
         } else {
             fprintf(stderr, "Warning: could not initialize Quickboot RAM file. "
                             "Please ensure enough disk space for the guest RAM size "
-                            "(%d MB) along with a safety factor.", hw->hw_ramSize);
+                            "(%d MB) along with a safety factor.\n", hw->hw_ramSize);
             feature_set_enabled_override(kFeature_QuickbootFileBacked, false);
         }
     }

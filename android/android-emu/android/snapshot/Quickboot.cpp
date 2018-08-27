@@ -139,6 +139,9 @@ constexpr int kBootTimeoutMs = 7 * 1000;
 constexpr int kMaxAdbConnectionRetries = 2;
 
 static int bootTimeoutMs() {
+    if (android_cmdLineOptions->read_only) {
+        return kBootTimeoutMs * 10;
+    }
     if (avdInfo_is_x86ish(android_avdInfo)) {
         return kBootTimeoutMs;
     }
@@ -147,7 +150,11 @@ static int bootTimeoutMs() {
 
 void Quickboot::startLivenessMonitor() {
     resetSnapshotLiveness();
-    mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
+    if (android_cmdLineOptions->read_only) {
+        mLivenessTimer->startRelative(kLivenessTimerTimeoutMs * 10);
+    } else {
+        mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
+    }
 }
 
 void Quickboot::onLivenessTimer() {
@@ -161,7 +168,8 @@ void Quickboot::onLivenessTimer() {
 
     const auto nowMs = System::get()->getHighResTimeUs() / 1000;
     if (int64_t(nowMs - mLoadTimeMs) > bootTimeoutMs()) {
-        if (mAdbConnectionRetries < kMaxAdbConnectionRetries) {
+        if (android_cmdLineOptions->read_only ||
+            mAdbConnectionRetries < kMaxAdbConnectionRetries) {
             mWindow.showMessage(
                     StringFormat("Guest isn't online after %d seconds, "
                                  "retrying ADB connection",
@@ -286,10 +294,11 @@ bool Quickboot::load(StringView name) {
         } else if (snapshotter.hasLoader() &&
                    (snapshotter.loader().snapshot().failureReason()))
         {
+            auto name = snapshotter.loader().snapshot().name();
             auto failureReason = snapshotter.loader().snapshot().failureReason();
             // Failed: the error is about something done before the real load
             // (e.g. condition check)
-            decideFailureReport(failureReason);
+            decideFailureReport(name, failureReason);
         } else {
             // Failed: the error is a problem with loading the VM
             mWindow.showMessage(
@@ -305,7 +314,8 @@ bool Quickboot::load(StringView name) {
     return true;
 }
 
-void Quickboot::decideFailureReport(const base::Optional<FailureReason>& failureReason) {
+void Quickboot::decideFailureReport(StringView name,
+                                    const base::Optional<FailureReason>& failureReason) {
     if (*failureReason == FailureReason::Empty ||
         *failureReason >= FailureReason::ValidationErrorLimit)
     {
@@ -317,8 +327,11 @@ void Quickboot::decideFailureReport(const base::Optional<FailureReason>& failure
                                  SNAPSHOT_LOAD))
                         .c_str(),
                 WINDOW_MESSAGE_WARNING, kDefaultMessageTimeoutMs);
-        mVmOps.vmReset();
+
         Snapshotter::get().loader().reportInvalid();
+        Snapshotter::get().deleteSnapshot(c_str(name));
+
+        mVmOps.vmReset();
         reportFailedLoad(pb::EmulatorQuickbootLoad::
                                  EMULATOR_QUICKBOOT_LOAD_FAILED,
                          *failureReason);
@@ -492,7 +505,10 @@ bool androidSnapshot_quickbootLoad(const char* name) {
     return android::snapshot::Quickboot::get().load(name);
 }
 
-bool androidSnapshot_quickbootSave(const char* name) {
+bool androidSnapshot_quickbootSave(const char* _name) {
+    const char* name =
+        _name ? _name : android::snapshot::kDefaultBootSnapshot;
+
     const bool saveResult = android::snapshot::Quickboot::get().save(name);
 
     // If we fail a save with RAM map shared, the quickboot snapshot
@@ -505,6 +521,10 @@ bool androidSnapshot_quickbootSave(const char* name) {
 
     if (needsInvalidation) {
         androidSnapshot_quickbootInvalidate(name);
+    } else {
+        if (android::snapshot::Snapshotter::get().isRamFileShared()) {
+            androidSnapshot_setRamFileDirty(c_str(name), false);
+        }
     }
 
     // Write user choice to the ini file if we are using file-backed RAM.
@@ -536,4 +556,8 @@ bool androidSnapshot_getQuickbootChoice() {
     bool res = ini.getBool("saveOnExit", true /* save on exit wanted */);
 
     return res;
+}
+
+extern "C" const char* android_get_quick_boot_name() {
+    return android::snapshot::Quickboot::kDefaultBootSnapshot;
 }

@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
+#include "android/utils/debug.h"
 
 #include <errno.h>
 #include <stdarg.h>
@@ -21,6 +21,9 @@
 
 namespace android {
 namespace base {
+
+// Forward declarations.
+class StringView;
 
 enum LogSeverity {
     LOG_VERBOSE = -1,
@@ -113,6 +116,19 @@ void setMinLogLevel(LogSeverity level);
         LOG_LAZY_EVAL(LOG_IS_ON(severity) && (condition), \
                       LOG_MESSAGE_STREAM_COMPACT(severity))
 
+// A variant of LOG() that integrates with the utils/debug.h verbose tags,
+// enabling statements to only appear on the console if the "-debug-<tag>"
+// command line parameter is provided.  Example:
+//
+//    VLOG(virtualscene) << "Starting scene.";
+//
+// Which would only be visible if -debug-virtualscene or -debug-all is passed
+// as a command line parameter.
+//
+// When logging is enabled, VLOG statements are logged at the INFO severity.
+#define VLOG(tag)                                         \
+    LOG_LAZY_EVAL(VERBOSE_CHECK(tag), \
+                  LOG_MESSAGE_STREAM_COMPACT(INFO))
 
 // A variant of LOG() that also appends the string message corresponding
 // to the current value of 'errno' just before the macro is called. This

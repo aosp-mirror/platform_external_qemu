@@ -188,7 +188,7 @@ LOCAL_LDLIBS += $(standalone_common_LDLIBS)
 
 LOCAL_INSTALL_OPENGL := true
 ifeq ($(BUILD_TARGET_OS),linux)
-LOCAL_LDFLAGS += -Wl,-rpath,$(BUILD_OBJS_DIR)/lib$(BUILD_TARGET_SUFFIX),-rpath,$(BUILD_OBJS_DIR)/lib$(BUILD_TARGET_SUFFIX)/gles_swiftshader
+LOCAL_LDFLAGS += '-Wl,-rpath,$$ORIGIN/lib$(BUILD_TARGET_SUFFIX),-rpath,$$ORIGIN/lib$(BUILD_TARGET_SUFFIX)/gles_swiftshader'
 endif
 $(call emugl-end-module)
 

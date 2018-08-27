@@ -1584,12 +1584,38 @@ static int file_ram_open(const char *path,
 
     *created = false;
     for (;;) {
+        // If an existing file is 4GB, Windows open() by itself fails.
+        // So use CreateFile() instead.
+#ifdef _WIN32
+        HANDLE fh =
+            CreateFile(
+                path,
+                // Must be both, or we cannot CreateFileMapping with PAGE_READWRITE
+                GENERIC_READ | GENERIC_WRITE,
+                // Need both read and write sharing to enable multiple instances.
+                // Even though we will not really be writing to the RAM file with
+                // multiple instances, the file needs to be opened to allow us to
+                // proceed.
+                FILE_SHARE_READ | FILE_SHARE_WRITE,
+                NULL,
+                // Need to fail on file-not-found to follow the same path as QEMU
+                OPEN_EXISTING,
+                FILE_ATTRIBUTE_NORMAL,
+                NULL);
+        fd = _open_osfhandle((intptr_t)fh, _O_RDWR);
+#else
         fd = open(path, O_RDWR);
+#endif
         if (fd >= 0) {
             /* @path names an existing file, use it */
             break;
         }
+#ifdef _WIN32
+        // CreateFile on a nonexistent file in Windows returns EBADF.
+        if (errno == ENOENT || errno == EBADF) {
+#else
         if (errno == ENOENT) {
+#endif
             /* @path names a file that doesn't exist, create it */
             fd = open(path, O_RDWR | O_CREAT | O_EXCL, 0644);
             if (fd >= 0) {
@@ -2137,7 +2163,11 @@ RAMBlock *qemu_ram_alloc_from_file(ram_addr_t size, MemoryRegion *mr,
         if (created) {
             unlink(mem_path);
         }
+#ifdef _WIN32
+        _close(fd);
+#else
         close(fd);
+#endif
         return NULL;
     }
 
@@ -2212,9 +2242,11 @@ static void reclaim_ramblock(RAMBlock *block)
         ;
     } else if (xen_enabled()) {
         xen_invalidate_map_cache_entry(block->host);
-#ifndef _WIN32
     } else if (block->fd >= 0) {
         qemu_ram_munmap(block->host, block->max_length);
+#ifdef _WIN32
+        _close(block->fd);
+#else
         close(block->fd);
 #endif
     } else {

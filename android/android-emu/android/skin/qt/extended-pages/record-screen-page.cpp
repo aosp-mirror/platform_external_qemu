@@ -29,6 +29,15 @@
 #include <QSettings>
 #include <QThread>
 
+static const char CONVERTING_TO_GIF[]  = "Converting to GIF";
+static const char FINISHING_ENCODING[] = "Finishing encoding";
+static const char RECORD_AGAIN[]       = "RECORD AGAIN";
+static const char SAVE_RECORDING[]     = "Save Recording";
+static const char SECONDS_RECORDING[]  = "%1s Recording...";
+static const char START_RECORDING[]    = "START RECORDING";
+static const char STARTING_RECORDER[]  = "Starting the recorder";
+static const char STOP_RECORDING[]     = "STOP RECORDING";
+
 using android::base::PathUtils;
 
 // static
@@ -104,7 +113,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_formatSwitch->hide();
             mUi->rec_saveButton->hide();
             mUi->rec_timeResLabel->hide();
-            mUi->rec_recordButton->setText(QString("START RECORDING"));
+            mUi->rec_recordButton->setText(tr(START_RECORDING));
             mUi->rec_recordButton->show();
             mVideoWidget->setVisible(false);
             break;
@@ -118,7 +127,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
                 movie->start();
                 mUi->rec_recordDotLabel->setMovie(movie);
             }
-            mUi->rec_timeElapsedLabel->setText("Starting the recorder");
+            mUi->rec_timeElapsedLabel->setText(tr(STARTING_RECORDER));
             mUi->rec_timeElapsedWidget->show();
             mUi->rec_recordButton->hide();
             break;
@@ -126,13 +135,13 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
         case RecordUiState::Recording:
             mUi->rec_recordDotLabel->setPixmap(QPixmap(QString::fromUtf8(":/light/recordCircle")));
             mUi->rec_recordOverlayWidget->show();
-            mUi->rec_timeElapsedLabel->setText("0s Recording...");
+            mUi->rec_timeElapsedLabel->setText(tr(SECONDS_RECORDING).arg(0));
             mUi->rec_timeElapsedWidget->show();
             mUi->rec_playStopButton->hide();
             mUi->rec_formatSwitch->hide();
             mUi->rec_saveButton->hide();
             mUi->rec_timeResLabel->hide();
-            mUi->rec_recordButton->setText(QString("STOP RECORDING"));
+            mUi->rec_recordButton->setText(tr(STOP_RECORDING));
             mUi->rec_recordButton->show();
             mVideoWidget->setVisible(false);
 
@@ -152,7 +161,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
                 movie->start();
                 mUi->rec_recordDotLabel->setMovie(movie);
             }
-            mUi->rec_timeElapsedLabel->setText("Finishing encoding");
+            mUi->rec_timeElapsedLabel->setText(tr(FINISHING_ENCODING));
             mUi->rec_recordButton->hide();
             // Set back to webm format
             mUi->rec_formatSwitch->setCurrentIndex(0);
@@ -174,18 +183,25 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             // Get the video duration from the video's metadata.
             mSec = mVideoInfo->getDurationSecs();
             mUi->rec_timeResLabel->setText(
-                    QString("%1s / %2 x %3")
+                         tr("%1s / %2 x %3")
                             .arg(mSec)
                             .arg(android_hw->hw_lcd_width)
                             .arg(android_hw->hw_lcd_height));
             mUi->rec_timeResLabel->show();
-            mUi->rec_recordButton->setText(QString("RECORD AGAIN"));
+            mUi->rec_recordButton->setText(tr(RECORD_AGAIN));
             mUi->rec_recordButton->show();
             mUi->rec_playStopButton->setEnabled(true);
             mUi->rec_formatSwitch->setEnabled(true);
             mUi->rec_saveButton->setEnabled(true);
             mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
             mUi->rec_playStopButton->setProperty("themeIconName", "play_arrow");
+            // Tell accessiblity screen readers to include the time and resolution
+            // when describing the Play button
+            mUi->rec_playStopButton->setAccessibleDescription(
+                    tr("Play Stop, %1 seconds, %2 by %3")
+                            .arg(mSec)
+                            .arg(android_hw->hw_lcd_width)
+                            .arg(android_hw->hw_lcd_height));
             // Display preview frame
             mVideoInfo->show();
             mVideoWidget->setVisible(true);
@@ -199,7 +215,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
                 movie->start();
                 mUi->rec_recordDotLabel->setMovie(movie);
             }
-            mUi->rec_timeElapsedLabel->setText("Converting to gif");
+            mUi->rec_timeElapsedLabel->setText(tr(CONVERTING_TO_GIF));
             mUi->rec_timeElapsedWidget->show();
             mUi->rec_recordButton->hide();
             mUi->rec_playStopButton->setEnabled(false);
@@ -212,7 +228,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
 }
 
 void RecordScreenPage::updateElapsedTime() {
-    QString qs = QString("%1s Recording...").arg(++mSec);
+    QString qs = tr(SECONDS_RECORDING).arg(++mSec);
     mUi->rec_timeElapsedLabel->setText(qs);
     mTimer.start(1000);
 }
@@ -295,7 +311,7 @@ void RecordScreenPage::on_rec_saveButton_clicked() {
     QString ext = mUi->rec_formatSwitch->currentText().toLower();
     QString savePath = QDir::toNativeSeparators(getRecordingSaveDirectory());
     QString recordingName = QFileDialog::getSaveFileName(
-            this, tr("Save Recording"),
+            this, tr(SAVE_RECORDING),
             savePath + QString("/untitled.%1").arg(ext),
             tr("Multimedia (*.%1)").arg(ext));
 
@@ -309,7 +325,7 @@ void RecordScreenPage::on_rec_saveButton_clicked() {
 
     if (!directoryIsWritable(dirName)) {
         QString errStr = tr("The path is not writable:<br>") + dirName;
-        showErrorDialog(errStr, tr("Save Recording"));
+        showErrorDialog(errStr, tr(SAVE_RECORDING));
         return;
     }
 
@@ -333,13 +349,13 @@ void RecordScreenPage::on_rec_saveButton_clicked() {
         if (removeFileIfExists(recordingName)) {
             if (!QFile::copy(QString(mTmpFilePath.c_str()), recordingName)) {
                 errStr = tr("Unknown error while saving<br>") + recordingName;
-                showErrorDialog(errStr, tr("Save Recording"));
+                showErrorDialog(errStr, tr(SAVE_RECORDING));
             }
         } else {
             errStr = tr("Unable to remove existing file before copying new "
                         "file<br>") +
                      recordingName;
-            showErrorDialog(errStr, tr("Save Recording"));
+            showErrorDialog(errStr, tr(SAVE_RECORDING));
         }
     }
 }
@@ -390,7 +406,7 @@ void RecordScreenPage::slot_recordingStatusChange(RecordingStatus status) {
             break;
         case RECORD_STOP_FAILED: {
             QString errStr = tr("An error occurred while recording.");
-            showErrorDialog(errStr, tr("Save Recording"));
+            showErrorDialog(errStr, tr(SAVE_RECORDING));
             setRecordUiState(RecordUiState::Ready);
             break;
         }
@@ -406,7 +422,7 @@ void RecordScreenPage::convertingStarted() {
 void RecordScreenPage::convertingFinished(bool success) {
     if (!success) {
         QString errStr = tr("An error occurred while converting to gif.");
-        showErrorDialog(errStr, tr("Save Recording"));
+        showErrorDialog(errStr, tr(SAVE_RECORDING));
     }
 
     setRecordUiState(RecordUiState::Stopped);

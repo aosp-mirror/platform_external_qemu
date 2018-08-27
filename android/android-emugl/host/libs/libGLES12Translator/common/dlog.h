@@ -25,12 +25,12 @@ ANDROID_BEGIN_HEADER
 #define APITRACE() do { \
     VERBOSE_TID_FUNCTION_DPRINT(gles1emu, "(gles1->2 translator) "); \
 } while (0)
-#define DLOG(...) do { \
+#define GL_DLOG(...) do { \
     VERBOSE_TID_FUNCTION_DPRINT(gles1emu, "(gles1->2 translator): ", ##__VA_ARGS__); \
 } while (0)
 #else
 #define APITRACE()
-#define DLOG(...)
+#define GL_DLOG(...)
 #endif
 
 ANDROID_END_HEADER

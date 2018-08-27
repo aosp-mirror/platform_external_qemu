@@ -1,0 +1,2318 @@
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[interfaces]]
+= Shader Interfaces
+
+When a pipeline is created, the set of shaders specified in the
+corresponding stext:Vk*PipelineCreateInfo structure are implicitly linked at
+a number of different interfaces.
+
+  * <<interfaces-iointerfaces,Shader Input and Output Interface>>
+  * <<interfaces-vertexinput,Vertex Input Interface>>
+  * <<interfaces-fragmentoutput,Fragment Output Interface>>
+  * <<interfaces-inputattachment,Fragment Input Attachment Interface>>
+  * <<interfaces-resources,Shader Resource Interface>>
+
+Interface definitions make use of the following SPIR-V decorations:
+
+  * code:DescriptorSet and code:Binding
+  * code:Location, code:Component, and code:Index
+  * code:Flat, code:NoPerspective, code:Centroid, and code:Sample
+  * code:Block and code:BufferBlock
+  * code:InputAttachmentIndex
+  * code:Offset, code:ArrayStride, and code:MatrixStride
+  * code:BuiltIn
+ifdef::VK_NV_geometry_shader_passthrough[]
+  * <<geometry-passthrough-passthrough,code:PassthroughNV>>
+endif::VK_NV_geometry_shader_passthrough[]
+
+
+This specification describes valid uses for Vulkan of these decorations.
+Any other use of one of these decorations is invalid.
+
+[[interfaces-iointerfaces]]
+== Shader Input and Output Interfaces
+
+When multiple stages are present in a pipeline, the outputs of one stage
+form an interface with the inputs of the next stage.
+When such an interface involves a shader, shader outputs are matched against
+the inputs of the next stage, and shader inputs are matched against the
+outputs of the previous stage.
+
+There are two classes of variables that can: be matched between shader
+stages, built-in variables and user-defined variables.
+Each class has a different set of matching criteria.
+Generally, when non-shader stages are between shader stages, the
+user-defined variables, and most built-in variables, form an interface
+between the shader stages.
+
+The variables forming the input or output _interfaces_ are listed as
+operands to the code:OpEntryPoint instruction and are declared with the
+code:Input or code:Output storage classes, respectively, in the SPIR-V
+module.
+
+code:Output variables of a shader stage have undefined values until the
+shader writes to them or uses the code:Initializer operand when declaring
+the variable.
+
+
+[[interfaces-iointerfaces-builtin]]
+=== Built-in Interface Block
+
+Shader <<interfaces-builtin-variables,built-in>> variables meeting the
+following requirements define the _built-in interface block_.
+They must:
+
+  * be explicitly declared (there are no implicit built-ins),
+  * be identified with a code:BuiltIn decoration,
+  * form object types as described in the
+    <<interfaces-builtin-variables,Built-in Variables>> section, and
+  * be declared in a block whose top-level members are the built-ins.
+
+Built-ins only participate in interface matching if they are declared in
+such a block.
+They must: not have any code:Location or code:Component decorations.
+
+There must: be no more than one built-in interface block per shader per
+interface.
+
+
+[[interfaces-iointerfaces-user]]
+=== User-defined Variable Interface
+
+The remaining variables listed by code:OpEntryPoint with the code:Input or
+code:Output storage class form the _user-defined variable interface_.
+ifdef::VK_VERSION_1_1,VK_KHR_16bit_storage[]
+By default such variables have a type with a width of 32 or 64.
+If an implementation supports
+<<features-features-storageInputOutput16,storageInputOutput16>>,
+user-defined variables in the code:Input and code:Output storage classes
+can: also have types with a width of 16.
+endif::VK_VERSION_1_1,VK_KHR_16bit_storage[]
+These variables must: be identified with a code:Location decoration and can:
+also be identified with a code:Component decoration.
+
+
+[[interfaces-iointerfaces-matching]]
+=== Interface Matching
+
+A user-defined output variable is considered to match an input variable in
+the subsequent stage if the two variables are declared with the same
+code:Location and code:Component decoration and match in type and
+decoration, except that <<shaders-interpolation-decorations,interpolation
+decorations>> are not required: to match.
+For the purposes of interface matching, variables declared without a
+code:Component decoration are considered to have a code:Component decoration
+of zero.
+
+ifdef::VK_NV_geometry_shader_passthrough[]
+[NOTE]
+.Note
+====
+Matching rules for _passthrough geometry shaders_ are slightly different and
+are described in the <<geometry-passthrough-interface,Passthrough Interface
+Matching>> section.
+====
+
+endif::VK_NV_geometry_shader_passthrough[]
+Variables or block members declared as structures are considered to match in
+type if and only if the structure members match in type, decoration, number,
+and declaration order.
+Variables or block members declared as arrays are considered to match in
+type only if both declarations specify the same element type and size.
+
+Tessellation control shader per-vertex output variables and blocks, and
+tessellation control, tessellation evaluation, and geometry shader
+per-vertex input variables and blocks are required to be declared as arrays,
+with each element representing input or output values for a single vertex of
+a multi-vertex primitive.
+For the purposes of interface matching, the outermost array dimension of
+such variables and blocks is ignored.
+
+At an interface between two non-fragment shader stages, the built-in
+interface block must: match exactly, as described above.
+At an interface involving the fragment shader inputs, the presence or
+absence of any built-in output does not affect the interface matching.
+
+At an interface between two shader stages, the user-defined variable
+interface must: match exactly, as described above.
+
+Any input value to a shader stage is well-defined as long as the preceding
+stages writes to a matching output, as described above.
+
+Additionally, scalar and vector inputs are well-defined if there is a
+corresponding output satisfying all of the following conditions:
+
+  * the input and output match exactly in decoration,
+  * the output is a vector with the same basic type and has at least as many
+    components as the input, and
+  * the common component type of the input and output is
+ifdef::VK_VERSION_1_1,VK_KHR_16bit_storage[]
+    16-bit integer or floating-point, or
+endif::VK_VERSION_1_1,VK_KHR_16bit_storage[]
+    32-bit integer or floating-point (64-bit component types are excluded).
+
+In this case, the components of the input will be taken from the first
+components of the output, and any extra components of the output will be
+ignored.
+
+
+[[interfaces-iointerfaces-locations]]
+=== Location Assignment
+
+This section describes how many locations are consumed by a given type.
+As mentioned above, geometry shader inputs, tessellation control shader
+inputs and outputs, and tessellation evaluation inputs all have an
+additional level of arrayness relative to other shader inputs and outputs.
+This outer array level is removed from the type before considering how many
+locations the type consumes.
+
+The code:Location value specifies an interface slot comprised of a 32-bit
+four-component vector conveyed between stages.
+The code:Component specifies
+<<interfaces-iointerfaces-components,components>> within these vector
+locations.
+Only types with widths of
+ifdef::VK_VERSION_1_1,VK_KHR_16bit_storage[]
+16,
+endif::VK_VERSION_1_1,VK_KHR_16bit_storage[]
+32 or 64 are supported in shader interfaces.
+
+Inputs and outputs of the following types consume a single interface
+location:
+
+ifdef::VK_VERSION_1_1,VK_KHR_16bit_storage[]
+  * 16-bit scalar and vector types, and
+endif::VK_VERSION_1_1,VK_KHR_16bit_storage[]
+  * 32-bit scalar and vector types, and
+  * 64-bit scalar and 2-component vector types.
+
+64-bit three- and four-component vectors consume two consecutive locations.
+
+If a declared input or output is an array of size _n_ and each element takes
+_m_ locations, it will be assigned _m_ {times} _n_ consecutive locations
+starting with the location specified.
+
+If the declared input or output is an _n_ {times} _m_
+ifdef::VK_VERSION_1_1,VK_KHR_16bit_storage[]
+16-,
+endif::VK_VERSION_1_1,VK_KHR_16bit_storage[]
+32- or 64-bit matrix, it will be assigned multiple locations starting with
+the location specified.
+The number of locations assigned for each matrix will be the same as for an
+_n_-element array of _m_-component vectors.
+
+The layout of a structure type used as an code:Input or code:Output depends
+on whether it is also a code:Block (i.e. has a code:Block decoration).
+
+If it is a not a code:Block, then the structure type must: have a
+code:Location decoration.
+Its members are assigned consecutive locations in their declaration order,
+with the first member assigned to the location specified for the structure
+type.
+The members, and their nested types, must: not themselves have code:Location
+decorations.
+
+If the structure type is a code:Block but without a code:Location, then each
+of its members must: have a code:Location decoration.
+If it is a code:Block with a code:Location decoration, then its members are
+assigned consecutive locations in declaration order, starting from the first
+member which is initially assigned the location specified for the
+code:Block.
+Any member with its own code:Location decoration is assigned that location.
+Each remaining member is assigned the location after the immediately
+preceding member in declaration order.
+
+The locations consumed by block and structure members are determined by
+applying the rules above in a depth-first traversal of the instantiated
+members as though the structure or block member were declared as an input or
+output variable of the same type.
+
+Any two inputs listed as operands on the same code:OpEntryPoint must: not be
+assigned the same location, either explicitly or implicitly.
+Any two outputs listed as operands on the same code:OpEntryPoint must: not
+be assigned the same location, either explicitly or implicitly.
+
+The number of input and output locations available for a shader input or
+output interface are limited, and dependent on the shader stage as described
+in <<interfaces-iointerfaces-limits>>.
+All variables in both the <<interfaces-builtin-variables,built-in interface
+block>> and the <<interfaces-iointerfaces-user,user-defined variable
+interface>> count against these limits.
+
+
+[[interfaces-iointerfaces-limits]]
+.Shader Input and Output Locations
+[width="90%",cols="<6,<13",options="header"]
+|====
+| Shader Interface              | Locations Available
+| vertex input                  | pname:maxVertexInputAttributes
+| vertex output                 | pname:maxVertexOutputComponents / 4
+| tessellation control input    | pname:maxTessellationControlPerVertexInputComponents / 4
+| tessellation control output   | pname:maxTessellationControlPerVertexOutputComponents / 4
+| tessellation evaluation input | pname:maxTessellationEvaluationInputComponents / 4
+| tessellation evaluation output| pname:maxTessellationEvaluationOutputComponents / 4
+| geometry input                | pname:maxGeometryInputComponents / 4
+| geometry output               | pname:maxGeometryOutputComponents / 4
+| fragment input                | pname:maxFragmentInputComponents / 4
+| fragment output               | pname:maxFragmentOutputAttachments
+|====
+
+
+[[interfaces-iointerfaces-components]]
+=== Component Assignment
+
+The code:Component decoration allows the code:Location to be more finely
+specified for scalars and vectors, down to the individual components within
+a location that are consumed.
+The components within a location are 0, 1, 2, and 3.
+A variable or block member starting at component N will consume components
+N, N+1, N+2, ...
+up through its size.
+ifdef::VK_VERSION_1_1,VK_KHR_16bit_storage[]
+For 16-, and 32-bit types,
+endif::VK_VERSION_1_1,VK_KHR_16bit_storage[]
+ifndef::VK_VERSION_1_1,VK_KHR_16bit_storage[]
+For single precision types,
+endif::VK_VERSION_1_1,VK_KHR_16bit_storage[]
+it is invalid if this sequence of components gets larger than 3.
+A scalar 64-bit type will consume two of these components in sequence, and a
+two-component 64-bit vector type will consume all four components available
+within a location.
+A three- or four-component 64-bit vector type must: not specify a
+code:Component decoration.
+A three-component 64-bit vector type will consume all four components of the
+first location and components 0 and 1 of the second location.
+This leaves components 2 and 3 available for other component-qualified
+declarations.
+
+A scalar or two-component 64-bit data type must: not specify a
+code:Component decoration of 1 or 3.
+A code:Component decoration must: not be specified for any type that is not
+a scalar or vector.
+
+
+[[interfaces-vertexinput]]
+== Vertex Input Interface
+
+When the vertex stage is present in a pipeline, the vertex shader input
+variables form an interface with the vertex input attributes.
+The vertex shader input variables are matched by the code:Location and
+code:Component decorations to the vertex input attributes specified in the
+pname:pVertexInputState member of the slink:VkGraphicsPipelineCreateInfo
+structure.
+
+The vertex shader input variables listed by code:OpEntryPoint with the
+code:Input storage class form the _vertex input interface_.
+These variables must: be identified with a code:Location decoration and can:
+also be identified with a code:Component decoration.
+
+For the purposes of interface matching: variables declared without a
+code:Component decoration are considered to have a code:Component decoration
+of zero.
+The number of available vertex input locations is given by the
+pname:maxVertexInputAttributes member of the sname:VkPhysicalDeviceLimits
+structure.
+
+See <<fxvertex-attrib-location>> for details.
+
+All vertex shader inputs declared as above must: have a corresponding
+attribute and binding in the pipeline.
+
+
+[[interfaces-fragmentoutput]]
+== Fragment Output Interface
+
+When the fragment stage is present in a pipeline, the fragment shader
+outputs form an interface with the output attachments of the current
+subpass.
+The fragment shader output variables are matched by the code:Location and
+code:Component decorations to the color attachments specified in the
+pname:pColorAttachments array of the slink:VkSubpassDescription structure
+that describes the subpass that the fragment shader is executed in.
+
+The fragment shader output variables listed by code:OpEntryPoint with the
+code:Output storage class form the _fragment output interface_.
+These variables must: be identified with a code:Location decoration.
+They can: also be identified with a code:Component decoration and/or an
+code:Index decoration.
+For the purposes of interface matching: variables declared without a
+code:Component decoration are considered to have a code:Component decoration
+of zero, and variables declared without an code:Index decoration are
+considered to have an code:Index decoration of zero.
+
+A fragment shader output variable identified with a code:Location decoration
+of _i_ is directed to the color attachment indicated by
+pname:pColorAttachments[_i_], after passing through the blending unit as
+described in <<framebuffer-blending>>, if enabled.
+Locations are consumed as described in
+<<interfaces-iointerfaces-locations,Location Assignment>>.
+The number of available fragment output locations is given by the
+pname:maxFragmentOutputAttachments member of the
+sname:VkPhysicalDeviceLimits structure.
+
+Components of the output variables are assigned as described in
+<<interfaces-iointerfaces-components,Component Assignment>>.
+Output components identified as 0, 1, 2, and 3 will be directed to the R, G,
+B, and A inputs to the blending unit, respectively, or to the output
+attachment if blending is disabled.
+If two variables are placed within the same location, they must: have the
+same underlying type (floating-point or integer).
+The input to blending or color attachment writes is undefined for components
+which do not correspond to a fragment shader output.
+
+Fragment outputs identified with an code:Index of zero are directed to the
+first input of the blending unit associated with the corresponding
+code:Location.
+Outputs identified with an code:Index of one are directed to the second
+input of the corresponding blending unit.
+
+No _component aliasing_ of output variables is allowed, that is there must:
+not be two output variables which have the same location, component, and
+index, either explicitly declared or implied.
+
+Output values written by a fragment shader must: be declared with either
+code:OpTypeFloat or code:OpTypeInt, and a Width of 32.
+ifdef::VK_VERSION_1_1,VK_KHR_16bit_storage[]
+If pname:storageInputOutput16 is supported, output values written by a
+fragment shader can: be also declared with either code:OpTypeFloat or
+code:OpTypeInt and a Width of 16.
+endif::VK_VERSION_1_1,VK_KHR_16bit_storage[]
+Composites of these types are also permitted.
+If the color attachment has a signed or unsigned normalized fixed-point
+format, color values are assumed to be floating-point and are converted to
+fixed-point as described in <<fundamentals-fpfixedconv>>; If the color
+attachment has an integer format, color values are assumed to be integers
+and converted to the bit-depth of the target.
+Any value that cannot be represented in the attachment's format is
+undefined.
+For any other attachment format no conversion is performed.
+If the type of the values written by the fragment shader do not match the
+format of the corresponding color attachment, the result is undefined for
+those components.
+
+
+[[interfaces-inputattachment]]
+== Fragment Input Attachment Interface
+
+When a fragment stage is present in a pipeline, the fragment shader subpass
+inputs form an interface with the input attachments of the current subpass.
+The fragment shader subpass input variables are matched by
+code:InputAttachmentIndex decorations to the input attachments specified in
+the pname:pInputAttachments array of the slink:VkSubpassDescription
+structure that describes the subpass that the fragment shader is executed
+in.
+
+The fragment shader subpass input variables with the code:UniformConstant
+storage class and a decoration of code:InputAttachmentIndex that are
+statically used by code:OpEntryPoint form the _fragment input attachment
+interface_.
+These variables must: be declared with a type of code:OpTypeImage, a
+code:Dim operand of code:SubpassData, and a code:Sampled operand of 2.
+
+A subpass input variable identified with an code:InputAttachmentIndex
+decoration of _i_ reads from the input attachment indicated by
+pname:pInputAttachments[_i_] member of sname:VkSubpassDescription.
+If the subpass input variable is declared as an array of size N, it consumes
+N consecutive input attachments, starting with the index specified.
+There must: not be more than one input variable with the same
+code:InputAttachmentIndex whether explicitly declared or implied by an array
+declaration.
+The number of available input attachment indices is given by the
+pname:maxPerStageDescriptorInputAttachments member of the
+sname:VkPhysicalDeviceLimits structure.
+
+Variables identified with the code:InputAttachmentIndex must: only be used
+by a fragment stage.
+The basic data type (floating-point, integer, unsigned integer) of the
+subpass input must: match the basic format of the corresponding input
+attachment, or the values of subpass loads from these variables are
+undefined.
+
+See <<descriptorsets-inputattachment>> for more details.
+
+
+[[interfaces-resources]]
+== Shader Resource Interface
+
+When a shader stage accesses buffer or image resources, as described in the
+<<descriptorsets,Resource Descriptors>> section, the shader resource
+variables must: be matched with the <<descriptorsets-pipelinelayout,pipeline
+layout>> that is provided at pipeline creation time.
+
+The set of shader resources that form the _shader resource interface_ for a
+stage are the variables statically used by code:OpEntryPoint with the
+storage class of code:Uniform, code:UniformConstant, or code:PushConstant.
+For the fragment shader, this includes the <<interfaces-inputattachment,
+fragment input attachment interface>>.
+
+The shader resource interface consists of two sub-interfaces: the push
+constant interface and the descriptor set interface.
+
+
+[[interfaces-resources-pushconst]]
+=== Push Constant Interface
+
+The shader variables defined with a storage class of code:PushConstant that
+are statically used by the shader entry points for the pipeline define the
+_push constant interface_.
+They must: be:
+
+  * typed as code:OpTypeStruct,
+  * identified with a code:Block decoration, and
+  * laid out explicitly using the code:Offset, code:ArrayStride, and
+    code:MatrixStride decorations as specified in
+    <<interfaces-resources-layout,Offset and Stride Assignment>>.
+
+There must: be no more than one push constant block statically used per
+shader entry point.
+
+Each variable in a push constant block must: be placed at an code:Offset
+such that the entire constant value is entirely contained within the
+slink:VkPushConstantRange for each code:OpEntryPoint that uses it, and the
+pname:stageFlags for that range must: specify the appropriate
+elink:VkShaderStageFlagBits for that stage.
+The code:Offset decoration for any variable in a push constant block must:
+not cause the space required for that variable to extend outside the range
+[eq]#[0, pname:maxPushConstantsSize)#.
+
+Any variable in a push constant block that is declared as an array must:
+only be accessed with _dynamically uniform_ indices.
+
+
+[[interfaces-resources-descset]]
+=== Descriptor Set Interface
+
+The _descriptor set interface_ is comprised of the shader variables with the
+storage class of code:Uniform or code:UniformConstant (including the
+variables in the <<interfaces-inputattachment,fragment input attachment
+interface>>) that are statically used by the shader entry points for the
+pipeline.
+
+These variables must: have code:DescriptorSet and code:Binding decorations
+specified, which are assigned and matched with the
+sname:VkDescriptorSetLayout objects in the pipeline layout as described in
+<<interfaces-resources-setandbinding,DescriptorSet and Binding Assignment>>.
+
+Variables identified with the code:UniformConstant storage class are used
+only as handles to refer to opaque resources.
+Such variables must: be typed as code:OpTypeImage, code:OpTypeSampler,
+code:OpTypeSampledImage, or an array of one of these types.
+
+The code:Sampled code:Type of an code:OpTypeImage declaration must: match
+the same basic data type as the corresponding resource, or the values
+obtained by reading or sampling from this image are undefined.
+
+The code:Image code:Format of an code:OpTypeImage declaration must: not be
+*Unknown*, for variables which are used for code:OpImageRead,
+code:OpImageSparseRead, or code:OpImageWrite operations, except under the
+following conditions:
+
+  * For code:OpImageWrite, if the pname:shaderStorageImageWriteWithoutFormat
+    feature is enabled and the shader module declares the
+    code:StorageImageWriteWithoutFormat capability.
+  * For code:OpImageRead or code:OpImageSparseRead, if the
+    pname:shaderStorageImageReadWithoutFormat feature is enabled and the
+    shader module declares the code:StorageImageReadWithoutFormat
+    capability.
+
+The code:Image code:Format of an code:OpTypeImage declaration must: not be
+*Unknown*, for variables which are used for code:OpAtomic* operations.
+
+Variables identified with the code:Uniform storage class are used to access
+transparent buffer backed resources.
+Such variables must: be:
+
+  * typed as code:OpTypeStruct, or an array of this type,
+  * identified with a code:Block or code:BufferBlock decoration, and
+  * laid out explicitly using the code:Offset, code:ArrayStride, and
+    code:MatrixStride decorations as specified in
+    <<interfaces-resources-layout,Offset and Stride Assignment>>.
+
+ifdef::VK_VERSION_1_1,VK_KHR_storage_buffer_storage_class[]
+Variables identified with the code:StorageBuffer storage class are used to
+access transparent buffer backed resources.
+Such variables must: be:
+
+  * typed as code:OpTypeStruct, or an array of this type,
+  * identified with a code:Block decoration, and
+  * laid out explicitly using the code:Offset, code:ArrayStride, and
+    code:MatrixStride decorations as specified in
+    <<interfaces-resources-layout,Offset and Stride Assignment>>.
+endif::VK_VERSION_1_1,VK_KHR_storage_buffer_storage_class[]
+
+ifndef::VK_VERSION_1_1,VK_KHR_storage_buffer_storage_class[]
+The code:Offset decoration for any variable in a code:Block must: not cause
+the space required for that variable to extend outside the range [eq]#[0,
+pname:maxUniformBufferRange)#.
+The code:Offset decoration for any variable in a code:BufferBlock must: not
+cause the space required for that variable to extend outside the range
+[eq]#[0, pname:maxStorageBufferRange)#.
+endif::VK_VERSION_1_1,VK_KHR_storage_buffer_storage_class[]
+
+ifdef::VK_VERSION_1_1,VK_KHR_storage_buffer_storage_class[]
+The code:Offset decoration for any member of a code:Block-decorated variable
+in the code:Uniform storage class must: not cause the space required for
+that variable to extend outside the range [eq]#[0,
+pname:maxUniformBufferRange)#.
+The code:Offset decoration for any member of a code:Block-decorated variable
+in the code:StorageBuffer storage class must: not cause the space required
+for that variable to extend outside the range [eq]#[0,
+pname:maxStorageBufferRange)#.
+endif::VK_VERSION_1_1,VK_KHR_storage_buffer_storage_class[]
+
+Variables identified with a storage class of code:UniformConstant and a
+decoration of code:InputAttachmentIndex must: be declared as described in
+<<interfaces-inputattachment,Fragment Input Attachment Interface>>.
+
+SPIR-V variables decorated with a descriptor set and binding that identify a
+<<descriptorsets-combinedimagesampler, combined image sampler descriptor>>
+can: have a type of code:OpTypeImage, code:OpTypeSampler (code:Sampled=1),
+or code:OpTypeSampledImage.
+
+Arrays of any of these types can: be indexed with constant integral
+expressions.
+The following features must: be enabled and capabilities must: be declared
+in order to index such arrays with dynamically uniform or non-uniform
+indices:
+
+  * Storage images (except storage texel buffers and input attachments):
+  ** Dynamically uniform: pname:shaderStorageImageArrayDynamicIndexing and
+     code:StorageImageArrayDynamicIndexing
+ifdef::VK_EXT_descriptor_indexing[]
+  ** Non-uniform: pname:shaderStorageImageArrayNonUniformIndexing and
+     code:StorageImageArrayNonUniformIndexingEXT
+  * Storage texel buffers:
+  ** Dynamically uniform: pname:shaderStorageTexelBufferArrayDynamicIndexing
+     and code:StorageTexelBufferArrayDynamicIndexingEXT
+  ** Non-uniform: pname:shaderStorageTexelBufferArrayNonUniformIndexing and
+     code:StorageTexelBufferArrayNonUniformIndexingEXT
+  * Input attachments:
+  ** Dynamically uniform: pname:shaderInputAttachmentArrayDynamicIndexing
+     and code:InputAttachmentArrayDynamicIndexingEXT
+  ** Non-uniform: pname:shaderInputAttachmentArrayNonUniformIndexing and
+     code:InputAttachmentArrayNonUniformIndexingEXT
+endif::VK_EXT_descriptor_indexing[]
+  * Sampled images (except uniform texel buffers):
+  ** Dynamically uniform: pname:shaderSampledImageArrayDynamicIndexing and
+     code:SampledImageArrayDynamicIndexing
+ifdef::VK_EXT_descriptor_indexing[]
+  ** Non-uniform: pname:shaderSampledImageArrayNonUniformIndexing and
+     code:SampledImageArrayNonUniformIndexingEXT
+  * Uniform texel buffers:
+  ** Dynamically uniform: pname:shaderUniformTexelBufferArrayDynamicIndexing
+     and code:UniformTexelBufferArrayDynamicIndexingEXT
+  ** Non-uniform: pname:shaderUniformTexelBufferArrayNonUniformIndexing and
+     code:UniformTexelBufferArrayNonUniformIndexingEXT
+endif::VK_EXT_descriptor_indexing[]
+  * Uniform buffers:
+  ** Dynamically uniform: pname:shaderUniformBufferArrayDynamicIndexing and
+     code:UniformBufferArrayDynamicIndexing
+ifdef::VK_EXT_descriptor_indexing[]
+  ** Non-uniform: pname:shaderUniformBufferArrayNonUniformIndexing and
+     code:UniformBufferArrayNonUniformIndexingEXT
+endif::VK_EXT_descriptor_indexing[]
+  * Storage buffers:
+  ** Dynamically uniform: pname:shaderStorageBufferArrayDynamicIndexing and
+     code:StorageBufferArrayDynamicIndexing
+ifdef::VK_EXT_descriptor_indexing[]
+  ** Non-uniform: pname:shaderStorageBufferArrayNonUniformIndexing and
+     code:StorageBufferArrayNonUniformIndexingEXT
+endif::VK_EXT_descriptor_indexing[]
+
+ifdef::VK_EXT_descriptor_indexing[]
+If an instruction loads from or stores to a resource (including atomics and
+image instructions) and the resource descriptor being accessed is not
+dynamically uniform, then the corresponding non-uniform indexing feature
+must: be enabled and the capability must: be declared.
+endif::VK_EXT_descriptor_indexing[]
+If an instruction loads from or stores to a resource (including atomics and
+image instructions) and the resource descriptor being accessed is not
+uniform, then the corresponding dynamic indexing
+ifdef::VK_EXT_descriptor_indexing[]
+or non-uniform
+endif::VK_EXT_descriptor_indexing[]
+feature must: be enabled and the capability must: be declared.
+
+ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+If sampler Y'C~B~C~R~ conversion is enabled, the combined image sampler
+must: be indexed only by constant integral expressions when aggregated into
+arrays in shader code, irrespective of the
+pname:shaderSampledImageArrayDynamicIndexing feature.
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+
+[[interfaces-resources-correspondence]]
+.Shader Resource and Descriptor Type Correspondence
+[width="90%",cols="<1,<2",options="header"]
+|====
+| Resource type          | Descriptor Type
+| sampler                | ename:VK_DESCRIPTOR_TYPE_SAMPLER or
+                           ename:VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+| sampled image          | ename:VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE or
+                           ename:VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+| storage image          | ename:VK_DESCRIPTOR_TYPE_STORAGE_IMAGE
+| combined image sampler | ename:VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+| uniform texel buffer   | ename:VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER
+| storage texel buffer   | ename:VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER
+| uniform buffer         | ename:VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER or
+                           ename:VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC
+| storage buffer         | ename:VK_DESCRIPTOR_TYPE_STORAGE_BUFFER or
+                           ename:VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC
+| input attachment       | ename:VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT
+|====
+
+[[interfaces-resources-storage-class-correspondence]]
+.Shader Resource and Storage Class Correspondence
+[width="100%",cols="<21%,<22%,<27%,<30%",options="header"]
+|====
+| Resource type   | Storage Class | Type | Decoration(s)^1^
+| sampler
+        | code:UniformConstant | code:OpTypeSampler |
+| sampled image
+        | code:UniformConstant | code:OpTypeImage (code:Sampled=1)|
+| storage image
+        | code:UniformConstant | code:OpTypeImage (code:Sampled=2) |
+| combined image sampler
+        | code:UniformConstant | code:OpTypeSampledImage +
+                                 code:OpTypeImage (code:Sampled=1) +
+                                 code:OpTypeSampler |
+| uniform texel buffer
+        | code:UniformConstant | code:OpTypeImage (code:Dim=code:Buffer, code:Sampled=1) |
+| storage texel buffer
+        | code:UniformConstant | code:OpTypeImage (code:Dim=code:Buffer, code:Sampled=2) |
+| uniform buffer
+        | code:Uniform         | code:OpTypeStruct
+        | code:Block, code:Offset, (code:ArrayStride), (code:MatrixStride)
+ifndef::VK_VERSION_1_1,VK_KHR_storage_buffer_storage_class[]
+| storage buffer
+        | code:Uniform         | code:OpTypeStruct
+        | code:BufferBlock, code:Offset, (code:ArrayStride), (code:MatrixStride)
+endif::VK_VERSION_1_1,VK_KHR_storage_buffer_storage_class[]
+ifdef::VK_VERSION_1_1,VK_KHR_storage_buffer_storage_class[]
+.2+<.^| storage buffer
+        | code:Uniform         .2+<.^| code:OpTypeStruct
+        | code:BufferBlock, code:Offset, (code:ArrayStride), (code:MatrixStride)
+        | code:StorageBuffer | code:Block, code:Offset, (code:ArrayStride), (code:MatrixStride)
+endif::VK_VERSION_1_1,VK_KHR_storage_buffer_storage_class[]
+| input attachment
+        | code:UniformConstant | code:OpTypeImage (code:Dim=code:SubpassData, code:Sampled=2)
+        | code:InputAttachmentIndex
+|====
+1:: in addition to code:DescriptorSet and code:Binding
+
+
+[[interfaces-resources-setandbinding]]
+=== DescriptorSet and Binding Assignment
+
+A variable decorated with a code:DescriptorSet decoration of [eq]#s# and a
+code:Binding decoration of [eq]#b# indicates that this variable is
+associated with the slink:VkDescriptorSetLayoutBinding that has a
+pname:binding equal to [eq]#b# in pname:pSetLayouts[_s_] that was specified
+in slink:VkPipelineLayoutCreateInfo.
+
+code:DescriptorSet decoration values must: be between zero and
+pname:maxBoundDescriptorSets minus one, inclusive.
+code:Binding decoration values can: be any 32-bit unsigned integer value, as
+described in <<descriptorsets-setlayout>>.
+Each descriptor set has its own binding name space.
+
+If the code:Binding decoration is used with an array, the entire array is
+assigned that binding value.
+The array must: be a single-dimensional array and size of the array must: be
+no larger than the number of descriptors in the binding.
+ifdef::VK_EXT_descriptor_indexing[]
+If the array is runtime-sized, then array elements greater than or equal to
+the size of that binding in the bound descriptor set must: not be used.
+If the array is runtime-sized, the pname:runtimeDescriptorArray feature
+must: be enabled and the code:RuntimeDescriptorArrayEXT capability must: be
+declared.
+endif::VK_EXT_descriptor_indexing[]
+ifndef::VK_EXT_descriptor_indexing[]
+The array must: not be runtime-sized.
+endif::VK_EXT_descriptor_indexing[]
+The index of each element of the array is referred to as the _arrayElement_.
+For the purposes of interface matching and descriptor set
+<<descriptorsets-updates,operations>>, if a resource variable is not an
+array, it is treated as if it has an arrayElement of zero.
+
+There is a limit on the number of resources of each type that can: be
+accessed by a pipeline stage as shown in
+<<interfaces-resources-limits,Shader Resource Limits>>.
+The "`Resources Per Stage`" column gives the limit on the number each type
+of resource that can: be statically used for an entry point in any given
+stage in a pipeline.
+The "`Resource Types`" column lists which resource types are counted against
+the limit.
+Some resource types count against multiple limits.
+
+The pipeline layout may: include descriptor sets and bindings which are not
+referenced by any variables statically used by the entry points for the
+shader stages in the binding's pname:stageFlags.
+
+However, if a variable assigned to a given code:DescriptorSet and
+code:Binding is statically used by the entry point for a shader stage, the
+pipeline layout must: contain a descriptor set layout binding in that
+descriptor set layout and for that binding number, and that binding's
+pname:stageFlags must: include the appropriate elink:VkShaderStageFlagBits
+for that stage.
+The variable must: be of a valid resource type determined by its SPIR-V type
+and storage class, as defined in
+<<interfaces-resources-storage-class-correspondence,Shader Resource and
+Storage Class Correspondence>>.
+The descriptor set layout binding must: be of a corresponding descriptor
+type, as defined in <<interfaces-resources-correspondence,Shader Resource
+and Descriptor Type Correspondence>>.
+
+[NOTE]
+.Note
+====
+There are no limits on the number of shader variables that can have
+overlapping set and binding values in a shader; but which resources are
+<<shaders-staticuse,statically used>> has an impact.
+If any shader variable identifying a resource is
+<<shaders-staticuse,statically used>> in a shader, then the underlying
+descriptor bound at the declared set and binding must
+<<interfaces-resources-correspondence,support the declared type in the
+shader>> when the shader executes.
+
+If multiple shader variables are declared with the same set and binding
+values, and with the same underlying descriptor type, they can all be
+statically used within the same shader.
+However, accesses are not automatically synchronized, and code:Aliased
+decorations should be used to avoid data hazards (see
+https://www.khronos.org/registry/spir-v/specs/unified1/SPIRV.html#_a_id_aliasingsection_a_aliasing[section
+2.18.2 Aliasing in the SPIR-V specification]).
+
+If multiple shader variables with the same set and binding values are
+declared in a single shader, but with different declared types, where any of
+those are not supported by the relevant bound descriptor, that shader can
+only be executed if the variables with the unsupported type are not
+statically used.
+
+A noteworthy example of using multiple statically-used shader variables
+sharing the same descriptor set and binding values is a descriptor of type
+code:VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER that has multiple
+corresponding shader variables in the code:UniformConstant storage class,
+where some could be code:OpTypeImage, some could be code:OpTypeSampler
+(code:Sampled=1), and some could be code:OpTypeSampledImage.
+====
+
+[[interfaces-resources-limits]]
+.Shader Resource Limits
+[width="80%",cols="<35,<23",options="header"]
+|====
+| Resources per Stage                   | Resource Types
+.2+<.^| pname:maxPerStageDescriptorSamplers
+ifdef::VK_EXT_descriptor_indexing[]
+or pname:maxPerStageDescriptorUpdateAfterBindSamplers
+endif::VK_EXT_descriptor_indexing[]
+            | sampler           | combined image sampler
+.3+<.^| pname:maxPerStageDescriptorSampledImages
+ifdef::VK_EXT_descriptor_indexing[]
+or pname:maxPerStageDescriptorUpdateAfterBindSampledImages
+endif::VK_EXT_descriptor_indexing[]
+            | sampled image     | combined image sampler | uniform texel buffer
+.2+<.^| pname:maxPerStageDescriptorStorageImages
+ifdef::VK_EXT_descriptor_indexing[]
+or pname:maxPerStageDescriptorUpdateAfterBindStorageImages
+endif::VK_EXT_descriptor_indexing[]
+            | storage image     | storage texel buffer
+.2+<.^| pname:maxPerStageDescriptorUniformBuffers
+ifdef::VK_EXT_descriptor_indexing[]
+or pname:maxPerStageDescriptorUpdateAfterBindUniformBuffers
+endif::VK_EXT_descriptor_indexing[]
+            | uniform buffer    | uniform buffer dynamic
+.2+<.^| pname:maxPerStageDescriptorStorageBuffers
+ifdef::VK_EXT_descriptor_indexing[]
+or pname:maxPerStageDescriptorUpdateAfterBindStorageBuffers
+endif::VK_EXT_descriptor_indexing[]
+            | storage buffer    | storage buffer dynamic
+| pname:maxPerStageDescriptorInputAttachments
+ifdef::VK_EXT_descriptor_indexing[]
+or pname:maxPerStageDescriptorUpdateAfterBindInputAttachments
+endif::VK_EXT_descriptor_indexing[]
+            | input attachment^1^
+|====
+
+1::
+    Input attachments can: only be used in the fragment shader stage
+
+
+[[interfaces-resources-layout]]
+=== Offset and Stride Assignment
+
+All variables with a storage class of code:PushConstant or code:Uniform
+must: be explicitly laid out using the code:Offset, code:ArrayStride, and
+code:MatrixStride decorations.
+There are two different layouts requirements depending on the specific
+resources.
+
+[[interfaces-resources-layout-std140]]
+*Standard Uniform Buffer Layout*
+
+The _base alignment_ of the type of an code:OpTypeStruct member of is
+defined recursively as follows:
+
+  * A scalar of size [eq]#N# has a base alignment of [eq]#N#.
+  * A two-component vector, with components of size [eq]#N#, has a base
+    alignment of [eq]#2 N#.
+  * A three- or four-component vector, with components of size [eq]#N#, has
+    a base alignment of [eq]#4 N#.
+  * An array has a base alignment equal to the base alignment of its element
+    type, rounded up to a multiple of [eq]#16#.
+  * A structure has a base alignment equal to the largest base alignment of
+    any of its members, rounded up to a multiple of [eq]#16#.
+  * A row-major matrix of [eq]#C# columns has a base alignment equal to the
+    base alignment of a vector of [eq]#C# matrix components.
+  * A column-major matrix has a base alignment equal to the base alignment
+    of the matrix column type.
+
+ifdef::VK_VERSION_1_1,VK_KHR_relaxed_block_layout[]
+
+A member is defined to _improperly straddle_ if either of the following are
+true:
+
+  * It is a vector with total size less than or equal to 16 bytes, and has
+    code:Offset decorations placing its first byte at [eq]#F# and its last
+    byte at [eq]#L#, where [eq]#floor(F / 16) != floor(L / 16)#.
+  * It is a vector with total size greater than 16 bytes and has its
+    code:Offset decorations placing its first byte at a non-integer multiple
+    of 16.
+
+endif::VK_VERSION_1_1,VK_KHR_relaxed_block_layout[]
+
+Every member of an code:OpTypeStruct with storage class of code:Uniform and
+a decoration of code:Block (uniform buffers) must: be laid out according to
+the following rules:
+
+ifndef::VK_VERSION_1_1,VK_KHR_relaxed_block_layout[]
+
+  * The code:Offset decoration must: be a multiple of its base alignment.
+
+endif::VK_VERSION_1_1,VK_KHR_relaxed_block_layout[]
+
+ifdef::VK_VERSION_1_1,VK_KHR_relaxed_block_layout[]
+
+  * The code:Offset decoration of a scalar, an array, a structure, or a
+    matrix must: be a multiple of its base alignment.
+  * The code:Offset decoration of a vector must: be an integer multiple of
+    the base alignment of its scalar component type, and must: not
+    improperly straddle, as defined above.
+
+endif::VK_VERSION_1_1,VK_KHR_relaxed_block_layout[]
+
+  * Any code:ArrayStride or code:MatrixStride decoration must: be an integer
+    multiple of the base alignment of the array or matrix from above.
+  * The code:Offset decoration of a member must: not place it between the
+    end of a structure or an array and the next multiple of the base
+    alignment of that structure or array.
+  * The numeric order of code:Offset decorations need not follow member
+    declaration order.
+
+[NOTE]
+.Note
+====
+The *std140 layout* in GLSL satisfies these rules.
+====
+
+[[interfaces-resources-layout-std430]]
+*Standard Storage Buffer Layout*
+
+Member variables of an code:OpTypeStruct with a storage class of
+code:PushConstant (push constants), or a storage class of code:Uniform with
+a decoration of code:BufferBlock (storage buffers)
+ifdef::VK_VERSION_1_1,VK_KHR_storage_buffer_storage_class[]
+, or a storage class of code:StorageBuffer with a decoration of code:Block
+endif::VK_VERSION_1_1,VK_KHR_storage_buffer_storage_class[]
+must: be laid out as <<interfaces-resources-layout-std140,above>>, except
+for array and structure base alignment which do not need to be rounded up to
+a multiple of [eq]#16#.
+
+[NOTE]
+.Note
+====
+The *std430 layout* in GLSL satisfies these rules.
+====
+
+
+[[interfaces-builtin-variables]]
+== Built-In Variables
+
+Built-in variables are accessed in shaders by declaring a variable decorated
+with a code:BuiltIn decoration.
+The meaning of each code:BuiltIn decoration is as follows.
+In the remainder of this section, the name of a built-in is used
+interchangeably with a term equivalent to a variable decorated with that
+particular built-in.
+Built-ins that represent integer values can: be declared as either signed or
+unsigned 32-bit integers.
+
+ifdef::VK_AMD_shader_explicit_vertex_parameter[]
+code:BaryCoordNoPerspAMD::
+
+The code:BaryCoordNoPerspAMD decoration can: be used to decorate a fragment
+shader input variable.
+This variable will contain the (I,J) pair of the barycentric coordinates
+corresponding to the fragment evaluated using linear interpolation at the
+pixel's center.
+The K coordinate of the barycentric coordinates can: be derived given the
+identity I + J + K = 1.0.
+
+code:BaryCoordNoPerspCentroidAMD::
+
+The code:BaryCoordNoPerspCentroidAMD decoration can: be used to decorate a
+fragment shader input variable.
+This variable will contain the (I,J) pair of the barycentric coordinates
+corresponding to the fragment evaluated using linear interpolation at the
+centroid.
+The K coordinate of the barycentric coordinates can: be derived given the
+identity I + J + K = 1.0.
+
+code:BaryCoordNoPerspSampleAMD::
+
+The code:BaryCoordNoPerspCentroidAMD decoration can: be used to decorate a
+fragment shader input variable.
+This variable will contain the (I,J) pair of the barycentric coordinates
+corresponding to the fragment evaluated using linear interpolation at each
+covered sample.
+The K coordinate of the barycentric coordinates can: be derived given the
+identity I + J + K = 1.0.
+
+code:BaryCoordPullModelAMD::
+
+The code:BaryCoordPullModelAMD decoration can: be used to decorate a
+fragment shader input variable.
+This variable will contain (1/W, 1/I, 1/J) evaluated at the pixel center and
+can: be used to calculate gradients and then interpolate I, J, and W at any
+desired sample location.
+
+code:BaryCoordSmoothAMD::
+
+The code:BaryCoordSmoothAMD decoration can: be used to decorate a fragment
+shader input variable.
+This variable will contain the (I,J) pair of the barycentric coordinates
+corresponding to the fragment evaluated using perspective interpolation at
+the pixel's center.
+The K coordinate of the barycentric coordinates can: be derived given the
+identity I + J + K = 1.0.
+
+code:BaryCoordSmoothCentroidAMD::
+
+The code:BaryCoordSmoothCentroidAMD decoration can: be used to decorate a
+fragment shader input variable.
+This variable will contain the (I,J) pair of the barycentric coordinates
+corresponding to the fragment evaluated using perspective interpolation at
+the centroid.
+The K coordinate of the barycentric coordinates can: be derived given the
+identity I + J + K = 1.0.
+
+code:BaryCoordSmoothSampleAMD::
+
+The code:BaryCoordSmoothCentroidAMD decoration can: be used to decorate a
+fragment shader input variable.
+This variable will contain the (I,J) pair of the barycentric coordinates
+corresponding to the fragment evaluated using perspective interpolation at
+each covered sample.
+The K coordinate of the barycentric coordinates can: be derived given the
+identity I + J + K = 1.0.
+
+endif::VK_AMD_shader_explicit_vertex_parameter[]
+
+ifdef::VK_VERSION_1_1,VK_KHR_shader_draw_parameters[]
+
+[[interfaces-builtin-variables-baseinstance]]
+code:BaseInstance::
+
+Decorating a variable with the code:BaseInstance built-in will make that
+variable contain the integer value corresponding to the first instance that
+was passed to the command that invoked the current vertex shader invocation.
+code:BaseInstance is the pname:firstInstance parameter to a _direct drawing
+command_ or the pname:firstInstance member of a structure consumed by an
+_indirect drawing command_.
++
+The code:BaseInstance decoration must: be used only within vertex shaders.
++
+The variable decorated with BaseInstance must: be declared using the input
+storage class.
++
+The variable decorated with BaseInstance must: be declared as a scalar
+32-bit integer.
+
+[[interfaces-builtin-variables-basevertex]]
+code:BaseVertex::
+
+Decorating a variable with the code:BaseVertex built-in will make that
+variable contain the integer value corresponding to the first vertex or
+vertex offset that was passed to the command that invoked the current vertex
+shader invocation.
+For _non-indexed drawing commands_, this variable is the pname:firstVertex
+parameter to a _direct drawing command_ or the pname:firstVertex member of
+the structure consumed by an _indirect drawing command_.
+For _indexed drawing commands_, this variable is the pname:vertexOffset
+parameter to a _direct drawing command_ or the pname:vertexOffset member of
+the structure consumed by an _indirect drawing command_.
++
+The code:BaseVertex decoration must: be used only within vertex shaders.
++
+The variable decorated with code:BaseVertex must: be declared using the
+input storage class.
++
+The variable decorated with codeBaseVertex must: be declared as a scalar
+32-bit integer.
+
+endif::VK_VERSION_1_1,VK_KHR_shader_draw_parameters[]
+
+code:ClipDistance::
+
+Decorating a variable with the code:ClipDistance built-in decoration will
+make that variable contain the mechanism for controlling user clipping.
+code:ClipDistance is an array such that the i^th^ element of the array
+specifies the clip distance for plane i.
+A clip distance of 0 means the vertex is on the plane, a positive distance
+means the vertex is inside the clip half-space, and a negative distance
+means the point is outside the clip half-space.
++
+The code:ClipDistance decoration must: be used only within vertex, fragment,
+tessellation control, tessellation evaluation, and geometry shaders.
++
+In vertex shaders, any variable decorated with code:ClipDistance must: be
+declared using the code:Output storage class.
++
+In fragment shaders, any variable decorated with code:ClipDistance must: be
+declared using the code:Input storage class.
++
+In tessellation control, tessellation evaluation, or geometry shaders, any
+variable decorated with code:ClipDistance must: not be in a storage class
+other than code:Input or code:Output.
++
+Any variable decorated with code:ClipDistance must: be declared as an array
+of 32-bit floating-point values.
+
+[NOTE]
+.Note
+====
+The array variable decorated with code:ClipDistance is explicitly sized by
+the shader.
+====
+
+[NOTE]
+.Note
+====
+In the last vertex processing stage, these values will be linearly
+interpolated across the primitive and the portion of the primitive with
+interpolated distances less than 0 will be considered outside the clip
+volume.
+If code:ClipDistance is then used by a fragment shader, code:ClipDistance
+contains these linearly interpolated values.
+====
+
+code:CullDistance::
+
+Decorating a variable with the code:CullDistance built-in decoration will
+make that variable contain the mechanism for controlling user culling.
+If any member of this array is assigned a negative value for all vertices
+belonging to a primitive, then the primitive is discarded before
+rasterization.
++
+The code:CullDistance decoration must: be used only within vertex, fragment,
+tessellation control, tessellation evaluation, and geometry shaders.
++
+In vertex shaders, any variable decorated with code:CullDistance must: be
+declared using the code:Output storage class.
++
+In fragment shaders, any variable decorated with code:CullDistance must: be
+declared using the code:Input storage class.
++
+In tessellation control, tessellation evaluation, or geometry shaders, any
+variable decorated with code:CullDistance must: not be declared in a storage
+class other than input or output.
++
+Any variable decorated with code:CullDistance must: be declared as an array
+of 32-bit floating-point values.
+
+[NOTE]
+.Note
+====
+In fragment shaders, the values of the code:CullDistance array are linearly
+interpolated across each primitive.
+====
+
+[NOTE]
+.Note
+====
+If code:CullDistance decorates an input variable, that variable will contain
+the corresponding value from the code:CullDistance decorated output variable
+from the previous shader stage.
+====
+
+ifdef::VK_VERSION_1_1,VK_KHR_device_group[]
+
+[[interfaces-builtin-variables-deviceindex]]
+code:DeviceIndex::
+
+The code:DeviceIndex decoration can: be applied to a shader input which will
+be filled with the device index of the physical device that is executing the
+current shader invocation.
+This value will be in the range latexmath:[[0,max(1,physicalDeviceCount))],
+where physicalDeviceCount is the pname:physicalDeviceCount member of
+slink:VkDeviceGroupDeviceCreateInfo.
++
+The code:DeviceIndex decoration can: be used in any shader.
++
+The variable decorated with code:DeviceIndex must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:DeviceIndex must: be declared as a scalar
+32-bit integer.
+
+endif::VK_VERSION_1_1,VK_KHR_device_group[]
+
+ifdef::VK_VERSION_1_1,VK_KHR_shader_draw_parameters[]
+
+[[interfaces-builtin-variables-drawindex]]
+code:DrawIndex::
+
+Decorating a variable with the code:DrawIndex built-in will make that
+variable contain the integer value corresponding to the zero-based index of
+the drawing command that invoked the current vertex shader invocation.
+For _indirect drawing commands_, code:DrawIndex begins at zero and
+increments by one for each draw command executed.
+The number of draw commands is given by the pname:drawCount parameter.
+For _direct drawing commands_, code:DrawIndex is always zero.
+code:DrawIndex is dynamically uniform.
++
+The code:DrawIndex decoration must: be used only within vertex shaders.
++
+The variable decorated with code:DrawIndex must: be declared using the input
+storage class.
++
+The variable decorated with code:DrawIndex must: be declared as a scalar
+32-bit integer.
+
+endif::VK_VERSION_1_1,VK_KHR_shader_draw_parameters[]
+
+code:FragCoord::
+
+Decorating a variable with the code:FragCoord built-in decoration will make
+that variable contain the framebuffer coordinate
+latexmath:[(x,y,z,\frac{1}{w})] of the fragment being processed.
+The [eq]#(x,y)# coordinate [eq]#(0,0)# is the upper left corner of the upper
+left pixel in the framebuffer.
++
+When <<primsrast-sampleshading,Sample Shading>> is enabled, the [eq]#x# and
+[eq]#y# components of code:FragCoord reflect the location of one of the
+samples corresponding to the shader invocation.
++
+When sample shading is not enabled, the [eq]#x# and [eq]#y# components of
+code:FragCoord reflect the location of the center of the pixel,
+[eq]#(0.5,0.5)#.
++
+The [eq]#z# component of code:FragCoord is the interpolated depth value of
+the primitive.
++
+The [eq]#w# component is the interpolated latexmath:[\frac{1}{w}].
++
+The code:FragCoord decoration must: be used only within fragment shaders.
++
+The variable decorated with code:FragCoord must: be declared using the
+code:Input storage class.
++
+The code:Centroid interpolation decoration is ignored, but allowed, on
+code:FragCoord.
++
+The variable decorated with code:FragCoord must: be declared as a
+four-component vector of 32-bit floating-point values.
+
+code:FragDepth::
+
+To have a shader supply a fragment-depth value, the shader must: declare the
+code:DepthReplacing execution mode.
+Such a shader's fragment-depth value will come from the variable decorated
+with the code:FragDepth built-in decoration.
++
+This value will be used for any subsequent depth testing performed by the
+implementation or writes to the depth attachment.
++
+The code:FragDepth decoration must: be used only within fragment shaders.
++
+The variable decorated with code:FragDepth must: be declared using the
+code:Output storage class.
++
+The variable decorated with code:FragDepth must: be declared as a scalar
+32-bit floating-point value.
+
+ifdef::VK_EXT_shader_stencil_export[]
+
+code:FragStencilRefEXT::
+
+Decorating a variable with the code:FragStencilRefEXT built-in decoration
+will make that variable contain the stencil reference value for all samples
+covered by the fragment.
+This value will be used as the stencil reference value used in stencil
+testing.
++
+To write to code:FragStencilRefEXT, a shader must: declare the
+code:StencilRefReplacingEXT execution mode.
+If a shader declares the code:StencilRefReplacingEXT execution mode and
+there is an execution path through the shader that does not set
+code:FragStencilRefEXT, then the fragment's stencil reference value is
+undefined for executions of the shader that take that path.
++
+The code:FragStencilRefEXT decoration must: be used only within fragment
+shaders.
++
+The variable decorated with code:FragStencilRefEXT must: be declared using
+the code:Output storage class.
++
+The variable decorated with code:FragStencilRefEXT must: be declared as a
+scalar integer value.
+Only the least significant *s* bits of the integer value of the variable
+decorated with code:FragStencilRefEXT are considered for stencil testing,
+where *s* is the number of bits in the stencil framebuffer attachment, and
+higher order bits are discarded.
+
+endif::VK_EXT_shader_stencil_export[]
+
+code:FrontFacing::
+
+Decorating a variable with the code:FrontFacing built-in decoration will
+make that variable contain whether the fragment is front or back facing.
+This variable is non-zero if the current fragment is considered to be part
+of a <<primsrast-polygons-basic,front-facing>> polygon primitive or of a
+non-polygon primitive and is zero if the fragment is considered to be part
+of a back-facing polygon primitive.
++
+The code:FrontFacing decoration must: be used only within fragment shaders.
++
+The variable decorated with code:FrontFacing must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:FrontFacing must: be declared as a boolean.
+
+ifdef::VK_EXT_conservative_rasterization[]
+
+code:FullyCoveredEXT::
+
+Decorating a variable with the code:FullyCoveredEXT built-in decoration will
+make that variable indicate whether the fragment pixel square is fully
+covered by the generating primitive.
+This variable is non-zero if conservative rasterization is enabled and the
+current fragment pixel square is fully covered by the generating primitive,
+and is zero if the fragment is not covered or partially covered, or
+conservative rasterization is disabled.
++
+The code:FullyCoveredEXT decoration must: be used only within fragment
+shaders and the code:FragmentFullyCoveredEXT capability must: be declared.
++
+The variable decorated with code:FullyCoveredEXT must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:FullyCoveredEXT must: be declared as a
+boolean.
++
+ifdef::VK_EXT_post_depth_coverage[]
+If the implementation supports
+sname:VkPhysicalDeviceConservativeRasterizationPropertiesEXT::pname:conservativeRasterizationPostDepthCoverage
+and the
+<<shaders-fragment-earlytest-postdepthcoverage,code:PostDepthCoverage>>
+execution mode is specified the code:SampleMask built-in input variable will
+reflect the coverage after the early per-fragment depth and stencil tests
+are applied.
+If
+sname:VkPhysicalDeviceConservativeRasterizationPropertiesEXT::pname:conservativeRasterizationPostDepthCoverage
+is not supported the
+<<shaders-fragment-earlytest-postdepthcoverage,code:PostDepthCoverage>>
+execution mode must: not be specified.
+endif::VK_EXT_post_depth_coverage[]
+
+endif::VK_EXT_conservative_rasterization[]
+
+code:GlobalInvocationId::
+
+Decorating a variable with the code:GlobalInvocationId built-in decoration
+will make that variable contain the location of the current invocation
+within the global workgroup.
+Each component is equal to the index of the local workgroup multiplied by
+the size of the local workgroup plus code:LocalInvocationId.
++
+The code:GlobalInvocationId decoration must: be used only within compute
+shaders.
++
+The variable decorated with code:GlobalInvocationId must: be declared using
+the code:Input storage class.
++
+The variable decorated with code:GlobalInvocationId must: be declared as a
+three-component vector of 32-bit integers.
+
+code:HelperInvocation::
+
+Decorating a variable with the code:HelperInvocation built-in decoration
+will make that variable contain whether the current invocation is a helper
+invocation.
+This variable is non-zero if the current fragment being shaded is a helper
+invocation and zero otherwise.
+A helper invocation is an invocation of the shader that is produced to
+satisfy internal requirements such as the generation of derivatives.
++
+The code:HelperInvocation decoration must: be used only within fragment
+shaders.
++
+The variable decorated with code:HelperInvocation must: be declared using
+the code:Input storage class.
++
+The variable decorated with code:HelperInvocation must: be declared as a
+boolean.
+
+[NOTE]
+.Note
+====
+It is very likely that a helper invocation will have a value of
+code:SampleMask fragment shader input value that is zero.
+====
+
+code:InvocationId::
+
+Decorating a variable with the code:InvocationId built-in decoration will
+make that variable contain the index of the current shader invocation in a
+geometry shader, or the index of the output patch vertex in a tessellation
+control shader.
++
+In a geometry shader, the index of the current shader invocation ranges from
+zero to the number of <<geometry-invocations,instances>> declared in the
+shader minus one.
+If the instance count of the geometry shader is one or is not specified,
+then code:InvocationId will be zero.
++
+The code:InvocationId decoration must: be used only within tessellation
+control and geometry shaders.
++
+The variable decorated with code:InvocationId must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:InvocationId must: be declared as a scalar
+32-bit integer.
+
+code:InstanceIndex::
+
+Decorating a variable with the code:InstanceIndex built-in decoration will
+make that variable contain the index of the instance that is being processed
+by the current vertex shader invocation.
+code:InstanceIndex begins at the pname:firstInstance parameter to
+flink:vkCmdDraw or flink:vkCmdDrawIndexed or at the pname:firstInstance
+member of a structure consumed by flink:vkCmdDrawIndirect or
+flink:vkCmdDrawIndexedIndirect.
++
+The code:InstanceIndex decoration must: be used only within vertex shaders.
++
+The variable decorated with code:InstanceIndex must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:InstanceIndex must: be declared as a scalar
+32-bit integer.
+
+[[interfaces-builtin-variables-layer]]
+code:Layer::
+
+Decorating a variable with the code:Layer built-in decoration will make that
+variable contain the select layer of a multi-layer framebuffer attachment.
++
+In a
+ifdef::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
+vertex, tessellation evaluation, or
+endif::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
+geometry shader, any variable decorated with code:Layer can be written with
+the framebuffer layer index to which the primitive produced by that shader
+will be directed.
+ifdef::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
++
+The last active _vertex processing stage_ (in pipeline order) controls the
+code:Layer that is used.
+Outputs in previous shader stages are not used, even if the last stage fails
+to write the code:Layer.
+endif::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
++
+If the last active vertex processing stage shader entry point's interface
+does not include a variable decorated with code:Layer, then the first layer
+is used.
+If a vertex processing stage shader entry point's interface includes a
+variable decorated with code:Layer, it must: write the same value to
+code:Layer for all output vertices of a given primitive.
+If the code:Layer value is less than 0 or greater than or equal to the
+number of layers in the framebuffer, then primitives may: still be
+rasterized, fragment shaders may: be executed, and the framebuffer values
+for all layers are undefined.
++
+The code:Layer decoration must: be used only within
+ifdef::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
+vertex, tessellation evaluation,
+endif::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
+geometry, and fragment shaders.
++
+In a
+ifdef::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
+vertex, tessellation evaluation, or
+endif::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
+geometry shader, any variable decorated with code:Layer must: be declared
+using the code:Output storage class.
+ifdef::VK_NV_viewport_array2[]
+If such a variable is also decorated with code:ViewportRelativeNV, then the
+code:ViewportIndex is added to the layer that is used for rendering and that
+is made available in the fragment shader.
+If the shader writes to a variable decorated code:ViewportMaskNV, then the
+layer selected has a different value for each viewport a primitive is
+rendered to.
+endif::VK_NV_viewport_array2[]
++
+In a fragment shader, a variable decorated with code:Layer contains the
+layer index of the primitive that the fragment invocation belongs to.
++
+In a fragment shader, any variable decorated with code:Layer must: be
+declared using the code:Input storage class.
++
+Any variable decorated with code:Layer must: be declared as a scalar 32-bit
+integer.
+
+code:LocalInvocationId::
+
+Decorating a variable with the code:LocalInvocationId built-in decoration
+will make that variable contain the location of the current compute shader
+invocation within the local workgroup.
+Each component ranges from zero through to the size of the workgroup in that
+dimension minus one.
++
+The code:LocalInvocationId decoration must: be used only within compute
+shaders.
++
+The variable decorated with code:LocalInvocationId must: be declared using
+the code:Input storage class.
++
+The variable decorated with code:LocalInvocationId must: be declared as a
+three-component vector of 32-bit integers.
+
+[NOTE]
+.Note
+====
+If the size of the workgroup in a particular dimension is one, then the
+code:LocalInvocationId in that dimension will be zero.
+If the workgroup is effectively two-dimensional, then
+code:LocalInvocationId.z will be zero.
+If the workgroup is effectively one-dimensional, then both
+code:LocalInvocationId.y and code:LocalInvocationId.z will be zero.
+====
+
+code:LocalInvocationIndex::
+
+Decorating a variable with the code:LocalInvocationIndex built-in decoration
+will make that variable contain a one-dimensional representation of
+code:LocalInvocationId.
+This is computed as:
+
+[source,c++]
+----
+LocalInvocationIndex =
+    LocalInvocationId.z * WorkgroupSize.x * WorkgroupSize.y +
+    LocalInvocationId.y * WorkgroupSize.x +
+    LocalInvocationId.x;
+----
+
+The code:LocalInvocationIndex decoration must: be used only within compute
+shaders.
++
+The variable decorated with code:LocalInvocationIndex must: be declared
+using the code:Input storage class.
++
+The variable decorated with code:LocalInvocationIndex must: be declared as a
+scalar 32-bit integer.
+
+ifdef::VK_VERSION_1_1[]
+
+code:NumSubgroups::
+
+Decorating a variable with the code:NumSubgroups built-in decoration will
+make that variable contain the number of subgroups in the local workgroup.
++
+The code:NumSubgroups decoration must: be used only within compute shaders.
++
+The variable decorated with code:NumSubgroups must: be declared using the
+code:Input storage class.
++
+The object decorated with code:NumSubgroups must: be declared as a scalar
+32-bit integer.
+
+endif::VK_VERSION_1_1[]
+
+code:NumWorkgroups::
+
+Decorating a variable with the code:NumWorkgroups built-in decoration will
+make that variable contain the number of local workgroups that are part of
+the dispatch that the invocation belongs to.
+Each component is equal to the values of the workgroup count parameters
+passed into the dispatch commands.
++
+The code:NumWorkgroups decoration must: be used only within compute shaders.
++
+The variable decorated with code:NumWorkgroups must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:NumWorkgroups must: be declared as a
+three-component vector of 32-bit integers.
+
+code:PatchVertices::
+
+Decorating a variable with the code:PatchVertices built-in decoration will
+make that variable contain the number of vertices in the input patch being
+processed by the shader.
+A single tessellation control or tessellation evaluation shader can: read
+patches of differing sizes, so the value of the code:PatchVertices variable
+may: differ between patches.
++
+The code:PatchVertices decoration must: be used only within tessellation
+control and tessellation evaluation shaders.
++
+The variable decorated with code:PatchVertices must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:PatchVertices must: be declared as a scalar
+32-bit integer.
+
+code:PointCoord::
+
+Decorating a variable with the code:PointCoord built-in decoration will make
+that variable contain the coordinate of the current fragment within the
+point being rasterized, normalized to the size of the point with origin in
+the upper left corner of the point, as described in
+<<primsrast-points-basic,Basic Point Rasterization>>.
+If the primitive the fragment shader invocation belongs to is not a point,
+then the variable decorated with code:PointCoord contains an undefined
+value.
++
+The code:PointCoord decoration must: be used only within fragment shaders.
++
+The variable decorated with code:PointCoord must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:PointCoord must: be declared as
+two-component vector of 32-bit floating-point values.
+
+[NOTE]
+.Note
+====
+Depending on how the point is rasterized, code:PointCoord may: never reach
+[eq]#(0,0)# or [eq]#(1,1)#.
+====
+
+code:PointSize::
+
+Decorating a variable with the code:PointSize built-in decoration will make
+that variable contain the size of point primitives.
+The value written to the variable decorated with code:PointSize by the last
+vertex processing stage in the pipeline is used as the framebuffer-space
+size of points produced by rasterization.
++
+The code:PointSize decoration must: be used only within vertex, tessellation
+control, tessellation evaluation, and geometry shaders.
++
+In a vertex shader, any variable decorated with code:PointSize must: be
+declared using the code:Output storage class.
++
+In a tessellation control, tessellation evaluation, or geometry shader, any
+variable decorated with code:PointSize must: be declared using either the
+code:Input or code:Output storage class.
++
+Any variable decorated with code:PointSize must: be declared as a scalar
+32-bit floating-point value.
+
+[NOTE]
+.Note
+====
+When code:PointSize decorates a variable in the code:Input storage class, it
+contains the data written to the output variable decorated with
+code:PointSize from the previous shader stage.
+====
+
+code:Position::
+
+Decorating a variable with the code:Position built-in decoration will make
+that variable contain the position of the current vertex.
+In the last vertex processing stage, the value of the variable decorated
+with code:Position is used in subsequent primitive assembly, clipping, and
+rasterization operations.
++
+The code:Position decoration must: be used only within vertex, tessellation
+control, tessellation evaluation, and geometry shaders.
++
+In a vertex shader, any variable decorated with code:Position must: be
+declared using the code:Output storage class.
++
+In a tessellation control, tessellation evaluation, or geometry shader, any
+variable decorated with code:Position must: not be declared in a storage
+class other than code:Input or code:Output.
++
+Any variable decorated with code:Position must: be declared as a
+four-component vector of 32-bit floating-point values.
+
+[NOTE]
+.Note
+====
+When code:Position decorates a variable in the code:Input storage class, it
+contains the data written to the output variable decorated with
+code:Position from the previous shader stage.
+====
+
+ifdef::VK_NVX_multiview_per_view_attributes[]
+[[interfaces-builtin-variables-positionperview]]
+code:PositionPerViewNV::
+
+Decorating a variable with the code:PositionPerViewNV built-in decoration
+will make that variable contain the position of the current vertex, for each
+view.
++
+The code:PositionPerViewNV decoration must: be used only within vertex,
+tessellation control, tessellation evaluation, and geometry shaders.
++
+In a vertex shader, any variable decorated with code:PositionPerViewNV must:
+be declared using the code:Output storage class.
++
+In a tessellation control, tessellation evaluation, or geometry shader, any
+variable decorated with code:PositionPerViewNV must: not be declared in a
+storage class other than input or output.
++
+Any variable decorated with code:PositionPerViewNV must: be declared as an
+array of four-component vector of 32-bit floating-point values with at least
+as many elements as the maximum view in the subpass's view mask plus one.
+The array must: be indexed by a constant or specialization constant.
++
+Elements of the array correspond to views in a multiview subpass, and those
+elements corresponding to views in the view mask of the subpass the shader
+is compiled against will be used as the position value for those views.
+For the final vertex processing stage in the pipeline, values written to an
+output variable decorated with code:PositionPerViewNV are used in subsequent
+primitive assembly, clipping, and rasterization operations, as with
+code:Position.
+code:PositionPerViewNV output in an earlier vertex processing stage is
+available as an input in the subsequent vertex processing stage.
++
+If a shader is compiled against a subpass that has the
+ename:VK_SUBPASS_DESCRIPTION_PER_VIEW_POSITION_X_ONLY_BIT_NVX bit set, then
+the position values for each view must: not differ in any component other
+than the X component.
+If the values do differ, one will be chosen in an implementation-dependent
+manner.
+endif::VK_NVX_multiview_per_view_attributes[]
+
+code:PrimitiveId::
+
+Decorating a variable with the code:PrimitiveId built-in decoration will
+make that variable contain the index of the current primitive.
++
+The index of the first primitive generated by a drawing command is zero, and
+the index is incremented after every individual point, line, or triangle
+primitive is processed.
++
+For triangles drawn as points or line segments (see <<primsrast-polygonmode
+, Polygon Mode>>), the primitive index is incremented only once, even if
+multiple points or lines are eventually drawn.
++
+Variables decorated with code:PrimitiveId are reset to zero between each
+instance drawn.
++
+Restarting a primitive topology using primitive restart has no effect on the
+value of variables decorated with code:PrimitiveId.
++
+In tessellation control and tessellation evaluation shaders, it will contain
+the index of the patch within the current set of rendering primitives that
+correspond to the shader invocation.
++
+In a geometry shader, it will contain the number of primitives presented as
+input to the shader since the current set of rendering primitives was
+started.
++
+In a fragment shader, it will contain the primitive index written by the
+geometry shader if a geometry shader is present, or with the value that
+would have been presented as input to the geometry shader had it been
+present.
++
+If a geometry shader is present and the fragment shader reads from an input
+variable decorated with code:PrimitiveId, then the geometry shader must:
+write to an output variable decorated with code:PrimitiveId in all execution
+paths.
++
+The code:PrimitiveId decoration must: be used only within fragment,
+tessellation control, tessellation evaluation, and geometry shaders.
++
+In a tessellation control or tessellation evaluation shader, any variable
+decorated with code:PrimitiveId must: be declared using the code:Input
+storage class.
++
+In a geometry shader, any variable decorated with code:PrimitiveId must: be
+declared using either the code:Input or code:Output storage class.
++
+In a fragment shader, any variable decorated with code:PrimitiveId must: be
+declared using the code:Input storage class, and either the code:Geometry or
+code:Tessellation capability must: also be declared.
++
+Any variable decorated with code:PrimitiveId must: be declared as a scalar
+32-bit integer.
+
+[NOTE]
+.Note
+====
+When the code:PrimitiveId decoration is applied to an output variable in the
+geometry shader, the resulting value is seen through the code:PrimitiveId
+decorated input variable in the fragment shader.
+====
+
+code:SampleId::
+
+Decorating a variable with the code:SampleId built-in decoration will make
+that variable contain the zero-based index of the sample the invocation
+corresponds to.
+code:SampleId ranges from zero to the number of samples in the framebuffer
+minus one.
+If a fragment shader entry point's interface includes an input variable
+decorated with code:SampleId, <<primsrast-sampleshading,Sample Shading>> is
+considered enabled with a pname:minSampleShading value of 1.0.
++
+The code:SampleId decoration must: be used only within fragment shaders.
++
+The variable decorated with code:SampleId must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:SampleId must: be declared as a scalar
+32-bit integer.
+
+[[interfaces-builtin-variables-samplemask]]
+code:SampleMask::
+
+Decorating a variable with the code:SampleMask built-in decoration will make
+any variable contain the sample coverage mask for the current fragment
+shader invocation.
++
+A variable in the code:Input storage class decorated with code:SampleMask
+will contain a bitmask of the set of samples covered by the primitive
+generating the fragment during rasterization.
+It has a sample bit set if and only if the sample is considered covered for
+this fragment shader invocation.
+code:SampleMask[] is an array of integers.
+Bits are mapped to samples in a manner where bit B of mask M
+(`SampleMask[M]`) corresponds to sample [eq]#32 {times} M {plus} B#.
++
+When state specifies multiple fragment shader invocations for a given
+fragment, the sample mask for any single fragment shader invocation
+specifies the subset of the covered samples for the fragment that correspond
+to the invocation.
+In this case, the bit corresponding to each covered sample will be set in
+exactly one fragment shader invocation.
+
+ifdef::VK_EXT_post_depth_coverage[]
++
+If the
+<<shaders-fragment-earlytest-postdepthcoverage,code:PostDepthCoverage>>
+execution mode is specified, the sample is considered covered if and only if
+the sample is covered by the primitive and the sample passes the
+<<fragops-early,early per-fragment tests>>.
+Otherwise the sample is considered covered if the sample is covered by the
+primitive, regardless of the result of the fragment tests.
+endif::VK_EXT_post_depth_coverage[]
++
+A variable in the code:Output storage class decorated with code:SampleMask
+is an array of integers forming a bit array in a manner similar an input
+variable decorated with code:SampleMask, but where each bit represents
+coverage as computed by the shader.
+Modifying the sample mask by writing zero to a bit of code:SampleMask causes
+the sample to be considered uncovered.
+ifndef::VK_NV_sample_mask_override_coverage[]
+However, setting sample mask bits to one will never enable samples not
+covered by the original primitive.
+endif::VK_NV_sample_mask_override_coverage[]
+ifdef::VK_NV_sample_mask_override_coverage[]
+If this variable is also decorated with code:OverrideCoverageNV, the
+fragment coverage is replaced with the sample mask bits set in the shader
+otherwise the fragment coverage is code:ANDed with the bits of the sample
+mask.
+endif::VK_NV_sample_mask_override_coverage[]
+If the fragment shader is being evaluated at any frequency other than
+per-fragment, bits of the sample mask not corresponding to the current
+fragment shader invocation are ignored.
+This array must: be sized in the fragment shader either implicitly or
+explicitly, to be no larger than the implementation-dependent maximum
+sample-mask (as an array of 32-bit elements), determined by the maximum
+number of samples.
+If a fragment shader entry point's interface includes an output variable
+decorated with code:SampleMask, the sample mask will be undefined for any
+array elements of any fragment shader invocations that fail to assign a
+value.
+If a fragment shader entry point's interface does not include an output
+variable decorated with code:SampleMask, the sample mask has no effect on
+the processing of a fragment.
++
+The code:SampleMask decoration must: be used only within fragment shaders.
++
+Any variable decorated with code:SampleMask must: be declared using either
+the code:Input or code:Output storage class.
++
+Any variable decorated with code:SampleMask must: be declared as an array of
+32-bit integers.
+
+code:SamplePosition::
+
+Decorating a variable with the code:SamplePosition built-in decoration will
+make that variable contain the sub-pixel position of the sample being
+shaded.
+The top left of the pixel is considered to be at coordinate [eq]#(0,0)# and
+the bottom right of the pixel is considered to be at coordinate [eq]#(1,1)#.
+If a fragment shader entry point's interface includes an input variable
+decorated with code:SamplePosition, <<primsrast-sampleshading,Sample
+Shading>> is considered enabled with a pname:minSampleShading value of 1.0.
++
+The code:SamplePosition decoration must: be used only within fragment
+shaders.
++
+The variable decorated with code:SamplePosition must: be declared using the
+code:Input storage class.
+ifdef::VK_EXT_sample_locations[]
+If the current pipeline uses <<primrast-samplelocations, custom sample
+locations>> the value of any variable decorated with the code:SamplePosition
+built-in decoration is undefined.
+endif::VK_EXT_sample_locations[]
++
+The variable decorated with code:SamplePosition must: be declared as a
+two-component vector of 32-bit floating-point values.
+
+ifdef::VK_VERSION_1_1[]
+
+code:SubgroupId::
++
+Decorating a variable with the code:SubgroupId built-in decoration will make
+that variable contain the index of the subgroup within the local workgroup.
+This variable is in range [0, code:NumSubgroups-1].
++
+The code:SubgroupId decoration must: be used only within compute shaders.
++
+The variable decorated with code:SubgroupId must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:SubgroupId must: be declared as a scalar
+32-bit integer.
+
+endif::VK_VERSION_1_1[]
+
+ifdef::VK_VERSION_1_1,VK_EXT_shader_subgroup_ballot[]
+
+[[interfaces-builtin-variables-sgeq]]
+code:SubgroupEqMask::
++
+Decorating a variable with the code:SubgroupEqMask builtin decoration will
+make that variable contain the _subgroup mask_ of the current subgroup
+invocation.
+The bit corresponding to the code:SubgroupLocalInvocationId is set in the
+variable decorated with code:SubgroupEqMask.
+All other bits are set to zero.
++
+The variable decorated with code:SubgroupEqMask must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:SubgroupEqMask must: be declared as a
+four-component vector of 32-bit integer values.
++
+code:SubgroupEqMaskKHR is an alias of code:SubgroupEqMask.
+
+[[interfaces-builtin-variables-sgge]]
+code:SubgroupGeMask::
++
+Decorating a variable with the code:SubgroupGeMask builtin decoration will
+make that variable contain the _subgroup mask_ of the current subgroup
+invocation.
+The bits corresponding to the invocations greater than or equal to
+code:SubgroupLocalInvocationId through code:SubgroupSize-1 are set in the
+variable decorated with code:SubgroupGeMask.
+All other bits are set to zero.
++
+The variable decorated with code:SubgroupGeMask must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:SubgroupGeMask must: be declared as a
+four-component vector of 32-bit integer values.
++
+code:SubgroupGeMaskKHR is an alias of code:SubgroupGeMask.
+
+[[interfaces-builtin-variables-sggt]]
+code:SubgroupGtMask::
++
+Decorating a variable with the code:SubgroupGtMask builtin decoration will
+make that variable contain the _subgroup mask_ of the current subgroup
+invocation.
+The bits corresponding to the invocations greater than
+code:SubgroupLocalInvocationId through code:SubgroupSize-1 are set in the
+variable decorated with code:SubgroupGtMask.
+All other bits are set to zero.
++
+The variable decorated with code:SubgroupGtMask must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:SubgroupGtMask must: be declared as a
+four-component vector of 32-bit integer values.
++
+code:SubgroupGtMaskKHR is an alias of code:SubgroupGtMask.
+
+[[interfaces-builtin-variables-sgle]]
+code:SubgroupLeMask::
++
+Decorating a variable with the code:SubgroupLeMask builtin decoration will
+make that variable contain the _subgroup mask_ of the current subgroup
+invocation.
+The bits corresponding to the invocations less than or equal to
+code:SubgroupLocalInvocationId are set in the variable decorated with
+code:SubgroupLeMask.
+All other bits are set to zero.
++
+The variable decorated with code:SubgroupLeMask must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:SubgroupLeMask must: be declared as a
+four-component vector of 32-bit integer values.
++
+code:SubgroupLeMaskKHR is an alias of code:SubgroupLeMask.
+
+[[interfaces-builtin-variables-sglt]]
+code:SubgroupLtMask::
++
+Decorating a variable with the code:SubgroupLtMask builtin decoration will
+make that variable contain the _subgroup mask_ of the current subgroup
+invocation.
+The bits corresponding to the invocations less than
+code:SubgroupLocalInvocationId are set in the variable decorated with
+code:SubgroupLtMask.
+All other bits are set to zero.
++
+The variable decorated with code:SubgroupLtMask must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:SubgroupLtMask must: be declared as a
+four-component vector of 32-bit integer values.
++
+code:SubgroupLtMaskKHR is an alias of code:SubgroupLtMask.
+
+[[interfaces-builtin-variables-sgli]]
+code:SubgroupLocalInvocationId::
++
+Decorating a variable with the code:SubgroupLocalInvocationId builtin
+decoration will make that variable contain the index of the invocation
+within the subgroup.
+This variable is in range [0,code:SubgroupSize-1].
++
+The variable decorated with code:SubgroupLocalInvocationId must: be declared
+using the code:Input storage class.
++
+The variable decorated with code:SubgroupLocalInvocationId must: be declared
+as a scalar 32-bit integer.
+
+[[interfaces-builtin-variables-sgs]]
+code:SubgroupSize::
++
+Decorating a variable with the code:SubgroupSize builtin decoration will
+make that variable contain the implementation-dependent maximum number of
+invocations in a subgroup.
+The maximum number of invocations that an implementation can support per
+subgroup is 128.
++
+The variable decorated with code:SubgroupSize must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:SubgroupSize must: be declared as a scalar
+32-bit integer.
+
+endif::VK_VERSION_1_1,VK_EXT_shader_subgroup_ballot[]
+
+code:TessCoord::
+
+Decorating a variable with the code:TessCoord built-in decoration will make
+that variable contain the three-dimensional [eq]#(u,v,w)# barycentric
+coordinate of the tessellated vertex within the patch.
+[eq]#u#, [eq]#v#, and [eq]#w# are in the range [eq]#[0,1]# and vary linearly
+across the primitive being subdivided.
+For the tessellation modes of code:Quads or code:IsoLines, the third
+component is always zero.
++
+The code:TessCoord decoration must: be used only within tessellation
+evaluation shaders.
++
+The variable decorated with code:TessCoord must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:TessCoord must: be declared as
+three-component vector of 32-bit floating-point values.
+
+code:TessLevelOuter::
+
+Decorating a variable with the code:TessLevelOuter built-in decoration will
+make that variable contain the outer tessellation levels for the current
+patch.
++
+In tessellation control shaders, the variable decorated with
+code:TessLevelOuter can: be written to which controls the tessellation
+factors for the resulting patch.
+These values are used by the tessellator to control primitive tessellation
+and can: be read by tessellation evaluation shaders.
++
+In tessellation evaluation shaders, the variable decorated with
+code:TessLevelOuter can: read the values written by the tessellation control
+shader.
++
+The code:TessLevelOuter decoration must: be used only within tessellation
+control and tessellation evaluation shaders.
++
+In a tessellation control shader, any variable decorated with
+code:TessLevelOuter must: be declared using the code:Output storage class.
++
+In a tessellation evaluation shader, any variable decorated with
+code:TessLevelOuter must: be declared using the code:Input storage class.
++
+Any variable decorated with code:TessLevelOuter must: be declared as an
+array of size four, containing 32-bit floating-point values.
+
+code:TessLevelInner::
+
+Decorating a variable with the code:TessLevelInner built-in decoration will
+make that variable contain the inner tessellation levels for the current
+patch.
++
+In tessellation control shaders, the variable decorated with
+code:TessLevelInner can: be written to, which controls the tessellation
+factors for the resulting patch.
+These values are used by the tessellator to control primitive tessellation
+and can: be read by tessellation evaluation shaders.
++
+In tessellation evaluation shaders, the variable decorated with
+code:TessLevelInner can: read the values written by the tessellation control
+shader.
++
+The code:TessLevelInner decoration must: be used only within tessellation
+control and tessellation evaluation shaders.
++
+In a tessellation control shader, any variable decorated with
+code:TessLevelInner must: be declared using the code:Output storage class.
++
+In a tessellation evaluation shader, any variable decorated with
+code:TessLevelInner must: be declared using the code:Input storage class.
++
+Any variable decorated with code:TessLevelInner must: be declared as an
+array of size two, containing 32-bit floating-point values.
+
+code:VertexIndex::
+
+Decorating a variable with the code:VertexIndex built-in decoration will
+make that variable contain the index of the vertex that is being processed
+by the current vertex shader invocation.
+For non-indexed draws, this variable begins at the pname:firstVertex
+parameter to flink:vkCmdDraw or the pname:firstVertex member of a structure
+consumed by flink:vkCmdDrawIndirect and increments by one for each vertex in
+the draw.
+For indexed draws, its value is the content of the index buffer for the
+vertex plus the pname:vertexOffset parameter to flink:vkCmdDrawIndexed or
+the pname:vertexOffset member of the structure consumed by
+flink:vkCmdDrawIndexedIndirect.
++
+The code:VertexIndex decoration must: be used only within vertex shaders.
++
+The variable decorated with code:VertexIndex must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:VertexIndex must: be declared as a scalar
+32-bit integer.
+
+[NOTE]
+.Note
+====
+code:VertexIndex starts at the same starting value for each instance.
+====
+
+ifdef::VK_VERSION_1_1,VK_KHR_multiview[]
+
+[[interfaces-builtin-variables-viewindex]]
+code:ViewIndex::
+
+The code:ViewIndex decoration can: be applied to a shader input which will
+be filled with the index of the view that is being processed by the current
+shader invocation.
++
+If multiview is enabled in the render pass, this value will be one of the
+bits set in the view mask of the subpass the pipeline is compiled against.
+If multiview is not enabled in the render pass, this value will be zero.
++
+The code:ViewIndex decoration must: not be used within compute shaders.
++
+The variable decorated with code:ViewIndex must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:ViewIndex must: be declared as a scalar
+32-bit integer.
+
+endif::VK_VERSION_1_1,VK_KHR_multiview[]
+
+[[interfaces-builtin-variables-viewportindex]]
+code:ViewportIndex::
+
+Decorating a variable with the code:ViewportIndex built-in decoration will
+make that variable contain the index of the viewport.
++
+In a
+ifdef::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
+vertex, tessellation evaluation, or
+endif::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
+geometry shader, the variable decorated with code:ViewportIndex can be
+written to with the viewport index to which the primitive produced by that
+shader will be directed.
++
+The selected viewport index is used to select the viewport transform and
+scissor rectangle.
+ifdef::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
++
+The last active _vertex processing stage_ (in pipeline order) controls the
+code:ViewportIndex that is used.
+Outputs in previous shader stages are not used, even if the last stage fails
+to write the code:ViewportIndex.
+endif::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
++
+If the last active vertex processing stage shader entry point's interface
+does not include a variable decorated with code:ViewportIndex, then the
+first viewport is used.
+If a vertex processing stage shader entry point's interface includes a
+variable decorated with code:ViewportIndex, it must: write the same value to
+code:ViewportIndex for all output vertices of a given primitive.
++
+The code:ViewportIndex decoration must: be used only within
+ifdef::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
+vertex, tessellation evaluation,
+endif::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
+geometry, and fragment shaders.
++
+In a
+ifdef::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
+vertex, tessellation evaluation, or
+endif::VK_NV_viewport_array2,VK_EXT_shader_viewport_index_layer[]
+geometry shader, any variable decorated with code:ViewportIndex must: be
+declared using the code:Output storage class.
++
+In a fragment shader, the variable decorated with code:ViewportIndex
+contains the viewport index of the primitive that the fragment invocation
+belongs to.
++
+In a fragment shader, any variable decorated with code:ViewportIndex must:
+be declared using the code:Input storage class.
++
+Any variable decorated with code:ViewportIndex must: be declared as a scalar
+32-bit integer.
+
+ifdef::VK_NV_viewport_array2[]
+[[interfaces-builtin-variables-viewportmask]]
+code:ViewportMaskNV::
+
+Decorating a variable with the code:ViewportMaskNV built-in decoration will
+make that variable contain the viewport mask.
++
+In a vertex, tessellation evaluation, or geometry shader, the variable
+decorated with code:ViewportMaskNV can be written to with the mask of which
+viewports the primitive produced by that shader will directed.
++
+The code:ViewportMaskNV variable must: be an array that has
+[eq]#{lceil}(sname:VkPhysicalDeviceLimits::pname:maxViewports / 32){rceil}#
+elements.
+When a shader writes to this variable, bit B of element M controls whether a
+primitive is emitted to viewport [eq]#32 {times} M +B#.
+The viewports indicated by the mask are used to select the viewport
+transform and scissor rectangle that a primitive will be transformed by.
++
+The last active _vertex processing stage_ (in pipeline order) controls the
+code:ViewportMaskNV that is used.
+Outputs in previous shader stages are not used, even if the last stage fails
+to write the code:ViewportMaskNV.
+When code:ViewportMaskNV is written by the final vertex processing stage,
+any variable decorated with code:ViewportIndex in the fragment shader will
+have the index of the viewport that was used in generating that fragment.
++
+If a vertex processing stage shader entry point's interface includes a
+variable decorated with code:ViewportMaskNV, it must: write the same value
+to code:ViewportMaskNV for all output vertices of a given primitive.
++
+The code:ViewportMaskNV decoration must: be used only within vertex,
+tessellation evaluation, and geometry shaders.
++
+Any variable decorated with code:ViewportMaskNV must: be declared using the
+code:Output storage class.
++
+Any variable decorated with code:ViewportMaskNV must: be declared as an
+array of 32-bit integers.
+endif::VK_NV_viewport_array2[]
+
+ifdef::VK_NVX_multiview_per_view_attributes+VK_NV_viewport_array2[]
+[[interfaces-builtin-variables-viewportmaskperview]]
+code:ViewportMaskPerViewNV::
+
+Decorating a variable with the code:ViewportMaskPerViewNV built-in
+decoration will make that variable contain the mask of viewports primitives
+are broadcast to, for each view.
++
+The code:ViewportMaskPerViewNV decoration must: be used only within vertex,
+tessellation control, tessellation evaluation, and geometry shaders.
++
+Any variable decorated with code:ViewportMaskPerViewNV must: be declared
+using the code:Output storage class.
++
+The value written to an element of code:ViewportMaskPerViewNV in the last
+vertex processing stage is a bitmask indicating which viewports the
+primitive will be directed to.
+The primitive will be broadcast to the viewport corresponding to each
+non-zero bit of the bitmask, and that viewport index is used to select the
+viewport transform and scissor rectangle, for each view.
+The same values must: be written to all vertices in a given primitive, or
+else the set of viewports used for that primitive is undefined.
++
+Any variable decorated with code:ViewportMaskPerViewNV must: be declared as
+an array of scalar 32-bit integers with at least as many elements as the
+maximum view in the subpass's view mask plus one.
+The array must: be indexed by a constant or specialization constant.
++
+Elements of the array correspond to views in a multiview subpass, and those
+elements corresponding to views in the view mask of the subpass the shader
+is compiled against will be used as the viewport mask value for those views.
+code:ViewportMaskPerViewNV output in an earlier vertex processing stage is
+not available as an input in the subsequent vertex processing stage.
++
+Although code:ViewportMaskNV is an array, code:ViewportMaskPerViewNV is not
+a two-dimensional array.
+Instead, code:ViewportMaskPerViewNV is limited to 32 viewports.
+endif::VK_NVX_multiview_per_view_attributes+VK_NV_viewport_array2[]
+
+code:WorkgroupId::
+
+Decorating a variable with the code:WorkgroupId built-in decoration will
+make that variable contain the global workgroup that the current invocation
+is a member of.
+Each component ranges from a base value to a [eq]#base {plus} count# value,
+based on the parameters passed into the dispatch commands.
++
+The code:WorkgroupId decoration must: be used only within compute shaders.
++
+The variable decorated with code:WorkgroupId must: be declared using the
+code:Input storage class.
++
+The variable decorated with code:WorkgroupId must: be declared as a
+three-component vector of 32-bit integers.
+
+code:WorkgroupSize::
+
+Decorating an object with the code:WorkgroupSize built-in decoration will
+make that object contain the dimensions of a local workgroup.
+If an object is decorated with the code:WorkgroupSize decoration, this must:
+take precedence over any execution mode set for code:LocalSize.
++
+The code:WorkgroupSize decoration must: be used only within compute shaders.
++
+The object decorated with code:WorkgroupSize must: be a specialization
+constant or a constant.
++
+The object decorated with code:WorkgroupSize must: be declared as a
+three-component vector of 32-bit integers.

@@ -284,6 +284,8 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \
+    android/automation/AutomationController.cpp \
+    android/automation/AutomationEventSink.cpp \
     android/avd/hw-config.c \
     android/avd/info.c \
     android/avd/scanner.c \
@@ -394,7 +396,7 @@ LOCAL_SRC_FILES := \
     android/hw-kmsg.c \
     android/hw-lcd.c \
     android/hw-qemud.cpp \
-    android/hw-sensors.c \
+    android/hw-sensors.cpp \
     android/jpeg-compress.c \
     android/kernel/kernel_utils.cpp \
     android/loadpng.c \
@@ -717,6 +719,7 @@ LOCAL_SRC_FILES := \
   android/base/network/NetworkUtils_unittest.cpp \
   android/base/Optional_unittest.cpp \
   android/base/ProcessControl_unittest.cpp \
+  android/base/Result_unittest.cpp \
   android/base/sockets/ScopedSocket_unittest.cpp \
   android/base/sockets/SocketDrainer_unittest.cpp \
   android/base/sockets/SocketUtils_unittest.cpp \
@@ -848,7 +851,7 @@ LOCAL_CFLAGS += -O0
 
 LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
-    emulator-libgtest \
+    $(EMULATOR_GTEST_STATIC_LIBRARIES) \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from
@@ -891,7 +894,7 @@ LOCAL_CFLAGS += -O0
 
 LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
-    emulator-libgtest \
+    $(EMULATOR_GTEST_STATIC_LIBRARIES) \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from
@@ -1013,7 +1016,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_CFLAGS += -O0 -UNDEBUG
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
-    emulator-libgtest \
+    $(EMULATOR_GTEST_STATIC_LIBRARIES) \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
     $(FFMPEG_STATIC_LIBRARIES) \
     $(LIBX264_STATIC_LIBRARIES) \

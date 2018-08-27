@@ -20,6 +20,8 @@
 #include "android/base/containers/Lookup.h"
 #include "GLcommon/FramebufferData.h"
 
+#include "emugl/common/logging.h"
+
 #include <array>
 #include <utility>
 
@@ -51,11 +53,15 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
     }
     if (stream) {
         m_needLoadRestore = true;
+        int i = 0;
         for (auto ns : m_nameSpace) {
+            GL_LOG("ShareGroup::%s: %p: start restore namespace for type %d\n", __func__, this, i);
             ns->postLoad(
                     [this](NamedObjectType p_type, ObjectLocalName p_localName) {
                         return this->getObjectDataPtrNoLock(p_type, p_localName);
                 });
+            GL_LOG("ShareGroup::%s: %p: finish restore namespace for type %d\n", __func__, this, i);
+            ++i;
         }
     }
 }
@@ -74,8 +80,12 @@ void ShareGroup::onSave(android::base::Stream* stream) {
     if (m_saveStage == Saved) return;
     assert(m_saveStage == PreSaved);
     m_saveStage = Saved;
+    int i = 0;
     for (auto ns : m_nameSpace) {
+        GL_LOG("ShareGroup::%s: %p: start saving type %d\n", __func__, this, i);
         ns->onSave(stream);
+        GL_LOG("ShareGroup::%s: %p: finish saving type %d\n", __func__, this, i);
+        ++i;
     }
 }
 
@@ -96,11 +106,15 @@ void ShareGroup::postSave(android::base::Stream* stream) {
 void ShareGroup::postLoadRestore() {
     emugl::Mutex::AutoLock lock(m_restoreLock);
     if (m_needLoadRestore) {
+        int i = 0;
         for (auto ns : m_nameSpace) {
+            GL_LOG("ShareGroup::%s: %p: start post load restore namespace for type %d\n", __func__, this, i);
             ns->postLoadRestore([this](NamedObjectType p_type,
                                 ObjectLocalName p_localName) {
                                     return getGlobalName(p_type, p_localName);
                             });
+            GL_LOG("ShareGroup::%s: %p: end post load restore namespace for type %d\n", __func__, this, i);
+            ++i;
         }
         m_needLoadRestore = false;
     }
