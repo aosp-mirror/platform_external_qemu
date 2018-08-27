@@ -119,6 +119,7 @@ CLANG_COMPILER_FLAGS= \
                       -Wno-unused-lambda-capture \
                       -Wno-unused-private-field \
                       -Wno-unused-value \
+                      -Wswitch \
 
 # Add your tidy checks here.
 CLANG_TIDY_CHECKS=-*, \
