@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "cb657671_09c268ed",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T18:56:38Z",
+      "side": 1,
+      "message": "Got it, thanks! Agreed, the initialization should be controlled in some way so that it initializes on the correct thread/looper.",
+      "parentUuid": "db5e4275_5408fc04",
+      "range": {
+        "startLine": 113,
+        "startChar": 0,
+        "endLine": 113,
+        "endChar": 53
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fdfa7b3a_e75a7770",
         "filename": "android/android-emu/android/automation/AutomationController.cpp",
         "patchSetId": 2
@@ -93,6 +117,30 @@
       "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3c5ec531_63c55511",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T18:56:38Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "79e60242_80474db1",
+      "range": {
+        "startLine": 127,
+        "startChar": 0,
+        "endLine": 132,
+        "endChar": 1
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -143,6 +191,30 @@
     },
     {
       "key": {
+        "uuid": "0f04824b_3e2be979",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T18:56:38Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "23f174dc_c56bd733",
+      "range": {
+        "startLine": 177,
+        "startChar": 0,
+        "endLine": 179,
+        "endChar": 5
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "13fd0195_3c86b014",
         "filename": "android/android-emu/android/automation/AutomationController.cpp",
         "patchSetId": 2
@@ -178,6 +250,30 @@
       "side": 1,
       "message": "Maybe I should keep the parameter name.  This is proofOfLock, I system I like to use to make sure that the caller actually has a lock since this method must be called under lock.",
       "parentUuid": "13fd0195_3c86b014",
+      "range": {
+        "startLine": 352,
+        "startChar": 43,
+        "endLine": 352,
+        "endChar": 58
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98061baf_7ae4755e",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T18:56:38Z",
+      "side": 1,
+      "message": "Cool trick, thanks. Will keep it in mind",
+      "parentUuid": "36192ace_73a5847d",
       "range": {
         "startLine": 352,
         "startChar": 43,
@@ -295,6 +391,30 @@
     },
     {
       "key": {
+        "uuid": "48397485_d054e0df",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T18:56:38Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "7df106d2_571f0d8a",
+      "range": {
+        "startLine": 228,
+        "startChar": 0,
+        "endLine": 228,
+        "endChar": 32
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eae49dd5_f38f8d43",
         "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
         "patchSetId": 2
@@ -342,6 +462,30 @@
     },
     {
       "key": {
+        "uuid": "84aff99f_91b37a22",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 807,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T18:56:38Z",
+      "side": 1,
+      "message": "If you\u0027re considering breaking the protocol, do it now while we already have to break the protocol for QEMU 2.12 and it is not in stable :) (and increment the Snapshot::kVersion number)",
+      "parentUuid": "47abb339_f0163854",
+      "range": {
+        "startLine": 806,
+        "startChar": 0,
+        "endLine": 807,
+        "endChar": 49
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9126a68c_bbdd81f0",
         "filename": "android/android-emu/android/virtualscene/SceneCamera.cpp",
         "patchSetId": 2
@@ -377,6 +521,30 @@
       "side": 1,
       "message": "Nice catch!  I don\u0027t know if it\u0027s possible to get to this point without qemu\u0027s participation, since it requires the camera to be started, but it\u0027s likely that won\u0027t hold true in the future.\n\nI\u0027ll update this to check if the AutomationController is valid first.",
       "parentUuid": "9126a68c_bbdd81f0",
+      "range": {
+        "startLine": 94,
+        "startChar": 0,
+        "endLine": 98,
+        "endChar": 58
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d21e745f_8a37cde2",
+        "filename": "android/android-emu/android/virtualscene/SceneCamera.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T18:56:38Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ef3f9800_0e43eaed",
       "range": {
         "startLine": 94,
         "startChar": 0,
