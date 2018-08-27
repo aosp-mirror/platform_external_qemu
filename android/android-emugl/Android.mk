@@ -52,6 +52,7 @@ include $(EMUGL_PATH)/common.mk
 # module that hasn't been declared yet anyway.
 #
 
+include $(EMUGL_PATH)/../third_party/astc-codec/Android.mk
 
 # Required by our units test.
 include $(EMUGL_PATH)/googletest.mk
@@ -88,6 +89,9 @@ include $(EMUGL_PATH)/host/libs/Translator/GLES_CM/Android.mk
 include $(EMUGL_PATH)/host/libs/Translator/GLES_V2/Android.mk
 include $(EMUGL_PATH)/host/libs/Translator/EGL/Android.mk
 include $(EMUGL_PATH)/host/libs/libOpenGLESDispatch/Android.mk
+
+# Vulkan
+include $(EMUGL_PATH)/host/libs/libOpenglRender/vulkan/Android.mk
 
 # Host shared libraries
 include $(EMUGL_PATH)/host/libs/libOpenglRender/Android.mk

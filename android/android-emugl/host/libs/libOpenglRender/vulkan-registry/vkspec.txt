@@ -1,0 +1,139 @@
+// Copyright (c) 2014-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+= Vulkan^(R)^ {revnumber} - A Specification {apititle}
+The Khronos Vulkan Working Group
+:data-uri:
+:icons: font
+:toc2:
+:toclevels: 2
+:max-width: 100
+:numbered:
+:source-highlighter: coderay
+// Various special / math symbols. This is easier to edit with than Unicode.
+include::config/attribs.txt[]
+
+//:editing-notes:
+
+<<<<
+
+include::copyright-spec.txt[]
+
+<<<<
+
+// Table of contents is inserted here
+toc::[]
+
+:leveloffset: 1
+
+:test: 0
+
+ifeval::["{test}"=="1"]
+// include::config/mathtest.txt[]
+
+include::chapters/fundamentals.txt[]
+
+include::chapters/memory.txt[]
+endif::[]
+
+ifeval::["{test}"!="1"]
+include::chapters/introduction.txt[]
+
+include::chapters/fundamentals.txt[]
+
+include::chapters/initialization.txt[]
+
+include::chapters/devsandqueues.txt[]
+
+include::chapters/cmdbuffers.txt[]
+
+include::chapters/synchronization.txt[]
+
+include::chapters/renderpass.txt[]
+
+include::chapters/shaders.txt[]
+
+include::chapters/pipelines.txt[]
+
+include::chapters/memory.txt[]
+
+include::chapters/resources.txt[]
+
+include::chapters/samplers.txt[]
+
+include::chapters/descriptorsets.txt[]
+
+include::chapters/interfaces.txt[]
+
+include::chapters/textures.txt[]
+
+include::chapters/queries.txt[]
+
+// Transfer operations
+include::chapters/clears.txt[]
+
+include::chapters/copies.txt[]
+
+// Graphics Operations
+include::chapters/drawing.txt[]
+
+include::chapters/fxvertex.txt[]
+
+include::chapters/tessellation.txt[]
+
+include::chapters/geometry.txt[]
+
+include::chapters/vertexpostproc.txt[]
+
+include::chapters/primsrast.txt[]
+
+include::chapters/fragops.txt[]
+
+include::chapters/framebuffer.txt[]
+
+// Compute
+include::chapters/dispatch.txt[]
+
+// Device Generated Commands
+ifdef::VK_NVX_device_generated_commands[]
+include::chapters/VK_NVX_device_generated_commands/generatedcommands.txt[]
+endif::VK_NVX_device_generated_commands[]
+
+// Sparse
+include::chapters/sparsemem.txt[]
+
+ifdef::VK_KHR_surface[]
+include::chapters/VK_KHR_surface/wsi.txt[]
+endif::VK_KHR_surface[]
+
+// Sort of an appendix
+include::chapters/extensions.txt[]
+
+include::chapters/features.txt[]
+
+include::chapters/debugging.txt[]
+
+// Appendices
+:numbered!:
+
+include::appendices/spirvenv.txt[]
+
+include::appendices/compressedtex.txt[]
+
+ifdef::VK_VERSION_1_1[]
+include::appendices/versions.txt[]
+endif::VK_VERSION_1_1[]
+
+// Extension appendices are now included from extensions.txt
+include::appendices/extensions.txt[]
+
+include::appendices/boilerplate.txt[]
+
+include::appendices/invariance.txt[]
+
+include::appendices/glossary.txt[]
+
+include::appendices/credits.txt[]
+
+endif::[]

@@ -1,0 +1,597 @@
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[clears]]
+= Clear Commands
+
+
+[[clears-outside]]
+== Clearing Images Outside A Render Pass Instance
+
+Color and depth/stencil images can: be cleared outside a render pass
+instance using flink:vkCmdClearColorImage or
+flink:vkCmdClearDepthStencilImage, respectively.
+These commands are only allowed outside of a render pass instance.
+
+[open,refpage='vkCmdClearColorImage',desc='Clear regions of a color image',type='protos']
+--
+
+To clear one or more subranges of a color image, call:
+
+include::../api/protos/vkCmdClearColorImage.txt[]
+
+  * pname:commandBuffer is the command buffer into which the command will be
+    recorded.
+  * pname:image is the image to be cleared.
+  * pname:imageLayout specifies the current layout of the image subresource
+    ranges to be cleared, and must: be
+ifdef::VK_KHR_shared_presentable_image[]
+    ename:VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR,
+endif::VK_KHR_shared_presentable_image[]
+    ename:VK_IMAGE_LAYOUT_GENERAL or
+    ename:VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL.
+  * pname:pColor is a pointer to a slink:VkClearColorValue structure that
+    contains the values the image subresource ranges will be cleared to (see
+    <<clears-values>> below).
+  * pname:rangeCount is the number of image subresource range structures in
+    pname:pRanges.
+  * pname:pRanges points to an array of slink:VkImageSubresourceRange
+    structures that describe a range of mipmap levels, array layers, and
+    aspects to be cleared, as described in <<resources-image-views,Image
+    Views>>.
+    The pname:aspectMask of all image subresource ranges must: only include
+    ename:VK_IMAGE_ASPECT_COLOR_BIT.
+
+Each specified range in pname:pRanges is cleared to the value specified by
+pname:pColor.
+
+.Valid Usage
+****
+ifdef::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * [[VUID-vkCmdClearColorImage-image-01993]]
+    The <<resources-image-format-features,format features>> of pname:image
+    must: contain ename:VK_FORMAT_FEATURE_TRANSFER_DST_BIT.
+endif::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * [[VUID-vkCmdClearColorImage-image-00002]]
+    pname:image must: have been created with
+    ename:VK_IMAGE_USAGE_TRANSFER_DST_BIT usage flag
+ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-vkCmdClearColorImage-image-01545]]
+    pname:image must: not use a format listed in
+    <<features-formats-requiring-sampler-ycbcr-conversion>>
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-vkCmdClearColorImage-image-00003]]
+    If pname:image is non-sparse then it must: be bound completely and
+    contiguously to a single sname:VkDeviceMemory object
+  * [[VUID-vkCmdClearColorImage-imageLayout-00004]]
+    pname:imageLayout must: specify the layout of the image subresource
+    ranges of pname:image specified in pname:pRanges at the time this
+    command is executed on a sname:VkDevice
+ifndef::VK_KHR_shared_presentable_image[]
+  * [[VUID-vkCmdClearColorImage-imageLayout-00005]]
+    pname:imageLayout must: be ename:VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL or
+    ename:VK_IMAGE_LAYOUT_GENERAL
+endif::VK_KHR_shared_presentable_image[]
+ifdef::VK_KHR_shared_presentable_image[]
+  * [[VUID-vkCmdClearColorImage-imageLayout-01394]]
+    pname:imageLayout must: be ename:VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+    ename:VK_IMAGE_LAYOUT_GENERAL, or
+    ename:VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR
+endif::VK_KHR_shared_presentable_image[]
+  * [[VUID-vkCmdClearColorImage-baseMipLevel-01470]]
+    The slink:VkImageSubresourceRange::pname:baseMipLevel members of the
+    elements of the pname:pRanges array must: each be less than the
+    pname:mipLevels specified in slink:VkImageCreateInfo when pname:image
+    was created
+  * [[VUID-vkCmdClearColorImage-pRanges-01692]]
+    For each slink:VkImageSubresourceRange element of pname:pRanges, if the
+    pname:levelCount member is not ename:VK_REMAINING_MIP_LEVELS, then
+    [eq]#pname:baseMipLevel {plus} pname:levelCount# must: be less than the
+    pname:mipLevels specified in slink:VkImageCreateInfo when pname:image
+    was created
+  * [[VUID-vkCmdClearColorImage-baseArrayLayer-01472]]
+    The slink:VkImageSubresourceRange::pname:baseArrayLayer members of the
+    elements of the pname:pRanges array must: each be less than the
+    pname:arrayLayers specified in slink:VkImageCreateInfo when pname:image
+    was created
+  * [[VUID-vkCmdClearColorImage-pRanges-01693]]
+    For each slink:VkImageSubresourceRange element of pname:pRanges, if the
+    pname:layerCount member is not ename:VK_REMAINING_ARRAY_LAYERS, then
+    [eq]#pname:baseArrayLayer {plus} pname:layerCount# must: be less than
+    the pname:arrayLayers specified in slink:VkImageCreateInfo when
+    pname:image was created
+  * [[VUID-vkCmdClearColorImage-image-00007]]
+    pname:image must: not have a compressed or depth/stencil format
+ifdef::VK_VERSION_1_1[]
+  * [[VUID-vkCmdClearColorImage-commandBuffer-01805]]
+    If pname:commandBuffer is an unprotected command buffer, then
+    pname:image must: not be a protected image
+  * [[VUID-vkCmdClearColorImage-commandBuffer-01806]]
+    If pname:commandBuffer is a protected command buffer, then pname:image
+    must: not be an unprotected image
+endif::VK_VERSION_1_1[]
+****
+
+include::../validity/protos/vkCmdClearColorImage.txt[]
+--
+
+[open,refpage='vkCmdClearDepthStencilImage',desc='Fill regions of a combined depth/stencil image',type='protos']
+--
+
+To clear one or more subranges of a depth/stencil image, call:
+
+include::../api/protos/vkCmdClearDepthStencilImage.txt[]
+
+  * pname:commandBuffer is the command buffer into which the command will be
+    recorded.
+  * pname:image is the image to be cleared.
+  * pname:imageLayout specifies the current layout of the image subresource
+    ranges to be cleared, and must: be ename:VK_IMAGE_LAYOUT_GENERAL or
+    ename:VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL.
+  * pname:pDepthStencil is a pointer to a slink:VkClearDepthStencilValue
+    structure that contains the values the depth and stencil image
+    subresource ranges will be cleared to (see <<clears-values>> below).
+  * pname:rangeCount is the number of image subresource range structures in
+    pname:pRanges.
+  * pname:pRanges points to an array of slink:VkImageSubresourceRange
+    structures that describe a range of mipmap levels, array layers, and
+    aspects to be cleared, as described in <<resources-image-views,Image
+    Views>>.
+    The pname:aspectMask of each image subresource range in pname:pRanges
+    can: include ename:VK_IMAGE_ASPECT_DEPTH_BIT if the image format has a
+    depth component, and ename:VK_IMAGE_ASPECT_STENCIL_BIT if the image
+    format has a stencil component.
+
+.Valid Usage
+****
+ifdef::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * [[VUID-vkCmdClearDepthStencilImage-image-01994]]
+    The <<resources-image-format-features,format features>> of pname:image
+    must: contain ename:VK_FORMAT_FEATURE_TRANSFER_DST_BIT.
+endif::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * [[VUID-vkCmdClearDepthStencilImage-image-00009]]
+    pname:image must: have been created with
+    ename:VK_IMAGE_USAGE_TRANSFER_DST_BIT usage flag
+  * [[VUID-vkCmdClearDepthStencilImage-image-00010]]
+    If pname:image is non-sparse then it must: be bound completely and
+    contiguously to a single sname:VkDeviceMemory object
+  * [[VUID-vkCmdClearDepthStencilImage-imageLayout-00011]]
+    pname:imageLayout must: specify the layout of the image subresource
+    ranges of pname:image specified in pname:pRanges at the time this
+    command is executed on a sname:VkDevice
+  * [[VUID-vkCmdClearDepthStencilImage-imageLayout-00012]]
+    pname:imageLayout must: be either of
+    ename:VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL or
+    ename:VK_IMAGE_LAYOUT_GENERAL
+  * [[VUID-vkCmdClearDepthStencilImage-baseMipLevel-01474]]
+    The slink:VkImageSubresourceRange::pname:baseMipLevel members of the
+    elements of the pname:pRanges array must: each be less than the
+    pname:mipLevels specified in slink:VkImageCreateInfo when pname:image
+    was created
+  * [[VUID-vkCmdClearDepthStencilImage-pRanges-01694]]
+    For each slink:VkImageSubresourceRange element of pname:pRanges, if the
+    pname:levelCount member is not ename:VK_REMAINING_MIP_LEVELS, then
+    [eq]#pname:baseMipLevel {plus} pname:levelCount# must: be less than the
+    pname:mipLevels specified in slink:VkImageCreateInfo when pname:image
+    was created
+  * [[VUID-vkCmdClearDepthStencilImage-baseArrayLayer-01476]]
+    The slink:VkImageSubresourceRange::pname:baseArrayLayer members of the
+    elements of the pname:pRanges array must: each be less than the
+    pname:arrayLayers specified in slink:VkImageCreateInfo when pname:image
+    was created
+  * [[VUID-vkCmdClearDepthStencilImage-pRanges-01695]]
+    For each slink:VkImageSubresourceRange element of pname:pRanges, if the
+    pname:layerCount member is not ename:VK_REMAINING_ARRAY_LAYERS, then
+    [eq]#pname:baseArrayLayer {plus} pname:layerCount# must: be less than
+    the pname:arrayLayers specified in slink:VkImageCreateInfo when
+    pname:image was created
+  * [[VUID-vkCmdClearDepthStencilImage-image-00014]]
+    pname:image must: have a depth/stencil format
+ifdef::VK_VERSION_1_1[]
+  * [[VUID-vkCmdClearDepthStencilImage-commandBuffer-01807]]
+    If pname:commandBuffer is an unprotected command buffer, then
+    pname:image must: not be a protected image
+  * [[VUID-vkCmdClearDepthStencilImage-commandBuffer-01808]]
+    If pname:commandBuffer is a protected command buffer, then pname:image
+    must: not be an unprotected image
+endif::VK_VERSION_1_1[]
+
+****
+
+include::../validity/protos/vkCmdClearDepthStencilImage.txt[]
+--
+
+Clears outside render pass instances are treated as transfer operations for
+the purposes of memory barriers.
+
+
+[[clears-inside]]
+== Clearing Images Inside A Render Pass Instance
+
+[open,refpage='vkCmdClearAttachments',desc='Clear regions within bound framebuffer attachments',type='protos']
+--
+
+To clear one or more regions of color and depth/stencil attachments inside a
+render pass instance, call:
+
+include::../api/protos/vkCmdClearAttachments.txt[]
+
+  * pname:commandBuffer is the command buffer into which the command will be
+    recorded.
+  * pname:attachmentCount is the number of entries in the pname:pAttachments
+    array.
+  * pname:pAttachments is a pointer to an array of slink:VkClearAttachment
+    structures defining the attachments to clear and the clear values to
+    use.
+  * pname:rectCount is the number of entries in the pname:pRects array.
+  * pname:pRects points to an array of slink:VkClearRect structures defining
+    regions within each selected attachment to clear.
+
+fname:vkCmdClearAttachments can: clear multiple regions of each attachment
+used in the current subpass of a render pass instance.
+This command must: be called only inside a render pass instance, and
+implicitly selects the images to clear based on the current framebuffer
+attachments and the command parameters.
+
+.Valid Usage
+****
+  * [[VUID-vkCmdClearAttachments-aspectMask-00015]]
+    If the pname:aspectMask member of any element of pname:pAttachments
+    contains ename:VK_IMAGE_ASPECT_COLOR_BIT, the pname:colorAttachment
+    member of that element must: refer to a valid color attachment in the
+    current subpass
+  * [[VUID-vkCmdClearAttachments-pRects-00016]]
+    The rectangular region specified by each element of pname:pRects must:
+    be contained within the render area of the current render pass instance
+  * [[VUID-vkCmdClearAttachments-pRects-00017]]
+    The layers specified by each element of pname:pRects must: be contained
+    within every attachment that pname:pAttachments refers to
+  * [[VUID-vkCmdClearAttachments-layerCount-01934]]
+    The pname:layerCount member of each element of pname:pRects must: not be
+    `0`
+ifdef::VK_VERSION_1_1,VK_KHR_multiview[]
+  * [[VUID-vkCmdClearAttachments-baseArrayLayer-00018]]
+    If the render pass instance this is recorded in uses multiview, then
+    pname:baseArrayLayer must: be zero and pname:layerCount must: be one.
+endif::VK_VERSION_1_1,VK_KHR_multiview[]
+****
+
+include::../validity/protos/vkCmdClearAttachments.txt[]
+--
+
+[open,refpage='VkClearRect',desc='Structure specifying a clear rectangle',type='structs']
+--
+
+The sname:VkClearRect structure is defined as:
+
+include::../api/structs/VkClearRect.txt[]
+
+  * pname:rect is the two-dimensional region to be cleared.
+  * pname:baseArrayLayer is the first layer to be cleared.
+  * pname:layerCount is the number of layers to clear.
+
+The layers [eq]#[pname:baseArrayLayer, pname:baseArrayLayer {plus}
+pname:layerCount)# counting from the base layer of the attachment image view
+are cleared.
+
+include::../validity/structs/VkClearRect.txt[]
+--
+
+[open,refpage='VkClearAttachment',desc='Structure specifying a clear attachment',type='structs']
+--
+
+The sname:VkClearAttachment structure is defined as:
+
+include::../api/structs/VkClearAttachment.txt[]
+
+  * pname:aspectMask is a mask selecting the color, depth and/or stencil
+    aspects of the attachment to be cleared.
+    pname:aspectMask can: include ename:VK_IMAGE_ASPECT_COLOR_BIT for color
+    attachments, ename:VK_IMAGE_ASPECT_DEPTH_BIT for depth/stencil
+    attachments with a depth component, and
+    ename:VK_IMAGE_ASPECT_STENCIL_BIT for depth/stencil attachments with a
+    stencil component.
+    If the subpass's depth/stencil attachment is ename:VK_ATTACHMENT_UNUSED,
+    then the clear has no effect.
+  * pname:colorAttachment is only meaningful if
+    ename:VK_IMAGE_ASPECT_COLOR_BIT is set in pname:aspectMask, in which
+    case it is an index to the pname:pColorAttachments array in the
+    slink:VkSubpassDescription structure of the current subpass which
+    selects the color attachment to clear.
+    If pname:colorAttachment is ename:VK_ATTACHMENT_UNUSED then the clear
+    has no effect.
+  * pname:clearValue is the color or depth/stencil value to clear the
+    attachment to, as described in <<clears-values,Clear Values>> below.
+
+No memory barriers are needed between fname:vkCmdClearAttachments and
+preceding or subsequent draw or attachment clear commands in the same
+subpass.
+
+The fname:vkCmdClearAttachments command is not affected by the bound
+pipeline state.
+
+Attachments can: also be cleared at the beginning of a render pass instance
+by setting pname:loadOp (or pname:stencilLoadOp) of
+slink:VkAttachmentDescription to ename:VK_ATTACHMENT_LOAD_OP_CLEAR, as
+described for flink:vkCreateRenderPass.
+
+.Valid Usage
+****
+  * [[VUID-VkClearAttachment-aspectMask-00019]]
+    If pname:aspectMask includes ename:VK_IMAGE_ASPECT_COLOR_BIT, it must:
+    not include ename:VK_IMAGE_ASPECT_DEPTH_BIT or
+    ename:VK_IMAGE_ASPECT_STENCIL_BIT
+  * [[VUID-VkClearAttachment-aspectMask-00020]]
+    pname:aspectMask must: not include ename:VK_IMAGE_ASPECT_METADATA_BIT
+  * [[VUID-VkClearAttachment-clearValue-00021]]
+    pname:clearValue must: be a valid sname:VkClearValue union
+ifdef::VK_VERSION_1_1[]
+  * [[VUID-VkClearAttachment-commandBuffer-01809]]
+    If pname:commandBuffer is an unprotected command buffer, then the
+    attachment to be cleared must: not be a protected image.
+  * [[VUID-VkClearAttachment-commandBuffer-01810]]
+    If pname:commandBuffer is a protected command buffer, then the
+    attachment to be cleared must: not be an unprotected image.
+endif::VK_VERSION_1_1[]
+****
+
+include::../validity/structs/VkClearAttachment.txt[]
+--
+
+
+[[clears-values]]
+== Clear Values
+
+[open,refpage='VkClearColorValue',desc='Structure specifying a clear color value',type='structs']
+--
+
+The sname:VkClearColorValue structure is defined as:
+
+include::../api/structs/VkClearColorValue.txt[]
+
+  * pname:float32 are the color clear values when the format of the image or
+    attachment is one of the formats in the
+    <<features-formats-numericformat, Interpretation of Numeric Format>>
+    table other than signed integer (etext:SINT) or unsigned integer
+    (etext:UINT).
+    Floating point values are automatically converted to the format of the
+    image, with the clear value being treated as linear if the image is
+    sRGB.
+  * pname:int32 are the color clear values when the format of the image or
+    attachment is signed integer (etext:SINT).
+    Signed integer values are converted to the format of the image by
+    casting to the smaller type (with negative 32-bit values mapping to
+    negative values in the smaller type).
+    If the integer clear value is not representable in the target type (e.g.
+    would overflow in conversion to that type), the clear value is
+    undefined.
+  * pname:uint32 are the color clear values when the format of the image or
+    attachment is unsigned integer (etext:UINT).
+    Unsigned integer values are converted to the format of the image by
+    casting to the integer type with fewer bits.
+
+The four array elements of the clear color map to R, G, B, and A components
+of image formats, in order.
+
+If the image has more than one sample, the same value is written to all
+samples for any pixels being cleared.
+
+include::../validity/structs/VkClearColorValue.txt[]
+--
+
+[open,refpage='VkClearDepthStencilValue',desc='Structure specifying a clear depth stencil value',type='structs']
+--
+
+The sname:VkClearDepthStencilValue structure is defined as:
+
+include::../api/structs/VkClearDepthStencilValue.txt[]
+
+  * pname:depth is the clear value for the depth aspect of the depth/stencil
+    attachment.
+    It is a floating-point value which is automatically converted to the
+    attachment's format.
+  * pname:stencil is the clear value for the stencil aspect of the
+    depth/stencil attachment.
+    It is a 32-bit integer value which is converted to the attachment's
+    format by taking the appropriate number of LSBs.
+
+.Valid Usage
+****
+ifdef::VK_EXT_depth_range_unrestricted[]
+  * [[VUID-VkClearDepthStencilValue-depth-00022]]
+    Unless the `<<VK_EXT_depth_range_unrestricted>>` extension is enabled
+    pname:depth must: be between `0.0` and `1.0`, inclusive
+endif::VK_EXT_depth_range_unrestricted[]
+ifndef::VK_EXT_depth_range_unrestricted[]
+  * [[VUID-VkClearDepthStencilValue-depth-00022]]
+    pname:depth must: be between `0.0` and `1.0`, inclusive
+endif::VK_EXT_depth_range_unrestricted[]
+****
+
+
+include::../validity/structs/VkClearDepthStencilValue.txt[]
+--
+
+[open,refpage='VkClearValue',desc='Structure specifying a clear value',type='structs']
+--
+
+The sname:VkClearValue union is defined as:
+
+include::../api/structs/VkClearValue.txt[]
+
+  * pname:color specifies the color image clear values to use when clearing
+    a color image or attachment.
+  * pname:depthStencil specifies the depth and stencil clear values to use
+    when clearing a depth/stencil image or attachment.
+
+This union is used where part of the API requires either color or
+depth/stencil clear values, depending on the attachment, and defines the
+initial clear values in the slink:VkRenderPassBeginInfo structure.
+
+include::../validity/structs/VkClearValue.txt[]
+--
+
+
+[[clears-filling-buffers]]
+== Filling Buffers
+
+[open,refpage='vkCmdFillBuffer',desc='Fill a region of a buffer with a fixed value',type='protos']
+--
+
+To clear buffer data, call:
+
+include::../api/protos/vkCmdFillBuffer.txt[]
+
+  * pname:commandBuffer is the command buffer into which the command will be
+    recorded.
+  * pname:dstBuffer is the buffer to be filled.
+  * pname:dstOffset is the byte offset into the buffer at which to start
+    filling, and must: be a multiple of 4.
+  * pname:size is the number of bytes to fill, and must: be either a
+    multiple of 4, or ename:VK_WHOLE_SIZE to fill the range from
+    pname:offset to the end of the buffer.
+    If ename:VK_WHOLE_SIZE is used and the remaining size of the buffer is
+    not a multiple of 4, then the nearest smaller multiple is used.
+  * pname:data is the 4-byte word written repeatedly to the buffer to fill
+    pname:size bytes of data.
+    The data word is written to memory according to the host endianness.
+
+fname:vkCmdFillBuffer is treated as "`transfer`" operation for the purposes
+of synchronization barriers.
+The ename:VK_BUFFER_USAGE_TRANSFER_DST_BIT must: be specified in pname:usage
+of sname:VkBufferCreateInfo in order for the buffer to be compatible with
+fname:vkCmdFillBuffer.
+
+.Valid Usage
+****
+  * [[VUID-vkCmdFillBuffer-dstOffset-00024]]
+    pname:dstOffset must: be less than the size of pname:dstBuffer
+  * [[VUID-vkCmdFillBuffer-dstOffset-00025]]
+    pname:dstOffset must: be a multiple of `4`
+  * [[VUID-vkCmdFillBuffer-size-00026]]
+    If pname:size is not equal to ename:VK_WHOLE_SIZE, pname:size must: be
+    greater than `0`
+  * [[VUID-vkCmdFillBuffer-size-00027]]
+    If pname:size is not equal to ename:VK_WHOLE_SIZE, pname:size must: be
+    less than or equal to the size of pname:dstBuffer minus pname:dstOffset
+  * [[VUID-vkCmdFillBuffer-size-00028]]
+    If pname:size is not equal to ename:VK_WHOLE_SIZE, pname:size must: be a
+    multiple of `4`
+  * [[VUID-vkCmdFillBuffer-dstBuffer-00029]]
+    pname:dstBuffer must: have been created with
+    ename:VK_BUFFER_USAGE_TRANSFER_DST_BIT usage flag
+ifndef::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * [[VUID-vkCmdFillBuffer-commandBuffer-00030]]
+    The sname:VkCommandPool that pname:commandBuffer was allocated from
+    must: support graphics or compute operations
+endif::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * [[VUID-vkCmdFillBuffer-dstBuffer-00031]]
+    If pname:dstBuffer is non-sparse then it must: be bound completely and
+    contiguously to a single sname:VkDeviceMemory object
+ifdef::VK_VERSION_1_1[]
+  * [[VUID-vkCmdFillBuffer-commandBuffer-01811]]
+    If pname:commandBuffer is an unprotected command buffer, then
+    pname:dstBuffer must: not be a protected buffer
+  * [[VUID-vkCmdFillBuffer-commandBuffer-01812]]
+    If pname:commandBuffer is a protected command buffer, then
+    pname:dstBuffer must: not be an unprotected buffer
+endif::VK_VERSION_1_1[]
+****
+
+include::../validity/protos/vkCmdFillBuffer.txt[]
+--
+
+
+[[clears-updating-buffers]]
+== Updating Buffers
+
+[open,refpage='vkCmdUpdateBuffer',desc='Update a buffer\'s contents from host memory',type='protos']
+--
+
+To update buffer data inline in a command buffer, call:
+
+include::../api/protos/vkCmdUpdateBuffer.txt[]
+
+  * pname:commandBuffer is the command buffer into which the command will be
+    recorded.
+  * pname:dstBuffer is a handle to the buffer to be updated.
+  * pname:dstOffset is the byte offset into the buffer to start updating,
+    and must: be a multiple of 4.
+  * pname:dataSize is the number of bytes to update, and must: be a multiple
+    of 4.
+  * pname:pData is a pointer to the source data for the buffer update, and
+    must: be at least pname:dataSize bytes in size.
+
+pname:dataSize must: be less than or equal to 65536 bytes.
+For larger updates, applications can: use buffer to buffer
+<<copies-buffers,copies>>.
+
+[NOTE]
+.Note
+====
+Buffer updates performed with fname:vkCmdUpdateBuffer first copy the data
+into command buffer memory when the command is recorded (which requires
+additional storage and may incur an additional allocation), and then copy
+the data from the command buffer into pname:dstBuffer when the command is
+executed on a device.
+
+The additional cost of this functionality compared to <<copies-buffers,
+buffer to buffer copies>> means it is only recommended for very small
+amounts of data, and is why it is limited to only 65536 bytes.
+
+Applications can: work around this by issuing multiple
+fname:vkCmdUpdateBuffer commands to different ranges of the same buffer, but
+it is strongly recommended that they should: not.
+====
+
+The source data is copied from the user pointer to the command buffer when
+the command is called.
+
+fname:vkCmdUpdateBuffer is only allowed outside of a render pass.
+This command is treated as "`transfer`" operation, for the purposes of
+synchronization barriers.
+The ename:VK_BUFFER_USAGE_TRANSFER_DST_BIT must: be specified in pname:usage
+of slink:VkBufferCreateInfo in order for the buffer to be compatible with
+fname:vkCmdUpdateBuffer.
+
+.Valid Usage
+****
+  * [[VUID-vkCmdUpdateBuffer-dstOffset-00032]]
+    pname:dstOffset must: be less than the size of pname:dstBuffer
+  * [[VUID-vkCmdUpdateBuffer-dataSize-00033]]
+    pname:dataSize must: be less than or equal to the size of
+    pname:dstBuffer minus pname:dstOffset
+  * [[VUID-vkCmdUpdateBuffer-dstBuffer-00034]]
+    pname:dstBuffer must: have been created with
+    ename:VK_BUFFER_USAGE_TRANSFER_DST_BIT usage flag
+  * [[VUID-vkCmdUpdateBuffer-dstBuffer-00035]]
+    If pname:dstBuffer is non-sparse then it must: be bound completely and
+    contiguously to a single sname:VkDeviceMemory object
+  * [[VUID-vkCmdUpdateBuffer-dstOffset-00036]]
+    pname:dstOffset must: be a multiple of `4`
+  * [[VUID-vkCmdUpdateBuffer-dataSize-00037]]
+    pname:dataSize must: be less than or equal to `65536`
+  * [[VUID-vkCmdUpdateBuffer-dataSize-00038]]
+    pname:dataSize must: be a multiple of `4`
+ifdef::VK_VERSION_1_1[]
+  * [[VUID-vkCmdUpdateBuffer-commandBuffer-01813]]
+    If pname:commandBuffer is an unprotected command buffer, then
+    pname:dstBuffer must: not be a protected buffer
+  * [[VUID-vkCmdUpdateBuffer-commandBuffer-01814]]
+    If pname:commandBuffer is a protected command buffer, then
+    pname:dstBuffer must: not be an unprotected buffer
+endif::VK_VERSION_1_1[]
+****
+
+include::../validity/protos/vkCmdUpdateBuffer.txt[]
+--
+
+[NOTE]
+.Note
+====
+The pname:pData parameter was of type code:uint32_t* instead of code:void*
+prior to revision 1.0.19 of the Specification and dlink:VK_HEADER_VERSION 19
+of the <<boilerplate-headers,Vulkan Header Files>>.
+This was a historical anomaly, as the source data may be of other types.
+====

@@ -1,0 +1,150 @@
+#!/usr/bin/python3
+#
+# Copyright (c) 2016-2018 The Khronos Group Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Ensure config/extDependency.py is up-to-date before we import it.
+# If it is up to date, 'make' will print a useless warning without '-s'.
+import argparse,subprocess,sys
+subprocess.check_call(['make', '-s', 'config/extDependency.py'])
+
+# Alter sys.path to import config/extDependency.py.
+sys.path = sys.path + [ 'config' ]
+
+from genspec import *
+from extDependency import allExts, khrExts
+
+# Eventually, these may be defined by extDependency.py
+allVersions = [ 'VK_VERSION_1_0', 'VK_VERSION_1_1' ]
+Version1_0 = [ 'VK_VERSION_1_0' ]
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-internal', action='store_true',
+                        help='Generate internal build, not public')
+    parser.add_argument('-norefpages', action='store_true',
+                        help='Do not generate refpages')
+    parser.add_argument('-pdf', action='store_true',
+                        help='Always generate PDF outputs')
+    parser.add_argument('-nov11', action='store_false', dest='v11',
+                        help='Suppress Vulkan 1.1 targets')
+    parser.add_argument('-v10', action='store_true',
+                        help='Generate Vulkan 1.0 targets')
+
+    args = parser.parse_args()
+
+    if args.internal:
+        # For internal build & pseudo-release
+        repoDir = '/home/tree/git/vulkan'
+        outDir = '/home/tree/git/vulkan/out'
+    else:
+        # For public release
+        repoDir = '/home/tree/git/Vulkan-Docs'
+        outDir = '/home/tree/git/registry/vulkan/specs'
+
+        # Always build PDF for public releases
+        args.pdf = True
+
+    if args.norefpages:
+        refPageTargets = ''
+    else:
+        # Just generate separate reference pages, not the single-page
+        # 'manhtml' and 'manpdf' refpage targets.
+        refPageTargets = ' manhtmlpages'
+        # refPageTargets += ' manhtml'
+        # if args.pdf:
+        #    refPageTargets += ' manpdf'
+
+    specTargets = ' html'
+    if args.pdf:
+        specTargets += ' pdf'
+
+    print('echo Info: Building release from', repoDir, 'to', outDir)
+    print('echo Info: Building spec targets', specTargets)
+    print('')
+
+    # Vulkan 1.1 specs
+    if args.v11:
+        # Build ref pages and validusage targets only for 1.1 + all
+        # extensions.
+        buildBranch('1.1-extensions',
+                    versions = allVersions,
+                    extensions = allExts,
+                    ratified = False,
+                    apititle = '(with all registered Vulkan extensions)',
+                    xmlTargets = 'clobber install',
+                    specTargets = specTargets + ' validusage' + refPageTargets,
+                    repoDir = repoDir,
+                    outDir = outDir)
+
+        buildBranch('1.1-khr-extensions',
+                    versions = allVersions,
+                    extensions = khrExts,
+                    ratified = True,
+                    apititle = '(with KHR extensions)',
+                    xmlTargets = 'clobber install',
+                    specTargets = specTargets,
+                    repoDir = repoDir,
+                    outDir = outDir)
+
+        # Build style guide and registry documentation targets only for 1.1
+        # + no extensions.
+        buildBranch('1.1',
+                    versions = allVersions,
+                    extensions = None,
+                    ratified = True,
+                    apititle = None,
+                    xmlTargets = 'clobber install',
+                    specTargets = specTargets + ' styleguide registry',
+                    repoDir = repoDir,
+                    outDir = outDir,
+                    needRefSources = True)
+
+    # Vulkan 1.0 specs. Only build the core spec now that 1.1 is out.
+    if args.v10:
+        buildBranch('1.0-extensions',
+                versions = Version1_0,
+                extensions = allExts,
+                ratified = False,
+                apititle = '(with all registered Vulkan extensions)',
+                xmlTargets = 'clobber install',
+                specTargets = specTargets,
+                repoDir = repoDir,
+                outDir = outDir)
+
+        buildBranch('1.0-wsi_extensions',
+                versions = Version1_0,
+                extensions = khrExts,
+                ratified = True,
+                apititle = '(with KHR extensions)',
+                xmlTargets = 'clobber install',
+                specTargets = specTargets,
+                repoDir = repoDir,
+                outDir = outDir)
+
+        buildBranch('1.0',
+                versions = Version1_0,
+                extensions = None,
+                ratified = True,
+                apititle = None,
+                xmlTargets = 'clobber install',
+                specTargets = specTargets,
+                repoDir = repoDir,
+                outDir = outDir)
+    else:
+        print('echo Info: Not building 1.0 specs yet')
+
+    print('echo Info: post-generation cleanup')
+    createTags(releaseNum(), buildOnFriday())

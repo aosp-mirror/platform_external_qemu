@@ -117,6 +117,8 @@ constexpr uint64_t kDecommitChunkSize = 4096 * 4096; // 16 MB
 constexpr const char* kDefaultBootSnapshot = "default_boot";
 constexpr const char* kRamFileName = "ram.bin";
 constexpr const char* kTexturesFileName = "textures.bin";
+constexpr const char* kMappedRamFileName = "ram.img";
+constexpr const char* kMappedRamFileDirtyName = "ram.img.dirty";
 
 void resetSnapshotLiveness();
 bool isSnapshotAlive();

@@ -1,0 +1,989 @@
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[extensions]]
+= API Versions, Extensions, and Layers
+
+This chapter describes required and recommended processes for writing
+specification language for different core API versions, extensions, and API
+layers.
+It is concerned with processes and registration, while fine-grained naming
+conventions are included in the <<naming,API Naming Conventions chapter>>.
+
+[NOTE]
+.Note
+====
+The mechanism and process of specifying extensions is subject to change, as
+we receive feedback from authors and further requirements of documentation
+tooling.
+This document will be updated as changes are made.
+====
+
+
+== Introduction
+
+The Khronos extension registries and extension naming conventions serve
+several purposes:
+
+  * Avoiding naming collisions between extensions developed by mutually
+    unaware parties, both in the extension names themselves, as well as
+    their token, command, and type names.
+  * Allocating enumerant values for tokens added by extensions
+  * Creating a defined order between extensions.
+    Extensions with higher numbers may have dependencies upon extensions
+    with lower numbers, and must define any relevant interactions with
+    lower-numbered extensions.
+  * Provides a central repository for documentation and header changes
+    associated with extensions
+
+
+[[extensions-rules]]
+== General Rules/Guidelines
+
+Some general rules to simplify the specific rules below:
+
+  * API versions, extensions and layers must each have a globally unique
+    name.
+  * All commands and tokens must have a globally unique name.
+  * API versions and extensions can expose new commands, types, and/or
+    tokens, but layers must not.
+  ** However, layers can expose their own extensions, which in turn are
+     allowed to expose new commands and tokens.
+  * All extensions must be registered with Khronos.
+  * Extensions in general are strictly additive and backwards-compatible
+    with each other and with the core API.
+    However, as described in more detail the Fundamentals chapter of the
+    <<vulkan-spec,Vulkan API Specification>>, explicit incompatibilities may
+    exist, and must be documented.
+
+
+[[extensions-naming-conventions]]
+== Version, Extension, and Layer Naming Conventions
+
+Versions, extensions and layers have formal _names_.
+These names are used in a variety of places:
+
+  * When specifying extensions and layers to enable in the API.
+  * As a preprocessor symbol in the `vulkan_core.h` header file indicating
+    that an extension interface is defined at compile time.
+  * To control building the Vulkan Specification from asciidoc source
+    containing multiple versions and extensions, by explicitly enabling
+    their inclusion.
+
+[NOTE]
+.Note
+====
+Published extensions are documented as part of the `master` branch of the
+<<vulkan-docs,KhronosGroup/Vulkan-Docs>> project.
+They can optionally be included or excluded when generating specifications.
+====
+
+There is a rigid syntax for these names:
+
+  * Versions are named with the syntax `VK_VERSION_<major>_<minor>`.
+  * Extensions are named with the syntax `VK_<author>_<name>`.
+  * Layers are named with the syntax `VK_LAYER_<author>_<name>` or
+    `VK_LAYER_<fqdn>_<name>`.
+
+All these names include a `VK_` prefix, as described in the
+<<naming-preprocessor,Preprocessor Defines>> section above.
+In addition, layers add a `LAYER_` prefix.
+
+All these names must be valid C language identifiers.
+
+
+[[extensions-naming-conventions-name-strings]]
+=== Version, Extension and Layer Name Strings
+
+The `<name>` portion of version, extension and layer names is a concise name
+describing its purpose or functionality.
+The underscore (`_`) character is used as a delimiter between words.
+Every alphabetic character of the name must be in lower case.
+
+
+[[extensions-naming-author-IDs]]
+=== Author IDs for Extensions and Layers
+
+Extension and layer names also contain an _author ID_, indicated by
+`<author>` above, identifying the author of the extension/layer.
+This ID is a short, capitalized string identifying an author, such as a
+Khronos member developing Vulkan implementations for their devices, or a
+non-Khronos developer creating Vulkan layers.
+Author IDs must be registered with Khronos.
+
+Some authors have platform communities they wish to distinguish between, and
+can register additional author IDs for that purpose.
+For example, Google has separate Android and Chrome communities.
+
+Details on how to register an author ID are provided below.
+Layer authors not wishing to register an author ID with Khronos can instead
+use a fully-qualified domain name (FQDN, indicated by `<fqdn>` above) as the
+ID.
+The FQDN should be a domain name owned by the author.
+FQDNs cannot be used for extensions, only for layers.
+
+  * The following are examples of extension and layer names, demonstrating
+    the above syntax:
+  ** Extension names all use the base prefix `VK_`.
+  ** Khronos-ratified extensions add the reserved author ID `KHR` and use
+     the prefix `VK_KHR_`.
+  ** The following author IDs are reserved and must not be used:
+  *** `VK` - To avoid confusion with the top-level `VK_` prefix.
+  *** `VULKAN` - To avoid confusion with the name of the Vulkan API.
+  *** `LAYER` - To avoid confusion with the higher-level "`LAYER`" prefix.
+  *** `KHRONOS` - To avoid confusion with the Khronos organization.
+  ** Multi-author extensions that have not been ratified by Khronos (those
+     developed via cooperation between, and intended to be supported by two
+     or more registered authors) add the special author ID `EXT` to the base
+     prefix, and will use the prefix `VK_EXT_`.
+  ** Traditional author-specific extensions developed by one author (or one
+     author in cooperation with non-authors) add the author ID to the base
+     prefix.
+     For example, NVIDIA will use the prefix `VK_NV_`, and Valve will use
+     the prefix `VK_VALVE_`.
+     Some authors can have additional registered author IDs for special
+     purposes.
+     For example, an Android extension developed by Google - but part of an
+     Android open-source community project, and so not a proprietary Google
+     extension - will use the author ID `ANDROID`.
+  ** Layer names follow the same conventions as extensions, but use the base
+     prefix `VK_LAYER_`.
+  ** Because layers need not be registered with Khronos, an alternative
+     mechanism is needed to allow creating unique layer names without
+     registering an author ID.
+     Layer authors that prefer not to register an author ID can instead use
+     a fully-qualified domain name (FQDN) in reverse-order as an author ID,
+     replacing `.` (period) with `_` (underscore) characters.
+     The restriction that layer names must be valid C identifiers means that
+     some FQDNs cannot be used as part of layer names.
+
+[NOTE]
+.Note
+====
+The `KHX` author ID was used for _experimental_ extensions, as described in
+the "`Layers & Extensions`" appendix of the <<vulkan-spec,Vulkan API
+Specification>>.
+As of the initial Vulkan 1.1 public release, all `KHX` extensions have been
+promoted to `KHR` status, and this mechanism is no longer used.
+====
+
+[source, c]
+.Example
+----
+// Core API version name for Vulkan 1.1
+VK_VERSION_1_1
+
+// Khronos extension name
+VK_KHR_mirror_clamp_to_edge
+
+// Multivendor extension name
+VK_EXT_debug_marker
+
+// Vendor extension name using author ID NV
+VK_NV_glsl_shader
+
+// Vendor layer name using author ID LUNARG
+VK_LAYER_LUNARG_vktrace
+
+// Layer name using the FQDN www.3dxcl.invalid instead of an author ID
+VK_LAYER_invalid_3dxcl_www
+----
+
+[NOTE]
+.Note
+====
+To avoid linking to a nonexistent domain, the reserved TLD `.invalid` is
+used in the example above.
+====
+
+
+[[extensions-naming]]
+== Extension Command, Type, and Token Naming Conventions
+
+Extensions may add new commands, types, and tokens, or collectively
+"`objects`", to the Vulkan API.
+These objects are given globally unique names by appending the author ID
+defined above for the extension name as described in the
+<<naming-extension-identifiers, Extension Identifier Naming Conventions>>
+section above.
+
+
+[[extensions-api-registry]]
+== The Vulkan Registry
+
+The canonical definition of the Vulkan APIs is kept in an XML file known as
+the *Vulkan registry*.
+The registry is kept in `xml/vk.xml` in the `master` branch of the
+<<vulkan-docs,KhronosGroup/Vulkan-Docs>> project, containing the most
+recently released Vulkan API specification.
+The registry contains reserved author IDs, core and extension interface
+definitions, definitions of individual commands and structures, and other
+information which must be agreed on by all implementations.
+The registry is used to maintain a single, consistent global namespace for
+the registered entities, to generate the Khronos-supplied Vulkan header
+files, and to create a variety of related documentation used in generating
+the API specification and reference pages.
+Other uses of the registry outside Khronos include the LunarG Loader and
+Validation Layers, and a variety of language bindings.
+
+
+[[extensions-author-ID]]
+== Registering an Author ID with Khronos
+
+Previous Khronos APIs could only officially be modified by Khronos members.
+In an effort to build a more flexible platform, Vulkan allows non-Khronos
+developers to extend and modify the API via layers and extensions in the
+same manner as Khronos members.
+However, extensions must still be registered with Khronos.
+A mechanism for non-members to register layers and extensions is provided.
+
+Extension authors will be able to create an account on GitHub and register
+an author ID with Khronos through the
+<<vulkan-docs,KhronosGroup/Vulkan-Docs>> project.
+The author ID must be used for any extensions that author registers.
+The same mechanism will be used to request registration of extensions or
+layers with Khronos, as described below.
+
+To reserve an author ID, propose a merge request against
+<<extensions-api-registry,`vk.xml`>> in the `master` branch.
+The merge must add a `<tag>` XML tag and fill in the `name`, `author` and
++contact+ attributes with the requested author ID, the author's formal name
+(e.g. company or project name), and contact email address, respectively.
+The author ID will only be reserved once this merge request is accepted.
+
+Please do not try to reserve author IDs which clearly belong to another
+existing company or project which may wish to develop Vulkan extensions or
+layers in the future, as a matter of courtesy and respect.
+Khronos may decline to register author IDs that are not requested in good
+faith.
+
+
+[[extensions-vendor-id]]
+== Registering a Vendor ID with Khronos
+
+Vulkan implementers must report a valid vendor ID for their implementation
+when queried by fname:vkGetPhysicalDeviceProperties, as described in the
+"`Devices and Queues`" section of the <<vulkan-spec,Vulkan API
+Specification>>.
+If there is no valid PCI vendor ID defined for the physical device,
+implementations must obtain a Khronos vendor ID.
+
+Khronos vendor IDs are reserved in a similar fashion to
+<<extensions-author-ID,author IDs>>.
+While vendor IDs are not directly related to API extensions, the reservation
+process is similar, and so is described in this section.
+
+To reserve an Khronos vendor ID, you must first have a Khronos author ID.
+Propose a merge request against <<extensions-api-registry,`vk.xml`>> in the
+`master` branch.
+The merge must define a new enumerant by adding an `<enum>` tag to the
+`VkVendorId` `<enums>` tag, following the existing examples.
+The `value` attribute of the `<enum>` must be the next available unused
+value, and is the reserved vendor ID.
+The `name` attribute must be `VK_VENDOR_ID_<author>`, where `<author>` is
+the author tag.
+The vendor ID will be reserved only once this merge request has been
+accepted.
+
+Please do not try to reserve vendor IDs unless you are making a good faith
+effort to develop a Vulkan implementation and require one for that purpose.
+
+
+== Registering Extensions and Layers
+
+Extensions must be registered with Khronos.
+Layers should be registered, but registration is not required.
+Registration means:
+
+  * Receiving an extension number.
+  * Adding the extension or layer name to the list in `vk.xml` and appearing
+    on the Khronos registry website, which will link to associated
+    documentation hosted on Khronos.
+  * For extensions which add to the Vulkan API, including definitions of
+    those additions to `vk.xml`.
+
+Registration for Khronos members is handled by filing a merge request in the
+internal gitlab repository against the branch containing the core
+specification against which the extension or layer will be written.
+The merge must modify `vk.xml` to define extension names, API interfaces,
+and related information.
+Registration is not complete until the registry maintainer has validated and
+accepted the merge.
+
+Since this process could in principle be completely automated, this suggests
+a scalable mechanism for accepting registration of non-Khronos extensions.
+Non-Khronos members who want to create extensions must register with Khronos
+by creating a GitHub account, and registering their author ID and/or FQDNs
+to that account.
+They can then submit new extension registration requests by proposing merges
+to `vk.xml`.
+On acceptance of the merge, the extension will be registered, though its
+specification need not be checked into the Khronos GitHub repository at that
+point.
+
+The registration process can be split into several steps to accommodate
+extension number assignment prior to extension publication:
+
+  * Acquire an extension number.
+    This is done by proposing a merge request against `vk.xml` similarly to
+    how <<extensions-author-ID,author IDs are reserved>>.
+    The merge should add a new `<extension>` tag at the end of the file with
+    attributes specifying the proposed extension `name`, the next unused
+    sequential extension `number`, the `author` and `contact` information
+    (if different than that already specified for the author ID used in the
+    extension name), and finally, specifying `supported="disabled"`.
+    The extension number will be reserved only once this merge request is
+    accepted into the `master` branch.
+  * Develop and test the extension using the registered extension number.
+  * Publish the extension to Khronos using the previously registered
+    extension number, by submitting merge requests to the `master` branch
+    defining the changes specific to the extension.
+    Changes to both the specification source, and to `vk.xml` will be
+    needed.
+  ** Extension changes to the specification source must be protected by
+     asciidoc conditionals as described in the
+     <<extensions-documenting,Documenting Extensions>> section.
+  ** Changes to `vk.xml` must define the extension interfaces in the
+     `<extension>` block, and must also change the `supported` attribute
+     value of the `<extension>` to `supported="vulkan"`.
+  ** When publishing an extension, mark it as enabled by proposing a merge
+     to the `master` branch changing the `supported` attribute value of the
+     `<extension>` to `supported="vulkan"`.
+     This should be completely automated and under the control of the
+     publishers, to allow them to align publication on Khronos with product
+     releases.
+     However, complete automation might be difficult, since steps such as
+     regenerating and validating the Vulkan header files are involved.
+     Once the merge is accepted and the corresponding updated header with
+     the new extension interface is committed to the `master` branch,
+     publication is complete.
+  ** Publishing on the <<vulkan-docs,Khronos public GitHub repository>> is
+     preferred whenever possible.
+     Khronos members may instead create branches on Khronos' internal gitlab
+     server, but those branches will eventually be mirrored to GitHub.
+  ** Once the merge request defining an extension has been accepted into the
+     `master` branch, publication is complete - although it may not be
+     visible on GitHub until the next regular core Specification update is
+     pushed out.
+  * It is still possible to publish a separate branch of the repository with
+    appropriate changes relative to the core Vulkan API branch instead, but
+    this approach is deprecated and discouraged.
+    If this is done, all changes to `vk.xml` must still be made in the
+    `master` branch.
+
+ifdef::editing-notes[]
+[NOTE]
+.editing-note
+====
+TODO: This section is subject to change and not complete yet, but in broad
+is how we expect extension registration and specifications to work.
+The process will be refined as members and outside authors define further
+extensions.
+====
+endif::editing-notes[]
+
+
+[[extensions-documenting]]
+== Documenting API Versions and Extensions
+
+API versions and extensions are documented as modifications to the Vulkan
+specification.
+Changes specific to a version or extension are protected by asciidoc
+conditionals.
+The changes are only visible in generated documentation when the
+Specification is built with an asciidoc attribute of that name defined.
+
+For example, the `VK_KHR_surface` extension is now documented in the
+`master` branch of the GitHub `<<vulkan-docs,KhronosGroup/Vulkan-Docs>>`
+project.
+However, specifications generated from this branch will only include the
+extension when the Makefile is invoked appropriately.
+
+
+[[extensions-documenting-extensions]]
+=== Changes for New Extensions
+
+Most language defining extensions can be localized either into a small
+number of asciidoc include files which are conditionally included in the
+core specification chapters and appendices, or into parts of `vk.xml`
+defining the extension interfaces.
+
+[NOTE]
+.Note
+====
+We do not yet fully document an example of including a new version or
+extension.
+New versions are authored only by Khronos and examples will be available at
+such time that we publish a new version.
+Extension authors should refer to the `master` branch and search for the
+names of existing extensions, such as `VK_KHR_surface`, for markup examples.
+Some aspects of the changes for this example extension are described below.
+====
+
+Changes for extensions include (but may not be limited to) the following:
+
+  * All extensions must add an appendix to the Vulkan specification.
+    The appendix should be modeled after the `VK_KHR_shader_draw_parameters`
+    extension in `appendices/VK_KHR_shader_draw_parameters.txt`, which
+    contains metainformation about the extension (as well as code examples,
+    and revision history).
+    This example is complicated because `VK_KHR_shader_draw_parameters` has
+    a variety of external dependencies and interactions.
+    The `VK_EXT_debug_marker` extension is a simpler, standalone example.
+  * In the preamble to the appendix, start with an asciidoc `include` of the
+    automatically generated meta information.
+    This information includes the extension name string, type, number,
+    revision, and contact information from +vk.xml+.
+  * Following the `include`, add as many of the following sections as are
+    meaningful:
+  ** *Status* - *Complete*, *Draft*, or other.
+     When an extension is published in the `master` branch, it is normally
+     assumed to be complete; the *Status* field should be removed at this
+     time, unless it contains additional information.
+  ** *Last Modified Date* - if wanted, although git log queries can provide
+     equivalent information.
+  ** *IP Status* - Such as *No known IP claims*.
+  ** *Interactions and External Dependencies* - may include requirements or
+     interactions with optional Vulkan features, SPIR-V (+SPV+) and OpenGL
+     extensions, and interactions (other than strictly requiring) with other
+     Vulkan extensions.
+  ** *Contributors* - Names and corporate affiliations of people who have
+     made significant direct contributions to this extension.
+  * Each extension's appendix file is automatically included from
+    `appendices/extensions.txt` via code generated from `vk.xml`.
+    It is no longer neccessary to explicit include the appendices.
+  * Extensions usually make significant additions and changes to the Vulkan
+    specification.
+    They often add an entirely new chapter, or a new section of an existing
+    chapter, defining the new functions, structures, and enumerants.
+    For example, in the case of `VK_EXT_debug_marker`, it adds a new section
+    of the "`Debugging`" chapter in `chapters/debugging.txt`, by including
+    in that file:
++
+[source,asciidoc]
+.Example Markup
+----
+\ifdef::VK_EXT_debug_marker[]
+\include::chapters/VK_EXT_debug_marker/wsi.txt[]
+\endif::VK_EXT_debug_marker[]
+----
+  * In every other place where the extension alters the behavior of the core
+    Specification, make such changes and protect the modifications with the
+    same asciidoc conditionals.
+    For example, `VK_KHR_surface` adds new error codes to Vulkan.
+    These are added to `chapters/fundamentals.txt` in the "`Return Codes`"
+    section as follows:
++
+[source,asciidoc]
+.Example Markup
+----
+... list of existing error codes
+\ifdef::VK_KHR_surface[]
+\include::VK_KHR_surface/VkResultErrorDescriptions_surface.txt[]
+\endif::VK_KHR_surface[]
+----
+  * If two extensions interact, the asciidoc conditionals must be carefully
+    structured so as to properly document the interactions if the
+    specification is built with both extensions.
+    Asciidoc conditionals allow "and" and "or" constructs (see:
+    http://asciidoctor.org/docs/user-manual/#conditional-preprocessor-directives
+    and
+    http://asciidoctor.org/docs/user-manual/#checking-multiple-attributes-ifdef-and-ifndef-only).
++
+[source,asciidoc]
+.Example Markup
+----
+\ifdef::VK_KHR_foo[]
+... discussion of VK_KHR_foo ...
+\ifdef::VK_KHR_fum[]
+... discussion of interactions between VK_KHR_foo and VK_KHR_fum ...
+\endif::VK_KHR_fum[]
+\endif::VK_KHR_foo[]
+
+\ifdef::VK_KHR_fum[]
+... discussion of VK_KHR_fum ...
+\endif::VK_KHR_fum[]
+----
+  * In cases where a new extension (A) modifies both core and an existing
+    extension (B), if the new extension (A) becomes part of the core at a
+    future release (i.e. is no longer an extension), the portion of the new
+    extension that modified the existing extension (B) effectively becomes
+    part of that existing extension.
+    Thus, at the new core release, enabling the pre-existing extension (B)
+    also enables the functionality that was previously enabled by enabling
+    the previously-new extension (A).
+  * For vendor extensions, changes made to existing core Specification
+    source files and to `vk.xml` all fall under the Contributor License
+    Agreement.
+    Vendors may use their own copyright on new files they add to the
+    `master` branch, although that copyright must be compatible with the
+    Specification copyright.
+  * In most cases, there will be at most two new files added to the
+    specification: `extensions/*extension_name*.txt`, and
+    `chapters/*extension_name*.txt`.
+    If you need more than one new file in either the `chapters/` or
+    `extensions/` directories, create a subdirectory named with the
+    extension name and place the new files there.
+    For example, instead of `chapters/VK_KHR_android_surface.txt`, there is
+    `chapters/VK_KHR_android_surface/platformCreateSurface_android.txt` and
+    `chapters/VK_KHR_android_surface/platformQuerySupport_android.txt`, both
+    of which are conditionally included elsewhere in the core specification
+    files.
+  * Valid Usage statements referring to interactions between structures in a
+    pname:pNext chain must be described in the parent structure's language,
+    as specified <<extensions-interactions-parent, in more detail below>>.
+  * Valid Usage statements must: be kept atomic with regards to extension
+    conditionals - do not surround part of a single statement with
+    conditionals.
+    Valid usage statements are automatically extracted from the
+    specification for use by ecosystem components like the validation
+    layers, and the extraction scripts need to know which valid usage
+    statements apply to which extensions.
+    The loops required to deal with partial statements are simply not worth
+    the trouble.
+    For example, instead of
++
+[source,asciidoc]
+.Example Markup
+----
+  * If pname:buffer was created with a sharing mode of
+    ename:VK_SHARING_MODE_EXCLUSIVE, pname:srcQueueFamilyIndex and
+    pname:dstQueueFamilyIndex must: either both be
+    ename:VK_QUEUE_FAMILY_IGNORED, or both be a valid queue family (see
+    <<devsandqueues-queueprops>>)
+\ifdef::VK_KHR_external_memory[]
+    unless one of them is ename:VK_QUEUE_FAMILY_EXTERNAL_KHR and the other
+    is ename:VK_QUEUE_FAMILY_IGNORED.
+\endif::VK_KHR_external_memory[]
+----
++
+Use
++
+[source,asciidoc]
+.Example Markup
+----
+ifndef::VK_KHR_external_memory[]
+  * If pname:buffer was created with a sharing mode of
+    ename:VK_SHARING_MODE_EXCLUSIVE, pname:srcQueueFamilyIndex and
+    pname:dstQueueFamilyIndex must: either both be
+    ename:VK_QUEUE_FAMILY_IGNORED, or both be a valid queue family (see
+    <<devsandqueues-queueprops>>)
+endif::VK_KHR_external_memory[]
+ifdef::VK_KHR_external_memory[]
+  * If pname:buffer was created with a sharing mode of
+    ename:VK_SHARING_MODE_EXCLUSIVE, pname:srcQueueFamilyIndex and
+    pname:dstQueueFamilyIndex must: either both be
+    ename:VK_QUEUE_FAMILY_IGNORED, both be a valid queue family (see
+    <<devsandqueues-queueprops>>), or be
+    ename:VK_QUEUE_FAMILY_EXTERNAL_KHR and ename:VK_QUEUE_FAMILY_IGNORED in
+    either order
+endif::VK_KHR_external_memory[]
+----
+
+
+[[extensions-documenting-versions]]
+=== Changes for New API Versions
+
+When creating a new version of the core API, such as Vulkan 1.1, changes are
+done similarly to extensions, with the following differences:
+
+[NOTE]
+.Note
+====
+This list is being developed in conjunction with the Vulkan 1.1
+Specification, is probably incomplete, and is subject to change.
+Items marked *TBD* are still being discussed within the Vulkan Working
+Group.
+====
+
+  * New API versions will be more tightly integrated into the specification
+    sources than extensions, although it's still helpful to partition
+    changes into new files when they're sufficiently self-contained.
+  * New API versions must add an appendix to the Vulkan specification.
+    Unlike the extension appendices, this appendix simply summarizes release
+    information (dates of Ratification by the Khronos Board of Promoters,
+    and of public release), the contributor list, and high-level
+    descriptions of new features in this version (including the names of any
+    extensions promoted to core status in this version).
+  ** TBD - we might choose to include a new API summary with links into the
+     spec body for new features, as well.
+  * TBD - how to name and where to include this appendix file.
+  * Changes to the Specification for new versions will range from small
+    changes to existing language, to new commands and structures, to adding
+    entire new chapters.
+    New chapters must be defined in separate files under the `chapters/`
+    directory, and included at an appropriate point in `vkspec.txt` or other
+    specification source files.
+    Other changes and additions are included inline in existing chapters.
+  * All changes that are specific to the new version must be protected by
+    the asciidoc conditional (e.g. the version name).
+    For example, in the case of Vulkan 1.1:
++
++
+[source,asciidoc]
+.Example Markup
+----
+Add a new chapter:
+
+\ifdef::VK_VERSION_1_1[]
+\include::chapters/newchapter11.txt[]
+\endif::VK_VERSION_1_1[]
+
+Add a new feature:
+
+\ifdef::VK_VERSION_1_1[]
+... language describing the new command, structure, or enumeration
+\endif::VK_VERSION_1_1[]
+----
+  * The specification must continue to be a valid document when the new
+    version is *not* defined, so that (for example) the Vulkan 1.1 branch
+    specification can continue to be updated.
+  * TBD - how to deprecate extensions which have been promoted to core
+    status in the new version, while continuing to have those extensions
+    appear then older versions of the specification are being built.
+  * The same constraints <<extensions-documenting-extensions, described
+    above>> for Valid Usage statements modified by extensions apply for new
+    versions.
+
+
+== Assigning Extension Token Values
+
+Extensions can define their own enumeration types and assign any values to
+their enumerants that they like.
+Each enumeration has a private namespace, so collisions are not a problem.
+However, when extending existing enumeration objects with new values, care
+must be taken to preserve global uniqueness of values.
+Enumerations which define new bits in a bitmask are treated specially as
+described in <<extensions-reserving-bitmask-values,Reserving Bitmask
+Values>> below.
+
+Each extension is assigned a range of values that can be used to create
+globally-unique enum values.
+Most values will be negative numbers, but positive numbers are also
+reserved.
+The ability to create both positive and negative extension values is
+necessary to enable extending enumerations such as etext:VkResult that
+assign special meaning to negative and positive values.
+Therefore, 1000 positive and 1000 negative values are reserved for each
+extension.
+Extensions must not define enum values outside their reserved range without
+explicit permission from the owner of those values (e.g. from the author of
+another extension whose range is infringed on, or from the Khronos Registrar
+if the values do not belong to any extension's range).
+
+[NOTE]
+.Note
+====
+Typically, extensions use a unique offset for each enumeration constant they
+add, yielding 1000 distinct token values per extension.
+Since each enumeration object has its own namespace, if an extension needs
+to add many enumeration constant values, it can reuse offsets on a per-type
+basis.
+====
+
+The information needed to add new values to the XML are as follows:
+
+  * The **extension name** (e.g. `VK_KHR_swapchain`) that is adding the new
+    enumeration constant.
+  * The existing enumeration **type** being extended (e.g.
+    stext:VkStructureType).
+  * The name of the new enumeration **token** being added (e.g.
+    etext:VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR).
+  * The **offset**, which is an integer between 0 and 999 relative to the
+    base being used for the extension.
+  * The **direction** may be specified to indicate a negative value
+    (`dir="-"`) when needed for negative etext:VkResult values indicating
+    errors, like etext:VK_ERROR_SURFACE_LOST_KHR.
+    The default direction is positive, if not specified.
+
+Implicit is the registered number of an extension, which is used to create a
+range of unused values offset against a global extension base value.
+Individual enumerant values are calculated as offsets in that range.
+Values are calculated as follows:
+
+  * [eq]#_base_value_ = 1000000000#
+  * [eq]#_range_size_ = 1000#
+  * [eq]#enum_offset(_extension_number_, _offset_) = _base_value_ {plus}
+    (_extension_number_ - 1) {times} _range_size_ + _offset_#
+  * Positive values: [eq]#enum_offset(_extension_number_, _offset_})#
+  * Negative values: [eq]#enum_offset(_extension_number_, _offset_})#
+
+The exact syntax for specifying extension enumerant values is defined in the
+`readme.pdf` specifying the format of `vk.xml`, and extension authors can
+also refer to existing extensions for examples.
+
+If an extension becomes part of core, the enumerant values should remain the
+same as they were in the original extension, in order to maintain binary
+compatibility with existing applications.
+
+
+[[extensions-reserving-bitmask-values]]
+=== Reserving Bitmask Values
+
+Enumerants which define bitmask values are a special case, since there are
+only a small number of unused bits available for extensions.
+For core Vulkan API and KHR extension bitmask types, reservations must be
+approved by a vote of the Vulkan Working Group.
+For EXT and vendor extension bitmask types, reservations must be approved by
+the listed contact of the extension.
+Bits are not reserved, and must not be used in a published implementation or
+specification until the reservation is merged into
+<<extensions-api-registry,+vk.xml+>> by the registry maintainer.
+
+
+== Required Extension Tokens
+
+In addition to any tokens specific to the functionality of an extension, all
+extensions must define two additional tokens.
+
+  * `VK_EXTNAME_SPEC_VERSION` is an integer constant which is the revision
+    of the extension named `VK_extname` (`EXTNAME` is all upper-case, while
+    extname is the capitalization of the actual extension name).
+    This value begins at 1 with the initial version of an extension
+    specification, and is incremented when changes are made.
+    Note that the revision of an extension defined in the Vulkan header
+    files and the revision supported by the Vulkan implementation (the
+    pname:specVersion field of the slink:VkExtensionProperties structure
+    corresponding to the extension and returned by one of the
+    <<extended-functionality-extensions,extension queries>>) may differ.
+    The revision value indicates a patch version of the extension
+    specification, and differences in this version number maintain full
+    compatibility, as defined in the
+    link:html/vkspec.html#fundamentals-versionnum[API Version Numbers and
+    Semantics] section of the <<vulkan-spec,Vulkan API Specification>>.
+
+[NOTE]
+.Note
+====
+Any changes requiring the addition or removal of a type or command should be
+done by creating a new extension.
+The resulting extension should take care to include the appropriate
+dependency information on the original extension.
+====
+
+[NOTE]
+.Note
+====
+When the Debug Report extension (VK_EXT_debug_report) was recently updated
+to include the enum values of VK_DEBUG_REPORT_OBJECT_TYPE_DISPLAY_KHR_EXT
+and VK_DEBUG_REPORT_OBJECT_TYPE_DISPLAY_MODE_KHR_EXT, we violated this
+policy.
+That change was done prior to this revision policy clarification.
+From this point forward, we intend to follow this policy.
+====
+
+  * `VK_EXTNAME_EXTENSION_NAME` is a string constant which is the name of
+    the extension.
+
+For example, for the WSI extension `VK_KHR_surface`, at the time of writing
+the following definitions were in effect:
+
+[source,c]
+----
+#define VK_KHR_SURFACE_SPEC_VERSION 24
+#define VK_KHR_SURFACE_EXTENSION_NAME "VK_KHR_surface"
+----
+
+
+== Extension Handles, Objects, Enums, and Typedefs
+
+Expanding on previous discussion, extensions can add values to existing
+enums; and can add their own commands, enums, typedefs, etc.
+This is done by adding to <<extensions-api-registry,+vk.xml+>>.
+All such additions will be included in the Vulkan header files supplied by
+Khronos.
+
+If the extension adds a new handle to Vulkan, a corresponding value must be
+added to ename:VkObjectType (as defined in the "`Debugging`" section of the
+<<vulkan-spec,Vulkan API Specification>>) in order to allow components to
+identify and track objects of the new type.
+
+The new enumeration value must conform to the naming defined in the
+<<extension-enumerant-names,Extension Enumerant Names>> section.
+In this case, the type's etext:Vk prefix is replaced with the enum prefix
+etext:VK_OBJECT_TYPE_, and the rest of the handle name is converted as
+described in that section.
+
+[source,asciidoc]
+.Conversion of Handle to VkObjectType Examples:
+----
+ VkSurfaceKHR                  -> VK_OBJECT_TYPE_SURFACE_KHR
+ VkDescriptorUpdateTemplateKHR -> VK_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_KHR
+----
+
+[NOTE]
+.Note
+====
+Application developers are encouraged to be careful when using `switch`
+statements with Vulkan API enums.
+This is because extensions can add new values to existing enums.
+The use of a `default:` statement, within a `switch`, may avoid future
+compilation issues.
+====
+
+[[extension-function_prototypes]]
+== Extension Function Prototypes
+
+Function pointer declarations and function prototypes for all core Vulkan
+API commands are included in the Vulkan header files.
+These come from the official XML specification of the Vulkan API hosted by
+Khronos.
+
+Function pointer declarations are also included in the Vulkan header for all
+commands defined by registered extensions.
+Function prototypes for extensions may be included in the headers.
+Extension commands that are part of the Vulkan ABI must be flagged in the
+XML.
+Function prototypes will be included in the headers for all extension
+commands that are part of the Vulkan ABI.
+
+An extension can be considered platform specific, in which case its
+interfaces in the header files are protected by #ifdefs.
+This is orthogonal to whether an extension command is considered to be part
+of the Vulkan ABI.
+
+The initial set of WSI extension commands (i.e. for `VK_KHR_surface`,
+`VK_KHR_swapchain`, and `VK_KHR_*_surface`) are considered to be part of the
+Vulkan ABI.
+Function prototypes for these WSI commands are included in platform-specific
+files such as `vulkan_android.h`.
+See the "`Window System-Specific Header Control (Informative)`" section of
+the Vulkan Specification for more details.
+
+[NOTE]
+.Note
+====
+Based on feedback from implementers, Khronos expects the Android, Linux, and
+Windows Vulkan SDKs to include our header files, and export the supported
+WSI functions for those platforms from their loader libraries.
+Other implementations can make different choices for their headers and
+loader libraries, but are encouraged to be consistent with these
+implementations.
+====
+
+
+== Accessing Extension Functions from Programs
+
+flink:vkGetInstanceProcAddr and flink:vkGetDeviceProcAddr can be used in
+order to obtain function pointer addresses for core and extension commands
+(per the description in the "`Command Function Pointers`" section of the
+<<vulkan-spec,Vulkan API Specification>>).
+Different Vulkan API loaders can choose to statically export functions for
+some or all of the core Vulkan API commands, and can statically export
+functions for some or all extension commands.
+If a loader statically exports a function, an application can link against
+that function without needing to call one of the ftext:vkGet*ProcAddr
+commands.
+
+[NOTE]
+.Note
+====
+The Vulkan API loader for Android, Linux, and Windows exports functions for
+all core Vulkan API commands, and for a set of WSI extension commands that
+are applicable to those operating systems (see Vulkan loader documentation
+for the relevant platform/OS for details).
+The WSI functions are considered special, because they are required for many
+applications.
+====
+
+
+[[extensions-interactions]]
+== Extension Interactions
+
+Extensions modifying the behavior of existing commands should provide
+additional parameters by using the pname:pNext field of an existing
+structure, pointing to a new structure defined by the extension, as
+described in the "`Valid Usage`" section of the <<vulkan-spec,Vulkan API
+Specification>>.
+Extension structures defined by multiple extensions affecting the same
+structure can be chained together in this fashion.
+Any structure which can be chained in this fashion must begin with the
+following two members:
+
+["source","c++",title=""]
+----
+VkStructureType        sType;
+const void*            pNext;
+----
+
+It is in principle possible for extensions to provide additional parameters
+through alternate means, such as passing a handle parameter to a structure
+with a pname:sType defined by the extension, but this approach is
+discouraged and should not be used.
+
+When chaining multiple extensions to a structure, the implementation will
+process the chain starting with the base parameter and proceeding through
+each successive chained structure in turn.
+Extensions should be defined to accept any order of chaining, and must
+define their interactions with other extensions such that the results are
+deterministic.
+If an extension needs a specific ordering of its extension structure with
+respect to other extensions in a chain to provide deterministic results, it
+must define the required ordering and expected behavior as part of its
+specification.
+
+Validation of such extended structure chains is automatically generated from
+the registry, as described in the description of attr:structextends in
+link:registry.html[the registry document].
+
+
+[[extensions-interactions-parent]]
+== Valid Usage and Extension pname:pNext Chains
+
+When there is a Valid Usage interaction between a parent structure and
+another structure appearing in the pname:pNext chain of the parent, that
+interaction must: be described in the explicit Valid Usage section of the
+parent structure, rather than the chained structure, and must: be protected
+by appropriate extension-specific `ifdef` constructs.
+
+For example, a constraint added to the slink:VkImageCreateInfo structure by
+the presence of two extensions which cannot interact is properly described
+as:
+
+[source,asciidoc]
+.Example Markup
+----
+// CORRECT: define interaction with children in parent VkImageCreateInfo
+// structure
+\ifdef::VK_NV_external_memory+VK_KHR_external_memory[]
+  * If the pname:pNext chain contains an instance of
+    slink:VkExternalMemoryImageCreateInfoNV, it must: not contain an
+    instance of slink:VkExternalMemoryImageCreateInfoKHR.
+\endif::VK_NV_external_memory+VK_KHR_external_memory[]
+----
+
+However, a constraint added to slink:VkBufferCreateInfo by a structure in
+the `VK_NV_dedicated_allocation` extension must not be described as part of
+that structure's valid usage:
+
+[source,asciidoc]
+.Example Markup
+----
+// WRONG! Do not define interaction with parent in child
+// VkDedicatedAllocationBufferCreateInfoNV structure
+  * If pname:dedicatedAllocation is ename:VK_TRUE,
+    sname:VkBufferCreateInfo::pname:flags must: not include
+    ename:VK_BUFFER_CREATE_SPARSE_BINDING_BIT,
+    ename:VK_BUFFER_CREATE_SPARSE_RESIDENCY_BIT, or
+    ename:VK_BUFFER_CREATE_SPARSE_ALIASED_BIT
+----
+
+Instead, define the constraint as part of the parent
+slink:VkBufferCreateInfo structure's valid usage:
+
+[source,asciidoc]
+.Example Markup
+----
+// REWRITTEN CORRECTLY: Define interaction with child in
+// parent VkBufferCreateInfo structure
+\ifdef::VK_NV_dedicated_allocation[]
+  * If the pname:pNext chain contains an instance of
+    slink:VkDedicatedAllocationBufferCreateInfoNV, and the
+    pname:dedicatedAllocation member of the chained structure is
+    ename:VK_TRUE, then pname:flags must: not include
+    ename:VK_BUFFER_CREATE_SPARSE_BINDING_BIT,
+    ename:VK_BUFFER_CREATE_SPARSE_RESIDENCY_BIT, or
+    ename:VK_BUFFER_CREATE_SPARSE_ALIASED_BIT
+\endif::VK_NV_dedicated_allocation[]
+----

@@ -692,8 +692,6 @@ void GLESv2Context::initExtensionString() {
         *s_glExtensions+="GL_OES_rgb8_rgba8 ";
     if (s_glSupport.GL_EXT_color_buffer_float)
         *s_glExtensions+="GL_EXT_color_buffer_float ";
-    if (s_glSupport.ext_GL_EXT_color_buffer_half_float)
-        *s_glExtensions+="GL_EXT_color_buffer_half_float ";
 }
 
 int GLESv2Context::getMaxTexUnits() {

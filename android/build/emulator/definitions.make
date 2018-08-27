@@ -92,6 +92,9 @@ local-symbol-install-path = $(subst $(BUILD_OBJS_DIR),$(_BUILD_SYMBOLS_DIR),$(1)
 local-debug-info-install-path = $(subst $(BUILD_OBJS_DIR),$(_BUILD_DEBUG_INFO_DIR),$(1))$(if $(findstring darwin,$(BUILD_TARGET_OS)),.dSYM)
 
 # Location of resource files
+local-install-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)$(1)
+
+# Location of resource files
 local-resource-install-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)resources/$(1)
 
 # Location of test data (for unittests)

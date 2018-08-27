@@ -1,0 +1,2032 @@
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[sparsememory]]
+= Sparse Resources
+
+As documented in <<resources-association,Resource Memory Association>>,
+sname:VkBuffer and sname:VkImage resources in Vulkan must: be bound
+completely and contiguously to a single sname:VkDeviceMemory object.
+This binding must: be done before the resource is used, and the binding is
+immutable for the lifetime of the resource.
+
+_Sparse resources_ relax these restrictions and provide these additional
+features:
+
+  * Sparse resources can: be bound non-contiguously to one or more
+    sname:VkDeviceMemory allocations.
+  * Sparse resources can: be re-bound to different memory allocations over
+    the lifetime of the resource.
+  * Sparse resources can: have descriptors generated and used orthogonally
+    with memory binding commands.
+
+
+[[sparsememory-sparseresourcefeatures]]
+== Sparse Resource Features
+
+Sparse resources have several features that must: be enabled explicitly at
+resource creation time.
+The features are enabled by including bits in the pname:flags parameter of
+slink:VkImageCreateInfo or slink:VkBufferCreateInfo.
+Each feature also has one or more corresponding feature enables specified in
+slink:VkPhysicalDeviceFeatures.
+
+  * <<features-features-sparseBinding,Sparse binding>> is the base feature,
+    and provides the following capabilities:
+
+  ** Resources can: be bound at some defined (sparse block) granularity.
+  ** The entire resource must: be bound to memory before use regardless of
+     regions actually accessed.
+  ** No specific mapping of image region to memory offset is defined, i.e.
+     the location that each texel corresponds to in memory is
+     implementation-dependent.
+  ** Sparse buffers have a well-defined mapping of buffer range to memory
+     range, where an offset into a range of the buffer that is bound to a
+     single contiguous range of memory corresponds to an identical offset
+     within that range of memory.
+  ** Requested via the ename:VK_IMAGE_CREATE_SPARSE_BINDING_BIT and
+     ename:VK_BUFFER_CREATE_SPARSE_BINDING_BIT bits.
+  ** A sparse image created using ename:VK_IMAGE_CREATE_SPARSE_BINDING_BIT
+     (but not ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT) supports all
+     formats that non-sparse usage supports, and supports both
+     ename:VK_IMAGE_TILING_OPTIMAL and ename:VK_IMAGE_TILING_LINEAR tiling.
+
+  * _Sparse Residency_ builds on (and requires) the pname:sparseBinding
+    feature.
+    It includes the following capabilities:
+
+  ** Resources do not have to be completely bound to memory before use on
+     the device.
+  ** Images have a prescribed sparse image block layout, allowing specific
+     rectangular regions of the image to be bound to specific offsets in
+     memory allocations.
+  ** Consistency of access to unbound regions of the resource is defined by
+     the absence or presence of
+     sname:VkPhysicalDeviceSparseProperties::pname:residencyNonResidentStrict.
+     If this property is present, accesses to unbound regions of the
+     resource are well defined and behave as if the data bound is populated
+     with all zeros; writes are discarded.
+     When this property is absent, accesses are considered safe, but reads
+     will return undefined values.
+  ** Requested via the ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT and
+     ename:VK_BUFFER_CREATE_SPARSE_RESIDENCY_BIT bits.
+  ** [[features-features-sparseResidency]] Sparse residency support is
+     advertised on a finer grain via the following features:
++
+  *** <<features-features-sparseResidencyBuffer,pname:sparseResidencyBuffer>>:
+      Support for creating sname:VkBuffer objects with the
+      ename:VK_BUFFER_CREATE_SPARSE_RESIDENCY_BIT.
+  *** <<features-features-sparseResidencyImage2D,pname:sparseResidencyImage2D>>:
+      Support for creating 2D single-sampled sname:VkImage objects with
+      ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT.
+  *** <<features-features-sparseResidencyImage3D,pname:sparseResidencyImage3D>>:
+      Support for creating 3D sname:VkImage objects with
+      ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT.
+  *** <<features-features-sparseResidency2Samples,pname:sparseResidency2Samples>>:
+      Support for creating 2D sname:VkImage objects with 2 samples and
+      ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT.
+  *** <<features-features-sparseResidency4Samples,pname:sparseResidency4Samples>>:
+      Support for creating 2D sname:VkImage objects with 4 samples and
+      ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT.
+  *** <<features-features-sparseResidency8Samples,pname:sparseResidency8Samples>>:
+      Support for creating 2D sname:VkImage objects with 8 samples and
+      ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT.
+  *** <<features-features-sparseResidency16Samples,pname:sparseResidency16Samples>>:
+      Support for creating 2D sname:VkImage objects with 16 samples and
+      ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT.
++
+Implementations supporting pname:sparseResidencyImage2D are only required:
+to support sparse 2D, single-sampled images.
+Support for sparse 3D and MSAA images is optional: and can: be enabled via
+pname:sparseResidencyImage3D, pname:sparseResidency2Samples,
+pname:sparseResidency4Samples, pname:sparseResidency8Samples, and
+pname:sparseResidency16Samples.
+
+  ** A sparse image created using ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT
+     supports all non-compressed color formats with power-of-two element
+     size that non-sparse usage supports.
+     Additional formats may: also be supported and can: be queried via
+     flink:vkGetPhysicalDeviceSparseImageFormatProperties.
+     ename:VK_IMAGE_TILING_LINEAR tiling is not supported.
+
+  * <<features-features-sparseResidencyAliased,Sparse aliasing>> provides
+    the following capability that can: be enabled per resource:
++
+Allows physical memory ranges to be shared between multiple locations in the
+same sparse resource or between multiple sparse resources, with each binding
+of a memory location observing a consistent interpretation of the memory
+contents.
++
+See <<sparsememory-sparse-memory-aliasing,Sparse Memory Aliasing>> for more
+information.
+
+
+[[sparsememory-fully-resident]]
+== Sparse Buffers and Fully-Resident Images
+
+Both sname:VkBuffer and sname:VkImage objects created with the
+ename:VK_IMAGE_CREATE_SPARSE_BINDING_BIT or
+ename:VK_BUFFER_CREATE_SPARSE_BINDING_BIT bits can: be thought of as a
+linear region of address space.
+In the sname:VkImage case if ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT is
+not used, this linear region is entirely opaque, meaning that there is no
+application-visible mapping between texel location and memory offset.
+
+Unless ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT or
+ename:VK_BUFFER_CREATE_SPARSE_RESIDENCY_BIT are also used, the entire
+resource must: be bound to one or more sname:VkDeviceMemory objects before
+use.
+
+
+=== Sparse Buffer and Fully-Resident Image Block Size
+
+The sparse block size in bytes for sparse buffers and fully-resident images
+is reported as sname:VkMemoryRequirements::pname:alignment.
+pname:alignment represents both the memory alignment requirement and the
+binding granularity (in bytes) for sparse resources.
+
+
+[[sparsememory-partially-resident-buffers]]
+== Sparse Partially-Resident Buffers
+
+sname:VkBuffer objects created with the
+ename:VK_BUFFER_CREATE_SPARSE_RESIDENCY_BIT bit allow the buffer to be made
+only partially resident.
+Partially resident sname:VkBuffer objects are allocated and bound
+identically to sname:VkBuffer objects using only the
+ename:VK_BUFFER_CREATE_SPARSE_BINDING_BIT feature.
+The only difference is the ability for some regions of the buffer to be
+unbound during device use.
+
+
+[[sparsememory-partially-resident-images]]
+== Sparse Partially-Resident Images
+
+sname:VkImage objects created with the
+ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT bit allow specific rectangular
+regions of the image called sparse image blocks to be bound to specific
+ranges of memory.
+This allows the application to manage residency at either image subresource
+or sparse image block granularity.
+Each image subresource (outside of the <<sparsememory-miptail,mip tail>>)
+starts on a sparse block boundary and has dimensions that are integer
+multiples of the corresponding dimensions of the sparse image block.
+
+[NOTE]
+.Note
+====
+Applications can: use these types of images to control LOD based on total
+memory consumption.
+If memory pressure becomes an issue the application can: unbind and disable
+specific mipmap levels of images without having to recreate resources or
+modify texel data of unaffected levels.
+
+The application can: also use this functionality to access subregions of the
+image in a "`megatexture`" fashion.
+The application can: create a large image and only populate the region of
+the image that is currently being used in the scene.
+====
+
+
+[[sparsememory-accessing-unbound]]
+=== Accessing Unbound Regions
+
+The following member of sname:VkPhysicalDeviceSparseProperties affects how
+data in unbound regions of sparse resources are handled by the
+implementation:
+
+  * pname:residencyNonResidentStrict
+
+If this property is not present, reads of unbound regions of the image will
+return undefined values.
+Both reads and writes are still considered _safe_ and will not affect other
+resources or populated regions of the image.
+
+If this property is present, all reads of unbound regions of the image will
+behave as if the region was bound to memory populated with all zeros; writes
+will be discarded.
+
+Formatted accesses to unbound memory may: still alter some component values
+in the natural way for those accesses, e.g. substituting a value of one for
+alpha in formats that do not have an alpha component.
+
+====
+Example: Reading the alpha component of an unbacked ename:VK_FORMAT_R8_UNORM
+image will return a value of [eq]#1.0f#.
+====
+
+See <<devsandqueues-physical-device-enumeration,Physical Device
+Enumeration>> for instructions for retrieving physical device properties.
+
+ifdef::implementation-guide[]
+.Implementor's Note
+****
+For implementations that cannot: natively handle access to unbound regions
+of a resource, the implementation may: allocate and bind memory to the
+unbound regions.
+Reads and writes to unbound regions will access the implementation-managed
+memory instead.
+
+Given that reads of unbound regions are undefined in this scenario,
+implementations may: use the same physical memory for all unbound regions of
+multiple resources within the same process.
+****
+endif::implementation-guide[]
+
+
+[[sparsememory-miptail]]
+=== Mip Tail Regions
+
+Sparse images created using ename:VK_IMAGE_CREATE_SPARSE_BINDING_BIT
+(without also using ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT) have no
+specific mapping of image region or image subresource to memory offset
+defined, so the entire image can: be thought of as a linear opaque address
+region.
+However, images created with ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT do
+have a prescribed sparse image block layout, and hence each image
+subresource must: start on a sparse block boundary.
+Within each array layer, the set of mip levels that have a smaller size than
+the sparse block size in bytes are grouped together into a _mip tail
+region_.
+
+If the ename:VK_SPARSE_IMAGE_FORMAT_ALIGNED_MIP_SIZE_BIT flag is present in
+the pname:flags member of sname:VkSparseImageFormatProperties, for the
+image's pname:format, then any mip level which has dimensions that are not
+integer multiples of the corresponding dimensions of the sparse image block,
+and all subsequent mip levels, are also included in the mip tail region.
+
+The following member of sname:VkPhysicalDeviceSparseProperties may: affect
+how the implementation places mip levels in the mip tail region:
+
+  * pname:residencyAlignedMipSize
+
+Each mip tail region is bound to memory as an opaque region (i.e. must: be
+bound using a slink:VkSparseImageOpaqueMemoryBindInfo structure) and may: be
+of a size greater than or equal to the sparse block size in bytes.
+This size is guaranteed to be an integer multiple of the sparse block size
+in bytes.
+
+An implementation may: choose to allow each array-layer's mip tail region to
+be bound to memory independently or require that all array-layer's mip tail
+regions be treated as one.
+This is dictated by ename:VK_SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT in
+sname:VkSparseImageMemoryRequirements::pname:flags.
+
+The following diagrams depict how
+ename:VK_SPARSE_IMAGE_FORMAT_ALIGNED_MIP_SIZE_BIT and
+ename:VK_SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT alter memory usage and
+requirements.
+
+[%inline]
+image::images/sparseimage.svg[align="center", title="Sparse Image"]
+
+In the absence of ename:VK_SPARSE_IMAGE_FORMAT_ALIGNED_MIP_SIZE_BIT and
+ename:VK_SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT, each array layer contains a
+mip tail region containing texel data for all mip levels smaller than the
+sparse image block in any dimension.
+
+Mip levels that are as large or larger than a sparse image block in all
+dimensions can: be bound individually.
+Right-edges and bottom-edges of each level are allowed to have partially
+used sparse blocks.
+Any bound partially-used-sparse-blocks must: still have their full sparse
+block size in bytes allocated in memory.
+
+[%inline]
+image::images/sparseimage_singlemiptail.svg[align="center", title="Sparse Image with Single Mip Tail"]
+
+When ename:VK_SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT is present all array
+layers will share a single mip tail region.
+
+[%inline]
+image::images/sparseimage_alignedmipsize.svg[align="center", title="Sparse Image with Aligned Mip Size"]
+
+[NOTE]
+.Note
+====
+The mip tail regions are presented here in 2D arrays simply for figure size
+reasons.
+Each mip tail is logically a single array of sparse blocks with an
+implementation-dependent mapping of texels or compressed texel blocks to
+sparse blocks.
+====
+
+When ename:VK_SPARSE_IMAGE_FORMAT_ALIGNED_MIP_SIZE_BIT is present the first
+mip level that would contain partially used sparse blocks begins the mip
+tail region.
+This level and all subsequent levels are placed in the mip tail.
+Only the first [eq]#N# mip levels whose dimensions are an exact multiple of
+the sparse image block dimensions can: be bound and unbound on a sparse
+block basis.
+
+[%inline]
+image::images/sparseimage_alignedmipsize_singlemiptail.svg[align="center", title="Sparse Image with Aligned Mip Size and Single Mip Tail"]
+
+[NOTE]
+.Note
+====
+The mip tail region is presented here in a 2D array simply for figure size
+reasons.
+It is logically a single array of sparse blocks with an
+implementation-dependent mapping of texels or compressed texel blocks to
+sparse blocks.
+====
+
+When both ename:VK_SPARSE_IMAGE_FORMAT_ALIGNED_MIP_SIZE_BIT and
+ename:VK_SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT are present the constraints
+from each of these flags are in effect.
+
+
+[[sparsememory-standard-shapes]]
+=== Standard Sparse Image Block Shapes
+
+Standard sparse image block shapes define a standard set of dimensions for
+sparse image blocks that depend on the format of the image.
+Layout of texels or compressed texel blocks within a sparse image block is
+implementation dependent.
+All currently defined standard sparse image block shapes are 64 KB in size.
+
+For block-compressed formats (e.g. ename:VK_FORMAT_BC5_UNORM_BLOCK), the
+texel size is the size of the compressed texel block (e.g. 128-bit for
+etext:BC5) thus the dimensions of the standard sparse image block shapes
+apply in terms of compressed texel blocks.
+
+[NOTE]
+.Note
+====
+For block-compressed formats, the dimensions of a sparse image block in
+terms of texels can: be calculated by multiplying the sparse image block
+dimensions by the compressed texel block dimensions.
+====
+
+<<<
+
+[[sparsememory-sparseblockshapessingle]]
+.Standard Sparse Image Block Shapes (Single Sample)
+[options="header"]
+|====
+| TEXEL SIZE (bits) | Block Shape (2D)              | Block Shape (3D)
+| *8-Bit*           | 256 {times} 256 {times} 1     | 64 {times} 32 {times} 32
+| *16-Bit*          | 256 {times} 128 {times} 1     | 32 {times} 32 {times} 32
+| *32-Bit*          | 128 {times} 128 {times} 1     | 32 {times} 32 {times} 16
+| *64-Bit*          | 128 {times} 64 {times} 1      | 32 {times} 16 {times} 16
+| *128-Bit*         | 64 {times} 64 {times} 1       | 16 {times} 16 {times} 16
+|====
+
+[[sparsememory-sparseblockshapesmsaa]]
+.Standard Sparse Image Block Shapes (MSAA)
+[options="header"]
+|====
+| TEXEL SIZE (bits)| Block Shape (2X)            | Block Shape (4X)             | Block Shape (8X)             | Block Shape (16X)
+| *8-Bit*          | 128 {times} 256 {times} 1   | 128 {times} 128 {times} 1    | 64 {times} 128 {times} 1     | 64 {times} 64 {times} 1
+| *16-Bit*         | 128 {times} 128 {times} 1   | 128 {times} 64 {times} 1     | 64 {times} 64 {times} 1      | 64 {times} 32 {times} 1
+| *32-Bit*         | 64 {times} 128 {times} 1    | 64 {times} 64 {times} 1      | 32 {times} 64 {times} 1      | 32 {times} 32 {times} 1
+| *64-Bit*         | 64 {times} 64 {times} 1     | 64 {times} 32 {times} 1      | 32 {times} 32 {times} 1      | 32 {times} 16 {times} 1
+| *128-Bit*        | 32 {times} 64 {times} 1     | 32 {times} 32 {times} 1      | 16 {times} 32 {times} 1      | 16 {times} 16 {times} 1
+|====
+
+
+Implementations that support the standard sparse image block shape for all
+formats listed in the <<sparsememory-sparseblockshapessingle>> and
+<<sparsememory-sparseblockshapesmsaa>> tables may: advertise the following
+sname:VkPhysicalDeviceSparseProperties:
+
+  * pname:residencyStandard2DBlockShape
+  * pname:residencyStandard2DMultisampleBlockShape
+  * pname:residencyStandard3DBlockShape
+
+Reporting each of these features does _not_ imply that all possible image
+types are supported as sparse.
+Instead, this indicates that no supported sparse image of the corresponding
+type will use custom sparse image block dimensions for any formats that have
+a corresponding standard sparse image block shape.
+
+
+[[sparsememory-custom-shapes]]
+=== Custom Sparse Image Block Shapes
+
+An implementation that does not support a standard image block shape for a
+particular sparse partially-resident image may: choose to support a custom
+sparse image block shape for it instead.
+The dimensions of such a custom sparse image block shape are reported in
+sname:VkSparseImageFormatProperties::pname:imageGranularity.
+As with standard sparse image block shapes, the size in bytes of the custom
+sparse image block shape will be reported in
+sname:VkMemoryRequirements::pname:alignment.
+
+Custom sparse image block dimensions are reported through
+fname:vkGetPhysicalDeviceSparseImageFormatProperties and
+fname:vkGetImageSparseMemoryRequirements.
+
+An implementation must: not support both the standard sparse image block
+shape and a custom sparse image block shape for the same image.
+The standard sparse image block shape must: be used if it is supported.
+
+
+[[sparsememory-multiaspect]]
+=== Multiple Aspects
+
+Partially resident images are allowed to report separate sparse properties
+for different aspects of the image.
+One example is for depth/stencil images where the implementation separates
+the depth and stencil data into separate planes.
+Another reason for multiple aspects is to allow the application to manage
+memory allocation for implementation-private _metadata_ associated with the
+image.
+See the figure below:
+
+[%inline]
+image::images/sparseimage_multiaspect.svg[align="center",title="Multiple Aspect Sparse Image"]
+
+[NOTE]
+.Note
+====
+The mip tail regions are presented here in 2D arrays simply for figure size
+reasons.
+Each mip tail is logically a single array of sparse blocks with an
+implementation-dependent mapping of texels or compressed texel blocks to
+sparse blocks.
+====
+
+In the figure above the depth, stencil, and metadata aspects all have unique
+sparse properties.
+The per-texel stencil data is [eq]#{onequarter}# the size of the depth data,
+hence the stencil sparse blocks include [eq]#4 {times}# the number of
+texels.
+The sparse block size in bytes for all of the aspects is identical and
+defined by sname:VkMemoryRequirements::pname:alignment.
+
+
+==== Metadata
+
+The metadata aspect of an image has the following constraints:
+
+  * All metadata is reported in the mip tail region of the metadata aspect.
+  * All metadata must: be bound prior to device use of the sparse image.
+
+
+[[sparsememory-sparse-memory-aliasing]]
+== Sparse Memory Aliasing
+
+By default sparse resources have the same aliasing rules as non-sparse
+resources.
+See <<resources-memory-aliasing,Memory Aliasing>> for more information.
+
+sname:VkDevice objects that have the
+<<features-features-sparseResidencyAliased,sparseResidencyAliased>> feature
+enabled are able to use the ename:VK_BUFFER_CREATE_SPARSE_ALIASED_BIT and
+ename:VK_IMAGE_CREATE_SPARSE_ALIASED_BIT flags for resource creation.
+These flags allow resources to access physical memory bound into multiple
+locations within one or more sparse resources in a _data consistent_
+fashion.
+This means that reading physical memory from multiple aliased locations will
+return the same value.
+
+Care must: be taken when performing a write operation to aliased physical
+memory.
+Memory dependencies must: be used to separate writes to one alias from reads
+or writes to another alias.
+Writes to aliased memory that are not properly guarded against accesses to
+different aliases will have undefined results for all accesses to the
+aliased memory.
+
+Applications that wish to make use of data consistent sparse memory aliasing
+must: abide by the following guidelines:
+
+  * All sparse resources that are bound to aliased physical memory must: be
+    created with the ename:VK_BUFFER_CREATE_SPARSE_ALIASED_BIT /
+    ename:VK_IMAGE_CREATE_SPARSE_ALIASED_BIT flag.
+  * All resources that access aliased physical memory must: interpret the
+    memory in the same way.
+    This implies the following:
+  ** Buffers and images cannot: alias the same physical memory in a data
+     consistent fashion.
+     The physical memory ranges must: be used exclusively by buffers or used
+     exclusively by images for data consistency to be guaranteed.
+  ** Memory in sparse image mip tail regions cannot: access aliased memory
+     in a data consistent fashion.
+  ** Sparse images that alias the same physical memory must: have compatible
+     formats and be using the same sparse image block shape in order to
+     access aliased memory in a data consistent fashion.
+
+Failure to follow any of the above guidelines will require the application
+to abide by the normal, non-sparse resource <<resources-memory-aliasing,
+aliasing rules>>.
+In this case memory cannot: be accessed in a data consistent fashion.
+
+[NOTE]
+.Note
+====
+Enabling sparse resource memory aliasing can: be a way to lower physical
+memory use, but it may: reduce performance on some implementations.
+An application developer can: test on their target HW and balance the memory
+/ performance trade-offs measured.
+====
+
+
+ifdef::implementation-guide[]
+== Sparse Resource Implementation Guidelines
+
+****
+This section is Informative.
+It is included to aid in implementors`' understanding of sparse resources.
+
+.Device Virtual Address
+
+The basic pname:sparseBinding feature allows the resource to reserve its own
+device virtual address range at resource creation time rather than relying
+on a bind operation to set this.
+Without any other creation flags, no other constraints are relaxed compared
+to normal resources.
+All pages must: be bound to physical memory before the device accesses the
+resource.
+
+The <<features-features-sparseResidency,sparse residency>> features allow
+sparse resources to be used even when not all pages are bound to memory.
+Implementations that support access to unbound pages without causing a fault
+may: support pname:residencyNonResidentStrict.
+
+Not faulting on access to unbound pages is not enough to support
+pname:residencyNonResidentStrict.
+An implementation must: also guarantee that reads after writes to unbound
+regions of the resource always return data for the read as if the memory
+contains zeros.
+Depending on any caching hierarchy of the implementation this may: not
+always be possible.
+
+Any implementation that does not fault, but does not guarantee correct read
+values must: not support pname:residencyNonResidentStrict.
+
+Any implementation that cannot: access unbound pages without causing a fault
+will require the implementation to bind the entire device virtual address
+range to physical memory.
+Any pages that the application does not bind to memory may: be bound to one
+(or more) "`dummy`" physical page(s) allocated by the implementation.
+Given the following properties:
+
+  * A process must: not access memory from another process
+  * Reads return undefined values
+
+It is sufficient for each host process to allocate these dummy pages and use
+them for all resources in that process.
+Implementations may: allocate more often (per instance, per device, or per
+resource).
+
+
+.Binding Memory
+
+The byte size reported in sname:VkMemoryRequirements::pname:size must: be
+greater than or equal to the amount of physical memory required: to fully
+populate the resource.
+Some implementations require "`holes`" in the device virtual address range
+that are never accessed.
+These holes may: be included in the pname:size reported for the resource.
+
+Including or not including the device virtual address holes in the resource
+size will alter how the implementation provides support for
+sname:VkSparseImageOpaqueMemoryBindInfo.
+This operation must: be supported for all sparse images, even ones created
+with ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT.
+
+ifdef::editing-notes[]
+[NOTE]
+.editing-note
+====
+@ntrevett suggested expanding the NOTE tag below to encompass everything
+from "`The cost is...`" in the first bullet point through the current note.
+TBD.
+====
+endif::editing-notes[]
+
+  * If the holes are included in the size, this bind function becomes very
+    easy.
+    In most cases the pname:resourceOffset is simply a device virtual
+    address offset and the implementation can easily determine what device
+    virtual address to bind.
+    The cost is that the application may: allocate more physical memory for
+    the resource than it needs.
+  * If the holes are not included in the size, the application can: allocate
+    less physical memory than otherwise for the resource.
+    However, in this case the implementation must: account for the holes
+    when mapping pname:resourceOffset to the actual device virtual address
+    intended to be mapped.
+
+[NOTE]
+.Note
+====
+If the application always uses sname:VkSparseImageMemoryBindInfo to bind
+memory for the non-tail mip levels, any holes that are present in the
+resource size may: never be bound.
+
+Since sname:VkSparseImageMemoryBindInfo uses texel locations to determine
+which device virtual addresses to bind, it is impossible to bind device
+virtual address holes with this operation.
+====
+
+.Binding Metadata Memory
+
+All metadata for sparse images have their own sparse properties and are
+embedded in the mip tail region for said properties.
+See the <<sparsememory-multiaspect,Multiaspect>> section for details.
+
+Given that metadata is in a mip tail region, and the mip tail region must:
+be reported as contiguous (either globally or per-array-layer), some
+implementations will have to resort to complicated offset -> device virtual
+address mapping for handling sname:VkSparseImageOpaqueMemoryBindInfo.
+
+To make this easier on the implementation, the
+ename:VK_SPARSE_MEMORY_BIND_METADATA_BIT explicitly specifies when metadata
+is bound with sname:VkSparseImageOpaqueMemoryBindInfo.
+When this flag is not present, the pname:resourceOffset may: be treated as a
+strict device virtual address offset.
+
+When ename:VK_SPARSE_MEMORY_BIND_METADATA_BIT is present, the
+pname:resourceOffset must: have been derived explicitly from the
+pname:imageMipTailOffset in the sparse resource properties returned for the
+metadata aspect.
+By manipulating the value returned for pname:imageMipTailOffset, the
+pname:resourceOffset does not have to correlate directly to a device virtual
+address offset, and may: instead be whatever values makes it easiest for the
+implementation to derive the correct device virtual address.
+
+****
+endif::implementation-guide[]
+
+
+[[sparsememory-resourceapi]]
+== Sparse Resource API
+
+The APIs related to sparse resources are grouped into the following
+categories:
+
+  * <<sparsememory-physicalfeatures,Physical Device Features>>
+  * <<sparsememory-physicalprops,Physical Device Sparse Properties>>
+  * <<sparsememory-format-props,Sparse Image Format Properties>>
+  * <<sparsememory-resource-creation,Sparse Resource Creation>>
+  * <<sparsememory-memory-requirements,Sparse Resource Memory Requirements>>
+  * <<sparsememory-resource-binding,Binding Resource Memory>>
+
+
+[[sparsememory-physicalfeatures]]
+=== Physical Device Features
+
+Some sparse-resource related features are reported and enabled in
+sname:VkPhysicalDeviceFeatures.
+These features must: be supported and enabled on the sname:VkDevice object
+before applications can: use them.
+See <<features-features,Physical Device Features>> for information on how to
+get and set enabled device features, and for more detailed explanations of
+these features.
+
+
+==== Sparse Physical Device Features
+
+  * pname:sparseBinding: Support for creating slink:VkBuffer and
+    sname:VkImage objects with the ename:VK_BUFFER_CREATE_SPARSE_BINDING_BIT
+    and ename:VK_IMAGE_CREATE_SPARSE_BINDING_BIT flags, respectively.
+  * pname:sparseResidencyBuffer: Support for creating slink:VkBuffer objects
+    with the ename:VK_BUFFER_CREATE_SPARSE_RESIDENCY_BIT flag.
+  * pname:sparseResidencyImage2D: Support for creating 2D single-sampled
+    sname:VkImage objects with ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT.
+  * pname:sparseResidencyImage3D: Support for creating 3D slink:VkImage
+    objects with ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT.
+  * pname:sparseResidency2Samples: Support for creating 2D slink:VkImage
+    objects with 2 samples and ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT.
+  * pname:sparseResidency4Samples: Support for creating 2D slink:VkImage
+    objects with 4 samples and ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT.
+  * pname:sparseResidency8Samples: Support for creating 2D slink:VkImage
+    objects with 8 samples and ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT.
+  * pname:sparseResidency16Samples: Support for creating 2D slink:VkImage
+    objects with 16 samples and ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT.
+  * pname:sparseResidencyAliased: Support for creating slink:VkBuffer and
+    sname:VkImage objects with the ename:VK_BUFFER_CREATE_SPARSE_ALIASED_BIT
+    and ename:VK_IMAGE_CREATE_SPARSE_ALIASED_BIT flags, respectively.
+
+
+[[sparsememory-physicalprops]]
+=== Physical Device Sparse Properties
+
+Some features of the implementation are not possible to disable, and are
+reported to allow applications to alter their sparse resource usage
+accordingly.
+These read-only capabilities are reported in the
+slink:VkPhysicalDeviceProperties::pname:sparseProperties member, which is a
+structure of type sname:VkPhysicalDeviceSparseProperties.
+
+[open,refpage='VkPhysicalDeviceSparseProperties',desc='Structure specifying physical device sparse memory properties',type='structs']
+--
+
+The sname:VkPhysicalDeviceSparseProperties structure is defined as:
+
+include::../api/structs/VkPhysicalDeviceSparseProperties.txt[]
+
+  * pname:residencyStandard2DBlockShape is ename:VK_TRUE if the physical
+    device will access all single-sample 2D sparse resources using the
+    standard sparse image block shapes (based on image format), as described
+    in the <<sparsememory-sparseblockshapessingle,Standard Sparse Image
+    Block Shapes (Single Sample)>> table.
+    If this property is not supported the value returned in the
+    pname:imageGranularity member of the sname:VkSparseImageFormatProperties
+    structure for single-sample 2D images is not required: to match the
+    standard sparse image block dimensions listed in the table.
+  * pname:residencyStandard2DMultisampleBlockShape is ename:VK_TRUE if the
+    physical device will access all multisample 2D sparse resources using
+    the standard sparse image block shapes (based on image format), as
+    described in the <<sparsememory-sparseblockshapesmsaa,Standard Sparse
+    Image Block Shapes (MSAA)>> table.
+    If this property is not supported, the value returned in the
+    pname:imageGranularity member of the sname:VkSparseImageFormatProperties
+    structure for multisample 2D images is not required: to match the
+    standard sparse image block dimensions listed in the table.
+  * pname:residencyStandard3DBlockShape is ename:VK_TRUE if the physical
+    device will access all 3D sparse resources using the standard sparse
+    image block shapes (based on image format), as described in the
+    <<sparsememory-sparseblockshapessingle,Standard Sparse Image Block
+    Shapes (Single Sample)>> table.
+    If this property is not supported, the value returned in the
+    pname:imageGranularity member of the sname:VkSparseImageFormatProperties
+    structure for 3D images is not required: to match the standard sparse
+    image block dimensions listed in the table.
+  * pname:residencyAlignedMipSize is ename:VK_TRUE if images with mip level
+    dimensions that are not integer multiples of the corresponding
+    dimensions of the sparse image block may: be placed in the mip tail.
+    If this property is not reported, only mip levels with dimensions
+    smaller than the pname:imageGranularity member of the
+    sname:VkSparseImageFormatProperties structure will be placed in the mip
+    tail.
+    If this property is reported the implementation is allowed to return
+    ename:VK_SPARSE_IMAGE_FORMAT_ALIGNED_MIP_SIZE_BIT in the pname:flags
+    member of sname:VkSparseImageFormatProperties, indicating that mip level
+    dimensions that are not integer multiples of the corresponding
+    dimensions of the sparse image block will be placed in the mip tail.
+  * pname:residencyNonResidentStrict specifies whether the physical device
+    can: consistently access non-resident regions of a resource.
+    If this property is ename:VK_TRUE, access to non-resident regions of
+    resources will be guaranteed to return values as if the resource were
+    populated with 0; writes to non-resident regions will be discarded.
+
+include::../validity/structs/VkPhysicalDeviceSparseProperties.txt[]
+--
+
+
+[[sparsememory-format-props]]
+=== Sparse Image Format Properties
+
+Given that certain aspects of sparse image support, including the sparse
+image block dimensions, may: be implementation-dependent,
+flink:vkGetPhysicalDeviceSparseImageFormatProperties can: be used to query
+for sparse image format properties prior to resource creation.
+This command is used to check whether a given set of sparse image parameters
+is supported and what the sparse image block shape will be.
+
+
+==== Sparse Image Format Properties API
+
+[open,refpage='VkSparseImageFormatProperties',desc='Structure specifying sparse image format properties',type='structs']
+--
+
+The sname:VkSparseImageFormatProperties structure is defined as:
+
+include::../api/structs/VkSparseImageFormatProperties.txt[]
+
+  * pname:aspectMask is a bitmask elink:VkImageAspectFlagBits specifying
+    which aspects of the image the properties apply to.
+  * pname:imageGranularity is the width, height, and depth of the sparse
+    image block in texels or compressed texel blocks.
+  * pname:flags is a bitmask of elink:VkSparseImageFormatFlagBits specifying
+    additional information about the sparse resource.
+
+include::../validity/structs/VkSparseImageFormatProperties.txt[]
+--
+
+[open,refpage='VkSparseImageFormatFlagBits',desc='Bitmask specifying additional information about a sparse image resource',type='enums']
+--
+
+Bits which can: be set in slink:VkSparseImageFormatProperties::pname:flags,
+specifying additional information about the sparse resource, are:
+
+include::../api/enums/VkSparseImageFormatFlagBits.txt[]
+
+  * ename:VK_SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT specifies that the image
+    uses a single mip tail region for all array layers.
+  * ename:VK_SPARSE_IMAGE_FORMAT_ALIGNED_MIP_SIZE_BIT specifies that the
+    first mip level whose dimensions are not integer multiples of the
+    corresponding dimensions of the sparse image block begins the mip tail
+    region.
+  * ename:VK_SPARSE_IMAGE_FORMAT_NONSTANDARD_BLOCK_SIZE_BIT specifies that
+    the image uses non-standard sparse image block dimensions, and the
+    pname:imageGranularity values do not match the standard sparse image
+    block dimensions for the given format.
+
+--
+
+[open,refpage='VkSparseImageFormatFlags',desc='Bitmask of VkSparseImageFormatFlagBits',type='enums']
+--
+include::../api/flags/VkSparseImageFormatFlags.txt[]
+
+sname:VkSparseImageFormatFlags is a bitmask type for setting a mask of zero
+or more slink:VkSparseImageFormatFlagBits.
+--
+
+[open,refpage='vkGetPhysicalDeviceSparseImageFormatProperties',desc='Retrieve properties of an image format applied to sparse images',type='protos']
+--
+
+fname:vkGetPhysicalDeviceSparseImageFormatProperties returns an array of
+slink:VkSparseImageFormatProperties.
+Each element will describe properties for one set of image aspects that are
+bound simultaneously in the image.
+This is usually one element for each aspect in the image, but for
+interleaved depth/stencil images there is only one element describing the
+combined aspects.
+
+include::../api/protos/vkGetPhysicalDeviceSparseImageFormatProperties.txt[]
+
+  * pname:physicalDevice is the physical device from which to query the
+    sparse image capabilities.
+  * pname:format is the image format.
+  * pname:type is the dimensionality of image.
+  * pname:samples is the number of samples per texel as defined in
+    elink:VkSampleCountFlagBits.
+  * pname:usage is a bitmask describing the intended usage of the image.
+  * pname:tiling is the tiling arrangement of the data elements in memory.
+  * pname:pPropertyCount is a pointer to an integer related to the number of
+    sparse format properties available or queried, as described below.
+  * pname:pProperties is either `NULL` or a pointer to an array of
+    slink:VkSparseImageFormatProperties structures.
+
+If pname:pProperties is `NULL`, then the number of sparse format properties
+available is returned in pname:pPropertyCount.
+Otherwise, pname:pPropertyCount must: point to a variable set by the user to
+the number of elements in the pname:pProperties array, and on return the
+variable is overwritten with the number of structures actually written to
+pname:pProperties.
+If pname:pPropertyCount is less than the number of sparse format properties
+available, at most pname:pPropertyCount structures will be written.
+
+If ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT is not supported for the given
+arguments, pname:pPropertyCount will be set to zero upon return, and no data
+will be written to pname:pProperties.
+
+Multiple aspects are returned for depth/stencil images that are implemented
+as separate planes by the implementation.
+The depth and stencil data planes each have unique
+sname:VkSparseImageFormatProperties data.
+
+Depth/stencil images with depth and stencil data interleaved into a single
+plane will return a single sname:VkSparseImageFormatProperties structure
+with the pname:aspectMask set to ename:VK_IMAGE_ASPECT_DEPTH_BIT |
+ename:VK_IMAGE_ASPECT_STENCIL_BIT.
+
+.Valid Usage
+****
+  * [[VUID-vkGetPhysicalDeviceSparseImageFormatProperties-samples-01094]]
+    pname:samples must: be a bit value that is set in
+    sname:VkImageFormatProperties::pname:sampleCounts returned by
+    fname:vkGetPhysicalDeviceImageFormatProperties with pname:format,
+    pname:type, pname:tiling, and pname:usage equal to those in this command
+    and pname:flags equal to the value that is set in
+    sname:VkImageCreateInfo::pname:flags when the image is created
+****
+
+include::../validity/protos/vkGetPhysicalDeviceSparseImageFormatProperties.txt[]
+--
+
+ifdef::VK_VERSION_1_1,VK_KHR_get_physical_device_properties2[]
+
+[open,refpage='vkGetPhysicalDeviceSparseImageFormatProperties2',desc='Retrieve properties of an image format applied to sparse images',type='protos']
+--
+
+fname:vkGetPhysicalDeviceSparseImageFormatProperties2 returns an array of
+slink:VkSparseImageFormatProperties2.
+Each element will describe properties for one set of image aspects that are
+bound simultaneously in the image.
+This is usually one element for each aspect in the image, but for
+interleaved depth/stencil images there is only one element describing the
+combined aspects.
+
+ifdef::VK_VERSION_1_1[]
+include::../api/protos/vkGetPhysicalDeviceSparseImageFormatProperties2.txt[]
+endif::VK_VERSION_1_1[]
+
+ifdef::VK_VERSION_1_1+VK_KHR_get_physical_device_properties2[or the equivalent command]
+
+ifdef::VK_KHR_get_physical_device_properties2[]
+include::../api/protos/vkGetPhysicalDeviceSparseImageFormatProperties2KHR.txt[]
+endif::VK_KHR_get_physical_device_properties2[]
+
+  * pname:physicalDevice is the physical device from which to query the
+    sparse image capabilities.
+  * pname:pFormatInfo is a pointer to a structure of type
+    slink:VkPhysicalDeviceSparseImageFormatInfo2 containing input parameters
+    to the command.
+  * pname:pPropertyCount is a pointer to an integer related to the number of
+    sparse format properties available or queried, as described below.
+  * pname:pProperties is either `NULL` or a pointer to an array of
+    slink:VkSparseImageFormatProperties2 structures.
+
+fname:vkGetPhysicalDeviceSparseImageFormatProperties2 behaves identically to
+flink:vkGetPhysicalDeviceSparseImageFormatProperties, with the ability to
+return extended information by adding extension structures to the
+pname:pNext chain of its pname:pProperties parameter.
+
+include::../validity/protos/vkGetPhysicalDeviceSparseImageFormatProperties2.txt[]
+--
+
+[open,refpage='VkPhysicalDeviceSparseImageFormatInfo2',desc='Structure specifying sparse image format inputs',type='structs']
+--
+
+The sname:VkPhysicalDeviceSparseImageFormatInfo2 structure is defined as:
+
+include::../api/structs/VkPhysicalDeviceSparseImageFormatInfo2.txt[]
+
+ifdef::VK_KHR_get_physical_device_properties2[]
+or the equivalent
+
+include::../api/structs/VkPhysicalDeviceSparseImageFormatInfo2KHR.txt[]
+endif::VK_KHR_get_physical_device_properties2[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:format is the image format.
+  * pname:type is the dimensionality of image.
+  * pname:samples is the number of samples per texel as defined in
+    elink:VkSampleCountFlagBits.
+  * pname:usage is a bitmask describing the intended usage of the image.
+  * pname:tiling is the tiling arrangement of the data elements in memory.
+
+.Valid Usage
+****
+  * [[VUID-VkPhysicalDeviceSparseImageFormatInfo2-samples-01095]]
+    pname:samples must: be a bit value that is set in
+    sname:VkImageFormatProperties::pname:sampleCounts returned by
+    fname:vkGetPhysicalDeviceImageFormatProperties with pname:format,
+    pname:type, pname:tiling, and pname:usage equal to those in this command
+    and pname:flags equal to the value that is set in
+    sname:VkImageCreateInfo::pname:flags when the image is created
+****
+
+include::../validity/structs/VkPhysicalDeviceSparseImageFormatInfo2.txt[]
+--
+
+[open,refpage='VkSparseImageFormatProperties2',desc='Structure specifying sparse image format properties',type='structs']
+--
+
+The sname:VkSparseImageFormatProperties2 structure is defined as:
+
+include::../api/structs/VkSparseImageFormatProperties2.txt[]
+
+ifdef::VK_KHR_get_physical_device_properties2[]
+or the equivalent
+
+include::../api/structs/VkSparseImageFormatProperties2KHR.txt[]
+endif::VK_KHR_get_physical_device_properties2[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:properties is a structure of type
+    slink:VkSparseImageFormatProperties which is populated with the same
+    values as in flink:vkGetPhysicalDeviceSparseImageFormatProperties.
+
+include::../validity/structs/VkSparseImageFormatProperties2.txt[]
+--
+
+endif::VK_VERSION_1_1,VK_KHR_get_physical_device_properties2[]
+
+
+[[sparsememory-resource-creation]]
+=== Sparse Resource Creation
+
+Sparse resources require that one or more sparse feature flags be specified
+(as part of the sname:VkPhysicalDeviceFeatures structure described
+previously in the <<sparsememory-physicalfeatures,Physical Device Features>>
+section) at CreateDevice time.
+When the appropriate device features are enabled, the
+etext:VK_BUFFER_CREATE_SPARSE_* and etext:VK_IMAGE_CREATE_SPARSE_* flags
+can: be used.
+See flink:vkCreateBuffer and flink:vkCreateImage for details of the resource
+creation APIs.
+
+[NOTE]
+.Note
+====
+Specifying ename:VK_BUFFER_CREATE_SPARSE_RESIDENCY_BIT or
+ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT requires specifying
+ename:VK_BUFFER_CREATE_SPARSE_BINDING_BIT or
+ename:VK_IMAGE_CREATE_SPARSE_BINDING_BIT, respectively, as well.
+This means that resources must: be created with the appropriate
+etext:*_SPARSE_BINDING_BIT to be used with the sparse binding command
+(fname:vkQueueBindSparse).
+====
+
+
+[[sparsememory-memory-requirements]]
+=== Sparse Resource Memory Requirements
+
+Sparse resources have specific memory requirements related to binding sparse
+memory.
+These memory requirements are reported differently for sname:VkBuffer
+objects and sname:VkImage objects.
+
+
+[[sparsememory-memory-buffer-fully-resident]]
+==== Buffer and Fully-Resident Images
+
+Buffers (both fully and partially resident) and fully-resident images can:
+be bound to memory using only the data from sname:VkMemoryRequirements.
+For all sparse resources the sname:VkMemoryRequirements::pname:alignment
+member specifies both the bindable sparse block size in bytes and required:
+alignment of sname:VkDeviceMemory.
+
+
+[[sparsememory-memory-partially-resident]]
+==== Partially Resident Images
+
+Partially resident images have a different method for binding memory.
+As with buffers and fully resident images, the
+sname:VkMemoryRequirements::pname:alignment field specifies the bindable
+sparse block size in bytes for the image.
+
+Requesting sparse memory requirements for sname:VkImage objects using
+fname:vkGetImageSparseMemoryRequirements will return an array of one or more
+sname:VkSparseImageMemoryRequirements structures.
+Each structure describes the sparse memory requirements for a group of
+aspects of the image.
+
+The sparse image must: have been created using the
+ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT flag to retrieve valid sparse
+image memory requirements.
+
+
+==== Sparse Image Memory Requirements
+
+[open,refpage='VkSparseImageMemoryRequirements',desc='Structure specifying sparse image memory requirements',type='structs']
+--
+
+The sname:VkSparseImageMemoryRequirements structure is defined as:
+
+include::../api/structs/VkSparseImageMemoryRequirements.txt[]
+
+  * pname:formatProperties.aspectMask is the set of aspects of the image
+    that this sparse memory requirement applies to.
+    This will usually have a single aspect specified.
+    However, depth/stencil images may: have depth and stencil data
+    interleaved in the same sparse block, in which case both
+    ename:VK_IMAGE_ASPECT_DEPTH_BIT and ename:VK_IMAGE_ASPECT_STENCIL_BIT
+    would be present.
+  * pname:formatProperties.imageGranularity describes the dimensions of a
+    single bindable sparse image block in texel units.
+    For aspect ename:VK_IMAGE_ASPECT_METADATA_BIT, all dimensions will be
+    zero.
+    All metadata is located in the mip tail region.
+  * pname:formatProperties.flags is a bitmask of
+    elink:VkSparseImageFormatFlagBits:
+  ** If ename:VK_SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT is set the image
+     uses a single mip tail region for all array layers.
+  ** If ename:VK_SPARSE_IMAGE_FORMAT_ALIGNED_MIP_SIZE_BIT is set the
+     dimensions of mip levels must: be integer multiples of the
+     corresponding dimensions of the sparse image block for levels not
+     located in the mip tail.
+  ** If ename:VK_SPARSE_IMAGE_FORMAT_NONSTANDARD_BLOCK_SIZE_BIT is set the
+     image uses non-standard sparse image block dimensions.
+     The pname:formatProperties.imageGranularity values do not match the
+     standard sparse image block dimension corresponding to the image's
+     format.
+  * pname:imageMipTailFirstLod is the first mip level at which image
+    subresources are included in the mip tail region.
+  * pname:imageMipTailSize is the memory size (in bytes) of the mip tail
+    region.
+    If pname:formatProperties.flags contains
+    ename:VK_SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT, this is the size of the
+    whole mip tail, otherwise this is the size of the mip tail of a single
+    array layer.
+    This value is guaranteed to be a multiple of the sparse block size in
+    bytes.
+  * pname:imageMipTailOffset is the opaque memory offset used with
+    slink:VkSparseImageOpaqueMemoryBindInfo to bind the mip tail region(s).
+  * pname:imageMipTailStride is the offset stride between each array-layer's
+    mip tail, if pname:formatProperties.flags does not contain
+    ename:VK_SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT (otherwise the value is
+    undefined).
+
+include::../validity/structs/VkSparseImageMemoryRequirements.txt[]
+--
+
+[open,refpage='vkGetImageSparseMemoryRequirements',desc='Query the memory requirements for a sparse image',type='protos']
+--
+
+To query sparse memory requirements for an image, call:
+
+include::../api/protos/vkGetImageSparseMemoryRequirements.txt[]
+
+  * pname:device is the logical device that owns the image.
+  * pname:image is the slink:VkImage object to get the memory requirements
+    for.
+  * pname:pSparseMemoryRequirementCount is a pointer to an integer related
+    to the number of sparse memory requirements available or queried, as
+    described below.
+  * pname:pSparseMemoryRequirements is either `NULL` or a pointer to an
+    array of sname:VkSparseImageMemoryRequirements structures.
+
+If pname:pSparseMemoryRequirements is `NULL`, then the number of sparse
+memory requirements available is returned in
+pname:pSparseMemoryRequirementCount.
+Otherwise, pname:pSparseMemoryRequirementCount must: point to a variable set
+by the user to the number of elements in the pname:pSparseMemoryRequirements
+array, and on return the variable is overwritten with the number of
+structures actually written to pname:pSparseMemoryRequirements.
+If pname:pSparseMemoryRequirementCount is less than the number of sparse
+memory requirements available, at most pname:pSparseMemoryRequirementCount
+structures will be written.
+
+If the image was not created with ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT
+then pname:pSparseMemoryRequirementCount will be set to zero and
+pname:pSparseMemoryRequirements will not be written to.
+
+[NOTE]
+.Note
+====
+It is legal for an implementation to report a larger value in
+sname:VkMemoryRequirements::pname:size than would be obtained by adding
+together memory sizes for all sname:VkSparseImageMemoryRequirements returned
+by fname:vkGetImageSparseMemoryRequirements.
+This may: occur when the implementation requires unused padding in the
+address range describing the resource.
+====
+
+include::../validity/protos/vkGetImageSparseMemoryRequirements.txt[]
+--
+
+ifdef::VK_VERSION_1_1,VK_KHR_get_memory_requirements2[]
+
+[open,refpage='vkGetImageSparseMemoryRequirements2',desc='Query the memory requirements for a sparse image',type='protos']
+--
+
+To query sparse memory requirements for an image, call:
+
+ifdef::VK_VERSION_1_1[]
+include::../api/protos/vkGetImageSparseMemoryRequirements2.txt[]
+endif::VK_VERSION_1_1[]
+
+ifdef::VK_VERSION_1_1+VK_KHR_get_memory_requirements2[or the equivalent command]
+
+ifdef::VK_KHR_get_memory_requirements2[]
+include::../api/protos/vkGetImageSparseMemoryRequirements2KHR.txt[]
+endif::VK_KHR_get_memory_requirements2[]
+
+  * pname:device is the logical device that owns the image.
+  * pname:pInfo is a pointer to an instance of the
+    sname:VkImageSparseMemoryRequirementsInfo2 structure containing
+    parameters required for the memory requirements query.
+  * pname:pSparseMemoryRequirementCount is a pointer to an integer related
+    to the number of sparse memory requirements available or queried, as
+    described below.
+  * pname:pSparseMemoryRequirements is either `NULL` or a pointer to an
+    array of sname:VkSparseImageMemoryRequirements2 structures.
+
+include::../validity/protos/vkGetImageSparseMemoryRequirements2.txt[]
+--
+
+[open,refpage='VkImageSparseMemoryRequirementsInfo2',desc='(None)',type='structs']
+--
+The sname:VkImageSparseMemoryRequirementsInfo2 structure is defined as:
+
+include::../api/structs/VkImageSparseMemoryRequirementsInfo2.txt[]
+
+ifdef::VK_KHR_get_memory_requirements2[]
+or the equivalent
+
+include::../api/structs/VkImageSparseMemoryRequirementsInfo2KHR.txt[]
+endif::VK_KHR_get_memory_requirements2[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:image is the image to query.
+
+include::../validity/structs/VkImageSparseMemoryRequirementsInfo2.txt[]
+--
+
+[open,refpage='VkSparseImageMemoryRequirements2',desc='(None)',type='structs']
+--
+The sname:VkSparseImageMemoryRequirements2 structure is defined as:
+
+include::../api/structs/VkSparseImageMemoryRequirements2.txt[]
+
+ifdef::VK_KHR_get_memory_requirements2[]
+or the equivalent
+
+include::../api/structs/VkSparseImageMemoryRequirements2KHR.txt[]
+endif::VK_KHR_get_memory_requirements2[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:memoryRequirements is a structure of type
+    slink:VkSparseImageMemoryRequirements describing the memory requirements
+    of the sparse image.
+
+include::../validity/structs/VkSparseImageMemoryRequirements2.txt[]
+--
+
+endif::VK_VERSION_1_1,VK_KHR_get_memory_requirements2[]
+
+
+[[sparsememory-resource-binding]]
+=== Binding Resource Memory
+
+Non-sparse resources are backed by a single physical allocation prior to
+device use (via fname:vkBindImageMemory or fname:vkBindBufferMemory), and
+their backing must: not be changed.
+On the other hand, sparse resources can: be bound to memory non-contiguously
+and these bindings can: be altered during the lifetime of the resource.
+
+[NOTE]
+.Note
+====
+It is important to note that freeing a sname:VkDeviceMemory object with
+fname:vkFreeMemory will not cause resources (or resource regions) bound to
+the memory object to become unbound.
+Access to resources that are bound to memory objects that have been freed
+will result in undefined behavior, potentially including application
+termination.
+
+Implementations must: ensure that no access to physical memory owned by the
+system or another process will occur in this scenario.
+In other words, accessing resources bound to freed memory may: result in
+application termination, but must: not result in system termination or in
+reading non-process-accessible memory.
+====
+
+Sparse memory bindings execute on a queue that includes the
+ename:VK_QUEUE_SPARSE_BINDING_BIT bit.
+Applications must: use <<synchronization,synchronization primitives>> to
+guarantee that other queues do not access ranges of memory concurrently with
+a binding change.
+Accessing memory in a range while it is being rebound results in undefined
+behavior.
+It is valid to access other ranges of the same resource while a bind
+operation is executing.
+
+[NOTE]
+.Note
+====
+Implementations must: provide a guarantee that simultaneously binding sparse
+blocks while another queue accesses those same sparse blocks via a sparse
+resource must: not access memory owned by another process or otherwise
+corrupt the system.
+====
+
+While some implementations may: include ename:VK_QUEUE_SPARSE_BINDING_BIT
+support in queue families that also include graphics and compute support,
+other implementations may: only expose a
+ename:VK_QUEUE_SPARSE_BINDING_BIT-only queue family.
+In either case, applications must: use <<synchronization,synchronization
+primitives>> to explicitly request any ordering dependencies between sparse
+memory binding operations and other graphics/compute/transfer operations, as
+sparse binding operations are not automatically ordered against command
+buffer execution, even within a single queue.
+
+When binding memory explicitly for the ename:VK_IMAGE_ASPECT_METADATA_BIT
+the application must: use the ename:VK_SPARSE_MEMORY_BIND_METADATA_BIT in
+the sname:VkSparseMemoryBind::pname:flags field when binding memory.
+Binding memory for metadata is done the same way as binding memory for the
+mip tail, with the addition of the ename:VK_SPARSE_MEMORY_BIND_METADATA_BIT
+flag.
+
+Binding the mip tail for any aspect must: only be performed using
+slink:VkSparseImageOpaqueMemoryBindInfo.
+If pname:formatProperties.flags contains
+ename:VK_SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT, then it can: be bound with
+a single slink:VkSparseMemoryBind structure, with pname:resourceOffset =
+pname:imageMipTailOffset and pname:size = pname:imageMipTailSize.
+
+If pname:formatProperties.flags does not contain
+ename:VK_SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT then the offset for the mip
+tail in each array layer is given as:
+
+[source,c++]
+---------------------------------------------------
+arrayMipTailOffset = imageMipTailOffset + arrayLayer * imageMipTailStride;
+---------------------------------------------------
+
+and the mip tail can: be bound with code:layerCount slink:VkSparseMemoryBind
+structures, each using pname:size = pname:imageMipTailSize and
+pname:resourceOffset = ptext:arrayMipTailOffset as defined above.
+
+Sparse memory binding is handled by the following APIs and related data
+structures.
+
+
+[[sparsemem-memory-binding]]
+==== Sparse Memory Binding Functions
+
+[open,refpage='VkSparseMemoryBind',desc='Structure specifying a sparse memory bind operation',type='structs']
+--
+
+The sname:VkSparseMemoryBind structure is defined as:
+
+include::../api/structs/VkSparseMemoryBind.txt[]
+
+  * pname:resourceOffset is the offset into the resource.
+  * pname:size is the size of the memory region to be bound.
+  * pname:memory is the slink:VkDeviceMemory object that the range of the
+    resource is bound to.
+    If pname:memory is dlink:VK_NULL_HANDLE, the range is unbound.
+  * pname:memoryOffset is the offset into the slink:VkDeviceMemory object to
+    bind the resource range to.
+    If pname:memory is dlink:VK_NULL_HANDLE, this value is ignored.
+  * pname:flags is a bitmask of elink:VkSparseMemoryBindFlagBits specifying
+    usage of the binding operation.
+
+The _binding range_ [eq]#[pname:resourceOffset, pname:resourceOffset {plus}
+pname:size)# has different constraints based on pname:flags.
+If pname:flags contains ename:VK_SPARSE_MEMORY_BIND_METADATA_BIT, the
+binding range must: be within the mip tail region of the metadata aspect.
+This metadata region is defined by:
+
+  :: [eq]#metadataRegion = [base, base {plus} pname:imageMipTailSize)#
+  :: [eq]#base = pname:imageMipTailOffset {plus} pname:imageMipTailStride
+     {times} n#
+
+and pname:imageMipTailOffset, pname:imageMipTailSize, and
+pname:imageMipTailStride values are from the
+slink:VkSparseImageMemoryRequirements corresponding to the metadata aspect
+of the image, and [eq]#n# is a valid array layer index for the image,
+
+pname:imageMipTailStride is considered to be zero for aspects where
+sname:VkSparseImageMemoryRequirements::pname:formatProperties.flags contains
+ename:VK_SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT.
+
+If pname:flags does not contain ename:VK_SPARSE_MEMORY_BIND_METADATA_BIT,
+the binding range must: be within the range
+[eq]#[0,slink:VkMemoryRequirements::pname:size)#.
+
+.Valid Usage
+****
+  * [[VUID-VkSparseMemoryBind-memory-01096]]
+    If pname:memory is not dlink:VK_NULL_HANDLE, pname:memory and
+    pname:memoryOffset must: match the memory requirements of the resource,
+    as described in section <<resources-association>>
+  * [[VUID-VkSparseMemoryBind-memory-01097]]
+    If pname:memory is not dlink:VK_NULL_HANDLE, pname:memory must: not have
+    been created with a memory type that reports
+    ename:VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT bit set
+  * [[VUID-VkSparseMemoryBind-size-01098]]
+    pname:size must: be greater than `0`
+  * [[VUID-VkSparseMemoryBind-resourceOffset-01099]]
+    pname:resourceOffset must: be less than the size of the resource
+  * [[VUID-VkSparseMemoryBind-size-01100]]
+    pname:size must: be less than or equal to the size of the resource minus
+    pname:resourceOffset
+  * [[VUID-VkSparseMemoryBind-memoryOffset-01101]]
+    pname:memoryOffset must: be less than the size of pname:memory
+  * [[VUID-VkSparseMemoryBind-size-01102]]
+    pname:size must: be less than or equal to the size of pname:memory minus
+    pname:memoryOffset
+****
+
+include::../validity/structs/VkSparseMemoryBind.txt[]
+--
+
+[open,refpage='VkSparseMemoryBindFlagBits',desc='Bitmask specifying usage of a sparse memory binding operation',type='enums']
+--
+
+Bits which can: be set in slink:VkSparseMemoryBind::pname:flags, specifying
+usage of a sparse memory binding operation, are:
+
+include::../api/enums/VkSparseMemoryBindFlagBits.txt[]
+
+  * ename:VK_SPARSE_MEMORY_BIND_METADATA_BIT specifies that the memory being
+    bound is only for the metadata aspect.
+
+--
+
+[open,refpage='VkSparseMemoryBindFlags',desc='Bitmask of VkSparseMemoryBindFlagBits',type='enums']
+--
+include::../api/flags/VkSparseMemoryBindFlags.txt[]
+
+sname:VkSparseMemoryBindFlags is a bitmask type for setting a mask of zero
+or more slink:VkSparseMemoryBindFlagBits.
+--
+
+[open,refpage='VkSparseBufferMemoryBindInfo',desc='Structure specifying a sparse buffer memory bind operation',type='structs']
+--
+
+Memory is bound to sname:VkBuffer objects created with the
+ename:VK_BUFFER_CREATE_SPARSE_BINDING_BIT flag using the following
+structure:
+
+include::../api/structs/VkSparseBufferMemoryBindInfo.txt[]
+
+  * pname:buffer is the slink:VkBuffer object to be bound.
+  * pname:bindCount is the number of slink:VkSparseMemoryBind structures in
+    the pname:pBinds array.
+  * pname:pBinds is a pointer to array of slink:VkSparseMemoryBind
+    structures.
+
+include::../validity/structs/VkSparseBufferMemoryBindInfo.txt[]
+--
+
+[open,refpage='VkSparseImageOpaqueMemoryBindInfo',desc='Structure specifying sparse image opaque memory bind info',type='structs']
+--
+
+Memory is bound to opaque regions of sname:VkImage objects created with the
+ename:VK_IMAGE_CREATE_SPARSE_BINDING_BIT flag using the following structure:
+
+include::../api/structs/VkSparseImageOpaqueMemoryBindInfo.txt[]
+
+  * pname:image is the slink:VkImage object to be bound.
+  * pname:bindCount is the number of slink:VkSparseMemoryBind structures in
+    the pname:pBinds array.
+  * pname:pBinds is a pointer to array of slink:VkSparseMemoryBind
+    structures.
+
+.Valid Usage
+****
+  * [[VUID-VkSparseImageOpaqueMemoryBindInfo-pBinds-01103]]
+    If the pname:flags member of any element of pname:pBinds contains
+    ename:VK_SPARSE_MEMORY_BIND_METADATA_BIT, the binding range defined
+    must: be within the mip tail region of the metadata aspect of
+    pname:image
+****
+
+include::../validity/structs/VkSparseImageOpaqueMemoryBindInfo.txt[]
+--
+
+[NOTE]
+.Note
+====
+This operation is normally used to bind memory to fully-resident sparse
+images or for mip tail regions of partially resident images.
+However, it can: also be used to bind memory for the entire binding range of
+partially resident images.
+
+In case pname:flags does not contain
+ename:VK_SPARSE_MEMORY_BIND_METADATA_BIT, the pname:resourceOffset is in the
+range [eq]#[0, slink:VkMemoryRequirements::pname:size)#, This range includes
+data from all aspects of the image, including metadata.
+For most implementations this will probably mean that the
+pname:resourceOffset is a simple device address offset within the resource.
+It is possible for an application to bind a range of memory that includes
+both resource data and metadata.
+However, the application would not know what part of the image the memory is
+used for, or if any range is being used for metadata.
+
+When pname:flags contains ename:VK_SPARSE_MEMORY_BIND_METADATA_BIT, the
+binding range specified must: be within the mip tail region of the metadata
+aspect.
+In this case the pname:resourceOffset is not required: to be a simple device
+address offset within the resource.
+However, it _is_ defined to be within [eq]#[imageMipTailOffset,
+imageMipTailOffset {plus} imageMipTailSize)# for the metadata aspect.
+See slink:VkSparseMemoryBind for the full constraints on binding region with
+this flag present.
+====
+
+ifdef::editing-notes[]
+[NOTE]
+.editing-note
+====
+(Jon) The preceding NOTE refers to pname:flags, which is presumably a
+reference to slink:VkSparseMemoryBind above, even though that is not
+contextually clear.
+====
+endif::editing-notes[]
+
+[open,refpage='VkSparseImageMemoryBindInfo',desc='Structure specifying sparse image memory bind info',type='structs']
+--
+
+Memory can: be bound to sparse image blocks of sname:VkImage objects created
+with the ename:VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT flag using the following
+structure:
+
+include::../api/structs/VkSparseImageMemoryBindInfo.txt[]
+
+  * pname:image is the slink:VkImage object to be bound
+  * pname:bindCount is the number of slink:VkSparseImageMemoryBind
+    structures in pBinds array
+  * pname:pBinds is a pointer to array of slink:VkSparseImageMemoryBind
+    structures
+
+.Valid Usage
+****
+  * [[VUID-VkSparseImageMemoryBindInfo-subresource-01722]]
+    The pname:subresource.mipLevel member of each element of pname:pBinds
+    must: be less than the pname:mipLevels specified in
+    slink:VkImageCreateInfo when pname:image was created
+  * [[VUID-VkSparseImageMemoryBindInfo-subresource-01723]]
+    The pname:subresource.arrayLayer member of each element of pname:pBinds
+    must: be less than the pname:arrayLayers specified in
+    slink:VkImageCreateInfo when pname:image was created
+****
+
+include::../validity/structs/VkSparseImageMemoryBindInfo.txt[]
+--
+
+[open,refpage='VkSparseImageMemoryBind',desc='Structure specifying sparse image memory bind',type='structs']
+--
+
+The sname:VkSparseImageMemoryBind structure is defined as:
+
+include::../api/structs/VkSparseImageMemoryBind.txt[]
+
+  * pname:subresource is the aspectMask and region of interest in the image.
+  * pname:offset are the coordinates of the first texel within the image
+    subresource to bind.
+  * pname:extent is the size in texels of the region within the image
+    subresource to bind.
+    The extent must: be a multiple of the sparse image block dimensions,
+    except when binding sparse image blocks along the edge of an image
+    subresource it can: instead be such that any coordinate of
+    [eq]#pname:offset {plus} pname:extent# equals the corresponding
+    dimensions of the image subresource.
+  * pname:memory is the slink:VkDeviceMemory object that the sparse image
+    blocks of the image are bound to.
+    If pname:memory is dlink:VK_NULL_HANDLE, the sparse image blocks are
+    unbound.
+  * pname:memoryOffset is an offset into slink:VkDeviceMemory object.
+    If pname:memory is dlink:VK_NULL_HANDLE, this value is ignored.
+  * pname:flags are sparse memory binding flags.
+
+.Valid Usage
+****
+  * [[VUID-VkSparseImageMemoryBind-memory-01104]]
+    If the <<features-features-sparseResidencyAliased,sparse aliased
+    residency>> feature is not enabled, and if any other resources are bound
+    to ranges of pname:memory, the range of pname:memory being bound must:
+    not overlap with those bound ranges
+  * [[VUID-VkSparseImageMemoryBind-memory-01105]]
+    pname:memory and pname:memoryOffset must: match the memory requirements
+    of the calling command's pname:image, as described in section
+    <<resources-association>>
+  * [[VUID-VkSparseImageMemoryBind-subresource-01106]]
+    pname:subresource must: be a valid image subresource for pname:image
+    (see <<resources-image-views>>)
+  * [[VUID-VkSparseImageMemoryBind-offset-01107]]
+    pname:offset.x must: be a multiple of the sparse image block width
+    (sname:VkSparseImageFormatProperties::pname:imageGranularity.width) of
+    the image
+  * [[VUID-VkSparseImageMemoryBind-extent-01108]]
+    pname:extent.width must: either be a multiple of the sparse image block
+    width of the image, or else [eq]#(pname:extent.width {plus}
+    pname:offset.x)# must: equal the width of the image subresource
+  * [[VUID-VkSparseImageMemoryBind-offset-01109]]
+    pname:offset.y must: be a multiple of the sparse image block height
+    (sname:VkSparseImageFormatProperties::pname:imageGranularity.height) of
+    the image
+  * [[VUID-VkSparseImageMemoryBind-extent-01110]]
+    pname:extent.height must: either be a multiple of the sparse image block
+    height of the image, or else [eq]#(pname:extent.height {plus}
+    pname:offset.y)# must: equal the height of the image subresource
+  * [[VUID-VkSparseImageMemoryBind-offset-01111]]
+    pname:offset.z must: be a multiple of the sparse image block depth
+    (sname:VkSparseImageFormatProperties::pname:imageGranularity.depth) of
+    the image
+  * [[VUID-VkSparseImageMemoryBind-extent-01112]]
+    pname:extent.depth must: either be a multiple of the sparse image block
+    depth of the image, or else [eq]#(pname:extent.depth {plus}
+    pname:offset.z)# must: equal the depth of the image subresource
+****
+
+include::../validity/structs/VkSparseImageMemoryBind.txt[]
+--
+
+[open,refpage='vkQueueBindSparse',desc='Bind device memory to a sparse resource object',type='protos']
+--
+
+To submit sparse binding operations to a queue, call:
+
+include::../api/protos/vkQueueBindSparse.txt[]
+
+  * pname:queue is the queue that the sparse binding operations will be
+    submitted to.
+  * pname:bindInfoCount is the number of elements in the pname:pBindInfo
+    array.
+  * pname:pBindInfo is an array of slink:VkBindSparseInfo structures, each
+    specifying a sparse binding submission batch.
+  * pname:fence is an optional: handle to a fence to be signaled.
+    If pname:fence is not dlink:VK_NULL_HANDLE, it defines a
+    <<synchronization-fences-signaling, fence signal operation>>.
+
+fname:vkQueueBindSparse is a <<devsandqueues-submission,queue submission
+command>>, with each batch defined by an element of pname:pBindInfo as an
+instance of the slink:VkBindSparseInfo structure.
+Batches begin execution in the order they appear in pname:pBindInfo, but
+may: complete out of order.
+
+Within a batch, a given range of a resource must: not be bound more than
+once.
+Across batches, if a range is to be bound to one allocation and offset and
+then to another allocation and offset, then the application must: guarantee
+(usually using semaphores) that the binding operations are executed in the
+correct order, as well as to order binding operations against the execution
+of command buffer submissions.
+
+As no operation to flink:vkQueueBindSparse causes any pipeline stage to
+access memory, synchronization primitives used in this command effectively
+only define execution dependencies.
+
+Additional information about fence and semaphore operation is described in
+<<synchronization, the synchronization chapter>>.
+
+.Valid Usage
+****
+  * [[VUID-vkQueueBindSparse-fence-01113]]
+    If pname:fence is not dlink:VK_NULL_HANDLE, pname:fence must: be
+    unsignaled
+  * [[VUID-vkQueueBindSparse-fence-01114]]
+    If pname:fence is not dlink:VK_NULL_HANDLE, pname:fence must: not be
+    associated with any other queue command that has not yet completed
+    execution on that queue
+  * [[VUID-vkQueueBindSparse-pSignalSemaphores-01115]]
+    Each element of the pname:pSignalSemaphores member of each element of
+    pname:pBindInfo must: be unsignaled when the semaphore signal operation
+    it defines is executed on the device
+  * [[VUID-vkQueueBindSparse-pWaitSemaphores-01116]]
+    When a semaphore unsignal operation defined by any element of the
+    pname:pWaitSemaphores member of any element of pname:pBindInfo executes
+    on pname:queue, no other queue must: be waiting on the same semaphore.
+  * [[VUID-vkQueueBindSparse-pWaitSemaphores-01117]]
+    All elements of the pname:pWaitSemaphores member of all elements of
+    pname:pBindInfo must: be semaphores that are signaled, or have
+    <<synchronization-semaphores-signaling, semaphore signal operations>>
+    previously submitted for execution.
+****
+
+include::../validity/protos/vkQueueBindSparse.txt[]
+--
+
+[open,refpage='VkBindSparseInfo',desc='Structure specifying a sparse binding operation',type='structs']
+--
+
+The sname:VkBindSparseInfo structure is defined as:
+
+include::../api/structs/VkBindSparseInfo.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:waitSemaphoreCount is the number of semaphores upon which to wait
+    before executing the sparse binding operations for the batch.
+  * pname:pWaitSemaphores is a pointer to an array of semaphores upon which
+    to wait on before the sparse binding operations for this batch begin
+    execution.
+    If semaphores to wait on are provided, they define a
+    <<synchronization-semaphores-waiting, semaphore wait operation>>.
+  * pname:bufferBindCount is the number of sparse buffer bindings to perform
+    in the batch.
+  * pname:pBufferBinds is a pointer to an array of
+    slink:VkSparseBufferMemoryBindInfo structures.
+  * pname:imageOpaqueBindCount is the number of opaque sparse image bindings
+    to perform.
+  * pname:pImageOpaqueBinds is a pointer to an array of
+    slink:VkSparseImageOpaqueMemoryBindInfo structures, indicating opaque
+    sparse image bindings to perform.
+  * pname:imageBindCount is the number of sparse image bindings to perform.
+  * pname:pImageBinds is a pointer to an array of
+    slink:VkSparseImageMemoryBindInfo structures, indicating sparse image
+    bindings to perform.
+  * pname:signalSemaphoreCount is the number of semaphores to be signaled
+    once the sparse binding operations specified by the structure have
+    completed execution.
+  * pname:pSignalSemaphores is a pointer to an array of semaphores which
+    will be signaled when the sparse binding operations for this batch have
+    completed execution.
+    If semaphores to be signaled are provided, they define a
+    <<synchronization-semaphores-signaling, semaphore signal operation>>.
+
+include::../validity/structs/VkBindSparseInfo.txt[]
+--
+
+ifdef::VK_VERSION_1_1,VK_KHR_device_group[]
+
+[open,refpage='VkDeviceGroupBindSparseInfo',desc='Structure indicating which instances are bound',type='structs']
+--
+
+If the pname:pNext chain of slink:VkBindSparseInfo includes a
+sname:VkDeviceGroupBindSparseInfo structure, then that structure includes
+device indices specifying which instance of the resources and memory are
+bound.
+
+The sname:VkDeviceGroupBindSparseInfo structure is defined as:
+
+include::../api/structs/VkDeviceGroupBindSparseInfo.txt[]
+
+ifdef::VK_KHR_device_group[]
+or the equivalent
+
+include::../api/structs/VkDeviceGroupBindSparseInfoKHR.txt[]
+endif::VK_KHR_device_group[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:resourceDeviceIndex is a device index indicating which instance of
+    the resource is bound.
+  * pname:memoryDeviceIndex is a device index indicating which instance of
+    the memory the resource instance is bound to.
+
+These device indices apply to all buffer and image memory binds included in
+the batch that points to this structure.
+The semaphore waits and signals for the batch are executed only by the
+physical device specified by the pname:resourceDeviceIndex.
+
+If this structure is not present, pname:resourceDeviceIndex and
+pname:memoryDeviceIndex are assumed to be zero.
+
+.Valid Usage
+****
+  * [[VUID-VkDeviceGroupBindSparseInfo-resourceDeviceIndex-01118]]
+    pname:resourceDeviceIndex and pname:memoryDeviceIndex must: both be
+    valid device indices.
+  * [[VUID-VkDeviceGroupBindSparseInfo-memoryDeviceIndex-01119]]
+    Each memory allocation bound in this batch must: have allocated an
+    instance for pname:memoryDeviceIndex.
+****
+
+include::../validity/structs/VkDeviceGroupBindSparseInfo.txt[]
+
+--
+
+endif::VK_VERSION_1_1,VK_KHR_device_group[]
+
+
+[[sparsememory-examples]]
+== Examples
+
+The following examples illustrate basic creation of sparse images and
+binding them to physical memory.
+
+
+[[sparsememory-examples-basic]]
+=== Basic Sparse Resources
+
+This basic example creates a normal sname:VkImage object but uses
+fine-grained memory allocation to back the resource with multiple memory
+ranges.
+
+[source,c++]
+---------------------------------------------------
+VkDevice                device;
+VkQueue                 queue;
+VkImage                 sparseImage;
+VkAllocationCallbacks*  pAllocator = NULL;
+VkMemoryRequirements    memoryRequirements = {};
+VkDeviceSize            offset = 0;
+VkSparseMemoryBind      binds[MAX_CHUNKS] = {}; // MAX_CHUNKS is NOT part of Vulkan
+uint32_t                bindCount = 0;
+
+// ...
+
+// Allocate image object
+const VkImageCreateInfo sparseImageInfo =
+{
+    VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,        // sType
+    NULL,                                       // pNext
+    VK_IMAGE_CREATE_SPARSE_BINDING_BIT | ...,   // flags
+    ...
+};
+vkCreateImage(device, &sparseImageInfo, pAllocator, &sparseImage);
+
+// Get memory requirements
+vkGetImageMemoryRequirements(
+    device,
+    sparseImage,
+    &memoryRequirements);
+
+// Bind memory in fine-grained fashion, find available memory ranges
+// from potentially multiple VkDeviceMemory pools.
+// (Illustration purposes only, can be optimized for perf)
+while (memoryRequirements.size && bindCount < MAX_CHUNKS)
+{
+    VkSparseMemoryBind* pBind = &binds[bindCount];
+    pBind->resourceOffset = offset;
+
+    AllocateOrGetMemoryRange(
+        device,
+        &memoryRequirements,
+        &pBind->memory,
+        &pBind->memoryOffset,
+        &pBind->size);
+
+    // memory ranges must be sized as multiples of the alignment
+    assert(IsMultiple(pBind->size, memoryRequirements.alignment));
+    assert(IsMultiple(pBind->memoryOffset, memoryRequirements.alignment));
+
+    memoryRequirements.size -= pBind->size;
+    offset                  += pBind->size;
+    bindCount++;
+}
+
+// Ensure all image has backing
+if (memoryRequirements.size)
+{
+    // Error condition - too many chunks
+}
+
+const VkSparseImageOpaqueMemoryBindInfo opaqueBindInfo =
+{
+    sparseImage,                                // image
+    bindCount,                                  // bindCount
+    binds                                       // pBinds
+};
+
+const VkBindSparseInfo bindSparseInfo =
+{
+    VK_STRUCTURE_TYPE_BIND_SPARSE_INFO,         // sType
+    NULL,                                       // pNext
+    ...
+    1,                                          // imageOpaqueBindCount
+    &opaqueBindInfo,                            // pImageOpaqueBinds
+    ...
+};
+
+// vkQueueBindSparse is externally synchronized per queue object.
+AcquireQueueOwnership(queue);
+
+// Actually bind memory
+vkQueueBindSparse(queue, 1, &bindSparseInfo, VK_NULL_HANDLE);
+
+ReleaseQueueOwnership(queue);
+---------------------------------------------------
+
+
+[[sparsememory-examples-advanced]]
+=== Advanced Sparse Resources
+
+This more advanced example creates an arrayed color attachment / texture
+image and binds only LOD zero and the required: metadata to physical memory.
+
+[source,c++]
+---------------------------------------------------
+VkDevice                            device;
+VkQueue                             queue;
+VkImage                             sparseImage;
+VkAllocationCallbacks*              pAllocator = NULL;
+VkMemoryRequirements                memoryRequirements = {};
+uint32_t                            sparseRequirementsCount = 0;
+VkSparseImageMemoryRequirements*    pSparseReqs = NULL;
+VkSparseMemoryBind                  binds[MY_IMAGE_ARRAY_SIZE] = {};
+VkSparseImageMemoryBind             imageBinds[MY_IMAGE_ARRAY_SIZE] = {};
+uint32_t                            bindCount = 0;
+
+// Allocate image object (both renderable and sampleable)
+const VkImageCreateInfo sparseImageInfo =
+{
+    VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,        // sType
+    NULL,                                       // pNext
+    VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT | ..., // flags
+    ...
+    VK_FORMAT_R8G8B8A8_UNORM,                   // format
+    ...
+    MY_IMAGE_ARRAY_SIZE,                        // arrayLayers
+    ...
+    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+    VK_IMAGE_USAGE_SAMPLED_BIT,                 // usage
+    ...
+};
+vkCreateImage(device, &sparseImageInfo, pAllocator, &sparseImage);
+
+// Get memory requirements
+vkGetImageMemoryRequirements(
+    device,
+    sparseImage,
+    &memoryRequirements);
+
+// Get sparse image aspect properties
+vkGetImageSparseMemoryRequirements(
+    device,
+    sparseImage,
+    &sparseRequirementsCount,
+    NULL);
+
+pSparseReqs = (VkSparseImageMemoryRequirements*)
+    malloc(sparseRequirementsCount * sizeof(VkSparseImageMemoryRequirements));
+
+vkGetImageSparseMemoryRequirements(
+    device,
+    sparseImage,
+    &sparseRequirementsCount,
+    pSparseReqs);
+
+// Bind LOD level 0 and any required metadata to memory
+for (uint32_t i = 0; i < sparseRequirementsCount; ++i)
+{
+    if (pSparseReqs[i].formatProperties.aspectMask &
+        VK_IMAGE_ASPECT_METADATA_BIT)
+    {
+        // Metadata must not be combined with other aspects
+        assert(pSparseReqs[i].formatProperties.aspectMask ==
+               VK_IMAGE_ASPECT_METADATA_BIT);
+
+        if (pSparseReqs[i].formatProperties.flags &
+            VK_SPARSE_IMAGE_FORMAT_SINGLE_MIPTAIL_BIT)
+        {
+            VkSparseMemoryBind* pBind = &binds[bindCount];
+            pBind->memorySize = pSparseReqs[i].imageMipTailSize;
+            bindCount++;
+
+            // ... Allocate memory range
+
+            pBind->resourceOffset = pSparseReqs[i].imageMipTailOffset;
+            pBind->memoryOffset = /* allocated memoryOffset */;
+            pBind->memory = /* allocated memory */;
+            pBind->flags = VK_SPARSE_MEMORY_BIND_METADATA_BIT;
+
+        }
+        else
+        {
+            // Need a mip tail region per array layer.
+            for (uint32_t a = 0; a < sparseImageInfo.arrayLayers; ++a)
+            {
+                VkSparseMemoryBind* pBind = &binds[bindCount];
+                pBind->memorySize = pSparseReqs[i].imageMipTailSize;
+                bindCount++;
+
+                // ... Allocate memory range
+
+                pBind->resourceOffset = pSparseReqs[i].imageMipTailOffset +
+                                        (a * pSparseReqs[i].imageMipTailStride);
+
+                pBind->memoryOffset = /* allocated memoryOffset */;
+                pBind->memory = /* allocated memory */
+                pBind->flags = VK_SPARSE_MEMORY_BIND_METADATA_BIT;
+            }
+        }
+    }
+    else
+    {
+        // resource data
+        VkExtent3D lod0BlockSize =
+        {
+            AlignedDivide(
+                sparseImageInfo.extent.width,
+                pSparseReqs[i].formatProperties.imageGranularity.width);
+            AlignedDivide(
+                sparseImageInfo.extent.height,
+                pSparseReqs[i].formatProperties.imageGranularity.height);
+            AlignedDivide(
+                sparseImageInfo.extent.depth,
+                pSparseReqs[i].formatProperties.imageGranularity.depth);
+        }
+        size_t totalBlocks =
+            lod0BlockSize.width *
+            lod0BlockSize.height *
+            lod0BlockSize.depth;
+
+        // Each block is the same size as the alignment requirement,
+        // calculate total memory size for level 0
+        VkDeviceSize lod0MemSize = totalBlocks * memoryRequirements.alignment;
+
+        // Allocate memory for each array layer
+        for (uint32_t a = 0; a < sparseImageInfo.arrayLayers; ++a)
+        {
+            // ... Allocate memory range
+
+            VkSparseImageMemoryBind* pBind = &imageBinds[a];
+            pBind->subresource.aspectMask = pSparseReqs[i].formatProperties.aspectMask;
+            pBind->subresource.mipLevel = 0;
+            pBind->subresource.arrayLayer = a;
+
+            pBind->offset = (VkOffset3D){0, 0, 0};
+            pBind->extent = sparseImageInfo.extent;
+            pBind->memoryOffset = /* allocated memoryOffset */;
+            pBind->memory = /* allocated memory */;
+            pBind->flags = 0;
+        }
+    }
+
+    free(pSparseReqs);
+}
+
+const VkSparseImageOpaqueMemoryBindInfo opaqueBindInfo =
+{
+    sparseImage,                                // image
+    bindCount,                                  // bindCount
+    binds                                       // pBinds
+};
+
+const VkSparseImageMemoryBindInfo imageBindInfo =
+{
+    sparseImage,                                // image
+    sparseImageInfo.arrayLayers,                // bindCount
+    imageBinds                                  // pBinds
+};
+
+const VkBindSparseInfo bindSparseInfo =
+{
+    VK_STRUCTURE_TYPE_BIND_SPARSE_INFO,         // sType
+    NULL,                                       // pNext
+    ...
+    1,                                          // imageOpaqueBindCount
+    &opaqueBindInfo,                            // pImageOpaqueBinds
+    1,                                          // imageBindCount
+    &imageBindInfo,                             // pImageBinds
+    ...
+};
+
+// vkQueueBindSparse is externally synchronized per queue object.
+AcquireQueueOwnership(queue);
+
+// Actually bind memory
+vkQueueBindSparse(queue, 1, &bindSparseInfo, VK_NULL_HANDLE);
+
+ReleaseQueueOwnership(queue);
+---------------------------------------------------

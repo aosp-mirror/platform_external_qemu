@@ -1,0 +1,1568 @@
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
+
+[[devsandqueues]]
+= Devices and Queues
+
+Once Vulkan is initialized, devices and queues are the primary objects used
+to interact with a Vulkan implementation.
+
+[open,refpage='VkPhysicalDevice',desc='Opaque handle to a physical device object',type='handles']
+--
+
+Vulkan separates the concept of _physical_ and _logical_ devices.
+A physical device usually represents a single complete implementation of
+Vulkan (excluding instance-level functionality) available to the host, of
+which there are a finite number.
+A logical device represents an instance of that implementation with its own
+state and resources independent of other logical devices.
+
+Physical devices are represented by sname:VkPhysicalDevice handles:
+
+include::../api/handles/VkPhysicalDevice.txt[]
+
+--
+
+
+[[devsandqueues-physical-device-enumeration]]
+== Physical Devices
+
+[open,refpage='vkEnumeratePhysicalDevices',desc='Enumerates the physical devices accessible to a Vulkan instance',type='protos']
+--
+
+To retrieve a list of physical device objects representing the physical
+devices installed in the system, call:
+
+include::../api/protos/vkEnumeratePhysicalDevices.txt[]
+
+  * pname:instance is a handle to a Vulkan instance previously created with
+    flink:vkCreateInstance.
+  * pname:pPhysicalDeviceCount is a pointer to an integer related to the
+    number of physical devices available or queried, as described below.
+  * pname:pPhysicalDevices is either `NULL` or a pointer to an array of
+    sname:VkPhysicalDevice handles.
+
+If pname:pPhysicalDevices is `NULL`, then the number of physical devices
+available is returned in pname:pPhysicalDeviceCount.
+Otherwise, pname:pPhysicalDeviceCount must: point to a variable set by the
+user to the number of elements in the pname:pPhysicalDevices array, and on
+return the variable is overwritten with the number of handles actually
+written to pname:pPhysicalDevices.
+If pname:pPhysicalDeviceCount is less than the number of physical devices
+available, at most pname:pPhysicalDeviceCount structures will be written.
+If pname:pPhysicalDeviceCount is smaller than the number of physical devices
+available, ename:VK_INCOMPLETE will be returned instead of ename:VK_SUCCESS,
+to indicate that not all the available physical devices were returned.
+
+include::../validity/protos/vkEnumeratePhysicalDevices.txt[]
+--
+
+[open,refpage='vkGetPhysicalDeviceProperties',desc='Returns properties of a physical device',type='protos']
+--
+
+To query general properties of physical devices once enumerated, call:
+
+include::../api/protos/vkGetPhysicalDeviceProperties.txt[]
+
+  * pname:physicalDevice is the handle to the physical device whose
+    properties will be queried.
+  * pname:pProperties points to an instance of the
+    slink:VkPhysicalDeviceProperties structure, that will be filled with
+    returned information.
+
+include::../validity/protos/vkGetPhysicalDeviceProperties.txt[]
+--
+
+[open,refpage='VkPhysicalDeviceProperties',desc='Structure specifying physical device properties',type='structs']
+--
+
+The sname:VkPhysicalDeviceProperties structure is defined as:
+
+include::../api/structs/VkPhysicalDeviceProperties.txt[]
+
+  * pname:apiVersion is the version of Vulkan supported by the device,
+    encoded as described in the <<fundamentals-versionnum,API Version
+    Numbers and Semantics>> section.
+  * pname:driverVersion is the vendor-specified version of the driver.
+  * pname:vendorID is a unique identifier for the _vendor_ (see below) of
+    the physical device.
+  * pname:deviceID is a unique identifier for the physical device among
+    devices available from the vendor.
+  * pname:deviceType is a elink:VkPhysicalDeviceType specifying the type of
+    device.
+  * pname:deviceName is a null-terminated UTF-8 string containing the name
+    of the device.
+  * pname:pipelineCacheUUID is an array of size ename:VK_UUID_SIZE,
+    containing 8-bit values that represent a universally unique identifier
+    for the device.
+  * pname:limits is the slink:VkPhysicalDeviceLimits structure which
+    specifies device-specific limits of the physical device.
+    See <<features-limits,Limits>> for details.
+  * pname:sparseProperties is the slink:VkPhysicalDeviceSparseProperties
+    structure which specifies various sparse related properties of the
+    physical device.
+    See <<sparsememory-physicalprops,Sparse Properties>> for details.
+
+ifdef::VK_VERSION_1_1[]
+[NOTE]
+.Note
+====
+The value of pname:apiVersion may: be different than the version returned by
+flink:vkEnumerateInstanceVersion; either higher or lower.
+In such cases, the application must: not use functionality that exceeds the
+version of Vulkan associated with a given object.
+The pname:pApiVersion parameter returned by flink:vkEnumerateInstanceVersion
+is the version associated with a slink:VkInstance and its children, except
+for a slink:VkPhysicalDevice and its children.
+sname:VkPhysicalDeviceProperties::pname:apiVersion is the version associated
+with a slink:VkPhysicalDevice and its children.
+====
+endif::VK_VERSION_1_1[]
+
+The pname:vendorID and pname:deviceID fields are provided to allow
+applications to adapt to device characteristics that are not adequately
+exposed by other Vulkan queries.
+
+[NOTE]
+.Note
+====
+These may: include performance profiles, hardware errata, or other
+characteristics.
+====
+
+The _vendor_ identified by pname:vendorID is the entity responsible for the
+most salient characteristics of the underlying implementation of the
+slink:VkPhysicalDevice being queried.
+
+[NOTE]
+.Note
+====
+For example, in the case of a discrete GPU implementation, this should: be
+the GPU chipset vendor.
+In the case of a hardware accelerator integrated into a system-on-chip
+(SoC), this should: be the supplier of the silicon IP used to create the
+accelerator.
+====
+
+If the vendor has a https://pcisig.com/membership/member-companies[PCI
+vendor ID], the low 16 bits of pname:vendorID must: contain that PCI vendor
+ID, and the remaining bits must: be set to zero.
+Otherwise, the value returned must: be a valid Khronos vendor ID, obtained
+as described in the <<vulkan-styleguide,Vulkan Documentation and Extensions:
+Procedures and Conventions>> document in the section "`Registering a Vendor
+ID with Khronos`".
+Khronos vendor IDs are allocated starting at 0x10000, to distinguish them
+from the PCI vendor ID namespace.
+Khronos vendor IDs are symbolically defined in the elink:VkVendorId type.
+
+The vendor is also responsible for the value returned in pname:deviceID.
+If the implementation is driven primarily by a https://pcisig.com/[PCI
+device] with a https://pcisig.com/[PCI device ID], the low 16 bits of
+pname:deviceID must: contain that PCI device ID, and the remaining bits
+must: be set to zero.
+Otherwise, the choice of what values to return may: be dictated by operating
+system or platform policies - but should: uniquely identify both the device
+version and any major configuration options (for example, core count in the
+case of multicore devices).
+
+[NOTE]
+.Note
+====
+The same device ID should: be used for all physical implementations of that
+device version and configuration.
+For example, all uses of a specific silicon IP GPU version and configuration
+should: use the same device ID, even if those uses occur in different SoCs.
+====
+
+include::../validity/structs/VkPhysicalDeviceProperties.txt[]
+--
+
+[open,refpage='VkVendorId',desc='Khronos vendor IDs',type='enums']
+--
+Khronos vendor IDs which may: be returned in
+slink:VkPhysicalDeviceProperties::pname:vendorID are:
+
+include::../api/enums/VkVendorId.txt[]
+
+[NOTE]
+.Note
+====
+Khronos vendor IDs may be allocated by vendors at any time.
+Only the latest canonical versions of this Specification, of the
+corresponding `vk.xml` API Registry, and of the corresponding
+`vulkan_core.h` header file must: contain all reserved Khronos vendor IDs.
+
+Only Khronos vendor IDs are given symbolic names at present.
+PCI vendor IDs returned by the implementation can be looked up in the
+PCI-SIG database.
+====
+
+--
+
+
+[open,refpage='VkPhysicalDeviceType',desc='Supported physical device types',type='enums']
+--
+
+The physical device types which may: be returned in
+slink:VkPhysicalDeviceProperties::pname:deviceType are:
+
+include::../api/enums/VkPhysicalDeviceType.txt[]
+
+  * ename:VK_PHYSICAL_DEVICE_TYPE_OTHER - the device does not match any
+    other available types.
+  * ename:VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU - the device is typically
+    one embedded in or tightly coupled with the host.
+  * ename:VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU - the device is typically a
+    separate processor connected to the host via an interlink.
+  * ename:VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU - the device is typically a
+    virtual node in a virtualization environment.
+  * ename:VK_PHYSICAL_DEVICE_TYPE_CPU - the device is typically running on
+    the same processors as the host.
+
+The physical device type is advertised for informational purposes only, and
+does not directly affect the operation of the system.
+However, the device type may: correlate with other advertised properties or
+capabilities of the system, such as how many memory heaps there are.
+
+--
+
+ifdef::VK_VERSION_1_1,VK_KHR_get_physical_device_properties2[]
+
+[open,refpage='vkGetPhysicalDeviceProperties2',desc='Returns properties of a physical device',type='protos']
+--
+
+To query general properties of physical devices once enumerated, call:
+
+ifdef::VK_VERSION_1_1[]
+include::../api/protos/vkGetPhysicalDeviceProperties2.txt[]
+endif::VK_VERSION_1_1[]
+
+ifdef::VK_VERSION_1_1+VK_KHR_get_physical_device_properties2[or the equivalent command]
+
+ifdef::VK_KHR_get_physical_device_properties2[]
+include::../api/protos/vkGetPhysicalDeviceProperties2KHR.txt[]
+endif::VK_KHR_get_physical_device_properties2[]
+
+  * pname:physicalDevice is the handle to the physical device whose
+    properties will be queried.
+  * pname:pProperties points to an instance of the
+    slink:VkPhysicalDeviceProperties2 structure, that will be filled with
+    returned information.
+
+Each structure in pname:pProperties and its pname:pNext chain contain
+members corresponding to properties or implementation-dependent limits.
+fname:vkGetPhysicalDeviceProperties2 writes each member to a value
+indicating the value of that property or limit.
+
+include::../validity/protos/vkGetPhysicalDeviceProperties2.txt[]
+--
+
+[open,refpage='VkPhysicalDeviceProperties2',desc='Structure specifying physical device properties',type='structs']
+--
+
+The sname:VkPhysicalDeviceProperties2 structure is defined as:
+
+include::../api/structs/VkPhysicalDeviceProperties2.txt[]
+
+ifdef::VK_KHR_get_physical_device_properties2[]
+or the equivalent
+
+include::../api/structs/VkPhysicalDeviceProperties2KHR.txt[]
+endif::VK_KHR_get_physical_device_properties2[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:properties is a structure of type slink:VkPhysicalDeviceProperties
+    describing the properties of the physical device.
+    This structure is written with the same values as if it were written by
+    flink:vkGetPhysicalDeviceProperties.
+
+The pname:pNext chain of this structure is used to extend the structure with
+properties defined by extensions.
+
+include::../validity/structs/VkPhysicalDeviceProperties2.txt[]
+--
+
+ifdef::VK_VERSION_1_1,VK_KHR_external_memory_capabilities,VK_KHR_external_semaphore_capabilities,VK_KHR_external_fence_capabilities[]
+
+[open,refpage='VkPhysicalDeviceIDProperties',desc='Structure specifying IDs related to the physical device',type='structs']
+--
+
+To query the UUID and LUID of a device, add
+slink:VkPhysicalDeviceIDProperties to the pname:pNext chain of the
+slink:VkPhysicalDeviceProperties2 structure.
+The sname:VkPhysicalDeviceIDProperties structure is defined as:
+
+include::../api/structs/VkPhysicalDeviceIDProperties.txt[]
+
+ifdef::VK_KHR_external_memory_capabilities[]
+or the equivalent
+
+include::../api/structs/VkPhysicalDeviceIDPropertiesKHR.txt[]
+endif::VK_KHR_external_memory_capabilities[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:deviceUUID is an array of size ename:VK_UUID_SIZE, containing
+    8-bit values that represent a universally unique identifier for the
+    device.
+  * pname:driverUUID is an array of size ename:VK_UUID_SIZE, containing
+    8-bit values that represent a universally unique identifier for the
+    driver build in use by the device.
+  * pname:deviceLUID is an array of size ename:VK_LUID_SIZE, containing
+    8-bit values that represent a locally unique identifier for the device.
+  * pname:deviceNodeMask is a bitfield identifying the node within a linked
+    device adapter corresponding to the device.
+  * pname:deviceLUIDValid is a boolean value that will be ename:VK_TRUE if
+    pname:deviceLUID contains a valid LUID and pname:deviceNodeMask contains
+    a valid node mask, and ename:VK_FALSE if they do not.
+
+pname:deviceUUID must: be immutable for a given device across instances,
+processes, driver APIs, driver versions, and system reboots.
+
+Applications can: compare the pname:driverUUID value across instance and
+process boundaries, and can: make similar queries in external APIs to
+determine whether they are capable of sharing memory objects and resources
+using them with the device.
+
+pname:deviceUUID and/or pname:driverUUID must: be used to determine whether
+a particular external object can be shared between driver components, where
+such a restriction exists as defined in the compatibility table for the
+particular object type:
+
+ifdef::VK_VERSION_1_1,VK_KHR_external_memory_capabilities[]
+  * <<external-memory-handle-types-compatibility,External memory handle
+    types compatibility>>
+endif::VK_VERSION_1_1,VK_KHR_external_memory_capabilities[]
+ifdef::VK_VERSION_1_1,VK_KHR_external_semaphore_capabilities[]
+  * <<external-semaphore-handle-types-compatibility,External semaphore
+    handle types compatibility>>
+endif::VK_VERSION_1_1,VK_KHR_external_semaphore_capabilities[]
+ifdef::VK_VERSION_1_1,VK_KHR_external_fence_capabilities[]
+  * <<external-fence-handle-types-compatibility,External fence handle types
+    compatibility>>
+endif::VK_VERSION_1_1,VK_KHR_external_fence_capabilities[]
+
+If pname:deviceLUIDValid is ename:VK_FALSE, the contents of pname:deviceLUID
+and pname:deviceNodeMask are undefined.
+If pname:deviceLUIDValid is ename:VK_TRUE and Vulkan is running on the
+Windows operating system, the contents of pname:deviceLUID can: be cast to
+an sname:LUID object and must: be equal to the locally unique identifier of
+a sname:IDXGIAdapter1 object that corresponds to pname:physicalDevice.
+If pname:deviceLUIDValid is ename:VK_TRUE, pname:deviceNodeMask must:
+contain exactly one bit.
+If Vulkan is running on an operating system that supports the Direct3D 12
+API and pname:physicalDevice corresponds to an individual device in a linked
+device adapter, pname:deviceNodeMask identifies the Direct3D 12 node
+corresponding to pname:physicalDevice.
+Otherwise, pname:deviceNodeMask must: be `1`.
+
+[NOTE]
+.Note
+====
+Although they have identical descriptions,
+slink:VkPhysicalDeviceIDProperties::pname:deviceUUID may differ from
+slink:VkPhysicalDeviceProperties2::pname:pipelineCacheUUID.
+The former is intended to identify and correlate devices across API and
+driver boundaries, while the latter is used to identify a compatible device
+and driver combination to use when serializing and de-serializing pipeline
+state.
+====
+
+[NOTE]
+.Note
+====
+While slink:VkPhysicalDeviceIDProperties::pname:deviceUUID is specified to
+remain consistent across driver versions and system reboots, it is not
+intended to be usable as a serializable persistent identifier for a device.
+It may change when a device is physically added to, removed from, or moved
+to a different connector in a system while that system is powered down.
+Further, there is no reasonable way to verify with conformance testing that
+a given device retains the same UUID in a given system across all driver
+versions supported in that system.
+While implementations should make every effort to report consistent device
+UUIDs across driver versions, applications should avoid relying on the
+persistence of this value for uses other than identifying compatible devices
+for external object sharing purposes.
+====
+
+include::../validity/structs/VkPhysicalDeviceIDProperties.txt[]
+--
+
+endif::VK_VERSION_1_1,VK_KHR_external_memory_capabilities,VK_KHR_external_semaphore_capabilities,VK_KHR_external_fence_capabilities[]
+
+endif::VK_VERSION_1_1,VK_KHR_get_physical_device_properties2[]
+
+[open,refpage='vkGetPhysicalDeviceQueueFamilyProperties',desc='Reports properties of the queues of the specified physical device',type='protos']
+--
+
+To query properties of queues available on a physical device, call:
+
+include::../api/protos/vkGetPhysicalDeviceQueueFamilyProperties.txt[]
+
+  * pname:physicalDevice is the handle to the physical device whose
+    properties will be queried.
+  * pname:pQueueFamilyPropertyCount is a pointer to an integer related to
+    the number of queue families available or queried, as described below.
+  * pname:pQueueFamilyProperties is either `NULL` or a pointer to an array
+    of slink:VkQueueFamilyProperties structures.
+
+If pname:pQueueFamilyProperties is `NULL`, then the number of queue families
+available is returned in pname:pQueueFamilyPropertyCount.
+Otherwise, pname:pQueueFamilyPropertyCount must: point to a variable set by
+the user to the number of elements in the pname:pQueueFamilyProperties
+array, and on return the variable is overwritten with the number of
+structures actually written to pname:pQueueFamilyProperties.
+If pname:pQueueFamilyPropertyCount is less than the number of queue families
+available, at most pname:pQueueFamilyPropertyCount structures will be
+written.
+
+include::../validity/protos/vkGetPhysicalDeviceQueueFamilyProperties.txt[]
+--
+
+[open,refpage='VkQueueFamilyProperties',desc='Structure providing information about a queue family',type='structs']
+--
+
+The sname:VkQueueFamilyProperties structure is defined as:
+
+include::../api/structs/VkQueueFamilyProperties.txt[]
+
+  * pname:queueFlags is a bitmask of elink:VkQueueFlagBits indicating
+    capabilities of the queues in this queue family.
+  * pname:queueCount is the unsigned integer count of queues in this queue
+    family.
+  * pname:timestampValidBits is the unsigned integer count of meaningful
+    bits in the timestamps written via fname:vkCmdWriteTimestamp.
+    The valid range for the count is 36..64 bits, or a value of 0,
+    indicating no support for timestamps.
+    Bits outside the valid range are guaranteed to be zeros.
+  * pname:minImageTransferGranularity is the minimum granularity supported
+    for image transfer operations on the queues in this queue family.
+
+The value returned in pname:minImageTransferGranularity has a unit of
+compressed texel blocks for images having a block-compressed format, and a
+unit of texels otherwise.
+
+Possible values of pname:minImageTransferGranularity are:
+
+  * [eq]#(0,0,0)# which indicates that only whole mip levels must: be
+    transferred using the image transfer operations on the corresponding
+    queues.
+    In this case, the following restrictions apply to all offset and extent
+    parameters of image transfer operations:
+
+  ** The pname:x, pname:y, and pname:z members of a slink:VkOffset3D
+     parameter must: always be zero.
+  ** The pname:width, pname:height, and pname:depth members of a
+     slink:VkExtent3D parameter must: always match the width, height, and
+     depth of the image subresource corresponding to the parameter,
+     respectively.
+
+  * [eq]#(A~x~, A~y~, A~z~)# where [eq]#A~x~#, [eq]#A~y~#, and [eq]#A~z~#
+    are all integer powers of two.
+    In this case the following restrictions apply to all image transfer
+    operations:
+
+  ** pname:x, pname:y, and pname:z of a slink:VkOffset3D parameter must: be
+     integer multiples of [eq]#A~x~#, [eq]#A~y~#, and [eq]#A~z~#,
+     respectively.
+  ** pname:width of a slink:VkExtent3D parameter must: be an integer
+     multiple of [eq]#A~x~#, or else [eq]#pname:x {plus} pname:width# must:
+     equal the width of the image subresource corresponding to the
+     parameter.
+  ** pname:height of a slink:VkExtent3D parameter must: be an integer
+     multiple of [eq]#A~y~#, or else [eq]#pname:y {plus} pname:height# must:
+     equal the height of the image subresource corresponding to the
+     parameter.
+  ** pname:depth of a slink:VkExtent3D parameter must: be an integer
+     multiple of [eq]#A~z~#, or else [eq]#pname:z {plus} pname:depth# must:
+     equal the depth of the image subresource corresponding to the
+     parameter.
+  ** If the format of the image corresponding to the parameters is one of
+     the block-compressed formats then for the purposes of the above
+     calculations the granularity must: be scaled up by the compressed texel
+     block dimensions.
+
+Queues supporting graphics and/or compute operations must: report
+[eq]#(1,1,1)# in pname:minImageTransferGranularity, meaning that there are
+no additional restrictions on the granularity of image transfer operations
+for these queues.
+Other queues supporting image transfer operations are only required: to
+support whole mip level transfers, thus pname:minImageTransferGranularity
+for queues belonging to such queue families may: be [eq]#(0,0,0)#.
+
+The <<memory-device,Device Memory>> section describes memory properties
+queried from the physical device.
+
+For physical device feature queries see the <<features, Features>> chapter.
+
+include::../validity/structs/VkQueueFamilyProperties.txt[]
+--
+
+[open,refpage='VkQueueFlagBits',desc='Bitmask specifying capabilities of queues in a queue family',type='enums']
+--
+
+Bits which may: be set in slink:VkQueueFamilyProperties::pname:queueFlags
+indicating capabilities of queues in a queue family are:
+
+include::../api/enums/VkQueueFlagBits.txt[]
+
+  * ename:VK_QUEUE_GRAPHICS_BIT specifies that queues in this queue family
+    support graphics operations.
+  * ename:VK_QUEUE_COMPUTE_BIT specifies that queues in this queue family
+    support compute operations.
+  * ename:VK_QUEUE_TRANSFER_BIT specifies that queues in this queue family
+    support transfer operations.
+  * ename:VK_QUEUE_SPARSE_BINDING_BIT specifies that queues in this queue
+    family support sparse memory management operations (see
+    <<sparsememory,Sparse Resources>>).
+    If any of the sparse resource features are enabled, then at least one
+    queue family must: support this bit.
+ifdef::VK_VERSION_1_1[]
+  * if ename:VK_QUEUE_PROTECTED_BIT is set, then the queues in this queue
+    family support the ename:VK_DEVICE_QUEUE_CREATE_PROTECTED_BIT bit.
+    (see <<memory-protected-memory,Protected Memory>>).
+    If the protected memory physical device feature is supported, then at
+    least one queue family of at least one physical device exposed by the
+    implementation must: support this bit.
+endif::VK_VERSION_1_1[]
+
+If an implementation exposes any queue family that supports graphics
+operations, at least one queue family of at least one physical device
+exposed by the implementation must: support both graphics and compute
+operations.
+
+ifdef::VK_VERSION_1_1[]
+Furthermore, if the protected memory physical device feature is supported,
+then at least one queue family of at least one physical device exposed by
+the implementation must: support graphics operations, compute operations,
+and protected memory operations.
+endif::VK_VERSION_1_1[]
+
+[NOTE]
+.Note
+====
+All commands that are allowed on a queue that supports transfer operations
+are also allowed on a queue that supports either graphics or compute
+operations.
+Thus, if the capabilities of a queue family include
+ename:VK_QUEUE_GRAPHICS_BIT or ename:VK_QUEUE_COMPUTE_BIT, then reporting
+the ename:VK_QUEUE_TRANSFER_BIT capability separately for that queue family
+is optional:.
+====
+
+For further details see <<devsandqueues-queues,Queues>>.
+
+--
+
+[open,refpage='VkQueueFlags',desc='Bitmask of VkQueueFlagBits',type='enums']
+--
+include::../api/flags/VkQueueFlags.txt[]
+
+sname:VkQueueFlags is a bitmask type for setting a mask of zero or more
+slink:VkQueueFlagBits.
+--
+
+ifdef::VK_VERSION_1_1,VK_KHR_get_physical_device_properties2[]
+
+[open,refpage='vkGetPhysicalDeviceQueueFamilyProperties2',desc='Reports properties of the queues of the specified physical device',type='protos']
+--
+
+To query properties of queues available on a physical device, call:
+
+ifdef::VK_VERSION_1_1[]
+include::../api/protos/vkGetPhysicalDeviceQueueFamilyProperties2.txt[]
+endif::VK_VERSION_1_1[]
+
+ifdef::VK_VERSION_1_1+VK_KHR_get_physical_device_properties2[or the equivalent command]
+
+ifdef::VK_KHR_get_physical_device_properties2[]
+include::../api/protos/vkGetPhysicalDeviceQueueFamilyProperties2KHR.txt[]
+endif::VK_KHR_get_physical_device_properties2[]
+
+  * pname:physicalDevice is the handle to the physical device whose
+    properties will be queried.
+  * pname:pQueueFamilyPropertyCount is a pointer to an integer related to
+    the number of queue families available or queried, as described in
+    flink:vkGetPhysicalDeviceQueueFamilyProperties.
+  * pname:pQueueFamilyProperties is either `NULL` or a pointer to an array
+    of slink:VkQueueFamilyProperties2 structures.
+
+fname:vkGetPhysicalDeviceQueueFamilyProperties2 behaves similarly to
+flink:vkGetPhysicalDeviceQueueFamilyProperties, with the ability to return
+extended information in a pname:pNext chain of output structures.
+
+include::../validity/protos/vkGetPhysicalDeviceQueueFamilyProperties2.txt[]
+--
+
+[open,refpage='VkQueueFamilyProperties2',desc='Structure providing information about a queue family',type='structs']
+--
+
+The sname:VkQueueFamilyProperties2 structure is defined as:
+
+include::../api/structs/VkQueueFamilyProperties2.txt[]
+
+ifdef::VK_KHR_get_physical_device_properties2[]
+or the equivalent
+
+include::../api/structs/VkQueueFamilyProperties2KHR.txt[]
+endif::VK_KHR_get_physical_device_properties2[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:queueFamilyProperties is a structure of type
+    slink:VkQueueFamilyProperties which is populated with the same values as
+    in flink:vkGetPhysicalDeviceQueueFamilyProperties.
+
+include::../validity/structs/VkQueueFamilyProperties2.txt[]
+--
+
+ifdef::VK_NV_device_diagnostic_checkpoints[]
+include::VK_NV_device_diagnostic_checkpoints/queue_checkpoint_properties.txt[]
+endif::VK_NV_device_diagnostic_checkpoints[]
+
+endif::VK_VERSION_1_1,VK_KHR_get_physical_device_properties2[]
+
+[[devsandqueues-devices]]
+== Devices
+
+Device objects represent logical connections to physical devices.
+Each device exposes a number of _queue families_ each having one or more
+_queues_.
+All queues in a queue family support the same operations.
+
+As described in <<devsandqueues-physical-device-enumeration,Physical
+Devices>>, a Vulkan application will first query for all physical devices in
+a system.
+Each physical device can: then be queried for its capabilities, including
+its queue and queue family properties.
+Once an acceptable physical device is identified, an application will create
+a corresponding logical device.
+An application must: create a separate logical device for each physical
+device it will use.
+The created logical device is then the primary interface to the physical
+device.
+
+How to enumerate the physical devices in a system and query those physical
+devices for their queue family properties is described in the
+<<devsandqueues-physical-device-enumeration, Physical Device Enumeration>>
+section above.
+
+ifdef::VK_VERSION_1_1,VK_KHR_device_group_creation[]
+
+A single logical device can: also be created from multiple physical devices,
+if those physical devices belong to the same device group.
+A _device group_ is a set of physical devices that support accessing each
+other's memory and recording a single command buffer that can: be executed
+on all the physical devices.
+Device groups are enumerated by calling
+flink:vkEnumeratePhysicalDeviceGroups, and a logical device is created from
+a subset of the physical devices in a device group by passing the physical
+devices through slink:VkDeviceGroupDeviceCreateInfo.
+
+[open,refpage='vkEnumeratePhysicalDeviceGroups',desc='Enumerates groups of physical devices that can be used to create a single logical device',type='protos']
+--
+
+To retrieve a list of the device groups present in the system, call:
+
+ifdef::VK_VERSION_1_1[]
+include::../api/protos/vkEnumeratePhysicalDeviceGroups.txt[]
+endif::VK_VERSION_1_1[]
+
+ifdef::VK_VERSION_1_1+VK_KHR_device_group_creation[or the equivalent command]
+
+ifdef::VK_KHR_device_group_creation[]
+include::../api/protos/vkEnumeratePhysicalDeviceGroupsKHR.txt[]
+endif::VK_KHR_device_group_creation[]
+
+  * pname:instance is a handle to a Vulkan instance previously created with
+    flink:vkCreateInstance.
+  * pname:pPhysicalDeviceGroupCount is a pointer to an integer related to
+    the number of device groups available or queried, as described below.
+  * pname:pPhysicalDeviceGroupProperties is either `NULL` or a pointer to an
+    array of slink:VkPhysicalDeviceGroupProperties structures.
+
+If pname:pPhysicalDeviceGroupProperties is `NULL`, then the number of device
+groups available is returned in pname:pPhysicalDeviceGroupCount.
+Otherwise, pname:pPhysicalDeviceGroupCount must: point to a variable set by
+the user to the number of elements in the
+pname:pPhysicalDeviceGroupProperties array, and on return the variable is
+overwritten with the number of structures actually written to
+pname:pPhysicalDeviceGroupProperties.
+If pname:pPhysicalDeviceGroupCount is less than the number of device groups
+available, at most pname:pPhysicalDeviceGroupCount structures will be
+written.
+If pname:pPhysicalDeviceGroupCount is smaller than the number of device
+groups available, ename:VK_INCOMPLETE will be returned instead of
+ename:VK_SUCCESS, to indicate that not all the available device groups were
+returned.
+
+Every physical device must: be in exactly one device group.
+
+include::../validity/protos/vkEnumeratePhysicalDeviceGroups.txt[]
+--
+
+[open,refpage='VkPhysicalDeviceGroupProperties',desc='Structure specifying physical device group properties',type='structs']
+--
+
+The sname:VkPhysicalDeviceGroupProperties structure is defined as:
+
+include::../api/structs/VkPhysicalDeviceGroupProperties.txt[]
+
+ifdef::VK_KHR_device_group_creation[]
+or the equivalent
+
+include::../api/structs/VkPhysicalDeviceGroupPropertiesKHR.txt[]
+endif::VK_KHR_device_group_creation[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:physicalDeviceCount is the number of physical devices in the
+    group.
+  * pname:physicalDevices is an array of physical device handles
+    representing all physical devices in the group.
+    The first pname:physicalDeviceCount elements of the array will be valid.
+  * pname:subsetAllocation specifies whether logical devices created from
+    the group support allocating device memory on a subset of devices, via
+    the pname:deviceMask member of the slink:VkMemoryAllocateFlagsInfo.
+    If this is ename:VK_FALSE, then all device memory allocations are made
+    across all physical devices in the group.
+    If pname:physicalDeviceCount is `1`, then pname:subsetAllocation must:
+    be ename:VK_FALSE.
+
+--
+
+endif::VK_VERSION_1_1,VK_KHR_device_group_creation[]
+
+
+[[devsandqueues-device-creation]]
+=== Device Creation
+
+[open,refpage='VkDevice',desc='Opaque handle to a device object',type='handles']
+--
+
+Logical devices are represented by sname:VkDevice handles:
+
+include::../api/handles/VkDevice.txt[]
+
+--
+
+[open,refpage='vkCreateDevice',desc='Create a new device instance',type='protos']
+--
+
+A logical device is created as a _connection_ to a physical device.
+To create a logical device, call:
+
+include::../api/protos/vkCreateDevice.txt[]
+
+  * pname:physicalDevice must: be one of the device handles returned from a
+    call to fname:vkEnumeratePhysicalDevices (see
+    <<devsandqueues-physical-device-enumeration, Physical Device
+    Enumeration>>).
+  * pname:pCreateInfo is a pointer to a slink:VkDeviceCreateInfo structure
+    containing information about how to create the device.
+  * pname:pAllocator controls host memory allocation as described in the
+    <<memory-allocation, Memory Allocation>> chapter.
+  * pname:pDevice points to a handle in which the created slink:VkDevice is
+    returned.
+
+fname:vkCreateDevice verifies that extensions and features requested in the
+pname:ppEnabledExtensionNames and pname:pEnabledFeatures members of
+pname:pCreateInfo, respectively, are supported by the implementation.
+If any requested extension is not supported, fname:vkCreateDevice must:
+return ename:VK_ERROR_EXTENSION_NOT_PRESENT.
+If any requested feature is not supported, fname:vkCreateDevice must: return
+ename:VK_ERROR_FEATURE_NOT_PRESENT.
+Support for extensions can: be checked before creating a device by querying
+flink:vkEnumerateDeviceExtensionProperties.
+Support for features can: similarly be checked by querying
+flink:vkGetPhysicalDeviceFeatures.
+
+After verifying and enabling the extensions the sname:VkDevice object is
+created and returned to the application.
+If a requested extension is only supported by a layer, both the layer and
+the extension need to be specified at fname:vkCreateInstance time for the
+creation to succeed.
+
+Multiple logical devices can: be created from the same physical device.
+Logical device creation may: fail due to lack of device-specific resources
+(in addition to the other errors).
+If that occurs, fname:vkCreateDevice will return
+ename:VK_ERROR_TOO_MANY_OBJECTS.
+
+.Valid Usage
+****
+  * [[VUID-vkCreateDevice-ppEnabledExtensionNames-01387]]
+    All <<extended-functionality-extensions-dependencies, required
+    extensions>> for each extension in the
+    slink:VkDeviceCreateInfo::pname:ppEnabledExtensionNames list must: also
+    be present in that list.
+****
+
+include::../validity/protos/vkCreateDevice.txt[]
+--
+
+[open,refpage='VkDeviceCreateInfo',desc='Structure specifying parameters of a newly created device',type='structs']
+--
+
+The sname:VkDeviceCreateInfo structure is defined as:
+
+include::../api/structs/VkDeviceCreateInfo.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:flags is reserved for future use.
+  * pname:queueCreateInfoCount is the unsigned integer size of the
+    pname:pQueueCreateInfos array.
+    Refer to the <<devsandqueues-queue-creation,Queue Creation>> section
+    below for further details.
+  * pname:pQueueCreateInfos is a pointer to an array of
+    slink:VkDeviceQueueCreateInfo structures describing the queues that are
+    requested to be created along with the logical device.
+    Refer to the <<devsandqueues-queue-creation,Queue Creation>> section
+    below for further details.
+  * pname:enabledLayerCount is deprecated and ignored.
+  * pname:ppEnabledLayerNames is deprecated and ignored.
+    See <<extended-functionality-device-layer-deprecation,Device Layer
+    Deprecation>>.
+  * pname:enabledExtensionCount is the number of device extensions to
+    enable.
+  * pname:ppEnabledExtensionNames is a pointer to an array of
+    pname:enabledExtensionCount null-terminated UTF-8 strings containing the
+    names of extensions to enable for the created device.
+    See the <<extended-functionality-extensions,Extensions>> section for
+    further details.
+  * pname:pEnabledFeatures is `NULL` or a pointer to a
+    slink:VkPhysicalDeviceFeatures structure that contains boolean
+    indicators of all the features to be enabled.
+    Refer to the <<features-features,Features>> section for further details.
+
+.Valid Usage
+****
+  * [[VUID-VkDeviceCreateInfo-queueFamilyIndex-00372]]
+ifndef::VK_VERSION_1_1[]
+    The pname:queueFamilyIndex member of each element of
+    pname:pQueueCreateInfos must: be unique within pname:pQueueCreateInfos
+endif::VK_VERSION_1_1[]
+ifdef::VK_VERSION_1_1[]
+    The pname:queueFamilyIndex member of each element of
+    pname:pQueueCreateInfos must: be unique within pname:pQueueCreateInfos,
+    except that two members can share the same pname:queueFamilyIndex if one
+    is a protected-capable queue and one is not a protected-capable queue.
+endif::VK_VERSION_1_1[]
+ifdef::VK_VERSION_1_1,VK_KHR_get_physical_device_properties2[]
+  * [[VUID-VkDeviceCreateInfo-pNext-00373]]
+    If the pname:pNext chain includes a slink:VkPhysicalDeviceFeatures2
+    structure, then pname:pEnabledFeatures must: be `NULL`
+endif::VK_VERSION_1_1,VK_KHR_get_physical_device_properties2[]
+ifdef::VK_AMD_negative_viewport_height[]
+ifdef::VK_VERSION_1_1[]
+  * [[VUID-VkDeviceCreateInfo-ppEnabledExtensionNames-01840]]
+    pname:ppEnabledExtensionNames must: not contain
+    code:VK_AMD_negative_viewport_height
+endif::VK_VERSION_1_1[]
+ifndef::VK_VERSION_1_1[]
+ifdef::VK_KHR_maintenance1[]
+  * [[VUID-VkDeviceCreateInfo-ppEnabledExtensionNames-00374]]
+    pname:ppEnabledExtensionNames must: not contain both
+    `<<VK_KHR_maintenance1>>` and `<<VK_AMD_negative_viewport_height>>`
+endif::VK_KHR_maintenance1[]
+endif::VK_VERSION_1_1[]
+endif::VK_AMD_negative_viewport_height[]
+****
+
+include::../validity/structs/VkDeviceCreateInfo.txt[]
+--
+
+[open,refpage='VkDeviceCreateFlags',desc='Reserved for future use',type='enums']
+--
+include::../api/flags/VkDeviceCreateFlags.txt[]
+
+sname:VkDeviceCreateFlags is a bitmask type for setting a mask, but is
+currently reserved for future use.
+--
+
+ifdef::VK_VERSION_1_1,VK_KHR_device_group_creation[]
+
+[open,refpage='VkDeviceGroupDeviceCreateInfo',desc='Create a logical device from multiple physical devices',type='structs']
+--
+
+A logical device can: be created that connects to one or more physical
+devices by including a sname:VkDeviceGroupDeviceCreateInfo structure in the
+pname:pNext chain of slink:VkDeviceCreateInfo.
+The sname:VkDeviceGroupDeviceCreateInfo structure is defined as:
+
+include::../api/structs/VkDeviceGroupDeviceCreateInfo.txt[]
+
+ifdef::VK_KHR_device_group_creation[]
+or the equivalent
+
+include::../api/structs/VkDeviceGroupDeviceCreateInfoKHR.txt[]
+endif::VK_KHR_device_group_creation[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:physicalDeviceCount is the number of elements in the
+    pname:pPhysicalDevices array.
+  * pname:pPhysicalDevices is an array of physical device handles belonging
+    to the same device group.
+
+The elements of the pname:pPhysicalDevices array are an ordered list of the
+physical devices that the logical device represents.
+These must: be a subset of a single device group, and need not be in the
+same order as they were enumerated.
+The order of the physical devices in the pname:pPhysicalDevices array
+determines the _device index_ of each physical device, with element [eq]#i#
+being assigned a device index of [eq]#i#.
+Certain commands and structures refer to one or more physical devices by
+using device indices or _device masks_ formed using device indices.
+
+A logical device created without using sname:VkDeviceGroupDeviceCreateInfo,
+or with pname:physicalDeviceCount equal to zero, is equivalent to a
+pname:physicalDeviceCount of one and pname:pPhysicalDevices pointing to the
+pname:physicalDevice parameter to flink:vkCreateDevice.
+In particular, the device index of that physical device is zero.
+
+.Valid Usage
+****
+  * [[VUID-VkDeviceGroupDeviceCreateInfo-pPhysicalDevices-00375]]
+    Each element of pname:pPhysicalDevices must: be unique
+  * [[VUID-VkDeviceGroupDeviceCreateInfo-pPhysicalDevices-00376]]
+    All elements of pname:pPhysicalDevices must: be in the same device group
+    as enumerated by flink:vkEnumeratePhysicalDeviceGroups
+  * [[VUID-VkDeviceGroupDeviceCreateInfo-physicalDeviceCount-00377]]
+    If pname:physicalDeviceCount is not `0`, the pname:physicalDevice
+    parameter of flink:vkCreateDevice must: be an element of
+    pname:pPhysicalDevices.
+****
+
+include::../validity/structs/VkDeviceGroupDeviceCreateInfo.txt[]
+
+--
+
+endif::VK_VERSION_1_1,VK_KHR_device_group_creation[]
+
+
+[[devsandqueues-use]]
+=== Device Use
+
+The following is a high-level list of sname:VkDevice uses along with
+references on where to find more information:
+
+  * Creation of queues.
+    See the <<devsandqueues-queues,Queues>> section below for further
+    details.
+  * Creation and tracking of various synchronization constructs.
+    See <<synchronization,Synchronization and Cache Control>> for further
+    details.
+  * Allocating, freeing, and managing memory.
+    See <<memory,Memory Allocation>> and <<resources,Resource Creation>> for
+    further details.
+  * Creation and destruction of command buffers and command buffer pools.
+    See <<commandbuffers,Command Buffers>> for further details.
+  * Creation, destruction, and management of graphics state.
+    See <<pipelines,Pipelines>> and <<descriptorsets,Resource Descriptors>>,
+    among others, for further details.
+
+
+[[devsandqueues-lost-device]]
+=== Lost Device
+
+A logical device may: become _lost_ for a number of implementation-specific
+reasons, indicating that pending and future command execution may: fail and
+cause resources and backing memory to become undefined.
+
+[NOTE]
+.Note
+====
+Typical reasons for device loss will include things like execution timing
+out (to prevent denial of service), power management events, platform
+resource management, or implementation errors.
+====
+
+When this happens, certain commands will return ename:VK_ERROR_DEVICE_LOST
+(see <<fundamentals-errorcodes,Error Codes>> for a list of such commands).
+After any such event, the logical device is considered _lost_.
+It is not possible to reset the logical device to a non-lost state, however
+the lost state is specific to a logical device (sname:VkDevice), and the
+corresponding physical device (sname:VkPhysicalDevice) may: be otherwise
+unaffected.
+
+In some cases, the physical device may: also be lost, and attempting to
+create a new logical device will fail, returning ename:VK_ERROR_DEVICE_LOST.
+This is usually indicative of a problem with the underlying implementation,
+or its connection to the host.
+If the physical device has not been lost, and a new logical device is
+successfully created from that physical device, it must: be in the non-lost
+state.
+
+[NOTE]
+.Note
+====
+Whilst logical device loss may: be recoverable, in the case of physical
+device loss, it is unlikely that an application will be able to recover
+unless additional, unaffected physical devices exist on the system.
+The error is largely informational and intended only to inform the user that
+a platform issue has occurred, and should: be investigated further.
+For example, underlying hardware may: have developed a fault or become
+physically disconnected from the rest of the system.
+In many cases, physical device loss may: cause other more serious issues
+such as the operating system crashing; in which case it may: not be reported
+via the Vulkan API.
+====
+
+[NOTE]
+.Note
+====
+Undefined behavior caused by an application error may: cause a device to
+become lost.
+However, such undefined behavior may: also cause unrecoverable damage to the
+process, and it is then not guaranteed that the API objects, including the
+sname:VkPhysicalDevice or the sname:VkInstance are still valid or that the
+error is recoverable.
+====
+
+When a device is lost, its child objects are not implicitly destroyed and
+their handles are still valid.
+Those objects must: still be destroyed before their parents or the device
+can: be destroyed (see the <<fundamentals-objectmodel-lifetime,Object
+Lifetime>> section).
+The host address space corresponding to device memory mapped using
+flink:vkMapMemory is still valid, and host memory accesses to these mapped
+regions are still valid, but the contents are undefined.
+It is still legal to call any API command on the device and child objects.
+
+Once a device is lost, command execution may: fail, and commands that return
+a elink:VkResult may: return ename:VK_ERROR_DEVICE_LOST.
+Commands that do not allow run-time errors must: still operate correctly for
+valid usage and, if applicable, return valid data.
+
+Commands that wait indefinitely for device execution (namely
+flink:vkDeviceWaitIdle, flink:vkQueueWaitIdle, flink:vkWaitForFences
+ifdef::VK_KHR_swapchain[]
+or flink:vkAcquireNextImageKHR
+endif::VK_KHR_swapchain[]
+with a maximum pname:timeout, and flink:vkGetQueryPoolResults with the
+ename:VK_QUERY_RESULT_WAIT_BIT bit set in pname:flags) must: return in
+finite time even in the case of a lost device, and return either
+ename:VK_SUCCESS or ename:VK_ERROR_DEVICE_LOST.
+For any command that may: return ename:VK_ERROR_DEVICE_LOST, for the purpose
+of determining whether a command buffer is in the
+<<commandbuffers-lifecycle, pending state>>, or whether resources are
+considered in-use by the device, a return value of
+ename:VK_ERROR_DEVICE_LOST is equivalent to ename:VK_SUCCESS.
+
+ifdef::VK_VERSION_1_1,VK_KHR_external_memory[]
+
+The content of any external memory objects that have been exported from or
+imported to a lost device become undefined.
+Objects on other logical devices or in other APIs which are associated with
+the same underlying memory resource as the external memory objects on the
+lost device are unaffected other than their content becoming undefined.
+The layout of subresources of images on other logical devices that are bound
+to sname:VkDeviceMemory objects associated with the same underlying memory
+resources as external memory objects on the lost device becomes
+ename:VK_IMAGE_LAYOUT_UNDEFINED.
+
+endif::VK_VERSION_1_1,VK_KHR_external_memory[]
+
+ifdef::VK_VERSION_1_1,VK_KHR_external_semaphore[]
+
+The state of sname:VkSemaphore objects on other logical devices created by
+<<synchronization-semaphores-importing,importing a semaphore payload>> with
+temporary permanence which was exported from the lost device is undefined.
+The state of sname:VkSemaphore objects on other logical devices that
+permanently share a semaphore payload with a sname:VkSemaphore object on the
+lost device is undefined, and remains undefined following any subsequent
+signal operations.
+Implementations must: ensure pending and subsequently submitted wait
+operations on such semaphores behave as defined in
+<<synchronization-semaphores-waiting-state,Semaphore State Requirements For
+Wait Operations>> for external semaphores not in a valid state for a wait
+operation.
+
+endif::VK_VERSION_1_1,VK_KHR_external_semaphore[]
+
+ifdef::editing-notes[]
+[NOTE]
+.editing-note
+====
+TODO (piman) - I do not think we are very clear about what "`in-use by the
+device`" means.
+====
+endif::editing-notes[]
+
+
+[[devsandqueues-destruction]]
+=== Device Destruction
+
+[open,refpage='vkDestroyDevice',desc='Destroy a logical device',type='protos']
+--
+
+To destroy a device, call:
+
+include::../api/protos/vkDestroyDevice.txt[]
+
+  * pname:device is the logical device to destroy.
+  * pname:pAllocator controls host memory allocation as described in the
+    <<memory-allocation, Memory Allocation>> chapter.
+
+To ensure that no work is active on the device, flink:vkDeviceWaitIdle can:
+be used to gate the destruction of the device.
+Prior to destroying a device, an application is responsible for
+destroying/freeing any Vulkan objects that were created using that device as
+the first parameter of the corresponding ftext:vkCreate* or
+ftext:vkAllocate* command.
+
+[NOTE]
+.Note
+====
+The lifetime of each of these objects is bound by the lifetime of the
+sname:VkDevice object.
+Therefore, to avoid resource leaks, it is critical that an application
+explicitly free all of these resources prior to calling
+fname:vkDestroyDevice.
+====
+
+.Valid Usage
+****
+  * [[VUID-vkDestroyDevice-device-00378]]
+    All child objects created on pname:device must: have been destroyed
+    prior to destroying pname:device
+  * [[VUID-vkDestroyDevice-device-00379]]
+    If sname:VkAllocationCallbacks were provided when pname:device was
+    created, a compatible set of callbacks must: be provided here
+  * [[VUID-vkDestroyDevice-device-00380]]
+    If no sname:VkAllocationCallbacks were provided when pname:device was
+    created, pname:pAllocator must: be `NULL`
+****
+
+include::../validity/protos/vkDestroyDevice.txt[]
+--
+
+
+[[devsandqueues-queues]]
+== Queues
+
+
+[[devsandqueues-queueprops]]
+=== Queue Family Properties
+
+As discussed in the <<devsandqueues-physical-device-enumeration,Physical
+Device Enumeration>> section above, the
+flink:vkGetPhysicalDeviceQueueFamilyProperties command is used to retrieve
+details about the queue families and queues supported by a device.
+
+Each index in the pname:pQueueFamilyProperties array returned by
+flink:vkGetPhysicalDeviceQueueFamilyProperties describes a unique queue
+family on that physical device.
+These indices are used when creating queues, and they correspond directly
+with the pname:queueFamilyIndex that is passed to the flink:vkCreateDevice
+command via the slink:VkDeviceQueueCreateInfo structure as described in the
+<<devsandqueues-queue-creation,Queue Creation>> section below.
+
+Grouping of queue families within a physical device is
+implementation-dependent.
+
+[NOTE]
+.Note
+====
+The general expectation is that a physical device groups all queues of
+matching capabilities into a single family.
+However, while implementations should: do this, it is possible that a
+physical device may: return two separate queue families with the same
+capabilities.
+====
+
+Once an application has identified a physical device with the queue(s) that
+it desires to use, it will create those queues in conjunction with a logical
+device.
+This is described in the following section.
+
+
+[[devsandqueues-queue-creation]]
+=== Queue Creation
+
+[open,refpage='VkQueue',desc='Opaque handle to a queue object',type='handles']
+--
+
+Creating a logical device also creates the queues associated with that
+device.
+The queues to create are described by a set of slink:VkDeviceQueueCreateInfo
+structures that are passed to flink:vkCreateDevice in
+pname:pQueueCreateInfos.
+
+Queues are represented by sname:VkQueue handles:
+
+include::../api/handles/VkQueue.txt[]
+
+--
+
+[open,refpage='VkDeviceQueueCreateInfo',desc='Structure specifying parameters of a newly created device queue',type='structs']
+--
+
+The sname:VkDeviceQueueCreateInfo structure is defined as:
+
+include::../api/structs/VkDeviceQueueCreateInfo.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+ifndef::VK_VERSION_1_1[]
+  * pname:flags is reserved for future use.
+endif::VK_VERSION_1_1[]
+ifdef::VK_VERSION_1_1[]
+  * pname:flags is a bitmask indicating behavior of the queue.
+endif::VK_VERSION_1_1[]
+  * pname:queueFamilyIndex is an unsigned integer indicating the index of
+    the queue family to create on this device.
+    This index corresponds to the index of an element of the
+    pname:pQueueFamilyProperties array that was returned by
+    fname:vkGetPhysicalDeviceQueueFamilyProperties.
+  * pname:queueCount is an unsigned integer specifying the number of queues
+    to create in the queue family indicated by pname:queueFamilyIndex.
+  * pname:pQueuePriorities is an array of pname:queueCount normalized
+    floating point values, specifying priorities of work that will be
+    submitted to each created queue.
+    See <<devsandqueues-priority,Queue Priority>> for more information.
+
+.Valid Usage
+****
+  * [[VUID-VkDeviceQueueCreateInfo-queueFamilyIndex-00381]]
+    pname:queueFamilyIndex must: be less than
+    pname:pQueueFamilyPropertyCount returned by
+    fname:vkGetPhysicalDeviceQueueFamilyProperties
+  * [[VUID-VkDeviceQueueCreateInfo-queueCount-00382]]
+    pname:queueCount must: be less than or equal to the pname:queueCount
+    member of the sname:VkQueueFamilyProperties structure, as returned by
+    fname:vkGetPhysicalDeviceQueueFamilyProperties in the
+    pname:pQueueFamilyProperties[pname:queueFamilyIndex]
+  * [[VUID-VkDeviceQueueCreateInfo-pQueuePriorities-00383]]
+    Each element of pname:pQueuePriorities must: be between `0.0` and `1.0`
+    inclusive
+****
+
+include::../validity/structs/VkDeviceQueueCreateInfo.txt[]
+--
+
+ifdef::VK_VERSION_1_1[]
+
+[open,refpage='VkDeviceQueueCreateFlagBits',desc='Bitmask specifying behavior of the queue',type='enums']
+--
+
+Bits which can: be set in slink:VkDeviceQueueCreateInfo::pname:flags to
+specify usage behavior of the queue are:
+
+include::../api/enums/VkDeviceQueueCreateFlagBits.txt[]
+
+  * ename:VK_DEVICE_QUEUE_CREATE_PROTECTED_BIT specifies that the device
+    queue is a protected-capable queue.
+    If the protected memory feature is not enabled, the
+    ename:VK_DEVICE_QUEUE_CREATE_PROTECTED_BIT bit of pname:flags must: not
+    be set.
+
+--
+
+endif::VK_VERSION_1_1[]
+
+[open,refpage='VkDeviceQueueCreateFlags',desc='Bitmask of VkDeviceQueueCreateFlagBits',type='enums']
+--
+include::../api/flags/VkDeviceQueueCreateFlags.txt[]
+
+sname:VkDeviceQueueCreateFlags is a bitmask type for setting a mask of zero
+or more slink:VkDeviceQueueCreateFlagBits.
+--
+
+ifdef::VK_EXT_global_priority[]
+
+[open,refpage='VkDeviceQueueGlobalPriorityCreateInfoEXT',desc='Specify a system wide priority',type='structs']
+--
+
+A queue can: be created with a system-wide priority by including a
+sname:VkDeviceQueueGlobalPriorityCreateInfoEXT structure in the pname:pNext
+chain of slink:VkDeviceQueueCreateInfo.
+
+The sname:VkDeviceQueueGlobalPriorityCreateInfoEXT structure is defined as:
+
+include::../api/structs/VkDeviceQueueGlobalPriorityCreateInfoEXT.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:globalPriority is the system-wide priority associated to this
+    queue as specified by elink:VkQueueGlobalPriorityEXT
+
+A queue created without specifying
+sname:VkDeviceQueueGlobalPriorityCreateInfoEXT will default to
+ename:VK_QUEUE_GLOBAL_PRIORITY_MEDIUM_EXT.
+
+include::../validity/structs/VkDeviceQueueGlobalPriorityCreateInfoEXT.txt[]
+--
+
+[open,refpage='VkQueueGlobalPriorityEXT',desc='Values specifying a system-wide queue priority',type='enums']
+--
+
+Possible values of
+slink:VkDeviceQueueGlobalPriorityCreateInfoEXT::pname:globalPriority,
+specifying a system-wide priority level are:
+
+include::../api/enums/VkQueueGlobalPriorityEXT.txt[]
+
+Priority values are sorted in ascending order.
+A comparison operation on the enum values can be used to determine the
+priority order.
+
+  * ename:VK_QUEUE_GLOBAL_PRIORITY_LOW_EXT is below the system default.
+    Useful for non-interactive tasks.
+  * ename:VK_QUEUE_GLOBAL_PRIORITY_MEDIUM_EXT is the system default
+    priority.
+  * ename:VK_QUEUE_GLOBAL_PRIORITY_HIGH_EXT is above the system default.
+  * ename:VK_QUEUE_GLOBAL_PRIORITY_REALTIME_EXT is the highest priority.
+    Useful for critical tasks.
+--
+
+Queues with higher system priority may: be allotted more processing time
+than queues with lower priority.
+An implementation may: allow a higher-priority queue to starve a
+lower-priority queue until the higher-priority queue has no further commands
+to execute.
+
+Priorities imply no ordering or scheduling constraints.
+
+No specific guarantees are made about higher priority queues receiving more
+processing time or better quality of service than lower priority queues.
+
+The global priority level of a queue takes precedence over the per-process
+queue priority (sname:VkDeviceQueueCreateInfo::pname:pQueuePriorities).
+
+Abuse of this feature may: result in starving the rest of the system of
+implementation resources.
+Therefore, the driver implementation may: deny requests to acquire a
+priority above the default priority
+(ename:VK_QUEUE_GLOBAL_PRIORITY_MEDIUM_EXT) if the caller does not have
+sufficient privileges.
+In this scenario ename:VK_ERROR_NOT_PERMITTED_EXT is returned.
+
+The driver implementation may: fail the queue allocation request if
+resources required to complete the operation have been exhausted (either by
+the same process or a different process).
+In this scenario ename:VK_ERROR_INITIALIZATION_FAILED is returned.
+
+endif::VK_EXT_global_priority[]
+
+[open,refpage='vkGetDeviceQueue',desc='Get a queue handle from a device',type='protos']
+--
+
+To retrieve a handle to a slink:VkQueue object, call:
+
+include::../api/protos/vkGetDeviceQueue.txt[]
+
+  * pname:device is the logical device that owns the queue.
+  * pname:queueFamilyIndex is the index of the queue family to which the
+    queue belongs.
+  * pname:queueIndex is the index within this queue family of the queue to
+    retrieve.
+  * pname:pQueue is a pointer to a slink:VkQueue object that will be filled
+    with the handle for the requested queue.
+
+ifdef::VK_VERSION_1_1[]
+fname:vkGetDeviceQueue must: only be used to get queues that were created
+with the pname:flags parameter of sname:VkDeviceQueueCreateInfo set to zero.
+To get queues that were created with a non-zero pname:flags parameter use
+flink:vkGetDeviceQueue2.
+endif::VK_VERSION_1_1[]
+
+.Valid Usage
+****
+  * [[VUID-vkGetDeviceQueue-queueFamilyIndex-00384]]
+    pname:queueFamilyIndex must: be one of the queue family indices
+    specified when pname:device was created, via the
+    sname:VkDeviceQueueCreateInfo structure
+  * [[VUID-vkGetDeviceQueue-queueIndex-00385]]
+    pname:queueIndex must: be less than the number of queues created for the
+    specified queue family index when pname:device was created, via the
+    pname:queueCount member of the sname:VkDeviceQueueCreateInfo structure
+  * [[VUID-vkGetDeviceQueue-flags-01841]]
+    slink:VkDeviceQueueCreateInfo::pname:flags must: have been set to zero
+    when pname:device was created
+****
+
+include::../validity/protos/vkGetDeviceQueue.txt[]
+--
+
+ifdef::VK_VERSION_1_1[]
+
+[open,refpage='vkGetDeviceQueue2',desc='Get a queue handle from a device',type='protos']
+--
+
+To retrieve a handle to a slink:VkQueue object with specific
+pname:VkDeviceQueueCreateFlags creation flags, call:
+
+include::../api/protos/vkGetDeviceQueue2.txt[]
+
+  * pname:device is the logical device that owns the queue.
+  * pname:pQueueInfo points to an instance of the slink:VkDeviceQueueInfo2
+    structure, describing the parameters used to create the device queue.
+  * pname:pQueue is a pointer to a slink:VkQueue object that will be filled
+    with the handle for the requested queue.
+
+include::../validity/protos/vkGetDeviceQueue2.txt[]
+--
+
+[open,refpage='VkDeviceQueueInfo2',desc='Structure specifying the parameters used for device queue creation',type='structs']
+--
+
+The sname:VkDeviceQueueInfo2 structure is defined as:
+
+include::../api/structs/VkDeviceQueueInfo2.txt[]
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+    The pname:pNext chain of sname:VkDeviceQueueInfo2 is used to provide
+    additional image parameters to fname:vkGetDeviceQueue2.
+  * pname:flags is a elink:VkDeviceQueueCreateFlags value indicating the
+    flags used to create the device queue.
+  * pname:queueFamilyIndex is the index of the queue family to which the
+    queue belongs.
+  * pname:queueIndex is the index within this queue family of the queue to
+    retrieve.
+
+The queue returned by fname:vkGetDeviceQueue2 must: have the same
+pname:flags value from this structure as that used at device creation time
+in a sname:VkDeviceQueueCreateInfo instance.
+If no matching pname:flags were specified at device creation time then
+pname:pQueue will return code:VK_NULL_HANDLE.
+
+.Valid Usage
+****
+  * [[VUID-VkDeviceQueueInfo2-queueFamilyIndex-01842]]
+    pname:queueFamilyIndex must: be one of the queue family indices
+    specified when pname:device was created, via the
+    sname:VkDeviceQueueCreateInfo structure
+  * [[VUID-VkDeviceQueueInfo2-queueIndex-01843]]
+    pname:queueIndex must: be less than the number of queues created for the
+    specified queue family index and sname:VkDeviceQueueCreateFlags member
+    pname:flags equal to this pname:flags value when pname:device was
+    created, via the pname:queueCount member of the
+    sname:VkDeviceQueueCreateInfo structure
+****
+
+include::../validity/structs/VkDeviceQueueInfo2.txt[]
+--
+
+endif::VK_VERSION_1_1[]
+
+
+[[devsandqueues-index]]
+=== Queue Family Index
+
+The queue family index is used in multiple places in Vulkan in order to tie
+operations to a specific family of queues.
+
+When retrieving a handle to the queue via fname:vkGetDeviceQueue, the queue
+family index is used to select which queue family to retrieve the
+sname:VkQueue handle from as described in the previous section.
+
+When creating a sname:VkCommandPool object (see
+<<commandbuffers-pools,Command Pools>>), a queue family index is specified
+in the slink:VkCommandPoolCreateInfo structure.
+Command buffers from this pool can: only be submitted on queues
+corresponding to this queue family.
+
+When creating sname:VkImage (see <<resources-images,Images>>) and
+sname:VkBuffer (see <<resources-buffers,Buffers>>) resources, a set of queue
+families is included in the slink:VkImageCreateInfo and
+slink:VkBufferCreateInfo structures to specify the queue families that can:
+access the resource.
+
+When inserting a slink:VkBufferMemoryBarrier or slink:VkImageMemoryBarrier
+(see <<synchronization-events>>) a source and destination queue family index
+is specified to allow the ownership of a buffer or image to be transferred
+from one queue family to another.
+See the <<resources-sharing,Resource Sharing>> section for details.
+
+
+[[devsandqueues-priority]]
+=== Queue Priority
+
+Each queue is assigned a priority, as set in the
+slink:VkDeviceQueueCreateInfo structures when creating the device.
+The priority of each queue is a normalized floating point value between 0.0
+and 1.0, which is then translated to a discrete priority level by the
+implementation.
+Higher values indicate a higher priority, with 0.0 being the lowest priority
+and 1.0 being the highest.
+
+Within the same device, queues with higher priority may: be allotted more
+processing time than queues with lower priority.
+The implementation makes no guarantees with regards to ordering or
+scheduling among queues with the same priority, other than the constraints
+defined by any <<synchronization, explicit synchronization primitives>>.
+The implementation make no guarantees with regards to queues across
+different devices.
+
+An implementation may: allow a higher-priority queue to starve a
+lower-priority queue on the same sname:VkDevice until the higher-priority
+queue has no further commands to execute.
+The relationship of queue priorities must: not cause queues on one
+sname:VkDevice to starve queues on another sname:VkDevice.
+
+No specific guarantees are made about higher priority queues receiving more
+processing time or better quality of service than lower priority queues.
+
+
+[[devsandqueues-submission]]
+=== Queue Submission
+
+Work is submitted to a queue via _queue submission_ commands such as
+flink:vkQueueSubmit.
+Queue submission commands define a set of _queue operations_ to be executed
+by the underlying physical device, including synchronization with semaphores
+and fences.
+
+Submission commands take as parameters a target queue, zero or more
+_batches_ of work, and an optional: fence to signal upon completion.
+Each batch consists of three distinct parts:
+
+  . Zero or more semaphores to wait on before execution of the rest of the
+    batch.
+  ** If present, these describe a <<synchronization-semaphores-waiting,
+     semaphore wait operation>>.
+  . Zero or more work items to execute.
+  ** If present, these describe a _queue operation_ matching the work
+     described.
+  . Zero or more semaphores to signal upon completion of the work items.
+  ** If present, these describe a <<synchronization-semaphores-signaling,
+     semaphore signal operation>>.
+
+If a fence is present in a queue submission, it describes a
+<<synchronization-fences-signaling, fence signal operation>>.
+
+All work described by a queue submission command must: be submitted to the
+queue before the command returns.
+
+
+[[devsandqueues-sparsebinding]]
+==== Sparse Memory Binding
+
+In Vulkan it is possible to sparsely bind memory to buffers and images as
+described in the <<sparsememory,Sparse Resource>> chapter.
+Sparse memory binding is a queue operation.
+A queue whose flags include the ename:VK_QUEUE_SPARSE_BINDING_BIT must: be
+able to support the mapping of a virtual address to a physical address on
+the device.
+This causes an update to the page table mappings on the device.
+This update must: be synchronized on a queue to avoid corrupting page table
+mappings during execution of graphics commands.
+By binding the sparse memory resources on queues, all commands that are
+dependent on the updated bindings are synchronized to only execute after the
+binding is updated.
+See the <<synchronization,Synchronization and Cache Control>> chapter for
+how this synchronization is accomplished.
+
+
+[[devsandqueues-queuedestruction]]
+=== Queue Destruction
+
+Queues are created along with a logical device during fname:vkCreateDevice.
+All queues associated with a logical device are destroyed when
+fname:vkDestroyDevice is called on that device.

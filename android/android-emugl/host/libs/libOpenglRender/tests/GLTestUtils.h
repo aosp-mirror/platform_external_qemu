@@ -42,5 +42,7 @@ TestTexture createTestPatternRGBA8888(int width, int height);
 TestTexture createTestTextureRGB888SingleColor(int width, int height, float r, float g, float b);
 TestTexture createTestTextureRGBA8888SingleColor(int width, int height, float r, float g, float b, float a);
 
+// Return the name associated with |v| as a string.
+const char* getEnumString(GLenum v);
 
 } // namespace emugl
