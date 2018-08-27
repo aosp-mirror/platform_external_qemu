@@ -141,7 +141,7 @@ LocationPage::LocationPage(QWidget *parent) :
         mUi->locationTabs->removeTab(3);
         // Hide the V2 widgets that are not functional yet
         mUi->locationTabs->removeTab(2); // "Settings"
-        mUi->locationTabs->removeTab(1); // "Routes"
+//        mUi->locationTabs->removeTab(1); // "Routes"
         mUi->pointSortBox->hide();       // "Sort by ..."
     } else {
         mUi->locationTabs->setTabText(3, ""); // "V1"
@@ -221,6 +221,15 @@ LocationPage::LocationPage(QWidget *parent) :
     scanForPoints();
     populatePointListWidget();
     highlightPointListWidget();
+
+    mRouteItemBuilder = new RouteItemBuilder(mUi->routeList);
+
+    mUi->routeList->setItemDelegateForColumn(0, new BackgroundDelegate(this));
+    mUi->routeList->setItemDelegateForColumn(1, new BackgroundDelegate(this));
+
+    scanForRoutes();
+    populateRouteListWidget();
+    highlightRouteListWidget();
   } else { // !useLocationV2
     mTimer.setSingleShot(true);
 
@@ -325,6 +334,7 @@ void LocationPage::shutDown() {
 void LocationPage::updateTheme() {
     // Re-do the lists of routes and points
     highlightPointListWidget();
+    highlightRouteListWidget();
 //    populatePointListWidget();
 //    populateRouteListWidget();
 }

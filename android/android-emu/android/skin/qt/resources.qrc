@@ -46,15 +46,18 @@
 
         <!-- Used in the "extended" window -->
         <file alias="add">images/light/ic_add_0BA_48dp.svg</file>
+        <file alias="android_auto">images/light/ic_car_678_56px.svg</file>
         <file alias="arrow_drop_down">images/light/ic_arrow_drop_down_black_18px.svg</file>
         <file alias="arrow_drop_up">images/light/ic_arrow_drop_up_black_18px.svg</file>
         <file alias="arrow_down">images/light/ic_keyboard_arrow_down_777_48dp.svg</file>
         <file alias="arrow_up">images/light/ic_keyboard_arrow_up_777_48dp.svg</file>
         <file alias="add_disabled">images/light/ic_add_BEE_48dp.svg</file>
         <file alias="battery">images/light/ic_battery_80_678_48dp.svg</file>
+        <file alias="bike">images/light/ic_directions_bike_222_48dp.svg</file>
         <file alias="bugreport">images/light/bug.svg</file>
         <file alias="call_end">images/light/ic_call_end_777_48dp.svg</file>
         <file alias="call_end_disabled">images/light/ic_call_end_BBB_48dp.svg</file>
+        <file alias="car">images/light/ic_directions_car_222_48dp.svg</file>
         <file alias="camera_iris">images/light/ic_camera_678_48dp.svg</file>
         <file alias="check_yes">images/light/ic_check_box_0BA_24dp.svg</file>
         <file alias="check_yes_disabled">images/light/ic_check_box_BEE_24dp.svg</file>
@@ -125,6 +128,7 @@
         <file alias="remove_disabled">images/light/ic_remove_BEE_48dp.svg</file>
         <file alias="rotary_input">images/light/ic_rotary_input.svg</file>
         <file alias="rotary_input_control">images/light/rotary_input_control.svg</file>
+        <file alias="run">images/light/ic_directions_run_222_48dp.svg</file>
         <file alias="send">images/light/ic_send_777_48dp.svg</file>
         <file alias="settings">images/light/ic_settings_678_48dp.svg</file>
         <file alias="side_on_watch">images/light/side_on_watch.svg</file>
@@ -137,7 +141,7 @@
         <file alias="toggle_on_disabled">images/light/toggle_on_disabled_light.png</file>
         <file alias="trash">images/light/ic_delete_777_48px.svg</file>
         <file alias="virtSensors">images/light/Virtual_Sensors_678.svg</file>
-        <file alias="android_auto">images/light/ic_car_678_56px.svg</file>
+        <file alias="walk">images/light/ic_directions_walk_222_48dp.svg</file>
     </qresource>
     <qresource prefix="/dark">
         <!-- Main list of tool buttons -->
@@ -167,11 +171,14 @@
         <!-- Used in the "extended" window -->
         <file alias="add">images/dark/ic_add_0BA_48dp.svg</file>
         <file alias="add_disabled">images/dark/ic_add_155_48dp.svg</file>
+        <file alias="android_auto">images/dark/ic_car_677_56px.svg</file>
         <file alias="battery">images/dark/ic_battery_80_677_48dp.svg</file>
+        <file alias="bike">images/dark/ic_directions_bike_EEE_48dp.svg</file>
         <file alias="bugreport">images/dark/bug_dark.svg</file>
         <file alias="call_end">images/dark/ic_call_end_BCC_48dp.svg</file>
         <file alias="call_end_disabled">images/dark/ic_call_end_566_48dp.svg</file>
         <file alias="camera_iris">images/dark/ic_camera_677_48dp.svg</file>
+        <file alias="car">images/dark/ic_directions_car_EEE_48dp.svg</file>
         <file alias="check_yes">images/dark/ic_check_box_0BA_24dp.svg</file>
         <file alias="check_yes_disabled">images/dark/ic_check_box_155_24dp.svg</file>
         <file alias="check_no">images/dark/ic_check_box_outline_blank_BCC_24dp.svg</file>
@@ -240,6 +247,7 @@
         <file alias="remove_disabled">images/dark/ic_remove_155_48dp.svg</file>
         <file alias="rotary_input">images/dark/ic_rotary_input.svg</file>
         <file alias="rotary_input_control">images/dark/rotary_input_control.svg</file>
+        <file alias="run">images/dark/ic_directions_run_EEE_48dp.svg</file>
         <file alias="send">images/dark/ic_send_BCC_48dp.svg</file>
         <file alias="settings">images/dark/ic_settings_677_48dp.svg</file>
         <file alias="signal_cellular_3_bar">images/dark/ic_signal_cellular_3_bar_677_48dp.svg</file>
@@ -251,7 +259,7 @@
         <file alias="toggle_on_disabled">images/dark/toggle_on_disabled_dark.png</file>
         <file alias="trash">images/dark/ic_delete_bcc_48px.svg</file>
         <file alias="virtSensors">images/dark/Virtual_Sensors_677.svg</file>
-        <file alias="android_auto">images/dark/ic_car_677_56px.svg</file>
+        <file alias="walk">images/dark/ic_directions_walk_EEE_48dp.svg</file>
     </qresource>
     <qresource prefix="/cursor">
         <file alias="zoom_cursor">images/cursor/zoom_cursor.svg</file>

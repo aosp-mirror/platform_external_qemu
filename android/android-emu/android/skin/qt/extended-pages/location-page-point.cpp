@@ -77,11 +77,11 @@ void LocationPage::scanForPoints() {
     // Get the directory
     std::string pointDirectoryName = android::base::PathUtils::
             join(::android::ConfigDirs::getUserDirectory().c_str(),
-                 "locations");
+                 "locations", "points");
 
     if (!path_is_dir(pointDirectoryName.c_str())) {
-        // No "locations/" directory
-        printf("l-p-p: In scanForPoints(): No \"locations/\" directory\n"); // ??
+        // No "locations/points" directory
+        printf("l-p-p: In scanForPoints(): No \"locations/points/\" directory\n"); // ??
         return;
     }
 
@@ -174,7 +174,7 @@ void LocationPage::highlightPointListWidget() {
 }
 
 void LocationPage::on_pointList_cellClicked(int row, int column) {
-    printf("l-p-p: Cell clicked\n");
+//    printf("l-p-p: Cell clicked\n");
     mUi->pointList->setCurrentCell(row, 0, QItemSelectionModel::Rows);
     if (column == 1) {
         QMenu* popMenu = new QMenu(this);
@@ -335,7 +335,7 @@ void LocationPage::deletePoint(int row) {
     auto widgetItem = (PointWidgetItem*)(mUi->pointList->item(row, 0));
     auto thisPoint = widgetItem->pointElement;
 
-    QMessageBox msgBox(QMessageBox::Question,
+    QMessageBox msgBox(QMessageBox::Warning,
                        tr("Delete single point"),
                        tr("Do you want to permanently delete<br>point \"%1\"?")
                                .arg(thisPoint->logicalName),
@@ -427,7 +427,7 @@ std::string LocationPage::writePointProtobufByName(
     // Get the directory to hold the protobuf
     std::string protoFileDirectoryName = android::base::PathUtils::
             join(::android::ConfigDirs::getUserDirectory().c_str(),
-                 "locations",
+                 "locations", "points",
                  pointFormalName.toStdString().c_str());
 
     // Ensure that the directory exists
