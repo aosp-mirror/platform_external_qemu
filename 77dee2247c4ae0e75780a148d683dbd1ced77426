@@ -1,0 +1,112 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7baec75a_cbbf29a0",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1098054
+      },
+      "writtenOn": "2018-08-27T17:51:24Z",
+      "side": 1,
+      "message": "This is pretty slick.",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 77
+      },
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af3d2d90_4983709b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 3397,
+      "author": {
+        "id": 1098054
+      },
+      "writtenOn": "2018-08-27T17:51:24Z",
+      "side": 1,
+      "message": "I don\u0027t see read/write handling for pData, is that intentional?",
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3b0343f4_d7f29c3c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 3481,
+      "author": {
+        "id": 1098054
+      },
+      "writtenOn": "2018-08-27T17:51:24Z",
+      "side": 1,
+      "message": "No handling of pData pointer here. Is that intentional?",
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ba53574f_35ad5e19",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 4011,
+      "author": {
+        "id": 1098054
+      },
+      "writtenOn": "2018-08-27T17:51:24Z",
+      "side": 1,
+      "message": "There\u0027s some risk in marshaling members like this that the spec says are ignored in some cases\nsuch as in this case \"is ignored if the pipeline does not include a tessellation control shader stage and tessellation evaluation shader stage\".\nAn app could have garbage here that may lead to a crash due to invalid access.",
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a9c6cbcb_4447eb61",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.h",
+        "patchSetId": 40
+      },
+      "lineNbr": 4777,
+      "author": {
+        "id": 1098054
+      },
+      "writtenOn": "2018-08-27T17:51:24Z",
+      "side": 1,
+      "message": "Not a big deal but could skip these empty #ifdef cases. Would help delay this file\u0027s unstoppable progression to 10k lines.",
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2812b684_9185d9b0",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/guest/goldfish_vk_frontend.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1098054
+      },
+      "writtenOn": "2018-08-27T17:51:24Z",
+      "side": 1,
+      "message": "Where is the vkStream instantiated?",
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
