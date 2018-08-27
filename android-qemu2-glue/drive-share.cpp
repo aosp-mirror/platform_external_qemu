@@ -143,9 +143,11 @@ static bool parseQemuOptForQcow2(bool wipeData) {
     QemuOptsList* optList = qemu_find_opts("drive");
     for (p = 0; p < count; p++) {
         QemuOpts* opts = qemu_opts_find(optList, images[p].drive);
+        const char* qcow2_image_path = nullptr;
         if (opts) {
+            qcow2_image_path = qemu_opt_get(opts, "file");
             sDriveShare->srcImagePaths.emplace(images[p].drive,
-                                               qemu_opt_get(opts, "file"));
+                                               qcow2_image_path);
         }
         const char* backing_image_path = images[p].backing_image_path;
         if (!backing_image_path || *backing_image_path == '\0') {
@@ -153,8 +155,7 @@ static bool parseQemuOptForQcow2(bool wipeData) {
             continue;
         }
         char* image_basename = path_basename(backing_image_path);
-        char* qcow2_path_buffer = NULL;
-        const char* qcow2_image_path = NULL;
+        char* qcow2_path_buffer = nullptr;
         bool need_create_tmp = false;
         // ChromeOS and Android pass parameters differently
         if (android_hw->hw_arc) {
@@ -188,11 +189,11 @@ static bool parseQemuOptForQcow2(bool wipeData) {
             qcow2_image_path = qcow2_path_buffer;
             sDriveShare->srcImagePaths[images[p].drive] = qcow2_image_path;
         } else {
-            qcow2_image_path = qemu_opt_get(opts, "file");
             const char qcow2_suffix[] = "." QCOW2_SUFFIX;
-            if (strcmp(qcow2_suffix, qcow2_image_path +
-                                             strlen(qcow2_image_path) -
-                                             strlen(qcow2_suffix))) {
+            if (!qcow2_image_path ||
+                strcmp(qcow2_suffix, qcow2_image_path +
+                                            strlen(qcow2_image_path) -
+                                            strlen(qcow2_suffix))) {
                 // We are not using qcow2
                 continue;
             }
