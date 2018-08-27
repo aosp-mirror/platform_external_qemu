@@ -47,6 +47,8 @@ public:
 
     enum class State : uint8_t { Empty, Reading, Read, Filling, Filled, Error };
 
+    static constexpr int64_t kReadChunkSize = 16 * 1048576;
+
     struct Page;
     using Pages = std::vector<Page>;
 
@@ -88,6 +90,8 @@ public:
     bool wasStarted() const { return mWasStarted; }
     void join();
     void interrupt();
+
+    void touchAllPages();
 
     bool hasError() const { return mHasError; }
     void invalidateGaps() { mGaps.reset(nullptr); }
@@ -194,6 +198,9 @@ private:
 
     // Whether we loaded to a ram.img
     bool mLoadedToFileBacking = false;
+
+    // Whether we are currently lazy loading from a ram.img by mmap
+    bool mLazyLoadingFromFileBacking = false;
 };
 
 struct RamLoader::Page {
