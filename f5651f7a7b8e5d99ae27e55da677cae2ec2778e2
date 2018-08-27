@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "78cd94b0_d2f5ede5",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-27T21:15:20Z",
+      "side": 1,
+      "message": "Done. Yes, the skipping is intentional.",
+      "parentUuid": "e0247d39_b5f310e6",
+      "range": {
+        "startLine": 366,
+        "startChar": 47,
+        "endLine": 366,
+        "endChar": 66
+      },
+      "revId": "f5651f7a7b8e5d99ae27e55da677cae2ec2778e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "438305f8_12e5a9a5",
         "filename": "android-qemu2-glue/drive-share.cpp",
         "patchSetId": 1
@@ -116,6 +140,30 @@
       "revId": "f5651f7a7b8e5d99ae27e55da677cae2ec2778e2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eb0346c5_b3613ba6",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-27T21:15:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "438305f8_12e5a9a5",
+      "range": {
+        "startLine": 420,
+        "startChar": 46,
+        "endLine": 420,
+        "endChar": 68
+      },
+      "revId": "f5651f7a7b8e5d99ae27e55da677cae2ec2778e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
