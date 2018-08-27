@@ -690,6 +690,7 @@ LOCAL_SRC_FILES := \
   android/base/containers/BufferQueue_unittest.cpp \
   android/base/containers/CircularBuffer_unittest.cpp \
   android/base/containers/Lookup_unittest.cpp \
+  android/base/containers/Pool_unittest.cpp \
   android/base/containers/SmallVector_unittest.cpp \
   android/base/containers/StaticMap_unittest.cpp \
   android/base/EintrWrapper_unittest.cpp \
