@@ -215,6 +215,30 @@
     },
     {
       "key": {
+        "uuid": "e31e96a6_1f6d5b9f",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-27T20:05:34Z",
+      "side": 1,
+      "message": "Updated.",
+      "parentUuid": "0f04824b_3e2be979",
+      "range": {
+        "startLine": 177,
+        "startChar": 0,
+        "endLine": 179,
+        "endChar": 5
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "13fd0195_3c86b014",
         "filename": "android/android-emu/android/automation/AutomationController.cpp",
         "patchSetId": 2
@@ -341,6 +365,30 @@
       "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "15e44868_b58f1ecc",
+        "filename": "android/android-emu/android/automation/AutomationEventSink.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-27T20:05:34Z",
+      "side": 1,
+      "message": "Hmm, ideally yes, but PhysicalModel uses the int type internally.  I\u0027m going to defer for now but will keep this in mind.",
+      "parentUuid": "47f50808_3d5ab513",
+      "range": {
+        "startLine": 58,
+        "startChar": 34,
+        "endLine": 58,
+        "endChar": 42
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -483,6 +531,30 @@
       "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8baa9b18_b346f5f2",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 807,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-27T20:05:34Z",
+      "side": 1,
+      "message": "Discussed offline.",
+      "parentUuid": "84aff99f_91b37a22",
+      "range": {
+        "startLine": 806,
+        "startChar": 0,
+        "endLine": 807,
+        "endChar": 49
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
