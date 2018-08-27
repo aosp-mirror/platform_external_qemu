@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c4363fa5_6f9c75a3",
+        "filename": "android/android-emu/android/snapshot/Loader.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T19:17:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a697afb2_f253287a",
+      "range": {
+        "startLine": 180,
+        "startChar": 12,
+        "endLine": 180,
+        "endChar": 69
+      },
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "90eb320a_962b7707",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/marshaling.py",
         "patchSetId": 40
@@ -45,6 +69,30 @@
       "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "11c6a371_79a0bb02",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/marshaling.py",
+        "patchSetId": 40
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T19:17:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "90eb320a_962b7707",
+      "range": {
+        "startLine": 115,
+        "startChar": 0,
+        "endLine": 115,
+        "endChar": 8
+      },
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "f3b6d172_5935e96f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/marshaling.py",
+        "patchSetId": 40
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T19:17:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9aa30f4_a047b86f",
+      "range": {
+        "startLine": 200,
+        "startChar": 0,
+        "endLine": 200,
+        "endChar": 34
+      },
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa90aea2_12cdaea2",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/marshaling.py",
         "patchSetId": 40
@@ -91,6 +163,30 @@
       "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8549581_0c44dbf5",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/marshaling.py",
+        "patchSetId": 40
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T19:17:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa90aea2_12cdaea2",
+      "range": {
+        "startLine": 227,
+        "startChar": 0,
+        "endLine": 227,
+        "endChar": 34
+      },
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -137,6 +233,30 @@
       "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4d840688_4ae7ee81",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/Android.mk",
+        "patchSetId": 40
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T19:17:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3e7ac3c2_7d08e63d",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 8,
+        "endChar": 4
+      },
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
