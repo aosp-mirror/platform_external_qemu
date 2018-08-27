@@ -1,0 +1,205 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "517f1a44_50fd5b26",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T16:05:51Z",
+      "side": 1,
+      "message": "Why not LazyInstance?",
+      "range": {
+        "startLine": 113,
+        "startChar": 0,
+        "endLine": 113,
+        "endChar": 53
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fdfa7b3a_e75a7770",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T16:05:51Z",
+      "side": 1,
+      "message": "Is this only used in the unit tests? If so, I suggest moving it there.",
+      "range": {
+        "startLine": 127,
+        "startChar": 0,
+        "endLine": 132,
+        "endChar": 1
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1a4f20a6_2cc42055",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T16:05:51Z",
+      "side": 1,
+      "message": "This pattern seems to occur a lot. Is it unsafe to set the same time twice in PhysicalModel? If so, could this be handled in physical model logic, while this takes care of telling physical model about the current time?",
+      "range": {
+        "startLine": 177,
+        "startChar": 0,
+        "endLine": 179,
+        "endChar": 5
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "13fd0195_3c86b014",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T16:05:51Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 352,
+        "startChar": 43,
+        "endLine": 352,
+        "endChar": 58
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "403343ee_8da0c12d",
+        "filename": "android/android-emu/android/automation/AutomationController_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T16:05:51Z",
+      "side": 1,
+      "message": "Cool tests :)",
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "47f50808_3d5ab513",
+        "filename": "android/android-emu/android/automation/AutomationEventSink.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T16:05:51Z",
+      "side": 1,
+      "message": "Should this be a System::Duration?",
+      "range": {
+        "startLine": 58,
+        "startChar": 34,
+        "endLine": 58,
+        "endChar": 42
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0aa7361e_c6945fc5",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T16:05:51Z",
+      "side": 1,
+      "message": "Should this be outside the lock?",
+      "range": {
+        "startLine": 228,
+        "startChar": 0,
+        "endLine": 228,
+        "endChar": 32
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eae49dd5_f38f8d43",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 807,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T16:05:51Z",
+      "side": 1,
+      "message": "Just checking; no change in the physical model snapshot protocol? Can we save a snapshot on an old emulator version and load it safely here, and vice versa? I see you\u0027ve separated into two different state save/loads, but was wondering still.",
+      "range": {
+        "startLine": 806,
+        "startChar": 0,
+        "endLine": 807,
+        "endChar": 49
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9126a68c_bbdd81f0",
+        "filename": "android/android-emu/android/virtualscene/SceneCamera.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T16:05:51Z",
+      "side": 1,
+      "message": "I guess this highlights deeper issues in the code, and we probably want to sit back and address this later, but qemu-setup will be called in vl.c which is after Qt initializes. We\u0027ve had a lot of tricky bugs because Qt can play with virtual devices and such if clicked fast enough before the emulation setup code is triggered. So it could be possible to construct AutomationController from a different thread than we wanted.\n\nFor the real fix, we might want to somehow disable Qt until after emulation setup, but for this code, it might make sense to decouple getting the automation controller from initializing it, and if we get a null pointer, bail from this function instead of aborting.",
+      "range": {
+        "startLine": 94,
+        "startChar": 0,
+        "endLine": 98,
+        "endChar": 58
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
