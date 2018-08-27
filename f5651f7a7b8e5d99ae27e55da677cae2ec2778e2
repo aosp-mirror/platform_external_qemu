@@ -70,6 +70,52 @@
       "revId": "f5651f7a7b8e5d99ae27e55da677cae2ec2778e2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0247d39_b5f310e6",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T20:43:35Z",
+      "side": 1,
+      "message": "nit: recommend putting this in one bool shared between the two uses of it, if possible.\n\nAlso is it intended to skip snapshot goto if the id is not cache?",
+      "range": {
+        "startLine": 366,
+        "startChar": 47,
+        "endLine": 366,
+        "endChar": 66
+      },
+      "revId": "f5651f7a7b8e5d99ae27e55da677cae2ec2778e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "438305f8_12e5a9a5",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T20:43:35Z",
+      "side": 1,
+      "message": "here too",
+      "range": {
+        "startLine": 420,
+        "startChar": 46,
+        "endLine": 420,
+        "endChar": 68
+      },
+      "revId": "f5651f7a7b8e5d99ae27e55da677cae2ec2778e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
