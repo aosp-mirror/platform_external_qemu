@@ -283,6 +283,30 @@
     },
     {
       "key": {
+        "uuid": "f6931a20_8789ad60",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T20:33:03Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "7baec75a_cbbf29a0",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 77
+      },
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "af3d2d90_4983709b",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
         "patchSetId": 40
@@ -318,6 +342,24 @@
     },
     {
       "key": {
+        "uuid": "41bbbbfc_e75d6fea",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 3397,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T20:33:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf6b78c7_8d60590f",
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3b0343f4_d7f29c3c",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
         "patchSetId": 40
@@ -350,6 +392,24 @@
       "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0948471c_f48de624",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
+        "patchSetId": 40
+      },
+      "lineNbr": 3481,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T20:33:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c13e2b71_2572fff0",
+      "revId": "77dee2247c4ae0e75780a148d683dbd1ced77426",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
