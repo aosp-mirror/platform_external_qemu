@@ -136,7 +136,7 @@ void Quickboot::reportSuccessfulSave(StringView name,
 
 constexpr int kLivenessTimerTimeoutMs = 100;
 constexpr int kBootTimeoutMs = 7 * 1000;
-constexpr int kMaxAdbConnectionRetries = 2;
+constexpr int kMaxAdbConnectionRetries = 3;
 
 static int bootTimeoutMs() {
     if (android_cmdLineOptions->read_only) {
@@ -159,16 +159,25 @@ void Quickboot::startLivenessMonitor() {
 
 void Quickboot::onLivenessTimer() {
     if (isSnapshotAlive()) {
+        fprintf(stderr, "Guest came online %.3f sec after loading\n",
+                      (System::get()->getHighResTimeUs() / 1000 - mLoadTimeMs) /
+                              1000.0);
         VERBOSE_PRINT(snapshot, "Guest came online %.3f sec after loading",
                       (System::get()->getHighResTimeUs() / 1000 - mLoadTimeMs) /
                               1000.0);
+            Snapshotter::get().touchAllPages();
         // done here: snapshot loaded fine and emulator's working.
         return;
     }
 
     const auto nowMs = System::get()->getHighResTimeUs() / 1000;
     if (int64_t(nowMs - mLoadTimeMs) > bootTimeoutMs()) {
-        if (android_cmdLineOptions->read_only ||
+        if (mAdbConnectionRetries == 0) {
+            VERBOSE_PRINT(snapshot, "Guest not online yet, touching all pages.",
+                          (System::get()->getHighResTimeUs() / 1000 - mLoadTimeMs) /
+                                  1000.0);
+            mAdbConnectionRetries++;
+        } else if (android_cmdLineOptions->read_only ||
             mAdbConnectionRetries < kMaxAdbConnectionRetries) {
             mWindow.showMessage(
                     StringFormat("Guest isn't online after %d seconds, "

@@ -26,6 +26,11 @@
 namespace android {
 namespace base {
 
+// Assumes is aligned to page size and the whole page is there.
+// static void rewritePage(void* start, uint64_t length) {
+    // // TODO some inline asm
+// }
+
 bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
 #ifdef _WIN32
     switch (hint) {
@@ -46,11 +51,15 @@ bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
         VirtualUnlock(start, length);
         VirtualUnlock(start, length);
         return true;
+    case MemoryHint::Touch:
+        memmove(start, start, length);
+        return true;
     case MemoryHint::Normal:
         return true;
     // TODO: Find some way to implement those on Windows
     case MemoryHint::Random:
     case MemoryHint::Sequential:
+        return true;
     default:
         return true;
     }
@@ -88,6 +97,9 @@ bool memoryHint(void* start, uint64_t length, MemoryHint hint) {
             break;
         case MemoryHint::Sequential:
             asAdviseFlag = MADV_SEQUENTIAL;
+            break;
+        case MemoryHint::Touch:
+            memmove(start, start, length);
             break;
         default:
             break;

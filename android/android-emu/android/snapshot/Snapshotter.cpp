@@ -284,6 +284,13 @@ OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
     return mLoader->status();
 }
 
+void Snapshotter::touchAllPages() {
+    android::RecursiveScopedVmLock lock;
+    if (mLoader) {
+        mLoader->touchAllPages();
+    }
+}
+
 void Snapshotter::prepareLoaderForSaving(const char* name) {
     if (!mLoader) {
         return;
