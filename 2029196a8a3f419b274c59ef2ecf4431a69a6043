@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f4bdb45a_b85ac1e5",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VulkanStream_unittest.cpp",
+        "patchSetId": 42
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-27T21:33:26Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 416,
+        "startChar": 0,
+        "endLine": 416,
+        "endChar": 4
+      },
+      "revId": "2029196a8a3f419b274c59ef2ecf4431a69a6043",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
