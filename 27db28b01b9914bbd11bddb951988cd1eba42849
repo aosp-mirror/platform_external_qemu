@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "db5e4275_5408fc04",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-27T18:26:43Z",
+      "side": 1,
+      "message": "Two reasons:\n\n1. The constructor takes parameters now, which LazyInstance doesn\u0027t handle well.\n2. Since I\u0027m using ThreadLooper::get(), I wanted to make sure that the AutomationController isn\u0027t created on the wrong thread.  Now it must be created by calling AutomationController::initialize() in qemu-setup.",
+      "parentUuid": "517f1a44_50fd5b26",
+      "range": {
+        "startLine": 113,
+        "startChar": 0,
+        "endLine": 113,
+        "endChar": 53
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fdfa7b3a_e75a7770",
         "filename": "android/android-emu/android/automation/AutomationController.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2018-08-27T16:05:51Z",
       "side": 1,
       "message": "Is this only used in the unit tests? If so, I suggest moving it there.",
+      "range": {
+        "startLine": 127,
+        "startChar": 0,
+        "endLine": 132,
+        "endChar": 1
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "79e60242_80474db1",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-27T18:26:43Z",
+      "side": 1,
+      "message": "Yep, it\u0027s only used in unit tests but since it instantiates a file-local class it can\u0027t be moved there.",
+      "parentUuid": "fdfa7b3a_e75a7770",
       "range": {
         "startLine": 127,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "23f174dc_c56bd733",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-27T18:26:43Z",
+      "side": 1,
+      "message": "I just checked, it\u0027s safe to set the same time twice and it basically no-ops.  I was just being paranoid, I\u0027ll update it.",
+      "parentUuid": "1a4f20a6_2cc42055",
+      "range": {
+        "startLine": 177,
+        "startChar": 0,
+        "endLine": 179,
+        "endChar": 5
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "13fd0195_3c86b014",
         "filename": "android/android-emu/android/automation/AutomationController.cpp",
         "patchSetId": 2
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "36192ace_73a5847d",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-27T18:26:43Z",
+      "side": 1,
+      "message": "Maybe I should keep the parameter name.  This is proofOfLock, I system I like to use to make sure that the caller actually has a lock since this method must be called under lock.",
+      "parentUuid": "13fd0195_3c86b014",
+      "range": {
+        "startLine": 352,
+        "startChar": 43,
+        "endLine": 352,
+        "endChar": 58
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "403343ee_8da0c12d",
         "filename": "android/android-emu/android/automation/AutomationController_unittest.cpp",
         "patchSetId": 2
@@ -108,6 +204,24 @@
       "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "897e1f40_e2541e89",
+        "filename": "android/android-emu/android/automation/AutomationController_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-27T18:26:43Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "403343ee_8da0c12d",
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -157,6 +271,30 @@
     },
     {
       "key": {
+        "uuid": "7df106d2_571f0d8a",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-27T18:26:43Z",
+      "side": 1,
+      "message": "Yeah, this is one of the things I called out in the commit message-- I\u0027m taking special care to make sure callbacks aren\u0027t called under lock, since doing so is prone to deadlocks.",
+      "parentUuid": "0aa7361e_c6945fc5",
+      "range": {
+        "startLine": 228,
+        "startChar": 0,
+        "endLine": 228,
+        "endChar": 32
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eae49dd5_f38f8d43",
         "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
         "patchSetId": 2
@@ -180,6 +318,30 @@
     },
     {
       "key": {
+        "uuid": "47abb339_f0163854",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 807,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-27T18:26:43Z",
+      "side": 1,
+      "message": "Yeah, no change in snapshot protocol.  I renamed the previous save/load for snapshot use only, and the saveState/loadState are for automation.  However, I\u0027m seriously considering merging them, which would break the protocol.  Maybe in a later change :-)",
+      "parentUuid": "eae49dd5_f38f8d43",
+      "range": {
+        "startLine": 806,
+        "startChar": 0,
+        "endLine": 807,
+        "endChar": 49
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9126a68c_bbdd81f0",
         "filename": "android/android-emu/android/virtualscene/SceneCamera.cpp",
         "patchSetId": 2
@@ -200,6 +362,30 @@
       "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ef3f9800_0e43eaed",
+        "filename": "android/android-emu/android/virtualscene/SceneCamera.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-08-27T18:26:43Z",
+      "side": 1,
+      "message": "Nice catch!  I don\u0027t know if it\u0027s possible to get to this point without qemu\u0027s participation, since it requires the camera to be started, but it\u0027s likely that won\u0027t hold true in the future.\n\nI\u0027ll update this to check if the AutomationController is valid first.",
+      "parentUuid": "9126a68c_bbdd81f0",
+      "range": {
+        "startLine": 94,
+        "startChar": 0,
+        "endLine": 98,
+        "endChar": 58
+      },
+      "revId": "27db28b01b9914bbd11bddb951988cd1eba42849",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
