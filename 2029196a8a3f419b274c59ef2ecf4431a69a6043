@@ -22,6 +22,30 @@
       "revId": "2029196a8a3f419b274c59ef2ecf4431a69a6043",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7dcb06ee_4daa47a8",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VulkanStream_unittest.cpp",
+        "patchSetId": 42
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-27T22:28:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f4bdb45a_b85ac1e5",
+      "range": {
+        "startLine": 416,
+        "startChar": 0,
+        "endLine": 416,
+        "endChar": 4
+      },
+      "revId": "2029196a8a3f419b274c59ef2ecf4431a69a6043",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
