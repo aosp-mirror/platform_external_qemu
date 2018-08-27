@@ -308,6 +308,7 @@ LOCAL_SRC_FILES := \
     android/base/async/ScopedSocketWatch.cpp \
     android/base/async/ThreadLooper.cpp \
     android/base/network/Dns.cpp \
+    android/base/Pool.cpp \
     android/base/sockets/SocketDrainer.cpp \
     android/base/threads/internal/ParallelTaskBase.cpp \
     android/boot-properties.c \
@@ -727,6 +728,7 @@ LOCAL_SRC_FILES := \
   android/base/network/IpAddress_unittest.cpp \
   android/base/network/NetworkUtils_unittest.cpp \
   android/base/Optional_unittest.cpp \
+  android/base/Pool_unittest.cpp \
   android/base/ProcessControl_unittest.cpp \
   android/base/Result_unittest.cpp \
   android/base/sockets/ScopedSocket_unittest.cpp \
