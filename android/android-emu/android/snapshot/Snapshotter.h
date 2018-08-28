@@ -75,6 +75,7 @@ public:
     OperationStatus save(bool isOnExit, const char* name);
 
     void setRamFile(const char* path, bool shared);
+    void setRamFileShared(bool shared);
 
     // Cancels the current save operation, and queries
     // whether saving was canceled.
@@ -128,6 +129,7 @@ public:
     bool isQuickboot() const { return mIsQuickboot; }
     bool hasRamFile() const { return !mRamFile.empty(); }
     bool isRamFileShared() const { return !mRamFile.empty() && mRamFileShared; }
+    void setRemapping(bool remapping) { mIsRemapping = remapping; }
 
 private:
     bool onStartSaving(const char* name);
@@ -167,6 +169,7 @@ private:
     bool mIsQuickboot = false;
     bool mIsOnExit = false;
     bool mIsInvalidating = false;
+    bool mIsRemapping = false;
 
     std::string mRamFile;
     bool mRamFileShared = false;
