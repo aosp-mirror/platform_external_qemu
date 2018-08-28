@@ -1251,6 +1251,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         dwarning("System image is writable");
     }
 
+    fprintf(stderr, "%s succeeded\n", __func__);
     return true;
 }
 
@@ -1443,6 +1444,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     *exit_status = 1;
 
     if (android_parse_options(p_argc, p_argv, opts) < 0) {
+        fprintf(stderr, "%s: failed to parse android options\n", __func__);
         return false;
     }
 
@@ -1462,6 +1464,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         int helpStatus = emulator_parseHelpOption(opt);
         if (helpStatus >= 0) {
             *exit_status = helpStatus;
+            fprintf(stderr, "%s: help status failed to parse\n", __func__);
             return false;
         }
 
@@ -1499,12 +1502,14 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
                "  GNU General Public License for more details.\n\n");
 
         *exit_status = 0;
+        fprintf(stderr, "%s: failed to print version\n", __func__);
         return false;
     }
 
     if (opts->webcam_list) {
         android_camera_list_webcams();
         *exit_status = 0;
+        fprintf(stderr, "%s: failed to list webcams\n", __func__);
         return false;
     }
 
@@ -1526,6 +1531,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
                     if (is_qemu2) {
                         android_snapshot_list_ok = true;
                     } else {
+                        fprintf(stderr, "%s: somehow snapshot storage called with is_qemu false\n", __func__);
                         return false;
                     }
                 }
@@ -1537,6 +1543,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         if (!android_snapshot_list_ok) {
             snapshot_print(opts->snapstorage);
             *exit_status = 0;
+            fprintf(stderr, "%s: snapshot list is NOT ok\n", __func__);
             return false;
         }
 
@@ -1551,6 +1558,8 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     char* qemu_info_opt = _findQemuInformationalOption(*p_argc, *p_argv);
     if ( qemu_info_opt) {
         D("Found informational option '%s' after '-qemu'.\n"
+          "All options before '-qemu' will be ignored!", qemu_info_opt);
+        fprintf(stderr, "Found informational option '%s' after '-qemu'.\n"
           "All options before '-qemu' will be ignored!", qemu_info_opt);
         *exit_status = EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER;
         return false;
@@ -1671,6 +1680,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     }
 
     if (!emulator_handleCommonEmulatorOptions(opts, hw, avd, is_qemu2)) {
+        fprintf(stderr, "%s: failed to handle common emulator options\n", __func__);
         return false;
     }
 
@@ -1830,6 +1840,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         SockAddress dnsServers[ANDROID_MAX_DNS_SERVERS] = {};
         int dnsCount = android_dns_get_servers(opts->dns_server, dnsServers);
         if (dnsCount < 0) {
+            fprintf(stderr, "%s: android_dns_get_servers failed.\n", __func__);
             return false;
         }
         if (dnsCount > 0) {
@@ -1857,6 +1868,8 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
                 derror("Invalid value for -cores <count> parameter: %s\n",
                     "Valid values are decimal count between 1 and 64\n",
                     opts->cores);
+                fprintf(stderr, "Invalid value for -cores <count> parameter: %s\n",
+                    "Valid values are decimal count between 1 and 64\n");
                 return false;
             }
             hw->hw_cpu_ncore = (int)val;
@@ -1888,11 +1901,13 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
           continue; // ignore the '-' character and continue.
         } else if (!isdigit(opts->phone_number[i])) {
           derror("Phone number should be all decimal digits\n");
+          fprintf(stderr, "Phone number should be all decimal digits\n");
           *exit_status = 2;
           return false;
         } else {
           if (j == 15) { // max possible MSISDN length
             derror("length of phone_number should be at most 15");
+            fprintf(stderr, "length of phone_number should be at most 15\n");
             *exit_status = 2;
             return false;
           }
@@ -1903,6 +1918,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
       str_reset(&opts->phone_number, phone_number);
     }
 
+    fprintf(stderr, "%s: success\n", __func__);
     *exit_status = 0;
     return true;
 }

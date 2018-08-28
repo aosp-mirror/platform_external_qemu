@@ -7,6 +7,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 const AndroidOptions* android_cmdLineOptions = NULL;
@@ -210,6 +211,7 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
         }
     }
 
+    fprintf(stderr, "%s: success\n", __func__);
     return 0;
 }
 
