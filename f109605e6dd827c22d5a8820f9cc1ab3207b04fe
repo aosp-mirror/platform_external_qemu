@@ -22,6 +22,30 @@
       "revId": "f109605e6dd827c22d5a8820f9cc1ab3207b04fe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ff0457b8_7842e639",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VulkanStream.cpp",
+        "patchSetId": 44
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-28T00:56:04Z",
+      "side": 1,
+      "message": "Thanks for the tip! Moved them to StreamSerializing.h along with the tests.",
+      "parentUuid": "d82b51dd_2a6bd131",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 15
+      },
+      "revId": "f109605e6dd827c22d5a8820f9cc1ab3207b04fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
