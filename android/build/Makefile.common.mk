@@ -30,14 +30,17 @@ include $(LOCAL_PATH)/android/third_party/libyuv/Android.mk
 include $(LOCAL_PATH)/android/third_party/Protobuf.mk
 include $(LOCAL_PATH)/android/third_party/liblz4.mk
 include $(LOCAL_PATH)/android/third_party/libffmpeg.mk
-include $(LOCAL_PATH)/android/third_party/libx264.mk
+#include $(LOCAL_PATH)/android/third_party/libx264.mk
 include $(LOCAL_PATH)/android/third_party/libvpx.mk
 include $(LOCAL_PATH)/android/third_party/libsdl2.mk
 include $(LOCAL_PATH)/android/third_party/tinyobjloader.mk
 include $(LOCAL_PATH)/android/third_party/picosha2/picosha2.mk
 include $(LOCAL_PATH)/android/third_party/libdtb/libdtb.mk
 include $(LOCAL_PATH)/android/third_party/tinyepoxy/tinyepoxy.mk
-include $(LOCAL_PATH)/android/third_party/libvirglrenderer.mk
+
+ifneq ($(BUILD_TARGET_OS),windows_msvc)
+  include $(LOCAL_PATH)/android/third_party/libvirglrenderer.mk
+endif
 
 # Bluez only works on linux
 ifeq ($(BUILD_TARGET_OS),linux)
@@ -45,7 +48,7 @@ ifeq ($(BUILD_TARGET_OS),linux)
 endif
 
 # Libusb only works on darwin/linux
-ifneq ($(BUILD_TARGET_OS),windows)
+ifneq ($(filter linux darwin, $(BUILD_TARGET_OS)),)
   include $(LOCAL_PATH)/android/third_party/libusb.mk
 endif
 
@@ -142,7 +145,7 @@ gen-hw-config-defs = \
   $(eval LOCAL_GENERATED_SOURCES += $(QEMU_HW_CONFIG_DEFS_H))\
   $(eval LOCAL_C_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES))
 
-ifeq ($(BUILD_TARGET_OS),windows)
+ifneq ($(filter windows windows_msvc, $(BUILD_TARGET_OS)),)
   # on Windows, link the icon file as well into the executable
   # unfortunately, our build system doesn't help us much, so we need
   # to use some weird pathnames to make this work...
@@ -218,7 +221,7 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
     # Ensure this is always built, even if 32-bit binaries are disabled.
     LOCAL_IGNORE_BITNESS := true
 
-    ifeq ($(BUILD_TARGET_OS),windows)
+    ifneq ($(filter windows windows_msvc, $(BUILD_TARGET_OS)),)
     $(eval $(call insert-windows-icon))
     endif
 
@@ -249,7 +252,7 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
 
     LOCAL_IGNORE_BITNESS := true
 
-    ifeq ($(BUILD_TARGET_OS),windows)
+    ifneq ($(filter windows windows_msvc, $(BUILD_TARGET_OS)),)
         $(eval $(call insert-windows-icon))
     endif
 

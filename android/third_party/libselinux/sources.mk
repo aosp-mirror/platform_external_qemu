@@ -10,7 +10,7 @@ LIBSELINUX_SOURCES := \
     src/label_file.c \
     src/label_android_property.c
 
-ifeq ($(BUILD_TARGET_OS),windows)
+ifneq ($(filter windows windows_msvc, $(BUILD_TARGET_OS)),)
     # This code doesn't not build on Windows, so create empty
     # libraries on this platform, this simplifies the build
     # configuration.
