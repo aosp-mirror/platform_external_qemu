@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "596025b1_98a12219",
+        "filename": "android/android-emu/android/base/memory/MemoryHints.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-28T00:27:39Z",
+      "side": 1,
+      "message": "casting a pointer to volatile and then reading from there and writing back may not be optimized out\nvolatile char* vptr \u003d ptr;\nchar val \u003d *vptr;\n*vptr \u003d val;\nthe last line is needed if you want to make sure copy-on-write is triggered\n\nBTW, no need to read the whole page, reading the first byte by definition would force whole page load",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 50
+      },
+      "revId": "decf5a13501b4c797348edadb61c36b1e9a85b30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
