@@ -59,11 +59,6 @@ ifeq ($(BUILD_DEBUG),true)
     # Enable code coverage for debug builds.
     BUILD_TARGET_CFLAGS += $(call if-target-clang, -fprofile-instr-generate -fcoverage-mapping -fprofile-arcs -ftest-coverage)
     BUILD_OPT_LDFLAGS += $(call if-target-clang, -fprofile-instr-generate -fcoverage-mapping -fprofile-arcs -ftest-coverage --coverage)
-
-    # Always enable address sanitizer for clang builds in debug mode if no specific sanitizer is requested.
-    ifeq (,$(BUILD_SANITIZER))
-      BUILD_SANITIZER = $(call if-target-clang,address)
-    endif
 else
     ifneq (windows,$(BUILD_TARGET_OS))
         BUILD_OPT_CFLAGS += -O3 -DNDEBUG=1
