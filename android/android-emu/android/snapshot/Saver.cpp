@@ -30,7 +30,7 @@ namespace android {
 namespace snapshot {
 
 Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit,
-             base::StringView ramMapFile, bool ramFileShared)
+             base::StringView ramMapFile, bool ramFileShared, bool isRemapping)
     : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
     if (path_mkdir_if_needed(c_str(mSnapshot.dataDir()), 0777) != 0) {
         return;
@@ -41,9 +41,9 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit,
 
         // If we're using a file-backed RAM that is writing through,
         // no need to save pages synchronously on exit.
-        if (isOnExit &&
-            !ramMapFile.empty() &&
-            ramFileShared) {
+        if ((!ramMapFile.empty() &&
+             ramFileShared) &&
+            (isOnExit || isRemapping)) {
             flags |= RamSaver::Flags::Async;
         }
 
