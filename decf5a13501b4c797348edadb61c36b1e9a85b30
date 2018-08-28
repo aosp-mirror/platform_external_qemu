@@ -22,6 +22,30 @@
       "revId": "decf5a13501b4c797348edadb61c36b1e9a85b30",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c31910a1_c6a3cd46",
+        "filename": "android/android-emu/android/base/memory/MemoryHints.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-28T01:31:48Z",
+      "side": 1,
+      "message": "Thanks! I\u0027ve confirmed that this method also seems to page everything in. There doesn\u0027t seem to be a need to trigger CoW for now.",
+      "parentUuid": "596025b1_98a12219",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 50
+      },
+      "revId": "decf5a13501b4c797348edadb61c36b1e9a85b30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
