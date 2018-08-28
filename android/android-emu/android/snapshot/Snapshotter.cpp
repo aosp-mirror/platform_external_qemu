@@ -628,7 +628,8 @@ OperationStatus Snapshotter::prepareForSaving(const char* name) {
     prepareLoaderForSaving(name);
     mVmOperations.vmStop();
     mSaver.reset(new Saver(
-            name, (mLoader && mLoader->status() != OperationStatus::Error)
+            name, (mLoader && mLoader->hasRamLoader() &&
+                   mLoader->status() != OperationStatus::Error)
                           ? &mLoader->ramLoader()
                           : nullptr,
             mIsOnExit,
@@ -770,7 +771,8 @@ bool Snapshotter::onStartSaving(const char* name) {
     prepareLoaderForSaving(name);
     if (!mSaver || isComplete(*mSaver)) {
         mSaver.reset(new Saver(
-                name, (mLoader && mLoader->status() != OperationStatus::Error)
+                name, (mLoader && mLoader->hasRamLoader() &&
+                       mLoader->status() != OperationStatus::Error)
                               ? &mLoader->ramLoader()
                               : nullptr,
                 mIsOnExit,
