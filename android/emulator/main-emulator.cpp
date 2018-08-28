@@ -748,6 +748,8 @@ int main(int argc, char** argv)
         printf("\n");
     }
 
+    printf("emulator: Trying to stat emulator\n");
+
     // Launch it with the same set of options !
     // Note that on Windows, the first argument must _not_ be quoted or
     // Windows will fail to find the program.

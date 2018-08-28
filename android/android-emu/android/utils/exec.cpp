@@ -68,6 +68,9 @@ static BOOL WINAPI ctrlHandler(DWORD type)
 using android::base::Win32UnicodeString;
 
 int safe_execv(const char* path, char* const* argv) {
+
+    fprintf(stderr, "%s: start. want to run: %s\n", __func__, path);
+
    std::vector<Win32UnicodeString> arguments;
    for (size_t i = 0; argv[i] != nullptr; ++i) {
       arguments.push_back(Win32UnicodeString(argv[i]));
@@ -81,19 +84,29 @@ int safe_execv(const char* path, char* const* argv) {
    argumentPointers.push_back(nullptr);
    Win32UnicodeString program(path);
 
+    fprintf(stderr, "%s: call SetConsoleCtrlHandler\n", __func__);
    ::SetConsoleCtrlHandler(ctrlHandler, TRUE);
+    fprintf(stderr, "%s: call SetConsoleCtrlHandler (done)\n", __func__);
 
+    fprintf(stderr, "%s: call wspawnv\n", __func__);
    sChildProcessHandle = (HANDLE)_wspawnv(_P_NOWAIT, program.c_str(),
                                   &argumentPointers[0]);
+
+    fprintf(stderr, "%s: call wspawnv (done). handle: %p\n", __func__, sChildProcessHandle);
+
    if (sChildProcessHandle == INVALID_HANDLE_VALUE) {
+        fprintf(stderr, "%s: wspawnv failed, exit\n", __func__);
        ::SetConsoleCtrlHandler(ctrlHandler, FALSE);
        return 1;
    }
    ::WaitForSingleObject(sChildProcessHandle, INFINITE);
+   fprintf(stderr, "%s: done waiting for child process. handle: %p\n", __func__, sChildProcessHandle);
    DWORD exitCode;
    if (!::GetExitCodeProcess(sChildProcessHandle, &exitCode)) {
+       fprintf(stderr, "%s: done waiting for child process. handle: %p (failed GetExitCodeProcess)\n", __func__, sChildProcessHandle);
        exitCode = 2;
    }
+   fprintf(stderr, "%s: exit with code %lu\n", __func__, exitCode);
    exit(exitCode);
 }
 

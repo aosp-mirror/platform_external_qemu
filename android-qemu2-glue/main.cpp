@@ -632,16 +632,22 @@ static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
 
 extern AndroidProxyCB* gAndroidProxyCB;
 extern "C" int main(int argc, char** argv) {
+    fprintf(stderr, "%s: in qemu-system-*** main\n", __func__);
+
     if (argc < 1) {
         fprintf(stderr, "Invalid invocation (no program path)\n");
         return 1;
     }
 
+    fprintf(stderr, "%s: begin process early setup\n", __func__);
     process_early_setup(argc, argv);
     android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
+    fprintf(stderr, "%s: end process early setup\n", __func__);
 
     // Start GPU information query to use it later for the renderer seleciton.
+    fprintf(stderr, "%s: begin async query host gpu\n", __func__);
     async_query_host_gpu_start();
+    fprintf(stderr, "%s: end async query host gpu\n", __func__);
 
     const char* executable = argv[0];
     android::ParameterList args = {executable};
@@ -652,7 +658,9 @@ extern "C" int main(int argc, char** argv) {
 
     gAndroidProxyCB->ProxySet = qemu_android_setup_http_proxy;
     gAndroidProxyCB->ProxyUnset = qemu_android_remove_http_proxy;
+    fprintf(stderr, "%s: begin http proxy init\n", __func__);
     qemu_android_init_http_proxy_ops();
+    fprintf(stderr, "%s: end http proxy init\n", __func__);
 
     if (!emulator_parseCommonCommandLineOptions(
                 &argc, &argv, kTarget.androidArch,
@@ -671,11 +679,13 @@ extern "C" int main(int argc, char** argv) {
 
             // Skip the translation of command-line options and jump
             // straight to qemu_main().
+            fprintf(stderr, "%s: skip straight to qemu main loop\n", __func__);
             enter_qemu_main_loop(args.size(), args.array());
             return 0;
         }
 
         // Normal exit.
+        fprintf(stderr, "%s: failed to parse command line options\n", __func__);
         return exitStatus;
     }
 
@@ -691,11 +701,13 @@ extern "C" int main(int argc, char** argv) {
         return 1;
     }
 
+    fprintf(stderr, "%s: finalize restart parameters\n", __func__);
     if (avdInfo_inAndroidBuild(avd) || opts->read_only) {
         android::base::disableRestart();
     } else {
         android::base::finalizeEmulatorRestartParameters(avdInfo_getContentPath(avd));
     }
+    fprintf(stderr, "%s: finalize restart parameters (done)\n", __func__);
 
     // Lock the AVD as soon as we can to make sure other copy won't do anything
     // stupid before detecting that the AVD is already in use.
@@ -733,6 +745,7 @@ extern "C" int main(int argc, char** argv) {
     android::base::FileShare shareMode = opts->read_only ? FileShare::Read
                                                          : FileShare::Write;
     if (!android::multiinstance::initInstanceShareMode(shareMode)) {
+        fprintf(stderr, "%s: multi instance share mode failed to init, exit.\n", __func__);
         return 1;
     }
 
@@ -758,10 +771,12 @@ extern "C" int main(int argc, char** argv) {
 #endif
 
     if (!emulator_parseFeatureCommandLineOptions(opts, avd, hw)) {
+        fprintf(stderr, "%s: feature command line options failed to parse, exit.\n", __func__);
         return 1;
     }
 
     if (!emulator_parseUiCommandLineOptions(opts, avd, hw)) {
+        fprintf(stderr, "%s: UI command line options failed to parse, exit.\n", __func__);
         return 1;
     }
 
@@ -934,6 +949,7 @@ extern "C" int main(int argc, char** argv) {
         int console_port = -1;
         int adb_port = -1;
         if (!android_parse_port_option(opts->port, &console_port, &adb_port)) {
+            fprintf(stderr, "%s: Port options failed to parse, exit.\n", __func__);
             return 1;
         }
         args.add("-android-ports");
@@ -944,6 +960,7 @@ extern "C" int main(int argc, char** argv) {
 
     if (opts->http_proxy) {
         if (!qemu_android_setup_http_proxy(opts->http_proxy)) {
+            fprintf(stderr, "%s: HTTP proxy setup failed to setup, exit.\n", __func__);
             return 1;
         }
     }
@@ -962,6 +979,7 @@ extern "C" int main(int argc, char** argv) {
 
         if (!path_exists(opts->charmap)) {
             derror("Charmap file does not exist: %s", opts->charmap);
+            fprintf(stderr, "Charmap file does not exist: %s\n", opts->charmap);
             return 1;
         }
         /* We need to store the charmap name in the hardware
@@ -1028,6 +1046,7 @@ extern "C" int main(int argc, char** argv) {
     if ((android_op_wipe_data || !path_exists(hw->disk_dataPartition_path))) {
         int ret = createUserData(avd, dataPath.c_str(), hw);
         if (ret != 0) {
+            fprintf(stderr, "Failed to initialize userdata.img!!!!!!!!!!!!!!!!!!\n");
             crashhandler_die("Failed to initialize userdata.img.");
             return ret;
         }
@@ -1352,9 +1371,11 @@ extern "C" int main(int argc, char** argv) {
 #endif
         skin_winsys_init_args(argc, argv);
         if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
+            fprintf(stderr, "%s: emulator user interface failed to initialize, exit.\n", __func__);
             return 1;
         }
         if (opts->ui_only) {
+            fprintf(stderr, "%s: is UI only session, exit.\n", __func__);
             // UI only. emulator_initUserInterface() is done, so we're done.
             return 0;
         }
@@ -1447,6 +1468,7 @@ extern "C" int main(int argc, char** argv) {
                 true /* isQemu2 */, hw->hw_arc));
 
         if (!kernel_parameters.get()) {
+            fprintf(stderr, "%s: failed to get kernel parameters, exit.\n", __func__);
             return 1;
         }
 
@@ -1484,8 +1506,10 @@ extern "C" int main(int argc, char** argv) {
 
     // Generate a hardware-qemu.ini for this AVD.
     int ret = genHwIniFile(hw, coreHwIniPath);
-    if (ret != 0)
+    if (ret != 0) {
+        fprintf(stderr, "%s: failed to generate HW ini file\n", __func__);
         return ret;
+    }
 
     args.add2("-android-hw", coreHwIniPath);
     crashhandler_copy_attachment(CRASH_AVD_HARDWARE_INFO, coreHwIniPath);
