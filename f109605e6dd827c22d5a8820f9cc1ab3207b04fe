@@ -123,6 +123,24 @@
     },
     {
       "key": {
+        "uuid": "60f9ac85_fb1919a7",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cerealgenerator.py",
+        "patchSetId": 44
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-28T15:18:20Z",
+      "side": 1,
+      "message": "At the moment, yes it is restricted to Android makefile, but IMO there should be a significant amount of $OTHER_BUILD_SYSTEM scripts inserted incrementally, for other code, before generalizing this part.\n\nHere\u0027s a plan for that that actually works pretty well with this work and will come from 2 directions:\n\n1. change build system for the graphics stack, having an alternate way to build all current android-emugl.\n2. building the mock Vulkan ICD only on the new build system to begin with.\n3. after (1) and (2), generalize this code so we can use these libraries along with the mock ICD in tests.",
+      "parentUuid": "b2cf6798_dbfa12bc",
+      "revId": "f109605e6dd827c22d5a8820f9cc1ab3207b04fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d82b51dd_2a6bd131",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VulkanStream.cpp",
         "patchSetId": 44
