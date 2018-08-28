@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3f4f8735_2fa1dc21",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/codegen.py",
+        "patchSetId": 44
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-28T01:24:13Z",
+      "side": 1,
+      "message": "Yes, although I don\u0027t think it is good for performance to open/close them every time with `with` every time we write something. I had those calls using open/close every time initially and it was much slower.",
+      "parentUuid": "b4ab9643_ae453cc0",
+      "revId": "f109605e6dd827c22d5a8820f9cc1ab3207b04fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "06cfeb61_b3fee644",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/testing.py",
         "patchSetId": 44
