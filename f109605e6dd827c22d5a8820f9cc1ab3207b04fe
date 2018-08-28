@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "7b0733d5_d6036044",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/testing.py",
+        "patchSetId": 44
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-28T01:09:23Z",
+      "side": 1,
+      "message": "This particular class is supposed to generate code that makes it easier to write C++ test code to test this, since most of the validity issues are in the correctness of generated code.\n\nNevertheless, I\u0027m intrigued by \"python unittest\"; how do I load it and does that run on build servers?",
+      "parentUuid": "06cfeb61_b3fee644",
+      "revId": "f109605e6dd827c22d5a8820f9cc1ab3207b04fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2e0185df_be0cef43",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/wrapperdefs.py",
         "patchSetId": 44
