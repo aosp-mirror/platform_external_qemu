@@ -22,7 +22,7 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QDir>
-#include <QDoubleValidator>
+#include <QDoubleValidator> // ??
 #include <QMenu>
 #include <QMessageBox>
 #include <QPainter>
@@ -252,14 +252,22 @@ void LocationPage::editPoint(int row) {
     descriptionEdit->setPlainText(oldDescription);
     dialogLayout->addWidget(descriptionEdit);
 
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Cancel,
+                                                       Qt::Horizontal);
+
+    QPushButton *saveButton = buttonBox->addButton(QDialogButtonBox::Save);
+
 #if 1 // ??
-    // ?? Need validators for these
+    // ?? Need validators for these.
+    //    Perhaps have an "onTextChanged" listener and connect it to both
+    //    Lat and Lng. In there, validate both fields and control the Save
+    //    button.
     // Latitude
     dialogLayout->addWidget(new QLabel(tr("Latitude")));
     QLineEdit* latitudeEdit = new QLineEdit(this);
     QString oldLatText = QString::number(pointElement->latitude);
     latitudeEdit->setText(oldLatText);
-    latitudeEdit->setValidator(new QDoubleValidator(-90.0, 90.0, 2)); // ??
+//??    latitudeEdit->setValidator(new LocationValidator(true, saveButton)); // ??
     dialogLayout->addWidget(latitudeEdit);
 
     // Longitude
@@ -267,12 +275,10 @@ void LocationPage::editPoint(int row) {
     QLineEdit* longitudeEdit = new QLineEdit(this);
     QString oldLngText = QString::number(pointElement->longitude);
     longitudeEdit->setText(oldLngText);
+//??    longitudeEdit->setValidator(new LocationValidator(false, saveButton)); // ??
     dialogLayout->addWidget(longitudeEdit);
 #endif // ??
 
-    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Save |
-                                                       QDialogButtonBox::Cancel,
-                                                       Qt::Horizontal);
     dialogLayout->addWidget(buttonBox);
 
     QDialog editDialog(this);

@@ -21,6 +21,7 @@
 #include "android/skin/qt/websockets/websocketclientwrapper.h"
 #include "android/skin/qt/websockets/websockettransport.h"
 
+//#include <QDoubleValidator> // ??
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QTimer>
@@ -320,3 +321,152 @@ private:
     QString mFileName;
     GpsFixArray* mFixes = nullptr;
 };
+
+#if 0
+class LocationValidator : public QDoubleValidator {
+public:
+    LocationValidator(double bottom, double top /* , saveButton */) :
+            QDoubleValidator(bottom, top, 2)
+    { }
+
+    QValidator::State validate(QString &input, int &unused) const
+    {
+        if (input.isEmpty()) {
+            printf("l-p.h: Validating: Intermediate: empty string\n"); // ??
+            return QValidator::Intermediate;
+        }
+
+        bool ok;
+        double value = input.toDouble(&ok);
+
+        printf("l-p.h: Validating: %12s: \"%s\"\n", // ??
+               ((ok && // ??
+                 value >= bottom() && // ??
+                 value <= top()      ) ? "OK" : "Bad"), // ??
+               input.toStdString().c_str()); // ??
+
+        return (ok &&
+                value >= bottom() &&
+                value <= top()      ) ? QValidator::Acceptable
+                                      : QValidator::Invalid;
+    }
+};
+#endif
+
+#if 0 // ??
+class LocationValidator : public QDoubleValidator {
+public:
+    LocationValidator(bool isLatitude, QPushButton* saveButton) :
+        mIAmLatitude(isLatitude),
+        mSaveButton(saveButton)
+    {
+        if (mIAmLatitude) {
+            mMinimum = -90.0;
+            mMaximum =  90.0;
+            sLatIsOk = true;
+        } else {
+            mMinimum = -180.0;
+            mMaximum =  180.0;
+            sLngIsOk = true;
+        }
+    }
+
+    QValidator::State validate(QString &input, int &unused) const
+    {
+        bool isOk = false;
+        QValidator::State returnState = QValidator::Intermediate;
+
+        if (input.isEmpty()) {
+            printf("l-p.h: Validating: Intermediate: empty string\n"); // ??
+            isOk = false;
+            returnState = QValidator::Intermediate;
+        } else {
+            bool conversionOk;
+            double value = input.toDouble(&conversionOk);
+
+            isOk = (conversionOk      &&
+                    value >= mMinimum &&
+                    value <= mMaximum   );
+
+            returnState = (isOk ? QValidator::Acceptable : QValidator::Invalid);
+        }
+
+        if (mIAmLatitude) sLatIsOk = isOk;
+        else              sLngIsOk = isOk;
+
+        printf("l-p.h: Now latOK %d, lngOk %d\n", sLatIsOk, sLngIsOk);
+
+        mSaveButton->setEnabled(sLatIsOk && sLngIsOk);
+
+        return returnState;
+    }
+private:
+    static bool sLatIsOk;
+    static bool sLngIsOk;
+
+    bool   mIAmLatitude;
+    double mMinimum;
+    double mMaximum;
+
+    QPushButton* mSaveButton;
+};
+#endif // ??
+
+#if 0 // ??
+class LocationValidator {
+
+public:
+    LocationValidator(QPushButton* saveButton) :
+        mSaveButton(saveButton)
+    { }
+
+    class LatitudeValidator : public QDoubleValidator {
+        QValidator::State validate(QString &input, int &unused) const {
+
+            QValidator::State returnState = validateImpl(input, -90.0, 90.0);
+            mLatIsOk = (returnState == QValidator::Acceptable);
+            controlSaveButton();
+            return returnState;
+        }
+    };
+
+    class LongitudeValidator : public QDoubleValidator {
+        QValidator::State validate(QString &input, int &unused) const {
+
+            QValidator::State returnState = validateImpl(input, -180.0, 180.0);
+            mLngIsOk = (returnState == QValidator::Acceptable);
+            controlSaveButton();
+            return returnState;
+        }
+    };
+
+private:
+
+    QValidator::State validateImpl(QString &input, double minVal, double maxVal)
+    {
+        QValidator::State returnState = QValidator::Intermediate;
+
+        if (input.isEmpty()) {
+            return QValidator::Intermediate;
+        }
+
+        bool conversionOk;
+        double value = input.toDouble(&conversionOk);
+
+        bool isOk = (conversionOk      &&
+                     value >= mMinimum &&
+                     value <= mMaximum   );
+
+        return (isOk ? QValidator::Acceptable : QValidator::Invalid);
+    }
+
+    void controlSaveButton() {
+        mSaveButton->setEnabled(sLatIsOk && sLngIsOk);
+    }
+private:
+    bool mLatIsOk = true;
+    bool mLngIsOk = true;
+
+    QPushButton* mSaveButton;
+};
+#endif // ??
