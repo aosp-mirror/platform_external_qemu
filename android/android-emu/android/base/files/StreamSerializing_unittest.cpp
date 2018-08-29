@@ -11,10 +11,13 @@
 
 #include "android/base/files/StreamSerializing.h"
 
+#include "android/base/ArraySize.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/testing/GTestUtils.h"
 
 #include <gtest/gtest.h>
+
+using android::base::arraySize;
 
 namespace android {
 namespace base {
@@ -39,6 +42,25 @@ TEST(StreamSerializing, smallVector) {
     loadBuffer(&saveStream, &v2);
     EXPECT_TRUE(RangesMatch(v, v2));
     EXPECT_EQ(0, saveStream.readSize());
+}
+
+TEST(StreamSerializing, StringArray) {
+    MemStream stream;
+
+    const char* const testStrings[] = {
+        "Hello World",
+        "asdf",
+        "",
+        "https://android.googlesource.com",
+    };
+
+    saveStringArray(&stream, testStrings, arraySize(testStrings));
+
+    auto stringsReturned = loadStringArray(&stream);
+
+    for (int i = 0; i < stringsReturned.size(); i++) {
+        EXPECT_EQ(stringsReturned[i], testStrings[i]);
+    }
 }
 
 }  // namespace base
