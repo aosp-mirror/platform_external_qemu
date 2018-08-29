@@ -193,13 +193,12 @@ extern "C" int main(int argc, char **argv) {
     int apiLevel = avdInfo_getApiLevel(avd);
     mem_map mem = { 0 };
     char* kernelParameters = emulator_getKernelParameters(
-        opts, kTargetArch, apiLevel, serialPrefix, hw->kernel_parameters,
-        rendererConfig.glesMode,
-        rendererConfig.bootPropOpenglesVersion, /* ro.opengles.version */
-        0ULL, /* glFramebufferSizeBytes */
-        mem,
-        hw->vm_heapSize,
-        false /* isQemu2 */, false /* isCros */);
+            opts, kTargetArch, apiLevel, serialPrefix, hw->kernel_parameters,
+            NULL,  // verifiedBootParameters
+            rendererConfig.glesMode,
+            rendererConfig.bootPropOpenglesVersion, /* ro.opengles.version */
+            0ULL,                                   /* glFramebufferSizeBytes */
+            mem, hw->vm_heapSize, false /* isQemu2 */, false /* isCros */);
 
     if (hw->hw_cpu_ncore > 1) {
         // Avoid printing this warning all the time because the default

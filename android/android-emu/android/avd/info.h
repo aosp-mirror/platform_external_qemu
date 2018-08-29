@@ -71,6 +71,7 @@ ANDROID_BEGIN_HEADER
     _AVD_IMG(SDCARD,"sdcard.img","SD Card") \
     _AVD_IMG(ENCRYPTIONKEY,"encryptionkey.img","Encryption Key") \
     _AVD_IMG(SNAPSHOTS,"snapshots.img","snapshots") \
+    _AVD_IMG(VERIFIEDBOOTPARAMS, "VerifiedBootParams.textproto","Verified Boot Parameters") \
 
 /* define the enumared values corresponding to each AVD image type
  * examples are: AVD_IMAGE_KERNEL, AVD_IMAGE_SYSTEM, etc..
@@ -201,6 +202,11 @@ char*  avdInfo_getDefaultCachePath( const AvdInfo*  i );
  * directory contains a file named "system-qemu.img".
  */
 char*  avdInfo_getSystemImagePath( const AvdInfo* i );
+
+/* Will return NULL, except if the AVD content
+ * directory contains a file named "VerifiedBootParams.textproto".
+ */
+char*  avdInfo_getVerifiedBootParamsPath( const AvdInfo* i );
 
 /* avdInfo_getSystemInitImagePath() retrieves the path to the read-only
  * initialization image for this disk image.

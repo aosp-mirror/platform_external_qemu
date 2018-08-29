@@ -1278,6 +1278,13 @@ avdInfo_getSystemImagePath( const AvdInfo*  i )
 }
 
 char*
+avdInfo_getVerifiedBootParamsPath( const AvdInfo*  i )
+{
+    const char* imageName = _imageFileNames[ AVD_IMAGE_VERIFIEDBOOTPARAMS ];
+    return _avdInfo_getContentOrSdkFilePath(i, imageName);
+}
+
+char*
 avdInfo_getSystemInitImagePath( const AvdInfo*  i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_INITSYSTEM ];
