@@ -1,0 +1,11 @@
+Autosubmit+1: Matt Wachowski <mattwach@google.com>
+Autosubmit+1: Lingfeng Yang <lfy@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Verified+1: Lingfeng Yang <lfy@google.com>
+Code-Review+2: Matt Wachowski <mattwach@google.com>
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Wed, 29 Aug 2018 01:41:50 +0000
+Reviewed-on: https://android-review.googlesource.com/737107
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
