@@ -117,6 +117,7 @@ public:
     // Implementation of the GpuFrameBridge::postFrame() method, must be
     // called from the EmuGL thread.
     virtual void postFrame(int width, int height, const void* pixels) {
+						fprintf(stderr, "mattwach(GpuFrameBridge.postFrame)\n");
         if (mInSocket < 0) {
             return;
         }
@@ -130,12 +131,14 @@ public:
     // Implementation of the GpuFrameBridge::postRecordFrame() method, must be
     // called from the EmuGL thread.
     virtual void postRecordFrame(int width, int height, const void* pixels) {
+						fprintf(stderr, "mattwach(GpuFrameBridge.postRecordFrame)\n");
         postRecordFrameAsync(width, height, pixels);
         AutoLock lock(mRecLock);
         memcpy(mRecTmpFrame->pixels, pixels, width * height * 4);
     }
 
     virtual void postRecordFrameAsync(int width, int height, const void* pixels) {
+						fprintf(stderr, "mattwach(GpuFrameBridge.postRecordFrameAsync)\n");
         {
             AutoLock lock(mRecLock);
             if (!mRecFrame) {

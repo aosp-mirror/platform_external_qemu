@@ -13,6 +13,7 @@ PostWorker::PostWorker(PostWorker::BindSubwinCallback&& cb) :
 
 void PostWorker::post(ColorBuffer* cb) {
     // bind the subwindow eglSurface
+				fprintf(stderr, "mattwach(PostWorker::post)\n");
     if (!m_initialized) {
         m_initialized = mBindSubwin();
     }
@@ -40,8 +41,11 @@ void PostWorker::post(ColorBuffer* cb) {
     //
     // render the color buffer to the window and apply the overlay
     //
+				fprintf(stderr, "mattwach(PostWorker::post): Post with overlay: tex=%u, zRot=%d, dx=%f, dy=%f\n", tex, zRot, dx, dy);
     cb->postWithOverlay(tex, zRot, dx, dy);
+				fprintf(stderr, "mattwach(PostWorker::post): s_egl.eglSwapBuffers\n");
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
+				fprintf(stderr, "mattwach(PostWorker::post): s_egl.eglSwapBuffers Done\n");
 }
 
 // Called whenever the subwindow needs a refresh (FrameBuffer::setupSubWindow).

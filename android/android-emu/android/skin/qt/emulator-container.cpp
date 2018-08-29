@@ -34,6 +34,8 @@
 #include "android/skin/qt/windows-native-window.h"
 #endif
 
+#include <stdio.h>
+
 static constexpr int kEventBufferSize = 8;
 
 EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
@@ -106,6 +108,13 @@ EmulatorContainer::~EmulatorContainer() {
 }
 
 bool EmulatorContainer::event(QEvent* e) {
+		//switch (e->type()) {
+		//		case 183:
+		//				// filtered cases
+		//				break;
+		//		default:
+		//				fprintf(stderr, "mattwach EmulatorContainer::event  type=%u\n", e->type());
+		//}
     // Ignore MetaCall and UpdateRequest events, and don't snap in zoom mode.
     if (mEmulatorWindow->isInZoomMode() || e->type() == QEvent::MetaCall ||
         e->type() == QEvent::UpdateRequest) {
@@ -156,6 +165,12 @@ bool EmulatorContainer::event(QEvent* e) {
     return QScrollArea::event(e);
 }
 
+static SkinEvent* createSkinEvent(SkinEventType t) {
+		SkinEvent* e = new SkinEvent();
+		e->type = t;
+		return e;
+}
+
 void EmulatorContainer::changeEvent(QEvent* event) {
     // Strictly preventing the maximizing (called "zooming" on OS X) of a
     // window is hard - it changes by host, and even by window manager on
@@ -168,17 +183,9 @@ void EmulatorContainer::changeEvent(QEvent* event) {
     // simply notifies the Qt representation (and us) that the OS-level window
     // has changed to a maximized state. We do not want to ignore this state
     // change, we just want to counteract the effects it had.
+				fprintf(stderr, "mattwach(EmulatorContainer::changeEvent)  type=%d\n", event->type());
     if (event->type() == QEvent::WindowStateChange) {
-        if (windowState() & Qt::WindowMaximized) {
-            showNormal();
-            if (mModalOverlay) {
-                mModalOverlay->showNormal();
-            }
-            if (mVirtualSceneInfo) {
-                mVirtualSceneInfo->showNormal();
-            }
-            mMessages->showNormal();
-        } else if (windowState() & Qt::WindowMinimized) {
+         if (windowState() & Qt::WindowMinimized) {
             // In case the window was minimized without pressing the toolbar's
             // minimize button (which is possible on some window managers),
             // remember to hide the toolbar (which will also hide the extended
@@ -191,6 +198,24 @@ void EmulatorContainer::changeEvent(QEvent* event) {
                 mVirtualSceneInfo->hide();
             }
             mMessages->hide();
+        } else {
+            // marker
+												fprintf(stderr, "mattwach(changeEvent): kEventScreenChanged 1\n");
+            mEmulatorWindow->queueSkinEvent(createSkinEvent(kEventScreenChanged));
+												fprintf(stderr, "mattwach(changeEvent): kEventScreenChanged 2\n");
+            mEmulatorWindow->queueSkinEvent(createSkinEvent(kEventScreenChanged));
+												fprintf(stderr, "mattwach(changeEvent): kEventScreenChanged 3\n");
+            mEmulatorWindow->queueSkinEvent(createSkinEvent(kEventScreenChanged));
+												fprintf(stderr, "mattwach(changeEvent): kEventScreenChanged 4\n");
+            mEmulatorWindow->queueSkinEvent(createSkinEvent(kEventScreenChanged));
+            showNormal();
+            if (mModalOverlay) {
+                mModalOverlay->showNormal();
+            }
+            if (mVirtualSceneInfo) {
+                mVirtualSceneInfo->showNormal();
+            }
+            mMessages->showNormal();
         }
     }
 }
@@ -202,6 +227,7 @@ void EmulatorContainer::closeEvent(QCloseEvent* event) {
 }
 
 void EmulatorContainer::focusInEvent(QFocusEvent* event) {
+		//fprintf(stderr, "EmulatorContainer::focusInEvent  type=%u\n", event->type());
     mEmulatorWindow->toolWindow()->raise();
     if (mModalOverlay) {
         mModalOverlay->raise();
@@ -224,6 +250,7 @@ void EmulatorContainer::keyReleaseEvent(QKeyEvent* event) {
 }
 
 void EmulatorContainer::moveEvent(QMoveEvent* event) {
+		//fprintf(stderr, "EmulatorContainer::moveEvent  type=%u\n", event->type());
     QScrollArea::moveEvent(event);
     mEmulatorWindow->simulateWindowMoved(event->pos());
     mEmulatorWindow->toolWindow()->dockMainWindow();
@@ -233,6 +260,7 @@ void EmulatorContainer::moveEvent(QMoveEvent* event) {
 }
 
 void EmulatorContainer::resizeEvent(QResizeEvent* event) {
+		fprintf(stderr, "EmulatorContainer::resize  type=%u\n", event->type());
     QScrollArea::resizeEvent(event);
     mEmulatorWindow->simulateZoomedWindowResized(this->viewportSize());
     adjustModalOverlayGeometry();
@@ -254,6 +282,7 @@ void EmulatorContainer::resizeEvent(QResizeEvent* event) {
 }
 
 void EmulatorContainer::showEvent(QShowEvent* event) {
+		fprintf(stderr, "EmulatorContainer::showEvent  type=%u\n", event->type());
 // Disable the minimize and maximize buttons on OSX. See the comment in the
 // constructor for an explanation of why this is necessary.
 #ifdef __APPLE__

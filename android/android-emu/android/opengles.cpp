@@ -296,12 +296,14 @@ android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
                            bool deleteExisting)
 {
     if (!sRenderer) {
+						fprintf(stderr, "mattwach(android_showOpenglesWindow) !sRenderer\n");
         return -1;
     }
     FBNativeWindowType win = (FBNativeWindowType)(uintptr_t)window;
     bool success = sRenderer->showOpenGLSubwindow(
             win, wx, wy, ww, wh, fbw, fbh, dpr, rotation,
                        deleteExisting);
+				fprintf(stderr, "mattwach(android_showOpenglesWindow) success=%u\n", success);
     return success ? 0 : -1;
 }
 

@@ -139,6 +139,7 @@ static int emulator_window_opengles_show_window(
         return android_showOpenglesWindow(window, x, y, vw, vh, w, h, dpr,
                                           rotation, deleteExisting);
     } else {
+        fprintf(stderr, "mattwach(emulator_window_opengles_show_window) did nothing!\n");
         return 0;
     }
 }

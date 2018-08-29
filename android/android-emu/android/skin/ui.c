@@ -273,6 +273,7 @@ bool skin_ui_process_events(SkinUI* ui) {
     while(skin_event_poll(&ev)) {
         switch(ev.type) {
         case kEventForceRedraw:
+										  fprintf(stderr, "mattwach(skin_ui_process_events): kEventForceRedraw\n");
             DE("EVENT: kEventVideoExpose\n");
             skin_window_redraw(ui->window, NULL);
             break;
@@ -361,6 +362,7 @@ bool skin_ui_process_events(SkinUI* ui) {
             break;
 
         case kEventScreenChanged:
+										  fprintf(stderr, "mattwach(skin_ui_process_events): kEventScreenChanged\n");
             DE("EVENT: kEventScreenChanged\n");
             skin_window_process_event(ui->window, &ev);
             break;

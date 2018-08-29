@@ -1126,7 +1126,8 @@ void EmulatorQtWindow::getSkinPixmap() {
     mRawSkinPixmap = new QPixmap(skinPath);
 }
 
-void EmulatorQtWindow::paintEvent(QPaintEvent*) {
+void EmulatorQtWindow::paintEvent(QPaintEvent* e) {
+		fprintf(stderr, "mattwach(EmulatorQtWindow::paintEvent): %u\n", e->type());
     QPainter painter(this);
     QRect bg(QPoint(0, 0), this->size());
     painter.fillRect(bg, Qt::black);
@@ -1151,11 +1152,13 @@ void EmulatorQtWindow::paintEvent(QPaintEvent*) {
 }
 
 void EmulatorQtWindow::raise() {
+				fprintf(stderr, "mattwach(raise)\n");
     mContainer.raise();
     mToolWindow->raise();
 }
 
 void EmulatorQtWindow::show() {
+				fprintf(stderr, "mattwach(show)\n");
     if (mClosed) {
         return;
     }
@@ -1423,8 +1426,7 @@ void EmulatorQtWindow::queueSkinEvent(SkinEvent* event) {
     bool replaced = false;
     const auto type = event->type;
     if (type == kEventScrollBarChanged ||
-        type == kEventZoomedWindowResized ||
-        type == kEventScreenChanged) {
+        type == kEventZoomedWindowResized) {
         for (int i = 0; i < mSkinEventQueue.size(); i++) {
             if (mSkinEventQueue.at(i)->type == type) {
                 SkinEvent* toDelete = mSkinEventQueue.at(i);
@@ -1569,6 +1571,7 @@ void EmulatorQtWindow::slot_setWindowTitle(QString title,
 void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
                                        QRect rect,
                                        QSemaphore* semaphore) {
+				fprintf(stderr, "mattwach(slot_showWindow)\n");
     if (mClosed) {
         return;
     }
@@ -1637,6 +1640,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
 }
 
 void EmulatorQtWindow::onScreenChanged(QScreen* newScreen) {
+				fprintf(stderr, "mattwach(onScreenChanged)\n");
     if (newScreen != mCurrentScreen) {
         D("%s: kEventScreenChanged", __FUNCTION__);
         queueSkinEvent(createSkinEvent(kEventScreenChanged));
@@ -1645,6 +1649,7 @@ void EmulatorQtWindow::onScreenChanged(QScreen* newScreen) {
 }
 
 void EmulatorQtWindow::onScreenConfigChanged() {
+				fprintf(stderr, "mattwach(onScreenConfigChanged)\n");
     auto newScreen = window()->windowHandle()->screen();
     if (newScreen != mCurrentScreen) {
         D("%s: kEventScreenChanged", __FUNCTION__);
@@ -1654,6 +1659,7 @@ void EmulatorQtWindow::onScreenConfigChanged() {
 }
 
 void EmulatorQtWindow::showEvent(QShowEvent* event) {
+				fprintf(stderr, "mattwach(showEvent)\n");
     mStartupTimer.stop();
     mStartupDialog->hide();
     mStartupDialog.clear();
@@ -1947,6 +1953,7 @@ SkinEvent* EmulatorQtWindow::createSkinEvent(SkinEventType type) {
 
 void EmulatorQtWindow::doResize(const QSize& size,
                                 bool isKbdShortcut) {
+				fprintf(stderr, "mattwach(doResize)\n");
     if (mClosed) {
         return;
     }
@@ -2448,6 +2455,7 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
 }
 
 void EmulatorQtWindow::setVisibleExtent(QBitmap bitMap) {
+				fprintf(stderr, "mattwach: setVisibleExtent\n");
     QImage bitImage = bitMap.toImage();
     int topVisible = -1;
     for (int row = 0; row < bitImage.height() && topVisible < 0; row++) {
