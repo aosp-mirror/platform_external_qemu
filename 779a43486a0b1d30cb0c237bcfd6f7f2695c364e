@@ -22,6 +22,30 @@
       "revId": "779a43486a0b1d30cb0c237bcfd6f7f2695c364e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fd28072e_a19cf4bd",
+        "filename": "hw/arm/ranchu.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-08-29T18:55:54Z",
+      "side": 1,
+      "message": "Will add with a warning, as that really shouldn\u0027t be happening.",
+      "parentUuid": "185b3a6e_f5137382",
+      "range": {
+        "startLine": 477,
+        "startChar": 0,
+        "endLine": 477,
+        "endChar": 28
+      },
+      "revId": "779a43486a0b1d30cb0c237bcfd6f7f2695c364e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
