@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "87d97d05_8a1a0688",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-29T20:59:27Z",
+      "side": 1,
+      "message": "nit: remove",
+      "revId": "e9b32573012d0cd4424905d313901719796ad09b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b1ac5ad8_51b37edd",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-29T20:59:27Z",
+      "side": 1,
+      "message": "nit: use Quickboot:kDefaultBootSnapshot",
+      "revId": "e9b32573012d0cd4424905d313901719796ad09b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
