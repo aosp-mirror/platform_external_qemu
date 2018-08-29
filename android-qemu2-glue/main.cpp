@@ -13,7 +13,9 @@
 #include "android/avd/hw-config.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/Log.h"
+#include "android/base/ProcessControl.h"
 #include "android/base/StringFormat.h"
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/ProcessControl.h"
@@ -60,6 +62,7 @@
 #include "android/utils/string.h"
 #include "android/utils/tempfile.h"
 #include "android/utils/win32_cmdline_quote.h"
+#include "android/verified-boot/load_config.h"
 
 #include "android/skin/qt/init-qt.h"
 #include "android/skin/winsys.h"
@@ -1439,10 +1442,16 @@ extern "C" int main(int argc, char** argv) {
             fc::setEnabledOverride(fc::GLAsyncSwap, false);
         }
 
+        // Get verified boot kernel parameters, if they exist.
+        std::vector<std::string> verified_boot_params;
+        android::verifiedboot::getParametersFromFile(
+                avdInfo_getVerifiedBootParamsPath(avd),  // NULL here is OK
+                &verified_boot_params);
+
         ScopedCPtr<char> kernel_parameters(emulator_getKernelParameters(
                 opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
-                hw->kernel_parameters, rendererConfig.glesMode,
-                rendererConfig.bootPropOpenglesVersion,
+                hw->kernel_parameters, &verified_boot_params,
+                rendererConfig.glesMode, rendererConfig.bootPropOpenglesVersion,
                 rendererConfig.glFramebufferSizeBytes, pstore, hw->vm_heapSize,
                 true /* isQemu2 */, hw->hw_arc));
 
