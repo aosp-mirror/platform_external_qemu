@@ -3646,11 +3646,12 @@ int main(int argc, char **argv, char **envp)
 #ifdef CONFIG_ANDROID
     crashhandler_exitmode("after main_loop");
 #endif
-    quit_timers();
-    net_cleanup();
-    android_wear_agent_stop();
-    socket_drainer_stop();
-    android_emulation_teardown();
+    // HACK: Stop crashing on exit in qemu1
+    // quit_timers();
+    // net_cleanup();
+    // android_wear_agent_stop();
+    // socket_drainer_stop();
+    // android_emulation_teardown();
     return 0;
 }
 

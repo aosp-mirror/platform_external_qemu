@@ -21,5 +21,6 @@
 ANDROID_BEGIN_HEADER
 
 extern bool qemu_android_emulation_setup(void);
+extern void qemu_android_emulation_teardown(void);
 
 ANDROID_END_HEADER

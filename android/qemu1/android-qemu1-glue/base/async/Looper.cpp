@@ -29,6 +29,12 @@ extern "C" {
 namespace android {
 namespace qemu {
 
+static bool sSkipTimerOps = false;
+
+void skipTimerOps() {
+    sSkipTimerOps = true;
+}
+
 namespace {
 
 extern "C" void qemu_system_shutdown_request(void);
@@ -55,12 +61,12 @@ typedef ::android::base::Looper::FdWatch BaseFdWatch;
 //
 class QemuLooper : public BaseLooper {
 public:
-    QemuLooper() {
-        mQemuBh = qemu_bh_new(handleBottomHalf, this);
-    }
+    QemuLooper() = default;
 
     virtual ~QemuLooper() {
-        qemu_bh_delete(mQemuBh);
+        if (mQemuBh) {
+            qemu_bh_delete(mQemuBh);
+        }
         DCHECK(mPendingFdWatches.empty());
     }
 
@@ -124,6 +130,11 @@ public:
 
     private:
         void updateEvents(unsigned events) {
+
+            if (events == mWantedEvents) {
+                return;
+            }
+
             IOHandler* cbRead = (events & kEventRead) ? handleRead : NULL;
             IOHandler* cbWrite = (events & kEventWrite) ? handleWrite : NULL;
             qemu_set_fd_handler(mFd, cbRead, cbWrite, this);
@@ -184,10 +195,15 @@ public:
         }
 
         ~Timer() {
+            if (sSkipTimerOps) return;
             ::timer_free(mTimer);
         }
 
         virtual void startRelative(Duration timeout_ms) {
+            if (sSkipTimerOps) {
+                return;
+            }
+
             if (timeout_ms == kDurationInfinite) {
                 timer_del(mTimer);
             } else {
@@ -198,6 +214,10 @@ public:
         }
 
         virtual void startAbsolute(Duration deadline_ms) {
+            if (sSkipTimerOps) {
+                return;
+            }
+
             if (deadline_ms == kDurationInfinite) {
                 timer_del(mTimer);
             } else {
@@ -206,10 +226,14 @@ public:
         }
 
         virtual void stop() {
+            if (sSkipTimerOps) return;
+
             ::timer_del(mTimer);
         }
 
         virtual bool isActive() const {
+            if (sSkipTimerOps) return false;
+
             return timer_pending(mTimer);
         }
 
@@ -231,7 +255,7 @@ public:
             timer->mCallback(timer->mOpaque, timer);
         }
 
-        QEMUTimer* mTimer;
+        QEMUTimer* mTimer = nullptr;
     };
 
     virtual BaseTimer* createTimer(BaseTimer::Callback callback,
@@ -329,6 +353,9 @@ private:
         DCHECK(!watch->isPending());
 
         if (mPendingFdWatches.empty()) {
+            if (!mQemuBh) {
+                mQemuBh = qemu_bh_new(handleBottomHalf, this);
+            }
             // Ensure the bottom-half is triggered to act on pending
             // watches as soon as possible.
             qemu_bh_schedule(mQemuBh);

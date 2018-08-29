@@ -14,6 +14,7 @@
 
 #include "android-qemu1-glue/qemu-setup.h"
 
+#include "android-qemu1-glue/base/async/Looper.h"
 #include "android-qemu1-glue/emulation/VmLock.h"
 #include "android-qemu1-glue/qemu-control-impl.h"
 #include "android/android.h"
@@ -46,4 +47,8 @@ bool qemu_android_emulation_setup() {
   android::AndroidPipe::initThreading(vmLock);
 
   return android_emulation_setup(&consoleAgents, false);
+}
+
+void qemu_android_emulation_teardown() {
+    android::qemu::skipTimerOps();
 }
