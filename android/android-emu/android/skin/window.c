@@ -1855,6 +1855,7 @@ void
 skin_window_redraw( SkinWindow*  window, SkinRect*  rect )
 {
     if (window != NULL && window->surface != NULL) {
+        fprintf(stderr, "mattwach(skin_window_redraw) is doing something\n");
         Layout*  layout = &window->layout;
 
         if (rect == NULL)
@@ -1898,6 +1899,10 @@ skin_window_redraw( SkinWindow*  window, SkinRect*  rect )
 
         skin_surface_update(window->surface, rect);
         skin_window_redraw_opengles(window);
+    } else if (window == NULL) {
+        fprintf(stderr, "mattwach(skin_window_redraw) window is NULL\n");
+    } else {
+        fprintf(stderr, "mattwach(skin_window_redraw) window surface is NULL\n");
     }
 }
 

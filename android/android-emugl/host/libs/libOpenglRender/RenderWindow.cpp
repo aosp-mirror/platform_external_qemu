@@ -161,7 +161,7 @@ struct RenderWindowMessage {
                        msg.subwindow.fbh,
                        msg.subwindow.dpr,
                        msg.subwindow.rotation);
-                D("CMD_SETUP_SUBWINDOW: parent=%p wx=%d wy=%d ww=%d wh=%d fbw=%d fbh=%d dpr=%f rotation=%f\n",
+                fprintf(stderr, "mattwach(RenderWindow.process) CMD_SETUP_SUBWINDOW: parent=%p wx=%d wy=%d ww=%d wh=%d fbw=%d fbh=%d dpr=%f rotation=%f\n",
                     (void*)(intptr_t)msg.subwindow.parent,
                     msg.subwindow.wx,
                     msg.subwindow.wy,
@@ -457,7 +457,7 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
                                   float dpr,
                                   float zRot,
                                   bool deleteExisting) {
-    D("Entering mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");
+    fprintf(stderr, "mattwach(RenderWindow.setupSubWindow): Entering mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");
 
     RenderWindowMessage msg = {};
     msg.cmd = CMD_SETUP_SUBWINDOW;
@@ -474,7 +474,7 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
 
     mHasSubWindow = processMessage(msg);
 
-    D("Exiting mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");
+    fprintf(stderr, "mattwach(RenderWindow.setupSubWindow) Exiting mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");
     return mHasSubWindow;
 }
 
@@ -524,6 +524,7 @@ void RenderWindow::setScreenMask(int width, int height, const unsigned char* rgb
 
 void RenderWindow::repaint() {
     D("Entering\n");
+    fprintf(stderr, "mattwach(RenderWindow.repaint)\n");
     RenderWindowMessage msg = {};
     msg.cmd = CMD_REPAINT;
     (void) processMessage(msg);
@@ -548,13 +549,14 @@ void RenderWindow::resetGuestPostedAFrame() {
 }
 
 bool RenderWindow::processMessage(const RenderWindowMessage& msg) {
+    fprintf(stderr, "mattwach(RenderWindow.processMessage)\n");
     if (useThread()) {
         if (msg.cmd == CMD_REPAINT) {
-            GL_LOG("Sending CMD_REPAINT to render window channel");
+            fprintf(stderr, "mattwach(RenderWindow.processMessage): Sending CMD_REPAINT to render window channel\n");
         }
         return mChannel->sendMessageAndGetResult(msg);
     } else if (msg.cmd == CMD_REPAINT) {
-        GL_LOG("Sending CMD_REPAINT to reposting thread");
+        fprintf(stderr, "mattwach(RenderWindow.processMessage): Sending CMD_REPAINT to reposting thread\n");
         mRepostCommands.send(RepostCommand::Repost);
         return true;
     } else {

@@ -703,9 +703,9 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                  float dpr,
                                  float zRot,
                                  bool deleteExisting) {
-    GL_LOG("Begin setupSubWindow");
+    fprintf(stderr, "mattwach(FrameBuffer::setupSubWindow)\n");
     if (!m_useSubWindow) {
-        ERR("%s: Cannot create native sub-window in this configuration\n",
+        fprintf(stderr, "mattwach(FrameBuffer::setupSubWindow): %s: Cannot create native sub-window in this configuration\n",
             __FUNCTION__);
         return false;
     }
@@ -735,29 +735,23 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             createSubWindow || moveSubWindow || m_zRot != zRot || m_dpr != dpr;
     if (!createSubWindow && !moveSubWindow && !redrawSubwindow) {
         assert(sInitialized.load(std::memory_order_relaxed));
-        GL_LOG("Exit setupSubWindow (nothing to do)");
-#if SNAPSHOT_PROFILE > 1
-        printf("FrameBuffer::%s(): nothing to do at %lld ms\n", __func__,
+        fprintf(stderr, "mattwach(FrameBuffer::setupSubWindow): FrameBuffer::%s(): nothing to do at %lld ms\n", __func__,
                (long long)System::get()->getProcessTimes().wallClockMs);
-#endif
         return true;
     }
 
-#if SNAPSHOT_PROFILE > 1
-    printf("FrameBuffer::%s(%s): start at %lld ms\n", __func__,
+    fprintf(stderr, "mattwach(FrameBuffer::setupSubWindow): FrameBuffer::%s(%s): start at %lld ms\n", __func__,
            deleteExisting ? "deleteExisting" : "keepExisting",
            (long long)System::get()->getProcessTimes().wallClockMs);
-#endif
 
     AutoLock mutex(m_lock);
 
-#if SNAPSHOT_PROFILE > 1
-    printf("FrameBuffer::%s(): got lock at %lld ms\n", __func__,
+    fprintf(stderr, "mattwach: FrameBuffer::%s(): got lock at %lld ms\n", __func__,
            (long long)System::get()->getProcessTimes().wallClockMs);
-#endif
 
     if (deleteExisting) {
         // TODO: look into reusing the existing native window when possible.
+        fprintf(stderr, "matwach(FrameBuffer::setupSubWindow): deleteExisting subwindow\n");
         removeSubWindow_locked();
     }
 
@@ -765,6 +759,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
 
     // If the subwindow doesn't exist, create it with the appropriate dimensions
     if (!m_subWin) {
+        fprintf(stderr, "matwach(FrameBuffer::setupSubWindow): !m_subwin: subwindow did not exist\n");
         // Create native subwindow for FB display output
         m_x = wx;
         m_y = wy;
@@ -801,6 +796,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         if (!moveSubWindow) {
             // Ensure that at least viewport parameters are properly updated.
             success = true;
+            fprintf(stderr, "mattwach(FrameBuffer::setupSubWindow): not moving anything\n");
         } else {
             // Only attempt to update window geometry if anything has actually
             // changed.
@@ -809,11 +805,13 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             m_windowWidth = ww;
             m_windowHeight = wh;
 
+            fprintf(stderr, "mattwach(FrameBuffer::setupSubWindow): move sub window\n");
             success = ::moveSubWindow(m_nativeWindow, m_subWin, m_x, m_y,
                                       m_windowWidth, m_windowHeight);
         }
 
         if (success && redrawSubwindow) {
+            fprintf(stderr, "mattwach(FrameBuffer::setupSubWindow): subwindow creation successful\n");
             // Subwin creation or movement was successful,
             // update viewport and z rotation and draw
             // the last posted color buffer.
@@ -828,7 +826,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             bool posted = false;
 
             if (m_lastPostedColorBuffer) {
-                GL_LOG("setupSubwindow: draw last posted cb");
+                fprintf(stderr, "mattwach(FrameBuffer::setupSubWindow): draw last posted cb\n");
                 posted = postImpl(m_lastPostedColorBuffer, false);
             }
 
@@ -836,10 +834,15 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                 postCmd.cmd = PostCmd::Clear;
                 sendPostWorkerCmd(postCmd);
             }
+        } else {
+            fprintf(stderr, "mattwach(FrameBuffer::setupSubWindow) creation NOT successful\n");
         }
+    } else {
+            fprintf(stderr, "mattwach(FrameBuffer::setupSubWindow): Was never able to make a subwindow!\n");
     }
 
     if (success && redrawSubwindow) {
+								fprintf(stderr, "mattwach(FrameBuffer::setupSubWindow): send the viewport command\n");
         bool bindSuccess = bind_locked();
         assert(bindSuccess);
         (void)bindSuccess;
@@ -856,12 +859,10 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
     sInitialized.store(true, std::memory_order_relaxed);
     sGlobals->condVar.broadcastAndUnlock(&lock);
 
-#if SNAPSHOT_PROFILE > 1
-    printf("FrameBuffer::%s(): end at %lld ms\n", __func__,
+    fprintf(stderr, "mattwach(FrameBuffer::setupSubWindow): FrameBuffer::%s(): end at %lld ms\n", __func__,
            (long long)System::get()->getProcessTimes().wallClockMs);
-#endif
 
-    GL_LOG("Exit setupSubWindow (successful setup)");
+    fprintf(stderr, "mattwach(FrameBuffer::setupSubWindow): Exit with successful setup\n");
     return success;
 }
 
@@ -1697,6 +1698,7 @@ void FrameBuffer::unbindAndDestroyTrivialSharedContext(EGLContext context,
 }
 
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
+    fprintf(stderr, "mattwach(post)");
     bool res = postImpl(p_colorbuffer, needLockAndBind);
     if (res) setGuestPostedAFrame();
     return res;

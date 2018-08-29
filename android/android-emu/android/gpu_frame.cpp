@@ -22,6 +22,8 @@
 
 #include <functional>
 
+#include <stdio.h>
+
 // Standard values from Khronos.
 #define GL_RGBA 0x1908
 #define GL_UNSIGNED_BYTE 0x1401
@@ -89,6 +91,7 @@ static on_new_gpu_frame_t choose_on_new_gpu_frame() {
 
 static void gpu_frame_set_post(bool on) {
     CHECK(sBridge);
+    fprintf(stderr, "mattwach(gpu_frame_set_post): %d\n", on);
 
     if (on) {
         android_setPostCallback(choose_on_new_gpu_frame(), sBridge);
