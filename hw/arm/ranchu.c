@@ -473,6 +473,17 @@ static void *ranchu_dtb(const struct arm_boot_info *binfo, int *fdt_size)
     return board->fdt;
 }
 
+static char* splice_out_cpu_model(const char* cpu_type) {
+    // This better be true..
+    assert(strcmp(cpu_type + (strlen(cpu_type) - strlen(TYPE_ARM_CPU)), TYPE_ARM_CPU) == 0);
+
+    char *cpu_model = malloc(strlen(cpu_type) + 1);
+    strcpy(cpu_model, cpu_type);
+    cpu_model[strlen(cpu_model) - strlen(TYPE_ARM_CPU) - 1] = '\0';
+
+    return cpu_model;
+}
+
 static void ranchu_init(MachineState *machine)
 {
     qemu_irq pic[NUM_IRQS];
@@ -481,7 +492,8 @@ static void ranchu_init(MachineState *machine)
     MemoryRegion *ram = g_new(MemoryRegion, 1);
     VirtBoardInfo *vbi;
 
-    const char *cpu_model = "cortex-a57";
+    // Cpu type contains cpu model, so we have to splice it out.
+    char *cpu_model = splice_out_cpu_model(machine->cpu_type);
 
     vbi = g_new0(VirtBoardInfo, 1);
 
