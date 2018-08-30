@@ -20,7 +20,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <inttypes.h>
 #include <string.h>

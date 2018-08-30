@@ -9,7 +9,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <sys/mman.h>
 
 int main (int argc, char *argv[])
