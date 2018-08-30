@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
