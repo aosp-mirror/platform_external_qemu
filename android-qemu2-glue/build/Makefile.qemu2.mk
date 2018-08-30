@@ -231,4 +231,6 @@ endif   # !CONFIG_MIN_BUILD
 # causing targets to be overridden.
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu-img.mk
 
+include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-tests.mk
+
 LOCAL_PATH := $(QEMU2_OLD_LOCAL_PATH)
