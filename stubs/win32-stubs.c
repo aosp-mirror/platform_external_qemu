@@ -29,3 +29,11 @@ DWORD win32GetModuleFileName(
 {
     return GetModuleFileName(hModule, lpFilename, nSize);
 }
+
+int win32_stat(const char* filepath, struct stat* st) {
+    return _stati64(filepath, st);
+}
+
+int win32_lstat(const char* filepath, struct stat* st) {
+    return win32_stat(filepath, st);
+}
