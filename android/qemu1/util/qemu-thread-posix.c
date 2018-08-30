@@ -18,7 +18,9 @@
 #include <stdint.h>
 #include <string.h>
 #include <limits.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <sys/time.h>
 #ifdef __linux__
 #include <sys/syscall.h>

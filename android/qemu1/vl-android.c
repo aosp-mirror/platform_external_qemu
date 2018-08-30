@@ -95,7 +95,9 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <time.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <zlib.h>
 
 /* Needed early for CONFIG_BSD etc. */

@@ -32,7 +32,9 @@
 #include "hw/msmouse.h"
 #include "qapi/qmp/types.h"
 
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <signal.h>
 #include <time.h>
