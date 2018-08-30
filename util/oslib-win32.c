@@ -825,10 +825,10 @@ ssize_t qemu_recvfrom_wrap(int sockfd, void *buf, size_t len, int flags,
 
 int qemu_stat(const char* path, struct stat* st)
 {
-    return stat(path, st);
+    return win32_stat(path, st);
 }
 
 int qemu_lstat(const char* path, struct stat* st)
 {
-    return qemu_stat(path, st);
+    return win32_lstat(path, st);
 }
