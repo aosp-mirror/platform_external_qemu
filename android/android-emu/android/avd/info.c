@@ -914,10 +914,10 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
     if (name == NULL)
         return NULL;
 
-    if (!_checkAvdName(name)) {
-        derror("virtual device name contains invalid characters");
-        return NULL;
-    }
+    // if (!_checkAvdName(name)) {
+        // derror("virtual device name contains invalid characters");
+        // return NULL;
+    // }
 
     ANEW0(i);
     str_reset(&i->deviceName, name);

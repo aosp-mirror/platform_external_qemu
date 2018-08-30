@@ -2,6 +2,9 @@
 
 #include "android/utils/win32_unicode.h"
 
+#include <direct.h>
+#include <windows.h>
+
 HANDLE win32CreateFile(
         LPCTSTR               lpFileName,
         DWORD                 dwDesiredAccess,
@@ -51,4 +54,17 @@ DWORD win32GetModuleFileName(
         return 0;
     }
     return (DWORD)ret;
+}
+
+int win32_stat(const char* filepath, struct stat* st) {
+    // Make sure we use the stat call that matches the type of stat struct we
+    // are getting. The incoming struct is a "struct _stati64" and this is the
+    // matching call for that struct. Unfortunately the macro doesn't take care
+    // of that.
+    return _wstati64(Win32UnicodeString(path).c_str(), buf);
+}
+
+int win32_lstat(const char* filepath, struct stat* st) {
+    // Windows doesn't seem to have an lstat function so just use regular stat
+    return _wstati64(Win32UnicodeString(path).c_str(), buf);
 }
