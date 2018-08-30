@@ -230,5 +230,6 @@ endif   # !CONFIG_MIN_BUILD
 # TODO(jansene): This gets included twice in the windows build (32 bit/64 bit)
 # causing targets to be overridden.
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu-img.mk
+include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-tests.mk
 
 LOCAL_PATH := $(QEMU2_OLD_LOCAL_PATH)
