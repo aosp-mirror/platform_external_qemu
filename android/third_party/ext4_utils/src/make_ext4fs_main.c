@@ -17,7 +17,9 @@
 #include <fcntl.h>
 #include <libgen.h>
 #include <stdio.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #if defined(__linux__)
 #include <linux/fs.h>

@@ -53,7 +53,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 const char*  android_skin_net_speed = NULL;
 const char*  android_skin_net_delay = NULL;

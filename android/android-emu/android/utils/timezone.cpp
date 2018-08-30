@@ -82,7 +82,9 @@ bufprint_zoneinfo_timezone( char*  p, char*  end )
  */
 #if defined(__APPLE__)
 
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <limits.h>
 #define  LOCALTIME_FILE  "/etc/localtime"
 #define  ZONEINFO_DIR    "/zoneinfo/"
@@ -132,7 +134,9 @@ get_zoneinfo_timezone( void )
  */
 #if defined(__linux__) || defined (__FreeBSD__)
 
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <limits.h>
 #include <sys/stat.h>
 #include <dirent.h>

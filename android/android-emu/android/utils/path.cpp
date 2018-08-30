@@ -40,7 +40,9 @@
 #include <limits.h>
 #include <winbase.h>
 #else
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <sys/stat.h>
 #include <time.h>
 #include <signal.h>
