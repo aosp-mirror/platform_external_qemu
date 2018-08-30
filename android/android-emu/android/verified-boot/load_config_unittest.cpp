@@ -97,10 +97,11 @@ TEST(VerifiedBootLoadConfigTest, RealWorldParams) {
             "dm_param: \"27e6b2075f9a47160d21f824b923f4ebdb755c3f\"\n"
             "dm_param: \"1\"\n"
             "dm_param: \"ignore_zero_blocks\"\n"
+            "param: \"androidboot.veritymode=enforcing\"\n"
             "param: \"root=/dev/dm-0\"";
     std::vector<std::string> params;
     EXPECT_EQ(Status::OK, getParameters(textproto, &params));
-    EXPECT_EQ(2, params.size());
+    EXPECT_EQ(3, params.size());
     EXPECT_EQ(
             "dm=\"1 vroot none ro 1,0 5159992 verity 1 "
             "PARTUUID=1ff336db-96f8-4906-9c0b-149da994cf78 "
@@ -110,7 +111,8 @@ TEST(VerifiedBootLoadConfigTest, RealWorldParams) {
             "27e6b2075f9a47160d21f824b923f4ebdb755c3f "
             "1 ignore_zero_blocks\"",
             params[0]);
-    EXPECT_EQ("root=/dev/dm-0", params[1]);
+    EXPECT_EQ("androidboot.veritymode=enforcing", params[1]);
+    EXPECT_EQ("root=/dev/dm-0", params[2]);
 }
 
 // Pass data that can not be parsed as a proto.
@@ -177,7 +179,7 @@ TEST(VerifiedBootLoadConfigTest, IllegalChars) {
             "dm_param: \"foo\"\n"
             "param: \"foo\"\n";
 
-    const std::string illegal_chars = " !@#$%^&*()+[]{}|';:?.<>";
+    const std::string illegal_chars = " !@#$%^&*()+[]{}|';:?<>";
     std::vector<std::string> params;
 
     for (const char c : illegal_chars) {
