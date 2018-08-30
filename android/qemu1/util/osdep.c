@@ -27,7 +27,9 @@
 #include <stdbool.h>
 #include <string.h>
 #include <errno.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 
 #ifndef _WIN32

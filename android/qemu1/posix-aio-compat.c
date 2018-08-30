@@ -14,7 +14,9 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <pthread.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <errno.h>
 #include <time.h>
 #include <signal.h>

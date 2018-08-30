@@ -23,7 +23,9 @@
  * THE SOFTWARE.
  */
 
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/types.h>

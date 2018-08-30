@@ -40,7 +40,9 @@
 #include <time.h>
 #include <ctype.h>
 #include <errno.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/time.h>
