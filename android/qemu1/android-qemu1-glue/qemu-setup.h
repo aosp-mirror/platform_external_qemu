@@ -22,4 +22,8 @@ ANDROID_BEGIN_HEADER
 
 extern bool qemu_android_emulation_setup(void);
 
+/* Call this function at the end of the QEMU main() function, just
+ * after the main loop has returned due to a machine exit. */
+extern void qemu_android_emulation_teardown(void);
+
 ANDROID_END_HEADER
