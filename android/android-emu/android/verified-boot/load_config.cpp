@@ -19,7 +19,9 @@
 #include <google/protobuf/text_format.h>
 
 #include <fcntl.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 using ::android::verifiedboot::Status;
 using ::android::verifiedboot::VerifiedBootConfig;

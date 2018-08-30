@@ -22,7 +22,9 @@
 #include <vector>
 
 #include <fcntl.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 using android::base::System;
 using android::base::TestSystem;

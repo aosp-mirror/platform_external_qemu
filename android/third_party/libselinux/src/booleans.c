@@ -13,7 +13,9 @@
 #include <dirent.h>
 #include <string.h>
 #include <stdio.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <fnmatch.h>
 #include <limits.h>
 #include <ctype.h>

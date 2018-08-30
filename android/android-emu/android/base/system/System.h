@@ -34,7 +34,9 @@
 #include <windows.h>
 #undef ERROR  // necessary to compile LOG(ERROR) statements
 #else  // !_WIN32
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #endif        // !_WIN32
 
 

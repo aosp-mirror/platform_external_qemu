@@ -96,7 +96,9 @@ void android::base::internal::closeFileForShare(void* fileHandle) {
 
 #else
 #include <sys/file.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 static int getFlockOperation(android::base::FileShare fileshare) {
     switch (fileshare) {
