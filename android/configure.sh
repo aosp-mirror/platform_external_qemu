@@ -1091,6 +1091,9 @@ probe_mingw_dlls () {
         for DLL in $DLLS; do
             SRC_DLL=${DLL#./}  # Remove initial ./ in DLL path.
             case $SRC_DLL in
+                lib/*)
+                    DST_DLL=lib64${SRC_DLL##lib}
+                    ;;
                 bin/*)
                     DST_DLL=lib64${SRC_DLL##bin}
                     ;;
@@ -1098,7 +1101,7 @@ probe_mingw_dlls () {
                     DST_DLL=lib${SRC_DLL##lib32}
                     ;;
                 *)
-                    DST_DLL=$SRC_DLL
+                    DST_DLL=${SRC_DLL}
                     ;;
             esac
             log2 "Mingw      :    $SRC_DLL -> $DST_DLL"
@@ -1109,6 +1112,8 @@ probe_mingw_dlls () {
 
 if [ "$OPTION_MINGW" = "yes" ] ; then
     probe_mingw_dlls libwinpthread-1.dll
+    probe_mingw_dlls libgcc_s_seh-1.dll
+    probe_mingw_dlls libgcc_s_sjlj-1.dll
 fi
 
 # Re-create the configuration file
