@@ -23,7 +23,9 @@
 
 #include <stdio.h>
 #include <string>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 namespace {
 

@@ -39,7 +39,9 @@
 #include <vector>
 
 // Sockets includes
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 

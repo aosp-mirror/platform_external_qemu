@@ -25,7 +25,9 @@
 
 #include <sys/types.h>
 #include <sys/wait.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <memory>
 
 #define E(...) derror(__VA_ARGS__)
