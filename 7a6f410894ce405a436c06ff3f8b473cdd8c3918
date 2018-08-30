@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d562f521_a37320fa",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-30T00:43:12Z",
+      "side": 1,
+      "message": "if we assume vm is stopped, this might not work sinc esnapshot remap might be incorrectly starting / stopping teh vm by itself",
+      "range": {
+        "startLine": 222,
+        "startChar": 25,
+        "endLine": 222,
+        "endChar": 82
+      },
+      "revId": "7a6f410894ce405a436c06ff3f8b473cdd8c3918",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
