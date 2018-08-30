@@ -209,4 +209,5 @@ bool qemu_android_emulation_setup() {
 void qemu_android_emulation_teardown() {
     android::qemu::skipTimerOps();
     androidSnapshot_finalize();
+    android_emulation_teardown();
 }

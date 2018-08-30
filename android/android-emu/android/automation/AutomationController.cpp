@@ -76,6 +76,8 @@ public:
                              base::Looper* looper);
     ~AutomationControllerImpl();
 
+    void shutdown();
+
     AutomationEventSink& getEventSink() override;
 
     void reset() override;
@@ -99,6 +101,7 @@ private:
     base::Looper* const mLooper;
 
     Lock mLock;
+    bool mShutdown = false;
     std::unique_ptr<android::base::Stream> mRecordingStream;
 
     // Playback state.
@@ -117,6 +120,18 @@ void AutomationController::initialize() {
             << "AutomationController::initialize() called more than once";
     sInstance = new AutomationControllerImpl(android_physical_model_instance(),
                                              ThreadLooper::get());
+}
+
+void AutomationController::shutdown() {
+    // Since other threads may be using the AutomationController, it's not safe
+    // to delete.  Instead, call shutdown which disables future calls.
+    // Note that there will only be one instance of AutomationController in
+    // the emulator, which will be cleaned up on process exit so it's safe to
+    // leak.
+    if (sInstance) {
+        VLOG(automation) << "Shutting down AutomationController";
+        sInstance->shutdown();
+    }
 }
 
 AutomationController& AutomationController::get() {
@@ -147,6 +162,15 @@ AutomationControllerImpl::~AutomationControllerImpl() {
     physicalModel_setAutomationController(mPhysicalModel, nullptr);
 }
 
+void AutomationControllerImpl::shutdown() {
+    {
+        AutoLock lock(mLock);
+        mShutdown = true;
+    }
+    stopRecording();
+    stopPlayback();
+}
+
 AutomationEventSink& AutomationControllerImpl::getEventSink() {
     return mEventSink;
 }
@@ -159,6 +183,9 @@ void AutomationControllerImpl::reset() {
 
 DurationNs AutomationControllerImpl::advanceTime() {
     AutoLock lock(mLock);
+    if (mShutdown) {
+        return 0;
+    }
 
     const DurationNs nowNs = mLooper->nowNs(Looper::ClockType::kVirtual);
     while (mPlaybackStream) {
@@ -180,6 +207,9 @@ DurationNs AutomationControllerImpl::advanceTime() {
 
 StartResult AutomationControllerImpl::startRecording(StringView filename) {
     AutoLock lock(mLock);
+    if (mShutdown) {
+        return Err(StartError::InternalError);
+    }
 
     if (filename.empty()) {
         return Err(StartError::InvalidFilename);
@@ -263,6 +293,9 @@ static bool parseNextCommand(android::base::Stream* stream,
 
 StartResult AutomationControllerImpl::startPlayback(StringView filename) {
     AutoLock lock(mLock);
+    if (mShutdown) {
+        return Err(StartError::InternalError);
+    }
 
     if (filename.empty()) {
         return Err(StartError::InvalidFilename);

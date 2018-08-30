@@ -3650,7 +3650,7 @@ int main(int argc, char **argv, char **envp)
     net_cleanup();
     android_wear_agent_stop();
     socket_drainer_stop();
-    android_emulation_teardown();
+    qemu1_android_emulation_teardown();
     return 0;
 }
 
@@ -3659,8 +3659,9 @@ void android_check_for_updates() {
 }
 
 void
-android_emulation_teardown(void)
+qemu1_android_emulation_teardown(void)
 {
     skin_charmap_done();
     android_teardown_metrics();
+    qemu_android_emulation_teardown();
 }
