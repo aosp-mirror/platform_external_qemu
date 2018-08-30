@@ -26,7 +26,9 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <inttypes.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #ifndef USE_MINGW
 #include <sys/mman.h>

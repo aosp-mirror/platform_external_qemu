@@ -22,7 +22,9 @@
 #ifdef _WIN32
 #include <windows.h>
 #else
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #endif
 
 namespace {

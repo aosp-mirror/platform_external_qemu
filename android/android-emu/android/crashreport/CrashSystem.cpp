@@ -35,7 +35,9 @@
 #include <process.h>
 #else
 #include <fcntl.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #endif
 
 #ifdef __APPLE__

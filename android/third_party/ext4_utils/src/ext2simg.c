@@ -24,7 +24,9 @@
 #include <fcntl.h>
 #include <inttypes.h>
 #include <libgen.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #include <sparse/sparse.h>
 

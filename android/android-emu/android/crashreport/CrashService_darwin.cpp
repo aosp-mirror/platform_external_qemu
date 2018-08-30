@@ -29,7 +29,9 @@
 #include <sys/sysctl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #include <fstream>
 #include <memory>

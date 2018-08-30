@@ -11,7 +11,7 @@
 
 #pragma once
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #include <unistd.h>
 #else
 #include <stdint.h>

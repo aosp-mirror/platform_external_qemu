@@ -23,7 +23,9 @@
 #elif defined(__APPLE__)
 #include <sys/sysctl.h>
 #include <sys/types.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #endif
 
 namespace android {

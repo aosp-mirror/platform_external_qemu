@@ -3,7 +3,9 @@
 
 #include <stdbool.h>
 #include <sys/types.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #include <selinux/label.h>
 
