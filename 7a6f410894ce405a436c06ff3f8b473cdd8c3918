@@ -118,6 +118,30 @@
       "revId": "7a6f410894ce405a436c06ff3f8b473cdd8c3918",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cb6505a2_b0e876b8",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-30T21:27:33Z",
+      "side": 1,
+      "message": "Discussed offline; that\u0027s kind of what thi sis doing already and I was totally off. Problem was in the remap combined with virtual devices that have their mapped hva\u0027s invalidated.",
+      "parentUuid": "8d8212f4_d47d4f48",
+      "range": {
+        "startLine": 222,
+        "startChar": 25,
+        "endLine": 222,
+        "endChar": 82
+      },
+      "revId": "7a6f410894ce405a436c06ff3f8b473cdd8c3918",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
