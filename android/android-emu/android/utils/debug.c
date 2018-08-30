@@ -15,7 +15,9 @@
 #include <fcntl.h>
 #include <stdint.h>
 #include <stdio.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 uint64_t android_verbose = 0;
 

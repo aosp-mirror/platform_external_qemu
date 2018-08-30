@@ -13,7 +13,9 @@
 
 #include "android/base/system/Win32UnicodeString.h"
 
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #ifdef _WIN32
 #include <vector>
