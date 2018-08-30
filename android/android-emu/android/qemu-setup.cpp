@@ -443,3 +443,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
 
     return true;
 }
+
+void android_emulation_teardown() {
+    android::automation::AutomationController::shutdown();
+}

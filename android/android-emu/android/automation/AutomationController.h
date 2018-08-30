@@ -23,7 +23,7 @@
 // Forward declarations;
 typedef struct PhysicalModel PhysicalModel;
 
-namespace android { 
+namespace android {
 namespace automation {
 
 typedef android::base::Looper::DurationNs DurationNs;
@@ -61,6 +61,9 @@ public:
 
     // Initialize the AutomationController, called in qemu-setup.cpp.
     static void initialize();
+
+    // Shutdown the AutomationController, called in qemu-setup.cpp.
+    static void shutdown();
 
     // Get the global instance of the AutomationController.  Asserts if called
     // before initialize().
