@@ -1581,7 +1581,7 @@ static int try_open_existing_ram_file(const char* path) {
     // So use CreateFile() instead.
 #ifdef _WIN32
     HANDLE fh =
-        CreateFile(
+        win32CreateFile(
             path,
             // Must be both, or we cannot CreateFileMapping with PAGE_READWRITE
             GENERIC_READ | GENERIC_WRITE,
