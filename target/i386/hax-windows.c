@@ -28,9 +28,9 @@ static int hax_open_device(hax_fd *fd)
         return -2;
     }
 
-    hDevice = CreateFile("\\\\.\\HAX",
-                         GENERIC_READ | GENERIC_WRITE,
-                         0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    hDevice = win32CreateFile("\\\\.\\HAX",
+                              GENERIC_READ | GENERIC_WRITE,
+                              0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
     if (hDevice == INVALID_HANDLE_VALUE) {
         fprintf(stderr, "Failed to open the HAX device!\n");
@@ -300,9 +300,9 @@ hax_fd hax_host_open_vm(struct hax_state *hax, int vm_id)
         return INVALID_HANDLE_VALUE;
     }
 
-    hDeviceVM = CreateFile(vm_name,
-                           GENERIC_READ | GENERIC_WRITE,
-                           0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    hDeviceVM = win32CreateFile(vm_name,
+                                GENERIC_READ | GENERIC_WRITE,
+                                0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if (hDeviceVM == INVALID_HANDLE_VALUE) {
         fprintf(stderr, "Open the vm device error:%s, ec:%lu\n",
                 vm_name, GetLastError());
@@ -358,10 +358,10 @@ hax_fd hax_host_open_vcpu(int vmid, int vcpuid)
         return INVALID_HANDLE_VALUE;
     }
 
-    hDeviceVCPU = CreateFile(devfs_path,
-                             GENERIC_READ | GENERIC_WRITE,
-                             0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,
-                             NULL);
+    hDeviceVCPU = win32CreateFile(devfs_path,
+                                  GENERIC_READ | GENERIC_WRITE,
+                                  0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,
+                                  NULL);
 
     if (hDeviceVCPU == INVALID_HANDLE_VALUE) {
         fprintf(stderr, "Failed to open the vcpu devfs\n");
