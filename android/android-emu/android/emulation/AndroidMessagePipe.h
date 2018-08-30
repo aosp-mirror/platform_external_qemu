@@ -105,7 +105,7 @@ public:
 protected:
     void resetRecvPayload(DataBuffer&& buffer);
 
-private:
+protected:
     void resetToInitState();
 
     void loadFromStream(base::Stream* stream);
