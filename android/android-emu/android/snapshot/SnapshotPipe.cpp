@@ -208,11 +208,19 @@ private:
                                          &sSnapshotCrossSession->sMetaData);
                     gQAndroidVmOperations->vmStop();
                     android::base::ThreadLooper::runOnMainLooper([]() {
-                        androidSnapshot_save(android::snapshot::kDefaultBootSnapshot);
-                        bool res =
-                                android::multiinstance::updateInstanceShareMode(
-                                        android::snapshot::kDefaultBootSnapshot,
-                                        android::base::FileShare::Read);
+                        fprintf(stderr,
+                                    "Ready to update RAM share mode\n");
+                        bool res = true;
+                        assert(res);
+                        if (!res) {
+                            fprintf(stderr,
+                                    "WARNING: RAM share mode update failure\n");
+                        }
+                        res = android::multiinstance::updateInstanceShareMode(
+                                    android::snapshot::kDefaultBootSnapshot,
+                                    android::base::FileShare::Read);
+                        res = gQAndroidVmOperations->snapshotRemap(false, nullptr,
+                                nullptr);
                         if (!res) {
                             fprintf(stderr,
                                     "WARNING: share mode update failure\n");
@@ -241,6 +249,7 @@ private:
                                                     2
                                     ? android::base::FileShare::Read
                                     : android::base::FileShare::Write;
+                    //mode = android::base::FileShare::Read;
                     android::base::ThreadLooper::runOnMainLooper([mode]() {
                         bool res =
                                 android::multiinstance::updateInstanceShareMode(
@@ -250,7 +259,12 @@ private:
                             fprintf(stderr,
                                     "WARNING: share mode update failure\n");
                         }
-                        androidSnapshot_load(android::snapshot::kDefaultBootSnapshot);
+                        if (mode == android::base::FileShare::Read) {
+                            // snapshotRemap automatically triggers snapshot load
+                            gQAndroidVmOperations->snapshotRemap(false, nullptr, nullptr);
+                        } else {
+                            androidSnapshot_load(android::snapshot::kDefaultBootSnapshot);
+                        }
                         gQAndroidVmOperations->vmStart();
                     });
                 } else if (sSnapshotCrossSession->sForkId ==
