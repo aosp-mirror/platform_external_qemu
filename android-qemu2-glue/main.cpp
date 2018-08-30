@@ -343,9 +343,6 @@ static int createUserData(AvdInfo* avd,
                 resizeExt4Partition(android_hw->disk_dataPartition_path,
                                     android_hw->disk_dataPartition_size);
             }
-        } else {
-            derror("Missing initial data partition file: %s",
-                   hw->disk_dataPartition_initPath);
         }
     }
 
