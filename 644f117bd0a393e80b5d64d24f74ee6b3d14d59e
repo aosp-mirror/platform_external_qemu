@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "755afa37_994ab3e8",
+        "filename": "android/build/emulator/host_executable.make",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-30T22:26:24Z",
+      "side": 1,
+      "message": "nit: extra lines (and in other places)",
+      "revId": "644f117bd0a393e80b5d64d24f74ee6b3d14d59e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
