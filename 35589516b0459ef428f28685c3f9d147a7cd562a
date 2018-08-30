@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "db6d4174_ed90d6e8",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-tests.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-30T23:21:21Z",
+      "side": 1,
+      "message": "nit: make the spacing consistent",
+      "range": {
+        "startLine": 79,
+        "startChar": 0,
+        "endLine": 79,
+        "endChar": 3
+      },
+      "revId": "35589516b0459ef428f28685c3f9d147a7cd562a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
