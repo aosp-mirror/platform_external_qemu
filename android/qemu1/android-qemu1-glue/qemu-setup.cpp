@@ -47,3 +47,7 @@ bool qemu_android_emulation_setup() {
 
   return android_emulation_setup(&consoleAgents, false);
 }
+
+void qemu_android_emulation_teardown() {
+    android_emulation_teardown();
+}
