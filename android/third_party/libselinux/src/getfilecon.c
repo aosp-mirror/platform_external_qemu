@@ -1,4 +1,6 @@
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <string.h>
 #include "selinux_internal.h"

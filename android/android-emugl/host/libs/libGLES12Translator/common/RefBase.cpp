@@ -23,7 +23,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <typeinfo>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <errno.h>
 
 #include <utils/RefBase.h>

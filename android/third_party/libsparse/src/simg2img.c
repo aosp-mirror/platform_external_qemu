@@ -24,7 +24,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #ifndef O_BINARY
 #define O_BINARY 0
