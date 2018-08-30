@@ -241,14 +241,15 @@ static bool qemu_snapshot_remap(bool shared,
     auto currentRamFileStatus = androidSnapshot_getRamFileInfo();
 
     if (currentRamFileStatus == SNAPSHOT_RAM_FILE_NONE) {
-        return true;
+        return false;
     }
 
     if (android::snapshot::Snapshotter::get().loadedSnapshotFile() != "default_boot") {
-        return true;
+        return false;
     }
 
     if (currentRamFileStatus == SNAPSHOT_RAM_FILE_SHARED && shared) {
+        fprintf(stderr, "mapping share to share\n");
         return true;
     }
 

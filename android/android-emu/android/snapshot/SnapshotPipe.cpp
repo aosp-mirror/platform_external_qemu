@@ -48,6 +48,8 @@ size_t getReadable(std::iostream& stream) {
     return ret;
 }
 
+static android::base::StaticLock sLock;
+
 class SnapshotPipe : public android::AndroidMessagePipe {
 public:
     class Service : public android::AndroidPipe::Service {
@@ -83,6 +85,8 @@ public:
         ANDROID_IF_DEBUG(assert(sSnapshotCrossSession->sLock.isLocked()));
         mIsLoad = static_cast<bool>(loadStream);
         if (mIsLoad) {
+            assert(mGuestWaitingState ==
+                    android::AndroidMessagePipe::GuestWaitingState::RecvMesgLength);
             resetRecvPayload(std::move(sSnapshotCrossSession->sMetaData));
             // sMetaData should be cleared after the move
         }
@@ -127,6 +131,7 @@ private:
     static void handleSnapshotPb(const offworld::GuestSend& guestSend,
                                  bool* shouldReply,
                                  offworld::GuestRecv* guestRecv) {
+        assert(sLock.tryLock());
         const offworld::GuestSend::ModuleSnapshot& snapshotPb
                 = guestSend.snapshot();
         using MS = offworld::GuestSend::ModuleSnapshot;
@@ -208,16 +213,28 @@ private:
                                          &sSnapshotCrossSession->sMetaData);
                     gQAndroidVmOperations->vmStop();
                     android::base::ThreadLooper::runOnMainLooper([]() {
-                        androidSnapshot_save(android::snapshot::kDefaultBootSnapshot);
-                        bool res =
-                                android::multiinstance::updateInstanceShareMode(
-                                        android::snapshot::kDefaultBootSnapshot,
-                                        android::base::FileShare::Read);
+                        assert(sLock.tryLock());
+                        fprintf(stderr,
+                                    "Ready to update RAM share mode\n");
+                        bool res = true;
+                        // snapshotRemap triggers a snapshot save.
+                        // It must happen before any other remapping
+                        res = gQAndroidVmOperations->snapshotRemap(false, nullptr,
+                                nullptr);
+                        if (!res) {
+                            fprintf(stderr,
+                                    "WARNING: RAM share mode update failure\n");
+                        }
+                        res = android::multiinstance::updateInstanceShareMode(
+                                    android::snapshot::kDefaultBootSnapshot,
+                                    android::base::FileShare::Read);
                         if (!res) {
                             fprintf(stderr,
                                     "WARNING: share mode update failure\n");
                         }
+                        assert(res);
                         androidSnapshot_load(android::snapshot::kDefaultBootSnapshot);
+                        sLock.unlock();
                         gQAndroidVmOperations->vmStart();
                     });
                 }
@@ -233,7 +250,6 @@ private:
                     recv.set_instance_id(sSnapshotCrossSession->sForkId);
                     encodeGuestRecvFrame(recv,
                                          &sSnapshotCrossSession->sMetaData);
-                    gQAndroidVmOperations->vmStop();
                     // Load back to write mode for the last instance
                     android::base::FileShare mode =
                             sSnapshotCrossSession->sForkId <
@@ -241,18 +257,38 @@ private:
                                                     2
                                     ? android::base::FileShare::Read
                                     : android::base::FileShare::Write;
-                    android::base::ThreadLooper::runOnMainLooper([mode]() {
-                        bool res =
-                                android::multiinstance::updateInstanceShareMode(
-                                        android::snapshot::kDefaultBootSnapshot,
-                                        mode);
-                        if (!res) {
-                            fprintf(stderr,
-                                    "WARNING: share mode update failure\n");
-                        }
-                        androidSnapshot_load(android::snapshot::kDefaultBootSnapshot);
-                        gQAndroidVmOperations->vmStart();
-                    });
+                    //mode = android::base::FileShare::Read;
+                    fprintf(stderr, "session %d\n", sSnapshotCrossSession->sForkId);
+                    // We don't reload for the last run
+                    if (sSnapshotCrossSession->sForkId <
+                                            sSnapshotCrossSession->sForkTotal -
+                                                    1) {
+                        gQAndroidVmOperations->vmStop();
+                        android::base::ThreadLooper::runOnMainLooper([mode]() {
+                            assert(sLock.tryLock());
+                            bool res =
+                                    android::multiinstance::updateInstanceShareMode(
+                                            android::snapshot::kDefaultBootSnapshot,
+                                            mode);
+                            //bool res = true;
+                            if (!res) {
+                                fprintf(stderr,
+                                        "WARNING: share mode update failure\n");
+                            }
+                            //if (mode == android::base::FileShare::Read) {
+                                // snapshotRemap automatically triggers snapshot load
+                            res = gQAndroidVmOperations->snapshotRemap(mode == android::base::FileShare::Write, nullptr, nullptr);
+                            fprintf(stderr, "snapshot remap result %d\n", res);
+                            //gQAndroidVmOperations->snapshotRemap(false, nullptr, nullptr);
+                            //} else {
+                            //    androidSnapshot_load(android::snapshot::kDefaultBootSnapshot);
+                            //}
+                            sLock.unlock();
+                            fprintf(stderr, "vmStart\n");
+                            gQAndroidVmOperations->vmStart();
+                            fprintf(stderr, "vmStarted\n");
+                        });
+                    }
                 } else if (sSnapshotCrossSession->sForkId ==
                            sSnapshotCrossSession->sForkTotal - 1) {
                     sSnapshotCrossSession->sForkId = 0;
@@ -266,6 +302,7 @@ private:
                         "message!");
                 *shouldReply = false;
         }
+        sLock.unlock();
     }
     enum class OP : int32_t { Save = 0, Load = 1 };
     bool mIsLoad;
