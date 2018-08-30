@@ -44,7 +44,7 @@ extern "C" {
 #include "sysemu/sysemu.h"
 }
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG
 #define D(...) printf(__VA_ARGS__)
