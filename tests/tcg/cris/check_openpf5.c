@@ -5,7 +5,9 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <errno.h>
 #include <limits.h>
 #include <sys/types.h>

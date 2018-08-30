@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #define MAGIC (0xdeadbeef)
 
