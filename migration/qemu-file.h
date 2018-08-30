@@ -25,6 +25,8 @@
 #ifndef MIGRATION_QEMU_FILE_H
 #define MIGRATION_QEMU_FILE_H
 
+#include <zlib.h>
+
 /* Read a chunk of data from a file at the given position.  The pos argument
  * can be ignored if the file is only be used for streaming.  The number of
  * bytes actually read should be returned.
@@ -132,6 +134,7 @@ bool qemu_file_is_writable(QEMUFile *f);
 
 size_t qemu_peek_buffer(QEMUFile *f, uint8_t **buf, size_t size, size_t offset);
 size_t qemu_get_buffer_in_place(QEMUFile *f, uint8_t **buf, size_t size);
+<<<<<<< HEAD   (beafc5 Merge "Merge "Fork read-only instances support in snapshot p)
 ssize_t qemu_put_compression_data(QEMUFile *f, const uint8_t *p, size_t size,
                                   int level);
 ssize_t qemu_put_compression_data_with_compressor(
@@ -139,6 +142,10 @@ ssize_t qemu_put_compression_data_with_compressor(
         ssize_t (*compressor)(uint8_t *dest, ssize_t dest_size,
                              const uint8_t *data, ssize_t size, int level),
         ssize_t (*compress_bound)(ssize_t size));
+=======
+ssize_t qemu_put_compression_data(QEMUFile *f, z_stream *stream,
+                                  const uint8_t *p, size_t size);
+>>>>>>> BRANCH (8e383d Merge remote-tracking branch 'remotes/dgilbert/tags/pull-mig)
 int qemu_put_qemu_file(QEMUFile *f_des, QEMUFile *f_src);
 
 /*
