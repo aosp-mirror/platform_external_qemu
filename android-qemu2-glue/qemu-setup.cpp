@@ -43,7 +43,6 @@
 #include "android-qemu2-glue/net-android.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
-#include "android-qemu2-glue/snapshot_compression.h"
 
 #include <random>
 
@@ -147,7 +146,6 @@ bool qemu_android_emulation_early_setup() {
 
     androidSnapshot_initialize(gQAndroidVmOperations,
                                gQAndroidEmulatorWindowAgent);
-    qemu_snapshot_compression_setup();
 
     android::emulation::AudioCaptureEngine::set(
                 new android::qemu::QemuAudioCaptureEngine());
