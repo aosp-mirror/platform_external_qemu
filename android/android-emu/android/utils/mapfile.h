@@ -20,7 +20,9 @@
 #include "android/utils/compiler.h"
 
 #include <stddef.h>
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <unistd.h>
 #endif
 
@@ -28,7 +30,7 @@ ANDROID_BEGIN_HEADER
 
 typedef struct MapFile MapFile;
 
-#ifdef WIN32
+#ifdef _WIN32
 /* Declare constants that are missing in Win32 headers. */
 #define PROT_READ   0x1
 #define PROT_WRITE  0x2

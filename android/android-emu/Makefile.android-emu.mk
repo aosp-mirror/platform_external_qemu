@@ -124,6 +124,10 @@ LOCAL_C_INCLUDES := \
     $(LIBUUID_INCLUDES) \
     $(LZ4_INCLUDES) \
 
+ifeq (windows_msvc,$(BUILD_TARGET_OS))
+    LOCAL_C_INCLUDES += $(MSVC_POSIX_COMPAT_INCLUDES)
+endif
+
 LOCAL_SRC_FILES := \
     android/base/ContiguousRangeMapper.cpp \
     android/base/Debug.cpp \

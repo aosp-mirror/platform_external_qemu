@@ -75,6 +75,11 @@ ifeq (windows,$(BUILD_TARGET_OS))
 LOCAL_CFLAGS := -DUSE_MINGW=1
 endif
 
+ifeq (windows_msvc,$(BUILD_TARGET_OS))
+    LOCAL_C_INCLUDES += $(MSVC_POSIX_COMPAT_INCLUDES)
+    LOCAL_STATIC_LIBRARIES += msvc-posix-compat
+endif
+
 $(call end-emulator-library)
 
 # Reset LOCAL_PATH before exiting this build file.

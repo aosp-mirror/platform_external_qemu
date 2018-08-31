@@ -32,6 +32,12 @@ LOCAL_C_INCLUDES := \
     $(LIBSELINUX_INCLUDES) \
     $(LOCAL_PATH)/../../../android/android-emu
 
+ifeq ($(BUILD_TARGET_OS),windows_msvc)
+    LOCAL_C_INCLUDES += \
+	$(MSVC_POSIX_COMPAT_INCLUDES) \
+	$(DIRENT_WIN32_INCLUDES)
+endif
+
 LOCAL_CFLAGS := $(LIBEXT4_UTILS_CFLAGS)
 $(call end-emulator-library)
 

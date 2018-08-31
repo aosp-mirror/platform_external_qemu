@@ -28,11 +28,15 @@
 #include <stddef.h>
 #include <string.h>
 
-#ifdef USE_MINGW
+#if defined(USE_MINGW) || defined(_MSC_VER)
 #include <winsock2.h>
 #else
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
+#endif
+
+#ifdef _MSC_VER
+#include "msvc-posix.h"
 #endif
 
 #if defined(__linux__)
@@ -398,7 +402,7 @@ u64 get_block_device_size(int fd)
 
 int is_block_device_fd(int fd)
 {
-#ifdef USE_MINGW
+#if defined(USE_MINGW) || defined(_MSC_VER)
 	return 0;
 #else
 	struct stat st;

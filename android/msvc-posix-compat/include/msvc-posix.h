@@ -55,6 +55,7 @@ typedef int pid_t;
 #define open _open
 #define read _read
 #define write _write
+#define creat _creat
 
 // From <sys/types.h>
 typedef int64_t off64_t;
