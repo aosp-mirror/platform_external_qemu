@@ -104,4 +104,31 @@ function(toolchain_generate TARGET_OS)
     set(ANDROID_SYSROOT ${ANDROID_SYSROOT} PARENT_SCOPE)
 endfunction()
 
+function(toolchain_generate_msvc TARGET_OS)
+    # This is a hack to workaround the fact that cmake will keep including
+    # the toolchain defintion over and over, and it will wipe out all the settings.
+    # so we will just store them in the environment, which gets blown away on exit
+    # anyway..
+    get_env_cache(COMPILER_PREFIX)
+    get_env_cache(ANDROID_SYSROOT)
+    if ("${COMPILER_PREFIX}" STREQUAL "")
+        toolchain_generate_internal(${TARGET_OS})
+        set_env_cache(COMPILER_PREFIX "${ANDROID_COMPILER_PREFIX}")
+        set_env_cache(ANDROID_SYSROOT "${ANDROID_SYSROOT}")
+    endif ()
+
+    set(triple x86_64-pc-win32)
+    set(CMAKE_RC_COMPILER ${COMPILER_PREFIX}windres PARENT_SCOPE)
+    set(CMAKE_C_COMPILER ${COMPILER_PREFIX}clang PARENT_SCOPE)
+    set(CMAKE_C_COMPILER_TARGET ${triple} PARENT_SCOPE)
+    set(CMAKE_CXX_COMPILER ${COMPILER_PREFIX}clang++ PARENT_SCOPE)
+    set(CMAKE_CXX_COMPILER_TARGET ${triple} PARENT_SCOPE)
+    # We will use system bintools
+    # set(CMAKE_AR ${COMPILER_PREFIX}ar PARENT_SCOPE)
+    set(CMAKE_RANLIB ${COMPILER_PREFIX}ranlib PARENT_SCOPE)
+    set(CMAKE_OBJCOPY ${COMPILER_PREFIX}objcopy PARENT_SCOPE)
+    set(ANDROID_SYSROOT ${ANDROID_SYSROOT} PARENT_SCOPE)
+
+endfunction()
+
 get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../.." ABSOLUTE)

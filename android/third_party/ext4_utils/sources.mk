@@ -16,6 +16,12 @@ LOCAL_C_INCLUDES := \
     $(LIBSPARSE_INCLUDES) \
     $(LIBSELINUX_INCLUDES) \
     $(LOCAL_PATH)/../../../android/android-emu
+
+ifeq ($(BUILD_TARGET_OS),windows_msvc)
+    LOCAL_C_INCLUDES += \
+        $(MSVC_POSIX_COMPAT_INCLUDES) \
+        $(DIRENT_WIN32_INCLUDES)
+endif
 $(call end-cmake-project)
 
 
@@ -33,6 +39,12 @@ LOCAL_STATIC_LIBRARIES := \
     emulator-zlib \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
     android-emu-base
+
+ifeq ($(BUILD_TARGET_OS),windows_msvc)
+    LOCAL_C_INCLUDES += \
+        $(MSVC_POSIX_COMPAT_INCLUDES) \
+        $(DIRENT_WIN32_INCLUDES)
+endif
 
 $(call local-link-static-c++lib)
 $(call end-emulator-program)

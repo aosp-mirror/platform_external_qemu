@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-if (WIN32 OR ("${LOCAL_OS}" STREQUAL "windows"))
+if (WIN32 OR ("${LOCAL_OS_FLAVOR}" STREQUAL "windows"))
     # Create an empty dummy lib..
     add_library(emulator-libselinux src/label_internal.h)
     set_property(TARGET emulator-libselinux PROPERTY LINKER_LANGUAGE CXX)

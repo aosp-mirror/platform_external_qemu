@@ -112,8 +112,16 @@ target_include_directories(emulator-libkeymaster3 PRIVATE src include)
 target_include_directories(emulator-libkeymaster3 PRIVATE ../../android-emu)
 target_link_libraries(emulator-libkeymaster3 PUBLIC ${CURL_LIBRARIES})
 
-if (WIN32 OR ("${LOCAL_OS}" STREQUAL "windows") AND ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"))
-    target_compile_definitions(emulator-libkeymaster3 PRIVATE -DUSE_MINGW=1)
+if (WIN32 OR ("${LOCAL_OS_FLAVOR}" STREQUAL "windows"))
+    # Workaround some gcc/mingw issues
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        target_compile_definitions(emulator-libkeymaster3 PRIVATE -DUSE_MINGW=1)
+    endif ()
+    if ("${LOCAL_OS}" STREQUAL "windows_msvc")
+        target_include_directories(emulator-libkeymaster3 PRIVATE ../../msvc-posix-compat/include)
+	target_link_libraries(emulator-libkeymaster3 PRIVATE msvc-posix-compat)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mssse3")
+    endif ()
 endif ()
 
 if (NOT DEFINED LOCAL_QEMU2_TOP_DIR)
