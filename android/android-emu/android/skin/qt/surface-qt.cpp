@@ -18,7 +18,9 @@
 #include <QRect>
 #include <QWidget>
 
+#ifndef _MSC_VER
 #include "android/skin/argb.h"
+#endif
 #include "android/skin/rect.h"
 #include "android/skin/surface.h"
 #include "android/skin/winsys.h"
