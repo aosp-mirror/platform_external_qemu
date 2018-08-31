@@ -100,7 +100,7 @@ include $(EMUGL_PATH)/host/libs/libGLSnapshot/Android.mk
 # Guest libraries built for host
 
 # TODO: Fix mingw build
-ifneq ($(BUILD_TARGET_OS),windows)
+ifneq ($(BUILD_TARGET_OS_FLAVOR),windows)
 ifeq (64,$(BUILD_TARGET_BITS))
 
 # Note: best included last as it overrides existing

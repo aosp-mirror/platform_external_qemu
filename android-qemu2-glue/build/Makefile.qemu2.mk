@@ -236,7 +236,7 @@ include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu-img.mk
 
 # The test infrastructure used by Qemu is not yet cross platform.
 # See b/113667469
-ifneq (windows,$(BUILD_TARGET_OS))
+ifneq (windows,$(BUILD_TARGET_OS_FLAVOR))
   include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-tests.mk
 endif
 

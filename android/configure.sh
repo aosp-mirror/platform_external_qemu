@@ -477,7 +477,7 @@ if [ "$CCACHE" ]; then
 else
     GEN_SDK_FLAGS="$GEN_SDK_FLAGS --no-ccache"
 fi
-SDK_TOOLCHAIN_DIR=$OUT_DIR/build/toolchain
+SDK_TOOLCHAIN_DIR=`pwd`/$OUT_DIR/build/toolchain
 GEN_SDK_FLAGS="$GEN_SDK_FLAGS --aosp-dir=$AOSP_PREBUILTS_DIR/.."
 "$GEN_SDK" $GEN_SDK_FLAGS "--verbosity=$VERBOSITY" "$SDK_TOOLCHAIN_DIR" || panic "Cannot generate SDK toolchain!"
 BINPREFIX=$("$GEN_SDK" $GEN_SDK_FLAGS --print=binprefix "$SDK_TOOLCHAIN_DIR")

@@ -40,9 +40,6 @@ TEST(SharedMemory, ShareVisibileWithinSameProc) {
     ASSERT_TRUE(mWriter.isOpen());
     ASSERT_TRUE(mReader.isOpen());
 
-    ASSERT_TRUE(mWriter.getFd() >= 0);
-    ASSERT_TRUE(mReader.getFd() >= 0);
-
     memcpy(*mWriter, message.c_str(), message.size());
     std::string read((const char*) *mReader);
     ASSERT_TRUE(message == read);
@@ -84,8 +81,6 @@ TEST(SharedMemory, CreateNoMapping) {
     ASSERT_EQ(0, err);
 
     ASSERT_FALSE(mem.isMapped());
-
-    ASSERT_TRUE(mem.getFd() >= 0);
 
     mem.close();
     ASSERT_FALSE(mem.isOpen());

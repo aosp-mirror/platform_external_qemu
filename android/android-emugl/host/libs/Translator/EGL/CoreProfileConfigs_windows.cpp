@@ -16,6 +16,10 @@
 
 #include "CoreProfileConfigs.h"
 
+#ifdef _MSC_VER
+// For gl.h WINGDIAPI to be defined
+#include <windows.h>
+#endif
 #include <GLES/glplatform.h>
 #include <GL/gl.h>
 #include <GL/wglext.h>
