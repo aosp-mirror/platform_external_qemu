@@ -177,18 +177,21 @@ std::string latestAndroidStudioDir(const std::string& scanPath) {
             // End of enumeration.
             break;
         }
-        // ignore files, only interested in subDirs
-        if (!system->pathIsDir(full_path)) {
-            continue;
-        }
 
         char* name = path_basename(full_path);
         if (name == NULL) {
             continue;
         }
+
         Version v = extractAndroidStudioVersion(name);
         free(name);
-        if (v.isValid() && latest_version < v) {
+
+        // ignore files, only interested in subDirs
+        if (!v.isValid() || !system->pathIsDir(full_path)) {
+            continue;
+        }
+
+        if (latest_version < v) {
             latest_version = v;
             latest_path = full_path;
         }
