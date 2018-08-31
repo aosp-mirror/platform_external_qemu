@@ -291,3 +291,14 @@ else
 fi
 
 echo "Done. !!"
+
+if [ "$OPTDEBUG" = "true" ]; then
+    overrides=`cat android/asan_overrides`
+    echo "Debug build enabled."
+    echo "ASAN may be in use; recommend disabling some ASAN checks as build is not"
+    echo "universally ASANified. This can be done with"
+    echo ""
+    echo ". android/envsetup.sh"
+    echo ""
+    echo "or export ASAN_OPTIONS=$overrides"
+fi
