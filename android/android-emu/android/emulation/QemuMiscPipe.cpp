@@ -23,7 +23,7 @@
 #include <random>
 #include <vector>
 
-extern const QAndroidVmOperations* const gQAndroidVmOperations;
+extern "C" const QAndroidVmOperations* const gQAndroidVmOperations;
 
 namespace android {
 static bool beginWith(const std::vector<uint8_t>& input, const char* keyword) {
