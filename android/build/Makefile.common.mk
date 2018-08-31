@@ -6,6 +6,10 @@ $(eval \
 	$(call on-first-run,FIRST_INCLUDE:= true,FIRST_INCLUDE:=) \
 )
 
+ifeq ($(BUILD_TARGET_OS),windows_msvc)
+  include $(LOCAL_PATH)/android/msvc-posix-compat/sources.mk
+endif
+
 # Build libext4_utils and related modules/
 include $(LOCAL_PATH)/android/third_party/zlib.mk
 include $(LOCAL_PATH)/android/third_party/libcurl.mk

@@ -81,6 +81,13 @@ typedef int64_t off64_t;
 #undef small
 #endif
 
+// Define for convenience only in mingw. This is
+// convenient for the _access function in Windows.
+#define F_OK 0   /* Check for file existence */
+#define X_OK 1   /* Check for execute permission (not supported in Windows) */
+#define W_OK 2   /* Check for write permission */
+#define R_OK 4   /* Check for read permission */
+
 /* QEMU uses sigsetjmp()/siglongjmp() as the portable way to specify
  * "longjmp and don't touch the signal masks". Since we know that the
  * savemask parameter will always be zero we can safely define these
