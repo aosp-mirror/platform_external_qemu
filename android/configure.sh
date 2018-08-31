@@ -845,6 +845,24 @@ if [ "$OPTION_AEMU64_ONLY" == "yes" ]; then
 fi
 
 ###
+### Copy tcmalloc if available
+###
+
+TCMALLOC_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/tcmalloc
+if [ -d $TCMALLOC_PREBUILTS_DIR ]; then
+    # Linux only
+    if [ $HOST_OS = "linux" ]; then
+        TCMALLOC_DSTDIR="$OUT_DIR/lib64"
+        TCMALLOC_SRCDIR="$TCMALLOC_PREBUILTS_DIR/linux-x86_64/lib64"
+        TCMALLOC_LIBNAME="libtcmalloc_minimal.so.4"
+        if [ -f "$TCMALLOC_SRCDIR/$TCMALLOC_LIBNAME" ]; then
+            install_prebuilt_dll "$TCMALLOC_SRCDIR/$TCMALLOC_LIBNAME" \
+                              "$TCMALLOC_DSTDIR/$TCMALLOC_LIBNAME"
+        fi
+    fi
+fi
+
+###
 ### Copy ANGLE if available
 ###
 ANGLE_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/ANGLE
