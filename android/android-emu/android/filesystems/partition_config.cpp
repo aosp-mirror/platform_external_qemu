@@ -11,6 +11,10 @@
 
 #include "android/filesystems/partition_config.h"
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#endif
+
 #include "android/base/system/System.h"
 #include "android/filesystems/internal/PartitionConfigBackend.h"
 #include "android/utils/debug.h"
