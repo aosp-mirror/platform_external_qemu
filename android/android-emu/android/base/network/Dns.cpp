@@ -80,7 +80,7 @@ public:
                 case EAI_FAIL:   // server is sick.
                     return -EHOSTDOWN;
 
-#if defined(EAI_NODATA) && (EAI_NODATA != EAHO_NONAME)
+#if defined(EAI_NODATA) && (EAI_NODATA != EAHO_NONAME) && (EAI_NODATA != EAI_NONAME)
                 case EAI_NODATA:
 #endif
                 case EAI_NONAME:

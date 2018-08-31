@@ -17,8 +17,8 @@ list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 include(toolchain)
 
 # First we create the toolchain
-set (ANDROID_TARGET_TAG "windows-x86_64")
-set (ANDROID_TARGET_OS "windows")
+set (ANDROID_TARGET_TAG "windows_msvc-x86_64")
+set (ANDROID_TARGET_OS "windows_msvc")
 set (ANDROID_TARGET_OS_FLAVOR "windows")
 #set(CMAKE_SYSTEM_NAME Windows)
 SET(CMAKE_SYSTEM_NAME Windows)
@@ -27,12 +27,7 @@ get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../.
 # Cmake goes crazy if we set AR manually.. so let's not do that.
 toolchain_generate("${ANDROID_TARGET_TAG}")
 
-list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/bin/libwinpthread-1.dll>lib64/libwinpthread-1.dll")
-list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/lib32/libwinpthread-1.dll>lib/libwinpthread-1.dll")
-list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/lib/libgcc_s_seh-1.dll>lib64/libgcc_s_seh-1.dll")
-list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/lib32/libgcc_s_sjlj-1.dll>lib/libgcc_s_sjlj-1.dll")
-
-list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-m64 -static-libgcc -Xlinker --build-id -mcx16")
+list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-target x86_64-pc-win32 -Xlinker --build-id -mcx16")
 
 # here is the target environment located, used to
 # locate packages. We don't want to do any package resolution
@@ -45,5 +40,6 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE NEVER)
+
 
 

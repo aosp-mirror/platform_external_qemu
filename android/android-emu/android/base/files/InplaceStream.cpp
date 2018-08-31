@@ -13,6 +13,10 @@
 
 #include "android/base/files/StreamSerializing.h"
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#endif
+
 #include <algorithm>
 #include <utility>
 #include <vector>
