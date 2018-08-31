@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f87c2779_dbbecea3",
+        "filename": "hw/arm/ranchu.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-31T23:13:40Z",
+      "side": 1,
+      "message": "typo: cpu",
+      "range": {
+        "startLine": 489,
+        "startChar": 24,
+        "endLine": 489,
+        "endChar": 27
+      },
+      "revId": "c1b33b3ae46d0c93c2177500e537f210839cfbff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
