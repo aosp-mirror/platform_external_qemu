@@ -22,6 +22,30 @@
       "revId": "543e70a511d9746701d5c584a24ceeaf76bace95",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d9f37ae1_627de7fa",
+        "filename": "android/android-emu/android/metrics/StudioConfig.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-08-31T22:02:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9e7fa9a3_9534adcd",
+      "range": {
+        "startLine": 194,
+        "startChar": 12,
+        "endLine": 194,
+        "endChar": 23
+      },
+      "revId": "543e70a511d9746701d5c584a24ceeaf76bace95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
