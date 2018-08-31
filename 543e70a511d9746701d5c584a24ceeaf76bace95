@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9e7fa9a3_9534adcd",
+        "filename": "android/android-emu/android/metrics/StudioConfig.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-08-31T22:01:05Z",
+      "side": 1,
+      "message": "this has already been checked for",
+      "range": {
+        "startLine": 194,
+        "startChar": 12,
+        "endLine": 194,
+        "endChar": 23
+      },
+      "revId": "543e70a511d9746701d5c584a24ceeaf76bace95",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
