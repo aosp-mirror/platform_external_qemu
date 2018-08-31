@@ -39,7 +39,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <unistd.h>
 #endif
 

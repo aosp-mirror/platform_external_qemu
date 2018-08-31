@@ -9,15 +9,22 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#ifdef _MSC_VER
+#define _USE_MATH_DEFINES
+#endif
+
 #include "android/skin/trackball.h"
 #include "android/skin/image.h"
 #include "android/utils/system.h"
 
-#include <math.h>
-#include <stdlib.h>
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <sys/time.h>
 #endif
+
+#include <math.h>
+#include <stdlib.h>
 
 // Return the number of milliseconds since the start of this module.
 static uint32_t get_ticks(void) {

@@ -72,14 +72,24 @@ static bool buffer_zero_sse2(const void* buf, int len) {
         if (_mm_movemask_epi8(t) != 0xFFFF) {
             return false;
         }
+#ifdef _MSC_VER
+        t = _mm_or_si128(_mm_or_si128(p[-4], p[-3]), _mm_or_si128(p[-2], p[-1]));
+#else
         t = p[-4] | p[-3] | p[-2] | p[-1];
+#endif
         p += 4;
     } while (p <= e);
 
     /* Finish the aligned tail.  */
+#ifdef _WIN32
+    t = _mm_or_si128(t, e[-3]);
+    t = _mm_or_si128(t, e[-2]);
+    t = _mm_or_si128(t, e[-1]);
+#else
     t |= e[-3];
     t |= e[-2];
     t |= e[-1];
+#endif
     return _mm_movemask_epi8(_mm_cmpeq_epi32(t, zero)) == 0xFFFF;
 }
 

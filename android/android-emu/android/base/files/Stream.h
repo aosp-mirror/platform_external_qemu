@@ -18,6 +18,10 @@
 #include <inttypes.h>
 #include <sys/types.h>
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#endif
+
 namespace android {
 namespace base {
 

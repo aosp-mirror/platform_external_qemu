@@ -10,6 +10,10 @@
  ** GNU General Public License for more details.
  */
 
+#ifdef _MSC_VER
+#define WIN32_LEAN_AND_MEAN
+#endif
+
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QPushButton>

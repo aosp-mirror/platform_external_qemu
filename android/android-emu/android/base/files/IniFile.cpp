@@ -14,6 +14,10 @@
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#endif
+
 #include <iomanip>
 #include <istream>
 #include <fstream>

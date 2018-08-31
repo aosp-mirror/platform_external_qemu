@@ -73,7 +73,7 @@ int android_stat(const char* path, struct stat* buf) {
     // are getting. The incoming struct is a "struct _stati64" and this is the
     // matching call for that struct. Unfortunately the macro doesn't take care
     // of that.
-    return _wstati64(Win32UnicodeString(path).c_str(), buf);
+    return _wstati64(Win32UnicodeString(path).c_str(), reinterpret_cast<struct _stati64*>(buf));
 #else
     return stat(path, buf);
 #endif

@@ -17,6 +17,10 @@
 #include "ext4_utils.h"
 #include "extent.h"
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#endif
+
 #include <sparse/sparse.h>
 
 #include <inttypes.h>

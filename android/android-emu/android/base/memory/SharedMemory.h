@@ -13,7 +13,7 @@
 #include "android/base/StringView.h"
 
 #ifdef _WIN32
-#include <windows.h>
+#include "msvc-posix.h"
 #endif
 
 using android::base::StringView;

@@ -14,6 +14,11 @@ LOCAL_STATIC_LIBRARIES += \
 LOCAL_SRC_FILES := \
     VulkanStream.cpp \
 
+ifeq (windows_msvc, $(BUILD_TARGET_OS))
+    LOCAL_C_INCLUDES += $(MSVC_POSIX_COMPAT_INCLUDES)
+    LOCAL_STATIC_LIBRARIES += $(MSVC_POSIX_COMPAT_INCLUDES)
+endif
+
 $(call emugl-end-module)
 
 $(call emugl-begin-executable,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan_unittests)

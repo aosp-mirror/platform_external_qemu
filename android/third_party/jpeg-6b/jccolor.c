@@ -395,7 +395,10 @@ grayscale_convert (j_compress_ptr cinfo,
 
 #ifdef ENABLE_ANDROID_NULL_CONVERT
 
+#ifndef _MSC_VER
+// Defined in basetsd.h for windows msvc
 typedef unsigned long UINT32;
+#endif
 
 #define B0(n)   ((n) & 0xFF)
 #define B1(n)   (((n) >> 8) & 0xFF)

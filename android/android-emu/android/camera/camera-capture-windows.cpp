@@ -52,6 +52,8 @@
 #define  T(...)    ((void)0)
 #endif
 
+#ifndef _MSC_VER
+// These are already defined in msvc
 static constexpr GUID MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE = {
         0xc60ac5fe,
         0x252a,
@@ -79,6 +81,7 @@ static constexpr GUID CLSID_VideoProcessorMFT = {
         0x5b24,
         0x49bd,
         {0xb2, 0xe7, 0xc, 0x44, 0x5c, 0x78, 0xc9, 0x82}};
+#endif  // !_MSC_VER
 
 static constexpr GUID kGuidNull = {};
 

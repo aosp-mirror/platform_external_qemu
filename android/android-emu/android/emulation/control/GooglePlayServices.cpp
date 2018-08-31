@@ -14,6 +14,10 @@
 
 #include "android/emulation/control/GooglePlayServices.h"
 
+#ifdef _MSC_VER
+#include <cctype>
+#endif
+
 #include <istream>
 #include <string>
 

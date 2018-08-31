@@ -47,9 +47,12 @@ BUILD_TARGET_CFLAGS := \
     $(call if-target-clang,, -fno-unwind-tables) \
     $(BUILD_WARNING_CFLAGS)
 BUILD_TARGET_CXXFLAGS := \
-    -fno-rtti \
     -DGOOGLE_PROTOBUF_NO_RTTI \
     $(BUILD_WARNING_CXXFLAGS)
+
+ifneq (windows_msvc,$(BUILD_TARGET_OS))
+    BUILD_TARGET_CXXFLAGS += -fno-rtti
+endif
 
 BUILD_OPT_CFLAGS :=
 BUILD_OPT_LDFLAGS :=
@@ -155,6 +158,7 @@ ifeq (windows_msvc,$(BUILD_TARGET_OS))
     			    -fcxx-exceptions \
     			    -fms-compatibility \
 			    -DLIEF_DISABLE_FROZEN=on \
+			    -DNOMINMAX \
 			    -D_CRT_SECURE_NO_WARNINGS
 
     ifneq (,$(EMULATOR_BUILD_32BITS))
@@ -179,6 +183,7 @@ ifeq (windows_msvc,$(BUILD_TARGET_OS))
     CLANG_COMPILER_LDFLAGS_TARGET = \
 	$(CLANG_COMPILER_FLAGS_TARGET) \
 	-fuse-ld=lld \
+	-loldnames \
 	-L/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/msvc/lib/x64 \
 	-L/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/lib/10.0.16299.0/ucrt/x64 \
 	-L/usr/local/google/home/joshuaduong/emu/master/prebuilts/android-emulator-build/msvc/win10sdk/lib/10.0.16299.0/um/x64
@@ -444,12 +449,18 @@ ifeq ($(BUILD_TARGET_OS),linux)
   QEMU_SYSTEM_LDLIBS += -lutil -lrt
 endif
 
+ifeq ($(BUILD_TARGET_OS),windows_msvc)
+  QEMU_SYSTEM_LDLIBS :=
+endif
+
 ifeq ($(BUILD_TARGET_OS),windows)
   # amd64-mingw32msvc- toolchain still name it ws2_32.  May change it once amd64-mingw32msvc-
   # is stabilized
   QEMU_SYSTEM_LDLIBS += -lwinmm -lws2_32 -liphlpapi
 else
-  QEMU_SYSTEM_LDLIBS += -lpthread
+  ifneq ($(BUILD_TARGET_OS),windows_msvc)
+    QEMU_SYSTEM_LDLIBS += -lpthread
+  endif
 endif
 
 ifeq ($(BUILD_TARGET_OS),darwin)

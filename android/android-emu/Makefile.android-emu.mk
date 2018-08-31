@@ -92,6 +92,11 @@ include $(_ANDROID_EMU_ROOT)/android/automation/proto/AutomationProto.mk
 
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
+
+ifeq (windows_msvc,$(BUILD_TARGET_OS))
+    ANDROID_EMU_BASE_INCLUDES += $(MSVC_POSIX_COMPAT_INCLUDES)
+endif
+
 ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
 
 ANDROID_EMU_CFLAGS :=
@@ -123,6 +128,12 @@ LOCAL_C_INCLUDES := \
     $(ANDROID_EMU_INCLUDES) \
     $(LIBUUID_INCLUDES) \
     $(LZ4_INCLUDES) \
+
+ifeq (windows_msvc,$(BUILD_TARGET_OS))
+    LOCAL_C_INCLUDES += \
+	$(MSVC_POSIX_COMPAT_INCLUDES) \
+        $(DIRENT_WIN32_INCLUDES)
+endif
 
 LOCAL_SRC_FILES := \
     android/base/ContiguousRangeMapper.cpp \
@@ -325,7 +336,6 @@ LOCAL_SRC_FILES := \
     android/cpu_accelerator.cpp \
     android/crashreport/CrashSystem.cpp \
     android/crashreport/CrashReporter_common.cpp \
-    android/crashreport/CrashReporter_$(BUILD_TARGET_OS).cpp \
     android/crashreport/HangDetector.cpp \
     android/cros.c \
     android/curl-support.c \
@@ -441,7 +451,6 @@ LOCAL_SRC_FILES := \
     android/opengl/GLProcessPipe.cpp \
     android/opengl/gpuinfo.cpp \
     android/opengl/logger.cpp \
-    android/opengl/NativeGpuInfo_$(BUILD_TARGET_OS).cpp \
     android/opengl/OpenglEsPipe.cpp \
     android/opengles.cpp \
     android/openssl-support.cpp \
@@ -477,7 +486,6 @@ LOCAL_SRC_FILES := \
     android/snapshot/interface.cpp \
     android/snapshot/Loader.cpp \
     android/snapshot/MemoryWatch_common.cpp \
-    android/snapshot/MemoryWatch_$(BUILD_TARGET_OS).cpp \
     android/snapshot/PathUtils.cpp \
     android/snapshot/Hierarchy.cpp \
     android/snapshot/Quickboot.cpp \
@@ -524,8 +532,19 @@ LOCAL_SRC_FILES := \
     android/virtualscene/VirtualSceneManager.cpp \
     android/wear-agent/android_wear_agent.cpp \
     android/wear-agent/WearAgent.cpp \
-    android/wear-agent/PairUpWearPhone.cpp \
+    android/wear-agent/PairUpWearPhone.cpp
 
+ifeq ($(BUILD_TARGET_OS),windows_msvc)
+    LOCAL_SRC_FILES += \
+        android/crashreport/CrashReporter_windows.cpp \
+        android/opengl/NativeGpuInfo_windows.cpp \
+        android/snapshot/MemoryWatch_windows.cpp
+else
+    LOCAL_SRC_FILES += \
+        android/crashreport/CrashReporter_$(BUILD_TARGET_OS).cpp \
+        android/opengl/NativeGpuInfo_$(BUILD_TARGET_OS).cpp \
+        android/snapshot/MemoryWatch_$(BUILD_TARGET_OS).cpp
+endif
 # Platform-specific camera capture
 ifeq ($(BUILD_TARGET_OS),linux)
     LOCAL_SRC_FILES += \

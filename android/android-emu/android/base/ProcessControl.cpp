@@ -18,6 +18,7 @@
 #include "android/base/system/System.h"
 #include "android/utils/path.h"
 
+#include <functional>
 #include <fstream>
 #include <sstream>
 
