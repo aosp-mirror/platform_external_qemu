@@ -11,7 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-prebuilt(X264)
+if (NOT ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc"))
+  prebuilt(X264)
+endif ()
 prebuilt(VPX)
 get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ffmpeg/${ANDROID_TARGET_TAG}" ABSOLUTE)
 

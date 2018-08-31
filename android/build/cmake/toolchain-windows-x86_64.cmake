@@ -19,6 +19,7 @@ include(toolchain)
 # First we create the toolchain
 set (ANDROID_TARGET_TAG "windows-x86_64")
 set (ANDROID_TARGET_OS "windows")
+set (ANDROID_TARGET_OS_FLAVOR "windows")
 #set(CMAKE_SYSTEM_NAME Windows)
 SET(CMAKE_SYSTEM_NAME Windows)
 get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../../" ABSOLUTE)

@@ -207,6 +207,33 @@ elseif(ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
     ${PREBUILT_ROOT}/plugins/platforms/qminimal.dll>/lib64/qt/plugins/platforms/qminimal.dll
     ${PREBUILT_ROOT}/plugins/printsupport/windowsprintersupport.dll>/lib64/qt/plugins/printsupport/windowsprintersupport.dll
     )
+elseif(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+  set(QT5_LIBRARIES
+      -L${PREBUILT_ROOT}/lib
+      ${QT5_LIBRARIES})
+  # dlls from bin/
+  file(GLOB qtdlls
+       LIST_DIRECTORIES false
+       RELATIVE ${PREBUILT_ROOT}/bin
+       ${PREBUILT_ROOT}/bin/*.dll)
+  foreach (qtdll ${qtdlls})
+    set(
+      QT5_SHARED_DEPENDENCIES
+      ${QT5_SHARED_DEPENDENCIES}
+      ${PREBUILT_ROOT}/bin/${qtdll}>/lib64/qt/lib64/${qtdll})
+  endforeach (qtdll)
+
+  # dlls from plugins/
+  file(GLOB_RECURSE qtdlls
+       LIST_DIRECTORIES false
+       RELATIVE ${PREBUILT_ROOT}/plugins
+       ${PREBUILT_ROOT}/plugins/*.dll)
+  foreach (qtdll ${qtdlls})
+    set(
+      QT5_SHARED_DEPENDENCIES
+      ${QT5_SHARED_DEPENDENCIES}
+      ${PREBUILT_ROOT}/plugins/${qtdll}>/lib64/qt/plugins/${qtdll})
+  endforeach (qtdll)
 elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
   set(
