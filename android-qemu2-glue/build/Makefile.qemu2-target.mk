@@ -207,6 +207,12 @@ LOCAL_LDLIBS += $(QEMU2_SYSTEM_LDLIBS) $(QEMU2_GLUE_LDLIBS)
 LOCAL_LDFLAGS += \
     $(QEMU2_DEPS_LDFLAGS) \
 
+#Link tcmalloc_minimal for Linux only
+ifeq ($(BUILD_TARGET_OS), linux)
+    LOCAL_LDFLAGS += -L$(TCMALLOC_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)/lib64
+    LOCAL_LDLIBS += -ltcmalloc_minimal
+endif
+
 LOCAL_LDLIBS += \
     $(QEMU2_GLIB_LDLIBS) \
     $(QEMU2_PIXMAN_LDLIBS) \
