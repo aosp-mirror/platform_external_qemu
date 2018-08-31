@@ -143,6 +143,18 @@ function run_windows_tests {
         panic "Failed to make win32 project"
 }
 
+function run_windows_msvc_tests {
+    SDK_FLAGS=" --host=windows_msvc-x86_64"
+    echo "Running failure case for win64-msvc"
+    failing_cmake $OPT_OUT/build/test/fail-win64-msvc windows_msvc-x86_64
+
+    echo "Running official win64 build"
+    run_cmake $OPT_OUT/build/test/win64-msvc windows_msvc-x86_64
+    run cd $OPT_OUT/build/test/win64-msvc &&
+        make ||
+        panic "Failed to make win64-msvc project"
+}
+
 function run_linux_tests {
     echo "Running failure case"
     failing_cmake $OPT_OUT/build/test/fail-linux linux-x86_64
@@ -174,14 +186,18 @@ function run_darwin_tests {
 }
 
 # Run tests on mac
-if [ "$HOST_OS" = "darwin" ]; then
-    run_darwin_tests
-fi
+#if [ "$HOST_OS" = "darwin" ]; then
+#    run_darwin_tests
+#fi
 
 # Run tests on linux
+#if [ "$HOST_OS" = "linux" ]; then
+#    run_linux_tests
+#    run_windows_tests
+#fi;
+
 if [ "$HOST_OS" = "linux" ]; then
-    run_linux_tests
-    run_windows_tests
+    run_windows_msvc_tests
 fi;
 
 
