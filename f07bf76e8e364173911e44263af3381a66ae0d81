@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ed12449_7affe584",
+        "filename": "android/android-emu/android/metrics/StudioConfig.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-08-31T21:49:54Z",
+      "side": 1,
+      "message": "it looks like those could be combined into something like \"if (!v.isValid || !system-\u003epathIsDir)\"",
+      "range": {
+        "startLine": 189,
+        "startChar": 0,
+        "endLine": 196,
+        "endChar": 9
+      },
+      "revId": "f07bf76e8e364173911e44263af3381a66ae0d81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
