@@ -20,6 +20,10 @@
 #include "android/base/files/ScopedStdioFile.h"
 #include "android/utils/debug.h"
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#endif
+
 #include <png.h>
 extern "C" {
 #include <jpeglib.h>

@@ -11,6 +11,10 @@
 
 #pragma once
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#endif
+
 #include <sys/types.h>
 
 namespace android {

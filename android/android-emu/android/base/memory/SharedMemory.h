@@ -13,8 +13,12 @@
 #include "android/base/StringView.h"
 
 #ifdef _WIN32
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <windows.h>
-#endif
+#endif  // _MSC_VER
+#endif  // _WIN32
 
 using android::base::StringView;
 

@@ -25,7 +25,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <unistd.h>
 #endif
 

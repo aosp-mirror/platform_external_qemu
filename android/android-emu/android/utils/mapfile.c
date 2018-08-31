@@ -20,11 +20,11 @@
 #include "stddef.h"
 #include "sys/types.h"
 #include "errno.h"
-#ifdef  WIN32
+#ifdef  _WIN32
 #include "windows.h"
-#else   // WIN32
+#else   // _WIN32
 #include <sys/mman.h>
-#endif  // WIN32
+#endif  // _WIN32
 #include <sys/stat.h>
 #include <fcntl.h>
 #ifndef _MSC_VER
@@ -36,7 +36,7 @@
 MapFile*
 mapfile_open(const char* path, int oflag, int share_mode)
 {
-#ifdef WIN32
+#ifdef _WIN32
     DWORD win32_share;
     DWORD win32_desired_access = GENERIC_READ;
     DWORD win32_disposition = OPEN_EXISTING;
@@ -88,9 +88,9 @@ mapfile_open(const char* path, int oflag, int share_mode)
     if (file_handle == INVALID_HANDLE_VALUE) {
         errno = GetLastError();
     }
-#else   // WIN32
+#else   // _WIN32
     int file_handle = open(path, oflag, share_mode);
-#endif  // WIN32
+#endif  // _WIN32
 
     return (MapFile*)(ptrdiff_t)file_handle;
 }
@@ -98,22 +98,22 @@ mapfile_open(const char* path, int oflag, int share_mode)
 int
 mapfile_close(MapFile* handle)
 {
-#ifdef WIN32
+#ifdef _WIN32
     if (CloseHandle(handle)) {
         return 0;
     } else {
         errno = GetLastError();
         return -1;
     }
-#else   // WIN32
+#else   // _WIN32
     return close((int)(ptrdiff_t)handle);
-#endif  // WIN32
+#endif  // _WIN32
 }
 
 ssize_t
 mapfile_read(MapFile* handle, void* buf, size_t nbyte)
 {
-#ifdef WIN32
+#ifdef _WIN32
     ssize_t ret_bytes;
     DWORD read_bytes;
     if (ReadFile(handle, buf, nbyte, &read_bytes, NULL)) {
@@ -123,15 +123,15 @@ mapfile_read(MapFile* handle, void* buf, size_t nbyte)
         ret_bytes = -1;
     }
     return ret_bytes;
-#else   // WIN32
+#else   // _WIN32
     return HANDLE_EINTR(read((int)(ptrdiff_t)handle, buf, nbyte));
-#endif  // WIN32
+#endif  // _WIN32
 }
 
 ssize_t
 mapfile_read_at(MapFile* handle, size_t offset, void* buf, size_t nbyte)
 {
-#ifdef WIN32
+#ifdef _WIN32
     LARGE_INTEGER convert;
     convert.QuadPart = offset;
     if ((SetFilePointer(handle, convert.LowPart, &convert.HighPart,
@@ -141,10 +141,10 @@ mapfile_read_at(MapFile* handle, size_t offset, void* buf, size_t nbyte)
         return -1;
     }
     return mapfile_read(handle, buf, nbyte);
-#else   // WIN32
+#else   // _WIN32
     ssize_t res = lseek((int)(ptrdiff_t)handle, offset, SEEK_SET);
     return res >= 0 ? mapfile_read(handle, buf, nbyte) : res;
-#endif  // WIN32
+#endif  // _WIN32
 }
 
 void*
@@ -161,7 +161,7 @@ mapfile_map(MapFile* handle,
     size_t map_size;
 
   /* Get the mask for mapping offset alignment. */
-#ifdef  WIN32
+#ifdef  _WIN32
     DWORD win32_prot;
     DWORD win32_map;
     HANDLE map_handle;
@@ -169,9 +169,9 @@ mapfile_map(MapFile* handle,
     SYSTEM_INFO sys_info;
     GetSystemInfo(&sys_info);
     align_mask = sys_info.dwAllocationGranularity - 1;
-#else   // WIN32
+#else   // _WIN32
     align_mask = getpagesize() - 1;
-#endif  // WIN32
+#endif  // _WIN32
 
     /* Adjust mapping offset and mapping size accordingly to
      * the mapping alignment requirements. */
@@ -185,7 +185,7 @@ mapfile_map(MapFile* handle,
     }
 
     /* Map the section. */
-#ifdef  WIN32
+#ifdef  _WIN32
     /* Convert to Win32 page protection and mapping type. */
     win32_prot = PAGE_READONLY;
     win32_map = FILE_MAP_READ;
@@ -221,13 +221,13 @@ mapfile_map(MapFile* handle,
         errno = GetLastError();
         return NULL;
     }
-#else   // WIN32
+#else   // _WIN32
     mapped_at =
         mmap(0, map_size, PROT_READ, MAP_SHARED, (int)(ptrdiff_t)handle, map_offset);
     if (mapped_at == MAP_FAILED) {
         return NULL;
     }
-#endif  // WIN32
+#endif  // _WIN32
 
     *mapped_offset = (char*)mapped_at + (offset - map_offset);
     *mapped_size = size;
@@ -238,13 +238,13 @@ mapfile_map(MapFile* handle,
 int
 mapfile_unmap(void* mapped_at, size_t len)
 {
-#ifdef WIN32
+#ifdef _WIN32
     if (!UnmapViewOfFile(mapped_at)) {
         errno = GetLastError();
         return -1;
     }
     return 0;
-#else   // WIN32
+#else   // _WIN32
     return munmap(mapped_at, len);
-#endif  // WIN32
+#endif  // _WIN32
 }

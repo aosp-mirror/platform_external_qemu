@@ -16,7 +16,7 @@
 
 #include <string.h>
 
-#ifdef USE_MINGW
+#if defined(USE_MINGW) || defined(_MSC_VER)
 #include <winsock2.h>
 #else
 #include <arpa/inet.h>

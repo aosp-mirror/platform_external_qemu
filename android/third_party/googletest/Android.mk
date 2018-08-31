@@ -37,6 +37,8 @@ LOCAL_C_INCLUDES += \
 LOCAL_C_INCLUDES += $(EMULATOR_GTEST_SOURCES_DIR)/../qemu/android/android-emu
 LOCAL_CPP_EXTENSION := .cc
 LOCAL_CFLAGS += -O0 -Wno-unused-variable
+# Don't include the custom TempDir function. It is for Android only.
+LOCAL_CFLAGS += -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_
 LOCAL_SRC_FILES := $(EMULATOR_GTEST_SOURCES)
 $(call end-emulator-library)
 

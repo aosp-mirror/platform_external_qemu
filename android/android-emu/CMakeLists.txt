@@ -19,6 +19,9 @@ if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
+if("${LOCAL_OS}" STREQUAL "windows_msvc")
+  set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
+endif()
 
 # Make sure we create archives in the same way..
 SET(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> crs <TARGET> <LINK_FLAGS> <OBJECTS>")
@@ -114,7 +117,7 @@ set(COMMON_SOURCES
 
 # WIN32 Tag does not work on cross compilation, but will
 # work when you are active on windows
-if(WIN32 OR ("${LOCAL_OS}" STREQUAL "windows") )
+if(WIN32 OR ("${LOCAL_OS_FLAVOR}" STREQUAL "windows") )
     set(PLATFORM_SOURCES
         android/base/files/preadwrite.cpp
         android/base/memory/SharedMemory_win32.cpp

@@ -18,7 +18,11 @@
 #define ANDROID_HARDWARE_KEYMASTER_COMMON_H
 
 #include <stdint.h>
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <sys/cdefs.h>
+#endif
 #include <sys/types.h>
 
 #include <hardware/hardware.h>

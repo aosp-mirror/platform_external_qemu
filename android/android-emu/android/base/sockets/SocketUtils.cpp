@@ -31,6 +31,10 @@
 #  include <netinet/tcp.h>
 #endif
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#endif
+
 #include <vector>
 
 #include <stdlib.h>

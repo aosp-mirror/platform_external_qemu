@@ -33,6 +33,12 @@
 #include <stdint.h>
 #include <string.h>
 
+#ifdef _MSC_VER
+#ifdef ERROR
+#undef ERROR
+#endif
+#endif
+
 using android::base::LazyInstance;
 using android::base::Result;
 using android::base::Ok;

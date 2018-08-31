@@ -18,7 +18,9 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <unistd.h>
 #endif
 #include <errno.h>

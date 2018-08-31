@@ -73,7 +73,7 @@ int android_stat(const char* path, struct stat* buf) {
     // are getting. The incoming struct is a "struct _stati64" and this is the
     // matching call for that struct. Unfortunately the macro doesn't take care
     // of that.
-    return _wstati64(Win32UnicodeString(path).c_str(), buf);
+    return _wstati64(Win32UnicodeString(path).c_str(), reinterpret_cast<struct _stati64*>(buf));
 #else
     return stat(path, buf);
 #endif
@@ -130,7 +130,10 @@ int android_chmod(const char* path, mode_t mode) {
 //
 // Unfortunately stat is not weakly linked which is why it is not listed here
 // and any code that calls stat should use android_stat instead.
-#ifdef _WIN32
+// TODO(joshuaduong): Looks like we can't use weak linking with MSVC. Either
+// need to find another way to do this or rename all of these calls to
+// android_*.
+#if defined(_WIN32) && !defined(_MSC_VER)
 
 // getcwd cannot use the same macro as the other calls because it places data
 // in one of its parameters and it returns a char pointer, not a result code
@@ -197,7 +200,7 @@ FILE* __cdecl fopen(const char* path, const char* mode) {
     return WIDEN_CALL_2(fopen, path, mode);
 }
 
-#endif  // _WIN32
+#endif  // _WIN32 && !_MSC_VER
 
 }  // extern "C"
 

@@ -26,6 +26,8 @@ $(call emugl-begin-static-library,libemugl_gtest)
 
 LOCAL_SRC_FILES := $(common_SRC_FILES)
 LOCAL_CFLAGS += $(common_CFLAGS)
+# Don't include the custom TempDir function. It is for Android only.
+LOCAL_CFLAGS += -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_
 LOCAL_C_INCLUDES := \
     $(common_INCLUDES) \
     $(LOCAL_PATH)/googletest \

@@ -13,6 +13,10 @@
 
 #include "android/filesystems/internal/PartitionConfigBackend.h"
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#endif
+
 #include <gtest/gtest.h>
 
 #include <errno.h>

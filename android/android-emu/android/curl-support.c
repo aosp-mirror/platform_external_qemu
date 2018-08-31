@@ -11,6 +11,10 @@
 
 #include "android/curl-support.h"
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#endif
+
 #include "android/openssl-support.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"

@@ -153,6 +153,10 @@ typedef char JOCTET;
  * typedefs live at a different point on the speed/space tradeoff curve.)
  */
 
+// The below are already defined in msvc's basetsd.h
+#ifdef _MSC_VER
+#include <basetsd.h>
+#else
 /* UINT8 must hold at least the values 0..255. */
 
 #ifdef HAVE_UNSIGNED_CHAR
@@ -184,6 +188,8 @@ typedef short INT16;
 #ifndef XMD_H			/* X11/xmd.h correctly defines INT32 */
 typedef long INT32;
 #endif
+
+#endif // !_MSC_VER
 
 /* Datatype used for image dimensions.  The JPEG standard only supports
  * images up to 64K*64K due to 16-bit fields in SOF markers.  Therefore

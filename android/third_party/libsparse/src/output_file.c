@@ -27,7 +27,10 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#include <winioctl.h>
+#else
 #include <unistd.h>
 #endif
 #include <zlib.h>
@@ -37,7 +40,7 @@
 #include "sparse_crc32.h"
 #include "sparse_format.h"
 
-#ifndef USE_MINGW
+#if !defined(USE_MINGW) && !defined(_MSC_VER)
 #define O_BINARY 0
 #else
 #define NOMINMAX
@@ -126,7 +129,7 @@ static int file_open(struct output_file *out, int fd)
 	struct output_file_normal *outn = to_output_file_normal(out);
 
 	outn->fd = fd;
-#ifdef USE_MINGW
+#if defined(USE_MINGW) || defined(_MSC_VER)
 	// Try to make the file sparse on Windows: we know that it will contain
 	// lots of zeroes, so it's not worth writing them all out.
 	HANDLE h = (HANDLE)_get_osfhandle(outn->fd);
@@ -156,7 +159,7 @@ static int file_skip(struct output_file *out, int64_t cnt)
 static int file_pad(struct output_file *out, int64_t len)
 {
 	struct output_file_normal *outn = to_output_file_normal(out);
-#ifdef USE_MINGW
+#if defined(USE_MINGW) || defined(_MSC_VER)
 	HANDLE h = (HANDLE)_get_osfhandle(outn->fd);
 	LARGE_INTEGER prevPos;
 	LARGE_INTEGER newPos = {};
@@ -185,7 +188,7 @@ static int file_pad(struct output_file *out, int64_t len)
 #endif
 }
 
-#ifdef USE_MINGW
+#if defined(USE_MINGW) || defined(_MSC_VER)
 
 static bool is_zeroed(void* ptr, int len) {
 	const char* data = ptr;
@@ -204,7 +207,7 @@ static int file_write(struct output_file *out, void *data, int len)
 	int ret;
 	struct output_file_normal *outn = to_output_file_normal(out);
 
-#ifdef USE_MINGW
+#if defined(USE_MINGW) || defined(_MSC_VER)
 	if (outn->sparse && is_zeroed(data, len)) {
 		// Files are written in sequential order, so we know this range is
 		// already empty and we can skip it.

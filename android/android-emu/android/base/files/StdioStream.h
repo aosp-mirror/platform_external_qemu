@@ -14,6 +14,10 @@
 #include "android/base/Compiler.h"
 #include "android/base/files/Stream.h"
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#endif
+
 #include <stdio.h>
 
 namespace android {

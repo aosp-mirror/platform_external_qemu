@@ -33,6 +33,8 @@
 #define __BYTE_ORDER __LITTLE_ENDIAN
 #endif
 
+#include <stdint.h>
+
 namespace {
 
 // Static (compile time) count of one bits in an integer constant.

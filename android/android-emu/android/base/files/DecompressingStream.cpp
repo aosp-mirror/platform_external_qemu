@@ -14,6 +14,10 @@
 #include "android/base/files/StreamSerializing.h"
 #include "lz4.h"
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#endif
+
 #include <errno.h>
 #include <cassert>
 

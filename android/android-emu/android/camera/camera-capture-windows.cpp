@@ -52,6 +52,8 @@
 #define  T(...)    ((void)0)
 #endif
 
+#ifndef _MSC_VER
+// These are already defined in msvc
 static constexpr GUID MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE = {
         0xc60ac5fe,
         0x252a,
@@ -67,6 +69,7 @@ static constexpr GUID MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID = {
         0x4ae7,
         0x42d8,
         {0x99, 0xe0, 0x0a, 0x60, 0x13, 0xee, 0xf9, 0x0f}};
+#endif  // !_MSC_VER
 
 // Note: These are only available on Win8 and above.
 static constexpr GUID MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING = {

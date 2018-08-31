@@ -13,6 +13,10 @@
 
 #include "android/utils/compiler.h"
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#endif
+
 #include <inttypes.h>
 #include <sys/types.h>
 

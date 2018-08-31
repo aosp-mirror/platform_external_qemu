@@ -12,7 +12,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/mac-native-window.mm
 endif
 
-ifeq (windows,$(BUILD_TARGET_OS))
+ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
 ANDROID_SKIN_SOURCES += \
     android/skin/qt/windows-native-window.cpp
 endif

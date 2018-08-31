@@ -18,6 +18,12 @@
 #include <stdint.h>
 #include <string.h>
 
+#ifdef _MSC_VER
+#ifdef ERROR
+#undef ERROR
+#endif
+#endif
+
 namespace android {
 
 namespace {

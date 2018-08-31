@@ -100,8 +100,8 @@ extern "C" {
             dprint(__VA_ARGS__); \
     } while (0)
 
-extern bool android_op_wipe_data;
-extern bool android_op_writable_system;
+extern "C" bool android_op_wipe_data;
+extern "C" bool android_op_writable_system;
 
 // Check if we are running multiple emulators on the same AVD
 static bool is_multi_instance = false;
@@ -630,7 +630,8 @@ static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
     return false;
 }
 
-extern AndroidProxyCB* gAndroidProxyCB;
+
+extern "C" AndroidProxyCB* gAndroidProxyCB;
 extern "C" int main(int argc, char** argv) {
     if (argc < 1) {
         fprintf(stderr, "Invalid invocation (no program path)\n");

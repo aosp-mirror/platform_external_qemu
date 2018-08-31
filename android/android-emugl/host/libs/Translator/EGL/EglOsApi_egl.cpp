@@ -40,7 +40,7 @@
 #define CHECK_EGL_ERR ((void)0);
 #endif
 
-#ifdef __WIN32
+#if defined(__WIN32) || defined(_MSC_VER)
 
 static const char* kEGLLibName = "libEGL.dll";
 static const char* kGLES2LibName = "libGLESv2.dll";
