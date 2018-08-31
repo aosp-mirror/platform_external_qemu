@@ -86,6 +86,11 @@ aosp_clang_version () {
   printf "clang-4679922" # Make sure that libc++ links against glibc2.15 or lower
 }
 
+# Returns the version of the Windows SDK we are using
+aosp_winsdk_version () {
+  printf "10.0.16299.0"
+}
+
 aosp_clang_libcplusplus () {
     local CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for linux)
     local CLANG_DIR=$(realpath $CLANG_BINDIR/..)
