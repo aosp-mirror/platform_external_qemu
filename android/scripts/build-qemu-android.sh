@@ -461,6 +461,10 @@ EOF
             # Now build everything else in parallel.
             run make -j$NUM_JOBS $BUILD_FLAGS $LINKPROG_FLAGS V=1
 
+            # Now build the unit tests
+            run make check -j$NUM_JOBS $BUILD_FLAGS $LINKPROG_FLAGS V=1
+
+
             for QEMU_EXE in $QEMU_TARGET_BUILDS; do
                 if [ ! -f "$QEMU_EXE" ]; then
                     panic "$(builder_text) Could not build $QEMU_EXE!!"
@@ -511,6 +515,17 @@ EOF
             -e 's|'${QEMU_SRCDIR}'|@SRC_DIR@|g' \
             -e 's|'${BUILD_DIR}'||g' \
             "$LINK_FILE" > $INSTALL_DIR/$1/$(basename "$LINK_FILE")
+    done
+
+    mkdir -p $INSTALL_DIR/$1/tests
+    # Copy all the test files
+    for LINK_FILE in "$BUILD_DIR"/LINK-tests/*; do
+        [ -f $LINK_FILE ] && \
+        sed \
+            -e 's|'${PREBUILTS_DIR}'|@PREBUILTS_DIR@|g' \
+            -e 's|'${QEMU_SRCDIR}'|@SRC_DIR@|g' \
+            -e 's|'${BUILD_DIR}'||g' \
+            "$LINK_FILE" > $INSTALL_DIR/$1/tests/$(basename "$LINK_FILE")
     done
 
     unset PKG_CONFIG PKG_CONFIG_PATH PKG_CONFIG_LIBDIR SDL_CONFIG
