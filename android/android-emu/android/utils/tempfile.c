@@ -20,8 +20,12 @@
 #include <fcntl.h>
 
 #ifdef _WIN32
+#ifdef _MSC_VER
+#  include "msvc-posix.h"
+#else
 #  define WIN32_LEAN_AND_MEAN
 #  include <windows.h>
+#endif
 #else
 #  include <unistd.h>
 #endif

@@ -19,6 +19,10 @@ if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
+if("${LOCAL_OS}" STREQUAL "windows_msvc")
+  set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
+endif()
+
 
 # Make sure we create archives in the same way..
 set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> crs <TARGET> <LINK_FLAGS> <OBJECTS>")
@@ -52,11 +56,16 @@ target_include_directories(emulator-libext4_utils PRIVATE ../libselinux/include)
 target_include_directories(emulator-libext4_utils PRIVATE ../libsparse/include)
 target_include_directories(emulator-libext4_utils PRIVATE ../../android-emu/)
 
-if (WIN32 OR ("${LOCAL_OS}" STREQUAL "windows"))
+if (WIN32 OR ("${LOCAL_OS_FLAVOR}" STREQUAL "windows"))
     # Work around some gcc/mingw issues
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         target_compile_definitions(emulator-libext4_utils PRIVATE -DUSE_MINGW=1)
     endif ()
+    if ("${LOCAL_OS}" STREQUAL "windows_msvc")
+        target_include_directories(emulator-libext4_utils PRIVATE ../../msvc-posix-compat/include)
+        target_include_directories(emulator-libext4_utils PRIVATE ../dirent-win32/include)
+        target_link_libraries(emulator-libext4_utils PRIVATE msvc-posix-compat)
+    endif()
 endif ()
 target_compile_options(emulator-libext4_utils PRIVATE -Wno-error)
 target_compile_definitions(emulator-libext4_utils PRIVATE -DHOST)

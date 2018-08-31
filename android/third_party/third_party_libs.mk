@@ -28,7 +28,7 @@ PRODUCED_EXECUTABLES := emulator_astc_unittests=emulator$(BUILD_TARGET_SUFFIX)_a
 # are consumed
 CONSUMED_STATIC_LIBS := emulator-libsparse
 
-ifeq ($(BUILD_TARGET_OS),windows)
+ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
     PRODUCED_STATIC_LIBS += emulator-libmman-win32
 endif
 
@@ -45,7 +45,7 @@ LIBKEYMASTER3_INCLUDES := android/third_party/libkeymaster3
 LIBKEYMASTER3_STATIC_LIBRARIES := emulator-libkeymaster3 emulator-libcrypto android-emu
 MURMURHASH_STATIC_LIBRARIES := emulator-murmurhash
 
-ifeq ($(BUILD_TARGET_OS),windows)
+ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
     LIBMMAN_WIN32_INCLUDES := android/third_party/mman-win32/includes
     LIBMMAN_WIN32_STATIC_LIBRARIES := emulator-libmman-win32
 endif

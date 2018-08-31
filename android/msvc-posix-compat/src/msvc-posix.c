@@ -32,7 +32,7 @@ int mkstemp(char* t) {
 }
 
 // From https://msdn.microsoft.com/en-us/library/28d5ce15.aspx
-int asprintf(char** buf, char* format, ...) {
+int asprintf(char** buf, const char* format, ...) {
     va_list args;
     int len;
 

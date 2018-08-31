@@ -48,6 +48,13 @@ _ANDROID_EMU_ROOT := $(LOCAL_PATH)
 
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
+
+ifeq (windows_msvc,$(BUILD_TARGET_OS))
+    ANDROID_EMU_BASE_INCLUDES += \
+        $(MSVC_POSIX_COMPAT_INCLUDES) \
+        $(DIRENT_WIN32_INCLUDES)
+endif
+
 ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
 
 ANDROID_EMU_CFLAGS :=
@@ -384,7 +391,7 @@ android_emu_LOCAL_SRC_FILES := \
     android/verified-boot/load_config.cpp \
     android/wear-agent/android_wear_agent.cpp \
     android/wear-agent/WearAgent.cpp \
-    android/wear-agent/PairUpWearPhone.cpp \
+    android/wear-agent/PairUpWearPhone.cpp
 
 # Platform-specific camera capture
 ifeq ($(BUILD_TARGET_OS),linux)
@@ -516,8 +523,12 @@ ANDROID_EMU_BASE_STATIC_LIBRARIES := \
     $(LIBUUID_STATIC_LIBRARIES) \
     emulator-lz4 \
 
+ifeq ($(BUILD_TARGET_OS),windows_msvc)
+    ANDROID_EMU_BASE_STATIC_LIBRARIES += msvc-posix-compat
+endif
+
 ANDROID_EMU_BASE_LDLIBS := \
-    $(LIBUUID_LDLIBS) \
+    $(LIBUUID_LDLIBS)
 
 ifeq ($(BUILD_TARGET_OS),linux)
     ANDROID_EMU_BASE_LDLIBS += -lrt
@@ -526,6 +537,10 @@ ifeq ($(BUILD_TARGET_OS),linux)
 endif
 ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
     ANDROID_EMU_BASE_LDLIBS += -lpsapi -ld3d9
+endif
+ifeq ($(BUILD_TARGET_OS),windows_msvc)
+    # GetSystemMetrics, ...
+    ANDROID_EMU_BASE_LDLIBS += -luser32 -ladvapi32 -lshell32 -lrpcrt4 -lwldap32
 endif
 ifeq ($(BUILD_TARGET_OS),darwin)
     ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,AppKit

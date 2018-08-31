@@ -35,4 +35,3 @@ add_subdirectory(android/offworld/proto)
 # Grab the android-emu-base library
 include(android-emu-base)
 include(android-libui)
-

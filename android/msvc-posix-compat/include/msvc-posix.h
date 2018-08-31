@@ -135,7 +135,7 @@ extern int getopt_long_only(int nargc,
                             const struct option* long_options,
                             int* idx);
 extern int gettimeofday(struct timeval* tp, struct timezone* tz);
-extern int asprintf(char** buf, char* format, ...);
+extern int asprintf(char** buf, const char* format, ...);
 extern int vasprintf(char** buf, const char* format, va_list args);
 extern int mkstemp(char* t);
 

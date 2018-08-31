@@ -9,6 +9,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#ifdef _MSC_VER
+#define _USE_MATH_DEFINES
+#endif
+
 #include "android/skin/qt/extended-pages/location-page.h"
 
 #include "android/base/memory/LazyInstance.h"

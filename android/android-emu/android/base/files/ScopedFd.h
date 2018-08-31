@@ -14,7 +14,9 @@
 #include "android/base/Compiler.h"
 
 #include <errno.h>
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <unistd.h>
 #endif
 

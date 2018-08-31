@@ -38,7 +38,7 @@
 #include <sys/types.h>
 
 #include "android/utils/file_io.h"
-#ifdef USE_MINGW
+#if defined(USE_MINGW) || defined(_MSC_VER)
 
 #include <winsock2.h>
 
@@ -66,7 +66,7 @@
 
 #endif
 
-#ifdef USE_MINGW
+#if defined(USE_MINGW) || defined(_MSC_VER)
 static int scandir_win(const char* path, struct dirent ***namelist) {
     int pathSize = strlen(path);
     int nameBufferSize = pathSize + 1 + 1;
@@ -145,7 +145,7 @@ static u32 build_default_directory_structure(const char *dir_path,
 	inode_set_permissions(inode, dentries.mode,
 		dentries.uid, dentries.gid, dentries.mtime);
 
-#ifndef USE_MINGW
+#if !defined(USE_MINGW) && !defined(_MSC_VER)
 	if (sehnd) {
 		char *path = NULL;
 		char *secontext = NULL;
@@ -189,12 +189,12 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 	u32 inode;
 	u32 entry_inode;
 	u32 dirs = 0;
-#ifndef USE_MINGW
+#if !defined(USE_MINGW) && !defined(_MSC_VER)
 	bool needs_lost_and_found = false;
 #endif
 
 	if (full_path) {
-#ifdef USE_MINGW
+#if defined(USE_MINGW) || defined(_MSC_VER)
             entries = scandir_win(full_path, &namelist);
 #else
             entries = scandir(full_path, &namelist, filter_dot, (void*)alphasort);
@@ -205,7 +205,7 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
             }
 	}
 
-#ifndef USE_MINGW
+#if !defined(USE_MINGW) && !defined(_MSC_VER)
 	if (dir_inode == 0) {
 		/* root directory, check if lost+found already exists */
 		for (i = 0; i < entries; i++)
@@ -238,7 +238,11 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 		}
 
 		dentries[i].size = _stat.st_size;
+#ifdef _MSC_VER
+		dentries[i].mode = _stat.st_mode & (S_ISUID|S_ISGID|S_ISVTX|S_IRWXU);
+#else
 		dentries[i].mode = _stat.st_mode & (S_ISUID|S_ISGID|S_ISVTX|S_IRWXU|S_IRWXG|S_IRWXO);
+#endif
 		dentries[i].mtime = _stat.st_mtime;
 		if (fs_config_func != NULL) {
 			uint64_t capabilities;
@@ -252,7 +256,7 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 			dentries[i].gid = gid;
 			dentries[i].capabilities = capabilities;
 		}
-#ifndef USE_MINGW
+#if !defined(USE_MINGW) && !defined(_MSC_VER)
 		if (sehnd) {
 			if (selabel_lookup(sehnd, &dentries[i].secon, dentries[i].path, _stat.st_mode) < 0) {
 				error("cannot lookup security context for %s", dentries[i].path);
@@ -275,7 +279,7 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 		} else if (S_ISFIFO(_stat.st_mode)) {
 			dentries[i].file_type = EXT4_FT_FIFO;
 		}
-#ifndef USE_MINGW
+#if !defined(USE_MINGW) && !defined(_MSC_VER)
                 else if (S_ISSOCK(_stat.st_mode)) {
 			dentries[i].file_type = EXT4_FT_SOCK;
 		} else if (S_ISLNK(_stat.st_mode)) {
@@ -292,7 +296,7 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 	}
 	free(namelist);
 
-#ifndef USE_MINGW
+#if !defined(USE_MINGW) && !defined(_MSC_VER)
 	if (needs_lost_and_found) {
 		/* insert a lost+found directory at the beginning of the dentries */
 		struct dentry *tmp = calloc(entries + 1, sizeof(struct dentry));
@@ -659,7 +663,7 @@ int make_ext4fs_internal(int fd, const char *_directory,
 	root_mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
 	inode_set_permissions(root_inode_num, root_mode, 0, 0, 0);
 
-#ifndef USE_MINGW
+#if !defined(USE_MINGW) && !defined(_MSC_VER)
 	if (sehnd) {
 		char *secontext = NULL;
 
