@@ -476,6 +476,70 @@ prepare_build_for_windows_msvc() {
     # TODO(joshuaduong): Need to setup build environment/flags here, so we
     # can also cross-compile the prebuilts. Right now, we're just building
     # all of the prebuilts natively on Windows.
+    MSVC_DIR="${AOSP_DIR}/prebuilts/android-emulator-build/msvc"
+
+    local CLANG_LINK_FLAGS=
+    var_append CLANG_LINK_FLAGS "-fuse-ld=lld"
+    var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/msvc/lib/x64"
+    var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/win10sdk/lib/10.0.16299.0/ucrt/x64"
+    var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/win10sdk/lib/10.0.16299.0/um/x64"
+    var_append CLANG_LINK_FLAGS "-Wl,-nodefaultlib:libcmt,-defaultlib:msvcrt,-defaultlib:oldnames"
+
+    if [ $(get_verbosity) -gt 3 ]; then
+      # This will get pretty crazy, but useful if you want to debug linker issues.
+      var_append CLANG_LINK_FLAGS "-Wl,-verbose"
+      var_append CLANG_LINK_FLAGS "-v"
+    else
+      # You're likely to always hit this due to our linker workarounds..
+      var_append CLANG_LINK_FLAGS "-Wno-unused-command-line-argument"
+    fi
+
+
+    EXTRA_CFLAGS="-target x86_64-pc-win32"
+    var_append EXTRA_CFLAGS "-DLIEF_DISABLE_FROZEN=on"
+    var_append EXTRA_CFLAGS "-D_MD"
+    var_append EXTRA_CFLAGS "-D_DLL"
+    var_append EXTRA_CFLAGS "-D_CRT_SECURE_NO_WARNINGS"
+    var_append EXTRA_CFLAGS "-Wno-msvc-not-found"
+    # Disable builtin #include directories
+    var_append EXTRA_CFLAGS "-nobuiltininc"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/clang-intrins/include"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/msvc/include"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win10sdk/include/10.0.16299.0/ucrt"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win10sdk/include/10.0.16299.0/um"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win10sdk/include/10.0.16299.0/winrt"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win10sdk/include/10.0.16299.0/hypervisor"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win10sdk/include/10.0.16299.0/shared"
+    var_append EXTRA_CFLAGS ${CLANG_LINK_FLAGS}
+
+
+    EXTRA_CXXFLAGS="-target x86_64-pc-win32"
+    var_append EXTRA_CXXFLAGS "-DLIEF_DISABLE_FROZEN=on"
+    var_append EXTRA_CXXFLAGS "-D_MD"
+    var_append EXTRA_CXXFLAGS "-D_DLL"
+    var_append EXTRA_CXXFLAGS "-D_CRT_SECURE_NO_WARNINGS"
+    var_append EXTRA_CXXFLAGS "-Wno-msvc-not-found"
+    # Disable builtin #include directories
+    var_append EXTRA_CXXFLAGS "-nobuiltininc"
+    # Disable standard #include directories for the C++ standard library
+    var_append EXTRA_CXXFLAGS "-nostdinc++"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/clang-intrins/include"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/msvc/include"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win10sdk/include/10.0.16299.0/ucrt"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win10sdk/include/10.0.16299.0/um"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win10sdk/include/10.0.16299.0/winrt"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win10sdk/include/10.0.16299.0/hypervisor"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win10sdk/include/10.0.16299.0/shared"
+    var_append EXTRA_CXXFLAGS ${CLANG_LINK_FLAGS}
+
+    if [ "$OPT_CXX11" ]; then
+        var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
+    fi
+
+    EXTRA_LDFLAGS="-target x86_64-pc-win32"
+    # Make sure we don't accidently pick up any clang libs or msvc libs
+    # that are included by default (libcmt).
+    var_append EXTRA_LDFLAGS "-nodefaultlibs"
 }
 
 
