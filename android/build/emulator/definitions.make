@@ -348,7 +348,7 @@ $$(_DST): $$(_TST)
 	@echo "Running $$(PRIVATE_TST)"
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@export WINEPATH=$(BUILD_OBJS_DIR)/lib
-	$(hide) ASAN_OPTIONS="detect_leaks=0:detect_container_overflow=0" LLVM_PROFILE_FILE=$(call local-test-result-path)/$$(PRIVATE_TST).profraw $(TEST_SHELL) $$(PRIVATE_TST) --gtest_output=xml:$(call local-test-result-path)/$$(PRIVATE_TST).xml
+	$(hide) ASAN_OPTIONS=`cat android/asan_overrides` LLVM_PROFILE_FILE=$(call local-test-result-path)/$$(PRIVATE_TST).profraw $(TEST_SHELL) $$(PRIVATE_TST) --gtest_output=xml:$(call local-test-result-path)/$$(PRIVATE_TST).xml
 	@touch $$(PRIVATE_DST)
 endef
 
