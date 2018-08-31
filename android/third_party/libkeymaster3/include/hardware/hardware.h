@@ -18,7 +18,11 @@
 #define ANDROID_INCLUDE_HARDWARE_HARDWARE_H
 
 #include <stdint.h>
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <sys/cdefs.h>
+#endif
 
 #ifndef _HW_DONT_INCLUDE_CORE_
 //#include <cutils/native_handle.h>

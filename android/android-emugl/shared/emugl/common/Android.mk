@@ -25,6 +25,9 @@ host_commonLdLibs += \
 $(call emugl-begin-static-library,libemugl_common)
 LOCAL_SRC_FILES := $(host_commonSources)
 $(call emugl-export,C_INCLUDES,$(EMUGL_PATH)/shared)
+ifeq (windows_msvc,$(BUILD_TARGET_OS))
+    $(call emugl-export,C_INCLUDES,$(MSVC_POSIX_COMPAT_INCLUDES))
+endif
 $(call emugl-export,LDLIBS,$(host_commonLdLibs))
 $(call emugl-end-module)
 
