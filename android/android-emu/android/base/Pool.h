@@ -17,6 +17,7 @@
 
 #include <inttypes.h>
 #include <stddef.h>
+#include <string.h>
 
 namespace android {
 namespace base {
@@ -57,6 +58,30 @@ public:
         size_t bytes = sizeof(T) * count;
         void* res = alloc(bytes);
         return (T*) res;
+    }
+
+    char* strDup(const char* toCopy) {
+        size_t bytes = strlen(toCopy) + 1;
+        void* res = alloc(bytes);
+        memset(res, 0x0, bytes);
+        memcpy(res, toCopy, bytes);
+        return (char*)res;
+    }
+
+    char** strDupArray(const char* const* arrayToCopy, size_t count) {
+        char** res = allocArray<char*>(count);
+
+        for (size_t i = 0; i < count; i++) {
+            res[i] = strDup(arrayToCopy[i]);
+        }
+
+        return res;
+    }
+
+    void* dupArray(const void* buf, size_t bytes) {
+        void* res = alloc(bytes);
+        memcpy(res, buf, bytes);
+        return res;
     }
 
 private:

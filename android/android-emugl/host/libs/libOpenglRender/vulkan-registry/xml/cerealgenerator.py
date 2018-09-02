@@ -130,6 +130,10 @@ cereal_STATIC_LIBRARIES := \\
         self.addModule("common", "goldfish_vk_testing")
         self.addWrapper(cereal.VulkanTesting(self.modules["goldfish_vk_testing"], self.typeInfo))
 
+        # Utility module
+        self.addModule("common", "goldfish_vk_deepcopy")
+        self.addWrapper(cereal.VulkanDeepcopy(self.modules["goldfish_vk_deepcopy"], self.typeInfo))
+
         self.cereal_Android_mk_body = """
 $(call emugl-begin-static-library,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan_cereal)
 
@@ -204,7 +208,7 @@ namespace goldfish_vk {
         self.modules["goldfish_vk_frontend"].implPostamble = """
 } // namespace goldfish_vk
 """
-        # Testing header/impl pre/post#########3################################
+        # Testing header/impl pre/post##########################################
         self.modules["goldfish_vk_testing"].headerPreamble += """
 #pragma once
 
@@ -230,6 +234,34 @@ namespace goldfish_vk {
 
 """
         self.modules["goldfish_vk_testing"].implPostamble = """
+} // namespace goldfish_vk
+"""
+        # Deepcopy pre/postambles########3######################################
+        self.modules["goldfish_vk_deepcopy"].headerPreamble += """
+#pragma once
+
+#include <vulkan.h>
+
+#include "android/base/Pool.h"
+
+using android::base::Pool;
+
+namespace goldfish_vk {
+
+"""
+        self.modules["goldfish_vk_deepcopy"].headerPostamble = """
+} // namespace goldfish_vk
+"""
+
+        self.modules["goldfish_vk_deepcopy"].implPreamble += """
+#include "goldfish_vk_deepcopy.h"
+
+#include <string.h>
+
+namespace goldfish_vk {
+
+"""
+        self.modules["goldfish_vk_deepcopy"].implPostamble = """
 } // namespace goldfish_vk
 """
 

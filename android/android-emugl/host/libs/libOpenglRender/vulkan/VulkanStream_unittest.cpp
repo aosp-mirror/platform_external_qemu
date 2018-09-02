@@ -13,10 +13,12 @@
 // limitations under the License.
 #include "VulkanStream.h"
 
+#include "common/goldfish_vk_deepcopy.h"
 #include "common/goldfish_vk_marshaling.h"
 #include "common/goldfish_vk_testing.h"
 
 #include "android/base/ArraySize.h"
+#include "android/base/Pool.h"
 
 #include <gtest/gtest.h>
 #include <string.h>
@@ -486,6 +488,62 @@ TEST(VulkanStream, testMarshalVulkanStructWithVoidPtrToData) {
 
     checkEqual_VkSpecializationInfo(
         &forMarshaling, &forUnmarshaling, [](const char* errMsg) {
+        EXPECT_TRUE(false) << errMsg;
+    });
+}
+
+// Tests that marshal + unmarshal is equivalent to deepcopy.
+TEST(VulkanStream, testDeepcopyEquivalence) {
+    Pool pool;
+    VulkanStreamForTesting stream;
+
+    VkApplicationInfo appInfo = {
+        VK_STRUCTURE_TYPE_APPLICATION_INFO,
+        0, // pNext
+        "VulkanStreamTest", // application name
+        6, // application version
+        "VulkanStreamTestEngine", //engine name
+        4, // engine version,
+        VK_API_VERSION_1_0,
+    };
+
+    const char* const layerNames[] = {
+        "layer0",
+        "layer1: test layer",
+    };
+
+    const char* const extensionNames[] = {
+        "VK_KHR_8bit_storage",
+        "VK_KHR_android_surface",
+        "VK_MVK_macos_surface",
+    };
+
+    VkInstanceCreateInfo forMarshaling = {
+        VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        0, // pNext
+        0, // flags,
+        &appInfo, // pApplicationInfo,
+        arraySize(layerNames),
+        layerNames,
+        arraySize(extensionNames),
+        extensionNames
+    };
+
+    marshal_VkInstanceCreateInfo(&stream, &forMarshaling);
+
+    VkInstanceCreateInfo forUnmarshaling;
+    VkInstanceCreateInfo forDeepcopy;
+
+    unmarshal_VkInstanceCreateInfo(&stream, &forUnmarshaling);
+    deepcopy_VkInstanceCreateInfo(&pool, &forMarshaling, &forDeepcopy);
+
+    checkEqual_VkInstanceCreateInfo(
+        &forMarshaling, &forUnmarshaling, [](const char* errMsg) {
+        EXPECT_TRUE(false) << errMsg;
+    });
+
+    checkEqual_VkInstanceCreateInfo(
+        &forMarshaling, &forDeepcopy, [](const char* errMsg) {
         EXPECT_TRUE(false) << errMsg;
     });
 }
