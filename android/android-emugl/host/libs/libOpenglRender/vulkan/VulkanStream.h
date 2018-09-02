@@ -15,6 +15,8 @@
 
 #include "android/base/files/Stream.h"
 
+#include "android/base/Pool.h"
+
 #include <string>
 #include <vector>
 
@@ -24,7 +26,13 @@ class VulkanStream : public android::base::Stream {
 public:
     VulkanStream();
 
-    // TODO: Vulkan-specific common interfaces
+    // Utility functions to load strings or
+    // string arrays in place with allocation.
+    void loadStringInPlace(char** forOutput);
+    void loadStringArrayInPlace(char*** forOutput);
+
+private:
+    android::base::Pool mPool { 8, 4096, 64 };
 };
 
 } // namespace goldfish_vk

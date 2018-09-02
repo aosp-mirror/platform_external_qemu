@@ -487,4 +487,91 @@ TEST(VulkanStream, testMarshalVulkanStructWithVoidPtrToData) {
     });
 }
 
+// Test the marshaling of strings and string arrays.
+TEST(VulkanStream, testMarshalStrings) {
+    VulkanStreamForTesting stream;
+
+    VkApplicationInfo appInfo = {
+        VK_STRUCTURE_TYPE_APPLICATION_INFO,
+        0, // pNext
+        "VulkanStreamTest", // application name
+        6, // application version
+        "VulkanStreamTestEngine", //engine name
+        4, // engine version,
+        VK_API_VERSION_1_0,
+    };
+
+    const char* const layerNames[] = {
+        "layer0",
+        "layer1: test layer",
+    };
+
+    const char* const extensionNames[] = {
+        "VK_KHR_8bit_storage",
+        "VK_KHR_android_surface",
+        "VK_MVK_macos_surface",
+    };
+
+    VkInstanceCreateInfo forMarshaling = {
+        VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        0, // pNext
+        0, // flags,
+        &appInfo, // pApplicationInfo,
+        arraySize(layerNames),
+        layerNames,
+        arraySize(extensionNames),
+        extensionNames
+    };
+
+    marshal_VkInstanceCreateInfo(&stream, &forMarshaling);
+
+    VkApplicationInfo forUnmarshalingAppInfo;
+    VkInstanceCreateInfo forUnmarshaling;
+    memset(&forUnmarshaling, 0x0, sizeof(VkInstanceCreateInfo));
+    forUnmarshaling.pApplicationInfo = &forUnmarshalingAppInfo;
+
+    // Before unmarshaling, these structs should be different.
+    // Test that the generated comparator can detect inequality.
+    int inequalities = 0;
+    checkEqual_VkInstanceCreateInfo(
+        &forMarshaling, &forUnmarshaling, [&inequalities](const char* errMsg) {
+        (void)errMsg;
+        ++inequalities;
+    });
+
+    EXPECT_GT(inequalities, 0);
+
+    unmarshal_VkInstanceCreateInfo(&stream, &forUnmarshaling);
+
+    // Check that the strings are equal as well.
+
+    EXPECT_STREQ(
+        forMarshaling.pApplicationInfo->pApplicationName,
+        forUnmarshaling.pApplicationInfo->pApplicationName);
+
+    EXPECT_STREQ(
+        forMarshaling.pApplicationInfo->pEngineName,
+        forUnmarshaling.pApplicationInfo->pEngineName);
+
+    for (size_t i = 0; i < arraySize(layerNames); ++i) {
+        EXPECT_STREQ(
+                forMarshaling.ppEnabledLayerNames[i],
+                forUnmarshaling.ppEnabledLayerNames[i]);
+    }
+
+    for (size_t i = 0; i < arraySize(extensionNames); ++i) {
+        EXPECT_STREQ(
+                forMarshaling.ppEnabledExtensionNames[i],
+                forUnmarshaling.ppEnabledExtensionNames[i]);
+    }
+
+    // Use the auto-generated check.
+    checkEqual_VkInstanceCreateInfo(
+        &forMarshaling, &forUnmarshaling, [](const char* errMsg) {
+        EXPECT_TRUE(false) << errMsg;
+    });
+
+
+}
+
 } // namespace goldfish_vk
