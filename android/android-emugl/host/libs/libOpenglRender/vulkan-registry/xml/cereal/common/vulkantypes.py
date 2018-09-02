@@ -259,6 +259,12 @@ class VulkanTypeInfo(object):
     def categoryOf(self, name):
         return self.typeCategories[name]
 
+    def isHandleType(self, vulkantype):
+        name = vulkantype.typeName
+        if name in self.typeCategories:
+            return self.typeCategories[name] == "handle"
+        return False
+
     def isCompoundType(self, name):
         if name in self.typeCategories:
             return self.typeCategories[name] in ["struct", "union"]
