@@ -52,9 +52,9 @@ void unmarshal_VkApplicationInfo(
     vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
-    vkStream->getString();
+    vkStream->loadStringInPlace((char**)&forUnmarshaling->pApplicationName);
     vkStream->read((uint32_t*)&forUnmarshaling->applicationVersion, sizeof(uint32_t));
-    vkStream->getString();
+    vkStream->loadStringInPlace((char**)&forUnmarshaling->pEngineName);
     vkStream->read((uint32_t*)&forUnmarshaling->engineVersion, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->apiVersion, sizeof(uint32_t));
 }
@@ -89,12 +89,13 @@ void unmarshal_VkInstanceCreateInfo(
     vkStream->read((VkApplicationInfo**)&forUnmarshaling->pApplicationInfo, sizeof(const VkApplicationInfo*));
     if (forUnmarshaling->pApplicationInfo)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pApplicationInfo, sizeof(const VkApplicationInfo));
         unmarshal_VkApplicationInfo(vkStream, (VkApplicationInfo*)(forUnmarshaling->pApplicationInfo));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->enabledLayerCount, sizeof(uint32_t));
-    loadStringArray(vkStream);
+    vkStream->loadStringArrayInPlace((char***)&forUnmarshaling->ppEnabledLayerNames);
     vkStream->read((uint32_t*)&forUnmarshaling->enabledExtensionCount, sizeof(uint32_t));
-    loadStringArray(vkStream);
+    vkStream->loadStringArrayInPlace((char***)&forUnmarshaling->ppEnabledExtensionNames);
 }
 
 void marshal_VkAllocationCallbacks(
@@ -120,6 +121,7 @@ void unmarshal_VkAllocationCallbacks(
     vkStream->read((void**)&forUnmarshaling->pUserData, sizeof(void*));
     if (forUnmarshaling->pUserData)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pUserData, sizeof(uint8_t));
         vkStream->read((void*)forUnmarshaling->pUserData, sizeof(uint8_t));
     }
     vkStream->read((PFN_vkAllocationFunction*)&forUnmarshaling->pfnAllocation, sizeof(PFN_vkAllocationFunction));
@@ -153,10 +155,12 @@ VkResult unmarshal_vkCreateInstance(
     const VkAllocationCallbacks* pAllocator,
     VkInstance* pInstance)
 {
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkInstanceCreateInfo));
     unmarshal_VkInstanceCreateInfo(vkStream, (VkInstanceCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkInstance*)pInstance, sizeof(VkInstance));
@@ -187,6 +191,7 @@ void unmarshal_vkDestroyInstance(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -925,7 +930,7 @@ PFN_vkVoidFunction unmarshal_vkGetInstanceProcAddr(
     const char* pName)
 {
     vkStream->read((VkInstance*)&instance, sizeof(VkInstance));
-    vkStream->getString();
+    vkStream->loadStringInPlace((char**)&pName);
     PFN_vkVoidFunction unmarshal_vkGetInstanceProcAddr_PFN_vkVoidFunction_return;
     vkStream->write(&unmarshal_vkGetInstanceProcAddr_PFN_vkVoidFunction_return, sizeof(PFN_vkVoidFunction));
     return unmarshal_vkGetInstanceProcAddr_PFN_vkVoidFunction_return;
@@ -949,7 +954,7 @@ PFN_vkVoidFunction unmarshal_vkGetDeviceProcAddr(
     const char* pName)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
-    vkStream->getString();
+    vkStream->loadStringInPlace((char**)&pName);
     PFN_vkVoidFunction unmarshal_vkGetDeviceProcAddr_PFN_vkVoidFunction_return;
     vkStream->write(&unmarshal_vkGetDeviceProcAddr_PFN_vkVoidFunction_return, sizeof(PFN_vkVoidFunction));
     return unmarshal_vkGetDeviceProcAddr_PFN_vkVoidFunction_return;
@@ -978,6 +983,7 @@ void unmarshal_VkDeviceQueueCreateInfo(
     vkStream->read((VkDeviceQueueCreateFlags*)&forUnmarshaling->flags, sizeof(VkDeviceQueueCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->queueFamilyIndex, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->queueCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pQueuePriorities, forUnmarshaling->queueCount * sizeof(const float));
     vkStream->read((float*)forUnmarshaling->pQueuePriorities, forUnmarshaling->queueCount * sizeof(const float));
 }
 
@@ -1014,17 +1020,19 @@ void unmarshal_VkDeviceCreateInfo(
     // TODO: Unsupported : const void* pNext
     vkStream->read((VkDeviceCreateFlags*)&forUnmarshaling->flags, sizeof(VkDeviceCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->queueCreateInfoCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pQueueCreateInfos, forUnmarshaling->queueCreateInfoCount * sizeof(const VkDeviceQueueCreateInfo));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->queueCreateInfoCount; ++i)
     {
         unmarshal_VkDeviceQueueCreateInfo(vkStream, (VkDeviceQueueCreateInfo*)(forUnmarshaling->pQueueCreateInfos + i));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->enabledLayerCount, sizeof(uint32_t));
-    loadStringArray(vkStream);
+    vkStream->loadStringArrayInPlace((char***)&forUnmarshaling->ppEnabledLayerNames);
     vkStream->read((uint32_t*)&forUnmarshaling->enabledExtensionCount, sizeof(uint32_t));
-    loadStringArray(vkStream);
+    vkStream->loadStringArrayInPlace((char***)&forUnmarshaling->ppEnabledExtensionNames);
     vkStream->read((VkPhysicalDeviceFeatures**)&forUnmarshaling->pEnabledFeatures, sizeof(const VkPhysicalDeviceFeatures*));
     if (forUnmarshaling->pEnabledFeatures)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pEnabledFeatures, sizeof(const VkPhysicalDeviceFeatures));
         unmarshal_VkPhysicalDeviceFeatures(vkStream, (VkPhysicalDeviceFeatures*)(forUnmarshaling->pEnabledFeatures));
     }
 }
@@ -1057,10 +1065,12 @@ VkResult unmarshal_vkCreateDevice(
     VkDevice* pDevice)
 {
     vkStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkDeviceCreateInfo));
     unmarshal_VkDeviceCreateInfo(vkStream, (VkDeviceCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkDevice*)pDevice, sizeof(VkDevice));
@@ -1091,6 +1101,7 @@ void unmarshal_vkDestroyDevice(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -1134,7 +1145,7 @@ VkResult unmarshal_vkEnumerateInstanceExtensionProperties(
     uint32_t* pPropertyCount,
     VkExtensionProperties* pProperties)
 {
-    vkStream->getString();
+    vkStream->loadStringInPlace((char**)&pLayerName);
     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
     {
@@ -1172,7 +1183,7 @@ VkResult unmarshal_vkEnumerateDeviceExtensionProperties(
     VkExtensionProperties* pProperties)
 {
     vkStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
-    vkStream->getString();
+    vkStream->loadStringInPlace((char**)&pLayerName);
     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
     {
@@ -1317,11 +1328,15 @@ void unmarshal_VkSubmitInfo(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->waitSemaphoreCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pWaitSemaphores, forUnmarshaling->waitSemaphoreCount * sizeof(const VkSemaphore));
     vkStream->read((VkSemaphore*)forUnmarshaling->pWaitSemaphores, forUnmarshaling->waitSemaphoreCount * sizeof(const VkSemaphore));
+    vkStream->alloc((void**)&forUnmarshaling->pWaitDstStageMask, forUnmarshaling->waitSemaphoreCount * sizeof(const VkPipelineStageFlags));
     vkStream->read((VkPipelineStageFlags*)forUnmarshaling->pWaitDstStageMask, forUnmarshaling->waitSemaphoreCount * sizeof(const VkPipelineStageFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->commandBufferCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pCommandBuffers, forUnmarshaling->commandBufferCount * sizeof(const VkCommandBuffer));
     vkStream->read((VkCommandBuffer*)forUnmarshaling->pCommandBuffers, forUnmarshaling->commandBufferCount * sizeof(const VkCommandBuffer));
     vkStream->read((uint32_t*)&forUnmarshaling->signalSemaphoreCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pSignalSemaphores, forUnmarshaling->signalSemaphoreCount * sizeof(const VkSemaphore));
     vkStream->read((VkSemaphore*)forUnmarshaling->pSignalSemaphores, forUnmarshaling->signalSemaphoreCount * sizeof(const VkSemaphore));
 }
 
@@ -1353,6 +1368,7 @@ VkResult unmarshal_vkQueueSubmit(
 {
     vkStream->read((VkQueue*)&queue, sizeof(VkQueue));
     vkStream->read((uint32_t*)&submitCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pSubmits, ((submitCount)) * sizeof(const VkSubmitInfo));
     for (uint32_t i = 0; i < (uint32_t)((submitCount)); ++i)
     {
         unmarshal_VkSubmitInfo(vkStream, (VkSubmitInfo*)(pSubmits + i));
@@ -1453,10 +1469,12 @@ VkResult unmarshal_vkAllocateMemory(
     VkDeviceMemory* pMemory)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pAllocateInfo, sizeof(const VkMemoryAllocateInfo));
     unmarshal_VkMemoryAllocateInfo(vkStream, (VkMemoryAllocateInfo*)(pAllocateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkDeviceMemory*)pMemory, sizeof(VkDeviceMemory));
@@ -1491,6 +1509,7 @@ void unmarshal_vkFreeMemory(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -1602,6 +1621,7 @@ VkResult unmarshal_vkFlushMappedMemoryRanges(
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((uint32_t*)&memoryRangeCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pMemoryRanges, ((memoryRangeCount)) * sizeof(const VkMappedMemoryRange));
     for (uint32_t i = 0; i < (uint32_t)((memoryRangeCount)); ++i)
     {
         unmarshal_VkMappedMemoryRange(vkStream, (VkMappedMemoryRange*)(pMemoryRanges + i));
@@ -1636,6 +1656,7 @@ VkResult unmarshal_vkInvalidateMappedMemoryRanges(
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((uint32_t*)&memoryRangeCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pMemoryRanges, ((memoryRangeCount)) * sizeof(const VkMappedMemoryRange));
     for (uint32_t i = 0; i < (uint32_t)((memoryRangeCount)); ++i)
     {
         unmarshal_VkMappedMemoryRange(vkStream, (VkMappedMemoryRange*)(pMemoryRanges + i));
@@ -1953,6 +1974,7 @@ void unmarshal_VkSparseBufferMemoryBindInfo(
 {
     vkStream->read((VkBuffer*)&forUnmarshaling->buffer, sizeof(VkBuffer));
     vkStream->read((uint32_t*)&forUnmarshaling->bindCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pBinds, forUnmarshaling->bindCount * sizeof(const VkSparseMemoryBind));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bindCount; ++i)
     {
         unmarshal_VkSparseMemoryBind(vkStream, (VkSparseMemoryBind*)(forUnmarshaling->pBinds + i));
@@ -1977,6 +1999,7 @@ void unmarshal_VkSparseImageOpaqueMemoryBindInfo(
 {
     vkStream->read((VkImage*)&forUnmarshaling->image, sizeof(VkImage));
     vkStream->read((uint32_t*)&forUnmarshaling->bindCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pBinds, forUnmarshaling->bindCount * sizeof(const VkSparseMemoryBind));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bindCount; ++i)
     {
         unmarshal_VkSparseMemoryBind(vkStream, (VkSparseMemoryBind*)(forUnmarshaling->pBinds + i));
@@ -2061,6 +2084,7 @@ void unmarshal_VkSparseImageMemoryBindInfo(
 {
     vkStream->read((VkImage*)&forUnmarshaling->image, sizeof(VkImage));
     vkStream->read((uint32_t*)&forUnmarshaling->bindCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pBinds, forUnmarshaling->bindCount * sizeof(const VkSparseImageMemoryBind));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bindCount; ++i)
     {
         unmarshal_VkSparseImageMemoryBind(vkStream, (VkSparseImageMemoryBind*)(forUnmarshaling->pBinds + i));
@@ -2103,23 +2127,28 @@ void unmarshal_VkBindSparseInfo(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->waitSemaphoreCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pWaitSemaphores, forUnmarshaling->waitSemaphoreCount * sizeof(const VkSemaphore));
     vkStream->read((VkSemaphore*)forUnmarshaling->pWaitSemaphores, forUnmarshaling->waitSemaphoreCount * sizeof(const VkSemaphore));
     vkStream->read((uint32_t*)&forUnmarshaling->bufferBindCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pBufferBinds, forUnmarshaling->bufferBindCount * sizeof(const VkSparseBufferMemoryBindInfo));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bufferBindCount; ++i)
     {
         unmarshal_VkSparseBufferMemoryBindInfo(vkStream, (VkSparseBufferMemoryBindInfo*)(forUnmarshaling->pBufferBinds + i));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->imageOpaqueBindCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pImageOpaqueBinds, forUnmarshaling->imageOpaqueBindCount * sizeof(const VkSparseImageOpaqueMemoryBindInfo));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->imageOpaqueBindCount; ++i)
     {
         unmarshal_VkSparseImageOpaqueMemoryBindInfo(vkStream, (VkSparseImageOpaqueMemoryBindInfo*)(forUnmarshaling->pImageOpaqueBinds + i));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->imageBindCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pImageBinds, forUnmarshaling->imageBindCount * sizeof(const VkSparseImageMemoryBindInfo));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->imageBindCount; ++i)
     {
         unmarshal_VkSparseImageMemoryBindInfo(vkStream, (VkSparseImageMemoryBindInfo*)(forUnmarshaling->pImageBinds + i));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->signalSemaphoreCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pSignalSemaphores, forUnmarshaling->signalSemaphoreCount * sizeof(const VkSemaphore));
     vkStream->read((VkSemaphore*)forUnmarshaling->pSignalSemaphores, forUnmarshaling->signalSemaphoreCount * sizeof(const VkSemaphore));
 }
 
@@ -2151,6 +2180,7 @@ VkResult unmarshal_vkQueueBindSparse(
 {
     vkStream->read((VkQueue*)&queue, sizeof(VkQueue));
     vkStream->read((uint32_t*)&bindInfoCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pBindInfo, ((bindInfoCount)) * sizeof(const VkBindSparseInfo));
     for (uint32_t i = 0; i < (uint32_t)((bindInfoCount)); ++i)
     {
         unmarshal_VkBindSparseInfo(vkStream, (VkBindSparseInfo*)(pBindInfo + i));
@@ -2209,10 +2239,12 @@ VkResult unmarshal_vkCreateFence(
     VkFence* pFence)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkFenceCreateInfo));
     unmarshal_VkFenceCreateInfo(vkStream, (VkFenceCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkFence*)pFence, sizeof(VkFence));
@@ -2247,6 +2279,7 @@ void unmarshal_vkDestroyFence(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -2273,6 +2306,7 @@ VkResult unmarshal_vkResetFences(
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((uint32_t*)&fenceCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pFences, ((fenceCount)) * sizeof(const VkFence));
     vkStream->read((VkFence*)pFences, ((fenceCount)) * sizeof(const VkFence));
     VkResult unmarshal_vkResetFences_VkResult_return;
     vkStream->write(&unmarshal_vkResetFences_VkResult_return, sizeof(VkResult));
@@ -2331,6 +2365,7 @@ VkResult unmarshal_vkWaitForFences(
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((uint32_t*)&fenceCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pFences, ((fenceCount)) * sizeof(const VkFence));
     vkStream->read((VkFence*)pFences, ((fenceCount)) * sizeof(const VkFence));
     vkStream->read((VkBool32*)&waitAll, sizeof(VkBool32));
     vkStream->read((uint64_t*)&timeout, sizeof(uint64_t));
@@ -2387,10 +2422,12 @@ VkResult unmarshal_vkCreateSemaphore(
     VkSemaphore* pSemaphore)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkSemaphoreCreateInfo));
     unmarshal_VkSemaphoreCreateInfo(vkStream, (VkSemaphoreCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkSemaphore*)pSemaphore, sizeof(VkSemaphore));
@@ -2425,6 +2462,7 @@ void unmarshal_vkDestroySemaphore(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -2477,10 +2515,12 @@ VkResult unmarshal_vkCreateEvent(
     VkEvent* pEvent)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkEventCreateInfo));
     unmarshal_VkEventCreateInfo(vkStream, (VkEventCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkEvent*)pEvent, sizeof(VkEvent));
@@ -2515,6 +2555,7 @@ void unmarshal_vkDestroyEvent(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -2645,10 +2686,12 @@ VkResult unmarshal_vkCreateQueryPool(
     VkQueryPool* pQueryPool)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkQueryPoolCreateInfo));
     unmarshal_VkQueryPoolCreateInfo(vkStream, (VkQueryPoolCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkQueryPool*)pQueryPool, sizeof(VkQueryPool));
@@ -2683,6 +2726,7 @@ void unmarshal_vkDestroyQueryPool(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -2769,6 +2813,7 @@ void unmarshal_VkBufferCreateInfo(
     vkStream->read((uint32_t**)&forUnmarshaling->pQueueFamilyIndices, sizeof(const uint32_t*));
     if (forUnmarshaling->pQueueFamilyIndices)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pQueueFamilyIndices, forUnmarshaling->queueFamilyIndexCount * sizeof(const uint32_t));
         vkStream->read((uint32_t*)forUnmarshaling->pQueueFamilyIndices, forUnmarshaling->queueFamilyIndexCount * sizeof(const uint32_t));
     }
 }
@@ -2801,10 +2846,12 @@ VkResult unmarshal_vkCreateBuffer(
     VkBuffer* pBuffer)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkBufferCreateInfo));
     unmarshal_VkBufferCreateInfo(vkStream, (VkBufferCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkBuffer*)pBuffer, sizeof(VkBuffer));
@@ -2839,6 +2886,7 @@ void unmarshal_vkDestroyBuffer(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -2899,10 +2947,12 @@ VkResult unmarshal_vkCreateBufferView(
     VkBufferView* pView)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkBufferViewCreateInfo));
     unmarshal_VkBufferViewCreateInfo(vkStream, (VkBufferViewCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkBufferView*)pView, sizeof(VkBufferView));
@@ -2937,6 +2987,7 @@ void unmarshal_vkDestroyBufferView(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -2988,6 +3039,7 @@ void unmarshal_VkImageCreateInfo(
     vkStream->read((uint32_t**)&forUnmarshaling->pQueueFamilyIndices, sizeof(const uint32_t*));
     if (forUnmarshaling->pQueueFamilyIndices)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pQueueFamilyIndices, forUnmarshaling->queueFamilyIndexCount * sizeof(const uint32_t));
         vkStream->read((uint32_t*)forUnmarshaling->pQueueFamilyIndices, forUnmarshaling->queueFamilyIndexCount * sizeof(const uint32_t));
     }
     vkStream->read((VkImageLayout*)&forUnmarshaling->initialLayout, sizeof(VkImageLayout));
@@ -3021,10 +3073,12 @@ VkResult unmarshal_vkCreateImage(
     VkImage* pImage)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkImageCreateInfo));
     unmarshal_VkImageCreateInfo(vkStream, (VkImageCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkImage*)pImage, sizeof(VkImage));
@@ -3059,6 +3113,7 @@ void unmarshal_vkDestroyImage(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -3107,6 +3162,7 @@ void unmarshal_vkGetImageSubresourceLayout(
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((VkImage*)&image, sizeof(VkImage));
+    vkStream->alloc((void**)&pSubresource, sizeof(const VkImageSubresource));
     unmarshal_VkImageSubresource(vkStream, (VkImageSubresource*)(pSubresource));
     unmarshal_VkSubresourceLayout(vkStream, (VkSubresourceLayout*)(pLayout));
 }
@@ -3211,10 +3267,12 @@ VkResult unmarshal_vkCreateImageView(
     VkImageView* pView)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkImageViewCreateInfo));
     unmarshal_VkImageViewCreateInfo(vkStream, (VkImageViewCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkImageView*)pView, sizeof(VkImageView));
@@ -3249,6 +3307,7 @@ void unmarshal_vkDestroyImageView(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -3274,6 +3333,7 @@ void unmarshal_VkShaderModuleCreateInfo(
     // TODO: Unsupported : const void* pNext
     vkStream->read((VkShaderModuleCreateFlags*)&forUnmarshaling->flags, sizeof(VkShaderModuleCreateFlags));
     vkStream->read((size_t*)&forUnmarshaling->codeSize, sizeof(size_t));
+    vkStream->alloc((void**)&forUnmarshaling->pCode, (forUnmarshaling->codeSize / 4) * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pCode, (forUnmarshaling->codeSize / 4) * sizeof(const uint32_t));
 }
 
@@ -3305,10 +3365,12 @@ VkResult unmarshal_vkCreateShaderModule(
     VkShaderModule* pShaderModule)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkShaderModuleCreateInfo));
     unmarshal_VkShaderModuleCreateInfo(vkStream, (VkShaderModuleCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkShaderModule*)pShaderModule, sizeof(VkShaderModule));
@@ -3343,6 +3405,7 @@ void unmarshal_vkDestroyShaderModule(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -3368,6 +3431,7 @@ void unmarshal_VkPipelineCacheCreateInfo(
     // TODO: Unsupported : const void* pNext
     vkStream->read((VkPipelineCacheCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineCacheCreateFlags));
     vkStream->read((size_t*)&forUnmarshaling->initialDataSize, sizeof(size_t));
+    vkStream->alloc((void**)&forUnmarshaling->pInitialData, forUnmarshaling->initialDataSize * sizeof(const uint8_t));
     vkStream->read((void*)forUnmarshaling->pInitialData, forUnmarshaling->initialDataSize * sizeof(const uint8_t));
 }
 
@@ -3399,10 +3463,12 @@ VkResult unmarshal_vkCreatePipelineCache(
     VkPipelineCache* pPipelineCache)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkPipelineCacheCreateInfo));
     unmarshal_VkPipelineCacheCreateInfo(vkStream, (VkPipelineCacheCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkPipelineCache*)pPipelineCache, sizeof(VkPipelineCache));
@@ -3437,6 +3503,7 @@ void unmarshal_vkDestroyPipelineCache(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -3499,6 +3566,7 @@ VkResult unmarshal_vkMergePipelineCaches(
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((VkPipelineCache*)&dstCache, sizeof(VkPipelineCache));
     vkStream->read((uint32_t*)&srcCacheCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pSrcCaches, ((srcCacheCount)) * sizeof(const VkPipelineCache));
     vkStream->read((VkPipelineCache*)pSrcCaches, ((srcCacheCount)) * sizeof(const VkPipelineCache));
     VkResult unmarshal_vkMergePipelineCaches_VkResult_return;
     vkStream->write(&unmarshal_vkMergePipelineCaches_VkResult_return, sizeof(VkResult));
@@ -3541,11 +3609,13 @@ void unmarshal_VkSpecializationInfo(
     VkSpecializationInfo* forUnmarshaling)
 {
     vkStream->read((uint32_t*)&forUnmarshaling->mapEntryCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pMapEntries, forUnmarshaling->mapEntryCount * sizeof(const VkSpecializationMapEntry));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->mapEntryCount; ++i)
     {
         unmarshal_VkSpecializationMapEntry(vkStream, (VkSpecializationMapEntry*)(forUnmarshaling->pMapEntries + i));
     }
     vkStream->read((size_t*)&forUnmarshaling->dataSize, sizeof(size_t));
+    vkStream->alloc((void**)&forUnmarshaling->pData, forUnmarshaling->dataSize * sizeof(const uint8_t));
     vkStream->read((void*)forUnmarshaling->pData, forUnmarshaling->dataSize * sizeof(const uint8_t));
 }
 
@@ -3577,10 +3647,11 @@ void unmarshal_VkPipelineShaderStageCreateInfo(
     vkStream->read((VkPipelineShaderStageCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineShaderStageCreateFlags));
     vkStream->read((VkShaderStageFlagBits*)&forUnmarshaling->stage, sizeof(VkShaderStageFlagBits));
     vkStream->read((VkShaderModule*)&forUnmarshaling->module, sizeof(VkShaderModule));
-    vkStream->getString();
+    vkStream->loadStringInPlace((char**)&forUnmarshaling->pName);
     vkStream->read((VkSpecializationInfo**)&forUnmarshaling->pSpecializationInfo, sizeof(const VkSpecializationInfo*));
     if (forUnmarshaling->pSpecializationInfo)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pSpecializationInfo, sizeof(const VkSpecializationInfo));
         unmarshal_VkSpecializationInfo(vkStream, (VkSpecializationInfo*)(forUnmarshaling->pSpecializationInfo));
     }
 }
@@ -3652,11 +3723,13 @@ void unmarshal_VkPipelineVertexInputStateCreateInfo(
     // TODO: Unsupported : const void* pNext
     vkStream->read((VkPipelineVertexInputStateCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineVertexInputStateCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->vertexBindingDescriptionCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pVertexBindingDescriptions, forUnmarshaling->vertexBindingDescriptionCount * sizeof(const VkVertexInputBindingDescription));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->vertexBindingDescriptionCount; ++i)
     {
         unmarshal_VkVertexInputBindingDescription(vkStream, (VkVertexInputBindingDescription*)(forUnmarshaling->pVertexBindingDescriptions + i));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->vertexAttributeDescriptionCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pVertexAttributeDescriptions, forUnmarshaling->vertexAttributeDescriptionCount * sizeof(const VkVertexInputAttributeDescription));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->vertexAttributeDescriptionCount; ++i)
     {
         unmarshal_VkVertexInputAttributeDescription(vkStream, (VkVertexInputAttributeDescription*)(forUnmarshaling->pVertexAttributeDescriptions + i));
@@ -3821,6 +3894,7 @@ void unmarshal_VkPipelineViewportStateCreateInfo(
     vkStream->read((VkViewport**)&forUnmarshaling->pViewports, sizeof(const VkViewport*));
     if (forUnmarshaling->pViewports)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pViewports, forUnmarshaling->viewportCount * sizeof(const VkViewport));
         for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->viewportCount; ++i)
         {
             unmarshal_VkViewport(vkStream, (VkViewport*)(forUnmarshaling->pViewports + i));
@@ -3830,6 +3904,7 @@ void unmarshal_VkPipelineViewportStateCreateInfo(
     vkStream->read((VkRect2D**)&forUnmarshaling->pScissors, sizeof(const VkRect2D*));
     if (forUnmarshaling->pScissors)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pScissors, forUnmarshaling->scissorCount * sizeof(const VkRect2D));
         for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->scissorCount; ++i)
         {
             unmarshal_VkRect2D(vkStream, (VkRect2D*)(forUnmarshaling->pScissors + i));
@@ -3911,6 +3986,7 @@ void unmarshal_VkPipelineMultisampleStateCreateInfo(
     vkStream->read((VkSampleMask**)&forUnmarshaling->pSampleMask, sizeof(const VkSampleMask*));
     if (forUnmarshaling->pSampleMask)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pSampleMask, (((forUnmarshaling->rasterizationSamples) + 31) / 32) * sizeof(const VkSampleMask));
         vkStream->read((VkSampleMask*)forUnmarshaling->pSampleMask, (((forUnmarshaling->rasterizationSamples) + 31) / 32) * sizeof(const VkSampleMask));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->alphaToCoverageEnable, sizeof(VkBool32));
@@ -4038,6 +4114,7 @@ void unmarshal_VkPipelineColorBlendStateCreateInfo(
     vkStream->read((VkBool32*)&forUnmarshaling->logicOpEnable, sizeof(VkBool32));
     vkStream->read((VkLogicOp*)&forUnmarshaling->logicOp, sizeof(VkLogicOp));
     vkStream->read((uint32_t*)&forUnmarshaling->attachmentCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pAttachments, forUnmarshaling->attachmentCount * sizeof(const VkPipelineColorBlendAttachmentState));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentCount; ++i)
     {
         unmarshal_VkPipelineColorBlendAttachmentState(vkStream, (VkPipelineColorBlendAttachmentState*)(forUnmarshaling->pAttachments + i));
@@ -4066,6 +4143,7 @@ void unmarshal_VkPipelineDynamicStateCreateInfo(
     // TODO: Unsupported : const void* pNext
     vkStream->read((VkPipelineDynamicStateCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineDynamicStateCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->dynamicStateCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pDynamicStates, forUnmarshaling->dynamicStateCount * sizeof(const VkDynamicState));
     vkStream->read((VkDynamicState*)forUnmarshaling->pDynamicStates, forUnmarshaling->dynamicStateCount * sizeof(const VkDynamicState));
 }
 
@@ -4131,41 +4209,51 @@ void unmarshal_VkGraphicsPipelineCreateInfo(
     // TODO: Unsupported : const void* pNext
     vkStream->read((VkPipelineCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->stageCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pStages, forUnmarshaling->stageCount * sizeof(const VkPipelineShaderStageCreateInfo));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->stageCount; ++i)
     {
         unmarshal_VkPipelineShaderStageCreateInfo(vkStream, (VkPipelineShaderStageCreateInfo*)(forUnmarshaling->pStages + i));
     }
+    vkStream->alloc((void**)&forUnmarshaling->pVertexInputState, sizeof(const VkPipelineVertexInputStateCreateInfo));
     unmarshal_VkPipelineVertexInputStateCreateInfo(vkStream, (VkPipelineVertexInputStateCreateInfo*)(forUnmarshaling->pVertexInputState));
+    vkStream->alloc((void**)&forUnmarshaling->pInputAssemblyState, sizeof(const VkPipelineInputAssemblyStateCreateInfo));
     unmarshal_VkPipelineInputAssemblyStateCreateInfo(vkStream, (VkPipelineInputAssemblyStateCreateInfo*)(forUnmarshaling->pInputAssemblyState));
     vkStream->read((VkPipelineTessellationStateCreateInfo**)&forUnmarshaling->pTessellationState, sizeof(const VkPipelineTessellationStateCreateInfo*));
     if (forUnmarshaling->pTessellationState)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pTessellationState, sizeof(const VkPipelineTessellationStateCreateInfo));
         unmarshal_VkPipelineTessellationStateCreateInfo(vkStream, (VkPipelineTessellationStateCreateInfo*)(forUnmarshaling->pTessellationState));
     }
     vkStream->read((VkPipelineViewportStateCreateInfo**)&forUnmarshaling->pViewportState, sizeof(const VkPipelineViewportStateCreateInfo*));
     if (forUnmarshaling->pViewportState)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pViewportState, sizeof(const VkPipelineViewportStateCreateInfo));
         unmarshal_VkPipelineViewportStateCreateInfo(vkStream, (VkPipelineViewportStateCreateInfo*)(forUnmarshaling->pViewportState));
     }
+    vkStream->alloc((void**)&forUnmarshaling->pRasterizationState, sizeof(const VkPipelineRasterizationStateCreateInfo));
     unmarshal_VkPipelineRasterizationStateCreateInfo(vkStream, (VkPipelineRasterizationStateCreateInfo*)(forUnmarshaling->pRasterizationState));
     vkStream->read((VkPipelineMultisampleStateCreateInfo**)&forUnmarshaling->pMultisampleState, sizeof(const VkPipelineMultisampleStateCreateInfo*));
     if (forUnmarshaling->pMultisampleState)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pMultisampleState, sizeof(const VkPipelineMultisampleStateCreateInfo));
         unmarshal_VkPipelineMultisampleStateCreateInfo(vkStream, (VkPipelineMultisampleStateCreateInfo*)(forUnmarshaling->pMultisampleState));
     }
     vkStream->read((VkPipelineDepthStencilStateCreateInfo**)&forUnmarshaling->pDepthStencilState, sizeof(const VkPipelineDepthStencilStateCreateInfo*));
     if (forUnmarshaling->pDepthStencilState)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pDepthStencilState, sizeof(const VkPipelineDepthStencilStateCreateInfo));
         unmarshal_VkPipelineDepthStencilStateCreateInfo(vkStream, (VkPipelineDepthStencilStateCreateInfo*)(forUnmarshaling->pDepthStencilState));
     }
     vkStream->read((VkPipelineColorBlendStateCreateInfo**)&forUnmarshaling->pColorBlendState, sizeof(const VkPipelineColorBlendStateCreateInfo*));
     if (forUnmarshaling->pColorBlendState)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pColorBlendState, sizeof(const VkPipelineColorBlendStateCreateInfo));
         unmarshal_VkPipelineColorBlendStateCreateInfo(vkStream, (VkPipelineColorBlendStateCreateInfo*)(forUnmarshaling->pColorBlendState));
     }
     vkStream->read((VkPipelineDynamicStateCreateInfo**)&forUnmarshaling->pDynamicState, sizeof(const VkPipelineDynamicStateCreateInfo*));
     if (forUnmarshaling->pDynamicState)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pDynamicState, sizeof(const VkPipelineDynamicStateCreateInfo));
         unmarshal_VkPipelineDynamicStateCreateInfo(vkStream, (VkPipelineDynamicStateCreateInfo*)(forUnmarshaling->pDynamicState));
     }
     vkStream->read((VkPipelineLayout*)&forUnmarshaling->layout, sizeof(VkPipelineLayout));
@@ -4214,6 +4302,7 @@ VkResult unmarshal_vkCreateGraphicsPipelines(
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((VkPipelineCache*)&pipelineCache, sizeof(VkPipelineCache));
     vkStream->read((uint32_t*)&createInfoCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pCreateInfos, ((createInfoCount)) * sizeof(const VkGraphicsPipelineCreateInfo));
     for (uint32_t i = 0; i < (uint32_t)((createInfoCount)); ++i)
     {
         unmarshal_VkGraphicsPipelineCreateInfo(vkStream, (VkGraphicsPipelineCreateInfo*)(pCreateInfos + i));
@@ -4221,6 +4310,7 @@ VkResult unmarshal_vkCreateGraphicsPipelines(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkPipeline*)pPipelines, ((createInfoCount)) * sizeof(VkPipeline));
@@ -4296,6 +4386,7 @@ VkResult unmarshal_vkCreateComputePipelines(
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((VkPipelineCache*)&pipelineCache, sizeof(VkPipelineCache));
     vkStream->read((uint32_t*)&createInfoCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pCreateInfos, ((createInfoCount)) * sizeof(const VkComputePipelineCreateInfo));
     for (uint32_t i = 0; i < (uint32_t)((createInfoCount)); ++i)
     {
         unmarshal_VkComputePipelineCreateInfo(vkStream, (VkComputePipelineCreateInfo*)(pCreateInfos + i));
@@ -4303,6 +4394,7 @@ VkResult unmarshal_vkCreateComputePipelines(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkPipeline*)pPipelines, ((createInfoCount)) * sizeof(VkPipeline));
@@ -4337,6 +4429,7 @@ void unmarshal_vkDestroyPipeline(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -4385,8 +4478,10 @@ void unmarshal_VkPipelineLayoutCreateInfo(
     // TODO: Unsupported : const void* pNext
     vkStream->read((VkPipelineLayoutCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineLayoutCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->setLayoutCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pSetLayouts, forUnmarshaling->setLayoutCount * sizeof(const VkDescriptorSetLayout));
     vkStream->read((VkDescriptorSetLayout*)forUnmarshaling->pSetLayouts, forUnmarshaling->setLayoutCount * sizeof(const VkDescriptorSetLayout));
     vkStream->read((uint32_t*)&forUnmarshaling->pushConstantRangeCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pPushConstantRanges, forUnmarshaling->pushConstantRangeCount * sizeof(const VkPushConstantRange));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->pushConstantRangeCount; ++i)
     {
         unmarshal_VkPushConstantRange(vkStream, (VkPushConstantRange*)(forUnmarshaling->pPushConstantRanges + i));
@@ -4421,10 +4516,12 @@ VkResult unmarshal_vkCreatePipelineLayout(
     VkPipelineLayout* pPipelineLayout)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkPipelineLayoutCreateInfo));
     unmarshal_VkPipelineLayoutCreateInfo(vkStream, (VkPipelineLayoutCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkPipelineLayout*)pPipelineLayout, sizeof(VkPipelineLayout));
@@ -4459,6 +4556,7 @@ void unmarshal_vkDestroyPipelineLayout(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -4541,10 +4639,12 @@ VkResult unmarshal_vkCreateSampler(
     VkSampler* pSampler)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkSamplerCreateInfo));
     unmarshal_VkSamplerCreateInfo(vkStream, (VkSamplerCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkSampler*)pSampler, sizeof(VkSampler));
@@ -4579,6 +4679,7 @@ void unmarshal_vkDestroySampler(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -4609,6 +4710,7 @@ void unmarshal_VkDescriptorSetLayoutBinding(
     vkStream->read((VkSampler**)&forUnmarshaling->pImmutableSamplers, sizeof(const VkSampler*));
     if (forUnmarshaling->pImmutableSamplers)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pImmutableSamplers, forUnmarshaling->descriptorCount * sizeof(const VkSampler));
         vkStream->read((VkSampler*)forUnmarshaling->pImmutableSamplers, forUnmarshaling->descriptorCount * sizeof(const VkSampler));
     }
 }
@@ -4637,6 +4739,7 @@ void unmarshal_VkDescriptorSetLayoutCreateInfo(
     // TODO: Unsupported : const void* pNext
     vkStream->read((VkDescriptorSetLayoutCreateFlags*)&forUnmarshaling->flags, sizeof(VkDescriptorSetLayoutCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->bindingCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pBindings, forUnmarshaling->bindingCount * sizeof(const VkDescriptorSetLayoutBinding));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bindingCount; ++i)
     {
         unmarshal_VkDescriptorSetLayoutBinding(vkStream, (VkDescriptorSetLayoutBinding*)(forUnmarshaling->pBindings + i));
@@ -4671,10 +4774,12 @@ VkResult unmarshal_vkCreateDescriptorSetLayout(
     VkDescriptorSetLayout* pSetLayout)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkDescriptorSetLayoutCreateInfo));
     unmarshal_VkDescriptorSetLayoutCreateInfo(vkStream, (VkDescriptorSetLayoutCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkDescriptorSetLayout*)pSetLayout, sizeof(VkDescriptorSetLayout));
@@ -4709,6 +4814,7 @@ void unmarshal_vkDestroyDescriptorSetLayout(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -4755,6 +4861,7 @@ void unmarshal_VkDescriptorPoolCreateInfo(
     vkStream->read((VkDescriptorPoolCreateFlags*)&forUnmarshaling->flags, sizeof(VkDescriptorPoolCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->maxSets, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->poolSizeCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pPoolSizes, forUnmarshaling->poolSizeCount * sizeof(const VkDescriptorPoolSize));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->poolSizeCount; ++i)
     {
         unmarshal_VkDescriptorPoolSize(vkStream, (VkDescriptorPoolSize*)(forUnmarshaling->pPoolSizes + i));
@@ -4789,10 +4896,12 @@ VkResult unmarshal_vkCreateDescriptorPool(
     VkDescriptorPool* pDescriptorPool)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkDescriptorPoolCreateInfo));
     unmarshal_VkDescriptorPoolCreateInfo(vkStream, (VkDescriptorPoolCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkDescriptorPool*)pDescriptorPool, sizeof(VkDescriptorPool));
@@ -4827,6 +4936,7 @@ void unmarshal_vkDestroyDescriptorPool(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -4880,6 +4990,7 @@ void unmarshal_VkDescriptorSetAllocateInfo(
     // TODO: Unsupported : const void* pNext
     vkStream->read((VkDescriptorPool*)&forUnmarshaling->descriptorPool, sizeof(VkDescriptorPool));
     vkStream->read((uint32_t*)&forUnmarshaling->descriptorSetCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pSetLayouts, forUnmarshaling->descriptorSetCount * sizeof(const VkDescriptorSetLayout));
     vkStream->read((VkDescriptorSetLayout*)forUnmarshaling->pSetLayouts, forUnmarshaling->descriptorSetCount * sizeof(const VkDescriptorSetLayout));
 }
 
@@ -4904,6 +5015,7 @@ VkResult unmarshal_vkAllocateDescriptorSets(
     VkDescriptorSet* pDescriptorSets)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pAllocateInfo, sizeof(const VkDescriptorSetAllocateInfo));
     unmarshal_VkDescriptorSetAllocateInfo(vkStream, (VkDescriptorSetAllocateInfo*)(pAllocateInfo));
     vkStream->write((VkDescriptorSet*)pDescriptorSets, pAllocateInfo->descriptorSetCount * sizeof(VkDescriptorSet));
     VkResult unmarshal_vkAllocateDescriptorSets_VkResult_return;
@@ -4944,6 +5056,7 @@ VkResult unmarshal_vkFreeDescriptorSets(
     vkStream->read((VkDescriptorSet**)&pDescriptorSets, sizeof(const VkDescriptorSet*));
     if (pDescriptorSets)
     {
+        vkStream->alloc((void**)&pDescriptorSets, ((descriptorSetCount)) * sizeof(const VkDescriptorSet));
         vkStream->read((VkDescriptorSet*)pDescriptorSets, ((descriptorSetCount)) * sizeof(const VkDescriptorSet));
     }
     VkResult unmarshal_vkFreeDescriptorSets_VkResult_return;
@@ -5037,6 +5150,7 @@ void unmarshal_VkWriteDescriptorSet(
     vkStream->read((VkDescriptorImageInfo**)&forUnmarshaling->pImageInfo, sizeof(const VkDescriptorImageInfo*));
     if (forUnmarshaling->pImageInfo)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pImageInfo, forUnmarshaling->descriptorCount * sizeof(const VkDescriptorImageInfo));
         for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->descriptorCount; ++i)
         {
             unmarshal_VkDescriptorImageInfo(vkStream, (VkDescriptorImageInfo*)(forUnmarshaling->pImageInfo + i));
@@ -5045,6 +5159,7 @@ void unmarshal_VkWriteDescriptorSet(
     vkStream->read((VkDescriptorBufferInfo**)&forUnmarshaling->pBufferInfo, sizeof(const VkDescriptorBufferInfo*));
     if (forUnmarshaling->pBufferInfo)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pBufferInfo, forUnmarshaling->descriptorCount * sizeof(const VkDescriptorBufferInfo));
         for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->descriptorCount; ++i)
         {
             unmarshal_VkDescriptorBufferInfo(vkStream, (VkDescriptorBufferInfo*)(forUnmarshaling->pBufferInfo + i));
@@ -5053,6 +5168,7 @@ void unmarshal_VkWriteDescriptorSet(
     vkStream->read((VkBufferView**)&forUnmarshaling->pTexelBufferView, sizeof(const VkBufferView*));
     if (forUnmarshaling->pTexelBufferView)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pTexelBufferView, forUnmarshaling->descriptorCount * sizeof(const VkBufferView));
         vkStream->read((VkBufferView*)forUnmarshaling->pTexelBufferView, forUnmarshaling->descriptorCount * sizeof(const VkBufferView));
     }
 }
@@ -5120,11 +5236,13 @@ void unmarshal_vkUpdateDescriptorSets(
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((uint32_t*)&descriptorWriteCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pDescriptorWrites, ((descriptorWriteCount)) * sizeof(const VkWriteDescriptorSet));
     for (uint32_t i = 0; i < (uint32_t)((descriptorWriteCount)); ++i)
     {
         unmarshal_VkWriteDescriptorSet(vkStream, (VkWriteDescriptorSet*)(pDescriptorWrites + i));
     }
     vkStream->read((uint32_t*)&descriptorCopyCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pDescriptorCopies, ((descriptorCopyCount)) * sizeof(const VkCopyDescriptorSet));
     for (uint32_t i = 0; i < (uint32_t)((descriptorCopyCount)); ++i)
     {
         unmarshal_VkCopyDescriptorSet(vkStream, (VkCopyDescriptorSet*)(pDescriptorCopies + i));
@@ -5157,6 +5275,7 @@ void unmarshal_VkFramebufferCreateInfo(
     vkStream->read((VkFramebufferCreateFlags*)&forUnmarshaling->flags, sizeof(VkFramebufferCreateFlags));
     vkStream->read((VkRenderPass*)&forUnmarshaling->renderPass, sizeof(VkRenderPass));
     vkStream->read((uint32_t*)&forUnmarshaling->attachmentCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pAttachments, forUnmarshaling->attachmentCount * sizeof(const VkImageView));
     vkStream->read((VkImageView*)forUnmarshaling->pAttachments, forUnmarshaling->attachmentCount * sizeof(const VkImageView));
     vkStream->read((uint32_t*)&forUnmarshaling->width, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->height, sizeof(uint32_t));
@@ -5191,10 +5310,12 @@ VkResult unmarshal_vkCreateFramebuffer(
     VkFramebuffer* pFramebuffer)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkFramebufferCreateInfo));
     unmarshal_VkFramebufferCreateInfo(vkStream, (VkFramebufferCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkFramebuffer*)pFramebuffer, sizeof(VkFramebuffer));
@@ -5229,6 +5350,7 @@ void unmarshal_vkDestroyFramebuffer(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -5319,11 +5441,13 @@ void unmarshal_VkSubpassDescription(
     vkStream->read((VkSubpassDescriptionFlags*)&forUnmarshaling->flags, sizeof(VkSubpassDescriptionFlags));
     vkStream->read((VkPipelineBindPoint*)&forUnmarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
     vkStream->read((uint32_t*)&forUnmarshaling->inputAttachmentCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pInputAttachments, forUnmarshaling->inputAttachmentCount * sizeof(const VkAttachmentReference));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->inputAttachmentCount; ++i)
     {
         unmarshal_VkAttachmentReference(vkStream, (VkAttachmentReference*)(forUnmarshaling->pInputAttachments + i));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->colorAttachmentCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pColorAttachments, forUnmarshaling->colorAttachmentCount * sizeof(const VkAttachmentReference));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->colorAttachmentCount; ++i)
     {
         unmarshal_VkAttachmentReference(vkStream, (VkAttachmentReference*)(forUnmarshaling->pColorAttachments + i));
@@ -5331,6 +5455,7 @@ void unmarshal_VkSubpassDescription(
     vkStream->read((VkAttachmentReference**)&forUnmarshaling->pResolveAttachments, sizeof(const VkAttachmentReference*));
     if (forUnmarshaling->pResolveAttachments)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pResolveAttachments, forUnmarshaling->colorAttachmentCount * sizeof(const VkAttachmentReference));
         for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->colorAttachmentCount; ++i)
         {
             unmarshal_VkAttachmentReference(vkStream, (VkAttachmentReference*)(forUnmarshaling->pResolveAttachments + i));
@@ -5339,9 +5464,11 @@ void unmarshal_VkSubpassDescription(
     vkStream->read((VkAttachmentReference**)&forUnmarshaling->pDepthStencilAttachment, sizeof(const VkAttachmentReference*));
     if (forUnmarshaling->pDepthStencilAttachment)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pDepthStencilAttachment, sizeof(const VkAttachmentReference));
         unmarshal_VkAttachmentReference(vkStream, (VkAttachmentReference*)(forUnmarshaling->pDepthStencilAttachment));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->preserveAttachmentCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pPreserveAttachments, forUnmarshaling->preserveAttachmentCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pPreserveAttachments, forUnmarshaling->preserveAttachmentCount * sizeof(const uint32_t));
 }
 
@@ -5405,16 +5532,19 @@ void unmarshal_VkRenderPassCreateInfo(
     // TODO: Unsupported : const void* pNext
     vkStream->read((VkRenderPassCreateFlags*)&forUnmarshaling->flags, sizeof(VkRenderPassCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->attachmentCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pAttachments, forUnmarshaling->attachmentCount * sizeof(const VkAttachmentDescription));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentCount; ++i)
     {
         unmarshal_VkAttachmentDescription(vkStream, (VkAttachmentDescription*)(forUnmarshaling->pAttachments + i));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->subpassCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pSubpasses, forUnmarshaling->subpassCount * sizeof(const VkSubpassDescription));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->subpassCount; ++i)
     {
         unmarshal_VkSubpassDescription(vkStream, (VkSubpassDescription*)(forUnmarshaling->pSubpasses + i));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->dependencyCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pDependencies, forUnmarshaling->dependencyCount * sizeof(const VkSubpassDependency));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->dependencyCount; ++i)
     {
         unmarshal_VkSubpassDependency(vkStream, (VkSubpassDependency*)(forUnmarshaling->pDependencies + i));
@@ -5449,10 +5579,12 @@ VkResult unmarshal_vkCreateRenderPass(
     VkRenderPass* pRenderPass)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkRenderPassCreateInfo));
     unmarshal_VkRenderPassCreateInfo(vkStream, (VkRenderPassCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkRenderPass*)pRenderPass, sizeof(VkRenderPass));
@@ -5487,6 +5619,7 @@ void unmarshal_vkDestroyRenderPass(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -5563,10 +5696,12 @@ VkResult unmarshal_vkCreateCommandPool(
     VkCommandPool* pCommandPool)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkCommandPoolCreateInfo));
     unmarshal_VkCommandPoolCreateInfo(vkStream, (VkCommandPoolCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkCommandPool*)pCommandPool, sizeof(VkCommandPool));
@@ -5601,6 +5736,7 @@ void unmarshal_vkDestroyCommandPool(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -5678,6 +5814,7 @@ VkResult unmarshal_vkAllocateCommandBuffers(
     VkCommandBuffer* pCommandBuffers)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pAllocateInfo, sizeof(const VkCommandBufferAllocateInfo));
     unmarshal_VkCommandBufferAllocateInfo(vkStream, (VkCommandBufferAllocateInfo*)(pAllocateInfo));
     vkStream->write((VkCommandBuffer*)pCommandBuffers, pAllocateInfo->commandBufferCount * sizeof(VkCommandBuffer));
     VkResult unmarshal_vkAllocateCommandBuffers_VkResult_return;
@@ -5715,6 +5852,7 @@ void unmarshal_vkFreeCommandBuffers(
     vkStream->read((VkCommandBuffer**)&pCommandBuffers, sizeof(const VkCommandBuffer*));
     if (pCommandBuffers)
     {
+        vkStream->alloc((void**)&pCommandBuffers, ((commandBufferCount)) * sizeof(const VkCommandBuffer));
         vkStream->read((VkCommandBuffer*)pCommandBuffers, ((commandBufferCount)) * sizeof(const VkCommandBuffer));
     }
 }
@@ -5775,6 +5913,7 @@ void unmarshal_VkCommandBufferBeginInfo(
     vkStream->read((VkCommandBufferInheritanceInfo**)&forUnmarshaling->pInheritanceInfo, sizeof(const VkCommandBufferInheritanceInfo*));
     if (forUnmarshaling->pInheritanceInfo)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pInheritanceInfo, sizeof(const VkCommandBufferInheritanceInfo));
         unmarshal_VkCommandBufferInheritanceInfo(vkStream, (VkCommandBufferInheritanceInfo*)(forUnmarshaling->pInheritanceInfo));
     }
 }
@@ -5797,6 +5936,7 @@ VkResult unmarshal_vkBeginCommandBuffer(
     const VkCommandBufferBeginInfo* pBeginInfo)
 {
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+    vkStream->alloc((void**)&pBeginInfo, sizeof(const VkCommandBufferBeginInfo));
     unmarshal_VkCommandBufferBeginInfo(vkStream, (VkCommandBufferBeginInfo*)(pBeginInfo));
     VkResult unmarshal_vkBeginCommandBuffer_VkResult_return;
     vkStream->write(&unmarshal_vkBeginCommandBuffer_VkResult_return, sizeof(VkResult));
@@ -5895,6 +6035,7 @@ void unmarshal_vkCmdSetViewport(
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
     vkStream->read((uint32_t*)&firstViewport, sizeof(uint32_t));
     vkStream->read((uint32_t*)&viewportCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pViewports, ((viewportCount)) * sizeof(const VkViewport));
     for (uint32_t i = 0; i < (uint32_t)((viewportCount)); ++i)
     {
         unmarshal_VkViewport(vkStream, (VkViewport*)(pViewports + i));
@@ -5927,6 +6068,7 @@ void unmarshal_vkCmdSetScissor(
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
     vkStream->read((uint32_t*)&firstScissor, sizeof(uint32_t));
     vkStream->read((uint32_t*)&scissorCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pScissors, ((scissorCount)) * sizeof(const VkRect2D));
     for (uint32_t i = 0; i < (uint32_t)((scissorCount)); ++i)
     {
         unmarshal_VkRect2D(vkStream, (VkRect2D*)(pScissors + i));
@@ -6120,8 +6262,10 @@ void unmarshal_vkCmdBindDescriptorSets(
     vkStream->read((VkPipelineLayout*)&layout, sizeof(VkPipelineLayout));
     vkStream->read((uint32_t*)&firstSet, sizeof(uint32_t));
     vkStream->read((uint32_t*)&descriptorSetCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pDescriptorSets, ((descriptorSetCount)) * sizeof(const VkDescriptorSet));
     vkStream->read((VkDescriptorSet*)pDescriptorSets, ((descriptorSetCount)) * sizeof(const VkDescriptorSet));
     vkStream->read((uint32_t*)&dynamicOffsetCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pDynamicOffsets, ((dynamicOffsetCount)) * sizeof(const uint32_t));
     vkStream->read((uint32_t*)pDynamicOffsets, ((dynamicOffsetCount)) * sizeof(const uint32_t));
 }
 
@@ -6177,7 +6321,9 @@ void unmarshal_vkCmdBindVertexBuffers(
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
     vkStream->read((uint32_t*)&firstBinding, sizeof(uint32_t));
     vkStream->read((uint32_t*)&bindingCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pBuffers, ((bindingCount)) * sizeof(const VkBuffer));
     vkStream->read((VkBuffer*)pBuffers, ((bindingCount)) * sizeof(const VkBuffer));
+    vkStream->alloc((void**)&pOffsets, ((bindingCount)) * sizeof(const VkDeviceSize));
     vkStream->read((VkDeviceSize*)pOffsets, ((bindingCount)) * sizeof(const VkDeviceSize));
 }
 
@@ -6401,6 +6547,7 @@ void unmarshal_vkCmdCopyBuffer(
     vkStream->read((VkBuffer*)&srcBuffer, sizeof(VkBuffer));
     vkStream->read((VkBuffer*)&dstBuffer, sizeof(VkBuffer));
     vkStream->read((uint32_t*)&regionCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pRegions, ((regionCount)) * sizeof(const VkBufferCopy));
     for (uint32_t i = 0; i < (uint32_t)((regionCount)); ++i)
     {
         unmarshal_VkBufferCopy(vkStream, (VkBufferCopy*)(pRegions + i));
@@ -6487,6 +6634,7 @@ void unmarshal_vkCmdCopyImage(
     vkStream->read((VkImage*)&dstImage, sizeof(VkImage));
     vkStream->read((VkImageLayout*)&dstImageLayout, sizeof(VkImageLayout));
     vkStream->read((uint32_t*)&regionCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pRegions, ((regionCount)) * sizeof(const VkImageCopy));
     for (uint32_t i = 0; i < (uint32_t)((regionCount)); ++i)
     {
         unmarshal_VkImageCopy(vkStream, (VkImageCopy*)(pRegions + i));
@@ -6566,6 +6714,7 @@ void unmarshal_vkCmdBlitImage(
     vkStream->read((VkImage*)&dstImage, sizeof(VkImage));
     vkStream->read((VkImageLayout*)&dstImageLayout, sizeof(VkImageLayout));
     vkStream->read((uint32_t*)&regionCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pRegions, ((regionCount)) * sizeof(const VkImageBlit));
     for (uint32_t i = 0; i < (uint32_t)((regionCount)); ++i)
     {
         unmarshal_VkImageBlit(vkStream, (VkImageBlit*)(pRegions + i));
@@ -6631,6 +6780,7 @@ void unmarshal_vkCmdCopyBufferToImage(
     vkStream->read((VkImage*)&dstImage, sizeof(VkImage));
     vkStream->read((VkImageLayout*)&dstImageLayout, sizeof(VkImageLayout));
     vkStream->read((uint32_t*)&regionCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pRegions, ((regionCount)) * sizeof(const VkBufferImageCopy));
     for (uint32_t i = 0; i < (uint32_t)((regionCount)); ++i)
     {
         unmarshal_VkBufferImageCopy(vkStream, (VkBufferImageCopy*)(pRegions + i));
@@ -6671,6 +6821,7 @@ void unmarshal_vkCmdCopyImageToBuffer(
     vkStream->read((VkImageLayout*)&srcImageLayout, sizeof(VkImageLayout));
     vkStream->read((VkBuffer*)&dstBuffer, sizeof(VkBuffer));
     vkStream->read((uint32_t*)&regionCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pRegions, ((regionCount)) * sizeof(const VkBufferImageCopy));
     for (uint32_t i = 0; i < (uint32_t)((regionCount)); ++i)
     {
         unmarshal_VkBufferImageCopy(vkStream, (VkBufferImageCopy*)(pRegions + i));
@@ -6704,6 +6855,7 @@ void unmarshal_vkCmdUpdateBuffer(
     vkStream->read((VkBuffer*)&dstBuffer, sizeof(VkBuffer));
     vkStream->read((VkDeviceSize*)&dstOffset, sizeof(VkDeviceSize));
     vkStream->read((VkDeviceSize*)&dataSize, sizeof(VkDeviceSize));
+    vkStream->alloc((void**)&pData, ((dataSize)) * sizeof(const uint8_t));
     vkStream->read((void*)pData, ((dataSize)) * sizeof(const uint8_t));
 }
 
@@ -6787,8 +6939,10 @@ void unmarshal_vkCmdClearColorImage(
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
     vkStream->read((VkImage*)&image, sizeof(VkImage));
     vkStream->read((VkImageLayout*)&imageLayout, sizeof(VkImageLayout));
+    vkStream->alloc((void**)&pColor, sizeof(const VkClearColorValue));
     unmarshal_VkClearColorValue(vkStream, (VkClearColorValue*)(pColor));
     vkStream->read((uint32_t*)&rangeCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pRanges, ((rangeCount)) * sizeof(const VkImageSubresourceRange));
     for (uint32_t i = 0; i < (uint32_t)((rangeCount)); ++i)
     {
         unmarshal_VkImageSubresourceRange(vkStream, (VkImageSubresourceRange*)(pRanges + i));
@@ -6843,8 +6997,10 @@ void unmarshal_vkCmdClearDepthStencilImage(
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
     vkStream->read((VkImage*)&image, sizeof(VkImage));
     vkStream->read((VkImageLayout*)&imageLayout, sizeof(VkImageLayout));
+    vkStream->alloc((void**)&pDepthStencil, sizeof(const VkClearDepthStencilValue));
     unmarshal_VkClearDepthStencilValue(vkStream, (VkClearDepthStencilValue*)(pDepthStencil));
     vkStream->read((uint32_t*)&rangeCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pRanges, ((rangeCount)) * sizeof(const VkImageSubresourceRange));
     for (uint32_t i = 0; i < (uint32_t)((rangeCount)); ++i)
     {
         unmarshal_VkImageSubresourceRange(vkStream, (VkImageSubresourceRange*)(pRanges + i));
@@ -6934,11 +7090,13 @@ void unmarshal_vkCmdClearAttachments(
 {
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
     vkStream->read((uint32_t*)&attachmentCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pAttachments, ((attachmentCount)) * sizeof(const VkClearAttachment));
     for (uint32_t i = 0; i < (uint32_t)((attachmentCount)); ++i)
     {
         unmarshal_VkClearAttachment(vkStream, (VkClearAttachment*)(pAttachments + i));
     }
     vkStream->read((uint32_t*)&rectCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pRects, ((rectCount)) * sizeof(const VkClearRect));
     for (uint32_t i = 0; i < (uint32_t)((rectCount)); ++i)
     {
         unmarshal_VkClearRect(vkStream, (VkClearRect*)(pRects + i));
@@ -7005,6 +7163,7 @@ void unmarshal_vkCmdResolveImage(
     vkStream->read((VkImage*)&dstImage, sizeof(VkImage));
     vkStream->read((VkImageLayout*)&dstImageLayout, sizeof(VkImageLayout));
     vkStream->read((uint32_t*)&regionCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pRegions, ((regionCount)) * sizeof(const VkImageResolve));
     for (uint32_t i = 0; i < (uint32_t)((regionCount)); ++i)
     {
         unmarshal_VkImageResolve(vkStream, (VkImageResolve*)(pRegions + i));
@@ -7195,20 +7354,24 @@ void unmarshal_vkCmdWaitEvents(
 {
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
     vkStream->read((uint32_t*)&eventCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pEvents, ((eventCount)) * sizeof(const VkEvent));
     vkStream->read((VkEvent*)pEvents, ((eventCount)) * sizeof(const VkEvent));
     vkStream->read((VkPipelineStageFlags*)&srcStageMask, sizeof(VkPipelineStageFlags));
     vkStream->read((VkPipelineStageFlags*)&dstStageMask, sizeof(VkPipelineStageFlags));
     vkStream->read((uint32_t*)&memoryBarrierCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pMemoryBarriers, ((memoryBarrierCount)) * sizeof(const VkMemoryBarrier));
     for (uint32_t i = 0; i < (uint32_t)((memoryBarrierCount)); ++i)
     {
         unmarshal_VkMemoryBarrier(vkStream, (VkMemoryBarrier*)(pMemoryBarriers + i));
     }
     vkStream->read((uint32_t*)&bufferMemoryBarrierCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pBufferMemoryBarriers, ((bufferMemoryBarrierCount)) * sizeof(const VkBufferMemoryBarrier));
     for (uint32_t i = 0; i < (uint32_t)((bufferMemoryBarrierCount)); ++i)
     {
         unmarshal_VkBufferMemoryBarrier(vkStream, (VkBufferMemoryBarrier*)(pBufferMemoryBarriers + i));
     }
     vkStream->read((uint32_t*)&imageMemoryBarrierCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pImageMemoryBarriers, ((imageMemoryBarrierCount)) * sizeof(const VkImageMemoryBarrier));
     for (uint32_t i = 0; i < (uint32_t)((imageMemoryBarrierCount)); ++i)
     {
         unmarshal_VkImageMemoryBarrier(vkStream, (VkImageMemoryBarrier*)(pImageMemoryBarriers + i));
@@ -7267,16 +7430,19 @@ void unmarshal_vkCmdPipelineBarrier(
     vkStream->read((VkPipelineStageFlags*)&dstStageMask, sizeof(VkPipelineStageFlags));
     vkStream->read((VkDependencyFlags*)&dependencyFlags, sizeof(VkDependencyFlags));
     vkStream->read((uint32_t*)&memoryBarrierCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pMemoryBarriers, ((memoryBarrierCount)) * sizeof(const VkMemoryBarrier));
     for (uint32_t i = 0; i < (uint32_t)((memoryBarrierCount)); ++i)
     {
         unmarshal_VkMemoryBarrier(vkStream, (VkMemoryBarrier*)(pMemoryBarriers + i));
     }
     vkStream->read((uint32_t*)&bufferMemoryBarrierCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pBufferMemoryBarriers, ((bufferMemoryBarrierCount)) * sizeof(const VkBufferMemoryBarrier));
     for (uint32_t i = 0; i < (uint32_t)((bufferMemoryBarrierCount)); ++i)
     {
         unmarshal_VkBufferMemoryBarrier(vkStream, (VkBufferMemoryBarrier*)(pBufferMemoryBarriers + i));
     }
     vkStream->read((uint32_t*)&imageMemoryBarrierCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pImageMemoryBarriers, ((imageMemoryBarrierCount)) * sizeof(const VkImageMemoryBarrier));
     for (uint32_t i = 0; i < (uint32_t)((imageMemoryBarrierCount)); ++i)
     {
         unmarshal_VkImageMemoryBarrier(vkStream, (VkImageMemoryBarrier*)(pImageMemoryBarriers + i));
@@ -7456,6 +7622,7 @@ void unmarshal_vkCmdPushConstants(
     vkStream->read((VkShaderStageFlags*)&stageFlags, sizeof(VkShaderStageFlags));
     vkStream->read((uint32_t*)&offset, sizeof(uint32_t));
     vkStream->read((uint32_t*)&size, sizeof(uint32_t));
+    vkStream->alloc((void**)&pValues, ((size)) * sizeof(const uint8_t));
     vkStream->read((void*)pValues, ((size)) * sizeof(const uint8_t));
 }
 
@@ -7494,6 +7661,7 @@ void unmarshal_VkRenderPassBeginInfo(
     vkStream->read((VkClearValue**)&forUnmarshaling->pClearValues, sizeof(const VkClearValue*));
     if (forUnmarshaling->pClearValues)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pClearValues, forUnmarshaling->clearValueCount * sizeof(const VkClearValue));
         for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->clearValueCount; ++i)
         {
             unmarshal_VkClearValue(vkStream, (VkClearValue*)(forUnmarshaling->pClearValues + i));
@@ -7519,6 +7687,7 @@ void unmarshal_vkCmdBeginRenderPass(
     VkSubpassContents contents)
 {
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+    vkStream->alloc((void**)&pRenderPassBegin, sizeof(const VkRenderPassBeginInfo));
     unmarshal_VkRenderPassBeginInfo(vkStream, (VkRenderPassBeginInfo*)(pRenderPassBegin));
     vkStream->read((VkSubpassContents*)&contents, sizeof(VkSubpassContents));
 }
@@ -7574,6 +7743,7 @@ void unmarshal_vkCmdExecuteCommands(
 {
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
     vkStream->read((uint32_t*)&commandBufferCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pCommandBuffers, ((commandBufferCount)) * sizeof(const VkCommandBuffer));
     vkStream->read((VkCommandBuffer*)pCommandBuffers, ((commandBufferCount)) * sizeof(const VkCommandBuffer));
 }
 
@@ -7794,6 +7964,7 @@ VkResult unmarshal_vkBindBufferMemory2(
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((uint32_t*)&bindInfoCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pBindInfos, ((bindInfoCount)) * sizeof(const VkBindBufferMemoryInfo));
     for (uint32_t i = 0; i < (uint32_t)((bindInfoCount)); ++i)
     {
         unmarshal_VkBindBufferMemoryInfo(vkStream, (VkBindBufferMemoryInfo*)(pBindInfos + i));
@@ -7828,6 +7999,7 @@ VkResult unmarshal_vkBindImageMemory2(
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((uint32_t*)&bindInfoCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pBindInfos, ((bindInfoCount)) * sizeof(const VkBindImageMemoryInfo));
     for (uint32_t i = 0; i < (uint32_t)((bindInfoCount)); ++i)
     {
         unmarshal_VkBindImageMemoryInfo(vkStream, (VkBindImageMemoryInfo*)(pBindInfos + i));
@@ -7953,6 +8125,7 @@ void unmarshal_VkDeviceGroupRenderPassBeginInfo(
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->deviceMask, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->deviceRenderAreaCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pDeviceRenderAreas, forUnmarshaling->deviceRenderAreaCount * sizeof(const VkRect2D));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->deviceRenderAreaCount; ++i)
     {
         unmarshal_VkRect2D(vkStream, (VkRect2D*)(forUnmarshaling->pDeviceRenderAreas + i));
@@ -8002,10 +8175,13 @@ void unmarshal_VkDeviceGroupSubmitInfo(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->waitSemaphoreCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pWaitSemaphoreDeviceIndices, forUnmarshaling->waitSemaphoreCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pWaitSemaphoreDeviceIndices, forUnmarshaling->waitSemaphoreCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->commandBufferCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pCommandBufferDeviceMasks, forUnmarshaling->commandBufferCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pCommandBufferDeviceMasks, forUnmarshaling->commandBufferCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->signalSemaphoreCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pSignalSemaphoreDeviceIndices, forUnmarshaling->signalSemaphoreCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pSignalSemaphoreDeviceIndices, forUnmarshaling->signalSemaphoreCount * sizeof(const uint32_t));
 }
 
@@ -8136,6 +8312,7 @@ void unmarshal_VkBindBufferMemoryDeviceGroupInfo(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->deviceIndexCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pDeviceIndices, forUnmarshaling->deviceIndexCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pDeviceIndices, forUnmarshaling->deviceIndexCount * sizeof(const uint32_t));
 }
 
@@ -8163,8 +8340,10 @@ void unmarshal_VkBindImageMemoryDeviceGroupInfo(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->deviceIndexCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pDeviceIndices, forUnmarshaling->deviceIndexCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pDeviceIndices, forUnmarshaling->deviceIndexCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->splitInstanceBindRegionCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pSplitInstanceBindRegions, forUnmarshaling->splitInstanceBindRegionCount * sizeof(const VkRect2D));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->splitInstanceBindRegionCount; ++i)
     {
         unmarshal_VkRect2D(vkStream, (VkRect2D*)(forUnmarshaling->pSplitInstanceBindRegions + i));
@@ -8214,6 +8393,7 @@ void unmarshal_VkDeviceGroupDeviceCreateInfo(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->physicalDeviceCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pPhysicalDevices, forUnmarshaling->physicalDeviceCount * sizeof(const VkPhysicalDevice));
     vkStream->read((VkPhysicalDevice*)forUnmarshaling->pPhysicalDevices, forUnmarshaling->physicalDeviceCount * sizeof(const VkPhysicalDevice));
 }
 
@@ -8369,6 +8549,7 @@ void unmarshal_vkGetImageMemoryRequirements2(
     VkMemoryRequirements2* pMemoryRequirements)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pInfo, sizeof(const VkImageMemoryRequirementsInfo2));
     unmarshal_VkImageMemoryRequirementsInfo2(vkStream, (VkImageMemoryRequirementsInfo2*)(pInfo));
     unmarshal_VkMemoryRequirements2(vkStream, (VkMemoryRequirements2*)(pMemoryRequirements));
 }
@@ -8391,6 +8572,7 @@ void unmarshal_vkGetBufferMemoryRequirements2(
     VkMemoryRequirements2* pMemoryRequirements)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pInfo, sizeof(const VkBufferMemoryRequirementsInfo2));
     unmarshal_VkBufferMemoryRequirementsInfo2(vkStream, (VkBufferMemoryRequirementsInfo2*)(pInfo));
     unmarshal_VkMemoryRequirements2(vkStream, (VkMemoryRequirements2*)(pMemoryRequirements));
 }
@@ -8419,6 +8601,7 @@ void unmarshal_vkGetImageSparseMemoryRequirements2(
     VkSparseImageMemoryRequirements2* pSparseMemoryRequirements)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pInfo, sizeof(const VkImageSparseMemoryRequirementsInfo2));
     unmarshal_VkImageSparseMemoryRequirementsInfo2(vkStream, (VkImageSparseMemoryRequirementsInfo2*)(pInfo));
     vkStream->write((uint32_t*)pSparseMemoryRequirementCount, sizeof(uint32_t));
     for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
@@ -8702,6 +8885,7 @@ VkResult unmarshal_vkGetPhysicalDeviceImageFormatProperties2(
     VkImageFormatProperties2* pImageFormatProperties)
 {
     vkStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
+    vkStream->alloc((void**)&pImageFormatInfo, sizeof(const VkPhysicalDeviceImageFormatInfo2));
     unmarshal_VkPhysicalDeviceImageFormatInfo2(vkStream, (VkPhysicalDeviceImageFormatInfo2*)(pImageFormatInfo));
     unmarshal_VkImageFormatProperties2(vkStream, (VkImageFormatProperties2*)(pImageFormatProperties));
     VkResult unmarshal_vkGetPhysicalDeviceImageFormatProperties2_VkResult_return;
@@ -8779,6 +8963,7 @@ void unmarshal_vkGetPhysicalDeviceSparseImageFormatProperties2(
     VkSparseImageFormatProperties2* pProperties)
 {
     vkStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
+    vkStream->alloc((void**)&pFormatInfo, sizeof(const VkPhysicalDeviceSparseImageFormatInfo2));
     unmarshal_VkPhysicalDeviceSparseImageFormatInfo2(vkStream, (VkPhysicalDeviceSparseImageFormatInfo2*)(pFormatInfo));
     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -8869,6 +9054,7 @@ void unmarshal_VkRenderPassInputAttachmentAspectCreateInfo(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->aspectReferenceCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pAspectReferences, forUnmarshaling->aspectReferenceCount * sizeof(const VkInputAttachmentAspectReference));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->aspectReferenceCount; ++i)
     {
         unmarshal_VkInputAttachmentAspectReference(vkStream, (VkInputAttachmentAspectReference*)(forUnmarshaling->pAspectReferences + i));
@@ -8938,10 +9124,13 @@ void unmarshal_VkRenderPassMultiviewCreateInfo(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->subpassCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pViewMasks, forUnmarshaling->subpassCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pViewMasks, forUnmarshaling->subpassCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->dependencyCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pViewOffsets, forUnmarshaling->dependencyCount * sizeof(const int32_t));
     vkStream->read((int32_t*)forUnmarshaling->pViewOffsets, forUnmarshaling->dependencyCount * sizeof(const int32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->correlationMaskCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pCorrelationMasks, forUnmarshaling->correlationMaskCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pCorrelationMasks, forUnmarshaling->correlationMaskCount * sizeof(const uint32_t));
 }
 
@@ -9115,6 +9304,7 @@ void unmarshal_vkGetDeviceQueue2(
     VkQueue* pQueue)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pQueueInfo, sizeof(const VkDeviceQueueInfo2));
     unmarshal_VkDeviceQueueInfo2(vkStream, (VkDeviceQueueInfo2*)(pQueueInfo));
     vkStream->write((VkQueue*)pQueue, sizeof(VkQueue));
 }
@@ -9281,10 +9471,12 @@ VkResult unmarshal_vkCreateSamplerYcbcrConversion(
     VkSamplerYcbcrConversion* pYcbcrConversion)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkSamplerYcbcrConversionCreateInfo));
     unmarshal_VkSamplerYcbcrConversionCreateInfo(vkStream, (VkSamplerYcbcrConversionCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkSamplerYcbcrConversion*)pYcbcrConversion, sizeof(VkSamplerYcbcrConversion));
@@ -9319,6 +9511,7 @@ void unmarshal_vkDestroySamplerYcbcrConversion(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -9376,6 +9569,7 @@ void unmarshal_VkDescriptorUpdateTemplateCreateInfo(
     // TODO: Unsupported : void* pNext
     vkStream->read((VkDescriptorUpdateTemplateCreateFlags*)&forUnmarshaling->flags, sizeof(VkDescriptorUpdateTemplateCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->descriptorUpdateEntryCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pDescriptorUpdateEntries, forUnmarshaling->descriptorUpdateEntryCount * sizeof(const VkDescriptorUpdateTemplateEntry));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->descriptorUpdateEntryCount; ++i)
     {
         unmarshal_VkDescriptorUpdateTemplateEntry(vkStream, (VkDescriptorUpdateTemplateEntry*)(forUnmarshaling->pDescriptorUpdateEntries + i));
@@ -9415,10 +9609,12 @@ VkResult unmarshal_vkCreateDescriptorUpdateTemplate(
     VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkDescriptorUpdateTemplateCreateInfo));
     unmarshal_VkDescriptorUpdateTemplateCreateInfo(vkStream, (VkDescriptorUpdateTemplateCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkDescriptorUpdateTemplate*)pDescriptorUpdateTemplate, sizeof(VkDescriptorUpdateTemplate));
@@ -9453,6 +9649,7 @@ void unmarshal_vkDestroyDescriptorUpdateTemplate(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -9487,6 +9684,7 @@ void unmarshal_vkUpdateDescriptorSetWithTemplate(
     vkStream->read((void**)&pData, sizeof(const void*));
     if (pData)
     {
+        vkStream->alloc((void**)&pData, sizeof(const uint8_t));
         vkStream->read((void*)pData, sizeof(const uint8_t));
     }
 }
@@ -9639,6 +9837,7 @@ void unmarshal_vkGetPhysicalDeviceExternalBufferProperties(
     VkExternalBufferProperties* pExternalBufferProperties)
 {
     vkStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
+    vkStream->alloc((void**)&pExternalBufferInfo, sizeof(const VkPhysicalDeviceExternalBufferInfo));
     unmarshal_VkPhysicalDeviceExternalBufferInfo(vkStream, (VkPhysicalDeviceExternalBufferInfo*)(pExternalBufferInfo));
     unmarshal_VkExternalBufferProperties(vkStream, (VkExternalBufferProperties*)(pExternalBufferProperties));
 }
@@ -9765,6 +9964,7 @@ void unmarshal_vkGetPhysicalDeviceExternalFenceProperties(
     VkExternalFenceProperties* pExternalFenceProperties)
 {
     vkStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
+    vkStream->alloc((void**)&pExternalFenceInfo, sizeof(const VkPhysicalDeviceExternalFenceInfo));
     unmarshal_VkPhysicalDeviceExternalFenceInfo(vkStream, (VkPhysicalDeviceExternalFenceInfo*)(pExternalFenceInfo));
     unmarshal_VkExternalFenceProperties(vkStream, (VkExternalFenceProperties*)(pExternalFenceProperties));
 }
@@ -9871,6 +10071,7 @@ void unmarshal_vkGetPhysicalDeviceExternalSemaphoreProperties(
     VkExternalSemaphoreProperties* pExternalSemaphoreProperties)
 {
     vkStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
+    vkStream->alloc((void**)&pExternalSemaphoreInfo, sizeof(const VkPhysicalDeviceExternalSemaphoreInfo));
     unmarshal_VkPhysicalDeviceExternalSemaphoreInfo(vkStream, (VkPhysicalDeviceExternalSemaphoreInfo*)(pExternalSemaphoreInfo));
     unmarshal_VkExternalSemaphoreProperties(vkStream, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
 }
@@ -9935,6 +10136,7 @@ void unmarshal_vkGetDescriptorSetLayoutSupport(
     VkDescriptorSetLayoutSupport* pSupport)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkDescriptorSetLayoutCreateInfo));
     unmarshal_VkDescriptorSetLayoutCreateInfo(vkStream, (VkDescriptorSetLayoutCreateInfo*)(pCreateInfo));
     unmarshal_VkDescriptorSetLayoutSupport(vkStream, (VkDescriptorSetLayoutSupport*)(pSupport));
 }
@@ -9987,6 +10189,7 @@ void unmarshal_vkDestroySurfaceKHR(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -10220,6 +10423,7 @@ void unmarshal_VkSwapchainCreateInfoKHR(
     vkStream->read((uint32_t**)&forUnmarshaling->pQueueFamilyIndices, sizeof(const uint32_t*));
     if (forUnmarshaling->pQueueFamilyIndices)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pQueueFamilyIndices, forUnmarshaling->queueFamilyIndexCount * sizeof(const uint32_t));
         vkStream->read((uint32_t*)forUnmarshaling->pQueueFamilyIndices, forUnmarshaling->queueFamilyIndexCount * sizeof(const uint32_t));
     }
     vkStream->read((VkSurfaceTransformFlagBitsKHR*)&forUnmarshaling->preTransform, sizeof(VkSurfaceTransformFlagBitsKHR));
@@ -10257,10 +10461,12 @@ VkResult unmarshal_vkCreateSwapchainKHR(
     VkSwapchainKHR* pSwapchain)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkSwapchainCreateInfoKHR));
     unmarshal_VkSwapchainCreateInfoKHR(vkStream, (VkSwapchainCreateInfoKHR*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkSwapchainKHR*)pSwapchain, sizeof(VkSwapchainKHR));
@@ -10295,6 +10501,7 @@ void unmarshal_vkDestroySwapchainKHR(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -10398,13 +10605,17 @@ void unmarshal_VkPresentInfoKHR(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->waitSemaphoreCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pWaitSemaphores, forUnmarshaling->waitSemaphoreCount * sizeof(const VkSemaphore));
     vkStream->read((VkSemaphore*)forUnmarshaling->pWaitSemaphores, forUnmarshaling->waitSemaphoreCount * sizeof(const VkSemaphore));
     vkStream->read((uint32_t*)&forUnmarshaling->swapchainCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pSwapchains, forUnmarshaling->swapchainCount * sizeof(const VkSwapchainKHR));
     vkStream->read((VkSwapchainKHR*)forUnmarshaling->pSwapchains, forUnmarshaling->swapchainCount * sizeof(const VkSwapchainKHR));
+    vkStream->alloc((void**)&forUnmarshaling->pImageIndices, forUnmarshaling->swapchainCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pImageIndices, forUnmarshaling->swapchainCount * sizeof(const uint32_t));
     vkStream->read((VkResult**)&forUnmarshaling->pResults, sizeof(VkResult*));
     if (forUnmarshaling->pResults)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pResults, forUnmarshaling->swapchainCount * sizeof(VkResult));
         vkStream->read((VkResult*)forUnmarshaling->pResults, forUnmarshaling->swapchainCount * sizeof(VkResult));
     }
 }
@@ -10427,6 +10638,7 @@ VkResult unmarshal_vkQueuePresentKHR(
     const VkPresentInfoKHR* pPresentInfo)
 {
     vkStream->read((VkQueue*)&queue, sizeof(VkQueue));
+    vkStream->alloc((void**)&pPresentInfo, sizeof(const VkPresentInfoKHR));
     unmarshal_VkPresentInfoKHR(vkStream, (VkPresentInfoKHR*)(pPresentInfo));
     VkResult unmarshal_vkQueuePresentKHR_VkResult_return;
     vkStream->write(&unmarshal_vkQueuePresentKHR_VkResult_return, sizeof(VkResult));
@@ -10545,6 +10757,7 @@ void unmarshal_VkDeviceGroupPresentInfoKHR(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->swapchainCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pDeviceMasks, forUnmarshaling->swapchainCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pDeviceMasks, forUnmarshaling->swapchainCount * sizeof(const uint32_t));
     vkStream->read((VkDeviceGroupPresentModeFlagBitsKHR*)&forUnmarshaling->mode, sizeof(VkDeviceGroupPresentModeFlagBitsKHR));
 }
@@ -10680,6 +10893,7 @@ VkResult unmarshal_vkAcquireNextImage2KHR(
     uint32_t* pImageIndex)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pAcquireInfo, sizeof(const VkAcquireNextImageInfoKHR));
     unmarshal_VkAcquireNextImageInfoKHR(vkStream, (VkAcquireNextImageInfoKHR*)(pAcquireInfo));
     vkStream->write((uint32_t*)pImageIndex, sizeof(uint32_t));
     VkResult unmarshal_vkAcquireNextImage2KHR_VkResult_return;
@@ -10707,7 +10921,7 @@ void unmarshal_VkDisplayPropertiesKHR(
     VkDisplayPropertiesKHR* forUnmarshaling)
 {
     vkStream->read((VkDisplayKHR*)&forUnmarshaling->display, sizeof(VkDisplayKHR));
-    vkStream->getString();
+    vkStream->loadStringInPlace((char**)&forUnmarshaling->displayName);
     unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->physicalDimensions));
     unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->physicalResolution));
     vkStream->read((VkSurfaceTransformFlagsKHR*)&forUnmarshaling->supportedTransforms, sizeof(VkSurfaceTransformFlagsKHR));
@@ -11019,10 +11233,12 @@ VkResult unmarshal_vkCreateDisplayModeKHR(
 {
     vkStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
     vkStream->read((VkDisplayKHR*)&display, sizeof(VkDisplayKHR));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkDisplayModeCreateInfoKHR));
     unmarshal_VkDisplayModeCreateInfoKHR(vkStream, (VkDisplayModeCreateInfoKHR*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkDisplayModeKHR*)pMode, sizeof(VkDisplayModeKHR));
@@ -11091,10 +11307,12 @@ VkResult unmarshal_vkCreateDisplayPlaneSurfaceKHR(
     VkSurfaceKHR* pSurface)
 {
     vkStream->read((VkInstance*)&instance, sizeof(VkInstance));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkDisplaySurfaceCreateInfoKHR));
     unmarshal_VkDisplaySurfaceCreateInfoKHR(vkStream, (VkDisplaySurfaceCreateInfoKHR*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -11164,6 +11382,7 @@ VkResult unmarshal_vkCreateSharedSwapchainsKHR(
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((uint32_t*)&swapchainCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pCreateInfos, ((swapchainCount)) * sizeof(const VkSwapchainCreateInfoKHR));
     for (uint32_t i = 0; i < (uint32_t)((swapchainCount)); ++i)
     {
         unmarshal_VkSwapchainCreateInfoKHR(vkStream, (VkSwapchainCreateInfoKHR*)(pCreateInfos + i));
@@ -11171,6 +11390,7 @@ VkResult unmarshal_vkCreateSharedSwapchainsKHR(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkSwapchainKHR*)pSwapchains, ((swapchainCount)) * sizeof(VkSwapchainKHR));
@@ -11208,6 +11428,7 @@ void unmarshal_VkXlibSurfaceCreateInfoKHR(
     vkStream->read((Display**)&forUnmarshaling->dpy, sizeof(Display*));
     if (forUnmarshaling->dpy)
     {
+        vkStream->alloc((void**)&forUnmarshaling->dpy, sizeof(Display));
         vkStream->read((Display*)forUnmarshaling->dpy, sizeof(Display));
     }
     vkStream->read((Window*)&forUnmarshaling->window, sizeof(Window));
@@ -11241,10 +11462,12 @@ VkResult unmarshal_vkCreateXlibSurfaceKHR(
     VkSurfaceKHR* pSurface)
 {
     vkStream->read((VkInstance*)&instance, sizeof(VkInstance));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkXlibSurfaceCreateInfoKHR));
     unmarshal_VkXlibSurfaceCreateInfoKHR(vkStream, (VkXlibSurfaceCreateInfoKHR*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -11314,6 +11537,7 @@ void unmarshal_VkXcbSurfaceCreateInfoKHR(
     vkStream->read((xcb_connection_t**)&forUnmarshaling->connection, sizeof(xcb_connection_t*));
     if (forUnmarshaling->connection)
     {
+        vkStream->alloc((void**)&forUnmarshaling->connection, sizeof(xcb_connection_t));
         vkStream->read((xcb_connection_t*)forUnmarshaling->connection, sizeof(xcb_connection_t));
     }
     vkStream->read((xcb_window_t*)&forUnmarshaling->window, sizeof(xcb_window_t));
@@ -11347,10 +11571,12 @@ VkResult unmarshal_vkCreateXcbSurfaceKHR(
     VkSurfaceKHR* pSurface)
 {
     vkStream->read((VkInstance*)&instance, sizeof(VkInstance));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkXcbSurfaceCreateInfoKHR));
     unmarshal_VkXcbSurfaceCreateInfoKHR(vkStream, (VkXcbSurfaceCreateInfoKHR*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -11424,11 +11650,13 @@ void unmarshal_VkWaylandSurfaceCreateInfoKHR(
     vkStream->read((wl_display**)&forUnmarshaling->display, sizeof(wl_display*));
     if (forUnmarshaling->display)
     {
+        vkStream->alloc((void**)&forUnmarshaling->display, sizeof(wl_display));
         vkStream->read((wl_display*)forUnmarshaling->display, sizeof(wl_display));
     }
     vkStream->read((wl_surface**)&forUnmarshaling->surface, sizeof(wl_surface*));
     if (forUnmarshaling->surface)
     {
+        vkStream->alloc((void**)&forUnmarshaling->surface, sizeof(wl_surface));
         vkStream->read((wl_surface*)forUnmarshaling->surface, sizeof(wl_surface));
     }
 }
@@ -11461,10 +11689,12 @@ VkResult unmarshal_vkCreateWaylandSurfaceKHR(
     VkSurfaceKHR* pSurface)
 {
     vkStream->read((VkInstance*)&instance, sizeof(VkInstance));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkWaylandSurfaceCreateInfoKHR));
     unmarshal_VkWaylandSurfaceCreateInfoKHR(vkStream, (VkWaylandSurfaceCreateInfoKHR*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -11534,11 +11764,13 @@ void unmarshal_VkMirSurfaceCreateInfoKHR(
     vkStream->read((MirConnection**)&forUnmarshaling->connection, sizeof(MirConnection*));
     if (forUnmarshaling->connection)
     {
+        vkStream->alloc((void**)&forUnmarshaling->connection, sizeof(MirConnection));
         vkStream->read((MirConnection*)forUnmarshaling->connection, sizeof(MirConnection));
     }
     vkStream->read((MirSurface**)&forUnmarshaling->mirSurface, sizeof(MirSurface*));
     if (forUnmarshaling->mirSurface)
     {
+        vkStream->alloc((void**)&forUnmarshaling->mirSurface, sizeof(MirSurface));
         vkStream->read((MirSurface*)forUnmarshaling->mirSurface, sizeof(MirSurface));
     }
 }
@@ -11571,10 +11803,12 @@ VkResult unmarshal_vkCreateMirSurfaceKHR(
     VkSurfaceKHR* pSurface)
 {
     vkStream->read((VkInstance*)&instance, sizeof(VkInstance));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkMirSurfaceCreateInfoKHR));
     unmarshal_VkMirSurfaceCreateInfoKHR(vkStream, (VkMirSurfaceCreateInfoKHR*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -11639,6 +11873,7 @@ void unmarshal_VkAndroidSurfaceCreateInfoKHR(
     vkStream->read((ANativeWindow**)&forUnmarshaling->window, sizeof(ANativeWindow*));
     if (forUnmarshaling->window)
     {
+        vkStream->alloc((void**)&forUnmarshaling->window, sizeof(ANativeWindow));
         vkStream->read((ANativeWindow*)forUnmarshaling->window, sizeof(ANativeWindow));
     }
 }
@@ -11671,10 +11906,12 @@ VkResult unmarshal_vkCreateAndroidSurfaceKHR(
     VkSurfaceKHR* pSurface)
 {
     vkStream->read((VkInstance*)&instance, sizeof(VkInstance));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkAndroidSurfaceCreateInfoKHR));
     unmarshal_VkAndroidSurfaceCreateInfoKHR(vkStream, (VkAndroidSurfaceCreateInfoKHR*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -11737,10 +11974,12 @@ VkResult unmarshal_vkCreateWin32SurfaceKHR(
     VkSurfaceKHR* pSurface)
 {
     vkStream->read((VkInstance*)&instance, sizeof(VkInstance));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkWin32SurfaceCreateInfoKHR));
     unmarshal_VkWin32SurfaceCreateInfoKHR(vkStream, (VkWin32SurfaceCreateInfoKHR*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -11858,6 +12097,7 @@ VkResult unmarshal_vkGetPhysicalDeviceImageFormatProperties2KHR(
     VkImageFormatProperties2* pImageFormatProperties)
 {
     vkStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
+    vkStream->alloc((void**)&pImageFormatInfo, sizeof(const VkPhysicalDeviceImageFormatInfo2));
     unmarshal_VkPhysicalDeviceImageFormatInfo2(vkStream, (VkPhysicalDeviceImageFormatInfo2*)(pImageFormatInfo));
     unmarshal_VkImageFormatProperties2(vkStream, (VkImageFormatProperties2*)(pImageFormatProperties));
     VkResult unmarshal_vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return;
@@ -11935,6 +12175,7 @@ void unmarshal_vkGetPhysicalDeviceSparseImageFormatProperties2KHR(
     VkSparseImageFormatProperties2* pProperties)
 {
     vkStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
+    vkStream->alloc((void**)&pFormatInfo, sizeof(const VkPhysicalDeviceSparseImageFormatInfo2));
     unmarshal_VkPhysicalDeviceSparseImageFormatInfo2(vkStream, (VkPhysicalDeviceSparseImageFormatInfo2*)(pFormatInfo));
     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
     for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
@@ -12113,6 +12354,7 @@ void unmarshal_vkGetPhysicalDeviceExternalBufferPropertiesKHR(
     VkExternalBufferProperties* pExternalBufferProperties)
 {
     vkStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
+    vkStream->alloc((void**)&pExternalBufferInfo, sizeof(const VkPhysicalDeviceExternalBufferInfo));
     unmarshal_VkPhysicalDeviceExternalBufferInfo(vkStream, (VkPhysicalDeviceExternalBufferInfo*)(pExternalBufferInfo));
     unmarshal_VkExternalBufferProperties(vkStream, (VkExternalBufferProperties*)(pExternalBufferProperties));
 }
@@ -12171,6 +12413,7 @@ void unmarshal_VkExportMemoryWin32HandleInfoKHR(
     vkStream->read((SECURITY_ATTRIBUTES**)&forUnmarshaling->pAttributes, sizeof(const SECURITY_ATTRIBUTES*));
     if (forUnmarshaling->pAttributes)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pAttributes, sizeof(const SECURITY_ATTRIBUTES));
         vkStream->read((SECURITY_ATTRIBUTES*)forUnmarshaling->pAttributes, sizeof(const SECURITY_ATTRIBUTES));
     }
     vkStream->read((DWORD*)&forUnmarshaling->dwAccess, sizeof(DWORD));
@@ -12240,6 +12483,7 @@ VkResult unmarshal_vkGetMemoryWin32HandleKHR(
     HANDLE* pHandle)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pGetWin32HandleInfo, sizeof(const VkMemoryGetWin32HandleInfoKHR));
     unmarshal_VkMemoryGetWin32HandleInfoKHR(vkStream, (VkMemoryGetWin32HandleInfoKHR*)(pGetWin32HandleInfo));
     vkStream->write((HANDLE*)pHandle, sizeof(HANDLE));
     VkResult unmarshal_vkGetMemoryWin32HandleKHR_VkResult_return;
@@ -12366,6 +12610,7 @@ VkResult unmarshal_vkGetMemoryFdKHR(
     int* pFd)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pGetFdInfo, sizeof(const VkMemoryGetFdInfoKHR));
     unmarshal_VkMemoryGetFdInfoKHR(vkStream, (VkMemoryGetFdInfoKHR*)(pGetFdInfo));
     vkStream->write((int*)pFd, sizeof(int));
     VkResult unmarshal_vkGetMemoryFdKHR_VkResult_return;
@@ -12431,11 +12676,16 @@ void unmarshal_VkWin32KeyedMutexAcquireReleaseInfoKHR(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->acquireCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pAcquireSyncs, forUnmarshaling->acquireCount * sizeof(const VkDeviceMemory));
     vkStream->read((VkDeviceMemory*)forUnmarshaling->pAcquireSyncs, forUnmarshaling->acquireCount * sizeof(const VkDeviceMemory));
+    vkStream->alloc((void**)&forUnmarshaling->pAcquireKeys, forUnmarshaling->acquireCount * sizeof(const uint64_t));
     vkStream->read((uint64_t*)forUnmarshaling->pAcquireKeys, forUnmarshaling->acquireCount * sizeof(const uint64_t));
+    vkStream->alloc((void**)&forUnmarshaling->pAcquireTimeouts, forUnmarshaling->acquireCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pAcquireTimeouts, forUnmarshaling->acquireCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->releaseCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pReleaseSyncs, forUnmarshaling->releaseCount * sizeof(const VkDeviceMemory));
     vkStream->read((VkDeviceMemory*)forUnmarshaling->pReleaseSyncs, forUnmarshaling->releaseCount * sizeof(const VkDeviceMemory));
+    vkStream->alloc((void**)&forUnmarshaling->pReleaseKeys, forUnmarshaling->releaseCount * sizeof(const uint64_t));
     vkStream->read((uint64_t*)forUnmarshaling->pReleaseKeys, forUnmarshaling->releaseCount * sizeof(const uint64_t));
 }
 
@@ -12459,6 +12709,7 @@ void unmarshal_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
     VkExternalSemaphoreProperties* pExternalSemaphoreProperties)
 {
     vkStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
+    vkStream->alloc((void**)&pExternalSemaphoreInfo, sizeof(const VkPhysicalDeviceExternalSemaphoreInfo));
     unmarshal_VkPhysicalDeviceExternalSemaphoreInfo(vkStream, (VkPhysicalDeviceExternalSemaphoreInfo*)(pExternalSemaphoreInfo));
     unmarshal_VkExternalSemaphoreProperties(vkStream, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
 }
@@ -12521,6 +12772,7 @@ void unmarshal_VkExportSemaphoreWin32HandleInfoKHR(
     vkStream->read((SECURITY_ATTRIBUTES**)&forUnmarshaling->pAttributes, sizeof(const SECURITY_ATTRIBUTES*));
     if (forUnmarshaling->pAttributes)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pAttributes, sizeof(const SECURITY_ATTRIBUTES));
         vkStream->read((SECURITY_ATTRIBUTES*)forUnmarshaling->pAttributes, sizeof(const SECURITY_ATTRIBUTES));
     }
     vkStream->read((DWORD*)&forUnmarshaling->dwAccess, sizeof(DWORD));
@@ -12559,12 +12811,14 @@ void unmarshal_VkD3D12FenceSubmitInfoKHR(
     vkStream->read((uint64_t**)&forUnmarshaling->pWaitSemaphoreValues, sizeof(const uint64_t*));
     if (forUnmarshaling->pWaitSemaphoreValues)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pWaitSemaphoreValues, forUnmarshaling->waitSemaphoreValuesCount * sizeof(const uint64_t));
         vkStream->read((uint64_t*)forUnmarshaling->pWaitSemaphoreValues, forUnmarshaling->waitSemaphoreValuesCount * sizeof(const uint64_t));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->signalSemaphoreValuesCount, sizeof(uint32_t));
     vkStream->read((uint64_t**)&forUnmarshaling->pSignalSemaphoreValues, sizeof(const uint64_t*));
     if (forUnmarshaling->pSignalSemaphoreValues)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pSignalSemaphoreValues, forUnmarshaling->signalSemaphoreValuesCount * sizeof(const uint64_t));
         vkStream->read((uint64_t*)forUnmarshaling->pSignalSemaphoreValues, forUnmarshaling->signalSemaphoreValuesCount * sizeof(const uint64_t));
     }
 }
@@ -12609,6 +12863,7 @@ VkResult unmarshal_vkImportSemaphoreWin32HandleKHR(
     const VkImportSemaphoreWin32HandleInfoKHR* pImportSemaphoreWin32HandleInfo)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pImportSemaphoreWin32HandleInfo, sizeof(const VkImportSemaphoreWin32HandleInfoKHR));
     unmarshal_VkImportSemaphoreWin32HandleInfoKHR(vkStream, (VkImportSemaphoreWin32HandleInfoKHR*)(pImportSemaphoreWin32HandleInfo));
     VkResult unmarshal_vkImportSemaphoreWin32HandleKHR_VkResult_return;
     vkStream->write(&unmarshal_vkImportSemaphoreWin32HandleKHR_VkResult_return, sizeof(VkResult));
@@ -12636,6 +12891,7 @@ VkResult unmarshal_vkGetSemaphoreWin32HandleKHR(
     HANDLE* pHandle)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pGetWin32HandleInfo, sizeof(const VkSemaphoreGetWin32HandleInfoKHR));
     unmarshal_VkSemaphoreGetWin32HandleInfoKHR(vkStream, (VkSemaphoreGetWin32HandleInfoKHR*)(pGetWin32HandleInfo));
     vkStream->write((HANDLE*)pHandle, sizeof(HANDLE));
     VkResult unmarshal_vkGetSemaphoreWin32HandleKHR_VkResult_return;
@@ -12711,6 +12967,7 @@ VkResult unmarshal_vkImportSemaphoreFdKHR(
     const VkImportSemaphoreFdInfoKHR* pImportSemaphoreFdInfo)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pImportSemaphoreFdInfo, sizeof(const VkImportSemaphoreFdInfoKHR));
     unmarshal_VkImportSemaphoreFdInfoKHR(vkStream, (VkImportSemaphoreFdInfoKHR*)(pImportSemaphoreFdInfo));
     VkResult unmarshal_vkImportSemaphoreFdKHR_VkResult_return;
     vkStream->write(&unmarshal_vkImportSemaphoreFdKHR_VkResult_return, sizeof(VkResult));
@@ -12738,6 +12995,7 @@ VkResult unmarshal_vkGetSemaphoreFdKHR(
     int* pFd)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pGetFdInfo, sizeof(const VkSemaphoreGetFdInfoKHR));
     unmarshal_VkSemaphoreGetFdInfoKHR(vkStream, (VkSemaphoreGetFdInfoKHR*)(pGetFdInfo));
     vkStream->write((int*)pFd, sizeof(int));
     VkResult unmarshal_vkGetSemaphoreFdKHR_VkResult_return;
@@ -12801,6 +13059,7 @@ void unmarshal_vkCmdPushDescriptorSetKHR(
     vkStream->read((VkPipelineLayout*)&layout, sizeof(VkPipelineLayout));
     vkStream->read((uint32_t*)&set, sizeof(uint32_t));
     vkStream->read((uint32_t*)&descriptorWriteCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pDescriptorWrites, ((descriptorWriteCount)) * sizeof(const VkWriteDescriptorSet));
     for (uint32_t i = 0; i < (uint32_t)((descriptorWriteCount)); ++i)
     {
         unmarshal_VkWriteDescriptorSet(vkStream, (VkWriteDescriptorSet*)(pDescriptorWrites + i));
@@ -12841,6 +13100,7 @@ void unmarshal_vkCmdPushDescriptorSetWithTemplateKHR(
     vkStream->read((void**)&pData, sizeof(const void*));
     if (pData)
     {
+        vkStream->alloc((void**)&pData, sizeof(const uint8_t));
         vkStream->read((void*)pData, sizeof(const uint8_t));
     }
 }
@@ -12890,6 +13150,7 @@ void unmarshal_VkPresentRegionKHR(
     vkStream->read((VkRectLayerKHR**)&forUnmarshaling->pRectangles, sizeof(const VkRectLayerKHR*));
     if (forUnmarshaling->pRectangles)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pRectangles, forUnmarshaling->rectangleCount * sizeof(const VkRectLayerKHR));
         for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->rectangleCount; ++i)
         {
             unmarshal_VkRectLayerKHR(vkStream, (VkRectLayerKHR*)(forUnmarshaling->pRectangles + i));
@@ -12926,6 +13187,7 @@ void unmarshal_VkPresentRegionsKHR(
     vkStream->read((VkPresentRegionKHR**)&forUnmarshaling->pRegions, sizeof(const VkPresentRegionKHR*));
     if (forUnmarshaling->pRegions)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pRegions, forUnmarshaling->swapchainCount * sizeof(const VkPresentRegionKHR));
         for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->swapchainCount; ++i)
         {
             unmarshal_VkPresentRegionKHR(vkStream, (VkPresentRegionKHR*)(forUnmarshaling->pRegions + i));
@@ -12963,10 +13225,12 @@ VkResult unmarshal_vkCreateDescriptorUpdateTemplateKHR(
     VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkDescriptorUpdateTemplateCreateInfo));
     unmarshal_VkDescriptorUpdateTemplateCreateInfo(vkStream, (VkDescriptorUpdateTemplateCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkDescriptorUpdateTemplate*)pDescriptorUpdateTemplate, sizeof(VkDescriptorUpdateTemplate));
@@ -13001,6 +13265,7 @@ void unmarshal_vkDestroyDescriptorUpdateTemplateKHR(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -13035,6 +13300,7 @@ void unmarshal_vkUpdateDescriptorSetWithTemplateKHR(
     vkStream->read((void**)&pData, sizeof(const void*));
     if (pData)
     {
+        vkStream->alloc((void**)&pData, sizeof(const uint8_t));
         vkStream->read((void*)pData, sizeof(const uint8_t));
     }
 }
@@ -13149,11 +13415,13 @@ void unmarshal_VkSubpassDescription2KHR(
     vkStream->read((VkPipelineBindPoint*)&forUnmarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
     vkStream->read((uint32_t*)&forUnmarshaling->viewMask, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->inputAttachmentCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pInputAttachments, forUnmarshaling->inputAttachmentCount * sizeof(const VkAttachmentReference2KHR));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->inputAttachmentCount; ++i)
     {
         unmarshal_VkAttachmentReference2KHR(vkStream, (VkAttachmentReference2KHR*)(forUnmarshaling->pInputAttachments + i));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->colorAttachmentCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pColorAttachments, forUnmarshaling->colorAttachmentCount * sizeof(const VkAttachmentReference2KHR));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->colorAttachmentCount; ++i)
     {
         unmarshal_VkAttachmentReference2KHR(vkStream, (VkAttachmentReference2KHR*)(forUnmarshaling->pColorAttachments + i));
@@ -13161,6 +13429,7 @@ void unmarshal_VkSubpassDescription2KHR(
     vkStream->read((VkAttachmentReference2KHR**)&forUnmarshaling->pResolveAttachments, sizeof(const VkAttachmentReference2KHR*));
     if (forUnmarshaling->pResolveAttachments)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pResolveAttachments, forUnmarshaling->colorAttachmentCount * sizeof(const VkAttachmentReference2KHR));
         for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->colorAttachmentCount; ++i)
         {
             unmarshal_VkAttachmentReference2KHR(vkStream, (VkAttachmentReference2KHR*)(forUnmarshaling->pResolveAttachments + i));
@@ -13169,9 +13438,11 @@ void unmarshal_VkSubpassDescription2KHR(
     vkStream->read((VkAttachmentReference2KHR**)&forUnmarshaling->pDepthStencilAttachment, sizeof(const VkAttachmentReference2KHR*));
     if (forUnmarshaling->pDepthStencilAttachment)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pDepthStencilAttachment, sizeof(const VkAttachmentReference2KHR));
         unmarshal_VkAttachmentReference2KHR(vkStream, (VkAttachmentReference2KHR*)(forUnmarshaling->pDepthStencilAttachment));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->preserveAttachmentCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pPreserveAttachments, forUnmarshaling->preserveAttachmentCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pPreserveAttachments, forUnmarshaling->preserveAttachmentCount * sizeof(const uint32_t));
 }
 
@@ -13245,21 +13516,25 @@ void unmarshal_VkRenderPassCreateInfo2KHR(
     // TODO: Unsupported : const void* pNext
     vkStream->read((VkRenderPassCreateFlags*)&forUnmarshaling->flags, sizeof(VkRenderPassCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->attachmentCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pAttachments, forUnmarshaling->attachmentCount * sizeof(const VkAttachmentDescription2KHR));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentCount; ++i)
     {
         unmarshal_VkAttachmentDescription2KHR(vkStream, (VkAttachmentDescription2KHR*)(forUnmarshaling->pAttachments + i));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->subpassCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pSubpasses, forUnmarshaling->subpassCount * sizeof(const VkSubpassDescription2KHR));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->subpassCount; ++i)
     {
         unmarshal_VkSubpassDescription2KHR(vkStream, (VkSubpassDescription2KHR*)(forUnmarshaling->pSubpasses + i));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->dependencyCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pDependencies, forUnmarshaling->dependencyCount * sizeof(const VkSubpassDependency2KHR));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->dependencyCount; ++i)
     {
         unmarshal_VkSubpassDependency2KHR(vkStream, (VkSubpassDependency2KHR*)(forUnmarshaling->pDependencies + i));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->correlatedViewMaskCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pCorrelatedViewMasks, forUnmarshaling->correlatedViewMaskCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pCorrelatedViewMasks, forUnmarshaling->correlatedViewMaskCount * sizeof(const uint32_t));
 }
 
@@ -13291,10 +13566,12 @@ VkResult unmarshal_vkCreateRenderPass2KHR(
     VkRenderPass* pRenderPass)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkRenderPassCreateInfo2KHR));
     unmarshal_VkRenderPassCreateInfo2KHR(vkStream, (VkRenderPassCreateInfo2KHR*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkRenderPass*)pRenderPass, sizeof(VkRenderPass));
@@ -13341,7 +13618,9 @@ void unmarshal_vkCmdBeginRenderPass2KHR(
     const VkSubpassBeginInfoKHR* pSubpassBeginInfo)
 {
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+    vkStream->alloc((void**)&pRenderPassBegin, sizeof(const VkRenderPassBeginInfo));
     unmarshal_VkRenderPassBeginInfo(vkStream, (VkRenderPassBeginInfo*)(pRenderPassBegin));
+    vkStream->alloc((void**)&pSubpassBeginInfo, sizeof(const VkSubpassBeginInfoKHR));
     unmarshal_VkSubpassBeginInfoKHR(vkStream, (VkSubpassBeginInfoKHR*)(pSubpassBeginInfo));
 }
 
@@ -13381,7 +13660,9 @@ void unmarshal_vkCmdNextSubpass2KHR(
     const VkSubpassEndInfoKHR* pSubpassEndInfo)
 {
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+    vkStream->alloc((void**)&pSubpassBeginInfo, sizeof(const VkSubpassBeginInfoKHR));
     unmarshal_VkSubpassBeginInfoKHR(vkStream, (VkSubpassBeginInfoKHR*)(pSubpassBeginInfo));
+    vkStream->alloc((void**)&pSubpassEndInfo, sizeof(const VkSubpassEndInfoKHR));
     unmarshal_VkSubpassEndInfoKHR(vkStream, (VkSubpassEndInfoKHR*)(pSubpassEndInfo));
 }
 
@@ -13400,6 +13681,7 @@ void unmarshal_vkCmdEndRenderPass2KHR(
     const VkSubpassEndInfoKHR* pSubpassEndInfo)
 {
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+    vkStream->alloc((void**)&pSubpassEndInfo, sizeof(const VkSubpassEndInfoKHR));
     unmarshal_VkSubpassEndInfoKHR(vkStream, (VkSubpassEndInfoKHR*)(pSubpassEndInfo));
 }
 
@@ -13469,6 +13751,7 @@ void unmarshal_vkGetPhysicalDeviceExternalFencePropertiesKHR(
     VkExternalFenceProperties* pExternalFenceProperties)
 {
     vkStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
+    vkStream->alloc((void**)&pExternalFenceInfo, sizeof(const VkPhysicalDeviceExternalFenceInfo));
     unmarshal_VkPhysicalDeviceExternalFenceInfo(vkStream, (VkPhysicalDeviceExternalFenceInfo*)(pExternalFenceInfo));
     unmarshal_VkExternalFenceProperties(vkStream, (VkExternalFenceProperties*)(pExternalFenceProperties));
 }
@@ -13531,6 +13814,7 @@ void unmarshal_VkExportFenceWin32HandleInfoKHR(
     vkStream->read((SECURITY_ATTRIBUTES**)&forUnmarshaling->pAttributes, sizeof(const SECURITY_ATTRIBUTES*));
     if (forUnmarshaling->pAttributes)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pAttributes, sizeof(const SECURITY_ATTRIBUTES));
         vkStream->read((SECURITY_ATTRIBUTES*)forUnmarshaling->pAttributes, sizeof(const SECURITY_ATTRIBUTES));
     }
     vkStream->read((DWORD*)&forUnmarshaling->dwAccess, sizeof(DWORD));
@@ -13577,6 +13861,7 @@ VkResult unmarshal_vkImportFenceWin32HandleKHR(
     const VkImportFenceWin32HandleInfoKHR* pImportFenceWin32HandleInfo)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pImportFenceWin32HandleInfo, sizeof(const VkImportFenceWin32HandleInfoKHR));
     unmarshal_VkImportFenceWin32HandleInfoKHR(vkStream, (VkImportFenceWin32HandleInfoKHR*)(pImportFenceWin32HandleInfo));
     VkResult unmarshal_vkImportFenceWin32HandleKHR_VkResult_return;
     vkStream->write(&unmarshal_vkImportFenceWin32HandleKHR_VkResult_return, sizeof(VkResult));
@@ -13604,6 +13889,7 @@ VkResult unmarshal_vkGetFenceWin32HandleKHR(
     HANDLE* pHandle)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pGetWin32HandleInfo, sizeof(const VkFenceGetWin32HandleInfoKHR));
     unmarshal_VkFenceGetWin32HandleInfoKHR(vkStream, (VkFenceGetWin32HandleInfoKHR*)(pGetWin32HandleInfo));
     vkStream->write((HANDLE*)pHandle, sizeof(HANDLE));
     VkResult unmarshal_vkGetFenceWin32HandleKHR_VkResult_return;
@@ -13679,6 +13965,7 @@ VkResult unmarshal_vkImportFenceFdKHR(
     const VkImportFenceFdInfoKHR* pImportFenceFdInfo)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pImportFenceFdInfo, sizeof(const VkImportFenceFdInfoKHR));
     unmarshal_VkImportFenceFdInfoKHR(vkStream, (VkImportFenceFdInfoKHR*)(pImportFenceFdInfo));
     VkResult unmarshal_vkImportFenceFdKHR_VkResult_return;
     vkStream->write(&unmarshal_vkImportFenceFdKHR_VkResult_return, sizeof(VkResult));
@@ -13706,6 +13993,7 @@ VkResult unmarshal_vkGetFenceFdKHR(
     int* pFd)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pGetFdInfo, sizeof(const VkFenceGetFdInfoKHR));
     unmarshal_VkFenceGetFdInfoKHR(vkStream, (VkFenceGetFdInfoKHR*)(pGetFdInfo));
     vkStream->write((int*)pFd, sizeof(int));
     VkResult unmarshal_vkGetFenceFdKHR_VkResult_return;
@@ -13798,6 +14086,7 @@ VkResult unmarshal_vkGetPhysicalDeviceSurfaceCapabilities2KHR(
     VkSurfaceCapabilities2KHR* pSurfaceCapabilities)
 {
     vkStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
+    vkStream->alloc((void**)&pSurfaceInfo, sizeof(const VkPhysicalDeviceSurfaceInfo2KHR));
     unmarshal_VkPhysicalDeviceSurfaceInfo2KHR(vkStream, (VkPhysicalDeviceSurfaceInfo2KHR*)(pSurfaceInfo));
     unmarshal_VkSurfaceCapabilities2KHR(vkStream, (VkSurfaceCapabilities2KHR*)(pSurfaceCapabilities));
     VkResult unmarshal_vkGetPhysicalDeviceSurfaceCapabilities2KHR_VkResult_return;
@@ -13832,6 +14121,7 @@ VkResult unmarshal_vkGetPhysicalDeviceSurfaceFormats2KHR(
     VkSurfaceFormat2KHR* pSurfaceFormats)
 {
     vkStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
+    vkStream->alloc((void**)&pSurfaceInfo, sizeof(const VkPhysicalDeviceSurfaceInfo2KHR));
     unmarshal_VkPhysicalDeviceSurfaceInfo2KHR(vkStream, (VkPhysicalDeviceSurfaceInfo2KHR*)(pSurfaceInfo));
     vkStream->write((uint32_t*)pSurfaceFormatCount, sizeof(uint32_t));
     for (uint32_t i = 0; i < (uint32_t)(*(pSurfaceFormatCount)); ++i)
@@ -14076,6 +14366,7 @@ VkResult unmarshal_vkGetDisplayPlaneCapabilities2KHR(
     VkDisplayPlaneCapabilities2KHR* pCapabilities)
 {
     vkStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
+    vkStream->alloc((void**)&pDisplayPlaneInfo, sizeof(const VkDisplayPlaneInfo2KHR));
     unmarshal_VkDisplayPlaneInfo2KHR(vkStream, (VkDisplayPlaneInfo2KHR*)(pDisplayPlaneInfo));
     unmarshal_VkDisplayPlaneCapabilities2KHR(vkStream, (VkDisplayPlaneCapabilities2KHR*)(pCapabilities));
     VkResult unmarshal_vkGetDisplayPlaneCapabilities2KHR_VkResult_return;
@@ -14109,6 +14400,7 @@ void unmarshal_vkGetImageMemoryRequirements2KHR(
     VkMemoryRequirements2* pMemoryRequirements)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pInfo, sizeof(const VkImageMemoryRequirementsInfo2));
     unmarshal_VkImageMemoryRequirementsInfo2(vkStream, (VkImageMemoryRequirementsInfo2*)(pInfo));
     unmarshal_VkMemoryRequirements2(vkStream, (VkMemoryRequirements2*)(pMemoryRequirements));
 }
@@ -14131,6 +14423,7 @@ void unmarshal_vkGetBufferMemoryRequirements2KHR(
     VkMemoryRequirements2* pMemoryRequirements)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pInfo, sizeof(const VkBufferMemoryRequirementsInfo2));
     unmarshal_VkBufferMemoryRequirementsInfo2(vkStream, (VkBufferMemoryRequirementsInfo2*)(pInfo));
     unmarshal_VkMemoryRequirements2(vkStream, (VkMemoryRequirements2*)(pMemoryRequirements));
 }
@@ -14159,6 +14452,7 @@ void unmarshal_vkGetImageSparseMemoryRequirements2KHR(
     VkSparseImageMemoryRequirements2* pSparseMemoryRequirements)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pInfo, sizeof(const VkImageSparseMemoryRequirementsInfo2));
     unmarshal_VkImageSparseMemoryRequirementsInfo2(vkStream, (VkImageSparseMemoryRequirementsInfo2*)(pInfo));
     vkStream->write((uint32_t*)pSparseMemoryRequirementCount, sizeof(uint32_t));
     for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
@@ -14188,6 +14482,7 @@ void unmarshal_VkImageFormatListCreateInfoKHR(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->viewFormatCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pViewFormats, forUnmarshaling->viewFormatCount * sizeof(const VkFormat));
     vkStream->read((VkFormat*)forUnmarshaling->pViewFormats, forUnmarshaling->viewFormatCount * sizeof(const VkFormat));
 }
 
@@ -14221,10 +14516,12 @@ VkResult unmarshal_vkCreateSamplerYcbcrConversionKHR(
     VkSamplerYcbcrConversion* pYcbcrConversion)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkSamplerYcbcrConversionCreateInfo));
     unmarshal_VkSamplerYcbcrConversionCreateInfo(vkStream, (VkSamplerYcbcrConversionCreateInfo*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkSamplerYcbcrConversion*)pYcbcrConversion, sizeof(VkSamplerYcbcrConversion));
@@ -14259,6 +14556,7 @@ void unmarshal_vkDestroySamplerYcbcrConversionKHR(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -14290,6 +14588,7 @@ VkResult unmarshal_vkBindBufferMemory2KHR(
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((uint32_t*)&bindInfoCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pBindInfos, ((bindInfoCount)) * sizeof(const VkBindBufferMemoryInfo));
     for (uint32_t i = 0; i < (uint32_t)((bindInfoCount)); ++i)
     {
         unmarshal_VkBindBufferMemoryInfo(vkStream, (VkBindBufferMemoryInfo*)(pBindInfos + i));
@@ -14324,6 +14623,7 @@ VkResult unmarshal_vkBindImageMemory2KHR(
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((uint32_t*)&bindInfoCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pBindInfos, ((bindInfoCount)) * sizeof(const VkBindImageMemoryInfo));
     for (uint32_t i = 0; i < (uint32_t)((bindInfoCount)); ++i)
     {
         unmarshal_VkBindImageMemoryInfo(vkStream, (VkBindImageMemoryInfo*)(pBindInfos + i));
@@ -14353,6 +14653,7 @@ void unmarshal_vkGetDescriptorSetLayoutSupportKHR(
     VkDescriptorSetLayoutSupport* pSupport)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkDescriptorSetLayoutCreateInfo));
     unmarshal_VkDescriptorSetLayoutCreateInfo(vkStream, (VkDescriptorSetLayoutCreateInfo*)(pCreateInfo));
     unmarshal_VkDescriptorSetLayoutSupport(vkStream, (VkDescriptorSetLayoutSupport*)(pSupport));
 }
@@ -14491,6 +14792,7 @@ void unmarshal_VkDebugReportCallbackCreateInfoEXT(
     vkStream->read((void**)&forUnmarshaling->pUserData, sizeof(void*));
     if (forUnmarshaling->pUserData)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pUserData, sizeof(uint8_t));
         vkStream->read((void*)forUnmarshaling->pUserData, sizeof(uint8_t));
     }
 }
@@ -14523,10 +14825,12 @@ VkResult unmarshal_vkCreateDebugReportCallbackEXT(
     VkDebugReportCallbackEXT* pCallback)
 {
     vkStream->read((VkInstance*)&instance, sizeof(VkInstance));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkDebugReportCallbackCreateInfoEXT));
     unmarshal_VkDebugReportCallbackCreateInfoEXT(vkStream, (VkDebugReportCallbackCreateInfoEXT*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkDebugReportCallbackEXT*)pCallback, sizeof(VkDebugReportCallbackEXT));
@@ -14561,6 +14865,7 @@ void unmarshal_vkDestroyDebugReportCallbackEXT(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -14603,8 +14908,8 @@ void unmarshal_vkDebugReportMessageEXT(
     vkStream->read((uint64_t*)&object, sizeof(uint64_t));
     vkStream->read((size_t*)&location, sizeof(size_t));
     vkStream->read((int32_t*)&messageCode, sizeof(int32_t));
-    vkStream->getString();
-    vkStream->getString();
+    vkStream->loadStringInPlace((char**)&pLayerPrefix);
+    vkStream->loadStringInPlace((char**)&pMessage);
 }
 
 #endif
@@ -14662,7 +14967,7 @@ void unmarshal_VkDebugMarkerObjectNameInfoEXT(
     // TODO: Unsupported : const void* pNext
     vkStream->read((VkDebugReportObjectTypeEXT*)&forUnmarshaling->objectType, sizeof(VkDebugReportObjectTypeEXT));
     vkStream->read((uint64_t*)&forUnmarshaling->object, sizeof(uint64_t));
-    vkStream->getString();
+    vkStream->loadStringInPlace((char**)&forUnmarshaling->pObjectName);
 }
 
 void marshal_VkDebugMarkerObjectTagInfoEXT(
@@ -14690,6 +14995,7 @@ void unmarshal_VkDebugMarkerObjectTagInfoEXT(
     vkStream->read((uint64_t*)&forUnmarshaling->object, sizeof(uint64_t));
     vkStream->read((uint64_t*)&forUnmarshaling->tagName, sizeof(uint64_t));
     vkStream->read((size_t*)&forUnmarshaling->tagSize, sizeof(size_t));
+    vkStream->alloc((void**)&forUnmarshaling->pTag, forUnmarshaling->tagSize * sizeof(const uint8_t));
     vkStream->read((void*)forUnmarshaling->pTag, forUnmarshaling->tagSize * sizeof(const uint8_t));
 }
 
@@ -14711,7 +15017,7 @@ void unmarshal_VkDebugMarkerMarkerInfoEXT(
     vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
-    vkStream->getString();
+    vkStream->loadStringInPlace((char**)&forUnmarshaling->pMarkerName);
     vkStream->read((float*)forUnmarshaling->color, 4 * sizeof(float));
 }
 
@@ -14733,6 +15039,7 @@ VkResult unmarshal_vkDebugMarkerSetObjectTagEXT(
     const VkDebugMarkerObjectTagInfoEXT* pTagInfo)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pTagInfo, sizeof(const VkDebugMarkerObjectTagInfoEXT));
     unmarshal_VkDebugMarkerObjectTagInfoEXT(vkStream, (VkDebugMarkerObjectTagInfoEXT*)(pTagInfo));
     VkResult unmarshal_vkDebugMarkerSetObjectTagEXT_VkResult_return;
     vkStream->write(&unmarshal_vkDebugMarkerSetObjectTagEXT_VkResult_return, sizeof(VkResult));
@@ -14757,6 +15064,7 @@ VkResult unmarshal_vkDebugMarkerSetObjectNameEXT(
     const VkDebugMarkerObjectNameInfoEXT* pNameInfo)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pNameInfo, sizeof(const VkDebugMarkerObjectNameInfoEXT));
     unmarshal_VkDebugMarkerObjectNameInfoEXT(vkStream, (VkDebugMarkerObjectNameInfoEXT*)(pNameInfo));
     VkResult unmarshal_vkDebugMarkerSetObjectNameEXT_VkResult_return;
     vkStream->write(&unmarshal_vkDebugMarkerSetObjectNameEXT_VkResult_return, sizeof(VkResult));
@@ -14778,6 +15086,7 @@ void unmarshal_vkCmdDebugMarkerBeginEXT(
     const VkDebugMarkerMarkerInfoEXT* pMarkerInfo)
 {
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+    vkStream->alloc((void**)&pMarkerInfo, sizeof(const VkDebugMarkerMarkerInfoEXT));
     unmarshal_VkDebugMarkerMarkerInfoEXT(vkStream, (VkDebugMarkerMarkerInfoEXT*)(pMarkerInfo));
 }
 
@@ -14810,6 +15119,7 @@ void unmarshal_vkCmdDebugMarkerInsertEXT(
     const VkDebugMarkerMarkerInfoEXT* pMarkerInfo)
 {
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+    vkStream->alloc((void**)&pMarkerInfo, sizeof(const VkDebugMarkerMarkerInfoEXT));
     unmarshal_VkDebugMarkerMarkerInfoEXT(vkStream, (VkDebugMarkerMarkerInfoEXT*)(pMarkerInfo));
 }
 
@@ -15240,6 +15550,7 @@ void unmarshal_VkExportMemoryWin32HandleInfoNV(
     vkStream->read((SECURITY_ATTRIBUTES**)&forUnmarshaling->pAttributes, sizeof(const SECURITY_ATTRIBUTES*));
     if (forUnmarshaling->pAttributes)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pAttributes, sizeof(const SECURITY_ATTRIBUTES));
         vkStream->read((SECURITY_ATTRIBUTES*)forUnmarshaling->pAttributes, sizeof(const SECURITY_ATTRIBUTES));
     }
     vkStream->read((DWORD*)&forUnmarshaling->dwAccess, sizeof(DWORD));
@@ -15303,11 +15614,16 @@ void unmarshal_VkWin32KeyedMutexAcquireReleaseInfoNV(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->acquireCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pAcquireSyncs, forUnmarshaling->acquireCount * sizeof(const VkDeviceMemory));
     vkStream->read((VkDeviceMemory*)forUnmarshaling->pAcquireSyncs, forUnmarshaling->acquireCount * sizeof(const VkDeviceMemory));
+    vkStream->alloc((void**)&forUnmarshaling->pAcquireKeys, forUnmarshaling->acquireCount * sizeof(const uint64_t));
     vkStream->read((uint64_t*)forUnmarshaling->pAcquireKeys, forUnmarshaling->acquireCount * sizeof(const uint64_t));
+    vkStream->alloc((void**)&forUnmarshaling->pAcquireTimeoutMilliseconds, forUnmarshaling->acquireCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pAcquireTimeoutMilliseconds, forUnmarshaling->acquireCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->releaseCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pReleaseSyncs, forUnmarshaling->releaseCount * sizeof(const VkDeviceMemory));
     vkStream->read((VkDeviceMemory*)forUnmarshaling->pReleaseSyncs, forUnmarshaling->releaseCount * sizeof(const VkDeviceMemory));
+    vkStream->alloc((void**)&forUnmarshaling->pReleaseKeys, forUnmarshaling->releaseCount * sizeof(const uint64_t));
     vkStream->read((uint64_t*)forUnmarshaling->pReleaseKeys, forUnmarshaling->releaseCount * sizeof(const uint64_t));
 }
 
@@ -15332,6 +15648,7 @@ void unmarshal_VkValidationFlagsEXT(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->disabledValidationCheckCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pDisabledValidationChecks, forUnmarshaling->disabledValidationCheckCount * sizeof(const VkValidationCheckEXT));
     vkStream->read((VkValidationCheckEXT*)forUnmarshaling->pDisabledValidationChecks, forUnmarshaling->disabledValidationCheckCount * sizeof(const VkValidationCheckEXT));
 }
 
@@ -15363,6 +15680,7 @@ void unmarshal_VkViSurfaceCreateInfoNN(
     vkStream->read((void**)&forUnmarshaling->window, sizeof(void*));
     if (forUnmarshaling->window)
     {
+        vkStream->alloc((void**)&forUnmarshaling->window, sizeof(uint8_t));
         vkStream->read((void*)forUnmarshaling->window, sizeof(uint8_t));
     }
 }
@@ -15395,10 +15713,12 @@ VkResult unmarshal_vkCreateViSurfaceNN(
     VkSurfaceKHR* pSurface)
 {
     vkStream->read((VkInstance*)&instance, sizeof(VkInstance));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkViSurfaceCreateInfoNN));
     unmarshal_VkViSurfaceCreateInfoNN(vkStream, (VkViSurfaceCreateInfoNN*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -15494,6 +15814,7 @@ void unmarshal_vkCmdBeginConditionalRenderingEXT(
     const VkConditionalRenderingBeginInfoEXT* pConditionalRenderingBegin)
 {
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+    vkStream->alloc((void**)&pConditionalRenderingBegin, sizeof(const VkConditionalRenderingBeginInfoEXT));
     unmarshal_VkConditionalRenderingBeginInfoEXT(vkStream, (VkConditionalRenderingBeginInfoEXT*)(pConditionalRenderingBegin));
 }
 
@@ -15625,6 +15946,7 @@ void unmarshal_VkIndirectCommandsLayoutCreateInfoNVX(
     vkStream->read((VkPipelineBindPoint*)&forUnmarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
     vkStream->read((VkIndirectCommandsLayoutUsageFlagsNVX*)&forUnmarshaling->flags, sizeof(VkIndirectCommandsLayoutUsageFlagsNVX));
     vkStream->read((uint32_t*)&forUnmarshaling->tokenCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pTokens, forUnmarshaling->tokenCount * sizeof(const VkIndirectCommandsLayoutTokenNVX));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->tokenCount; ++i)
     {
         unmarshal_VkIndirectCommandsLayoutTokenNVX(vkStream, (VkIndirectCommandsLayoutTokenNVX*)(forUnmarshaling->pTokens + i));
@@ -15663,6 +15985,7 @@ void unmarshal_VkCmdProcessCommandsInfoNVX(
     vkStream->read((VkObjectTableNVX*)&forUnmarshaling->objectTable, sizeof(VkObjectTableNVX));
     vkStream->read((VkIndirectCommandsLayoutNVX*)&forUnmarshaling->indirectCommandsLayout, sizeof(VkIndirectCommandsLayoutNVX));
     vkStream->read((uint32_t*)&forUnmarshaling->indirectCommandsTokenCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pIndirectCommandsTokens, forUnmarshaling->indirectCommandsTokenCount * sizeof(const VkIndirectCommandsTokenNVX));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->indirectCommandsTokenCount; ++i)
     {
         unmarshal_VkIndirectCommandsTokenNVX(vkStream, (VkIndirectCommandsTokenNVX*)(forUnmarshaling->pIndirectCommandsTokens + i));
@@ -15725,8 +16048,11 @@ void unmarshal_VkObjectTableCreateInfoNVX(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->objectCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pObjectEntryTypes, forUnmarshaling->objectCount * sizeof(const VkObjectEntryTypeNVX));
     vkStream->read((VkObjectEntryTypeNVX*)forUnmarshaling->pObjectEntryTypes, forUnmarshaling->objectCount * sizeof(const VkObjectEntryTypeNVX));
+    vkStream->alloc((void**)&forUnmarshaling->pObjectEntryCounts, forUnmarshaling->objectCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pObjectEntryCounts, forUnmarshaling->objectCount * sizeof(const uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pObjectEntryUsageFlags, forUnmarshaling->objectCount * sizeof(const VkObjectEntryUsageFlagsNVX));
     vkStream->read((VkObjectEntryUsageFlagsNVX*)forUnmarshaling->pObjectEntryUsageFlags, forUnmarshaling->objectCount * sizeof(const VkObjectEntryUsageFlagsNVX));
     vkStream->read((uint32_t*)&forUnmarshaling->maxUniformBuffersPerDescriptor, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->maxStorageBuffersPerDescriptor, sizeof(uint32_t));
@@ -15862,6 +16188,7 @@ void unmarshal_vkCmdProcessCommandsNVX(
     const VkCmdProcessCommandsInfoNVX* pProcessCommandsInfo)
 {
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+    vkStream->alloc((void**)&pProcessCommandsInfo, sizeof(const VkCmdProcessCommandsInfoNVX));
     unmarshal_VkCmdProcessCommandsInfoNVX(vkStream, (VkCmdProcessCommandsInfoNVX*)(pProcessCommandsInfo));
 }
 
@@ -15880,6 +16207,7 @@ void unmarshal_vkCmdReserveSpaceForCommandsNVX(
     const VkCmdReserveSpaceForCommandsInfoNVX* pReserveSpaceInfo)
 {
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+    vkStream->alloc((void**)&pReserveSpaceInfo, sizeof(const VkCmdReserveSpaceForCommandsInfoNVX));
     unmarshal_VkCmdReserveSpaceForCommandsInfoNVX(vkStream, (VkCmdReserveSpaceForCommandsInfoNVX*)(pReserveSpaceInfo));
 }
 
@@ -15911,10 +16239,12 @@ VkResult unmarshal_vkCreateIndirectCommandsLayoutNVX(
     VkIndirectCommandsLayoutNVX* pIndirectCommandsLayout)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkIndirectCommandsLayoutCreateInfoNVX));
     unmarshal_VkIndirectCommandsLayoutCreateInfoNVX(vkStream, (VkIndirectCommandsLayoutCreateInfoNVX*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkIndirectCommandsLayoutNVX*)pIndirectCommandsLayout, sizeof(VkIndirectCommandsLayoutNVX));
@@ -15949,6 +16279,7 @@ void unmarshal_vkDestroyIndirectCommandsLayoutNVX(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -15981,10 +16312,12 @@ VkResult unmarshal_vkCreateObjectTableNVX(
     VkObjectTableNVX* pObjectTable)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkObjectTableCreateInfoNVX));
     unmarshal_VkObjectTableCreateInfoNVX(vkStream, (VkObjectTableCreateInfoNVX*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkObjectTableNVX*)pObjectTable, sizeof(VkObjectTableNVX));
@@ -16019,6 +16352,7 @@ void unmarshal_vkDestroyObjectTableNVX(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -16051,6 +16385,7 @@ VkResult unmarshal_vkRegisterObjectsNVX(
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((VkObjectTableNVX*)&objectTable, sizeof(VkObjectTableNVX));
     vkStream->read((uint32_t*)&objectCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pObjectIndices, ((objectCount)) * sizeof(const uint32_t));
     vkStream->read((uint32_t*)pObjectIndices, ((objectCount)) * sizeof(const uint32_t));
     VkResult unmarshal_vkRegisterObjectsNVX_VkResult_return;
     vkStream->write(&unmarshal_vkRegisterObjectsNVX_VkResult_return, sizeof(VkResult));
@@ -16086,7 +16421,9 @@ VkResult unmarshal_vkUnregisterObjectsNVX(
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((VkObjectTableNVX*)&objectTable, sizeof(VkObjectTableNVX));
     vkStream->read((uint32_t*)&objectCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pObjectEntryTypes, ((objectCount)) * sizeof(const VkObjectEntryTypeNVX));
     vkStream->read((VkObjectEntryTypeNVX*)pObjectEntryTypes, ((objectCount)) * sizeof(const VkObjectEntryTypeNVX));
+    vkStream->alloc((void**)&pObjectIndices, ((objectCount)) * sizeof(const uint32_t));
     vkStream->read((uint32_t*)pObjectIndices, ((objectCount)) * sizeof(const uint32_t));
     VkResult unmarshal_vkUnregisterObjectsNVX_VkResult_return;
     vkStream->write(&unmarshal_vkUnregisterObjectsNVX_VkResult_return, sizeof(VkResult));
@@ -16164,6 +16501,7 @@ void unmarshal_VkPipelineViewportWScalingStateCreateInfoNV(
     vkStream->read((VkViewportWScalingNV**)&forUnmarshaling->pViewportWScalings, sizeof(const VkViewportWScalingNV*));
     if (forUnmarshaling->pViewportWScalings)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pViewportWScalings, forUnmarshaling->viewportCount * sizeof(const VkViewportWScalingNV));
         for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->viewportCount; ++i)
         {
             unmarshal_VkViewportWScalingNV(vkStream, (VkViewportWScalingNV*)(forUnmarshaling->pViewportWScalings + i));
@@ -16197,6 +16535,7 @@ void unmarshal_vkCmdSetViewportWScalingNV(
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
     vkStream->read((uint32_t*)&firstViewport, sizeof(uint32_t));
     vkStream->read((uint32_t*)&viewportCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pViewportWScalings, ((viewportCount)) * sizeof(const VkViewportWScalingNV));
     for (uint32_t i = 0; i < (uint32_t)((viewportCount)); ++i)
     {
         unmarshal_VkViewportWScalingNV(vkStream, (VkViewportWScalingNV*)(pViewportWScalings + i));
@@ -16465,6 +16804,7 @@ VkResult unmarshal_vkDisplayPowerControlEXT(
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((VkDisplayKHR*)&display, sizeof(VkDisplayKHR));
+    vkStream->alloc((void**)&pDisplayPowerInfo, sizeof(const VkDisplayPowerInfoEXT));
     unmarshal_VkDisplayPowerInfoEXT(vkStream, (VkDisplayPowerInfoEXT*)(pDisplayPowerInfo));
     VkResult unmarshal_vkDisplayPowerControlEXT_VkResult_return;
     vkStream->write(&unmarshal_vkDisplayPowerControlEXT_VkResult_return, sizeof(VkResult));
@@ -16499,10 +16839,12 @@ VkResult unmarshal_vkRegisterDeviceEventEXT(
     VkFence* pFence)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pDeviceEventInfo, sizeof(const VkDeviceEventInfoEXT));
     unmarshal_VkDeviceEventInfoEXT(vkStream, (VkDeviceEventInfoEXT*)(pDeviceEventInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkFence*)pFence, sizeof(VkFence));
@@ -16543,10 +16885,12 @@ VkResult unmarshal_vkRegisterDisplayEventEXT(
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((VkDisplayKHR*)&display, sizeof(VkDisplayKHR));
+    vkStream->alloc((void**)&pDisplayEventInfo, sizeof(const VkDisplayEventInfoEXT));
     unmarshal_VkDisplayEventInfoEXT(vkStream, (VkDisplayEventInfoEXT*)(pDisplayEventInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkFence*)pFence, sizeof(VkFence));
@@ -16670,6 +17014,7 @@ void unmarshal_VkPresentTimesInfoGOOGLE(
     vkStream->read((VkPresentTimeGOOGLE**)&forUnmarshaling->pTimes, sizeof(const VkPresentTimeGOOGLE*));
     if (forUnmarshaling->pTimes)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pTimes, forUnmarshaling->swapchainCount * sizeof(const VkPresentTimeGOOGLE));
         for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->swapchainCount; ++i)
         {
             unmarshal_VkPresentTimeGOOGLE(vkStream, (VkPresentTimeGOOGLE*)(forUnmarshaling->pTimes + i));
@@ -16824,6 +17169,7 @@ void unmarshal_VkPipelineViewportSwizzleStateCreateInfoNV(
     vkStream->read((VkViewportSwizzleNV**)&forUnmarshaling->pViewportSwizzles, sizeof(const VkViewportSwizzleNV*));
     if (forUnmarshaling->pViewportSwizzles)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pViewportSwizzles, forUnmarshaling->viewportCount * sizeof(const VkViewportSwizzleNV));
         for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->viewportCount; ++i)
         {
             unmarshal_VkViewportSwizzleNV(vkStream, (VkViewportSwizzleNV*)(forUnmarshaling->pViewportSwizzles + i));
@@ -16886,6 +17232,7 @@ void unmarshal_VkPipelineDiscardRectangleStateCreateInfoEXT(
     vkStream->read((VkRect2D**)&forUnmarshaling->pDiscardRectangles, sizeof(const VkRect2D*));
     if (forUnmarshaling->pDiscardRectangles)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pDiscardRectangles, forUnmarshaling->discardRectangleCount * sizeof(const VkRect2D));
         for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->discardRectangleCount; ++i)
         {
             unmarshal_VkRect2D(vkStream, (VkRect2D*)(forUnmarshaling->pDiscardRectangles + i));
@@ -16919,6 +17266,7 @@ void unmarshal_vkCmdSetDiscardRectangleEXT(
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
     vkStream->read((uint32_t*)&firstDiscardRectangle, sizeof(uint32_t));
     vkStream->read((uint32_t*)&discardRectangleCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pDiscardRectangles, ((discardRectangleCount)) * sizeof(const VkRect2D));
     for (uint32_t i = 0; i < (uint32_t)((discardRectangleCount)); ++i)
     {
         unmarshal_VkRect2D(vkStream, (VkRect2D*)(pDiscardRectangles + i));
@@ -17066,7 +17414,9 @@ void unmarshal_vkSetHdrMetadataEXT(
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((uint32_t*)&swapchainCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pSwapchains, ((swapchainCount)) * sizeof(const VkSwapchainKHR));
     vkStream->read((VkSwapchainKHR*)pSwapchains, ((swapchainCount)) * sizeof(const VkSwapchainKHR));
+    vkStream->alloc((void**)&pMetadata, ((swapchainCount)) * sizeof(const VkHdrMetadataEXT));
     for (uint32_t i = 0; i < (uint32_t)((swapchainCount)); ++i)
     {
         unmarshal_VkHdrMetadataEXT(vkStream, (VkHdrMetadataEXT*)(pMetadata + i));
@@ -17101,6 +17451,7 @@ void unmarshal_VkIOSSurfaceCreateInfoMVK(
     vkStream->read((void**)&forUnmarshaling->pView, sizeof(const void*));
     if (forUnmarshaling->pView)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pView, sizeof(const uint8_t));
         vkStream->read((void*)forUnmarshaling->pView, sizeof(const uint8_t));
     }
 }
@@ -17133,10 +17484,12 @@ VkResult unmarshal_vkCreateIOSSurfaceMVK(
     VkSurfaceKHR* pSurface)
 {
     vkStream->read((VkInstance*)&instance, sizeof(VkInstance));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkIOSSurfaceCreateInfoMVK));
     unmarshal_VkIOSSurfaceCreateInfoMVK(vkStream, (VkIOSSurfaceCreateInfoMVK*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -17173,6 +17526,7 @@ void unmarshal_VkMacOSSurfaceCreateInfoMVK(
     vkStream->read((void**)&forUnmarshaling->pView, sizeof(const void*));
     if (forUnmarshaling->pView)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pView, sizeof(const uint8_t));
         vkStream->read((void*)forUnmarshaling->pView, sizeof(const uint8_t));
     }
 }
@@ -17205,10 +17559,12 @@ VkResult unmarshal_vkCreateMacOSSurfaceMVK(
     VkSurfaceKHR* pSurface)
 {
     vkStream->read((VkInstance*)&instance, sizeof(VkInstance));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkMacOSSurfaceCreateInfoMVK));
     unmarshal_VkMacOSSurfaceCreateInfoMVK(vkStream, (VkMacOSSurfaceCreateInfoMVK*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -17244,7 +17600,7 @@ void unmarshal_VkDebugUtilsObjectNameInfoEXT(
     // TODO: Unsupported : const void* pNext
     vkStream->read((VkObjectType*)&forUnmarshaling->objectType, sizeof(VkObjectType));
     vkStream->read((uint64_t*)&forUnmarshaling->objectHandle, sizeof(uint64_t));
-    vkStream->getString();
+    vkStream->loadStringInPlace((char**)&forUnmarshaling->pObjectName);
 }
 
 void marshal_VkDebugUtilsObjectTagInfoEXT(
@@ -17272,6 +17628,7 @@ void unmarshal_VkDebugUtilsObjectTagInfoEXT(
     vkStream->read((uint64_t*)&forUnmarshaling->objectHandle, sizeof(uint64_t));
     vkStream->read((uint64_t*)&forUnmarshaling->tagName, sizeof(uint64_t));
     vkStream->read((size_t*)&forUnmarshaling->tagSize, sizeof(size_t));
+    vkStream->alloc((void**)&forUnmarshaling->pTag, forUnmarshaling->tagSize * sizeof(const uint8_t));
     vkStream->read((void*)forUnmarshaling->pTag, forUnmarshaling->tagSize * sizeof(const uint8_t));
 }
 
@@ -17293,7 +17650,7 @@ void unmarshal_VkDebugUtilsLabelEXT(
     vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
-    vkStream->getString();
+    vkStream->loadStringInPlace((char**)&forUnmarshaling->pLabelName);
     vkStream->read((float*)forUnmarshaling->color, 4 * sizeof(float));
 }
 
@@ -17345,13 +17702,14 @@ void unmarshal_VkDebugUtilsMessengerCallbackDataEXT(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((VkDebugUtilsMessengerCallbackDataFlagsEXT*)&forUnmarshaling->flags, sizeof(VkDebugUtilsMessengerCallbackDataFlagsEXT));
-    vkStream->getString();
+    vkStream->loadStringInPlace((char**)&forUnmarshaling->pMessageIdName);
     vkStream->read((int32_t*)&forUnmarshaling->messageIdNumber, sizeof(int32_t));
-    vkStream->getString();
+    vkStream->loadStringInPlace((char**)&forUnmarshaling->pMessage);
     vkStream->read((uint32_t*)&forUnmarshaling->queueLabelCount, sizeof(uint32_t));
     vkStream->read((VkDebugUtilsLabelEXT**)&forUnmarshaling->pQueueLabels, sizeof(VkDebugUtilsLabelEXT*));
     if (forUnmarshaling->pQueueLabels)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pQueueLabels, forUnmarshaling->queueLabelCount * sizeof(VkDebugUtilsLabelEXT));
         for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->queueLabelCount; ++i)
         {
             unmarshal_VkDebugUtilsLabelEXT(vkStream, (VkDebugUtilsLabelEXT*)(forUnmarshaling->pQueueLabels + i));
@@ -17361,6 +17719,7 @@ void unmarshal_VkDebugUtilsMessengerCallbackDataEXT(
     vkStream->read((VkDebugUtilsLabelEXT**)&forUnmarshaling->pCmdBufLabels, sizeof(VkDebugUtilsLabelEXT*));
     if (forUnmarshaling->pCmdBufLabels)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pCmdBufLabels, forUnmarshaling->cmdBufLabelCount * sizeof(VkDebugUtilsLabelEXT));
         for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->cmdBufLabelCount; ++i)
         {
             unmarshal_VkDebugUtilsLabelEXT(vkStream, (VkDebugUtilsLabelEXT*)(forUnmarshaling->pCmdBufLabels + i));
@@ -17370,6 +17729,7 @@ void unmarshal_VkDebugUtilsMessengerCallbackDataEXT(
     vkStream->read((VkDebugUtilsObjectNameInfoEXT**)&forUnmarshaling->pObjects, sizeof(VkDebugUtilsObjectNameInfoEXT*));
     if (forUnmarshaling->pObjects)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pObjects, forUnmarshaling->objectCount * sizeof(VkDebugUtilsObjectNameInfoEXT));
         for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->objectCount; ++i)
         {
             unmarshal_VkDebugUtilsObjectNameInfoEXT(vkStream, (VkDebugUtilsObjectNameInfoEXT*)(forUnmarshaling->pObjects + i));
@@ -17409,6 +17769,7 @@ void unmarshal_VkDebugUtilsMessengerCreateInfoEXT(
     vkStream->read((void**)&forUnmarshaling->pUserData, sizeof(void*));
     if (forUnmarshaling->pUserData)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pUserData, sizeof(uint8_t));
         vkStream->read((void*)forUnmarshaling->pUserData, sizeof(uint8_t));
     }
 }
@@ -17431,6 +17792,7 @@ VkResult unmarshal_vkSetDebugUtilsObjectNameEXT(
     const VkDebugUtilsObjectNameInfoEXT* pNameInfo)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pNameInfo, sizeof(const VkDebugUtilsObjectNameInfoEXT));
     unmarshal_VkDebugUtilsObjectNameInfoEXT(vkStream, (VkDebugUtilsObjectNameInfoEXT*)(pNameInfo));
     VkResult unmarshal_vkSetDebugUtilsObjectNameEXT_VkResult_return;
     vkStream->write(&unmarshal_vkSetDebugUtilsObjectNameEXT_VkResult_return, sizeof(VkResult));
@@ -17455,6 +17817,7 @@ VkResult unmarshal_vkSetDebugUtilsObjectTagEXT(
     const VkDebugUtilsObjectTagInfoEXT* pTagInfo)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pTagInfo, sizeof(const VkDebugUtilsObjectTagInfoEXT));
     unmarshal_VkDebugUtilsObjectTagInfoEXT(vkStream, (VkDebugUtilsObjectTagInfoEXT*)(pTagInfo));
     VkResult unmarshal_vkSetDebugUtilsObjectTagEXT_VkResult_return;
     vkStream->write(&unmarshal_vkSetDebugUtilsObjectTagEXT_VkResult_return, sizeof(VkResult));
@@ -17476,6 +17839,7 @@ void unmarshal_vkQueueBeginDebugUtilsLabelEXT(
     const VkDebugUtilsLabelEXT* pLabelInfo)
 {
     vkStream->read((VkQueue*)&queue, sizeof(VkQueue));
+    vkStream->alloc((void**)&pLabelInfo, sizeof(const VkDebugUtilsLabelEXT));
     unmarshal_VkDebugUtilsLabelEXT(vkStream, (VkDebugUtilsLabelEXT*)(pLabelInfo));
 }
 
@@ -17508,6 +17872,7 @@ void unmarshal_vkQueueInsertDebugUtilsLabelEXT(
     const VkDebugUtilsLabelEXT* pLabelInfo)
 {
     vkStream->read((VkQueue*)&queue, sizeof(VkQueue));
+    vkStream->alloc((void**)&pLabelInfo, sizeof(const VkDebugUtilsLabelEXT));
     unmarshal_VkDebugUtilsLabelEXT(vkStream, (VkDebugUtilsLabelEXT*)(pLabelInfo));
 }
 
@@ -17526,6 +17891,7 @@ void unmarshal_vkCmdBeginDebugUtilsLabelEXT(
     const VkDebugUtilsLabelEXT* pLabelInfo)
 {
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+    vkStream->alloc((void**)&pLabelInfo, sizeof(const VkDebugUtilsLabelEXT));
     unmarshal_VkDebugUtilsLabelEXT(vkStream, (VkDebugUtilsLabelEXT*)(pLabelInfo));
 }
 
@@ -17558,6 +17924,7 @@ void unmarshal_vkCmdInsertDebugUtilsLabelEXT(
     const VkDebugUtilsLabelEXT* pLabelInfo)
 {
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+    vkStream->alloc((void**)&pLabelInfo, sizeof(const VkDebugUtilsLabelEXT));
     unmarshal_VkDebugUtilsLabelEXT(vkStream, (VkDebugUtilsLabelEXT*)(pLabelInfo));
 }
 
@@ -17589,10 +17956,12 @@ VkResult unmarshal_vkCreateDebugUtilsMessengerEXT(
     VkDebugUtilsMessengerEXT* pMessenger)
 {
     vkStream->read((VkInstance*)&instance, sizeof(VkInstance));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkDebugUtilsMessengerCreateInfoEXT));
     unmarshal_VkDebugUtilsMessengerCreateInfoEXT(vkStream, (VkDebugUtilsMessengerCreateInfoEXT*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkDebugUtilsMessengerEXT*)pMessenger, sizeof(VkDebugUtilsMessengerEXT));
@@ -17627,6 +17996,7 @@ void unmarshal_vkDestroyDebugUtilsMessengerEXT(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -17654,6 +18024,7 @@ void unmarshal_vkSubmitDebugUtilsMessageEXT(
     vkStream->read((VkInstance*)&instance, sizeof(VkInstance));
     vkStream->read((VkDebugUtilsMessageSeverityFlagBitsEXT*)&messageSeverity, sizeof(VkDebugUtilsMessageSeverityFlagBitsEXT));
     vkStream->read((VkDebugUtilsMessageTypeFlagsEXT*)&messageTypes, sizeof(VkDebugUtilsMessageTypeFlagsEXT));
+    vkStream->alloc((void**)&pCallbackData, sizeof(const VkDebugUtilsMessengerCallbackDataEXT));
     unmarshal_VkDebugUtilsMessengerCallbackDataEXT(vkStream, (VkDebugUtilsMessengerCallbackDataEXT*)(pCallbackData));
 }
 
@@ -17752,6 +18123,7 @@ void unmarshal_VkImportAndroidHardwareBufferInfoANDROID(
     vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
+    vkStream->alloc((void**)&forUnmarshaling->buffer, sizeof(AHardwareBuffer));
     vkStream->read((AHardwareBuffer*)forUnmarshaling->buffer, sizeof(AHardwareBuffer));
 }
 
@@ -17816,6 +18188,7 @@ VkResult unmarshal_vkGetAndroidHardwareBufferPropertiesANDROID(
     VkAndroidHardwareBufferPropertiesANDROID* pProperties)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&buffer, sizeof(const AHardwareBuffer));
     vkStream->read((AHardwareBuffer*)buffer, sizeof(const AHardwareBuffer));
     unmarshal_VkAndroidHardwareBufferPropertiesANDROID(vkStream, (VkAndroidHardwareBufferPropertiesANDROID*)(pProperties));
     VkResult unmarshal_vkGetAndroidHardwareBufferPropertiesANDROID_VkResult_return;
@@ -17844,6 +18217,7 @@ VkResult unmarshal_vkGetMemoryAndroidHardwareBufferANDROID(
     AHardwareBuffer** pBuffer)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pInfo, sizeof(const VkMemoryGetAndroidHardwareBufferInfoANDROID));
     unmarshal_VkMemoryGetAndroidHardwareBufferInfoANDROID(vkStream, (VkMemoryGetAndroidHardwareBufferInfoANDROID*)(pInfo));
     vkStream->write((AHardwareBuffer**)pBuffer, sizeof(AHardwareBuffer*));
     VkResult unmarshal_vkGetMemoryAndroidHardwareBufferANDROID_VkResult_return;
@@ -17947,6 +18321,7 @@ void unmarshal_VkSampleLocationsInfoEXT(
     vkStream->read((VkSampleCountFlagBits*)&forUnmarshaling->sampleLocationsPerPixel, sizeof(VkSampleCountFlagBits));
     unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->sampleLocationGridSize));
     vkStream->read((uint32_t*)&forUnmarshaling->sampleLocationsCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pSampleLocations, forUnmarshaling->sampleLocationsCount * sizeof(const VkSampleLocationEXT));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->sampleLocationsCount; ++i)
     {
         unmarshal_VkSampleLocationEXT(vkStream, (VkSampleLocationEXT*)(forUnmarshaling->pSampleLocations + i));
@@ -18012,11 +18387,13 @@ void unmarshal_VkRenderPassSampleLocationsBeginInfoEXT(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->attachmentInitialSampleLocationsCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pAttachmentInitialSampleLocations, forUnmarshaling->attachmentInitialSampleLocationsCount * sizeof(const VkAttachmentSampleLocationsEXT));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentInitialSampleLocationsCount; ++i)
     {
         unmarshal_VkAttachmentSampleLocationsEXT(vkStream, (VkAttachmentSampleLocationsEXT*)(forUnmarshaling->pAttachmentInitialSampleLocations + i));
     }
     vkStream->read((uint32_t*)&forUnmarshaling->postSubpassSampleLocationsCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pPostSubpassSampleLocations, forUnmarshaling->postSubpassSampleLocationsCount * sizeof(const VkSubpassSampleLocationsEXT));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->postSubpassSampleLocationsCount; ++i)
     {
         unmarshal_VkSubpassSampleLocationsEXT(vkStream, (VkSubpassSampleLocationsEXT*)(forUnmarshaling->pPostSubpassSampleLocations + i));
@@ -18108,6 +18485,7 @@ void unmarshal_vkCmdSetSampleLocationsEXT(
     const VkSampleLocationsInfoEXT* pSampleLocationsInfo)
 {
     vkStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+    vkStream->alloc((void**)&pSampleLocationsInfo, sizeof(const VkSampleLocationsInfoEXT));
     unmarshal_VkSampleLocationsInfoEXT(vkStream, (VkSampleLocationsInfoEXT*)(pSampleLocationsInfo));
 }
 
@@ -18269,6 +18647,7 @@ void unmarshal_VkPipelineCoverageModulationStateCreateInfoNV(
     vkStream->read((float**)&forUnmarshaling->pCoverageModulationTable, sizeof(const float*));
     if (forUnmarshaling->pCoverageModulationTable)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pCoverageModulationTable, forUnmarshaling->coverageModulationTableCount * sizeof(const float));
         vkStream->read((float*)forUnmarshaling->pCoverageModulationTable, forUnmarshaling->coverageModulationTableCount * sizeof(const float));
     }
 }
@@ -18300,6 +18679,7 @@ void unmarshal_VkValidationCacheCreateInfoEXT(
     // TODO: Unsupported : const void* pNext
     vkStream->read((VkValidationCacheCreateFlagsEXT*)&forUnmarshaling->flags, sizeof(VkValidationCacheCreateFlagsEXT));
     vkStream->read((size_t*)&forUnmarshaling->initialDataSize, sizeof(size_t));
+    vkStream->alloc((void**)&forUnmarshaling->pInitialData, forUnmarshaling->initialDataSize * sizeof(const uint8_t));
     vkStream->read((void*)forUnmarshaling->pInitialData, forUnmarshaling->initialDataSize * sizeof(const uint8_t));
 }
 
@@ -18351,10 +18731,12 @@ VkResult unmarshal_vkCreateValidationCacheEXT(
     VkValidationCacheEXT* pValidationCache)
 {
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
+    vkStream->alloc((void**)&pCreateInfo, sizeof(const VkValidationCacheCreateInfoEXT));
     unmarshal_VkValidationCacheCreateInfoEXT(vkStream, (VkValidationCacheCreateInfoEXT*)(pCreateInfo));
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
     vkStream->write((VkValidationCacheEXT*)pValidationCache, sizeof(VkValidationCacheEXT));
@@ -18389,6 +18771,7 @@ void unmarshal_vkDestroyValidationCacheEXT(
     vkStream->read((VkAllocationCallbacks**)&pAllocator, sizeof(const VkAllocationCallbacks*));
     if (pAllocator)
     {
+        vkStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
         unmarshal_VkAllocationCallbacks(vkStream, (VkAllocationCallbacks*)(pAllocator));
     }
 }
@@ -18419,6 +18802,7 @@ VkResult unmarshal_vkMergeValidationCachesEXT(
     vkStream->read((VkDevice*)&device, sizeof(VkDevice));
     vkStream->read((VkValidationCacheEXT*)&dstCache, sizeof(VkValidationCacheEXT));
     vkStream->read((uint32_t*)&srcCacheCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&pSrcCaches, ((srcCacheCount)) * sizeof(const VkValidationCacheEXT));
     vkStream->read((VkValidationCacheEXT*)pSrcCaches, ((srcCacheCount)) * sizeof(const VkValidationCacheEXT));
     VkResult unmarshal_vkMergeValidationCachesEXT_VkResult_return;
     vkStream->write(&unmarshal_vkMergeValidationCachesEXT_VkResult_return, sizeof(VkResult));
@@ -18478,6 +18862,7 @@ void unmarshal_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->bindingCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pBindingFlags, forUnmarshaling->bindingCount * sizeof(const VkDescriptorBindingFlagsEXT));
     vkStream->read((VkDescriptorBindingFlagsEXT*)forUnmarshaling->pBindingFlags, forUnmarshaling->bindingCount * sizeof(const VkDescriptorBindingFlagsEXT));
 }
 
@@ -18622,6 +19007,7 @@ void unmarshal_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->descriptorSetCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pDescriptorCounts, forUnmarshaling->descriptorSetCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pDescriptorCounts, forUnmarshaling->descriptorSetCount * sizeof(const uint32_t));
 }
 
@@ -18697,6 +19083,7 @@ void unmarshal_VkImportMemoryHostPointerInfoEXT(
     vkStream->read((void**)&forUnmarshaling->pHostPointer, sizeof(void*));
     if (forUnmarshaling->pHostPointer)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pHostPointer, sizeof(uint8_t));
         vkStream->read((void*)forUnmarshaling->pHostPointer, sizeof(uint8_t));
     }
 }
@@ -18773,6 +19160,7 @@ VkResult unmarshal_vkGetMemoryHostPointerPropertiesEXT(
     vkStream->read((void**)&pHostPointer, sizeof(const void*));
     if (pHostPointer)
     {
+        vkStream->alloc((void**)&pHostPointer, sizeof(const uint8_t));
         vkStream->read((void*)pHostPointer, sizeof(const uint8_t));
     }
     unmarshal_VkMemoryHostPointerPropertiesEXT(vkStream, (VkMemoryHostPointerPropertiesEXT*)(pMemoryHostPointerProperties));
@@ -18921,6 +19309,7 @@ void unmarshal_VkPipelineVertexInputDivisorStateCreateInfoEXT(
     vkStream->read((void**)&forUnmarshaling->pNext, sizeof(const void*));
     // TODO: Unsupported : const void* pNext
     vkStream->read((uint32_t*)&forUnmarshaling->vertexBindingDivisorCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pVertexBindingDivisors, forUnmarshaling->vertexBindingDivisorCount * sizeof(const VkVertexInputBindingDivisorDescriptionEXT));
     for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->vertexBindingDivisorCount; ++i)
     {
         unmarshal_VkVertexInputBindingDivisorDescriptionEXT(vkStream, (VkVertexInputBindingDivisorDescriptionEXT*)(forUnmarshaling->pVertexBindingDivisors + i));
@@ -18977,6 +19366,7 @@ void unmarshal_VkCheckpointDataNV(
     vkStream->read((void**)&forUnmarshaling->pCheckpointMarker, sizeof(void*));
     if (forUnmarshaling->pCheckpointMarker)
     {
+        vkStream->alloc((void**)&forUnmarshaling->pCheckpointMarker, sizeof(uint8_t));
         vkStream->read((void*)forUnmarshaling->pCheckpointMarker, sizeof(uint8_t));
     }
 }
@@ -19003,6 +19393,7 @@ void unmarshal_vkCmdSetCheckpointNV(
     vkStream->read((void**)&pCheckpointMarker, sizeof(const void*));
     if (pCheckpointMarker)
     {
+        vkStream->alloc((void**)&pCheckpointMarker, sizeof(const uint8_t));
         vkStream->read((void*)pCheckpointMarker, sizeof(const uint8_t));
     }
 }

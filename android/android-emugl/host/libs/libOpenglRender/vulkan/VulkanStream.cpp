@@ -14,11 +14,46 @@
 
 #include "VulkanStream.h"
 
+#include "android/base/files/StreamSerializing.h"
+
 namespace goldfish_vk {
 
 VulkanStream::VulkanStream() {
 }
 
-// TODO: Vulkan-specific common implementations
+void VulkanStream::alloc(void** ptrAddr, size_t bytes) {
+    if (!bytes) {
+        *ptrAddr = nullptr;
+        return;
+    }
+
+    *ptrAddr = mPool.alloc(bytes);
+}
+
+void VulkanStream::loadStringInPlace(char** forOutput) {
+    size_t len = this->getBe32();
+
+    *forOutput = mPool.allocArray<char>(len + 1);
+
+    memset(*forOutput, 0x0, len + 1);
+
+    if (len > 0) {
+        this->read(*forOutput, len);
+    }
+}
+
+void VulkanStream::loadStringArrayInPlace(char*** forOutput) {
+    size_t count = this->getBe32();
+
+    if (!count) { *forOutput = nullptr; return; }
+
+    *forOutput = mPool.allocArray<char*>(count);
+
+    char** stringsForOutput = *forOutput;
+
+    for (size_t i = 0; i < count; i++) {
+        loadStringInPlace(stringsForOutput + i);
+    }
+}
 
 } // namespace goldfish_vk
