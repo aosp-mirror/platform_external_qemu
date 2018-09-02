@@ -156,7 +156,9 @@ class CodeGen(object):
         if vulkanType.pointerIndirectionLevels == 0:
             ptrSpec = ""
         elif vulkanType.isPointerToConstPointer:
-            ptrSpec = "* const*"
+            ptrSpec = "* const*" if vulkanType.isConst else "**"
+            if vulkanType.pointerIndirectionLevels > 2:
+                ptrSpec += "*" * (vulkanType.pointerIndirectionLevels - 2)
         else:
             ptrSpec = "*" * vulkanType.pointerIndirectionLevels
 
