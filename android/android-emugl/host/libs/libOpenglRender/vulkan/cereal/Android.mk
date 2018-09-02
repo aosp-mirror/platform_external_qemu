@@ -32,6 +32,7 @@ LOCAL_SRC_FILES := \
     common/goldfish_vk_marshaling.cpp \
     guest/goldfish_vk_frontend.cpp \
     common/goldfish_vk_testing.cpp \
+    common/goldfish_vk_deepcopy.cpp \
 
 $(call emugl-end-module)
 
