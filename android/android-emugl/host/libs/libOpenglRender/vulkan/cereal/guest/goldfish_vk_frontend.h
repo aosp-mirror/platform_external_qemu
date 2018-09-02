@@ -26,9 +26,12 @@
 
 #include <vulkan.h>
 
+
+#include "common/goldfish_vk_marshaling.h"
+
+
 namespace goldfish_vk {
 
-class VulkanStream;
 #ifdef VK_VERSION_1_0
 VkResult goldfish_frontend_vkCreateInstance(
     const VkInstanceCreateInfo* pCreateInfo,

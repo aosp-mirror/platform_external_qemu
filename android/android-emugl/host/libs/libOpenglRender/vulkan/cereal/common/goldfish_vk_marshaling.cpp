@@ -24,9 +24,7 @@
 
 #include "goldfish_vk_marshaling.h"
 
-#include "VulkanStream.h"
 
-#include "android/base/files/StreamSerializing.h"
 
 namespace goldfish_vk {
 

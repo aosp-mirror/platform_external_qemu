@@ -22,11 +22,9 @@
 // CEREAL_OUTPUT_DIR: Where to put the generated sources.
 // python3 $VULKAN_REGISTRY_XML_DIR/genvk.py -registry $VULKAN_REGISTRY_XML_DIR/vk.xml cereal -o $CEREAL_OUTPUT_DIR
 
-#include "guest/goldfish_vk_frontend.h"
+#include "goldfish_vk_frontend.h"
 
-#include "common/goldfish_vk_marshaling.h"
 
-#include "VulkanStream.h"
 
 namespace goldfish_vk {
 
