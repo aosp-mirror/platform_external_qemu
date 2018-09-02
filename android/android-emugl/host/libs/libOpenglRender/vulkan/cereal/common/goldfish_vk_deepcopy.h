@@ -26,9 +26,10 @@
 
 #include <vulkan.h>
 
-#include "android/base/Pool.h"
 
+#include "android/base/Pool.h"
 using android::base::Pool;
+
 
 namespace goldfish_vk {
 

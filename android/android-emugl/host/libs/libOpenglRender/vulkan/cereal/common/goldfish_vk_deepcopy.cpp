@@ -24,7 +24,7 @@
 
 #include "goldfish_vk_deepcopy.h"
 
-#include <string.h>
+
 
 namespace goldfish_vk {
 
