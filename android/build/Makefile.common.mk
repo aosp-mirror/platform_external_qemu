@@ -8,6 +8,7 @@ $(eval \
 
 ifeq ($(BUILD_TARGET_OS),windows_msvc)
   include $(LOCAL_PATH)/android/msvc-posix-compat/sources.mk
+  include $(LOCAL_PATH)/android/third_party/dirent-win32/sources.mk
 endif
 
 # Build libext4_utils and related modules/
