@@ -23,8 +23,8 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <inttypes.h>
-#include <libgen.h>
 #ifndef _MSC_VER
+#include <libgen.h>
 #include <unistd.h>
 #endif
 

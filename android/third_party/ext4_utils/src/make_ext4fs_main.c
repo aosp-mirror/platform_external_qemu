@@ -15,9 +15,9 @@
  */
 
 #include <fcntl.h>
-#include <libgen.h>
 #include <stdio.h>
 #ifndef _MSC_VER
+#include <libgen.h>
 #include <unistd.h>
 #endif
 
