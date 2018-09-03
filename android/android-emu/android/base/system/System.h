@@ -470,6 +470,7 @@ protected:
     // Static version that queries host environment variables
     // regardless of being TestSystem.
     static std::string getEnvironmentVariable(StringView varname);
+    static std::string getProgramDirectoryFromPlatform();
 
 private:
     DISALLOW_COPY_AND_ASSIGN(System);
