@@ -13,10 +13,12 @@
 // limitations under the License.
 #include "VulkanStream.h"
 
+#include "common/goldfish_vk_deepcopy.h"
 #include "common/goldfish_vk_marshaling.h"
 #include "common/goldfish_vk_testing.h"
 
 #include "android/base/ArraySize.h"
+#include "android/base/Pool.h"
 
 #include <gtest/gtest.h>
 #include <string.h>
@@ -118,10 +120,8 @@ TEST(VulkanStream, testMarshalVulkanStruct) {
 
     marshal_VkInstanceCreateInfo(&stream, &forMarshaling);
 
-    VkApplicationInfo forUnmarshalingAppInfo;
     VkInstanceCreateInfo forUnmarshaling;
     memset(&forUnmarshaling, 0x0, sizeof(VkInstanceCreateInfo));
-    forUnmarshaling.pApplicationInfo = &forUnmarshalingAppInfo;
 
     // Before unmarshaling, these structs should be different.
     // Test that the generated comparator can detect inequality.
@@ -135,6 +135,28 @@ TEST(VulkanStream, testMarshalVulkanStruct) {
     EXPECT_GT(inequalities, 0);
 
     unmarshal_VkInstanceCreateInfo(&stream, &forUnmarshaling);
+
+    // Check that the strings are equal as well.
+
+    EXPECT_STREQ(
+        forMarshaling.pApplicationInfo->pApplicationName,
+        forUnmarshaling.pApplicationInfo->pApplicationName);
+
+    EXPECT_STREQ(
+        forMarshaling.pApplicationInfo->pEngineName,
+        forUnmarshaling.pApplicationInfo->pEngineName);
+
+    for (size_t i = 0; i < arraySize(layerNames); ++i) {
+        EXPECT_STREQ(
+                forMarshaling.ppEnabledLayerNames[i],
+                forUnmarshaling.ppEnabledLayerNames[i]);
+    }
+
+    for (size_t i = 0; i < arraySize(extensionNames); ++i) {
+        EXPECT_STREQ(
+                forMarshaling.ppEnabledExtensionNames[i],
+                forUnmarshaling.ppEnabledExtensionNames[i]);
+    }
 
     EXPECT_EQ(forMarshaling.sType, forUnmarshaling.sType);
     EXPECT_EQ(forMarshaling.pNext, forUnmarshaling.pNext);
@@ -340,10 +362,6 @@ TEST(VulkanStream, testMarshalVulkanStructWithPtrFields) {
         sparseBinds.push_back(sparseBind);
     }
 
-    std::vector<VkSparseImageMemoryBind> sparseBindsForUnmarshaling = sparseBinds;
-    memset(sparseBindsForUnmarshaling.data(), 0x0,
-           sparseBindsForUnmarshaling.size() * sizeof(VkSparseImageMemoryBind));
-
     VkSparseImageMemoryBindInfo forMarshaling = {
         (VkImage)(uintptr_t)54,
         bindCount,
@@ -353,8 +371,7 @@ TEST(VulkanStream, testMarshalVulkanStructWithPtrFields) {
     marshal_VkSparseImageMemoryBindInfo(&stream, &forMarshaling);
 
     VkSparseImageMemoryBindInfo forUnmarshaling = {
-        0, 0,
-        sparseBindsForUnmarshaling.data(),
+        0, 0, nullptr,
     };
 
     unmarshal_VkSparseImageMemoryBindInfo(&stream, &forUnmarshaling);
@@ -391,9 +408,6 @@ TEST(VulkanStream, testMarshalVulkanStructWithSimplePtrFields) {
         queuePriorities.push_back(i * 4.0f);
     }
 
-    std::vector<float> queuePrioritiesForUnmarshaling = queuePriorities;
-    memset(queuePrioritiesForUnmarshaling.data(), 0, queuePriorities.size() * sizeof(float));
-
     VkDeviceQueueCreateInfo forMarshaling = {
         VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
         0,
@@ -408,8 +422,8 @@ TEST(VulkanStream, testMarshalVulkanStructWithSimplePtrFields) {
         0,
         0,
         0,
-        queueCount,
-        queuePrioritiesForUnmarshaling.data(),
+        0,
+        nullptr,
     };
 
     marshal_VkDeviceQueueCreateInfo(&stream, &forMarshaling);
@@ -461,16 +475,9 @@ TEST(VulkanStream, testMarshalVulkanStructWithVoidPtrToData) {
     VkSpecializationInfo forUnmarshaling;
     memset(&forUnmarshaling, 0x0, sizeof(VkSpecializationInfo));
 
-    std::vector<VkSpecializationMapEntry> entriesForUnmarshaling(numEntries);
-    std::vector<uint8_t> dataForUnmarshaling(dataSize);
-
-    forUnmarshaling.pMapEntries = entriesForUnmarshaling.data();
-    forUnmarshaling.pData = dataForUnmarshaling.data();
-
     int inequalities = 0;
     checkEqual_VkSpecializationInfo(
         &forMarshaling, &forUnmarshaling, [&inequalities](const char* errMsg) {
-        (void)errMsg;
         ++inequalities;
     });
 
@@ -479,10 +486,64 @@ TEST(VulkanStream, testMarshalVulkanStructWithVoidPtrToData) {
     marshal_VkSpecializationInfo(&stream, &forMarshaling);
     unmarshal_VkSpecializationInfo(&stream, &forUnmarshaling);
 
-    EXPECT_EQ(data, dataForUnmarshaling);
-
     checkEqual_VkSpecializationInfo(
         &forMarshaling, &forUnmarshaling, [](const char* errMsg) {
+        EXPECT_TRUE(false) << errMsg;
+    });
+}
+
+// Tests that marshal + unmarshal is equivalent to deepcopy.
+TEST(VulkanStream, testDeepcopyEquivalence) {
+    Pool pool;
+    VulkanStreamForTesting stream;
+
+    VkApplicationInfo appInfo = {
+        VK_STRUCTURE_TYPE_APPLICATION_INFO,
+        0, // pNext
+        "VulkanStreamTest", // application name
+        6, // application version
+        "VulkanStreamTestEngine", //engine name
+        4, // engine version,
+        VK_API_VERSION_1_0,
+    };
+
+    const char* const layerNames[] = {
+        "layer0",
+        "layer1: test layer",
+    };
+
+    const char* const extensionNames[] = {
+        "VK_KHR_8bit_storage",
+        "VK_KHR_android_surface",
+        "VK_MVK_macos_surface",
+    };
+
+    VkInstanceCreateInfo forMarshaling = {
+        VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        0, // pNext
+        0, // flags,
+        &appInfo, // pApplicationInfo,
+        arraySize(layerNames),
+        layerNames,
+        arraySize(extensionNames),
+        extensionNames
+    };
+
+    marshal_VkInstanceCreateInfo(&stream, &forMarshaling);
+
+    VkInstanceCreateInfo forUnmarshaling;
+    VkInstanceCreateInfo forDeepcopy;
+
+    unmarshal_VkInstanceCreateInfo(&stream, &forUnmarshaling);
+    deepcopy_VkInstanceCreateInfo(&pool, &forMarshaling, &forDeepcopy);
+
+    checkEqual_VkInstanceCreateInfo(
+        &forMarshaling, &forUnmarshaling, [](const char* errMsg) {
+        EXPECT_TRUE(false) << errMsg;
+    });
+
+    checkEqual_VkInstanceCreateInfo(
+        &forMarshaling, &forDeepcopy, [](const char* errMsg) {
         EXPECT_TRUE(false) << errMsg;
     });
 }
