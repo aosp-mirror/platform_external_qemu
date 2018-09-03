@@ -35,8 +35,9 @@ class VulkanMarshalingCodegen(object):
                  streamVarName,
                  inputVarName,
                  marshalPrefix,
-                 direction="write",
-                 forApiOutput=False):
+                 direction = "write",
+                 forApiOutput = False,
+                 dynAlloc = False):
         self.cgen = cgen
         self.direction = direction
         self.processSimple = "write" if self.direction == "write" else "read"
@@ -50,6 +51,8 @@ class VulkanMarshalingCodegen(object):
 
         self.exprAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = True)
         self.lenAccessor = lambda t: self.cgen.generalLengthAccess(t, parentVarName = self.inputVarName)
+
+        self.dynAlloc = dynAlloc
 
     def needSkip(self, vulkanType):
         if vulkanType.isNextPointer():
@@ -81,6 +84,22 @@ class VulkanMarshalingCodegen(object):
 
         self.cgen.stmt(
             "%s->%s(%s%s, %s)" % (varname, func, cast, toStreamExpr, sizeExpr))
+
+    def doAllocSpace(self, vulkanType):
+        if self.dynAlloc and self.direction == "read":
+            access = self.exprAccessor(vulkanType)
+            lenAccess = self.lenAccessor(vulkanType)
+            sizeof = self.cgen.sizeofExpr( \
+                         vulkanType.getForValueAccess())
+            if lenAccess:
+                bytesExpr = "%s * %s" % (lenAccess, sizeof)
+            else:
+                bytesExpr = sizeof
+
+            self.cgen.stmt( \
+                "%s->alloc((void**)&%s, %s)" %
+                    (self.streamVarName,
+                     access, bytesExpr))
 
     def onCheck(self, vulkanType):
 
@@ -118,6 +137,9 @@ class VulkanMarshalingCodegen(object):
         access = self.exprAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
 
+        if vulkanType.pointerIndirectionLevels > 0:
+            self.doAllocSpace(vulkanType)
+
         if lenAccess is not None:
             loopVar = "i"
             access = "%s + %s" % (access, loopVar)
@@ -142,7 +164,13 @@ class VulkanMarshalingCodegen(object):
         if self.direction == "write":
             self.cgen.stmt("%s->putString(%s)" % (self.streamVarName, access))
         else:
-            self.cgen.stmt("%s->getString()" % (self.streamVarName))
+            castExpr = \
+                self.makeCastExpr( \
+                    self.getTypeForStreaming( \
+                        vulkanType.getForAddressAccess()))
+
+            self.cgen.stmt( \
+                "%s->loadStringInPlace(%s&%s)" % (self.streamVarName, castExpr, access))
 
     def onStringArray(self, vulkanType):
 
@@ -153,7 +181,12 @@ class VulkanMarshalingCodegen(object):
             self.cgen.stmt("saveStringArray(%s, %s, %s)" % (self.streamVarName,
                                                             access, lenAccess))
         else:
-            self.cgen.stmt("loadStringArray(%s)" % (self.streamVarName))
+            castExpr = \
+                self.makeCastExpr( \
+                    self.getTypeForStreaming( \
+                        vulkanType.getForAddressAccess()))
+
+            self.cgen.stmt("%s->loadStringArrayInPlace(%s&%s)" % (self.streamVarName, castExpr, access))
 
     def onStaticArr(self, vulkanType):
         access = self.exprAccessor(vulkanType)
@@ -169,6 +202,8 @@ class VulkanMarshalingCodegen(object):
 
         access = self.exprAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
+
+        self.doAllocSpace(vulkanType)
 
         if lenAccess is not None:
             finalLenExpr = "%s * %s" % (
@@ -211,7 +246,8 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 VULKAN_STREAM_VAR_NAME,
                 UNMARSHAL_INPUT_VAR_NAME,
                 API_PREFIX_UNMARSHAL,
-                direction = "read")
+                direction = "read",
+                dynAlloc = True)
 
         self.apiOutputCodegenForWrite = \
             VulkanMarshalingCodegen(
@@ -220,7 +256,8 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 UNMARSHAL_INPUT_VAR_NAME,
                 API_PREFIX_UNMARSHAL,
                 direction = "write",
-                forApiOutput = True)
+                forApiOutput = True,
+                dynAlloc = True)
 
         def apiMarshalingDef(cgen, api):
             self.apiOutputCodegenForRead.cgen = cgen

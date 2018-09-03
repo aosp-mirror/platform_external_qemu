@@ -26,9 +26,12 @@
 
 #include <vulkan.h>
 
-namespace goldfish_vk {
 
-class VulkanStream;
+#include "VulkanStream.h"
+#include "android/base/files/StreamSerializing.h"
+
+
+namespace goldfish_vk {
 
 #ifdef VK_VERSION_1_0
 void marshal_VkApplicationInfo(

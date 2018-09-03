@@ -20,6 +20,10 @@ $(call emugl-begin-executable,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan_unitt
 $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan libemugl_gtest)
 $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan_cereal)
 
+LOCAL_STATIC_LIBRARIES += \
+    android-emu \
+    android-emu-base \
+
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/cereal \
     $(EMUGL_PATH)/host/include/vulkan \
