@@ -427,6 +427,18 @@ class VulkanWrapperGenerator(object):
         self.module = module
         self.typeInfo = typeInfo
 
+    def onBegin(self):
+        pass
+
+    def onEnd(self):
+        pass
+
+    def onBeginFeature(self, featureName):
+        pass
+
+    def onEndFeature(self):
+        pass
+
     def onGenType(self, typeInfo, name, alias):
         pass
 
