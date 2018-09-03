@@ -153,6 +153,27 @@ using android::base::Pool;
         self.addModule("common", "goldfish_vk_handlemap", extraHeader = handleMapInclude)
         self.addWrapper(cereal.VulkanHandleMap(self.modules["goldfish_vk_handlemap"], self.typeInfo))
 
+        dispatchHeaderDefs = """
+namespace goldfish_vk {
+
+struct VulkanDispatch;
+
+} // namespace goldfish_vk
+using DlOpenFunc = void* (void);
+using DlSymFunc = void* (void*, const char*);
+using InstanceGetter = bool (const goldfish_vk::VulkanDispatch* vk, VkInstance* instance);
+using DeviceGetter = bool (const goldfish_vk::VulkanDispatch* vk, VkInstance instance, VkPhysicalDevice* physDeviceOut, uint32_t* physicalDeviceQueueFamilyInfoCountOut, VkQueueFamilyProperties* physicalDeviceQueueFamilyInfosOut, VkDevice* deviceOut, bool* presentCapable);
+"""
+
+        dispatchImplIncludes = """
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+"""
+
+        self.addModule("common", "goldfish_vk_dispatch", extraHeader = dispatchHeaderDefs, extraImpl = dispatchImplIncludes)
+        self.addWrapper(cereal.VulkanDispatch(self.modules["goldfish_vk_dispatch"], self.typeInfo))
+
         self.cereal_Android_mk_body = """
 $(call emugl-begin-static-library,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan_cereal)
 
@@ -229,10 +250,12 @@ namespace goldfish_vk {
         write(self.cereal_Android_mk_body, file = self.outFile)
 
         self.forEachModule(lambda m: m.begin(self.genOpts.directory))
+        self.forEachWrapper(lambda w: w.onBegin())
 
     def endFile(self):
         OutputGenerator.endFile(self)
 
+        self.forEachWrapper(lambda w: w.onEnd())
         self.forEachModule(lambda m: m.end())
 
     def beginFeature(self, interface, emit):
@@ -241,6 +264,7 @@ namespace goldfish_vk {
 
         self.forEachModule(lambda m: m.appendHeader("#ifdef %s\n" % self.featureName))
         self.forEachModule(lambda m: m.appendImpl("#ifdef %s\n" % self.featureName))
+        self.forEachWrapper(lambda w: w.onBeginFeature(self.featureName))
 
     def endFeature(self):
         # Finish processing in superclass
@@ -248,6 +272,7 @@ namespace goldfish_vk {
 
         self.forEachModule(lambda m: m.appendHeader("#endif\n"))
         self.forEachModule(lambda m: m.appendImpl("#endif\n"))
+        self.forEachWrapper(lambda w: w.onEndFeature())
 
     def genType(self, typeinfo, name, alias):
         OutputGenerator.genType(self, typeinfo, name, alias)

@@ -89,6 +89,7 @@ endif
 standalone_common_C_INCLUDES := \
     $(LOCAL_PATH) \
     $(EMUGL_PATH)/host/include \
+    $(EMUGL_PATH)/host/include/vulkan \
     $(EMUGL_PATH)/host/libs/Translator/include \
     $(EMUGL_PATH)/host/libs/Translator/GLES_V2/ \
     $(EMUGL_PATH)/host/libs/libOpenGLESDispatch \
@@ -97,6 +98,7 @@ standalone_common_C_INCLUDES := \
     $(ANGLE_TRANSLATION_INCLUDES) \
     $(EMUGL_PATH)/host/libs/libOpenglRender/standalone_common \
     $(EMUGL_PATH)/host/libs/libOpenglRender/standalone_common/angle-util \
+    $(EMUGL_PATH)/host/libs/libOpenglRender/vulkan \
 
 standalone_common_STATIC_LIBRARIES := \
     $(ANGLE_TRANSLATION_STATIC_LIBRARIES) \
@@ -111,6 +113,7 @@ standalone_common_STATIC_LIBRARIES := \
 $(call emugl-begin-shared-library,lib$(BUILD_TARGET_SUFFIX)OpenglRender)
 
 $(call emugl-import,libGLESv1_dec libGLESv2_dec lib_renderControl_dec libOpenglCodecCommon)
+$(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan)
 
 LOCAL_LDLIBS += $(host_common_LDLIBS)
 LOCAL_LDLIBS += $(ANDROID_EMU_LDLIBS)
@@ -120,8 +123,10 @@ $(call emugl-export,C_INCLUDES,$(EMUGL_PATH)/host/include)
 $(call emugl-export,C_INCLUDES,$(LOCAL_PATH))
 
 # use Translator's egl/gles headers
+LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/include/vulkan
 LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/include
 LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/libOpenGLESDispatch
+LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/libOpenglRender/vulkan
 
 LOCAL_STATIC_LIBRARIES += libemugl_common
 LOCAL_STATIC_LIBRARIES += libOpenGLESDispatch
@@ -137,6 +142,7 @@ $(call emugl-end-module)
 $(call emugl-begin-static-library,lib$(BUILD_TARGET_SUFFIX)OpenglRender_standalone_common)
 $(call emugl-import,libOpenglCodecCommon libemugl_gtest)
 $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender)
+$(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan)
 
 LOCAL_C_INCLUDES += $(standalone_common_C_INCLUDES)
 LOCAL_STATIC_LIBRARIES += $(standalone_common_STATIC_LIBRARIES)
@@ -182,6 +188,7 @@ LOCAL_SRC_FILES := \
     tests/OpenGLTestContext.cpp \
     tests/StalePtrRegistry_unittest.cpp \
     tests/TextureDraw_unittest.cpp \
+    tests/Vulkan_unittest.cpp \
 
 LOCAL_LDFLAGS += $(standalone_common_LDFLAGS)
 LOCAL_LDLIBS += $(standalone_common_LDLIBS)
