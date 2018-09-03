@@ -49,6 +49,7 @@ namespace base {
 class TestSystem : public System {
 public:
     using System::getEnvironmentVariable;
+    using System::getProgramDirectoryFromPlatform;
 
     TestSystem(StringView launcherDir,
                int hostBitness,
