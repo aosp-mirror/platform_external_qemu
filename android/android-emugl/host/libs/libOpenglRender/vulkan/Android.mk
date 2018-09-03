@@ -1,6 +1,7 @@
 LOCAL_PATH := $(call my-dir)
 
 $(call emugl-begin-static-library,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan)
+$(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan_cereal)
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH) \
@@ -12,13 +13,13 @@ LOCAL_STATIC_LIBRARIES += \
     android-emu-base \
 
 LOCAL_SRC_FILES := \
+    VulkanDispatch.cpp \
     VulkanStream.cpp \
 
 $(call emugl-end-module)
 
 $(call emugl-begin-executable,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan_unittests)
 $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan libemugl_gtest)
-$(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan_cereal)
 
 LOCAL_STATIC_LIBRARIES += \
     android-emu \
