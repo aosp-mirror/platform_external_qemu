@@ -85,6 +85,10 @@ sdk {
             into 'lib64'
             builtBy buildDefaultEmulator
         }
+        item("$buildDefaultEmulator.output/testlib64") {
+            into 'testlib64'
+            builtBy buildDefaultEmulator
+        }
         item("$buildDefaultEmulator.output/build/debug_info/lib64") {
             into 'lib64'
             builtBy buildDefaultEmulator
@@ -191,6 +195,10 @@ sdk {
         }
         item("$buildWindowsEmulator.output/lib64") {
             into 'lib64'
+            builtBy buildWindowsEmulator
+        }
+        item("$buildWindowsEmulator.output/testlib64") {
+            into 'testlib64'
             builtBy buildWindowsEmulator
         }
         item("$buildWindowsEmulator.output/build/debug_info/lib64") {
