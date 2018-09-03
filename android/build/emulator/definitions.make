@@ -137,10 +137,19 @@ local-static-libraries-ldlibs = $(local-static-libraries-ldlibs-$(BUILD_TARGET_O
 # Note that this is only used for Qt-related stuff, and on Windows, the
 # Windows libraries are placed under bin/ instead of lib/ so there is no
 # point in changing the PATH variable.
+set-host-library-search-path-qt = $(call set-host-library-search-path-qt-$(BUILD_TARGET_OS),$1)
+set-host-library-search-path-qt-linux = LD_LIBRARY_PATH=$1
+set-host-library-search-path-qt-darwin = DYLD_LIBRARY_PATH=$1
+set-host-library-search-path-qt-windows =
+
+# The general version
 set-host-library-search-path = $(call set-host-library-search-path-$(BUILD_TARGET_OS),$1)
 set-host-library-search-path-linux = LD_LIBRARY_PATH=$1
 set-host-library-search-path-darwin = DYLD_LIBRARY_PATH=$1
-set-host-library-search-path-windows =
+set-host-library-search-path-windows = PATH=$1
+
+# Vulkan mock ICD setup
+set-vulkan-mock-icd = $(call set-host-library-search-path,$1) VK_ICD_FILENAMES=$(1)/VkICD_mock_icd.json
 
 # Toolchain control support.
 # It's possible to switch between the regular toolchain and the host one
@@ -348,7 +357,12 @@ $$(_DST): $$(_TST)
 	@echo "Running $$(PRIVATE_TST)"
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@export WINEPATH=$(BUILD_OBJS_DIR)/lib
-	$(hide) ASAN_OPTIONS=`cat android/asan_overrides` LLVM_PROFILE_FILE=$(call local-test-result-path)/$$(PRIVATE_TST).profraw $(TEST_SHELL) $$(PRIVATE_TST) --gtest_output=xml:$(call local-test-result-path)/$$(PRIVATE_TST).xml
+	@export VK_ICD_FILENAMES=$(BUILD_OBJS_DIR)/testlib64/VkICD_mock_icd.json
+	@export VK_LOADER_DEBUG=all
+	@echo "Running $$(PRIVATE_TST) $(BUILD_OBJS_DIR)"
+	@echo `ls $(BUILD_OBJS_DIR)`
+	@echo `ls $(BUILD_OBJS_DIR)/testlib64`
+	$(hide) ASAN_OPTIONS=`cat android/asan_overrides` LLVM_PROFILE_FILE=$(call local-test-result-path)/$$(PRIVATE_TST).profraw VK_ICD_FILENAMES=$(BUILD_OBJS_DIR)/testlib64/VkICD_mock_icd.json VK_LOADER_DEBUG=all $(TEST_SHELL) $$(PRIVATE_TST) --gtest_output=xml:$(call local-test-result-path)/$$(PRIVATE_TST).xml
 	@touch $$(PRIVATE_DST)
 endef
 
@@ -528,7 +542,7 @@ $$(MOC_SRC): PRIVATE_DST := $$(MOC_SRC)
 $$(MOC_SRC): $$(LOCAL_PATH)/$$(SRC) $$(MOC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt moc: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
-	$(hide) $$(call set-host-library-search-path,$$(QT_UIC_TOOL_LDPATH)) $$(QT_MOC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC) -p $$(PRIVATE_SRC_DIR)
+	$(hide) $$(call set-host-library-search-path-qt,$$(QT_UIC_TOOL_LDPATH)) $$(QT_MOC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC) -p $$(PRIVATE_SRC_DIR)
 
 $$(eval $$(call compile-generated-cxx-source,$$(MOC_SRC)))
 endef
@@ -547,7 +561,7 @@ $$(RCC_SRC): PRIVATE_NAME := $$(notdir $$(SRC:%.qrc=%))
 $$(RCC_SRC): $$(LOCAL_PATH)/$$(SRC) $$(QT_RCC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt rcc (static): $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
-	$(hide) $$(call set-host-library-search-path,$$(QT_UIC_TOOL_LDPATH)) $$(QT_RCC_TOOL) -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
+	$(hide) $$(call set-host-library-search-path-qt,$$(QT_UIC_TOOL_LDPATH)) $$(QT_RCC_TOOL) -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
 
 $$(eval $$(call compile-generated-cxx-source,$$(RCC_SRC)))
 endef
@@ -566,7 +580,7 @@ $$(RCC_OUT): PRIVATE_NAME := $$(notdir $$(SRC:%.qrc=%))
 $$(RCC_OUT): $$(LOCAL_PATH)/$$(SRC) $$(QT_RCC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt rcc (dynamic): $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
-	$(hide) $$(call set-host-library-search-path,$$(QT_UIC_TOOL_LDPATH)) $$(QT_RCC_TOOL) -binary -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
+	$(hide) $$(call set-host-library-search-path-qt,$$(QT_UIC_TOOL_LDPATH)) $$(QT_RCC_TOOL) -binary -o $$(PRIVATE_DST) --name $$(PRIVATE_NAME) $$(PRIVATE_SRC)
 
 $$(eval $$(call install-file,$$(RCC_OUT),$$(call local-resource-install-path,$$(notdir $$(RCC_OUT)))))
 endef
@@ -587,7 +601,7 @@ $$(UIC_SRC): PRIVATE_DST := $$(UIC_SRC)
 $$(UIC_SRC): $$(LOCAL_PATH)/$$(SRC) $$(QT_UIC_TOOL)
 	@mkdir -p $$(dir $$(PRIVATE_DST))
 	@echo "Qt uic: $$(notdir $$(PRIVATE_DST)) <-- $$(PRIVATE_SRC)"
-	$(hide) $$(call set-host-library-search-path,$$(QT_UIC_TOOL_LDPATH)) $$(QT_UIC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC)
+	$(hide) $$(call set-host-library-search-path-qt,$$(QT_UIC_TOOL_LDPATH)) $$(QT_UIC_TOOL) -o $$(PRIVATE_DST) $$(PRIVATE_SRC)
 
 LOCAL_GENERATED_SOURCES += $$(UIC_SRC)
 endef
