@@ -26,11 +26,13 @@
 
 #include <vulkan.h>
 
+
+#include <string.h>
 #include <functional>
+using OnFailCompareFunc = std::function<void(const char*)>;
+
 
 namespace goldfish_vk {
-
-using OnFailCompareFunc = std::function<void(const char*)>;
 
 #ifdef VK_VERSION_1_0
 void checkEqual_VkApplicationInfo(

@@ -72,6 +72,9 @@ class VulkanEqualityCodegen(object):
     def makeEqualBufExpr(self, lhs, rhs, size):
         return "(memcmp(%s, %s, %s) == 0)" % (lhs, rhs, size)
 
+    def makeEqualStringExpr(self, lhs, rhs):
+        return "(strcmp(%s, %s) == 0)" % (lhs, rhs)
+
     def makeBothNotNullExpr(self, lhs, rhs):
         return "(%s) && (%s)" % (lhs, rhs)
 
@@ -79,7 +82,7 @@ class VulkanEqualityCodegen(object):
         return "!(%s) && !(%s)" % (lhs, rhs)
 
     def compareWithConsequence(self, compareExpr, vulkanType, errMsg=""):
-        self.cgen.stmt("if (!(%s)) %s(\"%s (Error: %s)\")" %
+        self.cgen.stmt("if (!(%s)) { %s(\"%s (Error: %s)\"); }" %
                        (compareExpr, self.onFailCompareVar,
                         self.exprAccessorValueLhs(vulkanType), errMsg))
 
@@ -104,7 +107,7 @@ class VulkanEqualityCodegen(object):
         if skipStreamInternal:
             return
 
-        self.cgen.beginIf(accessLhs)
+        self.cgen.beginIf("%s && %s" % (accessLhs, accessRhs))
 
     def endCheck(self, vulkanType):
 
@@ -123,9 +126,17 @@ class VulkanEqualityCodegen(object):
         lenAccessLhs = self.lenAccessorLhs(vulkanType)
         lenAccessRhs = self.lenAccessorRhs(vulkanType)
 
+        needNullCheck = vulkanType.pointerIndirectionLevels > 0
+
+        if needNullCheck:
+            bothNotNullExpr = self.makeBothNotNullExpr(accessLhs, accessRhs)
+            self.cgen.beginIf(bothNotNullExpr)
+
         if lenAccessLhs is not None:
+            equalLenExpr = self.makeEqualExpr(lenAccessLhs, lenAccessRhs)
+
             self.compareWithConsequence( \
-                self.makeEqualExpr(lenAccessLhs, lenAccessRhs),
+                equalLenExpr,
                 vulkanType, "Lengths not equal")
 
             loopVar = "i"
@@ -134,6 +145,10 @@ class VulkanEqualityCodegen(object):
             forInit = "uint32_t %s = 0" % loopVar
             forCond = "%s < (uint32_t)%s" % (loopVar, lenAccessLhs)
             forIncr = "++%s" % loopVar
+
+            if needNullCheck:
+                self.cgen.beginIf(equalLenExpr)
+
             self.cgen.beginFor(forInit, forCond, forIncr)
 
         self.cgen.funcCall(None, self.prefix + vulkanType.typeName,
@@ -141,29 +156,77 @@ class VulkanEqualityCodegen(object):
 
         if lenAccessLhs is not None:
             self.cgen.endFor()
+            if needNullCheck:
+                self.cgen.endIf()
+
+        if needNullCheck:
+            self.cgen.endIf()
 
     def onString(self, vulkanType):
-        pass
+        accessLhs = self.exprAccessorLhs(vulkanType)
+        accessRhs = self.exprAccessorRhs(vulkanType)
 
-        # TODO
-        # access = self.exprAccessor(vulkanType)
+        bothNullExpr = self.makeBothNullExpr(accessLhs, accessRhs)
+        bothNotNullExpr = self.makeBothNotNullExpr(accessLhs, accessRhs)
+        nullMatchExpr = "(%s) || (%s)" % (bothNullExpr, bothNotNullExpr)
 
-        # if self.direction == "write":
-        #     self.cgen.stmt("%s->putString(%s)" % (self.streamVarName, access))
-        # else:
-        #     self.cgen.stmt("%s->getString()" % (self.streamVarName))
+        self.compareWithConsequence( \
+            nullMatchExpr,
+            vulkanType,
+            "Mismatch in string pointer nullness")
+
+        self.cgen.beginIf(bothNotNullExpr)
+
+        self.compareWithConsequence(
+            self.makeEqualStringExpr(accessLhs, accessRhs),
+            vulkanType, "Unequal strings")
+
+        self.cgen.endIf()
 
     def onStringArray(self, vulkanType):
-        pass
+        accessLhs = self.exprAccessorLhs(vulkanType)
+        accessRhs = self.exprAccessorRhs(vulkanType)
 
-        # TODO
-        # access = self.exprAccessor(vulkanType)
-        # lenAccess = self.lenAccessor(vulkanType)
+        lenAccessLhs = self.lenAccessorLhs(vulkanType)
+        lenAccessRhs = self.lenAccessorRhs(vulkanType)
 
-        # if self.direction == "write":
-        #     self.cgen.stmt("%s->putStringArray(%s, %s)" % (self.streamVarName, access, lenAccess))
-        # else:
-        #     self.cgen.stmt("%s->getStringArray()" % (self.streamVarName))
+        bothNullExpr = self.makeBothNullExpr(accessLhs, accessRhs)
+        bothNotNullExpr = self.makeBothNotNullExpr(accessLhs, accessRhs)
+        nullMatchExpr = "(%s) || (%s)" % (bothNullExpr, bothNotNullExpr)
+
+        self.compareWithConsequence( \
+            nullMatchExpr,
+            vulkanType,
+            "Mismatch in string array pointer nullness")
+
+        equalLenExpr = self.makeEqualExpr(lenAccessLhs, lenAccessRhs)
+
+        self.compareWithConsequence( \
+            equalLenExpr,
+            vulkanType, "Lengths not equal in string array")
+
+        self.compareWithConsequence( \
+            equalLenExpr,
+            vulkanType, "Lengths not equal in string array")
+
+        self.cgen.beginIf("%s && %s" % (equalLenExpr, bothNotNullExpr))
+
+        loopVar = "i"
+        accessLhs = "*(%s + %s)" % (accessLhs, loopVar)
+        accessRhs = "*(%s + %s)" % (accessRhs, loopVar)
+        forInit = "uint32_t %s = 0" % loopVar
+        forCond = "%s < (uint32_t)%s" % (loopVar, lenAccessLhs)
+        forIncr = "++%s" % loopVar
+
+        self.cgen.beginFor(forInit, forCond, forIncr)
+
+        self.compareWithConsequence(
+            self.makeEqualStringExpr(accessLhs, accessRhs),
+            vulkanType, "Unequal string in string array")
+
+        self.cgen.endFor()
+
+        self.cgen.endIf()
 
     def onStaticArr(self, vulkanType):
         accessLhs = self.exprAccessorLhs(vulkanType)
