@@ -2,6 +2,9 @@
 # sources.
 LOCAL_PATH:=$(call my-dir)
 
+# Only build emugen on 64-bit targets
+ifeq ($(BUILD_TARGET_SUFFIX),64)
+
 $(call emugl-begin-host-executable,emugen)
 LOCAL_SRC_FILES := \
     ApiGen.cpp \
@@ -19,6 +22,8 @@ endif
 LOCAL_INSTALL := false
 
 $(call emugl-end-module)
+
+endif # BUILD_TARGET_SUFFIX == 64
 
 # The location of the emugen host tool that is used to generate wire
 # protocol encoders/ decoders. This variable is used by other emugl modules.
