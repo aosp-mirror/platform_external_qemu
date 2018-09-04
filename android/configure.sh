@@ -942,6 +942,62 @@ if [ -d $SWIFTSHADER_PREBUILTS_DIR ]; then
     done
 fi
 
+###
+### Copy Vulkan libraries (for now, for test only, so send them to testlibs)
+###
+VULKAN_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/vulkan
+if [ -d $VULKAN_PREBUILTS_DIR ]; then
+    log "Copying Vulkan prebuilt libraries from $VULKAN_PREBUILTS_DIR"
+
+    VULKAN_TESTLIB_DSTDIR="$OUT_DIR/testlib64"
+    VULKAN_LIB_DSTDIR="$OUT_DIR/lib64/vulkan"
+    VULKAN_HOST=$HOST_OS
+
+    for PREBUILT_ARCH in $PREBUILT_ARCHS; do
+        VULKAN_SRCDIR="$VULKAN_PREBUILTS_DIR/$HOST_OS-$PREBUILT_ARCH"
+
+        VULKAN_MAC_ICD_LIB=libMoltenVK.dylib
+        VULKAN_MAC_ICD_FILE=MoltenVK_icd.json
+
+        VULKAN_MOCK_ICD_FILE=VkICD_mock_icd.json
+
+        case $VULKAN_HOST in
+            windows)
+                VULKAN_LOADER_LIB=vulkan-1.dll
+                VULKAN_MOCK_ICD_LIB=VkICD_mock_icd.dll
+                ;;
+            darwin)
+                VULKAN_LOADER_LIB=libvulkan.dylib
+                VULKAN_MOCK_ICD_LIB=libVkICD_mock_icd.dylib
+                ;;
+            linux)
+                VULKAN_LOADER_LIB=libvulkan.so
+                VULKAN_MOCK_ICD_LIB=libVkICD_mock_icd.so
+                ;;
+            *)
+        esac
+
+        # Install the loader only to the test dir, unless on mac
+        if [ "$PREBUILT_ARCH" = "x86_64" ]; then
+            copy_file "$VULKAN_SRCDIR/$VULKAN_LOADER_LIB" \
+                             "$VULKAN_TESTLIB_DSTDIR/$VULKAN_LOADER_LIB"
+            copy_file "$VULKAN_SRCDIR/$VULKAN_MOCK_ICD_LIB" \
+                             "$VULKAN_TESTLIB_DSTDIR/$VULKAN_MOCK_ICD_LIB"
+            copy_file "$VULKAN_SRCDIR/$VULKAN_MOCK_ICD_FILE" \
+                             "$VULKAN_TESTLIB_DSTDIR/$VULKAN_MOCK_ICD_FILE"
+
+            # For mac, we copy a mac vulkan implementation
+            if [ "$VULKAN_HOST" = "darwin" ]; then
+                copy_file "$VULKAN_SRCDIR/$VULKAN_LOADER_LIB" \
+                                 "$VULKAN_LIB_DSTDIR/$VULKAN_LOADER_LIB"
+                copy_file "$VULKAN_SRCDIR/$VULKAN_MAC_ICD_LIB" \
+                                 "$VULKAN_LIB_DSTDIR/$VULKAN_MAC_ICD_LIB"
+                copy_file "$VULKAN_SRCDIR/$VULKAN_MAC_ICD_FILE" \
+                          "$VULKAN_LIB_DSTDIR/$VULKAN_MAC_ICD_FILE"
+            fi
+        fi
+    done
+fi
 
 ###
 ###  Copy Mesa if available
