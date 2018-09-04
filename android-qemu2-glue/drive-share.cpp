@@ -37,6 +37,7 @@ extern "C" {
 #include "qemu/config-file.h"
 #include "qemu/cutils.h"
 #include "qemu/error-report.h"
+#include "qemu/option.h"
 #include "qemu/option_int.h"
 #include "qemu/osdep.h"
 #include "sysemu/block-backend.h"
@@ -126,10 +127,14 @@ static bool parseQemuOptForQcow2(bool wipeData) {
 
     /* List of paths to all images that can be mounted.*/
     const DriveBackingPair image_paths[] = {
-            {"system", android_hw->disk_systemPartition_path
-                               ?: android_hw->disk_systemPartition_initPath},
-            {"vendor", android_hw->disk_vendorPartition_path
-                               ?: android_hw->disk_vendorPartition_initPath},
+            {"system", android_hw->disk_systemPartition_path &&
+                                       android_hw->disk_systemPartition_path[0]
+                               ? android_hw->disk_systemPartition_path
+                               : android_hw->disk_systemPartition_initPath},
+            {"vendor", android_hw->disk_vendorPartition_path &&
+                                       android_hw->disk_vendorPartition_path[0]
+                               ? android_hw->disk_vendorPartition_path
+                               : android_hw->disk_vendorPartition_initPath},
             {"cache", android_hw->disk_cachePartition_path},
             {"userdata", android_hw->disk_dataPartition_path},
             {"sdcard", android_hw->hw_sdCard_path},
@@ -245,12 +250,14 @@ static bool parseQemuOptForQcow2(bool wipeData) {
     return true;
 }
 
-static bool needRemount(const char* id) {
-    return strcmp("system", id) && strcmp("vendor", id);
+static bool needRemount(QemuOpts* opts) {
+    return !qemu_opt_get_bool(opts, "read-only", false);
 }
 
-static bool needCreateTmp(const char* id, android::base::FileShare shareMode) {
-    return shareMode == android::base::FileShare::Read && needRemount(id) &&
+static bool needCreateTmp(const char* id,
+                          android::base::FileShare shareMode,
+                          QemuOpts* opts) {
+    return shareMode == android::base::FileShare::Read && needRemount(opts) &&
            android::base::PathUtils::extension(
                    sDriveShare->srcImagePaths[id]) == ".qcow2";
 }
@@ -271,9 +278,10 @@ static bool createEmptySnapshot(BlockDriverState* bs,
 }
 
 static std::string initDrivePath(const char* id,
-                                 android::base::FileShare shareMode) {
+                                 android::base::FileShare shareMode,
+                                 QemuOpts* opts) {
     assert(sDriveShare->srcImagePaths.count(id));
-    if (needCreateTmp(id, shareMode)) {
+    if (needCreateTmp(id, shareMode, opts)) {
         // Create a temp qcow2-on-qcow2
         Error* img_creation_error = NULL;
         TempFile* img = tempfile_create_with_ext(".qcow2");
@@ -320,9 +328,9 @@ static int drive_init(void* opaque, QemuOpts* opts, Error** errp) {
     DriveInitParam* param = (DriveInitParam*)opaque;
     const char* id = opts->id;
     if (id) {
-        std::string path = initDrivePath(id, param->shareMode);
+        std::string path = initDrivePath(id, param->shareMode, opts);
         qemu_opt_set(opts, "file", path.c_str(), errp);
-        if (needCreateTmp(id, param->shareMode) && param->snapshotName) {
+        if (needCreateTmp(id, param->shareMode, opts) && param->snapshotName) {
             if (strcmp(id, "cache")) {
                 int res = 0;
                 if (param->baseNeedApplySnapshot) {
@@ -359,7 +367,7 @@ static int drive_init(void* opaque, QemuOpts* opts, Error** errp) {
 static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
     const char* id = opts->id;
     D("Re-init drive %s\n", id);
-    if (!needRemount(id)) {
+    if (!needRemount(opts)) {
         return 0;
     }
     DriveInitParam* param = (DriveInitParam*)opaque;
@@ -374,7 +382,7 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
     AioContext* aioCtx = bdrv_get_aio_context(oldbs);
     aio_context_acquire(aioCtx);
     bool isCache = !strcmp(id, "cache");
-    if (needCreateTmp(id, param->shareMode) && !isCache) {
+    if (needCreateTmp(id, param->shareMode, opts) && !isCache) {
         bdrv_flush(oldbs);
         // Set the base file to use the snapshot
         int res = bdrv_snapshot_goto(oldbs, snapshotName, errp);
@@ -387,8 +395,8 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
     }
     blk_remove_bs(blk);
     aio_context_release(aioCtx);
-    std::string path = initDrivePath(id, param->shareMode);
-    if (needCreateTmp(id, param->shareMode) && isCache) {
+    std::string path = initDrivePath(id, param->shareMode, opts);
+    if (needCreateTmp(id, param->shareMode, opts) && isCache) {
         mirrorTmpCache(path.c_str(),
                     sDriveShare->srcImagePaths[id].c_str());
     }
@@ -428,7 +436,7 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
         return 1;
     }
 
-    if (needCreateTmp(id, param->shareMode) && !isCache) {
+    if (needCreateTmp(id, param->shareMode, opts) && !isCache) {
         // fake an empty snapshot
         // We don't worry if it fails.
         createEmptySnapshot(bs, param->snapshotName);
