@@ -67,6 +67,9 @@ local-intermediates-dir = $(call intermediates-dir-for,$(call local-build-var,BI
 # See LOCAL_PROTO_SOURCES for details.
 generated-proto-sources-dir = $(call intermediates-dir-for,$(call local-build-var,BITS),proto-sources)
 
+# Location of intermediate cmake files.
+local-cmake-path = $(call intermediates-dir-for,$(call local-build-var,BITS),cmake)/$(1)
+
 # Location of intermediate static libraries during build.
 local-library-path = $(call intermediates-dir-for,$(call local-build-var,BITS),$(1))/$(1).a
 
@@ -349,6 +352,83 @@ endif  # BUILD_TARGET_OS != darwin
 else  # BUILD_STRIP_BINARIES != true
 	$(hide) cp -f $$(PRIVATE_SRC) $$(PRIVATE_DST)
 endif # BUILD_STRIP_BINARIES != true
+endef
+
+define cmake-project-host
+_SRC := $(1)
+_DST := $(2)
+$$(_DST): PRIVATE_DST := $$(_DST)
+$$(_DST): PRIVATE_CMAKE_DST := $$(dir $$(_DST))
+$$(_DST): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS)
+$$(_DST): PRIVATE_CXXFLAGS := $$(LOCAL_CXXFLAGS)
+$$(_DST): PRIVATE_C_INCLUDES := $(LOCAL_C_INCLUDES)
+$$(_DST): PRIVATE_SRC := $$(dir $$(_SRC))
+$$(_DST): PRIVATE_CC  := $$(BUILD_HOST_CC)
+$$(_DST): PRIVATE_CXX := $$(BUILD_HOST_CXX)
+$$(_DST): PRIVATE_AR  := $$(BUILD_HOST_AR)
+$$(_DST): PRIVATE_OS  := $$(BUILD_HOST_OS)
+$$(_DST): PRIVATE_RANLIB  := $$(BUILD_HOST_RANLIB)
+$$(_DST): PRIVATE_OBJCOPY  := $$(BUILD_HOST_OBJCOPY)
+$$(_DST): CMAKE_TOOL := $$(CMAKE_DIR)/$$(BUILD_HOST_TAG)/bin/cmake
+$$(_DST): PRIVATE_INST := $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)
+$$(_DST): $$(_SRC)
+	$(hide) CC=$$(PRIVATE_CC) CXX=$$(PRIVATE_CXX) $$(CMAKE_TOOL) \
+       -H$$(PRIVATE_SRC) \
+       -B$$(PRIVATE_CMAKE_DST) \
+       -DCMAKE_AR=$$(PRIVATE_AR) \
+       -DCMAKE_RANLIB=$$(PRIVATE_RANLIB) \
+       -DCMAKE_OBJCOPY=$$(PRIVATE_OBJCOPY) \
+       -DLOCAL_C_INCLUDES="$$(PRIVATE_C_INCLUDES)" \
+       -DLOCAL_CXXFLAGS="$$(PRIVATE_CXXFLAGS)" \
+       -DLOCAL_CFLAGS="$$(PRIVATE_CFLAGS)" \
+       -DLOCAL_OS="$${PRIVATE_OS}" \
+
+endef
+
+define cmake-project-target
+_SRC := $(1)
+_DST := $(2)
+$$(_DST): PRIVATE_DST := $$(_DST)
+$$(_DST): PRIVATE_CMAKE_DST := $$(dir $$(_DST))
+$$(_DST): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS)
+$$(_DST): PRIVATE_CXXFLAGS := $$(LOCAL_CXXFLAGS)
+$$(_DST): PRIVATE_C_INCLUDES := $$(LOCAL_C_INCLUDES)
+$$(_DST): PRIVATE_SRC := $$(dir $$(_SRC))
+$$(_DST): PRIVATE_CC  := $$(BUILD_TARGET_CC)
+$$(_DST): PRIVATE_CXX := $$(BUILD_TARGET_CXX)
+$$(_DST): PRIVATE_AR  := $$(BUILD_TARGET_AR)
+$$(_DST): PRIVATE_OS  := $$(BUILD_TARGET_OS)
+$$(_DST): PRIVATE_RANLIB  := $$(BUILD_TARGET_RANLIB)
+$$(_DST): PRIVATE_OBJCOPY  := $$(BUILD_TARGET_OBJCOPY)
+$$(_DST): CMAKE_TOOL := $$(CMAKE_DIR)/$$(BUILD_HOST_TAG)/bin/cmake
+$$(_DST): PRIVATE_INST := $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)
+$$(_DST): $$(_SRC)
+	$(hide) CC=$$(PRIVATE_CC) CXX=$$(PRIVATE_CXX) $$(CMAKE_TOOL) \
+       -H$$(PRIVATE_SRC) \
+       -B$$(PRIVATE_CMAKE_DST) \
+       -DCMAKE_AR=$$(PRIVATE_AR) \
+       -DCMAKE_RANLIB=$$(PRIVATE_RANLIB) \
+       -DCMAKE_OBJCOPY=$$(PRIVATE_OBJCOPY) \
+       -DLOCAL_C_INCLUDES="$$(PRIVATE_C_INCLUDES)" \
+       -DLOCAL_CXXFLAGS="$$(PRIVATE_CXXFLAGS)" \
+       -DLOCAL_CFLAGS="$$(PRIVATE_CFLAGS)" \
+       -DLOCAL_OS="$${PRIVATE_OS}" \
+
+endef
+
+# Makes the specific target from the generated CMAKE project file.
+# We use $(MAKE) to make sure we pass the proper make concurency flags down.
+# Note, that we force build this, otherwise we get weird issues around dependency
+# recognition.
+define make-cmake-project
+_SRC := $(1)
+_DST := $(2)
+_TARGET := $(3)
+$$(_DST): PRIVATE_DST := $$(_DST)
+$$(_DST): PRIVATE_SRC := $$(_SRC)
+$$(_DST): PRIVATE_TARGET := $$(_TARGET)
+$$(_DST): $$(_SRC) force
+	@$(hide)  $(MAKE) $$(PRIVATE_TARGET) -C $$(dir $$(PRIVATE_SRC))
 endef
 
 # Runs a test target
