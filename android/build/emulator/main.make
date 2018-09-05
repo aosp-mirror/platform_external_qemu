@@ -46,6 +46,7 @@ include $(_BUILD_CORE_DIR)/emulator/definitions.make
 
 CLEAR_VARS                := $(_BUILD_CORE_DIR)/emulator/clear_vars.make
 BUILD_HOST_EXECUTABLE     := $(_BUILD_CORE_DIR)/emulator/host_executable.make
+BUILD_CMAKE               := $(_BUILD_CORE_DIR)/emulator/cmake.make
 BUILD_HOST_STATIC_LIBRARY := $(_BUILD_CORE_DIR)/emulator/host_static_library.make
 BUILD_HOST_SHARED_LIBRARY := $(_BUILD_CORE_DIR)/emulator/host_shared_library.make
 PREBUILT_STATIC_LIBRARY   := $(_BUILD_CORE_DIR)/emulator/prebuilt_static_library.make
@@ -59,6 +60,7 @@ _BUILD_LIBRARIES :=
 _BUILD_DEBUG_INFOS :=
 _BUILD_TESTS :=
 _BUILD_LINT :=
+_BUILD_CMAKE_MAKEFILES :=
 
 clean: clean-intermediates
 
