@@ -44,6 +44,8 @@ public:
     void complete(bool succeeded);
     void onInvalidSnapshotLoad();
 
+    void touchAllPages();
+
     // synchronize() will finish all background loading operations and update
     // the gap tracker with gap info from the ram file on disk, making the
     // Loader good for doing all other operations that can happen on it.

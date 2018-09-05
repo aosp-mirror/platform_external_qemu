@@ -28,6 +28,7 @@ enum class MemoryHint {
     Normal,
     Random,
     Sequential,
+    Touch,
 };
 
 // Returns true if successful, false otherwise.

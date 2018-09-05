@@ -71,6 +71,7 @@ public:
 
     OperationStatus prepareForLoading(const char* name);
     OperationStatus load(bool isQuickboot, const char* name);
+    void touchAllPages();
     OperationStatus prepareForSaving(const char* name);
     OperationStatus save(bool isOnExit, const char* name);
 

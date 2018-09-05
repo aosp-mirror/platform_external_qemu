@@ -89,6 +89,8 @@ public:
     void join();
     void interrupt();
 
+    void touchAllPages();
+
     bool hasError() const { return mHasError; }
     void invalidateGaps() { mGaps.reset(nullptr); }
     bool hasGaps() const { return mGaps ? 1 : 0; }
@@ -194,6 +196,9 @@ private:
 
     // Whether we loaded to a ram.img
     bool mLoadedToFileBacking = false;
+
+    // Whether we are currently lazy loading from a ram.img by mmap
+    bool mLazyLoadingFromFileBacking = false;
 };
 
 struct RamLoader::Page {
