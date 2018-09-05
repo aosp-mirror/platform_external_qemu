@@ -67,6 +67,9 @@ local-intermediates-dir = $(call intermediates-dir-for,$(call local-build-var,BI
 # See LOCAL_PROTO_SOURCES for details.
 generated-proto-sources-dir = $(call intermediates-dir-for,$(call local-build-var,BITS),proto-sources)
 
+# Location of intermediate cmake files.
+local-cmake-path = $(call intermediates-dir-for,$(call local-build-var,BITS),cmake)/$(1)
+
 # Location of intermediate static libraries during build.
 local-library-path = $(call intermediates-dir-for,$(call local-build-var,BITS),$(1))/$(1).a
 
@@ -336,6 +339,36 @@ else  # BUILD_STRIP_BINARIES != true
 	$(hide) cp -f $$(PRIVATE_SRC) $$(PRIVATE_DST)
 endif # BUILD_STRIP_BINARIES != true
 endef
+
+
+define cmake-project-host
+_SRC := $(1)
+_DST := $(2)
+$$(_DST): PRIVATE_DST := $$(_DST)
+$$(_DST): PRIVATE_CMAKE_DST := $$(dir $$(_DST))
+$$(_DST): PRIVATE_SRC := $$(dir $$(_SRC))
+$$(_DST): PRIVATE_CC  := $$(BUILD_HOST_CC)
+$$(_DST): PRIVATE_CXX := $$(BUILD_HOST_CXX)
+$$(_DST): PRIVATE_AR  := $$(BUILD_HOST_AR)
+$$(_DST): PRIVATE_RANLIB  := $$(BUILD_HOST_RANLIB)
+$$(_DST): PRIVATE_OBJCOPY  := $$(BUILD_HOST_OBJCOPY)
+$$(_DST): CMAKE_TOOL := $$(CMAKE_DIR)/$$(BUILD_HOST_TAG)/bin/cmake
+$$(_DST): PRIVATE_INST := $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)
+$$(_DST): $$(_SRC)
+	@$(hide) CC=$$(PRIVATE_CC) CXX=$$(PRIVATE_CXX) $$(CMAKE_TOOL) -H$$(PRIVATE_SRC) -B$$(PRIVATE_CMAKE_DST) -DCMAKE_AR=$$(PRIVATE_AR) -DCMAKE_RANLIB=$$(PRIVATE_RANLIB) -DCMAKE_OBJCOPY=$$(PRIVATE_OBJCOPY)
+endef
+
+define make-cmake-project
+_SRC := $(1)
+_DST := $(2)
+_TARGET := $(3)
+$$(_DST): PRIVATE_DST := $$(_DST)
+$$(_DST): PRIVATE_SRC := $$(_SRC)
+$$(_DST): PRIVATE_TARGET := $$(_TARGET)
+$$(_DST): $$(_SRC)
+	@$(hide) cd $$(dir $$(PRIVATE_SRC)) && make $$(PRIVATE_TARGET)
+endef
+
 
 # Runs a test target
 define run-test
