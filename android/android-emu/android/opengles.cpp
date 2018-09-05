@@ -153,6 +153,11 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
 
     android_init_opengl_logger();
 
+    const GpuInfoList& gpuList = globalGpuInfoList();
+    std::string gpuInfoAsString = gpuList.dump();
+    android_opengl_logger_write("%s: gpu info", __func__);
+    android_opengl_logger_write("%s", gpuInfoAsString.c_str());
+
     sRenderLib->setRenderer(emuglConfig_get_current_renderer());
     sRenderLib->setAvdInfo(guestPhoneApi, guestApiLevel);
     sRenderLib->setCrashReporter(&crashhandler_die_format);
