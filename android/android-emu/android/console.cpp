@@ -40,6 +40,7 @@
 #include "android/network/constants.h"
 #include "android/network/control.h"
 #include "android/network/globals.h"
+#include "android/network/wifi.h"
 #include "android/recording/screen-recorder-constants.h"
 #include "android/shaper.h"
 #include "android/tcpdump.h"
@@ -160,6 +161,7 @@ typedef struct CmdFeatureFlag_
 
 const CmdFeatureFlag command_flags[] = {
         {"screenrecord", android::featurecontrol::ScreenRecording},
+        {"wifi", android::featurecontrol::WifiConfigurable},
         {NULL, android::featurecontrol::Feature_n_items}};
 }  // namespace
 
@@ -989,6 +991,74 @@ static const CommandDefRec  network_commands[] =
       "allows to start/stop capture of network packets to a file for later analysis\r\n", NULL,
       NULL, network_capture_commands },
 
+    { NULL, NULL, NULL, NULL, NULL, NULL }
+};
+
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
+/*****                       W I F I   C O N F I G U R A T I O N                       ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+static int do_wifi_add(ControlClient client, char* args)
+{
+    size_t len = strcspn(args, " ");
+    std::string ssid(args, args + len);
+    std::string password;
+    if (args[len] != '\0') {
+        const char* passwordLocation = args + len + 1;
+        len = strcspn(passwordLocation, " ");
+        password.assign(passwordLocation, passwordLocation + len);
+    }
+    return android_wifi_add_ssid(ssid.c_str(),
+                                 password.empty() ? nullptr : password.c_str());
+}
+
+static void describe_wifi_add(ControlClient client)
+{
+    control_write(client,
+                  "'wifi add <ssid> [password]' will add a new SSID named <ssid> that will be visible\n"
+                  "on the device. If the optional [password] is provided the SSID will be set up\n"
+                  "with this WPA2-PSK password. If an SSID with the same name already exists\n"
+                  "the password will be updated if different, otherwise nothing will happen.\n");
+}
+
+static int do_wifi_block(ControlClient client, char* args)
+{
+    return android_wifi_set_ssid_block_on(args, true);
+}
+
+static void describe_wifi_block(ControlClient client)
+{
+    control_write(client,
+                  "'wifi block <ssid>' will block network access on the given SSID. The device\n"
+                  "will still be able to connect to the SSID but will not be able to access the\n"
+                  "internet or any outside network.\n");
+}
+
+static int do_wifi_unblock(ControlClient client, char* args)
+{
+    return android_wifi_set_ssid_block_on(args, false);
+}
+
+static void describe_wifi_unblock(ControlClient client)
+{
+    control_write(client,
+                  "'wifi unblock <ssid>' will unblock network access on the given SSID. The device\n"
+                  "will have its connection to the outside world restored, undoing\n"
+                  " a previous block command.\n");
+}
+
+static const CommandDefRec wifi_commands[] =
+{
+    { "add", "add new WiFi SSID", NULL, describe_wifi_add,
+      do_wifi_add, NULL },
+    { "block", "block network access on SSID", NULL, describe_wifi_block,
+      do_wifi_block, NULL },
+    { "unblock", "unblock network access on SSID", NULL, describe_wifi_unblock,
+      do_wifi_unblock, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
@@ -3468,6 +3538,10 @@ extern const CommandDefRec main_commands[] = {
          "of the\r\n"
          "emulated device.\r\n",
          NULL, NULL, network_commands},
+
+         {"wifi", "manage wifi settings",
+          "allows you to manage wifi settings in the device\r\n",
+          NULL, NULL, wifi_commands},
 
         {"power", "power related commands",
          "allows to change battery and AC power status\r\n", NULL, NULL,
