@@ -282,3 +282,14 @@ ifeq (,$(CONFIG_AEMU64_ONLY))
 include $(QEMU2_TOP_DIR)/android-qemu2-glue/build/Makefile.qemu2.mk
 endif # !CONFIG_AEMU64_ONLY
 endif
+
+##############################################################################
+##############################################################################
+###
+###  Emulator end2end tests
+###
+ifdef QEMU2_TOP_DIR
+ifeq (,$(CONFIG_AEMU64_ONLY))
+include $(QEMU2_TOP_DIR)/android/tests/Makefile.end2end.mk
+endif # !CONFIG_AEMU64_ONLY
+endif
