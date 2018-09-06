@@ -311,6 +311,8 @@ android_emu_LOCAL_SRC_FILES := \
     android/network/control.cpp \
     android/network/constants.c \
     android/network/globals.c \
+    android/network/NetworkPipe.cpp \
+    android/network/wifi.cpp \
     android/opengl/EmuglBackendList.cpp \
     android/opengl/EmuglBackendScanner.cpp \
     android/opengl/emugl_config.cpp \
