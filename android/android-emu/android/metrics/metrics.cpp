@@ -396,6 +396,9 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::ON_DEMAND_SNAPSHOT_LOAD;
         case android::featurecontrol::Feature_n_items:
             return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
+        case android::featurecontrol::WifiConfigurable:
+            // TODO: change this when WiFi configurability is fully supported
+            return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
