@@ -341,6 +341,8 @@ LOCAL_SRC_FILES := \
     android/network/constants.c \
     android/network/globals.c \
     android/offworld/OffworldPipe.cpp \
+    android/network/NetworkPipe.cpp \
+    android/network/wifi.cpp \
     android/opengl/EmuglBackendList.cpp \
     android/opengl/EmuglBackendScanner.cpp \
     android/opengl/emugl_config.cpp \
