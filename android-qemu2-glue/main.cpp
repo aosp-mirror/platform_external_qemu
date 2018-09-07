@@ -1209,7 +1209,7 @@ extern "C" int main(int argc, char** argv) {
         // instead of virtio block device
         args.add("-drive");
         const char* avd_dir = avdInfo_getContentPath(avd);
-        args.addFormat("index=0,format=raw,id=system,file=cat:%s" PATH_SEP
+        args.addFormat("format=raw,file=cat:%s" PATH_SEP
                        "system.img.qcow2|"
                        "%s" PATH_SEP
                        "userdata-qemu.img.qcow2|"
