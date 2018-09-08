@@ -53,7 +53,9 @@ typedef char *caddr_t;
 # include <sys/bitypes.h>
 #endif
 
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif
 
 #ifdef NEED_TYPEDEFS
 typedef char int8_t;

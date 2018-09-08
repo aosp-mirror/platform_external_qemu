@@ -20,8 +20,8 @@
 #include <limits.h>
 #ifndef _MSC_VER
 #include <unistd.h>
-#endif
 #include <sys/time.h>
+#endif
 #ifdef __linux__
 #include <sys/syscall.h>
 #include <linux/futex.h>

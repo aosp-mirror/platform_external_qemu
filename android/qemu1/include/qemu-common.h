@@ -45,7 +45,9 @@
 #endif
 #include <fcntl.h>
 #include <sys/stat.h>
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif
 #include <assert.h>
 #include <signal.h>
 #include <glib.h>

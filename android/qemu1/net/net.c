@@ -23,12 +23,12 @@
  */
 #ifndef _MSC_VER
 #include <unistd.h>
+#include <sys/time.h>
 #endif
 #include <fcntl.h>
 #include <signal.h>
 #include <time.h>
 #include <errno.h>
-#include <sys/time.h>
 #include <zlib.h>
 
 /* Needed early for CONFIG_BSD etc. */

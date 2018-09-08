@@ -93,10 +93,10 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <sys/time.h>
 #include <time.h>
 #ifndef _MSC_VER
 #include <unistd.h>
+#include <sys/time.h>
 #endif
 #include <zlib.h>
 
