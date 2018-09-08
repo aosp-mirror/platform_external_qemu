@@ -74,13 +74,13 @@ extern int daemon(int, int);
  * function availability on recentish Mingw-w64 platforms. */
 #ifndef _MSC_VER
 #include <unistd.h>
+#include <sys/time.h>
 #endif
 #include <time.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <assert.h>
 /* setjmp must be declared before sysemu/os-win32.h
  * because it is redefined there. */
