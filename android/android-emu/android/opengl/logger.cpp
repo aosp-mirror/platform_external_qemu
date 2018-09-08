@@ -22,7 +22,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string>
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif
 #include <vector>
 
 using android::base::AutoLock;
