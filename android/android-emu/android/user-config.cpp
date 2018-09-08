@@ -20,7 +20,9 @@
 #include "android/utils/path.h"
 #include <stdlib.h>
 #include <errno.h>
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif
 
 #define  D(...)   VERBOSE_PRINT(init,__VA_ARGS__)
 
