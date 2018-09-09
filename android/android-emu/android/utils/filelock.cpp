@@ -218,6 +218,8 @@ static int filelock_lock(FileLock* lock, int timeout) {
             // its parent process has exited; that prevents us from opening
             // it for writing.
             SetFileAttributesW(unicodeName.c_str(), FILE_ATTRIBUTE_NORMAL);
+
+            ::CloseHandle(getpidHandle);
         }
         if (lockHandle != INVALID_HANDLE_VALUE) {
             createFileResult = true;
