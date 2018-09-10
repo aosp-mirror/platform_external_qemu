@@ -26,12 +26,14 @@
 #include <sys/stat.h>
 #include <time.h>
 #ifdef _WIN32
+#  include "android/base/files/ScopedFileHandle.h"
 #  include "android/base/memory/ScopedPtr.h"
 #  include "android/base/system/Win32UnicodeString.h"
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
 #  include <windows.h>
+using android::base::ScopedFileHandle;
 #else
 #  include <sys/types.h>
 #  include <unistd.h>
@@ -152,6 +154,7 @@ static int filelock_lock(FileLock* lock, int timeout) {
     lock->lock_handle = nullptr;
     const auto unicodeDir = android::base::Win32UnicodeString(lock->lock);
     const auto unicodeName = android::base::Win32UnicodeString(lock->temp);
+    static constexpr size_t pidCharsMax = 11;
 
     HANDLE lockHandle = INVALID_HANDLE_VALUE;
     bool createFileResult = false;
@@ -189,7 +192,7 @@ static int filelock_lock(FileLock* lock, int timeout) {
             (lastErr == ERROR_ACCESS_DENIED ||
              lastErr == ERROR_SHARING_VIOLATION)) {
 
-            HANDLE getpidHandle =
+            ScopedFileHandle getpidHandle(
                 ::CreateFileW(
                     unicodeName.c_str(),
                     GENERIC_READ, // open only for reading
@@ -199,25 +202,27 @@ static int filelock_lock(FileLock* lock, int timeout) {
                     nullptr,               // default security
                     OPEN_EXISTING,         // existing file only
                     FILE_ATTRIBUTE_NORMAL, // normal file
-                    nullptr);              // no template file
+                    nullptr));              // no template file
 
-            // Read the pid of the locking process.
-            char buf[12] = {};
-            DWORD bytesRead;
-            if (::ReadFile(getpidHandle, buf, 12, &bytesRead, nullptr)) {
-                DWORD lockingPid;
-                if (sscanf(buf, "%lu", &lockingPid) == 1) {
-                    // Try waiting for the specified timeout for
-                    // the locking process to exit. If that doesn't work, bail.
-                    System::get()->waitForProcessExit(lockingPid,
-                            sleep_duration_ms);
-                    slept = true;
+            if (getpidHandle.valid()) {
+                // Read the pid of the locking process.
+                char buf[pidCharsMax + 1] = {};
+                DWORD bytesRead;
+                if (::ReadFile(getpidHandle.get(), buf, pidCharsMax, &bytesRead, nullptr)) {
+                    DWORD lockingPid;
+                    if (sscanf(buf, "%lu", &lockingPid) == 1) {
+                        // Try waiting for the specified timeout for
+                        // the locking process to exit. If that doesn't work, bail.
+                        System::get()->waitForProcessExit(lockingPid,
+                                sleep_duration_ms);
+                        slept = true;
+                    }
                 }
+                // Sometimes a previous file gets readonly attribute even when
+                // its parent process has exited; that prevents us from opening
+                // it for writing.
+                SetFileAttributesW(unicodeName.c_str(), FILE_ATTRIBUTE_NORMAL);
             }
-            // Sometimes a previous file gets readonly attribute even when
-            // its parent process has exited; that prevents us from opening
-            // it for writing.
-            SetFileAttributesW(unicodeName.c_str(), FILE_ATTRIBUTE_NORMAL);
         }
         if (lockHandle != INVALID_HANDLE_VALUE) {
             createFileResult = true;
@@ -252,7 +257,7 @@ static int filelock_lock(FileLock* lock, int timeout) {
 
     // We're good. Now write down the process ID as Android Studio relies on it.
     const DWORD pid = ::GetCurrentProcessId();
-    char pidBuf[12];
+    char pidBuf[pidCharsMax + 1] = {};
     const int len = snprintf(pidBuf, sizeof(pidBuf), "%lu", pid);
     assert(len > 0 && len < (int)sizeof(pidBuf));
     DWORD bytesWritten;
