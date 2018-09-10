@@ -925,18 +925,7 @@ public:
     }
 
     void envSet(StringView varname, StringView varvalue) override {
-#ifdef _WIN32
-        std::string envStr =
-            StringFormat("%s=%s", varname, varvalue);
-        // Note: this leaks the result of release().
-        _wputenv(Win32UnicodeString(envStr).release());
-#else
-        if (varvalue.empty()) {
-            unsetenv(c_str(varname));
-        } else {
-            setenv(c_str(varname), c_str(varvalue), 1);
-        }
-#endif
+        setEnvironmentVariable(varname, varvalue);
     }
 
     bool envTest(StringView varname) const override {
@@ -2296,6 +2285,22 @@ System::FileSize System::getAlignedFileSize(System::FileSize align, System::File
 #endif
 
     return ROUND_UP(size, align);
+}
+
+// static
+void System::setEnvironmentVariable(StringView varname, StringView varvalue) {
+#ifdef _WIN32
+    std::string envStr =
+        StringFormat("%s=%s", varname, varvalue);
+    // Note: this leaks the result of release().
+    _wputenv(Win32UnicodeString(envStr).release());
+#else
+    if (varvalue.empty()) {
+        unsetenv(c_str(varname));
+    } else {
+        setenv(c_str(varname), c_str(varvalue), 1);
+    }
+#endif
 }
 
 // static
