@@ -67,12 +67,12 @@ extern int daemon(int, int);
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <strings.h>
 #include <inttypes.h>
 #include <limits.h>
 /* Put unistd.h before time.h as that triggers localtime_r/gmtime_r
  * function availability on recentish Mingw-w64 platforms. */
 #ifndef _MSC_VER
+#include <strings.h>
 #include <unistd.h>
 #include <sys/time.h>
 #endif
