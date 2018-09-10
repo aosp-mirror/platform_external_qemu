@@ -23,8 +23,13 @@
  * THE SOFTWARE.
  */
 
+#ifdef _MSC_VER
+#define USE_QEMU_DIRENT
+#endif
 #include "qemu/osdep.h"
+#ifndef _MSC_VER
 #include <dirent.h>
+#endif
 #include "qapi/error.h"
 #include "block/block_int.h"
 #include "qemu/module.h"
@@ -2715,7 +2720,7 @@ static int handle_renames_and_mkdirs(BDRVVVFATState* s)
             mapping_t* mapping;
             int j, parent_path_len;
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
             if (mkdir(commit->path))
                 return -5;
 #else
