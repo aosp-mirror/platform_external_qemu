@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "172480fb_906ef76f",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-10T16:22:46Z",
+      "side": 1,
+      "message": "nit: it could be a good idea to check for error here, and to use android/base/files/ScopedFileHandle.h for resource management",
+      "range": {
+        "startLine": 192,
+        "startChar": 12,
+        "endLine": 192,
+        "endChar": 33
+      },
+      "revId": "4aeedee8252a01f3c7b64c76959c420df2d7464f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
