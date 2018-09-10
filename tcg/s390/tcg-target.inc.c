@@ -1535,8 +1535,14 @@ static void tcg_out_qemu_st_direct(TCGContext *s, TCGMemOp opc, TCGReg data,
 /* We're expecting to use a 20-bit signed offset on the tlb memory ops.
    Using the offset of the second entry in the last tlb table ensures
    that we can index all of the elements of the first entry.  */
+// We can't use a static_assert with offsetof() because in msvc 2017, it uses
+// reinterpret_cast.
+// TODO: Add runtime assertion instead?
+// https://developercommunity.visualstudio.com/content/problem/22196/static-assert-cannot-compile-constexprs-method-tha.html
+#ifndef _MSC_VER
 QEMU_BUILD_BUG_ON(offsetof(CPUArchState, tlb_table[NB_MMU_MODES - 1][1])
                   > 0x7ffff);
+#endif
 
 /* Load and compare a TLB entry, leaving the flags set.  Loads the TLB
    addend into R2.  Returns a register with the santitized guest address.  */

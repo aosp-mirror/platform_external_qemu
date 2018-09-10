@@ -251,8 +251,14 @@ static int qcow2_write_snapshots(BlockDriverState *bs)
         goto fail;
     }
 
+    // We can't use a static_assert with offsetof() because in msvc 2017, it uses
+    // reinterpret_cast.
+    // TODO: Add runtime assertion instead?
+    // https://developercommunity.visualstudio.com/content/problem/22196/static-assert-cannot-compile-constexprs-method-tha.html
+#ifndef _MSC_VER
     QEMU_BUILD_BUG_ON(offsetof(QCowHeader, snapshots_offset) !=
         offsetof(QCowHeader, nb_snapshots) + sizeof(header_data.nb_snapshots));
+#endif
 
     header_data.nb_snapshots        = cpu_to_be32(s->nb_snapshots);
     header_data.snapshots_offset    = cpu_to_be64(snapshots_offset);
