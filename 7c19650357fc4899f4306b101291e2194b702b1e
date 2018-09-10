@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5cc727ac_bc4c673d",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-10T19:01:20Z",
+      "side": 1,
+      "message": "But could ReadFile with 12 end up putting a nonzero value at 12?",
+      "range": {
+        "startLine": 210,
+        "startChar": 20,
+        "endLine": 210,
+        "endChar": 80
+      },
+      "revId": "7c19650357fc4899f4306b101291e2194b702b1e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
