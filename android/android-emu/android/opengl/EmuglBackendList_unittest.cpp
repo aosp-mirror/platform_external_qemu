@@ -11,7 +11,7 @@
 
 #include "android/opengl/EmuglBackendList.h"
 
-#include "android/base/StringFormat.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
@@ -22,13 +22,13 @@ namespace opengl {
 
 #define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
 
-using android::base::StringFormat;
+using android::base::pj;
 using android::base::System;
 using android::base::TestTempDir;
 using android::base::TestSystem;
 
 static std::string makeLibSubPath(const char* name) {
-    return StringFormat("foo/%s/%s", System::kLibSubDir, name);
+    return pj("foo", System::kLibSubDir, name);
 }
 
 static void makeLibSubDir(TestTempDir* dir, const char* name) {
@@ -98,21 +98,21 @@ TEST(EmuglBackendList, getBackendLibPath) {
     const size_t kDataLen = ARRAYLEN(kData);
 
     for (size_t n = 0; n < kDataLen; ++n) {
-        std::string file = "gles_bar/";
-        file += kData[n].libName;
+        std::string file =
+            pj("gles_bar", kData[n].libName);
         makeLibSubFile(myDir, file.c_str());
     }
 
-    EmuglBackendList list("/foo", System::kProgramBitness);
+    auto sysdir = pj("/", "foo");
+    EmuglBackendList list(sysdir.c_str(), System::kProgramBitness);
     const std::vector<std::string>& names = list.names();
 
     EXPECT_EQ(1U, names.size());
     EXPECT_STREQ("bar", names[0].c_str());
 
     for (size_t n = 0; n < kDataLen; ++n) {
-        std::string expected = StringFormat("/foo/%s/gles_bar/%s",
-                                            System::kLibSubDir,
-                                            kData[n].libName);
+        std::string expected =
+            pj("/", "foo", System::kLibSubDir, "gles_bar", kData[n].libName);
         std::string libdir;
         EXPECT_TRUE(list.getBackendLibPath("bar", kData[n].library, &libdir));
         EXPECT_TRUE(list.contains("bar"));
