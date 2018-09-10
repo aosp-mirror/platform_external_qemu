@@ -280,11 +280,18 @@ public:
     SmallFixedVector() {
         // Make sure that the small array starts exactly where base class
         // expects it: right after the |mCapacity|.
+
+        // We can't use a static_assert with offsetof() because in msvc, it uses
+        // reinterpret_cast.
+        // TODO: Add runtime assertion instead?
+        // https://developercommunity.visualstudio.com/content/problem/22196/static-assert-cannot-compile-constexprs-method-tha.html
+#ifndef _MSC_VER
         static_assert(offsetof(base, mCapacity) + sizeof(base::mCapacity) ==
                                       offsetof(SmallFixedVector, mData) &&
                               offsetof(Data, array) == 0,
                       "SmallFixedVector<> class layout is wrong, "
                       "|mData| needs to follow |mCapacity|");
+#endif
 
         init_inplace();
     }
