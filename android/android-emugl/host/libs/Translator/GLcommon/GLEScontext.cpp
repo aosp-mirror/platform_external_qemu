@@ -34,7 +34,9 @@
 #include <GLcommon/TextureUtils.h>
 #include <GLcommon/FramebufferData.h>
 #include <GLcommon/ScopedGLState.h>
+#ifndef _MSC_VER
 #include <strings.h>
+#endif
 #include <string.h>
 
 #include <numeric>
