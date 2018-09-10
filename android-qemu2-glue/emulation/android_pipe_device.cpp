@@ -129,12 +129,18 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
             static_assert(
                     sizeof(AndroidPipeBuffer) == sizeof(GoldfishPipeBuffer),
                     "Invalid PipeBuffer sizes");
+        // We can't use a static_assert with offsetof() because in msvc, it uses
+        // reinterpret_cast.
+        // TODO: Add runtime assertion instead?
+        // https://developercommunity.visualstudio.com/content/problem/22196/static-assert-cannot-compile-constexprs-method-tha.html
+#ifndef _MSC_VER
             static_assert(offsetof(AndroidPipeBuffer, data) ==
                                   offsetof(GoldfishPipeBuffer, data),
                           "Invalid PipeBuffer::data offsets");
             static_assert(offsetof(AndroidPipeBuffer, size) ==
                                   offsetof(GoldfishPipeBuffer, size),
                           "Invalid PipeBuffer::size offsets");
+#endif
             return android_pipe_guest_recv(
                     hostPipe, reinterpret_cast<AndroidPipeBuffer*>(buffers),
                     numBuffers);
