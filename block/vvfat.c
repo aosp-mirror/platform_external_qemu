@@ -2715,7 +2715,7 @@ static int handle_renames_and_mkdirs(BDRVVVFATState* s)
             mapping_t* mapping;
             int j, parent_path_len;
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
             if (mkdir(commit->path))
                 return -5;
 #else

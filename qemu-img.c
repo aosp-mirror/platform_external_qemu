@@ -22,8 +22,14 @@
  * THE SOFTWARE.
  */
 
+#ifdef _MSC_VER
+#define USE_QEMU_GETOPT
+#endif
+
 #include "qemu/osdep.h"
+#ifndef _MSC_VER
 #include <getopt.h>
+#endif
 
 #include "qemu-version.h"
 #include "qapi/error.h"

@@ -15,7 +15,9 @@
 #include "replay-internal.h"
 #include "qemu/error-report.h"
 
-int64_t replay_save_clock(ReplayClockKind kind, int64_t clock)
+// TODO: having issues when using ReplayClockKind in place of unsigned int, so
+// just use unsigned int for now.
+int64_t replay_save_clock(unsigned int kind, int64_t clock)
 {
 
     if (replay_file) {
@@ -29,7 +31,7 @@ int64_t replay_save_clock(ReplayClockKind kind, int64_t clock)
     return clock;
 }
 
-void replay_read_next_clock(ReplayClockKind kind)
+void replay_read_next_clock(unsigned int kind)
 {
     unsigned int read_kind = replay_state.data_kind - EVENT_CLOCK;
 
@@ -44,7 +46,7 @@ void replay_read_next_clock(ReplayClockKind kind)
 }
 
 /*! Reads next clock event from the input. */
-int64_t replay_read_clock(ReplayClockKind kind)
+int64_t replay_read_clock(unsigned int kind)
 {
     g_assert(replay_file && replay_mutex_locked());
 
