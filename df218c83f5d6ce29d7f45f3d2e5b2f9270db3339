@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a88b0033_e8cc054a",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-10T18:46:48Z",
+      "side": 1,
+      "message": "I\u0027m concerned about buffer overruns here, is there a sscanf_s style helper we can use, or can we explicitly set the last byte to \u0027\\0\u0027?",
+      "range": {
+        "startLine": 212,
+        "startChar": 24,
+        "endLine": 212,
+        "endChar": 30
+      },
+      "revId": "df218c83f5d6ce29d7f45f3d2e5b2f9270db3339",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
