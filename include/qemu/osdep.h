@@ -99,7 +99,12 @@ extern int daemon(int, int);
 #endif
 
 #ifdef _WIN32
+#ifdef _MSC_VER
+// msvc libs (mingw doesn't define _MSC_VER)
+#include "sysemu/os-win32-msvc.h"
+#else
 #include "sysemu/os-win32.h"
+#endif
 #endif
 
 #ifdef CONFIG_POSIX
