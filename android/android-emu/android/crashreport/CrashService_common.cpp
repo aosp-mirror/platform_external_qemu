@@ -57,7 +57,9 @@
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef _MSC_VER
 #include <strings.h>
+#endif
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
