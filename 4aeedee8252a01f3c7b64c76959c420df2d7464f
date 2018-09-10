@@ -22,6 +22,30 @@
       "revId": "4aeedee8252a01f3c7b64c76959c420df2d7464f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "669a6c63_8dff3237",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-10T18:40:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "172480fb_906ef76f",
+      "range": {
+        "startLine": 192,
+        "startChar": 12,
+        "endLine": 192,
+        "endChar": 33
+      },
+      "revId": "4aeedee8252a01f3c7b64c76959c420df2d7464f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
