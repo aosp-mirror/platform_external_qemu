@@ -34,13 +34,13 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <string.h>
-#include <strings.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <time.h>
 #include <ctype.h>
 #include <errno.h>
 #ifndef _MSC_VER
+#include <strings.h>
 #include <unistd.h>
 #endif
 #include <fcntl.h>
