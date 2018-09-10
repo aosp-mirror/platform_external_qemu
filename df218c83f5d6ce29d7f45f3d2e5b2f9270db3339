@@ -70,6 +70,30 @@
       "revId": "df218c83f5d6ce29d7f45f3d2e5b2f9270db3339",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aa5d5fd0_e2c2514d",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-10T18:53:13Z",
+      "side": 1,
+      "message": "Got it, so this current thing should be safe.\n\nI also just found out that sscanf_s is apparently allowed in our mingw?/?////\n\nMaybe that lets us replace all usages of sscanf in our windows code",
+      "parentUuid": "efdbd2dc_68d404d1",
+      "range": {
+        "startLine": 212,
+        "startChar": 24,
+        "endLine": 212,
+        "endChar": 30
+      },
+      "revId": "df218c83f5d6ce29d7f45f3d2e5b2f9270db3339",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
