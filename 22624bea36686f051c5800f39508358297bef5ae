@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "464fcb7f_9aebb097",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2296,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-10T19:59:50Z",
+      "side": 1,
+      "message": "I know this is just moved code, but it makes me ask why.  Can\u0027t this be .c_str()?  It looks like the original code is 3 years old and other parts use .c_str() just fine.",
+      "range": {
+        "startLine": 2295,
+        "startChar": 4,
+        "endLine": 2296,
+        "endChar": 50
+      },
+      "revId": "22624bea36686f051c5800f39508358297bef5ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
