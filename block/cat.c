@@ -10,8 +10,13 @@
  * See the COPYING.LIB file in the top-level directory.
  *
  */
+#ifdef _MSC_VER
+#define USE_QEMU_DIRENT
+#endif
 #include "qemu/osdep.h"
+#ifndef _MSC_VER
 #include <dirent.h>
+#endif
 #include "qapi/error.h"
 #include "block/block_int.h"
 #include "qemu/module.h"

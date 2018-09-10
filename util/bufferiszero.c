@@ -91,17 +91,31 @@ buffer_zero_sse2(const void *buf, size_t len)
         if (unlikely(_mm_movemask_epi8(t) != 0xFFFF)) {
             return false;
         }
+#ifdef _WIN32
+        t = _mm_or_si128(_mm_or_si128(p[-4], p[-3]), _mm_or_si128(p[-2], p[-1]));
+#else
         t = p[-4] | p[-3] | p[-2] | p[-1];
+#endif
         p += 4;
     }
 
     /* Finish the aligned tail.  */
+#ifdef _WIN32
+    t = _mm_or_si128(t, e[-3]);
+    t = _mm_or_si128(t, e[-2]);
+    t = _mm_or_si128(t, e[-1]);
+#else
     t |= e[-3];
     t |= e[-2];
     t |= e[-1];
+#endif
 
     /* Finish the unaligned tail.  */
+#ifdef _WIN32
+    t = _mm_or_si128(t, _mm_loadu_si128(buf + len - 16));
+#else
     t |= _mm_loadu_si128(buf + len - 16);
+#endif
 
     return _mm_movemask_epi8(_mm_cmpeq_epi8(t, zero)) == 0xFFFF;
 }

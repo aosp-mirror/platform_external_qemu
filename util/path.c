@@ -3,9 +3,14 @@
 
    The assumption is that this area does not change.
 */
+#ifdef _MSC_VER
+#define USE_QEMU_DIRENT
+#endif
 #include "qemu/osdep.h"
+#ifndef _MSC_VER
 #include <sys/param.h>
 #include <dirent.h>
+#endif
 #include "qemu/cutils.h"
 #include "qemu/path.h"
 

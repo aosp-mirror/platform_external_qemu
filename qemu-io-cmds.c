@@ -8,6 +8,10 @@
  * See the COPYING file in the top-level directory.
  */
 
+#ifdef _MSC_VER
+#define USE_QEMU_GETOPT
+#endif
+
 #include "qemu/osdep.h"
 #include "qapi/error.h"
 #include "qemu-io.h"
