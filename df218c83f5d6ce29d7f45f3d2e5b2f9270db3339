@@ -94,6 +94,30 @@
       "revId": "df218c83f5d6ce29d7f45f3d2e5b2f9270db3339",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "255daad3_7bd3cb5f",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-10T18:56:21Z",
+      "side": 1,
+      "message": "A quick scan (heh) of our codebase makes me think we only use sscanf with scalar values or strings with a constant number of characters scanned, so it\u0027s probably ok to keep as is",
+      "parentUuid": "aa5d5fd0_e2c2514d",
+      "range": {
+        "startLine": 212,
+        "startChar": 24,
+        "endLine": 212,
+        "endChar": 30
+      },
+      "revId": "df218c83f5d6ce29d7f45f3d2e5b2f9270db3339",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
