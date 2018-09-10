@@ -154,6 +154,7 @@ static int filelock_lock(FileLock* lock, int timeout) {
     lock->lock_handle = nullptr;
     const auto unicodeDir = android::base::Win32UnicodeString(lock->lock);
     const auto unicodeName = android::base::Win32UnicodeString(lock->temp);
+    static constexpr size_t pidCharsMax = 11;
 
     HANDLE lockHandle = INVALID_HANDLE_VALUE;
     bool createFileResult = false;
@@ -205,9 +206,9 @@ static int filelock_lock(FileLock* lock, int timeout) {
 
             if (getpidHandle.valid()) {
                 // Read the pid of the locking process.
-                char buf[12] = {};
+                char buf[pidCharsMax + 1] = {};
                 DWORD bytesRead;
-                if (::ReadFile(getpidHandle.get(), buf, 12, &bytesRead, nullptr)) {
+                if (::ReadFile(getpidHandle.get(), buf, pidCharsMax, &bytesRead, nullptr)) {
                     DWORD lockingPid;
                     if (sscanf(buf, "%lu", &lockingPid) == 1) {
                         // Try waiting for the specified timeout for
@@ -256,7 +257,7 @@ static int filelock_lock(FileLock* lock, int timeout) {
 
     // We're good. Now write down the process ID as Android Studio relies on it.
     const DWORD pid = ::GetCurrentProcessId();
-    char pidBuf[12];
+    char pidBuf[pidCharsMax + 1] = {};
     const int len = snprintf(pidBuf, sizeof(pidBuf), "%lu", pid);
     assert(len > 0 && len < (int)sizeof(pidBuf));
     DWORD bytesWritten;
