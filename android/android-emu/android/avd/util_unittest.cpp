@@ -13,6 +13,7 @@
 #include "android/base/testing/TestSystem.h"
 #include "android/utils/file_data.h"
 #include "android/base/ArraySize.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/testing/TestSystem.h"
 
@@ -22,7 +23,7 @@
 #include <gtest/gtest.h>
 #include "android/base/testing/TestTempDir.h"
 
-
+using android::base::pj;
 using android::base::ScopedCPtr;
 using android::base::TestSystem;
 using android::base::TestTempDir;
@@ -37,31 +38,40 @@ TEST(AvdUtil, path_getAvdSystemPath) {
     TestSystem sys("/home", 64, "/");
     TestTempDir* tmp = sys.getTempRoot();
     tmp->makeSubDir("android_home");
-    tmp->makeSubDir("android_home/sysimg");
-    tmp->makeSubDir("android_home/avd");
+    tmp->makeSubDir(pj("android_home", "sysimg"));
+    tmp->makeSubDir(pj("android_home", "avd"));
     tmp->makeSubDir("nothome");
 
-    std::string sdkRoot = tmp->pathString() + "/android_home";
-    std::string avdConfig = sdkRoot + "/avd/config.ini";
+    std::string sdkRoot =
+        pj(tmp->pathString(), "android_home");
+    std::string avdConfig =
+        pj(sdkRoot, "avd", "config.ini");
     sys.envSet("ANDROID_AVD_HOME", sdkRoot);
 
     // Create an in file for the @q avd.
-    writeToFile(sdkRoot + "/q.ini", "path=" + sdkRoot + "/avd");
+    writeToFile(pj(sdkRoot, "q.ini"),
+                "path=" +
+                    pj(sdkRoot, "avd"));
 
     // A relative path should be resolved from ANRDOID_AVD_HOME
     writeToFile(avdConfig, "image.sysdir.1=sysimg");
 
     ScopedCPtr<char> path(path_getAvdSystemPath("q", sdkRoot.c_str()));
 
-    EXPECT_STREQ((sdkRoot + "/sysimg").c_str(), path.get());
+    auto sysimgPath = pj(sdkRoot, "sysimg");
+    EXPECT_STREQ(sysimgPath.c_str(), path.get());
 
     // An absolute path should be usuable as well
     writeToFile(avdConfig,
-                 "image.sysdir.1=" + tmp->pathString() + "/nothome");
+                "image.sysdir.1=" +
+                pj(
+                    tmp->pathString(),
+                    "nothome"));
 
     path.reset(path_getAvdSystemPath("q", sdkRoot.c_str()));
 
-    EXPECT_STREQ((tmp->pathString() + "/nothome").c_str(), path.get());
+    auto notHomePath = pj(tmp->pathString(), "nothome");
+    EXPECT_STREQ(notHomePath.c_str(), path.get());
 
     std::string noBufferOverflow(MAX_PATH * 2, 'Z');
     writeToFile(avdConfig, "image.sysdir.1=" + noBufferOverflow);
