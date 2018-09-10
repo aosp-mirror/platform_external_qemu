@@ -180,7 +180,6 @@ private:
                             break;
                     }
                 }
-                printf("snapshot load share mode %d\n", shareMode);
                 android::base::ThreadLooper::runOnMainLooper([snapshotName,
                                                               shareMode]() {
                     bool res = android::multiinstance::updateInstanceShareMode(
@@ -208,15 +207,23 @@ private:
                                          &sSnapshotCrossSession->sMetaData);
                     gQAndroidVmOperations->vmStop();
                     android::base::ThreadLooper::runOnMainLooper([]() {
-                        androidSnapshot_save(android::snapshot::kDefaultBootSnapshot);
-                        bool res =
-                                android::multiinstance::updateInstanceShareMode(
-                                        android::snapshot::kDefaultBootSnapshot,
-                                        android::base::FileShare::Read);
+                        // snapshotRemap triggers a snapshot save.
+                        // It must happen before changing disk backend
+                        bool res = gQAndroidVmOperations->snapshotRemap(
+                                false, nullptr, nullptr);
+                        if (!res) {
+                            fprintf(stderr,
+                                    "WARNING: RAM share mode update failure\n");
+                        }
+                        // Update share mode flag and disk backend
+                        res = android::multiinstance::updateInstanceShareMode(
+                                android::snapshot::kDefaultBootSnapshot,
+                                android::base::FileShare::Read);
                         if (!res) {
                             fprintf(stderr,
                                     "WARNING: share mode update failure\n");
                         }
+                        assert(res);
                         androidSnapshot_load(android::snapshot::kDefaultBootSnapshot);
                         gQAndroidVmOperations->vmStart();
                     });
@@ -233,30 +240,40 @@ private:
                     recv.set_instance_id(sSnapshotCrossSession->sForkId);
                     encodeGuestRecvFrame(recv,
                                          &sSnapshotCrossSession->sMetaData);
-                    gQAndroidVmOperations->vmStop();
-                    // Load back to write mode for the last instance
-                    android::base::FileShare mode =
-                            sSnapshotCrossSession->sForkId <
-                                            sSnapshotCrossSession->sForkTotal -
-                                                    2
-                                    ? android::base::FileShare::Read
-                                    : android::base::FileShare::Write;
-                    android::base::ThreadLooper::runOnMainLooper([mode]() {
-                        bool res =
-                                android::multiinstance::updateInstanceShareMode(
-                                        android::snapshot::kDefaultBootSnapshot,
-                                        mode);
-                        if (!res) {
-                            fprintf(stderr,
-                                    "WARNING: share mode update failure\n");
-                        }
-                        androidSnapshot_load(android::snapshot::kDefaultBootSnapshot);
-                        gQAndroidVmOperations->vmStart();
-                    });
+                    if (sSnapshotCrossSession->sForkId <
+                        sSnapshotCrossSession->sForkTotal - 1) {
+                        gQAndroidVmOperations->vmStop();
+                        // Load back to write mode for the last run
+                        android::base::FileShare mode =
+                                sSnapshotCrossSession->sForkId <
+                                                sSnapshotCrossSession
+                                                                ->sForkTotal -
+                                                        2
+                                        ? android::base::FileShare::Read
+                                        : android::base::FileShare::Write;
+                        android::base::ThreadLooper::runOnMainLooper([mode]() {
+                            bool res = android::multiinstance::
+                                    updateInstanceShareMode(
+                                            android::snapshot::
+                                                    kDefaultBootSnapshot,
+                                            mode);
+                            if (!res) {
+                                fprintf(stderr,
+                                        "WARNING: share mode update failure\n");
+                            }
+                            res = gQAndroidVmOperations->snapshotRemap(
+                                    mode == android::base::FileShare::Write,
+                                    nullptr, nullptr);
+                            gQAndroidVmOperations->vmStart();
+                        });
+                    }
                 } else if (sSnapshotCrossSession->sForkId ==
                            sSnapshotCrossSession->sForkTotal - 1) {
+                    // We don't load after the last run
                     sSnapshotCrossSession->sForkId = 0;
                     sSnapshotCrossSession->sForkTotal = 0;
+                } else {
+                    fprintf(stderr, "WARNING: bad fork session ID\n");
                 }
                 *shouldReply = false;
                 break;
