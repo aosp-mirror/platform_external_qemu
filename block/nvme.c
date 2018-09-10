@@ -84,7 +84,13 @@ typedef volatile struct {
     uint32_t doorbells[];
 } QEMU_PACKED NVMeRegs;
 
+// We can't use a static_assert with offsetof() because in msvc 2017, it uses
+// reinterpret_cast.
+// TODO: Add runtime assertion instead?
+// https://developercommunity.visualstudio.com/content/problem/22196/static-assert-cannot-compile-constexprs-method-tha.html
+#ifndef _MSC_VER
 QEMU_BUILD_BUG_ON(offsetof(NVMeRegs, doorbells) != 0x1000);
+#endif
 
 typedef struct {
     AioContext *aio_context;
