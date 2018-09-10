@@ -344,5 +344,25 @@ std::string PathUtils::relativeTo(StringView base, StringView path, HostType hos
     return result;
 }
 
+std::string pj(StringView path1, StringView path2) {
+    return PathUtils::join(path1, path2);
+}
+
+std::string pj(const std::vector<std::string>& paths) {
+    std::string res;
+
+    if (paths.size() == 0) return "";
+
+    if (paths.size() == 1) return paths[0];
+
+    res = paths[0];
+
+    for (size_t i = 1; i < paths.size(); i++) {
+        res = pj(res, paths[i]);
+    }
+
+    return res;
+}
+
 }  // namespace base
 }  // namespace android
