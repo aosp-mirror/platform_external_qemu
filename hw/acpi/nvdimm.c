@@ -467,8 +467,14 @@ struct NvdimmFuncGetLabelDataIn {
     uint32_t length; /* the size of data is to be read via the function. */
 } QEMU_PACKED;
 typedef struct NvdimmFuncGetLabelDataIn NvdimmFuncGetLabelDataIn;
+// We can't use a static_assert with offsetof() because in msvc 2017, it uses
+// reinterpret_cast.
+// TODO: Add runtime assertion instead?
+// https://developercommunity.visualstudio.com/content/problem/22196/static-assert-cannot-compile-constexprs-method-tha.html
+#ifndef _MSC_VER
 QEMU_BUILD_BUG_ON(sizeof(NvdimmFuncGetLabelDataIn) +
                   offsetof(NvdimmDsmIn, arg3) > NVDIMM_DSM_MEMORY_SIZE);
+#endif
 
 struct NvdimmFuncGetLabelDataOut {
     /* the size of buffer filled by QEMU. */
@@ -485,15 +491,19 @@ struct NvdimmFuncSetLabelDataIn {
     uint8_t in_buf[0]; /* the data written to label data area. */
 } QEMU_PACKED;
 typedef struct NvdimmFuncSetLabelDataIn NvdimmFuncSetLabelDataIn;
+#ifndef _MSC_VER
 QEMU_BUILD_BUG_ON(sizeof(NvdimmFuncSetLabelDataIn) +
                   offsetof(NvdimmDsmIn, arg3) > NVDIMM_DSM_MEMORY_SIZE);
+#endif
 
 struct NvdimmFuncReadFITIn {
     uint32_t offset; /* the offset into FIT buffer. */
 } QEMU_PACKED;
 typedef struct NvdimmFuncReadFITIn NvdimmFuncReadFITIn;
+#ifndef _MSC_VER
 QEMU_BUILD_BUG_ON(sizeof(NvdimmFuncReadFITIn) +
                   offsetof(NvdimmDsmIn, arg3) > NVDIMM_DSM_MEMORY_SIZE);
+#endif
 
 struct NvdimmFuncReadFITOut {
     /* the size of buffer filled by QEMU. */
