@@ -240,11 +240,13 @@ static bool qemu_snapshot_remap(bool shared,
     // (going from auto saving to continuing to auto-save).
     auto currentRamFileStatus = androidSnapshot_getRamFileInfo();
 
-    if (currentRamFileStatus == SNAPSHOT_RAM_FILE_NONE) {
-        return true;
-    }
-
-    if (android::snapshot::Snapshotter::get().loadedSnapshotFile() != "default_boot") {
+    // If the backing file is not "default_boot" then we cannot use file-backed
+    // ram.
+    // If it doesn't have a backing file then we will create a default_boot
+    // snapshot.
+    if (android::snapshot::Snapshotter::get().loadedSnapshotFile() != "" &&
+        android::snapshot::Snapshotter::get().loadedSnapshotFile() !=
+                "default_boot") {
         return true;
     }
 
@@ -254,7 +256,7 @@ static bool qemu_snapshot_remap(bool shared,
 
     bool wasVmRunning = runstate_is_running() != 0;
 
-    if (currentRamFileStatus == SNAPSHOT_RAM_FILE_SHARED && !shared) {
+    if (currentRamFileStatus != SNAPSHOT_RAM_FILE_PRIVATE && !shared) {
         vm_stop(RUN_STATE_SAVE_VM);
         android::snapshot::Snapshotter::get().setRemapping(true);
         qemu_savevm("default_boot", MessageCallback(opaque, nullptr, errConsumer));
