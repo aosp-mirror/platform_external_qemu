@@ -291,6 +291,7 @@ LOCAL_SRC_FILES := \
     android/adb-server.cpp \
     android/automation/AutomationController.cpp \
     android/automation/AutomationEventSink.cpp \
+    android/avd/generate.cpp \
     android/avd/hw-config.c \
     android/avd/info.c \
     android/avd/scanner.c \
