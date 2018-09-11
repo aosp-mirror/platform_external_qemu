@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "71987958_f48f1cc3",
+        "filename": "android/android-emu/android/avd/generate.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-11T19:22:46Z",
+      "side": 1,
+      "message": "Sure, we could scope that out at some point as there\u0027s interest in easy AVD creation scripts. From what I tried, it seems like all we need to do is the operations in generateAvd, and the emulator should fill in the other files based on the system image dir.\n\nIt will be out of the scope of this CL (which is narrowly geard towards testing non ascii paths) but I\u0027ll ask in an email on what are the requirements so we can get going there.",
+      "parentUuid": "459c3e44_e6a2d083",
+      "revId": "2b5bc3a27e944103769e1d2943588719cc2db0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7483e358_b680b191",
         "filename": "android/emulator/main-emulator.cpp",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2018-09-11T17:44:18Z",
       "side": 1,
       "message": "Could we hide this behind a -qtest \u003ctype\u003e flag? This is a flag that qemu uses as well to launch qemu in a test config.",
+      "revId": "2b5bc3a27e944103769e1d2943588719cc2db0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "998c9a47_cbcc677f",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-11T19:22:46Z",
+      "side": 1,
+      "message": "That\u0027s a good idea, will add a -test flag for emulator launcher where test options can be specified.",
+      "parentUuid": "7483e358_b680b191",
       "revId": "2b5bc3a27e944103769e1d2943588719cc2db0d6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -64,6 +100,24 @@
       "writtenOn": "2018-09-11T17:44:18Z",
       "side": 1,
       "message": "Do we need to clean mCustomDirs?",
+      "revId": "2b5bc3a27e944103769e1d2943588719cc2db0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c624d18d_d18b6ee7",
+        "filename": "android/tests/end2end/HelloEmulator.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-11T19:22:46Z",
+      "side": 1,
+      "message": "We don\u0027t need to as it should be all in a temp dir, but I\u0027d prefer to delete test dirs on teardown as each test dir would have a good amount of data in it (fake sdk, kernels, copied/e2fsck\u0027ed .img\u0027s), which could hit some limit for buildbots.",
+      "parentUuid": "1404d2fd_0d7b3764",
       "revId": "2b5bc3a27e944103769e1d2943588719cc2db0d6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
