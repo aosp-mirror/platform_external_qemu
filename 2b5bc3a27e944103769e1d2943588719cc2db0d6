@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "459c3e44_e6a2d083",
+        "filename": "android/android-emu/android/avd/generate.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-09-11T17:44:18Z",
+      "side": 1,
+      "message": "Would it make sense to turn this into protobufs? That way we might be able to easily declare these info objects, and they can be consumed by other languages. (Might be useful for test team?)",
+      "revId": "2b5bc3a27e944103769e1d2943588719cc2db0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7483e358_b680b191",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-09-11T17:44:18Z",
+      "side": 1,
+      "message": "Could we hide this behind a -qtest \u003ctype\u003e flag? This is a flag that qemu uses as well to launch qemu in a test config.",
+      "revId": "2b5bc3a27e944103769e1d2943588719cc2db0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "69b75167_94d8e243",
+        "filename": "android/tests/end2end/HelloEmulator.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-09-11T17:44:18Z",
+      "side": 1,
+      "message": "Store the original and restore on teardown?",
+      "revId": "2b5bc3a27e944103769e1d2943588719cc2db0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1404d2fd_0d7b3764",
+        "filename": "android/tests/end2end/HelloEmulator.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-09-11T17:44:18Z",
+      "side": 1,
+      "message": "Do we need to clean mCustomDirs?",
+      "revId": "2b5bc3a27e944103769e1d2943588719cc2db0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dc3dd540_eb5ea616",
+        "filename": "android/tests/end2end/HelloEmulator.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-09-11T17:44:18Z",
+      "side": 1,
+      "message": "You might be able to use return System::runCommandWithResult, which will return an Optional\u003cstd::string\u003e.",
+      "revId": "2b5bc3a27e944103769e1d2943588719cc2db0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "df49bf77_a82ee39c",
+        "filename": "android/tests/end2end/HelloEmulator.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-09-11T17:44:18Z",
+      "side": 1,
+      "message": "Would it make sense to separate avd creation from this test? I know some people would love a tool that create avds ;-)",
+      "revId": "2b5bc3a27e944103769e1d2943588719cc2db0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cea98679_005ebfe9",
+        "filename": "android/tests/end2end/HelloEmulator.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-09-11T17:44:18Z",
+      "side": 1,
+      "message": "I see you didn\u0027t take the risk of using the unicode chars in the source itself ;-)",
+      "revId": "2b5bc3a27e944103769e1d2943588719cc2db0d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
