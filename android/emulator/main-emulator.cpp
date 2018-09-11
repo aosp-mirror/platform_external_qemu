@@ -37,6 +37,7 @@
 #include "android/base/ProcessControl.h"
 #include "android/base/system/System.h"
 #include "android/camera/camera-list.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/main-emugl.h"
 #include "android/main-help.h"
 #include "android/opengl/emugl_config.h"
@@ -62,6 +63,7 @@ using android::base::RunOptions;
 using android::base::ScopedCPtr;
 using android::base::StringView;
 using android::base::System;
+using android::ConfigDirs;
 
 #define DEBUG 1
 
@@ -238,6 +240,7 @@ int main(int argc, char** argv)
     const char* sysDir = NULL;
     bool doAccelCheck = false;
     bool doListAvds = false;
+    bool doConfigCheck = false;
     bool force32bit = false;
     bool useSystemLibs = false;
     bool forceEngineLaunch = false;
@@ -370,6 +373,11 @@ int main(int argc, char** argv)
             continue;
         }
 
+        if (!strcmp(opt, "-config-check")) {
+            doConfigCheck = true;
+            continue;
+        }
+
         if (!strcmp(opt, "-webcam-list")) {
             doListWebcams = true;
             continue;
@@ -418,6 +426,20 @@ int main(int argc, char** argv)
             printf("%s\n", name);
         }
         avdScanner_free(scanner);
+        return 0;
+    }
+
+    if (doConfigCheck) {
+        auto sdkRoot = ConfigDirs::getSdkRootDirectory();
+        auto avdRoot = ConfigDirs::getAvdRootDirectory();
+
+        bool sdkRootExists = path_exists(sdkRoot.c_str());
+        bool avdRootExists = path_exists(avdRoot.c_str());
+
+        printf("Performing config check.\n");
+        printf("Android SDK location: %s. %s\n", sdkRoot.c_str(), sdkRootExists ? "(exists)" : "(does not exist)");
+        printf("Android AVD root location: %s. %s\n", avdRoot.c_str(), avdRootExists ? "(exists)" : "(does not exist)");
+
         return 0;
     }
 
