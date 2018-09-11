@@ -182,8 +182,10 @@ ifeq (,$(CONFIG_AEMU64_ONLY))
     EMULATOR_TARGET_ARCH := x86
     include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
 
-    EMULATOR_TARGET_ARCH := mips
-    include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
+    ifeq (true,$(BUILD_ENABLE_MIPS))
+        EMULATOR_TARGET_ARCH := mips
+        include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
+    endif
 endif   # !CONFIG_AEMU64_ONLY
 endif   # !CONFIG_MIN_BUILD
 
