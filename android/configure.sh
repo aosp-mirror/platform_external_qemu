@@ -255,6 +255,7 @@ OPTION_SDK_REV=
 OPTION_SYMBOLS=no
 OPTION_BENCHMARKS=no
 OPTION_LTO=
+OPTION_MIPS=
 OPTION_SNAPSHOT_PROFILE=no
 OPTION_MIN_BUILD=no
 OPTION_AEMU64_ONLY=no
@@ -355,6 +356,8 @@ for opt do
   ;;
   --lto) OPTION_LTO=true
   ;;
+  --with-mips) OPTION_MIPS=true
+  ;;
   --snapshot-profile) OPTION_SNAPSHOT_PROFILE=1
   ;;
   --snapshot-profile-level=*) OPTION_SNAPSHOT_PROFILE=$optarg
@@ -401,6 +404,7 @@ EOF
     echo "  --lto                       Force link-time optimization."
     echo "  --snapshot-profile[-level=X] Enable snapshot profiling via debug prints."
     echo "  --min[-build]               Only build the qemu2 x64 host x86 target binaries."
+    echo "  --with-mips                 Build the deprecated mips emulator. This option will be removed in future versions."
     echo ""
     exit 1
 fi
@@ -1003,7 +1007,7 @@ fi
 ###  Copy Mesa if available
 ###
 MESA_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/mesa
-if [ -d $MESA_PREBUILTS_DIR ] && [ "$OPTION_AEMU64_ONLY" == "no"]; then
+if [ [ -d $MESA_PREBUILTS_DIR ] && [ "$OPTION_AEMU64_ONLY" == "no"] ]; then
     log "Copying Mesa prebuilt libraries from $MESA_PREBUILTS_DIR"
     case $HOST_OS in
         windows)
@@ -1230,6 +1234,10 @@ echo "BUILD_HOST_DUMPSYMS   := $DUMPSYMS" >> $config_mk
 
 if [ "$OPTION_LTO" = "true" ]; then
     echo "BUILD_ENABLE_LTO      := true" >> $config_mk
+fi
+
+if [ "$OPTION_MIPS" = "true" ]; then
+    echo "BUILD_ENABLE_MIPS      := true" >> $config_mk
 fi
 
 if [ "$OPTION_MIN_BUILD" = "yes" ]; then
