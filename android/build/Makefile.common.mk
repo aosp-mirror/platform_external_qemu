@@ -195,8 +195,6 @@ endif   # !CONFIG_MIN_BUILD
 ###  emulator: LAUNCHER FOR TARGET-SPECIFIC EMULATOR
 ###
 
-ifeq (,$(CONFIG_AEMU64_ONLY))
-
 # NOTE: Build as 32-bit or 64-bit executable, depending on the value of
 #       EMULATOR_PROGRAM_BITNESS.
 ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
@@ -265,7 +263,6 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
     $(call end-emulator-program)
 endif  # BUILD_TARGET_BITS == EMULATOR_PROGRAM_BITNESS
 
-endif # !CONFIG_AEMU64_ONLY
 
 ##############################################################################
 ##############################################################################

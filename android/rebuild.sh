@@ -112,8 +112,8 @@ check_file_type_substring () {
 if [ "$MINGW" ]; then
     EXPECTED_32BIT_FILE_TYPE="PE32 executable \(console\) Intel 80386"
     EXPECTED_64BIT_FILE_TYPE="PE32\+ executable \(console\) x86-64"
-    EXPECTED_EMULATOR_BITNESS=32
-    EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_32BIT_FILE_TYPE
+    EXPECTED_EMULATOR_BITNESS=64
+    EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
     TARGET_OS=windows
 elif [ "$HOST_OS" = "Darwin" ]; then
     EXPECTED_64BIT_FILE_TYPE="Mach-O 64-bit executable x86_64"

@@ -256,6 +256,7 @@ OPTION_SYMBOLS=no
 OPTION_BENCHMARKS=no
 OPTION_LTO=
 OPTION_MIPS=
+OPTION_WIN_X86=
 OPTION_SNAPSHOT_PROFILE=no
 OPTION_MIN_BUILD=no
 OPTION_AEMU64_ONLY=no
@@ -366,6 +367,8 @@ for opt do
   ;;
   -aemu64only|--aemu64-only) OPTION_AEMU64_ONLY=yes
   ;;
+  --with-windows-x86) OPTION_WIN_X86=true
+  ;;
   *)
     echo "unknown option '$opt', use --help"
     exit 1
@@ -406,6 +409,7 @@ EOF
     echo "  --min[-build]               Only build the qemu2 x64 host x86 target binaries."
     echo "  --with-mips                 Build the deprecated mips emulator. This option will be removed in future versions."
     echo ""
+    echo "  --with-windows-x86          Build the deprecated 32 bit windows version. This option will be removed in future versions."
     exit 1
 fi
 
@@ -1234,6 +1238,9 @@ echo "BUILD_HOST_DUMPSYMS   := $DUMPSYMS" >> $config_mk
 
 if [ "$OPTION_LTO" = "true" ]; then
     echo "BUILD_ENABLE_LTO      := true" >> $config_mk
+fi
+if [ "OPTION_WIN_X86" = "true" ]; then
+    echo "EMULATOR_BUILD32BITS := true" >> $config_mk
 fi
 
 if [ "$OPTION_MIPS" = "true" ]; then
