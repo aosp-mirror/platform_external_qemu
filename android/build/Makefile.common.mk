@@ -176,6 +176,8 @@ ifeq (,$(CONFIG_AEMU64_ONLY))
     include $(LOCAL_PATH)/android/android-emu/Makefile.crash-service.mk
 endif   # !CONFIG_MIN_BUILD
 
+# Qemu1 will soon be deprecated, so don't build it.
+ifneq ($(BUILD_TARGET_OS),windows_msvc)
 ifeq (,$(CONFIG_MIN_BUILD))
 ifeq (,$(CONFIG_AEMU64_ONLY))
     include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-common.mk
@@ -193,6 +195,7 @@ ifeq (,$(CONFIG_AEMU64_ONLY))
     include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
 endif   # !CONFIG_AEMU64_ONLY
 endif   # !CONFIG_MIN_BUILD
+endif   # !windows_msvc
 
 ##############################################################################
 ##############################################################################
