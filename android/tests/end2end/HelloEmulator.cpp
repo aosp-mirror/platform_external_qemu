@@ -11,14 +11,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <gtest/gtest.h>
-
 #include "android/base/files/PathUtils.h"
+#include "android/base/StringView.h"
 #include "android/base/system/System.h"
+#include "android/base/testing/TestTempDir.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/utils/path.h"
 
-using android::base::PathUtils;
-using android::base::System;
+#include <memory>
+
+#include <gtest/gtest.h>
 
 #define EMU_BINARY_BASENAME "emulator"
 
@@ -28,18 +30,120 @@ using android::base::System;
 #define EMU_BINARY_SUFFIX ""
 #endif
 
-static const int kExecTimeoutMs = 5000;
+static const int kLaunchTimeoutMs = 5000;
 
-TEST(HelloEmulator, BasicAccelCheck) {
-    auto dir = android::base::System::get()->getProgramDirectory();
-    std::string emulatorBinaryFilename(EMU_BINARY_BASENAME EMU_BINARY_SUFFIX);
-    auto emuLauncherPath = PathUtils::join(dir, emulatorBinaryFilename);
-    EXPECT_TRUE(path_exists(emuLauncherPath.c_str()));
+namespace android {
+namespace base {
 
-    std::string result =
-        System::get()->runCommandWithResult(
-            {emuLauncherPath, "-accel-check"},
-            5000).valueOr({});
+class EmulatorEnvironmentTest : public ::testing::Test {
+protected:
+    void SetUp() override { mTempDir.reset(new TestTempDir("emuenvtest")); }
 
+    void TearDown() override {
+        mTempDir.reset();
+        System::get()->envSet("ANDROID_SDK_ROOT", "");
+        System::get()->envSet("ANDROID_SDK_HOME", "");
+
+        for (const auto& dir: mCustomDirs) {
+            path_delete_dir(dir.c_str());
+        }
+    }
+
+    std::string makeSdkAt(StringView dir) {
+        std::string root = mTempDir->makeSubPath(dir);
+        std::string platforms = PathUtils::join(root, "platforms");
+        std::string platformTools = PathUtils::join(root, "platform-tools");
+
+        EXPECT_TRUE(path_mkdir_if_needed(platforms.c_str(), 0755) == 0);
+        EXPECT_TRUE(path_mkdir_if_needed(platformTools.c_str(), 0755) == 0);
+
+        mCustomDirs.push_back(root);
+
+        return root;
+    }
+
+    std::string makeSdkHomeAt(StringView dir) {
+        std::string root = mTempDir->makeSubPath(dir);
+        std::string avdRoot = PathUtils::join(root, "avd");
+
+        EXPECT_TRUE(path_mkdir_if_needed(root.c_str(), 0755) == 0);
+        EXPECT_TRUE(path_mkdir_if_needed(avdRoot.c_str(), 0755) == 0);
+
+        mCustomDirs.push_back(root);
+
+        return root;
+    }
+
+    void setSdkRoot(StringView sdkRoot) {
+        System::get()->envSet("ANDROID_SDK_ROOT", sdkRoot);
+    }
+
+    void setSdkHome(StringView sdkHome) {
+        System::get()->envSet("ANDROID_SDK_HOME", sdkHome);
+    }
+
+    std::string launchEmulatorWithResult(
+        const std::vector<std::string>& args,
+        int timeoutMs) {
+
+        auto dir = System::get()->getLauncherDirectory();
+
+        std::string emulatorBinaryFilename(EMU_BINARY_BASENAME EMU_BINARY_SUFFIX);
+        auto emuLauncherPath = PathUtils::join(dir, emulatorBinaryFilename);
+        EXPECT_TRUE(path_exists(emuLauncherPath.c_str()));
+
+        std::vector<std::string> allArgs = { emuLauncherPath };
+
+        for (const auto a: args) {
+            allArgs.push_back(a);
+        }
+
+        std::string result =
+            System::get()->runCommandWithResult(
+                allArgs,
+                timeoutMs).valueOr({});
+
+        return result;
+    }
+
+    std::unique_ptr<TestTempDir> mTempDir;
+
+    std::vector<std::string> mCustomDirs;
+};
+
+TEST_F(EmulatorEnvironmentTest, BasicAccelCheck) {
+    EXPECT_FALSE(launchEmulatorWithResult({"-accel-check"}, kLaunchTimeoutMs) == "");
+}
+
+TEST_F(EmulatorEnvironmentTest, BasicASCII) {
+    auto sdkRootPath = makeSdkAt("testSdk");
+    auto sdkHomePath = makeSdkHomeAt("testSdkHome");
+
+    setSdkRoot(sdkRootPath);
+    setSdkHome(sdkHomePath);
+
+    auto result = launchEmulatorWithResult({"-config-check"}, kLaunchTimeoutMs);
     EXPECT_FALSE(result == "");
 }
+
+TEST_F(EmulatorEnvironmentTest, BasicNonASCII) {
+    const char* sdkName = "\xF0\x9F\xA4\x94";
+    const char* sdkHomeName = "foo\xE1\x80\x80 bar";
+
+    auto sdkRootPath = makeSdkAt(sdkName);
+    auto sdkHomePath = makeSdkHomeAt(sdkHomeName);
+
+    setSdkRoot(sdkRootPath);
+    setSdkHome(sdkHomePath);
+
+    fprintf(stderr, "%s: %s\n", __func__, sdkRootPath.c_str());
+
+    // MessageBox(0, "Hello there", "want to continue?", MB_OK);
+
+    auto result = launchEmulatorWithResult({"-config-check"}, kLaunchTimeoutMs);
+    EXPECT_FALSE(result == "");
+    fprintf(stderr, "%s: res: %s\n", __func__, result.c_str());
+}
+
+} // namespace base
+} // namespace android
