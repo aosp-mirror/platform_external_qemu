@@ -27,6 +27,8 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QPlainTextEdit>
+//??#include <QWebEngineScript> // ??
+#include <QWebEngineScriptCollection> // ??
 
 #include <fstream>
 
@@ -459,4 +461,66 @@ void LocationPage::writePointProtobufFullPath(
 {
     std::ofstream outStream(protoFullPath.toStdString().c_str(), std::ofstream::binary);
     protobuf.SerializeToOstream(&outStream);
+}
+
+void LocationPage::setUpWebEngine(QWebEnginePage* webEnginePage, const char* pageName) {
+    QFile webChannelJsFile(":/html/js/qwebchannel.js");
+    if(!webChannelJsFile.open(QIODevice::ReadOnly)) {
+        qDebug() << QString("Couldn't open qwebchannel.js file: %1").arg(webChannelJsFile.errorString());
+        return;
+    }
+
+    QByteArray webChannelJs = webChannelJsFile.readAll();
+    webChannelJs.append(
+            "\n"
+            "var wsUri = 'ws://localhost:12345';"
+            "var socket = new WebSocket(wsUri);"
+            "socket.onclose = function() {"
+                "console.error('web channel closed');"
+            "};"
+            "socket.onerror = function(error) {"
+                "console.error('web channel error: ' + error);"
+            "};"
+            "socket.onopen = function() {"
+                "window.channel = new QWebChannel(socket, function(channel) {"
+                    "channel.objects.emulocationserver.showLocation.connect(function(lat, lng) {"
+                        "if (showPendingLocation) {"
+                            "showPendingLocation(lat, lng);"
+                        "}"
+                    "});"
+                    "channel.objects.emulocationserver.locationChanged.connect(function(lat, lng) {"
+                        "if (setDeviceLocation) {"
+                            "setDeviceLocation(lat, lng);"
+                        "}"
+                    "});"
+                "});"
+            "}");
+
+    QWebEngineScript script;
+    script.setSourceCode(webChannelJs);
+    script.setName("qwebchannel.js");
+    script.setWorldId(QWebEngineScript::MainWorld);
+    script.setInjectionPoint(QWebEngineScript::DocumentCreation);
+    script.setRunsOnSubFrames(false);
+
+    webEnginePage->scripts().insert(script);
+
+    mServer.reset(new QWebSocketServer(QStringLiteral("QWebChannel Standalone Example Server"),
+                        QWebSocketServer::NonSecureMode));
+    if (!mServer->listen(QHostAddress::LocalHost, 12345)) {
+        printf("Unable to open web socket port 12345.");
+    }
+
+    // wrap WebSocket clients in QWebChannelAbstractTransport objects
+    mClientWrapper.reset(new WebSocketClientWrapper(mServer.get()));
+
+    // setup the channel
+    mWebChannel.reset(new QWebChannel(webEnginePage));
+    QObject::connect(mClientWrapper.get(), &WebSocketClientWrapper::clientConnected,
+                     mWebChannel.get(), &QWebChannel::connectTo);
+
+    // setup the dialog and publish it to the QWebChannel
+    mWebChannel->registerObject(QStringLiteral("emulocationserver"), this);
+
+    webEnginePage->load(QUrl(pageName));
 }

@@ -247,6 +247,7 @@ private:
                                          const emulator_location::RouteMetadata& protobuf);
     void writeRouteProtobufFullPath(const QString& protoFullPath,
                                     const emulator_location::RouteMetadata& protobuf);
+    void setUpWebEngine(QWebEnginePage* webEnginePage, const char* pageName);
 
     static bool validateCell(QTableWidget* table,
                              int row,

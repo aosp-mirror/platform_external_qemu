@@ -95,6 +95,8 @@ html, body {
     var lastLatLng = {lat: 37.4220919, lng: -122.0826088};
     var sevDeviceLocation;
     var gMap;
+    var gFirstPoint;
+    var gStartLatLng;
 
     // Callback function for Maps API
     function initMap() {
@@ -108,8 +110,13 @@ html, body {
             disableDefaultUI: true
         });
 
-        // Create a marker and set its position.
-        gCurrentMarker = new google.maps.Marker({
+        gFirstPoint = true;
+        // Create 'start' and 'end' markers
+        gStartMarker = new google.maps.Marker({
+            map: gMap,
+            position: lastLatLng
+        });
+        gEndMarker = new google.maps.Marker({
             map: gMap,
             position: lastLatLng
         });
@@ -117,16 +124,69 @@ html, body {
         // Register a listener that sets a new marker wherever user clicks
         // on the map.
         google.maps.event.addListener(gMap, 'click', function(event) {
-            gCurrentMarker.setMap(null);
-            gCurrentMarker = new google.maps.Marker({
-                map: gMap,
-                position: event.latLng
-            });
+            var startMarker = 'data:image/svg+xml, \
+                    <svg xmlns="http://www.w3.org/2000/svg" width="44px" height="44px" \
+                            viewBox="0 0 44 44"> \
+                        <circle cx="22" cy="22" r="14" stroke="#666666" stroke-width="7" \
+                                fill="#ffffff" /> \
+                    </svg>';
+            var startMarkerImage = {
+              url: startMarker,
+              size: new google.maps.Size(24, 24),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(12, 12),
+              scaledSize: new google.maps.Size(25, 25)
+            };
+            var endMarker = 'data:image/svg+xml, \
+                    <svg xmlns="http://www.w3.org/2000/svg" width="44px" height="44px" \
+                            viewBox="0 0 44 44"> \
+                        <circle cx="22" cy="22" r="14" stroke="#666666" stroke-width="7" \
+                                fill="#ffffff" /> \
+                        <circle cx="22" cy="22" r="6" fill="#666666" /> \
+                    </svg>';
+            var endMarkerImage = {
+              url: endMarker,
+              size: new google.maps.Size(24, 24),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(12, 12),
+              scaledSize: new google.maps.Size(25, 25)
+            };
+
+            if (gFirstPoint) {
+                // Place the 'start' marker and erase the 'end' marker
+                gStartMarker.setMap(null);
+                gStartMarker = new google.maps.Marker({
+                    map: gMap,
+                    position: event.latLng
+                });
+                console.warn('JZK Route page: start: ' + event.latLng.lat() +
+                             ', ' + event.latLng.lng()); // ??
+                gStartMarker.setIcon(startMarkerImage);
+                gEndMarker.setMap(null);
+            } else {
+                // Place the 'end' marker
+                gEndMarker.setMap(null);
+                gEndMarker = new google.maps.Marker({
+                    map: gMap,
+                    position: event.latLng
+                });
+                console.warn('JZK Route page: start: ' + lastLatLng.lat
+                             + ', ' + lastLatLng.lng + ', end: '
+                             + event.latLng.lat()
+                             + ', ' + event.latLng.lng()); // ??
+                gEndMarker.setIcon(endMarkerImage);
+                // (leave the 'start' marker where it is)
+            }
+            gFirstPoint = !gFirstPoint;
+
+
+
+
+
 
             // Send the location coordinates to the emulator
             lastLatLng.lat = event.latLng.lat();
             lastLatLng.lng = event.latLng.lng();
-            console.warn('JK Point page: lat=' + event.latLng.lat() + ' lng=' + event.latLng.lng()); // ??
             channel.objects.emulocationserver.sendLocation(event.latLng.lat(), event.latLng.lng());
         });
 
@@ -136,9 +196,29 @@ html, body {
             // Code to set location marker on the map. Move this to a signal event handler.
 
             var latLng = new google.maps.LatLng(lat, lng);
-            gCurrentMarker.setPosition(latLng);
-            console.warn('point code placing a default pin'); // ??
-            gCurrentMarker.setIcon(null); // Default "pin"
+            gStartMarker.setPosition(latLng);
+
+
+
+            var blackDot = 'data:image/svg+xml, \
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" \
+                            viewBox="0 0 24 24" fill="#000000"> \
+                        <circle cx="12" cy="12" r="10" fill="#black" opacity=".1" /> \
+                        <circle cx="12" cy="12" r="8" stroke="white" stroke-width="2" \
+                            fill="#ffffff" /> \
+                    </svg>';
+            var blackDotImage = {
+              url: blackDot,
+              size: new google.maps.Size(24, 24),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(12, 12),
+              scaledSize: new google.maps.Size(25, 25)
+            };
+//            gStartMarker.setIcon(gFirstPoint ? null  // Default "pin"
+//                                               : blackDotImage);
+//            gStartMarker.setIcon(blackDotImage); // ??
+            console.warn('gFirstPoint was ' + gFirstPoint); // ??
+            gFirstPoint = !gFirstPoint;
             gMap.setCenter(latLng);
         }
 
@@ -147,7 +227,8 @@ html, body {
             // Code to set location marker on the map. Move this to a signal event handler.
 
             var latLng = new google.maps.LatLng(lat, lng);
-            gCurrentMarker.setPosition(latLng);
+            console.warn('Route page setting blue dot'); // ??
+            gStartMarker.setPosition(latLng);
             var blueDot = 'data:image/svg+xml, \
                     <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" \
                             viewBox="0 0 24 24" fill="#000000"> \
@@ -162,7 +243,7 @@ html, body {
               anchor: new google.maps.Point(12, 12),
               scaledSize: new google.maps.Size(25, 25)
             };
-            gCurrentMarker.setIcon(image);
+            gStartMarker.setIcon(image);
         }
 
         // Add Google search box

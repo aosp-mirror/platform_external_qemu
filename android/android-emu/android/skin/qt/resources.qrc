@@ -14,6 +14,7 @@
         <file alias="styles/stylesheet_template.css">styles/stylesheet_template.css</file>
         <file alias="styles/fonts_stylesheet_template.css">styles/fonts_stylesheet_template.css</file>
         <file alias="html/index.html">html/index.html</file>
+        <file alias="html/route.html">html/route.html</file>
         <file alias="html/js/qwebchannel.js">html/js/qwebchannel.js</file>
     </qresource>
     <qresource prefix="/lib/fonts">

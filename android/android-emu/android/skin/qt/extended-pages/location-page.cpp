@@ -29,8 +29,8 @@
 #include <QItemDelegate>
 #include <QSettings>
 #include <QWebEngineProfile>
-#include <QWebEngineScript>
-#include <QWebEngineScriptCollection>
+#include <QWebEngineScript> // ??
+#include <QWebEngineScriptCollection> // ??
 
 #include <algorithm>
 #include <string>
@@ -153,6 +153,10 @@ LocationPage::LocationPage(QWidget *parent) :
     }
 
   if (useLocationV2) {
+#if 1 // ??
+    setUpWebEngine(mUi->pointWebEngineView->page(), "qrc:/html/index.html");
+    setUpWebEngine(mUi->routeWebEngineView->page(), "qrc:/html/route.html");
+#else // ??
     QFile webChannelJsFile(":/html/js/qwebchannel.js");
     if(!webChannelJsFile.open(QIODevice::ReadOnly)) {
         qDebug() << QString("Couldn't open qwebchannel.js file: %1").arg(webChannelJsFile.errorString());
@@ -192,7 +196,8 @@ LocationPage::LocationPage(QWidget *parent) :
         script.setInjectionPoint(QWebEngineScript::DocumentCreation);
         script.setRunsOnSubFrames(false);
 
-        mUi->pointWebEngineView->page()->scripts().insert(script);
+//??        mUi->pointWebEngineView->page()->scripts().insert(script);
+        mUi->routeWebEngineView->page()->scripts().insert(script); // ??
 
         mServer.reset(new QWebSocketServer(QStringLiteral("QWebChannel Standalone Example Server"),
                             QWebSocketServer::NonSecureMode));
@@ -204,15 +209,18 @@ LocationPage::LocationPage(QWidget *parent) :
         mClientWrapper.reset(new WebSocketClientWrapper(mServer.get()));
 
         // setup the channel
-        mWebChannel.reset(new QWebChannel(mUi->pointWebEngineView->page()));
+//??        mWebChannel.reset(new QWebChannel(mUi->pointWebEngineView->page()));
+        mWebChannel.reset(new QWebChannel(mUi->routeWebEngineView->page())); // ??
         QObject::connect(mClientWrapper.get(), &WebSocketClientWrapper::clientConnected,
                          mWebChannel.get(), &QWebChannel::connectTo);
 
         // setup the dialog and publish it to the QWebChannel
         mWebChannel->registerObject(QStringLiteral("emulocationserver"), this);
 
-        mUi->pointWebEngineView->page()->load(QUrl("qrc:/html/index.html"));
+//??        mUi->pointWebEngineView->page()->load(QUrl("qrc:/html/index.html"));
+        mUi->routeWebEngineView->page()->load(QUrl("qrc:/html/index.html")); // ??
     }
+#endif // ??
     mPointItemBuilder = new PointItemBuilder(mUi->pointList);
 
     mUi->pointList->setItemDelegateForColumn(0, new BackgroundDelegate(this));
