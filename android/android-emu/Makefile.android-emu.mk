@@ -291,6 +291,7 @@ LOCAL_SRC_FILES := \
     android/adb-server.cpp \
     android/automation/AutomationController.cpp \
     android/automation/AutomationEventSink.cpp \
+    android/avd/generate.cpp \
     android/avd/hw-config.c \
     android/avd/info.c \
     android/avd/scanner.c \
@@ -585,6 +586,9 @@ LOCAL_COPY_COMMON_TESTDATA += \
     textureutils/rgb24_31px.png \
     textureutils/rgba32_golden.bmp \
     textureutils/rgba32.png \
+
+LOCAL_COPY_COMMON_TESTDATA_DIRS += \
+	test-sdk \
 
 endif
 
