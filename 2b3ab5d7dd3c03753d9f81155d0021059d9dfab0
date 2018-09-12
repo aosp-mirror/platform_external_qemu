@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "72186b55_e91ad921",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-12T20:36:52Z",
+      "side": 1,
+      "message": "I would rather prefer to have a subdirectory in the temp dir. These files *are temporary*, and storing them in AVD directory may mislead people. Storing them in %tmp%/\u003cavd\u003e/ solves all issues",
+      "range": {
+        "startLine": 279,
+        "startChar": 4,
+        "endLine": 302,
+        "endChar": 75
+      },
+      "revId": "2b3ab5d7dd3c03753d9f81155d0021059d9dfab0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
