@@ -362,7 +362,8 @@ void BugreportPage::loadAdbBugreport() {
                 } else {
                     // TODO(wdu) Better error handling for failed adb bugreport
                     // generation
-                    showErrorDialog(tr("There was an error while generating "
+                    showErrorDialog(tr("Bug report interrupted by snapshot load? "
+                                       "There was an error while generating "
                                        "adb bugreport"),
                                     tr("Bugreport"));
                 }
