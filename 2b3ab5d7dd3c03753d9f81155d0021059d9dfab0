@@ -70,6 +70,30 @@
       "revId": "2b3ab5d7dd3c03753d9f81155d0021059d9dfab0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9505694_329957d5",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-12T23:50:22Z",
+      "side": 1,
+      "message": "we can just change the temp subdirectory name for new emulators, e.g android-%user% to aemu-%user%\nI still feel strongly that putting temp stuff into the avd dir will most probably not end well. But it\u0027s up to you\n\nIMO the best approach would be to:\n(1) create a new android-user-guid temp directory for each run and only use that\n(2) on new launch try to delete all android-user-guid directories that have not been accessed in X days\n\nthis way we could be sure that deleting it is safe, it won\u0027t affect anything else, and that we limit the impact to both emulator and the rest of the OS",
+      "parentUuid": "c21f0762_5b569940",
+      "range": {
+        "startLine": 279,
+        "startChar": 4,
+        "endLine": 302,
+        "endChar": 75
+      },
+      "revId": "2b3ab5d7dd3c03753d9f81155d0021059d9dfab0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
