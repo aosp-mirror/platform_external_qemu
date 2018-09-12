@@ -5579,6 +5579,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         fprintf(stderr, "Unexpected: iothread lock lost.");
     }
 
+    fflush(stdout);
+    fflush(stderr);
+
 #ifdef CONFIG_ANDROID
     handle_emulator_restart();
 #endif
