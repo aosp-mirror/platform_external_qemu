@@ -250,6 +250,7 @@ int main(int argc, char** argv)
     bool cleanUpAvdContent = false;
     bool isRestart = false;
     int restartPid = -1;
+    bool doDeleteTempDir = false;
 
     /* Test-only actions */
     bool isLauncherTest = false;
@@ -410,6 +411,10 @@ int main(int argc, char** argv)
                 avdName = opt+1;
             }
         }
+
+        if (!strcmp(opt, "-delete-temp-dir")) {
+            doDeleteTempDir = true;
+        }
     }
 
     if (doAccelCheck) {
@@ -456,6 +461,10 @@ int main(int argc, char** argv)
     if (doListWebcams) {
         android_camera_list_webcams();
         return 0;
+    }
+
+    if (doDeleteTempDir) {
+        System::deleteTempDir();
     }
 
     /* If ANDROID_EMULATOR_FORCE_32BIT is set to 'true' or '1' in the
