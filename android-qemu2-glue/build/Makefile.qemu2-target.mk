@@ -44,6 +44,7 @@ QEMU2_SYSTEM_CFLAGS := \
     -DNEED_CPU_H \
 
 QEMU2_SYSTEM_INCLUDES := \
+    $(BUILD_OBJS_DIR)/build/qemu2-config/ \
     $(QEMU2_INCLUDES) \
     $(QEMU2_DEPS_TOP_DIR)/include \
     $(call qemu2-if-linux,$(LOCAL_PATH)/linux-headers) \
