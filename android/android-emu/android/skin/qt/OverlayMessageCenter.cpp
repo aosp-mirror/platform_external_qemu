@@ -247,19 +247,19 @@ static Optional<int> calcTimeout(int timeoutMs) {
     }
 }
 
-QPixmap OverlayMessageCenter::icon(Icon type) {
+QPixmap OverlayMessageCenter::iconFromMessageType(MessageType type) {
     const char* name = nullptr;
     switch (type) {
-        case Icon::None:
+        case MessageType::None:
             return {};
-        case Icon::Info:
-            name = "info";
+        case MessageType::Info:
+            name = "check_circle";
             break;
-        case Icon::Warning:
+        case MessageType::Warning:
             name = "warning";
             break;
-        case Icon::Error:
-            name = "error";
+        case MessageType::Error:
+            name = "dangerous";
             break;
     }
     if (!name) {
@@ -326,7 +326,7 @@ void OverlayMessageCenter::dismissMessageImmediately(OverlayChildWidget* message
 }
 
 OverlayChildWidget* OverlayMessageCenter::addMessage(QString message,
-                                                     Icon icon,
+                                                     MessageType messageType,
                                                      int timeoutMs) {
     // Don't add too many items at once.
     const auto children =
@@ -335,7 +335,9 @@ OverlayChildWidget* OverlayMessageCenter::addMessage(QString message,
         dismissMessage(static_cast<OverlayChildWidget*>(children[i]));
     }
 
-    auto widget = new OverlayChildWidget(this, message, this->icon(icon));
+    auto widget =
+        new OverlayChildWidget(
+            this, message, this->iconFromMessageType(messageType));
 
     QPointer<OverlayChildWidget> widgetPtr = widget;
     widget->dismissButton()->connect(widget->dismissButton(),

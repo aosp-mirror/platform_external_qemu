@@ -625,7 +625,6 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         char* arch = avdInfo_getTargetCpuArch(avd);
         D("Target arch = '%s'", arch ? arch : "NULL");
         if (arch != NULL && !strcmp(arch, "x86")) {
-            fprintf(stderr, "%s: use cpu model\n", __func__);
             str_reset(&hw->hw_cpu_model, "qemu32");
             D("Auto-config: -qemu -cpu %s", hw->hw_cpu_model);
         }
