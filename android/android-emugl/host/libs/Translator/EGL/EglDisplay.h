@@ -96,6 +96,7 @@ public:
     void terminate();
     bool isInitialize();
 
+    bool isImageRestored(EGLImageKHR img) const;
     ImagePtr getImage(EGLImageKHR img,
         SaveableTexture::restorer_t restorer) const;
     EGLImageKHR addImageKHR(ImagePtr);

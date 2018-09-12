@@ -66,6 +66,7 @@ public:
             mLoaderThread->wait();
             mLoaderThread.reset();
         }
+        printf("join texture loader\n");
         mStream.close();
         mEndTime = base::System::get()->getHighResTimeUs();
     }
