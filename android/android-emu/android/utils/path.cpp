@@ -675,6 +675,15 @@ APosixStatus path_copy_dir(const char* dst, const char* src) {
 }
 
 APosixStatus path_delete_dir(const char* path) {
+    APosixStatus contentsDeleteStatus =
+        path_delete_dir_contents(path);
+
+    auto res = rmdir(path);
+    res = contentsDeleteStatus ? contentsDeleteStatus : res;
+    return res;
+}
+
+APosixStatus path_delete_dir_contents(const char* path) {
     auto dirScanner = android::base::makeCustomScopedPtr(dirScanner_new(path),
                                                          dirScanner_free);
     if (!dirScanner)
@@ -695,7 +704,67 @@ APosixStatus path_delete_dir(const char* path) {
         name = dirScanner_nextFull(dirScanner.get());
     }
 
-    auto res = rmdir(path);
-    fullRes = fullRes ? fullRes : res;
+    return fullRes;
+}
+
+bool path_dir_has_files(const char* path) {
+
+    if (!path_is_dir(path)) return false;
+
+    auto dirScanner = android::base::makeCustomScopedPtr(dirScanner_new(path),
+                                                         dirScanner_free);
+    if (!dirScanner)
+        return false;
+
+    const char* name = dirScanner_nextFull(dirScanner.get());
+    return name != nullptr;
+}
+
+APosixStatus path_delete_file_on_reboot(const char* path) {
+#ifdef _WIN32
+    // MoveFileEx requires an empty directory.
+    if (path_is_dir(path) && path_dir_has_files(path)) {
+        return -EINVAL;
+    }
+
+    Win32UnicodeString utf16Path(path);
+    BOOL result =
+        MoveFileExW(
+            utf16Path.c_str(),
+            NULL,
+            MOVEFILE_DELAY_UNTIL_REBOOT);
+
+    if (!result) {
+        return -1;
+    }
+
+    return 0;
+#else
+    // Not yet implemented on POSIX
+    return -EINVAL;
+#endif
+}
+
+APosixStatus path_delete_dir_contents_on_reboot(const char* path) {
+    auto dirScanner = android::base::makeCustomScopedPtr(dirScanner_new(path),
+                                                         dirScanner_free);
+    if (!dirScanner)
+        return -EINVAL;
+
+    int fullRes = 0;
+    const char* name = dirScanner_nextFull(dirScanner.get());
+    while (name) {
+        if (path_is_dir(name)) {
+            if (auto res = path_delete_dir(name)) {
+                fullRes = fullRes ? fullRes : res;
+            }
+        } else {
+            if (auto res = path_delete_file(name)) {
+                fullRes = fullRes ? fullRes : res;
+            }
+        }
+        name = dirScanner_nextFull(dirScanner.get());
+    }
+
     return fullRes;
 }
