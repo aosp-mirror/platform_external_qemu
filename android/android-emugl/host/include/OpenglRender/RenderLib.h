@@ -48,6 +48,7 @@ public:
     // Sets the function use to read from the guest
     // physically contiguous DMA region at particular offsets.
     virtual void setDmaOps(emugl_dma_ops) = 0;
+    virtual void setIsLoadingSnapshot(emugl_is_loading_t) = 0;
 
     virtual void* getGL(void) = 0;
 

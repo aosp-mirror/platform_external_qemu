@@ -38,6 +38,8 @@ typedef bool (*emugl_sync_device_exists_t)();
 
 // OpenGL timestamped logger
 typedef void (*emugl_logger_t)(const char* fmt, ...);
+typedef bool (*emugl_is_loading_t)();
+typedef uint64_t (*emugl_sync_create_timeline_t)();
 typedef struct {
     emugl_logger_t coarse;
     emugl_logger_t fine;
