@@ -46,6 +46,30 @@
       "revId": "88e9ee1366da66bc041977d12102d728b95a2d82",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "84df6916_98a218b1",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-12T18:07:18Z",
+      "side": 0,
+      "message": "Ack",
+      "parentUuid": "0819a07c_eb0e8e82",
+      "range": {
+        "startLine": 312,
+        "startChar": 0,
+        "endLine": 312,
+        "endChar": 25
+      },
+      "revId": "88e9ee1366da66bc041977d12102d728b95a2d82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
