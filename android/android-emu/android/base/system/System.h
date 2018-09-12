@@ -439,6 +439,13 @@ public:
     virtual Optional<std::string> runCommandWithResult( const std::vector<std::string>& commandLine,
                             System::Duration timeoutMs = kInfinite,
                             System::ProcessExitCode* outExitCode = nullptr) = 0;
+
+    static Optional<std::string> pathWithoutDirs(StringView name);
+    static std::vector<Pid> queryRunningProcessPids(
+        const std::vector<StringView>& targets, bool approxMatch = true);
+
+    static void deleteTempDir();
+
 protected:
     size_t mMemorySize = 0;
 

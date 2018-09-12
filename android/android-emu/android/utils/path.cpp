@@ -675,6 +675,15 @@ APosixStatus path_copy_dir(const char* dst, const char* src) {
 }
 
 APosixStatus path_delete_dir(const char* path) {
+    APosixStatus contentsDeleteStatus =
+        path_delete_dir_contents(path);
+
+    auto res = rmdir(path);
+    int fullRes = fullRes ? fullRes : res;
+    return fullRes;
+}
+
+APosixStatus path_delete_dir_contents(const char* path) {
     auto dirScanner = android::base::makeCustomScopedPtr(dirScanner_new(path),
                                                          dirScanner_free);
     if (!dirScanner)
@@ -695,7 +704,5 @@ APosixStatus path_delete_dir(const char* path) {
         name = dirScanner_nextFull(dirScanner.get());
     }
 
-    auto res = rmdir(path);
-    fullRes = fullRes ? fullRes : res;
     return fullRes;
 }
