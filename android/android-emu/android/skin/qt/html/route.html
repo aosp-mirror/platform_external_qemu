@@ -93,10 +93,12 @@ html, body {
     <script>
     // Googleplex!
     var lastLatLng = {lat: 37.4220919, lng: -122.0826088};
-    var sevDeviceLocation;
     var gMap;
     var gFirstPoint;
     var gStartLatLng;
+    var gEndLatLng;
+    var gDirectionsService;
+    var gDirectionsDisplay;
 
     // Callback function for Maps API
     function initMap() {
@@ -111,71 +113,76 @@ html, body {
         });
 
         gFirstPoint = true;
-        // Create 'start' and 'end' markers
-        gStartMarker = new google.maps.Marker({
-            map: gMap,
-            position: lastLatLng
-        });
-        gEndMarker = new google.maps.Marker({
-            map: gMap,
-            position: lastLatLng
-        });
+//        // Create a 'start' marker
+//        gStartMarker = new google.maps.Marker({
+//            map: gMap,
+//            position: lastLatLng
+//        });
+//        gEndMarker = new google.maps.Marker({
+//            map: gMap,
+//            position: lastLatLng
+//        });
 
         // Register a listener that sets a new marker wherever user clicks
         // on the map.
         google.maps.event.addListener(gMap, 'click', function(event) {
-            var startMarker = 'data:image/svg+xml, \
-                    <svg xmlns="http://www.w3.org/2000/svg" width="44px" height="44px" \
-                            viewBox="0 0 44 44"> \
-                        <circle cx="22" cy="22" r="14" stroke="#666666" stroke-width="7" \
-                                fill="#ffffff" /> \
-                    </svg>';
-            var startMarkerImage = {
-              url: startMarker,
-              size: new google.maps.Size(24, 24),
-              origin: new google.maps.Point(0, 0),
-              anchor: new google.maps.Point(12, 12),
-              scaledSize: new google.maps.Size(25, 25)
-            };
-            var endMarker = 'data:image/svg+xml, \
-                    <svg xmlns="http://www.w3.org/2000/svg" width="44px" height="44px" \
-                            viewBox="0 0 44 44"> \
-                        <circle cx="22" cy="22" r="14" stroke="#666666" stroke-width="7" \
-                                fill="#ffffff" /> \
-                        <circle cx="22" cy="22" r="6" fill="#666666" /> \
-                    </svg>';
-            var endMarkerImage = {
-              url: endMarker,
-              size: new google.maps.Size(24, 24),
-              origin: new google.maps.Point(0, 0),
-              anchor: new google.maps.Point(12, 12),
-              scaledSize: new google.maps.Size(25, 25)
-            };
+            // var startMarker = 'data:image/svg+xml, \
+            //         <svg xmlns="http://www.w3.org/2000/svg" width="44px" height="44px" \
+            //                 viewBox="0 0 44 44"> \
+            //             <circle cx="22" cy="22" r="14" stroke="#666666" stroke-width="7" \
+            //                     fill="#ffffff" /> \
+            //         </svg>';
+            // var startMarkerImage = {
+            //   url: startMarker,
+            //   size: new google.maps.Size(24, 24),
+            //   origin: new google.maps.Point(0, 0),
+            //   anchor: new google.maps.Point(12, 12),
+            //   scaledSize: new google.maps.Size(25, 25)
+            // };
+            // var endMarker = 'data:image/svg+xml, \
+            //         <svg xmlns="http://www.w3.org/2000/svg" width="44px" height="44px" \
+            //                 viewBox="0 0 44 44"> \
+            //             <circle cx="22" cy="22" r="14" stroke="#666666" stroke-width="7" \
+            //                     fill="#ffffff" /> \
+            //             <circle cx="22" cy="22" r="6" fill="#666666" /> \
+            //         </svg>';
+            // var endMarkerImage = {
+            //   url: endMarker,
+            //   size: new google.maps.Size(24, 24),
+            //   origin: new google.maps.Point(0, 0),
+            //   anchor: new google.maps.Point(12, 12),
+            //   scaledSize: new google.maps.Size(25, 25)
+            // };
 
             if (gFirstPoint) {
-                // Place the 'start' marker and erase the 'end' marker
-                gStartMarker.setMap(null);
+                gStartLatLng = event.latLng;
+
+                // Place the 'start' marker
                 gStartMarker = new google.maps.Marker({
                     map: gMap,
                     position: event.latLng
                 });
-                console.warn('JZK Route page: start: ' + event.latLng.lat() +
-                             ', ' + event.latLng.lng()); // ??
-                gStartMarker.setIcon(startMarkerImage);
-                gEndMarker.setMap(null);
+//                console.warn('JZK Route page: start: ' + gStartLatLng); // ??
+//                gStartMarker.setIcon(startMarkerImage);
+//                gEndMarker.setMap(null);
+                // Remove the old path
+                if (gDirectionsDisplay != null) {
+                    gDirectionsDisplay.setMap(null);
+                    gDirectionsDisplay = null;
+                }
             } else {
-                // Place the 'end' marker
-                gEndMarker.setMap(null);
-                gEndMarker = new google.maps.Marker({
-                    map: gMap,
-                    position: event.latLng
-                });
-                console.warn('JZK Route page: start: ' + lastLatLng.lat
-                             + ', ' + lastLatLng.lng + ', end: '
-                             + event.latLng.lat()
-                             + ', ' + event.latLng.lng()); // ??
-                gEndMarker.setIcon(endMarkerImage);
-                // (leave the 'start' marker where it is)
+                gEndLatLng = event.latLng;
+//                // Place the 'end' marker
+//                gEndMarker.setMap(null);
+//                gEndMarker = new google.maps.Marker({
+//                    map: gMap,
+//                    position: event.latLng
+//                });
+                // Remove the start marker: the route has its own markers
+                gStartMarker.setMap(null);
+                console.warn('JZK Route page: start: ' + gStartLatLng + ', end: ' + gEndLatLng); // ??
+//                gEndMarker.setIcon(endMarkerImage);
+                calcRoute();
             }
             gFirstPoint = !gFirstPoint;
 
@@ -299,6 +306,130 @@ html, body {
         google.maps.event.addListener(gMap, 'bounds_changed', function() {
           var bounds = gMap.getBounds();
           searchBox.setBounds(bounds);
+        });
+
+        // Set up to retrieve directions
+        gDirectionsService = new google.maps.DirectionsService();
+    }
+
+    function distanceBetween(start, end) {
+        var startLat = start.lat();
+        var startLon = start.lng();
+        var endLat   = end.lat();
+        var endLon   = end.lng();
+
+        var startLatRadians = startLat * Math.PI / 180.0;
+        var startLonRadians = startLon * Math.PI / 180.0;
+        var endLatRadians   = endLat   * Math.PI / 180.0;
+        var endLonRadians   = endLon   * Math.PI / 180.0;
+
+        var deltaLatRadians = endLatRadians - startLatRadians;
+        var deltaLonRadians = endLonRadians - startLonRadians;
+
+        var sinDeltaLatBy2 = Math.sin(deltaLatRadians / 2.0);
+        var sinDeltaLonBy2 = Math.sin(deltaLonRadians / 2.0);
+
+        var termA =   sinDeltaLatBy2 * sinDeltaLatBy2
+                       + Math.cos(startLatRadians) * Math.cos(endLatRadians) *
+                         sinDeltaLonBy2 * sinDeltaLonBy2;
+        var termC = 2.0 * Math.atan2(Math.sqrt(termA), Math.sqrt(1.0 - termA));
+
+        var earthRadius = 6371000.; // Meters
+
+        var dist = earthRadius * termC;
+        return dist;
+   }
+
+    function calcRoute() {
+        const MINIMUM_DISTANCE = 50; // Meters
+        const MINIMUM_TIME     = 10; // Seconds
+        var request = {
+            origin: gStartLatLng,
+            destination: gEndLatLng,
+            // DRIVING, WALKING, BICYCLING, TRANSIT
+            travelMode: 'DRIVING'
+//            travelMode: 'WALKING'
+        };
+        gDirectionsDisplay = new google.maps.DirectionsRenderer();
+        gDirectionsDisplay.setMap(gMap);
+        gDirectionsService.route(request, function(result, status) {
+            if (status == 'OK') {
+// vv ??
+                var r0 = result.routes[0];
+                var leg0 = r0.legs[0];
+                var theSteps = leg0.steps;
+                var numSteps = theSteps.length;
+
+                console.warn('JZK Route result: ' + result.routes.length
+                             + ' routes, route[0] has ' + r0.legs.length
+                             + ' legs, leg[0] has ' + numSteps
+                             + ' steps and lasts ' + leg0.duration.text); // ??
+                // Always accept the first point of the route
+                console.warn('     pt 0: ' + theSteps[0].path[0]
+                             + ', VERY FIRST POINT **');
+                var marker = new google.maps.Marker({
+                    map: gMap,
+                    position: theSteps[0].path[0]
+                });
+                var previousPoint = theSteps[0].path[0];
+
+                for (var stepIdx = 0; stepIdx < numSteps; stepIdx++) {
+                    var thisStep = theSteps[stepIdx];
+                    // ?? How to protect this from /0?
+                    var stepSpeed = thisStep.distance.value / thisStep.duration.value;
+                    var thisPath = theSteps[stepIdx].path;
+                    var numPts = thisPath.length;
+                    console.warn('  step ' + stepIdx + ' has ' + numPts
+                                 + ' points; distance '
+                                 + theSteps[stepIdx].distance.value
+                                 + ' meters, and lasts '
+                                 + theSteps[stepIdx].duration.value
+                                 + ' seconds'); // ??
+                    for (var ptIdx = 1; ptIdx < numPts; ptIdx++) {
+                        var thisPoint = thisPath[ptIdx];
+                        if (ptIdx != numPts-1) {
+                            // This is not the last point of the step.
+                            // Accept it only if it is far enough from
+                            // the last point we accepted.
+                            var dist = distanceBetween(previousPoint, thisPoint);
+                            var time = dist / stepSpeed;
+                            if (dist < MINIMUM_DISTANCE) { // ??
+                                console.warn('     pt ' + ptIdx // ??
+                                             + ': ' + thisPath[ptIdx]
+                                             + ', distance ' + dist
+                                             + ' meters, time ' + time
+                                             + ' -- too close');
+                            } // ??
+                            if (dist < MINIMUM_DISTANCE) continue;
+                            if (dist / stepSpeed < MINIMUM_TIME) {
+                                console.warn('     pt ' + ptIdx // ??
+                                             + ': ' + thisPath[ptIdx]
+                                             + ', distance ' + dist
+                                             + ' meters, time ' + time
+                                             + ' -- time too short');
+                            } // ??
+                            if (dist / stepSpeed < MINIMUM_TIME) continue;
+                            console.warn('     pt ' + ptIdx // ??
+                                         + ': ' + thisPath[ptIdx]
+                                         + ', distance ' + dist
+                                         + ' meters, time ' + time
+                                         + ' -- TAKE IT');
+                        }
+                        else console.warn('     pt ' + ptIdx // ??
+                                         + ': ' + thisPath[ptIdx]
+                                         + ', LAST POINT OF STEP **');
+                        previousPoint = thisPoint;
+
+                        var marker = new google.maps.Marker({
+                            map: gMap,
+                            position: thisPoint
+                        });
+                    }
+                }
+// ^^ ??
+//??                gDirectionsDisplay.setDirections(result);
+            }
+            else console.warn('JZK Route result had status != OK'); // ??
         });
     }
     </script>

@@ -28,7 +28,7 @@
 #include <QPainter>
 #include <QPlainTextEdit>
 //??#include <QWebEngineScript> // ??
-#include <QWebEngineScriptCollection> // ??
+#include <QWebEngineScriptCollection>
 
 #include <fstream>
 
@@ -36,7 +36,7 @@ static const char PROTO_FILE_NAME[] = "point_metadata.pb";
 
 // Invoked when the user clicks on the map
 void LocationPage::sendLocation(const QString& lat, const QString& lng) {
-    qDebug() << "l-p: sendLocation(): Map clicked: lat=" << lat << ", lng=" << lng;
+//    qDebug() << "l-p-p: sendLocation(): Map clicked: lat=" << lat << ", lng=" << lng; // ??
     mLastLat = lat;
     mLastLng = lng;
 
