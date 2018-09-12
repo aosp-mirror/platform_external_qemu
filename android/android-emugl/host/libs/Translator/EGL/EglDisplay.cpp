@@ -553,7 +553,16 @@ ImagePtr EglDisplay::getImage(EGLImageKHR img,
     return i->second;
 }
 
-bool EglDisplay:: destroyImageKHR(EGLImageKHR img) {
+bool EglDisplay::isImageRestored(EGLImageKHR img) const {
+    unsigned int hndl = SafeUIntFromPointer(img);
+    ImagesHndlMap::const_iterator i( m_eglImages.find(hndl) );
+    if (i == m_eglImages.end()) {
+        return false;
+    }
+    return !i->second->needRestore;
+}
+
+bool EglDisplay::destroyImageKHR(EGLImageKHR img) {
     emugl::Mutex::AutoLock mutex(m_lock);
     /* img is "key" in map<unsigned int, ImagePtr>. */
     unsigned int hndl = SafeUIntFromPointer(img);

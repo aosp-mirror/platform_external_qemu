@@ -812,6 +812,8 @@ void Snapshotter::onSavingFailed(const char* name, int res) {
 }
 
 bool Snapshotter::onStartLoading(const char* name) {
+    mIsLoading = true;
+    printf("Snapshotter start loading\n");
     mLoadedSnapshotFile.clear();
     CrashReporter::get()->hangDetector().pause(true);
     callCallbacks(Operation::Load, Stage::Start);
@@ -844,10 +846,14 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
                   *failureReason : FailureReason::InternalError);
         mVmOperations.setFailureReason(
             name, failureReasonForQemu);
+        mIsLoading = false;
+        printf("Snapshotter loading complete with error\n");
         return false;
     }
     mLoadedSnapshotFile = name;
     Hierarchy::get()->currentInfo();
+    mIsLoading = false;
+    printf("Snapshotter loading complete\n");
     return true;
 }
 
@@ -896,6 +902,10 @@ void Snapshotter::addOperationCallback(Callback&& cb) {
     if (cb) {
         mCallbacks.emplace_back(std::move(cb));
     }
+}
+
+bool Snapshotter::isLoading() {
+    return sInstance.hasInstance() && get().mIsLoading;
 }
 
 }  // namespace snapshot

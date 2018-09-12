@@ -25,6 +25,7 @@
 #include <GLES2/gl2.h>
 
 intptr_t GLBackgroundLoader::main() {
+    return 0;
 #if SNAPSHOT_PROFILE > 1
     const auto start = get_uptime_ms();
     printf("Starting GL background loading at %" PRIu64 " ms\n", start);
