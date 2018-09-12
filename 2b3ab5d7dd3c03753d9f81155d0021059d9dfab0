@@ -46,6 +46,30 @@
       "revId": "2b3ab5d7dd3c03753d9f81155d0021059d9dfab0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c21f0762_5b569940",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-12T22:12:11Z",
+      "side": 1,
+      "message": "Made it more obvious in the dir name that it is a temp dir.",
+      "parentUuid": "b29e10e4_a371af12",
+      "range": {
+        "startLine": 279,
+        "startChar": 4,
+        "endLine": 302,
+        "endChar": 75
+      },
+      "revId": "2b3ab5d7dd3c03753d9f81155d0021059d9dfab0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
