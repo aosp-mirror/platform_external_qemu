@@ -14,6 +14,7 @@
 
 #include "android/emulation/control/AdbInterface.h"
 
+#include "android/avd/info.h"
 #include "android/base/ArraySize.h"
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
@@ -29,6 +30,7 @@
 #include "android/emulation/AdbHostServer.h"
 #include "android/emulation/ComponentVersion.h"
 #include "android/emulation/ConfigDirs.h"
+#include "android/globals.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 #include "android/utils/sockets.h"
@@ -269,12 +271,31 @@ AdbCommand::AdbCommand(Looper* looper,
                        ResultCallback&& callback)
     : mLooper(looper),
       mResultCallback(std::move(callback)),
-      mOutputFilePath(PathUtils::join(
-              System::get()->getTempDir(),
-              std::string("adbcommand").append(Uuid::generate().toString()))),
       mWantOutput(want_output),
       mTimeoutMs(timeoutMs) {
+
     mCommand.push_back(adb_path);
+
+    auto avdContentPath = avdInfo_getContentPath(android_avdInfo);
+
+    std::string outputFolder;
+
+    if (avdContentPath) {
+        auto avdCmdDir =
+            PathUtils::join(avdContentPath, "adbCommands");
+
+        if (path_mkdir_if_needed(avdCmdDir.c_str(), 0755) < 0) {
+            outputFolder = System::get()->getTempDir();
+        } else {
+            outputFolder = avdCmdDir;
+        }
+    } else {
+        outputFolder = System::get()->getTempDir();
+    }
+
+    mOutputFilePath =
+        PathUtils::join(outputFolder,
+            std::string("adbcommand").append(Uuid::generate().toString()));
 
     // TODO: when run headless, the serial string won't be properly
     // initialized, so make a best attempt by using -e. This should be updated
