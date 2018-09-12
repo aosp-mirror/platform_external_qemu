@@ -261,6 +261,7 @@ int main(int argc, char** argv)
     bool cleanUpAvdContent = false;
     bool isRestart = false;
     int restartPid = -1;
+    bool doDeleteTempDir = false;
 
     /* Test-only actions */
     bool isLauncherTest = false;
@@ -421,6 +422,10 @@ int main(int argc, char** argv)
                 avdName = opt+1;
             }
         }
+
+        if (!strcmp(opt, "-delete-temp-dir")) {
+            doDeleteTempDir = true;
+        }
     }
 
     if (doAccelCheck) {
@@ -466,6 +471,16 @@ int main(int argc, char** argv)
 
     if (doListWebcams) {
         android_camera_list_webcams();
+        return 0;
+    }
+
+    if (doDeleteTempDir) {
+        printf("Checking for other emulator instances...");
+
+        printf("Deleting emulator temp directory...");
+        std::string tempDir = System::get()->getTempDir();
+        path_delete_dir(tempDir.c_str());
+        printf("done\n");
         return 0;
     }
 

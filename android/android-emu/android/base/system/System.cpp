@@ -2335,5 +2335,10 @@ std::string toString(OsType osType) {
     }
 }
 
+// static
+std::vector<Pid> queryRunningProcessPids(StringView name) {
+    return {};
+}
+
 }  // namespace base
 }  // namespace android
