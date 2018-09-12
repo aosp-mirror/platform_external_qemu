@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4ec27034_0c3ef1f1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-12T18:25:30Z",
+      "side": 1,
+      "message": "Can you go into more detail what this does exactly?",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 40
+      },
+      "revId": "940cf3c739c45c55da569921165eeaf41086bd2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
