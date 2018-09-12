@@ -370,7 +370,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     qRegisterMetaType<SkinRotation>();
     qRegisterMetaType<SkinGenericFunction>();
     qRegisterMetaType<RunOnUiThreadFunc>();
-    qRegisterMetaType<Ui::OverlayMessageIcon>();
+    qRegisterMetaType<Ui::OverlayMessageType>();
     qRegisterMetaType<Ui::OverlayChildWidget::DismissFunc>();
 
     mOrientation = !strcmp(android_hw->hw_initialOrientation, "landscape") ?
@@ -1787,17 +1787,17 @@ void EmulatorQtWindow::slot_adbPushCanceled() {
 }
 
 void EmulatorQtWindow::slot_showMessage(QString text,
-                                        Ui::OverlayMessageIcon icon,
+                                        Ui::OverlayMessageType messageType,
                                         int timeoutMs) {
-    mContainer.messageCenter().addMessage(text, icon, timeoutMs);
+    mContainer.messageCenter().addMessage(text, messageType, timeoutMs);
 }
 
 void EmulatorQtWindow::slot_showMessageWithDismissCallback(QString text,
-                                                           Ui::OverlayMessageIcon icon,
+                                                           Ui::OverlayMessageType messageType,
                                                            QString dismissText,
                                                            RunOnUiThreadFunc func,
                                                            int timeoutMs) {
-    auto msg = mContainer.messageCenter().addMessage(text, icon, timeoutMs);
+    auto msg = mContainer.messageCenter().addMessage(text, messageType, timeoutMs);
     msg->setDismissCallback(dismissText, std::move(func));
 }
 
