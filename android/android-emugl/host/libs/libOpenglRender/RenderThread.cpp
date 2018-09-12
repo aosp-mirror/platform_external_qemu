@@ -32,6 +32,7 @@
 #include "android/base/system/System.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/utils/path.h"
+#include "emugl/common/misc.h"
 
 #define EMUGL_DEBUG_LEVEL 0
 #include "emugl/common/debug.h"
@@ -289,6 +290,12 @@ intptr_t RenderThread::main() {
                     break;
                 }
             } else if (needRestoreFromSnapshot) {
+                if (emugl::isLoadingSnapshot()) {
+                    printf("abandoning thread\n");
+                    // We are doing a second load before restoring the previous one.
+                    // Abandon the session immediately.
+                    return 0;
+                }
                 // We just loaded from a snapshot, need to initialize / bind
                 // the contexts.
                 needRestoreFromSnapshot = false;

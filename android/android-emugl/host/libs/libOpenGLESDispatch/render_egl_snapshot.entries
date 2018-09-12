@@ -12,9 +12,11 @@ EGLBoolean eglSaveAllImages(EGLDisplay display, EGLStream stream, const void* te
 
 EGLBoolean eglPreSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
 
-EGLBoolean eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
+EGLBoolean eglPostLoadAllImages(EGLDisplay display, EGLStream stream, EGLBoolean backgroundLoad);
 
 EGLBoolean eglPostSaveContext(EGLDisplay display, EGLConfig config, EGLStream stream);
+
+EGLBoolean eglTouchAllTextures(EGLDisplay display);
 
 void eglUseOsEglApi(EGLBoolean enable);
 void eglSetMaxGLESVersion(EGLint glesVersion);

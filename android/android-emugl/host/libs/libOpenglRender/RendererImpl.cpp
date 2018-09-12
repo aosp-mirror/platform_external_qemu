@@ -258,8 +258,10 @@ bool RendererImpl::load(android::base::Stream* stream,
     android::base::System::Duration startTime
             = android::base::System::get()->getUnixTimeUs();
 #endif
-    cleanupRenderThreads();
-    waitForProcessCleanup();
+    //printf("flushing messages\n");
+    //mRenderWindow->flushMessages();
+    //cleanupRenderThreads();
+    //waitForProcessCleanup();
 #ifdef SNAPSHOT_PROFILE
     printf("RenderThread cleanup time: %lld ms\n",
             (long long)(android::base::System::get()->getUnixTimeUs()
@@ -380,6 +382,34 @@ void RendererImpl::setScreenMask(int width, int height, const unsigned char* rgb
 
 void RendererImpl::cleanupProcGLObjects(uint64_t puid) {
     mCleanupThread->cleanup(puid);
+}
+
+void RendererImpl::snapshotOperationCallback(
+            android::snapshot::Snapshotter::Operation op,
+            android::snapshot::Snapshotter::Stage stage) {
+    using namespace android::snapshot;
+    switch (op) {
+        case Snapshotter::Operation::Load:
+            if (stage == Snapshotter::Stage::Start) {
+                mRenderWindow->flushMessages();
+                cleanupRenderThreads();
+                waitForProcessCleanup(); 
+            }
+            break;
+        case Snapshotter::Operation::Save:
+            if (stage == Snapshotter::Stage::Start) {
+                printf("touching all textures\n");
+                // TODO yahan@: make a light weight touch which only load the data
+                // into RAM and generate a texture name without loading stuff into
+                // GPU
+                FrameBuffer::getFB()->touchAllTextures();
+            }
+            break;
+    }
+}
+
+void RendererImpl::setEnableBackgroundLoad(bool enable) {
+    FrameBuffer::getFB()->setEnableBackgroundLoad(enable);
 }
 
 }  // namespace emugl
