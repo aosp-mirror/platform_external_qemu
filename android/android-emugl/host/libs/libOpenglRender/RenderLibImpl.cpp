@@ -77,6 +77,10 @@ void RenderLibImpl::setDmaOps(emugl_dma_ops ops) {
     set_emugl_dma_unlock(ops.unlock);
 }
 
+void RenderLibImpl::setIsLoadingSnapshot(emugl_is_loading_t isLoading) {
+    emugl::setIsLoadingSnapshot(isLoading);
+}
+
 void* RenderLibImpl::getGL(void) {
     return &s_gles2;
 }
