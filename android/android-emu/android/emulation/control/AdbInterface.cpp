@@ -309,32 +309,11 @@ void AdbCommand::taskDoneFunction(const OptionalAdbCommandResult& result) {
     if (!mCancelled) {
         mResultCallback(result);
     }
-    AutoLock lock(mLock);
     mFinished = true;
-    mCv.broadcastAndUnlock(&lock);
     // This may invalidate this object and clean it up.
     // DO NOT reference any internal state from this class after this
     // point.
     mTask.reset();
-}
-
-bool AdbCommand::wait(System::Duration timeoutMs) {
-    if (!mTask) {
-        return true;
-    }
-
-    AutoLock lock(mLock);
-    if (timeoutMs < 0) {
-        mCv.wait(&lock, [this]() { return mFinished; });
-        return true;
-    }
-
-    const auto deadlineUs = System::get()->getUnixTimeUs() + timeoutMs * 1000;
-    while (!mFinished && System::get()->getUnixTimeUs() < deadlineUs) {
-        mCv.timedWait(&mLock, deadlineUs);
-    }
-
-    return mFinished;
 }
 
 void AdbCommand::taskFunction(OptionalAdbCommandResult* result) {
@@ -356,6 +335,9 @@ void AdbCommand::taskFunction(OptionalAdbCommandResult* result) {
     if (command_ran) {
         result->emplace(exit_code,
                         mWantOutput ? mOutputFilePath : std::string());
+    } else {
+        // Just in case (e.g. if the command got terminated on timeout).
+        path_delete_file(mOutputFilePath.c_str());
     }
 }
 
@@ -371,21 +353,6 @@ AdbCommandResult::~AdbCommandResult() {
     if (!output_name.empty()) {
         path_delete_file(output_name.c_str());
     }
-}
-
-AdbCommandResult::AdbCommandResult(AdbCommandResult&& other)
-    : exit_code(other.exit_code),
-      output(std::move(other.output)),
-      output_name(std::move(other.output_name)) {
-    other.output_name.clear();  // make sure |other| won't delete it
-}
-
-AdbCommandResult& AdbCommandResult::operator=(AdbCommandResult&& other) {
-    exit_code = other.exit_code;
-    output = std::move(other.output);
-    output_name = std::move(other.output_name);
-    other.output_name.clear();
-    return *this;
 }
 
 }  // namespace emulation
