@@ -281,7 +281,11 @@
         <file alias="error_2x">images/all/error_2x.png</file>
         <file alias="info">images/all/ic_info_outline_0BA_24dp.svg</file>
         <file alias="info_2x">images/all/ic_info_outline_0BA_48dp.svg</file>
-        <file alias="warning">images/all/warning.png</file>
-        <file alias="warning_2x">images/all/warning_2x.png</file>
+        <file alias="warning">images/all/ic_warning_amber_24dp.svg</file>
+        <file alias="warning_2x">images/all/ic_warning_amber_48dp.svg</file>
+        <file alias="dangerous">images/all/ic_dangerous_red_24dp.svg</file>
+        <file alias="dangerous_2x">images/all/ic_dangerous_red_48dp.svg</file>
+        <file alias="check_circle">images/all/ic_check_circle_0BA_24dp.svg</file>
+        <file alias="check_circle_2x">images/all/ic_check_circle_0BA_48dp.svg</file>
     </qresource>
 </RCC>

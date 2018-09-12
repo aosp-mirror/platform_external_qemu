@@ -174,7 +174,7 @@ void Quickboot::onLivenessTimer() {
                                  "loading remaining RAM pages",
                                  int(nowMs - mLoadTimeMs) / 1000)
                             .c_str(),
-                    WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
+                    WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
             Snapshotter::get().touchAllPages();
             mAdbConnectionRetries++;
         } else if (android_cmdLineOptions->read_only ||
@@ -184,7 +184,7 @@ void Quickboot::onLivenessTimer() {
                                  "retrying ADB connection",
                                  int(nowMs - mLoadTimeMs) / 1000)
                             .c_str(),
-                    WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
+                    WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
             android_adb_reset_connection();
             mLoadTimeMs = nowMs;
             mAdbConnectionRetries++;
