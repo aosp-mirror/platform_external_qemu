@@ -1,0 +1,9 @@
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Verified+1: Erwin Jansen <jansene@google.com>
+Code-Review+1: Erwin Jansen <jansene@google.com>
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Submitted-by: Erwin Jansen <jansene@google.com>
+Submitted-at: Wed, 12 Sep 2018 21:02:32 +0000
+Reviewed-on: https://android-review.googlesource.com/755109
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
