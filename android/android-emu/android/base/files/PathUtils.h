@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "android/base/Optional.h"
 #include "android/base/StringView.h"
 
 #include <string>
@@ -253,6 +254,8 @@ public:
     static std::string relativeTo(StringView base, StringView path) {
         return relativeTo(base, path, HOST_TYPE);
     }
+
+    static Optional<std::string> pathWithoutDirs(StringView name);
 };
 
 // Useful shortcuts to avoid too much typing.

@@ -199,6 +199,21 @@ extern APosixStatus   path_delete_file( const char*  path );
  */
 extern APosixStatus   path_delete_dir( const char*  path );
 
+/* delete a given directory's contents recursively.
+ * Same thing with Win32 - doesn't work if any file inside is open.
+ */
+extern APosixStatus   path_delete_dir_contents( const char*  path );
+
+/* Returns whether or not the directory has files in it.
+ * For regular files, returns false. */
+extern bool           path_dir_has_files( const char*  path );
+
+/* Mark a file to be deleted on reboot. */
+extern APosixStatus   path_delete_file_on_reboot( const char*  path );
+
+/* Mark files in a directory to be deleted on reboot. */
+extern APosixStatus   path_delete_dir_contents_on_reboot( const char*  path );
+
 /* try to load a given file into a heap-allocated block.
  * if 'pSize' is not NULL, this will set the file's size in '*pSize'
  * note that this actually zero-terminates the file for convenience.
