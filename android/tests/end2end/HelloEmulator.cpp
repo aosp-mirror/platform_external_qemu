@@ -155,7 +155,9 @@ protected:
 
     bool doSdkCheck() {
         auto result =
-            launchEmulatorWithResult({"-launcher-test", "sdkCheck"}, kLaunchTimeoutMs);
+            launchEmulatorWithResult(
+                {"-launcher-test", "sdkCheck"},
+                kLaunchTimeoutMs);
         return didSdkCheckSucceed(result);
     }
 
