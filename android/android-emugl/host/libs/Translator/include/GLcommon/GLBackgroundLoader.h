@@ -33,6 +33,7 @@ public:
         m_eglIface(eglIface),
         m_glesIface(glesIface),
         m_textureMap(textureMap) { }
+    ~GLBackgroundLoader() { m_textureMap.clear(); }
 
     intptr_t main();
 
