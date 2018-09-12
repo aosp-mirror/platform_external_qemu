@@ -464,6 +464,8 @@ int main(int argc, char** argv)
     }
 
     if (doDeleteTempDir) {
+        printf("Checking for other emulator instances...");
+
         printf("Deleting emulator temp directory...");
         std::string tempDir = System::get()->getTempDir();
         path_delete_dir(tempDir.c_str());
