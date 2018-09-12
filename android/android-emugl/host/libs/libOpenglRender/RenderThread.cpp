@@ -289,6 +289,12 @@ intptr_t RenderThread::main() {
                     break;
                 }
             } else if (needRestoreFromSnapshot) {
+                if (RendererImpl::isLoading()) {
+                    // We are doing a second load before restoring the previous
+                    // one. Abandon the session immediately without recovering
+                    // the contexts.
+                    return 0;
+                }
                 // We just loaded from a snapshot, need to initialize / bind
                 // the contexts.
                 needRestoreFromSnapshot = false;

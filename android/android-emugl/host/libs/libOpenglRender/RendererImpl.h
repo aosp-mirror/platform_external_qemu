@@ -81,10 +81,18 @@ public:
     void fillGLESUsages(android_studio::EmulatorGLESUsages*) final;
     void getScreenshot(unsigned int nChannels, unsigned int* width,
             unsigned int* height, std::vector<unsigned char>& pixels) final;
+    void snapshotOperationCallback(
+            android::snapshot::Snapshotter::Operation op,
+            android::snapshot::Snapshotter::Stage stage) final;
+
+    static bool isLoading() { return sLoading; }
+
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RendererImpl);
 
 private:
+    static bool sLoading = false;
+
     // Stop all render threads and wait until they exit.
     void cleanupRenderThreads();
     // Wait for process cleanup to complete.
