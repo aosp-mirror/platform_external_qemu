@@ -171,10 +171,10 @@ darwin_min_version () {
 OSX_DEPLOYMENT_TARGET=10.8
 
 # List all executables to check later.
-EXECUTABLES="emulator emulator64-arm emulator64-x86"
+EXECUTABLES="emulator emulator64-arm emulator64-x86 emulator64-mips"
 if [ "$HOST_OS" = "Linux" ]; then
   if [ -z "$MINGW" ]; then
-    EXECUTABLES="$EXECUTABLES emulator-arm emulator-x86"
+    EXECUTABLES="$EXECUTABLES emulator-arm emulator-x86 emulator-mips"
   fi
 fi
 

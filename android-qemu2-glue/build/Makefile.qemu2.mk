@@ -220,14 +220,11 @@ ifeq (,$(CONFIG_MIN_BUILD))
     QEMU2_TARGET := arm64
     include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
 
-    ifeq (true,$(BUILD_ENABLE_MIPS))
-      QEMU2_TARGET := mips
-      include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
+    QEMU2_TARGET := mips
+    include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
 
-      QEMU2_TARGET := mips64
-      include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
-    endif
-
+    QEMU2_TARGET := mips64
+    include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
 endif   # !CONFIG_MIN_BUILD
 
 # TODO(jansene): This gets included twice in the windows build (32 bit/64 bit)
