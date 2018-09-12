@@ -305,6 +305,19 @@ $$(_DST): $$(_SRC)
 	$(hide) cp -f $$(PRIVATE_SRC) $$(PRIVATE_DST)
 endef
 
+# Installs a dir to a new destination
+define install-dir
+_SRC := $(1)
+_DST := $(2)
+LOCAL_ADDITIONAL_DEPENDENCIES += $$(_DST)
+$$(_DST): PRIVATE_DST := $$(_DST)
+$$(_DST): PRIVATE_SRC := $$(_SRC)
+$$(_DST): $$(_SRC)
+	@mkdir -p $$(dir $$(PRIVATE_DST))
+	@echo "InstallDir: $$(PRIVATE_DST)"
+	$(hide) cp -r $$(PRIVATE_SRC) $$(PRIVATE_DST)
+endef
+
 # Installs a binary to a new destination
 # If required, will strip the binary
 define install-binary
