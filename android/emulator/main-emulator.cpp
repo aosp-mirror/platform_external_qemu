@@ -37,6 +37,7 @@
 #include "android/base/ProcessControl.h"
 #include "android/base/system/System.h"
 #include "android/camera/camera-list.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/main-emugl.h"
 #include "android/main-help.h"
 #include "android/opengl/emugl_config.h"
@@ -62,6 +63,7 @@ using android::base::RunOptions;
 using android::base::ScopedCPtr;
 using android::base::StringView;
 using android::base::System;
+using android::ConfigDirs;
 
 #define DEBUG 1
 
@@ -229,6 +231,8 @@ static bool checkOsVersion() {
 #endif  // _WIN32
 }
 
+static void doLauncherTest(const char* launcherTestArg);
+
 /* Main routine */
 int main(int argc, char** argv)
 {
@@ -246,6 +250,10 @@ int main(int argc, char** argv)
     bool cleanUpAvdContent = false;
     bool isRestart = false;
     int restartPid = -1;
+
+    /* Test-only actions */
+    bool isLauncherTest = false;
+    const char* launcherTestArg = nullptr;
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
@@ -370,6 +378,20 @@ int main(int argc, char** argv)
             continue;
         }
 
+        if (!strcmp(opt, "-launcher-test")) {
+            isLauncherTest = true;
+            launcherTestArg = nullptr;
+            if (nn + 1 < argc) {
+                launcherTestArg = argv[nn + 1];
+            }
+            nn++;
+            continue;
+        }
+        if (!strcmp(opt, "--restart")) {
+            isRestart = true;
+            continue;
+        }
+
         if (!strcmp(opt, "-webcam-list")) {
             doListWebcams = true;
             continue;
@@ -418,6 +440,16 @@ int main(int argc, char** argv)
             printf("%s\n", name);
         }
         avdScanner_free(scanner);
+        return 0;
+    }
+
+    if (isLauncherTest) {
+        if (!launcherTestArg) {
+            fprintf(stderr, "ERROR: Launcher test not specified\n");
+            return 1;
+        }
+        doLauncherTest(launcherTestArg);
+        fprintf(stderr, "Launcher test complete.\n");
         return 0;
     }
 
@@ -1063,4 +1095,36 @@ static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
 
     AFREE(kernel_file);
     return result;
+}
+
+static constexpr char existsStr[] = "(exists)";
+static constexpr char notexistStr[] = "(does not exist)";
+
+static const char* getExistsStr(bool exists) {
+    return exists ? existsStr : notexistStr;
+}
+
+static void doLauncherTest(const char* launcherTestArg) {
+    if (!launcherTestArg || !launcherTestArg[0]) {
+        printf("Error: No launcher test specified.\n");
+    }
+
+    if (!strcmp(launcherTestArg, "sdkCheck")) {
+        auto sdkRoot = ConfigDirs::getSdkRootDirectory();
+        auto avdRoot = ConfigDirs::getAvdRootDirectory();
+
+        bool sdkRootExists = path_exists(sdkRoot.c_str());
+        bool avdRootExists = path_exists(avdRoot.c_str());
+
+        printf("Performing SDK check.\n");
+        printf("Android SDK location: %s. %s\n",
+               sdkRoot.c_str(), getExistsStr(sdkRootExists));
+        printf("Android AVD root location: %s. %s\n",
+               avdRoot.c_str(), getExistsStr(avdRootExists));
+        return;
+    }
+
+    // TODO: Other launcher tests
+
+    printf("Error: Unknown launcher test %s\n", launcherTestArg);
 }
