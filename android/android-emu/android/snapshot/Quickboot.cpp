@@ -174,7 +174,7 @@ void Quickboot::onLivenessTimer() {
                                  "loading remaining RAM pages",
                                  int(nowMs - mLoadTimeMs) / 1000)
                             .c_str(),
-                    WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
+                    WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
             Snapshotter::get().touchAllPages();
             mAdbConnectionRetries++;
         } else if (android_cmdLineOptions->read_only ||
@@ -184,7 +184,7 @@ void Quickboot::onLivenessTimer() {
                                  "retrying ADB connection",
                                  int(nowMs - mLoadTimeMs) / 1000)
                             .c_str(),
-                    WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
+                    WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
             android_adb_reset_connection();
             mLoadTimeMs = nowMs;
             mAdbConnectionRetries++;
@@ -250,7 +250,7 @@ bool Quickboot::load(StringView name) {
             // Only display a message if this is a one-time-like thing (command
             // line), and not an AVD option.
             mWindow.showMessage("Cold boot: requested by the user",
-                                WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+                                WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
         }
         reportFailedLoad(
                 android_hw->fastboot_forceColdBoot
@@ -263,7 +263,7 @@ bool Quickboot::load(StringView name) {
         mWindow.showMessage(
                 StringFormat(
                     "Cold boot: in Android build system").c_str(),
-                WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+                WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
         reportFailedLoad(pb::EmulatorQuickbootLoad::
                                  EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
                          FailureReason::Empty);
@@ -274,7 +274,7 @@ bool Quickboot::load(StringView name) {
                              emuglConfig_renderer_to_string(
                                      emuglConfig_get_current_renderer()))
                         .c_str(),
-                WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+                WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
         reportFailedLoad(pb::EmulatorQuickbootLoad::
                                  EMULATOR_QUICKBOOT_LOAD_COLD_UNSUPPORTED,
                          FailureReason::Empty);
@@ -350,7 +350,7 @@ void Quickboot::decideFailureReport(StringView name,
         // There's no quickboot snapshot and the user is configured
         // for NO save on exit. Say that is the reason.
         mWindow.showMessage("Cold boot based on user configuration",
-                WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+                WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
         reportFailedLoad(pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
                          *failureReason);
     } else {
@@ -360,7 +360,7 @@ void Quickboot::decideFailureReport(StringView name,
                                  failureReasonToString(*failureReason,
                                                        SNAPSHOT_LOAD))
                             .c_str(),
-                    WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+                    WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
         }
         reportFailedLoad(
                 failureReason < FailureReason::UnrecoverableErrorLimit

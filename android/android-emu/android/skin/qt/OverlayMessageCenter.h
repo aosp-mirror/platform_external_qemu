@@ -27,7 +27,7 @@ namespace Ui {
 
 class OverlayMessageCenter;
 
-enum class OverlayMessageIcon { None, Info, Warning, Error };
+enum class OverlayMessageType { None, Info, Warning, Error, Ok };
 
 // A widget to hold a single overlay message.
 class OverlayChildWidget : public QFrame {
@@ -36,7 +36,8 @@ public:
     using DismissFunc = std::function<void()>;
     OverlayChildWidget(OverlayMessageCenter* parent,
                        QString text,
-                       QPixmap icon);
+                       QPixmap icon,
+                       OverlayMessageType messageType);
 
     QLabel* icon() const { return mIcon; }
     QLabel* label() const { return mLabel; }
@@ -70,13 +71,13 @@ public:
 
     void adjustSize();
 
-    using Icon = OverlayMessageIcon;
+    using MessageType = OverlayMessageType;
 
     static constexpr int kDefaultTimeoutMs = 0;
     static constexpr int kInfiniteTimeout = -1;
 
     OverlayChildWidget* addMessage(QString message,
-                                   OverlayMessageIcon icon,
+                                   OverlayMessageType messageType,
                                    int timeoutMs = kDefaultTimeoutMs);
 
 signals:
@@ -88,7 +89,7 @@ private:
     void reattachToParent();
     void dismissMessage(OverlayChildWidget* messageWidget);
     void dismissMessageImmediately(OverlayChildWidget* messageWidget);
-    QPixmap icon(Icon type);
+    QPixmap iconFromMessageType(MessageType type);
 
     SizeTweaker mSizeTweaker;
 };

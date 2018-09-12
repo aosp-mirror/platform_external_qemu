@@ -33,17 +33,34 @@ using android::base::Optional;
 
 namespace Ui {
 
+static QString sTextColorFromMessageType(OverlayMessageType messageType) {
+    switch (messageType) {
+        case OverlayMessageType::None:
+        case OverlayMessageType::Info:
+            return QString("rgb(255, 255, 255)");
+        case OverlayMessageType::Warning:
+            return QString("rgb(255, 255, 204)");
+        case OverlayMessageType::Error:
+            return QString("rgb(255, 204, 204)");
+        default:
+        case OverlayMessageType::Ok:
+            return QString("rgb(204, 255, 204)");
+    }
+}
+
 OverlayChildWidget::OverlayChildWidget(OverlayMessageCenter* parent,
                                        QString text,
-                                       QPixmap icon)
+                                       QPixmap icon,
+                                       OverlayMessageType messageType)
     : QFrame(parent), mText(text) {
     setObjectName("OverlayChildWidget");
-    setStyleSheet(QString("* { font-size: %1; } #OverlayChildWidget { "
-                          "border-radius: %2px; border-style: outward; "
+    setStyleSheet(QString("* { font-size: %1; color: %2; } #OverlayChildWidget { "
+                          "border-radius: %3px; border-style: outward; "
                           "border-color: rgba(255, 255, 255, 10%); "
-                          "border-top-width: %3; border-left-width: %3; "
-                          "border-bottom-width: %4; border-right-width: %4; }")
+                          "border-top-width: %4; border-left-width: %5; "
+                          "border-bottom-width: %6; border-right-width: %7; }")
                           .arg(Ui::stylesheetFontSize(Ui::FontSize::Larger))
+                          .arg(sTextColorFromMessageType(messageType))
                           .arg(qCeil(SizeTweaker::scaleFactor(this).x()))
                           .arg(qCeil(1 * SizeTweaker::scaleFactor(this).x()))
                           .arg(qCeil(3 * SizeTweaker::scaleFactor(this).x())));
@@ -247,19 +264,22 @@ static Optional<int> calcTimeout(int timeoutMs) {
     }
 }
 
-QPixmap OverlayMessageCenter::icon(Icon type) {
+QPixmap OverlayMessageCenter::iconFromMessageType(MessageType type) {
     const char* name = nullptr;
     switch (type) {
-        case Icon::None:
+        case MessageType::None:
             return {};
-        case Icon::Info:
+        case MessageType::Info:
             name = "info";
             break;
-        case Icon::Warning:
+        case MessageType::Warning:
             name = "warning";
             break;
-        case Icon::Error:
-            name = "error";
+        case MessageType::Error:
+            name = "dangerous";
+            break;
+        case MessageType::Ok:
+            name = "check_circle";
             break;
     }
     if (!name) {
@@ -326,7 +346,7 @@ void OverlayMessageCenter::dismissMessageImmediately(OverlayChildWidget* message
 }
 
 OverlayChildWidget* OverlayMessageCenter::addMessage(QString message,
-                                                     Icon icon,
+                                                     MessageType messageType,
                                                      int timeoutMs) {
     // Don't add too many items at once.
     const auto children =
@@ -335,7 +355,11 @@ OverlayChildWidget* OverlayMessageCenter::addMessage(QString message,
         dismissMessage(static_cast<OverlayChildWidget*>(children[i]));
     }
 
-    auto widget = new OverlayChildWidget(this, message, this->icon(icon));
+    auto widget =
+        new OverlayChildWidget(
+            this, message,
+            this->iconFromMessageType(messageType),
+            messageType);
 
     QPointer<OverlayChildWidget> widgetPtr = widget;
     widget->dismissButton()->connect(widget->dismissButton(),
