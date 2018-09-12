@@ -60,7 +60,7 @@ Q_DECLARE_METATYPE(QPainter::CompositionMode);
 Q_DECLARE_METATYPE(RunOnUiThreadFunc);
 Q_DECLARE_METATYPE(SkinGenericFunction);
 Q_DECLARE_METATYPE(SkinRotation);
-Q_DECLARE_METATYPE(Ui::OverlayMessageIcon);
+Q_DECLARE_METATYPE(Ui::OverlayMessageType);
 
 class MainLoopThread : public QThread {
     Q_OBJECT
@@ -191,9 +191,9 @@ signals:
     void updateRotation(SkinRotation rotation);
     void layoutChanged(SkinRotation rot);
 
-    void showMessage(QString text, Ui::OverlayMessageIcon icon, int timeoutMs);
+    void showMessage(QString text, Ui::OverlayMessageType icon, int timeoutMs);
     void showMessageWithDismissCallback(QString text,
-                                        Ui::OverlayMessageIcon icon,
+                                        Ui::OverlayMessageType icon,
                                         QString dismissText,
                                         RunOnUiThreadFunc func,
                                         int timeoutMs);
@@ -314,10 +314,10 @@ private slots:
     void slot_installCanceled();
     void slot_adbPushCanceled();
 
-    void slot_showMessage(QString text, Ui::OverlayMessageIcon icon,
+    void slot_showMessage(QString text, Ui::OverlayMessageType icon,
                           int timeoutMs);
     void slot_showMessageWithDismissCallback(QString text,
-                                             Ui::OverlayMessageIcon icon,
+                                             Ui::OverlayMessageType icon,
                                              QString dismissText,
                                              Ui::OverlayChildWidget::DismissFunc func,
                                              int timeoutMs);
