@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "19362d65_ef182ced",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-12T20:44:40Z",
+      "side": 1,
+      "message": "please create it back, as for some cases that might be the whole system-wide temp directory and deleting it breaks the OS\neven better, we should only clear the directory without deleting it",
+      "range": {
+        "startLine": 482,
+        "startChar": 0,
+        "endLine": 482,
+        "endChar": 41
+      },
+      "revId": "c7ad8c4b70db6e7ae0f9870c37ab9a4bc71173b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
