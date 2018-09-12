@@ -440,6 +440,18 @@ copy_directory_files ()
         panic "Cannot copy to directory: $DSTDIR"
 }
 
+# Creates the given directory if it doesn't exist yet
+# $1: Directory to create
+make_if_not_exists()
+{
+    local DESTDIR="$1"
+    if [ ! -d $DESTDIR ]; then
+       run mkdir -p ${DESTDIR} || panic "Unable to create ${DESTDIR}"
+    else
+       log2 "Directory: ${DESTDIR} already exists"
+    fi
+}
+
 # Compute the SHA-1 sum of a given file. Implementation depends on the
 # current host machine.
 # $1: File path
