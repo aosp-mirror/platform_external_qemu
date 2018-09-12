@@ -22,6 +22,30 @@
       "revId": "88e9ee1366da66bc041977d12102d728b95a2d82",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0819a07c_eb0e8e82",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-12T18:06:12Z",
+      "side": 0,
+      "message": "I don\u0027t think so. This is the only place where we modify |mFinished|, and |mTask| also gets changed in start() where this thread doesn\u0027t exist and here, where start() can\u0027t get called.",
+      "parentUuid": "f55888fe_86b06e0a",
+      "range": {
+        "startLine": 312,
+        "startChar": 0,
+        "endLine": 312,
+        "endChar": 25
+      },
+      "revId": "88e9ee1366da66bc041977d12102d728b95a2d82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
