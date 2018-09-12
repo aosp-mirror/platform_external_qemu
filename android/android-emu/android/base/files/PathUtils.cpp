@@ -344,6 +344,17 @@ std::string PathUtils::relativeTo(StringView base, StringView path, HostType hos
     return result;
 }
 
+// static
+Optional<std::string> PathUtils::pathWithoutDirs(StringView name) {
+    if (System::get()->pathIsDir(name)) return kNullopt;
+
+    auto components = PathUtils::decompose(name);
+
+    if (components.empty()) return kNullopt;
+
+    return components.back().str();
+}
+
 std::string pj(StringView path1, StringView path2) {
     return PathUtils::join(path1, path2);
 }
