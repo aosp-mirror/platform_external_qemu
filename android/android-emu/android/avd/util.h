@@ -171,4 +171,6 @@ const char* emulator_getBackendSuffix(const char* targetArch);
  */
 #define  ANDROID_AVD_DIR    "avd"
 
+#define ANDROID_AVD_TMP_ADB_COMMAND_DIR "tmpAdbCmds"
+
 ANDROID_END_HEADER
