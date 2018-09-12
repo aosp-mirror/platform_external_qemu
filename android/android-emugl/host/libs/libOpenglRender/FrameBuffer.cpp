@@ -1880,6 +1880,12 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
             pixels.data());
 }
 
+void FrameBuffer::touchAllTextures() {
+    AutoLock mutex(m_lock);
+    ScopedBind scopedBind(m_colorBufferHelper);
+    s_egl.eglTouchAllTextures(m_eglDisplay);
+}
+
 void FrameBuffer::onSave(Stream* stream,
                          const android::snapshot::ITextureSaverPtr& textureSaver) {
     // Things we do not need to snapshot:

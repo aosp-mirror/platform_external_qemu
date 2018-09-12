@@ -16,6 +16,8 @@ EGLBoolean eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
 
 EGLBoolean eglPostSaveContext(EGLDisplay display, EGLConfig config, EGLStream stream);
 
+EGLBoolean eglTouchAllTextures(EGLDisplay display);
+
 void eglUseOsEglApi(EGLBoolean enable);
 void eglSetMaxGLESVersion(EGLint glesVersion);
 

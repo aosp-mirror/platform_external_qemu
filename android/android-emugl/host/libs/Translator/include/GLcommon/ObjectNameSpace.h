@@ -152,6 +152,7 @@ public:
         m_eglIface = eglIface;
         m_glesIface = glesIface;
     }
+    void touchAllTextures(SaveableTexture::restorer_t restorer);
 
 private:
 

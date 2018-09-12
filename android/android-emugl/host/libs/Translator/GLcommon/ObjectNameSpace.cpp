@@ -372,8 +372,9 @@ void GlobalNameSpace::onSave(android::base::Stream* stream,
 void GlobalNameSpace::onLoad(android::base::Stream* stream,
                              const ITextureLoaderWPtr& textureLoaderWPtr,
                              SaveableTexture::creator_t creator) {
+    printf("GlobalNameSpace deleting texture map\n");
+    //clearTextureMap();
     const ITextureLoaderPtr textureLoader = textureLoaderWPtr.lock();
-    assert(m_textureMap.size() == 0);
     if (!textureLoader->start()) {
         fprintf(stderr,
                 "Error: texture file unsupported version or corrupted.\n");
@@ -394,7 +395,13 @@ void GlobalNameSpace::onLoad(android::base::Stream* stream,
                         this, [globalName, textureLoaderWPtr](
                                       SaveableTexture* saveableTexture) {
                             auto textureLoader = textureLoaderWPtr.lock();
-                            if (!textureLoader) return;
+                            if (!textureLoader) {
+                                fprintf(stderr,
+                                        "Error: texture file read failed.\n");
+                                emugl_crash_reporter(
+                                        "Error: texture file read failed.\n");
+                                return;
+                            }
                             textureLoader->loadTexture(
                                     globalName,
                                     [saveableTexture](
@@ -414,6 +421,13 @@ void GlobalNameSpace::onLoad(android::base::Stream* stream,
 
 void GlobalNameSpace::clearTextureMap() {
     decltype(m_textureMap)().swap(m_textureMap);
+}
+
+void GlobalNameSpace::touchAllTextures(SaveableTexture::restorer_t restorer) {
+    for (auto& texture : m_textureMap) {
+        restorer(texture.second.get());
+    }
+    clearTextureMap();
 }
 
 void GlobalNameSpace::postLoad(android::base::Stream* stream) {

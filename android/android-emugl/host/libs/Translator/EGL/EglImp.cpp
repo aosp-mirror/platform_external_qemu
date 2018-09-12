@@ -152,6 +152,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display,
                                                EGLStream stream,
                                                const void* textureLoader);
 EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
+EGLAPI EGLBoolean EGLAPIENTRY eglTouchAllTextures(EGLDisplay display);
 EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable);
 EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version);
 EGLAPI void EGLAPIENTRY eglFillUsages(void* usages);
@@ -1436,12 +1437,15 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image)
 {
     VALIDATE_DISPLAY(display);
-    unsigned int imagehndl = SafeUIntFromPointer(image);
-    ImagePtr img = getEGLImage(imagehndl);
-    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
-    if(img && img->sync) {
-        iface->deleteSync((GLsync)img->sync);
-        img->sync = nullptr;
+    // Avoid accidentally restoring the image
+    if (dpy->isImageRestored(image)) {
+        unsigned int imagehndl = SafeUIntFromPointer(image);
+        ImagePtr img = getEGLImage(imagehndl);
+        const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+        if(img && img->sync) {
+            iface->deleteSync((GLsync)img->sync);
+            img->sync = nullptr;
+        }
     }
     return dpy->destroyImageKHR(image) ? EGL_TRUE:EGL_FALSE;
 }
@@ -1636,6 +1640,13 @@ EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream
     VALIDATE_DISPLAY(display);
     android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
     dpy->postLoadAllImages(stm);
+    return true;
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglTouchAllTextures(EGLDisplay display) {
+    VALIDATE_DISPLAY(display);
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    dpy->touchAllTextures(iface->restoreTexture);
     return true;
 }
 

@@ -14,6 +14,7 @@
   X(EGLBoolean, eglPreSaveContext, (EGLDisplay display, EGLContext contex, EGLStream stream)) \
   X(EGLBoolean, eglPostLoadAllImages, (EGLDisplay display, EGLStream stream)) \
   X(EGLBoolean, eglPostSaveContext, (EGLDisplay display, EGLConfig config, EGLStream stream)) \
+  X(EGLBoolean, eglTouchAllTextures, (EGLDisplay display)) \
   X(void, eglUseOsEglApi, (EGLBoolean enable)) \
   X(void, eglSetMaxGLESVersion, (EGLint glesVersion)) \
   X(void, eglFillUsages, (void* usages)) \
