@@ -204,6 +204,20 @@ static void delete_snapshots_at(const char* content) {
     }
 }
 
+static void delete_adbCmds_at(const char* content) {
+    if (char* const cmdFolder =
+            path_join(
+                content,
+                ANDROID_AVD_TMP_ADB_COMMAND_DIR)) {
+        if (!path_delete_dir(cmdFolder)) {
+            D("Removed ADB command directory '%s'", cmdFolder);
+        } else {
+            D("Failed to remove ADB command directory '%s'", cmdFolder);
+        }
+        free(cmdFolder);
+    }
+}
+
 static bool checkOsVersion() {
 #ifndef _WIN32
     return true;
@@ -572,6 +586,7 @@ int main(int argc, char** argv)
             if (avd_folder) {
                 clean_up_avd_contents_except_config_ini(avd_folder);
                 delete_snapshots_at(avd_folder);
+                delete_adbCmds_at(avd_folder);
                 free(avd_folder);
             }
         } else if (androidOut) {
