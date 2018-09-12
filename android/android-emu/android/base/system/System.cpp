@@ -15,6 +15,7 @@
 #include "android/base/system/System.h"
 
 #include "android/base/EintrWrapper.h"
+#include "android/base/Optional.h"
 #include "android/base/StringFormat.h"
 #include "android/base/StringParse.h"
 #include "android/base/files/PathUtils.h"
@@ -44,6 +45,7 @@
 
 #ifdef __APPLE__
 #import <Carbon/Carbon.h>
+#include <libproc.h>
 #include <mach/clock.h>
 #include <mach/mach.h>
 #include <spawn.h>
@@ -2333,6 +2335,161 @@ std::string toString(OsType osType) {
     default:
         return "Unknown";
     }
+}
+
+#ifdef __APPLE__
+// From http://mirror.informatimago.com/next/developer.apple.com/qa/qa2001/qa1123.html
+typedef struct kinfo_proc kinfo_proc;
+
+static int GetBSDProcessList(kinfo_proc **procList, size_t *procCount)
+    // Returns a list of all BSD processes on the system.  This routine
+    // allocates the list and puts it in *procList and a count of the
+    // number of entries in *procCount.  You are responsible for freeing
+    // this list (use "free" from System framework).
+    // On success, the function returns 0.
+    // On error, the function returns a BSD errno value.
+{
+    int                 err;
+    kinfo_proc *        result;
+    bool                done;
+    static const int    name[] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL, 0 };
+    // Declaring name as const requires us to cast it when passing it to
+    // sysctl because the prototype doesn't include the const modifier.
+    size_t              length;
+
+    assert( procList != NULL);
+    assert(*procList == NULL);
+    assert(procCount != NULL);
+
+    *procCount = 0;
+
+    // We start by calling sysctl with result == NULL and length == 0.
+    // That will succeed, and set length to the appropriate length.
+    // We then allocate a buffer of that size and call sysctl again
+    // with that buffer.  If that succeeds, we're done.  If that fails
+    // with ENOMEM, we have to throw away our buffer and loop.  Note
+    // that the loop causes use to call sysctl with NULL again; this
+    // is necessary because the ENOMEM failure case sets length to
+    // the amount of data returned, not the amount of data that
+    // could have been returned.
+
+    result = NULL;
+    done = false;
+    do {
+        assert(result == NULL);
+
+        // Call sysctl with a NULL buffer.
+
+        length = 0;
+        err = sysctl( (int *) name, (sizeof(name) / sizeof(*name)) - 1,
+                      NULL, &length,
+                      NULL, 0);
+        if (err == -1) {
+            err = errno;
+        }
+
+        // Allocate an appropriately sized buffer based on the results
+        // from the previous call.
+
+        if (err == 0) {
+            result = (kinfo_proc*)malloc(length);
+            if (result == NULL) {
+                err = ENOMEM;
+            }
+        }
+
+        // Call sysctl again with the new buffer.  If we get an ENOMEM
+        // error, toss away our buffer and start again.
+
+        if (err == 0) {
+            err = sysctl( (int *) name, (sizeof(name) / sizeof(*name)) - 1,
+                          result, &length,
+                          NULL, 0);
+            if (err == -1) {
+                err = errno;
+            }
+            if (err == 0) {
+                done = true;
+            } else if (err == ENOMEM) {
+                assert(result != NULL);
+                free(result);
+                result = NULL;
+                err = 0;
+            }
+        }
+    } while (err == 0 && ! done);
+
+    // Clean up and establish post conditions.
+
+    if (err != 0 && result != NULL) {
+        free(result);
+        result = NULL;
+    }
+    *procList = result;
+    if (err == 0) {
+        *procCount = length / sizeof(kinfo_proc);
+    }
+
+    assert( (err == 0) == (*procList != NULL) );
+
+    return err;
+}
+
+// From https://astojanov.wordpress.com/2011/11/16/mac-os-x-resolve-absolute-path-using-process-pid/
+Optional<std::string> getPathOfProcessByPid(pid_t pid) {
+    int ret;
+    std::string result(PROC_PIDPATHINFO_MAXSIZE + 1, 0);
+    ret = proc_pidpath(pid, (void*)result.data(), result.size());
+
+    if ( ret <= 0 ) {
+        return kNullopt;
+    } else {
+        return result;
+    }
+}
+
+#endif
+
+// static
+std::vector<System::Pid> queryRunningProcessPids(StringView name) {
+// From https://stackoverflow.com/questions/20874381/get-a-process-id-in-c-by-name
+#ifdef _WIN32
+    HANDLE handle;
+    PROCESSENTRY32 pe32;
+    std::vector<System::Pid> pids;
+
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+
+    // Take a snapshot of all processes in the system.
+    handle =
+        CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+
+    if (handle == INVALID_HANDLE_VALUE) return {};
+
+    // Retrieve information about the first process and exit if unsuccessful.
+    if (!Process32First(handle, &pe32)) {
+        CloseHandle(handle);
+        return {};
+    }
+
+    do {
+        if (!strcmp(c_str(name), pe32.szExeFile)) {
+            pids.push_back((System::Pid)pe32.th32ProcessID);
+        }
+    } while (Process32Next(handle, &pe32));
+
+    CloseHandle(handle);
+
+    return pids;
+#else
+
+    // TODO: Linux, macos
+
+
+
+
+#endif
+    return {};
 }
 
 }  // namespace base
