@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "61313efa_89913248",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-09-12T19:30:42Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "4ec27034_0c3ef1f1",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 40
+      },
+      "revId": "940cf3c739c45c55da569921165eeaf41086bd2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6cc77b0c_cff6dad9",
         "filename": "android/rebuild.sh",
         "patchSetId": 1
