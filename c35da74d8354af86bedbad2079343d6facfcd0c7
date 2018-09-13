@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "026b8e7a_d96611ac",
+        "filename": "android/android-emu/android/utils/path.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 683,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-13T00:57:50Z",
+      "side": 1,
+      "message": "this is UB, you\u0027re checking the variable value when initializing it :)",
+      "range": {
+        "startLine": 682,
+        "startChar": 3,
+        "endLine": 683,
+        "endChar": 19
+      },
+      "revId": "c35da74d8354af86bedbad2079343d6facfcd0c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
