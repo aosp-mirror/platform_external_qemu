@@ -271,6 +271,29 @@
     },
     {
       "key": {
+        "uuid": "cc20071e_c00b8b71",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 2558,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-13T19:52:15Z",
+      "side": 1,
+      "message": "I think this is too aggressive, the main thing to avoid is if the tempDir is empty or doesn\u0027t contain any directory components.  We want to avoid deleting \"/\" or \"C:\\\".  Maybe make sure that we have at least one directory in addition to the root?  So C:\\ \u003d invalid, C:\\Temp \u003d valid, and similarly / \u003d invalid, /tmp \u003d valid.\n\nAlso canonicalize/normalize it so that a path can\u0027t be \"C:\\Users\\something\\Temp\\..\\..\\..\\\"",
+      "range": {
+        "startLine": 2552,
+        "startChar": 4,
+        "endLine": 2558,
+        "endChar": 6
+      },
+      "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "05e9b2d1_35501365",
         "filename": "android/android-emu/android/base/system/System.cpp",
         "patchSetId": 12
@@ -315,6 +338,29 @@
       "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f09dfd3_8d0eb9a3",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 2592,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-13T19:52:15Z",
+      "side": 1,
+      "message": "Duplicate line?",
+      "range": {
+        "startLine": 2591,
+        "startChar": 4,
+        "endLine": 2592,
+        "endChar": 0
+      },
+      "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     },
     {
       "key": {
