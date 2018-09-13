@@ -262,6 +262,9 @@ $(call end-emulator-benchmark)
 
 $(call start-emulator-library,android-emu)
 
+# Workaround for b/115634240
+LOCAL_SOURCE_DEPENDENCIES := $(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
+
 LOCAL_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
     $(LIBCURL_CFLAGS) \
@@ -677,6 +680,9 @@ endif
 $(call start-emulator-program, android_emu$(BUILD_TARGET_SUFFIX)_unittests)
 $(call gen-hw-config-defs)
 
+# Workaround for b/115634240
+LOCAL_SOURCE_DEPENDENCIES := $(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
+
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
     $(EMULATOR_COMMON_INCLUDES) \
@@ -885,6 +891,9 @@ $(call end-emulator-program)
 $(call start-emulator-program, \
     android_emu_metrics$(BUILD_TARGET_SUFFIX)_unittests)
 
+# Workaround for b/115634240
+LOCAL_SOURCE_DEPENDENCIES := $(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
+
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
     $(EMULATOR_COMMON_INCLUDES) \
@@ -966,6 +975,10 @@ LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(EMULATOR_LIBUI_INCLUDES) \
     $(FFMPEG_INCLUDES) \
+
+
+# Workaround for b/115634240
+LOCAL_SOURCE_DEPENDENCIES := $(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
 
 LOCAL_SRC_FILES += \
     $(ANDROID_SKIN_SOURCES) \
