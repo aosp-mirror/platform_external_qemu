@@ -276,10 +276,10 @@ QPixmap OverlayMessageCenter::iconFromMessageType(MessageType type) {
             name = "warning";
             break;
         case MessageType::Error:
-            name = "dangerous";
+            name = "error";
             break;
         case MessageType::Ok:
-            name = "check_circle";
+            name = "success";
             break;
     }
     if (!name) {
