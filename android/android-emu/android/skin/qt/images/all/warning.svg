@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.2 (57519) - http://www.bohemiancoding.com/sketch -->
+    <title>INFO</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="INFO" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="info">
+            <rect id="Rectangle-path" x="0" y="0" width="16" height="16"></rect>
+            <path d="M8,1 C11.8659932,1 15,4.13400675 15,8 C15,11.8659932 11.8659932,15 8,15 C4.13400675,15 1,11.8659932 1,8 C1,4.13400675 4.13400675,1 8,1 Z M9,12 L9,7 L7,7 L7,12 L9,12 Z M9,6 L9,4 L7,4 L7,6 L9,6 Z" id="Shape" fill="#F8BC1C"></path>
+        </g>
+    </g>
+</svg>
