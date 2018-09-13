@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ccb67b8c_8f88beaf",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 2467,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-13T18:26:51Z",
+      "side": 1,
+      "message": "you don\u0027t need to convert to std::strings here, just use std::search() algorithm",
+      "range": {
+        "startLine": 2458,
+        "startChar": 4,
+        "endLine": 2467,
+        "endChar": 43
+      },
+      "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "20cb55b1_747593fc",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 2547,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-13T18:26:51Z",
+      "side": 1,
+      "message": "nit: looksLikeEmulatorTempDir() ?",
+      "range": {
+        "startLine": 2547,
+        "startChar": 12,
+        "endLine": 2547,
+        "endChar": 33
+      },
+      "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "05e9b2d1_35501365",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 2566,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-13T18:26:51Z",
+      "side": 1,
+      "message": "same thing about std::search()",
+      "range": {
+        "startLine": 2563,
+        "startChar": 8,
+        "endLine": 2566,
+        "endChar": 5
+      },
+      "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "203a68ae_acdda85b",
+        "filename": "android/android-emu/android/utils/path.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 723,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-13T18:26:51Z",
+      "side": 1,
+      "message": "the implementation actually deletes an empty directory as well :)",
+      "range": {
+        "startLine": 723,
+        "startChar": 25,
+        "endLine": 723,
+        "endChar": 29
+      },
+      "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
