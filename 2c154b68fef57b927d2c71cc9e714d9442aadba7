@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a57f924_8902bacf",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2460,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-13T00:25:38Z",
+      "side": 1,
+      "message": "imho this should be a part of PathUtils",
+      "range": {
+        "startLine": 2452,
+        "startChar": 0,
+        "endLine": 2460,
+        "endChar": 35
+      },
+      "revId": "2c154b68fef57b927d2c71cc9e714d9442aadba7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b8ac0662_172bd375",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2574,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-13T00:25:38Z",
+      "side": 1,
+      "message": "same thing about not deleting the whole dir but only files in it",
+      "range": {
+        "startLine": 2574,
+        "startChar": 4,
+        "endLine": 2574,
+        "endChar": 19
+      },
+      "revId": "2c154b68fef57b927d2c71cc9e714d9442aadba7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
