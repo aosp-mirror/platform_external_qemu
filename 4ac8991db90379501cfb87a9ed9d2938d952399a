@@ -22,6 +22,30 @@
       "revId": "4ac8991db90379501cfb87a9ed9d2938d952399a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f4d16797_386cd1c5",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 2543,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-13T19:50:14Z",
+      "side": 1,
+      "message": "That\u0027s probably ok, then we probably just need to print an error message saying to delete whatever System::getTempDir() returns. (Trading for more safety there; while most users would have it in their appdata; otherwise we might delete C:\\Users\\Temp or c:\\Users\\MrTemp)",
+      "parentUuid": "b548ae45_d5dead16",
+      "range": {
+        "startLine": 2539,
+        "startChar": 0,
+        "endLine": 2543,
+        "endChar": 6
+      },
+      "revId": "4ac8991db90379501cfb87a9ed9d2938d952399a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
