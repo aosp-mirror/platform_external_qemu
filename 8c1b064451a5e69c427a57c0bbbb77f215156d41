@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7f98fa53_7cd52bdd",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-13T22:10:33Z",
+      "side": 1,
+      "message": "nit: to make it eaiser to read, organize those terms so that theres one lhs or rhs leaf per line",
+      "range": {
+        "startLine": 255,
+        "startChar": 0,
+        "endLine": 256,
+        "endChar": 83
+      },
+      "revId": "8c1b064451a5e69c427a57c0bbbb77f215156d41",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "efd2f15a_1a1c7dc6",
+        "filename": "android/android-emugl/host/include/OpenglRender/render_api_types.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-13T22:10:33Z",
+      "side": 1,
+      "message": "emugl_sync_create_timeline_t looks duplicated",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 51
+      },
+      "revId": "8c1b064451a5e69c427a57c0bbbb77f215156d41",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "18b78db9_e5c334a4",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-13T22:10:33Z",
+      "side": 1,
+      "message": "Cool find :)\n\nCould there be some other race condition here where we are below this if statement but then emugl::isLoadingSnapshot() is true?",
+      "range": {
+        "startLine": 293,
+        "startChar": 0,
+        "endLine": 297,
+        "endChar": 17
+      },
+      "revId": "8c1b064451a5e69c427a57c0bbbb77f215156d41",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0d4eeba_c5e0d03f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderWindow.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-13T22:10:33Z",
+      "side": 1,
+      "message": "nit: line this up",
+      "range": {
+        "startLine": 373,
+        "startChar": 21,
+        "endLine": 373,
+        "endChar": 30
+      },
+      "revId": "8c1b064451a5e69c427a57c0bbbb77f215156d41",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
