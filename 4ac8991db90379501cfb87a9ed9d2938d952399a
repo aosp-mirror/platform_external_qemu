@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b548ae45_d5dead16",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 2543,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-13T19:42:55Z",
+      "side": 1,
+      "message": "what I just realized is that anyone who customizes their temp directory will get \u0027false\u0027 from this function. E.g. my temp dir is always c:\\Temp on home machines and c:\\src\\temp on corp ones.",
+      "range": {
+        "startLine": 2539,
+        "startChar": 0,
+        "endLine": 2543,
+        "endChar": 6
+      },
+      "revId": "4ac8991db90379501cfb87a9ed9d2938d952399a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
