@@ -2,6 +2,74 @@
   "comments": [
     {
       "key": {
+        "uuid": "3fe07485_46b92352",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 2375,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-09-13T19:29:54Z",
+      "side": 1,
+      "message": "Okay, that\u0027s confusing. So we eventually return err !\u003d ENOMEM?",
+      "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac5a9eb7_bd6d82c3",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 2384,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-09-13T19:29:54Z",
+      "side": 1,
+      "message": "We could use one of our fancy template parameters for getting array length.",
+      "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b75f7e0_4212e7ea",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 2405,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-09-13T19:29:54Z",
+      "side": 1,
+      "message": "Same here",
+      "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f76d0bbe_f3b1540d",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 2424,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-09-13T19:29:54Z",
+      "side": 1,
+      "message": "No need to check for NULL. free(0) \u003d NOP already.",
+      "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ccb67b8c_8f88beaf",
         "filename": "android/android-emu/android/base/system/System.cpp",
         "patchSetId": 12
@@ -19,6 +87,23 @@
         "endLine": 2467,
         "endChar": 43
       },
+      "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d49200c7_bf4d3dde",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 2495,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-09-13T19:29:54Z",
+      "side": 1,
+      "message": "We could use ScopedFileHandle",
       "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -71,6 +156,23 @@
     },
     {
       "key": {
+        "uuid": "09c9732c_471b7ed8",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 2613,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-09-13T19:29:54Z",
+      "side": 1,
+      "message": "NIT: It\u0027s not easy to see which if / else this closes",
+      "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "203a68ae_acdda85b",
         "filename": "android/android-emu/android/utils/path.cpp",
         "patchSetId": 12
@@ -88,6 +190,23 @@
         "endLine": 723,
         "endChar": 29
       },
+      "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d1734a95_bc0ea7d6",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-09-13T19:29:54Z",
+      "side": 1,
+      "message": "Do we want to document this in the help?",
       "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
