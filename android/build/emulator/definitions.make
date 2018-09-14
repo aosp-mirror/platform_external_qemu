@@ -59,6 +59,9 @@ local-build-var = $(if $(strip $(LOCAL_HOST_BUILD)),$(BUILD_HOST_$1),$(BUILD_TAR
 # BUILD_HOST_XXX depending on the definition of LOCAL_HOST_BUILD.
 local-build-define = $(if $(strip $(LOCAL_$1)),,$(eval LOCAL_$1 := $$(call local-build-var,$1)))
 
+# Expands every path to an absolute path
+to-absolute-path = $(foreach dir,$(1), $(realpath $(dir)))
+
 # Return the directory containing the intermediate files for the current
 # module. LOCAL_MODULE must be defined before calling this.
 local-intermediates-dir = $(call intermediates-dir-for,$(call local-build-var,BITS),$(LOCAL_MODULE))
@@ -361,7 +364,7 @@ $$(_DST): PRIVATE_DST := $$(_DST)
 $$(_DST): PRIVATE_CMAKE_DST := $$(dir $$(_DST))
 $$(_DST): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS)
 $$(_DST): PRIVATE_CXXFLAGS := $$(LOCAL_CXXFLAGS)
-$$(_DST): PRIVATE_C_INCLUDES := $(LOCAL_C_INCLUDES)
+$$(_DST): PRIVATE_C_INCLUDES := $$(call to-absolute-path,$$(LOCAL_C_INCLUDES))
 $$(_DST): PRIVATE_SRC := $$(dir $$(_SRC))
 $$(_DST): PRIVATE_CC  := $$(BUILD_HOST_CC)
 $$(_DST): PRIVATE_CXX := $$(BUILD_HOST_CXX)
@@ -390,9 +393,11 @@ _SRC := $(1)
 _DST := $(2)
 $$(_DST): PRIVATE_DST := $$(_DST)
 $$(_DST): PRIVATE_CMAKE_DST := $$(dir $$(_DST))
-$$(_DST): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS)
-$$(_DST): PRIVATE_CXXFLAGS := $$(LOCAL_CXXFLAGS)
-$$(_DST): PRIVATE_C_INCLUDES := $$(LOCAL_C_INCLUDES)
+$$(_DST): PRIVATE_CFLAGS := $$(filter-out -I%,$$(LOCAL_CFLAGS))
+$$(_DST): PRIVATE_CXXFLAGS := $$(filter-out -I%,$$(LOCAL_CXXFLAGS))
+$$(_DST): PRIVATE_C_INCLUDES := $$(call to-absolute-path,$$(LOCAL_C_INCLUDES))
+$$(_DST): PRIVATE_C_INCLUDES += $$(call to-absolute-path,$$(patsubst -I%,%,$$(filter -I%,$$(LOCAL_CFLAGS))))
+$$(_DST): PRIVATE_C_INCLUDES += $$(call to-absolute-path,$$(patsubst -I%,%,$$(filter -I%,$$(LOCAL_CXXFLAGS))))
 $$(_DST): PRIVATE_SRC := $$(dir $$(_SRC))
 $$(_DST): PRIVATE_CC  := $$(BUILD_TARGET_CC)
 $$(_DST): PRIVATE_CXX := $$(BUILD_TARGET_CXX)
@@ -424,11 +429,12 @@ define make-cmake-project
 _SRC := $(1)
 _DST := $(2)
 _TARGET := $(3)
+$$(LOCAL_PATH)/$$(_SRC): $$(LOCAL_SOURCE_DEPENDENCIES)
 $$(_DST): PRIVATE_DST := $$(_DST)
 $$(_DST): PRIVATE_SRC := $$(_SRC)
 $$(_DST): PRIVATE_TARGET := $$(_TARGET)
 $$(_DST): $$(_SRC) force
-	@$(hide)  $(MAKE) $$(PRIVATE_TARGET) -C $$(dir $$(PRIVATE_SRC))
+	@$(hide)  +$(MAKE) $$(PRIVATE_TARGET) -C $$(dir $$(PRIVATE_SRC))
 endef
 
 # Runs a test target
