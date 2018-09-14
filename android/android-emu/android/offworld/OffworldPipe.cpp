@@ -12,12 +12,11 @@
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
-#include "android/crashreport/crash-handler.h"
 #include "android/emulation/AndroidMessagePipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/metrics/MetricsLogging.h"
-#include "android/multi-instance.h"
 #include "android/offworld/proto/offworld.pb.h"
+#include "android/snapshot/SnapshotAPI.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
 
@@ -28,26 +27,19 @@
 #include <sstream>
 #include <vector>
 
+using android::base::LazyInstance;
+using android::base::Lock;
+using android::base::Optional;
+
 extern const QAndroidVmOperations* const gQAndroidVmOperations;
 
 namespace {
 
-struct SnapshotCrossSession {
-    android::AndroidMessagePipe::DataBuffer sMetaData = {};
-    android::base::Lock sLock = {};
-    int sForkTotal = 0;
-    int sForkId = 0;
+struct OffworldCrossSession {
+    Lock sLock = {};
 };
 
-android::base::LazyInstance<SnapshotCrossSession> sSnapshotCrossSession;
-
-size_t getReadable(std::iostream& stream) {
-    size_t beg = stream.tellg();
-    stream.seekg(0, stream.end);
-    size_t ret = (size_t)stream.tellg() - beg;
-    stream.seekg(beg, stream.beg);
-    return ret;
-}
+LazyInstance<OffworldCrossSession> sOffworldCrossSession;
 
 class OffworldPipe : public android::AndroidMessagePipe {
 public:
@@ -60,7 +52,7 @@ public:
                 override {
             // To avoid complicated synchronization issues, only 1 instance
             // of a OffworldPipe is allowed at a time
-            if (sSnapshotCrossSession->sLock.tryLock()) {
+            if (sOffworldCrossSession->sLock.tryLock()) {
                 return new OffworldPipe(hwPipe, this);
             } else {
                 return nullptr;
@@ -71,7 +63,7 @@ public:
                                    const char* args,
                                    android::base::Stream* stream) override {
             __attribute__((unused)) bool success =
-                    sSnapshotCrossSession->sLock.tryLock();
+                    sOffworldCrossSession->sLock.tryLock();
             assert(success);
             return new OffworldPipe(hwPipe, this, stream);
         }
@@ -81,14 +73,13 @@ public:
                  android::base::Stream* loadStream = nullptr)
         : android::AndroidMessagePipe(hwPipe, service, decodeAndExecute,
         loadStream) {
-        ANDROID_IF_DEBUG(assert(sSnapshotCrossSession->sLock.isLocked()));
+        ANDROID_IF_DEBUG(assert(sOffworldCrossSession->sLock.isLocked()));
         mIsLoad = static_cast<bool>(loadStream);
         if (mIsLoad) {
-            resetRecvPayload(std::move(sSnapshotCrossSession->sMetaData));
-            // sMetaData should be cleared after the move
+            resetRecvPayload(android::snapshot::getLoadMetadata());
         }
     }
-    ~OffworldPipe() { sSnapshotCrossSession->sLock.unlock(); }
+    ~OffworldPipe() { sOffworldCrossSession->sLock.unlock(); }
 
 private:
     static void encodeGuestRecvFrame(const google::protobuf::Message& message,
@@ -133,13 +124,8 @@ private:
         using MS = offworld::GuestSend::ModuleSnapshot;
         switch (snapshotPb.function_case()) {
             case MS::FunctionCase::kCreateCheckpointParam: {
-                const std::string& snapshotName
-                        = snapshotPb.create_checkpoint_param().snapshot_name();
-                gQAndroidVmOperations->vmStop();
-                android::base::ThreadLooper::runOnMainLooper([snapshotName]() {
-                    androidSnapshot_save(snapshotName.data());
-                    gQAndroidVmOperations->vmStart();
-                });
+                android::snapshot::createCheckpoint(
+                        snapshotPb.create_checkpoint_param().snapshot_name());
                 *shouldReply = true;
                 guestRecv->Clear();
                 break;
@@ -147,27 +133,14 @@ private:
             case MS::FunctionCase::kGotoCheckpointParam: {
                 const MS::GotoCheckpoint& gotoCheckpointParam
                         = snapshotPb.goto_checkpoint_param();
-                const std::string& snapshotName
-                        = gotoCheckpointParam.snapshot_name();
-                // Note: metadata are raw bytes, not necessary a string. It is
-                // just protobuf encodes them into strings. The data should be
-                // handled as raw bytes (no extra '\0' at the end). Please try
-                // not to use metadata.c_str().
-                const std::string& metadata
-                        = gotoCheckpointParam.metadata();
-                offworld::GuestRecv::ModuleSnapshot::CreateCheckpoint recv;
-                recv.set_metadata(metadata);
-                encodeGuestRecvFrame(recv, &sSnapshotCrossSession->sMetaData);
-                gQAndroidVmOperations->vmStop();
-                android::base::FileShare shareMode =
-                        android::multiinstance::getInstanceShareMode();
 
-                if (gotoCheckpointParam.has_share_mode() &&
-                    gotoCheckpointParam.share_mode() !=
-                            MS::GotoCheckpoint::UNKNOWN &&
-                    gotoCheckpointParam.share_mode() !=
-                            MS::GotoCheckpoint::UNCHANGED) {
+                Optional<android::base::FileShare> shareMode;
+
+                if (gotoCheckpointParam.has_share_mode()) {
                     switch (gotoCheckpointParam.share_mode()) {
+                        case MS::GotoCheckpoint::UNKNOWN:
+                        case MS::GotoCheckpoint::UNCHANGED:
+                            break;
                         case MS::GotoCheckpoint::READ_ONLY:
                             shareMode = android::base::FileShare::Read;
                             break;
@@ -181,101 +154,22 @@ private:
                             break;
                     }
                 }
-                android::base::ThreadLooper::runOnMainLooper([snapshotName,
-                                                              shareMode]() {
-                    bool res = android::multiinstance::updateInstanceShareMode(
-                            snapshotName.c_str(), shareMode);
-                    if (!res) {
-                        fprintf(stderr, "WARNING: share mode update failure\n");
-                    }
-                    androidSnapshot_load(snapshotName.data());
-                    gQAndroidVmOperations->vmStart();
-                });
+
+                android::snapshot::gotoCheckpoint(
+                        gotoCheckpointParam.snapshot_name(),
+                        gotoCheckpointParam.metadata(), shareMode);
                 *shouldReply = false;
                 break;
             }
             case MS::FunctionCase::kForkReadOnlyInstancesParam: {
-                if (android::multiinstance::getInstanceShareMode() ==
-                    android::base::FileShare::Write) {
-                    sSnapshotCrossSession->sForkTotal =
-                            snapshotPb.fork_read_only_instances_param()
-                                    .num_instances();
-                    sSnapshotCrossSession->sForkId = 0;
-                    offworld::GuestRecv::ModuleSnapshot::ForkReadOnlyInstances
-                            recv;
-                    recv.set_instance_id(sSnapshotCrossSession->sForkId);
-                    encodeGuestRecvFrame(recv,
-                                         &sSnapshotCrossSession->sMetaData);
-                    gQAndroidVmOperations->vmStop();
-                    android::base::ThreadLooper::runOnMainLooper([]() {
-                        // snapshotRemap triggers a snapshot save.
-                        // It must happen before changing disk backend
-                        bool res = gQAndroidVmOperations->snapshotRemap(
-                                false, nullptr, nullptr);
-                        if (!res) {
-                            fprintf(stderr,
-                                    "WARNING: RAM share mode update failure\n");
-                        }
-                        // Update share mode flag and disk backend
-                        res = android::multiinstance::updateInstanceShareMode(
-                                android::snapshot::kDefaultBootSnapshot,
-                                android::base::FileShare::Read);
-                        if (!res) {
-                            fprintf(stderr,
-                                    "WARNING: share mode update failure\n");
-                        }
-                        assert(res);
-                        androidSnapshot_load(android::snapshot::kDefaultBootSnapshot);
-                        gQAndroidVmOperations->vmStart();
-                    });
-                }
+                android::snapshot::forkReadOnlyInstances(
+                        snapshotPb.fork_read_only_instances_param()
+                                .num_instances());
                 *shouldReply = false;
                 break;
             }
             case MS::FunctionCase::kDoneInstanceParam: {
-                if (sSnapshotCrossSession->sForkId <
-                    sSnapshotCrossSession->sForkTotal - 1) {
-                    sSnapshotCrossSession->sForkId++;
-                    offworld::GuestRecv::ModuleSnapshot::ForkReadOnlyInstances
-                            recv;
-                    recv.set_instance_id(sSnapshotCrossSession->sForkId);
-                    encodeGuestRecvFrame(recv,
-                                         &sSnapshotCrossSession->sMetaData);
-                    if (sSnapshotCrossSession->sForkId <
-                        sSnapshotCrossSession->sForkTotal - 1) {
-                        gQAndroidVmOperations->vmStop();
-                        // Load back to write mode for the last run
-                        android::base::FileShare mode =
-                                sSnapshotCrossSession->sForkId <
-                                                sSnapshotCrossSession
-                                                                ->sForkTotal -
-                                                        2
-                                        ? android::base::FileShare::Read
-                                        : android::base::FileShare::Write;
-                        android::base::ThreadLooper::runOnMainLooper([mode]() {
-                            bool res = android::multiinstance::
-                                    updateInstanceShareMode(
-                                            android::snapshot::
-                                                    kDefaultBootSnapshot,
-                                            mode);
-                            if (!res) {
-                                fprintf(stderr,
-                                        "WARNING: share mode update failure\n");
-                            }
-                            res = gQAndroidVmOperations->snapshotRemap(
-                                    mode == android::base::FileShare::Write,
-                                    nullptr, nullptr);
-                            gQAndroidVmOperations->vmStart();
-                        });
-                    }
-                } else if (sSnapshotCrossSession->sForkId ==
-                           sSnapshotCrossSession->sForkTotal - 1) {
-                    // We don't load after the last run
-                    sSnapshotCrossSession->sForkId = 0;
-                    sSnapshotCrossSession->sForkTotal = 0;
-                } else {
-                    fprintf(stderr, "WARNING: bad fork session ID\n");
-                }
+                android::snapshot::doneInstance();
                 *shouldReply = false;
                 break;
             }
@@ -294,10 +188,12 @@ private:
 
 namespace android {
 namespace offworld {
+
 void registerOffworldPipeService() {
     if (android::featurecontrol::isEnabled(android::featurecontrol::Offworld)) {
         android::AndroidPipe::Service::add(new OffworldPipe::Service());
     }
 }
+
 }  // namespace offworld
 }  // namespace android
