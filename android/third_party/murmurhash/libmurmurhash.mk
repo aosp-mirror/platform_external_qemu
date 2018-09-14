@@ -6,9 +6,8 @@ MURMURHASH_DIR := $(LOCAL_PATH)
 MURMURHASH_INCLUDES := $(MURMURHASH_DIR)
 MURMURHASH_STATIC_LIBRARIES := emulator-murmurhash
 
-$(call start-emulator-library,emulator-murmurhash)
-    LOCAL_C_INCLUDES := $(MURMURHASH_INCLUDES)
-    LOCAL_SRC_FILES := MurmurHash3.cpp
-$(call end-emulator-library)
+$(call start-cmake-project,emulator-murmurhash)
+PRODUCED_STATIC_LIBS := emulator-murmurhash
+$(call end-cmake-project)
 
 LOCAL_PATH := $(OLD_LOCAL_PATH)

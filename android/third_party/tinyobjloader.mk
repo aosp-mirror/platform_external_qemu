@@ -17,18 +17,14 @@ endif
 
 TINYOBJLOADER_INCLUDES := $(TINYOBJLOADER_SOURCES_DIR)
 
-TINYOBJLOADER_SOURCES := \
-    tiny_obj_loader.cc
-
 old_LOCAL_PATH := $(LOCAL_PATH)
 
-LOCAL_PATH := $(TINYOBJLOADER_SOURCES_DIR)
+LOCAL_PATH := android/third_party
 
-$(call start-emulator-library, emulator-tinyobjloader)
-LOCAL_C_INCLUDES += $(TINYOBJLOADER_INCLUDES)
-LOCAL_CPP_EXTENSION := .cc
-LOCAL_SRC_FILES := $(TINYOBJLOADER_SOURCES)
-$(call end-emulator-library)
+# TODO(jansene): Use actual cmake from tinyobj?
+$(call start-cmake-project,emulator-tinyobjloader)
+PRODUCED_STATIC_LIBS := emulator-tinyobjloader
+$(call end-cmake-project)
 
 LOCAL_PATH := $(old_LOCAL_PATH)
 

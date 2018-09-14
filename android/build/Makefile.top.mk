@@ -298,6 +298,7 @@ BUILD_HOST_LDFLAGS += $(BUILD_TARGET_LDFLAGS)
 start-emulator-library = \
     $(eval include $(CLEAR_VARS)) \
     $(eval LOCAL_MODULE := $1) \
+	$(info "lib $(1)") \
     $(eval LOCAL_MODULE_CLASS := STATIC_LIBRARIES) \
     $(eval LOCAL_BUILD_FILE := $(BUILD_HOST_STATIC_LIBRARY))
 
@@ -306,7 +307,9 @@ end-emulator-library = \
     $(eval $(end-emulator-module-ev)) \
 
 define-emulator-prebuilt-library = \
-    $(call start-emulator-library,$1) \
+    $(eval include $(CLEAR_VARS)) \
+    $(eval LOCAL_MODULE := $1) \
+    $(eval LOCAL_MODULE_CLASS := STATIC_LIBRARIES) \
     $(eval LOCAL_BUILD_FILE := $(PREBUILT_STATIC_LIBRARY)) \
     $(eval LOCAL_SRC_FILES := $2) \
     $(eval $(end-emulator-module-ev)) \
@@ -314,7 +317,8 @@ define-emulator-prebuilt-library = \
 # A variant of start-emulator-library to start the definition of a host
 # program instead. Use with end-emulator-program
 start-emulator-program = \
-    $(call start-emulator-library,$1) \
+    $(eval include $(CLEAR_VARS)) \
+    $(eval LOCAL_MODULE := $1) \
     $(eval LOCAL_MODULE_CLASS := EXECUTABLES) \
     $(eval LOCAL_BUILD_FILE := $(BUILD_HOST_EXECUTABLE))
 

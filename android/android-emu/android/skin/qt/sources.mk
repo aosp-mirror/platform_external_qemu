@@ -1,5 +1,6 @@
 # Definitions related to the Qt-based UI backend.
 
+# DEPRECATED! Modify the CMakeLists.txt instead.
 ANDROID_SKIN_SOURCES += \
     android/skin/qt/event-qt.cpp \
     android/skin/qt/init-qt.cpp \
