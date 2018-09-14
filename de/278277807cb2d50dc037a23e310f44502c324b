@@ -1,0 +1,8 @@
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Verified+1: Matt Wachowski <mattwach@google.com>
+Code-Review+2: Matt Wachowski <mattwach@google.com>
+Submitted-by: Matt Wachowski <mattwach@google.com>
+Submitted-at: Fri, 14 Sep 2018 15:47:15 +0000
+Reviewed-on: https://android-review.googlesource.com/755250
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
