@@ -254,18 +254,6 @@ void RendererImpl::save(android::base::Stream* stream,
 
 bool RendererImpl::load(android::base::Stream* stream,
                         const android::snapshot::ITextureLoaderPtr& textureLoader) {
-#ifdef SNAPSHOT_PROFILE
-    android::base::System::Duration startTime
-            = android::base::System::get()->getUnixTimeUs();
-#endif
-    cleanupRenderThreads();
-    waitForProcessCleanup();
-#ifdef SNAPSHOT_PROFILE
-    printf("RenderThread cleanup time: %lld ms\n",
-            (long long)(android::base::System::get()->getUnixTimeUs()
-            - startTime) / 1000);
-#endif
-
     mStopped = stream->getByte();
     if (mStopped) {
         return true;
@@ -380,6 +368,55 @@ void RendererImpl::setScreenMask(int width, int height, const unsigned char* rgb
 
 void RendererImpl::cleanupProcGLObjects(uint64_t puid) {
     mCleanupThread->cleanup(puid);
+}
+
+void RendererImpl::snapshotOperationCallback(
+        android::snapshot::Snapshotter::Operation op,
+        android::snapshot::Snapshotter::Stage stage) {
+    using namespace android::snapshot;
+    switch (op) {
+        case Snapshotter::Operation::Load:
+            if (stage == Snapshotter::Stage::Start) {
+#ifdef SNAPSHOT_PROFILE
+                android::base::System::Duration startTime =
+                        android::base::System::get()->getUnixTimeUs();
+#endif
+                mRenderWindow->flushMessages();
+                cleanupRenderThreads();
+                waitForProcessCleanup();
+#ifdef SNAPSHOT_PROFILE
+                printf("Previous session cleanup time: %lld ms\n",
+                       (long long)(android::base::System::get()
+                                           ->getUnixTimeUs() -
+                                   startTime) /
+                               1000);
+#endif
+            }
+            break;
+        case Snapshotter::Operation::Save:
+            if (stage == Snapshotter::Stage::Start) {
+                // TODO yahan@: make a light weight touch which only load the
+                // data into RAM and generate a texture name without loading
+                // stuff into GPU
+#ifdef SNAPSHOT_PROFILE
+                android::base::System::Duration startTime =
+                        android::base::System::get()->getUnixTimeUs();
+#endif
+                FrameBuffer::getFB()->touchAllTextures();
+#ifdef SNAPSHOT_PROFILE
+                printf("Force load all texture time: %lld ms\n",
+                       (long long)(android::base::System::get()
+                                           ->getUnixTimeUs() -
+                                   startTime) /
+                               1000);
+#endif
+            }
+            break;
+    }
+}
+
+void RendererImpl::setEnableBackgroundLoad(bool enable) {
+    FrameBuffer::getFB()->setEnableBackgroundLoad(enable);
 }
 
 }  // namespace emugl
