@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f5a11958_03263938",
+        "filename": "android/android-emugl/host/tools/emugen/CMakeLists.txt",
+        "patchSetId": 9
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-09-14T17:33:41Z",
+      "side": 1,
+      "message": "nit: mixing space and tabs?",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 1
+      },
+      "revId": "b08c07c453e0e6849f4e2949fd4e0f12ee6cd887",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "667ae6d5_dfa7daf5",
+        "filename": "android/build/emulator/definitions.make",
+        "patchSetId": 9
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-09-14T17:33:41Z",
+      "side": 1,
+      "message": "nit: mixing space with tab? is it intentional?",
+      "range": {
+        "startLine": 375,
+        "startChar": 0,
+        "endLine": 375,
+        "endChar": 1
+      },
+      "revId": "b08c07c453e0e6849f4e2949fd4e0f12ee6cd887",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
