@@ -156,42 +156,73 @@ bool EmulatorContainer::event(QEvent* e) {
     return QScrollArea::event(e);
 }
 
+#if defined(__linux__)
+// All callers to this function are currently under __linux__ so
+// we needs an ifdef to avoid a "defined but not used" build failure
+// on other platforms.
+static SkinEvent* createSkinEvent(SkinEventType t) {
+    SkinEvent* e = new SkinEvent();
+    e->type = t;
+    return e;
+}
+#endif
+
 void EmulatorContainer::changeEvent(QEvent* event) {
-    // Strictly preventing the maximizing (called "zooming" on OS X) of a
-    // window is hard - it changes by host, and even by window manager on
-    // Linux. Therefore, we counteract it by seeing if the window ever
-    // enters a maximized state, and if it does, immediately undoing that
-    // maximization.
-    //
-    // Note that we *do not* call event->ignore(). Maximizing happens in the
-    // OS-level window, not Qt's representation of the window. This event
-    // simply notifies the Qt representation (and us) that the OS-level window
-    // has changed to a maximized state. We do not want to ignore this state
-    // change, we just want to counteract the effects it had.
-    if (event->type() == QEvent::WindowStateChange) {
-        if (windowState() & Qt::WindowMaximized) {
-            showNormal();
-            if (mModalOverlay) {
-                mModalOverlay->showNormal();
+    switch (event->type()) {
+        case QEvent::WindowStateChange:
+            // Strictly preventing the maximizing (called "zooming" on OS X) of
+            // a window is hard - it changes by host, and even by window manager
+            // on Linux. Therefore, we counteract it by seeing if the window
+            // ever enters a maximized state, and if it does, immediately
+            // undoing that maximization.
+            //
+            // Note that we *do not* call event->ignore(). Maximizing happens in
+            // the OS-level window, not Qt's representation of the window. This
+            // event simply notifies the Qt representation (and us) that the
+            // OS-level window has changed to a maximized state. We do not want
+            // to ignore this state change, we just want to counteract the
+            // effects it had.
+            if (windowState() & Qt::WindowMaximized) {
+                showNormal();
+                if (mModalOverlay) {
+                    mModalOverlay->showNormal();
+                }
+                if (mVirtualSceneInfo) {
+                    mVirtualSceneInfo->showNormal();
+                }
+                mMessages->showNormal();
+            } else if (windowState() & Qt::WindowMinimized) {
+                // In case the window was minimized without pressing the
+                // toolbar's minimize button (which is possible on some
+                // window managers), remember to hide the toolbar (which
+                // will also hide the extended window, if it exists).
+                mEmulatorWindow->toolWindow()->hide();
+                if (mModalOverlay) {
+                    mModalOverlay->hide();
+                }
+                if (mVirtualSceneInfo) {
+                    mVirtualSceneInfo->hide();
+                }
+                mMessages->hide();
             }
-            if (mVirtualSceneInfo) {
-                mVirtualSceneInfo->showNormal();
-            }
-            mMessages->showNormal();
-        } else if (windowState() & Qt::WindowMinimized) {
-            // In case the window was minimized without pressing the toolbar's
-            // minimize button (which is possible on some window managers),
-            // remember to hide the toolbar (which will also hide the extended
-            // window, if it exists).
-            mEmulatorWindow->toolWindow()->hide();
-            if (mModalOverlay) {
-                mModalOverlay->hide();
-            }
-            if (mVirtualSceneInfo) {
-                mVirtualSceneInfo->hide();
-            }
-            mMessages->hide();
-        }
+
+            break;
+
+        case QEvent::ActivationChange:
+#if defined(__linux__)
+            // b/79158122: When restoring from minimize or a desktop switch,
+            // Linux/OpenGL does not refresh the screen on it's own, normal
+            // Linux/QT does work.  This logic pushes a refresh event to work
+            // around the issue.  Note that putting this logic under
+            // QEvent::WindowStateChange above does not work as that event comes
+            // too early for refreshes to be effective.
+            mEmulatorWindow->queueSkinEvent(createSkinEvent(kEventForceRedraw));
+#endif
+            break;
+
+        default:
+            // Ignore other event types
+            break;
     }
 }
 
@@ -300,9 +331,7 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
             // The subwindow won't redraw until the guest screen changes, which
             // may not happen for a minute (when the clock changes), so force a
             // redraw after re-showing the window.
-            SkinEvent* event = new SkinEvent();
-            event->type = kEventForceRedraw;
-            mEmulatorWindow->queueSkinEvent(event);
+            mEmulatorWindow->queueSkinEvent(createSkinEvent(kEventForceRedraw));
         }
 #endif  // __linux__
         mEmulatorWindow->toolWindow()->show();
