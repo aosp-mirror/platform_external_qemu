@@ -43,9 +43,9 @@ void LocationPage::makeRouteProtobuf() { // ?? Debug only
     emulator_location::RouteMetadata myMetadata;
     myMetadata.set_logical_name(routeName.toStdString().c_str());
     myMetadata.set_creation_time(now.toMSecsSinceEpoch() / 1000LL);
-    myMetadata.set_mode_of_transportation(emulator_location::RouteMetadata_Mode_CAR); // = 2
+    myMetadata.set_mode_of_travel(emulator_location::RouteMetadata_Mode_DRIVING);
     myMetadata.set_loop(false);
-    myMetadata.set_speed_factor(emulator_location::RouteMetadata_PlaybackSpeed_SPEED_1x); // = 0
+    myMetadata.set_speed_factor(emulator_location::RouteMetadata_PlaybackSpeed_SPEED_1x);
     myMetadata.set_description("One misty moisty morning, when cloudy was the weather...");
     myMetadata.set_duration(90);
 
@@ -111,7 +111,7 @@ void LocationPage::scanForRoutes() {
         listElement.protoFilePath = protoFilePath.c_str();
         listElement.logicalName   = routeMetadata->logical_name().c_str();
         listElement.description   = routeMetadata->description().c_str();
-        listElement.modeIndex     = routeMetadata->mode_of_transportation();
+        listElement.modeIndex     = routeMetadata->mode_of_travel();
         listElement.speedFactor   = routeMetadata->speed_factor();
         listElement.loop          = routeMetadata->loop();
         listElement.duration      = routeMetadata->duration();
@@ -251,22 +251,6 @@ void LocationPage::editRoute(int row) {
     descriptionEdit->setPlainText(oldDescription);
     dialogLayout->addWidget(descriptionEdit);
 
-    // Mode of transportation
-    dialogLayout->addWidget(new QLabel(tr("Mode")));
-    QComboBox* transportMode = new QComboBox();
-    transportMode->addItem(tr("None"));
-// ?? The Google Maps Directions Service supports
-//        DRIVING, WALKING, BICYCLING, TRANSIT
-//    I need to replace "Run" with "Transit" and use the gerund forms.
-//    go/icons has "directions transit", e.g. ic_directions_transit_black_24dp.svg
-//    The canonical term seems to be "travel mode"
-    transportMode->addItem(getIconForCurrentTheme("bike"), tr("Bike"));
-    transportMode->addItem(getIconForCurrentTheme("car"),  tr("Drive"));
-    transportMode->addItem(getIconForCurrentTheme("run"),  tr("Run"));
-    transportMode->addItem(getIconForCurrentTheme("walk"), tr("Walk"));
-    transportMode->setCurrentIndex(routeElement->modeIndex);
-    dialogLayout->addWidget(transportMode);
-
     // Playback speed
     dialogLayout->addWidget(new QLabel(tr("Playback speed")));
     QComboBox* playbackSpeed = new QComboBox();
@@ -308,7 +292,6 @@ void LocationPage::editRoute(int row) {
 
     if ((newName.isEmpty() || newName == oldName)                  &&
         newDescription                == oldDescription            &&
-        transportMode->currentIndex() == routeElement->modeIndex   &&
         playbackSpeed->currentIndex() == routeElement->speedFactor &&
         loopCheckBox->isChecked()     == routeElement->loop          )
     {
@@ -330,8 +313,6 @@ void LocationPage::editRoute(int row) {
         routeMetadata.set_logical_name(newName.toStdString().c_str());
     }
     routeMetadata.set_description(newDescription.toStdString().c_str());
-    routeMetadata.set_mode_of_transportation(
-            (emulator_location::RouteMetadata_Mode)transportMode->currentIndex());
     routeMetadata.set_speed_factor(
             (emulator_location::RouteMetadata_PlaybackSpeed)playbackSpeed->currentIndex());
     routeMetadata.set_loop(loopCheckBox->isChecked());
@@ -419,18 +400,17 @@ LocationPage::RouteItemBuilder::highlightRouteWidgetItem(LocationPage::RouteWidg
     QString modeIconName;
     switch (theItem->routeElement->modeIndex) {
         default:
-        case 0:  modeIconName = "";     break;
-        case 1:  modeIconName = "bike"; break;
-        case 2:  modeIconName = "car";  break;
-        case 3:  modeIconName = "run";  break;
-        case 4:  modeIconName = "walk"; break;
+        case 0:  modeIconName = "car";     break;
+        case 1:  modeIconName = "walk";    break;
+        case 2:  modeIconName = "bike";    break;
+        case 3:  modeIconName = "transit"; break;
     }
     QIcon modeIcon = getIconForCurrentTheme(modeIconName);
-    QPixmap transportIcon = modeIcon.pixmap(ICON_SIZE, ICON_SIZE);
+    QPixmap modeIconPix = modeIcon.pixmap(ICON_SIZE, ICON_SIZE);
     int vertPosition = (mFieldHeight - ICON_SIZE) / 2;
     int horizPosition = mFieldWidth - ICON_SIZE;
     horizPosition -= HORIZ_PADDING;
-    painter.drawPixmap(QRect(horizPosition, vertPosition, ICON_SIZE, ICON_SIZE), transportIcon);
+    painter.drawPixmap(QRect(horizPosition, vertPosition, ICON_SIZE, ICON_SIZE), modeIconPix);
 
     theItem->setIcon(basePixmap);
 }
@@ -458,11 +438,10 @@ void LocationPage::showRouteDetails(const RouteListElement* theElement) {
     QString modeString;
     switch (theElement->modeIndex) {
         default:
-        case 0:  modeString = "";      break;
-        case 1:  modeString = "Bike";  break;
-        case 2:  modeString = "Drive"; break;
-        case 3:  modeString = "Run";   break;
-        case 4:  modeString = "Walk";  break;
+        case 0:  modeString = tr("Driving");    break;
+        case 1:  modeString = tr("Walking");    break;
+        case 2:  modeString = tr("Bicycling");  break;
+        case 3:  modeString = tr("Transit");    break;
     }
     std::string protobufName = theElement->protoFilePath.toStdString();
     android::base::StringView dirPath;

@@ -34,15 +34,14 @@ message RouteMetadata {
   // Descriptive string given by the user
   optional string description = 3;
 
-  // Mode of transportation
+  // Mode of travel
   enum Mode {
-    UNKNOWN = 0;
-    BIKE = 1;
-    CAR = 2;
-    RUN = 3;
-    WALK = 4;
+    DRIVING = 0;
+    WALKING = 1;
+    BICYCLING = 2;
+    TRANSIT = 3;
   }
-  optional Mode mode_of_transportation = 4;
+  optional Mode mode_of_travel = 4;
 
   // On playback, should we continuously repeat this route?
   // Default = false = play only once

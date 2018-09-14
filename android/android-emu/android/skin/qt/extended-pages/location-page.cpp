@@ -273,11 +273,19 @@ void LocationPage::shutDown() {
 }
 
 void LocationPage::updateTheme() {
+    // Set the icons in the Mode of Travel pull-down.
+    // (I couldn't figure out how to extend adjustAllButtonsForTheme()
+    //  to include QComboBox items that have icons. I could find all
+    //  QComboBox items that have icons, but I could not read their
+    //  properties to get 'iconThemeName'.)
+    mUi->loc_travelMode->setItemIcon(0, getIconForCurrentTheme("car"));
+    mUi->loc_travelMode->setItemIcon(1, getIconForCurrentTheme("walk"));
+    mUi->loc_travelMode->setItemIcon(2, getIconForCurrentTheme("bike"));
+    mUi->loc_travelMode->setItemIcon(3, getIconForCurrentTheme("transit"));
+
     // Re-do the lists of routes and points
     highlightPointListWidget();
     highlightRouteListWidget();
-//    populatePointListWidget();
-//    populateRouteListWidget();
 }
 
 void LocationPage::on_loc_GpxKmlButton_clicked()
