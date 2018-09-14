@@ -93,6 +93,30 @@
       "revId": "b08c07c453e0e6849f4e2949fd4e0f12ee6cd887",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "70fa2b61_b9758e4d",
+        "filename": "android/build/emulator/definitions.make",
+        "patchSetId": 9
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-09-14T17:47:52Z",
+      "side": 1,
+      "message": "I guess that is why nobody uses make file and everybody writes their own build system",
+      "parentUuid": "bdaf793c_83dc6b28",
+      "range": {
+        "startLine": 375,
+        "startChar": 0,
+        "endLine": 375,
+        "endChar": 1
+      },
+      "revId": "b08c07c453e0e6849f4e2949fd4e0f12ee6cd887",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
