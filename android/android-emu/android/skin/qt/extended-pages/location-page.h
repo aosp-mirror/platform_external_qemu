@@ -50,7 +50,7 @@ public:
     bool isLoadingGeoData() const { return mNowLoadingGeoData; }
     void requestStopLoadingGeoData() { mGpsNextPopulateIndex = mGpsFixesArray.size(); }
     Q_INVOKABLE void sendLocation(const QString& lat, const QString& lng);
-    Q_INVOKABLE void sendRouteToEmu(int pointIndex, double lat, double lng, double timeToHere);
+    Q_INVOKABLE void sendRoutePointToEmu(int pointIndex, double lat, double lng, double timeToHere);
 
     void updateTheme();
 
@@ -260,13 +260,28 @@ private:
     GpsFixArray          mGpsFixesArray;
     int                  mGpsNextPopulateIndex = 0;
 
-        GeoDataLoaderThread* mGeoDataLoader;
+    GeoDataLoaderThread* mGeoDataLoader;
     QTimer mTimer;
     bool mNowPlaying = false;
     bool mNowLoadingGeoData = false;
     bool mLocationUsed = false;
     int mRowToSend;
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
+
+    // Route information
+    typedef struct {
+        double lat;
+        double lng;
+        double delayBefore;
+    } routePoint_t;
+    enum class RouteStatus { OK, INCOMPLETE, FAILED, TOO_BIG };
+    static constexpr int MAX_POINTS_IN_ROUTE = 20000;
+    RouteStatus mRouteStatus = RouteStatus::INCOMPLETE;
+    routePoint_t mRoutePoints[MAX_POINTS_IN_ROUTE]; // ?? Should I allocate this dynamically
+                                                    //    and free it when I'm done?
+    int mNumRoutePointsReceived = 0;
+    QDateTime mRouteCreationTime;
+    int mRouteTravelMode;
 
     // Last point sent to the emulator from the map
     QString mLastLat = "-122.084";

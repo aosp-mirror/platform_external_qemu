@@ -313,6 +313,8 @@ html, body {
         gDirectionsDisplay.setMap(gMap);
         gDirectionsService.route(request, function(result, status) {
             if (status == 'OK') {
+                // Show the route on the Map
+                gDirectionsDisplay.setDirections(result);
 // vv ??
                 var r0 = result.routes[0];
                 var leg0 = r0.legs[0];
@@ -326,7 +328,7 @@ html, body {
                 // Always accept the first point of the route
                 var previousPoint = theSteps[0].path[0];
                 var numPointsSent = 0;
-                channel.objects.emulocationserver.sendRouteToEmu(
+                channel.objects.emulocationserver.sendRoutePointToEmu(
                     numPointsSent, previousPoint.lat(), previousPoint.lng(), 0.0);
                 numPointsSent++;
 //                console.warn('     pt 0: ' + theSteps[0].path[0]
@@ -386,7 +388,7 @@ html, body {
 //                                         + ', LAST POINT OF STEP **');
 
                         // Send this point to the Emulator
-                        channel.objects.emulocationserver.sendRouteToEmu(
+                        channel.objects.emulocationserver.sendRoutePointToEmu(
                             numPointsSent, thisPoint.lat(), thisPoint.lng(), time);
 
                         numPointsSent++;
@@ -399,10 +401,8 @@ html, body {
                     }
                 }
                 // Let the Emulator know that it has all the data
-                channel.objects.emulocationserver.sendRouteToEmu(-1, 0.0, 0.0, 0.0);
+                channel.objects.emulocationserver.sendRoutePointToEmu(-1, 0.0, 0.0, 0.0);
 // ^^ ??
-                // Show the route on the Map
-                gDirectionsDisplay.setDirections(result);
             }
             else console.warn('JZK Route result had status != OK'); // ??
         });

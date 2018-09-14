@@ -57,8 +57,42 @@ void LocationPage::makeRouteProtobuf() { // ?? Debug only
 }
 
 void LocationPage::on_saveRoute_clicked() {
-    printf("location-page-route: saveRoute clicked\n"); // ??
-    makeRouteProtobuf();
+    if (mRouteStatus != RouteStatus::OK) {
+        QString failureReason =
+                (mRouteStatus == RouteStatus::TOO_BIG) ? tr("Route is too long")
+                                                       : tr("Route is incomplete");
+        QMessageBox msgBox(QMessageBox::Warning,
+                           tr("Save route"),
+                           tr("Cannot save route.<br> %1.")
+                               .arg(failureReason),
+                           QMessageBox::Close,
+                           this);
+
+        int selection = msgBox.exec();
+        return;
+    }
+    QString routeName("route_" + mRouteCreationTime.toString("yyyy-MM-dd_HH-mm-ss"));
+
+    emulator_location::RouteMetadata routeMetadata;
+    routeMetadata.set_logical_name(routeName.toStdString().c_str());
+    routeMetadata.set_creation_time(mRouteCreationTime.toMSecsSinceEpoch() / 1000LL);
+    routeMetadata.set_mode_of_travel((emulator_location::RouteMetadata_Mode)mRouteTravelMode);
+    routeMetadata.set_loop(false);
+    routeMetadata.set_speed_factor(emulator_location::RouteMetadata_PlaybackSpeed_SPEED_1x);
+    double totalTime = 0.0;
+    for (int idx = 0; idx < mNumRoutePointsReceived; idx++) {
+        totalTime += mRoutePoints[idx].delayBefore;
+    }
+    routeMetadata.set_duration((int)(totalTime + 0.5));
+
+    writeRouteProtobufByName(routeName, routeMetadata);
+
+    scanForRoutes();
+    populateRouteListWidget();
+    highlightRouteListWidget();
+
+    // ?? Need to write the GPX file ...
+//??    makeRouteProtobuf();
 }
 
 void LocationPage::on_playRouteButton_clicked() {
@@ -496,8 +530,60 @@ void LocationPage::showRouteDetails(const RouteListElement* theElement) {
 }
 
 // Invoked by the Maps javascript when a route has been created
-void LocationPage::sendRouteToEmu(int pointIndex, double lat, double lng, double timeToHere) {
-    static double totalTime = 0.0;
+void LocationPage::sendRoutePointToEmu(int pointIndex, double lat, double lng, double timeToHere) {
+
+    static bool badState = false; // ??
+    static int lastReceivedIndex = 0; // ??
+    if (pointIndex == -1) {
+        // End of the route
+        if (mRouteStatus == RouteStatus::INCOMPLETE) {
+            mRouteStatus = RouteStatus::OK;
+        }
+#if 0 // ??
+        if (mRouteStatus != RouteStatus::OK) {
+            QString failureReason =
+                    (mRouteStatus == RouteStatus::TOO_BIG) ? tr("Too many points")
+                                                           : tr("No route found");
+            QMessageBox msgBox(QMessageBox::Information,
+                               tr("Route"),
+                               tr("Route failed<br> %1")
+                                   .arg(failureReason),
+                               QMessageBox::Ok,
+                               this);
+
+            int selection = msgBox.exec();
+        }
+#endif // ??
+        printf("l-p-r: lastReceivedIndex %d, mNumRoutePointsReceived %d\n", // ??
+               lastReceivedIndex, mNumRoutePointsReceived); // ??
+    } else if (pointIndex != mNumRoutePointsReceived) {
+        if (mRouteStatus == RouteStatus::INCOMPLETE) {
+            printf("l-p-r: Got index %d, expected %d\n",
+                   pointIndex, mNumRoutePointsReceived);
+        }
+        mRouteStatus = RouteStatus::TOO_BIG;
+        lastReceivedIndex = pointIndex; // ??
+    } else if (mNumRoutePointsReceived < MAX_POINTS_IN_ROUTE) {
+        if (pointIndex == 0) {
+            // Start of a route
+            mRouteStatus = RouteStatus::INCOMPLETE;
+            mNumRoutePointsReceived = 0;
+            mRouteCreationTime = QDateTime::currentDateTime();
+            mRouteTravelMode = mUi->loc_travelMode->currentIndex();
+            timeToHere = 0.0; // Always zero for the first point
+            badState = false;
+        }
+        mRoutePoints[mNumRoutePointsReceived++] = { lat, lng, timeToHere };
+    } else {
+        // To much data!
+        if (mRouteStatus == RouteStatus::INCOMPLETE) {
+            printf("l-p-r: Got index %d: too big\n", pointIndex);
+        }
+        mRouteStatus = RouteStatus::TOO_BIG;
+        lastReceivedIndex = pointIndex; // ??
+    }
+
+#if 0 // ??
     if (pointIndex >= 0) {
         printf("l-p-r: Got %3d: %9.4f %9.4f, %5.2fs\n",
                pointIndex, lat, lng, timeToHere);
@@ -511,6 +597,7 @@ void LocationPage::sendRouteToEmu(int pointIndex, double lat, double lng, double
                hh, mm, totalTime);
         totalTime = 0.0;
     }
+#endif // ??
 }
 
 // Write a protobuf into the specified directory.
