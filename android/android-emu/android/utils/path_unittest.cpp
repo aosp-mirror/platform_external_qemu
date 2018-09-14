@@ -11,11 +11,13 @@
 
 #include "android/utils/path.h"
 
+#include "android/base/files/PathUtils.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
 #include "gtest/gtest.h"
 
+using android::base::pj;
 using android::base::TestTempDir;
 
 namespace android {
@@ -115,6 +117,34 @@ TEST(Path, EscapePath) {
     EXPECT_STREQ(windowsInputPath, result);
 
     free(result);
+}
+
+TEST(Path, DeleteDir) {
+    TestTempDir tempDir("deleteDirTest");
+
+    auto dirToDelete = tempDir.makeSubPath("toDelete");
+    auto dirToDeleteSubDir = tempDir.makeSubPath(pj("toDelete", "subdir"));
+
+    EXPECT_EQ(0, path_mkdir_if_needed(dirToDeleteSubDir.c_str(), 0755));
+    EXPECT_TRUE(path_is_dir(dirToDeleteSubDir.c_str()));
+    EXPECT_EQ(0, path_delete_dir(dirToDelete.c_str()));
+    EXPECT_FALSE(path_is_dir(dirToDeleteSubDir.c_str()));
+    EXPECT_FALSE(path_is_dir(dirToDelete.c_str()));
+}
+
+TEST(Path, DeleteDirContents) {
+    TestTempDir tempDir("deleteDirContentsTest");
+
+    auto dirToDelete = tempDir.makeSubPath("toDelete");
+    auto dirToDeleteSubDir = tempDir.makeSubPath(pj("toDelete", "subdir"));
+
+    EXPECT_EQ(0, path_mkdir_if_needed(dirToDeleteSubDir.c_str(), 0755));
+    EXPECT_TRUE(path_is_dir(dirToDeleteSubDir.c_str()));
+
+    EXPECT_EQ(0, path_delete_dir_contents(dirToDelete.c_str()));
+
+    EXPECT_FALSE(path_is_dir(dirToDeleteSubDir.c_str()));
+    EXPECT_TRUE(path_is_dir(dirToDelete.c_str()));
 }
 
 }  // namespace path
