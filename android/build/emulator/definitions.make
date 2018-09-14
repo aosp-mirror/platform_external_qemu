@@ -160,11 +160,13 @@ $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
 $$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
 $$(OBJ): PRIVATE_SRC    := $$(call local-location-src,$$(LOCAL_PATH),$$(SRC))
 $$(OBJ): PRIVATE_SRC0   := $$(SRC)
+$$(OBJ): PRIVATE_GCDA   := $$(OBJ:%.o=%.gcda)
 $$(OBJ): $$(call local-location-src,$$(LOCAL_PATH),$$(SRC))
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
 	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	@rm -f $$(PRIVATE_GCDA)
 endef
 
 # Compile a C++ source file
@@ -181,11 +183,13 @@ $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
 $$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
 $$(OBJ): PRIVATE_SRC    := $$(LOCAL_PATH)/$$(SRC)
 $$(OBJ): PRIVATE_SRC0   := $$(SRC)
+$$(OBJ): PRIVATE_GCDA   := $$(OBJ:%.o=%.gcda)
 $$(OBJ): $$(LOCAL_PATH)/$$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CXX) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
 	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	@rm -f $$(PRIVATE_GCDA)
 endef
 
 # Compile an Objective-C source file
@@ -201,11 +205,13 @@ $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
 $$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
 $$(OBJ): PRIVATE_SRC    := $$(LOCAL_PATH)/$$(SRC)
 $$(OBJ): PRIVATE_SRC0   := $$(SRC)
+$$(OBJ): PRIVATE_GCDA   := $$(OBJ:%.o=%.gcda)
 $$(OBJ): $$(LOCAL_PATH)/$$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
 	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	@rm -f $$(PRIVATE_GCDA)
 endef
 
 # Compile an Objective-C source file
@@ -221,11 +227,13 @@ $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
 $$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
 $$(OBJ): PRIVATE_SRC    := $$(LOCAL_PATH)/$$(SRC)
 $$(OBJ): PRIVATE_SRC0   := $$(SRC)
+$$(OBJ): PRIVATE_GCDA   := $$(OBJ:%.o=%.gcda)
 $$(OBJ): $$(LOCAL_PATH)/$$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
 	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	@rm -f $$(PRIVATE_GCDA)
 endef
 
 # Compile a generated C source files#
@@ -241,11 +249,13 @@ $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
 $$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
 $$(OBJ): PRIVATE_SRC    := $$(SRC)
 $$(OBJ): PRIVATE_SRC0   := $$(SRC)
+$$(OBJ): PRIVATE_GCDA   := $$(OBJ:%.o=%.gcda)
 $$(OBJ): $$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
 	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	@rm -f $$(PRIVATE_GCDA)
 endef
 
 define compile-generated-cxx-source
@@ -259,11 +269,13 @@ $$(OBJ): PRIVATE_OBJ    := $$(OBJ)
 $$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
 $$(OBJ): PRIVATE_SRC    := $$(SRC)
 $$(OBJ): PRIVATE_SRC0   := $$(SRC)
+$$(OBJ): PRIVATE_GCDA   := $$(OBJ:%.o=%.gcda)
 $$(OBJ): $$(SRC)
 	@mkdir -p $$(dir $$(PRIVATE_OBJ))
 	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
 	$(hide) $$(PRIVATE_CXX) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
 	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+	@rm -f $$(PRIVATE_GCDA)
 endef
 
 # Install a file
