@@ -407,9 +407,9 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>20</y>
+       <y>50</y>
        <width>300</width>
-       <height>498</height>
+       <height>468</height>
       </rect>
      </property>
     </widget>
@@ -428,6 +428,55 @@
       </font>
      </property>
     </widget>
+    <widget class="QLabel" name="label_16">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>140</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Mode of travel</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="loc_travelMode">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>20</y>
+       <width>140</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Driving</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Walking</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Bicycling</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Transit</string>
+      </property>
+     </item>
+    </widget>
     <zorder>routeList</zorder>
     <zorder>saveRoute</zorder>
     <zorder>playRouteButton</zorder>
@@ -435,6 +484,8 @@
     <zorder>routeWebEngineView</zorder>
     <zorder>routeInfo</zorder>
     <zorder>noSavedRoutes_mask</zorder>
+    <zorder>label_16</zorder>
+    <zorder>loc_travelMode</zorder>
    </widget>
    <widget class="QWidget" name="settingsTab">
     <attribute name="title">

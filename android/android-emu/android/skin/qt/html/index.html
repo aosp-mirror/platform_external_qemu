@@ -165,6 +165,15 @@ html, body {
             gCurrentMarker.setIcon(image);
         }
 
+        // ?? The version in route.html is invoked and is what I want.
+        //    This version gets invoked also.
+        // ?? If I remove this version, the route.html version runs,
+        //    but I also get
+        //        "Uncaught ReferenceError: setTravelMode is not defined"
+        setTravelMode = function(mode) { // ??
+//            console.warn('index.html: js In setTravelMode(), Would like to remove this function');
+        }
+
         // Add Google search box
         // Create the search box and link it to the UI element.
         var input = /** @type {HTMLInputElement} */ (

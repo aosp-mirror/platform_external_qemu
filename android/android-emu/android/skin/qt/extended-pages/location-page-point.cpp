@@ -493,6 +493,13 @@ void LocationPage::setUpWebEngine(QWebEnginePage* webEnginePage, const char* pag
                             "setDeviceLocation(lat, lng);"
                         "}"
                     "});"
+                    "channel.objects.emulocationserver.travelModeChanged.connect(function(mode) {"
+                        "if (setTravelMode) {"
+//                            "console.warn('l-p-p js:Calling setTravelMode()');" // ??
+                            "setTravelMode(mode);"
+                        "}"
+//                        "else console.warn('l-p-p js:Cannot call setTravelMode()');" // ??
+                    "});"
                 "});"
             "}");
 

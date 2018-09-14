@@ -65,6 +65,11 @@ void LocationPage::on_playRouteButton_clicked() {
     printf("location-page-route: playRoute clicked\n"); // ??
 }
 
+void LocationPage::on_loc_travelMode_currentIndexChanged(int index) {
+    printf("location-page-route: Travel mode index is now %d\n", index); // ??
+    emit travelModeChanged(index);
+}
+
 // Populate mRouteList with the routes that are found on disk
 void LocationPage::scanForRoutes() {
 //    printf("l-p-p: >>>>> Starting scanForRoutes()\n"); // ??
@@ -250,6 +255,11 @@ void LocationPage::editRoute(int row) {
     dialogLayout->addWidget(new QLabel(tr("Mode")));
     QComboBox* transportMode = new QComboBox();
     transportMode->addItem(tr("None"));
+// ?? The Google Maps Directions Service supports
+//        DRIVING, WALKING, BICYCLING, TRANSIT
+//    I need to replace "Run" with "Transit" and use the gerund forms.
+//    go/icons has "directions transit", e.g. ic_directions_transit_black_24dp.svg
+//    The canonical term seems to be "travel mode"
     transportMode->addItem(getIconForCurrentTheme("bike"), tr("Bike"));
     transportMode->addItem(getIconForCurrentTheme("car"),  tr("Drive"));
     transportMode->addItem(getIconForCurrentTheme("run"),  tr("Run"));
@@ -504,6 +514,24 @@ void LocationPage::showRouteDetails(const RouteListElement* theElement) {
                           .arg(dirTail.str().c_str())
                           .arg(theElement->description);
     mUi->routeInfo->setHtml(infoString);
+}
+
+// Invoked by the Maps javascript when a route has been created
+void LocationPage::sendRouteToEmu(int pointIndex, double lat, double lng, double timeToHere) {
+    static double totalTime = 0.0;
+    if (pointIndex >= 0) {
+        printf("l-p-r: Got %3d: %9.4f %9.4f, %5.2fs\n",
+               pointIndex, lat, lng, timeToHere);
+        totalTime += timeToHere;
+    } else {
+        int hh = totalTime / (60.0 * 60.0);
+        totalTime -= hh * (60 * 60);
+        int mm = totalTime / 60.0;
+        totalTime -= mm * 60;
+        printf("l-p-r: Total time: %dh %dm %.2fs\n",
+               hh, mm, totalTime);
+        totalTime = 0.0;
+    }
 }
 
 // Write a protobuf into the specified directory.

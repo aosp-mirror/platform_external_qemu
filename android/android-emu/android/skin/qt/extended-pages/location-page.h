@@ -50,6 +50,7 @@ public:
     bool isLoadingGeoData() const { return mNowLoadingGeoData; }
     void requestStopLoadingGeoData() { mGpsNextPopulateIndex = mGpsFixesArray.size(); }
     Q_INVOKABLE void sendLocation(const QString& lat, const QString& lng);
+    Q_INVOKABLE void sendRouteToEmu(int pointIndex, double lat, double lng, double timeToHere);
 
     void updateTheme();
 
@@ -61,16 +62,16 @@ signals:
     void populateNextGeoDataChunk();
     void targetHeadingChanged(double heading);
 
-    // Ways to send location updates to the js code
-    void showLocation(QString lat, QString lng);
+    // Ways to send updates to the js code
     void locationChanged(QString lat, QString lng);
+    void showLocation(QString lat, QString lng);
+    void travelModeChanged(int mode);
 
 private slots:
     void on_loc_GpxKmlButton_clicked();
     void on_loc_pathTable_cellChanged(int row, int col);
     void on_loc_playStopButton_clicked();
     void on_loc_modeSwitch_currentIndexChanged(int index);
-//??    void on_playRouteButton_clicked();
     void on_loc_sendPointButton_clicked();
     void on_loc_longitudeInput_valueChanged(double);
     void on_loc_latitudeInput_valueChanged(double);
@@ -106,10 +107,11 @@ private slots:
     void on_pointList_cellClicked(int row, int column);
     void on_pointList_itemSelectionChanged();
 
-    void on_saveRoute_clicked();
+    void on_loc_travelMode_currentIndexChanged(int index);
     void on_playRouteButton_clicked();
     void on_routeList_cellClicked(int row, int column);
     void on_routeList_itemSelectionChanged();
+    void on_saveRoute_clicked();
 
 private:
     typedef struct {

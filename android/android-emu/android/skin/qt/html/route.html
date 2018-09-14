@@ -89,6 +89,19 @@ html, body {
 </head>
 <body>
     <input id="pac-input" class="controls" type="text" placeholder="Search">
+
+<!-- This looks bad
+    <div>
+    <strong>Mode of Travel: </strong>
+    <select id="mode" onchange="calcRoute();">
+      <option value="DRIVING">Driving</option>
+      <option value="WALKING">Walking</option>
+      <option value="BICYCLING">Bicycling</option>
+      <option value="TRANSIT">Transit</option>
+    </select>
+    </div>
+-->
+
     <div id="map"></div>
     <script>
     // Googleplex!
@@ -99,6 +112,8 @@ html, body {
     var gEndLatLng;
     var gDirectionsService;
     var gDirectionsDisplay;
+    var gTravelModeString = "DRIVING";
+            // DRIVING, WALKING, BICYCLING, TRANSIT
 
     // Callback function for Maps API
     function initMap() {
@@ -186,71 +201,18 @@ html, body {
             }
             gFirstPoint = !gFirstPoint;
 
-
-
-
-
-
-            // Send the location coordinates to the emulator
-            lastLatLng.lat = event.latLng.lat();
-            lastLatLng.lng = event.latLng.lng();
-            channel.objects.emulocationserver.sendLocation(event.latLng.lat(), event.latLng.lng());
         });
 
-        showPendingLocation = function(lat, lng) {
-            // Called from Qt code to show a pending location on the UI map.
-            // This point has NOT been sent to the AVD.
-            // Code to set location marker on the map. Move this to a signal event handler.
-
-            var latLng = new google.maps.LatLng(lat, lng);
-            gStartMarker.setPosition(latLng);
-
-
-
-            var blackDot = 'data:image/svg+xml, \
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" \
-                            viewBox="0 0 24 24" fill="#000000"> \
-                        <circle cx="12" cy="12" r="10" fill="#black" opacity=".1" /> \
-                        <circle cx="12" cy="12" r="8" stroke="white" stroke-width="2" \
-                            fill="#ffffff" /> \
-                    </svg>';
-            var blackDotImage = {
-              url: blackDot,
-              size: new google.maps.Size(24, 24),
-              origin: new google.maps.Point(0, 0),
-              anchor: new google.maps.Point(12, 12),
-              scaledSize: new google.maps.Size(25, 25)
-            };
-//            gStartMarker.setIcon(gFirstPoint ? null  // Default "pin"
-//                                               : blackDotImage);
-//            gStartMarker.setIcon(blackDotImage); // ??
-            console.warn('gFirstPoint was ' + gFirstPoint); // ??
-            gFirstPoint = !gFirstPoint;
-            gMap.setCenter(latLng);
-        }
-
-        setDeviceLocation = function(lat, lng) {
-            // Called from Qt code to show the blue marker to display the emulator location on the map.
-            // Code to set location marker on the map. Move this to a signal event handler.
-
-            var latLng = new google.maps.LatLng(lat, lng);
-            console.warn('Route page setting blue dot'); // ??
-            gStartMarker.setPosition(latLng);
-            var blueDot = 'data:image/svg+xml, \
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" \
-                            viewBox="0 0 24 24" fill="#000000"> \
-                        <circle cx="12" cy="12" r="10" fill="#black" opacity=".1" /> \
-                        <circle cx="12" cy="12" r="8" stroke="white" stroke-width="2" \
-                            fill="#4286f5" /> \
-                    </svg>';
-            var image = {
-              url: blueDot,
-              size: new google.maps.Size(24, 24),
-              origin: new google.maps.Point(0, 0),
-              anchor: new google.maps.Point(12, 12),
-              scaledSize: new google.maps.Size(25, 25)
-            };
-            gStartMarker.setIcon(image);
+        setTravelMode = function(mode) {
+            switch (mode) {
+                case 0:
+                default: gTravelModeString = "DRIVING";   break;
+                case 1:  gTravelModeString = "WALKING";   break;
+                case 2:  gTravelModeString = "BICYCLING"; break;
+                case 3:  gTravelModeString = "TRANSIT";   break;
+            }
+            console.warn('route.html: js In setTravelMode(), mode is now ' + gTravelModeString); // ??
+            // ?? Need to call calcRoute IF we have start and end points
         }
 
         // Add Google search box
@@ -346,9 +308,7 @@ html, body {
         var request = {
             origin: gStartLatLng,
             destination: gEndLatLng,
-            // DRIVING, WALKING, BICYCLING, TRANSIT
-            travelMode: 'DRIVING'
-//            travelMode: 'WALKING'
+            travelMode: gTravelModeString
         };
         gDirectionsDisplay = new google.maps.DirectionsRenderer();
         gDirectionsDisplay.setMap(gMap);
@@ -365,13 +325,17 @@ html, body {
                              + ' legs, leg[0] has ' + numSteps
                              + ' steps and lasts ' + leg0.duration.text); // ??
                 // Always accept the first point of the route
-                console.warn('     pt 0: ' + theSteps[0].path[0]
-                             + ', VERY FIRST POINT **');
-                var marker = new google.maps.Marker({
-                    map: gMap,
-                    position: theSteps[0].path[0]
-                });
                 var previousPoint = theSteps[0].path[0];
+                var numPointsSent = 0;
+                channel.objects.emulocationserver.sendRouteToEmu(
+                    numPointsSent, previousPoint.lat(), previousPoint.lng(), 0.0);
+                numPointsSent++;
+//                console.warn('     pt 0: ' + theSteps[0].path[0]
+//                             + ', VERY FIRST POINT **');
+//                var marker = new google.maps.Marker({
+//                    map: gMap,
+//                    position: theSteps[0].path[0]
+//                });
 
                 for (var stepIdx = 0; stepIdx < numSteps; stepIdx++) {
                     var thisStep = theSteps[stepIdx];
@@ -379,55 +343,67 @@ html, body {
                     var stepSpeed = thisStep.distance.value / thisStep.duration.value;
                     var thisPath = theSteps[stepIdx].path;
                     var numPts = thisPath.length;
-                    console.warn('  step ' + stepIdx + ' has ' + numPts
-                                 + ' points; distance '
-                                 + theSteps[stepIdx].distance.value
-                                 + ' meters, and lasts '
-                                 + theSteps[stepIdx].duration.value
-                                 + ' seconds'); // ??
+//                    console.warn('  step ' + stepIdx + ' has ' + numPts
+//                                 + ' points; distance '
+//                                 + theSteps[stepIdx].distance.value
+//                                 + ' meters, and lasts '
+//                                 + theSteps[stepIdx].duration.value
+//                                 + ' seconds'); // ??
                     for (var ptIdx = 1; ptIdx < numPts; ptIdx++) {
                         var thisPoint = thisPath[ptIdx];
+                        var dist = distanceBetween(previousPoint, thisPoint);
+                        // Determine how long it will take to get here
+                        // from the previously-accepted point
+                        var time = dist / stepSpeed;
+//                            if (dist < MINIMUM_DISTANCE) { // ??
+//                                console.warn('     pt ' + ptIdx // ??
+//                                             + ': ' + thisPath[ptIdx]
+//                                             + ', distance ' + dist
+//                                             + ' meters, time ' + time
+//                                             + ' -- too close');
+//                            } // ??
                         if (ptIdx != numPts-1) {
                             // This is not the last point of the step.
-                            // Accept it only if it is far enough from
-                            // the last point we accepted.
-                            var dist = distanceBetween(previousPoint, thisPoint);
-                            var time = dist / stepSpeed;
-                            if (dist < MINIMUM_DISTANCE) { // ??
-                                console.warn('     pt ' + ptIdx // ??
-                                             + ': ' + thisPath[ptIdx]
-                                             + ', distance ' + dist
-                                             + ' meters, time ' + time
-                                             + ' -- too close');
-                            } // ??
+                            // Accept it only if it is far enough (in
+                            // space-time) from the last point we accepted.
+
                             if (dist < MINIMUM_DISTANCE) continue;
-                            if (dist / stepSpeed < MINIMUM_TIME) {
-                                console.warn('     pt ' + ptIdx // ??
-                                             + ': ' + thisPath[ptIdx]
-                                             + ', distance ' + dist
-                                             + ' meters, time ' + time
-                                             + ' -- time too short');
-                            } // ??
-                            if (dist / stepSpeed < MINIMUM_TIME) continue;
-                            console.warn('     pt ' + ptIdx // ??
-                                         + ': ' + thisPath[ptIdx]
-                                         + ', distance ' + dist
-                                         + ' meters, time ' + time
-                                         + ' -- TAKE IT');
+//                            if (dist / stepSpeed < MINIMUM_TIME) { // ??
+//                                console.warn('     pt ' + ptIdx // ??
+//                                             + ': ' + thisPath[ptIdx]
+//                                             + ', distance ' + dist
+//                                             + ' meters, time ' + time
+//                                             + ' -- time too short');
+//                            } // ??
+                            if (time < MINIMUM_TIME) continue;
+//                            console.warn('     pt ' + ptIdx // ??
+//                                         + ': ' + thisPath[ptIdx]
+//                                         + ', distance ' + dist
+//                                         + ' meters, time ' + time
+//                                         + ' -- TAKE IT');
                         }
-                        else console.warn('     pt ' + ptIdx // ??
-                                         + ': ' + thisPath[ptIdx]
-                                         + ', LAST POINT OF STEP **');
+//                        else console.warn('     pt ' + ptIdx // ??
+//                                         + ': ' + thisPath[ptIdx]
+//                                         + ', LAST POINT OF STEP **');
+
+                        // Send this point to the Emulator
+                        channel.objects.emulocationserver.sendRouteToEmu(
+                            numPointsSent, thisPoint.lat(), thisPoint.lng(), time);
+
+                        numPointsSent++;
                         previousPoint = thisPoint;
 
-                        var marker = new google.maps.Marker({
-                            map: gMap,
-                            position: thisPoint
-                        });
+//                        var marker = new google.maps.Marker({
+//                            map: gMap,
+//                            position: thisPoint
+//                        });
                     }
                 }
+                // Let the Emulator know that it has all the data
+                channel.objects.emulocationserver.sendRouteToEmu(-1, 0.0, 0.0, 0.0);
 // ^^ ??
-//??                gDirectionsDisplay.setDirections(result);
+                // Show the route on the Map
+                gDirectionsDisplay.setDirections(result);
             }
             else console.warn('JZK Route result had status != OK'); // ??
         });
