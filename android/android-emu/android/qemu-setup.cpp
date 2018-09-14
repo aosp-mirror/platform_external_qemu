@@ -32,9 +32,9 @@
 #include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
 #include "android/logcat-pipe.h"
+#include "android/offworld/OffworldPipe.h"
 #include "android/opengles-pipe.h"
 #include "android/proxy/proxy_setup.h"
-#include "android/snapshot/SnapshotPipe.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/ipaddr.h"
@@ -328,7 +328,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_init_opengles_pipe();
     android_init_clipboard_pipe();
     android_init_logcat_pipe();
-    android::snapshot::registerSnapshotPipeService();
+    android::offworld::registerOffworldPipeService();
 
 #ifndef _WIN32
     // bug: 70566718
