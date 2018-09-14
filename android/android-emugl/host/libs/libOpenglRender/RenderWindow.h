@@ -137,6 +137,8 @@ public:
     // Resets whether the guest has posted a frame.
     void resetGuestPostedAFrame();
 
+    void flushMessages();
+
 private:
     bool processMessage(const RenderWindowMessage& msg);
     bool useThread() const { return mThread != nullptr; }

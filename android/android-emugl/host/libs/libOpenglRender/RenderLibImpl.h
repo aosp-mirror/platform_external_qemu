@@ -39,6 +39,7 @@ public:
                                emugl_sync_device_exists_t) override;
 
     virtual void setDmaOps(emugl_dma_ops) override;
+    virtual void setIsLoadingSnapshot(emugl_is_loading_t) override;
 
     virtual void* getGL(void) override;
 
