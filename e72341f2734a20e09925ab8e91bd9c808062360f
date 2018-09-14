@@ -294,6 +294,30 @@
     },
     {
       "key": {
+        "uuid": "aeb56103_eb646d9b",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 2558,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-14T13:58:05Z",
+      "side": 1,
+      "message": "Point taken on the normalization, will address. However, I still think it\u0027s safer to only delete something that looks like the above, since it\u0027s still really bad to delete user dirs, we don\u0027t want to delete c:\\users\\temp or anything so I\u0027m taking a real cautious approach to it.",
+      "parentUuid": "cc20071e_c00b8b71",
+      "range": {
+        "startLine": 2552,
+        "startChar": 4,
+        "endLine": 2558,
+        "endChar": 6
+      },
+      "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "05e9b2d1_35501365",
         "filename": "android/android-emu/android/base/system/System.cpp",
         "patchSetId": 12
@@ -361,6 +385,30 @@
       "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a9401d5d_19c0233c",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 2592,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-14T13:58:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4f09dfd3_8d0eb9a3",
+      "range": {
+        "startLine": 2591,
+        "startChar": 4,
+        "endLine": 2592,
+        "endChar": 0
+      },
+      "revId": "e72341f2734a20e09925ab8e91bd9c808062360f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
