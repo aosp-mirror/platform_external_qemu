@@ -14,11 +14,12 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/AndroidMessagePipe.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/metrics/MetricsLogging.h"
 #include "android/multi-instance.h"
+#include "android/offworld/proto/offworld.pb.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
-#include "android/snapshot/proto/offworld.pb.h"
 
 #include <assert.h>
 #include <atomic>
@@ -48,19 +49,19 @@ size_t getReadable(std::iostream& stream) {
     return ret;
 }
 
-class SnapshotPipe : public android::AndroidMessagePipe {
+class OffworldPipe : public android::AndroidMessagePipe {
 public:
     class Service : public android::AndroidPipe::Service {
     public:
-        Service() : android::AndroidPipe::Service("SnapshotPipe") {}
+        Service() : android::AndroidPipe::Service("OffworldPipe") {}
         bool canLoad() const override { return true; }
 
         virtual android::AndroidPipe* create(void* hwPipe, const char* args)
                 override {
             // To avoid complicated synchronization issues, only 1 instance
-            // of a SnapshotPipe is allowed at a time
+            // of a OffworldPipe is allowed at a time
             if (sSnapshotCrossSession->sLock.tryLock()) {
-                return new SnapshotPipe(hwPipe, this);
+                return new OffworldPipe(hwPipe, this);
             } else {
                 return nullptr;
             }
@@ -72,10 +73,10 @@ public:
             __attribute__((unused)) bool success =
                     sSnapshotCrossSession->sLock.tryLock();
             assert(success);
-            return new SnapshotPipe(hwPipe, this, stream);
+            return new OffworldPipe(hwPipe, this, stream);
         }
     };
-    SnapshotPipe(void* hwPipe,
+    OffworldPipe(void* hwPipe,
                  Service* service,
                  android::base::Stream* loadStream = nullptr)
         : android::AndroidMessagePipe(hwPipe, service, decodeAndExecute,
@@ -87,7 +88,7 @@ public:
             // sMetaData should be cleared after the move
         }
     }
-    ~SnapshotPipe() { sSnapshotCrossSession->sLock.unlock(); }
+    ~OffworldPipe() { sSnapshotCrossSession->sLock.unlock(); }
 
 private:
     static void encodeGuestRecvFrame(const google::protobuf::Message& message,
@@ -292,9 +293,11 @@ private:
 }  // namespace
 
 namespace android {
-namespace snapshot {
-void registerSnapshotPipeService() {
-    android::AndroidPipe::Service::add(new SnapshotPipe::Service());
+namespace offworld {
+void registerOffworldPipeService() {
+    if (android::featurecontrol::isEnabled(android::featurecontrol::Offworld)) {
+        android::AndroidPipe::Service::add(new OffworldPipe::Service());
+    }
 }
-}  // namespace snapshot
+}  // namespace offworld
 }  // namespace android

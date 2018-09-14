@@ -12,9 +12,9 @@
 #pragma once
 
 namespace android {
-namespace snapshot {
+namespace offworld {
 
-void registerSnapshotPipeService();
+void registerOffworldPipeService();
 
-}
+}  // namespace offworld
 }  // namespace android
