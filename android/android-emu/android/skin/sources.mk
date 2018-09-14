@@ -7,22 +7,8 @@ ANDROID_SKIN_STATIC_LIBRARIES :=
 
 ANDROID_SKIN_QT_MOC_SRC_FILES :=
 ANDROID_SKIN_QT_RESOURCES :=
-
-ANDROID_SKIN_SOURCES := \
-    android/skin/charmap.c \
-    android/skin/rect.c \
-    android/skin/generic-event.cpp \
-    android/skin/generic-event-buffer.cpp \
-    android/skin/image.c \
-    android/skin/trackball.c \
-    android/skin/keyboard.c \
-    android/skin/keycode.c \
-    android/skin/keycode-buffer.c \
-    android/skin/file.c \
-    android/skin/window.c \
-    android/skin/resource.c \
-    android/skin/ui.c \
-
+# DEPRECATED! MODIFY THE CMAKELISTS.TXT instead.
+#
 # enable MMX code for our skin scaler
 ANDROID_SKIN_CFLAGS += -DUSE_MMX=1 -mmmx
 
