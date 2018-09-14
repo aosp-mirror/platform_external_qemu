@@ -32,7 +32,12 @@ else
  $(eval $(call cmake-project-host,$(LOCAL_CMAKELISTS),$(LOCAL_BUILT_MAKEFILE)))
 endif
 
-$(foreach exe,$(PRODUCED_EXECUTABLES), \
+$(foreach prg,$(PRODUCED_EXECUTABLES), \
+  $(eval map := $(subst =,$(space),$(prg))) \
+  $(info $(map)) \
+  $(eval exe := $(word 1, $(map))) \
+  $(eval to  := $(word 2, $(map))) \
+  $(eval to  := $(if $(to),$(to),$(exe))) \
   $(eval LOCAL_BUILT_MODULE := $(LOCAL_CMAKE_MODULE)/$(exe)) \
   $(eval LOCAL_INSTALL_MODULE := $(call local-executable-install-path,$(exe))) \
   $(eval $(call make-cmake-project,$(LOCAL_BUILT_MAKEFILE),$(LOCAL_BUILT_MODULE),$(exe))) \

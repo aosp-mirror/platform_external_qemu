@@ -1,6 +1,10 @@
 # Build file for tinyepoxy library.
 
-$(call start-emulator-library, emulator-tinyepoxy)
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/android/android-emugl/host/include
-LOCAL_SRC_FILES := android/third_party/tinyepoxy/tinyepoxy.cpp
+OLD_LOCAL_PATH := $(LOCAL_PATH)
+LOCAL_PATH := $(call my-dir)
+
+$(call start-cmake-project, emulator-tinyepoxy)
+PRODUCED_STATIC_LIBS := emulator-tinyepoxy
 $(call end-emulator-library)
+
+LOCAL_PATH = $(OLD_LOCAL_PATH)
