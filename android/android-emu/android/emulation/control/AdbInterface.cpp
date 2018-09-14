@@ -255,6 +255,7 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         ResultCallback&& result_callback,
         System::Duration timeout_ms,
         bool want_output) {
+    fprintf(stderr, "%s: call\n", __func__);
     auto command = std::shared_ptr<AdbCommand>(
             new AdbCommand(mLooper, adbPath(), mSerialString, args, want_output,
                            timeout_ms, std::move(result_callback)));
