@@ -470,6 +470,7 @@ CC="$SDK_TOOLCHAIN_DIR/${BINPREFIX}gcc"
 CXX="$SDK_TOOLCHAIN_DIR/${BINPREFIX}g++"
 TIDY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}clang-tidy"
 AR="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ar"
+RANLIB="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ranlib"
 LD=$CXX
 OBJCOPY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}objcopy"
 TOOLCHAIN_SYSROOT="$("${GEN_SDK}" $GEN_SDK_FLAGS --print=sysroot "${SDK_TOOLCHAIN_DIR}")"
@@ -487,6 +488,7 @@ fi
 setup_toolchain
 
 BUILD_AR=$AR
+BUILD_RANLIB=$RANLIB
 BUILD_CC=$CC
 BUILD_CXX=$CXX
 BUILD_LD=$LD
@@ -595,6 +597,11 @@ case "$HOST_OS" in
     ;;
 esac
 
+CMAKE_DIR=$AOSP_PREBUILTS_DIR/cmake
+if [ ! -d "$CMAKE_DIR" ]; then
+  panic "Missing cmake directory: $CMAKE_DIR"
+fi
+
 probe_prebuilts_dir () {
     local PREBUILTS_DIR
     PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/$3
@@ -659,6 +666,7 @@ probe_prebuilts_dir "Protobuf" PROTOBUF_PREBUILTS_DIR protobuf
 ###  virglrenderer probe
 ###
 probe_prebuilts_dir "virglrenderer" VIRGLRENDERER_PREBUILTS_DIR common/virglrenderer
+
 
 CACERTS_FILE="$PROGDIR/data/ca-bundle.pem"
 if [ ! -f "$CACERTS_FILE" ]; then
@@ -1223,6 +1231,7 @@ echo "BUILD_TIDY            := $TIDY" >> $config_mk
 
 echo "" >> $config_mk
 echo "BUILD_HOST_AR         := $BUILD_AR" >> $config_mk
+echo "BUILD_HOST_RANLIB     := $BUILD_RANLIB" >> $config_mk
 echo "BUILD_HOST_CC         := $BUILD_CC" >> $config_mk
 echo "BUILD_HOST_CC_TYPE    := $(cc_type $BUILD_CC)" >> $config_mk
 echo "BUILD_HOST_CXX        := $BUILD_CXX" >> $config_mk
@@ -1264,6 +1273,7 @@ else
     echo "EMULATOR_USE_ANGLE := false" >> $config_mk
 fi
 
+echo "CMAKE_DIR := $CMAKE_DIR" >> $config_mk
 echo "COMMON_PREBUILTS_DIR := $COMMON_PREBUILTS_DIR" >> $config_mk
 echo "ZLIB_PREBUILTS_DIR := $ZLIB_PREBUILTS_DIR" >> $config_mk
 echo "LIBPNG_PREBUILTS_DIR := $LIBPNG_PREBUILTS_DIR" >> $config_mk
