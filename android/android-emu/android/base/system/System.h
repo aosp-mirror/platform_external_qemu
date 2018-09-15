@@ -477,6 +477,7 @@ protected:
     // regardless of being TestSystem.
     static void setEnvironmentVariable(StringView varname, StringView varvalue);
     static std::string getEnvironmentVariable(StringView varname);
+    static std::string getProgramDirectoryFromPlatform();
 
 private:
     DISALLOW_COPY_AND_ASSIGN(System);
