@@ -852,7 +852,7 @@ case $HOST_OS in
         ;;
 esac
 
-if [ "$OPTION_AEMU64_ONLY" == "yes" ]; then
+if [ "$OPTION_AEMU64_ONLY" = "yes" ]; then
     PREBUILT_ARCHS="x86_64"
 fi
 
@@ -1015,7 +1015,7 @@ fi
 ###  Copy Mesa if available
 ###
 MESA_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/mesa
-if [ [ -d $MESA_PREBUILTS_DIR ] && [ "$OPTION_AEMU64_ONLY" == "no"] ]; then
+if [ -d $MESA_PREBUILTS_DIR ] && [ "$OPTION_AEMU64_ONLY" = "no"]; then
     log "Copying Mesa prebuilt libraries from $MESA_PREBUILTS_DIR"
     case $HOST_OS in
         windows)

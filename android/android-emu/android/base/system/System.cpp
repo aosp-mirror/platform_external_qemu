@@ -248,56 +248,7 @@ public:
 
     const std::string& getProgramDirectory() const override {
         if (mProgramDir.empty()) {
-#if defined(__linux__)
-            char path[1024];
-            memset(path, 0, sizeof(path));  // happy valgrind!
-            int len = readlink("/proc/self/exe", path, sizeof(path));
-            if (len > 0 && len < (int)sizeof(path)) {
-                char* x = ::strrchr(path, '/');
-                if (x) {
-                    *x = '\0';
-                    mProgramDir.assign(path);
-                }
-            }
-#elif defined(__APPLE__)
-            ProcessSerialNumber psn;
-            GetCurrentProcess(&psn);
-            CFDictionaryRef dict =
-                    ProcessInformationCopyDictionary(&psn, 0xffffffff);
-            CFStringRef value = (CFStringRef)CFDictionaryGetValue(
-                    dict, CFSTR("CFBundleExecutable"));
-            char s[PATH_MAX];
-            CFStringGetCString(value, s, PATH_MAX - 1, kCFStringEncodingUTF8);
-            char* x = ::strrchr(s, '/');
-            if (x) {
-                // skip all slashes - there might be more than one
-                while (x > s && x[-1] == '/') {
-                    --x;
-                }
-                *x = '\0';
-                mProgramDir.assign(s);
-            } else {
-                mProgramDir.assign("<unknown-application-dir>");
-            }
-#elif defined(_WIN32)
-            Win32UnicodeString appDir(PATH_MAX);
-            int len = GetModuleFileNameW(0, appDir.data(), appDir.size());
-            mProgramDir.assign("<unknown-application-dir>");
-            if (len > 0) {
-                if (len > (int)appDir.size()) {
-                    appDir.resize(static_cast<size_t>(len));
-                    GetModuleFileNameW(0, appDir.data(), appDir.size());
-                }
-                std::string dir = appDir.toString();
-                char* sep = ::strrchr(&dir[0], '\\');
-                if (sep) {
-                    *sep = '\0';
-                    mProgramDir.assign(dir.c_str());
-                }
-            }
-#else
-#error "Unsupported platform!"
-#endif
+            mProgramDir.assign(getProgramDirectoryFromPlatform());
         }
         return mProgramDir;
     }
@@ -2322,6 +2273,62 @@ std::string System::getEnvironmentVariable(StringView varname) {
     }
     return std::string(value);
 #endif
+}
+
+// static
+std::string System::getProgramDirectoryFromPlatform() {
+    std::string res;
+#if defined(__linux__)
+    char path[1024];
+    memset(path, 0, sizeof(path));  // happy valgrind!
+    int len = readlink("/proc/self/exe", path, sizeof(path));
+    if (len > 0 && len < (int)sizeof(path)) {
+        char* x = ::strrchr(path, '/');
+        if (x) {
+            *x = '\0';
+            res.assign(path);
+        }
+    }
+#elif defined(__APPLE__)
+    ProcessSerialNumber psn;
+    GetCurrentProcess(&psn);
+    CFDictionaryRef dict =
+            ProcessInformationCopyDictionary(&psn, 0xffffffff);
+    CFStringRef value = (CFStringRef)CFDictionaryGetValue(
+            dict, CFSTR("CFBundleExecutable"));
+    char s[PATH_MAX];
+    CFStringGetCString(value, s, PATH_MAX - 1, kCFStringEncodingUTF8);
+    char* x = ::strrchr(s, '/');
+    if (x) {
+        // skip all slashes - there might be more than one
+        while (x > s && x[-1] == '/') {
+            --x;
+        }
+        *x = '\0';
+        res.assign(s);
+    } else {
+        res.assign("<unknown-application-dir>");
+    }
+#elif defined(_WIN32)
+    Win32UnicodeString appDir(PATH_MAX);
+    int len = GetModuleFileNameW(0, appDir.data(), appDir.size());
+    res.assign("<unknown-application-dir>");
+    if (len > 0) {
+        if (len > (int)appDir.size()) {
+            appDir.resize(static_cast<size_t>(len));
+            GetModuleFileNameW(0, appDir.data(), appDir.size());
+        }
+        std::string dir = appDir.toString();
+        char* sep = ::strrchr(&dir[0], '\\');
+        if (sep) {
+            *sep = '\0';
+            res.assign(dir.c_str());
+        }
+    }
+#else
+#error "Unsupported platform!"
+#endif
+    return res;
 }
 
 std::string toString(OsType osType) {

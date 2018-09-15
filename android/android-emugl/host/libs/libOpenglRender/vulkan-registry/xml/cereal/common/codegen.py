@@ -136,6 +136,9 @@ class CodeGen(object):
     def line(self, code):
         self.code += self.indent() + code + "\n"
 
+    def leftline(self, code):
+        self.code += code + "\n"
+
     def funcCall(self, lhs, funcName, parameters):
         res = self.indent()
 
@@ -426,6 +429,18 @@ class VulkanWrapperGenerator(object):
     def __init__(self, module, typeInfo):
         self.module = module
         self.typeInfo = typeInfo
+
+    def onBegin(self):
+        pass
+
+    def onEnd(self):
+        pass
+
+    def onBeginFeature(self, featureName):
+        pass
+
+    def onEndFeature(self):
+        pass
 
     def onGenType(self, typeInfo, name, alias):
         pass
