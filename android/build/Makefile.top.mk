@@ -325,6 +325,21 @@ end-emulator-program = \
       $(eval LOCAL_LDFLAGS += -Wl,-rpath=\$$$$ORIGIN/lib64:\$$$$ORIGIN/lib)) \
     $(eval $(end-emulator-module-ev)) \
 
+# A variant that enables incorporation of cmake subprojects.
+start-cmake-project = \
+    $(eval include $(CLEAR_VARS)) \
+    $(eval PRODUCED_EXECUTABLES:=) \
+    $(eval PRODUCED_TESTS:=) \
+    $(eval PRODUCED_SHARED_LIBS:=) \
+    $(eval PRODUCED_STATIC_LIBS:=) \
+    $(eval LOCAL_MODULE:=$(1)) \
+    $(eval LOCAL_BUILD_FILE := $(BUILD_CMAKE))
+
+# A variant of end-emulator-library for host programs instead
+end-cmake-project = \
+    $(eval $(end-emulator-module-ev)) \
+
+
 # Same thing for shared libraries
 start-emulator-shared-lib = \
     $(call start-emulator-library,$1) \
