@@ -9,11 +9,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/base/Log.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/emulation/AndroidMessagePipe.h"
-#include "android/metrics/MetricsLogging.h"
 #include "android/multi-instance.h"
 #include "android/offworld/proto/offworld.pb.h"
 #include "android/snapshot/SnapshotAPI.h"
@@ -26,15 +26,14 @@
 #include <sstream>
 #include <vector>
 
-extern const QAndroidVmOperations* const gQAndroidVmOperations;
-
 namespace {
 
-struct OffworldCrossSession {
+struct OffworldState {
     android::base::Lock sLock = {};
 };
 
-android::base::LazyInstance<OffworldCrossSession> sOffworldCrossSession;
+static constexpr uint32_t kProtocolVersion = 1;
+android::base::LazyInstance<OffworldState> sOffworldState;
 
 class OffworldPipe : public android::AndroidMessagePipe {
 public:
@@ -47,7 +46,7 @@ public:
                 override {
             // To avoid complicated synchronization issues, only 1 instance
             // of a OffworldPipe is allowed at a time
-            if (sOffworldCrossSession->sLock.tryLock()) {
+            if (sOffworldState->sLock.tryLock()) {
                 return new OffworldPipe(hwPipe, this);
             } else {
                 return nullptr;
@@ -58,7 +57,7 @@ public:
                                    const char* args,
                                    android::base::Stream* stream) override {
             __attribute__((unused)) bool success =
-                    sOffworldCrossSession->sLock.tryLock();
+                    sOffworldState->sLock.tryLock();
             assert(success);
             return new OffworldPipe(hwPipe, this, stream);
         }
@@ -66,74 +65,110 @@ public:
     OffworldPipe(void* hwPipe,
                  Service* service,
                  android::base::Stream* loadStream = nullptr)
-        : android::AndroidMessagePipe(hwPipe, service, decodeAndExecute,
-        loadStream) {
-        ANDROID_IF_DEBUG(assert(sOffworldCrossSession->sLock.isLocked()));
-        mIsLoad = static_cast<bool>(loadStream);
-        if (mIsLoad) {
+        : android::AndroidMessagePipe(hwPipe,
+                                      service,
+                                      std::bind(&OffworldPipe::decodeAndExecute,
+                                                this,
+                                                std::placeholders::_1,
+                                                std::placeholders::_2),
+                                      loadStream) {
+        ANDROID_IF_DEBUG(assert(sOffworldState->sLock.isLocked()));
+        const bool isLoad = static_cast<bool>(loadStream);
+        if (isLoad) {
+            // TODO(jwmcglynn): Store state on the stream to make sure handshake
+            // was successful.
+            mHandshakeComplete = true;
             resetRecvPayload(android::snapshot::getLoadMetadata());
         }
     }
-    ~OffworldPipe() { sOffworldCrossSession->sLock.unlock(); }
+    ~OffworldPipe() { sOffworldState->sLock.unlock(); }
 
 private:
-    static void encodeGuestRecvFrame(const google::protobuf::Message& message,
-            std::vector<uint8_t>* output) {
-        uint32_t recvSize = message.ByteSize();
-        output->resize(recvSize + sizeof(recvSize));
-        memcpy(output->data(), (void*)&recvSize, sizeof(recvSize));
-        message.SerializeToArray(output->data() + sizeof(recvSize),
-                recvSize);
-    }
-    static void decodeAndExecute(const std::vector<uint8_t>& input,
-            std::vector<uint8_t>* output) {
-        offworld::GuestSend guestSendPb;
-        offworld::GuestRecv guestRecvPb;
-        bool shouldReply = false;
-        if (!guestSendPb.ParseFromArray(input.data(), input.size())) {
-            E("Offworld lib message parsing failed.");
+    void decodeAndExecute(const std::vector<uint8_t>& input,
+                          std::vector<uint8_t>* output) {
+        output->clear();
+
+        if (!mHandshakeComplete) {
+            offworld::ConnectHandshake request;
+            offworld::ConnectHandshakeResponse response;
+            response.set_result(offworld::ConnectHandshakeResponse::OK);
+
+            bool error = false;
+            if (request.ParseFromArray(input.data(), input.size())) {
+                if (request.version() != kProtocolVersion) {
+                    VLOG(offworld) << "Unsupported offworld version: "
+                                   << request.version();
+                    error = true;
+                    response.set_result(offworld::ConnectHandshakeResponse::
+                                                ERROR_VERSION_MISMATCH);
+                }
+            } else {
+                LOG(ERROR) << "Failed to parse offworld handshake.";
+                error = true;
+                response.set_result(
+                        offworld::ConnectHandshakeResponse::ERROR_UNKNOWN);
+            }
+
+            // TODO(jwmcglynn): Close the pipe if there was a handshake error.
+            if (!error) {
+                mHandshakeComplete = true;
+            }
+
+            const int size = response.ByteSize();
+            output->resize(size, 0);
+            response.SerializeToArray(output->data(), size);
+
         } else {
-            switch (guestSendPb.module_case()) {
-                case offworld::GuestSend::ModuleCase::kSnapshot:
-                    handleSnapshotPb(guestSendPb, &shouldReply, &guestRecvPb);
-                    break;
-                case offworld::GuestSend::ModuleCase::kArTesting:
-                    // TODO
-                    break;
-                default:
-                    E("Offworld lib received unrecognized message!\n");
+            offworld::Request request;
+            offworld::Response response;
+            bool shouldReply = false;
+
+            if (!request.ParseFromArray(input.data(), input.size())) {
+                LOG(ERROR) << "Offworld lib message parsing failed.";
+            } else {
+                switch (request.module_case()) {
+                    case offworld::Request::ModuleCase::kSnapshot:
+                        handleSnapshotPb(request.snapshot(), &shouldReply,
+                                         &response);
+                        break;
+                    case offworld::Request::ModuleCase::kAutomation:
+                        // TODO
+                        break;
+                    default:
+                        LOG(ERROR) << "Offworld lib received unrecognized "
+                                      "message!";
+                }
+            }
+            if (shouldReply) {
+                const int size = response.ByteSize();
+                output->resize(size, 0);
+                response.SerializeToArray(output->data(), size);
             }
         }
-        if (shouldReply) {
-            output->resize(guestRecvPb.ByteSize());
-            guestRecvPb.SerializeToArray(output, output->size());
-        } else {
-            output->clear();
-        }
     }
-    static void handleSnapshotPb(const offworld::GuestSend& guestSend,
+
+    static void handleSnapshotPb(const offworld::SnapshotRequest& request,
                                  bool* shouldReply,
-                                 offworld::GuestRecv* guestRecv) {
-        const offworld::GuestSend::ModuleSnapshot& snapshotPb
-                = guestSend.snapshot();
-        using MS = offworld::GuestSend::ModuleSnapshot;
-        switch (snapshotPb.function_case()) {
-            case MS::FunctionCase::kCreateCheckpointParam: {
+                                 offworld::Response* response) {
+        using MS = offworld::SnapshotRequest;
+
+        switch (request.function_case()) {
+            case MS::FunctionCase::kCreateCheckpoint: {
                 android::snapshot::createCheckpoint(
-                        snapshotPb.create_checkpoint_param().snapshot_name());
+                        request.create_checkpoint().snapshot_name());
                 *shouldReply = true;
-                guestRecv->Clear();
+                response->Clear();
                 break;
             }
-            case MS::FunctionCase::kGotoCheckpointParam: {
-                const MS::GotoCheckpoint& gotoCheckpointParam
-                        = snapshotPb.goto_checkpoint_param();
+            case MS::FunctionCase::kGotoCheckpoint: {
+                const MS::GotoCheckpoint& gotoCheckpoint =
+                        request.goto_checkpoint();
 
                 android::base::FileShare shareMode;
                 bool hasShareMode = false;
 
-                if (gotoCheckpointParam.has_share_mode()) {
-                    switch (gotoCheckpointParam.share_mode()) {
+                if (gotoCheckpoint.has_share_mode()) {
+                    switch (gotoCheckpoint.share_mode()) {
                         case MS::GotoCheckpoint::UNKNOWN:
                         case MS::GotoCheckpoint::UNCHANGED:
                             hasShareMode = false;
@@ -147,50 +182,46 @@ private:
                             shareMode = android::base::FileShare::Write;
                             break;
                         default:
-                            fprintf(stderr,
-                                    "WARNING: unsupported share mode, "
-                                    "default to unchanged.\n");
+                            LOG(WARNING) << "Unsupported share mode, "
+                                            "defaulting to unchanged.";
                             break;
                     }
                 }
 
                 if (hasShareMode) {
                     android::snapshot::gotoCheckpointWithShareMode(
-                            gotoCheckpointParam.snapshot_name(),
-                            gotoCheckpointParam.metadata(), shareMode);
+                            gotoCheckpoint.snapshot_name(),
+                            gotoCheckpoint.metadata(), shareMode);
                 } else {
                     android::snapshot::gotoCheckpoint(
-                            gotoCheckpointParam.snapshot_name(),
-                            gotoCheckpointParam.metadata());
+                            gotoCheckpoint.snapshot_name(),
+                            gotoCheckpoint.metadata());
                 }
                 *shouldReply = false;
                 break;
             }
-            case MS::FunctionCase::kForkReadOnlyInstancesParam: {
+            case MS::FunctionCase::kForkReadOnlyInstances: {
                 if (android::multiinstance::getInstanceShareMode() ==
                     android::base::FileShare::Write) {
                     android::snapshot::forkReadOnlyInstances(
-                            snapshotPb.fork_read_only_instances_param()
-                                    .num_instances());
+                            request.fork_read_only_instances().num_instances());
                 }
                 *shouldReply = false;
                 break;
             }
-            case MS::FunctionCase::kDoneInstanceParam: {
+            case MS::FunctionCase::kDoneInstance: {
                 android::snapshot::doneInstance();
                 *shouldReply = false;
                 break;
             }
             default:
-                fprintf(stderr, "Error: offworld lib received unrecognized "
-                        "message!");
+                LOG(ERROR) << "Unrecognized offworld snapshot message";
                 *shouldReply = false;
         }
     }
-    enum class OP : int32_t { Save = 0, Load = 1 };
-    bool mIsLoad;
-};
 
+    bool mHandshakeComplete = false;
+};
 
 }  // namespace
 
