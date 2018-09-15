@@ -40,12 +40,15 @@ struct SnapshotCrossSession {
 
 android::base::LazyInstance<SnapshotCrossSession> sSnapshotCrossSession;
 
-static void encodeMetadataFrame(const google::protobuf::Message& message,
-                                std::vector<uint8_t>* output) {
+static void setResponseAfterLoad(const google::protobuf::Message& message) {
+    std::vector<uint8_t> output;
+
     uint32_t recvSize = message.ByteSize();
-    output->resize(recvSize + sizeof(recvSize));
-    memcpy(output->data(), (void*)&recvSize, sizeof(recvSize));
-    message.SerializeToArray(output->data() + sizeof(recvSize), recvSize);
+    output.resize(recvSize + sizeof(recvSize));
+    memcpy(output.data(), (void*)&recvSize, sizeof(recvSize));
+    message.SerializeToArray(output.data() + sizeof(recvSize), recvSize);
+
+    sSnapshotCrossSession->sMetaData = std::move(output);
 }
 
 }  // namespace
@@ -73,9 +76,11 @@ void gotoCheckpoint(
     // just protobuf encodes them into strings. The data should be
     // handled as raw bytes (no extra '\0' at the end). Please try
     // not to use metadata.c_str().
-    offworld::GuestRecv::ModuleSnapshot::CreateCheckpoint recv;
-    recv.set_metadata(metadata);
-    encodeMetadataFrame(recv, &sSnapshotCrossSession->sMetaData);
+    offworld::Response response;
+    response.set_result(offworld::Response::RESULT_NO_ERROR);
+    response.mutable_snapshot()->mutable_create_checkpoint()->set_metadata(
+            metadata);
+    setResponseAfterLoad(response);
 
     gQAndroidVmOperations->vmStop();
     android::base::ThreadLooper::runOnMainLooper([snapshotName, shareMode]() {
@@ -100,9 +105,12 @@ void forkReadOnlyInstances(int forkTotal) {
     sSnapshotCrossSession->sForkTotal = forkTotal;
     sSnapshotCrossSession->sForkId = 0;
 
-    offworld::GuestRecv::ModuleSnapshot::ForkReadOnlyInstances recv;
-    recv.set_instance_id(sSnapshotCrossSession->sForkId);
-    encodeMetadataFrame(recv, &sSnapshotCrossSession->sMetaData);
+    offworld::Response response;
+    response.set_result(offworld::Response::RESULT_NO_ERROR);
+    response.mutable_snapshot()
+            ->mutable_fork_read_only_instances()
+            ->set_instance_id(sSnapshotCrossSession->sForkId);
+    setResponseAfterLoad(response);
 
     gQAndroidVmOperations->vmStop();
     android::base::ThreadLooper::runOnMainLooper([]() {
@@ -130,9 +138,13 @@ void doneInstance() {
     if (sSnapshotCrossSession->sForkId <
         sSnapshotCrossSession->sForkTotal - 1) {
         sSnapshotCrossSession->sForkId++;
-        offworld::GuestRecv::ModuleSnapshot::ForkReadOnlyInstances recv;
-        recv.set_instance_id(sSnapshotCrossSession->sForkId);
-        encodeMetadataFrame(recv, &sSnapshotCrossSession->sMetaData);
+
+        offworld::Response response;
+        response.set_result(offworld::Response::RESULT_NO_ERROR);
+        response.mutable_snapshot()
+                ->mutable_fork_read_only_instances()
+                ->set_instance_id(sSnapshotCrossSession->sForkId);
+        setResponseAfterLoad(response);
 
         if (sSnapshotCrossSession->sForkId <
             sSnapshotCrossSession->sForkTotal - 1) {
@@ -160,6 +172,9 @@ void doneInstance() {
         // We don't load after the last run
         sSnapshotCrossSession->sForkId = 0;
         sSnapshotCrossSession->sForkTotal = 0;
+
+        // TODO(yahan): Send a DoneInstance response.
+
     } else {
         fprintf(stderr, "WARNING: bad fork session ID\n");
     }

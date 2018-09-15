@@ -2,77 +2,177 @@ syntax = "proto2";
 
 package offworld;
 
-enum ModuleName {
-  UNKNOWN = 0;
-  SNAPSHOT = 1;
-  AR_TESTING = 2;  // TODO(jwmcglynn): rename it as you like
+// Offworld is a protocol implemented by the Android Emulator to enable
+// controlling features of the emulator from the guest OS.
+//
+// The protocol is implemented on top of qemu pipe service, and the underlying
+// encoding of the pipe is a stream of protobufs, with the length of each
+// message encoded as a uint32 immediately before it:
+//
+// <uint32 length> <length bytes of binary-serialized protobuf>
+//
+// Upon receiving each message, the protobuf is deserialized from its binary
+// form and dispatched.
+//
+// On connect, the guest is expected to first send a ConnectHandshake.  For
+// notational purposes, assume that the protobuf has been serialized with the
+// above encoding.  The guest then waits for the host to respond with a
+// ConnectHandshakeResponse message.
+//
+// guest->host: ConnectHandshake { version: 1 }
+// host->guest: ConnectHandshakeResponse { result: OK }
+//
+// The ConnectHandshakeResponse will either contain Result.OK or an error.
+// If an error value is returned the host will not handle any further guest
+// messages.
+//
+// After the connection is established, the guest may send Request messages, and
+// will receive synchronous replies with a Response message.  The response may
+// include a pending_async_id, in which case there may be additional messages
+// with an AsyncResponse payload corresponding to that async_id.
+//
+// For synchronous messages, the flow is:
+//
+// guest->host: Request { snapshot { create_checkpoint {
+//                                     snapshot_name: "Test" } } }
+// host->guest: Response { result: OK, snapshot { create_checkpoint { ... } } }
+//
+//
+// For asynchronous messages, a synchronous response is immediately returned
+// with a pending_async_id, followed by one or more AsyncResponse messages with
+// a matching async_id.  Multiple async messages may be generated as a stream;
+// to determine when the stream is complete check AsyncResponse.complete.
+//
+// guest->host: Request { automation { replay { event: "..." } } }
+// host->guest: Response { result: OK, pending_async_id: 1 } }
+// ...
+// host->guest: Response { async { async_id: 1, complete: true, automation {
+//                                   replay_complete { } } } }
+
+message ConnectHandshake {
+  optional uint32 version = 1;
 }
 
-message GuestSend {
-  message ModuleSnapshot {
-    message CreateCheckpoint {
-      optional string snapshot_name = 1;
-    }
-    message GotoCheckpoint {
-      enum ShareMode {
-        UNKNOWN = 0;
-        UNCHANGED = 1;
-        WRITABLE = 2;
-        READ_ONLY = 3;
-      };
-      optional string snapshot_name = 1;
-      optional bytes metadata = 2;
-      optional ShareMode share_mode = 3;
-    }
-    message ForkReadOnlyInstances {
-      optional int32 num_instances = 1;
-    }
-    message DoneInstance {
-    }
-    oneof function {
-      CreateCheckpoint create_checkpoint_param = 1;
-      GotoCheckpoint goto_checkpoint_param = 2;
-      ForkReadOnlyInstances fork_read_only_instances_param = 3;
-      DoneInstance done_instance_param = 4;
-    }
+message ConnectHandshakeResponse {
+  enum Result {
+    RESULT_NO_ERROR = 0;
+    RESULT_ERROR_UNKNOWN = 1;
+    RESULT_ERROR_VERSION_MISMATCH = 2;
   }
-  message ModuleArTesting {  // TODO(jwmcglynn)
-  }
-  optional int32 version = 1;
+
+  optional Result result = 1;
+}
+
+//
+// Requests
+//
+
+message Request {
   oneof module {
-    ModuleSnapshot snapshot = 2;
-    ModuleArTesting ar_testing = 3;
+    SnapshotRequest snapshot = 1;
+    AutomationRequest automation = 2;
   }
 }
 
-// Most of the time we don't use GuestRecv. Instead we directly use the
-// function parameter messages because the function knows what is supposed
-// to be returned from the pipe.
+message SnapshotRequest {
+  message CreateCheckpoint {
+    optional string snapshot_name = 1;
+  }
+  message GotoCheckpoint {
+    enum ShareMode {
+      UNKNOWN = 0;
+      UNCHANGED = 1;
+      WRITABLE = 2;
+      READ_ONLY = 3;
+    };
+    optional string snapshot_name = 1;
+    optional bytes metadata = 2;
+    optional ShareMode share_mode = 3;
+  }
+  message ForkReadOnlyInstances {
+    optional int32 num_instances = 1;
+  }
+  message DoneInstance {}
 
-message GuestRecv {
-  message ModuleSnapshot {
-    message CreateCheckpoint {
-      optional bytes metadata = 1;
-    }
-    message GotoCheckpoint {
-    }
-    message ForkReadOnlyInstances {
-      optional int32 instance_id = 1;
-    }
-    message DoneInstance {
-    }
-    oneof function {
-      CreateCheckpoint create_checkpoint_param = 1;
-      GotoCheckpoint goto_checkpoint_param = 2;
-      ForkReadOnlyInstances fork_read_only_instances_param = 3;
-      DoneInstance done_instance_param = 4;
-    }
+  oneof function {
+    CreateCheckpoint create_checkpoint = 1;
+    GotoCheckpoint goto_checkpoint = 2;
+    ForkReadOnlyInstances fork_read_only_instances = 3;
+    DoneInstance done_instance = 4;
   }
-  message ModuleArTesting {  // TODO(jwmcglynn)
+}
+
+message AutomationRequest {}
+
+//
+// Responses
+//
+
+message Response {
+  enum Result {
+    RESULT_NO_ERROR = 0;
+    RESULT_ERROR_UNKNOWN = 1;
+    RESULT_ERROR_ACCESS_DENIED = 2;
   }
-  optional int32 version = 1;
+
+  optional Result result = 1;
+
   oneof module {
-    ModuleSnapshot snapshot = 2;
-    ModuleArTesting arTesting = 3;
+    // Sync.
+    SnapshotResponse snapshot = 100;
+
+    // Async.
+    // Indicates that this is an async messages and there will be additional
+    // messages with a matching module.async.async_id.
+    uint32 pending_async_id = 200;
+    // Async response.
+    AsyncResponse async = 201;
+  }
+}
+
+message AsyncResponse {
+  // An async id corresponding to the async_id from the original synchronous
+  // response.
+  optional uint32 async_id = 1;
+  // True if there will be no further messages with this async_id.
+  optional bool complete = 2;
+
+  oneof module {
+    AutomationAsyncResponse automation = 100;
+  }
+}
+
+message SnapshotResponse {
+  message CreateCheckpoint {
+    optional bytes metadata = 1;
+  }
+  message GotoCheckpoint {}
+  message ForkReadOnlyInstances {
+    optional int32 instance_id = 1;
+  }
+  message DoneInstance {}
+
+  oneof function {
+    CreateCheckpoint create_checkpoint = 1;
+    GotoCheckpoint goto_checkpoint = 2;
+    ForkReadOnlyInstances fork_read_only_instances = 3;
+    DoneInstance done_instance = 4;
+  }
+}
+
+message AutomationAsyncResponse {
+  message ReplayComplete {}
+
+  message EventGenerated {
+    // An text-encoded protobuf containing the initial state of the system,
+    // may be replayed as a standard event.
+    optional string initial_state = 1;
+    // A text-encoded protobuf containing a replayable event.
+    optional string event = 2;
+  }
+
+  oneof function {
+    ReplayComplete replay_complete = 1;
+    EventGenerated event_generated = 2;
   }
 }
