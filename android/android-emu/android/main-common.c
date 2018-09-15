@@ -1951,11 +1951,8 @@ bool configAndStartRenderer(
         (isGuestRendererChoice(opts->gpu) ||
          isGuestRendererChoice(hw->hw_gpu_mode))) {
         dwarning("Your AVD has been configured with an in-guest renderer, "
-                 "but there are issues with the current system image build "
-                 "preventing guest rendering from working. "
-                 "We are switching to the \'swiftshader\' software renderer "
-                 "until the next system image update. "
-                 "Sorry for the inconvenience.");
+                 "but the system image does not support guest rendering."
+                 "Falling back to 'swiftshader_indirect' mode.");
         if (opts->gpu) {
             str_reset(&opts->gpu, DEFAULT_SOFTWARE_GPU_MODE);
         } else {

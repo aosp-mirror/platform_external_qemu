@@ -1862,12 +1862,19 @@ const char* avdInfo_getSdCardSize(const AvdInfo* i) {
                           : NULL;
 }
 
-// This is a one-off mitigation of users getting black screen forever on startup
-// because guest rendering does not work.
-// TODO: Fix guest rendering for the next image update.
-// Let's try not to add any more build id's to this.
+// Guest rendering is deprecated in future API level.  This function controls
+// the current guest rendering blacklist status; particular builds of system
+// images and particular API levels cannot run guest rendering.
 bool avdInfo_sysImgGuestRenderingBlacklisted(const AvdInfo* i) {
     switch (i->apiLevel) {
+    // Allow guest rendering for older API levels
+    case 10:
+    case 15:
+    case 16:
+    case 17:
+    case 18:
+        return false;
+    // Disallow guest rendering for some problematic builds
     case 19:
         return i->incrementalVersion == 4087698;
     case 21:
@@ -1882,7 +1889,13 @@ bool avdInfo_sysImgGuestRenderingBlacklisted(const AvdInfo* i) {
         return i->incrementalVersion == 4153093;
     case 26:
         return i->incrementalVersion == 4074420;
-    default:
+    case 27:
         return false;
+    // bug 111971822
+    // Guest side Swiftshader becomes much harder to maintain
+    // after SELinux changes that disallow executable memory.
+    case 28:
+    default:
+        return true;
     }
 }
