@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5cd17882_713b2575",
+        "filename": "android/android-emu/android/offworld/OffworldPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-15T03:00:04Z",
+      "side": 1,
+      "message": "I think it\u0027s cleaner to fold all the file share stuff into snapshot api, or a separate MultiInstanceAPI or something",
+      "range": {
+        "startLine": 132,
+        "startChar": 16,
+        "endLine": 154,
+        "endChar": 21
+      },
+      "revId": "5c58aa820a01146121f0791a7c43f58b74abb55e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
