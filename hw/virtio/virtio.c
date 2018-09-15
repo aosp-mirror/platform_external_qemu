@@ -1517,6 +1517,12 @@ static bool virtio_queue_notify_aio_vq(VirtQueue *vq)
     if (vq->vring.desc && vq->handle_aio_output) {
         VirtIODevice *vdev = vq->vdev;
 
+        // bug: 113890671
+        // Based on https://lists.gnu.org/archive/html/qemu-devel/2016-11/msg03259.html
+        if (unlikely(vq->vdev->broken)) {
+            return false;
+        }
+
         trace_virtio_queue_notify(vdev, vq - vdev->vq, vq);
         return vq->handle_aio_output(vdev, vq);
     }
