@@ -322,30 +322,29 @@ TEST_F(EmulatorEnvironmentTest, BasicNonASCII) {
     EXPECT_TRUE(doSdkCheck());
 }
 
-// bug: 115570746
-// TEST_F(EmulatorEnvironmentTest, BasicAvd) {
-//
-//     std::string result =
-//         createAndLaunchAvd(
-//             "testSdk", "testSdkHome",
-//             "android-19", "google_apis",
-//             "armeabi-v7");
-//
-//     EXPECT_TRUE(didEmulatorKernelStartup(result));
-// }
-//
-// TEST_F(EmulatorEnvironmentTest, NonASCIIAvd) {
-//     const char* sdkName = "\xF0\x9F\xA4\x94";
-//     const char* sdkHomeName = "foo\xE1\x80\x80 bar";
-//
-//     std::string result =
-//         createAndLaunchAvd(
-//             sdkName, sdkHomeName,
-//             "android-19", "google_apis",
-//             "armeabi-v7");
-//
-//     EXPECT_TRUE(didEmulatorKernelStartup(result));
-// }
+TEST_F(EmulatorEnvironmentTest, BasicAvd) {
+
+    std::string result =
+        createAndLaunchAvd(
+            "testSdk", "testSdkHome",
+            "android-19", "google_apis",
+            "armeabi-v7");
+
+    EXPECT_TRUE(didEmulatorKernelStartup(result));
+}
+
+TEST_F(EmulatorEnvironmentTest, NonASCIIAvd) {
+    const char* sdkName = "\xF0\x9F\xA4\x94";
+    const char* sdkHomeName = "foo\xE1\x80\x80 bar";
+
+    std::string result =
+        createAndLaunchAvd(
+            sdkName, sdkHomeName,
+            "android-19", "google_apis",
+            "armeabi-v7");
+
+    EXPECT_TRUE(didEmulatorKernelStartup(result));
+}
 
 } // namespace base
 } // namespace android
