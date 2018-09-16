@@ -14,12 +14,11 @@
 
 #include "RenderWindow.h"
 
-#include "FrameBuffer.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/message_channel.h"
-#include "emugl/common/misc.h"
 #include "emugl/common/mutex.h"
 #include "emugl/common/thread.h"
+#include "FrameBuffer.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -369,8 +368,7 @@ RenderWindow::RenderWindow(int width,
           while (auto cmd = mRepostCommands.receive()) {
               if (*cmd == RepostCommand::Sync) {
                   continue;
-              } else if (*cmd == RepostCommand::Repost &&
-                         !emugl::isLoadingSnapshot()) {
+              } else if (*cmd == RepostCommand::Repost) {
                   GL_LOG("Reposting thread dequeueing a CMD_REPAINT");
                   RenderWindowMessage msg = {CMD_REPAINT};
                   (void)msg.process();
@@ -409,16 +407,6 @@ RenderWindow::~RenderWindow() {
         delete mChannel;
     } else {
         mRepostThread.wait();
-    }
-}
-
-void RenderWindow::flushMessages() {
-    if (useThread()) {
-        fprintf(stderr,
-                "WARNING: flushMessages unsupported for RenderWindowThread. "
-                "Generic snapshot load might segfault.\n");
-    } else {
-        mRepostCommands.waitForEmpty();
     }
 }
 

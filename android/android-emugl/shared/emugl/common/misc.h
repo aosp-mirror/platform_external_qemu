@@ -35,7 +35,5 @@ namespace emugl {
     bool hasExtension(const char* extensionsStr,
                       const char* wantedExtension);
 
-    void setIsLoadingSnapshot(bool (*isLoading)());
-    bool isLoadingSnapshot();
     using Profiler = android::base::Profiler;
 }
