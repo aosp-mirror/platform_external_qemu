@@ -258,7 +258,7 @@ void SnapshotTest::loadSnapshot(const std::string streamFile,
     m_config = egl->eglLoadConfig(m_display, egl_stream);
     m_surface = pbufferSurface(m_display, m_config, kTestSurfaceSize[0],
                                kTestSurfaceSize[0]);
-    egl->eglPostLoadAllImages(m_display, egl_stream, true);
+    egl->eglPostLoadAllImages(m_display, egl_stream);
 
     m_stream->close();
     m_texture_loader->join();
