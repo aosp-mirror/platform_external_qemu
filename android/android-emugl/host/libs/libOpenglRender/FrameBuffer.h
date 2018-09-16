@@ -428,11 +428,6 @@ public:
     // Note: swiftshader_indirect does not work with 3 channels
     void getScreenshot(unsigned int nChannels, unsigned int* width,
             unsigned int* height, std::vector<unsigned char>& pixels);
-
-    // Force loading all textures to memory
-    void touchAllTextures();
-    void setEnableBackgroundLoad(bool enable);
-
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
@@ -578,6 +573,5 @@ private:
     void sendPostWorkerCmd(Post post);
 
     bool m_fastBlitSupported = false;
-    bool m_backgroundLoad = true;
 };
 #endif

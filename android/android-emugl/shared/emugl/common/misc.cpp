@@ -23,8 +23,6 @@ static int s_glesMinorVersion = 0;
 static SelectedRenderer s_renderer =
     SELECTED_RENDERER_HOST;
 
-static bool (*s_isLoading)() = nullptr;
-
 void emugl::setAvdInfo(bool phone, int apiLevel) {
     s_isPhone = phone;
     s_apiLevel = apiLevel;
@@ -62,12 +60,4 @@ bool emugl::hasExtension(const char* extensionsStr, const char* wantedExtension)
         return true;
     }
     return false;
-}
-
-void emugl::setIsLoadingSnapshot(bool (*isLoading)()) {
-    s_isLoading = isLoading;
-}
-
-bool emugl::isLoadingSnapshot() {
-    return s_isLoading();
 }

@@ -16,7 +16,6 @@
 #include "OpenglRender/RenderChannel.h"
 #include "OpenglRender/render_api_platform_types.h"
 #include "android/base/files/Stream.h"
-#include "android/snapshot/Snapshotter.h"
 #include "android/snapshot/common.h"
 
 #include <functional>
@@ -184,11 +183,6 @@ public:
     virtual void fillGLESUsages(android_studio::EmulatorGLESUsages*) = 0;
     virtual void getScreenshot(unsigned int nChannels, unsigned int* width,
         unsigned int* height, std::vector<unsigned char>& pixels) = 0;
-    virtual void snapshotOperationCallback(
-            android::snapshot::Snapshotter::Operation op,
-            android::snapshot::Snapshotter::Stage stage) = 0;
-    virtual void setEnableBackgroundLoad(bool enable) = 0;
-
 protected:
     ~Renderer() = default;
 };

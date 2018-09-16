@@ -1880,12 +1880,6 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
             pixels.data());
 }
 
-void FrameBuffer::touchAllTextures() {
-    AutoLock mutex(m_lock);
-    ScopedBind scopedBind(m_colorBufferHelper);
-    s_egl.eglTouchAllTextures(m_eglDisplay);
-}
-
 void FrameBuffer::onSave(Stream* stream,
                          const android::snapshot::ITextureSaverPtr& textureSaver) {
     // Things we do not need to snapshot:
@@ -1970,10 +1964,6 @@ void FrameBuffer::onSave(Stream* stream,
             s_egl.eglPostSaveContext(m_eglDisplay, m_pbufContext, stream);
         }
     }
-}
-
-void FrameBuffer::setEnableBackgroundLoad(bool enable) {
-    m_backgroundLoad = enable;
 }
 
 bool FrameBuffer::onLoad(Stream* stream,
@@ -2078,7 +2068,7 @@ bool FrameBuffer::onLoad(Stream* stream,
     loadProcOwnedCollection(stream, &m_procOwnedRenderContext);
 
     if (s_egl.eglPostLoadAllImages) {
-        s_egl.eglPostLoadAllImages(m_eglDisplay, stream, m_backgroundLoad);
+        s_egl.eglPostLoadAllImages(m_eglDisplay, stream);
     }
 
     registerTriggerWait();
