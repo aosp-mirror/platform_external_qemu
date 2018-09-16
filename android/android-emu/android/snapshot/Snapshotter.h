@@ -132,8 +132,6 @@ public:
     bool isRamFileShared() const { return !mRamFile.empty() && mRamFileShared; }
     void setRemapping(bool remapping) { mIsRemapping = remapping; }
 
-    static bool isLoading();
-
 private:
     bool onStartSaving(const char* name);
     bool onSavingComplete(const char* name, int res);
@@ -173,7 +171,6 @@ private:
     bool mIsOnExit = false;
     bool mIsInvalidating = false;
     bool mIsRemapping = false;
-    bool mIsLoading = false;
 
     std::string mRamFile;
     bool mRamFileShared = false;

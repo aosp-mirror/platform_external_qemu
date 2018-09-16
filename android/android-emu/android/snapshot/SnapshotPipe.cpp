@@ -16,7 +16,6 @@
 #include "android/emulation/AndroidMessagePipe.h"
 #include "android/metrics/MetricsLogging.h"
 #include "android/multi-instance.h"
-#include "android/opengles.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
 #include "android/snapshot/proto/offworld.pb.h"
@@ -188,11 +187,7 @@ private:
                     if (!res) {
                         fprintf(stderr, "WARNING: share mode update failure\n");
                     }
-                    const emugl::RendererPtr& renderer =
-                            android_getOpenglesRenderer();
-                    renderer->setEnableBackgroundLoad(false);
                     androidSnapshot_load(snapshotName.data());
-                    renderer->setEnableBackgroundLoad(true);
                     gQAndroidVmOperations->vmStart();
                 });
                 *shouldReply = false;
@@ -229,11 +224,7 @@ private:
                                     "WARNING: share mode update failure\n");
                         }
                         assert(res);
-                        const emugl::RendererPtr& renderer =
-                                android_getOpenglesRenderer();
-                        renderer->setEnableBackgroundLoad(false);
                         androidSnapshot_load(android::snapshot::kDefaultBootSnapshot);
-                        renderer->setEnableBackgroundLoad(true);
                         gQAndroidVmOperations->vmStart();
                     });
                 }
@@ -270,13 +261,9 @@ private:
                                 fprintf(stderr,
                                         "WARNING: share mode update failure\n");
                             }
-                            const emugl::RendererPtr& renderer =
-                                    android_getOpenglesRenderer();
-                            renderer->setEnableBackgroundLoad(false);
                             res = gQAndroidVmOperations->snapshotRemap(
                                     mode == android::base::FileShare::Write,
                                     nullptr, nullptr);
-                            renderer->setEnableBackgroundLoad(true);
                             gQAndroidVmOperations->vmStart();
                         });
                     }

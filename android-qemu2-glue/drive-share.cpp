@@ -251,10 +251,7 @@ static bool parseQemuOptForQcow2(bool wipeData) {
 }
 
 static bool needRemount(QemuOpts* opts) {
-    QemuOpt* opt = qemu_opt_find(opts, "read-only");
-    return opt && (!strcmp("on", opt->str) ||
-                   (opt->desc && opt->desc->type == QEMU_OPT_BOOL &&
-                    opt->value.boolean));
+    return !qemu_opt_get_bool(opts, "read-only", false);
 }
 
 static bool needCreateTmp(const char* id,

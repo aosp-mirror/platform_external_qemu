@@ -141,7 +141,7 @@ public:
     void onLoad(android::base::Stream* stream,
                 const android::snapshot::ITextureLoaderWPtr& textureLoaderWPtr,
                 SaveableTexture::creator_t creator);
-    void postLoad(android::base::Stream* stream, bool backgroundLoad);
+    void postLoad(android::base::Stream* stream);
     const SaveableTexturePtr& getSaveableTextureFromLoad(unsigned int oldGlobalName);
     SaveableTextureMap* getSaveableTextureMap() { return &m_textureMap; }
 
@@ -152,7 +152,6 @@ public:
         m_eglIface = eglIface;
         m_glesIface = glesIface;
     }
-    void touchAllTextures(SaveableTexture::restorer_t restorer);
 
 private:
 

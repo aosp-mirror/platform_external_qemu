@@ -177,11 +177,6 @@ public:
             pixels.resize(0);
         }
     }
-    void snapshotOperationCallback(
-            android::snapshot::Snapshotter::Operation op,
-            android::snapshot::Snapshotter::Stage stage) {}
-    void setEnableBackgroundLoad(bool enable) {}
-
 private:
     bool mHasValidScreenshot = false;
     bool mGuestPostedAFrame = false;
