@@ -106,15 +106,19 @@ protected:
 
     std::string launchEmulatorWithResult(
         const std::vector<std::string>& args,
-        int timeoutMs) {
+        int timeoutMs,
+        std::string* kernelOutput = nullptr) {
 
         auto dir = System::get()->getLauncherDirectory();
 
         auto outFilePath = pj(dir, "emuOutput.txt");
+        auto kernelOutputPath = pj(dir, "emuKernelOutput.txt");
 
         std::string emulatorBinaryFilename(EMU_BINARY_BASENAME EMU_BINARY_SUFFIX);
         auto emuLauncherPath = PathUtils::join(dir, emulatorBinaryFilename);
         EXPECT_TRUE(path_exists(emuLauncherPath.c_str()));
+
+        auto kernelOutputArg = "file:" + kernelOutputPath;
 
         std::vector<std::string> allArgs = {
             emuLauncherPath,
@@ -123,6 +127,8 @@ protected:
             "-no-window",
             "-verbose",
             "-show-kernel",
+            "-shell-serial",
+            kernelOutputArg,
         };
 
         for (const auto a: args) {
@@ -143,6 +149,12 @@ protected:
         (void)result;
 
         auto output = readFileIntoString(outFilePath);
+        auto kernelOutputFileContents =
+            readFileIntoString(kernelOutputPath);
+
+        if (kernelOutput && kernelOutputFileContents) {
+            *kernelOutputFileContents = *kernelOutputFileContents;
+        }
 
         path_delete_file(outFilePath.c_str());
 
@@ -197,16 +209,21 @@ protected:
                 avdName, sdkRootPath, sdkHomePath,
                 "android-19", "google_apis", "armeabi-v7a");
 
+        std::string kernelResult;
+
         auto result =
             launchEmulatorWithResult(
                     {"-avd", avdName},
-                    kLaunchTimeoutMs);
+                    kLaunchTimeoutMs,
+                    &kernelResult);
 
         // Print the result for posterity.
         printf("Kernel startup run result for avd %s:\n", avdName);
         printf("%s\n", result.c_str());
+        printf("Kernel log:\n");
+        printf("%s\n", kernelResult.c_str());
 
-        return result;
+        return result + kernelResult;
     }
 
     std::unique_ptr<TestTempDir> mTempDir;
