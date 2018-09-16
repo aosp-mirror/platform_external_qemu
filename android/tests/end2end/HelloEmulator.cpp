@@ -195,7 +195,7 @@ protected:
 
         generateAvdWithDefaults(
                 avdName, sdkRootPath, sdkHomePath,
-                "android-19", "google_apis", "armeabi-v7a");
+                androidTarget, variant, abi);
 
         auto result =
             launchEmulatorWithResult(
@@ -328,7 +328,7 @@ TEST_F(EmulatorEnvironmentTest, BasicAvd) {
         createAndLaunchAvd(
             "testSdk", "testSdkHome",
             "android-19", "google_apis",
-            "armeabi-v7");
+            "armeabi-v7a");
 
     EXPECT_TRUE(didEmulatorKernelStartup(result));
 }
@@ -341,7 +341,7 @@ TEST_F(EmulatorEnvironmentTest, NonASCIIAvd) {
         createAndLaunchAvd(
             sdkName, sdkHomeName,
             "android-19", "google_apis",
-            "armeabi-v7");
+            "armeabi-v7a");
 
     EXPECT_TRUE(didEmulatorKernelStartup(result));
 }
