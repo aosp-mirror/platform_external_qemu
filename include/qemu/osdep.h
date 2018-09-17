@@ -551,4 +551,10 @@ extern intptr_t qemu_real_host_page_mask;
 extern int qemu_icache_linesize;
 extern int qemu_dcache_linesize;
 
+/* Formatted message function pointer. */
+typedef void (*QemuCrashDumpMessageFunc)(const char *format, va_list args);
+
+void qemu_crash_dump_message_func_set(QemuCrashDumpMessageFunc func);
+void qemu_crash_dump_message(const char* format, ...);
+
 #endif
