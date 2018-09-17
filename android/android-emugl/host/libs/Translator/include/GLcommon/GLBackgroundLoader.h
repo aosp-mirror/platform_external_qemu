@@ -36,6 +36,10 @@ public:
     ~GLBackgroundLoader() { m_textureMap.clear(); }
 
     intptr_t main();
+    bool wait(intptr_t* exitStatus) override;
+
+private:
+    int m_loadDelayMs = 10;
 
     const android::snapshot::ITextureLoaderWPtr m_textureLoaderWPtr;
     const EGLiface& m_eglIface;
