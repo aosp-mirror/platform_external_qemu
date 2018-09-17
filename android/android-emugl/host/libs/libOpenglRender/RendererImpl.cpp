@@ -402,7 +402,6 @@ void RendererImpl::snapshotOperationCallback(
                 android::base::System::Duration startTime =
                         android::base::System::get()->getUnixTimeUs();
 #endif
-                FrameBuffer::getFB()->touchAllTextures();
 #ifdef SNAPSHOT_PROFILE
                 printf("Force load all texture time: %lld ms\n",
                        (long long)(android::base::System::get()
