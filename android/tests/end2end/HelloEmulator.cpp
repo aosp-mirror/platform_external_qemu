@@ -106,11 +106,18 @@ protected:
 
     std::string launchEmulatorWithResult(
         const std::vector<std::string>& args,
-        int timeoutMs) {
+        int timeoutMs,
+        std::string* kernelOutput = nullptr) {
 
         auto dir = System::get()->getLauncherDirectory();
 
         auto outFilePath = pj(dir, "emuOutput.txt");
+        auto outKernelPath = pj(dir, "emuKernelOutput.txt");
+
+        path_delete_file(outFilePath.c_str());
+        path_delete_file(outKernelPath.c_str());
+
+        std::string shellSerialFileArg = "file:" + outKernelPath;
 
         std::string emulatorBinaryFilename(EMU_BINARY_BASENAME EMU_BINARY_SUFFIX);
         auto emuLauncherPath = PathUtils::join(dir, emulatorBinaryFilename);
@@ -118,14 +125,27 @@ protected:
 
         std::vector<std::string> allArgs = {
             emuLauncherPath,
+        };
+
+        for (const auto a: args) {
+            allArgs.push_back(a);
+        }
+
+        std::vector<std::string> launchOpts = {
             "-no-accel",
             "-no-snapshot",
             "-no-window",
             "-verbose",
             "-show-kernel",
+            "-shell-serial",
+            shellSerialFileArg,
+            "-qemu",
+            "-no-reboot",
+            "-append",
+            "kernel.panic=-1",
         };
 
-        for (const auto a: args) {
+        for (const auto a: launchOpts) {
             allArgs.push_back(a);
         }
 
@@ -144,7 +164,15 @@ protected:
 
         auto output = readFileIntoString(outFilePath);
 
+        if (kernelOutput) {
+            auto kernelContents = readFileIntoString(outKernelPath);
+            if (kernelContents) {
+                *kernelOutput = *kernelContents;
+            }
+        }
+
         path_delete_file(outFilePath.c_str());
+        path_delete_file(outKernelPath.c_str());
 
         if (output) {
             return *output;
@@ -180,33 +208,40 @@ protected:
         return hasMainLoopStartup && hasColdBootChoice;
     }
 
-    std::string createAndLaunchAvd(StringView sdkRoot,
-                                   StringView sdkHome,
-                                   StringView androidTarget,
-                                   StringView variant,
-                                   StringView abi) {
+    std::string runAvdTest(StringView avdName,
+                           StringView sdkRoot,
+                           StringView sdkHome,
+                           StringView androidTarget,
+                           StringView variant,
+                           StringView abi) {
+
         auto sdkRootPath = makeSdkAt(sdkRoot);
         auto sdkHomePath = makeSdkHomeAt(sdkHome);
 
         setSdkRoot(sdkRootPath);
         setSdkHome(sdkHomePath);
 
-        const char avdName[] = "api19";
-
+        deleteAvd(avdName, sdkHomePath);
         generateAvdWithDefaults(
                 avdName, sdkRootPath, sdkHomePath,
-                "android-19", "google_apis", "armeabi-v7a");
+                androidTarget, variant, abi);
 
+        std::string kernelOutput;
         auto result =
             launchEmulatorWithResult(
                     {"-avd", avdName},
-                    kLaunchTimeoutMs);
+                    kLaunchTimeoutMs,
+                    &kernelOutput);
 
         // Print the result for posterity.
-        printf("Kernel startup run result for avd %s:\n", avdName);
+        std::string avdNameAsStr = avdName.str();
+        printf("Kernel startup run result for avd %s:\n", avdNameAsStr.c_str());
         printf("%s\n", result.c_str());
+        printf("Kernel output: %s\n", kernelOutput.c_str());
 
-        return result;
+        deleteAvd(avdName, sdkHomePath);
+
+        return result + kernelOutput;
     }
 
     std::unique_ptr<TestTempDir> mTempDir;
@@ -325,10 +360,11 @@ TEST_F(EmulatorEnvironmentTest, BasicNonASCII) {
 TEST_F(EmulatorEnvironmentTest, BasicAvd) {
 
     std::string result =
-        createAndLaunchAvd(
+        runAvdTest(
+            "api19Ascii",
             "testSdk", "testSdkHome",
             "android-19", "google_apis",
-            "armeabi-v7");
+            "armeabi-v7a");
 
     EXPECT_TRUE(didEmulatorKernelStartup(result));
 }
@@ -338,10 +374,11 @@ TEST_F(EmulatorEnvironmentTest, NonASCIIAvd) {
     const char* sdkHomeName = "foo\xE1\x80\x80 bar";
 
     std::string result =
-        createAndLaunchAvd(
+        runAvdTest(
+            "api19NonAscii",
             sdkName, sdkHomeName,
             "android-19", "google_apis",
-            "armeabi-v7");
+            "armeabi-v7a");
 
     EXPECT_TRUE(didEmulatorKernelStartup(result));
 }
