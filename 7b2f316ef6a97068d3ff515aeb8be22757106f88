@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3d1733c8_b87dbc4c",
+        "filename": "android/android-emu/android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-17T18:57:17Z",
+      "side": 1,
+      "message": "This seemed weird to me, so I dug further.  Not a bug, but just an observation: It doesn\u0027t appear that CrashReporter::get() ever returns null, it is just returning a LazyInstance pointer.  There is some logic in CrashReporter::destroy() that calls the destructor, and potentially invalidates the pointer (without setting it to null), but that is done as the last item in main() so it won\u0027t cause issues.",
+      "range": {
+        "startLine": 331,
+        "startChar": 4,
+        "endLine": 333,
+        "endChar": 5
+      },
+      "revId": "7b2f316ef6a97068d3ff515aeb8be22757106f88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
