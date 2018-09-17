@@ -81,3 +81,6 @@ void generateAvdWithDefaults(android::base::StringView avdName,
                              android::base::StringView androidTarget,
                              android::base::StringView variant,
                              android::base::StringView abi);
+
+void deleteAvd(android::base::StringView avdName,
+               android::base::StringView sdkHomePath);

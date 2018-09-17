@@ -184,11 +184,11 @@ void generateAvdWithDefaults(StringView avdName,
         /* hw.gpu.mode */ "auto",
         /* hw.initialOrientation */ "Portrait",
         /* hw.keyboard */ "yes",
-        /* hw.lcd.density */ 420,
-        /* hw.lcd.height */ 1920,
-        /* hw.lcd.width */ 1080,
+        /* hw.lcd.density */ 120,
+        /* hw.lcd.height */ 480,
+        /* hw.lcd.width */ 640,
         /* hw.mainKeys */ "no",
-        /* hw.ramSize */ 1536,
+        /* hw.ramSize */ 128,
         /* hw.sdCard */ "yes",
         /* hw.sensors.orientation */ "yes",
         /* hw.sensors.proximity */ "yes",
@@ -203,8 +203,19 @@ void generateAvdWithDefaults(StringView avdName,
         /* skin.path */ skinDir.c_str(),
         /* tag.display */ "Google APIs",
         /* tag.id */ "google_apis",
-        /* vm.heapSize */ 228,
+        /* vm.heapSize */ 16,
     };
 
     generateAvd(genInfo);
+}
+
+void deleteAvd(StringView avdName,
+               StringView sdkHomePath) {
+    auto avdIniPath =
+        pj(sdkHomePath, "avd", avdName.str() + ".ini");
+    auto avdFolderPath =
+        pj(sdkHomePath, "avd", avdName.str() + ".avd");
+
+    path_delete_file(avdIniPath.c_str());
+    path_delete_dir(avdFolderPath.c_str());
 }
