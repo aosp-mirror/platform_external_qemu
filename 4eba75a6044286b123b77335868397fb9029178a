@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "373a838a_cce16cb2",
+        "filename": "android/android-emu/android/offworld/OffworldPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-17T19:54:50Z",
+      "side": 1,
+      "message": "Yeah, I left this intact in this CL but the next one splits it into a separate offworld/snapshot struct.  The offworld one is still used to enforce only having a single pipe.",
+      "parentUuid": "b324c693_ef6b5094",
+      "range": {
+        "startLine": 63,
+        "startChar": 16,
+        "endLine": 63,
+        "endChar": 37
+      },
+      "revId": "4eba75a6044286b123b77335868397fb9029178a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "27fbcbf6_21de52a0",
         "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
         "patchSetId": 1
@@ -60,6 +84,30 @@
       "writtenOn": "2018-09-17T19:39:39Z",
       "side": 1,
       "message": "Please don\u0027t bump the version number if possible? Does it load previous emulator snapshots if it hasn\u0027t been using SnapshotPipe?",
+      "range": {
+        "startLine": 339,
+        "startChar": 32,
+        "endLine": 339,
+        "endChar": 34
+      },
+      "revId": "4eba75a6044286b123b77335868397fb9029178a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a05e3237_7f6dcef7",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-17T19:54:50Z",
+      "side": 1,
+      "message": "I was getting a crash-on-load, even when I didn\u0027t use the original pipe.  The issue was an assert in forEachServiceFromStream:\n\n    for (int i \u003d 0; i \u003c count; ++i) {\n        const auto name \u003d bs-\u003egetString();\n        servicePos \u003d android::sGlobals-\u003efindServicePositionByName(\n                                 name.c_str(), servicePos + 1);\n        assert(servicePos \u003e\u003d 0);  // \u003c-- previous service not found\n        const auto\u0026 service \u003d services[servicePos];\n        func(service.get(), bs);\n        missingServices.erase(service.get());\n    }\n\nMaybe we can make it silently ignore services that are in the snapshot but no longer exist?  Or would that create other load issues?",
+      "parentUuid": "27fbcbf6_21de52a0",
       "range": {
         "startLine": 339,
         "startChar": 32,
