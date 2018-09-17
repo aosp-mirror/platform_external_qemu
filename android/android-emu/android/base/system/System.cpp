@@ -2629,5 +2629,32 @@ void System::deleteTempDir() {
 #endif // !__linux__
 }
 
+// static
+void System::killProcess(System::Pid pid) {
+#ifdef _WIN32
+    ScopedFileHandle forKilling(OpenProcess(PROCESS_TERMINATE, false, pid));
+    if (forKilling.valid()) {
+        TerminateProcess(forKilling.get(), 1);
+    }
+#else
+    kill(pid, SIGKILL);
+#endif
+}
+
+// static
+void System::stopAllEmulatorProcesses() {
+    std::vector<StringView> emulatorExePatterns = {
+        "emulator",
+        "qemu-system",
+    };
+
+    std::vector<System::Pid> emuPids =
+        queryRunningProcessPids(emulatorExePatterns);
+
+    for (auto pid : emuPids) {
+        System::killProcess(pid);
+    }
+}
+
 }  // namespace base
 }  // namespace android
