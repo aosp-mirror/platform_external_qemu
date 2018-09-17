@@ -35,6 +35,10 @@ public:
         m_textureMap(textureMap) { }
     ~GLBackgroundLoader() { m_textureMap.clear(); }
 
+    void finish();
+
+private:
+
     intptr_t main();
 
     const android::snapshot::ITextureLoaderWPtr m_textureLoaderWPtr;
@@ -45,4 +49,6 @@ public:
     EGLSurface m_surface = nullptr;
 
     SaveableTextureMap& m_textureMap;
+
+    int m_saveIntervalMs = 10;
 };

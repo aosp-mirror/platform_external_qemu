@@ -370,7 +370,7 @@ RenderWindow::RenderWindow(int width,
               if (*cmd == RepostCommand::Sync) {
                   continue;
               } else if (*cmd == RepostCommand::Repost &&
-                         !RendererImpl::isLoading()) {
+                         !emugl::RendererImpl::isLoading()) {
                   GL_LOG("Reposting thread dequeueing a CMD_REPAINT");
                   RenderWindowMessage msg = {CMD_REPAINT};
                   (void)msg.process();

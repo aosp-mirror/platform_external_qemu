@@ -24,11 +24,15 @@
 #include <EGL/eglext.h>
 #include <GLES2/gl2.h>
 
+void GLBackgroundLoader::finish() {
+    fprintf(stderr, "%s: do\n", __func__);
+    m_saveIntervalMs = 0;
+    wait();
+}
+
 intptr_t GLBackgroundLoader::main() {
-#if SNAPSHOT_PROFILE > 1
     const auto start = get_uptime_ms();
     printf("Starting GL background loading at %" PRIu64 " ms\n", start);
-#endif
 
     if (!m_eglIface.createAndBindAuxiliaryContext(&m_context, &m_surface)) {
         return 0;
@@ -47,18 +51,16 @@ intptr_t GLBackgroundLoader::main() {
             m_glesIface.restoreTexture(saveable.get());
             // allow other threads to run for a while
             ptr.reset();
-            android::base::System::get()->sleepMs(10);
+            android::base::System::get()->sleepMs(m_saveIntervalMs);
         }
     }
 
     m_eglIface.unbindAndDestroyAuxiliaryContext(m_context, m_surface);
     m_textureMap.clear();
 
-#if SNAPSHOT_PROFILE > 1
     const auto end = get_uptime_ms();
     printf("Finished GL background loading at %" PRIu64 " ms (%d ms total)\n",
            end, int(end - start));
-#endif
 
     return 0;
 }

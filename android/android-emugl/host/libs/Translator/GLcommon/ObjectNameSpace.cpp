@@ -332,6 +332,9 @@ void GlobalNameSpace::preSaveAddTex(TextureData* texture) {
 void GlobalNameSpace::onSave(android::base::Stream* stream,
                              const ITextureSaverPtr& textureSaver,
                              SaveableTexture::saver_t saver) {
+    if (m_backgroundLoader) {
+        m_backgroundLoader->finish();
+    }
 #if SNAPSHOT_PROFILE > 1
     int cleanTexs = 0;
     int dirtyTexs = 0;
@@ -372,6 +375,10 @@ void GlobalNameSpace::onSave(android::base::Stream* stream,
 void GlobalNameSpace::onLoad(android::base::Stream* stream,
                              const ITextureLoaderWPtr& textureLoaderWPtr,
                              SaveableTexture::creator_t creator) {
+    if (m_backgroundLoader) {
+        m_backgroundLoader->finish();
+    }
+
     const ITextureLoaderPtr textureLoader = textureLoaderWPtr.lock();
     assert(m_textureMap.size() == 0);
     if (!textureLoader->start()) {

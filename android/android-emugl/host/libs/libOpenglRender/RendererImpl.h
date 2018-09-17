@@ -91,7 +91,7 @@ private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RendererImpl);
 
 private:
-    static bool sLoading = false;
+    static bool sLoading;
 
     // Stop all render threads and wait until they exit.
     void cleanupRenderThreads();

@@ -49,6 +49,9 @@ namespace emugl {
 //   thread, which may in turn be blocked on something else.
 static const bool kUseSubwindowThread = false;
 
+// Whether a snapshot load is in progress.
+bool RendererImpl::sLoading = false;
+
 // This object manages the cleanup of guest process resources when the process
 // exits. It runs the cleanup in a separate thread to never block the main
 // render thread for a low-priority task.
@@ -400,22 +403,6 @@ void RendererImpl::snapshotOperationCallback(
             }
             break;
         case Snapshotter::Operation::Save:
-            if (stage == Snapshotter::Stage::Start) {
-                // TODO yahan@: make a light weight touch which only load the
-                // data into RAM and generate a texture name without loading
-                // stuff into GPU
-#ifdef SNAPSHOT_PROFILE
-                android::base::System::Duration startTime =
-                        android::base::System::get()->getUnixTimeUs();
-#endif
-#ifdef SNAPSHOT_PROFILE
-                printf("Force load all texture time: %lld ms\n",
-                       (long long)(android::base::System::get()
-                                           ->getUnixTimeUs() -
-                                   startTime) /
-                               1000);
-#endif
-            }
             break;
     }
 }
