@@ -445,6 +445,9 @@ public:
 
     static void deleteTempDir();
 
+    static void killProcess(Pid);
+    static void stopAllEmulatorProcesses();
+
 protected:
     size_t mMemorySize = 0;
 
