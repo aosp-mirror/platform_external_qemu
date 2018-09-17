@@ -117,6 +117,10 @@ const std::string& CrashReporter::getDataExchangeDir() const {
     return mDataExchangeDir;
 }
 
+void CrashReporter::AppendDump(const char* message) {
+    passDumpMessage(message);
+}
+
 void CrashReporter::GenerateDump(const char* message) {
     passDumpMessage(message);
     writeDump();
@@ -321,6 +325,25 @@ bool crashhandler_init() {
 
 void crashhandler_cleanup() {
     CrashReporter::destroy();
+}
+
+void crashhandler_append_message(const char* message) {
+    if (const auto reporter = CrashReporter::get()) {
+        reporter->AppendDump(message);
+    }
+}
+
+void crashhandler_append_message_format_v(const char* format, va_list args) {
+    char message[2048] = {};
+    vsnprintf(message, sizeof(message) - 1, format, args);
+    crashhandler_append_message(message);
+}
+
+void crashhandler_append_message_format(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    crashhandler_append_message_format_v(format, args);
+    va_end(args);
 }
 
 void crashhandler_die(const char* message) {

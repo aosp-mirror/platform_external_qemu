@@ -122,6 +122,11 @@ public:
             bool replace = false,
             bool binary = false);
 
+    // To make it easier to diagnose general issues,
+    // have a function to append to the dump message file
+    // without needing to generate a minidump
+    // or crash the emulator.
+    void AppendDump(const char* message);
     // The following two functions write a dump of current process state.
     // Both pass the |message| to the dump writer, so it is sent together with
     // the dump file
