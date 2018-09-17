@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "96bd5011_512587f7",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-09-17T21:24:52Z",
+      "side": 1,
+      "message": "GlobalNameSpace will reset its background loader in postLoad so this code is unlikely to run?",
+      "range": {
+        "startLine": 336,
+        "startChar": 8,
+        "endLine": 336,
+        "endChar": 37
+      },
+      "revId": "40d2da4349e9c00825963c30fc69e492b447ff87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
