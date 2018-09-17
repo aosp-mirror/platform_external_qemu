@@ -58,6 +58,7 @@ void LocationPage::makeRouteProtobuf() { // ?? Debug only
 }
 
 void LocationPage::on_saveRoute_clicked() {
+    mUi->saveRoute->setEnabled(false);
     if (mRouteStatus != RouteStatus::OK) {
         QString failureReason =
                 (mRouteStatus == RouteStatus::TOO_BIG) ? tr("Route is too long")
@@ -68,10 +69,11 @@ void LocationPage::on_saveRoute_clicked() {
                                .arg(failureReason),
                            QMessageBox::Close,
                            this);
+        msgBox.exec();
 
-        int selection = msgBox.exec();
         return;
     }
+    printf("l-p-r: Save route: Requesting WaitCursor\n"); // ??
     QApplication::setOverrideCursor(Qt::WaitCursor);
     // Create the protobuf describing this route
     QString routeName("route_" + mRouteCreationTime.toString("yyyy-MM-dd_HH-mm-ss"));
@@ -82,51 +84,29 @@ void LocationPage::on_saveRoute_clicked() {
     routeMetadata.set_mode_of_travel((emulator_location::RouteMetadata_Mode)mRouteTravelMode);
     routeMetadata.set_loop(false);
     routeMetadata.set_speed_factor(emulator_location::RouteMetadata_PlaybackSpeed_SPEED_1x);
-    double totalTime = 0.0;
-    for (int idx = 0; idx < mNumRoutePointsReceived; idx++) {
-        totalTime += mRoutePoints[idx].delayBefore;
-    }
-    routeMetadata.set_duration((int)(totalTime + 0.5));
-
-    // Write a GPX file with the specifics
+    routeMetadata.set_duration((int)(mRouteTotalTime + 0.5));
     std::string protoPath = writeRouteProtobufByName(routeName, routeMetadata);
-    char* protoDirName = path_dirname(protoPath.c_str());
-    if (protoDirName) {
-        char* gpxFileName = path_join(protoDirName, GPX_FILE_NAME);
-        QFile gpxFile(gpxFileName);
-        if (gpxFile.open(QFile::WriteOnly | QFile::Text)) {
-            // Write a minimal GPX header
-            gpxFile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                          "<gpx version=\"1.1\" creator=\"Android Emulator\">\n"
-                          "<trk><trkseg>\n");
+    // Make this new item the selected item
+    mSelectedRouteName = protoPath.c_str();
 
-            // Write each point in the route
-            QDateTime zuluPointTime = mRouteCreationTime.toUTC();
-            for (int idx = 0; idx < mNumRoutePointsReceived; idx++) {
-                zuluPointTime = zuluPointTime.addMSecs(
-                                  (long)(mRoutePoints[idx].delayBefore * 1000.0));
-                QString timeString = zuluPointTime.toString("yyyy-MM-ddTHH:mm:ss.zzzZ");
-                char pointString[128];
-                snprintf(pointString, 128,
-                         "  <trkpt lat=\"%9.5f\" lon=\"%10.5f\"><time>%s</time></trkpt>\n",
-                         mRoutePoints[idx].lat, mRoutePoints[idx].lng,
-                         timeString.toStdString().c_str());
-                gpxFile.write(pointString);
-            }
+    writeRouteGpxFile(protoPath);
 
-            // Write the GPX tail
-            gpxFile.write("</trkseg></trk>\n</gpx>\n");
-
-            gpxFile.close();
-        }
-        free(gpxFileName);
-        free(protoDirName);
-    }
     // Update the UI
     scanForRoutes();
     populateRouteListWidget();
     highlightRouteListWidget();
+
+    int selectedRow = mUi->routeList->currentRow();
+    if (selectedRow < 0) {
+        mUi->routeInfo->clear();
+    } else {
+        auto widgetItem = (RouteWidgetItem*)(mUi->routeList->item(selectedRow, 0));
+        auto routeElement = widgetItem->routeElement;
+        showRouteDetails(routeElement);
+    }
+
     QApplication::restoreOverrideCursor();
+    printf("l-p-r: Save route: Restoring cursor\n"); // ??
 }
 
 void LocationPage::on_playRouteButton_clicked() {
@@ -408,12 +388,12 @@ void LocationPage::deleteRoute(int row) {
                                .arg(thisRoute->logicalName),
                        QMessageBox::Cancel,
                        this);
-    QPushButton *deleteButton = msgBox.addButton(QMessageBox::Ok);
+    QPushButton *deleteButton = msgBox.addButton(QMessageBox::Apply);
     deleteButton->setText(tr("Delete"));
 
     int selection = msgBox.exec();
 
-    if (selection == QMessageBox::Ok) {
+    if (selection == QMessageBox::Apply) {
         QApplication::setOverrideCursor(Qt::WaitCursor);
         std::string protobufName = thisRoute->protoFilePath.toStdString();
         android::base::StringView dirName;
@@ -563,39 +543,52 @@ void LocationPage::showRouteDetails(const RouteListElement* theElement) {
     mUi->routeInfo->setHtml(infoString);
 }
 
+// Display the details of the not-yet-saved route
+void LocationPage::showPendingRouteDetails() {
+    int durationSeconds = mRouteTotalTime + 0.5;
+    int durationHours = durationSeconds / (60 * 60);
+    durationSeconds -= durationHours * (60 * 60);
+    int durationMinutes = durationSeconds / 60;
+    durationSeconds -= durationMinutes * 60;
+    QString durationString = (durationHours > 0)   ? tr("%1h %2m %3s")
+                                                     .arg(durationHours)
+                                                     .arg(durationMinutes)
+                                                     .arg(durationSeconds)
+                                                   :
+                             (durationMinutes > 0) ? tr("%1m %2s")
+                                                     .arg(durationMinutes)
+                                                     .arg(durationSeconds)
+                                                   :
+                                                     tr("%1s")
+                                                     .arg(durationSeconds);
+    QString infoString = tr("<b>Unsaved route</b><br>"
+                            "&nbsp;&nbsp;Duration: <b>%1</b><br>")
+                          .arg(durationString);
+    mUi->routeInfo->setHtml(infoString);
+}
+
 // Invoked by the Maps javascript when a route has been created
 void LocationPage::sendRoutePointToEmu(int pointIndex, double lat, double lng, double timeToHere) {
 
-    static bool badState = false; // ??
     static int lastReceivedIndex = 0; // ??
     if (pointIndex == -1) {
         // End of the route
         if (mRouteStatus == RouteStatus::INCOMPLETE) {
             mRouteStatus = RouteStatus::OK;
+            mSelectedRouteName = "";
+            mUi->routeList->setCurrentItem(nullptr);
+            highlightRouteListWidget();
+            showPendingRouteDetails();
+            mUi->saveRoute->setEnabled(true);
         }
-#if 0 // ??
-        if (mRouteStatus != RouteStatus::OK) {
-            QString failureReason =
-                    (mRouteStatus == RouteStatus::TOO_BIG) ? tr("Too many points")
-                                                           : tr("No route found");
-            QMessageBox msgBox(QMessageBox::Information,
-                               tr("Route"),
-                               tr("Route failed<br> %1")
-                                   .arg(failureReason),
-                               QMessageBox::Ok,
-                               this);
-
-            int selection = msgBox.exec();
-        }
-#endif // ??
         printf("l-p-r: lastReceivedIndex %d, mNumRoutePointsReceived %d\n", // ??
                lastReceivedIndex, mNumRoutePointsReceived); // ??
-    } else if (pointIndex != mNumRoutePointsReceived) {
+    } else if (pointIndex != 0 && pointIndex != mNumRoutePointsReceived) {
         if (mRouteStatus == RouteStatus::INCOMPLETE) {
             printf("l-p-r: Got index %d, expected %d\n",
                    pointIndex, mNumRoutePointsReceived);
         }
-        mRouteStatus = RouteStatus::TOO_BIG;
+        mRouteStatus = RouteStatus::FAILED;
         lastReceivedIndex = pointIndex; // ??
     } else if (mNumRoutePointsReceived < MAX_POINTS_IN_ROUTE) {
         if (pointIndex == 0) {
@@ -604,14 +597,15 @@ void LocationPage::sendRoutePointToEmu(int pointIndex, double lat, double lng, d
             mNumRoutePointsReceived = 0;
             mRouteCreationTime = QDateTime::currentDateTime();
             mRouteTravelMode = mUi->loc_travelMode->currentIndex();
+            mRouteTotalTime = 0.0;
             timeToHere = 0.0; // Always zero for the first point
-            badState = false;
         }
+        mRouteTotalTime += timeToHere;
         mRoutePoints[mNumRoutePointsReceived++] = { lat, lng, timeToHere };
     } else {
-        // To much data!
+        // Too much data!
         if (mRouteStatus == RouteStatus::INCOMPLETE) {
-            printf("l-p-r: Got index %d: too big\n", pointIndex);
+            printf("l-p-r: Got index %d: too big\n", pointIndex); // ??
         }
         mRouteStatus = RouteStatus::TOO_BIG;
         lastReceivedIndex = pointIndex; // ??
@@ -672,4 +666,41 @@ void LocationPage::writeRouteProtobufFullPath(
            protoFullPath.toStdString().c_str()); // ??
     std::ofstream outStream(protoFullPath.toStdString().c_str(), std::ofstream::binary);
     protobuf.SerializeToOstream(&outStream);
+}
+
+void LocationPage::writeRouteGpxFile(const std::string& pathOfProtoFile) {
+    // Write a GPX file with the points that we receveived
+    // from Google Maps
+    char* protoDirName = path_dirname(pathOfProtoFile.c_str());
+    if (protoDirName) {
+        char* gpxFileName = path_join(protoDirName, GPX_FILE_NAME);
+        QFile gpxFile(gpxFileName);
+        if (gpxFile.open(QFile::WriteOnly | QFile::Text)) {
+            // Write a minimal GPX header
+            gpxFile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                          "<gpx version=\"1.1\" creator=\"Android Emulator\">\n"
+                          "<trk><trkseg>\n");
+
+            // Write each point in the route
+            QDateTime zuluPointTime = mRouteCreationTime.toUTC();
+            for (int idx = 0; idx < mNumRoutePointsReceived; idx++) {
+                zuluPointTime = zuluPointTime.addMSecs(
+                                  (long)(mRoutePoints[idx].delayBefore * 1000.0));
+                QString timeString = zuluPointTime.toString("yyyy-MM-ddTHH:mm:ss.zzzZ");
+                char pointString[128];
+                snprintf(pointString, 128,
+                         "  <trkpt lat=\"%9.5f\" lon=\"%10.5f\"><time>%s</time></trkpt>\n",
+                         mRoutePoints[idx].lat, mRoutePoints[idx].lng,
+                         timeString.toStdString().c_str());
+                gpxFile.write(pointString);
+            }
+
+            // Write the GPX tail
+            gpxFile.write("</trkseg></trk>\n</gpx>\n");
+
+            gpxFile.close();
+        }
+        free(gpxFileName);
+        free(protoDirName);
+    }
 }

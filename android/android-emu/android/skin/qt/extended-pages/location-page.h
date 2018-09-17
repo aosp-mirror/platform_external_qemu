@@ -238,6 +238,7 @@ private:
     void writeLocationPlaybackSpeedToSettings(int speed);
     int getLocationPlaybackSpeedFromSettings();
 
+    void showPendingRouteDetails();
     void makeRouteProtobuf(); // ?? Debug only
     void showRouteDetails(const RouteListElement* theElement);
     std::string writePointProtobufByName(const QString& pointFormalName,
@@ -249,6 +250,7 @@ private:
                                          const emulator_location::RouteMetadata& protobuf);
     void writeRouteProtobufFullPath(const QString& protoFullPath,
                                     const emulator_location::RouteMetadata& protobuf);
+    void writeRouteGpxFile(const std::string& pathOfProtoFile);
     void setUpWebEngine(QWebEnginePage* webEnginePage, const char* pageName);
 
     static bool validateCell(QTableWidget* table,
@@ -281,7 +283,8 @@ private:
                                                     //    and free it when I'm done?
     int mNumRoutePointsReceived = 0;
     QDateTime mRouteCreationTime;
-    int mRouteTravelMode;
+    int mRouteTravelMode = 0;
+    double mRouteTotalTime = 0.0; // Seconds
 
     // Last point sent to the emulator from the map
     QString mLastLat = "-122.084";

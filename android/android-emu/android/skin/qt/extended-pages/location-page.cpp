@@ -171,6 +171,7 @@ LocationPage::LocationPage(QWidget *parent) :
     scanForRoutes();
     populateRouteListWidget();
     highlightRouteListWidget();
+    mUi->saveRoute->setEnabled(false);
   } else { // !useLocationV2
     mTimer.setSingleShot(true);
 

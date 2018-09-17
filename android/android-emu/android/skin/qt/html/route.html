@@ -127,48 +127,12 @@ html, body {
         });
 
         gFirstPoint = true;
-//        // Create a 'start' marker
-//        gStartMarker = new google.maps.Marker({
-//            map: gMap,
-//            position: lastLatLng
-//        });
-//        gEndMarker = new google.maps.Marker({
-//            map: gMap,
-//            position: lastLatLng
-//        });
 
         // Register a listener that sets a new marker wherever user clicks
         // on the map.
         google.maps.event.addListener(gMap, 'click', function(event) {
-            // var startMarker = 'data:image/svg+xml, \
-            //         <svg xmlns="http://www.w3.org/2000/svg" width="44px" height="44px" \
-            //                 viewBox="0 0 44 44"> \
-            //             <circle cx="22" cy="22" r="14" stroke="#666666" stroke-width="7" \
-            //                     fill="#ffffff" /> \
-            //         </svg>';
-            // var startMarkerImage = {
-            //   url: startMarker,
-            //   size: new google.maps.Size(24, 24),
-            //   origin: new google.maps.Point(0, 0),
-            //   anchor: new google.maps.Point(12, 12),
-            //   scaledSize: new google.maps.Size(25, 25)
-            // };
-            // var endMarker = 'data:image/svg+xml, \
-            //         <svg xmlns="http://www.w3.org/2000/svg" width="44px" height="44px" \
-            //                 viewBox="0 0 44 44"> \
-            //             <circle cx="22" cy="22" r="14" stroke="#666666" stroke-width="7" \
-            //                     fill="#ffffff" /> \
-            //             <circle cx="22" cy="22" r="6" fill="#666666" /> \
-            //         </svg>';
-            // var endMarkerImage = {
-            //   url: endMarker,
-            //   size: new google.maps.Size(24, 24),
-            //   origin: new google.maps.Point(0, 0),
-            //   anchor: new google.maps.Point(12, 12),
-            //   scaledSize: new google.maps.Size(25, 25)
-            // };
-
             if (gFirstPoint) {
+                console.warn('JZK Route page: First click'); // ??
                 gStartLatLng = event.latLng;
 
                 // Place the 'start' marker
@@ -176,30 +140,20 @@ html, body {
                     map: gMap,
                     position: event.latLng
                 });
-//                console.warn('JZK Route page: start: ' + gStartLatLng); // ??
-//                gStartMarker.setIcon(startMarkerImage);
-//                gEndMarker.setMap(null);
                 // Remove the old path
                 if (gDirectionsDisplay != null) {
                     gDirectionsDisplay.setMap(null);
                     gDirectionsDisplay = null;
                 }
             } else {
+                console.warn('JZK Route page: Second click'); // ??
                 gEndLatLng = event.latLng;
-//                // Place the 'end' marker
-//                gEndMarker.setMap(null);
-//                gEndMarker = new google.maps.Marker({
-//                    map: gMap,
-//                    position: event.latLng
-//                });
                 // Remove the start marker: the route has its own markers
                 gStartMarker.setMap(null);
-                console.warn('JZK Route page: start: ' + gStartLatLng + ', end: ' + gEndLatLng); // ??
-//                gEndMarker.setIcon(endMarkerImage);
                 calcRoute();
             }
             gFirstPoint = !gFirstPoint;
-
+            console.warn('JZK Route page: Click listener is done.'); // ??
         });
 
         setTravelMode = function(mode) {
@@ -314,7 +268,9 @@ html, body {
         gDirectionsService.route(request, function(result, status) {
             if (status == 'OK') {
                 // Show the route on the Map
+                console.warn('JZK Route page: Have route. Displaying it'); // ??
                 gDirectionsDisplay.setDirections(result);
+                console.warn('JZK Route page: Done displaying route. Sending it to host.'); // ??
 // vv ??
                 var r0 = result.routes[0];
                 var leg0 = r0.legs[0];
@@ -402,6 +358,7 @@ html, body {
                 }
                 // Let the Emulator know that it has all the data
                 channel.objects.emulocationserver.sendRoutePointToEmu(-1, 0.0, 0.0, 0.0);
+                console.warn('JZK Route page: Done sending route to host.'); // ??
 // ^^ ??
             }
             else console.warn('JZK Route result had status != OK'); // ??
