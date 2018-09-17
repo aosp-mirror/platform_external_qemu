@@ -592,26 +592,45 @@ static int virtio_blk_handle_request(VirtIOBlockReq *req, MultiReqBuffer *mrb)
     return 0;
 }
 
+#define VIRTIO_BLK_UNUSUAL_ITER_COUNT 1024
+
 bool virtio_blk_handle_vq(VirtIOBlock *s, VirtQueue *vq)
 {
     VirtIOBlockReq *req;
     MultiReqBuffer mrb = {};
     bool progress = false;
+    uint32_t all_iters = 0;
+    uint32_t progress_iters = 0;
 
     aio_context_acquire(blk_get_aio_context(s->blk));
     blk_io_plug(s->blk);
 
     do {
+        ++all_iters;
+
         virtio_queue_set_notification(vq, 0);
 
         while ((req = virtio_blk_get_request(s, vq))) {
             progress = true;
+            ++progress_iters;
             if (virtio_blk_handle_request(req, &mrb)) {
                 virtqueue_detach_element(req->vq, &req->elem, 0);
                 virtio_blk_free_request(req);
                 break;
             }
+
+            qemu_spin_warning(
+                progress_iters,
+                VIRTIO_BLK_UNUSUAL_ITER_COUNT,
+                "Warning: virtio_blk_handle_vq spun %u times with progress.\n",
+                progress_iters);
         }
+
+        qemu_spin_warning(
+            all_iters,
+            VIRTIO_BLK_UNUSUAL_ITER_COUNT,
+            "Warning: virtio_blk_handle_vq spun %u times total.\n",
+            all_iters);
 
         virtio_queue_set_notification(vq, 1);
     } while (!virtio_queue_empty(vq));
