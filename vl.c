@@ -5539,7 +5539,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #ifdef CONFIG_ANDROID
     android_report_session_phase(ANDROID_SESSION_PHASE_EXIT);
     crashhandler_exitmode("after main_loop");
-    android_wear_agent_stop();
     socket_drainer_stop();
 #endif
 
@@ -5559,6 +5558,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
 #ifdef CONFIG_ANDROID
     qemu_android_emulation_teardown();
+    android_wear_agent_stop();
     android_reporting_teardown();
     android_devices_teardown();
 #endif
