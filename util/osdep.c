@@ -567,13 +567,31 @@ void qemu_crash_dump_message_func_set(QemuCrashDumpMessageFunc func) {
     qemu_message_send_func_impl = func;
 }
 
-void qemu_crash_dump_message(const char* format, ...) {
-    va_list args;
-    va_start(args, format);
+static void qemu_crash_dump_message_v(const char* format, va_list args) {
     if (qemu_message_send_func_impl) {
         (*qemu_message_send_func_impl)(format, args);
     } else {
         vfprintf(stderr, format, args);
     }
+}
+
+void qemu_crash_dump_message(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    qemu_crash_dump_message_v(format, args);
     va_end(args);
+}
+
+void qemu_spin_warning(uint32_t spinCount,
+                       uint32_t spinInterval,
+                       const char* format, ...) {
+    if (unlikely(
+            spinCount >= spinInterval &&
+            (spinCount % spinInterval == 0))) {
+        va_list args;
+        va_start(args, format);
+        vfprintf(stderr, format, args);
+        qemu_crash_dump_message_v(format, args);
+        va_end(args);
+    }
 }
