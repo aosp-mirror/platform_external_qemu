@@ -47,7 +47,7 @@ intptr_t GLBackgroundLoader::main() {
             m_glesIface.restoreTexture(saveable.get());
             // allow other threads to run for a while
             ptr.reset();
-            android::base::System::get()->sleepMs(10);
+            android::base::System::get()->sleepMs(m_loadDelayMs);
         }
     }
 
@@ -61,4 +61,9 @@ intptr_t GLBackgroundLoader::main() {
 #endif
 
     return 0;
+}
+
+bool GLBackgroundLoader::wait(intptr_t* exitStatus) {
+    m_loadDelayMs = 0;
+    return Thread::wait();
 }
