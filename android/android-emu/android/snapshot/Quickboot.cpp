@@ -431,18 +431,16 @@ bool Quickboot::save(StringView name) {
         name = kDefaultBootSnapshot;
     }
 
-    const int kMinUptimeForSavingMs = 1500;
     const auto nowMs = System::get()->getHighResTimeUs() / 1000;
     const auto sessionUptimeMs =
             nowMs - (mLoadTimeMs ? mLoadTimeMs : mStartTimeMs);
-    const bool ranLongEnoughForSaving = sessionUptimeMs > kMinUptimeForSavingMs;
 
     // TODO: when cleaning the current 'default_boot' snapshot, save the reason
     //  of its invalidation in it - this way emulator will be able to give a
     //  better idea on the next clean boot other than "no snapshot".
 
     if (!emuglConfig_current_renderer_supports_snapshot()) {
-        if (shouldTrySaving && ranLongEnoughForSaving) {
+        if (shouldTrySaving) {
             // Preserve the state changes - we've ran for a while now
             // and the AVD state is different from what could be saved in
             // the default boot snapshot.
@@ -464,17 +462,6 @@ bool Quickboot::save(StringView name) {
         }
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED);
-        return false;
-    }
-
-    if (!ranLongEnoughForSaving) {
-        dwarning(
-                "Not saving state: emulator ran for just %d "
-                "ms (<%d ms)",
-                int(sessionUptimeMs), kMinUptimeForSavingMs);
-        reportFailedSave(
-                pb::EmulatorQuickbootSave::
-                        EMULATOR_QUICKBOOT_SAVE_SKIPPED_LOW_UPTIME);
         return false;
     }
 
