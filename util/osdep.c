@@ -560,3 +560,20 @@ writev(int fd, const struct iovec *iov, int iov_cnt)
     return readv_writev(fd, iov, iov_cnt, true);
 }
 #endif
+
+static QemuCrashDumpMessageFunc qemu_message_send_func_impl = 0;
+
+void qemu_crash_dump_message_func_set(QemuCrashDumpMessageFunc func) {
+    qemu_message_send_func_impl = func;
+}
+
+void qemu_crash_dump_message(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    if (qemu_message_send_func_impl) {
+        (*qemu_message_send_func_impl)(format, args);
+    } else {
+        vfprintf(stderr, format, args);
+    }
+    va_end(args);
+}
