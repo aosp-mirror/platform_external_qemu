@@ -41,7 +41,14 @@ ANDROID_BEGIN_HEADER
 bool crashhandler_init(void);
 void crashhandler_cleanup(void);
 
-// Abort the program execution immidiately; when showing a crash dialog, use
+// Append message to crash dump file without aborting.
+// Useful for saving debugging information just before a crash.
+void crashhandler_append_message(const char* message);
+// A variadic overload with C interface
+void crashhandler_append_message_format(const char* format, ...);
+void crashhandler_append_message_format_v(const char* format, va_list args);
+
+// Abort the program execution immediately; when showing a crash dialog, use
 // show |message| to the user instead of standard 'emulator have crashed'
 ANDROID_NORETURN void crashhandler_die(const char* message)
     __attribute__((noinline));
