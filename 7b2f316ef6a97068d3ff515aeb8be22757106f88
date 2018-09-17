@@ -22,6 +22,30 @@
       "revId": "7b2f316ef6a97068d3ff515aeb8be22757106f88",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6066e2f1_fcd9e2fb",
+        "filename": "android/android-emu/android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-17T19:34:46Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "3d1733c8_b87dbc4c",
+      "range": {
+        "startLine": 331,
+        "startChar": 4,
+        "endLine": 333,
+        "endChar": 5
+      },
+      "revId": "7b2f316ef6a97068d3ff515aeb8be22757106f88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
