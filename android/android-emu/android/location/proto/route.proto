@@ -20,9 +20,8 @@ package emulator_location;
 // a route (path) of Location data.
 //
 // The actual points that define the route
-// are in a separate file in the same
-// directory as the .pb file. (The separate
-// file is probably a JSON or XML.)
+// are in a 'route.gpx' file in the same
+// directory as the .pb file.
 
 message RouteMetadata {
   // Name that the user gave this route

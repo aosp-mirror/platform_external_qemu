@@ -31,6 +31,7 @@
 
 #include <fstream>
 
+static const char GPX_FILE_NAME[]   = "route.gpx";
 static const char PROTO_FILE_NAME[] = "route_metadata.pb";
 
 void LocationPage::makeRouteProtobuf() { // ?? Debug only
@@ -71,6 +72,8 @@ void LocationPage::on_saveRoute_clicked() {
         int selection = msgBox.exec();
         return;
     }
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    // Create the protobuf describing this route
     QString routeName("route_" + mRouteCreationTime.toString("yyyy-MM-dd_HH-mm-ss"));
 
     emulator_location::RouteMetadata routeMetadata;
@@ -85,14 +88,45 @@ void LocationPage::on_saveRoute_clicked() {
     }
     routeMetadata.set_duration((int)(totalTime + 0.5));
 
-    writeRouteProtobufByName(routeName, routeMetadata);
+    // Write a GPX file with the specifics
+    std::string protoPath = writeRouteProtobufByName(routeName, routeMetadata);
+    char* protoDirName = path_dirname(protoPath.c_str());
+    if (protoDirName) {
+        char* gpxFileName = path_join(protoDirName, GPX_FILE_NAME);
+        QFile gpxFile(gpxFileName);
+        if (gpxFile.open(QFile::WriteOnly | QFile::Text)) {
+            // Write a minimal GPX header
+            gpxFile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                          "<gpx version=\"1.1\" creator=\"Android Emulator\">\n"
+                          "<trk><trkseg>\n");
 
+            // Write each point in the route
+            QDateTime zuluPointTime = mRouteCreationTime.toUTC();
+            for (int idx = 0; idx < mNumRoutePointsReceived; idx++) {
+                zuluPointTime = zuluPointTime.addMSecs(
+                                  (long)(mRoutePoints[idx].delayBefore * 1000.0));
+                QString timeString = zuluPointTime.toString("yyyy-MM-ddTHH:mm:ss.zzzZ");
+                char pointString[128];
+                snprintf(pointString, 128,
+                         "  <trkpt lat=\"%9.5f\" lon=\"%10.5f\"><time>%s</time></trkpt>\n",
+                         mRoutePoints[idx].lat, mRoutePoints[idx].lng,
+                         timeString.toStdString().c_str());
+                gpxFile.write(pointString);
+            }
+
+            // Write the GPX tail
+            gpxFile.write("</trkseg></trk>\n</gpx>\n");
+
+            gpxFile.close();
+        }
+        free(gpxFileName);
+        free(protoDirName);
+    }
+    // Update the UI
     scanForRoutes();
     populateRouteListWidget();
     highlightRouteListWidget();
-
-    // ?? Need to write the GPX file ...
-//??    makeRouteProtobuf();
+    QApplication::restoreOverrideCursor();
 }
 
 void LocationPage::on_playRouteButton_clicked() {
@@ -100,7 +134,7 @@ void LocationPage::on_playRouteButton_clicked() {
 }
 
 void LocationPage::on_loc_travelMode_currentIndexChanged(int index) {
-    printf("location-page-route: Travel mode index is now %d\n", index); // ??
+//    printf("location-page-route: Travel mode index is now %d\n", index); // ??
     emit travelModeChanged(index);
 }
 
