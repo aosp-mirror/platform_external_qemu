@@ -117,6 +117,30 @@
       "revId": "4eba75a6044286b123b77335868397fb9029178a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e518119f_c431c816",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-09-17T20:30:04Z",
+      "side": 1,
+      "message": "Thanks for the investigation. It would be great if you could have a workaround for it because we got user complaints when we bump the number. Or maybe just modify the \"findServicePositionByName\" to allow for alias?\n\nIf there is no good workaround, then please go ahead and submit it as it is.",
+      "parentUuid": "a05e3237_7f6dcef7",
+      "range": {
+        "startLine": 339,
+        "startChar": 32,
+        "endLine": 339,
+        "endChar": 34
+      },
+      "revId": "4eba75a6044286b123b77335868397fb9029178a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
