@@ -208,12 +208,12 @@ protected:
         return hasMainLoopStartup && hasColdBootChoice;
     }
 
-    std::string runAvdTest(StringView avdName,
-                           StringView sdkRoot,
-                           StringView sdkHome,
-                           StringView androidTarget,
-                           StringView variant,
-                           StringView abi) {
+    void runAvdTest(StringView avdName,
+                    StringView sdkRoot,
+                    StringView sdkHome,
+                    StringView androidTarget,
+                    StringView variant,
+                    StringView abi) {
 
         auto sdkRootPath = makeSdkAt(sdkRoot);
         auto sdkHomePath = makeSdkHomeAt(sdkHome);
@@ -241,7 +241,9 @@ protected:
 
         deleteAvd(avdName, sdkHomePath);
 
-        return result + kernelOutput;
+        EXPECT_TRUE(didEmulatorKernelStartup(result + kernelOutput));
+
+        System::stopAllEmulatorProcesses();
     }
 
     std::unique_ptr<TestTempDir> mTempDir;
@@ -358,30 +360,25 @@ TEST_F(EmulatorEnvironmentTest, BasicNonASCII) {
 }
 
 TEST_F(EmulatorEnvironmentTest, BasicAvd) {
-
-    std::string result =
-        runAvdTest(
+    runAvdTest(
             "api19Ascii",
             "testSdk", "testSdkHome",
             "android-19", "google_apis",
             "armeabi-v7a");
-
-    EXPECT_TRUE(didEmulatorKernelStartup(result));
 }
 
 TEST_F(EmulatorEnvironmentTest, NonASCIIAvd) {
     const char* sdkName = "\xF0\x9F\xA4\x94";
     const char* sdkHomeName = "foo\xE1\x80\x80 bar";
 
-    std::string result =
-        runAvdTest(
-            "api19NonAscii",
-            sdkName, sdkHomeName,
-            "android-19", "google_apis",
-            "armeabi-v7a");
-
-    EXPECT_TRUE(didEmulatorKernelStartup(result));
+    runAvdTest(
+        "api19NonAscii",
+        sdkName, sdkHomeName,
+        "android-19", "google_apis",
+        "armeabi-v7a");
 }
+
+
 
 } // namespace base
 } // namespace android
