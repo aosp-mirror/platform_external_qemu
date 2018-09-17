@@ -22,6 +22,30 @@
       "revId": "5c58aa820a01146121f0791a7c43f58b74abb55e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c28bbb0e_d2051fa5",
+        "filename": "android/android-emu/android/offworld/OffworldPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-09-17T19:45:46Z",
+      "side": 1,
+      "message": "+1 to this comment. I think we have an \"android::base::Optional\" you can use. Or you can simply pass the protobuf structures to as the function parameter.",
+      "parentUuid": "5cd17882_713b2575",
+      "range": {
+        "startLine": 132,
+        "startChar": 16,
+        "endLine": 154,
+        "endChar": 21
+      },
+      "revId": "5c58aa820a01146121f0791a7c43f58b74abb55e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
