@@ -14,6 +14,7 @@
 #include "android/avd/info.h"
 #include "android/avd/util.h"
 #include "android/camera/camera-list.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/emulation/android_pipe_unix.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/featurecontrol/feature_control.h"
@@ -1976,6 +1977,18 @@ bool configAndStartRenderer(
                 opts->no_window,
                 uiPreferredBackend)) {
         derror("%s", config.status);
+
+        crashhandler_append_message_format(
+            "Error: androidEmuglConfigInit failed. Info: "
+            "api_arch %s api_level %d isGoogle %d "
+            "opts->gpu %s hw->hw_gpu_mode %s opts->no_window %d",
+            "uiPreferredBackend %d\n",
+            api_arch, api_level,
+            isGoogle,
+            opts->gpu, hw->hw_gpu_mode,
+            opts->no_window,
+            (int)uiPreferredBackend);
+
         config_out->openglAlive = 0;
         lastRendererConfig = *config_out;
         AFREE(api_arch);
@@ -2040,18 +2053,34 @@ bool configAndStartRenderer(
             config_out->glesMode = kAndroidGlesEmulationOff;
         }
     } else {
+        bool isPhone =
+            avdInfo_getAvdFlavor(avd) == AVD_PHONE;
         int gles_init_res =
             android_initOpenglesEmulation();
         int renderer_startup_res =
             android_startOpenglesRenderer(
                     hw->hw_lcd_width,
                     hw->hw_lcd_height,
-                    avdInfo_getAvdFlavor(avd) == AVD_PHONE,
-                    avdInfo_getApiLevel(avd),
+                    isPhone,
+                    api_level,
                     &gles_major_version,
                     &gles_minor_version);
-        if (gles_init_res || renderer_startup_res)
+        if (gles_init_res || renderer_startup_res) {
             config_out->openglAlive = 0;
+            crashhandler_append_message_format(
+                "Error: android_startOpenglesRenderer failed. Info: "
+                "hw->hw_lcd_width %d hw->hw_lcd_height %d isPhone %d apiLevel %d "
+                "gles_major_version %d gles_minor_version %d "
+                "gles_init_res %d renderer_startup_res %d",
+                 hw->hw_lcd_width,
+                 hw->hw_lcd_height,
+                 isPhone,
+                 api_level,
+                 gles_major_version,
+                 gles_minor_version,
+                 gles_init_res,
+                 renderer_startup_res);
+        }
     }
 
     // We need to know boot property
