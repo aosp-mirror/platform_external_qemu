@@ -1880,12 +1880,6 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
             pixels.data());
 }
 
-void FrameBuffer::touchAllTextures() {
-    AutoLock mutex(m_lock);
-    ScopedBind scopedBind(m_colorBufferHelper);
-    s_egl.eglTouchAllTextures(m_eglDisplay);
-}
-
 void FrameBuffer::onSave(Stream* stream,
                          const android::snapshot::ITextureSaverPtr& textureSaver) {
     // Things we do not need to snapshot:
@@ -1899,6 +1893,9 @@ void FrameBuffer::onSave(Stream* stream,
     AutoLock mutex(m_lock);
     // set up a context because some snapshot commands try using GL
     ScopedBind scopedBind(m_colorBufferHelper);
+    // Touch all textures in case we disabled background loader.
+    // Must not be triggered too early in case background loader is still running.
+    s_egl.eglTouchAllTextures(m_eglDisplay);
     // eglPreSaveContext labels all guest context textures to be saved
     // (textures created by the host are not saved!)
     // eglSaveAllImages labels all EGLImages (both host and guest) to be saved

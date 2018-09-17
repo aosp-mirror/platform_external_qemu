@@ -429,8 +429,6 @@ public:
     void getScreenshot(unsigned int nChannels, unsigned int* width,
             unsigned int* height, std::vector<unsigned char>& pixels);
 
-    // Force loading all textures to memory
-    void touchAllTextures();
     void setEnableBackgroundLoad(bool enable);
 
 private:

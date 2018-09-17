@@ -394,23 +394,7 @@ void RendererImpl::snapshotOperationCallback(
             }
             break;
         case Snapshotter::Operation::Save:
-            if (stage == Snapshotter::Stage::Start) {
-                // TODO yahan@: make a light weight touch which only load the
-                // data into RAM and generate a texture name without loading
-                // stuff into GPU
-#ifdef SNAPSHOT_PROFILE
-                android::base::System::Duration startTime =
-                        android::base::System::get()->getUnixTimeUs();
-#endif
-                FrameBuffer::getFB()->touchAllTextures();
-#ifdef SNAPSHOT_PROFILE
-                printf("Force load all texture time: %lld ms\n",
-                       (long long)(android::base::System::get()
-                                           ->getUnixTimeUs() -
-                                   startTime) /
-                               1000);
-#endif
-            }
+            // No-op
             break;
     }
 }
