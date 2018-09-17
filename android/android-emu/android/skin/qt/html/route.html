@@ -132,7 +132,7 @@ html, body {
         // on the map.
         google.maps.event.addListener(gMap, 'click', function(event) {
             if (gFirstPoint) {
-                console.warn('JZK Route page: First click'); // ??
+                console.warn('JK Route page: First click'); // ??
                 gStartLatLng = event.latLng;
 
                 // Place the 'start' marker
@@ -146,14 +146,13 @@ html, body {
                     gDirectionsDisplay = null;
                 }
             } else {
-                console.warn('JZK Route page: Second click'); // ??
+                console.warn('JK Route page: Second click'); // ??
                 gEndLatLng = event.latLng;
                 // Remove the start marker: the route has its own markers
                 gStartMarker.setMap(null);
                 calcRoute();
             }
             gFirstPoint = !gFirstPoint;
-            console.warn('JZK Route page: Click listener is done.'); // ??
         });
 
         setTravelMode = function(mode) {
@@ -265,28 +264,81 @@ html, body {
         };
         gDirectionsDisplay = new google.maps.DirectionsRenderer();
         gDirectionsDisplay.setMap(gMap);
+        console.warn('JK Route page: calcRoute requesting route...'); // ??
         gDirectionsService.route(request, function(result, status) {
-            if (status == 'OK') {
-                // Show the route on the Map
-                console.warn('JZK Route page: Have route. Displaying it'); // ??
-                gDirectionsDisplay.setDirections(result);
-                console.warn('JZK Route page: Done displaying route. Sending it to host.'); // ??
+            if (status != 'OK') {
+                console.warn('JK Route result had status != OK'); // ??
+                return;
+            }
 // vv ??
-                var r0 = result.routes[0];
-                var leg0 = r0.legs[0];
-                var theSteps = leg0.steps;
-                var numSteps = theSteps.length;
+            // ?? xyzzy Can I create my own DirectionsResult that Maps will display?
+            //   DirectionsResult
+            //     DirectionsGeocodedWaypoint   geocoded_waypoints[]
+            //     DirectionsRoute              routes[]
+            //       DirectionsLeg              legs[]
+            //         DirectionsStep           steps[]
+            //         Distance               x distance
+            //         Duration                 duration <--- required (else fails parsing)
+            //         Duration               x duration_in_traffic
+            //         Time                   x arrival_time
+            //         Time                   x departure_time
+            //         LatLng                   start_location <--- required for start marker
+            //         LatLng                   end_location   <--- required for end marker
+            //         String                 x start_address
+            //         String                 x end_address
+            //
+            //       int[]?                     waypoint_order
+            //       LatLng[]                 x overview_path
+            //       points                   x overview_polyline
+            //       LatLngBounds             x bounds
+            //       String                     copyrights
+            //       String                     warnings[]
+            //       ?                          fare
+            //         ?                        currency
+            //         Number                   value
+            result.geocoded_waypoints = null; // OK
+            result.routes[0].legs[0].distance            = null; // OK
 
-                console.warn('JZK Route result: ' + result.routes.length
-                             + ' routes, route[0] has ' + r0.legs.length
-                             + ' legs, leg[0] has ' + numSteps
-                             + ' steps and lasts ' + leg0.duration.text); // ??
-                // Always accept the first point of the route
-                var previousPoint = theSteps[0].path[0];
-                var numPointsSent = 0;
-                channel.objects.emulocationserver.sendRoutePointToEmu(
-                    numPointsSent, previousPoint.lat(), previousPoint.lng(), 0.0);
-                numPointsSent++;
+            result.routes[0].legs[0].distance            = null; // OK
+            result.routes[0].legs[0].duration_in_traffic = null; // OK
+            result.routes[0].legs[0].arrival_time        = null; // OK
+            result.routes[0].legs[0].depature_time       = null; // OK
+            result.routes[0].legs[0].start_address       = null; // OK
+            result.routes[0].legs[0].end_address         = null; // OK
+
+            result.overview_path = null; // OK
+            result.over_polyline = null; // OK
+            result.bounds        = null; // OK
+
+//            // ?? This creates OK, but does not render
+//            var jkLeg = new Object();
+//            jkLeg.steps = result.routes[0].legs[0].steps;
+//            var jkRoutes = new Object();
+//            jkRoutes.routes = new Array(1);
+//            jkRoutes.routes[0] = new Object();
+//            jkRoutes.routes[0].legs = new Array(1);
+//            jkRoutes.routes[0].legs[0] = jkLeg;
+// ^^ ??
+            // Show the route on the Map
+            console.warn('JK Route page: Have route. Displaying it...'); // ??
+            gDirectionsDisplay.setDirections(result);
+            console.warn('JK Route page: Done displaying route. Sending it to host.'); // ??
+// vv ??
+            var r0 = result.routes[0];
+            var leg0 = r0.legs[0];
+            var theSteps = leg0.steps;
+            var numSteps = theSteps.length;
+
+            console.warn('JK Route result: ' + result.routes.length
+                         + ' routes, route[0] has ' + r0.legs.length
+                         + ' legs, leg[0] has ' + numSteps
+                         + ' steps and lasts ' + leg0.duration.text); // ??
+            // Always accept the first point of the route
+            var previousPoint = theSteps[0].path[0];
+            var numPointsSent = 0;
+            channel.objects.emulocationserver.sendRoutePointToEmu(
+                numPointsSent, previousPoint.lat(), previousPoint.lng(), 0.0);
+            numPointsSent++;
 //                console.warn('     pt 0: ' + theSteps[0].path[0]
 //                             + ', VERY FIRST POINT **');
 //                var marker = new google.maps.Marker({
@@ -294,24 +346,26 @@ html, body {
 //                    position: theSteps[0].path[0]
 //                });
 
-                for (var stepIdx = 0; stepIdx < numSteps; stepIdx++) {
-                    var thisStep = theSteps[stepIdx];
-                    // ?? How to protect this from /0?
-                    var stepSpeed = thisStep.distance.value / thisStep.duration.value;
-                    var thisPath = theSteps[stepIdx].path;
-                    var numPts = thisPath.length;
+            var rawNumberOfPoints = 0; // ??
+            for (var stepIdx = 0; stepIdx < numSteps; stepIdx++) {
+                var thisStep = theSteps[stepIdx];
+                // ?? How to protect this from /0?
+                var stepSpeed = thisStep.distance.value / thisStep.duration.value;
+                var thisPath = theSteps[stepIdx].path;
+                var numPts = thisPath.length;
+                rawNumberOfPoints += numPts; // ??
 //                    console.warn('  step ' + stepIdx + ' has ' + numPts
 //                                 + ' points; distance '
 //                                 + theSteps[stepIdx].distance.value
 //                                 + ' meters, and lasts '
 //                                 + theSteps[stepIdx].duration.value
 //                                 + ' seconds'); // ??
-                    for (var ptIdx = 1; ptIdx < numPts; ptIdx++) {
-                        var thisPoint = thisPath[ptIdx];
-                        var dist = distanceBetween(previousPoint, thisPoint);
-                        // Determine how long it will take to get here
-                        // from the previously-accepted point
-                        var time = dist / stepSpeed;
+                for (var ptIdx = 1; ptIdx < numPts; ptIdx++) {
+                    var thisPoint = thisPath[ptIdx];
+                    var dist = distanceBetween(previousPoint, thisPoint);
+                    // Determine how long it will take to get here
+                    // from the previously-accepted point
+                    var time = dist / stepSpeed;
 //                            if (dist < MINIMUM_DISTANCE) { // ??
 //                                console.warn('     pt ' + ptIdx // ??
 //                                             + ': ' + thisPath[ptIdx]
@@ -319,12 +373,12 @@ html, body {
 //                                             + ' meters, time ' + time
 //                                             + ' -- too close');
 //                            } // ??
-                        if (ptIdx != numPts-1) {
-                            // This is not the last point of the step.
-                            // Accept it only if it is far enough (in
-                            // space-time) from the last point we accepted.
+                    if (ptIdx != numPts-1) {
+                        // This is not the last point of the step.
+                        // Accept it only if it is far enough (in
+                        // space-time) from the last point we accepted.
 
-                            if (dist < MINIMUM_DISTANCE) continue;
+                        if (dist < MINIMUM_DISTANCE) continue;
 //                            if (dist / stepSpeed < MINIMUM_TIME) { // ??
 //                                console.warn('     pt ' + ptIdx // ??
 //                                             + ': ' + thisPath[ptIdx]
@@ -332,36 +386,36 @@ html, body {
 //                                             + ' meters, time ' + time
 //                                             + ' -- time too short');
 //                            } // ??
-                            if (time < MINIMUM_TIME) continue;
+                        if (time < MINIMUM_TIME) continue;
 //                            console.warn('     pt ' + ptIdx // ??
 //                                         + ': ' + thisPath[ptIdx]
 //                                         + ', distance ' + dist
 //                                         + ' meters, time ' + time
 //                                         + ' -- TAKE IT');
-                        }
+                    }
 //                        else console.warn('     pt ' + ptIdx // ??
 //                                         + ': ' + thisPath[ptIdx]
 //                                         + ', LAST POINT OF STEP **');
 
-                        // Send this point to the Emulator
-                        channel.objects.emulocationserver.sendRoutePointToEmu(
-                            numPointsSent, thisPoint.lat(), thisPoint.lng(), time);
+                    // Send this point to the Emulator
+                    channel.objects.emulocationserver.sendRoutePointToEmu(
+                        numPointsSent, thisPoint.lat(), thisPoint.lng(), time);
 
-                        numPointsSent++;
-                        previousPoint = thisPoint;
+                    numPointsSent++;
+                    previousPoint = thisPoint;
 
 //                        var marker = new google.maps.Marker({
 //                            map: gMap,
 //                            position: thisPoint
 //                        });
-                    }
                 }
-                // Let the Emulator know that it has all the data
-                channel.objects.emulocationserver.sendRoutePointToEmu(-1, 0.0, 0.0, 0.0);
-                console.warn('JZK Route page: Done sending route to host.'); // ??
-// ^^ ??
             }
-            else console.warn('JZK Route result had status != OK'); // ??
+            // Let the Emulator know that it has all the data
+            channel.objects.emulocationserver.sendRoutePointToEmu(-1, 0.0, 0.0, 0.0);
+            // ?? Panama City to Montreal: 125000 raw points (24,500 filtered)
+            console.warn('JK Route page: Done sending route to host. Raw route had ' // ??
+                         + rawNumberOfPoints + ' points'); // ??
+// ^^ ??
         });
     }
     </script>

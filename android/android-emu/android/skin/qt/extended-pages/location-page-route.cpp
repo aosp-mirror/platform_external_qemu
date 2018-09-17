@@ -45,8 +45,6 @@ void LocationPage::makeRouteProtobuf() { // ?? Debug only
     myMetadata.set_logical_name(routeName.toStdString().c_str());
     myMetadata.set_creation_time(now.toMSecsSinceEpoch() / 1000LL);
     myMetadata.set_mode_of_travel(emulator_location::RouteMetadata_Mode_DRIVING);
-    myMetadata.set_loop(false);
-    myMetadata.set_speed_factor(emulator_location::RouteMetadata_PlaybackSpeed_SPEED_1x);
     myMetadata.set_description("One misty moisty morning, when cloudy was the weather...");
     myMetadata.set_duration(90);
 
@@ -82,8 +80,6 @@ void LocationPage::on_saveRoute_clicked() {
     routeMetadata.set_logical_name(routeName.toStdString().c_str());
     routeMetadata.set_creation_time(mRouteCreationTime.toMSecsSinceEpoch() / 1000LL);
     routeMetadata.set_mode_of_travel((emulator_location::RouteMetadata_Mode)mRouteTravelMode);
-    routeMetadata.set_loop(false);
-    routeMetadata.set_speed_factor(emulator_location::RouteMetadata_PlaybackSpeed_SPEED_1x);
     routeMetadata.set_duration((int)(mRouteTotalTime + 0.5));
     std::string protoPath = writeRouteProtobufByName(routeName, routeMetadata);
     // Make this new item the selected item
@@ -160,8 +156,6 @@ void LocationPage::scanForRoutes() {
         listElement.logicalName   = routeMetadata->logical_name().c_str();
         listElement.description   = routeMetadata->description().c_str();
         listElement.modeIndex     = routeMetadata->mode_of_travel();
-        listElement.speedFactor   = routeMetadata->speed_factor();
-        listElement.loop          = routeMetadata->loop();
         listElement.duration      = routeMetadata->duration();
 
         mRouteList.append(listElement);
@@ -299,22 +293,6 @@ void LocationPage::editRoute(int row) {
     descriptionEdit->setPlainText(oldDescription);
     dialogLayout->addWidget(descriptionEdit);
 
-    // Playback speed
-    dialogLayout->addWidget(new QLabel(tr("Playback speed")));
-    QComboBox* playbackSpeed = new QComboBox();
-    playbackSpeed->addItem(tr("1x"));
-    playbackSpeed->addItem(tr("2x"));
-    playbackSpeed->addItem(tr("3x"));
-    playbackSpeed->addItem(tr("4x"));
-    playbackSpeed->addItem(tr("5x"));
-    playbackSpeed->setCurrentIndex(routeElement->speedFactor);
-    dialogLayout->addWidget(playbackSpeed);
-
-    // "Loop" checkbox
-    QCheckBox* loopCheckBox = new QCheckBox(tr("Repeat on playback"));
-    loopCheckBox->setChecked(routeElement->loop);
-    dialogLayout->addWidget(loopCheckBox);
-
     QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Save |
                                                        QDialogButtonBox::Cancel,
                                                        Qt::Horizontal);
@@ -338,10 +316,8 @@ void LocationPage::editRoute(int row) {
     QString newName = nameEdit->text();
     QString newDescription = descriptionEdit->toPlainText();
 
-    if ((newName.isEmpty() || newName == oldName)                  &&
-        newDescription                == oldDescription            &&
-        playbackSpeed->currentIndex() == routeElement->speedFactor &&
-        loopCheckBox->isChecked()     == routeElement->loop          )
+    if ((newName.isEmpty() || newName == oldName) &&
+        newDescription == oldDescription             )
     {
         return;
     }
@@ -361,9 +337,6 @@ void LocationPage::editRoute(int row) {
         routeMetadata.set_logical_name(newName.toStdString().c_str());
     }
     routeMetadata.set_description(newDescription.toStdString().c_str());
-    routeMetadata.set_speed_factor(
-            (emulator_location::RouteMetadata_PlaybackSpeed)playbackSpeed->currentIndex());
-    routeMetadata.set_loop(loopCheckBox->isChecked());
 
     writeRouteProtobufFullPath(routeElement->protoFilePath, routeMetadata);
     scanForRoutes();
@@ -527,17 +500,13 @@ void LocationPage::showRouteDetails(const RouteListElement* theElement) {
                                                      tr("%1s")
                                                      .arg(durationSeconds);
     QString infoString = tr("<b>%1</b><br>"
-                            "&nbsp;&nbsp;Mode: <b>%2</b><br>"
-                            "&nbsp;&nbsp;Playback speed: <b>%3x</b><br>"
-                            "&nbsp;&nbsp;Repeat on playback: <b>%4</b><br>"
-                            "&nbsp;&nbsp;Duration: <b>%5</b><br>"
-                            "&nbsp;&nbsp;Directory: <b>%6</b><br>"
-                            "<b>%7</b>")
+                            "&nbsp;&nbsp;Duration: <b>%2</b><br>"
+                            "&nbsp;&nbsp;Mode: <b>%3</b><br>"
+                            "&nbsp;&nbsp;Directory: <b>%4</b><br>"
+                            "<b>%5</b>")
                           .arg(theElement->logicalName)
-                          .arg(modeString)
-                          .arg(theElement->speedFactor + 1)
-                          .arg(theElement->loop ? "yes" : "no")
                           .arg(durationString)
+                          .arg(modeString)
                           .arg(dirTail.str().c_str())
                           .arg(theElement->description);
     mUi->routeInfo->setHtml(infoString);
@@ -545,6 +514,14 @@ void LocationPage::showRouteDetails(const RouteListElement* theElement) {
 
 // Display the details of the not-yet-saved route
 void LocationPage::showPendingRouteDetails() {
+    QString modeString;
+    switch (mRouteTravelMode) {
+        default:
+        case 0:  modeString = tr("Driving");    break;
+        case 1:  modeString = tr("Walking");    break;
+        case 2:  modeString = tr("Bicycling");  break;
+        case 3:  modeString = tr("Transit");    break;
+    }
     int durationSeconds = mRouteTotalTime + 0.5;
     int durationHours = durationSeconds / (60 * 60);
     durationSeconds -= durationHours * (60 * 60);
@@ -562,8 +539,10 @@ void LocationPage::showPendingRouteDetails() {
                                                      tr("%1s")
                                                      .arg(durationSeconds);
     QString infoString = tr("<b>Unsaved route</b><br>"
-                            "&nbsp;&nbsp;Duration: <b>%1</b><br>")
-                          .arg(durationString);
+                            "&nbsp;&nbsp;Duration: <b>%1</b><br>"
+                            "&nbsp;&nbsp;Mode: <b>%2</b><br>")
+                          .arg(durationString)
+                          .arg(modeString);
     mUi->routeInfo->setHtml(infoString);
 }
 

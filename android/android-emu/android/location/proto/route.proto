@@ -42,19 +42,6 @@ message RouteMetadata {
   }
   optional Mode mode_of_travel = 4;
 
-  // On playback, should we continuously repeat this route?
-  // Default = false = play only once
-  optional bool loop = 5;
-
-  // Playback speed factor
-  enum PlaybackSpeed {
-    SPEED_1x = 0;
-    SPEED_2x = 1;
-    SPEED_3x = 2;
-    SPEED_4x = 3;
-  }
-  optional PlaybackSpeed speed_factor = 6;
-
-  // Duration of the route (the time taken at 1x)
-  optional int64 duration = 7;
+  // Duration of the route (the time taken at 1x, in seconds)
+  optional int64 duration = 5;
 }

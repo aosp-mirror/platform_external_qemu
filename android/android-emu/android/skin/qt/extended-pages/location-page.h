@@ -127,8 +127,6 @@ private:
         QString logicalName;
         QString description;
         int     modeIndex;
-        int     speedFactor;
-        bool    loop;
         int     duration; // Route duration at 1x (seconds)
     } RouteListElement;
 
