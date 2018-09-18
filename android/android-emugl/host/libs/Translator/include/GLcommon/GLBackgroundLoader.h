@@ -23,7 +23,7 @@
 
 #include <memory>
 
-class GLBackgroundLoader : public emugl::Thread {
+class GLBackgroundLoader : public emugl::InterruptibleThread {
 public:
     GLBackgroundLoader(const android::snapshot::ITextureLoaderWPtr& textureLoaderWeak,
                        const EGLiface& eglIface,
@@ -33,8 +33,18 @@ public:
         m_eglIface(eglIface),
         m_glesIface(glesIface),
         m_textureMap(textureMap) { }
+    ~GLBackgroundLoader() {
+        wait(nullptr);
+        m_textureMap.clear();
+    }
 
     intptr_t main();
+    bool wait(intptr_t* exitStatus) override;
+    void interrupt() override;
+
+private:
+    int m_loadDelayMs = 10;
+    bool m_interrupted = false;
 
     const android::snapshot::ITextureLoaderWPtr m_textureLoaderWPtr;
     const EGLiface& m_eglIface;

@@ -405,6 +405,7 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
         GL_LOG("SaveableTexture::%s: warning: texture target 0x%x not supported\n", m_target);
         fprintf(stderr, "Warning: texture target %d not supported\n", m_target);
     }
+    m_loadedFromStream.store(true);
 }
 
 void SaveableTexture::onSave(
@@ -665,12 +666,18 @@ void SaveableTexture::onSave(
 void SaveableTexture::restore() {
     assert(m_loader);
     m_loader(this);
+
+    if (!m_loadedFromStream.load()) {
+        return;
+    }
+
     m_globalTexObj.reset(new NamedObject(
             GenNameInfo(NamedObjectType::TEXTURE), m_globalNamespace));
     if (!m_globalTexObj) {
         GL_LOG("SaveableTexture::%s: %p: could not allocate NamedObject for texture\n", __func__, this);
         emugl_crash_reporter( "Fatal: could not allocate SaveableTexture m_globalTexObj\n");
     }
+
     m_globalName = m_globalTexObj->getGlobalName();
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {

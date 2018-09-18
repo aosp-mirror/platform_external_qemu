@@ -435,7 +435,10 @@ bool Quickboot::save(StringView name) {
     const auto nowMs = System::get()->getHighResTimeUs() / 1000;
     const auto sessionUptimeMs =
             nowMs - (mLoadTimeMs ? mLoadTimeMs : mStartTimeMs);
-    const bool ranLongEnoughForSaving = sessionUptimeMs > kMinUptimeForSavingMs;
+    const bool ranLongEnoughForSaving =
+        (Snapshotter::get().hasRamFile() &&
+         Snapshotter::get().isRamFileShared()) ||
+        sessionUptimeMs > kMinUptimeForSavingMs;
 
     // TODO: when cleaning the current 'default_boot' snapshot, save the reason
     //  of its invalidation in it - this way emulator will be able to give a
