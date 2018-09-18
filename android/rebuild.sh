@@ -16,6 +16,7 @@ VERBOSE=1
 MINGW=
 NO_TESTS=
 OUT_DIR=objs
+OUT_INTERMEDIATES_DIR=objs
 HELP=
 
 for OPT; do
@@ -40,6 +41,9 @@ for OPT; do
             ;;
         --out-dir=*)
             OUT_DIR=${OPT##--out-dir=}
+            ;;
+        --out-intermediates-dir=*)
+            OUT_INTERMEDIATES_DIR=${OPT##--out-intermediates-dir=}
             ;;
         --help|-?)
             VERBOSE=2
@@ -102,22 +106,22 @@ if [ "$VERBOSE" -ne 2 ]; then
     echo "Configuring build."
 fi
 export IN_ANDROID_REBUILD_SH=1
-run android/configure.sh --out-dir=$OUT_DIR "$@" $OPT_CLANG ||
+run android/configure.sh --out-dir=$OUT_DIR --out-intermediates-dir=$OUT_INTERMEDIATES_DIR "$@" $OPT_CLANG ||
     panic "Configuration error, please run ./android/configure.sh to see why."
 
-CONFIG_MAKE=$OUT_DIR/build/config.make
+CONFIG_MAKE=$OUT_INTERMEDIATES_DIR/build/config.make
 if [ ! -f "$CONFIG_MAKE" ]; then
     panic "Cannot find: $CONFIG_MAKE"
 fi
 
 echo "Building sources."
-run make -j$HOST_NUM_CPUS BUILD_OBJS_DIR="$OUT_DIR" ||
+run make -j$HOST_NUM_CPUS BUILD_OBJS_DIR="$OUT_DIR" BUILD_INTERMEDIATES_DIR="$OUT_INTERMEDIATES_DIR" ||
     panic "Could not build sources, please run 'make' to see why."
 
 
 if [ -z "$NO_TESTS" ]; then
     # Let's not run all the tests parallel..
-   run android/scripts/run_tests.sh --verbose --verbose --out-dir=$OUT_DIR --jobs=1
+   run android/scripts/run_tests.sh --verbose --verbose --out-dir=$OUT_DIR --out-intermediates-dir=$OUT_INTERMEDIATES_DIR --jobs=1
 else
     echo "Ignoring unit tests suite."
 fi

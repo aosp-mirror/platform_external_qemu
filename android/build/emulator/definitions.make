@@ -47,7 +47,7 @@ local-cxx-src-to-tidy = $(strip \
 # kind of executable
 # $1 = bitness (32 or 64)
 # $2 = module name
-intermediates-dir-for = $(BUILD_OBJS_DIR)/build/intermediates$(1)/$(2)
+intermediates-dir-for = $(BUILD_INTERMEDIATES_DIR)/build/intermediates$(1)/$(2)
 
 # Return the name of a given build-related variable that can be defined either
 # for the build host or build target. I.e. if LOCAL_HOST_BUILD is not defined,
@@ -81,6 +81,9 @@ local-shared-library-path = $(call intermediates-dir-for,$(call local-build-var,
 
 # Location of final (potentially stripped) executables.
 local-executable-install-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)$(1)$(call local-build-var,EXEEXT)
+
+# Location of final (potentially stripped) executables for generating other files to build.
+local-executable-install-path-for-build = $(BUILD_INTERMEDIATES_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)$(1)$(call local-build-var,EXEEXT)
 
 # Location of the test results
 local-test-result-path = $(BUILD_OBJS_DIR)/tests
@@ -382,7 +385,7 @@ $$(_DST): PRIVATE_OS  := $$(BUILD_HOST_OS)
 $$(_DST): PRIVATE_RANLIB  := $$(BUILD_HOST_RANLIB)
 $$(_DST): PRIVATE_OBJCOPY  := $$(BUILD_HOST_OBJCOPY)
 $$(_DST): CMAKE_TOOL := $$(CMAKE_DIR)/$$(BUILD_HOST_TAG)/bin/cmake
-$$(_DST): PRIVATE_INST := $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)
+$$(_DST): PRIVATE_INST := $(BUILD_INTERMEDIATES_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)
 $$(_DST): $$(_SRC)
 	$(hide) CC=$$(PRIVATE_CC) CXX=$$(PRIVATE_CXX) $$(CMAKE_TOOL) \
        -H$$(PRIVATE_SRC) \
@@ -413,7 +416,7 @@ $$(_DST): PRIVATE_OS  := $$(BUILD_TARGET_OS)
 $$(_DST): PRIVATE_RANLIB  := $$(BUILD_TARGET_RANLIB)
 $$(_DST): PRIVATE_OBJCOPY  := $$(BUILD_TARGET_OBJCOPY)
 $$(_DST): CMAKE_TOOL := $$(CMAKE_DIR)/$$(BUILD_HOST_TAG)/bin/cmake
-$$(_DST): PRIVATE_INST := $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)
+$$(_DST): PRIVATE_INST := $(BUILD_INTERMEDIATES_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)
 $$(_DST): $$(_SRC)
 	$(hide) CC=$$(PRIVATE_CC) CXX=$$(PRIVATE_CXX) $$(CMAKE_TOOL) \
        -H$$(PRIVATE_SRC) \
