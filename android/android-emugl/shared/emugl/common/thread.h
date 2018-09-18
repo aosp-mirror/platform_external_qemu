@@ -19,5 +19,6 @@
 namespace emugl {
 
 using android::base::Thread;
+using android::base::InterruptibleThread;
 
 }  // namespace emugl
