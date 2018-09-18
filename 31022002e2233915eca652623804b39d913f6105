@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "68d98888_52a3317e",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLBackgroundLoader.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-18T01:20:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c0b248ca_9575f2aa",
+      "range": {
+        "startLine": 36,
+        "startChar": 28,
+        "endLine": 36,
+        "endChar": 49
+      },
+      "revId": "31022002e2233915eca652623804b39d913f6105",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c953c1e4_5efae961",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "31022002e2233915eca652623804b39d913f6105",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e92aaef_d5258301",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-18T01:20:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c953c1e4_5efae961",
+      "range": {
+        "startLine": 414,
+        "startChar": 19,
+        "endLine": 414,
+        "endChar": 31
+      },
+      "revId": "31022002e2233915eca652623804b39d913f6105",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
