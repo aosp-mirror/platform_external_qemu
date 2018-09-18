@@ -22,6 +22,30 @@
       "revId": "6bdbda65859d7314fc1c7f0dfae31d31f36d7252",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "221dd69d_2e5244bc",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLBackgroundLoader.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-18T01:39:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b4a6f937_85c1a100",
+      "range": {
+        "startLine": 47,
+        "startChar": 4,
+        "endLine": 47,
+        "endChar": 8
+      },
+      "revId": "6bdbda65859d7314fc1c7f0dfae31d31f36d7252",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
