@@ -535,8 +535,8 @@ static MemoryRegionSection flatview_do_translate(FlatView *fv,
     uint32_t iters = 0;
     hwaddr first_addr = addr;
 
-    if (plen_out) {
-        plen = *plen_out;
+    if (!plen_out) {
+        plen_out = &plen;
     }
 
     for (;;) {
@@ -548,8 +548,8 @@ static MemoryRegionSection flatview_do_translate(FlatView *fv,
             NULL, section ? section->mr : NULL);
 
         section = address_space_translate_internal(
-                flatview_to_dispatch(fv), addr, &addr,
-                &plen, is_mmio);
+                flatview_to_dispatch(fv), addr, xlat,
+                plen_out, is_mmio);
 
         iommu_mr = memory_region_get_iommu(section->mr);
         if (!iommu_mr) {
@@ -557,33 +557,27 @@ static MemoryRegionSection flatview_do_translate(FlatView *fv,
         }
         imrc = memory_region_get_iommu_class_nocheck(iommu_mr);
 
+        addr = *xlat;
         iotlb = imrc->translate(iommu_mr, addr, is_write ?
                                 IOMMU_WO : IOMMU_RO);
-        addr = ((iotlb.translated_addr & ~iotlb.addr_mask)
-                | (addr & iotlb.addr_mask));
-        page_mask &= iotlb.addr_mask;
-        plen = MIN(plen, (addr | iotlb.addr_mask) - addr + 1);
         if (!(iotlb.perm & (1 << is_write))) {
             goto translate_fail;
         }
 
+        addr = ((iotlb.translated_addr & ~iotlb.addr_mask)
+                | (addr & iotlb.addr_mask));
+        page_mask &= iotlb.addr_mask;
+        *plen_out = MIN(*plen_out, (addr | iotlb.addr_mask) - addr + 1);
         fv = address_space_to_flatview(iotlb.target_as);
         *target_as = iotlb.target_as;
     }
 
-    *xlat = addr;
-
-    if (page_mask == (hwaddr)(-1)) {
-        /* Not behind an IOMMU, use default page size. */
-        page_mask = ~TARGET_PAGE_MASK;
-    }
-
     if (page_mask_out) {
+        if (page_mask == (hwaddr)(-1)) {
+            /* Not behind an IOMMU, use default page size. */
+            page_mask = ~TARGET_PAGE_MASK;
+        }
         *page_mask_out = page_mask;
-    }
-
-    if (plen_out) {
-        *plen_out = plen;
     }
 
     return *section;
