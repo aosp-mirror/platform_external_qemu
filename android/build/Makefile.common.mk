@@ -87,11 +87,11 @@ ifdef EMULATOR_CRASHUPLOAD
     EMULATOR_COMMON_CFLAGS += -DCRASHUPLOAD=$(EMULATOR_CRASHUPLOAD)
 endif
 
-# $(BUILD_OBJS_DIR)/build is required to access config-host.h
+# $(BUILD_INTERMEDIATES_DIR)/build is required to access config-host.h
 # $(generated-proto-sources-dir) is needed to access generated
 # protobuff headers.
 EMULATOR_COMMON_INCLUDES := \
-    $(BUILD_OBJS_DIR)/build \
+    $(BUILD_INTERMEDIATES_DIR)/build \
     $(generated-proto-sources-dir) \
     $(LIBMMAN_WIN32_INCLUDES) \
     $(PICOSHA2_INCLUDES) \
@@ -150,7 +150,7 @@ ifeq ($(BUILD_TARGET_OS),windows)
 WINDRES_CPU_32 := i386
 WINDRES_CPU_64 := x86-64
 
-EMULATOR_ICON_OBJ := $(BUILD_OBJS_DIR)/build/emulator_icon$(BUILD_TARGET_BITS).o
+EMULATOR_ICON_OBJ := $(BUILD_INTERMEDIATES_DIR)/build/emulator_icon$(BUILD_TARGET_BITS).o
 $(EMULATOR_ICON_OBJ): PRIVATE_TARGET := $(WINDRES_CPU_$(BUILD_TARGET_BITS))
 $(EMULATOR_ICON_OBJ): $(LOCAL_PATH)/android/images/emulator_icon.rc
 	@echo "Windres ($(PRIVATE_TARGET)): $@"
