@@ -13,6 +13,6 @@ LOCAL_STATIC_LIBRARIES:=
 LOCAL_SHARED_LIBRARIES:=
 
 # Define the EMUGL variable..
-EMUGL_EMUGEN := $(call local-executable-install-path,emugen)
+EMUGL_EMUGEN := $(call local-executable-install-path-for-build,emugen)
 $(call end-cmake-project)
 
