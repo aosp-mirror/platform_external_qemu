@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed2af38a_d59416e4",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-glue.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-18T23:24:44Z",
+      "side": 1,
+      "message": "for future CL consideration: is it necessary to save/restore local path?",
+      "range": {
+        "startLine": 4,
+        "startChar": 0,
+        "endLine": 5,
+        "endChar": 31
+      },
+      "revId": "b1edcf7b89f025f2da5531dfd148a7993cc2941a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
