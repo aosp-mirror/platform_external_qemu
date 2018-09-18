@@ -34,7 +34,7 @@ protected:
 public:
     ITextureLoader() = default;
 
-    using LoaderThreadPtr = std::shared_ptr<android::base::Thread>;
+    using LoaderThreadPtr = std::shared_ptr<android::base::InterruptibleThread>;
     using loader_t = std::function<void(android::base::Stream*)>;
 
     virtual bool start() = 0;
@@ -45,6 +45,7 @@ public:
     virtual uint64_t diskSize() const = 0;
     virtual bool compressed() const = 0;
     virtual void join() = 0;
+    virtual void interrupt() = 0;
 };
 
 class TextureLoader final : public ITextureLoader {
@@ -63,6 +64,16 @@ public:
 
     void join() override {
         if (mLoaderThread) {
+            mLoaderThread->wait();
+            mLoaderThread.reset();
+        }
+        mStream.close();
+        mEndTime = base::System::get()->getHighResTimeUs();
+    }
+
+    void interrupt() override {
+        if (mLoaderThread) {
+            mLoaderThread->interrupt();
             mLoaderThread->wait();
             mLoaderThread.reset();
         }
