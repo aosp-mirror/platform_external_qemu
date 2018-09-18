@@ -541,7 +541,8 @@ bool androidSnapshot_quickbootSave(const char* _name) {
 
     // Write user choice to the ini file if we are using file-backed RAM.
     if (android::snapshot::Snapshotter::get().hasRamFile()) {
-        bool wantedSaveOnExit = !(android_avdParams->flags & AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT);
+        bool wantedSaveOnExit =
+            !(android_avdParams->flags & AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT);
         androidSnapshot_writeQuickbootChoice(wantedSaveOnExit);
     }
 
