@@ -110,6 +110,10 @@ void Loader::interrupt() {
     if (mRamLoader && !mRamLoader->hasError()) {
         mRamLoader->interrupt();
     }
+
+    if (mTextureLoader && !mTextureLoader->hasError()) {
+        mTextureLoader->interrupt();
+    }
 }
 
 ITextureLoaderPtr Loader::textureLoader() const {

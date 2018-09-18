@@ -25,6 +25,7 @@
 
 #include <GLES2/gl2ext.h>
 
+#include <atomic>
 #include <functional>
 #include <memory>
 
@@ -108,6 +109,7 @@ private:
     loader_t m_loader;
     GlobalNameSpace* m_globalNamespace = nullptr;
     bool m_isDirty = true;
+    std::atomic<bool> m_loadedFromStream { false };
 };
 
 typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;
