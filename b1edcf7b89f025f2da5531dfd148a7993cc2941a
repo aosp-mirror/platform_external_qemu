@@ -22,6 +22,29 @@
       "revId": "b1edcf7b89f025f2da5531dfd148a7993cc2941a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "512e12a8_e48bd534",
+        "filename": "android/build/emulator/definitions.make",
+        "patchSetId": 4
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-18T23:26:09Z",
+      "side": 1,
+      "message": "Also lets document the qt5 specific dependency here, it\u0027s not obvious why that\u0027s needed.",
+      "range": {
+        "startLine": 450,
+        "startChar": 0,
+        "endLine": 450,
+        "endChar": 47
+      },
+      "revId": "b1edcf7b89f025f2da5531dfd148a7993cc2941a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
