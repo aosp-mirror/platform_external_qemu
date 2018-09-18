@@ -35,6 +35,8 @@ intptr_t GLBackgroundLoader::main() {
     }
 
     for (const auto& it : m_textureMap) {
+        if (m_interrupted) break;
+
         // Acquire the texture loader for each load; bail
         // in case something else happened to interrupt loading.
         auto ptr = m_textureLoaderWPtr.lock();
@@ -66,4 +68,8 @@ intptr_t GLBackgroundLoader::main() {
 bool GLBackgroundLoader::wait(intptr_t* exitStatus) {
     m_loadDelayMs = 0;
     return Thread::wait();
+}
+
+void GLBackgroundLoader::interrupt() {
+    m_interrupted = true;
 }
