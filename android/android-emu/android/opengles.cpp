@@ -19,6 +19,7 @@
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/logger.h"
 #include "android/snapshot/PathUtils.h"
+#include "android/snapshot/Snapshotter.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/dll.h"
@@ -182,6 +183,12 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     sRenderLib->setDmaOps(dma_ops);
 
     sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow, sEgl2egl);
+    android::snapshot::Snapshotter::get().addOperationCallback(
+            [](android::snapshot::Snapshotter::Operation op,
+               android::snapshot::Snapshotter::Stage stage) {
+                sRenderer->snapshotOperationCallback(op, stage);
+            });
+
     if (!sRenderer) {
         D("Can't start OpenGLES renderer?");
         return -1;
