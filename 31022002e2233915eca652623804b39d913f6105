@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c0b248ca_9575f2aa",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLBackgroundLoader.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-18T00:50:27Z",
+      "side": 1,
+      "message": "This is a potential race condition if the thread is currently enumerating over the map or calling m_textureMap.clear().  Join the thread before this?",
+      "range": {
+        "startLine": 36,
+        "startChar": 28,
+        "endLine": 36,
+        "endChar": 49
+      },
+      "revId": "31022002e2233915eca652623804b39d913f6105",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c953c1e4_5efae961",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-18T00:50:27Z",
+      "side": 1,
+      "message": "TODO(yahan) ?",
+      "range": {
+        "startLine": 414,
+        "startChar": 19,
+        "endLine": 414,
+        "endChar": 31
+      },
+      "revId": "31022002e2233915eca652623804b39d913f6105",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
