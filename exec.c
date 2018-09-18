@@ -73,6 +73,8 @@
 
 //#define DEBUG_SUBPAGE
 
+#define FLATVIEW_UNUSUAL_ITER_COUNT 128
+
 #if !defined(CONFIG_USER_ONLY)
 /* ram_list is read under rcu_read_lock()/rcu_read_unlock().  Writes
  * are protected by the ramlist lock.
@@ -464,6 +466,39 @@ address_space_translate_internal(AddressSpaceDispatch *d, hwaddr addr, hwaddr *x
     return section;
 }
 
+static const char* memory_region_get_name_safe(MemoryRegion* mr) {
+    if (!mr) {
+        return "(null region)";
+    }
+
+    if (!mr->name) {
+        return "(none)";
+    }
+
+    return mr->name;
+}
+
+static void flatview_spin_warning(
+    const char* label,
+    uint32_t iters,
+    hwaddr first_addr,
+    hwaddr addr,
+    MemoryRegion* first_mr,
+    MemoryRegion* mr) {
+
+    qemu_spin_warning(
+        iters, FLATVIEW_UNUSUAL_ITER_COUNT,
+        "Warning: %s has iterated %u times. "
+        "First addr: 0x%llx. Last addr: 0x%llx. "
+        "First mr: %p (%s). Last mr: %p (%s)\n",
+        label,
+        iters,
+        (unsigned long long)first_addr,
+        (unsigned long long)addr,
+        first_mr, memory_region_get_name_safe(first_mr),
+        mr, memory_region_get_name_safe(mr));
+}
+
 /**
  * flatview_do_translate - translate an address in FlatView
  *
@@ -492,17 +527,26 @@ static MemoryRegionSection flatview_do_translate(FlatView *fv,
                                                  AddressSpace **target_as)
 {
     IOMMUTLBEntry iotlb;
-    MemoryRegionSection *section;
+    MemoryRegionSection *section = NULL;
     IOMMUMemoryRegion *iommu_mr;
     IOMMUMemoryRegionClass *imrc;
     hwaddr page_mask = (hwaddr)(-1);
     hwaddr plen = (hwaddr)(-1);
+    uint32_t iters = 0;
+    hwaddr first_addr = addr;
 
     if (plen_out) {
         plen = *plen_out;
     }
 
     for (;;) {
+        ++iters;
+        flatview_spin_warning(
+            "flatview_do_translate",
+            iters,
+            first_addr, addr,
+            NULL, section ? section->mr : NULL);
+
         section = address_space_translate_internal(
                 flatview_to_dispatch(fv), addr, &addr,
                 &plen, is_mmio);
@@ -3246,8 +3290,18 @@ static MemTxResult flatview_write_continue(FlatView *fv, hwaddr addr,
     uint64_t val;
     MemTxResult result = MEMTX_OK;
     bool release_lock = false;
+    uint32_t iters = 0;
+    hwaddr first_addr = addr;
+    MemoryRegion* first_mr = mr;
 
     for (;;) {
+        ++iters;
+        flatview_spin_warning(
+            "flatview_write_continue",
+            iters,
+            first_addr, addr,
+            first_mr, mr);
+
         if (!memory_access_is_direct(mr, true)) {
             release_lock |= prepare_mmio_access(mr);
             l = memory_access_size(mr, l, addr1);
@@ -3335,8 +3389,18 @@ MemTxResult flatview_read_continue(FlatView *fv, hwaddr addr,
     uint64_t val;
     MemTxResult result = MEMTX_OK;
     bool release_lock = false;
+    uint32_t iters = 0;
+    hwaddr first_addr = addr;
+    MemoryRegion* first_mr = mr;
 
     for (;;) {
+        ++iters;
+        flatview_spin_warning(
+            "flatview_read_continue",
+            iters,
+            first_addr, addr,
+            first_mr, mr);
+
         if (!memory_access_is_direct(mr, false)) {
             /* I/O case */
             release_lock |= prepare_mmio_access(mr);
