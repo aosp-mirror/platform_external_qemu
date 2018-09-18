@@ -43,7 +43,9 @@ option_register_var "-j<count>" OPT_NUM_JOBS "Run <count> parallel build jobs [$
 option_register_var "--jobs=<count>" OPT_NUM_JOBS "Same as -j<count>."
 
 OPT_OUT=objs
+OPT_INTERMEDIATES=objs
 option_register_var "--out-dir=<dir>" OPT_OUT "Use specific output directory"
+option_register_var "--out-intermediates-dir=<dir>" OPT_INTERMEDIATES "Use specific intermediates output directory"
 
 aosp_dir_register_option
 option_parse "$@"
@@ -61,7 +63,7 @@ cd $PROGDIR/../..
 
 QEMU2_TOP_DIR=${AOSP_DIR}/external/qemu
 HOST_OS=$(get_build_os)
-CONFIG_MAKE=${OPT_OUT}/build/config.make
+CONFIG_MAKE=${OPT_INTERMEDIATES}/build/config.make
 # Extract the target os from config.make.
 TARGET_OS=$(grep BUILD_TARGET_OS ${CONFIG_MAKE} | awk '{ print $3; }')
 FAILURES=""
