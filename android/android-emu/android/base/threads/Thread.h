@@ -133,5 +133,16 @@ private:
 // Helper function to obtain a printable id for the current thread.
 unsigned long getCurrentThreadId();
 
+// Subclass of Thread covering interruptible threads.
+class InterruptibleThread : public Thread {
+    DISALLOW_COPY_ASSIGN_AND_MOVE(InterruptibleThread);
+public:
+    // Public constructor.
+    InterruptibleThread(ThreadFlags flags = ThreadFlags::MaskSignals, int stackSize = 0) :
+        Thread(flags, stackSize) { }
+
+    virtual void interrupt() = 0;
+};
+
 }  // namespace base
 }  // namespace android

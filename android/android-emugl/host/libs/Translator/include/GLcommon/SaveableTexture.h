@@ -108,6 +108,7 @@ private:
     loader_t m_loader;
     GlobalNameSpace* m_globalNamespace = nullptr;
     bool m_isDirty = true;
+    bool m_loadedFromStream = false;
 };
 
 typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;
