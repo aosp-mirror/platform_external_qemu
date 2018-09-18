@@ -52,8 +52,6 @@ include $(EMUGL_PATH)/common.mk
 # module that hasn't been declared yet anyway.
 #
 
-include $(EMUGL_PATH)/../third_party/astc-codec/Android.mk
-
 # Required by our units test.
 include $(EMUGL_PATH)/googletest.mk
 
