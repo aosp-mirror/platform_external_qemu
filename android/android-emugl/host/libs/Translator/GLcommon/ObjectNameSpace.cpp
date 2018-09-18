@@ -103,6 +103,7 @@ void NameSpace::touchTextures() {
         if (!texNamedObj) {
             GL_LOG("NameSpace::%s: %p: fatal: global object null for texture data %p\n",
                     __func__, this, texData);
+            fprintf(stderr, "fatal: null global texture object in NameSpace::touchTextures");
             emugl_crash_reporter("fatal: null global texture object in NameSpace::touchTextures");
         }
         setGlobalObject(obj.first, texNamedObj);
