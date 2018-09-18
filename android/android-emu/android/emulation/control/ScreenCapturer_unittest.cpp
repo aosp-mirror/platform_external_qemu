@@ -177,6 +177,9 @@ public:
             pixels.resize(0);
         }
     }
+    void snapshotOperationCallback(
+            android::snapshot::Snapshotter::Operation op,
+            android::snapshot::Snapshotter::Stage stage) {}
 private:
     bool mHasValidScreenshot = false;
     bool mGuestPostedAFrame = false;

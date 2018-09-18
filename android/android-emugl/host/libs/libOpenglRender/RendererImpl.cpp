@@ -254,16 +254,18 @@ void RendererImpl::save(android::base::Stream* stream,
 
 bool RendererImpl::load(android::base::Stream* stream,
                         const android::snapshot::ITextureLoaderPtr& textureLoader) {
+
 #ifdef SNAPSHOT_PROFILE
-    android::base::System::Duration startTime
-            = android::base::System::get()->getUnixTimeUs();
+    android::base::System::Duration startTime =
+            android::base::System::get()->getUnixTimeUs();
 #endif
-    cleanupRenderThreads();
     waitForProcessCleanup();
 #ifdef SNAPSHOT_PROFILE
-    printf("RenderThread cleanup time: %lld ms\n",
-            (long long)(android::base::System::get()->getUnixTimeUs()
-            - startTime) / 1000);
+    printf("Previous session cleanup time: %lld ms\n",
+           (long long)(android::base::System::get()
+                               ->getUnixTimeUs() -
+                       startTime) /
+                   1000);
 #endif
 
     mStopped = stream->getByte();
@@ -380,6 +382,36 @@ void RendererImpl::setScreenMask(int width, int height, const unsigned char* rgb
 
 void RendererImpl::cleanupProcGLObjects(uint64_t puid) {
     mCleanupThread->cleanup(puid);
+}
+
+void RendererImpl::snapshotOperationCallback(
+        android::snapshot::Snapshotter::Operation op,
+        android::snapshot::Snapshotter::Stage stage) {
+    using namespace android::snapshot;
+    switch (op) {
+        case Snapshotter::Operation::Load:
+            if (stage == Snapshotter::Stage::Start) {
+#ifdef SNAPSHOT_PROFILE
+             android::base::System::Duration startTime =
+                     android::base::System::get()->getUnixTimeUs();
+#endif
+                mRenderWindow->setPaused(true);
+                cleanupRenderThreads();
+#ifdef SNAPSHOT_PROFILE
+                printf("Previous session suspend time: %lld ms\n",
+                       (long long)(android::base::System::get()
+                                           ->getUnixTimeUs() -
+                                   startTime) /
+                               1000);
+#endif
+            }
+            if (stage == Snapshotter::Stage::End) {
+                mRenderWindow->setPaused(false);
+            }
+            break;
+        default:
+            break;
+    }
 }
 
 }  // namespace emugl
