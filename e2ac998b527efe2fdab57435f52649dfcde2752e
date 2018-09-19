@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "430d92e0_b7a93062",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2060,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-19T16:25:51Z",
+      "side": 1,
+      "message": "is the return code of any value too?",
+      "range": {
+        "startLine": 2060,
+        "startChar": 16,
+        "endLine": 2060,
+        "endChar": 29
+      },
+      "revId": "e2ac998b527efe2fdab57435f52649dfcde2752e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7a7ccb5e_abbd4125",
+        "filename": "android/android-emu/android/opengles.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-19T16:25:51Z",
+      "side": 1,
+      "message": "what about returning different values here and appending them to the crash log for easier investigation?",
+      "range": {
+        "startLine": 165,
+        "startChar": 0,
+        "endLine": 178,
+        "endChar": 5
+      },
+      "revId": "e2ac998b527efe2fdab57435f52649dfcde2752e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
