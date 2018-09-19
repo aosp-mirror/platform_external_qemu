@@ -419,6 +419,7 @@ $$(_DST): PRIVATE_RANLIB  := $$(BUILD_TARGET_RANLIB)
 $$(_DST): PRIVATE_OBJCOPY  := $$(BUILD_TARGET_OBJCOPY)
 $$(_DST): CMAKE_TOOL := $$(CMAKE_DIR)/$$(BUILD_HOST_TAG)/bin/cmake
 $$(_DST): PRIVATE_INST := $$(abspath $$(dir $$(_DST)))
+$$(_DST): PRIVATE_BUILD_OBJS_DIR  := $$(abspath $$(BUILD_OBJS_DIR))
 $$(_DST): $$(_SRC)
 	$(hide) CC=$$(PRIVATE_CC) CXX=$$(PRIVATE_CXX) $$(CMAKE_TOOL) \
        -H$$(PRIVATE_SRC) \
@@ -432,6 +433,7 @@ $$(_DST): $$(_SRC)
        -DLOCAL_OS="$${PRIVATE_OS}" \
        -DLOCAL_INSTALL="$$(PRIVATE_INST)" \
        -DLOCAL_QEMU2_TOP_DIR="$$(QEMU2_TOP_DIR)" \
+       -DLOCAL_BUILD_OBJS_DIR="$$(PRIVATE_BUILD_OBJS_DIR)" \
        -DCMAKE_TOOLCHAIN_FILE=$$(call qemu2-if-windows,"$$(QEMU2_TOP_DIR)/android/build/cmake/toolchain-win.cmake")
 endef
 
