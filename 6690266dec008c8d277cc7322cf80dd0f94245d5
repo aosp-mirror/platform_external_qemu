@@ -16,6 +16,24 @@
       "revId": "6690266dec008c8d277cc7322cf80dd0f94245d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "db8dff40_674d81a7",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 730,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-19T18:31:48Z",
+      "side": 1,
+      "message": "it might have been, although my current take on it is that with on-demand load (which is where the bug happened), we don\u0027t use a decompressing thread pool, the decompression is handled in this function directly, so this would only potentially affect eager ram load with readAllPages()",
+      "parentUuid": "611050a4_b1291cac",
+      "revId": "6690266dec008c8d277cc7322cf80dd0f94245d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
