@@ -117,6 +117,9 @@ if lastItem:
 if targetFile == '--':
     out = sys.stdout
 else:
+    targetDir = os.path.dirname(targetFile)
+    if not os.path.exists(targetDir):
+        os.makedirs(targetDir)
     out = open(targetFile,"wb")
 
 out.write(targetHeader)
