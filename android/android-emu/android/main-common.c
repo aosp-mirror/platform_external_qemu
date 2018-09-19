@@ -14,6 +14,7 @@
 #include "android/avd/info.h"
 #include "android/avd/util.h"
 #include "android/camera/camera-list.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/emulation/android_pipe_unix.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/featurecontrol/feature_control.h"
@@ -1977,6 +1978,10 @@ bool configAndStartRenderer(
                 uiPreferredBackend)) {
         derror("%s", config.status);
         config_out->openglAlive = 0;
+
+        crashhandler_append_message_format(
+            "androidEmuglConfigInit failed.\n");
+
         lastRendererConfig = *config_out;
         AFREE(api_arch);
 
@@ -2050,8 +2055,19 @@ bool configAndStartRenderer(
                     avdInfo_getApiLevel(avd),
                     &gles_major_version,
                     &gles_minor_version);
-        if (gles_init_res || renderer_startup_res)
+        if (gles_init_res || renderer_startup_res) {
             config_out->openglAlive = 0;
+            if (gles_init_res) {
+                crashhandler_append_message_format(
+                    "android_initOpenglesEmulation failed. "
+                    "Error: %d\n", gles_init_res);
+            }
+            if (renderer_startup_res) {
+                crashhandler_append_message_format(
+                    "android_startOpenglesRenderer failed. "
+                    "Error: %d\n", renderer_startup_res);
+            }
+        }
     }
 
     // We need to know boot property
