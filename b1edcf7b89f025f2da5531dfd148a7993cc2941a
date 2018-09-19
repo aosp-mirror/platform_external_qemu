@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "da1b6ea6_1034ddb7",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-glue.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-19T02:33:22Z",
+      "side": 1,
+      "message": "Well, I was more thinking about why LOCAL_PATH needed to get save / restored only with Cmake while it wasn\u0027t touched before. That\u0027s ok though, it can be addressed in a followup CL.",
+      "parentUuid": "6cff0b31_53647dfa",
+      "range": {
+        "startLine": 4,
+        "startChar": 0,
+        "endLine": 5,
+        "endChar": 31
+      },
+      "revId": "b1edcf7b89f025f2da5531dfd148a7993cc2941a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "512e12a8_e48bd534",
         "filename": "android/build/emulator/definitions.make",
         "patchSetId": 4
