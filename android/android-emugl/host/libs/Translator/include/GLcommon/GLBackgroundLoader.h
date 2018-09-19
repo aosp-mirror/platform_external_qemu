@@ -21,6 +21,7 @@
 
 #include <EGL/egl.h>
 
+#include <atomic>
 #include <memory>
 
 class GLBackgroundLoader : public emugl::InterruptibleThread {
@@ -43,8 +44,8 @@ public:
     void interrupt() override;
 
 private:
-    int m_loadDelayMs = 10;
-    bool m_interrupted = false;
+    std::atomic<int> m_loadDelayMs { 10 };
+    std::atomic<bool> m_interrupted { false };
 
     const android::snapshot::ITextureLoaderWPtr m_textureLoaderWPtr;
     const EGLiface& m_eglIface;
