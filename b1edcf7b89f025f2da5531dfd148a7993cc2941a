@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6cff0b31_53647dfa",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-glue.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-09-19T02:27:12Z",
+      "side": 1,
+      "message": "Many of the makefile commands rely on LOCAL_PATH, if we don\u0027t set it back to what it was we can get strange behavior after including a .mk file using $(include)",
+      "parentUuid": "ed2af38a_d59416e4",
+      "range": {
+        "startLine": 4,
+        "startChar": 0,
+        "endLine": 5,
+        "endChar": 31
+      },
+      "revId": "b1edcf7b89f025f2da5531dfd148a7993cc2941a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "512e12a8_e48bd534",
         "filename": "android/build/emulator/definitions.make",
         "patchSetId": 4
