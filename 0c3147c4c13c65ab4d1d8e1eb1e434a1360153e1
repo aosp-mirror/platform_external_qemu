@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "55ecaf5a_aa1eb2a2",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLBackgroundLoader.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-19T16:21:29Z",
+      "side": 1,
+      "message": "here and later: please use the explicit memory order, which is usually \"relaxed\" unless the atomic value synchronizes any non-atomic data access. Default order creates a barrier instruction at each atomic access, which is pretty slow and causes a long delay on all CPU cores",
+      "range": {
+        "startLine": 38,
+        "startChar": 26,
+        "endLine": 38,
+        "endChar": 30
+      },
+      "revId": "0c3147c4c13c65ab4d1d8e1eb1e434a1360153e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
