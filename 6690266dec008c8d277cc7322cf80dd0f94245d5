@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "611050a4_b1291cac",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 730,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-19T18:00:09Z",
+      "side": 1,
+      "message": "so was this that bug with double-free?",
+      "revId": "6690266dec008c8d277cc7322cf80dd0f94245d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
