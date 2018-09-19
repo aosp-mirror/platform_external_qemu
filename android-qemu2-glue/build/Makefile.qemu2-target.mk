@@ -44,6 +44,7 @@ QEMU2_SYSTEM_CFLAGS := \
     -DNEED_CPU_H \
 
 QEMU2_SYSTEM_INCLUDES := \
+    $(QEMU2_CONFIG_DIR) \
     $(QEMU2_INCLUDES) \
     $(QEMU2_DEPS_TOP_DIR)/include \
     $(call qemu2-if-linux,$(LOCAL_PATH)/linux-headers) \
@@ -76,7 +77,7 @@ QEMU2_SYSTEM_STATIC_LIBRARIES := \
 
 $(call start-emulator-library,libqemu2-system-$(QEMU2_TARGET_SYSTEM))
 
-LOCAL_GENERATED_SOURCES += \
+LOCAL_SRC_FILES += \
     $(QEMU2_AUTO_GENERATED_DIR)/target/$(QEMU2_TARGET_TARGET)/generated-helpers.c
 
 LOCAL_CFLAGS += \
@@ -93,10 +94,10 @@ LOCAL_SRC_FILES += \
     $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES_$(BUILD_TARGET_TAG))
 
 ifeq (arm64,$(QEMU2_TARGET))
-LOCAL_GENERATED_SOURCES += $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml-arm64.c
+LOCAL_SRC_FILES += $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml-arm64.c
 LOCAL_SRC_FILES += hw/smbios/smbios_type_38-stub.c
 else ifeq (arm,$(QEMU2_TARGET))
-LOCAL_GENERATED_SOURCES += $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml-arm.c
+LOCAL_SRC_FILES += $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml-arm.c
 LOCAL_SRC_FILES += hw/smbios/smbios_type_38-stub.c
 else
 LOCAL_SRC_FILES += stubs/gdbstub.c
@@ -114,7 +115,7 @@ LOCAL_SRC_FILES += \
 
 
 LOCAL_PREBUILTS_OBJ_FILES += \
-    $(call qemu2-if-windows,$(QEMU2_AUTO_GENERATED_DIR)/version.o)
+    $(call qemu2-if-windows,$(QEMU2_CONFIG_DIR)/version.o)
 
 $(call end-emulator-library)
 
