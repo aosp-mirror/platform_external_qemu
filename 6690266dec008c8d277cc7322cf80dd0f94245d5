@@ -34,6 +34,24 @@
       "revId": "6690266dec008c8d277cc7322cf80dd0f94245d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3f84e9dd_486b8077",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 730,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-19T18:47:39Z",
+      "side": 1,
+      "message": "(and the dbl free has been fixed by https://android-review.googlesource.com/c/platform/external/qemu/+/643673 (and it was generalized asfter)",
+      "parentUuid": "db8dff40_674d81a7",
+      "revId": "6690266dec008c8d277cc7322cf80dd0f94245d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
