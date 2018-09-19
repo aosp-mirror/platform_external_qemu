@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5c633d72_acece6cd",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2060,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-19T16:31:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "430d92e0_b7a93062",
+      "range": {
+        "startLine": 2060,
+        "startChar": 16,
+        "endLine": 2060,
+        "endChar": 29
+      },
+      "revId": "e2ac998b527efe2fdab57435f52649dfcde2752e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7ccb5e_abbd4125",
         "filename": "android/android-emu/android/opengles.cpp",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "e2ac998b527efe2fdab57435f52649dfcde2752e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "39da8134_6ba19e4d",
+        "filename": "android/android-emu/android/opengles.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-19T16:31:29Z",
+      "side": 1,
+      "message": "D()/E() have been modified to append to the opengl log, which is always included in the crash log.",
+      "parentUuid": "7a7ccb5e_abbd4125",
+      "range": {
+        "startLine": 165,
+        "startChar": 0,
+        "endLine": 178,
+        "endChar": 5
+      },
+      "revId": "e2ac998b527efe2fdab57435f52649dfcde2752e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
