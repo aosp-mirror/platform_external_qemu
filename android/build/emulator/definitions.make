@@ -59,6 +59,9 @@ local-build-var = $(if $(strip $(LOCAL_HOST_BUILD)),$(BUILD_HOST_$1),$(BUILD_TAR
 # BUILD_HOST_XXX depending on the definition of LOCAL_HOST_BUILD.
 local-build-define = $(if $(strip $(LOCAL_$1)),,$(eval LOCAL_$1 := $$(call local-build-var,$1)))
 
+# Expands every path to an absolute path
+to-absolute-path = $(foreach dir,$(1), $(abspath $(dir)))
+
 # Return the directory containing the intermediate files for the current
 # module. LOCAL_MODULE must be defined before calling this.
 local-intermediates-dir = $(call intermediates-dir-for,$(call local-build-var,BITS),$(LOCAL_MODULE))
@@ -373,7 +376,7 @@ $$(_DST): PRIVATE_DST := $$(_DST)
 $$(_DST): PRIVATE_CMAKE_DST := $$(dir $$(_DST))
 $$(_DST): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS)
 $$(_DST): PRIVATE_CXXFLAGS := $$(LOCAL_CXXFLAGS)
-$$(_DST): PRIVATE_C_INCLUDES := $(LOCAL_C_INCLUDES)
+$$(_DST): PRIVATE_C_INCLUDES := $$(call to-absolute-path,$$(LOCAL_C_INCLUDES))
 $$(_DST): PRIVATE_SRC := $$(dir $$(_SRC))
 $$(_DST): PRIVATE_CC  := $$(BUILD_HOST_CC)
 $$(_DST): PRIVATE_CXX := $$(BUILD_HOST_CXX)
@@ -402,9 +405,11 @@ _SRC := $(1)
 _DST := $(2)
 $$(_DST): PRIVATE_DST := $$(_DST)
 $$(_DST): PRIVATE_CMAKE_DST := $$(dir $$(_DST))
-$$(_DST): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS)
-$$(_DST): PRIVATE_CXXFLAGS := $$(LOCAL_CXXFLAGS)
-$$(_DST): PRIVATE_C_INCLUDES := $$(LOCAL_C_INCLUDES)
+$$(_DST): PRIVATE_CFLAGS := $$(filter-out -I%,$$(LOCAL_CFLAGS))
+$$(_DST): PRIVATE_CXXFLAGS := $$(filter-out -I%,$$(LOCAL_CXXFLAGS))
+$$(_DST): PRIVATE_C_INCLUDES := $$(call to-absolute-path,$$(LOCAL_C_INCLUDES))
+$$(_DST): PRIVATE_C_INCLUDES += $$(call to-absolute-path,$$(patsubst -I%,%,$$(filter -I%,$$(LOCAL_CFLAGS))))
+$$(_DST): PRIVATE_C_INCLUDES += $$(call to-absolute-path,$$(patsubst -I%,%,$$(filter -I%,$$(LOCAL_CXXFLAGS))))
 $$(_DST): PRIVATE_SRC := $$(dir $$(_SRC))
 $$(_DST): PRIVATE_CC  := $$(BUILD_TARGET_CC)
 $$(_DST): PRIVATE_CXX := $$(BUILD_TARGET_CXX)
@@ -413,7 +418,7 @@ $$(_DST): PRIVATE_OS  := $$(BUILD_TARGET_OS)
 $$(_DST): PRIVATE_RANLIB  := $$(BUILD_TARGET_RANLIB)
 $$(_DST): PRIVATE_OBJCOPY  := $$(BUILD_TARGET_OBJCOPY)
 $$(_DST): CMAKE_TOOL := $$(CMAKE_DIR)/$$(BUILD_HOST_TAG)/bin/cmake
-$$(_DST): PRIVATE_INST := $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)
+$$(_DST): PRIVATE_INST := $$(abspath $$(dir $$(_DST)))
 $$(_DST): $$(_SRC)
 	$(hide) CC=$$(PRIVATE_CC) CXX=$$(PRIVATE_CXX) $$(CMAKE_TOOL) \
        -H$$(PRIVATE_SRC) \
@@ -425,7 +430,9 @@ $$(_DST): $$(_SRC)
        -DLOCAL_CXXFLAGS="$$(PRIVATE_CXXFLAGS)" \
        -DLOCAL_CFLAGS="$$(PRIVATE_CFLAGS)" \
        -DLOCAL_OS="$${PRIVATE_OS}" \
-
+       -DLOCAL_INSTALL="$$(PRIVATE_INST)" \
+       -DLOCAL_QEMU2_TOP_DIR="$$(QEMU2_TOP_DIR)" \
+       -DCMAKE_TOOLCHAIN_FILE=$$(call qemu2-if-windows,"$$(QEMU2_TOP_DIR)/android/build/cmake/toolchain-win.cmake")
 endef
 
 # Makes the specific target from the generated CMAKE project file.
@@ -436,11 +443,12 @@ define make-cmake-project
 _SRC := $(1)
 _DST := $(2)
 _TARGET := $(3)
+$$(LOCAL_PATH)/$$(_SRC): $$(LOCAL_SOURCE_DEPENDENCIES)
 $$(_DST): PRIVATE_DST := $$(_DST)
 $$(_DST): PRIVATE_SRC := $$(_SRC)
 $$(_DST): PRIVATE_TARGET := $$(_TARGET)
 $$(_DST): $$(_SRC) force
-	@$(hide)  $(MAKE) $$(PRIVATE_TARGET) -C $$(dir $$(PRIVATE_SRC))
+	@$(hide) +$(MAKE) --no-print-directory $$(PRIVATE_TARGET) -C $$(dir $$(PRIVATE_SRC))
 endef
 
 # Runs a test target

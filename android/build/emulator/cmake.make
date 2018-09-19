@@ -28,22 +28,28 @@ include $(_BUILD_CORE_DIR)/emulator/binary.make
 # Generate the proper cmake translation target, based upon the host build property
 ifeq ($(strip $(LOCAL_HOST_BUILD)),)
  $(eval $(call cmake-project-target,$(LOCAL_CMAKELISTS),$(LOCAL_BUILT_MAKEFILE)))
+ $(eval LOCAL_EXEEXT:=$(BUILD_TARGET_EXEEXT))
 else
  $(eval $(call cmake-project-host,$(LOCAL_CMAKELISTS),$(LOCAL_BUILT_MAKEFILE)))
+ $(eval LOCAL_EXEEXT:=$(BUILD_HOST_EXEEXT))
 endif
 
-$(foreach exe,$(PRODUCED_EXECUTABLES), \
+$(foreach prg,$(PRODUCED_EXECUTABLES), \
+  $(eval map := $(subst =,$(space),$(prg))) \
+  $(eval exe := $(word 1, $(map))) \
+  $(eval to  := $(word 2, $(map))) \
+  $(eval to  := $(if $(to),$(to),$(exe))) \
   $(eval LOCAL_BUILT_MODULE := $(LOCAL_CMAKE_MODULE)/$(exe)) \
   $(eval LOCAL_INSTALL_MODULE := $(call local-executable-install-path,$(exe))) \
   $(eval $(call make-cmake-project,$(LOCAL_BUILT_MAKEFILE),$(LOCAL_BUILT_MODULE),$(exe))) \
-  $(eval $(call install-binary,$(LOCAL_BUILT_MODULE),$(LOCAL_INSTALL_MODULE),--strip-all,$(LOCAL_INSTALL_OPENGL))) \
+  $(eval $(call install-binary,$(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT),$(LOCAL_INSTALL_MODULE),--strip-all,$(LOCAL_INSTALL_OPENGL))) \
 )
 
 $(foreach exe,$(PRODUCED_TESTS), \
   $(eval LOCAL_BUILT_MODULE := $(LOCAL_CMAKE_MODULE)/$(exe)) \
   $(eval LOCAL_INSTALL_MODULE := $(call local-executable-install-path,$(exe))) \
   $(eval $(call make-cmake-project,$(LOCAL_BUILT_MAKEFILE),$(LOCAL_BUILT_MODULE),$(exe))) \
-  $(eval $(call install-binary,$(LOCAL_BUILT_MODULE),$(LOCAL_INSTALL_MODULE),--strip-all,$(LOCAL_INSTALL_OPENGL))) \
+  $(eval $(call install-binary,$(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT),$(LOCAL_INSTALL_MODULE),--strip-all,$(LOCAL_INSTALL_OPENGL))) \
   $(eval $(call run-test,$(LOCAL_INSTALL_MODULE))) \
 )
 
