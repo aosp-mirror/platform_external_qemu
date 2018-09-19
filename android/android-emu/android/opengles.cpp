@@ -34,8 +34,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
-#define DD(...) VERBOSE_PRINT(gles,__VA_ARGS__)
+#define D(...) do { \
+    VERBOSE_PRINT(init,__VA_ARGS__); \
+    android_opengl_logger_write(__VA_ARGS__); \
+} while(0);
+
+#define DD(...) do { \
+    VERBOSE_PRINT(gles,__VA_ARGS__); \
+    android_opengl_logger_write(__VA_ARGS__); \
+} while(0);
+
+#define E(fmt,...) do { \
+    derror(fmt, ##__VA_ARGS__); \
+    android_opengl_logger_write(fmt "\n", ##__VA_ARGS__); \
+} while(0);
 
 /* Name of the GLES rendering library we're going to use */
 #if UINTPTR_MAX == UINT32_MAX
@@ -67,7 +79,7 @@ static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
         using type = ret(sig); \
         name = (type*)symbol; \
     } else { \
-        derror("GLES emulation: Could not find required symbol (%s): %s", #name, error); \
+        E("GLES emulation: Could not find required symbol (%s): %s", #name, error); \
         free(error); \
         return -1; \
     }
@@ -77,15 +89,19 @@ static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
     return 0;
 }
 
-static bool sRendererUsesSubWindow;
-static bool sEgl2egl;
+static bool sOpenglLoggerInitialized = false;
+static bool sRendererUsesSubWindow = false;
+static bool sEgl2egl = false;
 static emugl::RenderLibPtr sRenderLib = nullptr;
 static emugl::RendererPtr sRenderer = nullptr;
 
-static EGLDispatch* sEgl;
-static GLESv2Dispatch* sGLES;
+static EGLDispatch* sEgl = nullptr;
+static GLESv2Dispatch* sGLES = nullptr;
 
 int android_initOpenglesEmulation() {
+    android_init_opengl_logger();
+    sOpenglLoggerInitialized = true;
+
     char* error = NULL;
 
     if (sRenderLib != NULL)
@@ -96,20 +112,23 @@ int android_initOpenglesEmulation() {
     ADynamicLibrary* const rendererSo =
             adynamicLibrary_open(RENDERER_LIB_NAME, &error);
     if (rendererSo == NULL) {
-        derror("Could not load OpenGLES emulation library [%s]: %s",
+        E("Could not load OpenGLES emulation library [%s]: %s",
                RENDERER_LIB_NAME, error);
         return -1;
     }
 
     /* Resolve the functions */
     if (initOpenglesEmulationFuncs(rendererSo) < 0) {
-        derror("OpenGLES emulation library mismatch. Be sure to use the correct version!");
+        E("OpenGLES emulation library mismatch. Be sure to use the correct version!");
+        crashhandler_append_message_format(
+            "OpenGLES emulation library mismatch. Be sure to use the correct version!");
         goto BAD_EXIT;
     }
 
     sRenderLib = initLibrary();
     if (!sRenderLib) {
-        derror("OpenGLES initialization failed!");
+        E("OpenGLES initialization failed!");
+        crashhandler_append_message_format("OpenGLES initialization failed!");
         goto BAD_EXIT;
     }
 
@@ -133,7 +152,7 @@ int android_initOpenglesEmulation() {
     return 0;
 
 BAD_EXIT:
-    derror("OpenGLES emulation library could not be initialized!");
+    E("OpenGLES emulation library could not be initialized!");
     adynamicLibrary_close(rendererSo);
     return -1;
 }
@@ -148,11 +167,19 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
         return -1;
     }
 
+    if (!sEgl) {
+        D("Can't start OpenGLES renderer without EGL libraries");
+        return -1;
+    }
+
+    if (!sGLES) {
+        D("Can't start OpenGLES renderer without GLES libraries");
+        return -1;
+    }
+
     if (sRenderer) {
         return 0;
     }
-
-    android_init_opengl_logger();
 
     const GpuInfoList& gpuList = globalGpuInfoList();
     std::string gpuInfoAsString = gpuList.dump();
