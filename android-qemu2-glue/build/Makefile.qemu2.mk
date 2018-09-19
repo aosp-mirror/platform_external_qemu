@@ -39,7 +39,8 @@ qemu2-if-posix = $(call qemu2-ifnot-os,windows,$1,$2)
 qemu2-if-darwin = $(call qemu2-if-os,darwin,$1,$2)
 qemu2-if-linux = $(call qemu2-if-os,linux,$1,$2)
 
-QEMU2_AUTO_GENERATED_DIR := $(BUILD_OBJS_DIR)/build/qemu2-qapi-auto-generated
+QEMU2_AUTO_GENERATED_DIR := qemu2-auto-generated
+QEMU2_CONFIG_DIR = $(BUILD_OBJS_DIR)/build/qemu2-config/
 
 QEMU2_DEPS_TOP_DIR := $(QEMU2_DEPS_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)
 QEMU2_DEPS_LDFLAGS := -L$(QEMU2_DEPS_TOP_DIR)/lib
@@ -112,6 +113,7 @@ endif
 QEMU2_INCLUDES += \
     $(LOCAL_PATH) \
     $(LOCAL_PATH)/include \
+    $(QEMU2_CONFIG_DIR) \
     $(QEMU2_AUTO_GENERATED_DIR) \
 
 QEMU2_INCLUDES += $(QEMU2_GLIB_INCLUDES) \
