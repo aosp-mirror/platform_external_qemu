@@ -35,7 +35,7 @@ intptr_t GLBackgroundLoader::main() {
     }
 
     for (const auto& it : m_textureMap) {
-        if (m_interrupted) break;
+        if (m_interrupted.load(std::memory_order_relaxed)) break;
 
         // Acquire the texture loader for each load; bail
         // in case something else happened to interrupt loading.
@@ -49,7 +49,8 @@ intptr_t GLBackgroundLoader::main() {
             m_glesIface.restoreTexture(saveable.get());
             // allow other threads to run for a while
             ptr.reset();
-            android::base::System::get()->sleepMs(m_loadDelayMs);
+            android::base::System::get()->sleepMs(
+                m_loadDelayMs.load(std::memory_order_relaxed));
         }
     }
 
@@ -66,10 +67,10 @@ intptr_t GLBackgroundLoader::main() {
 }
 
 bool GLBackgroundLoader::wait(intptr_t* exitStatus) {
-    m_loadDelayMs = 0;
+    m_loadDelayMs.store(0, std::memory_order_relaxed);
     return Thread::wait();
 }
 
 void GLBackgroundLoader::interrupt() {
-    m_interrupted = true;
+    m_interrupted.store(true, std::memory_order_relaxed);
 }
