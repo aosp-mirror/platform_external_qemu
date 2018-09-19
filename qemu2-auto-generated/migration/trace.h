@@ -115,6 +115,8 @@ extern TraceEvent _TRACE_PROCESS_INCOMING_MIGRATION_CO_END_EVENT;
 extern TraceEvent _TRACE_PROCESS_INCOMING_MIGRATION_CO_POSTCOPY_END_MAIN_EVENT;
 extern TraceEvent _TRACE_MIGRATION_SET_INCOMING_CHANNEL_EVENT;
 extern TraceEvent _TRACE_MIGRATION_SET_OUTGOING_CHANNEL_EVENT;
+extern TraceEvent _TRACE_MARK_POSTCOPY_BLOCKTIME_BEGIN_EVENT;
+extern TraceEvent _TRACE_MARK_POSTCOPY_BLOCKTIME_END_EVENT;
 extern TraceEvent _TRACE_QEMU_RDMA_ACCEPT_INCOMING_MIGRATION_EVENT;
 extern TraceEvent _TRACE_QEMU_RDMA_ACCEPT_INCOMING_MIGRATION_ACCEPTED_EVENT;
 extern TraceEvent _TRACE_QEMU_RDMA_ACCEPT_PIN_STATE_EVENT;
@@ -194,6 +196,7 @@ extern TraceEvent _TRACE_POSTCOPY_RAM_INCOMING_CLEANUP_CLOSEUF_EVENT;
 extern TraceEvent _TRACE_POSTCOPY_RAM_INCOMING_CLEANUP_ENTRY_EVENT;
 extern TraceEvent _TRACE_POSTCOPY_RAM_INCOMING_CLEANUP_EXIT_EVENT;
 extern TraceEvent _TRACE_POSTCOPY_RAM_INCOMING_CLEANUP_JOIN_EVENT;
+extern TraceEvent _TRACE_POSTCOPY_RAM_INCOMING_CLEANUP_BLOCKTIME_EVENT;
 extern TraceEvent _TRACE_POSTCOPY_REQUEST_SHARED_PAGE_EVENT;
 extern TraceEvent _TRACE_POSTCOPY_REQUEST_SHARED_PAGE_PRESENT_EVENT;
 extern TraceEvent _TRACE_POSTCOPY_WAKE_SHARED_EVENT;
@@ -201,6 +204,7 @@ extern TraceEvent _TRACE_SAVE_XBZRLE_PAGE_SKIPPING_EVENT;
 extern TraceEvent _TRACE_SAVE_XBZRLE_PAGE_OVERFLOW_EVENT;
 extern TraceEvent _TRACE_RAM_SAVE_ITERATE_BIG_WAIT_EVENT;
 extern TraceEvent _TRACE_RAM_LOAD_COMPLETE_EVENT;
+extern TraceEvent _TRACE_GET_MEM_FAULT_CPU_INDEX_EVENT;
 extern TraceEvent _TRACE_MIGRATION_EXEC_OUTGOING_EVENT;
 extern TraceEvent _TRACE_MIGRATION_EXEC_INCOMING_EVENT;
 extern TraceEvent _TRACE_MIGRATION_FD_OUTGOING_EVENT;
@@ -339,6 +343,8 @@ extern uint16_t _TRACE_PROCESS_INCOMING_MIGRATION_CO_END_DSTATE;
 extern uint16_t _TRACE_PROCESS_INCOMING_MIGRATION_CO_POSTCOPY_END_MAIN_DSTATE;
 extern uint16_t _TRACE_MIGRATION_SET_INCOMING_CHANNEL_DSTATE;
 extern uint16_t _TRACE_MIGRATION_SET_OUTGOING_CHANNEL_DSTATE;
+extern uint16_t _TRACE_MARK_POSTCOPY_BLOCKTIME_BEGIN_DSTATE;
+extern uint16_t _TRACE_MARK_POSTCOPY_BLOCKTIME_END_DSTATE;
 extern uint16_t _TRACE_QEMU_RDMA_ACCEPT_INCOMING_MIGRATION_DSTATE;
 extern uint16_t _TRACE_QEMU_RDMA_ACCEPT_INCOMING_MIGRATION_ACCEPTED_DSTATE;
 extern uint16_t _TRACE_QEMU_RDMA_ACCEPT_PIN_STATE_DSTATE;
@@ -418,6 +424,7 @@ extern uint16_t _TRACE_POSTCOPY_RAM_INCOMING_CLEANUP_CLOSEUF_DSTATE;
 extern uint16_t _TRACE_POSTCOPY_RAM_INCOMING_CLEANUP_ENTRY_DSTATE;
 extern uint16_t _TRACE_POSTCOPY_RAM_INCOMING_CLEANUP_EXIT_DSTATE;
 extern uint16_t _TRACE_POSTCOPY_RAM_INCOMING_CLEANUP_JOIN_DSTATE;
+extern uint16_t _TRACE_POSTCOPY_RAM_INCOMING_CLEANUP_BLOCKTIME_DSTATE;
 extern uint16_t _TRACE_POSTCOPY_REQUEST_SHARED_PAGE_DSTATE;
 extern uint16_t _TRACE_POSTCOPY_REQUEST_SHARED_PAGE_PRESENT_DSTATE;
 extern uint16_t _TRACE_POSTCOPY_WAKE_SHARED_DSTATE;
@@ -425,6 +432,7 @@ extern uint16_t _TRACE_SAVE_XBZRLE_PAGE_SKIPPING_DSTATE;
 extern uint16_t _TRACE_SAVE_XBZRLE_PAGE_OVERFLOW_DSTATE;
 extern uint16_t _TRACE_RAM_SAVE_ITERATE_BIG_WAIT_DSTATE;
 extern uint16_t _TRACE_RAM_LOAD_COMPLETE_DSTATE;
+extern uint16_t _TRACE_GET_MEM_FAULT_CPU_INDEX_DSTATE;
 extern uint16_t _TRACE_MIGRATION_EXEC_OUTGOING_DSTATE;
 extern uint16_t _TRACE_MIGRATION_EXEC_INCOMING_DSTATE;
 extern uint16_t _TRACE_MIGRATION_FD_OUTGOING_DSTATE;
@@ -563,6 +571,8 @@ extern uint16_t _TRACE_DIRTY_BITMAP_LOAD_SUCCESS_DSTATE;
 #define TRACE_PROCESS_INCOMING_MIGRATION_CO_POSTCOPY_END_MAIN_ENABLED 1
 #define TRACE_MIGRATION_SET_INCOMING_CHANNEL_ENABLED 1
 #define TRACE_MIGRATION_SET_OUTGOING_CHANNEL_ENABLED 1
+#define TRACE_MARK_POSTCOPY_BLOCKTIME_BEGIN_ENABLED 1
+#define TRACE_MARK_POSTCOPY_BLOCKTIME_END_ENABLED 1
 #define TRACE_QEMU_RDMA_ACCEPT_INCOMING_MIGRATION_ENABLED 1
 #define TRACE_QEMU_RDMA_ACCEPT_INCOMING_MIGRATION_ACCEPTED_ENABLED 1
 #define TRACE_QEMU_RDMA_ACCEPT_PIN_STATE_ENABLED 1
@@ -642,6 +652,7 @@ extern uint16_t _TRACE_DIRTY_BITMAP_LOAD_SUCCESS_DSTATE;
 #define TRACE_POSTCOPY_RAM_INCOMING_CLEANUP_ENTRY_ENABLED 1
 #define TRACE_POSTCOPY_RAM_INCOMING_CLEANUP_EXIT_ENABLED 1
 #define TRACE_POSTCOPY_RAM_INCOMING_CLEANUP_JOIN_ENABLED 1
+#define TRACE_POSTCOPY_RAM_INCOMING_CLEANUP_BLOCKTIME_ENABLED 1
 #define TRACE_POSTCOPY_REQUEST_SHARED_PAGE_ENABLED 1
 #define TRACE_POSTCOPY_REQUEST_SHARED_PAGE_PRESENT_ENABLED 1
 #define TRACE_POSTCOPY_WAKE_SHARED_ENABLED 1
@@ -649,6 +660,7 @@ extern uint16_t _TRACE_DIRTY_BITMAP_LOAD_SUCCESS_DSTATE;
 #define TRACE_SAVE_XBZRLE_PAGE_OVERFLOW_ENABLED 1
 #define TRACE_RAM_SAVE_ITERATE_BIG_WAIT_ENABLED 1
 #define TRACE_RAM_LOAD_COMPLETE_ENABLED 1
+#define TRACE_GET_MEM_FAULT_CPU_INDEX_ENABLED 1
 #define TRACE_MIGRATION_EXEC_OUTGOING_ENABLED 1
 #define TRACE_MIGRATION_EXEC_INCOMING_ENABLED 1
 #define TRACE_MIGRATION_FD_OUTGOING_ENABLED 1
@@ -2205,6 +2217,34 @@ static inline void trace_migration_set_outgoing_channel(void * ioc, const char *
     }
 }
 
+#define TRACE_MARK_POSTCOPY_BLOCKTIME_BEGIN_BACKEND_DSTATE() ( \
+    false)
+
+static inline void _nocheck__trace_mark_postcopy_blocktime_begin(uint64_t addr, void * dd, uint32_t time, int cpu, int received)
+{
+}
+
+static inline void trace_mark_postcopy_blocktime_begin(uint64_t addr, void * dd, uint32_t time, int cpu, int received)
+{
+    if (true) {
+        _nocheck__trace_mark_postcopy_blocktime_begin(addr, dd, time, cpu, received);
+    }
+}
+
+#define TRACE_MARK_POSTCOPY_BLOCKTIME_END_BACKEND_DSTATE() ( \
+    false)
+
+static inline void _nocheck__trace_mark_postcopy_blocktime_end(uint64_t addr, void * dd, uint32_t time, int affected_cpu)
+{
+}
+
+static inline void trace_mark_postcopy_blocktime_end(uint64_t addr, void * dd, uint32_t time, int affected_cpu)
+{
+    if (true) {
+        _nocheck__trace_mark_postcopy_blocktime_end(addr, dd, time, affected_cpu);
+    }
+}
+
 #define TRACE_QEMU_RDMA_ACCEPT_INCOMING_MIGRATION_BACKEND_DSTATE() ( \
     false)
 
@@ -3244,14 +3284,14 @@ static inline void trace_postcopy_ram_fault_thread_quit(void)
 #define TRACE_POSTCOPY_RAM_FAULT_THREAD_REQUEST_BACKEND_DSTATE() ( \
     false)
 
-static inline void _nocheck__trace_postcopy_ram_fault_thread_request(uint64_t hostaddr, const char * ramblock, size_t offset)
+static inline void _nocheck__trace_postcopy_ram_fault_thread_request(uint64_t hostaddr, const char * ramblock, size_t offset, uint32_t pid)
 {
 }
 
-static inline void trace_postcopy_ram_fault_thread_request(uint64_t hostaddr, const char * ramblock, size_t offset)
+static inline void trace_postcopy_ram_fault_thread_request(uint64_t hostaddr, const char * ramblock, size_t offset, uint32_t pid)
 {
     if (true) {
-        _nocheck__trace_postcopy_ram_fault_thread_request(hostaddr, ramblock, offset);
+        _nocheck__trace_postcopy_ram_fault_thread_request(hostaddr, ramblock, offset, pid);
     }
 }
 
@@ -3308,6 +3348,20 @@ static inline void trace_postcopy_ram_incoming_cleanup_join(void)
 {
     if (true) {
         _nocheck__trace_postcopy_ram_incoming_cleanup_join();
+    }
+}
+
+#define TRACE_POSTCOPY_RAM_INCOMING_CLEANUP_BLOCKTIME_BACKEND_DSTATE() ( \
+    false)
+
+static inline void _nocheck__trace_postcopy_ram_incoming_cleanup_blocktime(uint64_t total)
+{
+}
+
+static inline void trace_postcopy_ram_incoming_cleanup_blocktime(uint64_t total)
+{
+    if (true) {
+        _nocheck__trace_postcopy_ram_incoming_cleanup_blocktime(total);
     }
 }
 
@@ -3406,6 +3460,20 @@ static inline void trace_ram_load_complete(int ret, uint64_t seq_iter)
 {
     if (true) {
         _nocheck__trace_ram_load_complete(ret, seq_iter);
+    }
+}
+
+#define TRACE_GET_MEM_FAULT_CPU_INDEX_BACKEND_DSTATE() ( \
+    false)
+
+static inline void _nocheck__trace_get_mem_fault_cpu_index(int cpu, uint32_t pid)
+{
+}
+
+static inline void trace_get_mem_fault_cpu_index(int cpu, uint32_t pid)
+{
+    if (true) {
+        _nocheck__trace_get_mem_fault_cpu_index(cpu, pid);
     }
 }
 

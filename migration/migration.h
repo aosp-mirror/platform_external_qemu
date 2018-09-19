@@ -22,8 +22,9 @@
 #include "qemu/coroutine_int.h"
 #include "qom/object.h"
 #include "hw/qdev.h"
-#include "migration/compression.h"
 #include "io/channel.h"
+
+struct PostcopyBlocktimeContext;
 
 /* State for the incoming migration */
 struct MigrationIncomingState {
@@ -68,10 +69,20 @@ struct MigrationIncomingState {
     /* The coroutine we should enter (back) after failover */
     Coroutine *migration_incoming_co;
     QemuSemaphore colo_incoming_sem;
+
+    /*
+     * PostcopyBlocktimeContext to keep information for postcopy
+     * live migration, to calculate vCPU block time
+     * */
+    struct PostcopyBlocktimeContext *blocktime_ctx;
 };
 
 MigrationIncomingState *migration_incoming_get_current(void);
 void migration_incoming_state_destroy(void);
+/*
+ * Functions to work with blocktime context
+ */
+void fill_destination_postcopy_migration_info(MigrationInfo *info);
 
 #define TYPE_MIGRATION "migration"
 
@@ -207,9 +218,8 @@ bool migration_is_blocked(Error **errp);
 bool migration_in_postcopy(void);
 MigrationState *migrate_get_current(void);
 
-void compress_threads_save_setup(void);
+int compress_threads_save_setup(void);
 void compress_threads_save_cleanup(void);
-void compress_threads_load_setup(void);
 void compress_threads_load_cleanup(void);
 uint64_t ram_bytes_remaining(void);
 uint64_t ram_bytes_transferred(void);
@@ -284,6 +294,7 @@ int migrate_compress_level(void);
 int migrate_compress_threads(void);
 int migrate_decompress_threads(void);
 bool migrate_use_events(void);
+bool migrate_postcopy_blocktime(void);
 
 /* Sending on the return path - generic and then for each message type */
 void migrate_send_rp_shut(MigrationIncomingState *mis,

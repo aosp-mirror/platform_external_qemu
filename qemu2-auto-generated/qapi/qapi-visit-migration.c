@@ -229,6 +229,18 @@ void visit_type_MigrationInfo_members(Visitor *v, MigrationInfo *obj, Error **er
             goto out;
         }
     }
+    if (visit_optional(v, "postcopy-blocktime", &obj->has_postcopy_blocktime)) {
+        visit_type_uint32(v, "postcopy-blocktime", &obj->postcopy_blocktime, &err);
+        if (err) {
+            goto out;
+        }
+    }
+    if (visit_optional(v, "postcopy-vcpu-blocktime", &obj->has_postcopy_vcpu_blocktime)) {
+        visit_type_uint32List(v, "postcopy-vcpu-blocktime", &obj->postcopy_vcpu_blocktime, &err);
+        if (err) {
+            goto out;
+        }
+    }
 
 out:
     error_propagate(errp, err);

@@ -5238,6 +5238,18 @@ const QLitObject qmp_schema_qlit = QLIT_QLIST(((QLitObject[]) {
                 { "type", QLIT_QSTR("str") },
                 {}
             })),
+            QLIT_QDICT(((QLitDictEntry[]) {
+                { "default", QLIT_QNULL },
+                { "name", QLIT_QSTR("postcopy-blocktime") },
+                { "type", QLIT_QSTR("int") },
+                {}
+            })),
+            QLIT_QDICT(((QLitDictEntry[]) {
+                { "default", QLIT_QNULL },
+                { "name", QLIT_QSTR("postcopy-vcpu-blocktime") },
+                { "type", QLIT_QSTR("[int]") },
+                {}
+            })),
             {}
         })) },
         { "meta-type", QLIT_QSTR("object") },
@@ -10489,6 +10501,7 @@ const QLitObject qmp_schema_qlit = QLIT_QLIST(((QLitObject[]) {
             QLIT_QSTR("pause-before-switchover"),
             QLIT_QSTR("x-multifd"),
             QLIT_QSTR("dirty-bitmaps"),
+            QLIT_QSTR("postcopy-blocktime"),
             {}
         })) },
         {}

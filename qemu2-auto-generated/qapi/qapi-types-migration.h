@@ -57,7 +57,8 @@ typedef enum MigrationCapability {
     MIGRATION_CAPABILITY_PAUSE_BEFORE_SWITCHOVER = 11,
     MIGRATION_CAPABILITY_X_MULTIFD = 12,
     MIGRATION_CAPABILITY_DIRTY_BITMAPS = 13,
-    MIGRATION_CAPABILITY__MAX = 14,
+    MIGRATION_CAPABILITY_POSTCOPY_BLOCKTIME = 14,
+    MIGRATION_CAPABILITY__MAX = 15,
 } MigrationCapability;
 
 #define MigrationCapability_str(val) \
@@ -213,6 +214,10 @@ struct MigrationInfo {
     int64_t cpu_throttle_percentage;
     bool has_error_desc;
     char *error_desc;
+    bool has_postcopy_blocktime;
+    uint32_t postcopy_blocktime;
+    bool has_postcopy_vcpu_blocktime;
+    uint32List *postcopy_vcpu_blocktime;
 };
 
 void qapi_free_MigrationInfo(MigrationInfo *obj);

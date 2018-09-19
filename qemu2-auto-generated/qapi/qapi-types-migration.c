@@ -87,6 +87,7 @@ const QEnumLookup MigrationCapability_lookup = {
         [MIGRATION_CAPABILITY_PAUSE_BEFORE_SWITCHOVER] = "pause-before-switchover",
         [MIGRATION_CAPABILITY_X_MULTIFD] = "x-multifd",
         [MIGRATION_CAPABILITY_DIRTY_BITMAPS] = "dirty-bitmaps",
+        [MIGRATION_CAPABILITY_POSTCOPY_BLOCKTIME] = "postcopy-blocktime",
     },
     .size = MIGRATION_CAPABILITY__MAX
 };

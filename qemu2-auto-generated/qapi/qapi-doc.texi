@@ -11231,6 +11231,11 @@ has started throttling guest cpus. (Since 2.7)
 the human readable error description string, when
 @code{status} is 'failed'. Clients should not attempt to parse the
 error strings. (Since 2.7)
+@item @code{postcopy-blocktime: int} (optional)
+total time when all vCPU were blocked during postcopy
+live migration (Since 2.13)
+@item @code{postcopy-vcpu-blocktime: array of int} (optional)
+list of the postcopy blocktime per vCPU (Since 2.13)
 @end table
 
 @b{Since:}
@@ -11432,6 +11437,9 @@ Use more than one fd for migration (since 2.11)
 @item @code{dirty-bitmaps}
 If enabled, QEMU will migrate named dirty bitmaps.
 (since 2.12)
+@item @code{postcopy-blocktime}
+Calculate downtime for postcopy live migration
+(since 2.13)
 @end table
 
 @b{Since:}
