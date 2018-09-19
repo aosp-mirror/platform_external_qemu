@@ -99,10 +99,10 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
                        "rendering for this device. This could avoid driver "
                        "problems and make it easier to debug the OpenGL code "
                        "in your app."
-#ifdef __APPLE__
-                       " (You may need to reduce your screen resolution to run "
-                       "this way.)"
-#endif
+                       "To enable software rendering, go to:\n\n"
+                       "Extended Controls > Settings > Advanced tab\n\n"
+                       "and change \"OpenGL ES renderer (requires restart)\""
+                       "to \"Swiftshader.\""
                        ));
         }
     } else {
