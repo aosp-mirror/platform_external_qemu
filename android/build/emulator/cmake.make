@@ -29,6 +29,10 @@ LOCAL_LDFLAGS += $(foreach lib,\
     $(LOCAL_WHOLE_STATIC_LIBRARIES) $(LOCAL_STATIC_LIBRARIES),\
     -L$(abspath $(call intermediates-dir-for,$(call local-build-var,BITS),$(lib))))
 
+LOCAL_DEPENDENCIES += $(foreach lib,\
+    $(CONSUMED_STATIC_LIBS),\
+    $(call local-library-path,$(lib)))
+#
 # Generate the proper cmake translation target, based upon the host build property
 ifeq ($(strip $(LOCAL_HOST_BUILD)),)
  $(eval $(call cmake-project-target,$(LOCAL_CMAKELISTS),$(LOCAL_BUILT_MAKEFILE)))
@@ -45,7 +49,7 @@ $(foreach prg,$(PRODUCED_EXECUTABLES), \
   $(eval to  := $(if $(to),$(to),$(exe))) \
   $(eval LOCAL_BUILT_MODULE := $(LOCAL_CMAKE_MODULE)/$(exe)) \
   $(eval LOCAL_INSTALL_MODULE := $(call local-executable-install-path,$(exe))) \
-  $(eval $(call make-cmake-project,$(LOCAL_BUILT_MAKEFILE),$(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT),$(exe))) \
+  $(eval $(call make-cmake-project,$(LOCAL_BUILT_MAKEFILE),$(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT),$(exe), $(LOCAL_DEPENDENCIES))) \
   $(eval $(call install-binary,$(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT),$(LOCAL_INSTALL_MODULE),--strip-all,$(LOCAL_INSTALL_OPENGL))) \
 )
 

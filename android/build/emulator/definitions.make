@@ -420,6 +420,7 @@ $$(_DST): PRIVATE_OBJCOPY  := $$(BUILD_TARGET_OBJCOPY)
 $$(_DST): PRIVATE_BUILD_TARGET_TAG := $$(BUILD_TARGET_TAG)
 $$(_DST): CMAKE_TOOL := $$(CMAKE_DIR)/$$(BUILD_HOST_TAG)/bin/cmake
 $$(_DST): PRIVATE_INST := $$(abspath $$(dir $$(_DST)))
+$$(_DST): PRIVATE_BUILD_OBJS_DIR  := $$(abspath $$(BUILD_OBJS_DIR))
 $$(_DST): $$(_SRC)
 	$(hide) CC=$$(PRIVATE_CC) CXX=$$(PRIVATE_CXX) $$(CMAKE_TOOL) \
        -H$$(PRIVATE_SRC) \
@@ -434,6 +435,7 @@ $$(_DST): $$(_SRC)
        -DLOCAL_INSTALL="$$(PRIVATE_INST)" \
        -DLOCAL_QEMU2_TOP_DIR="$$(QEMU2_TOP_DIR)" \
        -DLOCAL_TARGET_TAG="$$(PRIVATE_BUILD_TARGET_TAG)" \
+       -DLOCAL_BUILD_OBJS_DIR="$$(PRIVATE_BUILD_OBJS_DIR)" \
        -DCMAKE_TOOLCHAIN_FILE=$$(call qemu2-if-windows,"$$(QEMU2_TOP_DIR)/android/build/cmake/toolchain-win.cmake")
 endef
 
@@ -445,12 +447,13 @@ define make-cmake-project
 _SRC := $(1)
 _DST := $(2)
 _TARGET := $(3)
+_DEPENDS := $(4)
 $$(LOCAL_PATH)/$$(_SRC): $$(LOCAL_SOURCE_DEPENDENCIES)
 $$(LOCAL_PATH)/$$(_SRC): $$(foreach lib,$$(LOCAL_STATIC_LIBRARIES),$$(call local-library-path,$$(lib)))
 $$(_DST): PRIVATE_DST := $$(_DST)
 $$(_DST): PRIVATE_SRC := $$(_SRC)
 $$(_DST): PRIVATE_TARGET := $$(_TARGET)
-$$(_DST): $$(_SRC) force
+$$(_DST): $$(_SRC) $$(_DEPENDS) force
 	@$(hide) +$(MAKE) --no-print-directory $$(PRIVATE_TARGET) -C $$(dir $$(PRIVATE_SRC))
 endef
 

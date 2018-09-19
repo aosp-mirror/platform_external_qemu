@@ -24,6 +24,10 @@ PRODUCED_EXECUTABLES := emulator_astc_unittests=emulator$(BUILD_TARGET_SUFFIX)_a
                         emulator_img2simg=emulator$(BUILD_TARGET_SUFFIX)_img2simg \
                         emulator_simg2img=emulator$(BUILD_TARGET_SUFFIX)_simg2img)
 
+# Since we are using a cross build system, we need to declare the static libs that
+# are consumed
+CONSUMED_STATIC_LIBS := emulator-libsparse
+
 ifeq ($(BUILD_TARGET_OS),windows)
     PRODUCED_STATIC_LIBS += emulator-libmman-win32
 endif
