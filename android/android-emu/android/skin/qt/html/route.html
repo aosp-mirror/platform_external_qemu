@@ -270,58 +270,124 @@ html, body {
                 console.warn('JK Route result had status != OK'); // ??
                 return;
             }
+            var fullResult = JSON.stringify(result);
+            console.warn('Stringified full result is ' + fullResult.length + ' characters'); // ??
+            channel.objects.emulocationserver.sendFullRouteToEmu(fullResult);
+//            console.warn('::::: start ' + fullResult);
+//            console.warn('::::: end');
+
 // vv ??
+//            console.warn('=== As received: ' + Object.keys(result));
+//               Gave: geocoded_waypoints,routes,status,request
+//            console.warn('===== step[0] before has ' + Object.keys(result.routes[0].legs[0].steps[0])); // ??
+//js: ===== step[0] before has encoded_lat_lngs, lat_lngs, maneuver, start_point, end_point
+
             // ?? xyzzy Can I create my own DirectionsResult that Maps will display?
             //   DirectionsResult
-            //     DirectionsGeocodedWaypoint   geocoded_waypoints[]
-            //     DirectionsRoute              routes[]
-            //       DirectionsLeg              legs[]
-            //         DirectionsStep           steps[]
-            //         Distance               x distance
-            //         Duration                 duration <--- required (else fails parsing)
-            //         Duration               x duration_in_traffic
-            //         Time                   x arrival_time
-            //         Time                   x departure_time
-            //         LatLng                   start_location <--- required for start marker
-            //         LatLng                   end_location   <--- required for end marker
-            //         String                 x start_address
-            //         String                 x end_address
-            //
-            //       int[]?                     waypoint_order
-            //       LatLng[]                 x overview_path
-            //       points                   x overview_polyline
-            //       LatLngBounds             x bounds
-            //       String                     copyrights
-            //       String                     warnings[]
-            //       ?                          fare
-            //         ?                        currency
-            //         Number                   value
-            result.geocoded_waypoints = null; // OK
-            result.routes[0].legs[0].distance            = null; // OK
+            //       ?                           x  status
+            //       ?                              request              <--- required for travelMode
+            //       DirectionsGeocodedWaypoint  x  geocoded_waypoints[]
+            //       DirectionsRoute             -  routes[]
+            //       |   DirectionsLeg             -  legs[]
+            //       |       DirectionsStep          -  steps[]
+            //       |       |   Distance                 distance       <--- required (else fails parsing)
+            //       |       |   Duration                 duration       <--- required (else fails parsing)
+            //       |       |   Duration              x  duration_in_traffic
+            //       |       |   Time                  x  arrival_time
+            //       |       |   Time                  x  departure_time
+            //       |       |   LatLng                   start_location <--- required for start marker
+            //       |       |   LatLng                   end_location   <--- required for end marker
+            //       |       |   String                x  start_address
+            //       |       |   String                x  end_address
+            //       |       |   String                x  instructions
+            //       |       |   Array[LatLng]         x  path
+            //       |       |   TransitDetails        x  transit
+            //       |       |   TravelMode               travel_mode    <--- required for parsing
+            //       |       |   ?                        encoded_lat_lngs
+            //       |       |   ?                        lat_lngs
+            //       |       |   ?                        maneuver
+            //       |       |   ?                        start_point
+            //       |       |   ?                        end_point
+            //       |   int[]?                    x  waypoint_order
+            //       |   LatLng[]                  x  overview_path
+            //       |   points                    x  overview_polyline
+            //       |   LatLngBounds              x  bounds
+            //       |   String                    x  copyrights
+            //       |   String                    x  warnings[]
+            //       |   ?                         x  fare
+            //       |   |   ?                       x  currency
+            //       |   |   Number                  x  value
 
-            result.routes[0].legs[0].distance            = null; // OK
-            result.routes[0].legs[0].duration_in_traffic = null; // OK
-            result.routes[0].legs[0].arrival_time        = null; // OK
-            result.routes[0].legs[0].depature_time       = null; // OK
-            result.routes[0].legs[0].start_address       = null; // OK
-            result.routes[0].legs[0].end_address         = null; // OK
+//            routes[0]:  bounds,copyrights,legs,overview_polyline,summary,warnings,waypoint_order,overview_path
+// step[n] has distance, duration, end_location, polyline, start_location, travel_mode, encoded_lat_lngs,
+//             path, lat_lngs, maneuver, start_point, end_point
 
-            result.overview_path = null; // OK
-            result.over_polyline = null; // OK
-            result.bounds        = null; // OK
+            delete result.geocoded_waypoints; // OK
+            delete result.status; // OK
+// Rqd            delete result.request;
 
-//            // ?? This creates OK, but does not render
-//            var jkLeg = new Object();
-//            jkLeg.steps = result.routes[0].legs[0].steps;
-//            var jkRoutes = new Object();
-//            jkRoutes.routes = new Array(1);
-//            jkRoutes.routes[0] = new Object();
-//            jkRoutes.routes[0].legs = new Array(1);
-//            jkRoutes.routes[0].legs[0] = jkLeg;
+            delete result.routes[0].waypoint_order; // OK
+            delete result.routes[0].overview_path; // OK
+            delete result.routes[0].overview_polyline; // OK
+            delete result.routes[0].bounds; // OK
+            delete result.routes[0].copyright; // OK
+            delete result.routes[0].warnings; // OK
+            delete result.routes[0].fare; // OK
+
+            for (var stepIdx = 0; stepIdx < result.routes[0].legs[0].steps.length; stepIdx++) {
+// Rqd                result.routes[0].legs[0].steps[stepIdx].distance = null;
+// Rqd                result.routes[0].legs[0].steps[stepIdx].duration = null;
+                delete result.routes[0].legs[0].steps[stepIdx].duration_in_traffic; //  Not needed
+                delete result.routes[0].legs[0].steps[stepIdx].arrival_time; //  Not needed
+                delete result.routes[0].legs[0].steps[stepIdx].depature_time; //  Not needed
+                delete result.routes[0].legs[0].steps[stepIdx].start_address; //  Not needed
+                delete result.routes[0].legs[0].steps[stepIdx].end_address; //  Not needed
+                delete result.routes[0].legs[0].steps[stepIdx].instructions; //  Not needed
+// Rqd                result.routes[0].legs[0].steps[stepIdx].path = null;
+                delete result.routes[0].legs[0].steps[stepIdx].transit; //  Not needed
+// Rqd               result.routes[0].legs[0].steps[stepIdx].travel_mode = null;
+            }
+
+
+//            delete result.routes[0].legs[0].waypoint_order;
+//            delete result.routes[0].legs[0].overview_path;
+//            delete result.routes[0].legs[0].overview_polyline;
+//            delete result.routes[0].legs[0].copyrights;
+//            delete result.routes[0].legs[0].warnings;
+//            delete result.routes[0].legs[0].fare;
+//            delete result.routes[0].legs[0].bounds;
+//            delete result.routes[0].legs[0].surelyDoesntExist; // No problem doing this
+
+
+            var jkDirResults = JSON.parse(fullResult);
+
+//            var jkDirResults = new Object();
+//            jkDirResults = result;
+
+//            var keys = Object.keys(jkDirResults);
+//            console.warn('=== ' + keys);
+//            console.warn('=== routes[0]:  ' + Object.keys(jkDirResults.routes[0]));
+
+//            routes[0]:  bounds,copyrights,legs,overview_polyline,summary,warnings,waypoint_order,overview_path
+
+//            console.warn('=== request: ' + Object.keys(jkDirResults.request));
+//              origin, destination, travelMode
+
+// ?? Mostly success; missing start and end markers
+//            var jkDirResults = new Object();
+
+//            jkDirResults.request = result.request;
+
+//            jkDirResults.routes = new Array(1);
+//            jkDirResults.routes[0] = new Object();
+//            jkDirResults.routes[0].legs = new Array(1);
+//            jkDirResults.routes[0].legs[0] = new Object();
+//            jkDirResults.routes[0].legs[0].steps = result.routes[0].legs[0].steps;
 // ^^ ??
             // Show the route on the Map
             console.warn('JK Route page: Have route. Displaying it...'); // ??
-            gDirectionsDisplay.setDirections(result);
+            gDirectionsDisplay.setDirections(jkDirResults); // ??
+//            gDirectionsDisplay.setDirections(result);
             console.warn('JK Route page: Done displaying route. Sending it to host.'); // ??
 // vv ??
             var r0 = result.routes[0];
@@ -346,6 +412,7 @@ html, body {
 //                    position: theSteps[0].path[0]
 //                });
 
+            console.warn('===== step[0] after  has ' + Object.keys(theSteps[0]));
             var rawNumberOfPoints = 0; // ??
             for (var stepIdx = 0; stepIdx < numSteps; stepIdx++) {
                 var thisStep = theSteps[stepIdx];

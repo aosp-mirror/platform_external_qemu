@@ -50,6 +50,7 @@ public:
     bool isLoadingGeoData() const { return mNowLoadingGeoData; }
     void requestStopLoadingGeoData() { mGpsNextPopulateIndex = mGpsFixesArray.size(); }
     Q_INVOKABLE void sendLocation(const QString& lat, const QString& lng);
+    Q_INVOKABLE void sendFullRouteToEmu(const QString& routeJSON);
     Q_INVOKABLE void sendRoutePointToEmu(int pointIndex, double lat, double lng, double timeToHere);
 
     void updateTheme();

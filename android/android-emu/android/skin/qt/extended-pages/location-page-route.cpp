@@ -547,6 +547,13 @@ void LocationPage::showPendingRouteDetails() {
 }
 
 // Invoked by the Maps javascript when a route has been created
+void LocationPage::sendFullRouteToEmu(const QString& routeJSON) {
+    printf("l-p-r: sendFullRouteToEmu() got %d characters\n",
+           routeJSON.length());
+}
+
+
+// Invoked by the Maps javascript when a route has been created
 void LocationPage::sendRoutePointToEmu(int pointIndex, double lat, double lng, double timeToHere) {
 
     static int lastReceivedIndex = 0; // ??
