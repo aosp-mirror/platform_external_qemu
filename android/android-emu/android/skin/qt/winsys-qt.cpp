@@ -27,6 +27,7 @@
 #include "android/skin/qt/extended-pages/snapshot-page.h"
 #include "android/skin/qt/init-qt.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/QtLogger.h"
 #include "android/utils/setenv.h"
 #include "android/main-common-ui.h"
 
@@ -365,6 +366,8 @@ extern void skin_winsys_quit_request()
 void skin_winsys_destroy() {
     D(__FUNCTION__);
 
+    QtLogger::stop();
+
     // Mac is still causing us troubles - it somehow manages to not call the
     // main window destructor (in qemi1 only!) and crashes if QApplication
     // is destroyed right here. So let's delay the deletion for now
@@ -539,8 +542,35 @@ extern void skin_winsys_init_args(int argc, char** argv) {
     g->argv = argv;
 }
 
+void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    QtLogger* q = QtLogger::get();
+    QByteArray localMsg = msg.toLocal8Bit();
+    switch (type) {
+    case QtDebugMsg:
+        q->write("Debug: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        break;
+    case QtInfoMsg:
+        q->write("Info: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        break;
+    case QtWarningMsg:
+        fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        q->write("Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        break;
+    case QtCriticalMsg:
+        fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        q->write("Critical: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        break;
+    case QtFatalMsg:
+        fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        q->write("Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        break;
+    }
+}
+
 extern int skin_winsys_snapshot_control_start() {
     GlobalState* g = globalState();
+
     g->app = new QApplication(g->argc, g->argv);
     androidQtDefaultInit();
     // Pop up a stand-alone Snapshot pane
@@ -562,6 +592,7 @@ extern void skin_winsys_start(bool no_window) {
 #endif
     skin_winsys_setup_library_paths();
 
+    qInstallMessageHandler(myMessageOutput);
     if (no_window) {
         g->app = new QCoreApplication(g->argc, g->argv);
         EmulatorQtNoWindow::create();

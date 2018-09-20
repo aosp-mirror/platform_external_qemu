@@ -5,6 +5,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/init-qt.cpp \
     android/skin/qt/surface-qt.cpp \
     android/skin/qt/winsys-qt.cpp \
+    android/skin/qt/QtLogger.cpp \
 
 ifeq (darwin,$(BUILD_TARGET_OS))
 ANDROID_SKIN_SOURCES += \
