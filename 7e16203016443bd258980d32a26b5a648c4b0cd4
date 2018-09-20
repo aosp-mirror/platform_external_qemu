@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d121f684_fbe738ad",
+        "filename": "android/android-emu/android/offworld/OffworldPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-20T01:50:37Z",
+      "side": 0,
+      "message": "could it b offworldcrosssession to maintain layering at least?",
+      "range": {
+        "startLine": 62,
+        "startChar": 16,
+        "endLine": 62,
+        "endChar": 37
+      },
+      "revId": "7e16203016443bd258980d32a26b5a648c4b0cd4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

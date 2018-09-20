@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd74c012_477b0e6d",
+        "filename": "android/android-emu/android/emulation/AndroidPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-20T01:50:37Z",
+      "side": 1,
+      "message": "alphabetical order, even dir vs file",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 44
+      },
+      "revId": "86aca4b218ecb9db1373cf3e510e56b84f757c5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "91af0837_92d143f4",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControlDefHost.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-20T01:50:37Z",
+      "side": 1,
+      "message": "I believe if it is in snapshot insensitive already, it doesn\u0027t need to be here.",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 45
+      },
+      "revId": "86aca4b218ecb9db1373cf3e510e56b84f757c5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
