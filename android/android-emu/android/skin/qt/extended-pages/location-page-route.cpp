@@ -31,7 +31,7 @@
 
 #include <fstream>
 
-static const char GPX_FILE_NAME[]   = "route.gpx";
+static const char JSON_FILE_NAME[]   = "route.json";
 static const char PROTO_FILE_NAME[] = "route_metadata.pb";
 
 void LocationPage::makeRouteProtobuf() { // ?? Debug only
@@ -57,20 +57,20 @@ void LocationPage::makeRouteProtobuf() { // ?? Debug only
 
 void LocationPage::on_saveRoute_clicked() {
     mUi->saveRoute->setEnabled(false);
-    if (mRouteStatus != RouteStatus::OK) {
-        QString failureReason =
-                (mRouteStatus == RouteStatus::TOO_BIG) ? tr("Route is too long")
-                                                       : tr("Route is incomplete");
-        QMessageBox msgBox(QMessageBox::Warning,
-                           tr("Save route"),
-                           tr("Cannot save route.<br> %1.")
-                               .arg(failureReason),
-                           QMessageBox::Close,
-                           this);
-        msgBox.exec();
+    // if (mRouteStatus != RouteStatus::OK) {
+    //     QString failureReason =
+    //             (mRouteStatus == RouteStatus::TOO_BIG) ? tr("Route is too long")
+    //                                                    : tr("Route is incomplete");
+    //     QMessageBox msgBox(QMessageBox::Warning,
+    //                        tr("Save route"),
+    //                        tr("Cannot save route.<br> %1.")
+    //                            .arg(failureReason),
+    //                        QMessageBox::Close,
+    //                        this);
+    //     msgBox.exec();
 
-        return;
-    }
+    //     return;
+    // }
     printf("l-p-r: Save route: Requesting WaitCursor\n"); // ??
     QApplication::setOverrideCursor(Qt::WaitCursor);
     // Create the protobuf describing this route
@@ -85,7 +85,8 @@ void LocationPage::on_saveRoute_clicked() {
     // Make this new item the selected item
     mSelectedRouteName = protoPath.c_str();
 
-    writeRouteGpxFile(protoPath);
+    // Write the JSON to a file
+    writeRouteJsonFile(protoPath);
 
     // Update the UI
     scanForRoutes();
@@ -269,6 +270,12 @@ void LocationPage::on_routeList_itemSelectionChanged() {
     // Redraw the table to show the new selection
     highlightRouteListWidget();
     showRouteDetails(routeElement);
+
+    // Read the JSON route file and pass it to the javascript to display it
+    const QString& routeJson = readRouteJsonFile(routeElement->protoFilePath);
+    if (routeJson.length() > 0) {
+        emit showRouteOnMap(routeJson.toStdString().c_str());
+    }
 }
 
 void LocationPage::editRoute(int row) {
@@ -547,72 +554,83 @@ void LocationPage::showPendingRouteDetails() {
 }
 
 // Invoked by the Maps javascript when a route has been created
-void LocationPage::sendFullRouteToEmu(const QString& routeJSON) {
-    printf("l-p-r: sendFullRouteToEmu() got %d characters\n",
-           routeJSON.length());
+void LocationPage::sendFullRouteToEmu(double durationSeconds, const QString& routeJson) {
+    mRouteCreationTime = QDateTime::currentDateTime();
+    mRouteTravelMode = mUi->loc_travelMode->currentIndex();
+    mRouteTotalTime = durationSeconds;
+
+    mRouteJson = routeJson;
+    printf("l-p-r: sendFullRouteToEmu() got duration %.1f seconds, %d characters\n",
+           durationSeconds, routeJson.length());
+
+    mSelectedRouteName = "";
+    mUi->routeList->setCurrentItem(nullptr);
+    highlightRouteListWidget();
+    showPendingRouteDetails();
+    mUi->saveRoute->setEnabled(true);
 }
 
 
-// Invoked by the Maps javascript when a route has been created
-void LocationPage::sendRoutePointToEmu(int pointIndex, double lat, double lng, double timeToHere) {
+// // Invoked by the Maps javascript when a route has been created
+// void LocationPage::sendRoutePointToEmu(int pointIndex, double lat, double lng, double timeToHere) {
 
-    static int lastReceivedIndex = 0; // ??
-    if (pointIndex == -1) {
-        // End of the route
-        if (mRouteStatus == RouteStatus::INCOMPLETE) {
-            mRouteStatus = RouteStatus::OK;
-            mSelectedRouteName = "";
-            mUi->routeList->setCurrentItem(nullptr);
-            highlightRouteListWidget();
-            showPendingRouteDetails();
-            mUi->saveRoute->setEnabled(true);
-        }
-        printf("l-p-r: lastReceivedIndex %d, mNumRoutePointsReceived %d\n", // ??
-               lastReceivedIndex, mNumRoutePointsReceived); // ??
-    } else if (pointIndex != 0 && pointIndex != mNumRoutePointsReceived) {
-        if (mRouteStatus == RouteStatus::INCOMPLETE) {
-            printf("l-p-r: Got index %d, expected %d\n",
-                   pointIndex, mNumRoutePointsReceived);
-        }
-        mRouteStatus = RouteStatus::FAILED;
-        lastReceivedIndex = pointIndex; // ??
-    } else if (mNumRoutePointsReceived < MAX_POINTS_IN_ROUTE) {
-        if (pointIndex == 0) {
-            // Start of a route
-            mRouteStatus = RouteStatus::INCOMPLETE;
-            mNumRoutePointsReceived = 0;
-            mRouteCreationTime = QDateTime::currentDateTime();
-            mRouteTravelMode = mUi->loc_travelMode->currentIndex();
-            mRouteTotalTime = 0.0;
-            timeToHere = 0.0; // Always zero for the first point
-        }
-        mRouteTotalTime += timeToHere;
-        mRoutePoints[mNumRoutePointsReceived++] = { lat, lng, timeToHere };
-    } else {
-        // Too much data!
-        if (mRouteStatus == RouteStatus::INCOMPLETE) {
-            printf("l-p-r: Got index %d: too big\n", pointIndex); // ??
-        }
-        mRouteStatus = RouteStatus::TOO_BIG;
-        lastReceivedIndex = pointIndex; // ??
-    }
+//     static int lastReceivedIndex = 0; // ??
+//     if (pointIndex == -1) {
+//         // End of the route
+//         if (mRouteStatus == RouteStatus::INCOMPLETE) {
+//             mRouteStatus = RouteStatus::OK;
+//             mSelectedRouteName = "";
+//             mUi->routeList->setCurrentItem(nullptr);
+//             highlightRouteListWidget();
+//             showPendingRouteDetails();
+//             mUi->saveRoute->setEnabled(true);
+//         }
+//         printf("l-p-r: lastReceivedIndex %d, mNumRoutePointsReceived %d\n", // ??
+//                lastReceivedIndex, mNumRoutePointsReceived); // ??
+//     } else if (pointIndex != 0 && pointIndex != mNumRoutePointsReceived) {
+//         if (mRouteStatus == RouteStatus::INCOMPLETE) {
+//             printf("l-p-r: Got index %d, expected %d\n",
+//                    pointIndex, mNumRoutePointsReceived);
+//         }
+//         mRouteStatus = RouteStatus::FAILED;
+//         lastReceivedIndex = pointIndex; // ??
+//     } else if (mNumRoutePointsReceived < MAX_POINTS_IN_ROUTE) {
+//         if (pointIndex == 0) {
+//             // Start of a route
+//             mRouteStatus = RouteStatus::INCOMPLETE;
+//             mNumRoutePointsReceived = 0;
+//             mRouteCreationTime = QDateTime::currentDateTime();
+//             mRouteTravelMode = mUi->loc_travelMode->currentIndex();
+//             mRouteTotalTime = 0.0;
+//             timeToHere = 0.0; // Always zero for the first point
+//         }
+//         mRouteTotalTime += timeToHere;
+//         mRoutePoints[mNumRoutePointsReceived++] = { lat, lng, timeToHere };
+//     } else {
+//         // Too much data!
+//         if (mRouteStatus == RouteStatus::INCOMPLETE) {
+//             printf("l-p-r: Got index %d: too big\n", pointIndex); // ??
+//         }
+//         mRouteStatus = RouteStatus::TOO_BIG;
+//         lastReceivedIndex = pointIndex; // ??
+//     }
 
-#if 0 // ??
-    if (pointIndex >= 0) {
-        printf("l-p-r: Got %3d: %9.4f %9.4f, %5.2fs\n",
-               pointIndex, lat, lng, timeToHere);
-        totalTime += timeToHere;
-    } else {
-        int hh = totalTime / (60.0 * 60.0);
-        totalTime -= hh * (60 * 60);
-        int mm = totalTime / 60.0;
-        totalTime -= mm * 60;
-        printf("l-p-r: Total time: %dh %dm %.2fs\n",
-               hh, mm, totalTime);
-        totalTime = 0.0;
-    }
-#endif // ??
-}
+// #if 0 // ??
+//     if (pointIndex >= 0) {
+//         printf("l-p-r: Got %3d: %9.4f %9.4f, %5.2fs\n",
+//                pointIndex, lat, lng, timeToHere);
+//         totalTime += timeToHere;
+//     } else {
+//         int hh = totalTime / (60.0 * 60.0);
+//         totalTime -= hh * (60 * 60);
+//         int mm = totalTime / 60.0;
+//         totalTime -= mm * 60;
+//         printf("l-p-r: Total time: %dh %dm %.2fs\n",
+//                hh, mm, totalTime);
+//         totalTime = 0.0;
+//     }
+// #endif // ??
+// }
 
 // Write a protobuf into the specified directory.
 // This code determines the parent directory. The
@@ -654,39 +672,75 @@ void LocationPage::writeRouteProtobufFullPath(
     protobuf.SerializeToOstream(&outStream);
 }
 
-void LocationPage::writeRouteGpxFile(const std::string& pathOfProtoFile) {
-    // Write a GPX file with the points that we receveived
+QString LocationPage::readRouteJsonFile(const QString& pathOfProtoFile) {
+    // Read a text file with the JSON that we received
+    // from Google Maps
+    QString fullContents;
+    char* protoDirName = path_dirname(pathOfProtoFile.toStdString().c_str());
+    if (protoDirName) {
+        char* jsonFileName = path_join(protoDirName, JSON_FILE_NAME);
+        QFile jsonFile(jsonFileName);
+        if (jsonFile.open(QFile::ReadOnly | QFile::Text)) {
+            QTextStream jsonStream(&jsonFile);
+            fullContents = jsonStream.readAll();
+            jsonFile.close();
+        }
+        free(jsonFileName);
+        free(protoDirName);
+    }
+    return fullContents;
+}
+
+void LocationPage::writeRouteJsonFile(const std::string& pathOfProtoFile) {
+    // Write a text file with the JSON that we received
     // from Google Maps
     char* protoDirName = path_dirname(pathOfProtoFile.c_str());
     if (protoDirName) {
-        char* gpxFileName = path_join(protoDirName, GPX_FILE_NAME);
-        QFile gpxFile(gpxFileName);
-        if (gpxFile.open(QFile::WriteOnly | QFile::Text)) {
-            // Write a minimal GPX header
-            gpxFile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                          "<gpx version=\"1.1\" creator=\"Android Emulator\">\n"
-                          "<trk><trkseg>\n");
-
-            // Write each point in the route
-            QDateTime zuluPointTime = mRouteCreationTime.toUTC();
-            for (int idx = 0; idx < mNumRoutePointsReceived; idx++) {
-                zuluPointTime = zuluPointTime.addMSecs(
-                                  (long)(mRoutePoints[idx].delayBefore * 1000.0));
-                QString timeString = zuluPointTime.toString("yyyy-MM-ddTHH:mm:ss.zzzZ");
-                char pointString[128];
-                snprintf(pointString, 128,
-                         "  <trkpt lat=\"%9.5f\" lon=\"%10.5f\"><time>%s</time></trkpt>\n",
-                         mRoutePoints[idx].lat, mRoutePoints[idx].lng,
-                         timeString.toStdString().c_str());
-                gpxFile.write(pointString);
-            }
-
-            // Write the GPX tail
-            gpxFile.write("</trkseg></trk>\n</gpx>\n");
-
-            gpxFile.close();
+        char* jsonFileName = path_join(protoDirName, JSON_FILE_NAME);
+        QFile jsonFile(jsonFileName);
+        if (jsonFile.open(QFile::WriteOnly | QFile::Text)) {
+            jsonFile.write(mRouteJson.toStdString().c_str());
+            jsonFile.write("\n");
+            jsonFile.close();
         }
-        free(gpxFileName);
+        free(jsonFileName);
         free(protoDirName);
     }
 }
+
+// void LocationPage::writeRouteGpxFile(const std::string& pathOfProtoFile) {
+//     // Write a GPX file with the points that we receveived
+//     // from Google Maps
+//     char* protoDirName = path_dirname(pathOfProtoFile.c_str());
+//     if (protoDirName) {
+//         char* gpxFileName = path_join(protoDirName, GPX_FILE_NAME);
+//         QFile gpxFile(gpxFileName);
+//         if (gpxFile.open(QFile::WriteOnly | QFile::Text)) {
+//             // Write a minimal GPX header
+//             gpxFile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+//                           "<gpx version=\"1.1\" creator=\"Android Emulator\">\n"
+//                           "<trk><trkseg>\n");
+
+//             // Write each point in the route
+//             QDateTime zuluPointTime = mRouteCreationTime.toUTC();
+//             for (int idx = 0; idx < mNumRoutePointsReceived; idx++) {
+//                 zuluPointTime = zuluPointTime.addMSecs(
+//                                   (long)(mRoutePoints[idx].delayBefore * 1000.0));
+//                 QString timeString = zuluPointTime.toString("yyyy-MM-ddTHH:mm:ss.zzzZ");
+//                 char pointString[128];
+//                 snprintf(pointString, 128,
+//                          "  <trkpt lat=\"%9.5f\" lon=\"%10.5f\"><time>%s</time></trkpt>\n",
+//                          mRoutePoints[idx].lat, mRoutePoints[idx].lng,
+//                          timeString.toStdString().c_str());
+//                 gpxFile.write(pointString);
+//             }
+
+//             // Write the GPX tail
+//             gpxFile.write("</trkseg></trk>\n</gpx>\n");
+
+//             gpxFile.close();
+//         }
+//         free(gpxFileName);
+//         free(protoDirName);
+//     }
+// }

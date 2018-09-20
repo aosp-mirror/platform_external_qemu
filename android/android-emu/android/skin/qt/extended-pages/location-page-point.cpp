@@ -500,6 +500,13 @@ void LocationPage::setUpWebEngine(QWebEnginePage* webEnginePage, const char* pag
                         "}"
 //                        "else console.warn('l-p-p js:Cannot call setTravelMode()');" // ??
                     "});"
+                    "channel.objects.emulocationserver.showRouteOnMap.connect(function(routeJson) {"
+                        "if (setRouteOnMap) {"
+                            "console.warn('l-p-p js:Calling setRouteOnMap()');" // ??
+                            "setRouteOnMap(routeJson);"
+                        "}"
+                        "else console.warn('l-p-p js:Cannot call setRouteOnMap()');" // ??
+                    "});"
                 "});"
             "}");
 

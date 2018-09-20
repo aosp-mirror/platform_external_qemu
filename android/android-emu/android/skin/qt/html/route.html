@@ -155,6 +155,7 @@ html, body {
             gFirstPoint = !gFirstPoint;
         });
 
+        // Receive the mode of travel from the host
         setTravelMode = function(mode) {
             switch (mode) {
                 case 0:
@@ -165,6 +166,16 @@ html, body {
             }
             console.warn('route.html: js In setTravelMode(), mode is now ' + gTravelModeString); // ??
             // ?? Need to call calcRoute IF we have start and end points
+        }
+
+        // Receive the selected route from the host
+        setRouteOnMap = function(routeJson) {
+            console.warn('route.html: js In setRouteOnMap(), JSON is ' + // ??
+                       routeJson.length + ' characters'); // ??
+            if (routeJson.length > 0) {
+                var theRoute = JSON.parse(routeJson);
+                gDirectionsDisplay.setDirections(theRoute);
+            }
         }
 
         // Add Google search box
@@ -226,37 +237,7 @@ html, body {
         gDirectionsService = new google.maps.DirectionsService();
     }
 
-    function distanceBetween(start, end) {
-        var startLat = start.lat();
-        var startLon = start.lng();
-        var endLat   = end.lat();
-        var endLon   = end.lng();
-
-        var startLatRadians = startLat * Math.PI / 180.0;
-        var startLonRadians = startLon * Math.PI / 180.0;
-        var endLatRadians   = endLat   * Math.PI / 180.0;
-        var endLonRadians   = endLon   * Math.PI / 180.0;
-
-        var deltaLatRadians = endLatRadians - startLatRadians;
-        var deltaLonRadians = endLonRadians - startLonRadians;
-
-        var sinDeltaLatBy2 = Math.sin(deltaLatRadians / 2.0);
-        var sinDeltaLonBy2 = Math.sin(deltaLonRadians / 2.0);
-
-        var termA =   sinDeltaLatBy2 * sinDeltaLatBy2
-                       + Math.cos(startLatRadians) * Math.cos(endLatRadians) *
-                         sinDeltaLonBy2 * sinDeltaLonBy2;
-        var termC = 2.0 * Math.atan2(Math.sqrt(termA), Math.sqrt(1.0 - termA));
-
-        var earthRadius = 6371000.; // Meters
-
-        var dist = earthRadius * termC;
-        return dist;
-   }
-
     function calcRoute() {
-        const MINIMUM_DISTANCE = 50; // Meters
-        const MINIMUM_TIME     = 10; // Seconds
         var request = {
             origin: gStartLatLng,
             destination: gEndLatLng,
@@ -270,219 +251,32 @@ html, body {
                 console.warn('JK Route result had status != OK'); // ??
                 return;
             }
-            var fullResult = JSON.stringify(result);
-            console.warn('Stringified full result is ' + fullResult.length + ' characters'); // ??
-            channel.objects.emulocationserver.sendFullRouteToEmu(fullResult);
-//            console.warn('::::: start ' + fullResult);
-//            console.warn('::::: end');
+            gDirectionsDisplay.setDirections(result);
 
-// vv ??
-//            console.warn('=== As received: ' + Object.keys(result));
-//               Gave: geocoded_waypoints,routes,status,request
-//            console.warn('===== step[0] before has ' + Object.keys(result.routes[0].legs[0].steps[0])); // ??
-//js: ===== step[0] before has encoded_lat_lngs, lat_lngs, maneuver, start_point, end_point
-
-            // ?? xyzzy Can I create my own DirectionsResult that Maps will display?
-            //   DirectionsResult
-            //       ?                           x  status
-            //       ?                              request              <--- required for travelMode
-            //       DirectionsGeocodedWaypoint  x  geocoded_waypoints[]
-            //       DirectionsRoute             -  routes[]
-            //       |   DirectionsLeg             -  legs[]
-            //       |       DirectionsStep          -  steps[]
-            //       |       |   Distance                 distance       <--- required (else fails parsing)
-            //       |       |   Duration                 duration       <--- required (else fails parsing)
-            //       |       |   Duration              x  duration_in_traffic
-            //       |       |   Time                  x  arrival_time
-            //       |       |   Time                  x  departure_time
-            //       |       |   LatLng                   start_location <--- required for start marker
-            //       |       |   LatLng                   end_location   <--- required for end marker
-            //       |       |   String                x  start_address
-            //       |       |   String                x  end_address
-            //       |       |   String                x  instructions
-            //       |       |   Array[LatLng]         x  path
-            //       |       |   TransitDetails        x  transit
-            //       |       |   TravelMode               travel_mode    <--- required for parsing
-            //       |       |   ?                        encoded_lat_lngs
-            //       |       |   ?                        lat_lngs
-            //       |       |   ?                        maneuver
-            //       |       |   ?                        start_point
-            //       |       |   ?                        end_point
-            //       |   int[]?                    x  waypoint_order
-            //       |   LatLng[]                  x  overview_path
-            //       |   points                    x  overview_polyline
-            //       |   LatLngBounds              x  bounds
-            //       |   String                    x  copyrights
-            //       |   String                    x  warnings[]
-            //       |   ?                         x  fare
-            //       |   |   ?                       x  currency
-            //       |   |   Number                  x  value
-
-//            routes[0]:  bounds,copyrights,legs,overview_polyline,summary,warnings,waypoint_order,overview_path
-// step[n] has distance, duration, end_location, polyline, start_location, travel_mode, encoded_lat_lngs,
-//             path, lat_lngs, maneuver, start_point, end_point
-
-            delete result.geocoded_waypoints; // OK
-            delete result.status; // OK
-// Rqd            delete result.request;
-
-            delete result.routes[0].waypoint_order; // OK
-            delete result.routes[0].overview_path; // OK
-            delete result.routes[0].overview_polyline; // OK
-            delete result.routes[0].bounds; // OK
-            delete result.routes[0].copyright; // OK
-            delete result.routes[0].warnings; // OK
-            delete result.routes[0].fare; // OK
-
-            for (var stepIdx = 0; stepIdx < result.routes[0].legs[0].steps.length; stepIdx++) {
-// Rqd                result.routes[0].legs[0].steps[stepIdx].distance = null;
-// Rqd                result.routes[0].legs[0].steps[stepIdx].duration = null;
-                delete result.routes[0].legs[0].steps[stepIdx].duration_in_traffic; //  Not needed
-                delete result.routes[0].legs[0].steps[stepIdx].arrival_time; //  Not needed
-                delete result.routes[0].legs[0].steps[stepIdx].depature_time; //  Not needed
-                delete result.routes[0].legs[0].steps[stepIdx].start_address; //  Not needed
-                delete result.routes[0].legs[0].steps[stepIdx].end_address; //  Not needed
-                delete result.routes[0].legs[0].steps[stepIdx].instructions; //  Not needed
-// Rqd                result.routes[0].legs[0].steps[stepIdx].path = null;
-                delete result.routes[0].legs[0].steps[stepIdx].transit; //  Not needed
-// Rqd               result.routes[0].legs[0].steps[stepIdx].travel_mode = null;
-            }
-
-
-//            delete result.routes[0].legs[0].waypoint_order;
-//            delete result.routes[0].legs[0].overview_path;
-//            delete result.routes[0].legs[0].overview_polyline;
-//            delete result.routes[0].legs[0].copyrights;
-//            delete result.routes[0].legs[0].warnings;
-//            delete result.routes[0].legs[0].fare;
-//            delete result.routes[0].legs[0].bounds;
-//            delete result.routes[0].legs[0].surelyDoesntExist; // No problem doing this
-
-
-            var jkDirResults = JSON.parse(fullResult);
-
-//            var jkDirResults = new Object();
-//            jkDirResults = result;
-
-//            var keys = Object.keys(jkDirResults);
-//            console.warn('=== ' + keys);
-//            console.warn('=== routes[0]:  ' + Object.keys(jkDirResults.routes[0]));
-
-//            routes[0]:  bounds,copyrights,legs,overview_polyline,summary,warnings,waypoint_order,overview_path
-
-//            console.warn('=== request: ' + Object.keys(jkDirResults.request));
-//              origin, destination, travelMode
-
-// ?? Mostly success; missing start and end markers
-//            var jkDirResults = new Object();
-
-//            jkDirResults.request = result.request;
-
-//            jkDirResults.routes = new Array(1);
-//            jkDirResults.routes[0] = new Object();
-//            jkDirResults.routes[0].legs = new Array(1);
-//            jkDirResults.routes[0].legs[0] = new Object();
-//            jkDirResults.routes[0].legs[0].steps = result.routes[0].legs[0].steps;
-// ^^ ??
-            // Show the route on the Map
-            console.warn('JK Route page: Have route. Displaying it...'); // ??
-            gDirectionsDisplay.setDirections(jkDirResults); // ??
-//            gDirectionsDisplay.setDirections(result);
-            console.warn('JK Route page: Done displaying route. Sending it to host.'); // ??
-// vv ??
-            var r0 = result.routes[0];
-            var leg0 = r0.legs[0];
-            var theSteps = leg0.steps;
-            var numSteps = theSteps.length;
-
-            console.warn('JK Route result: ' + result.routes.length
-                         + ' routes, route[0] has ' + r0.legs.length
-                         + ' legs, leg[0] has ' + numSteps
-                         + ' steps and lasts ' + leg0.duration.text); // ??
-            // Always accept the first point of the route
-            var previousPoint = theSteps[0].path[0];
-            var numPointsSent = 0;
-            channel.objects.emulocationserver.sendRoutePointToEmu(
-                numPointsSent, previousPoint.lat(), previousPoint.lng(), 0.0);
-            numPointsSent++;
-//                console.warn('     pt 0: ' + theSteps[0].path[0]
-//                             + ', VERY FIRST POINT **');
-//                var marker = new google.maps.Marker({
-//                    map: gMap,
-//                    position: theSteps[0].path[0]
-//                });
-
-            console.warn('===== step[0] after  has ' + Object.keys(theSteps[0]));
-            var rawNumberOfPoints = 0; // ??
-            for (var stepIdx = 0; stepIdx < numSteps; stepIdx++) {
-                var thisStep = theSteps[stepIdx];
-                // ?? How to protect this from /0?
-                var stepSpeed = thisStep.distance.value / thisStep.duration.value;
-                var thisPath = theSteps[stepIdx].path;
-                var numPts = thisPath.length;
-                rawNumberOfPoints += numPts; // ??
-//                    console.warn('  step ' + stepIdx + ' has ' + numPts
-//                                 + ' points; distance '
-//                                 + theSteps[stepIdx].distance.value
-//                                 + ' meters, and lasts '
-//                                 + theSteps[stepIdx].duration.value
-//                                 + ' seconds'); // ??
-                for (var ptIdx = 1; ptIdx < numPts; ptIdx++) {
-                    var thisPoint = thisPath[ptIdx];
-                    var dist = distanceBetween(previousPoint, thisPoint);
-                    // Determine how long it will take to get here
-                    // from the previously-accepted point
-                    var time = dist / stepSpeed;
-//                            if (dist < MINIMUM_DISTANCE) { // ??
-//                                console.warn('     pt ' + ptIdx // ??
-//                                             + ': ' + thisPath[ptIdx]
-//                                             + ', distance ' + dist
-//                                             + ' meters, time ' + time
-//                                             + ' -- too close');
-//                            } // ??
-                    if (ptIdx != numPts-1) {
-                        // This is not the last point of the step.
-                        // Accept it only if it is far enough (in
-                        // space-time) from the last point we accepted.
-
-                        if (dist < MINIMUM_DISTANCE) continue;
-//                            if (dist / stepSpeed < MINIMUM_TIME) { // ??
-//                                console.warn('     pt ' + ptIdx // ??
-//                                             + ': ' + thisPath[ptIdx]
-//                                             + ', distance ' + dist
-//                                             + ' meters, time ' + time
-//                                             + ' -- time too short');
-//                            } // ??
-                        if (time < MINIMUM_TIME) continue;
-//                            console.warn('     pt ' + ptIdx // ??
-//                                         + ': ' + thisPath[ptIdx]
-//                                         + ', distance ' + dist
-//                                         + ' meters, time ' + time
-//                                         + ' -- TAKE IT');
+            // Calculate the total duration of the route
+            var totalDuration = 0.0;
+            for (var routeIdx = 0;
+                 routeIdx < result.routes.length;
+                 routeIdx++)
+            {
+                for (var legIdx = 0;
+                     legIdx < result.routes[routeIdx].legs.length;
+                     legIdx++)
+                {
+                    for (var stepIdx = 0;
+                         stepIdx < result.routes[routeIdx].legs[legIdx].steps.length;
+                         stepIdx++)
+                    {
+                        totalDuration += result.routes[routeIdx].legs[legIdx]
+                                             .steps[stepIdx].duration.value;
                     }
-//                        else console.warn('     pt ' + ptIdx // ??
-//                                         + ': ' + thisPath[ptIdx]
-//                                         + ', LAST POINT OF STEP **');
-
-                    // Send this point to the Emulator
-                    channel.objects.emulocationserver.sendRoutePointToEmu(
-                        numPointsSent, thisPoint.lat(), thisPoint.lng(), time);
-
-                    numPointsSent++;
-                    previousPoint = thisPoint;
-
-//                        var marker = new google.maps.Marker({
-//                            map: gMap,
-//                            position: thisPoint
-//                        });
                 }
             }
-            // Let the Emulator know that it has all the data
-            channel.objects.emulocationserver.sendRoutePointToEmu(-1, 0.0, 0.0, 0.0);
-            // ?? Panama City to Montreal: 125000 raw points (24,500 filtered)
-            console.warn('JK Route page: Done sending route to host. Raw route had ' // ??
-                         + rawNumberOfPoints + ' points'); // ??
-// ^^ ??
+
+            var fullResult = JSON.stringify(result);
+            console.warn('Stringified full result is ' + fullResult.length + // ??
+                         ' characters, duration ' + totalDuration); // ??
+            channel.objects.emulocationserver.sendFullRouteToEmu(totalDuration, fullResult);
         });
     }
     </script>

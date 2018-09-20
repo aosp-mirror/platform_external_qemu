@@ -50,8 +50,8 @@ public:
     bool isLoadingGeoData() const { return mNowLoadingGeoData; }
     void requestStopLoadingGeoData() { mGpsNextPopulateIndex = mGpsFixesArray.size(); }
     Q_INVOKABLE void sendLocation(const QString& lat, const QString& lng);
-    Q_INVOKABLE void sendFullRouteToEmu(const QString& routeJSON);
-    Q_INVOKABLE void sendRoutePointToEmu(int pointIndex, double lat, double lng, double timeToHere);
+    Q_INVOKABLE void sendFullRouteToEmu(double durationSeconds, const QString& routeJSON);
+//    Q_INVOKABLE void sendRoutePointToEmu(int pointIndex, double lat, double lng, double timeToHere);
 
     void updateTheme();
 
@@ -66,6 +66,7 @@ signals:
     // Ways to send updates to the js code
     void locationChanged(QString lat, QString lng);
     void showLocation(QString lat, QString lng);
+    void showRouteOnMap(const QString& routeJson);
     void travelModeChanged(int mode);
 
 private slots:
@@ -249,7 +250,8 @@ private:
                                          const emulator_location::RouteMetadata& protobuf);
     void writeRouteProtobufFullPath(const QString& protoFullPath,
                                     const emulator_location::RouteMetadata& protobuf);
-    void writeRouteGpxFile(const std::string& pathOfProtoFile);
+    QString readRouteJsonFile(const QString& pathOfProtoFile);
+    void writeRouteJsonFile(const std::string& pathOfProtoFile);
     void setUpWebEngine(QWebEnginePage* webEnginePage, const char* pageName);
 
     static bool validateCell(QTableWidget* table,
@@ -276,14 +278,15 @@ private:
         double delayBefore;
     } routePoint_t;
     enum class RouteStatus { OK, INCOMPLETE, FAILED, TOO_BIG };
-    static constexpr int MAX_POINTS_IN_ROUTE = 20000;
-    RouteStatus mRouteStatus = RouteStatus::INCOMPLETE;
-    routePoint_t mRoutePoints[MAX_POINTS_IN_ROUTE]; // ?? Should I allocate this dynamically
+//    static constexpr int MAX_POINTS_IN_ROUTE = 20000;
+//    RouteStatus mRouteStatus = RouteStatus::INCOMPLETE;
+//    routePoint_t mRoutePoints[MAX_POINTS_IN_ROUTE]; // ?? Should I allocate this dynamically
                                                     //    and free it when I'm done?
-    int mNumRoutePointsReceived = 0;
+//    int mNumRoutePointsReceived = 0;
     QDateTime mRouteCreationTime;
     int mRouteTravelMode = 0;
     double mRouteTotalTime = 0.0; // Seconds
+    QString mRouteJson;
 
     // Last point sent to the emulator from the map
     QString mLastLat = "-122.084";
