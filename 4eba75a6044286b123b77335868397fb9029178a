@@ -141,6 +141,30 @@
       "revId": "4eba75a6044286b123b77335868397fb9029178a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3fa1f74a_ef7dbcff",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-20T01:46:10Z",
+      "side": 1,
+      "message": "I still have to rev this version, but made some changes that prevent having to rev it in the future.\n\nNow we use a MemStream for loading pipes, which enables us to skip loading some pipes, and Offworld uses a feature flag so it won\u0027t be enabled by default, enabling us to make future breaking changes to it.  Currently changing this flag invalidates snapshots, but when I add support for the new pipe protocol I\u0027ll add a version to the Offworld snapshot data and make it a snapshot-insensitive flag.",
+      "parentUuid": "e518119f_c431c816",
+      "range": {
+        "startLine": 339,
+        "startChar": 32,
+        "endLine": 339,
+        "endChar": 34
+      },
+      "revId": "4eba75a6044286b123b77335868397fb9029178a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
