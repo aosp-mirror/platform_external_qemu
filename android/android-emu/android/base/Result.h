@@ -126,6 +126,9 @@ detail::Err<Value> Err(E&& value) {
 template <typename T, typename E>
 class Result {
 public:
+    using Ok = detail::Ok<T>;
+    using Err = detail::Err<E>;
+
     template <typename U,
               typename = typename std::enable_if<
                       std::is_convertible<U, T>::value>::type>
