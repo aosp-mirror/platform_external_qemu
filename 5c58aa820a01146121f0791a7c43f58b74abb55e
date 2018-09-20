@@ -46,6 +46,30 @@
       "revId": "5c58aa820a01146121f0791a7c43f58b74abb55e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e39a3c45_9e39db21",
+        "filename": "android/android-emu/android/offworld/OffworldPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-20T02:41:04Z",
+      "side": 1,
+      "message": "This is mostly just converting the proto enum to the android::base::FileShare enum, ideally I\u0027d like to keep most of the proto parsing in this file.  I do like the idea of using Optional, though, I\u0027ll do that.",
+      "parentUuid": "c28bbb0e_d2051fa5",
+      "range": {
+        "startLine": 132,
+        "startChar": 16,
+        "endLine": 154,
+        "endChar": 21
+      },
+      "revId": "5c58aa820a01146121f0791a7c43f58b74abb55e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
