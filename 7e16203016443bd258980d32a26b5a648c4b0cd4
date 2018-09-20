@@ -22,6 +22,30 @@
       "revId": "7e16203016443bd258980d32a26b5a648c4b0cd4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7cbd275d_4aa8875b",
+        "filename": "android/android-emu/android/offworld/OffworldPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-20T02:19:58Z",
+      "side": 0,
+      "message": "I renamed this in the follow-up change which introduces SnapshotAPI, so it will be fixed shortly.",
+      "parentUuid": "d121f684_fbe738ad",
+      "range": {
+        "startLine": 62,
+        "startChar": 16,
+        "endLine": 62,
+        "endChar": 37
+      },
+      "revId": "7e16203016443bd258980d32a26b5a648c4b0cd4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
