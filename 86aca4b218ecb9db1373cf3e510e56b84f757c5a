@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "3f126fa9_1cc69f4c",
+        "filename": "android/android-emu/android/emulation/AndroidPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-20T17:56:32Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "0ba3f692_a17fcf38",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 44
+      },
+      "revId": "86aca4b218ecb9db1373cf3e510e56b84f757c5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "91af0837_92d143f4",
         "filename": "android/android-emu/android/featurecontrol/FeatureControlDefHost.h",
         "patchSetId": 2
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "It looks like it still needs to be in either Host or Guest:\n\n\nstd::vector\u003cFeature\u003e FeatureControlImpl::getEnabled() const {\n    std::vector\u003cFeature\u003e res;\n\n#define FEATURE_CONTROL_ITEM(feature) \\\n    if (mFeatures[feature].currentVal) \\\n        res.push_back(feature); \\\n\n#include \"FeatureControlDefHost.h\"\n#include \"FeatureControlDefGuest.h\"\n#undef FEATURE_CONTROL_ITEM\n\n    return res;\n}",
       "parentUuid": "91af0837_92d143f4",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 45
+      },
+      "revId": "86aca4b218ecb9db1373cf3e510e56b84f757c5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6e95bc30_fc911890",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControlDefHost.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-20T17:56:32Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "2cb258d6_b886ec22",
       "range": {
         "startLine": 49,
         "startChar": 0,
