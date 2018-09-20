@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "85d342ce_d76942a1",
+        "filename": "android/android-emu/Makefile.android-emu.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-20T21:13:36Z",
+      "side": 1,
+      "message": "Both of these seem like they should go into a test-only block.",
+      "range": {
+        "startLine": 261,
+        "startChar": 0,
+        "endLine": 276,
+        "endChar": 46
+      },
+      "revId": "7c5945571a62a0ebdf4012e14ccc566511e8cbcb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9ed449d5_26210127",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-20T21:13:36Z",
+      "side": 1,
+      "message": "This is test-only, right?  Maybe move into a testing directory or rename to TestHostGoldfishPipe?",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 2
+      },
+      "revId": "7c5945571a62a0ebdf4012e14ccc566511e8cbcb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d4ca724a_56645271",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-20T21:13:36Z",
+      "side": 1,
+      "message": "Log failure here?  In what cases would this happen?",
+      "range": {
+        "startLine": 98,
+        "startChar": 8,
+        "endLine": 98,
+        "endChar": 23
+      },
+      "revId": "7c5945571a62a0ebdf4012e14ccc566511e8cbcb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fa88fd96_dd4101e7",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-20T21:13:36Z",
+      "side": 1,
+      "message": "It may be helpful to have a helper that allocates/returns as well:\n\nResult\u003cstd::vector\u003cuint8_t\u003e, ssize_t\u003e read(void* pipe, size_t maxLength);",
+      "range": {
+        "startLine": 114,
+        "startChar": 8,
+        "endLine": 116,
+        "endChar": 54
+      },
+      "revId": "7c5945571a62a0ebdf4012e14ccc566511e8cbcb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6bd24299_d8e7c42f",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-20T21:13:36Z",
+      "side": 1,
+      "message": "Maybe not in this change, but it may be useful to handle the case where the receiver doesn\u0027t read all of the data, by adding some sort of internal buffering.  Maybe a writeBuffered call?",
+      "range": {
+        "startLine": 120,
+        "startChar": 8,
+        "endLine": 123,
+        "endChar": 54
+      },
+      "revId": "7c5945571a62a0ebdf4012e14ccc566511e8cbcb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
