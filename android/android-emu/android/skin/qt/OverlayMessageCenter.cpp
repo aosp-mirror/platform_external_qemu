@@ -57,8 +57,8 @@ OverlayChildWidget::OverlayChildWidget(OverlayMessageCenter* parent,
     setStyleSheet(QString("* { font-size: %1; color: %2; } #OverlayChildWidget { "
                           "border-radius: %3px; border-style: outward; "
                           "border-color: rgba(255, 255, 255, 10%); "
-                          "border-top-width: %4; border-left-width: %5; "
-                          "border-bottom-width: %6; border-right-width: %7; }")
+                          "border-top-width: %4; border-left-width: %4; "
+                          "border-bottom-width: %5; border-right-width: %5; }")
                           .arg(Ui::stylesheetFontSize(Ui::FontSize::Larger))
                           .arg(sTextColorFromMessageType(messageType))
                           .arg(qCeil(SizeTweaker::scaleFactor(this).x()))
