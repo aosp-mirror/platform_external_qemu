@@ -13,42 +13,61 @@
 // limitations under the License.
 #pragma once
 
+#include "android/base/Result.h"
+
+#include <cstdint>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
 #include <sys/types.h>
 
 // Fake pipe driver and device for testing goldfish pipe on host without
 // running a VM.
 namespace android {
 
-class HostGoldfishPipeDevice;
+class HostGoldfishPipeDevice {
+public:
+    using ReadResult = android::base::Result<std::vector<uint8_t>, int>;
+    using WriteResult = android::base::Result<ssize_t, int>;
+
+    HostGoldfishPipeDevice() = default;
+    ~HostGoldfishPipeDevice();
+
+    static HostGoldfishPipeDevice* get();
+
+    // Opens/closes pipe services.
+    void* connect(const char* name);
+    void close(void* pipe);
+
+    void resetPipe(void* pipe, void* internal_pipe);
+
+    // Read/write for a particular pipe, along with C++ versions.
+    ssize_t read(void* pipe, void* buffer, size_t len);
+    ssize_t write(void* pipe, const void* buffer, size_t len);
+
+    ReadResult read(void* pipe, size_t maxLength);
+    WriteResult write(void* pipe, const std::vector<uint8_t>& data);
+
+    unsigned poll(void* pipe) const;
+    void signalWake(int wakes);
+    int getErrno() const { return mErrno; }
+
+private:
+    void initialize();
+    void* open();
+    void* popHwSidePipe(void* pipe);
+    void setErrno(ssize_t res);
+
+    bool mInitialized = false;
+    int mErrno = 0;
+    void* mCurrentPipeWantingConnection = nullptr;
+    std::unordered_set<void*> mPipes;
+    std::unordered_map<void*, void*> mResettedPipes;
+};
 
 // Initializes a global pipe instance for the current process.
 HostGoldfishPipeDevice* getHostPipeInstance();
 
-// connect, close, read, write and poll.
-void* host_pipe_connect(const char* name);
-void host_pipe_close(void* pipe);
-ssize_t host_pipe_read(void* pipe, void* buffer, size_t len);
-ssize_t host_pipe_write(void* pipe, const void* buffer, size_t len);
-unsigned host_pipe_poll(void* pipe);
-
 } // namespace android
 
-extern "C" {
-
-typedef void* (*host_pipe_connect_t)(const char*);
-typedef void (*host_pipe_close_t)(void*);
-typedef ssize_t (*host_pipe_read_t)(void*, void* , size_t);
-typedef ssize_t (*host_pipe_write_t)(void* pipe, const void* buffer, size_t len);
-typedef unsigned (*host_pipe_poll_t)(void* pipe);
-
-struct HostPipeDispatch {
-    host_pipe_connect_t connect = 0;
-    host_pipe_close_t close = 0;
-    host_pipe_read_t read = 0;
-    host_pipe_write_t write = 0;
-    host_pipe_poll_t poll = 0;
-};
-
-HostPipeDispatch make_host_pipe_dispatch();
-
-} // namespace android

@@ -23,14 +23,13 @@ class HostGoldfishPipeTest : public ::testing::Test {
 protected:
     void SetUp() override {
         AndroidPipe::Service::resetAll();
-        mDevice = getHostPipeInstance();
+        mDevice = HostGoldfishPipeDevice::get();
     }
 
     void TearDown() override {
         AndroidPipe::Service::resetAll();
         // mDevice is singleton, no need to tear down
     }
-private:
     HostGoldfishPipeDevice* mDevice = nullptr;
 };
 
@@ -57,24 +56,24 @@ TEST_F(HostGoldfishPipeTest, MessagePipe) {
    registerAndroidMessagePipeService(
        "testMessagePipe", myDecodeAndExecute);
 
-   auto pipe = host_pipe_connect("testMessagePipe");
+   auto pipe = mDevice->connect("testMessagePipe");
 
    int32_t payloadSz = strlen(kPayload) + 1;
 
-   host_pipe_write(pipe, &payloadSz, sizeof(int32_t));
-   host_pipe_write(pipe, kPayload, strlen(kPayload) + 1);
+   mDevice->write(pipe, &payloadSz, sizeof(int32_t));
+   mDevice->write(pipe, kPayload, strlen(kPayload) + 1);
 
    int32_t responseSize = 0;
-   host_pipe_read(pipe, (void*)&responseSize, sizeof(int32_t));
+   mDevice->read(pipe, (void*)&responseSize, sizeof(int32_t));
 
    EXPECT_TRUE(ran);
 
    std::vector<uint8_t> response(responseSize + 1, 0);
-   host_pipe_read(pipe, (void*)response.data(), responseSize);
+   mDevice->read(pipe, (void*)response.data(), responseSize);
 
    EXPECT_STREQ(kResponse, (char*)response.data());
 
-   host_pipe_close(pipe);
+   mDevice->close(pipe);
 }
 
 } // namespace android
