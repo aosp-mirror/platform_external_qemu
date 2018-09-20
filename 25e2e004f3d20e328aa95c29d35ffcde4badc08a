@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "51beb45f_03d58f98",
+        "filename": "android/android-emu/android/offworld/OffworldPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-20T19:04:55Z",
+      "side": 1,
+      "message": "also happens here",
+      "range": {
+        "startLine": 124,
+        "startChar": 0,
+        "endLine": 126,
+        "endChar": 60
+      },
+      "revId": "25e2e004f3d20e328aa95c29d35ffcde4badc08a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5ded86ab_7c3f120e",
+        "filename": "android/android-emu/android/offworld/OffworldPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-20T19:04:55Z",
+      "side": 1,
+      "message": "factor this out into a common \"fill response proto\" function?",
+      "range": {
+        "startLine": 150,
+        "startChar": 0,
+        "endLine": 152,
+        "endChar": 64
+      },
+      "revId": "25e2e004f3d20e328aa95c29d35ffcde4badc08a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4fbf0bba_670797f6",
+        "filename": "android/android-emu/android/snapshot/SnapshotAPI.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-20T19:04:55Z",
+      "side": 1,
+      "message": "Worth putting into a common function?",
+      "range": {
+        "startLine": 108,
+        "startChar": 0,
+        "endLine": 113,
+        "endChar": 35
+      },
+      "revId": "25e2e004f3d20e328aa95c29d35ffcde4badc08a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7e08d87d_af9f173b",
+        "filename": "android/android-emu/android/snapshot/SnapshotAPI.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-20T19:04:55Z",
+      "side": 1,
+      "message": "the other place where it occurs",
+      "range": {
+        "startLine": 142,
+        "startChar": 0,
+        "endLine": 147,
+        "endChar": 39
+      },
+      "revId": "25e2e004f3d20e328aa95c29d35ffcde4badc08a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
