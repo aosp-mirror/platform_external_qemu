@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "57cec870_4b24f901",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-20T21:32:30Z",
+      "side": 1,
+      "message": "It is for testing currently, but I also have some future plans to allow for some pipes to get driven from the host, like from a another process on the host, so it\u0027s not in a testing dir. Otherwise, I would have just extended TestAndroidPipeDevice.",
+      "parentUuid": "9ed449d5_26210127",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 2
+      },
+      "revId": "7c5945571a62a0ebdf4012e14ccc566511e8cbcb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d4ca724a_56645271",
         "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
         "patchSetId": 4
