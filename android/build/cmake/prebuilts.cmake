@@ -107,7 +107,6 @@ endfunction (prebuilt pkg)
 function (target_prebuilt_dependency RUN_TARGET RUN_TARGET_DEPENDENCIES RUN_TARGET_PROPERTIES)
     list(REMOVE_DUPLICATES RUN_TARGET_DEPENDENCIES)
     foreach(DEP ${RUN_TARGET_DEPENDENCIES})
-        message(STATUS "Handling ${DEP}")
         # Turns src>dst into a list, so we can
         # split out SRC --> DST
         string(REPLACE ">" ";" SRC_DST ${DEP})
@@ -132,71 +131,13 @@ function (target_prebuilt_dependency RUN_TARGET RUN_TARGET_DEPENDENCIES RUN_TARG
 
     list(REMOVE_DUPLICATES RUN_TARGET_PROPERTIES)
     foreach(PROP ${RUN_TARGET_PROPERTIES})
-        message(STATUS "Exploring ${PROP}")
         string(REPLACE "=" ";" KEY_VAL ${PROP})
         list(GET KEY_VAL 0 KEY)
         list(GET KEY_VAL 1 VAL)
 
         set(${KEY}_VAL "${${KEY}_VAL} ${VAL}")
-        message(STATUS "set_target_properties(${RUN_TARGET} PROPERTIES ${KEY} ${${KEY}_VAL})")
         set_target_properties(${RUN_TARGET} PROPERTIES "${KEY}" "${${KEY}_VAL}")
     endforeach()
 
 endfunction()
-
-
-# Configure the OS dependencies, if we are in android make system..
-if ( ${LOCAL_TARGET_TAG} MATCHES "windows-x86_64")
-    set(GEN_SDK "${LOCAL_QEMU2_TOP_DIR}/android/scripts/gen-android-sdk-toolchain.sh")
-    execute_process(COMMAND ${GEN_SDK} "--host=windows-x86_64" "--print=sysroot" "unused_param"
-                    RESULT_VARIABLE GEN_SDK_RES
-                    OUTPUT_VARIABLE MINGW_SYSROOT)
-    string(REPLACE "\n" "" MINGW_SYSROOT "${MINGW_SYSROOT}")
-    list(APPEND RUNTIME_OS_DEPENDENCIES "${MINGW_SYSROOT}/bin/libwinpthread-1.dll>lib64/libwinpthread-1.dll")
-    list(APPEND RUNTIME_OS_DEPENDENCIES "${MINGW_SYSROOT}/lib32/libwinpthread-1.dll>lib/libwinpthread-1.dll")
-    list(APPEND RUNTIME_OS_DEPENDENCIES "${MINGW_SYSROOT}/lib/libgcc_s_seh-1.dll>lib64/libgcc_s_seh-1.dll")
-    list(APPEND RUNTIME_OS_DEPENDENCIES "${MINGW_SYSROOT}/lib32/libgcc_s_sjlj-1.dll>lib/libgcc_s_sjlj-1.dll")
-
-    list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-m64")
-    list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-static-libgcc")
-    list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-Xlinker")
-    list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=--build-id")
-    list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-mcx16")
-    list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-Wl,-Bstatic -lstdc++")
-elseif ( ${LOCAL_TARGET_TAG} MATCHES "windows-x86")
-    set(GEN_SDK "${LOCAL_QEMU2_TOP_DIR}/android/scripts/gen-android-sdk-toolchain.sh")
-    execute_process(COMMAND ${GEN_SDK} "--host=windows-x86" "--print=sysroot" "unused_param"
-                    RESULT_VARIABLE GEN_SDK_RES
-                    OUTPUT_VARIABLE MINGW_SYSROOT)
-    string(REPLACE "\n" "" MINGW_SYSROOT "${MINGW_SYSROOT}")
-    list(APPEND RUNTIME_OS_DEPENDENCIES "${MINGW_SYSROOT}/bin/libwinpthread-1.dll>lib64/libwinpthread-1.dll")
-    list(APPEND RUNTIME_OS_DEPENDENCIES "${MINGW_SYSROOT}/lib32/libwinpthread-1.dll>lib/libwinpthread-1.dll")
-    list(APPEND RUNTIME_OS_DEPENDENCIES "${MINGW_SYSROOT}/lib/libgcc_s_seh-1.dll>lib64/libgcc_s_seh-1.dll")
-    list(APPEND RUNTIME_OS_DEPENDENCIES "${MINGW_SYSROOT}/lib32/libgcc_s_sjlj-1.dll>lib/libgcc_s_sjlj-1.dll")
-
-    list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-m32 -Xlinker --large-address-aware -mcx16 -Xlinker")
-    list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=--stack -Xlinker 1048576 -static-libgcc -Xlinker --build-id -mcx16")
-    list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-Wl,-Bstatic -lstdc++")
-elseif ( ${LOCAL_TARGET_TAG} MATCHES "linux-x86_64")
-    set(GEN_SDK "${LOCAL_QEMU2_TOP_DIR}/android/scripts/gen-android-sdk-toolchain.sh")
-    execute_process(COMMAND ${GEN_SDK} "--print=libcplusplus" "unused_param"
-                    RESULT_VARIABLE GEN_SDK_RES
-                    OUTPUT_VARIABLE LIBCPLUSPLUS)
-
-    # Resolve the files.
-    string(REPLACE "\n" "" LIBCPLUSPLUS "${LIBCPLUSPLUS}")
-    get_filename_component(RESOLVED_SO "${LIBCPLUSPLUS}" REALPATH)
-    get_filename_component(RESOLVED_FILENAME "${RESOLVED_SO}" NAME)
-
-    list(APPEND RUNTIME_OS_DEPENDENCIES "${LIBCPLUSPLUS}>lib64/${RESOLVED_FILENAME}")
-
-    # Configure the RPATH be dynamic..
-    list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-Wl,-rpath,'$ORIGIN/lib64'")
-elseif (${LOCAL_TARGET_TAG} MATCHES "darwin-x86")
-    list(APPEND RUNTIME_OS_PROPERTIES "")
-    list(APPEND RUNTIME_OS_DEPENDENCIES "")
-endif ()
-
-message("OS_DEPS: [${RUNTIME_OS_DEPENDENCIES}] - [${RUNTIME_OS_PROPERTIES}]")
-
 
