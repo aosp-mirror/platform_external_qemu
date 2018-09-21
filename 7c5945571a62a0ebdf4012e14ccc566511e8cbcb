@@ -95,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "88fd0ecc_fef554e0",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-21T01:40:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d4ca724a_56645271",
+      "range": {
+        "startLine": 98,
+        "startChar": 8,
+        "endLine": 98,
+        "endChar": 23
+      },
+      "revId": "7c5945571a62a0ebdf4012e14ccc566511e8cbcb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa88fd96_dd4101e7",
         "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
         "patchSetId": 4
@@ -118,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "c4b0c1f0_44cfab8c",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-21T01:40:20Z",
+      "side": 1,
+      "message": "Thanks, that makes the usage more convenient! Done",
+      "parentUuid": "fa88fd96_dd4101e7",
+      "range": {
+        "startLine": 114,
+        "startChar": 8,
+        "endLine": 116,
+        "endChar": 54
+      },
+      "revId": "7c5945571a62a0ebdf4012e14ccc566511e8cbcb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6bd24299_d8e7c42f",
         "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
         "patchSetId": 4
@@ -138,6 +186,30 @@
       "revId": "7c5945571a62a0ebdf4012e14ccc566511e8cbcb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ab935f8_11898d88",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-21T01:40:20Z",
+      "side": 1,
+      "message": "Noted (will do it in a future change)",
+      "parentUuid": "6bd24299_d8e7c42f",
+      "range": {
+        "startLine": 120,
+        "startChar": 8,
+        "endLine": 123,
+        "endChar": 54
+      },
+      "revId": "7c5945571a62a0ebdf4012e14ccc566511e8cbcb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
