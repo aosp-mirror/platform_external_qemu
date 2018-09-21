@@ -7,4 +7,4 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
 add_library(metrics_proto ${PROTO_SRCS} ${PROTO_HDRS})
 target_include_directories(metrics_proto PUBLIC ${PROTOBUF_INCLUDE_DIR})
 target_link_libraries(metrics_proto PUBLIC ${PROTOBUF_LIBRARIES})
-target_include_directories(metrics_proto PUBLIC ${CMAKE_BINARY_DIR})
+target_include_directories(metrics_proto PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/../../..)

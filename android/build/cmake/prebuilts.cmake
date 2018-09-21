@@ -16,7 +16,10 @@
 # and manageable.
 
 set(PREBUILT_COMMON "BLUEZ;LZ4;X264")
-get_filename_component(ANDROID_TOOLS_DIRECTORY "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
+if (NOT DEFINED ANDROID_TOOLS_DIRECTORY)
+  get_filename_component(ANDROID_TOOLS_DIRECTORY "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
+  set(ANDROID_TOOLS_DIRECTORY ${ANDROID_TOOLS_DIRECTORY} CACHE STRING "Path to tools directory")
+endif ()
 
 # Internal function for simple packages.
 function(simple_prebuilt Package)
@@ -68,14 +71,17 @@ function(prebuilt Package)
             find_package(${Package} REQUIRED NAMES "emu-${pkg}")
 
             # Oh oh.
-            if (NOT ${PKG}_LIBRARIES MATCHES "${PREBUILT_ROOT}.*")
-                message(STATUS "Discovered ${Package} lib  -l${${PKG}_LIBRARIES} and -I${${PKG}_INCLUDE_DIR} which is outside of tree ${PREBUILT_ROOT}!")
+            foreach(LIB ${${PKG}_LIBRARIES})
+                if (NOT ${LIB} MATCHES "-l.*|-L.*|${PREBUILT_ROOT}.*")
+                    message(STATUS "Discovered ${Package} lib  ${LIB}  which is outside of tree ${PREBUILT_ROOT}!")
+                endif ()
+            endforeach()
+        endif ()
+        foreach(INC ${${PKG}_INCLUDE_DIRS})
+            if (NOT EXISTS ${INC})
+                message(FATAL_ERROR "The include directory ${INC} of ${Package} does not exist..")
             endif ()
-        endif ()
-
-        if (DEFINED ${PKG}_INCLUDE_DIR AND NOT EXISTS ${${PKG}_INCLUDE_DIR})
-            message(FATAL_ERROR "The include ${${PKG}_INCLUDE_DIR} directory of ${Package} does not exist..")
-        endif ()
+        endforeach()
         message(STATUS "Found ${Package}: ${${PKG}_LIBRARIES} (Prebuilt version)")
 
         # Export the variables to parent

@@ -56,6 +56,7 @@ add_library(emulator-libkeymaster3
         trusty_keymaster_enforcement.cpp
         trusty_rng.c
         )
+set_property(TARGET emulator-libkeymaster3 PROPERTY CXX_STANDARD 11)
 
 target_include_directories(emulator-libkeymaster3 PUBLIC .)
 target_include_directories(emulator-libkeymaster3 PUBLIC ${CURL_INCLUDE_DIRS})
