@@ -1,32 +1,14 @@
 cmake_minimum_required(VERSION 3.5)
 
-# COMPILER + PATH CONFIGURATION
-# =============================
-# TODO(jansene): This section is needed as a bridge
-# to the android build system.
-string(REPLACE " " ";" INCLUDES ${LOCAL_C_INCLUDES})
-include_directories(${INCLUDES})
-include_directories(.)
-
-# Use same compiler config as android build system
-set(CMAKE_C_FLAGS ${LOCAL_CFLAGS})
-set(CMAKE_CXX_FLAGS  "${LOCAL_CFLAGS} ${LOCAL_CXXFLAGS}")
-
-# Work around some gcc/mingw issues
-if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-endif()
-
-
-# Make sure we create archives in the same way..
-SET(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> crs <TARGET> <LINK_FLAGS> <OBJECTS>")
-SET(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> crs <TARGET> <LINK_FLAGS> <OBJECTS>")
+prebuilt(GLIB2)
+prebuilt(PIXMAN)
+prebuilt(LZ4)
 
 # hw-config generator
 add_custom_command(PRE_BUILD
                    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h
-                   COMMAND python ${LOCAL_QEMU2_TOP_DIR}/android/scripts/gen-hw-config.py
-                                  ${LOCAL_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini
+                   COMMAND python ${ANDROID_QEMU2_TOP_DIR}/android/scripts/gen-hw-config.py
+                                  ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini
                                   ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h
                    VERBATIM )
 set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h PROPERTIES GENERATED TRUE)
@@ -81,6 +63,17 @@ set(COMMON_QEMU2GLUE_SOURCES
 set_source_files_properties(${COMMON_QEMU2GLUE_SOURCES} PROPERTIES OBJECT_DEPENDS ${GENERATED_SOURCES})
 
 add_library(libqemu2-glue ${COMMON_QEMU2GLUE_SOURCES})
+target_link_libraries(libqemu2-glue PUBLIC emulator-libdtb ${PIXMAN_LIBRARIES} ${GLIB2_LIBRARIES} ${LZ4_LIBRARIES})
 
-target_include_directories(libqemu2-glue PRIVATE ../android/third_party/libdtb/include/)
+target_compile_definitions(libqemu2-glue PRIVATE  -D__STDC_CONSTANT_MACROS -D_LIBCPP_VERSION=__GLIBCPP__ -D_GNU_SOURCE)
+target_compile_options(libqemu2-glue PRIVATE "-Wno-extern-c-compat" "-Wno-invalid-constexpr" "-Wno-c++14-extensions" "-Wno-deprecated-register" "-Wno-inconsistent-missing-override" "-Wno-return-type-c-linkage")
+# Pick up the right config.
+target_include_directories(libqemu2-glue PUBLIC
+    ${ANDROID_QEMU2_TOP_DIR}
+    ${ANDROID_QEMU2_TOP_DIR}/slirp
+    ${ANDROID_QEMU2_TOP_DIR}/qemu2-auto-generated
+    ${ANDROID_QEMU2_TOP_DIR}/include
+    config/${ANDROID_TARGET_TAG})
+
+target_include_directories(libqemu2-glue PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu ${GLIB2_INCLUDE_DIRS} ${PIXMAN_INCLUDE_DIRS} ${LZ4_INCLUDE_DIRS})
 

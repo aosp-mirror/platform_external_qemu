@@ -68,21 +68,6 @@ warn() {
 
 # Generates the toolchain to be used by cmake. You can the G
 
-function gen_toolchain {
-    SDK_TOOLCHAIN_DIR=$OPT_OUT/build/toolchain
-    GEN_SDK_FLAGS="$SDK_FLAGS --aosp-dir=$AOSP_DIR"
-    GEN_SDK=${QEMU2_TOP_DIR}/android/scripts/gen-android-sdk-toolchain.sh
-    run "$GEN_SDK" $GEN_SDK_FLAGS "--verbosity=$(get_verbosity)" "$SDK_TOOLCHAIN_DIR" || panic "Cannot generate SDK toolchain!"
-    BINPREFIX=$("$GEN_SDK" $GEN_SDK_FLAGS --print=binprefix "$SDK_TOOLCHAIN_DIR")
-    CC="$SDK_TOOLCHAIN_DIR/${BINPREFIX}gcc"
-    CXX="$SDK_TOOLCHAIN_DIR/${BINPREFIX}g++"
-    AR="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ar"
-    RANLIB="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ranlib"
-    LD=$CXX
-    OBJCOPY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}objcopy"
-}
-
-
 # Configures the cmake paramaters and generates the toolchain.
 # $1  - The output location of the generated makefiles
 # $2  - Target tag used to build (linux-x86_64, darwin-x86_64, windows-x86, windows-x86_64)
@@ -91,17 +76,8 @@ function cmake_params {
     # Generate the toolchain..
     local CMAKE_PARAMS=-H${QEMU2_TOP_DIR}/android/build/cmake/test
     CMAKE_PARAMS="${CMAKE_PARAMS} -B$1"
-    CMAKE_PARAMS="${CMAKE_PARAMS} -DCMAKE_AR=${AR} "
-    CMAKE_PARAMS="${CMAKE_PARAMS} -DCMAKE_RANLIB=${RANLIB} "
-    CMAKE_PARAMS="${CMAKE_PARAMS} -DCMAKE_OBJCOPY=${OBJCOPY} "
-    CMAKE_PARAMS="${CMAKE_PARAMS} -DLOCAL_CXXFLAGS=${CXXFLAGS} "
-    CMAKE_PARAMS="${CMAKE_PARAMS} -DLOCAL_QEMU2_TOP_DIR=${3} "
-    CMAKE_PARAMS="${CMAKE_PARAMS} -DLOCAL_TARGET_TAG=$2 "
-    CMAKE_PARAMS="${CMAKE_PARAMS} -DLOCAL_BUILD_OBJS_DIR=${BUILD_OBJS_DIR} "
-
-    if [[ $2 = *"windows"* ]]; then
-        CMAKE_PARAMS="${CMAKE_PARAMS} -DCMAKE_TOOLCHAIN_FILE=${QEMU2_TOP_DIR}/android/build/cmake/toolchain-win.cmake"
-    fi
+    CMAKE_PARAMS="${CMAKE_PARAMS} -DCMAKE_TOOLCHAIN_FILE=${QEMU2_TOP_DIR}/android/build/cmake/toolchain-$2.cmake"
+    CMAKE_PARAMS="${CMAKE_PARAMS} $3"
     echo $CMAKE_PARAMS
 }
 
@@ -110,10 +86,7 @@ function cmake_params {
 # $2: Target tag used to build (linux-x86_64, darwin-x86_64, windows-x86, windows-x86_64)
 function run_cmake {
     echo "Running test: Find all prebuilts succeed for $2"
-    gen_toolchain
-    export CC
-    export CXX
-    CMAKE_PARAMS=$(cmake_params $1 $2 $QEMU2_TOP_DIR)
+    CMAKE_PARAMS=$(cmake_params $1 $2)
     run ${CMAKE_TOOL} ${CMAKE_PARAMS} \
         || panic "Failed to run cmake for target $2"
 }
@@ -124,8 +97,7 @@ function run_cmake {
 # $2: Target tag used to build (linux-x86_64, darwin-x86_64, windows-x86, windows-x86_64)
 function failing_cmake {
     echo "Running test: Incorred prebuilt dir should fail for $2"
-    gen_toolchain
-    CMAKE_PARAMS=$(cmake_params $1 $2 /a/dir/without/prebuilts)
+    CMAKE_PARAMS=$(cmake_params $1 $2 -DAOSP=/a/dir/without/prebuilts)
     run ${CMAKE_TOOL} ${CMAKE_PARAMS} && panic "Unexpected success for cmake run on target $2"
 }
 
@@ -146,8 +118,6 @@ function local_cmake {
 }
 
 function run_windows_tests {
-    SDK_FLAGS=" --host=windows-x86_64"
-
     echo "Running failure case for win64"
     failing_cmake $OPT_OUT/build/test/fail-win64 windows-x86_64
 
@@ -173,7 +143,6 @@ function run_windows_tests {
 }
 
 function run_linux_tests {
-    SDK_FLAGS=""
     echo "Running failure case"
     failing_cmake $OPT_OUT/build/test/fail-linux linux-x86_64
 
