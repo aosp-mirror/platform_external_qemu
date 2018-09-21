@@ -192,6 +192,8 @@ LOCAL_CFLAGS += \
     $(QEMU2_CFLAGS) \
     -DPOISON_CONFIG_ANDROID \
 
+	$(info "Flags: $(LOCAL_CFLAGS)")
+
 LOCAL_C_INCLUDES += \
     $(QEMU2_INCLUDES) \
 

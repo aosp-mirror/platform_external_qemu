@@ -1084,6 +1084,7 @@ for QT_ARCH in $PREBUILT_ARCHS; do
     if [ -z "$QT_LIBS" ]; then
         panic "Cannot find Qt prebuilt libraries!?"
     fi
+    echo "File list: $QT_LIBS"
     for QT_LIB in $QT_LIBS; do
         QT_LIB=${QT_LIB#./}
         QT_DST_LIB=$QT_LIB

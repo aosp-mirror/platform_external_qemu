@@ -94,7 +94,7 @@ sdk {
             into 'resources'
             builtBy buildDefaultEmulator
         }
-        item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/bios.bin") {
+        item("$project.rootDir/y") {
             into 'lib/pc-bios'
         }
         item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/vgabios-cirrus.bin") {
