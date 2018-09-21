@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "95e9a731_4f4c8a8a",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-21T15:58:05Z",
+      "side": 1,
+      "message": "What\u0027s the requirement that the message length be sent byte by byte using putByte?\n\n(\"putBe32\" enforces consistent endianness)",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 9
+      },
+      "revId": "a6a617d14e28e85674db97255c57fe065e413d8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ece50aba_a07d44f8",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-21T15:58:05Z",
+      "side": 1,
+      "message": "Even if the message length needs to be sent byte by byte, this could be more readable as a uint32_t here, and then using various |, \u003e\u003e in the streaming.",
+      "range": {
+        "startLine": 179,
+        "startChar": 0,
+        "endLine": 179,
+        "endChar": 50
+      },
+      "revId": "a6a617d14e28e85674db97255c57fe065e413d8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
