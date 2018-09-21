@@ -1,0 +1,182 @@
+cc_prebuilt_library_shared {
+    name: "libreference-driver",
+    proprietary: true,
+    owner: "google",
+    export_include_dirs: ["include"],
+    srcs: ["libreference-driver-none.so"],
+    compile_multilib: "64",
+    strip: {
+        keep_symbols: true,
+    }
+}
+
+cc_prebuilt_library_shared {
+    name: "libdarwinn_compiler",
+    // Note: this works on Walleye, but doesn't fit in /vendor on Marlin.
+    proprietary: true,
+    owner: "google",
+    export_include_dirs: ["include"],
+    srcs: ["libdarwinn_compiler.so"],
+    compile_multilib: "64",
+    strip: {
+        keep_symbols: true,
+    }
+}
+
+cc_library_static {
+    name: "libdarwinn_compiler_protos",
+    defaults: ["neuralnetworks_defaults"],
+    proprietary: true,
+    srcs: [
+        ":darwinn_compiler_protos_gen",
+    ],
+    cflags: [
+        "-DGOOGLE_PROTOBUF_NO_RTTI",
+    ],
+    shared_libs: [
+        "libprotobuf-cpp-full",
+    ],
+    generated_headers: [
+        "darwinn_compiler_protos_gen_headers",
+    ],
+    export_generated_headers: [
+        "darwinn_compiler_protos_gen_headers",
+    ],
+}
+
+genrule {
+    name: "darwinn_compiler_protos_gen",
+    srcs: [
+        "proto/platforms/darwinn/model/config/representation.proto",
+        "proto/platforms/darwinn/model/config/array.proto",
+        "proto/platforms/darwinn/model/config/internal.proto",
+    ],
+    tools: [
+        "aprotoc",
+    ],
+    cmd: "mkdir -p $(genDir)/vendor/google/darwinn/external/proto && $(location aprotoc)" +
+    "    --cpp_out=$(genDir)/vendor/google/darwinn/external/proto" +
+    "    --proto_path=vendor/google/darwinn/external/proto $(in)",
+    out: [
+        "vendor/google/darwinn/external/proto/platforms/darwinn/model/config/representation.pb.cc",
+        "vendor/google/darwinn/external/proto/platforms/darwinn/model/config/array.pb.cc",
+        "vendor/google/darwinn/external/proto/platforms/darwinn/model/config/internal.pb.cc",
+    ],
+}
+
+genrule {
+    name: "darwinn_compiler_protos_gen_headers",
+    srcs: [
+        "proto/platforms/darwinn/model/config/representation.proto",
+        "proto/platforms/darwinn/model/config/array.proto",
+        "proto/platforms/darwinn/model/config/internal.proto",
+    ],
+    tools: [
+        "aprotoc",
+    ],
+    cmd: "mkdir -p $(genDir)/vendor/google/darwinn/external/proto && $(location aprotoc)" +
+    "    --cpp_out=$(genDir)/vendor/google/darwinn/external/proto" +
+    "    --proto_path=vendor/google/darwinn/external/proto $(in)",
+    out: [
+        "vendor/google/darwinn/external/proto/platforms/darwinn/model/config/representation.pb.h",
+        "vendor/google/darwinn/external/proto/platforms/darwinn/model/config/array.pb.h",
+        "vendor/google/darwinn/external/proto/platforms/darwinn/model/config/internal.pb.h",
+    ],
+    export_include_dirs: [
+        "proto",
+    ],
+}
+
+cc_prebuilt_library_static {
+    name: "libembedded_compiler_test_vector",
+    proprietary: true,
+    owner: "google",
+    export_include_dirs: ["include"],
+    srcs: ["libembedded_compiler_test_vector.a"],
+    compile_multilib: "64",
+    strip: {
+        keep_symbols: true,
+    }
+}
+
+// TODO(b/113178234) Uncomment this build-rule after the dependency issue is
+// resolved.
+//cc_test {
+//    name: "compiler_test",
+//    defaults: ["neuralnetworks_defaults"],
+//    proprietary: true,
+//    compile_multilib: "64",
+//    cppflags: [
+//        "-DDARWINN_PORT_ANDROID_SYSTEM=1",
+//        "-DDARWINN_COMPILER_TEST_EXTERNAL=1",
+//    ],
+//    srcs: [
+//        "tests/platforms/darwinn/code_generator/api/nnapi/compiler_test.cc",
+//    ],
+//    header_libs: [
+//        "flatbuffer_headers",
+//    ],
+//    local_include_dirs: [
+//        "tests",
+//        "generated",
+//    ],
+//    shared_libs: [
+//        "libdarwinn_compiler",
+//        "libbase",
+//        "libprotobuf-cpp-full",
+//    ],
+//    static_libs: [
+//        "libdarwinn_compiler_protos",
+//        "libembedded_compiler_test_vector",
+//    ],
+//    ldflags: [
+//        "-Wl,-rpath,/vendor/lib64",
+//    ],
+//}
+
+cc_library_static {
+    name: "libdarwinn_layer_builder",
+    defaults: ["neuralnetworks_defaults"],
+    proprietary: true,
+    srcs: [
+        "src/platforms/darwinn/model/layer_builder.cc",
+    ],
+    local_include_dirs: [ "include" ],
+    shared_libs: [
+        "libbase",
+        "libprotobuf-cpp-full",
+    ],
+    cppflags: [
+        "-DDARWINN_PORT_ANDROID_SYSTEM=1",
+        "-Wno-sign-compare",
+    ],
+    generated_headers: [
+        "darwinn_compiler_protos_gen_headers",
+    ],
+    export_include_dirs: ["include"],
+}
+
+cc_defaults {
+    name: "darwinn_driver_defaults",
+    cppflags: ["-DDARWINN_PORT_ANDROID_SYSTEM=1"],
+    proprietary: true,
+    header_libs: [ "darwinn_g3_headers" ],
+    shared_libs: [
+        "libbase",
+    ],
+}
+
+cc_library_headers {
+    name: "darwinn_g3_headers",
+    proprietary: true,
+    export_include_dirs: [ "include", "generated" ],
+}
+
+cc_library_headers {
+    name: "darwinn_api_headers",
+    export_include_dirs: [ "generated/third_party/darwinn/api" ],
+}
+
+subdirs = [
+    "src"
+]
