@@ -1,0 +1,38 @@
+// IDL file for DarwiNN Driver Options.
+
+namespace platforms.darwinn.api;
+
+enum PerformanceExpectation : int {
+  // Clock-rate setting affecting performance.
+  Low,
+  Medium,
+  High,
+  Max
+}
+
+// USB-specific options
+table DriverUsbOptions {
+  // Path to the DFU firmware. Empty string implies default values(s).
+  dfu_firmware:string;
+  // If true, always performs DFU. Otherwise, only performs DFU if
+  // device is in DFU mode.
+  always_dfu:bool = true;
+  // TODO (ijsung): migrate other USB options from Beagle USB provider.
+}
+
+table DriverOptions {
+  // Forwarded compatibility is possible only within the same version number
+  // by following Flatbuffer schema evolution guidelines.
+  // https://google.github.io/flatbuffers/md__schemas.html
+  version:int = 1;
+  usb:DriverUsbOptions;
+
+  // Debug message verbosity inside the driver.
+  verbosity:int = 0;
+  performance_expectation:PerformanceExpectation = High;
+
+  // The public key used for verifying executable packages in PEM format.
+  public_key:string;
+}
+
+root_type DriverOptions;
