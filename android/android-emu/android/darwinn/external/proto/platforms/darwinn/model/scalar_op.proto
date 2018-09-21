@@ -1,0 +1,109 @@
+syntax = "proto2";
+
+option java_package = "com.google.platforms.darwinn.model";
+
+package platforms.darwinn.model;
+
+// Define types of scalar_op. Reference
+// google3/third_party/tensorflow/core/framework/types.proto?l=10&gsn=DataType
+enum DataType {
+  INVALID = 0;
+  FLOAT = 1;
+  INT32 = 2;
+  BOOL = 3;
+};
+
+// Define the input source type for placeholder operation.
+enum SourceType {
+  // Input from a layer.
+  LAYER = 0;
+  // Input from a named parameter.
+  NAMED_PARAMETER = 1;
+  // Input from a named output.
+  NAMED_OUTPUT = 2;
+}
+
+// Scalar Operation.
+message ScalarOp {
+
+  // The Opcode looks close to the ones defined in isa.proto, but they have
+  // different usage.
+  // The isa.proto Opcode is too close to hw, and scalar layer needs a higher
+  // level of abstraction. For instance, scalar layer uses ADD instead of
+  // IADD or FADD.
+  // Also, some operations like PLACEHOLDER cannot be represented correctly
+  // using isa.proto, although eventually all these operations should be
+  // lower to isa.proto by code generator.
+  enum Opcode {
+    // Arithmetic operators.
+    NOP = 0;   // nop
+    ADD = 1;   // add
+    SUB = 2;   // sub
+    MUL = 3;   // mul
+    ABS = 4;   // absolute
+
+    // Assignment operator.
+    MOV = 6;   // mov immediate
+    ITOF = 7;  // integer to float
+    FTOI = 8;  // float to integer (RTNE)
+
+    // Bitwise operators.
+    AND = 10;   // and
+    OR = 11;    // or
+    XOR = 12;   // xor
+    LSL = 13;   // logical shift left
+    LSR = 14;   // logical shift right
+    ASR = 15;   // arithmetic shift right
+
+    // Relational operators.
+    EQ = 20;     // x == y
+    NE = 21;     // x != y
+    GT = 22;     // x > y
+    LT = 23;     // x < y
+    GTE = 24;    // x >= y
+    LTE = 25;    // x <= y
+
+    // Eup operations
+    RSQRT = 30;  // Reciprocal Square Root
+    RECIP = 31;  // Reciprocal
+    EXP = 32;    // Exponential base-2
+    LOG = 33;    // Log base-2
+    TANH = 34;   // Tanh
+
+    // Misc. operations
+    PLACEHOLDER = 40;     // Load value from layer or named_parameter.
+    ASSIGN = 41;          // Assign value to a named output.
+    BRANCH = 42;          // Branch to target layer when condition is met.
+    COND = 43;            // Ternary operator ?:
+  };
+
+  // Name of this instruction
+  optional string name = 1;
+
+  // Unique ID of this instruction
+  optional int32 id = 2;
+
+  // Opcode of this operation.
+  optional Opcode opcode = 3;
+
+  // Data type of this operation.
+  optional DataType data_type = 4;
+
+  // Data type of this operation's source.
+  optional DataType src_data_type = 5;
+
+  // The ScalarOp::id or an immediate that defines the first operand.
+  optional int32 src_x = 10;
+
+  // The ScalarOp::id or an immediate that defines the second operand.
+  optional int32 src_y = 11;
+
+  // The ScalarOp::id or an immediate that defines the third operand.
+  optional int32 src_z = 12;
+
+  // Source name for placeholder.
+  optional string src_name = 13;
+
+  // Source type for placeholder.
+  optional SourceType src_type = 14;
+}

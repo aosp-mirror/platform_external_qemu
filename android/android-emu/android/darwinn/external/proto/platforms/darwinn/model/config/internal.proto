@@ -1,0 +1,88 @@
+syntax = "proto2";
+
+package platforms.darwinn.model.config;
+
+// All the layers in this proto are internally used by DarwiNN, and not exposed
+// externally.
+
+// Sharded input layer. To enable contiguous streaming of activations, input
+// layers are sharded in Y dimension only.
+message InputShardLayer {
+  // Original input layer's name, which current layer is sharding.
+  optional string input_layer_name = 1;
+
+  // Sharded Y offset.
+  optional int32 sharded_y_in_begin = 2;
+
+  // Sharded Y dimension.
+  optional int32 sharded_y_in_dim = 3;
+
+  // Original input dimensions.
+  optional int32 y_in_dim = 4;
+  optional int32 x_in_dim = 5;
+  optional int32 z_in_dim = 6;
+
+  // Original output dimensions.
+  optional int32 z_out_dim = 7;
+}
+
+// Output layer.
+// This layer is automatically created by DarwiNN model transformer to undo the
+// zero padding at the end of Z dimension. Zero padding is also automatically
+// inserted by DarwiNN model transformer as DarwiNN hardware requires Z
+// dimension to be multiple of ZInBundle.
+// Output layer also sends data back to the host, and output layer will be a
+// place to perform relayout.
+message OutputLayer {
+  // Output Z dimension. This should match the original z out dimension before z
+  // padding.
+  optional int32 z_out_dim = 1;
+}
+
+// Sharded output layer. To enable contiguous streaming of activations, output
+// layers are sharded in Y dimension only.
+message OutputShardLayer {
+  // Original output layer's name, which current layer is sharding.
+  optional string output_layer_name = 1;
+
+  // Sharded Y offset.
+  optional int32 sharded_y_out_begin = 2;
+
+  // Sharded Y dimension.
+  optional int32 sharded_y_out_dim = 3;
+
+  // Original dimensions.
+  optional int32 y_out_dim = 4;
+  optional int32 z_out_dim = 5;
+}
+
+// A memory location where a layer can spill data to or fetch data from.
+// Note: memory location will not be used by reference code, which should not
+// have this low-level knowledge. This field is defined by internal graph
+// transformer, and is used by code generator.
+enum SpillLocation {
+  INVALID = 0;
+  WIDE_MEMORY = 1;
+  DRAM = 2;
+};
+
+// Spill layer.
+// This layer is used to spill data from its input layer to spill location.
+message SpillLayer {
+  // Where to spill the data.
+  optional SpillLocation spill_location = 1;
+}
+
+// Fetch layer.
+// This layer is used to fetch (or reload) data from spill location.
+message FetchLayer {
+  // Where to fetch the data.
+  optional SpillLocation spill_location = 1;
+}
+
+// Rescaling layer.
+// This layer is used to rescale the input data by applying output activation
+// scaling factor and activation function.
+message RescalingLayer {
+  // This layer does not have field.
+}

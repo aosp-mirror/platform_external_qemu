@@ -311,6 +311,14 @@ define-emulator-prebuilt-library = \
     $(eval LOCAL_SRC_FILES := $2) \
     $(eval $(end-emulator-module-ev)) \
 
+define-emulator-shared-prebuilt-library = \
+    $(call start-emulator-shared-lib,$1) \
+    $(eval LOCAL_BUILD_FILE := $(PREBUILT_SHARED_LIBRARY)) \
+    $(eval LOCAL_SRC_FILES := $2) \
+    $(eval LOCAL_MODUL_SUFFIX := .so) \
+    $(eval include $(BUILD_PREBUILT)) \
+    $(eval $(end-emulator-shared-lib)) \
+
 # A variant of start-emulator-library to start the definition of a host
 # program instead. Use with end-emulator-program
 start-emulator-program = \

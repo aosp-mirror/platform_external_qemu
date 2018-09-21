@@ -1,0 +1,11 @@
+cc_library_static {
+    name: "darwinn_port_blocking_counter",
+    defaults: [ "darwinn_driver_defaults" ],
+    srcs: [
+        "blocking_counter.cc",
+    ],
+}
+
+subdirs = [
+    "default",
+]

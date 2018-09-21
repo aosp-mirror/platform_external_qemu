@@ -57,6 +57,11 @@ include $(_ANDROID_EMU_ROOT)/android/emulation/proto/VehicleHalProto.mk
 
 ###############################################################################
 #
+# Darwinn model config protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/darwinn/external/proto/platforms/darwinn/model/config/DarwinnModelConfigProto.mk
+
+###############################################################################
+#
 # Feature control protoc-generated library.
 include $(_ANDROID_EMU_ROOT)/android/featurecontrol/proto/FeatureControlProto.mk
 
@@ -102,6 +107,10 @@ ifeq ($(BUILD_TARGET_OS),linux)
     ANDROID_EMU_CFLAGS += -idirafter $(_ANDROID_EMU_ROOT)/../../linux-headers/
 endif
 
+###############################################################################
+#
+# Darwinn prebuilt shared libraries
+include $(_ANDROID_EMU_ROOT)/android/darwinn/external/DarwinnExternal.mk
 
 ###############################################################################
 #
@@ -115,12 +124,13 @@ endif
 #
 
 $(call start-cmake-project,android-emu-base)
-LOCAL_CFLAGS := $(EMULATOR_COMMON_CFLAGS) $(ANDROID_EMU_CFLAGS)
+LOCAL_CFLAGS := $(EMULATOR_COMMON_CFLAGS) $(ANDROID_EMU_CFLAGS) $(DARWINN_CFLAGS)
 LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(ANDROID_EMU_INCLUDES) \
     $(LIBUUID_INCLUDES) \
     $(LZ4_INCLUDES) \
+    $(LIBDARWINN_INCLUDES) \
 
 PRODUCED_STATIC_LIBS=android-emu-base
 $(call end-cmake-project)
@@ -132,6 +142,7 @@ $(call start-emulator-benchmark,android_emu$(BUILD_TARGET_SUFFIX)_benchmark)
 
 LOCAL_C_INCLUDES := \
     $(ANDROID_EMU_BASE_INCLUDES) \
+    $(LIBDARWINN_INCLUDES) \
 
 LOCAL_SRC_FILES := \
     android/base/synchronization/Lock_benchmark.cpp \
@@ -163,6 +174,7 @@ LOCAL_CFLAGS := \
     $(LIBCURL_CFLAGS) \
     $(LIBXML2_CFLAGS) \
     $(ANDROID_EMU_CFLAGS) \
+    $(DARWINN_CFLAGS) \
 
 LOCAL_C_INCLUDES := \
     $(EMUGL_INCLUDES) \
@@ -182,6 +194,7 @@ LOCAL_C_INCLUDES := \
     $(LZ4_INCLUDES) \
     $(ZLIB_INCLUDES) \
     $(MURMURHASH_INCLUDES) \
+    $(LIBDARWINN_INCLUDES) \
 
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \
@@ -227,6 +240,7 @@ LOCAL_SRC_FILES := \
     android/crashreport/HangDetector.cpp \
     android/cros.c \
     android/curl-support.c \
+    android/darwinn/darwinn-service.cpp \
     android/emuctl-client.cpp \
     android/emulation/AdbDebugPipe.cpp \
     android/emulation/AdbGuestPipe.cpp \
@@ -501,10 +515,15 @@ ANDROID_EMU_BASE_STATIC_LIBRARIES := \
 ANDROID_EMU_BASE_LDLIBS := \
     $(LIBUUID_LDLIBS) \
 
+LOCAL_SHARED_LIBRARIES += \
+    $(LIBDARWINN_PREBUILT_SHARED_LIBRARIES) \
+
+
 ifeq ($(BUILD_TARGET_OS),linux)
     ANDROID_EMU_BASE_LDLIBS += -lrt
     ANDROID_EMU_BASE_LDLIBS += -lX11
     ANDROID_EMU_BASE_LDLIBS += -lGL
+
 endif
 ifeq ($(BUILD_TARGET_OS),windows)
     ANDROID_EMU_BASE_LDLIBS += -lpsapi -ld3d9
@@ -546,6 +565,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     $(PHYSICS_PROTO_STATIC_LIBRARIES) \
     $(AUTOMATION_PROTO_STATIC_LIBRARIES) \
     ${VERIFIEDBOOTCFG_PROTO_STATIC_LIBRARIES} \
+    $(DARWINNMODELCONFIG_PROTO_STATIC_LIBRARIES) \
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
@@ -583,6 +603,7 @@ LOCAL_C_INCLUDES += \
     $(LIBXML2_INCLUDES) \
     $(EMUGL_INCLUDES) \
     $(LZ4_INCLUDES) \
+    $(LIBDARWINN_INCLUDES) \
 
 LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
@@ -762,7 +783,7 @@ LOCAL_SRC_FILES += \
 
 endif
 
-LOCAL_CFLAGS += -O0
+LOCAL_CFLAGS += -O0 $(DARWINN_CFLAGS)
 
 LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
@@ -792,6 +813,7 @@ LOCAL_C_INCLUDES += \
     $(EMULATOR_COMMON_INCLUDES) \
     $(EMULATOR_GTEST_INCLUDES) \
     $(LIBXML2_INCLUDES) \
+    $(LIBDARWINN_INCLUDES) \
 
 LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
@@ -808,7 +830,7 @@ LOCAL_SRC_FILES := \
   android/metrics/tests/PeriodicReporter_unittest.cpp \
   android/metrics/tests/SyncMetricsReporter_unittest.cpp \
 
-LOCAL_CFLAGS += -O0
+LOCAL_CFLAGS += -O0 $(DARWINN_CFLAGS)
 
 LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
@@ -868,6 +890,7 @@ LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(EMULATOR_LIBUI_INCLUDES) \
     $(FFMPEG_INCLUDES) \
+    $(LIBDARWINN_INCLUDES) \
 
 
 # Workaround for b/115634240
@@ -911,6 +934,7 @@ LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
     $(EMULATOR_GTEST_INCLUDES) \
     $(FFMPEG_INCLUDES) \
+    $(LIBDARWINN_INCLUDES) \
 
 # Recompile FfmpegRecorder.cpp so we can keep assertions enabled for death tests
 LOCAL_SRC_FILES := \
@@ -934,8 +958,9 @@ endif
 
 LOCAL_C_INCLUDES += \
     $(LIBXML2_INCLUDES) \
+    $(LIBDARWINN_INCLUDES) \
 
-LOCAL_CFLAGS += -O0 -UNDEBUG
+LOCAL_CFLAGS += -O0 -UNDEBUG $(DARWINN_CFLAGS)
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
     $(EMULATOR_GTEST_STATIC_LIBRARIES) \
