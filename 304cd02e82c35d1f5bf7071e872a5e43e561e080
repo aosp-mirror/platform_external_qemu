@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "49b9f1e6_f35d7bc6",
+        "filename": "android/android-emu/android/emulation/hostpipe/HostGoldfishPipe.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-21T01:34:58Z",
+      "side": 1,
+      "message": "Just a nit, but you should be able to do this:\n\nusing android::base::Ok;\nreturn Ok(mErrno);\n\nThe main reason that the function exists is for the no-parameter case, since that would have to be Ok\u003cvoid\u003e() otherwise.",
+      "range": {
+        "startLine": 136,
+        "startChar": 15,
+        "endLine": 136,
+        "endChar": 63
+      },
+      "revId": "304cd02e82c35d1f5bf7071e872a5e43e561e080",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
