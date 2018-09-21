@@ -37,7 +37,6 @@
 
 #include <sys/types.h>
 #include <sys/mman.h>
-
 #include <Hypervisor/hv.h>
 #endif
 
