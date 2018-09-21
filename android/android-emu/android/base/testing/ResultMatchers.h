@@ -48,7 +48,7 @@ MATCHER_P(IsOk, value, "Ok(" + ::testing::PrintToString(value) + ")") {
         return false;
     }
 
-    return arg.ok().value() == value;
+    return ::testing::Matches(value)(arg.ok().value());
 }
 
 MATCHER_P(IsErr, err, "Err(" + ::testing::PrintToString(err) + ")") {
@@ -56,7 +56,7 @@ MATCHER_P(IsErr, err, "Err(" + ::testing::PrintToString(err) + ")") {
         return false;
     }
 
-    return arg.err().value() == err;
+    return ::testing::Matches(err)(arg.err().value());
 }
 
 }  // namespace base
