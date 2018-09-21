@@ -33,6 +33,8 @@ void androidQtDefaultInit() {
         VERBOSE_PRINT(init,
                       "Count not register resources file: '%s'",
                       resourceFile.c_str());
+        // CMake will embed the resources in the binary..
+        Q_INIT_RESOURCE(resources);
     }
 
     // Give Qt the fonts from our resource file

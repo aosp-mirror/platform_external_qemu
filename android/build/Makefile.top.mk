@@ -370,6 +370,9 @@ end-emulator-benchmark = \
 
 define end-emulator-module-ev
 LOCAL_BITS := $$(BUILD_TARGET_BITS)
+$(info $(LOCAL_MODULE))
+$(info    [C_FLAGS $(LOCAL_CFLAGS)] )
+$(info    [SRC: $(LOCAL_SRC_FILES) ])
 include $$(LOCAL_BUILD_FILE)
 endef
 
