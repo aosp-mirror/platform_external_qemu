@@ -283,8 +283,12 @@ set(android-emu_darwin-x86_64_src
     android/crashreport/CrashReporter_darwin.cpp)
 
 # Linux specific sources.
-set(android-emu_linux-x86_64_src android/opengl/NativeGpuInfo_linux.cpp android/snapshot/MemoryWatch_linux.cpp
-    android/camera/camera-capture-linux.c android/crashreport/CrashReporter_linux.cpp)
+set(android-emu_linux-x86_64_src
+    android/opengl/NativeGpuInfo_linux.cpp
+    android/snapshot/MemoryWatch_linux.cpp
+    android/camera/camera-capture-linux.c
+    android/crashreport/CrashReporter_linux.cpp
+    android/darwinn/darwinn-service.cpp)
 
 android_add_library(android-emu)
 
@@ -317,6 +321,7 @@ target_link_libraries(android-emu
                               verified-boot
                               automation
                               offworld
+                              darwinnmodelconfig
                               # Prebuilt libraries
                               BREAKPAD::Client
                               CURL::libcurl
@@ -345,6 +350,8 @@ android_target_link_libraries(android-emu
                               # GetNetworkParams() for android/utils/dns.c
                               -liphlpapi)
 
+prebuilt(DARWINN)
+
 # These are the libs needed for android-emu on linux.
 android_target_link_libraries(android-emu linux-x86_64 PUBLIC -lrt -lX11 -lGL -lc++)
 
@@ -362,7 +369,7 @@ android_target_link_libraries(android-emu
                               "-weak_framework Hypervisor"
                               "-framework OpenGL")
 
-target_include_directories(android-emu PUBLIC 
+target_include_directories(android-emu PUBLIC
                                    # TODO(jansene): The next 2 imply a link dependendency on emugl libs, which
                                    # we have not yet made explicit
                                    ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
@@ -372,7 +379,8 @@ target_include_directories(android-emu PUBLIC
                                    # this has to be sorted out,
                                    ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
                                    # If you use our library, you get access to our headers.
-                                   ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+                                   ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+                                   ${DARWINN_INCLUDE_DIRS})
 
 target_compile_options(android-emu PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
 android_target_compile_options(android-emu linux-x86_64 PRIVATE -idirafter ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
@@ -383,6 +391,11 @@ android_target_compile_definitions(android-emu
                                    "-D_DARWIN_C_SOURCE=1"
                                    "-Dftello64=ftell"
                                    "-Dfseeko64=fseek")
+
+android_target_compile_definitions(android-emu
+                                   linux-x86_64
+                                   PRIVATE
+                                   ${DARWINN_COMPILE_DEFINITIONS})
 
 target_compile_definitions(android-emu
                                    PRIVATE
@@ -420,7 +433,7 @@ android_add_shared_library(android-emu-shared)
 
 # Note that these are basically the same as android-emu-shared. We should clean this up
 target_link_libraries(android-emu-shared
-                              PRIVATE 
+                              PRIVATE
                               emulator-libext4_utils
                               android-emu-base
                               emulator-libsparse
@@ -445,6 +458,7 @@ target_link_libraries(android-emu-shared
                               verified-boot
                               automation
                               offworld
+                              darwinnmodelconfig
                               # Prebuilt libraries
                               BREAKPAD::Client
                               CURL::libcurl
@@ -498,6 +512,11 @@ android_target_compile_definitions(android-emu-shared
                                    "-D_DARWIN_C_SOURCE=1"
                                    "-Dftello64=ftell"
                                    "-Dfseeko64=fseek")
+
+android_target_compile_definitions(android-emu
+                                   linux-x86_64
+                                   PRIVATE
+                                   ${DARWINN_COMPILE_DEFINITIONS})
 
 target_compile_definitions(android-emu-shared
                                    PRIVATE
@@ -707,7 +726,8 @@ target_include_directories(android-emu_unittests
                                    ${PROTOBUF_INCLUDE_DIRS}
                                    ${LZ4_INCLUDE_DIRS}
                                    ${PNG_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS})
+                                   ${ZLIB_INCLUDE_DIRS}
+                                   ${DARWINN_INCLUDE_DIRS})
 
 target_compile_definitions(android-emu_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 
@@ -718,6 +738,11 @@ android_target_compile_definitions(android-emu_unittests
                                    "-D_DARWIN_C_SOURCE=1"
                                    "-Dftello64=ftell"
                                    "-Dfseeko64=fseek")
+
+android_target_compile_definitions(android-emu
+                                   linux-x86_64
+                                   PRIVATE
+                                   ${DARWINN_COMPILE_DEFINITIONS})
 
 # Dependecies are exported from android-emu.
 target_link_libraries(android-emu_unittests PRIVATE android-emu gtest gmock gtest_main)

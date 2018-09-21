@@ -1,0 +1,59 @@
+syntax = "proto2";
+
+package platforms.darwinn.driver.debug;
+
+// See: https://developers.google.com/protocol-buffers/docs/proto
+// - google3 : link against libprotobuf
+// - non-google3 : link against libprotobuf-lite.
+// Copybara will enable this option when exporting to git.
+// option optimize_for = LITE_RUNTIME;
+
+// CSR Read From Host To Device.
+message RegisterRead {
+  optional int64 offset = 1;
+  optional uint64 value = 2;
+}
+
+// CSR Write From Host To Device.
+message RegisterWrite {
+  optional int64 offset = 1;
+  optional uint64 value = 3;
+}
+
+// CSR Poll.
+message RegisterPoll {
+  optional int64 offset = 1;
+  optional uint64 expected_value = 2;
+}
+
+// DMA Read From Device To Host.
+message DmaRead {
+  optional uint64 address = 1;
+  optional uint64 size = 2;
+  optional bytes data = 3;
+}
+
+// DMA Write From Device To Host.
+message DmaWrite {
+  optional uint64 address = 1;
+  optional uint64 size = 2;
+  optional bytes data = 3;
+}
+
+// Interrupt Event.
+message Interrupt {
+  optional int32 id = 1;
+}
+
+// Trace Event.
+message TraceEvent {
+  // Various trace events.
+  oneof trace_event {
+    RegisterRead register_read = 20;
+    RegisterWrite register_write = 21;
+    DmaRead dma_read = 22;
+    DmaWrite dma_write = 23;
+    Interrupt interrupt = 24;
+    RegisterPoll register_poll = 25;
+  }
+}
