@@ -461,6 +461,11 @@ void AndroidPipe::initThreading(VmLock* vmLock) {
     sGlobals->pipeWaker.init(vmLock);
 }
 
+// static
+void AndroidPipe::initThreadingForTest(VmLock* vmLock, base::Looper* looper) {
+    sGlobals->pipeWaker.init(vmLock, looper);
+}
+
 AndroidPipe::~AndroidPipe() {
     DD("%s: for hwpipe=%p (host %p '%s')", __FUNCTION__, mHwPipe, this,
        mService->name().c_str());
@@ -605,6 +610,7 @@ void android_pipe_guest_close(void* internalPipe, PipeCloseReason reason) {
     if (pipe) {
         D("%s: host=%p [%s] reason=%d", __FUNCTION__, pipe, pipe->name(),
             (int)reason);
+        pipe->abortPendingOperation();
         pipe->onGuestClose(reason);
     }
 }
