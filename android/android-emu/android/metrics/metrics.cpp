@@ -379,11 +379,13 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
         case android::featurecontrol::LocationUiV2:
             return android_studio::EmulatorFeatureFlagState::LOCATION_UI_V2;
         case android::featurecontrol::SnapshotAdb:
+            return android_studio::EmulatorFeatureFlagState::SNAPSHOT_ADB;
         case android::featurecontrol::QuickbootFileBacked:
-            // TODO: uncomment the following line when we get the studio stats
-            // ready
-            // return android_studio::EmulatorFeatureFlagState::SNAPSHOT_ADB;
-            // return android_studio::EmulatorFeatureFlagState::QUICKBOOT_FILE_BACKED;
+            return android_studio::EmulatorFeatureFlagState::QUICKBOOT_FILE_BACKED;
+        case android::featurecontrol::Offworld:
+            return android_studio::EmulatorFeatureFlagState::OFFWORLD;
+        case android::featurecontrol::OffworldDisableSecurity:
+            return android_studio::EmulatorFeatureFlagState::OFFWORLD_DISABLE_SECURITY;
         case android::featurecontrol::Feature_n_items:
             return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
     }
