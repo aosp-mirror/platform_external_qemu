@@ -276,8 +276,12 @@ set(android-emu_darwin-x86_64_src
     android/crashreport/CrashReporter_darwin.cpp)
 
 # Linux specific sources.
-set(android-emu_linux-x86_64_src android/opengl/NativeGpuInfo_linux.cpp android/snapshot/MemoryWatch_linux.cpp
-    android/camera/camera-capture-linux.c android/crashreport/CrashReporter_linux.cpp)
+set(android-emu_linux-x86_64_src
+    android/opengl/NativeGpuInfo_linux.cpp
+    android/snapshot/MemoryWatch_linux.cpp
+    android/camera/camera-capture-linux.c
+    android/crashreport/CrashReporter_linux.cpp
+    android/darwinn/darwinn-service.cpp)
 
 android_add_library(android-emu)
 
@@ -310,6 +314,7 @@ target_link_libraries(android-emu
                               verified-boot
                               automation
                               offworld
+                              darwinnmodelconfig
                               # Prebuilt libraries
                               ${BREAKPAD_CLIENT_LIBRARIES}
                               ${CURL_LIBRARIES}
@@ -358,6 +363,8 @@ android_target_link_libraries(android-emu
 android_target_include_directories(android-emu
                                    all
                                    PRIVATE
+                                   ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/include
+                                   ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/generated
                                    ${BREAKPAD_INCLUDE_DIRS}
                                    ${CURL_INCLUDE_DIRS}
                                    ${LIBXML2_INCLUDE_DIRS}
@@ -393,6 +400,14 @@ android_target_compile_definitions(android-emu
                                    "-D_DARWIN_C_SOURCE=1"
                                    "-Dftello64=ftell"
                                    "-Dfseeko64=fseek")
+
+android_target_compile_definitions(android-emu
+                                   linux-x86_64
+                                   PRIVATE
+                                   "-DDARWINN_COMPILER_TEST_EXTERNAL"
+                                   "-DDARWINN_PORT_ANDROID_EMULATOR=1"
+                                   "-DDARWINN_CHIP_TYPE=USB"
+                                   "-DDARWINN_CHIP_NAME=beagle")
 
 target_compile_definitions(android-emu
                                    PRIVATE
@@ -455,6 +470,7 @@ target_link_libraries(android-emu-shared
                               verified-boot
                               automation
                               offworld
+                              darwinnmodelconfig
                               # Prebuilt libraries
                               ${BREAKPAD_CLIENT_LIBRARIES}
                               ${CURL_LIBRARIES}
@@ -524,6 +540,14 @@ android_target_compile_definitions(android-emu-shared
                                    "-D_DARWIN_C_SOURCE=1"
                                    "-Dftello64=ftell"
                                    "-Dfseeko64=fseek")
+
+android_target_compile_definitions(android-emu
+                                  linux-x86_64
+                                  PRIVATE
+                                  "-DDARWINN_COMPILER_TEST_EXTERNAL"
+                                  "-DDARWINN_PORT_ANDROID_EMULATOR=1"
+                                  "-DDARWINN_CHIP_TYPE=USB"
+                                  "-DDARWINN_CHIP_NAME=beagle")
 
 target_compile_definitions(android-emu-shared
                                    PRIVATE
@@ -728,6 +752,8 @@ android_target_include_directories(android-emu_unittests
                                    all
                                    PRIVATE
                                    ../android-emugl/host/include/
+                                   ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/include
+                                   ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/generated
                                    ${BREAKPAD_INCLUDE_DIRS}
                                    ${CURL_INCLUDE_DIRS}
                                    ${LIBXML2_INCLUDE_DIRS}
@@ -748,6 +774,14 @@ android_target_compile_definitions(android-emu_unittests
                                    "-D_DARWIN_C_SOURCE=1"
                                    "-Dftello64=ftell"
                                    "-Dfseeko64=fseek")
+
+android_target_compile_definitions(android-emu
+                                  linux-x86_64
+                                  PRIVATE
+                                  "-DDARWINN_COMPILER_TEST_EXTERNAL"
+                                  "-DDARWINN_PORT_ANDROID_EMULATOR=1"
+                                  "-DDARWINN_CHIP_TYPE=USB"
+                                  "-DDARWINN_CHIP_NAME=beagle")
 
 # Dependecies are exported from android-emu.
 android_target_link_libraries(android-emu_unittests all PRIVATE android-emu gtest gmock gtest_main)
