@@ -412,6 +412,12 @@ define-emulator-prebuilt-library = \
     $(eval LOCAL_SRC_FILES := $2) \
     $(eval $(end-emulator-module-ev)) \
 
+define-emulator-shared-prebuilt-library = \
+    $(call start-emulator-shared-lib,$1) \
+    $(eval LOCAL_BUILD_FILE := $(PREBUILT_SHARED_LIBRARY)) \
+    $(eval LOCAL_SRC_FILES := $2) \
+    $(eval $(end-emulator-module-ev)) \
+
 # A variant of start-emulator-library to start the definition of a host
 # program instead. Use with end-emulator-program
 start-emulator-program = \
@@ -445,7 +451,8 @@ end-cmake-project = \
 
 # Same thing for shared libraries
 start-emulator-shared-lib = \
-    $(call start-emulator-library,$1) \
+    $(eval include $(CLEAR_VARS)) \
+    $(eval LOCAL_MODULE := $1) \
     $(eval LOCAL_MODULE_CLASS := SHARED_LIBRARIES) \
     $(eval LOCAL_BUILD_FILE := $(BUILD_HOST_SHARED_LIBRARY)) \
 

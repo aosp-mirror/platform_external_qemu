@@ -1,0 +1,10 @@
+cc_library_static {
+    name: "darwinn_port_default_port",
+    defaults: [ "darwinn_driver_defaults" ],
+    srcs: [
+        "logging.cc",
+        "status.cc",
+        "statusor.cc",
+        "stringprintf.cc",
+    ],
+}
