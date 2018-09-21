@@ -1,0 +1,587 @@
+syntax = "proto2";
+
+package platforms.darwinn.model.config;
+
+import "array.proto";
+import "internal.proto";
+
+// Padding type.
+// Refer to following link for Tensorflow's definitions:
+// https://www.tensorflow.org/api_guides/python/nn#convolution
+enum Pad {
+  // There is no padding, the kernel stops at the input activations x,y
+  // borders -- only the inside pixels are considered to be "valid".
+  VALID = 1;
+  // Pad so that the output activations x,y dimensions are the same
+  // as the input activations x,y dimensions, when stride = 1.
+  // When stride > 1, output dimensions are input dimensions divided by
+  // stride.
+  SAME = 2;
+  // Custom padding scheme.
+  CUSTOM = 255;
+};
+
+// Padding amount when a user wants to specify custom padding amount.
+message PaddingAmount {
+  optional int32 y_top = 1;
+  optional int32 y_bottom = 2;
+  optional int32 x_left = 3;
+  optional int32 x_right = 4;
+}
+
+// Base layer.
+message Layer {
+  // Layer name.
+  optional string name = 1;
+
+  // Activation function types.
+  enum ActivationFunction {
+    NONE = 1;
+    LINEAR = 2;
+    SQRT = 3;
+    RECIPROCAL_SQRT = 4;
+    RELU = 5;
+    RELU6 = 6;
+    TANH = 7;
+    LOGISTIC = 8;
+    CLIPPED_LINEAR = 12;
+  };
+  optional ActivationFunction activation_function = 2 [default = NONE];
+
+  // Padding strategy.
+  optional Pad pad = 3 [default = VALID];
+  // Custom padding amount when a user wants a custom padding scheme.
+  // TODO(dwoo): Do we want to completely eliminate "pad" field above?
+  optional PaddingAmount padding_amount = 4;
+
+  // Layer(s) that are input to this one; this provides the model topology.
+  repeated string input_layers = 5;
+
+  // TODO(b/77726215) move all of these to convolution (and copy to other
+  // convolution-like layers if needed)
+  //
+  // Kernel x,y dimensions.
+  optional int32 kernel_y_dim = 6 [default = 1];
+  optional int32 kernel_x_dim = 7 [default = 1];
+  // Kernel x,y strides.
+  optional int32 y_stride = 8 [default = 1];
+  optional int32 x_stride = 9 [default = 1];
+  // The dilation rate in the case it's an atrous convolution.
+  // We'll use this information in the reference code to make sure our
+  // model transformation is mathematically correct.
+  optional int32 dilation_rate = 10 [default = 1];
+
+  // The metadata that describes this layer's output activations.
+  optional ArrayInfo output_array = 13;
+
+  // Parameter tensor consumed by this Layer. NOTE: This is an index into
+  // Model.constant_array.
+  optional int32 parameter_array_id = 14;
+
+  // The metadata that describes this layer's parameters.
+  //
+  // TODO(b/77726280) This duplicates the ArrayInfo in
+  // Model.constant_array[index].array_info; this is by design. Both ArrayInfos
+  // must be equal.
+  optional ArrayInfo parameter_array_info = 15;
+
+  // Bias tensor consumed by this Layer. NOTE: This is an index into
+  // Model.constant_array.
+  optional int32 bias_array_id = 16;
+
+  // The metadata that describes this layer's biases.
+  //
+  // TODO(b/77726280) This duplicates the ArrayInfo in
+  // Model.constant_array[index].array_info; this is by design. Both ArrayInfos
+  // must be equal.
+  optional ArrayInfo bias_array_info = 17;
+
+  // The metadata that describes a loop. This information is attached to the
+  // head of the loop.
+  optional LoopInfo loop_info = 18;
+
+  // Layer specific information.
+  oneof layer {
+    ClassifierLayer classifier = 101;
+    ConcatenationLayer concatenation = 102;
+    ConvolutionLayer convolution = 103;
+    DepthwiseConvolutionLayer depthwise_convolution = 104;
+    FullyConnectedLayer fully_connected = 105;
+    ImageInterpolationLayer image_interpolation = 106;
+    InputLayer input = 108;
+    NormalizationLayer normalization = 109;
+    PoolingLayer pooling = 110;
+    ReshapeLayer reshape = 111;
+    SliceLayer slice = 113;
+    VectorLayer vector = 114;
+    ZeroPaddingLayer zero_padding = 116;
+    InterleaveLayer interleave = 117;
+    SpaceToDepthLayer space_to_depth = 118;
+    DepthToSpaceLayer depth_to_space = 119;
+    ConstantLayer constant = 120;
+    TransposedConvolutionLayer transposed_convolution = 121;
+    // Until we properly handle a batch, space-to-batch and batch-to-space will
+    // be used only for dilated convolution.
+    SpaceToBatchLayer space_to_batch = 122;
+    BatchToSpaceLayer batch_to_space = 123;
+
+    // Internal Only.
+    InputShardLayer input_shard = 201;
+    InlineConvolutionPoolingLayer inline_convolution_pooling = 202;
+    OutputLayer output = 203;
+    SpillLayer spill = 204;
+    FetchLayer fetch = 205;
+    OutputShardLayer output_shard = 206;
+    RescalingLayer rescaling = 207;
+  }
+}
+
+// Classifier layer.
+message ClassifierLayer {
+  // Classifier type.
+  enum Op { SOFTMAX = 1; };
+
+  optional Op op = 2;
+  // Beta value.
+  optional float beta = 3;
+}
+
+// Concatenation layer.
+message ConcatenationLayer {
+  // Concatenation mode.
+  enum Mode {
+    // Concatenation along z_in dimension.
+    Z = 1;
+    // Concatenation along x_in dimension.
+    X = 2;
+    // Concatenation along y_in dimension.
+    Y = 3;
+  };
+
+  optional Mode mode = 2;
+}
+
+message ConvolutionLayer {
+  // Number of output channels.
+  optional int32 z_out_dim = 2;
+}
+
+message DepthwiseConvolutionLayer {
+  // Depthwise multiplier.
+  optional int32 depth_multiplier = 4;
+}
+
+message TransposedConvolutionLayer {
+  // Transposed convolution requires output shape to be specified because same
+  // input, kernel, padding, stride can map to multiple output shapes.
+  optional int32 y_out_dim = 1;
+  optional int32 x_out_dim = 2;
+  optional int32 z_out_dim = 3;
+}
+
+// Fully-connected layer.
+message FullyConnectedLayer {
+  // TODO(liujack): in the current implementation, we create basic LSTM cell
+  // sub-graph and this LSTM info based on the LstmCellOperator. If in the
+  // future DarwiNN can identify LSTM thru input model, then we don't need
+  // this LSTM info here.
+
+  // A basic LSTM cell will have these four gates.
+  enum LstmGate {
+    INPUT_GATE = 0;
+    INPUT_MODULATION_GATE = 1;
+    FORGET_GATE = 2;
+    OUTPUT_GATE = 3;
+  };
+
+  // If this fully connected layer is part of the basic LSTM cell, 'Lstm' tells
+  // which portion of its parameters is associated with which gate.
+  message Lstm {
+    // Which LSTM gate that this portion of parameters is associated with.
+    optional LstmGate lstm_gate = 1;
+
+    // The begin position of this gate's state in a merged state. The offset is
+    // zero-based. For performance reasons, code generator will merge four
+    // fully-connected layers and their associated gates into one
+    // fully-connected layer, and this field will tell code generator the offset
+    // of a gate in the merged state.
+    optional int32 offset_in_merged_state = 2;
+
+    // The number of features describing the state of the LSTM gate.
+    optional int32 state_size = 3;
+
+    // The name of the same LSTM layer and for the first time step. The current
+    // usage is for parameter sharing: a LSTM cell will share the same
+    // parameters across all the time steps, and we use this name to get the
+    // parameters for this LSTM layer.
+    optional string first_time_step_name = 5;
+  };
+
+  // Number of output channels.
+  optional int32 z_out_dim = 3;
+
+  // LSTM specific information about which portion of parameters associates
+  // with which LSTM gate.
+  repeated Lstm lstm = 4;
+}
+
+// Image interpolation layer fields.
+message ImageInterpolationLayer {
+  // Interpolation algorithm.
+  enum Algorithm {
+    NEAREST_NEIGHBOR = 0;
+    LINEAR = 1;
+    BILINEAR = 2;
+  };
+
+  // Method to calculate stride and offset.
+  enum StrideMethod {
+    // Simply divides in/out and uses 0 as starting offset.
+    TENSORFLOW_DEFAULT = 0;
+
+    // Makes sure that border output pixels are aligned with border input
+    // pixels. Not yet implemented.
+    TENSORFLOW_ALIGN_CORNERS = 1;
+
+    // Makes sure that the two border output pixels equally sample the three
+    // border input pixels. Computation to derive stride can be found here:
+    // https://g3doc.corp.google.com/platforms/darwinn/silo/g3doc/spec/interpolation.md#deriving-offset-and-stride
+    BALANCED_ENDPOINTS = 2;
+
+    // Uses custom offset and stride provided together.
+    CUSTOM = 3;
+  };
+
+  // Custom start offset and stride.
+  message StartOffsetAndStride {
+    // Start offset relative to first pixel. The value is interpreted as fixed
+    // point, where information of integer and fractional parts are given below.
+    optional uint32 start_offset = 1;
+
+    // Stride between pixels. The value is interpreted as fixed point, where
+    // information of integer and fractional parts are given below.
+    optional uint32 stride = 2;
+
+    // Number of fractional bits used to interpret "start_offset" and "stride"
+    // as a fixed point value. (32 - num_fractional_bits) will be integer bits.
+    optional int32 num_fractional_bits = 3;
+  };
+
+  optional Algorithm algorithm = 2;
+
+  // The size of the downsampled image output by the interpolation layer.
+  optional int32 y_size = 3;
+  optional int32 x_size = 4;
+
+  // How we are going to calculate stride and offset value.
+  optional StrideMethod stride_method = 5;
+
+  // Custom start offset and stride for y/x dimensions.
+  optional StartOffsetAndStride y = 6;
+  optional StartOffsetAndStride x = 7;
+}
+
+// Inline convolution and pooling layer fields.
+message InlineConvolutionPoolingLayer {
+  // TODO(b/38267300): When resolved these fields can be of type ConvLayer and
+  // PoolLayer as opposed to the top Layer.
+  // convolution layer configuration.
+  optional Layer conv_layer = 1;
+  // pooling layer configuration.
+  optional Layer pool_layer = 2;
+}
+
+// Input layer.
+message InputLayer {
+  // Input dimensions.
+  optional int32 y_in_dim = 1;
+  optional int32 x_in_dim = 2;
+  optional int32 z_in_dim = 3;
+
+  // Output dimensions. Y/X dimensions are the same as input dimensions.
+  optional int32 z_out_dim = 4;
+}
+
+// Constant layer. This is to mimic tf.constant. A user is expected to fill
+// constant values using constant_array defined in Model message. Internally,
+// the host will treat this as parameters, and tiles will treat this similar to
+// InputLayer.
+message ConstantLayer {
+  // Input dimensions.
+  optional int32 y_in_dim = 1;
+  optional int32 x_in_dim = 2;
+  optional int32 z_in_dim = 3;
+
+  // Output dimensions. Y/X dimensions are the same as input dimensions.
+  optional int32 z_out_dim = 4;
+}
+
+// Normalization layer. E.g. biased normalization is used in the facedetect
+// model.
+//
+// This proto only encompasses normalization layers that occur in tiles. Do not
+// add normalization types that occur in the scalar core. If you don't think
+// this restriction is appropriate, contact dkillebrew.
+message NormalizationLayer {
+  optional NormalizationType normalization_type = 2;
+
+  // Data needed for L2 normalization
+  message L2Normalization {
+    // Used when computing the normalization factor. If the sum of squares of
+    // activations is less than this, this is used instead, to prevent a divide
+    // by 0. I.e. normalization factor = 1/sqrt(max(epsilon, sum_of_squares))
+    //
+    // Recommendation is to not set this parameter. This parameter is truly
+    // optional. If not provided by the model, Darwinn will choose a parameter
+    // that will avoid divide by zero while not affecting results when
+    // sum_of_squares > 0.
+    //
+    // Given the recommendation above, the reason this parameter is settable is
+    // 1) For compatibility with models that set this parameter.
+    // 2) Setting a sufficiently large epsilon will result in slightly less
+    //    quantization error when computing the normalization factor.
+    optional float epsilon = 1;
+  }
+
+  // Data needed for Biased normalization
+  message BiasedNormalization {
+    // The (bias - constant) value that is added to the sum of squares. It's
+    // denoted alpha in the math equations (Facedetect paper), so that's what we
+    // call it throughout the code. Must be greater than zero to prevent the
+    // possibility of division by 0.
+    optional float alpha = 1;
+  }
+
+  // Ensure that a normalization layer is exactly one of:
+  // BiasedNormalization, L2Normalization
+  message NormalizationType {
+    oneof check {
+      BiasedNormalization biased_normalization = 1;
+      L2Normalization l2_normalization = 2;
+    }
+  }
+}
+
+// Pooling layer fields.
+message PoolingLayer {
+  // Pooling type.
+  enum Pool {
+    MAX = 1;
+    AVERAGE = 2;
+  };
+
+  optional Pool pool = 2;
+}
+
+// Reshape layer fields.
+message ReshapeLayer {
+  // Output shape in the order of YXZ.
+  //
+  // If input dimension is 8x8x32,
+  // shape can be, for example,
+  //   [1, 1, 2048]
+  //   [2, 2, 512]
+  //   [32, 16, 4]
+  //
+  // If input is [Y, X, Z] and shape is [y, x, -1], "-1" is automatically
+  // converted to be YXZ / yx. This is to ensure that, if we just want to
+  // simply perform XYZ-to-Z reshaping, we don't have to know the input shape at
+  // all.
+  enum Dim { ALL = -1; };
+
+  optional int32 y_out_dim = 1;
+  optional int32 x_out_dim = 2;
+  optional int32 z_out_dim = 3;
+}
+
+// Slice layer fields.
+message SliceLayer {
+  // Slice mode.
+  enum Mode {
+    // Slice along z_in dimension.
+    Z = 1;
+    // Slice along x_in dimension.
+    X = 2;
+    // Slice along y_in dimension.
+    Y = 3;
+  };
+
+  optional Mode mode = 2;
+
+  // Begin position of the slice.
+  optional int32 in_begin = 3;
+  // Slice size.
+  optional int32 in_size = 4;
+}
+
+// Vector layer fields.
+message VectorLayer {
+  // Operation performed by the layer.
+  enum Op {
+    ADD = 1;
+    MULTIPLY = 2;
+    SUBTRACT = 3;
+    MINIMUM = 4;
+    MAXIMUM = 5;
+  };
+
+  optional Op op = 2;
+}
+
+// ZeroPaddingLayer adds zeros to the beginning and/or end of a tensor along a
+// single dimension. Generally used to enable fine grained control of how a
+// convolution operation executes (presumably a convolution follows this zero
+// padding). Enables mimicking Tensorflow, Caffe, and any other framework's
+// padding and convolution methods.
+message ZeroPaddingLayer {
+  // Padding dimension.
+  enum Dimension {
+    // Pad along z dimension.
+    Z = 1;
+    // Pad along x dimension.
+    X = 2;
+    // Pad along y dimension.
+    Y = 3;
+  };
+  optional Dimension dimension = 1;
+
+  // Pre and post-padding amounts.
+  optional uint32 pre_padding = 2;
+  optional uint32 post_padding = 3;
+}
+
+// InterleaveLayer interleave multiple input tensors along specified dimension.
+// All input layers are assumed to have same dimensions.
+message InterleaveLayer {
+  // Interleave mode.
+  enum Mode {
+    // Interleave along z_in dimension.
+    Z = 1;
+    // Interleave along x_in dimension.
+    X = 2;
+    // Interleave along y_in dimension.
+    Y = 3;
+  };
+  optional Mode mode = 1;
+}
+
+// SpaceToDepth layer rearranges blocks of spatial data into depth.
+message SpaceToDepthLayer {
+  optional uint32 block_size = 1;
+}
+
+// DepthToSpace layer rearranges data from depth to blocks of spatial data.
+message DepthToSpaceLayer {
+  optional uint32 block_size = 1;
+}
+
+// SpaceToBatch layer rearranges blocks of spatial data into batch.
+message SpaceToBatchLayer {
+  // How many spatial pixels will be transformed to batch.
+  // For example, 2x2 pixels can quadrupple batch size.
+  optional uint32 block_size = 1;
+
+  // Pre-transformation padding amount
+  optional PaddingAmount padding_amount = 2;
+}
+
+// BatchToSpace layer rearranges data from batch to blocks of spatial data.
+message BatchToSpaceLayer {
+  // How many batch elements will be transformed to space.
+  // For example, 4 batch elements can become 2x2 pixels with a quarter size of
+  // a batch. Then, block_size is 2.
+  optional uint32 block_size = 1;
+
+  // Post-transformation crop amount
+  optional PaddingAmount crop_amount = 2;
+}
+
+// Loop info is used to describe the execution of a group of layers that have
+// forward or loop-carried dependencies. This can be used to represent basic
+// LSTM cell execution across different time steps.
+// For instance, this info will be attached to the entrance layer to a basic
+// LSTM cell. The entrance layer to a basic LSTM cell is a concat layer that
+// operates on input activations and LSTM cell state.
+message LoopInfo {
+  message Edge {
+    // Attribute for edge.
+    enum Attribute {
+      UNDEFINED = 0;
+
+      // A forward edge establishes the connection in the same iteration. The
+      // source layer will provide input, and target layer will consume the
+      // data in the same iteration.
+      FORWARD = 1;
+
+      // A back edge establishes the connection in different iterations. It
+      // represents the dependency across two different iterations: the source
+      // layer of a back edge will provide data computed at iteration N, and
+      // target layer of a back edge will use the data at iteration (N+1).
+      // If source layer is not specified, then at each iteration, the source
+      // data will be provided from input layer, instead of from a layer at
+      // previous iteration.
+      BACKWARD = 2;
+    };
+
+    // The target layer of an edge.
+    optional string target = 1;
+
+    // The source layer of an edge.
+    optional string source = 2;
+
+    // The attribute of an edge.
+    optional Attribute attribute = 3;
+
+    // The number of iterations this edge will be iterated.
+    optional int32 iterations = 4;
+  };
+
+  // Name of the head of this loop.
+  optional string name = 1;
+
+  // A set of edges inside this loop.
+  repeated Edge edges = 2;
+}
+
+// Machine-Learning model.
+message Model {
+  optional string name = 1;
+
+  // All Layers that compose this model.
+  repeated Layer layers = 2;
+
+  // TODO(dkillebrew) These two fields aren't used yet, but they will be.
+
+  // These are indices into array_info that indicate which ArrayInfos describe
+  // the runtime inputs to a model. That is, there is some set of activations
+  // that need to be provided for every model inference. These indices identify
+  // the ArrayInfos that describe the shape, DataType, etc. of those
+  // activations.
+  //
+  // The integers are the indices of these ArrayInfo into the Model.array_info
+  // container.
+  repeated int32 input_id = 3;
+
+  // Similar to input_id, these are indices into Model.array_info and identify
+  // which arrays are model outputs.
+  repeated int32 output_id = 4;
+
+  // A list of input layer names that a user specified. If specified, a
+  // compiled binary will accept input activation information in the order that
+  // the user specified.
+  repeated string input_layer_order = 5;
+
+  // A list of output layer names that a user specified. If specified, a
+  // compiled binary will return output activation information in the order that
+  // the user specified.
+  repeated string output_layer_order = 6;
+
+  // The list of all constant arrays in the model, e.g. parameters and biases.
+  // Layers refer to ConstantArrays with an index; that index refers to an
+  // element of this field.
+  //
+  // The large id (starting at 100) is to ensure that when viewing the contents
+  // of the protobuf, this huge field will appear last (that's what tools
+  // usually do).
+  repeated ConstantArray constant_array = 101;
+}
