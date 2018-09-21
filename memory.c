@@ -972,6 +972,30 @@ void memory_listeners_refresh_topology()
     }
 }
 
+MemoryRegion*
+memory_region_system_memory_redirect_add(const char* name,
+                                         hwaddr gpa_start,
+                                         size_t size,
+                                         void* host) {
+    MemoryRegion* redirect = g_malloc0(sizeof(MemoryRegion));
+    MemoryRegion* system = get_system_memory();
+
+    memory_region_init_ram_ptr(
+        redirect, NULL, name, size, host);
+
+    memory_region_add_subregion(
+        system, gpa_start, redirect);
+
+    return redirect;
+}
+
+void memory_region_system_memory_redirect_remove(MemoryRegion* mr) {
+    MemoryRegion* system = get_system_memory();
+
+    memory_region_del_subregion(system, mr);
+    mr->destructor(mr);
+}
+
 static void flatviews_init(void)
 {
     static FlatView *empty_view;

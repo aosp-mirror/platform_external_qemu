@@ -21,3 +21,10 @@ void ram_blocks_remap_shared(int shared);
  * Purpose: to refresh hypervisor memory mappings, primarily.
  */
 void memory_listeners_refresh_topology();
+
+/* Remaps a portion of guest physical addresses. Allocates and
+ * returns a new MemoryRegion* describing the mapping. */
+MemoryRegion* memory_region_system_memory_redirect_add(const char* name, hwaddr gpa_start, size_t len, void* host);
+
+/* Undoes |memory_region_redirect_guest_ram| */
+void memory_region_system_memory_redirect_remove(MemoryRegion* mr);
