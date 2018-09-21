@@ -238,15 +238,16 @@ public:
         }
 
         void save(android::base::Stream* stream) const {
-            timer_put(
-                reinterpret_cast<android::qemu::QemuFileStream*>(stream)->file(),
-                mTimer);
+            stream->putBe64(timer_expire_time_ns(mTimer));
         }
 
         void load(android::base::Stream* stream) {
-            timer_get(
-                reinterpret_cast<android::qemu::QemuFileStream*>(stream)->file(),
-                mTimer);
+            uint64_t deadline_ns = stream->getBe64();
+            if (deadline_ns != -1) {
+                timer_mod_ns(mTimer, deadline_ns);
+            } else {
+                timer_del(mTimer);
+            }
         }
 
     private:

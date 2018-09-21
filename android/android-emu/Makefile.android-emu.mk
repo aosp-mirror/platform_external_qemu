@@ -48,6 +48,11 @@ _ANDROID_EMU_ROOT := $(LOCAL_PATH)
 
 ###############################################################################
 #
+# Automation protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/automation/proto/AutomationProto.mk
+
+###############################################################################
+#
 # Metrics library is a part of android-emu, so let's include it here
 include $(_ANDROID_EMU_ROOT)/android/metrics/proto/MetricsProto.mk
 
@@ -64,6 +69,11 @@ include $(_ANDROID_EMU_ROOT)/android/featurecontrol/proto/FeatureControlProto.mk
 #
 # Location-routes protoc-generated library.
 include $(_ANDROID_EMU_ROOT)/android/location/proto/LocationProto.mk
+
+###############################################################################
+#
+# Offworld protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/offworld/proto/OffworldProto.mk
 
 ###############################################################################
 #
@@ -85,10 +95,6 @@ include $(_ANDROID_EMU_ROOT)/android/telephony/proto/SimAccessRulesProto.mk
 # Verified Boot Config protoc-generated library.
 include $(_ANDROID_EMU_ROOT)/android/verified-boot/proto/VerifiedBootConfigProto.mk
 
-###############################################################################
-#
-# Automation protoc-generated library.
-include $(_ANDROID_EMU_ROOT)/android/automation/proto/AutomationProto.mk
 
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
@@ -332,6 +338,7 @@ LOCAL_SRC_FILES := \
     android/network/control.cpp \
     android/network/constants.c \
     android/network/globals.c \
+    android/offworld/OffworldPipe.cpp \
     android/opengl/EmuglBackendList.cpp \
     android/opengl/EmuglBackendScanner.cpp \
     android/opengl/emugl_config.cpp \
@@ -384,7 +391,7 @@ LOCAL_SRC_FILES := \
     android/snapshot/RamSnapshotTesting.cpp \
     android/snapshot/Saver.cpp \
     android/snapshot/Snapshot.cpp \
-    android/snapshot/SnapshotPipe.cpp \
+    android/snapshot/SnapshotAPI.cpp \
     android/snapshot/Snapshotter.cpp \
     android/snapshot/TextureLoader.cpp \
     android/snapshot/TextureSaver.cpp \
@@ -535,16 +542,17 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-zlib \
     emulator-murmurhash \
     emulator-tinyepoxy \
+    $(AUTOMATION_PROTO_STATIC_LIBRARIES) \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
     $(LOCATION_PROTO_STATIC_LIBRARIES) \
     $(VEHICLE_PROTO_STATIC_LIBRARIES) \
     $(FEATURECONTROL_PROTO_STATIC_LIBRARIES) \
+    $(OFFWORLD_PROTO_STATIC_LIBRARIES) \
     $(SNAPSHOT_PROTO_STATIC_LIBRARIES) \
     $(CRASHREPORT_PROTO_STATIC_LIBRARIES) \
     $(SIM_ACCESS_RULES_PROTO_STATIC_LIBRARIES) \
     $(PHYSICS_PROTO_STATIC_LIBRARIES) \
-    $(AUTOMATION_PROTO_STATIC_LIBRARIES) \
     ${VERIFIEDBOOTCFG_PROTO_STATIC_LIBRARIES} \
 
 ANDROID_EMU_LDLIBS := \

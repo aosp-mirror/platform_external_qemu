@@ -150,6 +150,7 @@ message AndroidStudioEvent {
   // set when kind = STUDIO_PROCESS_STATS
   // or kind = GRADLE_BUILD_PROFILE
   // or kind = STUDIO_UI_OOM_DIALOG_EVENT
+  // or kind = STUDIO_LOW_MEMORY_EVENT
   optional JavaProcessStats java_process_stats = 37;
 
   // set when kind = STUDIO_PERFORMANCE_STATS
@@ -238,8 +239,8 @@ message AndroidStudioEvent {
   // set when kind == LINT_ACTION
   optional LintAction lint_action = 64;
 
-  // set when kind = STUDIO_RUN_STATS
-  optional StudioRunEvent studio_run_event = 65;
+  // set when kind = STUDIO_RUN_EVENT
+  optional StudioRunEvent studio_run_event = 65 [deprecated = true];
 
   // set when kind = INTELLIJ_PROJECT_SIZE_STATS
   repeated IntellijProjectSizeStats intellij_project_size_stats = 66;
@@ -263,6 +264,10 @@ message AndroidStudioEvent {
   // Describes a group of event kinds related to each other.
   // This is redundant in the presence of EventKind + event specific message,
   // and is only necessary for events originally sent to GA.
+
+  // set when kind = RUN_EVENT
+  optional RunEvent run_event = 72;
+
   enum EventCategory {
     // The event was not grouped into any specific category (default).
     NO_EVENT_CATEGORY = 0;
@@ -630,7 +635,7 @@ message AndroidStudioEvent {
     LINT_ACTION = 133;
 
     // Events related to a “Run” in studio
-    STUDIO_RUN_EVENT = 134;
+    STUDIO_RUN_EVENT = 134 [ deprecated = true ];
 
     // The event is related to count files in a search scope
     INTELLIJ_PROJECT_SIZE_STATS = 135;
@@ -673,6 +678,12 @@ message AndroidStudioEvent {
     PROJECT_STRUCTURE_DIALOG_FLAVORS_PRODUCTFLAVOR_REMOVE = 164;
     PROJECT_STRUCTURE_DIALOG_FLAVORS_PRODUCTFLAVOR_RENAME = 165;
     PROJECT_STRUCTURE_DIALOG_UPDATE_LIBRARY_VERSION = 166;
+
+    // Deploying and running apps from studio
+    RUN_EVENT = 167;
+
+    // Studio's LowMemoryWatcher triggered
+    STUDIO_LOW_MEMORY_EVENT = 168;
   }
 
   // Represents different Performance Monitoring types.
@@ -773,6 +784,8 @@ message AndroidStudioEvent {
     APP_WIDGET = 35;
     ANDROID_INSTANT_APP_PROJECT = 36;
     ANDROID_INSTANT_APP_MODULE = 37;
+    ANDROID_INSTANT_APP_BUNDLE_PROJECT = 38;
+    ANDROID_INSTANT_APP_DYNAMIC_MODULE = 39;
   }
 
   // Reasons Gradle sync failed.
@@ -1107,7 +1120,10 @@ message EmulatorFeatureFlagState {
     LOCATION_UI_V2 = 28;
     GENERIC_INCREMENTAL_SNAPSHOT = 29;
     SNAPSHOT_ADB = 30;
-    // Next tag: 31
+    OFFWORLD = 31;
+    OFFWORLD_DISABLE_SECURITY = 32;
+    QUICKBOOT_FILE_BACKED = 33;
+    // Next tag: 34
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
@@ -1792,6 +1808,8 @@ message JniInspectionEvent {
     PARAMETERS_INSPECTION_EVENT = 3;
     // Set when the OnLoad / OnUnload inspection quickfix is used.
     ONLOAD_INSPECTION_EVENT = 4;
+    // Set when the FindMethod inspection quickfix is used.
+    FIND_METHOD_INSPECTION_EVENT = 5;
   }
 
   optional JniInspectionType type = 1;
@@ -4118,6 +4136,8 @@ message GradleSyncStats {
     GRADLE_SYNC_TYPE_COMPOUND = 3;
     // Shipped sync
     GRADLE_SYNC_TYPE_SHIPPED = 4;
+    // New sync (without other features)
+    GRADLE_SYNC_TYPE_NEW_SYNC = 5;
   }
 }
 
@@ -4448,7 +4468,74 @@ message LintAction {
   }
 }
 
+message RunEvent {
+  enum Status {
+    UNKNOWN_STATUS = 0;
+    // The run finished successfully
+    SUCCESS = 1;
+    // The run finished with an error
+    FAIL = 2;
+    // The run was aborted mid-way
+    ABORT = 3;
+  }
+
+  optional Status status = 1;
+  // The executor used, from Executor::getId()
+  optional string executor = 2;
+  // Whether the app is debuggable
+  optional bool debuggable = 3;
+  // Whether instant run is enabled
+  optional bool instant_run_enabled = 4;
+  // Whether the apply changes button was used
+  optional bool apply_changes = 5;
+  // Whether the device dialog was open
+  optional bool user_selected_target = 6;
+  // Weather a device, like the emulator, was launched
+  optional bool launched_devices = 7;
+  // How many devices were targeted
+  optional int32 device_count = 8;
+  // True if this run event started mid-way
+  optional bool partial = 9;
+  // All the launch tasks executed during deploy
+  repeated LaunchTaskDetail launch_task_detail = 10;
+
+  // Timestamps in expected order
+  // The run cycle begins
+  optional int64 begin_timestamp_ms = 11;
+  // The before-run tasks start (i.e. running gradle)
+  optional int64 begin_before_run_tasks_timestamp_ms = 12;
+  // End of the before-run tasks
+  optional int64 end_before_run_tasks_timestamp_ms = 13;
+  // Before launching, we must wait for devices
+  optional int64 begin_wait_for_device_timestamp_ms = 14;
+  // All devices are now ready
+  optional int64 end_wait_for_device_timestamp_ms = 15;
+  // Launch tasks start being executed
+  optional int64 begin_launch_tasks_timestamp_ms = 16;
+  // All launch tasks completed
+  optional int64 end_launch_tasks_timestamp_ms = 17;
+  // The run cycle finished
+  optional int64 end_timestamp_ms = 18;
+
+  // Whether the run configuration was set to deploy as instant
+  optional bool deployed_as_instant = 19;
+  // Whether the run configuration was set to deploy from app bundle
+  optional bool deployed_from_bundle = 20;
+}
+
+message LaunchTaskDetail {
+  // The id of the task from LaunchTask::getId()
+  optional string id = 1;
+  // This task starts
+  optional int64 start_timestamp_ms = 2;
+  // This task ends
+  optional int64 end_timestamp_ms = 3;
+  // For the tasks that deploy artifacts, their details.
+  repeated ArtifactDetail artifact = 4;
+}
+
 message StudioRunEvent {
+  option deprecated = true;
   enum RunType {
     UNKNOWN = 0;
     RUN = 1;
@@ -4814,6 +4901,8 @@ message UserSentiment {
     UNKNOWN_SENTIMENT_STATE = 0;
     POSITIVE = 1;
     NEGATIVE = 2;
+    // The user is feeling strong enough about the issue to start filing a bug.
+    FILE_BUG = 3;
   }
 }
 
@@ -4824,6 +4913,7 @@ message EmulatorBootInfo {
     BOOT_COMPLETED = 1;
     BOOT_FAILED = 2;
   }
+  // Outcome of the emulator boot.
   optional BootStatus boot_status = 1;
   // How long it took to boot, either successfully or not.
   optional uint64 duration_ms = 2;
