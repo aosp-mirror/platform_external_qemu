@@ -43,7 +43,7 @@ public:
     ~ContiguousRangeMapper();
 
 private:
-    Func mMapFunc = {};
+    Func mMapFunc = Func();
     uintptr_t mBatchSize = 0;
     bool mHasRange = false;
     uintptr_t mStart = 0;

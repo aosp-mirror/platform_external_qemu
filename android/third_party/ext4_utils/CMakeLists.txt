@@ -48,9 +48,10 @@ add_library(emulator-libext4_utils
 
 target_include_directories(emulator-libext4_utils PUBLIC include)
 target_include_directories(emulator-libext4_utils PRIVATE ../libselinux/include)
-
 target_include_directories(emulator-libext4_utils PRIVATE ../libsparse/include)
 target_include_directories(emulator-libext4_utils PRIVATE ../../android-emu/)
+target_link_libraries(emulator-libext4_utils PUBLIC emulator-libselinux)
+target_link_libraries(emulator-libext4_utils PUBLIC emulator-libsparse)
 
 if (WIN32 OR ("${LOCAL_OS}" STREQUAL "windows"))
     # Work around some gcc/mingw issues

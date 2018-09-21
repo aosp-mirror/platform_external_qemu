@@ -81,6 +81,9 @@ set(COMMON_QEMU2GLUE_SOURCES
 set_source_files_properties(${COMMON_QEMU2GLUE_SOURCES} PROPERTIES OBJECT_DEPENDS ${GENERATED_SOURCES})
 
 add_library(libqemu2-glue ${COMMON_QEMU2GLUE_SOURCES})
+target_link_libraries(libqemu2 PUBLIC emulator-libdtb)
 
-target_include_directories(libqemu2-glue PRIVATE ../android/third_party/libdtb/include/)
+# Pick up the right config.
+
+target_include_directories(libqemu2-glue PUBLIC config/${LOCAL_TARGET_TAG})
 

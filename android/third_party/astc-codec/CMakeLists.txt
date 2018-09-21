@@ -15,7 +15,7 @@ add_library(emulator-astc-codec
         ${src}/decoder/quantization.cc
         ${src}/decoder/weight_infill.cc
         )
-
+set_property(TARGET emulator-astc-codec PROPERTY CXX_STANDARD 11)
 target_include_directories(emulator-astc-codec PUBLIC ${src}/../include)
 target_include_directories(emulator-astc-codec PRIVATE ${src}/..)
 
@@ -58,6 +58,7 @@ add_executable(emulator_astc_unittests
         )
 target_include_directories(emulator_astc_unittests PRIVATE ${src}/..)
 target_link_libraries(emulator_astc_unittests emulator-astc-codec gmock_main)
+set_property(TARGET emulator_astc_unittests PROPERTY CXX_STANDARD 11)
 
 IF (UNIX AND NOT APPLE)
     set_target_properties(emulator_astc_unittests PROPERTIES LINK_FLAGS "-Wl,-rpath=$ORIGIN/lib64:$ORIGIN/lib:$ORIGIN/intermediates64")
