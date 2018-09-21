@@ -363,9 +363,7 @@ prepare_build_for_darwin() {
     EXTRA_LDFLAGS="$common_FLAGS"
     DST_PREFIX=
 
-    if [ "$OPT_CXX11" ]; then
-        var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
-    fi
+    var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
 }
 
 prepare_build_for_linux() {
@@ -411,9 +409,7 @@ prepare_build_for_linux() {
     var_append EXTRA_CXXFLAGS "-stdlib=libc++"
     var_append EXTRA_CXXFLAGS ${GCC_LINK_FLAGS}
 
-    if [ "$OPT_CXX11" ]; then
-        var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
-    fi
+    var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
 
     # Make sure we can find libc++
     EXTRA_LDFLAGS="-m64"
@@ -448,9 +444,7 @@ prepare_build_for_windows () {
           ;;
     esac
 
-    if [ "$OPT_CXX11" ]; then
-        var_append EXTRA_CXXFLAGS "-std=c++11" "-Werror=c++11-compat"
-    fi
+    var_append EXTRA_CXXFLAGS "-std=c++11" "-Werror=c++11-compat"
 
     var_append EXTRA_CFLAGS ${GCC_LINK_FLAGS}
     var_append EXTRA_CXXFLAGS ${GCC_LINK_FLAGS}

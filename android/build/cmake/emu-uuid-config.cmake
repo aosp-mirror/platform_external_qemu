@@ -17,10 +17,10 @@ get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/and
 if ("${LOCAL_TARGET_TAG}" MATCHES "darwin.*")
     # Apple does its own thing, and the headers are in /usr/include
     set(UUID_INCLUDE_DIR "/usr/include")
-    set(UUID_INCLUDE_DIRS "${UUID_INCLUDE_DIRS}")
+    set(UUID_INCLUDE_DIRS "${UUID_INCLUDE_DIR}")
 elseif ("${LOCAL_TARGET_TAG}" MATCHES "linux.*")
     set(UUID_INCLUDE_DIR "${PREBUILT_ROOT}/include")
-    set(UUID_INCLUDE_DIRS "${UUID_INCLUDE_DIRS}")
+    set(UUID_INCLUDE_DIRS "${UUID_INCLUDE_DIR}")
     set(UUID_LIBRARIES "${PREBUILT_ROOT}/lib/libuuid.a")
 elseif ( ("${LOCAL_TARGET_TAG}" MATCHES "windows.*") )
     # In windows you include rpc.h

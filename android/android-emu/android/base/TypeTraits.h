@@ -45,7 +45,7 @@ using enable_if_c = typename std::enable_if<predicate, Type>::type;
 // Use 'enable_if_convertible<From,To,Type>' instead of
 // 'typename std::enable_if<std::is_convertible<From,To>::value, Type>::type'
 template <class From, class To, class Type = void*>
-using enable_if_convertible = enable_if<std::is_convertible<From, To>>;
+    using enable_if_convertible = enable_if<std::is_convertible<From, To> >;
 
 // -----------------------------------------------------------------------------
 // A predicate for checking if some object is callable with a specific
