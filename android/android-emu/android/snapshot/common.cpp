@@ -81,16 +81,24 @@ const char* failureReasonToString(FailureReason failure,
     }
 }
 
+// bug: 116315668
+// The current scheme of snapshot liveness checking
+// causes more problems than it solves;
+// adb reliability or idle app graphics will cause
+// hang signals.
+// For now, just fall back on the hang detector.
 void resetSnapshotLiveness() {
-    android_resetGuestPostedAFrame();
+    // android_resetGuestPostedAFrame();
 }
 
 bool isSnapshotAlive() {
-    return metrics::AdbLivenessChecker::isEmulatorBooted() ||
-           guest_boot_completed ||
-           android_hasGuestPostedAFrame() ||
-           android::featurecontrol::isEnabled(
-                android::featurecontrol::AllowSnapshotMigration);
+    // bug: 116315668
+    return true;
+    // return metrics::AdbLivenessChecker::isEmulatorBooted() ||
+    //        guest_boot_completed ||
+    //        android_hasGuestPostedAFrame() ||
+    //        android::featurecontrol::isEnabled(
+    //             android::featurecontrol::AllowSnapshotMigration);
 }
 
 } // namespace android
