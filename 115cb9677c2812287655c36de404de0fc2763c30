@@ -94,6 +94,52 @@
       "revId": "115cb9677c2812287655c36de404de0fc2763c30",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8e427351_9965f802",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-22T21:06:00Z",
+      "side": 1,
+      "message": "This is often called with a particular timeout and the sleep is always 50 ms. Could there be a faster or more guaranteed way to make sure the event is processed?",
+      "range": {
+        "startLine": 123,
+        "startChar": 0,
+        "endLine": 130,
+        "endChar": 0
+      },
+      "revId": "115cb9677c2812287655c36de404de0fc2763c30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d2c1ee15_68667291",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-22T21:06:00Z",
+      "side": 1,
+      "message": "If you have access to a Linux box, it would be cool to try running the multithreaded tests with ./android/rebuild.sh --no-strip --sanitizer\u003dthread to uncover any race conditions here",
+      "range": {
+        "startLine": 274,
+        "startChar": 0,
+        "endLine": 285,
+        "endChar": 5
+      },
+      "revId": "115cb9677c2812287655c36de404de0fc2763c30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
