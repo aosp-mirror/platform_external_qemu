@@ -45,6 +45,11 @@ static inline T alignRowBytes(T value) {
     return (value + 3) / 4 * 4;
 }
 
+static void pngWarningCallback(png_structp readPtr,
+                               png_const_charp warningMessage) {
+    D("%s: %s\n", __FUNCTION__, warningMessage);
+}
+
 TextureUtils::Result TextureUtils::createEmpty(uint32_t width,
                                                uint32_t height) {
     Result result;
@@ -108,6 +113,8 @@ Optional<TextureUtils::Result> TextureUtils::loadPNG(const char* filename) {
         E("%s: Failed to allocate png info struct", __FUNCTION__);
         return {};
     }
+
+    png_set_error_fn(png, nullptr, nullptr, pngWarningCallback);
 
     if (setjmp(png_jmpbuf(png))) {
         E("%s: PNG library error", __FUNCTION__);
