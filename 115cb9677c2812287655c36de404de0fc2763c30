@@ -144,6 +144,30 @@
     },
     {
       "key": {
+        "uuid": "e56a70eb_5d988b4d",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-22T22:56:50Z",
+      "side": 1,
+      "message": "Got it; it seems it would be vulnerable to flakes since the other thread could get scheduled away for much longer than its sleep value, especially in the build server environment. What if we spin forever on the looper, once every 50 ms, until a reply comes back?",
+      "parentUuid": "02571845_76c60cbd",
+      "range": {
+        "startLine": 123,
+        "startChar": 0,
+        "endLine": 130,
+        "endChar": 0
+      },
+      "revId": "115cb9677c2812287655c36de404de0fc2763c30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d2c1ee15_68667291",
         "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
         "patchSetId": 3
@@ -188,6 +212,30 @@
       "revId": "115cb9677c2812287655c36de404de0fc2763c30",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "171230d0_8ac1cf72",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-22T22:56:50Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "631f04d6_3a559ba9",
+      "range": {
+        "startLine": 274,
+        "startChar": 0,
+        "endLine": 285,
+        "endChar": 5
+      },
+      "revId": "115cb9677c2812287655c36de404de0fc2763c30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
