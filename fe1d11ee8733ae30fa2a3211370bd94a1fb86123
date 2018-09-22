@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e82c514c_63313fa3",
+        "filename": "android/android-emu/android/emulation/AndroidPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-22T19:50:01Z",
+      "side": 1,
+      "message": "Nice find! Can you go into more detail on what happens when we don\u0027tcall this?",
+      "range": {
+        "startLine": 613,
+        "startChar": 0,
+        "endLine": 613,
+        "endChar": 38
+      },
+      "revId": "fe1d11ee8733ae30fa2a3211370bd94a1fb86123",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
