@@ -120,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "02571845_76c60cbd",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-22T22:50:11Z",
+      "side": 1,
+      "message": "Hmm, possibly.  This is for the multithreaded test case, which intentionally does a sleep() to simulate a long-running process that replies later.  Until the sleep is done, looper::runOneIterationWithDeadlineMs returns instantly since it has no timers registered that it\u0027s waiting on, but I need to keep ticking until one gets registered.\n\nI could potentially introduce a new event that gets set after the worker thread\u0027s sendMessage() is complete, and then only call into the looper after that, but that may limit the scope of the test.  If you feel strongly about it and I can give that a go.",
+      "parentUuid": "8e427351_9965f802",
+      "range": {
+        "startLine": 123,
+        "startChar": 0,
+        "endLine": 130,
+        "endChar": 0
+      },
+      "revId": "115cb9677c2812287655c36de404de0fc2763c30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d2c1ee15_68667291",
         "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
         "patchSetId": 3
@@ -131,6 +155,30 @@
       "writtenOn": "2018-09-22T21:06:00Z",
       "side": 1,
       "message": "If you have access to a Linux box, it would be cool to try running the multithreaded tests with ./android/rebuild.sh --no-strip --sanitizer\u003dthread to uncover any race conditions here",
+      "range": {
+        "startLine": 274,
+        "startChar": 0,
+        "endLine": 285,
+        "endChar": 5
+      },
+      "revId": "115cb9677c2812287655c36de404de0fc2763c30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "631f04d6_3a559ba9",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-22T22:50:11Z",
+      "side": 1,
+      "message": "Sure, I can give that a try on Monday.  I don\u0027t anticipate issues since this is pretty straightforward.",
+      "parentUuid": "d2c1ee15_68667291",
       "range": {
         "startLine": 274,
         "startChar": 0,
