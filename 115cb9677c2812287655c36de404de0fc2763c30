@@ -22,6 +22,30 @@
       "revId": "115cb9677c2812287655c36de404de0fc2763c30",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f02cfe00_e4961bea",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-22T19:48:14Z",
+      "side": 1,
+      "message": "apache 2, not gpl",
+      "parentUuid": "99d363d2_62966c3f",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 47
+      },
+      "revId": "115cb9677c2812287655c36de404de0fc2763c30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
