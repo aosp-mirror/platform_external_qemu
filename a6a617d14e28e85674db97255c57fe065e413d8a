@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "a2858dc2_3f2a5333",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-22T18:23:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "255e9943_c152e45b",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 9
+      },
+      "revId": "a6a617d14e28e85674db97255c57fe065e413d8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ece50aba_a07d44f8",
         "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.h",
         "patchSetId": 1
