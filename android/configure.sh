@@ -259,6 +259,7 @@ OPTION_MIPS=
 OPTION_SNAPSHOT_PROFILE=no
 OPTION_MIN_BUILD=no
 OPTION_AEMU64_ONLY=no
+OPTION_GOLDFISH_OPENGL_DIR=no
 ANDROID_SDK_TOOLS_REVISION=
 ANDROID_SDK_TOOLS_BUILD_NUMBER=
 
@@ -274,6 +275,8 @@ OPTION_CXX=
 
 VERBOSITY=0
 OPTION_SNAPSHOT_PROFILE=0
+
+AOSP_ROOT_DIR=$(dirname "$0")/../../../
 
 AOSP_PREBUILTS_DIR=$(dirname "$0")/../../../prebuilts
 if [ -d "$AOSP_PREBUILTS_DIR" ]; then
@@ -362,6 +365,8 @@ for opt do
   -min|--min-build) OPTION_MIN_BUILD=yes
   ;;
   -aemu64only|--aemu64-only) OPTION_AEMU64_ONLY=yes
+  ;;
+  -goldfish-opengl|--goldfish-opengl=*) OPTION_GOLDFISH_OPENGL_DIR=yes
   ;;
   *)
     echo "unknown option '$opt', use --help"
@@ -858,6 +863,12 @@ esac
 
 if [ "$OPTION_AEMU64_ONLY" == "yes" ]; then
     PREBUILT_ARCHS="x86_64"
+fi
+
+if [ "$OPTION_GOLDFISH_OPENGL_DIR" = "yes" ]; then
+    echo "CONFIG_GOLDFISH_OPENGL_DIR  := $OPTION_GOLDFISH_OPENGL_DIR" >> $config_mk
+else
+    echo "CONFIG_GOLDFISH_OPENGL_DIR  := $AOSP_ROOT_DIR/device/generic/goldfish-opengl" >> $config_mk
 fi
 
 ###
