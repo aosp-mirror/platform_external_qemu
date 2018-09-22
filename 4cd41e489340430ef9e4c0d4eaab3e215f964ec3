@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "089ea7b2_c96ddd24",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-22T20:45:09Z",
+      "side": 1,
+      "message": "Does this also build with mingw?",
+      "revId": "4cd41e489340430ef9e4c0d4eaab3e215f964ec3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f26a691d_8658f286",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-22T20:45:09Z",
+      "side": 1,
+      "message": "Very cool stuff :)",
+      "revId": "4cd41e489340430ef9e4c0d4eaab3e215f964ec3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

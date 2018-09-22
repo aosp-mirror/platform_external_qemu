@@ -46,6 +46,30 @@
       "revId": "fe1d11ee8733ae30fa2a3211370bd94a1fb86123",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ab8cb8f_3ac55960",
+        "filename": "android/android-emu/android/emulation/AndroidPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-22T20:45:09Z",
+      "side": 1,
+      "message": "Thanks for the explanation, that\u0027s quite a great find, especially since that makes me think when running with qemu, I\u0027m not sure whether the loopers should be valid or they should get super canceled on snapshot loads, or that there should still be timers pending anywhere on a snapshot save.",
+      "parentUuid": "c5e4edc3_e99a6121",
+      "range": {
+        "startLine": 613,
+        "startChar": 0,
+        "endLine": 613,
+        "endChar": 38
+      },
+      "revId": "fe1d11ee8733ae30fa2a3211370bd94a1fb86123",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
