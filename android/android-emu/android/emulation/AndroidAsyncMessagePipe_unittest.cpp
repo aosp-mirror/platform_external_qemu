@@ -368,8 +368,8 @@ TEST_F(AndroidAsyncMessagePipeTest, Snapshot) {
         performSend = sendCallback;
     };
 
-    registerSimpleAndroidAsyncMessagePipeService("AfterDestroy", onMessage);
-    auto pipe = mDevice->connect("AfterDestroy");
+    registerSimpleAndroidAsyncMessagePipeService("Snapshot", onMessage);
+    auto pipe = mDevice->connect("Snapshot");
 
     writePacket(pipe, {1, 2, 3});
     EXPECT_THAT(lastMessage, ElementsAre(1, 2, 3));
@@ -383,6 +383,58 @@ TEST_F(AndroidAsyncMessagePipeTest, Snapshot) {
 
     auto restoredPipe = snapshotLoad(&snapshotStream);
     EXPECT_EQ(mDevice->poll(restoredPipe), PIPE_POLL_IN);
+    EXPECT_THAT(readPacket(restoredPipe), ElementsAreArray(kResponse));
+}
+
+// Verifies that getPipe can restore the pipe after snapshot load.
+TEST_F(AndroidAsyncMessagePipeTest, SnapshotGetPipe) {
+    auto pipeService =
+            new AndroidAsyncMessagePipe::Service<SimpleMessagePipe>("TestPipe");
+    AndroidPipe::Service::add(pipeService);
+
+    auto pipe = mDevice->connect("TestPipe");
+
+    AsyncMessagePipeHandle handle = static_cast<AndroidAsyncMessagePipe*>(
+                                            static_cast<AndroidPipe*>(pipe))
+                                            ->getHandle();
+
+    base::MemStream snapshotStream;
+    snapshotSave(pipe, &snapshotStream);
+    mDevice->close(pipe);
+
+    auto restoredPipe = snapshotLoad(&snapshotStream);
+    SimpleMessagePipe* derivedRestoredPipe = static_cast<SimpleMessagePipe*>(
+            static_cast<AndroidPipe*>(restoredPipe));
+
+    auto pipeRefOpt = pipeService->getPipe(handle);
+    ASSERT_TRUE(pipeRefOpt.hasValue());
+    EXPECT_EQ(pipeRefOpt.value().pipe, derivedRestoredPipe);
+}
+
+// Verifies that sendCallback remains valid and works after snapshot load.
+TEST_F(AndroidAsyncMessagePipeTest, SnapshotSendCallback) {
+    std::vector<uint8_t> lastMessage;
+    PipeSendFunction performSend;
+
+    auto onMessage = [&](const std::vector<uint8_t>& data,
+                         PipeSendFunction sendCallback) {
+        lastMessage = data;
+        performSend = sendCallback;
+    };
+
+    registerSimpleAndroidAsyncMessagePipeService("SnapshotSend", onMessage);
+    auto pipe = mDevice->connect("SnapshotSend");
+
+    writePacket(pipe, {1, 2, 3});
+    EXPECT_THAT(lastMessage, ElementsAre(1, 2, 3));
+
+    base::MemStream snapshotStream;
+    snapshotSave(pipe, &snapshotStream);
+    mDevice->close(pipe);
+
+    auto restoredPipe = snapshotLoad(&snapshotStream);
+    const std::vector<uint8_t> kResponse = {5, 6, 7};
+    performSend(std::vector<uint8_t>(kResponse));
     EXPECT_THAT(readPacket(restoredPipe), ElementsAreArray(kResponse));
 }
 

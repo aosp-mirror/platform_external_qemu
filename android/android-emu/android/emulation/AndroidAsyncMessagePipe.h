@@ -53,6 +53,21 @@
 //
 // (Little-endian is for historical reasons for compatibility with
 // AndroidMessagePipe-based pipes)
+//
+//
+// To enable async operations, AndroidAsyncMessagePipe allows holding a
+// reference to a pipe using AsyncMessagePipeHandle.  To get a handle, call
+// AndroidAsyncMessagePipe::getHandle().
+//
+// To get a pipe instance back again with a handle, call
+// AndroidAsyncMessagePipe::Service<PipeType>>::getPipe(handle), which will
+// return the pipe if it is valid, or nullopt_t if it has already been
+// destroyed.  This is returned in the form of a PipeRef, which holds a lock
+// on the pipe until it goes out of scope.
+//
+// AsyncMessagePipeHandle has the unique property that it also persists snapshot
+// save and restore, so it can be used to store persistent data across
+// snapshot sessions.
 
 namespace android {
 
@@ -86,23 +101,32 @@ public:
         virtual AndroidPipe* load(void* hwPipe,
                                   const char* args,
                                   base::Stream* stream) final {
-            return createPipe(hwPipe, args, stream);
+            base::AutoLock lock(mLock);
+            AsyncMessagePipeHandle handle;
+            handle.id = static_cast<int>(stream->getBe32());
+            return createPipe(handle, hwPipe, args, stream);
         }
 
         virtual AndroidPipe* create(void* hwPipe, const char* args) final {
-            return createPipe(hwPipe, args, nullptr);
+            base::AutoLock lock(mLock);
+            AsyncMessagePipeHandle handle = nextPipeHandle();
+            return createPipe(handle, hwPipe, args, nullptr);
         }
 
-        void destroyPipe(AsyncMessagePipeHandle handle) {
-            base::AutoLock lock(mLock);
-            const auto it = mPipes.find(handle.id);
-            if (it == mPipes.end()) {
-                LOG(WARNING)
-                        << "destroyPipe could not find pipe id " << handle.id;
-                return;
-            }
+        // Called once per whole vm save/load operation.
+        virtual void preSave(base::Stream* stream) override {
+            stream->putBe32(mNextId);
+        }
 
-            mPipes.erase(it);
+        virtual void preLoad(base::Stream* stream) override {
+            mNextId = stream->getBe32();
+        }
+
+        virtual void savePipe(AndroidPipe* pipe,
+                              android::base::Stream* stream) override {
+            auto derivedPipe = static_cast<PipeType*>(pipe);
+            stream->putBe32(static_cast<uint32_t>(derivedPipe->getHandle().id));
+            AndroidPipe::Service::savePipe(pipe, stream);
         }
 
         struct PipeRef {
@@ -122,11 +146,10 @@ public:
         }
 
     private:
-        AndroidPipe* createPipe(void* hwPipe,
+        AndroidPipe* createPipe(AsyncMessagePipeHandle handle,
+                                void* hwPipe,
                                 const char* args,
                                 base::Stream* stream) {
-            base::AutoLock lock(mLock);
-            AsyncMessagePipeHandle handle = nextPipeHandle();
             PipeArgs pipeArgs = {handle, hwPipe, args, stream,
                                  std::bind(&Service::destroyPipe, this,
                                            std::placeholders::_1)};
@@ -135,6 +158,18 @@ public:
             AndroidPipe* pipePtr = pipe.get();
             mPipes[handle.id] = std::move(pipe);
             return pipePtr;
+        }
+
+        void destroyPipe(AsyncMessagePipeHandle handle) {
+            base::AutoLock lock(mLock);
+            const auto it = mPipes.find(handle.id);
+            if (it == mPipes.end()) {
+                LOG(WARNING)
+                        << "destroyPipe could not find pipe id " << handle.id;
+                return;
+            }
+
+            mPipes.erase(it);
         }
 
         AsyncMessagePipeHandle nextPipeHandle() {
