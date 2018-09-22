@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "255e9943_c152e45b",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-22T18:22:22Z",
+      "side": 1,
+      "message": "Yeah, there\u0027s no good reason for this vs. uint32_t, I\u0027ll update.  In earlier iterations I used a single vector for both header and data, but splitting it out helped me avoid an unnecessary vector copy.",
+      "parentUuid": "95e9a731_4f4c8a8a",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 9
+      },
+      "revId": "a6a617d14e28e85674db97255c57fe065e413d8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ece50aba_a07d44f8",
         "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.h",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "a6a617d14e28e85674db97255c57fe065e413d8a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3ae8c7e3_27a94569",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-22T18:22:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ece50aba_a07d44f8",
+      "range": {
+        "startLine": 179,
+        "startChar": 0,
+        "endLine": 179,
+        "endChar": 50
+      },
+      "revId": "a6a617d14e28e85674db97255c57fe065e413d8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
