@@ -97,4 +97,10 @@ include $(EMUGL_PATH)/host/libs/libOpenglRender/Android.mk
 include $(EMUGL_PATH)/host/libs/libGLES12Translator/Android.mk
 include $(EMUGL_PATH)/host/libs/libGLSnapshot/Android.mk
 
+# Guest libraries built for host
+# Note: must be included last as it overrides existing
+# EMUGL_COMMON_* variables.
+GOLDFISH_OPENGL_BUILD_FOR_HOST := true
+include $(GOLDFISH_OPENGL_DIR)/Android.mk
+
 LOCAL_PATH := $(EMUGL_OLD_LOCAL_PATH)
