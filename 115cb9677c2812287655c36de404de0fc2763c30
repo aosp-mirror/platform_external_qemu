@@ -46,6 +46,30 @@
       "revId": "115cb9677c2812287655c36de404de0fc2763c30",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "249b5b49_c9648d6f",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-22T20:18:08Z",
+      "side": 1,
+      "message": "Got it, I typically copy from a nearby header-- we should be more consistent for Apache2 going forward.  I also updated a few others where I used the wrong one.",
+      "parentUuid": "f02cfe00_e4961bea",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 47
+      },
+      "revId": "115cb9677c2812287655c36de404de0fc2763c30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

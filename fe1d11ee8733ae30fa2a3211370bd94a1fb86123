@@ -22,6 +22,30 @@
       "revId": "fe1d11ee8733ae30fa2a3211370bd94a1fb86123",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c5e4edc3_e99a6121",
+        "filename": "android/android-emu/android/emulation/AndroidPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-22T20:18:08Z",
+      "side": 1,
+      "message": "Sure, this has been fixed by multiple different things, but I\u0027ll give background.\n\nBasically, HostGoldfishPipe used to be using it\u0027s \"this\" singleton instance as the hwpipe pointer, so all pipes that were opened had the same hwpipe.  AndroidAsyncMessagePipe, I\u0027m sending a wake event (basically the only thing pendingOperation controls) every time a packet is sent.\n\nWake events are dispatched to the looper using AndroidPipe.cpp\u0027s PipeWaker, which uses a timer to dispatch events.  In most tests, I don\u0027t have a looper set up so all of the events get queued up and never dispatched.\n\nIn the one test I have a looper, I was seeing tons of wake events even when I hadn\u0027t scheduled any, and they were all valid because the hwpipe wasn\u0027t changed.\n\nChanging HostGoldfishPipe to use a unique id for hwpipe mitigates this, and when running on with qemu the looper is valid so these events won\u0027t get backed up, but it\u0027s still good to fix it here since the wake events should never be valid after this point.",
+      "parentUuid": "e82c514c_63313fa3",
+      "range": {
+        "startLine": 613,
+        "startChar": 0,
+        "endLine": 613,
+        "endChar": 38
+      },
+      "revId": "fe1d11ee8733ae30fa2a3211370bd94a1fb86123",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
