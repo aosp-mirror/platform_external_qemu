@@ -519,7 +519,6 @@ void AndroidPipe::abortPendingOperation() {
     sGlobals->pipeWaker.abortPending(mHwPipe);
 }
 
-// static
 void AndroidPipe::saveToStream(BaseStream* stream) {
     // First, write service name.
     if (mService == &sGlobals->connectorService) {
@@ -536,7 +535,7 @@ void AndroidPipe::saveToStream(BaseStream* stream) {
 
     // Save pipe-specific state now.
     if (mService->canLoad()) {
-        onSave(&pipeStream);
+        mService->savePipe(this, &pipeStream);
     }
 
     // Save the pending wake or close operations as well.
