@@ -216,6 +216,30 @@
     },
     {
       "key": {
+        "uuid": "c4291d79_10c25ea2",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-23T06:21:36Z",
+      "side": 1,
+      "message": "Okay, this latest iteration should be an improvement.  I discovered I misread how runOneIterationWithDeadlineMs behaves, it always waits until the deadline before returning, and doesn\u0027t pick up new events until the very end, so this was always hitting the timeout duration.\n\nI changed this to take a TestEvent as a parameter, and repeatedly check if the event has been signaled while pumping in 50ms increments, with an overall timeout of 15 seconds.",
+      "parentUuid": "bae59968_3360ee14",
+      "range": {
+        "startLine": 123,
+        "startChar": 0,
+        "endLine": 130,
+        "endChar": 0
+      },
+      "revId": "115cb9677c2812287655c36de404de0fc2763c30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d2c1ee15_68667291",
         "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
         "patchSetId": 3
