@@ -82,6 +82,14 @@ TEST(LazyInstance, Simple) {
     EXPECT_EQ(foo1, foo_instance.ptr());
 }
 
+TEST(LazyInstance, Clear) {
+    LazyInstance<Foo> foo_instance = LAZY_INSTANCE_INIT;
+    EXPECT_EQ(42, foo_instance->get());
+    foo_instance->set(500);
+    foo_instance.clear();
+    EXPECT_EQ(42, foo_instance->get());
+}
+
 // For the following test, launch 1000 threads that each try to get
 // the instance pointer of a lazy instance. Then verify that they're all
 // the same value.
