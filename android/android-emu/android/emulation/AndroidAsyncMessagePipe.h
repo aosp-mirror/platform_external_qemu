@@ -75,6 +75,9 @@ struct AsyncMessagePipeHandle {
     int id = -1;
 
     bool isValid() const { return id >= 0; }
+    bool operator<(const AsyncMessagePipeHandle& other) const {
+        return id < other.id;
+    }
 };
 
 class AndroidAsyncMessagePipe : public AndroidPipe {

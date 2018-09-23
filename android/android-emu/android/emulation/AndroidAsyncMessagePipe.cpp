@@ -113,8 +113,12 @@ int AndroidAsyncMessagePipe::readBuffers(const AndroidPipeBuffer* buffers,
             if (mIncomingPacket->complete()) {
                 DLOG(VERBOSE) << "Packet complete, "
                               << mIncomingPacket->messageLength << " bytes";
-                onMessage(mIncomingPacket->data);
+                // Clear the incoming packet before invoking onMessage in case
+                // onMessage takes a snapshot, we don't want this message to
+                // be captured in the snapshot.
+                IncomingPacket packet = std::move(mIncomingPacket.value());
                 mIncomingPacket.clear();
+                onMessage(packet.data);
             }
         }
     }
