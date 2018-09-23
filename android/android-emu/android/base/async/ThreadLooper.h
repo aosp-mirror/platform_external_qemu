@@ -40,6 +40,9 @@ public:
     // Run the specified std::function on the main loop.
     using Closure = std::function<void()>;
     static void runOnMainLooper(Closure&& func);
+
+    // Reset the main runner, used by test code when clearing the main looper.
+    static void clearMainRunner();
 };
 
 }  // namespace base

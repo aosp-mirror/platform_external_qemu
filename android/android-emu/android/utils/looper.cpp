@@ -196,6 +196,9 @@ static Looper* sMainLooper = nullptr;
 
 void android_registerMainLooper(Looper* looper) {
     sMainLooper = looper;
+    if (!sMainLooper) {
+        android::base::ThreadLooper::clearMainRunner();
+    }
 }
 
 Looper* android_getMainLooper() {

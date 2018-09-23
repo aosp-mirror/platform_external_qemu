@@ -115,7 +115,6 @@ static LazyInstance<MainLoopClosureRunner> sMainRunner = LAZY_INSTANCE_INIT;
 
 // static
 void ThreadLooper::runOnMainLooper(ThreadLooper::Closure&& func) {
-
     if (!android_getMainLooper()) {
         derror("ERROR: trying to run on main looper "
                "without a main looper!");
@@ -125,6 +124,10 @@ void ThreadLooper::runOnMainLooper(ThreadLooper::Closure&& func) {
     sMainRunner->appendAndWake(std::move(func));
 }
 
+// static
+void ThreadLooper::clearMainRunner() {
+    sMainRunner.clear();
+}
 
 }  // namespace base
 }  // namespace android
