@@ -16,17 +16,18 @@
 # and manageable.
 
 set(PREBUILT_COMMON "BLUEZ;LZ4;X264")
+get_filename_component(ANDROID_TOOLS_DIRECTORY "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
 
 # Internal function for simple packages.
 function(simple_prebuilt Package)
     # A simple common package..
     string(TOLOWER ${Package} pkg)
     string(TOUPPER ${Package} PKG)
-    get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/${pkg}/${LOCAL_TARGET_TAG}" ABSOLUTE)
+    get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/${pkg}/${ANDROID_TARGET_TAG}" ABSOLUTE)
 
     set(${PKG}_INCLUDE_DIRS "${PREBUILT_ROOT}/include" PARENT_SCOPE)
     set(${PKG}_INCLUDE_DIR "${PREBUILT_ROOT}/include" PARENT_SCOPE)
-    set(${PKG}_LIBRARIES "${PREBUILT_ROOT}/lib/lib${pgk}.a" PARENT_SCOPE)
+    set(${PKG}_LIBRARIES "${PREBUILT_ROOT}/lib/lib${pkg}.a" PARENT_SCOPE)
     set(${PKG}_FOUND TRUE PARENT_SCOPE)
     set(PACKAGE_EXPORT "${PKG}_INCLUDE_DIR;${PKG}_INCLUDE_DIRS;${PKG}_LIBRARIES;${PKG}_FOUND" PARENT_SCOPE)
 endfunction()
@@ -50,15 +51,17 @@ endfunction()
 function(prebuilt Package)
     string(TOLOWER ${Package} pkg)
     string(TOUPPER ${Package} PKG)
-    if (DEFINED LOCAL_QEMU2_TOP_DIR AND DEFINED LOCAL_TARGET_TAG)
+    if (DEFINED ANDROID_QEMU2_TOP_DIR AND DEFINED ANDROID_TARGET_TAG)
         if (${PKG} IN_LIST PREBUILT_COMMON)
             simple_prebuilt(${Package})
         else ()
-            get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../.." ABSOLUTE)
+            get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../.." ABSOLUTE)
 
             # We make sure we use our internal cmake directory to resolve
             # packages
-            set(${Package}_DIR "${TOOLS_DIRECTORY}/cmake")
+            set(${Package}_DIR "${ANDROID_TOOLS_DIRECTORY}")
+            set(LOCAL_TARGET_TAG ${ANDROID_TARGET_TAG})
+            set(LOCAL_QEMU2_TOP_DIR ${ANDROID_QEMU2_TOP_DIR})
 
             # This will cause cmake to look for emu-${pkg}-config.cmake in
             # the directory above.

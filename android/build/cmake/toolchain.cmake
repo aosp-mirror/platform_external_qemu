@@ -46,9 +46,9 @@ endfunction ()
 #   The target environment for which we are creating the toolchain
 #
 # Returns:
-#   The variable LOCAL_SYSROOT will be set to point to the sysroot for the
+#   The variable ANDROID_SYSROOT will be set to point to the sysroot for the
 #   target os.
-#   The variablke LOCAL_COMPILER_PREFIX will point to the prefix for
+#   The variablke ANDROID_COMPILER_PREFIX will point to the prefix for
 #     gcc, g++, ar, ld etc..
 function(toolchain_generate_internal TARGET_OS)
     set(TOOLCHAIN "${PROJECT_BINARY_DIR}/toolchain")
@@ -61,11 +61,11 @@ function(toolchain_generate_internal TARGET_OS)
 
     # Let's find the bin-prefix
     toolchain_cmd("${TARGET_OS}" "--print=binprefix" "unused")
-    set(LOCAL_COMPILER_PREFIX "${TOOLCHAIN}/${STD_OUT}" PARENT_SCOPE)
+    set(ANDROID_COMPILER_PREFIX "${TOOLCHAIN}/${STD_OUT}" PARENT_SCOPE)
 
     # And define all the compilers..
     toolchain_cmd("${TARGET_OS}" "--print=sysroot" "unused")
-    set(LOCAL_SYSROOT "${STD_OUT}" PARENT_SCOPE)
+    set(ANDROID_SYSROOT "${STD_OUT}" PARENT_SCOPE)
 endfunction ()
 
 # Gets the given key from the enviroment. This your usual shell environment
@@ -87,11 +87,11 @@ function(toolchain_generate TARGET_OS)
     # so we will just store them in the environment, which gets blown away on exit
     # anyway..
     get_env_cache(COMPILER_PREFIX)
-    get_env_cache(LOCAL_SYSROOT)
+    get_env_cache(ANDROID_SYSROOT)
     if ("${COMPILER_PREFIX}" STREQUAL "")
         toolchain_generate_internal(${TARGET_OS})
-        set_env_cache(COMPILER_PREFIX "${LOCAL_COMPILER_PREFIX}")
-        set_env_cache(LOCAL_SYSROOT "${LOCAL_SYSROOT}")
+        set_env_cache(COMPILER_PREFIX "${ANDROID_COMPILER_PREFIX}")
+        set_env_cache(ANDROID_SYSROOT "${ANDROID_SYSROOT}")
     endif ()
 
     set(CMAKE_RC_COMPILER ${COMPILER_PREFIX}windres PARENT_SCOPE)
@@ -101,7 +101,7 @@ function(toolchain_generate TARGET_OS)
     # set(CMAKE_AR ${COMPILER_PREFIX}ar PARENT_SCOPE)
     set(CMAKE_RANLIB ${COMPILER_PREFIX}ranlib PARENT_SCOPE)
     set(CMAKE_OBJCOPY ${COMPILER_PREFIX}objcopy PARENT_SCOPE)
-    set(LOCAL_SYSROOT ${LOCAL_SYSROOT} PARENT_SCOPE)
+    set(ANDROID_SYSROOT ${ANDROID_SYSROOT} PARENT_SCOPE)
 endfunction()
 
-get_filename_component(QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../.." ABSOLUTE)
+get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../.." ABSOLUTE)

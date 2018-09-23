@@ -1,56 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 # TODO(jansene): Move to a function
-if (DEFINED LOCAL_QEMU2_TOP_DIR)
-    get_filename_component(REPO_ROOT "${LOCAL_QEMU2_TOP_DIR}/../.." ABSOLUTE)
-    set(CURL_ROOT "${REPO_ROOT}/prebuilts/android-emulator-build/curl/${LOCAL_TARGET_TAG}")
-    set(CURL_LIBRARY ${CURL_ROOT}/lib/libcurl.a)
-    set(CURL_INCLUDE_DIR ${CURL_ROOT}/include)
-
-    # We will now find the prebuilt package.
-    find_package(CURL REQUIRED)
-    if (NOT CURL_LIBRARIES MATCHES "${REPO_ROOT}.*")
-        message(FATAL_ERROR "Discovered curl at: ${CURL_LIBRARIES}, ${CURL_INCLUDE_DIRS} which is outside of tree ${REPO_ROOT}!")
-    endif ()
-else ()
-    message(WARNING "Building outside the make system!")
-    find_package(CURL REQUIRED)
-
-    include (ExternalProject)
-
-    set(boringssl_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/boringssl/src/boringssl/include)
-    set(boringssl_URL https://boringssl.googlesource.com/boringssl)
-    set(boringssl_TAG chromium-stable)
-    set(boringssl_BUILD ${CMAKE_BINARY_DIR}/boringssl/src/boringssl-build)
-    #set(boringssl_LIBRARIES ${boringssl_BUILD}/obj/so/libboringssl.so)
-    set(boringssl_STATIC_LIBRARIES
-        ${boringssl_BUILD}/ssl/libssl.a
-        ${boringssl_BUILD}/crypto/libcrypto.a
-        ${boringssl_BUILD}/decrepit/libdecrepit.a
-        )
-    set(boringssl_INCLUDES ${boringssl_BUILD})
-
-    set(boringssl_HEADERS
-        "${boringssl_INCLUDE_DIR}/include/*.h"
-        )
-
-    ExternalProject_Add(boringssl
-        PREFIX boringssl
-        GIT_REPOSITORY ${boringssl_URL}
-        GIT_TAG ${boringssl_TAG}
-        DOWNLOAD_DIR "${DOWNLOAD_LOCATION}"
-        # BUILD_IN_SOURCE 1
-        BUILD_BYPRODUCTS ${boringssl_STATIC_LIBRARIES}
-        INSTALL_COMMAND ""
-        CMAKE_CACHE_ARGS
-        -DCMAKE_BUILD_TYPE:STRING=Release
-        -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF
-        )
-
-    set(CURL_INCLUDE_DIRS "${CURL_INCLUDE_DIRS};${boringssl_INCLUDE_DIR}")
-    set(CURL_LIBRARIES} "${CURL_LIBRARIES});${boringssl_STATIC_LIBRARIES}")
-endif ()
-
+prebuilt(CURL)
 
 add_library(emulator-libkeymaster3
         aes_key.cpp
@@ -116,7 +67,7 @@ if (WIN32 OR ("${LOCAL_OS}" STREQUAL "windows") AND ("${CMAKE_CXX_COMPILER_ID}" 
     target_compile_definitions(emulator-libkeymaster3 PRIVATE -DUSE_MINGW=1)
 endif ()
 
-if (NOT DEFINED LOCAL_QEMU2_TOP_DIR)
+if (NOT DEFINED ANDROID_QEMU2_TOP_DIR)
   add_dependencies(emulator-libkeymaster3 boringssl)
 endif ()
 

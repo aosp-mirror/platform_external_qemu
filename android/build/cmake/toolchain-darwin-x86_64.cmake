@@ -17,7 +17,6 @@ list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 include(toolchain)
 
 # First we create the toolchain
-set(LOCAL_TARGET_TAG "darwin-x86_64")
-toolchain_generate("${LOCAL_TARGET_TAG}")
-
+set(ANDROID_TARGET_TAG "darwin-x86_64")
+toolchain_generate("${ANDROID_TARGET_TAG}")
 # No magical includes or dependencies for darwin..

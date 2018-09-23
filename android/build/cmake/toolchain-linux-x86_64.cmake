@@ -19,14 +19,14 @@ list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 include(toolchain)
 
 # First we create the toolchain
-set(LOCAL_TARGET_TAG "linux-x86_64")
-get_filename_component(LOCAL_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../../" ABSOLUTE)
-toolchain_generate("${LOCAL_TARGET_TAG}")
+set(ANDROID_TARGET_TAG "linux-x86_64")
+get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../../" ABSOLUTE)
+toolchain_generate("${ANDROID_TARGET_TAG}")
 
 get_env_cache(RUNTIME_OS_PROPERTIES)
 get_env_cache(RUNTIME_OS_DEPENDENCIES)
 if ("${RUNTIME_OS_DEPENDENCIES}" STREQUAL "")
-    toolchain_cmd("${LOCAL_TARGET_TAG}" "--print=libcplusplus" "unused_param")
+    toolchain_cmd("${ANDROID_TARGET_TAG}" "--print=libcplusplus" "unused_param")
     get_filename_component(RESOLVED_SO "${STD_OUT}" REALPATH)
     get_filename_component(RESOLVED_FILENAME "${RESOLVED_SO}" NAME)
 
@@ -39,4 +39,4 @@ endif()
 # here is the target environment located, used to
 # locate packages. We don't want to do any package resolution
 # with mingw, so we explicitly disable it.
-set(CMAKE_FIND_ROOT_PATH  "${LOCAL_SYSROOT}")
+set(CMAKE_FIND_ROOT_PATH  "${ANDROID_SYSROOT}")
