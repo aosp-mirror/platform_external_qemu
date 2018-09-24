@@ -189,6 +189,9 @@ public:
     void send(const std::vector<uint8_t>& data);
     virtual void onMessage(const std::vector<uint8_t>& data) = 0;
 
+    // Waits for any pending messages to be sent and then calls closeFromHost().
+    void queueCloseFromHost();
+
     void onSave(base::Stream* stream) override;
     virtual void onLoad(base::Stream* stream);
 
@@ -257,6 +260,7 @@ private:
     mutable std::recursive_mutex mMutex;
     const AsyncMessagePipeHandle mHandle;
     const std::function<void(AsyncMessagePipeHandle)> mDeleter;
+    bool mCloseQueued = false;
 
     base::Optional<IncomingPacket> mIncomingPacket;
     std::list<OutgoingPacket> mOutgoingPackets;

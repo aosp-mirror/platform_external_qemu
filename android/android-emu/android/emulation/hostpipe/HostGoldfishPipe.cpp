@@ -292,7 +292,11 @@ void HostGoldfishPipeDevice::resetPipeCallback(void* hwpipe,
 
 // static
 void HostGoldfishPipeDevice::closeFromHostCallback(void* hwpipe) {
-    HostGoldfishPipeDevice::get()->close(hwpipe);
+    // PIPE_WAKE_CLOSED gets translated to closeFromHostCallback.
+    // To simplify detecting a close-from-host, signal a wake callback so that
+    // the event can be detected.
+    HostGoldfishPipeDevice::get()->signalWake(hwpipe, PIPE_WAKE_CLOSED);
+    HostGoldfishPipeDevice::get()->closeHwPipe(hwpipe);
 }
 
 // static

@@ -39,6 +39,11 @@ void AndroidAsyncMessagePipe::send(std::vector<uint8_t>&& data) {
     signalWake(PIPE_WAKE_READ);
 }
 
+void AndroidAsyncMessagePipe::queueCloseFromHost() {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    mCloseQueued = true;
+}
+
 void AndroidAsyncMessagePipe::onSave(base::Stream* stream) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     if (mIncomingPacket) {
@@ -73,6 +78,10 @@ void AndroidAsyncMessagePipe::onLoad(base::Stream* stream) {
 }
 
 bool AndroidAsyncMessagePipe::allowRead() const {
+    if (mCloseQueued) {
+        return false;
+    }
+
     // If we're partially done reading data, complete that first.
     if (mIncomingPacket && !mIncomingPacket->complete()) {
         return true;
@@ -84,13 +93,15 @@ bool AndroidAsyncMessagePipe::allowRead() const {
 
 int AndroidAsyncMessagePipe::readBuffers(const AndroidPipeBuffer* buffers,
                                          int numBuffers) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    std::unique_lock<std::recursive_mutex> lock(mMutex);
     if (!allowRead()) {
         DLOG(VERBOSE) << "Returning PIPE_ERROR_AGAIN, incoming="
                       << (mIncomingPacket ? 1 : 0)
                       << ", outgoing=" << mOutgoingPackets.size();
         return PIPE_ERROR_AGAIN;
     }
+
+    std::vector<IncomingPacket> completedPackets;
 
     int bytesRead = 0;
     for (int i = 0; i < numBuffers && allowRead(); ++i) {
@@ -113,10 +124,17 @@ int AndroidAsyncMessagePipe::readBuffers(const AndroidPipeBuffer* buffers,
             if (mIncomingPacket->complete()) {
                 DLOG(VERBOSE) << "Packet complete, "
                               << mIncomingPacket->messageLength << " bytes";
-                onMessage(mIncomingPacket->data);
+                completedPackets.push_back(std::move(mIncomingPacket.value()));
                 mIncomingPacket.clear();
             }
         }
+    }
+
+    lock.unlock();
+    // onMessage may delete this, it's not safe to access any
+    // data members past this point.
+    for (const auto& packet : completedPackets) {
+        onMessage(packet.data);
     }
 
     DLOG(VERBOSE) << "readBuffers complete, " << bytesRead << " bytes total";
@@ -125,7 +143,7 @@ int AndroidAsyncMessagePipe::readBuffers(const AndroidPipeBuffer* buffers,
 
 int AndroidAsyncMessagePipe::writeBuffers(AndroidPipeBuffer* buffers,
                                           int numBuffers) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    std::unique_lock<std::recursive_mutex> lock(mMutex);
     if (mOutgoingPackets.empty()) {
         DLOG(VERBOSE) << "Returning PIPE_ERROR_AGAIN, outgoing="
                       << mOutgoingPackets.size();
@@ -151,6 +169,12 @@ int AndroidAsyncMessagePipe::writeBuffers(AndroidPipeBuffer* buffers,
 
         assert(bytesWritten + bufferWriteOffset < INT32_MAX);
         bytesWritten += int(bufferWriteOffset);
+    }
+
+    if (mCloseQueued && mOutgoingPackets.empty()) {
+        lock.unlock();
+        DLOG(VERBOSE) << "Closing pipe, queued close operation.";
+        closeFromHost();
     }
 
     DLOG(VERBOSE) << "writeBuffers complete, " << bytesWritten << " bytes";

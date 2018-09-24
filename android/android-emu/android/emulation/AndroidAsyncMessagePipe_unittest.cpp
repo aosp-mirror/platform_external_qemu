@@ -228,6 +228,76 @@ TEST_F(AndroidAsyncMessagePipeTest, OutOfBand) {
     mDevice->close(pipe);
 }
 
+class CloseOnMessagePipe : public AndroidAsyncMessagePipe {
+public:
+    static constexpr uint8_t kCloseNow = 0;
+    static constexpr uint8_t kQueueClose = 1;
+
+    CloseOnMessagePipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs)
+        : AndroidAsyncMessagePipe(service, std::move(pipeArgs)) {}
+
+    void onMessage(const std::vector<uint8_t>& data) override {
+        EXPECT_EQ(data.size(), 1);
+        if (data[0] == kCloseNow) {
+            closeFromHost();
+        } else if (data[0] == kQueueClose) {
+            send({1, 2, 3});
+            queueCloseFromHost();
+        } else {
+            FAIL() << "Unexpected message: " << data[0];
+        }
+    }
+};
+
+// Attempt to close the pipe in the onMessage callback.
+TEST_F(AndroidAsyncMessagePipeTest, CloseOnMessage) {
+    auto pipeService = new AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>(
+            "ClosePipe");
+    AndroidPipe::Service::add(pipeService);
+
+    auto pipe = mDevice->connect("ClosePipe");
+
+    TestEvent receivedClose;
+    mDevice->setWakeCallback(pipe, [&](int wakes) {
+        std::cout << "Received wake " << wakes << std::endl;
+        if (wakes & PIPE_WAKE_CLOSED) {
+            receivedClose.signal();
+        }
+    });
+
+    writePacket(pipe, {CloseOnMessagePipe::kCloseNow});
+
+    // Check that the pipe was closed by the host.
+    pumpLooperUntilEvent(receivedClose);
+
+    mDevice->close(pipe);
+}
+
+TEST_F(AndroidAsyncMessagePipeTest, QueueCloseOnMessage) {
+    auto pipeService = new AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>(
+            "ClosePipe");
+    AndroidPipe::Service::add(pipeService);
+
+    auto pipe = mDevice->connect("ClosePipe");
+
+    TestEvent receivedClose;
+    mDevice->setWakeCallback(pipe, [&](int wakes) {
+        std::cout << "Received wake " << wakes << std::endl;
+        if (wakes & PIPE_WAKE_CLOSED) {
+            receivedClose.signal();
+        }
+    });
+
+    writePacket(pipe, {CloseOnMessagePipe::kQueueClose});
+
+    EXPECT_THAT(readPacket(pipe), ElementsAre(1, 2, 3));
+
+    // Check that the pipe was closed by the host.
+    pumpLooperUntilEvent(receivedClose);
+
+    mDevice->close(pipe);
+}
+
 class MultithreadedEchoMessagePipe : public AndroidAsyncMessagePipe {
 public:
     MultithreadedEchoMessagePipe(AndroidPipe::Service* service,
