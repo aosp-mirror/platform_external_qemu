@@ -238,6 +238,7 @@ LOCAL_SRC_FILES := \
     android/emulation/AdbGuestPipe.cpp \
     android/emulation/AdbHostListener.cpp \
     android/emulation/AdbHostServer.cpp \
+    android/emulation/AndroidAsyncMessagePipe.cpp \
     android/emulation/AndroidMessagePipe.cpp \
     android/emulation/AndroidPipe.cpp \
     android/emulation/android_pipe_host.cpp \
@@ -676,6 +677,7 @@ LOCAL_SRC_FILES := \
   android/emulation/AdbHostServer_unittest.cpp \
   android/emulation/android_pipe_pingpong_unittest.cpp \
   android/emulation/android_pipe_zero_unittest.cpp \
+  android/emulation/AndroidAsyncMessagePipe_unittest.cpp \
   android/emulation/bufprint_config_dirs_unittest.cpp \
   android/emulation/ComponentVersion_unittest.cpp \
   android/emulation/ConfigDirs_unittest.cpp \

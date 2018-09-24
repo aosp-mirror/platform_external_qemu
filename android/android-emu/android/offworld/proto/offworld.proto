@@ -7,7 +7,7 @@ package offworld;
 //
 // The protocol is implemented on top of qemu pipe service, and the underlying
 // encoding of the pipe is a stream of protobufs, with the length of each
-// message encoded as a uint32 immediately before it:
+// message encoded as a little-endian uint32 immediately before it:
 //
 // <uint32 length> <length bytes of binary-serialized protobuf>
 //

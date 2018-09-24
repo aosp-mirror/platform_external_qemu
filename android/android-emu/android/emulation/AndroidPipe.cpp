@@ -461,6 +461,11 @@ void AndroidPipe::initThreading(VmLock* vmLock) {
     sGlobals->pipeWaker.init(vmLock);
 }
 
+// static
+void AndroidPipe::initThreadingForTest(VmLock* vmLock, base::Looper* looper) {
+    sGlobals->pipeWaker.init(vmLock, looper);
+}
+
 AndroidPipe::~AndroidPipe() {
     DD("%s: for hwpipe=%p (host %p '%s')", __FUNCTION__, mHwPipe, this,
        mService->name().c_str());
@@ -514,7 +519,6 @@ void AndroidPipe::abortPendingOperation() {
     sGlobals->pipeWaker.abortPending(mHwPipe);
 }
 
-// static
 void AndroidPipe::saveToStream(BaseStream* stream) {
     // First, write service name.
     if (mService == &sGlobals->connectorService) {
@@ -531,7 +535,7 @@ void AndroidPipe::saveToStream(BaseStream* stream) {
 
     // Save pipe-specific state now.
     if (mService->canLoad()) {
-        onSave(&pipeStream);
+        mService->savePipe(this, &pipeStream);
     }
 
     // Save the pending wake or close operations as well.
@@ -605,6 +609,7 @@ void android_pipe_guest_close(void* internalPipe, PipeCloseReason reason) {
     if (pipe) {
         D("%s: host=%p [%s] reason=%d", __FUNCTION__, pipe, pipe->name(),
             (int)reason);
+        pipe->abortPendingOperation();
         pipe->onGuestClose(reason);
     }
 }

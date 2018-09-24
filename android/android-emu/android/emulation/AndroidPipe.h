@@ -17,6 +17,12 @@
 
 namespace android {
 
+namespace base {
+// Forward-declare looper here because it is only used by
+// initThreadingForTest.
+class Looper;
+}  // namespace base
+
 // AndroidPipe is a mostly-abstract base class for Android pipe connections.
 // It's important to understand that most pipe operations (onGuestXXX methods)
 // are performed with the global VM lock held.
@@ -67,6 +73,8 @@ public:
     // state lock or not (if not, operations are queued).
     static void initThreading(VmLock* vmLock);
 
+    static void initThreadingForTest(VmLock* lock, base::Looper* looper);
+
     // A base class for all AndroidPipe services, which is in charge
     // of creating new instances when a guest client connects to the
     // service.
@@ -93,6 +101,12 @@ public:
         virtual void postLoad(android::base::Stream* stream) {}
         virtual void preSave(android::base::Stream* stream) {}
         virtual void postSave(android::base::Stream* stream) {}
+
+        // Called for each pipe, override to save additional information.
+        virtual void savePipe(AndroidPipe* pipe,
+                              android::base::Stream* stream) {
+            pipe->onSave(stream);
+        }
 
         // Returns true if loading pipe instances from a stream is
         // supported. If true, the load() method will be called to load
