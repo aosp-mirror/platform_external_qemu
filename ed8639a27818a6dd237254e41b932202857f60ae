@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "93dd7bda_63473313",
+        "filename": "android/android-emu/android/base/testing/TestEvent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-24T23:09:55Z",
+      "side": 1,
+      "message": "signal?",
+      "range": {
+        "startLine": 30,
+        "startChar": 13,
+        "endLine": 30,
+        "endChar": 16
+      },
+      "revId": "ed8639a27818a6dd237254e41b932202857f60ae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
