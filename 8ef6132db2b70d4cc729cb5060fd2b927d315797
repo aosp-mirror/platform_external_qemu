@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "de08a8fb_2b989556",
+        "filename": "android/android-emu/android/opengles.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 461,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-24T18:34:09Z",
+      "side": 1,
+      "message": "You might be able to create a 1x1 pbuffer (or use EGL_NO_SURFACE as the pbuffer if supported), then use an FBO for the offscreen rendering. That\u0027s the most reliable + fastest on Swiftshader, if you are doing offscreen rendering.",
+      "range": {
+        "startLine": 455,
+        "startChar": 0,
+        "endLine": 461,
+        "endChar": 59
+      },
+      "revId": "8ef6132db2b70d4cc729cb5060fd2b927d315797",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
