@@ -22,6 +22,30 @@
       "revId": "8ef6132db2b70d4cc729cb5060fd2b927d315797",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf2ff653_04ffccc3",
+        "filename": "android/android-emu/android/opengles.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 461,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2018-09-24T18:36:56Z",
+      "side": 1,
+      "message": "Actually I have a question here: when I create a FBO, it seems I don\u0027t need to tell opengl the width /height of that fbo, then how opengl \"reserve\" memory for that FBO? My guess is that it will follow the width/height of the surface, that\u0027s why I create a \"4k\" surface here.",
+      "parentUuid": "de08a8fb_2b989556",
+      "range": {
+        "startLine": 455,
+        "startChar": 0,
+        "endLine": 461,
+        "endChar": 59
+      },
+      "revId": "8ef6132db2b70d4cc729cb5060fd2b927d315797",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
