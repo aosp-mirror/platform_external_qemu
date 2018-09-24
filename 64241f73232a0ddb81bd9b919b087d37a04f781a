@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "dcccb751_f0e607c6",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-24T23:14:59Z",
+      "side": 1,
+      "message": "Hmm, yeah that\u0027s a good edge case.  I can either fix that by creating a shared_ptr external state to track if this was deleted, or only process one message at a time.",
+      "parentUuid": "02e04e55_2183fb21",
+      "range": {
+        "startLine": 133,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 36
+      },
+      "revId": "64241f73232a0ddb81bd9b919b087d37a04f781a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "83f4f594_ae79869d",
         "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
         "patchSetId": 1
@@ -41,6 +65,53 @@
         "startChar": 0,
         "endLine": 241,
         "endChar": 35
+      },
+      "revId": "64241f73232a0ddb81bd9b919b087d37a04f781a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5bda0f4_78f31b0e",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-24T23:14:59Z",
+      "side": 1,
+      "message": "We could, but the pipe gets closed immediately so it isn\u0027t possible to read it.",
+      "parentUuid": "83f4f594_ae79869d",
+      "range": {
+        "startLine": 241,
+        "startChar": 0,
+        "endLine": 241,
+        "endChar": 35
+      },
+      "revId": "64241f73232a0ddb81bd9b919b087d37a04f781a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b3b1f6b5_337040b8",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-24T23:14:59Z",
+      "side": 1,
+      "message": "Remove these debug outputs.",
+      "range": {
+        "startLine": 262,
+        "startChar": 8,
+        "endLine": 262,
+        "endChar": 60
       },
       "revId": "64241f73232a0ddb81bd9b919b087d37a04f781a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
