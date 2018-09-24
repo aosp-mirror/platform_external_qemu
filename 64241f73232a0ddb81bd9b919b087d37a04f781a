@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "02e04e55_2183fb21",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-24T23:06:31Z",
+      "side": 1,
+      "message": "@ the same time, what if we queued a close, it unlocks, but onMessage even triggers the send of more packets, but before it can do that, the pipe is closed prematurely?",
+      "range": {
+        "startLine": 133,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 36
+      },
+      "revId": "64241f73232a0ddb81bd9b919b087d37a04f781a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "83f4f594_ae79869d",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-24T23:06:31Z",
+      "side": 1,
+      "message": "Could we also send a message in this case so we can make sure it\u0027s closed right away?",
+      "range": {
+        "startLine": 241,
+        "startChar": 0,
+        "endLine": 241,
+        "endChar": 35
+      },
+      "revId": "64241f73232a0ddb81bd9b919b087d37a04f781a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
