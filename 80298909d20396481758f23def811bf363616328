@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e66bf479_4a3f6753",
+        "filename": "android/android-emu/android/opengles.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 459,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-24T19:01:10Z",
+      "side": 1,
+      "message": "nit: can this be static constexpr?",
+      "range": {
+        "startLine": 455,
+        "startChar": 0,
+        "endLine": 459,
+        "endChar": 6
+      },
+      "revId": "80298909d20396481758f23def811bf363616328",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
