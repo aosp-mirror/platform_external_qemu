@@ -46,6 +46,30 @@
       "revId": "8ef6132db2b70d4cc729cb5060fd2b927d315797",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c713916e_93e1a65a",
+        "filename": "android/android-emu/android/opengles.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 461,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-24T18:40:37Z",
+      "side": 1,
+      "message": "It\u0027s indirectly determined by the size of the renderbuffer or texture that is attached to the FBO, so if you give it a 4kx4k texture in glFramebufferTexture2D, that\u0027s going to be the resolution.\n\nMake sure to set glViewport to the intended size when rendering to the FBO.",
+      "parentUuid": "cf2ff653_04ffccc3",
+      "range": {
+        "startLine": 455,
+        "startChar": 0,
+        "endLine": 461,
+        "endChar": 59
+      },
+      "revId": "8ef6132db2b70d4cc729cb5060fd2b927d315797",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
