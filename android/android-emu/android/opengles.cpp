@@ -329,7 +329,9 @@ android_stopOpenglesRenderer(bool wait)
     }
 }
 
+static emugl::RenderOpt sOpt;
 static int sWidth, sHeight;
+static int sNewWidth, sNewHeight;
 
 int
 android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
@@ -343,12 +345,8 @@ android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
     bool success = sRenderer->showOpenGLSubwindow(
             win, wx, wy, ww, wh, fbw, fbh, dpr, rotation,
                        deleteExisting);
-    int width = ww * dpr;
-    int height = wh * dpr;
-    if (sWidth != width || sHeight != height) {
-        sWidth = width;
-        sHeight = height;
-    }
+    sNewWidth = ww * dpr;
+    sNewHeight = wh * dpr;
     return success ? 0 : -1;
 }
 
@@ -427,9 +425,8 @@ void android_cleanupProcGLObjects(uint64_t puid) {
     }
 }
 
-static emugl::RenderOpt sOpt;
 
-static void* sContext;
+static void* sContext, * sRenderContext, * sSurface;
 static EGLint s_gles_attr[5];
 
 extern void tinyepoxy_init(GLESv2Dispatch* gles, int version);
@@ -450,6 +447,21 @@ static bool prepare_epoxy(void) {
     if (sContext == nullptr) {
         return false;
     }
+    sRenderContext = sEgl->eglCreateContext(sOpt.display, sOpt.config,
+                                            sContext, attr);
+    if (sRenderContext == nullptr) {
+        return false;
+    }
+    static constexpr EGLint surface_attr[] = {
+        EGL_WIDTH, 1,
+        EGL_HEIGHT, 1,
+        EGL_NONE
+    };
+    sSurface = sEgl->eglCreatePbufferSurface(sOpt.display, sOpt.config,
+                                             surface_attr);
+    if (sSurface == EGL_NO_SURFACE) {
+        return false;
+    }
     static_assert(sizeof(attr) == sizeof(s_gles_attr), "Mismatch");
     memcpy(s_gles_attr, attr, sizeof(s_gles_attr));
     tinyepoxy_init(sGLES, major * 10 + minor);
@@ -465,7 +477,7 @@ void * android_gl_create_context(DisplayChangeListener * unuse1,
     if (!ok) {
         return nullptr;
     }
-    sEgl->eglMakeCurrent(sOpt.display, sOpt.surface, sOpt.surface, sContext);
+    sEgl->eglMakeCurrent(sOpt.display, sSurface, sSurface, sContext);
     return sEgl->eglCreateContext(sOpt.display, sOpt.config, sContext, s_gles_attr);
 }
 
@@ -474,7 +486,7 @@ void android_gl_destroy_context(DisplayChangeListener* unused, void * ctx) {
 }
 
 int android_gl_make_context_current(DisplayChangeListener* unused, void * ctx) {
-    return sEgl->eglMakeCurrent(sOpt.display, sOpt.surface, sOpt.surface, ctx);
+    return sEgl->eglMakeCurrent(sOpt.display, sSurface, sSurface, ctx);
 }
 
 static GLuint s_tex_id, s_fbo_id;
@@ -493,11 +505,18 @@ void android_gl_scanout_texture(DisplayChangeListener* unuse,
     s_gfx_h = h;
     s_gfx_w = w;
     s_y0_top = backing_y_0_top;
-    sEgl->eglMakeCurrent(sOpt.display, sOpt.surface, sOpt.surface, sContext);
+    if (sNewWidth != sWidth || sNewHeight != sHeight) {
+        sRenderLib->getOpt(&sOpt);
+        sWidth = sNewWidth;
+        sHeight = sNewHeight;
+    }
+    sEgl->eglMakeCurrent(sOpt.display, sOpt.surface, sOpt.surface,
+                         sRenderContext);
     if (!s_fbo_id) {
         sGLES->glGenFramebuffers(1, &s_fbo_id);
     }
     sGLES->glBindFramebuffer(GL_FRAMEBUFFER_EXT, s_fbo_id);
+    sGLES->glViewport(0, 0, h, w);
     sGLES->glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0,
                                   GL_TEXTURE_2D, backing_id, 0);
 }
@@ -508,7 +527,8 @@ void android_gl_scanout_flush(DisplayChangeListener* unuse,
     if (!s_fbo_id)  {
         return;
     }
-    sEgl->eglMakeCurrent(sOpt.display, sOpt.surface, sOpt.surface, sContext);
+    sEgl->eglMakeCurrent(sOpt.display, sOpt.surface, sOpt.surface,
+                         sRenderContext);
 
     sGLES->glBindFramebuffer(GL_READ_FRAMEBUFFER, s_fbo_id);
     sGLES->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
