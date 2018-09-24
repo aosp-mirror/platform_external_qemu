@@ -70,6 +70,30 @@
       "revId": "8ef6132db2b70d4cc729cb5060fd2b927d315797",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "36271e29_994e33bf",
+        "filename": "android/android-emu/android/opengles.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 461,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2018-09-24T18:46:04Z",
+      "side": 1,
+      "message": "OK, in the draft, actually I\u0027ve set width/height to 1 and I did seem some crash, but it could be from other reasons. Now I change back to 1x1 and it seems it works fine.",
+      "parentUuid": "c713916e_93e1a65a",
+      "range": {
+        "startLine": 455,
+        "startChar": 0,
+        "endLine": 461,
+        "endChar": 59
+      },
+      "revId": "8ef6132db2b70d4cc729cb5060fd2b927d315797",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
