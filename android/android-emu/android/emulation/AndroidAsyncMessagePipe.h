@@ -184,10 +184,14 @@ public:
     };
 
     AndroidAsyncMessagePipe(AndroidPipe::Service* service, PipeArgs&& args);
+    virtual ~AndroidAsyncMessagePipe();
 
     void send(std::vector<uint8_t>&& data);
     void send(const std::vector<uint8_t>& data);
     virtual void onMessage(const std::vector<uint8_t>& data) = 0;
+
+    // Waits for any pending messages to be sent and then calls closeFromHost().
+    void queueCloseFromHost();
 
     void onSave(base::Stream* stream) override;
     virtual void onLoad(base::Stream* stream);
@@ -254,9 +258,14 @@ private:
         void serialize(base::Stream* stream) const;
     };
 
-    mutable std::recursive_mutex mMutex;
+    struct PipeState {
+        mutable std::recursive_mutex mMutex;
+        bool mDeleted = false;
+    };
+    std::shared_ptr<PipeState> mState = std::make_shared<PipeState>();
     const AsyncMessagePipeHandle mHandle;
     const std::function<void(AsyncMessagePipeHandle)> mDeleter;
+    bool mCloseQueued = false;
 
     base::Optional<IncomingPacket> mIncomingPacket;
     std::list<OutgoingPacket> mOutgoingPackets;
