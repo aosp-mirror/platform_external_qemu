@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "20d9af5f_b8894050",
+        "filename": "android/android-emu/android/update-check/UpdateChecker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1342319
+      },
+      "writtenOn": "2018-09-24T03:00:09Z",
+      "side": 1,
+      "message": "nit: could be const",
+      "revId": "6c11170559972ab6acffe6e307ad40ed25f4d991",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
