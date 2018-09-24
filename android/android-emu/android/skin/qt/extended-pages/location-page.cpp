@@ -51,7 +51,7 @@ static void getDeviceLocationFromSettings(double* pOutLatitude,
                                           double* pOutLongitude,
                                           double* pOutAltitude);
 static void getDeviceVelocity(double* speed, double* heading);
-static void putdeviceVelocity(double speed, double heading);
+static void putDeviceVelocity(double speed, double heading);
 
 class BackgroundDelegate : public QItemDelegate {
 public:
@@ -110,6 +110,7 @@ static void updateThreadLoop() {
         if (sGlobals->shouldCloseUpdateThread) break;
 
         now = android::base::System::get()->getUnixTimeUs();
+//        if (gotSignal) printf("l-p: updateThreadLoop() got a signal\n"); // ??
         if (!gotSignal && now < wakeTime) {
             // We did not get the signal and it's too early for
             // time out. This is a spurious return from timedWait().
@@ -150,6 +151,9 @@ LocationPage::LocationPage(QWidget *parent) :
         mUi->pointList->setRowCount(0);
     }
 
+  mTimer.setSingleShot(true);
+  QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout_v2);
+
   if (useLocationV2) {
     setUpWebEngine(mUi->pointWebEngineView->page(), "qrc:/html/index.html");
     setUpWebEngine(mUi->routeWebEngineView->page(), "qrc:/html/route.html");
@@ -173,8 +177,6 @@ LocationPage::LocationPage(QWidget *parent) :
     highlightRouteListWidget();
     mUi->saveRoute->setEnabled(false);
   } else { // !useLocationV2
-    mTimer.setSingleShot(true);
-
     // We can only send 1 decimal of altitude (in meters).
     mAltitudeValidator.setNotation(QDoubleValidator::StandardNotation);
     mAltitudeValidator.setRange(-1000, 10000, 1);
@@ -183,7 +185,6 @@ LocationPage::LocationPage(QWidget *parent) :
 
     mUi->loc_latitudeInput->setMinValue(-90.0);
     mUi->loc_latitudeInput->setMaxValue(90.0);
-    QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout);
     QObject::connect(this, &LocationPage::locationUpdateRequired,
                      this, &LocationPage::updateDisplayedLocation);
     QObject::connect(this, &LocationPage::populateNextGeoDataChunk,
@@ -561,7 +562,18 @@ void LocationPage::locationPlaybackStop()
     mUi->loc_pathTable->setEditTriggers(QAbstractItemView::DoubleClicked |
                                                 QAbstractItemView::EditKeyPressed |
                                                 QAbstractItemView::AnyKeyPressed);
-    putdeviceVelocity(0.0, 0.0);
+    putDeviceVelocity(0.0, 0.0);
+    mNowPlaying = false;
+}
+
+
+void LocationPage::locationPlaybackStop_v2()
+{
+    mTimer.stop();
+    mRowToSend = -1;
+    // ?? Reset controls and buttons that were
+    //    changed by locationPlaybackStart_v2()
+    putDeviceVelocity(0.0, 0.0);
     mNowPlaying = false;
 }
 
@@ -570,6 +582,7 @@ void LocationPage::timeout() {
     bool cellOK;
     QTableWidgetItem *theItem;
 
+    printf("l-p: In timeout() V1!!\n"); // ??
     // Check if we've reached the end of the dataset.
     if (mRowToSend < 0  ||
         mRowToSend >= mUi->loc_pathTable->rowCount()) {
@@ -620,7 +633,7 @@ void LocationPage::timeout() {
         }
         direction = getHeading(lat, lon, nextLat, nextLon);
     }
-    putdeviceVelocity(speed, direction);
+    putDeviceVelocity(speed, direction);
 
     emit targetHeadingChanged(direction);
 
@@ -648,6 +661,68 @@ void LocationPage::timeout() {
     if (mRowToSend >= mUi->loc_pathTable->rowCount()) {
         // No more to send. Same as clicking Stop.
         locationPlaybackStop();
+    } else {
+        // Set a timer for when this row should be sent
+        int mSec = deltaTimeSec * 1000.0;
+        if (mSec < 0) mSec = 0;
+        mTimer.setInterval(mSec);
+        mTimer.start();
+    }
+}
+
+void LocationPage::timeout_v2() {
+//    printf("l-p: In timeout_v2()\n"); // ??
+    if (mRowToSend < 0  ||  mRowToSend >= mRouteNumPoints) {
+        // No more to send. Same as clicking Stop.
+        locationPlaybackStop_v2();
+        return;
+    }
+    // Get the data for the point we're about to send.
+    double lat = mPlaybackElements[mRowToSend].lat;
+    double lng = mPlaybackElements[mRowToSend].lng;
+    double alt = 0.0;
+//    printf("l-p: timeout_v2(): [0] is %.8f, %.8f\n", lat, lng); // ??
+
+    // Get the speed and direction to the next point
+    double speed = 0.0;
+    double direction = 0.0;
+    double deltaTimeSec = 0.0;
+    int nextRow = mRowToSend + 1;
+    if (nextRow < mRouteNumPoints) {
+        double nextLat = mPlaybackElements[nextRow].lat;
+        double nextLng = mPlaybackElements[nextRow].lng;
+
+        deltaTimeSec = mPlaybackElements[nextRow].delayBefore /
+                           (mUi->loc_playbackSpeed->currentIndex() + 1);
+
+        double distance = getDistanceNm(lat, lng, nextLat, nextLng);
+        double deltaTimeHours = deltaTimeSec / (60.0 * 60.0);
+        if (deltaTimeHours > 0.0) {
+            speed = std::min(distance / deltaTimeHours, MAX_SPEED);
+        }
+        direction = getHeading(lat, lng, nextLat, nextLng);
+    }
+    putDeviceVelocity(speed, direction);
+
+    emit targetHeadingChanged(direction);
+
+    AutoLock lock (sGlobals->updateThreadLock);
+
+    // Send the command.
+    LocationPage::writeDeviceLocationToSettings(lat, lng, alt);
+    printf("l-p: timeout_v2() sending a signal to the timer loop for point %2d of %d\n", // ??
+           mRowToSend, mRouteNumPoints); // ??
+    sGlobals->updateThreadCv.signalAndUnlock(&lock);
+
+    // Update the location marker on the UI map
+    emit locationChanged(QString::number(lat, 'g', 12), QString::number(lng, 'g', 12));
+
+    // Go on to the next row
+    mRowToSend = nextRow;
+    if (mRowToSend >= mRouteNumPoints) {
+        printf("l-p: timeout_v2() Done\n"); // ??
+        // No more to send. Same as clicking Stop.
+        locationPlaybackStop_v2();
     } else {
         // Set a timer for when this row should be sent
         int mSec = deltaTimeSec * 1000.0;
@@ -841,7 +916,7 @@ static void getDeviceVelocity(double* speed, double* heading) {
 }
 
 // Set the current speed and direction
-static void putdeviceVelocity(double speed, double heading) {
+static void putDeviceVelocity(double speed, double heading) {
     sDeviceSpeed = speed;
     sDeviceHeading = heading;
 }

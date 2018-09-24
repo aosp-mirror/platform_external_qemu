@@ -64,6 +64,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/location-page.cpp \
     android/skin/qt/extended-pages/location-page-point.cpp \
     android/skin/qt/extended-pages/location-page-route.cpp \
+    android/skin/qt/extended-pages/location-page-route-playback.cpp \
     android/skin/qt/extended-pages/microphone-page.cpp \
     android/skin/qt/extended-pages/record-screen-page.cpp \
     android/skin/qt/extended-pages/rotary-input-dial.cpp \

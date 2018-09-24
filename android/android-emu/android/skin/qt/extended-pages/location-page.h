@@ -50,7 +50,7 @@ public:
     bool isLoadingGeoData() const { return mNowLoadingGeoData; }
     void requestStopLoadingGeoData() { mGpsNextPopulateIndex = mGpsFixesArray.size(); }
     Q_INVOKABLE void sendLocation(const QString& lat, const QString& lng);
-    Q_INVOKABLE void sendFullRouteToEmu(double durationSeconds, const QString& routeJSON);
+    Q_INVOKABLE void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON);
 //    Q_INVOKABLE void sendRoutePointToEmu(int pointIndex, double lat, double lng, double timeToHere);
 
     void updateTheme();
@@ -104,6 +104,10 @@ private slots:
     void locationPlaybackStop();
     void timeout();
 
+    void locationPlaybackStart_v2(); // ??
+    void locationPlaybackStop_v2(); // ??
+    void timeout_v2(); // ??
+
     void on_savePoint_clicked();
     void on_singlePoint_setLocationButton_clicked();
     void on_pointList_cellClicked(int row, int column);
@@ -129,8 +133,15 @@ private:
         QString logicalName;
         QString description;
         int     modeIndex;
+        int     numPoints;
         int     duration; // Route duration at 1x (seconds)
     } RouteListElement;
+
+    typedef struct {
+        double lat;
+        double lng;
+        double delayBefore; // Seconds
+    } RoutePoint;
 
     class PointWidgetItem;
     class RouteWidgetItem;
@@ -251,6 +262,8 @@ private:
     void writeRouteProtobufFullPath(const QString& protoFullPath,
                                     const emulator_location::RouteMetadata& protobuf);
     QString readRouteJsonFile(const QString& pathOfProtoFile);
+//    struct LocationPage::RoutePoint; // ??
+    int parsePointsFromJson(RoutePoint locationElements[], int numLocationsExpected);
     void writeRouteJsonFile(const std::string& pathOfProtoFile);
     void setUpWebEngine(QWebEnginePage* webEnginePage, const char* pageName);
 
@@ -258,6 +271,9 @@ private:
                              int row,
                              int col,
                              QString* outErrorMessage);
+
+//    static void sendLocationToDevice();
+    static double getDistanceNm(double startLat, double startLon, double endLat, double endLon);
 
     QDoubleValidator mAltitudeValidator;
     GpsFixArray          mGpsFixesArray;
@@ -272,21 +288,18 @@ private:
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
 
     // Route information
-    typedef struct {
-        double lat;
-        double lng;
-        double delayBefore;
-    } routePoint_t;
-    enum class RouteStatus { OK, INCOMPLETE, FAILED, TOO_BIG };
+//    enum class RouteStatus { OK, INCOMPLETE, FAILED, TOO_BIG };
 //    static constexpr int MAX_POINTS_IN_ROUTE = 20000;
 //    RouteStatus mRouteStatus = RouteStatus::INCOMPLETE;
 //    routePoint_t mRoutePoints[MAX_POINTS_IN_ROUTE]; // ?? Should I allocate this dynamically
-                                                    //    and free it when I'm done?
+//                                                    //    and free it when I'm done?
 //    int mNumRoutePointsReceived = 0;
     QDateTime mRouteCreationTime;
     int mRouteTravelMode = 0;
+    int mRouteNumPoints = 0;
     double mRouteTotalTime = 0.0; // Seconds
     QString mRouteJson;
+    RoutePoint* mPlaybackElements = nullptr;
 
     // Last point sent to the emulator from the map
     QString mLastLat = "-122.084";

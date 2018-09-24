@@ -20,7 +20,7 @@ package emulator_location;
 // a route (path) of Location data.
 //
 // The actual points that define the route
-// are in a 'route.gpx' file in the same
+// are in a 'route.json' file in the same
 // directory as the .pb file.
 
 message RouteMetadata {
@@ -44,4 +44,7 @@ message RouteMetadata {
 
   // Duration of the route (the time taken at 1x, in seconds)
   optional int64 duration = 5;
+
+  // Number of lat/lng pairs in the route
+  optional int64 number_of_points = 6;
 }

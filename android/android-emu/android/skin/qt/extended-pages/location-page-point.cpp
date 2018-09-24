@@ -39,6 +39,8 @@ void LocationPage::sendLocation(const QString& lat, const QString& lng) {
 //    qDebug() << "l-p-p: sendLocation(): Map clicked: lat=" << lat << ", lng=" << lng; // ??
     mLastLat = lat;
     mLastLng = lng;
+    printf("l-p-p: sendLocation() received \"%s\", \"%s\"\n", //??
+           lat.toStdString().c_str(), lng.toStdString().c_str()); // ??
 
     // Make nothing selected now
     mUi->pointList->setCurrentItem(nullptr);
@@ -217,10 +219,13 @@ void LocationPage::on_pointList_itemSelectionChanged() {
     mSelectedPointName = pointElement->protoFilePath;
 //    printf("l-p-p: Changed selection to %s\n", mSelectedPointName.toStdString().c_str()); // ??
 
-    mLastLat = QString::number(pointElement->latitude);
-    mLastLng = QString::number(pointElement->longitude);
+    mLastLat = QString::number(pointElement->latitude, 'g', 12);
+    mLastLng = QString::number(pointElement->longitude, 'g', 12);
 
     // Show the location, but do not send it to the device
+    // ?? Has reduced precision!
+    printf("l-p-p: Setting blue dot at \"%s\", \"%s\"\n", // ??
+           mLastLat.toStdString().c_str(), mLastLng.toStdString().c_str()); // ??
     emit showLocation(mLastLat, mLastLng);
 
     // Redraw the table to show the new selection
@@ -267,7 +272,7 @@ void LocationPage::editPoint(int row) {
     // Latitude
     dialogLayout->addWidget(new QLabel(tr("Latitude")));
     QLineEdit* latitudeEdit = new QLineEdit(this);
-    QString oldLatText = QString::number(pointElement->latitude);
+    QString oldLatText = QString::number(pointElement->latitude, 'g', 12);
     latitudeEdit->setText(oldLatText);
 //??    latitudeEdit->setValidator(new LocationValidator(true, saveButton)); // ??
     dialogLayout->addWidget(latitudeEdit);
@@ -275,7 +280,7 @@ void LocationPage::editPoint(int row) {
     // Longitude
     dialogLayout->addWidget(new QLabel(tr("Longitude")));
     QLineEdit* longitudeEdit = new QLineEdit(this);
-    QString oldLngText = QString::number(pointElement->longitude);
+    QString oldLngText = QString::number(pointElement->longitude, 'g', 12);
     longitudeEdit->setText(oldLngText);
 //??    longitudeEdit->setValidator(new LocationValidator(false, saveButton)); // ??
     dialogLayout->addWidget(longitudeEdit);

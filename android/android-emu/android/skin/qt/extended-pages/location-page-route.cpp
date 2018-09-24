@@ -24,6 +24,9 @@
 #include <QDialogButtonBox>
 #include <QDir>
 #include <QDoubleValidator>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPainter>
@@ -80,6 +83,7 @@ void LocationPage::on_saveRoute_clicked() {
     routeMetadata.set_logical_name(routeName.toStdString().c_str());
     routeMetadata.set_creation_time(mRouteCreationTime.toMSecsSinceEpoch() / 1000LL);
     routeMetadata.set_mode_of_travel((emulator_location::RouteMetadata_Mode)mRouteTravelMode);
+    routeMetadata.set_number_of_points(mRouteNumPoints);
     routeMetadata.set_duration((int)(mRouteTotalTime + 0.5));
     std::string protoPath = writeRouteProtobufByName(routeName, routeMetadata);
     // Make this new item the selected item
@@ -104,10 +108,6 @@ void LocationPage::on_saveRoute_clicked() {
 
     QApplication::restoreOverrideCursor();
     printf("l-p-r: Save route: Restoring cursor\n"); // ??
-}
-
-void LocationPage::on_playRouteButton_clicked() {
-    printf("location-page-route: playRoute clicked\n"); // ??
 }
 
 void LocationPage::on_loc_travelMode_currentIndexChanged(int index) {
@@ -157,6 +157,7 @@ void LocationPage::scanForRoutes() {
         listElement.logicalName   = routeMetadata->logical_name().c_str();
         listElement.description   = routeMetadata->description().c_str();
         listElement.modeIndex     = routeMetadata->mode_of_travel();
+        listElement.numPoints     = routeMetadata->number_of_points();
         listElement.duration      = routeMetadata->duration();
 
         mRouteList.append(listElement);
@@ -245,7 +246,6 @@ void LocationPage::on_routeList_cellClicked(int row, int column) {
 
 void LocationPage::on_routeList_itemSelectionChanged() {
     int selectedRow = mUi->routeList->currentRow();
-
     if (selectedRow < 0) {
         mUi->routeInfo->clear();
         return;
@@ -266,6 +266,7 @@ void LocationPage::on_routeList_itemSelectionChanged() {
     }
 
     mSelectedRouteName = routeElement->protoFilePath;
+    mRouteNumPoints = routeElement->numPoints;
 
     // Redraw the table to show the new selection
     highlightRouteListWidget();
@@ -509,11 +510,13 @@ void LocationPage::showRouteDetails(const RouteListElement* theElement) {
     QString infoString = tr("<b>%1</b><br>"
                             "&nbsp;&nbsp;Duration: <b>%2</b><br>"
                             "&nbsp;&nbsp;Mode: <b>%3</b><br>"
-                            "&nbsp;&nbsp;Directory: <b>%4</b><br>"
-                            "<b>%5</b>")
+                            "&nbsp;&nbsp;Number of points: <b>%4</b><br>"
+                            "&nbsp;&nbsp;Directory: <b>%5</b><br>"
+                            "<b>%6</b>")
                           .arg(theElement->logicalName)
                           .arg(durationString)
                           .arg(modeString)
+                          .arg(theElement->numPoints)
                           .arg(dirTail.str().c_str())
                           .arg(theElement->description);
     mUi->routeInfo->setHtml(infoString);
@@ -547,21 +550,24 @@ void LocationPage::showPendingRouteDetails() {
                                                      .arg(durationSeconds);
     QString infoString = tr("<b>Unsaved route</b><br>"
                             "&nbsp;&nbsp;Duration: <b>%1</b><br>"
-                            "&nbsp;&nbsp;Mode: <b>%2</b><br>")
+                            "&nbsp;&nbsp;Mode: <b>%2</b><br>"
+                            "&nbsp;&nbsp;Number of points: <b>%3</b>")
                           .arg(durationString)
-                          .arg(modeString);
+                          .arg(modeString)
+                          .arg(mRouteNumPoints);
     mUi->routeInfo->setHtml(infoString);
 }
 
 // Invoked by the Maps javascript when a route has been created
-void LocationPage::sendFullRouteToEmu(double durationSeconds, const QString& routeJson) {
+void LocationPage::sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJson) {
+    mRouteNumPoints = numPoints;
+    mRouteTotalTime = durationSeconds;
     mRouteCreationTime = QDateTime::currentDateTime();
     mRouteTravelMode = mUi->loc_travelMode->currentIndex();
-    mRouteTotalTime = durationSeconds;
 
     mRouteJson = routeJson;
-    printf("l-p-r: sendFullRouteToEmu() got duration %.1f seconds, %d characters\n",
-           durationSeconds, routeJson.length());
+    printf("l-p-r: sendFullRouteToEmu() got duration %.1f seconds, %d characters, %d points\n",
+           durationSeconds, routeJson.length(), numPoints);
 
     mSelectedRouteName = "";
     mUi->routeList->setCurrentItem(nullptr);

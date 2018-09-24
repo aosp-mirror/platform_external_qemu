@@ -128,6 +128,8 @@ html, body {
 
         gFirstPoint = true;
 
+        gBlueMarker = new google.maps.Marker({map: null, position: lastLatLng});
+
         // Register a listener that sets a new marker wherever user clicks
         // on the map.
         google.maps.event.addListener(gMap, 'click', function(event) {
@@ -155,6 +157,30 @@ html, body {
             gFirstPoint = !gFirstPoint;
         });
 
+        setDeviceLocation = function(lat, lng) {
+            // Called from Qt code to show the blue marker to display the emulator location on the map.
+            // Code to set location marker on the map. Move this to a signal event handler.
+
+            var latLng = new google.maps.LatLng(lat, lng);
+            gBlueMarker.setMap(null); // Remove the old marker
+            gBlueMarker = new google.maps.Marker({map: gMap, position: latLng});
+            var blueDot = 'data:image/svg+xml, \
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" \
+                            viewBox="0 0 24 24" fill="#000000"> \
+                        <circle cx="12" cy="12" r="10" fill="#black" opacity=".1" /> \
+                        <circle cx="12" cy="12" r="8" stroke="white" stroke-width="2" \
+                            fill="#4286f5" /> \
+                    </svg>';
+            var image = {
+              url: blueDot,
+              size: new google.maps.Size(24, 24),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(12, 12),
+              scaledSize: new google.maps.Size(25, 25)
+            };
+            gBlueMarker.setIcon(image);
+        }
+
         // Receive the mode of travel from the host
         setTravelMode = function(mode) {
             switch (mode) {
@@ -170,10 +196,16 @@ html, body {
 
         // Receive the selected route from the host
         setRouteOnMap = function(routeJson) {
-            console.warn('route.html: js In setRouteOnMap(), JSON is ' + // ??
-                       routeJson.length + ' characters'); // ??
+//            console.warn('route.html: js In setRouteOnMap(), JSON is ' + // ??
+//                       routeJson.length + ' characters'); // ??
             if (routeJson.length > 0) {
                 var theRoute = JSON.parse(routeJson);
+                if (gDirectionsDisplay != null) {
+                    // Clear any previous route
+                    gDirectionsDisplay.setMap(null);
+                }
+                gDirectionsDisplay = new google.maps.DirectionsRenderer();
+                gDirectionsDisplay.setMap(gMap);
                 gDirectionsDisplay.setDirections(theRoute);
             }
         }
@@ -253,30 +285,35 @@ html, body {
             }
             gDirectionsDisplay.setDirections(result);
 
-            // Calculate the total duration of the route
+            // Calculate the number of points and the total duration of the route
+            var numPoints = 0;
             var totalDuration = 0.0;
-            for (var routeIdx = 0;
-                 routeIdx < result.routes.length;
-                 routeIdx++)
+            for (var legIdx = 0;
+                 legIdx < result.routes[0].legs.length;
+                 legIdx++)
             {
-                for (var legIdx = 0;
-                     legIdx < result.routes[routeIdx].legs.length;
-                     legIdx++)
-                {
-                    for (var stepIdx = 0;
-                         stepIdx < result.routes[routeIdx].legs[legIdx].steps.length;
-                         stepIdx++)
-                    {
-                        totalDuration += result.routes[routeIdx].legs[legIdx]
-                                             .steps[stepIdx].duration.value;
-                    }
+                totalDuration += result.routes[0].legs[legIdx].duration.value;
+
+                var latZero = result.routes[0].legs[legIdx].steps[0].path[0].lat();
+                var lngZero = result.routes[0].legs[legIdx].steps[0].path[0].lng();
+
+                var numSteps = result.routes[0].legs[legIdx].steps.length;
+                for (var stepIdx = 0; stepIdx < numSteps; stepIdx++) {
+//                    console.warn('JK leg[' + legIdx + '].step[' + stepIdx + // ??
+//                                 '] has ' + // ??
+//                                 result.routes[0].legs[legIdx].steps[stepIdx].path.length + // ??
+//                                 ' points'); // ??
+                    numPoints += result.routes[0].legs[legIdx].steps[stepIdx].path.length;
                 }
+                numPoints -= (numSteps - 1); // Don't count the duplicate first points
             }
+//            console.warn('JK totalPoints: ' + numPoints); // ??
 
             var fullResult = JSON.stringify(result);
             console.warn('Stringified full result is ' + fullResult.length + // ??
-                         ' characters, duration ' + totalDuration); // ??
-            channel.objects.emulocationserver.sendFullRouteToEmu(totalDuration, fullResult);
+                         ' characters, duration ' + totalDuration + // ??
+                         's, ' + numPoints + ' points'); // ??
+            channel.objects.emulocationserver.sendFullRouteToEmu(numPoints, totalDuration, fullResult);
         });
     }
     </script>
