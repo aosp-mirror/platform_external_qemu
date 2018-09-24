@@ -14,8 +14,10 @@
 #pragma once
 
 #include "android/base/Result.h"
+#include "android/base/files/Stream.h"
 
 #include <cstdint>
+#include <functional>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -40,7 +42,8 @@ public:
     void* connect(const char* name);
     void close(void* pipe);
 
-    void resetPipe(void* pipe, void* internal_pipe);
+    // Loads a pipe from a stream, returns null if the pipe can't be loaded.
+    void* load(base::Stream* stream);
 
     // Read/write for a particular pipe, along with C++ versions.
     ssize_t read(void* pipe, void* buffer, size_t len);
@@ -50,20 +53,53 @@ public:
     WriteResult write(void* pipe, const std::vector<uint8_t>& data);
 
     unsigned poll(void* pipe) const;
-    void signalWake(int wakes);
     int getErrno() const { return mErrno; }
+
+    // Sets a callback that will be invoked when the pipe is signaled by the
+    // host, accepts an "int wakes" parameter that matches contains PIPE_WAKE_*
+    // flags.
+    void setWakeCallback(void* pipe, std::function<void(int)> callback);
 
 private:
     void initialize();
-    void* open();
-    void* popHwSidePipe(void* pipe);
+    // Opens a new pipe connection, returns a pointer to the host connector
+    // pipe.
+    //
+    // hwpipe is an opaque pointer that will be used as the hwpipe id, generate
+    // one with createNewHwPipeId().
+    void* open(void* hwpipe);
+    // Returns the host-side pipe for a connector pipe, if the pipe has been
+    // reset.
+    void* popHostPipe(void* connectorPipe);
     void setErrno(ssize_t res);
+
+    void* createNewHwPipeId();
+
+    // Called to associate a given hwpipe with a host-side pipe.
+    //
+    // |hwpipe| - hwpipe pointer, the goldfish pipe pointer.
+    // |internal_pipe| - Host-side pipe, corresponding to AndroidPipe*.
+    void resetPipe(void* hwpipe, void* internal_pipe);
+
+    // Close a hwpipe.
+    void closeHwPipe(void* hwpipe);
+    // Wake a hwpipe.
+    void signalWake(void* hwpipe, int wakes);
+
+    // Callbacks for AndroidPipeHwFuncs.
+    static void resetPipeCallback(void* hwpipe, void* internal_pipe);
+    static void closeFromHostCallback(void* hwpipe);
+    static void signalWakeCallback(void* hwpipe, unsigned wakes);
+
+    uintptr_t mNextHwPipe = 1;
 
     bool mInitialized = false;
     int mErrno = 0;
     void* mCurrentPipeWantingConnection = nullptr;
     std::unordered_set<void*> mPipes;
     std::unordered_map<void*, void*> mResettedPipes;
+    std::unordered_map<void*, void*> mPipeToHwPipe;
+    std::unordered_map<void*, std::function<void(int)>> mHwPipeWakeCallbacks;
 };
 
 // Initializes a global pipe instance for the current process.
