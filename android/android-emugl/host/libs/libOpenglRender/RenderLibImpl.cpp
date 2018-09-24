@@ -85,21 +85,17 @@ void* RenderLibImpl::getEGL(void) {
     return &s_egl;
 }
 
-bool RenderLibImpl::getDSCC(void** display, void** surface, void** config,
-                            void** context, int* width, int* height) {
+bool RenderLibImpl::getOpt(RenderOpt* opt) {
     FrameBuffer* fb  = FrameBuffer::getFB();
     if (fb == nullptr) {
         return false;
     }
 
-    *display = fb->getDisplay();
-    *surface = fb->getWindowSurface();
-    *config = fb->getConfig();
-    *context = fb->getContext();
-    *width = fb->windowWidth() * fb->getDpr();
-    *height = fb->windowHeight() * fb->getDpr();
+    opt->display = fb->getDisplay();
+    opt->surface = fb->getWindowSurface();
+    opt->config = fb->getConfig();
 
-    return (*display && *surface  && *config && *context);
+    return (opt->display && opt->surface  && opt->config);
 }
 
 RendererPtr RenderLibImpl::initRenderer(int width, int height,
