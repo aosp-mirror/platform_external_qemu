@@ -59,7 +59,7 @@ public:
 #else
         ret = ::pthread_mutex_trylock(&mLock) == 0;
 #endif
-        ANDROID_IF_DEBUG(mIsLocked = true;)
+        ANDROID_IF_DEBUG(mIsLocked = ret;)
         return ret;
     }
 
