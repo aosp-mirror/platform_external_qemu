@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa00a1a0_59b15031",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-25T00:46:56Z",
+      "side": 1,
+      "message": "making sure if the caller of readBuffers() can handle |this| deletion in a graceful manner",
+      "range": {
+        "startLine": 98,
+        "startChar": 29,
+        "endLine": 98,
+        "endChar": 40
+      },
+      "revId": "d7caa2fdc18157c6d0ed2905598bfb6fbdc183c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7951081c_44cc4850",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-25T00:46:56Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 151,
+        "startChar": 29,
+        "endLine": 151,
+        "endChar": 41
+      },
+      "revId": "d7caa2fdc18157c6d0ed2905598bfb6fbdc183c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fbb27579_5f1a72d8",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-25T00:46:56Z",
+      "side": 1,
+      "message": "nit: typo",
+      "range": {
+        "startLine": 153,
+        "startChar": 35,
+        "endLine": 153,
+        "endChar": 42
+      },
+      "revId": "d7caa2fdc18157c6d0ed2905598bfb6fbdc183c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
