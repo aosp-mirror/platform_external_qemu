@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "8c2c66ed_568d2843",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-25T00:42:27Z",
+      "side": 1,
+      "message": "I opted to create an external shared_ptr state, since I wanted readBuffers to read the full buffer in the common case.  Partially reading the buffers until it receives the first packet, would be more error-prone.",
+      "parentUuid": "dcccb751_f0e607c6",
+      "range": {
+        "startLine": 133,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 36
+      },
+      "revId": "64241f73232a0ddb81bd9b919b087d37a04f781a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "83f4f594_ae79869d",
         "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
         "patchSetId": 1
@@ -96,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "19abb835_ff2bb5b6",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-25T00:42:27Z",
+      "side": 1,
+      "message": "I fixed a bug in HostGoldfishPipe :-)\n\nBefore, if I tried to use mDevice-\u003eread() and the pipe had closed, it would crash.  Now it gracefully returns EINVAL, and I validate that occurs in the test.",
+      "parentUuid": "f5bda0f4_78f31b0e",
+      "range": {
+        "startLine": 241,
+        "startChar": 0,
+        "endLine": 241,
+        "endChar": 35
+      },
+      "revId": "64241f73232a0ddb81bd9b919b087d37a04f781a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b3b1f6b5_337040b8",
         "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
         "patchSetId": 1
@@ -116,6 +164,30 @@
       "revId": "64241f73232a0ddb81bd9b919b087d37a04f781a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b7b86681_f655c003",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-25T00:42:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b3b1f6b5_337040b8",
+      "range": {
+        "startLine": 262,
+        "startChar": 8,
+        "endLine": 262,
+        "endChar": 60
+      },
+      "revId": "64241f73232a0ddb81bd9b919b087d37a04f781a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
