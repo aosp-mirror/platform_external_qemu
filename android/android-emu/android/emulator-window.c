@@ -47,7 +47,25 @@ const QAndroidUserEventAgent* user_event_agent;
 static bool s_use_emugl_subwindow = 1;
 
 static void emulator_window_refresh(EmulatorWindow* emulator);
-extern void qemu_system_shutdown_request(void);
+
+// Enumeration of various causes for shutdown. Please keep this in sync
+// with the similar enum in include/sysem/sysemu.h.
+typedef enum QemuShutdownCause {
+    QEMU_SHUTDOWN_CAUSE_NONE,              /* No shutdown request pending */
+    QEMU_SHUTDOWN_CAUSE_HOST_ERROR,        /* An error prevents further use of guest */
+    QEMU_SHUTDOWN_CAUSE_HOST_QMP,          /* Reaction to a QMP command, like 'quit' */
+    QEMU_SHUTDOWN_CAUSE_HOST_SIGNAL,       /* Reaction to a signal, such as SIGINT */
+    QEMU_SHUTDOWN_CAUSE_HOST_UI,           /* Reaction to UI event, like window close */
+    QEMU_SHUTDOWN_CAUSE_GUEST_SHUTDOWN,    /* Guest shutdown/suspend request, via
+                                              ACPI or other hardware-specific means */
+    QEMU_SHUTDOWN_CAUSE_GUEST_RESET,       /* Guest reset request, and command line
+                                              turns that into a shutdown */
+    QEMU_SHUTDOWN_CAUSE_GUEST_PANIC,       /* Guest panicked, and command line turns
+                                              that into a shutdown */
+    QEMU_SHUTDOWN_CAUSE__MAX,
+} QemuShutdownCause;
+
+extern void qemu_system_shutdown_request(QemuShutdownCause reason);
 
 static void write_window_name(char* buff,
                               size_t buff_len,
@@ -449,7 +467,7 @@ static void emulator_window_refresh(EmulatorWindow* emulator)
         if (skin_ui_process_events(emulator->ui)) {
             // Quit program.
             emulator->done = true;
-            qemu_system_shutdown_request();
+            qemu_system_shutdown_request(QEMU_SHUTDOWN_CAUSE_HOST_UI);
         }
     }
 }
