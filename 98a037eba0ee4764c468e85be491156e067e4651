@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d09da0af_77eb9bab",
+        "filename": "android/android-emu/android/emulation/testing/MockAndroidVmOperations.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-25T17:20:57Z",
+      "side": 1,
+      "message": "Yeah, I\u0027ve been wanting something like this and finally had a need to create it.  I hope that we can use something like this for mock entire dependencies.  Such as UI tests that mock everything else, and android-emu tests that mock qemu and the UI.",
+      "parentUuid": "a482a24d_086dd2cd",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 59
+      },
+      "revId": "98a037eba0ee4764c468e85be491156e067e4651",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "52d9f273_b24d50ba",
         "filename": "android/android-emu/android/snapshot/SnapshotAPI.h",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2018-09-25T03:58:25Z",
       "side": 1,
       "message": "What\u0027s the expected behavior when theres multiple connections? It feels like they will interleave. Is that ok? Could there be an opportunity to simplify by restricting to only one connection for SnapshotAPI?",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 69
+      },
+      "revId": "98a037eba0ee4764c468e85be491156e067e4651",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9c10acc6_47ed33bc",
+        "filename": "android/android-emu/android/snapshot/SnapshotAPI.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-25T17:20:57Z",
+      "side": 1,
+      "message": "Yep, handling multiple connections was one of the design goals, I think it\u0027s pretty cool.  Previously the OffworldPipe was limited to one connection, and I wanted to remove that restriction.\n\nSpeaking of which, I should add a test around that case.",
+      "parentUuid": "52d9f273_b24d50ba",
       "range": {
         "startLine": 24,
         "startChar": 0,
