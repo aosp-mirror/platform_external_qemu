@@ -829,6 +829,8 @@ message ProductDetails {
   optional CpuArchitecture os_architecture = 5;
   // The state in the software lifecycle of this product.
   optional SoftwareLifeCycleChannel channel = 6;
+  // Set when ProductKind = STUDIO, the look and feel of the product.
+  optional IdeTheme theme = 7;
 
   // Various states in the software life cycle this software could be in.
   enum SoftwareLifeCycleChannel {
@@ -853,6 +855,16 @@ message ProductDetails {
     UNKNOWN_CPU_ARCHITECTURE = 0;
     X86 = 1;
     X86_64 = 2;
+  }
+
+  // The current theme set for Android Studio
+  enum IdeTheme {
+    UNKNOWN_THEME = 0;
+    DARCULA = 1;
+    LIGHT = 2;
+    LIGHT_MAC_NATIVE = 3;
+    LIGHT_WIN_NATIVE = 4;
+    GTK = 5;
   }
 }
 
@@ -1171,7 +1183,9 @@ enum EmulatorSnapshotSaveState {
   EMULATOR_SNAPSHOT_SAVE_SKIPPED_NOT_BOOTED = 3;
   // Saving skipped: No snapshot name given.
   EMULATOR_SNAPSHOT_SAVE_SKIPPED_NO_SNAPSHOT = 4;
-  // Next tag: 5
+  // Saving skipped: Disk under pressure.
+  EMULATOR_SNAPSHOT_SAVE_SKIPPED_DISK_PRESSURE = 5;
+  // Next tag: 6
 }
 
 // Generic snapshot load states. Distinguished

@@ -509,7 +509,7 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
         if (reportMetrics) {
             appendFailedSave(
                 pb::EmulatorSnapshotSaveState::
-                    EMULATOR_SNAPSHOT_SAVE_SKIPPED_NOT_BOOTED,
+                    EMULATOR_SNAPSHOT_SAVE_SKIPPED_DISK_PRESSURE,
                 FailureReason::OutOfDiskSpace);
         }
         return false;
