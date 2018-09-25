@@ -141,10 +141,15 @@ static const MemMapEntry a15memmap[] = {
     [VIRT_FW_CFG] =             { 0x09020000, 0x00000018 },
     [VIRT_GPIO] =               { 0x09030000, 0x00001000 },
     [VIRT_SECURE_UART] =        { 0x09040000, 0x00001000 },
+    [VIRT_GOLDFISH_FB] =        { 0x09050000, 0x00000100 },
+    [VIRT_GOLDFISH_BATTERY] =   { 0x09060000, 0x00001000 },
+    [VIRT_GOLDFISH_AUDIO] =     { 0x09070000, 0x00000100 },
+    [VIRT_GOLDFISH_EVDEV] =     { 0x09080000, 0x00001000 },
     [VIRT_MMIO] =               { 0x0a000000, 0x00000200 },
+    [VIRT_GOLDFISH_PIPE] =      { 0x0a010000, 0x00002000 },
     /* ...repeating for a total of NUM_VIRTIO_TRANSPORTS, each of that size */
     [VIRT_PLATFORM_BUS] =       { 0x0c000000, 0x02000000 },
-    [VIRT_SECURE_MEM] =         { 0x0e000000, 0x01000000 },
+    [VIRT_SECURE_MEM] =         { 0x0e000000, 0x02000000 },
     [VIRT_PCIE_MMIO] =          { 0x10000000, 0x2eff0000 },
     [VIRT_PCIE_PIO] =           { 0x3eff0000, 0x00010000 },
     [VIRT_PCIE_ECAM] =          { 0x3f000000, 0x01000000 },
@@ -155,10 +160,15 @@ static const MemMapEntry a15memmap[] = {
 
 static const int a15irqmap[] = {
     [VIRT_UART] = 1,
-    [VIRT_RTC] = 2,
-    [VIRT_PCIE] = 3, /* ... to 6 */
-    [VIRT_GPIO] = 7,
+    [VIRT_GOLDFISH_FB] = 2,
+    [VIRT_GOLDFISH_BATTERY] = 3,
+    [VIRT_GOLDFISH_AUDIO] = 4,
+    [VIRT_GOLDFISH_EVDEV] = 5,
+    [VIRT_GOLDFISH_PIPE] = 6,
     [VIRT_SECURE_UART] = 8,
+    [VIRT_RTC] = 9,
+    [VIRT_PCIE] = 10, /* ... to 13 */
+    [VIRT_GPIO] = 14,
     [VIRT_MMIO] = 16, /* ...to 16 + NUM_VIRTIO_TRANSPORTS - 1 */
     [VIRT_GIC_V2M] = 48, /* ...to 48 + NUM_GICV2M_SPIS - 1 */
     [VIRT_PLATFORM_BUS] = 112, /* ...to 112 + PLATFORM_BUS_NUM_IRQS -1 */
@@ -199,6 +209,12 @@ static void create_fdt(VirtMachineState *vms)
     qemu_fdt_setprop_string(fdt, "/", "compatible", "linux,dummy-virt");
     qemu_fdt_setprop_cell(fdt, "/", "#address-cells", 0x2);
     qemu_fdt_setprop_cell(fdt, "/", "#size-cells", 0x2);
+
+    /* Firmware node */
+    qemu_fdt_add_subnode(fdt, "/firmware");
+    qemu_fdt_add_subnode(fdt, "/firmware/android");
+    qemu_fdt_setprop_string(fdt, "/firmware/android", "compatible", "android,firmware");
+    qemu_fdt_setprop_string(fdt, "/firmware/android", "hardware", "ranchu");
 
     /*
      * /chosen and /memory nodes must exist for load_dtb
@@ -772,6 +788,64 @@ static void create_virtio_devices(const VirtMachineState *vms, qemu_irq *pic)
         qemu_fdt_setprop(vms->fdt, nodename, "dma-coherent", NULL, 0);
         g_free(nodename);
     }
+}
+
+static void init_simple_device(DeviceState *dev,
+                               const VirtMachineState *vms, qemu_irq *pic,
+                               int devid, const char *sysbus_name,
+                               const char *compat,
+                               int num_compat_strings,
+                               const char *clocks, int num_clocks)
+{
+    int irq = vms->irqmap[devid];
+    hwaddr base = vms->memmap[devid].base;
+    hwaddr size = vms->memmap[devid].size;
+    char *nodename;
+    int i;
+    int compat_sz = 0;
+    int clocks_sz = 0;
+
+    SysBusDevice *s = SYS_BUS_DEVICE(dev);
+    qdev_init_nofail(dev);
+    sysbus_mmio_map(s, 0, base);
+    if (pic[irq]) {
+        sysbus_connect_irq(s, 0, pic[irq]);
+    }
+
+    for (i = 0; i < num_compat_strings; i++) {
+        compat_sz += strlen(compat + compat_sz) + 1;
+    }
+
+    for (i = 0; i < num_clocks; i++) {
+        clocks_sz += strlen(clocks + clocks_sz) + 1;
+    }
+
+    nodename = g_strdup_printf("/%s@%" PRIx64, sysbus_name, base);
+    qemu_fdt_add_subnode(vms->fdt, nodename);
+    qemu_fdt_setprop(vms->fdt, nodename, "compatible", compat, compat_sz);
+    qemu_fdt_setprop_sized_cells(vms->fdt, nodename, "reg", 2, base, 2, size);
+    if (irq) {
+        qemu_fdt_setprop_cells(vms->fdt, nodename, "interrupts",
+                               GIC_FDT_IRQ_TYPE_SPI, irq,
+                               GIC_FDT_IRQ_FLAGS_LEVEL_HI);
+    }
+    if (num_clocks) {
+        qemu_fdt_setprop_cells(vms->fdt, nodename, "clocks",
+                               vms->clock_phandle, vms->clock_phandle);
+        qemu_fdt_setprop(vms->fdt, nodename, "clock-names",
+                         clocks, clocks_sz);
+    }
+    g_free(nodename);
+}
+
+static void create_simple_device(const VirtMachineState *vms, qemu_irq *pic,
+                                 int devid, const char *sysbus_name,
+                                 const char *compat, int num_compat_strings,
+                                 const char *clocks, int num_clocks)
+{
+    DeviceState *dev = qdev_create(NULL, sysbus_name);
+    init_simple_device(dev, vms, pic, devid, sysbus_name, compat,
+                       num_compat_strings, clocks, num_clocks);
 }
 
 static void create_one_flash(const char *name, hwaddr flashbase,
@@ -1392,6 +1466,25 @@ static void machvirt_init(MachineState *machine)
 
     vms->fw_cfg = create_fw_cfg(vms, &address_space_memory);
     rom_set_fw(vms->fw_cfg);
+
+    create_simple_device(vms, pic, VIRT_GOLDFISH_FB, "goldfish_fb",
+                         "google,goldfish-fb\0"
+                         "generic,goldfish-fb", 2, 0, 0);
+    create_simple_device(vms, pic, VIRT_GOLDFISH_BATTERY, "goldfish_battery",
+                         "google,goldfish-battery\0"
+                         "generic,goldfish-battery", 2, 0, 0);
+    create_simple_device(vms, pic, VIRT_GOLDFISH_AUDIO, "goldfish_audio",
+                         "google,goldfish-audio\0"
+                         "generic,goldfish-audio", 2, 0, 0);
+    create_simple_device(vms, pic, VIRT_GOLDFISH_EVDEV, "goldfish-events",
+                         "google,goldfish-events-keypad\0"
+                         "generic,goldfish-events-keypad", 2, 0, 0);
+    create_simple_device(vms, pic, VIRT_GOLDFISH_PIPE, "goldfish_pipe",
+                         "google,android-pipe\0"
+                         "generic,android-pipe", 2, 0, 0);
+    create_simple_device(vms, pic, VIRT_GOLDFISH_SYNC, "goldfish_sync",
+                         "google,goldfish-sync\0"
+                         "generic,goldfish-sync", 2, 0, 0);
 
     vms->machine_done.notify = virt_machine_done;
     qemu_add_machine_init_done_notifier(&vms->machine_done);

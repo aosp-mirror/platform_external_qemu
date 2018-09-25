@@ -386,7 +386,7 @@ private:
                                                    bool writable) {
         int apiLevel = avdInfo_getApiLevel(m_avd);
 
-#if defined(TARGET_X86_64) || defined(TARGET_I386)
+#if defined(TARGET_X86_64) || defined(TARGET_I386) | defined(TARGET_AARCH64)
         /* for x86, 'if=none' is necessary for virtio blk*/
         std::string driveParam("if=none,");
 #else
@@ -1145,7 +1145,10 @@ extern "C" int main(int argc, char** argv) {
 
     AFREE(accel_status);
 #else   // !TARGET_X86_64 && !TARGET_I386
-    args.add2("-machine", "type=ranchu");
+    if (opts->trustzone)
+        args.add2("-machine", "type=virt,secure=on");
+    else
+        args.add2("-machine", "type=ranchu");
 #endif  // !TARGET_X86_64 && !TARGET_I386
 
 #if defined(TARGET_X86_64) || defined(TARGET_I386)

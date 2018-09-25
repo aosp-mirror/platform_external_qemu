@@ -1599,6 +1599,14 @@ help_sim_access_rules_file(stralloc_t* out)
     );
 }
 
+static void
+help_trustzone(stralloc_t* out)
+{
+    PRINTF(
+    "  TrustZone support (ARM targets only)\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
