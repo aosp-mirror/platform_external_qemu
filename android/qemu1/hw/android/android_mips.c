@@ -173,7 +173,7 @@ static void goldfish_reset_io_write(void *opaque, hwaddr addr, uint32_t val)
         qemu_system_reset_request();
         break;
     case 0x43:
-        qemu_system_shutdown_request();
+        qemu_system_shutdown_request(SHUTDOWN_CAUSE_GUEST_SHUTDOWN);
         break;
     default:
         fprintf(stdout, "%s: %d: Unknown command %x\n",
