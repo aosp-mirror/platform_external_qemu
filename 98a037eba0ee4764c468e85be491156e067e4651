@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a482a24d_086dd2cd",
+        "filename": "android/android-emu/android/emulation/testing/MockAndroidVmOperations.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-25T03:58:25Z",
+      "side": 1,
+      "message": "Thanks, this is quite useful :)",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 59
+      },
+      "revId": "98a037eba0ee4764c468e85be491156e067e4651",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "52d9f273_b24d50ba",
+        "filename": "android/android-emu/android/snapshot/SnapshotAPI.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-25T03:58:25Z",
+      "side": 1,
+      "message": "What\u0027s the expected behavior when theres multiple connections? It feels like they will interleave. Is that ok? Could there be an opportunity to simplify by restricting to only one connection for SnapshotAPI?",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 69
+      },
+      "revId": "98a037eba0ee4764c468e85be491156e067e4651",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
