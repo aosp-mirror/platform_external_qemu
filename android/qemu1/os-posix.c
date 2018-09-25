@@ -74,7 +74,7 @@ static void termsig_handler(int signal)
     // event.
     skin_winsys_quit_request();
 #else
-    qemu_system_shutdown_request();
+    qemu_system_shutdown_request(SHUTDOWN_CAUSE_GUEST_SHUTDOWN);
 #endif  //!CONFIG_ANDROID
 }
 

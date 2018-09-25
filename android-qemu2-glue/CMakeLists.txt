@@ -82,5 +82,7 @@ set_source_files_properties(${COMMON_QEMU2GLUE_SOURCES} PROPERTIES OBJECT_DEPEND
 
 add_library(libqemu2-glue ${COMMON_QEMU2GLUE_SOURCES})
 
+add_library(libqemu2-testbuild tests/build_consistency.cpp)
+
 target_include_directories(libqemu2-glue PRIVATE ../android/third_party/libdtb/include/)
 
