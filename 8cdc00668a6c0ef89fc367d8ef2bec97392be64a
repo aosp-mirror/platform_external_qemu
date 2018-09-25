@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "eb5296ff_a9454cb9",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-25T00:24:05Z",
+      "side": 1,
+      "message": "It sure can, I\u0027ll create follow-up change.",
+      "parentUuid": "725f52ea_0ffec812",
+      "range": {
+        "startLine": 105,
+        "startChar": 0,
+        "endLine": 106,
+        "endChar": 60
+      },
+      "revId": "8cdc00668a6c0ef89fc367d8ef2bec97392be64a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "31d43ce1_cd06aed4",
         "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.h",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2018-09-24T23:49:44Z",
       "side": 1,
       "message": "nit: if (mPipes.erase(handle.id) \u003d\u003d 0) { ... }",
+      "range": {
+        "startLine": 165,
+        "startChar": 11,
+        "endLine": 166,
+        "endChar": 37
+      },
+      "revId": "8cdc00668a6c0ef89fc367d8ef2bec97392be64a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9b193d6f_49f27e2a",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-25T00:24:05Z",
+      "side": 1,
+      "message": "Good fix, I\u0027ll include this in my follow-up.",
+      "parentUuid": "31d43ce1_cd06aed4",
       "range": {
         "startLine": 165,
         "startChar": 11,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "c8dd36ed_f59f1bf4",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-25T00:24:05Z",
+      "side": 1,
+      "message": "Yeah, this really isn\u0027t that useful to users, it indicates a programming error for the caller, but not a strong enough one to crash on release.  I\u0027ll make this an assert.",
+      "parentUuid": "ca76d985_2b8f5fdc",
+      "revId": "8cdc00668a6c0ef89fc367d8ef2bec97392be64a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "56def86a_3d12aa87",
         "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
         "patchSetId": 3
@@ -76,6 +142,30 @@
       "writtenOn": "2018-09-24T23:49:44Z",
       "side": 1,
       "message": "somehow word \u0027Simple\u0027 doesn\u0027t fit for me with the rest of the function name",
+      "range": {
+        "startLine": 371,
+        "startChar": 4,
+        "endLine": 371,
+        "endChar": 48
+      },
+      "revId": "8cdc00668a6c0ef89fc367d8ef2bec97392be64a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb9bf311_912607cc",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-25T00:24:05Z",
+      "side": 1,
+      "message": "Hmm, yeah but I\u0027m drawing a blank for a better name.  This is similar to AndroidMessagePipe\u0027s registerAndroidMessagePipeService which takes a decodeAndExecute callback.\n\nCurrently this is for test code, but the AndroidMessagePipe one is used in product as well (I\u0027d like this to replace AndroidMessagePipe eventually).\n\nI also don\u0027t want to conflate this callback with the AndroidPipe::Service::add() method of registration by removing \"Simple\".\n\nMaybe I can add overloads?\nregisterAndroidAsyncMessagePipeService(const char* name, std::function\u003c...\u003e lambda);\nregisterAndroidAsyncMessagePipeService(AsyncMessagePipeService* service) { AndroidPipe::Service::add(service); }",
+      "parentUuid": "56def86a_3d12aa87",
       "range": {
         "startLine": 371,
         "startChar": 4,
