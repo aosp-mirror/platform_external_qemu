@@ -46,6 +46,30 @@
       "revId": "4f2529b71eff0d25c0056f0ef8a3581819b569e0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "adc0cb54_b5823eaa",
+        "filename": "android/android-emu/android/emulator-window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-25T18:11:54Z",
+      "side": 1,
+      "message": "If only we had ThenChange for gerrit.  Maybe we could move this to a header and then create a new file that includes both the qemu one and this one, then does a static_assert?  I\u0027m concerned about the maintenance cost when taking new qemu drops.\n\nWe could also potentially simplify the enum so we have less to static_assert, or potentially change it to a const int (or whatever the same-sized type is, potentially verifiable with a static_assert too: static_assert(sizeof(int) \u003d\u003d sizeof(QemuEnum))\n\ntypedef enum QemuShutdownCause {\n    QEMU_SHUTDOWN_CAUSE_HOST_UI \u003d 4,\n    QEMU_SHUTDOWN_CAUSE__MAX \u003d 8,\n} QemuShutdownCause;",
+      "parentUuid": "17988f6b_42475987",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 51
+      },
+      "revId": "4f2529b71eff0d25c0056f0ef8a3581819b569e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
