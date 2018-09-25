@@ -97,6 +97,7 @@ include $(EMUGL_PATH)/host/libs/libOpenglRender/Android.mk
 include $(EMUGL_PATH)/host/libs/libGLES12Translator/Android.mk
 include $(EMUGL_PATH)/host/libs/libGLSnapshot/Android.mk
 
+ifneq ($(BUILD_TARGET_OS),windows)
 ifeq (64,$(BUILD_TARGET_BITS))
 # Guest libraries built for host
 # Note: must be included last as it overrides existing
@@ -104,6 +105,7 @@ ifeq (64,$(BUILD_TARGET_BITS))
 GOLDFISH_OPENGL_BUILD_FOR_HOST := true
 include $(EMUGL_PATH)/guest/Android.mk
 include $(GOLDFISH_OPENGL_DIR)/Android.mk
+endif
 endif
 
 LOCAL_PATH := $(EMUGL_OLD_LOCAL_PATH)
