@@ -18,6 +18,7 @@
 #include "android/base/files/MemStream.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/ResultMatchers.h"
+#include "android/base/testing/TestEvent.h"
 #include "android/base/testing/TestLooper.h"
 #include "android/emulation/VmLock.h"
 #include "android/emulation/android_pipe_device.h"
@@ -41,43 +42,6 @@ using testing::ElementsAre;
 using testing::StrEq;
 
 namespace android {
-
-class TestEvent {
-    DISALLOW_COPY_AND_ASSIGN(TestEvent);
-
-public:
-    TestEvent() = default;
-
-    void signal() {
-        {
-            std::lock_guard<std::mutex> lock(mMutex);
-            ++mSignaledCount;
-        }
-        mCv.notify_one();
-    }
-
-    bool isSignaled() {
-        std::lock_guard<std::mutex> lock(mMutex);
-        return mSignaledCount > 0;
-    }
-
-    void wait() {
-        std::unique_lock<std::mutex> lock(mMutex);
-        if (mSignaledCount > 0 ||
-            mCv.wait_for(lock, std::chrono::seconds(10),
-                         [this] { return mSignaledCount > 0; })) {
-            ASSERT_GT(mSignaledCount, 0);
-            --mSignaledCount;
-        } else {
-            FAIL() << "TestEvent::wait() timed out.";
-        }
-    }
-
-private:
-    std::condition_variable mCv;
-    std::mutex mMutex;
-    size_t mSignaledCount = 0;
-};
 
 class AndroidAsyncMessagePipeTest : public ::testing::Test {
 protected:
