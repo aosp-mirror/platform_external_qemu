@@ -22,6 +22,39 @@
 
 ANDROID_BEGIN_HEADER
 
+// Enumeration of various causes for shutdown. Please keep this in sync
+// with the similar enum in include/sysem/sysemu.h.
+typedef enum QemuShutdownCause {
+    QEMU_SHUTDOWN_CAUSE_NONE,              /* No shutdown request pending */
+    QEMU_SHUTDOWN_CAUSE_HOST_ERROR,        /* An error prevents further use of guest */
+    QEMU_SHUTDOWN_CAUSE_HOST_QMP,          /* Reaction to a QMP command, like 'quit' */
+    QEMU_SHUTDOWN_CAUSE_HOST_SIGNAL,       /* Reaction to a signal, such as SIGINT */
+    QEMU_SHUTDOWN_CAUSE_HOST_UI,           /* Reaction to UI event, like window close */
+    QEMU_SHUTDOWN_CAUSE_GUEST_SHUTDOWN,    /* Guest shutdown/suspend request, via
+                                              ACPI or other hardware-specific means */
+    QEMU_SHUTDOWN_CAUSE_GUEST_RESET,       /* Guest reset request, and command line
+                                              turns that into a shutdown */
+    QEMU_SHUTDOWN_CAUSE_GUEST_PANIC,       /* Guest panicked, and command line turns
+                                              that into a shutdown */
+    QEMU_SHUTDOWN_CAUSE__MAX,
+} QemuShutdownCause;
+
+#define SHUTDOWN_CAUSE_STATIC_ASSERT_ERROR_MESSAGE "QEMU shutdown cause values differ from AndroidEmu's!" \
+
+#define SHUTDOWN_CAUSE_STATIC_MATCH(origCause) \
+    static_assert((int)(QEMU_##origCause) == (int)(origCause), SHUTDOWN_CAUSE_STATIC_ASSERT_ERROR_MESSAGE);
+
+#define STATIC_ASSERT_SHUTDOWN_CAUSE_MATCHES \
+    SHUTDOWN_CAUSE_STATIC_MATCH(SHUTDOWN_CAUSE_NONE) \
+    SHUTDOWN_CAUSE_STATIC_MATCH(SHUTDOWN_CAUSE_HOST_ERROR) \
+    SHUTDOWN_CAUSE_STATIC_MATCH(SHUTDOWN_CAUSE_HOST_QMP) \
+    SHUTDOWN_CAUSE_STATIC_MATCH(SHUTDOWN_CAUSE_HOST_SIGNAL) \
+    SHUTDOWN_CAUSE_STATIC_MATCH(SHUTDOWN_CAUSE_HOST_UI) \
+    SHUTDOWN_CAUSE_STATIC_MATCH(SHUTDOWN_CAUSE_GUEST_SHUTDOWN) \
+    SHUTDOWN_CAUSE_STATIC_MATCH(SHUTDOWN_CAUSE_GUEST_RESET) \
+    SHUTDOWN_CAUSE_STATIC_MATCH(SHUTDOWN_CAUSE_GUEST_PANIC) \
+    SHUTDOWN_CAUSE_STATIC_MATCH(SHUTDOWN_CAUSE__MAX) \
+
 typedef struct {
     int (*onStart)(void* opaque, const char* name);
     void (*onEnd)(void* opaque, const char* name, int res);

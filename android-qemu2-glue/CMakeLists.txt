@@ -74,6 +74,7 @@ set(COMMON_QEMU2GLUE_SOURCES
     dtb.cpp
     snapshot_compression.cpp
     telephony/modem_init.c
+    tests/build_consistency.cpp
     utils/stream.cpp
     )
 
