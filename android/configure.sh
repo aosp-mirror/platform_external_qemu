@@ -259,6 +259,7 @@ OPTION_MIPS=
 OPTION_SNAPSHOT_PROFILE=no
 OPTION_MIN_BUILD=no
 OPTION_AEMU64_ONLY=no
+OPTION_GOLDFISH_OPENGL_DIR=no
 ANDROID_SDK_TOOLS_REVISION=
 ANDROID_SDK_TOOLS_BUILD_NUMBER=
 
@@ -275,12 +276,14 @@ OPTION_CXX=
 VERBOSITY=0
 OPTION_SNAPSHOT_PROFILE=0
 
-AOSP_PREBUILTS_DIR=$(dirname "$0")/../../../prebuilts
-if [ -d "$AOSP_PREBUILTS_DIR" ]; then
-    AOSP_PREBUILTS_DIR=$(cd "$AOSP_PREBUILTS_DIR" && pwd -P 2>/dev/null)
+AOSP_ROOT_DIR=$(dirname "$0")/../../../
+if [ -d "$AOSP_ROOT_DIR" ]; then
+    AOSP_ROOT_DIR=$(cd "$AOSP_ROOT_DIR" && pwd -P 2>/dev/null)
 else
-    AOSP_PREBUILTS_DIR=
+    AOSP_ROOT_DIR=
 fi
+
+AOSP_PREBUILTS_DIR=$AOSP_ROOT_DIR/prebuilts
 
 for opt do
   optarg=`expr "x$opt" : 'x[^=]*=\(.*\)'`
@@ -362,6 +365,8 @@ for opt do
   -min|--min-build) OPTION_MIN_BUILD=yes
   ;;
   -aemu64only|--aemu64-only) OPTION_AEMU64_ONLY=yes
+  ;;
+  -goldfish-opengl|--goldfish-opengl=*) OPTION_GOLDFISH_OPENGL_DIR=yes
   ;;
   *)
     echo "unknown option '$opt', use --help"
@@ -860,6 +865,14 @@ if [ "$OPTION_AEMU64_ONLY" == "yes" ]; then
     PREBUILT_ARCHS="x86_64"
 fi
 
+GOLDFISH_OPENGL_DIR=$AOSP_ROOT_DIR/device/generic/goldfish-opengl
+
+if [ "$OPTION_GOLDFISH_OPENGL_DIR" = "yes" ]; then
+    GOLDFISH_OPENGL_DIR=$OPTION_GOLDFISH_OPENGL_DIR
+fi
+
+log "Guest OpenGL driver location: $GOLDFISH_OPENGL_DIR"
+
 ###
 ### Copy tcmalloc if available
 ###
@@ -1294,6 +1307,7 @@ echo "FFMPEG_PREBUILTS_DIR := $FFMPEG_PREBUILTS_DIR" >> $config_mk
 echo "X264_PREBUILTS_DIR := $X264_PREBUILTS_DIR" >> $config_mk
 echo "LIBVPX_PREBUILTS_DIR := $LIBVPX_PREBUILTS_DIR" >> $config_mk
 echo "VIRGLRENDERER_PREBUILTS_DIR := $VIRGLRENDERER_PREBUILTS_DIR" >> $config_mk
+echo "GOLDFISH_OPENGL_DIR := $GOLDFISH_OPENGL_DIR" >> $config_mk
 
 
 if [ "$HOST_OS" = "linux" ]; then
