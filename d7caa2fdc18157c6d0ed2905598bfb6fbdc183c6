@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "54ca18c0_512fe965",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-25T01:00:00Z",
+      "side": 1,
+      "message": "I\u0027ve confirmed that the caller handles it correctly, these are simply renamed overrides from AndroidPipe:\n\n    int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) final {\n        return writeBuffers(buffers, numBuffers);\n    }\n\n    int onGuestSend(const AndroidPipeBuffer* buffers, int numBuffers) final {\n        return readBuffers(buffers, numBuffers);\n    }\n\nThere\u0027s also unittest coverage that validates this case, and I added a comment to AndroidPipe to indicate that pipe isn\u0027t valid after onGuestRecv/onGuestSend.  Let me know if you have any other suggestions.",
+      "parentUuid": "aa00a1a0_59b15031",
+      "range": {
+        "startLine": 98,
+        "startChar": 29,
+        "endLine": 98,
+        "endChar": 40
+      },
+      "revId": "d7caa2fdc18157c6d0ed2905598bfb6fbdc183c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7951081c_44cc4850",
         "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.cpp",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "0029aef6_79b32e8a",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-25T01:00:00Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "7951081c_44cc4850",
+      "range": {
+        "startLine": 151,
+        "startChar": 29,
+        "endLine": 151,
+        "endChar": 41
+      },
+      "revId": "d7caa2fdc18157c6d0ed2905598bfb6fbdc183c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbb27579_5f1a72d8",
         "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.cpp",
         "patchSetId": 3
@@ -68,6 +116,30 @@
       "revId": "d7caa2fdc18157c6d0ed2905598bfb6fbdc183c6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5c07b671_64466829",
+        "filename": "android/android-emu/android/emulation/AndroidAsyncMessagePipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-09-25T01:00:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fbb27579_5f1a72d8",
+      "range": {
+        "startLine": 153,
+        "startChar": 35,
+        "endLine": 153,
+        "endChar": 42
+      },
+      "revId": "d7caa2fdc18157c6d0ed2905598bfb6fbdc183c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
