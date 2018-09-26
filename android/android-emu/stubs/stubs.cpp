@@ -11,30 +11,5 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <cstdarg>
 
-#include <stdio.h>
-
-#define LOG_BUF_SIZE 1024
-
-#ifdef _WIN32
-#define EXPORT __declspec(dllexport)
-#else
-#define EXPORT __attribute__((visibility("default")))
-#endif
-
-extern "C" {
-
-EXPORT int __android_log_print(int prio, const char* tag, const char* fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
-    return 0;
-}
-
-EXPORT void __android_log_assert(const char* cond, const char* tag, const char* fmt, ...) {
-    // Placeholder
-}
-
-}
+int guest_data_partition_mounted = 0;
