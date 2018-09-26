@@ -31,7 +31,7 @@ extern "C" EmulatorWindow* emulator_window_get(void) {
     return NULL;
 }
 
-const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent = nullptr;
+extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
 
 class ScreenCapturerTest : public ::testing::Test {
 public:

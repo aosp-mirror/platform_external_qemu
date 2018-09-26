@@ -503,8 +503,8 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
     // Snapshots vary in size. They can be close to a GB.
     // Rather than taking all the remaining disk space,
     // save only if we have 2 GB of space available.
-    if (System::isUnderDiskPressure(
-            avdInfo_getContentPath(android_avdInfo))) {
+    if (android_avdInfo &&
+        System::isUnderDiskPressure(avdInfo_getContentPath(android_avdInfo))) {
         showError("Not saving snapshot: Disk space < 2 GB");
         if (reportMetrics) {
             appendFailedSave(
@@ -663,7 +663,8 @@ OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
     }
     mVmOperations.snapshotSave(name, this, nullptr);
     mLastSaveDuration.emplace(sw.elapsedUs() / 1000);
-    return mSaver->status();
+    // In unit tests, we don't have a saver, so trivially succeed.
+    return mSaver ? mSaver->status() : OperationStatus::Ok;
 }
 
 void Snapshotter::setRamFile(const char* path, bool shared) {
@@ -697,7 +698,8 @@ OperationStatus Snapshotter::saveGeneric(const char* name) {
     OperationStatus res = OperationStatus::Error;
     if (checkSafeToSave(name)) {
         res = save(false /* not on exit */, name);
-        handleGenericSave(name, res);
+        handleGenericSave(name, res,
+                          /* report metrics */ mSaver ? true : false);
     }
     return res;
 }
@@ -941,5 +943,5 @@ void androidSnapshot_initialize(
 
 void androidSnapshot_finalize() {
     android::snapshot::Quickboot::finalize();
-    android::snapshot::sInstance->~Snapshotter();
+    android::snapshot::sInstance.clear();
 }

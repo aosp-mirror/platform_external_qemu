@@ -1,22 +1,26 @@
-// Copyright 2018 The Android Open Source Project
+// Copyright (C) 2018 The Android Open Source Project
 //
-// This software is licensed under the terms of the GNU General Public
-// License version 2, as published by the Free Software Foundation, and
-// may be copied, distributed, and modified under those terms.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "android/offworld/OffworldPipe.h"
 
 #include "android/base/Log.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
-#include "android/emulation/AndroidMessagePipe.h"
+#include "android/emulation/AndroidAsyncMessagePipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/metrics/MetricsLogging.h"
-#include "android/offworld/proto/offworld.pb.h"
 #include "android/snapshot/SnapshotAPI.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
@@ -34,13 +38,6 @@ using android::base::Optional;
 
 namespace {
 
-struct OffworldState {
-    android::base::Lock sLock = {};
-};
-
-static constexpr uint32_t kProtocolVersion = 1;
-android::base::LazyInstance<OffworldState> sOffworldState;
-
 static std::vector<uint8_t> protoToVector(
         const google::protobuf::Message& message) {
     const int size = message.ByteSize();
@@ -49,59 +46,49 @@ static std::vector<uint8_t> protoToVector(
     return result;
 }
 
-class OffworldPipe : public android::AndroidMessagePipe {
+class OffworldPipe : public android::AndroidAsyncMessagePipe {
 public:
-    class Service : public android::AndroidPipe::Service {
+    class Service
+        : public android::AndroidAsyncMessagePipe::Service<OffworldPipe> {
+        typedef android::AndroidAsyncMessagePipe::Service<OffworldPipe> Super;
+
     public:
-        Service() : android::AndroidPipe::Service("OffworldPipe") {}
-        bool canLoad() const override { return true; }
+        Service() : Super("OffworldPipe") {}
+        ~Service() {
+            android::base::AutoLock lock(sOffworldLock);
+            sOffworldInstance = nullptr;
+        }
 
-        virtual android::AndroidPipe* create(void* hwPipe, const char* args)
-                override {
-            // To avoid complicated synchronization issues, only 1 instance
-            // of a OffworldPipe is allowed at a time
-            if (sOffworldState->sLock.tryLock()) {
-                return new OffworldPipe(hwPipe, this);
-            } else {
-                return nullptr;
+        static Service* get() {
+            android::base::AutoLock lock(sOffworldLock);
+            if (!sOffworldInstance) {
+                sOffworldInstance = new Service();
             }
+            return sOffworldInstance;
         }
 
-        android::AndroidPipe* load(void* hwPipe,
-                                   const char* args,
-                                   android::base::Stream* stream) override {
-            __attribute__((unused)) bool success =
-                    sOffworldState->sLock.tryLock();
-            assert(success);
-            return new OffworldPipe(hwPipe, this, stream);
+        virtual void postSave(android::base::Stream* stream) override {
+            android::snapshot::onOffworldSave(stream);
+            Super::postSave(stream);
         }
+
+        virtual void postLoad(android::base::Stream* stream) override {
+            android::snapshot::onOffworldLoad(stream);
+            Super::postLoad(stream);
+        }
+
+    private:
+        // Since OffworldPipe::Service may be destroyed in unittests, we cannot
+        // use LazyInstance. Instead store the pointer and clear it on destruct.
+        static Service* sOffworldInstance;
+        static android::base::StaticLock sOffworldLock;
     };
-    OffworldPipe(void* hwPipe,
-                 Service* service,
-                 android::base::Stream* loadStream = nullptr)
-        : android::AndroidMessagePipe(hwPipe,
-                                      service,
-                                      std::bind(&OffworldPipe::decodeAndExecute,
-                                                this,
-                                                std::placeholders::_1,
-                                                std::placeholders::_2),
-                                      loadStream) {
-        ANDROID_IF_DEBUG(assert(sOffworldState->sLock.isLocked()));
-        const bool isLoad = static_cast<bool>(loadStream);
-        if (isLoad) {
-            // TODO(jwmcglynn): Store state on the stream to make sure handshake
-            // was successful.
-            mHandshakeComplete = true;
-            resetRecvPayload(android::snapshot::getLoadMetadata());
-        }
-    }
-    ~OffworldPipe() { sOffworldState->sLock.unlock(); }
+
+    OffworldPipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs)
+        : android::AndroidAsyncMessagePipe(service, std::move(pipeArgs)) {}
 
 private:
-    void decodeAndExecute(const std::vector<uint8_t>& input,
-                          std::vector<uint8_t>* output) {
-        output->clear();
-
+    void onMessage(const std::vector<uint8_t>& input) override {
         if (!mHandshakeComplete) {
             offworld::ConnectHandshake request;
             offworld::ConnectHandshakeResponse response;
@@ -110,7 +97,7 @@ private:
 
             bool error = false;
             if (request.ParseFromArray(input.data(), input.size())) {
-                if (request.version() != kProtocolVersion) {
+                if (request.version() != android::offworld::kProtocolVersion) {
                     VLOG(offworld) << "Unsupported offworld version: "
                                    << request.version();
                     error = true;
@@ -124,25 +111,21 @@ private:
                                             RESULT_ERROR_UNKNOWN);
             }
 
-            // TODO(jwmcglynn): Close the pipe if there was a handshake error.
-            if (!error) {
-                mHandshakeComplete = true;
+            send(std::move(protoToVector(response)));
+            mHandshakeComplete = !error;
+            if (error) {
+                queueCloseFromHost();
             }
-
-            *output = std::move(protoToVector(response));
 
         } else {
             offworld::Request request;
-            offworld::Response response;
-            bool shouldReply = false;
 
             if (!request.ParseFromArray(input.data(), input.size())) {
                 LOG(ERROR) << "Offworld lib message parsing failed.";
             } else {
                 switch (request.module_case()) {
                     case offworld::Request::ModuleCase::kSnapshot:
-                        handleSnapshotPb(request.snapshot(), &shouldReply,
-                                         &response);
+                        handleSnapshotPb(request.snapshot());
                         break;
                     case offworld::Request::ModuleCase::kAutomation:
                         // TODO
@@ -152,23 +135,17 @@ private:
                                       "message!";
                 }
             }
-            if (shouldReply) {
-                *output = std::move(protoToVector(response));
-            }
         }
     }
 
-    static void handleSnapshotPb(const offworld::SnapshotRequest& request,
-                                 bool* shouldReply,
-                                 offworld::Response* response) {
+    void handleSnapshotPb(const offworld::SnapshotRequest& request) {
         using MS = offworld::SnapshotRequest;
 
         switch (request.function_case()) {
             case MS::FunctionCase::kCreateCheckpoint: {
                 android::snapshot::createCheckpoint(
+                        getHandle(),
                         request.create_checkpoint().snapshot_name());
-                *shouldReply = true;
-                response->Clear();
                 break;
             }
             case MS::FunctionCase::kGotoCheckpoint: {
@@ -196,30 +173,30 @@ private:
                 }
 
                 android::snapshot::gotoCheckpoint(
-                        gotoCheckpoint.snapshot_name(),
+                        getHandle(), gotoCheckpoint.snapshot_name(),
                         gotoCheckpoint.metadata(), shareMode);
-                *shouldReply = false;
                 break;
             }
             case MS::FunctionCase::kForkReadOnlyInstances: {
                 android::snapshot::forkReadOnlyInstances(
+                        getHandle(),
                         request.fork_read_only_instances().num_instances());
-                *shouldReply = false;
                 break;
             }
             case MS::FunctionCase::kDoneInstance: {
-                android::snapshot::doneInstance();
-                *shouldReply = false;
+                android::snapshot::doneInstance(getHandle());
                 break;
             }
             default:
                 LOG(ERROR) << "Unrecognized offworld snapshot message";
-                *shouldReply = false;
         }
     }
 
     bool mHandshakeComplete = false;
 };
+
+OffworldPipe::Service* OffworldPipe::Service::sOffworldInstance = nullptr;
+android::base::StaticLock OffworldPipe::Service::sOffworldLock;
 
 }  // namespace
 
@@ -228,7 +205,24 @@ namespace offworld {
 
 void registerOffworldPipeService() {
     if (android::featurecontrol::isEnabled(android::featurecontrol::Offworld)) {
-        android::AndroidPipe::Service::add(new OffworldPipe::Service());
+        registerAsyncMessagePipeService(OffworldPipe::Service::get());
+    }
+}
+
+void registerOffworldPipeServiceForTest() {
+    registerAsyncMessagePipeService(OffworldPipe::Service::get());
+}
+
+// Send a response to an Offworld pipe.
+bool sendResponse(android::AsyncMessagePipeHandle pipe,
+                  const ::offworld::Response& response) {
+    OffworldPipe::Service* service = OffworldPipe::Service::get();
+    auto pipeRefOpt = service->getPipe(pipe);
+    if (pipeRefOpt) {
+        pipeRefOpt->pipe->send(std::move(protoToVector(response)));
+        return true;
+    } else {
+        return false;
     }
 }
 
