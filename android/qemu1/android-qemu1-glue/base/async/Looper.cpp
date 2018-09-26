@@ -13,6 +13,7 @@
 
 #include "android/base/Log.h"
 #include "android/base/sockets/SocketUtils.h"
+#include "android/emulation/control/vm_operations.h"
 #include "android-qemu1-glue/base/files/QemuFileStream.h"
 #include "android/utils/stream.h"
 
@@ -31,7 +32,7 @@ namespace qemu {
 
 namespace {
 
-extern "C" void qemu_system_shutdown_request(void);
+extern "C" void qemu_system_shutdown_request(QemuShutdownCause cause);
 
 typedef ::android::base::Looper BaseLooper;
 typedef ::android::base::Looper::Timer BaseTimer;
@@ -314,7 +315,7 @@ public:
     }
 
     virtual void forceQuit() {
-        qemu_system_shutdown_request();
+        qemu_system_shutdown_request(QEMU_SHUTDOWN_CAUSE_HOST_SIGNAL);
     }
 
 private:

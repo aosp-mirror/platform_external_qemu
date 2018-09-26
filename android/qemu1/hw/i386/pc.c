@@ -433,7 +433,7 @@ static void bochs_bios_write(void *opaque, uint32_t addr, uint32_t val)
             shutdown_index++;
             if (shutdown_index == 8) {
                 shutdown_index = 0;
-                qemu_system_shutdown_request();
+                qemu_system_shutdown_request(SHUTDOWN_CAUSE_GUEST_SHUTDOWN);
             }
         } else {
             shutdown_index = 0;

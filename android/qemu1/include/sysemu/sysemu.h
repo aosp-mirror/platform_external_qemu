@@ -35,6 +35,25 @@ VMChangeStateEntry *qemu_add_vm_change_state_handler(VMChangeStateHandler *cb,
                                                      void *opaque);
 void qemu_del_vm_change_state_handler(VMChangeStateEntry *e);
 
+// Enumeration of various causes for shutdown. This is purely
+// to make interfaces consistent for qemu_system_shutdown_request
+// between QEMU1 and QEMU2. No attempt is made to actually
+// following the semantics of this.
+typedef enum ShutdownCause {
+    SHUTDOWN_CAUSE_NONE,              /* No shutdown request pending */
+    SHUTDOWN_CAUSE_HOST_ERROR,        /* An error prevents further use of guest */
+    SHUTDOWN_CAUSE_HOST_QMP,          /* Reaction to a QMP command, like 'quit' */
+    SHUTDOWN_CAUSE_HOST_SIGNAL,       /* Reaction to a signal, such as SIGINT */
+    SHUTDOWN_CAUSE_HOST_UI,           /* Reaction to UI event, like window close */
+    SHUTDOWN_CAUSE_GUEST_SHUTDOWN,    /* Guest shutdown/suspend request, via
+                                         ACPI or other hardware-specific means */
+    SHUTDOWN_CAUSE_GUEST_RESET,       /* Guest reset request, and command line
+                                         turns that into a shutdown */
+    SHUTDOWN_CAUSE_GUEST_PANIC,       /* Guest panicked, and command line turns
+                                         that into a shutdown */
+    SHUTDOWN_CAUSE__MAX,
+} ShutdownCause;
+
 void vm_start(void);
 void vm_stop(int reason);
 
@@ -59,7 +78,8 @@ int icount_time_shift;
 int tcg_has_work(void);
 
 void qemu_system_reset_request(void);
-void qemu_system_shutdown_request(void);
+
+void qemu_system_shutdown_request(ShutdownCause cause);
 void qemu_system_powerdown_request(void);
 int qemu_shutdown_requested(void);
 int qemu_reset_requested(void);
