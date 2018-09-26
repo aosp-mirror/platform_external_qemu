@@ -68,6 +68,7 @@ private:
     // hwpipe is an opaque pointer that will be used as the hwpipe id, generate
     // one with createNewHwPipeId().
     void* open(void* hwpipe);
+    ssize_t writeInternal(void* pipe, const void* buffer, size_t len);
     // Returns the host-side pipe for a connector pipe, if the pipe has been
     // reset.
     void* popHostPipe(void* connectorPipe);
