@@ -15,10 +15,11 @@
 
 #include <memory>
 
-#include "android/base/files/Stream.h"
-#include "android/opengl/emugl_config.h"
 #include "OpenglRender/Renderer.h"
 #include "OpenglRender/render_api_types.h"
+#include "android/base/files/Stream.h"
+#include "android/emulation/RefcountPipe.h"
+#include "android/opengl/emugl_config.h"
 
 namespace emugl {
 
@@ -73,6 +74,8 @@ public:
     // There might be only one renderer.
     virtual RendererPtr initRenderer(int width, int height,
                                      bool useSubWindow, bool egl2egl) = 0;
+
+    virtual OnLastColorBufferRef getOnLastColorBufferRef() = 0;
 };
 
 using RenderLibPtr = std::unique_ptr<RenderLib>;
