@@ -205,12 +205,12 @@ namespace offworld {
 
 void registerOffworldPipeService() {
     if (android::featurecontrol::isEnabled(android::featurecontrol::Offworld)) {
-        android::AndroidPipe::Service::add(OffworldPipe::Service::get());
+        registerAsyncMessagePipeService(OffworldPipe::Service::get());
     }
 }
 
 void registerOffworldPipeServiceForTest() {
-    android::AndroidPipe::Service::add(OffworldPipe::Service::get());
+    registerAsyncMessagePipeService(OffworldPipe::Service::get());
 }
 
 // Send a response to an Offworld pipe.
