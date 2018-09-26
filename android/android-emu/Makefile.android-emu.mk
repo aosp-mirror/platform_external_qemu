@@ -159,18 +159,19 @@ $(call end-emulator-benchmark)
 #        tests.
 #
 
-$(call start-emulator-library,android-emu)
+# Common definitions
 
 # Workaround for b/115634240
-LOCAL_SOURCE_DEPENDENCIES := $(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
+android_emu_LOCAL_SOURCE_DEPENDENCIES := \
+	$(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
 
-LOCAL_CFLAGS := \
+android_emu_LOCAL_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
     $(LIBCURL_CFLAGS) \
     $(LIBXML2_CFLAGS) \
     $(ANDROID_EMU_CFLAGS) \
 
-LOCAL_C_INCLUDES := \
+android_emu_LOCAL_C_INCLUDES := \
     $(EMUGL_INCLUDES) \
     $(EMUGL_SRCDIR)/shared \
     $(EMULATOR_COMMON_INCLUDES) \
@@ -189,7 +190,7 @@ LOCAL_C_INCLUDES := \
     $(ZLIB_INCLUDES) \
     $(MURMURHASH_INCLUDES) \
 
-LOCAL_SRC_FILES := \
+android_emu_LOCAL_SRC_FILES := \
     android/adb-server.cpp \
     android/automation/AutomationController.cpp \
     android/automation/AutomationEventSink.cpp \
@@ -436,12 +437,12 @@ LOCAL_SRC_FILES := \
 
 # Platform-specific camera capture
 ifeq ($(BUILD_TARGET_OS),linux)
-    LOCAL_SRC_FILES += \
+    android_emu_LOCAL_SRC_FILES += \
         android/camera/camera-capture-linux.c
 endif
 
 ifeq ($(BUILD_TARGET_OS),darwin)
-    LOCAL_SRC_FILES += \
+    android_emu_LOCAL_SRC_FILES += \
         android/camera/camera-capture-mac.m \
         android/opengl/macTouchOpenGL.m \
         android/snapshot/MacSegvHandler.cpp \
@@ -449,11 +450,22 @@ ifeq ($(BUILD_TARGET_OS),darwin)
 endif
 
 ifeq ($(BUILD_TARGET_OS),windows)
-    LOCAL_SRC_FILES += \
+    android_emu_LOCAL_SRC_FILES += \
         android/camera/camera-capture-windows.cpp \
         android/windows_installer.cpp \
 
 endif
+
+# The actual invocation for the static library build.
+$(call start-emulator-library,android-emu)
+
+LOCAL_SOURCE_DEPENDENCIES += $(android_emu_LOCAL_SOURCE_DEPENDENCIES)
+
+LOCAL_CFLAGS += $(android_emu_LOCAL_CFLAGS)
+
+LOCAL_C_INCLUDES += $(android_emu_LOCAL_C_INCLUDES)
+
+LOCAL_SRC_FILES += $(android_emu_LOCAL_SRC_FILES)
 
 # This file can get included multiple times, with different variable
 # declarations. We only want to set LOCAL_COPY_COMMON_PREBUILT_RESOURCES and
@@ -500,6 +512,27 @@ endif
 
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
+
+# Shared library variant of android-emu.
+#
+# Currently incomplete, but eventually we might want to use it in place
+# of a static android-emu library, especially if it means we can develop
+# in android-emu on Windows directly.
+#
+# And eventually, make android-emu both a shared library and minimize the
+# interface between qemu and android-emu so that android-emu can be a plugin
+# and we make minimal or only qemu-specific changes to qemu itself.
+$(call start-emulator-shared-lib,android-emu-shared)
+
+LOCAL_SOURCE_DEPENDENCIES += android_emu_LOCAL_SOURCE_DEPENDENCIES
+
+LOCAL_CFLAGS += android_emu_LOCAL_CFLAGS -fvisibility=default
+
+LOCAL_C_INCLUDES += android_emu_LOCAL_CFLAGS
+
+LOCAL_SRC_FILES += android_emu_LOCAL_SRC_FILES
+
+$(call end-emulator-shared-lib)
 
 # List of static libraries that anything that depends on the base libraries
 # should use.
