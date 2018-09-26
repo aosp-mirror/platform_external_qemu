@@ -159,18 +159,19 @@ $(call end-emulator-benchmark)
 #        tests.
 #
 
-$(call start-emulator-library,android-emu)
+# Common definitions
 
 # Workaround for b/115634240
-LOCAL_SOURCE_DEPENDENCIES := $(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
+android_emu_LOCAL_SOURCE_DEPENDENCIES := \
+	$(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
 
-LOCAL_CFLAGS := \
+android_emu_LOCAL_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
     $(LIBCURL_CFLAGS) \
     $(LIBXML2_CFLAGS) \
     $(ANDROID_EMU_CFLAGS) \
 
-LOCAL_C_INCLUDES := \
+android_emu_LOCAL_C_INCLUDES := \
     $(EMUGL_INCLUDES) \
     $(EMUGL_SRCDIR)/shared \
     $(EMULATOR_COMMON_INCLUDES) \
@@ -189,7 +190,7 @@ LOCAL_C_INCLUDES := \
     $(ZLIB_INCLUDES) \
     $(MURMURHASH_INCLUDES) \
 
-LOCAL_SRC_FILES := \
+android_emu_LOCAL_SRC_FILES := \
     android/adb-server.cpp \
     android/automation/AutomationController.cpp \
     android/automation/AutomationEventSink.cpp \
@@ -215,12 +216,6 @@ LOCAL_SRC_FILES := \
     android/base/sockets/SocketDrainer.cpp \
     android/base/threads/internal/ParallelTaskBase.cpp \
     android/boot-properties.c \
-    android/camera/camera-common.cpp \
-    android/camera/camera-format-converters.c \
-    android/camera/camera-list.cpp \
-    android/camera/camera-metrics.cpp \
-    android/camera/camera-service.c \
-    android/camera/camera-virtualscene.cpp \
     android/car.cpp \
     android/cmdline-option.cpp \
     android/CommonReportedInfo.cpp \
@@ -258,7 +253,6 @@ LOCAL_SRC_FILES := \
     android/emulation/control/FilePusher.cpp \
     android/emulation/control/GooglePlayServices.cpp \
     android/emulation/control/LineConsumer.cpp \
-    android/emulation/control/ScreenCapturer.cpp \
     android/emulation/control/AdbBugReportServices.cpp \
     android/emulation/CpuAccelerator.cpp \
     android/emulation/DmaMap.cpp \
@@ -267,9 +261,7 @@ LOCAL_SRC_FILES := \
     android/emulation/goldfish_sync.cpp \
     android/emulation/hostpipe/HostGoldfishPipe.cpp \
     android/emulation/LogcatPipe.cpp \
-    android/emulation/Keymaster3.cpp \
     android/emulation/FakeRotatingCameraSensor.cpp \
-    android/emulation/QemuMiscPipe.cpp \
     android/emulation/nand_limits.c \
     android/emulation/ParameterList.cpp \
     android/emulation/qemud/android_qemud_client.cpp \
@@ -300,7 +292,6 @@ LOCAL_SRC_FILES := \
     android/gps.c \
     android/gpu_frame.cpp \
     android/help.c \
-    android/http_proxy.c \
     android/HostHwInfo.cpp \
     android/hw-control.c \
     android/hw-events.c \
@@ -314,11 +305,9 @@ LOCAL_SRC_FILES := \
     android/loadpng.c \
     android/location/Point.cpp \
     android/location/Route.cpp \
-    android/main-common.c \
     android/main-help.cpp \
     android/main-emugl.cpp \
     android/main-kernel-parameters.cpp \
-    android/main-qemu-parameters.cpp \
     android/metrics/AdbLivenessChecker.cpp \
     android/metrics/AsyncMetricsReporter.cpp \
     android/metrics/CrashMetricsReporting.cpp \
@@ -341,7 +330,6 @@ LOCAL_SRC_FILES := \
     android/network/control.cpp \
     android/network/constants.c \
     android/network/globals.c \
-    android/offworld/OffworldPipe.cpp \
     android/opengl/EmuglBackendList.cpp \
     android/opengl/EmuglBackendScanner.cpp \
     android/opengl/emugl_config.cpp \
@@ -366,7 +354,6 @@ LOCAL_SRC_FILES := \
     android/proxy/proxy_http_rewriter.c \
     android/proxy/proxy_setup.cpp \
     android/proxy/ProxyUtils.cpp \
-    android/qemu-setup.cpp \
     android/qemu-tcpdump.c \
     android/qt/qt_path.cpp \
     android/qt/qt_setup.cpp \
@@ -394,7 +381,6 @@ LOCAL_SRC_FILES := \
     android/snapshot/RamSnapshotTesting.cpp \
     android/snapshot/Saver.cpp \
     android/snapshot/Snapshot.cpp \
-    android/snapshot/SnapshotAPI.cpp \
     android/snapshot/Snapshotter.cpp \
     android/snapshot/TextureLoader.cpp \
     android/snapshot/TextureSaver.cpp \
@@ -409,7 +395,6 @@ LOCAL_SRC_FILES := \
     android/telephony/sms.c \
     android/telephony/sysdeps.c \
     android/telephony/TagLengthValue.cpp \
-    android/test/checkboot.cpp \
     android/uncompress.cpp \
     android/update-check/UpdateChecker.cpp \
     android/update-check/VersionExtractor.cpp \
@@ -420,6 +405,55 @@ LOCAL_SRC_FILES := \
     android/utils/sockets.c \
     android/utils/looper.cpp \
     android/verified-boot/load_config.cpp \
+    android/wear-agent/android_wear_agent.cpp \
+    android/wear-agent/WearAgent.cpp \
+    android/wear-agent/PairUpWearPhone.cpp \
+
+# Platform-specific camera capture
+ifeq ($(BUILD_TARGET_OS),linux)
+    android_emu_dependent_LOCAL_SRC_FILES += \
+        android/camera/camera-capture-linux.c \
+
+endif
+
+ifeq ($(BUILD_TARGET_OS),darwin)
+    android_emu_LOCAL_SRC_FILES += \
+        android/opengl/macTouchOpenGL.m \
+        android/snapshot/MacSegvHandler.cpp \
+
+    android_emu_dependent_LOCAL_SRC_FILES += \
+        android/camera/camera-capture-mac.m \
+
+endif
+
+ifeq ($(BUILD_TARGET_OS),windows)
+    android_emu_LOCAL_SRC_FILES += \
+        android/windows_installer.cpp \
+
+    android_emu_dependent_LOCAL_SRC_FILES += \
+        android/camera/camera-capture-windows.cpp \
+
+endif
+
+# Source files in androidEmu that are dependent on other static
+# libraries being there.
+android_emu_dependent_LOCAL_SRC_FILES += \
+    android/camera/camera-common.cpp \
+    android/camera/camera-format-converters.c \
+    android/camera/camera-list.cpp \
+    android/camera/camera-metrics.cpp \
+    android/camera/camera-service.c \
+    android/camera/camera-virtualscene.cpp \
+    android/emulation/control/ScreenCapturer.cpp \
+    android/emulation/Keymaster3.cpp \
+    android/emulation/QemuMiscPipe.cpp \
+    android/http_proxy.c \
+    android/main-common.c \
+    android/main-qemu-parameters.cpp \
+    android/offworld/OffworldPipe.cpp \
+    android/qemu-setup.cpp \
+    android/snapshot/SnapshotAPI.cpp \
+    android/test/checkboot.cpp \
     android/virtualscene/MeshSceneObject.cpp \
     android/virtualscene/PosterInfo.cpp \
     android/virtualscene/PosterSceneObject.cpp \
@@ -430,30 +464,17 @@ LOCAL_SRC_FILES := \
     android/virtualscene/SceneObject.cpp \
     android/virtualscene/TextureUtils.cpp \
     android/virtualscene/VirtualSceneManager.cpp \
-    android/wear-agent/android_wear_agent.cpp \
-    android/wear-agent/WearAgent.cpp \
-    android/wear-agent/PairUpWearPhone.cpp \
 
-# Platform-specific camera capture
-ifeq ($(BUILD_TARGET_OS),linux)
-    LOCAL_SRC_FILES += \
-        android/camera/camera-capture-linux.c
-endif
+# The actual invocation for the static library build.
+$(call start-emulator-library,android-emu)
 
-ifeq ($(BUILD_TARGET_OS),darwin)
-    LOCAL_SRC_FILES += \
-        android/camera/camera-capture-mac.m \
-        android/opengl/macTouchOpenGL.m \
-        android/snapshot/MacSegvHandler.cpp \
+LOCAL_SOURCE_DEPENDENCIES += $(android_emu_LOCAL_SOURCE_DEPENDENCIES)
 
-endif
+LOCAL_CFLAGS += $(android_emu_LOCAL_CFLAGS)
 
-ifeq ($(BUILD_TARGET_OS),windows)
-    LOCAL_SRC_FILES += \
-        android/camera/camera-capture-windows.cpp \
-        android/windows_installer.cpp \
+LOCAL_C_INCLUDES += $(android_emu_LOCAL_C_INCLUDES)
 
-endif
+LOCAL_SRC_FILES += $(android_emu_LOCAL_SRC_FILES) $(android_emu_dependent_LOCAL_SRC_FILES)
 
 # This file can get included multiple times, with different variable
 # declarations. We only want to set LOCAL_COPY_COMMON_PREBUILT_RESOURCES and
@@ -527,12 +548,10 @@ ifeq ($(BUILD_TARGET_OS),darwin)
     ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,OpenGL
 endif
 
-ANDROID_EMU_STATIC_LIBRARIES := \
-    android-emu \
+ANDROID_EMU_STATIC_LIBRARIES_DEPS := \
     emulator-libext4_utils \
     $(ANDROID_EMU_BASE_STATIC_LIBRARIES) \
     $(LIBCURL_STATIC_LIBRARIES) \
-    $(LIBKEYMASTER3_STATIC_LIBRARIES) \
     $(LIBXML2_STATIC_LIBRARIES) \
     $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
     emulator-libsparse \
@@ -558,6 +577,10 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     $(PHYSICS_PROTO_STATIC_LIBRARIES) \
     ${VERIFIEDBOOTCFG_PROTO_STATIC_LIBRARIES} \
 
+ANDROID_EMU_STATIC_LIBRARIES := \
+    android-emu $(ANDROID_EMU_STATIC_LIBRARIES_DEPS) \
+    $(LIBKEYMASTER3_STATIC_LIBRARIES) \
+
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
     $(LIBCURL_LDLIBS) \
@@ -574,6 +597,33 @@ ANDROID_EMU_LDLIBS += -lws2_32
 ANDROID_EMU_LDLIBS += -liphlpapi
 endif
 
+# Shared library variant of android-emu.
+#
+# Currently incomplete, but eventually we might want to use it in place
+# of a static android-emu library, especially if it means we can develop
+# in android-emu on Windows directly.
+#
+# And eventually, make android-emu both a shared library and minimize the
+# interface between qemu and android-emu so that android-emu can be a plugin
+# and we make minimal or only qemu-specific changes to qemu itself.
+$(call start-emulator-shared-lib,android-emu-shared)
+
+LOCAL_STATIC_LIBRARIES += $(ANDROID_EMU_STATIC_LIBRARIES_DEPS)
+
+LOCAL_SOURCE_DEPENDENCIES += $(android_emu_LOCAL_SOURCE_DEPENDENCIES)
+
+LOCAL_CFLAGS += $(android_emu_LOCAL_CFLAGS) -fvisibility=default
+
+LOCAL_C_INCLUDES += $(android_emu_LOCAL_C_INCLUDES)
+
+LOCAL_SRC_FILES += $(android_emu_LOCAL_SRC_FILES) stubs/stubs.cpp
+
+LOCAL_LDLIBS += $(ANDROID_EMU_LDLIBS)
+
+$(call local-link-static-c++lib)
+
+$(call gen-hw-config-defs)
+$(call end-emulator-shared-lib)
 
 ###############################################################################
 #
