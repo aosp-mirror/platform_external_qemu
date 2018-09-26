@@ -55,4 +55,6 @@ enum Feature {
     LocationUiV2 = 27;
 
     SnapshotAdb = 28;
+
+    RefCountPipe = 29;
 }

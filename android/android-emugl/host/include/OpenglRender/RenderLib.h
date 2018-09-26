@@ -73,6 +73,8 @@ public:
     // There might be only one renderer.
     virtual RendererPtr initRenderer(int width, int height,
                                      bool useSubWindow, bool egl2egl) = 0;
+
+    virtual void* getOnLastColorBufferRef() = 0;
 };
 
 using RenderLibPtr = std::unique_ptr<RenderLib>;

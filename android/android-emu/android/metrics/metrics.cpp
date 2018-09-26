@@ -388,6 +388,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::OFFWORLD_DISABLE_SECURITY;
         case android::featurecontrol::Feature_n_items:
             return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
+        case android::featurecontrol::RefCountPipe:
+            return android_studio::EmulatorFeatureFlagState::REFCOUNT_PIPE;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }

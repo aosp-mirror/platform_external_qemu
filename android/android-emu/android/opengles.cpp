@@ -14,6 +14,7 @@
 
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/GoldfishDma.h"
+#include "android/emulation/RefcountPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/opengl/emugl_config.h"
@@ -215,6 +216,9 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
                android::snapshot::Snapshotter::Stage stage) {
                 sRenderer->snapshotOperationCallback(op, stage);
             });
+
+    android::emulation::registerOnLastRefCallback(
+            (refcount_pipe_on_last_ref_t)sRenderLib->getOnLastColorBufferRef());
 
     if (!sRenderer) {
         D("Can't start OpenGLES renderer?");

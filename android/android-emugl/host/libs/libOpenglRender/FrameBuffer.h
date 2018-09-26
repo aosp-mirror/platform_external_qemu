@@ -428,6 +428,9 @@ public:
     // Note: swiftshader_indirect does not work with 3 channels
     void getScreenshot(unsigned int nChannels, unsigned int* width,
             unsigned int* height, std::vector<unsigned char>& pixels);
+
+    void onLastColorBufferRef(uint32_t handle);
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
@@ -528,6 +531,9 @@ private:
     // Flag set when emulator is shutting down.
     bool m_shuttingDown = false;
 
+    // Flag set when RefCount Pipe is enabled. So we can skip the reference
+    // counting on host side.
+    bool m_refCountPipeEnabled = false;
     // Async readback
     enum class ReadbackCmd {
         Init = 0,

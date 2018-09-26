@@ -30,6 +30,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+//#include "android/featurecontrol/FeatureControl.h"
 
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
@@ -49,6 +50,7 @@ namespace {
 // Helper class to call the bind_locked() / unbind_locked() properly.
 typedef ColorBuffer::RecursiveScopedHelperContext ScopedBind;
 
+// namespace fc = android::featurecontrol;
 // Implementation of a ColorBuffer::Helper instance that redirects calls
 // to a FrameBuffer instance.
 class ColorBufferHelper : public ColorBuffer::Helper {
@@ -550,6 +552,9 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         sGlobals->condVar.broadcastAndUnlock(&lock);
     }
 
+    fb->m_refCountPipeEnabled =
+            emugl_feature_is_enabled(android::featurecontrol::RefCountPipe);
+
     // Start up the single sync thread if GLAsyncSwap enabled
     if (emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap)) {
         SyncThread::get();
@@ -927,7 +932,7 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
         int apiLevel = 1000;
         emugl::getAvdInfo(nullptr, &apiLevel);
         // pre-O and post-O use different color buffer memory management logic
-        if (apiLevel > 0 && apiLevel < 26) {
+        if (apiLevel > 0 && apiLevel < 26 && !m_refCountPipeEnabled) {
             m_colorbuffers[ret] = { std::move(cb), 1, false, 0 };
 
             RenderThreadInfo* tInfo = RenderThreadInfo::get();
@@ -1107,6 +1112,9 @@ void FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_surface) {
 }
 
 int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
+    if (m_refCountPipeEnabled)
+        return 0;
+
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
     AutoLock mutex(m_lock);
@@ -1130,6 +1138,9 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
 }
 
 void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
+    if (m_refCountPipeEnabled)
+        return;
+
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
     AutoLock mutex(m_lock);
@@ -1150,6 +1161,9 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
 
 void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
                                          bool forced) {
+    if (m_refCountPipeEnabled)
+        return;
+
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
         // This is harmless: it is normal for guest system to issue
@@ -1878,6 +1892,13 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
     c->second.cb->readPixels(0, 0, *width, *height,
             nChannels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE,
             pixels.data());
+}
+
+void FrameBuffer::onLastColorBufferRef(uint32_t handle) {
+    if (m_refCountPipeEnabled) {
+        AutoLock mutex(m_lock);
+        m_colorbuffers.erase((HandleType)handle);
+    }
 }
 
 void FrameBuffer::onSave(Stream* stream,
