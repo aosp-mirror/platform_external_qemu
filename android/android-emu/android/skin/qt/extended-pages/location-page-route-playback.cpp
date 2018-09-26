@@ -59,7 +59,8 @@ void LocationPage::on_playRouteButton_clicked() {
             return;
         }
     }
-    locationPlaybackStart_v2();
+    printf("l-p-r-p: ***** Skipping the actual playback *****\n"); // ??
+//??    locationPlaybackStart_v2();
 }
 
 int LocationPage::parsePointsFromJson(RoutePoint locationElements[], int numLocationsExpected) {
@@ -81,42 +82,75 @@ int LocationPage::parsePointsFromJson(RoutePoint locationElements[], int numLoca
     printf("l-p-r-p: There are %d steps\n", nSteps);
 
     // Look at all routes[0].legs[0].steps[]
+    double previousLat = 0.0;
+    double previousLng = 0.0;
+
     int nLocationsRead = 0;
     for (int stepIdx = 0; stepIdx < nSteps; stepIdx++) {
         QJsonObject thisStepObject = stepsArray.at(stepIdx).toObject();
 
-        // Each steps[] element should have a duration
-        int duration = thisStepObject.value("duration").toObject().value("value").toInt();
+        // Each steps[] element should have a distance (meters) and a duration (seconds)
+        double distance = thisStepObject.value("distance").toObject().value("value").toDouble();
+        double duration = thisStepObject.value("duration").toObject().value("value").toDouble();
+        double stepSpeed = distance / duration;
 
-        // Each steps[] element should also have a path[]
+        // Each steps[] element should also have a 'path' array,
+        // which is an array of locations.
         QJsonArray pathArray = thisStepObject.value("path").toArray();
 
-        int nPaths = pathArray.size();
-        printf("l-p-r-p: step[%2d] has a path with %3d locations and takes %3d seconds\n", // ??
-               stepIdx, nPaths, duration); // ??
+        int nLocations = pathArray.size();
+        printf("l-p-r-p: step[%2d] has a path with %3d locations and takes %6.1f seconds\n", // ??
+               stepIdx, nLocations, duration); // ??
 
         // Get each point in the step
-        for (int pathIdx = 0; pathIdx < nPaths; pathIdx++) {
+        for (int locationIdx = 0; locationIdx < nLocations; locationIdx++) {
+#if 0 // ??
+            double delayBefore = 0.0;
+            if (locationIdx == 0) {
+                if (stepIdx == 0) {
+                    // The first location of the first step. It's 'delayBefore'
+                    // is zero, by definition.
+                    delayBefore = 0.0;
+                    /*
+                    prevLat = thisLat;
+                    prevLng = thisLng;
+                    */
+                } else {
+                    // The first location of a subsequent step. This is a
+                    // duplicate of the last location of the previous step.
+                    // Skip it.
+                    continue;
+                }
+            } else {
+                /*
+                distance = getDistanceNm(prevLat, prevLng, thisLat, thisLng);
+                delayBefore = distance / speed;
+                prevLat = thisLat;
+                prevLng = thisLng;
+                */
+            }
+#endif // ??
+
             // Except for step[0], skip the first point. It's the
             // same as the last point from the previous step.
-            if (stepIdx > 0 && pathIdx == 0) continue;
+            if (stepIdx > 0 && locationIdx == 0) continue;
             if (nLocationsRead >= numLocationsExpected) {
                 printf("l-p-r-p: Expected %d points, got more than that. Truncating.\n", //??
                        numLocationsExpected); // ??
                 break;
             }
-            QJsonObject thisPathObject = pathArray.at(pathIdx).toObject();
-            double lat = thisPathObject.value("lat").toDouble();
-            double lng = thisPathObject.value("lng").toDouble();
+            QJsonObject thisLocationObject = pathArray.at(locationIdx).toObject();
+            double lat = thisLocationObject.value("lat").toDouble();
+            double lng = thisLocationObject.value("lng").toDouble();
 
             // ?? Resolution is good here: -122.08537000
-            locationElements[nLocationsRead].lat = thisPathObject.value("lat").toDouble();
-            locationElements[nLocationsRead].lng = thisPathObject.value("lng").toDouble();
-            // ?? Need to get the time for the path and allocate time to this point
+            locationElements[nLocationsRead].lat = thisLocationObject.value("lat").toDouble();
+            locationElements[nLocationsRead].lng = thisLocationObject.value("lng").toDouble();
+            // ?? Need to get the time for the location and allocate time to this point
             locationElements[nLocationsRead].delayBefore = 2.0; // ??
 
-//            printf("l-p-r-p: step[%d] path[%2d] is (%8.4f, %9.4f)\n", // ??
-//                   stepIdx, pathIdx, lat, lng); // ??
+//            printf("l-p-r-p: step[%d] location[%2d] is (%8.4f, %9.4f)\n", // ??
+//                   stepIdx, locationIdx, lat, lng); // ??
             // ?? Save the Lat, Lng, duration
             nLocationsRead++;
         }
