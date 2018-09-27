@@ -21,7 +21,19 @@ LOCAL_LIBRARIES := $(foreach lib,\
     $(LOCAL_WHOLE_STATIC_LIBRARIES) $(LOCAL_STATIC_LIBRARIES),\
     $(call local-library-path,$(lib)))
 
-LOCAL_LDLIBS := $(call local-static-libraries-ldlibs) $(LOCAL_LDLIBS)
+ifeq ($(BUILD_TARGET_OS),darwin)
+    LOCAL_SHARED_LIBRARY_LDLIBS := \
+        $(foreach lib,$(LOCAL_SHARED_LIBRARIES),$(call local-shared-library-path,$(lib)))
+else
+    LOCAL_LDFLAGS += \
+        $(foreach lib,$(LOCAL_SHARED_LIBRARIES), \
+            -L$(dir $(call local-shared-library-path,$(lib)))) \
+
+    LOCAL_SHARED_LIBRARY_LDLIBS := \
+        $(foreach lib,$(LOCAL_SHARED_LIBRARIES), -l:$(notdir $(call local-shared-library-path,$(lib))))
+endif
+
+LOCAL_LDLIBS := $(call local-static-libraries-ldlibs) $(LOCAL_SHARED_LIBRARY_LDLIBS) $(LOCAL_LDLIBS)
 
 $(LOCAL_BUILT_MODULE): PRIVATE_LDFLAGS := $(LDFLAGS) $(LOCAL_LDFLAGS)
 $(LOCAL_BUILT_MODULE): PRIVATE_LDLIBS  := $(LOCAL_LDLIBS)

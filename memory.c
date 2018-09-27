@@ -18,16 +18,19 @@
 #include "qemu-common.h"
 #include "cpu.h"
 #include "exec/memory.h"
+#include "exec/memory-remap.h"
 #include "exec/address-spaces.h"
 #include "exec/ioport.h"
 #include "qapi/visitor.h"
 #include "qemu/bitops.h"
 #include "qemu/error-report.h"
+#include "qemu/mmap-alloc.h"
 #include "qom/object.h"
 #include "trace-root.h"
 
 #include "exec/memory-internal.h"
 #include "exec/ram_addr.h"
+#include "exec/ramlist.h"
 #include "sysemu/kvm.h"
 #include "sysemu/sysemu.h"
 #include "hw/misc/mmio_interface.h"
@@ -935,6 +938,37 @@ static void address_space_update_topology_pass(AddressSpace *as,
 
             ++inew;
         }
+    }
+}
+
+void address_space_refresh_topology(AddressSpace *as)
+{
+    FlatView *curr_view = address_space_to_flatview(as);
+    unsigned i = 0;
+    FlatRange *fr = NULL;
+
+    assert(curr_view);
+
+    for (; i < curr_view->nr; ++i) {
+        fr = &curr_view->ranges[i];
+        MEMORY_LISTENER_UPDATE_REGION(fr, as, Reverse, region_del);
+    }
+
+    i = 0;
+
+    for (; i < curr_view->nr; ++i) {
+        fr = &curr_view->ranges[i];
+        MEMORY_LISTENER_UPDATE_REGION(fr, as, Forward, region_add);
+    }
+
+}
+
+void memory_listeners_refresh_topology()
+{
+    AddressSpace *as;
+
+    QTAILQ_FOREACH(as, &address_spaces, address_spaces_link) {
+        address_space_refresh_topology(as);
     }
 }
 

@@ -23,7 +23,7 @@ QEMU1_COMMON_INCLUDES := \
 
 # Need to include "qapi-types.h" and other auto-generated files from
 # android/configure.sh
-QEMU1_COMMON_INCLUDES += $(BUILD_OBJS_DIR)/build/qemu1-qapi-auto-generated
+QEMU1_COMMON_INCLUDES += $(LOCAL_PATH)/qemu1-qapi-auto-generated
 
 # Zlib sources
 QEMU1_COMMON_INCLUDES += $(ZLIB_INCLUDES)
@@ -186,7 +186,7 @@ LOCAL_SRC_FILES += \
     android-qemu1-glue/qemu-net-agent-impl.c \
     android-qemu1-glue/qemu-car-data-agent-impl.cpp \
     android-qemu1-glue/qemu-record-screen-agent-impl.c \
-    android-qemu1-glue/qemu-sensors-agent-impl.c \
+    android-qemu1-glue/qemu-sensors-agent-impl.cpp \
     android-qemu1-glue/qemu-setup.cpp \
     android-qemu1-glue/qemu-telephony-agent-impl.c \
     android-qemu1-glue/qemu-virtual-scene-agent-impl.cpp \

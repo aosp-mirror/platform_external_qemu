@@ -43,6 +43,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    int apiLevel,
                                    const char* kernelSerialPrefix,
                                    const char* avdKernelParameters,
+                                   const std::vector<std::string>* verifiedBootParameters,
                                    AndroidGlesEmulationMode glesMode,
                                    int bootPropOpenglesVersion,
                                    uint64_t glFramebufferSizeBytes,
@@ -189,7 +190,11 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
             params.add("rootwait");
             params.add("ro");
             params.add("init=/init");
-            params.add("root=/dev/vda1");
+            // If verifiedBootParameters were added, they will provide the root
+            // argument which corresponds to a mapped device.
+            if (!verifiedBootParameters || verifiedBootParameters->empty()) {
+                params.add("root=/dev/vda1");
+            }
         }
     }
 
@@ -200,6 +205,12 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     if (avdKernelParameters && avdKernelParameters[0]) {
         params.add(avdKernelParameters);
+    }
+
+    if (verifiedBootParameters) {
+        for (const std::string& param : *verifiedBootParameters) {
+            params.add(param);
+        }
     }
 
     // Configure the ramoops module, and mark the region where ramoops lives as

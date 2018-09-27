@@ -44,7 +44,7 @@ public:
 
     virtual void* getEGL(void) override;
 
-    virtual bool getDSCC(void**, void**, void **, void**, int*, int*) override;
+    virtual bool getOpt(RenderOpt* opt) override;
 
     virtual RendererPtr initRenderer(int width,
                                      int height,

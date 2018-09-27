@@ -6,38 +6,27 @@ $(eval \
 	$(call on-first-run,FIRST_INCLUDE:= true,FIRST_INCLUDE:=) \
 )
 
-
 # Build libext4_utils and related modules/
 include $(LOCAL_PATH)/android/third_party/zlib.mk
 include $(LOCAL_PATH)/android/third_party/libcurl.mk
 include $(LOCAL_PATH)/android/third_party/libuuid.mk
 include $(LOCAL_PATH)/android/third_party/libxml2.mk
-include $(LOCAL_PATH)/android/third_party/mman-win32/libmman-win32.mk
-include $(LOCAL_PATH)/android/third_party/murmurhash/libmurmurhash.mk
-include $(LOCAL_PATH)/android/third_party/libsparse/sources.mk
-include $(LOCAL_PATH)/android/third_party/libselinux/sources.mk
-include $(LOCAL_PATH)/android/third_party/libwebp/sources.mk
-include $(LOCAL_PATH)/android/third_party/libkeymaster3/sources.mk
-include $(LOCAL_PATH)/android/third_party/ext4_utils/sources.mk
 include $(LOCAL_PATH)/android/third_party/libbreakpad.mk
 include $(LOCAL_PATH)/android/third_party/Qt5.mk
-include $(LOCAL_PATH)/android/third_party/jpeg-6b/libjpeg.mk
 include $(LOCAL_PATH)/android/third_party/libpng.mk
 include $(LOCAL_PATH)/android/third_party/mini-glib/sources.make
 include $(LOCAL_PATH)/android/third_party/googletest/Android.mk
 include $(LOCAL_PATH)/android/third_party/libANGLEtranslation.mk
-include $(LOCAL_PATH)/android/third_party/libyuv/Android.mk
 include $(LOCAL_PATH)/android/third_party/Protobuf.mk
 include $(LOCAL_PATH)/android/third_party/liblz4.mk
 include $(LOCAL_PATH)/android/third_party/libffmpeg.mk
 include $(LOCAL_PATH)/android/third_party/libx264.mk
 include $(LOCAL_PATH)/android/third_party/libvpx.mk
 include $(LOCAL_PATH)/android/third_party/libsdl2.mk
-include $(LOCAL_PATH)/android/third_party/tinyobjloader.mk
 include $(LOCAL_PATH)/android/third_party/picosha2/picosha2.mk
-include $(LOCAL_PATH)/android/third_party/libdtb/libdtb.mk
-include $(LOCAL_PATH)/android/third_party/tinyepoxy/tinyepoxy.mk
 include $(LOCAL_PATH)/android/third_party/libvirglrenderer.mk
+include $(LOCAL_PATH)/android/third_party/third_party_libs.mk
+include $(LOCAL_PATH)/android/third_party/ext4_utils/sources.mk
 
 # Bluez only works on linux
 ifeq ($(BUILD_TARGET_OS),linux)
@@ -182,8 +171,10 @@ ifeq (,$(CONFIG_AEMU64_ONLY))
     EMULATOR_TARGET_ARCH := x86
     include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
 
-    EMULATOR_TARGET_ARCH := mips
-    include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
+    ifeq (true,$(BUILD_ENABLE_MIPS))
+        EMULATOR_TARGET_ARCH := mips
+        include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
+    endif
 endif   # !CONFIG_AEMU64_ONLY
 endif   # !CONFIG_MIN_BUILD
 
@@ -280,5 +271,16 @@ include $(EMUGL_SRCDIR)/Android.mk
 ifdef QEMU2_TOP_DIR
 ifeq (,$(CONFIG_AEMU64_ONLY))
 include $(QEMU2_TOP_DIR)/android-qemu2-glue/build/Makefile.qemu2.mk
+endif # !CONFIG_AEMU64_ONLY
+endif
+
+##############################################################################
+##############################################################################
+###
+###  Emulator end2end tests
+###
+ifdef QEMU2_TOP_DIR
+ifeq (,$(CONFIG_AEMU64_ONLY))
+include $(QEMU2_TOP_DIR)/android/tests/Makefile.end2end.mk
 endif # !CONFIG_AEMU64_ONLY
 endif

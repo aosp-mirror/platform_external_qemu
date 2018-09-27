@@ -59,7 +59,7 @@ public:
 #else
         ret = ::pthread_mutex_trylock(&mLock) == 0;
 #endif
-        ANDROID_IF_DEBUG(mIsLocked = true;)
+        ANDROID_IF_DEBUG(mIsLocked = ret;)
         return ret;
     }
 
@@ -142,6 +142,10 @@ class AutoLock {
 public:
     AutoLock(StaticLock& lock) : mLock(lock) { mLock.lock(); }
 
+    AutoLock(AutoLock&& other) : mLock(other.mLock), mLocked(other.mLocked) {
+        other.mLocked = false;
+    }
+
     void lock() {
         assert(!mLocked);
         mLock.lock();
@@ -168,7 +172,7 @@ private:
 
     friend class ConditionVariable;
     // Don't allow move because this class has a non-movable object.
-    DISALLOW_COPY_ASSIGN_AND_MOVE(AutoLock);
+    DISALLOW_COPY_AND_ASSIGN(AutoLock);
 };
 
 class AutoWriteLock {

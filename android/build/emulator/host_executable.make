@@ -62,5 +62,13 @@ ifneq (,$(findstring unittest,$(LOCAL_BUILT_MODULE)))
 $(eval $(call run-test,$(LOCAL_INSTALL_MODULE)))
 endif
 
+ifneq (,$(findstring qtest,$(LOCAL_BUILT_MODULE)))
+$(eval $(call run-test,$(LOCAL_INSTALL_MODULE)))
+endif
+
+ifneq (,$(findstring end2endtest,$(LOCAL_BUILT_MODULE)))
+$(eval $(call run-test,$(LOCAL_INSTALL_MODULE)))
+endif
+
 include $(_BUILD_CORE_DIR)/emulator/symbols.make
 endif  # LOCAL_INSTALL == true

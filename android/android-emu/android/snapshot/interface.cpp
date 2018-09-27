@@ -12,6 +12,7 @@
 #include "android/snapshot/interface.h"
 
 #include "android/base/files/PathUtils.h"
+#include "android/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "android/snapshot/common.h"
@@ -127,7 +128,7 @@ const char* androidSnapshot_prepareAutosave(int memSizeMb, const char* _name) {
 
     // Delete the snapshot dir if RAM file still dirty.
     if (androidSnapshot_isRamFileDirty(name)) {
-        fprintf(stderr, "Found invalid RAM file. Deleting snapshot\n");
+        VLOG(snapshot) << "Found invalid RAM file. Deleting snapshot.";
         path_delete_dir(dir.c_str());
         // Reinitialize the directory since QEMU might need it created already
         // for the next RAM file.
@@ -138,9 +139,9 @@ const char* androidSnapshot_prepareAutosave(int memSizeMb, const char* _name) {
         System::get()->pathFileSize(mapPath, &existingSize);
 
         if (existingSize != ramSizeBytesWithAlign) {
-            fprintf(stderr, "Refreshing RAM file (size mismatch): existing %llu curr %llu\n",
-                    (unsigned long long)existingSize,
-                    (unsigned long long)ramSizeBytesWithAlign);
+            VLOG(snapshot) <<
+                "Refreshing RAM file (size mismatch): existing " <<
+                existingSize << " current " << ramSizeBytesWithAlign;
             path_delete_file(mapPath.c_str());
             existingSize = 0;
         }

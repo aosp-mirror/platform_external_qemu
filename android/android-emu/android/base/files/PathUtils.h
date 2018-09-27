@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "android/base/Optional.h"
 #include "android/base/StringView.h"
 
 #include <string>
@@ -253,12 +254,26 @@ public:
     static std::string relativeTo(StringView base, StringView path) {
         return relativeTo(base, path, HOST_TYPE);
     }
+
+    static Optional<std::string> pathWithoutDirs(StringView name);
 };
 
 // Useful shortcuts to avoid too much typing.
 static const PathUtils::HostType kHostPosix = PathUtils::HOST_POSIX;
 static const PathUtils::HostType kHostWin32 = PathUtils::HOST_WIN32;
 static const PathUtils::HostType kHostType = PathUtils::HOST_TYPE;
+
+template <class... Paths>
+std::string pj(StringView path1,
+                  StringView path2,
+                  Paths&&... paths) {
+    return PathUtils::join(path1,
+               pj(path2, std::forward<Paths>(paths)...));
+}
+
+std::string pj(StringView path1, StringView path2);
+
+std::string pj(const std::vector<std::string>& paths);
 
 }  // namespace base
 }  // namespace android

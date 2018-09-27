@@ -62,6 +62,7 @@ bool android::multiinstance::updateInstanceShareMode(
     }
     if (android::base::updateFileShare(sMultiInstanceState->sharedFile,
                                        shareMode)) {
+        assert(sMultiInstanceState->updateDriveShareModeFunc);
         if (sMultiInstanceState->updateDriveShareModeFunc) {
             if (!sMultiInstanceState->updateDriveShareModeFunc(snapshotName,
                                                                shareMode)) {

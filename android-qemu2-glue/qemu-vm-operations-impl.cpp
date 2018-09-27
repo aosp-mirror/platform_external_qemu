@@ -23,8 +23,10 @@
 #include "android/emulation/CpuAccelerator.h"
 #include "android/emulation/VmLock.h"
 #include "android/snapshot/common.h"
+#include "android/snapshot/interface.h"
 #include "android/snapshot/MemoryWatch.h"
 #include "android/snapshot/PathUtils.h"
+#include "android/snapshot/Snapshotter.h"
 
 extern "C" {
 #include "qemu/osdep.h"
@@ -40,6 +42,7 @@ extern "C" {
 #include "sysemu/sysemu.h"
 #include "sysemu/cpus.h"
 #include "exec/cpu-common.h"
+#include "exec/memory-remap.h"
 }
 
 #include <string>
@@ -221,6 +224,58 @@ static bool qemu_snapshot_delete(const char* name,
                                  LineConsumerCallback errConsumer) {
     android::RecursiveScopedVmLock vmlock;
     return qemu_delvm(name, MessageCallback(opaque, nullptr, errConsumer)) == 0;
+}
+
+static bool qemu_snapshot_remap(bool shared,
+                                void* opaque,
+                                LineConsumerCallback errConsumer) {
+
+    android::RecursiveScopedVmLock vmlock;
+
+    // We currently only support remap of the Quickboot snapshot,
+    // and only if file-backed.
+    //
+    // It's good to skip doing anything if the use case
+    // is currently out of scope, or it would have no semantic effect
+    // (going from auto saving to continuing to auto-save).
+    auto currentRamFileStatus = androidSnapshot_getRamFileInfo();
+
+    // If the backing file is not "default_boot" then we cannot use file-backed
+    // ram.
+    // If it doesn't have a backing file then we will create a default_boot
+    // snapshot.
+    if (android::snapshot::Snapshotter::get().loadedSnapshotFile() != "" &&
+        android::snapshot::Snapshotter::get().loadedSnapshotFile() !=
+                "default_boot") {
+        return true;
+    }
+
+    if (currentRamFileStatus == SNAPSHOT_RAM_FILE_SHARED && shared) {
+        return true;
+    }
+
+    bool wasVmRunning = runstate_is_running() != 0;
+
+    if (currentRamFileStatus != SNAPSHOT_RAM_FILE_PRIVATE && !shared) {
+        vm_stop(RUN_STATE_SAVE_VM);
+        android::snapshot::Snapshotter::get().setRemapping(true);
+        qemu_savevm("default_boot", MessageCallback(opaque, nullptr, errConsumer));
+        android::snapshot::Snapshotter::get().setRemapping(false);
+        ram_blocks_remap_shared(shared);
+    } else {
+        vm_stop(RUN_STATE_RESTORE_VM);
+        ram_blocks_remap_shared(shared);
+        qemu_loadvm("default_boot", MessageCallback(opaque, nullptr, errConsumer));
+    }
+
+    android::snapshot::Snapshotter::get().setRamFileShared(shared);
+    androidSnapshot_setRamFileDirty("default_boot", false);
+
+    if (wasVmRunning) {
+        vm_start();
+    }
+
+    return true;
 }
 
 static SnapshotCallbacks sSnapshotCallbacks = {};
@@ -506,6 +561,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .snapshotSave = qemu_snapshot_save,
         .snapshotLoad = qemu_snapshot_load,
         .snapshotDelete = qemu_snapshot_delete,
+        .snapshotRemap = qemu_snapshot_remap,
         .setSnapshotCallbacks = set_snapshot_callbacks,
         .getVmConfiguration = get_vm_config,
         .setFailureReason = set_failure_reason,

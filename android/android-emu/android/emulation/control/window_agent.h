@@ -23,6 +23,7 @@ typedef enum {
     WINDOW_MESSAGE_INFO,
     WINDOW_MESSAGE_WARNING,
     WINDOW_MESSAGE_ERROR,
+    WINDOW_MESSAGE_OK,
 } WindowMessageType;
 
 static const int kWindowMessageTimeoutInfinite = -1;

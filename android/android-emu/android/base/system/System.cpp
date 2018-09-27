@@ -40,10 +40,12 @@
 #include <psapi.h>
 #include <winioctl.h>
 #include <ntddscsi.h>
+#include <tlhelp32.h>
 #endif
 
 #ifdef __APPLE__
 #import <Carbon/Carbon.h>
+#include <libproc.h>
 #include <mach/clock.h>
 #include <mach/mach.h>
 #include <spawn.h>
@@ -246,56 +248,7 @@ public:
 
     const std::string& getProgramDirectory() const override {
         if (mProgramDir.empty()) {
-#if defined(__linux__)
-            char path[1024];
-            memset(path, 0, sizeof(path));  // happy valgrind!
-            int len = readlink("/proc/self/exe", path, sizeof(path));
-            if (len > 0 && len < (int)sizeof(path)) {
-                char* x = ::strrchr(path, '/');
-                if (x) {
-                    *x = '\0';
-                    mProgramDir.assign(path);
-                }
-            }
-#elif defined(__APPLE__)
-            ProcessSerialNumber psn;
-            GetCurrentProcess(&psn);
-            CFDictionaryRef dict =
-                    ProcessInformationCopyDictionary(&psn, 0xffffffff);
-            CFStringRef value = (CFStringRef)CFDictionaryGetValue(
-                    dict, CFSTR("CFBundleExecutable"));
-            char s[PATH_MAX];
-            CFStringGetCString(value, s, PATH_MAX - 1, kCFStringEncodingUTF8);
-            char* x = ::strrchr(s, '/');
-            if (x) {
-                // skip all slashes - there might be more than one
-                while (x > s && x[-1] == '/') {
-                    --x;
-                }
-                *x = '\0';
-                mProgramDir.assign(s);
-            } else {
-                mProgramDir.assign("<unknown-application-dir>");
-            }
-#elif defined(_WIN32)
-            Win32UnicodeString appDir(PATH_MAX);
-            int len = GetModuleFileNameW(0, appDir.data(), appDir.size());
-            mProgramDir.assign("<unknown-application-dir>");
-            if (len > 0) {
-                if (len > (int)appDir.size()) {
-                    appDir.resize(static_cast<size_t>(len));
-                    GetModuleFileNameW(0, appDir.data(), appDir.size());
-                }
-                std::string dir = appDir.toString();
-                char* sep = ::strrchr(&dir[0], '\\');
-                if (sep) {
-                    *sep = '\0';
-                    mProgramDir.assign(dir.c_str());
-                }
-            }
-#else
-#error "Unsupported platform!"
-#endif
+            mProgramDir.assign(getProgramDirectoryFromPlatform());
         }
         return mProgramDir;
     }
@@ -925,18 +878,7 @@ public:
     }
 
     void envSet(StringView varname, StringView varvalue) override {
-#ifdef _WIN32
-        std::string envStr =
-            StringFormat("%s=%s", varname, varvalue);
-        // Note: this leaks the result of release().
-        _wputenv(Win32UnicodeString(envStr).release());
-#else
-        if (varvalue.empty()) {
-            unsetenv(c_str(varname));
-        } else {
-            setenv(c_str(varname), c_str(varvalue), 1);
-        }
-#endif
+        setEnvironmentVariable(varname, varvalue);
     }
 
     bool envTest(StringView varname) const override {
@@ -2299,6 +2241,22 @@ System::FileSize System::getAlignedFileSize(System::FileSize align, System::File
 }
 
 // static
+void System::setEnvironmentVariable(StringView varname, StringView varvalue) {
+#ifdef _WIN32
+    std::string envStr =
+        StringFormat("%s=%s", varname, varvalue);
+    // Note: this leaks the result of release().
+    _wputenv(Win32UnicodeString(envStr).release());
+#else
+    if (varvalue.empty()) {
+        unsetenv(c_str(varname));
+    } else {
+        setenv(c_str(varname), c_str(varvalue), 1);
+    }
+#endif
+}
+
+// static
 std::string System::getEnvironmentVariable(StringView varname) {
 #ifdef _WIN32
     Win32UnicodeString varname_unicode(varname);
@@ -2317,6 +2275,62 @@ std::string System::getEnvironmentVariable(StringView varname) {
 #endif
 }
 
+// static
+std::string System::getProgramDirectoryFromPlatform() {
+    std::string res;
+#if defined(__linux__)
+    char path[1024];
+    memset(path, 0, sizeof(path));  // happy valgrind!
+    int len = readlink("/proc/self/exe", path, sizeof(path));
+    if (len > 0 && len < (int)sizeof(path)) {
+        char* x = ::strrchr(path, '/');
+        if (x) {
+            *x = '\0';
+            res.assign(path);
+        }
+    }
+#elif defined(__APPLE__)
+    ProcessSerialNumber psn;
+    GetCurrentProcess(&psn);
+    CFDictionaryRef dict =
+            ProcessInformationCopyDictionary(&psn, 0xffffffff);
+    CFStringRef value = (CFStringRef)CFDictionaryGetValue(
+            dict, CFSTR("CFBundleExecutable"));
+    char s[PATH_MAX];
+    CFStringGetCString(value, s, PATH_MAX - 1, kCFStringEncodingUTF8);
+    char* x = ::strrchr(s, '/');
+    if (x) {
+        // skip all slashes - there might be more than one
+        while (x > s && x[-1] == '/') {
+            --x;
+        }
+        *x = '\0';
+        res.assign(s);
+    } else {
+        res.assign("<unknown-application-dir>");
+    }
+#elif defined(_WIN32)
+    Win32UnicodeString appDir(PATH_MAX);
+    int len = GetModuleFileNameW(0, appDir.data(), appDir.size());
+    res.assign("<unknown-application-dir>");
+    if (len > 0) {
+        if (len > (int)appDir.size()) {
+            appDir.resize(static_cast<size_t>(len));
+            GetModuleFileNameW(0, appDir.data(), appDir.size());
+        }
+        std::string dir = appDir.toString();
+        char* sep = ::strrchr(&dir[0], '\\');
+        if (sep) {
+            *sep = '\0';
+            res.assign(dir.c_str());
+        }
+    }
+#else
+#error "Unsupported platform!"
+#endif
+    return res;
+}
+
 std::string toString(OsType osType) {
     switch (osType) {
     case OsType::Windows:
@@ -2328,6 +2342,321 @@ std::string toString(OsType osType) {
     default:
         return "Unknown";
     }
+}
+
+#ifdef __APPLE__
+// From http://mirror.informatimago.com/next/developer.apple.com/qa/qa2001/qa1123.html
+typedef struct kinfo_proc kinfo_proc;
+
+static int GetBSDProcessList(kinfo_proc **procList, size_t *procCount)
+    // Returns a list of all BSD processes on the system.  This routine
+    // allocates the list and puts it in *procList and a count of the
+    // number of entries in *procCount.  You are responsible for freeing
+    // this list (use "free" from System framework).
+    // On success, the function returns 0.
+    // On error, the function returns a BSD errno value.
+{
+    int                 err;
+    kinfo_proc *        result;
+    bool                done;
+    static const int    name[] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL, 0 };
+    // Declaring name as const requires us to cast it when passing it to
+    // sysctl because the prototype doesn't include the const modifier.
+    size_t              length;
+
+    assert( procList != NULL);
+    assert(*procList == NULL);
+    assert(procCount != NULL);
+
+    *procCount = 0;
+
+    // We start by calling sysctl with result == NULL and length == 0.
+    // That will succeed, and set length to the appropriate length.
+    // We then allocate a buffer of that size and call sysctl again
+    // with that buffer.  If that succeeds, we're done.  If that fails
+    // with ENOMEM, we have to throw away our buffer and loop.  Note
+    // that the loop causes use to call sysctl with NULL again; this
+    // is necessary because the ENOMEM failure case sets length to
+    // the amount of data returned, not the amount of data that
+    // could have been returned.
+
+    result = NULL;
+    done = false;
+    do {
+        assert(result == NULL);
+
+        // Call sysctl with a NULL buffer.
+
+        length = 0;
+        err = sysctl( (int *) name, (sizeof(name) / sizeof(*name)) - 1,
+                      NULL, &length,
+                      NULL, 0);
+        if (err == -1) {
+            err = errno;
+        }
+
+        // Allocate an appropriately sized buffer based on the results
+        // from the previous call.
+
+        if (err == 0) {
+            result = (kinfo_proc*)malloc(length);
+            if (result == NULL) {
+                err = ENOMEM;
+            }
+        }
+
+        // Call sysctl again with the new buffer.  If we get an ENOMEM
+        // error, toss away our buffer and start again.
+
+        if (err == 0) {
+            err = sysctl( (int *) name, (sizeof(name) / sizeof(*name)) - 1,
+                          result, &length,
+                          NULL, 0);
+            if (err == -1) {
+                err = errno;
+            }
+            if (err == 0) {
+                done = true;
+            } else if (err == ENOMEM) {
+                assert(result != NULL);
+                free(result);
+                result = NULL;
+                err = 0;
+            }
+        }
+    } while (err == 0 && ! done);
+
+    // Clean up and establish post conditions.
+
+    if (err != 0 && result != NULL) {
+        free(result);
+        result = NULL;
+    }
+    *procList = result;
+    if (err == 0) {
+        *procCount = length / sizeof(kinfo_proc);
+    }
+
+    assert( (err == 0) == (*procList != NULL) );
+
+    return err;
+}
+
+// From https://astojanov.wordpress.com/2011/11/16/mac-os-x-resolve-absolute-path-using-process-pid/
+Optional<std::string> getPathOfProcessByPid(pid_t pid) {
+    int ret;
+    std::string result(PROC_PIDPATHINFO_MAXSIZE + 1, 0);
+    ret = proc_pidpath(pid, (void*)result.data(), PROC_PIDPATHINFO_MAXSIZE);
+
+    if ( ret <= 0 ) {
+        return kNullopt;
+    } else {
+        return result;
+    }
+}
+
+#endif
+
+static bool sMultiStringMatch(StringView haystack,
+                              const std::vector<StringView>& needles,
+                              bool approxMatch) {
+    bool found = false;
+
+    for (auto needle : needles) {
+        found = found ||
+            approxMatch ?
+                (haystack.find(needle) !=
+                 std::string::npos) :
+                (haystack == needle);
+    }
+
+    return found;
+}
+
+// static
+std::vector<System::Pid> System::queryRunningProcessPids(
+    const std::vector<StringView>& targets,
+    bool approxMatch) {
+
+    std::vector<System::Pid> pids;
+
+// From https://stackoverflow.com/questions/20874381/get-a-process-id-in-c-by-name
+#ifdef _WIN32
+    // Take a snapshot of all processes in the system.
+    ScopedFileHandle handle(
+        CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0));
+
+    if (!handle.valid()) return {};
+
+    PROCESSENTRY32 pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+
+    // Retrieve information about the first process and exit if unsuccessful.
+    if (!Process32First(handle.get(), &pe32)) {
+        return {};
+    }
+
+    do {
+        if (sMultiStringMatch(pe32.szExeFile, targets, approxMatch)) {
+            pids.push_back((System::Pid)pe32.th32ProcessID);
+        }
+    } while (Process32Next(handle.get(), &pe32));
+#else
+
+#ifdef __APPLE__
+
+    kinfo_proc* procs = nullptr;
+    size_t procCount = 0;
+
+    GetBSDProcessList(&procs, &procCount);
+
+    for (size_t i = 0; i < procCount; i++) {
+        pid_t pid = procs[i].kp_proc.p_pid;
+        auto path = getPathOfProcessByPid(pid);
+
+        if (!path) continue;
+
+        auto filePart = PathUtils::pathWithoutDirs(*path);
+
+        if (!filePart) continue;
+
+        if (sMultiStringMatch(*filePart, targets, approxMatch)) {
+            pids.push_back((System::Pid)pid);
+        }
+    }
+
+#else
+    // TODO: It seems quite error prone to try to list processes on Linux,
+    // as opening and iterating through /proc/ seems needed.
+    // We only want to use this for Windows anyway. YAGNI.
+    fprintf(stderr, "FATAL: Process listing not implemented for Linux.\n");
+    abort();
+#endif
+
+#endif
+    return pids;
+}
+
+static bool looksLikeTempDir(StringView tempDir) {
+    auto pathComponents = PathUtils::decompose(tempDir);
+
+    if (pathComponents.empty()) return false;
+
+    // basic validity checks
+    for (auto pathComponent : pathComponents) {
+        // Treat .. as not valid for a temp dir spec.
+        // Too complex to handle in its full generality.
+        if (pathComponent == "..") {
+            return false;
+        }
+    }
+
+    std::vector<StringView> neededPathComponents = {
+#ifdef _WIN32
+        "Users", "AppData", "Local", "Temp",
+#else
+        "tmp", "android-",
+#endif
+    };
+
+    std::vector<size_t> foundPathComponentIndices;
+
+    for (auto pathComponent: pathComponents)  {
+        size_t index = 0;
+        for (auto neededPathComponent : neededPathComponents) {
+            if (pathComponent.find(
+                    neededPathComponent.str()) !=
+                std::string::npos) {
+                foundPathComponentIndices.push_back(index);
+                break;
+            }
+            ++index;
+        }
+    }
+
+    if (foundPathComponentIndices.size() != neededPathComponents.size()) {
+        return false;
+    }
+
+    for (size_t i = 0; i < foundPathComponentIndices.size(); i++) {
+        if (foundPathComponentIndices[i] != i) return false;
+    }
+
+    return true;
+}
+
+// static
+void System::deleteTempDir() {
+    std::string tempDir = System::get()->getTempDir();
+
+    std::vector<StringView> emulatorExePatterns = {
+        "emulator",
+        "qemu-system",
+    };
+
+#ifdef __linux__
+    printf("Temp directory deletion not supported on Linux. Skipping.\n");
+#else // !__linux__
+    printf("Checking if path is safe for deletion: %s\n", tempDir.c_str());
+
+    if (!looksLikeTempDir(tempDir)) {
+        printf("WARNING: %s does not look like a standard temp directory.\n",
+               tempDir.c_str());
+        printf("Please remove files in there manually.\n");
+        return;
+    }
+
+    printf("Checking for other emulator instances...");
+
+    std::vector<System::Pid> emuPids =
+        queryRunningProcessPids(emulatorExePatterns);
+
+    if (!emuPids.empty()) {
+#ifdef _WIN32
+        printf("Detected running emulator processes.\n");
+        printf("Marking existing files for deletion on reboot...\n");
+        path_delete_dir_contents_on_reboot(tempDir.c_str());
+        printf("Done.\n");
+#else // !_WIN32
+        printf("Detected running emulator processes. Skipping.\n");
+#endif // !_WIN32
+        return;
+    }
+
+    printf("Deleting emulator temp directory contents...");
+    path_delete_dir_contents(tempDir.c_str());
+    printf("done\n");
+#endif // !__linux__
+}
+
+// static
+void System::killProcess(System::Pid pid) {
+#ifdef _WIN32
+    ScopedFileHandle forKilling(OpenProcess(PROCESS_TERMINATE, false, pid));
+    if (forKilling.valid()) {
+        TerminateProcess(forKilling.get(), 1);
+    }
+#else
+    kill(pid, SIGKILL);
+#endif
+}
+
+// static
+void System::stopAllEmulatorProcesses() {
+// TODO: Implement process grepping for Linux.
+#ifndef __linux__
+    std::vector<StringView> emulatorExePatterns = {
+        "emulator",
+        "qemu-system",
+    };
+
+    std::vector<System::Pid> emuPids =
+        queryRunningProcessPids(emulatorExePatterns);
+
+    for (auto pid : emuPids) {
+        System::killProcess(pid);
+    }
+#endif
 }
 
 }  // namespace base

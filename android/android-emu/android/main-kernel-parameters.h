@@ -16,6 +16,8 @@
 #include "android/opengl/emugl_config.h"
 
 #include <stdint.h>
+#include <string>
+#include <vector>
 
 ANDROID_BEGIN_HEADER
 
@@ -33,6 +35,8 @@ typedef struct mem_map {
 // |avdKernelParameters| are the optional extra kernel parameters stored
 // in the AVD's kernel.parameters hardware property, if any. They will
 // be appended to the result.
+// |verifiedBootParameters| is a vector of verified boot kernel parameters to
+// add.  Passing NULL is OK.  Passing an empty vector is OK.
 // |glesMode| is the EGL/GLES emulation mode.
 // |glesGuestCmaMB| is the size in megabytes of the contiguous memory
 // allocation to be used when |glesMode| is kAndroidGlesEmulationGuest.
@@ -47,6 +51,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    int apiLevel,
                                    const char* kernelSerialPrefix,
                                    const char* avdKernelParameters,
+                                   const std::vector<std::string>* verifiedBootParameters,
                                    AndroidGlesEmulationMode glesMode,
                                    int bootPropOpenglesVersion,
                                    uint64_t glFramebufferSizeBytes,

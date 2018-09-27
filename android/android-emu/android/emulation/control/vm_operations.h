@@ -99,6 +99,9 @@ typedef struct QAndroidVmOperations {
     bool (*snapshotDelete)(const char* name,
                            void* opaque,
                            LineConsumerCallback errConsumer);
+    bool (*snapshotRemap)(bool shared,
+                          void* opaque,
+                          LineConsumerCallback errConsumer);
 
     // Sets a set of callback to listen for snapshot operations.
     void (*setSnapshotCallbacks)(void* opaque,

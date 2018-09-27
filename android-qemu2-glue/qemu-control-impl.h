@@ -59,7 +59,7 @@ extern const QAndroidHttpProxyAgent* const gQAndroidHttpProxyAgent;
 // Defined in android/qemu-record-screen-agent.c
 extern const QAndroidRecordScreenAgent* const gQAndroidRecordScreenAgent;
 
-// Defined in android/qemu-sensors-agent.c
+// Defined in android/qemu-sensors-agent.cpp
 extern const QAndroidSensorsAgent* const gQAndroidSensorsAgent;
 
 // Defined in android/qemu-telephony-agent.c

@@ -115,6 +115,8 @@ bool qemu_android_emulation_early_setup() {
     qemu_thread_register_setup_callback(qemu_looper_setForThread);
 
     qemu_abort_set_handler((QemuAbortHandler)&crashhandler_die_format_v);
+    qemu_crash_dump_message_func_set(
+        (QemuCrashDumpMessageFunc)&crashhandler_append_message_format_v);
 
     // Make sure we override the ctrl-C handler as soon as possible.
     qemu_set_ctrlc_handler(&skin_winsys_quit_request);
@@ -209,4 +211,5 @@ bool qemu_android_emulation_setup() {
 void qemu_android_emulation_teardown() {
     android::qemu::skipTimerOps();
     androidSnapshot_finalize();
+    android_emulation_teardown();
 }

@@ -439,6 +439,15 @@ public:
     virtual Optional<std::string> runCommandWithResult( const std::vector<std::string>& commandLine,
                             System::Duration timeoutMs = kInfinite,
                             System::ProcessExitCode* outExitCode = nullptr) = 0;
+
+    static std::vector<Pid> queryRunningProcessPids(
+        const std::vector<StringView>& targets, bool approxMatch = true);
+
+    static void deleteTempDir();
+
+    static void killProcess(Pid);
+    static void stopAllEmulatorProcesses();
+
 protected:
     size_t mMemorySize = 0;
 
@@ -467,9 +476,11 @@ protected:
     static Optional<DiskKind> diskKindInternal(StringView path);
     static Optional<DiskKind> diskKindInternal(int fd);
 
-    // Static version that queries host environment variables
+    // Static version that sets or queries host environment variables
     // regardless of being TestSystem.
+    static void setEnvironmentVariable(StringView varname, StringView varvalue);
     static std::string getEnvironmentVariable(StringView varname);
+    static std::string getProgramDirectoryFromPlatform();
 
 private:
     DISALLOW_COPY_AND_ASSIGN(System);

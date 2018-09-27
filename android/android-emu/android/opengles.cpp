@@ -19,6 +19,7 @@
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/logger.h"
 #include "android/snapshot/PathUtils.h"
+#include "android/snapshot/Snapshotter.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/dll.h"
@@ -33,8 +34,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
-#define DD(...) VERBOSE_PRINT(gles,__VA_ARGS__)
+#define D(...) do { \
+    VERBOSE_PRINT(init,__VA_ARGS__); \
+    android_opengl_logger_write(__VA_ARGS__); \
+} while(0);
+
+#define DD(...) do { \
+    VERBOSE_PRINT(gles,__VA_ARGS__); \
+    android_opengl_logger_write(__VA_ARGS__); \
+} while(0);
+
+#define E(fmt,...) do { \
+    derror(fmt, ##__VA_ARGS__); \
+    android_opengl_logger_write(fmt "\n", ##__VA_ARGS__); \
+} while(0);
 
 /* Name of the GLES rendering library we're going to use */
 #if UINTPTR_MAX == UINT32_MAX
@@ -66,7 +79,7 @@ static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
         using type = ret(sig); \
         name = (type*)symbol; \
     } else { \
-        derror("GLES emulation: Could not find required symbol (%s): %s", #name, error); \
+        E("GLES emulation: Could not find required symbol (%s): %s", #name, error); \
         free(error); \
         return -1; \
     }
@@ -76,15 +89,19 @@ static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
     return 0;
 }
 
-static bool sRendererUsesSubWindow;
-static bool sEgl2egl;
+static bool sOpenglLoggerInitialized = false;
+static bool sRendererUsesSubWindow = false;
+static bool sEgl2egl = false;
 static emugl::RenderLibPtr sRenderLib = nullptr;
 static emugl::RendererPtr sRenderer = nullptr;
 
-static EGLDispatch* sEgl;
-static GLESv2Dispatch* sGLES;
+static EGLDispatch* sEgl = nullptr;
+static GLESv2Dispatch* sGLES = nullptr;
 
 int android_initOpenglesEmulation() {
+    android_init_opengl_logger();
+    sOpenglLoggerInitialized = true;
+
     char* error = NULL;
 
     if (sRenderLib != NULL)
@@ -95,20 +112,23 @@ int android_initOpenglesEmulation() {
     ADynamicLibrary* const rendererSo =
             adynamicLibrary_open(RENDERER_LIB_NAME, &error);
     if (rendererSo == NULL) {
-        derror("Could not load OpenGLES emulation library [%s]: %s",
+        E("Could not load OpenGLES emulation library [%s]: %s",
                RENDERER_LIB_NAME, error);
         return -1;
     }
 
     /* Resolve the functions */
     if (initOpenglesEmulationFuncs(rendererSo) < 0) {
-        derror("OpenGLES emulation library mismatch. Be sure to use the correct version!");
+        E("OpenGLES emulation library mismatch. Be sure to use the correct version!");
+        crashhandler_append_message_format(
+            "OpenGLES emulation library mismatch. Be sure to use the correct version!");
         goto BAD_EXIT;
     }
 
     sRenderLib = initLibrary();
     if (!sRenderLib) {
-        derror("OpenGLES initialization failed!");
+        E("OpenGLES initialization failed!");
+        crashhandler_append_message_format("OpenGLES initialization failed!");
         goto BAD_EXIT;
     }
 
@@ -132,7 +152,7 @@ int android_initOpenglesEmulation() {
     return 0;
 
 BAD_EXIT:
-    derror("OpenGLES emulation library could not be initialized!");
+    E("OpenGLES emulation library could not be initialized!");
     adynamicLibrary_close(rendererSo);
     return -1;
 }
@@ -147,11 +167,24 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
         return -1;
     }
 
+    if (!sEgl) {
+        D("Can't start OpenGLES renderer without EGL libraries");
+        return -1;
+    }
+
+    if (!sGLES) {
+        D("Can't start OpenGLES renderer without GLES libraries");
+        return -1;
+    }
+
     if (sRenderer) {
         return 0;
     }
 
-    android_init_opengl_logger();
+    const GpuInfoList& gpuList = globalGpuInfoList();
+    std::string gpuInfoAsString = gpuList.dump();
+    android_opengl_logger_write("%s: gpu info", __func__);
+    android_opengl_logger_write("%s", gpuInfoAsString.c_str());
 
     sRenderLib->setRenderer(emuglConfig_get_current_renderer());
     sRenderLib->setAvdInfo(guestPhoneApi, guestApiLevel);
@@ -177,6 +210,12 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     sRenderLib->setDmaOps(dma_ops);
 
     sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow, sEgl2egl);
+    android::snapshot::Snapshotter::get().addOperationCallback(
+            [](android::snapshot::Snapshotter::Operation op,
+               android::snapshot::Snapshotter::Stage stage) {
+                sRenderer->snapshotOperationCallback(op, stage);
+            });
+
     if (!sRenderer) {
         D("Can't start OpenGLES renderer?");
         return -1;
@@ -290,6 +329,10 @@ android_stopOpenglesRenderer(bool wait)
     }
 }
 
+static emugl::RenderOpt sOpt;
+static int sWidth, sHeight;
+static int sNewWidth, sNewHeight;
+
 int
 android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
                            int fbw, int fbh, float dpr, float rotation,
@@ -302,6 +345,8 @@ android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
     bool success = sRenderer->showOpenGLSubwindow(
             win, wx, wy, ww, wh, fbw, fbh, dpr, rotation,
                        deleteExisting);
+    sNewWidth = ww * dpr;
+    sNewHeight = wh * dpr;
     return success ? 0 : -1;
 }
 
@@ -380,16 +425,14 @@ void android_cleanupProcGLObjects(uint64_t puid) {
     }
 }
 
-static void* sDisplay, * sSurface, * sConfig, * sContext;
-static int sWidth, sHeight;
+
+static void* sContext, * sRenderContext, * sSurface;
 static EGLint s_gles_attr[5];
 
 extern void tinyepoxy_init(GLESv2Dispatch* gles, int version);
 
 static bool prepare_epoxy(void) {
-    void* unused;
-    if (!sRenderLib->getDSCC(&sDisplay, &sSurface, &sConfig, &unused,
-                             &sWidth, &sHeight)) {
+    if (!sRenderLib->getOpt(&sOpt)) {
         return false;
     }
     int major, minor;
@@ -399,9 +442,24 @@ static bool prepare_epoxy(void) {
         EGL_CONTEXT_MINOR_VERSION_KHR, minor,
         EGL_NONE
     };
-    sContext = sEgl->eglCreateContext(sDisplay, sConfig, EGL_NO_CONTEXT,
+    sContext = sEgl->eglCreateContext(sOpt.display, sOpt.config, EGL_NO_CONTEXT,
                                       attr);
     if (sContext == nullptr) {
+        return false;
+    }
+    sRenderContext = sEgl->eglCreateContext(sOpt.display, sOpt.config,
+                                            sContext, attr);
+    if (sRenderContext == nullptr) {
+        return false;
+    }
+    static constexpr EGLint surface_attr[] = {
+        EGL_WIDTH, 1,
+        EGL_HEIGHT, 1,
+        EGL_NONE
+    };
+    sSurface = sEgl->eglCreatePbufferSurface(sOpt.display, sOpt.config,
+                                             surface_attr);
+    if (sSurface == EGL_NO_SURFACE) {
         return false;
     }
     static_assert(sizeof(attr) == sizeof(s_gles_attr), "Mismatch");
@@ -419,16 +477,16 @@ void * android_gl_create_context(DisplayChangeListener * unuse1,
     if (!ok) {
         return nullptr;
     }
-    sEgl->eglMakeCurrent(sDisplay, sSurface, sSurface, sContext);
-    return sEgl->eglCreateContext(sDisplay, sConfig, sContext, s_gles_attr);
+    sEgl->eglMakeCurrent(sOpt.display, sSurface, sSurface, sContext);
+    return sEgl->eglCreateContext(sOpt.display, sOpt.config, sContext, s_gles_attr);
 }
 
 void android_gl_destroy_context(DisplayChangeListener* unused, void * ctx) {
-    sEgl->eglDestroyContext(sDisplay, ctx);
+    sEgl->eglDestroyContext(sOpt.display, ctx);
 }
 
 int android_gl_make_context_current(DisplayChangeListener* unused, void * ctx) {
-    return sEgl->eglMakeCurrent(sDisplay, sSurface, sSurface, ctx);
+    return sEgl->eglMakeCurrent(sOpt.display, sSurface, sSurface, ctx);
 }
 
 static GLuint s_tex_id, s_fbo_id;
@@ -447,11 +505,18 @@ void android_gl_scanout_texture(DisplayChangeListener* unuse,
     s_gfx_h = h;
     s_gfx_w = w;
     s_y0_top = backing_y_0_top;
-    sEgl->eglMakeCurrent(sDisplay, sSurface, sSurface, sContext);
+    if (sNewWidth != sWidth || sNewHeight != sHeight) {
+        sRenderLib->getOpt(&sOpt);
+        sWidth = sNewWidth;
+        sHeight = sNewHeight;
+    }
+    sEgl->eglMakeCurrent(sOpt.display, sOpt.surface, sOpt.surface,
+                         sRenderContext);
     if (!s_fbo_id) {
         sGLES->glGenFramebuffers(1, &s_fbo_id);
     }
     sGLES->glBindFramebuffer(GL_FRAMEBUFFER_EXT, s_fbo_id);
+    sGLES->glViewport(0, 0, h, w);
     sGLES->glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0,
                                   GL_TEXTURE_2D, backing_id, 0);
 }
@@ -462,7 +527,8 @@ void android_gl_scanout_flush(DisplayChangeListener* unuse,
     if (!s_fbo_id)  {
         return;
     }
-    sEgl->eglMakeCurrent(sDisplay, sSurface, sSurface, sContext);
+    sEgl->eglMakeCurrent(sOpt.display, sOpt.surface, sOpt.surface,
+                         sRenderContext);
 
     sGLES->glBindFramebuffer(GL_READ_FRAMEBUFFER, s_fbo_id);
     sGLES->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -474,6 +540,6 @@ void android_gl_scanout_flush(DisplayChangeListener* unuse,
     sGLES->glBlitFramebuffer(0, y1, s_gfx_w, y2,
                              0, 0, sWidth, sHeight,
                              GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    sEgl->eglSwapBuffers(sDisplay, sSurface);
+    sEgl->eglSwapBuffers(sOpt.display, sOpt.surface);
     sGLES->glBindFramebuffer(GL_FRAMEBUFFER_EXT, s_fbo_id);
 }

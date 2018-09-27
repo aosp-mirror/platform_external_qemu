@@ -21,7 +21,9 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/vec3.hpp>
 
+#include "android/automation/AutomationController.h"
 #include "android/automation/AutomationEventSink.h"
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/system/System.h"
@@ -29,8 +31,6 @@
 #include "android/hw-sensors.h"
 #include "android/physics/AmbientEnvironment.h"
 #include "android/physics/InertialModel.h"
-#include "android/utils/debug.h"
-#include "android/utils/looper.h"
 #include "android/utils/stream.h"
 
 #include <cstdio>
@@ -40,6 +40,7 @@
 #define W(...) dwarning(__VA_ARGS__)
 #define E(...) derror(__VA_ARGS__)
 
+using android::automation::AutomationController;
 using android::base::PathUtils;
 using android::base::StdioStream;
 using android::base::System;
@@ -65,7 +66,7 @@ namespace physics {
  */
 class PhysicalModelImpl {
 public:
-    PhysicalModelImpl(bool shouldTick);
+    PhysicalModelImpl();
     ~PhysicalModelImpl();
 
     /*
@@ -85,6 +86,11 @@ public:
      * Returns whether the physical state is stable or changing at the set time.
      */
     void setCurrentTime(int64_t time_ns);
+
+    /*
+     * Replays a PhysicalModelEvent onto the current PhysicalModel state.
+     */
+    void replayEvent(const pb::PhysicalModelEvent& event);
 
     /*
      * Sets the target value for the given physical parameter that the physical
@@ -149,20 +155,31 @@ public:
     void setPhysicalStateAgent(const QAndroidPhysicalStateAgent* agent);
 
     /*
-     * Save the current physical state to the given stream.
+     * Set or unset the automation controller.
+     * Can be called from any thread.
      */
-    void save(Stream* f);
+    void setAutomationController(AutomationController* controller);
 
     /*
-     * Load the current physical state from the given stream.
+     * Save the full physical state to the given stream for snapshots.
      */
-    int load(Stream* f);
+    void snapshotSave(Stream* f);
 
     /*
-     * Start recording physical model changes to the given file.
-     * Returns 0 if successful.
+     * Load the full physical state from the given stream.
      */
-    int record(const char* filename);
+    int snapshotLoad(Stream* f);
+
+    /*
+     * Save physical model state, used for automation.  Does not include
+     * overrides.
+     */
+    void saveState(pb::InitialState* state);
+
+    /*
+     * Load physical model state, used for automation.
+     */
+    void loadState(const pb::InitialState& state);
 
     /*
      * Start recording physical model ground truth to the given file.
@@ -171,25 +188,11 @@ public:
     int recordGroundTruth(const char* filename);
 
     /*
-     * Play a recording from the given file.
-     * Returns 0 if successful.
-     */
-    int playback(const char* filename);
-
-    /*
-     * Stop the current recording or playback of physical state changes.
-     */
-    void stopRecordAndPlayback();
-
-    /*
      * Stop recording the ground truth.
      */
     void stopRecordGroundTruth();
 
 private:
-
-    void setCurrentTimeInternal(int64_t time_ns);
-
     /*
      * Sets the target value for the given physical parameter that the physical
      * model should move towards.
@@ -218,15 +221,17 @@ private:
     /*
      * Helper for setting overrides.
      */
-    template<class T>
+    template <class T>
     void setOverride(AndroidSensor sensor,
                      T* overrideMemberPointer,
                      T overrideValue) {
-        std::lock_guard<std::recursive_mutex> lock(mMutex);
         physicalStateChanging();
-        mUseOverride[sensor] = true;
-        mMeasurementId[sensor]++;
-        *overrideMemberPointer = overrideValue;
+        {
+            std::lock_guard<std::recursive_mutex> lock(mMutex);
+            mUseOverride[sensor] = true;
+            mMeasurementId[sensor]++;
+            *overrideMemberPointer = overrideValue;
+        }
     }
 
     /*
@@ -259,16 +264,12 @@ private:
                        PhysicalInterpolation mode,
                        ValueType value);
 
-    /*
-     * Ticks the physical model.
-     */
-    static void tick(void* opaque, LoopTimer* unused);
-
     mutable std::recursive_mutex mMutex;
 
     InertialModel mInertialModel;
     AmbientEnvironment mAmbientEnvironment;
 
+    AutomationController* mAutomationController = nullptr;
     const QAndroidPhysicalStateAgent* mAgent = nullptr;
     bool mIsPhysicalStateChanging = false;
 
@@ -282,25 +283,9 @@ private:
 #undef SENSOR_
 #undef OVERRIDE_NAME
 
-    enum PlaybackState {
-        PLAYBACK_STATE_NONE,
-        PLAYBACK_STATE_RECORDING,
-        PLAYBACK_STATE_PLAYING,
-    };
-
-    PlaybackState mPlaybackState = PLAYBACK_STATE_NONE;
-    int64_t mPlaybackAndRecordingStartTimeNs = 0L;
-
-    pb::Time mNextPlaybackCommandTime;
-    pb::PhysicalModelEvent mNextPlaybackCommand;
-    std::unique_ptr<StdioStream> mRecordingAndPlaybackStream;
     std::unique_ptr<StdioStream> mGroundTruthStream;
 
-    const uint32_t kPlaybackFileVersion = 1;
-
     int64_t mModelTimeNs = 0L;
-
-    LoopTimer* mLoopTimer = nullptr;
 
     PhysicalModel mPhysicalModelInterface;
 };
@@ -317,16 +302,8 @@ static vec3 fromGlm(glm::vec3 input) {
     return value;
 }
 
-PhysicalModelImpl::PhysicalModelImpl(bool shouldTick) {
+PhysicalModelImpl::PhysicalModelImpl() {
     mPhysicalModelInterface.opaque = reinterpret_cast<void*>(this);
-
-    if (shouldTick) {
-        mLoopTimer = loopTimer_newWithClock(
-                looper_getForThread(),
-                PhysicalModelImpl::tick,
-                reinterpret_cast<void*>(&mPhysicalModelInterface),
-                LOOPER_CLOCK_VIRTUAL);
-    }
 }
 
 PhysicalModelImpl::~PhysicalModelImpl() {
@@ -341,33 +318,6 @@ PhysicalModelImpl* PhysicalModelImpl::getImpl(PhysicalModel* physicalModel) {
     return physicalModel != nullptr ?
             reinterpret_cast<PhysicalModelImpl*>(physicalModel->opaque) :
             nullptr;
-}
-
-pb::PhysicalModelEvent_InterpolationMethod toProto(
-        PhysicalInterpolation interpolation) {
-    switch (interpolation) {
-        case PHYSICAL_INTERPOLATION_SMOOTH:
-            return pb::PhysicalModelEvent_InterpolationMethod_Smooth;
-        case PHYSICAL_INTERPOLATION_STEP:
-            return pb::PhysicalModelEvent_InterpolationMethod_Step;
-        default:
-            assert(false);  // should never happen
-            return pb::PhysicalModelEvent_InterpolationMethod_Smooth;
-    }
-}
-
-PhysicalInterpolation fromProto(
-        pb::PhysicalModelEvent_InterpolationMethod interpolation) {
-    switch (interpolation) {
-        case pb::PhysicalModelEvent_InterpolationMethod_Smooth:
-            return PHYSICAL_INTERPOLATION_SMOOTH;
-        case pb::PhysicalModelEvent_InterpolationMethod_Step:
-            return PHYSICAL_INTERPOLATION_STEP;
-        default:
-            W("%s: Unknown interpolation mode %d.  Defaulting to smooth.",
-              __FUNCTION__, interpolation);
-            return PHYSICAL_INTERPOLATION_SMOOTH;
-    }
 }
 
 pb::PhysicalModelEvent_ParameterType toProto(PhysicalParameter param) {
@@ -406,198 +356,205 @@ PhysicalParameter fromProto(pb::PhysicalModelEvent_ParameterType param) {
     }
 }
 
-float getProtoValue_float(const pb::PhysicalModelEvent& target) {
-    if (!target.has_value() || target.value().data_size() != 1) {
+template <typename T>
+T getProtoValue(const pb::PhysicalModelEvent_ParameterValue& parameter);
+
+template <>
+float getProtoValue<float>(const pb::PhysicalModelEvent_ParameterValue& parameter) {
+    if (parameter.data_size() != 1) {
         W("%s: Error in parsed physics command.  Float parameters should have "
           "exactly one value.  Found %d.",
-          __FUNCTION__, target.value().data_size());
+          __FUNCTION__, parameter.data_size());
         return 0.f;
     }
-    return target.value().data(0);
+    return parameter.data(0);
 }
 
-vec3 getProtoValue_vec3(const pb::PhysicalModelEvent& target) {
-    if (!target.has_value() || target.value().data_size() != 3) {
+template <>
+vec3 getProtoValue<vec3>(const pb::PhysicalModelEvent_ParameterValue& parameter) {
+    if (parameter.data_size() != 3) {
         W("%s: Error in parsed physics command.  Vec3 parameters should have "
           "exactly three values.  Found %d.",
-          __FUNCTION__, target.value().data_size());
+          __FUNCTION__, parameter.data_size());
         return vec3{0.f, 0.f, 0.f};
     }
-    const pb::PhysicalModelEvent_ParameterValue& value = target.value();
-    return vec3{value.data(0), value.data(1), value.data(2)};
+    return vec3{parameter.data(0), parameter.data(1), parameter.data(2)};
 }
 
-void setProtoValue(pb::PhysicalModelEvent* target, float value) {
-    target->mutable_value()->add_data(value);
+void setProtoCurrentValue(pb::PhysicalModelEvent* event, float value) {
+    event->mutable_current_value()->add_data(value);
 }
 
-void setProtoValue(pb::PhysicalModelEvent* target, vec3 value) {
-    pb::PhysicalModelEvent_ParameterValue* pbValue = target->mutable_value();
+void setProtoCurrentValue(pb::PhysicalModelEvent* event, vec3 value) {
+    pb::PhysicalModelEvent_ParameterValue* pbValue =
+            event->mutable_current_value();
     pbValue->add_data(value.x);
     pbValue->add_data(value.y);
     pbValue->add_data(value.z);
 }
 
-static bool isPhysicalModelEventValid(const pb::PhysicalModelEvent& event) {
-    return (event.has_type() && event.has_interpolation_method());
+void setProtoTargetValue(pb::PhysicalModelEvent* event, float value) {
+    event->mutable_target_value()->add_data(value);
 }
 
-static bool parseNextCommand(StdioStream* inStream,
-                             pb::Time* outTime,
-                             pb::PhysicalModelEvent* outCommand) {
-    const std::string nextCommand = inStream->getString();
-
-    pb::RecordedEvent event;
-    if (nextCommand.empty() || !event.ParseFromString(nextCommand)) {
-        return false;
-    }
-
-    if (!event.has_stream_type() ||
-        event.stream_type() != pb::RecordedEvent_StreamType_PHYSICAL_MODEL) {
-        // Currently if other stream types are present the recording is
-        // considered invalid.
-        return false;
-    }
-
-    if (!event.has_event_time() || !event.has_physical_model() ||
-        !isPhysicalModelEventValid(event.physical_model())) {
-        return false;
-    }
-
-    *outTime = event.event_time();
-    *outCommand = event.physical_model();
-    return true;
+void setProtoTargetValue(pb::PhysicalModelEvent* event, vec3 value) {
+    pb::PhysicalModelEvent_ParameterValue* pbValue =
+            event->mutable_target_value();
+    pbValue->add_data(value.x);
+    pbValue->add_data(value.y);
+    pbValue->add_data(value.z);
 }
 
 void PhysicalModelImpl::setCurrentTime(int64_t time_ns) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
-    while (mPlaybackState == PLAYBACK_STATE_PLAYING &&
-           time_ns >= mPlaybackAndRecordingStartTimeNs +
-                              mNextPlaybackCommandTime.timestamp()) {
-        setCurrentTimeInternal(mPlaybackAndRecordingStartTimeNs +
-                               mNextPlaybackCommandTime.timestamp());
-        switch (fromProto(mNextPlaybackCommand.type())) {
+    bool stateStabilized = false;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mModelTimeNs = time_ns;
+        const bool isInertialModelStable =
+                mInertialModel.setCurrentTime(time_ns) == INERTIAL_STATE_STABLE;
+        const bool isAmbientModelStable =
+                mAmbientEnvironment.setCurrentTime(time_ns) ==
+                AMBIENT_STATE_STABLE;
+        stateStabilized = (isInertialModelStable && isAmbientModelStable &&
+                           mIsPhysicalStateChanging);
+    }
+
+    if (stateStabilized) {
+        physicalStateStabilized();
+    }
+}
+
+void PhysicalModelImpl::replayEvent(const pb::PhysicalModelEvent& event) {
+    switch (fromProto(event.type())) {
 #define PHYSICAL_PARAMETER_ENUM(x) PHYSICAL_PARAMETER_##x
 #define SET_TARGET_INTERNAL_FUNCTION_NAME(x) setTargetInternal##x
 #define GET_PROTO_VALUE_FUNCTION_NAME(x) getProtoValue_##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) \
-            case PHYSICAL_PARAMETER_ENUM(x):\
-                SET_TARGET_INTERNAL_FUNCTION_NAME(z)(\
-                        GET_PROTO_VALUE_FUNCTION_NAME(w)(mNextPlaybackCommand),\
-                        fromProto(mNextPlaybackCommand.interpolation_method()));\
-                break;
+#define PHYSICAL_PARAMETER_(x, y, z, type)                  \
+    case PHYSICAL_PARAMETER_ENUM(x):                        \
+        if (event.has_current_value()) {                    \
+            SET_TARGET_INTERNAL_FUNCTION_NAME(z)(           \
+                getProtoValue<type>(event.current_value()), \
+                PHYSICAL_INTERPOLATION_STEP);               \
+        }                                                   \
+        if (event.has_target_value()) {                     \
+            SET_TARGET_INTERNAL_FUNCTION_NAME(z)(           \
+                getProtoValue<type>(event.target_value()),  \
+                PHYSICAL_INTERPOLATION_SMOOTH);             \
+        }                                                   \
+        break;
 
-            PHYSICAL_PARAMETERS_LIST
+        PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef GET_PROTO_VALUE_FUNCTION_NAME
 #undef SET_TARGET_INTERNAL_FUNCTION_NAME
 #undef PHYSICAL_PARAMETER_ENUM
-            default:
-                break;
-        }
-        if (!parseNextCommand(mRecordingAndPlaybackStream.get(),
-                              &mNextPlaybackCommandTime,
-                              &mNextPlaybackCommand)) {
-            stopRecordAndPlayback();
-        }
-    }
-
-    setCurrentTimeInternal(time_ns);
-}
-
-void PhysicalModelImpl::setCurrentTimeInternal(int64_t time_ns) {
-    mModelTimeNs = time_ns;
-    bool isInertialModelStable = mInertialModel.setCurrentTime(time_ns) ==
-            INERTIAL_STATE_STABLE;
-    bool isAmbientModelStable = mAmbientEnvironment.setCurrentTime(time_ns) ==
-            AMBIENT_STATE_STABLE;
-    if (isInertialModelStable && isAmbientModelStable &&
-            mIsPhysicalStateChanging) {
-        physicalStateStabilized();
+        default:
+            break;
     }
 }
 
 void PhysicalModelImpl::setTargetInternalPosition(vec3 position,
         PhysicalInterpolation mode) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
-    mInertialModel.setTargetPosition(toGlm(position), mode);
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mInertialModel.setTargetPosition(toGlm(position), mode);
+    }
     targetStateChanged();
 }
 
 void PhysicalModelImpl::setTargetInternalVelocity(vec3 velocity,
         PhysicalInterpolation mode) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
-    mInertialModel.setTargetVelocity(toGlm(velocity), mode);
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mInertialModel.setTargetVelocity(toGlm(velocity), mode);
+    }
     targetStateChanged();
 }
 
 void PhysicalModelImpl::setTargetInternalAmbientMotion(float bounds,
         PhysicalInterpolation mode) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
-    mInertialModel.setTargetAmbientMotion(bounds, mode);
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mInertialModel.setTargetAmbientMotion(bounds, mode);
+    }
     targetStateChanged();
 }
 
 void PhysicalModelImpl::setTargetInternalRotation(vec3 rotation,
         PhysicalInterpolation mode) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
-    mInertialModel.setTargetRotation(glm::toQuat(glm::eulerAngleXYZ(
-            glm::radians(rotation.x),
-            glm::radians(rotation.y),
-            glm::radians(rotation.z))), mode);
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mInertialModel.setTargetRotation(
+                glm::toQuat(glm::eulerAngleXYZ(glm::radians(rotation.x),
+                                               glm::radians(rotation.y),
+                                               glm::radians(rotation.z))),
+                mode);
+    }
     targetStateChanged();
 }
 
 void PhysicalModelImpl::setTargetInternalMagneticField(
-        vec3 field, PhysicalInterpolation mode) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
+        vec3 field,
+        PhysicalInterpolation mode) {
     physicalStateChanging();
-    mAmbientEnvironment.setMagneticField(
-        field.x, field.y, field.z, mode);
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mAmbientEnvironment.setMagneticField(field.x, field.y, field.z, mode);
+    }
     targetStateChanged();
 }
 
 void PhysicalModelImpl::setTargetInternalTemperature(
         float celsius, PhysicalInterpolation mode) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
-    mAmbientEnvironment.setTemperature(celsius, mode);
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mAmbientEnvironment.setTemperature(celsius, mode);
+    }
     targetStateChanged();
 }
 
 void PhysicalModelImpl::setTargetInternalProximity(
         float centimeters, PhysicalInterpolation mode) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
-    mAmbientEnvironment.setProximity(centimeters, mode);
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mAmbientEnvironment.setProximity(centimeters, mode);
+    }
     targetStateChanged();
 }
 
 void PhysicalModelImpl::setTargetInternalLight(
         float lux, PhysicalInterpolation mode) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
-    mAmbientEnvironment.setLight(lux, mode);
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mAmbientEnvironment.setLight(lux, mode);
+    }
     targetStateChanged();
 }
 
 void PhysicalModelImpl::setTargetInternalPressure(
         float hPa, PhysicalInterpolation mode) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
-    mAmbientEnvironment.setPressure(hPa, mode);
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mAmbientEnvironment.setPressure(hPa, mode);
+    }
     targetStateChanged();
 }
 
 void PhysicalModelImpl::setTargetInternalHumidity(
         float percentage, PhysicalInterpolation mode) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
-    mAmbientEnvironment.setHumidity(percentage, mode);
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mAmbientEnvironment.setHumidity(percentage, mode);
+    }
     targetStateChanged();
 }
 
@@ -761,14 +718,6 @@ void PhysicalModelImpl::getTransform(
         int64_t* out_timestamp) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
 
-    // Note: when getting the transform, we always update the current time
-    //       so that consumers of this transform get the most up-to-date
-    //       value possible, and so that transform timestamps progress even when
-    //       sensors are not polling.
-    const DurationNs now_ns =
-            looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
-    setCurrentTime(now_ns);
-
     const vec3 position = getParameterPosition(PARAMETER_VALUE_TYPE_CURRENT);
     *out_translation_x = position.x;
     *out_translation_y = position.y;
@@ -789,35 +738,45 @@ void PhysicalModelImpl::getTransform(
 
 void PhysicalModelImpl::setPhysicalStateAgent(
         const QAndroidPhysicalStateAgent* agent) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    bool stateChanging = false;
 
-    if (mAgent != nullptr && mAgent->onPhysicalStateStabilized != nullptr) {
-        mAgent->onPhysicalStateStabilized(mAgent->context);
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mAgent = agent;
+        stateChanging = mIsPhysicalStateChanging;
     }
-    mAgent = agent;
-    if (mAgent != nullptr) {
-        if (mIsPhysicalStateChanging) {
+
+    // Invoke callbacks outside of the lock.
+    if (agent) {
+        if (stateChanging) {
             // Ensure the new agent is set correctly if the is a pending state
             // change.
-            if (mAgent->onPhysicalStateChanging != nullptr) {
-                mAgent->onPhysicalStateChanging(mAgent->context);
+            if (agent->onPhysicalStateChanging) {
+                agent->onPhysicalStateChanging(agent->context);
             }
         } else {
             // If no state change is pending, we still send a change/stabilize
             // message so that agents can depend on them for initialization.
-            if (mAgent->onPhysicalStateChanging != nullptr) {
-                mAgent->onPhysicalStateChanging(mAgent->context);
+            if (agent->onPhysicalStateChanging) {
+                agent->onPhysicalStateChanging(agent->context);
             }
-            if (mAgent->onPhysicalStateStabilized != nullptr) {
-                mAgent->onPhysicalStateStabilized(mAgent->context);
+            if (agent->onPhysicalStateStabilized) {
+                agent->onPhysicalStateStabilized(agent->context);
             }
         }
+
         // We send an initial target state change so agents can depend on this
         // for initialization.
-        if (mAgent->onTargetStateChanged != nullptr) {
-            mAgent->onTargetStateChanged(mAgent->context);
+        if (agent->onTargetStateChanged) {
+            agent->onTargetStateChanged(agent->context);
         }
     }
+}
+
+void PhysicalModelImpl::setAutomationController(
+        AutomationController* controller) {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    mAutomationController = controller;
 }
 
 static void readValueFromStream(Stream* f, vec3* value) {
@@ -840,7 +799,7 @@ static void writeValueToStream(Stream* f, float value) {
     stream_put_float(f, value);
 }
 
-void PhysicalModelImpl::save(Stream* f) {
+void PhysicalModelImpl::snapshotSave(Stream* f) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
 
     // first save targets
@@ -899,7 +858,7 @@ void PhysicalModelImpl::save(Stream* f) {
     }
 }
 
-int PhysicalModelImpl::load(Stream* f) {
+int PhysicalModelImpl::snapshotLoad(Stream* f) {
     // first load targets
     const int32_t num_physical_parameters = stream_get_be32(f);
     if (num_physical_parameters > MAX_PHYSICAL_PARAMETERS) {
@@ -908,8 +867,6 @@ int PhysicalModelImpl::load(Stream* f) {
           __FUNCTION__, num_physical_parameters, MAX_PHYSICAL_PARAMETERS);
         return -EIO;
     }
-
-    stopRecordAndPlayback();
 
     // Note: any new target params will remain at their defaults.
 
@@ -978,33 +935,92 @@ int PhysicalModelImpl::load(Stream* f) {
     return 0;
 }
 
-int PhysicalModelImpl::record(const char* filename) {
-    stopRecordAndPlayback();
+template <typename ValueType>
+void serializeState(pb::InitialState* state, PhysicalParameter type,
+                    ValueType currentValue, ValueType targetValue) {
+    pb::PhysicalModelEvent* command = state->add_physical_model();
+    command->set_type(toProto(type));
+    setProtoCurrentValue(command, currentValue);
+    setProtoTargetValue(command, targetValue);
+}
 
-    if (!filename) {
-        E("%s: Must specify filename for writing.  Physical Motion will not be "
-          "recorded.", __FUNCTION__, filename);
-        return -1;
+void PhysicalModelImpl::saveState(pb::InitialState* state) {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+
+    state->mutable_initial_time()->set_timestamp(mModelTimeNs);
+
+    // TODO(jwmcglynn): Prune state and only save non-default parameters.
+
+    for (int parameter = 0; parameter < MAX_PHYSICAL_PARAMETERS; parameter++) {
+        switch (parameter) {
+#define PHYSICAL_PARAMETER_NAME(x) PHYSICAL_PARAMETER_##x
+#define GET_PARAMETER_FUNCTION_NAME(x) getParameter##x
+#define PHYSICAL_PARAMETER_(x, y, z, w)            \
+    case PHYSICAL_PARAMETER_NAME(x): {             \
+        serializeState(                            \
+                state, PHYSICAL_PARAMETER_NAME(x), \
+                GET_PARAMETER_FUNCTION_NAME(z)(PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION),  \
+                GET_PARAMETER_FUNCTION_NAME(z)(PARAMETER_VALUE_TYPE_TARGET)); \
+            break;                                                            \
+        }
+
+        PHYSICAL_PARAMETERS_LIST
+#undef PHYSICAL_PARAMETER_
+#undef GET_PARAMETER_FUNCTION_NAME
+#undef PHYSICAL_PARAMETER_NAME
+            default:
+                assert(false);  // should never happen
+                break;
+        }
+    }
+}
+
+void PhysicalModelImpl::loadState(const pb::InitialState& state) {
+    constexpr vec3 kVecZero = {0.f, 0.f, 0.f};
+    vec3 currentPosition = {0.f, 0.f, 0.f};
+    vec3 targetPosition = {0.f, 0.f, 0.f};
+    vec3 currentVelocity = {0.f, 0.f, 0.f};
+    vec3 targetVelocity = {0.f, 0.f, 0.f};
+
+    for (int i = 0; i < state.physical_model_size(); ++i) {
+        const pb::PhysicalModelEvent& event = state.physical_model(i);
+
+        // Position and velocity require special ordering to replay properly,
+        // dispatch those events separately.
+        if (event.type() == pb::PhysicalModelEvent_ParameterType_POSITION) {
+            if (event.has_current_value()) {
+                currentPosition = getProtoValue<vec3>(event.current_value());
+            }
+            if (event.has_target_value()) {
+                targetPosition = getProtoValue<vec3>(event.target_value());
+            }
+        } else if (event.type() ==
+                   pb::PhysicalModelEvent_ParameterType_VELOCITY) {
+            if (event.has_current_value()) {
+                currentVelocity = getProtoValue<vec3>(event.current_value());
+            }
+            if (event.has_target_value()) {
+                targetVelocity = getProtoValue<vec3>(event.target_value());
+            }
+        } else {
+            replayEvent(event);
+        }
     }
 
-    const std::string path = PathUtils::join(
-            System::get()->getHomeDirectory(), filename);
+    // To avoid overriding the velocity, first replay current position, then
+    // current velocity, then the target position and velocity.
+    setTargetInternalPosition(currentPosition, PHYSICAL_INTERPOLATION_STEP);
+    setTargetInternalVelocity(currentVelocity, PHYSICAL_INTERPOLATION_STEP);
 
-    mRecordingAndPlaybackStream.reset(new StdioStream(fopen(path.c_str(), "wb"),
-            StdioStream::kOwner));
-    if (!mRecordingAndPlaybackStream.get()) {
-        E("%s: Error unable to open physics file %s for writing.  "
-          "Physical Motion will not be recorded.", __FUNCTION__, filename);
-        return -1;
+    if (targetVelocity != kVecZero) {
+        // If we have a non-zero target velocity, then we are moving at a
+        // velocity instead of towards a position.
+        setTargetInternalVelocity(targetVelocity,
+                                  PHYSICAL_INTERPOLATION_SMOOTH);
+    } else {
+        setTargetInternalPosition(targetPosition,
+                                  PHYSICAL_INTERPOLATION_SMOOTH);
     }
-
-    mPlaybackState = PLAYBACK_STATE_RECORDING;
-    mPlaybackAndRecordingStartTimeNs = mModelTimeNs;
-    mRecordingAndPlaybackStream->putBe32(kPlaybackFileVersion);
-    automation::AutomationEventSink::get().registerStream(
-            mRecordingAndPlaybackStream.get(),
-            automation::StreamEncoding::BinaryPbChunks);
-    return 0;
 }
 
 int PhysicalModelImpl::recordGroundTruth(const char* filename) {
@@ -1034,59 +1050,6 @@ int PhysicalModelImpl::recordGroundTruth(const char* filename) {
     return 0;
 }
 
-int PhysicalModelImpl::playback(const char* filename) {
-    stopRecordAndPlayback();
-
-    if (!filename) {
-        E("%s: Must specify filename for reading.  Physical Motion will not be "
-          "played back.", __FUNCTION__, filename);
-        return -1;
-    }
-
-    const std::string path = PathUtils::join(
-            System::get()->getHomeDirectory(), filename);
-
-    std::unique_ptr<StdioStream> playbackStream(
-            new StdioStream(fopen(path.c_str(), "rb"), StdioStream::kOwner));
-    if (!playbackStream.get()) {
-        E("%s: Error unable to open physics file %s for reading.  "
-          "Physical Motion will not be played back.", __FUNCTION__, filename);
-        return -1;
-    }
-
-    uint32_t version = playbackStream->getBe32();
-    if (kPlaybackFileVersion != version) {
-        E("%s: Unsupported version %d in physics file %s.  Required Version "
-          "is %d.  Physical Motion will not be played back.",
-          __FUNCTION__, version, filename, kPlaybackFileVersion);
-        return -1;
-    }
-
-    if (!parseNextCommand(playbackStream.get(), &mNextPlaybackCommandTime,
-                          &mNextPlaybackCommand)) {
-        E("%s: Invalid physics file %s.  Physical Motion will not be played "
-          "back.",
-          __FUNCTION__, filename);
-        return -1;
-    }
-    mRecordingAndPlaybackStream.swap(playbackStream);
-    mPlaybackState = PLAYBACK_STATE_PLAYING;
-    mPlaybackAndRecordingStartTimeNs = mModelTimeNs;
-    return 0;
-}
-
-void PhysicalModelImpl::stopRecordAndPlayback() {
-    if (mRecordingAndPlaybackStream &&
-        mPlaybackState == PLAYBACK_STATE_RECORDING) {
-        automation::AutomationEventSink::get().unregisterStream(
-                mRecordingAndPlaybackStream.get());
-    }
-    mRecordingAndPlaybackStream.reset(nullptr);
-    mPlaybackState = PLAYBACK_STATE_NONE;
-    mPlaybackAndRecordingStartTimeNs = 0;
-    stopRecordGroundTruth();
-}
-
 void PhysicalModelImpl::stopRecordGroundTruth() {
     mGroundTruthStream.reset(nullptr);
 }
@@ -1108,39 +1071,61 @@ PHYSICAL_PARAMETERS_LIST
 #undef SET_TARGET_FUNCTION_NAME
 
 void PhysicalModelImpl::physicalStateChanging() {
-    // Note: We only call onPhysicalStateChanging if this is a transition from
-    // stable to changing (i.e. don't call if we get to physicalStateChanging
-    // calls in a row without a physicalStateStabilized call in between).
-    if (!mIsPhysicalStateChanging && mAgent != nullptr &&
-            mAgent->onPhysicalStateChanging != nullptr) {
-        mAgent->onPhysicalStateChanging(mAgent->context);
+    const QAndroidPhysicalStateAgent* agent = nullptr;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        // Note: We only call onPhysicalStateChanging if this is a transition
+        // from stable to changing (i.e. don't call if we get to
+        // physicalStateChanging calls in a row without a
+        // physicalStateStabilized call in between).
+        if (!mIsPhysicalStateChanging) {
+            mIsPhysicalStateChanging = true;
+            agent = mAgent;
+        }
     }
-    if (mLoopTimer != nullptr) {
-        loopTimer_startRelative(mLoopTimer, 0);
+
+    // Call the callback outside of the lock.
+    if (agent && agent->onPhysicalStateChanging) {
+        agent->onPhysicalStateChanging(agent->context);
     }
-    mIsPhysicalStateChanging = true;
 }
 
 void PhysicalModelImpl::physicalStateStabilized() {
-    assert(mIsPhysicalStateChanging);
-    if (mAgent != nullptr && mAgent->onPhysicalStateStabilized != nullptr) {
-        mAgent->onPhysicalStateStabilized(mAgent->context);
+    const QAndroidPhysicalStateAgent* agent;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        assert(mIsPhysicalStateChanging);
+        agent = mAgent;
+
+        // Increment all of the measurement ids because the physical state has
+        // stabilized.
+        for (size_t i = 0; i < MAX_SENSORS; i++) {
+            mMeasurementId[i]++;
+        }
+        mIsPhysicalStateChanging = false;
     }
-    // Increment all of the measurement ids because the physical state has
-    // stabilized.
-    for (int i = 0; i < MAX_SENSORS; i++) {
-        mMeasurementId[i]++;
+
+    // Call the callback outside of the lock.
+    if (agent && agent->onPhysicalStateStabilized) {
+        agent->onPhysicalStateStabilized(agent->context);
     }
-    mIsPhysicalStateChanging = false;
 }
 
 void PhysicalModelImpl::targetStateChanged() {
-    /* when target state changes we reset all sensor overrides */
-    for (int i = 0; i < MAX_SENSORS; i++) {
-        mUseOverride[i] = false;
+    const QAndroidPhysicalStateAgent* agent;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        // When target state changes we reset all sensor overrides.
+        for (size_t i = 0; i < MAX_SENSORS; ++i) {
+            mUseOverride[i] = false;
+        }
+
+        agent = mAgent;
     }
-    if (mAgent != nullptr && mAgent->onTargetStateChanged != nullptr) {
-        mAgent->onTargetStateChanged(mAgent->context);
+
+    // Call the callback outside of the lock.
+    if (agent && agent->onTargetStateChanged) {
+        agent->onTargetStateChanged(agent->context);
     }
 }
 
@@ -1148,34 +1133,17 @@ template <typename ValueType>
 void PhysicalModelImpl::generateEvent(PhysicalParameter type,
                    PhysicalInterpolation mode,
                    ValueType value) {
-    // TODO(jwmcglynn): For recordings we need some way to save the initial
-    // state.
-    pb::Time time;
-    time.set_timestamp(mModelTimeNs - mPlaybackAndRecordingStartTimeNs);
-
     pb::PhysicalModelEvent command;
     command.set_type(toProto(type));
-    command.set_interpolation_method(toProto(mode));
-    setProtoValue(&command, value);
+    if (mode == PHYSICAL_INTERPOLATION_SMOOTH) {
+        setProtoTargetValue(&command, value);
+    } else {
+        setProtoCurrentValue(&command, value);
+    }
 
-    automation::AutomationEventSink::get().recordPhysicalModelEvent(time,
-                                                                    command);
-}
-
-void PhysicalModelImpl::tick(void* opaque, LoopTimer* unused) {
-    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(
-            reinterpret_cast<PhysicalModel*>(opaque));
-    if (impl != nullptr) {
-        const DurationNs now_ns =
-                looper_nowNsWithClock(looper_getForThread(),
-                LOOPER_CLOCK_VIRTUAL);
-        impl->setCurrentTime(now_ns);
-
-        // if the model is still changing, schedule another timer.
-        if (impl->mIsPhysicalStateChanging) {
-            assert(impl->mLoopTimer != nullptr);
-            loopTimer_startRelative(impl->mLoopTimer, 10);
-        }
+    if (mAutomationController) {
+        mAutomationController->getEventSink().recordPhysicalModelEvent(
+                mModelTimeNs, command);
     }
 }
 
@@ -1184,8 +1152,8 @@ void PhysicalModelImpl::tick(void* opaque, LoopTimer* unused) {
 
 using android::physics::PhysicalModelImpl;
 
-PhysicalModel* physicalModel_new(bool shouldTick) {
-    PhysicalModelImpl* impl = new PhysicalModelImpl(shouldTick);
+PhysicalModel* physicalModel_new() {
+    PhysicalModelImpl* impl = new PhysicalModelImpl();
     return impl != nullptr ? impl->getPhysicalModel() : nullptr;
 }
 
@@ -1295,36 +1263,58 @@ void physicalModel_setPhysicalStateAgent(PhysicalModel* model,
     }
 }
 
-void physicalModel_save(PhysicalModel* model, Stream* f) {
+void physicalModel_setAutomationController(PhysicalModel* model,
+                                           AutomationController* controller) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
-        impl->save(f);
+        impl->setAutomationController(controller);
     }
 }
 
-int physicalModel_load(PhysicalModel* model, Stream* f) {
+void physicalModel_snapshotSave(PhysicalModel* model, Stream* f) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
-        return impl->load(f);
+        impl->snapshotSave(f);
+    }
+}
+
+int physicalModel_snapshotLoad(PhysicalModel* model, Stream* f) {
+    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
+    if (impl != nullptr) {
+        return impl->snapshotLoad(f);
     } else {
         return -EIO;
     }
 }
 
-int physicalModel_record(PhysicalModel* model, const char* filename) {
+int physicalModel_saveState(PhysicalModel* model, pb::InitialState* state) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
-        return impl->record(filename);
+        impl->saveState(state);
+        return 0;
+    } else {
+        return -EIO;
     }
-    return -1;
 }
 
-int physicalModel_playback(PhysicalModel* model, const char* filename) {
+int physicalModel_loadState(PhysicalModel* model, const pb::InitialState& state) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
-        return impl->playback(filename);
+        impl->loadState(state);
+        return 0;
+    } else {
+        return -EIO;
     }
-    return -1;
+}
+
+void physicalModel_replayEvent(PhysicalModel* model,
+                               const pb::PhysicalModelEvent& event) {
+    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
+    if (impl != nullptr) {
+        impl->replayEvent(event);
+    } else {
+        D("%s: Discarding sensor event", __FUNCTION__);
+    }
 }
 
 int physicalModel_recordGroundTruth(PhysicalModel* model,
@@ -1336,10 +1326,9 @@ int physicalModel_recordGroundTruth(PhysicalModel* model,
     return -1;
 }
 
-int physicalModel_stopRecordAndPlayback(PhysicalModel* model) {
+int physicalModel_stopRecording(PhysicalModel* model) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
-        impl->stopRecordAndPlayback();
         impl->stopRecordGroundTruth();
         return 0;
     }

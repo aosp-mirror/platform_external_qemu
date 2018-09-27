@@ -19,14 +19,16 @@
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/utils/debug.h"
 
-static_assert(WINDOW_MESSAGE_GENERIC == int(Ui::OverlayMessageIcon::None),
+static_assert(WINDOW_MESSAGE_GENERIC == int(Ui::OverlayMessageType::None),
               "Bad message type enum value (None)");
-static_assert(WINDOW_MESSAGE_INFO == int(Ui::OverlayMessageIcon::Info),
+static_assert(WINDOW_MESSAGE_INFO == int(Ui::OverlayMessageType::Info),
               "Bad message type enum value (Info)");
-static_assert(WINDOW_MESSAGE_WARNING == int(Ui::OverlayMessageIcon::Warning),
+static_assert(WINDOW_MESSAGE_WARNING == int(Ui::OverlayMessageType::Warning),
               "Bad message type enum value (Warning)");
-static_assert(WINDOW_MESSAGE_ERROR == int(Ui::OverlayMessageIcon::Error),
+static_assert(WINDOW_MESSAGE_ERROR == int(Ui::OverlayMessageType::Error),
               "Bad message type enum value (Error)");
+static_assert(WINDOW_MESSAGE_OK == int(Ui::OverlayMessageType::Ok),
+              "Bad message type enum value (Ok)");
 
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .getEmulatorWindow = emulator_window_get,
@@ -48,7 +50,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         win->showMessage(
                                 QString::fromUtf8(message),
-                                static_cast<Ui::OverlayMessageIcon>(type),
+                                static_cast<Ui::OverlayMessageType>(type),
                                 timeoutMs);
                     } else {
                         const auto printer =
@@ -67,7 +69,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         win->showMessageWithDismissCallback(
                                 QString::fromUtf8(message),
-                                static_cast<Ui::OverlayMessageIcon>(type),
+                                static_cast<Ui::OverlayMessageType>(type),
                                 QString::fromUtf8(dismissText),
                                 [func, context] { if (func) func(context); },
                                 timeoutMs);

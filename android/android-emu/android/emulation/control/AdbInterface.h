@@ -17,8 +17,6 @@
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"
 #include "android/base/async/Looper.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/ParallelTask.h"
 
@@ -51,11 +49,11 @@ struct AdbCommandResult {
                      const std::string& outputName);
 
     ~AdbCommandResult();
-    AdbCommandResult(AdbCommandResult&&);
-    AdbCommandResult& operator=(AdbCommandResult&&);
 
 private:
     std::string output_name;
+
+    DISALLOW_COPY_ASSIGN_AND_MOVE(AdbCommandResult);
 };
 using OptionalAdbCommandResult = android::base::Optional<AdbCommandResult>;
 
@@ -136,11 +134,6 @@ public:
     // Cancels the running command (has no effect if the command isn't running).
     void cancel() { mCancelled = true; }
 
-    // Block until the command finishes (and the done() callback returns), or
-    // timeout expires. Returns |true| if command finished, or was canceled, or
-    // wasn't even started (which should not happen), and |false| on timeout.
-    bool wait(base::System::Duration timeoutMs = -1);
-
 private:
     AdbCommand(android::base::Looper* looper,
                const std::string& adb_path,
@@ -162,9 +155,6 @@ private:
     bool mCancelled = false;
     bool mFinished = false;
     int mTimeoutMs;
-    // To signal the command completion.
-    base::Lock mLock;
-    base::ConditionVariable mCv;
 };
 
 // Builder that can be used by unit tests to inject different behaviors,

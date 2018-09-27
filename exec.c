@@ -19,6 +19,7 @@
 #include "qemu/osdep.h"
 #include "qapi/error.h"
 
+#include "qemu/abort.h"
 #include "qemu/cutils.h"
 #include "cpu.h"
 #include "exec/exec-all.h"
@@ -40,6 +41,7 @@
 #else /* !CONFIG_USER_ONLY */
 #include "hw/hw.h"
 #include "exec/memory.h"
+#include "exec/memory-remap.h"
 #include "exec/ioport.h"
 #include "sysemu/dma.h"
 #include "sysemu/numa.h"
@@ -70,6 +72,8 @@
 #include "monitor/monitor.h"
 
 //#define DEBUG_SUBPAGE
+
+#define FLATVIEW_UNUSUAL_ITER_COUNT 128
 
 #if !defined(CONFIG_USER_ONLY)
 /* ram_list is read under rcu_read_lock()/rcu_read_unlock().  Writes
@@ -462,6 +466,113 @@ address_space_translate_internal(AddressSpaceDispatch *d, hwaddr addr, hwaddr *x
     return section;
 }
 
+static const char* memory_region_get_name_safe(MemoryRegion* mr) {
+    if (!mr) {
+        return "(null region)";
+    }
+
+    if (!mr->name) {
+        return "(none)";
+    }
+
+    return mr->name;
+}
+
+static void flatview_spin_warning(
+    const char* label,
+    uint32_t iters,
+    hwaddr first_addr,
+    hwaddr addr,
+    MemoryRegion* first_mr,
+    MemoryRegion* mr) {
+
+    qemu_spin_warning(
+        iters, FLATVIEW_UNUSUAL_ITER_COUNT,
+        "Warning: %s has iterated %u times. "
+        "First addr: 0x%llx. Last addr: 0x%llx. "
+        "First mr: %p (%s). Last mr: %p (%s)\n",
+        label,
+        iters,
+        (unsigned long long)first_addr,
+        (unsigned long long)addr,
+        first_mr, memory_region_get_name_safe(first_mr),
+        mr, memory_region_get_name_safe(mr));
+}
+
+/**
+ * address_space_translate_iommu - translate an address through an IOMMU
+ * memory region and then through the target address space.
+ *
+ * @iommu_mr: the IOMMU memory region that we start the translation from
+ * @addr: the address to be translated through the MMU
+ * @xlat: the translated address offset within the destination memory region.
+ *        It cannot be %NULL.
+ * @plen_out: valid read/write length of the translated address. It
+ *            cannot be %NULL.
+ * @page_mask_out: page mask for the translated address. This
+ *            should only be meaningful for IOMMU translated
+ *            addresses, since there may be huge pages that this bit
+ *            would tell. It can be %NULL if we don't care about it.
+ * @is_write: whether the translation operation is for write
+ * @is_mmio: whether this can be MMIO, set true if it can
+ * @target_as: the address space targeted by the IOMMU
+ *
+ * This function is called from RCU critical section.  It is the common
+ * part of flatview_do_translate and address_space_translate_cached.
+ */
+static MemoryRegionSection address_space_translate_iommu(IOMMUMemoryRegion *iommu_mr,
+                                                         hwaddr *xlat,
+                                                         hwaddr *plen_out,
+                                                         hwaddr *page_mask_out,
+                                                         bool is_write,
+                                                         bool is_mmio,
+                                                         AddressSpace **target_as)
+{
+    MemoryRegionSection *section;
+    hwaddr page_mask = (hwaddr)-1;
+    uint32_t iters = 0;
+    hwaddr first_addr = *xlat;
+
+    do {
+        hwaddr addr = *xlat;
+
+        ++iters;
+        flatview_spin_warning(
+            "address_space_translate_iommu",
+            iters,
+            first_addr, addr,
+            NULL, section ? section->mr : NULL);
+
+        IOMMUMemoryRegionClass *imrc = memory_region_get_iommu_class_nocheck(iommu_mr);
+        IOMMUTLBEntry iotlb = imrc->translate(iommu_mr, addr, is_write ?
+                                              IOMMU_WO : IOMMU_RO);
+
+        if (!(iotlb.perm & (1 << is_write))) {
+            goto unassigned;
+        }
+
+        addr = ((iotlb.translated_addr & ~iotlb.addr_mask)
+                | (addr & iotlb.addr_mask));
+        page_mask &= iotlb.addr_mask;
+        *plen_out = MIN(*plen_out, (addr | iotlb.addr_mask) - addr + 1);
+        *target_as = iotlb.target_as;
+
+        section = address_space_translate_internal(
+                address_space_to_dispatch(iotlb.target_as), addr, xlat,
+                plen_out, is_mmio);
+
+        iommu_mr = memory_region_get_iommu(section->mr);
+    } while (unlikely(iommu_mr));
+
+    if (page_mask_out) {
+        *page_mask_out = page_mask;
+    }
+    return *section;
+
+ unassigned:
+    return (MemoryRegionSection) { .mr = &io_mem_unassigned };
+}
+
 /**
  * flatview_do_translate - translate an address in FlatView
  *
@@ -489,61 +600,31 @@ static MemoryRegionSection flatview_do_translate(FlatView *fv,
                                                  bool is_mmio,
                                                  AddressSpace **target_as)
 {
-    IOMMUTLBEntry iotlb;
-    MemoryRegionSection *section;
+    MemoryRegionSection *section = NULL;
     IOMMUMemoryRegion *iommu_mr;
-    IOMMUMemoryRegionClass *imrc;
-    hwaddr page_mask = (hwaddr)(-1);
     hwaddr plen = (hwaddr)(-1);
 
-    if (plen_out) {
-        plen = *plen_out;
+    if (!plen_out) {
+        plen_out = &plen;
     }
 
-    for (;;) {
-        section = address_space_translate_internal(
-                flatview_to_dispatch(fv), addr, &addr,
-                &plen, is_mmio);
-
-        iommu_mr = memory_region_get_iommu(section->mr);
-        if (!iommu_mr) {
-            break;
-        }
-        imrc = memory_region_get_iommu_class_nocheck(iommu_mr);
-
-        iotlb = imrc->translate(iommu_mr, addr, is_write ?
-                                IOMMU_WO : IOMMU_RO);
-        addr = ((iotlb.translated_addr & ~iotlb.addr_mask)
-                | (addr & iotlb.addr_mask));
-        page_mask &= iotlb.addr_mask;
-        plen = MIN(plen, (addr | iotlb.addr_mask) - addr + 1);
-        if (!(iotlb.perm & (1 << is_write))) {
-            goto translate_fail;
-        }
-
-        fv = address_space_to_flatview(iotlb.target_as);
-        *target_as = iotlb.target_as;
-    }
-
-    *xlat = addr;
-
-    if (page_mask == (hwaddr)(-1)) {
-        /* Not behind an IOMMU, use default page size. */
-        page_mask = ~TARGET_PAGE_MASK;
+    section = address_space_translate_internal(
+            flatview_to_dispatch(fv), addr, xlat,
+            plen_out, is_mmio);
+    iommu_mr = memory_region_get_iommu(section->mr);
+    if (unlikely(iommu_mr)) {
+        return address_space_translate_iommu(iommu_mr, xlat,
+                                             plen_out, page_mask_out,
+                                             is_write, is_mmio,
+                                             target_as);
     }
 
     if (page_mask_out) {
-        *page_mask_out = page_mask;
-    }
-
-    if (plen_out) {
-        *plen_out = plen;
+        /* Not behind an IOMMU, use default page size. */
+        *page_mask_out = ~TARGET_PAGE_MASK;
     }
 
     return *section;
-
-translate_fail:
-    return (MemoryRegionSection) { .mr = &io_mem_unassigned };
 }
 
 /* Called from RCU critical section */
@@ -1572,6 +1653,35 @@ static int64_t get_file_size(int fd)
     return size;
 }
 
+static int try_open_existing_ram_file(const char* path) {
+    int fd = -1;
+
+    // If an existing file is 4GB, Windows open() by itself fails.
+    // So use CreateFile() instead.
+#ifdef _WIN32
+    HANDLE fh =
+        win32CreateFile(
+            path,
+            // Must be both, or we cannot CreateFileMapping with PAGE_READWRITE
+            GENERIC_READ | GENERIC_WRITE,
+            // Need both read and write sharing to enable multiple instances.
+            // Even though we will not really be writing to the RAM file with
+            // multiple instances, the file needs to be opened to allow us to
+            // proceed.
+            FILE_SHARE_READ | FILE_SHARE_WRITE,
+            NULL,
+            // Need to fail on file-not-found to follow the same path as QEMU
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL,
+            NULL);
+    fd = _open_osfhandle((intptr_t)fh, _O_RDWR);
+#else
+    fd = open(path, O_RDWR);
+#endif
+
+    return fd;
+}
+
 static int file_ram_open(const char *path,
                          const char *region_name,
                          bool *created,
@@ -1584,28 +1694,9 @@ static int file_ram_open(const char *path,
 
     *created = false;
     for (;;) {
-        // If an existing file is 4GB, Windows open() by itself fails.
-        // So use CreateFile() instead.
-#ifdef _WIN32
-        HANDLE fh =
-            CreateFile(
-                path,
-                // Must be both, or we cannot CreateFileMapping with PAGE_READWRITE
-                GENERIC_READ | GENERIC_WRITE,
-                // Need both read and write sharing to enable multiple instances.
-                // Even though we will not really be writing to the RAM file with
-                // multiple instances, the file needs to be opened to allow us to
-                // proceed.
-                FILE_SHARE_READ | FILE_SHARE_WRITE,
-                NULL,
-                // Need to fail on file-not-found to follow the same path as QEMU
-                OPEN_EXISTING,
-                FILE_ATTRIBUTE_NORMAL,
-                NULL);
-        fd = _open_osfhandle((intptr_t)fh, _O_RDWR);
-#else
-        fd = open(path, O_RDWR);
-#endif
+
+        fd = try_open_existing_ram_file(path);
+
         if (fd >= 0) {
             /* @path names an existing file, use it */
             break;
@@ -1725,6 +1816,7 @@ static void *file_ram_alloc(RAMBlock *block,
     }
 
     block->fd = fd;
+    block->mapped_size = memory;
     return area;
 }
 
@@ -2171,7 +2263,7 @@ RAMBlock *qemu_ram_alloc_from_file(ram_addr_t size, MemoryRegion *mr,
         return NULL;
     }
 
-    block->path = mem_path;
+    block->path = g_strdup(mem_path);
     return block;
 }
 
@@ -2323,6 +2415,119 @@ void qemu_ram_remap(ram_addr_t addr, ram_addr_t length)
     }
 }
 #endif /* !_WIN32 */
+
+static void ram_block_teardown_backing(RAMBlock* block) {
+
+    if (block->fd >= 0) {
+        qemu_ram_munmap(block->host, block->max_length);
+#ifdef _WIN32
+        _close(block->fd);
+#else
+        close(block->fd);
+#endif
+        block->fd = -1;
+    } else {
+        qemu_anon_ram_free(block->host, block->max_length);
+    }
+
+    if (block->path) {
+        g_free((void*)block->path);
+        block->path = NULL;
+    }
+
+    block->flags = 0;
+}
+
+void ram_block_remap_backing(RAMBlock* block, const char* mem_path, int shared)
+{
+    rcu_read_lock();
+
+    // Check against bad usage, since the first move of this function
+    // is to free |block->path|.
+    if (mem_path && block->path &&
+        (mem_path == block->path)) {
+        qemu_abort(
+            "%s: Not allowed to alias mem_path and block->path!\n",
+            __func__);
+    }
+
+    ram_block_teardown_backing(block);
+
+    if (mem_path) {
+        block->path = g_strdup(mem_path);
+        block->flags = RAM_MAPPED | (shared ? RAM_SHARED : 0);
+
+        // Assume it exists
+        block->fd = try_open_existing_ram_file(block->path);
+
+        if (block->fd < 0) {
+            rcu_read_unlock();
+            qemu_abort(
+                "error opening new ram file "
+                "for guest memory '%s' at %s\n",
+                memory_region_name(block->mr),
+                block->path);
+            abort();
+        }
+
+        // Assume the mapped size hasn't changed
+        block->host =
+            qemu_ram_mmap(
+                block->fd,
+                block->mapped_size,
+                block->mr->align,
+                block->flags & RAM_SHARED);
+
+        if (!block->host) {
+            rcu_read_unlock();
+            qemu_abort("cannot remap backing for guest memory '%s' "
+                       "to new file (shared: %d)",
+                       memory_region_name(block->mr),
+                       shared);
+        }
+    } else {
+        block->host =
+            phys_mem_alloc(
+                block->max_length,
+                &block->mr->align,
+                shared);
+
+        if (!block->host) {
+            rcu_read_unlock();
+
+            if (insufficientMemMessage) {
+                // Insufficient for allocation; exit.
+                _exit(1);
+            }
+
+            // Fatal error in allocation.
+            qemu_abort(
+                "cannot remap backing for guest memory '%s' "
+                "to anonymous backing",
+                memory_region_name(block->mr));
+            abort();
+        }
+    }
+
+    rcu_read_unlock();
+}
+
+void ram_blocks_remap_shared(int shared)
+{
+    RAMBlock *block;
+
+    RAMBLOCK_FOREACH(block) {
+        char* remap_path;
+
+        if (!block->path) continue;
+
+        remap_path = g_strdup(block->path);
+        ram_block_remap_backing(block, remap_path, shared);
+        g_free(remap_path);
+    }
+
+    memory_listeners_refresh_topology();
+}
 
 /* Return a host pointer to ram allocated with qemu_ram_alloc.
  * This should not be used for general purpose DMA.  Use address_space_map
@@ -3120,8 +3325,18 @@ static MemTxResult flatview_write_continue(FlatView *fv, hwaddr addr,
     uint64_t val;
     MemTxResult result = MEMTX_OK;
     bool release_lock = false;
+    uint32_t iters = 0;
+    hwaddr first_addr = addr;
+    MemoryRegion* first_mr = mr;
 
     for (;;) {
+        ++iters;
+        flatview_spin_warning(
+            "flatview_write_continue",
+            iters,
+            first_addr, addr,
+            first_mr, mr);
+
         if (!memory_access_is_direct(mr, true)) {
             release_lock |= prepare_mmio_access(mr);
             l = memory_access_size(mr, l, addr1);
@@ -3209,8 +3424,18 @@ MemTxResult flatview_read_continue(FlatView *fv, hwaddr addr,
     uint64_t val;
     MemTxResult result = MEMTX_OK;
     bool release_lock = false;
+    uint32_t iters = 0;
+    hwaddr first_addr = addr;
+    MemoryRegion* first_mr = mr;
 
     for (;;) {
+        ++iters;
+        flatview_spin_warning(
+            "flatview_read_continue",
+            iters,
+            first_addr, addr,
+            first_mr, mr);
+
         if (!memory_access_is_direct(mr, false)) {
             /* I/O case */
             release_lock |= prepare_mmio_access(mr);
@@ -3495,6 +3720,7 @@ static bool flatview_access_valid(FlatView *fv, hwaddr addr, int len,
         if (!memory_access_is_direct(mr, is_write)) {
             l = memory_access_size(mr, l, addr);
             if (!memory_region_access_valid(mr, xlat, l, is_write)) {
+                rcu_read_unlock();
                 return false;
             }
         }

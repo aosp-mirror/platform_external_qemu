@@ -23,6 +23,12 @@ class TestLooper : public DefaultLooper {
 public:
     using DefaultLooper::DefaultLooper;
 
+    // Override nowMs/nowNs to allow overriding virtual time.
+    Duration nowMs(ClockType clockType = ClockType::kHost) override;
+    DurationNs nowNs(ClockType clockType = ClockType::kHost) override;
+
+    void setVirtualTimeNs(DurationNs timeNs);
+
     // Add some functions to uncover the internal state
     const TimerSet& timers() const;
     const TimerList& activeTimers() const;
@@ -34,7 +40,30 @@ public:
     bool exitRequested() const;
 
     using DefaultLooper::runOneIterationWithDeadlineMs;
+
+private:
+    DurationNs mVirtualTimeNs = 0;
 };
+
+inline Looper::Duration TestLooper::nowMs(ClockType clockType) {
+    if (clockType == ClockType::kVirtual) {
+        return mVirtualTimeNs / 1000LL;
+    } else {
+        return DefaultLooper::nowMs(clockType);
+    }
+}
+
+inline Looper::DurationNs TestLooper::nowNs(ClockType clockType) {
+    if (clockType == ClockType::kVirtual) {
+        return mVirtualTimeNs;
+    } else {
+        return DefaultLooper::nowNs(clockType);
+    }
+}
+
+inline void TestLooper::setVirtualTimeNs(DurationNs timeNs) {
+    mVirtualTimeNs = timeNs;
+}
 
 inline const DefaultLooper::TimerSet& TestLooper::timers() const {
     return mTimers;

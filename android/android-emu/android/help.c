@@ -1391,6 +1391,9 @@ help_gpu(stralloc_t* out)
     "                             Windows 8.1+, or Windows 10 only).\n"
     "     guest                -> Use guest-side software rendering. For\n"
     "                             advanced users only. Warning: slow!\n"
+    "                             In API 28 and later, guest rendering\n"
+    "                             is not supported, and will fall back\n"
+    "                             automatically to swiftshader_indirect.\n"
 
     "  Note that enabling GPU emulation if the system image does not support it\n"
     "  will prevent the proper display of the emulated framebuffer.\n\n"

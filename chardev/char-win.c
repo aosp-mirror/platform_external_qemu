@@ -91,8 +91,8 @@ int win_chr_serial_init(Chardev *chr, const char *filename, Error **errp)
         goto fail;
     }
 
-    s->file = CreateFile(filename, GENERIC_READ | GENERIC_WRITE, 0, NULL,
-                      OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
+    s->file = win32CreateFile(filename, GENERIC_READ | GENERIC_WRITE, 0, NULL,
+                              OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
     if (s->file == INVALID_HANDLE_VALUE) {
         error_setg(errp, "Failed CreateFile (%lu)", GetLastError());
         s->file = NULL;

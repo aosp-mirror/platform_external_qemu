@@ -70,6 +70,9 @@ typedef struct QAndroidSensorsAgent {
     // Sets the agent used to receive callbacks to used to track whether the
     // state of the physical model is currently changing.
     int (*setPhysicalStateAgent)(const struct QAndroidPhysicalStateAgent* agent);
+
+    // Advance the current time on the sensors agent.
+    void (*advanceTime)();
 } QAndroidSensorsAgent;
 
 ANDROID_END_HEADER

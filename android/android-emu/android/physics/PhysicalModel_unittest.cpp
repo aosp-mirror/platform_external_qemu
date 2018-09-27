@@ -14,11 +14,12 @@
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
+#include "android/automation/proto/automation.pb.h"
+#include "android/base/Debug.h"
+#include "android/base/files/MemStream.h"
 #include "android/physics/InertialModel.h"
 #include "android/physics/physical_state_agent.h"
 #include "android/utils/stream.h"
-#include "android/base/files/MemStream.h"
-#include "android/base/Debug.h"
 
 #include <glm/vec3.hpp>
 #include <glm/gtx/euler_angles.hpp>
@@ -29,6 +30,10 @@
 
 using android::base::TestSystem;
 using android::base::System;
+
+static constexpr float kDefaultProximity = 1.f;
+static constexpr vec3 kDefaultAccelerometer = {0.f, 9.81f, 0.f};
+static constexpr vec3 kDefaultMagnetometer = {0.0f, 5.9f, -48.4f};
 
 static Stream* asStream(android::base::Stream* stream) {
     return reinterpret_cast<Stream*>(stream);
@@ -41,14 +46,14 @@ EXPECT_NEAR(e.z,a.z,d);
 
 TEST(PhysicalModel, CreateAndDestroy) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
     EXPECT_NE(model, nullptr);
     physicalModel_free(model);
 }
 
 TEST(PhysicalModel, DefaultInertialSensorValues) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
     physicalModel_setCurrentTime(model, 1000000000L);
     long measurement_id;
     vec3 accelerometer = physicalModel_getAccelerometer(model,
@@ -63,7 +68,7 @@ TEST(PhysicalModel, DefaultInertialSensorValues) {
 
 TEST(PhysicalModel, ConstantMeasurementId) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
     physicalModel_setCurrentTime(model, 1000000000L);
     long measurement_id0;
     physicalModel_getAccelerometer(model, &measurement_id0);
@@ -81,7 +86,7 @@ TEST(PhysicalModel, ConstantMeasurementId) {
 
 TEST(PhysicalModel, NewMeasurementId) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
     physicalModel_setCurrentTime(model, 1000000000L);
     long measurement_id0;
     physicalModel_getAccelerometer(model, &measurement_id0);
@@ -106,7 +111,7 @@ TEST(PhysicalModel, NewMeasurementId) {
 
 TEST(PhysicalModel, SetTargetPosition) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
     physicalModel_setCurrentTime(model, 0UL);
     vec3 targetPosition;
     targetPosition.x = 2.0f;
@@ -127,7 +132,7 @@ TEST(PhysicalModel, SetTargetPosition) {
 
 TEST(PhysicalModel, SetTargetRotation) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
     physicalModel_setCurrentTime(model, 0UL);
     vec3 targetRotation;
     targetRotation.x = 45.0f;
@@ -163,7 +168,7 @@ const GravityTestCase gravityTestCases[] = {
 TEST(PhysicalModel, GravityAcceleration) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     for (const auto& testCase : gravityTestCases) {
-        PhysicalModel* model = physicalModel_new(false);
+        PhysicalModel* model = physicalModel_new();
         physicalModel_setCurrentTime(model, 1000000000L);
 
         vec3 targetRotation;
@@ -189,7 +194,7 @@ TEST(PhysicalModel, GravityAcceleration) {
 TEST(PhysicalModel, GravityOnlyAcceleration) {
     TestSystem mTestSystem("/", System::kProgramBitness);
 
-    PhysicalModel* model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
     physicalModel_setCurrentTime(model, 1000000000L);
 
     vec3 targetPosition;
@@ -209,14 +214,14 @@ TEST(PhysicalModel, GravityOnlyAcceleration) {
     // the acceleration is expected to be close to zero at this point.
     vec3 currentAcceleration = physicalModel_getAccelerometer(model,
             &measurement_id);
-    EXPECT_VEC3_NEAR((vec3{0.f, 9.81f, 0.f}), currentAcceleration, 0.01f);
+    EXPECT_VEC3_NEAR(kDefaultAccelerometer, currentAcceleration, 0.01f);
 
     physicalModel_free(model);
 }
 
 TEST(PhysicalModel, NonInstantaneousRotation) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel* model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
     physicalModel_setCurrentTime(model, 0L);
 
     vec3 startRotation;
@@ -249,7 +254,7 @@ TEST(PhysicalModel, NonInstantaneousRotation) {
 
 TEST(PhysicalModel, InstantaneousRotation) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel* model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
     physicalModel_setCurrentTime(model, 0L);
 
     vec3 startRotation;
@@ -276,7 +281,7 @@ TEST(PhysicalModel, InstantaneousRotation) {
 
 TEST(PhysicalModel, OverrideAccelerometer) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel* model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
     physicalModel_setCurrentTime(model, 0L);
 
     long initial_measurement_id;
@@ -305,7 +310,7 @@ TEST(PhysicalModel, OverrideAccelerometer) {
     long physical_measurement_id;
     vec3 sensorPhysicalValue = physicalModel_getAccelerometer(model,
             &physical_measurement_id);
-    EXPECT_VEC3_NEAR((vec3 {0.f, 9.81f, 0.f}), sensorPhysicalValue, 0.000001f);
+    EXPECT_VEC3_NEAR(kDefaultAccelerometer, sensorPhysicalValue, 0.000001f);
 
     EXPECT_NE(physical_measurement_id, override_measurement_id);
     EXPECT_NE(physical_measurement_id, initial_measurement_id);
@@ -315,196 +320,361 @@ TEST(PhysicalModel, OverrideAccelerometer) {
 
 TEST(PhysicalModel, SaveLoad) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel* model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
 
     android::base::MemStream modelStream;
     Stream* saveStream = asStream(&modelStream);
 
-    physicalModel_save(model, saveStream);
+    physicalModel_snapshotSave(model, saveStream);
 
     const uint32_t streamEndMarker = 1923789U;
     stream_put_be32(saveStream, streamEndMarker);
 
     physicalModel_free(model);
 
-    PhysicalModel* loadedModel = physicalModel_new(false);
-    physicalModel_load(loadedModel, saveStream);
+    PhysicalModel* loadedModel = physicalModel_new();
+    physicalModel_snapshotLoad(loadedModel, saveStream);
 
     EXPECT_EQ(streamEndMarker, stream_get_be32(saveStream));
 
     physicalModel_free(loadedModel);
 }
 
+TEST(PhysicalModel, SaveLoadStateSimple) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    PhysicalModel* model = physicalModel_new();
+
+    emulator_automation::InitialState state;
+    physicalModel_saveState(model, &state);
+
+    physicalModel_free(model);
+
+    PhysicalModel* loadedModel = physicalModel_new();
+    physicalModel_loadState(loadedModel, state);
+
+    physicalModel_free(loadedModel);
+}
+
+static constexpr vec3 kVecZero = {0.f, 0.f, 0.f};
+static constexpr vec3 kAccelOverride = {1.f, 2.f, 3.f};
+static constexpr vec3 kGyroOverride = {4.f, 5.f, 6.f};
+static constexpr vec3 kMagnetometerOverride = {7.f, 8.f, 9.f};
+static constexpr vec3 kOrientationOverride = {10.f, 11.f, 12.f};
+static constexpr float kTemperatureOverride = 13.f;
+static constexpr float kProximityOverride = 14.f;
+static constexpr float kLightOverride = 15.f;
+static constexpr float kPressureOverride = 16.f;
+static constexpr float kHumidityOverride = 17.f;
+static constexpr vec3 kMagneticUncalibratedOverride = {18.f, 19.f, 20.f};
+static constexpr vec3 kGyroUncalibratedOverride = {21.f, 22.f, 23.f};
+
+static void applyOverrides(PhysicalModel* model) {
+    physicalModel_overrideAccelerometer(model, kAccelOverride);
+    physicalModel_overrideGyroscope(model, kGyroOverride);
+    physicalModel_overrideMagnetometer(model, kMagnetometerOverride);
+    physicalModel_overrideOrientation(model, kOrientationOverride);
+    physicalModel_overrideTemperature(model, kTemperatureOverride);
+    physicalModel_overrideProximity(model, kProximityOverride);
+    physicalModel_overrideLight(model, kLightOverride);
+    physicalModel_overridePressure(model, kPressureOverride);
+    physicalModel_overrideHumidity(model, kHumidityOverride);
+    physicalModel_overrideMagnetometerUncalibrated(
+            model, kMagneticUncalibratedOverride);
+    physicalModel_overrideGyroscopeUncalibrated(model,
+                                                kGyroUncalibratedOverride);
+}
+
 TEST(PhysicalModel, SaveLoadOverrides) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel* model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
 
-    const vec3 accelOverride = {1.f, 2.f, 3.f};
-    const vec3 gyroOverride = {4.f, 5.f, 6.f};
-    const vec3 magnetometerOverride = {7.f, 8.f, 9.f};
-    const vec3 orientationOverride = {10.f, 11.f, 12.f};
-    const float temperatureOverride = 13.f;
-    const float proximityOverride = 14.f;
-    const float lightOverride = 15.f;
-    const float pressureOverride = 16.f;
-    const float humidityOverride = 17.f;
-    const vec3 magneticUncalibratedOverride = {18.f, 19.f, 20.f};
-    const vec3 gyroUncalibratedOverride = {21.f, 22.f, 23.f};
-
-    physicalModel_overrideAccelerometer(model, accelOverride);
-    physicalModel_overrideGyroscope(model, gyroOverride);
-    physicalModel_overrideMagnetometer(model, magnetometerOverride);
-    physicalModel_overrideOrientation(model, orientationOverride);
-    physicalModel_overrideTemperature(model, temperatureOverride);
-    physicalModel_overrideProximity(model, proximityOverride);
-    physicalModel_overrideLight(model, lightOverride);
-    physicalModel_overridePressure(model, pressureOverride);
-    physicalModel_overrideHumidity(model, humidityOverride);
-    physicalModel_overrideMagnetometerUncalibrated(model,
-            magneticUncalibratedOverride);
-    physicalModel_overrideGyroscopeUncalibrated(model,
-            gyroUncalibratedOverride);
+    applyOverrides(model);
 
     android::base::MemStream modelStream;
     Stream* saveStream = asStream(&modelStream);
 
-    physicalModel_save(model, saveStream);
+    physicalModel_snapshotSave(model, saveStream);
     physicalModel_free(model);
 
     const uint32_t streamEndMarker = 349087U;
     stream_put_be32(saveStream, streamEndMarker);
 
-    PhysicalModel* loadedModel = physicalModel_new(false);
-    physicalModel_load(loadedModel, saveStream);
+    PhysicalModel* loadedModel = physicalModel_new();
+    physicalModel_snapshotLoad(loadedModel, saveStream);
 
     EXPECT_EQ(streamEndMarker, stream_get_be32(saveStream));
 
     long measurement_id;
-    EXPECT_VEC3_NEAR(accelOverride,
+    EXPECT_VEC3_NEAR(
+            kAccelOverride,
             physicalModel_getAccelerometer(loadedModel, &measurement_id),
             0.00001f);
-    EXPECT_VEC3_NEAR(gyroOverride,
-            physicalModel_getGyroscope(loadedModel, &measurement_id),
-            0.00001f);
-    EXPECT_VEC3_NEAR(magnetometerOverride,
+    EXPECT_VEC3_NEAR(kGyroOverride,
+                     physicalModel_getGyroscope(loadedModel, &measurement_id),
+                     0.00001f);
+    EXPECT_VEC3_NEAR(
+            kMagnetometerOverride,
             physicalModel_getMagnetometer(loadedModel, &measurement_id),
             0.00001f);
-    EXPECT_VEC3_NEAR(orientationOverride,
-            physicalModel_getOrientation(loadedModel, &measurement_id),
+    EXPECT_VEC3_NEAR(kOrientationOverride,
+                     physicalModel_getOrientation(loadedModel, &measurement_id),
+                     0.00001f);
+    EXPECT_NEAR(kTemperatureOverride,
+                physicalModel_getTemperature(loadedModel, &measurement_id),
+                0.00001f);
+    EXPECT_NEAR(kProximityOverride,
+                physicalModel_getProximity(loadedModel, &measurement_id),
+                0.00001f);
+    EXPECT_NEAR(kLightOverride,
+                physicalModel_getLight(loadedModel, &measurement_id), 0.00001f);
+    EXPECT_NEAR(kPressureOverride,
+                physicalModel_getPressure(loadedModel, &measurement_id),
+                0.00001f);
+    EXPECT_NEAR(kHumidityOverride,
+                physicalModel_getHumidity(loadedModel, &measurement_id),
+                0.00001f);
+    EXPECT_VEC3_NEAR(kMagneticUncalibratedOverride,
+                     physicalModel_getMagnetometerUncalibrated(loadedModel,
+                                                               &measurement_id),
+                     0.00001f);
+    EXPECT_VEC3_NEAR(kGyroUncalibratedOverride,
+                     physicalModel_getGyroscopeUncalibrated(loadedModel,
+                                                            &measurement_id),
+                     0.00001f);
+
+    physicalModel_free(loadedModel);
+}
+
+TEST(PhysicalModel, SaveLoadStateOverrides) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    PhysicalModel* model = physicalModel_new();
+
+    applyOverrides(model);
+
+    emulator_automation::InitialState state;
+    physicalModel_saveState(model, &state);
+    physicalModel_free(model);
+
+    PhysicalModel* loadedModel = physicalModel_new();
+    physicalModel_loadState(loadedModel, state);
+
+    // loadState doesn't load overrides, verify they all are zero.
+    long measurement_id;
+    EXPECT_VEC3_NEAR(
+            kDefaultAccelerometer,
+            physicalModel_getAccelerometer(loadedModel, &measurement_id),
             0.00001f);
-    EXPECT_NEAR(temperatureOverride,
-            physicalModel_getTemperature(loadedModel, &measurement_id),
+    EXPECT_VEC3_NEAR(kVecZero,
+                     physicalModel_getGyroscope(loadedModel, &measurement_id),
+                     0.00001f);
+    EXPECT_VEC3_NEAR(
+            kDefaultMagnetometer,
+            physicalModel_getMagnetometer(loadedModel, &measurement_id),
             0.00001f);
-    EXPECT_NEAR(proximityOverride,
-            physicalModel_getProximity(loadedModel, &measurement_id),
-            0.00001f);
-    EXPECT_NEAR(lightOverride,
-            physicalModel_getLight(loadedModel, &measurement_id),
-            0.00001f);
-    EXPECT_NEAR(pressureOverride,
-            physicalModel_getPressure(loadedModel, &measurement_id),
-            0.00001f);
-    EXPECT_NEAR(humidityOverride,
-            physicalModel_getHumidity(loadedModel, &measurement_id),
-            0.00001f);
-    EXPECT_VEC3_NEAR(magneticUncalibratedOverride,
-            physicalModel_getMagnetometerUncalibrated(
-                    loadedModel, &measurement_id),
-            0.00001f);
-    EXPECT_VEC3_NEAR(gyroUncalibratedOverride,
-            physicalModel_getGyroscopeUncalibrated(
-                    loadedModel, &measurement_id),
-            0.00001f);
+    EXPECT_VEC3_NEAR(kVecZero,
+                     physicalModel_getOrientation(loadedModel, &measurement_id),
+                     0.00001f);
+    EXPECT_NEAR(0.f, physicalModel_getTemperature(loadedModel, &measurement_id),
+                0.00001f);
+    EXPECT_NEAR(kDefaultProximity,
+                physicalModel_getProximity(loadedModel, &measurement_id),
+                0.00001f);
+    EXPECT_NEAR(0.f, physicalModel_getLight(loadedModel, &measurement_id),
+                0.00001f);
+    EXPECT_NEAR(0.f, physicalModel_getPressure(loadedModel, &measurement_id),
+                0.00001f);
+    EXPECT_NEAR(0.f, physicalModel_getHumidity(loadedModel, &measurement_id),
+                0.00001f);
+    EXPECT_VEC3_NEAR(kVecZero,
+                     physicalModel_getGyroscopeUncalibrated(loadedModel,
+                                                            &measurement_id),
+                     0.00001f);
+    EXPECT_VEC3_NEAR(kDefaultMagnetometer,
+                     physicalModel_getMagnetometerUncalibrated(loadedModel,
+                                                               &measurement_id),
+                     0.00001f);
 
     physicalModel_free(loadedModel);
 }
 
 TEST(PhysicalModel, SaveLoadTargets) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel* model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
 
-    const vec3 positionTarget = {24.f, 25.f, 26.f};
-    const vec3 rotationTarget = {27.f, 28.f, 29.f};
-    const vec3 magneticFieldTarget = {30.f, 31.f, 32.f};
-    const float temperatureTarget = 33.f;
-    const float proximityTarget = 34.f;
-    const float lightTarget = 35.f;
-    const float pressureTarget = 36.f;
-    const float humidityTarget = 37.f;
+    const vec3 kPositionTarget = {24.f, 25.f, 26.f};
+    const vec3 kRotationTarget = {27.f, 28.f, 29.f};
+    const vec3 kMagneticFieldTarget = {30.f, 31.f, 32.f};
+    const float kTemperatureTarget = 33.f;
+    const float kProximityTarget = 34.f;
+    const float kLightTarget = 35.f;
+    const float kPressureTarget = 36.f;
+    const float kHumidityTarget = 37.f;
 
     // Note: Save/Load should save out target state - interpolation mode should
     //       not be used, nor relevant (i.e. when loading, the interpolation is
     //       considered to have finisshed).
-    physicalModel_setTargetPosition(model, positionTarget,
-            PHYSICAL_INTERPOLATION_STEP);
-    physicalModel_setTargetRotation(model, rotationTarget,
-            PHYSICAL_INTERPOLATION_SMOOTH);
-    physicalModel_setTargetMagneticField(model, magneticFieldTarget,
-            PHYSICAL_INTERPOLATION_STEP);
-    physicalModel_setTargetTemperature(model, temperatureTarget,
-            PHYSICAL_INTERPOLATION_STEP);
-    physicalModel_setTargetProximity(model, proximityTarget,
-            PHYSICAL_INTERPOLATION_STEP);
-    physicalModel_setTargetLight(model, lightTarget,
-            PHYSICAL_INTERPOLATION_STEP);
-    physicalModel_setTargetPressure(model, pressureTarget,
-            PHYSICAL_INTERPOLATION_STEP);
-    physicalModel_setTargetHumidity(model, humidityTarget,
-            PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetPosition(model, kPositionTarget,
+                                    PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetRotation(model, kRotationTarget,
+                                    PHYSICAL_INTERPOLATION_SMOOTH);
+    physicalModel_setTargetMagneticField(model, kMagneticFieldTarget,
+                                         PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetTemperature(model, kTemperatureTarget,
+                                       PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetProximity(model, kProximityTarget,
+                                     PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetLight(model, kLightTarget,
+                                 PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetPressure(model, kPressureTarget,
+                                    PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetHumidity(model, kHumidityTarget,
+                                    PHYSICAL_INTERPOLATION_STEP);
 
     android::base::MemStream modelStream;
     Stream* saveStream = asStream(&modelStream);
 
-    physicalModel_save(model, saveStream);
+    physicalModel_snapshotSave(model, saveStream);
     physicalModel_free(model);
 
     const uint32_t streamEndMarker = 3489U;
     stream_put_be32(saveStream, streamEndMarker);
 
-    PhysicalModel* loadedModel = physicalModel_new(false);
-    physicalModel_load(loadedModel, saveStream);
+    PhysicalModel* loadedModel = physicalModel_new();
+    physicalModel_snapshotLoad(loadedModel, saveStream);
 
     EXPECT_EQ(streamEndMarker, stream_get_be32(saveStream));
 
-    EXPECT_VEC3_NEAR(positionTarget,
-            physicalModel_getParameterPosition(loadedModel,
-                                               PARAMETER_VALUE_TYPE_TARGET),
-            0.00001f);
-    EXPECT_VEC3_NEAR(rotationTarget,
-            physicalModel_getParameterRotation(loadedModel,
-                                               PARAMETER_VALUE_TYPE_TARGET),
-            0.0001f);
-    EXPECT_VEC3_NEAR(magneticFieldTarget,
-            physicalModel_getParameterMagneticField(loadedModel,
-                                               PARAMETER_VALUE_TYPE_TARGET),
-            0.00001f);
-    EXPECT_NEAR(temperatureTarget,
-            physicalModel_getParameterTemperature(loadedModel,
-                                               PARAMETER_VALUE_TYPE_TARGET),
-            0.00001f);
-    EXPECT_NEAR(proximityTarget,
-            physicalModel_getParameterProximity(loadedModel,
-                                               PARAMETER_VALUE_TYPE_TARGET),
-            0.00001f);
-    EXPECT_NEAR(lightTarget,
-            physicalModel_getParameterLight(loadedModel,
-                                               PARAMETER_VALUE_TYPE_TARGET),
-            0.00001f);
-    EXPECT_NEAR(pressureTarget,
-            physicalModel_getParameterPressure(loadedModel,
-                                               PARAMETER_VALUE_TYPE_TARGET),
-            0.00001f);
-    EXPECT_NEAR(humidityTarget,
-            physicalModel_getParameterHumidity(loadedModel,
-                                               PARAMETER_VALUE_TYPE_TARGET),
-            0.00001f);
+    EXPECT_VEC3_NEAR(kPositionTarget,
+                     physicalModel_getParameterPosition(
+                             loadedModel, PARAMETER_VALUE_TYPE_TARGET),
+                     0.00001f);
+    EXPECT_VEC3_NEAR(kRotationTarget,
+                     physicalModel_getParameterRotation(
+                             loadedModel, PARAMETER_VALUE_TYPE_TARGET),
+                     0.0001f);
+    EXPECT_VEC3_NEAR(kMagneticFieldTarget,
+                     physicalModel_getParameterMagneticField(
+                             loadedModel, PARAMETER_VALUE_TYPE_TARGET),
+                     0.00001f);
+    EXPECT_NEAR(kTemperatureTarget,
+                physicalModel_getParameterTemperature(
+                        loadedModel, PARAMETER_VALUE_TYPE_TARGET),
+                0.00001f);
+    EXPECT_NEAR(kProximityTarget,
+                physicalModel_getParameterProximity(
+                        loadedModel, PARAMETER_VALUE_TYPE_TARGET),
+                0.00001f);
+    EXPECT_NEAR(kLightTarget,
+                physicalModel_getParameterLight(loadedModel,
+                                                PARAMETER_VALUE_TYPE_TARGET),
+                0.00001f);
+    EXPECT_NEAR(kPressureTarget,
+                physicalModel_getParameterPressure(loadedModel,
+                                                   PARAMETER_VALUE_TYPE_TARGET),
+                0.00001f);
+    EXPECT_NEAR(kHumidityTarget,
+                physicalModel_getParameterHumidity(loadedModel,
+                                                   PARAMETER_VALUE_TYPE_TARGET),
+                0.00001f);
+
+    physicalModel_free(loadedModel);
+}
+
+TEST(PhysicalModel, SaveLoadStatePosition) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    PhysicalModel* model = physicalModel_new();
+
+    const vec3 kPositionCurrent = {-1.f, 21.f, -6.f};
+    const vec3 kRotationCurrent = {5.f, 35.f, -5.f};
+    const vec3 kPositionTarget = {24.f, 25.f, 26.f};
+    const vec3 kRotationTarget = {27.f, 28.f, 29.f};
+
+    // NOTE: saveState/loadState should save out both current and target state.
+    physicalModel_setTargetPosition(model, kPositionCurrent,
+                                    PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetPosition(model, kPositionTarget,
+                                    PHYSICAL_INTERPOLATION_SMOOTH);
+    physicalModel_setTargetRotation(model, kRotationCurrent,
+                                    PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetRotation(model, kRotationTarget,
+                                    PHYSICAL_INTERPOLATION_SMOOTH);
+
+    emulator_automation::InitialState state;
+    physicalModel_saveState(model, &state);
+    physicalModel_free(model);
+
+    PhysicalModel* loadedModel = physicalModel_new();
+    physicalModel_loadState(loadedModel, state);
+
+    EXPECT_VEC3_NEAR(kPositionCurrent,
+                     physicalModel_getParameterPosition(
+                             loadedModel,
+                             PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION),
+                     0.00001f);
+    EXPECT_VEC3_NEAR(kPositionTarget,
+                     physicalModel_getParameterPosition(
+                             loadedModel, PARAMETER_VALUE_TYPE_TARGET),
+                     0.00001f);
+    EXPECT_VEC3_NEAR(kRotationCurrent,
+                     physicalModel_getParameterRotation(
+                             loadedModel,
+                             PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION),
+                     0.0001f);
+    EXPECT_VEC3_NEAR(kRotationTarget,
+                     physicalModel_getParameterRotation(
+                             loadedModel, PARAMETER_VALUE_TYPE_TARGET),
+                     0.0001f);
+
+    physicalModel_free(loadedModel);
+}
+
+TEST(PhysicalModel, SaveLoadStateVelocity) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    PhysicalModel* model = physicalModel_new();
+
+    const vec3 kPositionCurrent = {-1.f, 21.f, -6.f};
+    const vec3 kVelocityCurrent = {5.f, 35.f, -5.f};
+    const vec3 kPositionTarget = {24.f, 25.f, 26.f};
+    const vec3 kVelocityTarget = {27.f, 28.f, 29.f};
+
+    physicalModel_setTargetPosition(model, kPositionCurrent,
+                                    PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetPosition(model, kPositionTarget,
+                                    PHYSICAL_INTERPOLATION_SMOOTH);
+    physicalModel_setTargetVelocity(model, kVelocityCurrent,
+                                    PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetVelocity(model, kVelocityTarget,
+                                    PHYSICAL_INTERPOLATION_SMOOTH);
+
+    emulator_automation::InitialState state;
+    physicalModel_saveState(model, &state);
+    physicalModel_free(model);
+
+    PhysicalModel* loadedModel = physicalModel_new();
+    physicalModel_loadState(loadedModel, state);
+
+    EXPECT_VEC3_NEAR(kPositionCurrent,
+                     physicalModel_getParameterPosition(
+                             loadedModel,
+                             PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION),
+                     0.00001f);
+    // NOTE: When velocity is set target position is no longer valid.
+    EXPECT_VEC3_NEAR(kVelocityCurrent,
+                     physicalModel_getParameterVelocity(
+                             loadedModel,
+                             PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION),
+                     0.0001f);
+    EXPECT_VEC3_NEAR(kVelocityTarget,
+                     physicalModel_getParameterVelocity(
+                             loadedModel, PARAMETER_VALUE_TYPE_TARGET),
+                     0.0001f);
 
     physicalModel_free(loadedModel);
 }
 
 TEST(PhysicalModel, SetRotatedIMUResults) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
     physicalModel_setCurrentTime(model, 0UL);
 
     const vec3 initialRotation {45.0f, 10.0f, 4.0f};
@@ -523,6 +693,8 @@ TEST(PhysicalModel, SetRotatedIMUResults) {
 
     uint64_t time = 500000000UL;
     const uint64_t stepNs = 1000UL;
+    const uint64_t maxConvergenceTimeNs =
+            time + android::physics::secondsToNs(5.0f);
 
     const vec3 targetPosition {1.0f, 2.0f, 3.0f};
 
@@ -560,12 +732,19 @@ TEST(PhysicalModel, SetRotatedIMUResults) {
     const float stepSeconds = android::physics::nsToSeconds(stepNs);
     long prevMeasurementId = -1;
     time += stepNs / 2;
+
+    size_t iteration = 0;
     while (physicalStateChanging) {
+        SCOPED_TRACE(testing::Message() << "Iteration " << iteration);
+        ++iteration;
+
+        ASSERT_LT(time, maxConvergenceTimeNs)
+                << "Physical state did not stabilize";
         physicalModel_setCurrentTime(model, time);
         long measurementId;
         const vec3 measuredAcceleration = physicalModel_getAccelerometer(
                 model, &measurementId);
-        EXPECT_NE(prevMeasurementId, measurementId);
+        ASSERT_NE(prevMeasurementId, measurementId);
         prevMeasurementId = measurementId;
         const glm::vec3 acceleration(
                 measuredAcceleration.x,
@@ -589,7 +768,7 @@ TEST(PhysicalModel, SetRotatedIMUResults) {
 
 TEST(PhysicalModel, SetRotationIMUResults) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
     physicalModel_setCurrentTime(model, 0UL);
 
     vec3 initialRotation {45.0f, 10.0f, 4.0f};
@@ -599,6 +778,8 @@ TEST(PhysicalModel, SetRotationIMUResults) {
 
     uint64_t time = 0UL;
     const uint64_t stepNs = 5000UL;
+    const uint64_t maxConvergenceTimeNs =
+            time + android::physics::secondsToNs(5.0f);
 
     vec3 targetRotation {-10.0f, 20.0f, 45.0f};
 
@@ -635,11 +816,13 @@ TEST(PhysicalModel, SetRotationIMUResults) {
     long prevMeasurementId = -1;
     time += stepNs / 2;
     while (physicalStateChanging) {
+        ASSERT_LT(time, maxConvergenceTimeNs)
+                << "Physical state did not stabilize";
         physicalModel_setCurrentTime(model, time);
         long measurementId;
         const vec3 measuredGyroscope = physicalModel_getGyroscope(
                 model, &measurementId);
-        EXPECT_NE(prevMeasurementId, measurementId);
+        ASSERT_NE(prevMeasurementId, measurementId);
         prevMeasurementId = measurementId;
         const glm::vec3 deviceSpaceRotationalVelocity(
                 measuredGyroscope.x,
@@ -674,7 +857,7 @@ TEST(PhysicalModel, SetRotationIMUResults) {
 
 TEST(PhysicalModel, MoveWhileRotating) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
     physicalModel_setCurrentTime(model, 0UL);
 
     const vec3 initialRotation {45.0f, 10.0f, 4.0f};
@@ -688,6 +871,8 @@ TEST(PhysicalModel, MoveWhileRotating) {
 
     uint64_t time = 0UL;
     const uint64_t stepNs = 5000UL;
+    const uint64_t maxConvergenceTimeNs =
+            time + android::physics::secondsToNs(5.0f);
 
     const vec3 targetPosition {1.0f, 2.0f, 3.0f};
     const vec3 targetRotation {-10.0f, 20.0f, 45.0f};
@@ -732,11 +917,13 @@ TEST(PhysicalModel, MoveWhileRotating) {
     long prevAccelMeasurementId = -1;
     time += stepNs / 2;
     while (physicalStateChanging) {
+        ASSERT_LT(time, maxConvergenceTimeNs)
+                << "Physical state did not stabilize";
         physicalModel_setCurrentTime(model, time);
         long gyroMeasurementId;
         const vec3 measuredGyroscope = physicalModel_getGyroscope(
                 model, &gyroMeasurementId);
-        EXPECT_NE(prevGyroMeasurementId, gyroMeasurementId);
+        ASSERT_NE(prevGyroMeasurementId, gyroMeasurementId);
         prevGyroMeasurementId = gyroMeasurementId;
         const glm::vec3 deviceSpaceRotationalVelocity(
                 measuredGyroscope.x,
@@ -789,7 +976,7 @@ TEST(PhysicalModel, MoveWhileRotating) {
 
 TEST(PhysicalModel, SetVelocityAndPositionWhileRotating) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new();
     physicalModel_setCurrentTime(model, 0UL);
 
     const vec3 initialRotation {45.0f, 10.0f, 4.0f};
@@ -848,11 +1035,15 @@ TEST(PhysicalModel, SetVelocityAndPositionWhileRotating) {
     glm::vec3 position(initialPosition.x, initialPosition.y, initialPosition.z);
 
     const float stepSeconds = android::physics::nsToSeconds(stepNs);
+    const float maxConvergenceTimeNs =
+            time + android::physics::secondsToNs(5.0f);
     long prevGyroMeasurementId = -1;
     long prevAccelMeasurementId = -1;
     time += stepNs / 2;
     int stepsRemainingAfterStable = 10;
     while (physicalStateChanging || stepsRemainingAfterStable > 0) {
+        ASSERT_LT(time, maxConvergenceTimeNs)
+                << "Physical state did not stabilize";
         if (!physicalStateChanging) {
           stepsRemainingAfterStable--;
         }
@@ -869,7 +1060,7 @@ TEST(PhysicalModel, SetVelocityAndPositionWhileRotating) {
         const vec3 measuredGyroscope = physicalModel_getGyroscope(
                 model, &gyroMeasurementId);
         if (physicalStateChanging) {
-            EXPECT_NE(prevGyroMeasurementId, gyroMeasurementId);
+            ASSERT_NE(prevGyroMeasurementId, gyroMeasurementId);
         }
         prevGyroMeasurementId = gyroMeasurementId;
         const glm::vec3 deviceSpaceRotationalVelocity(
@@ -889,7 +1080,7 @@ TEST(PhysicalModel, SetVelocityAndPositionWhileRotating) {
         const vec3 measuredAcceleration = physicalModel_getAccelerometer(
                 model, &accelMeasurementId);
         if (physicalStateChanging) {
-            EXPECT_NE(prevAccelMeasurementId, accelMeasurementId);
+            ASSERT_NE(prevAccelMeasurementId, accelMeasurementId);
         }
         prevAccelMeasurementId = accelMeasurementId;
         const glm::vec3 acceleration(measuredAcceleration.x,

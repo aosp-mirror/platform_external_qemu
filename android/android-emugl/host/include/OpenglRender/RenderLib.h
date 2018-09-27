@@ -22,6 +22,12 @@
 
 namespace emugl {
 
+struct RenderOpt {
+    void* display;
+    void* surface;
+    void* config;
+};
+
 // RenderLib - root interface for the GPU emulation library
 //  Use it to set the library-wide parameters (logging, crash reporting) and
 //  create indivudual renderers that take care of drawing windows.
@@ -53,7 +59,7 @@ public:
 
     virtual void* getEGL(void) = 0;
 
-    virtual bool getDSCC(void**, void**, void**, void**, int* , int*) = 0;
+    virtual bool getOpt(RenderOpt* opt) = 0;
 
     // initRenderer - initialize the OpenGL renderer object.
     //

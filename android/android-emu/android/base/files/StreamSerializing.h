@@ -16,6 +16,7 @@
 #include "android/base/files/Stream.h"
 #include "android/base/TypeTraits.h"
 
+#include <string>
 #include <vector>
 
 namespace android {
@@ -105,6 +106,9 @@ void loadCollection(Stream* stream, Collection* c, LoadFunc&& loader) {
         c->emplace(loader(stream));
     }
 }
+
+void saveStringArray(Stream* stream, const char* const* strings, uint32_t count);
+std::vector<std::string> loadStringArray(Stream* stream);
 
 }  // namespace base
 }  // namespace android

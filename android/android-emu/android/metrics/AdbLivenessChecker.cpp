@@ -93,7 +93,19 @@ AdbLivenessChecker::AdbLivenessChecker(
       mBootCheckTask(looper,
                      [this]() { return runBootCheck(); },
                      bootCheckTaskTimeoutMs(mCheckIntervalMs)),
-      mRemainingAttempts(kMaxAttempts) {
+      // TODO: bug 115582308
+      // Remove the liveness checker.
+      // Until we figure out how to run adb from socket directly.
+      //
+      // The liveness checker is only meant to measure one extremely narrow
+      // thing: the edge trigger for online -> offline.  This one thing, that
+      // we don't even look at very much in metrics, and whose rate of going
+      // offline is very low already, is a guaranteed onerous burden for users
+      // as it is a heavyweight operation that starts a subprocess and involves
+      // temp file handling, and easily falls over or overloads the user's
+      // machine with adb procesess when the smallest thing is out of whack,
+      // such as when there are mismatched ADB servers running on the host.
+      mRemainingAttempts(0) {
     // Don't call start() here: start() launches a parallel task that calls
     // shared_from_this(), which needs at least one shared pointer owning
     // |this|. We can't guarantee that until the constructor call returns.
@@ -113,13 +125,15 @@ AdbLivenessChecker::~AdbLivenessChecker() {
 }
 
 void AdbLivenessChecker::start() {
-    mRecurrentTask.start(true);
-    mBootCheckTask.start(true);
+    // TODO: bug 115582308
+    // mRecurrentTask.start(true);
+    // mBootCheckTask.start(true);
 }
 
 void AdbLivenessChecker::stop() {
-    mRecurrentTask.stopAndWait();
-    mBootCheckTask.stopAndWait();
+    // TODO: bug 115582308
+    // mRecurrentTask.stopAndWait();
+    // mBootCheckTask.stopAndWait();
 }
 
 bool AdbLivenessChecker::adbCheckRequest() {
@@ -287,7 +301,7 @@ void AdbLivenessChecker::reportCheckResult(const CheckResult& result) {
     }
 
     if (result == CheckResult::kOnline) {
-        mRemainingAttempts = kMaxAttempts;
+        mRemainingAttempts = 0;
         dropMetrics(result);
     } else if (--mRemainingAttempts == 0) {
         LOG(VERBOSE) << "Reporting error: " << static_cast<int>(result);

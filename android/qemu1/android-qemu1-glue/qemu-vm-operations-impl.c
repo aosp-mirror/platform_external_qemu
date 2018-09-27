@@ -59,6 +59,12 @@ static bool qemu_snapshot_save(const char* name,
     return !ret;
 }
 
+static bool qemu_snapshot_remap(bool shared,
+                                void* opaque,
+                                LineConsumerCallback errConsumer) {
+    return true;
+}
+
 static bool qemu_snapshot_load(const char* name,
                                void* opaque,
                                LineConsumerCallback errConsumer) {
@@ -104,6 +110,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
     .snapshotList = qemu_snapshot_list,
     .snapshotLoad = qemu_snapshot_load,
     .snapshotSave = qemu_snapshot_save,
+    .snapshotRemap = qemu_snapshot_remap,
     .snapshotDelete = qemu_snapshot_delete,
     .setSnapshotCallbacks = set_snapshot_callbacks,
     .getVmConfiguration = get_vm_config,

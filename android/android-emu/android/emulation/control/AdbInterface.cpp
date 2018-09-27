@@ -14,6 +14,8 @@
 
 #include "android/emulation/control/AdbInterface.h"
 
+#include "android/avd/info.h"
+#include "android/avd/util.h"
 #include "android/base/ArraySize.h"
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
@@ -29,6 +31,7 @@
 #include "android/emulation/AdbHostServer.h"
 #include "android/emulation/ComponentVersion.h"
 #include "android/emulation/ConfigDirs.h"
+#include "android/globals.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 #include "android/utils/sockets.h"
@@ -269,12 +272,37 @@ AdbCommand::AdbCommand(Looper* looper,
                        ResultCallback&& callback)
     : mLooper(looper),
       mResultCallback(std::move(callback)),
-      mOutputFilePath(PathUtils::join(
-              System::get()->getTempDir(),
-              std::string("adbcommand").append(Uuid::generate().toString()))),
       mWantOutput(want_output),
       mTimeoutMs(timeoutMs) {
+
     mCommand.push_back(adb_path);
+
+    const char* avdContentPath = nullptr;
+
+    std::string outputFolder;
+
+    if (android_avdInfo) {
+        avdContentPath = avdInfo_getContentPath(android_avdInfo);
+    }
+
+    if (avdContentPath) {
+        auto avdCmdDir =
+            PathUtils::join(
+                avdContentPath,
+                ANDROID_AVD_TMP_ADB_COMMAND_DIR);
+
+        if (path_mkdir_if_needed(avdCmdDir.c_str(), 0755) < 0) {
+            outputFolder = System::get()->getTempDir();
+        } else {
+            outputFolder = avdCmdDir;
+        }
+    } else {
+        outputFolder = System::get()->getTempDir();
+    }
+
+    mOutputFilePath =
+        PathUtils::join(outputFolder,
+            std::string("adbcommand").append(Uuid::generate().toString()));
 
     // TODO: when run headless, the serial string won't be properly
     // initialized, so make a best attempt by using -e. This should be updated
@@ -309,32 +337,11 @@ void AdbCommand::taskDoneFunction(const OptionalAdbCommandResult& result) {
     if (!mCancelled) {
         mResultCallback(result);
     }
-    AutoLock lock(mLock);
     mFinished = true;
-    mCv.broadcastAndUnlock(&lock);
     // This may invalidate this object and clean it up.
     // DO NOT reference any internal state from this class after this
     // point.
     mTask.reset();
-}
-
-bool AdbCommand::wait(System::Duration timeoutMs) {
-    if (!mTask) {
-        return true;
-    }
-
-    AutoLock lock(mLock);
-    if (timeoutMs < 0) {
-        mCv.wait(&lock, [this]() { return mFinished; });
-        return true;
-    }
-
-    const auto deadlineUs = System::get()->getUnixTimeUs() + timeoutMs * 1000;
-    while (!mFinished && System::get()->getUnixTimeUs() < deadlineUs) {
-        mCv.timedWait(&mLock, deadlineUs);
-    }
-
-    return mFinished;
 }
 
 void AdbCommand::taskFunction(OptionalAdbCommandResult* result) {
@@ -356,6 +363,9 @@ void AdbCommand::taskFunction(OptionalAdbCommandResult* result) {
     if (command_ran) {
         result->emplace(exit_code,
                         mWantOutput ? mOutputFilePath : std::string());
+    } else {
+        // Just in case (e.g. if the command got terminated on timeout).
+        path_delete_file(mOutputFilePath.c_str());
     }
 }
 
@@ -371,21 +381,6 @@ AdbCommandResult::~AdbCommandResult() {
     if (!output_name.empty()) {
         path_delete_file(output_name.c_str());
     }
-}
-
-AdbCommandResult::AdbCommandResult(AdbCommandResult&& other)
-    : exit_code(other.exit_code),
-      output(std::move(other.output)),
-      output_name(std::move(other.output_name)) {
-    other.output_name.clear();  // make sure |other| won't delete it
-}
-
-AdbCommandResult& AdbCommandResult::operator=(AdbCommandResult&& other) {
-    exit_code = other.exit_code;
-    output = std::move(other.output);
-    output_name = std::move(other.output_name);
-    other.output_name.clear();
-    return *this;
 }
 
 }  // namespace emulation

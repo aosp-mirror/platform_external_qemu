@@ -3301,14 +3301,23 @@ static void android_teardown_metrics()
     android_metrics_stop(METRICS_STOP_GRACEFUL);
 }
 
+static const char openglInitFailureMessage[] =
+    "OpenGLES emulation failed to initialize. "
+    "Please consider the following troubleshooting steps:\n\n"
+    "1. Make sure your GPU drivers are up to date.\n\n"
+    "2. Try software rendering: Go to Extended Controls > Settings > Advanced tab and change "
+    "\"OpenGL ES renderer (requires restart)\" to \"Swiftshader\".\n\n"
+    "Or, run emulator from command line with \"-gpu swiftshader_indirect\". "
+    "3. Please file an issue to https://issuetracker.google.com/issues?q=componentid:192727 "
+    "and provide your complete CPU/GPU info plus OS and display setup.\n";
+
 static bool android_reporting_setup(void)
 {
     android_init_metrics();
     if (!is_opengl_alive) {
-        derror("Could not initialize OpenglES emulation, "
-               "use '-gpu off' to disable it.");
+        derror(openglInitFailureMessage);
         android_teardown_metrics();
-        crashhandler_die("OpenGLES emulation failed to initialize.");
+        crashhandler_die(openglInitFailureMessage);
         return false;
     }
 
@@ -5539,7 +5548,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #ifdef CONFIG_ANDROID
     android_report_session_phase(ANDROID_SESSION_PHASE_EXIT);
     crashhandler_exitmode("after main_loop");
-    android_wear_agent_stop();
     socket_drainer_stop();
 #endif
 
@@ -5559,6 +5567,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
 #ifdef CONFIG_ANDROID
     qemu_android_emulation_teardown();
+    android_wear_agent_stop();
     android_reporting_teardown();
     android_devices_teardown();
 #endif
@@ -5578,6 +5587,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     } else {
         fprintf(stderr, "Unexpected: iothread lock lost.");
     }
+
+    fflush(stdout);
+    fflush(stderr);
 
 #ifdef CONFIG_ANDROID
     handle_emulator_restart();

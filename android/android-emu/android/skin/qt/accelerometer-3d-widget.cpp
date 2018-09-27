@@ -13,7 +13,7 @@
 #include "android/base/system/System.h"
 #include "android/emulation/control/sensors_agent.h"
 #include "android/hw-sensors.h"
-#include "android/physics/Physics.h"
+#include "android/physics/GlmHelpers.h"
 #include "android/skin/qt/gl-common.h"
 #include "android/skin/qt/wavefront-obj-parser.h"
 

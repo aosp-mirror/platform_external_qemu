@@ -136,7 +136,7 @@ void Quickboot::reportSuccessfulSave(StringView name,
 
 constexpr int kLivenessTimerTimeoutMs = 100;
 constexpr int kBootTimeoutMs = 7 * 1000;
-constexpr int kMaxAdbConnectionRetries = 2;
+constexpr int kMaxAdbConnectionRetries = 3;
 
 static int bootTimeoutMs() {
     if (android_cmdLineOptions->read_only) {
@@ -168,14 +168,23 @@ void Quickboot::onLivenessTimer() {
 
     const auto nowMs = System::get()->getHighResTimeUs() / 1000;
     if (int64_t(nowMs - mLoadTimeMs) > bootTimeoutMs()) {
-        if (android_cmdLineOptions->read_only ||
+        if (mAdbConnectionRetries == 0) {
+            mWindow.showMessage(
+                    StringFormat("Guest isn't online after %d seconds, "
+                                 "loading remaining RAM pages",
+                                 int(nowMs - mLoadTimeMs) / 1000)
+                            .c_str(),
+                    WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
+            Snapshotter::get().touchAllPages();
+            mAdbConnectionRetries++;
+        } else if (android_cmdLineOptions->read_only ||
             mAdbConnectionRetries < kMaxAdbConnectionRetries) {
             mWindow.showMessage(
                     StringFormat("Guest isn't online after %d seconds, "
                                  "retrying ADB connection",
                                  int(nowMs - mLoadTimeMs) / 1000)
                             .c_str(),
-                    WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
+                    WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
             android_adb_reset_connection();
             mLoadTimeMs = nowMs;
             mAdbConnectionRetries++;
@@ -241,7 +250,7 @@ bool Quickboot::load(StringView name) {
             // Only display a message if this is a one-time-like thing (command
             // line), and not an AVD option.
             mWindow.showMessage("Cold boot: requested by the user",
-                                WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+                                WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
         }
         reportFailedLoad(
                 android_hw->fastboot_forceColdBoot
@@ -254,7 +263,7 @@ bool Quickboot::load(StringView name) {
         mWindow.showMessage(
                 StringFormat(
                     "Cold boot: in Android build system").c_str(),
-                WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+                WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
         reportFailedLoad(pb::EmulatorQuickbootLoad::
                                  EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
                          FailureReason::Empty);
@@ -265,7 +274,7 @@ bool Quickboot::load(StringView name) {
                              emuglConfig_renderer_to_string(
                                      emuglConfig_get_current_renderer()))
                         .c_str(),
-                WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+                WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
         reportFailedLoad(pb::EmulatorQuickbootLoad::
                                  EMULATOR_QUICKBOOT_LOAD_COLD_UNSUPPORTED,
                          FailureReason::Empty);
@@ -341,7 +350,7 @@ void Quickboot::decideFailureReport(StringView name,
         // There's no quickboot snapshot and the user is configured
         // for NO save on exit. Say that is the reason.
         mWindow.showMessage("Cold boot based on user configuration",
-                WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+                WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
         reportFailedLoad(pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
                          *failureReason);
     } else {
@@ -351,7 +360,7 @@ void Quickboot::decideFailureReport(StringView name,
                                  failureReasonToString(*failureReason,
                                                        SNAPSHOT_LOAD))
                             .c_str(),
-                    WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+                    WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
         }
         reportFailedLoad(
                 failureReason < FailureReason::UnrecoverableErrorLimit
@@ -426,7 +435,10 @@ bool Quickboot::save(StringView name) {
     const auto nowMs = System::get()->getHighResTimeUs() / 1000;
     const auto sessionUptimeMs =
             nowMs - (mLoadTimeMs ? mLoadTimeMs : mStartTimeMs);
-    const bool ranLongEnoughForSaving = sessionUptimeMs > kMinUptimeForSavingMs;
+    const bool ranLongEnoughForSaving =
+        (Snapshotter::get().hasRamFile() &&
+         Snapshotter::get().isRamFileShared()) ||
+        sessionUptimeMs > kMinUptimeForSavingMs;
 
     // TODO: when cleaning the current 'default_boot' snapshot, save the reason
     //  of its invalidation in it - this way emulator will be able to give a
@@ -529,7 +541,8 @@ bool androidSnapshot_quickbootSave(const char* _name) {
 
     // Write user choice to the ini file if we are using file-backed RAM.
     if (android::snapshot::Snapshotter::get().hasRamFile()) {
-        bool wantedSaveOnExit = !(android_avdParams->flags & AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT);
+        bool wantedSaveOnExit =
+            !(android_avdParams->flags & AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT);
         androidSnapshot_writeQuickbootChoice(wantedSaveOnExit);
     }
 

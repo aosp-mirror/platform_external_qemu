@@ -582,7 +582,29 @@ static void close_all_pipes_v2(PipeDevice* dev, GoldfishPipeCloseReason reason) 
     for (; i < dev->pipes_capacity; ++i) {
         HwPipe* pipe = dev->pipes[i];
         if (pipe) {
-            unmap_command_buffer(pipe->command_buffer);
+            // Make sure to use the guest physical address to
+            // obtain the host address to unmap;
+            // it is possible a remap occurred.
+            //
+            // map_guest_buffer increments refcount
+            // on the memory region, so we need to explicitly
+            // unmap this.
+            void* current_buffer =
+                map_guest_buffer(
+                    pipe->command_buffer_addr,
+                    COMMAND_BUFFER_SIZE, 1);
+
+            // Unref for telling QEMU we are done with this command buffer.
+            cpu_physical_memory_unmap(
+                current_buffer, COMMAND_BUFFER_SIZE, 1,
+                COMMAND_BUFFER_SIZE);
+
+            // Explicitly unmap again because we just called
+            // map_guest_buffer.
+            cpu_physical_memory_unmap(
+                current_buffer, COMMAND_BUFFER_SIZE, 1,
+                COMMAND_BUFFER_SIZE);
+
             hwpipe_free(pipe, reason);
             dev->pipes[i] = NULL;
         }

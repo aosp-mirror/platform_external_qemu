@@ -390,6 +390,7 @@ extern int android_display_bpp;
 extern void  dprint( const char* format, ... );
 
 static void android_check_for_updates();
+static void qemu1_android_emulation_teardown();
 
 const char* dns_log_filename = NULL;
 const char* drop_log_filename = NULL;
@@ -3650,7 +3651,7 @@ int main(int argc, char **argv, char **envp)
     net_cleanup();
     android_wear_agent_stop();
     socket_drainer_stop();
-    android_emulation_teardown();
+    qemu1_android_emulation_teardown();
     return 0;
 }
 
@@ -3658,9 +3659,8 @@ void android_check_for_updates() {
     android_checkForUpdates(QEMU_CORE_VERSION);
 }
 
-void
-android_emulation_teardown(void)
-{
+void qemu1_android_emulation_teardown() {
     skin_charmap_done();
     android_teardown_metrics();
+    qemu_android_emulation_teardown();
 }

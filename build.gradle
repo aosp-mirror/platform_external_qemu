@@ -109,11 +109,6 @@ sdk {
             builtBy buildDefaultEmulator
         }
 
-        item("$buildDefaultEmulator.output/emulator64-mips") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-
         item("$buildDefaultEmulator.output/emulator64-x86") {
             executable true
             builtBy buildDefaultEmulator
@@ -216,10 +211,6 @@ sdk {
             executable true
             builtBy buildWindowsEmulator
         }
-        item("$buildWindowsEmulator.output/emulator-mips.exe") {
-            executable true
-            builtBy buildWindowsEmulator
-        }
         item("$buildWindowsEmulator.output/emulator-x86.exe") {
             executable true
             builtBy buildWindowsEmulator
@@ -235,11 +226,6 @@ sdk {
         }
 
         item("$buildWindowsEmulator.output/emulator64-arm.exe") {
-            executable true
-            builtBy buildWindowsEmulator
-        }
-
-        item("$buildWindowsEmulator.output/emulator64-mips.exe") {
             executable true
             builtBy buildWindowsEmulator
         }

@@ -48,6 +48,11 @@ _ANDROID_EMU_ROOT := $(LOCAL_PATH)
 
 ###############################################################################
 #
+# Automation protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/automation/proto/AutomationProto.mk
+
+###############################################################################
+#
 # Metrics library is a part of android-emu, so let's include it here
 include $(_ANDROID_EMU_ROOT)/android/metrics/proto/MetricsProto.mk
 
@@ -67,6 +72,11 @@ include $(_ANDROID_EMU_ROOT)/android/location/proto/LocationProto.mk
 
 ###############################################################################
 #
+# Offworld protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/offworld/proto/OffworldProto.mk
+
+###############################################################################
+#
 # Snapshot protoc-generated library.
 include $(_ANDROID_EMU_ROOT)/android/snapshot/proto/SnapshotProto.mk
 
@@ -82,8 +92,9 @@ include $(_ANDROID_EMU_ROOT)/android/telephony/proto/SimAccessRulesProto.mk
 
 ###############################################################################
 #
-# Automation protoc-generated library.
-include $(_ANDROID_EMU_ROOT)/android/automation/proto/AutomationProto.mk
+# Verified Boot Config protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/verified-boot/proto/VerifiedBootConfigProto.mk
+
 
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
@@ -109,123 +120,16 @@ endif
 #  be part of this library, but goes into android-emu
 #
 
-$(call start-emulator-library,android-emu-base)
-
+$(call start-cmake-project,android-emu-base)
 LOCAL_CFLAGS := $(EMULATOR_COMMON_CFLAGS) $(ANDROID_EMU_CFLAGS)
-
 LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(ANDROID_EMU_INCLUDES) \
     $(LIBUUID_INCLUDES) \
     $(LZ4_INCLUDES) \
 
-LOCAL_SRC_FILES := \
-    android/base/ContiguousRangeMapper.cpp \
-    android/base/Debug.cpp \
-    android/base/files/CompressingStream.cpp \
-    android/base/files/DecompressingStream.cpp \
-    android/base/files/Fd.cpp \
-    android/base/files/FileShareOpen.cpp \
-    android/base/files/IniFile.cpp \
-    android/base/files/InplaceStream.cpp \
-    android/base/files/MemStream.cpp \
-    android/base/files/PathUtils.cpp \
-    android/base/files/StdioStream.cpp \
-    android/base/files/Stream.cpp \
-    android/base/files/StreamSerializing.cpp \
-    android/base/misc/FileUtils.cpp \
-    android/base/misc/HttpUtils.cpp \
-    android/base/misc/StringUtils.cpp \
-    android/base/misc/Utf8Utils.cpp \
-    android/base/network/IpAddress.cpp \
-    android/base/network/NetworkUtils.cpp \
-    android/base/Stopwatch.cpp \
-    android/base/StringFormat.cpp \
-    android/base/StringParse.cpp \
-    android/base/StringView.cpp \
-    android/base/sockets/SocketUtils.cpp \
-    android/base/sockets/SocketWaiter.cpp \
-    android/base/synchronization/MessageChannel.cpp \
-    android/base/Log.cpp \
-    android/base/memory/LazyInstance.cpp \
-    android/base/memory/MemoryHints.cpp \
-    android/base/ProcessControl.cpp \
-    android/base/system/System.cpp \
-    android/base/threads/Async.cpp \
-    android/base/threads/FunctorThread.cpp \
-    android/base/threads/ThreadStore.cpp \
-    android/base/Uri.cpp \
-    android/base/Uuid.cpp \
-    android/base/Version.cpp \
-    android/utils/aconfig-file.c \
-    android/utils/assert.c \
-    android/utils/async.cpp \
-    android/utils/bufprint.c \
-    android/utils/bufprint_system.cpp \
-    android/utils/cbuffer.c \
-    android/utils/debug.c \
-    android/utils/debug_wrapper.cpp \
-    android/utils/dll.c \
-    android/utils/dirscanner.cpp \
-    android/utils/eintr_wrapper.c \
-    android/utils/exec.cpp \
-    android/utils/fd.cpp \
-    android/utils/filelock.cpp \
-    android/utils/file_data.c \
-    android/utils/file_io.cpp \
-    android/utils/format.cpp \
-    android/utils/host_bitness.cpp \
-    android/utils/http_utils.cpp \
-    android/utils/iolooper.cpp \
-    android/utils/ini.cpp \
-    android/utils/intmap.c \
-    android/utils/ipaddr.cpp \
-    android/utils/lineinput.c \
-    android/utils/lock.cpp \
-    android/utils/mapfile.c \
-    android/utils/misc.c \
-    android/utils/panic.c \
-    android/utils/path.cpp \
-    android/utils/path_system.cpp \
-    android/utils/property_file.c \
-    android/utils/reflist.c \
-    android/utils/refset.c \
-    android/utils/sockets.c \
-    android/utils/stralloc.c \
-    android/utils/stream.cpp \
-    android/utils/string.cpp \
-    android/utils/system.c \
-    android/utils/system_wrapper.cpp \
-    android/utils/tempfile.c \
-    android/utils/timezone.cpp \
-    android/utils/uri.cpp \
-    android/utils/utf8_utils.cpp \
-    android/utils/vector.c \
-    android/utils/x86_cpuid.cpp \
-
-ifeq ($(BUILD_TARGET_OS),windows)
-LOCAL_SRC_FILES += \
-    android/base/files/preadwrite.cpp \
-    android/base/memory/SharedMemory_win32.cpp \
-    android/base/threads/Thread_win32.cpp \
-    android/base/system/Win32Utils.cpp \
-    android/base/system/Win32UnicodeString.cpp \
-    android/utils/win32_cmdline_quote.cpp \
-    android/utils/win32_unicode.cpp \
-
-else
-LOCAL_SRC_FILES += \
-    android/base/memory/SharedMemory_posix.cpp \
-    android/base/threads/Thread_pthread.cpp \
-
-endif
-
-ifeq ($(BUILD_TARGET_OS),darwin)
-LOCAL_SRC_FILES += \
-    android/base/system/system-native-mac.mm
-endif
-
-$(call end-emulator-library)
+PRODUCED_STATIC_LIBS=android-emu-base
+$(call end-cmake-project)
 
 ####
 # Small low-level benchmark for android-emu-base.
@@ -257,6 +161,9 @@ $(call end-emulator-benchmark)
 
 $(call start-emulator-library,android-emu)
 
+# Workaround for b/115634240
+LOCAL_SOURCE_DEPENDENCIES := $(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
+
 LOCAL_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
     $(LIBCURL_CFLAGS) \
@@ -286,6 +193,7 @@ LOCAL_SRC_FILES := \
     android/adb-server.cpp \
     android/automation/AutomationController.cpp \
     android/automation/AutomationEventSink.cpp \
+    android/avd/generate.cpp \
     android/avd/hw-config.c \
     android/avd/info.c \
     android/avd/scanner.c \
@@ -303,6 +211,7 @@ LOCAL_SRC_FILES := \
     android/base/async/ScopedSocketWatch.cpp \
     android/base/async/ThreadLooper.cpp \
     android/base/network/Dns.cpp \
+    android/base/Pool.cpp \
     android/base/sockets/SocketDrainer.cpp \
     android/base/threads/internal/ParallelTaskBase.cpp \
     android/boot-properties.c \
@@ -329,6 +238,7 @@ LOCAL_SRC_FILES := \
     android/emulation/AdbGuestPipe.cpp \
     android/emulation/AdbHostListener.cpp \
     android/emulation/AdbHostServer.cpp \
+    android/emulation/AndroidAsyncMessagePipe.cpp \
     android/emulation/AndroidMessagePipe.cpp \
     android/emulation/AndroidPipe.cpp \
     android/emulation/android_pipe_host.cpp \
@@ -355,6 +265,7 @@ LOCAL_SRC_FILES := \
     android/emulation/GoldfishDma.cpp \
     android/emulation/GoldfishSyncCommandQueue.cpp \
     android/emulation/goldfish_sync.cpp \
+    android/emulation/hostpipe/HostGoldfishPipe.cpp \
     android/emulation/LogcatPipe.cpp \
     android/emulation/Keymaster3.cpp \
     android/emulation/FakeRotatingCameraSensor.cpp \
@@ -369,6 +280,7 @@ LOCAL_SRC_FILES := \
     android/emulation/serial_line.cpp \
     android/emulation/SerialLine.cpp \
     android/emulation/SetupParameters.cpp \
+    android/emulation/testing/TestVmLock.cpp \
     android/emulation/VmLock.cpp \
     android/error-messages.cpp \
     android/featurecontrol/FeatureControl.cpp \
@@ -429,6 +341,7 @@ LOCAL_SRC_FILES := \
     android/network/control.cpp \
     android/network/constants.c \
     android/network/globals.c \
+    android/offworld/OffworldPipe.cpp \
     android/opengl/EmuglBackendList.cpp \
     android/opengl/EmuglBackendScanner.cpp \
     android/opengl/emugl_config.cpp \
@@ -481,7 +394,7 @@ LOCAL_SRC_FILES := \
     android/snapshot/RamSnapshotTesting.cpp \
     android/snapshot/Saver.cpp \
     android/snapshot/Snapshot.cpp \
-    android/snapshot/SnapshotPipe.cpp \
+    android/snapshot/SnapshotAPI.cpp \
     android/snapshot/Snapshotter.cpp \
     android/snapshot/TextureLoader.cpp \
     android/snapshot/TextureSaver.cpp \
@@ -506,6 +419,7 @@ LOCAL_SRC_FILES := \
     android/utils/socket_drainer.cpp \
     android/utils/sockets.c \
     android/utils/looper.cpp \
+    android/verified-boot/load_config.cpp \
     android/virtualscene/MeshSceneObject.cpp \
     android/virtualscene/PosterInfo.cpp \
     android/virtualscene/PosterSceneObject.cpp \
@@ -579,6 +493,9 @@ LOCAL_COPY_COMMON_TESTDATA += \
     textureutils/rgba32_golden.bmp \
     textureutils/rgba32.png \
 
+LOCAL_COPY_COMMON_TESTDATA_DIRS += \
+	test-sdk \
+
 endif
 
 $(call gen-hw-config-defs)
@@ -628,16 +545,18 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-zlib \
     emulator-murmurhash \
     emulator-tinyepoxy \
+    $(AUTOMATION_PROTO_STATIC_LIBRARIES) \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
     $(LOCATION_PROTO_STATIC_LIBRARIES) \
     $(VEHICLE_PROTO_STATIC_LIBRARIES) \
     $(FEATURECONTROL_PROTO_STATIC_LIBRARIES) \
+    $(OFFWORLD_PROTO_STATIC_LIBRARIES) \
     $(SNAPSHOT_PROTO_STATIC_LIBRARIES) \
     $(CRASHREPORT_PROTO_STATIC_LIBRARIES) \
     $(SIM_ACCESS_RULES_PROTO_STATIC_LIBRARIES) \
     $(PHYSICS_PROTO_STATIC_LIBRARIES) \
-    $(AUTOMATION_PROTO_STATIC_LIBRARIES) \
+    ${VERIFIEDBOOTCFG_PROTO_STATIC_LIBRARIES} \
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
@@ -665,6 +584,9 @@ endif
 $(call start-emulator-program, android_emu$(BUILD_TARGET_SUFFIX)_unittests)
 $(call gen-hw-config-defs)
 
+# Workaround for b/115634240
+LOCAL_SOURCE_DEPENDENCIES := $(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
+
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
     $(EMULATOR_COMMON_INCLUDES) \
@@ -677,6 +599,8 @@ LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
 
 LOCAL_SRC_FILES := \
+  android/automation/AutomationController_unittest.cpp \
+  android/automation/AutomationEventSink_unittest.cpp \
   android/avd/util_unittest.cpp \
   android/avd/util_wrapper_unittest.cpp \
   android/base/ArraySize_unittest.cpp \
@@ -718,6 +642,7 @@ LOCAL_SRC_FILES := \
   android/base/network/IpAddress_unittest.cpp \
   android/base/network/NetworkUtils_unittest.cpp \
   android/base/Optional_unittest.cpp \
+  android/base/Pool_unittest.cpp \
   android/base/ProcessControl_unittest.cpp \
   android/base/Result_unittest.cpp \
   android/base/sockets/ScopedSocket_unittest.cpp \
@@ -732,6 +657,7 @@ LOCAL_SRC_FILES := \
   android/base/synchronization/ReadWriteLock_unittest.cpp \
   android/base/synchronization/MessageChannel_unittest.cpp \
   android/base/system/System_unittest.cpp \
+  android/base/testing/TestEvent_unittest.cpp \
   android/base/threads/Async_unittest.cpp \
   android/base/threads/FunctorThread_unittest.cpp \
   android/base/threads/ParallelTask_unittest.cpp \
@@ -752,6 +678,7 @@ LOCAL_SRC_FILES := \
   android/emulation/AdbHostServer_unittest.cpp \
   android/emulation/android_pipe_pingpong_unittest.cpp \
   android/emulation/android_pipe_zero_unittest.cpp \
+  android/emulation/AndroidAsyncMessagePipe_unittest.cpp \
   android/emulation/bufprint_config_dirs_unittest.cpp \
   android/emulation/ComponentVersion_unittest.cpp \
   android/emulation/ConfigDirs_unittest.cpp \
@@ -765,6 +692,7 @@ LOCAL_SRC_FILES := \
   android/emulation/control/LineConsumer_unittest.cpp \
   android/emulation/CpuAccelerator_unittest.cpp \
   android/emulation/Hypervisor_unittest.cpp \
+  android/emulation/hostpipe/HostGoldfishPipe_unittest.cpp \
   android/emulation/ParameterList_unittest.cpp \
   android/emulation/serial_line_unittest.cpp \
   android/emulation/SetupParameters_unittest.cpp \
@@ -827,6 +755,7 @@ LOCAL_SRC_FILES := \
   android/utils/string_unittest.cpp \
   android/utils/sockets_unittest.cpp \
   android/utils/x86_cpuid_unittest.cpp \
+  android/verified-boot/load_config_unittest.cpp \
   android/virtualscene/TextureUtils_unittest.cpp \
   android/wear-agent/PairUpWearPhone_unittest.cpp \
   android/wear-agent/testing/WearAgentTestUtils.cpp \
@@ -868,6 +797,9 @@ $(call end-emulator-program)
 
 $(call start-emulator-program, \
     android_emu_metrics$(BUILD_TARGET_SUFFIX)_unittests)
+
+# Workaround for b/115634240
+LOCAL_SOURCE_DEPENDENCIES := $(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
@@ -950,6 +882,10 @@ LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(EMULATOR_LIBUI_INCLUDES) \
     $(FFMPEG_INCLUDES) \
+
+
+# Workaround for b/115634240
+LOCAL_SOURCE_DEPENDENCIES := $(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
 
 LOCAL_SRC_FILES += \
     $(ANDROID_SKIN_SOURCES) \

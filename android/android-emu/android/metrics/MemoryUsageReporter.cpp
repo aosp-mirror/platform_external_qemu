@@ -24,6 +24,8 @@
 
 static const uint32_t kMemUsageMetricsReportIntervalMs = 60 * 1000;
 
+static bool sStopping = false;
+
 namespace android {
 namespace metrics {
 
@@ -56,6 +58,9 @@ MemoryUsageReporter::MemoryUsageReporter(
     using android::metrics::PeriodicReporter;
     PeriodicReporter::get().addTask(kMemUsageMetricsReportIntervalMs,
         [this](android_studio::AndroidStudioEvent* event) {
+
+            if (sStopping) return true;
+
             android_studio::EmulatorMemoryUsage* memUsageProto =
                 event->mutable_emulator_performance_stats()->add_memory_usage();
 
@@ -90,6 +95,7 @@ void MemoryUsageReporter::start() {
 }
 
 void MemoryUsageReporter::stop() {
+    sStopping = true;
     mRecurrentTask.stopAndWait();
 }
 

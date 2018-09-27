@@ -33,5 +33,21 @@ bool loadBufferRaw(Stream* stream, char* buffer) {
     return ret == (int)len;
 }
 
+void saveStringArray(Stream* stream, const char* const* strings, uint32_t count) {
+    stream->putBe32(count);
+    for (uint32_t i = 0; i < count; ++i) {
+        stream->putString(strings[i]);
+    }
+}
+
+std::vector<std::string> loadStringArray(Stream* stream) {
+    uint32_t count = stream->getBe32();
+    std::vector<std::string> res;
+    for (uint32_t i = 0; i < count; ++i) {
+        res.push_back(stream->getString());
+    }
+    return res;
+}
+
 }  // namespace base
 }  // namespace android
