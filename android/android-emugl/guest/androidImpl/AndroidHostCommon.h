@@ -11,26 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <cstdarg>
+#pragma once
 
-#include <stdio.h>
+// Macro for exporting symbols to DLL
 
-#include "AndroidHostCommon.h"
+#ifdef _WIN32
+#define EXPORT __declspec(dllexport)
+#else
+#define EXPORT __attribute__((visibility("default")))
+#endif
 
-#define LOG_BUF_SIZE 1024
-
-extern "C" {
-
-EXPORT int __android_log_print(int prio, const char* tag, const char* fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
-    return 0;
-}
-
-EXPORT void __android_log_assert(const char* cond, const char* tag, const char* fmt, ...) {
-    // Placeholder
-}
-
-}

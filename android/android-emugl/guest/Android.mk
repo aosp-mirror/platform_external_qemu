@@ -19,8 +19,11 @@ $(call emugl-end-module)
 
 $(call emugl-begin-shared-library,liblog)
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH)
+LOCAL_C_INCLUDES := $(LOCAL_PATH) $(ANDROID_EMU_BASE_INCLUDES)
+
 LOCAL_SRC_FILES := \
-    androidImpl/Log.cpp
+    androidImpl/Ashmem.cpp \
+    androidImpl/Log.cpp \
+    androidImpl/Properties.cpp \
 
 $(call emugl-end-module)
