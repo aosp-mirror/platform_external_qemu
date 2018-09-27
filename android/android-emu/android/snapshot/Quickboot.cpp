@@ -42,6 +42,7 @@ using android::base::StringView;
 using android::base::System;
 using android::crashreport::CrashReporter;
 using android::metrics::MetricsReporter;
+
 namespace pb = android_studio;
 
 static constexpr int kDefaultMessageTimeoutMs = 10000;
