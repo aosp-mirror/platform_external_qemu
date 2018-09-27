@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "69ad1a39_b86c3acd",
+        "filename": "android/data/advancedFeatures.ini",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-09-27T21:00:41Z",
+      "side": 1,
+      "message": "maybe we only turn on this RefCountPipe feature in canary for now.",
+      "revId": "19102db4b9ab4acf49f4e972f1c7fdab99b0f955",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e5fdf0d3_beb5814f",
+        "filename": "android/data/advancedFeaturesCanary.ini",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-09-27T21:00:41Z",
+      "side": 1,
+      "message": "I will be working on the description.",
+      "revId": "19102db4b9ab4acf49f4e972f1c7fdab99b0f955",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
