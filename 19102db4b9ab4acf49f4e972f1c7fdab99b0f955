@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "522ef333_b46b26e6",
+        "filename": "android/android-emugl/host/include/OpenglRender/RenderLib.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-27T21:19:00Z",
+      "side": 1,
+      "message": "Ah, that\u0027s right, we found out that clang format is configured to be case sensitive and capital letters all before lowercase. case insitive is to be spported in a future or current but more bleeding edge version",
+      "parentUuid": "c3dfbe9a_e7e538d8",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 40
+      },
+      "revId": "19102db4b9ab4acf49f4e972f1c7fdab99b0f955",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "69ad1a39_b86c3acd",
         "filename": "android/data/advancedFeatures.ini",
         "patchSetId": 2
