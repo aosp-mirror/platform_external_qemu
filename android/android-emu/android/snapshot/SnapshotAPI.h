@@ -14,23 +14,27 @@
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"
 #include "android/base/files/FileShareOpen.h"
+#include "android/emulation/AndroidAsyncMessagePipe.h"
 
 #include <vector>
 
 namespace android {
 namespace snapshot {
 
-void createCheckpoint(android::base::StringView name);
+void createCheckpoint(android::AsyncMessagePipeHandle pipe,
+                      android::base::StringView name);
 
 void gotoCheckpoint(
+        AsyncMessagePipeHandle pipe,
         android::base::StringView name,
         android::base::StringView metadata,
         android::base::Optional<android::base::FileShare> shareMode);
 
-void forkReadOnlyInstances(int forkTotal);
-void doneInstance();
+void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe, int forkTotal);
+void doneInstance(android::AsyncMessagePipeHandle pipe);
 
-std::vector<uint8_t> getLoadMetadata();
+void onOffworldSave(base::Stream* stream);
+void onOffworldLoad(base::Stream* stream);
 
 }  // namespace snapshot
 }  // namespace android

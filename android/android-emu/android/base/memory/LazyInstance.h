@@ -149,6 +149,13 @@ struct LazyInstance {
     T* ptr() { return ptrInternal(); }
     const T* ptr() const { return ptrInternal(); }
 
+    void clear() {
+        if (mState.needDestruction()) {
+            reinterpret_cast<T*>(&mStorage)->~T();
+            mState.doneDestroying();
+        }
+    }
+
 private:
     T* ptrInternal() const;
 
