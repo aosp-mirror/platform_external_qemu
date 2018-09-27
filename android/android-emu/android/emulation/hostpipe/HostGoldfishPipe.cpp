@@ -61,8 +61,8 @@ void* HostGoldfishPipeDevice::connect(const char* name) {
 
     handshake += name;
 
-    int len = static_cast<int>(handshake.size()) + 1;
-    int ret = write(pipe, handshake.c_str(), len);
+    const ssize_t len = static_cast<ssize_t>(handshake.size()) + 1;
+    const ssize_t ret = writeInternal(pipe, handshake.c_str(), len);
 
     if (ret == len) {
         // pipe is currently refencing the connect pipe.  After writing the pipe
@@ -127,6 +127,14 @@ void* HostGoldfishPipeDevice::load(base::Stream* stream) {
 // Read/write/poll but for a particular pipe.
 ssize_t HostGoldfishPipeDevice::read(void* pipe, void* buffer, size_t len) {
     RecursiveScopedVmLock lock;
+
+    auto it = mPipes.find(pipe);
+    if (it == mPipes.end()) {
+        LOG(INFO) << "Pipe not found.";
+        mErrno = EINVAL;
+        return PIPE_ERROR_INVAL;
+    }
+
     AndroidPipeBuffer buf = { static_cast<uint8_t*>(buffer), len };
     ssize_t res = android_pipe_guest_recv(pipe, &buf, 1);
     setErrno(res);
@@ -150,11 +158,15 @@ HostGoldfishPipeDevice::ReadResult HostGoldfishPipeDevice::read(void* pipe, size
 
 ssize_t HostGoldfishPipeDevice::write(void* pipe, const void* buffer, size_t len) {
     RecursiveScopedVmLock lock;
-    AndroidPipeBuffer buf = {
-            (uint8_t*)buffer, len };
-    ssize_t res = android_pipe_guest_send(pipe, &buf, 1);
-    setErrno(res);
-    return res;
+
+    auto it = mPipes.find(pipe);
+    if (it == mPipes.end()) {
+        LOG(INFO) << "Pipe not found.";
+        mErrno = EINVAL;
+        return PIPE_ERROR_INVAL;
+    }
+
+    return writeInternal(pipe, buffer, len);
 }
 
 HostGoldfishPipeDevice::WriteResult HostGoldfishPipeDevice::write(void* pipe, const std::vector<uint8_t>& data) {
@@ -204,6 +216,15 @@ void* HostGoldfishPipeDevice::open(void* hwpipe) {
         mErrno = ENOENT;
         return nullptr;
     }
+    return res;
+}
+
+ssize_t HostGoldfishPipeDevice::writeInternal(void* pipe,
+                                              const void* buffer,
+                                              size_t len) {
+    AndroidPipeBuffer buf = {(uint8_t*)buffer, len};
+    ssize_t res = android_pipe_guest_send(pipe, &buf, 1);
+    setErrno(res);
     return res;
 }
 
@@ -292,7 +313,11 @@ void HostGoldfishPipeDevice::resetPipeCallback(void* hwpipe,
 
 // static
 void HostGoldfishPipeDevice::closeFromHostCallback(void* hwpipe) {
-    HostGoldfishPipeDevice::get()->close(hwpipe);
+    // PIPE_WAKE_CLOSED gets translated to closeFromHostCallback.
+    // To simplify detecting a close-from-host, signal a wake callback so that
+    // the event can be detected.
+    HostGoldfishPipeDevice::get()->signalWake(hwpipe, PIPE_WAKE_CLOSED);
+    HostGoldfishPipeDevice::get()->closeHwPipe(hwpipe);
 }
 
 // static
