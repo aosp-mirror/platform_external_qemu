@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "6037a74e_4bcac52e",
+        "filename": "android/android-emu/android/metrics/metrics.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-09-27T19:32:38Z",
+      "side": 1,
+      "message": "Will do.",
+      "parentUuid": "b89c2132_b71ee117",
+      "range": {
+        "startLine": 389,
+        "startChar": 0,
+        "endLine": 390,
+        "endChar": 95
+      },
+      "revId": "e535d117a875b033f8cc986a4d92b083bd531797",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0e8820b1_bfa842b5",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 1
@@ -83,6 +107,30 @@
       "writtenOn": "2018-09-27T17:58:49Z",
       "side": 1,
       "message": "Should we assume the feature is enabled here to reduce the # code paths possible?",
+      "range": {
+        "startLine": 1898,
+        "startChar": 0,
+        "endLine": 1898,
+        "endChar": 32
+      },
+      "revId": "e535d117a875b033f8cc986a4d92b083bd531797",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "00497b4f_8c388db9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1898,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-09-27T19:32:38Z",
+      "side": 1,
+      "message": "I think we can safely get rid of this check.",
+      "parentUuid": "0e8820b1_bfa842b5",
       "range": {
         "startLine": 1898,
         "startChar": 0,
