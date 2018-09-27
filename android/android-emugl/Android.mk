@@ -112,6 +112,8 @@ OLD_EMUGL_COMMON_CFLAGS := EMUGL_COMMON_CFLAGS
 include $(EMUGL_PATH)/guest/Android.mk
 include $(GOLDFISH_OPENGL_DIR)/Android.mk
 
+include $(EMUGL_PATH)/combined/Android.mk
+
 EMUGL_COMMON_CFLAGS := OLD_EMUGL_COMMON_CFLAGS
 
 endif # BUILD_TARGET_BITS == 64
