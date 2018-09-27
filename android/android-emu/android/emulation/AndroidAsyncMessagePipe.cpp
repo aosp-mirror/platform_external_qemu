@@ -31,16 +31,25 @@ AndroidAsyncMessagePipe::AndroidAsyncMessagePipe(AndroidPipe::Service* service,
     }
 }
 
+AndroidAsyncMessagePipe::~AndroidAsyncMessagePipe() {
+    mState->mDeleted = true;
+}
+
 void AndroidAsyncMessagePipe::send(std::vector<uint8_t>&& data) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    std::lock_guard<std::recursive_mutex> lock(mState->mMutex);
     DLOG(VERBOSE) << "Sending packet, " << data.size() << " bytes";
     mOutgoingPackets.emplace_back(std::move(data));
 
     signalWake(PIPE_WAKE_READ);
 }
 
+void AndroidAsyncMessagePipe::queueCloseFromHost() {
+    std::lock_guard<std::recursive_mutex> lock(mState->mMutex);
+    mCloseQueued = true;
+}
+
 void AndroidAsyncMessagePipe::onSave(base::Stream* stream) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    std::lock_guard<std::recursive_mutex> lock(mState->mMutex);
     if (mIncomingPacket) {
         stream->putByte(1);
         mIncomingPacket->serialize(stream);
@@ -57,7 +66,7 @@ void AndroidAsyncMessagePipe::onSave(base::Stream* stream) {
 }
 
 void AndroidAsyncMessagePipe::onLoad(base::Stream* stream) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    std::lock_guard<std::recursive_mutex> lock(mState->mMutex);
     mIncomingPacket.clear();
     mOutgoingPackets.clear();
 
@@ -73,6 +82,10 @@ void AndroidAsyncMessagePipe::onLoad(base::Stream* stream) {
 }
 
 bool AndroidAsyncMessagePipe::allowRead() const {
+    if (mCloseQueued) {
+        return false;
+    }
+
     // If we're partially done reading data, complete that first.
     if (mIncomingPacket && !mIncomingPacket->complete()) {
         return true;
@@ -84,13 +97,17 @@ bool AndroidAsyncMessagePipe::allowRead() const {
 
 int AndroidAsyncMessagePipe::readBuffers(const AndroidPipeBuffer* buffers,
                                          int numBuffers) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    // Hold onto the state in case we get deleted during callbacks.
+    std::shared_ptr<PipeState> state = mState;
+    std::lock_guard<std::recursive_mutex> lock(state->mMutex);
     if (!allowRead()) {
         DLOG(VERBOSE) << "Returning PIPE_ERROR_AGAIN, incoming="
                       << (mIncomingPacket ? 1 : 0)
                       << ", outgoing=" << mOutgoingPackets.size();
         return PIPE_ERROR_AGAIN;
     }
+
+    std::vector<IncomingPacket> completedPackets;
 
     int bytesRead = 0;
     for (int i = 0; i < numBuffers && allowRead(); ++i) {
@@ -113,8 +130,16 @@ int AndroidAsyncMessagePipe::readBuffers(const AndroidPipeBuffer* buffers,
             if (mIncomingPacket->complete()) {
                 DLOG(VERBOSE) << "Packet complete, "
                               << mIncomingPacket->messageLength << " bytes";
-                onMessage(mIncomingPacket->data);
+                IncomingPacket packet = std::move(mIncomingPacket.value());
                 mIncomingPacket.clear();
+
+                // onMessage may delete this, it's not safe to access any
+                // data members past this point.
+                onMessage(packet.data);
+                if (state->mDeleted) {
+                    DLOG(VERBOSE) << "Pipe deleted during onMessage.";
+                    return bytesRead;
+                }
             }
         }
     }
@@ -125,7 +150,9 @@ int AndroidAsyncMessagePipe::readBuffers(const AndroidPipeBuffer* buffers,
 
 int AndroidAsyncMessagePipe::writeBuffers(AndroidPipeBuffer* buffers,
                                           int numBuffers) {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    // Hold onto the state in case we get deleted during callbacks.
+    std::shared_ptr<PipeState> state = mState;
+    std::lock_guard<std::recursive_mutex> lock(state->mMutex);
     if (mOutgoingPackets.empty()) {
         DLOG(VERBOSE) << "Returning PIPE_ERROR_AGAIN, outgoing="
                       << mOutgoingPackets.size();
@@ -153,12 +180,18 @@ int AndroidAsyncMessagePipe::writeBuffers(AndroidPipeBuffer* buffers,
         bytesWritten += int(bufferWriteOffset);
     }
 
+    if (mCloseQueued && mOutgoingPackets.empty()) {
+        DLOG(VERBOSE) << "Closing pipe, queued close operation.";
+        // It's not safe to use any members past this point.
+        closeFromHost();
+    }
+
     DLOG(VERBOSE) << "writeBuffers complete, " << bytesWritten << " bytes";
     return bytesWritten;
 }
 
 unsigned AndroidAsyncMessagePipe::onGuestPoll() const {
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    std::lock_guard<std::recursive_mutex> lock(mState->mMutex);
     // Note that in/out is in the context of the guest, so it's "out" of the
     // guest OS.
 

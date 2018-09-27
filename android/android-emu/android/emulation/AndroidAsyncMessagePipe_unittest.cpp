@@ -36,6 +36,7 @@
 #include <thread>
 
 using android::base::arraySize;
+using android::base::IsErr;
 using android::base::IsOk;
 using testing::ElementsAreArray;
 using testing::ElementsAre;
@@ -224,6 +225,111 @@ TEST_F(AndroidAsyncMessagePipeTest, OutOfBand) {
     performSend(std::vector<uint8_t>(kResponse2));
     EXPECT_EQ(mDevice->poll(pipe), PIPE_POLL_IN);
     EXPECT_THAT(readPacket(pipe), ElementsAreArray(kResponse2));
+
+    mDevice->close(pipe);
+}
+
+class CloseOnMessagePipe : public AndroidAsyncMessagePipe {
+public:
+    static constexpr uint8_t kCloseNow = 0;
+    static constexpr uint8_t kQueueClose = 1;
+
+    CloseOnMessagePipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs)
+        : AndroidAsyncMessagePipe(service, std::move(pipeArgs)) {}
+
+    void onMessage(const std::vector<uint8_t>& data) override {
+        EXPECT_EQ(data.size(), 1);
+        if (data[0] == kCloseNow) {
+            send({4, 5, 6});  // Should never be received.
+            closeFromHost();
+        } else if (data[0] == kQueueClose) {
+            send({1, 2, 3});
+            queueCloseFromHost();
+        } else {
+            FAIL() << "Unexpected message: " << data[0];
+        }
+    }
+};
+
+// Attempt to close the pipe in the onMessage callback.
+TEST_F(AndroidAsyncMessagePipeTest, CloseOnMessage) {
+    auto pipeService = new AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>(
+            "ClosePipe");
+    AndroidPipe::Service::add(pipeService);
+
+    auto pipe = mDevice->connect("ClosePipe");
+
+    TestEvent receivedClose;
+    mDevice->setWakeCallback(pipe, [&](int wakes) {
+        if (wakes & PIPE_WAKE_CLOSED) {
+            receivedClose.signal();
+        }
+    });
+
+    writePacket(pipe, {CloseOnMessagePipe::kCloseNow});
+    // Check that the pipe was closed by the host.
+    pumpLooperUntilEvent(receivedClose);
+
+    EXPECT_THAT(mDevice->read(pipe, 3), IsErr(EINVAL));
+
+    mDevice->close(pipe);
+}
+
+// Verify closing the pipe skips processing future messages, with multiple
+// simultaneous messages.
+TEST_F(AndroidAsyncMessagePipeTest, CloseWithQueuedMessages) {
+    auto pipeService = new AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>(
+            "ClosePipe");
+    AndroidPipe::Service::add(pipeService);
+
+    auto pipe = mDevice->connect("ClosePipe");
+
+    TestEvent receivedClose;
+    mDevice->setWakeCallback(pipe, [&](int wakes) {
+        if (wakes & PIPE_WAKE_CLOSED) {
+            receivedClose.signal();
+        }
+    });
+
+    // We need to manually craft the message, since we want all messages to
+    // arrive in the same readBuffers call.
+    std::vector<uint8_t> message((sizeof(uint32_t) + 1) * 2);
+    // Packet 1.
+    *reinterpret_cast<uint32_t*>(&message[0]) = 1;
+    message[4] = CloseOnMessagePipe::kCloseNow;
+    // Packet 2, should never process.  If it does CloseOnMessagePipe will hit
+    // a FAIL() for unexpected message type.
+    *reinterpret_cast<uint32_t*>(&message[5]) = 1;
+    message[9] = 123;
+
+    EXPECT_THAT(mDevice->write(pipe, message), IsOk(5));
+
+    // Check that the pipe was closed by the host.
+    pumpLooperUntilEvent(receivedClose);
+
+    mDevice->close(pipe);
+}
+
+TEST_F(AndroidAsyncMessagePipeTest, QueueCloseOnMessage) {
+    auto pipeService = new AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>(
+            "ClosePipe");
+    AndroidPipe::Service::add(pipeService);
+
+    auto pipe = mDevice->connect("ClosePipe");
+
+    TestEvent receivedClose;
+    mDevice->setWakeCallback(pipe, [&](int wakes) {
+        if (wakes & PIPE_WAKE_CLOSED) {
+            receivedClose.signal();
+        }
+    });
+
+    writePacket(pipe, {CloseOnMessagePipe::kQueueClose});
+
+    EXPECT_THAT(readPacket(pipe), ElementsAre(1, 2, 3));
+
+    // Check that the pipe was closed by the host.
+    pumpLooperUntilEvent(receivedClose);
 
     mDevice->close(pipe);
 }
