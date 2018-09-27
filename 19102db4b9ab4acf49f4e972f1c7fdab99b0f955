@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c3dfbe9a_e7e538d8",
+        "filename": "android/android-emugl/host/include/OpenglRender/RenderLib.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-09-27T21:12:17Z",
+      "side": 1,
+      "message": "git clang-format did this i guess. I am not aware of the change.",
+      "parentUuid": "339e941b_d338813a",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 40
+      },
+      "revId": "19102db4b9ab4acf49f4e972f1c7fdab99b0f955",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "69ad1a39_b86c3acd",
         "filename": "android/data/advancedFeatures.ini",
         "patchSetId": 2
