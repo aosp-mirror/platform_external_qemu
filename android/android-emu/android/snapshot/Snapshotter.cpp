@@ -284,6 +284,17 @@ OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
     return mLoader->status();
 }
 
+void Snapshotter::touchAllPages() {
+    android::RecursiveScopedVmLock lock;
+    if (mLoader) {
+        CrashReporter::get()->hangDetector().pause(true);
+        callCallbacks(Operation::Load, Stage::Start);
+        mLoader->touchAllPages();
+        callCallbacks(Operation::Load, Stage::End);
+        CrashReporter::get()->hangDetector().pause(false);
+    }
+}
+
 void Snapshotter::prepareLoaderForSaving(const char* name) {
     if (!mLoader) {
         return;
@@ -498,7 +509,7 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
         if (reportMetrics) {
             appendFailedSave(
                 pb::EmulatorSnapshotSaveState::
-                    EMULATOR_SNAPSHOT_SAVE_SKIPPED_NOT_BOOTED,
+                    EMULATOR_SNAPSHOT_SAVE_SKIPPED_DISK_PRESSURE,
                 FailureReason::OutOfDiskSpace);
         }
         return false;
@@ -628,12 +639,14 @@ OperationStatus Snapshotter::prepareForSaving(const char* name) {
     prepareLoaderForSaving(name);
     mVmOperations.vmStop();
     mSaver.reset(new Saver(
-            name, (mLoader && mLoader->status() != OperationStatus::Error)
+            name, (mLoader && mLoader->hasRamLoader() &&
+                   mLoader->status() != OperationStatus::Error)
                           ? &mLoader->ramLoader()
                           : nullptr,
             mIsOnExit,
             mRamFile,
-            mRamFileShared));
+            mRamFileShared,
+            mIsRemapping));
     mVmOperations.vmStart();
     mSaver->prepare();
     return mSaver->status();
@@ -655,6 +668,10 @@ OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
 
 void Snapshotter::setRamFile(const char* path, bool shared) {
     mRamFile = path;
+    mRamFileShared = shared;
+}
+
+void Snapshotter::setRamFileShared(bool shared) {
     mRamFileShared = shared;
 }
 
@@ -770,12 +787,14 @@ bool Snapshotter::onStartSaving(const char* name) {
     prepareLoaderForSaving(name);
     if (!mSaver || isComplete(*mSaver)) {
         mSaver.reset(new Saver(
-                name, (mLoader && mLoader->status() != OperationStatus::Error)
+                name, (mLoader && mLoader->hasRamLoader() &&
+                       mLoader->status() != OperationStatus::Error)
                               ? &mLoader->ramLoader()
                               : nullptr,
                 mIsOnExit,
                 mRamFile,
-                mRamFileShared));
+                mRamFileShared,
+                mIsRemapping));
     }
     if (mSaver->status() == OperationStatus::Error) {
         onSavingComplete(name, -1);

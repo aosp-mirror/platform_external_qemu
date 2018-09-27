@@ -20,6 +20,7 @@
 #include "android/base/Uri.h"
 #include "android/curl-support.h"
 #include "android/emulation/ConfigDirs.h"
+#include "android/globals.h"
 #include "android/metrics/StudioConfig.h"
 #include "android/update-check/update_check.h"
 #include "android/update-check/VersionExtractor.h"
@@ -258,7 +259,12 @@ void UpdateChecker::asyncWorker() {
                   "UpdateCheck: current version '%s', last version '%s'",
                   current.toString().c_str(), last->first.toString().c_str());
 
-    if (current < last->first) {
+    bool inAndroidBuild =
+        !android_avdInfo ||
+        avdInfo_inAndroidBuild(android_avdInfo);
+
+    if (!inAndroidBuild &&
+        (current < last->first)) {
         mReporter->reportNewerVersion(current, last->first);
     }
 

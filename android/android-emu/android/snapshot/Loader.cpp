@@ -110,6 +110,10 @@ void Loader::interrupt() {
     if (mRamLoader && !mRamLoader->hasError()) {
         mRamLoader->interrupt();
     }
+
+    if (mTextureLoader && !mTextureLoader->hasError()) {
+        mTextureLoader->interrupt();
+    }
 }
 
 ITextureLoaderPtr Loader::textureLoader() const {
@@ -148,6 +152,12 @@ void Loader::onInvalidSnapshotLoad() {
         mSnapshot.saveFailure(FailureReason::CorruptedData);
     } else {
         mSnapshot.saveFailure(FailureReason::InternalError);
+    }
+}
+
+void Loader::touchAllPages() {
+    if (mRamLoader) {
+        mRamLoader->touchAllPages();
     }
 }
 

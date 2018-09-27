@@ -17,6 +17,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/Optional.h"
 #include "android/base/StringFormat.h"
+#include "android/base/files/MemStream.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/ThreadStore.h"
 #include "android/crashreport/CrashReporter.h"
@@ -61,6 +62,7 @@ using OptionalString = android::base::Optional<std::string>;
 using Service = android::AndroidPipe::Service;
 using ServiceList = std::vector<std::unique_ptr<Service>>;
 using VmLock = android::VmLock;
+using android::base::MemStream;
 using android::base::StringFormat;
 using android::crashreport::CrashReporter;
 
@@ -79,6 +81,10 @@ static BaseStream* asBaseStream(CStream* stream) {
 namespace android {
 
 namespace {
+
+static bool isPipeOptional(android::base::StringView name) {
+    return name == "OffworldPipe";
+}
 
 // Write an optional string |str| to |stream|. |str| can be null. Use
 // readOptionalString() to read it back later.
@@ -455,6 +461,11 @@ void AndroidPipe::initThreading(VmLock* vmLock) {
     sGlobals->pipeWaker.init(vmLock);
 }
 
+// static
+void AndroidPipe::initThreadingForTest(VmLock* vmLock, base::Looper* looper) {
+    sGlobals->pipeWaker.init(vmLock, looper);
+}
+
 AndroidPipe::~AndroidPipe() {
     DD("%s: for hwpipe=%p (host %p '%s')", __FUNCTION__, mHwPipe, this,
        mService->name().c_str());
@@ -508,7 +519,6 @@ void AndroidPipe::abortPendingOperation() {
     sGlobals->pipeWaker.abortPending(mHwPipe);
 }
 
-// static
 void AndroidPipe::saveToStream(BaseStream* stream) {
     // First, write service name.
     if (mService == &sGlobals->connectorService) {
@@ -519,16 +529,20 @@ void AndroidPipe::saveToStream(BaseStream* stream) {
         stream->putByte(1);
         stream->putString(mService->name());
     }
-    writeOptionalString(stream, mArgs.c_str());
+
+    MemStream pipeStream;
+    writeOptionalString(&pipeStream, mArgs.c_str());
 
     // Save pipe-specific state now.
     if (mService->canLoad()) {
-        onSave(stream);
+        mService->savePipe(this, &pipeStream);
     }
 
     // Save the pending wake or close operations as well.
     const int pendingFlags = sGlobals->pipeWaker.getPendingFlags(mHwPipe);
-    stream->putBe32(pendingFlags);
+    pipeStream.putBe32(pendingFlags);
+
+    pipeStream.save(stream);
 }
 
 // static
@@ -536,10 +550,14 @@ AndroidPipe* AndroidPipe::loadFromStream(BaseStream* stream,
                                          void* hwPipe,
                                          char* pForceClose) {
     Service* service = sGlobals->loadServiceByName(stream);
+    // Always load the pipeStream, it allows us to safely skip loading streams.
+    MemStream pipeStream;
+    pipeStream.load(stream);
+
     if (!service) {
         return nullptr;
     }
-    return loadPipeFromStreamCommon(stream, hwPipe, service, pForceClose);
+    return loadPipeFromStreamCommon(&pipeStream, hwPipe, service, pForceClose);
 }
 
 // static
@@ -550,14 +568,18 @@ AndroidPipe* AndroidPipe::loadFromStreamLegacy(BaseStream* stream,
                                                unsigned char* pClosed,
                                                char* pForceClose) {
     Service* service = sGlobals->loadServiceByName(stream);
+    // Always load the pipeStream, it allows us to safely skip loading streams.
+    MemStream pipeStream;
+    pipeStream.load(stream);
+
     if (!service) {
         return nullptr;
     }
-    *pChannel = stream->getBe64();
-    *pWakes = stream->getByte();
-    *pClosed = stream->getByte();
+    *pChannel = pipeStream.getBe64();
+    *pWakes = pipeStream.getByte();
+    *pClosed = pipeStream.getByte();
 
-    return loadPipeFromStreamCommon(stream, hwPipe, service, pForceClose);
+    return loadPipeFromStreamCommon(&pipeStream, hwPipe, service, pForceClose);
 }
 
 }  // namespace android
@@ -587,6 +609,7 @@ void android_pipe_guest_close(void* internalPipe, PipeCloseReason reason) {
     if (pipe) {
         D("%s: host=%p [%s] reason=%d", __FUNCTION__, pipe, pipe->name(),
             (int)reason);
+        pipe->abortPendingOperation();
         pipe->onGuestClose(reason);
     }
 }
@@ -597,7 +620,12 @@ static void forEachServiceToStream(CStream* stream, Func&& func) {
     bs->putBe16(android::sGlobals->services.size());
     for (const auto& service : android::sGlobals->services) {
         bs->putString(service->name());
-        func(service.get(), bs);
+
+        // Write to the pipeStream first so that we know the length and can
+        // enable skipping loading specific pipes on load, see isPipeOptional.
+        MemStream pipeStream;
+        func(service.get(), &pipeStream);
+        pipeStream.save(bs);
     }
 }
 
@@ -615,10 +643,23 @@ static void forEachServiceFromStream(CStream* stream, Func&& func) {
         const auto name = bs->getString();
         servicePos = android::sGlobals->findServicePositionByName(
                                  name.c_str(), servicePos + 1);
-        assert(servicePos >= 0);
-        const auto& service = services[servicePos];
-        func(service.get(), bs);
-        missingServices.erase(service.get());
+
+        // Always load the pipeStream, so that if the pipe is missing it does
+        // not corrupt the next pipe.
+        MemStream pipeStream;
+        pipeStream.load(bs);
+
+        if (servicePos >= 0) {
+            const auto& service = services[servicePos];
+            func(service.get(), &pipeStream);
+            missingServices.erase(service.get());
+        } else if (android::isPipeOptional(name)) {
+            D("%s: Skipping optional pipe %s\n", __FUNCTION__, name.c_str());
+        } else {
+            assert(false && "Service for snapshot pipe does not exist");
+            E("%s: Could not load pipe %s, service does not exist\n",
+              __FUNCTION__, name.c_str());
+        }
     }
 
     // Now call the same function for all services that weren't in the snapshot.

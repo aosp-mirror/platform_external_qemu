@@ -38,4 +38,7 @@ FEATURE_CONTROL_ITEM(VirtualScene)
 FEATURE_CONTROL_ITEM(GenericSnapshotsUI)
 // File-backed Quickboot
 FEATURE_CONTROL_ITEM(QuickbootFileBacked)
+// Meta feature which disables a confirmation dialog, does not affect snapshot
+// data
+FEATURE_CONTROL_ITEM(OffworldDisableSecurity)
 // No guest feature flags seem safe to snapshot.

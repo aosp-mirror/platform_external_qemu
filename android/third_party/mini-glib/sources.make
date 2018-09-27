@@ -7,6 +7,8 @@ MINIGLIB_DIR := $(LOCAL_PATH)
 MINIGLIB_INCLUDES := $(MINIGLIB_DIR)/include
 MINIGLIB_STATIC_LIBRARIES := emulator-miniglib
 
+
+# Qemu1, let's not convert to cmake..
 $(call start-emulator-library,emulator-miniglib)
 
 LOCAL_C_INCLUDES := $(MINIGLIB_INCLUDES)

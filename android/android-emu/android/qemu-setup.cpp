@@ -12,6 +12,7 @@
 
 #include "android/adb-server.h"
 #include "android/android.h"
+#include "android/automation/AutomationController.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/boot-properties.h"
 #include "android/car.h"
@@ -31,9 +32,9 @@
 #include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
 #include "android/logcat-pipe.h"
+#include "android/offworld/OffworldPipe.h"
 #include "android/opengles-pipe.h"
 #include "android/proxy/proxy_setup.h"
-#include "android/snapshot/SnapshotPipe.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/ipaddr.h"
@@ -327,7 +328,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_init_opengles_pipe();
     android_init_clipboard_pipe();
     android_init_logcat_pipe();
-    android::snapshot::registerSnapshotPipeService();
+    android::offworld::registerOffworldPipeService();
 
 #ifndef _WIN32
     // bug: 70566718
@@ -422,6 +423,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
 
     /* initialize sensors, this must be done here due to timer issues */
     android_hw_sensors_init();
+    android::automation::AutomationController::initialize();
 
     AvdFlavor flavor = avdInfo_getAvdFlavor(android_avdInfo);
     /* initialize the car data emulation if the system image is a Android Auto build */
@@ -440,4 +442,8 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
                 android::base::ThreadLooper::get());
 
     return true;
+}
+
+void android_emulation_teardown() {
+    android::automation::AutomationController::shutdown();
 }

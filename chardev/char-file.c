@@ -59,8 +59,8 @@ static void qmp_chardev_open_file(Chardev *chr,
         flags = CREATE_ALWAYS;
     }
 
-    out = CreateFile(file->out, accessmode, FILE_SHARE_READ, NULL, flags,
-                     FILE_ATTRIBUTE_NORMAL, NULL);
+    out = win32CreateFile(file->out, accessmode, FILE_SHARE_READ, NULL, flags,
+                          FILE_ATTRIBUTE_NORMAL, NULL);
     if (out == INVALID_HANDLE_VALUE) {
         error_setg(errp, "open %s failed", file->out);
         return;

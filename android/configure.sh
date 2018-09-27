@@ -255,10 +255,11 @@ OPTION_SDK_REV=
 OPTION_SYMBOLS=no
 OPTION_BENCHMARKS=no
 OPTION_LTO=
+OPTION_MIPS=
 OPTION_SNAPSHOT_PROFILE=no
 OPTION_MIN_BUILD=no
 OPTION_AEMU64_ONLY=no
-OPTION_TRACE=no
+OPTION_GOLDFISH_OPENGL_DIR=no
 ANDROID_SDK_TOOLS_REVISION=
 ANDROID_SDK_TOOLS_BUILD_NUMBER=
 
@@ -275,12 +276,14 @@ OPTION_CXX=
 VERBOSITY=0
 OPTION_SNAPSHOT_PROFILE=0
 
-AOSP_PREBUILTS_DIR=$(dirname "$0")/../../../prebuilts
-if [ -d "$AOSP_PREBUILTS_DIR" ]; then
-    AOSP_PREBUILTS_DIR=$(cd "$AOSP_PREBUILTS_DIR" && pwd -P 2>/dev/null)
+AOSP_ROOT_DIR=$(dirname "$0")/../../../
+if [ -d "$AOSP_ROOT_DIR" ]; then
+    AOSP_ROOT_DIR=$(cd "$AOSP_ROOT_DIR" && pwd -P 2>/dev/null)
 else
-    AOSP_PREBUILTS_DIR=
+    AOSP_ROOT_DIR=
 fi
+
+AOSP_PREBUILTS_DIR=$AOSP_ROOT_DIR/prebuilts
 
 for opt do
   optarg=`expr "x$opt" : 'x[^=]*=\(.*\)'`
@@ -347,13 +350,13 @@ for opt do
   ;;
   --sdk-revision=*) ANDROID_SDK_TOOLS_REVISION=$optarg
   ;;
-  --trace) OPTION_TRACE=yes
-  ;;
   --sdk-build-number=*) ANDROID_SDK_TOOLS_BUILD_NUMBER=$optarg
   ;;
   --benchmarks) OPTION_BENCHMARKS=yes
   ;;
   --lto) OPTION_LTO=true
+  ;;
+  --with-mips) OPTION_MIPS=true
   ;;
   --snapshot-profile) OPTION_SNAPSHOT_PROFILE=1
   ;;
@@ -362,6 +365,8 @@ for opt do
   -min|--min-build) OPTION_MIN_BUILD=yes
   ;;
   -aemu64only|--aemu64-only) OPTION_AEMU64_ONLY=yes
+  ;;
+  -goldfish-opengl|--goldfish-opengl=*) OPTION_GOLDFISH_OPENGL_DIR=yes
   ;;
   *)
     echo "unknown option '$opt', use --help"
@@ -386,7 +391,6 @@ EOF
     echo "  --symbols                   Generating Breakpad symbol files."
     echo "  --no-symbols                Do not generate Breakpad symbol files (default)."
     echo "  --crash-[staging,prod]      Send crashes to specific server (no crash reporting by default)."
-    echo "  --trace                     Compile with qemu simple qemu trace backend turned on (off by default)."
     echo "  --gles=dgl                  Build the OpenGLES to Desktop OpenGL Translator (default)"
     echo "  --gles=angle                Build the OpenGLES to ANGLE wrapper"
     echo "  --aosp-prebuilts-dir=<path> Use specific prebuilt toolchain root directory [$AOSP_PREBUILTS_DIR]"
@@ -401,6 +405,7 @@ EOF
     echo "  --lto                       Force link-time optimization."
     echo "  --snapshot-profile[-level=X] Enable snapshot profiling via debug prints."
     echo "  --min[-build]               Only build the qemu2 x64 host x86 target binaries."
+    echo "  --with-mips                 Build the deprecated mips emulator. This option will be removed in future versions."
     echo ""
     exit 1
 fi
@@ -466,6 +471,7 @@ CC="$SDK_TOOLCHAIN_DIR/${BINPREFIX}gcc"
 CXX="$SDK_TOOLCHAIN_DIR/${BINPREFIX}g++"
 TIDY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}clang-tidy"
 AR="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ar"
+RANLIB="$SDK_TOOLCHAIN_DIR/${BINPREFIX}ranlib"
 LD=$CXX
 OBJCOPY="$SDK_TOOLCHAIN_DIR/${BINPREFIX}objcopy"
 TOOLCHAIN_SYSROOT="$("${GEN_SDK}" $GEN_SDK_FLAGS --print=sysroot "${SDK_TOOLCHAIN_DIR}")"
@@ -483,6 +489,7 @@ fi
 setup_toolchain
 
 BUILD_AR=$AR
+BUILD_RANLIB=$RANLIB
 BUILD_CC=$CC
 BUILD_CXX=$CXX
 BUILD_LD=$LD
@@ -590,6 +597,11 @@ case "$HOST_OS" in
     windows) PROBE_WINAUDIO=yes
     ;;
 esac
+
+CMAKE_DIR=$AOSP_PREBUILTS_DIR/cmake
+if [ ! -d "$CMAKE_DIR" ]; then
+  panic "Missing cmake directory: $CMAKE_DIR"
+fi
 
 probe_prebuilts_dir () {
     local PREBUILTS_DIR
@@ -734,6 +746,15 @@ probe_prebuilts_dir "x264" X264_PREBUILTS_DIR common/x264
 ###
 probe_prebuilts_dir "libxpx" LIBVPX_PREBUILTS_DIR common/libvpx
 
+probe_prebuilts_dir "QEMU2 Dependencies" \
+    QEMU2_DEPS_PREBUILTS_DIR \
+    qemu-android-deps
+
+probe_prebuilts_dir "TCMALLOC Dependencies" \
+    TCMALLOC_PREBUILTS_DIR \
+    common/tcmalloc
+
+
 # create the objs directory that is going to contain all generated files
 # including the configuration ones
 #
@@ -844,6 +865,32 @@ if [ "$OPTION_AEMU64_ONLY" == "yes" ]; then
     PREBUILT_ARCHS="x86_64"
 fi
 
+GOLDFISH_OPENGL_DIR=$AOSP_ROOT_DIR/device/generic/goldfish-opengl
+
+if [ "$OPTION_GOLDFISH_OPENGL_DIR" = "yes" ]; then
+    GOLDFISH_OPENGL_DIR=$OPTION_GOLDFISH_OPENGL_DIR
+fi
+
+log "Guest OpenGL driver location: $GOLDFISH_OPENGL_DIR"
+
+###
+### Copy tcmalloc if available
+###
+
+TCMALLOC_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/tcmalloc
+if [ -d $TCMALLOC_PREBUILTS_DIR ]; then
+    # Linux only
+    if [ $HOST_OS = "linux" ]; then
+        TCMALLOC_DSTDIR="$OUT_DIR/lib64"
+        TCMALLOC_SRCDIR="$TCMALLOC_PREBUILTS_DIR/linux-x86_64/lib64"
+        TCMALLOC_LIBNAME="libtcmalloc_minimal.so.4"
+        if [ -f "$TCMALLOC_SRCDIR/$TCMALLOC_LIBNAME" ]; then
+            install_prebuilt_dll "$TCMALLOC_SRCDIR/$TCMALLOC_LIBNAME" \
+                              "$TCMALLOC_DSTDIR/$TCMALLOC_LIBNAME"
+        fi
+    fi
+fi
+
 ###
 ### Copy ANGLE if available
 ###
@@ -924,12 +971,68 @@ if [ -d $SWIFTSHADER_PREBUILTS_DIR ]; then
     done
 fi
 
+###
+### Copy Vulkan libraries (for now, for test only, so send them to testlibs)
+###
+VULKAN_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/common/vulkan
+if [ -d $VULKAN_PREBUILTS_DIR ]; then
+    log "Copying Vulkan prebuilt libraries from $VULKAN_PREBUILTS_DIR"
+
+    VULKAN_TESTLIB_DSTDIR="$OUT_DIR/testlib64"
+    VULKAN_LIB_DSTDIR="$OUT_DIR/lib64/vulkan"
+    VULKAN_HOST=$HOST_OS
+
+    for PREBUILT_ARCH in $PREBUILT_ARCHS; do
+        VULKAN_SRCDIR="$VULKAN_PREBUILTS_DIR/$HOST_OS-$PREBUILT_ARCH"
+
+        VULKAN_MAC_ICD_LIB=libMoltenVK.dylib
+        VULKAN_MAC_ICD_FILE=MoltenVK_icd.json
+
+        VULKAN_MOCK_ICD_FILE=VkICD_mock_icd.json
+
+        case $VULKAN_HOST in
+            windows)
+                VULKAN_LOADER_LIB=vulkan-1.dll
+                VULKAN_MOCK_ICD_LIB=VkICD_mock_icd.dll
+                ;;
+            darwin)
+                VULKAN_LOADER_LIB=libvulkan.dylib
+                VULKAN_MOCK_ICD_LIB=libVkICD_mock_icd.dylib
+                ;;
+            linux)
+                VULKAN_LOADER_LIB=libvulkan.so
+                VULKAN_MOCK_ICD_LIB=libVkICD_mock_icd.so
+                ;;
+            *)
+        esac
+
+        # Install the loader only to the test dir, unless on mac
+        if [ "$PREBUILT_ARCH" = "x86_64" ]; then
+            copy_file "$VULKAN_SRCDIR/$VULKAN_LOADER_LIB" \
+                             "$VULKAN_TESTLIB_DSTDIR/$VULKAN_LOADER_LIB"
+            copy_file "$VULKAN_SRCDIR/$VULKAN_MOCK_ICD_LIB" \
+                             "$VULKAN_TESTLIB_DSTDIR/$VULKAN_MOCK_ICD_LIB"
+            copy_file "$VULKAN_SRCDIR/$VULKAN_MOCK_ICD_FILE" \
+                             "$VULKAN_TESTLIB_DSTDIR/$VULKAN_MOCK_ICD_FILE"
+
+            # For mac, we copy a mac vulkan implementation
+            if [ "$VULKAN_HOST" = "darwin" ]; then
+                copy_file "$VULKAN_SRCDIR/$VULKAN_LOADER_LIB" \
+                                 "$VULKAN_LIB_DSTDIR/$VULKAN_LOADER_LIB"
+                copy_file "$VULKAN_SRCDIR/$VULKAN_MAC_ICD_LIB" \
+                                 "$VULKAN_LIB_DSTDIR/$VULKAN_MAC_ICD_LIB"
+                copy_file "$VULKAN_SRCDIR/$VULKAN_MAC_ICD_FILE" \
+                          "$VULKAN_LIB_DSTDIR/$VULKAN_MAC_ICD_FILE"
+            fi
+        fi
+    done
+fi
 
 ###
 ###  Copy Mesa if available
 ###
 MESA_PREBUILTS_DIR=$AOSP_PREBUILTS_DIR/android-emulator-build/mesa
-if [ -d $MESA_PREBUILTS_DIR ] && [ "$OPTION_AEMU64_ONLY" == "no"]; then
+if [ [ -d $MESA_PREBUILTS_DIR ] && [ "$OPTION_AEMU64_ONLY" == "no" ] ]; then
     log "Copying Mesa prebuilt libraries from $MESA_PREBUILTS_DIR"
     case $HOST_OS in
         windows)
@@ -1091,6 +1194,9 @@ probe_mingw_dlls () {
         for DLL in $DLLS; do
             SRC_DLL=${DLL#./}  # Remove initial ./ in DLL path.
             case $SRC_DLL in
+                lib/*)
+                    DST_DLL=lib64${SRC_DLL##lib}
+                    ;;
                 bin/*)
                     DST_DLL=lib64${SRC_DLL##bin}
                     ;;
@@ -1098,7 +1204,7 @@ probe_mingw_dlls () {
                     DST_DLL=lib${SRC_DLL##lib32}
                     ;;
                 *)
-                    DST_DLL=$SRC_DLL
+                    DST_DLL=${SRC_DLL}
                     ;;
             esac
             log2 "Mingw      :    $SRC_DLL -> $DST_DLL"
@@ -1109,6 +1215,8 @@ probe_mingw_dlls () {
 
 if [ "$OPTION_MINGW" = "yes" ] ; then
     probe_mingw_dlls libwinpthread-1.dll
+    probe_mingw_dlls libgcc_s_seh-1.dll
+    probe_mingw_dlls libgcc_s_sjlj-1.dll
 fi
 
 # Re-create the configuration file
@@ -1140,6 +1248,7 @@ echo "BUILD_TIDY            := $TIDY" >> $config_mk
 
 echo "" >> $config_mk
 echo "BUILD_HOST_AR         := $BUILD_AR" >> $config_mk
+echo "BUILD_HOST_RANLIB     := $BUILD_RANLIB" >> $config_mk
 echo "BUILD_HOST_CC         := $BUILD_CC" >> $config_mk
 echo "BUILD_HOST_CC_TYPE    := $(cc_type $BUILD_CC)" >> $config_mk
 echo "BUILD_HOST_CXX        := $BUILD_CXX" >> $config_mk
@@ -1151,6 +1260,10 @@ echo "BUILD_HOST_DUMPSYMS   := $DUMPSYMS" >> $config_mk
 
 if [ "$OPTION_LTO" = "true" ]; then
     echo "BUILD_ENABLE_LTO      := true" >> $config_mk
+fi
+
+if [ "$OPTION_MIPS" = "true" ]; then
+    echo "BUILD_ENABLE_MIPS      := true" >> $config_mk
 fi
 
 if [ "$OPTION_MIN_BUILD" = "yes" ]; then
@@ -1177,6 +1290,7 @@ else
     echo "EMULATOR_USE_ANGLE := false" >> $config_mk
 fi
 
+echo "CMAKE_DIR := $CMAKE_DIR" >> $config_mk
 echo "COMMON_PREBUILTS_DIR := $COMMON_PREBUILTS_DIR" >> $config_mk
 echo "ZLIB_PREBUILTS_DIR := $ZLIB_PREBUILTS_DIR" >> $config_mk
 echo "LIBPNG_PREBUILTS_DIR := $LIBPNG_PREBUILTS_DIR" >> $config_mk
@@ -1193,14 +1307,7 @@ echo "FFMPEG_PREBUILTS_DIR := $FFMPEG_PREBUILTS_DIR" >> $config_mk
 echo "X264_PREBUILTS_DIR := $X264_PREBUILTS_DIR" >> $config_mk
 echo "LIBVPX_PREBUILTS_DIR := $LIBVPX_PREBUILTS_DIR" >> $config_mk
 echo "VIRGLRENDERER_PREBUILTS_DIR := $VIRGLRENDERER_PREBUILTS_DIR" >> $config_mk
-
-if [ "$OPTION_TRACE" = "yes" ] ; then
-  log "Enabling tracing"
-  QEMU2_TRACE=simple,log
-  echo "QEMU2_TRACE := yes" >> $config_mk
-else
-  QEMU2_TRACE=nop
-fi
+echo "GOLDFISH_OPENGL_DIR := $GOLDFISH_OPENGL_DIR" >> $config_mk
 
 
 if [ "$HOST_OS" = "linux" ]; then
@@ -1248,6 +1355,9 @@ if [ "$ANDROID_SDK_TOOLS_CL_SHA1" ] ; then
   echo "ANDROID_SDK_TOOLS_CL_SHA1 := $ANDROID_SDK_TOOLS_CL_SHA1" >> $config_mk
 fi
 
+echo "QEMU2_DEPS_PREBUILTS_DIR := $QEMU2_DEPS_PREBUILTS_DIR" >> $config_mk
+echo "TCMALLOC_PREBUILTS_DIR := $TCMALLOC_PREBUILTS_DIR" >> $config_mk
+
 if [ -z "$OPTION_QEMU2_SRCDIR" ]; then
     QEMU2_TOP_DIR=$ANDROID_EMULATOR_QEMU2_SRCDIR
     if [ -n "$QEMU2_TOP_DIR" ]; then
@@ -1283,6 +1393,9 @@ for PREBUILT_SYMPATH_PAIR in $PREBUILT_SYMPATH_PAIRS;
 do
     echo "    $PREBUILT_SYMPATH_PAIR \\" >> $config_mk
 done
+
+cat $QEMU2_TOP_DIR/qemu2-qapi-auto-generated/trace-config >> $config_mk
+
 echo "" >> $config_mk
 
 # Build the config-host.h file
@@ -1386,28 +1499,37 @@ echo "#define CONFIG_ANDROID       1" >> $config_h
 
 log "Generate   : $config_h"
 
-# Generate the QAPI headers and sources from qapi-schema.json
-# Ideally, this would be done in our Makefiles, but as far as I
-# understand, the platform build doesn't support a single tool
-# that generates several sources files, nor the standalone one.
-export PYTHONDONTWRITEBYTECODE=1
-AUTOGENERATED_DIR=$OUT_DIR/build/qemu1-qapi-auto-generated
-QAPI_SCHEMA=$PROGDIR/qemu1/qapi-schema.json
-QAPI_SCRIPTS=$PROGDIR/qemu1/scripts
-mkdir -p "$AUTOGENERATED_DIR"
-python $QAPI_SCRIPTS/qapi-types.py qapi.types --output-dir=$AUTOGENERATED_DIR -b < $QAPI_SCHEMA
-python $QAPI_SCRIPTS/qapi-visit.py --output-dir=$AUTOGENERATED_DIR -b < $QAPI_SCHEMA
-python $QAPI_SCRIPTS/qapi-commands.py --output-dir=$AUTOGENERATED_DIR -m < $QAPI_SCHEMA
+QEMU2_CONFIG_DIR=$OUT_DIR/build/qemu2-config
 
-log "Generate   : $AUTOGENERATED_DIR"
+[ -d $QEMU2_CONFIG_DIR ] || mkdir -p $QEMU2_CONFIG_DIR
 
-if [ -z "$OPTION_PREBUILT_QEMU2" ]; then
-    QEMU2_CONFIGURE=$QEMU2_TOP_DIR/android-qemu2-glue/build/configure.sh
-    if [ -f "$QEMU2_CONFIGURE" ]; then
-        log "QEMU2    : Configuring."
-        . "$QEMU2_CONFIGURE"
-    fi
+if [ "$OPT_MINGW" ]; then
+    $OUT_DIR/objs/build/toolchain/x86_64-mingw32-windres \
+        -o $QEMU2_CONFIG_DIR/version.o \
+        $QEMU2_TOP_DIR/version.rc
 fi
+
+replace_with_if_different () {
+    cmp -s "$1" "$2" || mv "$2" "$1"
+}
+
+# Generate qemu-version.h from Git history.
+QEMU_VERSION_H=$QEMU2_CONFIG_DIR/qemu-version.h
+QEMU_VERSION_H_TMP=$QEMU_VERSION_H.tmp
+rm -f "$QEMU_VERSION_H"
+
+if [ -d "$QEMU2_TOP_DIR/.git" ]; then
+    QEMU_VERSION=$(cd "$QEMU2_TOP_DIR" && git describe --match 'v*' 2>/dev/null | tr -d '\n')
+else
+    QEMU_VERSION=$(date "+%Y-%m-%d")
+fi
+
+echo "QEMU2    : Version [$QEMU_VERSION]"
+
+printf "#define QEMU_PKGVERSION \"(android-%s)\"\n" "$QEMU_VERSION" > $QEMU_VERSION_H_TMP
+printf '#define QEMU_FULL_VERSION QEMU_VERSION " (" QEMU_PKGVERSION ")"\n' >> $QEMU_VERSION_H_TMP
+replace_with_if_different "$QEMU_VERSION_H" "$QEMU_VERSION_H_TMP"
+rm -f "$QEMU_VERSION_TMP_H"
 
 clean_temp
 

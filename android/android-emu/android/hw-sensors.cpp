@@ -12,15 +12,16 @@
 
 #include "android/hw-sensors.h"
 
+#include "android/automation/AutomationController.h"
 #include "android/emulation/android_qemud.h"
 #include "android/globals.h"
 #include "android/physics/PhysicalModel.h"
 #include "android/sensors-port.h"
 #include "android/utils/debug.h"
+#include "android/utils/looper.h"
 #include "android/utils/misc.h"
 #include "android/utils/stream.h"
 #include "android/utils/system.h"
-#include "android/utils/looper.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -358,10 +359,7 @@ static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
     // time of the sensor event arrival. Since the CTS enforces this property,
     // other code may also rely on it.
     const DurationNs now_ns =
-            looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
-
-    // Update the current time on the physical model.
-    physicalModel_setCurrentTime(cl->sensors->physical_model, now_ns);
+            android::automation::AutomationController::get().advanceTime();
 
     for (size_t sensor_id = 0; sensor_id < MAX_SENSORS; ++sensor_id) {
         if (!_hwSensorClient_enabled(cl, sensor_id)) {
@@ -693,17 +691,6 @@ PHYSICAL_PARAMETERS_LIST
     }
 }
 
-/* Getter for simulatenous physical rotation and translation */
-static void _hwSensors_getPhysicalTransform(HwSensors* h,
-    float* out_translation_x, float* out_translation_y, float* out_translation_z,
-    float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
-    int64_t* out_timestamp) {
-    physicalModel_getTransform(h->physical_model,
-            out_translation_x, out_translation_y, out_translation_z,
-            out_rotation_x, out_rotation_y, out_rotation_z,
-            out_timestamp);
-}
-
 /*
  * Saves available sensors and physical state to allow checking availability
  * when loaded.
@@ -721,7 +708,7 @@ static void _hwSensors_save(Stream* f, QemudService* sv, void* opaque) {
         stream_put_be32(f, s->enabled);
     }
 
-    physicalModel_save(h->physical_model, f);
+    physicalModel_snapshotSave(h->physical_model, f);
 }
 
 static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
@@ -758,7 +745,9 @@ static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
         h->sensors[sensor_id].enabled = false;
     }
 
-    return physicalModel_load(h->physical_model, f);
+    android::automation::AutomationController::get().reset();
+
+    return physicalModel_snapshotLoad(h->physical_model, f);
 }
 
 /* change the coarse orientation (landscape/portrait) of the emulated device */
@@ -836,7 +825,7 @@ static void _hwSensors_init(HwSensors* h) {
         physicalModel_free(h->physical_model);
         h->physical_model = NULL;
     }
-    h->physical_model = physicalModel_new(true);
+    h->physical_model = physicalModel_new();
 
     if (android_hw->hw_accelerometer) {
         h->sensors[ANDROID_SENSOR_ACCELERATION].enabled = true;
@@ -1031,6 +1020,13 @@ extern int32_t android_sensors_get_delay_ms() {
     return min_delay;
 }
 
+/* Get the physical model instance. */
+extern PhysicalModel* android_physical_model_instance() {
+    HwSensors* hw = _sensorsState;
+
+    return hw->physical_model;
+}
+
 /* Get a physical model parameter target value*/
 extern int android_physical_model_get(
         int physical_parameter, float* out_a, float* out_b, float* out_c,
@@ -1050,32 +1046,6 @@ extern int android_physical_model_get(
 
     _hwSensors_getPhysicalParameterValue(
             hw, physical_parameter, out_a, out_b, out_c, parameter_value_type);
-
-    return PHYSICAL_PARAMETER_STATUS_OK;
-}
-
-/* Getter for simulatenous physical rotation and translation */
-extern int android_physical_model_get_transform(
-    float* out_translation_x, float* out_translation_y, float* out_translation_z,
-    float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
-    int64_t* out_timestamp) {
-    HwSensors* hw = _sensorsState;
-
-    *out_translation_x = 0;
-    *out_translation_y = 0;
-    *out_translation_z = 0;
-    *out_rotation_x = 0;
-    *out_rotation_y = 0;
-    *out_rotation_z = 0;
-
-    if (hw->physical_model == NULL) {
-        return PHYSICAL_PARAMETER_STATUS_NO_SERVICE;
-    }
-
-    _hwSensors_getPhysicalTransform(
-            hw, out_translation_x, out_translation_y, out_translation_z,
-            out_rotation_x, out_rotation_y, out_rotation_z,
-            out_timestamp);
 
     return PHYSICAL_PARAMETER_STATUS_OK;
 }
@@ -1131,20 +1101,6 @@ extern const char* android_physical_model_get_parameter_name_from_id(
     return _physicalParamNameFromId(physical_parameter_id);
 }
 
-// Start recording physical changes to the specified file.
-extern int android_physical_model_record(const char* file_name) {
-    HwSensors* hw = _sensorsState;
-
-    return physicalModel_record(hw->physical_model, file_name);
-}
-
-// Start playing back physical changes from the specified file.
-extern int android_physical_model_playback(const char* file_name) {
-    HwSensors* hw = _sensorsState;
-
-    return physicalModel_playback(hw->physical_model, file_name);
-}
-
 // Start recording ground truth to the specified file.
 extern int android_physical_model_record_ground_truth(const char* file_name) {
     HwSensors* hw = _sensorsState;
@@ -1152,9 +1108,9 @@ extern int android_physical_model_record_ground_truth(const char* file_name) {
     return physicalModel_recordGroundTruth(hw->physical_model, file_name);
 }
 
-// Stop all active recording and playback.
-extern int android_physical_model_stop_record_and_playback() {
+// Stop ground truth recording.
+extern int android_physical_model_stop_recording() {
     HwSensors* hw = _sensorsState;
 
-    return physicalModel_stopRecordAndPlayback(hw->physical_model);
+    return physicalModel_stopRecording(hw->physical_model);
 }

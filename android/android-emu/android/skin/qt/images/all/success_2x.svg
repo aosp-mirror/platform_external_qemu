@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.2 (57519) - http://www.bohemiancoding.com/sketch -->
+    <title>SUCCESS</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="SUCCESS" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="success">
+            <rect id="Rectangle-path" x="0" y="0" width="32" height="32"></rect>
+            <path d="M16,30 C8.2680135,30 2,23.7319864 2,16 C2,8.2680135 8.2680135,2 16,2 C23.7319864,2 30,8.2680135 30,16 C30,23.7319864 23.7319864,30 16,30 Z M9.37,14.968 L7.552,16.806 L13.072,22.272 L24.212,11.278 L22.378,9.456 L13.058,18.62 L9.37,14.968 Z" id="Shape" fill="#48C64D"></path>
+        </g>
+    </g>
+</svg>

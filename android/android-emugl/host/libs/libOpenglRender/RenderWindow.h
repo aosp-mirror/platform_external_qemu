@@ -137,6 +137,8 @@ public:
     // Resets whether the guest has posted a frame.
     void resetGuestPostedAFrame();
 
+    void setPaused(bool paused);
+
 private:
     bool processMessage(const RenderWindowMessage& msg);
     bool useThread() const { return mThread != nullptr; }
@@ -152,6 +154,8 @@ private:
     };
     android::base::MessageChannel<RepostCommand, 10> mRepostCommands;
     android::base::FunctorThread mRepostThread;
+
+    bool mPaused = false;
 };
 
 #endif  // ANDROID_EMUGL_LIBRENDER_RENDER_WINDOW_H

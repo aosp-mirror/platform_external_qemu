@@ -383,7 +383,8 @@ void TextureResize::resize(GLuint texture) {
     // Restore the previous texture filters.
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
-
+    s_gles2.glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
     // Secondly, scale the vertical dimension using the second framebuffer.
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBHeight.framebuffer);
     s_gles2.glClear(GL_COLOR_BUFFER_BIT);
@@ -394,7 +395,8 @@ void TextureResize::resize(GLuint texture) {
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBWidth.texture);
     s_gles2.glUniform1i(mFBHeight.uTexture, 0);
     s_gles2.glDrawArrays(GL_TRIANGLES, 0, sizeof(kVertexData) / (2 * sizeof(float)));
-
+    s_gles2.glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
     // Clear the bindings. (Viewport restored outside)
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);

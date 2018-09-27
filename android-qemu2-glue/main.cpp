@@ -60,6 +60,7 @@
 #include "android/utils/string.h"
 #include "android/utils/tempfile.h"
 #include "android/utils/win32_cmdline_quote.h"
+#include "android/verified-boot/load_config.h"
 
 #include "android/skin/qt/init-qt.h"
 #include "android/skin/winsys.h"
@@ -343,9 +344,6 @@ static int createUserData(AvdInfo* avd,
                 resizeExt4Partition(android_hw->disk_dataPartition_path,
                                     android_hw->disk_dataPartition_size);
             }
-        } else {
-            derror("Missing initial data partition file: %s",
-                   hw->disk_dataPartition_initPath);
         }
     }
 
@@ -1211,7 +1209,7 @@ extern "C" int main(int argc, char** argv) {
         // instead of virtio block device
         args.add("-drive");
         const char* avd_dir = avdInfo_getContentPath(avd);
-        args.addFormat("index=0,format=raw,id=system,file=cat:%s" PATH_SEP
+        args.addFormat("format=raw,file=cat:%s" PATH_SEP
                        "system.img.qcow2|"
                        "%s" PATH_SEP
                        "userdata-qemu.img.qcow2|"
@@ -1439,10 +1437,16 @@ extern "C" int main(int argc, char** argv) {
             fc::setEnabledOverride(fc::GLAsyncSwap, false);
         }
 
+        // Get verified boot kernel parameters, if they exist.
+        std::vector<std::string> verified_boot_params;
+        android::verifiedboot::getParametersFromFile(
+                avdInfo_getVerifiedBootParamsPath(avd),  // NULL here is OK
+                &verified_boot_params);
+
         ScopedCPtr<char> kernel_parameters(emulator_getKernelParameters(
                 opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
-                hw->kernel_parameters, rendererConfig.glesMode,
-                rendererConfig.bootPropOpenglesVersion,
+                hw->kernel_parameters, &verified_boot_params,
+                rendererConfig.glesMode, rendererConfig.bootPropOpenglesVersion,
                 rendererConfig.glFramebufferSizeBytes, pstore, hw->vm_heapSize,
                 true /* isQemu2 */, hw->hw_arc));
 

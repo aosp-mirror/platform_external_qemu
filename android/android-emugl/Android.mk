@@ -52,8 +52,6 @@ include $(EMUGL_PATH)/common.mk
 # module that hasn't been declared yet anyway.
 #
 
-include $(EMUGL_PATH)/../third_party/astc-codec/Android.mk
-
 # Required by our units test.
 include $(EMUGL_PATH)/googletest.mk
 
@@ -91,11 +89,25 @@ include $(EMUGL_PATH)/host/libs/Translator/EGL/Android.mk
 include $(EMUGL_PATH)/host/libs/libOpenGLESDispatch/Android.mk
 
 # Vulkan
+include $(EMUGL_PATH)/host/libs/libOpenglRender/vulkan/cereal/Android.mk
 include $(EMUGL_PATH)/host/libs/libOpenglRender/vulkan/Android.mk
 
 # Host shared libraries
 include $(EMUGL_PATH)/host/libs/libOpenglRender/Android.mk
 include $(EMUGL_PATH)/host/libs/libGLES12Translator/Android.mk
 include $(EMUGL_PATH)/host/libs/libGLSnapshot/Android.mk
+
+ifneq ($(BUILD_TARGET_OS),darwin)
+ifneq ($(BUILD_TARGET_OS),windows)
+ifeq (64,$(BUILD_TARGET_BITS))
+# Guest libraries built for host
+# Note: must be included last as it overrides existing
+# EMUGL_COMMON_* variables.
+GOLDFISH_OPENGL_BUILD_FOR_HOST := true
+include $(EMUGL_PATH)/guest/Android.mk
+include $(GOLDFISH_OPENGL_DIR)/Android.mk
+endif
+endif
+endif
 
 LOCAL_PATH := $(EMUGL_OLD_LOCAL_PATH)

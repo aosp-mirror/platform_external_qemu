@@ -18,6 +18,7 @@
 PROGDIR=`dirname $0`
 
 shell_import utils/aosp_dir.shi
+shell_import utils/temp_dir.shi
 shell_import utils/option_parser.shi
 
 PROGRAM_PARAMETERS=""
@@ -39,6 +40,9 @@ option_register_var  "--csv" OPT_CSV "Produce a CSV instead of html"
 OPT_BUILDID=-1
 option_register_var "--buildid=<buildid>" OPT_BUILDID "Use the given build id for csv generation."
 
+OPT_COVERAGE=code-coverage.zip
+option_register_var "--coverage=<zipfile>" OPT_COVERAGE "Zip file with all the .gcno, .gcda coverage files."
+
 aosp_dir_register_option
 
 aosp_dir_parse_option
@@ -55,16 +59,27 @@ fi
 OS=$(get_build_os)
 CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for $OS)
 QEMU2_TOP_DIR=$(realpath $PROGDIR/../..)/.
-TITLE=$(git log --pretty=oneline -n 1)
-VENV=$OPT_OUT/build/venv
+ANDROID_SDK_TOOLS_CL_SHA1=$( git log -n 1 --pretty=format:"%H" )
 
-if [ ! -f $VENV/bin/activate ]; then
-  run python -m virtualenv $VENV
+var_create_temp_dir CODE_COVERAGE_DIR codecoverage
+
+function prep_env() {
+  # Prepares the python virtual environment
+  VENV=$OPT_OUT/build/venv
+
+  if [ ! -f $VENV/bin/activate ]; then
+    run python -m virtualenv $VENV
+  fi
+
+  source $VENV/bin/activate
+  run pip install gcovr
+}
+
+if [ "$OPT_BUILDID" ]; then
+  run unzip $OPT_COVERAGE -d $CODE_COVERAGE_DIR
 fi
 
-source $VENV/bin/activate
-run pip install gcovr
-
+prep_env
 
 run mkdir -p "$OPT_OUT/coverage"
 if [ "$OPT_CSV" ]; then
@@ -78,11 +93,12 @@ if [ "$OPT_CSV" ]; then
     --xml \
     --xml-pretty \
     --verbose \
-    $OPT_OUT
-  run xsltproc --param buildid $OPT_BUILDID \
+    $CODE_COVERAGE_DIR
+  xsltproc --param buildid $OPT_BUILDID \
     $QEMU2_TOP_DIR/android/scripts/coverage.xsl \
     $COVXML > "$OPT_OUT/coverage/emu-coverage.csv"
 else
+  TITLE=$(git log --pretty=oneline -n 1 $ANDROID_SDK_TOOLS_CL_SHA1)
   run gcovr \
     -j $NUM_JOBS \
     --root $QEMU2_TOP_DIR \
@@ -93,5 +109,5 @@ else
     --html-details \
     --html \
     --verbose \
-    $OPT_OUT
+    $CODE_COVERAGE_DIR
 fi
