@@ -8,10 +8,6 @@ LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/cereal \
     $(EMUGL_PATH)/host/include/vulkan \
 
-LOCAL_STATIC_LIBRARIES += \
-    android-emu \
-    android-emu-base \
-
 LOCAL_SRC_FILES := \
     VulkanDispatch.cpp \
     VulkanStream.cpp \

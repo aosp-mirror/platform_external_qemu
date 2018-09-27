@@ -47,6 +47,7 @@ set(COMMON_SOURCES
     android/base/misc/Utf8Utils.cpp
     android/base/network/IpAddress.cpp
     android/base/network/NetworkUtils.cpp
+    android/base/sockets/SocketDrainer.cpp
     android/base/Stopwatch.cpp
     android/base/StringFormat.cpp
     android/base/StringParse.cpp
@@ -98,6 +99,7 @@ set(COMMON_SOURCES
     android/utils/property_file.c
     android/utils/reflist.c
     android/utils/refset.c
+    android/utils/socket_drainer.cpp
     android/utils/sockets.c
     android/utils/stralloc.c
     android/utils/stream.cpp
