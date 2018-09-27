@@ -97,17 +97,24 @@ include $(EMUGL_PATH)/host/libs/libOpenglRender/Android.mk
 include $(EMUGL_PATH)/host/libs/libGLES12Translator/Android.mk
 include $(EMUGL_PATH)/host/libs/libGLSnapshot/Android.mk
 
-ifneq ($(BUILD_TARGET_OS),darwin)
+# Guest libraries built for host
+
+# TODO: Fix mingw build
 ifneq ($(BUILD_TARGET_OS),windows)
 ifeq (64,$(BUILD_TARGET_BITS))
-# Guest libraries built for host
-# Note: must be included last as it overrides existing
+
+# Note: best included last as it overrides existing
 # EMUGL_COMMON_* variables.
 GOLDFISH_OPENGL_BUILD_FOR_HOST := true
+
+OLD_EMUGL_COMMON_CFLAGS := EMUGL_COMMON_CFLAGS
+
 include $(EMUGL_PATH)/guest/Android.mk
 include $(GOLDFISH_OPENGL_DIR)/Android.mk
-endif
-endif
-endif
+
+EMUGL_COMMON_CFLAGS := OLD_EMUGL_COMMON_CFLAGS
+
+endif # BUILD_TARGET_BITS == 64
+endif # BUILD_TARGET_OS != windows
 
 LOCAL_PATH := $(EMUGL_OLD_LOCAL_PATH)
