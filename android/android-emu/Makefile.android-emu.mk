@@ -708,6 +708,7 @@ LOCAL_SRC_FILES := \
   android/base/synchronization/MessageChannel_unittest.cpp \
   android/base/system/System_unittest.cpp \
   android/base/testing/TestEvent_unittest.cpp \
+  android/base/testing/MockUtils_unittest.cpp \
   android/base/threads/Async_unittest.cpp \
   android/base/threads/FunctorThread_unittest.cpp \
   android/base/threads/ParallelTask_unittest.cpp \
@@ -747,6 +748,8 @@ LOCAL_SRC_FILES := \
   android/emulation/serial_line_unittest.cpp \
   android/emulation/SetupParameters_unittest.cpp \
   android/emulation/testing/TestAndroidPipeDevice.cpp \
+  android/emulation/testing/MockAndroidEmulatorWindowAgent.cpp \
+  android/emulation/testing/MockAndroidVmOperations.cpp \
   android/emulation/VmLock_unittest.cpp \
   android/error-messages_unittest.cpp \
   android/featurecontrol/FeatureControl_unittest.cpp \
@@ -767,6 +770,7 @@ LOCAL_SRC_FILES := \
   android/location/Route_unittest.cpp \
   android/network/control_unittest.cpp \
   android/network/constants_unittest.cpp \
+  android/offworld/OffworldPipe_unittest.cpp \
   android/opengl/EmuglBackendList_unittest.cpp \
   android/opengl/EmuglBackendScanner_unittest.cpp \
   android/opengl/emugl_config_unittest.cpp \
