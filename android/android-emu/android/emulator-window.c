@@ -14,6 +14,7 @@
 
 #include "android/android.h"
 #include "android/emulation/control/user_event_agent.h"
+#include "android/emulation/control/vm_operations.h"
 #include "android/framebuffer.h"
 #include "android/globals.h"
 #include "android/gpu_frame.h"
@@ -47,7 +48,8 @@ const QAndroidUserEventAgent* user_event_agent;
 static bool s_use_emugl_subwindow = 1;
 
 static void emulator_window_refresh(EmulatorWindow* emulator);
-extern void qemu_system_shutdown_request(void);
+
+extern void qemu_system_shutdown_request(QemuShutdownCause reason);
 
 static void write_window_name(char* buff,
                               size_t buff_len,
@@ -55,7 +57,6 @@ static void write_window_name(char* buff,
                               const char* avd_name) {
     snprintf(buff, buff_len, "Android Emulator - %s:%d", avd_name, base_port);
 }
-
 
 static void
 emulator_window_light_brightness(void* opaque, const char*  light, int  value)
@@ -449,7 +450,7 @@ static void emulator_window_refresh(EmulatorWindow* emulator)
         if (skin_ui_process_events(emulator->ui)) {
             // Quit program.
             emulator->done = true;
-            qemu_system_shutdown_request();
+            qemu_system_shutdown_request(QEMU_SHUTDOWN_CAUSE_HOST_UI);
         }
     }
 }

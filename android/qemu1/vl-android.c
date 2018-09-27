@@ -1332,11 +1332,14 @@ void qemu_system_killed(int signal, pid_t pid)
 {
     shutdown_signal = signal;
     shutdown_pid = pid;
-    qemu_system_shutdown_request();
+    qemu_system_shutdown_request(SHUTDOWN_CAUSE_HOST_SIGNAL);
 }
 
-void qemu_system_shutdown_request(void)
+void qemu_system_shutdown_request(ShutdownCause cause)
 {
+    // |cause| is only there to keep a consistent interface with QEMU2.
+    (void)cause;
+
     shutdown_requested = 1;
     qemu_notify_event();
 }

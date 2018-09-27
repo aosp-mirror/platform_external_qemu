@@ -287,6 +287,16 @@ endif
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 
+$(call start-emulator-library, emulator-libqemu-testbuild)
+
+LOCAL_C_INCLUDES += \
+    $(QEMU1_COMMON_INCLUDES) \
+    $(ANDROID_EMU_INCLUDES) \
+
+LOCAL_SRC_FILES += \
+    android-qemu1-glue/tests/build_consistency.cpp \
+
+$(call end-emulator-library)
 
 ##############################################################################
 ##############################################################################
