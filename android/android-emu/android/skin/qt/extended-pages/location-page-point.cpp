@@ -43,12 +43,12 @@ void LocationPage::sendLocation(const QString& lat, const QString& lng) {
            lat.toStdString().c_str(), lng.toStdString().c_str()); // ??
 
     // Make nothing selected now
-    mUi->pointList->setCurrentItem(nullptr);
+    mUi->loc_pointList->setCurrentItem(nullptr);
     mSelectedPointName.clear();
     highlightPointListWidget();
 }
 
-void LocationPage::on_savePoint_clicked() {
+void LocationPage::on_loc_savePoint_clicked() {
     QDateTime now = QDateTime::currentDateTime();
     QString pointName("point_" + now.toString("yyyy-MM-dd_HH-mm-ss"));
 
@@ -68,7 +68,7 @@ void LocationPage::on_savePoint_clicked() {
     highlightPointListWidget();
 }
 
-void LocationPage::on_singlePoint_setLocationButton_clicked() {
+void LocationPage::on_loc_singlePoint_setLocationButton_clicked() {
     sendMostRecentUiLocation();
 }
 
@@ -123,7 +123,7 @@ void LocationPage::scanForPoints() {
 // Populate the UI list of points from mPointList
 void LocationPage::populatePointListWidget() {
     // Disable sorting while we're updating the table
-    mUi->pointList->setSortingEnabled(false);
+    mUi->loc_pointList->setSortingEnabled(false);
 
     // Set the dotdotdot column to take the available space. This
     // prevents the widget from scrolling horizontally due to an
@@ -135,24 +135,24 @@ void LocationPage::populatePointListWidget() {
 //           mUi->pointList->columnWidth(0), // ??
 //           mUi->pointList->columnWidth(1), // ??
 //           mUi->pointList->width()); // ??
-    mUi->pointList->setColumnWidth(1,
-            mUi->pointList->width() - mUi->pointList->columnWidth(0));
+    mUi->loc_pointList->setColumnWidth(1,
+            mUi->loc_pointList->width() - mUi->loc_pointList->columnWidth(0));
 
     int nItems = mPointList.size();
-    mUi->pointList->setRowCount(nItems);
+    mUi->loc_pointList->setRowCount(nItems);
 
     for (int idx = 0; idx < nItems; idx++) {
 //        printf("l-p-p: List %2d: %s\n", idx, mPointList[idx].logicalName.toStdString().c_str()); // ??
-        mUi->pointList->setItem(idx, 0, new PointWidgetItem(&mPointList[idx]));
-        mUi->pointList->setItem(idx, 1, new QTableWidgetItem());
+        mUi->loc_pointList->setItem(idx, 0, new PointWidgetItem(&mPointList[idx]));
+        mUi->loc_pointList->setItem(idx, 1, new QTableWidgetItem());
     }
 
     // All done updating. Enable sorting now.
-    mUi->pointList->sortByColumn(0, Qt::AscendingOrder);
-    mUi->pointList->setSortingEnabled(true);
+    mUi->loc_pointList->sortByColumn(0, Qt::AscendingOrder);
+    mUi->loc_pointList->setSortingEnabled(true);
 
     // If the list is empty, show an overlay saying that.
-    mUi->noSavedPoints_mask->setVisible(nItems <= 0);
+    mUi->loc_noSavedPoints_mask->setVisible(nItems <= 0);
 }
 
 // Update the UI list of points to highlight the
@@ -160,26 +160,26 @@ void LocationPage::populatePointListWidget() {
 void LocationPage::highlightPointListWidget() {
     // Update the QTableWidgetItems that are associated
     // with this widget
-    for (int row = 0; row < mUi->pointList->rowCount(); row++) {
-        PointWidgetItem* pointItem = (PointWidgetItem*)mUi->pointList->takeItem(row, 0);
+    for (int row = 0; row < mUi->loc_pointList->rowCount(); row++) {
+        PointWidgetItem* pointItem = (PointWidgetItem*)mUi->loc_pointList->takeItem(row, 0);
         bool isSelected = (mSelectedPointName == pointItem->pointElement->protoFilePath);
         mPointItemBuilder->highlightPointWidgetItem(pointItem, isSelected);
-        mUi->pointList->setItem(row, 0, pointItem);
+        mUi->loc_pointList->setItem(row, 0, pointItem);
 
-        QTableWidgetItem* dotDotItem = mUi->pointList->takeItem(row, 1);
+        QTableWidgetItem* dotDotItem = mUi->loc_pointList->takeItem(row, 1);
         mPointItemBuilder->highlightDotDotWidgetItem(dotDotItem, isSelected);
-        mUi->pointList->setItem(row, 1, dotDotItem);
+        mUi->loc_pointList->setItem(row, 1, dotDotItem);
 
         if (isSelected) {
-            mUi->pointList->setCurrentItem(pointItem);
+            mUi->loc_pointList->setCurrentItem(pointItem);
         }
     }
-    mUi->pointList->viewport()->repaint();
+    mUi->loc_pointList->viewport()->repaint();
 }
 
-void LocationPage::on_pointList_cellClicked(int row, int column) {
+void LocationPage::on_loc_pointList_cellClicked(int row, int column) {
 //    printf("l-p-p: Cell clicked\n");
-    mUi->pointList->setCurrentCell(row, 0, QItemSelectionModel::Rows);
+    mUi->loc_pointList->setCurrentCell(row, 0, QItemSelectionModel::Rows);
     if (column == 1) {
         QMenu* popMenu = new QMenu(this);
         QAction* editAction   = popMenu->addAction(tr("Edit"));
@@ -197,21 +197,21 @@ void LocationPage::on_pointList_cellClicked(int row, int column) {
     }
 }
 
-void LocationPage::on_pointList_itemSelectionChanged() {
-    int selectedRow = mUi->pointList->currentRow();
+void LocationPage::on_loc_pointList_itemSelectionChanged() {
+    int selectedRow = mUi->loc_pointList->currentRow();
 //    printf("l-p-p: In itemSelectionChanged() for row %2d\n", selectedRow); // ??
     if (selectedRow < 0) return;
 
-    mUi->pointList->setCurrentCell(selectedRow, 0, QItemSelectionModel::Rows);
+    mUi->loc_pointList->setCurrentCell(selectedRow, 0, QItemSelectionModel::Rows);
 
-    auto widgetItem = (PointWidgetItem*)(mUi->pointList->item(selectedRow, 0));
+    auto widgetItem = (PointWidgetItem*)(mUi->loc_pointList->item(selectedRow, 0));
     auto pointElement = widgetItem->pointElement;
 
     if (mSelectedPointName == pointElement->protoFilePath) {
         // No change in the selection
         if (selectedRow >= 0) {
-            mUi->pointList->setCurrentCell(selectedRow, 0); // (Helps if the user drags the selection)
-            mUi->pointList->scrollToItem(mUi->pointList->currentItem());
+            mUi->loc_pointList->setCurrentCell(selectedRow, 0); // (Helps if the user drags the selection)
+            mUi->loc_pointList->scrollToItem(mUi->loc_pointList->currentItem());
         }
         return;
     }
@@ -241,7 +241,7 @@ void LocationPage::editPoint(int row) {
     QApplication::setOverrideCursor(Qt::WaitCursor);
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
 
-    auto widgetItem = (PointWidgetItem*)(mUi->pointList->item(row, 0));
+    auto widgetItem = (PointWidgetItem*)(mUi->loc_pointList->item(row, 0));
     auto pointElement = widgetItem->pointElement;
 
     // Name
@@ -345,7 +345,7 @@ void LocationPage::deletePoint(int row) {
         return;
     }
 //    printf("l-p-p: deletePoint(%d)\n", row); // ??
-    auto widgetItem = (PointWidgetItem*)(mUi->pointList->item(row, 0));
+    auto widgetItem = (PointWidgetItem*)(mUi->loc_pointList->item(row, 0));
     auto thisPoint = widgetItem->pointElement;
 
     QMessageBox msgBox(QMessageBox::Warning,
@@ -370,7 +370,7 @@ void LocationPage::deletePoint(int row) {
             path_delete_dir(dirName.str().c_str());
             mSelectedPointName.clear();
             scanForPoints();
-            mUi->pointList->setCurrentItem(nullptr);
+            mUi->loc_pointList->setCurrentItem(nullptr);
             populatePointListWidget();
             highlightPointListWidget();
         }

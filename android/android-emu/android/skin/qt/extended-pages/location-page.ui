@@ -32,7 +32,7 @@
     <attribute name="title">
      <string>Single points</string>
     </attribute>
-    <widget class="QTableWidget" name="pointList">
+    <widget class="QTableWidget" name="loc_pointList">
      <property name="geometry">
       <rect>
        <x>332</x>
@@ -93,7 +93,7 @@
      <column/>
      <column/>
     </widget>
-    <widget class="QWebEngineView" name="pointWebEngineView" native="true">
+    <widget class="QWebEngineView" name="loc_pointWebEngineView" native="true">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -103,7 +103,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="RaisedMaterialButton" name="savePoint">
+    <widget class="RaisedMaterialButton" name="loc_savePoint">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -133,7 +133,7 @@
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="RaisedMaterialButton" name="singlePoint_setLocationButton">
+    <widget class="RaisedMaterialButton" name="loc_singlePoint_setLocationButton">
      <property name="geometry">
       <rect>
        <x>472</x>
@@ -169,7 +169,7 @@
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="QLabel" name="savedPointsLabel">
+    <widget class="QLabel" name="loc_savedPointsLabel">
      <property name="geometry">
       <rect>
        <x>332</x>
@@ -185,7 +185,7 @@
       <string notr="true">Title</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="pointSortBox">
+    <widget class="QComboBox" name="loc_pointSortBox">
      <property name="geometry">
       <rect>
        <x>472</x>
@@ -211,7 +211,7 @@
       </property>
      </item>
     </widget>
-    <widget class="QLabel" name="noSavedPoints_mask">
+    <widget class="QLabel" name="loc_noSavedPoints_mask">
      <property name="geometry">
       <rect>
        <x>342</x>
@@ -234,11 +234,11 @@
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="routesTab">
+   <widget class="QWidget" name="loc_routesTab">
     <attribute name="title">
      <string>Routes</string>
     </attribute>
-    <widget class="RaisedMaterialButton" name="saveRoute">
+    <widget class="RaisedMaterialButton" name="loc_saveRoute">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -268,7 +268,7 @@
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="RaisedMaterialButton" name="playRouteButton">
+    <widget class="RaisedMaterialButton" name="loc_playRouteButton">
      <property name="geometry">
       <rect>
        <x>472</x>
@@ -304,7 +304,7 @@
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="QLabel" name="noSavedRoutes_mask">
+    <widget class="QLabel" name="loc_noSavedRoutes_mask">
      <property name="geometry">
       <rect>
        <x>342</x>
@@ -326,7 +326,7 @@
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
-    <widget class="QLabel" name="savedRoutesLabel_2">
+    <widget class="QLabel" name="loc_savedRoutesLabel_2">
      <property name="geometry">
       <rect>
        <x>332</x>
@@ -342,7 +342,7 @@
       <string notr="true">Title</string>
      </property>
     </widget>
-    <widget class="QTableWidget" name="routeList">
+    <widget class="QTableWidget" name="loc_routeList">
      <property name="geometry">
       <rect>
        <x>332</x>
@@ -403,7 +403,7 @@
      <column/>
      <column/>
     </widget>
-    <widget class="QWebEngineView" name="routeWebEngineView" native="true">
+    <widget class="QWebEngineView" name="loc_routeWebEngineView" native="true">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -413,7 +413,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QTextBrowser" name="routeInfo">
+    <widget class="QTextBrowser" name="loc_routeInfo">
      <property name="geometry">
       <rect>
        <x>332</x>
@@ -517,7 +517,7 @@
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Repeat on playback</string>
+      <string>Repeat playback</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Title</string>
@@ -551,13 +551,13 @@
       <bool>false</bool>
      </property>
     </widget>
-    <zorder>routeList</zorder>
-    <zorder>saveRoute</zorder>
-    <zorder>playRouteButton</zorder>
-    <zorder>savedRoutesLabel_2</zorder>
-    <zorder>routeWebEngineView</zorder>
-    <zorder>routeInfo</zorder>
-    <zorder>noSavedRoutes_mask</zorder>
+    <zorder>loc_routeList</zorder>
+    <zorder>loc_saveRoute</zorder>
+    <zorder>loc_playRouteButton</zorder>
+    <zorder>loc_savedRoutesLabel_2</zorder>
+    <zorder>loc_routeWebEngineView</zorder>
+    <zorder>loc_routeInfo</zorder>
+    <zorder>loc_noSavedRoutes_mask</zorder>
     <zorder>loc_travelMode</zorder>
     <zorder>loc_routeSpeed</zorder>
     <zorder>loc_repeatLabel</zorder>

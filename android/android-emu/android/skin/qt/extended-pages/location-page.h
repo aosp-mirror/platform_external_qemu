@@ -108,16 +108,16 @@ private slots:
     void locationPlaybackStop_v2(); // ??
     void timeout_v2(); // ??
 
-    void on_savePoint_clicked();
-    void on_singlePoint_setLocationButton_clicked();
-    void on_pointList_cellClicked(int row, int column);
-    void on_pointList_itemSelectionChanged();
+    void on_loc_savePoint_clicked();
+    void on_loc_singlePoint_setLocationButton_clicked();
+    void on_loc_pointList_cellClicked(int row, int column);
+    void on_loc_pointList_itemSelectionChanged();
 
     void on_loc_travelMode_currentIndexChanged(int index);
-    void on_playRouteButton_clicked();
-    void on_routeList_cellClicked(int row, int column);
-    void on_routeList_itemSelectionChanged();
-    void on_saveRoute_clicked();
+    void on_loc_playRouteButton_clicked();
+    void on_loc_routeList_cellClicked(int row, int column);
+    void on_loc_routeList_itemSelectionChanged();
+    void on_loc_saveRoute_clicked();
 
 private:
     typedef struct {
@@ -273,7 +273,8 @@ private:
                              QString* outErrorMessage);
 
 //    static void sendLocationToDevice();
-    static double getDistanceNm(double startLat, double startLon, double endLat, double endLon);
+    static double getDistanceMeters(double startLat, double startLng, double endLat, double endLng);
+    static double getDistanceNm    (double startLat, double startLng, double endLat, double endLng);
 
     QDoubleValidator mAltitudeValidator;
     GpsFixArray          mGpsFixesArray;

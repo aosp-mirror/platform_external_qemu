@@ -58,8 +58,8 @@ void LocationPage::makeRouteProtobuf() { // ?? Debug only
     highlightRouteListWidget();
 }
 
-void LocationPage::on_saveRoute_clicked() {
-    mUi->saveRoute->setEnabled(false);
+void LocationPage::on_loc_saveRoute_clicked() {
+    mUi->loc_saveRoute->setEnabled(false);
     // if (mRouteStatus != RouteStatus::OK) {
     //     QString failureReason =
     //             (mRouteStatus == RouteStatus::TOO_BIG) ? tr("Route is too long")
@@ -97,11 +97,11 @@ void LocationPage::on_saveRoute_clicked() {
     populateRouteListWidget();
     highlightRouteListWidget();
 
-    int selectedRow = mUi->routeList->currentRow();
+    int selectedRow = mUi->loc_routeList->currentRow();
     if (selectedRow < 0) {
-        mUi->routeInfo->clear();
+        mUi->loc_routeInfo->clear();
     } else {
-        auto widgetItem = (RouteWidgetItem*)(mUi->routeList->item(selectedRow, 0));
+        auto widgetItem = (RouteWidgetItem*)(mUi->loc_routeList->item(selectedRow, 0));
         auto routeElement = widgetItem->routeElement;
         showRouteDetails(routeElement);
     }
@@ -168,7 +168,7 @@ void LocationPage::scanForRoutes() {
 void LocationPage::populateRouteListWidget() {
 //    printf("l-p-r: In populateRouteListWidget\n"); // ??
     // Disable sorting while we're updating the table
-    mUi->routeList->setSortingEnabled(false);
+    mUi->loc_routeList->setSortingEnabled(false);
 
     // Set the dotdotdot column to take the available space. This
     // prevents the widget from scrolling horizontally due to an
@@ -180,24 +180,24 @@ void LocationPage::populateRouteListWidget() {
 //           mUi->routeList->columnWidth(0), // ??
 //           mUi->routeList->columnWidth(1), // ??
 //           mUi->routeList->width()); // ??
-    mUi->routeList->setColumnWidth(1,
-            mUi->routeList->width() - mUi->routeList->columnWidth(0));
+    mUi->loc_routeList->setColumnWidth(1,
+            mUi->loc_routeList->width() - mUi->loc_routeList->columnWidth(0));
 
     int nItems = mRouteList.size();
-    mUi->routeList->setRowCount(nItems);
+    mUi->loc_routeList->setRowCount(nItems);
 
     for (int idx = 0; idx < nItems; idx++) {
 //        printf("l-p-r: List %2d: %s\n", idx, mRouteList[idx].logicalName.toStdString().c_str()); // ??
-        mUi->routeList->setItem(idx, 0, new RouteWidgetItem(&mRouteList[idx]));
-        mUi->routeList->setItem(idx, 1, new QTableWidgetItem());
+        mUi->loc_routeList->setItem(idx, 0, new RouteWidgetItem(&mRouteList[idx]));
+        mUi->loc_routeList->setItem(idx, 1, new QTableWidgetItem());
     }
 
     // All done updating. Enable sorting now.
-    mUi->routeList->sortByColumn(0, Qt::AscendingOrder);
-    mUi->routeList->setSortingEnabled(true);
+    mUi->loc_routeList->sortByColumn(0, Qt::AscendingOrder);
+    mUi->loc_routeList->setSortingEnabled(true);
 
     // If the list is empty, show an overlay saying that.
-    mUi->noSavedRoutes_mask->setVisible(nItems <= 0);
+    mUi->loc_noSavedRoutes_mask->setVisible(nItems <= 0);
 
 }
 
@@ -207,26 +207,26 @@ void LocationPage::highlightRouteListWidget() {
 //    printf("l-p-r: In higlightRoutesListWidget\n"); // ??
     // Update the QTableWidgetItems that are associated
     // with this widget
-    for (int row = 0; row < mUi->routeList->rowCount(); row++) {
-        RouteWidgetItem* routeItem = (RouteWidgetItem*)mUi->routeList->takeItem(row, 0);
+    for (int row = 0; row < mUi->loc_routeList->rowCount(); row++) {
+        RouteWidgetItem* routeItem = (RouteWidgetItem*)mUi->loc_routeList->takeItem(row, 0);
         bool isSelected = (mSelectedRouteName == routeItem->routeElement->protoFilePath);
 
         mRouteItemBuilder->highlightRouteWidgetItem(routeItem, isSelected);
-        mUi->routeList->setItem(row, 0, routeItem);
+        mUi->loc_routeList->setItem(row, 0, routeItem);
 
-        QTableWidgetItem* dotDotItem = mUi->routeList->takeItem(row, 1);
+        QTableWidgetItem* dotDotItem = mUi->loc_routeList->takeItem(row, 1);
         mRouteItemBuilder->highlightDotDotWidgetItem(dotDotItem, isSelected);
-        mUi->routeList->setItem(row, 1, dotDotItem);
+        mUi->loc_routeList->setItem(row, 1, dotDotItem);
 
         if (isSelected) {
-            mUi->routeList->setCurrentItem(routeItem);
+            mUi->loc_routeList->setCurrentItem(routeItem);
         }
     }
-    mUi->routeList->viewport()->repaint();
+    mUi->loc_routeList->viewport()->repaint();
 }
 
-void LocationPage::on_routeList_cellClicked(int row, int column) {
-    mUi->routeList->setCurrentCell(row, 0, QItemSelectionModel::Rows);
+void LocationPage::on_loc_routeList_cellClicked(int row, int column) {
+    mUi->loc_routeList->setCurrentCell(row, 0, QItemSelectionModel::Rows);
     if (column == 1) {
         QMenu* popMenu = new QMenu(this);
         QAction* editAction   = popMenu->addAction(tr("Edit"));
@@ -244,23 +244,23 @@ void LocationPage::on_routeList_cellClicked(int row, int column) {
     }
 }
 
-void LocationPage::on_routeList_itemSelectionChanged() {
-    int selectedRow = mUi->routeList->currentRow();
+void LocationPage::on_loc_routeList_itemSelectionChanged() {
+    int selectedRow = mUi->loc_routeList->currentRow();
     if (selectedRow < 0) {
-        mUi->routeInfo->clear();
+        mUi->loc_routeInfo->clear();
         return;
     }
 
-    mUi->routeList->setCurrentCell(selectedRow, 0, QItemSelectionModel::Rows);
+    mUi->loc_routeList->setCurrentCell(selectedRow, 0, QItemSelectionModel::Rows);
 
-    auto widgetItem = (RouteWidgetItem*)(mUi->routeList->item(selectedRow, 0));
+    auto widgetItem = (RouteWidgetItem*)(mUi->loc_routeList->item(selectedRow, 0));
     auto routeElement = widgetItem->routeElement;
 
     if (mSelectedRouteName == routeElement->protoFilePath) {
         // No change in the selection
         if (selectedRow >= 0) {
-            mUi->routeList->setCurrentCell(selectedRow, 0); // (Helps if the user drags the selection)
-            mUi->routeList->scrollToItem(mUi->routeList->currentItem());
+            mUi->loc_routeList->setCurrentCell(selectedRow, 0); // (Helps if the user drags the selection)
+            mUi->loc_routeList->scrollToItem(mUi->loc_routeList->currentItem());
         }
         return;
     }
@@ -283,7 +283,7 @@ void LocationPage::editRoute(int row) {
     QApplication::setOverrideCursor(Qt::WaitCursor);
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
 
-    auto widgetItem = (RouteWidgetItem*)(mUi->routeList->item(row, 0));
+    auto widgetItem = (RouteWidgetItem*)(mUi->loc_routeList->item(row, 0));
     auto routeElement = widgetItem->routeElement;
 
     // Name
@@ -360,7 +360,7 @@ void LocationPage::deleteRoute(int row) {
         return;
     }
 //    printf("l-p-r: deleteRoute(%d)\n", row); // ??
-    auto widgetItem = (RouteWidgetItem*)(mUi->routeList->item(row, 0));
+    auto widgetItem = (RouteWidgetItem*)(mUi->loc_routeList->item(row, 0));
     auto thisRoute = widgetItem->routeElement;
 
     QMessageBox msgBox(QMessageBox::Warning,
@@ -385,7 +385,7 @@ void LocationPage::deleteRoute(int row) {
             path_delete_dir(dirName.str().c_str());
             mSelectedRouteName.clear();
             scanForRoutes();
-            mUi->routeList->setCurrentItem(nullptr);
+            mUi->loc_routeList->setCurrentItem(nullptr);
             populateRouteListWidget();
             highlightRouteListWidget();
         }
@@ -519,7 +519,7 @@ void LocationPage::showRouteDetails(const RouteListElement* theElement) {
                           .arg(theElement->numPoints)
                           .arg(dirTail.str().c_str())
                           .arg(theElement->description);
-    mUi->routeInfo->setHtml(infoString);
+    mUi->loc_routeInfo->setHtml(infoString);
 }
 
 // Display the details of the not-yet-saved route
@@ -555,7 +555,7 @@ void LocationPage::showPendingRouteDetails() {
                           .arg(durationString)
                           .arg(modeString)
                           .arg(mRouteNumPoints);
-    mUi->routeInfo->setHtml(infoString);
+    mUi->loc_routeInfo->setHtml(infoString);
 }
 
 // Invoked by the Maps javascript when a route has been created
@@ -570,10 +570,10 @@ void LocationPage::sendFullRouteToEmu(int numPoints, double durationSeconds, con
            durationSeconds, routeJson.length(), numPoints);
 
     mSelectedRouteName = "";
-    mUi->routeList->setCurrentItem(nullptr);
+    mUi->loc_routeList->setCurrentItem(nullptr);
     highlightRouteListWidget();
     showPendingRouteDetails();
-    mUi->saveRoute->setEnabled(true);
+    mUi->loc_saveRoute->setEnabled(true);
 }
 
 

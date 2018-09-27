@@ -159,7 +159,6 @@ html, body {
 
         setDeviceLocation = function(lat, lng) {
             // Called from Qt code to show the blue marker to display the emulator location on the map.
-            // Code to set location marker on the map. Move this to a signal event handler.
 
             var latLng = new google.maps.LatLng(lat, lng);
             gBlueMarker.setMap(null); // Remove the old marker
@@ -179,6 +178,7 @@ html, body {
               scaledSize: new google.maps.Size(25, 25)
             };
             gBlueMarker.setIcon(image);
+            gMap.setCenter(latLng); // ?? Does this work?
         }
 
         // Receive the mode of travel from the host

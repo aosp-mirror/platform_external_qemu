@@ -141,41 +141,41 @@ LocationPage::LocationPage(QWidget *parent) :
         // Hide the V2 widgets that are not functional yet
         mUi->locationTabs->removeTab(2); // "Settings"
 //        mUi->locationTabs->removeTab(1); // "Routes"
-        mUi->pointSortBox->hide();       // "Sort by ..."
+        mUi->loc_pointSortBox->hide();       // "Sort by ..."
     } else {
         mUi->locationTabs->setTabText(3, ""); // "V1"
         // Hide the new tabs on the Location page
         mUi->locationTabs->removeTab(2); // "Settings"
         mUi->locationTabs->removeTab(1); // "Routes"
         mUi->locationTabs->removeTab(0); // "Single points"
-        mUi->pointList->setRowCount(0);
+        mUi->loc_pointList->setRowCount(0);
     }
 
   mTimer.setSingleShot(true);
   QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout_v2);
 
   if (useLocationV2) {
-    setUpWebEngine(mUi->pointWebEngineView->page(), "qrc:/html/index.html");
-    setUpWebEngine(mUi->routeWebEngineView->page(), "qrc:/html/route.html");
+    setUpWebEngine(mUi->loc_pointWebEngineView->page(), "qrc:/html/index.html");
+    setUpWebEngine(mUi->loc_routeWebEngineView->page(), "qrc:/html/route.html");
 
-    mPointItemBuilder = new PointItemBuilder(mUi->pointList);
+    mPointItemBuilder = new PointItemBuilder(mUi->loc_pointList);
 
-    mUi->pointList->setItemDelegateForColumn(0, new BackgroundDelegate(this));
-    mUi->pointList->setItemDelegateForColumn(1, new BackgroundDelegate(this));
+    mUi->loc_pointList->setItemDelegateForColumn(0, new BackgroundDelegate(this));
+    mUi->loc_pointList->setItemDelegateForColumn(1, new BackgroundDelegate(this));
 
     scanForPoints();
     populatePointListWidget();
     highlightPointListWidget();
 
-    mRouteItemBuilder = new RouteItemBuilder(mUi->routeList);
+    mRouteItemBuilder = new RouteItemBuilder(mUi->loc_routeList);
 
-    mUi->routeList->setItemDelegateForColumn(0, new BackgroundDelegate(this));
-    mUi->routeList->setItemDelegateForColumn(1, new BackgroundDelegate(this));
+    mUi->loc_routeList->setItemDelegateForColumn(0, new BackgroundDelegate(this));
+    mUi->loc_routeList->setItemDelegateForColumn(1, new BackgroundDelegate(this));
 
     scanForRoutes();
     populateRouteListWidget();
     highlightRouteListWidget();
-    mUi->saveRoute->setEnabled(false);
+    mUi->loc_saveRoute->setEnabled(false);
   } else { // !useLocationV2
     // We can only send 1 decimal of altitude (in meters).
     mAltitudeValidator.setNotation(QDoubleValidator::StandardNotation);
@@ -566,17 +566,16 @@ void LocationPage::locationPlaybackStop()
     mNowPlaying = false;
 }
 
-
 void LocationPage::locationPlaybackStop_v2()
 {
     mTimer.stop();
     mRowToSend = -1;
-    // ?? Reset controls and buttons that were
-    //    changed by locationPlaybackStart_v2()
     putDeviceVelocity(0.0, 0.0);
+
+    mUi->loc_playRouteButton->setText(tr("PLAY ROUTE"));
+
     mNowPlaying = false;
 }
-
 
 void LocationPage::timeout() {
     bool cellOK;
@@ -671,9 +670,11 @@ void LocationPage::timeout() {
 }
 
 void LocationPage::timeout_v2() {
-//    printf("l-p: In timeout_v2()\n"); // ??
+//    printf("l-p: In timeout_v2(), mRowToSend %d, nPts %d, repeat %d\n", // ??
+//           mRowToSend, mRouteNumPoints, mUi->loc_repeatRoute->isChecked()); // ??
     if (mRowToSend < 0  ||  mRowToSend >= mRouteNumPoints) {
-        // No more to send. Same as clicking Stop.
+//        printf("l-p: In timeout_v2(), ending.\n"); // ??
+        // Nothing to send. Treat the same as clicking Stop.
         locationPlaybackStop_v2();
         return;
     }
@@ -681,7 +682,7 @@ void LocationPage::timeout_v2() {
     double lat = mPlaybackElements[mRowToSend].lat;
     double lng = mPlaybackElements[mRowToSend].lng;
     double alt = 0.0;
-//    printf("l-p: timeout_v2(): [0] is %.8f, %.8f\n", lat, lng); // ??
+//    printf("l-p: timeout_v2(): [%2d] is %.8f, %.8f\n", mRowToSend, lat, lng); // ??
 
     // Get the speed and direction to the next point
     double speed = 0.0;
@@ -693,7 +694,7 @@ void LocationPage::timeout_v2() {
         double nextLng = mPlaybackElements[nextRow].lng;
 
         deltaTimeSec = mPlaybackElements[nextRow].delayBefore /
-                           (mUi->loc_playbackSpeed->currentIndex() + 1);
+                           (mUi->loc_routeSpeed->currentIndex() + 1.0);
 
         double distance = getDistanceNm(lat, lng, nextLat, nextLng);
         double deltaTimeHours = deltaTimeSec / (60.0 * 60.0);
@@ -710,8 +711,8 @@ void LocationPage::timeout_v2() {
 
     // Send the command.
     LocationPage::writeDeviceLocationToSettings(lat, lng, alt);
-    printf("l-p: timeout_v2() sending a signal to the timer loop for point %2d of %d\n", // ??
-           mRowToSend, mRouteNumPoints); // ??
+//    printf("l-p: timeout_v2() sending a signal to the timer loop for point %2d of %d\n", // ??
+//           mRowToSend, mRouteNumPoints); // ??
     sGlobals->updateThreadCv.signalAndUnlock(&lock);
 
     // Update the location marker on the UI map
@@ -719,16 +720,19 @@ void LocationPage::timeout_v2() {
 
     // Go on to the next row
     mRowToSend = nextRow;
-    if (mRowToSend >= mRouteNumPoints) {
-        printf("l-p: timeout_v2() Done\n"); // ??
-        // No more to send. Same as clicking Stop.
-        locationPlaybackStop_v2();
-    } else {
-        // Set a timer for when this row should be sent
+    if (mRowToSend < mRouteNumPoints) {
+        // Set a timer for when we should send this next location
         int mSec = deltaTimeSec * 1000.0;
         if (mSec < 0) mSec = 0;
         mTimer.setInterval(mSec);
         mTimer.start();
+    } else if (mUi->loc_repeatRoute->isChecked()) {
+        // We are at the end and should repeat
+        mTimer.stop();
+        locationPlaybackStart_v2();
+    } else {
+        // We are at the end and should stop
+        locationPlaybackStop_v2();
     }
 }
 
