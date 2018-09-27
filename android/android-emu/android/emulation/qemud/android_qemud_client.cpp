@@ -250,6 +250,9 @@ void qemud_client_recv(void* opaque, uint8_t* msg, int msglen) {
             c->clie_recv(c->clie_opaque, c->payload->buff, c->payload->size, c);
 
         AFREE(data);
+
+        /* Reset the payload buffer as well. */
+        qemud_sink_reset(c->payload, 0, 0);
     }
 }
 

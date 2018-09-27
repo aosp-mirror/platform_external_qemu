@@ -570,8 +570,11 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
         return false;
     }
 
+    bool decompressorThreadPoolOwned = false;
+
     if (compressed) {
         if (mDecompressor) {
+            decompressorThreadPoolOwned = true;
             page.data = buf;
             mDecompressor->enqueue(&page);
         } else {
@@ -602,7 +605,9 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
         }
     }
 
-    page.data = buf;
+    if (!decompressorThreadPoolOwned) {
+        page.data = buf;
+    }
     page.state.store(uint8_t(State::Read), std::memory_order_release);
     return true;
 }

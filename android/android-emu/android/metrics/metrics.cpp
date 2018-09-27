@@ -377,6 +377,7 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
         case android::featurecontrol::KernelDeviceTreeBlobSupport:
             return android_studio::EmulatorFeatureFlagState::KERNEL_DEVICE_TREE_BLOB_SUPPORT;
         case android::featurecontrol::Feature_n_items:
+        default:
             return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;

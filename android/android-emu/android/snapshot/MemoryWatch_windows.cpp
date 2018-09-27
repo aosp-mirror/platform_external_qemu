@@ -209,6 +209,11 @@ bool MemoryAccessWatch::isSupported() {
         return false;
     }
 
+    if (!android::featurecontrol::isEnabled(
+            android::featurecontrol::OnDemandSnapshotLoad)) {
+        return false;
+    }
+
     if (GetCurrentCpuAccelerator() == CPU_ACCELERATOR_HAX
         && guest_mem_protect_call)
         return guest_mem_protection_supported_call();
