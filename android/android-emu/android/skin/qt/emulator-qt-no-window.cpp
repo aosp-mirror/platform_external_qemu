@@ -14,6 +14,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/emulation/control/vm_operations.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/metrics/metrics.h"
@@ -95,7 +96,7 @@ void EmulatorQtNoWindow::startThread(std::function<void()> f) {
     thread->start();
 }
 
-extern "C" void qemu_system_shutdown_request(void);
+extern "C" void qemu_system_shutdown_request(QemuShutdownCause cause);
 
 void EmulatorQtNoWindow::slot_requestClose() {
     if (mRunning) {
@@ -116,12 +117,12 @@ void EmulatorQtNoWindow::slot_requestClose() {
         }
 
         if (fastSnapshotV1 || savevm_on_exit) {
-            qemu_system_shutdown_request();
+            qemu_system_shutdown_request(QEMU_SHUTDOWN_CAUSE_HOST_UI);
         } else {
             mAdbInterface->runAdbCommand(
                     {"shell", "reboot", "-p"},
                     [](const android::emulation::OptionalAdbCommandResult&) {
-                        qemu_system_shutdown_request();
+                        qemu_system_shutdown_request(QEMU_SHUTDOWN_CAUSE_HOST_UI);
                     },
                     5000, false);
         }
