@@ -141,7 +141,7 @@ public:
 };
 
 TEST_F(AndroidAsyncMessagePipeTest, Basic) {
-    AndroidPipe::Service::add(
+    registerAsyncMessagePipeService(
             new AndroidAsyncMessagePipe::Service<SimpleMessagePipe>(
                     "TestPipe"));
 
@@ -175,7 +175,7 @@ TEST_F(AndroidAsyncMessagePipeTest, Lambda) {
         sendCallback(std::move(output));
     };
 
-    registerSimpleAndroidAsyncMessagePipeService("TestPipeLambda", onMessage);
+    registerAsyncMessagePipeService("TestPipeLambda", onMessage);
     auto pipe = mDevice->connect("TestPipeLambda");
 
     const uint32_t payloadSize = arraySize(kSimplePayload);
@@ -206,7 +206,7 @@ TEST_F(AndroidAsyncMessagePipeTest, OutOfBand) {
         performSend = sendCallback;
     };
 
-    registerSimpleAndroidAsyncMessagePipeService("OutOfBand", onMessage);
+    registerAsyncMessagePipeService("OutOfBand", onMessage);
     auto pipe = mDevice->connect("OutOfBand");
 
     writePacket(pipe, {1, 2, 3});
@@ -255,7 +255,7 @@ public:
 TEST_F(AndroidAsyncMessagePipeTest, CloseOnMessage) {
     auto pipeService = new AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>(
             "ClosePipe");
-    AndroidPipe::Service::add(pipeService);
+    registerAsyncMessagePipeService(pipeService);
 
     auto pipe = mDevice->connect("ClosePipe");
 
@@ -280,7 +280,7 @@ TEST_F(AndroidAsyncMessagePipeTest, CloseOnMessage) {
 TEST_F(AndroidAsyncMessagePipeTest, CloseWithQueuedMessages) {
     auto pipeService = new AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>(
             "ClosePipe");
-    AndroidPipe::Service::add(pipeService);
+    registerAsyncMessagePipeService(pipeService);
 
     auto pipe = mDevice->connect("ClosePipe");
 
@@ -313,7 +313,7 @@ TEST_F(AndroidAsyncMessagePipeTest, CloseWithQueuedMessages) {
 TEST_F(AndroidAsyncMessagePipeTest, QueueCloseOnMessage) {
     auto pipeService = new AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>(
             "ClosePipe");
-    AndroidPipe::Service::add(pipeService);
+    registerAsyncMessagePipeService(pipeService);
 
     auto pipe = mDevice->connect("ClosePipe");
 
@@ -371,7 +371,7 @@ private:
 };
 
 TEST_F(AndroidAsyncMessagePipeTest, Multithreaded) {
-    AndroidPipe::Service::add(
+    registerAsyncMessagePipeService(
             new AndroidAsyncMessagePipe::Service<MultithreadedEchoMessagePipe>(
                     "Multithreaded"));
     auto pipe = mDevice->connect("Multithreaded");
@@ -417,7 +417,7 @@ TEST_F(AndroidAsyncMessagePipeTest, SendAfterDestroy) {
         performSend = sendCallback;
     };
 
-    registerSimpleAndroidAsyncMessagePipeService("AfterDestroy", onMessage);
+    registerAsyncMessagePipeService("AfterDestroy", onMessage);
     auto pipe = mDevice->connect("AfterDestroy");
 
     writePacket(pipe, {1, 2, 3});
@@ -438,7 +438,7 @@ TEST_F(AndroidAsyncMessagePipeTest, Snapshot) {
         performSend = sendCallback;
     };
 
-    registerSimpleAndroidAsyncMessagePipeService("Snapshot", onMessage);
+    registerAsyncMessagePipeService("Snapshot", onMessage);
     auto pipe = mDevice->connect("Snapshot");
 
     writePacket(pipe, {1, 2, 3});
@@ -460,7 +460,7 @@ TEST_F(AndroidAsyncMessagePipeTest, Snapshot) {
 TEST_F(AndroidAsyncMessagePipeTest, SnapshotGetPipe) {
     auto pipeService =
             new AndroidAsyncMessagePipe::Service<SimpleMessagePipe>("TestPipe");
-    AndroidPipe::Service::add(pipeService);
+    registerAsyncMessagePipeService(pipeService);
 
     auto pipe = mDevice->connect("TestPipe");
 
@@ -492,7 +492,7 @@ TEST_F(AndroidAsyncMessagePipeTest, SnapshotSendCallback) {
         performSend = sendCallback;
     };
 
-    registerSimpleAndroidAsyncMessagePipeService("SnapshotSend", onMessage);
+    registerAsyncMessagePipeService("SnapshotSend", onMessage);
     auto pipe = mDevice->connect("SnapshotSend");
 
     writePacket(pipe, {1, 2, 3});

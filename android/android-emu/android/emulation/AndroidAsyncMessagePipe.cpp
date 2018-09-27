@@ -329,22 +329,22 @@ void AndroidAsyncMessagePipe::IncomingPacket::serialize(
     stream->putString(reinterpret_cast<const char*>(data.data()), data.size());
 }
 
-class SimpleAndroidAsyncMessagePipe : public AndroidAsyncMessagePipe {
+class CallbackMessagePipeService : public AndroidAsyncMessagePipe {
 public:
-    class Service : public AndroidAsyncMessagePipe::Service<
-                            SimpleAndroidAsyncMessagePipe> {
+    class Service
+        : public AndroidAsyncMessagePipe::Service<CallbackMessagePipeService> {
     public:
         Service(const char* serviceName,
                 OnMessageCallbackFunction onMessageCallback)
-            : AndroidAsyncMessagePipe::Service<SimpleAndroidAsyncMessagePipe>(
+            : AndroidAsyncMessagePipe::Service<CallbackMessagePipeService>(
                       serviceName),
               mOnMessageCallback(onMessageCallback) {}
 
         OnMessageCallbackFunction mOnMessageCallback;
     };
 
-    SimpleAndroidAsyncMessagePipe(AndroidPipe::Service* service,
-                                  PipeArgs&& pipeArgs)
+    CallbackMessagePipeService(AndroidPipe::Service* service,
+                               PipeArgs&& pipeArgs)
         : AndroidAsyncMessagePipe(service, std::move(pipeArgs)),
           mService(static_cast<Service*>(service)) {
         AsyncMessagePipeHandle handle = getHandle();
@@ -366,10 +366,10 @@ private:
     PipeSendFunction mOnSend;
 };
 
-void registerSimpleAndroidAsyncMessagePipeService(
+void registerAsyncMessagePipeService(
         const char* serviceName,
         OnMessageCallbackFunction onMessageCallback) {
-    AndroidPipe::Service::add(new SimpleAndroidAsyncMessagePipe::Service(
+    registerAsyncMessagePipeService(new CallbackMessagePipeService::Service(
             serviceName, onMessageCallback));
 }
 

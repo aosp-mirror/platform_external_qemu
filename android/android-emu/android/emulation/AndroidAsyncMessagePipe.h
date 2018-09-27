@@ -75,6 +75,9 @@ struct AsyncMessagePipeHandle {
     int id = -1;
 
     bool isValid() const { return id >= 0; }
+    bool operator<(const AsyncMessagePipeHandle& other) const {
+        return id < other.id;
+    }
 };
 
 class AndroidAsyncMessagePipe : public AndroidPipe {
@@ -101,16 +104,17 @@ public:
         virtual AndroidPipe* load(void* hwPipe,
                                   const char* args,
                                   base::Stream* stream) final {
-            base::AutoLock lock(mLock);
             AsyncMessagePipeHandle handle;
             handle.id = static_cast<int>(stream->getBe32());
-            return createPipe(handle, hwPipe, args, stream);
+
+            base::AutoLock lock(mLock);
+            return createPipeUnderLock(handle, hwPipe, args, stream);
         }
 
         virtual AndroidPipe* create(void* hwPipe, const char* args) final {
             base::AutoLock lock(mLock);
             AsyncMessagePipeHandle handle = nextPipeHandle();
-            return createPipe(handle, hwPipe, args, nullptr);
+            return createPipeUnderLock(handle, hwPipe, args, nullptr);
         }
 
         // Called once per whole vm save/load operation.
@@ -146,10 +150,10 @@ public:
         }
 
     private:
-        AndroidPipe* createPipe(AsyncMessagePipeHandle handle,
-                                void* hwPipe,
-                                const char* args,
-                                base::Stream* stream) {
+        AndroidPipe* createPipeUnderLock(AsyncMessagePipeHandle handle,
+                                         void* hwPipe,
+                                         const char* args,
+                                         base::Stream* stream) {
             PipeArgs pipeArgs = {handle, hwPipe, args, stream,
                                  std::bind(&Service::destroyPipe, this,
                                            std::placeholders::_1)};
@@ -162,14 +166,10 @@ public:
 
         void destroyPipe(AsyncMessagePipeHandle handle) {
             base::AutoLock lock(mLock);
-            const auto it = mPipes.find(handle.id);
-            if (it == mPipes.end()) {
-                LOG(WARNING)
-                        << "destroyPipe could not find pipe id " << handle.id;
-                return;
+            if (mPipes.erase(handle.id) == 0) {
+                DLOG(INFO) << "Could not find pipe id " << handle.id
+                           << ", pipe already destroyed?";
             }
-
-            mPipes.erase(it);
         }
 
         AsyncMessagePipeHandle nextPipeHandle() {
@@ -276,8 +276,16 @@ typedef std::function<void(const std::vector<uint8_t>&,
                            const PipeSendFunction& func)>
         OnMessageCallbackFunction;
 
-// Helper to register a simple message pipe service, passing a lambda as an
-// onMessage handler.
+// Register a AndroidAsyncMessagePipe service.  Takes ownership of the pointer,
+// and will delete on cleanup.
+template <typename T>
+void registerAsyncMessagePipeService(
+        android::AndroidAsyncMessagePipe::Service<T>* service) {
+    android::AndroidPipe::Service::add(service);
+}
+
+// Helper to register a message pipe service with a lambda as an onMessage
+// handler.
 //
 // Takes a callback with this signature:
 // void onMessageCallback(const std::vector<uint8_t>& data,
@@ -285,7 +293,7 @@ typedef std::function<void(const std::vector<uint8_t>&,
 //
 // When ready to send a callback, simply invoke sendFunction, which works from
 // within the onMessageCallback or from any other thread.
-void registerSimpleAndroidAsyncMessagePipeService(
+void registerAsyncMessagePipeService(
         const char* serviceName,
         OnMessageCallbackFunction onMessageCallback);
 
