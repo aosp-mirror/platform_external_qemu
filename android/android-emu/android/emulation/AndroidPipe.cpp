@@ -747,6 +747,8 @@ int android_pipe_guest_recv(void* internalPipe,
                             int numBuffers) {
     CHECK_VM_STATE_LOCK();
     auto pipe = static_cast<AndroidPipe*>(internalPipe);
+    // Note that pipe may be deleted during this call, so it's not safe to
+    // access pipe after this point.
     return pipe->onGuestRecv(buffers, numBuffers);
 }
 
@@ -755,6 +757,8 @@ int android_pipe_guest_send(void* internalPipe,
                             int numBuffers) {
     CHECK_VM_STATE_LOCK();
     auto pipe = static_cast<AndroidPipe*>(internalPipe);
+    // Note that pipe may be deleted during this call, so it's not safe to
+    // access pipe after this point.
     return pipe->onGuestSend(buffers, numBuffers);
 }
 
