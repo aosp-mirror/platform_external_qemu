@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "339e941b_d338813a",
+        "filename": "android/android-emugl/host/include/OpenglRender/RenderLib.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-27T21:05:31Z",
+      "side": 1,
+      "message": "Is this necessary? Usually we expect the android/ to be above openglrender for the alphabetical order",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 40
+      },
+      "revId": "19102db4b9ab4acf49f4e972f1c7fdab99b0f955",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "69ad1a39_b86c3acd",
         "filename": "android/data/advancedFeatures.ini",
         "patchSetId": 2
@@ -16,6 +39,24 @@
       "revId": "19102db4b9ab4acf49f4e972f1c7fdab99b0f955",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8c4a2c7e_7e0e793d",
+        "filename": "android/data/advancedFeatures.ini",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-27T21:05:31Z",
+      "side": 1,
+      "message": "Sounds good, though this is only in emu-master-dev so even in this file, it will only be for canary",
+      "parentUuid": "69ad1a39_b86c3acd",
+      "revId": "19102db4b9ab4acf49f4e972f1c7fdab99b0f955",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
