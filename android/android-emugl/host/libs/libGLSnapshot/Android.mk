@@ -10,7 +10,8 @@ LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/GLESv2_dec
 
 LOCAL_STATIC_LIBRARIES += libOpenGLESDispatch
 LOCAL_STATIC_LIBRARIES += libemugl_common
-LOCAL_STATIC_LIBRARIES += android-emu-base
+
+$(call emugl-import-android-emu-base)
 
 LOCAL_SRC_FILES := GLSnapshot.cpp
 

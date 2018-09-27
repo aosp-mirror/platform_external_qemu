@@ -61,6 +61,14 @@ emugl-end-module = \
     $(eval _emugl_$(_emugl_HOST)modules += $(_emugl_MODULE))\
     $(if $(EMUGL_DEBUG),$(call emugl-dump-module))
 
+emugl-import-android-emu-base = \
+    $(if $(filter linux,$(BUILD_TARGET_OS)), \
+      $(eval LOCAL_SHARED_LIBRARIES += android-emu-base-shared)) \
+    $(if $(filter darwin,$(BUILD_TARGET_OS)), \
+      $(eval LOCAL_SHARED_LIBRARIES += android-emu-base-shared)) \
+    $(if $(filter windows,$(BUILD_TARGET_OS)), \
+      $(eval LOCAL_STATIC_LIBRARIES += android-emu-base)) \
+
 # Managing module exports and imports.
 #
 # A module can 'import' another module, by calling emugl-import. This will

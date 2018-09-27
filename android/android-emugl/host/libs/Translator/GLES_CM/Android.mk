@@ -16,5 +16,8 @@ $(call emugl-import,libGLcommon)
 LOCAL_SOURCE_DEPENDENCIES := $(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
 
 LOCAL_SRC_FILES := $(host_common_SRC_FILES)
-LOCAL_STATIC_LIBRARIES += android-emu-base emulator-astc-codec
+LOCAL_STATIC_LIBRARIES += emulator-astc-codec
+
+$(call emugl-import-android-emu-base)
+
 $(call emugl-end-module)
