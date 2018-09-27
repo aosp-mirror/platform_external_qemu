@@ -25,6 +25,7 @@
 #include "android/console_internal.h"
 
 #include "android/android.h"
+#include "android/automation/AutomationController.h"
 #include "android/base/StringView.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/cmdline-option.h"
@@ -2322,6 +2323,36 @@ static int do_snapshot_del(ControlClient client, char* args) {
     return success ? 0 : -1;
 }
 
+static int do_snapshot_remap(ControlClient client, char* args) {
+    bool shared = true;
+
+    if (args && strcmp(args, "1") == 0) {
+        shared = true;
+    } else if (args && strcmp(args, "0") == 0) {
+        shared = false;
+    } else {
+        control_write(
+            client,
+            "KO: Argument missing, "
+            "try 'avd snapshot remap <auto-save>'\r\n");
+        return -1;
+    }
+
+    bool success = vmopers(client)->snapshotRemap(shared, client,
+            control_write_err_cb);
+
+    if (!success) {
+        control_write(
+            client,
+            "KO: failed to remap ram. "
+            "wanted shared mode: %d \r\n",
+            shared);
+        return -1;
+    }
+
+    return true;
+}
+
 static const CommandDefRec  snapshot_commands[] =
 {
     { "list", "list available state snapshots",
@@ -2343,6 +2374,24 @@ static const CommandDefRec  snapshot_commands[] =
     { "delete", "delete state snapshot",
     "'avd snapshot delete <name>' will delete the state snapshot with the given name\r\n",
     NULL, do_snapshot_del, NULL },
+
+    { "remap", "remap current snapshot RAM",
+    "'avd snapshot remap <auto-save>' will activate or shut off Quickboot auto-saving\r\n"
+    "while the emulator is running.\r\n"
+    "<auto-save> value of 0: deactivate auto-save\r\n"
+    "<auto-save> value of 1: activate auto-save\r\n"
+    "- It is required that the current loaded snapshot be the Quickboot snapshot (default_boot).\r\n"
+    "- If auto-saving is currently active and gets deactivated, a snapshot will be saved\r\n"
+    "  to establish the last state.\r\n"
+    "- If the emulator is not currently auto-saving and a remap command is issued,\r\n"
+    "  the Quickboot snapshot will be reloaded with auto-saving enabled or disabled\r\n"
+    "  according to the value of the <auto-save> argument.\r\n"
+    "- This allows the user to set a checkpoint in the middle of running the emulator:\r\n"
+    "  by starting the emulator with auto-save enabled, then issuing 'avd snapshot remap 0'\r\n"
+    "  to disable auto-save and thus set the checkpoint. Subsequent 'avd snapshot remap 0'\r\n"
+    "  commands will then repeatedly rewind to that checkpoint.\r\n"
+    "  Issuing 'avd snapshot remap 1' after that will rewind again but activate auto-saving.\r\n",
+    NULL, do_snapshot_remap, NULL },
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
@@ -2760,21 +2809,96 @@ static const CommandDefRec sensor_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
-/*****                        P H Y S I C S  C O M M A N D S                           ******/
+/*****                     A U T O M A T I O N  C O M M A N D S                        ******/
 /*****                                                                                 ******/
 /********************************************************************************************/
 /********************************************************************************************/
 
+// Start recording device state changes to the given file.
+static int do_automation_record(ControlClient client, char* args) {
+    using namespace android::automation;
 
-// Start recording physical state changes to the given file.
-static int do_physics_record(ControlClient client, char* args) {
-    return android_physical_model_record(args);
+    auto result = AutomationController::get().startRecording(args);
+    if (result.err()) {
+        std::ostringstream str;
+        str << "KO: " << result.unwrapErr();
+        control_write(client, "%s\r\n", str.str().c_str());
+        return -1;
+    }
+
+    return 0;
 }
 
-// Start playing physical state changes from the given file.
-static int do_physics_play(ControlClient client, char* args) {
-    return android_physical_model_playback(args);
+// Stop recording back device state.
+static int do_automation_stop_recording(ControlClient client, char* args) {
+    using namespace android::automation;
+
+    auto result = AutomationController::get().stopRecording();
+    if (result.err()) {
+        std::ostringstream str;
+        str << "KO: " << result.unwrapErr();
+        control_write(client, "%s\r\n", str.str().c_str());
+        return -1;
+    }
+
+    return 0;
 }
+
+// Start playing back device state from the given file.
+static int do_automation_play(ControlClient client, char* args) {
+    using namespace android::automation;
+
+    auto result = AutomationController::get().startPlayback(args);
+    if (result.err()) {
+        std::ostringstream str;
+        str << "KO: " << result.unwrapErr();
+        control_write(client, "%s\r\n", str.str().c_str());
+        return -1;
+    }
+
+    return 0;
+}
+
+// Stop playing back device state.
+static int do_automation_stop_playback(ControlClient client, char* args) {
+    using namespace android::automation;
+
+    auto result = AutomationController::get().stopPlayback();
+    if (result.err()) {
+        std::ostringstream str;
+        str << "KO: " << result.unwrapErr();
+        control_write(client, "%s\r\n", str.str().c_str());
+        return -1;
+    }
+
+    return 0;
+}
+
+// Automation commands for record/playback of device state.
+static const CommandDefRec automation_commands[] = {
+    { "record", "start recording a macro.",
+      "'record <filename>': start recording a macro of device state changes to the given file.\r\n",
+      nullptr, do_automation_record, nullptr },
+    { "stop-record", "stop recording a macro.",
+      "'stop-record': stop the current recording.\r\n",
+      nullptr, do_automation_stop_recording, nullptr },
+    { "play", "playback macro.",
+      "'play <filename>': start playing back the macro from the given file.\r\n",
+      nullptr, do_automation_play, nullptr },
+    { "stop-play", "stop playing macro.",
+      "'stop-play': stop the current macro playback.\r\n",
+      nullptr, do_automation_stop_playback, nullptr },
+
+    { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr }
+};
+
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
+/*****                        P H Y S I C S  C O M M A N D S                           ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
 
 // Start recording of ground truth to the given file.
 static int do_physics_record_ground_truth(ControlClient client, char* args) {
@@ -2783,22 +2907,16 @@ static int do_physics_record_ground_truth(ControlClient client, char* args) {
 
 // Stop the current recording or playback of physical state changes.
 static int do_physics_stop(ControlClient client, char* args) {
-    return android_physical_model_stop_record_and_playback();
+    return android_physical_model_stop_recording();
 }
 
 // Physics commands for record/playback physics state.
 static const CommandDefRec physics_commands[] = {
-    { "record", "start recording physical state changes.",
-      "'record <filename>': start recording physical state changes to the given file.\r\n",
-      nullptr, do_physics_record, nullptr },
-    { "play", "start playing physical state changes.",
-      "'play <filename>': start playing physical state changes from the given file.\r\n",
-      nullptr, do_physics_play, nullptr },
     { "record-gt", "start recording ground truth of the physical model's 6dof poses",
       "'record-gt <filename>': start recording of ground truth to the given file.\r\n",
       nullptr, do_physics_record_ground_truth, nullptr },
-    { "stop", "stop recording or playing back physical state changes.",
-      "'stop': stop the current recording or playback of physical state changes.\r\n",
+    { "stop", "stop recording ground truth",
+      "'stop': stop the current recording of ground truth.\r\n",
       nullptr, do_physics_stop, nullptr },
 
     { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr }
@@ -3263,6 +3381,11 @@ extern const CommandDefRec main_commands[] = {
 
         PING_COMMAND,
 
+        {"automation", "manage emulator automation",
+         "allows you to record and play back macros for device state "
+         "automation\r\n",
+         NULL, NULL, automation_commands},
+
         {"event", "simulate hardware events",
          "allows you to send fake hardware events to the kernel\r\n", NULL,
          NULL, event_commands},
@@ -3288,7 +3411,8 @@ extern const CommandDefRec main_commands[] = {
 
         {"kill", "kill the emulator instance", NULL, NULL, do_kill, NULL},
 
-        {"restart", "restart the emulator instance", NULL, NULL, do_restart, NULL},
+        {"restart", "restart the emulator instance", NULL, NULL, do_restart,
+         NULL},
 
         {"network", "manage network settings",
          "allows you to manage the settings related to the network data "
@@ -3327,8 +3451,8 @@ extern const CommandDefRec main_commands[] = {
          sensor_commands},
 
         {"physics", "manage physical model",
-         "allows you to record and playback physical model state changes\r\n", NULL, NULL,
-         physics_commands},
+         "allows you to record and playback physical model state changes\r\n",
+         NULL, NULL, physics_commands},
 
         {"finger", "manage emulator finger print",
          "allows you to touch the emulator finger print sensor\r\n", NULL, NULL,
@@ -3340,8 +3464,8 @@ extern const CommandDefRec main_commands[] = {
         {"rotate", "rotate the screen clockwise by 90 degrees", NULL, NULL,
          do_rotate_90_clockwise, NULL},
 
-        {"screenrecord", "Records the emulator's display", NULL,
-         NULL, NULL, screenrecord_commands},
+        {"screenrecord", "Records the emulator's display", NULL, NULL, NULL,
+         screenrecord_commands},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 

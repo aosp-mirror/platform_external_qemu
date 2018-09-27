@@ -473,6 +473,23 @@ static void *ranchu_dtb(const struct arm_boot_info *binfo, int *fdt_size)
     return board->fdt;
 }
 
+#define DEFAULT_ARM_CPU_MODEL "cortex-a15"
+
+static char* splice_out_cpu_model(const char* cpu_type) {
+    // We rely on the model being encoded in the cpu_type, so we validate
+    // the assumption here.
+    assert(cpu_type &&
+           strcmp(cpu_type + (strlen(cpu_type) - strlen(TYPE_ARM_CPU)), TYPE_ARM_CPU) == 0);
+
+    if (!cpu_type) {
+      fprintf(stderr, "%s: WARNING, unknown cpu type, defaulting to cortex-a15\n", __func__);
+      return g_strdup(DEFAULT_ARM_CPU_MODEL);
+    }
+
+    // cpu model is the cpy type minus the ARM postfix.
+    return g_strndup(cpu_type, strlen(cpu_type) - strlen(TYPE_ARM_CPU) - 1);
+}
+
 static void ranchu_init(MachineState *machine)
 {
     qemu_irq pic[NUM_IRQS];
@@ -481,7 +498,8 @@ static void ranchu_init(MachineState *machine)
     MemoryRegion *ram = g_new(MemoryRegion, 1);
     VirtBoardInfo *vbi;
 
-    const char *cpu_model = "cortex-a57";
+    // Cpu type contains cpu model, so we have to splice it out.
+    char *cpu_model = splice_out_cpu_model(machine->cpu_type);
 
     vbi = g_new0(VirtBoardInfo, 1);
 
@@ -561,6 +579,8 @@ static void ranchu_init(MachineState *machine)
     vbi->bootinfo.loader_start = memmap[RANCHU_MEM].base;
     vbi->bootinfo.get_dtb = ranchu_dtb;
     arm_load_kernel(ARM_CPU(first_cpu), &vbi->bootinfo);
+
+    g_free(cpu_model);
 }
 
 static void ranchu_machine_init(MachineClass *mc)

@@ -365,6 +365,8 @@ all-subdir-makefiles = $(call all-makefiles-under,$(call my-dir))
 # -----------------------------------------------------------------------------
 ifeq ($(V),1)
 hide = $(empty)
+# Pass on the verbose settings to submake/cmake
+MAKEFLAGS += VERBOSE=1
 else
 hide = @
 endif

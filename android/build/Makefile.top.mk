@@ -59,6 +59,11 @@ ifeq ($(BUILD_DEBUG),true)
     # Enable code coverage for debug builds.
     BUILD_TARGET_CFLAGS += $(call if-target-clang, -fprofile-instr-generate -fcoverage-mapping -fprofile-arcs -ftest-coverage)
     BUILD_OPT_LDFLAGS += $(call if-target-clang, -fprofile-instr-generate -fcoverage-mapping -fprofile-arcs -ftest-coverage --coverage)
+
+    # Always enable address sanitizer for clang builds in debug mode if no specific sanitizer is requested.
+    ifeq (,$(BUILD_SANITIZER))
+      BUILD_SANITIZER = $(call if-target-clang,address)
+    endif
 else
     ifneq (windows,$(BUILD_TARGET_OS))
         BUILD_OPT_CFLAGS += -O3 -DNDEBUG=1
@@ -119,6 +124,7 @@ CLANG_COMPILER_FLAGS= \
                       -Wno-unused-lambda-capture \
                       -Wno-unused-private-field \
                       -Wno-unused-value \
+                      -Wswitch \
 
 # Add your tidy checks here.
 CLANG_TIDY_CHECKS=-*, \
@@ -318,6 +324,22 @@ end-emulator-program = \
     $(if $(filter linux,$(BUILD_TARGET_OS)), \
       $(eval LOCAL_LDFLAGS += -Wl,-rpath=\$$$$ORIGIN/lib64:\$$$$ORIGIN/lib)) \
     $(eval $(end-emulator-module-ev)) \
+
+# A variant that enables incorporation of cmake subprojects.
+start-cmake-project = \
+    $(eval include $(CLEAR_VARS)) \
+    $(eval PRODUCED_EXECUTABLES:=) \
+    $(eval PRODUCED_TESTS:=) \
+    $(eval PRODUCED_SHARED_LIBS:=) \
+    $(eval PRODUCED_STATIC_LIBS:=) \
+    $(eval CONSUMED_STATIC_LIBS:=) \
+    $(eval LOCAL_MODULE:=$(1)) \
+    $(eval LOCAL_BUILD_FILE := $(BUILD_CMAKE))
+
+# A variant of end-emulator-library for host programs instead
+end-cmake-project = \
+    $(eval $(end-emulator-module-ev)) \
+
 
 # Same thing for shared libraries
 start-emulator-shared-lib = \

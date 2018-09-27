@@ -313,6 +313,58 @@
     <string notr="true">Title</string>
    </property>
   </widget>
+  <widget class="QLabel" name="bat_noBat_mask">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>600</width>
+     <height>600</height>
+    </rect>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgba(128, 128, 128, 200)</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="bat_noBat_message">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>250</y>
+     <width>600</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgba(128, 128, 128, 0)</string>
+   </property>
+   <property name="text">
+    <string>This emulated device does not have a battery.</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <zorder>bat_noBat_mask</zorder>
+  <zorder>bat_noBat_message</zorder>
+  <zorder>bat_acGroup</zorder>
+  <zorder>bat_healthBox</zorder>
+  <zorder>bat_chargeGroup</zorder>
+  <zorder>bat_statusGroup</zorder>
+  <zorder>bat_statusBox</zorder>
+  <zorder>bat_chargerBox</zorder>
+  <zorder>bat_healthGroup</zorder>
  </widget>
  <resources/>
  <connections/>

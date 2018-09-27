@@ -1,16 +1,20 @@
-// Copyright 2018 The Android Open Source Project
+// Copyright (C) 2018 The Android Open Source Project
 //
-// This software is licensed under the terms of the GNU General Public
-// License version 2, as published by the Free Software Foundation, and
-// may be copied, distributed, and modified under those terms.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #include "android/base/Result.h"
 #include "android/base/Compiler.h"
+#include "android/base/testing/ResultMatchers.h"
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -18,12 +22,39 @@
 #include <string>
 
 using android::base::Err;
+using android::base::IsErr;
+using android::base::IsOk;
 using android::base::Ok;
 using android::base::Result;
 
 using testing::Eq;
+using testing::ExplainMatchResult;
+using testing::Not;
 using testing::Optional;
 enum class MyError { Failed1, Failed2 };
+
+std::ostream& operator<<(std::ostream& os, const MyError& value) {
+    switch (value) {
+        case MyError::Failed1:
+            os << "MyError::Failed1";
+            break;
+        case MyError::Failed2:
+            os << "MyError::Failed2";
+            break;
+        // Default intentionally omitted to generate compiler warning if fields
+        // are added.
+    }
+
+    return os;
+}
+
+template <typename MatcherType>
+std::string DescribeResult(const MatcherType& m) {
+    std::stringstream ss;
+    testing::SafeMatcherCast<const Result<uint32_t, MyError>&>(m).DescribeTo(
+            &ss);
+    return ss.str();
+}
 
 TEST(Result, VoidEnum) {
     {
@@ -54,6 +85,28 @@ TEST(Result, ReturnValue) {
         EXPECT_FALSE(result.ok());
         EXPECT_TRUE(result.err());
         EXPECT_THAT(result.err(), Optional(Eq(MyError::Failed2)));
+    }
+}
+
+TEST(Result, Matchers) {
+    EXPECT_EQ("Ok()", DescribeResult(IsOk()));
+    EXPECT_EQ("Ok(0)", DescribeResult(IsOk(0)));
+    EXPECT_EQ("Err(MyError::Failed1)", DescribeResult(IsErr(MyError::Failed1)));
+    EXPECT_EQ("Err(MyError::Failed2)", DescribeResult(IsErr(MyError::Failed2)));
+
+    {
+        Result<void, MyError> result = Ok();
+        EXPECT_THAT(result, IsOk());
+    }
+
+    {
+        Result<uint32_t, MyError> result = Ok(1);
+        EXPECT_THAT(result, IsOk(1));
+    }
+
+    {
+        Result<uint32_t, MyError> result = Err(MyError::Failed1);
+        EXPECT_THAT(result, IsErr(MyError::Failed1));
     }
 }
 

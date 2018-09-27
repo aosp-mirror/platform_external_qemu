@@ -18,6 +18,7 @@
 #include "android/base/files/MemStream.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/preadwrite.h"
+#include "android/base/memory/MemoryHints.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/Profiler.h"
 #include "android/base/Stopwatch.h"
@@ -35,6 +36,7 @@
 
 using android::base::ContiguousRangeMapper;
 using android::base::ScopedMemoryProfiler;
+using android::base::MemoryHint;
 using android::base::MemStream;
 using android::base::PathUtils;
 using android::base::Stopwatch;
@@ -211,6 +213,19 @@ void RamLoader::interrupt() {
     mStream.close();
 }
 
+// Touches all pages that are currently file-backed, making sure
+// they are in memory. Cost is similar to an eager RAM load.
+void RamLoader::touchAllPages() {
+    if (mLazyLoadingFromFileBacking) {
+        for (const auto& block : mIndex.blocks) {
+            if (block.ramBlock.path.empty()) continue;
+            android::base::memoryHint(block.ramBlock.hostPtr, block.ramBlock.totalSize, MemoryHint::Touch);
+        }
+    } else {
+        join();
+    }
+}
+
 const RamLoader::Page* RamLoader::findPage(int blockIndex,
                                            const char* id,
                                            int pageIndex) const {
@@ -333,6 +348,7 @@ void RamLoader::readBlockPages(base::Stream* stream,
     if ((savedFlags & SNAPSHOT_RAM_MAPPED_SHARED) &&
         (activeFlags & SNAPSHOT_RAM_MAPPED) &&
         savedMemPath == activeMemPath) {
+        mLazyLoadingFromFileBacking = true;
         return;
     }
 
@@ -358,12 +374,16 @@ void RamLoader::readBlockPages(base::Stream* stream,
         int ramFileFd = fileno(ramFileStream.get());
 
         uint8_t* hostPtr = block.ramBlock.hostPtr;
-        uint64_t totalSz = block.ramBlock.totalSize;
+        int64_t totalSz = block.ramBlock.totalSize;
 
-        static constexpr size_t readChunkSize = 16 * 1048576;
+        static constexpr int64_t kReadChunkSize = 16 * 1048576;
 
-        for (size_t i = 0; i < totalSz; i += readChunkSize) {
-            HANDLE_EINTR(base::pread(ramFileFd, hostPtr + i, readChunkSize, i));
+        for (int64_t i = 0; i < totalSz; i += kReadChunkSize) {
+            HANDLE_EINTR(
+                base::pread(ramFileFd,
+                            hostPtr + i,
+                            std::min(kReadChunkSize, totalSz - i),
+                            i));
         }
 
         // Mark that we loaded this directly
@@ -671,8 +691,11 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
         return false;
     }
 
+    bool decompressorThreadPoolOwned = false;
+
     if (compressed) {
         if (mDecompressor) {
+            decompressorThreadPoolOwned = true;
             page.data = buf;
             mDecompressor->enqueue(&page);
         } else {
@@ -703,7 +726,9 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
         }
     }
 
-    page.data = buf;
+    if (!decompressorThreadPoolOwned) {
+        page.data = buf;
+    }
     page.state.store(uint8_t(State::Read), std::memory_order_release);
     return true;
 }

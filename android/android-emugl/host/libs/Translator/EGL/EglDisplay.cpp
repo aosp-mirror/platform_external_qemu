@@ -53,13 +53,16 @@ void EglDisplay::initialize(int renderableType) {
     m_configInitialized = true;
 }
 
-bool EglDisplay::isInitialize() { return m_initialized;}
+bool EglDisplay::isInitialize() {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    return m_initialized;
+}
 
 void EglDisplay::terminate(){
     emugl::Mutex::AutoLock mutex(m_lock);
-     m_contexts.clear();
-     m_surfaces.clear();
-     m_initialized = false;
+    m_contexts.clear();
+    m_surfaces.clear();
+    m_initialized = false;
 }
 
 namespace CompareEglConfigs {

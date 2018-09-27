@@ -141,6 +141,10 @@ $(foreach src,$(LOCAL_COPY_COMMON_TESTDATA), \
     $(eval $(call install-file,$(COMMON_PREBUILTS_DIR)/testdata/$(src),$(call local-testdata-path,$(notdir $(src))))) \
 )
 
+$(foreach src,$(LOCAL_COPY_COMMON_TESTDATA_DIRS), \
+    $(eval $(call install-dir,$(COMMON_PREBUILTS_DIR)/testdata/$(src),$(call local-testdata-path,$(src)))) \
+)
+
 $(foreach src,$(LOCAL_COPY_FILES), \
     $(eval $(call install-file,$(LOCAL_PATH)/$(src),$(call local-install-path,$(src)))) \
 )

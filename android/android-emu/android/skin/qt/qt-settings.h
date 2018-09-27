@@ -47,10 +47,18 @@ constexpr char ADB_PATH[] = "set/adbPath";
 constexpr char AUTO_FIND_ADB[] = "set/autoFindAdb";
 constexpr char ALWAYS_ON_TOP[] = "set/alwaysOnTop";
 constexpr char FORWARD_SHORTCUTS_TO_DEVICE[] = "set/forwardShortcutsToDevice";
-constexpr char FRAME_ALWAYS[] = "set/frameAlways4"; // Do not use "set/frameAlways" (current version: 4 (for canary, default with frame for Wear devices only, default off for everything else))
+constexpr char FRAME_ALWAYS[] = "set/frameAlways4"; // Do not use "set/frameAlways": the current
+                                                    // version is 4
+                                                    // (for canary, default with frame ON for Wear
+                                                    // devices, default OFF for everything else)
 constexpr char SAVE_PATH[] = "set/savePath";
 constexpr char UI_THEME[] = "set/theme";
 constexpr char DISABLE_MOUSE_WHEEL[] = "set/disableMouseWheel";
+
+constexpr char BATTERY_CHARGE_LEVEL[] = "battery/charge_level";
+constexpr char BATTERY_CHARGER_TYPE[] = "battery/charger_type";
+constexpr char BATTERY_HEALTH[]       = "battery/health";
+constexpr char BATTERY_STATUS[]       = "battery/status";
 
 constexpr char CELLULAR_NETWORK_TYPE[]    = "cell/network_type";
 constexpr char CELLULAR_SIGNAL_STRENGTH[] = "cell/signal_strength";
