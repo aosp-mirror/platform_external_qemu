@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7fb04f6c_38804f97",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 767,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-28T18:24:44Z",
+      "side": 1,
+      "message": "please do a style cleanup pass",
+      "range": {
+        "startLine": 767,
+        "startChar": 0,
+        "endLine": 767,
+        "endChar": 17
+      },
+      "revId": "1506755a9e7fdecbb263e5c6bbc60a63fd1a8932",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "624a078f_767c02f5",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 576,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-28T18:24:44Z",
+      "side": 1,
+      "message": "ComposeDevice*",
+      "revId": "1506755a9e7fdecbb263e5c6bbc60a63fd1a8932",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
