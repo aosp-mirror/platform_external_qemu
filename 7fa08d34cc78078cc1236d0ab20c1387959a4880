@@ -1,0 +1,222 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0dcf0ce_40f9f5d6",
+        "filename": "android/android-emu/android/emulation/RefcountPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-28T18:00:16Z",
+      "side": 1,
+      "message": "you don\u0027t need these streams in this file, they are for std:: streams",
+      "revId": "7fa08d34cc78078cc1236d0ab20c1387959a4880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "abcec086_47622266",
+        "filename": "android/android-emu/android/emulation/RefcountPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-28T18:00:16Z",
+      "side": 1,
+      "message": "std::function\u003c\u003e is a class with constructor, so if you need a global object please make it a LazyInstance\u003c\u003e\n\nAnother thing: is it possible to make it a member of RefcountPipe instead?",
+      "range": {
+        "startLine": 23,
+        "startChar": 7,
+        "endLine": 23,
+        "endChar": 27
+      },
+      "revId": "7fa08d34cc78078cc1236d0ab20c1387959a4880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "06c1dc28_51913df5",
+        "filename": "android/android-emu/android/emulation/RefcountPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-28T18:00:16Z",
+      "side": 1,
+      "message": "otherwise what value will it get? It\u0027s usually better to explicitly zero-out variables and leave a comment that guest will send its value later\nAlso it\u0027s good to have some safeguard code in case guest doesn\u0027t send it, e.g. the guest process crashes or guest OS hangs",
+      "range": {
+        "startLine": 28,
+        "startChar": 8,
+        "endLine": 28,
+        "endChar": 15
+      },
+      "revId": "7fa08d34cc78078cc1236d0ab20c1387959a4880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "58818e07_98307cfa",
+        "filename": "android/android-emu/android/emulation/RefcountPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-28T18:00:16Z",
+      "side": 1,
+      "message": "forRecv + result\n?",
+      "range": {
+        "startLine": 54,
+        "startChar": 15,
+        "endLine": 54,
+        "endChar": 22
+      },
+      "revId": "7fa08d34cc78078cc1236d0ab20c1387959a4880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "68d2ef8f_3f0917e5",
+        "filename": "android/android-emu/android/emulation/RefcountPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-28T18:00:16Z",
+      "side": 1,
+      "message": "android::base::arraySize(forRecv)\n?",
+      "range": {
+        "startLine": 60,
+        "startChar": 18,
+        "endLine": 60,
+        "endChar": 19
+      },
+      "revId": "7fa08d34cc78078cc1236d0ab20c1387959a4880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "93deab64_07dedaeb",
+        "filename": "android/android-emu/android/emulation/RefcountPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-28T18:00:16Z",
+      "side": 1,
+      "message": "4 -\u003e result?",
+      "range": {
+        "startLine": 61,
+        "startChar": 34,
+        "endLine": 61,
+        "endChar": 35
+      },
+      "revId": "7fa08d34cc78078cc1236d0ab20c1387959a4880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f741563a_536ad2a4",
+        "filename": "android/android-emu/android/emulation/RefcountPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-28T18:00:16Z",
+      "side": 1,
+      "message": "nit: std::move(func)",
+      "revId": "7fa08d34cc78078cc1236d0ab20c1387959a4880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e1933fbc_cf1b3c05",
+        "filename": "android/android-emu/android/emulation/RefcountPipe.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-28T18:00:16Z",
+      "side": 1,
+      "message": "please move it into the namespaces, having global types usually backfire\nnit: syntax \"using OnLastColorBufferRef \u003d std::function\u003cvoid(uint32_t)\u003e;\" looks more clear to me",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 59
+      },
+      "revId": "7fa08d34cc78078cc1236d0ab20c1387959a4880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "61459b50_b69dddf5",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-28T18:00:16Z",
+      "side": 1,
+      "message": "please cleanup",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 52
+      },
+      "revId": "7fa08d34cc78078cc1236d0ab20c1387959a4880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d862a4b2_3ed3e844",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderLibImpl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-09-28T18:00:16Z",
+      "side": 1,
+      "message": "just curious if it\u0027s possible that |fb| is null here.",
+      "range": {
+        "startLine": 116,
+        "startChar": 4,
+        "endLine": 116,
+        "endChar": 43
+      },
+      "revId": "7fa08d34cc78078cc1236d0ab20c1387959a4880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
