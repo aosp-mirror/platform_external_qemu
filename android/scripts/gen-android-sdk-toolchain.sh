@@ -109,7 +109,7 @@ aosp_dir_parse_option
 # Handle --host option.
 if [ "$OPT_HOST" ]; then
     case $OPT_HOST in
-        linux-x86_64|darwin-x86_64|windows-x86|windows-x86_64)
+        linux-x86_64|darwin-x86_64|windows-x86|windows-x86_64|windows_msvc-x86_64)
             ;;
         *)
             panic "Invalid --host value: $OPT_HOST"
@@ -200,6 +200,10 @@ gen_wrapper_program ()
             clang-tidy)
                 DST_PREFIX=$CLANG_BINDIR/
                 ;;
+            ar)
+                DST_PROG=llvm-ar
+                DST_PREFIX=$CLANG_BINDIR/
+                ;;
         esac
     fi
 
@@ -278,6 +282,12 @@ gen_wrapper_toolchain () {
                     EXTRA_WINDRESFLAGS="--target=pe-i386"
                     ;;
             esac
+            ;;
+    esac
+
+    case "$CURRENT_HOST" in
+        windows_msvc*)
+            PROGRAMS="$PROGRAMS windres"
             ;;
     esac
 
@@ -456,6 +466,18 @@ prepare_build_for_windows () {
     var_append EXTRA_CXXFLAGS ${GCC_LINK_FLAGS}
  }
 
+prepare_build_for_windows_msvc() {
+    # TODO(joshuaduong): Only linux enivronment is set up. Set up for
+    # mac/windows as well.
+    CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for linux)
+    CLANG_DIR=$(realpath $CLANG_BINDIR/..)
+    CLANG_VERSION=$(${CLANG_BINDIR}/clang -v 2>&1 | head -n 1 | awk '{print $4}')
+
+    # TODO(joshuaduong): Need to setup build environment/flags here, so we
+    # can also cross-compile the prebuilts. Right now, we're just building
+    # all of the prebuilts natively on Windows.
+}
+
 
 # Prints info based on the passed in parameter
 # $1 The information we want to print, from { binprefix, sysroot, clang-dir,
@@ -515,6 +537,9 @@ prepare_build_for_host () {
             ;;
         darwin-*)
             prepare_build_for_darwin
+            ;;
+        windows_msvc-*)
+            prepare_build_for_windows_msvc
             ;;
         windows-*)
             prepare_build_for_windows
