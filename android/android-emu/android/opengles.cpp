@@ -12,6 +12,8 @@
 
 #include "android/opengles.h"
 
+#include "android/base/files/PathUtils.h"
+#include "android/base/system/System.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/GoldfishDma.h"
 #include "android/featurecontrol/FeatureControl.h"
@@ -48,6 +50,9 @@
     derror(fmt, ##__VA_ARGS__); \
     android_opengl_logger_write(fmt "\n", ##__VA_ARGS__); \
 } while(0);
+
+using android::base::pj;
+using android::base::System;
 
 /* Name of the GLES rendering library we're going to use */
 #if UINTPTR_MAX == UINT32_MAX
@@ -109,12 +114,26 @@ int android_initOpenglesEmulation() {
 
     D("Initializing hardware OpenGLES emulation support");
 
-    ADynamicLibrary* const rendererSo =
+    ADynamicLibrary* rendererSo =
             adynamicLibrary_open(RENDERER_LIB_NAME, &error);
     if (rendererSo == NULL) {
         E("Could not load OpenGLES emulation library [%s]: %s",
                RENDERER_LIB_NAME, error);
-        return -1;
+
+        E("Retrying in program directory/lib64...");
+
+        auto progDir = System::get()->getProgramDirectory();
+
+        auto retryLibPath =
+            pj(progDir, "lib64", RENDERER_LIB_NAME);
+
+        rendererSo = adynamicLibrary_open(retryLibPath.c_str(), &error);
+
+        if (rendererSo == nullptr) {
+            E("Could not load OpenGLES emulation library [%s]: %s (2nd try)",
+                   retryLibPath.c_str(), error);
+            return -1;
+        }
     }
 
     /* Resolve the functions */
