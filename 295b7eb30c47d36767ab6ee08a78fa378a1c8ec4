@@ -140,6 +140,30 @@
       "revId": "295b7eb30c47d36767ab6ee08a78fa378a1c8ec4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "45cab87f_33bc4f0d",
+        "filename": "android/build/emulator/host_executable.make",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-29T18:27:40Z",
+      "side": 1,
+      "message": "Ok, I was more saying that you might want to add this for host_shared_library.make as well, but this pattern here might not be needed?",
+      "parentUuid": "53f99f85_a8820e39",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 5
+      },
+      "revId": "295b7eb30c47d36767ab6ee08a78fa378a1c8ec4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
