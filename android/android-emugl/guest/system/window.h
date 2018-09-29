@@ -151,6 +151,14 @@ enum {
      * with GRALLOC_USAGE_PROTECTED usage bits on.
      */
     NATIVE_WINDOW_CONSUMER_IS_PROTECTED = 19,
+    /*
+     * Returns data space for the buffers.
+     */
+    NATIVE_WINDOW_DATASPACE = 20,
+    /*
+     * Returns maxBufferCount set by BufferQueueConsumer
+     */
+    NATIVE_WINDOW_MAX_BUFFER_COUNT = 21,
 };
 /* Valid operations for the (*perform)() hook.
  *
@@ -196,6 +204,8 @@ enum {
     NATIVE_WINDOW_GET_HDR_SUPPORT               = 29,
     NATIVE_WINDOW_SET_USAGE64                   = 30,
     NATIVE_WINDOW_GET_CONSUMER_USAGE64          = 31,
+    NATIVE_WINDOW_SET_BUFFERS_SMPTE2086_METADATA = 32,
+    NATIVE_WINDOW_SET_BUFFERS_CTA861_3_METADATA = 33,
 // clang-format on
 };
 /* parameter for NATIVE_WINDOW_[API_][DIS]CONNECT */
@@ -627,6 +637,40 @@ static inline int native_window_set_buffers_data_space(
 {
     return window->perform(window, NATIVE_WINDOW_SET_BUFFERS_DATASPACE,
             dataSpace);
+}
+/*
+ * native_window_set_buffers_smpte2086_metadata(..., metadata)
+ * All buffers queued after this call will be associated with the SMPTE
+ * ST.2086 metadata specified.
+ *
+ * metadata specifies additional information about the contents of the buffer
+ * that may affect how it's displayed.  When it is nullptr, it means no such
+ * information is available.  No SMPTE ST.2086 metadata is associated with the
+ * buffers by default.
+ */
+static inline int native_window_set_buffers_smpte2086_metadata(
+        struct ANativeWindow* window,
+        const struct android_smpte2086_metadata* metadata)
+{
+    return window->perform(window, NATIVE_WINDOW_SET_BUFFERS_SMPTE2086_METADATA,
+            metadata);
+}
+/*
+ * native_window_set_buffers_cta861_3_metadata(..., metadata)
+ * All buffers queued after this call will be associated with the CTA-861.3
+ * metadata specified.
+ *
+ * metadata specifies additional information about the contents of the buffer
+ * that may affect how it's displayed.  When it is nullptr, it means no such
+ * information is available.  No CTA-861.3 metadata is associated with the
+ * buffers by default.
+ */
+static inline int native_window_set_buffers_cta861_3_metadata(
+        struct ANativeWindow* window,
+        const struct android_cta861_3_metadata* metadata)
+{
+    return window->perform(window, NATIVE_WINDOW_SET_BUFFERS_CTA861_3_METADATA,
+            metadata);
 }
 /*
  * native_window_set_buffers_transform(..., int transform)
