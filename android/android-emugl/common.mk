@@ -44,7 +44,7 @@ emugl-begin-module = \
     $(eval LOCAL_MODULE_CLASS := $(patsubst HOST_%,%,$(patsubst %EXECUTABLE,%EXECUTABLES,$(patsubst %LIBRARY,%LIBRARIES,$2)))) \
     $(eval LOCAL_C_INCLUDES += $(ANDROID_EMU_BASE_INCLUDES) $(EMUGL_COMMON_INCLUDES)) \
     $(eval LOCAL_CFLAGS += $(EMUGL_COMMON_CFLAGS)) \
-    $(eval LOCAL_STATIC_LIBRARIES += $(if $3,,$(ANDROID_EMU_BASE_STATIC_LIBRARIES))) \
+    $(if $3,,$(call emugl-import-android-emu-base)) \
     $(eval LOCAL_LDLIBS += $(if $3,,$(ANDROID_EMU_BASE_LDLIBS)) $(CXX_STD_LIB)) \
     $(eval LOCAL_BUILD_FILE := $(BUILD_$2)) \
     $(call _emugl-init-module,$1,$2,$3)
@@ -60,6 +60,14 @@ emugl-end-module = \
     $(eval LOCAL_BUILD_FILE :=) \
     $(eval _emugl_$(_emugl_HOST)modules += $(_emugl_MODULE))\
     $(if $(EMUGL_DEBUG),$(call emugl-dump-module))
+
+emugl-import-android-emu-base = \
+    $(if $(filter linux,$(BUILD_TARGET_OS)), \
+      $(eval LOCAL_SHARED_LIBRARIES += android-emu-base-shared)) \
+    $(if $(filter darwin,$(BUILD_TARGET_OS)), \
+      $(eval LOCAL_SHARED_LIBRARIES += android-emu-base-shared)) \
+    $(if $(filter windows,$(BUILD_TARGET_OS)), \
+      $(eval LOCAL_STATIC_LIBRARIES += android-emu-base)) \
 
 # Managing module exports and imports.
 #
