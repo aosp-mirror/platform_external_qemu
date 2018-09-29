@@ -164,6 +164,30 @@
       "revId": "295b7eb30c47d36767ab6ee08a78fa378a1c8ec4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c26e1794_18c78add",
+        "filename": "android/build/emulator/host_executable.make",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-29T19:26:33Z",
+      "side": 1,
+      "message": "I guess we would need some kind of static import to import DLL once we start using more DLLs in the emulator build, so I think this is useful.",
+      "parentUuid": "45cab87f_33bc4f0d",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 5
+      },
+      "revId": "295b7eb30c47d36767ab6ee08a78fa378a1c8ec4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
