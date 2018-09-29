@@ -1,0 +1,6 @@
+
+1. Config and start renderer
+2. Register pipe service and init threading
+3. Start up Host goldfish pipe device
+4. open gralloc fb device and gpu device
+5. start sf
