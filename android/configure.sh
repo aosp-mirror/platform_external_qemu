@@ -709,6 +709,13 @@ probe_prebuilts_dir "Protobuf" PROTOBUF_PREBUILTS_DIR protobuf
 ###
 probe_prebuilts_dir "virglrenderer" VIRGLRENDERER_PREBUILTS_DIR common/virglrenderer
 
+###
+### MSVC probe
+###
+if [ "$OPTION_WINDOWS_MSVC" = "yes" ] ; then
+    probe_prebuilts_dir "msvc" MSVC_DIR msvc
+fi
+
 CACERTS_FILE="$PROGDIR/data/ca-bundle.pem"
 if [ ! -f "$CACERTS_FILE" ]; then
     panic "Missing cacerts file: $CACERTS_FILE"
@@ -1357,6 +1364,9 @@ echo "LIBVPX_PREBUILTS_DIR := $LIBVPX_PREBUILTS_DIR" >> $config_mk
 echo "VIRGLRENDERER_PREBUILTS_DIR := $VIRGLRENDERER_PREBUILTS_DIR" >> $config_mk
 echo "GOLDFISH_OPENGL_DIR := $GOLDFISH_OPENGL_DIR" >> $config_mk
 
+if [ "$HOST_OS" = "windows_msvc" ]; then
+  echo "MSVC_DIR := $MSVC_DIR" >> $config_mk
+fi
 
 if [ "$HOST_OS" = "linux" ]; then
   echo "LIBBLUEZ_PREBUILTS_DIR := $LIBBLUEZ_PREBUILTS_DIR" >> $config_mk

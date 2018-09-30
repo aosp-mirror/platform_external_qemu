@@ -135,6 +135,8 @@ local-static-libraries-ldlibs-linux = $(strip \
 
 local-static-libraries-ldlibs-windows =  $(local-static-libraries-ldlibs-linux)
 
+local-static-libraries-ldlibs-windows_msvc =  $(local-static-libraries-ldlibs-linux)
+
 # TODO(zyy): add -Wl,--start-group / end-group here for gcc builds after
 # migrating our Mac build to LLVM linker.
 local-static-libraries-ldlibs = $(local-static-libraries-ldlibs-$(BUILD_TARGET_OS))
@@ -147,6 +149,7 @@ set-host-library-search-path = $(call set-host-library-search-path-$(BUILD_TARGE
 set-host-library-search-path-linux = LD_LIBRARY_PATH=$1
 set-host-library-search-path-darwin = DYLD_LIBRARY_PATH=$1
 set-host-library-search-path-windows =
+set-host-library-search-path-windows_msvc =
 
 # Toolchain control support.
 # It's possible to switch between the regular toolchain and the host one
@@ -623,8 +626,10 @@ endef
 
 GEN_ENTRIES_MODE_darwin := _symbols
 GEN_ENTRIES_MODE_windows := def
+GEN_ENTRIES_MODE_windows_msvc := def
 GEN_ENTRIES_MODE_linux := sym
 
+EXPORTED_SYMBOL_LIST_windows_msvc := -Wl,-def:
 EXPORTED_SYMBOL_LIST_windows :=
 EXPORTED_SYMBOL_LIST_darwin := -Wl,-exported_symbols_list,
 EXPORTED_SYMBOL_LIST_linux := -Wl,--version-script=
