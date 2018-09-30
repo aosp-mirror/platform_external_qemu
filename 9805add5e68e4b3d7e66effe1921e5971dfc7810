@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "80791818_0bb038aa",
+        "filename": "qemu2-auto-generated/qapi/qapi-introspect.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-09-30T03:14:47Z",
+      "side": 1,
+      "message": "nit: extra space",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 2
+      },
+      "revId": "9805add5e68e4b3d7e66effe1921e5971dfc7810",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
