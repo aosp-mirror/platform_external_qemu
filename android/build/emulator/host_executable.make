@@ -29,8 +29,14 @@ else
         $(foreach lib,$(LOCAL_SHARED_LIBRARIES), \
             -L$(dir $(call local-shared-library-path,$(lib)))) \
 
-    LOCAL_SHARED_LIBRARY_LDLIBS := \
-        $(foreach lib,$(LOCAL_SHARED_LIBRARIES), -l:$(notdir $(call local-shared-library-path,$(lib))))
+    ifeq ($(BUILD_TARGET_OS),windows_msvc)
+        # clang will generate an import lib for any generated dll, so link to that .lib file.
+        LOCAL_SHARED_LIBRARY_LDLIBS := \
+            $(foreach lib,$(LOCAL_SHARED_LIBRARIES), $(subst .dll,, -l$(notdir $(call local-shared-library-path,$(lib)))))
+    else
+        LOCAL_SHARED_LIBRARY_LDLIBS := \
+            $(foreach lib,$(LOCAL_SHARED_LIBRARIES), -l:$(notdir $(call local-shared-library-path,$(lib))))
+    endif
 endif
 
 LOCAL_LDLIBS := \
