@@ -27,14 +27,18 @@ int SharedMemory::create(mode_t mode) {
     return openInternal(O_CREAT | O_RDWR, mode);
 }
 
-int SharedMemory::open(AccessMode access) {
+int SharedMemory::createNoMapping(mode_t mode) {
+    return openInternal(O_CREAT | O_RDWR, mode, false);
+}
+
+int SharedMemory::open(AccessMode access, bool doMapping) {
     int oflag = O_RDONLY;
     int mode = 0400;
     if (access == AccessMode::READ_WRITE) {
         oflag = O_RDWR;
         mode = 0600;
     }
-    return openInternal(oflag, mode);
+    return openInternal(oflag, mode, doMapping);
 }
 
 void SharedMemory::close() {
@@ -56,7 +60,7 @@ bool SharedMemory::isOpen() const {
     return mAddr != unmappedMemory();
 }
 
-int SharedMemory::openInternal(int oflag, int mode) {
+int SharedMemory::openInternal(int oflag, int mode, bool doMapping) {
     if (isOpen()) {
         return EEXIST;
     }
@@ -86,16 +90,18 @@ int SharedMemory::openInternal(int oflag, int mode) {
         }
     }
 
-    int mapFlags = PROT_READ;
-    if (oflag & O_RDWR || oflag & O_CREAT) {
-        mapFlags |= PROT_WRITE;
-    }
+    if (doMapping) {
+        int mapFlags = PROT_READ;
+        if (oflag & O_RDWR || oflag & O_CREAT) {
+            mapFlags |= PROT_WRITE;
+        }
 
-    mAddr = mmap(nullptr, mSize, mapFlags, MAP_SHARED, mFd, 0);
-    if (mAddr == unmappedMemory()) {
-        err = -errno;
-        close();
-        return err;
+        mAddr = mmap(nullptr, mSize, mapFlags, MAP_SHARED, mFd, 0);
+        if (mAddr == unmappedMemory()) {
+            err = -errno;
+            close();
+            return err;
+        }
     }
 
     mCreate |= (oflag & O_CREAT);

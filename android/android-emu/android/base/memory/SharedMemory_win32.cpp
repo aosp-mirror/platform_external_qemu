@@ -29,9 +29,13 @@ int SharedMemory::create(mode_t mode) {
     return open(AccessMode::READ_WRITE);
 }
 
+int SharedMemory::createNoMapping(mode_t mode) {
+    return open(AccessMode::READ_WRITE, false);
+}
+
 // Opens the shared memory object, returns 0 on success
 // or the error code.
-int SharedMemory::open(AccessMode access) {
+int SharedMemory::open(AccessMode access, bool doMapping) {
     if (mCreate) {
         return EEXIST;
     }
@@ -61,18 +65,20 @@ int SharedMemory::open(AccessMode access) {
         return err;
     }
 
-    // MapViewOfFile has a slightly different way of naming protection.
-    protection = FILE_MAP_READ;
-    if (access == AccessMode::READ_WRITE) {
-        protection = FILE_MAP_WRITE;
-    }
+    if (doMapping) {
+        // MapViewOfFile has a slightly different way of naming protection.
+        protection = FILE_MAP_READ;
+        if (access == AccessMode::READ_WRITE) {
+            protection = FILE_MAP_WRITE;
+        }
 
-    mAddr = MapViewOfFile(hMapFile, protection, 0, 0, mSize);
+        mAddr = MapViewOfFile(hMapFile, protection, 0, 0, mSize);
 
-    if (hMapFile == NULL) {
-        int err = -GetLastError();
-        close();
-        return err;
+        if (hMapFile == NULL) {
+            int err = -GetLastError();
+            close();
+            return err;
+        }
     }
 
     mCreate = true;
