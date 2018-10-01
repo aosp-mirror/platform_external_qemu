@@ -13,7 +13,7 @@ ifeq ($(BUILD_TARGET_OS),darwin)
     host_common_LDLIBS += -Wl,-framework,AppKit
 endif
 
-ifeq ($(BUILD_TARGET_OS),windows)
+ifeq ($(call if-target-any-windows,,not-windows),)
     host_OS_SRCS = NativeSubWindow_win32.cpp
     host_common_LDLIBS += -lgdi32
 endif
@@ -61,22 +61,26 @@ ifeq ($(BUILD_TARGET_OS),darwin)
     standalone_common_SRC_FILES += standalone_common/angle-util/osx/OSXWindow.mm
 endif
 
-ifeq ($(BUILD_TARGET_OS),windows)
+ifeq ($(call if-target-any-windows,,not-windows),)
     standalone_common_SRC_FILES += standalone_common/angle-util/windows/WindowsTimer.cpp
     standalone_common_SRC_FILES += standalone_common/angle-util/windows/win32/Win32Window.cpp
 endif
 
-standalone_common_LDLIBS := -lm
+standalone_common_LDLIBS :=
 
 ifeq ($(BUILD_TARGET_OS),linux)
-    standalone_common_LDLIBS += -lX11 -lrt
+    standalone_common_LDLIBS += -lm -lX11 -lrt
 endif
 
 ifeq ($(BUILD_TARGET_OS),darwin)
-    standalone_common_LDLIBS += -Wl,-framework,AppKit
+    standalone_common_LDLIBS += -lm -Wl,-framework,AppKit
 endif
 
 ifeq ($(BUILD_TARGET_OS),windows)
+    standalone_common_LDLIBS += -lm -lgdi32
+endif
+
+ifeq ($(BUILD_TARGET_OS),windows_msvc)
     standalone_common_LDLIBS += -lgdi32
 endif
 
