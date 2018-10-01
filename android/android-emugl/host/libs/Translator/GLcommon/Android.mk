@@ -31,7 +31,7 @@ ifeq ($(BUILD_TARGET_OS),linux)
     host_common_LDFLAGS += -Wl,-Bsymbolic
 endif
 
-ifeq ($(BUILD_TARGET_OS),windows)
+ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
     host_common_LDLIBS += -lgdi32
     host_common_LDFLAGS += -Wl,--add-stdcall-alias
 endif
