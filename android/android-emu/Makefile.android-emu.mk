@@ -224,7 +224,11 @@ android_emu_LOCAL_SRC_FILES := \
     android/cpu_accelerator.cpp \
     android/crashreport/CrashSystem.cpp \
     android/crashreport/CrashReporter_common.cpp \
-    android/crashreport/CrashReporter_$(BUILD_TARGET_OS).cpp \
+    $(call if-target-any-windows, \
+        android/crashreport/CrashReporter_windows.cpp \
+    , \
+        android/crashreport/CrashReporter_$(BUILD_TARGET_OS).cpp \
+    ) \
     android/crashreport/HangDetector.cpp \
     android/cros.c \
     android/curl-support.c \
@@ -337,7 +341,11 @@ android_emu_LOCAL_SRC_FILES := \
     android/opengl/GLProcessPipe.cpp \
     android/opengl/gpuinfo.cpp \
     android/opengl/logger.cpp \
-    android/opengl/NativeGpuInfo_$(BUILD_TARGET_OS).cpp \
+    $(call if-target-any-windows, \
+        android/opengl/NativeGpuInfo_windows.cpp \
+    , \
+        android/opengl/NativeGpuInfo_$(BUILD_TARGET_OS).cpp \
+    ) \
     android/opengl/OpenglEsPipe.cpp \
     android/opengles.cpp \
     android/openssl-support.cpp \
@@ -372,7 +380,11 @@ android_emu_LOCAL_SRC_FILES := \
     android/snapshot/interface.cpp \
     android/snapshot/Loader.cpp \
     android/snapshot/MemoryWatch_common.cpp \
-    android/snapshot/MemoryWatch_$(BUILD_TARGET_OS).cpp \
+    $(call if-target-any-windows, \
+        android/snapshot/MemoryWatch_windows.cpp \
+    , \
+        android/snapshot/MemoryWatch_$(BUILD_TARGET_OS).cpp \
+    ) \
     android/snapshot/PathUtils.cpp \
     android/snapshot/Hierarchy.cpp \
     android/snapshot/Quickboot.cpp \
@@ -426,7 +438,7 @@ ifeq ($(BUILD_TARGET_OS),darwin)
 
 endif
 
-ifeq ($(BUILD_TARGET_OS),windows)
+ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
     android_emu_LOCAL_SRC_FILES += \
         android/windows_installer.cpp \
 
@@ -537,7 +549,7 @@ ifeq ($(BUILD_TARGET_OS),linux)
     ANDROID_EMU_BASE_LDLIBS += -lX11
     ANDROID_EMU_BASE_LDLIBS += -lGL
 endif
-ifeq ($(BUILD_TARGET_OS),windows)
+ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
     ANDROID_EMU_BASE_LDLIBS += -lpsapi -ld3d9
 endif
 ifeq ($(BUILD_TARGET_OS),darwin)
@@ -586,7 +598,7 @@ ANDROID_EMU_LDLIBS := \
     $(LIBCURL_LDLIBS) \
     $(BREAKPAD_CLIENT_LDLIBS) \
 
-ifeq ($(BUILD_TARGET_OS),windows)
+ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
 # For CoTaskMemFree used in camera-capture-windows.cpp
 ANDROID_EMU_LDLIBS += -lole32
 # For GetPerformanceInfo in CrashService_windows.cpp
@@ -815,7 +827,7 @@ LOCAL_SRC_FILES := \
   android/wear-agent/testing/WearAgentTestUtils.cpp \
   android/wear-agent/WearAgent_unittest.cpp \
 
-ifeq (windows,$(BUILD_TARGET_OS))
+ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
 LOCAL_SRC_FILES += \
   android/base/files/ScopedFileHandle_unittest.cpp \
   android/base/files/ScopedRegKey_unittest.cpp \

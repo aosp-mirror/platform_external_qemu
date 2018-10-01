@@ -28,7 +28,11 @@ $(call gen-hw-config-defs)
 LOCAL_SRC_FILES := \
     android/crashreport/main-crash-service.cpp \
     android/crashreport/CrashService_common.cpp \
-    android/crashreport/CrashService_$(BUILD_TARGET_OS).cpp \
+    $(call if-target-any-windows, \
+        android/crashreport/CrashService_windows.cpp \
+    , \
+        android/crashreport/CrashService_$(BUILD_TARGET_OS).cpp \
+    ) \
     android/crashreport/ui/ConfirmDialog.cpp \
     android/resource.c \
     android/skin/resource.c \
@@ -79,7 +83,7 @@ LOCAL_C_INCLUDES += \
     $(BREAKPAD_INCLUDES) \
     $(BREAKPAD_CLIENT_INCLUDES) \
 
-ifeq ($(BUILD_TARGET_OS),windows)
+ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
 $(eval $(call insert-windows-icon))
 endif
 
@@ -147,7 +151,11 @@ LOCAL_CFLAGS += -O0 $(LIBCURL_CFLAGS)
 
 LOCAL_SRC_FILES := \
     android/crashreport/CrashService_common.cpp \
-    android/crashreport/CrashService_$(BUILD_TARGET_OS).cpp \
+    $(call if-target-any-windows, \
+        android/crashreport/CrashService_windows.cpp \
+    , \
+        android/crashreport/CrashService_$(BUILD_TARGET_OS).cpp \
+    ) \
     android/crashreport/CrashService_unittest.cpp \
     android/crashreport/CrashSystem_unittest.cpp \
     android/crashreport/HangDetector_unittest.cpp \

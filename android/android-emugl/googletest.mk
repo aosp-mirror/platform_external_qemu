@@ -19,9 +19,8 @@ common_INCLUDES := \
 
 common_CFLAGS := -O0 -Wno-unused-variable
 
-ifneq (windows,$(BUILD_TARGET_OS))
-    common_LDLIBS += -lpthread
-endif
+common_LDLIBS += \
+    $(call if-target-any-windows,,-lpthread)
 
 $(call emugl-begin-static-library,libemugl_gtest)
 
