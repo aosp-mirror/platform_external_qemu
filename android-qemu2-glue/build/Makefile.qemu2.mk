@@ -34,6 +34,8 @@ qemu2-ifnot-os = $(if $(filter-out $1,$(BUILD_TARGET_OS)),$2,$3)
 qemu2-if-windows = $(call qemu2-if-os,windows,$1,$2)
 # If $(BUILD_TARGET_OS) is windows_msvc, return $1, otherwise $2
 qemu2-if-windows-msvc = $(call qemu2-if-os,windows_msvc,$1,$2)
+# If $(BUILD_TARGET_OS) is windows/windows_msvc, return $1, otherwise $2
+qemu2-if-any-windows = $(call qemu2-if-os,windows windows_msvc,$1,$2)
 
 # If $(BUILD_TARGET_OS) is not windows, return $1, otherwise $2
 qemu2-if-posix = $(call qemu2-ifnot-os,windows windows_msvc,$1,$2)
@@ -71,11 +73,10 @@ QEMU2_SDL2_LDLIBS := \
     $(call qemu2-if-darwin,, \
         -lSDL2main \
     ) \
-    $(call qemu2-if-windows, \
+    $(call qemu2-if-any-windows, \
         -limm32 \
         -ldinput8 \
         -ldxguid \
-        -ldxerr8 \
         -luser32 \
         -lgdi32 \
         -lwinmm \
@@ -88,6 +89,12 @@ QEMU2_SDL2_LDLIBS := \
     , \
         -ldl \
     ) \
+    $(call qemu2-if-windows, \
+        -ldxerr8 \
+    ) \
+    $(call qemu2-if-windows-msvc, \
+        $(QEMU2_PIXMAN_LDLIBS) \
+    )\
 
 ifeq (darwin,$(BUILD_TARGET_OS))
 # NOTE: Because the following contain commas, we cannot use qemu2-if-darwin!
@@ -129,6 +136,9 @@ QEMU2_CFLAGS := \
         -DWIN32_LEAN_AND_MEAN \
         -D__USE_MINGW_ANSI_STDIO=1 \
         -mms-bitfields) \
+    $(call qemu2-if-windows-msvc,\
+        -DWIN32_LEAN_AND_MEAN \
+    ) \
     -fno-strict-aliasing \
     -fno-common \
     $(LIBCURL_CFLAGS) \
@@ -180,7 +190,10 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES += \
     $(QEMU2_AUTO_GENERATED_DIR)/trace-root.c \
     $(QEMU2_COMMON_SOURCES) \
-    $(QEMU2_COMMON_SOURCES_$(BUILD_TARGET_TAG)) \
+    $(call qemu2-if-windows-msvc, \
+        $(QEMU2_COMMON_SOURCES_windows-x86_64), \
+        $(QEMU2_COMMON_SOURCES_$(BUILD_TARGET_TAG)) \
+    ) \
 
 $(call gen-hw-config-defs)
 QEMU2_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES)
@@ -198,7 +211,10 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_SRC_FILES += \
     $(QEMU2_LIB_qemuutil) \
-    $(QEMU2_LIB_qemuutil_$(BUILD_TARGET_TAG)) \
+    $(call qemu2-if-windows-msvc, \
+        $(QEMU2_LIB_qemuutil_windows-x86_64), \
+        $(QEMU2_LIB_qemuutil_$(BUILD_TARGET_TAG)) \
+    ) \
 
 # Include the simple tracer if requested
 ifneq (,$(QEMU2_TRACE))

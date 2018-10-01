@@ -89,7 +89,9 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES += \
     $(QEMU2_TARGET_SOURCES) \
     $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES) \
-    $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES_$(BUILD_TARGET_TAG))
+    $(call qemu2-if-windows-msvc, \
+        $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES_windows-x86_64), \
+        $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES_$(BUILD_TARGET_TAG))) \
 
 ifeq (arm64,$(QEMU2_TARGET))
 LOCAL_SRC_FILES += $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml-arm64.c
@@ -103,7 +105,7 @@ endif
 
 LOCAL_SRC_FILES += \
     $(call qemu2-if-target,x86 x86_64, \
-        $(call qemu2-if-os, linux windows, hvf-stub.c), \
+        $(call qemu2-if-os, linux windows windows_msvc, hvf-stub.c), \
         hvf-stub.c \
     ) \
     #$(call qemu2-if-target,x86 x86_64, \
@@ -113,7 +115,7 @@ LOCAL_SRC_FILES += \
 
 
 LOCAL_PREBUILTS_OBJ_FILES += \
-    $(call qemu2-if-windows,$(QEMU2_CONFIG_DIR)/version.o)
+    $(call qemu2-if-any-windows,$(QEMU2_CONFIG_DIR)/version.o)
 
 $(call end-emulator-library)
 
@@ -143,7 +145,7 @@ ifeq (,$(CONFIG_MIN_BUILD))
             hw/i386/acpi-build.c \
             hw/i386/pc_piix.c \
             ) \
-        $(call qemu2-if-windows, \
+        $(call qemu2-if-any-windows, \
             stubs/win32-stubs.c \
             ) \
         ui/sdl2.c \
@@ -195,7 +197,7 @@ LOCAL_SRC_FILES += \
         hw/i386/acpi-build.c \
         hw/i386/pc_piix.c \
         ) \
-    $(call qemu2-if-windows, \
+    $(call qemu2-if-any-windows, \
         android-qemu2-glue/stubs/win32-stubs.c \
         ) \
     vl.c \
