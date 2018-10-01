@@ -22,9 +22,10 @@ LOCAL_SRC_FILES += combined_unittest.cpp
 
 LOCAL_SHARED_LIBRARIES += \
     android-emu-shared \
+    libcutils \
+    libgui \
     libOpenglSystemCommon \
     libEGL_emulation \
-    libcutils \
     libGLESv2_emulation \
 
 LOCAL_INSTALL_OPENGL := true
