@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c7b3a7f5_26e9a5cc",
+        "filename": "android/android-emugl/guest/android/data_space.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-01T21:07:09Z",
+      "side": 1,
+      "message": "Is this possible to write exactly \"STANDARD_BT709 | TRANSFER_LINEAR | RANGE_EXTENDED\" instead of \"406913024\"? Do we have these constants defined? Maybe we want to define them?",
+      "range": {
+        "startLine": 50,
+        "startChar": 30,
+        "endLine": 50,
+        "endChar": 43
+      },
+      "revId": "ddd302eb02c0c2ca6d30e63a61b6b0ad812f47ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
