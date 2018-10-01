@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ec27900d_4d35e948",
+        "filename": "android/android-emugl/guest/Android.mk",
+        "patchSetId": 9
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-01T20:34:56Z",
+      "side": 1,
+      "message": "3? :-)",
+      "range": {
+        "startLine": 38,
+        "startChar": 50,
+        "endLine": 38,
+        "endChar": 51
+      },
+      "revId": "dd3732de839d3ab216c497e0121908e285b36c51",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "41ee3c2e_b084be88",
+        "filename": "android/android-emugl/guest/Android.mk",
+        "patchSetId": 9
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-01T20:34:56Z",
+      "side": 1,
+      "message": "Does anything need to be done for macOS?",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 5
+      },
+      "revId": "dd3732de839d3ab216c497e0121908e285b36c51",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c7a90566_caca0d29",
+        "filename": "android/android-emugl/guest/androidImpl/AndroidWindow.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-01T20:34:56Z",
+      "side": 1,
+      "message": "Should this return failure in this case, or at least initialize *value \u003d 0; ?",
+      "range": {
+        "startLine": 91,
+        "startChar": 8,
+        "endLine": 92,
+        "endChar": 18
+      },
+      "revId": "dd3732de839d3ab216c497e0121908e285b36c51",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
