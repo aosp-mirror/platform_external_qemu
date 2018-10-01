@@ -126,10 +126,16 @@ public:
     // write access. Returns 0 on success, or an negative error code otheriwse.
     // The error code (errno) is platform dependent.
     int create(mode_t mode);
+    // Creates a shared object in the same manner as create(), except for
+    // performing actual mapping.
+    int createNoMapping(mode_t mode);
 
     // Opens the shared memory object, returns 0 on success
     // or the negative error code.
-    int open(AccessMode access);
+    // |doMapping| controls whether or not to perform
+    // the actual mmap() call as well.
+    // If false, the user accesses the fd directly.
+    int open(AccessMode access, bool doMapping = true);
     bool isOpen() const;
     void close();
 
@@ -139,9 +145,11 @@ public:
     memory_type operator*() const { return get(); }
 
     handle_type getFd() { return mFd; }
+    bool isMapped() const { return mAddr != unmappedMemory(); }
 
 private:
-    int openInternal(int oflag, int mode);
+    int openInternal(int oflag, int mode, bool doMapping = true);
+
     void clear() {
         mSize = 0;
         mName = "";
