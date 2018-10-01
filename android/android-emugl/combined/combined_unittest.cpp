@@ -176,6 +176,9 @@ protected:
         EXPECT_EQ(EGL_TRUE, eglDestroySurface(mEGL.display, mEGL.surface));
         EXPECT_EQ(EGL_TRUE, eglTerminate(mEGL.display));
         EXPECT_EQ(EGL_TRUE, eglReleaseThread());
+
+        // Cancel all host threads as well
+        android_finishOpenglesRenderer();
     }
 
     buffer_handle_t createTestGrallocBuffer(

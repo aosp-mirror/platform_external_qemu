@@ -158,6 +158,12 @@ void RendererImpl::stop(bool wait) {
     mStoppedChannels.clear();
 }
 
+void RendererImpl::finish() {
+    mRenderWindow->setPaused(true);
+    cleanupRenderThreads();
+    mRenderWindow->setPaused(false);
+}
+
 void RendererImpl::cleanupRenderThreads() {
     android::base::AutoLock lock(mChannelsLock);
     const auto channels = std::move(mChannels);

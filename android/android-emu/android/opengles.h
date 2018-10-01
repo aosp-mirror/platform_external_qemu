@@ -87,6 +87,11 @@ void android_screenShot(const char* dirname);
 /* Stop the renderer process */
 void android_stopOpenglesRenderer(bool wait);
 
+/* Finish all renderer work, deleting current
+ * render threads. Renderer is allowed to get
+ * new render threads after that. */
+void android_finishOpenglesRenderer();
+
 /* set to TRUE if you want to use fast GLES pipes, 0 if you want to
  * fallback to local TCP ones
  */
