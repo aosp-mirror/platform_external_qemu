@@ -16,15 +16,17 @@ LOCAL_C_INCLUDES += \
 
 ifeq ($(BUILD_TARGET_OS),linux)
 LOCAL_LDFLAGS += '-Wl,-rpath,$$ORIGIN/lib$(BUILD_TARGET_SUFFIX),-rpath,$$ORIGIN/lib$(BUILD_TARGET_SUFFIX)/gles_swiftshader'
+LOCAL_LDLIBS += -ldl
 endif
 
 LOCAL_SRC_FILES += combined_unittest.cpp
 
 LOCAL_SHARED_LIBRARIES += \
     android-emu-shared \
+    libcutils \
+    libgui \
     libOpenglSystemCommon \
     libEGL_emulation \
-    libcutils \
     libGLESv2_emulation \
 
 LOCAL_INSTALL_OPENGL := true
