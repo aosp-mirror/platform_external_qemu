@@ -48,6 +48,54 @@
     },
     {
       "key": {
+        "uuid": "6dc0b880_2e7dce1e",
+        "filename": "android/android-emugl/guest/androidImpl/Ashmem.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-01T23:10:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11352240_d6723061",
+      "range": {
+        "startLine": 38,
+        "startChar": 8,
+        "endLine": 38,
+        "endChar": 57
+      },
+      "revId": "adf637ed4b0e976fc0a1e1174eec1ceb42420573",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6c2b3a8d_43a03e8e",
+        "filename": "android/android-emugl/guest/androidImpl/Ashmem.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-01T23:10:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "33bf82a1_b128b8b4",
+      "range": {
+        "startLine": 38,
+        "startChar": 8,
+        "endLine": 38,
+        "endChar": 25
+      },
+      "revId": "adf637ed4b0e976fc0a1e1174eec1ceb42420573",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8f0b1d16_ef8f3522",
         "filename": "android/android-emugl/guest/androidImpl/Ashmem.cpp",
         "patchSetId": 1
@@ -94,6 +142,54 @@
     },
     {
       "key": {
+        "uuid": "482ecd51_0ddbddd8",
+        "filename": "android/android-emugl/guest/androidImpl/Ashmem.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-01T23:10:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e09ecedf_da38c837",
+      "range": {
+        "startLine": 57,
+        "startChar": 8,
+        "endLine": 57,
+        "endChar": 26
+      },
+      "revId": "adf637ed4b0e976fc0a1e1174eec1ceb42420573",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b934965c_27cab1c8",
+        "filename": "android/android-emugl/guest/androidImpl/Ashmem.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-01T23:10:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8f0b1d16_ef8f3522",
+      "range": {
+        "startLine": 57,
+        "startChar": 8,
+        "endLine": 57,
+        "endChar": 26
+      },
+      "revId": "adf637ed4b0e976fc0a1e1174eec1ceb42420573",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ec85787b_53148820",
         "filename": "android/android-emugl/guest/androidImpl/Ashmem.cpp",
         "patchSetId": 1
@@ -114,6 +210,30 @@
       "revId": "adf637ed4b0e976fc0a1e1174eec1ceb42420573",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5af4cac7_fe79b965",
+        "filename": "android/android-emugl/guest/androidImpl/Ashmem.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-01T23:10:06Z",
+      "side": 1,
+      "message": "It could be unique_ptr, I guess.\n\nNot using std::move with emplace, or emplace generally, because that\u0027s actually a bug uncovered during testing; unordered map emplace won\u0027t replace existing mappings.",
+      "parentUuid": "ec85787b_53148820",
+      "range": {
+        "startLine": 72,
+        "startChar": 40,
+        "endLine": 72,
+        "endChar": 41
+      },
+      "revId": "adf637ed4b0e976fc0a1e1174eec1ceb42420573",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -183,6 +303,30 @@
       "revId": "adf637ed4b0e976fc0a1e1174eec1ceb42420573",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "65140797_2b8645cc",
+        "filename": "android/android-emugl/guest/androidImpl/GrallocDispatch.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-01T23:10:06Z",
+      "side": 1,
+      "message": "Done (made it C++)",
+      "parentUuid": "02cb5343_79320735",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 12
+      },
+      "revId": "adf637ed4b0e976fc0a1e1174eec1ceb42420573",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
