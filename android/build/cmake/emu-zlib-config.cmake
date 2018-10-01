@@ -16,7 +16,13 @@ get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/and
 
 set(ZLIB_INCLUDE_DIR "${PREBUILT_ROOT}/include")
 set(ZLIB_INCLUDE_DIRS "${ZLIB_INCLUDE_DIRS}")
-set(ZLIB_LIBRARIES "${PREBUILT_ROOT}/lib/libz.a")
+
+if (WIN32 OR (${LOCAL_TARGET_TAG} MATCHES ".*windows_msvc.*"))
+    set(ZLIB_LIBRARIES "${PREBUILT_ROOT}/lib/zlibstatic.lib")
+else ()
+    set(ZLIB_LIBRARIES "${PREBUILT_ROOT}/lib/libz.a")
+endif ()
+
 set(ZLIB_FOUND TRUE)
 
 set(PACKAGE_EXPORT "ZLIB_INCLUDE_DIR;ZLIB_INCLUDE_DIRS;ZLIB_LIBRARIES;ZLIB_FOUND")

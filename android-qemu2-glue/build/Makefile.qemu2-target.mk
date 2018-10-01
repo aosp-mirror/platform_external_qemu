@@ -61,7 +61,7 @@ QEMU2_SYSTEM_LDLIBS := \
     $(QEMU2_GLIB_LDLIBS) \
     $(QEMU2_PIXMAN_LDLIBS) \
     $(CXX_STD_LIB) \
-    -lfdt \
+    $(call qemu2-if-windows-msvc, -llibfdtstatic, -lfdt) \
     $(call qemu2-if-windows, -lvfw32 -ldxguid) \
     $(call qemu2-if-linux, -lpulse) \
     $(call qemu2-if-darwin, -weak_framework Hypervisor) \
@@ -216,7 +216,7 @@ LOCAL_LDLIBS += \
     $(QEMU2_GLIB_LDLIBS) \
     $(QEMU2_PIXMAN_LDLIBS) \
     $(CXX_STD_LIB) \
-    -lfdt \
+    $(call qemu2-if-windows-msvc, -llibfdtstatic, -lfdt) \
     $(call qemu2-if-windows, -lvfw32 -ldxguid) \
     $(call qemu2-if-linux, -lpulse) \
     $(ANDROID_EMU_LDLIBS) \

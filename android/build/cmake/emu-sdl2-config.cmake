@@ -16,7 +16,13 @@ get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/and
 
 set(SDL2_INCLUDE_DIRS "${PREBUILT_ROOT}/include")
 set(SDL2_INCLUDE_DIR "${PREBUILT_ROOT}/include")
-set(SDL2_LIBRARIES "${PREBUILT_ROOT}/lib/SDL2.a")
+
+if (WIN32 OR (${LOCAL_TARGET_TAG} MATCHES ".*windows_msvc.*"))
+    set(SDL2_LIBRARIES "${PREBUILT_ROOT}/lib/SDL2.lib")
+else ()
+    set(SDL2_LIBRARIES "${PREBUILT_ROOT}/lib/libSDL2.a")
+endif ()
+
 set(SDL_FOUND TRUE)
 
 set(PACKAGE_EXPORT "SDL2_INCLUDE_DIR;SDL2_INCLUDE_DIRS;SDL2_LIBRARIES;SDL2_FOUND")

@@ -16,12 +16,19 @@ get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/and
 
 set(PROTOBUF_INCLUDE_DIR "${PREBUILT_ROOT}/include")
 set(PROTOBUF_INCLUDE_DIRS "${PROTOBUF_INCLUDE_DIR}")
-set(PROTOBUF_LIBRARIES "${PREBUILT_ROOT}/lib/libprotobuf.a")
-set(PROTOBUF_LIBRARY "${PREBUILT_ROOT}/lib/libprotobuf.a")
+
+if (WIN32 OR (${LOCAL_TARGET_TAG} MATCHES ".*windows_msvc.*"))
+    set(PROTOBUF_LIBRARIES "${PREBUILT_ROOT}/lib/libprotobuf.lib")
+    set(PROTOBUF_LIBRARY "${PREBUILT_ROOT}/lib/libprotobuf.lib")
+else ()
+    set(PROTOBUF_LIBRARIES "${PREBUILT_ROOT}/lib/libprotobuf.a")
+    set(PROTOBUF_LIBRARY "${PREBUILT_ROOT}/lib/libprotobuf.a")
+endif ()
+
 set(PROTOBUF_IMPORT_DIRS "${PROTOBUF_INCLUDE_DIR}")
 set(PROTOBUF_FOUND TRUE)
 
-if ( ${LOCAL_TARGET_TAG} MATCHES ".*windows.*")
+if ((NOT WIN32) AND (${LOCAL_TARGET_TAG} MATCHES ".*windows.*"))
     # We better be able to run the protoc tool when we are cross compiling...
     get_filename_component(PROTO_EXEC_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/protobuf/linux-x86_64" ABSOLUTE)
     set(PROTOBUF_PROTOC_EXECUTABLE "${PROTO_EXEC_ROOT}/bin/protoc")

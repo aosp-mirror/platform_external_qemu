@@ -17,7 +17,13 @@ get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/and
 
 set(PNG_INCLUDE_DIR "${PREBUILT_ROOT}/include")
 set(PNG_INCLUDE_DIRS "${PREBUILT_ROOT}/include")
-set(PNG_LIBRARIES "${PREBUILT_ROOT}/lib/libpng.a;${ZLIB_LIBRARIES}")
+
+if (WIN32 OR (${LOCAL_TARGET_TAG} MATCHES ".*windows_msvc.*"))
+    set(PNG_LIBRARIES "${PREBUILT_ROOT}/lib/libpng16_static.lib;${ZLIB_LIBRARIES}")
+else ()
+    set(PNG_LIBRARIES "${PREBUILT_ROOT}/lib/libpng.a;${ZLIB_LIBRARIES}")
+endif ()
+
 set(PNG_FOUND TRUE)
 
 set(PACKAGE_EXPORT "PNG_INCLUDE_DIR;PNG_INCLUDE_DIRS;PNG_LIBRARIES;PNG_FOUND")

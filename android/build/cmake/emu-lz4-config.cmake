@@ -12,19 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/curl/${LOCAL_TARGET_TAG}" ABSOLUTE)
+get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/lz4/${LOCAL_TARGET_TAG}" ABSOLUTE)
 
-set(OPENSSL_INCLUDE_DIR "${PREBUILT_ROOT}/include")
-set(OPENSSL_INCLUDE_DIRS "${PREBUILT_ROOT}/include")
+set(LZ4_INCLUDE_DIR "${PREBUILT_ROOT}/include")
+set(LZ4_INCLUDE_DIRS "${VPX_INCLUDE_DIRS}")
 
 if (WIN32 OR (${LOCAL_TARGET_TAG} MATCHES ".*windows_msvc.*"))
-    set(OPENSSL_LIBRARIES "${PREBUILT_ROOT}/lib/libeay32.lib;${PREBUILT_ROOT}/lib/libeay32.lib")
+    set(VPX_LIBRARIES "${PREBUILT_ROOT}/lib/liblz4_static.lib")
 else ()
-    set(OPENSSL_LIBRARIES "${PREBUILT_ROOT}/lib/libssl.a;${PREBUILT_ROOT}/lib/libcrypto.a")
+    set(VPX_LIBRARIES "${PREBUILT_ROOT}/lib/liblz4.a")
 endif ()
 
-set(OPENSSL_FOUND TRUE)
-set(OPENSSL_VERSION "1.0.2j")
+set(LZ4_FOUND TRUE)
 
-set(PACKAGE_EXPORT "OPENSSL_INCLUDE_DIR;OPENSSL_INCLUDE_DIRS;OPENSSL_LIBRARIES;OPENSSL_FOUND;OPENSSL_VERSION")
+set(PACKAGE_EXPORT "LZ4_INCLUDE_DIR;LZ4_INCLUDE_DIRS;LZ4_LIBRARIES;LZ4_FOUND")
+
 

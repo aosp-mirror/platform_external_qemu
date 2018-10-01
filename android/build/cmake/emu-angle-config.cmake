@@ -16,7 +16,12 @@ get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/and
 
 set(ANGLE_INCLUDE_DIRS "${PREBUILT_ROOT}/include")
 set(ANGLE_INCLUDE_DIR "${PREBUILT_ROOT}/include")
-set(ANGLE_LIBRARIES "${PREBUILT_ROOT}/lib/libtranslator_static.a;${PREBUILT_ROOT}/lib/libtranslator_lib.a;${PREBUILT_ROOT}/lib/libpreprocessor.a;${PREBUILT_ROOT}/lib/libangle_common.a")
+
+if (WIN32 OR (${LOCAL_TARGET_TAG} MATCHES ".*windows_msvc.*"))
+    set(ANGLE_LIBRARIES "${PREBUILT_ROOT}/lib/translator_static.lib;${PREBUILT_ROOT}/lib/translator_lib.lib;${PREBUILT_ROOT}/lib/preprocessor.lib;${PREBUILT_ROOT}/lib/angle_common.lib")
+else ()
+    set(ANGLE_LIBRARIES "${PREBUILT_ROOT}/lib/libtranslator_static.a;${PREBUILT_ROOT}/lib/libtranslator_lib.a;${PREBUILT_ROOT}/lib/libpreprocessor.a;${PREBUILT_ROOT}/lib/libangle_common.a")
+endif ()
 set(ANGLE_FOUND TRUE)
 set(PACKAGE_EXPORT "ANGLE_INCLUDE_DIR;ANGLE_INCLUDE_DIRS;ANGLE_LIBRARIES;ANGLE_FOUND")
 
