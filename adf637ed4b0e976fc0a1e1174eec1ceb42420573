@@ -260,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "f3f993fe_0adf6c95",
+        "filename": "android/android-emugl/guest/androidImpl/GrallocDispatch.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-01T23:44:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b86e147f_392f7e29",
+      "range": {
+        "startLine": 29,
+        "startChar": 26,
+        "endLine": 29,
+        "endChar": 63
+      },
+      "revId": "adf637ed4b0e976fc0a1e1174eec1ceb42420573",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2706a70b_78bc32c8",
         "filename": "android/android-emugl/guest/androidImpl/GrallocDispatch.cpp",
         "patchSetId": 1
@@ -280,6 +304,30 @@
       "revId": "adf637ed4b0e976fc0a1e1174eec1ceb42420573",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf4624df_56d79f13",
+        "filename": "android/android-emugl/guest/androidImpl/GrallocDispatch.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-01T23:44:42Z",
+      "side": 1,
+      "message": "Done (added check)",
+      "parentUuid": "2706a70b_78bc32c8",
+      "range": {
+        "startLine": 43,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 16
+      },
+      "revId": "adf637ed4b0e976fc0a1e1174eec1ceb42420573",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
