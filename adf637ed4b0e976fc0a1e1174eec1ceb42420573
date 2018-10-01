@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "33bf82a1_b128b8b4",
+        "filename": "android/android-emugl/guest/androidImpl/Ashmem.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-01T22:31:55Z",
+      "side": 1,
+      "message": "Why not a unique_ptr?",
+      "range": {
+        "startLine": 38,
+        "startChar": 8,
+        "endLine": 38,
+        "endChar": 25
+      },
+      "revId": "adf637ed4b0e976fc0a1e1174eec1ceb42420573",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8f0b1d16_ef8f3522",
         "filename": "android/android-emugl/guest/androidImpl/Ashmem.cpp",
         "patchSetId": 1
@@ -36,6 +59,29 @@
       "writtenOn": "2018-10-01T22:26:08Z",
       "side": 1,
       "message": "Isn\u0027t this a memory leak? They are closed, but not deleted.",
+      "range": {
+        "startLine": 57,
+        "startChar": 8,
+        "endLine": 57,
+        "endChar": 26
+      },
+      "revId": "adf637ed4b0e976fc0a1e1174eec1ceb42420573",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e09ecedf_da38c837",
+        "filename": "android/android-emugl/guest/androidImpl/Ashmem.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-01T22:31:55Z",
+      "side": 1,
+      "message": "This is leaking the SharedMemory pointers.  Could ~SharedMemory call close automatically too?",
       "range": {
         "startLine": 57,
         "startChar": 8,
