@@ -19,9 +19,8 @@ host_commonSources := $(commonSources)
 
 host_commonLdLibs := $(CXX_STD_LIB)
 
-ifneq (windows,$(BUILD_TARGET_OS))
-    host_commonLdLibs += -ldl -lpthread
-endif
+host_commonLdLibs += \
+    $(call if-target-any-windows,,-ldl -lpthread)
 
 $(call emugl-begin-static-library,libemugl_common)
 LOCAL_SRC_FILES := $(host_commonSources)
