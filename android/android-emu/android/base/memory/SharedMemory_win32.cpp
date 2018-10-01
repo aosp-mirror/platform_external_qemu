@@ -26,12 +26,20 @@ SharedMemory::SharedMemory(StringView name, size_t size)
 // Creates a shared region, you will be considered the owner, and will have
 // write access. Returns 0 on success, or an error code otheriwse.
 int SharedMemory::create(mode_t mode) {
-    return open(AccessMode::READ_WRITE);
+    return openInternal(AccessMode::READ_WRITE);
+}
+
+int SharedMemory::createNoMapping(mode_t mode) {
+    return openInternal(AccessMode::READ_WRITE, false /* no mapping */);
 }
 
 // Opens the shared memory object, returns 0 on success
 // or the error code.
 int SharedMemory::open(AccessMode access) {
+    return openInternal(access);
+}
+
+int SharedMemory::openInternal(AccessMode access, bool doMapping) {
     if (mCreate) {
         return EEXIST;
     }
@@ -61,18 +69,20 @@ int SharedMemory::open(AccessMode access) {
         return err;
     }
 
-    // MapViewOfFile has a slightly different way of naming protection.
-    protection = FILE_MAP_READ;
-    if (access == AccessMode::READ_WRITE) {
-        protection = FILE_MAP_WRITE;
-    }
+    if (doMapping) {
+        // MapViewOfFile has a slightly different way of naming protection.
+        protection = FILE_MAP_READ;
+        if (access == AccessMode::READ_WRITE) {
+            protection = FILE_MAP_WRITE;
+        }
 
-    mAddr = MapViewOfFile(hMapFile, protection, 0, 0, mSize);
+        mAddr = MapViewOfFile(hMapFile, protection, 0, 0, mSize);
 
-    if (hMapFile == NULL) {
-        int err = -GetLastError();
-        close();
-        return err;
+        if (hMapFile == NULL) {
+            int err = -GetLastError();
+            close();
+            return err;
+        }
     }
 
     mCreate = true;
@@ -86,14 +96,15 @@ void SharedMemory::close() {
     }
     if (mFd) {
         CloseHandle(mFd);
-        mFd = invalidHandle();
+        mFd = createMappingFailedHandle();
     }
 
     assert(!isOpen());
 }
 
 bool SharedMemory::isOpen() const {
-    return mAddr != unmappedMemory();
+    return mFd != createMappingFailedHandle();
 }
+
 }  // namespace base
 }  // namespace android
