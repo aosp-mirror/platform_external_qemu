@@ -112,12 +112,12 @@ static int hook_dequeueBuffer_DEPRECATED(struct ANativeWindow* window, struct AN
 }
 
 static int hook_lockBuffer_DEPRECATED(struct ANativeWindow* window, struct ANativeWindowBuffer* buffer) {
-    fprintf(stderr, "%s:%p not implemented\n", __func__, window);
+    E("Not implemented");
     return 0;
 }
 
 static int hook_queueBuffer_DEPRECATED(struct ANativeWindow* window, struct ANativeWindowBuffer* buffer) {
-    fprintf(stderr, "%s:%p not implemented\n", __func__, window);
+    E("Not implemented");
     return 0;
 }
 
@@ -127,12 +127,12 @@ static int hook_query(const struct ANativeWindow* window, int what, int* value) 
 }
 
 static int hook_perform(struct ANativeWindow* window, int operation, ... ) {
-    fprintf(stderr, "%s:%p not implemented\n", __func__, window);
+    E("Not implemented");
     return 0;
 }
 
 static int hook_cancelBuffer_DEPRECATED(struct ANativeWindow* window, struct ANativeWindowBuffer* buffer) {
-    fprintf(stderr, "%s:%p not implemented\n", __func__, window);
+    E("Not implemented");
     return 0;
 }
 
@@ -147,16 +147,16 @@ static int hook_queueBuffer(struct ANativeWindow* window, struct ANativeWindowBu
 }
 
 static int hook_cancelBuffer(struct ANativeWindow* window, struct ANativeWindowBuffer* buffer, int fenceFd) {
-    fprintf(stderr, "%s:%p not implemented\n", __func__, window);
+    E("Not implemented");
     return 0;
 }
 
 static void hook_incRef(struct android_native_base_t* common) {
-    fprintf(stderr, "%s:%p not implemented\n", __func__, common);
+    E("Not implemented");
 }
 
 static void hook_decRef(struct android_native_base_t* common) {
-    fprintf(stderr, "%s:%p not implemented\n", __func__, common);
+    E("Not implemented");
 }
 
 } // namespace aemu
