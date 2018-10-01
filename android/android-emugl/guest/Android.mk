@@ -32,6 +32,7 @@ LOCAL_SRC_FILES := \
     androidImpl/AndroidBufferQueue.cpp \
     androidImpl/ANativeWindow.cpp \
     androidImpl/AndroidWindow.cpp \
+    androidImpl/AndroidWindowBuffer.cpp \
 
 $(call emugl-end-module)
 
