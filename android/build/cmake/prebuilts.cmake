@@ -15,7 +15,7 @@
 # This contains a set of definitions to make working with prebuilts easier
 # and manageable.
 
-set(PREBUILT_COMMON "BLUEZ;LZ4;X264")
+set(PREBUILT_COMMON "BLUEZ;X264")
 
 # Internal function for simple packages.
 function(simple_prebuilt Package)
@@ -26,7 +26,7 @@ function(simple_prebuilt Package)
 
     set(${PKG}_INCLUDE_DIRS "${PREBUILT_ROOT}/include" PARENT_SCOPE)
     set(${PKG}_INCLUDE_DIR "${PREBUILT_ROOT}/include" PARENT_SCOPE)
-    set(${PKG}_LIBRARIES "${PREBUILT_ROOT}/lib/lib${pgk}.a" PARENT_SCOPE)
+    set(${PKG}_LIBRARIES "${PREBUILT_ROOT}/lib/lib${pkg}.a" PARENT_SCOPE)
     set(${PKG}_FOUND TRUE PARENT_SCOPE)
     set(PACKAGE_EXPORT "${PKG}_INCLUDE_DIR;${PKG}_INCLUDE_DIRS;${PKG}_LIBRARIES;${PKG}_FOUND" PARENT_SCOPE)
 endfunction()
@@ -193,6 +193,9 @@ elseif ( ${LOCAL_TARGET_TAG} MATCHES "linux-x86_64")
     # Configure the RPATH be dynamic..
     list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-Wl,-rpath,'$ORIGIN/lib64'")
 elseif (${LOCAL_TARGET_TAG} MATCHES "darwin-x86")
+    list(APPEND RUNTIME_OS_PROPERTIES "")
+    list(APPEND RUNTIME_OS_DEPENDENCIES "")
+elseif (${LOCAL_TARGET_TAG} MATCHES "windows_msvc-x86_64")
     list(APPEND RUNTIME_OS_PROPERTIES "")
     list(APPEND RUNTIME_OS_DEPENDENCIES "")
 endif ()

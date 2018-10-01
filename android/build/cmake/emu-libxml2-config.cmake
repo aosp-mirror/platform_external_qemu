@@ -16,7 +16,13 @@ get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/and
 
 set(LIBXML2_INCLUDE_DIR "${PREBUILT_ROOT}/include")
 set(LIBXML2_INCLUDE_DIRS "${LIBXML2_INCLUDE_DIRS}")
-set(LIBXML2_LIBRARIES "${PREBUILT_ROOT}/lib/libxml2.a")
+
+if (WIN32 OR (${LOCAL_TARGET_TAG} MATCHES ".*windows_msvc.*"))
+    set(LIBXML2_LIBRARIES "${PREBUILT_ROOT}/lib/libxml2_a.lib")
+else ()
+    set(LIBXML2_LIBRARIES "${PREBUILT_ROOT}/lib/libxml2.a")
+endif ()
+
 set(LIBXML2_DEFINITIONS "-DLIBXML_STATIC")
 set(LIBXML2_FOUND TRUE)
 
