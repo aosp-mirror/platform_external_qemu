@@ -13,6 +13,7 @@ $(call emugl-begin-shared-library,libcutils)
 LOCAL_SRC_FILES := \
     androidImpl/Ashmem.cpp \
     androidImpl/Properties.cpp \
+    androidImpl/GrallocDispatch.cpp \
 
 $(call emugl-end-module)
 
