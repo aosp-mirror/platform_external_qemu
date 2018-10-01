@@ -46,6 +46,30 @@
       "revId": "efdcc5cb5752e5b9f4c61da6daa2be9eea66336d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "84f8f19d_9e75e1e0",
+        "filename": "android/android-emugl/combined/combined_unittest.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-01T20:15:06Z",
+      "side": 1,
+      "message": "Using a raw ptr for now until we figure out how to create OnDemand elements with 0 args in the constructor (for the controlled destruction capability).",
+      "parentUuid": "4589a65c_7b05c26b",
+      "range": {
+        "startLine": 90,
+        "startChar": 43,
+        "endLine": 90,
+        "endChar": 51
+      },
+      "revId": "efdcc5cb5752e5b9f4c61da6daa2be9eea66336d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
