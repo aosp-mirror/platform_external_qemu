@@ -17,7 +17,13 @@ get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/and
 
 set(CURL_INCLUDE_DIRS "${PREBUILT_ROOT}/include")
 set(CURL_INCLUDE_DIR "${PREBUILT_ROOT}/include")
-set(CURL_LIBRARIES "${PREBUILT_ROOT}/lib/libcurl.a;${OPENSSL_LIBRARIES}")
+
+if (WIN32 OR (${LOCAL_TARGET_TAG} MATCHES ".*windows_msvc.*"))
+    set(CURL_LIBRARIES "${PREBUILT_ROOT}/lib/libcurl.lib;${OPENSSL_LIBRARIES}")
+else ()
+    set(CURL_LIBRARIES "${PREBUILT_ROOT}/lib/libcurl.a;${OPENSSL_LIBRARIES}")
+endif ()
+
 set(CURL_CFLAGS "-DCURL_STATICLIB")
 set(CURL_FOUND TRUE)
 

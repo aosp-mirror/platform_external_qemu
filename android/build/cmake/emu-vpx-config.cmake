@@ -16,7 +16,13 @@ get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/and
 
 set(VPX_INCLUDE_DIR "${PREBUILT_ROOT}/include")
 set(VPX_INCLUDE_DIRS "${VPX_INCLUDE_DIRS}")
-set(VPX_LIBRARIES "${PREBUILT_ROOT}/lib/libvpx.a")
+
+if (WIN32 OR (${LOCAL_TARGET_TAG} MATCHES ".*windows_msvc.*"))
+    set(VPX_LIBRARIES "${PREBUILT_ROOT}/lib/vpxmt.lib")
+else ()
+    set(VPX_LIBRARIES "${PREBUILT_ROOT}/lib/libvpx.a")
+endif ()
+
 set(VPX_FOUND TRUE)
 
 set(PACKAGE_EXPORT "VPX_INCLUDE_DIR;VPX_INCLUDE_DIRS;VPX_LIBRARIES;VPX_FOUND")
