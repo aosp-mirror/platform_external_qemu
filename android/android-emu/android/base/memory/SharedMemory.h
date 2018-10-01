@@ -86,6 +86,9 @@ public:
     constexpr static handle_type invalidHandle() {
         return INVALID_HANDLE_VALUE;
     }
+    constexpr static handle_type createMappingFailedHandle() {
+        return NULL;
+    }
     constexpr static memory_type unmappedMemory() { return nullptr; }
 #else
     using memory_type = void*;
@@ -126,10 +129,15 @@ public:
     // write access. Returns 0 on success, or an negative error code otheriwse.
     // The error code (errno) is platform dependent.
     int create(mode_t mode);
+    // Creates a shared object in the same manner as create(), except for
+    // performing actual mapping.
+    int createNoMapping(mode_t mode);
 
     // Opens the shared memory object, returns 0 on success
     // or the negative error code.
+    // The shared memory object will be mapped.
     int open(AccessMode access);
+
     bool isOpen() const;
     void close();
 
@@ -139,9 +147,15 @@ public:
     memory_type operator*() const { return get(); }
 
     handle_type getFd() { return mFd; }
+    bool isMapped() const { return mAddr != unmappedMemory(); }
 
 private:
-    int openInternal(int oflag, int mode);
+#ifdef _WIN32
+    int openInternal(AccessMode access, bool doMapping = true);
+#else
+    int openInternal(int oflag, int mode, bool doMapping = true);
+#endif
+
     void clear() {
         mSize = 0;
         mName = "";
