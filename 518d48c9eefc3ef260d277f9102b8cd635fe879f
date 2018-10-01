@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6ca4ba2f_e9ec8cb4",
+        "filename": "android/android-emu/android/base/memory/SharedMemory.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-01T23:40:49Z",
+      "side": 1,
+      "message": "Done; removed the argument and refactored the win32 parts to have an openInternal to make that decision.",
+      "parentUuid": "f8c93993_b711a409",
+      "range": {
+        "startLine": 133,
+        "startChar": 4,
+        "endLine": 138,
+        "endChar": 55
+      },
+      "revId": "518d48c9eefc3ef260d277f9102b8cd635fe879f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "55a72d0c_bf0f75ef",
         "filename": "android/android-emu/android/base/memory/SharedMemory_posix.cpp",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "518d48c9eefc3ef260d277f9102b8cd635fe879f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "72169db2_c7c1b5a2",
+        "filename": "android/android-emu/android/base/memory/SharedMemory_posix.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-01T23:40:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "55a72d0c_bf0f75ef",
+      "range": {
+        "startLine": 108,
+        "startChar": 11,
+        "endLine": 108,
+        "endChar": 33
+      },
+      "revId": "518d48c9eefc3ef260d277f9102b8cd635fe879f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
