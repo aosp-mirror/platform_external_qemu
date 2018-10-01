@@ -22,6 +22,75 @@
       "revId": "ddd302eb02c0c2ca6d30e63a61b6b0ad812f47ad",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "34d19b98_b8ab722b",
+        "filename": "android/android-emugl/guest/androidImpl/ANativeWindow.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-01T21:21:53Z",
+      "side": 1,
+      "message": "Where does \"4\" come from? Here it looks the size of window-\u003eoem, but below you compare for \u003e\u003d.",
+      "range": {
+        "startLine": 144,
+        "startChar": 15,
+        "endLine": 144,
+        "endChar": 16
+      },
+      "revId": "ddd302eb02c0c2ca6d30e63a61b6b0ad812f47ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f7b6d0d7_1e45bb41",
+        "filename": "android/android-emugl/guest/androidImpl/ANativeWindow.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-01T21:21:53Z",
+      "side": 1,
+      "message": "May be put\n\nreturn window-\u003equery(window, int(what), value);\n\nhere?",
+      "range": {
+        "startLine": 167,
+        "startChar": 12,
+        "endLine": 167,
+        "endChar": 17
+      },
+      "revId": "ddd302eb02c0c2ca6d30e63a61b6b0ad812f47ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a3f27326_baa5271d",
+        "filename": "android/android-emugl/guest/androidImpl/AndroidWindow.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-01T21:21:53Z",
+      "side": 1,
+      "message": "value is not initialized here and no error is reported.",
+      "range": {
+        "startLine": 92,
+        "startChar": 12,
+        "endLine": 92,
+        "endChar": 17
+      },
+      "revId": "ddd302eb02c0c2ca6d30e63a61b6b0ad812f47ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
