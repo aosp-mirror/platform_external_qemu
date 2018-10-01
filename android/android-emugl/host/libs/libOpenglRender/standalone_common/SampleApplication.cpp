@@ -180,8 +180,8 @@ private:
 };
 
 // SampleApplication implementation/////////////////////////////////////////////
-SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refreshRate, GLESApi glVersion) :
-    mWidth(windowWidth), mHeight(windowHeight), mRefreshRate(refreshRate) {
+SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refreshRate, GLESApi glVersion, bool compose) :
+    mWidth(windowWidth), mHeight(windowHeight), mRefreshRate(refreshRate), mIsCompose(compose) {
 
     setupStandaloneLibrarySearchPaths();
 
@@ -308,100 +308,156 @@ void SampleApplication::surfaceFlingerComposerLoop() {
     });
 
     FunctorThread sfThread([&]() {
-        RenderThreadInfo* tInfo = new RenderThreadInfo;
-        unsigned int sfContext = mFb->createRenderContext(0, 0, GLESApi_3_0);
-        unsigned int sfSurface = mFb->createWindowSurface(0, mWidth, mHeight);
-        mFb->bindContext(sfContext, sfSurface, sfSurface);
+        if (mIsCompose) {
+            uint32_t size = sizeof(ComposeDevice) + 2 * sizeof(ComposeLayer);
+            ComposeDevice* d = (ComposeDevice*)malloc(size);
+            if (!d) {
+                printf("%s: Error allocating memory for host composition", __FUNCTION__);
+                return;
+            }
+            d->version = 1;
+            d->targetHandle = 0;
+            d->numLayers = 2;
+            d->layer[0].cbHandle = 0;
+            d->layer[0].composeMode = HWC2_COMPOSITION_SOLID_COLOR;
+            d->layer[0].displayFrame.left = 0;
+            d->layer[0].displayFrame.top = mHeight/2;
+            d->layer[0].displayFrame.right = mWidth;
+            d->layer[0].displayFrame.bottom = mHeight;
+            d->layer[0].crop.left = 0.0;
+            d->layer[0].crop.top = 0.0;
+            d->layer[0].crop.right = mWidth;
+            d->layer[0].crop.bottom = mHeight;
+            d->layer[0].blendMode = HWC2_BLEND_MODE_NONE;
+            d->layer[0].alpha = 1.0;
+            d->layer[0].color.r = 200;
+            d->layer[0].color.g = 0;
+            d->layer[0].color.b = 0;
+            d->layer[0].color.a = 255;
+            d->layer[0].transform = HWC_TRANSFORM_FLIP_H;
 
-        auto gl = getGlDispatch();
-
-        static constexpr char blitVshaderSrc[] = R"(#version 300 es
-        precision highp float;
-        layout (location = 0) in vec2 pos;
-        layout (location = 1) in vec2 texcoord;
-        out vec2 texcoord_varying;
-        void main() {
-            gl_Position = vec4(pos, 0.0, 1.0);
-            texcoord_varying = texcoord;
-        })";
-
-        static constexpr char blitFshaderSrc[] = R"(#version 300 es
-        precision highp float;
-        uniform sampler2D tex;
-        in vec2 texcoord_varying;
-        out vec4 fragColor;
-        void main() {
-            fragColor = texture(tex, texcoord_varying);
-        })";
-
-        GLint blitProgram =
-            compileAndLinkShaderProgram(
-                blitVshaderSrc, blitFshaderSrc);
-
-        GLint samplerLoc = gl->glGetUniformLocation(blitProgram, "tex");
-
-        GLuint blitVbo;
-        gl->glGenBuffers(1, &blitVbo);
-        gl->glBindBuffer(GL_ARRAY_BUFFER, blitVbo);
-        const float attrs[] = {
-            -1.0f, -1.0f, 0.0f, 1.0f,
-            1.0f, -1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 0.0f,
-            -1.0f, -1.0f, 0.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 0.0f,
-            -1.0f, 1.0f, 0.0f, 0.0f,
-        };
-        gl->glBufferData(GL_ARRAY_BUFFER, sizeof(attrs), attrs, GL_STATIC_DRAW);
-        gl->glEnableVertexAttribArray(0);
-        gl->glEnableVertexAttribArray(1);
-
-        gl->glVertexAttribPointer(
-            0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
-        gl->glVertexAttribPointer(
-            1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
-            (GLvoid*)(uintptr_t)(2 * sizeof(GLfloat)));
-
-        GLuint blitTexture;
-        gl->glActiveTexture(GL_TEXTURE0);
-        gl->glGenTextures(1, &blitTexture);
-        gl->glBindTexture(GL_TEXTURE_2D, blitTexture);
-
-        gl->glUseProgram(blitProgram);
-        gl->glUniform1i(samplerLoc, 0);
-
-        ColorBufferQueue::Item appItem = {};
-        ColorBufferQueue::Item hwcItem = {};
-
-        while (true) {
-            hwc2sfQueue.dequeueBuffer(&hwcItem);
-            if (hwcItem.sync) { hwcItem.sync->wait(EGL_FOREVER_KHR); }
-
-            mFb->setWindowSurfaceColorBuffer(sfSurface, hwcItem.colorBuffer);
-
-            {
+            ColorBufferQueue::Item appItem = {};
+            while (true) {
                 app2sfQueue.dequeueBuffer(&appItem);
-
-                mFb->bindColorBufferToTexture(appItem.colorBuffer);
-
-                gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-                gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
                 if (appItem.sync) { appItem.sync->wait(EGL_FOREVER_KHR); }
 
-                gl->glDrawArrays(GL_TRIANGLES, 0, 6);
+                d->layer[1].cbHandle = appItem.colorBuffer;
+                d->layer[1].composeMode = HWC2_COMPOSITION_DEVICE;
+                d->layer[1].displayFrame.left = 0;
+                d->layer[1].displayFrame.top = 0;
+                d->layer[1].displayFrame.right = mWidth;
+                d->layer[1].displayFrame.bottom = mHeight/2;
+                d->layer[1].crop.left = 0.0;
+                d->layer[1].crop.top = 0.0;
+                d->layer[1].crop.right = mWidth;
+                d->layer[1].crop.bottom = mHeight;
+                d->layer[1].blendMode = HWC2_BLEND_MODE_PREMULTIPLIED;
+                d->layer[1].alpha = 0.8;
+                d->layer[1].transform = HWC_TRANSFORM_ROT_90;
+
+                mFb->compose(size, d);
 
                 if (appItem.sync) { appItem.sync->decRef(); }
                 sf2appQueue.queueBuffer(ColorBufferQueue::Item(appItem.colorBuffer, newFence()));
             }
-
-            mFb->flushWindowSurfaceColorBuffer(sfSurface);
-
-            if (hwcItem.sync) { hwcItem.sync->decRef(); }
-            sf2hwcQueue.queueBuffer(ColorBufferQueue::Item(hwcItem.colorBuffer, newFence()));
+            free(d);
         }
-        delete tInfo;
+        else {
+            RenderThreadInfo* tInfo = new RenderThreadInfo;
+            unsigned int sfContext = mFb->createRenderContext(0, 0, GLESApi_3_0);
+            unsigned int sfSurface = mFb->createWindowSurface(0, mWidth, mHeight);
+            mFb->bindContext(sfContext, sfSurface, sfSurface);
+
+            auto gl = getGlDispatch();
+
+            static constexpr char blitVshaderSrc[] = R"(#version 300 es
+            precision highp float;
+            layout (location = 0) in vec2 pos;
+            layout (location = 1) in vec2 texcoord;
+            out vec2 texcoord_varying;
+            void main() {
+                gl_Position = vec4(pos, 0.0, 1.0);
+                texcoord_varying = texcoord;
+            })";
+
+            static constexpr char blitFshaderSrc[] = R"(#version 300 es
+            precision highp float;
+            uniform sampler2D tex;
+            in vec2 texcoord_varying;
+            out vec4 fragColor;
+            void main() {
+                fragColor = texture(tex, texcoord_varying);
+            })";
+
+            GLint blitProgram =
+                compileAndLinkShaderProgram(
+                    blitVshaderSrc, blitFshaderSrc);
+
+            GLint samplerLoc = gl->glGetUniformLocation(blitProgram, "tex");
+
+            GLuint blitVbo;
+            gl->glGenBuffers(1, &blitVbo);
+            gl->glBindBuffer(GL_ARRAY_BUFFER, blitVbo);
+            const float attrs[] = {
+                -1.0f, -1.0f, 0.0f, 1.0f,
+                1.0f, -1.0f, 1.0f, 1.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                -1.0f, -1.0f, 0.0f, 1.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                -1.0f, 1.0f, 0.0f, 0.0f,
+            };
+            gl->glBufferData(GL_ARRAY_BUFFER, sizeof(attrs), attrs, GL_STATIC_DRAW);
+            gl->glEnableVertexAttribArray(0);
+            gl->glEnableVertexAttribArray(1);
+
+            gl->glVertexAttribPointer(
+                0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+            gl->glVertexAttribPointer(
+                1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
+                (GLvoid*)(uintptr_t)(2 * sizeof(GLfloat)));
+
+            GLuint blitTexture;
+            gl->glActiveTexture(GL_TEXTURE0);
+            gl->glGenTextures(1, &blitTexture);
+            gl->glBindTexture(GL_TEXTURE_2D, blitTexture);
+
+            gl->glUseProgram(blitProgram);
+            gl->glUniform1i(samplerLoc, 0);
+
+            ColorBufferQueue::Item appItem = {};
+            ColorBufferQueue::Item hwcItem = {};
+
+            while (true) {
+                hwc2sfQueue.dequeueBuffer(&hwcItem);
+                if (hwcItem.sync) { hwcItem.sync->wait(EGL_FOREVER_KHR); }
+
+                mFb->setWindowSurfaceColorBuffer(sfSurface, hwcItem.colorBuffer);
+
+                {
+                    app2sfQueue.dequeueBuffer(&appItem);
+
+                    mFb->bindColorBufferToTexture(appItem.colorBuffer);
+
+                    gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+                    gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                    gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+                    if (appItem.sync) { appItem.sync->wait(EGL_FOREVER_KHR); }
+
+                    gl->glDrawArrays(GL_TRIANGLES, 0, 6);
+
+                    if (appItem.sync) { appItem.sync->decRef(); }
+                    sf2appQueue.queueBuffer(ColorBufferQueue::Item(appItem.colorBuffer, newFence()));
+                }
+
+                mFb->flushWindowSurfaceColorBuffer(sfSurface);
+
+                if (hwcItem.sync) { hwcItem.sync->decRef(); }
+                sf2hwcQueue.queueBuffer(ColorBufferQueue::Item(hwcItem.colorBuffer, newFence()));
+            }
+            delete tInfo;
+            }
     });
 
     sfThread.start();
@@ -409,16 +465,17 @@ void SampleApplication::surfaceFlingerComposerLoop() {
 
     Vsync vsync(mRefreshRate);
     ColorBufferQueue::Item sfItem = {};
-    while (true) {
-        sf2hwcQueue.dequeueBuffer(&sfItem);
-        if (sfItem.sync) { sfItem.sync->wait(EGL_FOREVER_KHR); sfItem.sync->decRef(); }
-
-        vsync.waitUntilNextVsync();
-        mFb->post(sfItem.colorBuffer);
-        if (mUseSubWindow) {
-            mWindow->messageLoop();
+    if (!mIsCompose) {
+        while (true) {
+            sf2hwcQueue.dequeueBuffer(&sfItem);
+            if (sfItem.sync) { sfItem.sync->wait(EGL_FOREVER_KHR); sfItem.sync->decRef(); }
+            vsync.waitUntilNextVsync();
+            mFb->post(sfItem.colorBuffer);
+            if (mUseSubWindow) {
+                mWindow->messageLoop();
+            }
+            hwc2sfQueue.queueBuffer(ColorBufferQueue::Item(sfItem.colorBuffer, newFence()));
         }
-        hwc2sfQueue.queueBuffer(ColorBufferQueue::Item(sfItem.colorBuffer, newFence()));
     }
 
     appThread.wait();
