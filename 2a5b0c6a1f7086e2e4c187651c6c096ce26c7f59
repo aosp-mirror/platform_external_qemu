@@ -22,6 +22,30 @@
       "revId": "2a5b0c6a1f7086e2e4c187651c6c096ce26c7f59",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4a89c465_a50bb64d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-01T17:38:38Z",
+      "side": 1,
+      "message": "Good catch, will put it under a lock.",
+      "parentUuid": "ef46e9ec_92d89f93",
+      "range": {
+        "startLine": 164,
+        "startChar": 29,
+        "endLine": 164,
+        "endChar": 34
+      },
+      "revId": "2a5b0c6a1f7086e2e4c187651c6c096ce26c7f59",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
