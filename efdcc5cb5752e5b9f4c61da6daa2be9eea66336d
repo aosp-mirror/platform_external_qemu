@@ -22,6 +22,30 @@
       "revId": "efdcc5cb5752e5b9f4c61da6daa2be9eea66336d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4589a65c_7b05c26b",
+        "filename": "android/android-emugl/combined/combined_unittest.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-01T17:37:57Z",
+      "side": 1,
+      "message": "It seems to be slower if we set up the test env and tear it down for each test. I wonder if there is a way to do a global setup/teardown setup in GoogleTest.",
+      "parentUuid": "dc7fc642_0f23e22f",
+      "range": {
+        "startLine": 90,
+        "startChar": 43,
+        "endLine": 90,
+        "endChar": 51
+      },
+      "revId": "efdcc5cb5752e5b9f4c61da6daa2be9eea66336d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
