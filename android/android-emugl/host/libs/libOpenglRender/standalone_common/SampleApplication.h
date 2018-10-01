@@ -17,6 +17,7 @@
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "RenderContext.h"
 #include "android/base/Compiler.h"
+#include "Hwc2.h"
 
 #include <cinttypes>
 #include <functional>
@@ -40,7 +41,8 @@ OSWindow* createOrGetTestWindow(int xoffset, int yoffset, int width, int height)
 class SampleApplication {
 public:
     SampleApplication(int windowWidth = 256, int windowHeight = 256,
-                      int refreshRate = 60, GLESApi glVersion = GLESApi_3_0);
+                      int refreshRate = 60, GLESApi glVersion = GLESApi_3_0,
+                      bool compose = false);
     ~SampleApplication();
 
     // A basic draw loop that works similar to most simple
@@ -70,6 +72,16 @@ public:
     // Just initialize, draw, and swap buffers once.
     void drawOnce();
 
+private:
+    void configureLayer(uint32_t layerId, unsigned int cb,
+                        hwc2_composition_t composeMode,
+                        hwc_rect_t displayFrame,
+                        hwc_frect_t crop,
+                        hwc2_blend_mode_t blendMode,
+                        float alpha,
+                        hwc_color_t color
+                        );
+
 protected:
     virtual void initialize() = 0;
     virtual void draw() = 0;
@@ -91,6 +103,10 @@ protected:
     unsigned int mColorBuffer = 0;
     unsigned int mSurface = 0;
     unsigned int mContext = 0;
+
+    bool mIsCompose = false;
+    ComposeDevice* mComposeDevice = nullptr;
+    int mComposeSize = 0;
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(SampleApplication);
 };
