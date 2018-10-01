@@ -40,7 +40,8 @@ OSWindow* createOrGetTestWindow(int xoffset, int yoffset, int width, int height)
 class SampleApplication {
 public:
     SampleApplication(int windowWidth = 256, int windowHeight = 256,
-                      int refreshRate = 60, GLESApi glVersion = GLESApi_3_0);
+                      int refreshRate = 60, GLESApi glVersion = GLESApi_3_0,
+                      bool compose = false);
     ~SampleApplication();
 
     // A basic draw loop that works similar to most simple
@@ -91,6 +92,8 @@ protected:
     unsigned int mColorBuffer = 0;
     unsigned int mSurface = 0;
     unsigned int mContext = 0;
+
+    bool mIsCompose = false;
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(SampleApplication);
 };
