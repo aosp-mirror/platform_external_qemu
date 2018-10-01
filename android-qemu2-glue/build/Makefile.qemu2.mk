@@ -32,9 +32,11 @@ qemu2-ifnot-os = $(if $(filter-out $1,$(BUILD_TARGET_OS)),$2,$3)
 
 # If $(BUILD_TARGET_OS) is windows, return $1, otherwise $2
 qemu2-if-windows = $(call qemu2-if-os,windows,$1,$2)
+# If $(BUILD_TARGET_OS) is windows_msvc, return $1, otherwise $2
+qemu2-if-windows-msvc = $(call qemu2-if-os,windows_msvc,$1,$2)
 
 # If $(BUILD_TARGET_OS) is not windows, return $1, otherwise $2
-qemu2-if-posix = $(call qemu2-ifnot-os,windows,$1,$2)
+qemu2-if-posix = $(call qemu2-ifnot-os,windows windows_msvc,$1,$2)
 
 qemu2-if-darwin = $(call qemu2-if-os,darwin,$1,$2)
 qemu2-if-linux = $(call qemu2-if-os,linux,$1,$2)
@@ -153,8 +155,7 @@ QEMU2_CFLAGS += \
     -DCONFIG_MIGRATION_RAM_SINGLE_ITERATION
 
 # Enable VIRGL
-QEMU2_CFLAGS += \
-    -DCONFIG_VIRGL
+QEMU2_CFLAGS += $(call qemu2-if-windows-msvc,,-DCONFIG_VIRGL)
 
 #include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
 
