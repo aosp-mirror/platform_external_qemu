@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "96197f58_e80c2bb7",
+        "filename": "android/android-emugl/guest/androidImpl/AndroidWindowBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-01T22:35:10Z",
+      "side": 1,
+      "message": "Is this for memory management? Are they optional?",
+      "range": {
+        "startLine": 23,
+        "startChar": 12,
+        "endLine": 23,
+        "endChar": 23
+      },
+      "revId": "5d2b09ca55e9c002840b1682349d21d71d6eaa2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
