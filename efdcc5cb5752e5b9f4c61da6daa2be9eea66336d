@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc7fc642_0f23e22f",
+        "filename": "android/android-emugl/combined/combined_unittest.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-01T17:24:53Z",
+      "side": 1,
+      "message": "This will never get destroyed, can you make it a member of CombinedGoldfishOpenglTest instead?  Consider using OnDemand if you want to delay construction until SetUp().\n\nAlthough unless this is slow, I recommend just creating/destroying in SetUp/TearDown.",
+      "range": {
+        "startLine": 90,
+        "startChar": 43,
+        "endLine": 90,
+        "endChar": 51
+      },
+      "revId": "efdcc5cb5752e5b9f4c61da6daa2be9eea66336d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
