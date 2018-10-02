@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1c9cd90d_0cbd5b95",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2018-10-02T16:58:20Z",
+      "side": 1,
+      "message": "Thanks, Done.",
+      "parentUuid": "a557cd29_4d81891c",
+      "range": {
+        "startLine": 313,
+        "startChar": 0,
+        "endLine": 313,
+        "endChar": 60
+      },
+      "revId": "7d2b247430f95dcbc4f27420934d5d1140ff90b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0c7066c6_b5b2beea",
         "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
         "patchSetId": 2
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "9d27a170_1117ebc3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/TextureDraw_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2018-10-02T16:58:20Z",
+      "side": 1,
+      "message": "Thanks, Done!",
+      "parentUuid": "fd3b3cd8_8f93fc04",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 137,
+        "endChar": 60
+      },
+      "revId": "7d2b247430f95dcbc4f27420934d5d1140ff90b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2043af13_1d1aef7b",
         "filename": "android/android-emugl/host/libs/libOpenglRender/tests/TextureDraw_unittest.cpp",
         "patchSetId": 2
@@ -91,6 +139,30 @@
       "revId": "7d2b247430f95dcbc4f27420934d5d1140ff90b2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f1d4493_aea04262",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/TextureDraw_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2018-10-02T16:58:20Z",
+      "side": 1,
+      "message": "I put all blue texture in the following test. Avoid confusing with the first one.",
+      "parentUuid": "2043af13_1d1aef7b",
+      "range": {
+        "startLine": 139,
+        "startChar": 0,
+        "endLine": 143,
+        "endChar": 63
+      },
+      "revId": "7d2b247430f95dcbc4f27420934d5d1140ff90b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
