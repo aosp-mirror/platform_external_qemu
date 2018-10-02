@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/breakpad/${ANDROID_TARGET_TAG}" ABSOLUTE)
+get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
+list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
+include(toolchain)
 
-set(BREAKPAD_INCLUDE_DIR "${PREBUILT_ROOT}/include/breakpad")
-set(BREAKPAD_INCLUDE_DIRS "${BREAKPAD_INCLUDE_DIR}")
-set(BREAKPAD_LIBRARIES "${PREBUILT_ROOT}/lib/libbreakpad.a;${PREBUILT_ROOT}/lib/libdisasm.a")
-set(BREAKPAD_CLIENT_LIBRARIES "${PREBUILT_ROOT}/lib/libbreakpad_client.a")
-set(BREAKPAD_FOUND TRUE)
-set(PACKAGE_EXPORT "BREAKPAD_INCLUDE_DIR;BREAKPAD_INCLUDE_DIRS;BREAKPAD_LIBRARIES;BREAKPAD_CLIENT_LIBRARIES;BREAKPAD_FOUND")
-
+# First we create the toolchain
+set(ANDROID_TARGET_TAG "darwin-x86_64")
+set(ANDROID_TARGET_OS "darwin")
+toolchain_generate("${ANDROID_TARGET_TAG}")
+# No magical includes or dependencies for darwin..

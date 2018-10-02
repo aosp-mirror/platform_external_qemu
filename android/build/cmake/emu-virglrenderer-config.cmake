@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/virglrenderer/${LOCAL_TARGET_TAG}" ABSOLUTE)
+get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/virglrenderer/${ANDROID_TARGET_TAG}" ABSOLUTE)
 
 set(VIRGLRENDERER_INCLUDE_DIR "${PREBUILT_ROOT}/include/virgl")
-set(VIRGLRENDERER_INCLUDE_DIRS "${VIRGLRENDERER_INCLUDE_DIRS}")
+set(VIRGLRENDERER_INCLUDE_DIRS "${VIRGLRENDERER_INCLUDE_DIR}")
 set(VIRGLRENDERER_LIBRARIES "${PREBUILT_ROOT}/lib/libvirglrenderer.a")
 set(VIRGLRENDERER_FOUND TRUE)
 
