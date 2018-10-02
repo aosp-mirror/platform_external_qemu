@@ -82,7 +82,9 @@ CF_EXPORT const CFStringRef _kCFSystemVersionProductVersionKey;
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <time.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #endif
 #include <assert.h>
 #include <stdlib.h>

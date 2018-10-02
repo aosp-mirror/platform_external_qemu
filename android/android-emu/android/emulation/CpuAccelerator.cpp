@@ -21,7 +21,9 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #endif
 
 #include <stdio.h>

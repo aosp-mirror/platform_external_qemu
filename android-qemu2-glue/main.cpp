@@ -88,7 +88,9 @@ extern "C" {
 #include <assert.h>
 #include <limits.h>
 #include <stdio.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <algorithm>
 
 #include "android/version.h"

@@ -4,7 +4,9 @@
 
 #include <stddef.h>
 #include <sys/types.h>
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif
 
 using namespace android::base;
 
