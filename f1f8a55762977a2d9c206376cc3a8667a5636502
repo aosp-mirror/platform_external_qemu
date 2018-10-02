@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "92f19708_f4631f9b",
+        "filename": ".vscode/c_cpp_properties.json",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-02T18:48:27Z",
+      "side": 1,
+      "message": "\"includePath\": [\n                \"${workspaceFolder}\",\n                \"/usr/local/include\",\n                \"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1\",\n                \"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.0.0/include\",\n                \"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include\",\n                \"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include\",\n                \"${workspaceFolder}/android/android-emu\",\n                \"${workspaceFolder}/android/android-emugl/host/include\",\n                \"${workspaceFolder}/android-qemu2-glue/config/darwin-x86_64\",\n                \"${workspaceFolder}/objs/build/intermediates64/emulator_hw_config_defs\",\n                \"${workspaceFolder}/objs/build/intermediates64/proto-sources\",\n                \"${workspaceFolder}/../../prebuilts/android-emulator-build/protobuf/darwin-x86_64/include\",\n                \"${workspaceFolder}/android/android-emugl/shared\",\n                \"${workspaceFolder}/../../prebuilts/android-emulator-build/qt/common/include\",\n                \"${workspaceFolder}/../../prebuilts/android-emulator-build/qt/common/include/QtCore\",\n                \"${workspaceFolder}/../../prebuilts/android-emulator-build/qt/common/include/QtGui\",\n                \"${workspaceFolder}/../../prebuilts/android-emulator-build/qt/common/include/QtSvg\",\n                \"${workspaceFolder}/../../prebuilts/android-emulator-build/qt/common/include/QtWidgets\",\n                \"${workspaceFolder}/../../prebuilts/android-emulator-build/qt/darwin-x86_64/include.system\",\n                \"${workspaceFolder}/../../prebuilts/android-emulator-build/qt/darwin-x86_64/include.system/QtCore\",\n                \"${workspaceFolder}/android/qemu1\",\n                \"${workspaceFolder}/include\",\n                \"${workspaceFolder}/objs/build/qemu1-qapi-auto-generated\",\n                \"${workspaceFolder}/objs/build/intermediates64/emulator-libui\",\n                \"${workspaceFolder}/android/android-emugl/shared/OpenglCodecCommon\",\n                \"${workspaceFolder}/android/android-emugl/host/include/OpenGLESDispatch\",\n                \"${workspaceFolder}/android/android-emugl/host/libs/GLESv1_dec\",\n                \"${workspaceFolder}/objs/build/intermediates64/gles1\",\n                \"${workspaceFolder}/android/android-emugl/host/libs/GLESv2_dec\",\n                \"${workspaceFolder}/objs/build/intermediates64/gles2\",\n                \"${workspaceFolder}/android/android-emugl/host/libs/libGLSnapshot\",\n                \"${workspaceFolder}/objs/build/intermediates64/renderControl\",\n                \"${workspaceFolder}/android/android-emugl/host/libs/renderControl_dec\",\n                \"${workspaceFolder}/objs/build/intermediates64/proto-sources\",\n                \"${workspaceFolder}/../googletest/googletest/include\",\n                \"${workspaceFolder}/../googletest/googlemock/include\"\n            ],\n            \"defines\": [\n                \"_DARWIN_C_SOURCE\u003d1\"\n            ],",
+      "range": {
+        "startLine": 6,
+        "startChar": 17,
+        "endLine": 8,
+        "endChar": 85
+      },
+      "revId": "f1f8a55762977a2d9c206376cc3a8667a5636502",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
