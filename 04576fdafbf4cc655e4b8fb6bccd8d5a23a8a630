@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dce8afe3_a03c0155",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T21:09:21Z",
+      "side": 1,
+      "message": "nit: 4 space indent",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 26
+      },
+      "revId": "04576fdafbf4cc655e4b8fb6bccd8d5a23a8a630",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
