@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3f79d946_18a0dbea",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-02T00:39:41Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "1b63e322_94040c8d",
+      "range": {
+        "startLine": 140,
+        "startChar": 0,
+        "endLine": 140,
+        "endChar": 31
+      },
+      "revId": "85c98c250f60c7372e3e3ce48c3c90d63ff965d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "43cf3cbf_3fba0e4d",
         "filename": "android/android-emu/Makefile.android-emu.mk",
         "patchSetId": 3
@@ -45,6 +69,30 @@
       "revId": "85c98c250f60c7372e3e3ce48c3c90d63ff965d4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fbdc8a9f_92e6d428",
+        "filename": "android/android-emu/Makefile.android-emu.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 830,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-02T00:39:41Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "43cf3cbf_3fba0e4d",
+      "range": {
+        "startLine": 830,
+        "startChar": 0,
+        "endLine": 830,
+        "endChar": 50
+      },
+      "revId": "85c98c250f60c7372e3e3ce48c3c90d63ff965d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
