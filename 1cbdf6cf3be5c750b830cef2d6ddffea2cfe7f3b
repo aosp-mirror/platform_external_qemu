@@ -22,6 +22,30 @@
       "revId": "1cbdf6cf3be5c750b830cef2d6ddffea2cfe7f3b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f33a0fd_f4a51010",
+        "filename": ".vscode/c_cpp_properties.json",
+        "patchSetId": 4
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T19:43:02Z",
+      "side": 1,
+      "message": "Done (and translated to the qemu root dir which I think was the intent of it)",
+      "parentUuid": "da30c976_453586c2",
+      "range": {
+        "startLine": 5,
+        "startChar": 12,
+        "endLine": 5,
+        "endChar": 28
+      },
+      "revId": "1cbdf6cf3be5c750b830cef2d6ddffea2cfe7f3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
