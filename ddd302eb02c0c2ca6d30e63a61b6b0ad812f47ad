@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3ae8f830_09d149fc",
+        "filename": "android/android-emugl/guest/android/data_space.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T01:47:51Z",
+      "side": 1,
+      "message": "This is also taken from Android framework sources; I\u0027m not quite sure why it\u0027s done like this, so I\u0027ll leave as is to reduce surprises with not exactly matching enums/values once this ever gets used.",
+      "parentUuid": "c7b3a7f5_26e9a5cc",
+      "range": {
+        "startLine": 50,
+        "startChar": 30,
+        "endLine": 50,
+        "endChar": 43
+      },
+      "revId": "ddd302eb02c0c2ca6d30e63a61b6b0ad812f47ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "34d19b98_b8ab722b",
         "filename": "android/android-emugl/guest/androidImpl/ANativeWindow.cpp",
         "patchSetId": 10
@@ -45,6 +69,30 @@
       "revId": "ddd302eb02c0c2ca6d30e63a61b6b0ad812f47ad",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1ac6b39a_6dab3d53",
+        "filename": "android/android-emugl/guest/androidImpl/ANativeWindow.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T01:47:51Z",
+      "side": 1,
+      "message": "Oh, I didn\u0027t write this particular code, it\u0027s straight from aosp-master sources. Since we don\u0027t use this part, I\u0027ll delete the OemStorage things.",
+      "parentUuid": "34d19b98_b8ab722b",
+      "range": {
+        "startLine": 144,
+        "startChar": 15,
+        "endLine": 144,
+        "endChar": 16
+      },
+      "revId": "ddd302eb02c0c2ca6d30e63a61b6b0ad812f47ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "96db8acf_8d72a25b",
+        "filename": "android/android-emugl/guest/androidImpl/ANativeWindow.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T01:47:51Z",
+      "side": 1,
+      "message": "Also did not write this part, but that\u0027s a good idea. Done",
+      "parentUuid": "f7b6d0d7_1e45bb41",
+      "range": {
+        "startLine": 167,
+        "startChar": 12,
+        "endLine": 167,
+        "endChar": 17
+      },
+      "revId": "ddd302eb02c0c2ca6d30e63a61b6b0ad812f47ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a3f27326_baa5271d",
         "filename": "android/android-emugl/guest/androidImpl/AndroidWindow.cpp",
         "patchSetId": 10
@@ -91,6 +163,30 @@
       "revId": "ddd302eb02c0c2ca6d30e63a61b6b0ad812f47ad",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9a7770e5_76dcdc9a",
+        "filename": "android/android-emugl/guest/androidImpl/AndroidWindow.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T01:47:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a3f27326_baa5271d",
+      "range": {
+        "startLine": 92,
+        "startChar": 12,
+        "endLine": 92,
+        "endChar": 17
+      },
+      "revId": "ddd302eb02c0c2ca6d30e63a61b6b0ad812f47ad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
