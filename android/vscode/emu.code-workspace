@@ -1,0 +1,10 @@
+{
+	"folders": [
+		{
+			"path": "external/qemu"
+		},
+		{
+			"path": "device/generic/goldfish-opengl"
+		}
+	]
+}
