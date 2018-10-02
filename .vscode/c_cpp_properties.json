@@ -1,0 +1,57 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "/usr/local/include",
+                "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
+                "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.0.0/include",
+                "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include",
+                "${workspaceFolder}/external/qemu",
+                "${workspaceFolder}/external/qemu/android/android-emu",
+                "${workspaceFolder}/external/qemu/android/android-emugl/host/include",
+                "${workspaceFolder}/external/qemu/android-qemu2-glue/config/darwin-x86_64",
+                "${workspaceFolder}/external/qemu/objs/build/intermediates64/emulator_hw_config_defs",
+                "${workspaceFolder}/external/qemu/objs/build/intermediates64/proto-sources",
+                "${workspaceFolder}/external/qemu/../../prebuilts/android-emulator-build/protobuf/darwin-x86_64/include",
+                "${workspaceFolder}/external/qemu/android/android-emugl/shared",
+                "${workspaceFolder}/external/qemu/../../prebuilts/android-emulator-build/qt/common/include",
+                "${workspaceFolder}/external/qemu/../../prebuilts/android-emulator-build/qt/common/include/QtCore",
+                "${workspaceFolder}/external/qemu/../../prebuilts/android-emulator-build/qt/common/include/QtGui",
+                "${workspaceFolder}/external/qemu/../../prebuilts/android-emulator-build/qt/common/include/QtSvg",
+                "${workspaceFolder}/external/qemu/../../prebuilts/android-emulator-build/qt/common/include/QtWidgets",
+                "${workspaceFolder}/external/qemu/../../prebuilts/android-emulator-build/qt/darwin-x86_64/include.system",
+                "${workspaceFolder}/external/qemu/../../prebuilts/android-emulator-build/qt/darwin-x86_64/include.system/QtCore",
+                "${workspaceFolder}/external/qemu/android/qemu1",
+                "${workspaceFolder}/external/qemu/include",
+                "${workspaceFolder}/external/qemu/objs/build/qemu1-qapi-auto-generated",
+                "${workspaceFolder}/external/qemu/objs/build/intermediates64/emulator-libui",
+                "${workspaceFolder}/external/qemu/android/android-emugl/shared/OpenglCodecCommon",
+                "${workspaceFolder}/external/qemu/android/android-emugl/host/include/OpenGLESDispatch",
+                "${workspaceFolder}/external/qemu/android/android-emugl/host/libs/GLESv1_dec",
+                "${workspaceFolder}/external/qemu/objs/build/intermediates64/gles1",
+                "${workspaceFolder}/external/qemu/android/android-emugl/host/libs/GLESv2_dec",
+                "${workspaceFolder}/external/qemu/objs/build/intermediates64/gles2",
+                "${workspaceFolder}/external/qemu/android/android-emugl/host/libs/libGLSnapshot",
+                "${workspaceFolder}/external/qemu/objs/build/intermediates64/renderControl",
+                "${workspaceFolder}/external/qemu/android/android-emugl/host/libs/renderControl_dec",
+                "${workspaceFolder}/external/qemu/objs/build/intermediates64/proto-sources",
+                "${workspaceFolder}/external/qemu/../googletest/googletest/include",
+                "${workspaceFolder}/external/qemu/../googletest/googlemock/include"
+            ],
+            "defines": [
+                "_DARWIN_C_SOURCE=1"
+            ],
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}
