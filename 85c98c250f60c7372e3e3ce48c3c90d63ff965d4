@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1b63e322_94040c8d",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T00:29:37Z",
+      "side": 1,
+      "message": "Could we make that for if-any-windows?",
+      "range": {
+        "startLine": 140,
+        "startChar": 0,
+        "endLine": 140,
+        "endChar": 31
+      },
+      "revId": "85c98c250f60c7372e3e3ce48c3c90d63ff965d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "43cf3cbf_3fba0e4d",
+        "filename": "android/android-emu/Makefile.android-emu.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 830,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T00:29:37Z",
+      "side": 1,
+      "message": "I wonder if we can have BUILD_TARGET_OS_FLAVOR for those makefile cases, so there\u0027s less specialness for windows handling",
+      "range": {
+        "startLine": 830,
+        "startChar": 0,
+        "endLine": 830,
+        "endChar": 50
+      },
+      "revId": "85c98c250f60c7372e3e3ce48c3c90d63ff965d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
