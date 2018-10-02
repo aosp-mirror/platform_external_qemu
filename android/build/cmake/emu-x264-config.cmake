@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/breakpad/${ANDROID_TARGET_TAG}" ABSOLUTE)
+get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/x264/${ANDROID_TARGET_TAG}" ABSOLUTE)
 
-set(BREAKPAD_INCLUDE_DIR "${PREBUILT_ROOT}/include/breakpad")
-set(BREAKPAD_INCLUDE_DIRS "${BREAKPAD_INCLUDE_DIR}")
-set(BREAKPAD_LIBRARIES "${PREBUILT_ROOT}/lib/libbreakpad.a;${PREBUILT_ROOT}/lib/libdisasm.a")
-set(BREAKPAD_CLIENT_LIBRARIES "${PREBUILT_ROOT}/lib/libbreakpad_client.a")
-set(BREAKPAD_FOUND TRUE)
-set(PACKAGE_EXPORT "BREAKPAD_INCLUDE_DIR;BREAKPAD_INCLUDE_DIRS;BREAKPAD_LIBRARIES;BREAKPAD_CLIENT_LIBRARIES;BREAKPAD_FOUND")
+set(X264_INCLUDE_DIR "${PREBUILT_ROOT}/include/")
+set(X264_INCLUDE_DIRS "${X264_INCLUDE_DIR}")
+set(X264_LIBRARIES "${PREBUILT_ROOT}/lib/libx264.a")
+set(X264_FOUND TRUE)
+set(PACKAGE_EXPORT "X264_INCLUDE_DIR;X264_INCLUDE_DIRS;X264_LIBRARIES;X264_FOUND")
+
 
