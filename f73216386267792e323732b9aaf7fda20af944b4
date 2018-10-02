@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d88c5dd6_14f2bfa9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T23:07:11Z",
+      "side": 1,
+      "message": "to help readability, please #define kComposeModeSomething 2 in the shader",
+      "range": {
+        "startLine": 84,
+        "startChar": 26,
+        "endLine": 84,
+        "endChar": 27
+      },
+      "revId": "f73216386267792e323732b9aaf7fda20af944b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a4c147cc_5842e68d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 436,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T23:07:11Z",
+      "side": 1,
+      "message": "I recommend making this CL first as the TextureDraw change doesn\u0027t have any other dependencies underneath it",
+      "range": {
+        "startLine": 435,
+        "startChar": 0,
+        "endLine": 436,
+        "endChar": 20
+      },
+      "revId": "f73216386267792e323732b9aaf7fda20af944b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
