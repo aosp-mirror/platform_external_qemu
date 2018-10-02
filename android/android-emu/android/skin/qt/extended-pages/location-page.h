@@ -52,6 +52,7 @@ private slots:
     void on_loc_sendPointButton_clicked();
     void on_loc_longitudeInput_valueChanged(double);
     void on_loc_latitudeInput_valueChanged(double);
+    void on_loc_speedInput_editingFinished();
     void on_loc_altitudeInput_editingFinished();
     void on_loc_playbackSpeed_currentIndexChanged(int index);
 

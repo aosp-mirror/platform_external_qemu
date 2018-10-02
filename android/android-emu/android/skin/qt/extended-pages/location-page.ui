@@ -282,11 +282,11 @@
      <bold>false</bold>
     </font>
    </property>
-   <property name="alternatingRowColors">
-    <bool>true</bool>
-   </property>
    <property name="horizontalScrollBarPolicy">
     <enum>Qt::ScrollBarAlwaysOff</enum>
+   </property>
+   <property name="alternatingRowColors">
+    <bool>true</bool>
    </property>
    <property name="selectionMode">
     <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -325,7 +325,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignRight|AlignVCenter</set>
+     <set>AlignTrailing|AlignVCenter</set>
     </property>
    </column>
    <column>
@@ -340,7 +340,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignRight|AlignVCenter</set>
+     <set>AlignTrailing|AlignVCenter</set>
     </property>
    </column>
    <column>
@@ -355,7 +355,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignRight|AlignVCenter</set>
+     <set>AlignTrailing|AlignVCenter</set>
     </property>
    </column>
    <column>
@@ -370,7 +370,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignRight|AlignVCenter</set>
+     <set>AlignTrailing|AlignVCenter</set>
     </property>
    </column>
    <column>
@@ -385,7 +385,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignRight|AlignVCenter</set>
+     <set>AlignTrailing|AlignVCenter</set>
     </property>
    </column>
    <column>
@@ -400,7 +400,7 @@
      </font>
     </property>
     <property name="textAlignment">
-     <set>AlignRight|AlignVCenter</set>
+     <set>AlignTrailing|AlignVCenter</set>
     </property>
    </column>
   </widget>
@@ -520,6 +520,44 @@
     <font>
      <family>Roboto</family>
     </font>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="loc_speedInput">
+   <property name="geometry">
+    <rect>
+     <x>324</x>
+     <y>240</y>
+     <width>131</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="accessibleDescription">
+    <string>Altitude in meters</string>
+   </property>
+   <property name="text">
+    <string>0</string>
+   </property>
+   <property name="class" stdset="0">
+    <string>EditableValue</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="loc_speedLabel">
+   <property name="geometry">
+    <rect>
+     <x>324</x>
+     <y>220</y>
+     <width>91</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Speed (knots)</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Title</string>
    </property>
   </widget>
  </widget>
