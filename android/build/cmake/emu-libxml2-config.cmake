@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/libxml2/${LOCAL_TARGET_TAG}" ABSOLUTE)
+get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/libxml2/${ANDROID_TARGET_TAG}" ABSOLUTE)
 
 set(LIBXML2_INCLUDE_DIR "${PREBUILT_ROOT}/include")
 set(LIBXML2_INCLUDE_DIRS "${LIBXML2_INCLUDE_DIRS}")
