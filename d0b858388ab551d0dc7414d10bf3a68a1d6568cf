@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "52db863a_0038d2b3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-02T18:40:45Z",
+      "side": 1,
+      "message": "+1, there isn\u0027t that great of a solution AFAIK but I would do something like this:\n\nclass AutoComposeDevice {\npublic:\n    AutoComposeDevice(size_t layerCount) : mData(new uint8_t[sizeof(ComposeDevice) + layerCount * sizeof(ComposeLayer)]) {\n        mComposeDevice \u003d reinterpret_cast\u003cComposeDevice*\u003e(mData.get());\n\n        mComposeDevice-\u003eversion \u003d 1;\n        mComposeDevice-\u003etargetHandle \u003d 0;\n        mComposeDevice-\u003enumLayers \u003d layerCount;\n    }\n\n    ComposeDevice* get() {\n        return mComposeDevice;\n    }\n\nprivate:\n    std::unique_ptr\u003cuint8_t[]\u003e mData;\n    ComposeDevice* mComposeDevice;\n};\n\nMaybe with a default constructor too.",
+      "parentUuid": "55de7408_af7cf47d",
+      "range": {
+        "startLine": 222,
+        "startChar": 8,
+        "endLine": 222,
+        "endChar": 20
+      },
+      "revId": "d0b858388ab551d0dc7414d10bf3a68a1d6568cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8838cde2_1c0d4a4a",
         "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
         "patchSetId": 4
@@ -136,6 +160,52 @@
         "startChar": 0,
         "endLine": 254,
         "endChar": 5
+      },
+      "revId": "d0b858388ab551d0dc7414d10bf3a68a1d6568cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "96e4a8a3_9ed46ec6",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-02T18:40:45Z",
+      "side": 1,
+      "message": "I think it\u0027s worth factoring out the if/else into helper functions, since the lambda is pretty giant.\n\nFunctorThread sfThread([\u0026]() {\n    if (mIsCompose) {\n        drawWorkerWithCompose();\n    } else {\n        drawWorker();\n    }\n});",
+      "range": {
+        "startLine": 359,
+        "startChar": 12,
+        "endLine": 359,
+        "endChar": 22
+      },
+      "revId": "d0b858388ab551d0dc7414d10bf3a68a1d6568cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "33a6fee1_d57d2245",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-02T18:40:45Z",
+      "side": 1,
+      "message": "Looks like this could use a \"git clang-format\"",
+      "range": {
+        "startLine": 476,
+        "startChar": 12,
+        "endLine": 477,
+        "endChar": 13
       },
       "revId": "d0b858388ab551d0dc7414d10bf3a68a1d6568cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
