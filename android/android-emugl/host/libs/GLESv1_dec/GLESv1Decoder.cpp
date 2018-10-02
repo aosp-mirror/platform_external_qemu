@@ -16,6 +16,8 @@
 #include "GLESv1Decoder.h"
 
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/Lock.h"
+
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 
 #include <EGL/egl.h>
@@ -26,6 +28,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+using android::base::AutoLock;
+using android::base::StaticLock;
 
 static inline void* SafePointerFromUInt(GLuint value) {
   return (void*)(uintptr_t)value;
@@ -53,6 +58,7 @@ int gles1_decoder_extended_context::initDispatch(
     return 0;
 }
 
+static StaticLock sLock;
 static GLESv1Decoder::get_proc_func_t sGetProcFunc;
 static void* sGetProcFuncData;
 
@@ -81,6 +87,7 @@ GLESv1Decoder::~GLESv1Decoder()
 
 int GLESv1Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
 {
+    AutoLock lock(sLock);
     sGetProcFunc = getProcFunc;
     sGetProcFuncData = getProcFuncData;
     static_cast<gles1_decoder_extended_context&>(*this) = sContextTemplate->context;
