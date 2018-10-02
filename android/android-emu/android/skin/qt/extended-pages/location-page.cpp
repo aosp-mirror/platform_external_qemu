@@ -106,7 +106,7 @@ LocationPage::LocationPage(QWidget *parent) :
 
     // We can only send 1 decimal of altitude (in meters).
     mAltitudeValidator.setNotation(QDoubleValidator::StandardNotation);
-    mAltitudeValidator.setRange(-1000, 10000, 1);
+//    mAltitudeValidator.setRange(-1000, 10000, 1);
     mAltitudeValidator.setLocale(QLocale::C);
     mUi->loc_altitudeInput->setValidator(&mAltitudeValidator);
 
@@ -127,6 +127,7 @@ LocationPage::LocationPage(QWidget *parent) :
     updateDisplayedLocation(curLat, curLon, curAlt);
 
     mUi->loc_altitudeInput->setText(QString::number(curAlt, 'f', 1));
+    mUi->loc_speedInput->setText(QString::number(sDeviceSpeed, 'f', 1));
     mUi->loc_latitudeInput->setValue(curLat);
     mUi->loc_longitudeInput->setValue(curLon);
 
@@ -256,11 +257,12 @@ void LocationPage::on_loc_sendPointButton_clicked() {
     double lat = 0.0;
     double lon = 0.0;
     double altitude = mUi->loc_altitudeInput->text().toDouble();
-    if (altitude < -1000.0 || altitude > 10000.0) {
-        double validAltitude;
-        getDeviceLocationFromSettings(&lat, &lon, &validAltitude);
-        mUi->loc_altitudeInput->setText(QString::number(validAltitude));
-    }
+//    if (altitude < -1000.0 || altitude > 10000.0) {
+//        double validAltitude;
+//        getDeviceLocationFromSettings(&lat, &lon, &validAltitude);
+//        mUi->loc_altitudeInput->setText(QString::number(validAltitude));
+//    }
+    sDeviceSpeed = mUi->loc_speedInput->text().toDouble();
 
     AutoLock lock(sGlobals->updateThreadLock);
     lat = mUi->loc_latitudeInput->value(),
@@ -272,8 +274,9 @@ void LocationPage::on_loc_sendPointButton_clicked() {
 }
 
 void LocationPage::updateDisplayedLocation(double lat, double lon, double alt) {
-    QString curLoc = tr("Longitude: %1\nLatitude: %2\nAltitude: %3")
-                     .arg(lon, 0, 'f', 4).arg(lat, 0, 'f', 4).arg(alt, 0, 'f', 1);
+    QString curLoc = tr("Longitude: %1\nLatitude: %2\nAltitude: %3\nSpeed: %4")
+                     .arg(lon, 0, 'f', 4).arg(lat, 0, 'f', 4)
+                     .arg(alt, 0, 'f', 1).arg(sDeviceSpeed, 0, 'f', 1);
     mUi->loc_currentLoc->setPlainText(curLoc);
     writeDeviceLocationToSettings(lat, lon, alt);
 }
@@ -287,6 +290,10 @@ void LocationPage::on_loc_latitudeInput_valueChanged(double value) {
 }
 
 void LocationPage::on_loc_altitudeInput_editingFinished() {
+    // no-op
+}
+
+void LocationPage::on_loc_speedInput_editingFinished() {
     // no-op
 }
 
@@ -352,11 +359,11 @@ bool LocationPage::validateCell(QTableWidget* table,
                 *outErrorMessage = tr("Elevation must be a number.");
                 return false;
             }
-            if (cellValue < -1000.0 || cellValue > 10000.0) {
-                *outErrorMessage = tr(
-                        "Altitude must be between -1000 and 10000, inclusive.");
-                cellOK = false;
-            }
+//            if (cellValue < -1000.0 || cellValue > 10000.0) {
+//                *outErrorMessage = tr(
+//                        "Altitude must be between -1000 and 10000, inclusive.");
+//                cellOK = false;
+//            }
             break;
         default:
             // Name, description: Anything is OK
