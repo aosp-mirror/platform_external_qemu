@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "42d77206_ec4086d4",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1912,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T23:04:25Z",
+      "side": 1,
+      "message": "Can you explain more on the data path that causes targetHandle !\u003d 0 to mean that the composition is hybrid?",
+      "range": {
+        "startLine": 1906,
+        "startChar": 0,
+        "endLine": 1912,
+        "endChar": 5
+      },
+      "revId": "7f4c45d10b555228ccb46ea539a56cbb9d7de720",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f7e7d7f3_b080cc40",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1915,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T23:04:25Z",
+      "side": 1,
+      "message": "To be consistent with other Framebuffer methods that have a normal interface that takes a lock, versus a method with *Locked at the end, I recommend changing this to createColorBufferLocked and createColorBuffer will take the lock on its own.",
+      "range": {
+        "startLine": 1915,
+        "startChar": 30,
+        "endLine": 1915,
+        "endChar": 51
+      },
+      "revId": "7f4c45d10b555228ccb46ea539a56cbb9d7de720",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2505b9bf_366aa843",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 569,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T23:04:25Z",
+      "side": 1,
+      "message": "compose shared with exit, please move exit to 4",
+      "range": {
+        "startLine": 568,
+        "startChar": 1,
+        "endLine": 569,
+        "endChar": 17
+      },
+      "revId": "7f4c45d10b555228ccb46ea539a56cbb9d7de720",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
