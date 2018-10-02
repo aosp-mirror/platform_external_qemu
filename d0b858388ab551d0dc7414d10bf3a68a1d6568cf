@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8838cde2_1c0d4a4a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T17:14:16Z",
+      "side": 1,
+      "message": "We can auto free mComposeDevice on ~SampleApplication if we delcare it as a unique_ptr (it\u0027s cleaner that way IMO)\n\nI.e.,\n\n#include \u003cmemory\u003e\n\nstd::unique_ptr\u003cComposeDevice\u003e mComposeDevice;\n\nand then to allocate it, mComposeDevice.reset(new ComposeDevice)\n\nand then it will do the equivalent of\n\nif (mComposeDevice) free(mComposeDevice)\n\non ~SampleApplication, as the destructor will also invoke the destructor for all class members.",
+      "range": {
+        "startLine": 252,
+        "startChar": 0,
+        "endLine": 254,
+        "endChar": 5
+      },
+      "revId": "d0b858388ab551d0dc7414d10bf3a68a1d6568cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
