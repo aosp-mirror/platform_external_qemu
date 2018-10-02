@@ -912,8 +912,7 @@ static int rcCompose(uint32_t bufferSize, void* buffer) {
     if (!fb) {
         return -1;
     }
-    return 0;
-//    return fb->compose(bufferSize, buffer);
+    return fb->compose(bufferSize, buffer);
 }
 
 void initRenderControlContext(renderControl_decoder_context_t *dec)

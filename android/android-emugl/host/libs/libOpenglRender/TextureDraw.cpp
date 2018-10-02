@@ -364,3 +364,17 @@ void TextureDraw::setScreenMask(int width, int height, const unsigned char* rgba
 
     mHaveNewMask = true;
 }
+
+void TextureDraw::prepareForDrawLayer() {
+    //TODO:
+}
+
+void TextureDraw::drawLayer(ComposeLayer* l, int frameWidth, int frameHeight,
+                            int cbWidth, int cbHeight, GLuint texture) {
+    //TODO
+}
+
+// Do Post right after drawing each layer, so keep using this program
+void TextureDraw::cleanupForDrawLayer() {
+    //TODO
+}
