@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "496e4451_14a2479a",
+        "filename": "android/android-emugl/guest/androidImpl/AndroidBufferQueue.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-02T23:20:47Z",
+      "side": 1,
+      "message": "I believe you don\u0027t need this.",
+      "range": {
+        "startLine": 35,
+        "startChar": 4,
+        "endLine": 35,
+        "endChar": 18
+      },
+      "revId": "97bffcfccc539814c650b2938864890d7fdb7b25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "11e708c2_2ff81c41",
+        "filename": "android/android-emugl/guest/androidImpl/AndroidBufferQueue.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-02T23:20:47Z",
+      "side": 1,
+      "message": "Just return Item instead?",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 43,
+        "endChar": 4
+      },
+      "revId": "97bffcfccc539814c650b2938864890d7fdb7b25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
