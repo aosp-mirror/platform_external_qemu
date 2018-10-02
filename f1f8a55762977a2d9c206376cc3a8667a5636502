@@ -22,6 +22,30 @@
       "revId": "f1f8a55762977a2d9c206376cc3a8667a5636502",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fa537d76_d853cf3f",
+        "filename": ".vscode/c_cpp_properties.json",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-02T18:49:19Z",
+      "side": 1,
+      "message": "Looks like a lost my comment above this.  I seem to have lost my linux config, but my mac one is pretty extensive.  I recommend using this as a starting point (or amending after this commit).",
+      "parentUuid": "92f19708_f4631f9b",
+      "range": {
+        "startLine": 6,
+        "startChar": 17,
+        "endLine": 8,
+        "endChar": 85
+      },
+      "revId": "f1f8a55762977a2d9c206376cc3a8667a5636502",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
