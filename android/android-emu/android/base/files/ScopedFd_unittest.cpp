@@ -11,7 +11,9 @@
 
 #include "android/base/files/ScopedFd.h"
 
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 
 #include <gtest/gtest.h>

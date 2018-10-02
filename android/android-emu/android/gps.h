@@ -15,7 +15,9 @@
 #include "android/emulation/serial_line.h"
 
 #include <stdbool.h>
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif
 
 /* this is the internal character driver used to communicate with the
  * emulated GPS unit. see qemu_chr_open() in vl.c */

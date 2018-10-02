@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-#include <unistd.h>
+#ifndef _MSC_VER
 #include <libgen.h>
+#include <unistd.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include "ext4fixup.h"

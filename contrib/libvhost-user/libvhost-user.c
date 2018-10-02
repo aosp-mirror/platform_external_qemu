@@ -16,7 +16,9 @@
 /* this code avoids GLib dependency */
 #include <stdlib.h>
 #include <stdio.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <stdarg.h>
 #include <errno.h>
 #include <string.h>

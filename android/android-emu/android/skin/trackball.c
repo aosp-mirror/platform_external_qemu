@@ -15,7 +15,9 @@
 
 #include <math.h>
 #include <stdlib.h>
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif
 
 // Return the number of milliseconds since the start of this module.
 static uint32_t get_ticks(void) {

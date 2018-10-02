@@ -19,7 +19,9 @@
 #include "jpeglib.h"
 #include "jmemsys.h"		/* import the system-dependent declarations */
 
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <sys/mman.h>
 
 #ifndef HAVE_STDLIB_H		/* <stdlib.h> should declare malloc(),free() */

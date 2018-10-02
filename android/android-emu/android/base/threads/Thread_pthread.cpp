@@ -20,7 +20,9 @@
 #include <assert.h>
 #include <signal.h>
 #include <stdio.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 namespace android {
 namespace base {
