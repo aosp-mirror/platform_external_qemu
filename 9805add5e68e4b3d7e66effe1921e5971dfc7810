@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "10569149_541748fc",
+        "filename": "android-qemu2-glue/scripts/gen-cmake.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-02T23:18:23Z",
+      "side": 1,
+      "message": "Will do,",
+      "parentUuid": "6185dd23_e2fce798",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 5,
+        "endChar": 6
+      },
+      "revId": "9805add5e68e4b3d7e66effe1921e5971dfc7810",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f2f9c504_0f26be53",
         "filename": "cmake-main.windows-x86.inc",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2018-10-01T16:29:40Z",
       "side": 1,
       "message": "Recommend inlining the complete instructions incl. building the upstream sources, and having something easy to paste here given those repos (hopefully we can make this not necessary at some point?)\n\nOtherwise the easy / likely path will remain just adding something here, as the process to regenerate this has many steps.",
+      "range": {
+        "startLine": 2,
+        "startChar": 2,
+        "endLine": 2,
+        "endChar": 40
+      },
+      "revId": "9805add5e68e4b3d7e66effe1921e5971dfc7810",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9310c86b_64d7caf4",
+        "filename": "cmake-main.windows-x86.inc",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-02T23:18:23Z",
+      "side": 1,
+      "message": "Good idea. \n\nWill add.",
+      "parentUuid": "f2f9c504_0f26be53",
       "range": {
         "startLine": 2,
         "startChar": 2,
