@@ -58,4 +58,6 @@ enum Feature {
     SnapshotAdb = 28;
 
     RefCountPipe = 29;
+
+    HostComposition = 31;
 }
