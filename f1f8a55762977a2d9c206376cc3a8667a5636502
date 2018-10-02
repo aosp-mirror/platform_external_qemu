@@ -46,6 +46,30 @@
       "revId": "f1f8a55762977a2d9c206376cc3a8667a5636502",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2868bbcb_23429b67",
+        "filename": ".vscode/c_cpp_properties.json",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T18:52:44Z",
+      "side": 1,
+      "message": "Awesome, thanks v much Jeff :}",
+      "parentUuid": "fa537d76_d853cf3f",
+      "range": {
+        "startLine": 6,
+        "startChar": 17,
+        "endLine": 8,
+        "endChar": 85
+      },
+      "revId": "f1f8a55762977a2d9c206376cc3a8667a5636502",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
