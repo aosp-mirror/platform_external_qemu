@@ -16,6 +16,7 @@
 #define TEXTURE_DRAW_H
 
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include <GLES2/gl2.h>
 #include "Hwc2.h"
 
@@ -61,10 +62,16 @@ private:
     GLuint mVertexShader;
     GLuint mFragmentShader;
     GLuint mProgram;
+    GLint mAlpha;
+    GLint mComposeMode;
+    GLint mColor;
     GLint mPositionSlot;
     GLint mInCoordSlot;
     GLint mTextureSlot;
     GLint mTranslationSlot;
+    GLint mScaleSlot;
+    GLint mCoordTranslation;
+    GLint mCoordScale;
     GLuint mVertexBuffer;
     GLuint mIndexBuffer;
 
