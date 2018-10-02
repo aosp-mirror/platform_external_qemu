@@ -156,6 +156,7 @@ public:
     void setScreenMask(int width, int height, const unsigned char* rgbaData) { }
     void cleanupProcGLObjects(uint64_t puid) { }
     void stop(bool wait) { }
+    void finish() { }
     void pauseAllPreSave() { }
     void resumeAll() { }
     void save(android::base::Stream* stream,

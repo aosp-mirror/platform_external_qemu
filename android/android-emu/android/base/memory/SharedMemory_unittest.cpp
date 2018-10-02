@@ -73,6 +73,24 @@ TEST(SharedMemory, CannotOpenTwice) {
     ASSERT_NE(0, err);
 }
 
+TEST(SharedMemory, CreateNoMapping) {
+    const mode_t user_read_write = 0755;
+    std::string name = "tst_21654869810548";
+    base::SharedMemory mem(name, 256);
+
+    ASSERT_FALSE(mem.isOpen());
+
+    int err = mem.createNoMapping(user_read_write);
+    ASSERT_EQ(0, err);
+
+    ASSERT_FALSE(mem.isMapped());
+
+    ASSERT_TRUE(mem.getFd() >= 0);
+
+    mem.close();
+    ASSERT_FALSE(mem.isOpen());
+}
+
 }  // namespace base
 }  // namespace android
 
