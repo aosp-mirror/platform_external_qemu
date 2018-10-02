@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "10b2e6e7_8901bf74",
+        "filename": "android/build/cmake/emu-angle-config.cmake",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T02:56:24Z",
+      "side": 1,
+      "message": "nit: Could we simplify this by defining a ${WINDOWS_STATIC_LIB_SUFFIX} somewhere? (and for the others)",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 8
+      },
+      "revId": "08212014bf59ebc92e88c2b494d1e19043ba24aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
