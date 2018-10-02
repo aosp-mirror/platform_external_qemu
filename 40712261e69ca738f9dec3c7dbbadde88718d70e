@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c81f24f7_bf6a1649",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 916,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T22:58:44Z",
+      "side": 1,
+      "message": "nit: remove, or add the rcCompose after fb-\u003ecompose is implemented",
+      "revId": "40712261e69ca738f9dec3c7dbbadde88718d70e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
