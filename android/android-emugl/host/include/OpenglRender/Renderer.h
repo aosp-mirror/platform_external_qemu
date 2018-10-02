@@ -170,6 +170,10 @@ public:
     // stopped.
     virtual void stop(bool wait) = 0;
 
+    // Waits for all channels to finish and deletes all render threads.
+    // The renderer can still be used after finish().
+    virtual void finish() = 0;
+
     // Pauses all channels to prepare for snapshot saving.
     virtual void pauseAllPreSave() = 0;
 
