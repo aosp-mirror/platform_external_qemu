@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "13d3ba6c_17f97bff",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/Hwc2.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-02T22:59:50Z",
+      "side": 1,
+      "message": "Recommend capitalizing those to ComposeLayer or changing to underscore with compose_layer, compose_device.",
+      "range": {
+        "startLine": 84,
+        "startChar": 15,
+        "endLine": 84,
+        "endChar": 27
+      },
+      "revId": "f2ece625d91e5376d79df222ca295067404acdd0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
