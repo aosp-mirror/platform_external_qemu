@@ -33,7 +33,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <sys/mman.h>
 

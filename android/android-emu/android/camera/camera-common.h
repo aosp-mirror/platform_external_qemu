@@ -37,7 +37,9 @@
 
 #include <errno.h>
 #include <stdlib.h>
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif
 #ifdef _WIN32
 #include <winsock2.h>
 #endif

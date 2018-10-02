@@ -28,7 +28,9 @@
 #include <algorithm>
 #include <string>
 #include <utility>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 using android::base::AutoLock;
 using android::base::LazyInstance;

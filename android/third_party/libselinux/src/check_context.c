@@ -1,4 +1,6 @@
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <fcntl.h>
 #include <stdlib.h>

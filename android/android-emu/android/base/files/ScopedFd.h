@@ -14,7 +14,9 @@
 #include "android/base/Compiler.h"
 
 #include <errno.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 namespace android {
 namespace base {

@@ -15,7 +15,9 @@
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif
 
 ANDROID_BEGIN_HEADER
 

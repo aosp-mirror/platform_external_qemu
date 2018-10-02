@@ -12,7 +12,9 @@
 #include "android/tcpdump.h"
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif
 
 int  qemu_tcpdump_active;
 

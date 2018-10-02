@@ -27,7 +27,9 @@ extern "C" {
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #ifndef _WIN32
 #define O_BINARY 0

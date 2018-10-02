@@ -20,7 +20,9 @@
 #include "android/utils/compiler.h"
 
 #include <stddef.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 ANDROID_BEGIN_HEADER
 

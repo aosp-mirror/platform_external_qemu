@@ -22,7 +22,9 @@
 #include "emugl/common/OpenGLDispatchLoader.h"
 #include "emugl/common/sync_device.h"
 
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif
 #include <memory>
 
 #define DEBUG 0
