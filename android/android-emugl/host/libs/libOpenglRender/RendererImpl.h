@@ -42,6 +42,7 @@ public:
 
     bool initialize(int width, int height, bool useSubWindow, bool egl2egl);
     void stop(bool wait);
+    void finish();
 
 public:
     RenderChannelPtr createRenderChannel(android::base::Stream* loadStream) final;

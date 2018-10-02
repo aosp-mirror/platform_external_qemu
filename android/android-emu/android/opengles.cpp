@@ -348,6 +348,14 @@ android_stopOpenglesRenderer(bool wait)
     }
 }
 
+void
+android_finishOpenglesRenderer()
+{
+    if (sRenderer) {
+        sRenderer->finish();
+    }
+}
+
 static emugl::RenderOpt sOpt;
 static int sWidth, sHeight;
 static int sNewWidth, sNewHeight;

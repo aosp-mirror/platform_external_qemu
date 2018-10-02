@@ -84,7 +84,10 @@ public:
     using memory_type = void*;
     using handle_type = HANDLE;
     constexpr static handle_type invalidHandle() {
-        return INVALID_HANDLE_VALUE;
+        // This is the invalid return value for
+        // CreateFileMappingW; INVALID_HANDLE_VALUE
+        // could mean the paging file on Windows.
+        return NULL;
     }
     constexpr static memory_type unmappedMemory() { return nullptr; }
 #else
@@ -126,10 +129,15 @@ public:
     // write access. Returns 0 on success, or an negative error code otheriwse.
     // The error code (errno) is platform dependent.
     int create(mode_t mode);
+    // Creates a shared object in the same manner as create(), except for
+    // performing actual mapping.
+    int createNoMapping(mode_t mode);
 
     // Opens the shared memory object, returns 0 on success
     // or the negative error code.
+    // The shared memory object will be mapped.
     int open(AccessMode access);
+
     bool isOpen() const;
     void close();
 
@@ -139,9 +147,15 @@ public:
     memory_type operator*() const { return get(); }
 
     handle_type getFd() { return mFd; }
+    bool isMapped() const { return mAddr != unmappedMemory(); }
 
 private:
-    int openInternal(int oflag, int mode);
+#ifdef _WIN32
+    int openInternal(AccessMode access, bool doMapping = true);
+#else
+    int openInternal(int oflag, int mode, bool doMapping = true);
+#endif
+
     void clear() {
         mSize = 0;
         mName = "";
@@ -150,11 +164,12 @@ private:
         mAddr = unmappedMemory();
     }
 
+    memory_type mAddr = unmappedMemory();
+    handle_type mFd = invalidHandle();
+    bool mCreate = false;
+
     std::string mName;
     size_t mSize;
-    memory_type mAddr;
-    handle_type mFd;
-    bool mCreate;
 };
 }  // namespace base
 }  // namespace android
