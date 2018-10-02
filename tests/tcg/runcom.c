@@ -5,7 +5,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <signal.h>
