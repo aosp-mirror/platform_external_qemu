@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "55de7408_af7cf47d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-02T17:31:29Z",
+      "side": 1,
+      "message": "Unfortunately unique_ptr will not work here, because this \"type\" has runtime defined size. We need to invent a AutoComposeDevice class.",
+      "parentUuid": "7d2bdd7e_9b9d398f",
+      "range": {
+        "startLine": 222,
+        "startChar": 8,
+        "endLine": 222,
+        "endChar": 20
+      },
+      "revId": "d0b858388ab551d0dc7414d10bf3a68a1d6568cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8838cde2_1c0d4a4a",
         "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
         "patchSetId": 4
