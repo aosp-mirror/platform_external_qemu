@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "e82b5666_fbd30a4b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-02T17:24:44Z",
+      "side": 1,
+      "message": "Is this possible to ask ComposeDevice for how much memory it needs for n layers instead of calculating it here?",
+      "range": {
+        "startLine": 222,
+        "startChar": 8,
+        "endLine": 222,
+        "endChar": 20
+      },
+      "revId": "d0b858388ab551d0dc7414d10bf3a68a1d6568cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2149aad4_2a1359d6",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-02T17:24:44Z",
+      "side": 1,
+      "message": "Why do we allocate this size? Do layers come right after the device?",
+      "range": {
+        "startLine": 222,
+        "startChar": 23,
+        "endLine": 222,
+        "endChar": 72
+      },
+      "revId": "d0b858388ab551d0dc7414d10bf3a68a1d6568cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8838cde2_1c0d4a4a",
         "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
         "patchSetId": 4
@@ -18,6 +64,53 @@
         "startChar": 0,
         "endLine": 254,
         "endChar": 5
+      },
+      "revId": "d0b858388ab551d0dc7414d10bf3a68a1d6568cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8bac7259_932808cd",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/SampleApplication.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-02T17:24:44Z",
+      "side": 1,
+      "message": "It is allocated in a weird way that C++ will not like.",
+      "parentUuid": "8838cde2_1c0d4a4a",
+      "range": {
+        "startLine": 252,
+        "startChar": 0,
+        "endLine": 254,
+        "endChar": 5
+      },
+      "revId": "d0b858388ab551d0dc7414d10bf3a68a1d6568cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "246376f6_9d4b9892",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/tests/TextureDraw_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-02T17:24:44Z",
+      "side": 1,
+      "message": "maybe nBytes?",
+      "range": {
+        "startLine": 99,
+        "startChar": 14,
+        "endLine": 99,
+        "endChar": 19
       },
       "revId": "d0b858388ab551d0dc7414d10bf3a68a1d6568cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
