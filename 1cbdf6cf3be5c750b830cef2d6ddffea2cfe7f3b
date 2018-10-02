@@ -46,6 +46,30 @@
       "revId": "1cbdf6cf3be5c750b830cef2d6ddffea2cfe7f3b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f2afc1a8_161015ab",
+        "filename": ".vscode/c_cpp_properties.json",
+        "patchSetId": 4
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-02T19:50:43Z",
+      "side": 1,
+      "message": "Yep, indeed it was.  I see the difference now, I used qemu as my workspace dir and this is using the repo root.",
+      "parentUuid": "9f33a0fd_f4a51010",
+      "range": {
+        "startLine": 5,
+        "startChar": 12,
+        "endLine": 5,
+        "endChar": 28
+      },
+      "revId": "1cbdf6cf3be5c750b830cef2d6ddffea2cfe7f3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
