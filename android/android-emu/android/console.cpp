@@ -62,13 +62,13 @@
 #include <assert.h>
 #include <ctype.h>
 #include <fcntl.h>
-#include <getopt.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #ifndef _MSC_VER
+#include <getopt.h>
 #include <unistd.h>
 #endif
 
