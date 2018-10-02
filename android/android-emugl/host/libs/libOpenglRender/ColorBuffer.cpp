@@ -734,7 +734,7 @@ void ColorBuffer::restore() {
 
 
 GLuint ColorBuffer::getTexture() {
-    initialize();
+    touch();
     return m_tex;
 }
 
