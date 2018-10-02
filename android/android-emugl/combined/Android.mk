@@ -9,6 +9,8 @@ $(call emugl-export,C_INCLUDES,$(LOCAL_PATH))
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH) \
+    $(EMUGL_PATH)/guest \
+    $(EMUGL_PATH)/guest/androidImpl \
     $(EMUGL_PATH)/host/include \
     $(ANDROID_EMU_BASE_INCLUDES) \
 
@@ -22,6 +24,8 @@ LOCAL_SHARED_LIBRARIES += \
     android-emu-shared \
     libOpenglSystemCommon \
     libEGL_emulation \
+    libcutils \
+    libGLESv2_emulation \
 
 LOCAL_INSTALL_OPENGL := true
 

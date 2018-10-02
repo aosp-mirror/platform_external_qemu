@@ -17,6 +17,24 @@
 #include <string>
 #include <vector>
 
+#ifdef __APPLE__
+
+#define LIBSUFFIX ".dylib"
+
+#else
+
+#ifdef _WIN32
+
+#define LIBSUFFIX ".dll"
+
+#else
+
+#define LIBSUFFIX ".so"
+
+#endif // !_WIN32 (linux)
+
+#endif // !__APPLE__
+
 namespace android {
 namespace base {
 
