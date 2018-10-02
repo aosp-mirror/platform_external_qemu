@@ -23,7 +23,9 @@
  */
 
 #include "qemu/osdep.h"
+#ifndef _MSC_VER
 #include <getopt.h>
+#endif
 
 #include "qemu-version.h"
 #include "qapi/error.h"
