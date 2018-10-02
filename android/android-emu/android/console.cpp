@@ -2572,12 +2572,14 @@ do_geo_fix( ControlClient  client, char*  args )
     gettimeofday(&tVal, NULL);
 
     // Also update the settings.
+    double velocity = 0.0;
+    double heading  = 0.0;
     if (location_agent_qt_settings_func) {
-        location_agent_qt_settings_func(params[GEO_LAT], params[GEO_LONG], altitude);
+        location_agent_qt_settings_func(params[GEO_LAT], params[GEO_LONG], altitude, velocity, heading);
     }
     client->global->location_agent->gpsSendLoc(params[GEO_LAT], params[GEO_LONG],
                                                altitude,
-                                               0.0, 0.0, // Speed and heading
+                                               velocity, heading,
                                                n_satellites, &tVal);
 
     return 0;
