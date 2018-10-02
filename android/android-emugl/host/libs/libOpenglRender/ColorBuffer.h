@@ -224,8 +224,6 @@ public:
     HandleType getHndl() const;
 
     bool isFastBlitSupported() const { return m_fastBlitSupported; }
-    bool isInitialized();
-    void initialize();
     void postLayer(ComposeLayer* l, int frameWidth, int frameHeight);
     GLuint getTexture();
 
