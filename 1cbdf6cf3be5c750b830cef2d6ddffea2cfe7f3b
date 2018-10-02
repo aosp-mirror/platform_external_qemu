@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da30c976_453586c2",
+        "filename": ".vscode/c_cpp_properties.json",
+        "patchSetId": 4
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-02T19:01:48Z",
+      "side": 1,
+      "message": "On, I think the \"${workspaceFolder}\" line got lost.",
+      "range": {
+        "startLine": 5,
+        "startChar": 12,
+        "endLine": 5,
+        "endChar": 28
+      },
+      "revId": "1cbdf6cf3be5c750b830cef2d6ddffea2cfe7f3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
