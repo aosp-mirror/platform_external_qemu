@@ -120,6 +120,8 @@ enum class SaveSnapshotOnExitUiOrder { Always, Never, Ask };
 constexpr char PER_AVD_LONGITUDE[] = "perAvd/loc/longitude";
 constexpr char PER_AVD_LATITUDE[] = "perAvd/loc/latitude";
 constexpr char PER_AVD_ALTITUDE[] = "perAvd/loc/altitude";
+constexpr char PER_AVD_VELOCITY[] = "perAvd/loc/velocity";
+constexpr char PER_AVD_HEADING[] = "perAvd/loc/heading";
 
 constexpr char PER_AVD_LOC_PLAYBACK_FILE[] = "perAvd/loc/playback_file_path";
 constexpr char PER_AVD_LOC_PLAYBACK_SPEED[] = "perAvd/loc/playback_speed";
