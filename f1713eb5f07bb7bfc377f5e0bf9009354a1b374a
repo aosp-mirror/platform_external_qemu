@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "60ea602d_ad3e3fea",
+        "filename": ".vscode/c_cpp_properties.json",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-02T21:07:39Z",
+      "side": 1,
+      "message": "Do we need to separate this from the external/qemu include?",
+      "range": {
+        "startLine": 26,
+        "startChar": 16,
+        "endLine": 26,
+        "endChar": 65
+      },
+      "revId": "f1713eb5f07bb7bfc377f5e0bf9009354a1b374a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
