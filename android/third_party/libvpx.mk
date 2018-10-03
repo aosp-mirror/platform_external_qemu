@@ -4,7 +4,7 @@ LIBVPX_TOP_DIR := $(LIBVPX_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)
 
 $(call define-emulator-prebuilt-library, \
     emulator-libvpx, \
-    $(LIBVPX_TOP_DIR)/lib/libvpx.a)
+    $(LIBVPX_TOP_DIR)/lib/libvpx$(BUILD_TARGET_STATIC_LIBEXT))
 
 
 LIBVPX_INCLUDES := $(LIBVPX_TOP_DIR)/include
