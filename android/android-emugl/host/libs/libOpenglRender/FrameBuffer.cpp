@@ -648,6 +648,9 @@ FrameBuffer::postWorkerFunc(const Post& post) {
             m_postWorker->viewport(post.viewport.width,
                                    post.viewport.height);
             break;
+        case PostCmd::Compose:
+            m_postWorker->compose(post.d);
+            break;
         case PostCmd::Clear:
             m_postWorker->clear();
             break;
@@ -913,7 +916,16 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
                                           int p_height,
                                           GLenum p_internalFormat,
                                           FrameworkFormat p_frameworkFormat) {
+
     AutoLock mutex(m_lock);
+    return createColorBufferLocked(p_width, p_height, p_internalFormat,
+                                   p_frameworkFormat);
+}
+
+HandleType FrameBuffer::createColorBufferLocked(int p_width,
+                                                int p_height,
+                                                GLenum p_internalFormat,
+                                                FrameworkFormat p_frameworkFormat) {
     HandleType ret = 0;
 
     ret = genHandle_locked();
@@ -1880,6 +1892,39 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
             pixels.data());
 }
 
+bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
+    ComposeDevice* p = (ComposeDevice*)buffer;
+    ComposeLayer* l = (ComposeLayer*)p->layer;
+    AutoLock mutex(m_lock);
+
+    // Only support DEVICE or SOLID_COLOR modes, SurfaceFlinger
+    // will not allocate the target colorbuffer
+    if (p->targetHandle != 0) {
+        // should not be here
+        ERR("Error: not support compose target cb %d\n", p->targetHandle);
+    }
+
+    if (m_targetCb == nullptr) {
+        HandleType targetCb = createColorBufferLocked(m_framebufferWidth,
+                                                      m_framebufferHeight,
+                                                      GL_RGBA,
+                                                      FRAMEWORK_FORMAT_GL_COMPATIBLE);
+        m_targetCb = findColorBuffer(targetCb);
+        if (m_targetCb == nullptr) {
+            ERR("Create color buffer failed.\n");
+            return false;
+        }
+    }
+
+    Post composeCmd;
+    composeCmd.cmd = PostCmd::Compose;
+    composeCmd.d = p;
+    sendPostWorkerCmd(composeCmd);
+
+    post(m_targetCb->getHndl(), false);
+    return true;
+}
+
 void FrameBuffer::onSave(Stream* stream,
                          const android::snapshot::ITextureSaverPtr& textureSaver) {
     // Things we do not need to snapshot:
@@ -2082,4 +2127,14 @@ void FrameBuffer::lock() {
 
 void FrameBuffer::unlock() {
     m_lock.unlock();
+}
+
+ColorBufferPtr FrameBuffer::findColorBuffer(HandleType p_colorbuffer) {
+    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+    if (c == m_colorbuffers.end()) {
+        return nullptr;
+    }
+    else {
+        return c->second.cb;
+    }
 }
