@@ -176,6 +176,24 @@ static OSStatus coreaudio_get_voice(AudioDeviceID *id, Boolean isInput)
     transportTypeQueryRes =
         AudioObjectGetPropertyData(*id, &addr, 0, 0, &size, &transportType);
 
+    	switch (transportType)
+	{
+		case kAudioDeviceTransportTypeBuiltIn:       fprintf(stderr, "Built-in\n"); break;
+		case kAudioDeviceTransportTypeAggregate:     fprintf(stderr, "Aggregate\n"); break;
+		case kAudioDeviceTransportTypeAutoAggregate: fprintf(stderr, "Auto Aggregate\n"); break;
+		case kAudioDeviceTransportTypeVirtual:       fprintf(stderr, "Virtual\n"); break;
+		case kAudioDeviceTransportTypePCI:           fprintf(stderr, "PCI\n"); break;
+		case kAudioDeviceTransportTypeUSB:           fprintf(stderr, "USB\n"); break;
+		case kAudioDeviceTransportTypeFireWire:      fprintf(stderr, "FireWire\n"); break;
+		case kAudioDeviceTransportTypeBluetooth:     fprintf(stderr, "Bluetooth\n"); break;
+		case kAudioDeviceTransportTypeHDMI:          fprintf(stderr, "HDMI\n"); break;
+		case kAudioDeviceTransportTypeDisplayPort:   fprintf(stderr, "DisplayPort\n"); break;
+		case kAudioDeviceTransportTypeAirPlay:       fprintf(stderr, "AirPlay\n"); break;
+		case kAudioDeviceTransportTypeAVB:           fprintf(stderr, "AVB\n"); break;
+		case kAudioDeviceTransportTypeThunderbolt:   fprintf(stderr, "Thunderbolt\n"); break;
+		case kAudioDeviceTransportTypeUnknown:       fprintf(stderr, "UNKNOWN\n"); break;
+	}
+
     // Can't query the transport type, just go with the previous behavior.
     // Or, the input device is not Bluetooth.
     if (transportTypeQueryRes != kAudioHardwareNoError ||
