@@ -45,7 +45,6 @@
 extern const QAndroidVmOperations* const gQAndroidVmOperations;
 extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
 
-namespace pb = ::offworld;
 using namespace android;
 using namespace android::offworld;
 using namespace android::base;
