@@ -1460,6 +1460,8 @@ void EmulatorQtWindow::queueSkinEvent(SkinEvent* event) {
 void EmulatorQtWindow::slot_updateRotation(SkinRotation rotation) {
     mOrientation = rotation;
     emit(layoutChanged(rotation));
+
+    fixScale();
 }
 
 void EmulatorQtWindow::slot_releaseBitmap(SkinSurface* s,
@@ -2265,6 +2267,10 @@ void EmulatorQtWindow::scaleDown() {
 
 void EmulatorQtWindow::scaleUp() {
     doResize(mContainer.size() * 1.1, true);
+}
+
+void EmulatorQtWindow::fixScale() {
+    doResize(mContainer.size(), true);
 }
 
 void EmulatorQtWindow::zoomIn() {
