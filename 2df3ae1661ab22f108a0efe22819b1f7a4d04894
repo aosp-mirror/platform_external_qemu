@@ -70,6 +70,30 @@
       "revId": "2df3ae1661ab22f108a0efe22819b1f7a4d04894",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e96e914_09feb240",
+        "filename": "android/android-emugl/host/libs/GLESv1_dec/GLESv1Decoder.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-03T00:24:08Z",
+      "side": 1,
+      "message": "Sounds like a good idea, though I would like to add more tests and uncover more issues like this first.\n\nIt looks like we\u0027d first want to edit the android/base/synchronization/Lock.h class to add the EXCLUSIVE_LOCK_FUNCTION/UNLOCK macros.",
+      "parentUuid": "901b2b5b_d8165551",
+      "range": {
+        "startLine": 62,
+        "startChar": 38,
+        "endLine": 62,
+        "endChar": 50
+      },
+      "revId": "2df3ae1661ab22f108a0efe22819b1f7a4d04894",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
