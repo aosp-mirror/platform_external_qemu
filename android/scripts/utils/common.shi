@@ -570,6 +570,23 @@ build_debug_info () {
     done
 }
 
+# Adds the given file to the zip file
+#
+# $1: The zip archive to use
+# $2: The root used
+# $3: The file to be added
+add_to_zip () {
+  local CURRENT_PWD=$PWD
+  local ZIPFILE=$1
+  local ROOT=$2
+  local SRC=$3
+  # pseudo absolute path to relative path
+  local SOURCE_FILE=${SRC#"$ROOT/"}
+  cd $ROOT
+  run zip -u "$ZIPFILE" "$SOURCE_FILE"
+  cd $CURRENT_PWD
+}
+#
 # Build breakpad symbols from unstripped binaries
 # Builds a symbols directory at the destination root dir and populates it with
 # *.sym extension symbol files mirroring the binary file paths
