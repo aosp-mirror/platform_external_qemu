@@ -647,6 +647,9 @@ FrameBuffer::postWorkerFunc(const Post& post) {
             m_postWorker->viewport(post.viewport.width,
                                    post.viewport.height);
             break;
+        case PostCmd::Compose:
+            m_postWorker->compose(post.d);
+            break;
         case PostCmd::Clear:
             m_postWorker->clear();
             break;
@@ -912,7 +915,16 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
                                           int p_height,
                                           GLenum p_internalFormat,
                                           FrameworkFormat p_frameworkFormat) {
+
     AutoLock mutex(m_lock);
+    return createColorBufferLocked(p_width, p_height, p_internalFormat,
+                                   p_frameworkFormat);
+}
+
+HandleType FrameBuffer::createColorBufferLocked(int p_width,
+                                                int p_height,
+                                                GLenum p_internalFormat,
+                                                FrameworkFormat p_frameworkFormat) {
     HandleType ret = 0;
 
     ret = genHandle_locked();
@@ -1906,6 +1918,19 @@ void FrameBuffer::onLastColorBufferRef(uint32_t handle) {
     m_colorbuffers.erase((HandleType)handle);
 }
 
+bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
+    ComposeDevice* p = (ComposeDevice*)buffer;
+    AutoLock mutex(m_lock);
+
+    Post composeCmd;
+    composeCmd.cmd = PostCmd::Compose;
+    composeCmd.d = p;
+    sendPostWorkerCmd(composeCmd);
+
+    post(p->targetHandle, false);
+    return true;
+}
+
 void FrameBuffer::onSave(Stream* stream,
                          const android::snapshot::ITextureSaverPtr& textureSaver) {
     // Things we do not need to snapshot:
@@ -2108,4 +2133,14 @@ void FrameBuffer::lock() {
 
 void FrameBuffer::unlock() {
     m_lock.unlock();
+}
+
+ColorBufferPtr FrameBuffer::findColorBuffer(HandleType p_colorbuffer) {
+    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+    if (c == m_colorbuffers.end()) {
+        return nullptr;
+    }
+    else {
+        return c->second.cb;
+    }
 }
