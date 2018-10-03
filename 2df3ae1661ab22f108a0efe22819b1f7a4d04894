@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "692dc504_a778508e",
+        "filename": "android/android-emugl/host/libs/GLESv1_dec/GLESv1Decoder.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-03T00:08:10Z",
+      "side": 1,
+      "message": "Do we have a macro that checks if sLock is held while access sGetProcFunc?",
+      "range": {
+        "startLine": 62,
+        "startChar": 38,
+        "endLine": 62,
+        "endChar": 50
+      },
+      "revId": "2df3ae1661ab22f108a0efe22819b1f7a4d04894",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
