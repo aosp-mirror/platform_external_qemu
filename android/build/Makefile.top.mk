@@ -12,7 +12,7 @@ if-host-clang   = $(if $(filter clang,$(BUILD_HOST_CC_TYPE)),$1,$2)
 # the first is built with mingw, and the latter is built with the Windows
 # SDK.
 if-target-any-windows = \
-        $(if $(filter windows windows_msvc,$(BUILD_TARGET_OS)),$1,$2)
+        $(if $(filter windows,$(BUILD_TARGET_OS_FLAVOR)),$1,$2)
 
 ifeq (,$(CONFIG_MIN_BUILD))
 ifeq (,$(CONFIG_AEMU64_ONLY))
