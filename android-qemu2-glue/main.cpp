@@ -1440,10 +1440,14 @@ extern "C" int main(int argc, char** argv) {
         }
 
         // Get verified boot kernel parameters, if they exist.
+        // If this is not a playstore image, then -writable_system will
+        // disable verified boot.
         std::vector<std::string> verified_boot_params;
-        android::verifiedboot::getParametersFromFile(
-                avdInfo_getVerifiedBootParamsPath(avd),  // NULL here is OK
-                &verified_boot_params);
+        if (feature_is_enabled(kFeature_PlayStoreImage) || !android_op_writable_system) {
+          android::verifiedboot::getParametersFromFile(
+                  avdInfo_getVerifiedBootParamsPath(avd),  // NULL here is OK
+                  &verified_boot_params);
+        }
 
         ScopedCPtr<char> kernel_parameters(emulator_getKernelParameters(
                 opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
