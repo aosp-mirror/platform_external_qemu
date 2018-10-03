@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8bb3526a_dfa5bbee",
+        "filename": "android/build/cmake/toolchain.cmake",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-03T15:53:05Z",
+      "side": 1,
+      "message": "We need to figure out the issue with defining CMAKE_AR, because for msvc build, we have to use llvm-ar to extract the windows libraries.",
+      "range": {
+        "startLine": 100,
+        "startChar": 4,
+        "endLine": 101,
+        "endChar": 53
+      },
+      "revId": "ac08d1007b7b4a1cac60300b99bf1e988bc4a09b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
