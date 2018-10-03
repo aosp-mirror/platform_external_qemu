@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d8f5e2ed_b03f0816",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1988,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-03T23:10:16Z",
+      "side": 1,
+      "message": "is it possible to not have to do save/load m_targetCb? This breaks the snapshot protocol.",
+      "range": {
+        "startLine": 1986,
+        "startChar": 0,
+        "endLine": 1988,
+        "endChar": 37
+      },
+      "revId": "148cb420e7d8b3e804ec7930c3fa94abcc8858fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
