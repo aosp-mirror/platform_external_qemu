@@ -22,6 +22,7 @@
 #include "emugl/common/mutex.h"
 #include "emugl/common/thread.h"
 
+#include <atomic>
 #include <memory>
 
 namespace emugl {
@@ -43,7 +44,7 @@ public:
     virtual ~RenderThread();
 
     // Returns true iff the thread has finished.
-    bool isFinished() const { return mFinished; }
+    bool isFinished() const { return mFinished.load(std::memory_order_relaxed); }
 
     void pausePreSnapshot();
     void resume();
@@ -77,7 +78,7 @@ private:
 
     RenderChannelImpl* mChannel = nullptr;
     SnapshotState mState = SnapshotState::Empty;
-    bool mFinished = false;
+    std::atomic<bool> mFinished { false };
     android::base::Lock mLock;
     android::base::ConditionVariable mCondVar;
     android::base::Optional<android::base::MemStream> mStream;
