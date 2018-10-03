@@ -18,7 +18,7 @@ ifeq ($(BUILD_TARGET_OS),windows)
     QT_LDFLAGS += \
             -L$(QT_TOP_DIR)/bin \
             -lmingw32 \
-            $(QT_TOP_DIR)/lib/libqtmain.a
+            $(QT_TOP_DIR)/lib/libqtmain$(BUILD_TARGET_STATIC_LIBEXT)
 else
     QT_LDFLAGS := -L$(QT_TOP_DIR)/lib
 endif

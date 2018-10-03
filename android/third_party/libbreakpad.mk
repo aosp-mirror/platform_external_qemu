@@ -8,7 +8,7 @@ BREAKPAD_TOP_DIR := $(BREAKPAD_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)
 
 $(call define-emulator-prebuilt-library,\
     emulator-libbreakpad_client, \
-    $(BREAKPAD_TOP_DIR)/lib/libbreakpad_client.a)
+    $(BREAKPAD_TOP_DIR)/lib/libbreakpad_client$(BUILD_TARGET_STATIC_LIBEXT))
 
 BREAKPAD_CLIENT_STATIC_LIBRARIES := \
     emulator-libbreakpad_client
@@ -17,11 +17,11 @@ BREAKPAD_CLIENT_LDLIBS :=
 
 $(call define-emulator-prebuilt-library,\
     emulator-libbreakpad, \
-    $(BREAKPAD_TOP_DIR)/lib/libbreakpad.a)
+    $(BREAKPAD_TOP_DIR)/lib/libbreakpad$(BUILD_TARGET_STATIC_LIBEXT))
 
 $(call define-emulator-prebuilt-library,\
     emulator-libdisasm, \
-    $(BREAKPAD_TOP_DIR)/lib/libdisasm.a)
+    $(BREAKPAD_TOP_DIR)/lib/libdisasm$(BUILD_TARGET_STATIC_LIBEXT))
 
 BREAKPAD_STATIC_LIBRARIES := \
     emulator-libbreakpad \
