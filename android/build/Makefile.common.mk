@@ -135,7 +135,7 @@ gen-hw-config-defs = \
   $(eval LOCAL_GENERATED_SOURCES += $(QEMU_HW_CONFIG_DEFS_H))\
   $(eval LOCAL_C_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES))
 
-ifeq ($(call if-target-any-windows,,not-windows),)
+ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
   # on Windows, link the icon file as well into the executable
   # unfortunately, our build system doesn't help us much, so we need
   # to use some weird pathnames to make this work...
