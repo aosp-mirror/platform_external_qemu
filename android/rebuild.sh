@@ -13,6 +13,7 @@ export LC_ALL=C
 PROGDIR=$(dirname "$0")
 VERBOSE=1
 
+OPTION_MIPS=
 MINGW=
 WINDOWS_MSVC=
 NO_TESTS=
@@ -58,6 +59,8 @@ for OPT; do
         --debug)
             OPTDEBUG=true
             ;;
+        --with-mips) OPTION_MIPS=true
+            ;;
     esac
 done
 
@@ -90,9 +93,11 @@ HOST_OS=$(uname -s)
 case $HOST_OS in
     Linux)
         HOST_NUM_CPUS=`cat /proc/cpuinfo | grep processor | wc -l`
+        QEMU_HOST=linux-x86_64
         ;;
     Darwin|FreeBSD)
         HOST_NUM_CPUS=`sysctl -n hw.ncpu`
+        QEMU_HOST=darwin-x86_64
         ;;
     CYGWIN*|*_NT-*)
         HOST_NUM_CPUS=$NUMBER_OF_PROCESSORS
@@ -131,6 +136,31 @@ if [ -z "$NO_TESTS" ]; then
 
 else
     echo "Ignoring unit tests suite."
+fi
+
+# In debug builds we will also build qemu..
+if [ "$OPTDEBUG" = "true" ]; then
+  TARGET_LIST=arm,arm64,x86,x86_64
+  if [ "$OPTION_MIPS" = "true" ]; then
+      TARGET_LIST=$TARGET_LIST,mips,mips64
+  fi
+  if [ "$MINGW" = "true" ]; then
+        QEMU_HOST=windows-x86_64,windows-x86
+  fi
+
+  # Translate to absolute path
+  case $OUT_DIR in
+      /*) ABS_OUT=$OUT_DIR;;
+      *) ABS_OUT=$PWD/$OUT_DIR;;
+  esac
+  log "Now build upstream qemu in $ABS_OUT for $QEMU_HOST"
+  run ./android/scripts/build-qemu-android.sh --target=$TARGET_LIST \
+      --install-dir=$ABS_OUT \
+      --build-dir=$ABS_OUT/build/qemu-upstream \
+      --force \
+      --verbosity=$VERBOSE \
+      --host=$QEMU_HOST ||
+      panic "Unable to build upstream qemu!"
 fi
 
 echo "Done. !!"
