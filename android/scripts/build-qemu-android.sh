@@ -461,10 +461,6 @@ EOF
             # Now build everything else in parallel.
             run make -j$NUM_JOBS $BUILD_FLAGS $LINKPROG_FLAGS V=1
 
-            # Now build the unit tests
-            run make check -j$NUM_JOBS $BUILD_FLAGS $LINKPROG_FLAGS V=1
-
-
             for QEMU_EXE in $QEMU_TARGET_BUILDS; do
                 if [ ! -f "$QEMU_EXE" ]; then
                     panic "$(builder_text) Could not build $QEMU_EXE!!"
