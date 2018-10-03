@@ -4,7 +4,7 @@ LIBX264_TOP_DIR := $(X264_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)
 
 $(call define-emulator-prebuilt-library, \
     emulator-libx264, \
-    $(LIBX264_TOP_DIR)/lib/libx264.a)
+    $(LIBX264_TOP_DIR)/lib/libx264$(BUILD_TARGET_STATIC_LIBEXT))
 
 
 LIBX264_INCLUDES := $(LIBX264_TOP_DIR)/include
