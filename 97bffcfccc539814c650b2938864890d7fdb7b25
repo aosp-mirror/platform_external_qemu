@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "64a4759f_5d29cfba",
+        "filename": "android/android-emugl/guest/androidImpl/AndroidBufferQueue.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-03T19:46:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "496e4451_14a2479a",
+      "range": {
+        "startLine": 35,
+        "startChar": 4,
+        "endLine": 35,
+        "endChar": 18
+      },
+      "revId": "97bffcfccc539814c650b2938864890d7fdb7b25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11e708c2_2ff81c41",
         "filename": "android/android-emugl/guest/androidImpl/AndroidBufferQueue.cpp",
         "patchSetId": 20
@@ -36,6 +60,30 @@
       "writtenOn": "2018-10-02T23:20:47Z",
       "side": 1,
       "message": "Just return Item instead?",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 43,
+        "endChar": 4
+      },
+      "revId": "97bffcfccc539814c650b2938864890d7fdb7b25",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3588b138_6ae37f11",
+        "filename": "android/android-emugl/guest/androidImpl/AndroidBufferQueue.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-03T19:46:55Z",
+      "side": 1,
+      "message": "Yes, that is simpler and more C++y, but in this context, I\u0027d prefer to have interfaces similar to ANativeWindow_dequeueBuffer, as this will be used mostly with the Android graphics libraries, so the user of this class doesn\u0027t have to keep two different returning disciplines in mind.",
+      "parentUuid": "11e708c2_2ff81c41",
       "range": {
         "startLine": 43,
         "startChar": 0,
