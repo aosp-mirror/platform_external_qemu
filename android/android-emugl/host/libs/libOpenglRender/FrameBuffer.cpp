@@ -1984,6 +1984,7 @@ void FrameBuffer::onSave(Stream* stream,
         s->putBe32(std::max<System::Duration>(0, now - pair.second.closedTs));
     });
     stream->putBe32(m_lastPostedColorBuffer);
+    stream->putBe32((m_targetCb != nullptr)? m_targetCb->getHndl() : 0);
     saveCollection(stream, m_windows,
                    [](Stream* s, const WindowSurfaceMap::value_type& pair) {
         pair.second.first->onSave(s);
@@ -2098,6 +2099,7 @@ bool FrameBuffer::onLoad(Stream* stream,
     });
     m_lastPostedColorBuffer = static_cast<HandleType>(stream->getBe32());
     GL_LOG("Got lasted posted color buffer from snapshot");
+    m_targetCb = findColorBuffer(static_cast<HandleType>(stream->getBe32()));
 
     loadCollection(stream, &m_windows,
                    [this](Stream* stream) -> WindowSurfaceMap::value_type {
