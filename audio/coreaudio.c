@@ -41,7 +41,8 @@
 
 #if DEBUG_COREAUDIO
 
-#define D(fmt,...) printf("%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
+#define D(fmt,...) \
+    printf("%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
 
 #else
 
