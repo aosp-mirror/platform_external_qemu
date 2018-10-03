@@ -17,6 +17,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/Result.h"
 #include "android/base/async/Looper.h"
+#include "android/emulation/AndroidAsyncMessagePipe.h"
 
 #include <memory>
 
@@ -44,6 +45,22 @@ std::ostream& operator<<(std::ostream& os, const StartError& value);
 enum class StopError { NotStarted };
 using StopResult = base::Result<void, StopError>;
 std::ostream& operator<<(std::ostream& os, const StopError& value);
+
+enum class ReplayError {
+    PlaybackInProgress,
+    NotImplemented,
+};
+
+using ReplayResult = base::Result<void, ReplayError>;
+std::ostream& operator<<(std::ostream& os, const ReplayError& value);
+
+enum class ListenError {
+    AlreadyListening,
+    StartFailed,
+};
+
+using ListenResult = base::Result<void, ListenError>;
+std::ostream& operator<<(std::ostream& os, const ListenError& value);
 
 //
 // Controls recording and playback of emulator automation events.
@@ -101,6 +118,34 @@ public:
 
     // Stop playback from a file.
     virtual StopResult stopPlayback() = 0;
+
+    //
+    // Offworld API
+    //
+
+    // Replay an initial state event from the offworld pipe.
+    virtual ReplayResult replayInitialState(
+            android::base::StringView state) = 0;
+
+    // Replay an event through from the offworld pipe.
+    //
+    // If successful, replayEvent will send an async response to the pipe handle
+    // when replay has completed.  The provided async id will be sent with that
+    // response.  If an error is returned, no messages will be sent to the pipe
+    // and the caller should propagate the error to the user.
+    virtual ReplayResult replayEvent(android::AsyncMessagePipeHandle pipe,
+                                     android::base::StringView event,
+                                     uint32_t asyncId) = 0;
+
+    // Listen to the stream of automation events, returns an error if there is
+    // already a pending listen operations.
+    //
+    // If successful, any additional async responses will include the provided
+    // asyncId.
+    virtual ListenResult listen(android::AsyncMessagePipeHandle pipe,
+                                uint32_t asyncId) = 0;
+
+    virtual void stopListening() = 0;
 };
 
 }  // namespace automation

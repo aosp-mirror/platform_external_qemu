@@ -20,6 +20,8 @@
 namespace android {
 namespace offworld {
 
+namespace pb = ::offworld;
+
 static constexpr uint32_t kProtocolVersion = 1;
 
 // Called during emulator initialization, do not call manually.

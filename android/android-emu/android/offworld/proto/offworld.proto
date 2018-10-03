@@ -102,7 +102,20 @@ message SnapshotRequest {
   }
 }
 
-message AutomationRequest {}
+message AutomationRequest {
+  message Replay {
+    optional string event = 1;
+  }
+
+  message Listen {}
+  message StopListening {}
+
+  oneof function {
+    Replay replay = 1;
+    Listen listen = 2;
+    StopListening stop_listening = 3;
+  }
+}
 
 //
 // Responses
@@ -113,9 +126,11 @@ message Response {
     RESULT_NO_ERROR = 0;
     RESULT_ERROR_UNKNOWN = 1;
     RESULT_ERROR_ACCESS_DENIED = 2;
+    RESULT_ERROR_NOT_IMPLEMENTED = 3;
   }
 
   optional Result result = 1;
+  optional string error_string = 2;
 
   oneof module {
     // Sync.
