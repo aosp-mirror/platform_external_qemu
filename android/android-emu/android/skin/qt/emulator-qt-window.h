@@ -227,6 +227,7 @@ public:
     void saveZoomPoints(const QPoint& focus, const QPoint& viewportFocus);
     void scaleDown();
     void scaleUp();
+    void fixScale();
     void screenshot();
     void setFrameAlways(bool showFrame);
     void setOnTop(bool onTop);
