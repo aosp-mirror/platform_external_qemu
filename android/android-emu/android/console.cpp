@@ -2583,6 +2583,22 @@ do_geo_fix( ControlClient  client, char*  args )
     return 0;
 }
 
+static int
+do_geo_gnss( ControlClient  client, char*  args )
+{
+    if (!args) {
+        control_write( client, "KO: GNSS sentence missing, try 'help geo gnss'\r\n" );
+        return -1;
+    }
+    if (!client->global->location_agent->gpsIsSupported()) {
+        control_write( client, "KO: no GPS emulation in this virtual device\r\n" );
+        return -1;
+    }
+    client->global->location_agent->gpsSendGnss(args);
+    control_write( client, "OK: sending %s\r\n", args);
+    return 0;
+}
+
 static const CommandDefRec  geo_commands[] =
 {
     { "nmea", "send a GPS NMEA sentence",
@@ -2601,6 +2617,15 @@ static const CommandDefRec  geo_commands[] =
     "  <satellites>  number of satellites being tracked (1-12)\r\n"
     "\r\n",
     NULL, do_geo_fix, NULL },
+
+    { "gnss", "send a GNSS sentence",
+    "'geo gnss <sentence>' sends a GNSS sentence to the emulated device.\r\n"
+    "<sentence> has fields separated by ','.\r\n"
+    "It starts with 8 fields for clock data, 1 field for measurement count,\r\n"
+    "and followed by count * 9 (each measurement data has 9 fields).\r\n"
+    "e.g. geo gnss c1,c2,c3,c4,c5,c6,c7,c8,1,m1,m2,m3,m4,m5,m6,m7,m8,m9.\r\n",
+    NULL, do_geo_gnss, NULL },
+
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };

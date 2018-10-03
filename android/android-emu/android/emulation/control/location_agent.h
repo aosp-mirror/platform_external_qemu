@@ -57,6 +57,10 @@ typedef struct QAndroidLocationAgent {
 
     // Send an NMEA fix sentence to the device.
     void (*gpsSendNmea)(const char* sentence);
+
+    // Send an gnss sentence to the device.
+    void (*gpsSendGnss)(const char* sentence);
+
     // Should ping the guest GPS update every few seconds or not
     void (*gpsSetPassiveUpdate)(bool enable);
     bool (*gpsGetPassiveUpdate)();
