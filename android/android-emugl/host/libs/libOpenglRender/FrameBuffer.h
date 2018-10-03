@@ -24,6 +24,7 @@
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
 #include "GLESVersionDetector.h"
+#include "Hwc2.h"
 #include "PostWorker.h"
 #include "ReadbackWorker.h"
 #include "RenderContext.h"
@@ -395,6 +396,7 @@ public:
 
     void setShuttingDown() { m_shuttingDown = true; }
     bool isShuttingDown() const { return m_shuttingDown; }
+    bool compose(uint32_t bufferSize, void* buffer);
 
     ~FrameBuffer();
 
@@ -428,6 +430,10 @@ public:
     // Note: swiftshader_indirect does not work with 3 channels
     void getScreenshot(unsigned int nChannels, unsigned int* width,
             unsigned int* height, std::vector<unsigned char>& pixels);
+    ColorBuffer::Helper* getColorBufferHelper() { return m_colorBufferHelper; }
+    ColorBufferPtr getComposeTargetCb() { return m_targetCb; }
+    ColorBufferPtr findColorBuffer(HandleType p_colorbuffer);
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
@@ -446,6 +452,10 @@ private:
 
     bool postImpl(HandleType p_colorbuffer, bool needLockAndBind = true, bool repaint = false);
     void setGuestPostedAFrame() { m_guestPostedAFrame = true; }
+    HandleType createColorBufferLocked(int p_width,
+                                       int p_height,
+                                       GLenum p_internalFormat,
+                                       FrameworkFormat p_frameworkFormat);
 
 private:
     static FrameBuffer *s_theFrameBuffer;
@@ -474,6 +484,7 @@ private:
     RenderContextMap m_contexts;
     WindowSurfaceMap m_windows;
     ColorBufferMap m_colorbuffers;
+    ColorBufferPtr m_targetCb = nullptr;
 
     // A collection of color buffers that were closed without any usages
     // (|opened| == false).
@@ -552,8 +563,9 @@ private:
     enum class PostCmd {
         Post = 0,
         Viewport = 1,
-        Clear = 2,
-        Exit = 3,
+        Compose = 2,
+        Clear = 3,
+        Exit = 4,
     };
 
     struct Post {
@@ -564,6 +576,7 @@ private:
                 int width;
                 int height;
             } viewport;
+            ComposeDevice* d;
         };
     };
 
