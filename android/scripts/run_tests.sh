@@ -63,7 +63,7 @@ QEMU2_TOP_DIR=${AOSP_DIR}/external/qemu
 HOST_OS=$(get_build_os)
 CONFIG_MAKE=${OPT_OUT}/build/config.make
 # Extract the target os from config.make.
-TARGET_OS=$(grep BUILD_TARGET_OS ${CONFIG_MAKE} | awk '{ print $3; }')
+TARGET_OS=$(grep "\<BUILD_TARGET_OS\>" ${CONFIG_MAKE} | awk '{ print $3; }')
 FAILURES=""
 EXE_SUFFIX=
 OSX_DEPLOYMENT_TARGET=10.8
@@ -114,6 +114,12 @@ esac
 # on the current target platform. Then EXPECTED_EMULATOR_BITNESS and
 # EXPECTED_EMULATOR_FILE_TYPE accordingly.
 case $TARGET_OS in
+    windows_msvc*)
+        EXPECTED_32BIT_FILE_TYPE="PE32 executable \(console\) Intel 80386"
+        EXPECTED_64BIT_FILE_TYPE="PE32\+ executable \(console\) x86-64"
+        EXPECTED_EMULATOR_BITNESS=64
+        EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
+        ;;
     windows*)
         EXPECTED_32BIT_FILE_TYPE="PE32 executable \(console\) Intel 80386"
         EXPECTED_64BIT_FILE_TYPE="PE32\+ executable \(console\) x86-64"
