@@ -454,16 +454,12 @@ EOF
                     # before the rest, or the parallel build will
                     # fail miserably.
                     run make config-host.h $BUILD_FLAGS
-                    run make version.o version.lo $BUILD_FLAGS
+                    run make version.o  $BUILD_FLAGS
                     ;;
             esac
 
             # Now build everything else in parallel.
             run make -j$NUM_JOBS $BUILD_FLAGS $LINKPROG_FLAGS V=1
-
-            # Now build the unit tests
-            run make check -j$NUM_JOBS $BUILD_FLAGS $LINKPROG_FLAGS V=1
-
 
             for QEMU_EXE in $QEMU_TARGET_BUILDS; do
                 if [ ! -f "$QEMU_EXE" ]; then
@@ -481,12 +477,14 @@ EOF
     ) || panic "Build failed!!"
 
     BINARY_DIR=$INSTALL_DIR/$1
+    ZIPFILE=$INSTALL_DIR/qemu-link-$1.zip
     run mkdir -p "$BINARY_DIR" ||
     panic "Could not create final directory: $BINARY_DIR"
 
     run cp -p \
         "$BUILD_DIR"/config-host.h \
         "$BINARY_DIR"/config-host.h
+    add_to_zip $ZIPFILE $INSTALL_DIR  "$BINARY_DIR"/config-host.h
 
     for QEMU_TARGET in $QEMU_TARGETS; do
         QEMU_EXE=qemu-system-${QEMU_TARGET}$(builder_host_exe_extension)
@@ -501,6 +499,7 @@ EOF
         run cp -p \
             "$BUILD_DIR"/$QEMU_TARGET-softmmu/config-target.h \
             "$BINARY_DIR"/$QEMU_TARGET-softmmu/config-target.h
+        add_to_zip $ZIPFILE $INSTALL_DIR  "$BINARY_DIR"/$QEMU_TARGET-softmmu/config-target.h
 
         if [ -z "$OPT_DEBUG" ]; then
             run ${GNU_CONFIG_HOST_PREFIX}strip "$BINARY_DIR"/$QEMU_EXE
@@ -509,13 +508,17 @@ EOF
 
     # Copy LINK-* files, adjusting hard-coded paths in them.
     for LINK_FILE in "$BUILD_DIR"/LINK-*; do
-        [ -f $LINK_FILE ] && \
-        sed \
-            -e 's|'${PREBUILTS_DIR}'|@PREBUILTS_DIR@|g' \
-            -e 's|'${QEMU_SRCDIR}'|@SRC_DIR@|g' \
-            -e 's|'${BUILD_DIR}'||g' \
-            "$LINK_FILE" > $INSTALL_DIR/$1/$(basename "$LINK_FILE")
+        LINK_OUTPUT=$INSTALL_DIR/$1/$(basename "$LINK_FILE")
+        if [ -f $LINK_FILE ]; then
+            sed \
+                -e 's|'${PREBUILTS_DIR}'|@PREBUILTS_DIR@|g' \
+                -e 's|'${QEMU_SRCDIR}'|@SRC_DIR@|g' \
+                -e 's|'${BUILD_DIR}'||g' \
+                "$LINK_FILE" > "$LINK_OUTPUT"
+            add_to_zip $ZIPFILE $INSTALL_DIR $LINK_OUTPUT
+        fi
     done
+
 
     mkdir -p $INSTALL_DIR/$1/tests
     # Copy all the test files

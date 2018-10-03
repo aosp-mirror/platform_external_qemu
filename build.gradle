@@ -130,11 +130,17 @@ sdk {
             into ''
             builtBy  packageCodeCoverage
         }
+
     }
 
     linux {
         item(fprops) {
             notice null
+        }
+        item("$buildEmulatorCodeCoverage.output/qemu-link-linux-x86_64.zip") {
+            debug true
+            into ''
+            builtBy buildEmulatorCodeCoverage
         }
     }
 
@@ -143,9 +149,24 @@ sdk {
             name 'source.properties'
             notice null
         }
+        item("$buildEmulatorCodeCoverage.output/qemu-link-darwin-x86_64.zip") {
+            debug true
+            into ''
+            builtBy buildEmulatorCodeCoverage
+        }
     }
 
     windows {
+        item("$buildEmulatorCodeCoverage.output/qemu-link-windows-x86_64.zip") {
+            debug true
+            into ''
+            builtBy buildEmulatorCodeCoverage
+        }
+        item("$buildEmulatorCodeCoverage.output/qemu-link-windows-x86.zip") {
+            debug true
+            into ''
+            builtBy buildEmulatorCodeCoverage
+        }
         item(fprops_win) {
             name 'source.properties'
             notice null
