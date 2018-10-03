@@ -7,19 +7,19 @@ ANGLE_TRANSLATION_TOP_DIR := $(ANGLE_TRANSLATION_PREBUILTS_DIR)/$(BUILD_TARGET_T
 
 $(call define-emulator-prebuilt-library,\
     emulator-libpreprocessor,\
-    $(ANGLE_TRANSLATION_TOP_DIR)/lib/libpreprocessor.a)
+    $(ANGLE_TRANSLATION_TOP_DIR)/lib/libpreprocessor$(BUILD_TARGET_STATIC_LIBEXT))
 
 $(call define-emulator-prebuilt-library,\
     emulator-libtranslator_lib,\
-    $(ANGLE_TRANSLATION_TOP_DIR)/lib/libtranslator_lib.a)
+    $(ANGLE_TRANSLATION_TOP_DIR)/lib/libtranslator_lib$(BUILD_TARGET_STATIC_LIBEXT))
 
 $(call define-emulator-prebuilt-library,\
     emulator-libangle_common,\
-    $(ANGLE_TRANSLATION_TOP_DIR)/lib/libangle_common.a)
+    $(ANGLE_TRANSLATION_TOP_DIR)/lib/libangle_common$(BUILD_TARGET_STATIC_LIBEXT))
 
 $(call define-emulator-prebuilt-library,\
     emulator-libtranslator_static,\
-    $(ANGLE_TRANSLATION_TOP_DIR)/lib/libtranslator_static.a)
+    $(ANGLE_TRANSLATION_TOP_DIR)/lib/libtranslator_static$(BUILD_TARGET_STATIC_LIBEXT))
 
 ANGLE_TRANSLATION_INCLUDES := $(ANGLE_TRANSLATION_TOP_DIR)/include
 ANGLE_TRANSLATION_STATIC_LIBRARIES := \
