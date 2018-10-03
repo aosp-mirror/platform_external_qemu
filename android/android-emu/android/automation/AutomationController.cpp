@@ -23,13 +23,36 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/hw-sensors.h"
+#include "android/offworld/OffworldPipe.h"
 #include "android/physics/PhysicalModel.h"
+
+#include <google/protobuf/text_format.h>
 
 #include <ostream>
 
 using namespace android::base;
 
 static constexpr uint32_t kFileVersion = 2;
+
+namespace {
+
+static offworld::Response createOkPendingResponse(uint32_t asyncId) {
+    offworld::Response response;
+    response.set_result(offworld::Response::RESULT_NO_ERROR);
+    response.set_pending_async_id(asyncId);
+    return response;
+}
+
+static offworld::Response createAsyncResponse(uint32_t asyncId) {
+    offworld::Response response;
+    response.set_result(offworld::Response::RESULT_NO_ERROR);
+
+    offworld::AsyncResponse* asyncResponse = response.mutable_async();
+    asyncResponse->set_async_id(asyncId);
+    return response;
+}
+
+}  // namespace.
 
 namespace android {
 namespace automation {
@@ -70,6 +93,72 @@ std::ostream& operator<<(std::ostream& os, const StopError& value) {
     return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const ReplayError& value) {
+    switch (value) {
+        case ReplayError::PlaybackInProgress:
+            os << "Playback in progress";
+            break;
+        case ReplayError::NotImplemented:
+            os << "Not implemented";
+            break;
+            // Default intentionally omitted so that missing statements generate
+            // errors.
+    }
+
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const ListenError& value) {
+    switch (value) {
+        case ListenError::AlreadyListening:
+            os << "Already listening";
+            break;
+        case ListenError::StartFailed:
+            os << "Start failed";
+            break;
+            // Default intentionally omitted so that missing statements generate
+            // errors.
+    }
+
+    return os;
+}
+
+class ListenPipeStream : public android::base::Stream {
+public:
+    ListenPipeStream(android::AsyncMessagePipeHandle pipe, uint32_t asyncId)
+        : mPipe(pipe), mAsyncId(asyncId) {}
+    virtual ~ListenPipeStream() { close(); }
+
+    // Stream interface implementation.
+    ssize_t read(void* buffer, size_t size) override { return -EPERM; }
+    ssize_t write(const void* buffer, size_t size) override {
+        namespace pb = android::offworld::pb;
+
+        pb::Response response = createAsyncResponse(mAsyncId);
+        auto event = response.mutable_async()
+                             ->mutable_automation()
+                             ->mutable_event_generated();
+        event->set_event(static_cast<const char*>(buffer), size);
+
+        android::offworld::sendResponse(mPipe, response);
+        return static_cast<ssize_t>(size);
+    }
+
+    void close() {
+        namespace pb = android::offworld::pb;
+
+        pb::Response response = createAsyncResponse(mAsyncId);
+        response.mutable_async()->set_complete(true);
+        android::offworld::sendResponse(mPipe, response);
+    }
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(ListenPipeStream);
+
+    AsyncMessagePipeHandle mPipe;
+    const uint32_t mAsyncId;
+};
+
 class AutomationControllerImpl : public AutomationController {
 public:
     AutomationControllerImpl(PhysicalModel* physicalModel,
@@ -89,12 +178,21 @@ public:
     StartResult startPlayback(StringView filename) override;
     StopResult stopPlayback() override;
 
+    ReplayResult replayEvent(android::AsyncMessagePipeHandle pipe,
+                             android::base::StringView event,
+                             uint32_t asyncId) override;
+
+    ListenResult listen(android::AsyncMessagePipeHandle pipe,
+                        uint32_t asyncId) override;
+
+    void stopListening() override;
+
 private:
     // Helper to replay the last event in the playback stream, must be called
     // under lock.
     //
     // If the playback stream reaches EOF, automatically ends playback.
-    void replayEvent(const AutoLock& proofOfLock);
+    void replayNextEvent(const AutoLock& proofOfLock);
 
     AutomationEventSink mEventSink;
     PhysicalModel* const mPhysicalModel;
@@ -111,6 +209,9 @@ private:
     DurationNs mPlaybackTimeBase = 0L;
     DurationNs mNextPlaybackCommandTime = 0L;
     pb::RecordedEvent mNextPlaybackCommand;
+
+    // Offworld state.
+    std::unique_ptr<ListenPipeStream> mPipeListener;
 };
 
 static AutomationControllerImpl* sInstance = nullptr;
@@ -195,7 +296,7 @@ DurationNs AutomationControllerImpl::advanceTime() {
 
         if (nowNs >= nextEventTimeNs) {
             physicalModel_setCurrentTime(mPhysicalModel, nextEventTimeNs);
-            replayEvent(lock);
+            replayNextEvent(lock);
         } else {
             break;
         }
@@ -345,7 +446,7 @@ StartResult AutomationControllerImpl::startPlayback(StringView filename) {
     const int loadStateResult =
             physicalModel_loadState(mPhysicalModel, initialState);
     if (loadStateResult != 0) {
-        LOG(ERROR) << "physicalModel_saveState failed with " << loadStateResult;
+        LOG(ERROR) << "physicalModel_loadState failed with " << loadStateResult;
         return Err(StartError::InternalError);
     }
 
@@ -379,7 +480,63 @@ StopResult AutomationControllerImpl::stopPlayback() {
     return Ok();
 }
 
-void AutomationControllerImpl::replayEvent(const AutoLock& proofOfLock) {
+ReplayResult AutomationControllerImpl::replayEvent(
+        android::AsyncMessagePipeHandle pipe,
+        android::base::StringView event,
+        uint32_t asyncId) {
+    // TODO(jwmcglynn)
+    return Err(ReplayError::NotImplemented);
+}
+
+ListenResult AutomationControllerImpl::listen(
+        android::AsyncMessagePipeHandle pipe,
+        uint32_t asyncId) {
+    if (mPipeListener) {
+        return Err(ListenError::AlreadyListening);
+    }
+
+    pb::InitialState initialState;
+    const int saveStateResult =
+            physicalModel_saveState(mPhysicalModel, &initialState);
+    if (saveStateResult != 0) {
+        return Err(ListenError::StartFailed);
+    }
+
+    google::protobuf::TextFormat::Printer printer;
+    printer.SetSingleLineMode(true);
+    printer.SetUseShortRepeatedPrimitives(true);
+
+    std::string textInitialState;
+    if (!printer.PrintToString(initialState, &textInitialState)) {
+        LOG(WARNING) << "Could not serialize initialstate to string.";
+        return Err(ListenError::StartFailed);
+    }
+
+    // Send the initial state, which will be queued to send immediately after
+    // the initial synchronous response.
+    ::offworld::Response response = createAsyncResponse(asyncId);
+    auto event = response.mutable_async()
+                         ->mutable_automation()
+                         ->mutable_event_generated();
+    event->set_initial_state(textInitialState);
+    android::offworld::sendResponse(pipe, response);
+
+    mPipeListener.reset(new ListenPipeStream(pipe, asyncId));
+    mEventSink.registerStream(mPipeListener.get(), StreamEncoding::TextPb);
+
+    return Ok();
+}
+
+void AutomationControllerImpl::stopListening() {
+    if (!mPipeListener) {
+        return;
+    }
+
+    mEventSink.unregisterStream(mPipeListener.get());
+    mPipeListener.reset();
+}
+
+void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
     const auto& event = mNextPlaybackCommand;
     if (event.has_stream_type()) {
         switch (event.stream_type()) {
