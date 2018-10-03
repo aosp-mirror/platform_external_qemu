@@ -69,6 +69,68 @@ void PostWorker::clear() {
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
 }
 
+void PostWorker::compose(ComposeDevice* p) {
+    // bind the subwindow eglSurface
+    if (!m_initialized) {
+        m_initialized = mBindSubwin();
+    }
+
+    ComposeLayer* l = (ComposeLayer*)p->layer;
+    ColorBuffer* targetCb = mFb->getComposeTargetCb();
+    GLint vport[4] = { 0, };
+    s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
+    s_gles2.glViewport(0, 0, mFb->getWidth(),mFb->getHeight());
+    if (m_composeFbo) {
+        s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, m_composeFbo);
+    }
+    else {
+        s_gles2.glGenFramebuffers(1, &m_composeFbo);
+        s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, m_composeFbo);
+        s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER,
+                                       GL_COLOR_ATTACHMENT0_OES,
+                                       GL_TEXTURE_2D,
+                                       targetCb->getTexture(), 0);
+    }
+
+    DBG("worker compose %d layers\n", p->numLayers);
+    mFb->getTextureDraw()->prepareForDrawLayer();
+    for (int i = 0; i < p->numLayers; i++, l++) {
+        DBG("\tcomposeMode %d color %d %d %d %d blendMode "
+               "%d alpha %f transform %d %d %d %d %d "
+               "%f %f %f %f\n",
+               l->composeMode, l->color.r, l->color.g, l->color.b,
+               l->color.a, l->blendMode, l->alpha, l->transform,
+               l->displayFrame.left, l->displayFrame.top,
+               l->displayFrame.right, l->displayFrame.bottom,
+               l->crop.left, l->crop.top, l->crop.right,
+               l->crop.bottom);
+        if (l->composeMode == HWC2_COMPOSITION_DEVICE) {
+            ColorBuffer* cb = mFb->findColorBuffer(l->cbHandle);
+            if (cb == nullptr) {
+                // bad colorbuffer handle
+                ERR("%s: fail to find colorbuffer %d\n", __FUNCTION__, l->cbHandle);
+                continue;
+            }
+            composeLayer(cb, l);
+        }
+        else {
+            composeLayer(nullptr, l);
+        }
+    }
+
+    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
+    mFb->getTextureDraw()->cleanupForDrawLayer();
+}
+
+void PostWorker::composeLayer(ColorBuffer* cb, ComposeLayer* l) {
+    if (l->composeMode == HWC2_COMPOSITION_DEVICE) {
+        cb->postLayer(l, mFb->getWidth(), mFb->getHeight());
+    }
+    else {
+        mFb->getTextureDraw()->drawLayer(l, mFb->getWidth(), mFb->getHeight(), 1, 1, 0);
+    }
+}
 PostWorker::~PostWorker() {
     if (mFb->getDisplay() != EGL_NO_DISPLAY) {
         s_egl.eglMakeCurrent(mFb->getDisplay(), EGL_NO_SURFACE, EGL_NO_SURFACE,
