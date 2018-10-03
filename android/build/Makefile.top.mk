@@ -331,12 +331,17 @@ endif
 # NOTE: The following definitions are only used by the standalone build.
 BUILD_TARGET_EXEEXT :=
 BUILD_TARGET_DLLEXT := .so
+BUILD_TARGET_STATIC_LIBEXT := .a
 ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
   BUILD_TARGET_EXEEXT := .exe
   BUILD_TARGET_DLLEXT := .dll
 endif
 ifeq ($(BUILD_TARGET_OS),darwin)
   BUILD_TARGET_DLLEXT := .dylib
+endif
+
+ifeq ($(BUILD_TARGET_OS),windows_msvc)
+  BUILD_TARGET_STATIC_LIBEXT := .lib
 endif
 
 # Some CFLAGS below use -Wno-missing-field-initializers but this is not
