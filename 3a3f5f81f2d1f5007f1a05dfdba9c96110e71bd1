@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "273908f0_4e51ebdb",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/Hwc2.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-03T19:05:28Z",
+      "side": 1,
+      "message": "please address comments from the previous version of the CL",
+      "range": {
+        "startLine": 84,
+        "startChar": 15,
+        "endLine": 84,
+        "endChar": 27
+      },
+      "revId": "3a3f5f81f2d1f5007f1a05dfdba9c96110e71bd1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
