@@ -23,11 +23,11 @@
 #include "android/base/files/Stream.h"
 #include "android/snapshot/LazySnapshotObj.h"
 #include "emugl/common/smart_ptr.h"
+#include "FrameworkFormats.h"
+#include "Hwc2.h"
 #include "RenderContext.h"
 
 #include <memory>
-
-#include "FrameworkFormats.h"
 
 class TextureDraw;
 class TextureResize;
@@ -224,6 +224,10 @@ public:
     HandleType getHndl() const;
 
     bool isFastBlitSupported() const { return m_fastBlitSupported; }
+    bool isInitialized();
+    void initialize();
+    void postLayer(ComposeLayer* l, int frameWidth, int frameHeight);
+    GLuint getTexture();
 
 public:
     void restore();
