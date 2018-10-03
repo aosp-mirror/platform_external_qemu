@@ -65,6 +65,30 @@
     },
     {
       "key": {
+        "uuid": "acfb3255_e6671bde",
+        "filename": "android/android-emu/android/emulation/RefcountPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-10-03T04:12:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "06c1dc28_51913df5",
+      "range": {
+        "startLine": 28,
+        "startChar": 8,
+        "endLine": 28,
+        "endChar": 15
+      },
+      "revId": "7fa08d34cc78078cc1236d0ab20c1387959a4880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "58818e07_98307cfa",
         "filename": "android/android-emu/android/emulation/RefcountPipe.cpp",
         "patchSetId": 3
@@ -151,6 +175,24 @@
     },
     {
       "key": {
+        "uuid": "ca8a6875_71106cff",
+        "filename": "android/android-emu/android/emulation/RefcountPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-10-03T04:12:27Z",
+      "side": 1,
+      "message": "https://en.cppreference.com/w/cpp/utility/functional/function/operator%3D\nI think operator \u003d does the std::move",
+      "parentUuid": "f741563a_536ad2a4",
+      "revId": "7fa08d34cc78078cc1236d0ab20c1387959a4880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e1933fbc_cf1b3c05",
         "filename": "android/android-emu/android/emulation/RefcountPipe.h",
         "patchSetId": 3
@@ -197,6 +239,30 @@
     },
     {
       "key": {
+        "uuid": "1066f051_3cbc8c59",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-10-03T04:12:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "61459b50_b69dddf5",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 52
+      },
+      "revId": "7fa08d34cc78078cc1236d0ab20c1387959a4880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d862a4b2_3ed3e844",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RenderLibImpl.cpp",
         "patchSetId": 3
@@ -208,6 +274,30 @@
       "writtenOn": "2018-09-28T18:00:16Z",
       "side": 1,
       "message": "just curious if it\u0027s possible that |fb| is null here.",
+      "range": {
+        "startLine": 116,
+        "startChar": 4,
+        "endLine": 116,
+        "endChar": 43
+      },
+      "revId": "7fa08d34cc78078cc1236d0ab20c1387959a4880",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f168c1f4_0bb10638",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderLibImpl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-10-03T04:12:27Z",
+      "side": 1,
+      "message": "I think it is better to add a check.",
+      "parentUuid": "d862a4b2_3ed3e844",
       "range": {
         "startLine": 116,
         "startChar": 4,
