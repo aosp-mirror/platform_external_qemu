@@ -215,6 +215,7 @@ RenderChannelPtr RendererImpl::createRenderChannel(
 
         // Take the time to check if our loader thread is done as well.
         if (mLoaderRenderThread && mLoaderRenderThread->isFinished()) {
+            mLoaderRenderThread->wait();
             mLoaderRenderThread.reset();
         }
 

@@ -103,7 +103,7 @@ void SyncThread::initSyncContext() {
     DPRINT("enter");
     SyncThreadCmd to_send;
     to_send.opCode = SYNC_THREAD_INIT;
-    sendAsync(to_send);
+    sendAndWaitForResult(to_send);
     DPRINT("exit");
 }
 
