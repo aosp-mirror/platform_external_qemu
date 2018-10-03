@@ -41,7 +41,7 @@
 
 #if DEBUG_COREAUDIO
 
-#define D(fmt,...) printf("%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS_);
+#define D(fmt,...) printf("%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
 
 #else
 
@@ -161,14 +161,12 @@ static OSStatus coreaudio_get_voice(AudioDeviceID *id, Boolean isInput)
     // anything other than 'no error', return that right away.
     if (res != kAudioHardwareNoError) return res;
 
-    if (!isInput) goto defaultExit;
-
     // Bluetooth audio inputs should not be activated since they cause an
     // unexpected drop in audio output quality. Protect users from this nasty
     // surprise by avoiding such audio inputs.
 
-    // Check if this input device is bluetooth. If not, just go with that
-    // default input device.
+    // Check if this audio device is bluetooth. If not, just go with that
+    // default audio device.
 
     addr.mSelector = kAudioDevicePropertyTransportType;
     transportType = 0;
@@ -177,29 +175,27 @@ static OSStatus coreaudio_get_voice(AudioDeviceID *id, Boolean isInput)
         AudioObjectGetPropertyData(*id, &addr, 0, 0, &size, &transportType);
 
     // Can't query the transport type, just go with the previous behavior.
-    // Or, the input device is not Bluetooth.
+    // Or, the audio device is not Bluetooth.
     if (transportTypeQueryRes != kAudioHardwareNoError ||
         (transportType != kAudioDeviceTransportTypeBluetooth &&
          transportType != kAudioDeviceTransportTypeBluetoothLE)) {
         goto defaultExit;
     }
 
-    // At this point, *id is a Bluetooth input device. Avoid at all costs.
+    // At this point, *id is a Bluetooth audio device. Avoid at all costs.
 
-    D("Warning: Bluetooth microphone is currently "
-      "the default audio input device. "
-      "This can degrade audio output quality. "
+    D("Warning: Bluetooth is currently "
+      "the default audio device. "
+      "This will degrade audio output quality. "
       "Attempting to find and use "
-      "an alternative non-Bluetooth audio input...");
+      "an alternative non-Bluetooth audio device...");
 
-    // Try to find a different input device and fail with no audio input
+    // Try to find a different audio device and fail with no audio
     // devices if it cannot be found.
     *id = 0;
     res = -1;
 
     // Obtain the number and IDs of all audio devices
-    // (No way to reliably filter this to input devices
-    // at this level, unfortunately).
     addr.mSelector = kAudioHardwarePropertyDevices;
     currentQueryResult =
         AudioObjectGetPropertyDataSize(kAudioObjectSystemObject,
@@ -228,7 +224,12 @@ static OSStatus coreaudio_get_voice(AudioDeviceID *id, Boolean isInput)
                                        &addr, 0, 0, &size, &transportType);
         if (currentQueryResult != kAudioHardwareNoError) continue;
 
-        addr.mScope = kAudioDevicePropertyScopeInput;
+        if (isInput) {
+            addr.mScope = kAudioDevicePropertyScopeInput;
+        } else {
+            addr.mScope = kAudioDevicePropertyScopeOutput;
+        }
+
         addr.mSelector = kAudioDevicePropertyStreams;
         currentQueryResult =
             AudioObjectGetPropertyDataSize(allDevices[i],
@@ -237,18 +238,17 @@ static OSStatus coreaudio_get_voice(AudioDeviceID *id, Boolean isInput)
 
         numStreams = size / sizeof(AudioStreamID);
 
-        // Skip devices with no input streams.
+        // Skip devices with no streams of the desired type.
         if (numStreams == 0) continue;
 
-        // This is an input device. Do we use it?
         switch (transportType) {
         case kAudioDeviceTransportTypeBluetooth:
         case kAudioDeviceTransportTypeBluetoothLE:
             // Is bluetooth, continue to avoid.
             break;
         default:
-            // A valid non-bluetooth input. Use it.
-            D("Success: Found alternative non-bluetooth audio input.");
+            // A valid non-bluetooth device. Use it.
+            D("Success: Found alternative non-bluetooth audio device.");
             *id = allDevices[i];
             // Print its name if possible.
             coreaudio_print_device_name(allDevices[i]);
@@ -261,10 +261,10 @@ static OSStatus coreaudio_get_voice(AudioDeviceID *id, Boolean isInput)
 freeDevicesBluetoothFail:
     free(allDevices);
 bluetoothFail:
-    D("Failure: No alternative audio inputs available, deactivating audio input. "
-      "Consider connecting a microphone to line-in or using a USB microphone / headset.");
+    fprintf(stderr,
+            "Failure: No non-bluetooth audio devices available, deactivating audio. "
+            "Consider using an analog or USB sound device.");
     return -1;
-
 // Success cleanup path.
 freeDevicesBluetoothSuccess:
     free(allDevices);
