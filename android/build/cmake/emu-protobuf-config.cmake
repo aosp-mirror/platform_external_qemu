@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/protobuf/${LOCAL_TARGET_TAG}" ABSOLUTE)
+get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/protobuf/${ANDROID_TARGET_TAG}" ABSOLUTE)
 
 set(PROTOBUF_INCLUDE_DIR "${PREBUILT_ROOT}/include")
 set(PROTOBUF_INCLUDE_DIRS "${PROTOBUF_INCLUDE_DIR}")
@@ -21,9 +21,9 @@ set(PROTOBUF_LIBRARY "${PREBUILT_ROOT}/lib/libprotobuf.a")
 set(PROTOBUF_IMPORT_DIRS "${PROTOBUF_INCLUDE_DIR}")
 set(PROTOBUF_FOUND TRUE)
 
-if ( ${LOCAL_TARGET_TAG} MATCHES ".*windows.*")
+if ( ${ANDROID_TARGET_TAG} MATCHES ".*windows.*")
     # We better be able to run the protoc tool when we are cross compiling...
-    get_filename_component(PROTO_EXEC_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/protobuf/linux-x86_64" ABSOLUTE)
+    get_filename_component(PROTO_EXEC_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/protobuf/linux-x86_64" ABSOLUTE)
     set(PROTOBUF_PROTOC_EXECUTABLE "${PROTO_EXEC_ROOT}/bin/protoc")
     message(STATUS "Cross compiling using linux protoc")
 else ()
