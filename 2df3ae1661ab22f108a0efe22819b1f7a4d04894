@@ -22,6 +22,30 @@
       "revId": "2df3ae1661ab22f108a0efe22819b1f7a4d04894",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f9e1baeb_c19db851",
+        "filename": "android/android-emugl/host/libs/GLESv1_dec/GLESv1Decoder.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-03T00:13:30Z",
+      "side": 1,
+      "message": "Nope; what do you have in mind?",
+      "parentUuid": "692dc504_a778508e",
+      "range": {
+        "startLine": 62,
+        "startChar": 38,
+        "endLine": 62,
+        "endChar": 50
+      },
+      "revId": "2df3ae1661ab22f108a0efe22819b1f7a4d04894",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
