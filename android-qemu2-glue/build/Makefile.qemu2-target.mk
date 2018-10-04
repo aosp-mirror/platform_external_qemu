@@ -54,6 +54,7 @@ QEMU2_SYSTEM_INCLUDES := \
     $(LOCAL_PATH)/tcg/i386 \
     $(LOCAL_PATH)/accel/tcg \
 
+
 QEMU2_SYSTEM_LDFLAGS := $(QEMU2_DEPS_LDFLAGS)
 
 QEMU2_SYSTEM_LDLIBS := \
@@ -70,7 +71,99 @@ QEMU2_SYSTEM_STATIC_LIBRARIES := \
     $(call qemu2-if-windows-msvc,,emulator-virglrenderer) \
     emulator-tinyepoxy \
     $(LIBUSB_STATIC_LIBRARIES) \
-    $(call qemu2-if-linux, emulator-libbluez) \
+    $(call qemu2-if-linux, emulator-libbluez)
+
+$(call start-emulator-library,libqemu2-system-$(QEMU2_TARGET_SYSTEM))
+
+LOCAL_SRC_FILES += \
+    $(QEMU2_AUTO_GENERATED_DIR)/target/$(QEMU2_TARGET_TARGET)/generated-helpers.c
+
+LOCAL_CFLAGS += \
+    $(QEMU2_SYSTEM_CFLAGS) \
+    -DPOISON_CONFIG_ANDROID \
+
+LOCAL_C_INCLUDES += \
+    $(QEMU2_SYSTEM_INCLUDES) \
+    $(call qemu2-if-target,arm arm64,$(LOCAL_PATH)/disas/libvixl) \
+
+LOCAL_SRC_FILES += \
+    $(QEMU2_TARGET_SOURCES) \
+    $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES) \
+    $(QEMU2_TARGET_$(QEMU2_TARGET_CPU)_SOURCES_$(BUILD_TARGET_TAG))
+
+ifeq (arm64,$(QEMU2_TARGET))
+LOCAL_SRC_FILES += $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml-arm64.c
+LOCAL_SRC_FILES += hw/smbios/smbios_type_38-stub.c
+else ifeq (arm,$(QEMU2_TARGET))
+LOCAL_SRC_FILES += $(QEMU2_AUTO_GENERATED_DIR)/gdbstub-xml-arm.c
+LOCAL_SRC_FILES += hw/smbios/smbios_type_38-stub.c
+else
+LOCAL_SRC_FILES += stubs/gdbstub.c
+endif
+
+LOCAL_SRC_FILES += \
+    $(call qemu2-if-target,x86 x86_64, \
+        $(call qemu2-if-os, linux windows, hvf-stub.c), \
+        hvf-stub.c \
+    ) \
+    #$(call qemu2-if-target,x86 x86_64, \
+        $(call qemu2-if-os, linux darwin, whpx-stub.c), \
+        whpx-stub.c \
+    ) \
+
+
+LOCAL_PREBUILTS_OBJ_FILES += \
+    $(call qemu2-if-windows,$(QEMU2_CONFIG_DIR)/version.o)
+
+$(call end-emulator-library)
+
+ifeq (,$(CONFIG_MIN_BUILD))
+    # The upstream version of QEMU2, without any Android-specific hacks.
+    # This uses the regular SDL2 UI backend.
+
+    $(call start-emulator-program,qemu-upstream-$(QEMU2_TARGET_SYSTEM))
+
+    LOCAL_WHOLE_STATIC_LIBRARIES += \
+        libqemu2-system-$(QEMU2_TARGET_SYSTEM) \
+        libqemu2-common \
+
+    LOCAL_STATIC_LIBRARIES += \
+        $(QEMU2_SYSTEM_STATIC_LIBRARIES) \
+        libqemu2-util \
+
+    LOCAL_CFLAGS += \
+        $(QEMU2_SYSTEM_CFLAGS) \
+
+    LOCAL_C_INCLUDES += \
+        $(QEMU2_SYSTEM_INCLUDES) \
+        $(QEMU2_SDL2_INCLUDES) \
+
+    LOCAL_SRC_FILES += \
+        $(call qemu2-if-target,x86 x86_64, \
+            hw/i386/acpi-build.c \
+            hw/i386/pc_piix.c \
+            ) \
+        $(call qemu2-if-windows, \
+            stubs/win32-stubs.c \
+            ) \
+        ui/sdl2.c \
+        ui/sdl2-input.c \
+        ui/sdl2-2d.c \
+        vl.c \
+
+    LOCAL_LDFLAGS += $(QEMU2_SYSTEM_LDFLAGS)
+
+    LOCAL_LDLIBS += \
+        $(QEMU2_SYSTEM_LDLIBS) \
+        $(QEMU2_SDL2_LDLIBS) \
+
+    LOCAL_INSTALL_DIR := qemu/$(BUILD_TARGET_TAG)
+
+    $(call end-emulator-program)
+endif   # !CONFIG_MIN_BUILD
+
+# The emulator-specific version of QEMU2, with CONFIG_ANDROID defined at
+# compile-time.
 
 $(call start-emulator-program,qemu-system-$(QEMU2_TARGET_SYSTEM))
 
