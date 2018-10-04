@@ -424,6 +424,7 @@ EOF
     exit 1
 fi
 
+echo "Configuring with $@."
 # Check asan support
 [ "$OPTION_SANITIZER" != "no" ] && ([ "$OPTION_MINGW" = "yes" ] || [ "$OPTION_WINDOWS_MSVC" = "yes" ]) && panic "Asan is not supported under windows"
 
