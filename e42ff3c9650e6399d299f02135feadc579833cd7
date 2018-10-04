@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8c1ff30a_9e877c63",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-10-04T18:51:28Z",
+      "side": 1,
+      "message": "Nope. That was supposed to be removed.",
+      "parentUuid": "18ce0cd9_3208d6bd",
+      "range": {
+        "startLine": 519,
+        "startChar": 0,
+        "endLine": 519,
+        "endChar": 93
+      },
+      "revId": "e42ff3c9650e6399d299f02135feadc579833cd7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e6f5eb32_cca7272d",
         "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.ui",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2018-10-04T14:45:28Z",
       "side": 1,
       "message": "is it in knots or meter ? I am getting confusing message from CTS",
+      "range": {
+        "startLine": 535,
+        "startChar": 12,
+        "endLine": 535,
+        "endChar": 26
+      },
+      "revId": "e42ff3c9650e6399d299f02135feadc579833cd7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "866acec2_a52066fe",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 535,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-10-04T18:51:28Z",
+      "side": 1,
+      "message": "The value is used directly in the GPRMC sentence of NMEA.\nAll the web sites that I found say that field is \"Speed over ground in knots\".",
+      "parentUuid": "e6f5eb32_cca7272d",
       "range": {
         "startLine": 535,
         "startChar": 12,
