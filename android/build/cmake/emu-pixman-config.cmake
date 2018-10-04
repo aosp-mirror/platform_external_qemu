@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/breakpad/${ANDROID_TARGET_TAG}" ABSOLUTE)
+get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/${ANDROID_TARGET_TAG}" ABSOLUTE)
 
-set(BREAKPAD_INCLUDE_DIR "${PREBUILT_ROOT}/include/breakpad")
-set(BREAKPAD_INCLUDE_DIRS "${BREAKPAD_INCLUDE_DIR}")
-set(BREAKPAD_LIBRARIES "${PREBUILT_ROOT}/lib/libbreakpad.a;${PREBUILT_ROOT}/lib/libdisasm.a")
-set(BREAKPAD_CLIENT_LIBRARIES "${PREBUILT_ROOT}/lib/libbreakpad_client.a")
-set(BREAKPAD_FOUND TRUE)
-set(PACKAGE_EXPORT "BREAKPAD_INCLUDE_DIR;BREAKPAD_INCLUDE_DIRS;BREAKPAD_LIBRARIES;BREAKPAD_CLIENT_LIBRARIES;BREAKPAD_FOUND")
+set(PIXMAN_INCLUDE_DIR "${PREBUILT_ROOT}/include/pixman-1")
+set(PIXMAN_INCLUDE_DIRS ${PIXMAN_INCLUDE_DIR})
+set(PIXMAN_LIBRARIES -lpixman-1 -L${PREBUILT_ROOT}/lib)
+set(PIXMAN_FOUND TRUE)
+
+set(PACKAGE_EXPORT "PIXMAN_INCLUDE_DIR;PIXMAN_INCLUDE_DIRS;PIXMAN_LIBRARIES;PIXMAN_FOUND")
 

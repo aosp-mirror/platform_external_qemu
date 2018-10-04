@@ -63,7 +63,7 @@ RenderThread::RenderThread(RenderChannelImpl* channel,
             android::base::loadStream(loadStream, &*mStream);
             mState = SnapshotState::StartLoading;
         } else {
-            mFinished = true;
+            mFinished.store(true, std::memory_order_relaxed);
         }
     }
 }
@@ -114,7 +114,8 @@ void RenderThread::save(android::base::Stream* stream) {
 }
 
 void RenderThread::waitForSnapshotCompletion(AutoLock* lock) {
-    while (mState != SnapshotState::Finished && !mFinished) {
+    while (mState != SnapshotState::Finished &&
+           !mFinished.load(std::memory_order_relaxed)) {
         mCondVar.wait(lock);
     }
 }
@@ -182,14 +183,14 @@ void RenderThread::setFinished() {
     // Make sure it never happens that we wait forever for the thread to
     // save to snapshot while it was not even going to.
     AutoLock lock(mLock);
-    mFinished = true;
+    mFinished.store(true, std::memory_order_relaxed);
     if (mState != SnapshotState::Empty) {
         mCondVar.broadcastAndUnlock(&lock);
     }
 }
 
 intptr_t RenderThread::main() {
-    if (mFinished) {
+    if (mFinished.load(std::memory_order_relaxed)) {
         DBG("Error: fail loading a RenderThread @%p\n", this);
         return 0;
     }
@@ -208,7 +209,7 @@ intptr_t RenderThread::main() {
 
     if (!mChannel) {
         DBG("Exited a loader RenderThread @%p\n", this);
-        mFinished = true;
+        mFinished.store(true, std::memory_order_relaxed);
         return 0;
     }
 

@@ -1,6 +1,6 @@
 # Build file for libwebp
 
-ifeq ($(BUILD_TARGET_OS),windows)
+ifeq ($(BUILD_OS_TARGET_FLAVOR),windows)
 
 # Update LOCAL_PATH after saving old value.
 LIBMMAN_WIN32_OLD_LOCAL_PATH := $(LOCAL_PATH)
