@@ -157,55 +157,41 @@ QEMU2_CFLAGS += \
 # Enable VIRGL
 QEMU2_CFLAGS += $(call qemu2-if-windows-msvc,,-DCONFIG_VIRGL)
 
-#include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
-
-#include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-qt.mk
-
-include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-sources.mk
-
 # A static library containing target-independent code
-$(call start-emulator-library,libqemu2-common)
+$(call start-cmake-project,libqemu2-common)
+$(call gen-hw-config-defs)
 
-LOCAL_CFLAGS += \
+PRODUCED_STATIC_LIBS:=libqemu2-common libqemu2-util
+LOCAL_CFLAGS := \
     $(QEMU2_CFLAGS) \
     -DPOISON_CONFIG_ANDROID \
 
-LOCAL_C_INCLUDES += \
+LOCAL_C_INCLUDES := \
     $(QEMU2_INCLUDES) \
     $(LOCAL_PATH)/slirp \
     $(LOCAL_PATH)/tcg \
     $(ZLIB_INCLUDES) \
     $(LIBBLUEZ_INCLUDES) \
 
-LOCAL_SRC_FILES += \
-    $(QEMU2_AUTO_GENERATED_DIR)/trace-root.c \
-    $(QEMU2_COMMON_SOURCES) \
-    $(QEMU2_COMMON_SOURCES_$(BUILD_TARGET_TAG)) \
-
-$(call gen-hw-config-defs)
 QEMU2_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES)
+$(call end-cmake-project)
 
-$(call end-emulator-library)
+$(call start-cmake-project,libqemu2-system)
 
-# Static library containing all the utilities.
-$(call start-emulator-library,libqemu2-util)
-LOCAL_CFLAGS += \
-    $(QEMU2_CFLAGS) \
-    -DPOISON_CONFIG_ANDROID \
+PRODUCED_STATIC_LIBS = libqemu2-system-i386 libqemu2-system-x86_64 libqemu2-system-armel libqemu2-system-aarch64
+LOCAL_SOURCE_DEPENDENCIES := libqemu2-common libqemu2-util
+LOCAL_CFLAGS :=  $(QEMU2_SYSTEM_CFLAGS) \
+    -DPOISON_CONFIG_ANDROID
+LOCAL_C_INCLUDES := \
+    $(QEMU2_CONFIG_DIR) \
+    $(QEMU2_INCLUDES)\
+    $(LOCAL_PATH)/slirp \
+    $(LOCAL_PATH)/tcg \
+    $(ZLIB_INCLUDES) \
+    $(LIBBLUEZ_INCLUDES) \
+$(info "libqemu: $(LOCAL_C_INCLUDES)")
 
-LOCAL_C_INCLUDES += \
-    $(QEMU2_INCLUDES) \
-
-LOCAL_SRC_FILES += \
-    $(QEMU2_LIB_qemuutil) \
-    $(QEMU2_LIB_qemuutil_$(BUILD_TARGET_TAG)) \
-
-# Include the simple tracer if requested
-ifneq (,$(QEMU2_TRACE))
-    LOCAL_SRC_FILES += trace/simple.c
-    LOCAL_CFLAGS += -DCONFIG_TRACE_SIMPLE=1
-endif
-$(call end-emulator-library)
+$(call end-cmake-project)
 
 
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
