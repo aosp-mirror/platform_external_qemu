@@ -22,6 +22,30 @@
       "revId": "25bb425a089122c569133536050d52b01f990127",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b8101271_c9fc3977",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/GLESv2Decoder.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 396,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-04T23:16:56Z",
+      "side": 1,
+      "message": "Yes, it was my plan to make it working with memcpy for now, since I don\u0027t know how to make glMapBufferRange working with paddr to retire memcpys.",
+      "parentUuid": "6fe530b4_df229ebb",
+      "range": {
+        "startLine": 396,
+        "startChar": 0,
+        "endLine": 396,
+        "endChar": 69
+      },
+      "revId": "25bb425a089122c569133536050d52b01f990127",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
