@@ -286,8 +286,8 @@ bool Quickboot::load(StringView name) {
         // the same load.
         // Don't try to delete it completely as that is a heavyweight
         // operation and we are in the middle of crashing.
-        CrashReporter::get()->addCrashCallback([this, name]() {
-            Snapshotter::get().onCrashedSnapshot(c_str(name));
+        CrashReporter::get()->addCrashCallback([this, nameStr = name.str()]() {
+            Snapshotter::get().onCrashedSnapshot(nameStr.c_str());
         });
 
         const auto startTimeMs = System::get()->getHighResTimeUs() / 1000;
