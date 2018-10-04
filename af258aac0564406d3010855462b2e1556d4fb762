@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "312c9f9f_f7966f9b",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-04T04:24:41Z",
+      "side": 1,
+      "message": "TIL that this syntax is available with all of our compilers!",
+      "range": {
+        "startLine": 289,
+        "startChar": 54,
+        "endLine": 289,
+        "endChar": 74
+      },
+      "revId": "af258aac0564406d3010855462b2e1556d4fb762",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
