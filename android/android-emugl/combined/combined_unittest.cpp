@@ -22,6 +22,9 @@
 #include "android/opengles-pipe.h"
 #include "android/opengl/emugl_config.h"
 
+#include "AndroidBufferQueue.h"
+#include "AndroidWindow.h"
+#include "AndroidWindowBuffer.h"
 #include "GrallocDispatch.h"
 
 #include <hardware/gralloc.h>
@@ -32,6 +35,10 @@
 #include <string>
 
 #include <stdio.h>
+
+using aemu::AndroidBufferQueue;
+using aemu::AndroidWindow;
+using aemu::AndroidWindowBuffer;
 
 using android::AndroidPipe;
 using android::base::makeOnDemand;
@@ -212,6 +219,7 @@ protected:
         mGralloc.unregisterBuffer(buffer);
         mGralloc.free(buffer);
     }
+
     struct gralloc_implementation mGralloc;
     EGLState mEGL;
 };
@@ -234,4 +242,28 @@ TEST_F(CombinedGoldfishOpenglTest, ViewportQuery) {
     EXPECT_EQ(0, viewport[1]);
     EXPECT_EQ(kWindowSize, viewport[2]);
     EXPECT_EQ(kWindowSize, viewport[3]);
+}
+
+TEST_F(CombinedGoldfishOpenglTest, CreateWindowSurface) {
+    AndroidWindow testWindow(kWindowSize, kWindowSize);
+
+    AndroidBufferQueue toWindow;
+    AndroidBufferQueue fromWindow;
+
+    testWindow.setProducer(&toWindow, &fromWindow);
+
+    AndroidWindowBuffer testBuffer(&testWindow, createTestGrallocBuffer());
+
+    toWindow.queueBuffer(AndroidBufferQueue::Item(&testBuffer));
+
+    static const EGLint attribs[] = {EGL_WIDTH, kWindowSize, EGL_HEIGHT,
+                                     kWindowSize, EGL_NONE};
+    EGLSurface testEGLWindow =
+            eglCreateWindowSurface(mEGL.display, mEGL.config,
+                                   (EGLNativeWindowType)(&testWindow), attribs);
+
+    EXPECT_NE(EGL_NO_SURFACE, testEGLWindow);
+    EXPECT_EQ(EGL_TRUE, eglDestroySurface(mEGL.display, testEGLWindow));
+
+    destroyTestGrallocBuffer(testBuffer.handle);
 }
