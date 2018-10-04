@@ -1422,6 +1422,15 @@ static void skin_window_ensure_fully_visible(void* ptr) {
         if (new_y < 0)
             new_y = 0;
 
+        /* If it is somehow off screen horizontally, put it back */
+        if (new_x < 0)
+            new_x = 0;
+
+        /* Don't try to put it back if the emulator is only partially too
+           far to the right, because that invites bouncing. */
+        if (new_x >= data->monitor.size.w)
+            new_x -= data->win_w;
+
         VERBOSE_PRINT(init, "Window repositioned to [%d,%d]", new_x, new_y);
 
         /* Done */

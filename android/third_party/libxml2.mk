@@ -4,7 +4,7 @@ LIBXML2_TOP_DIR := $(LIBXML2_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)
 
 $(call define-emulator-prebuilt-library, \
     emulator-libxml2, \
-    $(LIBXML2_TOP_DIR)/lib/libxml2.a)
+    $(LIBXML2_TOP_DIR)/lib/libxml2$(BUILD_TARGET_STATIC_LIBEXT))
 
 # Required on Windows to indicate that the code will link against a static
 # version of libxml2. Otherwise, the linker complains about undefined

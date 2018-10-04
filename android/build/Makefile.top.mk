@@ -305,7 +305,7 @@ ifeq ($(BUILD_TARGET_OS),freebsd)
   BUILD_TARGET_CFLAGS += -I /usr/local/include
 endif
 
-ifeq ($(call if-target-any-windows,,not-windows),)
+ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
   # we need Win32 features that are available since Windows 7 (NT 6.1)
   BUILD_TARGET_CFLAGS += -DWINVER=0x601 -D_WIN32_WINNT=0x601 -mcx16
   # LARGEADDRESSAWARE gives more address space to 32-bit process
@@ -331,12 +331,17 @@ endif
 # NOTE: The following definitions are only used by the standalone build.
 BUILD_TARGET_EXEEXT :=
 BUILD_TARGET_DLLEXT := .so
-ifeq ($(call if-target-any-windows,,not-windows),)
+BUILD_TARGET_STATIC_LIBEXT := .a
+ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
   BUILD_TARGET_EXEEXT := .exe
   BUILD_TARGET_DLLEXT := .dll
 endif
 ifeq ($(BUILD_TARGET_OS),darwin)
   BUILD_TARGET_DLLEXT := .dylib
+endif
+
+ifeq ($(BUILD_TARGET_OS),windows_msvc)
+  BUILD_TARGET_STATIC_LIBEXT := .lib
 endif
 
 # Some CFLAGS below use -Wno-missing-field-initializers but this is not

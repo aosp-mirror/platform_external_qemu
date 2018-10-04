@@ -47,12 +47,13 @@ static void testScanf() {
     EXPECT_EQ(3, n);
 }
 
-TEST(StringParse, SscanfWithCLocale) {
+// These are flaky as they depend on the build env.
+TEST(StringParse, DISABLED_SscanfWithCLocale) {
     auto scopedCommaLocale = setScopedCommaLocale();
     testScanf();
 }
 
-TEST(StringParse, SscanfWithCLocaleThreads) {
+TEST(StringParse, DISABLED_SscanfWithCLocaleThreads) {
     auto scopedCommaLocale = setScopedCommaLocale();
 
     std::vector<std::unique_ptr<FunctorThread>> threads;
