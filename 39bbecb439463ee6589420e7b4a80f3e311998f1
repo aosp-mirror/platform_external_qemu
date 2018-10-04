@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1feda722_e3a13f5d",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-04T00:03:24Z",
+      "side": 0,
+      "message": "Rust has lifetimes to prevent errors like this.",
+      "range": {
+        "startLine": 289,
+        "startChar": 54,
+        "endLine": 289,
+        "endChar": 55
+      },
+      "revId": "39bbecb439463ee6589420e7b4a80f3e311998f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
