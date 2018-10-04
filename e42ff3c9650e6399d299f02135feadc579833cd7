@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "18ce0cd9_3208d6bd",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-04T14:38:59Z",
+      "side": 1,
+      "message": "Just checking; is it intended to print the last point?",
+      "range": {
+        "startLine": 519,
+        "startChar": 0,
+        "endLine": 519,
+        "endChar": 93
+      },
+      "revId": "e42ff3c9650e6399d299f02135feadc579833cd7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
