@@ -22,6 +22,30 @@
       "revId": "39bbecb439463ee6589420e7b4a80f3e311998f1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88fcaaad_53917bd6",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-04T00:05:15Z",
+      "side": 0,
+      "message": "Yeah its getting real tempting for me to start learning rust these days :|",
+      "parentUuid": "1feda722_e3a13f5d",
+      "range": {
+        "startLine": 289,
+        "startChar": 54,
+        "endLine": 289,
+        "endChar": 55
+      },
+      "revId": "39bbecb439463ee6589420e7b4a80f3e311998f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
