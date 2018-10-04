@@ -22,6 +22,30 @@
       "revId": "5d2b09ca55e9c002840b1682349d21d71d6eaa2f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "15d43018_31fa6e7e",
+        "filename": "android/android-emugl/guest/androidImpl/AndroidWindowBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-04T00:02:46Z",
+      "side": 1,
+      "message": "Yes, to both; they are not needed for the tests we are interested in targeting currently (dEQP). We would probably want a complete accounting of refcounts for native buffers at some point to really track guest leakage of handles though.",
+      "parentUuid": "96197f58_e80c2bb7",
+      "range": {
+        "startLine": 23,
+        "startChar": 12,
+        "endLine": 23,
+        "endChar": 23
+      },
+      "revId": "5d2b09ca55e9c002840b1682349d21d71d6eaa2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
