@@ -434,7 +434,7 @@ start-cmake-project = \
     $(eval PRODUCED_SHARED_LIBS:=) \
     $(eval PRODUCED_STATIC_LIBS:=) \
     $(eval CONSUMED_STATIC_LIBS:=) \
-    $(eval LOCAL_MODULE:=$(1)$(LOCAL_BITS)) \
+    $(eval LOCAL_MODULE:=$(1)) \
     $(eval LOCAL_BUILD_FILE := $(BUILD_CMAKE))
 
 # A variant of end-emulator-library for host programs instead
