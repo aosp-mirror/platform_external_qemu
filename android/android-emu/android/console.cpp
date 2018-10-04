@@ -3312,11 +3312,7 @@ static const CommandDefRec  qemu_commands[] =
 /********************************************************************************************/
 
 static void __attribute__((noreturn)) crash() {
-#ifndef __APPLE__
-    volatile int * ptr = NULL;
-    *ptr+=1;
-#endif
-    abort();    // just to make the compiler happy
+    crashhandler_die("console-initiated crash");
 }
 
 static int
