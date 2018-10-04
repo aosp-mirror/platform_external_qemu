@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6fe530b4_df229ebb",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/GLESv2Decoder.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 396,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-04T23:08:25Z",
+      "side": 1,
+      "message": "I believe if we stick to the memcpy way, we can still get this part working without any adjustments to hypervisor or QEMU, if we can hunt down the function that translates the paddr to a host addr.\n\nLook for \"g_emugl_dma_get_host_addr\"\n\nrcUpdateColorBufferDMA incorporates something that calls that in its codegen:\n\nrcUpdateColorBufferDMA\n    dir pixels in\n    len pixels pixels_size\n    var_flag pixels DMA\n    flag flushOnEncode",
+      "range": {
+        "startLine": 396,
+        "startChar": 0,
+        "endLine": 396,
+        "endChar": 69
+      },
+      "revId": "25bb425a089122c569133536050d52b01f990127",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
