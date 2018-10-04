@@ -254,8 +254,8 @@ TEST(GpxParser, ParseValidLocation) {
     EXPECT_EQ("Name", wpt.name);
 }
 
-
-TEST(GpxParser, ParseValidLocationCommaLocale) {
+// Flaky test; uses locale.
+TEST(GpxParser, DISABLED_ParseValidLocationCommaLocale) {
     auto scopedCommaLocale = setScopedCommaLocale();
 
     char text[] =
