@@ -1,8 +1,30 @@
 LOCAL_PATH := $(call my-dir)
 
+$(call emugl-begin-shared-library,libaemugraphics)
+
+LOCAL_C_INCLUDES += \
+    $(LOCAL_PATH) \
+    $(EMUGL_PATH)/guest \
+    $(EMUGL_PATH)/guest/androidImpl \
+    $(EMUGL_PATH)/host/include \
+    $(ANDROID_EMU_BASE_INCLUDES) \
+
+LOCAL_SRC_FILES += \
+    ClientComposer.cpp \
+
+$(call emugl-export,SHARED_LIBRARIES, \
+    android-emu-shared \
+    libcutils \
+    libgui \
+    libOpenglSystemCommon \
+    libEGL_emulation \
+    libGLESv2_emulation)
+
+$(call emugl-end-module)
+
 $(call emugl-begin-executable,emugl_combined_unittests)
 
-$(call emugl-import,libemugl_gtest)
+$(call emugl-import,libemugl_gtest libaemugraphics)
 
 $(call emugl-export,C_INCLUDES,$(EMUGL_PATH)/host/include)
 $(call emugl-export,C_INCLUDES,$(LOCAL_PATH))
@@ -20,14 +42,6 @@ LOCAL_LDLIBS += -ldl
 endif
 
 LOCAL_SRC_FILES += combined_unittest.cpp
-
-LOCAL_SHARED_LIBRARIES += \
-    android-emu-shared \
-    libcutils \
-    libgui \
-    libOpenglSystemCommon \
-    libEGL_emulation \
-    libGLESv2_emulation \
 
 LOCAL_INSTALL_OPENGL := true
 
