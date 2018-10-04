@@ -22,6 +22,30 @@
       "revId": "656d89360055b9455504130dfe49e16a23f1450a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "47c6a2ae_1db41b30",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2575,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-10-04T23:54:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a9fb988_83cd8fc2",
+      "range": {
+        "startLine": 2575,
+        "startChar": 11,
+        "endLine": 2575,
+        "endChar": 19
+      },
+      "revId": "656d89360055b9455504130dfe49e16a23f1450a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
