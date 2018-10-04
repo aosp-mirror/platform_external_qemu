@@ -84,9 +84,11 @@ process_symbol () {
     CODE_FILE=$DEBUG_FILE
     CODE_IDENTIFIER=$DEBUG_IDENTIFIER
 
-    echo -n -e curl \
+    START=$(date +%s)
+    STATUS=$(curl \
         --show-error \
         --silent \
+        --fail \
         --dump-header /dev/null \
         --form product="$PRODUCT" \
         --form codeFile="$CODE_FILE" \
@@ -94,8 +96,18 @@ process_symbol () {
         --form debugFile="$DEBUG_FILE" \
         --form debugIdentifier="$DEBUG_IDENTIFIER" \
         --form symbolFile="@$SYMBOL_FILE" \
-        "$URL" \
-        "\0"
+        --write-out "%{http_code}\n" \
+        -o /dev/null \
+        "$URL")
+    ERROR=$?
+    END=$(date +%s)
+    DIFF=$(( $END - $START))
+    if [ $STATUS -ne 200 ] || [ $ERROR -ne 0 ]; then
+        panic "Unable to upload $SYMBOL_FILE to $URL, status code: $STATUS, after $DIFF sec."
+    else
+        log "Uploaded $SYMBOL_FILE -> $URL in $DIFF sec."
+    fi
+
 }
 
 process_dir () {
@@ -104,4 +116,5 @@ process_dir () {
     done
 }
 
-process_dir | xargs -0 -n1 -P 5 -t bash -c
+log_invocation
+process_dir

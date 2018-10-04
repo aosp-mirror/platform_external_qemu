@@ -597,9 +597,10 @@ $$(_SYMBOL): $$(_SYMBOL_DEP)
 	@echo "Build Symbol: $$(PRIVATE_SYMBOL)"
 	@mkdir -p $$(dir $$(PRIVATE_SYMBOL))
 ifeq (darwin,$(BUILD_TARGET_OS))
-	$$(PRIVATE_DUMPSYMS) -g $$(PRIVATE_DSYM) $$(PRIVATE_MODULE) > $$(PRIVATE_SYMBOL)
+	$$(PRIVATE_DUMPSYMS) -g $$(PRIVATE_DSYM) $$(PRIVATE_MODULE) > $$(PRIVATE_SYMBOL) 2> $$(PRIVATE_MODULE).symbol.err
 else
-	$(hide) $$(PRIVATE_DUMPSYMS) $$(PRIVATE_MODULE) > $$(PRIVATE_SYMBOL)
+	$(hide) $$(PRIVATE_DUMPSYMS) $$(PRIVATE_MODULE) > $$(PRIVATE_SYMBOL) 2> $$(PRIVATE_MODULE).symbol.err
+
 endif
 endef
 
