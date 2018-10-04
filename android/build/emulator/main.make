@@ -61,6 +61,7 @@ _BUILD_DEBUG_INFOS :=
 _BUILD_TESTS :=
 _BUILD_LINT :=
 _BUILD_CMAKE_MAKEFILES :=
+_BUILD_SYMBOLS :=
 
 clean: clean-intermediates
 
@@ -80,6 +81,18 @@ symbols: $(_BUILD_SYMBOLS)
 debuginfo: $(_BUILD_DEBUG_INFOS)
 tests: $(_BUILD_TESTS)
 lint: $(_BUILD_LINT)
+
+
+# Zip up the generated symbols and errors.
+ifeq (true,$(BUILD_GENERATE_SYMBOLS))
+SYMBOL_ZIP:=$(call local-symbol-zip-install-path)
+
+symbols: $(SYMBOL_ZIP)
+$(SYMBOL_ZIP): $(_BUILD_SYMBOLS)
+	@echo "Zipping symbols: $(SYMBOL_ZIP)"
+	$(hide) zip -u $(call local-symbol-zip-install-path) $(_BUILD_SYMBOLS) $(_BUILD_SYMBOLS:.sym=.sym.err)
+endif
+
 
 clean-intermediates:
 	rm -rf $(BUILD_OBJS_DIR)/intermediates $(_BUILD_EXECUTABLES) \
