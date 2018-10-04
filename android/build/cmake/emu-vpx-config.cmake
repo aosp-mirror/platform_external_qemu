@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/libvpx/${LOCAL_TARGET_TAG}" ABSOLUTE)
+get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/libvpx/${ANDROID_TARGET_TAG}" ABSOLUTE)
 
 set(VPX_INCLUDE_DIR "${PREBUILT_ROOT}/include")
 set(VPX_INCLUDE_DIRS "${VPX_INCLUDE_DIRS}")

@@ -705,9 +705,6 @@ OperationStatus Snapshotter::saveGeneric(const char* name) {
 }
 
 OperationStatus Snapshotter::loadGeneric(const char* name) {
-    CrashReporter::get()->addCrashCallback([this, &name]() {
-        Snapshotter::get().onCrashedSnapshot(name);
-    });
     OperationStatus res = OperationStatus::Error;
     if (checkSafeToLoad(name)) {
         res = load(false /* not quickboot */, name);

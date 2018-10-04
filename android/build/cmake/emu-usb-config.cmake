@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-get_filename_component(PREBUILT_ROOT "${LOCAL_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/libusb/${LOCAL_TARGET_TAG}" ABSOLUTE)
+get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/libusb/${ANDROID_TARGET_TAG}" ABSOLUTE)
 
 set(USB_INCLUDE_DIR "${PREBUILT_ROOT}/include/libusb-1.0")
-set(USB_INCLUDE_DIRS "${USB_INCLUDE_DIRS}")
+set(USB_INCLUDE_DIRS "${USB_INCLUDE_DIR}")
 set(USB_LIBRARIES "${PREBUILT_ROOT}/lib/libusb-1.0.a")
 set(USB_FOUND TRUE)
 

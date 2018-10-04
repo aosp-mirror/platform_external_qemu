@@ -546,7 +546,8 @@ TEST(KmlParser, ParsePlacemarkNullNameNoCrash) {
     EXPECT_STREQ("", locations.front().description.c_str());
 }
 
-TEST(KmlParser, ParseLocationNormalCommaLocale) {
+// Flaky test; uses locale.
+TEST(KmlParser, DISABLED_ParseLocationNormalCommaLocale) {
     auto scopedCommaLocale = setScopedCommaLocale();
 
     TestTempDir myDir("parse_location_tests");

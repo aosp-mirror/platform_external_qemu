@@ -12,7 +12,7 @@ LIBUUID_TOP_DIR := $(LIBUUID_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)
 
 $(call define-emulator-prebuilt-library,\
     emulator-libuuid,\
-    $(LIBUUID_TOP_DIR)/lib/libuuid.a)
+    $(LIBUUID_TOP_DIR)/lib/libuuid$(BUILD_TARGET_STATIC_LIBEXT))
 
 LIBUUID_INCLUDES := $(LIBUUID_TOP_DIR)/include
 LIBUUID_STATIC_LIBRARIES := emulator-libuuid

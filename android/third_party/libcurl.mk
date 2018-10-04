@@ -8,15 +8,15 @@ LIBCURL_TOP_DIR := $(LIBCURL_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)
 
 $(call define-emulator-prebuilt-library,\
     emulator-libcurl,\
-    $(LIBCURL_TOP_DIR)/lib/libcurl.a)
+    $(LIBCURL_TOP_DIR)/lib/libcurl$(BUILD_TARGET_STATIC_LIBEXT))
 
 $(call define-emulator-prebuilt-library,\
     emulator-libssl,\
-    $(LIBCURL_TOP_DIR)/lib/libssl.a)
+    $(LIBCURL_TOP_DIR)/lib/libssl$(BUILD_TARGET_STATIC_LIBEXT))
 
 $(call define-emulator-prebuilt-library,\
     emulator-libcrypto,\
-    $(LIBCURL_TOP_DIR)/lib/libcrypto.a)
+    $(LIBCURL_TOP_DIR)/lib/libcrypto$(BUILD_TARGET_STATIC_LIBEXT))
 
 LIBCURL_INCLUDES := $(LIBCURL_TOP_DIR)/include
 LIBCURL_CFLAGS += -DCURL_STATICLIB
