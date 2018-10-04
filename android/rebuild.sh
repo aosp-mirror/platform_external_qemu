@@ -11,6 +11,7 @@ export LANG=C
 export LC_ALL=C
 
 PROGDIR=$(dirname "$0")
+. $(dirname "$0")/scripts/utils/common.shi
 VERBOSE=1
 
 MINGW=
@@ -18,6 +19,7 @@ WINDOWS_MSVC=
 NO_TESTS=
 OUT_DIR=objs
 HELP=
+
 
 for OPT; do
     case $OPT in
@@ -112,6 +114,12 @@ if [ "$VERBOSE" -ne 2 ]; then
     echo "Configuring build."
 fi
 export IN_ANDROID_REBUILD_SH=1
+
+# Display how we got called, so we can figure out what's happening
+# in the build logs.
+log_invocation
+
+
 run android/configure.sh --out-dir=$OUT_DIR "$@" $OPT_CLANG ||
     panic "Configuration error, please run ./android/configure.sh to see why."
 
