@@ -1119,9 +1119,7 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
     }
     c->second.refcount++;
     markOpened(&c->second);
-    if(!c->second.cb->isInitialized()) {
-        c->second.cb->initialize();
-    }
+
     uint64_t puid = tInfo->m_puid;
     if (puid) {
         m_procOwnedColorBuffers[puid].insert(p_colorbuffer);
