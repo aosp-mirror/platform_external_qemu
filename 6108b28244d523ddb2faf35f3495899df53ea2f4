@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f511f0fa_19f7d5cb",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T23:51:58Z",
+      "side": 1,
+      "message": "What kind of error generation is desirable and do we know that in this function?\n\ne.g., default: crashhandler_die(\"msg\") to stop things right there?",
+      "range": {
+        "startLine": 111,
+        "startChar": 0,
+        "endLine": 112,
+        "endChar": 22
+      },
+      "revId": "6108b28244d523ddb2faf35f3495899df53ea2f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
