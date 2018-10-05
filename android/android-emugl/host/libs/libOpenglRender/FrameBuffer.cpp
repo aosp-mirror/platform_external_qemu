@@ -588,15 +588,14 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_useSubWindow(useSubWindow),
       m_fpsStats(getenv("SHOW_FPS_STATS") != nullptr),
       m_colorBufferHelper(new ColorBufferHelper(this)),
-      m_readbackThread(
-          [this](FrameBuffer::Readback&& readback) {
-              return sendReadbackWorkerCmd(readback);
-          }),
-      m_postThread(
-          [this](FrameBuffer::Post&& post) {
-              return postWorkerFunc(post);
-          })
-{}
+      m_refCountPipeEnabled(
+              emugl_feature_is_enabled(android::featurecontrol::RefCountPipe)),
+      m_readbackThread([this](FrameBuffer::Readback&& readback) {
+          return sendReadbackWorkerCmd(readback);
+      }),
+      m_postThread([this](FrameBuffer::Post&& post) {
+          return postWorkerFunc(post);
+      }) {}
 
 FrameBuffer::~FrameBuffer() {
     finalize();
@@ -923,20 +922,28 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
                                           m_fastBlitSupported));
     if (cb.get() != NULL) {
         assert(m_colorbuffers.count(ret) == 0);
-        // Android master default api level is 1000
-        int apiLevel = 1000;
-        emugl::getAvdInfo(nullptr, &apiLevel);
-        // pre-O and post-O use different color buffer memory management logic
-        if (apiLevel > 0 && apiLevel < 26) {
-            m_colorbuffers[ret] = { std::move(cb), 1, false, 0 };
-
-            RenderThreadInfo* tInfo = RenderThreadInfo::get();
-            uint64_t puid = tInfo->m_puid;
-            if (puid) {
-                m_procOwnedColorBuffers[puid].insert(ret);
-            }
-        } else {
+        // When guest feature flag RefCountPipe is on, no reference counting is
+        // needed. We only memoize the mapping from handle to ColorBuffer.
+        if (m_refCountPipeEnabled) {
             m_colorbuffers[ret] = { std::move(cb), 0, false, 0 };
+        } else {
+            // Android master default api level is 1000
+            int apiLevel = 1000;
+            emugl::getAvdInfo(nullptr, &apiLevel);
+            // pre-O and post-O use different color buffer memory management
+            // logic
+            if (apiLevel > 0 && apiLevel < 26) {
+                m_colorbuffers[ret] = {std::move(cb), 1, false, 0};
+
+                RenderThreadInfo* tInfo = RenderThreadInfo::get();
+                uint64_t puid = tInfo->m_puid;
+                if (puid) {
+                    m_procOwnedColorBuffers[puid].insert(ret);
+                }
+
+            } else {
+                m_colorbuffers[ret] = {std::move(cb), 0, false, 0};
+            }
         }
     } else {
         ret = 0;
@@ -1107,6 +1114,11 @@ void FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_surface) {
 }
 
 int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
+    // When guest feature flag RefCountPipe is on, no reference counting is
+    // needed.
+    if (m_refCountPipeEnabled)
+        return 0;
+
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
     AutoLock mutex(m_lock);
@@ -1117,6 +1129,7 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
         ERR("FB: openColorBuffer cb handle %#x not found\n", p_colorbuffer);
         return -1;
     }
+
     c->second.refcount++;
     markOpened(&c->second);
 
@@ -1128,6 +1141,11 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
 }
 
 void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
+    // When guest feature flag RefCountPipe is on, no reference counting is
+    // needed.
+    if (m_refCountPipeEnabled)
+        return;
+
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
     AutoLock mutex(m_lock);
@@ -1148,6 +1166,11 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
 
 void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
                                          bool forced) {
+    // When guest feature flag RefCountPipe is on, no reference counting is
+    // needed.
+    if (m_refCountPipeEnabled)
+        return;
+
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
         // This is harmless: it is normal for guest system to issue
@@ -1182,7 +1205,7 @@ void FrameBuffer::performDelayedColorBufferCloseLocked(bool forced) {
     // timestamp change (end of previous second -> beginning of a next one),
     // but not for long - this is a workaround for race conditions, and they
     // are quick.
-    static constexpr int kColorBufferClosingDelaySec = 2;
+    static constexpr int kColorBufferClosingDelaySec = 1;
 
     const auto now = System::get()->getUnixTime();
     auto it = m_colorBufferDelayedCloseList.begin();
@@ -1876,6 +1899,11 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
     c->second.cb->readPixels(0, 0, *width, *height,
             nChannels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE,
             pixels.data());
+}
+
+void FrameBuffer::onLastColorBufferRef(uint32_t handle) {
+    AutoLock mutex(m_lock);
+    m_colorbuffers.erase((HandleType)handle);
 }
 
 void FrameBuffer::onSave(Stream* stream,

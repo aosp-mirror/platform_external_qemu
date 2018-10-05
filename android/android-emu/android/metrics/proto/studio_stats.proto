@@ -1135,6 +1135,7 @@ message EmulatorFeatureFlagState {
     OFFWORLD = 31;
     OFFWORLD_DISABLE_SECURITY = 32;
     QUICKBOOT_FILE_BACKED = 33;
+    REFCOUNT_PIPE = 34;
     // Next tag: 34
   }
   // Which features were enabled by default or through the server-side config.

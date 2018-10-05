@@ -112,4 +112,14 @@ RendererPtr RenderLibImpl::initRenderer(int width, int height,
     return res;
 }
 
+static void impl_onLastCbRef(uint32_t handle) {
+    FrameBuffer* fb = FrameBuffer::getFB();
+    if (fb)
+        fb->onLastColorBufferRef(handle);
+}
+
+OnLastColorBufferRef RenderLibImpl::getOnLastColorBufferRef() {
+    return (OnLastColorBufferRef)impl_onLastCbRef;
+}
+
 }  // namespace emugl
