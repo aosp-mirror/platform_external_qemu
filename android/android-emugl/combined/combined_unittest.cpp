@@ -25,6 +25,7 @@
 #include "AndroidBufferQueue.h"
 #include "AndroidWindow.h"
 #include "AndroidWindowBuffer.h"
+#include "ClientComposer.h"
 #include "GrallocDispatch.h"
 
 #include <hardware/gralloc.h>
@@ -39,6 +40,7 @@
 using aemu::AndroidBufferQueue;
 using aemu::AndroidWindow;
 using aemu::AndroidWindowBuffer;
+using aemu::ClientComposer;
 
 using android::AndroidPipe;
 using android::base::makeOnDemand;
@@ -264,6 +266,27 @@ TEST_F(CombinedGoldfishOpenglTest, CreateWindowSurface) {
 
     EXPECT_NE(EGL_NO_SURFACE, testEGLWindow);
     EXPECT_EQ(EGL_TRUE, eglDestroySurface(mEGL.display, testEGLWindow));
+
+    destroyTestGrallocBuffer(testBuffer.handle);
+}
+
+TEST_F(CombinedGoldfishOpenglTest, ClientCompositionSetup) {
+
+    AndroidWindow composeWindow(kWindowSize, kWindowSize);
+
+    AndroidBufferQueue toComposeWindow;
+    AndroidWindowBuffer testBuffer(&composeWindow, createTestGrallocBuffer());
+    toComposeWindow.queueBuffer(AndroidBufferQueue::Item(&testBuffer));
+
+    AndroidBufferQueue fromComposeWindow;
+
+    composeWindow.setProducer(&toComposeWindow, &fromComposeWindow);
+
+    AndroidBufferQueue fromAppWindow;
+    AndroidBufferQueue toAppWindow;
+
+    ClientComposer* c = new ClientComposer(&composeWindow, &fromAppWindow, &toAppWindow);
+    delete c;
 
     destroyTestGrallocBuffer(testBuffer.handle);
 }
