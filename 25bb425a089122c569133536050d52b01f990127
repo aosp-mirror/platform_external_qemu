@@ -46,6 +46,30 @@
       "revId": "25bb425a089122c569133536050d52b01f990127",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ed16d39f_d7c6eab0",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/GLESv2Decoder.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 396,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-05T00:02:49Z",
+      "side": 1,
+      "message": "rcUpdateColorBufferDMA\n    dir pixels in\n    len pixels pixels_size\n    var_flag pixels DMA\n    flag flushOnEncode\n\ni am sorry, but I don\u0027t understand how this is related to glMapBufferRangeDMA. It just passes a 64 bit integer between the guest and the host. I believe dir and len are not applicable to it. What does \"var_flag xxx DMA\" do?",
+      "parentUuid": "b8101271_c9fc3977",
+      "range": {
+        "startLine": 396,
+        "startChar": 0,
+        "endLine": 396,
+        "endChar": 69
+      },
+      "revId": "25bb425a089122c569133536050d52b01f990127",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
