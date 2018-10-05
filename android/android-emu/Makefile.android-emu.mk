@@ -269,6 +269,7 @@ android_emu_LOCAL_SRC_FILES := \
     android/emulation/qemud/android_qemud_serial.cpp \
     android/emulation/qemud/android_qemud_service.cpp \
     android/emulation/qemud/android_qemud_sink.cpp \
+    android/emulation/RefcountPipe.cpp \
     android/emulation/serial_line.cpp \
     android/emulation/SerialLine.cpp \
     android/emulation/SetupParameters.cpp \
@@ -745,6 +746,7 @@ LOCAL_SRC_FILES := \
   android/emulation/Hypervisor_unittest.cpp \
   android/emulation/hostpipe/HostGoldfishPipe_unittest.cpp \
   android/emulation/ParameterList_unittest.cpp \
+  android/emulation/RefcountPipe_unittest.cpp \
   android/emulation/serial_line_unittest.cpp \
   android/emulation/SetupParameters_unittest.cpp \
   android/emulation/testing/TestAndroidPipeDevice.cpp \
