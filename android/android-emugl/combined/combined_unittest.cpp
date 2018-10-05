@@ -14,7 +14,6 @@
 #include <gtest/gtest.h>
 
 #include "android/base/files/PathUtils.h"
-#include "android/base/memory/OnDemand.h"
 #include "android/base/system/System.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/hostpipe/HostGoldfishPipe.h"
@@ -43,8 +42,6 @@ using aemu::AndroidWindowBuffer;
 using aemu::ClientComposer;
 
 using android::AndroidPipe;
-using android::base::makeOnDemand;
-using android::base::OnDemandT;
 using android::base::pj;
 using android::base::System;
 using android::HostGoldfishPipeDevice;
