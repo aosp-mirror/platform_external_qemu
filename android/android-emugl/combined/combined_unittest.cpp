@@ -322,3 +322,21 @@ TEST_F(CombinedGoldfishOpenglTest, ClientCompositionSetup) {
     ClientComposer composer(&composeWindow.window, &appWindow.fromWindow,
                             &appWindow.toWindow);
 }
+
+// Client composition, but also advances a frame.
+TEST_F(CombinedGoldfishOpenglTest, ClientCompositionAdvanceFrame) {
+
+    WindowWithBacking composeWindow(this);
+    WindowWithBacking appWindow(this);
+
+    AndroidBufferQueue::Item item;
+
+    appWindow.toWindow.dequeueBuffer(&item);
+    appWindow.fromWindow.queueBuffer(item);
+
+    ClientComposer composer(&composeWindow.window, &appWindow.fromWindow,
+                            &appWindow.toWindow);
+
+    composer.advanceFrame();
+    composer.join();
+}

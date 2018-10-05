@@ -32,6 +32,7 @@ class Composer {
 public:
     Composer() = default;
     virtual ~Composer() = default;
+    virtual void advanceFrame() = 0;
 };
 
 class SurfaceFlinger {
@@ -50,6 +51,7 @@ public:
     ~SurfaceFlinger() = default;
 
     void connectWindow(AndroidWindow* window);
+    void advanceFrame();
 
 private:
     void disconnectWindow();
