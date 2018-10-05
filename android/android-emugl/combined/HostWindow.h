@@ -1,4 +1,4 @@
-// Copyright 2018 The Android Open Source Project
+// Copyright (C) 2018 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,28 +13,4 @@
 // limitations under the License.
 #pragma once
 
-#include "SurfaceFlinger.h"
-
-#include <memory>
-
-namespace aemu {
-
-class ClientComposer : public Composer {
-public:
-    ClientComposer(AndroidWindow* composeWindow,
-                   AndroidBufferQueue* fromApp,
-                   AndroidBufferQueue* toApp);
-
-    ~ClientComposer() override;
-
-    void join();
-
-    void advanceFrame() override;
-
-private:
-    class Impl;
-
-    std::unique_ptr<Impl> mImpl;
-};
-
-} // namespace aemu
+#include "OSWindow.h"
