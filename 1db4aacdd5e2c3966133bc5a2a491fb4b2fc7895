@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d91089ea_cec943e5",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1906,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2018-10-05T20:43:55Z",
+      "side": 1,
+      "message": "Done. This if-statement is not necessary anymore. HWC2 HAL on the android side will allocate a target Colorbuffer.",
+      "parentUuid": "e72d62e2_572dd7a0",
+      "range": {
+        "startLine": 1900,
+        "startChar": 0,
+        "endLine": 1906,
+        "endChar": 0
+      },
+      "revId": "1db4aacdd5e2c3966133bc5a2a491fb4b2fc7895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0318b78f_c0f69794",
         "filename": "android/android-emugl/host/libs/libOpenglRender/PostWorker.cpp",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2018-10-03T23:09:14Z",
       "side": 1,
       "message": "There are a lot of if-statements here and below in composeLayer. It\u0027s hard to understand what\u0027s going on. Recommend pushing down this complexity into the composeLayer method. There\u0027s also a lot of concurrent accesses to the FrameBuffer data structures; it feels like with findColorBuffer, getTextureDraw, etc. there is going to be some race condition. Instead, would it be possible to pass a struct containing copies of exactly the info needed to PostWorker?",
+      "range": {
+        "startLine": 107,
+        "startChar": 0,
+        "endLine": 118,
+        "endChar": 9
+      },
+      "revId": "1db4aacdd5e2c3966133bc5a2a491fb4b2fc7895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a9e7c4de_85adda92",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/PostWorker.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2018-10-05T20:43:55Z",
+      "side": 1,
+      "message": "Thanks, moves the contents to composeLayer method.\nFrameBuffer::compose will wait for the postworker thread finish handling composition. So, it should be safe to pass a pointer to the postworker thread.",
+      "parentUuid": "0318b78f_c0f69794",
       "range": {
         "startLine": 107,
         "startChar": 0,
