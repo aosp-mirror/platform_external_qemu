@@ -29,6 +29,8 @@ public:
 
     void join();
 
+    void advanceFrame() override;
+
 private:
     class Impl;
 
