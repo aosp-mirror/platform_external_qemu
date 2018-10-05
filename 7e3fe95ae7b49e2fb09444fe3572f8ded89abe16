@@ -1,0 +1,203 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "018458d7_9b2c96fc",
+        "filename": "android/android-emu/Makefile.android-emu.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T17:14:28Z",
+      "side": 1,
+      "message": "nit: spaces",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c90e051f_a72e9be5",
+        "filename": "android/android-emu/android/base/async/AsyncSocketServer_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T17:14:28Z",
+      "side": 1,
+      "message": "This is a pattern that happens a lot, but isn\u0027t obvious. Do you think there\u0027s some way to fold that into msvc-posix.h?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 6
+      },
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "91f8ad9e_771987df",
+        "filename": "android/android-emu/android/base/files/DecompressingStream.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T17:14:28Z",
+      "side": 1,
+      "message": "What do you think about folding the _MSC_VER check into msvc-posix.h so it can be included everywhere without needing the extra ifdef?",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 6
+      },
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a2390a73_c816ba57",
+        "filename": "android/android-emu/android/base/memory/SharedMemory_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T17:14:28Z",
+      "side": 1,
+      "message": "Hmm..............................................\n\nthese getFd() tests can be deleted since mWriter.isOpen/mReader.isOpen check exactly that now",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b8827252_bb8e1844",
+        "filename": "android/android-emu/android/snapshot/RamSnapshotTesting.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T17:14:28Z",
+      "side": 1,
+      "message": "Welp",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6df60d89_ab684681",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T17:14:28Z",
+      "side": 1,
+      "message": "Don\u0027t think we need this file, it became snapshotAPI.cpp at some point",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d9056dd7_3448e510",
+        "filename": "android/android-emu/android/utils/file_io.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T17:14:28Z",
+      "side": 1,
+      "message": "hmm, recommend renamign them to android at some point, since it might not be safe to use the basic functions when non ascii is involved. filed a bug",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56f7708c_243a5670",
+        "filename": "android/msvc-posix-compat/CMakeLists.txt",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T17:14:28Z",
+      "side": 1,
+      "message": "nit: spaces",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "477f4bcb_88882a7e",
+        "filename": "android/scripts/utils/package_builder.shi",
+        "patchSetId": 3
+      },
+      "lineNbr": 515,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T17:14:28Z",
+      "side": 1,
+      "message": "nit:spaces",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aea793c8_9658efba",
+        "filename": "android/third_party/ext4_utils/CMakeLists.txt",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T17:14:28Z",
+      "side": 1,
+      "message": "nit: spaces",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "676b5d31_d3542a2b",
+        "filename": "android/third_party/ext4_utils/sources.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T17:14:28Z",
+      "side": 1,
+      "message": "nit: change to spaces (and below)",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
