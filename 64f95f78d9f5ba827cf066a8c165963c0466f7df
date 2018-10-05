@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8df2e27e_439cafc8",
+        "filename": "android/android-emu/android/base/testing/ProtobufMatchers.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T23:47:35Z",
+      "side": 1,
+      "message": "ignore?",
+      "range": {
+        "startLine": 89,
+        "startChar": 36,
+        "endLine": 89,
+        "endChar": 42
+      },
+      "revId": "64f95f78d9f5ba827cf066a8c165963c0466f7df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
