@@ -9,6 +9,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include "Object.h"
+#include "test.pb.h"
 
 
 int main(int argc, char** argv) {
@@ -19,7 +20,7 @@ int main(int argc, char** argv) {
     uuid_t uu;
     uuid_generate(uu);
 #endif
-
+    emulator::SampleMessage msg = emulator::SampleMessage::default_instance();
 
     QApplication app(argc, argv);
 	QMessageBox msgBox;
