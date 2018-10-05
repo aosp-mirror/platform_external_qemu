@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8c0be26c_ba6cd53d",
+        "filename": "util/oslib-win32.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 872,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T16:57:27Z",
+      "side": 1,
+      "message": "nit: use spaces (and elsewhere)",
+      "range": {
+        "startLine": 860,
+        "startChar": 0,
+        "endLine": 872,
+        "endChar": 25
+      },
+      "revId": "a2ab032cba8248c6b752308a29c5c0cc00a35b2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "758439fb_b99d7de7",
+        "filename": "util/oslib-win32.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1096,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T16:57:27Z",
+      "side": 1,
+      "message": "please rerun HelloEmulator_end2endtest after this is building to make sure the non ascii args still work. I\u0027ve filed a bug for it",
+      "range": {
+        "startLine": 1095,
+        "startChar": 1,
+        "endLine": 1096,
+        "endChar": 56
+      },
+      "revId": "a2ab032cba8248c6b752308a29c5c0cc00a35b2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc5cb6b3_11fcfa46",
+        "filename": "util/oslib-win32.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1338,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T16:57:27Z",
+      "side": 1,
+      "message": "for safety, use the win32 unicode string interface?",
+      "range": {
+        "startLine": 1330,
+        "startChar": 0,
+        "endLine": 1338,
+        "endChar": 52
+      },
+      "revId": "a2ab032cba8248c6b752308a29c5c0cc00a35b2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
