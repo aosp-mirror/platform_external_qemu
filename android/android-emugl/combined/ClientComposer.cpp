@@ -185,6 +185,8 @@ private:
 
         glUseProgram(mProgram);
         glUniform1i(samplerLoc, 0);
+
+        mInitialized = true;
     }
 
     WorkerProcessingResult composeLoop(AndroidWindow* composeWindow,
@@ -223,6 +225,10 @@ private:
     }
 
     void teardown() {
+        for (auto it : mEGLImages) {
+            eglDestroyImageKHR(mDisplay, it.second);
+        }
+
         glDisableVertexAttribArray(mPosLoc);
         glDisableVertexAttribArray(mTexCoordLoc);
 
@@ -331,6 +337,10 @@ ClientComposer::~ClientComposer() = default;
 
 void ClientComposer::join() {
     mImpl->join();
+}
+
+void ClientComposer::advanceFrame() {
+    mImpl->advanceFrame();
 }
 
 }  // namespace aemu

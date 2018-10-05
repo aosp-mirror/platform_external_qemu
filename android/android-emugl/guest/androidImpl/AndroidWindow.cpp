@@ -58,6 +58,8 @@ AndroidWindow::AndroidWindow(int _width, int _height)
 
     common.incRef = hook_incRef;
     common.decRef = hook_decRef;
+
+    fprintf(stderr, "%s: cancelbuffer loc %p\n", __func__, cancelBuffer_DEPRECATED);
 }
 
 void AndroidWindow::setProducer(AndroidBufferQueue* _fromProducer,
