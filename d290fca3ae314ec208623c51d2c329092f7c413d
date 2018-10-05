@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "05128093_c73d4a19",
+        "filename": "android/msvc-posix-compat/src/getopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 536,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T17:00:31Z",
+      "side": 1,
+      "message": "replace tabs with spaces",
+      "revId": "d290fca3ae314ec208623c51d2c329092f7c413d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "070dbc9e_c9ab6e2d",
+        "filename": "android/msvc-posix-compat/src/gettimeofday.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T17:00:31Z",
+      "side": 1,
+      "message": "need consistent indentation / spacing",
+      "revId": "d290fca3ae314ec208623c51d2c329092f7c413d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "21804205_46b11bf4",
+        "filename": "android/msvc-posix-compat/src/msvc-posix.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T17:00:31Z",
+      "side": 1,
+      "message": "suggest using the win32unicodestring interface for this",
+      "revId": "d290fca3ae314ec208623c51d2c329092f7c413d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
