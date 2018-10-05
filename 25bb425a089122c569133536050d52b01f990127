@@ -70,6 +70,30 @@
       "revId": "25bb425a089122c569133536050d52b01f990127",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a744f3ac_6c0d6ade",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/GLESv2Decoder.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 396,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-05T00:04:49Z",
+      "side": 1,
+      "message": "var_flag xxx DMA auto generates the code that calls \"g_emugl_dma_get_host_addr\"; it could be relevant for purposes of generating that code for glMapBufferRangeDMA as well, or be relevant for getting some similar functionality manually",
+      "parentUuid": "ed16d39f_d7c6eab0",
+      "range": {
+        "startLine": 396,
+        "startChar": 0,
+        "endLine": 396,
+        "endChar": 69
+      },
+      "revId": "25bb425a089122c569133536050d52b01f990127",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
