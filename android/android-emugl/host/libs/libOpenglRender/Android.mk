@@ -1,5 +1,42 @@
 LOCAL_PATH := $(call my-dir)
 
+$(call emugl-begin-static-library,lib$(BUILD_TARGET_SUFFIX)OSWindow)
+
+LOCAL_C_INCLUDES += \
+    $(EMUGL_PATH)/host/libs/libOpenglRender/standalone_common/angle-util \
+
+LOCAL_SRC_FILES += \
+    standalone_common/angle-util/OSWindow.cpp \
+
+ifeq ($(BUILD_TARGET_OS),linux)
+    LOCAL_SRC_FILES += standalone_common/angle-util/x11/X11Window.cpp
+endif
+
+ifeq ($(BUILD_TARGET_OS),darwin)
+    LOCAL_SRC_FILES += standalone_common/angle-util/osx/OSXWindow.mm
+endif
+
+ifeq ($(BUILD_TARGET_OS),windows)
+    LOCAL_SRC_FILES += standalone_common/angle-util/windows/WindowsTimer.cpp
+    LOCAL_SRC_FILES += standalone_common/angle-util/windows/win32/Win32Window.cpp
+endif
+
+LOCAL_LDLIBS := -lm
+
+ifeq ($(BUILD_TARGET_OS),linux)
+    LOCAL_LDLIBS += -lX11 -lrt
+endif
+
+ifeq ($(BUILD_TARGET_OS),darwin)
+    LOCAL_LDLIBS += -Wl,-framework,AppKit
+endif
+
+ifeq ($(BUILD_TARGET_OS),windows)
+    LOCAL_LDLIBS += -lgdi32
+endif
+
+$(call emugl-end-module)
+
 host_OS_SRCS :=
 host_common_LDLIBS :=
 
@@ -48,23 +85,9 @@ host_common_SRC_FILES := \
 standalone_common_SRC_FILES := \
     $(host_common_SRC_FILES) \
     ../Translator/GLES_V2/ANGLEShaderParser.cpp \
-    standalone_common/angle-util/OSWindow.cpp \
     standalone_common/SampleApplication.cpp \
     standalone_common/SearchPathsSetup.cpp \
     standalone_common/ShaderUtils.cpp \
-
-ifeq ($(BUILD_TARGET_OS),linux)
-    standalone_common_SRC_FILES += standalone_common/angle-util/x11/X11Window.cpp
-endif
-
-ifeq ($(BUILD_TARGET_OS),darwin)
-    standalone_common_SRC_FILES += standalone_common/angle-util/osx/OSXWindow.mm
-endif
-
-ifeq ($(BUILD_TARGET_OS),windows)
-    standalone_common_SRC_FILES += standalone_common/angle-util/windows/WindowsTimer.cpp
-    standalone_common_SRC_FILES += standalone_common/angle-util/windows/win32/Win32Window.cpp
-endif
 
 standalone_common_LDLIBS := -lm
 
@@ -143,6 +166,7 @@ $(call emugl-begin-static-library,lib$(BUILD_TARGET_SUFFIX)OpenglRender_standalo
 $(call emugl-import,libOpenglCodecCommon libemugl_gtest)
 $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender)
 $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan)
+$(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OSWindow)
 
 LOCAL_C_INCLUDES += $(standalone_common_C_INCLUDES)
 LOCAL_STATIC_LIBRARIES += $(standalone_common_STATIC_LIBRARIES)
@@ -157,6 +181,7 @@ $(call emugl-end-module)
 # Tests#########################################################################
 $(call emugl-begin-executable,lib$(BUILD_TARGET_SUFFIX)OpenglRender_unittests)
 $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender_standalone_common libemugl_gtest)
+$(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OSWindow)
 
 LOCAL_C_INCLUDES += $(standalone_common_C_INCLUDES)
 LOCAL_STATIC_LIBRARIES += $(standalone_common_STATIC_LIBRARIES)
@@ -204,6 +229,7 @@ $(call emugl-end-module)
 make_sample = \
     $(eval $(call emugl-begin-executable, $1)) \
     $(eval $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender_standalone_common)) \
+    $(eval $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OSWindow)) \
     $(eval LOCAL_C_INCLUDES += $(standalone_common_C_INCLUDES)) \
     $(eval LOCAL_STATIC_LIBRARIES += $(standalone_common_STATIC_LIBRARIES)) \
     $(eval LOCAL_SRC_FILES := samples/$1.cpp) \
