@@ -166,7 +166,6 @@ function run_darwin_tests {
     run cd $OPT_OUT/build/test/darwin && make VERBOSE=1 || panic "Failed to make darwin project"
 
     echo "Running executable"
-    echo QT_PLUGIN_PATH=$OPT_OUT/build/test/darwin/lib64/qt/plugins  $OPT_OUT/build/test/darwin/hello || panic "Unable to execute hello"
     DYLD_FALLBACK_LIBRARY_PATH=$OPT_OUT/build/test/darwin/lib64/qt/lib \
     QT_PLUGIN_PATH=$OPT_OUT/build/test/darwin/lib64/qt/plugins \
     $OPT_OUT/build/test/darwin/hello || panic "Unable to execute hello"

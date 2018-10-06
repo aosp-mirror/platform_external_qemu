@@ -18,7 +18,7 @@ $(call end-emulator-library)
 # vs. the googletest framework.
 start-emulator-qemu-test = \
     $(call start-emulator-program,$1_qtest) \
-    $(eval LOCAL_STATIC_LIBRARIES += libqemu-test $(QEMU2_SYSTEM_STATIC_LIBRARIES) $(QEMU2_GLUE_STATIC_LIBRARIES) $(ANDROID_EMU_STATIC_LIBRARIES) libqemu2-util) \
+    $(eval LOCAL_STATIC_LIBRARIES += libqemu-test $(QEMU2_SYSTEM_STATIC_LIBRARIES) $(QEMU2_GLUE_STATIC_LIBRARIES) $(ANDROID_EMU_STATIC_LIBRARIES) libqemu2-util libqemu2-common) \
     $(eval LOCAL_LDFLAGS += $(QEMU2_SYSTEM_LDFLAGS) $(QEMU2_GLUE_LDFLAGS) $(QEMU2_DEPS_LDFLAGS) ) \
     $(eval LOCAL_LDLIBS += $(QEMU2_SYSTEM_LDLIBS) $(QEMU2_GLIB_LDLIBS)) \
     $(eval LOCAL_CFLAGS += $(QEMU2_SYSTEM_CFLAGS) -DCONFIG_ANDROID ) \

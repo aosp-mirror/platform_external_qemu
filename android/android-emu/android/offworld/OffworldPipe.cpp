@@ -14,6 +14,7 @@
 
 #include "android/offworld/OffworldPipe.h"
 
+#include "android/automation/AutomationController.h"
 #include "android/base/Log.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/memory/LazyInstance.h"
@@ -25,8 +26,8 @@
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
 
-#include <assert.h>
 #include <atomic>
+#include <cassert>
 #include <cstdint>
 #include <memory>
 #include <sstream>
@@ -44,6 +45,12 @@ static std::vector<uint8_t> protoToVector(
     std::vector<uint8_t> result(static_cast<size_t>(size));
     message.SerializeToArray(result.data(), size);
     return result;
+}
+
+static offworld::Response createOkResponse() {
+    offworld::Response response;
+    response.set_result(offworld::Response::RESULT_NO_ERROR);
+    return response;
 }
 
 class OffworldPipe : public android::AndroidAsyncMessagePipe {
@@ -122,47 +129,50 @@ private:
 
             if (!request.ParseFromArray(input.data(), input.size())) {
                 LOG(ERROR) << "Offworld lib message parsing failed.";
+                sendError(offworld::Response::RESULT_ERROR_UNKNOWN);
             } else {
                 switch (request.module_case()) {
                     case offworld::Request::ModuleCase::kSnapshot:
-                        handleSnapshotPb(request.snapshot());
+                        handleSnapshotRequest(request.snapshot());
                         break;
                     case offworld::Request::ModuleCase::kAutomation:
-                        // TODO
+                        handleAutomationRequest(request.automation());
                         break;
                     default:
                         LOG(ERROR) << "Offworld lib received unrecognized "
                                       "message!";
+                        sendError(offworld::Response::
+                                          RESULT_ERROR_NOT_IMPLEMENTED);
                 }
             }
         }
     }
 
-    void handleSnapshotPb(const offworld::SnapshotRequest& request) {
-        using MS = offworld::SnapshotRequest;
+    void handleSnapshotRequest(const offworld::SnapshotRequest& request) {
+        using sr = offworld::SnapshotRequest;
 
         switch (request.function_case()) {
-            case MS::FunctionCase::kCreateCheckpoint: {
+            case sr::FunctionCase::kCreateCheckpoint: {
                 android::snapshot::createCheckpoint(
                         getHandle(),
                         request.create_checkpoint().snapshot_name());
                 break;
             }
-            case MS::FunctionCase::kGotoCheckpoint: {
-                const MS::GotoCheckpoint& gotoCheckpoint =
+            case sr::FunctionCase::kGotoCheckpoint: {
+                const sr::GotoCheckpoint& gotoCheckpoint =
                         request.goto_checkpoint();
 
                 Optional<android::base::FileShare> shareMode;
 
                 if (gotoCheckpoint.has_share_mode()) {
                     switch (gotoCheckpoint.share_mode()) {
-                        case MS::GotoCheckpoint::UNKNOWN:
-                        case MS::GotoCheckpoint::UNCHANGED:
+                        case sr::GotoCheckpoint::UNKNOWN:
+                        case sr::GotoCheckpoint::UNCHANGED:
                             break;
-                        case MS::GotoCheckpoint::READ_ONLY:
+                        case sr::GotoCheckpoint::READ_ONLY:
                             shareMode = android::base::FileShare::Read;
                             break;
-                        case MS::GotoCheckpoint::WRITABLE:
+                        case sr::GotoCheckpoint::WRITABLE:
                             shareMode = android::base::FileShare::Write;
                             break;
                         default:
@@ -177,22 +187,112 @@ private:
                         gotoCheckpoint.metadata(), shareMode);
                 break;
             }
-            case MS::FunctionCase::kForkReadOnlyInstances: {
+            case sr::FunctionCase::kForkReadOnlyInstances: {
                 android::snapshot::forkReadOnlyInstances(
                         getHandle(),
                         request.fork_read_only_instances().num_instances());
                 break;
             }
-            case MS::FunctionCase::kDoneInstance: {
+            case sr::FunctionCase::kDoneInstance: {
                 android::snapshot::doneInstance(getHandle());
                 break;
             }
             default:
                 LOG(ERROR) << "Unrecognized offworld snapshot message";
+                sendError(offworld::Response::RESULT_ERROR_NOT_IMPLEMENTED);
+                break;
         }
     }
 
+    void handleAutomationRequest(const offworld::AutomationRequest& request) {
+        using autor = offworld::AutomationRequest;
+        using namespace android::automation;
+
+        switch (request.function_case()) {
+            case autor::FunctionCase::kReplayInitialState: {
+                auto result = AutomationController::get().replayInitialState(
+                        request.replay_initial_state().state());
+
+                if (result.ok()) {
+                    sendResponse(createOkResponse());
+                } else {
+                    std::stringstream ss;
+                    ss << result.unwrapErr();
+                    sendError(offworld::Response::RESULT_ERROR_UNKNOWN,
+                              ss.str());
+                }
+                break;
+            }
+            case autor::FunctionCase::kReplay: {
+                const uint32_t asyncId = mNextAsyncId;
+                auto result = AutomationController::get().replayEvent(
+                        getHandle(), request.replay().event(), asyncId);
+
+                if (result.ok()) {
+                    mNextAsyncId++;  // Id consumed, increment for next call.
+
+                    offworld::Response response = createOkResponse();
+                    response.set_pending_async_id(asyncId);
+                    sendResponse(response);
+                } else {
+                    std::stringstream ss;
+                    ss << result.unwrapErr();
+                    sendError(offworld::Response::RESULT_ERROR_UNKNOWN,
+                              ss.str());
+                }
+                break;
+            }
+            case autor::FunctionCase::kListen: {
+                const uint32_t asyncId = mNextAsyncId;
+                auto result = AutomationController::get().listen(getHandle(),
+                                                                 asyncId);
+
+                if (result.ok()) {
+                    mNextAsyncId++;  // Id consumed, increment for next call.
+
+                    offworld::Response response = createOkResponse();
+                    response.set_pending_async_id(asyncId);
+                    response.mutable_automation()
+                            ->mutable_listen()
+                            ->set_initial_state(result.unwrap());
+
+                    sendResponse(response);
+                } else {
+                    std::stringstream ss;
+                    ss << result.unwrapErr();
+                    sendError(offworld::Response::RESULT_ERROR_UNKNOWN,
+                              ss.str());
+                }
+                break;
+            }
+            case autor::FunctionCase::kStopListening: {
+                AutomationController::get().stopListening();
+                sendResponse(createOkResponse());
+                break;
+            }
+            default:
+                LOG(ERROR) << "Unrecognized offworld automation message";
+                sendError(offworld::Response::RESULT_ERROR_NOT_IMPLEMENTED);
+                break;
+        }
+    }
+
+    void sendResponse(const offworld::Response& response) {
+        send(std::move(protoToVector(response)));
+    }
+
+    void sendError(const offworld::Response_Result& result,
+                   std::string str = std::string()) {
+        offworld::Response response;
+        response.set_result(result);
+        if (!str.empty()) {
+            response.set_error_string(str);
+        }
+        sendResponse(response);
+    }
+
     bool mHandshakeComplete = false;
+    uint32_t mNextAsyncId = 1;
 };
 
 OffworldPipe::Service* OffworldPipe::Service::sOffworldInstance = nullptr;
@@ -215,7 +315,7 @@ void registerOffworldPipeServiceForTest() {
 
 // Send a response to an Offworld pipe.
 bool sendResponse(android::AsyncMessagePipeHandle pipe,
-                  const ::offworld::Response& response) {
+                  const pb::Response& response) {
     OffworldPipe::Service* service = OffworldPipe::Service::get();
     auto pipeRefOpt = service->getPipe(pipe);
     if (pipeRefOpt) {
