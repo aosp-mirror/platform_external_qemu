@@ -175,9 +175,9 @@ public:
     // Return the next command from the source.
     virtual pb::RecordedEvent consumeNextCommand() = 0;
 
-    // Get the next command time from the event source.  Returns false if there
+    // Get the next command delay from the event source.  Returns false if there
     // are no events remaining.
-    virtual bool getNextCommandTime(DurationNs* outTime) = 0;
+    virtual bool getNextCommandDelay(DurationNs* outDelay) = 0;
 };
 
 class BinaryStreamEventSource : public EventSource {
@@ -192,7 +192,7 @@ public:
         return event;
     }
 
-    bool getNextCommandTime(DurationNs* outTime) override {
+    bool getNextCommandDelay(DurationNs* outDelay) override {
         if (!mNextCommand) {
             const std::string nextCommand = mStream->getString();
             if (nextCommand.empty()) {
@@ -209,13 +209,12 @@ public:
             mNextCommand = event;
         }
 
-        if (!mNextCommand->has_event_time() ||
-            !mNextCommand->event_time().has_timestamp()) {
-            VLOG(automation) << "Event missing timestamp";
+        if (!mNextCommand->has_delay()) {
+            VLOG(automation) << "Event missing delay";
             return false;
         }
 
-        *outTime = mNextCommand->event_time().timestamp();
+        *outDelay = mNextCommand->delay();
         return true;
     }
 
@@ -264,14 +263,14 @@ public:
         return event.event;
     }
 
-    bool getNextCommandTime(DurationNs* outTime) override {
+    bool getNextCommandDelay(DurationNs* outDelay) override {
         if (mEvents.empty()) {
             VLOG(automation) << "No more events";
             return false;
         }
 
         const Event& event = mEvents.front();
-        *outTime = event.event.event_time().timestamp();
+        *outDelay = event.event.delay();
         return true;
     }
 
@@ -295,9 +294,8 @@ public:
                 return false;
             }
 
-            if (!event.has_event_time() ||
-                !event.event_time().has_timestamp()) {
-                VLOG(automation) << "Event missing timestamp";
+            if (!event.has_delay()) {
+                VLOG(automation) << "Event missing delay";
                 return false;
             }
 
@@ -392,8 +390,6 @@ private:
     // Playback state.
     bool mPlayingFromFile = false;
     std::unique_ptr<EventSource> mPlaybackEventSource;
-    DurationNs mPlaybackStartTime = 0L;
-    DurationNs mPlaybackTimeBase = 0L;
     DurationNs mNextPlaybackCommandTime = 0L;
 
     // Offworld state.
@@ -453,7 +449,8 @@ AutomationControllerImpl::AutomationControllerImpl(
         base::Looper* looper,
         std::function<void(android::AsyncMessagePipeHandle,
                            const ::offworld::Response&)> sendMessageCallback)
-    : mPhysicalModel(physicalModel),
+    : mEventSink(looper),
+      mPhysicalModel(physicalModel),
       mLooper(looper),
       mSendMessageCallback(sendMessageCallback) {
     physicalModel_setAutomationController(physicalModel, this);
@@ -468,6 +465,7 @@ void AutomationControllerImpl::shutdown() {
         AutoLock lock(mLock);
         mShutdown = true;
     }
+    mEventSink.shutdown();
     stopRecording();
     stopPlayback();
 }
@@ -489,17 +487,9 @@ DurationNs AutomationControllerImpl::advanceTime() {
     }
 
     const DurationNs nowNs = mLooper->nowNs(Looper::ClockType::kVirtual);
-    while (mPlaybackEventSource) {
-        const DurationNs nextEventTimeNs = mPlaybackStartTime +
-                                           mNextPlaybackCommandTime -
-                                           mPlaybackTimeBase;
-
-        if (nowNs >= nextEventTimeNs) {
-            physicalModel_setCurrentTime(mPhysicalModel, nextEventTimeNs);
-            replayNextEvent(lock);
-        } else {
-            break;
-        }
+    while (mPlaybackEventSource && nowNs >= mNextPlaybackCommandTime) {
+        physicalModel_setCurrentTime(mPhysicalModel, mNextPlaybackCommandTime);
+        replayNextEvent(lock);
     }
 
     physicalModel_setCurrentTime(mPhysicalModel, nowNs);
@@ -533,8 +523,12 @@ StartResult AutomationControllerImpl::startRecording(StringView filename) {
         return Err(StartError::InternalError);
     }
 
-    std::string binaryProto;
-    if (!initialState.SerializeToString(&binaryProto)) {
+    pb::FileHeader header;
+    header.set_version(kFileVersion);
+    *header.mutable_initial_state() = initialState;
+
+    std::string serializedHeader;
+    if (!header.SerializeToString(&serializedHeader)) {
         LOG(ERROR) << "SerializeToString failed";
         return Err(StartError::InternalError);
     }
@@ -548,8 +542,7 @@ StartResult AutomationControllerImpl::startRecording(StringView filename) {
     }
 
     mRecordingStream = std::move(recordingStream);
-    mRecordingStream->putBe32(kFileVersion);
-    mRecordingStream->putString(binaryProto);
+    mRecordingStream->putString(serializedHeader);
     mEventSink.registerStream(mRecordingStream.get(),
                               StreamEncoding::BinaryPbChunks);
 
@@ -598,31 +591,26 @@ StartResult AutomationControllerImpl::startPlayback(StringView filename) {
         return Err(StartError::FileOpenError);
     }
 
-    const uint32_t version = playbackStream->getBe32();
-    if (kFileVersion != version) {
-        LOG(ERROR) << "Unsupported file version " << version
+    const std::string headerStr = playbackStream->getString();
+    pb::FileHeader header;
+    if (headerStr.empty() || !header.ParseFromString(headerStr)) {
+        LOG(ERROR) << "Could not load header";
+        return Err(StartError::PlaybackFileCorrupt);
+    }
+
+    if (!header.has_version() || header.version() != kFileVersion) {
+        LOG(ERROR) << "Unsupported file version " << header.version()
                    << " expected version " << kFileVersion;
         return Err(StartError::PlaybackFileCorrupt);
     }
 
-    const std::string initialStateStr = playbackStream->getString();
-    pb::InitialState initialState;
-    if (initialStateStr.empty() ||
-        !initialState.ParseFromString(initialStateStr)) {
-        LOG(ERROR) << "Could not load initial data";
+    if (!header.has_initial_state()) {
+        LOG(ERROR) << "Initial state missing";
         return Err(StartError::PlaybackFileCorrupt);
     }
-
-    if (!initialState.has_initial_time() ||
-        !initialState.initial_time().has_timestamp()) {
-        LOG(ERROR) << "Initial state missing timestamp";
-        return Err(StartError::PlaybackFileCorrupt);
-    }
-
-    const DurationNs initialTime = initialState.initial_time().timestamp();
 
     const int loadStateResult =
-            physicalModel_loadState(mPhysicalModel, initialState);
+            physicalModel_loadState(mPhysicalModel, header.initial_state());
     if (loadStateResult != 0) {
         LOG(ERROR) << "physicalModel_loadState failed with " << loadStateResult;
         return Err(StartError::InternalError);
@@ -631,14 +619,12 @@ StartResult AutomationControllerImpl::startPlayback(StringView filename) {
     std::unique_ptr<EventSource> source(
             new BinaryStreamEventSource(std::move(playbackStream)));
 
-    DurationNs nextCommandTime;
-    if (source->getNextCommandTime(&nextCommandTime)) {
+    DurationNs nextCommandDelay;
+    if (source->getNextCommandDelay(&nextCommandDelay)) {
         // Header parsed, initialize class state.
         mPlaybackEventSource = std::move(source);
-        mPlaybackStartTime = mLooper->nowNs(Looper::ClockType::kVirtual);
-        mPlaybackTimeBase = initialTime;
-
-        mNextPlaybackCommandTime = nextCommandTime;
+        mNextPlaybackCommandTime =
+                mLooper->nowNs(Looper::ClockType::kVirtual) + nextCommandDelay;
     } else {
         LOG(INFO) << "Playback did not contain any commands";
     }
@@ -670,17 +656,6 @@ ReplayResult AutomationControllerImpl::replayInitialState(
         return Err(ReplayError::ParseError);
     }
 
-    if (!initialState.has_initial_time() ||
-        !initialState.initial_time().has_timestamp()) {
-        LOG(ERROR) << "Initial state missing timestamp";
-        return Err(ReplayError::ParseError);
-    }
-
-    const DurationNs initialTime = initialState.initial_time().timestamp();
-
-    mPlaybackStartTime = mLooper->nowNs(Looper::ClockType::kVirtual);
-    mPlaybackTimeBase = initialTime;
-
     const int loadStateResult =
             physicalModel_loadState(mPhysicalModel, initialState);
     if (loadStateResult != 0) {
@@ -703,13 +678,15 @@ ReplayResult AutomationControllerImpl::replayEvent(
         std::unique_ptr<OffworldEventSource> source(new OffworldEventSource(
                 pipe, event, asyncId, mSendMessageCallback));
 
-        DurationNs nextCommandTime;
-        if (source->getNextCommandTime(&nextCommandTime)) {
+        DurationNs nextCommandDelay;
+        if (source->getNextCommandDelay(&nextCommandDelay)) {
             // Header parsed, initialize class state.
             mOffworldEventSource = source.get();
             mPlaybackEventSource = std::move(source);
 
-            mNextPlaybackCommandTime = nextCommandTime;
+            mNextPlaybackCommandTime =
+                    mLooper->nowNs(Looper::ClockType::kVirtual) +
+                    nextCommandDelay;
         } else {
             LOG(INFO) << "Replay did not contain any commands";
             return Err(ReplayError::ParseError);
@@ -766,20 +743,20 @@ void AutomationControllerImpl::stopListening() {
 
 void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
     pb::RecordedEvent event = mPlaybackEventSource->consumeNextCommand();
-    if (event.has_stream_type()) {
-        switch (event.stream_type()) {
-            case pb::RecordedEvent_StreamType_PHYSICAL_MODEL:
-                physicalModel_replayEvent(mPhysicalModel,
-                                          event.physical_model());
-                break;
-            default:
-                VLOG(automation) << "Unhandled stream type: "
-                                 << static_cast<uint32_t>(event.stream_type());
-                break;
-        }
+    switch (event.stream_case()) {
+        case pb::RecordedEvent::StreamCase::kPhysicalModel:
+            physicalModel_replayEvent(mPhysicalModel, event.physical_model());
+            break;
+        default:
+            VLOG(automation) << "Unhandled stream type: "
+                             << static_cast<uint32_t>(event.stream_case());
+            break;
     }
 
-    if (!mPlaybackEventSource->getNextCommandTime(&mNextPlaybackCommandTime)) {
+    DurationNs nextCommandDelay;
+    if (mPlaybackEventSource->getNextCommandDelay(&nextCommandDelay)) {
+        mNextPlaybackCommandTime += nextCommandDelay;
+    } else {
         VLOG(automation) << "Playback hit EOF";
         mPlaybackEventSource.reset();
         mOffworldEventSource = nullptr;

@@ -24,14 +24,27 @@ using namespace android::base;
 namespace android {
 namespace automation {
 
+AutomationEventSink::AutomationEventSink(Looper* looper) : mLooper(looper) {}
+
+void AutomationEventSink::shutdown() {
+    AutoLock lock(mLock);
+    mShutdown = true;
+}
+
 void AutomationEventSink::registerStream(Stream* stream,
                                          StreamEncoding encoding) {
     AutoLock lock(mLock);
+    if (mShutdown) {
+        return;
+    }
+
     if (encoding == StreamEncoding::BinaryPbChunks) {
         mBinaryStreams.insert(stream);
     } else {
         mTextStreams.insert(stream);
     }
+
+    mLastEventTime[stream] = mLooper->nowNs(Looper::ClockType::kVirtual);
 }
 
 void AutomationEventSink::unregisterStream(Stream* stream) {
@@ -39,31 +52,37 @@ void AutomationEventSink::unregisterStream(Stream* stream) {
     if (!mTextStreams.erase(stream) && !mBinaryStreams.erase(stream)) {
         LOG(WARNING) << "Could not find stream.";
     }
+
+    mLastEventTime.erase(stream);
 }
 
 void AutomationEventSink::recordPhysicalModelEvent(
         uint64_t timeNs,
         pb::PhysicalModelEvent& event) {
     pb::RecordedEvent recordedEvent;
-    recordedEvent.set_stream_type(pb::RecordedEvent_StreamType_PHYSICAL_MODEL);
-    recordedEvent.mutable_event_time()->set_timestamp(timeNs);
     *recordedEvent.mutable_physical_model() = event;
-
-    handleEvent(recordedEvent);
+    handleEvent(timeNs, recordedEvent);
 }
 
-void AutomationEventSink::handleEvent(pb::RecordedEvent& event) {
+void AutomationEventSink::handleEvent(uint64_t timeNs,
+                                      const pb::RecordedEvent& event) {
     AutoLock lock(mLock);
-    if (!mBinaryStreams.empty()) {
+    if (mShutdown) {
+        return;
+    }
+
+    for (auto& stream : mBinaryStreams) {
+        pb::RecordedEvent modifiedEvent = event;
+        uint64_t& lastEventTime = mLastEventTime[stream];
+        modifiedEvent.set_delay(timeNs - mLastEventTime[stream]);
+        lastEventTime = timeNs;
+
         std::string binaryProto;
-        if (!event.SerializeToString(&binaryProto)) {
+        if (!modifiedEvent.SerializeToString(&binaryProto)) {
             LOG(WARNING) << "Could not serialize event.";
             return;
         }
-
-        for (auto& stream : mBinaryStreams) {
-            stream->putString(binaryProto);
-        }
+        stream->putString(binaryProto);
     }
 
     if (!mTextStreams.empty() || VERBOSE_CHECK(automation)) {
@@ -71,15 +90,28 @@ void AutomationEventSink::handleEvent(pb::RecordedEvent& event) {
         printer.SetSingleLineMode(true);
         printer.SetUseShortRepeatedPrimitives(true);
 
-        std::string textProto;
-        if (!printer.PrintToString(event, &textProto)) {
-            LOG(WARNING) << "Could not serialize event to string.";
-            return;
+        if (VERBOSE_CHECK(automation)) {
+            std::string textProto;
+            if (!printer.PrintToString(event, &textProto)) {
+                LOG(WARNING) << "Could not serialize event to string.";
+                return;
+            }
+
+            VLOG(automation) << textProto;
         }
 
-        VLOG(automation) << textProto;
-
         for (auto& stream : mTextStreams) {
+            pb::RecordedEvent modifiedEvent = event;
+            uint64_t& lastEventTime = mLastEventTime[stream];
+            modifiedEvent.set_delay(timeNs - mLastEventTime[stream]);
+            lastEventTime = timeNs;
+
+            std::string textProto;
+            if (!printer.PrintToString(modifiedEvent, &textProto)) {
+                LOG(WARNING) << "Could not serialize event to string.";
+                return;
+            }
+
             // Use write() instead of putString() because putString writes
             // length as binary before the data, and we want to maintain pure
             // text.
