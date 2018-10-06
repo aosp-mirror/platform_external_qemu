@@ -60,6 +60,10 @@ void SurfaceFlinger::connectWindow(AndroidWindow* window) {
     mCurrentWindow = window;
 }
 
+void SurfaceFlinger::advanceFrame() {
+    mComposerImpl->advanceFrame();
+}
+
 void SurfaceFlinger::disconnectWindow() {
     if (!mCurrentWindow) return;
 
