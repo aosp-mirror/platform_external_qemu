@@ -2,27 +2,22 @@ syntax = "proto2";
 
 package emulator_automation;
 
-message Time {
-    optional uint64 timestamp = 1;
+message FileHeader {
+    optional uint32 version = 1;
+    optional InitialState initial_state = 2;
 }
 
 message InitialState {
-    optional uint32 version = 1;
-    optional Time initial_time = 2;
-    repeated PhysicalModelEvent physical_model = 3;
+    repeated PhysicalModelEvent physical_model = 2;
 }
 
 message RecordedEvent {
-    enum StreamType {
-        PHYSICAL_MODEL = 0;
-        TOUCH = 1;
+    optional uint64 delay = 1;
+
+    oneof stream {
+        PhysicalModelEvent physical_model = 50;
+        TouchEvent touch = 51;
     }
-
-    optional Time event_time = 1;
-    optional StreamType stream_type = 2;
-
-    optional PhysicalModelEvent physical_model = 3;
-    optional TouchEvent touch = 4;
 }
 
 message PhysicalModelEvent {
