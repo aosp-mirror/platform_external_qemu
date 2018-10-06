@@ -47,8 +47,8 @@ function(internal_android_target_settings name modifier)
   string(TOLOWER ${modifier} modifier)
   string(TOUPPER ${modifier} MODIFIER)
 
-  # We do not want to do dependency resolution when we are
-  # in our frankenstein build (gnumake mixed with cmake)
+  # We do not want to do dependency resolution when we are in our frankenstein
+  # build (gnumake mixed with cmake)
   if(NOT FRANKENBUILD)
     if(DEFINED ${name}_libs_${modifier})
       target_link_libraries(${name} ${MODIFIER} ${${name}_libs_${modifier}})
@@ -57,39 +57,74 @@ function(internal_android_target_settings name modifier)
       target_link_libraries(${name} ${MODIFIER}
                             ${${name}_${ANDROID_TARGET_TAG}_libs_${modifier}})
     endif()
-    else()
-        # Setup the frankenbuild includes..
-        target_include_directories(${name} PRIVATE ${INCLUDES})
+  else()
+    target_include_directories(${name} PRIVATE ${INCLUDES})
+    # Instead we are going to add our interface dependencies, so all of our
+    # includes etc pass forward. Setup the frankenbuild includes and interface
+    # dependencies
+    add_library(${name}_frankenbuild INTERFACE)
+    foreach(dep ${name}_libs_${modifier})
+      if(${dep}_frankenbuild)
+        target_link_libraries(${name} PRIVATE ${dep}_frankenbuild)
+      endif()
+    endforeach()
   endif()
 
   # Definitions
   if(DEFINED ${name}_defs_${modifier})
     target_compile_definitions(${name} ${MODIFIER} ${${name}_defs_${modifier}})
+    if(FRANKENBUID AND ${MODIFIER} STREQUAL "PUBLIC")
+      target_compile_definitions(${name}_frankenbuild INTERFACE
+                                 ${${name}_defs_${modifier}})
+    endif()
   endif()
   if(DEFINED ${name}_${ANDROID_TARGET_TAG}_defs_${modifier})
     target_compile_definitions(
       ${name} ${MODIFIER} ${${name}_${ANDROID_TARGET_TAG}_defs_${modifier}})
+    if(FRANKENBUID AND ${MODIFIER} STREQUAL "PUBLIC")
+      target_compile_definitions(
+        ${name}_frankenbuild INTERFACE
+        ${${name}_${ANDROID_TARGET_TAG}_defs_${modifier}})
+    endif()
   endif()
 
   # Includes
   if(DEFINED ${name}_includes_${modifier})
     target_include_directories(${name} ${MODIFIER}
                                ${${name}_includes_${modifier}})
+    if(FRANKENBUID AND ${MODIFIER} STREQUAL "PUBLIC")
+      target_include_directories(${name}_frankenbuild
+                                 INTERFACE ${${name}_includes_${modifier}})
+    endif()
   endif()
   if(DEFINED ${name}_${ANDROID_TARGET_TAG}_includes_${modifier})
     target_include_directories(
       ${name} ${MODIFIER} ${${name}_${ANDROID_TARGET_TAG}_includes_${modifier}})
+    if(FRANKENBUID AND ${MODIFIER} STREQUAL "PUBLIC")
+      target_include_directories(
+        ${name}_frankenbuild
+        INTERFACE ${${name}_${ANDROID_TARGET_TAG}_includes_${modifier}})
+    endif()
   endif()
 
   # Compiler options
   if(DEFINED ${name}_compile_options_${modifier})
     target_compile_options(${name} ${MODIFIER}
                            ${${name}_compile_options_${modifier}})
+    if(FRANKENBUID AND ${MODIFIER} STREQUAL "PUBLIC")
+      target_compile_options(${name}_frankenbuild
+                             INTERFACE ${${name}_compile_options_${modifier}})
+    endif()
   endif()
   if(DEFINED ${name}_${ANDROID_TARGET_TAG}_compile_options_${modifier})
     target_compile_options(
       ${name} ${MODIFIER}
       ${${name}_${ANDROID_TARGET_TAG}_compile_options_${modifier}})
+    if(FRANKENBUID AND ${MODIFIER} STREQUAL "PUBLIC")
+      target_compile_options(
+        ${name}_frankenbuild
+        INTERFACE ${${name}_${ANDROID_TARGET_TAG}_compile_options_${modifier}})
+    endif()
   endif()
 endfunction()
 
@@ -147,4 +182,16 @@ function(add_android_executable name)
 
   target_prebuilt_dependency(${name} "${prebuilt_dependencies}"
                              "${prebuilt_properties}")
+endfunction()
+
+function(add_android_protobuf libname protofiles)
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${protofiles})
+set(${libname}_public ${PROTOBUF_INCLUDE_DIR})
+set(${libname}_src ${PROTO_SRCS} ${PROTO_HDRS})
+set(${libname}_includes_public ${PROTOBUF_INCLUDE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+set(${libname}_libs_public ${PROTOBUF_LIBRARIES})
+add_android_library(${libname})
+if (FRANKENBUILD)
+    add_library(lib${libname}_proto ALIAS ${libname})
+endif()
 endfunction()

@@ -68,3 +68,14 @@ $(foreach lib,$(PRODUCED_STATIC_LIBS), \
   $(eval $(call install-file,$(LOCAL_BUILT_MODULE),$(LOCAL_FINAL_MODULE))) \
 )
 
+
+$(foreach lib,$(PRODUCED_PROTO_LIBS), \
+  $(eval LOCAL_BUILT_MODULE := $(LOCAL_CMAKE_MODULE)/lib$(lib).a) \
+  $(eval LOCAL_FINAL_MODULE := $(call local-library-path,lib$(lib)_proto)) \
+  $(eval $(call make-cmake-project,$(LOCAL_BUILT_MAKEFILE),$(LOCAL_BUILT_MODULE),$(lib))) \
+  $(eval $(call install-file,$(LOCAL_BUILT_MODULE),$(LOCAL_FINAL_MODULE))) \
+  $(eval ALL_PROTOBUF_LIBS += lib$(lib)_proto) \
+  $(eval PROTOBUF_DEPS += $(LOCAL_FINAL_MODULE) ) \
+  $(eval PROTOBUF_INCLUDES += $(LOCAL_CMAKE_MODULE))\
+)
+
