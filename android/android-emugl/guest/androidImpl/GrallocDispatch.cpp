@@ -20,6 +20,12 @@
 #include <stdio.h>
 #include <string.h>
 
+static struct gralloc_implementation* sCurrentGralloc = nullptr;
+
+// static
+struct gralloc_implementation*
+gralloc_implementation::get() { return sCurrentGralloc; }
+
 extern "C" {
 
 EXPORT void load_gralloc_module(
@@ -59,10 +65,14 @@ EXPORT void load_gralloc_module(
         impl_out->fb_dev->common.module);
     impl_out->alloc_module = reinterpret_cast<gralloc_module_t*>(
         impl_out->alloc_dev->common.module);
+
+    sCurrentGralloc = impl_out;
 }
 
 EXPORT void unload_gralloc_module(
     const struct gralloc_implementation* impl) {
+
+    sCurrentGralloc = nullptr;
 
     if (!impl->lib) return;
 

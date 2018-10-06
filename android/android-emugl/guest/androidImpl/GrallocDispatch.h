@@ -27,6 +27,9 @@ struct gralloc_implementation {
     struct gralloc_module_t* fb_module;
     struct gralloc_module_t* alloc_module;
 
+    // Gets the currently loaded gralloc_implementation.
+    static struct gralloc_implementation* get();
+
 // Framebuffer device===========================================================
 
     int setSwapInterval(int interval) {
