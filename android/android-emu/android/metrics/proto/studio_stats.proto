@@ -1107,6 +1107,7 @@ message EmulatorFeatureFlagState {
     INTEL_PERFORMANCE_MONITORING_UNIT = 4;
     GL_ASYNC_SWAP = 5;
     GLDMA = 6;
+    GLDMA2 = 35;
     GLES_DYNAMIC_VERSION = 7;
     FORCE_ANGLE = 8;
     FORCE_SWIFTSHADER = 9;
@@ -1136,7 +1137,7 @@ message EmulatorFeatureFlagState {
     OFFWORLD_DISABLE_SECURITY = 32;
     QUICKBOOT_FILE_BACKED = 33;
     REFCOUNT_PIPE = 34;
-    // Next tag: 34
+    // Next tag: 36
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
