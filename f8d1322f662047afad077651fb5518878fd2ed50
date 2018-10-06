@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "45c10a36_2d1e99e2",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-06T06:19:46Z",
+      "side": 1,
+      "message": "Ah, got it, I see now. Callback is just fine then :)",
+      "parentUuid": "a75e0317_99f264a7",
+      "range": {
+        "startLine": 274,
+        "startChar": 45,
+        "endLine": 274,
+        "endChar": 76
+      },
+      "revId": "f8d1322f662047afad077651fb5518878fd2ed50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0e937779_6d53afc0",
         "filename": "android/android-emu/android/automation/AutomationController.h",
         "patchSetId": 1
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "This is to enable recording the events that occur from the guest application, with something like Espresso test recorder, which can later be replayed with replayEvent.  Basically recording and playback on the guest.",
       "parentUuid": "0e937779_6d53afc0",
+      "range": {
+        "startLine": 125,
+        "startChar": 0,
+        "endLine": 126,
+        "endChar": 43
+      },
+      "revId": "f8d1322f662047afad077651fb5518878fd2ed50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37f63691_8d871c43",
+        "filename": "android/android-emu/android/automation/AutomationController.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-06T06:19:46Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "89aaf3b7_9a153fe5",
       "range": {
         "startLine": 125,
         "startChar": 0,
