@@ -24,6 +24,8 @@ public:
 
     Vsync(Callback&& vsyncCallback);
     ~Vsync();
+
+    void start();
     void join();
 
     void waitUntilNextVsync();

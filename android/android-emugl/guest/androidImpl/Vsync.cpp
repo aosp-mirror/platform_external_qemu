@@ -36,10 +36,23 @@ public:
           mRefreshRate(refreshRate),
           mRefreshIntervalUs(1000000ULL / mRefreshRate),
           mThread([this] {
+
+              mNowUs = System::get()->getHighResTimeUs();
+              mNextVsyncDeadlineUs = mNowUs + mRefreshIntervalUs;
+
               while (true) {
                   if (mShouldStop.load(std::memory_order_relaxed))
                       return 0;
-                  System::get()->sleepUs(mRefreshIntervalUs);
+
+                  mNowUs = System::get()->getHighResTimeUs();
+
+                  if (mNextVsyncDeadlineUs > mNowUs) {
+                    System::get()->sleepUs(mNextVsyncDeadlineUs - mNowUs);
+                  }
+
+                  mNowUs = System::get()->getHighResTimeUs();
+                  mNextVsyncDeadlineUs = mNowUs + mRefreshIntervalUs;
+
                   AutoLock lock(mLock);
                   mSync = 1;
                   mCv.signal();
@@ -47,6 +60,10 @@ public:
               }
               return 0;
           }) {
+    }
+
+    void start() {
+        mShouldStop.store(false, std::memory_order_relaxed);
         mThread.start();
     }
 
@@ -73,7 +90,9 @@ private:
 
     Callback mCallback;
     int mRefreshRate = 60;
-    uint64_t mRefreshIntervalUs;
+    System::Duration mRefreshIntervalUs;
+    System::Duration mNowUs = 0;
+    System::Duration mNextVsyncDeadlineUs = 0;
     FunctorThread mThread;
 };
 
@@ -82,9 +101,8 @@ Vsync::Vsync(Vsync::Callback&& callback)
 
 Vsync::~Vsync() = default;
 
-void Vsync::join() {
-    mImpl->join();
-}
+void Vsync::start() { mImpl->start(); }
+void Vsync::join() { mImpl->join(); }
 
 void Vsync::waitUntilNextVsync() {
     mImpl->waitUntilNextVsync();
