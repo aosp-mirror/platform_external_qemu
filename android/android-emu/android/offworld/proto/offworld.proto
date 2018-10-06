@@ -113,18 +113,21 @@ message Response {
     RESULT_NO_ERROR = 0;
     RESULT_ERROR_UNKNOWN = 1;
     RESULT_ERROR_ACCESS_DENIED = 2;
+    RESULT_ERROR_NOT_IMPLEMENTED = 3;
   }
 
   optional Result result = 1;
+  optional string error_string = 2;
+
+  // Indicates that this is an async messages and there will be additional
+  // messages with a matching module.async.async_id.
+  optional uint32 pending_async_id = 3;
 
   oneof module {
     // Sync.
     SnapshotResponse snapshot = 100;
 
     // Async.
-    // Indicates that this is an async messages and there will be additional
-    // messages with a matching module.async.async_id.
-    uint32 pending_async_id = 200;
     // Async response.
     AsyncResponse async = 201;
   }
