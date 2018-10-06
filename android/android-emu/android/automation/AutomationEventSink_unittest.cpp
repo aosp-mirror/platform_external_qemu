@@ -61,18 +61,12 @@ pb::RecordedEvent ReceiveBinaryEvent(TestMemoryOutputStream& stream) {
 
 pb::RecordedEvent ReceiveTextEvent(TestMemoryOutputStream& stream) {
     auto str = stream.view();
-    const size_t eol = str.find("\r\n");
-    EXPECT_NE(eol, std::string::npos);
 
-    if (eol != std::string::npos) {
-        pb::RecordedEvent receivedEvent;
-        EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
-                str.str(), &receivedEvent));
-        stream.reset();
-        return receivedEvent;
-    }
-
-    return pb::RecordedEvent();
+    pb::RecordedEvent receivedEvent;
+    EXPECT_TRUE(google::protobuf::TextFormat::ParseFromString(
+            str.str(), &receivedEvent));
+    stream.reset();
+    return receivedEvent;
 }
 
 void PhysicalModelEventEqual(uint64_t timeNs,

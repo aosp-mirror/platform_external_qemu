@@ -17,11 +17,16 @@
 #include "android/base/Compiler.h"
 #include "android/base/Result.h"
 #include "android/base/async/Looper.h"
+#include "android/emulation/AndroidAsyncMessagePipe.h"
 
 #include <memory>
 
-// Forward declarations;
+// Forward declarations.
 typedef struct PhysicalModel PhysicalModel;
+
+namespace offworld {
+class Response;
+}  // namespace offworld
 
 namespace android {
 namespace automation {
@@ -44,6 +49,14 @@ std::ostream& operator<<(std::ostream& os, const StartError& value);
 enum class StopError { NotStarted };
 using StopResult = base::Result<void, StopError>;
 std::ostream& operator<<(std::ostream& os, const StopError& value);
+
+enum class ListenError {
+    AlreadyListening,
+    StartFailed,
+};
+
+using ListenResult = base::Result<std::string, ListenError>;
+std::ostream& operator<<(std::ostream& os, const ListenError& value);
 
 //
 // Controls recording and playback of emulator automation events.
@@ -72,7 +85,10 @@ public:
     // Create an instance of the Looper for test usage.
     static std::unique_ptr<AutomationController> createForTest(
             PhysicalModel* physicalModel,
-            base::Looper* looper);
+            base::Looper* looper,
+            std::function<void(android::AsyncMessagePipeHandle,
+                               const ::offworld::Response&)>
+                    sendMessageCallback = nullptr);
 
     // Advance the time if the AutomationController has been created.
     static void tryAdvanceTime();
@@ -101,6 +117,20 @@ public:
 
     // Stop playback from a file.
     virtual StopResult stopPlayback() = 0;
+
+    //
+    // Offworld API
+    //
+
+    // Listen to the stream of automation events, returns an error if there is
+    // already a pending listen operations.
+    //
+    // If successful, any additional async responses will include the provided
+    // asyncId.
+    virtual ListenResult listen(android::AsyncMessagePipeHandle pipe,
+                                uint32_t asyncId) = 0;
+
+    virtual void stopListening() = 0;
 };
 
 }  // namespace automation
