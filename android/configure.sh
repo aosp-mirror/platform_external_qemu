@@ -1320,6 +1320,9 @@ echo "BUILD_HOST_CFLAGS      := $BUILD_CFLAGS" >> $config_mk
 echo "BUILD_HOST_LDFLAGS     := $BUILD_LDFLAGS" >> $config_mk
 echo "BUILD_HOST_DUMPSYMS    := $DUMPSYMS" >> $config_mk
 
+if [ "${TOOLCHAIN_SYSROOT}" ]; then
+echo "TOOLCHAIN_SYSROOT    := $TOOLCHAIN_SYSROOT" >> $config_mk
+fi
 if [ "$OPTION_LTO" = "true" ]; then
     echo "BUILD_ENABLE_LTO      := true" >> $config_mk
 fi
@@ -1459,7 +1462,7 @@ do
     echo "    $PREBUILT_SYMPATH_PAIR \\" >> $config_mk
 done
 
-cat $QEMU2_TOP_DIR/qemu2-qapi-auto-generated/trace-config >> $config_mk
+cat $QEMU2_TOP_DIR/trace-config >> $config_mk
 
 echo "" >> $config_mk
 
