@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ad55b7c5_4a8a5c36",
+        "filename": "android/android-emu/android/automation/AutomationController.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-06T01:48:46Z",
+      "side": 1,
+      "message": "Could we simplify the API surface for this to simply replay events, some of which might reset to an initial state? Decouple the meanings of what is sent from the command format, so we can have fewer command types (less complex protocol)",
+      "range": {
+        "startLine": 134,
+        "startChar": 0,
+        "endLine": 134,
+        "endChar": 60
+      },
+      "revId": "4d2b2a700680c7ac889300824d6fc60c32208812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
