@@ -109,8 +109,7 @@ set(android-emu-base_darwin-x86_64_src
     android/base/system/system-native-mac.mm)
 
 # Linux specific sources.
-set(android-emu-base_linux-x86_64_src
-    android/base/memory/SharedMemory_posix.cpp
+set(android-emu-base_linux-x86_64_src android/base/memory/SharedMemory_posix.cpp
     android/base/threads/Thread_pthread.cpp)
 
 # Includes
