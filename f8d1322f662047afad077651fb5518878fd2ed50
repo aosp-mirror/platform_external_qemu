@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a75e0317_99f264a7",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-06T06:12:29Z",
+      "side": 1,
+      "message": "This is to enable intercepting sendResponse calls in test code, createForTest accepts an arbitrary std::function.\n\nI contemplated making it a virtual function call, and making createForTest create a AutomationControllerForTest class that wraps it, but since we only need one function call I thought that may be overkill.  Should I revisit and do it that way?",
+      "parentUuid": "6c1a9cd3_cd2c995b",
+      "range": {
+        "startLine": 274,
+        "startChar": 45,
+        "endLine": 274,
+        "endChar": 76
+      },
+      "revId": "f8d1322f662047afad077651fb5518878fd2ed50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0e937779_6d53afc0",
         "filename": "android/android-emu/android/automation/AutomationController.h",
         "patchSetId": 1

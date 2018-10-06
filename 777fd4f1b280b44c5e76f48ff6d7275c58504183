@@ -22,6 +22,30 @@
       "revId": "777fd4f1b280b44c5e76f48ff6d7275c58504183",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a85fdff2_15dcf519",
+        "filename": "android/android-emu/android/automation/AutomationEventSink_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-06T06:12:29Z",
+      "side": 0,
+      "message": "No, this was only because I appended \\r\\n to a proto in AutomationEventSink, which I removed since since I ended up just sending the messages in different packets anyway, and it turned out to be extraneous.\n\nIn this case we are receiving at most one message a time.",
+      "parentUuid": "1de26137_752e0331",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 40
+      },
+      "revId": "777fd4f1b280b44c5e76f48ff6d7275c58504183",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
