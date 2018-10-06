@@ -25,6 +25,8 @@
 #include "AndroidBufferQueue.h"
 #include "AndroidWindow.h"
 #include "AndroidWindowBuffer.h"
+#include "ClientComposer.h"
+#include "Display.h"
 #include "GrallocDispatch.h"
 
 #include <hardware/gralloc.h>
@@ -39,6 +41,8 @@
 using aemu::AndroidBufferQueue;
 using aemu::AndroidWindow;
 using aemu::AndroidWindowBuffer;
+using aemu::ClientComposer;
+using aemu::Display;
 
 using android::AndroidPipe;
 using android::base::makeOnDemand;
@@ -220,6 +224,44 @@ protected:
         mGralloc.free(buffer);
     }
 
+    std::vector<AndroidWindowBuffer> primeWindowBufferQueue(AndroidWindow& window) {
+        EXPECT_NE(nullptr, window.fromProducer);
+        EXPECT_NE(nullptr, window.toProducer);
+
+        std::vector<AndroidWindowBuffer> buffers;
+        for (int i = 0; i < AndroidBufferQueue::kCapacity; i++) {
+            buffers.push_back(AndroidWindowBuffer(
+                    &window, createTestGrallocBuffer()));
+        }
+
+        for (int i = 0; i < AndroidBufferQueue::kCapacity; i++) {
+            window.fromProducer->queueBuffer(AndroidBufferQueue::Item(
+                    (ANativeWindowBuffer*)(buffers.data() + i)));
+        }
+        return buffers;
+    }
+
+    class WindowWithBacking {
+    public:
+        WindowWithBacking(CombinedGoldfishOpenglTest* _env)
+            : env(_env), window(kWindowSize, kWindowSize) {
+            window.setProducer(&toWindow, &fromWindow);
+            buffers = env->primeWindowBufferQueue(window);
+        }
+
+        ~WindowWithBacking() {
+            for (auto& buffer : buffers) {
+                env->destroyTestGrallocBuffer(buffer.handle);
+            }
+        }
+
+        CombinedGoldfishOpenglTest* env;
+        AndroidWindow window;
+        AndroidBufferQueue toWindow;
+        AndroidBufferQueue fromWindow;
+        std::vector<AndroidWindowBuffer> buffers;
+    };
+
     struct gralloc_implementation mGralloc;
     EGLState mEGL;
 };
@@ -227,13 +269,17 @@ protected:
 // static
 GoldfishOpenglTestEnv* CombinedGoldfishOpenglTest::testEnv = nullptr;
 
+// Tests that the pipe connection can be made and that
+// gralloc/EGL can be set up.
 TEST_F(CombinedGoldfishOpenglTest, Basic) { }
 
+// Tests allocation and deletion of a gralloc buffer.
 TEST_F(CombinedGoldfishOpenglTest, GrallocBuffer) {
     buffer_handle_t buffer = createTestGrallocBuffer();
     destroyTestGrallocBuffer(buffer);
 }
 
+// Tests basic GLES usage.
 TEST_F(CombinedGoldfishOpenglTest, ViewportQuery) {
     GLint viewport[4] = {};
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -244,6 +290,7 @@ TEST_F(CombinedGoldfishOpenglTest, ViewportQuery) {
     EXPECT_EQ(kWindowSize, viewport[3]);
 }
 
+// Tests eglCreateWindowSurface.
 TEST_F(CombinedGoldfishOpenglTest, CreateWindowSurface) {
     AndroidWindow testWindow(kWindowSize, kWindowSize);
 
@@ -266,4 +313,53 @@ TEST_F(CombinedGoldfishOpenglTest, CreateWindowSurface) {
     EXPECT_EQ(EGL_TRUE, eglDestroySurface(mEGL.display, testEGLWindow));
 
     destroyTestGrallocBuffer(testBuffer.handle);
+}
+
+// Starts a client composer, but doesn't do anything with it.
+TEST_F(CombinedGoldfishOpenglTest, ClientCompositionSetup) {
+
+    WindowWithBacking composeWindow(this);
+    WindowWithBacking appWindow(this);
+
+    ClientComposer composer(&composeWindow.window, &appWindow.fromWindow,
+                            &appWindow.toWindow);
+}
+
+// Client composition, but also advances a frame.
+TEST_F(CombinedGoldfishOpenglTest, ClientCompositionAdvanceFrame) {
+
+    WindowWithBacking composeWindow(this);
+    WindowWithBacking appWindow(this);
+
+    AndroidBufferQueue::Item item;
+
+    appWindow.toWindow.dequeueBuffer(&item);
+    appWindow.fromWindow.queueBuffer(item);
+
+    ClientComposer composer(&composeWindow.window, &appWindow.fromWindow,
+                            &appWindow.toWindow);
+
+    composer.advanceFrame();
+    composer.join();
+}
+
+TEST_F(CombinedGoldfishOpenglTest, ShowWindow) {
+    bool useWindow =
+            System::get()->envGet("ANDROID_EMU_TEST_WITH_WINDOW") == "1";
+
+    Display disp(useWindow, kWindowSize, kWindowSize);
+
+    if (useWindow) {
+        EXPECT_NE(nullptr, disp.getNative());
+        android_showOpenglesWindow(disp.getNative(), 0, 0, kWindowSize,
+                                   kWindowSize, kWindowSize, kWindowSize, 1.0,
+                                   0, false);
+    }
+
+    for (int i = 0; i < 10; i++) {
+        disp.loop();
+        System::get()->sleepMs(1);
+    }
+
+    if (useWindow) android_hideOpenglesWindow();
 }
