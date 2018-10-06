@@ -1720,6 +1720,7 @@ void FrameBuffer::unbindAndDestroyTrivialSharedContext(EGLContext context,
 }
 
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
+    fprintf(stderr, "%s: call\n", __func__);
     bool res = postImpl(p_colorbuffer, needLockAndBind);
     if (res) setGuestPostedAFrame();
     return res;

@@ -204,7 +204,9 @@ private:
                 teardown();
                 return WorkerProcessingResult::Stop;
             case Command::AdvanceFrame:
+                fprintf(stderr, "%s: do adv frame\n", __func__);
                 fromApp->dequeueBuffer(&appItem);
+                fprintf(stderr, "%s: dequeued buffer\n", __func__);
 
                 glEGLImageTargetTexture2DOES(
                         GL_TEXTURE_2D, createOrGetEGLImage(appItem.buffer));
