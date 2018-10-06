@@ -454,16 +454,12 @@ EOF
                     # before the rest, or the parallel build will
                     # fail miserably.
                     run make config-host.h $BUILD_FLAGS
-                    run make version.o version.lo $BUILD_FLAGS
+                    run make version.o  $BUILD_FLAGS
                     ;;
             esac
 
             # Now build everything else in parallel.
             run make -j$NUM_JOBS $BUILD_FLAGS $LINKPROG_FLAGS V=1
-
-            # Now build the unit tests
-            run make check -j$NUM_JOBS $BUILD_FLAGS $LINKPROG_FLAGS V=1
-
 
             for QEMU_EXE in $QEMU_TARGET_BUILDS; do
                 if [ ! -f "$QEMU_EXE" ]; then
