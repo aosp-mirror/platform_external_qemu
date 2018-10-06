@@ -16,9 +16,11 @@
 
 #include "android/automation/proto/automation.pb.h"
 #include "android/base/Compiler.h"
+#include "android/base/async/Looper.h"
 #include "android/base/files/Stream.h"
 #include "android/base/synchronization/Lock.h"
 
+#include <unordered_map>
 #include <unordered_set>
 
 namespace android {
@@ -42,9 +44,12 @@ class AutomationEventSink {
     friend class AutomationControllerImpl;
 
     // Can only be created by AutomationController.
-    AutomationEventSink() = default;
+    AutomationEventSink(base::Looper* looper);
 
 public:
+    // Shutdown the event sink.
+    void shutdown();
+
     // Register a stream to write recorded events out to.
     // |stream| - Stream pointer, assumes that the pointer remains valid until
     //            unregisterStream is called.
@@ -59,11 +64,16 @@ public:
                                   pb::PhysicalModelEvent& event);
 
 private:
-    void handleEvent(pb::RecordedEvent& event);
+    void handleEvent(uint64_t timeNs, const pb::RecordedEvent& event);
+
+    base::Looper* const mLooper;
 
     android::base::Lock mLock;
+    bool mShutdown = false;
     std::unordered_set<android::base::Stream*> mBinaryStreams;
     std::unordered_set<android::base::Stream*> mTextStreams;
+
+    std::unordered_map<android::base::Stream*, uint64_t> mLastEventTime;
 };
 
 }  // namespace automation
