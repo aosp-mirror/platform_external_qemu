@@ -708,8 +708,9 @@ LOCAL_SRC_FILES := \
   android/base/synchronization/ReadWriteLock_unittest.cpp \
   android/base/synchronization/MessageChannel_unittest.cpp \
   android/base/system/System_unittest.cpp \
-  android/base/testing/TestEvent_unittest.cpp \
   android/base/testing/MockUtils_unittest.cpp \
+  android/base/testing/ProtobufMatchers.cpp \
+  android/base/testing/TestEvent_unittest.cpp \
   android/base/threads/Async_unittest.cpp \
   android/base/threads/FunctorThread_unittest.cpp \
   android/base/threads/ParallelTask_unittest.cpp \
