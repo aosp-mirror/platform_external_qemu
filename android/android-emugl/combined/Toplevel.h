@@ -1,4 +1,4 @@
-// Copyright (C) 2018 The Android Open Source Project
+// Copyright 2018 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,17 +15,22 @@
 
 #include <memory>
 
+class ANativeWindow;
+
 namespace aemu {
 
-class Display {
+class Toplevel {
 public:
-    Display(bool useWindow, int width = 256, int height = 256);
-    ~Display();
+    Toplevel();
+    ~Toplevel();
 
-    float getDevicePixelRatio();
-    void* getNative();
+    ANativeWindow* createWindow();
+    void destroyWindow(ANativeWindow* window);
+    void destroyWindow(void* window);
+
+    void teardownDisplay();
+
     void loop();
-
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
