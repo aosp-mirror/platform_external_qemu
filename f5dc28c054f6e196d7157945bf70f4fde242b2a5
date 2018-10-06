@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0ef86821_53c79da4",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 601,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-06T16:30:18Z",
+      "side": 1,
+      "message": "Should we check has_version() as well, concerning past protos and any future change in structure?",
+      "revId": "f5dc28c054f6e196d7157945bf70f4fde242b2a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
