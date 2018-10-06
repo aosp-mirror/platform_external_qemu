@@ -360,22 +360,20 @@ TEST_F(AutomationControllerTest, ListenEvents) {
 
     EXPECT_THAT(mController->listen(pipe, 456), IsOk());
 
-    EXPECT_CALL(
-            *this,
-            offworldSendResponse(
-                    Eq(pipe),
-                    EqualsProto("result: RESULT_NO_ERROR\n"
-                                "async {\n"
-                                "    async_id: 456\n"
-                                "    automation {\n"
-                                "        event_generated {\n"
-                                "            event: \"event_time { timestamp: "
-                                "500000000 } stream_type: PHYSICAL_MODEL "
-                                "physical_model { type: POSITION current_value "
-                                "{ data: [0.5, 10, 0] } } \"\n"
-                                "        }\n"
-                                "    }\n"
-                                "}")))
+    EXPECT_CALL(*this,
+                offworldSendResponse(Eq(pipe),
+                                     EqualsProto("result: RESULT_NO_ERROR\n"
+                                                 "async {\n"
+                                                 "    async_id: 456\n"
+                                                 "    automation {\n"
+                                                 "        event_generated {\n"
+                                                 "            event: \"delay: "
+                                                 "500000000 physical_model { "
+                                                 "type: POSITION current_value "
+                                                 "{ data: [0.5, 10, 0] } } \"\n"
+                                                 "        }\n"
+                                                 "    }\n"
+                                                 "}")))
             .Times(1);
 
     const uint64_t kEventTime1 = secondsToNs(0.5);
@@ -423,16 +421,14 @@ TEST_F(AutomationControllerTest, ListenNoEventsAfterStop) {
     testing::Mock::VerifyAndClearExpectations(this);
 }
 
+TEST_F(AutomationControllerTest, InitialState) {
+    EXPECT_THAT(mController->replayInitialState(""), IsOk());
+}
+
 TEST_F(AutomationControllerTest, BadInitialState) {
-    EXPECT_THAT(mController->replayInitialState(""),
-                IsErr(ReplayError::ParseError));
     EXPECT_THAT(mController->replayInitialState("not a protobuf"),
                 IsErr(ReplayError::ParseError));
     EXPECT_THAT(mController->replayInitialState(std::string(5, '\0')),
-                IsErr(ReplayError::ParseError));
-    EXPECT_THAT(mController->replayInitialState("version: 2"),
-                IsErr(ReplayError::ParseError));
-    EXPECT_THAT(mController->replayInitialState("version: 0"),
                 IsErr(ReplayError::ParseError));
 }
 
@@ -444,20 +440,19 @@ TEST_F(AutomationControllerTest, BadReplay) {
                 IsErr(ReplayError::ParseError));
     EXPECT_THAT(mController->replayEvent(pipe, "\n", 123),
                 IsErr(ReplayError::ParseError));
-    EXPECT_THAT(mController->replayEvent(
-                        pipe,
-                        "stream_type: PHYSICAL_MODEL physical_model { type: "
-                        "POSITION target_value { data: [0.5, 10, 0] } }",
-                        123),
-                IsErr(ReplayError::ParseError));
+    EXPECT_THAT(
+            mController->replayEvent(pipe,
+                                     "physical_model { type: POSITION "
+                                     "target_value { data: [0.5, 10, 0] } }",
+                                     123),
+            IsErr(ReplayError::ParseError));
 }
 
 TEST_F(AutomationControllerTest, TimeOnlyReplay) {
     android::AsyncMessagePipeHandle pipe;
     pipe.id = 123;
 
-    EXPECT_THAT(mController->replayEvent(
-                        pipe, "event_time { timestamp: 500000000 }", 123),
+    EXPECT_THAT(mController->replayEvent(pipe, "delay: 500000000", 123),
                 IsOk());
     EXPECT_CALL(*this,
                 offworldSendResponse(

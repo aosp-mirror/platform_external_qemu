@@ -947,8 +947,6 @@ void serializeState(pb::InitialState* state, PhysicalParameter type,
 void PhysicalModelImpl::saveState(pb::InitialState* state) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
 
-    state->mutable_initial_time()->set_timestamp(mModelTimeNs);
-
     // TODO(jwmcglynn): Prune state and only save non-default parameters.
 
     for (int parameter = 0; parameter < MAX_PHYSICAL_PARAMETERS; parameter++) {
