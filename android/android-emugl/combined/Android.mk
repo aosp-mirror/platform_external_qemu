@@ -13,13 +13,16 @@ combined_C_INCLUDES := \
     $(EMUGL_PATH)/guest \
     $(EMUGL_PATH)/guest/androidImpl \
     $(EMUGL_PATH)/host/include \
+    $(EMUGL_PATH)/host/libs/libOpenglRender/standalone_common/angle-util \
     $(ANDROID_EMU_BASE_INCLUDES) \
 
 combined_SRC_FILES := \
     ClientComposer.cpp \
+    Display.cpp \
 
 # Shared library for Android graphics on host###################################
 $(call emugl-begin-shared-library,libaemugraphics)
+$(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OSWindow)
 LOCAL_C_INCLUDES += $(combined_C_INCLUDES)
 LOCAL_SRC_FILES += $(combined_SRC_FILES)
 $(call emugl-export,SHARED_LIBRARIES, $(combined_SHARED_LIBRARIES))

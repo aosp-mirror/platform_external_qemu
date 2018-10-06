@@ -26,6 +26,7 @@
 #include "AndroidWindow.h"
 #include "AndroidWindowBuffer.h"
 #include "ClientComposer.h"
+#include "Display.h"
 #include "GrallocDispatch.h"
 
 #include <hardware/gralloc.h>
@@ -41,6 +42,7 @@ using aemu::AndroidBufferQueue;
 using aemu::AndroidWindow;
 using aemu::AndroidWindowBuffer;
 using aemu::ClientComposer;
+using aemu::Display;
 
 using android::AndroidPipe;
 using android::base::makeOnDemand;
@@ -339,4 +341,25 @@ TEST_F(CombinedGoldfishOpenglTest, ClientCompositionAdvanceFrame) {
 
     composer.advanceFrame();
     composer.join();
+}
+
+TEST_F(CombinedGoldfishOpenglTest, ShowWindow) {
+    bool useWindow =
+            System::get()->envGet("ANDROID_EMU_TEST_WITH_WINDOW") == "1";
+
+    Display disp(useWindow, kWindowSize, kWindowSize);
+
+    if (useWindow) {
+        EXPECT_NE(nullptr, disp.getNative());
+        android_showOpenglesWindow(disp.getNative(), 0, 0, kWindowSize,
+                                   kWindowSize, kWindowSize, kWindowSize, 1.0,
+                                   0, false);
+    }
+
+    for (int i = 0; i < 10; i++) {
+        disp.loop();
+        System::get()->sleepMs(1);
+    }
+
+    if (useWindow) android_hideOpenglesWindow();
 }
