@@ -43,8 +43,8 @@ $(call emugl-begin-static-library,libGLcommon)
 LOCAL_SRC_FILES := $(host_common_SRC_FILES)
 $(call emugl-export,LDLIBS,$(host_common_LDLIBS))
 $(call emugl-export,LDFLAGS,$(host_common_LDFLAGS))
-$(call emugl-export,C_INCLUDES,$(LOCAL_PATH)/../include $(EMUGL_PATH)/shared $(METRICS_PROTO_INCLUDES) $(EMUGL_PATH)/../../../astc-codec/include $(generated-proto-sources-dir))
-$(call emugl-export,STATIC_LIBRARIES, libemugl_common $(METRICS_PROTO_STATIC_LIBRARIES))
+$(call emugl-export,C_INCLUDES,$(LOCAL_PATH)/../include $(EMUGL_PATH)/shared $(METRICS_PROTO_INCLUDES) $(EMUGL_PATH)/../../../astc-codec/include $(generated-proto-sources-dir) $(PROTOBUF_INCLUDES))
+$(call emugl-export,STATIC_LIBRARIES, libemugl_common $(ALL_PROTOBUF_LIBS) $(PROTOBUF_STATIC_LIBRARIES))
 
 $(call emugl-end-module)
 
