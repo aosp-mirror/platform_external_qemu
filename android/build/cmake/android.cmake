@@ -46,13 +46,20 @@
 function(internal_android_target_settings name modifier)
   string(TOLOWER ${modifier} modifier)
   string(TOUPPER ${modifier} MODIFIER)
-  message(STATUS "if(DEFINED ${name}_libs_${modifier}")
-  if(DEFINED ${name}_libs_${modifier})
-    target_link_libraries(${name} ${MODIFIER} ${${name}_libs_${modifier}})
-  endif()
-  if(DEFINED ${name}_${ANDROID_TARGET_TAG}_libs_${modifier})
-    target_link_libraries(${name} ${MODIFIER}
-                          ${${name}_${ANDROID_TARGET_TAG}_libs_${modifier}})
+
+  # We do not want to do dependency resolution when we are
+  # in our frankenstein build (gnumake mixed with cmake)
+  if(NOT FRANKENBUILD)
+    if(DEFINED ${name}_libs_${modifier})
+      target_link_libraries(${name} ${MODIFIER} ${${name}_libs_${modifier}})
+    endif()
+    if(DEFINED ${name}_${ANDROID_TARGET_TAG}_libs_${modifier})
+      target_link_libraries(${name} ${MODIFIER}
+                            ${${name}_${ANDROID_TARGET_TAG}_libs_${modifier}})
+    endif()
+    else()
+        # Setup the frankenbuild includes..
+        target_include_directories(${name} PRIVATE ${INCLUDES})
   endif()
 
   # Definitions
