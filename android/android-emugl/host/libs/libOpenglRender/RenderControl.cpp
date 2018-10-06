@@ -160,7 +160,9 @@ static constexpr android::base::StringView kAsyncSwapStrV3 = "ANDROID_EMU_native
 // DMA version history:
 // "ANDROID_EMU_dma_v1": add dma device and rcUpdateColorBufferDMA and do
 // yv12 conversion on the GPU
-static constexpr android::base::StringView kDmaStr = "ANDROID_EMU_dma_v1";
+// "ANDROID_EMU_dma_v2": adds DMA support glMapBufferRange (and unmap)
+static constexpr android::base::StringView kDma1Str = "ANDROID_EMU_dma_v1";
+static constexpr android::base::StringView kDma2Str = "ANDROID_EMU_dma_v2";
 
 // GLESDynamicVersion: up to 3.1 so far
 static constexpr android::base::StringView kGLESDynamicVersion_2 = "ANDROID_EMU_gles_max_version_2";
@@ -328,8 +330,10 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     bool isChecksumEnabled =
         emugl_feature_is_enabled(android::featurecontrol::GLPipeChecksum);
     bool asyncSwapEnabled = shouldEnableAsyncSwap();
-    bool dmaEnabled =
+    bool dma1Enabled =
         emugl_feature_is_enabled(android::featurecontrol::GLDMA);
+    bool dma2Enabled =
+        emugl_feature_is_enabled(android::featurecontrol::GLDMA2);
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -346,8 +350,13 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         }
     }
 
-    if (dmaEnabled && name == GL_EXTENSIONS) {
-        glStr += kDmaStr;
+    if (dma1Enabled && name == GL_EXTENSIONS) {
+        glStr += kDma1Str;
+        glStr += " ";
+    }
+
+    if (dma2Enabled && name == GL_EXTENSIONS) {
+        glStr += kDma2Str;
         glStr += " ";
     }
 
