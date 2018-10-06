@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1de26137_752e0331",
+        "filename": "android/android-emu/android/automation/AutomationEventSink_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-06T02:00:18Z",
+      "side": 0,
+      "message": "Was this needed to be able to tell different protos apart? What makes it not needed after all?",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 40
+      },
+      "revId": "777fd4f1b280b44c5e76f48ff6d7275c58504183",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

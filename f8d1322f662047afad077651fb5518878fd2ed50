@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6c1a9cd3_cd2c995b",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-06T02:00:18Z",
+      "side": 1,
+      "message": "Is it necessary to expose that it\u0027s a callback to the ListenPipeStream class when it\u0027s already specialized to offworld + async message pipe? Could it be simpler to hard code android::offworld::sendResponse to the ListenPipeStream class, or will the callbacks become a place to extend the listen functionality?",
+      "range": {
+        "startLine": 274,
+        "startChar": 45,
+        "endLine": 274,
+        "endChar": 76
+      },
+      "revId": "f8d1322f662047afad077651fb5518878fd2ed50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e937779_6d53afc0",
+        "filename": "android/android-emu/android/automation/AutomationController.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-06T02:00:18Z",
+      "side": 1,
+      "message": "What are the potential use cases of \"listen\"? Are there any more other than recording events on host to accumulate in the guest?",
+      "range": {
+        "startLine": 125,
+        "startChar": 0,
+        "endLine": 126,
+        "endChar": 43
+      },
+      "revId": "f8d1322f662047afad077651fb5518878fd2ed50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3092be00_75c339b2",
+        "filename": "android/android-emu/android/automation/AutomationController_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-06T02:00:18Z",
+      "side": 1,
+      "message": "What does this do / where is it defined?",
+      "range": {
+        "startLine": 81,
+        "startChar": 20,
+        "endLine": 81,
+        "endChar": 40
+      },
+      "revId": "f8d1322f662047afad077651fb5518878fd2ed50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ea6fa91_631fc564",
+        "filename": "android/android-emu/android/automation/AutomationController_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-06T02:00:18Z",
+      "side": 1,
+      "message": "Oh ok, it\u0027s here",
+      "range": {
+        "startLine": 116,
+        "startChar": 0,
+        "endLine": 116,
+        "endChar": 38
+      },
+      "revId": "f8d1322f662047afad077651fb5518878fd2ed50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
