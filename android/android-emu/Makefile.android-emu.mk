@@ -192,8 +192,6 @@ android_emu_LOCAL_C_INCLUDES := \
 
 android_emu_LOCAL_SRC_FILES := \
     android/adb-server.cpp \
-    android/automation/AutomationController.cpp \
-    android/automation/AutomationEventSink.cpp \
     android/avd/generate.cpp \
     android/avd/hw-config.c \
     android/avd/info.c \
@@ -219,7 +217,6 @@ android_emu_LOCAL_SRC_FILES := \
     android/car.cpp \
     android/cmdline-option.cpp \
     android/CommonReportedInfo.cpp \
-    android/console.cpp \
     android/console_auth.cpp \
     android/cpu_accelerator.cpp \
     android/crashreport/CrashSystem.cpp \
@@ -261,7 +258,6 @@ android_emu_LOCAL_SRC_FILES := \
     android/emulation/goldfish_sync.cpp \
     android/emulation/hostpipe/HostGoldfishPipe.cpp \
     android/emulation/LogcatPipe.cpp \
-    android/emulation/FakeRotatingCameraSensor.cpp \
     android/emulation/nand_limits.c \
     android/emulation/ParameterList.cpp \
     android/emulation/qemud/android_qemud_client.cpp \
@@ -269,6 +265,7 @@ android_emu_LOCAL_SRC_FILES := \
     android/emulation/qemud/android_qemud_serial.cpp \
     android/emulation/qemud/android_qemud_service.cpp \
     android/emulation/qemud/android_qemud_sink.cpp \
+    android/emulation/RefcountPipe.cpp \
     android/emulation/serial_line.cpp \
     android/emulation/SerialLine.cpp \
     android/emulation/SetupParameters.cpp \
@@ -299,7 +296,6 @@ android_emu_LOCAL_SRC_FILES := \
     android/hw-kmsg.c \
     android/hw-lcd.c \
     android/hw-qemud.cpp \
-    android/hw-sensors.cpp \
     android/jpeg-compress.c \
     android/kernel/kernel_utils.cpp \
     android/loadpng.c \
@@ -341,9 +337,6 @@ android_emu_LOCAL_SRC_FILES := \
     android/opengl/OpenglEsPipe.cpp \
     android/opengles.cpp \
     android/openssl-support.cpp \
-    android/physics/AmbientEnvironment.cpp \
-    android/physics/InertialModel.cpp \
-    android/physics/PhysicalModel.cpp \
     android/process_setup.cpp \
     android/protobuf/DelimitedSerialization.cpp \
     android/protobuf/LoadSave.cpp \
@@ -359,7 +352,6 @@ android_emu_LOCAL_SRC_FILES := \
     android/qt/qt_setup.cpp \
     android/resource.c \
     android/sdk-controller-socket.c \
-    android/sensors-port.c \
     android/session_phase_reporter.cpp \
     android/shaper.c \
     android/snaphost-android.c \
@@ -438,6 +430,8 @@ endif
 # Source files in androidEmu that are dependent on other static
 # libraries being there.
 android_emu_dependent_LOCAL_SRC_FILES += \
+    android/automation/AutomationController.cpp \
+    android/automation/AutomationEventSink.cpp \
     android/camera/camera-common.cpp \
     android/camera/camera-format-converters.c \
     android/camera/camera-list.cpp \
@@ -445,13 +439,20 @@ android_emu_dependent_LOCAL_SRC_FILES += \
     android/camera/camera-service.c \
     android/camera/camera-virtualscene.cpp \
     android/emulation/control/ScreenCapturer.cpp \
+    android/emulation/FakeRotatingCameraSensor.cpp \
     android/emulation/Keymaster3.cpp \
     android/emulation/QemuMiscPipe.cpp \
+    android/console.cpp \
     android/http_proxy.c \
+    android/hw-sensors.cpp \
     android/main-common.c \
     android/main-qemu-parameters.cpp \
     android/offworld/OffworldPipe.cpp \
+    android/physics/AmbientEnvironment.cpp \
+    android/physics/InertialModel.cpp \
+    android/physics/PhysicalModel.cpp \
     android/qemu-setup.cpp \
+    android/sensors-port.c \
     android/snapshot/SnapshotAPI.cpp \
     android/test/checkboot.cpp \
     android/virtualscene/MeshSceneObject.cpp \
@@ -707,8 +708,9 @@ LOCAL_SRC_FILES := \
   android/base/synchronization/ReadWriteLock_unittest.cpp \
   android/base/synchronization/MessageChannel_unittest.cpp \
   android/base/system/System_unittest.cpp \
-  android/base/testing/TestEvent_unittest.cpp \
   android/base/testing/MockUtils_unittest.cpp \
+  android/base/testing/ProtobufMatchers.cpp \
+  android/base/testing/TestEvent_unittest.cpp \
   android/base/threads/Async_unittest.cpp \
   android/base/threads/FunctorThread_unittest.cpp \
   android/base/threads/ParallelTask_unittest.cpp \
@@ -745,6 +747,7 @@ LOCAL_SRC_FILES := \
   android/emulation/Hypervisor_unittest.cpp \
   android/emulation/hostpipe/HostGoldfishPipe_unittest.cpp \
   android/emulation/ParameterList_unittest.cpp \
+  android/emulation/RefcountPipe_unittest.cpp \
   android/emulation/serial_line_unittest.cpp \
   android/emulation/SetupParameters_unittest.cpp \
   android/emulation/testing/TestAndroidPipeDevice.cpp \

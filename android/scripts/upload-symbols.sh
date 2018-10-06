@@ -39,11 +39,15 @@ OPT_CRASH_PROD=
 option_register_var "--crash-prod" OPT_CRASH_PROD \
        "Upload crashes to production."
 
+OPT_MY_URL=
+option_register_var "--symbol-url=<url>" OPT_MY_URL \
+       "Use this url for uploading symbols"
 
 PROGRAM_DESCRIPTION=\
 "Uploads a symbol directory to either staging or production crash server
 
-Use --crash-prod or --crash-staging to select between servers
+Use --crash-prod or --crash-staging to select between servers or provide
+your own with --symbol-url=0
 
 Use --symbol-dir to provide symbol directory
 
@@ -62,8 +66,8 @@ if [ "$OPT_CRASH_PROD" ] && [ "$OPT_CRASH_STAGING" ]; then
   panic "Can not use both --crash-staging and --crash-prod at the same time"
 fi
 
-if [ -z "$OPT_CRASH_PROD" ] && [ -z "$OPT_CRASH_STAGING" ]; then
-  panic "Must use either --crash-staging or --crash-prod"
+if [ -z "$OPT_CRASH_PROD" ] && [ -z "$OPT_CRASH_STAGING" ] && [ -z "OPT_MY_URL" ]; then
+  panic "Must use either --crash-staging, --crash-prod or --symbol-url"
 fi
 
 URL=
@@ -73,7 +77,12 @@ else
   URL=$STAGING_URL
 fi
 
+if [ "$OPT_MY_URL" ]; then
+    URL=$OPT_MY_URL
+fi
+
 process_symbol () {
+    set +e
     SYMBOL_FILE="$1"
     LINE=$(sed -n -e 1p "$SYMBOL_FILE")
     read MODULE OS ARCH DEBUG_IDENTIFIER DEBUG_FILE <<<"$LINE"
@@ -84,7 +93,8 @@ process_symbol () {
     CODE_FILE=$DEBUG_FILE
     CODE_IDENTIFIER=$DEBUG_IDENTIFIER
 
-    echo -n -e curl \
+    START=$(date +%s)
+    STATUS=$(curl \
         --show-error \
         --silent \
         --dump-header /dev/null \
@@ -94,14 +104,25 @@ process_symbol () {
         --form debugFile="$DEBUG_FILE" \
         --form debugIdentifier="$DEBUG_IDENTIFIER" \
         --form symbolFile="@$SYMBOL_FILE" \
-        "$URL" \
-        "\0"
+        --write-out "%{http_code}\n" \
+        -o /dev/null \
+        "$URL")
+    ERROR=$?
+    END=$(date +%s)
+    DIFF=$(( $END - $START))
+    if [ $STATUS -ne 200 ] && [ $STATUS -ne 204 ] || [ $ERROR -ne 0 ]; then
+        warn "Unable to upload $SYMBOL_FILE to $URL, status code: $STATUS, after $DIFF sec."
+    else
+        log "Uploaded $SYMBOL_FILE -> $URL in $DIFF sec."
+    fi
+    set -e
 }
 
 process_dir () {
-    find $SYMBOL_DIR -type f -print0 -name "*.sym" | while read -d $'\0' file; do
+    find $SYMBOL_DIR -type f -name "*.sym" -print0 | while read -d $'\0' file; do
         process_symbol $file
     done
 }
 
-process_dir | xargs -0 -n1 -P 5 -t bash -c
+log_invocation
+process_dir

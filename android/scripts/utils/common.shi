@@ -19,6 +19,9 @@ set -e
 export LANG=C
 export LC_ALL=C
 
+
+
+
 if [ -z "$_SHU_PROGDIR" ]; then
     _SHU_PROGDIR=$(dirname "$0")
 elif [ ! -f "$_SHU_PROGDIR"/common.shi ]; then
@@ -26,11 +29,23 @@ elif [ ! -f "$_SHU_PROGDIR"/common.shi ]; then
 fi
 
 _SHU_PROGNAME=$(basename "$0")
-
+_SHU_INVOKED="$0 $@"
 # Print an error message to stderr then exit the current process.
 panic () {
     echo "ERROR: $@" >&2
     exit 1
+}
+
+warn () {
+    # Fancy colors in the terminal
+    if [ -t 1 ] ; then
+      RED=`tput setaf 1`
+      RESET=`tput sgr0`
+    else
+      RED=
+      RESET=
+    fi
+    echo "${RED}WARNING: $@${RESET}" >&2
 }
 
 # Internal verbosity level. Note that this value is inherited from
@@ -643,4 +658,11 @@ strip_libs () {
                 panic "Could not strip $DEST_ROOT/$LIB"
         fi
     done
+}
+
+
+log_invocation() {
+    # Log the invocation of this command, this makes
+    # reading the build logs a lot easier.
+    dump "Running: $_SHU_INVOKED"
 }

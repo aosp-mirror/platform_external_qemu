@@ -20,6 +20,8 @@
 namespace android {
 namespace offworld {
 
+namespace pb = ::offworld;
+
 static constexpr uint32_t kProtocolVersion = 1;
 
 // Called during emulator initialization, do not call manually.
@@ -30,7 +32,7 @@ void registerOffworldPipeServiceForTest();
 
 // Send a response to an Offworld pipe.
 bool sendResponse(android::AsyncMessagePipeHandle pipe,
-                  const ::offworld::Response& response);
+                  const pb::Response& response);
 
 }  // namespace offworld
 }  // namespace android

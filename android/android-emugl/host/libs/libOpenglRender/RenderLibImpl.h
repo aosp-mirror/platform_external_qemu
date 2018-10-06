@@ -50,6 +50,9 @@ public:
                                      int height,
                                      bool useSubWindow,
                                      bool egl2egl) override;
+
+    OnLastColorBufferRef getOnLastColorBufferRef() override;
+
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RenderLibImpl);
 

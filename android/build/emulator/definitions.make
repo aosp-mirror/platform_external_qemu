@@ -93,6 +93,7 @@ local-shared-library-install-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),
 
 # Location of final symbol file based on final executable/shared library path
 local-symbol-install-path = $(subst $(BUILD_OBJS_DIR),$(_BUILD_SYMBOLS_DIR),$(1)).sym
+local-symbol-zip-install-path = $(_BUILD_SYMBOLS_DIR)/symbols.zip
 
 # Location of final debug info file based on final executable/shared library path
 local-debug-info-install-path = $(subst $(BUILD_OBJS_DIR),$(_BUILD_DEBUG_INFO_DIR),$(1))$(if $(findstring darwin,$(BUILD_TARGET_OS)),.dSYM)
@@ -390,6 +391,11 @@ $$(_DST): PRIVATE_OBJCOPY  := $$(BUILD_HOST_OBJCOPY)
 $$(_DST): CMAKE_TOOL := $$(CMAKE_DIR)/$$(BUILD_HOST_TAG)/bin/cmake
 $$(_DST): PRIVATE_INST := $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)
 $$(_DST): $$(_SRC)
+ifneq (darwin,$(BUILD_TARGET_OS))
+	# We need to make sure we pick up libstdc++ in our toolchain, as some buildbots
+	# are running with an older sysroot that has an out of date libstdc++
+	$(hide) export LD_LIBRARY_PATH=$(TOOLCHAIN_SYSROOT)/lib64:$(TOOLCHAIN_SYSROOT)/lib
+endif
 	$(hide) CC=$$(PRIVATE_CC) CXX=$$(PRIVATE_CXX) $$(CMAKE_TOOL) \
        -H$$(PRIVATE_SRC) \
        -B$$(PRIVATE_CMAKE_DST) \
@@ -425,6 +431,11 @@ $$(_DST): CMAKE_TOOL := $$(CMAKE_DIR)/$$(BUILD_HOST_TAG)/bin/cmake
 $$(_DST): PRIVATE_INST := $$(abspath $$(dir $$(_DST)))
 $$(_DST): PRIVATE_BUILD_OBJS_DIR  := $$(abspath $$(BUILD_OBJS_DIR))
 $$(_DST): $$(_SRC)
+ifneq (darwin,$(BUILD_TARGET_OS))
+	# We need to make sure we pick up libstdc++ in our toolchain, as some buildbots
+	# are running with an older sysroot that has an out of date libstdc++
+	$(hide) export LD_LIBRARY_PATH=$(TOOLCHAIN_SYSROOT)/lib64:$(TOOLCHAIN_SYSROOT)/lib
+endif
 	$(hide) CC=$$(PRIVATE_CC) CXX=$$(PRIVATE_CXX) $$(CMAKE_TOOL) \
        -H$$(PRIVATE_SRC) \
        -B$$(PRIVATE_CMAKE_DST) \
@@ -597,9 +608,9 @@ $$(_SYMBOL): $$(_SYMBOL_DEP)
 	@echo "Build Symbol: $$(PRIVATE_SYMBOL)"
 	@mkdir -p $$(dir $$(PRIVATE_SYMBOL))
 ifeq (darwin,$(BUILD_TARGET_OS))
-	$$(PRIVATE_DUMPSYMS) -g $$(PRIVATE_DSYM) $$(PRIVATE_MODULE) > $$(PRIVATE_SYMBOL)
+	$$(PRIVATE_DUMPSYMS) -g $$(PRIVATE_DSYM) $$(PRIVATE_MODULE) > $$(PRIVATE_SYMBOL) 2> $$(PRIVATE_SYMBOL).err
 else
-	$(hide) $$(PRIVATE_DUMPSYMS) $$(PRIVATE_MODULE) > $$(PRIVATE_SYMBOL)
+	$(hide) $$(PRIVATE_DUMPSYMS) $$(PRIVATE_MODULE) > $$(PRIVATE_SYMBOL) 2> $$(PRIVATE_SYMBOL).err
 endif
 endef
 

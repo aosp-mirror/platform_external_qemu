@@ -336,6 +336,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::GL_ASYNC_SWAP;
         case android::featurecontrol::GLDMA:
             return android_studio::EmulatorFeatureFlagState::GLDMA;
+        case android::featurecontrol::GLDMA2:
+            return android_studio::EmulatorFeatureFlagState::GLDMA2;
         case android::featurecontrol::GLESDynamicVersion:
             return android_studio::EmulatorFeatureFlagState::GLES_DYNAMIC_VERSION;
         case android::featurecontrol::ForceANGLE:
@@ -386,6 +388,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::OFFWORLD;
         case android::featurecontrol::OffworldDisableSecurity:
             return android_studio::EmulatorFeatureFlagState::OFFWORLD_DISABLE_SECURITY;
+        case android::featurecontrol::RefCountPipe:
+            return android_studio::EmulatorFeatureFlagState::REFCOUNT_PIPE;
         case android::featurecontrol::Feature_n_items:
             return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
     }

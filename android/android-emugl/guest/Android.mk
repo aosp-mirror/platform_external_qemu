@@ -33,6 +33,7 @@ LOCAL_SRC_FILES := \
     androidImpl/ANativeWindow.cpp \
     androidImpl/AndroidWindow.cpp \
     androidImpl/AndroidWindowBuffer.cpp \
+    androidImpl/SurfaceFlinger.cpp \
 
 $(call emugl-end-module)
 
