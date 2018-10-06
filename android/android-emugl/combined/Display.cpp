@@ -30,6 +30,11 @@ public:
         if (window) window->destroy();
     }
 
+    float getDevicePixelRatio() {
+        if (window) return window->getDevicePixelRatio();
+        return 1.0f;
+    }
+
     void* getNative() {
         if (window) return window->getFramebufferNativeWindow();
         return nullptr;
@@ -46,6 +51,10 @@ Display::Display(bool useWindow, int width, int height)
     : mImpl(new Display::Impl(useWindow, width, height)) {}
 
 Display::~Display() = default;
+
+float Display::getDevicePixelRatio() {
+    return mImpl->getDevicePixelRatio();
+}
 
 void* Display::getNative() {
     return mImpl->getNative();

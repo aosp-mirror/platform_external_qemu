@@ -19,21 +19,37 @@ combined_C_INCLUDES := \
 combined_SRC_FILES := \
     ClientComposer.cpp \
     Display.cpp \
+    Toplevel.cpp \
 
-# Shared library for Android graphics on host###################################
+# Shared library that combines guest driver with host drivers###################
 $(call emugl-begin-shared-library,libaemugraphics)
 $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OSWindow)
+LOCAL_CFLAGS += -fvisibility=default
 LOCAL_C_INCLUDES += $(combined_C_INCLUDES)
 LOCAL_SRC_FILES += $(combined_SRC_FILES)
 $(call emugl-export,SHARED_LIBRARIES, $(combined_SHARED_LIBRARIES))
 $(call emugl-end-module)
 
-# Unit tests####################################################################
+# Unit tests for individual components of the combined library##################
 $(call emugl-begin-executable,emugl_combined_unittests)
 $(call emugl-import,libaemugraphics libemugl_gtest)
 
 LOCAL_C_INCLUDES += $(combined_C_INCLUDES)
 LOCAL_SRC_FILES += combined_unittest.cpp
+
+ifeq ($(BUILD_TARGET_OS),linux)
+LOCAL_LDFLAGS += '-Wl,-rpath,$$ORIGIN/lib$(BUILD_TARGET_SUFFIX),-rpath,$$ORIGIN/lib$(BUILD_TARGET_SUFFIX)/gles_swiftshader'
+LOCAL_LDLIBS += -ldl
+endif
+LOCAL_INSTALL_OPENGL := true
+$(call emugl-end-module)
+
+# Unit tests for the Toplevel class#############################################
+$(call emugl-begin-executable,libaemugraphics_toplevel_unittests)
+$(call emugl-import,libaemugraphics libemugl_gtest)
+
+LOCAL_C_INCLUDES += $(combined_C_INCLUDES)
+LOCAL_SRC_FILES += toplevel_unittest.cpp
 
 ifeq ($(BUILD_TARGET_OS),linux)
 LOCAL_LDFLAGS += '-Wl,-rpath,$$ORIGIN/lib$(BUILD_TARGET_SUFFIX),-rpath,$$ORIGIN/lib$(BUILD_TARGET_SUFFIX)/gles_swiftshader'
