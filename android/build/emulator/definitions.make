@@ -93,6 +93,7 @@ local-shared-library-install-path = $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),
 
 # Location of final symbol file based on final executable/shared library path
 local-symbol-install-path = $(subst $(BUILD_OBJS_DIR),$(_BUILD_SYMBOLS_DIR),$(1)).sym
+local-symbol-zip-install-path = $(_BUILD_SYMBOLS_DIR)/symbols.zip
 
 # Location of final debug info file based on final executable/shared library path
 local-debug-info-install-path = $(subst $(BUILD_OBJS_DIR),$(_BUILD_DEBUG_INFO_DIR),$(1))$(if $(findstring darwin,$(BUILD_TARGET_OS)),.dSYM)
@@ -607,9 +608,9 @@ $$(_SYMBOL): $$(_SYMBOL_DEP)
 	@echo "Build Symbol: $$(PRIVATE_SYMBOL)"
 	@mkdir -p $$(dir $$(PRIVATE_SYMBOL))
 ifeq (darwin,$(BUILD_TARGET_OS))
-	$$(PRIVATE_DUMPSYMS) -g $$(PRIVATE_DSYM) $$(PRIVATE_MODULE) > $$(PRIVATE_SYMBOL)
+	$$(PRIVATE_DUMPSYMS) -g $$(PRIVATE_DSYM) $$(PRIVATE_MODULE) > $$(PRIVATE_SYMBOL) 2> $$(PRIVATE_SYMBOL).err
 else
-	$(hide) $$(PRIVATE_DUMPSYMS) $$(PRIVATE_MODULE) > $$(PRIVATE_SYMBOL)
+	$(hide) $$(PRIVATE_DUMPSYMS) $$(PRIVATE_MODULE) > $$(PRIVATE_SYMBOL) 2> $$(PRIVATE_SYMBOL).err
 endif
 endef
 
