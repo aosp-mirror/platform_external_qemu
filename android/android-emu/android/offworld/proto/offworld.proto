@@ -102,7 +102,25 @@ message SnapshotRequest {
   }
 }
 
-message AutomationRequest {}
+message AutomationRequest {
+  message ReplayInitialState {
+    optional string state = 1;
+  }
+
+  message Replay {
+    optional string event = 1;
+  }
+
+  message Listen {}
+  message StopListening {}
+
+  oneof function {
+    ReplayInitialState replay_initial_state = 1;
+    Replay replay = 2;
+    Listen listen = 3;
+    StopListening stop_listening = 4;
+  }
+}
 
 //
 // Responses
@@ -113,18 +131,22 @@ message Response {
     RESULT_NO_ERROR = 0;
     RESULT_ERROR_UNKNOWN = 1;
     RESULT_ERROR_ACCESS_DENIED = 2;
+    RESULT_ERROR_NOT_IMPLEMENTED = 3;
   }
 
   optional Result result = 1;
+  optional string error_string = 2;
+
+  // Indicates that this is an async messages and there will be additional
+  // messages with a matching module.async.async_id.
+  optional uint32 pending_async_id = 3;
 
   oneof module {
     // Sync.
     SnapshotResponse snapshot = 100;
+    AutomationResponse automation = 101;
 
     // Async.
-    // Indicates that this is an async messages and there will be additional
-    // messages with a matching module.async.async_id.
-    uint32 pending_async_id = 200;
     // Async response.
     AsyncResponse async = 201;
   }
@@ -160,15 +182,23 @@ message SnapshotResponse {
   }
 }
 
+message AutomationResponse {
+  message Listen {
+    // An text-encoded protobuf containing the initial state of the system.
+    optional string initial_state = 1;
+  }
+
+  oneof function {
+    Listen listen = 1;
+  }
+}
+
 message AutomationAsyncResponse {
   message ReplayComplete {}
 
   message EventGenerated {
-    // An text-encoded protobuf containing the initial state of the system,
-    // may be replayed as a standard event.
-    optional string initial_state = 1;
     // A text-encoded protobuf containing a replayable event.
-    optional string event = 2;
+    optional string event = 1;
   }
 
   oneof function {

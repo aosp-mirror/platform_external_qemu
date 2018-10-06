@@ -79,7 +79,6 @@ void AutomationEventSink::handleEvent(pb::RecordedEvent& event) {
 
         VLOG(automation) << textProto;
 
-        textProto += "\r\n";
         for (auto& stream : mTextStreams) {
             // Use write() instead of putString() because putString writes
             // length as binary before the data, and we want to maintain pure

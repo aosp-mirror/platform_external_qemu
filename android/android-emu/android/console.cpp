@@ -3282,7 +3282,7 @@ static const CommandDefRec  qemu_commands[] =
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
-#define HELP_COMMAND \
+#define HELP_BASIC_COMMAND \
     { "help|h|?", "print a list of commands", NULL, NULL, do_help, NULL }
 
 #define HELP_VERBOSE_COMMAND \
@@ -3375,7 +3375,7 @@ static int do_rotate_90_clockwise(ControlClient client, char* args) {
  */
 namespace {
 extern const CommandDefRec main_commands[] = {
-        HELP_COMMAND,
+        HELP_BASIC_COMMAND,
 
         HELP_VERBOSE_COMMAND,
 
@@ -3543,7 +3543,7 @@ static const CommandDefRec vm_commands_preauth[] = {
  * older versions of Android Studio */
 namespace {
 extern const CommandDefRec main_commands_preauth[] = {
-    HELP_COMMAND,
+    HELP_BASIC_COMMAND,
 
     HELP_VERBOSE_COMMAND,
 
