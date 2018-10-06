@@ -41,10 +41,11 @@ using android::base::Err;
 namespace android {
 
 HostGoldfishPipeDevice::~HostGoldfishPipeDevice() {
-    RecursiveScopedVmLock lock;
     for (auto pipe: mPipes) {
         close(pipe);
     }
+
+    ScopedVmLock lock;
     mHwPipeWakeCallbacks.clear();
     mPipes.clear();
     mPipeToHwPipe.clear();
@@ -52,7 +53,7 @@ HostGoldfishPipeDevice::~HostGoldfishPipeDevice() {
 
 // Also opens.
 void* HostGoldfishPipeDevice::connect(const char* name) {
-    RecursiveScopedVmLock lock;
+    ScopedVmLock lock;
     void* pipe = open(createNewHwPipeId());
 
     mCurrentPipeWantingConnection = pipe;
@@ -87,7 +88,7 @@ void* HostGoldfishPipeDevice::connect(const char* name) {
 }
 
 void HostGoldfishPipeDevice::close(void* pipe) {
-    RecursiveScopedVmLock lock;
+    ScopedVmLock lock;
 
     auto it = mPipes.find(pipe);
     if (it != mPipes.end()) {
@@ -107,7 +108,7 @@ void HostGoldfishPipeDevice::close(void* pipe) {
 }
 
 void* HostGoldfishPipeDevice::load(base::Stream* stream) {
-    RecursiveScopedVmLock lock;
+    ScopedVmLock lock;
     void* hwpipe = createNewHwPipeId();
 
     char forceClose = 0;
@@ -126,7 +127,7 @@ void* HostGoldfishPipeDevice::load(base::Stream* stream) {
 
 // Read/write/poll but for a particular pipe.
 ssize_t HostGoldfishPipeDevice::read(void* pipe, void* buffer, size_t len) {
-    RecursiveScopedVmLock lock;
+    ScopedVmLock lock;
 
     auto it = mPipes.find(pipe);
     if (it == mPipes.end()) {
@@ -157,7 +158,7 @@ HostGoldfishPipeDevice::ReadResult HostGoldfishPipeDevice::read(void* pipe, size
 }
 
 ssize_t HostGoldfishPipeDevice::write(void* pipe, const void* buffer, size_t len) {
-    RecursiveScopedVmLock lock;
+    ScopedVmLock lock;
 
     auto it = mPipes.find(pipe);
     if (it == mPipes.end()) {
@@ -180,14 +181,19 @@ HostGoldfishPipeDevice::WriteResult HostGoldfishPipeDevice::write(void* pipe, co
 }
 
 unsigned HostGoldfishPipeDevice::poll(void* pipe) const {
-    RecursiveScopedVmLock lock;
+    ScopedVmLock lock;
     return android_pipe_guest_poll(pipe);
+}
+
+int HostGoldfishPipeDevice::getErrno() const {
+    ScopedVmLock lock;
+    return mErrno;
 }
 
 void HostGoldfishPipeDevice::setWakeCallback(
         void* pipe,
         std::function<void(int)> callback) {
-    RecursiveScopedVmLock lock;
+    ScopedVmLock lock;
     auto it = mPipeToHwPipe.find(pipe);
     if (it != mPipeToHwPipe.end()) {
         mHwPipeWakeCallbacks[it->second] = callback;
@@ -205,12 +211,12 @@ void HostGoldfishPipeDevice::initialize() {
     };
     android_pipe_set_hw_funcs(&funcs);
     AndroidPipe::Service::resetAll();
-    AndroidPipe::initThreading(android::TestVmLock::getInstance());
+    AndroidPipe::initThreading(android::HostVmLock::getInstance());
     mInitialized = true;
 }
 
+// locked
 void* HostGoldfishPipeDevice::open(void* hwpipe) {
-    RecursiveScopedVmLock lock;
     void* res = android_pipe_guest_open(hwpipe);
     if (!res) {
         mErrno = ENOENT;
@@ -228,8 +234,8 @@ ssize_t HostGoldfishPipeDevice::writeInternal(void* pipe,
     return res;
 }
 
+// locked
 void* HostGoldfishPipeDevice::popHostPipe(void* pipe) {
-    RecursiveScopedVmLock lock;
     auto it = mResettedPipes.find(pipe);
     if (it == mResettedPipes.end()) {
         return nullptr;
@@ -262,14 +268,14 @@ void* HostGoldfishPipeDevice::createNewHwPipeId() {
     return reinterpret_cast<void*>(mNextHwPipe++);
 }
 
+// locked
 void HostGoldfishPipeDevice::resetPipe(void* hwpipe, void* internal_pipe) {
-    RecursiveScopedVmLock lock;
     mPipeToHwPipe[internal_pipe] = hwpipe;
     mResettedPipes[mCurrentPipeWantingConnection] = internal_pipe;
 }
 
 void HostGoldfishPipeDevice::closeHwPipe(void* hwpipe) {
-    RecursiveScopedVmLock lock;
+    ScopedVmLock lock;
     // To avoid having to also create a hwpipe to pipe map, just do a linear
     // scan.
     auto it = std::find_if(mPipeToHwPipe.begin(), mPipeToHwPipe.end(),
@@ -285,7 +291,7 @@ void HostGoldfishPipeDevice::closeHwPipe(void* hwpipe) {
 }
 
 void HostGoldfishPipeDevice::signalWake(void* hwpipe, int wakes) {
-    RecursiveScopedVmLock lock;
+    ScopedVmLock lock;
     auto callbackIt = mHwPipeWakeCallbacks.find(hwpipe);
     if (callbackIt != mHwPipeWakeCallbacks.end()) {
         (callbackIt->second)(wakes);

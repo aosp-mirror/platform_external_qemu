@@ -21,10 +21,16 @@ using android::base::LazyInstance;
 namespace android {
 
 static LazyInstance<TestVmLock> sTestVmLock = LAZY_INSTANCE_INIT;
+static LazyInstance<HostVmLock> sHostVmLock = LAZY_INSTANCE_INIT;
 
 // static
 TestVmLock* TestVmLock::getInstance() {
     return sTestVmLock.ptr();
+}
+
+// static
+HostVmLock* HostVmLock::getInstance() {
+    return sHostVmLock.ptr();
 }
 
 } // namespace android
