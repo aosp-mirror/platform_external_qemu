@@ -46,56 +46,6 @@ LOCAL_PATH := $(call my-dir)
 
 _ANDROID_EMU_ROOT := $(LOCAL_PATH)
 
-###############################################################################
-#
-# Automation protoc-generated library.
-include $(_ANDROID_EMU_ROOT)/android/automation/proto/AutomationProto.mk
-
-###############################################################################
-#
-# Metrics library is a part of android-emu, so let's include it here
-include $(_ANDROID_EMU_ROOT)/android/metrics/proto/MetricsProto.mk
-
-###############################################################################
-# Protobuf library for communicating with android vehicle hal
-include $(_ANDROID_EMU_ROOT)/android/emulation/proto/VehicleHalProto.mk
-
-###############################################################################
-#
-# Feature control protoc-generated library.
-include $(_ANDROID_EMU_ROOT)/android/featurecontrol/proto/FeatureControlProto.mk
-
-###############################################################################
-#
-# Location-routes protoc-generated library.
-include $(_ANDROID_EMU_ROOT)/android/location/proto/LocationProto.mk
-
-###############################################################################
-#
-# Offworld protoc-generated library.
-include $(_ANDROID_EMU_ROOT)/android/offworld/proto/OffworldProto.mk
-
-###############################################################################
-#
-# Snapshot protoc-generated library.
-include $(_ANDROID_EMU_ROOT)/android/snapshot/proto/SnapshotProto.mk
-
-###############################################################################
-#
-# Crash report protoc-generated library.
-include $(_ANDROID_EMU_ROOT)/android/crashreport/proto/CrashReportProto.mk
-
-###############################################################################
-#
-# SIM access rules protoc-generated library.
-include $(_ANDROID_EMU_ROOT)/android/telephony/proto/SimAccessRulesProto.mk
-
-###############################################################################
-#
-# Verified Boot Config protoc-generated library.
-include $(_ANDROID_EMU_ROOT)/android/verified-boot/proto/VerifiedBootConfigProto.mk
-
-
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
 ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
@@ -129,7 +79,11 @@ LOCAL_C_INCLUDES := \
     $(LZ4_INCLUDES) \
 
 PRODUCED_STATIC_LIBS=android-emu-base
+PRODUCED_PROTO_LIBS=metrics featurecontrol snapshot crashreport location emulation telephony verified-boot automation offworld
 $(call end-cmake-project)
+
+# Make sure the memory modules are available. (NOP on non windows)
+PROTOBUF_STATIC_LIBRARIES += $(LIBMMAN_WIN32_STATIC_LIBRARIES)
 
 ####
 # Small low-level benchmark for android-emu-base.
@@ -162,8 +116,7 @@ $(call end-emulator-benchmark)
 # Common definitions
 
 # Workaround for b/115634240
-android_emu_LOCAL_SOURCE_DEPENDENCIES := \
-	$(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
+android_emu_LOCAL_SOURCE_DEPENDENCIES := $(PROTOBUF_DEPS)
 
 android_emu_LOCAL_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
@@ -189,6 +142,7 @@ android_emu_LOCAL_C_INCLUDES := \
     $(LZ4_INCLUDES) \
     $(ZLIB_INCLUDES) \
     $(MURMURHASH_INCLUDES) \
+	$(PROTOBUF_INCLUDES)
 
 android_emu_LOCAL_SRC_FILES := \
     android/adb-server.cpp \
@@ -565,18 +519,8 @@ ANDROID_EMU_STATIC_LIBRARIES_DEPS := \
     emulator-zlib \
     emulator-murmurhash \
     emulator-tinyepoxy \
-    $(AUTOMATION_PROTO_STATIC_LIBRARIES) \
-    $(METRICS_PROTO_STATIC_LIBRARIES) \
-    $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
-    $(LOCATION_PROTO_STATIC_LIBRARIES) \
-    $(VEHICLE_PROTO_STATIC_LIBRARIES) \
-    $(FEATURECONTROL_PROTO_STATIC_LIBRARIES) \
-    $(OFFWORLD_PROTO_STATIC_LIBRARIES) \
-    $(SNAPSHOT_PROTO_STATIC_LIBRARIES) \
-    $(CRASHREPORT_PROTO_STATIC_LIBRARIES) \
-    $(SIM_ACCESS_RULES_PROTO_STATIC_LIBRARIES) \
-    $(PHYSICS_PROTO_STATIC_LIBRARIES) \
-    ${VERIFIEDBOOTCFG_PROTO_STATIC_LIBRARIES} \
+    $(ALL_PROTOBUF_LIBS) \
+	$(PROTOBUF_STATIC_LIBRARIES) \
 
 ANDROID_EMU_STATIC_LIBRARIES := \
     android-emu $(ANDROID_EMU_STATIC_LIBRARIES_DEPS) \
@@ -636,7 +580,7 @@ $(call start-emulator-program, android_emu$(BUILD_TARGET_SUFFIX)_unittests)
 $(call gen-hw-config-defs)
 
 # Workaround for b/115634240
-LOCAL_SOURCE_DEPENDENCIES := $(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
+LOCAL_SOURCE_DEPENDENCIES := $(PROTOBUF_DEPS)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
@@ -645,6 +589,7 @@ LOCAL_C_INCLUDES += \
     $(LIBXML2_INCLUDES) \
     $(EMUGL_INCLUDES) \
     $(LZ4_INCLUDES) \
+	$(PROTOBUF_INCLUDES)
 
 LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
@@ -856,13 +801,14 @@ $(call start-emulator-program, \
     android_emu_metrics$(BUILD_TARGET_SUFFIX)_unittests)
 
 # Workaround for b/115634240
-LOCAL_SOURCE_DEPENDENCIES := $(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
+LOCAL_SOURCE_DEPENDENCIES := $(PROTOBUF_DEPS)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
     $(EMULATOR_COMMON_INCLUDES) \
     $(EMULATOR_GTEST_INCLUDES) \
     $(LIBXML2_INCLUDES) \
+	$(PROTOBUF_INCLUDES)
 
 LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
@@ -917,7 +863,10 @@ EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STA
 
 $(call start-emulator-library, emulator-libui)
 
-EMULATOR_LIBUI_INCLUDES += $(ANDROID_SKIN_INCLUDES) $(EMULATOR_LIBYUV_INCLUDES)
+# Workaround for b/115634240
+LOCAL_SOURCE_DEPENDENCIES := $(PROTOBUF_DEPS)
+
+EMULATOR_LIBUI_INCLUDES += $(ANDROID_SKIN_INCLUDES) $(EMULATOR_LIBYUV_INCLUDES) $(PROTOBUF_INCLUDES)
 EMULATOR_LIBUI_LDLIBS += $(ANDROID_SKIN_LDLIBS)
 
 LOCAL_CFLAGS += \
@@ -939,10 +888,7 @@ LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(EMULATOR_LIBUI_INCLUDES) \
     $(FFMPEG_INCLUDES) \
-
-
-# Workaround for b/115634240
-LOCAL_SOURCE_DEPENDENCIES := $(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
+	$(PROTOBUF_INCLUDES)
 
 LOCAL_SRC_FILES += \
     $(ANDROID_SKIN_SOURCES) \
