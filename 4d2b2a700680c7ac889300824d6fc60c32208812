@@ -46,6 +46,30 @@
       "revId": "4d2b2a700680c7ac889300824d6fc60c32208812",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad6cf430_98aa8741",
+        "filename": "android/android-emu/android/automation/AutomationController.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-06T06:18:38Z",
+      "side": 1,
+      "message": "Cool, thanks for the explanation! So basically the initial state resetting doesn\u0027t really fit well with the concept of a typical replay event having a timestamp and being scheduled at a particular time.\n\nyeah the more compact format seems a bit easier to deal with, it looks like it would rely on set or unset fields to determine stream type instead of having an explicit tag, which would also allow delivering multiple settings per time offset easily",
+      "parentUuid": "8086a3e7_455b906f",
+      "range": {
+        "startLine": 134,
+        "startChar": 0,
+        "endLine": 134,
+        "endChar": 60
+      },
+      "revId": "4d2b2a700680c7ac889300824d6fc60c32208812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
