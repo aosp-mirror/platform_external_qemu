@@ -1320,6 +1320,9 @@ echo "BUILD_HOST_CFLAGS      := $BUILD_CFLAGS" >> $config_mk
 echo "BUILD_HOST_LDFLAGS     := $BUILD_LDFLAGS" >> $config_mk
 echo "BUILD_HOST_DUMPSYMS    := $DUMPSYMS" >> $config_mk
 
+if [ "${TOOLCHAIN_SYSROOT}" ]; then
+echo "TOOLCHAIN_SYSROOT    := $TOOLCHAIN_SYSROOT" >> $config_mk
+fi
 if [ "$OPTION_LTO" = "true" ]; then
     echo "BUILD_ENABLE_LTO      := true" >> $config_mk
 fi
