@@ -390,6 +390,11 @@ $$(_DST): PRIVATE_OBJCOPY  := $$(BUILD_HOST_OBJCOPY)
 $$(_DST): CMAKE_TOOL := $$(CMAKE_DIR)/$$(BUILD_HOST_TAG)/bin/cmake
 $$(_DST): PRIVATE_INST := $(BUILD_OBJS_DIR)/$(if $(LOCAL_INSTALL_DIR),$(LOCAL_INSTALL_DIR)/)
 $$(_DST): $$(_SRC)
+ifneq (darwin,$(BUILD_TARGET_OS))
+	# We need to make sure we pick up libstdc++ in our toolchain, as some buildbots
+	# are running with an older sysroot that has an out of date libstdc++
+	$(hide) export LD_LIBRARY_PATH=$(TOOLCHAIN_SYSROOT)/lib64:$(TOOLCHAIN_SYSROOT)/lib
+endif
 	$(hide) CC=$$(PRIVATE_CC) CXX=$$(PRIVATE_CXX) $$(CMAKE_TOOL) \
        -H$$(PRIVATE_SRC) \
        -B$$(PRIVATE_CMAKE_DST) \
@@ -425,6 +430,11 @@ $$(_DST): CMAKE_TOOL := $$(CMAKE_DIR)/$$(BUILD_HOST_TAG)/bin/cmake
 $$(_DST): PRIVATE_INST := $$(abspath $$(dir $$(_DST)))
 $$(_DST): PRIVATE_BUILD_OBJS_DIR  := $$(abspath $$(BUILD_OBJS_DIR))
 $$(_DST): $$(_SRC)
+ifneq (darwin,$(BUILD_TARGET_OS))
+	# We need to make sure we pick up libstdc++ in our toolchain, as some buildbots
+	# are running with an older sysroot that has an out of date libstdc++
+	$(hide) export LD_LIBRARY_PATH=$(TOOLCHAIN_SYSROOT)/lib64:$(TOOLCHAIN_SYSROOT)/lib
+endif
 	$(hide) CC=$$(PRIVATE_CC) CXX=$$(PRIVATE_CXX) $$(CMAKE_TOOL) \
        -H$$(PRIVATE_SRC) \
        -B$$(PRIVATE_CMAKE_DST) \
