@@ -46,20 +46,13 @@
 function(internal_android_target_settings name modifier)
   string(TOLOWER ${modifier} modifier)
   string(TOUPPER ${modifier} MODIFIER)
-
-  # We do not want to do dependency resolution when we are
-  # in our frankenstein build (gnumake mixed with cmake)
-  if(NOT FRANKENBUILD)
-    if(DEFINED ${name}_libs_${modifier})
-      target_link_libraries(${name} ${MODIFIER} ${${name}_libs_${modifier}})
-    endif()
-    if(DEFINED ${name}_${ANDROID_TARGET_TAG}_libs_${modifier})
-      target_link_libraries(${name} ${MODIFIER}
-                            ${${name}_${ANDROID_TARGET_TAG}_libs_${modifier}})
-    endif()
-    else()
-        # Setup the frankenbuild includes..
-        target_include_directories(${name} PRIVATE ${INCLUDES})
+  message(STATUS "if(DEFINED ${name}_libs_${modifier}")
+  if(DEFINED ${name}_libs_${modifier})
+    target_link_libraries(${name} ${MODIFIER} ${${name}_libs_${modifier}})
+  endif()
+  if(DEFINED ${name}_${ANDROID_TARGET_TAG}_libs_${modifier})
+    target_link_libraries(${name} ${MODIFIER}
+                          ${${name}_${ANDROID_TARGET_TAG}_libs_${modifier}})
   endif()
 
   # Definitions
@@ -148,3 +141,16 @@ function(add_android_executable name)
   target_prebuilt_dependency(${name} "${prebuilt_dependencies}"
                              "${prebuilt_properties}")
 endfunction()
+
+function(add_android_protobuf libname protofiles)
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${protofiles})
+set(${libname}_public ${PROTOBUF_INCLUDE_DIR})
+set(${libname}_src ${PROTO_SRCS} ${PROTO_HDRS})
+set(${libname}_includes_public ${PROTOBUF_INCLUDE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+set(${libname}_libs_public ${PROTOBUF_LIBRARIES})
+add_android_library(${libname})
+if (FRANKENBUILD)
+    add_library(lib${libname}_proto ALIAS ${libname})
+endif()
+endfunction()
+
