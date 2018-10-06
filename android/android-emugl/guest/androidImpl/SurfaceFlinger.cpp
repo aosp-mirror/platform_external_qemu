@@ -27,25 +27,29 @@ using android::base::Lock;
 namespace aemu {
 
 SurfaceFlinger::SurfaceFlinger(
-        int width,
-        int height,
+        AndroidWindow* composeWindow,
         std::vector<ANativeWindowBuffer*> appBuffers,
-        std::vector<ANativeWindowBuffer*> composeBuffers,
-        SurfaceFlinger::ComposerConstructFunc&& composerFunc)
-    : mComposeWindow(new AndroidWindow(width, height)),
-      mComposerImpl(composerFunc(mComposeWindow.get(), &mApp2Sf, &mSf2App)) {
-
-    mComposeWindow->setProducer(&mFromHwc, &mToHwc);
-
-    // Prime the queues
+        SurfaceFlinger::ComposerConstructFunc&& composerFunc,
+        Vsync::Callback&& vsyncFunc)
+    : mComposeWindow(composeWindow),
+      mComposerImpl(composerFunc(mComposeWindow, &mApp2Sf, &mSf2App)),
+      mVsync(std::move(vsyncFunc)) {
 
     for (auto buffer : appBuffers) {
         mSf2App.queueBuffer(AndroidBufferQueue::Item(buffer));
     }
+}
 
-    for (auto buffer : composeBuffers) {
-        mFromHwc.queueBuffer(AndroidBufferQueue::Item(buffer));
-    }
+SurfaceFlinger::~SurfaceFlinger() {
+    join();
+}
+
+void SurfaceFlinger::start() {
+    mVsync.start();
+}
+
+void SurfaceFlinger::join() {
+    mVsync.join();
 }
 
 void SurfaceFlinger::connectWindow(AndroidWindow* window) {
