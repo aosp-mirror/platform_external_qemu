@@ -13,5 +13,20 @@ include(prebuilts)
 get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)
 list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 
-# Grabe the android-emu-base library
+
+prebuilt(PROTOBUF)
+# Add the protobuf dependencies
+add_subdirectory(android/metrics/proto)
+add_subdirectory(android/featurecontrol/proto)
+add_subdirectory(android/snapshot/proto)
+add_subdirectory(android/crashreport/proto)
+add_subdirectory(android/location/proto)
+add_subdirectory(android/emulation/proto)
+add_subdirectory(android/telephony/proto)
+add_subdirectory(android/verified-boot/proto)
+add_subdirectory(android/automation/proto)
+add_subdirectory(android/offworld/proto)
+
+# Grab the android-emu-base library
 include(android-emu-base)
+
