@@ -14,6 +14,9 @@
 #pragma once
 
 #include "AndroidBufferQueue.h"
+#include "GrallocDispatch.h"
+#include "Vsync.h"
+
 #include <system/window.h>
 
 #include "android/base/FunctionView.h"
@@ -42,13 +45,12 @@ public:
                                                           AndroidBufferQueue*)>;
 
     SurfaceFlinger(
-            int width,
-            int height,
+            AndroidWindow* composeWindow,
             std::vector<ANativeWindowBuffer*> appBuffers,
-            std::vector<ANativeWindowBuffer*> composeBuffers,
-            ComposerConstructFunc&& composerFunc);
-
-    ~SurfaceFlinger() = default;
+            ComposerConstructFunc&& composerFunc,
+            Vsync::Callback&& vsyncFunc);
+    ~SurfaceFlinger();
+    void join();
 
     void connectWindow(AndroidWindow* window);
     void advanceFrame();
@@ -58,14 +60,12 @@ private:
 
     android::base::Lock mLock;
 
-    AndroidBufferQueue mFromHwc;
-    AndroidBufferQueue mToHwc;
-
     AndroidBufferQueue mApp2Sf;
     AndroidBufferQueue mSf2App;
 
-    std::unique_ptr<AndroidWindow> mComposeWindow;
+    AndroidWindow* mComposeWindow = nullptr;
     std::unique_ptr<Composer> mComposerImpl;
+    Vsync mVsync;
 
     AndroidWindow* mCurrentWindow = nullptr;
 };
