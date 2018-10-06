@@ -47,6 +47,10 @@ public:
               }
               return 0;
           }) {
+    }
+
+    void start() {
+        mShouldStop.store(false, std::memory_order_relaxed);
         mThread.start();
     }
 
@@ -82,9 +86,8 @@ Vsync::Vsync(Vsync::Callback&& callback)
 
 Vsync::~Vsync() = default;
 
-void Vsync::join() {
-    mImpl->join();
-}
+void Vsync::start() { mImpl->start(); }
+void Vsync::join() { mImpl->join(); }
 
 void Vsync::waitUntilNextVsync() {
     mImpl->waitUntilNextVsync();
