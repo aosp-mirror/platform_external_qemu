@@ -50,6 +50,15 @@ enum class StopError { NotStarted };
 using StopResult = base::Result<void, StopError>;
 std::ostream& operator<<(std::ostream& os, const StopError& value);
 
+enum class ReplayError {
+    PlaybackInProgress,
+    ParseError,
+    InternalError,
+};
+
+using ReplayResult = base::Result<void, ReplayError>;
+std::ostream& operator<<(std::ostream& os, const ReplayError& value);
+
 enum class ListenError {
     AlreadyListening,
     StartFailed,
@@ -121,6 +130,20 @@ public:
     //
     // Offworld API
     //
+
+    // Replay an initial state event from the offworld pipe.
+    virtual ReplayResult replayInitialState(
+            android::base::StringView state) = 0;
+
+    // Replay an event through from the offworld pipe.
+    //
+    // If successful, replayEvent will send an async response to the pipe handle
+    // when replay has completed.  The provided async id will be sent with that
+    // response.  If an error is returned, no messages will be sent to the pipe
+    // and the caller should propagate the error to the user.
+    virtual ReplayResult replayEvent(android::AsyncMessagePipeHandle pipe,
+                                     android::base::StringView event,
+                                     uint32_t asyncId) = 0;
 
     // Listen to the stream of automation events, returns an error if there is
     // already a pending listen operations.
