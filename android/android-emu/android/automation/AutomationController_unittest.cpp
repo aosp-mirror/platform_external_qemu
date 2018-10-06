@@ -13,13 +13,16 @@
 
 #include "android/automation/AutomationEventSink.h"
 #include "android/base/files/StdioStream.h"
+#include "android/base/testing/ProtobufMatchers.h"
 #include "android/base/testing/ResultMatchers.h"
 #include "android/base/testing/TestLooper.h"
 #include "android/base/testing/TestMemoryOutputStream.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
+#include "android/offworld/proto/offworld.pb.h"
 #include "android/physics/PhysicalModel.h"
 
+#include <gmock/gmock.h>
 #include <google/protobuf/text_format.h>
 #include <gtest/gtest.h>
 
@@ -31,6 +34,10 @@ using android::base::TestLooper;
 using android::base::TestMemoryOutputStream;
 using android::base::TestSystem;
 using android::base::TestTempDir;
+
+using android::EqualsProto;
+using android::proto::Partially;
+using testing::Eq;
 
 constexpr uint64_t secondsToNs(float seconds) {
     return static_cast<uint64_t>(seconds * 1000000000.0);
@@ -67,8 +74,12 @@ protected:
     void SetUp() override {
         mLooper.reset(new TestLooper());
         mPhysicalModel.reset(physicalModel_new());
-        mController = AutomationController::createForTest(mPhysicalModel.get(),
-                                                          mLooper.get());
+        mController = AutomationController::createForTest(
+                mPhysicalModel.get(), mLooper.get(),
+                [this](android::AsyncMessagePipeHandle pipe,
+                       const ::offworld::Response& response) {
+                    offworldSendResponse(pipe, response);
+                });
     }
 
     void TearDown() override {
@@ -81,6 +92,31 @@ protected:
         mLooper->setVirtualTimeNs(timeNs);
         EXPECT_EQ(mController->advanceTime(), timeNs);
     }
+
+    void recordOffworldEvents(std::vector<std::string>* events,
+                              android::AsyncMessagePipeHandle pipe,
+                              uint32_t asyncId) {
+        std::string proto = std::string("result: RESULT_NO_ERROR\n") +
+                            "async {\n"
+                            "    async_id: " + std::to_string(asyncId) + "\n"
+                            "    automation { event_generated {} }\n"
+                            "}";
+
+        ON_CALL(*this,
+                offworldSendResponse(Eq(pipe), Partially(EqualsProto(proto))))
+                .WillByDefault(::testing::Invoke(
+                        [events](android::AsyncMessagePipeHandle handle,
+                                 const ::offworld::Response& response) {
+                            events->push_back(response.async()
+                                                      .automation()
+                                                      .event_generated()
+                                                      .event());
+                        }));
+    }
+
+    MOCK_METHOD2(offworldSendResponse,
+                 void(android::AsyncMessagePipeHandle,
+                      const ::offworld::Response&));
 
     TestSystem mTestSystem;
     std::unique_ptr<TestLooper> mLooper;
@@ -268,4 +304,91 @@ TEST_F(AutomationControllerTest, RecordWhilePlaying) {
     EXPECT_THAT(mController->startPlayback("testRecording.txt"), IsOk());
     EXPECT_THAT(mController->startRecording("testRecording.txt"),
                 IsErr(StartError::FileOpenError));
+}
+
+TEST_F(AutomationControllerTest, Listen) {
+    android::AsyncMessagePipeHandle pipe;
+    pipe.id = 123;
+
+    EXPECT_THAT(mController->listen(pipe, 456), IsOk());
+
+    EXPECT_CALL(*this, offworldSendResponse(
+                               Eq(pipe), EqualsProto("result: RESULT_NO_ERROR\n"
+                                                     "async {\n"
+                                                     "    async_id: 456\n"
+                                                     "    complete: true\n"
+                                                     "}")))
+            .Times(1);
+
+    mController->stopListening();
+    testing::Mock::VerifyAndClearExpectations(this);
+}
+
+TEST_F(AutomationControllerTest, ListenEvents) {
+    android::AsyncMessagePipeHandle pipe;
+    pipe.id = 123;
+
+    EXPECT_THAT(mController->listen(pipe, 456), IsOk());
+
+    EXPECT_CALL(
+            *this,
+            offworldSendResponse(
+                    Eq(pipe),
+                    EqualsProto("result: RESULT_NO_ERROR\n"
+                                "async {\n"
+                                "    async_id: 456\n"
+                                "    automation {\n"
+                                "        event_generated {\n"
+                                "            event: \"event_time { timestamp: "
+                                "500000000 } stream_type: PHYSICAL_MODEL "
+                                "physical_model { type: POSITION current_value "
+                                "{ data: [0.5, 10, 0] } } \"\n"
+                                "        }\n"
+                                "    }\n"
+                                "}")))
+            .Times(1);
+
+    const uint64_t kEventTime1 = secondsToNs(0.5);
+    const vec3 kPosition1 = {0.5f, 10.0f, 0.0f};
+    advanceTimeToNs(kEventTime1);
+    physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
+                                    PHYSICAL_INTERPOLATION_STEP);
+
+    testing::Mock::VerifyAndClearExpectations(this);
+
+    EXPECT_CALL(*this, offworldSendResponse(
+                               Eq(pipe), EqualsProto("result: RESULT_NO_ERROR\n"
+                                                     "async {\n"
+                                                     "    async_id: 456\n"
+                                                     "    complete: true\n"
+                                                     "}\n")))
+            .Times(1);
+
+    mController->stopListening();
+}
+
+TEST_F(AutomationControllerTest, ListenNoEventsAfterStop) {
+    android::AsyncMessagePipeHandle pipe;
+    pipe.id = 123;
+
+    EXPECT_THAT(mController->listen(pipe, 456), IsOk());
+
+    EXPECT_CALL(*this, offworldSendResponse(
+                               Eq(pipe), EqualsProto("result: RESULT_NO_ERROR\n"
+                                                     "async {\n"
+                                                     "    async_id: 456\n"
+                                                     "    complete: true\n"
+                                                     "}\n")))
+            .Times(1);
+
+    mController->stopListening();
+    testing::Mock::VerifyAndClearExpectations(this);
+
+    const uint64_t kEventTime1 = secondsToNs(0.5);
+    const vec3 kPosition1 = {0.5f, 10.0f, 0.0f};
+    advanceTimeToNs(kEventTime1);
+    physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
+                                    PHYSICAL_INTERPOLATION_STEP);
+
+    testing::Mock::VerifyAndClearExpectations(this);
 }
