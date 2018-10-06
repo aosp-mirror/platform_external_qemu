@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "89aaf3b7_9a153fe5",
+        "filename": "android/android-emu/android/automation/AutomationController.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-06T04:33:31Z",
+      "side": 1,
+      "message": "This is to enable recording the events that occur from the guest application, with something like Espresso test recorder, which can later be replayed with replayEvent.  Basically recording and playback on the guest.",
+      "parentUuid": "0e937779_6d53afc0",
+      "range": {
+        "startLine": 125,
+        "startChar": 0,
+        "endLine": 126,
+        "endChar": 43
+      },
+      "revId": "f8d1322f662047afad077651fb5518878fd2ed50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3092be00_75c339b2",
         "filename": "android/android-emu/android/automation/AutomationController_unittest.cpp",
         "patchSetId": 1
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "09b5c319_903dd737",
+        "filename": "android/android-emu/android/automation/AutomationController_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-06T04:33:31Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "3092be00_75c339b2",
+      "range": {
+        "startLine": 81,
+        "startChar": 20,
+        "endLine": 81,
+        "endChar": 40
+      },
+      "revId": "f8d1322f662047afad077651fb5518878fd2ed50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8ea6fa91_631fc564",
         "filename": "android/android-emu/android/automation/AutomationController_unittest.cpp",
         "patchSetId": 1
@@ -91,6 +139,30 @@
       "revId": "f8d1322f662047afad077651fb5518878fd2ed50",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0809d4b6_62cfeca6",
+        "filename": "android/android-emu/android/automation/AutomationController_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-06T04:33:31Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "8ea6fa91_631fc564",
+      "range": {
+        "startLine": 116,
+        "startChar": 0,
+        "endLine": 116,
+        "endChar": 38
+      },
+      "revId": "f8d1322f662047afad077651fb5518878fd2ed50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
