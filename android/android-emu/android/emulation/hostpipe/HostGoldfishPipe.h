@@ -53,7 +53,7 @@ public:
     WriteResult write(void* pipe, const std::vector<uint8_t>& data);
 
     unsigned poll(void* pipe) const;
-    int getErrno() const { return mErrno; }
+    int getErrno() const;
 
     // Sets a callback that will be invoked when the pipe is signaled by the
     // host, accepts an "int wakes" parameter that matches contains PIPE_WAKE_*
