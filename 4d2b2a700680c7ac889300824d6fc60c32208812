@@ -22,6 +22,30 @@
       "revId": "4d2b2a700680c7ac889300824d6fc60c32208812",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8086a3e7_455b906f",
+        "filename": "android/android-emu/android/automation/AutomationController.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-06T06:06:12Z",
+      "side": 1,
+      "message": "I originally did this, and went back and evaluated it again, and think that keeping these separate has other simplifying properties that make it worthwhile.  For normal events, there is a timestamp where they occur, so they can be queued up and evaluated in order.  For the initial state, there\u0027s no timestamp-- it\u0027s an immediate snapshot.\n\nWhen replaying, it is odd if we immediately apply it when replayEvent typically queues, and still strange if we queue it since users may not expect it to be delayed.\n\nMaking it separate makes the most sense for now, but I\u0027ll keep this feedback in mind.\n\nNote that to parse protos I need to know the destination type ahead of time, so I\u0027d need to do something like wrap the RecordedEvent in another proto, like:\n\nmessage StreamedEvent {\n    optional InitialState initial_state \u003d 1;\n    optional RecordedEvent event \u003d 2;\n}\n\nCurrently they look like this:\nevent_time { timestamp: 500000000 } stream_type: PHYSICAL_MODEL physical_model { type: POSITION current_value { data: [0.5, 10, 0] } } \n\nWith the wrapped event, it would be: \nevent { event_time { timestamp: 500000000 } stream_type: PHYSICAL_MODEL physical_model { type: POSITION current_value { data: [0.5, 10, 0] } } }\n\nIdeally I\u0027d like to make them shorter, I\u0027m considering a change that would make them like this:\n\ntime_offset: 50000 physical_model { type: POSITION current_value { data: [0.5, 10, 0] } }",
+      "parentUuid": "ad55b7c5_4a8a5c36",
+      "range": {
+        "startLine": 134,
+        "startChar": 0,
+        "endLine": 134,
+        "endChar": 60
+      },
+      "revId": "4d2b2a700680c7ac889300824d6fc60c32208812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
