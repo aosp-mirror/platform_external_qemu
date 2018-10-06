@@ -22,6 +22,30 @@
       "revId": "a60ec082474df7ee4058fcc014048fed40f7373f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "019d9214_911b3906",
+        "filename": "android/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1465,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-06T00:17:59Z",
+      "side": 1,
+      "message": "typo in file name. Let me make a separate commit for that.",
+      "parentUuid": "605f37b5_d3f096b7",
+      "range": {
+        "startLine": 1465,
+        "startChar": 0,
+        "endLine": 1465,
+        "endChar": 45
+      },
+      "revId": "a60ec082474df7ee4058fcc014048fed40f7373f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
