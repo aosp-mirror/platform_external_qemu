@@ -90,6 +90,24 @@ std::ostream& operator<<(std::ostream& os, const StopError& value) {
     return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const ReplayError& value) {
+    switch (value) {
+        case ReplayError::PlaybackInProgress:
+            os << "Playback in progress";
+            break;
+        case ReplayError::ParseError:
+            os << "Parse error";
+            break;
+        case ReplayError::InternalError:
+            os << "Internal error";
+            break;
+            // Default intentionally omitted so that missing statements generate
+            // errors.
+    }
+
+    return os;
+}
+
 std::ostream& operator<<(std::ostream& os, const ListenError& value) {
     switch (value) {
         case ListenError::AlreadyListening:
@@ -207,6 +225,122 @@ private:
     Optional<pb::RecordedEvent> mNextCommand;
     std::unique_ptr<android::base::Stream> mStream;
 };
+
+class OffworldEventSource : public EventSource {
+public:
+    OffworldEventSource(android::AsyncMessagePipeHandle pipe,
+                        StringView event,
+                        uint32_t asyncId,
+                        std::function<void(android::AsyncMessagePipeHandle,
+                                           const ::offworld::Response&)>
+                                sendMessageCallback)
+        : mSendMessageCallback(sendMessageCallback) {
+        addEvents(pipe, event, asyncId);
+    }
+
+    ~OffworldEventSource() {
+        // Make sure we consume all events to trigger all replay complete
+        // notifications.
+        while (!mEvents.empty()) {
+            consumeNextCommand();
+        }
+    }
+
+    pb::RecordedEvent consumeNextCommand() override {
+        CHECK(!mEvents.empty());
+
+        Event event = std::move(mEvents.front());
+        mEvents.pop_front();
+
+        if (event.lastEvent) {
+            ::offworld::Response response = createAsyncResponse(event.asyncId);
+            response.mutable_async()->set_complete(true);
+            response.mutable_async()
+                    ->mutable_automation()
+                    ->mutable_replay_complete();
+            mSendMessageCallback(event.pipe, response);
+        }
+
+        return event.event;
+    }
+
+    bool getNextCommandTime(DurationNs* outTime) override {
+        if (mEvents.empty()) {
+            VLOG(automation) << "No more events";
+            return false;
+        }
+
+        const Event& event = mEvents.front();
+        *outTime = event.event.event_time().timestamp();
+        return true;
+    }
+
+    bool addEvents(android::AsyncMessagePipeHandle pipe,
+                   StringView event,
+                   uint32_t asyncId) {
+        using namespace google::protobuf;
+
+        std::vector<StringView> splitEventStrings;
+        split(event, "\n", [&splitEventStrings](StringView str) {
+            splitEventStrings.push_back(str);
+        });
+
+        std::vector<pb::RecordedEvent> newEvents;
+        for (auto subEventStr : splitEventStrings) {
+            io::ArrayInputStream stream(subEventStr.data(), subEventStr.size());
+            pb::RecordedEvent event;
+            if (!TextFormat::Parse(&stream, &event) ||
+                stream.ByteCount() != subEventStr.size()) {
+                VLOG(automation) << "Did not reach string EOF, parse error?";
+                return false;
+            }
+
+            if (!event.has_event_time() ||
+                !event.event_time().has_timestamp()) {
+                VLOG(automation) << "Event missing timestamp";
+                return false;
+            }
+
+            newEvents.push_back(event);
+        }
+
+        if (newEvents.empty()) {
+            VLOG(automation) << "No events";
+            return false;
+        }
+
+        for (size_t i = 0; i < newEvents.size(); ++i) {
+            const bool last = i + 1 == newEvents.size();
+
+            Event event;
+            event.event = std::move(newEvents[i]);
+            event.lastEvent = last;
+            event.pipe = pipe;
+            event.asyncId = asyncId;
+
+            mEvents.push_back(std::move(event));
+        }
+
+        return true;
+    }
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(OffworldEventSource);
+
+    struct Event {
+        pb::RecordedEvent event;
+
+        bool lastEvent = false;
+        android::AsyncMessagePipeHandle pipe;
+        uint32_t asyncId = 0;
+    };
+
+    std::deque<Event> mEvents;
+    std::function<void(android::AsyncMessagePipeHandle,
+                       const ::offworld::Response&)>
+            mSendMessageCallback;
+};
+
 class AutomationControllerImpl : public AutomationController {
 public:
     AutomationControllerImpl(PhysicalModel* physicalModel,
@@ -228,6 +362,12 @@ public:
 
     StartResult startPlayback(StringView filename) override;
     StopResult stopPlayback() override;
+
+    ReplayResult replayInitialState(StringView state) override;
+
+    ReplayResult replayEvent(android::AsyncMessagePipeHandle pipe,
+                             StringView event,
+                             uint32_t asyncId) override;
 
     ListenResult listen(android::AsyncMessagePipeHandle pipe,
                         uint32_t asyncId) override;
@@ -257,6 +397,7 @@ private:
     DurationNs mNextPlaybackCommandTime = 0L;
 
     // Offworld state.
+    OffworldEventSource* mOffworldEventSource = nullptr;
     std::unique_ptr<ListenPipeStream> mPipeListener;
 
     std::function<void(android::AsyncMessagePipeHandle,
@@ -517,6 +658,72 @@ StopResult AutomationControllerImpl::stopPlayback() {
     return Ok();
 }
 
+ReplayResult AutomationControllerImpl::replayInitialState(
+        android::base::StringView state) {
+    if (mPlayingFromFile) {
+        return Err(ReplayError::PlaybackInProgress);
+    }
+
+    pb::InitialState initialState;
+    if (!google::protobuf::TextFormat::ParseFromString(state, &initialState)) {
+        LOG(ERROR) << "Could not load initial data";
+        return Err(ReplayError::ParseError);
+    }
+
+    if (!initialState.has_initial_time() ||
+        !initialState.initial_time().has_timestamp()) {
+        LOG(ERROR) << "Initial state missing timestamp";
+        return Err(ReplayError::ParseError);
+    }
+
+    const DurationNs initialTime = initialState.initial_time().timestamp();
+
+    mPlaybackStartTime = mLooper->nowNs(Looper::ClockType::kVirtual);
+    mPlaybackTimeBase = initialTime;
+
+    const int loadStateResult =
+            physicalModel_loadState(mPhysicalModel, initialState);
+    if (loadStateResult != 0) {
+        LOG(ERROR) << "physicalModel_loadState failed with " << loadStateResult;
+        return Err(ReplayError::InternalError);
+    }
+
+    return Ok();
+}
+
+ReplayResult AutomationControllerImpl::replayEvent(
+        android::AsyncMessagePipeHandle pipe,
+        android::base::StringView event,
+        uint32_t asyncId) {
+    if (mPlayingFromFile) {
+        return Err(ReplayError::PlaybackInProgress);
+    }
+
+    if (!mOffworldEventSource) {
+        std::unique_ptr<OffworldEventSource> source(new OffworldEventSource(
+                pipe, event, asyncId, mSendMessageCallback));
+
+        DurationNs nextCommandTime;
+        if (source->getNextCommandTime(&nextCommandTime)) {
+            // Header parsed, initialize class state.
+            mOffworldEventSource = source.get();
+            mPlaybackEventSource = std::move(source);
+
+            mNextPlaybackCommandTime = nextCommandTime;
+        } else {
+            LOG(INFO) << "Replay did not contain any commands";
+            return Err(ReplayError::ParseError);
+        }
+    } else {
+        if (!mOffworldEventSource->addEvents(pipe, event, asyncId)) {
+            LOG(INFO) << "Replay did not contain any commands";
+            return Err(ReplayError::ParseError);
+        }
+    }
+
+    return Ok();
+}
+
 ListenResult AutomationControllerImpl::listen(
         android::AsyncMessagePipeHandle pipe,
         uint32_t asyncId) {
@@ -575,6 +782,7 @@ void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
     if (!mPlaybackEventSource->getNextCommandTime(&mNextPlaybackCommandTime)) {
         VLOG(automation) << "Playback hit EOF";
         mPlaybackEventSource.reset();
+        mOffworldEventSource = nullptr;
     }
 }
 
