@@ -238,6 +238,8 @@ make_sample = \
     $(eval LOCAL_INSTALL_OPENGL := true) \
     $(eval LOCAL_LDFLAGS += $(standalone_common_LDFLAGS)) \
     $(eval LOCAL_LDLIBS += $(standalone_common_LDLIBS)) \
+    $(if $(filter linux,$(BUILD_TARGET_OS)), \
+      $(eval LOCAL_LDFLAGS += -Wl,-rpath,\$$$$ORIGIN/lib$(BUILD_TARGET_SUFFIX),-rpath,\$$$$ORIGIN/lib$(BUILD_TARGET_SUFFIX)/gles_swiftshader)) \
     $(eval $(call emugl-end-module)) \
 
 # Only build samples on 64-bit hosts
