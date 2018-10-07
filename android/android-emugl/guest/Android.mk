@@ -34,6 +34,7 @@ LOCAL_SRC_FILES := \
     androidImpl/AndroidWindow.cpp \
     androidImpl/AndroidWindowBuffer.cpp \
     androidImpl/SurfaceFlinger.cpp \
+    androidImpl/Vsync.cpp \
 
 $(call emugl-end-module)
 
