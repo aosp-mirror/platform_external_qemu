@@ -34,6 +34,14 @@ public:
                         int usage = GRALLOC_USAGE_HW_RENDER,
                         int format = HAL_PIXEL_FORMAT_RGBA_8888,
                         int stride = 0);
+
+    // Creating a buffer without needing a window.
+    AndroidWindowBuffer(int width, int height,
+                        buffer_handle_t buffer,
+                        int usage = GRALLOC_USAGE_HW_RENDER,
+                        int format = HAL_PIXEL_FORMAT_RGBA_8888,
+                        int stride = 0);
+
     ~AndroidWindowBuffer() = default;
 };
 
