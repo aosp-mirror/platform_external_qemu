@@ -14,11 +14,16 @@
 #include <gtest/gtest.h>
 
 #include "AndroidWindow.h"
+#include "Vsync.h"
 
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/system/System.h"
 
+#include <atomic>
 #include <memory>
 #include <vector>
+
+using android::base::System;
 
 namespace aemu {
 
@@ -87,6 +92,24 @@ TEST(AndroidWindow, BufferQueue) {
         EXPECT_EQ(itemsForQueueing[i].buffer, item.buffer);
         EXPECT_EQ(itemsForQueueing[i].fenceFd, item.fenceFd);
     }
+}
+
+// TestSystem will totally mess this up. Disable for now
+TEST(Vsync, DISABLED_Basic) {
+    std::atomic<int> count { 0 };
+    Vsync vsync([&count]() { ++count; });
+
+    constexpr System::Duration kSleepIntervalMs = 20;
+    constexpr System::Duration kSleepLimitMs = 15000;
+
+    System::Duration totalSleepMs = 0;
+    while (count.load(std::memory_order_relaxed) == 0) {
+        totalSleepMs += kSleepIntervalMs;
+        System::get()->sleepMs(kSleepIntervalMs);
+        ASSERT_LE(totalSleepMs, kSleepLimitMs);
+    }
+
+    vsync.join();
 }
 
 }  // namespace aemu
