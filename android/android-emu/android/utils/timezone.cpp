@@ -871,6 +871,9 @@ get_zoneinfo_timezone( void )
         char		          tzname[128];
         time_t		          t = time(NULL);
         struct tm*            tm = localtime(&t);
+        // The lookup table above doesn't include "Daylight" in its timezone
+        // name. Thus, we always set dst to 0 (b/782174)
+        tm->tm_isdst = 0;
         const Win32Timezone*  win32tz = _win32_timezones;
 
         if (!tm) {
