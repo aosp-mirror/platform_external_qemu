@@ -868,7 +868,7 @@ get_zoneinfo_timezone( void )
 {
     if (!android_timezone)
     {
-        char		          tzname[128];
+        char                     tmpBuf[128];
         time_t		          t = time(NULL);
         struct tm*            tm = localtime(&t);
         const Win32Timezone*  win32tz = _win32_timezones;
@@ -878,11 +878,16 @@ get_zoneinfo_timezone( void )
             return NULL;
         }
 
-        memset(tzname, 0, sizeof(tzname));
-        strftime(tzname, sizeof(tzname) - 1, "%Z", tm);
-
+        memset(tmpBuf, 0, sizeof(tmpBuf));
+        strftime(tmpBuf, sizeof(tmpBuf) - 1, "%Z", tm);
+        std::string tzname(tmpBuf);
+        size_t found = tzname.find("Daylight");
+        if (found != std::string::npos) {
+            std::string replacement("Standard");
+            tzname.replace(found, sizeof(replacement), replacement);
+        }
         for (win32tz = _win32_timezones; win32tz->win_name != NULL; win32tz++)
-            if ( !strcmp(win32tz->win_name, tzname) ) {
+            if (!strcmp(win32tz->win_name, tzname.c_str())) {
                 android_timezone = win32tz->zoneinfo_name;
                 goto Exit;
             }
