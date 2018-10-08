@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "aa67ce9e_4420c3bb",
+        "filename": "android/android-emu/android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 873,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-10-08T23:04:07Z",
+      "side": 1,
+      "message": "Another solution could be that I copy the value from struct tm* tm to a local struct tm. and modify is_dst in the local struct tm.",
+      "parentUuid": "51f295dc_cd674e2b",
+      "range": {
+        "startLine": 873,
+        "startChar": 35,
+        "endLine": 873,
+        "endChar": 44
+      },
+      "revId": "e49d6ad55ba7df9b46af5eb6bca2c664f08d4b61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f5d8da57_76fa777e",
         "filename": "android/android-emu/android/utils/timezone.cpp",
         "patchSetId": 3
