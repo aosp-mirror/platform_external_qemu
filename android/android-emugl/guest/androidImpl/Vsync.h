@@ -1,4 +1,4 @@
-// Copyright (C) 2018 The Android Open Source Project
+// Copyright 2018 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,18 +13,22 @@
 // limitations under the License.
 #pragma once
 
+#include <functional>
 #include <memory>
 
 namespace aemu {
 
-class Display {
+class Vsync {
 public:
-    Display(bool useWindow, int width = 256, int height = 256);
-    ~Display();
+    using Callback = std::function<void()>;
 
-    float getDevicePixelRatio();
-    void* getNative();
-    void loop();
+    Vsync(Callback&& vsyncCallback);
+    ~Vsync();
+
+    void start();
+    void join();
+
+    void waitUntilNextVsync();
 
 private:
     class Impl;

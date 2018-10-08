@@ -13,6 +13,7 @@
 // limitations under the License.
 #pragma once
 
+#include "android/base/synchronization/Lock.h"
 #include "android/emulation/VmLock.h"
 
 namespace android {
@@ -41,6 +42,37 @@ public:
 
     int mLockCount = 0;
     int mUnlockCount = 0;
+    VmLock* mOldVmLock = nullptr;
+    bool mInstalled = false;
+};
+
+class HostVmLock : public VmLock {
+public:
+    static HostVmLock* getInstance();
+
+    HostVmLock() : mOldVmLock(VmLock::set(this)), mInstalled(true) {}
+
+    ~HostVmLock() { release(); }
+
+    void release() {
+        if (mInstalled) {
+            // NOTE: A value of nullptr for mOldVmLock is valid.
+            VmLock::set(mOldVmLock);
+            mInstalled = false;
+        }
+    }
+
+    void lock() override { mLock.lock(); }
+    void unlock() override { mLock.unlock(); }
+    virtual bool isLockedBySelf() const override {
+        if (mLock.tryLock()) {
+            mLock.unlock();
+            return false;
+        }
+        return true;
+    }
+
+    mutable base::Lock mLock;
     VmLock* mOldVmLock = nullptr;
     bool mInstalled = false;
 };
