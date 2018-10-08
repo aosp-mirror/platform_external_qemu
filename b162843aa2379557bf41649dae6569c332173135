@@ -22,6 +22,52 @@
       "revId": "b162843aa2379557bf41649dae6569c332173135",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fffc1e83_c27b21f6",
+        "filename": "android/android-emu/android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 887,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-10-08T20:51:45Z",
+      "side": 1,
+      "message": "this has to be the length of the \"Daylight\" string. And there\u0027s no need to create a new string to just replace something:\n\nauto toReplace \u003d StringView(\"Daylight\"); // check if this has to be different for different languages, and what the resulting string would look like.\nauto found \u003d tzname.find(toReplace.data(), toReplace.size());\nif (found !\u003d npos) {\n    tzname.replace(found, toReplace.size(), \"Standard\"); // also check if this is the right thing for all locales\n}",
+      "range": {
+        "startLine": 887,
+        "startChar": 35,
+        "endLine": 887,
+        "endChar": 52
+      },
+      "revId": "b162843aa2379557bf41649dae6569c332173135",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "406d1485_62944ef0",
+        "filename": "android/android-emu/android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 890,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-10-08T20:51:45Z",
+      "side": 1,
+      "message": "please use a simple operator \u003d\u003d here now",
+      "range": {
+        "startLine": 890,
+        "startChar": 12,
+        "endLine": 890,
+        "endChar": 61
+      },
+      "revId": "b162843aa2379557bf41649dae6569c332173135",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
