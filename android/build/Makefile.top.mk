@@ -451,6 +451,10 @@ start-emulator-shared-lib = \
 # A varient of end-emulator-library for host programs instead
 end-emulator-shared-lib = \
     $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
+    $(if $(filter linux,$(BUILD_TARGET_OS)), \
+      $(eval LOCAL_LDFLAGS += -Wl,-rpath=\$$$$ORIGIN/lib64:\$$$$ORIGIN/lib)) \
+    $(if $(filter darwin,$(BUILD_TARGET_OS)), \
+      $(eval LOCAL_LDFLAGS += -Wl,-install_name,@rpath/$(LOCAL_MODULE)$(BUILD_TARGET_DLLEXT))) \
     $(eval $(end-emulator-module-ev)) \
 
 # A variant of start-emulator-program that also links the Google Benchmark

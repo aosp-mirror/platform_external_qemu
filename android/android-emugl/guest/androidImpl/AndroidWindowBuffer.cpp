@@ -30,15 +30,27 @@ static void hook_decRef(struct android_native_base_t* common) {
     E("Not implemented");
 }
 
-AndroidWindowBuffer::AndroidWindowBuffer(
-        AndroidWindow* window,
-        buffer_handle_t buffer,
-        int usage,
-        int format,
-        int stride) : ANativeWindowBuffer() {
+AndroidWindowBuffer::AndroidWindowBuffer(AndroidWindow* window,
+                                         buffer_handle_t buffer,
+                                         int usage,
+                                         int format,
+                                         int stride)
+    : AndroidWindowBuffer(window->width,
+                          window->height,
+                          buffer,
+                          usage,
+                          format,
+                          stride) {}
 
-    this->width = window->width;
-    this->height = window->height;
+AndroidWindowBuffer::AndroidWindowBuffer(int _width,
+                                         int _height,
+                                         buffer_handle_t buffer,
+                                         int usage,
+                                         int format,
+                                         int stride)
+    : ANativeWindowBuffer() {
+    this->width = _width;
+    this->height = _height;
     this->stride = stride;
     this->format = format;
     this->usage_deprecated = usage;
