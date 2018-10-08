@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "74045c53_f3c5223d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-10-08T21:12:23Z",
+      "side": 1,
+      "message": "well, most of the times callbacks get created in the place of construction from a lambda, meaning they are actually an r-value. Having explicit r-value reference in the ctor avoids a copy in case when there\u0027s chain of calls from one ctor to another one",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 28
+      },
+      "revId": "cbb7e3a70928856c0412a9bfd8af82344b0522ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
