@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "66c37fcc_111d82c3",
+        "filename": "android/android-emu/android/utils/timezone.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 887,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-08T18:25:37Z",
+      "side": 1,
+      "message": "Is this possible to just reset tm_isdst in struct tm and strftime it?",
+      "range": {
+        "startLine": 887,
+        "startChar": 19,
+        "endLine": 887,
+        "endChar": 26
+      },
+      "revId": "e6f32ee84a23a471dc7af90c05a551573028c1d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
