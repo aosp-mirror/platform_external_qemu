@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e98dfc1b_6c7e7748",
+        "filename": "android/android-emu/android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 884,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-10-08T20:58:32Z",
+      "side": 1,
+      "message": "I doubt if any language other than English was handled before. Refer to the lookup table above.",
+      "parentUuid": "6f06995c_5020df9f",
+      "range": {
+        "startLine": 884,
+        "startChar": 36,
+        "endLine": 884,
+        "endChar": 44
+      },
+      "revId": "b162843aa2379557bf41649dae6569c332173135",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "fffc1e83_c27b21f6",
         "filename": "android/android-emu/android/utils/timezone.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2018-10-08T20:51:45Z",
       "side": 1,
       "message": "this has to be the length of the \"Daylight\" string. And there\u0027s no need to create a new string to just replace something:\n\nauto toReplace \u003d StringView(\"Daylight\"); // check if this has to be different for different languages, and what the resulting string would look like.\nauto found \u003d tzname.find(toReplace.data(), toReplace.size());\nif (found !\u003d npos) {\n    tzname.replace(found, toReplace.size(), \"Standard\"); // also check if this is the right thing for all locales\n}",
+      "range": {
+        "startLine": 887,
+        "startChar": 35,
+        "endLine": 887,
+        "endChar": 52
+      },
+      "revId": "b162843aa2379557bf41649dae6569c332173135",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "35d1bf24_77007e12",
+        "filename": "android/android-emu/android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 887,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-10-08T20:58:32Z",
+      "side": 1,
+      "message": "Let me check if setting tm_isdst to zero will solve this problem. Previous, we never handle the situation for non-English language.",
+      "parentUuid": "fffc1e83_c27b21f6",
       "range": {
         "startLine": 887,
         "startChar": 35,
