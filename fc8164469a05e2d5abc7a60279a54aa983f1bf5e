@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3fa49132_db75e544",
+        "filename": "android/android-emugl/guest/androidImpl/Vsync.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-08T17:19:09Z",
+      "side": 1,
+      "message": "\u0026\u0026 is not useful here, just pass a copy and move the copy.",
+      "range": {
+        "startLine": 25,
+        "startChar": 18,
+        "endLine": 25,
+        "endChar": 20
+      },
+      "revId": "fc8164469a05e2d5abc7a60279a54aa983f1bf5e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
