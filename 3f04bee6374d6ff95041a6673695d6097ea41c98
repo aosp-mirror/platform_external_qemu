@@ -45,6 +45,30 @@
       "revId": "3f04bee6374d6ff95041a6673695d6097ea41c98",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d2e982e0_f199fcdc",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/GLESv2Decoder.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-08T22:04:08Z",
+      "side": 1,
+      "message": "Frank, I could not find anything like glSetError here. What do we have for this purpose?",
+      "parentUuid": "228e5411_8909b0f1",
+      "range": {
+        "startLine": 379,
+        "startChar": 12,
+        "endLine": 379,
+        "endChar": 84
+      },
+      "revId": "3f04bee6374d6ff95041a6673695d6097ea41c98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
