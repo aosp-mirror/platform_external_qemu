@@ -30,7 +30,7 @@ SurfaceFlinger::SurfaceFlinger(
         AndroidWindow* composeWindow,
         std::vector<ANativeWindowBuffer*> appBuffers,
         SurfaceFlinger::ComposerConstructFunc&& composerFunc,
-        Vsync::Callback&& vsyncFunc)
+        Vsync::Callback vsyncFunc)
     : mComposeWindow(composeWindow),
       mComposerImpl(composerFunc(mComposeWindow, &mApp2Sf, &mSf2App)),
       mVsync(std::move(vsyncFunc)) {
