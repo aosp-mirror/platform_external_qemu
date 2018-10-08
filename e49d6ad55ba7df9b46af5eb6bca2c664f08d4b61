@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "c613e469_ba3c1313",
+        "filename": "android/android-emu/android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 873,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-08T23:14:01Z",
+      "side": 1,
+      "message": "If localtime_r is available, it is recommended instead of localtime. If not, modifying a copy is fine.",
+      "parentUuid": "aa67ce9e_4420c3bb",
+      "range": {
+        "startLine": 873,
+        "startChar": 35,
+        "endLine": 873,
+        "endChar": 44
+      },
+      "revId": "e49d6ad55ba7df9b46af5eb6bca2c664f08d4b61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f5d8da57_76fa777e",
         "filename": "android/android-emu/android/utils/timezone.cpp",
         "patchSetId": 3
