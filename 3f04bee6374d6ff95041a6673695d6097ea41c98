@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ee36cbf5_5b3c5632",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/GLESv2Decoder.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-10-08T21:24:02Z",
+      "side": 1,
+      "message": "this condition definitely needs a comment explaining both \u0027what\u0027 and \u0027why\u0027",
+      "range": {
+        "startLine": 370,
+        "startChar": 3,
+        "endLine": 373,
+        "endChar": 55
+      },
+      "revId": "3f04bee6374d6ff95041a6673695d6097ea41c98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "228e5411_8909b0f1",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/GLESv2Decoder.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-10-08T21:24:02Z",
+      "side": 1,
+      "message": "is there any way to report an error back, via glSetError() or something similar?",
+      "range": {
+        "startLine": 379,
+        "startChar": 12,
+        "endLine": 379,
+        "endChar": 84
+      },
+      "revId": "3f04bee6374d6ff95041a6673695d6097ea41c98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
