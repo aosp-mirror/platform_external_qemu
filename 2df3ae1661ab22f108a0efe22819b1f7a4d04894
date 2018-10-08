@@ -94,6 +94,29 @@
       "revId": "2df3ae1661ab22f108a0efe22819b1f7a4d04894",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9306030_a87fa351",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-10-08T21:27:48Z",
+      "side": 1,
+      "message": "doesn\u0027t Thread class call wait() in its destructor?",
+      "range": {
+        "startLine": 218,
+        "startChar": 12,
+        "endLine": 218,
+        "endChar": 31
+      },
+      "revId": "2df3ae1661ab22f108a0efe22819b1f7a4d04894",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
