@@ -69,6 +69,30 @@
       "revId": "e49d6ad55ba7df9b46af5eb6bca2c664f08d4b61",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "86a46eac_37ca2c10",
+        "filename": "android/android-emu/android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 875,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-10-08T22:59:56Z",
+      "side": 1,
+      "message": "will do. There is actually no external bug link. https://b.corp.google.com/issues/117424123 is actually internal.",
+      "parentUuid": "f5d8da57_76fa777e",
+      "range": {
+        "startLine": 875,
+        "startChar": 47,
+        "endLine": 875,
+        "endChar": 55
+      },
+      "revId": "e49d6ad55ba7df9b46af5eb6bca2c664f08d4b61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
