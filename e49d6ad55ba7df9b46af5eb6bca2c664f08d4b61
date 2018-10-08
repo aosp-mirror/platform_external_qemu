@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "51f295dc_cd674e2b",
+        "filename": "android/android-emu/android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 873,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-10-08T22:54:46Z",
+      "side": 1,
+      "message": "Good catch. Thanks!\nActually, localtime() in mingw is thread-safe and use thread local variable according to https://stackoverflow.com/questions/18551409/localtime-r-support-on-mingw",
+      "parentUuid": "c8448f35_f9bcc010",
+      "range": {
+        "startLine": 873,
+        "startChar": 35,
+        "endLine": 873,
+        "endChar": 44
+      },
+      "revId": "e49d6ad55ba7df9b46af5eb6bca2c664f08d4b61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f5d8da57_76fa777e",
         "filename": "android/android-emu/android/utils/timezone.cpp",
         "patchSetId": 3
