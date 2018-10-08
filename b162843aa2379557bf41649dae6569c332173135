@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6f06995c_5020df9f",
+        "filename": "android/android-emu/android/utils/timezone.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 884,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-08T20:09:53Z",
+      "side": 1,
+      "message": "Will this work for languages other than English?",
+      "range": {
+        "startLine": 884,
+        "startChar": 36,
+        "endLine": 884,
+        "endChar": 44
+      },
+      "revId": "b162843aa2379557bf41649dae6569c332173135",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
