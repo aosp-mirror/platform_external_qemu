@@ -174,9 +174,9 @@ private:
         glEnableVertexAttribArray(mPosLoc);
         glEnableVertexAttribArray(mTexCoordLoc);
 
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
+        glVertexAttribPointer(mPosLoc, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
                                  0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
+        glVertexAttribPointer(mTexCoordLoc, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat),
                                  (GLvoid*)(uintptr_t)(2 * sizeof(GLfloat)));
 
         glActiveTexture(GL_TEXTURE0);
