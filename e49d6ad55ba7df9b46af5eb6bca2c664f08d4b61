@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f5d8da57_76fa777e",
+        "filename": "android/android-emu/android/utils/timezone.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 875,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-10-08T22:34:40Z",
+      "side": 1,
+      "message": "I don\u0027t think this is the correct bug ID\nBTW, is there a public link to it?",
+      "range": {
+        "startLine": 875,
+        "startChar": 47,
+        "endLine": 875,
+        "endChar": 55
+      },
+      "revId": "e49d6ad55ba7df9b46af5eb6bca2c664f08d4b61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
