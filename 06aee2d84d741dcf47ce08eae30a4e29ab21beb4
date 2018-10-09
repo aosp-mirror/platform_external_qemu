@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2e43bf8_2b6eeec8",
+        "filename": "android/android-emu/Makefile.android-emu.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-09T21:04:26Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 93,
+        "startChar": 41,
+        "endLine": 93,
+        "endChar": 42
+      },
+      "revId": "06aee2d84d741dcf47ce08eae30a4e29ab21beb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
