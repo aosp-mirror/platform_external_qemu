@@ -24,16 +24,7 @@ using android::base::PathUtils;
 
 void androidQtDefaultInit() {
     Q_INIT_RESOURCE(static_resources);
-
-    const auto resourceFile = PathUtils::join(
-                                  System::get()->getLauncherDirectory(),
-                                  "resources", "resources.rcc");
-    if (!QResource::registerResource(
-            QString::fromUtf8(resourceFile.c_str(), resourceFile.size()))) {
-        VERBOSE_PRINT(init,
-                      "Count not register resources file: '%s'",
-                      resourceFile.c_str());
-    }
+    Q_INIT_RESOURCE(resources);
 
     // Give Qt the fonts from our resource file
     int fontId = QFontDatabase::addApplicationFont(":/lib/fonts/Roboto");

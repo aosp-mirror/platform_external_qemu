@@ -78,8 +78,39 @@ LOCAL_C_INCLUDES := \
     $(LIBUUID_INCLUDES) \
     $(LZ4_INCLUDES) \
 
-PRODUCED_STATIC_LIBS=android-emu-base
+PRODUCED_STATIC_LIBS=android-emu-base emulator-libui
 PRODUCED_PROTO_LIBS=metrics featurecontrol snapshot crashreport location emulation telephony verified-boot automation offworld
+
+#  emulator-libui linker flags & settings
+#
+EMULATOR_LIBUI_LDLIBS :=
+EMULATOR_LIBUI_LDFLAGS :=
+EMULATOR_LIBUI_STATIC_LIBRARIES :=
+
+EMULATOR_LIBUI_LDFLAGS += $(QT_LDFLAGS)
+EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
+EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STATIC_LIBRARIES) $(LIBX264_STATIC_LIBRARIES) $(LIBVPX_STATIC_LIBRARIES) emulator-zlib
+EMULATOR_LIBUI_INCLUDES += $(QT_INCLUDES) $(PROTOBUF_INCLUDES)
+
+
+ifeq (linux,$(BUILD_TARGET_OS))
+EMULATOR_LIBUI_LDLIBS += -lX11
+endif
+
+# gl-widget.cpp depends on libOpenGLESDispatch, which depends on
+# libemugl_common. Using libOpenGLESDispatch ensures that the code
+# will find and use the same host EGL/GLESv2 libraries as the ones
+# used by EmuGL. Doing anything else is prone to really bad failure
+# cases.
+EMULATOR_LIBUI_STATIC_LIBRARIES += \
+    libOpenGLESDispatch \
+    libemugl_common \
+
+# ffmpeg mac dependency
+ifeq ($(BUILD_TARGET_OS),darwin)
+    EMULATOR_LIBUI_LDLIBS += -lbz2
+endif
+
 $(call end-cmake-project)
 
 # Make sure the memory modules are available. (NOP on non windows)
@@ -838,85 +869,7 @@ $(call local-link-static-c++lib)
 
 $(call end-emulator-program)
 
-##############################################################################
-#
-#  emulator-libui
-#
-#  This is the library that implements the emulator's UI on top of
-#  android-emu. Note that it depends on interfaces that must be implemented
-#  by the engine-specific glue code. As such, the code cannot be unit-tested
-#  for now.
-#
-EMULATOR_LIBUI_INCLUDES :=
-EMULATOR_LIBUI_LDLIBS :=
-EMULATOR_LIBUI_LDFLAGS :=
-EMULATOR_LIBUI_STATIC_LIBRARIES :=
 
-EMULATOR_LIBUI_INCLUDES += $(QT_INCLUDES)
-EMULATOR_LIBUI_LDFLAGS += $(QT_LDFLAGS)
-EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
-
-# The skin support sources
-include $(_ANDROID_EMU_ROOT)/android/skin/sources.mk
-
-EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STATIC_LIBRARIES) $(LIBX264_STATIC_LIBRARIES) $(LIBVPX_STATIC_LIBRARIES) emulator-zlib
-
-$(call start-emulator-library, emulator-libui)
-
-# Workaround for b/115634240
-LOCAL_SOURCE_DEPENDENCIES := $(PROTOBUF_DEPS)
-
-EMULATOR_LIBUI_INCLUDES += $(ANDROID_SKIN_INCLUDES) $(EMULATOR_LIBYUV_INCLUDES) $(PROTOBUF_INCLUDES)
-EMULATOR_LIBUI_LDLIBS += $(ANDROID_SKIN_LDLIBS)
-
-LOCAL_CFLAGS += \
-    $(EMULATOR_COMMON_CFLAGS) \
-    $(ANDROID_SKIN_CFLAGS) \
-    $(LIBXML2_CFLAGS) \
-    $(ANDROID_EMU_CFLAGS) \
-
-# ffmpeg targets C, so it doesn't care that C++11 requres a space bewteen
-# string literals which are being glued together
-LOCAL_CXXFLAGS += $(call if-target-clang,-Wno-reserved-user-defined-literal,-Wno-literal-suffix)
-
-# ffmpeg mac dependency
-ifeq ($(BUILD_TARGET_OS),darwin)
-    EMULATOR_LIBUI_LDLIBS += -lbz2
-endif
-
-LOCAL_C_INCLUDES := \
-    $(EMULATOR_COMMON_INCLUDES) \
-    $(EMULATOR_LIBUI_INCLUDES) \
-    $(FFMPEG_INCLUDES) \
-	$(PROTOBUF_INCLUDES)
-
-LOCAL_SRC_FILES += \
-    $(ANDROID_SKIN_SOURCES) \
-    android/skin/LibuiAgent.cpp \
-    android/gpu_frame.cpp \
-    android/emulator-window.c \
-    android/emulation/control/ScreenCapturer.cpp \
-    android/window-agent-impl.cpp \
-    android/main-common-ui.c \
-    android/resource.c \
-    android/recording/audio/AudioProducer.cpp \
-    android/recording/codecs/audio/VorbisCodec.cpp \
-    android/recording/codecs/video/VP9Codec.cpp \
-    android/recording/FfmpegRecorder.cpp \
-    android/recording/Frame.cpp \
-    android/recording/GifConverter.cpp \
-    android/recording/screen-recorder.cpp \
-    android/recording/video/GuestReadbackWorker.cpp \
-    android/recording/video/VideoProducer.cpp \
-    android/recording/video/VideoFrameSharer.cpp \
-
-LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
-LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
-LOCAL_QT_DYNAMIC_RESOURCES := $(ANDROID_SKIN_QT_DYNAMIC_RESOURCES)
-LOCAL_QT_UI_SRC_FILES := $(ANDROID_SKIN_QT_UI_SRC_FILES)
-
-$(call gen-hw-config-defs)
-$(call end-emulator-library)
 
 # emulator-libui unit tests
 
