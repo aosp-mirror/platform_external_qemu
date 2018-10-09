@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "624bb018_07c00307",
+        "filename": "android/android-emu/android/emulation/control/location_agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-10-09T20:47:22Z",
+      "side": 1,
+      "message": "a gnss",
+      "range": {
+        "startLine": 61,
+        "startChar": 12,
+        "endLine": 61,
+        "endChar": 19
+      },
+      "revId": "8a42c9efebcab6a2cfbbc19679d6a99032d415d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d3ff7f5_88c22f68",
+        "filename": "android/android-emu/android/gps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-10-09T20:47:22Z",
+      "side": 1,
+      "message": "Seems like this should be moved below the following test. (Even though the existing code did it this way.)",
+      "range": {
+        "startLine": 49,
+        "startChar": 4,
+        "endLine": 49,
+        "endChar": 32
+      },
+      "revId": "8a42c9efebcab6a2cfbbc19679d6a99032d415d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
