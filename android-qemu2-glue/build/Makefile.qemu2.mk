@@ -189,7 +189,6 @@ LOCAL_C_INCLUDES := \
     $(LOCAL_PATH)/tcg \
     $(ZLIB_INCLUDES) \
     $(LIBBLUEZ_INCLUDES) \
-$(info "libqemu: $(LOCAL_C_INCLUDES)")
 
 $(call end-cmake-project)
 
