@@ -443,6 +443,7 @@ int socketAccept(int socket) {
 }  // namespace
 
 void socketClose(int socket) {
+    printf("close socket %d\n", socket);
     int save_errno = errno;
 #ifdef _WIN32
     ::closesocket(socket);

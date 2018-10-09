@@ -182,6 +182,7 @@ public:
 bool MemoryAccessWatch::isSupported() {
     // TODO: HAXM
     return GetCurrentCpuAccelerator() == CPU_ACCELERATOR_HVF;
+    //return false;
 }
 
 MemoryAccessWatch::MemoryAccessWatch(AccessCallback&& accessCallback,

@@ -13,3 +13,7 @@
 // limitations under the License.
 
 int guest_data_partition_mounted = 0;
+
+struct QAndroidVmOperations;
+
+extern const QAndroidVmOperations* const gQAndroidVmOperations = nullptr;

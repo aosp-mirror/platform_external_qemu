@@ -236,6 +236,7 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
     $(call start-emulator-program, emulator-check)
 
     LOCAL_SRC_FILES := \
+        android/android-emu/stubs/stubs.cpp \
         android/emulator-check/main-emulator-check.cpp \
         android/emulator-check/PlatformInfo.cpp \
 

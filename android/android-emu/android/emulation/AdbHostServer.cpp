@@ -30,6 +30,7 @@ using android::base::StringFormat;
 
 
 static ScopedSocket connectToAdbServer(int adbClientPort) {
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
     ScopedSocket socket(android::base::socketTcp4LoopbackClient(adbClientPort));
     if (!socket.valid()) {
         socket.reset(android::base::socketTcp6LoopbackClient(adbClientPort));
@@ -40,6 +41,7 @@ static ScopedSocket connectToAdbServer(int adbClientPort) {
 // Sends a message to the ADB server on the socket file descriptor.
 // The message will be formatted according to the ADB protocol
 static bool sendMessage(int fd, const std::string& message) {
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
     // A client sends a request using the following format:
     //
     // 1. A 4-byte hexadecimal string giving the length of the payload
@@ -55,6 +57,7 @@ static bool sendMessage(int fd, const std::string& message) {
 // At most bytesToRead will be read, the return string will be resized
 // to the number of bytes that have been read, and errno will be set.
 static std::string readResponse(int fd, int bytesToRead) {
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
     std::string buffer(bytesToRead, '\0');
     unsigned int bytesRead = 0;
     while (bytesToRead > 0) {

@@ -23,6 +23,7 @@
 #include "android/crashreport/CrashReporter.h"
 #include "android/emulation/android_pipe_device.h"
 #include "android/emulation/android_pipe_host.h"
+#include "android/emulation/control/vm_operations.h"
 #include "android/emulation/DeviceContextRunner.h"
 #include "android/emulation/VmLock.h"
 
@@ -65,6 +66,8 @@ using VmLock = android::VmLock;
 using android::base::MemStream;
 using android::base::StringFormat;
 using android::crashreport::CrashReporter;
+
+extern const QAndroidVmOperations* const gQAndroidVmOperations;
 
 static BaseStream* asBaseStream(CStream* stream) {
     return reinterpret_cast<BaseStream*>(stream);
@@ -749,6 +752,14 @@ int android_pipe_guest_recv(void* internalPipe,
     auto pipe = static_cast<AndroidPipe*>(internalPipe);
     // Note that pipe may be deleted during this call, so it's not safe to
     // access pipe after this point.
+    if (gQAndroidVmOperations) {
+        const auto loadRam = gQAndroidVmOperations->loadRam;
+        if (loadRam) {
+            for (int i = 0; i < numBuffers; i++) {
+                loadRam(buffers[i].data, buffers[i].size);
+            }
+        }
+    }
     return pipe->onGuestRecv(buffers, numBuffers);
 }
 

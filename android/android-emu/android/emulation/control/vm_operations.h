@@ -140,6 +140,9 @@ typedef struct QAndroidVmOperations {
     void (*setSnapshotCallbacks)(void* opaque,
                                  const SnapshotCallbacks* callbacks);
 
+    // Gets the set of callback to listen for snapshot operations.
+    const SnapshotCallbacks* (*getSnapshotCallbacks)();
+
     // Fills in the supplied |out| with current VM configuration.
     void (*getVmConfiguration)(VmConfiguration* out);
 
@@ -150,6 +153,7 @@ typedef struct QAndroidVmOperations {
     // Notifies QEMU that the emulator is exiting, can impact how
     // QEMU snapshot save calls work.
     void (*setExiting)(void);
+    void (*loadRam)(void* hostRam, uint64_t size);
 
 } QAndroidVmOperations;
 

@@ -94,7 +94,7 @@ public:
         const android::base::Looper::FdWatch* fdWatcher() const;
         bool valid() const;
 
-    private:
+    //private:
         std::unique_ptr<android::base::Looper::FdWatch> mFdWatcher;
         ScopedSocket mSocket;
     };
@@ -261,6 +261,7 @@ private:
     AdbHostAgent* mHostAgent = nullptr;
     bool mPlayStoreImage = false;
     BufferedSocketReader mRecvBuffer;
+    int mFdEventMask = 0;
 };
 
 }  // namespace emulation

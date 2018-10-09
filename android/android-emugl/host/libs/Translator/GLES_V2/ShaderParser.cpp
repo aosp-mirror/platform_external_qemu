@@ -111,6 +111,7 @@ void ShaderParser::convertESSLToGLSL() {
     }
     std::string translationLog;
     std::string parsedSource;
+    //printf("%p: %s\n", this, m_originalSrc.c_str());
     m_valid =
         ANGLEShaderParser::translate(
             m_coreProfile,

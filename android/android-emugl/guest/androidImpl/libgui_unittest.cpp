@@ -25,6 +25,10 @@
 
 using android::base::System;
 
+struct QAndroidVmOperations;
+
+extern "C" const QAndroidVmOperations* const gQAndroidVmOperations = nullptr;
+
 namespace aemu {
 
 TEST(AndroidWindow, Basic) {

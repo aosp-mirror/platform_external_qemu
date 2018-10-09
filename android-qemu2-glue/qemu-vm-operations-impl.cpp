@@ -498,6 +498,10 @@ static void set_snapshot_callbacks(void* opaque,
     }
 }
 
+static const SnapshotCallbacks* get_snapshot_callbacks() {
+    return &sSnapshotCallbacks;
+}
+
 // These are QEMU's functions to check for each specific hypervisor status.
 #ifdef CONFIG_HAX
   extern "C" int hax_enabled(void);
@@ -563,9 +567,11 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .snapshotDelete = qemu_snapshot_delete,
         .snapshotRemap = qemu_snapshot_remap,
         .setSnapshotCallbacks = set_snapshot_callbacks,
+        .getSnapshotCallbacks = get_snapshot_callbacks,
         .getVmConfiguration = get_vm_config,
         .setFailureReason = set_failure_reason,
         .setExiting = set_exiting,
+        .loadRam = qemu_ram_load,
 };
 const QAndroidVmOperations* const gQAndroidVmOperations =
         &sQAndroidVmOperations;

@@ -32,6 +32,7 @@ LOCAL_SRC_FILES := \
     android/crashreport/ui/ConfirmDialog.cpp \
     android/resource.c \
     android/skin/resource.c \
+    stubs/stubs.cpp \
 
 LOCAL_STATIC_LIBRARIES := \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
@@ -106,6 +107,7 @@ LOCAL_CFLAGS += -O0
 
 LOCAL_SRC_FILES += \
     android/crashreport/testing/main-test-crasher.cpp \
+    stubs/stubs.cpp \
 
 LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
@@ -151,6 +153,7 @@ LOCAL_SRC_FILES := \
     android/crashreport/CrashService_unittest.cpp \
     android/crashreport/CrashSystem_unittest.cpp \
     android/crashreport/HangDetector_unittest.cpp \
+    stubs/stubs.cpp \
 
 LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
