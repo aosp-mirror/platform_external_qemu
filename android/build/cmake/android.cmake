@@ -46,7 +46,6 @@
 function(internal_android_target_settings name modifier)
   string(TOLOWER ${modifier} modifier)
   string(TOUPPER ${modifier} MODIFIER)
-  message(STATUS "if(DEFINED ${name}_libs_${modifier}")
   if(DEFINED ${name}_libs_${modifier})
     target_link_libraries(${name} ${MODIFIER} ${${name}_libs_${modifier}})
   endif()
@@ -143,14 +142,37 @@ function(add_android_executable name)
 endfunction()
 
 function(add_android_protobuf libname protofiles)
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${protofiles})
-set(${libname}_public ${PROTOBUF_INCLUDE_DIR})
-set(${libname}_src ${PROTO_SRCS} ${PROTO_HDRS})
-set(${libname}_includes_public ${PROTOBUF_INCLUDE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-set(${libname}_libs_public ${PROTOBUF_LIBRARIES})
-add_android_library(${libname})
-if (FRANKENBUILD)
+  protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${protofiles})
+  set(${libname}_public ${PROTOBUF_INCLUDE_DIR})
+  set(${libname}_src ${PROTO_SRCS} ${PROTO_HDRS})
+  set(${libname}_includes_public ${PROTOBUF_INCLUDE_DIR}
+      ${CMAKE_CURRENT_BINARY_DIR})
+  set(${libname}_libs_public ${PROTOBUF_LIBRARIES})
+  add_android_library(${libname})
+  if(FRANKENBUILD)
     add_library(lib${libname}_proto ALIAS ${libname})
-endif()
+  endif()
 endfunction()
 
+# hw-config generator
+function(generate_hw_config)
+  add_custom_command(
+    PRE_BUILD
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h
+    COMMAND
+      python ${ANDROID_QEMU2_TOP_DIR}/android/scripts/gen-hw-config.py
+      ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini
+      ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h
+    VERBATIM)
+  set_source_files_properties(
+    ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h
+    PROPERTIES
+    GENERATED
+    TRUE)
+  set_source_files_properties(
+    ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h
+    PROPERTIES
+    HEADER_FILE_ONLY
+    TRUE)
+set(ANDROID_HW_CONFIG_H ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h PARENT_SCOPE)
+endfunction()
