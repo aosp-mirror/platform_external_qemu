@@ -871,15 +871,19 @@ get_zoneinfo_timezone( void )
         char		          tzname[128];
         time_t		          t = time(NULL);
         struct tm*            tm = localtime(&t);
-        const Win32Timezone*  win32tz = _win32_timezones;
-
         if (!tm) {
             D("%s: could not determine current date/time\n", __FUNCTION__);
             return NULL;
         }
+        // The lookup table above doesn't include "Daylight" in its timezone
+        // name. Thus, we always set dst to 0 (b/117424123)
+        struct tm local_tm = *tm;
+        local_tm.tm_isdst = 0;
+        const Win32Timezone*  win32tz = _win32_timezones;
+
 
         memset(tzname, 0, sizeof(tzname));
-        strftime(tzname, sizeof(tzname) - 1, "%Z", tm);
+        strftime(tzname, sizeof(tzname) - 1, "%Z", &local_tm);
 
         for (win32tz = _win32_timezones; win32tz->win_name != NULL; win32tz++)
             if ( !strcmp(win32tz->win_name, tzname) ) {
