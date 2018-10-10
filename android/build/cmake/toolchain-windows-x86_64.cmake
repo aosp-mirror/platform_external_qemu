@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
+get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_DIR}" DIRECTORY)
 list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 include(toolchain)
 
@@ -21,7 +21,7 @@ set (ANDROID_TARGET_TAG "windows-x86_64")
 set (ANDROID_TARGET_OS "windows")
 #set(CMAKE_SYSTEM_NAME Windows)
 SET(CMAKE_SYSTEM_NAME Windows)
-get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../../" ABSOLUTE)
+get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../../" ABSOLUTE)
 
 # Cmake goes crazy if we set AR manually.. so let's not do that.
 toolchain_generate("${ANDROID_TARGET_TAG}")
@@ -32,6 +32,7 @@ list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/lib/libgcc_s_seh-1.dll>l
 list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/lib32/libgcc_s_sjlj-1.dll>lib/libgcc_s_sjlj-1.dll")
 
 list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-m64 -static-libgcc -Xlinker --build-id -mcx16")
+set(RUNTIME_CONFIGURED TRUE)
 
 # here is the target environment located, used to
 # locate packages. We don't want to do any package resolution

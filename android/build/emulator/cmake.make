@@ -23,7 +23,7 @@ LOCAL_CMAKE_MODULE   :=$(call local-cmake-path,$(LOCAL_MODULE))
 LOCAL_CMAKELISTS     :=$(LOCAL_PATH)/CMakeLists.txt
 LOCAL_BUILT_MAKEFILE :=$(LOCAL_CMAKE_MODULE)/Makefile
 
-include $(_BUILD_CORE_DIR)/emulator/binary.make
+# include $(_BUILD_CORE_DIR)/emulator/binary.make
 
 LOCAL_LDFLAGS += $(foreach lib,\
     $(LOCAL_WHOLE_STATIC_LIBRARIES) $(LOCAL_STATIC_LIBRARIES),\
@@ -42,27 +42,37 @@ else
  $(eval LOCAL_EXEEXT:=$(BUILD_HOST_EXEEXT))
 endif
 
-$(foreach prg,$(PRODUCED_EXECUTABLES), \
-  $(eval map := $(subst =,$(space),$(prg))) \
-  $(eval exe := $(word 1, $(map))) \
-  $(eval to  := $(word 2, $(map))) \
-  $(eval to  := $(if $(to),$(to),$(exe))) \
-  $(eval LOCAL_BUILT_MODULE := $(LOCAL_CMAKE_MODULE)/$(exe)) \
-  $(eval LOCAL_INSTALL_MODULE := $(call local-executable-install-path,$(exe))) \
-  $(eval $(call make-cmake-project,$(LOCAL_BUILT_MAKEFILE),$(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT),$(exe), $(LOCAL_DEPENDENCIES))) \
-  $(eval $(call install-binary,$(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT),$(LOCAL_INSTALL_MODULE),--strip-all,$(LOCAL_INSTALL_OPENGL))) \
-  $(eval LOCAL_SOURCE_DEPENDENCIES += $(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT)) \
+## Copy dependency data, needed for the unit tests..
+$(foreach src,$(LOCAL_COPY_COMMON_PREBUILT_RESOURCES), \
+    $(eval $(call install-file,$(COMMON_PREBUILTS_DIR)/$(src),$(call local-resource-install-path,$(notdir $(src))))) \
 )
 
-$(foreach exe,$(PRODUCED_TESTS), \
-  $(eval LOCAL_BUILT_MODULE := $(LOCAL_CMAKE_MODULE)/$(exe)) \
-  $(eval LOCAL_INSTALL_MODULE := $(call local-executable-install-path,$(exe))) \
-  $(eval $(call make-cmake-project,$(LOCAL_BUILT_MAKEFILE),$(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT),$(exe))) \
-  $(eval $(call install-binary,$(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT),$(LOCAL_INSTALL_MODULE),--strip-all,$(LOCAL_INSTALL_OPENGL))) \
-  $(eval $(call run-test,$(LOCAL_INSTALL_MODULE))) \
-  $(eval LOCAL_SOURCE_DEPENDENCIES += $(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT)) \
+$(foreach src,$(LOCAL_COPY_COMMON_TESTDATA), \
+    $(eval $(call install-file,$(COMMON_PREBUILTS_DIR)/testdata/$(src),$(call local-testdata-path,$(notdir $(src))))) \
 )
 
+$(foreach src,$(LOCAL_COPY_COMMON_TESTDATA_DIRS), \
+    $(eval $(call install-dir,$(COMMON_PREBUILTS_DIR)/testdata/$(src),$(call local-testdata-path,$(src)))) \
+)
+
+LOCAL_SOURCE_DEPENDENCIES += $(LOCAL_ADDITIONAL_DEPENDENCIES)
+
+# Note that order of execution is very important, as we are setting up local source
+# dependencies between the generated archives.
+# We need this in our frankenstein build as we want to make sure that gnumake deals
+# properly with concurrency. (If we don't than cmake starts interfering in a nasty way).
+#
+# Generally it goes like this:
+# > Protobufs > archives > shared_libraries > executables > unittests
+#
+# 1. We compile all the protobufs and make them available.
+# 2. We compile the archives, they might use generated protobuf files
+# 3. We created shared libs, the could link against archives we created in step 1,2
+# 4. The executables, who could depend on 1,2,3..
+#
+# This works, but has the unfortunate side effect that the second (cmake) build will do
+# a NOP depenency analysis (which we want).
+#
 $(foreach lib,$(PRODUCED_PROTO_LIBS), \
   $(eval LOCAL_BUILT_MODULE := $(LOCAL_CMAKE_MODULE)/lib$(lib).a) \
   $(eval LOCAL_FINAL_MODULE := $(call local-library-path,lib$(lib)_proto)) \
@@ -77,8 +87,44 @@ $(foreach lib,$(PRODUCED_PROTO_LIBS), \
 $(foreach lib,$(PRODUCED_STATIC_LIBS), \
   $(eval LOCAL_BUILT_MODULE := $(LOCAL_CMAKE_MODULE)/lib$(lib).a) \
   $(eval LOCAL_FINAL_MODULE := $(call local-library-path,$(lib))) \
-  $(eval $(call make-cmake-project,$(LOCAL_BUILT_MAKEFILE),$(LOCAL_BUILT_MODULE),$(lib), $(PROTOBUF_DEPS))) \
+  $(eval $(call make-cmake-project,$(LOCAL_BUILT_MAKEFILE),$(LOCAL_BUILT_MODULE),$(lib), $(LOCAL_SOURCE_DEPENDENCIES))) \
   $(eval $(call install-file,$(LOCAL_BUILT_MODULE),$(LOCAL_FINAL_MODULE))) \
+  $(eval LOCAL_SOURCE_DEPENDENCIES += $(LOCAL_BUILT_MODULE)) \
+)
+
+$(foreach lib,$(PRODUCED_SHARED_LIBS), \
+  $(eval LOCAL_BUILT_MODULE := $(LOCAL_CMAKE_MODULE)/lib$(lib).so) \
+  $(eval LOCAL_FINAL_MODULE := $(call local-shared-library-path,$(lib))) \
+  $(eval LOCAL_INSTALL_MODULE := $(call local-shared-library-install-path,lib$(lib))) \
+  $(eval $(call make-cmake-project,$(LOCAL_BUILT_MAKEFILE),$(LOCAL_BUILT_MODULE),$(lib), $(LOCAL_SOURCE_DEPENDENCIES))) \
+  $(eval $(call install-file,$(LOCAL_BUILT_MODULE),$(LOCAL_FINAL_MODULE))) \
+  $(eval $(call install-binary,$(LOCAL_FINAL_MODULE),$(LOCAL_INSTALL_MODULE),--strip-unneeded)) \
+  $(eval LOCAL_SOURCE_DEPENDENCIES += $(LOCAL_BUILT_MODULE)) \
+)
+
+$(foreach prg,$(PRODUCED_EXECUTABLES), \
+  $(eval map := $(subst =,$(space),$(prg))) \
+  $(eval exe := $(word 1, $(map))) \
+  $(eval to  := $(word 2, $(map))) \
+  $(eval to  := $(if $(to),$(to),$(exe))) \
+  $(eval LOCAL_BUILT_MODULE := $(LOCAL_CMAKE_MODULE)/$(exe)) \
+  $(eval LOCAL_INSTALL_MODULE := $(call local-executable-install-path,$(to))) \
+  $(eval $(call make-cmake-project,$(LOCAL_BUILT_MAKEFILE),$(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT),$(exe), $(LOCAL_SOURCE_DEPENDENCIES))) \
+  $(eval $(call install-binary,$(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT),$(LOCAL_INSTALL_MODULE),--strip-all,$(LOCAL_INSTALL_OPENGL))) \
+  $(eval LOCAL_SOURCE_DEPENDENCIES += $(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT)) \
+)
+
+$(foreach exe,$(PRODUCED_TESTS), \
+  $(eval map := $(subst =,$(space),$(exe))) \
+  $(eval from := $(word 1, $(map))) \
+  $(eval to  := $(word 2, $(map))) \
+  $(eval to  := $(if $(to),$(to),$(exe))) \
+  $(eval LOCAL_BUILT_MODULE := $(LOCAL_CMAKE_MODULE)/$(from)) \
+  $(eval LOCAL_INSTALL_MODULE := $(call local-executable-install-path,$(to))) \
+  $(eval $(call make-cmake-project,$(LOCAL_BUILT_MAKEFILE),$(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT),$(from), $(LOCAL_SOURCE_DEPENDENCIES))) \
+  $(eval $(call install-binary,$(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT),$(LOCAL_INSTALL_MODULE),--strip-all,$(LOCAL_INSTALL_OPENGL))) \
+  $(eval $(call run-test,$(LOCAL_INSTALL_MODULE))) \
+  $(eval LOCAL_SOURCE_DEPENDENCIES += $(LOCAL_BUILT_MODULE)$(LOCAL_EXEEXT)) \
 )
 
 

@@ -14,14 +14,14 @@
 
 # Note! This file can get included many times, so we use some tricks to
 # Only calculate the settings once.
-get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
+get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_DIR}" DIRECTORY)
 list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 include(toolchain)
 
 # First we create the toolchain
 set(ANDROID_TARGET_TAG "linux-x86_64")
 set(ANDROID_TARGET_OS "linux")
-get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../../" ABSOLUTE)
+get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../../" ABSOLUTE)
 toolchain_generate("${ANDROID_TARGET_TAG}")
 
 get_env_cache(RUNTIME_OS_PROPERTIES)
@@ -34,8 +34,10 @@ if ("${RUNTIME_OS_DEPENDENCIES}" STREQUAL "")
     set_env_cache(RUNTIME_OS_DEPENDENCIES "${STD_OUT}>lib64/${RESOLVED_FILENAME}")
 
     # Configure the RPATH be dynamic..
-    set_env_cache(RUNTIME_OS_PROPERTIES "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64'")
+    set_env_cache(RUNTIME_OS_PROPERTIES "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64';LINK_FLAGS>=-lstdc++")
 endif()
+
+set(RUNTIME_CONFIGURED TRUE)
 
 # here is the target environment located, used to
 # locate packages. We don't want to do any package resolution

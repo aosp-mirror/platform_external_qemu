@@ -47,6 +47,10 @@ add_subdirectory(libyuv)
 add_subdirectory(murmurhash)
 add_subdirectory(tinyepoxy)
 add_subdirectory(libkeymaster3)
+add_subdirectory(ext4_utils)
+
+add_library(picosha2 INTERFACE)
+target_include_directories(picosha2 INTERFACE picosha2)
 
 if(WIN32 OR ("${LOCAL_OS}" STREQUAL "windows") )
   add_subdirectory(mman-win32)
