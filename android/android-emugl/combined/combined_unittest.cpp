@@ -59,6 +59,7 @@ static constexpr int kWindowSize = 256;
 class GoldfishOpenglTestEnv {
 public:
     GoldfishOpenglTestEnv() {
+        System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR", System::get()->getProgramDirectory());
         android::featurecontrol::setEnabledOverride(
                 android::featurecontrol::GLESDynamicVersion, false);
         android::featurecontrol::setEnabledOverride(

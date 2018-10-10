@@ -149,12 +149,14 @@ Hal Hal::hal_;
 #else
 #define LIBSUFFIX ".so"
 #endif
+// The cmake build system prefixes all libraries with lib
+#define LIBPREFIX "lib"
 
 void* LoadLibrary(const android_dlextinfo& dlextinfo,
                   const char* subname,
                   int subname_len) {
 
-    const char kLibFormat[] = "vulkan.%*s" LIBSUFFIX;
+    const char kLibFormat[] = LIBPREFIX "vulkan.%*s" LIBSUFFIX;
     char* name = static_cast<char*>(
         alloca(sizeof(kLibFormat) + static_cast<size_t>(subname_len)));
     sprintf(name, kLibFormat, subname_len, subname);

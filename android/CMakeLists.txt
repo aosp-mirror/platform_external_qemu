@@ -1,0 +1,5 @@
+add_subdirectory(third_party)
+add_subdirectory(android-emu)
+add_subdirectory(android-emugl)
+add_subdirectory(emulator)
+add_subdirectory(emulator-check)

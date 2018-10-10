@@ -33,8 +33,6 @@ include $(LOCAL_PATH)/android/third_party/picosha2/picosha2.mk
 ifneq ($(BUILD_TARGET_OS),windows_msvc)
     include $(LOCAL_PATH)/android/third_party/libvirglrenderer.mk
 endif
-include $(LOCAL_PATH)/android/third_party/third_party_libs.mk
-include $(LOCAL_PATH)/android/third_party/ext4_utils/sources.mk
 
 # Bluez only works on linux
 ifeq ($(BUILD_TARGET_OS),linux)
@@ -44,11 +42,6 @@ endif
 # Libusb only works on darwin/linux
 ifneq ($(filter linux darwin, $(BUILD_TARGET_OS)),)
   include $(LOCAL_PATH)/android/third_party/libusb.mk
-endif
-
-ifeq (true,$(BUILD_BENCHMARKS))
-include $(LOCAL_PATH)/android/third_party/regex-win32/sources.mk
-include $(LOCAL_PATH)/android/third_party/google-benchmark/sources.mk
 endif
 
 EMULATOR_VERSION_CFLAGS :=
@@ -160,7 +153,7 @@ endef
 
 endif  # BUILD_TARGET_OS == windows
 
-include $(LOCAL_PATH)/android/android-emu/Makefile.android-emu.mk
+include $(LOCAL_PATH)/android/android.mk
 
 ifeq (,$(CONFIG_AEMU64_ONLY))
     include $(LOCAL_PATH)/android/android-emu/Makefile.crash-service.mk
@@ -268,7 +261,7 @@ endif # !CONFIG_AEMU64_ONLY
 ###
 ###  GPU emulation libraries
 ###
-include $(EMUGL_SRCDIR)/Android.mk
+include $(EMUGL_SRCDIR)/Android.mk # Cmake.mk
 
 ##############################################################################
 ##############################################################################
