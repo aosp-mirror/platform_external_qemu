@@ -21,6 +21,16 @@ set(FFMPEG_LIBAVCODEC "${PREBUILT_ROOT}/lib/libavcodec.a")
 set(FFMPEG_LIBAVFORMAT "${PREBUILT_ROOT}/lib/libavformat.a")
 set(FFMPEG_LIBAVUTIL "${PREBUILT_ROOT}/lib/libavutil.a")
 set(FFMPEG_LIBRARIES "${PREBUILT_ROOT}/lib/libavformat.a;${PREBUILT_ROOT}/lib/libavfilter.a;${PREBUILT_ROOT}/lib/libavcodec.a;${PREBUILT_ROOT}/lib/libswresample.a;${PREBUILT_ROOT}/lib/libswscale.a;${PREBUILT_ROOT}/lib/libavutil.a;${X264_LIBRARIES};${VPX_LIBRARIES}")
+if (${ANDROID_TARGET_TAG} MATCHES "windows.*")
+    # We need winsock for avformat, so make that dependency explicit
+    list(APPEND FFMPEG_LIBRARIES -lws2_32)
+endif()
+if (${ANDROID_TARGET_TAG} STREQUAL "darwin-x86_64")
+    # Well, macos needs something extra as well
+    list(APPEND FFMPEG_LIBRARIES "-framework VideoToolbox")
+    list(APPEND FFMPEG_LIBRARIES "-framework VideoDecodeAcceleration")
+    list(APPEND FFMPEG_LIBRARIES "-lbz2")
+endif()
 set(FFMPEG_FOUND TRUE)
 set(PACKAGE_EXPORT "FFMPEG_INCLUDE_DIR;FFMPEG_INCLUDE_DIRS;FFMPEG_LIBRARIES;FFMPEG_CLIENT_LIBRARIES;FFMPEG_FOUND;FFMPEG_LIBAVUTIL;FFMPEG_LIBAVFORMAT;FFMPEG_LIBAVCODEC")
 
