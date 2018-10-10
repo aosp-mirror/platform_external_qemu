@@ -191,5 +191,6 @@ docker-src.*
 *~
 *.DS_Store
 /default.profraw
+/build
 *.ast_raw
 *.depend_raw
