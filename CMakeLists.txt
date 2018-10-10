@@ -1,208 +1,364 @@
 cmake_minimum_required(VERSION 3.5)
-project("Android-Emulator")
+message(STATUS "Compiling for target: ${ANDROID_TARGET_TAG}")
+if(NOT DEFINED ANDROID_TARGET_TAG)
+  message(STATUS "ANDROID_TARGET_TAG is undefined [${ANDROID_TARGET_TAG}]")
+  message(
+    FATAL_ERROR
+      "You need to invoke the cmake generator with a proper toolchain from android/build/cmake, pass: -DCMAKE_TOOLCHAIN_FILE=./android/build/cmake/toolchain-xxxx.cmake to cmake"
+    )
+endif()
+message(STATUS "Using toolchain for ${ANDROID_TARGET_TAG}")
 
-# COMPILER + PATH CONFIGURATION
-# =============================
-# TODO(jansene): This section is needed as a bridge to the android build system.
-string(REPLACE " "
-               ";"
-               INCLUDES
-               ${LOCAL_C_INCLUDES})
+include(android)
+include(prebuilts)
 
-# Use same compiler config as android build system
-set(CMAKE_C_FLAGS ${LOCAL_CFLAGS})
-set(CMAKE_CXX_FLAGS "${LOCAL_CFLAGS} ${LOCAL_CXXFLAGS}")
+set(OPTION_CRASHUPLOAD "NONE" CACHE STRING "Destination of crash reports.")
+set(OPTION_SDK_TOOLS_REVISION "" CACHE STRING "The tools revision to use, if any")
+set(OPTION_SDK_TOOLS_BUILD_NUMBER "" CACHE STRING "The sdk buildnumber to use, if any.")
+set(OPTION_ASAN "" CACHE STRING "The list of build sanitizers to user")
 
-# Work around some gcc/mingw issues
-if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set_property(CACHE OPTION_CRASHUPLOAD PROPERTY STRINGS NONE STAGING PROD)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+# So we are using some C++14 features..
+set(CMAKE_CXX_STANDARD 14)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Pthreads from the prebuilts please!
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+prebuilt(Threads)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  add_c_flag("-O0")
+  add_definitions("-DANDROID_DEBUG")
+  if(NOT OPTION_ASAN)
+    set(OPTION_ASAN address)
+  endif()
+
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    # Build an instrumented version of the code  that generates coverage mapping to enable code coverage analysis
+    set(ANDROID_CODE_COVERAGE TRUE)
+    add_c_flag("-fcoverage-mapping")
+    add_c_flag("-fprofile-instr-generate")
+    add_c_flag("-fprofile-arcs")
+    add_c_flag("-ftest-coverage")
+    add_c_flag("--coverage")
+  endif()
+else()
+  add_definitions("-DNDEBUG=1")
+  if(ANDROID_TARGET_TAG MATCHES "windows.*")
+    add_c_flag("-O2")
+  else()
+    add_c_flag("-O3")
+  endif()
 endif()
 
-# Make sure we create archives in the same way..
-set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> crs <TARGET> <LINK_FLAGS> <OBJECTS>")
-set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> crs <TARGET> <LINK_FLAGS> <OBJECTS>")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  add_definitions("-D__STDC_CONSTANT_MACROS" "-D_LIBCPP_VERSION=__GLIBCPP__")
 
-add_library(android-qemu-deps INTERFACE)
+  # Clang goes balistic on our codebase, so let's just suppress all the things.
+  add_c_flag("-Wno-mismatched-tags")
+  add_c_flag("-Wno-\#warnings")
+  add_c_flag("-Wno-unused-variable")
+  add_c_flag("-Wno-deprecated-declarations")
+  add_c_flag("-Wno-c++14-extensions")
+  add_c_flag("-Wno-array-bounds")
+  add_c_flag("-Wno-builtin-requires-header")
+  add_c_flag("-Wno-constant-conversion")
+  add_c_flag("-Wno-deprecated-register")
+  add_c_flag("-Wno-extern-c-compat")
+  add_c_flag("-Wno-gnu-designator")
+  add_c_flag("-Wno-inconsistent-missing-override")
+  add_c_flag("-Wno-initializer-overrides")
+  add_c_flag("-Wno-invalid-constexpr")
+  add_c_flag("-Wno-macro-redefined")
+  add_c_flag("-Wno-missing-braces")
+  add_c_flag("-Wno-missing-field-initializers")
+  add_c_flag("-Wno-parentheses-equality")
+  add_c_flag("-Wno-pessimizing-move")
+  add_c_flag("-Wno-pointer-bool-conversion")
+  add_c_flag("-Wno-return-type-c-linkage")
+  add_c_flag("-Wno-self-assign")
+  add_c_flag("-Wno-shift-negative-value")
+  add_c_flag("-Wno-string-plus-int")
+  add_c_flag("-Wno-uninitialized")
+  add_c_flag("-Wno-unknown-pragmas")
+  add_c_flag("-Wno-unused-command-line-argument")
+  add_c_flag("-Wno-unused-const-variable")
+  add_c_flag("-Wno-unused-function")
+  add_c_flag("-Wno-unused-lambda-capture")
+  add_c_flag("-Wno-unused-private-field")
+  add_c_flag("-Wno-unused-value")
+  add_c_flag("-Wswitch")
+endif()
 
-target_include_directories(
+add_cxx_flag("-Wno-invalid-offsetof")
+
+# Disable generation of information about every class with virtual functions for use by the C++ runtime type
+# identification features (dynamic_cast and typeid). If you don't use those parts of the language, you can save some
+# space by using this flag. Note that exception handling uses the same information, but it will generate it as needed.
+# The  dynamic_cast operator can still be used for casts that do not require runtime type information, i.e. casts to
+# void * or to unambiguous base classes.
+add_cxx_flag("-fno-rtti")
+
+# Compiling with -fno-exceptions disables exceptions support and uses the variant of C++ libraries without exceptions.
+# Use of try, catch, or throw results in an error message. Linking objects that have been compiled with -fno-exceptions
+# automatically selects the libraries without exceptions. You can use the linker option --no_exceptions to diagnose
+# whether the objects being linked contain exceptions. If an exception propagates into a function that has been compiled
+# without exceptions support, then the program terminates.
+add_cxx_flag("-fno-exceptions")
+
+# Ensure that <inttypes.h> always defines all interesting macros.
+add_definitions("-D__STDC_LIMIT_MACROS=1" "-D__STDC_FORMAT_MACROS=1")
+
+# (From https://stackoverflow.com/questions/5582211/what-does-define-gnu-source-imply) with GNU_SOURCE, you will get:
+#
+# * access to lots of nonstandard GNU/Linux extension functions
+# * access to traditional functions which were omitted from the POSIX standard (often for good reason, such as being
+#   replaced with better alternatives, or being tied to particular legacy implementations)
+# * access to low-level functions that cannot be portable, but that you sometimes need for implementing system utilities
+#   like mount, ifconfig, etc. broken behavior for lots of POSIX-specified functions, where the GNU folks disagreed with
+#   the standards committee on how the functions should behave and decided to do their own thing. As long as you're
+#   aware of these things, it should not be a problem to define _GNU_SOURCE, but you should avoid defining it and
+#   instead define _POSIX_C_SOURCE=200809L or _XOPEN_SOURCE=700 when possible to ensure that your programs are portable.
+add_definitions("-D_GNU_SOURCE=1")
+
+# Enable large-file support (i.e. make off_t a 64-bit value).
+add_definitions("-D_FILE_OFFSET_BITS=64" "-D_LARGEFILE_SOURCE")
+
+if(OPTION_ASAN)
+  message(STATUS "Enabling ASAN with: ${OPTION_ASAN}")
+  add_c_flag("-fsanitize=${OPTION_ASAN}")
+  add_c_flag("-g3")
+  if(OPTION_ASAN STREQUAL "address")
+    add_c_flag("-fno-omit-frame-pointer")
+  endif()
+endif()
+
+# We now have configured our base compiler..
+
+# Unit tests please!
+enable_testing()
+
+# TODO(jansene): Make these prebuilts. Files on which the emulator (and some unit tests dependes). If a target takes a
+# prebuilt_dependency on these, then they will be binplaced in  ${EXECUTABLE_DIRECTORY}/lib/...
+set(EMULATOR_FEATURE_DEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/android/data/advancedFeatures.ini>lib/advancedFeatures.ini"
+    "${ANDROID_QEMU2_TOP_DIR}/android/data/advancedFeaturesCanary.ini>lib/advancedFeaturesCanary.ini"
+    "${ANDROID_QEMU2_TOP_DIR}/android/data/emu-original-feature-flags.protobuf>lib/emu-original-feature-flags.protobuf")
+
+set(
+  SWIFTSHADER_DEPENDENCIES
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_TAG}/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_TAG}/lib/libGLES_CM${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLES_CM${CMAKE_SHARED_LIBRARY_SUFFIX}"
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_TAG}/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
+  )
+
+prebuilt(CURL)
+prebuilt(GLIB2)
+prebuilt(ZLIB)
+prebuilt(PIXMAN)
+prebuilt(VIRGLRENDERER)
+prebuilt(TCMALLOC)
+prebuilt(OpenSSL)
+
+# There is no USB support on windows, so we will not try to resolve it.
+if(NOT ANDROID_TARGET_TAG MATCHES "windows.*")
+  prebuilt(USB)
+endif()
+
+# Get the versions from git (Note that both functions are doing pretty much the same)
+get_git_version(ANDROID_QEMU_VERSION)
+get_git_sha(ANDROID_QEMU_SHA)
+
+# Generate the qemu-version header.
+configure_file(qemu-version.h.in qemu-version.h @ONLY)
+
+# Lets set up a qemu dependency that we all can rely on
+android_add_interface(android-qemu-deps)
+
+# This defines all the include directories needed to compile the libqemu libraries. There should be no need to make
+# additions here.
+android_target_include_directories(
   android-qemu-deps
+  all
   INTERFACE
-    tcg
-    tcg/i386
-    accel/tcg
-    include
-    .
-    qemu2-auto-generated
-    ${INCLUDES}
-    ../../prebuilts/android-emulator-build/qemu-android-deps/${LOCAL_TARGET_TAG}/include
-    android-qemu2-glue/config/${LOCAL_TARGET_TAG}/)
+  tcg
+  tcg/i386
+  accel/tcg
+  include
+  disas/libvixl
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${GLIB2_INCLUDE_DIRS}
+  ${USB_INCLUDE_DIRS}
+  ${PIXMAN_INCLUDE_DIRS}
+  ${VIRGLRENDERER_INCLUDE_DIRS}
+  qemu2-auto-generated
+  ../../prebuilts/android-emulator-build/qemu-android-deps/${ANDROID_TARGET_TAG}/include
+  android-qemu2-glue/config/${ANDROID_TARGET_TAG}/)
 
-target_compile_definitions(android-qemu-deps
-                           INTERFACE
-                           -DNEED_CPU_H
-                           -DPOISON_CONFIG_ANDROID)
+# These are the rules that every qemu component needs, regardless of the platform you are compiling on. Please document
+# any flags you set as not everyone is a compiler expert!
+android_target_compile_definitions(android-qemu-deps all INTERFACE
+                                   # Enable faster migration code when saving RAM to a snapshot
+                                   "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION"
+                                   # Enable VIRGL
+                                   "-DCONFIG_VIRGL"
+                                   # We link against the static version of curl, so make sure the source is aware of
+                                   # that.
+                                   ${CURL_DEFINITIONS})
+android_target_compile_options(android-qemu-deps all INTERFACE "-Werror=implicit-function-declaration"
+                               "-Wno-unused-function"
+                               # Do not allow the compiler to assume the strictest aliasing rules
+                               # applicable to the language being compiled. For C (and C++), this activates
+                               # optimizations based on the type of expressions. In particular, an object
+                               # of one type is assumed never to reside at the same address as an object of
+                               # a different type, unless the types are almost the same.  Supposedly this
+                               # can introduce weird failures esp. on older gcc versions (MINGW)
+                               # (See http://thiemonagel.de/2010/01/no-strict-aliasing/)
+                               "-fno-strict-aliasing"
+                               # This option instructs the compiler to assume that signed arithmetic
+                               # overflow of addition, subtraction and multiplication wraps around using
+                               # twos-complement representation. This flag enables some optimizations and
+                               # disables others. The options -ftrapv and -fwrapv override each other, so
+                               # using -ftrapv -fwrapv on the command-line results in -fwrapv being
+                               # effective. Qemu is using this, so we use it as well.
+                               "-fwrapv"
+                               # The -fno-common option specifies that the compiler should instead place
+                               # uninitialized global variables in the data section of the object file.
+                               # This inhibits the merging of tentative definitions by the linker so you
+                               # get a multiple-definition error if the same variable is defined in more
+                               # than one compilation unit. Compiling with -fno-common is useful on targets
+                               # for which it provides better performance, or if you wish to verify that
+                               # the program will work on other systems that always treat uninitialized
+                               # variable definitions this way.
+                               # Remove this and you'll get all sorts of fun linker issues.
+                               "-fno-common")
 
-if(${LOCAL_TARGET_TAG} STREQUAL "darwin-x86_64")
-  set(ANDROID_QEMU_i386_STUBS "")
-  set(ANDROID_QEMU_arm_STUBS "hvf-stub.c;accel/stubs/hax-stub.c")
-  target_compile_options(android-qemu-deps
-                         INTERFACE "-fno-strict-aliasing" "-fno-common"
-                                   "-Wno-address-of-packed-member")
+# Make sure we make our dependent libraries available.
+android_target_link_libraries(android-qemu-deps all INTERFACE ${GLIB2_LIBRARIES} ${PIXMAN_LIBRARIES} ${ZLIB_LIBRARIES})
 
-  target_compile_definitions(android-qemu-deps INTERFACE "-D_DARWIN_C_SOURCE=1")
-elseif(${LOCAL_TARGET_TAG} STREQUAL "windows-x86")
-  set(ANDROID_QEMU_arm_STUBS "hvf-stub.c;accel/stubs/hax-stub.c")
-  set(ANDROID_QEMU_i386_STUBS "hvf-stub.c")
-  target_compile_options(android-qemu-deps
-                         INTERFACE "-Werror=implicit-function-declaration"
-                                   "-mms-bitfields"
-                                   "-fno-strict-aliasing"
-                                   "-fno-common"
-                                   "-Wno-unused-function"
-                                   "-Wno-unused-variable"
-                                   "-Wno-unused-but-set-variable"
-                                   "-Wno-maybe-uninitialized"
-                                   "-m32")
-  target_compile_definitions(android-qemu-deps
-                             INTERFACE
-                             "-DCURL_STATICLIB"
-                             "-DENABLE_DLOG=0"
-                             "-DWIN32_LEAN_AND_MEAN"
-                             "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION"
-                             "-DCONFIG_VIRGL"
-                             "-DWINVER=0x601"
-                             "-D_FILE_OFFSET_BITS=64"
-                             "-D_GNU_SOURCE"
-                             "-D_GNU_SOURCE=1"
-                             "-D_LARGEFILE_SOURCE"
-                             "-D_WIN32_WINNT=0x601"
-                             "-D__USE_MINGW_ANSI_STDIO=1"
-                             "-D__packed=__attribute((packed))")
-elseif(${LOCAL_TARGET_TAG} STREQUAL "windows-x86_64")
-  set(ANDROID_QEMU_arm_STUBS "hvf-stub.c;accel/stubs/hax-stub.c")
-  set(ANDROID_QEMU_i386_STUBS "hvf-stub.c")
-  target_compile_options(android-qemu-deps
-                         INTERFACE "-Werror=implicit-function-declaration"
-                                   "-mms-bitfields"
-                                   "-fno-strict-aliasing"
-                                   "-fno-common"
-                                   "-Wno-unused-function"
-                                   "-Wno-unused-variable"
-                                   "-Wno-unused-but-set-variable"
-                                   "-Wno-maybe-uninitialized")
-  target_compile_definitions(android-qemu-deps
-                             INTERFACE
-                             "-DCURL_STATICLIB"
-                             "-DENABLE_DLOG=0"
-                             "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION"
-                             "-DCONFIG_VIRGL"
-                             "-DSTDC_LIMIT_MACROS=1"
-                             "-DWIN32_LEAN_AND_MEAN"
-                             "-DWINVER=0x601"
-                             "-D_FILE_OFFSET_BITS=64"
-                             "-D_GNU_SOURCE"
-                             "-D_GNU_SOURCE=1"
-                             "-D_LARGEFILE_SOURCE"
-                             "-D_WIN32_WINNT=0x601"
-                             "-D__STDC_FORMAT_MACROS=1"
-                             "-D__USE_MINGW_ANSI_STDIO=1"
-                             "-D__packed=__attribute\(\(packed\)\)")
-elseif(${LOCAL_TARGET_TAG} STREQUAL "windows_msvc-x86_64")
-  set(ANDROID_QEMU_arm_STUBS "hvf-stub.c;accel/stubs/hax-stub.c")
-  set(ANDROID_QEMU_i386_STUBS "hvf-stub.c")
-  target_compile_options(android-qemu-deps
-                         INTERFACE "-Werror=implicit-function-declaration"
-                                   "-mms-bitfields"
-                                   "-fno-strict-aliasing"
-                                   "-fno-common"
-                                   "-Wno-unused-function"
-                                   "-Wno-unused-variable")
-  target_compile_definitions(android-qemu-deps
-                             INTERFACE
-                             "-DCURL_STATICLIB"
-                             "-DENABLE_DLOG=0"
-                             "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION"
-                             "-DSTDC_LIMIT_MACROS=1"
-                             "-DWIN32_LEAN_AND_MEAN"
-                             "-DWINVER=0x601"
-                             "-D_FILE_OFFSET_BITS=64"
-                             "-D_GNU_SOURCE"
-                             "-D_GNU_SOURCE=1"
-                             "-D_LARGEFILE_SOURCE"
-                             "-D_WIN32_WINNT=0x601"
-                             "-D__STDC_FORMAT_MACROS=1"
-                             "-D__USE_MINGW_ANSI_STDIO=1"
-                             "-D__packed=__attribute\(\(packed\)\)")
-elseif(${LOCAL_TARGET_TAG} STREQUAL "linux-x86_64")
-  set(ANDROID_QEMU_i386_STUBS "hvf-stub.c;accel/stubs/hax-stub.c")
-  set(ANDROID_QEMU_arm_STUBS "hvf-stub.c;accel/stubs/hax-stub.c")
-  target_include_directories(android-qemu-deps INTERFACE linux-headers)
-  target_compile_options(android-qemu-deps
-                         INTERFACE -Wno-address-of-packed-member)
+# Let's bin place everything in the root, with the shared libs in the right place
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib64)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/archives)
+
+# Now we add the normal android libs, so we can use them
+add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../googletest googletest)
+# Okay, google test is not happy under msvc
+if("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
+  # Don't include the custom TempDir function. It is for Android only.
+  target_compile_definitions(gtest PRIVATE -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
 endif()
+add_subdirectory(android)
+add_subdirectory(android-qemu2-glue)
+
+# Darwin definitions
+set(ANDROID_QEMU_i386_STUBS_darwin-x86_64 "hw/i386/acpi-build.c;hw/i386/pc_piix.c")
+set(ANDROID_QEMU_arm_STUBS_darwin-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
+android_target_compile_options(android-qemu-deps darwin-x86_64 INTERFACE
+                               # Emit extra code to check for buffer overflows, such as stack smashing
+                               # attacks. This is done by adding a guard variable to functions with
+                               # vulnerable objects. This includes functions that call alloca, and
+                               # functions with buffers larger than 8 bytes. The guards are initialized
+                               # when a function is entered and then checked when the function exits. If a
+                               # guard check fails, an error message is printed and the program exits.
+                               # Like -fstack-protector but includes additional functions to be protected —
+                               # those that have local array definitions, or have references to local frame
+                               # addresses.
+                               "-fstack-protector-strong"
+                               "-Wno-address-of-packed-member"
+                               "-Wno-format-security"
+                               "-Wno-initializer-overrides"
+                               "-Wno-tautological-compare"
+                               "-Wno-tautological-pointer-compare"
+                               "-Wno-unused-variable")
+android_target_compile_definitions(android-qemu-deps darwin-x86_64 INTERFACE "-D_DARWIN_C_SOURCE=1")
+android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE "-framework IOKit" "-framework CoreFoundation")
+
+# Windows x86 definitions
+set(ANDROID_QEMU_arm_STUBS_windows-x86 "hvf-stub.c;accel/stubs/hax-stub.c")
+set(ANDROID_QEMU_i386_STUBS_windows-x86 "hvf-stub.c;hw/i386/acpi-build.c;hw/i386/pc_piix.c")
+set(ANDROID_QEMU_arm_STUBS_windows-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
+set(ANDROID_QEMU_i386_STUBS_windows-x86_64 "hvf-stub.c;hw/i386/acpi-build.c;hw/i386/pc_piix.c")
+android_target_compile_options(android-qemu-deps
+                               windows
+                               INTERFACE
+                               "-Werror=implicit-function-declaration"
+                               "-mms-bitfields"
+                               "-Wno-unused-variable"
+                               "-Wno-unused-but-set-variable"
+                               "-Wno-maybe-uninitialized"
+                               "-mcx16")
+android_target_compile_definitions(android-qemu-deps
+                                   windows
+                                   INTERFACE
+                                   "-DWIN32_LEAN_AND_MEAN"
+                                   "-DWINVER=0x601"
+                                   "-D_WIN32_WINNT=0x601"
+                                   "-D__USE_MINGW_ANSI_STDIO=1")
+
+# Linux settings
+set(ANDROID_QEMU_i386_STUBS_linux-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c;hw/i386/acpi-build.c;hw/i386/pc_piix.c")
+set(ANDROID_QEMU_arm_STUBS_linux-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
+android_target_include_directories(android-qemu-deps linux-x86_64 INTERFACE linux-headers)
+android_target_compile_options(android-qemu-deps linux-x86_64 INTERFACE
+                               # Emit extra code to check for buffer overflows, such as stack smashing
+                               # attacks. This is done by adding a guard variable to functions with
+                               # vulnerable objects. This includes functions that call alloca, and
+                               # functions with buffers larger than 8 bytes. The guards are initialized
+                               # when a function is entered and then checked when the function exits. If a
+                               # guard check fails, an error message is printed and the program exits.
+                               # Like -fstack-protector but includes additional functions to be protected —
+                               # those that have local array definitions, or have references to local frame
+                               # addresses.
+                               "-fstack-protector-strong"
+                               "-Wno-address-of-packed-member"
+                               "-Wno-format-security"
+                               "-Wno-initializer-overrides"
+                               "-Wno-tautological-compare"
+                               "-Wno-tautological-pointer-compare"
+                               "-Wno-unused-variable")
+android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE "${TCMALLOC_LIBRARIES} -lpulse -lutil")
+android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE "-framework CoreAudio")
+android_target_link_libraries(android-qemu-deps windows-x86_64 INTERFACE "-lwinmm -ldxguid")
 
 set(ANDROID_AUTOGEN "qemu2-auto-generated")
-set(ANDROID_QEMU2_TOP_DIR ${LOCAL_QEMU2_TOP_DIR})
-include(cmake-main.${LOCAL_TARGET_TAG}.inc)
+set(ANDROID_QEMU2_TOP_DIR ${ANDROID_QEMU2_TOP_DIR})
+include(cmake-main.${ANDROID_TARGET_TAG}.inc)
 
-add_library(libqemu2-common ${qemu2-shared_sources}
-            ${qemu2-shared_generated_sources})
-target_include_directories(
-  libqemu2-common
-  PRIVATE android-qemu2-glue/config/${LOCAL_TARGET_TAG}/
-          ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/target-x86_64
-          ${INCLUDES}
-          include)
+set(libqemu2-common_src ${qemu2-shared_sources} ${qemu2-shared_generated_sources})
+android_add_library(libqemu2-common)
+android_target_compile_definitions(libqemu2-common all PRIVATE "-DPOISON_CONFIG_ANDROID")
+android_target_link_libraries(libqemu2-common all PUBLIC android-qemu-deps)
 
-add_library(libqemu2-util ${libqemuutil_sources}
-            ${libqemuutil_generated_sources})
-target_include_directories(
-  libqemu2-util
-  PRIVATE android-qemu2-glue/config/${LOCAL_TARGET_TAG}/
-          ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/target-x86_64
-          ${INCLUDES}
-          include)
+set(libqemu2-util_src ${libqemuutil_sources} ${libqemuutil_generated_sources})
+android_add_library(libqemu2-util)
+android_target_link_libraries(libqemu2-util all PUBLIC android-qemu-deps -lfdt ${USB_LIBRARIES})
+android_target_link_libraries(libqemu2-util windows PUBLIC -lpsapi)
+android_target_compile_definitions(libqemu2-util all PRIVATE "-DPOISON_CONFIG_ANDROID")
 
-add_library(libqemu2-system-i386
-            ${qemu-system-i386_sources}
-            ${qemu-system-i386_generated_sources}
-            ${ANDROID_QEMU_i386_STUBS})
-add_library(libqemu2-system-x86_64
-            ${qemu-system-x86_64_sources}
-            ${qemu-system-x86_64_generated_sources}
-            ${ANDROID_QEMU_i386_STUBS})
-add_library(libqemu2-system-armel
-            ${qemu-system-arm_sources}
-            ${qemu-system-arm_generated_sources}
-            ${ANDROID_QEMU_arm_STUBS})
-add_library(libqemu2-system-aarch64
-            ${qemu-system-aarch64_sources}
-            ${qemu-system-aarch64_generated_sources}
-            ${ANDROID_QEMU_arm_STUBS})
+set(libqemustub_src ${libqemustub_sources} ${libqemuutil_generated_sources})
+android_add_library(libqemustub)
+android_target_link_libraries(libqemustub all PUBLIC android-qemu-deps)
 
-target_include_directories(
-  libqemu2-system-i386
-  PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/target-x86
-          ${ANDROID_QEMU2_TOP_DIR}/target/i386)
+# Qemu-img
+set(qemu-img_src ${qemu-img_sources} block/qcow2-bitmap.c)
+set(qemu-img_linux-x86_64_src scsi/pr-manager.c)
+android_add_executable(qemu-img)
+android_target_link_libraries(qemu-img all PRIVATE libqemu2-util libqemustub android-qemu-deps)
 
-target_link_libraries(libqemu2-system-i386 PRIVATE android-qemu-deps)
+# Create the qemu targets.
+android_add_qemu_executable(i386 x86 "${ANDROID_QEMU_i386_STUBS_${ANDROID_TARGET_TAG}}" i386)
+android_add_qemu_executable(x86_64 x86_64 "${ANDROID_QEMU_i386_STUBS_${ANDROID_TARGET_TAG}}" i386)
+android_add_qemu_executable(aarch64 arm64 "${ANDROID_QEMU_arm_STUBS_${ANDROID_TARGET_TAG}}" arm)
+android_add_qemu_executable(arm arm "${ANDROID_QEMU_arm_STUBS_${ANDROID_TARGET_TAG}}" arm)
 
-target_include_directories(
-  libqemu2-system-x86_64
-  PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/target-x86_64
-          ${ANDROID_QEMU2_TOP_DIR}/target/i386)
-target_link_libraries(libqemu2-system-x86_64 PRIVATE android-qemu-deps)
+# The tests currently work on linux only.
+if(ANDROID_TARGET_TAG MATCHES "linux.*")
+  include(qemu-test.cmake)
+endif()
 
-target_include_directories(
-  libqemu2-system-armel
-  PRIVATE ${ANDROID_QEMU2_TOP_DIR}/disas/libvixl
-          ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/target-arm
-          ${ANDROID_QEMU2_TOP_DIR}/target/arm)
-target_link_libraries(libqemu2-system-armel PRIVATE android-qemu-deps)
-
-target_include_directories(
-  libqemu2-system-aarch64
-  PRIVATE ${ANDROID_QEMU2_TOP_DIR}/disas/libvixl
-          ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/target-arm64
-          ${ANDROID_QEMU2_TOP_DIR}/target/arm)
-target_link_libraries(libqemu2-system-aarch64 PRIVATE android-qemu-deps)
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/target.tag "${ANDROID_TARGET_TAG}")
