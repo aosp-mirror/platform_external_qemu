@@ -10,7 +10,8 @@ set -e
 export LANG=C
 export LC_ALL=C
 
-PROGDIR=$(dirname "$0")
+# The posix way of getting the full path..
+PROGDIR="$( cd "$(dirname "$0")" ; pwd -P )"
 . $(dirname "$0")/scripts/utils/common.shi
 VERBOSE=1
 
@@ -54,8 +55,11 @@ for OPT; do
             OUT_DIR=${OPT##--out-dir=}
             ;;
         --help|-?)
-            VERBOSE=2
-            HELP=y
+            android/scripts/config-cmake.sh  --help
+            exit 0
+            ;;
+        --symbols)
+            OPT_SYMBOLS=true
             ;;
         --debug)
             OPTDEBUG=true
@@ -63,38 +67,24 @@ for OPT; do
     esac
 done
 
-panic () {
-    # don't print error message if we just came back from printing the help message
-   if [ -z "$HELP" ]; then
-       echo "ERROR: $@"
-   fi
-   exit 1
-}
-
-run () {
-    if [ "$VERBOSE" -gt 2 ]; then
-        echo "COMMAND: $@"
-        "$@"
-    elif [ "$VERBOSE" -gt 1 ]; then
-        "$@"
-    else
-        "$@" >/dev/null 2>&1
-    fi
-}
-
-log () {
-    if [ "$VERBOSE" -gt 1 ]; then
-        printf "%s\n" "$*"
-    fi
-}
-
+NINJA=ninja
 HOST_OS=$(uname -s)
 case $HOST_OS in
     Linux)
         HOST_NUM_CPUS=`cat /proc/cpuinfo | grep processor | wc -l`
+        NINJA=$PROGDIR/third_party/chromium/depot_tools/ninja
+        # Make sure our ninja version is on the path, so cmake can actually generate
+        # the needed files.
+        PATH=$PROGDIR/third_party/chromium/depot_tools:$PATH
         ;;
     Darwin|FreeBSD)
         HOST_NUM_CPUS=`sysctl -n hw.ncpu`
+        # Built in ninja should work on mac as well.
+        NINJA=$PROGDIR/third_party/chromium/depot_tools/ninja
+        # Make sure our ninja version is on the path, so cmake can actually generate
+        # the needed files.
+        PATH=$PROGDIR/third_party/chromium/depot_tools:$PATH
+        BREAKPAD=${PROGDIR}/../../../prebuilts/android-emulator-build/common/breakpad/darwin-x86_64/bin/dump_syms
         ;;
     CYGWIN*|*_NT-*)
         HOST_NUM_CPUS=$NUMBER_OF_PROCESSORS
@@ -103,48 +93,48 @@ case $HOST_OS in
         HOST_NUM_CPUS=1
 esac
 
-# Let's not remove the build directory when someone asks for help
-if [ -z "$HELP" ]; then
-    cd "$PROGDIR"/..
-    rm -rf "$OUT_DIR"
-fi
-# If the user only wants to print the help message and exit
-# there is no point of printing Configuring Build
-if [ "$VERBOSE" -ne 2 ]; then
-    echo "Configuring build."
-fi
-export IN_ANDROID_REBUILD_SH=1
-
-# Display how we got called, so we can figure out what's happening
-# in the build logs.
 log_invocation
 
+$PROGDIR/scripts/config-cmake.sh  "$@" ||
+    panic "Configuration error, please run ./android/scripts/config-cmake.sh to see why."
 
-run android/configure.sh --out-dir=$OUT_DIR "$@" $OPT_CLANG ||
-    panic "Configuration error, please run ./android/configure.sh to see why."
 
-CONFIG_MAKE=$OUT_DIR/build/config.make
-if [ ! -f "$CONFIG_MAKE" ]; then
-    panic "Cannot find: $CONFIG_MAKE"
+
+OLD_DIR=$PWD
+cd  $OUT_DIR
+if [ -f build.ninja ]; then
+    echo "Building sources with ninja."
+    $NINJA || panic "Could not build sourcis, please run 'ninja -C $OUT_DIR' to see why."
+else
+    echo "Building sources with make."
+    make -j$HOST_NUM_CPUS ||
+        panic "Could not build sources, please run 'make -C $OUT_DIR' to see why."
 fi
 
-echo "Building sources."
-run make -j$HOST_NUM_CPUS BUILD_OBJS_DIR="$OUT_DIR" ||
-    panic "Could not build sources, please run 'make' to see why."
-
+echo "Finished building sources."
+cd $OLD_DIR
 
 if [ -z "$NO_TESTS" ]; then
     # Let's not run all the tests parallel..
-   run android/scripts/run_tests.sh --verbose --verbose --out-dir=$OUT_DIR --jobs=1
-
+   $PROGDIR/scripts/run_tests.sh --verbose --verbose --out-dir=$OUT_DIR --jobs=1
 else
     echo "Ignoring unit tests suite."
+fi
+
+# Strip out symbols if requested
+if [ "$OPT_SYMBOLS" ]; then
+    echo "Generating symbols"
+    if [ "$MINGW" ]; then
+       $PROGDIR/scripts/strip-symbols.sh --out-dir=$OUT_DIR --mingw --verbosity=$VERBOSE
+    else
+       $PROGDIR/scripts/strip-symbols.sh --out-dir=$OUT_DIR --verbosity=$VERBOSE
+    fi
 fi
 
 echo "Done. !!"
 
 if [ "$OPTDEBUG" = "true" ]; then
-    overrides=`cat android/asan_overrides`
+    overrides=$(cat ${PROGDIR}/asan_overrides)
     echo "Debug build enabled."
     echo "ASAN may be in use; recommend disabling some ASAN checks as build is not"
     echo "universally ASANified. This can be done with"
