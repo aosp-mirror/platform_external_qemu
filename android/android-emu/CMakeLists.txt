@@ -18,8 +18,16 @@ list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 # set the ANDROID_HW_CONFIG_H variable to point to the generated header.
 # Those that need it can add it to their sources list, and it will be there.
 generate_hw_config()
-
+# Dependencies
+prebuilt(BREAKPAD)
+prebuilt(CURL)
+prebuilt(LIBXML2)
+prebuilt(LZ4)
+prebuilt(PNG)
 prebuilt(PROTOBUF)
+prebuilt(UUID)
+prebuilt(ZLIB)
+
 # Add the protobuf dependencies
 add_subdirectory(android/metrics/proto)
 add_subdirectory(android/featurecontrol/proto)
@@ -32,7 +40,8 @@ add_subdirectory(android/verified-boot/proto)
 add_subdirectory(android/automation/proto)
 add_subdirectory(android/offworld/proto)
 
-# Grab the android-emu-base library
+# Grab the other libraries.
 include(android-emu-base)
+include(android-emu)
 include(android-libui)
 
