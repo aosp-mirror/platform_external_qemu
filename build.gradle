@@ -151,7 +151,7 @@ sdk {
             executable true
             builtBy buildWindowsEmulator
         }
-        item("$buildWindowsEmulator.output/bin") {
+        item("$buildWindowsEmulator.output/bin64") {
             into 'bin'
             builtBy buildWindowsEmulator
         }
@@ -195,7 +195,7 @@ sdk {
         item("$project.rootDir/../external/qemu/android-info.txt") {
             into ''
         }
-      
+
         item("$buildWindowsEmulator.output/emulator64-crash-service.exe") {
             executable true
             builtBy buildWindowsEmulator

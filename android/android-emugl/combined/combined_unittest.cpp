@@ -59,6 +59,7 @@ static constexpr int kWindowSize = 256;
 class GoldfishOpenglTestEnv {
 public:
     GoldfishOpenglTestEnv() {
+        System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR", System::get()->getProgramDirectory());
         android::featurecontrol::setEnabledOverride(
                 android::featurecontrol::GLESDynamicVersion, false);
         android::featurecontrol::setEnabledOverride(
@@ -355,7 +356,7 @@ TEST_F(CombinedGoldfishOpenglTest, ShowWindow) {
     bool useWindow =
             System::get()->envGet("ANDROID_EMU_TEST_WITH_WINDOW") == "1";
 
-    Display disp(useWindow, kWindowSize, kWindowSize);
+    aemu::Display disp(useWindow, kWindowSize, kWindowSize);
 
     if (useWindow) {
         EXPECT_NE(nullptr, disp.getNative());

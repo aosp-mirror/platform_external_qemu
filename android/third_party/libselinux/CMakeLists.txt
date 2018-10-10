@@ -19,6 +19,6 @@ else ()
     if (APPLE)
         target_compile_definitions(emulator-libselinux PRIVATE -DDARWIN)
     endif ()
-    target_compile_definitions(emulator-libselinux PUBLIC -DHOST)
+    target_compile_definitions(emulator-libselinux PRIVATE -DHOST)
 endif ()
 

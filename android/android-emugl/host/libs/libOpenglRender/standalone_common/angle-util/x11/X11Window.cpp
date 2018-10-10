@@ -8,7 +8,7 @@
 
 #include "x11/X11Window.h"
 
-#include "android/base/system/System.cpp"
+#include "android/base/system/System.h"
 
 #include <assert.h>
 
