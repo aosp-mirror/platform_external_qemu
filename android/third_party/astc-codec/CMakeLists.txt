@@ -19,7 +19,7 @@ add_library(emulator-astc-codec
 target_include_directories(emulator-astc-codec PUBLIC ${src}/../include)
 target_include_directories(emulator-astc-codec PRIVATE ${src}/..)
 
-if (WIN32 OR ("${LOCAL_OS}" STREQUAL "windows"))
+if (WIN32 OR ("${ANDROID_TARGET_TAG}" MATCHES "windows.*"))
     # Work around some gcc/mingw issues
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         # MinGW has some additional warnings that are safe to ignore:
@@ -35,12 +35,6 @@ if (WIN32 OR ("${LOCAL_OS}" STREQUAL "windows"))
 endif ()
 
 enable_testing()
-add_subdirectory(../../../../googletest build/googletest)
-if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
-    # Don't include the custom TempDir function. It is for Android only.
-	target_compile_definitions(gtest PRIVATE
-            -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
-endif ()
 
 add_executable(emulator_astc_unittests
         ${src}/base/test/bit_stream_test.cpp
@@ -62,6 +56,7 @@ add_executable(emulator_astc_unittests
         ${src}/decoder/test/footprint_test.cc
         )
 target_include_directories(emulator_astc_unittests PRIVATE ${src}/..)
+target_compile_definitions(emulator_astc_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 target_link_libraries(emulator_astc_unittests emulator-astc-codec gmock_main)
 
 IF (UNIX AND NOT APPLE)

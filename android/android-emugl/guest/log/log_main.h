@@ -32,6 +32,7 @@ __BEGIN_DECLS
  * file) to change that behavior.
  */
 
+#define LOG_NDEBUG 0
 #ifndef LOG_NDEBUG
 #ifdef NDEBUG
 #define LOG_NDEBUG 1
