@@ -13,7 +13,7 @@
 # limitations under the License.
 
 get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
-list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
+list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 include(toolchain)
 
 # First we create the toolchain
@@ -40,11 +40,14 @@ list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-m64 -static-libgcc -Xlinker --bui
 # with mingw, so we explicitly disable it.
 set(CMAKE_FIND_ROOT_PATH  "${ANDROID_SYSROOT}")
 
-# Disable any searching as it might lead to unexpected behavior
-# that varies amongst build environments
+add_definitions(-DWINVER=0x601 -D_WIN32_WINNT=0x601)
+
+# here is the target environment located, used to locate packages. We don't want to do any package resolution with
+# mingw, so we explicitly disable it.
+set(CMAKE_FIND_ROOT_PATH "${ANDROID_SYSROOT}")
+
+# Disable any searching as it might lead to unexpected behavior that varies amongst build environments
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE NEVER)
-
-

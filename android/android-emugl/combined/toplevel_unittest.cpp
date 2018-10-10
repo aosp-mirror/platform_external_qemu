@@ -26,6 +26,7 @@ using android::base::System;
 namespace aemu {
 
 TEST(Toplevel, Basic) {
+    System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR", System::get()->getProgramDirectory());
     Toplevel t;
     auto win = t.createWindow();
 
