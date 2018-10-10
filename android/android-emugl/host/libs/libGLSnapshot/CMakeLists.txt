@@ -1,0 +1,4 @@
+set(GLSnapshot_src GLSnapshot.cpp)
+android_add_library(GLSnapshot)
+android_target_link_libraries(GLSnapshot all PRIVATE emugl_base)
+android_target_link_libraries(GLSnapshot all PUBLIC GLESv2_dec OpenglCodecCommon emugl_common)

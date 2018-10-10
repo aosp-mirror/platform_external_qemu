@@ -13,15 +13,13 @@
 # limitations under the License.
 
 get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
-list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
+list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 include(toolchain)
 
 # First we create the toolchain
-set (ANDROID_TARGET_TAG "windows-x86_64")
-set (ANDROID_TARGET_OS "windows")
-set (ANDROID_TARGET_OS_FLAVOR "windows")
-#set(CMAKE_SYSTEM_NAME Windows)
-SET(CMAKE_SYSTEM_NAME Windows)
+set(ANDROID_TARGET_TAG "windows-x86_64")
+set(ANDROID_TARGET_OS "windows")
+set(CMAKE_SYSTEM_NAME Windows)
 get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../../" ABSOLUTE)
 
 # Cmake goes crazy if we set AR manually.. so let's not do that.
@@ -34,16 +32,15 @@ list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/lib32/libgcc_s_sjlj-1.dl
 
 list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-m64 -static-libgcc -Xlinker --build-id -mcx16")
 
-# here is the target environment located, used to
-# locate packages. We don't want to do any package resolution
-# with mingw, so we explicitly disable it.
-set(CMAKE_FIND_ROOT_PATH  "${ANDROID_SYSROOT}")
 
-# Disable any searching as it might lead to unexpected behavior
-# that varies amongst build environments
+add_definitions(-DWINVER=0x601 -D_WIN32_WINNT=0x601)
+
+# here is the target environment located, used to locate packages. We don't want to do any package resolution with
+# mingw, so we explicitly disable it.
+set(CMAKE_FIND_ROOT_PATH "${ANDROID_SYSROOT}")
+
+# Disable any searching as it might lead to unexpected behavior that varies amongst build environments
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE NEVER)
-
-
