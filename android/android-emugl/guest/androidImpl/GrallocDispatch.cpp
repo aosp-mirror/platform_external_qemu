@@ -66,8 +66,10 @@ EXPORT void unload_gralloc_module(
 
     if (!impl->lib) return;
 
-    gralloc_close(impl->alloc_dev);
-    framebuffer_close(impl->fb_dev);
+    if (impl->alloc_dev)
+      gralloc_close(impl->alloc_dev);
+    if (impl->fb_dev)
+      framebuffer_close(impl->fb_dev);
 
     dlclose(impl->lib);
 

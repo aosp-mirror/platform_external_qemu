@@ -450,6 +450,7 @@ set(libqemustub_sources ""
    stubs/is-daemonized.c
    stubs/machine-init-done.c
    stubs/migr-blocker.c
+   stubs/change-state-handler.c
    stubs/monitor.c
    stubs/notify-event.c
    stubs/qtest.c
@@ -468,11 +469,14 @@ set(libqemustub_sources ""
    stubs/target-get-monitor-def.c
    stubs/pc_madt_cpu_entry.c
    stubs/vmgenid.c
-   stubs/migration.c)
+   stubs/migration.c
+   stubs/xen-common.c
+   stubs/xen-hvm.c
+   stubs/pci-host-piix.c)
 set(libqemustub_generated_sources "" 
 ${ANDROID_AUTOGEN}/)
 
-set(libqemustub_dep qemu2-shared)
+set(libqemustub_dep )
 
  ## TARGET: libqemuutil ##
 
@@ -665,6 +669,7 @@ ${ANDROID_AUTOGEN}/qapi/qapi-builtin-types.c
   ${ANDROID_AUTOGEN}/qapi/qapi-events-trace.c
   ${ANDROID_AUTOGEN}/qapi/qapi-events-transaction.c
   ${ANDROID_AUTOGEN}/qapi/qapi-events-ui.c
+  ${ANDROID_AUTOGEN}/qapi/qapi-introspect.c
   ${ANDROID_AUTOGEN}/trace-root.c
   ${ANDROID_AUTOGEN}/util/trace.c
   ${ANDROID_AUTOGEN}/crypto/trace.c
@@ -727,119 +732,217 @@ ${ANDROID_AUTOGEN}/qapi/qapi-builtin-types.c
   ${ANDROID_AUTOGEN}/nbd/trace.c
   ${ANDROID_AUTOGEN}/scsi/trace.c)
 
-set(libqemuutil_dep qemu2-shared)
+set(libqemuutil_dep )
 
  ## TARGET: qemu-img ##
 
 set(qemu-img_sources ""
-   qemu-img.c)
+   qemu-img.c
+   block.c
+   blockjob.c
+   qemu-io-cmds.c
+   replication.c
+   block/cat.c
+   block/raw-format.c
+   block/qcow.c
+   block/vdi.c
+   block/vmdk.c
+   block/cloop.c
+   block/bochs.c
+   block/vpc.c
+   block/vvfat.c
+   block/dmg.c
+   block/qcow2.c
+   block/qcow2-refcount.c
+   block/qcow2-cluster.c
+   block/qcow2-snapshot.c
+   block/qcow2-cache.c
+   block/qcow2-bitmap.c
+   block/qed.c
+   block/qed-l2-cache.c
+   block/qed-table.c
+   block/qed-cluster.c
+   block/qed-check.c
+   block/vhdx.c
+   block/vhdx-endian.c
+   block/vhdx-log.c
+   block/quorum.c
+   block/parallels.c
+   block/blkdebug.c
+   block/blkverify.c
+   block/blkreplay.c
+   block/block-backend.c
+   block/snapshot.c
+   block/qapi.c
+   block/file-win32.c
+   block/win32-aio.c
+   block/null.c
+   block/mirror.c
+   block/commit.c
+   block/io.c
+   block/throttle-groups.c
+   block/nbd.c
+   block/nbd-client.c
+   block/sheepdog.c
+   block/accounting.c
+   block/dirty-bitmap.c
+   block/write-threshold.c
+   block/backup.c
+   block/replication.c
+   block/throttle.c
+   block/crypto.c
+   nbd/server.c
+   nbd/client.c
+   nbd/common.c
+   scsi/utils.c
+   crypto/init.c
+   crypto/hash.c
+   crypto/hash-glib.c
+   crypto/hmac.c
+   crypto/hmac-glib.c
+   crypto/aes.c
+   crypto/desrfb.c
+   crypto/cipher.c
+   crypto/tlscreds.c
+   crypto/tlscredsanon.c
+   crypto/tlscredsx509.c
+   crypto/tlssession.c
+   crypto/secret.c
+   crypto/random-platform.c
+   crypto/pbkdf.c
+   crypto/ivgen.c
+   crypto/ivgen-essiv.c
+   crypto/ivgen-plain.c
+   crypto/ivgen-plain64.c
+   crypto/afsplit.c
+   crypto/xts.c
+   crypto/block.c
+   crypto/block-qcow.c
+   crypto/block-luks.c
+   io/channel.c
+   io/channel-buffer.c
+   io/channel-command.c
+   io/channel-file.c
+   io/channel-socket.c
+   io/channel-tls.c
+   io/channel-watch.c
+   io/channel-websock.c
+   io/channel-util.c
+   io/dns-resolver.c
+   io/task.c
+   qom/object.c
+   qom/container.c
+   qom/qom-qobject.c
+   qom/object_interfaces.c)
 set(qemu-img_generated_sources "" 
-${ANDROID_AUTOGEN}/trace-root.c
-  ${ANDROID_AUTOGEN}/util/trace.c
-  ${ANDROID_AUTOGEN}/crypto/trace.c
-  ${ANDROID_AUTOGEN}/io/trace.c
-  ${ANDROID_AUTOGEN}/migration/trace.c
-  ${ANDROID_AUTOGEN}/block/trace.c
-  ${ANDROID_AUTOGEN}/hw/block/trace.c
-  ${ANDROID_AUTOGEN}/hw/block/dataplane/trace.c
-  ${ANDROID_AUTOGEN}/hw/char/trace.c
-  ${ANDROID_AUTOGEN}/hw/intc/trace.c
-  ${ANDROID_AUTOGEN}/hw/net/trace.c
-  ${ANDROID_AUTOGEN}/hw/virtio/trace.c
-  ${ANDROID_AUTOGEN}/hw/audio/trace.c
-  ${ANDROID_AUTOGEN}/hw/misc/trace.c
-  ${ANDROID_AUTOGEN}/hw/usb/trace.c
-  ${ANDROID_AUTOGEN}/hw/scsi/trace.c
-  ${ANDROID_AUTOGEN}/hw/nvram/trace.c
-  ${ANDROID_AUTOGEN}/hw/display/trace.c
-  ${ANDROID_AUTOGEN}/hw/input/trace.c
-  ${ANDROID_AUTOGEN}/hw/timer/trace.c
-  ${ANDROID_AUTOGEN}/hw/dma/trace.c
-  ${ANDROID_AUTOGEN}/hw/sparc/trace.c
-  ${ANDROID_AUTOGEN}/hw/sd/trace.c
-  ${ANDROID_AUTOGEN}/hw/isa/trace.c
-  ${ANDROID_AUTOGEN}/hw/mem/trace.c
-  ${ANDROID_AUTOGEN}/hw/i386/trace.c
-  ${ANDROID_AUTOGEN}/hw/i386/xen/trace.c
-  ${ANDROID_AUTOGEN}/hw/9pfs/trace.c
-  ${ANDROID_AUTOGEN}/hw/ppc/trace.c
-  ${ANDROID_AUTOGEN}/hw/pci/trace.c
-  ${ANDROID_AUTOGEN}/hw/s390x/trace.c
-  ${ANDROID_AUTOGEN}/hw/vfio/trace.c
-  ${ANDROID_AUTOGEN}/hw/acpi/trace.c
-  ${ANDROID_AUTOGEN}/hw/arm/trace.c
-  ${ANDROID_AUTOGEN}/hw/alpha/trace.c
-  ${ANDROID_AUTOGEN}/hw/xen/trace.c
-  ${ANDROID_AUTOGEN}/ui/trace.c
-  ${ANDROID_AUTOGEN}/audio/trace.c
-  ${ANDROID_AUTOGEN}/net/trace.c
-  ${ANDROID_AUTOGEN}/target/arm/trace.c
-  ${ANDROID_AUTOGEN}/target/i386/trace.c
-  ${ANDROID_AUTOGEN}/target/mips/trace.c
-  ${ANDROID_AUTOGEN}/target/sparc/trace.c
-  ${ANDROID_AUTOGEN}/target/s390x/trace.c
-  ${ANDROID_AUTOGEN}/target/ppc/trace.c
-  ${ANDROID_AUTOGEN}/qom/trace.c
-  ${ANDROID_AUTOGEN}/linux-user/trace.c
-  ${ANDROID_AUTOGEN}/qapi/trace.c)
+${ANDROID_AUTOGEN}/)
 
-set(qemu-img_dep libqemuutil qemu2-shared libqemustub)
+set(qemu-img_dep libqemuutil)
 
  ## TARGET: qemu-io ##
 
 set(qemu-io_sources ""
-   qemu-io.c)
+   qemu-io.c
+   block.c
+   blockjob.c
+   qemu-io-cmds.c
+   replication.c
+   block/cat.c
+   block/raw-format.c
+   block/qcow.c
+   block/vdi.c
+   block/vmdk.c
+   block/cloop.c
+   block/bochs.c
+   block/vpc.c
+   block/vvfat.c
+   block/dmg.c
+   block/qcow2.c
+   block/qcow2-refcount.c
+   block/qcow2-cluster.c
+   block/qcow2-snapshot.c
+   block/qcow2-cache.c
+   block/qcow2-bitmap.c
+   block/qed.c
+   block/qed-l2-cache.c
+   block/qed-table.c
+   block/qed-cluster.c
+   block/qed-check.c
+   block/vhdx.c
+   block/vhdx-endian.c
+   block/vhdx-log.c
+   block/quorum.c
+   block/parallels.c
+   block/blkdebug.c
+   block/blkverify.c
+   block/blkreplay.c
+   block/block-backend.c
+   block/snapshot.c
+   block/qapi.c
+   block/file-win32.c
+   block/win32-aio.c
+   block/null.c
+   block/mirror.c
+   block/commit.c
+   block/io.c
+   block/throttle-groups.c
+   block/nbd.c
+   block/nbd-client.c
+   block/sheepdog.c
+   block/accounting.c
+   block/dirty-bitmap.c
+   block/write-threshold.c
+   block/backup.c
+   block/replication.c
+   block/throttle.c
+   block/crypto.c
+   nbd/server.c
+   nbd/client.c
+   nbd/common.c
+   scsi/utils.c
+   crypto/init.c
+   crypto/hash.c
+   crypto/hash-glib.c
+   crypto/hmac.c
+   crypto/hmac-glib.c
+   crypto/aes.c
+   crypto/desrfb.c
+   crypto/cipher.c
+   crypto/tlscreds.c
+   crypto/tlscredsanon.c
+   crypto/tlscredsx509.c
+   crypto/tlssession.c
+   crypto/secret.c
+   crypto/random-platform.c
+   crypto/pbkdf.c
+   crypto/ivgen.c
+   crypto/ivgen-essiv.c
+   crypto/ivgen-plain.c
+   crypto/ivgen-plain64.c
+   crypto/afsplit.c
+   crypto/xts.c
+   crypto/block.c
+   crypto/block-qcow.c
+   crypto/block-luks.c
+   io/channel.c
+   io/channel-buffer.c
+   io/channel-command.c
+   io/channel-file.c
+   io/channel-socket.c
+   io/channel-tls.c
+   io/channel-watch.c
+   io/channel-websock.c
+   io/channel-util.c
+   io/dns-resolver.c
+   io/task.c
+   qom/object.c
+   qom/container.c
+   qom/qom-qobject.c
+   qom/object_interfaces.c)
 set(qemu-io_generated_sources "" 
-${ANDROID_AUTOGEN}/trace-root.c
-  ${ANDROID_AUTOGEN}/util/trace.c
-  ${ANDROID_AUTOGEN}/crypto/trace.c
-  ${ANDROID_AUTOGEN}/io/trace.c
-  ${ANDROID_AUTOGEN}/migration/trace.c
-  ${ANDROID_AUTOGEN}/block/trace.c
-  ${ANDROID_AUTOGEN}/hw/block/trace.c
-  ${ANDROID_AUTOGEN}/hw/block/dataplane/trace.c
-  ${ANDROID_AUTOGEN}/hw/char/trace.c
-  ${ANDROID_AUTOGEN}/hw/intc/trace.c
-  ${ANDROID_AUTOGEN}/hw/net/trace.c
-  ${ANDROID_AUTOGEN}/hw/virtio/trace.c
-  ${ANDROID_AUTOGEN}/hw/audio/trace.c
-  ${ANDROID_AUTOGEN}/hw/misc/trace.c
-  ${ANDROID_AUTOGEN}/hw/usb/trace.c
-  ${ANDROID_AUTOGEN}/hw/scsi/trace.c
-  ${ANDROID_AUTOGEN}/hw/nvram/trace.c
-  ${ANDROID_AUTOGEN}/hw/display/trace.c
-  ${ANDROID_AUTOGEN}/hw/input/trace.c
-  ${ANDROID_AUTOGEN}/hw/timer/trace.c
-  ${ANDROID_AUTOGEN}/hw/dma/trace.c
-  ${ANDROID_AUTOGEN}/hw/sparc/trace.c
-  ${ANDROID_AUTOGEN}/hw/sd/trace.c
-  ${ANDROID_AUTOGEN}/hw/isa/trace.c
-  ${ANDROID_AUTOGEN}/hw/mem/trace.c
-  ${ANDROID_AUTOGEN}/hw/i386/trace.c
-  ${ANDROID_AUTOGEN}/hw/i386/xen/trace.c
-  ${ANDROID_AUTOGEN}/hw/9pfs/trace.c
-  ${ANDROID_AUTOGEN}/hw/ppc/trace.c
-  ${ANDROID_AUTOGEN}/hw/pci/trace.c
-  ${ANDROID_AUTOGEN}/hw/s390x/trace.c
-  ${ANDROID_AUTOGEN}/hw/vfio/trace.c
-  ${ANDROID_AUTOGEN}/hw/acpi/trace.c
-  ${ANDROID_AUTOGEN}/hw/arm/trace.c
-  ${ANDROID_AUTOGEN}/hw/alpha/trace.c
-  ${ANDROID_AUTOGEN}/hw/xen/trace.c
-  ${ANDROID_AUTOGEN}/ui/trace.c
-  ${ANDROID_AUTOGEN}/audio/trace.c
-  ${ANDROID_AUTOGEN}/net/trace.c
-  ${ANDROID_AUTOGEN}/target/arm/trace.c
-  ${ANDROID_AUTOGEN}/target/i386/trace.c
-  ${ANDROID_AUTOGEN}/target/mips/trace.c
-  ${ANDROID_AUTOGEN}/target/sparc/trace.c
-  ${ANDROID_AUTOGEN}/target/s390x/trace.c
-  ${ANDROID_AUTOGEN}/target/ppc/trace.c
-  ${ANDROID_AUTOGEN}/qom/trace.c
-  ${ANDROID_AUTOGEN}/linux-user/trace.c
-  ${ANDROID_AUTOGEN}/qapi/trace.c)
+${ANDROID_AUTOGEN}/)
 
-set(qemu-io_dep libqemuutil qemu2-shared libqemustub)
+set(qemu-io_dep libqemuutil)
 
  ## TARGET: qemu-system-aarch64 ##
 
@@ -2251,7 +2354,7 @@ set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/acpi/
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/hppa/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/hppa")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/input/trace.c ${ANDROID_QEMU2_TOP_DIR}/hw/input/pl050.c ${ANDROID_QEMU2_TOP_DIR}/hw/input/virtio-input.c ${ANDROID_QEMU2_TOP_DIR}/hw/input/ps2.c ${ANDROID_QEMU2_TOP_DIR}/hw/input/lm832x.c ${ANDROID_QEMU2_TOP_DIR}/hw/input/goldfish_events_common.c ${ANDROID_QEMU2_TOP_DIR}/hw/input/goldfish_rotary.c ${ANDROID_QEMU2_TOP_DIR}/hw/input/virtio-input-hid.c ${ANDROID_QEMU2_TOP_DIR}/hw/input/stellaris_input.c ${ANDROID_QEMU2_TOP_DIR}/hw/input/tsc2005.c ${ANDROID_QEMU2_TOP_DIR}/hw/input/tsc210x.c ${ANDROID_QEMU2_TOP_DIR}/hw/input/pxa2xx_keypad.c ${ANDROID_QEMU2_TOP_DIR}/hw/input/pckbd.c ${ANDROID_QEMU2_TOP_DIR}/hw/input/goldfish_events.c ${ANDROID_QEMU2_TOP_DIR}/hw/input/hid.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/input")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/net/rocker/rocker_of_dpa.c ${ANDROID_QEMU2_TOP_DIR}/hw/net/rocker/rocker.c ${ANDROID_QEMU2_TOP_DIR}/hw/net/rocker/rocker_world.c ${ANDROID_QEMU2_TOP_DIR}/hw/net/rocker/rocker_fp.c ${ANDROID_QEMU2_TOP_DIR}/hw/net/rocker/rocker_desc.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/net/rocker")
-set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/io/trace.c ${ANDROID_QEMU2_TOP_DIR}/io/channel.c ${ANDROID_QEMU2_TOP_DIR}/io/channel-socket.c ${ANDROID_QEMU2_TOP_DIR}/io/task.c ${ANDROID_QEMU2_TOP_DIR}/io/channel-tls.c ${ANDROID_QEMU2_TOP_DIR}/io/channel-websock.c ${ANDROID_QEMU2_TOP_DIR}/io/dns-resolver.c ${ANDROID_QEMU2_TOP_DIR}/io/channel-file.c ${ANDROID_QEMU2_TOP_DIR}/io/channel-command.c ${ANDROID_QEMU2_TOP_DIR}/io/channel-buffer.c ${ANDROID_QEMU2_TOP_DIR}/io/net-listener.c ${ANDROID_QEMU2_TOP_DIR}/io/channel-watch.c ${ANDROID_QEMU2_TOP_DIR}/io/channel-util.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/io")
+set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/io/trace.c ${ANDROID_QEMU2_TOP_DIR}/io/channel.c ${ANDROID_QEMU2_TOP_DIR}/io/channel-socket.c ${ANDROID_QEMU2_TOP_DIR}/io/task.c ${ANDROID_QEMU2_TOP_DIR}/io/channel-websock.c ${ANDROID_QEMU2_TOP_DIR}/io/dns-resolver.c ${ANDROID_QEMU2_TOP_DIR}/io/channel-file.c ${ANDROID_QEMU2_TOP_DIR}/io/channel-command.c ${ANDROID_QEMU2_TOP_DIR}/io/channel-buffer.c ${ANDROID_QEMU2_TOP_DIR}/io/net-listener.c ${ANDROID_QEMU2_TOP_DIR}/io/channel-watch.c ${ANDROID_QEMU2_TOP_DIR}/io/channel-tls.c ${ANDROID_QEMU2_TOP_DIR}/io/channel-util.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/io")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/disas/libvixl/vixl/compiler-intrinsics.cc ${ANDROID_QEMU2_TOP_DIR}/disas/libvixl/vixl/utils.cc PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/disas/libvixl/vixl")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/i386/xen/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/i386/xen")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/target/arm/trace.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/psci.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/crypto_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/op_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/helper.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/arm-powerctl.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/neon_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/gdbstub64.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/arch_dump.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/translate-a64.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/translate.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/machine.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/arm-semi.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/kvm-stub.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/cpu.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/vec_helper.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/cpu64.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/helper-a64.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/gdbstub.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/monitor.c ${ANDROID_QEMU2_TOP_DIR}/target/arm/iwmmxt_helper.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/target/arm")

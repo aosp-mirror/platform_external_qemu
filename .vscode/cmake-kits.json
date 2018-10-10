@@ -1,0 +1,18 @@
+[
+    {
+    "name": "Darwin",
+    "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-darwin-x86_64.cmake"
+},
+    {
+    "name": "Linux",
+    "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-linux-x86_64.cmake"
+},
+    {
+    "name": "Linux -> (MingW)",
+    "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-windows-x86_64.cmake"
+},
+    {
+    "name": "Linux -> (msvc)",
+    "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-windows-msvc-86_64.cmake"
+}
+]
