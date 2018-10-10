@@ -15,7 +15,8 @@
 # limitations under the License.
 
 . $(dirname "$0")/utils/common.shi
-PROGDIR=`dirname $0`
+# The posix way of getting the full path..
+PROGDIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
 shell_import utils/aosp_dir.shi
 shell_import utils/temp_dir.shi
@@ -61,14 +62,16 @@ cd $PROGDIR/../..
 
 QEMU2_TOP_DIR=${AOSP_DIR}/external/qemu
 HOST_OS=$(get_build_os)
-CONFIG_MAKE=${OPT_OUT}/build/config.make
-# Extract the target os from config.make.
-TARGET_OS=$(grep "\<BUILD_TARGET_OS\>" ${CONFIG_MAKE} | awk '{ print $3; }')
+CONFIG_MAKE=${OPT_OUT}/target.tag
+# Extract the target os from target.tag
+TARGET_OS=$(cat ${CONFIG_MAKE})
 FAILURES=""
 EXE_SUFFIX=
 OSX_DEPLOYMENT_TARGET=10.11
 RUN_EMUGEN_TESTS=true
 RUN_GEN_ENTRIES_TESTS=true
+NINJA=ninja
+
 
 
 echo "Running test on ${HOST_OS} for target: ${TARGET_OS}"
@@ -102,11 +105,10 @@ darwin_min_version () {
 }
 
 # List all executables to check later.
-EXECUTABLES="emulator emulator64-arm emulator64-x86"
+EXECUTABLES="emulator"
 case $TARGET_OS in
     windows*)
         EXE_SUFFIX=.exe
-        EXECUTABLES="$EXECUTABLES emulator-arm emulator-x86"
         ;;
 esac
 
@@ -118,18 +120,20 @@ case $TARGET_OS in
         EXPECTED_64BIT_FILE_TYPE="PE32\+ executable \(console\) x86-64"
         EXPECTED_EMULATOR_BITNESS=64
         EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
+        EMUGEN_DIR=android/android-emugl/emugen/src/emugen-build/
         ;;
     windows*)
         EXPECTED_64BIT_FILE_TYPE="PE32\+ executable \(console\) x86-64"
         EXPECTED_EMULATOR_BITNESS=64
         EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_32BIT_FILE_TYPE
+        EMUGEN_DIR=android/android-emugl/emugen/src/emugen-build/
         ;;
-    darwin)
+    darwin*)
         EXPECTED_64BIT_FILE_TYPE="Mach-O 64-bit executable x86_64"
         EXPECTED_EMULATOR_BITNESS=64
         EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
         ;;
-    linux)
+    linux*)
         EXPECTED_64BIT_FILE_TYPE="ELF 64-bit LSB +executable, x86-64"
         EXPECTED_EMULATOR_BITNESS=64
         EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
@@ -141,8 +145,22 @@ case $TARGET_OS in
 esac
 
 
-run make tests BUILD_OBJS_DIR="$OPT_OUT" -j${NUM_JOBS} ||
-    FAILURES="$FAILURES unittests"
+# In linux we can use the chromium ninja included in third_party
+case $HOST_OS in
+    linux*)
+       NINJA=${PROGDIR}/../third_party/chromium/depot_tools/ninja
+       ;;
+esac
+
+export CTEST_OUTPUT_ON_FAILURE=1
+OLD_DIR=$PWD
+cd $OPT_OUT
+if [ -f build.ninja ]; then
+    ninja test || FAILURES="$FAILURES unittests"
+else
+    run make test -j$HOST_NUM_CPUS || FAILURES="$FAILURES unittests"
+fi
+cd ..
 
 log "Checking for 'emulator' launcher program."
 EMULATOR=$OPT_OUT/emulator$EXE_SUFFIX
@@ -173,7 +191,7 @@ fi
 
 
 if [ "$RUN_EMUGEN_TESTS" ]; then
-    EMUGEN_UNITTESTS=$OPT_OUT/emugen_unittests
+    EMUGEN_UNITTESTS=$OPT_OUT/$EMUGEN_DIR/emugen_unittests
     if [ ! -f "$EMUGEN_UNITTESTS" ]; then
         warn "FAIL: Missing binary: $EMUGEN_UNITTESTS"
         FAILURES="$FAILURES emugen_unittests-binary"
@@ -185,7 +203,7 @@ if [ "$RUN_EMUGEN_TESTS" ]; then
     log "Running emugen regression test suite."
     # Note that the binary is always built for the 'build' machine type,
     # I.e. if --mingw is used, it's still a Linux executable.
-    EMUGEN=$OPT_OUT/emugen
+    EMUGEN=$OPT_OUT/$EMUGEN_DIR/emugen
     if [ ! -f "$EMUGEN" ]; then
         echo "FAIL: Missing 'emugen' binary: $EMUGEN"
         FAILURES="$FAILURES emugen-binary"
@@ -209,8 +227,10 @@ fi
 # Check the gen-entries.py script.
 if [ "$RUN_GEN_ENTRIES_TESTS" ]; then
     log "Running gen-entries.py test suite."
-    run android/scripts/tests/gen-entries/run-tests.sh ||
+    cd ${QEMU2_TOP_DIR}
+    run ./android/scripts/tests/gen-entries/run-tests.sh ||
         FAILURES="$FAILURES gen-entries_tests"
+    cd $OLD_DIR
 fi
 
 # Check that the windows executables all have icons.
@@ -222,8 +242,8 @@ case "TARGET_OS" in
             echo "FAIL: Could not find \$CONFIG_MAKE !?"
             FAILURES="$FAILURES out-dir-config-make"
         else
-            WINDRES=$(awk '/^BUILD_TARGET_WINDRES:=/ { print $2; } $1 == "BUILD_TARGET_WINDRES" { print $3; }' $CONFIG_MAKE) ||
-            if true; then
+            WINDRES=$SDK_TOOLCHAIN_DIR/${BINPREFIX}windres
+            if [ ! -f $WINRES ]; then
                 echo "FAIL: Could not find host 'windres' program"
                 FAILURES="$FAILURES host-windres"
             fi

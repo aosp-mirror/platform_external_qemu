@@ -1,4 +1,5 @@
 # This file defines android-emu-base library
+# This is a library that has very few dependencies (and we would like to keep it like that)
 
 # Dependencies
 prebuilt(LZ4)
@@ -29,8 +30,6 @@ set(android-emu-base_src
     android/base/StringFormat.cpp
     android/base/StringParse.cpp
     android/base/StringView.cpp
-    android/base/sockets/SocketUtils.cpp
-    android/base/sockets/SocketWaiter.cpp
     android/base/synchronization/MessageChannel.cpp
     android/base/Log.cpp
     android/base/memory/LazyInstance.cpp
@@ -76,7 +75,6 @@ set(android-emu-base_src
     android/utils/property_file.c
     android/utils/reflist.c
     android/utils/refset.c
-    android/utils/sockets.c
     android/utils/stralloc.c
     android/utils/stream.cpp
     android/utils/string.cpp
@@ -89,8 +87,8 @@ set(android-emu-base_src
     android/utils/vector.c
     android/utils/x86_cpuid.cpp)
 
-# Windows 32-bit specific
-set(android-emu-base_windows-x86_src
+# Windows 32-bit specific sources, these are only included in the windows 32 bit build
+set(android-emu-base_windows_src
     android/base/files/preadwrite.cpp
     android/base/memory/SharedMemory_win32.cpp
     android/base/threads/Thread_win32.cpp
@@ -99,42 +97,52 @@ set(android-emu-base_windows-x86_src
     android/utils/win32_cmdline_quote.cpp
     android/utils/win32_unicode.cpp)
 
-# Windows 64-bit (same as 32 bit)
-set(android-emu-base_windows-x86_64_src ${android-emu-base_windows-x86_src})
-set(android-emu-base_windows_msvc-x86_64_src ${android-emu-base_windows-x86_src})
-
-# Mac specific sources
-set(android-emu-base_darwin-x86_64_src
-    android/base/memory/SharedMemory_posix.cpp
-    android/base/threads/Thread_pthread.cpp
-    android/base/system/system-native-mac.mm)
+# Mac specific sources, only included in the darwin build.
+set(android-emu-base_darwin-x86_64_src android/base/memory/SharedMemory_posix.cpp
+    android/base/threads/Thread_pthread.cpp android/base/system/system-native-mac.mm)
 
 # Linux specific sources.
 set(android-emu-base_linux-x86_64_src android/base/memory/SharedMemory_posix.cpp
     android/base/threads/Thread_pthread.cpp)
 
-# Includes
-set(android-emu-base_includes_private
-    ${LZ4_INCLUDE_DIRS}
-    ${UUID_INCLUDE_DIRS}
-    .)
+# Let's add in the library
+android_add_library(android-emu-base)
 
-# Library dependencies, these are public so they will propagate
-set(android-emu-base_libs_public ${LZ4_LIBRARIES} ${UUID_LIBRARIES})
+# Includes, the following paths will be added to the search path, they are private so will not propagate to anyone who
+# takes a depedency on this library
+android_target_include_directories(android-emu-base all PRIVATE ${LZ4_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS})
 
-if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
-    set(android-emu-base_includes_private
-        ${android-emu-base_includes_private}
-	${MSVC_POSIX_COMPAT_INCLUDE_DIR}
-        ${DIRENT_WIN32_INCLUDE_DIR})
-    set(android-emu-base_libs_public
-        ${android-emu-base_libs_public}
-	${MSVC_POSIX_COMPAT_LIBRARY})
-endif()
-# Compiler flags
-set(android-emu-base_compile_options_private
-    "-Wno-parentheses"
-    "-Wno-invalid-constexpr"
-    "-Wno-c++14-extensions")
+# Anyone who takes a dependency gets to use our header files.
+android_target_include_directories(android-emu-base all PUBLIC .)
 
-add_android_library(android-emu-base)
+# Library dependencies, these are public so they will propagate, if you link against the base you will link against LZ4
+# & UUID
+android_target_link_libraries(android-emu-base all PUBLIC ${LZ4_LIBRARIES} ${UUID_LIBRARIES})
+android_target_link_libraries(android-emu-base linux-x86_64 PUBLIC -ldl Threads::Threads -lrt)
+android_target_link_libraries(android-emu-base windows-x86_64 PUBLIC -lpsapi Threads::Threads -liphlpapi)
+android_target_link_libraries(android-emu-base windows-x86 PUBLIC -lpsapi Threads::Threads -liphlpapi)
+android_target_link_libraries(android-emu-base
+                              darwin-x86_64
+                              PUBLIC
+                              "-framework Foundation"
+                              "-framework ApplicationServices"
+                              "-framework IOKit")
+android_target_compile_definitions(android-emu-base
+                                   darwin-x86_64
+                                   PRIVATE
+                                   "-D_DARWIN_C_SOURCE=1"
+                                   "-Dftello64=ftell"
+                                   "-Dfseeko64=fseek")
+
+# Compiler flags, not that these should never propagate (i.e. set to public) as we really want to limit the usage of
+# these flags.
+android_target_compile_options(android-emu-base
+                               all
+                               PRIVATE
+                               "-Wno-parentheses"
+                               "-Wno-invalid-constexpr")
+
+# Add the benchmark
+set(android-emu_benchmark_src android/base/synchronization/Lock_benchmark.cpp)
+android_add_executable(android-emu_benchmark)
+android_target_link_libraries(android-emu_benchmark all PRIVATE android-emu-base emulator-gbench)
