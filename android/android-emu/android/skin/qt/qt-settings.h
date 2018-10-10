@@ -102,8 +102,10 @@ enum class DeleteInvalidSnapshotsUiOrder { Auto, Ask, No };
 constexpr char LOCATION_PLAYBACK_FILE[] = "loc/playback_file_path";
 constexpr char LOCATION_PLAYBACK_SPEED[] = "loc/playback_speed";
 constexpr char LOCATION_RECENT_ALTITUDE[] = "loc/recent_altitude";
+constexpr char LOCATION_RECENT_HEADING[] = "loc/recent_heading";
 constexpr char LOCATION_RECENT_LATITUDE[] = "loc/recent_latitude";
 constexpr char LOCATION_RECENT_LONGITUDE[] = "loc/recent_longitude";
+constexpr char LOCATION_RECENT_VELOCITY[] = "loc/recent_velocity";
 
 constexpr char SCREENREC_SAVE_PATH[] = "rec/savePath";
 
@@ -117,9 +119,11 @@ enum class SaveSnapshotOnExit { Always, Never, Ask };
 // Order of the items on the GUI for save snapshot on exit
 enum class SaveSnapshotOnExitUiOrder { Always, Never, Ask };
 
+constexpr char PER_AVD_ALTITUDE[] = "perAvd/loc/altitude";
+constexpr char PER_AVD_HEADING[] = "perAvd/loc/heading";
 constexpr char PER_AVD_LONGITUDE[] = "perAvd/loc/longitude";
 constexpr char PER_AVD_LATITUDE[] = "perAvd/loc/latitude";
-constexpr char PER_AVD_ALTITUDE[] = "perAvd/loc/altitude";
+constexpr char PER_AVD_VELOCITY[] = "perAvd/loc/velocity";
 
 constexpr char PER_AVD_LOC_PLAYBACK_FILE[] = "perAvd/loc/playback_file_path";
 constexpr char PER_AVD_LOC_PLAYBACK_SPEED[] = "perAvd/loc/playback_speed";

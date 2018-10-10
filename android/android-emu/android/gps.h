@@ -54,10 +54,14 @@ extern void  android_gps_send_location(double latitude, double longitude,
 //    *outLatitude:        Degrees
 //    *outLongitude:       Degrees
 //    *outMetersElevation: Meters above sea level
+//    *outVelocityKnots:   Knots
+//    *outHeading:         Degrees, 0=north, 90=east
 //    *outNSatellites:     Number of satellites used
 // Null 'out' pointers are ignored.
 extern int android_gps_get_location(double* outLatitude, double* outLongitude,
-                                    double* outMetersElevation, int* outNSatellites);
+                                    double* outMetersElevation,
+                                    double* outVelocityKnots, double* outHeading,
+                                    int* outNSatellites);
 
 /* android_gps_set_passive_update sets whether to ping guest for location
  * updates every few seconds.
