@@ -179,7 +179,6 @@ $(call end-cmake-project)
 $(call start-cmake-project,libqemu2-system)
 
 PRODUCED_STATIC_LIBS = libqemu2-system-i386 libqemu2-system-x86_64 libqemu2-system-armel libqemu2-system-aarch64
-LOCAL_SOURCE_DEPENDENCIES := libqemu2-common libqemu2-util
 LOCAL_CFLAGS :=  $(QEMU2_SYSTEM_CFLAGS) \
     -DPOISON_CONFIG_ANDROID
 LOCAL_C_INCLUDES := \

@@ -110,10 +110,6 @@ function(add_android_interface_library name)
 endfunction()
 
 function(add_android_executable name)
-  message(
-    STATUS
-      "DEFINED ${name}_${ANDROID_TARGET_TAG}_src = ${${name}_${ANDROID_TARGET_TAG}_src}"
-    )
   if(DEFINED ${name}_${ANDROID_TARGET_TAG}_src)
     list(APPEND ${name}_src ${${name}_${ANDROID_TARGET_TAG}_src})
   endif()
@@ -121,6 +117,7 @@ function(add_android_executable name)
   internal_android_target_settings(${name} "PUBLIC")
   internal_android_target_settings(${name} "PRIVATE")
 
+  set(prebuilt_dependencies ${RUNTIME_OS_DEPENDENCIES})
   if(DEFINED ${name}_prebuilt_dependencies)
     list(APPEND prebuilt_dependencies ${${name}_prebuilt_dependencies})
   endif()
@@ -129,6 +126,7 @@ function(add_android_executable name)
                 ${${name}_${ANDROID_TARGET_TAG}_prebuilt_dependencies})
   endif()
 
+  set(prebuilt_properties ${RUNTIME_OS_PROPERTIES})
   if(DEFINED ${name}_prebuilt_properties)
     list(APPEND prebuilt_properties ${${name}_prebuilt_properties})
   endif()
@@ -137,6 +135,8 @@ function(add_android_executable name)
                 ${${name}_${ANDROID_TARGET_TAG}_prebuilt_properties})
   endif()
 
+  message(STATUS target_prebuilt_dependency(${name} "${prebuilt_dependencies}"
+                             "${prebuilt_properties}"))
   target_prebuilt_dependency(${name} "${prebuilt_dependencies}"
                              "${prebuilt_properties}")
 endfunction()
@@ -148,6 +148,7 @@ function(add_android_protobuf libname protofiles)
   set(${libname}_includes_public ${PROTOBUF_INCLUDE_DIR}
       ${CMAKE_CURRENT_BINARY_DIR})
   set(${libname}_libs_public ${PROTOBUF_LIBRARIES})
+  set(${libname}_defs_private -DGOOGLE_PROTOBUF_NO_RTTI)
   add_android_library(${libname})
   if(FRANKENBUILD)
     add_library(lib${libname}_proto ALIAS ${libname})
@@ -174,5 +175,6 @@ function(generate_hw_config)
     PROPERTIES
     HEADER_FILE_ONLY
     TRUE)
-set(ANDROID_HW_CONFIG_H ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h PARENT_SCOPE)
+  set(ANDROID_HW_CONFIG_H
+      ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h PARENT_SCOPE)
 endfunction()
