@@ -19,7 +19,7 @@ if ("${ANDROID_TARGET_TAG}" MATCHES "darwin.*")
 elseif ("${ANDROID_TARGET_TAG}" MATCHES "linux.*")
     set(UUID_INCLUDE_DIR "${PREBUILT_ROOT}/include")
     set(UUID_INCLUDE_DIRS "${UUID_INCLUDE_DIR}")
-    set(UUID_LIBRARIES "${PREBUILT_ROOT}/lib/libuuid.a")
+    set(UUID_LIBRARIES "${PREBUILT_ROOT}/lib/libuuid${CMAKE_STATIC_LIBRARY_SUFFIX}")
 elseif ( ("${ANDROID_TARGET_TAG}" MATCHES "windows.*") )
     # In windows you include rpc.h
     set(UUID_LIBRARIES "-lrpcrt4")
