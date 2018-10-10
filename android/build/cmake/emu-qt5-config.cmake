@@ -39,85 +39,13 @@ if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
   set(
     QT5_SHARED_DEPENDENCIES
-    ${PREBUILT_ROOT}/plugins/platforms/libqoffscreen.dylib>lib64/qt/plugins/platforms/libqoffscreen.dylib
-    ${PREBUILT_ROOT}/plugins/platforms/libqminimal.dylib>lib64/qt/plugins/platforms/libqminimal.dylib
-    ${PREBUILT_ROOT}/plugins/platforms/libqcocoa.dylib>lib64/qt/plugins/platforms/libqcocoa.dylib
-    ${PREBUILT_ROOT}/plugins/printsupport>lib64/qt/plugins/printsupport
-    ${PREBUILT_ROOT}/plugins/printsupport/libcocoaprintersupport.dylib>lib64/qt/plugins/printsupport/libcocoaprintersupport.dylib
-    ${PREBUILT_ROOT}/plugins/bearer>lib64/qt/plugins/bearer
-    ${PREBUILT_ROOT}/plugins/bearer/libqcorewlanbearer.dylib>lib64/qt/plugins/bearer/libqcorewlanbearer.dylib
-    ${PREBUILT_ROOT}/plugins/bearer/libqgenericbearer.dylib>lib64/qt/plugins/bearer/libqgenericbearer.dylib
-    ${PREBUILT_ROOT}/plugins/iconengines>lib64/qt/plugins/iconengines
-    ${PREBUILT_ROOT}/plugins/iconengines/libqsvgicon.dylib>lib64/qt/plugins/iconengines/libqsvgicon.dylib
-    ${PREBUILT_ROOT}/plugins/sqldrivers>lib64/qt/plugins/sqldrivers
-    ${PREBUILT_ROOT}/plugins/sqldrivers/libqsqlite.dylib>lib64/qt/plugins/sqldrivers/libqsqlite.dylib
-    ${PREBUILT_ROOT}/plugins/imageformats>lib64/qt/plugins/imageformats
-    ${PREBUILT_ROOT}/plugins/imageformats/libqgif.dylib>lib64/qt/plugins/imageformats/libqgif.dylib
-    ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp.dylib>lib64/qt/plugins/imageformats/libqwbmp.dylib
-    ${PREBUILT_ROOT}/plugins/imageformats/libqwebp.dylib>lib64/qt/plugins/imageformats/libqwebp.dylib
-    ${PREBUILT_ROOT}/plugins/imageformats/libqdds.dylib>lib64/qt/plugins/imageformats/libqdds.dylib
-    ${PREBUILT_ROOT}/plugins/imageformats/libqico.dylib>lib64/qt/plugins/imageformats/libqico.dylib
-    ${PREBUILT_ROOT}/plugins/imageformats/libqjpeg.dylib>lib64/qt/plugins/imageformats/libqjpeg.dylib
-    ${PREBUILT_ROOT}/plugins/imageformats/libqtiff.dylib>lib64/qt/plugins/imageformats/libqtiff.dylib
-    ${PREBUILT_ROOT}/plugins/imageformats/libqsvg.dylib>lib64/qt/plugins/imageformats/libqsvg.dylib
-    ${PREBUILT_ROOT}/plugins/imageformats/libqicns.dylib>lib64/qt/plugins/imageformats/libqicns.dylib
-    ${PREBUILT_ROOT}/plugins/imageformats/libqtga.dylib>lib64/qt/plugins/imageformats/libqtga.dylib
-    ${PREBUILT_ROOT}/plugins/imageformats/libqmacjp2.dylib>lib64/qt/plugins/imageformats/libqmacjp2.dylib
-    ${PREBUILT_ROOT}/plugins/generic>lib64/qt/plugins/generic
-    ${PREBUILT_ROOT}/plugins/generic/libqtuiotouchplugin.dylib>lib64/qt/plugins/generic/libqtuiotouchplugin.dylib
-    ${PREBUILT_ROOT}/lib>lib64/qt/lib
-    ${PREBUILT_ROOT}/lib/libQt5PrintSupport.dylib>lib64/qt/lib/libQt5PrintSupport.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Xml.5.7.0.dylib>lib64/qt/lib/libQt5Xml.5.7.0.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Network.5.7.dylib>lib64/qt/lib/libQt5Network.5.7.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Sql.5.7.dylib>lib64/qt/lib/libQt5Sql.5.7.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Widgets.5.7.dylib>lib64/qt/lib/libQt5Widgets.5.7.dylib
-    ${PREBUILT_ROOT}/lib/libQt5PrintSupport.5.7.dylib>lib64/qt/lib/libQt5PrintSupport.5.7.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Xml.5.dylib>lib64/qt/lib/libQt5Xml.5.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Network.5.dylib>lib64/qt/lib/libQt5Network.5.dylib
-    ${PREBUILT_ROOT}/lib/libQt5DBus.5.dylib>lib64/qt/lib/libQt5DBus.5.dylib
-    ${PREBUILT_ROOT}/lib/libQt5DBus.5.7.0.dylib>lib64/qt/lib/libQt5DBus.5.7.0.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Gui.5.7.0.dylib>lib64/qt/lib/libQt5Gui.5.7.0.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Sql.5.7.0.dylib>lib64/qt/lib/libQt5Sql.5.7.0.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Widgets.dylib>lib64/qt/lib/libQt5Widgets.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Svg.5.7.dylib>lib64/qt/lib/libQt5Svg.5.7.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Test.5.dylib>lib64/qt/lib/libQt5Test.5.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Core.5.dylib>lib64/qt/lib/libQt5Core.5.dylib
-    ${PREBUILT_ROOT}/lib/libQt5OpenGL.5.7.dylib>lib64/qt/lib/libQt5OpenGL.5.7.dylib
-    ${PREBUILT_ROOT}/lib/libQt5PrintSupport.5.dylib>lib64/qt/lib/libQt5PrintSupport.5.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Test.5.7.0.dylib>lib64/qt/lib/libQt5Test.5.7.0.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Core.5.7.0.dylib>lib64/qt/lib/libQt5Core.5.7.0.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Test.5.7.dylib>lib64/qt/lib/libQt5Test.5.7.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Core.dylib>lib64/qt/lib/libQt5Core.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Concurrent.5.dylib>lib64/qt/lib/libQt5Concurrent.5.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Concurrent.dylib>lib64/qt/lib/libQt5Concurrent.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Gui.dylib>lib64/qt/lib/libQt5Gui.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Svg.5.dylib>lib64/qt/lib/libQt5Svg.5.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Xml.5.7.dylib>lib64/qt/lib/libQt5Xml.5.7.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Core.5.7.dylib>lib64/qt/lib/libQt5Core.5.7.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Svg.5.7.0.dylib>lib64/qt/lib/libQt5Svg.5.7.0.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Sql.5.dylib>lib64/qt/lib/libQt5Sql.5.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Concurrent.5.7.dylib>lib64/qt/lib/libQt5Concurrent.5.7.dylib
-    ${PREBUILT_ROOT}/lib/libQt5PrintSupport.5.7.0.dylib>lib64/qt/lib/libQt5PrintSupport.5.7.0.dylib
-    ${PREBUILT_ROOT}/lib/libQt5DBus.dylib>lib64/qt/lib/libQt5DBus.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Network.5.7.0.dylib>lib64/qt/lib/libQt5Network.5.7.0.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Xml.dylib>lib64/qt/lib/libQt5Xml.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Widgets.5.dylib>lib64/qt/lib/libQt5Widgets.5.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Gui.5.7.dylib>lib64/qt/lib/libQt5Gui.5.7.dylib
-    ${PREBUILT_ROOT}/lib/libQt5DBus.5.7.dylib>lib64/qt/lib/libQt5DBus.5.7.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Concurrent.5.7.0.dylib>lib64/qt/lib/libQt5Concurrent.5.7.0.dylib
-    ${PREBUILT_ROOT}/lib/libQt5OpenGL.5.7.0.dylib>lib64/qt/lib/libQt5OpenGL.5.7.0.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Sql.dylib>lib64/qt/lib/libQt5Sql.dylib
-    ${PREBUILT_ROOT}/lib/libQt5OpenGL.dylib>lib64/qt/lib/libQt5OpenGL.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Test.dylib>lib64/qt/lib/libQt5Test.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Widgets.5.7.0.dylib>lib64/qt/lib/libQt5Widgets.5.7.0.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Svg.dylib>lib64/qt/lib/libQt5Svg.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Network.dylib>lib64/qt/lib/libQt5Network.dylib
-    ${PREBUILT_ROOT}/lib/libQt5Gui.5.dylib>lib64/qt/lib/libQt5Gui.5.dylib
-    ${PREBUILT_ROOT}/lib/libQt5OpenGL.5.dylib>lib64/qt/lib/libQt5OpenGL.5.dylib)
+    ${PREBUILT_ROOT}/plugins>>lib64/qt/
+    ${PREBUILT_ROOT}/lib>>lib64/qt/
+    )
   # Note: this will only set the property for install targets, not during build.
-  set(QT5_SHARED_PROPERTIES "INSTALL_RPATH>=@loader_path/lib64/qt/lib;BUILD_WITH_INSTALL_RPATH=ON;LINK_FLAGS>=-framework Cocoa;")
+  set(QT5_SHARED_PROPERTIES "INSTALL_RPATH>=@loader_path/lib64/qt/lib;INSTALL_RPATH>=@loader_path/lib64/qt/plugins;BUILD_WITH_INSTALL_RPATH=ON;LINK_FLAGS>=-framework Cocoa;INSTALL_RPATH_USE_LINK_PATH=ON")
 
-elseif(ANDROID_TARGET_TAG STREQUAL "windows-x86")
+elseif(${ANDROID_TARGET_TAG} STREQUAL "windows-x86")
   # On Windows, linking to mingw32 is required. The library is provided by the
   # toolchain, and depends on a main() function provided by qtmain which itself
   # depends on qMain(). These must appear in LDFLAGS and not LDLIBS since

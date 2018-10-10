@@ -162,10 +162,10 @@ $(call start-cmake-project,libqemu2-common)
 $(call gen-hw-config-defs)
 
 PRODUCED_STATIC_LIBS:=libqemu2-common libqemu2-util
+PROUDCED_EXECUTABLES:=qemu-img
 LOCAL_CFLAGS := \
     $(QEMU2_CFLAGS) \
     -DPOISON_CONFIG_ANDROID \
-
 LOCAL_C_INCLUDES := \
     $(QEMU2_INCLUDES) \
     $(LOCAL_PATH)/slirp \
@@ -179,7 +179,6 @@ $(call end-cmake-project)
 $(call start-cmake-project,libqemu2-system)
 
 PRODUCED_STATIC_LIBS = libqemu2-system-i386 libqemu2-system-x86_64 libqemu2-system-armel libqemu2-system-aarch64
-LOCAL_SOURCE_DEPENDENCIES := libqemu2-common libqemu2-util
 LOCAL_CFLAGS :=  $(QEMU2_SYSTEM_CFLAGS) \
     -DPOISON_CONFIG_ANDROID
 LOCAL_C_INCLUDES := \
@@ -189,6 +188,54 @@ LOCAL_C_INCLUDES := \
     $(LOCAL_PATH)/tcg \
     $(ZLIB_INCLUDES) \
     $(LIBBLUEZ_INCLUDES) \
+
+$(info "XX libqemu: $(LOCAL_CFLAGS)")
+
+CRYPTO_TESTS := \
+   test-crypto-afsplit \
+   test-crypto-cipher \
+   test-crypto-hash \
+   test-crypto-hmac \
+   test-crypto-ivgen \
+   test-crypto-pbkdf \
+   test-crypto-xts \
+
+SIMPLE_TESTS := \
+    test-aio \
+    test-base64 \
+    test-bitcnt \
+    test-bitops \
+    test-bufferiszero \
+    test-clone-visitor \
+    test-coroutine \
+    test-cutils \
+    test-int128 \
+    test-iov \
+    test-keyval \
+    test-logging \
+    test-mul64 \
+    test-opts-visitor \
+    test-qapi-util \
+    test-qdist \
+    test-qemu-opts \
+    test-qht \
+    test-qmp-event \
+    test-qobject-input-visitor \
+    test-qobject-output-visitor \
+    test-rcu-list \
+    test-shift128 \
+    test-string-input-visitor \
+    test-string-output-visitor \
+    test-timed-average \
+    test-uuid \
+    test-visitor-serialization \
+    test-x86-cpuid \
+
+# The test infrastructure used by Qemu is not yet cross platform.
+# See b/113667469
+ifneq (windows,$(BUILD_TARGET_OS))
+PRODUCED_TESTS := $(CRYPTO_TESTS) $(SIMPLE_TESTS)
+endif
 
 $(call end-cmake-project)
 
@@ -218,14 +265,5 @@ ifeq (,$(CONFIG_MIN_BUILD))
 
 endif   # !CONFIG_MIN_BUILD
 
-# TODO(jansene): This gets included twice in the windows build (32 bit/64 bit)
-# causing targets to be overridden.
-include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu-img.mk
-
-# The test infrastructure used by Qemu is not yet cross platform.
-# See b/113667469
-ifneq (windows,$(BUILD_TARGET_OS))
-  include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-tests.mk
-endif
 
 LOCAL_PATH := $(QEMU2_OLD_LOCAL_PATH)

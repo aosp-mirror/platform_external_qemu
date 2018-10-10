@@ -59,7 +59,7 @@ emugl-end-module = \
     $(eval $(end-emulator-module-ev)) \
     $(eval LOCAL_BUILD_FILE :=) \
     $(eval _emugl_$(_emugl_HOST)modules += $(_emugl_MODULE))\
-    $(if $(EMUGL_DEBUG),$(call emugl-dump-module))
+    $(if true,$(call emugl-dump-module))
 
 # Managing module exports and imports.
 #
@@ -176,8 +176,43 @@ _emugl-module-import = \
 _emugl-dump-list = \
     $(foreach _list_item,$(strip $1),$(info .    $(_list_item)))
 
+_filter_includes =
+
+# Older versions of GNUmake do not support actual writing to file, so we sort of do what we can
+# and write out text in chunks, escaping "
+write-to-file = \
+  $(eval _args:=) \
+  $(foreach obj,$3,$(eval _args+=$(obj))$(if $(word $2,$(_args)),@printf "%s" $(subst ",\",$(_args)) >> $1 $(EOL)$(eval _args:=))) \
+  $(if $(_args),@printf "%s" $(subst ",\", $(_args)) >> $1) \
+
+define EOL
+
+
+endef
+emugl-list-cmake= \
+	$(info add_subdirectory($(LOCAL_PATH)))
+
+emugl-dump-produce= \
+    $(if $(filter SHARED_LIBRARY,$(_emugl.$(_emugl_MODULE).type)),$(info  SHARED+=$(_emugl_MODULE) \\)) \
+    $(if $(filter EXECUTABLE,$(_emugl.$(_emugl_MODULE).type)),$(info  EXEC+=$(_emugl_MODULE) \\)) \
+    $(if $(filter STATIC_LIBRARY,$(_emugl.$(_emugl_MODULE).type)),$(info ARCHIVE+=$(_emugl_MODULE)\\)) \
+
+emugl-dump-cmake= \
+    $(info ================================================================================================) \
+    $(info $(LOCAL_PATH)) \
+    $(if $(_emugl.$(_emugl_MODULE).imports),$(info set($(_emugl_MODULE)_libs_public $(_emugl.$(_emugl_MODULE).imports))))\
+    $(info set($(_emugl_MODULE)_includes_private $(LOCAL_C_INCLUDES)))\
+    $(info set($(_emugl_MODULE)_compile_options_private $(filter-out -I%,$(filter-out -D%,$(LOCAL_CFLAGS)))))\
+    $(info set($(_emugl_MODULE)_defs_private $(filter -D%, $(LOCAL_CFLAGS))))\
+    $(info set($(_emugl_MODULE)_src $(LOCAL_SRC_FILES))) \
+    $(info $(if $(filter SHARED_LIBRARY,$(_emugl.$(_emugl_MODULE).type)), add_android_shared_library($(_emugl_MODULE)))) \
+    $(info $(if $(filter EXECUTABLE,$(_emugl.$(_emugl_MODULE).type)), add_android_executable($(_emugl_MODULE)))) \
+    $(info $(if $(filter STATIC_LIBRARY,$(_emugl.$(_emugl_MODULE).type)), add_android_library($(_emugl_MODULE)))) \
+
 emugl-dump-module = \
     $(info MODULE=$(_emugl_MODULE))\
+    $(info .  DIR=$(LOCAL_PATH))\
+    $(info .  TYPE=$(_emugl.$(_emugl_MODULE).type))\
     $(info .  HOST=$(_emugl_HOST))\
     $(info .  TYPE=$(_emugl.$(_emugl_MODULE).type))\
     $(info .  IMPORTS=$(_emugl.$(_emugl_MODULE).imports))\

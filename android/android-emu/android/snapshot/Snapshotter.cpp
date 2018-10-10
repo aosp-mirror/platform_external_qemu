@@ -917,7 +917,7 @@ void androidSnapshot_initialize(
         const QAndroidEmulatorWindowAgent* windowAgent) {
     using android::base::Version;
 
-    static constexpr auto kMinStudioVersion = Version(3, 0, 0);
+    static  auto kMinStudioVersion = Version(3, 0, 0);
     // Make sure the installed AndroidStudio is able to handle the snapshots
     // feature.
     if (isEnabled(android::featurecontrol::FastSnapshotV1)) {

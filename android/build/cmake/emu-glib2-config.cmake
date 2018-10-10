@@ -17,12 +17,12 @@ get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/a
 set(GLIB2_INCLUDE_DIR "${PREBUILT_ROOT}/include/glib-2.0;${PREBUILT_ROOT}/lib/glib-2.0/include")
 set(GLIB2_INCLUDE_DIRS ${GLIB2_INCLUDE_DIR})
 
-if(APPLE OR ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
-    set(GLIB2_LIBRARIES -liconv -lintl)
-elseif (WIN32 OR ANDROID_TARGET_TAG MATCHES "windows.*")
-    set(GLIB2_LIBRARIES -lole32)
-elseif (UNIX OR ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
-    set(GLIB2_LIBRARIES -lpthread -lrt)
+if(APPLE OR ${ANDROID_TARGET_TAG} STREQUAL "darwin-x86_64")
+    set(GLIB2_LIBRARIES -lglib-2.0 -liconv -lintl "-framework CoreServices" -L${PREBUILT_ROOT}/lib)
+elseif (WIN32 OR ${ANDROID_TARGET_TAG} MATCHES "windows.*")
+    set(GLIB2_LIBRARIES -lglib-2.0 -lole32 -L${PREBUILT_ROOT}/lib -lws2_32)
+elseif (UNIX OR ${ANDROID_TARGET_TAG} STREQUAL "linux-x86_64")
+    set(GLIB2_LIBRARIES -lglib-2.0 -lpthread -lrt -L${PREBUILT_ROOT}/lib)
 endif()
 
 

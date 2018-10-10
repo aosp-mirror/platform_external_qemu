@@ -18,6 +18,7 @@
 # COMPILER + PATH CONFIGURATION
 # =============================
 # TODO(jansene): This section is needed as a bridge to the android build system.
+message(FATAL_ERROR "NO LONGER NEEDED")
 if(NOT DEFINED ANDROID_TARGET_TAG)
   set(ANDROID_FRANKENBUILD ON)
   string(REPLACE " "
