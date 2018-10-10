@@ -15,7 +15,7 @@
 get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/${ANDROID_TARGET_TAG}" ABSOLUTE)
 
 set(ZLIB_INCLUDE_DIR "${PREBUILT_ROOT}/include")
-set(ZLIB_INCLUDE_DIRS "${ZLIB_INCLUDE_DIRS}")
+set(ZLIB_INCLUDE_DIRS "${ZLIB_INCLUDE_DIR}")
 set(ZLIB_LIBRARIES "${PREBUILT_ROOT}/lib/libz.a")
 set(ZLIB_FOUND TRUE)
 

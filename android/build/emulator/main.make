@@ -81,6 +81,8 @@ symbols: $(_BUILD_SYMBOLS)
 debuginfo: $(_BUILD_DEBUG_INFOS)
 tests: $(_BUILD_TESTS)
 lint: $(_BUILD_LINT)
+foo: $(_BUILD_FOO)
+	@echo "Hi $(_BUILD_FOO)"
 
 
 # Zip up the generated symbols and errors.

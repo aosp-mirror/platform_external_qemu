@@ -1,0 +1,4 @@
+set(OpenGLESDispatch_src EGLDispatch.cpp GLESv2Dispatch.cpp GLESv1Dispatch.cpp OpenGLDispatchLoader.cpp)
+android_add_library(OpenGLESDispatch)
+android_target_link_libraries(OpenGLESDispatch all PRIVATE emugl_base)
+android_target_link_libraries(OpenGLESDispatch all PUBLIC GLESv2_dec OpenglCodecCommon emugl_common GLESv1_dec)
