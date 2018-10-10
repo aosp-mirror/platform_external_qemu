@@ -29,8 +29,6 @@ include $(LOCAL_PATH)/android/third_party/picosha2/picosha2.mk
 ifneq ($(BUILD_TARGET_OS),windows_msvc)
     include $(LOCAL_PATH)/android/third_party/libvirglrenderer.mk
 endif
-include $(LOCAL_PATH)/android/third_party/third_party_libs.mk
-include $(LOCAL_PATH)/android/third_party/ext4_utils/sources.mk
 
 # Bluez only works on linux
 ifeq ($(BUILD_TARGET_OS),linux)
@@ -156,7 +154,7 @@ endef
 
 endif  # BUILD_TARGET_OS == windows
 
-include $(LOCAL_PATH)/android/android-emu/Makefile.android-emu.mk
+include $(LOCAL_PATH)/android/android.mk
 
 ifeq (,$(CONFIG_AEMU64_ONLY))
     include $(LOCAL_PATH)/android/android-emu/Makefile.crash-service.mk

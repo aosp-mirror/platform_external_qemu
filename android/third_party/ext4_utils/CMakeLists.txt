@@ -1,37 +1,5 @@
-cmake_minimum_required(VERSION 3.5)
-# COMPILER + PATH CONFIGURATION
-# =============================
-# TODO(jansene): This section is needed as a bridge
-# to the android build system.
-
-# Please do not try to test compile an executable..
-# We cannot run .exe on linux
-if (DEFINED LOCAL_C_INCLUDES)
-  string(REPLACE " " ";" INCLUDES ${LOCAL_C_INCLUDES})
-endif()
-
-# Use same compiler config as android build system
-set(CMAKE_C_FLAGS ${LOCAL_CFLAGS})
-set(CMAKE_CXX_FLAGS  "${LOCAL_CFLAGS} ${LOCAL_CXXFLAGS}")
-
-# Work around some gcc/mingw issues
-if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-endif()
-
-
-# Make sure we create archives in the same way..
-set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> crs <TARGET> <LINK_FLAGS> <OBJECTS>")
-set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> crs <TARGET> <LINK_FLAGS> <OBJECTS>")
-
-if (DEFINED LOCAL_INSTALL)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${LOCAL_INSTALL}")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${LOCAL_INSTALL}")
-endif()
-# END COMPILER CONFIGURATION
-# ==========================
-
-add_library(emulator-libext4_utils
+prebuilt(ZLIB)
+set(emulator-libext4_utils_src
         src/allocate.c
         src/contents.c
         src/crc16.c
@@ -46,18 +14,24 @@ add_library(emulator-libext4_utils
         src/wipe.c
         )
 
-target_include_directories(emulator-libext4_utils PUBLIC include)
-target_include_directories(emulator-libext4_utils PRIVATE ../libselinux/include)
+set(emulator-libext4_utils_includes_public include)
+set(emulator-libext4_utils_libs_public
+    emulator-libsparse
+    emulator-libselinux
+    ${ZLIB_LIBRARIES}
+    android-emu-base)
+set(emulator-libext4_utils_libs_windows-x86_64_public  emulator-libmman-win32)
+set(emulator-libext4_utils_libs_windows-x86_public  emulator-libmman-win32)
+set(emulator-libext4_utils_defs_private -DHOST)
+set(emulator-libext4_utils_windows-x86_64_defs_private -DUSE_MINGW=1)
+set(emulator-libext4_utils_windows-x86_defs_private -DUSE_MINGW=1)
+set(emulator-libext4_utils_compile_options_private -Wno-error)
 
-target_include_directories(emulator-libext4_utils PRIVATE ../libsparse/include)
-target_include_directories(emulator-libext4_utils PRIVATE ../../android-emu/)
+add_android_library(emulator-libext4_utils)
 
-if (WIN32 OR ("${LOCAL_OS}" STREQUAL "windows"))
-    # Work around some gcc/mingw issues
-    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-        target_compile_definitions(emulator-libext4_utils PRIVATE -DUSE_MINGW=1)
-    endif ()
-endif ()
-target_compile_options(emulator-libext4_utils PRIVATE -Wno-error)
-target_compile_definitions(emulator-libext4_utils PRIVATE -DHOST)
+set(emulator_make_ext4fs_src src/make_ext4fs_main.c)
+set(emulator_make_ext4fs_libs_private emulator-libext4_utils)
+set(emulator_make_ext4fs_defs_private -DHOST)
+
+add_android_executable(emulator_make_ext4fs)
 

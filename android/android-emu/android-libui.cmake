@@ -100,8 +100,8 @@ set(ANDROID_LIBUI_SRC_FILES
     android/recording/video/VideoProducer.cpp
     android/recording/video/VideoFrameSharer.cpp)
 
-# Note, these are seperated for historical reasons only, the
-# uic compiler will find this automatically
+# Note, these are seperated for historical reasons only, the uic compiler will
+# find this automatically
 set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended.ui
     android/skin/qt/extended-pages/battery-page.ui
@@ -203,20 +203,17 @@ set(emulator-libui_src
     ${ANDROID_SKIN_SOURCES})
 
 set(emulator-libui_includes_private
-    .
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
-    ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
-    ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/shared
     ${FFMPEG_INCLUDE_DIRS}
     ${QT5_INCLUDE_DIRS})
 
 set(emulator-libui_compile_options_private "-DUSE_MMX=1" "-mmmx")
 
-# Target specific compiler flags for windows
-set(emulator-libui_windows-x86_64_compile_options_private "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
-set(emulator-libui_windows-x86_compile_options_private "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
-
+# Target specific compiler flags for windows, since we include FFMPEG C sources
+# from C++ we need to make sure this flag is set for c++ sources.
+set(emulator-libui_windows-x86_64_compile_options_private
+    "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
+set(emulator-libui_windows-x86_compile_options_private
+    "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
 
 # Linux compiler settings
 set(emulator-libui_linux-x86_64_compile_options_private
@@ -238,13 +235,11 @@ set(emulator-libui_darwin-x86_64_compile_options_private
     "-Wno-invalid-constexpr"
     "-fPIC")
 
-# These dependencies are ignored in the franken build, once we switch over
-# we can remove the includes below, as all the dependencies will propagate.
+# These dependencies are ignored in the franken build, once we switch over we
+# can remove the includes below, as all the dependencies will propagate.
 set(emulator-libui_libs_public
     android-emu
     emulator-libyuv
-    libOpenGLESDispatch
-    libemugl_common
     ${FFMPEG_LIBRARIES}
     ${QT5_LIBRARIES}
     ${ZLIB_LIBRARIES})
@@ -258,3 +253,37 @@ set(emulator-libui_includes_public ${PROTOBUF_INCLUDE_DIRS}
     ${ANDROID_QEMU2_TOP_DIR}/../libyuv/files/include)
 
 add_android_library(emulator-libui)
+
+set(emulator-libui_unittests_src
+    android/skin/keycode_unittest.cpp
+    android/skin/keycode-buffer_unittest.cpp
+    android/skin/rect_unittest.cpp
+    android/recording/test/DummyAudioProducer.cpp
+    android/recording/test/DummyVideoProducer.cpp
+    android/recording/FfmpegRecorder.cpp
+    android/recording/test/FfmpegRecorder_unittest.cpp)
+
+set(emulator-libui_unittests_compile_options_private -O0 -UNDEBUG)
+set(emulator-libui_unittests_includes_private
+    ${FFMPEG_INCLUDE_DIRS}
+    ${QT5_INCLUDE_DIRS})
+
+# Target specific compiler flags for windows
+set(emulator-libui_unittests_windows-x86_64_compile_options_private
+    "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
+set(emulator-libui_unittests_windows-x86_compile_options_private
+    "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
+
+# Linux compiler settings
+set(emulator-libui_unittests_linux-x86_64_compile_options_private
+    "-Wno-reserved-user-defined-literal" "-fPIC")
+
+# Mac Os compiler settings
+set(emulator-libui_unittests_darwin-x86_64_compile_options_private
+    "-Wno-reserved-user-defined-literal" "-fPIC")
+
+set(emulator-libui_unittests_libs_private emulator-libui gmock_main)
+
+# Set rpath for linux..
+set(emulator-libui_unittests_linux-x86_64_prebuilt_properties "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64:$ORIGIN/lib64/qt/lib'")
+add_android_executable(emulator-libui_unittests)
