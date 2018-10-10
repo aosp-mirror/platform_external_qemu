@@ -60,6 +60,10 @@ endfunction()
 function(prebuilt Package)
   string(TOLOWER ${Package} pkg)
   string(TOUPPER ${Package} PKG)
+  if(${PKG}_FOUND)
+    message(STATUS "${Package} has already been foud")
+    return()
+  endif()
   if(DEFINED ANDROID_QEMU2_TOP_DIR AND DEFINED ANDROID_TARGET_TAG)
     if(${PKG} IN_LIST PREBUILT_COMMON)
       simple_prebuilt(${Package})
@@ -154,7 +158,10 @@ function(target_prebuilt_dependency
                      ${PROP})
       list(GET KEY_VAL 0 KEY)
       list(GET KEY_VAL 1 VAL)
-      message(STATUS "set_property(TARGET ${RUN_TARGET} APPEND PROPERTY '${KEY}' '${VAL}')")
+      message(
+        STATUS
+          "set_property(TARGET ${RUN_TARGET} APPEND PROPERTY '${KEY}' '${VAL}')"
+        )
       set_property(TARGET ${RUN_TARGET} APPEND PROPERTY "${KEY}" "${VAL}")
     else()
       # We are replacing
@@ -164,9 +171,35 @@ function(target_prebuilt_dependency
                      ${PROP})
       list(GET KEY_VAL 0 KEY)
       list(GET KEY_VAL 1 VAL)
-      message(STATUS "set_property(TARGET ${RUN_TARGET} PROPERTY '${KEY}' '${VAL}')")
+      message(
+        STATUS "set_property(TARGET ${RUN_TARGET} PROPERTY '${KEY}' '${VAL}')")
       set_property(TARGET ${RUN_TARGET} PROPERTY "${KEY}" "${VAL}")
     endif()
   endforeach()
 
+endfunction()
+
+# This configures the prebuilt dependencies if they have not yet been configured
+# The toolchain will use this to configure OS depencies, usually there is no
+# need to call this directly..
+#
+# Unless you are frankenbuilding (i.e. calling it from within gnumake without a
+# configured toolchain)
+function(configure_os_prebuilt_dependencies)
+  if (RUNTIME_CONFIGURED)
+      return()
+  endif()
+  if("${ANDROID_TARGET_TAG}" STREQUAL "windows-x86")
+    list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-m32 -Xlinker --large-address-aware -mcx16 -Xlinker --stack -Xlinker 1048576 -static-libgcc -Xlinker --build-id -mcx16")
+  endif()
+  if("${ANDROID_TARGET_TAG}" STREQUAL "windows-x86_64")
+    list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-m64 -static-libgcc -Xlinker --build-id -mcx16")
+  endif()
+  if("${ANDROID_TARGET_TAG}" STREQUAL "linux-x86_64")
+    set(RUNTIME_OS_PROPERTIES "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64'")
+  endif()
+
+  set(RUNTIME_OS_DEPENDENCIES ${RUNTIME_OS_DEPENDENCIES} PARENT_SCOPE)
+  set(RUNTIME_OS_PROPERTIES ${RUNTIME_OS_PROPERTIES} PARENT_SCOPE)
+  set(RUNTIME_CONFIGURED TRUE PARENT_SCOPE)
 endfunction()

@@ -1,4 +1,5 @@
 # This file defines android-emu-base library
+# This is a library that has very few dependencies (and we would like to keep it like that)
 
 # Dependencies
 prebuilt(LZ4)
@@ -29,8 +30,6 @@ set(android-emu-base_src
     android/base/StringFormat.cpp
     android/base/StringParse.cpp
     android/base/StringView.cpp
-    android/base/sockets/SocketUtils.cpp
-    android/base/sockets/SocketWaiter.cpp
     android/base/synchronization/MessageChannel.cpp
     android/base/Log.cpp
     android/base/memory/LazyInstance.cpp
@@ -76,7 +75,6 @@ set(android-emu-base_src
     android/utils/property_file.c
     android/utils/reflist.c
     android/utils/refset.c
-    android/utils/sockets.c
     android/utils/stralloc.c
     android/utils/stream.cpp
     android/utils/string.cpp
@@ -89,7 +87,8 @@ set(android-emu-base_src
     android/utils/vector.c
     android/utils/x86_cpuid.cpp)
 
-# Windows 32-bit specific
+# Windows 32-bit specific sources, these are only included in the
+# windows 32 bit build
 set(android-emu-base_windows-x86_src
     android/base/files/preadwrite.cpp
     android/base/memory/SharedMemory_win32.cpp
@@ -102,7 +101,7 @@ set(android-emu-base_windows-x86_src
 # Windows 64-bit (same as 32 bit)
 set(android-emu-base_windows-x86_64_src ${android-emu-base_windows-x86_src})
 
-# Mac specific sources
+# Mac specific sources, only included in the darwin build.
 set(android-emu-base_darwin-x86_64_src
     android/base/memory/SharedMemory_posix.cpp
     android/base/threads/Thread_pthread.cpp
@@ -112,16 +111,23 @@ set(android-emu-base_darwin-x86_64_src
 set(android-emu-base_linux-x86_64_src android/base/memory/SharedMemory_posix.cpp
     android/base/threads/Thread_pthread.cpp)
 
-# Includes
+# Includes, the following paths will be added to the search path, they are
+# private so will not propagate to anyone who takes a depedency on this library
 set(android-emu-base_includes_private
     ${LZ4_INCLUDE_DIRS}
     ${UUID_INCLUDE_DIRS}
-    .)
+    )
 
-# Library dependencies, these are public so they will propagate
+# Anyone who takes a dependency gets to use our header files.
+set(android-emu-base_includes_public  .)
+
+# Library dependencies, these are public so they will propagate, if you link
+# against the base you will link against LZ4 & UUID
 set(android-emu-base_libs_public ${LZ4_LIBRARIES} ${UUID_LIBRARIES})
+set(android-emu-base_linux-x86_64_libs_public -ldl)
 
-# Compiler flags
+# Compiler flags, not that these should never propagate (i.e. set to public)
+# as we really want to limit the usage of these flags.
 set(android-emu-base_compile_options_private
     "-Wno-parentheses"
     "-Wno-invalid-constexpr"
