@@ -1,22 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-# TODO(jansene): Move to a function
-if (DEFINED LOCAL_QEMU2_TOP_DIR)
-    get_filename_component(REPO_ROOT "${LOCAL_QEMU2_TOP_DIR}/../.." ABSOLUTE)
-    set(ZLIB_ROOT "${REPO_ROOT}/prebuilts/android-emulator-build/qemu-android-deps/${LOCAL_TARGET_TAG}")
-    set(ZLIB_LIBRARY ${ZLIB_ROOT}/lib/libz.a)
-    set(ZLIB_INCLUDE_DIR ${ZLIB_ROOT}/include)
-
-    # We will now find the prebuilt package.
-    find_package(ZLIB REQUIRED)
-    if (NOT ZLIB_LIBRARIES MATCHES "${REPO_ROOT}.*")
-        message(FATAL_ERROR "Discovered libz at: ${ZLIB_LIBRARIES}, ${ZLIB_INCLUDE_DIRS} which is outside of tree ${REPO_ROOT}!")
-    endif ()
-else ()
-    message(WARNING "Building outside the make system!")
-    find_package(ZLIB REQUIRED)
-endif ()
-
+prebuilt(ZLIB)
 
 add_library(emulator-libsparse
         src/backed_block.c

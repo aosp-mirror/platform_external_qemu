@@ -1,0 +1,28 @@
+set(EGL_translator_src
+    ThreadInfo.cpp
+    EglImp.cpp
+    EglConfig.cpp
+    EglContext.cpp
+    EglGlobalInfo.cpp
+    EglValidate.cpp
+    EglSurface.cpp
+    EglWindowSurface.cpp
+    EglPbufferSurface.cpp
+    EglThreadInfo.cpp
+    EglDisplay.cpp
+    ClientAPIExts.cpp)
+
+set(EGL_translator_darwin-x86_64_src EglOsApi_darwin.cpp EglOsApi_egl.cpp MacNative.m MacPixelFormatsAttribs.m)
+set(EGL_translator_linux-x86_64_src EglOsApi_glx.cpp EglOsApi_egl.cpp CoreProfileConfigs_linux.cpp)
+set(EGL_translator_windows_64_src EglOsApi_wgl.cpp EglOsApi_egl.cpp CoreProfileConfigs_windows.cpp)
+
+android_add_shared_library(EGL_translator)
+
+# TODO: We are not consistent with our prefix naming..
+set_target_properties(EGL_translator PROPERTIES PREFIX "lib${ANDROID_TARGET_BITS}")
+android_target_link_libraries(EGL_translator all PUBLIC GLcommon emugl_common)
+android_target_link_libraries(EGL_translator all PRIVATE emugl_base android-emu-base emulator-astc-codec)
+
+android_target_link_libraries(EGL_translator darwin-x86_64 PUBLIC "-framework AppKit")
+android_target_link_libraries(EGL_translator linux-x86_64 PUBLIC "-lGL -lX11 -ldl -lpthread")
+android_target_link_libraries(EGL_translator windows PUBLIC "-lgdi32")

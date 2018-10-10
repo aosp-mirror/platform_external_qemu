@@ -58,6 +58,7 @@ static constexpr int kWindowSize = 256;
 class GoldfishOpenglTestEnv {
 public:
     GoldfishOpenglTestEnv() {
+        System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR", System::get()->getProgramDirectory());
         EmuglConfig config;
 
         emuglConfig_init(&config, true /* gpu enabled */, "auto",

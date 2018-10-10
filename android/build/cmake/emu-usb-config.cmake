@@ -14,10 +14,14 @@
 
 get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/libusb/${ANDROID_TARGET_TAG}" ABSOLUTE)
 
-set(USB_INCLUDE_DIR "${PREBUILT_ROOT}/include/libusb-1.0")
-set(USB_INCLUDE_DIRS "${USB_INCLUDE_DIR}")
-set(USB_LIBRARIES "${PREBUILT_ROOT}/lib/libusb-1.0.a")
-set(USB_FOUND TRUE)
+# No usb support on windows!
+if (NOT ${ANDROID_TARGET_TAG} MATCHES "windows.*")
+    set(USB_INCLUDE_DIR "${PREBUILT_ROOT}/include/libusb-1.0")
+    set(USB_INCLUDE_DIRS "${USB_INCLUDE_DIR}")
+    set(USB_LIBRARIES "${PREBUILT_ROOT}/lib/libusb-1.0.a")
+    set(USB_FOUND TRUE)
+endif()
+
 
 set(PACKAGE_EXPORT "USB_INCLUDE_DIR;USB_INCLUDE_DIRS;USB_LIBRARIES;USB_FOUND")
 
