@@ -69,6 +69,7 @@ static void* dlOpenFuncForTesting() {
         std::string("libvulkan") + suffix;
 
     auto name = pj(loaderAndMockTestLibsDir(), libName);
+    fprintf(stderr, "dlopening: %s\n", name.c_str());
     return dlopen(name.c_str(), RTLD_NOW);
 #endif
 }
@@ -343,7 +344,7 @@ static void testDeviceCreation(const VulkanDispatch* vk,
     } else {
         EXPECT_TRUE(false);
         return;
-    } 
+    }
 
     // Now we got our device; select it
     VkPhysicalDevice bestPhysicalDevice = physicalDevices[bestPhysicalDeviceIndex];
@@ -435,7 +436,7 @@ protected:
             testIcdFilename());
 
         goldfish_vk::init_vulkan_dispatch_from_system_loader(
-                dlOpenFuncForTesting, 
+                dlOpenFuncForTesting,
                 dlSymFuncForTesting,
                 &mVk);
 

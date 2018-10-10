@@ -18,11 +18,13 @@ PRODUCED_STATIC_LIBS := emulator-tinyobjloader \
     emulator-libjpeg \
     emulator-libsparse \
     emulator-libkeymaster3 \
-    emulator-libdtb
+    emulator-libdtb \
+	emulator-libext4_utils  \
 
 PRODUCED_EXECUTABLES := emulator_astc_unittests=emulator$(BUILD_TARGET_SUFFIX)_astc_unittests \
                         emulator_img2simg=emulator$(BUILD_TARGET_SUFFIX)_img2simg \
                         emulator_simg2img=emulator$(BUILD_TARGET_SUFFIX)_simg2img)
+						emulator_make_ext4fs=emulator$(BUILD_TARGET_SUFFIX)_make_ext4fs
 
 # Since we are using a cross build system, we need to declare the static libs that
 # are consumed

@@ -54,8 +54,8 @@ for OPT; do
             OUT_DIR=${OPT##--out-dir=}
             ;;
         --help|-?)
-            VERBOSE=2
-            HELP=y
+            android/scripts/config-cmake.sh  --help
+            exit 0
             ;;
         --debug)
             OPTDEBUG=true
@@ -63,30 +63,6 @@ for OPT; do
     esac
 done
 
-panic () {
-    # don't print error message if we just came back from printing the help message
-   if [ -z "$HELP" ]; then
-       echo "ERROR: $@"
-   fi
-   exit 1
-}
-
-run () {
-    if [ "$VERBOSE" -gt 2 ]; then
-        echo "COMMAND: $@"
-        "$@"
-    elif [ "$VERBOSE" -gt 1 ]; then
-        "$@"
-    else
-        "$@" >/dev/null 2>&1
-    fi
-}
-
-log () {
-    if [ "$VERBOSE" -gt 1 ]; then
-        printf "%s\n" "$*"
-    fi
-}
 
 HOST_OS=$(uname -s)
 case $HOST_OS in
@@ -103,40 +79,31 @@ case $HOST_OS in
         HOST_NUM_CPUS=1
 esac
 
-# Let's not remove the build directory when someone asks for help
-if [ -z "$HELP" ]; then
-    cd "$PROGDIR"/..
-    rm -rf "$OUT_DIR"
-fi
-# If the user only wants to print the help message and exit
-# there is no point of printing Configuring Build
-if [ "$VERBOSE" -ne 2 ]; then
-    echo "Configuring build."
-fi
-export IN_ANDROID_REBUILD_SH=1
 
-# Display how we got called, so we can figure out what's happening
-# in the build logs.
 log_invocation
 
+$PROGDIR/scripts/config-cmake.sh  "$@" ||
+    panic "Configuration error, please run ./android/scripts/config-cmake.sh to see why."
 
-run android/configure.sh --out-dir=$OUT_DIR "$@" $OPT_CLANG ||
-    panic "Configuration error, please run ./android/configure.sh to see why."
 
-CONFIG_MAKE=$OUT_DIR/build/config.make
-if [ ! -f "$CONFIG_MAKE" ]; then
-    panic "Cannot find: $CONFIG_MAKE"
+
+OLD_DIR=$PWD
+cd  $OUT_DIR
+if [ -f build.ninja ]; then
+    echo "Building sources with ninja."
+    ninja || panic "Could not build sources, please run 'cd $OUT_DIR && ninja' to see why."
+else
+    echo "Building sources with make."
+    make -j$HOST_NUM_CPUS ||
+        panic "Could not build sources, please run 'cd $OUT_DIR && make' to see why."
 fi
 
-echo "Building sources."
-run make -j$HOST_NUM_CPUS BUILD_OBJS_DIR="$OUT_DIR" ||
-    panic "Could not build sources, please run 'make' to see why."
-
+echo "Finished building sources."
+cd $OLD_DIR
 
 if [ -z "$NO_TESTS" ]; then
     # Let's not run all the tests parallel..
-   run android/scripts/run_tests.sh --verbose --verbose --out-dir=$OUT_DIR --jobs=1
-
+   android/scripts/run_tests.sh --verbose --verbose --out-dir=$OUT_DIR --jobs=1
 else
     echo "Ignoring unit tests suite."
 fi

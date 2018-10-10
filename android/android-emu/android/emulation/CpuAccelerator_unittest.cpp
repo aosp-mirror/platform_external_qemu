@@ -90,6 +90,7 @@ TEST(cpuAcceleratorGetHaxVersion, Test) {
         "android/android-emu/android/emulation",
     };
 
+    printf("--------------------------------------- %s\n", System::get()->getLauncherDirectory().c_str());
     // this is a real version from from HAXM 1.2.1
     ASSERT_EQ(0x01020001, cpuAcceleratorGetHaxVersion(kext_dir, 3, "CpuAccelerator_unittest.dat2"));
 

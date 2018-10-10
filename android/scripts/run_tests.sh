@@ -61,9 +61,9 @@ cd $PROGDIR/../..
 
 QEMU2_TOP_DIR=${AOSP_DIR}/external/qemu
 HOST_OS=$(get_build_os)
-CONFIG_MAKE=${OPT_OUT}/build/config.make
-# Extract the target os from config.make.
-TARGET_OS=$(grep "\<BUILD_TARGET_OS\>" ${CONFIG_MAKE} | awk '{ print $3; }')
+CONFIG_MAKE=${OPT_OUT}/target.tag
+# Extract the target os from target.tag
+TARGET_OS=$(cat ${CONFIG_MAKE})
 FAILURES=""
 EXE_SUFFIX=
 OSX_DEPLOYMENT_TARGET=10.11
@@ -124,12 +124,12 @@ case $TARGET_OS in
         EXPECTED_EMULATOR_BITNESS=64
         EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_32BIT_FILE_TYPE
         ;;
-    darwin)
+    darwin*)
         EXPECTED_64BIT_FILE_TYPE="Mach-O 64-bit executable x86_64"
         EXPECTED_EMULATOR_BITNESS=64
         EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
         ;;
-    linux)
+    linux*)
         EXPECTED_64BIT_FILE_TYPE="ELF 64-bit LSB +executable, x86-64"
         EXPECTED_EMULATOR_BITNESS=64
         EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
@@ -141,8 +141,15 @@ case $TARGET_OS in
 esac
 
 
-run make tests BUILD_OBJS_DIR="$OPT_OUT" -j${NUM_JOBS} ||
-    FAILURES="$FAILURES unittests"
+export CTEST_OUTPUT_ON_FAILURE=1
+OLD_DIR=$PWD
+cd $OPT_OUT
+if [ -f build.ninja ]; then
+    ninja test || FAILURES="$FAILURES unittests"
+else
+    run make test -j$HOST_NUM_CPUS || FAILURES="$FAILURES unittests"
+fi
+cd ..
 
 log "Checking for 'emulator' launcher program."
 EMULATOR=$OPT_OUT/emulator$EXE_SUFFIX
@@ -222,8 +229,8 @@ case "TARGET_OS" in
             echo "FAIL: Could not find \$CONFIG_MAKE !?"
             FAILURES="$FAILURES out-dir-config-make"
         else
-            WINDRES=$(awk '/^BUILD_TARGET_WINDRES:=/ { print $2; } $1 == "BUILD_TARGET_WINDRES" { print $3; }' $CONFIG_MAKE) ||
-            if true; then
+            WINDRES=$SDK_TOOLCHAIN_DIR/${BINPREFIX}windres
+            if [ ! -f $WINRES ]; then
                 echo "FAIL: Could not find host 'windres' program"
                 FAILURES="$FAILURES host-windres"
             fi

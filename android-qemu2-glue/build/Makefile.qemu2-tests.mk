@@ -37,6 +37,7 @@ add-qemu-crypto-test = \
         $(QEMU2_AUTO_GENERATED_DIR)/qapi/qapi-types-crypto.c \
         $(QEMU2_AUTO_GENERATED_DIR)/qapi/qapi-visit-crypto.c \
     )\
+  $(info "add-qemu $(1) $(LOCAL_CFLAGS) $(LOCAL_LDFLAGS) $(LOCAL_LDLIBS) $(LOCAL_STATIC_LIBRARIES)) \
   $(call end-emulator-program) \
 
 # The socket test is special, it consists of 2 files.
