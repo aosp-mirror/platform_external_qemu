@@ -21,7 +21,7 @@
 
 ANDROID_BEGIN_HEADER
 
-typedef void (*location_qt_settings_writer)(double, double, double);
+typedef void (*location_qt_settings_writer)(double, double, double, double, double);
 
 // Register callback to sync Qt settings
 void location_registerQtSettingsWriter(location_qt_settings_writer);
@@ -50,10 +50,14 @@ typedef struct QAndroidLocationAgent {
     // If the return is 1, the output values are set:
     //   |outLatitude| and |outLongitude| are in degrees
     //   |outMetersElevation| is meters above sea level
+    //   |outVelocityKnots| is device speed in knots
+    //   |outHeading| is device heading in degrees (0=north, 90=east)
     //   |outNSatellites| is the number of satellites used
     // Null 'out' pointers are safely ignored.
     int (*gpsGetLoc)(double* outLatitude, double* outLongitude,
-                     double* outMetersElevation, int* outNSatellites);
+                     double* outMetersElevation,
+                     double* outVelocityKnots, double* outHeading,
+                     int* outNSatellites);
 
     // Send an NMEA fix sentence to the device.
     void (*gpsSendNmea)(const char* sentence);
