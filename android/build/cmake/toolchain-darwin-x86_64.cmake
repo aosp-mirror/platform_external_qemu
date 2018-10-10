@@ -19,5 +19,10 @@ include(toolchain)
 # First we create the toolchain
 set(ANDROID_TARGET_TAG "darwin-x86_64")
 set(ANDROID_TARGET_OS "darwin")
+
+# Make sure we always set the rpath to include current dir and ./lib64. We need this to create self
+# contained executables that dynamically load dylibs.
+set(RUNTIME_OS_PROPERTIES "INSTALL_RPATH>=@loader_path;INSTALL_RPATH>=@loader_path/lib64;BUILD_WITH_INSTALL_RPATH=ON;INSTALL_RPATH_USE_LINK_PATH=ON")
 toolchain_generate("${ANDROID_TARGET_TAG}")
+
 # No magical includes or dependencies for darwin..

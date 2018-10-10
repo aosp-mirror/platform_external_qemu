@@ -38,15 +38,15 @@ prebuilt(ZLIB)
 # Let's define a shared hello lib and all its settings.
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS test.proto)
 set(hello_base_src  ${PROTO_SRCS} ${PROTO_HDRS})
-set(hello_base_libs_public ${PROTOBUF_LIBRARIES})
-
-# We want to propagate the protobuf headers we are creating..
-set(hello_base_includes_public ${CMAKE_CURRENT_BINARY_DIR} ${PROTOBUF_INCLUDE_DIR})
 
 # and declare the library
-add_android_shared_library(hello_base)
+android_add_shared_library(hello_base)
 
-# Next we define a hello executable, that uses our defined shared lib.
+target_link_libraries(hello_base PUBLIC ${PROTOBUF_LIBRARIES})
+
+# We want to propagate the protobuf headers we are creating..
+target_include_directories(hello_base PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${PROTOBUF_INCLUDE_DIRS})
+
 
 # This merely showcases how you can modify the sources
 # for the various android targets, in our case we always use the same.
@@ -55,23 +55,24 @@ set(hello_linux-x86_64_src hello.cpp)
 set(hello_windows-x86_64_src hello.cpp)
 set(hello_windows-x86_src hello.cpp)
 
+# Add the executable
+android_add_executable(hello)
+
 # Compiler options that should not propagate to the next target, we need -fPIC
 # on lin/darwin for QT, on windows this is not needed.
-set(hello_darwin-x86_64_compile_options_private -fPIC)
-set(hello_linux-x86_64_compile_options_private  -fPIC)
+# Note that this command is basically the same as the CMake
+# target_compile_options, with the difference that the 2nd argument
+# specifies the android target.
+android_target_compile_options(hello darwin-x86_64 PRIVATE -fPIC)
+android_target_compile_options(hello linux-x86_64 PRIVATE  -fPIC)
 
 
 # Libraries that should propagate if (PUBLIC) if dependencies would rely on this target
-set(hello_libs_private hello_base ${UUID_LIBRARIES} ${QT5_LIBRARIES})
+target_link_libraries(hello PRIVATE  hello_base ${UUID_LIBRARIES} ${QT5_LIBRARIES})
 
 # Includes that are private
-set(hello_includes_private  ${UUID_INCLUDE_DIR} ${QT5_INCLUDE_DIRS})
+target_include_directories(hello PRIVATE ${UUID_INCLUDE_DIR} ${QT5_INCLUDE_DIRS})
 
 # The prebuilt dependencies.
-set(hello_prebuilt_dependencies "${RUNTIME_OS_DEPENDENCIES};${QT5_SHARED_DEPENDENCIES}")
-set(hello_prebuilt_properties "${RUNTIME_OS_PROPERTIES};${QT5_SHARED_PROPERTIES}")
-
-# On the mac we have to make sure our rpath can find the shared lib.
-set(hello_darwin-x86_64_prebuilt_properties "INSTALL_RPATH>=@loader_path")
-add_android_executable(hello)
-
+android_target_dependency(hello all "${RUNTIME_OS_DEPENDENCIES};${QT5_SHARED_DEPENDENCIES}")
+android_target_properties(hello all "${RUNTIME_OS_PROPERTIES};${QT5_SHARED_PROPERTIES}")

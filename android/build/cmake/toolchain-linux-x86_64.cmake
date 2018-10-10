@@ -21,7 +21,7 @@ include(toolchain)
 # First we create the toolchain
 set(ANDROID_TARGET_TAG "linux-x86_64")
 set(ANDROID_TARGET_OS "linux")
-get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../../" ABSOLUTE)
+get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../" ABSOLUTE)
 toolchain_generate("${ANDROID_TARGET_TAG}")
 
 get_env_cache(RUNTIME_OS_PROPERTIES)

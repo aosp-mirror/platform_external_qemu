@@ -1,17 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 
 # TODO(jansene): Move to a function
-if (DEFINED LOCAL_QEMU2_TOP_DIR)
-    get_filename_component(REPO_ROOT "${LOCAL_QEMU2_TOP_DIR}/../.." ABSOLUTE)
-    set(CURL_ROOT "${REPO_ROOT}/prebuilts/android-emulator-build/curl/${LOCAL_TARGET_TAG}")
-    set(CURL_LIBRARY ${CURL_ROOT}/lib/libcurl.a)
-    set(CURL_INCLUDE_DIR ${CURL_ROOT}/include)
-
-    # We will now find the prebuilt package.
-    find_package(CURL REQUIRED)
-    if (NOT CURL_LIBRARIES MATCHES "${REPO_ROOT}.*")
-        message(FATAL_ERROR "Discovered curl at: ${CURL_LIBRARIES}, ${CURL_INCLUDE_DIRS} which is outside of tree ${REPO_ROOT}!")
-    endif ()
+if (DEFINED ANDROID_QEMU2_TOP_DIR)
+    PREBUILT(CURL)
 else ()
     message(WARNING "Building outside the make system!")
     find_package(CURL REQUIRED)
@@ -116,7 +107,7 @@ if (WIN32 OR ("${LOCAL_OS}" STREQUAL "windows") AND ("${CMAKE_CXX_COMPILER_ID}" 
     target_compile_definitions(emulator-libkeymaster3 PRIVATE -DUSE_MINGW=1)
 endif ()
 
-if (NOT DEFINED LOCAL_QEMU2_TOP_DIR)
+if (NOT DEFINED ANDROID_QEMU2_TOP_DIR)
   add_dependencies(emulator-libkeymaster3 boringssl)
 endif ()
 
