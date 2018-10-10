@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f731a757_3bb03fc2",
+        "filename": "hw/misc/goldfish_pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1623,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-10T22:04:27Z",
+      "side": 1,
+      "message": "skip this",
+      "range": {
+        "startLine": 1615,
+        "startChar": 0,
+        "endLine": 1623,
+        "endChar": 32
+      },
+      "revId": "618a327530d693ee501cc99741f6bc50483f5a6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c01c9995_12c21023",
+        "filename": "hw/misc/goldfish_pipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1654,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-10T22:04:27Z",
+      "side": 1,
+      "message": "do this instead",
+      "range": {
+        "startLine": 1653,
+        "startChar": 0,
+        "endLine": 1654,
+        "endChar": 61
+      },
+      "revId": "618a327530d693ee501cc99741f6bc50483f5a6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
