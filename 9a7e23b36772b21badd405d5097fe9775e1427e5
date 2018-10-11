@@ -22,6 +22,30 @@
       "revId": "9a7e23b36772b21badd405d5097fe9775e1427e5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b5956574_b1917322",
+        "filename": "android/android-emu/android/emulation/AndroidPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 753,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-11T15:20:44Z",
+      "side": 1,
+      "message": "Perhaps there could be if(unlikely(snapshotter has instance and is not done loading)) around it.\n\nI\u0027m also thinking of, for mac / win, just not doing on demand ram load with MemoryWatch at least and only \"on demand loading\" via mmapped file, since it\u0027s possible to cause a similar problem in other virtual devices.",
+      "parentUuid": "483fbcf4_bae4a953",
+      "range": {
+        "startLine": 750,
+        "startChar": 4,
+        "endLine": 753,
+        "endChar": 5
+      },
+      "revId": "9a7e23b36772b21badd405d5097fe9775e1427e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
