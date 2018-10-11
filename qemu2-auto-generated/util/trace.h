@@ -157,28 +157,28 @@ extern uint16_t _TRACE_QEMU_VFIO_DMA_UNMAP_DSTATE;
 #define TRACE_RUN_POLL_HANDLERS_BEGIN_BACKEND_DSTATE() ( \
     false)
 
-static inline void _nocheck__trace_run_poll_handlers_begin(void * ctx, int64_t max_ns)
+static inline void _nocheck__trace_run_poll_handlers_begin(void * ctx, int64_t max_ns, int64_t timeout)
 {
 }
 
-static inline void trace_run_poll_handlers_begin(void * ctx, int64_t max_ns)
+static inline void trace_run_poll_handlers_begin(void * ctx, int64_t max_ns, int64_t timeout)
 {
     if (true) {
-        _nocheck__trace_run_poll_handlers_begin(ctx, max_ns);
+        _nocheck__trace_run_poll_handlers_begin(ctx, max_ns, timeout);
     }
 }
 
 #define TRACE_RUN_POLL_HANDLERS_END_BACKEND_DSTATE() ( \
     false)
 
-static inline void _nocheck__trace_run_poll_handlers_end(void * ctx, bool progress)
+static inline void _nocheck__trace_run_poll_handlers_end(void * ctx, bool progress, int64_t timeout)
 {
 }
 
-static inline void trace_run_poll_handlers_end(void * ctx, bool progress)
+static inline void trace_run_poll_handlers_end(void * ctx, bool progress, int64_t timeout)
 {
     if (true) {
-        _nocheck__trace_run_poll_handlers_end(ctx, progress);
+        _nocheck__trace_run_poll_handlers_end(ctx, progress, timeout);
     }
 }
 
