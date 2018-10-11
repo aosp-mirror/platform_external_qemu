@@ -45,6 +45,10 @@ endif
 PRODUCED_EXECUTABLES := emulator_img2simg=emulator$(BUILD_TARGET_SUFFIX)_img2simg \
                   emulator_simg2img=emulator$(BUILD_TARGET_SUFFIX)_simg2img \
 
+ifeq (true,$(BUILD_BENCHMARKS))
+    PRODUCED_EXECUTABLES+=android-emu_benchmark=android_emu$(BUILD_TARGET_SUFFIX)_benchmark
+endif
+
 # Our tests need testdata in a particular location, so we will use our
 # old make system to install these files.
 # they get double included on windows, which we can safely ignore.

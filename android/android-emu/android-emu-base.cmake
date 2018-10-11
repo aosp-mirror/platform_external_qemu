@@ -138,6 +138,6 @@ add_android_library(android-emu-base)
 # Add the benchmark
 # This will come back in later, we currently do not build this by default
 # see b/117599353
-# set(android-emu_benchmark_src android/base/synchronization/Lock_benchmark.cpp)
-# set(android-emu_benchmark_libs_private android-emu-base)
-# add_android_executable(android-emu_benchmark)
+set(android-emu_benchmark_src android/base/synchronization/Lock_benchmark.cpp)
+set(android-emu_benchmark_libs_private android-emu-base emulator-gbench)
+add_android_executable(android-emu_benchmark)

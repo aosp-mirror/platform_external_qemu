@@ -40,11 +40,6 @@ ifneq ($(filter linux darwin, $(BUILD_TARGET_OS)),)
   include $(LOCAL_PATH)/android/third_party/libusb.mk
 endif
 
-ifeq (true,$(BUILD_BENCHMARKS))
-include $(LOCAL_PATH)/android/third_party/regex-win32/sources.mk
-include $(LOCAL_PATH)/android/third_party/google-benchmark/sources.mk
-endif
-
 EMULATOR_VERSION_CFLAGS :=
 
 ANDROID_SDK_TOOLS_REVISION := $(strip $(ANDROID_SDK_TOOLS_REVISION))
