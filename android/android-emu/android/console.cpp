@@ -2500,13 +2500,10 @@ void location_registerQtSettingsWriter(location_qt_settings_writer f) {
 static int
 do_geo_fix( ControlClient  client, char*  args )
 {
-    // GEO_SAT2 provides bug backwards compatibility.
-    enum { GEO_LONG = 0, GEO_LAT, GEO_ALT, GEO_SAT, GEO_SAT2, NUM_GEO_PARAMS };
+    enum { GEO_LONG = 0, GEO_LAT, GEO_ALT, GEO_SAT, GEO_VELOCITY, NUM_GEO_PARAMS };
     const char* p = args;
     int     top_param = -1;
-    double  altitude;
     double  params[ NUM_GEO_PARAMS ];
-    int     n_satellites = 1;
 
     struct  timeval tVal;
 
@@ -2540,46 +2537,53 @@ do_geo_fix( ControlClient  client, char*  args )
 
     /* check longitude and latitude */
     {
-        double longitude = params[0];
+        double longitude = params[GEO_LONG];
         if (longitude < -180.0 || longitude > 180.0) {
             control_write(client, "KO: invalid longitude value. Should be in [-180,+180] range\r\n");
             return -1;
         }
-        double latitude = params[1];
+        double latitude = params[GEO_LAT];
         if (latitude < -90.0 || latitude > 90.0) {
             control_write(client, "KO: invalid latitude value. Should be in [-90,+90] range\r\n");
             return -1;
         }
     }
 
+    /* altitude */
+    double altitude = 0.0;
+    if (top_param >= GEO_ALT) {
+        altitude = params[GEO_ALT];
+    }
+
     /* check number of satellites, must be integer between 1 and 12 */
+    int n_satellites = 1;
     if (top_param >= GEO_SAT) {
-        int sat_index = (top_param >= GEO_SAT2) ? GEO_SAT2 : GEO_SAT;
-        n_satellites = (int) params[sat_index];
-        if (n_satellites != params[sat_index]
+        n_satellites = (int) params[GEO_SAT];
+        if (n_satellites != params[GEO_SAT]
             || n_satellites < 1 || n_satellites > 12) {
             control_write( client, "KO: invalid number of satellites. Must be an integer between 1 and 12\r\n");
             return -1;
         }
     }
 
-    altitude = 0.0;
-    if (top_param < GEO_ALT) {
-        altitude = params[GEO_ALT];
+    /* velocity */
+    double velocity = 0.0;
+    if (top_param >= GEO_VELOCITY) {
+        velocity = params[GEO_VELOCITY];
     }
 
     memset(&tVal, 0, sizeof(tVal));
     gettimeofday(&tVal, NULL);
 
     // Also update the settings.
+    double heading  = 0.0;
     if (location_agent_qt_settings_func) {
-        location_agent_qt_settings_func(params[GEO_LAT], params[GEO_LONG], altitude);
+        location_agent_qt_settings_func(params[GEO_LAT], params[GEO_LONG], altitude, velocity, heading);
     }
     client->global->location_agent->gpsSendLoc(params[GEO_LAT], params[GEO_LONG],
                                                altitude,
-                                               0.0, 0.0, // Speed and heading
+                                               velocity, heading,
                                                n_satellites, &tVal);
-
     return 0;
 }
 
@@ -2592,13 +2596,14 @@ static const CommandDefRec  geo_commands[] =
     NULL, do_geo_nmea, NULL },
 
     { "fix", "send a simple GPS fix",
-    "'geo fix <longitude> <latitude> [<altitude> [<satellites>]]'\r\n"
+    "'geo fix <longitude> <latitude> [<altitude> [<satellites> [<velocity>]]]'\r\n"
     " allows you to send a simple GPS fix to the emulated system.\r\n"
     " The parameters are:\r\n\r\n"
     "  <longitude>   longitude, in decimal degrees\r\n"
     "  <latitude>    latitude, in decimal degrees\r\n"
     "  <altitude>    optional altitude in meters\r\n"
     "  <satellites>  number of satellites being tracked (1-12)\r\n"
+    "  <velocity>    optional velocity in knots\r\n"
     "\r\n",
     NULL, do_geo_fix, NULL },
 

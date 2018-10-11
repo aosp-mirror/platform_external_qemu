@@ -38,9 +38,12 @@ public:
 
     static void writeDeviceLocationToSettings(double lat,
                                               double lon,
-                                              double alt);
+                                              double alt,
+                                              double velocity,
+                                              double heading);
 signals:
-    void locationUpdateRequired(double latitude, double longitude, double altitude);
+    void locationUpdateRequired(double latitude, double longitude, double altitude,
+                                double velocity, double heading);
     void populateNextGeoDataChunk();
     void targetHeadingChanged(double heading);
 
@@ -50,9 +53,6 @@ private slots:
     void on_loc_playStopButton_clicked();
     void on_loc_modeSwitch_currentIndexChanged(int index);
     void on_loc_sendPointButton_clicked();
-    void on_loc_longitudeInput_valueChanged(double);
-    void on_loc_latitudeInput_valueChanged(double);
-    void on_loc_altitudeInput_editingFinished();
     void on_loc_playbackSpeed_currentIndexChanged(int index);
 
     // Called when the thread that loads and parses
@@ -73,7 +73,7 @@ private slots:
     // loader thread (the one that occurs when the widget is first constructed)
     void startupGeoDataThreadFinished(QString file_name, bool ok, QString error);
 
-    void updateDisplayedLocation(double lat, double lon, double alt);
+    void updateDisplayedLocation(double lat, double lon, double alt, double velocity, double heading);
 
     void locationPlaybackStart();
     void locationPlaybackStop();
@@ -100,7 +100,6 @@ private:
                              QString* outErrorMessage);
 
     std::unique_ptr<Ui::LocationPage> mUi;
-    QDoubleValidator mAltitudeValidator;
     GpsFixArray          mGpsFixesArray;
     int                  mGpsNextPopulateIndex = 0;
     GeoDataLoaderThread* mGeoDataLoader;

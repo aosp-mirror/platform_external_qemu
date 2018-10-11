@@ -190,7 +190,9 @@ android_gps_send_location(double latitude, double longitude,
 
 int
 android_gps_get_location(double* outLatitude, double* outLongitude,
-                         double* outMetersElevation, int* outNSatellites)
+                         double* outMetersElevation,
+                         double* outVelocityKnots, double* outHeading,
+                         int* outNSatellites)
 {
     // TODO: This should use 'adb shell dumpsys location' and parse the result.
     //       It must ignore parameters the caller does not want (null pointers).

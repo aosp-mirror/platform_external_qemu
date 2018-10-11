@@ -81,7 +81,7 @@
    <property name="geometry">
     <rect>
      <x>472</x>
-     <y>220</y>
+     <y>200</y>
      <width>132</width>
      <height>36</height>
     </rect>
@@ -110,8 +110,8 @@
    <property name="geometry">
     <rect>
      <x>324</x>
-     <y>110</y>
-     <width>140</width>
+     <y>50</y>
+     <width>128</width>
      <height>16</height>
     </rect>
    </property>
@@ -166,9 +166,9 @@
   <widget class="QLabel" name="label_13">
    <property name="geometry">
     <rect>
-     <x>324</x>
+     <x>476</x>
      <y>50</y>
-     <width>140</width>
+     <width>128</width>
      <height>16</height>
     </rect>
    </property>
@@ -217,9 +217,9 @@
   <widget class="AngleInputWidget" name="loc_longitudeInput" native="true">
    <property name="geometry">
     <rect>
-     <x>324</x>
+     <x>476</x>
      <y>70</y>
-     <width>280</width>
+     <width>128</width>
      <height>21</height>
     </rect>
    </property>
@@ -231,8 +231,8 @@
    <property name="geometry">
     <rect>
      <x>324</x>
-     <y>130</y>
-     <width>280</width>
+     <y>70</y>
+     <width>128</width>
      <height>21</height>
     </rect>
    </property>
@@ -244,7 +244,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>250</y>
+     <y>240</y>
      <width>180</width>
      <height>31</height>
     </rect>
@@ -270,9 +270,9 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>290</y>
+     <y>270</y>
      <width>584</width>
-     <height>271</height>
+     <height>291</height>
     </rect>
    </property>
    <property name="font">
@@ -408,8 +408,8 @@
    <property name="geometry">
     <rect>
      <x>324</x>
-     <y>190</y>
-     <width>280</width>
+     <y>130</y>
+     <width>128</width>
      <height>21</height>
     </rect>
    </property>
@@ -430,8 +430,8 @@
    <property name="geometry">
     <rect>
      <x>324</x>
-     <y>170</y>
-     <width>140</width>
+     <y>110</y>
+     <width>128</width>
      <height>16</height>
     </rect>
    </property>
@@ -513,13 +513,51 @@
      <x>20</x>
      <y>128</y>
      <width>280</width>
-     <height>60</height>
+     <height>80</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Roboto</family>
     </font>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="loc_speedInput">
+   <property name="geometry">
+    <rect>
+     <x>476</x>
+     <y>130</y>
+     <width>128</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="accessibleDescription">
+    <string>Speed in knots</string>
+   </property>
+   <property name="text">
+    <string>0</string>
+   </property>
+   <property name="class" stdset="0">
+    <string>EditableValue</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="loc_speedLabel">
+   <property name="geometry">
+    <rect>
+     <x>476</x>
+     <y>110</y>
+     <width>128</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Speed (knots)</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Title</string>
    </property>
   </widget>
  </widget>

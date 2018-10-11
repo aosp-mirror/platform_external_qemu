@@ -15,9 +15,7 @@
 get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/e2fsprogs/${ANDROID_TARGET_TAG}" ABSOLUTE)
 
 if ("${ANDROID_TARGET_TAG}" MATCHES "darwin.*")
-    # Apple does its own thing, and the headers are in /usr/include
-    set(UUID_INCLUDE_DIR "/usr/include")
-    set(UUID_INCLUDE_DIRS "${UUID_INCLUDE_DIR}")
+    # Apple does its own thing, the headers should be on the path, so no need to set them explicitly.
 elseif ("${ANDROID_TARGET_TAG}" MATCHES "linux.*")
     set(UUID_INCLUDE_DIR "${PREBUILT_ROOT}/include")
     set(UUID_INCLUDE_DIRS "${UUID_INCLUDE_DIR}")
