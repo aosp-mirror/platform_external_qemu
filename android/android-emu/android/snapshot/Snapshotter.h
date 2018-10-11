@@ -131,7 +131,7 @@ public:
     bool hasRamFile() const { return !mRamFile.empty(); }
     bool isRamFileShared() const { return !mRamFile.empty() && mRamFileShared; }
     void setRemapping(bool remapping) { mIsRemapping = remapping; }
-
+    void loadRam(void* hostRamPtr, uint64_t size);
 private:
     bool onStartSaving(const char* name);
     bool onSavingComplete(const char* name, int res);

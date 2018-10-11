@@ -209,18 +209,7 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
              // loadRam
              [](void* opaque, void* hostRamPtr, uint64_t size) {
                  auto snapshot = static_cast<Snapshotter*>(opaque);
-
-                 auto& loader = snapshot->mLoader;
-                 if (!loader || loader->status() != OperationStatus::Ok ||
-                     !loader->hasRamLoader()) {
-                     return;
-                 }
-
-                 auto& ramLoader = loader->ramLoader();
-                 if (ramLoader.onDemandEnabled() &&
-                     !ramLoader.onDemandLoadingComplete()) {
-                     ramLoader.loadRam(hostRamPtr, size);
-                 }
+                 snapshot->loadRam(hostRamPtr, size);
              }}};
 
     assert(vmOperations.setSnapshotCallbacks);
@@ -228,6 +217,20 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
     mWindowAgent = windowAgent;
     mVmOperations.setSnapshotCallbacks(this, &kCallbacks);
 }  // namespace snapshot
+
+void Snapshotter::loadRam(void* hostRamPtr, uint64_t size) {
+    auto& loader = mLoader;
+    if (!loader || loader->status() != OperationStatus::Ok ||
+        !loader->hasRamLoader()) {
+        return;
+    }
+
+    auto& ramLoader = loader->ramLoader();
+    if (ramLoader.onDemandEnabled() &&
+        !ramLoader.onDemandLoadingComplete()) {
+        ramLoader.loadRam(hostRamPtr, size);
+    }
+}
 
 static constexpr int kDefaultMessageTimeoutMs = 10000;
 

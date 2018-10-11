@@ -25,6 +25,7 @@
 #include "android/emulation/android_pipe_host.h"
 #include "android/emulation/DeviceContextRunner.h"
 #include "android/emulation/VmLock.h"
+#include "android/snapshot/Snapshotter.h"
 
 #include <algorithm>
 #include <memory>
@@ -746,6 +747,10 @@ int android_pipe_guest_recv(void* internalPipe,
                             AndroidPipeBuffer* buffers,
                             int numBuffers) {
     CHECK_VM_STATE_LOCK();
+    auto& snapshotter = android::snapshot::Snapshotter::get();
+    for (int i = 0; i < numBuffers; i++) {
+        snapshotter.loadRam(buffers[i].data, buffers[i].size);
+    }
     auto pipe = static_cast<AndroidPipe*>(internalPipe);
     // Note that pipe may be deleted during this call, so it's not safe to
     // access pipe after this point.
@@ -756,6 +761,10 @@ int android_pipe_guest_send(void* internalPipe,
                             const AndroidPipeBuffer* buffers,
                             int numBuffers) {
     CHECK_VM_STATE_LOCK();
+    auto& snapshotter = android::snapshot::Snapshotter::get();
+    for (int i = 0; i < numBuffers; i++) {
+        snapshotter.loadRam(buffers[i].data, buffers[i].size);
+    }
     auto pipe = static_cast<AndroidPipe*>(internalPipe);
     // Note that pipe may be deleted during this call, so it's not safe to
     // access pipe after this point.
