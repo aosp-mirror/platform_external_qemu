@@ -43,16 +43,15 @@ static constexpr double MAX_SPEED =  666.0; // Arbitrary (~speed of sound in kno
 static double getHeading(double startLat, double startLon, double endLat, double endLon);
 static double getDistanceNm(double startLat, double startLon, double endLat, double endLon);
 static void sendLocationToDevice();
-static void getDeviceLocation(double* pLatitude, double* pLongitude, double* pAltitude);
+static void getDeviceLocation(double* pLatitude, double* pLongitude,
+                              double* pAltitude, double* pVelocity, double* pHeading);
 static void getDeviceLocationFromSettings(double* pOutLatitude,
                                           double* pOutLongitude,
-                                          double* pOutAltitude);
-static void getDeviceVelocity(double* speed, double* heading);
-static void putdeviceVelocity(double speed, double heading);
+                                          double* pOutAltitude,
+                                          double* pOutVelocity,
+                                          double* pOutHeading);
 
 static const QAndroidLocationAgent* sLocationAgent = nullptr;
-static double sDeviceSpeed = 0.0; // Knots
-static double sDeviceHeading = 0.0; // Degrees 0=north, 90=east
 
 static void updateThreadLoop();
 
@@ -104,12 +103,6 @@ LocationPage::LocationPage(QWidget *parent) :
     mUi->setupUi(this);
     mTimer.setSingleShot(true);
 
-    // We can only send 1 decimal of altitude (in meters).
-    mAltitudeValidator.setNotation(QDoubleValidator::StandardNotation);
-    mAltitudeValidator.setRange(-1000, 10000, 1);
-    mAltitudeValidator.setLocale(QLocale::C);
-    mUi->loc_altitudeInput->setValidator(&mAltitudeValidator);
-
     mUi->loc_latitudeInput->setMinValue(-90.0);
     mUi->loc_latitudeInput->setMaxValue(90.0);
     QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout);
@@ -122,11 +115,12 @@ LocationPage::LocationPage(QWidget *parent) :
     setButtonEnabled(mUi->loc_playStopButton, getSelectedTheme(), false);
 
     // Set the GUI to the current values
-    double curLat, curLon, curAlt;
-    getDeviceLocation(&curLat, &curLon, &curAlt);
-    updateDisplayedLocation(curLat, curLon, curAlt);
+    double curLat, curLon, curAlt, curVelocity, curHeading;
+    getDeviceLocation(&curLat, &curLon, &curAlt, &curVelocity, &curHeading);
+    updateDisplayedLocation(curLat, curLon, curAlt, curVelocity, curHeading);
 
     mUi->loc_altitudeInput->setText(QString::number(curAlt, 'f', 1));
+    mUi->loc_speedInput->setText(QString::number(curVelocity, 'f', 1));
     mUi->loc_latitudeInput->setValue(curLat);
     mUi->loc_longitudeInput->setValue(curLon);
 
@@ -171,10 +165,12 @@ LocationPage::~LocationPage() {
     mUi->loc_pathTable->clear();
 }
 
-static void locationAgentQtSettingsWriter(double lat, double lon, double alt) {
-    LocationPage::writeDeviceLocationToSettings(lat, lon, alt);
+static void locationAgentQtSettingsWriter(double lat, double lon, double alt,
+                                          double velocity, double heading)
+{
+    LocationPage::writeDeviceLocationToSettings(lat, lon, alt, velocity, heading);
     if (sGlobals->locationPagePtr) {
-        sGlobals->locationPagePtr->locationUpdateRequired(lat, lon, alt);
+        sGlobals->locationPagePtr->locationUpdateRequired(lat, lon, alt, velocity, heading);
     }
 }
 
@@ -184,9 +180,9 @@ void LocationPage::setLocationAgent(const QAndroidLocationAgent* agent) {
 
     location_registerQtSettingsWriter(locationAgentQtSettingsWriter);
 
-    double curLat, curLon, curAlt;
-    getDeviceLocation(&curLat, &curLon, &curAlt);
-    writeDeviceLocationToSettings(curLat, curLon, curAlt);
+    double curLat, curLon, curAlt, curVelocity, curHeading;
+    getDeviceLocation(&curLat, &curLon, &curAlt, &curVelocity, &curHeading);
+    writeDeviceLocationToSettings(curLat, curLon, curAlt, curVelocity, curHeading);
 
     sendLocationToDevice();
 
@@ -253,41 +249,26 @@ void LocationPage::on_loc_sendPointButton_clicked() {
     mUi->loc_latitudeInput->forceUpdate();
     mUi->loc_longitudeInput->forceUpdate();
 
-    double lat = 0.0;
-    double lon = 0.0;
-    double altitude = mUi->loc_altitudeInput->text().toDouble();
-    if (altitude < -1000.0 || altitude > 10000.0) {
-        double validAltitude;
-        getDeviceLocationFromSettings(&lat, &lon, &validAltitude);
-        mUi->loc_altitudeInput->setText(QString::number(validAltitude));
-    }
-
     AutoLock lock(sGlobals->updateThreadLock);
-    lat = mUi->loc_latitudeInput->value(),
-    lon = mUi->loc_longitudeInput->value(),
-    altitude = mUi->loc_altitudeInput->text().toDouble();
-    updateDisplayedLocation(lat, lon, altitude);
+    double lat = mUi->loc_latitudeInput->value();
+    double lon = mUi->loc_longitudeInput->value();
+    double velocity = mUi->loc_speedInput->text().toDouble();
+    double altitude = mUi->loc_altitudeInput->text().toDouble();
+    double heading = 0.0;
+    updateDisplayedLocation(lat, lon, altitude, velocity, heading);
 
     sGlobals->updateThreadCv.signalAndUnlock(&lock);
 }
 
-void LocationPage::updateDisplayedLocation(double lat, double lon, double alt) {
-    QString curLoc = tr("Longitude: %1\nLatitude: %2\nAltitude: %3")
-                     .arg(lon, 0, 'f', 4).arg(lat, 0, 'f', 4).arg(alt, 0, 'f', 1);
+void LocationPage::updateDisplayedLocation(double lat, double lon, double alt,
+                                           double velocity, double heading)
+{
+    QString curLoc = tr("Latitude: %1\nLongitude: %2\nAltitude: %3\nSpeed: %4\nHeading: %5")
+                     .arg(lat, 0, 'f', 4).arg(lon, 0, 'f', 4)
+                     .arg(alt, 0, 'f', 1).arg(velocity, 0, 'f', 1)
+                     .arg(heading, 0, 'f', 1);
     mUi->loc_currentLoc->setPlainText(curLoc);
-    writeDeviceLocationToSettings(lat, lon, alt);
-}
-
-void LocationPage::on_loc_longitudeInput_valueChanged(double value) {
-    // no-op
-}
-
-void LocationPage::on_loc_latitudeInput_valueChanged(double value) {
-    // no-op
-}
-
-void LocationPage::on_loc_altitudeInput_editingFinished() {
-    // no-op
+    writeDeviceLocationToSettings(lat, lon, alt, velocity, heading);
 }
 
 void LocationPage::on_loc_playbackSpeed_currentIndexChanged(int index) {
@@ -351,11 +332,6 @@ bool LocationPage::validateCell(QTableWidget* table,
             if (!cellOK) {
                 *outErrorMessage = tr("Elevation must be a number.");
                 return false;
-            }
-            if (cellValue < -1000.0 || cellValue > 10000.0) {
-                *outErrorMessage = tr(
-                        "Altitude must be between -1000 and 10000, inclusive.");
-                cellOK = false;
             }
             break;
         default:
@@ -473,7 +449,11 @@ void LocationPage::locationPlaybackStop()
     mUi->loc_pathTable->setEditTriggers(QAbstractItemView::DoubleClicked |
                                                 QAbstractItemView::EditKeyPressed |
                                                 QAbstractItemView::AnyKeyPressed);
-    putdeviceVelocity(0.0, 0.0);
+    // Set the velocity to zero
+    double curLat, curLon, curAlt, curVelocity, curHeading;
+    getDeviceLocation(&curLat, &curLon, &curAlt, &curVelocity, &curHeading);
+    curVelocity = 0.0;
+    updateDisplayedLocation(curLat, curLon, curAlt, curVelocity, curHeading);
     mNowPlaying = false;
 }
 
@@ -519,6 +499,7 @@ void LocationPage::timeout() {
     double deltaTimeSec = 0.0;
     int nextRow = mRowToSend + 1;
     if (nextRow < mUi->loc_pathTable->rowCount()) {
+        // Compute the direction to the next point
         theItem = mUi->loc_pathTable->item(nextRow, 0);
         deltaTimeSec = theItem->text().toDouble() / (mUi->loc_playbackSpeed->currentIndex() + 1);
         theItem = mUi->loc_pathTable->item(nextRow, 1);
@@ -531,10 +512,13 @@ void LocationPage::timeout() {
             speed = std::min(distance / deltaTimeHours, MAX_SPEED);
         }
         direction = getHeading(lat, lon, nextLat, nextLon);
+    } else {
+        // This is the last point. Maintain the direction that got us here.
+        double prevLat, prevLon, prevAlt, prevVelocity, prevHeading;
+        getDeviceLocation(&prevLat, &prevLon, &prevAlt, &prevVelocity, &prevHeading);
+        direction = prevHeading;
     }
-    putdeviceVelocity(speed, direction);
-
-    emit targetHeadingChanged(direction);
+    emit targetHeadingChanged(direction); // Update magnetometer
 
     // Update the appearance of the table:
     // 1. Clear the "play arrow" icon from the previous point, if necessary.
@@ -550,7 +534,7 @@ void LocationPage::timeout() {
     mUi->loc_pathTable->setCurrentItem(currentItem);
 
     AutoLock lock (sGlobals->updateThreadLock);
-    updateDisplayedLocation(lat, lon, alt);
+    updateDisplayedLocation(lat, lon, alt, speed, direction);
 
     // Send the command.
     sGlobals->updateThreadCv.signalAndUnlock(&lock);
@@ -678,8 +662,10 @@ int LocationPage::getLocationPlaybackSpeedFromSettings() {
 
 static void getDeviceLocationFromSettings(double* pOutLatitude,
                                           double* pOutLongitude,
-                                          double* pOutAltitude) {
-
+                                          double* pOutAltitude,
+                                          double* pOutVelocity,
+                                          double* pOutHeading)
+{
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
         QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -687,6 +673,8 @@ static void getDeviceLocationFromSettings(double* pOutLatitude,
         *pOutLatitude = avdSpecificSettings.value(Ui::Settings::PER_AVD_LATITUDE, kGplexLat).toDouble();
         *pOutLongitude = avdSpecificSettings.value(Ui::Settings::PER_AVD_LONGITUDE, kGplexLon).toDouble();
         *pOutAltitude = avdSpecificSettings.value(Ui::Settings::PER_AVD_ALTITUDE, kGplexAlt).toDouble();
+        *pOutVelocity = avdSpecificSettings.value(Ui::Settings::PER_AVD_VELOCITY, 0.0).toDouble();
+        *pOutHeading = avdSpecificSettings.value(Ui::Settings::PER_AVD_HEADING, 0.0).toDouble();
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
@@ -696,13 +684,20 @@ static void getDeviceLocationFromSettings(double* pOutLatitude,
                                      kGplexLon).toDouble();
         *pOutAltitude  = settings.value(Ui::Settings::LOCATION_RECENT_ALTITUDE,
                                      kGplexAlt).toDouble();
+        *pOutVelocity = settings.value(Ui::Settings::LOCATION_RECENT_VELOCITY,
+                                     0.0).toDouble();
+        *pOutHeading = settings.value(Ui::Settings::LOCATION_RECENT_HEADING,
+                                     0.0).toDouble();
     }
 }
 
 // static
 void LocationPage::writeDeviceLocationToSettings(double lat,
                                                  double lon,
-                                                 double alt) {
+                                                 double alt,
+                                                 double velocity,
+                                                 double heading)
+{
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
         QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -710,40 +705,36 @@ void LocationPage::writeDeviceLocationToSettings(double lat,
         avdSpecificSettings.setValue(Ui::Settings::PER_AVD_LATITUDE, lat);
         avdSpecificSettings.setValue(Ui::Settings::PER_AVD_LONGITUDE, lon);
         avdSpecificSettings.setValue(Ui::Settings::PER_AVD_ALTITUDE, alt);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_VELOCITY, velocity);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_HEADING, heading);
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
         settings.setValue(Ui::Settings::LOCATION_RECENT_LATITUDE, lat);
         settings.setValue(Ui::Settings::LOCATION_RECENT_LONGITUDE, lon);
         settings.setValue(Ui::Settings::LOCATION_RECENT_ALTITUDE, alt);
+        settings.setValue(Ui::Settings::LOCATION_RECENT_VELOCITY, velocity);
+        settings.setValue(Ui::Settings::LOCATION_RECENT_HEADING, heading);
     }
 }
 
 // Get the current location from the device. If that fails, use
 // the saved location from this UI.
-static void getDeviceLocation(double* pLatitude, double* pLongitude, double* pAltitude) {
+static void getDeviceLocation(double* pLatitude, double* pLongitude,
+                              double* pAltitude,
+                              double* pVelocity, double* pHeading)
+{
     bool gotDeviceLoc = false;
 
     if (sLocationAgent && sLocationAgent->gpsGetLoc) {
         // Query the device
-        gotDeviceLoc = sLocationAgent->gpsGetLoc(pLatitude, pLongitude, pAltitude, nullptr);
+        gotDeviceLoc = sLocationAgent->gpsGetLoc(pLatitude, pLongitude, pAltitude,
+                                                 pVelocity, pHeading, nullptr);
     }
 
     if (!gotDeviceLoc) {
-        getDeviceLocationFromSettings(pLatitude, pLongitude, pAltitude);
+        getDeviceLocationFromSettings(pLatitude, pLongitude, pAltitude, pVelocity, pHeading);
     }
-}
-
-// Get the current speed and direction
-static void getDeviceVelocity(double* speed, double* heading) {
-    *speed = sDeviceSpeed;
-    *heading = sDeviceHeading;
-}
-
-// Set the current speed and direction
-static void putdeviceVelocity(double speed, double heading) {
-    sDeviceSpeed = speed;
-    sDeviceHeading = heading;
 }
 
 // Send a GPS location to the device
@@ -753,15 +744,13 @@ static void sendLocationToDevice() {
         double latitude;
         double longitude;
         double altitude;
-        getDeviceLocation(&latitude, &longitude, &altitude);
-
-        double speed;   // Knots
-        double heading; // Degrees
-        getDeviceVelocity(&speed, &heading);
+        double velocity;
+        double heading;
+        getDeviceLocation(&latitude, &longitude, &altitude, &velocity, &heading);
 
         timeval timeVal = {};
         gettimeofday(&timeVal, nullptr);
-        sLocationAgent->gpsSendLoc(latitude, longitude, altitude, speed, heading, 4, &timeVal);
+        sLocationAgent->gpsSendLoc(latitude, longitude, altitude, velocity, heading, 4, &timeVal);
     }
 }
 

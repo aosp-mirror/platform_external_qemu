@@ -1,7 +1,8 @@
 LOCAL_PATH := $(call my-dir)
 
 # Workaround for b/115634240
-LOCAL_SOURCE_DEPENDENCIES := $(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
+LOCAL_SOURCE_DEPENDENCIES := \
+	$(call local-library-path,libmetrics_proto)
 
 host_common_SRC_FILES := \
      GLESv2Imp.cpp       \
@@ -21,7 +22,7 @@ $(call emugl-import, libGLcommon)
 $(call emugl-import, libOpenglCodecCommon)
 
 # Workaround for b/115634240
-LOCAL_SOURCE_DEPENDENCIES := $(call generated-proto-sources-dir)/android/metrics/proto/studio_stats.pb.cc
+LOCAL_SOURCE_DEPENDENCIES := $(call local-library-path,libmetrics_proto)
 
 LOCAL_SRC_FILES := $(host_common_SRC_FILES)
 
