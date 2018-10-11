@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "483fbcf4_bae4a953",
+        "filename": "android/android-emu/android/emulation/AndroidPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 753,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-11T15:17:29Z",
+      "side": 1,
+      "message": "This, and send, are a very hot codepath.  Is there anyplace else we can put this, or is there a way we can simplify the check before calling into loadRam?  The less pointer dereferences and memory accesses the better.\n\nFeel free to submit as-is, but if so I\u0027d like to see a follow-up bug/change.",
+      "range": {
+        "startLine": 750,
+        "startChar": 4,
+        "endLine": 753,
+        "endChar": 5
+      },
+      "revId": "9a7e23b36772b21badd405d5097fe9775e1427e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
