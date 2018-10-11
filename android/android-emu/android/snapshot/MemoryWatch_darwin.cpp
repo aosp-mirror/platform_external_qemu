@@ -180,8 +180,11 @@ public:
 
 // static
 bool MemoryAccessWatch::isSupported() {
+    // bug: 117473657
+    // Dangerous to use MemoryAccessWatch in general
+    return false;
     // TODO: HAXM
-    return GetCurrentCpuAccelerator() == CPU_ACCELERATOR_HVF;
+    // return GetCurrentCpuAccelerator() == CPU_ACCELERATOR_HVF;
 }
 
 MemoryAccessWatch::MemoryAccessWatch(AccessCallback&& accessCallback,

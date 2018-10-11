@@ -203,19 +203,21 @@ private:
 
 // static
 bool MemoryAccessWatch::isSupported() {
-
-    if (!android::featurecontrol::isEnabled(
-            android::featurecontrol::WindowsOnDemandSnapshotLoad) ||
-        android::featurecontrol::isEnabled(
-            android::featurecontrol::QuickbootFileBacked)) {
-        return false;
-    }
-
-    if (GetCurrentCpuAccelerator() == CPU_ACCELERATOR_HAX
-        && guest_mem_protect_call)
-        return guest_mem_protection_supported_call();
-
+    // BUG: 117473657
+    // Dangerous to use MemoryAccessWatch.
     return false;
+    // if (!android::featurecontrol::isEnabled(
+    //         android::featurecontrol::WindowsOnDemandSnapshotLoad) ||
+    //     android::featurecontrol::isEnabled(
+    //         android::featurecontrol::QuickbootFileBacked)) {
+    //     return false;
+    // }
+
+    // if (GetCurrentCpuAccelerator() == CPU_ACCELERATOR_HAX
+    //     && guest_mem_protect_call)
+    //     return guest_mem_protection_supported_call();
+
+    // return false;
 }
 
 MemoryAccessWatch::MemoryAccessWatch(AccessCallback&& accessCallback,
