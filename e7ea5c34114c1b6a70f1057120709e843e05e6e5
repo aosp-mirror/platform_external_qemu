@@ -48,6 +48,29 @@
     },
     {
       "key": {
+        "uuid": "db395095_1c3cd90a",
+        "filename": "android/build/emulator/cmake.make",
+        "patchSetId": 7
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-12T04:34:48Z",
+      "side": 1,
+      "message": "Can you clarify \"nasty way\", and especially the part where it\u0027s \"unfortunate\" that there will be a NOP dependency analysis and also it\u0027s saying that is something we want?",
+      "range": {
+        "startLine": 98,
+        "startChar": 0,
+        "endLine": 113,
+        "endChar": 61
+      },
+      "revId": "e7ea5c34114c1b6a70f1057120709e843e05e6e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ea77f8bf_f4024845",
         "filename": "android/third_party/jpeg-6b/CMakeLists.txt",
         "patchSetId": 7
