@@ -17,6 +17,8 @@
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "RenderContext.h"
 #include "android/base/Compiler.h"
+#include "FenceSync.h"
+#include "Hwc2.h"
 
 #include <cinttypes>
 #include <functional>
@@ -36,11 +38,14 @@ bool shouldUseHostGpu();
 // In that case, this function will return nullptr.
 OSWindow* createOrGetTestWindow(int xoffset, int yoffset, int width, int height);
 
+
+class ColorBufferQueue;
 // Creates a window (or runs headless) to be used in a sample app.
 class SampleApplication {
 public:
     SampleApplication(int windowWidth = 256, int windowHeight = 256,
-                      int refreshRate = 60, GLESApi glVersion = GLESApi_3_0);
+                      int refreshRate = 60, GLESApi glVersion = GLESApi_3_0,
+                      bool compose = false);
     ~SampleApplication();
 
     // A basic draw loop that works similar to most simple
@@ -70,6 +75,12 @@ public:
     // Just initialize, draw, and swap buffers once.
     void drawOnce();
 
+private:
+    void drawWorkerWithCompose(ColorBufferQueue& app2sfQueue, ColorBufferQueue& sf2appQueue);
+    void drawWorker(ColorBufferQueue& app2sfQueue, ColorBufferQueue& sf2appQueue,
+                ColorBufferQueue& sf2hwcQueue, ColorBufferQueue& hwc2sfQueue);
+    FenceSync* getFenceSync();
+
 protected:
     virtual void initialize() = 0;
     virtual void draw() = 0;
@@ -91,6 +102,9 @@ protected:
     unsigned int mColorBuffer = 0;
     unsigned int mSurface = 0;
     unsigned int mContext = 0;
+
+    bool mIsCompose = false;
+    uint32_t mTargetCb = 0;
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(SampleApplication);
 };
