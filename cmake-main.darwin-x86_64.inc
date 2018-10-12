@@ -478,7 +478,7 @@ set(libqemustub_sources ""
 set(libqemustub_generated_sources "" 
 ${ANDROID_AUTOGEN}/)
 
-set(libqemustub_dep qemu2-shared)
+set(libqemustub_dep )
 
  ## TARGET: libqemuutil ##
 
@@ -672,6 +672,7 @@ ${ANDROID_AUTOGEN}/qapi/qapi-builtin-types.c
   ${ANDROID_AUTOGEN}/qapi/qapi-events-trace.c
   ${ANDROID_AUTOGEN}/qapi/qapi-events-transaction.c
   ${ANDROID_AUTOGEN}/qapi/qapi-events-ui.c
+  ${ANDROID_AUTOGEN}/qapi/qapi-introspect.c
   ${ANDROID_AUTOGEN}/trace-root.c
   ${ANDROID_AUTOGEN}/util/trace.c
   ${ANDROID_AUTOGEN}/crypto/trace.c
@@ -734,34 +735,313 @@ ${ANDROID_AUTOGEN}/qapi/qapi-builtin-types.c
   ${ANDROID_AUTOGEN}/nbd/trace.c
   ${ANDROID_AUTOGEN}/scsi/trace.c)
 
-set(libqemuutil_dep qemu2-shared)
+set(libqemuutil_dep )
 
  ## TARGET: qemu-img ##
 
 set(qemu-img_sources ""
-   qemu-img.c)
+   qemu-img.c
+   block.c
+   blockjob.c
+   qemu-io-cmds.c
+   replication.c
+   block/cat.c
+   block/raw-format.c
+   block/qcow.c
+   block/vdi.c
+   block/vmdk.c
+   block/cloop.c
+   block/bochs.c
+   block/vpc.c
+   block/vvfat.c
+   block/dmg.c
+   block/qcow2.c
+   block/qcow2-refcount.c
+   block/qcow2-cluster.c
+   block/qcow2-snapshot.c
+   block/qcow2-cache.c
+   block/qcow2-bitmap.c
+   block/qed.c
+   block/qed-l2-cache.c
+   block/qed-table.c
+   block/qed-cluster.c
+   block/qed-check.c
+   block/vhdx.c
+   block/vhdx-endian.c
+   block/vhdx-log.c
+   block/quorum.c
+   block/parallels.c
+   block/blkdebug.c
+   block/blkverify.c
+   block/blkreplay.c
+   block/block-backend.c
+   block/snapshot.c
+   block/qapi.c
+   block/file-posix.c
+   block/null.c
+   block/mirror.c
+   block/commit.c
+   block/io.c
+   block/throttle-groups.c
+   block/nbd.c
+   block/nbd-client.c
+   block/sheepdog.c
+   block/accounting.c
+   block/dirty-bitmap.c
+   block/write-threshold.c
+   block/backup.c
+   block/replication.c
+   block/crypto.c
+   nbd/server.c
+   nbd/client.c
+   nbd/common.c
+   crypto/init.c
+   crypto/hash.c
+   crypto/hash-glib.c
+   crypto/hmac.c
+   crypto/hmac-glib.c
+   crypto/aes.c
+   crypto/desrfb.c
+   crypto/cipher.c
+   crypto/tlscreds.c
+   crypto/tlscredsanon.c
+   crypto/tlscredsx509.c
+   crypto/tlssession.c
+   crypto/secret.c
+   crypto/random-platform.c
+   crypto/pbkdf.c
+   crypto/ivgen.c
+   crypto/ivgen-essiv.c
+   crypto/ivgen-plain.c
+   crypto/ivgen-plain64.c
+   crypto/afsplit.c
+   crypto/xts.c
+   crypto/block.c
+   crypto/block-qcow.c
+   crypto/block-luks.c
+   io/channel.c
+   io/channel-buffer.c
+   io/channel-command.c
+   io/channel-file.c
+   io/channel-socket.c
+   io/channel-tls.c
+   io/channel-watch.c
+   io/channel-websock.c
+   io/channel-util.c
+   io/dns-resolver.c
+   io/task.c
+   qom/object.c
+   qom/container.c
+   qom/qom-qobject.c
+   qom/object_interfaces.c)
 set(qemu-img_generated_sources "" 
 ${ANDROID_AUTOGEN}/)
 
-set(qemu-img_dep libqemuutil qemu2-shared libqemustub)
+set(qemu-img_dep libqemuutil libqemustub)
 
  ## TARGET: qemu-io ##
 
 set(qemu-io_sources ""
-   qemu-io.c)
+   qemu-io.c
+   block.c
+   blockjob.c
+   qemu-io-cmds.c
+   replication.c
+   block/cat.c
+   block/raw-format.c
+   block/qcow.c
+   block/vdi.c
+   block/vmdk.c
+   block/cloop.c
+   block/bochs.c
+   block/vpc.c
+   block/vvfat.c
+   block/dmg.c
+   block/qcow2.c
+   block/qcow2-refcount.c
+   block/qcow2-cluster.c
+   block/qcow2-snapshot.c
+   block/qcow2-cache.c
+   block/qcow2-bitmap.c
+   block/qed.c
+   block/qed-l2-cache.c
+   block/qed-table.c
+   block/qed-cluster.c
+   block/qed-check.c
+   block/vhdx.c
+   block/vhdx-endian.c
+   block/vhdx-log.c
+   block/quorum.c
+   block/parallels.c
+   block/blkdebug.c
+   block/blkverify.c
+   block/blkreplay.c
+   block/block-backend.c
+   block/snapshot.c
+   block/qapi.c
+   block/file-posix.c
+   block/null.c
+   block/mirror.c
+   block/commit.c
+   block/io.c
+   block/throttle-groups.c
+   block/nbd.c
+   block/nbd-client.c
+   block/sheepdog.c
+   block/accounting.c
+   block/dirty-bitmap.c
+   block/write-threshold.c
+   block/backup.c
+   block/replication.c
+   block/crypto.c
+   nbd/server.c
+   nbd/client.c
+   nbd/common.c
+   crypto/init.c
+   crypto/hash.c
+   crypto/hash-glib.c
+   crypto/hmac.c
+   crypto/hmac-glib.c
+   crypto/aes.c
+   crypto/desrfb.c
+   crypto/cipher.c
+   crypto/tlscreds.c
+   crypto/tlscredsanon.c
+   crypto/tlscredsx509.c
+   crypto/tlssession.c
+   crypto/secret.c
+   crypto/random-platform.c
+   crypto/pbkdf.c
+   crypto/ivgen.c
+   crypto/ivgen-essiv.c
+   crypto/ivgen-plain.c
+   crypto/ivgen-plain64.c
+   crypto/afsplit.c
+   crypto/xts.c
+   crypto/block.c
+   crypto/block-qcow.c
+   crypto/block-luks.c
+   io/channel.c
+   io/channel-buffer.c
+   io/channel-command.c
+   io/channel-file.c
+   io/channel-socket.c
+   io/channel-tls.c
+   io/channel-watch.c
+   io/channel-websock.c
+   io/channel-util.c
+   io/dns-resolver.c
+   io/task.c
+   qom/object.c
+   qom/container.c
+   qom/qom-qobject.c
+   qom/object_interfaces.c)
 set(qemu-io_generated_sources "" 
 ${ANDROID_AUTOGEN}/)
 
-set(qemu-io_dep libqemuutil qemu2-shared libqemustub)
+set(qemu-io_dep libqemuutil libqemustub)
 
  ## TARGET: qemu-nbd ##
 
 set(qemu-nbd_sources ""
-   qemu-nbd.c)
+   qemu-nbd.c
+   block.c
+   blockjob.c
+   qemu-io-cmds.c
+   replication.c
+   block/cat.c
+   block/raw-format.c
+   block/qcow.c
+   block/vdi.c
+   block/vmdk.c
+   block/cloop.c
+   block/bochs.c
+   block/vpc.c
+   block/vvfat.c
+   block/dmg.c
+   block/qcow2.c
+   block/qcow2-refcount.c
+   block/qcow2-cluster.c
+   block/qcow2-snapshot.c
+   block/qcow2-cache.c
+   block/qcow2-bitmap.c
+   block/qed.c
+   block/qed-l2-cache.c
+   block/qed-table.c
+   block/qed-cluster.c
+   block/qed-check.c
+   block/vhdx.c
+   block/vhdx-endian.c
+   block/vhdx-log.c
+   block/quorum.c
+   block/parallels.c
+   block/blkdebug.c
+   block/blkverify.c
+   block/blkreplay.c
+   block/block-backend.c
+   block/snapshot.c
+   block/qapi.c
+   block/file-posix.c
+   block/null.c
+   block/mirror.c
+   block/commit.c
+   block/io.c
+   block/throttle-groups.c
+   block/nbd.c
+   block/nbd-client.c
+   block/sheepdog.c
+   block/accounting.c
+   block/dirty-bitmap.c
+   block/write-threshold.c
+   block/backup.c
+   block/replication.c
+   block/crypto.c
+   nbd/server.c
+   nbd/client.c
+   nbd/common.c
+   crypto/init.c
+   crypto/hash.c
+   crypto/hash-glib.c
+   crypto/hmac.c
+   crypto/hmac-glib.c
+   crypto/aes.c
+   crypto/desrfb.c
+   crypto/cipher.c
+   crypto/tlscreds.c
+   crypto/tlscredsanon.c
+   crypto/tlscredsx509.c
+   crypto/tlssession.c
+   crypto/secret.c
+   crypto/random-platform.c
+   crypto/pbkdf.c
+   crypto/ivgen.c
+   crypto/ivgen-essiv.c
+   crypto/ivgen-plain.c
+   crypto/ivgen-plain64.c
+   crypto/afsplit.c
+   crypto/xts.c
+   crypto/block.c
+   crypto/block-qcow.c
+   crypto/block-luks.c
+   io/channel.c
+   io/channel-buffer.c
+   io/channel-command.c
+   io/channel-file.c
+   io/channel-socket.c
+   io/channel-tls.c
+   io/channel-watch.c
+   io/channel-websock.c
+   io/channel-util.c
+   io/dns-resolver.c
+   io/task.c
+   qom/object.c
+   qom/container.c
+   qom/qom-qobject.c
+   qom/object_interfaces.c)
 set(qemu-nbd_generated_sources "" 
 ${ANDROID_AUTOGEN}/)
 
-set(qemu-nbd_dep libqemuutil qemu2-shared libqemustub)
+set(qemu-nbd_dep libqemuutil libqemustub)
 
  ## TARGET: qemu-system-aarch64 ##
 

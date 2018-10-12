@@ -162,6 +162,7 @@ $(call start-cmake-project,libqemu2-common)
 $(call gen-hw-config-defs)
 
 PRODUCED_STATIC_LIBS:=libqemu2-common libqemu2-util
+PROUDCED_EXECUTABLES:=qemu-img
 LOCAL_CFLAGS := \
     $(QEMU2_CFLAGS) \
     -DPOISON_CONFIG_ANDROID \
@@ -216,10 +217,6 @@ ifeq (,$(CONFIG_MIN_BUILD))
     endif
 
 endif   # !CONFIG_MIN_BUILD
-
-# TODO(jansene): This gets included twice in the windows build (32 bit/64 bit)
-# causing targets to be overridden.
-include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu-img.mk
 
 # The test infrastructure used by Qemu is not yet cross platform.
 # See b/113667469
