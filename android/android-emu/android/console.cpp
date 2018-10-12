@@ -2587,6 +2587,22 @@ do_geo_fix( ControlClient  client, char*  args )
     return 0;
 }
 
+static int
+do_geo_gnss( ControlClient  client, char*  args )
+{
+    if (!args) {
+        control_write( client, "KO: GNSS sentence missing, try 'help geo gnss'\r\n" );
+        return -1;
+    }
+    if (!client->global->location_agent->gpsIsSupported()) {
+        control_write( client, "KO: no GPS emulation in this virtual device\r\n" );
+        return -1;
+    }
+    client->global->location_agent->gpsSendGnss(args);
+    control_write( client, "OK: sending %s\r\n", args);
+    return 0;
+}
+
 static const CommandDefRec  geo_commands[] =
 {
     { "nmea", "send a GPS NMEA sentence",
@@ -2606,6 +2622,19 @@ static const CommandDefRec  geo_commands[] =
     "  <velocity>    optional velocity in knots\r\n"
     "\r\n",
     NULL, do_geo_fix, NULL },
+
+    { "gnss", "send a GNSS sentence",
+    "'geo gnss <sentence>' sends a GNSS sentence to the emulated device.\r\n"
+    "<sentence> has fields separated by ',', and it starts with 8 fields\r\n"
+    "for clock data, 1 field for measurement count, and followed by\r\n"
+    "count * 9 (each measurement data has 9 fields).\r\n"
+    "e.g. geo gnss TimeNanos,FullBiasNanos,BiasNanos,BiasUncertaintyNanos,\r\n"
+    "DriftNanosPerSecond,DriftUncertaintyNanosPerSecond,HardwareClockDiscontinuityCount,\r\n"
+    "GnssClockFlags,count,Svid,ConstellationType,State,ReceivedSvTimeNanos,ReceivedSvTimeUncertaintyNanos,\r\n"
+    "Cn0DbHz,PseudorangeRateMetersPerSecond,PseudorangeRateUncertaintyMetersPerSecond,\r\n"
+    "CarrierFrequencyHz,<more measurements>\r\n",
+    NULL, do_geo_gnss, NULL },
+
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
