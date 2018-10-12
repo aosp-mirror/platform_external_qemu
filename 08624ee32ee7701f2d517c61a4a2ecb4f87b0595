@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "318a0b9b_525afe92",
+        "filename": "android/build/cmake/Modules/Platform/WinMSVCCrossCompile.cmake",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-12T17:09:25Z",
+      "side": 1,
+      "message": ".so?",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cc72d830_0b0dc3ec",
+        "filename": "android/build/cmake/emu-qt5-config.cmake",
+        "patchSetId": 3
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-12T17:09:25Z",
+      "side": 1,
+      "message": "Would you mind generalizing this for the whole file? This approach makes more sense :-)",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf133e28_91496311",
+        "filename": "android/build/cmake/test/CMakeLists.txt",
+        "patchSetId": 3
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-12T17:09:25Z",
+      "side": 1,
+      "message": "Maybe time to read: http://reasonablypolymorphic.com/blog/protos-are-wrong/ :-)",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf63bac7_3ce69352",
+        "filename": "android/build/cmake/test/run_cmake_tests.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-12T17:09:25Z",
+      "side": 1,
+      "message": "So we cannot build yet?",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b33f2301_47e1852e",
+        "filename": "android/build/cmake/toolchain-windows_msvc-x86_64.cmake",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-12T17:09:25Z",
+      "side": 1,
+      "message": "This is not mingw :-)",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9a162825_6faf3997",
+        "filename": "android/build/cmake/toolchain.cmake",
+        "patchSetId": 3
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-12T17:09:25Z",
+      "side": 1,
+      "message": "Why do to set this to {PREFIX}clang? Don\u0027t the shell scripts that our toolchain builder uses not do the right thing? \n\nIt would be nice if we could the \"windows_msvc\" specific knowledge into a higher level function, as it  creates a secret dependency.\n\nUse passed in parameter TARGET_OS, vs ANDROID_TARGET_OS.",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "17f00ad8_a6002f3c",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-12T17:09:25Z",
+      "side": 1,
+      "message": "nit: Is it worthwhile to define a variable with the version number somewhere?",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "773499f6_7dd7473e",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 537,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-12T17:09:25Z",
+      "side": 1,
+      "message": "No real need to check for this. We will not be able to do anything useful without C++11 or higher :-)",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "146f52ef_f0a7814f",
+        "filename": "android/scripts/utils/package_builder.shi",
+        "patchSetId": 3
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-12T17:09:25Z",
+      "side": 1,
+      "message": "nit: tabs",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
