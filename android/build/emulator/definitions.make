@@ -446,7 +446,8 @@ $$(_DST): $$(_SRC)
        -DLOCAL_QEMU2_TOP_DIR="$$(QEMU2_TOP_DIR)" \
        -DLOCAL_TARGET_TAG="$$(PRIVATE_BUILD_TARGET_TAG)" \
        -DLOCAL_BUILD_OBJS_DIR="$$(PRIVATE_BUILD_OBJS_DIR)" \
-       -DCMAKE_TOOLCHAIN_FILE=$$(call qemu2-if-windows,"$$(QEMU2_TOP_DIR)/android/build/cmake/toolchain-win.cmake")
+       $$(call qemu2-if-windows,"-DCMAKE_TOOLCHAIN_FILE=$$(QEMU2_TOP_DIR)/android/build/cmake/toolchain-win.cmake") \
+       $$(call qemu2-if-windows-msvc,"-DCMAKE_TOOLCHAIN_FILE=$$(QEMU2_TOP_DIR)/android/build/cmake/toolchain-windows_msvc-x86_64.cmake")
 endef
 
 # Makes the specific target from the generated CMAKE project file.
