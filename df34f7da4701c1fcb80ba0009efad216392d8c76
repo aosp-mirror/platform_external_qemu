@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fe6035e7_ab2402db",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-12T16:48:19Z",
+      "side": 0,
+      "message": "it looks like an earlier change in this stack of CLs added those, but they are removed here. Let\u0027s minimize the number of these no-ops.",
+      "range": {
+        "startLine": 227,
+        "startChar": 1,
+        "endLine": 228,
+        "endChar": 22
+      },
+      "revId": "df34f7da4701c1fcb80ba0009efad216392d8c76",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

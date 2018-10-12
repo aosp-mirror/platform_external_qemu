@@ -22,6 +22,23 @@
       "revId": "0430f3330667d9a5603faa9da154b1f07275b1d4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "efe1db02_c5d0e352",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 737,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-12T16:48:19Z",
+      "side": 1,
+      "message": "this should be touch() in a previous CL",
+      "revId": "0430f3330667d9a5603faa9da154b1f07275b1d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
