@@ -23,6 +23,8 @@
 #include "RenderThreadInfo.h"
 #include "gles2_dec.h"
 
+#include "MultiWindow.h"
+
 #include "OpenGLESDispatch/EGLDispatch.h"
 
 #include "android/base/containers/Lookup.h"
@@ -556,6 +558,9 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     }
 
     GL_LOG("basic EGL initialization successful");
+
+    new MultiWindow(300, 300);
+
     return true;
 }
 

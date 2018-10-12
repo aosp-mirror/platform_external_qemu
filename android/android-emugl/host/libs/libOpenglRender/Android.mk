@@ -80,6 +80,7 @@ host_common_SRC_FILES := \
     TextureResize.cpp \
     WindowSurface.cpp \
     YUVConverter.cpp \
+    MultiWindow.cpp \
 
 # Common configuration for standalone apps such as tests and samples############
 standalone_common_SRC_FILES := \
@@ -137,6 +138,7 @@ $(call emugl-begin-shared-library,lib$(BUILD_TARGET_SUFFIX)OpenglRender)
 
 $(call emugl-import,libGLESv1_dec libGLESv2_dec lib_renderControl_dec libOpenglCodecCommon)
 $(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan)
+$(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OSWindow)
 
 LOCAL_LDLIBS += $(host_common_LDLIBS)
 LOCAL_LDLIBS += $(ANDROID_EMU_LDLIBS)
