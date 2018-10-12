@@ -109,6 +109,10 @@ function(add_android_interface_library name)
   internal_android_target_settings(${name} "INTERFACE")
 endfunction()
 
+function(add_android_test name)
+  add_android_executable(${name})
+endfunction()
+
 function(add_android_executable name)
   if(DEFINED ${name}_${ANDROID_TARGET_TAG}_src)
     list(APPEND ${name}_src ${${name}_${ANDROID_TARGET_TAG}_src})
