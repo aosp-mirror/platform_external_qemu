@@ -556,6 +556,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     }
 
     GL_LOG("basic EGL initialization successful");
+
     return true;
 }
 
@@ -595,6 +596,9 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       }),
       m_postThread([this](FrameBuffer::Post&& post) {
           return postWorkerFunc(post);
+      }),
+      m_multiWindowThread([this](FrameBuffer::MultiWindow&& multiWindow) {
+          return multiWindowWorkerFunc(multiWindow);
       }) {}
 
 FrameBuffer::~FrameBuffer() {
@@ -616,9 +620,11 @@ FrameBuffer::~FrameBuffer() {
 
     m_readbackThread.join();
     m_postThread.join();
+    m_multiWindowThread.join();
 
     m_readbackWorker.reset();
     m_postWorker.reset();
+    m_multiWindowWorker.reset();
 }
 
 WorkerProcessingResult
@@ -669,6 +675,22 @@ void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
 
     m_postThread.enqueue(Post(post));
     m_postThread.waitQueuedItems();
+}
+
+WorkerProcessingResult
+FrameBuffer::multiWindowWorkerFunc(const MultiWindow& multiWindow) {
+    switch (multiWindow.cmd) {
+    case  MultiWindowCmd::Init:
+        m_multiWindowWorker->initMultiWindow(multiWindow.width,
+                                                 multiWindow.height);
+        return WorkerProcessingResult::Continue;
+    case MultiWindowCmd::Post:
+        m_multiWindowWorker->post(multiWindow.cb);
+        return WorkerProcessingResult::Continue;
+    case MultiWindowCmd::Exit:
+        m_multiWindowWorker.reset();
+        return WorkerProcessingResult::Stop;
+    }
 }
 
 void FrameBuffer::setPostCallback(
@@ -864,6 +886,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
 #endif
 
     GL_LOG("Exit setupSubWindow (successful setup)");
+
     return success;
 }
 
@@ -2138,4 +2161,24 @@ ColorBufferPtr FrameBuffer::findColorBuffer(HandleType p_colorbuffer) {
     else {
         return c->second.cb;
     }
+}
+
+void FrameBuffer::initMultiWindow(int width, int height) {
+       if (!m_multiWindowThread.isStarted()) {
+//           m_multiWindowWorker.reset(new MultiWindowWorker(width, height));
+           m_multiWindowWorker.reset(new MultiWindowWorker());
+           m_multiWindowThread.start();
+           m_multiWindowThread.enqueue({MultiWindowCmd::Init, nullptr, width, height});
+           m_multiWindowThread.waitQueuedItems();
+       }
+}
+
+void FrameBuffer::postMultiWindow(HandleType p_colorbuffer) {
+    ColorBufferPtr cb = findColorBuffer(p_colorbuffer);
+    if (cb == nullptr) {
+        ERR("%s fail to find ColorBuffer %d\n", __FUNCTION__, p_colorbuffer);
+        return;
+    }
+    m_multiWindowThread.enqueue({MultiWindowCmd::Post, cb.get(), 0, 0});
+    m_multiWindowThread.waitQueuedItems();
 }

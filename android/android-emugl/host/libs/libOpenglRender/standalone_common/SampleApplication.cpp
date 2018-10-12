@@ -265,7 +265,7 @@ SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refr
                                            FRAMEWORK_FORMAT_GL_COMPATIBLE);
         mFb->openColorBuffer(mTargetCb);
     }
- }
+}
 
 SampleApplication::~SampleApplication() {
     if (mFb) {
@@ -277,6 +277,10 @@ SampleApplication::~SampleApplication() {
         mFb->DestroyWindowSurface(mSurface);
         mFb->finalize();
     }
+}
+
+void SampleApplication::addMultiWindow(int width, int height) {
+    mFb->initMultiWindow(width, height);
 }
 
 void SampleApplication::rebind() {
@@ -294,6 +298,7 @@ void SampleApplication::drawLoop() {
         vsync.waitUntilNextVsync();
         if (mUseSubWindow) {
             mFb->post(mColorBuffer);
+            mFb->postMultiWindow(mColorBuffer);
             mWindow->messageLoop();
         }
     }

@@ -25,6 +25,7 @@
 #include "FbConfig.h"
 #include "GLESVersionDetector.h"
 #include "Hwc2.h"
+#include "MultiWindowWorker.h"
 #include "PostWorker.h"
 #include "ReadbackWorker.h"
 #include "RenderContext.h"
@@ -433,6 +434,9 @@ public:
     void onLastColorBufferRef(uint32_t handle);
     ColorBuffer::Helper* getColorBufferHelper() { return m_colorBufferHelper; }
     ColorBufferPtr findColorBuffer(HandleType p_colorbuffer);
+    EGLContext getPbufContext() { return m_pbufContext; }
+    void initMultiWindow(int width, int height);
+    void postMultiWindow(HandleType p_colorbuffer);
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
@@ -588,6 +592,23 @@ private:
     android::base::WorkerThread<Post> m_postThread;
     android::base::WorkerProcessingResult postWorkerFunc(const Post& post);
     void sendPostWorkerCmd(Post post);
+
+    // MD windows
+    enum class MultiWindowCmd {
+        Init = 0,
+        Post = 1,
+        Exit = 2,
+    };
+
+    struct MultiWindow {
+        MultiWindowCmd cmd;
+        ColorBuffer* cb;
+        int width;
+        int height;
+    };
+    std::unique_ptr<MultiWindowWorker> m_multiWindowWorker = {};
+    android::base::WorkerThread<MultiWindow> m_multiWindowThread;
+    android::base::WorkerProcessingResult multiWindowWorkerFunc(const MultiWindow& multiWindow);
 
     bool m_fastBlitSupported = false;
 };

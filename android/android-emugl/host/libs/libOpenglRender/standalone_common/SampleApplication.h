@@ -75,6 +75,8 @@ public:
     // Just initialize, draw, and swap buffers once.
     void drawOnce();
 
+    void addMultiWindow(int width, int height);
+
 private:
     void drawWorkerWithCompose(ColorBufferQueue& app2sfQueue, ColorBufferQueue& sf2appQueue);
     void drawWorker(ColorBufferQueue& app2sfQueue, ColorBufferQueue& sf2appQueue,
