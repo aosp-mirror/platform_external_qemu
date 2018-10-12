@@ -64,6 +64,10 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     esac
 done
 
+cd $DEQP_DIR
+
+python external/fetch_sources.py
+
 cd $DEQP_BUILD_DIR
 
 cmake $DEQP_BUILD_DIR $DEQP_DIR \
