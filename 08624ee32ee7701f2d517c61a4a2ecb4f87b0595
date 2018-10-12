@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa81684c_c276424f",
+        "filename": "android/build/cmake/Modules/Platform/WinMSVCCrossCompile.cmake",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-12T22:14:44Z",
+      "side": 1,
+      "message": "I just took this from cmake\u0027s Platform/Windows.cmake. I\u0027ll remove the comments as it doesn\u0027t say much.",
+      "parentUuid": "318a0b9b_525afe92",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cc72d830_0b0dc3ec",
         "filename": "android/build/cmake/emu-qt5-config.cmake",
         "patchSetId": 3
@@ -33,6 +51,24 @@
       "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0f680de1_55c2023c",
+        "filename": "android/build/cmake/emu-qt5-config.cmake",
+        "patchSetId": 3
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-12T22:14:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cc72d830_0b0dc3ec",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "ab46ed18_1d1e1fb5",
+        "filename": "android/build/cmake/test/run_cmake_tests.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-12T22:14:44Z",
+      "side": 1,
+      "message": "Not until I get the msvc libraries in. I\u0027ll enable it once I do.",
+      "parentUuid": "cf63bac7_3ce69352",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b33f2301_47e1852e",
         "filename": "android/build/cmake/toolchain-windows_msvc-x86_64.cmake",
         "patchSetId": 3
@@ -87,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "49f991f3_805c0de9",
+        "filename": "android/build/cmake/toolchain-windows_msvc-x86_64.cmake",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-12T22:14:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b33f2301_47e1852e",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a162825_6faf3997",
         "filename": "android/build/cmake/toolchain.cmake",
         "patchSetId": 3
@@ -98,6 +170,24 @@
       "writtenOn": "2018-10-12T17:09:25Z",
       "side": 1,
       "message": "Why do to set this to {PREFIX}clang? Don\u0027t the shell scripts that our toolchain builder uses not do the right thing? \n\nIt would be nice if we could the \"windows_msvc\" specific knowledge into a higher level function, as it  creates a secret dependency.\n\nUse passed in parameter TARGET_OS, vs ANDROID_TARGET_OS.",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ad00d2c_79271d38",
+        "filename": "android/build/cmake/toolchain.cmake",
+        "patchSetId": 3
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-12T22:14:44Z",
+      "side": 1,
+      "message": "There was some cmake configuration problems when I first started this, and I thought it was coming from cmake trying to configure for gcc/g++. Since I switched to the WinMSVCCrossCompile.cmake file, this issue disappeared, so this is no longer necessary.",
+      "parentUuid": "9a162825_6faf3997",
       "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -121,6 +211,24 @@
     },
     {
       "key": {
+        "uuid": "87dd086f_92a7a61f",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-12T22:14:44Z",
+      "side": 1,
+      "message": "Yeah sure, it\u0027ll save us some typing :)",
+      "parentUuid": "17f00ad8_a6002f3c",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "773499f6_7dd7473e",
         "filename": "android/scripts/gen-android-sdk-toolchain.sh",
         "patchSetId": 3
@@ -138,6 +246,24 @@
     },
     {
       "key": {
+        "uuid": "d3396974_7725ee9a",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 537,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-12T22:14:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "773499f6_7dd7473e",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "146f52ef_f0a7814f",
         "filename": "android/scripts/utils/package_builder.shi",
         "patchSetId": 3
@@ -152,6 +278,24 @@
       "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "99c5ef1a_efcaf7c2",
+        "filename": "android/scripts/utils/package_builder.shi",
+        "patchSetId": 3
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-12T22:14:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "146f52ef_f0a7814f",
+      "revId": "08624ee32ee7701f2d517c61a4a2ecb4f87b0595",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
