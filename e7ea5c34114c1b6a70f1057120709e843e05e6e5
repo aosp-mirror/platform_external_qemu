@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cea48c8e_48069071",
+        "filename": "android/android-emu/android/help.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1280,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-12T04:30:25Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 1280,
+        "startChar": 1,
+        "endLine": 1280,
+        "endChar": 14
+      },
+      "revId": "e7ea5c34114c1b6a70f1057120709e843e05e6e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a270021d_41d6bdcc",
+        "filename": "android/build/cmake/emu-ffmpeg-config.cmake",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-12T04:30:25Z",
+      "side": 1,
+      "message": "another place where there could be an \"any windows\" macro",
+      "range": {
+        "startLine": 24,
+        "startChar": 3,
+        "endLine": 24,
+        "endChar": 46
+      },
+      "revId": "e7ea5c34114c1b6a70f1057120709e843e05e6e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ea77f8bf_f4024845",
+        "filename": "android/third_party/jpeg-6b/CMakeLists.txt",
+        "patchSetId": 7
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-12T04:30:25Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 52,
+        "startChar": 28,
+        "endLine": 52,
+        "endChar": 53
+      },
+      "revId": "e7ea5c34114c1b6a70f1057120709e843e05e6e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3eb0523e_51c6c7ae",
+        "filename": "android/third_party/mman-win32/CMakeLists.txt",
+        "patchSetId": 7
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-12T04:30:25Z",
+      "side": 1,
+      "message": "Do we have an analogue to \"any windows\" macro in cmake?",
+      "range": {
+        "startLine": 4,
+        "startChar": 14,
+        "endLine": 4,
+        "endChar": 58
+      },
+      "revId": "e7ea5c34114c1b6a70f1057120709e843e05e6e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "71372ca7_598738c9",
+        "filename": "android/third_party/third_party_libs.mk",
+        "patchSetId": 7
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-12T04:30:25Z",
+      "side": 1,
+      "message": "nit: spaces (and above)",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 6
+      },
+      "revId": "e7ea5c34114c1b6a70f1057120709e843e05e6e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
