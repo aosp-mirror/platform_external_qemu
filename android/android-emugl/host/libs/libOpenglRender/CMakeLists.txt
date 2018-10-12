@@ -30,6 +30,7 @@ set(OpenglRender_src
     FenceSync.cpp
     FrameBuffer.cpp
     GLESVersionDetector.cpp
+    MultiWindowWorker.cpp
     PostWorker.cpp
     ReadbackWorker.cpp
     ReadBuffer.cpp
@@ -90,6 +91,7 @@ set(OpenglRender_standalone_common_src
     FenceSync.cpp
     FrameBuffer.cpp
     GLESVersionDetector.cpp
+    MultiWindowWorker.cpp
     PostWorker.cpp
     ReadbackWorker.cpp
     ReadBuffer.cpp
