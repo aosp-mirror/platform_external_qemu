@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa5be370_ed79ecb8",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControlDefHost.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-12T16:39:13Z",
+      "side": 1,
+      "message": "this should be a guest feature right since it needs the hal in the guest? \"Host\" feature flags are features that work even if the guest is old, while \"guest\" feature flags require both the host and guest to have support.",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 37
+      },
+      "revId": "0430f3330667d9a5603faa9da154b1f07275b1d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
