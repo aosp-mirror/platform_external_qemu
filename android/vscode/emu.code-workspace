@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "device/generic/goldfish-opengl"
-		}
+		},
+		{
+			"path": "external/deqp"
+		},
 	]
 }
