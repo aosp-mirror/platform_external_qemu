@@ -24,6 +24,7 @@
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
 #include "GLESVersionDetector.h"
+#include "Hwc2.h"
 #include "PostWorker.h"
 #include "ReadbackWorker.h"
 #include "RenderContext.h"
@@ -395,6 +396,7 @@ public:
 
     void setShuttingDown() { m_shuttingDown = true; }
     bool isShuttingDown() const { return m_shuttingDown; }
+    bool compose(uint32_t bufferSize, void* buffer);
 
     ~FrameBuffer();
 
@@ -428,8 +430,9 @@ public:
     // Note: swiftshader_indirect does not work with 3 channels
     void getScreenshot(unsigned int nChannels, unsigned int* width,
             unsigned int* height, std::vector<unsigned char>& pixels);
-
     void onLastColorBufferRef(uint32_t handle);
+    ColorBuffer::Helper* getColorBufferHelper() { return m_colorBufferHelper; }
+    ColorBufferPtr findColorBuffer(HandleType p_colorbuffer);
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
@@ -449,6 +452,10 @@ private:
 
     bool postImpl(HandleType p_colorbuffer, bool needLockAndBind = true, bool repaint = false);
     void setGuestPostedAFrame() { m_guestPostedAFrame = true; }
+    HandleType createColorBufferLocked(int p_width,
+                                       int p_height,
+                                       GLenum p_internalFormat,
+                                       FrameworkFormat p_frameworkFormat);
 
 private:
     static FrameBuffer *s_theFrameBuffer;
@@ -560,8 +567,9 @@ private:
     enum class PostCmd {
         Post = 0,
         Viewport = 1,
-        Clear = 2,
-        Exit = 3,
+        Compose = 2,
+        Clear = 3,
+        Exit = 4,
     };
 
     struct Post {
@@ -572,6 +580,7 @@ private:
                 int width;
                 int height;
             } viewport;
+            ComposeDevice* d;
         };
     };
 
