@@ -318,10 +318,12 @@ public:
         if (read != draw) {
             return false;
         }
+        int bestSwapInterval = 0;
         switch (draw->type()) {
         case MacSurface::WINDOW:
             nsWindowMakeCurrent(MacContext::from(ctx),
                                 MacSurface::from(draw)->handle());
+            nsSwapInterval(&bestSwapInterval);
             break;
         case MacSurface::PBUFFER:
         {

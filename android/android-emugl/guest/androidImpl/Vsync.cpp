@@ -31,7 +31,7 @@ namespace aemu {
 
 class Vsync::Impl {
 public:
-    Impl(Callback&& callback, int refreshRate = 60)
+    Impl(Callback&& callback, int refreshRate = 4800)
         : mCallback(std::move(callback)),
           mRefreshRate(refreshRate),
           mRefreshIntervalUs(1000000ULL / mRefreshRate),

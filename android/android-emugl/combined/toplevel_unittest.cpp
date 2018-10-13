@@ -76,7 +76,7 @@ TEST(Toplevel, Basic) {
 
     eglMakeCurrent(d, s, s, c);
 
-    for (int i = 0; i < 120; i++) {
+    for (int i = 0; i < 1200; i++) {
         glViewport(0, 0, 256, 256);
         glClearColor(1.0f, 0.0f, i / 120.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
