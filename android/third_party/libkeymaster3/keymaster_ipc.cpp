@@ -211,16 +211,9 @@ class SoftwareOnlyHidlKeymasterEnforcement : public ::keymaster::KeymasterEnforc
     SoftwareOnlyHidlKeymasterEnforcement() : KeymasterEnforcement(64, 64) {}
 
     uint32_t get_current_time() const override {
-#ifdef CLOCK_MONOTONIC
-        struct timespec tp;
-        int err = clock_gettime(CLOCK_MONOTONIC, &tp);
-        if (err || tp.tv_sec < 0) return 0;
-        return static_cast<uint32_t>(tp.tv_sec);
-#else
         timeval tv;
         gettimeofday(&tv, nullptr);
         return static_cast<uint32_t>(tv.tv_sec);
-#endif
     }
 
     bool activation_date_valid(uint64_t) const override { return true; }

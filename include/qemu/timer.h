@@ -863,7 +863,9 @@ extern int use_rt_clock;
 
 static inline int64_t get_clock(void)
 {
-#ifdef CLOCK_MONOTONIC
+// bug: 117641619
+// clock_gettime not advisable on macOS
+#if defined(CLOCK_MONOTONIC) && !defined(__APPLE__)
     if (use_rt_clock) {
         struct timespec ts;
         clock_gettime(CLOCK_MONOTONIC, &ts);
