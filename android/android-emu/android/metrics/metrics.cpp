@@ -382,6 +382,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::LOCATION_UI_V2;
         case android::featurecontrol::SnapshotAdb:
             return android_studio::EmulatorFeatureFlagState::SNAPSHOT_ADB;
+        case android::featurecontrol::HostComposition:
+            return android_studio::EmulatorFeatureFlagState::HOST_COMPOSITION_V1;
         case android::featurecontrol::QuickbootFileBacked:
             return android_studio::EmulatorFeatureFlagState::QUICKBOOT_FILE_BACKED;
         case android::featurecontrol::Offworld:

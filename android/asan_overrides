@@ -1,1 +1,1 @@
-detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0
+detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1

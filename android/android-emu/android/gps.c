@@ -15,6 +15,7 @@
 
 #include <string.h>
 #include <time.h>
+#include <stdio.h>
 
 CSerialLine* android_gps_serial_line;
 // Set to true to ping guest for location updates every few seconds
@@ -36,6 +37,26 @@ android_gps_send_nmea( const char*  sentence )
     }
 
     android_serialline_write( android_gps_serial_line, (const void*)sentence, strlen(sentence) );
+    android_serialline_write( android_gps_serial_line, (const void*)"\n", 1 );
+}
+
+void
+android_gps_send_gnss( const char*  sentence )
+{
+    if (sentence == NULL)
+        return;
+
+    if (android_gps_serial_line == NULL) {
+        D("missing GPS channel, ignored");
+        return;
+    }
+
+    D("sending '%s'", sentence);
+
+    char temp[1024];
+    snprintf(temp, sizeof(temp), "$GPGNSSv1,%s", sentence);
+
+    android_serialline_write( android_gps_serial_line, (const void*)temp, strlen(temp) );
     android_serialline_write( android_gps_serial_line, (const void*)"\n", 1 );
 }
 
