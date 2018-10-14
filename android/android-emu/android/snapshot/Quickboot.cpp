@@ -531,7 +531,6 @@ bool androidSnapshot_quickbootSave(const char* _name) {
             (android::snapshot::Snapshotter::get().isRamFileShared() ||
              android_avdParams->flags & AVDINFO_SNAPSHOT_INVALIDATE);
 
-
     if (needsInvalidation) {
         androidSnapshot_quickbootInvalidate(name);
     } else {
