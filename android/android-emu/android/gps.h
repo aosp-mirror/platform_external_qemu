@@ -25,6 +25,8 @@ extern CSerialLine* android_gps_serial_line;
 
 extern void  android_gps_send_nmea( const char*  sentence );
 
+extern void  android_gps_send_gnss( const char*  sentence );
+
 // Send a GPS location to the AVD using an NMEA sentence
 //
 // Inputs: latitude:        Degrees

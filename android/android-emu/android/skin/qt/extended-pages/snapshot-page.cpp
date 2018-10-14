@@ -66,8 +66,7 @@ static const char INVALID_SNAPSHOT_ICON_NAME[] = "invalid_snapshot";
 static const char INVALID_SNAPSHOT_SELECTED_ICON_NAME[] = "invalid_snapshot_selected";
 
 static constexpr char kDefaultBootItemName[] = "Quickboot";
-static constexpr char kDefaultBootFileBackedTitleName[] =
-            "Quickboot auto-saved. Other snapshots:";
+static constexpr char kDefaultBootFileBackedTitleName[] = "Quickboot (auto-saved)";
 
 static SaveSnapshotOnExit getSaveOnExitChoice();
 static void setSaveOnExitChoice(SaveSnapshotOnExit choice);
