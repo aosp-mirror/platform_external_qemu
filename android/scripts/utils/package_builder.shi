@@ -492,7 +492,7 @@ _shu_builder_prepare_for_host () {
     _SHU_BUILDER_CONFIGURE_FLAGS=
     _SHU_BUILDER_HOST_EXE_EXTENSION=
     case $_SHU_BUILDER_CURRENT_HOST in
-        windows-*)
+        windows*)
             _SHU_BUILDER_HOST_EXE_EXTENSION=.exe
             ;;
         *)
