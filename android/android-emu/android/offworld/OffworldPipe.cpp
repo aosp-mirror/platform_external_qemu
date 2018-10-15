@@ -92,7 +92,20 @@ public:
     };
 
     OffworldPipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs)
-        : android::AndroidAsyncMessagePipe(service, std::move(pipeArgs)) {}
+        : android::AndroidAsyncMessagePipe(service, PipeArgs(pipeArgs)) {
+        if (pipeArgs.loadStream) {
+            auto stream = pipeArgs.loadStream;
+            mHandshakeComplete = static_cast<bool>(stream->getByte());
+            mNextAsyncId = stream->getBe32();
+        }
+    }
+
+    void onSave(android::base::Stream* stream) override {
+        android::AndroidAsyncMessagePipe::onSave(stream);
+        stream->putByte(mHandshakeComplete);
+        stream->putBe32(mNextAsyncId);
+    }
+
 
 private:
     void onMessage(const std::vector<uint8_t>& input) override {
@@ -105,7 +118,7 @@ private:
             bool error = false;
             if (request.ParseFromArray(input.data(), input.size())) {
                 if (request.version() != android::offworld::kProtocolVersion) {
-                    VLOG(offworld) << "Unsupported offworld version: "
+                    LOG(ERROR) << "Unsupported offworld version: "
                                    << request.version();
                     error = true;
                     response.set_result(offworld::ConnectHandshakeResponse::
