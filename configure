@@ -3424,7 +3424,9 @@ done
 # 32-bit QEMU while pointing at 64-bit glib headers
 cat > $TMPC <<EOF
 #include <glib.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #define QEMU_BUILD_BUG_ON(x) \
   typedef char qemu_build_bug_on[(x)?-1:1] __attribute__((unused));
@@ -5005,16 +5007,25 @@ cat > $TMPC << EOF
 #endif
 __int128_t a;
 __uint128_t b;
+__int128_t c;
 int main (void) {
   a = a + b;
   b = a * b;
   a = a * a;
+#ifdef _MSC_VER
+  // cross-compiling to windows using clang generates an undefined __udivti3
+  // symbol for 128-bit division, so we'll need to disable it until there's support
+  // for it either for msvc or libc++. I.e. this should not compile and turn off
+  // 128-bit support for msvc build.
+  a = a / c;
+#endif
   return 0;
 }
 EOF
 if compile_prog "" "" ; then
     int128=yes
 fi
+
 
 #########################################
 # See if 128-bit atomic operations are supported.
