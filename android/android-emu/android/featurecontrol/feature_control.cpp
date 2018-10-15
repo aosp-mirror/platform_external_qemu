@@ -23,7 +23,12 @@ bool feature_is_enabled(Feature feature) {
 
 void feature_set_enabled_override(Feature feature, bool isEnabled) {
     auto value = static_cast<android::featurecontrol::Feature>(feature);
-    return android::featurecontrol::setEnabledOverride(value, isEnabled);
+    android::featurecontrol::setEnabledOverride(value, isEnabled);
+}
+
+void feature_set_if_not_overridden(Feature feature, bool enable) {
+    auto value = static_cast<android::featurecontrol::Feature>(feature);
+    android::featurecontrol::setIfNotOverriden(value, enable);
 }
 
 void feature_reset_enabled_to_default(Feature feature) {
