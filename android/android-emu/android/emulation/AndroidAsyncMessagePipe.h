@@ -198,11 +198,11 @@ public:
     void queueCloseFromHost();
 
     void onSave(base::Stream* stream) override;
-    virtual void onLoad(base::Stream* stream);
 
     AsyncMessagePipeHandle getHandle() { return mHandle; }
 
 private:
+    void onLoad(base::Stream* stream);
     bool allowRead() const;
 
     int readBuffers(const AndroidPipeBuffer* buffers, int numBuffers);

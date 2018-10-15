@@ -92,7 +92,20 @@ public:
     };
 
     OffworldPipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs)
-        : android::AndroidAsyncMessagePipe(service, std::move(pipeArgs)) {}
+        : android::AndroidAsyncMessagePipe(service, PipeArgs(pipeArgs)) {
+        if (pipeArgs.loadStream) {
+            auto stream = pipeArgs.loadStream;
+            mHandshakeComplete = static_cast<bool>(stream->getByte());
+            mNextAsyncId = stream->getBe32();
+        }
+    }
+
+    void onSave(android::base::Stream* stream) override {
+        android::AndroidAsyncMessagePipe::onSave(stream);
+        stream->putByte(mHandshakeComplete);
+        stream->putBe32(mNextAsyncId);
+    }
+
 
 private:
     void onMessage(const std::vector<uint8_t>& input) override {
