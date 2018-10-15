@@ -97,13 +97,16 @@ public:
 
     void destroyAppWindow(AndroidWindow* window) {
         AutoLock lock(mLock);
-        if (!mSf) startDisplay();
+
         if (!window) return;
         if (mWindows.find(window) == mWindows.end()) return;
 
+        if (mSf) {
+            mSf->connectWindow(nullptr);
+        }
+
         delete window;
 
-        mSf->connectWindow(nullptr);
         mWindows.erase(window);
     }
 
@@ -254,8 +257,6 @@ private:
     }
 
     void clientPost() {
-        AutoLock lock(mLock);
-
         AndroidBufferQueue::Item item = {};
 
         mFromComposeWindow.dequeueBuffer(&item);
