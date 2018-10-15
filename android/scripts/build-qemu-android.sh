@@ -210,7 +210,6 @@ build_qemu_android () {
     (
         PREFIX=$QEMU_ANDROID_DEPS_INSTALL_DIR/$1
 
-        BUILD_FLAGS=
         if [ "$(get_verbosity)" -gt 3 ]; then
             var_append BUILD_FLAGS "V=1"
         fi
@@ -227,12 +226,15 @@ build_qemu_android () {
            darwin-*)
                EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Carbon"
                ;;
+           windows_msvc*)
+               EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ladvapi32"
+               ;;
            *)
                EXTRA_LDFLAGS="$EXTRA_LDFLAGS -static-libgcc -static-libstdc++"
                ;;
         esac
         case $1 in
-            windows-*)
+            windows*)
                 ;;
             *)
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ldl -lm"
@@ -244,11 +246,12 @@ build_qemu_android () {
         fi
         EXTRA_CFLAGS="-I$PREFIX/include"
         case $1 in
-            windows-*)
+            windows*)
                 # Necessary to build version.rc properly.
                 # VS_VERSION_INFO is a relatively new features that is
                 # not supported by the cross-toolchain's windres tool.
-                EXTRA_CFLAGS="$EXTRA_CFLAGS -DVS_VERSION_INFO=1"
+                EXTRA_CFLAGS="$EXTRA_CFLAGS -DVS_VERSION_INFO=1 -Wno-unused-command-line-argument"
+                EXTRA_CFLAGS="$EXTRA_CFLAGS -Wno-incompatible-ms-struct -Wno-c++11-narrowing"
                 ;;
             darwin-*)
                 EXTRA_CFLAGS="$EXTRA_CFLAGS -mmacosx-version-min=10.8"
@@ -262,7 +265,7 @@ build_qemu_android () {
                 # OSS, does not work
                 AUDIO_BACKENDS_FLAG="--audio-drv-list=pa"
                 ;;
-            windows-*)
+            windows*)
                 # Prefer winaudio on Windows over dsound.
                 AUDIO_BACKENDS_FLAG="--audio-drv-list=winaudio,dsound"
                 ;;
@@ -270,7 +273,7 @@ build_qemu_android () {
 
         WHPX_FLAG=
         case $1 in
-            windows-*)
+            windows*)
                 # Windows Hypervisor Platform accelerator will only be needed
                 # on Windows.
                 WHPX_FLAG="--enable-whpx"
@@ -282,7 +285,7 @@ build_qemu_android () {
 
         LIBUSB_FLAGS=
         case $1 in
-            windows-*)
+            windows*)
                 # Libusb support on windows is not what we would like it to be
                 LIBUSB_FLAGS="--disable-libusb --disable-usb-redir"
                 ;;
@@ -295,7 +298,7 @@ build_qemu_android () {
         PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
         PKG_CONFIG_LIBDIR=$PREFIX/lib/pkgconfig
         case $1 in
-            windows-*)
+            windows*)
                 # Use the host version, or the build will freeze.
                 PKG_CONFIG=`which pkg-config`
                 ;;
@@ -317,7 +320,11 @@ EOF
 
         # Export these to ensure that pkg-config picks them up properly.
         export GLIB_CFLAGS="-I$PREFIX/include/glib-2.0 -I$PREFIX/lib/glib-2.0/include"
-        export GLIB_LIBS="$PREFIX/lib/libglib-2.0.la"
+        if [ "$BUILD_OS" = "windows_msvc" ]; then
+          export GLIB_LIBS="$PREFIX/lib/libglib-2.0.lib"
+        else
+          export GLIB_LIBS="$PREFIX/lib/libglib-2.0.la"
+        fi
         case $BUILD_OS in
             darwin)
                 GLIB_LIBS="$GLIB_LIBS -Wl,-framework,Carbon -Wl,-framework,Foundation"
@@ -444,7 +451,7 @@ EOF
             &&
 
             case $1 in
-                windows-*)
+                windows*)
                     # Cannot build optionrom when cross-compiling to Windows,
                     # so disable that by removing the ROMS= line from
                     # the generated config-host.mak file.
