@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "94302dd4_62dd43ef",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-10-15T18:29:20Z",
+      "side": 1,
+      "message": "my impression is we already handle this at a higher level (AndroidPipe)",
+      "range": {
+        "startLine": 222,
+        "startChar": 8,
+        "endLine": 222,
+        "endChar": 17
+      },
+      "revId": "af7177b21405dc930e209dd6be2cd1ad0648efad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
