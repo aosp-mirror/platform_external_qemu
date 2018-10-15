@@ -27,6 +27,9 @@ bool feature_is_enabled(Feature feature);
 void feature_set_enabled_override(Feature feature, bool isEnabled);
 void feature_reset_enabled_to_default(Feature feature);
 
+// Set the feature if it is not user-overriden.
+void feature_set_if_not_overridden(Feature feature, bool enable);
+
 // Runs applyCachedServerFeaturePatterns then
 // asyncUpdateServerFeaturePatterns. See FeatureControl.h
 // for more info. To be called only once on startup.
