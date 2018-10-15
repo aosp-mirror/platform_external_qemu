@@ -22,6 +22,30 @@
       "revId": "af7177b21405dc930e209dd6be2cd1ad0648efad",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf9c4764_b6e039e0",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-15T18:34:17Z",
+      "side": 1,
+      "message": "It appears we only make that distinction for Service::load(), presumably so services can device if they canLoad in preLoad().\n\nThis does seem error-prone though, I would recommend that we audit all AndroidPipe services and see if canLoad is ever dynamically determined, and then update android_pipe_guest_*_load and android_pipe_guest_*_save APIs to check if canLoad() returns true before calling into services.",
+      "parentUuid": "94302dd4_62dd43ef",
+      "range": {
+        "startLine": 222,
+        "startChar": 8,
+        "endLine": 222,
+        "endChar": 17
+      },
+      "revId": "af7177b21405dc930e209dd6be2cd1ad0648efad",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
