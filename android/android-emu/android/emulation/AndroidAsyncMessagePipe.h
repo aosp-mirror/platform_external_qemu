@@ -112,6 +112,7 @@ public:
             handle.id = static_cast<int>(stream->getBe32());
 
             base::AutoLock lock(mLock);
+            printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
             return createPipeUnderLock(handle, hwPipe, args, stream);
         }
 
