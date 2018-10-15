@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "87560366_2daa944a",
+        "filename": "android/android-emu/android/emulation/HostmemAlloc.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-15T22:26:05Z",
+      "side": 1,
+      "message": "Could you please create an abstract class?",
+      "range": {
+        "startLine": 68,
+        "startChar": 4,
+        "endLine": 74,
+        "endChar": 0
+      },
+      "revId": "addd30f1b58cfdb091ce2989668612a098653b36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
