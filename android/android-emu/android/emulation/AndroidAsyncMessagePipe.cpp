@@ -23,9 +23,11 @@ AndroidAsyncMessagePipe::AndroidAsyncMessagePipe(AndroidPipe::Service* service,
     : AndroidPipe(args.hwPipe, service),
       mHandle(args.handle),
       mDeleter(std::move(args.deleter)) {
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
     LOG(INFO) << "Registering pipe service " << service->name();
 
     if (args.loadStream) {
+        printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
         LOG(VERBOSE) << "Loading state from snapshot";
         onLoad(args.loadStream);
     }
@@ -79,6 +81,7 @@ void AndroidAsyncMessagePipe::onLoad(base::Stream* stream) {
     for (uint64_t i = 0; i < outgoingPacketCount; ++i) {
         mOutgoingPackets.emplace_back(stream);
     }
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
 }
 
 bool AndroidAsyncMessagePipe::allowRead() const {

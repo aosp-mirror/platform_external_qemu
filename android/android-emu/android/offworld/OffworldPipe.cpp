@@ -92,11 +92,35 @@ public:
     };
 
     OffworldPipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs)
-        : android::AndroidAsyncMessagePipe(service, std::move(pipeArgs)) {}
+        : android::AndroidAsyncMessagePipe(service, PipeArgs(pipeArgs)) {
+        printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
+        if (pipeArgs.loadStream) {
+            auto stream = pipeArgs.loadStream;
+            mHandshakeComplete = static_cast<bool>(stream->getByte());
+            mNextAsyncId = stream->getBe32();
+            printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
+        }
+    }
+
+    void onSave(android::base::Stream* stream) override {
+        android::AndroidAsyncMessagePipe::onSave(stream);
+        stream->putByte(mHandshakeComplete);
+        stream->putBe32(mNextAsyncId);
+        printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
+    }
+    /*void onLoad(android::base::Stream* stream) override {
+        printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
+        android::AndroidAsyncMessagePipe::onLoad(stream);
+        mHandshakeComplete = static_cast<bool>(stream->getByte());
+        mNextAsyncId = stream->getBe32();
+        printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
+    }*/
 
 private:
     void onMessage(const std::vector<uint8_t>& input) override {
+        printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
         if (!mHandshakeComplete) {
+            printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
             offworld::ConnectHandshake request;
             offworld::ConnectHandshakeResponse response;
             response.set_result(
@@ -104,33 +128,41 @@ private:
 
             bool error = false;
             if (request.ParseFromArray(input.data(), input.size())) {
+                printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
+                printf("request version %d expect %d\n", request.version(), android::offworld::kProtocolVersion);
                 if (request.version() != android::offworld::kProtocolVersion) {
-                    VLOG(offworld) << "Unsupported offworld version: "
+                    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
+                    LOG(ERROR) << "Unsupported offworld version: "
                                    << request.version();
                     error = true;
                     response.set_result(offworld::ConnectHandshakeResponse::
                                                 RESULT_ERROR_VERSION_MISMATCH);
                 }
             } else {
+                printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
                 LOG(ERROR) << "Failed to parse offworld handshake.";
                 error = true;
                 response.set_result(offworld::ConnectHandshakeResponse::
                                             RESULT_ERROR_UNKNOWN);
             }
 
+            printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
             send(std::move(protoToVector(response)));
             mHandshakeComplete = !error;
             if (error) {
+                printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
                 queueCloseFromHost();
             }
 
         } else {
+            printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
             offworld::Request request;
 
             if (!request.ParseFromArray(input.data(), input.size())) {
                 LOG(ERROR) << "Offworld lib message parsing failed.";
                 sendError(offworld::Response::RESULT_ERROR_UNKNOWN);
             } else {
+                printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
                 switch (request.module_case()) {
                     case offworld::Request::ModuleCase::kSnapshot:
                         handleSnapshotRequest(request.snapshot());
@@ -149,6 +181,7 @@ private:
     }
 
     void handleSnapshotRequest(const offworld::SnapshotRequest& request) {
+        printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
         using sr = offworld::SnapshotRequest;
 
         switch (request.function_case()) {
@@ -194,6 +227,7 @@ private:
                 break;
             }
             case sr::FunctionCase::kDoneInstance: {
+                printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
                 android::snapshot::doneInstance(getHandle());
                 break;
             }

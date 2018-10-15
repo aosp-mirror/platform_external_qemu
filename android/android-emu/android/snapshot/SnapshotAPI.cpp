@@ -166,6 +166,7 @@ void gotoCheckpoint(
 
 void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
                            int forkTotal) {
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
     if (android::multiinstance::getInstanceShareMode() !=
         android::base::FileShare::Write) {
         return;
@@ -196,41 +197,46 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
         const AndroidSnapshotStatus result =
                 androidSnapshot_load(android::snapshot::kDefaultBootSnapshot);
         gQAndroidVmOperations->vmStart();
+        printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
         if (result != AndroidSnapshotStatus::SNAPSHOT_STATUS_OK) {
+            printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
             android::offworld::sendResponse(pipe, createErrorResponse());
         }
     });
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
 }
 
 void doneInstance(android::AsyncMessagePipeHandle pipe) {
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
     if (sSnapshotCrossSession->sForkId <
         sSnapshotCrossSession->sForkTotal - 1) {
+        printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
         sSnapshotCrossSession->sForkId++;
 
         sSnapshotCrossSession->mOverrideResponse[RequestType::Fork] =
                 createForkIdResponse(sSnapshotCrossSession->sForkId);
 
-        if (sSnapshotCrossSession->sForkId <
-            sSnapshotCrossSession->sForkTotal - 1) {
-            gQAndroidVmOperations->vmStop();
-            // Load back to write mode for the last run
-            android::base::FileShare mode =
-                    sSnapshotCrossSession->sForkId <
-                                    sSnapshotCrossSession->sForkTotal - 2
-                            ? android::base::FileShare::Read
-                            : android::base::FileShare::Write;
-            android::base::ThreadLooper::runOnMainLooper([mode]() {
-                bool res = android::multiinstance::updateInstanceShareMode(
-                        android::snapshot::kDefaultBootSnapshot, mode);
-                LOG_IF(WARNING, !res) << "Share mode update failure";
-                res = gQAndroidVmOperations->snapshotRemap(
-                        mode == android::base::FileShare::Write, nullptr,
-                        nullptr);
-                gQAndroidVmOperations->vmStart();
-            });
-        }
+        gQAndroidVmOperations->vmStop();
+        printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
+        // Load back to write mode for the last run
+        android::base::FileShare mode =
+                sSnapshotCrossSession->sForkId <
+                                sSnapshotCrossSession->sForkTotal - 1
+                        ? android::base::FileShare::Read
+                        : android::base::FileShare::Write;
+        android::base::ThreadLooper::runOnMainLooper([mode]() {
+            bool res = android::multiinstance::updateInstanceShareMode(
+                    android::snapshot::kDefaultBootSnapshot, mode);
+            LOG_IF(WARNING, !res) << "Share mode update failure";
+            printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
+            res = gQAndroidVmOperations->snapshotRemap(
+                    mode == android::base::FileShare::Write, nullptr,
+                    nullptr);
+            gQAndroidVmOperations->vmStart();
+        });
     } else if (sSnapshotCrossSession->sForkId ==
                sSnapshotCrossSession->sForkTotal - 1) {
+        printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
         // We don't load after the last run
         sSnapshotCrossSession->sForkId = 0;
         sSnapshotCrossSession->sForkTotal = 0;
@@ -242,6 +248,7 @@ void doneInstance(android::AsyncMessagePipeHandle pipe) {
         offworld::sendResponse(pipe, response);
 
     } else {
+        printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
         LOG(ERROR) << "Bad fork session id: " << sSnapshotCrossSession->sForkId
                    << ", expected total " << sSnapshotCrossSession->sForkTotal;
         offworld::sendResponse(pipe, createErrorResponse());
