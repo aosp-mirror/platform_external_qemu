@@ -186,6 +186,7 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
         bool res =
                 gQAndroidVmOperations->snapshotRemap(false, nullptr, nullptr);
         LOG_IF(WARNING, !res) << "RAM share mode update failure";
+        assert(res);
 
         // Update share mode flag and disk backend
         res = android::multiinstance::updateInstanceShareMode(
@@ -224,6 +225,7 @@ void doneInstance(android::AsyncMessagePipeHandle pipe) {
             LOG_IF(WARNING, !res) << "Share mode update failure";
             res = gQAndroidVmOperations->snapshotRemap(
                     mode == android::base::FileShare::Write, nullptr, nullptr);
+            assert(res);
             gQAndroidVmOperations->vmStart();
         });
     } else if (sSnapshotCrossSession->sForkId ==
