@@ -915,6 +915,12 @@ const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsi
                 m_shareGroup
                         ->getObjectData(NamedObjectType::VERTEXBUFFER,
                                         bufferName));
+        if(offset >= vbo->getSize() || vbo->getSize() - offset < size) {
+#ifdef _DEBUG
+            fprintf(stderr, "Warning: Invalid pointer offset %u, arrType %d, type %d\n", offset, arrType, type);
+#endif
+            return nullptr;
+        }
         m_currVaoState[arrType]->setBuffer(size,type,stride,vbo,bufferName,offset,normalize, isInt);
         return  static_cast<const unsigned char*>(vbo->getData()) +  offset;
     }
