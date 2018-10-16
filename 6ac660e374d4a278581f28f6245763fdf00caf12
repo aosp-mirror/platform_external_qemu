@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6c59c2ad_336851fb",
+        "filename": "android/android-emu/android/offworld/OffworldPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-16T00:54:26Z",
+      "side": 1,
+      "message": "Hmm, I intended these pipeArgs to just be moved directly into the parent constructor, and tried to make them opaque to the user.  What if instead of changing onLoad() to be a non-virtual function we just call it after the constructor completes?\n\nWe could modify createPipeUnderLock to call onLoad() if there is a load stream:\n\n\n        AndroidPipe* createPipeUnderLock(AsyncMessagePipeHandle handle,\n                                         void* hwPipe,\n                                         const char* args,\n                                         base::Stream* stream) {\n            PipeArgs pipeArgs \u003d {handle, hwPipe, args, stream,\n                                 std::bind(\u0026Service::destroyPipe, this,\n                                           std::placeholders::_1)};\n            std::unique_ptr\u003cPipeType\u003e pipe(\n                    new PipeType(this, std::move(pipeArgs)));\n            if (stream) {\n                pipe-\u003eonLoad(stream);\n            }\n            AndroidPipe* pipePtr \u003d pipe.get();\n            mPipes[handle.id] \u003d std::move(pipe);\n            return pipePtr;\n        }\n\nThen removing the call from AndroidAsyncMessagePipe constructor, of course.  We could go even further, and remove loadStream from PipeArgs at this point as well.",
+      "range": {
+        "startLine": 95,
+        "startChar": 52,
+        "endLine": 95,
+        "endChar": 70
+      },
+      "revId": "6ac660e374d4a278581f28f6245763fdf00caf12",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
