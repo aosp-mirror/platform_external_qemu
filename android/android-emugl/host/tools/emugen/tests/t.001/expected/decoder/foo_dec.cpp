@@ -44,8 +44,8 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream, Ch
 		if (end - ptr < packetLen) return ptr - (unsigned char*)buf;
 		switch(opcode) {
 		case OP_fooAlphaFunc: {
-			FooInt var_func = Unpack<FooInt,uint32_t>(ptr + 8);
-			FooFloat var_ref = Unpack<FooFloat,uint32_t>(ptr + 8 + 4);
+			FooInt var_func; Unpack<FooInt,uint32_t>(ptr + 8, &var_func);
+			FooFloat var_ref; Unpack<FooFloat,uint32_t>(ptr + 8 + 4, &var_ref);
 			if (useChecksum) {
 				ChecksumCalculatorThreadInfo::validOrDie(checksumCalc, ptr, 8 + 4 + 4, ptr + 8 + 4 + 4, checksumSize, 
 					"foo_decoder_context_t::decode, OP_fooAlphaFunc: GL checksumCalculator failure\n");
@@ -56,7 +56,7 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream, Ch
 			break;
 		}
 		case OP_fooIsBuffer: {
-			uint32_t size_stuff __attribute__((unused)) = Unpack<uint32_t,uint32_t>(ptr + 8);
+			uint32_t size_stuff __attribute__((unused)); Unpack<uint32_t,uint32_t>(ptr + 8, &size_stuff);
 			InputBuffer inptr_stuff(ptr + 8 + 4, size_stuff);
 			if (useChecksum) {
 				ChecksumCalculatorThreadInfo::validOrDie(checksumCalc, ptr, 8 + 4 + size_stuff, ptr + 8 + 4 + size_stuff, checksumSize, 
@@ -75,7 +75,7 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream, Ch
 			break;
 		}
 		case OP_fooUnsupported: {
-			uint32_t size_params __attribute__((unused)) = Unpack<uint32_t,uint32_t>(ptr + 8);
+			uint32_t size_params __attribute__((unused)); Unpack<uint32_t,uint32_t>(ptr + 8, &size_params);
 			InputBuffer inptr_params(ptr + 8 + 4, size_params);
 			if (useChecksum) {
 				ChecksumCalculatorThreadInfo::validOrDie(checksumCalc, ptr, 8 + 4 + size_params, ptr + 8 + 4 + size_params, checksumSize, 
@@ -87,7 +87,7 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream, Ch
 			break;
 		}
 		case OP_fooDoEncoderFlush: {
-			FooInt var_param = Unpack<FooInt,uint32_t>(ptr + 8);
+			FooInt var_param; Unpack<FooInt,uint32_t>(ptr + 8, &var_param);
 			if (useChecksum) {
 				ChecksumCalculatorThreadInfo::validOrDie(checksumCalc, ptr, 8 + 4, ptr + 8 + 4, checksumSize, 
 					"foo_decoder_context_t::decode, OP_fooDoEncoderFlush: GL checksumCalculator failure\n");
@@ -98,7 +98,7 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream, Ch
 			break;
 		}
 		case OP_fooTakeConstVoidPtrConstPtr: {
-			uint32_t size_param __attribute__((unused)) = Unpack<uint32_t,uint32_t>(ptr + 8);
+			uint32_t size_param __attribute__((unused)); Unpack<uint32_t,uint32_t>(ptr + 8, &size_param);
 			InputBuffer inptr_param(ptr + 8 + 4, size_param);
 			if (useChecksum) {
 				ChecksumCalculatorThreadInfo::validOrDie(checksumCalc, ptr, 8 + 4 + size_param, ptr + 8 + 4 + size_param, checksumSize, 
@@ -110,7 +110,7 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream, Ch
 			break;
 		}
 		case OP_fooSetComplexStruct: {
-			uint32_t size_obj __attribute__((unused)) = Unpack<uint32_t,uint32_t>(ptr + 8);
+			uint32_t size_obj __attribute__((unused)); Unpack<uint32_t,uint32_t>(ptr + 8, &size_obj);
 			InputBuffer inptr_obj(ptr + 8 + 4, size_obj);
 			void* inptr_obj_unpacked;
 			 FooStruct unpacked; inptr_obj_unpacked = (void*)(&unpacked); fooStructUnpack((unsigned char*)(inptr_obj.get()), size_obj, inptr_obj_unpacked);
@@ -124,7 +124,7 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream, Ch
 			break;
 		}
 		case OP_fooGetComplexStruct: {
-			uint32_t size_obj __attribute__((unused)) = Unpack<uint32_t,uint32_t>(ptr + 8);
+			uint32_t size_obj __attribute__((unused)); Unpack<uint32_t,uint32_t>(ptr + 8, &size_obj);
 			if (useChecksum) {
 				ChecksumCalculatorThreadInfo::validOrDie(checksumCalc, ptr, 8 + 4, ptr + 8 + 4, checksumSize, 
 					"foo_decoder_context_t::decode, OP_fooGetComplexStruct: GL checksumCalculator failure\n");
@@ -148,7 +148,7 @@ size_t foo_decoder_context_t::decode(void *buf, size_t len, IOStream *stream, Ch
 			break;
 		}
 		case OP_fooInout: {
-			uint32_t size_count __attribute__((unused)) = Unpack<uint32_t,uint32_t>(ptr + 8);
+			uint32_t size_count __attribute__((unused)); Unpack<uint32_t,uint32_t>(ptr + 8, &size_count);
 			InputBuffer inptr_count(ptr + 8 + 4, size_count);
 			if (useChecksum) {
 				ChecksumCalculatorThreadInfo::validOrDie(checksumCalc, ptr, 8 + 4 + size_count, ptr + 8 + 4 + size_count, checksumSize, 

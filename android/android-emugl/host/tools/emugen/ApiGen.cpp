@@ -1117,10 +1117,11 @@ R"(        // Do this on every iteration, as some commands may change the checks
                 if (v->isPointer() && v->isDMA()) {
                     if (pass == PASS_VariableDeclarations) {
                         fprintf(fp,
-                                "\t\t\tuint64_t var_%s_guest_paddr = Unpack<uint64_t,uint64_t>(ptr + %s);\n"
+                                "\t\t\tuint64_t var_%s_guest_paddr; Unpack<uint64_t,uint64_t>(ptr + %s, &var_%s_guest_paddr);\n"
                                 "\t\t\t%s var_%s = stream->getDmaForReading(var_%s_guest_paddr);\n",
                                 var_name,
                                 varoffset.c_str(),
+                                var_name,
                                 var_type_name,
                                 var_name,
                                 var_name);
@@ -1135,12 +1136,13 @@ R"(        // Do this on every iteration, as some commands may change the checks
                 if (!v->isPointer()) {
                     if (pass == PASS_VariableDeclarations) {
                         fprintf(fp,
-                                "\t\t\t%s var_%s = Unpack<%s,uint%u_t>(ptr + %s);\n",
+                                "\t\t\t%s var_%s; Unpack<%s,uint%u_t>(ptr + %s, &var_%s);\n",
                                 var_type_name,
                                 var_name,
                                 var_type_name,
                                 var_type_bytes * 8U,
-                                varoffset.c_str());
+                                varoffset.c_str(),
+                                var_name);
                     }
 
                     if (pass == PASS_FunctionCall ||
@@ -1153,9 +1155,10 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
                 if (pass == PASS_VariableDeclarations) {
                     fprintf(fp,
-                            "\t\t\tuint32_t size_%s __attribute__((unused)) = Unpack<uint32_t,uint32_t>(ptr + %s);\n",
+                            "\t\t\tuint32_t size_%s __attribute__((unused)); Unpack<uint32_t,uint32_t>(ptr + %s, &size_%s);\n",
                             var_name,
-                            varoffset.c_str());
+                            varoffset.c_str(),
+                            var_name);
                 }
 
                 if (!v->isDMA()) {

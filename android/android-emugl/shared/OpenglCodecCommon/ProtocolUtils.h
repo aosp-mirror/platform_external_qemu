@@ -39,30 +39,32 @@ namespace emugl {
 
 template <typename T, typename S>
 struct UnpackerT {
-    static T unpack(const void* ptr) {
+    static void unpack(const void* ptr, T* out) {
         static_assert(sizeof(T) == sizeof(S),
                       "Bad input arguments, have to be of the same size");
-        return *(const T*)ptr;
+        memcpy(out, ptr, sizeof(T));
     }
 };
 
 template <typename T, typename S>
 struct UnpackerT<T*, S> {
-    static T* unpack(const void* ptr) {
-        return (T*)(uintptr_t)(*(const S*)ptr);
+    static void unpack(const void* ptr, T** out) {
+        T* res = (T*)(uintptr_t)(*(const S*)ptr);
+        memcpy(out, &res, sizeof(T*));
     }
 };
 
 template <>
 struct UnpackerT<ssize_t, uint32_t> {
-    static ssize_t unpack(const void* ptr) {
-        return (ssize_t)*(const int32_t*)ptr;
+    static void unpack(const void* ptr, ssize_t* out) {
+        ssize_t res = (ssize_t)*(const int32_t*)ptr;
+        memcpy(out, &res, sizeof(ssize_t));
     }
 };
 
 template <typename T, typename S>
-inline T Unpack(const void* ptr) {
-    return UnpackerT<T, S>::unpack(ptr);
+inline void Unpack(const void* ptr, T* out) {
+    UnpackerT<T, S>::unpack(ptr, out);
 }
 
 // Helper classes GenericInputBuffer and GenericOutputBuffer used to ensure

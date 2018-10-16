@@ -272,7 +272,7 @@ intptr_t RenderThread::main() {
         int packetSize;
         if (readBuf.validData() >= 8) {
             // We know that packet size is the second int32_t from the start.
-            packetSize = *(const int32_t*)(readBuf.buf() + 4);
+            memcpy(&packetSize, readBuf.buf() + 4, sizeof(int32_t));
         } else {
             // Read enough data to at least be able to get the packet size next
             // time.

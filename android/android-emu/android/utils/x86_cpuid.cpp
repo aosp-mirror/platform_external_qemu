@@ -56,16 +56,16 @@ void android_get_x86_cpuid(uint32_t function,
 #endif /* !__x86_64__ */
 
     if (eax) {
-        *eax = vec[0];
+        memcpy(eax, vec, 4);
     }
     if (ebx) {
-        *ebx = vec[1];
+        memcpy(ebx, vec + 1, 4);
     }
     if (ecx) {
-        *ecx = vec[2];
+        memcpy(ecx, vec + 2, 4);
     }
     if (edx) {
-        *edx = vec[3];
+        memcpy(edx, vec + 3, 4);
     }
 #endif /* defined(__x86_64__) || defined(__i386__) */
 }
