@@ -168,6 +168,7 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
                            int forkTotal) {
     if (android::multiinstance::getInstanceShareMode() !=
         android::base::FileShare::Write) {
+        android::offworld::sendResponse(pipe, createErrorResponse());
         return;
     }
 
