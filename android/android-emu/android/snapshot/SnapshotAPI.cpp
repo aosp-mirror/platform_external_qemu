@@ -168,6 +168,7 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
                            int forkTotal) {
     if (android::multiinstance::getInstanceShareMode() !=
         android::base::FileShare::Write) {
+        android::offworld::sendResponse(pipe, createErrorResponse());
         return;
     }
 
@@ -210,25 +211,21 @@ void doneInstance(android::AsyncMessagePipeHandle pipe) {
         sSnapshotCrossSession->mOverrideResponse[RequestType::Fork] =
                 createForkIdResponse(sSnapshotCrossSession->sForkId);
 
-        if (sSnapshotCrossSession->sForkId <
-            sSnapshotCrossSession->sForkTotal - 1) {
-            gQAndroidVmOperations->vmStop();
-            // Load back to write mode for the last run
-            android::base::FileShare mode =
-                    sSnapshotCrossSession->sForkId <
-                                    sSnapshotCrossSession->sForkTotal - 2
-                            ? android::base::FileShare::Read
-                            : android::base::FileShare::Write;
-            android::base::ThreadLooper::runOnMainLooper([mode]() {
-                bool res = android::multiinstance::updateInstanceShareMode(
-                        android::snapshot::kDefaultBootSnapshot, mode);
-                LOG_IF(WARNING, !res) << "Share mode update failure";
-                res = gQAndroidVmOperations->snapshotRemap(
-                        mode == android::base::FileShare::Write, nullptr,
-                        nullptr);
-                gQAndroidVmOperations->vmStart();
-            });
-        }
+        gQAndroidVmOperations->vmStop();
+        // Load back to write mode for the last run
+        android::base::FileShare mode =
+                sSnapshotCrossSession->sForkId <
+                                sSnapshotCrossSession->sForkTotal - 1
+                        ? android::base::FileShare::Read
+                        : android::base::FileShare::Write;
+        android::base::ThreadLooper::runOnMainLooper([mode]() {
+            bool res = android::multiinstance::updateInstanceShareMode(
+                    android::snapshot::kDefaultBootSnapshot, mode);
+            LOG_IF(WARNING, !res) << "Share mode update failure";
+            res = gQAndroidVmOperations->snapshotRemap(
+                    mode == android::base::FileShare::Write, nullptr, nullptr);
+            gQAndroidVmOperations->vmStart();
+        });
     } else if (sSnapshotCrossSession->sForkId ==
                sSnapshotCrossSession->sForkTotal - 1) {
         // We don't load after the last run
