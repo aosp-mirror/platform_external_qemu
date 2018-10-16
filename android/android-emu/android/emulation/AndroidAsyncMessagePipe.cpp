@@ -24,11 +24,6 @@ AndroidAsyncMessagePipe::AndroidAsyncMessagePipe(AndroidPipe::Service* service,
       mHandle(args.handle),
       mDeleter(std::move(args.deleter)) {
     LOG(INFO) << "Registering pipe service " << service->name();
-
-    if (args.loadStream) {
-        LOG(VERBOSE) << "Loading state from snapshot";
-        onLoad(args.loadStream);
-    }
 }
 
 AndroidAsyncMessagePipe::~AndroidAsyncMessagePipe() {

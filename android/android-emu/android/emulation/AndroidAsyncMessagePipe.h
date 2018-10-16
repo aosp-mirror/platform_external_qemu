@@ -90,7 +90,6 @@ public:
         AsyncMessagePipeHandle handle;
         void* hwPipe;
         const char* args;
-        base::Stream* loadStream;
         std::function<void(AsyncMessagePipeHandle)> deleter;
     };
 
@@ -158,11 +157,14 @@ public:
                                          void* hwPipe,
                                          const char* args,
                                          base::Stream* stream) {
-            PipeArgs pipeArgs = {handle, hwPipe, args, stream,
+            PipeArgs pipeArgs = {handle, hwPipe, args,
                                  std::bind(&Service::destroyPipe, this,
                                            std::placeholders::_1)};
             std::unique_ptr<PipeType> pipe(
                     new PipeType(this, std::move(pipeArgs)));
+            if (stream) {
+                pipe->onLoad(stream);
+            }
             AndroidPipe* pipePtr = pipe.get();
             mPipes[handle.id] = std::move(pipe);
             return pipePtr;
