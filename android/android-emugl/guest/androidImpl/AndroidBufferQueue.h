@@ -37,6 +37,8 @@ public:
     void queueBuffer(const Item& item);
     void dequeueBuffer(Item* outItem);
 
+    bool try_dequeueBuffer(Item* outItem);
+
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
