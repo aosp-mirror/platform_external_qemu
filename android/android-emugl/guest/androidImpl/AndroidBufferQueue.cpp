@@ -43,4 +43,9 @@ void AndroidBufferQueue::dequeueBuffer(
     mImpl->queue.receive(outItem);
 }
 
+bool AndroidBufferQueue::try_dequeueBuffer(
+    AndroidBufferQueue::Item* outItem) {
+    return mImpl->queue.tryReceive(outItem);
+}
+
 } // namespace aemu

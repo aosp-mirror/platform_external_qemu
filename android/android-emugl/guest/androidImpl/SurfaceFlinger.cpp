@@ -61,6 +61,12 @@ void SurfaceFlinger::connectWindow(AndroidWindow* window) {
 
     window->setProducer(&mSf2App, &mApp2Sf);
 
+    // and prime the queue again
+    AndroidBufferQueue::Item item;
+    while (mApp2Sf.try_dequeueBuffer(&item)) {
+        mSf2App.queueBuffer(item);
+    }
+
     mCurrentWindow = window;
 }
 
