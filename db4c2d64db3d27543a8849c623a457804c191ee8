@@ -22,6 +22,30 @@
       "revId": "db4c2d64db3d27543a8849c623a457804c191ee8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca952f37_d5c345fe",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 918,
+      "author": {
+        "id": 1061639
+      },
+      "writtenOn": "2018-10-17T06:10:03Z",
+      "side": 1,
+      "message": "Oops, wrong operator, changed this last minute to prevent interger overflow and forgot about the operator. Fixed in #2.",
+      "parentUuid": "30eed06b_33ec2139",
+      "range": {
+        "startLine": 918,
+        "startChar": 39,
+        "endLine": 918,
+        "endChar": 69
+      },
+      "revId": "db4c2d64db3d27543a8849c623a457804c191ee8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
