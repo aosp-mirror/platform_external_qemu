@@ -36,6 +36,11 @@ endif ()
 
 enable_testing()
 add_subdirectory(../../../../googletest build/googletest)
+if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
+    # Don't include the custom TempDir function. It is for Android only.
+	target_compile_definitions(gtest PRIVATE
+            -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
+endif ()
 
 add_executable(emulator_astc_unittests
         ${src}/base/test/bit_stream_test.cpp
@@ -62,4 +67,3 @@ target_link_libraries(emulator_astc_unittests emulator-astc-codec gmock_main)
 IF (UNIX AND NOT APPLE)
     set_target_properties(emulator_astc_unittests PROPERTIES LINK_FLAGS "-Wl,-rpath=$ORIGIN/lib64:$ORIGIN/lib:$ORIGIN/intermediates64")
 ENDIF (UNIX AND NOT APPLE)
-
