@@ -68,12 +68,6 @@ log "Copying custom dEQP sources for Android Emulator."
 
 cp -r $EMU_DIR/android/scripts/deqp-src-to-copy/* $DEQP_DIR/
 
-log "Fetching dEQP external sources."
-
-cd $DEQP_DIR
-
-python external/fetch_sources.py
-
 cd $DEQP_BUILD_DIR
 
 cmake $DEQP_BUILD_DIR $DEQP_DIR \
