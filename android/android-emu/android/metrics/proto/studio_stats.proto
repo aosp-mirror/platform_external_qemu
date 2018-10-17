@@ -1138,7 +1138,8 @@ message EmulatorFeatureFlagState {
     QUICKBOOT_FILE_BACKED = 33;
     REFCOUNT_PIPE = 34;
     HOST_COMPOSITION_V1 = 36;
-    // Next tag: 37
+    ON_DEMAND_SNAPSHOT_LOAD = 37;
+    // Next tag: 38
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

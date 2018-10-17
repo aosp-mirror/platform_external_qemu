@@ -209,3 +209,11 @@ AndroidSnapshotRamFileMode androidSnapshot_getRamFileInfo() {
         return SNAPSHOT_RAM_FILE_NONE;
     }
 }
+
+void androidSnapshot_setUsingHdd(bool usingHdd) {
+    Snapshotter::get().setUsingHdd(usingHdd);
+}
+
+bool androidSnapshot_isUsingHdd() {
+    return Snapshotter::get().isUsingHdd();
+}
