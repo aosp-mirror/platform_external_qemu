@@ -49,8 +49,7 @@ void RamLoader::FileIndex::clear() {
     decltype(blocks)().swap(blocks);
 }
 
-RamLoader::RamBlockStructure::~RamBlockStructure() {
-}
+RamLoader::RamBlockStructure::~RamBlockStructure() { }
 
 RamLoader::RamLoader(base::StdioStream&& stream,
                      Flags flags,
