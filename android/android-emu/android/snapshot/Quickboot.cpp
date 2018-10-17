@@ -176,7 +176,6 @@ void Quickboot::onLivenessTimer() {
                                  int(nowMs - mLoadTimeMs) / 1000)
                             .c_str(),
                     WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
-            Snapshotter::get().touchAllPages();
             mAdbConnectionRetries++;
         } else if (android_cmdLineOptions->read_only ||
             mAdbConnectionRetries < kMaxAdbConnectionRetries) {

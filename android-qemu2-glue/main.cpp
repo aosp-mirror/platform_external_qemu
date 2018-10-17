@@ -834,19 +834,20 @@ extern "C" int main(int argc, char** argv) {
         }
 
         // Situations where not to use mmap() for RAM
-#ifdef __linux__
         // 1. Using HDD on Linux; no file mapping or we will have a bad time.
         if (avd){
             auto contentPath = avdInfo_getContentPath(avd);
             auto diskKind = System::get()->pathDiskKind(contentPath);
             if (diskKind) {
                 if (*diskKind == System::DiskKind::Hdd) {
+                    androidSnapshot_setUsingHdd(true /* is hdd */);
+#ifdef __linux__
                     feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false);
+#endif
                 }
             }
         }
         // 2. TODO
-#endif
     }
 
     if (opts->snapshot && feature_is_enabled(kFeature_FastSnapshotV1)) {
