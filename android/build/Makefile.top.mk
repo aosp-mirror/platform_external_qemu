@@ -331,6 +331,7 @@ endif
 # NOTE: The following definitions are only used by the standalone build.
 BUILD_TARGET_EXEEXT :=
 BUILD_TARGET_DLLEXT := .so
+BUILD_TARGET_STATIC_PREFIX := lib
 BUILD_TARGET_STATIC_LIBEXT := .a
 ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
   BUILD_TARGET_EXEEXT := .exe
@@ -341,6 +342,7 @@ ifeq ($(BUILD_TARGET_OS),darwin)
 endif
 
 ifeq ($(BUILD_TARGET_OS),windows_msvc)
+  BUILD_TARGET_STATIC_PREFIX :=
   BUILD_TARGET_STATIC_LIBEXT := .lib
 endif
 

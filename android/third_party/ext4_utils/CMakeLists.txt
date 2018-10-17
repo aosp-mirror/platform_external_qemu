@@ -35,6 +35,12 @@ endif()
 # END COMPILER CONFIGURATION
 # ==========================
 
+if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
+    set(MSVC_POSIX_COMPAT_INCLUDE_DIR ../../msvc-posix-compat/include)
+    set(DIRENT_WIN32_INCLUDE_DIR ../dirent-win32/include)
+    set(MSVC_POSIX_COMPAT_LIBRARY ${CMAKE_BINARY_DIR}/../msvc-posix-compat/msvc-posix-compat.lib)
+endif()
+
 add_library(emulator-libext4_utils
         src/allocate.c
         src/contents.c
@@ -62,9 +68,9 @@ if (WIN32 OR ("${LOCAL_OS_FLAVOR}" STREQUAL "windows"))
         target_compile_definitions(emulator-libext4_utils PRIVATE -DUSE_MINGW=1)
     endif ()
     if ("${LOCAL_OS}" STREQUAL "windows_msvc")
-        target_include_directories(emulator-libext4_utils PRIVATE ../../msvc-posix-compat/include)
-        target_include_directories(emulator-libext4_utils PRIVATE ../dirent-win32/include)
-	target_link_libraries(emulator-libext4_utils PRIVATE msvc-posix-compat)
+        target_include_directories(emulator-libext4_utils PRIVATE ${MSVC_POSIX_COMPAT_INCLUDE_DIR})
+        target_include_directories(emulator-libext4_utils PRIVATE ${DIRENT_WIN32_INCLUDE_DIR})
+        target_link_libraries(emulator-libext4_utils PRIVATE ${MSVC_POSIX_COMPAT_LIBRARY})
     endif()
 endif ()
 target_compile_options(emulator-libext4_utils PRIVATE -Wno-error)

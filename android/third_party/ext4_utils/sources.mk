@@ -12,15 +12,8 @@ endif
 $(call start-cmake-project,emulator-libext4_utils)
 PRODUCED_STATIC_LIBS := emulator-libext4_utils
 
-LOCAL_C_INCLUDES := \
-    $(LIBSPARSE_INCLUDES) \
-    $(LIBSELINUX_INCLUDES) \
-    $(LOCAL_PATH)/../../../android/android-emu
-
 ifeq ($(BUILD_TARGET_OS),windows_msvc)
-    LOCAL_C_INCLUDES += \
-        $(MSVC_POSIX_COMPAT_INCLUDES) \
-	$(DIRENT_WIN32_INCLUDES)
+    CONSUMED_STATIC_LIBS := msvc-posix-compat
 endif
 $(call end-cmake-project)
 
@@ -44,6 +37,8 @@ ifeq ($(BUILD_TARGET_OS),windows_msvc)
     LOCAL_C_INCLUDES += \
         $(MSVC_POSIX_COMPAT_INCLUDES) \
 	$(DIRENT_WIN32_INCLUDES)
+    LOCAL_STATIC_LIBRARIES += \
+        msvc-posix-compat
 endif
 
 $(call local-link-static-c++lib)

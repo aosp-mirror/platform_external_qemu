@@ -11,8 +11,6 @@
 
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-
 #include <fcntl.h>
 #include <io.h>
 #include <time.h>

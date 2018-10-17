@@ -74,7 +74,7 @@ generated-proto-sources-dir = $(call intermediates-dir-for,$(call local-build-va
 local-cmake-path = $(call intermediates-dir-for,$(call local-build-var,BITS),cmake)/$(1)
 
 # Location of intermediate static libraries during build.
-local-library-path = $(call intermediates-dir-for,$(call local-build-var,BITS),$(1))/$(1).a
+local-library-path = $(call intermediates-dir-for,$(call local-build-var,BITS),$(1))/$(1)$(call local-build-var,STATIC_LIBEXT)
 
 # Location of unstripped executables during build.
 local-executable-path = $(call intermediates-dir-for,$(call local-build-var,BITS),$(1))/$(1)$(call local-build-var,EXEEXT)
