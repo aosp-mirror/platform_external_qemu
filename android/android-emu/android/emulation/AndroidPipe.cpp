@@ -678,14 +678,18 @@ void android_pipe_guest_pre_load(CStream* stream) {
     android::sGlobals->pipeWaker.setContextRunMode(
                 android::ContextRunMode::DeferAlways);
     forEachServiceFromStream(stream, [](Service* service, BaseStream* bs) {
-        service->preLoad(bs);
+        if (service->canLoad()) {
+            service->preLoad(bs);
+        }
     });
 }
 
 void android_pipe_guest_post_load(CStream* stream) {
     CHECK_VM_STATE_LOCK();
     forEachServiceFromStream(stream, [](Service* service, BaseStream* bs) {
-        service->postLoad(bs);
+        if (service->canLoad()) {
+            service->postLoad(bs);
+        }
     });
     // Restore the regular handling of pipe interrupt requests.
     android::sGlobals->pipeWaker.setContextRunMode(
@@ -695,14 +699,18 @@ void android_pipe_guest_post_load(CStream* stream) {
 void android_pipe_guest_pre_save(CStream* stream) {
     CHECK_VM_STATE_LOCK();
     forEachServiceToStream(stream, [](Service* service, BaseStream* bs) {
-        service->preSave(bs);
+        if (service->canLoad()) {
+            service->preSave(bs);
+        }
     });
 }
 
 void android_pipe_guest_post_save(CStream* stream) {
     CHECK_VM_STATE_LOCK();
     forEachServiceToStream(stream, [](Service* service, BaseStream* bs) {
-        service->postSave(bs);
+        if (service->canLoad()) {
+            service->postSave(bs);
+        }
     });
 }
 
