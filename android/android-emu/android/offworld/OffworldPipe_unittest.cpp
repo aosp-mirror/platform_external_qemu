@@ -42,7 +42,7 @@
 #include <mutex>
 #include <thread>
 
-extern const QAndroidVmOperations* const gQAndroidVmOperations;
+extern "C" const QAndroidVmOperations* const gQAndroidVmOperations;
 extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
 
 using namespace android;

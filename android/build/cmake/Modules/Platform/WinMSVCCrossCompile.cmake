@@ -14,7 +14,9 @@
 
 # This cmake file is to configure cross-compilation for Windows on Linux
 set(WIN32 1)
-set(MSVC 1)
+# Don't define MSVC if cross-compiling with Clang because googletest
+# will think we're Visual Studio and add a bunch of unknown flags.
+#set(MSVC 1)
 
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
 set(CMAKE_STATIC_LIBRARY_SUFFIX ".lib")
