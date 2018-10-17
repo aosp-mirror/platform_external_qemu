@@ -16,7 +16,7 @@ ifeq ($(BUILD_TARGET_OS),darwin)
     LOCAL_SRC_FILES += standalone_common/angle-util/osx/OSXWindow.mm
 endif
 
-ifeq ($(BUILD_TARGET_OS),windows)
+ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
     LOCAL_SRC_FILES += standalone_common/angle-util/windows/WindowsTimer.cpp
     LOCAL_SRC_FILES += standalone_common/angle-util/windows/win32/Win32Window.cpp
 endif
@@ -31,7 +31,7 @@ ifeq ($(BUILD_TARGET_OS),darwin)
     LOCAL_LDLIBS += -Wl,-framework,AppKit
 endif
 
-ifeq ($(BUILD_TARGET_OS),windows)
+ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
     LOCAL_LDLIBS += -lgdi32
 endif
 

@@ -12,4 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Need to include this header in case the compiler decides to mangle the
+// symbol.
+#include "android/globals.h"
+
 int guest_data_partition_mounted = 0;

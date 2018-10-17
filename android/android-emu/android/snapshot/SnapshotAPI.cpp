@@ -28,7 +28,7 @@
 #include <sstream>
 #include <vector>
 
-extern const QAndroidVmOperations* const gQAndroidVmOperations;
+extern "C" const QAndroidVmOperations* const gQAndroidVmOperations;
 
 namespace {
 
