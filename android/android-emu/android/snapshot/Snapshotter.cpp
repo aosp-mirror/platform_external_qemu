@@ -284,14 +284,9 @@ OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
     return mLoader->status();
 }
 
-void Snapshotter::touchAllPages() {
-    android::RecursiveScopedVmLock lock;
+void Snapshotter::finishLoading() {
     if (mLoader) {
-        CrashReporter::get()->hangDetector().pause(true);
-        callCallbacks(Operation::Load, Stage::Start);
-        mLoader->touchAllPages();
-        callCallbacks(Operation::Load, Stage::End);
-        CrashReporter::get()->hangDetector().pause(false);
+        mLoader->join();
     }
 }
 
@@ -842,7 +837,14 @@ bool Snapshotter::onStartLoading(const char* name) {
 
 bool Snapshotter::onLoadingComplete(const char* name, int res) {
     assert(mLoader && name == mLoader->snapshot().name());
+
+    if (mUsingHdd) {
+        fprintf(stderr, "%s: using hdd, finishing load\n", __func__);
+        finishLoading();
+    }
+
     mLoader->complete(res == 0);
+
     CrashReporter::get()->hangDetector().pause(false);
     mLastLoadUptimeMs =
             System::Duration(System::get()->getProcessTimes().wallClockMs);
