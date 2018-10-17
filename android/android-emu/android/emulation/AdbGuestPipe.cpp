@@ -219,7 +219,6 @@ void AdbGuestPipe::Service::preLoad(android::base::Stream* stream) {
 }
 
 void AdbGuestPipe::Service::postLoad(android::base::Stream* stream) {
-    if (!canLoad()) return;
     int activeFd = stream->getBe32();
     if (activeFd == 0) {
         mCurrentActivePipe = nullptr;
@@ -236,7 +235,6 @@ void AdbGuestPipe::Service::postLoad(android::base::Stream* stream) {
 }
 
 void AdbGuestPipe::Service::postSave(android::base::Stream* stream) {
-    if (!canLoad()) return;
     DD("%s num. of pipes %d", __func__, (int)mPipes.size());
     if (mCurrentActivePipe && mCurrentActivePipe->mHostSocket.valid()) {
         stream->putBe32(mCurrentActivePipe->mHostSocket.fdWatcher()->fd());
