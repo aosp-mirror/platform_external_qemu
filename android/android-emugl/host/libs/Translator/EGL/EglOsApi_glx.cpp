@@ -585,6 +585,9 @@ public:
                     GlxSurface::drawableFor(draw),
                     GlxSurface::drawableFor(read),
                     GlxContext::contextFor(context));
+            if (draw->type() == GlxSurface::SurfaceType::WINDOW) {
+                mSwapInterval(mDisplay, GlxSurface::drawableFor(draw), 0);
+            }
         }
         int err = handler.getLastError();
         return (err == 0) && retval;
@@ -599,6 +602,8 @@ public:
 private:
     using CreateContextAttribs =
         GLXContext (*)(X11Display*, GLXFBConfig, GLXContext, Bool, const int*);
+    using SwapInterval =
+        void (*)(X11Display*, GLXDrawable, int);
 
     // Returns the highest level of OpenGL core profile support in
     // this GLX implementation.
@@ -609,8 +614,14 @@ private:
         GlxLibrary* lib = sGlxLibrary.ptr();
         mCreateContextAttribs =
             (CreateContextAttribs)lib->findSymbol("glXCreateContextAttribsARB");
+        mSwapInterval =
+            (SwapInterval)lib->findSymbol("glXSwapIntervalEXT");
 
         if (!mCreateContextAttribs || mFBConfigs.size() == 0) return;
+
+        if (!mSwapInterval) {
+            fprintf(stderr, "%s: swap interval not found\n", __func__);
+        }
 
         // Ascending index order of context attribs :
         // decreasing GL major/minor version
@@ -656,6 +667,7 @@ private:
     }
 
     CreateContextAttribs mCreateContextAttribs = nullptr;
+    SwapInterval mSwapInterval = nullptr;
 
     bool mCoreProfileSupported = false;
     int mCoreMajorVersion = 4;
