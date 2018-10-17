@@ -6,6 +6,9 @@
 
 
 #include "foo_types.h"
+#ifdef _MSC_VER
+#include <stdint.h>
+#endif
 #ifndef foo_APIENTRY
 #define foo_APIENTRY 
 #endif

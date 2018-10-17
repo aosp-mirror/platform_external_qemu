@@ -5,9 +5,13 @@ if (NOT ANDROID_TARGET_TAG)
     get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_DIR}/../build/cmake" ABSOLUTE)
     list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
     include(frankenbuild)
+elseif ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 endif()
 include(android)
 include(prebuilts)
+
 
 # Make sure we can find our local defined targets
 get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)

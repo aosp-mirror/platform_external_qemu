@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 
 # Workaround for b/115634240
 LOCAL_SOURCE_DEPENDENCIES := \
-	$(call local-library-path,libmetrics_proto)
+	$(call local-library-path,$(BUILD_TARGET_STATIC_PREFIX)metrics_proto)
 
 host_common_SRC_FILES := \
      GLESv2Imp.cpp       \
@@ -22,7 +22,7 @@ $(call emugl-import, libGLcommon)
 $(call emugl-import, libOpenglCodecCommon)
 
 # Workaround for b/115634240
-LOCAL_SOURCE_DEPENDENCIES := $(call local-library-path,libmetrics_proto)
+LOCAL_SOURCE_DEPENDENCIES := $(call local-library-path,$(BUILD_TARGET_STATIC_PREFIX)metrics_proto)
 
 LOCAL_SRC_FILES := $(host_common_SRC_FILES)
 
