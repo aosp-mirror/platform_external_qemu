@@ -103,4 +103,7 @@ AndroidSnapshotRamFileMode androidSnapshot_getRamFileInfo();
 void androidSnapshot_writeQuickbootChoice(bool save);
 bool androidSnapshot_getQuickbootChoice();
 
+void androidSnapshot_setUsingHdd(bool usingHdd);
+bool androidSnapshot_isUsingHdd();
+
 ANDROID_END_HEADER
