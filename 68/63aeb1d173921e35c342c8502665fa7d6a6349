@@ -1,0 +1,7 @@
+Code-Review+2: Bo Hu <bohu@google.com>
+Verified+1: Lingfeng Yang <lfy@google.com>
+Submitted-by: Lingfeng Yang <lfy@google.com>
+Submitted-at: Wed, 17 Oct 2018 21:14:35 +0000
+Reviewed-on: https://android-review.googlesource.com/792258
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
