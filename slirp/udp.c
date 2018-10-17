@@ -214,9 +214,10 @@ udp_input(register struct mbuf *m, int iphlen)
 	m->m_data += iphlen;
 
 	/*
-	 * Now we sendto() the packet.
+	 * Now we sendto() the packet.  If the write would block, there
+     * is congestion.  This is UDP so just drop.
 	 */
-	if(sosendto(so,m) == -1) {
+	if(sosendto(so,m) == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
 	  m->m_len += iphlen;
 	  m->m_data -= iphlen;
 	  *ip=save_ip;
@@ -294,6 +295,7 @@ int
 udp_attach(struct socket *so, unsigned short af)
 {
   so->s = qemu_socket(af, SOCK_DGRAM, 0);
+  qemu_set_nonblock(so->s);
   if (so->s != -1) {
     so->so_expire = curtime + SO_EXPIRE;
     insque(so, &so->slirp->udb);
