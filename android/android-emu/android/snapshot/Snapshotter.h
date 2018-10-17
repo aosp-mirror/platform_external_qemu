@@ -71,7 +71,6 @@ public:
 
     OperationStatus prepareForLoading(const char* name);
     OperationStatus load(bool isQuickboot, const char* name);
-    void touchAllPages();
     OperationStatus prepareForSaving(const char* name);
     OperationStatus save(bool isOnExit, const char* name);
 
@@ -132,6 +131,9 @@ public:
     bool isRamFileShared() const { return !mRamFile.empty() && mRamFileShared; }
     void setRemapping(bool remapping) { mIsRemapping = remapping; }
 
+    void setUsingHdd(bool usingHdd) { mUsingHdd = usingHdd; }
+    bool isUsingHdd() const { return mUsingHdd; }
+
 private:
     bool onStartSaving(const char* name);
     bool onSavingComplete(const char* name, int res);
@@ -141,6 +143,8 @@ private:
     void onLoadingFailed(const char* name, int res);
     bool onStartDelete(const char* name);
     bool onDeletingComplete(const char* name, int res);
+
+    void finishLoading();
 
     void prepareLoaderForSaving(const char* name);
     void callCallbacks(Operation op, Stage stage);
@@ -174,6 +178,7 @@ private:
 
     std::string mRamFile;
     bool mRamFileShared = false;
+    bool mUsingHdd = false;
 };
 
 }  // namespace snapshot
