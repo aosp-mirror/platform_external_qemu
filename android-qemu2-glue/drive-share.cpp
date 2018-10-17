@@ -252,7 +252,7 @@ static bool parseQemuOptForQcow2(bool wipeData) {
 
 static bool needRemount(QemuOpts* opts) {
     QemuOpt* opt = qemu_opt_find(opts, "read-only");
-    return opt && (!strcmp("on", opt->str) ||
+    return !opt || !(!strcmp("on", opt->str) ||
                    (opt->desc && opt->desc->type == QEMU_OPT_BOOL &&
                     opt->value.boolean));
 }
@@ -371,6 +371,7 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
     const char* id = opts->id;
     D("Re-init drive %s\n", id);
     if (!needRemount(opts)) {
+        D("%s dont need remount\n", id);
         return 0;
     }
     DriveInitParam* param = (DriveInitParam*)opaque;
