@@ -155,9 +155,12 @@ void Loader::onInvalidSnapshotLoad() {
     }
 }
 
-void Loader::touchAllPages() {
+void Loader::join() {
     if (mRamLoader) {
         mRamLoader->touchAllPages();
+    }
+    if (mTextureLoader) {
+        mTextureLoader->join();
     }
 }
 
