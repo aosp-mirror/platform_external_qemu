@@ -153,7 +153,7 @@ m_inc(struct mbuf *m, int size)
 {
     int datasize;
 	/* some compiles throw up on gotos.  This one we can fake. */
-	if (m->m_size > size) {
+	if (M_ROOM(m) > size) {
 		return;
 	}
 
