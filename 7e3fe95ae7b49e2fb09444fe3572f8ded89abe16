@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a43cac0_32352aa7",
+        "filename": "android/android-emu/Makefile.android-emu.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-18T23:22:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "018458d7_9b2c96fc",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c90e051f_a72e9be5",
         "filename": "android/android-emu/android/base/async/AsyncSocketServer_unittest.cpp",
         "patchSetId": 3
@@ -30,6 +48,30 @@
       "writtenOn": "2018-10-05T17:14:28Z",
       "side": 1,
       "message": "This is a pattern that happens a lot, but isn\u0027t obvious. Do you think there\u0027s some way to fold that into msvc-posix.h?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 6
+      },
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6cb98a17_aa206e7e",
+        "filename": "android/android-emu/android/base/async/AsyncSocketServer_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-18T23:22:37Z",
+      "side": 1,
+      "message": "This isn\u0027t something that I think should be exposed for all files including msvc-posix.h, as this macro is defined in windows.h. I think keeping the scope of undefing this as small as possible is best to avoid breaking something within the windows SDK.",
+      "parentUuid": "c90e051f_a72e9be5",
       "range": {
         "startLine": 25,
         "startChar": 0,
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "d08ad0f3_e9ac7aaa",
+        "filename": "android/android-emu/android/base/files/DecompressingStream.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-18T23:22:37Z",
+      "side": 1,
+      "message": "Maybe we can do the same thing qemu does, and include a osdep.h header, and choose from there which headers to include. I\u0027ll put up another CL to take care of this.",
+      "parentUuid": "91f8ad9e_771987df",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 6
+      },
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a2390a73_c816ba57",
         "filename": "android/android-emu/android/base/memory/SharedMemory_unittest.cpp",
         "patchSetId": 3
@@ -82,6 +148,24 @@
     },
     {
       "key": {
+        "uuid": "bf03f865_7351dced",
+        "filename": "android/android-emu/android/base/memory/SharedMemory_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-18T23:22:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a2390a73_c816ba57",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b8827252_bb8e1844",
         "filename": "android/android-emu/android/snapshot/RamSnapshotTesting.cpp",
         "patchSetId": 3
@@ -93,6 +177,24 @@
       "writtenOn": "2018-10-05T17:14:28Z",
       "side": 1,
       "message": "Welp",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc62e05e_409e1302",
+        "filename": "android/android-emu/android/snapshot/RamSnapshotTesting.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-18T23:22:37Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "b8827252_bb8e1844",
       "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -116,6 +218,24 @@
     },
     {
       "key": {
+        "uuid": "c1603a62_4bb9e400",
+        "filename": "android/android-emu/android/snapshot/SnapshotPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-18T23:22:37Z",
+      "side": 1,
+      "message": "K. I\u0027ll remove it.",
+      "parentUuid": "6df60d89_ab684681",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d9056dd7_3448e510",
         "filename": "android/android-emu/android/utils/file_io.cpp",
         "patchSetId": 3
@@ -127,6 +247,24 @@
       "writtenOn": "2018-10-05T17:14:28Z",
       "side": 1,
       "message": "hmm, recommend renamign them to android at some point, since it might not be safe to use the basic functions when non ascii is involved. filed a bug",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54ef9b61_2c9b37c5",
+        "filename": "android/android-emu/android/utils/file_io.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-18T23:22:37Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "d9056dd7_3448e510",
       "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -150,6 +288,24 @@
     },
     {
       "key": {
+        "uuid": "17d71d0e_01fa1c5f",
+        "filename": "android/msvc-posix-compat/CMakeLists.txt",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-18T23:22:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "56f7708c_243a5670",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "477f4bcb_88882a7e",
         "filename": "android/scripts/utils/package_builder.shi",
         "patchSetId": 3
@@ -167,6 +323,24 @@
     },
     {
       "key": {
+        "uuid": "05d3734c_8dbb4692",
+        "filename": "android/scripts/utils/package_builder.shi",
+        "patchSetId": 3
+      },
+      "lineNbr": 515,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-18T23:22:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "477f4bcb_88882a7e",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aea793c8_9658efba",
         "filename": "android/third_party/ext4_utils/CMakeLists.txt",
         "patchSetId": 3
@@ -181,6 +355,24 @@
       "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1800ef02_349bb90c",
+        "filename": "android/third_party/ext4_utils/CMakeLists.txt",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-18T23:22:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aea793c8_9658efba",
+      "revId": "7e3fe95ae7b49e2fb09444fe3572f8ded89abe16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
