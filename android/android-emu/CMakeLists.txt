@@ -32,6 +32,7 @@ add_subdirectory(android/verified-boot/proto)
 add_subdirectory(android/automation/proto)
 add_subdirectory(android/offworld/proto)
 add_subdirectory(android/darwinn/external/proto/platforms/darwinn/model/config)
+add_subdirectory(android/darwinn/proto)
 
 # Grab the android-emu-base library
 include(android-emu-base)
