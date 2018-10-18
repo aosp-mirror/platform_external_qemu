@@ -34,8 +34,13 @@ ifeq ($(BUILD_TARGET_ARCH), x86_64)
     compute-relative-path = \
         $(shell realpath --relative-to $(DARWINN_PREBUILT_OLD_LOCAL_PATH) $1)
 
-	DARWINN_SERVICE_SRC := \
-		$(call compute-relative-path, $(LOCAL_PATH)/darwinn-service.cpp) \
+    DARWINN_SERVICE_SRC := \
+        $(call compute-relative-path, $(LOCAL_PATH)/darwinn-service.cpp) \
+
+    DARWINN_SERVICE_TEST_SRC := \
+        $(call compute-relative-path, $(LOCAL_PATH)/DarwinnPipe_unittest.cpp) \
+        $(call compute-relative-path, $(LOCAL_PATH)/MockDarwinnDriver.cpp) \
+        $(call compute-relative-path, $(LOCAL_PATH)/MockDarwinnDriverFactory.cpp) \
 
     DARWINN_COMPILER_TEST_SRC := \
         $(call compute-relative-path, $(LOCAL_PATH)/external/tests/platforms/darwinn/code_generator/api/nnapi/darwinn_compiler_unittest.cpp) \
