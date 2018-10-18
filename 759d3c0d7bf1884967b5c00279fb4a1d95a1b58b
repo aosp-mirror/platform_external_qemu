@@ -22,6 +22,30 @@
       "revId": "759d3c0d7bf1884967b5c00279fb4a1d95a1b58b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "377e4eb9_9bfe18b4",
+        "filename": "android/android-emu/android/utils/tempfile.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-10-18T22:21:31Z",
+      "side": 1,
+      "message": "They are alloced when creating the temp file, see tempfile_create_with_ext.\n\n_all_tempfiles is supposed to own the whole chain. This file is supposed to be the only place that might free this structure so it would not introduce new double free.\n\non the other hand, this file does not handle concurrency...",
+      "parentUuid": "e47a0c18_5f359779",
+      "range": {
+        "startLine": 158,
+        "startChar": 0,
+        "endLine": 158,
+        "endChar": 23
+      },
+      "revId": "759d3c0d7bf1884967b5c00279fb4a1d95a1b58b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
