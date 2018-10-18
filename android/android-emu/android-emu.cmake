@@ -1,5 +1,32 @@
 # This file defines android-emu library
 
+# Add darwinn external libraries and includes
+if(ANDROID_TARGET_TAG MATCHES "linux-x86_64")
+set(DARWINN_EXTERNAL_INCLUDE_DIR 
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/include
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/generated)
+
+set(DARWINN_COMPILER_DEFINITIONS
+    "-DDARWINN_COMPILER_TEST_EXTERNAL"
+    "-DDARWINN_PORT_ANDROID_EMULATOR=1"
+    "-DDARWINN_CHIP_TYPE=USB"
+    "-DDARWINN_CHIP_NAME=beagle")
+
+add_library(DARWINN_COMPILER SHARED IMPORTED GLOBAL)
+set_target_properties(DARWINN_COMPILER
+                      PROPERTIES
+                      IMPORTED_LOCATION ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/libdarwinn_compiler.so
+                      INTERFACE_INCLUDE_DIRECTORIES "${DARWINN_EXTERNAL_INCLUDE_DIR}"
+                      INTERFACE_COMPILE_DEFINITIONS "${DARWINN_COMPILER_DEFINITIONS}")
+
+add_library(DARWINN_DRIVER_NONE SHARED IMPORTED GLOBAL)
+set_target_properties(DARWINN_DRIVER_NONE
+                      PROPERTIES
+                      IMPORTED_LOCATION ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/libreference-driver-none.so
+                      INTERFACE_INCLUDE_DIRECTORIES "${DARWINN_EXTERNAL_INCLUDE_DIR}"
+                      INTERFACE_COMPILE_DEFINITIONS "${DARWINN_COMPILER_DEFINITIONS}")        
+endif()
+
 # This is the set of sources that are common in both the shared libary and the archive. We currently have to split them
 # up due to dependencies on external variables/functions that are implemented in other libraries.
 set(android-emu-common
@@ -315,6 +342,7 @@ target_link_libraries(android-emu
                               automation
                               offworld
                               darwinnmodelconfig
+                              darwinnpipe
                               # Prebuilt libraries
                               ${BREAKPAD_CLIENT_LIBRARIES}
                               ${CURL_LIBRARIES}
@@ -323,7 +351,9 @@ target_link_libraries(android-emu
                               ${PROTOBUF_LIBRARIES}
                               ${LZ4_LIBRARIES}
                               ${PNG_LIBRARIES}
-                              ${ZLIB_LIBRARIES})
+                              ${ZLIB_LIBRARIES}
+                              ${DARWINN_COMPILER}
+                              ${DARWINN_DRIVER_NONE})
 
 # Here are the windows library and link dependencies. They are public and will propagate onwards to others that depend
 # on android-emu
@@ -363,8 +393,6 @@ android_target_link_libraries(android-emu
 android_target_include_directories(android-emu
                                    all
                                    PRIVATE
-                                   ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/include
-                                   ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/generated
                                    ${BREAKPAD_INCLUDE_DIRS}
                                    ${CURL_INCLUDE_DIRS}
                                    ${LIBXML2_INCLUDE_DIRS}
@@ -374,7 +402,8 @@ android_target_include_directories(android-emu
                                    ${PROTOBUF_INCLUDE_DIRS}
                                    ${LZ4_INCLUDE_DIRS}
                                    ${PNG_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS})
+                                   ${ZLIB_INCLUDE_DIRS}
+                                   ${DARWINN_EXTERNAL_INCLUDE_DIR})
 
 target_include_directories(android-emu PUBLIC ${LZ4_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS}
                                    # TODO(jansene): The next 2 imply a link dependendency on emugl libs, which
@@ -404,10 +433,7 @@ android_target_compile_definitions(android-emu
 android_target_compile_definitions(android-emu
                                    linux-x86_64
                                    PRIVATE
-                                   "-DDARWINN_COMPILER_TEST_EXTERNAL"
-                                   "-DDARWINN_PORT_ANDROID_EMULATOR=1"
-                                   "-DDARWINN_CHIP_TYPE=USB"
-                                   "-DDARWINN_CHIP_NAME=beagle")
+                                   "${DARWINN_COMPILER_DEFINITIONS}")
 
 target_compile_definitions(android-emu
                                    PRIVATE
@@ -471,6 +497,7 @@ target_link_libraries(android-emu-shared
                               automation
                               offworld
                               darwinnmodelconfig
+                              darwinnpipe
                               # Prebuilt libraries
                               ${BREAKPAD_CLIENT_LIBRARIES}
                               ${CURL_LIBRARIES}
@@ -541,13 +568,10 @@ android_target_compile_definitions(android-emu-shared
                                    "-Dftello64=ftell"
                                    "-Dfseeko64=fseek")
 
-android_target_compile_definitions(android-emu
-                                  linux-x86_64
-                                  PRIVATE
-                                  "-DDARWINN_COMPILER_TEST_EXTERNAL"
-                                  "-DDARWINN_PORT_ANDROID_EMULATOR=1"
-                                  "-DDARWINN_CHIP_TYPE=USB"
-                                  "-DDARWINN_CHIP_NAME=beagle")
+android_target_compile_definitions(android-emu-shared
+                                   linux-x86_64
+                                   PRIVATE
+                                   "${DARWINN_COMPILER_DEFINITIONS}")
 
 target_compile_definitions(android-emu-shared
                                    PRIVATE
@@ -740,8 +764,18 @@ set(android-emu_unittests_windows_src
     android/windows_installer_unittest.cpp)
 
 # Darwin & Linux only tests
-set(android-emu_unittests_darwin_x86_64_src android/emulation/nand_limits_unittest.cpp)
-set(android-emu_unittests_linux_x86_64_src android/emulation/nand_limits_unittest.cpp)
+set(android-emu_unittests_darwin-x86_64_src android/emulation/nand_limits_unittest.cpp)
+
+set(android-emu_unittests_linux-x86_64_src
+    android/emulation/nand_limits_unittest.cpp
+    # Linux darwinn(beagle board) service pipe tests
+    android/darwinn/DarwinnPipe_unittest.cpp
+    android/darwinn/MockDarwinnDriver.cpp
+    android/darwinn/MockDarwinnDriverFactory.cpp
+    android/darwinn/external/src/third_party/darwinn/port/default/logging.cc
+    android/darwinn/external/src/third_party/darwinn/port/default/status.cc
+    android/darwinn/external/src/third_party/darwinn/port/default/statusor.cc
+    android/darwinn/external/src/third_party/darwinn/api/buffer.cc)
 
 # And declare the test
 android_add_test(android-emu_unittests)
@@ -752,8 +786,6 @@ android_target_include_directories(android-emu_unittests
                                    all
                                    PRIVATE
                                    ../android-emugl/host/include/
-                                   ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/include
-                                   ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/generated
                                    ${BREAKPAD_INCLUDE_DIRS}
                                    ${CURL_INCLUDE_DIRS}
                                    ${LIBXML2_INCLUDE_DIRS}
@@ -763,7 +795,8 @@ android_target_include_directories(android-emu_unittests
                                    ${PROTOBUF_INCLUDE_DIRS}
                                    ${LZ4_INCLUDE_DIRS}
                                    ${PNG_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS})
+                                   ${ZLIB_INCLUDE_DIRS}
+                                   ${DARWINN_EXTERNAL_INCLUDE_DIR})
 
 android_target_compile_definitions(android-emu_unittests all PRIVATE -DGTEST_HAS_RTTI=0)
 
@@ -775,13 +808,10 @@ android_target_compile_definitions(android-emu_unittests
                                    "-Dftello64=ftell"
                                    "-Dfseeko64=fseek")
 
-android_target_compile_definitions(android-emu
-                                  linux-x86_64
-                                  PRIVATE
-                                  "-DDARWINN_COMPILER_TEST_EXTERNAL"
-                                  "-DDARWINN_PORT_ANDROID_EMULATOR=1"
-                                  "-DDARWINN_CHIP_TYPE=USB"
-                                  "-DDARWINN_CHIP_NAME=beagle")
+android_target_compile_definitions(android-emu_unittests
+                                   linux-x86_64
+                                   PRIVATE
+                                   "${DARWINN_COMPILER_DEFINITIONS}")
 
 # Dependecies are exported from android-emu.
 android_target_link_libraries(android-emu_unittests all PRIVATE android-emu gtest gmock gtest_main)

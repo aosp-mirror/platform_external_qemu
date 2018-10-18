@@ -91,7 +91,7 @@ LOCAL_C_INCLUDES := \
     $(LIBDARWINN_INCLUDES) \
 
 PRODUCED_STATIC_LIBS=android-emu-base emulator-libui
-PRODUCED_PROTO_LIBS=metrics featurecontrol snapshot crashreport location emulation telephony verified-boot automation offworld darwinnmodelconfig
+PRODUCED_PROTO_LIBS=metrics featurecontrol snapshot crashreport location emulation telephony verified-boot automation offworld darwinnmodelconfig darwinnpipe
 
 #  emulator-libui linker flags & settings
 #
@@ -828,6 +828,8 @@ LOCAL_SRC_FILES := \
   android/wear-agent/PairUpWearPhone_unittest.cpp \
   android/wear-agent/testing/WearAgentTestUtils.cpp \
   android/wear-agent/WearAgent_unittest.cpp \
+  $(DARWINN_SERVICE_TEST_SRC) \
+  $(DARWINN_TEST_THIRDPARTY_SRC) \
 
 ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
 LOCAL_SRC_FILES += \
