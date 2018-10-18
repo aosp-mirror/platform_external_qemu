@@ -67,6 +67,11 @@ include $(_ANDROID_EMU_ROOT)/android/darwinn/external/proto/platforms/darwinn/mo
 
 ###############################################################################
 #
+# Darwinn model config protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/darwinn/proto/DarwinnProto.mk
+
+###############################################################################
+#
 # Feature control protoc-generated library.
 include $(_ANDROID_EMU_ROOT)/android/featurecontrol/proto/FeatureControlProto.mk
 
@@ -596,6 +601,7 @@ ANDROID_EMU_STATIC_LIBRARIES_DEPS := \
     $(PHYSICS_PROTO_STATIC_LIBRARIES) \
     ${VERIFIEDBOOTCFG_PROTO_STATIC_LIBRARIES} \
     $(DARWINNMODELCONFIG_PROTO_STATIC_LIBRARIES) \
+    $(DARWINN_PROTO_STATIC_LIBRARIES) \
 
 ANDROID_EMU_STATIC_LIBRARIES := \
     android-emu $(ANDROID_EMU_STATIC_LIBRARIES_DEPS) \
@@ -745,6 +751,9 @@ LOCAL_SRC_FILES := \
   android/CommonReportedInfo_unittest.cpp \
   android/console_auth_unittest.cpp \
   android/console_unittest.cpp \
+  android/darwinn/DarwinnPipe_unittest.cpp \
+  android/darwinn/MockDarwinnDriver.cpp \
+  android/darwinn/MockDarwinnDriverFactory.cpp \
   android/emulation/AdbDebugPipe_unittest.cpp \
   android/emulation/AdbGuestPipe_unittest.cpp \
   android/emulation/AdbHostListener_unittest.cpp \
@@ -837,6 +846,7 @@ LOCAL_SRC_FILES := \
   android/wear-agent/PairUpWearPhone_unittest.cpp \
   android/wear-agent/testing/WearAgentTestUtils.cpp \
   android/wear-agent/WearAgent_unittest.cpp \
+  $(DARWINN_TEST_THIRDPARTY_SRC) \
 
 ifeq (windows,$(BUILD_TARGET_OS))
 LOCAL_SRC_FILES += \
