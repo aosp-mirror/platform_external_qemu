@@ -38,6 +38,12 @@ LOCAL_SRC_FILES := \
 
 $(call emugl-end-module)
 
+$(call emugl-begin-static-library,libgrallocusage)
+
+LOCAL_C_INCLUDES += $(LOCAL_PATH)
+LOCAL_SRC_FILES += libgrallocusage/GrallocUsageConversion.cpp
+
+$(call emugl-end-module)
 # Unit tests for Android graphics###############################################
 
 $(call emugl-begin-executable,libgui_unittests)
