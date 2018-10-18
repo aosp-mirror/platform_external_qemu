@@ -171,10 +171,18 @@ public:
         }
 
         void destroyPipe(AsyncMessagePipeHandle handle) {
-            base::AutoLock lock(mLock);
-            if (mPipes.erase(handle.id) == 0) {
-                DLOG(INFO) << "Could not find pipe id " << handle.id
-                           << ", pipe already destroyed?";
+            // To avoid destructing under a lock, move it out of the map first.
+            std::unique_ptr<PipeType> pipe;
+            {
+                base::AutoLock lock(mLock);
+                auto it = mPipes.find(handle.id);
+                if (it != mPipes.end()) {
+                    pipe = std::move(it->second);
+                    mPipes.erase(it);
+                } else {
+                    DLOG(INFO) << "Could not find pipe id " << handle.id
+                               << ", pipe already destroyed?";
+                }
             }
         }
 
