@@ -1,0 +1,44 @@
+if(ANDROID_TARGET_TAG MATCHES "linux-x86_64")
+set(DARWINN_EXTERNAL_INCLUDE_DIR
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/include
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/generated)
+
+set(DARWINN_COMPILER_DEFINITIONS
+    "-DDARWINN_COMPILER_TEST_EXTERNAL"
+    "-DDARWINN_PORT_ANDROID_EMULATOR=1"
+    "-DDARWINN_CHIP_TYPE=USB"
+    "-DDARWINN_CHIP_NAME=beagle")
+
+add_library(DARWINN_COMPILER SHARED IMPORTED GLOBAL)
+set_target_properties(DARWINN_COMPILER
+                      PROPERTIES
+                      IMPORTED_LOCATION ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/libdarwinn_compiler.so
+                      INTERFACE_INCLUDE_DIRECTORIES "${DARWINN_EXTERNAL_INCLUDE_DIR}"
+                      INTERFACE_COMPILE_DEFINITIONS "${DARWINN_COMPILER_DEFINITIONS}")
+
+add_library(DARWINN_DRIVER_NONE SHARED IMPORTED GLOBAL)
+set_target_properties(DARWINN_DRIVER_NONE
+                      PROPERTIES
+                      IMPORTED_LOCATION ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/libreference-driver-none.so
+                      INTERFACE_INCLUDE_DIRECTORIES "${DARWINN_EXTERNAL_INCLUDE_DIR}"
+                      INTERFACE_COMPILE_DEFINITIONS "${DARWINN_COMPILER_DEFINITIONS}")
+
+set(darwinn_src ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/darwinn-service.cpp)
+
+android_add_library(darwinn)
+target_compile_options(darwinn PUBLIC ${DARWINN_COMPILER_DEFINITIONS})
+target_link_libraries(darwinn PUBLIC darwinnmodelconfig darwinnpipe)
+target_include_directories(darwinn PUBLIC ${DARWINN_EXTERNAL_INCLUDE_DIR})
+target_include_directories(darwinn PRIVATE ${PROTOBUF_INCLUDE_DIRS})
+
+set(darwinn_unittests_src
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/DarwinnPipe_unittest.cpp
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/MockDarwinnDriver.cpp
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/MockDarwinnDriverFactory.cpp
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/src/third_party/darwinn/port/default/logging.cc
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/src/third_party/darwinn/port/default/status.cc
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/src/third_party/darwinn/port/default/statusor.cc
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/src/third_party/darwinn/api/buffer.cc)
+
+endif()
