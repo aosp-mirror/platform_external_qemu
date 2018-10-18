@@ -94,6 +94,10 @@ public:
     OffworldPipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs)
         : android::AndroidAsyncMessagePipe(service, std::move(pipeArgs)) {}
 
+    virtual ~OffworldPipe() {
+        android::automation::AutomationController::get().pipeClosed(getHandle());
+    }
+
     void onSave(android::base::Stream* stream) override {
         android::AndroidAsyncMessagePipe::onSave(stream);
         stream->putByte(mHandshakeComplete);
