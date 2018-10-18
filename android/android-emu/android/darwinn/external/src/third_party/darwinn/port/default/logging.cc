@@ -17,8 +17,7 @@ limitations under the License.
 
 // When building as part of Android System, equivalent logging macros are
 // already available.
-#if !defined(DARWINN_PORT_ANDROID_SYSTEM) && \
-    !defined(DARWINN_PORT_ANDROID_EMULATOR)
+#if !defined(DARWINN_PORT_ANDROID_SYSTEM)
 
 #include "third_party/darwinn/port/default/macros.h"
 
