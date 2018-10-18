@@ -72,11 +72,17 @@
                 "${workspaceFolder}/../../prebuilts/android-emulator-build/qemu-android-deps/darwin-x86_64/include/pixman-1",
                 "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/darwin-x86_64/include.system",
                 "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/darwin-x86_64/include.system/QtCore",
-                "${workspaceFolder}/android-qemu2-glue/config/darwin-x86_64"
+                "${workspaceFolder}/android-qemu2-glue/config/darwin-x86_64",
+                "${workspaceFolder}/android/android-emu/android/darwinn/external/include",
+                "${workspaceFolder}/android/android-emu/android/darwinn/external/generated",
+                "${workspaceFolder}/objs/build/intermediates64/cmake/android-emu-base"
             ],
             "defines": [
                 "${sharedDefines}",
-                "_DARWIN_C_SOURCE=1"
+                "_DARWIN_C_SOURCE=1",
+                "DARWINN_PORT_ANDROID_EMULATOR",
+                "DARWINN_CHIP_NAME=beagle",
+                "DARWINN_CHIP_TYPE=USB"
             ],
             "macFrameworkPath": [
                 "/System/Library/Frameworks",
@@ -103,10 +109,16 @@
                 "${workspaceFolder}/../../prebuilts/android-emulator-build/qemu-android-deps/linux-x86_64/include/pixman-1",
                 "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/linux-x86_64/include.system",
                 "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/linux-x86_64/include.system/QtCore",
-                "${workspaceFolder}/android-qemu2-glue/config/linux-x86_64"
+                "${workspaceFolder}/android-qemu2-glue/config/linux-x86_64",
+                "${workspaceFolder}/android/android-emu/android/darwinn/external/include",
+                "${workspaceFolder}/android/android-emu/android/darwinn/external/generated",
+                "${workspaceFolder}/objs/build/intermediates64/cmake/android-emu-base"
             ],
             "defines": [
-                "${sharedDefines}"
+              "${sharedDefines}",
+              "DARWINN_PORT_ANDROID_EMULATOR",
+              "DARWINN_CHIP_NAME=beagle",
+              "DARWINN_CHIP_TYPE=USB"
             ],
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c11",
