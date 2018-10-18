@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e47a0c18_5f359779",
+        "filename": "android/android-emu/android/utils/tempfile.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-18T22:12:54Z",
+      "side": 1,
+      "message": "where are those alloced? possible to double free?",
+      "range": {
+        "startLine": 158,
+        "startChar": 0,
+        "endLine": 158,
+        "endChar": 23
+      },
+      "revId": "759d3c0d7bf1884967b5c00279fb4a1d95a1b58b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
