@@ -104,7 +104,7 @@ private:
 };
 
 // For code size reasons, we do not want this inlined or templated.
-void sp_report_race();
+inline void sp_report_race() { }
 
 #undef COMPARE
 
