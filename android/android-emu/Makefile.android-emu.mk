@@ -84,7 +84,7 @@ LOCAL_C_INCLUDES := \
     $(LIBDARWINN_INCLUDES) \
 
 PRODUCED_STATIC_LIBS=android-emu-base emulator-libui
-PRODUCED_PROTO_LIBS=metrics featurecontrol snapshot crashreport location emulation telephony verified-boot automation offworld darwinnmodelconfig
+PRODUCED_PROTO_LIBS=metrics featurecontrol snapshot crashreport location emulation telephony verified-boot automation offworld darwinnmodelconfig darwinnpipe
 
 #  emulator-libui linker flags & settings
 #
@@ -715,6 +715,9 @@ LOCAL_SRC_FILES := \
   android/CommonReportedInfo_unittest.cpp \
   android/console_auth_unittest.cpp \
   android/console_unittest.cpp \
+  android/darwinn/DarwinnPipe_unittest.cpp \
+  android/darwinn/MockDarwinnDriver.cpp \
+  android/darwinn/MockDarwinnDriverFactory.cpp \
   android/emulation/AdbDebugPipe_unittest.cpp \
   android/emulation/AdbGuestPipe_unittest.cpp \
   android/emulation/AdbHostListener_unittest.cpp \
@@ -807,6 +810,7 @@ LOCAL_SRC_FILES := \
   android/wear-agent/PairUpWearPhone_unittest.cpp \
   android/wear-agent/testing/WearAgentTestUtils.cpp \
   android/wear-agent/WearAgent_unittest.cpp \
+  $(DARWINN_TEST_THIRDPARTY_SRC) \
 
 ifeq (windows,$(BUILD_TARGET_OS))
 LOCAL_SRC_FILES += \

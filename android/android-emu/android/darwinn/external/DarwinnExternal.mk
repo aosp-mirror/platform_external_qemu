@@ -25,7 +25,7 @@ ifeq ($(BUILD_TARGET_OS),linux)
     LIBDARWINNTEST_PREBUILT_STATIC_LIBRARIES := \
         libdarwinntestdata \
 
-    DARWINN_CFLAGS := -DDARWINN_PORT_ANDROID_EMULATOR=1 -DDARWINN_CHIP_TYPE=USB -DDARWINN_COMPILER_TEST_EXTERNAL
+    DARWINN_CFLAGS := -DDARWINN_PORT_ANDROID_EMULATOR=1 -DDARWINN_CHIP_TYPE=USB -DDARWINN_CHIP_NAME=beagle -DDARWINN_COMPILER_TEST_EXTERNAL
 
     compute-relative-path = \
         $(shell realpath --relative-to $(DARWINN_PREBUILT_OLD_LOCAL_PATH) $1)
@@ -33,6 +33,12 @@ ifeq ($(BUILD_TARGET_OS),linux)
     DARWINN_COMPILER_TEST_SRC := \
         $(call compute-relative-path, $(LOCAL_PATH)/tests/platforms/darwinn/code_generator/api/nnapi/darwinn_compiler_unittest.cpp) \
         $(call compute-relative-path, $(LOCAL_PATH)/src/third_party/darwinn/driver/test_util.cc) \
+
+		DARWINN_TEST_THIRDPARTY_SRC := \
+				$(call compute-relative-path, $(LOCAL_PATH)/src/third_party/darwinn/port/default/logging.cc) \
+				$(call compute-relative-path, $(LOCAL_PATH)/src/third_party/darwinn/port/default/status.cc) \
+				$(call compute-relative-path, $(LOCAL_PATH)/src/third_party/darwinn/port/default/statusor.cc) \
+				$(call compute-relative-path, $(LOCAL_PATH)/src/third_party/darwinn/api/buffer.cc) \
 
     LOCAL_PATH := $(DARWINN_PREBUILT_OLD_LOCAL_PATH)
 
