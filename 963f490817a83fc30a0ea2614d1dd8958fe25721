@@ -82,6 +82,57 @@
     },
     {
       "key": {
+        "uuid": "cbc3f04e_1cc87e83",
+        "filename": "android/android-emu/android/darwinn/MockDarwinnPackageRererence.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-19T17:36:04Z",
+      "side": 1,
+      "message": "MockDarwinnPackageRe[f]erence.h/cpp?",
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7c580294_90ae806e",
+        "filename": "android/android-emu/android/darwinn/darwinn-service.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-19T17:36:04Z",
+      "side": 1,
+      "message": "nit: trailing whitespace (and below)",
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6208f2b9_40ecf7b8",
+        "filename": "android/android-emu/android/darwinn/darwinn-service.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 500,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-19T17:36:04Z",
+      "side": 1,
+      "message": "this send is in a callback, while message process lock is not taken. Possible to have a race condition here?",
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c936c5c8_f0291635",
         "filename": "android/android-emu/android/darwinn/external/DarwinnExternal.mk",
         "patchSetId": 2
