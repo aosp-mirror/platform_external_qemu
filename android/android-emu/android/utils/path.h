@@ -91,6 +91,10 @@ extern APosixStatus   path_mkdir( const char*  path, int  mode );
    0 on success, -1 on error */
 extern APosixStatus   path_mkdir_if_needed( const char*  path, int  mode );
 
+/* creates a directory if needed, and also disables copy-on-write */
+/* bug: 117641628 */
+extern APosixStatus   path_mkdir_if_needed_no_cow( const char*  path, int  mode );
+
 /* return the size of a given file in '*psize'. returns 0 on
  * success, -1 on failure (error code in errno) */
 extern APosixStatus   path_get_size( const char*  path, uint64_t  *psize );

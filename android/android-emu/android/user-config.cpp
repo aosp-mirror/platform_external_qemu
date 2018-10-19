@@ -110,7 +110,7 @@ auserConfig_new( AvdInfo*  info )
                 return NULL;
             }
             DD("creating missing directory: %s", parentPath.get());
-            if (path_mkdir_if_needed(parentPath.get(), 0755) < 0) {
+            if (path_mkdir_if_needed_no_cow(parentPath.get(), 0755) < 0) {
                 derror("Using empty user-config, can't create %s: %s",
                        parentPath.get(), strerror(errno));
                 return NULL;
