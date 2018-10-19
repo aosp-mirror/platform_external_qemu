@@ -153,6 +153,52 @@
       "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d9744e86_efc568d6",
+        "filename": "android/android-emu/android/darwinn/proto/darwinnpipe.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-19T19:11:21Z",
+      "side": 1,
+      "message": "I would take a look at go/required-fields-harmful and consider making fields optional.  Basically, required makes it more difficult to make changes later-- which would be a protocol-breaking change (changing the version number).  For minor changes, it may make more sense to deprecate a field and introduce a new one, doing an automatic upgrade when necessary.",
+      "range": {
+        "startLine": 44,
+        "startChar": 4,
+        "endLine": 44,
+        "endChar": 12
+      },
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ea5dc996_a0255cbc",
+        "filename": "android/android-emu/android/darwinn/proto/darwinnpipe.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-19T19:11:21Z",
+      "side": 1,
+      "message": "Nit: the \"bytes\" field should include a size, is there a need for a separate parameter?",
+      "range": {
+        "startLine": 105,
+        "startChar": 2,
+        "endLine": 106,
+        "endChar": 26
+      },
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
