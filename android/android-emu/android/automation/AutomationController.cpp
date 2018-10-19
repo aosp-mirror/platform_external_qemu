@@ -283,7 +283,9 @@ public:
 
         std::vector<StringView> splitEventStrings;
         split(event, "\n", [&splitEventStrings](StringView str) {
-            splitEventStrings.push_back(str);
+            if (!str.empty()) {
+                splitEventStrings.push_back(str);
+            }
         });
 
         std::vector<pb::RecordedEvent> newEvents;
@@ -297,7 +299,7 @@ public:
             }
 
             if (!event.has_delay()) {
-                VLOG(automation) << "Event missing delay";
+                VLOG(automation) << "Event missing delay: " << subEventStr;
                 return false;
             }
 
