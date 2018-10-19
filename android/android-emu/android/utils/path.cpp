@@ -12,6 +12,7 @@
 #include "android/base/ArraySize.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/system/System.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/dirscanner.h"
 #include "android/utils/debug.h"
@@ -204,6 +205,18 @@ path_mkdir_if_needed( const char*  path, int  mode )
         }
     }
     return ret;
+}
+
+APosixStatus
+path_mkdir_if_needed_no_cow( const char* path, int mode )
+{
+    APosixStatus res = path_mkdir_if_needed(path, mode);
+
+    if (!res) {
+        android::base::System::disableCopyOnWriteForPath(path);
+    }
+
+    return res;
 }
 
 /* return the size of a given file in '*psize'. returns 0 on
