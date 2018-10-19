@@ -108,7 +108,7 @@ const char* androidSnapshot_prepareAutosave(int memSizeMb, const char* _name) {
         _name ? _name : android::snapshot::kDefaultBootSnapshot;
 
     std::string dir = android::snapshot::getSnapshotDir(name);
-    path_mkdir_if_needed(dir.c_str(), 0744);
+    path_mkdir_if_needed_no_cow(dir.c_str(), 0744);
 
     auto mapPath =
         android::base::PathUtils::join(
@@ -132,7 +132,7 @@ const char* androidSnapshot_prepareAutosave(int memSizeMb, const char* _name) {
         path_delete_dir(dir.c_str());
         // Reinitialize the directory since QEMU might need it created already
         // for the next RAM file.
-        path_mkdir_if_needed(dir.c_str(), 0744);
+        path_mkdir_if_needed_no_cow(dir.c_str(), 0744);
     } else {
         // Address the case where there was a previous ram.img there
         // and RAM size was reconfigured.
@@ -169,7 +169,7 @@ void androidSnapshot_setRamFileDirty(const char* _name, bool setDirty) {
         _name ? _name : android::snapshot::kDefaultBootSnapshot;
 
     std::string dir = android::snapshot::getSnapshotDir(name);
-    path_mkdir_if_needed(dir.c_str(), 0744);
+    path_mkdir_if_needed_no_cow(dir.c_str(), 0744);
 
     auto dirtyPath =
         android::base::PathUtils::join(

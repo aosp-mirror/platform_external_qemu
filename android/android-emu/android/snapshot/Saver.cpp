@@ -32,7 +32,7 @@ namespace snapshot {
 Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit,
              base::StringView ramMapFile, bool ramFileShared, bool isRemapping)
     : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
-    if (path_mkdir_if_needed(c_str(mSnapshot.dataDir()), 0777) != 0) {
+    if (path_mkdir_if_needed_no_cow(c_str(mSnapshot.dataDir()), 0777) != 0) {
         return;
     }
     {
