@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "f2f416cf_a223223b",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-19T17:20:37Z",
+      "side": 1,
+      "message": "Is this guaranteed to have been readonly before?  Or is doing this operation always okay for FileShare::Write?",
+      "range": {
+        "startLine": 403,
+        "startChar": 11,
+        "endLine": 403,
+        "endChar": 81
+      },
+      "revId": "759d3c0d7bf1884967b5c00279fb4a1d95a1b58b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e47a0c18_5f359779",
         "filename": "android/android-emu/android/utils/tempfile.c",
         "patchSetId": 3
@@ -42,6 +65,29 @@
         "startChar": 0,
         "endLine": 158,
         "endChar": 23
+      },
+      "revId": "759d3c0d7bf1884967b5c00279fb4a1d95a1b58b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c3f9d2fb_d24684ae",
+        "filename": "android/android-emu/android/utils/tempfile.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-19T17:20:37Z",
+      "side": 1,
+      "message": "Ah, the classic \"delete from a linked list\" problem.  To avoid special-casing the first item, I have a good tip: Use a double-pointer.\n\nfor (TempFile** nextPtr \u003d \u0026all_tempfiles; *nextPtr; nextPtr \u003d \u0026(*nextPtr)-\u003enext) {\n    TempFile* tempfile \u003d *nextPtr;\n    if (!strcmp(tempfile-\u003ename, filename)) {\n        *nextPtr \u003d tempfile-\u003enext;\n        tempfile_close(tempfile);\n        free(tempfile);\n        return;\n    }\n}\n\nNot tested, but based on this stackoverflow post: https://stackoverflow.com/a/12915035",
+      "range": {
+        "startLine": 154,
+        "startChar": 4,
+        "endLine": 171,
+        "endChar": 5
       },
       "revId": "759d3c0d7bf1884967b5c00279fb4a1d95a1b58b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
