@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "97447a65_84809331",
+        "filename": "android/android-emu/Makefile.android-emu.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 531,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-10-19T22:25:55Z",
+      "side": 1,
+      "message": "Done. This should be built right now only for 64 bit linux. All the DARWINN based flags are set only under ifeq($(BUILD_TARGET_OS),linux) and ifeq($(BUILD_TARGET_ARCH),x86_64) in android/android-emu/android/darwinn/Darwinn.mk",
+      "parentUuid": "515d3d1e_f80a2ba7",
+      "range": {
+        "startLine": 530,
+        "startChar": 0,
+        "endLine": 531,
+        "endChar": 45
+      },
+      "revId": "7d22d86f1e7964c1e87297eae1cecc90a63d0f56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f1521a1b_6be4dc90",
         "filename": "android/build/emulator/prebuilt_shared_library.make",
         "patchSetId": 3
@@ -45,6 +69,30 @@
       "revId": "7d22d86f1e7964c1e87297eae1cecc90a63d0f56",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f6a8d410_211ec8c1",
+        "filename": "android/build/emulator/prebuilt_shared_library.make",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-10-19T22:25:55Z",
+      "side": 1,
+      "message": "Apparently TABs are required here instead of space. Build fails with space. https://stackoverflow.com/questions/2131213/can-you-make-valid-makefiles-without-tab-characters/21920142#21920142",
+      "parentUuid": "f1521a1b_6be4dc90",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 20
+      },
+      "revId": "7d22d86f1e7964c1e87297eae1cecc90a63d0f56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
