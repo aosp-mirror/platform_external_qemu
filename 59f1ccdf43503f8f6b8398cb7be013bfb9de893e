@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "713db072_3b208fe2",
+        "filename": "android/android-emu/android/utils/tempfile.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-19T18:17:28Z",
+      "side": 1,
+      "message": "check for null filename?",
+      "revId": "59f1ccdf43503f8f6b8398cb7be013bfb9de893e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c7df59c9_d531f76f",
+        "filename": "android/android-emu/android/utils/tempfile_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-19T18:17:28Z",
+      "side": 1,
+      "message": "nit: spaces",
+      "revId": "59f1ccdf43503f8f6b8398cb7be013bfb9de893e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
