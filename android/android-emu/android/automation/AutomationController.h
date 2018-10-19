@@ -154,6 +154,9 @@ public:
                                 uint32_t asyncId) = 0;
 
     virtual void stopListening() = 0;
+
+    // Called on pipe close, to cancel any pending operations.
+    virtual void pipeClosed(android::AsyncMessagePipeHandle pipe) = 0;
 };
 
 }  // namespace automation

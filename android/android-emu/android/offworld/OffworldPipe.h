@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "android/automation/AutomationController.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
 #include "android/offworld/proto/offworld.pb.h"
 
@@ -27,8 +28,10 @@ static constexpr uint32_t kProtocolVersion = 1;
 // Called during emulator initialization, do not call manually.
 void registerOffworldPipeService();
 
-// Register the offworld pipe service for test, does not check featurecontrol.
-void registerOffworldPipeServiceForTest();
+// Register the offworld pipe service for test, does not check
+// featurecontrol.
+void registerOffworldPipeServiceForTest(
+        automation::AutomationController* automation);
 
 // Send a response to an Offworld pipe.
 bool sendResponse(android::AsyncMessagePipeHandle pipe,
