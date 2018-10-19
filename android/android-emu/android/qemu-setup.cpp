@@ -332,7 +332,6 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_init_opengles_pipe();
     android_init_clipboard_pipe();
     android_init_logcat_pipe();
-    android::offworld::registerOffworldPipeService();
     if (fc::isEnabled(fc::RefCountPipe))
         android_init_refcount_pipe();
 
@@ -430,6 +429,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     /* initialize sensors, this must be done here due to timer issues */
     android_hw_sensors_init();
     android::automation::AutomationController::initialize();
+    android::offworld::registerOffworldPipeService();
 
     AvdFlavor flavor = avdInfo_getAvdFlavor(android_avdInfo);
     /* initialize the car data emulation if the system image is a Android Auto build */
