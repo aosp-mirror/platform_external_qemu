@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "515d3d1e_f80a2ba7",
+        "filename": "android/android-emu/Makefile.android-emu.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 531,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-19T17:31:27Z",
+      "side": 1,
+      "message": "Have you built for Mac/Windows? If not, please limit the building to Linux only.",
+      "range": {
+        "startLine": 530,
+        "startChar": 0,
+        "endLine": 531,
+        "endChar": 45
+      },
+      "revId": "7d22d86f1e7964c1e87297eae1cecc90a63d0f56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1521a1b_6be4dc90",
+        "filename": "android/build/emulator/prebuilt_shared_library.make",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-19T17:31:27Z",
+      "side": 1,
+      "message": "nit: spaces",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 20
+      },
+      "revId": "7d22d86f1e7964c1e87297eae1cecc90a63d0f56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
