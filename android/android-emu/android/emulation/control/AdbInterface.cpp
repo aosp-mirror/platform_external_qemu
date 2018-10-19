@@ -291,7 +291,7 @@ AdbCommand::AdbCommand(Looper* looper,
                 avdContentPath,
                 ANDROID_AVD_TMP_ADB_COMMAND_DIR);
 
-        if (path_mkdir_if_needed(avdCmdDir.c_str(), 0755) < 0) {
+        if (path_mkdir_if_needed_no_cow(avdCmdDir.c_str(), 0755) < 0) {
             outputFolder = System::get()->getTempDir();
         } else {
             outputFolder = avdCmdDir;
