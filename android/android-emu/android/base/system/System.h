@@ -450,6 +450,13 @@ public:
     static void killProcess(Pid);
     static void stopAllEmulatorProcesses();
 
+    // bug: 117641628
+    // Newer Linux systems might have slow CoW filesystems
+    // like btrfs that interfere with emulator performance.
+    // This is a function to attempt to disable them in performance-
+    // critical directories.
+    static void disableCopyOnWriteForPath(StringView path);
+
 protected:
     size_t mMemorySize = 0;
 
