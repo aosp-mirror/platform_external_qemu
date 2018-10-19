@@ -33,6 +33,7 @@
 #include <sstream>
 #include <vector>
 
+using android::automation::AutomationController;
 using android::base::LazyInstance;
 using android::base::Lock;
 using android::base::Optional;
@@ -60,17 +61,22 @@ public:
         typedef android::AndroidAsyncMessagePipe::Service<OffworldPipe> Super;
 
     public:
-        Service() : Super("OffworldPipe") {}
+        Service(AutomationController& controller)
+            : Super("OffworldPipe"), mAutomationController(controller) {}
         ~Service() {
             android::base::AutoLock lock(sOffworldLock);
             sOffworldInstance = nullptr;
         }
 
+        static Service* create(AutomationController& controller) {
+            android::base::AutoLock lock(sOffworldLock);
+            CHECK(!sOffworldInstance) << "OffworldPipe already exists";
+            sOffworldInstance = new Service(controller);
+            return sOffworldInstance;
+        }
+
         static Service* get() {
             android::base::AutoLock lock(sOffworldLock);
-            if (!sOffworldInstance) {
-                sOffworldInstance = new Service();
-            }
             return sOffworldInstance;
         }
 
@@ -84,15 +90,26 @@ public:
             Super::postLoad(stream);
         }
 
+        AutomationController& getAutomationController() {
+            return mAutomationController;
+        }
+
     private:
         // Since OffworldPipe::Service may be destroyed in unittests, we cannot
         // use LazyInstance. Instead store the pointer and clear it on destruct.
         static Service* sOffworldInstance;
         static android::base::StaticLock sOffworldLock;
+
+        AutomationController& mAutomationController;
     };
 
     OffworldPipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs)
-        : android::AndroidAsyncMessagePipe(service, std::move(pipeArgs)) {}
+        : android::AndroidAsyncMessagePipe(service, std::move(pipeArgs)),
+          mService(static_cast<Service*>(service)) {}
+
+    virtual ~OffworldPipe() {
+        getAutomationController().pipeClosed(getHandle());
+    }
 
     void onSave(android::base::Stream* stream) override {
         android::AndroidAsyncMessagePipe::onSave(stream);
@@ -222,7 +239,7 @@ private:
 
         switch (request.function_case()) {
             case autor::FunctionCase::kReplayInitialState: {
-                auto result = AutomationController::get().replayInitialState(
+                auto result = getAutomationController().replayInitialState(
                         request.replay_initial_state().state());
 
                 if (result.ok()) {
@@ -237,7 +254,7 @@ private:
             }
             case autor::FunctionCase::kReplay: {
                 const uint32_t asyncId = mNextAsyncId;
-                auto result = AutomationController::get().replayEvent(
+                auto result = getAutomationController().replayEvent(
                         getHandle(), request.replay().event(), asyncId);
 
                 if (result.ok()) {
@@ -256,8 +273,8 @@ private:
             }
             case autor::FunctionCase::kListen: {
                 const uint32_t asyncId = mNextAsyncId;
-                auto result = AutomationController::get().listen(getHandle(),
-                                                                 asyncId);
+                auto result =
+                        getAutomationController().listen(getHandle(), asyncId);
 
                 if (result.ok()) {
                     mNextAsyncId++;  // Id consumed, increment for next call.
@@ -278,7 +295,7 @@ private:
                 break;
             }
             case autor::FunctionCase::kStopListening: {
-                AutomationController::get().stopListening();
+                getAutomationController().stopListening();
                 sendResponse(createOkResponse());
                 break;
             }
@@ -303,6 +320,12 @@ private:
         sendResponse(response);
     }
 
+    AutomationController& getAutomationController() {
+        return mService->getAutomationController();
+    }
+
+    Service* const mService;
+
     bool mHandshakeComplete = false;
     uint32_t mNextAsyncId = 1;
 };
@@ -317,18 +340,24 @@ namespace offworld {
 
 void registerOffworldPipeService() {
     if (android::featurecontrol::isEnabled(android::featurecontrol::Offworld)) {
-        registerAsyncMessagePipeService(OffworldPipe::Service::get());
+        registerAsyncMessagePipeService(
+                OffworldPipe::Service::create(AutomationController::get()));
     }
 }
 
-void registerOffworldPipeServiceForTest() {
-    registerAsyncMessagePipeService(OffworldPipe::Service::get());
+void registerOffworldPipeServiceForTest(AutomationController* automation) {
+    registerAsyncMessagePipeService(OffworldPipe::Service::create(*automation));
 }
 
 // Send a response to an Offworld pipe.
 bool sendResponse(android::AsyncMessagePipeHandle pipe,
                   const pb::Response& response) {
     OffworldPipe::Service* service = OffworldPipe::Service::get();
+    if (!service) {
+        LOG(INFO) << "Dropping Offworld response, service does not exist.";
+        return false;
+    }
+
     auto pipeRefOpt = service->getPipe(pipe);
     if (pipeRefOpt) {
         pipeRefOpt->pipe->send(std::move(protoToVector(response)));
