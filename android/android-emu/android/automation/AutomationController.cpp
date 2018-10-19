@@ -135,6 +135,8 @@ public:
           mSendMessageCallback(sendMessageCallback) {}
     virtual ~ListenPipeStream() { close(); }
 
+    AsyncMessagePipeHandle getPipe() { return mPipe; }
+
     // Stream interface implementation.
     ssize_t read(void* buffer, size_t size) override { return -EPERM; }
     ssize_t write(const void* buffer, size_t size) override {
@@ -281,7 +283,9 @@ public:
 
         std::vector<StringView> splitEventStrings;
         split(event, "\n", [&splitEventStrings](StringView str) {
-            splitEventStrings.push_back(str);
+            if (!str.empty()) {
+                splitEventStrings.push_back(str);
+            }
         });
 
         std::vector<pb::RecordedEvent> newEvents;
@@ -295,7 +299,7 @@ public:
             }
 
             if (!event.has_delay()) {
-                VLOG(automation) << "Event missing delay";
+                VLOG(automation) << "Event missing delay: " << subEventStr;
                 return false;
             }
 
@@ -371,6 +375,8 @@ public:
                         uint32_t asyncId) override;
 
     void stopListening() override;
+
+    void pipeClosed(android::AsyncMessagePipeHandle pipe) override;
 
 private:
     // Helper to replay the last event in the playback stream, must be called
@@ -739,6 +745,12 @@ void AutomationControllerImpl::stopListening() {
 
     mEventSink.unregisterStream(mPipeListener.get());
     mPipeListener.reset();
+}
+
+void AutomationControllerImpl::pipeClosed(android::AsyncMessagePipeHandle pipe) {
+    if (mPipeListener && mPipeListener->getPipe() == pipe) {
+        stopListening();
+    }
 }
 
 void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {

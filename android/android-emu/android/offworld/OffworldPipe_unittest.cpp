@@ -13,10 +13,12 @@
 // limitations under the License.
 
 #include "android/offworld/OffworldPipe.h"
+#include "android/automation/AutomationController.h"
 #include "android/base/ArraySize.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/MockUtils.h"
+#include "android/base/testing/ProtobufMatchers.h"
 #include "android/base/testing/ResultMatchers.h"
 #include "android/base/testing/TestEvent.h"
 #include "android/base/testing/TestLooper.h"
@@ -28,6 +30,7 @@
 #include "android/emulation/testing/MockAndroidVmOperations.h"
 #include "android/emulation/testing/TestVmLock.h"
 #include "android/opengl/emugl_config.h"
+#include "android/physics/PhysicalModel.h"
 #include "android/snapshot/SnapshotAPI.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/looper.h"
@@ -48,13 +51,24 @@ extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
 using namespace android;
 using namespace android::offworld;
 using namespace android::base;
+using android::automation::AutomationController;
 
+using android::EqualsProto;
+using android::proto::Partially;
 using ::testing::_;
 using ::testing::ElementsAreArray;
 using ::testing::Mock;
 using ::testing::StrEq;
 
 static constexpr base::Looper::Duration kTimeoutMs = 15000;  // 15 seconds.
+
+struct PhysicalModelDeleter {
+    void operator()(PhysicalModel* physicalModel) {
+        physicalModel_free(physicalModel);
+    }
+};
+
+typedef std::unique_ptr<PhysicalModel, PhysicalModelDeleter> PhysicalModelPtr;
 
 class OffworldPipeTest : public ::testing::Test {
 protected:
@@ -68,7 +82,11 @@ protected:
         android_registerMainLooper(reinterpret_cast<::Looper*>(
                 static_cast<base::Looper*>(mLooper.get())));
 
-        registerOffworldPipeServiceForTest();
+        mPhysicalModel.reset(physicalModel_new());
+        mAutomationController = AutomationController::createForTest(
+                mPhysicalModel.get(), mLooper.get(), sendResponse);
+
+        registerOffworldPipeServiceForTest(mAutomationController.get());
 
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(&config, true, "host", "off", 0, false,
@@ -91,6 +109,8 @@ protected:
         // Reset initThreading to avoid using our looper.
         AndroidPipe::initThreading(TestVmLock::getInstance());
         android_registerMainLooper(nullptr);
+        mAutomationController.reset();
+        mPhysicalModel.reset();
         mLooper.reset();
     }
 
@@ -119,6 +139,13 @@ protected:
                   mDevice->write(pipe, &payloadSize, sizeof(uint32_t)));
 
         EXPECT_THAT(mDevice->write(pipe, data), IsOk());
+    }
+
+    void writeRequest(void* pipe, const std::string& request) {
+        pb::Request requestMessage;
+        ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
+                request, &requestMessage));
+        writeMessage(pipe, requestMessage);
     }
 
     template <typename T>
@@ -241,8 +268,15 @@ protected:
         }
     }
 
+    void advanceTimeToNs(uint64_t timeNs) {
+        mLooper->setVirtualTimeNs(timeNs);
+        EXPECT_EQ(mAutomationController->advanceTime(), timeNs);
+    }
+
     HostGoldfishPipeDevice* mDevice = nullptr;
-    std::unique_ptr<base::TestLooper> mLooper;
+    std::unique_ptr<TestLooper> mLooper;
+    PhysicalModelPtr mPhysicalModel;
+    std::unique_ptr<AutomationController> mAutomationController;
 };
 
 TEST_F(OffworldPipeTest, Connect) {
@@ -310,3 +344,66 @@ TEST_F(OffworldPipeTest, SnapshotMultiPipe) {
 }
 
 // TODO(jwmcglynn): Add test coverage for fork API.
+
+TEST_F(OffworldPipeTest, AutomationListen) {
+    void* pipe = openAndConnectOffworld();
+
+    writeRequest(pipe, "automation { listen {} }");
+
+    EXPECT_THAT(
+            readMessageBlocking<pb::Response>(pipe),
+            Partially(EqualsProto("result: RESULT_NO_ERROR pending_async_id: 1 "
+                                  "automation { listen {} }")));
+
+    const uint64_t kEventTime1 = 123;
+    const vec3 kPosition1 = {0.5f, 10.0f, 0.0f};
+
+    advanceTimeToNs(kEventTime1);
+    physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
+                                    PHYSICAL_INTERPOLATION_SMOOTH);
+
+    EXPECT_THAT(
+            readMessageBlocking<pb::Response>(pipe),
+            Partially(EqualsProto("result: RESULT_NO_ERROR async { async_id: 1 "
+                                  " automation { event_generated {} } }")));
+    mDevice->close(pipe);
+}
+
+TEST_F(OffworldPipeTest, AutomationListenBlocksMultiple) {
+    void* pipe = openAndConnectOffworld();
+
+    writeRequest(pipe, "automation { listen {} }");
+
+    EXPECT_THAT(
+            readMessageBlocking<pb::Response>(pipe),
+            Partially(EqualsProto("result: RESULT_NO_ERROR pending_async_id: 1 "
+                                  "automation { listen {} }")));
+
+    writeRequest(pipe, "automation { listen {} }");
+
+    EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+                Partially(EqualsProto("result: RESULT_ERROR_UNKNOWN "
+                                      "error_string: \"Already listening\"")));
+    mDevice->close(pipe);
+}
+
+TEST_F(OffworldPipeTest, AutomationListenPipeClose) {
+    void* pipe = openAndConnectOffworld();
+
+    writeRequest(pipe, "automation { listen {} }");
+
+    EXPECT_THAT(
+            readMessageBlocking<pb::Response>(pipe),
+            Partially(EqualsProto("result: RESULT_NO_ERROR pending_async_id: 1 "
+                                  "automation { listen {} }")));
+    mDevice->close(pipe);
+
+    void* secondPipe = openAndConnectOffworld();
+    writeRequest(secondPipe, "automation { listen {} }");
+
+    EXPECT_THAT(
+            readMessageBlocking<pb::Response>(secondPipe),
+            Partially(EqualsProto("result: RESULT_NO_ERROR pending_async_id: 1 "
+                                  "automation { listen {} }")));
+    mDevice->close(secondPipe);
+}
