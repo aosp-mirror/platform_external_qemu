@@ -46,6 +46,30 @@
       "revId": "cbb7e3a70928856c0412a9bfd8af82344b0522ed",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "efa00bfc_9a25a568",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-10-19T23:13:53Z",
+      "side": 1,
+      "message": "This is redundant, see\n\nhttps://en.cppreference.com/w/cpp/utility/functional/function/function (5)",
+      "parentUuid": "d6fb4f67_0846ee68",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 28
+      },
+      "revId": "cbb7e3a70928856c0412a9bfd8af82344b0522ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
