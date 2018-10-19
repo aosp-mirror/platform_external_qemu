@@ -2661,5 +2661,20 @@ void System::stopAllEmulatorProcesses() {
 #endif
 }
 
+// static
+void System::disableCopyOnWriteForPath(StringView path) {
+#ifdef __linux__
+    std::vector<std::string> args = {
+        "chattr", "+C", path.str(),
+    };
+    System::get()->runCommand(args,
+                   RunOptions::WaitForCompletion |
+                   RunOptions::TerminateOnTimeout,
+                   1000 // timeout ms
+    );
+#endif
+    // TODO: Disable CoW for Windows/Mac as well
+}
+
 }  // namespace base
 }  // namespace android
