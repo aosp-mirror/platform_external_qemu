@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "2faae62d_de759d38",
+        "filename": "android/android-emu/android/utils/tempfile.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-10-19T18:19:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "713db072_3b208fe2",
+      "revId": "59f1ccdf43503f8f6b8398cb7be013bfb9de893e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c7df59c9_d531f76f",
         "filename": "android/android-emu/android/utils/tempfile_unittest.cpp",
         "patchSetId": 5
@@ -33,6 +51,24 @@
       "revId": "59f1ccdf43503f8f6b8398cb7be013bfb9de893e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "47d1cb3a_8544d99b",
+        "filename": "android/android-emu/android/utils/tempfile_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-10-19T18:19:28Z",
+      "side": 1,
+      "message": "clang-formatting",
+      "parentUuid": "c7df59c9_d531f76f",
+      "revId": "59f1ccdf43503f8f6b8398cb7be013bfb9de893e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
