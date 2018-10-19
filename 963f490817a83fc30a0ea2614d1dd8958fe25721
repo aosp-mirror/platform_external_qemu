@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5569a11f_5c754abd",
+        "filename": "android/android-emu/android/darwinn/DarwinnPipe_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-19T17:31:32Z",
+      "side": 1,
+      "message": "nit: trailing whitespace",
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9277b59d_0ada1853",
+        "filename": "android/android-emu/android/darwinn/DarwinnPipe_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-19T17:31:32Z",
+      "side": 1,
+      "message": "An arbitrary timeout can result in flaky tests especailly on the PSQ debug/code coverage builds which are a lot slower than normal code running on modern machines. Is it possible to ensure the response exists in the test? Alternatively, we can upgrade the timeout to 15 seconds which seems to work well so far.",
+      "range": {
+        "startLine": 212,
+        "startChar": 0,
+        "endLine": 212,
+        "endChar": 66
+      },
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7e8e6f8c_26c63233",
+        "filename": "android/android-emu/android/darwinn/DarwinnPipe_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-19T17:31:32Z",
+      "side": 1,
+      "message": "nit: trailing whitespace",
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "30ff288b_450f813c",
+        "filename": "android/android-emu/android/darwinn/DarwinnPipe_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-19T17:31:32Z",
+      "side": 1,
+      "message": "Can this be refactored to run every TearDown if mDevice exists?",
+      "range": {
+        "startLine": 379,
+        "startChar": 3,
+        "endLine": 379,
+        "endChar": 25
+      },
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c936c5c8_f0291635",
+        "filename": "android/android-emu/android/darwinn/external/DarwinnExternal.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-19T17:31:32Z",
+      "side": 1,
+      "message": "nit: spaces",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 88
+      },
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
