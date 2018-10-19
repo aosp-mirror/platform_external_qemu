@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ef71a53d_eeaca6da",
+        "filename": "android/android-emu/android/darwinn/DarwinnPipe_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-10-19T22:23:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5569a11f_5c754abd",
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9277b59d_0ada1853",
         "filename": "android/android-emu/android/darwinn/DarwinnPipe_unittest.cpp",
         "patchSetId": 2
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "b3e6dc46_66cc0d44",
+        "filename": "android/android-emu/android/darwinn/DarwinnPipe_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-10-19T22:23:56Z",
+      "side": 1,
+      "message": "I have upgraded the timeout to 15 seconds. I am not sure how to exactly wait for a response. There is a poll function, but I am not sure if that helps here. I will check with Jeff once he is available and to see if there is a better solution",
+      "parentUuid": "9277b59d_0ada1853",
+      "range": {
+        "startLine": 212,
+        "startChar": 0,
+        "endLine": 212,
+        "endChar": 66
+      },
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7e8e6f8c_26c63233",
         "filename": "android/android-emu/android/darwinn/DarwinnPipe_unittest.cpp",
         "patchSetId": 2
@@ -56,6 +98,24 @@
       "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "33c375c1_5edc17c7",
+        "filename": "android/android-emu/android/darwinn/DarwinnPipe_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-10-19T22:23:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7e8e6f8c_26c63233",
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -99,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "c8402a0c_a1f70492",
+        "filename": "android/android-emu/android/darwinn/MockDarwinnPackageRererence.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-10-19T22:23:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cbc3f04e_1cc87e83",
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c580294_90ae806e",
         "filename": "android/android-emu/android/darwinn/darwinn-service.cpp",
         "patchSetId": 2
@@ -116,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "e6130c0b_8ce12dc0",
+        "filename": "android/android-emu/android/darwinn/darwinn-service.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-10-19T22:23:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c580294_90ae806e",
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6208f2b9_40ecf7b8",
         "filename": "android/android-emu/android/darwinn/darwinn-service.cpp",
         "patchSetId": 2
@@ -130,6 +226,24 @@
       "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e087fd51_da99f095",
+        "filename": "android/android-emu/android/darwinn/darwinn-service.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 500,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-10-19T22:23:56Z",
+      "side": 1,
+      "message": "That is a good point. I have added an additional lock in sendResponse.",
+      "parentUuid": "6208f2b9_40ecf7b8",
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -156,6 +270,30 @@
     },
     {
       "key": {
+        "uuid": "5c32f9b1_e87f5443",
+        "filename": "android/android-emu/android/darwinn/external/DarwinnExternal.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-10-19T22:23:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c936c5c8_f0291635",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 88
+      },
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d9744e86_efc568d6",
         "filename": "android/android-emu/android/darwinn/proto/darwinnpipe.proto",
         "patchSetId": 2
@@ -179,6 +317,30 @@
     },
     {
       "key": {
+        "uuid": "44c6269f_a0197d64",
+        "filename": "android/android-emu/android/darwinn/proto/darwinnpipe.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-10-19T22:23:56Z",
+      "side": 1,
+      "message": "That\u0027s good to know. I have made all the fields optional and added checks with has_ for the optional fields. Out of curiosity, what happens if I try to access an optional field that does not exist?",
+      "parentUuid": "d9744e86_efc568d6",
+      "range": {
+        "startLine": 44,
+        "startChar": 4,
+        "endLine": 44,
+        "endChar": 12
+      },
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea5dc996_a0255cbc",
         "filename": "android/android-emu/android/darwinn/proto/darwinnpipe.proto",
         "patchSetId": 2
@@ -199,6 +361,30 @@
       "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ed80245_dcab2142",
+        "filename": "android/android-emu/android/darwinn/proto/darwinnpipe.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-10-19T22:23:56Z",
+      "side": 1,
+      "message": "I added this to give reasonable error messages to coding error. The bytes being passed are actually not in the form of string and could possibly have null terminating characters in the when cast as a buffer. If this is not taken into account, while constructing the string, this would result in an incomplete buffer being sent.",
+      "parentUuid": "ea5dc996_a0255cbc",
+      "range": {
+        "startLine": 105,
+        "startChar": 2,
+        "endLine": 106,
+        "endChar": 26
+      },
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
