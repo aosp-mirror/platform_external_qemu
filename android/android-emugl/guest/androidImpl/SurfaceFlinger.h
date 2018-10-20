@@ -48,7 +48,7 @@ public:
             AndroidWindow* composeWindow,
             std::vector<ANativeWindowBuffer*> appBuffers,
             ComposerConstructFunc&& composerFunc,
-            Vsync::Callback&& vsyncFunc);
+            Vsync::Callback vsyncFunc);
     ~SurfaceFlinger();
 
     void start();
