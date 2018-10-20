@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "1e2814a0_9b3bb99b",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/GLESv2Decoder.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-20T00:11:09Z",
+      "side": 1,
+      "message": "And as we can see here, if we invalidate and want to write (i.e., write and invalidate bits are set), we properly upload again to the buffer.\n\nOn second read this could be optimized to a glBufferSubData, but that is a future CL",
+      "range": {
+        "startLine": 355,
+        "startChar": 1,
+        "endLine": 355,
+        "endChar": 36
+      },
+      "revId": "3f04bee6374d6ff95041a6673695d6097ea41c98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ee36cbf5_5b3c5632",
         "filename": "android/android-emugl/host/libs/GLESv2_dec/GLESv2Decoder.cpp",
         "patchSetId": 6
@@ -13,6 +36,30 @@
       "writtenOn": "2018-10-08T21:24:02Z",
       "side": 1,
       "message": "this condition definitely needs a comment explaining both \u0027what\u0027 and \u0027why\u0027",
+      "range": {
+        "startLine": 370,
+        "startChar": 3,
+        "endLine": 373,
+        "endChar": 55
+      },
+      "revId": "3f04bee6374d6ff95041a6673695d6097ea41c98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e5671c19_3fdb4c16",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/GLESv2Decoder.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-20T00:11:09Z",
+      "side": 1,
+      "message": "Sorry, this was from the *AEMU implementation above where we first decide whether or not we even need to call the API on the host; that is, we do not need to call the API if access was to invalidate the range, or invalidate the entire buffer itself. That\u0027s because when we invalidate the range, we are asking to discard the existing contents of the buffer. When we are emulating glMapBufferRange, only when we are not discarding do we need to actually run the same API on the host to discover the current contents of the buffer.",
+      "parentUuid": "ee36cbf5_5b3c5632",
       "range": {
         "startLine": 370,
         "startChar": 3,
@@ -60,6 +107,30 @@
       "side": 1,
       "message": "Frank, I could not find anything like glSetError here. What do we have for this purpose?",
       "parentUuid": "228e5411_8909b0f1",
+      "range": {
+        "startLine": 379,
+        "startChar": 12,
+        "endLine": 379,
+        "endChar": 84
+      },
+      "revId": "3f04bee6374d6ff95041a6673695d6097ea41c98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aac75c7d_35a93988",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/GLESv2Decoder.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-20T00:11:09Z",
+      "side": 1,
+      "message": "I believe we simply give up here, and don\u0027t expose the mapped contents to the guest if map failed. But the important thing is to avoid a crash.",
+      "parentUuid": "d2e982e0_f199fcdc",
       "range": {
         "startLine": 379,
         "startChar": 12,
