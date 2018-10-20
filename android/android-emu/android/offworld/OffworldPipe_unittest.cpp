@@ -62,6 +62,10 @@ using ::testing::StrEq;
 
 static constexpr base::Looper::Duration kTimeoutMs = 15000;  // 15 seconds.
 
+constexpr uint64_t secondsToNs(float seconds) {
+    return static_cast<uint64_t>(seconds * 1000000000.0);
+}
+
 struct PhysicalModelDeleter {
     void operator()(PhysicalModel* physicalModel) {
         physicalModel_free(physicalModel);
@@ -199,6 +203,24 @@ protected:
         event.wait();
     }
 
+    void snapshotSave(void* pipe, base::Stream* stream) {
+        RecursiveScopedVmLock lock;
+        auto cStream = reinterpret_cast<::Stream*>(stream);
+        android_pipe_guest_pre_save(cStream);
+        android_pipe_guest_save(pipe, cStream);
+        android_pipe_guest_post_save(cStream);
+    }
+
+    void* snapshotLoad(base::Stream* stream) {
+        RecursiveScopedVmLock lock;
+        auto cStream = reinterpret_cast<::Stream*>(stream);
+        android_pipe_guest_pre_load(cStream);
+        void* pipe = mDevice->load(stream);
+        EXPECT_NE(pipe, nullptr);
+        android_pipe_guest_post_load(cStream);
+        return pipe;
+    }
+
     void createCheckpoint(void* pipe,
                           const char* snapshotName,
                           base::Stream* stream) {
@@ -293,6 +315,27 @@ TEST_F(OffworldPipeTest, Connect) {
     mDevice->close(pipe);
 }
 
+TEST_F(OffworldPipeTest, ConnectSnapshotBeforeHandshake) {
+    base::MemStream snapshotStream;
+    {
+        void* pipe = mDevice->connect("OffworldPipe");
+        snapshotSave(pipe, &snapshotStream);
+        mDevice->close(pipe);
+    }
+
+    auto restoredPipe = snapshotLoad(&snapshotStream);
+
+    pb::ConnectHandshake connect;
+    connect.set_version(android::offworld::kProtocolVersion);
+
+    writeMessage(restoredPipe, connect);
+
+    auto response = readMessage<pb::ConnectHandshakeResponse>(restoredPipe);
+    EXPECT_EQ(response.result(), pb::ConnectHandshakeResponse::RESULT_NO_ERROR);
+
+    mDevice->close(restoredPipe);
+}
+
 TEST_F(OffworldPipeTest, ConnectionFailure) {
     void* pipe = mDevice->connect("OffworldPipe");
 
@@ -366,6 +409,13 @@ TEST_F(OffworldPipeTest, AutomationListen) {
             readMessageBlocking<pb::Response>(pipe),
             Partially(EqualsProto("result: RESULT_NO_ERROR async { async_id: 1 "
                                   " automation { event_generated {} } }")));
+
+    writeRequest(pipe, "automation { stop_listening {} }");
+
+    EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+                EqualsProto("result: RESULT_NO_ERROR async { async_id: 1 "
+                            "complete: true }"));
+
     mDevice->close(pipe);
 }
 
@@ -406,4 +456,64 @@ TEST_F(OffworldPipeTest, AutomationListenPipeClose) {
             Partially(EqualsProto("result: RESULT_NO_ERROR pending_async_id: 1 "
                                   "automation { listen {} }")));
     mDevice->close(secondPipe);
+}
+
+TEST_F(OffworldPipeTest, AutomationReplay) {
+    void* pipe = openAndConnectOffworld();
+    const vec3 kPosition1 = {0.5f, 10.0f, 0.0f};
+    const uint64_t kFutureTime = secondsToNs(10.0f);
+
+    writeRequest(pipe,
+                 "automation { replay { event: 'delay: 123 "
+                 "physical_model { type: POSITION target_value { "
+                 "data: [0.5, 10, 0] } } ' } }");
+
+    EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+                EqualsProto("result: RESULT_NO_ERROR pending_async_id: 1"));
+
+    // Advance the time so that the event completes.
+    mLooper->setVirtualTimeNs(kFutureTime);
+    EXPECT_EQ(mAutomationController->advanceTime(), kFutureTime);
+
+    EXPECT_THAT(
+            readMessageBlocking<pb::Response>(pipe),
+            Partially(EqualsProto("result: RESULT_NO_ERROR async { async_id: 1 "
+                                  "complete: true automation { "
+                                  "replay_complete {} } }")));
+
+    EXPECT_EQ(physicalModel_getParameterPosition(mPhysicalModel.get(),
+                                                 PARAMETER_VALUE_TYPE_TARGET),
+              kPosition1);
+
+    mDevice->close(pipe);
+}
+
+TEST_F(OffworldPipeTest, AutomationAsyncIdSnapshot) {
+    base::MemStream snapshotStream;
+    {
+        void* pipe = openAndConnectOffworld();
+
+        writeRequest(pipe,
+                     "automation { replay { event: 'delay: 123 "
+                     "physical_model { type: POSITION target_value { "
+                     "data: [0.5, 10, 0] } } ' } }");
+
+        EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+                    EqualsProto("result: RESULT_NO_ERROR pending_async_id: 1"));
+
+        snapshotSave(pipe, &snapshotStream);
+        mDevice->close(pipe);
+    }
+
+    auto restoredPipe = snapshotLoad(&snapshotStream);
+
+    writeRequest(restoredPipe,
+                 "automation { replay { event: 'delay: 123 "
+                 "physical_model { type: POSITION target_value { "
+                 "data: [0.5, 10, 0] } } ' } }");
+
+    EXPECT_THAT(readMessageBlocking<pb::Response>(restoredPipe),
+                EqualsProto("result: RESULT_NO_ERROR pending_async_id: 2"));
+
+    mDevice->close(restoredPipe);
 }
