@@ -1412,4 +1412,13 @@ glGetProgramResourceLocation
 glGetProgramResourceName
     flag custom_decoder
 
+glMapBufferRangeDMA
+    flag custom_decoder
+    flag not_api
+
+glUnmapBufferDMA
+    dir out_res out
+    len out_res (sizeof(GLboolean))
+    flag custom_decoder
+    flag not_api
 
