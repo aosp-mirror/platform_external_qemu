@@ -140,6 +140,29 @@
     },
     {
       "key": {
+        "uuid": "4e91a0ce_37f9071a",
+        "filename": "android/android-emu/android/darwinn/darwinn-service.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-20T05:48:45Z",
+      "side": 1,
+      "message": "Since this is based on OffworldPipe, I bet you\u0027ll want to port Yahan\u0027s fix for snapshot save/load here too: https://android-review.googlesource.com/c/platform/external/qemu/+/789980/6/android/android-emu/android/offworld/OffworldPipe.cpp\n\nMaybe not in this CL, but you may want to think about how to handle the case if a snapshot save/load occurs in the middle of one of your async operations.  When that occurs, the entire Pipe will be destroyed and recreated, and *ideally* any operation on the guest should complete as if nothing happened.\n\nFor this, that may mean saving the initial state for any async operations and then rerunning them on snapshot load.\n\nHowever, since this is linux-only and appears to be for internal users, I think it\u0027s also valid to not support snapshots-- but I recommend making sure that we handle it deterministically without crashing or hanging the guest :-)",
+      "range": {
+        "startLine": 173,
+        "startChar": 4,
+        "endLine": 173,
+        "endChar": 22
+      },
+      "revId": "9a71ae4db8db5ec618ff1ea5cd0d6e01fc97080c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cf768125_72ade2f8",
         "filename": "android/android-emu/android/darwinn/darwinn-service.cpp",
         "patchSetId": 4
