@@ -365,6 +365,30 @@
     },
     {
       "key": {
+        "uuid": "f4c07022_2d1f45f3",
+        "filename": "android/android-emu/android/darwinn/proto/darwinnpipe.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-20T01:27:29Z",
+      "side": 1,
+      "message": "If you access a field and it does not exist, you\u0027ll get a default value back.  For integers that\u0027s 0, for messages it\u0027s basically the message without any values set.",
+      "parentUuid": "44c6269f_a0197d64",
+      "range": {
+        "startLine": 44,
+        "startChar": 4,
+        "endLine": 44,
+        "endChar": 12
+      },
+      "revId": "963f490817a83fc30a0ea2614d1dd8958fe25721",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea5dc996_a0255cbc",
         "filename": "android/android-emu/android/darwinn/proto/darwinnpipe.proto",
         "patchSetId": 2

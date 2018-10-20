@@ -1,0 +1,211 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d9bf1574_29480dd9",
+        "filename": "android/android-emu/android/darwinn/DarwinnPipe_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-20T01:27:29Z",
+      "side": 1,
+      "message": "If I remember correctly this registerMainLooper business was only necessary to call into the snapshots API.  You may be able to remove this.",
+      "range": {
+        "startLine": 41,
+        "startChar": 8,
+        "endLine": 43,
+        "endChar": 52
+      },
+      "revId": "9a71ae4db8db5ec618ff1ea5cd0d6e01fc97080c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4db7f8cc_3f364cfa",
+        "filename": "android/android-emu/android/darwinn/DarwinnPipe_unittest.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-20T01:27:29Z",
+      "side": 1,
+      "message": "Indent error?",
+      "range": {
+        "startLine": 83,
+        "startChar": 12,
+        "endLine": 84,
+        "endChar": 14
+      },
+      "revId": "9a71ae4db8db5ec618ff1ea5cd0d6e01fc97080c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cfc6fd1f_0f9095da",
+        "filename": "android/android-emu/android/darwinn/darwinn-service.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-20T01:27:29Z",
+      "side": 1,
+      "message": "Nit: I prefer inline member initialization over initializer lists, they tend to be less error-prone.",
+      "range": {
+        "startLine": 98,
+        "startChar": 15,
+        "endLine": 98,
+        "endChar": 31
+      },
+      "revId": "9a71ae4db8db5ec618ff1ea5cd0d6e01fc97080c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ed8dfd87_3059978c",
+        "filename": "android/android-emu/android/darwinn/darwinn-service.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-20T01:27:29Z",
+      "side": 1,
+      "message": "Consider using android::base::Optional here, it makes the special case of -1 more explicit (and would potentially let you change the elementIndex to an unsigned type).",
+      "range": {
+        "startLine": 102,
+        "startChar": 32,
+        "endLine": 102,
+        "endChar": 80
+      },
+      "revId": "9a71ae4db8db5ec618ff1ea5cd0d6e01fc97080c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "47fec520_2d30d787",
+        "filename": "android/android-emu/android/darwinn/darwinn-service.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-20T01:27:29Z",
+      "side": 1,
+      "message": "Is it important to fill in the first empty index?  If not, consider just getting the index of the last item in the map (since it\u0027s sorted) and adding 1.",
+      "range": {
+        "startLine": 105,
+        "startChar": 8,
+        "endLine": 110,
+        "endChar": 9
+      },
+      "revId": "9a71ae4db8db5ec618ff1ea5cd0d6e01fc97080c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "05093d82_e08f83bb",
+        "filename": "android/android-emu/android/darwinn/darwinn-service.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-20T01:27:29Z",
+      "side": 1,
+      "message": "Typically for out parameters I recommend making them pointers.  At the call site it wasn\u0027t immediately obvious that this was a return value, it looked like uninitialized memory was being passed in.",
+      "range": {
+        "startLine": 125,
+        "startChar": 35,
+        "endLine": 125,
+        "endChar": 40
+      },
+      "revId": "9a71ae4db8db5ec618ff1ea5cd0d6e01fc97080c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf768125_72ade2f8",
+        "filename": "android/android-emu/android/darwinn/darwinn-service.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-20T01:27:29Z",
+      "side": 1,
+      "message": "Unused?",
+      "range": {
+        "startLine": 186,
+        "startChar": 8,
+        "endLine": 186,
+        "endChar": 56
+      },
+      "revId": "9a71ae4db8db5ec618ff1ea5cd0d6e01fc97080c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "06abea90_1cc14e48",
+        "filename": "android/android-emu/android/darwinn/darwinn-service.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-20T01:27:29Z",
+      "side": 1,
+      "message": "Missing break?",
+      "range": {
+        "startLine": 222,
+        "startChar": 52,
+        "endLine": 222,
+        "endChar": 64
+      },
+      "revId": "9a71ae4db8db5ec618ff1ea5cd0d6e01fc97080c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "865b86c4_459b3fda",
+        "filename": "android/android-emu/android/darwinn/darwinn-service.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-20T01:27:29Z",
+      "side": 1,
+      "message": "Does this need to be incremented?",
+      "range": {
+        "startLine": 475,
+        "startChar": 22,
+        "endLine": 475,
+        "endChar": 30
+      },
+      "revId": "9a71ae4db8db5ec618ff1ea5cd0d6e01fc97080c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
