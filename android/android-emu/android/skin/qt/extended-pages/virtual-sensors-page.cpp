@@ -479,11 +479,20 @@ void VirtualSensorsPage::updateModelFromAccelWidget(
             rotationRadians.x, rotationRadians.y, rotationRadians.z);
     const glm::vec3 rotationDegrees = glm::degrees(rotationRadians);
 
-    setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSITION, mode, position.x,
-                               position.y, position.z);
-    setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION, mode,
-                               rotationDegrees.x, rotationDegrees.y,
-                               rotationDegrees.z);
+    const glm::vec3 currentPosition =
+            getPhysicalParameterTargetVec3(PHYSICAL_PARAMETER_POSITION);
+    if (!vecNearEqual(position, currentPosition)) {
+        setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSITION, mode,
+                                   position.x, position.y, position.z);
+    }
+
+    const glm::vec3 currentRotationDegrees =
+            getPhysicalParameterTargetVec3(PHYSICAL_PARAMETER_ROTATION);
+    if (!vecNearEqual(rotationDegrees, currentRotationDegrees)) {
+        setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION, mode,
+                                   rotationDegrees.x, rotationDegrees.y,
+                                   rotationDegrees.z);
+    }
 }
 
 /*
