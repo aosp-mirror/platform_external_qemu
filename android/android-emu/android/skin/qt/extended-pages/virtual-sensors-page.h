@@ -115,6 +115,8 @@ private:
 
     void resetDeviceRotation(const glm::quat&);
 
+    float getPhysicalParameterTarget(PhysicalParameter parameter_id);
+    glm::vec3 getPhysicalParameterTargetVec3(PhysicalParameter parameter_id);
     void setPhysicalParameterTarget(PhysicalParameter parameter_id,
             PhysicalInterpolation mode,
             double v1,
