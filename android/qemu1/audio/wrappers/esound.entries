@@ -1,6 +1,0 @@
-!esound
-%#include <esd.h>
-
-int esd_open_sound(const char *host);
-int esd_play_stream(esd_format_t format, int rate, const char *host, const char *name);
-int esd_record_stream(esd_format_t format, int rate, const char *host, const char *name);
