@@ -91,10 +91,6 @@ using android::ConfigDirs;
 #define GLES_EMULATION_LIB64  "lib64OpenglRender" DLL_EXTENSION
 
 /* Forward declarations */
-static char* getClassicEmulatorPath(const char* progDir,
-                                    const char* avdArch,
-                                    int* wantedBitness);
-
 static char* getQemuExecutablePath(const char* programPath,
                                    const char* avdArch,
                                    bool force64bitTarget,
@@ -103,11 +99,6 @@ static char* getQemuExecutablePath(const char* programPath,
 static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const char* launcherDir);
 
 static bool is32bitImageOn64bitRanchuKernel(const char* avdName,
-                                             const char* avdArch,
-                                             const char* sysDir,
-                                             const char* androidOut);
-
-static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
                                              const char* avdArch,
                                              const char* sysDir,
                                              const char* androidOut);
@@ -133,14 +124,6 @@ static bool isStringInList(const char* str,
     }
     return false;
 }
-
-// Return true if the CPU architecture |avdArch| is supported by QEMU1,
-// i.e. the 'goldfish' virtual board.
-static bool isCpuArchSupportedByGoldfish(const char* avdArch) {
-    static const char* const kSupported[] = {"arm", "mips", "x86", "x86_64"};
-    return isStringInList(avdArch, kSupported, ARRAY_SIZE(kSupported));
-}
-
 
 // Return true if the CPU architecture |avdArch| is supported by QEMU2,
 // i.e. the 'ranchu' virtual board.
@@ -616,78 +599,14 @@ int main(int argc, char** argv)
     const auto progDirSystem = android::base::System::get()->getProgramDirectory();
     D("argv[0]: '%s'; program directory: '%s'", argv[0], progDirSystem.c_str());
 
-    enum RanchuState {
-        RANCHU_AUTODETECT,
-        RANCHU_ON,
-        RANCHU_OFF,
-    } ranchu = RANCHU_AUTODETECT;
-
-    bool isSnapshotPresent = false;
-
     if (engine) {
-        if (!strcmp(engine, "auto")) {
-            if (isSnapshotPresent) {
-                fprintf(stderr, "WARNING: only classic engine supports snapshot, option 'auto' ignored.\n");
-            } else {
-                ranchu = RANCHU_AUTODETECT;
-            }
-        } else if (!strcmp(engine, "classic")) {
-            ranchu = RANCHU_OFF;
-        } else if (!strcmp(engine, "qemu2")) {
-            if (isSnapshotPresent) {
-                fprintf(stderr, "WARNING: qemu2 does not support snapshot, option 'qemu2' ignored.\n");
-            } else {
-                ranchu = RANCHU_ON;
-            }
-        } else {
-            APANIC("Invalid -engine value '%s', please use one of: auto, classic, qemu2\n",
-                   engine);
-        }
-    }
-
-    if (ranchu == RANCHU_AUTODETECT) {
-        if (!avdName) {
-            ranchu = RANCHU_ON;
-        } else {
-            // Auto-detect which emulation engine to launch.
-            bool cpuHasRanchu = isCpuArchSupportedByRanchu(avdArch);
-            bool cpuHasGoldfish = isCpuArchSupportedByGoldfish(avdArch);
-
-            if (cpuHasRanchu) {
-                if (cpuHasGoldfish) {
-                    // Need to auto-detect the default engine.
-                    // TODO: Deal with -kernel <file>, -systemdir <dir> and platform
-                    // builds appropriately. For now this only works reliably for
-                    // regular SDK AVD configurations.
-                    if (checkAvdSystemDirForKernelRanchu(avdName, avdArch,
-                                                         sysDir, androidOut)) {
-                        D("Auto-config: -engine qemu2 (based on configuration)");
-                        ranchu = RANCHU_ON;
-                    } else {
-                        D("Auto-config: -engine classic (based on configuration)");
-                        ranchu = RANCHU_OFF;
-                    }
-                } else {
-                    D("Auto-config: -engine qemu2 (%s default)", avdArch);
-                    ranchu = RANCHU_ON;
-                }
-            } else if (cpuHasGoldfish) {
-                D("Auto-config: -engine classic (%s default)", avdArch);
-                ranchu = RANCHU_OFF;
-            } else {
-                APANIC("CPU architecture '%s' is not supported\n", avdArch);
-            }
-        }
+        fprintf(stderr, "WARNING: engine selection is no longer supported, always using RACNHU.\n");
     }
 
     // Sanity checks.
     if (avdName) {
-        if (ranchu == RANCHU_OFF && !isCpuArchSupportedByGoldfish(avdArch)) {
-            APANIC("CPU Architecture '%s' is not supported by the classic emulator",
-                   avdArch);
-        }
-        if (ranchu == RANCHU_ON && !isCpuArchSupportedByRanchu(avdArch)) {
-            APANIC("CPU Architecture '%s' is not supported by the QEMU2 emulator",
+        if (!isCpuArchSupportedByRanchu(avdArch)) {
+            APANIC("CPU Architecture '%s' is not supported by the QEMU2 emulator, (the classic engine is deprecated!)",
                    avdArch);
         }
         std::string systemPath = getAvdSystemPath(avdName, sysDir);
@@ -703,13 +622,6 @@ int main(int argc, char** argv)
             }
         }
     }
-#ifdef _WIN32
-    // Windows version of Qemu1 works only in x86 mode
-    if (ranchu == RANCHU_OFF) {
-        wantedBitness = 32;
-    }
-#endif
-
     // in some cases, progDirSystem is incorrect, so we have to
     // search from the folder from the command line
     // more info can be found at b/65257562
@@ -729,13 +641,8 @@ int main(int argc, char** argv)
     for (unsigned int i = 0; i < ARRAY_SIZE(candidates); ++i) {
         D("try dir %s", candidates[i].data());
         progDir = candidates[i];
-        if (ranchu == RANCHU_ON) {
-            emulatorPath = getQemuExecutablePath(
-                    progDir.data(), avdArch, force64bitTarget, wantedBitness);
-        } else {
-            emulatorPath = getClassicEmulatorPath(progDir.data(), avdArch,
-                                                  &wantedBitness);
-        }
+        emulatorPath = getQemuExecutablePath(
+                progDir.data(), avdArch, force64bitTarget, wantedBitness);
         D("Trying emulator path '%s'", emulatorPath);
         if (path_exists(emulatorPath)) {
             break;
@@ -815,89 +722,6 @@ int main(int argc, char** argv)
     /* We could not launch the program ! */
     fprintf(stderr, "Could not launch '%s': %s\n", emulatorPath, strerror(errno));
     return errno;
-}
-
-static char* bufprint_emulatorName(char* p,
-                                   char* end,
-                                   const char* progDir,
-                                   const char* prefix,
-                                   const char* archSuffix) {
-    if (progDir) {
-        p = bufprint(p, end, "%s" PATH_SEP, progDir);
-    }
-    p = bufprint(p, end, "%s%s%s", prefix, archSuffix, kExeExtension);
-    return p;
-}
-
-/* Probe the filesystem to check if an emulator executable named like
- * <progDir>/<prefix><arch> exists.
- *
- * |progDir| is an optional program directory. If NULL, the executable
- * will be searched in the current directory.
- * |archSuffix| is an architecture-specific suffix, like "arm", or 'x86"
- * |wantedBitness| points to an integer describing the wanted bitness of
- * the program. The function might modify it, in the case where it is 64
- * but only 32-bit versions of the executables are found (in this case,
- * |*wantedBitness| is set to 32).
- * On success, returns the absolute path of the executable (string must
- * be freed by the caller). On failure, return NULL.
- */
-static char* probeTargetEmulatorPath(const char* progDir,
-                                     const char* archSuffix,
-                                     int* wantedBitness) {
-    char path[PATH_MAX], *pathEnd = path + sizeof(path), *p;
-
-    static const char kEmulatorPrefix[] = "emulator-";
-    static const char kEmulator64Prefix[] = "emulator64-";
-
-    // First search for the 64-bit emulator binary.
-    if (*wantedBitness == 64) {
-        p = bufprint_emulatorName(path,
-                                  pathEnd,
-                                  progDir,
-                                  kEmulator64Prefix,
-                                  archSuffix);
-        D("Probing program: %s", path);
-        if (p < pathEnd && path_exists(path)) {
-            return strdup(path);
-        }
-    }
-
-    // Then for the 32-bit one.
-    p = bufprint_emulatorName(path,
-                                pathEnd,
-                                progDir,
-                                kEmulatorPrefix,
-                                archSuffix);
-    D("Probing program: %s", path);
-    if (p < pathEnd && path_exists(path)) {
-        *wantedBitness = 32;
-        return path_get_absolute(path);
-    }
-
-    return NULL;
-}
-
-// Find the absolute path to the classic emulator binary that supports CPU architecture
-// |avdArch|. |progDir| is the program's directory.
-static char* getClassicEmulatorPath(const char* progDir,
-                                    const char* avdArch,
-                                    int* wantedBitness) {
-    const char* emulatorSuffix = emulator_getBackendSuffix(avdArch);
-    if (!emulatorSuffix) {
-        APANIC("This emulator cannot emulate %s CPUs!\n", avdArch);
-    }
-    D("Looking for emulator-%s to emulate '%s' CPU", emulatorSuffix,
-      avdArch);
-
-    char* result = probeTargetEmulatorPath(progDir,
-                                           emulatorSuffix,
-                                           wantedBitness);
-    if (!result) {
-        APANIC("Missing emulator engine program for '%s' CPU.\n", avdArch);
-    }
-    D("return result: %s", result);
-    return result;
 }
 
 // Convert an emulator-specific CPU architecture name |avdArch| into the
@@ -1067,55 +891,6 @@ static bool is32bitImageOn64bitRanchuKernel(const char* avdName,
         std::string systemImagePath = getAvdSystemPath(avdName, sysDir);
         asprintf(&kernel_file, "%s" PATH_SEP "%s", systemImagePath.c_str(),
                  "kernel-ranchu-64");
-    }
-    result = path_exists(kernel_file);
-    D("Probing for %s: file %s", kernel_file, result ? "exists" : "missing");
-
-    AFREE(kernel_file);
-    return result;
-}
-
-// Verify and AVD's system image directory to see if it supports ranchu.
-static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
-                                             const char* avdArch,
-                                             const char* sysDir,
-                                             const char* androidOut) {
-    bool result = false;
-    char* kernel_file = NULL;
-
-    // For now, just check that a kernel-ranchu file exists. All official
-    // system images should have that if they support ranchu.
-    if (androidOut) {
-        // This is running inside an Android platform build.
-        const char* androidBuildTop = getenv("ANDROID_BUILD_TOP");
-        if (!androidBuildTop || !androidBuildTop[0]) {
-            D("Cannot find Android build top directory, assume no ranchu "
-              "support!");
-            return false;
-        }
-        D("Found ANDROID_BUILD_TOP: %s", androidBuildTop);
-        if (!path_exists(androidBuildTop)) {
-            D("Invalid Android build top: %s", androidBuildTop);
-            return false;
-        }
-        asprintf(&kernel_file, "%s" PATH_SEP "prebuilts" PATH_SEP "qemu-kernel" PATH_SEP "%s" PATH_SEP "%s",
-                 androidBuildTop, avdArch, "kernel-ranchu");
-    } else {
-        // This is a regular SDK AVD launch.
-        std::string systemImagePath = getAvdSystemPath(avdName, sysDir);
-        if (systemImagePath.empty()) {
-            D("Cannot find system image path. Please define "
-              "ANDROID_SDK_ROOT");
-            return false;
-        }
-        asprintf(&kernel_file, "%s" PATH_SEP "%s", systemImagePath.c_str(),
-                 "kernel-ranchu");
-        result = path_exists(kernel_file);
-        if (result == false) {
-            AFREE(kernel_file);
-            asprintf(&kernel_file, "%s" PATH_SEP "%s", systemImagePath.c_str(),
-                    "kernel-ranchu-64");
-        }
     }
     result = path_exists(kernel_file);
     D("Probing for %s: file %s", kernel_file, result ? "exists" : "missing");
