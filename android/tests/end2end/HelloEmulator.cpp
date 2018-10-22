@@ -245,8 +245,6 @@ protected:
         if (!didEmulatorKernelStartup(result + kernelOutput)) {
             printf("You done goofed, kernel didn't start up!\n");
         }
-
-        System::stopAllEmulatorProcesses();
     }
 
     std::unique_ptr<TestTempDir> mTempDir;
