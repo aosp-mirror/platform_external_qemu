@@ -215,8 +215,8 @@ static std::string getBaseName(const std::string& name) {
 
 // Query uniform variables from driver
 std::unordered_map<GLuint, GLUniformDesc> ProgramData::collectUniformInfo() const {
-    GLint uniform_count;
-    GLint nameLength;
+    GLint uniform_count = 0;
+    GLint nameLength = 0;
     std::unordered_map<GLuint, GLUniformDesc> uniformsOnSave;
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     dispatcher.glGetProgramiv(ProgramName, GL_ACTIVE_UNIFORM_MAX_LENGTH, &nameLength);
