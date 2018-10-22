@@ -21,7 +21,7 @@ namespace aemu {
 
 class Toplevel {
 public:
-    Toplevel();
+    Toplevel(int refreshRate = 60);
     ~Toplevel();
 
     ANativeWindow* createWindow();
