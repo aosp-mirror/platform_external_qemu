@@ -97,7 +97,7 @@ TEST(AndroidWindow, BufferQueue) {
 // TestSystem will totally mess this up. Disable for now
 TEST(Vsync, DISABLED_Basic) {
     std::atomic<int> count { 0 };
-    Vsync vsync([&count]() { ++count; });
+    Vsync vsync(1000, [&count]() { ++count; });
 
     constexpr System::Duration kSleepIntervalMs = 20;
     constexpr System::Duration kSleepLimitMs = 15000;
