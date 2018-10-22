@@ -146,6 +146,37 @@ tempfile_close(TempFile*  tempfile)
 #endif
 }
 
+void tempfile_unref_and_close(const char* filename) {
+    if (!filename) {
+        dwarning("tring to close null file name.\n");
+        return;
+    }
+    if (!_all_tempfiles) {
+        dwarning("%s not referenced, skip deletion", filename);
+        return;
+    }
+    if (!strcmp(_all_tempfiles->name, filename)) {
+        TempFile* toDelete = _all_tempfiles;
+        _all_tempfiles = toDelete->next;
+        tempfile_close(toDelete);
+        free(toDelete);
+        return;
+    }
+    TempFile* prev = _all_tempfiles;
+    TempFile* tempfile;
+    for (tempfile = _all_tempfiles->next; tempfile; tempfile = tempfile->next) {
+        if (!strcmp(tempfile->name, filename)) {
+            prev->next = tempfile->next;
+            tempfile_close(tempfile);
+            free(tempfile);
+            return;
+        }
+        prev = tempfile;
+    }
+    dwarning("%s not referenced, skip deletion", filename);
+    return;
+}
+
 /** TEMP FILE CLEANUP
  **
  **/
