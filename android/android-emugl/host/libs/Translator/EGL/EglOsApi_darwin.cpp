@@ -205,6 +205,10 @@ public:
                 addConfigFunc,
                 addConfigOpaque);
         }
+
+        // Also disable vsync.
+        int bestSwapInterval = 0;
+        nsSwapInterval(&bestSwapInterval);
     }
 
     virtual bool isValidNativeWin(EglOS::Surface* win) {
