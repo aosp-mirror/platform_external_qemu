@@ -27,13 +27,14 @@ using android::base::Lock;
 namespace aemu {
 
 SurfaceFlinger::SurfaceFlinger(
+        int refreshRate,
         AndroidWindow* composeWindow,
         std::vector<ANativeWindowBuffer*> appBuffers,
         SurfaceFlinger::ComposerConstructFunc&& composerFunc,
         Vsync::Callback vsyncFunc)
     : mComposeWindow(composeWindow),
       mComposerImpl(composerFunc(mComposeWindow, &mApp2Sf, &mSf2App)),
-      mVsync(std::move(vsyncFunc)) {
+      mVsync(refreshRate, std::move(vsyncFunc)) {
 
     for (auto buffer : appBuffers) {
         mSf2App.queueBuffer(AndroidBufferQueue::Item(buffer));

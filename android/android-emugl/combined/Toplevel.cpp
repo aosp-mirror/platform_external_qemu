@@ -65,8 +65,9 @@ namespace aemu {
 
 class Toplevel::Impl {
 public:
-    Impl()
-        : mUseWindow(System::get()->envGet("ANDROID_EMU_TEST_WITH_WINDOW") ==
+    Impl(int refreshRate)
+        : mRefreshRate(refreshRate),
+          mUseWindow(System::get()->envGet("ANDROID_EMU_TEST_WITH_WINDOW") ==
                      "1"),
           mUseHostGpu(System::get()->envGet("ANDROID_EMU_TEST_WITH_HOST_GPU") ==
                       "1"),
@@ -251,6 +252,7 @@ private:
         }
 
         mSf.reset(new SurfaceFlinger(
+            mRefreshRate,
             &mComposeWindow,
             buffersToNativePtrs(mAppBuffers),
             [](AndroidWindow* composeWindow, AndroidBufferQueue* fromApp,
@@ -274,6 +276,8 @@ private:
 
     Lock mLock;
 
+    int mRefreshRate;
+
     bool mUseWindow;
     bool mUseHostGpu;
 
@@ -293,7 +297,7 @@ private:
     std::unordered_set<AndroidWindow*> mWindows;
 };
 
-Toplevel::Toplevel() : mImpl(new Toplevel::Impl()) {}
+Toplevel::Toplevel(int refreshRate) : mImpl(new Toplevel::Impl(refreshRate)) {}
 Toplevel::~Toplevel() = default;
 
 ANativeWindow* Toplevel::createWindow() {

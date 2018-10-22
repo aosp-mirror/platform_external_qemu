@@ -62,7 +62,7 @@ static aemu::Toplevel* sToplevel = nullptr;
 
 static aemu::Toplevel* sInitToplevel() {
 	if (sToplevel) return sToplevel;
-	sToplevel = new aemu::Toplevel();
+	sToplevel = new aemu::Toplevel(10000 /* allow high refresh rate */);
 	return sToplevel;
 }
 

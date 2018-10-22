@@ -96,8 +96,8 @@ private:
     FunctorThread mThread;
 };
 
-Vsync::Vsync(Vsync::Callback callback)
-    : mImpl(new Vsync::Impl(std::move(callback))) {}
+Vsync::Vsync(int refreshRate, Vsync::Callback callback)
+    : mImpl(new Vsync::Impl(std::move(callback), refreshRate)) {}
 
 Vsync::~Vsync() = default;
 

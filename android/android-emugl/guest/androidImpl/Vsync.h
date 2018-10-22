@@ -22,7 +22,7 @@ class Vsync {
 public:
     using Callback = std::function<void()>;
 
-    Vsync(Callback vsyncCallback);
+    Vsync(int refreshRate, Callback vsyncCallback);
     ~Vsync();
 
     void start();
