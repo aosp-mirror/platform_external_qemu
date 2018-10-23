@@ -892,7 +892,17 @@ again:
             return EXCP_HLT;
         }
 
+        struct timeval tv;
+        gettimeofday(&tv, NULL);
+        uint64_t start_us = tv.tv_usec + tv.tv_sec * 1000000;
         int r  = hv_vcpu_run(cpu->hvf_fd);
+        gettimeofday(&tv, NULL);
+        uint64_t end_us = tv.tv_usec + tv.tv_sec * 1000000;
+    uint64_t duration = end_us - start_us;
+
+    if (duration > 100000) {
+        fprintf(stderr, "%s: vcpu stuck for %f ms\n", __func__, duration / 1000.0f);
+    }
 
         if (r) {
             qemu_abort("%s: %ld: run failed with %x\n", __func__, rip, r);

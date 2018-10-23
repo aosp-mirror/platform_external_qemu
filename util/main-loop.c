@@ -264,7 +264,31 @@ static int os_host_main_loop_wait(int64_t timeout)
     qemu_mutex_unlock_iothread();
     replay_mutex_unlock();
 
-    ret = qemu_poll_ns((GPollFD *)gpollfds->data, gpollfds->len, timeout);
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    uint64_t start_us = tv.tv_usec + tv.tv_sec * 1000000LL;
+    uint64_t duration = 0;
+        ret = qemu_poll_ns((GPollFD *)gpollfds->data, gpollfds->len, timeout);
+        gettimeofday(&tv, NULL);
+        uint64_t end_us = tv.tv_usec + tv.tv_sec * 1000000LL;
+        duration = end_us - start_us;
+
+    // bool done = false;
+
+    // int64_t busywait_interval_ns = 1000LL > timeout ? timeout : 1000LL;
+
+    // while (!done) {
+        // ret = qemu_poll_ns((GPollFD *)gpollfds->data, gpollfds->len, timeout);
+        // gettimeofday(&tv, NULL);
+        // uint64_t end_us = tv.tv_usec + tv.tv_sec * 1000000LL;
+        // duration = end_us - start_us;
+        // if (!ret || duration * 1000LL > timeout) done = true;
+    // }
+
+    if (duration > 100000LL) {
+        fprintf(stderr, "%s: polled for %f ms (timeout: %f ms) ret: %d nfds: %d\n", __func__, duration / 1000.0f, timeout / 1000000.0f, ret, gpollfds->len);
+    }
 
     replay_mutex_lock();
     qemu_mutex_lock_iothread();

@@ -311,6 +311,30 @@ int qemu_timeout_ns_to_ms(int64_t ns)
     return (int) ms;
 }
 
+int qemu_timeout_ns_to_us(int64_t ns)
+{
+    int64_t ms;
+    if (ns < 0) {
+        return -1;
+    }
+
+    if (!ns) {
+        return 0;
+    }
+
+    /* Always round up, because it's better to wait too long than to wait too
+     * little and effectively busy-wait
+     */
+    ms = DIV_ROUND_UP(ns, SCALE_US);
+
+    /* To avoid overflow problems, limit this to 2^31, i.e. approx 25 days */
+    if (ms > (int64_t) INT32_MAX) {
+        ms = INT32_MAX;
+    }
+
+    return (int) ms;
+}
+
 
 /* qemu implementation of g_poll which uses a nanosecond timeout but is
  * otherwise identical to g_poll
@@ -318,6 +342,7 @@ int qemu_timeout_ns_to_ms(int64_t ns)
 int qemu_poll_ns(GPollFD *fds, guint nfds, int64_t timeout)
 {
 #ifdef CONFIG_PPOLL
+#error "using ppoll"
     if (timeout < 0) {
         return ppoll((struct pollfd *)fds, nfds, NULL, NULL);
     } else {
@@ -334,7 +359,53 @@ int qemu_poll_ns(GPollFD *fds, guint nfds, int64_t timeout)
         return ppoll((struct pollfd *)fds, nfds, &ts, NULL);
     }
 #else
-    return g_poll(fds, nfds, qemu_timeout_ns_to_ms(timeout));
+    struct timeval tv;
+    fd_set rset, wset, xset;
+    GPollFD *f;
+    int ready;
+    int maxfd = 0;
+    bool wait_forever;
+
+    FD_ZERO(&rset);
+    FD_ZERO(&wset);
+    FD_ZERO(&xset);
+
+    for (f = fds; f < &fds[nfds]; ++f)
+        if (f->fd >= 0)
+        {
+            if (f->events & G_IO_IN)
+                FD_SET(f->fd, &rset);
+            if (f->events & G_IO_OUT)
+                FD_SET(f->fd, &wset);
+            if (f->events & G_IO_PRI)
+                FD_SET(f->fd, &xset);
+            if (f->fd > maxfd && (f->events & (G_IO_IN | G_IO_OUT | G_IO_PRI)))
+                maxfd = f->fd;
+        }
+
+    wait_forever = timeout == -1;
+    timeout = qemu_timeout_ns_to_us(timeout);
+    tv.tv_sec = timeout / 1000000LL;
+    tv.tv_usec = timeout % 1000000LL;
+
+    ready = select(maxfd + 1, &rset, &wset, &xset,
+                   wait_forever ? NULL : &tv);
+    if (ready > 0)
+        for (f = fds; f < &fds[nfds]; ++f)
+        {
+            f->revents = 0;
+            if (f->fd >= 0)
+            {
+                if (FD_ISSET(f->fd, &rset))
+                    f->revents |= G_IO_IN;
+                if (FD_ISSET(f->fd, &wset))
+                    f->revents |= G_IO_OUT;
+                if (FD_ISSET(f->fd, &xset))
+                    f->revents |= G_IO_PRI;
+            }
+        }
+
+    return ready;
 #endif
 }
 

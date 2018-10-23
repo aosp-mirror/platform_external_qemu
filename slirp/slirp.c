@@ -660,36 +660,36 @@ void slirp_pollfds_fill(GArray *pollfds, uint32_t *timeout)
             }
         }
 
-        /*
-         * ICMP sockets
-         */
-        for (so = slirp->icmp.so_next; so != &slirp->icmp;
-                so = so_next) {
-            so_next = so->so_next;
+        // /*
+        //  * ICMP sockets
+        //  */
+        // for (so = slirp->icmp.so_next; so != &slirp->icmp;
+        //         so = so_next) {
+        //     so_next = so->so_next;
 
-            so->pollfds_idx = -1;
+        //     so->pollfds_idx = -1;
 
-            /*
-             * See if it's timed out
-             */
-            if (so->so_expire) {
-                if (so->so_expire <= curtime) {
-                    icmp_detach(so);
-                    continue;
-                } else {
-                    slirp->do_slowtimo = true; /* Let socket expire */
-                }
-            }
+        //     /*
+        //      * See if it's timed out
+        //      */
+        //     if (so->so_expire) {
+        //         if (so->so_expire <= curtime) {
+        //             icmp_detach(so);
+        //             continue;
+        //         } else {
+        //             slirp->do_slowtimo = true; /* Let socket expire */
+        //         }
+        //     }
 
-            if (so->so_state & SS_ISFCONNECTED) {
-                GPollFD pfd = {
-                    .fd = so->s,
-                    .events = G_IO_IN | G_IO_HUP | G_IO_ERR,
-                };
-                so->pollfds_idx = pollfds->len;
-                g_array_append_val(pollfds, pfd);
-            }
-        }
+        //     if (so->so_state & SS_ISFCONNECTED) {
+        //         GPollFD pfd = {
+        //             .fd = so->s,
+        //             .events = G_IO_IN | G_IO_HUP | G_IO_ERR,
+        //         };
+        //         so->pollfds_idx = pollfds->len;
+        //         g_array_append_val(pollfds, pfd);
+        //     }
+        // }
     }
     slirp_update_timeout(timeout);
 }
