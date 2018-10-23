@@ -11,6 +11,7 @@
 
 #include "android/physics/InertialModel.h"
 
+#include "android/base/testing/GlmTestHelpers.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
