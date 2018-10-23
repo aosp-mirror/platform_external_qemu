@@ -20,6 +20,10 @@ static int sDeviceHasBattery = 0;
 
 #include <assert.h>
 
+#define D0() fprintf(stderr, "rkir %s:%d\n", __FUNCTION__, __LINE__)
+#define DS(S) fprintf(stderr, "rkir %s:%d " S "\n", __FUNCTION__, __LINE__)
+#define DF(FMT, ...) fprintf(stderr, "rkir %s:%d " FMT "\n", __FUNCTION__, __LINE__, __VA_ARGS__)
+
 enum {
     /* status register */
     BATTERY_INT_STATUS = 0x00,
@@ -346,6 +350,8 @@ static void goldfish_battery_realize(DeviceState *dev, Error **errp)
     SysBusDevice *sbdev = SYS_BUS_DEVICE(dev);
     struct goldfish_battery_state *s = GOLDFISH_BATTERY(dev);
 
+    DF("s=%p", s);
+
     /* Initialize the device ID so the battery can be looked up during monitor
      * commands.
      */
@@ -383,6 +389,7 @@ static void goldfish_battery_realize(DeviceState *dev, Error **errp)
 
 static void goldfish_battery_class_init(ObjectClass *klass, void *data)
 {
+    DF("data=%p", data);
     DeviceClass *dc = DEVICE_CLASS(klass);
 
     dc->realize = goldfish_battery_realize;
@@ -399,6 +406,7 @@ static const TypeInfo goldfish_battery_info = {
 
 static void goldfish_battery_register(void)
 {
+    D0();
     type_register_static(&goldfish_battery_info);
 }
 
