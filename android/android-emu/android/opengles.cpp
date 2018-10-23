@@ -223,7 +223,11 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     dma_ops.unlock = android_goldfish_dma_ops.unlock;
     sRenderLib->setDmaOps(dma_ops);
 
-    sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow, sEgl2egl);
+    sRenderer = sRenderLib->initRenderer(width, height,
+                                         sRendererUsesSubWindow,
+                                         sEgl2egl,
+                                         gQAndroidVmOperations);
+
     android::snapshot::Snapshotter::get().addOperationCallback(
             [](android::snapshot::Snapshotter::Operation op,
                android::snapshot::Snapshotter::Stage stage) {

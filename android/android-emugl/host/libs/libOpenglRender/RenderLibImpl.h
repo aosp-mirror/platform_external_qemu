@@ -16,6 +16,7 @@
 #include "OpenglRender/RenderLib.h"
 
 #include "android/base/Compiler.h"
+#include "android/emulation/control/vm_operations.h"
 
 #include <memory>
 
@@ -49,7 +50,8 @@ public:
     virtual RendererPtr initRenderer(int width,
                                      int height,
                                      bool useSubWindow,
-                                     bool egl2egl) override;
+                                     bool egl2egl,
+                                     const QAndroidVmOperations *vm_operations) override;
 
     OnLastColorBufferRef getOnLastColorBufferRef() override;
 
