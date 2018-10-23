@@ -22,6 +22,30 @@
       "revId": "6ee23d5fe6277b5e33837a4312d30e873bcf1249",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "75b90f41_906b6f9c",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1002,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-23T18:07:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bafc0038_934c4a60",
+      "range": {
+        "startLine": 1002,
+        "startChar": 21,
+        "endLine": 1002,
+        "endChar": 24
+      },
+      "revId": "6ee23d5fe6277b5e33837a4312d30e873bcf1249",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
