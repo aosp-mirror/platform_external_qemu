@@ -658,6 +658,10 @@ void InertialModel::setTargetAmbientMotion(float bounds,
 
 glm::vec3 InertialModel::getPosition(
         ParameterValueType parameterValueType) const {
+    if (parameterValueType == PARAMETER_VALUE_TYPE_DEFAULT) {
+        return glm::vec3();
+    }
+
     glm::vec3 position = calculateInertialState(
             mPositionHeptic,
             mPositionCubic,
@@ -676,6 +680,10 @@ glm::vec3 InertialModel::getPosition(
 
 glm::vec3 InertialModel::getVelocity(
         ParameterValueType parameterValueType) const {
+    if (parameterValueType == PARAMETER_VALUE_TYPE_DEFAULT) {
+        return glm::vec3();
+    }
+
     glm::vec3 velocity = calculateInertialState(
         mVelocityHeptic,
         mVelocityCubic,
@@ -700,6 +708,10 @@ glm::vec3 InertialModel::getVelocity(
 
 glm::vec3 InertialModel::getAcceleration(
         ParameterValueType parameterValueType) const {
+    if (parameterValueType == PARAMETER_VALUE_TYPE_DEFAULT) {
+        return glm::vec3();
+    }
+
     glm::vec3 acceleration = calculateInertialState(
         mAccelerationHeptic,
         mAccelerationCubic,
@@ -729,6 +741,10 @@ glm::vec3 InertialModel::getAcceleration(
 
 glm::vec3 InertialModel::getJerk(
         ParameterValueType parameterValueType) const {
+    if (parameterValueType == PARAMETER_VALUE_TYPE_DEFAULT) {
+        return glm::vec3();
+    }
+
     return calculateInertialState(
         mJerkHeptic,
         mJerkCubic,
@@ -738,6 +754,10 @@ glm::vec3 InertialModel::getJerk(
 
 glm::quat InertialModel::getRotation(
         ParameterValueType parameterValueType) const {
+    if (parameterValueType == PARAMETER_VALUE_TYPE_DEFAULT) {
+        return glm::quat();
+    }
+
     const glm::vec4 rotationVec = calculateRotationalState(
             mRotationQuintic,
             mRotationCubic,
@@ -752,6 +772,10 @@ glm::quat InertialModel::getRotation(
 
 glm::vec3 InertialModel::getRotationalVelocity(
         ParameterValueType parameterValueType) const {
+    if (parameterValueType == PARAMETER_VALUE_TYPE_DEFAULT) {
+        return glm::vec3();
+    }
+
     const glm::vec4 rotationVec = calculateRotationalState(
             mRotationQuintic,
             mRotationCubic,
@@ -926,8 +950,10 @@ glm::vec4 InertialModel::calculateRotationalState(
 
 float InertialModel::getAmbientMotionBoundsValue(
         ParameterValueType parameterValueType) const {
-    if (parameterValueType != PARAMETER_VALUE_TYPE_TARGET &&
-            mModelTimeNs < mAmbientMotionChangeEndTime) {
+    if (parameterValueType == PARAMETER_VALUE_TYPE_DEFAULT) {
+        return 0.f;
+    } else if (parameterValueType != PARAMETER_VALUE_TYPE_TARGET &&
+               mModelTimeNs < mAmbientMotionChangeEndTime) {
         const float time1 = nsToSeconds(mModelTimeNs - mAmbientMotionChangeStartTime);
         const float time2 = time1 * time1;
         const float time3 = time2 * time1;

@@ -19,6 +19,9 @@
 namespace android {
 namespace physics {
 
+constexpr glm::vec3 AmbientEnvironment::kDefaultMagneticField;
+constexpr glm::vec3 AmbientEnvironment::kDefaultGravity;
+
 AmbientState AmbientEnvironment::setCurrentTime(uint64_t time_ns) {
     return AMBIENT_STATE_STABLE;
 }
@@ -58,31 +61,37 @@ void AmbientEnvironment::setHumidity(
 
 glm::vec3 AmbientEnvironment::getMagneticField(
         ParameterValueType valueType) const {
-    return mMagneticField;
+    return valueType == PARAMETER_VALUE_TYPE_DEFAULT ? kDefaultMagneticField
+                                                     : mMagneticField;
 }
 
 glm::vec3 AmbientEnvironment::getGravity(ParameterValueType valueType) const {
-    return mGravity;
+    return valueType == PARAMETER_VALUE_TYPE_DEFAULT ? kDefaultGravity
+                                                     : mGravity;
 }
 
 float AmbientEnvironment::getTemperature(ParameterValueType valueType) const {
-    return mTemperature;
+    return valueType == PARAMETER_VALUE_TYPE_DEFAULT ? kDefaultTemperature
+                                                     : mTemperature;
 }
 
 float AmbientEnvironment::getProximity(ParameterValueType valueType) const {
-    return mProximity;
+    return valueType == PARAMETER_VALUE_TYPE_DEFAULT ? kDefaultProximity
+                                                     : mProximity;
 }
 
 float AmbientEnvironment::getLight(ParameterValueType valueType) const {
-    return mLight;
+    return valueType == PARAMETER_VALUE_TYPE_DEFAULT ? kDefaultLight : mLight;
 }
 
 float AmbientEnvironment::getPressure(ParameterValueType valueType) const {
-    return mPressure;
+    return valueType == PARAMETER_VALUE_TYPE_DEFAULT ? kDefaultPressure
+                                                     : mPressure;
 }
 
 float AmbientEnvironment::getHumidity(ParameterValueType valueType) const {
-    return mHumidity;
+    return valueType == PARAMETER_VALUE_TYPE_DEFAULT ? kDefaultHumidity
+                                                     : mHumidity;
 }
 
 }  // namespace physics

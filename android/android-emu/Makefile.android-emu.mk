@@ -450,6 +450,7 @@ android_emu_dependent_LOCAL_SRC_FILES += \
     android/virtualscene/SceneObject.cpp \
     android/virtualscene/TextureUtils.cpp \
     android/virtualscene/VirtualSceneManager.cpp \
+    android/virtualscene/WASDInputHandler.cpp \
 
 # The actual invocation for the static library build.
 $(call start-emulator-library,android-emu)
@@ -728,6 +729,7 @@ LOCAL_SRC_FILES := \
   android/emulation/SetupParameters_unittest.cpp \
   android/emulation/testing/TestAndroidPipeDevice.cpp \
   android/emulation/testing/MockAndroidEmulatorWindowAgent.cpp \
+  android/emulation/testing/MockAndroidSensorsAgent.cpp \
   android/emulation/testing/MockAndroidVmOperations.cpp \
   android/emulation/VmLock_unittest.cpp \
   android/error-messages_unittest.cpp \
@@ -791,6 +793,7 @@ LOCAL_SRC_FILES := \
   android/utils/x86_cpuid_unittest.cpp \
   android/verified-boot/load_config_unittest.cpp \
   android/virtualscene/TextureUtils_unittest.cpp \
+  android/virtualscene/WASDInputHandler_unittest.cpp \
   android/wear-agent/PairUpWearPhone_unittest.cpp \
   android/wear-agent/testing/WearAgentTestUtils.cpp \
   android/wear-agent/WearAgent_unittest.cpp \
