@@ -500,12 +500,16 @@ static void set_snapshot_callbacks(void* opaque,
 }
 
 static void map_user_backed_ram(uint64_t gpa, void* hva, uint64_t size) {
+    fprintf(stderr, "rkir %s:%d gpa=%08lX hva=%p size=%lu\n", __func__, __LINE__, gpa, hva, size);
+
     android::RecursiveScopedVmLock vmlock;
 
     qemu_user_backed_ram_map(gpa, hva, size, USER_BACKED_RAM_FLAGS_READ | USER_BACKED_RAM_FLAGS_WRITE);
 }
 
 static void unmap_user_backed_ram(uint64_t gpa, uint64_t size) {
+    fprintf(stderr, "rkir %s:%d gpa=%08lX size=%lu\n", __func__, __LINE__, gpa, size);
+
     android::RecursiveScopedVmLock vmlock;
 
     qemu_user_backed_ram_unmap(gpa, size);
