@@ -16,7 +16,6 @@ get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/a
 
 set(ANGLE_INCLUDE_DIRS "${PREBUILT_ROOT}/include")
 set(ANGLE_INCLUDE_DIR "${PREBUILT_ROOT}/include")
-set(ANGLE_LIBRARIES "${PREBUILT_ROOT}/lib/libtranslator_static.a;${PREBUILT_ROOT}/lib/libtranslator_lib.a;${PREBUILT_ROOT}/lib/libpreprocessor.a;${PREBUILT_ROOT}/lib/libangle_common.a")
+set(ANGLE_LIBRARIES "${PREBUILT_ROOT}/lib/libtranslator_static${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libtranslator_lib${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libpreprocessor${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libangle_common${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set(ANGLE_FOUND TRUE)
 set(PACKAGE_EXPORT "ANGLE_INCLUDE_DIR;ANGLE_INCLUDE_DIRS;ANGLE_LIBRARIES;ANGLE_FOUND")
-
