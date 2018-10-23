@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "27b37313_1db89d52",
+        "filename": "include/qemu/compiler.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-23T21:08:27Z",
+      "side": 1,
+      "message": "maybe add bug? This todo will get lost in time :-)",
+      "revId": "ef628606b39c9694f9836728b927637661c2cd53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
