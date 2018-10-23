@@ -20,7 +20,6 @@
 #include <glm/gtc/epsilon.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/euler_angles.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -335,9 +334,7 @@ void Accelerometer3DWidget::repaintGL() {
         // Clamp the position to the visible range.
         position = clampPosition(position);
 
-        rotation = glm::eulerAngleXYZ(glm::radians(eulerDegrees.x),
-                                      glm::radians(eulerDegrees.y),
-                                      glm::radians(eulerDegrees.z));
+        rotation = glm::mat4(fromEulerAnglesXYZ(glm::radians(eulerDegrees)));
     }
 
     if (mOperationMode == OperationMode::Rotate &&

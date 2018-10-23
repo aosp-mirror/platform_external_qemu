@@ -16,10 +16,10 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
+#include "android/physics/GlmHelpers.h"
 #include "android/utils/debug.h"
 
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/euler_angles.hpp>
 
 #include <cmath>
 #include <fstream>
@@ -99,10 +99,7 @@ std::vector<PosterInfo> parsePostersFile(
                 return {};
             }
 
-            poster.rotation = glm::quat(
-                    glm::eulerAngleXYZ(glm::radians(eulerRotation.x),
-                                       glm::radians(eulerRotation.y),
-                                       glm::radians(eulerRotation.z)));
+            poster.rotation = fromEulerAnglesXYZ(glm::radians(eulerRotation));
         } else if (str == "size") {
             // Poster center position.
             // Specified with two floating point numbers, separated by
