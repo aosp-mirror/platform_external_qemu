@@ -14,6 +14,7 @@
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/featurecontrol/feature_control.h"
+#include "android/physics/GlmHelpers.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
@@ -30,8 +31,6 @@
 #include <Carbon/Carbon.h>  // For kVK_ANSI_E
 #include "android/skin/qt/mac-native-window.h"
 #endif
-
-#include <glm/gtx/euler_angles.hpp>
 
 // Allow at most 5 reports every 60 seconds.
 static constexpr uint64_t kReportWindowDurationUs = 1000 * 1000 * 60;
@@ -585,9 +584,7 @@ void VirtualSceneControlWindow::aggregateMovementMetrics(bool reset) {
             PHYSICAL_PARAMETER_POSITION, &position.x, &position.y, &position.z,
             PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
 
-    const glm::quat rotation = glm::eulerAngleXYZ(glm::radians(eulerDegrees.x),
-                                                  glm::radians(eulerDegrees.y),
-                                                  glm::radians(eulerDegrees.z));
+    const glm::quat rotation = fromEulerAnglesXYZ(glm::radians(eulerDegrees));
 
     if (!reset) {
         mVirtualSceneMetrics.totalTranslationMeters +=
