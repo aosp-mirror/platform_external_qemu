@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "android/base/Optional.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/skin/qt/qt-ui-commands.h"
@@ -18,6 +19,7 @@
 #include "android/skin/qt/size-tweaker.h"
 #include "android/skin/rect.h"
 #include "android/ui-emu-agent.h"
+#include "android/virtualscene/WASDInputHandler.h"
 
 #include "ui_virtualscene-controls.h"
 
@@ -91,7 +93,6 @@ private:
 
     // Returns true if the event was handled.
     bool handleKeyEvent(QKeyEvent* event);
-    void updateVelocity();
     void aggregateMovementMetrics(bool reset = false);
 
     QPoint getMouseCaptureCenter();
@@ -102,6 +103,8 @@ private:
     ToolWindow* mToolWindow = nullptr;
     SizeTweaker mSizeTweaker;
     std::unique_ptr<Ui::VirtualSceneControls> mControlsUi;
+    android::base::Optional<android::virtualscene::WASDInputHandler>
+            mInputHandler;
 
     bool mCaptureMouse = false;
     QTimer mMousePoller;
@@ -111,21 +114,6 @@ private:
     bool mIsActive = false;
     bool mShouldShowInfoDialog = true;
     bool mIsHotkeyAvailable = true;
-
-    glm::vec3 mVelocity = glm::vec3();
-    glm::vec3 mEulerRotationRadians = glm::vec3();
-
-    enum KeysHeldIndex {
-        Held_W,
-        Held_A,
-        Held_S,
-        Held_D,
-        Held_Q,
-        Held_E,
-        Held_Count
-    };
-
-    bool mKeysHeld[Held_Count] = {};
 
     uint64_t mReportWindowStartUs = 0;
     uint32_t mReportWindowCount = 0;
