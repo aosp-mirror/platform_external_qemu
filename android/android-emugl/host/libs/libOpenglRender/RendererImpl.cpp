@@ -96,7 +96,7 @@ RendererImpl::~RendererImpl() {
     mRenderWindow.reset();
 }
 
-bool RendererImpl::initialize(int width, int height, bool useSubWindow, bool egl2egl) {
+bool RendererImpl::initialize(int width, int height, bool useSubWindow, bool egl2egl, const QAndroidVmOperations *vm_operations) {
     if (mRenderWindow) {
         return false;
     }
@@ -118,7 +118,7 @@ bool RendererImpl::initialize(int width, int height, bool useSubWindow, bool egl
 
     // This render thread won't do anything but will only preload resources
     // for the real threads to start faster.
-    mLoaderRenderThread.reset(new RenderThread(nullptr));
+    mLoaderRenderThread.reset(new RenderThread(nullptr, vm_operations));
     mLoaderRenderThread->start();
 
     return true;

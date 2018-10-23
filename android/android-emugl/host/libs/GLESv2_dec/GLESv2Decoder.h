@@ -20,6 +20,7 @@
 #include "gles2_dec.h"
 #include "GLDecoderContextData.h"
 #include "emugl/common/shared_library.h"
+#include "android/emulation/control/vm_operations.h"
 
 #include "GLSnapshot.h"
 
@@ -42,13 +43,14 @@ public:
     typedef void *(*get_proc_func_t)(const char *name, void *userData);
     GLESv2Decoder();
     ~GLESv2Decoder();
-    int initGL(get_proc_func_t getProcFunc, void *getProcFuncData);
+    int initGL(get_proc_func_t getProcFunc, void *getProcFuncData, const QAndroidVmOperations *vm_operations);
     void setContextData(GLDecoderContextData *contextData) { m_contextData = contextData; }
 protected:
     GLSnapshot::GLSnapshotState *m_snapshot;
 private:
     GLDecoderContextData *m_contextData;
     emugl::SharedLibrary* m_GL2library;
+    const QAndroidVmOperations *m_vm_operations;
 
     static void *s_getProc(const char *name, void *userData);
     static void gles2_APIENTRY s_glGetCompressedTextureFormats(void *self, int count, GLint *formats);
@@ -64,7 +66,7 @@ private:
     static void gles2_APIENTRY s_glMapBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* mapped);
     static void gles2_APIENTRY s_glUnmapBufferAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, GLboolean* out_res);
     static void gles2_APIENTRY s_glFlushMappedBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer);
-    static void gles2_APIENTRY s_glMapBufferRangeDMA(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr);
+    static uint64_t gles2_APIENTRY s_glMapBufferRangeDMA(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr);
     static void gles2_APIENTRY s_glUnmapBufferDMA(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr, GLboolean* out_res);
 
     static void gles2_APIENTRY s_glCompressedTexImage2DOffsetAEMU(void* self, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, GLuint offset);

@@ -53,9 +53,11 @@ struct RenderThread::SnapshotObjects {
 static constexpr int kStreamBufferSize = 128 * 1024;
 
 RenderThread::RenderThread(RenderChannelImpl* channel,
+                           const QAndroidVmOperations *vm_operations,
                            android::base::Stream* loadStream)
     : emugl::Thread(android::base::ThreadFlags::MaskSignals, 2 * 1024 * 1024),
-      mChannel(channel) {
+      mChannel(channel),
+      mVmOperations(vm_operations) {
     if (loadStream) {
         const bool success = loadStream->getByte();
         if (success) {
@@ -204,7 +206,7 @@ intptr_t RenderThread::main() {
     // initialize decoders
     //
     tInfo.m_glDec.initGL(gles1_dispatch_get_proc_func, nullptr);
-    tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, nullptr);
+    tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, nullptr, mVmOperations);
     initRenderControlContext(&tInfo.m_rcDec);
 
     if (!mChannel) {
