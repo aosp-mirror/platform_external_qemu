@@ -1225,11 +1225,6 @@ void FrameBuffer::performDelayedColorBufferCloseLocked(bool forced) {
            (forced ||
            it->ts + kColorBufferClosingDelaySec <= now)) {
         if (it->cbHandle != 0) {
-            for (const auto& ite : m_procOwnedColorBuffers) {
-                if (ite.second.find(it->cbHandle) != ite.second.end()) {
-                    assert(0);
-                }
-            }
             const auto& cb = m_colorbuffers.find(it->cbHandle);
             m_colorbuffers.erase(cb);
         }
