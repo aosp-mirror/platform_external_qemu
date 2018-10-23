@@ -130,7 +130,8 @@ target_link_libraries(OpenglRender_standalone_common
                               GLESv2_dec
                               renderControl_dec
                               OpenglRender_vulkan_cereal
-                              OSWindow)
+                              OSWindow
+                              android-mock-vm-operations)
 target_link_libraries(OpenglRender_standalone_common PRIVATE emugl_base ANGLE::ANGLE)
 target_compile_options(OpenglRender_standalone_common PRIVATE -fvisibility=hidden)
 target_include_directories(OpenglRender_standalone_common

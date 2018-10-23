@@ -38,8 +38,8 @@ class RenderThread : public emugl::Thread {
 
 public:
     // Create a new RenderThread instance.
-    explicit RenderThread(RenderChannelImpl* channel,
-                          android::base::Stream* loadStream = nullptr);
+    RenderThread(RenderChannelImpl* channel,
+                 android::base::Stream* loadStream = nullptr);
 
     virtual ~RenderThread();
 
