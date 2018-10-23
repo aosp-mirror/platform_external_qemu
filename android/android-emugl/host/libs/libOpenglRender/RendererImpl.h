@@ -21,6 +21,7 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/threads/FunctorThread.h"
+#include "android/emulation/control/vm_operations.h"
 #include "android/snapshot/common.h"
 
 #include "RenderThread.h"
@@ -40,7 +41,7 @@ public:
     RendererImpl();
     ~RendererImpl();
 
-    bool initialize(int width, int height, bool useSubWindow, bool egl2egl);
+    bool initialize(int width, int height, bool useSubWindow, bool egl2egl, const QAndroidVmOperations *vm_operations);
     void stop(bool wait);
     void finish();
 

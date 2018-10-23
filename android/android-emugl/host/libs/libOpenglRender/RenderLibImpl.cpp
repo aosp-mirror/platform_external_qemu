@@ -99,13 +99,14 @@ bool RenderLibImpl::getOpt(RenderOpt* opt) {
 }
 
 RendererPtr RenderLibImpl::initRenderer(int width, int height,
-                                        bool useSubWindow, bool egl2egl) {
+                                        bool useSubWindow, bool egl2egl,
+                                        const QAndroidVmOperations *vm_operations) {
     if (!mRenderer.expired()) {
         return nullptr;
     }
 
     const auto res = std::make_shared<RendererImpl>();
-    if (!res->initialize(width, height, useSubWindow, egl2egl)) {
+    if (!res->initialize(width, height, useSubWindow, egl2egl, vm_operations)) {
         return nullptr;
     }
     mRenderer = res;
