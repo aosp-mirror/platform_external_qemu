@@ -20,8 +20,7 @@
 #include "android/emulation/control/sensors_agent.h"
 #include "android/hw-sensors.h"
 
-#include <glm/gtx/euler_angles.hpp>
-#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 namespace android {
 namespace physics {
