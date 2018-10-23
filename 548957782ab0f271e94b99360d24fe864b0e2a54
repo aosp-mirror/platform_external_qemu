@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "81c778cb_7b0d7f55",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 550,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-23T18:39:17Z",
+      "side": 1,
+      "message": "nit: early return to save on indents and improve readability by a bit\n\nif (!mInputHandler) return false;\nif (!controlKey) return false;",
+      "range": {
+        "startLine": 550,
+        "startChar": 0,
+        "endLine": 550,
+        "endChar": 24
+      },
+      "revId": "548957782ab0f271e94b99360d24fe864b0e2a54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
