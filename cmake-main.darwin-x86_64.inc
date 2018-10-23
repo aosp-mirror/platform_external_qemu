@@ -1413,6 +1413,7 @@ set(qemu-system-aarch64_sources ""
    hw/misc/aspeed_sdmc.c
    hw/misc/goldfish_battery.c
    hw/misc/goldfish_pipe.c
+   hw/pci/goldfish_address_space.c
    hw/misc/goldfish_sync.c
    hw/misc/goldfish_pstore.c
    hw/misc/mmio_interface.c
@@ -1763,6 +1764,7 @@ set(qemu-system-arm_sources ""
    hw/misc/aspeed_sdmc.c
    hw/misc/goldfish_battery.c
    hw/misc/goldfish_pipe.c
+   hw/pci/goldfish_address_space.c
    hw/misc/goldfish_sync.c
    hw/misc/goldfish_pstore.c
    hw/misc/mmio_interface.c
@@ -2045,6 +2047,7 @@ set(qemu-system-i386_sources ""
    hw/misc/pvpanic.c
    hw/misc/goldfish_battery.c
    hw/misc/goldfish_pipe.c
+   hw/pci/goldfish_address_space.c
    hw/misc/goldfish_sync.c
    hw/misc/goldfish_pstore.c
    hw/misc/mmio_interface.c
@@ -2231,6 +2234,7 @@ set(qemu-system-mips64el_sources ""
    hw/misc/mips_itu.c
    hw/misc/goldfish_battery.c
    hw/misc/goldfish_pipe.c
+   hw/pci/goldfish_address_space.c
    hw/misc/goldfish_sync.c
    hw/misc/goldfish_pstore.c
    hw/misc/mmio_interface.c
@@ -2379,6 +2383,7 @@ set(qemu-system-mipsel_sources ""
    hw/misc/mips_itu.c
    hw/misc/goldfish_battery.c
    hw/misc/goldfish_pipe.c
+   hw/pci/goldfish_address_space.c
    hw/misc/goldfish_sync.c
    hw/misc/goldfish_pstore.c
    hw/misc/mmio_interface.c
@@ -2516,6 +2521,7 @@ set(qemu-system-x86_64_sources ""
    hw/misc/pvpanic.c
    hw/misc/goldfish_battery.c
    hw/misc/goldfish_pipe.c
+   hw/pci/goldfish_address_space.c
    hw/misc/goldfish_sync.c
    hw/misc/goldfish_pstore.c
    hw/misc/mmio_interface.c
@@ -2731,7 +2737,7 @@ set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/block
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/mem/trace.c ${ANDROID_QEMU2_TOP_DIR}/hw/mem/nvdimm.c ${ANDROID_QEMU2_TOP_DIR}/hw/mem/pc-dimm.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/mem")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/fpu/softfloat.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/fpu")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/nbd/trace.c ${ANDROID_QEMU2_TOP_DIR}/nbd/client.c ${ANDROID_QEMU2_TOP_DIR}/nbd/server.c ${ANDROID_QEMU2_TOP_DIR}/nbd/common.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/nbd")
-set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/misc/trace.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/arm_sysctl.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/arm_l2x0.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/mips_itu.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/bcm2835_rng.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/mst_fpga.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/stm32f2xx_syscfg.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/cbus.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/sga.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/goldfish_pstore.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/max111x.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/zynq_slcr.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/arm11scu.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx7_snvs.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/tmp421.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx7_gpr.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/mips_cpc.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/edu.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/unimp.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/mmio_interface.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx7_ccm.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/mps2-scc.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/tmp105.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/auxbus.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/omap_l4.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx25_ccm.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/omap_gpmc.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/bcm2835_property.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/tz-ppc.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/goldfish_battery.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx6_src.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/exynos4210_rng.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/applesmc.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/mips_cmgcr.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/omap_tap.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/pc-testdev.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/mps2-fpgaio.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx2_wdt.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/vmcoreinfo.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/goldfish_sync.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx31_ccm.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/aspeed_scu.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/goldfish_pipe.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/iotkit-secctl.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx_ccm.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/debugexit.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/bcm2835_mbox.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/a9scu.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/exynos4210_pmu.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/msf2-sysreg.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/omap_sdrc.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/omap_clk.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/aspeed_sdmc.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/pci-testdev.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/pvpanic.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/exynos4210_clk.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/arm_integrator_debug.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx6_ccm.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/zynq-xadc.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/misc")
+set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/misc/trace.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/arm_sysctl.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/arm_l2x0.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/mips_itu.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/bcm2835_rng.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/mst_fpga.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/stm32f2xx_syscfg.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/cbus.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/sga.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/goldfish_pstore.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/max111x.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/zynq_slcr.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/arm11scu.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx7_snvs.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/tmp421.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx7_gpr.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/mips_cpc.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/edu.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/unimp.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/mmio_interface.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx7_ccm.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/mps2-scc.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/tmp105.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/auxbus.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/omap_l4.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx25_ccm.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/omap_gpmc.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/bcm2835_property.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/tz-ppc.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/goldfish_battery.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx6_src.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/exynos4210_rng.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/applesmc.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/mips_cmgcr.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/omap_tap.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/pc-testdev.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/mps2-fpgaio.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx2_wdt.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/vmcoreinfo.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/goldfish_sync.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx31_ccm.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/aspeed_scu.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/goldfish_pipe.c ${ANDROID_QEMU2_TOP_DIR}/hw/pci/goldfish_address_space.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/iotkit-secctl.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx_ccm.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/debugexit.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/bcm2835_mbox.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/a9scu.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/exynos4210_pmu.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/msf2-sysreg.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/omap_sdrc.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/omap_clk.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/aspeed_sdmc.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/pci-testdev.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/pvpanic.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/exynos4210_clk.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/arm_integrator_debug.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/imx6_ccm.c ${ANDROID_QEMU2_TOP_DIR}/hw/misc/zynq-xadc.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/misc")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/trace/generated-helpers.c ${ANDROID_QEMU2_TOP_DIR}/trace/qmp.c ${ANDROID_QEMU2_TOP_DIR}/trace/control-target.c ${ANDROID_QEMU2_TOP_DIR}/trace/control.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/trace")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/sparc/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/sparc")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/gpio/pl061.c ${ANDROID_QEMU2_TOP_DIR}/hw/gpio/imx_gpio.c ${ANDROID_QEMU2_TOP_DIR}/hw/gpio/gpio_key.c ${ANDROID_QEMU2_TOP_DIR}/hw/gpio/max7310.c ${ANDROID_QEMU2_TOP_DIR}/hw/gpio/zaurus.c ${ANDROID_QEMU2_TOP_DIR}/hw/gpio/omap_gpio.c ${ANDROID_QEMU2_TOP_DIR}/hw/gpio/bcm2835_gpio.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/hw/gpio")

@@ -1422,3 +1422,6 @@ glUnmapBufferDMA
     flag custom_decoder
     flag not_api
 
+glFlushMappedBufferRangeDMA
+    flag custom_decoder
+    flag not_api

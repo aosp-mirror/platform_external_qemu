@@ -82,7 +82,4 @@ add_subdirectory(shared/OpenglCodecCommon)
 add_subdirectory(shared/emugl/common)
 
 if(NOT ANDROID_TARGET_TAG MATCHES "windows.*")
-  add_subdirectory(guest)
-  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../../device/generic/goldfish-opengl goldfish-opengl)
-  add_subdirectory(combined)
 endif()

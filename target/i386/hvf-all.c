@@ -349,7 +349,10 @@ static hv_memory_flags_t user_backed_flags_to_hvf_flags(int flags) {
 }
 
 static void hvf_user_backed_ram_map(uint64_t gpa, void* hva, uint64_t size, int flags) {
-    hvf_map_safe(hva, gpa, size, user_backed_flags_to_hvf_flags(flags));
+    uint64_t res = hvf_map_safe(hva, gpa, size, user_backed_flags_to_hvf_flags(flags));
+    if (res != HV_SUCCESS) {
+        fprintf(stderr, "%s: error: 0x%llx\n", __func__, (unsigned long long)res);
+    }
 }
 
 static void hvf_user_backed_ram_unmap(uint64_t gpa, uint64_t size) {
@@ -1038,6 +1041,7 @@ again:
                 hvf_slot *slot;
                 addr_t gpa = rvmcs(cpu->hvf_fd, VMCS_GUEST_PHYSICAL_ADDRESS);
 
+
                 if ((idtvec_info & VMCS_IDT_VEC_VALID) == 0 && (exit_qual & EXIT_QUAL_NMIUDTI) != 0)
                     vmx_set_nmi_blocking(cpu);
 
@@ -1055,6 +1059,8 @@ again:
                            decode.opcode[0], decode.opcode[1], decode.modrm.byte, decode.len, gpa);
 #endif
                     exec_instruction(cpu, &decode);
+                    hv_vcpu_invalidate_tlb(cpu->hvf_fd);
+                    hv_vcpu_flush(cpu->hvf_fd);
                     store_regs(cpu);
                     break;
                 }
