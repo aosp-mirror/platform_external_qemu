@@ -11,6 +11,7 @@
 
 #include "android/physics/InertialModel.h"
 
+#include "android/base/testing/GlmTestHelpers.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
@@ -23,6 +24,11 @@
 using android::base::TestSystem;
 using android::base::System;
 using android::physics::InertialModel;
+
+constexpr ParameterValueType kValueTypes[] = {
+        PARAMETER_VALUE_TYPE_TARGET, PARAMETER_VALUE_TYPE_CURRENT,
+        PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION,
+        PARAMETER_VALUE_TYPE_DEFAULT};
 
 #define EXPECT_QUAT_NEAR(expected, actual, epsilon) {\
     glm::quat zero = glm::conjugate(expected) * actual;\
@@ -42,18 +48,45 @@ TEST(InertialModel, DefaultPosition) {
     InertialModel inertialModel;
     inertialModel.setCurrentTime(1000000000UL);
 
-    EXPECT_EQ(glm::vec3(0.f, 0.f, 0.f), inertialModel.getPosition());
-    EXPECT_EQ(glm::quat(1.f, 0.f, 0.f, 0.f), inertialModel.getRotation());
+    for (auto valueType : kValueTypes) {
+        SCOPED_TRACE(testing::Message() << "valueType=" << valueType);
+
+        EXPECT_EQ(inertialModel.getPosition(valueType),
+                  glm::vec3(0.f, 0.f, 0.f));
+        EXPECT_EQ(inertialModel.getRotation(valueType),
+                  glm::quat(1.f, 0.f, 0.f, 0.f));
+    }
 }
 
-TEST(InertialModel, DefaultAccelerationAndRotationalVelocity) {
+TEST(InertialModel, kDefaultVelocityAndAcceleration) {
     TestSystem mTestSystem("/", System::kProgramBitness);
 
     InertialModel inertialModel;
     inertialModel.setCurrentTime(1000000000UL);
 
-    EXPECT_EQ(glm::vec3(0.f, 0.0f, 0.f), inertialModel.getAcceleration());
-    EXPECT_EQ(glm::vec3(0.f, 0.f, 0.f), inertialModel.getRotationalVelocity());
+    for (auto valueType : kValueTypes) {
+        SCOPED_TRACE(testing::Message() << "valueType=" << valueType);
+
+        EXPECT_EQ(inertialModel.getVelocity(valueType),
+                  glm::vec3(0.f, 0.f, 0.f));
+        EXPECT_EQ(inertialModel.getRotationalVelocity(valueType),
+                  glm::vec3(0.f, 0.f, 0.f));
+        EXPECT_EQ(inertialModel.getAcceleration(valueType),
+                  glm::vec3(0.f, 0.f, 0.f));
+    }
+}
+
+TEST(InertialModel, DefaultAmbientMotion) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+
+    InertialModel inertialModel;
+    inertialModel.setCurrentTime(1000000000UL);
+
+    for (auto valueType : kValueTypes) {
+        SCOPED_TRACE(testing::Message() << "valueType=" << valueType);
+
+        EXPECT_EQ(inertialModel.getAmbientMotion(valueType), 0.0f);
+    }
 }
 
 TEST(InertialModel, ConvergeToPosition) {

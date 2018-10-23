@@ -17,14 +17,17 @@
 #include "android/automation/proto/automation.pb.h"
 #include "android/base/Debug.h"
 #include "android/base/files/MemStream.h"
+#include "android/base/testing/GlmTestHelpers.h"
+#include "android/base/testing/ProtobufMatchers.h"
 #include "android/physics/InertialModel.h"
 #include "android/physics/physical_state_agent.h"
 #include "android/utils/stream.h"
 
-#include <glm/vec3.hpp>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <gtest/gtest.h>
+#include <glm/vec3.hpp>
 
 #include <assert.h>
 
@@ -367,6 +370,37 @@ static constexpr float kPressureOverride = 16.f;
 static constexpr float kHumidityOverride = 17.f;
 static constexpr vec3 kMagneticUncalibratedOverride = {18.f, 19.f, 20.f};
 static constexpr vec3 kGyroUncalibratedOverride = {21.f, 22.f, 23.f};
+
+TEST(PhysicalModel, SaveLoadStateDefaultValues) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    PhysicalModel* model = physicalModel_new();
+
+    emulator_automation::InitialState state;
+    physicalModel_saveState(model, &state);
+
+    physicalModel_free(model);
+
+    // Initial state should not contain any values if everything is in a default
+    // state.
+    EXPECT_THAT(state,
+                android::EqualsProto(
+                        emulator_automation::InitialState::default_instance()));
+    EXPECT_EQ(state.ByteSize(), 0);
+
+    PhysicalModel* loadedModel = physicalModel_new();
+
+    static constexpr vec3 kPosition = {1.f, 2.f, 3.f};
+    physicalModel_setTargetPosition(loadedModel, kPosition,
+                                    PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_loadState(loadedModel, state);
+
+    // Validate that the position parameter was reset when loading state.
+    vec3 loadedPosition = physicalModel_getParameterPosition(
+            loadedModel, PARAMETER_VALUE_TYPE_TARGET);
+    EXPECT_VEC3_NEAR(loadedPosition, kVecZero, 0.000001f);
+
+    physicalModel_free(loadedModel);
+}
 
 static void applyOverrides(PhysicalModel* model) {
     physicalModel_overrideAccelerometer(model, kAccelOverride);
