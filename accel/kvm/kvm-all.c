@@ -919,6 +919,8 @@ static void kvm_user_backed_ram_map(uint64_t gpa, void* hva, uint64_t size, int 
     KVMMemoryListener* kml;
     int err;
 
+    fprintf(stderr, "rkir %s:%d gpa=0x%lX hva=%p size=%lu\n", __func__, __LINE__, gpa, hva, size);
+
     if (!kvm_state) {
         qemu_abort("%s: attempted to map RAM before KVM initialized\n", __func__);
     }
@@ -934,6 +936,7 @@ static void kvm_user_backed_ram_map(uint64_t gpa, void* hva, uint64_t size, int 
     err = kvm_set_user_memory_region(kml, slot);
 
     if (err) {
+        fprintf(stderr, "rkir %s:%d error registering slot %s\n", __func__, __LINE__, strerror(-err));
         qemu_abort("%s: error registering slot: %s\n", __func__,
                 strerror(-err));
     }
@@ -944,6 +947,8 @@ static void kvm_user_backed_ram_unmap(uint64_t gpa, uint64_t size) {
     KVMMemoryListener* kml;
     int err;
 
+    fprintf(stderr, "rkir %s:%d gpa=0x%lX size=%lu\n", __func__, __LINE__, gpa, size);
+
     if (!kvm_state) {
         qemu_abort("%s: attempted to map RAM before KVM initialized\n", __func__);
     }
@@ -952,6 +957,7 @@ static void kvm_user_backed_ram_unmap(uint64_t gpa, uint64_t size) {
 
     slot = kvm_lookup_matching_slot(kml, gpa, size);
     if (!slot) {
+        fprintf(stderr, "rkir %s:%d gpa=0x%lX size=%lu\n", __func__, __LINE__, gpa, size);
         return;
     }
 
@@ -959,6 +965,7 @@ static void kvm_user_backed_ram_unmap(uint64_t gpa, uint64_t size) {
     slot->memory_size = 0;
     err = kvm_set_user_memory_region(kml, slot);
     if (err) {
+        fprintf(stderr, "rkir %s:%d gpa=0x%lX size=%lu\n", __func__, __LINE__, gpa, size);
         qemu_abort("%s: error unregistering slot: %s\n",
                 __func__, strerror(-err));
     }

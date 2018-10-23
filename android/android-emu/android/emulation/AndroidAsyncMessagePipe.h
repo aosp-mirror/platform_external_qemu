@@ -16,6 +16,7 @@
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/emulation/control/vm_operations.h"
 #include "android/emulation/AndroidPipe.h"
 
 #include <array>

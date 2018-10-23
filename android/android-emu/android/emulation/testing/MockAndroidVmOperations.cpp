@@ -56,8 +56,12 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
                     return android::MockAndroidVmOperations::mock
                             ->setSnapshotCallbacks(opaque, callbacks);
                 },
-        .mapUserBackedRam = [](uint64_t gpa, void* hva, uint64_t size) {},
-        .unmapUserBackedRam = [](uint64_t gpa, uint64_t size) {},
+        .mapUserBackedRam = [](uint64_t gpa, void* hva, uint64_t size) {
+                                fprintf(stderr, "rkir %s:%d gpa=%08lX hva=%p size=%lu\n", __func__, __LINE__, gpa, hva, size);
+                            },
+        .unmapUserBackedRam = [](uint64_t gpa, uint64_t size) {
+                                  fprintf(stderr, "rkir %s:%d gpa=%08lX size=%lu\n", __func__, __LINE__, gpa, size);
+                              },
         .getVmConfiguration = nullptr,  // Not currently mocked.
         .setFailureReason = nullptr,    // Not currently mocked.
         .setExiting = nullptr,          // Not currently mocked.
