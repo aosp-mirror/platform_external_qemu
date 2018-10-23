@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "239f0c38_c0727f10",
+        "filename": "include/sysemu/replay.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-23T21:07:37Z",
+      "side": 0,
+      "message": "Where does ReplayClockKind come from? Why not change that to unsigned int?",
+      "revId": "0ecc704c52bc4ee4d488a69aca74bfba98c82053",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
