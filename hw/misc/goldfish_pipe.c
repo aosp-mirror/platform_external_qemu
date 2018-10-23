@@ -39,6 +39,7 @@
 #include "qemu/timer.h"
 #include "qemu/error-report.h"
 
+#include "exec/address-spaces.h"
 #include <assert.h>
 #include <glib.h>
 
@@ -249,6 +250,7 @@ static const PipeOperations pipe_ops_v1;
 typedef struct {
     SysBusDevice parent;
     MemoryRegion iomem;
+    MemoryRegion hostmem;
     qemu_irq irq;
 
     /* TODO: roll into shared state */
@@ -1694,6 +1696,12 @@ static void goldfish_pipe_realize(DeviceState* dev, Error** errp) {
                           "goldfish_pipe", 0x2000 /*TODO: ?how big?*/);
     sysbus_init_mmio(sbdev, &s->iomem);
     sysbus_init_irq(sbdev, &s->irq);
+
+    void* testPtr = qemu_memalign(0x1000, 0x1000);
+    memset(testPtr, 0xaa, 0x1000);
+    memory_region_init_ram_ptr(&s->hostmem, OBJECT(s), "goldfish_pipe_hostmem", 0x1000, testPtr);
+    memory_region_add_subregion_overlap(get_system_memory(), 0xff030000, &s->hostmem, 666);
+    fprintf(stderr, "%s: added hostmem\n", __func__);
 
     register_savevm_with_post_load(
             dev, "goldfish_pipe", 0, GOLDFISH_PIPE_SAVE_VERSION,
