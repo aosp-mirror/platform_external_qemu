@@ -17,8 +17,6 @@
 #include "android/physics/PhysicalModel.h"
 
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/euler_angles.hpp>
-#include <glm/gtx/quaternion.hpp>
 #include <glm/vec3.hpp>
 
 #include "android/automation/AutomationController.h"
@@ -490,10 +488,7 @@ void PhysicalModelImpl::setTargetInternalRotation(vec3 rotation,
     {
         std::lock_guard<std::recursive_mutex> lock(mMutex);
         mInertialModel.setTargetRotation(
-                glm::toQuat(glm::eulerAngleXYZ(glm::radians(rotation.x),
-                                               glm::radians(rotation.y),
-                                               glm::radians(rotation.z))),
-                mode);
+                fromEulerAnglesXYZ(glm::radians(toGlm(rotation))), mode);
     }
     targetStateChanged();
 }
@@ -580,10 +575,8 @@ float PhysicalModelImpl::getParameterAmbientMotion(
 vec3 PhysicalModelImpl::getParameterRotation(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    glm::vec3 rotationRadians;
-    glm::extractEulerAngleXYZ(
-            glm::mat4_cast(mInertialModel.getRotation(parameterValueType)),
-            rotationRadians.x, rotationRadians.y, rotationRadians.z);
+    const glm::vec3 rotationRadians =
+            toEulerAnglesXYZ(mInertialModel.getRotation(parameterValueType));
     return fromGlm(glm::degrees(rotationRadians));
 }
 
@@ -680,7 +673,7 @@ vec3 PhysicalModelImpl::getPhysicalMagnetometer() const {
 
 /* (x, y, z) == (azimuth, pitch, roll) */
 vec3 PhysicalModelImpl::getPhysicalOrientation() const {
-    return fromGlm(glm::eulerAngles(mInertialModel.getRotation()));
+    return fromGlm(toEulerAnglesXYZ(mInertialModel.getRotation()));
 }
 
 float PhysicalModelImpl::getPhysicalTemperature() const {
