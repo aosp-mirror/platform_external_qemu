@@ -19,6 +19,7 @@
 #include "android/base/Optional.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/emulation/control/vm_operations.h"
 #include "emugl/common/mutex.h"
 #include "emugl/common/thread.h"
 
@@ -38,8 +39,9 @@ class RenderThread : public emugl::Thread {
 
 public:
     // Create a new RenderThread instance.
-    explicit RenderThread(RenderChannelImpl* channel,
-                          android::base::Stream* loadStream = nullptr);
+    RenderThread(RenderChannelImpl* channel,
+                 const QAndroidVmOperations *vm_operations,
+                 android::base::Stream* loadStream = nullptr);
 
     virtual ~RenderThread();
 
@@ -82,6 +84,7 @@ private:
     android::base::Lock mLock;
     android::base::ConditionVariable mCondVar;
     android::base::Optional<android::base::MemStream> mStream;
+    const QAndroidVmOperations* mVmOperations;
 };
 
 }  // namespace emugl
