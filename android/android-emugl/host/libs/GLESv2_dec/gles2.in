@@ -1,3 +1,7 @@
+# Run ./android/android-emugl/scripts/update-emugl-sources.sh to regenerate encoders and decoders
+# e.g.:
+# ./android/android-emugl/scripts/update-emugl-sources.sh --emugen=./objs/emugen --aosp-dir=/path/to/repo-aosp-master
+
 GL_ENTRY(void, glActiveTexture, GLenum texture)
 GL_ENTRY(void, glAttachShader, GLuint program, GLuint shader)
 GL_ENTRY(void, glBindAttribLocation, GLuint program, GLuint index, const GLchar* name)
@@ -561,3 +565,8 @@ GL_ENTRY(void, glGetTexLevelParameteriv, GLenum target, GLint level, GLenum pnam
 # DMA support for glMapBufferRange
 GL_ENTRY(void, glMapBufferRangeDMA, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr)
 GL_ENTRY(void, glUnmapBufferDMA, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr, GLboolean* out_res)
+
+# Direct memory access GL functions
+GL_ENTRY(uint64_t, glMapBufferRangeDirect, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr)
+GL_ENTRY(void, glUnmapBufferDirect, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr, uint64_t guest_ptr, GLboolean* out_res)
+GL_ENTRY(void, glFlushMappedBufferRangeDirect, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access)
