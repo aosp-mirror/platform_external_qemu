@@ -368,9 +368,13 @@ android_target_link_libraries(android-qemu-deps windows-x86_64 INTERFACE "-lwinm
 
 set(ANDROID_AUTOGEN "qemu2-auto-generated")
 set(ANDROID_QEMU2_TOP_DIR ${ANDROID_QEMU2_TOP_DIR})
+
+# Sources that we do not include in qemu Makefile.objs
+set(qemu2-goldfish_sources hw/pci/goldfish_address_space.c)
+
 include(cmake-main.${ANDROID_TARGET_TAG}.inc)
 
-set(libqemu2-common_src ${qemu2-shared_sources} ${qemu2-shared_generated_sources})
+set(libqemu2-common_src ${qemu2-goldfish_sources} ${qemu2-shared_sources} ${qemu2-shared_generated_sources})
 android_add_library(libqemu2-common)
 target_compile_definitions(libqemu2-common PRIVATE "-DPOISON_CONFIG_ANDROID")
 target_link_libraries(libqemu2-common PUBLIC android-qemu-deps)
