@@ -136,10 +136,12 @@ DeviceState *qdev_try_create(BusState *bus, const char *type)
     DeviceState *dev;
 
     if (object_class_by_name(type) == NULL) {
+        error_report("object_class_by_name('%s') failed", type);
         return NULL;
     }
     dev = DEVICE(object_new(type));
     if (!dev) {
+        error_report("object_new('%s') failed", type);
         return NULL;
     }
 
