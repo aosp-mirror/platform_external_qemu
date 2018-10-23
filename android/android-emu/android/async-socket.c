@@ -693,7 +693,7 @@ _async_socket_close_socket(AsyncSocket* as)
     if (as->fd >= 0) {
         T("ASocket %s: Socket handle %d is closed.",
           _async_socket_string(as), as->fd);
-        loopIo_free(as->io);
+        if (as->io) loopIo_free(as->io);
         as->io = NULL;
         socket_close(as->fd);
         as->fd = -1;
@@ -811,7 +811,7 @@ _on_async_socket_recv(AsyncSocket* as)
     AsyncSocketIO* const asr = as->readers_head;
     if (asr == NULL) {
         D("ASocket %s: No reader is available.", _async_socket_string(as, tmp, sizeof(tmp)));
-        loopIo_dontWantRead(as->io);
+        if (as->io) loopIo_dontWantRead(as->io);
         return 0;
     }
 
@@ -858,7 +858,7 @@ _on_async_socket_recv(AsyncSocket* as)
     if (res < 0) {
         if (errno == EWOULDBLOCK || errno == EAGAIN) {
             /* Yield to writes behind this read. */
-            loopIo_wantRead(as->io);
+            if (as->io) loopIo_wantRead(as->io);
             async_socket_io_release(asr);
             return 0;
         }
@@ -927,7 +927,7 @@ _on_async_socket_send(AsyncSocket* as)
     AsyncSocketIO* const asw = as->writers_head;
     if (asw == NULL) {
         D("ASocket %s: No writer is available.", _async_socket_string(as, tmp, sizeof(tmp)));
-        loopIo_dontWantWrite(as->io);
+        if (as->io) loopIo_dontWantWrite(as->io);
         return 0;
     }
 
@@ -974,7 +974,7 @@ _on_async_socket_send(AsyncSocket* as)
     if (res < 0) {
         if (errno == EWOULDBLOCK || errno == EAGAIN) {
             /* Yield to reads behind this write. */
-            loopIo_wantWrite(as->io);
+            if (as->io) loopIo_wantWrite(as->io);
             async_socket_io_release(asw);
             return 0;
         }
@@ -1253,7 +1253,7 @@ async_socket_read_abs(AsyncSocket* as,
             as->readers_tail->next = asr;
             as->readers_tail = asr;
         }
-        loopIo_wantRead(as->io);
+        if (as->io) loopIo_wantRead(as->io);
     } else {
         D("ASocket %s: Read on a disconnected socket.", _async_socket_string(as, tmp, sizeof(tmp)));
         errno = ECONNRESET;
@@ -1297,7 +1297,7 @@ async_socket_write_abs(AsyncSocket* as,
             as->writers_tail->next = asw;
             as->writers_tail = asw;
         }
-        loopIo_wantWrite(as->io);
+        if (as->io) loopIo_wantWrite(as->io);
     } else {
         D("ASocket %s: Write on a disconnected socket.", _async_socket_string(as, tmp, sizeof(tmp)));
         errno = ECONNRESET;
