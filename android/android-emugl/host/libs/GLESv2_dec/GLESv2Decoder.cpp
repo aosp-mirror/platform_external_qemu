@@ -21,6 +21,7 @@
 #include "android/base/synchronization/Lock.h"
 
 #include "emugl/common/dma_device.h"
+#include "emugl/common/vm_operations.h"
 
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
@@ -120,6 +121,9 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glMapBufferRangeDMA = s_glMapBufferRangeDMA;
     glUnmapBufferDMA = s_glUnmapBufferDMA;
     glFlushMappedBufferRangeAEMU = s_glFlushMappedBufferRangeAEMU;
+    glMapBufferRangeDirect = s_glMapBufferRangeDirect;
+    glUnmapBufferDirect = s_glUnmapBufferDirect;
+    glFlushMappedBufferRangeDirect = s_glFlushMappedBufferRangeDirect;
     glCompressedTexImage2DOffsetAEMU = s_glCompressedTexImage2DOffsetAEMU;
     glCompressedTexSubImage2DOffsetAEMU = s_glCompressedTexSubImage2DOffsetAEMU;
     glTexImage2DOffsetAEMU = s_glTexImage2DOffsetAEMU;
@@ -405,6 +409,55 @@ void GLESv2Decoder::s_glUnmapBufferDMA(void* self, GLenum target, GLintptr offse
     }
 }
 
+static std::pair<void*, GLsizeiptr> align_pointer_size(void* ptr, GLsizeiptr length)
+{
+    constexpr size_t PAGE_BITS = 12;
+    constexpr size_t PAGE_SIZE = 1u << PAGE_BITS;
+    constexpr size_t PAGE_OFFSET_MASK = PAGE_SIZE - 1;
+
+    uintptr_t addr = reinterpret_cast<uintptr_t>(ptr);
+    uintptr_t page_offset = addr & PAGE_OFFSET_MASK;
+
+    return { reinterpret_cast<void*>(addr - page_offset),
+             ((length + page_offset + PAGE_SIZE - 1) >> PAGE_BITS) << PAGE_BITS
+           };
+}
+
+uint64_t GLESv2Decoder::s_glMapBufferRangeDirect(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr)
+{
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    // Check if this is a read or write request and not an invalidate one.
+    if (access & (GL_MAP_READ_BIT | GL_MAP_WRITE_BIT)) {
+        void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
+
+        if (gpu_ptr) {
+            std::pair<void*, GLsizeiptr> aligned = align_pointer_size(gpu_ptr, length);
+            get_emugl_vm_operations().mapUserBackedRam(paddr, aligned.first, aligned.second);
+            return reinterpret_cast<uint64_t>(gpu_ptr);
+        } else {
+            fprintf(stderr, "%s: error: could not map host gpu buffer\n", __func__);
+            return 0;
+        }
+    } else {
+        // if writing while not wanting to preserve previous contents,
+        // let |mapped| stay as garbage.
+        return 0;
+    }
+}
+
+void GLESv2Decoder::s_glUnmapBufferDirect(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr, uint64_t gpu_ptr, GLboolean* out_res)
+{
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    GLboolean res = GL_TRUE;
+
+    if (access & (GL_MAP_READ_BIT | GL_MAP_WRITE_BIT)) {
+        get_emugl_vm_operations().unmapUserBackedRam(paddr, align_pointer_size(reinterpret_cast<void*>(gpu_ptr), length).second);
+        res = ctx->glUnmapBuffer(target);
+    }
+
+    *out_res = res;
+}
+
 void GLESv2Decoder::s_glFlushMappedBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer) {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     if (!guest_buffer) fprintf(stderr, "%s: error: wanted to write to a mapped buffer with NULL!\n", __FUNCTION__);
@@ -420,6 +473,11 @@ void GLESv2Decoder::s_glFlushMappedBufferRangeAEMU(void* self, GLenum target, GL
     // |offset| was the absolute offset into the mapping, so just flush offset 0.
     ctx->glFlushMappedBufferRange(target, 0, length);
     ctx->glUnmapBuffer(target);
+}
+
+void GLESv2Decoder::s_glFlushMappedBufferRangeDirect(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glFlushMappedBufferRange(target, offset, length);
 }
 
 void GLESv2Decoder::s_glCompressedTexImage2DOffsetAEMU(void* self, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, GLuint offset) {

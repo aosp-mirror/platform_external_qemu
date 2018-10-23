@@ -502,13 +502,23 @@ static void set_snapshot_callbacks(void* opaque,
 static void map_user_backed_ram(uint64_t gpa, void* hva, uint64_t size) {
     android::RecursiveScopedVmLock vmlock;
 
+    const bool wasRunning = runstate_is_running() != 0;
+    if (wasRunning) { vm_stop(RUN_STATE_SAVE_VM); }
+
     qemu_user_backed_ram_map(gpa, hva, size, USER_BACKED_RAM_FLAGS_READ | USER_BACKED_RAM_FLAGS_WRITE);
+
+    if (wasRunning) { vm_start(); }
 }
 
 static void unmap_user_backed_ram(uint64_t gpa, uint64_t size) {
     android::RecursiveScopedVmLock vmlock;
 
+    const bool wasRunning = runstate_is_running() != 0;
+    if (wasRunning) { vm_stop(RUN_STATE_SAVE_VM); }
+
     qemu_user_backed_ram_unmap(gpa, size);
+
+    if (wasRunning) { vm_start(); }
 }
 
 static void get_vm_config(VmConfiguration* out) {
