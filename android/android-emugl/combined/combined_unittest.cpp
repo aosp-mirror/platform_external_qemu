@@ -18,6 +18,7 @@
 #include "android/base/system/System.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/hostpipe/HostGoldfishPipe.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/opengles.h"
 #include "android/opengles-pipe.h"
 #include "android/opengl/emugl_config.h"
@@ -58,6 +59,13 @@ static constexpr int kWindowSize = 256;
 class GoldfishOpenglTestEnv {
 public:
     GoldfishOpenglTestEnv() {
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::GLESDynamicVersion, false);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::GLDMA, false);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::GLAsyncSwap, false);
+
         EmuglConfig config;
 
         emuglConfig_init(&config, true /* gpu enabled */, "auto",
