@@ -211,6 +211,13 @@ LogStream& LogStream::operator<<(unsigned long long v) {
     return *this;
 }
 
+LogStream& LogStream::operator<<(float v) {
+    char temp[20];
+    int ret = snprintf(temp, sizeof temp, "%f", v);
+    append(temp, static_cast<size_t>(ret));
+    return *this;
+}
+
 LogStream& LogStream::operator<<(android::base::StringView v) {
     if (!v.empty()) {
         append(v.data(), v.size());

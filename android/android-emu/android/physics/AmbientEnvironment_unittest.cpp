@@ -11,6 +11,7 @@
 
 #include "android/physics/AmbientEnvironment.h"
 
+#include "android/base/testing/GlmTestHelpers.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
@@ -26,16 +27,26 @@ TEST(AmbientEnvironment, DefaultParameters) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     mTestSystem.setLiveUnixTime(false);
     mTestSystem.setUnixTime(1);
+
     AmbientEnvironment ambientEnvironment;
-    EXPECT_EQ(glm::vec3(0.0f, 5.9f, -48.4f),
-            ambientEnvironment.getMagneticField());
-    EXPECT_EQ(glm::vec3(0.f, -9.81f, 0.f),
-            ambientEnvironment.getGravity());
-    EXPECT_EQ(0.f, ambientEnvironment.getTemperature());
-    EXPECT_EQ(1.f, ambientEnvironment.getProximity());
-    EXPECT_EQ(0.f, ambientEnvironment.getLight());
-    EXPECT_EQ(0.f, ambientEnvironment.getPressure());
-    EXPECT_EQ(0.f, ambientEnvironment.getHumidity());
+
+    constexpr ParameterValueType valueTypes[] = {
+            PARAMETER_VALUE_TYPE_TARGET, PARAMETER_VALUE_TYPE_CURRENT,
+            PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION,
+            PARAMETER_VALUE_TYPE_DEFAULT};
+    for (auto valueType : valueTypes) {
+        SCOPED_TRACE(testing::Message() << "valueType=" << valueType);
+
+        EXPECT_EQ(glm::vec3(0.0f, 5.9f, -48.4f),
+                  ambientEnvironment.getMagneticField(valueType));
+        EXPECT_EQ(glm::vec3(0.f, -9.81f, 0.f),
+                  ambientEnvironment.getGravity(valueType));
+        EXPECT_EQ(0.f, ambientEnvironment.getTemperature(valueType));
+        EXPECT_EQ(1.f, ambientEnvironment.getProximity(valueType));
+        EXPECT_EQ(0.f, ambientEnvironment.getLight(valueType));
+        EXPECT_EQ(0.f, ambientEnvironment.getPressure(valueType));
+        EXPECT_EQ(0.f, ambientEnvironment.getHumidity(valueType));
+    }
 }
 
 TEST(AmbientEnvironment, SetMagneticField) {

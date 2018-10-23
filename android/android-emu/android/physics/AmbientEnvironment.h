@@ -108,19 +108,28 @@ public:
             ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
 
 private:
-    glm::vec3 mMagneticField = glm::vec3(0.0f, 5.9f, -48.4f);
-    glm::vec3 mGravity = glm::vec3(0.f, -9.81f, 0.f);
+    static constexpr glm::vec3 kDefaultMagneticField =
+            glm::vec3(0.0f, 5.9f, -48.4f);
+    static constexpr glm::vec3 kDefaultGravity = glm::vec3(0.f, -9.81f, 0.f);
 
     /* celsius */
-    float mTemperature = 0.f;
+    static constexpr float kDefaultTemperature = 0.f;
     /* cm */
-    float mProximity = 1.f;
+    static constexpr float kDefaultProximity = 1.f;
     /* lux */
-    float mLight = 0.f;
+    static constexpr float kDefaultLight = 0.f;
     /* hPa */
-    float mPressure = 0.f;
+    static constexpr float kDefaultPressure = 0.f;
     /* percent */
-    float mHumidity = 0.f;
+    static constexpr float kDefaultHumidity = 0.f;
+
+    glm::vec3 mMagneticField = kDefaultMagneticField;
+    glm::vec3 mGravity = kDefaultGravity;
+    float mTemperature = kDefaultTemperature;
+    float mProximity = kDefaultProximity;
+    float mLight = kDefaultLight;
+    float mPressure = kDefaultPressure;
+    float mHumidity = kDefaultHumidity;
 };
 
 }  // namespace physics

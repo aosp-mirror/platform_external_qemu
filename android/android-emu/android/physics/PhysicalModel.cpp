@@ -30,6 +30,7 @@
 #include "android/emulation/control/sensors_agent.h"
 #include "android/hw-sensors.h"
 #include "android/physics/AmbientEnvironment.h"
+#include "android/physics/GlmHelpers.h"
 #include "android/physics/InertialModel.h"
 #include "android/utils/stream.h"
 
@@ -935,34 +936,56 @@ int PhysicalModelImpl::snapshotLoad(Stream* f) {
     return 0;
 }
 
+static bool valueNearEqual(float lhs, float rhs) {
+    return glm::epsilonEqual(lhs, rhs, kPhysicsEpsilon);
+}
+
+static bool valueNearEqual(const vec3& lhs, const vec3& rhs) {
+    return glm::epsilonEqual(lhs.x, rhs.x, kPhysicsEpsilon) &&
+           glm::epsilonEqual(lhs.y, rhs.y, kPhysicsEpsilon) &&
+           glm::epsilonEqual(lhs.z, rhs.z, kPhysicsEpsilon);
+}
+
 template <typename ValueType>
-void serializeState(pb::InitialState* state, PhysicalParameter type,
-                    ValueType currentValue, ValueType targetValue) {
-    pb::PhysicalModelEvent* command = state->add_physical_model();
-    command->set_type(toProto(type));
-    setProtoCurrentValue(command, currentValue);
-    setProtoTargetValue(command, targetValue);
+void serializeState(pb::InitialState* state,
+                    PhysicalParameter type,
+                    ValueType currentValue,
+                    ValueType targetValue,
+                    ValueType defaultValue) {
+    const bool currentEq = valueNearEqual(currentValue, defaultValue);
+    const bool targetEq = valueNearEqual(targetValue, defaultValue);
+
+    if (!currentEq || !targetEq) {
+        pb::PhysicalModelEvent* command = state->add_physical_model();
+        command->set_type(toProto(type));
+        if (!currentEq) {
+            setProtoCurrentValue(command, currentValue);
+        }
+        if (!targetEq) {
+            setProtoTargetValue(command, targetValue);
+        }
+    }
 }
 
 void PhysicalModelImpl::saveState(pb::InitialState* state) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
 
-    // TODO(jwmcglynn): Prune state and only save non-default parameters.
-
     for (int parameter = 0; parameter < MAX_PHYSICAL_PARAMETERS; parameter++) {
         switch (parameter) {
 #define PHYSICAL_PARAMETER_NAME(x) PHYSICAL_PARAMETER_##x
 #define GET_PARAMETER_FUNCTION_NAME(x) getParameter##x
-#define PHYSICAL_PARAMETER_(x, y, z, w)            \
-    case PHYSICAL_PARAMETER_NAME(x): {             \
-        serializeState(                            \
-                state, PHYSICAL_PARAMETER_NAME(x), \
-                GET_PARAMETER_FUNCTION_NAME(z)(PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION),  \
-                GET_PARAMETER_FUNCTION_NAME(z)(PARAMETER_VALUE_TYPE_TARGET)); \
-            break;                                                            \
-        }
+#define PHYSICAL_PARAMETER_(x, y, z, w)                                        \
+    case PHYSICAL_PARAMETER_NAME(x): {                                         \
+        serializeState(                                                        \
+                state, PHYSICAL_PARAMETER_NAME(x),                             \
+                GET_PARAMETER_FUNCTION_NAME(z)(                                \
+                        PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION),       \
+                GET_PARAMETER_FUNCTION_NAME(z)(PARAMETER_VALUE_TYPE_TARGET),   \
+                GET_PARAMETER_FUNCTION_NAME(z)(PARAMETER_VALUE_TYPE_DEFAULT)); \
+        break;                                                                 \
+    }
 
-        PHYSICAL_PARAMETERS_LIST
+            PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef GET_PARAMETER_FUNCTION_NAME
 #undef PHYSICAL_PARAMETER_NAME
@@ -974,6 +997,35 @@ void PhysicalModelImpl::saveState(pb::InitialState* state) {
 }
 
 void PhysicalModelImpl::loadState(const pb::InitialState& state) {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+
+    // To reduce the size of the initial state, the protobuf only contains
+    // non-default values, so first reset the state to default so any missing
+    // values will be reset as well.
+    for (int parameter = 0; parameter < MAX_PHYSICAL_PARAMETERS; parameter++) {
+        switch (parameter) {
+#define PHYSICAL_PARAMETER_NAME(x) PHYSICAL_PARAMETER_##x
+#define SET_TARGET_FUNCTION_NAME(x) setTargetInternal##x
+#define GET_PARAMETER_FUNCTION_NAME(x) getParameter##x
+#define PHYSICAL_PARAMETER_(x, y, z, w)                                       \
+    case PHYSICAL_PARAMETER_NAME(x): {                                        \
+        w value =                                                             \
+                GET_PARAMETER_FUNCTION_NAME(z)(PARAMETER_VALUE_TYPE_DEFAULT); \
+        SET_TARGET_FUNCTION_NAME(z)(value, PHYSICAL_INTERPOLATION_STEP);      \
+        break;                                                                \
+    }
+
+        PHYSICAL_PARAMETERS_LIST
+#undef PHYSICAL_PARAMETER_
+#undef GET_PARAMETER_FUNCTION_NAME
+#undef SET_TARGET_FUNCTION_NAME
+#undef PHYSICAL_PARAMETER_NAME
+            default:
+                assert(false);  // should never happen
+                break;
+        }
+    }
+
     constexpr vec3 kVecZero = {0.f, 0.f, 0.f};
     vec3 currentPosition = {0.f, 0.f, 0.f};
     vec3 targetPosition = {0.f, 0.f, 0.f};
