@@ -21,6 +21,7 @@
 #include "android/base/synchronization/Lock.h"
 
 #include "emugl/common/dma_device.h"
+#include "emugl/common/vm_operations.h"
 
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
@@ -55,6 +56,29 @@ int gles2_decoder_extended_context::initDispatch(
 static StaticLock sLock;
 static GLESv2Decoder::get_proc_func_t sGetProcFunc;
 static void* sGetProcFuncData;
+
+struct MyTimer
+{
+    MyTimer(const char *s) : str(s) { clock_gettime(CLOCK_MONOTONIC, &start); }
+
+    ~MyTimer()
+    {
+        fprintf(stderr, "rkir %s:%d %s took %ld us\n", __func__, __LINE__, str, elapsed_micros());
+    }
+
+    long elapsed_micros() const {
+        struct timespec now;
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        return to_micros(now) - to_micros(start);
+    }
+
+    static long to_micros(const struct timespec &x) {
+        return x.tv_sec * 1000000 + x.tv_nsec / 1000;
+    }
+
+    const char *str;
+    struct timespec start;
+};
 
 namespace {
 
@@ -120,6 +144,7 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glMapBufferRangeDMA = s_glMapBufferRangeDMA;
     glUnmapBufferDMA = s_glUnmapBufferDMA;
     glFlushMappedBufferRangeAEMU = s_glFlushMappedBufferRangeAEMU;
+    glFlushMappedBufferRangeDMA = s_glFlushMappedBufferRangeDMA;
     glCompressedTexImage2DOffsetAEMU = s_glCompressedTexImage2DOffsetAEMU;
     glCompressedTexSubImage2DOffsetAEMU = s_glCompressedTexSubImage2DOffsetAEMU;
     glTexImage2DOffsetAEMU = s_glTexImage2DOffsetAEMU;
@@ -326,6 +351,8 @@ void GLESv2Decoder::s_glDrawElementsOffset(void *self, GLenum mode, GLsizei coun
 
 void GLESv2Decoder::s_glMapBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* mapped)
 {
+    MyTimer timer("glMapBufferRangeAEMU");
+
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     if ((access & GL_MAP_READ_BIT) ||
         ((access & GL_MAP_WRITE_BIT) &&
@@ -349,6 +376,8 @@ void GLESv2Decoder::s_glMapBufferRangeAEMU(void* self, GLenum target, GLintptr o
 
 void GLESv2Decoder::s_glUnmapBufferAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, GLboolean* out_res)
 {
+    MyTimer timer("glUnmapBufferAEMU");
+
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     *out_res = GL_TRUE;
 
@@ -364,48 +393,78 @@ void GLESv2Decoder::s_glUnmapBufferAEMU(void* self, GLenum target, GLintptr offs
     }
 }
 
-void GLESv2Decoder::s_glMapBufferRangeDMA(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr)
+static std::pair<void*, GLsizeiptr> align_pointer_size(void* ptr, GLsizeiptr length)
 {
+    constexpr size_t PAGE_BITS = 12;
+    constexpr size_t PAGE_SIZE = 1u << PAGE_BITS;
+    constexpr size_t PAGE_OFFSET_MASK = PAGE_SIZE - 1;
+
+    uintptr_t addr = reinterpret_cast<uintptr_t>(ptr);
+    uintptr_t page_offset = addr & PAGE_OFFSET_MASK;
+
+    return { reinterpret_cast<void*>(addr - page_offset),
+             ((length + page_offset + PAGE_SIZE - 1) >> PAGE_BITS) << PAGE_BITS
+           };
+}
+
+uint64_t GLESv2Decoder::s_glMapBufferRangeDMA(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr)
+{
+    MyTimer timer("glMapBufferRangeDMA");
+
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     // Check if this is a read or write request and not an invalidate one.
-    if ((access & (GL_MAP_READ_BIT | GL_MAP_WRITE_BIT)) &&
-        !(access & (GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT))) {
-        void* guest_buffer = emugl::g_emugl_dma_get_host_addr(paddr);
-        void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
-
-        // map failed, no need to copy or unmap
-        if (!gpu_ptr) {
-            fprintf(stderr, "%s: error: could not map host gpu buffer\n", __func__);
-            return;
+    if (access & (GL_MAP_READ_BIT | GL_MAP_WRITE_BIT)) {
+        void* gpu_ptr;
+        {
+            MyTimer timer("ctx->glMapBufferRange");
+            gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
+            fprintf(stderr, "%s: gpu ptr: %p length %d\n", __func__, gpu_ptr, length);
+            posix_memalign(&gpu_ptr, 4096, length);
+            fprintf(stderr, "%s: gpu ptr: %p length %d\n", __func__, gpu_ptr, length);
         }
 
-        memcpy(guest_buffer, gpu_ptr, length);
-        ctx->glUnmapBuffer(target);
+        if (gpu_ptr) {
+            std::pair<void*, GLsizeiptr> aligned = align_pointer_size(gpu_ptr, length);
+            {
+                MyTimer timer("mapUserBackedRam");
+                get_emugl_vm_operations().mapUserBackedRam(paddr, aligned.first, aligned.second);
+            }
+            return reinterpret_cast<uint64_t>(gpu_ptr);
+        } else {
+            fprintf(stderr, "%s: error: could not map host gpu buffer\n", __func__);
+            return 0;
+        }
     } else {
         // if writing while not wanting to preserve previous contents,
         // let |mapped| stay as garbage.
+        return 0;
     }
 }
 
-void GLESv2Decoder::s_glUnmapBufferDMA(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr, GLboolean* out_res)
+void GLESv2Decoder::s_glUnmapBufferDMA(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr, uint64_t gpu_ptr, GLboolean* out_res)
 {
-    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-    *out_res = GL_TRUE;
+    MyTimer timer("glUnmapBufferDMA");
 
-    if (access & GL_MAP_WRITE_BIT) {
-        if (!paddr) fprintf(stderr, "%s: error: wanted to write to a mapped buffer with NULL!\n", __FUNCTION__);
-        void* guest_buffer = emugl::g_emugl_dma_get_host_addr(paddr);
-        void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
-        if (!gpu_ptr) {
-            fprintf(stderr, "%s: could not get host gpu pointer!\n", __FUNCTION__);
-            return;
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    GLboolean res = GL_TRUE;
+
+    if (access & (GL_MAP_READ_BIT | GL_MAP_WRITE_BIT)) {
+        {
+            MyTimer timer("unmapUserBackedRam");
+            get_emugl_vm_operations().unmapUserBackedRam(paddr, align_pointer_size(reinterpret_cast<void*>(gpu_ptr), length).second);
         }
-        memcpy(gpu_ptr, guest_buffer, length);
-        *out_res = ctx->glUnmapBuffer(target);
+        {
+            MyTimer timer("ctx->glUnmapBuffer");
+            res = ctx->glUnmapBuffer(target);
+        }
     }
+
+    *out_res = res;
 }
 
 void GLESv2Decoder::s_glFlushMappedBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer) {
+    MyTimer timer("glFlushMappedBufferRangeAEMU");
+
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     if (!guest_buffer) fprintf(stderr, "%s: error: wanted to write to a mapped buffer with NULL!\n", __FUNCTION__);
     void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
@@ -420,6 +479,13 @@ void GLESv2Decoder::s_glFlushMappedBufferRangeAEMU(void* self, GLenum target, GL
     // |offset| was the absolute offset into the mapping, so just flush offset 0.
     ctx->glFlushMappedBufferRange(target, 0, length);
     ctx->glUnmapBuffer(target);
+}
+
+void GLESv2Decoder::s_glFlushMappedBufferRangeDMA(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access) {
+    MyTimer timer("glFlushMappedBufferRangeDMA");
+
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glFlushMappedBufferRange(target, offset, length);
 }
 
 void GLESv2Decoder::s_glCompressedTexImage2DOffsetAEMU(void* self, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, GLuint offset) {
