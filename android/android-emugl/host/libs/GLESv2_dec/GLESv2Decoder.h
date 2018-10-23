@@ -64,7 +64,7 @@ private:
     static void gles2_APIENTRY s_glMapBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* mapped);
     static void gles2_APIENTRY s_glUnmapBufferAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, GLboolean* out_res);
     static void gles2_APIENTRY s_glFlushMappedBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer);
-    static void gles2_APIENTRY s_glMapBufferRangeDMA(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr);
+    static uint64_t gles2_APIENTRY s_glMapBufferRangeDMA(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr);
     static void gles2_APIENTRY s_glUnmapBufferDMA(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr, GLboolean* out_res);
 
     static void gles2_APIENTRY s_glCompressedTexImage2DOffsetAEMU(void* self, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, GLuint offset);
