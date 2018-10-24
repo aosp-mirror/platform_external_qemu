@@ -25,7 +25,6 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/euler_angles.hpp>
 
 #include <array>
 #include <cassert>
@@ -299,9 +298,7 @@ void VirtualSensorsPage::updateTargetState() {
     glm::vec3 eulerDegrees =
             getPhysicalParameterTargetVec3(PHYSICAL_PARAMETER_ROTATION);
 
-    const glm::quat rotation = glm::eulerAngleXYZ(
-            glm::radians(eulerDegrees.x), glm::radians(eulerDegrees.y),
-            glm::radians(eulerDegrees.z));
+    const glm::quat rotation = fromEulerAnglesXYZ(glm::radians(eulerDegrees));
 
     mUi->accelWidget->setTargetPosition(position);
     mUi->accelWidget->setTargetRotation(rotation);
@@ -309,9 +306,7 @@ void VirtualSensorsPage::updateTargetState() {
     // Convert the rotation to a quaternion so to simplify comparing for
     // equality.
     const glm::quat oldRotation =
-            glm::eulerAngleXYZ(glm::radians(mSlidersTargetRotation.x),
-                               glm::radians(mSlidersTargetRotation.y),
-                               glm::radians(mSlidersTargetRotation.z));
+            fromEulerAnglesXYZ(glm::radians(mSlidersTargetRotation));
 
     mSlidersUseCurrent = !vecNearEqual(position, mSlidersTargetPosition) ||
                          !quaternionNearEqual(rotation, oldRotation);
@@ -473,11 +468,8 @@ void VirtualSensorsPage::updateModelFromAccelWidget(
         PhysicalInterpolation mode) {
     const glm::vec3& position =
             kMetersPerInch * mUi->accelWidget->targetPosition();
-    glm::vec3 rotationRadians;
-    glm::extractEulerAngleXYZ(
-            glm::mat4_cast(mUi->accelWidget->targetRotation()),
-            rotationRadians.x, rotationRadians.y, rotationRadians.z);
-    const glm::vec3 rotationDegrees = glm::degrees(rotationRadians);
+    const glm::vec3 rotationDegrees =
+            glm::degrees(toEulerAnglesXYZ(mUi->accelWidget->targetRotation()));
 
     const glm::vec3 currentPosition =
             getPhysicalParameterTargetVec3(PHYSICAL_PARAMETER_POSITION);
