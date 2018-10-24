@@ -274,6 +274,7 @@ public:
     }
 
     static Optional<std::string> pathWithoutDirs(StringView name);
+    static Optional<std::string> pathToDir(StringView name);
 };
 
 // Useful shortcuts to avoid too much typing.
