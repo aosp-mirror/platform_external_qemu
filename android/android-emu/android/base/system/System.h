@@ -457,6 +457,12 @@ public:
     // critical directories.
     static void disableCopyOnWriteForPath(StringView path);
 
+    // bug: 117923532
+    // macOS will make the emulator nap, which will mess up timers
+    // and cause mayhem like hang detection.
+    // On other platforms, this function doesn't do anything.
+    static void disableAppNap();
+
 protected:
     size_t mMemorySize = 0;
 
