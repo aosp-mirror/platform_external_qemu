@@ -20,7 +20,6 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/vec3.hpp>
 
@@ -120,15 +119,13 @@ protected:
 
     void ExpectTargetRotationNear(glm::vec3 expectedRotationDegrees) {
         const glm::quat expectedRotation =
-                glm::eulerAngleXYZ(glm::radians(expectedRotationDegrees.x),
-                                   glm::radians(expectedRotationDegrees.y),
-                                   glm::radians(expectedRotationDegrees.z));
+                fromEulerAnglesXYZ(glm::radians(expectedRotationDegrees));
 
         EXPECT_CALL(mMock, setPhysicalParameterTarget(
                                    Eq(PHYSICAL_PARAMETER_ROTATION), _, _, _, _))
                 .WillOnce(Invoke([=](int, float a, float b, float c, int) {
-                    const glm::quat rotation = glm::eulerAngleXYZ(
-                            glm::radians(a), glm::radians(b), glm::radians(c));
+                    const glm::quat rotation = fromEulerAnglesXYZ(
+                            glm::radians(glm::vec3(a, b, c)));
                     EXPECT_THAT(rotation,
                                 QuatNear(expectedRotation, kPhysicsEpsilon))
                             << "Expected degrees: "
@@ -345,8 +342,7 @@ TEST_F(WASDInputHandlerTest, MouseVerticalAndHorizontal) {
     Mock::VerifyAndClear(&mMock);
 }
 
-// TODO(b/118152582): Repro for bug, enable when fixed.
-TEST_F(WASDInputHandlerTest, DISABLED_MouseToggleWithZRotation) {
+TEST_F(WASDInputHandlerTest, MouseToggleWithZRotation) {
     for (float rotation : {-180.0f, -135.0f, -90.0f, -45.0f, 0.0f, 45.0f, 90.0f,
                            135.0f, 180.0f}) {
         SCOPED_TRACE(testing::Message() << "Rotation: " << rotation);
