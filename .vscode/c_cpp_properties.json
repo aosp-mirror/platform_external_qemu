@@ -34,6 +34,7 @@
             "${workspaceFolder}/qemu2-auto-generated"
         ],
         "sharedGeneratedIncludePaths": [
+            "${workspaceFolder}/objs/build/intermediates64/cmake/android-emu-base",
             "${workspaceFolder}/objs/build/intermediates64/emulator_hw_config_defs",
             "${workspaceFolder}/objs/build/intermediates64/emulator-libui",
             "${workspaceFolder}/objs/build/intermediates64/gles1",
