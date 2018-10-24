@@ -34,6 +34,22 @@
      <string>Car sensor data</string>
     </attribute>
    </widget>
+   <!-- Instrument Cluster Tab -->
+   <widget class="QWidget" name="instr_cluster_tab">
+    <attribute name="title">
+     <string>Instrument cluster</string>
+    </attribute>
+    <widget class="QWidget" name="render_window" native="true">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>480</width>
+       <height>270</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
   </widget>
   <!-- Add more tabs here -->
  </widget>
