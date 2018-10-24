@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "97fbdf6b_aa8766f3",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-24T15:35:47Z",
+      "side": 1,
+      "message": "nit: Can be removed",
+      "revId": "17ee7367ac7a474e87b49e2a8a83eb49669d88ab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
