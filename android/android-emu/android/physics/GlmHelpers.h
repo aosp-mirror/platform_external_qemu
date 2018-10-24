@@ -20,11 +20,53 @@
 
 constexpr float kPhysicsEpsilon = 0.001f;
 
-inline bool vecNearEqual(glm::vec3 lhs, glm::vec3 rhs) {
-    return glm::all(glm::epsilonEqual(lhs, rhs, kPhysicsEpsilon));
+inline bool vecNearEqual(glm::vec3 lhs,
+                         glm::vec3 rhs,
+                         float epsilon = kPhysicsEpsilon) {
+    return glm::all(glm::epsilonEqual(lhs, rhs, epsilon));
 }
 
-inline bool quaternionNearEqual(glm::quat lhs, glm::quat rhs) {
-    return glm::all(glm::epsilonEqual(lhs, rhs, kPhysicsEpsilon)) ||
-           glm::all(glm::epsilonEqual(lhs, -rhs, kPhysicsEpsilon));
+inline bool quaternionNearEqual(glm::quat lhs,
+                                glm::quat rhs,
+                                float epsilon = kPhysicsEpsilon) {
+    return glm::all(glm::epsilonEqual(lhs, rhs, epsilon)) ||
+           glm::all(glm::epsilonEqual(lhs, -rhs, epsilon));
+}
+
+inline glm::vec3 toEulerAnglesXYZ(const glm::quat& q) {
+    const glm::quat sq(q.w * q.w, q.x * q.x, q.y * q.y, q.z * q.z);
+
+    return glm::vec3(
+            glm::atan(2.0f * (q.x * q.w - q.y * q.z),
+                      sq.w - sq.x - sq.y + sq.z),
+            glm::asin(glm::clamp(2.0f * (q.x * q.z + q.y * q.w), -1.0f, 1.0f)),
+            glm::atan(2.0f * (q.z * q.w - q.x * q.y),
+                      sq.w + sq.x - sq.y - sq.z));
+}
+
+inline glm::quat fromEulerAnglesXYZ(const glm::vec3& euler) {
+    const glm::quat X = glm::angleAxis(euler.x, glm::vec3(1.0f, 0.0f, 0.0f));
+    const glm::quat Y = glm::angleAxis(euler.y, glm::vec3(0.0f, 1.0f, 0.0f));
+    const glm::quat Z = glm::angleAxis(euler.z, glm::vec3(0.0f, 0.0f, 1.0f));
+
+    return X * Y * Z;
+}
+
+inline glm::vec3 toEulerAnglesYXZ(const glm::quat& q) {
+    const glm::quat sq(q.w * q.w, q.x * q.x, q.y * q.y, q.z * q.z);
+
+    return glm::vec3(
+            glm::asin(glm::clamp(2.0f * (q.x * q.w - q.y * q.z), -1.0f, 1.0f)),
+            glm::atan(2.0f * (q.x * q.z + q.y * q.w),
+                      sq.w - sq.x - sq.y + sq.z),
+            glm::atan(2.0f * (q.x * q.y + q.z * q.w),
+                      sq.w - sq.x + sq.y - sq.z));
+}
+
+inline glm::quat fromEulerAnglesYXZ(const glm::vec3& euler) {
+    const glm::quat X = glm::angleAxis(euler.x, glm::vec3(1.0f, 0.0f, 0.0f));
+    const glm::quat Y = glm::angleAxis(euler.y, glm::vec3(0.0f, 1.0f, 0.0f));
+    const glm::quat Z = glm::angleAxis(euler.z, glm::vec3(0.0f, 0.0f, 1.0f));
+
+    return Y * X * Z;
 }
