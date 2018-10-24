@@ -122,6 +122,7 @@ private:
     SRWLOCK mLock = SRWLOCK_INIT;
 #else   // !_WIN32
     ReadWriteLock() { ::pthread_rwlock_init(&mLock, NULL); }
+    ~ReadWriteLock() { ::pthread_rwlock_destroy(&mLock); }
     void lockRead() { ::pthread_rwlock_rdlock(&mLock); }
     void unlockRead() { ::pthread_rwlock_unlock(&mLock); }
     void lockWrite() { ::pthread_rwlock_wrlock(&mLock); }
