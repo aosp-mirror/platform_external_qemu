@@ -41,6 +41,9 @@
             "${workspaceFolder}/objs/build/intermediates64/proto-sources",
             "${workspaceFolder}/objs/build/intermediates64/proto-sources",
             "${workspaceFolder}/objs/build/intermediates64/renderControl"
+        ],
+        "sharedDefines": [
+            "CONFIG_ANDROID=1"
         ]
     },
     "configurations": [
@@ -65,6 +68,7 @@
                 "${workspaceFolder}/android-qemu2-glue/config/darwin-x86_64"
             ],
             "defines": [
+                "${sharedDefines}",
                 "_DARWIN_C_SOURCE=1"
             ],
             "macFrameworkPath": [
@@ -92,7 +96,9 @@
                 "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/linux-x86_64/include.system/QtCore",
                 "${workspaceFolder}/android-qemu2-glue/config/linux-x86_64"
             ],
-            "defines": [],
+            "defines": [
+                "${sharedDefines}"
+            ],
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c11",
             "cppStandard": "c++14",
