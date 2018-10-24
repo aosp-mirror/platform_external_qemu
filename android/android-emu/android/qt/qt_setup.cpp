@@ -44,5 +44,11 @@ bool androidQtSetupEnv(int bitness, const char* emulatorDir) {
         "Setting Qt to use software OpenGL: QT_OPENGL=software");
     system->envSet("QT_OPENGL", "software");
 
+    VERBOSE_PRINT(init,
+        "Overriding pre-existing bad Qt high dpi settings...");
+    system->envSet("QT_AUTO_SCREEN_SCALE_FACTOR", "none");
+    system->envSet("QT_SCALE_FACTOR", "none");
+    system->envSet("QT_SCREEN_SCALE_FACTORS", "none");
+
     return true;
 }
