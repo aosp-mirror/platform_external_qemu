@@ -14,9 +14,8 @@
 
 #include "android/virtualscene/WASDInputHandler.h"
 #include "android/base/Log.h"
+#include "android/physics/GlmHelpers.h"
 #include "android/physics/PhysicalModel.h"
-
-#include <glm/gtx/euler_angles.hpp>
 
 namespace android {
 namespace virtualscene {
@@ -49,17 +48,8 @@ void WASDInputHandler::enable() {
     // The physical model represents rotation in the X Y Z order, but
     // for mouselook we need the Y X Z order. Convert the rotation order
     // via a quaternion and decomposing the rotations.
-    const glm::quat rotation = glm::eulerAngleXYZ(glm::radians(eulerDegrees.x),
-                                                  glm::radians(eulerDegrees.y),
-                                                  glm::radians(eulerDegrees.z));
-
-    mEulerRotationRadians.y = atan2(rotation.y, rotation.w) * 2.0f;
-
-    const glm::quat xzRotation = glm::angleAxis(-mEulerRotationRadians.y,
-                                                glm::vec3(0.0f, 1.0f, 0.0f)) *
-                                 rotation;
-    mEulerRotationRadians.x = glm::pitch(xzRotation);
-    mEulerRotationRadians.z = glm::roll(xzRotation);
+    const glm::quat rotation = fromEulerAnglesXYZ(glm::radians(eulerDegrees));
+    mEulerRotationRadians = toEulerAnglesYXZ(rotation);
 
     if (mEulerRotationRadians.x > M_PI) {
         mEulerRotationRadians.x -= static_cast<float>(2 * M_PI);
@@ -130,13 +120,8 @@ void WASDInputHandler::mouseMove(int offsetX, int offsetY) {
 
         // Rotations applied in the Y X Z order, but we need to convert to X
         // Y Z order for the physical model.
-        glm::vec3 rotationRadians;
-        glm::extractEulerAngleXYZ(glm::eulerAngleYXZ(mEulerRotationRadians.y,
-                                                     mEulerRotationRadians.x,
-                                                     mEulerRotationRadians.z),
-                                  rotationRadians.x, rotationRadians.y,
-                                  rotationRadians.z);
-        const glm::vec3 rotationDegrees = glm::degrees(rotationRadians);
+        const glm::vec3 rotationDegrees = glm::degrees(
+                toEulerAnglesXYZ(fromEulerAnglesYXZ(mEulerRotationRadians)));
 
         mSensorsAgent->setPhysicalParameterTarget(
                 PHYSICAL_PARAMETER_ROTATION, rotationDegrees.x,

@@ -17,13 +17,12 @@
 #include "android/virtualscene/SceneCamera.h"
 #include "android/automation/AutomationController.h"
 #include "android/hw-sensors.h"
+#include "android/physics/GlmHelpers.h"
 #include "android/physics/PhysicalModel.h"
 #include "android/utils/debug.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/euler_angles.hpp>
-#include <glm/gtx/quaternion.hpp>
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -57,7 +56,7 @@ static glm::mat4 projectionMatrixForCameraIntrinsics(float width,
 }
 
 static glm::mat4 poseToOpenGl(glm::quat rotation, glm::vec3 translation) {
-    glm::mat4 mat = glm::toMat4(rotation);
+    glm::mat4 mat(rotation);
     mat[3] = glm::vec4(translation, 1.0f);
     return mat;
 }
@@ -99,14 +98,14 @@ void SceneCamera::update() {
 
     int64_t timestamp;
     glm::vec3 position;
-    glm::vec3 rotationEuler;
+    glm::vec3 rotationEulerDegrees;
     physicalModel_getTransform(android_physical_model_instance(), &position.x,
-                               &position.y, &position.z, &rotationEuler.x,
-                               &rotationEuler.y, &rotationEuler.z, &timestamp);
+                               &position.y, &position.z,
+                               &rotationEulerDegrees.x, &rotationEulerDegrees.y,
+                               &rotationEulerDegrees.z, &timestamp);
 
-    const glm::mat4 rotationMat = glm::eulerAngleXYZ(
-            glm::radians(rotationEuler.x), glm::radians(rotationEuler.y),
-            glm::radians(rotationEuler.z));
+    const glm::mat4 rotationMat(
+            fromEulerAnglesXYZ(glm::radians(rotationEulerDegrees)));
 
     const glm::mat4 inverseSensorsPose =
             glm::inverse(rotationMat) * glm::translate(glm::mat4(), -position);
