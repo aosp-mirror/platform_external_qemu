@@ -1031,9 +1031,9 @@ extern "C" int main(int argc, char** argv) {
                    ",file=%s",
                    pstore.start, pstore.size, pstoreFile.c_str());
 
-    // studio avd manager does not allow user to change
-    // partition size, set a lower limit to 2GB
-    constexpr auto kMinPlaystoreImageSize = 2LL * 1024 * 1024 * 1024;
+    // studio avd manager does not allow user to change partition size, set a
+    // lower limit to 6GB.
+    constexpr auto kMinPlaystoreImageSize = 6LL * 1024 * 1024 * 1024;
     if (fc::isEnabled(fc::PlayStoreImage)) {
         if (android_hw->disk_dataPartition_size < kMinPlaystoreImageSize) {
             android_hw->disk_dataPartition_size = kMinPlaystoreImageSize;
@@ -1042,6 +1042,38 @@ extern "C" int main(int argc, char** argv) {
 
     // Create userdata file from init version if needed.
     if ((android_op_wipe_data || !path_exists(hw->disk_dataPartition_path))) {
+        // Check free space first if the path does not exist.
+        if (!path_exists(hw->disk_dataPartition_path)) {
+            System::FileSize availableSpace;
+
+            auto dataPartitionPathAsDir =
+                    PathUtils::pathToDir(hw->disk_dataPartition_path);
+
+            if (dataPartitionPathAsDir &&
+                System::get()->pathFreeSpace(*dataPartitionPathAsDir,
+                                             &availableSpace)) {
+
+                constexpr double kDataPartitionSafetyFactor = 1.2;
+
+                double needed = kDataPartitionSafetyFactor *
+                                android_hw->disk_dataPartition_size /
+                                (1024.0 * 1024.0);
+
+                double available = (double)availableSpace / (1024.0 * 1024.0);
+
+                if (needed > available) {
+                    derror("Not enough space to create userdata partition. "
+                           "Available: %f MB at %s, "
+                           "need %f MB.\n",
+                           available, dataPartitionPathAsDir->c_str(), needed);
+                    return 1;
+                }
+            } else {
+                // default to assuming enough space if the free space query
+                // fails.
+            }
+        }
+
         int ret = createUserData(avd, dataPath.c_str(), hw);
         if (ret != 0) {
             crashhandler_die("Failed to initialize userdata.img.");
