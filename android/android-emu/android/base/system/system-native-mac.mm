@@ -19,11 +19,23 @@
 #include <IOKit/Kext/KextManager.h>
 #include <IOKit/storage/IOBlockStorageDevice.h>
 
+#import <Foundation/Foundation.h>
+#import <Foundation/NSProcessInfo.h>
+
 #include <stdlib.h>
 #include <sys/stat.h>
 
 namespace android {
 namespace base {
+
+void disableAppNap_macImpl(void) {
+   if ([[NSProcessInfo processInfo]
+        respondsToSelector:@selector(beginActivityWithOptions:reason:)])
+   {
+      [[NSProcessInfo processInfo]
+       beginActivityWithOptions:0x00FFFFFF reason:@"Not sleepy and don't want to nap"];
+   }
+}
 
 Optional<System::DiskKind> nativeDiskKind(int st_dev) {
     const char* devName = devname(st_dev, S_IFBLK);
