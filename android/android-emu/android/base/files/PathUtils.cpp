@@ -355,6 +355,18 @@ Optional<std::string> PathUtils::pathWithoutDirs(StringView name) {
     return components.back().str();
 }
 
+Optional<std::string> PathUtils::pathToDir(StringView name) {
+    if (System::get()->pathIsDir(name)) return name.str();
+
+    auto components = PathUtils::decompose(name);
+
+    if (components.size() == 1) return kNullopt;
+
+    return PathUtils::recompose(
+            std::vector<StringView>(components.begin(), components.end() - 1));
+}
+
+
 std::string pj(StringView path1, StringView path2) {
     return PathUtils::join(path1, path2);
 }
