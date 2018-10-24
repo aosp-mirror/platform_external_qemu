@@ -2676,5 +2676,16 @@ void System::disableCopyOnWriteForPath(StringView path) {
     // TODO: Disable CoW for Windows/Mac as well
 }
 
+#ifdef __APPLE__
+void disableAppNap_macImpl(void);
+#endif
+
+// static
+void System::disableAppNap() {
+#ifdef __APPLE__
+    disableAppNap_macImpl();
+#endif
+}
+
 }  // namespace base
 }  // namespace android
