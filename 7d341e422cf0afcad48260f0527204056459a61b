@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2af6be0_7a98e33c",
+        "filename": "android/android-emu/android-emu-base.cmake",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-24T15:57:55Z",
+      "side": 1,
+      "message": "You can move this to the dirent/cmakelist.txt as follows:\nset(DIRENT_WIN32_INCLUDE_DIR ${CURRENT_SOURCE_DIR}/include) cmake will resolve it for you",
+      "revId": "7d341e422cf0afcad48260f0527204056459a61b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "154ccbc1_83bcc8eb",
+        "filename": "android/msvc-posix-compat/CMakeLists.txt",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-24T15:57:55Z",
+      "side": 1,
+      "message": "Do you happen to know which compiler flags we need specifically only for this lib? Could you add some documentation around that? We will need those flags when we go full cmake.",
+      "revId": "7d341e422cf0afcad48260f0527204056459a61b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "510a3314_7cb15e10",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-24T15:57:55Z",
+      "side": 1,
+      "message": "These 2 are set for all clang compilers in top.mk",
+      "revId": "7d341e422cf0afcad48260f0527204056459a61b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
