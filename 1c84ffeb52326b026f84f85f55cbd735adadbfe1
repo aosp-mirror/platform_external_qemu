@@ -16,6 +16,24 @@
       "revId": "1c84ffeb52326b026f84f85f55cbd735adadbfe1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2fdf9057_3712b1cf",
+        "filename": "android/msvc-posix-compat/src/getopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-25T20:44:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fb1534c8_c90f31ab",
+      "revId": "1c84ffeb52326b026f84f85f55cbd735adadbfe1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

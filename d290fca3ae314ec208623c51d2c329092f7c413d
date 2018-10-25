@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "4fc8c7ea_1c56d28a",
+        "filename": "android/msvc-posix-compat/src/getopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 536,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-25T20:44:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "05128093_c73d4a19",
+      "revId": "d290fca3ae314ec208623c51d2c329092f7c413d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "070dbc9e_c9ab6e2d",
         "filename": "android/msvc-posix-compat/src/gettimeofday.c",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "06ef1c74_be0fb40c",
+        "filename": "android/msvc-posix-compat/src/gettimeofday.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-25T20:44:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "070dbc9e_c9ab6e2d",
+      "revId": "d290fca3ae314ec208623c51d2c329092f7c413d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "21804205_46b11bf4",
         "filename": "android/msvc-posix-compat/src/msvc-posix.c",
         "patchSetId": 3
@@ -50,6 +86,24 @@
       "revId": "d290fca3ae314ec208623c51d2c329092f7c413d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7abcdf95_1c67caa3",
+        "filename": "android/msvc-posix-compat/src/msvc-posix.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-25T20:44:24Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "21804205_46b11bf4",
+      "revId": "d290fca3ae314ec208623c51d2c329092f7c413d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
