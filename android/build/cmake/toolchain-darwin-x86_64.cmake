@@ -17,6 +17,7 @@ list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 include(toolchain)
 
 # First we create the toolchain
+get_host_os(ANDROID_HOST_TAG)
 set(ANDROID_TARGET_TAG "darwin-x86_64")
 set(ANDROID_TARGET_OS "darwin")
 set(ANDROID_TARGET_OS_FLAVOR "darwin")

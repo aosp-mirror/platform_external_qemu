@@ -1,5 +1,12 @@
 QT_TOP_DIR := $(QT_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)
-QT_TOP64_DIR := $(QT_PREBUILTS_DIR)/$(BUILD_TARGET_OS)-x86_64
+ifeq ($(BUILD_TARGET_OS),windows_msvc)
+    # Use host os's moc, rcc, and uic for msvc build.
+    # We don't need to worry about this for mingw since this build system
+    # will be deprecated anyways.
+    QT_TOP64_DIR := $(QT_PREBUILTS_DIR)/$(BUILD_HOST_OS)-x86_64
+else
+    QT_TOP64_DIR := $(QT_PREBUILTS_DIR)/$(BUILD_TARGET_OS)-x86_64
+endif
 QT_MOC_TOOL := $(QT_TOP64_DIR)/bin/moc
 QT_RCC_TOOL := $(QT_TOP64_DIR)/bin/rcc
 # Special-case: the 'uic' tool depends on Qt5Core: always ensure that the
