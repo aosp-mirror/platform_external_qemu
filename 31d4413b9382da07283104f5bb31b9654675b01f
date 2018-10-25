@@ -16,6 +16,24 @@
       "revId": "31d4413b9382da07283104f5bb31b9654675b01f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "93016e2f_3a604a83",
+        "filename": "configure",
+        "patchSetId": 5
+      },
+      "lineNbr": 5016,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-25T20:43:49Z",
+      "side": 1,
+      "message": "Ack, let me add a comment here.",
+      "parentUuid": "171475ec_8063266e",
+      "revId": "31d4413b9382da07283104f5bb31b9654675b01f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
