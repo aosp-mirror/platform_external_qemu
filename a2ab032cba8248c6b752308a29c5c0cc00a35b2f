@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "90a4d4d8_d4ca8603",
+        "filename": "util/oslib-win32.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 872,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-25T20:44:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8c0be26c_ba6cd53d",
+      "range": {
+        "startLine": 860,
+        "startChar": 0,
+        "endLine": 872,
+        "endChar": 25
+      },
+      "revId": "a2ab032cba8248c6b752308a29c5c0cc00a35b2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "758439fb_b99d7de7",
         "filename": "util/oslib-win32.c",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2018-10-05T16:57:27Z",
       "side": 1,
       "message": "please rerun HelloEmulator_end2endtest after this is building to make sure the non ascii args still work. I\u0027ve filed a bug for it",
+      "range": {
+        "startLine": 1095,
+        "startChar": 1,
+        "endLine": 1096,
+        "endChar": 56
+      },
+      "revId": "a2ab032cba8248c6b752308a29c5c0cc00a35b2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd5f94c8_ee495a8d",
+        "filename": "util/oslib-win32.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1096,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-25T20:44:59Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "758439fb_b99d7de7",
       "range": {
         "startLine": 1095,
         "startChar": 1,
@@ -68,6 +116,30 @@
       "revId": "a2ab032cba8248c6b752308a29c5c0cc00a35b2f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e522f224_b01858ee",
+        "filename": "util/oslib-win32.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1338,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-25T20:44:59Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "dc5cb6b3_11fcfa46",
+      "range": {
+        "startLine": 1330,
+        "startChar": 0,
+        "endLine": 1338,
+        "endChar": 52
+      },
+      "revId": "a2ab032cba8248c6b752308a29c5c0cc00a35b2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
