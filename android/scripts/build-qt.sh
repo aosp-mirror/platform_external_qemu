@@ -327,6 +327,34 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             panic "Could not find any Qt shared library!!"
         fi
 
+        # Let's fix up the rpaths in darwin. This allows binaries that link
+        # against qt to launch directly if they contain a proper rpath. This
+        # removes the need to set DYLD_LIBRARY_PATH properly.
+        case $SYSTEM in
+            darwin*)
+                for lib in $QT_SHARED_LIBS; do
+                    idfix=$(basename $lib)
+                    install_name_tool -id "@rpath/$idfix" $lib
+                    tofix=$(otool -L $lib | grep $fix | cut -f1 -d ' ')
+                    for fix in $QT_SHARED_LIBS; do
+                        name=$(basename $fix)
+                        install_name_tool -change $fix "@rpath/$name" $lib
+                    done
+                done
+                    for fix in $QT_SHARED_LIBS; do
+                        name=$(basename $fix)
+                        install_name_tool -change $fix "@rpath/$name" "$(builder_install_prefix)/bin/moc"
+                        install_name_tool -change $fix "@rpath/$name" "$(builder_install_prefix)/bin/rcc"
+                        install_name_tool -change $fix "@rpath/$name" "$(builder_install_prefix)/bin/uic"
+                    done
+                    # setup the rpaths so we can use them without setting environment variables.
+                    install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/moc"
+                    install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/rcc"
+                    install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/uic"
+                ;;
+        esac
+
+
         # Copy binaries necessary for the build itself as well as static
         # libraries.
         copy_directory_files \
