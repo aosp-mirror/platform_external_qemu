@@ -192,6 +192,7 @@ set(ANDROID_SKIN_SOURCES
 set(emulator-libui_darwin-x86_64_src android/skin/qt/mac-native-window.mm)
 set(emulator-libui_windows-x86_64_src android/skin/qt/windows-native-window.cpp)
 set(emulator-libui_windows-x86_src android/skin/qt/windows-native-window.cpp)
+set(emulator-libui_windows_msvc-x86_64_src android/skin/qt/windows-native-window.cpp)
 
 # Set the sources
 set(emulator-libui_src
@@ -214,6 +215,7 @@ set(emulator-libui_includes_private
 set(emulator-libui_compile_options_private "-DUSE_MMX=1" "-mmmx")
 
 # Target specific compiler flags for windows
+set(emulator-libui_windows_msvc-x86_64_compile_options_private "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
 set(emulator-libui_windows-x86_64_compile_options_private "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
 set(emulator-libui_windows-x86_compile_options_private "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
 
@@ -248,6 +250,15 @@ set(emulator-libui_libs_public
     ${FFMPEG_LIBRARIES}
     ${QT5_LIBRARIES}
     ${ZLIB_LIBRARIES})
+
+if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
+    set(emulator-libui_includes_private
+        ${emulator-libui_includes_private}
+	${MSVC_POSIX_COMPAT_INCLUDE_DIR})
+    set(emulator-libui_libs_public
+        ${emulator-libui_libs_public}
+	${MSVC_POSIX_COMPAT_LIBRARY})
+endif()
 
 # gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug.
 # This implies a direct dependency to libX11.so

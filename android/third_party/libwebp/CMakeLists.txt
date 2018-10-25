@@ -101,10 +101,15 @@ target_include_directories(emulator-libwebp PRIVATE src)
 target_include_directories(emulator-libwebp PRIVATE .)
 target_compile_options(emulator-libwebp PRIVATE -Wno-error)
 
-if (WIN32 OR ("${LOCAL_OS}" STREQUAL "windows"))
+if (WIN32 OR ("${LOCAL_OS_FLAVOR}" STREQUAL "windows"))
     # Work around some gcc/mingw issues
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         target_compile_definitions(emulator-libwebp PRIVATE -DUSE_MINGW=1)
+    endif ()
+
+    if ("${LOCAL_OS}" STREQUAL "windows_msvc")
+        # clang whining about not enabling sse41 support
+        target_compile_options(emulator-libwebp PRIVATE -msse4.1)
     endif ()
 endif ()
 

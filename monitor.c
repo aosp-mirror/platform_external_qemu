@@ -22,8 +22,13 @@
  * THE SOFTWARE.
  */
 
+#ifdef _MSC_VER
+#define USE_QEMU_DIRENT
+#endif
 #include "qemu/osdep.h"
+#ifndef _MSC_VER
 #include <dirent.h>
+#endif
 #include "cpu.h"
 #include "hw/hw.h"
 #include "monitor/qdev.h"

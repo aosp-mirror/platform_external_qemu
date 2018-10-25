@@ -107,6 +107,32 @@ elseif(${LOCAL_TARGET_TAG} STREQUAL "windows-x86_64")
                              "-D__STDC_FORMAT_MACROS=1"
                              "-D__USE_MINGW_ANSI_STDIO=1"
                              "-D__packed=__attribute\(\(packed\)\)")
+elseif(${LOCAL_TARGET_TAG} STREQUAL "windows_msvc-x86_64")
+  set(ANDROID_QEMU_arm_STUBS "hvf-stub.c;accel/stubs/hax-stub.c")
+  set(ANDROID_QEMU_i386_STUBS "hvf-stub.c")
+  target_compile_options(android-qemu-deps
+                         INTERFACE "-Werror=implicit-function-declaration"
+                                   "-mms-bitfields"
+                                   "-fno-strict-aliasing"
+                                   "-fno-common"
+                                   "-Wno-unused-function"
+                                   "-Wno-unused-variable")
+  target_compile_definitions(android-qemu-deps
+                             INTERFACE
+                             "-DCURL_STATICLIB"
+                             "-DENABLE_DLOG=0"
+                             "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION"
+                             "-DSTDC_LIMIT_MACROS=1"
+                             "-DWIN32_LEAN_AND_MEAN"
+                             "-DWINVER=0x601"
+                             "-D_FILE_OFFSET_BITS=64"
+                             "-D_GNU_SOURCE"
+                             "-D_GNU_SOURCE=1"
+                             "-D_LARGEFILE_SOURCE"
+                             "-D_WIN32_WINNT=0x601"
+                             "-D__STDC_FORMAT_MACROS=1"
+                             "-D__USE_MINGW_ANSI_STDIO=1"
+                             "-D__packed=__attribute\(\(packed\)\)")
 elseif(${LOCAL_TARGET_TAG} STREQUAL "linux-x86_64")
   set(ANDROID_QEMU_i386_STUBS "hvf-stub.c;accel/stubs/hax-stub.c")
   set(ANDROID_QEMU_arm_STUBS "hvf-stub.c;accel/stubs/hax-stub.c")

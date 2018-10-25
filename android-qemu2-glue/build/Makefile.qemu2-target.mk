@@ -102,7 +102,7 @@ LOCAL_SRC_FILES += \
         hw/i386/acpi-build.c \
         hw/i386/pc_piix.c \
         ) \
-    $(call qemu2-if-windows, \
+    $(call qemu2-if-any-windows, \
         android-qemu2-glue/stubs/win32-stubs.c \
         ) \
     vl.c \

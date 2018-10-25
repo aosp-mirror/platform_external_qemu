@@ -20,6 +20,12 @@
 
 #include <errno.h>
 
+#ifdef _MSC_VER
+#ifdef ERROR
+#undef ERROR
+#endif
+#endif
+
 namespace android {
 namespace base {
 

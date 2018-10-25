@@ -17,7 +17,7 @@
 
 #define SHA1HANDSOFF		/* Copies data before messing with it. */
 
-#ifndef USE_MINGW
+#if !defined(USE_MINGW) && !defined(_MSC_VER)
 #include <sys/cdefs.h>
 #endif
 #include <sys/types.h>

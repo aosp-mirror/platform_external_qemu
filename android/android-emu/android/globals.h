@@ -15,6 +15,9 @@
 #include "android/constants.h"
 #include "android/avd/info.h"
 #include "android/avd/hw-config.h"
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
 
 /* this structure is setup when loading the virtual device
  * after that, you can read the 'flags' field to determine
@@ -39,3 +42,5 @@ extern int guest_data_partition_mounted;
 
 /* this indicates that guest has boot completed */
 extern int guest_boot_completed;
+
+ANDROID_END_HEADER

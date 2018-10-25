@@ -34,7 +34,7 @@
 #include "extent.h"
 #include "indirect.h"
 
-#ifdef USE_MINGW
+#if defined(USE_MINGW) || defined(_MSC_VER)
 #define S_IFLNK 0  /* used by make_link, not needed under mingw */
 #endif
 
