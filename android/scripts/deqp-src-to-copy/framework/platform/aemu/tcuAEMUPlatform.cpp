@@ -30,6 +30,7 @@
 #include "eglwEnums.hpp"
 #include "eglwLibrary.hpp"
 #include "deMemory.h"
+#include "vkWsiPlatform.hpp"
 
 // AEMU graphics include
 #include "Toplevel.h"
@@ -37,8 +38,10 @@
 // Name of the android emulator EGL library
 #ifdef __APPLE__
 #define GOLDFISH_OPENGL_EGL_LIBRARY "libEGL_emulation.dylib"
+#define GOLDFISH_VULKAN_LIBRARY "libvulkan_android.dylib"
 #else
 #define GOLDFISH_OPENGL_EGL_LIBRARY "libEGL_emulation.so"
+#define GOLDFISH_VULKAN_LIBRARY "libvulkan_android.so"
 #endif
 
 tcu::Platform* createPlatform (void)
@@ -101,6 +104,8 @@ public:
 		m_nativeWindow = sToplevel->createWindow();
 	}
 
+	void* getNativeWindow() { return m_nativeWindow; }
+
 	~Window(void) { sToplevel->destroyWindow(m_nativeWindow); }
 
 	eglw::EGLNativeWindowType getLegacyNative(void) { return m_nativeWindow; }
@@ -127,6 +132,51 @@ class WindowFactory : public eglu::NativeWindowFactory
 	}
 };
 
+// Vulkan
+class VulkanLibrary : public vk::Library
+{
+public:
+	VulkanLibrary(void)
+		: m_library(GOLDFISH_VULKAN_LIBRARY),
+		  m_driver(m_library) { }
+
+	const vk::PlatformInterface& getPlatformInterface(void) const { return m_driver; }
+	const tcu::FunctionLibrary& getFunctionLibrary(void) const { return m_library; }
+
+private:
+	const tcu::DynamicFunctionLibrary m_library;
+	const vk::PlatformDriver m_driver;
+};
+
+DE_STATIC_ASSERT(sizeof(vk::pt::AndroidNativeWindowPtr) == sizeof(void*));
+
+class VulkanWindow : public vk::wsi::AndroidWindowInterface
+{
+  public:
+	VulkanWindow(tcu::Window &window)
+		: vk::wsi::AndroidWindowInterface(
+			vk::pt::AndroidNativeWindowPtr(window.getNativeWindow())), m_window(window)
+	{
+	}
+
+	~VulkanWindow(void) {}
+
+  private:
+	tcu::Window &m_window;
+};
+
+class VulkanDisplay : public vk::wsi::Display
+{
+public:
+	VulkanDisplay () { }
+
+	vk::wsi::Window* createWindow (const Maybe<UVec2>& initialSize) const
+	{
+		tcu::Window* aemuWindow = new tcu::Window(256, 256);
+		return new VulkanWindow(*aemuWindow);
+	}
+};
+
 // DisplayFactory
 
 DisplayFactory::DisplayFactory(void)
@@ -149,5 +199,44 @@ AEMUPlatform::AEMUPlatform(void)
 }
 
 AEMUPlatform::~AEMUPlatform(void) { }
+
+vk::Library* AEMUPlatform::createLibrary (void) const
+{
+	return new VulkanLibrary();
+}
+
+void AEMUPlatform::describePlatform (std::ostream& dst) const
+{
+	dst << "Android Emulator Platform";
+}
+
+void AEMUPlatform::getMemoryLimits(vk::PlatformMemoryLimits &limits) const
+{
+	// Worst-case estimates
+	const size_t MiB = (size_t)(1 << 20);
+	const size_t totalSystemMemory = 256 * MiB;
+	const size_t baseMemUsage = 64 * MiB;
+	const double safeUsageRatio = 0.25;
+
+	limits.totalSystemMemory =
+		de::max((size_t)(double(deInt64(totalSystemMemory) - deInt64(baseMemUsage)) * safeUsageRatio), 16 * MiB);
+
+	// Assume UMA architecture
+	limits.totalDeviceLocalMemory = 0;
+
+	// Reasonable worst-case estimates
+	limits.deviceMemoryAllocationGranularity = 64 * 1024;
+	limits.devicePageSize = 4096;
+	limits.devicePageTableEntrySize = 8;
+	limits.devicePageTableHierarchyLevels = 3;
+}
+
+vk::wsi::Display *AEMUPlatform::createWsiDisplay(vk::wsi::Type wsiType) const
+{
+	if (wsiType == vk::wsi::TYPE_ANDROID)
+		return new VulkanDisplay();
+	else
+		TCU_THROW(NotSupportedError, "WSI type not supported on Android");
+}
 
 } // namespace tcu
