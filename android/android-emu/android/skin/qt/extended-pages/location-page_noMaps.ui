@@ -93,16 +93,6 @@
      <column/>
      <column/>
     </widget>
-    <widget class="QWebEngineView" name="loc_pointWebEngineView" native="true">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>20</y>
-       <width>300</width>
-       <height>490</height>
-      </rect>
-     </property>
-    </widget>
     <widget class="RaisedMaterialButton" name="loc_savePoint">
      <property name="geometry">
       <rect>
@@ -403,16 +393,6 @@
      <column/>
      <column/>
     </widget>
-    <widget class="QWebEngineView" name="loc_routeWebEngineView" native="true">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>50</y>
-       <width>300</width>
-       <height>460</height>
-      </rect>
-     </property>
-    </widget>
     <widget class="QTextBrowser" name="loc_routeInfo">
      <property name="geometry">
       <rect>
@@ -555,7 +535,6 @@
     <zorder>loc_saveRoute</zorder>
     <zorder>loc_playRouteButton</zorder>
     <zorder>loc_savedRoutesLabel_2</zorder>
-    <zorder>loc_routeWebEngineView</zorder>
     <zorder>loc_routeInfo</zorder>
     <zorder>loc_noSavedRoutes_mask</zorder>
     <zorder>loc_travelMode</zorder>
@@ -1148,11 +1127,6 @@
    <class>RaisedMaterialButton</class>
    <extends>QPushButton</extends>
    <header>android/skin/qt/raised-material-button.h</header>
-  </customwidget>
-  <customwidget>
-   <class>QWebEngineView</class>
-   <extends>QWidget</extends>
-   <header>../../../../prebuilts/android-emulator-build/qt/common/include/QtWebEngineWidgets/qwebengineview.h</header>
   </customwidget>
   <customwidget>
    <class>AngleInputWidget</class>
