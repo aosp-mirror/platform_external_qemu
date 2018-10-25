@@ -27,11 +27,12 @@
 #include "tcuPlatform.hpp"
 #include "gluPlatform.hpp"
 #include "egluPlatform.hpp"
+#include "vkPlatform.hpp"
 
 namespace tcu
 {
 
-class AEMUPlatform : public tcu::Platform, private glu::Platform, private eglu::Platform
+class AEMUPlatform : public tcu::Platform, private glu::Platform, private eglu::Platform, private vk::Platform
 {
 public:
 							AEMUPlatform	(void);
@@ -39,6 +40,13 @@ public:
 
 	const glu::Platform&		getGLPlatform		(void) const { return static_cast<const glu::Platform&>(*this);	}
 	const eglu::Platform&		getEGLPlatform		(void) const { return static_cast<const eglu::Platform&>(*this);}
+	virtual const vk::Platform&	getVulkanPlatform	(void) const { return static_cast<const vk::Platform&>(*this);		}
+
+	// Vulkan Platform API
+	vk::Library*					createLibrary		(void) const;
+	void							describePlatform	(std::ostream& dst) const;
+	void							getMemoryLimits		(vk::PlatformMemoryLimits& limits) const;
+	vk::wsi::Display*				createWsiDisplay	(vk::wsi::Type wsiType) const;
 };
 
 } // tcu
