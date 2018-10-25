@@ -104,6 +104,18 @@ function(toolchain_generate TARGET_OS)
     set(ANDROID_SYSROOT ${ANDROID_SYSROOT} PARENT_SCOPE)
 endfunction()
 
+function(get_host_tag RET_VAL)
+    # Prebuilts to be used on the host os should fall under one of
+    # the below tags
+    if (APPLE)
+        set (${RET_VAL} "darwin-x86_64" PARENT_SCOPE)
+    elseif (UNIX)
+        set (${RET_VAL} "linux-x86_64" PARENT_SCOPE)
+    else ()
+        set (${RET_VAL} "windows_msvc-x86_64" PARENT_SCOPE)
+    endif ()
+endfunction()
+
 function(toolchain_generate_msvc TARGET_OS)
     # This is a hack to workaround the fact that cmake will keep including
     # the toolchain defintion over and over, and it will wipe out all the settings.
@@ -128,7 +140,6 @@ function(toolchain_generate_msvc TARGET_OS)
     set(CMAKE_RANLIB ${COMPILER_PREFIX}ranlib PARENT_SCOPE)
     set(CMAKE_OBJCOPY ${COMPILER_PREFIX}objcopy PARENT_SCOPE)
     set(ANDROID_SYSROOT ${ANDROID_SYSROOT} PARENT_SCOPE)
-
 endfunction()
 
 get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../.." ABSOLUTE)
