@@ -16,6 +16,24 @@
       "revId": "ef628606b39c9694f9836728b927637661c2cd53",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "14af7db3_4803d581",
+        "filename": "include/qemu/compiler.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-25T20:44:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "27b37313_1db89d52",
+      "revId": "ef628606b39c9694f9836728b927637661c2cd53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
