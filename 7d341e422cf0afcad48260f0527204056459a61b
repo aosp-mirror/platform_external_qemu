@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e8cb55ff_2e23fb30",
+        "filename": "android/android-emu/android-emu-base.cmake",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-25T20:43:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a2af6be0_7a98e33c",
+      "revId": "7d341e422cf0afcad48260f0527204056459a61b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "154ccbc1_83bcc8eb",
         "filename": "android/msvc-posix-compat/CMakeLists.txt",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2018-10-24T15:57:55Z",
       "side": 1,
       "message": "Do you happen to know which compiler flags we need specifically only for this lib? Could you add some documentation around that? We will need those flags when we go full cmake.",
+      "revId": "7d341e422cf0afcad48260f0527204056459a61b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "07b8ba78_dfa4b112",
+        "filename": "android/msvc-posix-compat/CMakeLists.txt",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-25T20:43:10Z",
+      "side": 1,
+      "message": "For this lib specifically, there\u0027s no special flags. There are flags specific to clang-msvc build but not just this lib.",
+      "parentUuid": "154ccbc1_83bcc8eb",
       "revId": "7d341e422cf0afcad48260f0527204056459a61b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -50,6 +86,24 @@
       "revId": "7d341e422cf0afcad48260f0527204056459a61b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "afc74194_9b5296e6",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-25T20:43:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "510a3314_7cb15e10",
+      "revId": "7d341e422cf0afcad48260f0527204056459a61b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
