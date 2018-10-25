@@ -23,6 +23,7 @@
 
 #include "android/base/ArraySize.h"
 #include "android/base/Compiler.h"
+#include "android/base/Log.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/camera/camera-format-converters.h"
@@ -35,22 +36,18 @@
 #include <wrl/client.h>
 
 #include <map>
+#include <memory>
 #include <set>
+#include <sstream>
 #include <vector>
 
-#define E(...) derror(__VA_ARGS__)
-#define W(...) dwarning(__VA_ARGS__)
-#define D(...) VERBOSE_PRINT(camera, __VA_ARGS__)
-#define D_ACTIVE VERBOSE_CHECK(camera)
-
-/* the T(...) macro is used to dump traffic */
-#define T_ACTIVE 0
-
-#if T_ACTIVE
-#define  T(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
-#else
-#define  T(...)    ((void)0)
+// Conflicts with Log.h
+#ifdef ERROR
+#undef ERROR
 #endif
+
+using namespace Microsoft::WRL;
+using namespace android::base;
 
 static constexpr GUID MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE = {
         0xc60ac5fe,
@@ -105,19 +102,17 @@ static constexpr CameraFrameDim kExtraDimensions[] = {{1280, 960}};
 struct CameraFormatMapping {
     GUID mfSubtype;
     uint32_t v4l2Format;
+    const char* humanReadableName;
 };
 
 // In order of preference.
 static const CameraFormatMapping kSupportedPixelFormats[] = {
-        {MFVideoFormat_NV12, V4L2_PIX_FMT_NV12},
-        {MFVideoFormat_RGB32, V4L2_PIX_FMT_BGR32},
-        {MFVideoFormat_ARGB32, V4L2_PIX_FMT_BGR32},
-        {MFVideoFormat_RGB24, V4L2_PIX_FMT_BGR24},
-        {MFVideoFormat_I420, V4L2_PIX_FMT_YUV420},
+        {MFVideoFormat_NV12, V4L2_PIX_FMT_NV12, "NV12"},
+        {MFVideoFormat_RGB32, V4L2_PIX_FMT_BGR32, "RGB32"},
+        {MFVideoFormat_ARGB32, V4L2_PIX_FMT_BGR32, "ARGB32"},
+        {MFVideoFormat_RGB24, V4L2_PIX_FMT_BGR24, "RGB24"},
+        {MFVideoFormat_I420, V4L2_PIX_FMT_YUV420, "I420"},
 };
-
-using namespace Microsoft::WRL;
-using namespace android::base;
 
 template <typename Type>
 class DelayLoad {
@@ -260,6 +255,88 @@ bool operator<(REFGUID lhs, REFGUID rhs) {
     return memcmp(&lhs, &rhs, sizeof(GUID)) < 0;
 }
 
+static std::string hrToString(HRESULT hr) {
+    // 0x + 8 numbers + NUL = 11
+    char buf[11] = {};
+    snprintf(buf, sizeof(buf), "0x%08X", static_cast<unsigned int>(hr));
+    return std::string(buf);
+}
+
+static std::string guidToString(REFGUID guid) {
+    // 36 chars + NUL = 37
+    char buf[37] = {};
+    snprintf(buf, sizeof(buf),
+             "%08lX-%04hX-%04hX-%02hhX%02hhX-%02hhX%02hhX%02hhX%02hhX%02hhX%"
+             "02hhX",
+             guid.Data1, guid.Data2, guid.Data3, guid.Data4[0], guid.Data4[1],
+             guid.Data4[2], guid.Data4[3], guid.Data4[4], guid.Data4[5],
+             guid.Data4[6], guid.Data4[7]);
+    return std::string(buf);
+}
+
+static std::string fourccToString(uint32_t fourcc) {
+    char buf[5] = {};
+    snprintf(buf, sizeof(buf), "%.4s", reinterpret_cast<const char*>(&fourcc));
+    return std::string(buf);
+}
+
+static const char* subtypeHumanReadableName(REFGUID subtype) {
+    if (subtype == kGuidNull) {
+        return "GUID_NULL";
+    }
+
+    for (const auto& supportedFormat : kSupportedPixelFormats) {
+        if (supportedFormat.mfSubtype == subtype) {
+            return supportedFormat.humanReadableName;
+        }
+    }
+
+    return "UNKNOWN";
+}
+
+class MFInitialize {
+public:
+    MFInitialize() {
+        HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+        if (FAILED(hr)) {
+            LOG(INFO) << "CoInitialize failed, hr=" << hrToString(hr);
+            return;
+        }
+        mComInit = true;
+
+        if (!sMF->isValid()) {
+            LOG(WARNING) << "Media Foundation could not be loaded for webcam "
+                            "support. If this is a Windows N edition, install "
+                            "the Media Feature Pack.";
+            return;
+        }
+
+        hr = sMF->mfStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
+        if (FAILED(hr)) {
+            LOG(INFO) << "MFStartup failed, hr=" << hrToString(hr);
+            return;
+        }
+        mMfInit = true;
+    }
+
+    ~MFInitialize() {
+        if (mMfInit) {
+            (void)sMF->mfShutdown();
+        }
+
+        if (mComInit) {
+            (void)CoUninitialize();
+        }
+    }
+
+    // Returns true if the initialization completed successfully.
+    operator bool() { return mComInit && mMfInit; }
+
+private:
+    bool mComInit = false;
+    bool mMfInit = false;
+};
+
 /*******************************************************************************
  *                     MediaFoundationCameraDevice routines
  ******************************************************************************/
@@ -273,6 +350,7 @@ public:
 
     static int enumerateDevices(CameraInfo* cameraInfoList, int maxCount);
 
+    bool isMfInitialized() { return mMfInit; }
     CameraDevice* getCameraDevice() { return &mHeader; }
 
     int startCapturing(uint32_t pixelFormat, int frameWidth, int frameHeight);
@@ -290,11 +368,15 @@ private:
 
     struct WebcamInfo {
         std::vector<CameraFrameDim> dims;
+        std::vector<CameraFrameDim> unsupportedDims;
         GUID subtype = {};
     };
 
     static WebcamInfo getWebcamInfo(const ComPtr<IMFMediaSource>& source);
     static bool webcamSupportedWithoutConverters(const WebcamInfo& source);
+
+    // Handles calling MFStartup, should be first member in class.
+    MFInitialize mMfInit;
 
     // Common camera header.
     CameraDevice mHeader;
@@ -326,6 +408,22 @@ MediaFoundationCameraDevice::~MediaFoundationCameraDevice() {
     stopCapturing();
 }
 
+static std::string formatsToString(const std::set<GUID>& formats) {
+    bool showSeparator = false;
+    std::ostringstream stream;
+    for (const auto& format : formats) {
+        if (showSeparator) {
+            stream << ", ";
+        }
+
+        stream << "{" << guidToString(format) << "} "
+               << subtypeHumanReadableName(format);
+        showSeparator = true;
+    }
+
+    return stream.str();
+}
+
 MediaFoundationCameraDevice::WebcamInfo
 MediaFoundationCameraDevice::getWebcamInfo(
         const ComPtr<IMFMediaSource>& source) {
@@ -339,7 +437,10 @@ MediaFoundationCameraDevice::getWebcamInfo(
 
     std::vector<CameraFrameDim> allDims = getAllFrameDims();
     std::map<CameraFrameDim, std::set<GUID>> supportedDimsAndFormats;
+    std::map<CameraFrameDim, std::set<GUID>> unsupportedDimsAndFormats;
     if (SUCCEEDED(hr)) {
+        VLOG(camera) << "Found " << mediaTypeCount << " media types.";
+
         for (DWORD i = 0; i < mediaTypeCount; ++i) {
             ComPtr<IMFMediaType> type;
             hr = mediaHandler->GetMediaTypeByIndex(i, &type);
@@ -353,17 +454,44 @@ MediaFoundationCameraDevice::getWebcamInfo(
                     FAILED(type->GetGUID(MF_MT_SUBTYPE, &subtype)) ||
                     FAILED(MFGetAttributeSize(type.Get(), MF_MT_FRAME_SIZE,
                                               &width, &height))) {
+                    VLOG(camera) << "Skipping media type #" << i
+                                 << ", could not query properties.";
                     continue;
                 }
 
                 const CameraFrameDim dim = {static_cast<int>(width),
                                             static_cast<int>(height)};
-                if (major == MFMediaType_Video && subtype != kGuidNull &&
-                    std::find(allDims.begin(), allDims.end(), dim) !=
-                            allDims.end()) {
-                    supportedDimsAndFormats[dim].insert(subtype);
+                if (major == MFMediaType_Video && subtype != kGuidNull) {
+                    if (std::find(allDims.begin(), allDims.end(), dim) !=
+                        allDims.end()) {
+                        supportedDimsAndFormats[dim].insert(subtype);
+                    } else {
+                        unsupportedDimsAndFormats[dim].insert(subtype);
+                    }
+                } else {
+                    VLOG(camera) << "Media type #" << i
+                                 << " is not a video format or has a null "
+                                    "subtype, type { "
+                                 << guidToString(major) << "}, subtype {"
+                                 << guidToString(subtype) << "}";
                 }
             }
+        }
+    }
+
+    if (LOG_IS_ON(VERBOSE)) {
+        QLOG(VERBOSE) << "Supported dimensions/formats:";
+        for (const auto& dimFormats : supportedDimsAndFormats) {
+            QLOG(VERBOSE) << dimFormats.first.width << "x"
+                          << dimFormats.first.height << ": "
+                          << formatsToString(dimFormats.second);
+        }
+
+        QLOG(VERBOSE) << "Additional ignored dimensions/formats:";
+        for (const auto& dimFormats : unsupportedDimsAndFormats) {
+            QLOG(VERBOSE) << dimFormats.first.width << "x"
+                          << dimFormats.first.height << ": "
+                          << formatsToString(dimFormats.second);
         }
     }
 
@@ -395,6 +523,9 @@ MediaFoundationCameraDevice::getWebcamInfo(
     for (const auto& item : kSupportedPixelFormats) {
         if (subtypes.count(item.mfSubtype)) {
             info.subtype = item.mfSubtype;
+            QLOG(VERBOSE) << "Selected format "
+                          << "{" << guidToString(info.subtype) << "} "
+                          << subtypeHumanReadableName(info.subtype);
             break;
         }
     }
@@ -424,16 +555,10 @@ bool MediaFoundationCameraDevice::webcamSupportedWithoutConverters(
 
 int MediaFoundationCameraDevice::enumerateDevices(CameraInfo* cameraInfoList,
                                                   int maxCount) {
-    if (!sMF->isValid()) {
-        W("%s: Media Foundation could not be loaded, no cameras available.",
-          __FUNCTION__);
-        return -1;
-    }
-
     ComPtr<IMFAttributes> attributes;
     HRESULT hr = sMF->mfCreateAttributes(&attributes, 1);
     if (FAILED(hr)) {
-        E("%s: Failed to create attributes, hr = 0x%08X", __FUNCTION__, hr);
+        LOG(INFO) << "Failed to create attributes, hr=" << hrToString(hr);
         return -1;
     }
 
@@ -441,7 +566,7 @@ int MediaFoundationCameraDevice::enumerateDevices(CameraInfo* cameraInfoList,
     hr = attributes->SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
                              MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
     if (FAILED(hr)) {
-        E("%s: Failed setting attributes, hr = 0x%08X", __FUNCTION__, hr);
+        LOG(INFO) << "Failed setting attributes, hr=" << hrToString(hr);
         return -1;
     }
 
@@ -451,7 +576,7 @@ int MediaFoundationCameraDevice::enumerateDevices(CameraInfo* cameraInfoList,
     UINT32 deviceCount = 0;
     hr = sMF->mfEnumDeviceSources(attributes.Get(), &devices, &deviceCount);
     if (FAILED(hr)) {
-        E("%s: MFEnumDeviceSources, hr = 0x%08X", __FUNCTION__, hr);
+        LOG(INFO) << "MFEnumDeviceSources, hr=" << hrToString(hr);
         return -1;
     }
 
@@ -481,14 +606,31 @@ int MediaFoundationCameraDevice::enumerateDevices(CameraInfo* cameraInfoList,
             ComPtr<IMFMediaSource> source;
             hr = device->ActivateObject(IID_PPV_ARGS(&source));
             if (SUCCEEDED(hr)) {
+                QLOG(VERBOSE) << "Getting webcam info for '"
+                              << deviceName.toString() << "'";
                 webcamInfo = getWebcamInfo(source);
                 hr = device->ShutdownObject();
             }
 
             if (FAILED(hr)) {
-                E("%s: Failed to get webcam info for device '%s', hr = 0x%08X",
-                  __FUNCTION__, deviceName.toString().c_str(), hr);
+                LOG(INFO) << "Failed to get webcam info for device '"
+                          << deviceName.toString()
+                          << "', hr=" << hrToString(hr);
                 continue;
+            }
+
+            if (LOG_IS_ON(VERBOSE)) {
+                QLOG(VERBOSE)
+                        << "Found webcam '" << deviceName.toString() << "'";
+
+                std::ostringstream dims;
+                for (auto d : webcamInfo.dims) {
+                    dims << d.width << "x" << d.height << " ";
+                }
+
+                QLOG(VERBOSE) << "Supported dimensions: " << dims.str();
+                QLOG(VERBOSE) << "Pixel Format: "
+                              << subtypeHumanReadableName(webcamInfo.subtype);
             }
 
             if (sMF->supportsVideoProcessor()) {
@@ -499,9 +641,8 @@ int MediaFoundationCameraDevice::enumerateDevices(CameraInfo* cameraInfoList,
                     webcamInfo.subtype = MFVideoFormat_RGB32;
                 }
             } else if (!webcamSupportedWithoutConverters(webcamInfo)) {
-                W("%s: Webcam device '%s' does not support required "
-                  "dimensions.",
-                  __FUNCTION__, deviceName.toString().c_str());
+                QLOG(INFO) << "Webcam device '" << deviceName.toString()
+                           << "' does not support required configuration.";
                 // Skip to next camera.
                 continue;
             }
@@ -513,7 +654,7 @@ int MediaFoundationCameraDevice::enumerateDevices(CameraInfo* cameraInfoList,
             info.frame_sizes = reinterpret_cast<CameraFrameDim*>(
                     malloc(webcamInfo.dims.size() * sizeof(CameraFrameDim)));
             if (!info.frame_sizes) {
-                E("%s: Unable to allocate dimensions", __FUNCTION__);
+                LOG(ERROR) << "Unable to allocate dimensions";
                 break;
             }
 
@@ -543,12 +684,12 @@ int MediaFoundationCameraDevice::enumerateDevices(CameraInfo* cameraInfoList,
 int MediaFoundationCameraDevice::startCapturing(uint32_t pixelFormat,
                                                 int frameWidth,
                                                 int frameHeight) {
-    D("%s: Start capturing at %d x %d", __FUNCTION__, frameWidth, frameHeight);
+    QLOG(INFO) << "Starting webcam at " << frameWidth << "x" << frameHeight;
 
     ComPtr<IMFAttributes> attributes;
     HRESULT hr = sMF->mfCreateAttributes(&attributes, 2);
     if (FAILED(hr)) {
-        E("%s: Failed to create attributes, hr = 0x%08X", __FUNCTION__, hr);
+        LOG(INFO) << "Failed to create attributes, hr=" << hrToString(hr);
         return -1;
     }
 
@@ -556,7 +697,7 @@ int MediaFoundationCameraDevice::startCapturing(uint32_t pixelFormat,
     hr = attributes->SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
                              MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
     if (FAILED(hr)) {
-        E("%s: Failed setting attributes, hr = 0x%08X", __FUNCTION__, hr);
+        LOG(INFO) << "Failed setting attributes, hr=" << hrToString(hr);
         return -1;
     }
 
@@ -564,21 +705,30 @@ int MediaFoundationCameraDevice::startCapturing(uint32_t pixelFormat,
             MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
             Win32UnicodeString(mDeviceName).data());
     if (FAILED(hr)) {
-        E("%s: Failed setting attributes, hr = 0x%08X", __FUNCTION__, hr);
+        LOG(INFO) << "Failed setting attributes, hr=" << hrToString(hr);
         return -1;
     }
 
     ComPtr<IMFMediaSource> source;
     hr = sMF->mfCreateDeviceSource(attributes.Get(), &source);
     if (FAILED(hr)) {
-        E("%s: Webcam source creation failed, hr = 0x%08X", __FUNCTION__, hr);
+        LOG(INFO) << "Webcam source creation failed, hr=" << hrToString(hr);
         return -1;
     }
 
+    QLOG(VERBOSE) << "Getting webcam info for '" << mDeviceName << "'";
     WebcamInfo info = getWebcamInfo(source);
     if (sMF->supportsVideoProcessor()) {
         // If the video processor is supported, allow all resolutions.
         info.dims = getAllFrameDims();
+    } else {
+        QLOG(INFO) << "Webcam support may be limited, Media Foundation does "
+                      "not support Video Processor.";
+    }
+
+    if (info.dims.empty()) {
+        QLOG(INFO) << "Webcam has no supported resolutions.";
+        return -1;
     }
 
     bool foundDim = false;
@@ -590,8 +740,7 @@ int MediaFoundationCameraDevice::startCapturing(uint32_t pixelFormat,
     }
 
     if (!foundDim) {
-        E("%s: Unsupported resolution %dx%d", __FUNCTION__, frameWidth,
-          frameHeight);
+        QLOG(INFO) << "Webcam resolution not supported.";
         return -1;
     }
 
@@ -601,14 +750,14 @@ int MediaFoundationCameraDevice::startCapturing(uint32_t pixelFormat,
 
     hr = ConfigureMediaSource(source);
     if (FAILED(hr)) {
-        E("%s: Configure webcam source failed, hr = 0x%08X", __FUNCTION__, hr);
+        LOG(INFO) << "Configure webcam source failed, hr=" << hrToString(hr);
         stopCapturing();
         return -1;
     }
 
     hr = CreateSourceReader(source);
     if (FAILED(hr)) {
-        E("%s: Configure source reader failed, hr = 0x%08X", __FUNCTION__, hr);
+        LOG(INFO) << "Configure source reader failed, hr=" << hrToString(hr);
 
         // Normally the SourceReader automatically calls Shutdown on the source,
         // but since that failed we should do it manually.
@@ -625,8 +774,8 @@ int MediaFoundationCameraDevice::startCapturing(uint32_t pixelFormat,
                                    0, nullptr, &streamFlags, nullptr, &sample);
     if (FAILED(hr) || streamFlags & (MF_SOURCE_READERF_ERROR |
                                      MF_SOURCE_READERF_ENDOFSTREAM)) {
-        E("%s: ReadSample failed, hr = 0x%08X, streamFlags = %d", __FUNCTION__,
-          hr, streamFlags);
+        LOG(INFO) << "ReadSample failed, hr=" << hrToString(hr)
+                  << ", streamFlags=" << streamFlags;
         stopCapturing();
         return -1;
     }
@@ -647,7 +796,7 @@ int MediaFoundationCameraDevice::readFrame(ClientFrame* resultFrame,
                                            float bScale,
                                            float expComp) {
     if (!mSourceReader) {
-        E("%s: No webcam source reader, read frame failed.", __FUNCTION__);
+        LOG(INFO) << "No webcam source reader, read frame failed.";
         return -1;
     }
 
@@ -658,8 +807,8 @@ int MediaFoundationCameraDevice::readFrame(ClientFrame* resultFrame,
             &streamFlags, nullptr, &sample);
     if (FAILED(hr) || streamFlags & (MF_SOURCE_READERF_ERROR |
                                      MF_SOURCE_READERF_ENDOFSTREAM)) {
-        E("%s: ReadSample failed, hr = 0x%08X, streamFlags = %d", __FUNCTION__,
-          hr, streamFlags);
+        LOG(INFO) << "ReadSample failed, hr=" << hrToString(hr)
+                  << ", streamFlags=" << streamFlags;
         stopCapturing();
         return -1;
     }
@@ -672,8 +821,7 @@ int MediaFoundationCameraDevice::readFrame(ClientFrame* resultFrame,
     ComPtr<IMFMediaBuffer> buffer;
     hr = sample->ConvertToContiguousBuffer(&buffer);
     if (FAILED(hr)) {
-        E("%s: ConvertToContiguousBuffer failed, hr = 0x%08X", __FUNCTION__,
-          hr);
+        LOG(INFO) << "ConvertToContiguousBuffer failed, hr=" << hrToString(hr);
         stopCapturing();
         return -1;
     }
@@ -683,8 +831,7 @@ int MediaFoundationCameraDevice::readFrame(ClientFrame* resultFrame,
     DWORD currentLength = 0;
     hr = buffer->Lock(&data, &maxLength, &currentLength);
     if (FAILED(hr)) {
-        E("%s: Locking the webcam buffer failed, hr = 0x%08X", __FUNCTION__,
-          hr);
+        LOG(INFO) << "Locking the webcam buffer failed, hr=" << hrToString(hr);
         stopCapturing();
         return -1;
     }
@@ -807,15 +954,13 @@ HRESULT MediaFoundationCameraDevice::ConfigureMediaSource(
         // mapping list, so subtypeToPixelFormat cannot be used here. In this
         // situation, the SourceReader's advanced video processing will convert
         // to a supported format.
-        D("%s: SetCurrentMediaType to subtype "
-          "{%08lX-%04hX-%04hX-%02hhX%02hhX-%02hhX%02hhX%02hhX%02hhX%02hhX%"
-          "02hhX}, size %dx%d, frame rate %d/%d "
-          "(~%f fps)",
-          __FUNCTION__, subtype.Data1, subtype.Data2, subtype.Data3,
-          subtype.Data4[0], subtype.Data4[1], subtype.Data4[2],
-          subtype.Data4[3], subtype.Data4[4], subtype.Data4[5],
-          subtype.Data4[6], subtype.Data4[7], width, height, frameRateNum,
-          frameRateDenom, static_cast<float>(frameRateNum) / frameRateDenom);
+        LOG(VERBOSE) << "SetCurrentMediaType to subtype {"
+                     << guidToString(subtype) << "} ("
+                     << subtypeHumanReadableName(subtype) << "), size " << width
+                     << "x" << height << ", frame rate " << frameRateNum << "/"
+                     << frameRateDenom << " (~"
+                     << static_cast<float>(frameRateNum) / frameRateDenom
+                     << " fps)";
 
         hr = mediaHandler->SetCurrentMediaType(bestMediaType.Get());
     }
@@ -858,10 +1003,9 @@ HRESULT MediaFoundationCameraDevice::CreateSourceReader(
         // Try to set this type on the source reader.
         if (SUCCEEDED(hr)) {
             const uint32_t pixelFormat = subtypeToPixelFormat(mSubtype);
-            D("%s: SetCurrentMediaType to format %.4s, size %dx%d",
-              __FUNCTION__, reinterpret_cast<const char*>(&pixelFormat),
-              static_cast<uint32_t>(mFramebufferWidth),
-              static_cast<uint32_t>(mFramebufferHeight));
+            LOG(INFO) << "Creating webcam source reader with format "
+                      << fourccToString(pixelFormat) << ", size "
+                      << mFramebufferWidth << "x" << mFramebufferHeight;
 
             hr = mSourceReader->SetCurrentMediaType(
                     static_cast<DWORD>(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
@@ -886,15 +1030,17 @@ static MediaFoundationCameraDevice* toMediaFoundationCameraDevice(
 }
 
 CameraDevice* camera_device_open(const char* name, int inp_channel) {
-    const HRESULT hr = sMF->mfStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
-    if (FAILED(hr)) {
-        E("%s: MFStartup failed, hr = 0x%08X", __FUNCTION__, hr);
+    std::unique_ptr<MediaFoundationCameraDevice> cd(
+            new MediaFoundationCameraDevice(name, inp_channel));
+
+    if (!cd->isMfInitialized()) {
+        QLOG(ERROR) << "Webcam failed to initialize.";
         return nullptr;
     }
 
-    MediaFoundationCameraDevice* cd =
-            new MediaFoundationCameraDevice(name, inp_channel);
-    return cd ? cd->getCameraDevice() : nullptr;
+    CameraDevice* device = cd->getCameraDevice();
+    cd.release();  // The caller will now manage the lifetime.
+    return device;
 }
 
 int camera_device_start_capturing(CameraDevice* ccd,
@@ -903,7 +1049,7 @@ int camera_device_start_capturing(CameraDevice* ccd,
                                   int frame_height) {
     MediaFoundationCameraDevice* cd = toMediaFoundationCameraDevice(ccd);
     if (!cd) {
-        E("%s: Invalid camera device descriptor", __FUNCTION__);
+        LOG(ERROR) << "Invalid camera device descriptor.";
         return -1;
     }
 
@@ -913,7 +1059,7 @@ int camera_device_start_capturing(CameraDevice* ccd,
 int camera_device_stop_capturing(CameraDevice* ccd) {
     MediaFoundationCameraDevice* cd = toMediaFoundationCameraDevice(ccd);
     if (!cd) {
-        E("%s: Invalid camera device descriptor", __FUNCTION__);
+        LOG(ERROR) << "Invalid camera device descriptor.";
         return -1;
     }
 
@@ -930,7 +1076,7 @@ int camera_device_read_frame(CameraDevice* ccd,
                              float exp_comp) {
     MediaFoundationCameraDevice* cd = toMediaFoundationCameraDevice(ccd);
     if (!cd) {
-        E("%s: Invalid camera device descriptor", __FUNCTION__);
+        LOG(ERROR) << "Invalid camera descriptor.";
         return -1;
     }
 
@@ -940,24 +1086,26 @@ int camera_device_read_frame(CameraDevice* ccd,
 void camera_device_close(CameraDevice* ccd) {
     MediaFoundationCameraDevice* cd = toMediaFoundationCameraDevice(ccd);
     if (!cd) {
-        E("%s: Invalid camera device descriptor", __FUNCTION__);
+        LOG(ERROR) << "Invalid camera device descriptor.";
         return;
     }
 
     delete cd;
-
-    (void)sMF->mfShutdown();
 }
 
 int camera_enumerate_devices(CameraInfo* cis, int max) {
-    const HRESULT hr = sMF->mfStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
-    if (FAILED(hr)) {
-        E("%s: MFStartup failed, hr = 0x%08X", __FUNCTION__, hr);
+    MFInitialize init;
+    if (!init) {
+        QLOG(ERROR)
+                << "Could not initialize MediaFoundation, disabling webcam.";
         return -1;
     }
 
     const int result = MediaFoundationCameraDevice::enumerateDevices(cis, max);
+    if (result < 0) {
+        QLOG(ERROR) << "Failed to enumerate webcam devices, see the log above "
+                       "for more info.";
+    }
 
-    (void)sMF->mfShutdown();
     return result;
 }
