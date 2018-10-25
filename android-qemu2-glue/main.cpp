@@ -1031,17 +1031,21 @@ extern "C" int main(int argc, char** argv) {
                    ",file=%s",
                    pstore.start, pstore.size, pstoreFile.c_str());
 
+    bool firstTimeSetup =
+            (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path));
+
     // studio avd manager does not allow user to change partition size, set a
     // lower limit to 6GB.
     constexpr auto kMinPlaystoreImageSize = 6LL * 1024 * 1024 * 1024;
     if (fc::isEnabled(fc::PlayStoreImage)) {
-        if (android_hw->disk_dataPartition_size < kMinPlaystoreImageSize) {
+        if (firstTimeSetup &&
+            android_hw->disk_dataPartition_size < kMinPlaystoreImageSize) {
             android_hw->disk_dataPartition_size = kMinPlaystoreImageSize;
         }
     }
 
     // Create userdata file from init version if needed.
-    if ((android_op_wipe_data || !path_exists(hw->disk_dataPartition_path))) {
+    if (firstTimeSetup) {
         // Check free space first if the path does not exist.
         if (!path_exists(hw->disk_dataPartition_path)) {
             System::FileSize availableSpace;
