@@ -89,6 +89,7 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
 
         /* for backwards compatibility with previous versions */
         if (!strcmp(arg, "verbose")) {
+            base_enable_verbose_logs();
             arg = "debug-init";
         }
 
@@ -260,9 +261,13 @@ bool android_parse_debug_tags_option(const char* opt, bool parse_as_suffix) {
 
             if (is_tag_equal(x, y, "all")) {
                 result = true;
-                remove
-                        ? base_disable_verbose_logs()
-                        : base_enable_verbose_logs();
+                if (remove) {
+                    base_disable_verbose_logs();
+                    android_verbose = 0;
+                } else {
+                    base_enable_verbose_logs();
+                    android_verbose = ~0;
+                }
             } else {
                 char  temp[32];
                 buffer_translate_char_with_len(temp, sizeof temp,

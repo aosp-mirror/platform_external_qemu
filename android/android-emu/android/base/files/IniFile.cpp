@@ -91,14 +91,14 @@ void IniFile::parseStream(std::istream* in, bool keepComments) {
 
         // Handle empty lines, comments.
         if (citer == cend) {
-            LOG(VERBOSE) << "Line " << lineno << ": Skipped empty line.";
+            VLOG(avd_config) << "Line " << lineno << ": Skipped empty line.";
             if (keepComments) {
                 mComments.emplace_back(outputLineno, std::move(line));
             }
             continue;
         }
         if (*citer == '#' || *citer == ';') {
-            LOG(VERBOSE) << "Line " << lineno << ": Skipped comment line.";
+            VLOG(avd_config) << "Line " << lineno << ": Skipped comment line.";
             if (keepComments) {
                 mComments.emplace_back(outputLineno, std::move(line));
             }
@@ -108,9 +108,9 @@ void IniFile::parseStream(std::istream* in, bool keepComments) {
         // Extract and validate key.
         const auto keyStartIter = citer;
         if (!isKeyStartChar(*citer)) {
-            LOG(VERBOSE) << "Line " << lineno
-                         << ": Key does not start with a valid character."
-                         << " Skipped line.";
+            VLOG(avd_config) << "Line " << lineno
+                             << ": Key does not start with a valid character."
+                             << " Skipped line.";
             --outputLineno;
             continue;
         }
@@ -121,9 +121,9 @@ void IniFile::parseStream(std::istream* in, bool keepComments) {
         // Gobble the = sign.
         citer = eat(citer, cend, isSpaceChar);
         if (citer == cend || *citer != '=') {
-            LOG(VERBOSE) << "Line " << lineno
-                         << ": Missing expected assignment operator (=)."
-                         << " Skipped line.";
+            VLOG(avd_config) << "Line " << lineno
+                             << ": Missing expected assignment operator (=)."
+                             << " Skipped line.";
             --outputLineno;
             continue;
         }
@@ -141,9 +141,9 @@ void IniFile::parseStream(std::istream* in, bool keepComments) {
         // Ensure there's no invalid remainder.
         citer = eat(citer, cend, isSpaceChar);
         if (citer != cend) {
-            LOG(VERBOSE) << "Line " << lineno
-                         << ": Contains invalid character in the value."
-                         << " Skipped line.";
+            VLOG(avd_config) << "Line " << lineno
+                             << ": Contains invalid character in the value."
+                             << " Skipped line.";
             --outputLineno;
             continue;
         }
@@ -170,8 +170,8 @@ bool IniFile::read(bool keepComments) {
 
     ifstream inFile(mBackingFilePath, ios_base::in | ios_base::ate);
     if (!inFile) {
-        LOG(VERBOSE) << "Failed to process .ini file " << mBackingFilePath
-                     << " for reading.";
+        VLOG(avd_config) << "Failed to process .ini file " << mBackingFilePath
+                         << " for reading.";
         return false;
     }
 
@@ -381,7 +381,8 @@ int IniFile::getInt(const string& key, int defaultValue) const {
     errno = 0;
     const int result = strtol(value.c_str(), &end, 10);
     if (errno || *end != 0) {
-        LOG(VERBOSE) << "Malformed int value " << value << " for key " << key;
+        VLOG(avd_config) << "Malformed int value " << value << " for key "
+                         << key;
         return defaultValue;
     }
     return result;
@@ -397,7 +398,8 @@ int64_t IniFile::getInt64(const string& key, int64_t defaultValue) const {
     errno = 0;
     const int64_t result = strtoll(value.c_str(), &end, 10);
     if (errno || *end != 0) {
-        LOG(VERBOSE) << "Malformed int64 value " << value << " for key " << key;
+        VLOG(avd_config) << "Malformed int64 value " << value << " for key "
+                         << key;
         return defaultValue;
     }
     return result;
@@ -413,8 +415,8 @@ double IniFile::getDouble(const string& key, double defaultValue) const {
     errno = 0;
     const double result = strtod(value.c_str(), &end);
     if (errno || *end != 0) {
-        LOG(VERBOSE) << "Malformed double value " << value << " for key "
-                     << key;
+        VLOG(avd_config) << "Malformed double value " << value << " for key "
+                         << key;
         return defaultValue;
     }
     return result;
@@ -448,7 +450,8 @@ bool IniFile::getBool(const string& key, bool defaultValue) const {
     } else if (isBoolFalse(value)) {
         return false;
     } else {
-        LOG(VERBOSE) << "Malformed bool value " << value << " for key " << key;
+        VLOG(avd_config) << "Malformed bool value " << value << " for key "
+                         << key;
         return defaultValue;
     }
 }
