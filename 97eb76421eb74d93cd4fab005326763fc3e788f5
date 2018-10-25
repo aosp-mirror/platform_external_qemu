@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b1f83a70_016f3e8e",
+        "filename": "android/build/cmake/emu-qt5-config.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-25T15:51:12Z",
+      "side": 1,
+      "message": "Add \nset(QT5_LIBRARIES {QT5_LIBRARIES} -lQt5WebChannel -lQt5WebEngine -lQt5WebEngineWidgets -lQt5WebSockets -lQt5Network)\n\nbut we need to wrap it around \n\nif (NOT \"${ANDROID_TARGET_OS}\" STREQUAL \"windows\")\n\nThe msvc build will have this value as \"windows_msvc\"",
+      "range": {
+        "startLine": 36,
+        "startChar": 58,
+        "endLine": 36,
+        "endChar": 59
+      },
+      "revId": "97eb76421eb74d93cd4fab005326763fc3e788f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "495e120c_474a1cf8",
+        "filename": "android/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1187,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-25T15:51:12Z",
+      "side": 1,
+      "message": "Need to wrap this because mingw build doesn\u0027t have these folders. You can check \"OPTION_MINGW\" here.",
+      "range": {
+        "startLine": 1166,
+        "startChar": 4,
+        "endLine": 1187,
+        "endChar": 8
+      },
+      "revId": "97eb76421eb74d93cd4fab005326763fc3e788f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "83d054e0_fe72081e",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 401,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-25T15:51:12Z",
+      "side": 1,
+      "message": "Can you remove this change? This was a part of the msvc build.",
+      "range": {
+        "startLine": 398,
+        "startChar": 0,
+        "endLine": 401,
+        "endChar": 44
+      },
+      "revId": "97eb76421eb74d93cd4fab005326763fc3e788f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "add65f16_9b4cbe58",
+        "filename": "android/third_party/Qt5.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-10-25T15:51:12Z",
+      "side": 1,
+      "message": "Wrap this around ifneq ($(BUILD_TARGET_OS),windows)",
+      "range": {
+        "startLine": 11,
+        "startChar": 54,
+        "endLine": 11,
+        "endChar": 135
+      },
+      "revId": "97eb76421eb74d93cd4fab005326763fc3e788f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
