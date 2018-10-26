@@ -11,6 +11,9 @@
 
 #pragma once
 
+// windows.h must come before any of these files, or bad things will happen
+#include <windows.h>
+
 #include <direct.h>
 #include <ehstorioctl.h>
 #include <fcntl.h>
@@ -19,7 +22,6 @@
 #include <stdint.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <windows.h>
 #include <winsock2.h>
 //#include <basetsd.h>
 
