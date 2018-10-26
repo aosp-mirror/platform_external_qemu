@@ -121,7 +121,8 @@ TEST(GenericLooper, RunWithSingleTimer) {
     EXPECT_FALSE(timer1->isActive());
 }
 
-TEST(GenericLooper, RunWithSingleTimerTimingOut) {
+// The below test is flaky on mac buildbots.
+TEST(GenericLooper, DISABLED_RunWithSingleTimerTimingOut) {
     std::unique_ptr<Looper> looper(Looper::create());
 
     // Create a timer that runs after 10ms then calls Looper::forceQuit().
