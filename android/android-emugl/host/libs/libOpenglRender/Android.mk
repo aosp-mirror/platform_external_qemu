@@ -252,5 +252,6 @@ $(call make_sample,HelloTriangle)
 $(call make_sample,HelloSurfaceFlinger)
 $(call make_sample,CreateDestroyContext)
 $(call make_sample,HelloHostComposition)
+$(call make_sample,HelloVulkan)
 
 endif

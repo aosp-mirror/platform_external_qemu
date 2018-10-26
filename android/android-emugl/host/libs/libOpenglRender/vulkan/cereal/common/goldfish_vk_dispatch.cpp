@@ -284,7 +284,7 @@ void init_vulkan_dispatch_from_system_loader(
 {
     memset(out, 0x0, sizeof(VulkanDispatch));
     void* lib = dlOpenFunc();
-    if (!lib) return;
+    if (!lib) {fprintf(stderr, "%s: GOOFED\n", __func__); return; }
 #ifdef VK_VERSION_1_0
     out->vkDestroyInstance = (PFN_vkDestroyInstance)dlSymFunc(lib, "vkDestroyInstance");
     out->vkEnumeratePhysicalDevices = (PFN_vkEnumeratePhysicalDevices)dlSymFunc(lib, "vkEnumeratePhysicalDevices");
