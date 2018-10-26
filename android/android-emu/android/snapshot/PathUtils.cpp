@@ -23,6 +23,7 @@ namespace snapshot {
 
 std::string getSnapshotBaseDir() {
     auto avdDir = avdInfo_getContentPath(android_avdInfo);
+    fprintf(stderr, "%s: base dir: %s\n", __func__, avdDir);
     auto path = base::PathUtils::join(avdDir, "snapshots");
     return path;
 }
