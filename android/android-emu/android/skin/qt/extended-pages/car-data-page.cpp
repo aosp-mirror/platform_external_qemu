@@ -16,7 +16,6 @@
 #include "android/skin/qt/qt-settings.h"
 #include "android/utils/debug.h"
 #include "ui_car-data-page.h"
-
 #include <QSettings>
 
 #define D(...) VERBOSE_PRINT(car, __VA_ARGS__)
