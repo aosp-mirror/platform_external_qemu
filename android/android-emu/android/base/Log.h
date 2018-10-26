@@ -116,6 +116,17 @@ void setMinLogLevel(LogSeverity level);
         LOG_LAZY_EVAL(LOG_IS_ON(severity) && (condition), \
                       LOG_MESSAGE_STREAM_COMPACT(severity))
 
+// A variant of LOG() that avoids printing debug information such as file/line
+// information, for user-visible output.
+#define QLOG(severity) \
+    LOG_LAZY_EVAL(LOG_IS_ON(severity), QLOG_MESSAGE_STREAM_COMPACT(severity))
+
+// A variant of LOG_IF() that avoids printing debug information such as file/line
+// information, for user-visible output.
+#define QLOG_IF(severity, condition)                  \
+    LOG_LAZY_EVAL(LOG_IS_ON(severity) && (condition), \
+                  QLOG_MESSAGE_STREAM_COMPACT(severity))
+
 // A variant of LOG() that integrates with the utils/debug.h verbose tags,
 // enabling statements to only appear on the console if the "-debug-<tag>"
 // command line parameter is provided.  Example:
@@ -264,15 +275,14 @@ private:
 // Helper structure used to group the parameters of a LOG() or CHECK()
 // statement.
 struct LogParams {
-    LogParams() :
-            file(NULL), lineno(-1), severity(LOG_VERBOSE) {}
+    LogParams() {}
+    LogParams(const char* a_file, int a_lineno, LogSeverity a_severity, bool quiet = false)
+            : file(a_file), lineno(a_lineno), severity(a_severity), quiet(quiet) {}
 
-    LogParams(const char* a_file, int a_lineno, LogSeverity a_severity)
-            : file(a_file), lineno(a_lineno), severity(a_severity) {}
-
-    const char* file;
-    int lineno;
-    LogSeverity severity;
+    const char* file = nullptr;
+    int lineno = -1;
+    LogSeverity severity = LOG_VERBOSE;
+    bool quiet = false;
 };
 
 // Helper class used to implement an input stream similar to std::istream
@@ -284,7 +294,7 @@ struct LogParams {
 // statements are called.
 class LogStream {
 public:
-    LogStream(const char* file, int lineno, LogSeverity severity);
+    LogStream(const char* file, int lineno, LogSeverity severity, bool quiet);
     ~LogStream();
 
     inline LogStream& operator<<(const char* str) {
@@ -346,7 +356,8 @@ class LogStreamVoidify {
 // log (e.g. stderr by default).
 class LogMessage {
 public:
-    LogMessage(const char* file, int line, LogSeverity severity);
+    // To suppress printing file/line, set quiet = true.
+    LogMessage(const char* file, int line, LogSeverity severity, bool quiet = false);
     ~LogMessage();
 
     LogStream& stream() const { return *mStream; }
@@ -367,6 +378,13 @@ protected:
 #define LOG_MESSAGE_STREAM_COMPACT(severity) \
     LOG_MESSAGE_COMPACT(severity).stream()
 
+// A variant of LogMessage for outputting user-visible messages to the console,
+// without debug information.
+#define QLOG_MESSAGE_COMPACT(severity) \
+    ::android::base::LogMessage(__FILE__, __LINE__, LOG_SEVERITY_FROM(severity), true)
+
+#define QLOG_MESSAGE_STREAM_COMPACT(severity) \
+    QLOG_MESSAGE_COMPACT(severity).stream()
 
 // A variant of LogMessage that saves the errno value on creation,
 // then restores it on destruction, as well as append a strerror()

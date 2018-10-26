@@ -14,6 +14,7 @@
 #include "android/base/Debug.h"
 #include "android/base/StringFormat.h"
 #include "android/base/threads/Thread.h"
+#include "android/base/files/PathUtils.h"
 
 #include <string>
 
@@ -22,6 +23,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define ENABLE_THREAD_ID 0
 
 namespace android {
 namespace base {
@@ -51,28 +54,40 @@ const char* severityLevelToString(LogSeverity severity) {
 void defaultLogMessage(const LogParams& params,
                        const char* message,
                        size_t messageLen) {
-    // Obtaining current thread's id is expensive. Only do this for verbose
-    // logs.
-    std::string tidStr;
-    if (params.severity >= LOG_VERBOSE) {
+    const char* tidStr = "";
+#if ENABLE_THREAD_ID
+    // Obtaining current thread's id is expensive. Only do this for
+    // verbose logs.
+    std::string tidStrData;
+    if (params.severity <= LOG_VERBOSE) {
         tidStr = android::base::StringFormat("[%lu]:", getCurrentThreadId());
     }
+#endif
 
-    fprintf(stderr,
-            "%s%s:%s:%d:%.*s\n",
-            tidStr.c_str(),
-            severityLevelToString(params.severity),
-            params.file,
-            params.lineno,
-            int(messageLen),
-            message);
-    // Note: by default, stderr is non buffered, but the program might
-    // have altered this setting, so always flush explicitly to ensure
-    // that the log is displayed as soon as possible. This avoids log
-    // messages being lost when a crash happens, and makes debugging
-    // easier. On the other hand, it means lots of logging will impact
-    // performance.
-    fflush(stderr);
+    FILE* output = params.severity >= LOG_WARNING ? stderr : stdout;
+    if (params.quiet) {
+        fprintf(output, "%s: %.*s\n", severityLevelToString(params.severity), int(messageLen), message);
+    } else {
+        StringView path = params.file;
+        StringView filename;
+        if (!PathUtils::split(path, nullptr, &filename)) {
+            filename = path;
+        }
+
+        fprintf(output, "%s%s: %s:%d: %.*s\n", tidStr,
+                severityLevelToString(params.severity), c_str(filename).get(),
+                params.lineno, int(messageLen), message);
+
+        if (params.severity >= LOG_WARNING) {
+            // Note: by default, stderr is non buffered, but the program might
+            // have altered this setting, so always flush explicitly to ensure
+            // that the log is displayed as soon as possible. This avoids log
+            // messages being lost when a crash happens, and makes debugging
+            // easier. On the other hand, it means lots of logging will impact
+            // performance.
+            fflush(stderr);
+        }
+    }
 
     if (params.severity >= LOG_FATAL) {
         if (IsDebuggerAttached()) {
@@ -139,9 +154,9 @@ LogString::~LogString() {
 
 // LogStream
 
-LogStream::LogStream(const char* file, int lineno, LogSeverity severity) :
-        mParams(file, lineno, severity),
-        mString(NULL),
+LogStream::LogStream(const char* file, int lineno, LogSeverity severity, bool quiet) :
+        mParams(file, lineno, severity, quiet),
+        mString(nullptr),
         mSize(0),
         mCapacity(0) {}
 
@@ -250,8 +265,8 @@ void LogStream::append(const char* str, size_t len) {
 
 // LogMessage
 
-LogMessage::LogMessage(const char* file, int line, LogSeverity severity) :
-        mStream(new LogStream(file, line, severity)) {}
+LogMessage::LogMessage(const char* file, int line, LogSeverity severity, bool quiet) :
+        mStream(new LogStream(file, line, severity, quiet)) {}
 
 LogMessage::~LogMessage() {
     logMessage(mStream->params(),
@@ -266,8 +281,8 @@ ErrnoLogMessage::ErrnoLogMessage(const char* file,
                                  int line,
                                  LogSeverity severity,
                                  int errnoCode) :
-        mStream(NULL), mErrno(errnoCode) {
-    mStream = new LogStream(file, line, severity);
+        mStream(nullptr), mErrno(errnoCode) {
+    mStream = new LogStream(file, line, severity, false);
 }
 
 ErrnoLogMessage::~ErrnoLogMessage() {

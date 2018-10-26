@@ -14,11 +14,11 @@
 #include "android/base/Log.h"
 
 void base_enable_verbose_logs() {
-    android_verbose = ~0;
+    android_verbose |= VERBOSE_init;
     android::base::setMinLogLevel(android::base::LOG_VERBOSE);
 }
 
 void base_disable_verbose_logs() {
-    android_verbose = 0;
+    android_verbose &= ~VERBOSE_init;
     android::base::setMinLogLevel(android::base::LOG_INFO);
 }
