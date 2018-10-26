@@ -101,6 +101,7 @@ set(android-emu-base_windows-x86_src
 
 # Windows 64-bit (same as 32 bit)
 set(android-emu-base_windows-x86_64_src ${android-emu-base_windows-x86_src})
+set(android-emu-base_windows_msvc-x86_64_src ${android-emu-base_windows-x86_src})
 
 # Mac specific sources
 set(android-emu-base_darwin-x86_64_src
@@ -121,6 +122,15 @@ set(android-emu-base_includes_private
 # Library dependencies, these are public so they will propagate
 set(android-emu-base_libs_public ${LZ4_LIBRARIES} ${UUID_LIBRARIES})
 
+if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
+    set(android-emu-base_includes_private
+        ${android-emu-base_includes_private}
+	${MSVC_POSIX_COMPAT_INCLUDE_DIR}
+        ${DIRENT_WIN32_INCLUDE_DIR})
+    set(android-emu-base_libs_public
+        ${android-emu-base_libs_public}
+	${MSVC_POSIX_COMPAT_LIBRARY})
+endif()
 # Compiler flags
 set(android-emu-base_compile_options_private
     "-Wno-parentheses"

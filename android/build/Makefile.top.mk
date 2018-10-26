@@ -176,11 +176,11 @@ ifeq (windows_msvc,$(BUILD_TARGET_OS))
             -g \
             -Wl,-nodefaultlib:libcmt,-defaultlib:msvcrt,-defaultlib:oldnames
 
-    ifneq (,$(EMULATOR_BUILD_32BITS))
-        CLANG_COMPILER_FLAGS_TARGET += -target i386-pc-win32
-    else
-        CLANG_COMPILER_FLAGS_TARGET += -target x86_64-pc-win32
-    endif
+#    ifneq (,$(EMULATOR_BUILD_32BITS))
+#        CLANG_COMPILER_FLAGS_TARGET += -target i386-pc-win32
+#    else
+#        CLANG_COMPILER_FLAGS_TARGET += -target x86_64-pc-win32
+#    endif
 
     CLANG_COMPILER_CXXFLAGS_TARGET= \
             -std=c++14 \
@@ -190,23 +190,23 @@ ifeq (windows_msvc,$(BUILD_TARGET_OS))
     # We can't simply include the directory here because clang will be it's a system directory and ignore it.
     # We want the clang's intrinsic headers to be first in the search path instead of msvc's.
     # Maybe we can just take out msvc's intrinsic headers instead?
-    CLANG_COMPILER_FLAGS_TARGET += \
-            -I$(MSVC_DIR)/clang-intrins/include \
-            -I$(MSVC_DIR)/msvc/include \
-            -I$(MSVC_DIR)/win10sdk/include/10.0.16299.0/ucrt \
-            -I$(MSVC_DIR)/win10sdk/include/10.0.16299.0/um \
-            -I$(MSVC_DIR)/win10sdk/include/10.0.16299.0/winrt \
-            -I$(MSVC_DIR)/win10sdk/include/10.0.16299.0/hypervisor \
-            -I$(MSVC_DIR)/win10sdk/include/10.0.16299.0/shared
+#    CLANG_COMPILER_FLAGS_TARGET += \
+#            -I$(MSVC_DIR)/clang-intrins/include \
+#            -I$(MSVC_DIR)/msvc/include \
+#            -I$(MSVC_DIR)/win10sdk/include/10.0.16299.0/ucrt \
+#            -I$(MSVC_DIR)/win10sdk/include/10.0.16299.0/um \
+#            -I$(MSVC_DIR)/win10sdk/include/10.0.16299.0/winrt \
+#            -I$(MSVC_DIR)/win10sdk/include/10.0.16299.0/hypervisor \
+#            -I$(MSVC_DIR)/win10sdk/include/10.0.16299.0/shared
 
     # oldnames.lib is a wrapper for posix to the ISO C++ conformant functions (read -> _read, etc.).
     # Need to also link with msvcrt.lib for some symbols in oldnames.lib.
-    CLANG_COMPILER_LDFLAGS_TARGET = \
-            $(CLANG_COMPILER_FLAGS_TARGET) \
-            -fuse-ld=lld \
-            -L$(MSVC_DIR)/msvc/lib/x64 \
-            -L$(MSVC_DIR)/win10sdk/lib/10.0.16299.0/ucrt/x64 \
-            -L$(MSVC_DIR)/win10sdk/lib/10.0.16299.0/um/x64
+#    CLANG_COMPILER_LDFLAGS_TARGET = \
+#            $(CLANG_COMPILER_FLAGS_TARGET) \
+#            -fuse-ld=lld \
+#            -L$(MSVC_DIR)/msvc/lib/x64 \
+#            -L$(MSVC_DIR)/win10sdk/lib/10.0.16299.0/ucrt/x64 \
+#            -L$(MSVC_DIR)/win10sdk/lib/10.0.16299.0/um/x64
 endif
 
 # Add your tidy checks here.
@@ -331,6 +331,7 @@ endif
 # NOTE: The following definitions are only used by the standalone build.
 BUILD_TARGET_EXEEXT :=
 BUILD_TARGET_DLLEXT := .so
+BUILD_TARGET_STATIC_PREFIX := lib
 BUILD_TARGET_STATIC_LIBEXT := .a
 ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
   BUILD_TARGET_EXEEXT := .exe
@@ -341,6 +342,7 @@ ifeq ($(BUILD_TARGET_OS),darwin)
 endif
 
 ifeq ($(BUILD_TARGET_OS),windows_msvc)
+  BUILD_TARGET_STATIC_PREFIX :=
   BUILD_TARGET_STATIC_LIBEXT := .lib
 endif
 

@@ -1029,19 +1029,37 @@ typedef struct X86XSaveArea {
     XSavePKRU pkru_state;
 } X86XSaveArea;
 
+// We can't use a static_assert with offsetof() because in msvc 2017, it uses
+// reinterpret_cast.
+// TODO: Add runtime assertion instead?
+// https://developercommunity.visualstudio.com/content/problem/22196/static-assert-cannot-compile-constexprs-method-tha.html
+#ifndef _MSC_VER
 QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, avx_state) != 0x240);
+#endif
 QEMU_BUILD_BUG_ON(sizeof(XSaveAVX) != 0x100);
+#ifndef _MSC_VER
 QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, bndreg_state) != 0x3c0);
+#endif
 QEMU_BUILD_BUG_ON(sizeof(XSaveBNDREG) != 0x40);
+#ifndef _MSC_VER
 QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, bndcsr_state) != 0x400);
+#endif
 QEMU_BUILD_BUG_ON(sizeof(XSaveBNDCSR) != 0x40);
+#ifndef _MSC_VER
 QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, opmask_state) != 0x440);
+#endif
 QEMU_BUILD_BUG_ON(sizeof(XSaveOpmask) != 0x40);
+#ifndef _MSC_VER
 QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, zmm_hi256_state) != 0x480);
+#endif
 QEMU_BUILD_BUG_ON(sizeof(XSaveZMM_Hi256) != 0x200);
+#ifndef _MSC_VER
 QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, hi16_zmm_state) != 0x680);
+#endif
 QEMU_BUILD_BUG_ON(sizeof(XSaveHi16_ZMM) != 0x400);
+#ifndef _MSC_VER
 QEMU_BUILD_BUG_ON(offsetof(X86XSaveArea, pkru_state) != 0xA80);
+#endif
 QEMU_BUILD_BUG_ON(sizeof(XSavePKRU) != 0x8);
 
 typedef enum TPRAccess {

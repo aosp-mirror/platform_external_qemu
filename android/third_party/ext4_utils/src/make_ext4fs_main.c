@@ -16,7 +16,9 @@
 
 #include <fcntl.h>
 #include <stdio.h>
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <libgen.h>
 #include <unistd.h>
 #endif
@@ -31,7 +33,7 @@
 #include <private/android_filesystem_config.h>
 #endif
 
-#ifndef USE_MINGW
+#if !defined(USE_MINGW) && !defined(_MSC_VER)
 #include <selinux/selinux.h>
 #include <selinux/label.h>
 #include <selinux/android.h>
@@ -42,7 +44,7 @@ struct selabel_handle;
 #include "make_ext4fs.h"
 #include "ext4_utils.h"
 
-#ifndef USE_MINGW /* O_BINARY is windows-specific flag */
+#if !defined(USE_MINGW) && !defined(_MSC_VER) /* O_BINARY is windows-specific flag */
 #define O_BINARY 0
 #endif
 
@@ -51,7 +53,13 @@ extern struct fs_info info;
 
 static void usage(char *path)
 {
+#ifdef _MSC_VER
+        char basename[_MAX_FNAME];
+        _splitpath(path, NULL, NULL, basename, NULL);
+        fprintf(stderr, "%s [ -l <len> ] [ -j <journal size> ] [ -b <block_size> ]\n", basename);
+#else
 	fprintf(stderr, "%s [ -l <len> ] [ -j <journal size> ] [ -b <block_size> ]\n", basename(path));
+#endif
 	fprintf(stderr, "    [ -g <blocks per group> ] [ -i <inodes> ] [ -I <inode size> ]\n");
 	fprintf(stderr, "    [ -L <label> ] [ -f ] [ -a <android mountpoint> ]\n");
 	fprintf(stderr, "    [ -S file_contexts ]\n");
@@ -74,7 +82,7 @@ int main(int argc, char **argv)
 	int exitcode;
 	int verbose = 0;
 	struct selabel_handle *sehnd = NULL;
-#ifndef USE_MINGW
+#if !defined(USE_MINGW) && !defined(_MSC_VER)
 	struct selinux_opt seopts[] = { { SELABEL_OPT_PATH, "" } };
 #endif
 
@@ -133,7 +141,7 @@ int main(int argc, char **argv)
 			fprintf(stderr, "Warning: -t (initialize inode tables) is deprecated\n");
 			break;
 		case 'S':
-#ifndef USE_MINGW
+#if !defined(USE_MINGW) && !defined(_MSC_VER)
 			seopts[0].value = optarg;
 			sehnd = selabel_open(SELABEL_CTX_FILE, seopts, 1);
 			if (!sehnd) {

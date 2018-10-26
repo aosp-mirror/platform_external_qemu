@@ -21,6 +21,8 @@
 
 #include "GLES12Translator/underlying_apis.h"
 
+#include <stdint.h>
+
 // Define function pointer types.
 #define GLES1_DISPATCH_DEFINE_TYPE(return_type,func_name,signature,callargs) \
     typedef return_type (KHRONOS_APIENTRY * func_name ## _t) signature;
