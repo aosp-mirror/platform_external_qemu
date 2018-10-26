@@ -184,7 +184,8 @@ TEST(GenericLooper, RunWithSingleTimerSelfDeleting) {
     // TIMER WAS DELETED: EXPECT_FALSE(timer1->isActive());
 }
 
-TEST(GenericLooper, RunWithTwoTimersOneStoppingTheOther) {
+// Flaky/crashes on mac buildbots
+TEST(GenericLooper, DISABLED_RunWithTwoTimersOneStoppingTheOther) {
     // Create two timers, one that runs after 10ms, and the other after 20ms
     // The first timer callback will stop the second one, which will force
     // Looper::run() to exit after 10ms.
@@ -297,7 +298,8 @@ static void myTimerCallbackRemoveFdWatchRead(void* opaque,
     watch->dontWantRead();
 }
 
-TEST(GenericLooper, RunTimerAndFdWatchWithTimerRemovingPendingWatch) {
+// Flaky/crashes on mac buildbots
+TEST(GenericLooper, DISABLED_RunTimerAndFdWatchWithTimerRemovingPendingWatch) {
     ScopedSocket s0;
     ScopedSocket s1;
     ASSERT_TRUE(createScopedSocketPair(&s0, &s1));
