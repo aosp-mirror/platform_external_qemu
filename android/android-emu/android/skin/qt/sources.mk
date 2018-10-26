@@ -72,6 +72,8 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/telephony-page.cpp \
     android/skin/qt/extended-pages/virtual-sensors-page.cpp \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp \
+    android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp \
+    android/skin/qt/extended-pages/instr-cluster-render/renderwidget.cpp \
     android/skin/qt/extended-window.cpp \
     android/skin/qt/FramelessDetector.cpp \
     android/skin/qt/ModalOverlay.cpp \
@@ -129,6 +131,8 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-pages/telephony-page.h \
     android/skin/qt/extended-pages/virtual-sensors-page.h \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h \
+    android/skin/qt/extended-pages/instr-cluster-render/renderthread.h \
+    android/skin/qt/extended-pages/instr-cluster-render/renderwidget.h \
     android/skin/qt/extended-window.h \
     android/skin/qt/raised-material-button.h \
     android/skin/qt/ModalOverlay.h \
