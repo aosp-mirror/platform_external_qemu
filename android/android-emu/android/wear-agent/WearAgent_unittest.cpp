@@ -168,11 +168,11 @@ static bool testWearAgent(bool usbPhone) {
                                 usbPhone);
 }
 
-TEST(WearAgent, PairUpWearToUsbPhone) {
+TEST(WearAgent, DISABLED_PairUpWearToUsbPhone) {
     EXPECT_TRUE(testWearAgent(true));
 }
 
-TEST(WearAgent, PairUpWearToEmulatorPhone) {
+TEST(WearAgent, DISABLED_PairUpWearToEmulatorPhone) {
     EXPECT_TRUE(testWearAgent(false));
 }
 #endif
