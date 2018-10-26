@@ -19,11 +19,16 @@
 
 #include <assert.h>
 
+#include <atomic>
 #include <memory>
 #include <random>
 #include <vector>
 
 extern "C" const QAndroidVmOperations* const gQAndroidVmOperations;
+
+// This indicates the number of heartbeats from guest
+static std::atomic<int> guest_heart_beat_count {};
+
 
 namespace android {
 static bool beginWith(const std::vector<uint8_t>& input, const char* keyword) {
@@ -50,14 +55,22 @@ static void getRandomBytes(int bytes, std::vector<uint8_t>* outputp) {
     stream.read(&(output[0]), bytes);
 }
 
+static void fillWithOK(std::vector<uint8_t> &output) {
+    output.resize(3);
+    output[0]='O';
+    output[1]='K';
+    output[2]='\0';
+}
+
 static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
-                               std::vector<uint8_t>* outputp) {
+                                         std::vector<uint8_t>* outputp) {
     std::vector<uint8_t> & output = *outputp;
-    if (beginWith(input, "bootcomplete")) {
-        output.resize(3);
-        output[0]='O';
-        output[1]='K';
-        output[2]='\0';
+    if (beginWith(input, "heartbeat")) {
+        fillWithOK(output);
+        guest_heart_beat_count ++;
+        return;
+    } else if (beginWith(input, "bootcomplete")) {
+        fillWithOK(output);
         printf("emulator: INFO: boot completed\n");
         fflush(stdout);
         guest_boot_completed = 1;
