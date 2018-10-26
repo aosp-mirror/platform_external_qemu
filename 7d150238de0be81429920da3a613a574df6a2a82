@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9a529bf1_0d242cdd",
+        "filename": "android/android-emu/android/emulation/QemuMiscPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-10-26T14:56:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a765d63_c05a8b64",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 56
+      },
+      "revId": "7d150238de0be81429920da3a613a574df6a2a82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e4953336_2751bb7c",
         "filename": "android/android-emu/android/emulation/QemuMiscPipe.cpp",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "41171729_c120155c",
+        "filename": "android/android-emu/android/emulation/QemuMiscPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-10-26T14:56:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e4953336_2751bb7c",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 40
+      },
+      "revId": "7d150238de0be81429920da3a613a574df6a2a82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b4dd972d_e1d025a2",
         "filename": "android/android-emu/android/emulation/QemuMiscPipe.cpp",
         "patchSetId": 2
@@ -68,6 +116,30 @@
       "revId": "7d150238de0be81429920da3a613a574df6a2a82",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c641a295_91c7e517",
+        "filename": "android/android-emu/android/emulation/QemuMiscPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-10-26T14:56:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b4dd972d_e1d025a2",
+      "range": {
+        "startLine": 66,
+        "startChar": 31,
+        "endLine": 66,
+        "endChar": 62
+      },
+      "revId": "7d150238de0be81429920da3a613a574df6a2a82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
