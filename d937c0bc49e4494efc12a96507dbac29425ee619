@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1bd937c6_c198bcd4",
+        "filename": "android/build/cmake/toolchain-windows-x86_64.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-26T17:27:16Z",
+      "side": 1,
+      "message": "Technically this is not the right way to do host detection. CMake has a set of macros to do actual host detection that should be used instead, which we can do in toolchain.cmake and have it propagate out.",
+      "revId": "d937c0bc49e4494efc12a96507dbac29425ee619",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
