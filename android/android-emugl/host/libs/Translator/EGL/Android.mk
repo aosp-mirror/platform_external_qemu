@@ -20,7 +20,7 @@ ifeq ($(BUILD_TARGET_OS),darwin)
     host_common_LDLIBS += -Wl,-framework,AppKit
 endif
 
-ifeq ($(BUILD_TARGET_OS),windows)
+ifeq ($(BUILD_TARGET_OS_FLAVOR),windows)
     host_OS_SRCS = EglOsApi_wgl.cpp \
                    EglOsApi_egl.cpp \
                    CoreProfileConfigs_windows.cpp \

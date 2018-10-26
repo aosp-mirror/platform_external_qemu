@@ -19,5 +19,6 @@ include(toolchain)
 # First we create the toolchain
 set(ANDROID_TARGET_TAG "darwin-x86_64")
 set(ANDROID_TARGET_OS "darwin")
+set(ANDROID_TARGET_OS_FLAVOR "darwin")
 toolchain_generate("${ANDROID_TARGET_TAG}")
 # No magical includes or dependencies for darwin..

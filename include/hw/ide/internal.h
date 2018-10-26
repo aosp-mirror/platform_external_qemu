@@ -8,6 +8,7 @@
  */
 #include "hw/ide.h"
 #include "hw/isa/isa.h"
+#include "qemu/iov.h"
 #include "sysemu/dma.h"
 #include "sysemu/sysemu.h"
 #include "hw/block/block.h"

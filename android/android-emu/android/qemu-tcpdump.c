@@ -12,7 +12,9 @@
 #include "android/tcpdump.h"
 #include <stdio.h>
 #include <stdlib.h>
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <sys/time.h>
 #endif
 

@@ -17,7 +17,7 @@
 # lib/executable through variables that follow the following naming conventions
 #
 # ANDROID_TARGET_TAG is in the set [linux-x86_64, darwin-x86_64, windows-x86,
-# windows-x86_64] MODIFIER is in the set [public, private, interface]. The
+# windows-x86_64, windows_msvc-x86_64] MODIFIER is in the set [public, private, interface]. The
 # meaning of a modifier is as follows: (See
 # https://cmake.org/cmake/help/v3.5/command/target_link_libraries.html for more
 # details): The PUBLIC, PRIVATE and INTERFACE keywords can be used to specify
@@ -150,7 +150,7 @@ function(add_android_protobuf libname protofiles)
   set(${libname}_libs_public ${PROTOBUF_LIBRARIES})
   add_android_library(${libname})
   if(FRANKENBUILD)
-    add_library(lib${libname}_proto ALIAS ${libname})
+    add_library(${CMAKE_STATIC_LIBRARY_PREFIX}${libname}_proto ALIAS ${libname})
   endif()
 endfunction()
 

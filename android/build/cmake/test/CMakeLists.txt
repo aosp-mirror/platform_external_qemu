@@ -7,7 +7,11 @@ list(APPEND CMAKE_MODULE_PATH "${TOOLS_DIRECTORY}/cmake")
 include(prebuilts)
 include(android)
 
-set(CMAKE_CXX_STANDARD 11)
+# Must be c++14 or later for msvc build or clang will throw
+# a lot of errors.
+if(NOT ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc"))
+  set(CMAKE_CXX_STANDARD 11)
+endif ()
 
 # These are not usually available outside our build system.
 if(DEFINED ANDROID_TARGET_TAG)
@@ -17,13 +21,16 @@ if(DEFINED ANDROID_TARGET_TAG)
   prebuilt(LZ4)
   prebuilt(SDL2)
   prebuilt(UUID)
-  prebuilt(VIRGLRENDERER)
   prebuilt(VPX)
-  prebuilt(X264)
+  # No x264 or virglrenderer on windows_msvc build
+  if(NOT ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc"))
+    prebuilt(X264)
+    prebuilt(VIRGLRENDERER)
+  endif()
   prebuilt(OpenSSL)
   prebuilt(QT5)
   # No usb on windows..
-  if(NOT ("${ANDROID_TARGET_TAG}" MATCHES "windows.*"))
+  if(NOT ("${ANDROID_TARGET_OS_FLAVOR}" STREQUAL "windows"))
     prebuilt(USB)
   endif()
 endif()
@@ -54,6 +61,9 @@ set(hello_darwin-x86_64_src hello.cpp)
 set(hello_linux-x86_64_src hello.cpp)
 set(hello_windows-x86_64_src hello.cpp)
 set(hello_windows-x86_src hello.cpp)
+# TODO: not sure how to add __dlspec(dllexport) to the generated protobuf
+# headers, so just include the src for now.
+set(hello_windows_msvc-x86_64_src hello.cpp ${PROTO_SRCS})
 
 # Compiler options that should not propagate to the next target, we need -fPIC
 # on lin/darwin for QT, on windows this is not needed.
