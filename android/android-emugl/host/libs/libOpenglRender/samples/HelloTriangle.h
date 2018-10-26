@@ -36,7 +36,6 @@ protected:
     void initialize() override;
     void draw() override;
 
-private:
     GLint mTransformLoc;
     GLuint mBuffer;
     float mTime = 0.0f;
