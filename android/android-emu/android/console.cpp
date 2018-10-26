@@ -32,6 +32,7 @@
 #include "android/console_auth.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulator-window.h"
+#include "android/emulation/QemuMiscPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
@@ -2439,6 +2440,13 @@ do_avd_status( ControlClient  client, char*  args )
 }
 
 static int
+do_avd_heartbeat( ControlClient  client, char*  args )
+{
+    control_write(client, "heartbeat: %d\r\n", get_guest_heart_beat_count());
+    return 0;
+}
+
+static int
 do_avd_name( ControlClient  client, char*  args )
 {
     control_write( client, "%s\r\n", android_hw->avd_name);
@@ -2458,6 +2466,10 @@ static const CommandDefRec  vm_commands[] =
     { "status", "query virtual device status",
     "'avd status' will indicate whether the virtual device is running or not\r\n",
     NULL, do_avd_status, NULL },
+
+    { "heartbeat", "query the heart beat number of the guest system",
+    "'avd heartbeat' will report the number of heart beats from guest system running inside this avd\r\n",
+    NULL, do_avd_heartbeat, NULL },
 
     { "name", "query virtual device name",
     "'avd name' will return the name of this virtual device\r\n",
