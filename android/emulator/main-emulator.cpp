@@ -278,7 +278,7 @@ int main(int argc, char** argv)
     const char* debug = getenv("ANDROID_EMULATOR_DEBUG");
 
     if (debug != NULL && *debug && *debug != '0') {
-        android_verbose = 1;
+        base_enable_verbose_logs();
     }
 
     if (!checkOsVersion()) {
@@ -347,14 +347,12 @@ int main(int argc, char** argv)
 
         if (!strcmp(opt,"-verbose") || !strcmp(opt,"-debug-all")
                  || !strcmp(opt,"-debug-init")) {
-            android_verbose = 1;
             base_enable_verbose_logs();
             continue;
         }
 
         if (!strcmp(opt,"-debug") && nn + 1 < argc &&
             (!strcmp(argv[nn + 1], "all") || !strcmp(argv[nn + 1], "init"))) {
-            android_verbose = 1;
             base_enable_verbose_logs();
         }
 
