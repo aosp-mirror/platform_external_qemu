@@ -74,7 +74,7 @@ generated-proto-sources-dir = $(call intermediates-dir-for,$(call local-build-va
 local-cmake-path = $(call intermediates-dir-for,$(call local-build-var,BITS),cmake)/$(1)
 
 # Location of intermediate static libraries during build.
-local-library-path = $(call intermediates-dir-for,$(call local-build-var,BITS),$(1))/$(1).a
+local-library-path = $(call intermediates-dir-for,$(call local-build-var,BITS),$(1))/$(1)$(call local-build-var,STATIC_LIBEXT)
 
 # Location of unstripped executables during build.
 local-executable-path = $(call intermediates-dir-for,$(call local-build-var,BITS),$(1))/$(1)$(call local-build-var,EXEEXT)
@@ -422,6 +422,7 @@ $$(_DST): PRIVATE_CC  := $$(BUILD_TARGET_CC)
 $$(_DST): PRIVATE_CXX := $$(BUILD_TARGET_CXX)
 $$(_DST): PRIVATE_AR  := $$(BUILD_TARGET_AR)
 $$(_DST): PRIVATE_OS  := $$(BUILD_TARGET_OS)
+$$(_DST): PRIVATE_OS_FLAVOR  := $$(BUILD_TARGET_OS_FLAVOR)
 $$(_DST): PRIVATE_RANLIB  := $$(BUILD_TARGET_RANLIB)
 $$(_DST): PRIVATE_OBJCOPY  := $$(BUILD_TARGET_OBJCOPY)
 $$(_DST): PRIVATE_BUILD_TARGET_TAG := $$(BUILD_TARGET_TAG)
@@ -442,11 +443,14 @@ $$(_DST): $$(_SRC)
        -DLOCAL_CXXFLAGS="$$(PRIVATE_CXXFLAGS)" \
        -DLOCAL_CFLAGS="$$(PRIVATE_CFLAGS)" \
        -DLOCAL_OS="$${PRIVATE_OS}" \
+       -DLOCAL_OS_FLAVOR="$${PRIVATE_OS_FLAVOR}" \
        -DLOCAL_INSTALL="$$(PRIVATE_INST)" \
        -DLOCAL_QEMU2_TOP_DIR="$$(QEMU2_TOP_DIR)" \
        -DLOCAL_TARGET_TAG="$$(PRIVATE_BUILD_TARGET_TAG)" \
+       -DLOCAL_OS_FLAVOR="$$(PRIVATE_OS_FLAVOR)" \
        -DLOCAL_BUILD_OBJS_DIR="$$(PRIVATE_BUILD_OBJS_DIR)" \
-       -DCMAKE_TOOLCHAIN_FILE=$$(call qemu2-if-windows,"$$(QEMU2_TOP_DIR)/android/build/cmake/toolchain-win.cmake")
+       $$(call qemu2-if-windows,"-DCMAKE_TOOLCHAIN_FILE=$$(QEMU2_TOP_DIR)/android/build/cmake/toolchain-win.cmake") \
+       $$(call qemu2-if-windows-msvc,"-DCMAKE_TOOLCHAIN_FILE=$$(QEMU2_TOP_DIR)/android/build/cmake/toolchain-windows_msvc-x86_64.cmake")
 endef
 
 # Makes the specific target from the generated CMAKE project file.

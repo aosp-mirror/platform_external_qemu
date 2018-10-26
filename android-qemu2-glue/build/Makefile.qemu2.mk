@@ -23,20 +23,26 @@ LOCAL_PATH := $(QEMU2_TOP_DIR)
 
 # If $(BUILD_TARGET_OS) is $1, then return $2, otherwise $3
 qemu2-if-os = $(if $(filter $1,$(BUILD_TARGET_OS)),$2,$3)
+# If $(BUILD_TARGET_OS_FLAVOR) is $1, then return $2, otherwise $3
+qemu2-if-os-flavor = $(if $(filter $1,$(BUILD_TARGET_OS_FLAVOR)),$2,$3)
 
 # If $(BUILD_TARGET_ARCH) is $1, then return $2, otherwise $3
 qemu2-if-build-target-arch = $(if $(filter $1,$(BUILD_TARGET_ARCH)),$2,$3)
 
 # If $(BUILD_TARGET_OS) is not $1, then return $2, otherwise $3
 qemu2-ifnot-os = $(if $(filter-out $1,$(BUILD_TARGET_OS)),$2,$3)
+# If $(BUILD_TARGET_OS_FLAVOR) is not $1, then return $2, otherwise $3
+qemu2-ifnot-os-flavor = $(if $(filter-out $1,$(BUILD_TARGET_OS_FLAVOR)),$2,$3)
 
 # If $(BUILD_TARGET_OS) is windows, return $1, otherwise $2
 qemu2-if-windows = $(call qemu2-if-os,windows,$1,$2)
 # If $(BUILD_TARGET_OS) is windows_msvc, return $1, otherwise $2
 qemu2-if-windows-msvc = $(call qemu2-if-os,windows_msvc,$1,$2)
+# If $(BUILD_TARGET_OS_FLAVOR) is windows, return $1, otherwise $2
+qemu2-if-any-windows = $(call qemu2-if-os-flavor,windows,$1,$2)
 
 # If $(BUILD_TARGET_OS) is not windows, return $1, otherwise $2
-qemu2-if-posix = $(call qemu2-ifnot-os,windows windows_msvc,$1,$2)
+qemu2-if-posix = $(call qemu2-ifnot-os-flavor,windows,$1,$2)
 
 qemu2-if-darwin = $(call qemu2-if-os,darwin,$1,$2)
 qemu2-if-linux = $(call qemu2-if-os,linux,$1,$2)
@@ -71,11 +77,10 @@ QEMU2_SDL2_LDLIBS := \
     $(call qemu2-if-darwin,, \
         -lSDL2main \
     ) \
-    $(call qemu2-if-windows, \
+    $(call qemu2-if-any-windows, \
         -limm32 \
         -ldinput8 \
         -ldxguid \
-        -ldxerr8 \
         -luser32 \
         -lgdi32 \
         -lwinmm \
@@ -88,6 +93,12 @@ QEMU2_SDL2_LDLIBS := \
     , \
         -ldl \
     ) \
+    $(call qemu2-if-windows, \
+        -ldxerr8 \
+    ) \
+    $(call qemu2-if-windows-msvc, \
+        $(QEMU2_PIXMAN_LDLIBS) \
+    )\
 
 ifeq (darwin,$(BUILD_TARGET_OS))
 # NOTE: Because the following contain commas, we cannot use qemu2-if-darwin!
@@ -125,8 +136,9 @@ QEMU2_INCLUDES += $(QEMU2_GLIB_INCLUDES) \
 
 QEMU2_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
+    $(call qemu2-if-any-windows,\
+        -DWIN32_LEAN_AND_MEAN) \
     $(call qemu2-if-windows,\
-        -DWIN32_LEAN_AND_MEAN \
         -D__USE_MINGW_ANSI_STDIO=1 \
         -mms-bitfields) \
     -fno-strict-aliasing \
@@ -224,7 +236,7 @@ include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu-img.mk
 
 # The test infrastructure used by Qemu is not yet cross platform.
 # See b/113667469
-ifneq (windows,$(BUILD_TARGET_OS))
+ifneq (windows,$(BUILD_TARGET_OS_FLAVOR))
   include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-tests.mk
 endif
 

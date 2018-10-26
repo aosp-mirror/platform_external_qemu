@@ -19,14 +19,15 @@ common_INCLUDES := \
 
 common_CFLAGS := -O0 -Wno-unused-variable
 
-ifneq (windows,$(BUILD_TARGET_OS))
-    common_LDLIBS += -lpthread
-endif
+common_LDLIBS += \
+    $(call if-target-any-windows,,-lpthread)
 
 $(call emugl-begin-static-library,libemugl_gtest)
 
 LOCAL_SRC_FILES := $(common_SRC_FILES)
 LOCAL_CFLAGS += $(common_CFLAGS)
+# Don't include the custom TempDir function. It is for Android only.
+LOCAL_CFLAGS += -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_
 LOCAL_C_INCLUDES := \
     $(common_INCLUDES) \
     $(LOCAL_PATH)/googletest \

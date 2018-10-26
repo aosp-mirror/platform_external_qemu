@@ -117,7 +117,7 @@ LOCAL_SRC_FILES := \
     $(QEMU2_AUTO_GENERATED_DIR)/qom/trace.c \
     $(QEMU2_AUTO_GENERATED_DIR)/trace-root.c \
     $(QEMU2_AUTO_GENERATED_DIR)/util/trace.c \
-    $(call qemu2-if-windows, \
+    $(call qemu2-if-any-windows, \
         block/file-win32.c \
         block/win32-aio.c \
         ) \

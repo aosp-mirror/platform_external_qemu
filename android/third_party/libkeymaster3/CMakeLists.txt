@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.5)
 if (DEFINED LOCAL_QEMU2_TOP_DIR)
     get_filename_component(REPO_ROOT "${LOCAL_QEMU2_TOP_DIR}/../.." ABSOLUTE)
     set(CURL_ROOT "${REPO_ROOT}/prebuilts/android-emulator-build/curl/${LOCAL_TARGET_TAG}")
-    set(CURL_LIBRARY ${CURL_ROOT}/lib/libcurl.a)
+    set(CURL_LIBRARY ${CURL_ROOT}/lib/libcurl${CMAKE_STATIC_LIBRARY_SUFFIX})
     set(CURL_INCLUDE_DIR ${CURL_ROOT}/include)
 
     # We will now find the prebuilt package.
@@ -24,9 +24,9 @@ else ()
     set(boringssl_BUILD ${CMAKE_BINARY_DIR}/boringssl/src/boringssl-build)
     #set(boringssl_LIBRARIES ${boringssl_BUILD}/obj/so/libboringssl.so)
     set(boringssl_STATIC_LIBRARIES
-        ${boringssl_BUILD}/ssl/libssl.a
-        ${boringssl_BUILD}/crypto/libcrypto.a
-        ${boringssl_BUILD}/decrepit/libdecrepit.a
+        ${boringssl_BUILD}/ssl/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
+        ${boringssl_BUILD}/crypto/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}
+        ${boringssl_BUILD}/decrepit/libdecrepit${CMAKE_STATIC_LIBRARY_SUFFIX}
         )
     set(boringssl_INCLUDES ${boringssl_BUILD})
 
@@ -112,8 +112,16 @@ target_include_directories(emulator-libkeymaster3 PRIVATE src include)
 target_include_directories(emulator-libkeymaster3 PRIVATE ../../android-emu)
 target_link_libraries(emulator-libkeymaster3 PUBLIC ${CURL_LIBRARIES})
 
-if (WIN32 OR ("${LOCAL_OS}" STREQUAL "windows") AND ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"))
-    target_compile_definitions(emulator-libkeymaster3 PRIVATE -DUSE_MINGW=1)
+if (WIN32 OR ("${LOCAL_OS_FLAVOR}" STREQUAL "windows"))
+    # Workaround some gcc/mingw issues
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        target_compile_definitions(emulator-libkeymaster3 PRIVATE -DUSE_MINGW=1)
+    endif ()
+    if ("${LOCAL_OS}" STREQUAL "windows_msvc")
+        target_include_directories(emulator-libkeymaster3 PRIVATE ../../msvc-posix-compat/include)
+	target_link_libraries(emulator-libkeymaster3 PRIVATE msvc-posix-compat)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mssse3")
+    endif ()
 endif ()
 
 if (NOT DEFINED LOCAL_QEMU2_TOP_DIR)
