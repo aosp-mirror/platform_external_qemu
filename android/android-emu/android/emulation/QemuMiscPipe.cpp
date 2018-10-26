@@ -106,3 +106,7 @@ void registerQemuMiscPipeServicePipe() {
 extern "C" void android_init_qemu_misc_pipe(void) {
     android::registerQemuMiscPipeServicePipe();
 }
+
+extern "C" int get_guest_heart_beat_count(void) {
+    return guest_heart_beat_count.load();
+}

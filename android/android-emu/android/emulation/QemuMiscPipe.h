@@ -15,6 +15,7 @@
 ANDROID_BEGIN_HEADER
 
 void android_init_qemu_misc_pipe(void);
+int get_guest_heart_beat_count(void);
 
 ANDROID_END_HEADER
 
