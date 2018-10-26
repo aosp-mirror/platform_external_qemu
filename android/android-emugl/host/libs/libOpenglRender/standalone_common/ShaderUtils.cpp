@@ -142,6 +142,7 @@ Optional<std::string> compileSpirvFromGLSL(const std::string& shaderType,
     if (!glslFd.valid()) { return {}; }
 
     android::writeStringToFile(glslFd.get(), src);
+    glslFd.close();
 
     std::vector<std::string> args =
         { *spvCompilerPath, glslPath, "-V", "-S", shaderType, "-o", spvPath };
@@ -155,7 +156,8 @@ Optional<std::string> compileSpirvFromGLSL(const std::string& shaderType,
     }
 
     D("Result of compiling SPIRV from GLSL. res: %s args: %s %s -V -S %s -o %s",
-      runRes->c_str(), *spvCompilerPath, glslPath, shaderType.c_str(), spvPath);
+      runRes->c_str(), spvCompilerPath->c_str(), glslPath, shaderType.c_str(),
+      spvPath);
 
     auto res = android::readFileIntoString(spvPath);
 
