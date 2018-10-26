@@ -1,7 +1,7 @@
 LOCAL_PATH := $(call my-dir)
 
 $(call emugl-begin-static-library,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan)
-$(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan_cereal)
+$(call emugl-import,lib$(BUILD_TARGET_SUFFIX)OpenglRender_vulkan_cereal libOpenglCodecCommon)
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH) \

@@ -89,7 +89,6 @@ standalone_common_SRC_FILES := \
     standalone_common/SearchPathsSetup.cpp \
     standalone_common/ShaderUtils.cpp \
 
-
 ifeq ($(BUILD_TARGET_OS),linux)
     standalone_common_LDLIBS += -lm -lX11 -lrt
 endif
@@ -255,5 +254,6 @@ $(call make_sample,HelloTriangle)
 $(call make_sample,HelloSurfaceFlinger)
 $(call make_sample,CreateDestroyContext)
 $(call make_sample,HelloHostComposition)
+$(call make_sample,HelloVulkan)
 
 endif
