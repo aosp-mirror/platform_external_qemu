@@ -193,9 +193,6 @@ set(emulator-libui_darwin-x86_64_src android/skin/qt/mac-native-window.mm)
 set(emulator-libui_windows-x86_64_src android/skin/qt/windows-native-window.cpp)
 set(emulator-libui_windows-x86_src android/skin/qt/windows-native-window.cpp)
 set(emulator-libui_windows_msvc-x86_64_src android/skin/qt/windows-native-window.cpp)
-set(emulator-libui_linux-x86_64_src
-    android/skin/qt/websockets/websocketclientwrapper.cpp
-    android/skin/qt/websockets/websockettransport.cpp)
 
 # Set the sources
 set(emulator-libui_src
