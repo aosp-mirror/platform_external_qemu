@@ -27,24 +27,10 @@ set(QT5_INCLUDE_DIRS
     ${PREBUILT_ROOT}/include/QtCore
     ${PREBUILT_ROOT}/include/QtGui
     ${PREBUILT_ROOT}/include/QtSvg
-    ${PREBUILT_ROOT}/include/QtWebChannel
-    ${PREBUILT_ROOT}/include/QtWebEngineWidgets
-    ${PREBUILT_ROOT}/include/QtWebSockets
     ${PREBUILT_ROOT}/include/QtWidgets)
 
 set(QT5_INCLUDE_DIR ${QT5_INCLUDE_DIRS})
 set(QT5_LIBRARIES -lQt5Widgets -lQt5Gui -lQt5Core -lQt5Svg)
-
-if (NOT "${ANDROID_TARGET_OS}" STREQUAL "windows")
-  # Note: MSVC has ANDROID_TARGET_OS = "windows_msvc"
-  set(QT5_LIBRARIES
-      {QT5_LIBRARIES}
-      -lQt5WebChannel
-      -lQt5WebEngine
-      -lQt5WebEngineWidgets
-      -lQt5WebSockets
-      -lQt5Network)
-endif()
 
 set(QT5_CFLAGS "-DQT5_STATICLIB")
 set(QT5_FOUND TRUE)
