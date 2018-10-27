@@ -370,7 +370,8 @@ private:
     std::thread mWorker;
 };
 
-TEST_F(AndroidAsyncMessagePipeTest, Multithreaded) {
+// bug: 118512307
+TEST_F(AndroidAsyncMessagePipeTest, DISABLED_Multithreaded) {
     registerAsyncMessagePipeService(
             new AndroidAsyncMessagePipe::Service<MultithreadedEchoMessagePipe>(
                     "Multithreaded"));
