@@ -1126,14 +1126,8 @@ log "Copying Qt prebuilt libraries from $QT_PREBUILTS_DIR"
 for QT_ARCH in $PREBUILT_ARCHS; do
     QT_SRCDIR=$QT_PREBUILTS_DIR/$HOST_OS-$QT_ARCH
     case $QT_ARCH in
-        x86)
-            QT_DIR_SUFFIX="lib/qt"
-            QT_DSTDIR=$OUT_DIR/$QT_DIR_SUFFIX
-            ;;
-        x86_64)
-            QT_DIR_SUFFIX="lib64/qt"
-            QT_DSTDIR=$OUT_DIR/$QT_DIR_SUFFIX
-            ;;
+        x86) QT_DSTDIR=$OUT_DIR/lib/qt;;
+        x86_64) QT_DSTDIR=$OUT_DIR/lib64/qt;;
         *) panic "Invalid Qt host architecture: $QT_ARCH";;
     esac
     mkdir -p "$QT_DSTDIR" || panic "Could not create Qt library sub-directory!"
@@ -1162,31 +1156,6 @@ for QT_ARCH in $PREBUILT_ARCHS; do
         esac
         install_prebuilt_dll "$QT_SRCDIR/$QT_LIB" "$QT_DSTDIR/$QT_DST_LIB"
     done
-
-    if [ "$OPTION_MINGW" = "no" ] ; then
-        # Copy the libexec, resources, and translations directories for QtWebEngine
-        QEMU_INSTALL_DIR=$OUT_DIR/qemu/$HOST_OS-$BUILD_ARCH
-        mkdir -p $QEMU_INSTALL_DIR
-        cp -rf "$QT_SRCDIR/libexec" "$QT_DSTDIR"
-        cp -rf "$QT_SRCDIR/resources" "$QT_DSTDIR"
-        cp -rf "$QT_SRCDIR/translations" "$QT_DSTDIR"
-
-        # Qt is looking for resources/* and translations/qtwebengine_locales in two directories:
-        # 1) app directory
-        # 2) qt/libexec
-        # they must be in BOTH directories or qtwebengine will not work.
-        # For QtWebEngine to find the resources
-        QT_RESOURCES=$(ls "$QT_DSTDIR/resources")
-        for QT_RESOURCE in $QT_RESOURCES; do
-            ln -fs "../resources/$QT_RESOURCE" "$QT_DSTDIR/libexec/$QT_RESOURCE"
-        done
-        ln -fs "../translations/qtwebengine_locales" "$QT_DSTDIR/libexec/qtwebengine_locales"
-
-        QT_LIBEXECS=$(ls "$QT_DSTDIR/libexec")
-        for QT_LIBEXEC in $QT_LIBEXECS; do
-            ln -fs "../../$QT_DIR_SUFFIX/libexec/$QT_LIBEXEC" "$QEMU_INSTALL_DIR/$QT_LIBEXEC"
-        done
-    fi
 done
 
 # Copy e2fsprogs binaries.
