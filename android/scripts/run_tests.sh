@@ -115,15 +115,13 @@ esac
 # EXPECTED_EMULATOR_FILE_TYPE accordingly.
 case $TARGET_OS in
     windows_msvc*)
-        EXPECTED_32BIT_FILE_TYPE="PE32 executable \(console\) Intel 80386"
         EXPECTED_64BIT_FILE_TYPE="PE32\+ executable \(console\) x86-64"
         EXPECTED_EMULATOR_BITNESS=64
         EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
         ;;
     windows*)
-        EXPECTED_32BIT_FILE_TYPE="PE32 executable \(console\) Intel 80386"
         EXPECTED_64BIT_FILE_TYPE="PE32\+ executable \(console\) x86-64"
-        EXPECTED_EMULATOR_BITNESS=32
+        EXPECTED_EMULATOR_BITNESS=64
         EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_32BIT_FILE_TYPE
         ;;
     darwin)
