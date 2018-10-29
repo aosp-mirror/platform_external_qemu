@@ -22,6 +22,30 @@
       "revId": "9d0f69c7fe0ff252dd55db86c72652055bf921c5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2749a983_42cbc0fd",
+        "filename": "android/android-emu/android/snapshot/PathUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-29T18:04:26Z",
+      "side": 1,
+      "message": "Done (removed)",
+      "parentUuid": "f48433d6_02f3eb09",
+      "range": {
+        "startLine": 26,
+        "startChar": 4,
+        "endLine": 26,
+        "endChar": 11
+      },
+      "revId": "9d0f69c7fe0ff252dd55db86c72652055bf921c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
