@@ -207,19 +207,6 @@ sdk {
             into ''
         }
 
-        item("$buildWindowsEmulator.output/emulator-arm.exe") {
-            executable true
-            builtBy buildWindowsEmulator
-        }
-        item("$buildWindowsEmulator.output/emulator-x86.exe") {
-            executable true
-            builtBy buildWindowsEmulator
-        }
-        item("$buildWindowsEmulator.output/emulator-crash-service.exe") {
-            executable true
-            builtBy buildWindowsEmulator
-        }
-
         item("$buildWindowsEmulator.output/emulator64-crash-service.exe") {
             executable true
             builtBy buildWindowsEmulator
