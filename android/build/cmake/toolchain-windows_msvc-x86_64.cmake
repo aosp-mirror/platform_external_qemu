@@ -20,6 +20,7 @@ set(CMAKE_SYSTEM_NAME WinMSVCCrossCompile)
 include(toolchain)
 
 # First we create the toolchain
+get_host_tag(ANDROID_HOST_TAG)
 set (ANDROID_TARGET_TAG "windows_msvc-x86_64")
 set (ANDROID_TARGET_OS "windows_msvc")
 set (ANDROID_TARGET_OS_FLAVOR "windows")
