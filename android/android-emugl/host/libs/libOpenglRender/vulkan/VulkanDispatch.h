@@ -19,6 +19,6 @@ using goldfish_vk::VulkanDispatch;
 
 namespace emugl {
 
-VulkanDispatch* getInstanceDeviceAndDispatch();
+VulkanDispatch* vkDispatch(bool forTesting = false);
 
-}
+} // namespace emugl
