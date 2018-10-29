@@ -14,11 +14,26 @@
 
 #include "ShaderUtils.h"
 
+#include "android/base/files/PathUtils.h"
+#include "android/base/files/ScopedFd.h"
+#include "android/base/memory/ScopedPtr.h"
+#include "android/base/misc/FileUtils.h"
+#include "android/base/Optional.h"
+#include "android/base/system/System.h"
+#include "android/utils/path.h"
+#include "android/utils/tempfile.h"
+
 #include "emugl/common/OpenGLDispatchLoader.h"
 
+#include <fstream>
 #include <vector>
 
+#include <fcntl.h>
 #include <stdio.h>
+
+using android::base::Optional;
+using android::base::pj;
+using android::base::System;
 
 namespace emugl {
 
@@ -71,5 +86,92 @@ GLint compileAndLinkShaderProgram(const char* vshaderSrc, const char* fshaderSrc
 
     return program;
 }
+
+static Optional<std::string> getSpirvCompilerPath() {
+#ifdef _WIN32
+    std::string programName = "glslangValidator.exe";
+#else
+    std::string programName = "glslangValidator";
+#endif
+
+    auto programDirRelativePath =
+        pj(System::get()->getProgramDirectory(),
+           "lib64", "vulkan", "tools", programName);
+
+    if (path_exists(programDirRelativePath.c_str())) {
+        return programDirRelativePath;
+    }
+
+    auto launcherDirRelativePath =
+        pj(System::get()->getLauncherDirectory(),
+           "lib64", "vulkan", programName);
+    
+    if (path_exists(launcherDirRelativePath.c_str())) {
+        return launcherDirRelativePath;
+    }
+
+    fprintf(stderr, "%s: spirv compiler does not exist\n", __func__);
+    return {};
+}
+
+Optional<std::string> compileSpirvFromGLSL(const std::string& shaderType,
+                                           const std::string& src) {
+    auto spvCompilerPath = getSpirvCompilerPath();
+    
+    if (!spvCompilerPath) return {};
+
+    const auto glslFile = android::base::makeCustomScopedPtr(
+            tempfile_create(), tempfile_close);
+
+    const auto spvFile = android::base::makeCustomScopedPtr(
+            tempfile_create(), tempfile_close);
+
+    auto glslPath = tempfile_path(glslFile.get());
+    auto spvPath = tempfile_path(spvFile.get());
+
+    auto glslFd = android::base::ScopedFd(open(glslPath, O_RDWR));
+    if (!glslFd.valid()) { return {}; }
+
+    android::writeStringToFile(glslFd.get(), src);
+
+    std::vector<std::string> args =
+        { *spvCompilerPath, glslPath, "-V", "-S", shaderType, "-o", spvPath };
+
+    auto runRes = System::get()->runCommandWithResult(args);
+
+    if (!runRes) {
+        fprintf(stderr, "%s: failed to compile\n", __func__);
+        return {};
+    }
+
+    fprintf(stderr, "%s: run result: %s\n", __func__, runRes->c_str());
+
+    auto res = android::readFileIntoString(spvPath);
+
+    if (res) {
+        fprintf(stderr, "%s: got %zu bytes:\n", __func__, res->size());
+    } else {
+        fprintf(stderr, "%s: failed to read file into string\n", __func__);
+    }
+
+    return res;
+}
+
+Optional<std::vector<char> > readSpirv(const char* path) {
+    std::ifstream in(path, std::ios::ate | std::ios::binary);
+
+    if (!in) return {};
+
+    size_t fileSize = (size_t)in.tellg();
+    std::vector<char> buffer(fileSize);
+
+    in.seekg(0);
+    in.read(buffer.data(), fileSize);
+
+    return buffer;
+}
+
+
+
 
 } // namespace emugl

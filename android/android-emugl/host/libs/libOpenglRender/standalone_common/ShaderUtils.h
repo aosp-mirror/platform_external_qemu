@@ -15,9 +15,20 @@
 
 #include <GLES2/gl2.h>
 
+#include "android/base/Optional.h"
+
+#include <string>
+#include <vector>
+
 namespace emugl {
 
 GLuint compileShader(GLenum shaderType, const char* src);
 GLint compileAndLinkShaderProgram(const char* vshaderSrc, const char* fshaderSrc);
+
+android::base::Optional<std::string> compileSpirvFromGLSL(
+        const std::string& shaderType,
+        const std::string& src);
+
+android::base::Optional<std::vector<char>> readSpirv(const char* path);
 
 } // namespace emugl
