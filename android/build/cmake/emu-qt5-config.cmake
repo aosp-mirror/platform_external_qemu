@@ -3,15 +3,20 @@ get_filename_component(
   PREBUILT_ROOT
   "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_TARGET_TAG}"
   ABSOLUTE)
+get_filename_component(
+  HOST_QT_ROOT
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_HOST_TAG}"
+  ABSOLUTE)
 
 if(NOT TARGET Qt5::moc)
   set(QT_VERSION_MAJOR 5)
   set(CMAKE_AUTOMOC TRUE)
   set(CMAKE_AUTOUIC TRUE)
   set(CMAKE_AUTORCC TRUE)
-  set(QT_MOC_EXECUTABLE ${PREBUILT_ROOT}/bin/moc)
-  set(QT_UIC_EXECUTABLE ${PREBUILT_ROOT}/bin/uic)
-  set(QT_RCC_EXECUTABLE ${PREBUILT_ROOT}/bin/rcc)
+  # TODO(joshuaduong): Once we start building for windows, we need to add the .exe entension.
+  set(QT_MOC_EXECUTABLE ${HOST_QT_ROOT}/bin/moc)
+  set(QT_UIC_EXECUTABLE ${HOST_QT_ROOT}/bin/uic)
+  set(QT_RCC_EXECUTABLE ${HOST_QT_ROOT}/bin/rcc)
   add_executable(Qt5::moc IMPORTED GLOBAL)
   set_property(TARGET Qt5::moc PROPERTY IMPORTED_LOCATION ${QT_MOC_EXECUTABLE})
   add_executable(Qt5::uic IMPORTED GLOBAL)

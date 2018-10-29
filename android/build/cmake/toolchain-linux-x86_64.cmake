@@ -19,6 +19,7 @@ list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 include(toolchain)
 
 # First we create the toolchain
+get_host_tag(ANDROID_HOST_TAG)
 set(ANDROID_TARGET_TAG "linux-x86_64")
 set(ANDROID_TARGET_OS "linux")
 set(ANDROID_TARGET_OS_FLAVOR "linux")
