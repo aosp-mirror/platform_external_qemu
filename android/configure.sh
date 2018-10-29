@@ -1053,14 +1053,17 @@ if [ -d $VULKAN_PREBUILTS_DIR ]; then
             windows*)
                 VULKAN_LOADER_LIB=vulkan-1.dll
                 VULKAN_MOCK_ICD_LIB=VkICD_mock_icd.dll
+                VULKAN_GLSLANGVALIDATOR=glslangValidator.exe
                 ;;
             darwin)
                 VULKAN_LOADER_LIB=libvulkan.dylib
                 VULKAN_MOCK_ICD_LIB=libVkICD_mock_icd.dylib
+                VULKAN_GLSLANGVALIDATOR=glslangValidator
                 ;;
             linux)
                 VULKAN_LOADER_LIB=libvulkan.so
                 VULKAN_MOCK_ICD_LIB=libVkICD_mock_icd.so
+                VULKAN_GLSLANGVALIDATOR=glslangValidator
                 ;;
             *)
         esac
@@ -1073,6 +1076,11 @@ if [ -d $VULKAN_PREBUILTS_DIR ]; then
                              "$VULKAN_TESTLIB_DSTDIR/$VULKAN_MOCK_ICD_LIB"
             copy_file "$VULKAN_SRCDIR/$VULKAN_MOCK_ICD_FILE" \
                              "$VULKAN_TESTLIB_DSTDIR/$VULKAN_MOCK_ICD_FILE"
+
+            # copy over glslangValidator to allow compilation
+            # of SPIRV shaders from GLSL on host
+            copy_file "$VULKAN_SRCDIR/$VULKAN_GLSLANGVALIDATOR" \
+                      "$VULKAN_LIB_DSTDIR/$VULKAN_GLSLANGVALIDATOR"
 
             # For mac, we copy a mac vulkan implementation
             if [ "$VULKAN_HOST" = "darwin" ]; then
