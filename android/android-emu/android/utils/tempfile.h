@@ -37,6 +37,7 @@ extern  TempFile*    tempfile_create_with_ext( const char* ext );
 extern  const char*  tempfile_path( TempFile*  temp );
 extern  void         tempfile_close( TempFile*  temp );
 extern void tempfile_unref_and_close(const char* temp);
+extern void tempfile_unref_and_close_file( TempFile* temp );
 
 /** TEMP FILE CLEANUP
  **
