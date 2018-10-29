@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f48433d6_02f3eb09",
+        "filename": "android/android-emu/android/snapshot/PathUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-10-29T05:37:53Z",
+      "side": 1,
+      "message": "DPRINT()?",
+      "range": {
+        "startLine": 26,
+        "startChar": 4,
+        "endLine": 26,
+        "endChar": 11
+      },
+      "revId": "9d0f69c7fe0ff252dd55db86c72652055bf921c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
