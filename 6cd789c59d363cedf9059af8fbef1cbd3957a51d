@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bbe1b355_f7d8c5b8",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/ShaderUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-10-29T19:17:34Z",
+      "side": 1,
+      "message": "nit: space?",
+      "range": {
+        "startLine": 108,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 4
+      },
+      "revId": "6cd789c59d363cedf9059af8fbef1cbd3957a51d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bcf9e6b6_6f063983",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/ShaderUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-10-29T19:17:34Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 120,
+        "startChar": 0,
+        "endLine": 120,
+        "endChar": 4
+      },
+      "revId": "6cd789c59d363cedf9059af8fbef1cbd3957a51d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c11760be_fbfb0a3a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/ShaderUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-10-29T19:17:34Z",
+      "side": 1,
+      "message": "do you want to delete those files after usage so that you don\u0027t get too many stuff after a long run? There is the tempfile_unref_and_close for that purpose",
+      "range": {
+        "startLine": 129,
+        "startChar": 0,
+        "endLine": 130,
+        "endChar": 48
+      },
+      "revId": "6cd789c59d363cedf9059af8fbef1cbd3957a51d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
