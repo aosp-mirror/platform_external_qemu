@@ -17,6 +17,8 @@
 #include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/StringUtils.h"
+#include "android/crashreport/CrashReporter.h"
+#include "android/crashreport/CrashSystem.h"
 #include "android/emulation/ComponentVersion.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/CpuAccelerator.h"
@@ -28,13 +30,20 @@
 #include "android/update-check/VersionExtractor.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
+#include "android/version.h"
 
 #include "ui_bug-report-page.h"
 
 #include <QDesktopServices>
+#include <QEventLoop>
 #include <QFileDialog>
 #include <QFontMetrics>
+#include <QFuture>
+#include <QFutureWatcher>
 #include <QMovie>
+#include <QThread>
+#include <QVBoxLayout>
+#include <QtConcurrent/QtConcurrentRun>
 
 #include <algorithm>
 #include <fstream>
@@ -45,9 +54,11 @@ using android::base::StringAppendFormat;
 using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
+using android::base::trim;
 using android::base::Uri;
 using android::base::Version;
-using android::base::trim;
+using android::crashreport::CrashReporter;
+using android::crashreport::CrashService;
 using android::emulation::AdbBugReportServices;
 using android::emulation::AdbInterface;
 
@@ -150,7 +161,18 @@ BugreportPage::BugreportPage(QWidget* parent)
     mDeviceDetailsDialog->setModal(false);
     mDeviceDetailsDialog->setInformativeText(
             QString::fromStdString(mReportingFields.avdDetails));
+
     mUi->bug_sendToGoogle->setIcon(getIconForCurrentTheme("open_in_browser"));
+
+    mSavingStates.crashReporterLocation =
+            CrashReporter::get()->getDataExchangeDir();
+    CrashService* service =
+            CrashService::makeCrashService(
+                    EMULATOR_VERSION_STRING, EMULATOR_BUILD_STRING,
+                    mSavingStates.crashReporterLocation.c_str())
+                    .release();
+    service->shouldDeleteCrashDataOnExit(true);
+    mUploadDialog = new UploadDialog(this, service);
 }
 
 BugreportPage::~BugreportPage() {
@@ -217,64 +239,35 @@ void BugreportPage::showEvent(QShowEvent* event) {
     }
 }
 
-void BugreportPage::saveBugReportFolder(bool willOpenIssueTracker) {
-    QString dirName = QString::fromStdString(mSavingStates.saveLocation);
-    dirName = QFileDialog::getExistingDirectory(
-            Q_NULLPTR, tr("Report Saving Location"), dirName);
+BugReportFolderSavingTask* BugreportPage::createBugreportFolderSavingTask(
+        std::string savingPath) {
+    // launch the bugreport folder saving task in a separate thread
 
-    if (dirName.isNull()) {
-        return;
-    } else {
-        // launch the bugreport folder saving task in a separate thread
-        std::string savingPath = PathUtils::join(
-                dirName.toStdString(),
-                AdbBugReportServices::generateUniqueBugreportName());
-        std::string adbBugreportFilePath =
-                (mUi->bug_bugReportCheckBox->isChecked() &&
-                 mSavingStates.adbBugreportSucceed)
-                        ? mSavingStates.adbBugreportFilePath
-                        : "";
-        std::string screenshotFilePath =
-                (mUi->bug_screenshotCheckBox->isChecked() &&
-                 mSavingStates.screenshotSucceed)
-                        ? mSavingStates.screenshotFilePath
-                        : "";
-        QString reproSteps = mUi->bug_reproStepsTextEdit->toPlainText();
-        reproSteps.truncate(2000);
-        mReportingFields.reproSteps = reproSteps.toStdString();
-        auto thread = new QThread();
-        auto task = new BugReportFolderSavingTask(
-                savingPath, adbBugreportFilePath, screenshotFilePath,
-                mReportingFields.avdDetails, mReportingFields.reproSteps,
-                willOpenIssueTracker);
-        task->moveToThread(thread);
-        connect(thread, SIGNAL(started()), task, SLOT(run()));
-        connect(task, SIGNAL(started()), this,
-                SLOT(saveBugreportFolderStarted()));
-        connect(task, SIGNAL(finished(bool, QString, bool)), this,
-                SLOT(saveBugreportFolderFinished(bool, QString, bool)));
-        connect(task, SIGNAL(finished(bool, QString, bool)), thread,
-                SLOT(quit()));
-        connect(thread, SIGNAL(finished()), task, SLOT(deleteLater()));
-        connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-        thread->start();
-    }
+    std::string adbBugreportFilePath =
+            (mUi->bug_bugReportCheckBox->isChecked() &&
+             mSavingStates.adbBugreportSucceed)
+                    ? mSavingStates.adbBugreportFilePath
+                    : "";
+    std::string screenshotFilePath =
+            (mUi->bug_screenshotCheckBox->isChecked() &&
+             mSavingStates.screenshotSucceed)
+                    ? mSavingStates.screenshotFilePath
+                    : "";
+    QString reproSteps = mUi->bug_reproStepsTextEdit->toPlainText();
+    reproSteps.truncate(2000);
+    mReportingFields.reproSteps = reproSteps.toStdString();
+
+    return new BugReportFolderSavingTask(
+            savingPath, adbBugreportFilePath, screenshotFilePath,
+            mReportingFields.avdDetails, mReportingFields.reproSteps);
 }
 
-void BugreportPage::saveBugreportFolderFinished(bool success,
-                                                QString folderPath,
-                                                bool willOpenIssueTracker) {
+void BugreportPage::saveBugreportFolderFinished(bool success) {
     SettingsTheme theme = getSelectedTheme();
     setButtonEnabled(mUi->bug_sendToGoogle, theme, true);
     setButtonEnabled(mUi->bug_saveButton, theme, true);
     mSavingStates.bugreportSavedSucceed = success;
-    if (success) {
-        mSavingStates.bugreportFolderPath = folderPath.toStdString();
-        if (willOpenIssueTracker) {
-            // launch the issue tracker in a separate thread
-            launchIssueTrackerThread();
-        }
-    } else {
+    if (!success) {
         showErrorDialog(tr("The bugreport save location is invalid.<br/>"
                            "Check the settings page and ensure the directory "
                            "exists and is writeable."),
@@ -282,6 +275,12 @@ void BugreportPage::saveBugreportFolderFinished(bool success,
     }
 }
 
+void BugreportPage::saveBugreportToCrashDirFinished(bool success) {
+    if (!success) {
+        showErrorDialog(tr("The crash report directory is invalid"),
+                        tr("Bugreport"));
+    }
+}
 void BugreportPage::saveBugreportFolderStarted() {
     SettingsTheme theme = getSelectedTheme();
     setButtonEnabled(mUi->bug_sendToGoogle, theme, false);
@@ -299,25 +298,53 @@ void BugreportPage::issueTrackerTaskFinished(bool success, QString error) {
 }
 
 void BugreportPage::on_bug_saveButton_clicked() {
-    saveBugReportFolder(false);
+    QString dirName = QString::fromStdString(mSavingStates.saveLocation);
+    dirName = QFileDialog::getExistingDirectory(
+            Q_NULLPTR, tr("Report Saving Location"), dirName);
+    if (dirName.isNull())
+        return;
+    std::string savingPath = PathUtils::join(
+            dirName.toStdString(),
+            AdbBugReportServices::generateUniqueBugreportName());
+
+    mSavingStates.bugreportFolderPath = savingPath;
+
+    auto task = createBugreportFolderSavingTask(std::move(savingPath));
+    auto thread = new QThread();
+    task->moveToThread(thread);
+    connect(thread, SIGNAL(started()), task, SLOT(run()));
+    connect(task, SIGNAL(started()), this, SLOT(saveBugreportFolderStarted()));
+    connect(task, SIGNAL(finished(bool)), this,
+            SLOT(saveBugreportFolderFinished(bool)));
+    connect(task, SIGNAL(finished(bool)), thread, SLOT(quit()));
+    connect(thread, SIGNAL(finished()), task, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    thread->start();
 }
 
 void BugreportPage::on_bug_sendToGoogle_clicked() {
-    if (!mSavingStates.bugreportSavedSucceed) {
-        saveBugReportFolder(true);
-    } else {
-        QString reproSteps = mUi->bug_reproStepsTextEdit->toPlainText();
-        reproSteps.truncate(2000);
-        mReportingFields.reproSteps = reproSteps.toStdString();
-        // launch the issue tracker in a separate thread
-        launchIssueTrackerThread();
-        QString dirName = QFileDialog::getOpenFileName(
-                Q_NULLPTR, tr("Report Saving Location"),
-                QString::fromStdString(mSavingStates.bugreportFolderPath));
+    QSettings settings;
+    auto reportPreference =
+            static_cast<Ui::Settings::CRASHREPORT_PREFERENCE_VALUE>(
+                    settings.value(Ui::Settings::CRASHREPORT_PREFERENCE, 0)
+                            .toInt());
+
+    if (reportPreference == Ui::Settings::CRASHREPORT_PREFERENCE_NEVER) {
+        launchIssueTracker();
+        return;
+    }
+
+    mUploadDialog->exec();
+    if (reportPreference != Ui::Settings::CRASHREPORT_PREFERENCE_ASK) {
+        mUploadDialog->sendBugReport();
     }
 }
 
-void BugreportPage::launchIssueTrackerThread() {
+void BugreportPage::launchIssueTracker() {
+    QString reproSteps = mUi->bug_reproStepsTextEdit->toPlainText();
+    reproSteps.truncate(2000);
+    mReportingFields.reproSteps = reproSteps.toStdString();
+    // launch the issue tracker in a separate thread
     auto thread = new QThread();
     auto task = new IssueTrackerTask(mReportingFields);
     task->moveToThread(thread);
@@ -469,7 +496,8 @@ void BugreportPage::loadScreenshotImage() {
             int height = mUi->bug_screenshotImage->height();
             int width = mUi->bug_screenshotImage->width();
             mUi->bug_screenshotImage->setPixmap(
-                    image.scaled(width, height, Qt::KeepAspectRatio));
+                    image.scaled(width, height, Qt::KeepAspectRatio,
+                                 Qt::SmoothTransformation));
         }
     } else {
         // TODO(wdu) Better error handling for failed screen capture
@@ -493,28 +521,27 @@ BugReportFolderSavingTask::BugReportFolderSavingTask(
         std::string adbBugreportFilePath,
         std::string screenshotFilePath,
         std::string avdDetails,
-        std::string reproSteps,
-        bool openIssueTracker)
+        std::string reproSteps)
     : mSavingPath(std::move(savingPath)),
       mAdbBugreportFilePath(std::move(adbBugreportFilePath)),
       mScreenshotFilePath(std::move(screenshotFilePath)),
       mAvdDetails(std::move(avdDetails)),
-      mReproSteps(std::move(reproSteps)),
-      mOpenIssueTracker(openIssueTracker) {}
+      mReproSteps(std::move(reproSteps)) {}
 
-void BugReportFolderSavingTask::run() {
+bool BugReportFolderSavingTask::run() {
     emit started();
     if (mSavingPath.empty()) {
-        emit(finished(false, Q_NULLPTR, mOpenIssueTracker));
+        emit(finished(false));
+        return false;
     }
 
     QString dirName = QString::fromStdString(mSavingPath);
     if (path_mkdir_if_needed(mSavingPath.c_str(), 0755)) {
-        emit(finished(false, dirName, mOpenIssueTracker));
-        return;
+        emit(finished(false));
+        return false;
     }
 
-    if (!mAdbBugreportFilePath.empty()) {
+    /*if (!mAdbBugreportFilePath.empty()) {
         StringView bugreportBaseName;
         if (PathUtils::extension(mAdbBugreportFilePath) == ".zip") {
             bugreportBaseName = "bugreport.zip";
@@ -538,7 +565,7 @@ void BugReportFolderSavingTask::run() {
                               std::ios_base::out | std::ios_base::trunc);
         outFile << mAvdDetails << std::endl;
     }
-
+    */
     if (!mReproSteps.empty()) {
         auto reproStepsFilePath =
                 PathUtils::join(mSavingPath, "repro_steps.txt");
@@ -547,7 +574,8 @@ void BugReportFolderSavingTask::run() {
         outFile << mReproSteps << std::endl;
     }
 
-    emit(finished(true, dirName, mOpenIssueTracker));
+    emit(finished(true));
+    return true;
 }
 
 IssueTrackerTask::IssueTrackerTask(
@@ -568,4 +596,69 @@ void IssueTrackerTask::run() {
     } else {
         emit finished(true, url.errorString());
     }
+}
+
+UploadDialog::UploadDialog(QWidget* parent, CrashService* service)
+    : QDialog(parent) {
+    mCrashService.reset(service);
+    QVBoxLayout* dialogLayout = new QVBoxLayout(this);
+    mDialogLabel = new QLabel(tr(SEND_TO_GOOGLE));
+    dialogLayout->addWidget(mDialogLabel);
+    mButtonBox = new QDialogButtonBox(
+            QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal);
+    dialogLayout->addWidget(mButtonBox);
+    connect(mButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(mButtonBox, SIGNAL(accepted()), this, SLOT(sendBugReport()));
+    mProgressBar = new QProgressBar(this);
+    mProgressBar->hide();
+    mProgressBar->setMaximum(0);
+    mProgressBar->setValue(-1);
+    dialogLayout->addWidget(mProgressBar);
+
+    setWindowTitle("Upload bugreport");
+    setLayout(dialogLayout);
+    setModal(true);
+}
+
+void UploadDialog::collectSysInfo() {
+    mDialogLabel->setText(COLLECT_INFO);
+    mProgressBar->show();
+    mButtonBox->hide();
+    QEventLoop eventloop;
+    QFutureWatcher<bool> watcher;
+    connect(&watcher, SIGNAL(finished()), &eventloop, SLOT(quit()));
+    // Start the computation.
+    QFuture<bool> future = QtConcurrent::run(mCrashService.get(),
+                                             &CrashService::collectSysInfo);
+    watcher.setFuture(future);
+
+    eventloop.exec();
+}
+
+void UploadDialog::sendBugReport() {
+    collectSysInfo();
+    mDialogLabel->setText(SENDING_REPORT);
+
+    QEventLoop eventloop;
+    QFutureWatcher<bool> watcher;
+    connect(&watcher, SIGNAL(finished()), &eventloop, SLOT(quit()));
+
+    // Start the computation.
+    QFuture<bool> future =
+            QtConcurrent::run(mCrashService.get(), &CrashService::uploadCrash);
+    watcher.setFuture(future);
+
+    eventloop.exec();
+    mProgressBar->hide();
+
+    bool success = watcher.result();
+    if (success) {
+        fprintf(stderr, "report upload succeed report id %s \n",
+                mCrashService->getReportId().c_str());
+    } else {
+        fprintf(stderr, "report upload failed \n");
+    }
+    mDialogLabel->setText(SEND_TO_GOOGLE);
+    mButtonBox->show();
+    accept();
 }
