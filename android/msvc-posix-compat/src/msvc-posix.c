@@ -11,7 +11,8 @@
 
 #include "msvc-posix.h"
 
-#include "android/base/system/Win32UnicodeString.h"
+// TODO(joshuaduong): Support unicode (b/117322783)
+//#include "android/base/system/Win32UnicodeString.h"
 
 #include <io.h>
 
