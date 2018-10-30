@@ -1,0 +1,276 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "700aa4ff_59a7f692",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "I believe you should connect the socket on the beginning of the \"run()\" method.",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "801a5896_ba53f444",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "I believe here you should just call \"exitThread()\".",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f4e133a5_4e74d9a9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "Rename to \"start\"?",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6861cad9_14fbf1d2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "Rename to \"stop\"?",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c1557b31_f6ee8993",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "If I understand correctly, if getNextFrame() returns -1, then the pipe is broken.\nAt this point we should probably get out of this loop, show an error to the user (maybe in a different CL) and try to connect again.",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8800f157_53688401",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "At this point I could close the socket here.",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "757e1cea_b4dfdce0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "Rename this to \"readPacket\" (to distinguish between reading a socket packet and reading a H.264 frame).\n\nAlso, it would be good to document the output of this method.\n- output \u003e 0: size of the packet read.\n- output \u003d\u003d -1: the pipe is broken.",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9599e4fe_21772f70",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "You could keep this buffer as a class member, rather than creating and destroying one each time.",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "25da580b_99e191e9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "Is n \u003d\u003d 0 an error?",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d6ecbd32_95943ea9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "Same here, -1 means: no frame found, correct?",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6c2c6ffb_0234f435",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "It would be good to add some comment indicating what the resulting \"int\" could mean.\nAs far as I understand, it can be:\n- The size of the received frame (if \u003e\u003d 0)\n- Or -1 if the pipe broke (correct?)",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4dbe3810_3e1856d4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "This line is too long.\nAlso, is there a way to have use this \"max()\" function without the type casting?",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8b87d5a0_94380583",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "Maybe rename to \"CarClusterRenderThread\"? To make clearer what this thread is rendering.",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "06527da2_4ffc4014",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderwidget.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "Just for me to learn: what does this do?",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf7193b5_b3b3b7fa",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderwidget.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "This line is too long (or at least it is getting truncated in Gerrit)",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf084cbe_152abb50",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderwidget.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "Maybe \"CarClusterWidget\"?",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

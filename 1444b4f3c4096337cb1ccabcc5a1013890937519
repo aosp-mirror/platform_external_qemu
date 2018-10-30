@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "205b3cb8_0d8a3001",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "Maybe \"CLUSTER_WINDOW_WIDTH\"? \nI would like to make the code more readable and in this case might not be clear what these numbers are for.",
+      "revId": "1444b4f3c4096337cb1ccabcc5a1013890937519",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "057972b1_d9d7fa28",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "Rename to \"start\"?",
+      "revId": "1444b4f3c4096337cb1ccabcc5a1013890937519",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c2e81ce3_0685fc64",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "Rename to \"stop\"?",
+      "revId": "1444b4f3c4096337cb1ccabcc5a1013890937519",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3ab125a7_f5f1fbc9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "These comments are not indented correctly. I think it should go one level more.",
+      "revId": "1444b4f3c4096337cb1ccabcc5a1013890937519",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b9a5e0c8_fc1dc4ac",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-10-30T22:52:24Z",
+      "side": 1,
+      "message": "Would you mind renaming this to \"CarClusterRenderThread\"?",
+      "revId": "1444b4f3c4096337cb1ccabcc5a1013890937519",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
