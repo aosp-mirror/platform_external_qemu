@@ -170,6 +170,7 @@ android_emu_LOCAL_C_INCLUDES := \
     $(ANDROID_EMU_INCLUDES) \
     $(EMUGL_INCLUDES) \
     $(BREAKPAD_CLIENT_INCLUDES) \
+    $(BREAKPAD_INCLUDES) \
     $(LIBCURL_INCLUDES) \
     $(LIBJPEG_INCLUDES) \
     $(LIBXML2_INCLUDES) \
@@ -468,7 +469,7 @@ LOCAL_CFLAGS += $(android_emu_LOCAL_CFLAGS)
 
 LOCAL_C_INCLUDES += $(android_emu_LOCAL_C_INCLUDES)
 
-LOCAL_SRC_FILES += $(android_emu_LOCAL_SRC_FILES) $(android_emu_dependent_LOCAL_SRC_FILES)
+LOCAL_SRC_FILES += $(android_emu_LOCAL_SRC_FILES) $(android_emu_dependent_LOCAL_SRC_FILES) android/crashreport/CrashService_common.cpp android/crashreport/CrashService_$(BUILD_TARGET_OS_FLAVOR).cpp
 
 # This file can get included multiple times, with different variable
 # declarations. We only want to set LOCAL_COPY_COMMON_PREBUILT_RESOURCES and
@@ -572,6 +573,7 @@ ANDROID_EMU_STATIC_LIBRARIES_DEPS := \
 ANDROID_EMU_STATIC_LIBRARIES := \
     android-emu $(ANDROID_EMU_STATIC_LIBRARIES_DEPS) \
     $(LIBKEYMASTER3_STATIC_LIBRARIES) \
+    $(BREAKPAD_STATIC_LIBRARIES) \
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \

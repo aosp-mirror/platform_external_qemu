@@ -210,7 +210,8 @@ set(emulator-libui_includes_private
     ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
     ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/shared
     ${FFMPEG_INCLUDE_DIRS}
-    ${QT5_INCLUDE_DIRS})
+    ${QT5_INCLUDE_DIRS}
+    ${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/breakpad/${LOCAL_TARGET_TAG}/include/breakpad)
 
 set(emulator-libui_compile_options_private "-DUSE_MMX=1" "-mmmx")
 
