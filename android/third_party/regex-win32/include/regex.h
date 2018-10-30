@@ -39,7 +39,11 @@
 #ifndef _REGEX_H_
 #define	_REGEX_H_
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <sys/cdefs.h>
+#endif
 #include <sys/types.h>
 
 /* POSIX says regoff_t is at least as large as the larger of ptrdiff_t and

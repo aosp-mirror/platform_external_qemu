@@ -116,7 +116,7 @@ if [ "$OPTION_LIST_GEN" ]; then
 fi
 
 if [ "$OPTION_MSVC" ]; then
-    TOOLCHAIN=$QEMU_TOP/android/build/cmake/toolchain-windows-msvc.cmake
+    TOOLCHAIN=$QEMU_TOP/android/build/cmake/toolchain-windows_msvc-x86_64.cmake
 fi
 
 if [ "$OPTION_MINGW" ]; then
