@@ -85,6 +85,8 @@ static void fillImageInfo(pb::Image::Type type,
 static bool verifyImageInfo(pb::Image::Type type,
                             StringView path,
                             const pb::Image& in) {
+    auto pathStr = path.str();
+
     if (in.type() != type) {
         return false;
     }
@@ -572,6 +574,14 @@ const bool Snapshot::checkValid(bool writeFailure) {
                 });
         if (it != mSnapshotPb.images().end()) {
             if (!verifyImageInfo(image.type, path.get(), *it)) {
+
+                // If in build env, nuke the qcow2 as well.
+                if (avdInfo_inAndroidBuild(android_avdInfo)) {
+                    std::string qcow2Path(path.get());
+                    qcow2Path += ".qcow2";
+                    path_delete_file(qcow2Path.c_str());
+                }
+
                 if (writeFailure) saveFailure(FailureReason::SystemImageChanged);
                 return false;
             }
@@ -579,6 +589,14 @@ const bool Snapshot::checkValid(bool writeFailure) {
         } else {
             // Should match an empty image info
             if (!verifyImageInfo(image.type, path.get(), pb::Image())) {
+
+                // If in build env, nuke the qcow2 as well.
+                if (avdInfo_inAndroidBuild(android_avdInfo)) {
+                    std::string qcow2Path(path.get());
+                    qcow2Path += ".qcow2";
+                    path_delete_file(qcow2Path.c_str());
+                }
+
                 if (writeFailure) saveFailure(FailureReason::NoSnapshotInImage);
                 return false;
             }

@@ -259,14 +259,6 @@ bool Quickboot::load(StringView name) {
                         : pb::EmulatorQuickbootLoad::
                                   EMULATOR_QUICKBOOT_LOAD_COLD_CMDLINE,
                 FailureReason::Empty);
-    } else if (avdInfo_inAndroidBuild(android_avdInfo)) {
-        mWindow.showMessage(
-                StringFormat(
-                    "Cold boot: in Android build system").c_str(),
-                WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
-        reportFailedLoad(pb::EmulatorQuickbootLoad::
-                                 EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
-                         FailureReason::Empty);
     } else if (!emuglConfig_current_renderer_supports_snapshot()) {
         mWindow.showMessage(
                 StringFormat("Cold boot: selected renderer '%s' "
@@ -398,12 +390,6 @@ bool Quickboot::save(StringView name) {
     if (!isEnabled(featurecontrol::FastSnapshotV1)) {
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_DISABLED_FEATURE);
-        return false;
-    }
-
-    if (avdInfo_inAndroidBuild(android_avdInfo)) {
-        reportFailedSave(pb::EmulatorQuickbootSave::
-                                 EMULATOR_QUICKBOOT_SAVE_DISABLED_AVD);
         return false;
     }
 
