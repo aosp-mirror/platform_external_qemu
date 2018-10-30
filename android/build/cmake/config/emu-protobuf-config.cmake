@@ -66,4 +66,4 @@ find_package(Protobuf REQUIRED)
 
 
 # Prevent find_package from overring our lib
-set(PROTOBUF_LIBRARIES "${PREBUILT_ROOT}/lib/libprotobuf.a")
+set(PROTOBUF_LIBRARIES "${PREBUILT_ROOT}/lib/libprotobuf${CMAKE_STATIC_LIBRARY_SUFFIX}")
