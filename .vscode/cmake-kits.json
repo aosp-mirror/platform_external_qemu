@@ -13,6 +13,6 @@
 },
     {
     "name": "Linux -> (msvc)",
-    "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-windows-msvc-86_64.cmake"
+    "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-windows_msvc-x86_64.cmake"
 }
 ]

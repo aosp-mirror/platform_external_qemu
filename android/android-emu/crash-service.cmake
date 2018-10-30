@@ -13,9 +13,14 @@ set(android-emu-crash-service_src
 set(android-emu-crash-service_linux-x86_64_src android/crashreport/CrashService_linux.cpp)
 set(android-emu-crash-service_darwin-x86_64_src android/crashreport/CrashService_darwin.cpp)
 set(android-emu-crash-service_windows-x86_64_src android/crashreport/CrashService_windows.cpp)
+set(android-emu-crash-service_windows_msvc-x86_64_src android/crashreport/CrashService_windows.cpp)
 
 android_add_library(android-emu-crash-service)
 target_link_libraries(android-emu-crash-service PRIVATE BREAKPAD::Breakpad CURL::libcurl)
+# Windows-msvc specific dependencies. Need these for posix support.
+android_target_link_libraries(android-emu-crash-service windows_msvc PUBLIC
+        msvc-posix-compat
+        dirent-win32)
 
 set(emulator-crash-service_src
     android/crashreport/main-crash-service.cpp 
@@ -47,6 +52,11 @@ set(emulator_crashreport_unittests_src
 set(emulator_crashreport_unittests_linux-x86_64_src android/crashreport/CrashService_linux.cpp)
 set(emulator_crashreport_unittests_darwin-x86_64_src android/crashreport/CrashService_darwin.cpp)
 set(emulator_crashreport_unittests_windows-x86_64_src android/crashreport/CrashService_windows.cpp)
+set(emulator_crashreport_unittests_windows_msvc-x86_64_src android/crashreport/CrashService_windows.cpp)
 
 android_add_test(emulator_crashreport_unittests)
 target_link_libraries(emulator_crashreport_unittests PRIVATE  android-emu BREAKPAD::Breakpad gtest_main)
+# Windows-msvc specific dependencies. Need these for posix support.
+android_target_link_libraries(emulator_crashreport_unittests windows_msvc PUBLIC
+        msvc-posix-compat
+        dirent-win32)
