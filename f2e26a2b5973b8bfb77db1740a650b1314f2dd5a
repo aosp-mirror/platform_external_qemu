@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "97d799b2_c72205ec",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/samples/HelloVulkan.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 867,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-10-30T18:08:46Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 867,
+        "startChar": 23,
+        "endLine": 867,
+        "endChar": 24
+      },
+      "revId": "f2e26a2b5973b8bfb77db1740a650b1314f2dd5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
