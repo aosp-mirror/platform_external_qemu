@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "90d2ca88_0439eecf",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/ShaderUtils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-10-30T16:58:34Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 117,
+        "startChar": 0,
+        "endLine": 117,
+        "endChar": 4
+      },
+      "revId": "413eeab0379fc3aa86a9042a47c63895cdba5912",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ee1d6d0f_0fa3bfd5",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/standalone_common/ShaderUtils.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-10-30T16:58:34Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 129,
+        "startChar": 0,
+        "endLine": 129,
+        "endChar": 4
+      },
+      "revId": "413eeab0379fc3aa86a9042a47c63895cdba5912",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
