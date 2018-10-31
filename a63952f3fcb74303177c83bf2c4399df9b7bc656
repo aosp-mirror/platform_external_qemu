@@ -45,6 +45,29 @@
       "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "670d144b_426ee2f9",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1905,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-31T04:14:54Z",
+      "side": 1,
+      "message": "I\u0027m pretty rusty on this, but wondering: how many different ClientFrame\u0027s can occur? Itd be cool to try to avoid possible leaks here. If we don\u0027t expect more than one frame per camera client to get processed at a single time, maybe there can be a single staging framebuffer for the entire qemud client connection that is resized as we go, and itd be more obvious taht the lifetime of staging framebuffer would be limited to the connection.",
+      "range": {
+        "startLine": 1903,
+        "startChar": 0,
+        "endLine": 1905,
+        "endChar": 80
+      },
+      "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
