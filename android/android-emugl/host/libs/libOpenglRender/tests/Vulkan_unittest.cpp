@@ -343,7 +343,7 @@ static void testDeviceCreation(const VulkanDispatch* vk,
     } else {
         EXPECT_TRUE(false);
         return;
-    } 
+    }
 
     // Now we got our device; select it
     VkPhysicalDevice bestPhysicalDevice = physicalDevices[bestPhysicalDeviceIndex];
@@ -435,7 +435,7 @@ protected:
             testIcdFilename());
 
         goldfish_vk::init_vulkan_dispatch_from_system_loader(
-                dlOpenFuncForTesting, 
+                dlOpenFuncForTesting,
                 dlSymFuncForTesting,
                 &mVk);
 

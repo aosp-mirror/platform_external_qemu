@@ -33,7 +33,9 @@ ifneq ($(words $(_BUILD_ROOT)),1)
     $(error,Please fix the problem by reinstalling to a different location.)
 endif
 
-include $(_BUILD_ROOT)/android/build/emulator/main.make
-
+message:
+		@echo "The GNUMake system has been deprecated, please use cmake." 
+		@echo "source ./android/envsetup.sh"
+		@echo "./android/rebuild.sh"
 # END OF FILE
 

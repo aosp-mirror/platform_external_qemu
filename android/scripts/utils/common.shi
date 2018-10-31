@@ -603,6 +603,7 @@ build_symbols () {
     shift
     local BINARY_FILES="$@"
     local SYMBOL_DIR="$DEST_ROOT"/symbols
+    local DSYM_DIR="$DEST_ROOT"/debug_info
     local BINARY_FULLNAME=
     local BINARY_DIR=
     local SYMTOOL="$(aosp_prebuilt_breakpad_dump_syms_for $HOST)"
@@ -611,22 +612,35 @@ build_symbols () {
     fi
     run mkdir -p "$SYMBOL_DIR"
     for BINARY in $BINARY_FILES; do
-        if [ -L "$SRC_ROOT"/$BINARY ]; then
+        if [ -L "$SRC_ROOT"/$BINARY ] || [ ! -f "$SRC_ROOT"/$BINARY ]; then
+            log "Skipping $BINARY"
             continue
         fi
         BINARY_FULLNAME="$(basename "$BINARY")"
         BINARY_DIR="$(dirname "$BINARY")"
-        run mkdir -p $SYMBOL_DIR/$BINARY_DIR
+        silent_run mkdir -p $SYMBOL_DIR/$BINARY_DIR
+        silent_run mkdir -p $DSYM_DIR/$BINARY_DIR
+        log "Processing symbols for: ${BINARY}"
         if [ "$(get_build_os)" = "darwin" ]; then
-            DSYM_DIR=$(mktemp -d /tmp/$BINARY_FULLNAME.dsym.XXXXXX)
-            dsymutil --out=$DSYM_DIR $SRC_ROOT/$BINARY ||
-                panic "Failed to create dsym for $SRC_ROOT/$BINARY"
-            $SYMTOOL -g $DSYM_DIR $SRC_ROOT/$BINARY > $SYMBOL_DIR/$BINARY.sym ||
-                panic "Failed to create symbol file for $SRC_ROOT/$BINARY"
-            rm -rf "$DSYM_DIR"
+            DSYM_BIN_DIR=$DSYM_DIR/$BINARY.dsym
+            mkdir -p $DSYM_BIN_DIR
+            log2 dsymutil --out=$DSYM_BIN_DIR $SRC_ROOT/$BINARY
+            log2 $SYMTOOL -g $DSYM_BIN_DIR $SRC_ROOT/$BINARY > $SYMBOL_DIR/$BINARY.sym 2> $SYMBOL_DIR/$BINARY.err
+
+            dsymutil --out=$DSYM_BIN_DIR $SRC_ROOT/$BINARY 2>&1 | grep -q 'no debug symbols' ||
+            strip -S $DEST_ROOT/$LIB || panic "Could not strip $DEST_ROOT" &&
+            $SYMTOOL -g $DSYM_BIN_DIR $SRC_ROOT/$BINARY > $SYMBOL_DIR/$BINARY.sym 2> $SYMBOL_DIR/$BINARY.err ||
+                echo "Failed to create symbol file for $SRC_ROOT/$BINARY"
         else
-            $SYMTOOL $SRC_ROOT/$BINARY > $SYMBOL_DIR/$BINARY.sym ||
+            cp -f $SRC_ROOT/$BINARY $DSYM_DIR/$BINARY
+            $SYMTOOL $SRC_ROOT/$BINARY > $SYMBOL_DIR/$BINARY.sym 2> $SYMBOL_DIR/$BINARY.err ||
                 panic "Failed to create symbol file for $SRC_ROOT/$BINARY"
+            local OBJCOPY="$TOOLCHAIN_WRAPPER_DIR"/$(builder_gnu_config_host_prefix)objcopy
+            if [ ! -f "$OBJCOPY" ]; then
+                panic "Could not find objcopy at $OBJCOPY"
+            fi
+            run "$OBJCOPY" --strip-unneeded $SRC_ROOT/$BINARY || \
+                panic "Could not strip $SRC_ROOT/$BINARY"
         fi
     done
 }
@@ -647,6 +661,10 @@ strip_libs () {
         panic "TOOLCHAIN_WRAPPER_DIR is not a directory"
     fi
     for LIB in $LIBS; do
+        if [ -L "$DEST_ROOT"/$LIB ] || [ ! -f "$DEST_ROOT"/$LIB ]; then
+            log "Skipping $LIB"
+            continue
+        fi
         if [ "$(get_build_os)" = "darwin" ]; then
             run strip -S $DEST_ROOT/$LIB || panic "Could not strip $DEST_ROOT"
         else
