@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "092fefbf_dd35560f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-10-31T23:41:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "700aa4ff_59a7f692",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "801a5896_ba53f444",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
         "patchSetId": 9
@@ -33,6 +51,24 @@
       "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5f96f1b9_563d4e0b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-10-31T23:41:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "801a5896_ba53f444",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "f53ae21f_1d703d80",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-10-31T23:41:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f4e133a5_4e74d9a9",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6861cad9_14fbf1d2",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
         "patchSetId": 9
@@ -67,6 +121,24 @@
       "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "94905f22_90929cdc",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-10-31T23:41:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6861cad9_14fbf1d2",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "6a6bb3f5_58950b02",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-10-31T23:41:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c1557b31_f6ee8993",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8800f157_53688401",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
         "patchSetId": 9
@@ -101,6 +191,24 @@
       "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b6d636c5_bb4fe092",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-10-31T23:41:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8800f157_53688401",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "da2f100e_3f543751",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-10-31T23:41:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "757e1cea_b4dfdce0",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9599e4fe_21772f70",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
         "patchSetId": 9
@@ -135,6 +261,24 @@
       "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "37ddd651_639e5c35",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-10-31T23:41:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9599e4fe_21772f70",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "e320cbf9_6145b6ba",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-10-31T23:41:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "25da580b_99e191e9",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d6ecbd32_95943ea9",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
         "patchSetId": 9
@@ -169,6 +331,24 @@
       "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "054d4e87_58efa151",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-10-31T23:41:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d6ecbd32_95943ea9",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "9ead3d9b_18a9c010",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-10-31T23:41:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6c2c6ffb_0234f435",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4dbe3810_3e1856d4",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
         "patchSetId": 9
@@ -200,6 +398,24 @@
       "writtenOn": "2018-10-30T22:52:24Z",
       "side": 1,
       "message": "This line is too long.\nAlso, is there a way to have use this \"max()\" function without the type casting?",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "45958391_77ec5ef2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-10-31T23:41:53Z",
+      "side": 1,
+      "message": "I don\u0027t know a way that either casts or uses another line to set a variable to 0, since the 2nd argument is treated as an unsigned long (which is what the vector size is).",
+      "parentUuid": "4dbe3810_3e1856d4",
       "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "4bc38b3b_d210c671",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-10-31T23:41:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8b87d5a0_94380583",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "06527da2_4ffc4014",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderwidget.cpp",
         "patchSetId": 9
@@ -237,6 +471,24 @@
       "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0be6f7dc_cd500fab",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderwidget.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-10-31T23:41:53Z",
+      "side": 1,
+      "message": "Something I was reading online said it was necessary to recognize QImage in the signals/slots, which is why I had it. When I looked into the Qt documentation, it was actually unnecessary (it\u0027s built in), so I just got rid of it.",
+      "parentUuid": "06527da2_4ffc4014",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "fbd34a2e_4fb83b21",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderwidget.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-10-31T23:41:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf7193b5_b3b3b7fa",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bf084cbe_152abb50",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderwidget.h",
         "patchSetId": 9
@@ -271,6 +541,24 @@
       "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "78cc027c_195065bd",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderwidget.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-10-31T23:41:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bf084cbe_152abb50",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
