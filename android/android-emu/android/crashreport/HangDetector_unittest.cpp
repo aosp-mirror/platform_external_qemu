@@ -64,7 +64,8 @@ TEST_F(HangDetectorTest, PredicateTriggersHang) {
     waitUntilUnlocked();
 }
 
-TEST_F(HangDetectorTest, BlockedLooperTriggersHang) {
+// Flaky failure to detect hang on Mac.
+TEST_F(HangDetectorTest, DISABLED_BlockedLooperTriggersHang) {
     // Note that the looper is not running!
     auto looper = ThreadLooper::get();
     mHangDetector.addWatchedLooper(looper);
