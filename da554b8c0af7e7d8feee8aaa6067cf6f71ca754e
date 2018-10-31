@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e5b2c94a_75f794fd",
+        "filename": "android/android-emu/android/base/threads/Thread_pthread.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-31T20:59:33Z",
+      "side": 1,
+      "message": "ok to update from multiple threads?",
+      "range": {
+        "startLine": 109,
+        "startChar": 0,
+        "endLine": 116,
+        "endChar": 0
+      },
+      "revId": "da554b8c0af7e7d8feee8aaa6067cf6f71ca754e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
