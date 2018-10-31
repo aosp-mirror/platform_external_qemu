@@ -422,8 +422,6 @@ endif
 # Source files in androidEmu that are dependent on other static
 # libraries being there.
 android_emu_dependent_LOCAL_SRC_FILES += \
-    android/automation/AutomationController.cpp \
-    android/automation/AutomationEventSink.cpp \
     android/camera/camera-common.cpp \
     android/camera/camera-format-converters.c \
     android/camera/camera-list.cpp \
@@ -641,9 +639,15 @@ LOCAL_C_INCLUDES += \
 LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
 
+  # bug 118717612
+  # android/automation/AutomationController_unittest.cpp
+  # android/automation/AutomationEventSink_unittest.cpp
+  # android/base/testing/ProtobufMatchers.cpp
+  # android/offworld/OffworldPipe_unittest.cpp
+  # android/emulation/AndroidAsyncMessagePipe_unittest.cpp
+  # android/physics/PhysicalModel_unittest.cpp \
+
 LOCAL_SRC_FILES := \
-  android/automation/AutomationController_unittest.cpp \
-  android/automation/AutomationEventSink_unittest.cpp \
   android/avd/util_unittest.cpp \
   android/avd/util_wrapper_unittest.cpp \
   android/base/ArraySize_unittest.cpp \
@@ -701,7 +705,6 @@ LOCAL_SRC_FILES := \
   android/base/synchronization/MessageChannel_unittest.cpp \
   android/base/system/System_unittest.cpp \
   android/base/testing/MockUtils_unittest.cpp \
-  android/base/testing/ProtobufMatchers.cpp \
   android/base/testing/TestEvent_unittest.cpp \
   android/base/threads/Async_unittest.cpp \
   android/base/threads/FunctorThread_unittest.cpp \
@@ -723,7 +726,6 @@ LOCAL_SRC_FILES := \
   android/emulation/AdbHostServer_unittest.cpp \
   android/emulation/android_pipe_pingpong_unittest.cpp \
   android/emulation/android_pipe_zero_unittest.cpp \
-  android/emulation/AndroidAsyncMessagePipe_unittest.cpp \
   android/emulation/bufprint_config_dirs_unittest.cpp \
   android/emulation/ComponentVersion_unittest.cpp \
   android/emulation/ConfigDirs_unittest.cpp \
@@ -766,7 +768,6 @@ LOCAL_SRC_FILES := \
   android/location/Route_unittest.cpp \
   android/network/control_unittest.cpp \
   android/network/constants_unittest.cpp \
-  android/offworld/OffworldPipe_unittest.cpp \
   android/opengl/EmuglBackendList_unittest.cpp \
   android/opengl/EmuglBackendScanner_unittest.cpp \
   android/opengl/emugl_config_unittest.cpp \
@@ -774,7 +775,6 @@ LOCAL_SRC_FILES := \
   android/opengl/gpuinfo_unittest.cpp \
   android/physics/AmbientEnvironment_unittest.cpp \
   android/physics/InertialModel_unittest.cpp \
-  android/physics/PhysicalModel_unittest.cpp \
   android/proxy/proxy_common_unittest.cpp \
   android/proxy/ProxyUtils_unittest.cpp \
   android/qt/qt_path_unittest.cpp \
