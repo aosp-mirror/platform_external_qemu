@@ -13,6 +13,7 @@
 
 #include "lz4.h"
 
+#include <stdio.h>
 #include <cassert>
 
 namespace android {
@@ -23,8 +24,8 @@ bool Decompressor::decompress(const uint8_t* data,
                               uint8_t* outData,
                               int32_t outSize) {
     const int res = LZ4_decompress_safe(reinterpret_cast<const char*>(data),
-                                        reinterpret_cast<char*>(outData),
-                                        size, outSize);
+                                        reinterpret_cast<char*>(outData), size,
+                                        outSize);
     if (res != outSize) {
         fprintf(stderr, "Decompression failed: %d\n", res);
     }

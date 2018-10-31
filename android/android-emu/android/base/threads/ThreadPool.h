@@ -40,6 +40,7 @@
 //      struct WorkItem { int number; };
 //
 //      ThreadPool<WorkItem> tp([](WorkItem&& item) { std::cout << item.num; });
+//      CHECK(tp.start()) << "Failed to start the thread pool";
 //      tp.enqueue({1});
 //      tp.enqueue({2});
 //      tp.enqueue({3});
@@ -88,37 +89,55 @@ public:
         join();
     }
 
-    void start() {
+    bool start() {
         for (auto& workerPtr : mWorkers) {
-            workerPtr->start();
+            if (workerPtr->start()) {
+                ++mValidWorkersCount;
+            } else {
+                workerPtr.clear();
+            }
         }
+        return mValidWorkersCount > 0;
     }
 
     void done() {
         for (auto& workerPtr : mWorkers) {
-            workerPtr->enqueue(kNullopt);
+            if (workerPtr) {
+                workerPtr->enqueue(kNullopt);
+            }
         }
     }
 
     void join() {
         for (auto& workerPtr : mWorkers) {
-            workerPtr->join();
+            if (workerPtr) {
+                workerPtr->join();
+            }
         }
         mWorkers.clear();
+        mValidWorkersCount = 0;
     }
 
     void enqueue(Item&& item) {
-        int currentIndex =
-                mNextWorkerIndex.fetch_add(1, std::memory_order_relaxed);
-        mWorkers[currentIndex % mWorkers.size()]->enqueue(std::move(item));
+        // Iterate over the worker threads until we find a one that's running.
+        for (;;) {
+            int currentIndex =
+                    mNextWorkerIndex.fetch_add(1, std::memory_order_relaxed);
+            auto& workerPtr = mWorkers[currentIndex % mWorkers.size()];
+            if (workerPtr) {
+                workerPtr->enqueue(std::move(item));
+                break;
+            }
+        }
     }
 
-    int numWorkers() const { return mWorkers.size(); }
+    int numWorkers() const { return mValidWorkersCount; }
 
 private:
     Processor mProcessor;
     std::vector<Optional<Worker>> mWorkers;
     std::atomic<int> mNextWorkerIndex{0};
+    int mValidWorkersCount{0};
 };
 
 }  // namespace base
