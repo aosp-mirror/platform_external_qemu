@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c2bae59_a4f0983c",
+        "filename": "android/android-emu/android/camera/CameraFormatConverters_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-31T04:03:37Z",
+      "side": 1,
+      "message": "Is the idea that stagingFramebuffer is alloced by convert_frame_* and then freed by the caller of convert? What if it was a fixed std::vector living in the camera service that gets resized as we go along, and not have to expose this to the user?",
+      "range": {
+        "startLine": 417,
+        "startChar": 0,
+        "endLine": 417,
+        "endChar": 29
+      },
+      "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b7cceb51_43035d5a",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1112,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-10-31T04:03:37Z",
+      "side": 1,
+      "message": "mSourceFramebufferWidth",
+      "range": {
+        "startLine": 1112,
+        "startChar": 16,
+        "endLine": 1112,
+        "endChar": 40
+      },
+      "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
