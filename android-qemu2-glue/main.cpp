@@ -1041,6 +1041,11 @@ extern "C" int main(int argc, char** argv) {
         if (firstTimeSetup &&
             android_hw->disk_dataPartition_size < kMinPlaystoreImageSize) {
             android_hw->disk_dataPartition_size = kMinPlaystoreImageSize;
+            // Write it to config.ini as well, or we get all sorts of problems.
+            if (android_avdInfo) {
+                avdInfo_replaceDataPartitionSizeInConfigIni(
+                        android_avdInfo, kMinPlaystoreImageSize);
+            }
         }
     }
 
