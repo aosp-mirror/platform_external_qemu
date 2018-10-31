@@ -145,7 +145,10 @@ RamSaver::RamSaver(const std::string& fileName,
                     handlePageSave(std::move(pi));
                 });
             });
-    mWorkers->start();
+    if (!mWorkers->start()) {
+        mHasError = true;
+        return;
+    }
     mWriter.emplace([this](WriteInfo&& wi) {
         if (wi.blockIndex == -1) {
             return base::WorkerProcessingResult::Stop;
@@ -153,7 +156,10 @@ RamSaver::RamSaver(const std::string& fileName,
         writePage(std::move(wi));
         return base::WorkerProcessingResult::Continue;
     });
-    mWriter->start();
+    if (!mWriter->start()) {
+        mHasError = true;
+        return;
+    }
 }
 
 RamSaver::~RamSaver() {

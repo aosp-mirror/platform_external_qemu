@@ -28,9 +28,7 @@ namespace android {
 namespace base {
 
 Thread::Thread(ThreadFlags flags, int stackSize)
-    : mThread((pthread_t)NULL),
-      mStackSize(stackSize),
-      mFlags(flags) {}
+    : mThread((pthread_t)NULL), mStackSize(stackSize), mFlags(flags) {}
 
 Thread::~Thread() {
     assert(!mStarted || mFinished);
@@ -59,11 +57,15 @@ bool Thread::start() {
 
     if (pthread_create(&mThread, mStackSize ? &attr : nullptr, thread_main,
                        this)) {
+        LOG(ERROR) << "Thread: failed to create a thread, errno " << errno;
         ret = false;
         // We _do not_ need to guard this access to |mFinished| because we're
         // sure that the launched thread failed, so there can't be parallel
         // access.
         mFinished = true;
+        mExitStatus = -errno;
+        // Nothing to join, so technically it's joined.
+        mJoined = true;
     }
 
     if (useAttributes) {
@@ -97,15 +99,20 @@ bool Thread::tryWait(intptr_t* exitStatus) {
         return false;
     }
 
-    AutoLock locker(mLock);
-    if (!mFinished) {
-        return false;
+    {
+        AutoLock locker(mLock);
+        if (!mFinished) {
+            return false;
+        }
     }
 
-    if (!mJoined && pthread_join(mThread, NULL)) {
-        return false;
+    if (!mJoined) {
+        if (pthread_join(mThread, NULL)) {
+            LOG(WARNING) << "Thread: failed to join a finished thread, errno "
+                         << errno;
+        }
+        mJoined = true;
     }
-    mJoined = true;
 
     if (exitStatus) {
         *exitStatus = mExitStatus;

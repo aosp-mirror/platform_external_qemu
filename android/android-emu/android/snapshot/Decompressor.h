@@ -11,8 +11,7 @@
 
 #pragma once
 
-#include "android/base/threads/ThreadPool.h"
-#include "android/base/threads/WorkerThread.h"
+#include <stdint.h>
 
 //
 // Decompressor - a simple class for decompressing data.
