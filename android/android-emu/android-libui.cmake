@@ -100,8 +100,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/recording/video/VideoProducer.cpp
     android/recording/video/VideoFrameSharer.cpp)
 
-# Note, these are seperated for historical reasons only, the
-# uic compiler will find this automatically
+# Note, these are seperated for historical reasons only, the uic compiler will find this automatically
 set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended.ui
     android/skin/qt/extended-pages/battery-page.ui
@@ -203,69 +202,83 @@ set(emulator-libui_src
     ${ANDROID_SKIN_QT_UI_SRC_FILES}
     ${ANDROID_SKIN_SOURCES})
 
-set(emulator-libui_includes_private
-    .
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
-    ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
-    ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/shared
-    ${FFMPEG_INCLUDE_DIRS}
-    ${QT5_INCLUDE_DIRS})
+android_add_library(emulator-libui)
 
-set(emulator-libui_compile_options_private "-DUSE_MMX=1" "-mmmx")
+android_target_include_directories(emulator-libui all PRIVATE ${FFMPEG_INCLUDE_DIRS} ${QT5_INCLUDE_DIRS})
 
-# Target specific compiler flags for windows
-set(emulator-libui_windows_msvc-x86_64_compile_options_private "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
-set(emulator-libui_windows-x86_64_compile_options_private "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
-set(emulator-libui_windows-x86_compile_options_private "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
+android_target_compile_options(emulator-libui all PRIVATE "-DUSE_MMX=1" "-mmmx")
 
+# Target specific compiler flags for windows, since we include FFMPEG C sources from C++ we need to make sure this flag
+# is set for c++ sources.
+android_target_compile_options(emulator-libui windows PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
 
 # Linux compiler settings
-set(emulator-libui_linux-x86_64_compile_options_private
-    "-Wno-reserved-user-defined-literal"
-    "-Wno-pointer-bool-conversion"
-    "-Wno-deprecated-declarations"
-    "-Wno-inconsistent-missing-override"
-    "-Wno-return-type-c-linkage"
-    "-Wno-invalid-constexpr"
-    "-fPIC")
+android_target_compile_options(emulator-libui
+                               linux-x86_64
+                               PRIVATE
+                               "-Wno-reserved-user-defined-literal"
+                               "-Wno-pointer-bool-conversion"
+                               "-Wno-deprecated-declarations"
+                               "-Wno-inconsistent-missing-override"
+                               "-Wno-return-type-c-linkage"
+                               "-Wno-invalid-constexpr")
 
 # Mac Os compiler settings
-set(emulator-libui_darwin-x86_64_compile_options_private
-    "-Wno-reserved-user-defined-literal"
-    "-Wno-pointer-bool-conversion"
-    "-Wno-deprecated-declarations"
-    "-Wno-inconsistent-missing-override"
-    "-Wno-return-type-c-linkage"
-    "-Wno-invalid-constexpr"
-    "-fPIC")
+android_target_compile_options(emulator-libui
+                               darwin-x86_64
+                               PRIVATE
+                               "-Wno-reserved-user-defined-literal"
+                               "-Wno-pointer-bool-conversion"
+                               "-Wno-deprecated-declarations"
+                               "-Wno-inconsistent-missing-override"
+                               "-Wno-return-type-c-linkage"
+                               "-Wno-invalid-constexpr")
 
-# These dependencies are ignored in the franken build, once we switch over
-# we can remove the includes below, as all the dependencies will propagate.
-set(emulator-libui_libs_public
-    android-emu
-    emulator-libyuv
-    libOpenGLESDispatch
-    libemugl_common
-    ${FFMPEG_LIBRARIES}
-    ${QT5_LIBRARIES}
-    ${ZLIB_LIBRARIES})
+# dependencies will propagate.
+android_target_link_libraries(emulator-libui
+                              all
+                              PUBLIC
+                              android-emu
+                              emulator-libyuv
+                              ${FFMPEG_LIBRARIES}
+                              ${QT5_LIBRARIES}
+                              ${ZLIB_LIBRARIES})
 
-if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
-    set(emulator-libui_includes_private
-        ${emulator-libui_includes_private}
-	${MSVC_POSIX_COMPAT_INCLUDE_DIR})
-    set(emulator-libui_libs_public
-        ${emulator-libui_libs_public}
-	${MSVC_POSIX_COMPAT_LIBRARY})
-endif()
-
-# gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug.
-# This implies a direct dependency to libX11.so
-set(emulator-libui_linux-x86_64_libs_public -lX11)
+# gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug. This implies a direct dependency to
+# libX11.so
+android_target_link_libraries(emulator-libui linux-x86_64 PUBLIC -lX11)
 
 # Remove these later:
-set(emulator-libui_includes_public ${PROTOBUF_INCLUDE_DIRS}
-    ${ANDROID_QEMU2_TOP_DIR}/../libyuv/files/include)
+android_target_include_directories(emulator-libui all PUBLIC ${PROTOBUF_INCLUDE_DIRS}
+                                   ${ANDROID_QEMU2_TOP_DIR}/../libyuv/files/include)
 
-add_android_library(emulator-libui)
+set(emulator-libui_unittests_src
+    android/skin/keycode_unittest.cpp
+    android/skin/keycode-buffer_unittest.cpp
+    android/skin/rect_unittest.cpp
+    android/recording/test/DummyAudioProducer.cpp
+    android/recording/test/DummyVideoProducer.cpp
+    android/recording/FfmpegRecorder.cpp
+    android/recording/test/FfmpegRecorder_unittest.cpp)
+android_add_test(emulator-libui_unittests)
+
+android_target_compile_options(emulator-libui_unittests all PRIVATE -O0 -UNDEBUG)
+android_target_include_directories(emulator-libui_unittests all PRIVATE ${FFMPEG_INCLUDE_DIRS} ${QT5_INCLUDE_DIRS})
+
+# Target specific compiler flags for windows
+android_target_compile_options(emulator-libui_unittests windows PRIVATE
+                               "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
+
+# Linux compiler settings
+android_target_compile_options(emulator-libui_unittests linux-x86_64 PRIVATE "-Wno-reserved-user-defined-literal")
+
+# Mac Os compiler settings
+android_target_compile_options(emulator-libui_unittests darwin-x86_64 PRIVATE "-Wno-reserved-user-defined-literal")
+android_target_dependency(emulator-libui_unittests all "${QT5_SHARED_DEPENDENCIES}")
+android_target_properties(emulator-libui_unittests all "${QT5_SHARED_PROPERTIES}")
+
+# Make sure we disable rtti in gtest
+android_target_compile_definitions(emulator-libui_unittests all PRIVATE -DGTEST_HAS_RTTI=0)
+
+android_target_link_libraries(emulator-libui_unittests all PUBLIC emulator-libui gmock_main)
+

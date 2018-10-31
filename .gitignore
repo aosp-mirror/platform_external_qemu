@@ -191,5 +191,7 @@ docker-src.*
 *~
 *.DS_Store
 /default.profraw
+/build
+.vscode/cquery_cached_index
 *.ast_raw
 *.depend_raw
