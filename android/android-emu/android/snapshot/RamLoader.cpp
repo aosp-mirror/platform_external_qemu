@@ -15,17 +15,17 @@
 #include "android/base/ArraySize.h"
 #include "android/base/ContiguousRangeMapper.h"
 #include "android/base/EintrWrapper.h"
+#include "android/base/Profiler.h"
+#include "android/base/Stopwatch.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/preadwrite.h"
 #include "android/base/memory/MemoryHints.h"
 #include "android/base/misc/StringUtils.h"
-#include "android/base/Profiler.h"
-#include "android/base/Stopwatch.h"
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/Decompressor.h"
-#include "android/snapshot/interface.h"
 #include "android/snapshot/PathUtils.h"
+#include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 
@@ -35,10 +35,10 @@
 #include <memory>
 
 using android::base::ContiguousRangeMapper;
-using android::base::ScopedMemoryProfiler;
 using android::base::MemoryHint;
 using android::base::MemStream;
 using android::base::PathUtils;
+using android::base::ScopedMemoryProfiler;
 using android::base::Stopwatch;
 
 namespace android {
@@ -49,14 +49,12 @@ void RamLoader::FileIndex::clear() {
     decltype(blocks)().swap(blocks);
 }
 
-RamLoader::RamBlockStructure::~RamBlockStructure() { }
+RamLoader::RamBlockStructure::~RamBlockStructure() {}
 
 RamLoader::RamLoader(base::StdioStream&& stream,
                      Flags flags,
                      const RamLoader::RamBlockStructure& blockStructure)
-    : mStream(std::move(stream)),
-      mReaderThread([this]() { readerWorker(); }) {
-
+    : mStream(std::move(stream)), mReaderThread([this]() { readerWorker(); }) {
     if (nonzero(flags & Flags::LoadIndexOnly)) {
         mIndexOnly = true;
         applyRamBlockStructure(blockStructure);
@@ -105,14 +103,15 @@ RamLoader::RamBlockStructure RamLoader::getRamBlockStructure() const {
     return res;
 }
 
-void RamLoader::applyRamBlockStructure(const RamBlockStructure& blockStructure) {
+void RamLoader::applyRamBlockStructure(
+        const RamBlockStructure& blockStructure) {
     mPageSize = blockStructure.pageSize;
 
     mIndex.clear();
     mIndex.blocks.reserve(blockStructure.blocks.size());
 
     for (const auto ramBlock : blockStructure.blocks) {
-        mIndex.blocks.push_back({ ramBlock, {}, {}});
+        mIndex.blocks.push_back({ramBlock, {}, {}});
     }
 }
 
@@ -173,9 +172,10 @@ void RamLoader::join() {
     if (mAccessWatch) {
         // Unprotect all. Warning: this assumes the VM is stopped.
 
-        ContiguousRangeMapper bulkFillPreparer([this](uintptr_t start, uintptr_t size) {
-            mAccessWatch->initBulkFill((void*)start, size);
-        });
+        ContiguousRangeMapper bulkFillPreparer(
+                [this](uintptr_t start, uintptr_t size) {
+                    mAccessWatch->initBulkFill((void*)start, size);
+                });
 
         for (const Page& page : mIndex.pages) {
             auto ptr = pagePtr(page);
@@ -217,8 +217,11 @@ void RamLoader::interrupt() {
 void RamLoader::touchAllPages() {
     if (mLazyLoadingFromFileBacking) {
         for (const auto& block : mIndex.blocks) {
-            if (block.ramBlock.path.empty()) continue;
-            android::base::memoryHint(block.ramBlock.hostPtr, block.ramBlock.totalSize, MemoryHint::Touch);
+            if (block.ramBlock.path.empty())
+                continue;
+            android::base::memoryHint(block.ramBlock.hostPtr,
+                                      block.ramBlock.totalSize,
+                                      MemoryHint::Touch);
         }
     } else {
         join();
@@ -334,7 +337,8 @@ void RamLoader::readBlockPages(base::Stream* stream,
 
     // No need to load readonly ram blocks, since they will
     // be initialized the same way (or we will bump snapshot protocol version)
-    if (block.ramBlock.readonly) return;
+    if (block.ramBlock.readonly)
+        return;
 
     // Now query the ram block flags from the stream,
     // and compare with the actual loaded ram block.
@@ -345,8 +349,7 @@ void RamLoader::readBlockPages(base::Stream* stream,
     // same file. No need to do anything more, even if we mapped privately in
     // this session instead of shared.
     if ((savedFlags & SNAPSHOT_RAM_MAPPED_SHARED) &&
-        (activeFlags & SNAPSHOT_RAM_MAPPED) &&
-        savedMemPath == activeMemPath) {
+        (activeFlags & SNAPSHOT_RAM_MAPPED) && savedMemPath == activeMemPath) {
         mLazyLoadingFromFileBacking = true;
         return;
     }
@@ -357,8 +360,7 @@ void RamLoader::readBlockPages(base::Stream* stream,
     if ((savedFlags & SNAPSHOT_RAM_MAPPED_SHARED) &&
         (!(activeFlags & SNAPSHOT_RAM_MAPPED) ||
          ((activeFlags & SNAPSHOT_RAM_MAPPED) &&
-         savedMemPath != activeMemPath))) {
-
+          savedMemPath != activeMemPath))) {
         auto ramFilePath = PathUtils::join(getSnapshotBaseDir(), savedMemPath);
 
         auto ramFilePtr = fopen(ramFilePath.c_str(), "rb");
@@ -378,11 +380,8 @@ void RamLoader::readBlockPages(base::Stream* stream,
         static constexpr int64_t kReadChunkSize = 16 * 1048576;
 
         for (int64_t i = 0; i < totalSz; i += kReadChunkSize) {
-            HANDLE_EINTR(
-                base::pread(ramFileFd,
-                            hostPtr + i,
-                            std::min(kReadChunkSize, totalSz - i),
-                            i));
+            HANDLE_EINTR(base::pread(ramFileFd, hostPtr + i,
+                                     std::min(kReadChunkSize, totalSz - i), i));
         }
 
         // Mark that we loaded this directly
@@ -432,7 +431,8 @@ void RamLoader::readBlockPages(base::Stream* stream,
             page.filePos = 0;
         } else {
             if (mIndexOnly) {
-                page.state.store(uint8_t(State::Filled), std::memory_order_relaxed);
+                page.state.store(uint8_t(State::Filled),
+                                 std::memory_order_relaxed);
             }
             page.blockIndex = uint16_t(blockIndex);
             page.sizeOnDisk = uint32_t(sizeOnDisk);
@@ -617,7 +617,8 @@ void RamLoader::loadRamPage(void* ptr) {
     // No need to load ram if on separate storage;
     // assume OS will do the right thing.
     if (mIsQuickboot &&
-        nonzero(mIndex.flags & IndexFlags::SeparateBackingStore)) return;
+        nonzero(mIndex.flags & IndexFlags::SeparateBackingStore))
+        return;
 
     // It's possible for us to try to RAM load
     // things that are not registered in the index
@@ -718,7 +719,7 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
             }
 
             if (allocateBuffer && !preallocatedBuffer) {
-                delete [] buf;
+                delete[] buf;
             }
 
             buf = decompressed;
@@ -748,20 +749,21 @@ void RamLoader::fillPageData(Page* pagePtr) {
     printf("%s: loading page %p\n", __func__, this->pagePtr(page));
 #endif
     if (mAccessWatch) {
-
         void* guestRam = this->pagePtr(page);
         uint32_t guestRamSize = pageSize(page);
 
-        bool res = mJoining ?
-            mAccessWatch->fillPageBulk(guestRam, guestRamSize, page.data, mIsQuickboot) :
-            mAccessWatch->fillPage(guestRam, guestRamSize, page.data, mIsQuickboot);
+        bool res = mJoining
+                           ? mAccessWatch->fillPageBulk(guestRam, guestRamSize,
+                                                        page.data, mIsQuickboot)
+                           : mAccessWatch->fillPage(guestRam, guestRamSize,
+                                                    page.data, mIsQuickboot);
 
         if (!res) {
             mHasError = true;
         }
 
         if (page.data) {
-            delete [] page.data;
+            delete[] page.data;
             page.data = nullptr;
         }
 
@@ -838,7 +840,9 @@ void RamLoader::startDecompressor() {
             page->state.store(uint8_t(State::Error));
         }
     });
-    mDecompressor->start();
+    if (!mDecompressor->start()) {
+        mDecompressor.clear();
+    }
 }
 
 }  // namespace snapshot
