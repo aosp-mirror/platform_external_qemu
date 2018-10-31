@@ -77,19 +77,18 @@ build_symbols () {
         panic "Breakpad prebuilt symbol dumper could not be found at $SYMTOOL"
     fi
     silent_run mkdir -p "$SYMBOL_DIR"
-    log "Processing symbols for: ${BINARY}"
     if [ -L "$BINARY" ] || [ ! -f "$BINARY" ]; then
         log "Skipping $BINARY"
         return
     fi
     BINARY_FULLNAME="$(basename "$BINARY")"
     BINARY_DIR="$(dirname "$BINARY")"
-    run mkdir -p $SYMBOL_DIR/$BINARY_DIR
-    run mkdir -p $DSYM_DIR/$BINARY_DIR
+    silent_run mkdir -p $SYMBOL_DIR/$BINARY_DIR
+    silent_run mkdir -p $DSYM_DIR/$BINARY_DIR
     if [ "$(get_build_os)" = "darwin" ]; then
-        DSYM_BIN_DIR=$DSYM_DIR/$BINARY.dsym
+        DSYM_BIN_DIR=$DSYM_DIR/$BINARY.dSYM
         mkdir -p $DSYM_BIN_DIR
-        dsymutil --out=$DSYM_BIN_DIR $BINARY 2>&1 | grep -q 'no debug symbols' ||
+        run dsymutil --out=$DSYM_BIN_DIR $BINARY || panic "Unable to extract debug symbols"
         $SYMTOOL $BINARY > $SYMBOL_DIR/$BINARY.sym 2> $SYMBOL_DIR/$BINARY.err ||
             warn "Failed to create symbol file for $BINARY"
         run  strip -S $BINARY || panic "Could not strip $BINARY"
