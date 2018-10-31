@@ -21,5 +21,13 @@ get_host_tag(ANDROID_HOST_TAG)
 set(ANDROID_TARGET_TAG "darwin-x86_64")
 set(ANDROID_TARGET_OS "darwin")
 set(ANDROID_TARGET_OS_FLAVOR "darwin")
+
+# Make sure we always set the rpath to include current dir and ./lib64. We need this to create self
+# contained executables that dynamically load dylibs.
+set(RUNTIME_OS_PROPERTIES "INSTALL_RPATH>=@loader_path;INSTALL_RPATH>=@loader_path/lib64;BUILD_WITH_INSTALL_RPATH=ON;INSTALL_RPATH_USE_LINK_PATH=ON")
 toolchain_generate("${ANDROID_TARGET_TAG}")
+
+# Always consider the source to be darwin.
+add_definitions(-D_DARWIN_C_SOURCE=1)
+
 # No magical includes or dependencies for darwin..

@@ -1,44 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 
-# COMPILER + PATH CONFIGURATION
-# =============================
-# TODO(jansene): This section is needed as a bridge
-# to the android build system.
-string(REPLACE " " ";" INCLUDES ${LOCAL_C_INCLUDES})
-include_directories(${INCLUDES})
-include_directories(.)
+android_generate_hw_config()
 
-# Use same compiler config as android build system
-set(CMAKE_C_FLAGS ${LOCAL_CFLAGS})
-set(CMAKE_CXX_FLAGS  "${LOCAL_CFLAGS} ${LOCAL_CXXFLAGS}")
-
-# Work around some gcc/mingw issues
-if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-endif()
-
-if ("${LOCAL_OS}" STREQUAL "windows_msvc")
-  set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
-endif()
-
-# Make sure we create archives in the same way..
-SET(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> crs <TARGET> <LINK_FLAGS> <OBJECTS>")
-SET(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> crs <TARGET> <LINK_FLAGS> <OBJECTS>")
-
-# hw-config generator
-add_custom_command(PRE_BUILD
-                   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h
-                   COMMAND python ${LOCAL_QEMU2_TOP_DIR}/android/scripts/gen-hw-config.py
-                                  ${LOCAL_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini
-                                  ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h
-                   VERBATIM )
-set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h PROPERTIES GENERATED TRUE)
-set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h PROPERTIES HEADER_FILE_ONLY TRUE)
-set(GENERATED_SOURCES       ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h)
-
-# END COMPILER CONFIGURATION
-# ==========================
-set(COMMON_QEMU2GLUE_SOURCES
+set(libqemu2-glue_src
+    ${ANDROID_HW_CONFIG_H}
     android_qemud.cpp
     audio-capturer.cpp
     audio-output.cpp
@@ -77,15 +42,17 @@ set(COMMON_QEMU2GLUE_SOURCES
     dtb.cpp
     snapshot_compression.cpp
     telephony/modem_init.c
-    utils/stream.cpp
-    )
+    utils/stream.cpp)
 
-
-set_source_files_properties(${COMMON_QEMU2GLUE_SOURCES} PROPERTIES OBJECT_DEPENDS ${GENERATED_SOURCES})
-
-add_library(libqemu2-glue ${COMMON_QEMU2GLUE_SOURCES})
-
-add_library(libqemu2-testbuild tests/build_consistency.cpp)
-
-target_include_directories(libqemu2-glue PRIVATE ../android/third_party/libdtb/include/)
-
+android_add_library(libqemu2-glue)
+android_target_include_directories(libqemu2-glue
+                                   all
+                                   PRIVATE
+                                   ..
+                                   ../include
+                                   ${GLIB2_INCLUDE_DIRS}
+                                   ../qemu2-auto-generated
+                                   ${PIXMAN_INCLUDE_DIRS}
+                                   ../slirp
+                                   ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/)
+android_target_link_libraries(libqemu2-glue all PUBLIC android-emu ${GLIB2_LIBRARIES} emulator-libdtb)

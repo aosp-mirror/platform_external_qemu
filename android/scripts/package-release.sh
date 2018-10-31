@@ -502,7 +502,7 @@ ln -s "$AOSP_ROOT"/external/google-benchmark "$AOSP_TMPDIR"/external/google-benc
 ln -s "$AOSP_ROOT"/external/libyuv "$AOSP_TMPDIR"/external/libyuv
 ln -s "$AOSP_ROOT"/external/tinyobjloader "$AOSP_TMPDIR"/external/tinyobjloader
 
-AOSP_SOURCE_SUBDIRS="external/qemu external/gtest external/google-benchmark external/libyuv external/tinyobjloader"
+# AOSP_SOURCE_SUBDIRS="external/qemu external/gtest external/google-benchmark external/libyuv external/tinyobjloader"
 
 for AOSP_SUBDIR in $AOSP_SOURCE_SUBDIRS; do
     extract_subdir_git_history \
@@ -625,7 +625,7 @@ EOF
 
     dump "[$PKG_NAME] Copying license files."
     mkdir -p "$TEMP_PKG_DIR"/licenses/
-    cp android/qemu1/COPYING android/qemu1/COPYING.LIB "$TEMP_PKG_DIR"/licenses/
+    # cp android/qemu1/COPYING android/qemu1/COPYING.LIB "$TEMP_PKG_DIR"/licenses/
 
     dump "[$PKG_NAME] Creating tarball."
     PKG_FILE=$PKG_DIR/$PKG_PREFIX-$PKG_REVISION-$SYSTEM.tar.bz2

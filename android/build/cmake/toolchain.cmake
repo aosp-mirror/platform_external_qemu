@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This file contains a set of functions that make it easier to configure the toolchain used by the emulator
+# It's main responsibility is to create the toolchain by invoking the toolchain shell script that generates
+# the proper wrappers around the compilers and sysroot that are found in the build tree.
+# 
+# We need this to make sure that are builds are consistent accross different development environments.
+
 
 # This invokes the toolchain generator
 # HOST
@@ -70,13 +76,15 @@ endfunction ()
 
 # Gets the given key from the enviroment. This your usual shell environment
 # and is globally visuable during cmake generation. This used by the toolchain
-# generator to work around some caching issues.
-function(get_env_cache KEY)
+# generator to work around some caching issues. (CMake blows away the internal
+# variables when configuring the toolchain)
+# No sane person would use this outside the toolchain generation.
+function(internal_get_env_cache KEY)
     set(${KEY} $ENV{ENV_CACHE_${KEY}} PARENT_SCOPE)
 endfunction()
 
 # Sets the given key in the environment to the given value.
-function(set_env_cache KEY VAL)
+function(internal_set_env_cache KEY VAL)
     set(ENV{ENV_CACHE_${KEY}} "${VAL}")
     set(${KEY} "${VAL}" PARENT_SCOPE)
 endfunction()
@@ -85,23 +93,24 @@ function(toolchain_generate TARGET_OS)
     # This is a hack to workaround the fact that cmake will keep including
     # the toolchain defintion over and over, and it will wipe out all the settings.
     # so we will just store them in the environment, which gets blown away on exit
-    # anyway..
-    get_env_cache(COMPILER_PREFIX)
-    get_env_cache(ANDROID_SYSROOT)
+    # of cmake anyway..
+    internal_get_env_cache(COMPILER_PREFIX)
+    internal_get_env_cache(ANDROID_SYSROOT)
     if ("${COMPILER_PREFIX}" STREQUAL "")
         toolchain_generate_internal(${TARGET_OS})
-        set_env_cache(COMPILER_PREFIX "${ANDROID_COMPILER_PREFIX}")
-        set_env_cache(ANDROID_SYSROOT "${ANDROID_SYSROOT}")
+        internal_set_env_cache(COMPILER_PREFIX "${ANDROID_COMPILER_PREFIX}")
+        internal_set_env_cache(ANDROID_SYSROOT "${ANDROID_SYSROOT}")
     endif ()
 
-    set(CMAKE_RC_COMPILER ${COMPILER_PREFIX}windres PARENT_SCOPE)
-    set(CMAKE_C_COMPILER ${COMPILER_PREFIX}gcc PARENT_SCOPE)
-    set(CMAKE_CXX_COMPILER ${COMPILER_PREFIX}g++ PARENT_SCOPE)
-    # We will use system bintools
+    set(CMAKE_RC_COMPILER ${COMPILER_PREFIX}windres CACHE PATH "windres")
+    set(CMAKE_C_COMPILER ${COMPILER_PREFIX}gcc CACHE PATH "C compiler")
+    set(CMAKE_CXX_COMPILER ${COMPILER_PREFIX}g++ CACHE PATH "C++ compiler")
+    # We will use system bintools (Note, this might not work with msvc)
+    # As setting the AR somehow causes all sorts of strange issues.
     # set(CMAKE_AR ${COMPILER_PREFIX}ar PARENT_SCOPE)
-    set(CMAKE_RANLIB ${COMPILER_PREFIX}ranlib PARENT_SCOPE)
-    set(CMAKE_OBJCOPY ${COMPILER_PREFIX}objcopy PARENT_SCOPE)
-    set(ANDROID_SYSROOT ${ANDROID_SYSROOT} PARENT_SCOPE)
+    set(CMAKE_RANLIB ${COMPILER_PREFIX}ranlib CACHE PATH "Ranlib")
+    set(CMAKE_OBJCOPY ${COMPILER_PREFIX}objcopy CACHE PATH "Objcopy")
+    set(ANDROID_SYSROOT ${ANDROID_SYSROOT} CACHE PATH "Sysroot")
 endfunction()
 
 function(get_host_tag RET_VAL)

@@ -363,8 +363,9 @@ def main(_):
     cmake += transform('qemu2-shared', git_fs, shared_dependencies, [])
     for (target, _, files, libdeps, _) in deps:
       # Remove the shared dependencies
-      files = [x for x in files if x not in shared_dependencies]
-      libdeps.add('qemu2-shared')
+      if 'qemu-system' in target:
+        files = [x for x in files if x not in shared_dependencies]
+        libdeps.add('qemu2-shared')
       cmake += transform(target, git_fs, files, libdeps)
 
     # Set all the source properties to make sure we set

@@ -1277,7 +1277,7 @@ help_gps(stralloc_t*  out)
 }
 
 
-#ifdef CONFIG_NAND_LIMITS
+#ifndef _WIN32
 static void
 help_nand_limits(stralloc_t*  out)
 {
