@@ -49,7 +49,7 @@ add_library(emulator-libjpeg
     jquant2.c
     jutils.c
 )
-target_include_directories(emulator-libjpeg PRIVATE .)
+target_include_directories(emulator-libjpeg PUBLIC .)
 target_compile_options(emulator-libjpeg PRIVATE
     -O3
     -fstrict-aliasing
