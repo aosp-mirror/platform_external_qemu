@@ -641,9 +641,11 @@ LOCAL_C_INCLUDES += \
 LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
 
+  # bug 118717612
+  # android/automation/AutomationController_unittest.cpp
+  # android/automation/AutomationEventSink_unittest.cpp
+
 LOCAL_SRC_FILES := \
-  android/automation/AutomationController_unittest.cpp \
-  android/automation/AutomationEventSink_unittest.cpp \
   android/avd/util_unittest.cpp \
   android/avd/util_wrapper_unittest.cpp \
   android/base/ArraySize_unittest.cpp \
