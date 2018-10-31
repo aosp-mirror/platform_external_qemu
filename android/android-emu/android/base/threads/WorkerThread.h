@@ -77,9 +77,13 @@ public:
     ~WorkerThread() { join(); }
 
     // Starts the worker thread.
-    void start() {
-        mThread.start();
+    bool start() {
         mStarted = true;
+        if (!mThread.start()) {
+            mFinished = true;
+            return false;
+        }
+        return true;
     }
     bool isStarted() const { return mStarted; }
     // Waits for all enqueue()'d items to finish.
