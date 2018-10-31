@@ -422,6 +422,8 @@ endif
 # Source files in androidEmu that are dependent on other static
 # libraries being there.
 android_emu_dependent_LOCAL_SRC_FILES += \
+    android/automation/AutomationController.cpp \
+    android/automation/AutomationEventSink.cpp \
     android/camera/camera-common.cpp \
     android/camera/camera-format-converters.c \
     android/camera/camera-list.cpp \
