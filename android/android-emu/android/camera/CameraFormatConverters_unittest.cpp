@@ -240,8 +240,8 @@ TEST_P(ConvertWithSize, SlowPathIdentity) {
 
 TEST_P(ConvertWithSize, FastPathIdentity) {
     const FramebufferSizeParam param = GetParam();
-    std::vector<uint8_t> stagingFramebuffer(
-            bufferSize(V4L2_PIX_FMT_YUV420, param.width, param.height));
+    uint8_t* stagingFramebuffer = nullptr;
+    size_t stagingFramebufferSize = 0;
 
     for (uint32_t format : kSupportedDestinationFormats) {
         SCOPED_TRACE(testing::Message() << "source=" << fourccToString(format)
@@ -259,11 +259,12 @@ TEST_P(ConvertWithSize, FastPathIdentity) {
         ClientFrame resultFrame = {};
         resultFrame.framebuffers = &framebuffer;
         resultFrame.framebuffers_count = 1;
-        resultFrame.staging_framebuffer = stagingFramebuffer.data();
-        resultFrame.staging_framebuffer_size = stagingFramebuffer.size();
+        resultFrame.staging_framebuffer = &stagingFramebuffer;
+        resultFrame.staging_framebuffer_size = &stagingFramebufferSize;
 
         EXPECT_EQ(0, convert_frame_fast(src.data(), format, src.size(),
-                                        param.width, param.height, &resultFrame,
+                                        param.width, param.height, param.width,
+                                        param.height, &resultFrame,
                                         kDefaultExpComp));
 
         compareSumOfSquaredDifferences(src, dest, param.getThreshold());
@@ -272,14 +273,15 @@ TEST_P(ConvertWithSize, FastPathIdentity) {
             return;
         }
     }
+
+    free(stagingFramebuffer);
 }
 
 // Validate conversions from all source formats to all dest formats.
 TEST_P(ConvertWithSize, SourceToDest) {
     const FramebufferSizeParam param = GetParam();
-    const size_t stagingSize =
-            bufferSize(V4L2_PIX_FMT_YUV420, param.width, param.height);
-    std::vector<uint8_t> stagingFramebuffer(stagingSize);
+    uint8_t* stagingFramebuffer = nullptr;
+    size_t stagingFramebufferSize = 0;
 
     for (uint32_t src_format : kSupportedSourceFormats) {
         std::vector<uint8_t> src =
@@ -302,8 +304,8 @@ TEST_P(ConvertWithSize, SourceToDest) {
             ClientFrame resultFrame = {};
             resultFrame.framebuffers = &framebuffer;
             resultFrame.framebuffers_count = 1;
-            resultFrame.staging_framebuffer = stagingFramebuffer.data();
-            resultFrame.staging_framebuffer_size = stagingFramebuffer.size();
+            resultFrame.staging_framebuffer = &stagingFramebuffer;
+            resultFrame.staging_framebuffer_size = &stagingFramebufferSize;
 
             EXPECT_EQ(0, convert_frame(src.data(), src_format, src.size(),
                                        param.width, param.height, &resultFrame,
@@ -330,6 +332,8 @@ TEST_P(ConvertWithSize, SourceToDest) {
             }
         }
     }
+
+    free(stagingFramebuffer);
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -360,8 +364,8 @@ TEST_P(FrameModifiers, ExpComp) {
 
     const float expComp = GetParam();
 
-    const size_t stagingSize = bufferSize(V4L2_PIX_FMT_YUV420, kWidth, kHeight);
-    std::vector<uint8_t> stagingFramebuffer(stagingSize);
+    uint8_t* stagingFramebuffer = nullptr;
+    size_t stagingFramebufferSize = 0;
 
     for (uint32_t src_format : kSupportedSourceFormats) {
         std::vector<uint8_t> src = generateFramebuffer(
@@ -382,8 +386,8 @@ TEST_P(FrameModifiers, ExpComp) {
             ClientFrame resultFrame = {};
             resultFrame.framebuffers = &framebuffer;
             resultFrame.framebuffers_count = 1;
-            resultFrame.staging_framebuffer = stagingFramebuffer.data();
-            resultFrame.staging_framebuffer_size = stagingFramebuffer.size();
+            resultFrame.staging_framebuffer = &stagingFramebuffer;
+            resultFrame.staging_framebuffer_size = &stagingFramebufferSize;
 
             EXPECT_EQ(0, convert_frame(src.data(), src_format, src.size(),
                                        kWidth, kHeight, &resultFrame,
@@ -409,6 +413,8 @@ TEST_P(FrameModifiers, ExpComp) {
             }
         }
     }
+
+    free(stagingFramebuffer);
 }
 
 INSTANTIATE_TEST_CASE_P(CameraFormatConverters,
