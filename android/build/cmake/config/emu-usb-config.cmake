@@ -19,5 +19,8 @@ set(USB_INCLUDE_DIR "${PREBUILT_ROOT}/include/libusb-1.0")
 set(USB_INCLUDE_DIRS "${USB_INCLUDE_DIR}")
 set(USB_LIBRARIES "${PREBUILT_ROOT}/lib/libusb-1.0${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set(USB_FOUND TRUE)
+
+android_add_prebuilt_library(USB USB "${PREBUILT_ROOT}/lib/libusb-1.0" "${PREBUILT_ROOT}/include/libusb-1.0" "" "")
+
 endif()
 set(PACKAGE_EXPORT "USB_INCLUDE_DIR;USB_INCLUDE_DIRS;USB_LIBRARIES;USB_FOUND")

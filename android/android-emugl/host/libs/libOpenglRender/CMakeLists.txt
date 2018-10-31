@@ -125,9 +125,8 @@ target_link_libraries(OpenglRender_standalone_common
                               OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OSWindow)
-target_link_libraries(OpenglRender_standalone_common PRIVATE emugl_base)
+target_link_libraries(OpenglRender_standalone_common PRIVATE emugl_base ANGLE::ANGLE)
 target_compile_options(OpenglRender_standalone_common PRIVATE -fvisibility=hidden)
-target_include_directories(OpenglRender_standalone_common PRIVATE ${ANGLE_INCLUDE_DIRS})
 target_include_directories(OpenglRender_standalone_common
                                    PUBLIC
                                    ${ANDROID_EMUGL_DIR}/host/include/OpenglRender

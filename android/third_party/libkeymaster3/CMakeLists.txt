@@ -98,10 +98,8 @@ add_library(emulator-libkeymaster3
         )
 
 target_include_directories(emulator-libkeymaster3 PUBLIC .)
-target_include_directories(emulator-libkeymaster3 PUBLIC ${CURL_INCLUDE_DIRS})
 target_include_directories(emulator-libkeymaster3 PRIVATE src include)
-target_include_directories(emulator-libkeymaster3 PRIVATE ../../android-emu)
-target_link_libraries(emulator-libkeymaster3 PUBLIC ${CURL_LIBRARIES})
+target_link_libraries(emulator-libkeymaster3 PRIVATE android-emu-base OpenSSL::SSL OpenSSL::Crypto)
 
 if ("${ANDROID_TARGET_TAG}" MATCHES "windows.*")
     # Workaround some gcc/mingw issues
@@ -109,9 +107,8 @@ if ("${ANDROID_TARGET_TAG}" MATCHES "windows.*")
         target_compile_definitions(emulator-libkeymaster3 PRIVATE -DUSE_MINGW=1)
     endif ()
     if ("${ANDROID_TARGET_TAG}" MATCHES "windows_msvc.*")
-        target_include_directories(emulator-libkeymaster3 PRIVATE ../../msvc-posix-compat/include)
         target_link_libraries(emulator-libkeymaster3 PRIVATE msvc-posix-compat)
-        target_compile_options(emulator-libkeymaster3 "-mssse3")
+        target_compile_options(emulator-libkeymaster3 PRIVATE "-mssse3")
     endif ()
 endif ()
 
