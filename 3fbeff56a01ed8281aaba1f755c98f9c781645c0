@@ -22,6 +22,30 @@
       "revId": "3fbeff56a01ed8281aaba1f755c98f9c781645c0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3a95fd9d_1faca023",
+        "filename": "android/scripts/strip-symbols.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-10-31T23:41:50Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "efbbdd01_1043217b",
+      "range": {
+        "startLine": 86,
+        "startChar": 3,
+        "endLine": 86,
+        "endChar": 47
+      },
+      "revId": "3fbeff56a01ed8281aaba1f755c98f9c781645c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
