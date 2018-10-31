@@ -51,8 +51,19 @@ set(
   "PROTOBUF_INCLUDE_DIRS;PROTOBUF_IMPORT_DIRS;PROTOBUF_INCLUDE_DIR;PROTOBUF_LIBRARIES;PROTOBUF_PROTOC_EXECUTABLE;PROTOBUF_FOUND"
   )
 
+if (NOT TARGET protobuf::libprotobuf)
+  add_library(protobuf::libprotobuf INTERFACE IMPORTED GLOBAL)
+  set_target_properties(protobuf::libprotobuf PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${PROTOBUF_INCLUDE_DIRS}"
+    INTERFACE_LINK_LIBRARIES "${PROTOBUF_LIBRARIES}"
+  )
+endif()
+
+
 # We've configured everything, so now let's make sure cmake sets up the right macros
 find_package(Protobuf REQUIRED)
+
+
 
 # Prevent find_package from overring our lib
 set(PROTOBUF_LIBRARIES "${PREBUILT_ROOT}/lib/libprotobuf.a")

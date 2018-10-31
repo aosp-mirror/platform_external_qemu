@@ -181,9 +181,8 @@ android_add_interface(android-qemu-deps)
 
 # This defines all the include directories needed to compile the libqemu libraries. There should be no need to make
 # additions here.
-android_target_include_directories(
+target_include_directories(
   android-qemu-deps
-  all
   INTERFACE
   tcg
   tcg/i386
@@ -191,25 +190,19 @@ android_target_include_directories(
   include
   disas/libvixl
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${GLIB2_INCLUDE_DIRS}
-  ${USB_INCLUDE_DIRS}
-  ${PIXMAN_INCLUDE_DIRS}
-  ${VIRGLRENDERER_INCLUDE_DIRS}
   qemu2-auto-generated
   ../../prebuilts/android-emulator-build/qemu-android-deps/${ANDROID_TARGET_TAG}/include
   android-qemu2-glue/config/${ANDROID_TARGET_TAG}/)
 
 # These are the rules that every qemu component needs, regardless of the platform you are compiling on. Please document
 # any flags you set as not everyone is a compiler expert!
-android_target_compile_definitions(android-qemu-deps all INTERFACE
+target_compile_definitions(android-qemu-deps INTERFACE
                                    # Enable faster migration code when saving RAM to a snapshot
                                    "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION"
                                    # Enable VIRGL
                                    "-DCONFIG_VIRGL"
-                                   # We link against the static version of curl, so make sure the source is aware of
-                                   # that.
-                                   ${CURL_DEFINITIONS})
-android_target_compile_options(android-qemu-deps all INTERFACE "-Werror=implicit-function-declaration"
+                           )
+target_compile_options(android-qemu-deps INTERFACE "-Werror=implicit-function-declaration"
                                "-Wno-unused-function"
                                # Do not allow the compiler to assume the strictest aliasing rules
                                # applicable to the language being compiled. For C (and C++), this activates
@@ -238,7 +231,12 @@ android_target_compile_options(android-qemu-deps all INTERFACE "-Werror=implicit
                                "-fno-common")
 
 # Make sure we make our dependent libraries available.
-android_target_link_libraries(android-qemu-deps all INTERFACE ${GLIB2_LIBRARIES} ${PIXMAN_LIBRARIES} ${ZLIB_LIBRARIES})
+target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN ZLIB::ZLIB VIRGL::VIRGL)
+
+# We only support usb on mac/lin
+android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE USB::USB)
+android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE USB::USB)
+
 
 # Let's bin place everything in the root, with the shared libs in the right place
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib64)
@@ -331,24 +329,24 @@ include(cmake-main.${ANDROID_TARGET_TAG}.inc)
 
 set(libqemu2-common_src ${qemu2-shared_sources} ${qemu2-shared_generated_sources})
 android_add_library(libqemu2-common)
-android_target_compile_definitions(libqemu2-common all PRIVATE "-DPOISON_CONFIG_ANDROID")
-android_target_link_libraries(libqemu2-common all PUBLIC android-qemu-deps)
+target_compile_definitions(libqemu2-common PRIVATE "-DPOISON_CONFIG_ANDROID")
+target_link_libraries(libqemu2-common PUBLIC android-qemu-deps)
 
 set(libqemu2-util_src ${libqemuutil_sources} ${libqemuutil_generated_sources})
 android_add_library(libqemu2-util)
-android_target_link_libraries(libqemu2-util all PUBLIC android-qemu-deps -lfdt ${USB_LIBRARIES})
-android_target_link_libraries(libqemu2-util windows PUBLIC -lpsapi)
-android_target_compile_definitions(libqemu2-util all PRIVATE "-DPOISON_CONFIG_ANDROID")
+target_link_libraries(libqemu2-util PRIVATE android-qemu-deps -lfdt)
+android_target_link_libraries(libqemu2-util windows PRIVATE -lpsapi)
+target_compile_definitions(libqemu2-util PRIVATE "-DPOISON_CONFIG_ANDROID")
 
 set(libqemustub_src ${libqemustub_sources} ${libqemuutil_generated_sources})
 android_add_library(libqemustub)
-android_target_link_libraries(libqemustub all PUBLIC android-qemu-deps)
+target_link_libraries(libqemustub PRIVATE android-qemu-deps)
 
 # Qemu-img
 set(qemu-img_src ${qemu-img_sources} block/qcow2-bitmap.c)
 set(qemu-img_linux-x86_64_src scsi/pr-manager.c)
 android_add_executable(qemu-img)
-android_target_link_libraries(qemu-img all PRIVATE libqemu2-util libqemustub android-qemu-deps)
+target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub android-qemu-deps)
 
 # Create the qemu targets.
 android_add_qemu_executable(i386 x86 "${ANDROID_QEMU_i386_STUBS_${ANDROID_TARGET_TAG}}" i386)

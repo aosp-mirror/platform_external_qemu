@@ -39,13 +39,12 @@ set(QT5_INCLUDE_DIRS
     ${PREBUILT_ROOT}/include/QtWidgets)
 
 set(QT5_INCLUDE_DIR ${QT5_INCLUDE_DIRS})
-set(QT5_LIBRARIES -lQt5Widgets -lQt5Gui -lQt5Core -lQt5Svg)
 
 set(QT5_DEFINITIONS "-DQT5_STATICLIB")
 set(QT5_FOUND TRUE)
 
 if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
-  set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
+  set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib)
   set(QT5_SHARED_DEPENDENCIES ${PREBUILT_ROOT}/plugins>>lib64/qt/;${PREBUILT_ROOT}/lib>>lib64/qt/)
   # Note: this will only set the property for install targets, not during build.
   set(
@@ -55,19 +54,50 @@ if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
  elseif(ANDROID_TARGET_OS STREQUAL "windows_msvc")
     # Clang/VS doesn't support linking directly to dlls. We linking to the import libraries
     # instead (.lib).
-    set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
+    set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib)
     set(QT5_SHARED_DEPENDENCIES ${PREBUILT_ROOT}/plugins>>lib64/qt/;${PREBUILT_ROOT}/lib>>lib64/qt/)
 elseif(ANDROID_TARGET_TAG MATCHES "windows-x86.*")
   # On Windows, linking to mingw32 is required. The library is provided by the toolchain, and depends on a main()
   # function provided by qtmain which itself depends on qMain(). These must appear iemulator-libui_unittestsn LDFLAGS and not LDLIBS since
   # qMain() is provided by object/libraries that appear after these in the link command-line.
-  set(QT5_LIBRARIES -L${PREBUILT_ROOT}/bin ${QT5_LIBRARIES} -lmingw32 ${PREBUILT_ROOT}/lib/libqtmain.a)
+  set(QT5_LIBRARIES -L${PREBUILT_ROOT}/bin -lmingw32 ${PREBUILT_ROOT}/lib/libqtmain.a)
   set(QT5_SHARED_DEPENDENCIES ${PREBUILT_ROOT}/plugins>>lib64/qt/;${PREBUILT_ROOT}/bin/*dll>>lib64/qt/lib)
 elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
   set(QT5_SHARED_DEPENDENCIES ${PREBUILT_ROOT}/plugins>>lib64/qt/;${PREBUILT_ROOT}/lib>>lib64/qt/)
   set(QT5_SHARED_PROPERTIES "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/lib';LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/lib/plugins'")
 endif()
+
+
+# Define Qt5 Compatible targets
+if(NOT TARGET Qt5::Widgets)
+  add_library(Qt5::Widgets INTERFACE IMPORTED GLOBAL)
+  set_target_properties(Qt5::Widgets PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${QT5_INCLUDE_DIRS}"
+    INTERFACE_LINK_LIBRARIES "-lQt5Widgets;${QT5_LIBRARIES}"
+    INTERFACE_COMPILE_DEFINITIONS "QT5_STATICLIB"
+  )
+  add_library(Qt5::Core INTERFACE IMPORTED GLOBAL)
+  set_target_properties(Qt5::Core PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${QT5_INCLUDE_DIRS}"
+    INTERFACE_LINK_LIBRARIES "-lQt5Core;${QT5_LIBRARIES}"
+    INTERFACE_COMPILE_DEFINITIONS "QT5_STATICLIB"
+  )
+  add_library(Qt5::Gui INTERFACE IMPORTED GLOBAL)
+  set_target_properties(Qt5::Gui PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${QT5_INCLUDE_DIRS}"
+    INTERFACE_LINK_LIBRARIES "-lQt5Gui;${QT5_LIBRARIES}"
+    INTERFACE_COMPILE_DEFINITIONS "QT5_STATICLIB"
+  )
+  add_library(Qt5::Svg INTERFACE IMPORTED GLOBAL)
+  set_target_properties(Qt5::Svg PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${QT5_INCLUDE_DIRS}"
+    INTERFACE_LINK_LIBRARIES "-lQt5Svg;${QT5_LIBRARIES}"
+    INTERFACE_COMPILE_DEFINITIONS "QT5_STATICLIB"
+  )
+endif()
+
+set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5Widgets -lQt5Gui -lQt5Core -lQt5Svg)
 
 set(
   PACKAGE_EXPORT

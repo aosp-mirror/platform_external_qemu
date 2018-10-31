@@ -108,16 +108,12 @@ set(android-emu-base_linux-x86_64_src android/base/memory/SharedMemory_posix.cpp
 # Let's add in the library
 android_add_library(android-emu-base)
 
-# Includes, the following paths will be added to the search path, they are private so will not propagate to anyone who
-# takes a depedency on this library
-android_target_include_directories(android-emu-base all PRIVATE ${LZ4_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS})
-
 # Anyone who takes a dependency gets to use our header files.
-android_target_include_directories(android-emu-base all PUBLIC .)
+target_include_directories(android-emu-base PUBLIC .)
 
 # Library dependencies, these are public so they will propagate, if you link against the base you will link against LZ4
 # & UUID
-android_target_link_libraries(android-emu-base all PUBLIC ${LZ4_LIBRARIES} ${UUID_LIBRARIES})
+target_link_libraries(android-emu-base PRIVATE LZ4::LZ4 UUID::UUID)
 android_target_link_libraries(android-emu-base linux-x86_64 PUBLIC -ldl Threads::Threads -lrt)
 android_target_link_libraries(android-emu-base windows-x86_64 PUBLIC -lpsapi Threads::Threads -liphlpapi)
 android_target_link_libraries(android-emu-base windows-x86 PUBLIC -lpsapi Threads::Threads -liphlpapi)
@@ -136,8 +132,7 @@ android_target_compile_definitions(android-emu-base
 
 # Compiler flags, not that these should never propagate (i.e. set to public) as we really want to limit the usage of
 # these flags.
-android_target_compile_options(android-emu-base
-                               all
+target_compile_options(android-emu-base
                                PRIVATE
                                "-Wno-parentheses"
                                "-Wno-invalid-constexpr")
@@ -145,4 +140,4 @@ android_target_compile_options(android-emu-base
 # Add the benchmark
 set(android-emu_benchmark_src android/base/synchronization/Lock_benchmark.cpp)
 android_add_executable(android-emu_benchmark)
-android_target_link_libraries(android-emu_benchmark all PRIVATE android-emu-base emulator-gbench)
+target_link_libraries(android-emu_benchmark PRIVATE android-emu-base emulator-gbench)

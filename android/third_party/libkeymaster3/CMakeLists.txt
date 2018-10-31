@@ -1,47 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-
-# TODO(jansene): Move to a function
-if (DEFINED ANDROID_QEMU2_TOP_DIR)
-    PREBUILT(CURL)
-else ()
-    message(WARNING "Building outside the make system!")
-    find_package(CURL REQUIRED)
-
-    include (ExternalProject)
-
-    set(boringssl_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/boringssl/src/boringssl/include)
-    set(boringssl_URL https://boringssl.googlesource.com/boringssl)
-    set(boringssl_TAG chromium-stable)
-    set(boringssl_BUILD ${CMAKE_BINARY_DIR}/boringssl/src/boringssl-build)
-    #set(boringssl_LIBRARIES ${boringssl_BUILD}/obj/so/libboringssl.so)
-    set(boringssl_STATIC_LIBRARIES
-        ${boringssl_BUILD}/ssl/libssl${CMAKE_STATIC_LIBRARY_SUFFIX}
-        ${boringssl_BUILD}/crypto/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}
-        ${boringssl_BUILD}/decrepit/libdecrepit${CMAKE_STATIC_LIBRARY_SUFFIX}
-        )
-    set(boringssl_INCLUDES ${boringssl_BUILD})
-
-    set(boringssl_HEADERS
-        "${boringssl_INCLUDE_DIR}/include/*.h"
-        )
-
-    ExternalProject_Add(boringssl
-        PREFIX boringssl
-        GIT_REPOSITORY ${boringssl_URL}
-        GIT_TAG ${boringssl_TAG}
-        DOWNLOAD_DIR "${DOWNLOAD_LOCATION}"
-        # BUILD_IN_SOURCE 1
-        BUILD_BYPRODUCTS ${boringssl_STATIC_LIBRARIES}
-        INSTALL_COMMAND ""
-        CMAKE_CACHE_ARGS
-        -DCMAKE_BUILD_TYPE:STRING=Release
-        -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF
-        )
-
-    set(CURL_INCLUDE_DIRS "${CURL_INCLUDE_DIRS};${boringssl_INCLUDE_DIR}")
-    set(CURL_LIBRARIES} "${CURL_LIBRARIES});${boringssl_STATIC_LIBRARIES}")
-endif ()
-
+PREBUILT(CURL)
 
 add_library(emulator-libkeymaster3
         aes_key.cpp
@@ -98,10 +56,8 @@ add_library(emulator-libkeymaster3
         )
 
 target_include_directories(emulator-libkeymaster3 PUBLIC .)
-target_include_directories(emulator-libkeymaster3 PUBLIC ${CURL_INCLUDE_DIRS})
 target_include_directories(emulator-libkeymaster3 PRIVATE src include)
-target_include_directories(emulator-libkeymaster3 PRIVATE ../../android-emu)
-target_link_libraries(emulator-libkeymaster3 PUBLIC ${CURL_LIBRARIES})
+target_link_libraries(emulator-libkeymaster3 PRIVATE android-emu-base OpenSSL::SSL OpenSSL::Crypto)
 
 if ("${ANDROID_TARGET_TAG}" MATCHES "windows.*")
     # Workaround some gcc/mingw issues
@@ -109,9 +65,8 @@ if ("${ANDROID_TARGET_TAG}" MATCHES "windows.*")
         target_compile_definitions(emulator-libkeymaster3 PRIVATE -DUSE_MINGW=1)
     endif ()
     if ("${ANDROID_TARGET_TAG}" MATCHES "windows_msvc.*")
-        target_include_directories(emulator-libkeymaster3 PRIVATE ../../msvc-posix-compat/include)
         target_link_libraries(emulator-libkeymaster3 PRIVATE msvc-posix-compat)
-        target_compile_options(emulator-libkeymaster3 "-mssse3")
+        target_compile_options(emulator-libkeymaster3 PRIVATE "-mssse3")
     endif ()
 endif ()
 
