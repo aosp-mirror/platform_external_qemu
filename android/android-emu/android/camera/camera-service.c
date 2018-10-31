@@ -958,6 +958,8 @@ _camera_client_start(CameraClient* cc, int width, int height, int pix_format) {
     cc->pixel_num = cc->width * cc->height;
     cc->frames_cached = 0;
     cc->frame_count = 0;
+    cc->staging_framebuffer = NULL;
+    cc->staging_framebuffer_size = 0;
 
     /* Make sure that pixel format is known, and calculate video/preview
      * framebuffer size along the lines. */
@@ -974,12 +976,6 @@ _camera_client_start(CameraClient* cc, int width, int height, int pix_format) {
      * changes (if changes). */
     cc->preview_frame_size = cc->width * cc->height * 4;
 
-    if (!calculate_framebuffer_size(V4L2_PIX_FMT_YUV420, cc->width, cc->height,
-                                    &cc->staging_framebuffer_size)) {
-        E("%s: Failed to calculate I420 staging frame size", __FUNCTION__);
-        return CLIENT_START_RESULT_NO_PIXEL_CONVERSION;
-    }
-
     /* Make sure that we have a converters between the original camera pixel
      * format and the one that the client expects. Also a converter must exist
      * for the preview window pixel format (RGB32) */
@@ -993,19 +989,15 @@ _camera_client_start(CameraClient* cc, int width, int height, int pix_format) {
     /* Allocate buffer large enough to contain both, video and preview
      * framebuffers. */
     cc->video_frame =
-            (uint8_t*)malloc(cc->video_frame_size + cc->preview_frame_size +
-                             cc->staging_framebuffer_size);
+            (uint8_t*)malloc(cc->video_frame_size + cc->preview_frame_size);
     if (cc->video_frame == NULL) {
-        E("%s: Not enough memory for framebuffers %d + %d + %d", __FUNCTION__,
-          cc->video_frame_size, cc->preview_frame_size,
-          cc->staging_framebuffer_size);
+        E("%s: Not enough memory for framebuffers %d + %d", __FUNCTION__,
+          cc->video_frame_size, cc->preview_frame_size);
         return CLIENT_START_RESULT_OUT_OF_MEMORY;
     }
 
     /* Set framebuffer pointers. */
     cc->preview_frame = cc->video_frame + cc->video_frame_size;
-    cc->staging_framebuffer =
-            cc->video_frame + cc->video_frame_size + cc->preview_frame_size;
 
     /* Start the camera. */
     if (cc->start_capturing(cc->camera, cc->camera_info->pixel_format,
@@ -1155,6 +1147,9 @@ _camera_client_query_stop(CameraClient* cc, QemudClient* qc, const char* param)
     free(cc->video_frame);
     cc->video_frame = NULL;
 
+    free(cc->staging_framebuffer);
+    cc->staging_framebuffer = NULL;
+
     camera_metrics_report_stop_session(cc->frame_count);
 
     D("%s: Camera device '%s' is now stopped.", __FUNCTION__, cc->device_name);
@@ -1263,8 +1258,8 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
 
     frame.framebuffers_count = fbs_num;
     frame.framebuffers = fbs;
-    frame.staging_framebuffer = cc->staging_framebuffer;
-    frame.staging_framebuffer_size = cc->staging_framebuffer_size;
+    frame.staging_framebuffer = &cc->staging_framebuffer;
+    frame.staging_framebuffer_size = &cc->staging_framebuffer_size;
     frame.frame_time =
             looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
 
