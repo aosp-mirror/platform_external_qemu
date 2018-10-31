@@ -102,7 +102,7 @@ public:
 
     void join() {
         for (auto& workerPtr : mWorkers) {
-            workerPtr->join();
+            if (workerPtr) workerPtr->join();
         }
         mWorkers.clear();
     }
