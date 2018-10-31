@@ -414,4 +414,7 @@ const char* avdInfo_getSdCardSize(const AvdInfo* i);
 /* Returns true if the system image has problems with guest rendering. */
 bool avdInfo_sysImgGuestRenderingBlacklisted(const AvdInfo* i);
 
+/* Replace the disk.dataPartition.size in avd config.ini */
+void avdInfo_replaceDataPartitionSizeInConfigIni(AvdInfo* i, int64_t sizeBytes);
+
 ANDROID_END_HEADER
