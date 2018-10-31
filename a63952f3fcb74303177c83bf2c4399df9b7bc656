@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0ecc65f0_ff0a23f8",
+        "filename": "android/android-emu/android/camera/CameraFormatConverters_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-31T23:18:00Z",
+      "side": 1,
+      "message": "Previously the stagingFramebuffer was preallocated by camera-service, so the size was fixed ahead-of-time.  I wanted to be able to resize the staging framebuffer when required, but share the memory between frames, but I could only operate in C, so:\n\nCameraClient has the pointer to the actual buffer.\nCameraFrame has a pointer-to-pointer, which it can use to expand the storage with realloc, and it will automatically be updated in the CameraClient.\n\nThe pointer starts with null, which is valid and means that the first realloc will basically be a malloc.\n\nUnfortunately I can\u0027t use a std::vector here, since this is a pure C implementation in camera-service.  In C++, yes, this could be a vector.",
+      "parentUuid": "7c2bae59_a4f0983c",
+      "range": {
+        "startLine": 417,
+        "startChar": 0,
+        "endLine": 417,
+        "endChar": 29
+      },
+      "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b7cceb51_43035d5a",
         "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "7c83eba4_33d9f734",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1112,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-31T23:18:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b7cceb51_43035d5a",
+      "range": {
+        "startLine": 1112,
+        "startChar": 16,
+        "endLine": 1112,
+        "endChar": 40
+      },
+      "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "670d144b_426ee2f9",
         "filename": "android/android-emu/android/camera/camera-format-converters.c",
         "patchSetId": 1
@@ -68,6 +116,30 @@
       "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1de5f329_a20e93e4",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1905,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-10-31T23:18:00Z",
+      "side": 1,
+      "message": "There\u0027s basically one ClientFrame at a time, but this is a pointer-to-pointer owned by CameraClient.  There\u0027s one buffer that is resized as you described, but it\u0027s a bit confusing because of C.",
+      "parentUuid": "670d144b_426ee2f9",
+      "range": {
+        "startLine": 1903,
+        "startChar": 0,
+        "endLine": 1905,
+        "endChar": 80
+      },
+      "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
