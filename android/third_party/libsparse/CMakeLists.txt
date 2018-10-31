@@ -13,6 +13,7 @@ add_library(emulator-libsparse
 
 target_include_directories(emulator-libsparse PUBLIC include)
 target_include_directories(emulator-libsparse PRIVATE src)
+target_link_libraries(emulator-libsparse PRIVATE ZLIB::ZLIB)
 
 if (ANDROID_TARGET_TAG MATCHES "windows.*")
     # Work around some gcc/mingw issues
@@ -31,7 +32,6 @@ target_compile_options(emulator-libsparse PRIVATE -Wno-error)
 
 add_executable(emulator_img2simg src/img2simg.c)
 target_link_libraries(emulator_img2simg PRIVATE emulator-libsparse)
-target_link_libraries(emulator_img2simg PRIVATE ${ZLIB_LIBRARIES})
 if (ANDROID_TARGET_TAG MATCHES "windows.*")
     target_link_libraries(emulator_img2simg PRIVATE emulator-libmman-win32)
     if ("${LOCAL_OS}" STREQUAL "windows_msvc")
@@ -50,4 +50,3 @@ if (ANDROID_TARGET_TAG MATCHES "windows.*")
         target_link_libraries(emulator_simg2img PRIVATE ${MSVC_POSIX_COMPAT_LIBRARY})
     endif()
 endif ()
-target_link_libraries(emulator_simg2img PRIVATE ${ZLIB_LIBRARIES})

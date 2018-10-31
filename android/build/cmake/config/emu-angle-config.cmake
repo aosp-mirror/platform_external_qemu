@@ -19,5 +19,13 @@ get_filename_component(
 set(ANGLE_INCLUDE_DIRS "${PREBUILT_ROOT}/include")
 set(ANGLE_INCLUDE_DIR "${PREBUILT_ROOT}/include")
 set(ANGLE_LIBRARIES "${PREBUILT_ROOT}/lib/libtranslator_static${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libtranslator_lib${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libpreprocessor${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libangle_common${CMAKE_STATIC_LIBRARY_SUFFIX}")
+
+
+android_add_prebuilt_library(ANGLE StaticTranslator "${PREBUILT_ROOT}/lib/libtranslator_static" ${ANGLE_INCLUDE_DIRS} "" "")
+android_add_prebuilt_library(ANGLE LibTranslator "${PREBUILT_ROOT}/lib/libtranslator_static" ${ANGLE_INCLUDE_DIRS} "" "")
+android_add_prebuilt_library(ANGLE Common "${PREBUILT_ROOT}/lib/libangle_common" ${ANGLE_INCLUDE_DIRS} "" "")
+android_add_prebuilt_library(ANGLE Preprocessor "${PREBUILT_ROOT}/lib/libpreprocessor" ${ANGLE_INCLUDE_DIRS} "" "")
+android_add_prebuilt_library_list(ANGLE ANGLE "ANGLE::StaticTranslator;ANGLE::LibTranslator;ANGLE::Preprocessor;ANGLE::Common")
+
 set(ANGLE_FOUND TRUE)
 set(PACKAGE_EXPORT "ANGLE_INCLUDE_DIR;ANGLE_INCLUDE_DIRS;ANGLE_LIBRARIES;ANGLE_FOUND")

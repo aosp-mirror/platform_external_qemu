@@ -50,9 +50,7 @@ android_target_include_directories(libqemu2-glue
                                    PRIVATE
                                    ..
                                    ../include
-                                   ${GLIB2_INCLUDE_DIRS}
                                    ../qemu2-auto-generated
-                                   ${PIXMAN_INCLUDE_DIRS}
                                    ../slirp
                                    ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/)
-android_target_link_libraries(libqemu2-glue all PUBLIC android-emu ${GLIB2_LIBRARIES} emulator-libdtb)
+target_link_libraries(libqemu2-glue PRIVATE android-emu GLIB2::GLIB2 PIXMAN::PIXMAN emulator-libdtb)

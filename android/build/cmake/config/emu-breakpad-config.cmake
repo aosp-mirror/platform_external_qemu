@@ -25,5 +25,10 @@ else()
   set(BREAKPAD_DUMPSYM_EXE "${PREBUILT_ROOT}/bin/dump_syms")
 endif()
 
+android_add_prebuilt_library(BREAKPAD Client "${PREBUILT_ROOT}/lib/libbreakpad_client" ${BREAKPAD_INCLUDE_DIR} "" "")
+android_add_prebuilt_library(BREAKPAD libdisasm "${PREBUILT_ROOT}/lib/libdisasm" ${BREAKPAD_INCLUDE_DIR} "" "")
+android_add_prebuilt_library(BREAKPAD libbreakpad "${PREBUILT_ROOT}/lib/libbreakpad" ${BREAKPAD_INCLUDE_DIR} "" "")
+android_add_prebuilt_library_list(BREAKPAD Breakpad "BREAKPAD::Breakpad;BREAKPAD::libbreakpad;BREAKPAD::libdisasm")
+
 set(PACKAGE_EXPORT
     "BREAKPAD_INCLUDE_DIR;BREAKPAD_INCLUDE_DIRS;BREAKPAD_LIBRARIES;BREAKPAD_CLIENT_LIBRARIES;BREAKPAD_FOUND;BREAKPAD_DUMPSYM_EXE")
