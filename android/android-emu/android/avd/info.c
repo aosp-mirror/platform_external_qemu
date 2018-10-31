@@ -1899,3 +1899,11 @@ bool avdInfo_sysImgGuestRenderingBlacklisted(const AvdInfo* i) {
         return true;
     }
 }
+
+void avdInfo_replaceDataPartitionSizeInConfigIni(AvdInfo* i, int64_t sizeBytes) {
+    if (!i || !i->configIni) return;
+    iniFile_setInt64(i->configIni, "disk.dataPartition.size", sizeBytes);
+
+    char*  iniPath = _avdInfo_getContentFilePath(i, CORE_CONFIG_INI);
+    iniFile_saveToFile(i->configIni, iniPath);
+}
