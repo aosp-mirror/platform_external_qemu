@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5e6e77f3_857ab8fe",
+        "filename": "android/android-emu/android/crashreport/HangDetector.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-10-31T16:32:44Z",
+      "side": 1,
+      "message": "I believe it\u0027s this loop that we need to check for sleeping for too long, so if current time is over |waitUntilUs| for too much then there\u0027s no need to run the looper watchers. Individual watcher\u0027s |mTimeoutMs| has not much to do with the timeout.\nAlso it would be good to issue some debug message in case the code gets triggered - this way we may find out that it\u0027s happening in other cases as well if users report seeing messages with no apparent reason",
+      "range": {
+        "startLine": 191,
+        "startChar": 7,
+        "endLine": 198,
+        "endChar": 13
+      },
+      "revId": "7d733dc833f96c068fceff5fe698b9240192060c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
