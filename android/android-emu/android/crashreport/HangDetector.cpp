@@ -52,6 +52,9 @@ private:
     const base::System::Duration mTimeoutMs;
     const base::System::Duration mHangCheckTimeoutMs;
     std::unique_ptr<base::Lock> mLock{new base::Lock()};
+
+    static constexpr int kMaxHangCount = 2;
+    int mHangCount = 0;
 };
 
 HangDetector::LooperWatcher::LooperWatcher(
@@ -89,18 +92,31 @@ void HangDetector::LooperWatcher::process(const HangCallback& hangCallback) {
 
     const auto now = base::System::get()->getUnixTimeUs();
     if (mIsTaskRunning) {
-        if (now > *mLastCheckTimeUs + mTimeoutMs * 1000) {
+        // Heuristic: If the looper watcher itself took much longer than
+        // mTimeoutMs to fire again, it's possible there was a system-wide
+        // sleep. In this case, don't count that as hanging.
+        const auto timeSystemLiveAndHanging = *mLastCheckTimeUs + mTimeoutMs * 1000;
+        const auto timeSystemSleepedPastHangTimeout = *mLastCheckTimeUs + 2 * mTimeoutMs * 1000;
+        if (now > timeSystemLiveAndHanging &&
+            now < timeSystemSleepedPastHangTimeout) {
             const auto message = base::StringFormat(
                     "detected a hanging thread '%s'. No response for %d ms",
                     mLooper->name(), (int)((now - *mLastCheckTimeUs) / 1000));
+            ++mHangCount;
             l.unlock();
 
             derror("%s", message.c_str());
-            if (hangCallback && !android::base::IsDebuggerAttached()) {
+            if (mHangCount >= kMaxHangCount &&
+                hangCallback && !android::base::IsDebuggerAttached()) {
                 hangCallback(message);
+            } else {
+                // Start another hang check in case something happened to
+                // this previous event.
+                startHangCheckLocked();
             }
         }
     } else if (now > mLastCheckTimeUs.valueOr(0) + mHangCheckTimeoutMs * 1000) {
+        mHangCount = 0;
         startHangCheckLocked();
     }
 }
