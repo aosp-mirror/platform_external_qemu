@@ -192,8 +192,14 @@ void HangDetector::workerThread() {
                (base::System::get()->getUnixTimeUs() < waitUntilUs ||
                 mPaused)) {
             mWorkerThreadCv.timedWait(&mLock, waitUntilUs);
-            if (mPaused) {
-                // If paused, avoid spinning.
+            auto nowUs = base::System::get()->getUnixTimeUs();
+            const int64_t waitedTooLongUs =
+                waitUntilUs + mTiming.hangLoopIterationTimeoutMs * 1000;
+            if (mPaused ||
+                nowUs >= waitedTooLongUs) {
+                // If paused, or the condition variable wait
+                // took much longer than the hang loop iteration
+                // timeout, avoid spinning.
                 waitUntilUs = nextDeadline();
             }
         }
