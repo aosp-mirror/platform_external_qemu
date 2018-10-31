@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "723df2ea_b545cba5",
+        "filename": "android/android-emu/android/base/threads/ThreadPool.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-10-31T19:48:36Z",
+      "side": 1,
+      "message": "one isn\u0027t supposed to call join() and destroy the thread pool at the same time. Destructors run when no other methods can ever be called on an object, so having anything running in parallel with dtor is a bug in class usage",
+      "range": {
+        "startLine": 103,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 5
+      },
+      "revId": "b2f24d99beb2afc9f16a7b099b0939478304a6b2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
