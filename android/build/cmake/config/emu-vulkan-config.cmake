@@ -26,9 +26,15 @@ elseif(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
       # for translating shaders to SPIRV
       "${PREBUILT_ROOT}/glslangValidator>lib64/vulkan/glslangValidator"
       # On mac we need these on our load path
+      # MoltenVK
       "${PREBUILT_ROOT}/libvulkan.dylib>lib64/vulkan/libvulkan.dylib"
       "${PREBUILT_ROOT}/libMoltenVK.dylib>lib64/vulkan/libMoltenVK.dylib"
-      "${PREBUILT_ROOT}/MoltenVK_icd.json>lib64/vulkan/MoltenVK_icd.json")
+      "${PREBUILT_ROOT}/MoltenVK_icd.json>lib64/vulkan/MoltenVK_icd.json"
+      # gfx-rs libportability-icd
+      "${PREBUILT_ROOT}/portability-macos.json>lib64/vulkan/portability-macos.json"
+      "${PREBUILT_ROOT}/portability-macos-debug.json>lib64/vulkan/portability-macos-debug.json"
+      "${PREBUILT_ROOT}/libportability_icd-debug.dylib>lib64/vulkan/libportability_icd-debug.dylib"
+      "${PREBUILT_ROOT}/libportability_icd.dylib>lib64/vulkan/libportability_icd.dylib")
 elseif(ANDROID_TARGET_TAG MATCHES "windows.*")
   get_filename_component(PREBUILT_ROOT
                          "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/vulkan/windows-x86_64"
