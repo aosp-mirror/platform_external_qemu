@@ -97,12 +97,12 @@ endfunction(prebuilt pkg)
 # RUN_TARGET_DEPENDENCIES:
 # .   List of SRC>DST pairs that contains individual file dependencies.
 # .   List of SRC_DIR>>DST pairs that contains directorie depedencies.
-# 
+#
 # For example:
 #   set(MY_FOO_DEPENDENCIES "/tmp/a/b.txt>lib/some/dir/c.txt;" . # copy from /tmp/a/b.txt to lib/some/dir/c.txt
 #                           "/tmp/dirs>>lib/x")  # recursively copy /tmp/dirs to lib/x
 #
-# TODO: It would be nice if we could get these to propagate through link_libraries, so we would have 
+# TODO: It would be nice if we could get these to propagate through link_libraries, so we would have
 # proper dependency resolution.
 function(android_target_dependency RUN_TARGET TARGET_TAG RUN_TARGET_DEPENDENCIES)
   if(TARGET_TAG STREQUAL "${ANDROID_TARGET_TAG}" OR TARGET_TAG STREQUAL "all")
@@ -113,13 +113,14 @@ function(android_target_dependency RUN_TARGET TARGET_TAG RUN_TARGET_DEPENDENCIES
         string(REPLACE ">>" ";" SRC_DST ${DEP})
         list(GET SRC_DST 0 SRC)
         list(GET SRC_DST 1 DST)
-        if(NOT EXISTS ${SRC})
+        file(GLOB GLOBBED ${SRC})
+        if(NOT GLOBBED)
           message(
             FATAL_ERROR
-              "The target ${RUN_TARGET} depends on a dependency: ${SRC} that does not exist. Full list ${RUN_TARGET_DEPENDENCIES}!"
+            "The target ${RUN_TARGET} depends on a dependency: [${SRC}]/[${GLOBBED}] that does not exist. Full list ${RUN_TARGET_DEPENDENCIES}!"
             )
         endif()
-        if(WIN32)
+        if(HOST_TAG STREQUAL "windows_msvc-x86_64")
           add_custom_command(TARGET ${RUN_TARGET} POST_BUILD
                              COMMAND ${CMAKE_COMMAND} -E copy_directory "${SRC}"
                                      "$<TARGET_FILE_DIR:${RUN_TARGET}>/${DST}"
