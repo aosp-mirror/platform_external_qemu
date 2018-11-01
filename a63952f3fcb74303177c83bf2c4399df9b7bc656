@@ -259,6 +259,30 @@
       "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2893c16c_5d6c26ae",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2025,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-01T16:24:41Z",
+      "side": 1,
+      "message": "True, it is a help for clarity if the resize_staging was done once while all size determination is in another block by itself.",
+      "parentUuid": "eac5f879_881afb58",
+      "range": {
+        "startLine": 2023,
+        "startChar": 0,
+        "endLine": 2025,
+        "endChar": 9
+      },
+      "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
