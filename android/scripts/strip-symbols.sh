@@ -77,21 +77,31 @@ build_symbols () {
         panic "Breakpad prebuilt symbol dumper could not be found at $SYMTOOL"
     fi
     silent_run mkdir -p "$SYMBOL_DIR"
-    log "Processing symbols for: ${BINARY}"
     if [ -L "$BINARY" ] || [ ! -f "$BINARY" ]; then
         log "Skipping $BINARY"
         return
     fi
     BINARY_FULLNAME="$(basename "$BINARY")"
     BINARY_DIR="$(dirname "$BINARY")"
-    run mkdir -p $SYMBOL_DIR/$BINARY_DIR
-    run mkdir -p $DSYM_DIR/$BINARY_DIR
+
+    # First we are going to create the directories (if needed)
+    # where the symbols/debug information ends up, this is mostly
+    # a nop, so let's not spam the logs.
+    silent_run mkdir -p $SYMBOL_DIR/$BINARY_DIR
+    silent_run mkdir -p $DSYM_DIR/$BINARY_DIR
     if [ "$(get_build_os)" = "darwin" ]; then
-        DSYM_BIN_DIR=$DSYM_DIR/$BINARY.dsym
+        # Darwin places symbols in a directory, APFS and HPFS will treat these
+        # directories as packages. Be careful here, mac ships versions of these
+        # filesystems that can be case insensitive (default). This is not the case
+        # on our build bots
+        DSYM_BIN_DIR=$DSYM_DIR/$BINARY.dSYM
         mkdir -p $DSYM_BIN_DIR
-        dsymutil --out=$DSYM_BIN_DIR $BINARY 2>&1 | grep -q 'no debug symbols' ||
+        # Extract the symbols
+        run dsymutil --out=$DSYM_BIN_DIR $BINARY || panic "Unable to extract debug symbols"
+        # Extract our breakpad information
         $SYMTOOL $BINARY > $SYMBOL_DIR/$BINARY.sym 2> $SYMBOL_DIR/$BINARY.err ||
             warn "Failed to create symbol file for $BINARY"
+        # And strip the binary
         run  strip -S $BINARY || panic "Could not strip $BINARY"
     else
         case $HOST in
@@ -102,9 +112,12 @@ build_symbols () {
                 OBJCOPY=toolchain/x86_64-w64-mingw32-objcopy
                 ;;
         esac
+        # On win/lin debug_info cannot be seperated from the executable.
         run cp -f $BINARY $DSYM_DIR/$BINARY
+        # Generate the breakpad information
         $SYMTOOL $BINARY > $SYMBOL_DIR/$BINARY.sym 2> $SYMBOL_DIR/$BINARY.err ||
             warn "Failed to create symbol file for $BINARY"
+        # And strip out the debug information
         run "$OBJCOPY" --strip-unneeded $BINARY || \
             warn "Could not strip $BINARY"
     fi
