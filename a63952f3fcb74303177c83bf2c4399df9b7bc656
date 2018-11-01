@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "b876bbe5_4a22e809",
+        "filename": "android/android-emu/android/camera/CameraFormatConverters_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-01T01:02:09Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "0ecc65f0_ff0a23f8",
+      "range": {
+        "startLine": 417,
+        "startChar": 0,
+        "endLine": 417,
+        "endChar": 29
+      },
+      "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b7cceb51_43035d5a",
         "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
         "patchSetId": 1
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "Done",
       "parentUuid": "b7cceb51_43035d5a",
+      "range": {
+        "startLine": 1112,
+        "startChar": 16,
+        "endLine": 1112,
+        "endChar": 40
+      },
+      "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "20e24abf_969a01a4",
+        "filename": "android/android-emu/android/camera/camera-capture-windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1112,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-01T01:02:09Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "7c83eba4_33d9f734",
       "range": {
         "startLine": 1112,
         "startChar": 16,
@@ -140,6 +188,53 @@
       "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e679d468_f58e029d",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1905,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-01T01:02:09Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "1de5f329_a20e93e4",
+      "range": {
+        "startLine": 1903,
+        "startChar": 0,
+        "endLine": 1905,
+        "endChar": 80
+      },
+      "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "33113d02_7dc61f24",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2025,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-01T01:02:09Z",
+      "side": 1,
+      "message": "Minor nit: this ends up doing realloc twice compared to getting stuff up front wih two calls to get_yuv_info in the beginning. but itd oesnt seem that big of a deal since resize_staging no ops if the size is already \u003e\u003d required.",
+      "range": {
+        "startLine": 2023,
+        "startChar": 0,
+        "endLine": 2025,
+        "endChar": 9
+      },
+      "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
