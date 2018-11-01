@@ -422,6 +422,24 @@
     },
     {
       "key": {
+        "uuid": "e5100056_26a3fc51",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-01T17:04:46Z",
+      "side": 1,
+      "message": "Oops, I meant vector\u0027s size_type, not unsigned long (although the latter is fine for Linux, but not for Windows).",
+      "parentUuid": "45958391_77ec5ef2",
+      "revId": "025d4b7f19cc2cc49d0542a7b0154e56915e1d08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b87d5a0_94380583",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/renderthread.h",
         "patchSetId": 9
