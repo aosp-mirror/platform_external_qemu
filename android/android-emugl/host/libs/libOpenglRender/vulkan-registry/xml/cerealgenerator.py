@@ -125,31 +125,34 @@ LOCAL_PATH := $(call my-dir)
 
 $(call emugl-begin-static-library,libvulkan_cereal_guest)
 $(call emugl-export,C_INCLUDES,$(LOCAL_PATH))
-$(call emugl-import,libOpenglSystemCommon)
-$(call emugl-import,libOpenglCodecCommon$(GOLDFISH_OPENGL_LIB_SUFFIX))
+$(call emugl-import,libOpenglCodecCommon$(GOLDFISH_OPENGL_LIB_SUFFIX) libandroidemu)
 
 # Vulkan include dir
 ifeq (true,$(GOLDFISH_OPENGL_BUILD_FOR_HOST))
-LOCAL_C_INCLUDES += \
-    $(LOCAL_PATH) \
-    $(LOCAL_PATH)/../ \
-    $(HOST_EMUGL_PATH)/host/include \
+LOCAL_C_INCLUDES += \\
+    $(LOCAL_PATH) \\
+    $(LOCAL_PATH)/../vulkan_enc \\
+    $(HOST_EMUGL_PATH)/host/include \\
     $(HOST_EMUGL_PATH)/host/include/vulkan
 endif
 
 ifneq (true,$(GOLDFISH_OPENGL_BUILD_FOR_HOST))
-LOCAL_HEADER_LIBRARIES += \
-    vulkan_headers \
+LOCAL_C_INCLUDES += \\
+    $(LOCAL_PATH) \\
+    $(LOCAL_PATH)/../vulkan_enc \\
+
+LOCAL_HEADER_LIBRARIES += \\
+    vulkan_headers \\
 
 endif
 
-LOCAL_CFLAGS += \
-    -DLOG_TAG=\\"goldfish_vulkan\\" \
-    -Wno-missing-field-initializers \
-    -fvisibility=hidden \
-    -fstrict-aliasing \
-    -DVK_USE_PLATFORM_ANDROID_KHR \
-    -DVK_NO_PROTOTYPES \
+LOCAL_CFLAGS += \\
+    -DLOG_TAG=\\"goldfish_vulkan\\" \\
+    -Wno-missing-field-initializers \\
+    -fvisibility=hidden \\
+    -fstrict-aliasing \\
+    -DVK_USE_PLATFORM_ANDROID_KHR \\
+    -DVK_NO_PROTOTYPES \\
 
 LOCAL_SRC_FILES := %s
 
@@ -210,7 +213,7 @@ using DlSymFunc = void* (void*, const char*);
                 os.getcwd(),
                 "..", "..",
                 "device", "generic", "goldfish-opengl",
-                "system", "vulkan", "cereal")
+                "system", "vulkan_cereal")
 
         self.addGuestModule("goldfish_vk_marshaling_guest", extraHeader = marshalIncludeGuest)
         self.addGuestModule("goldfish_vk_frontend", extraHeader = marshalIncludeGuest)
@@ -265,7 +268,7 @@ using DlSymFunc = void* (void*, const char*);
         self.modules[basename].headerPreamble += """
 #pragma once
 
-#include <vulkan.h>
+#include <vulkan/vulkan.h>
 
 %s
 
