@@ -243,3 +243,21 @@ target_link_libraries(HelloHostComposition
                               OpenglRender_vulkan_cereal
                               OSWindow)
 add_opengl_dependencies(HelloHostComposition)
+
+set(HelloVulkan_src samples/HelloVulkan.cpp)
+android_add_executable(HelloVulkan)
+target_link_libraries(HelloVulkan
+                      PUBLIC
+                      OpenglRender_standalone_common
+                      OpenglCodecCommon
+                      emugl_common
+                      gmock_main
+                      OpenglRender
+                      GLESv1_dec
+                      GLESv2_dec
+                      renderControl_dec
+                      OpenglRender_vulkan
+                      OpenglRender_vulkan_cereal
+                      OSWindow)
+add_opengl_dependencies(HelloVulkan)
+
