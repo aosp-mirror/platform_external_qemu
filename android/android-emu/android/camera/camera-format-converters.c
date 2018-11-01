@@ -1880,94 +1880,199 @@ int convert_frame_slow(const void* src_frame,
     return 0;
 }
 
-int convert_frame_fast(const void* src_frame,
-                       uint32_t pixel_format,
-                       size_t framebuffer_size,
-                       int width,
-                       int height,
-                       ClientFrame* result_frame,
-                       float exp_comp) {
-    // Convert to I420, the intermediate format required for libyuv.
-    const size_t y_stride = align(width, 16);
-    const size_t u_or_v_stride = align(y_stride / 2, 16);
+typedef struct YUVInfo {
+    size_t y_stride;
+    size_t u_or_v_stride;
+    size_t y_size;
+    size_t u_or_v_size;
+} YUVInfo;
 
-    const size_t y_size = y_stride * height;
-    const size_t u_or_v_size = u_or_v_stride * ((height + 1) / 2);
+YUVInfo get_yuv_info(int width, int height) {
+    YUVInfo result;
+    result.y_stride = align(width, 16);
+    result.u_or_v_stride = align(result.y_stride / 2, 16);
+    result.y_size = result.y_stride * height;
+    result.u_or_v_size = result.u_or_v_stride * ((height + 1) / 2);
+    return result;
+}
 
-    const size_t required_framebuffer_size = y_size + 2 * u_or_v_size;
-    if (result_frame->staging_framebuffer_size < required_framebuffer_size) {
-        W("%s: Staging framebuffer too small, %d bytes required, %d provided",
-          __FUNCTION__, required_framebuffer_size,
-          result_frame->staging_framebuffer_size);
-        return -1;
+bool resize_staging(ClientFrame* result_frame, size_t required) {
+    if (*result_frame->staging_framebuffer_size < required) {
+        D("%s: Resizing staging framebuffer from %d to %d", __FUNCTION__,
+          *result_frame->staging_framebuffer_size, required);
+
+        *result_frame->staging_framebuffer =
+                (uint8_t*)realloc(*result_frame->staging_framebuffer, required);
+
+        if (*result_frame->staging_framebuffer) {
+            // Zero out the new memory.
+            memset(*result_frame->staging_framebuffer +
+                           *result_frame->staging_framebuffer_size,
+                   0, required - *result_frame->staging_framebuffer_size);
+
+            *result_frame->staging_framebuffer_size = required;
+        } else {
+            W("%s: Failed to resize camera staging framebuffer", __FUNCTION__);
+            *result_frame->staging_framebuffer_size = 0;
+            return false;
+        }
     }
 
-    uint8_t* y_staging = result_frame->staging_framebuffer;
-    uint8_t* u_staging = y_staging + y_size;
-    uint8_t* v_staging = u_staging + u_or_v_size;
+    return true;
+}
+
+int convert_to_i420(const void* src_frame,
+                    uint32_t pixel_format,
+                    size_t framebuffer_size,
+                    int width,
+                    int height,
+                    YUVInfo info,
+                    ClientFrame* result_frame) {
+    const size_t staging_size = info.y_size + 2 * info.u_or_v_size;
+
+    uint8_t* y_staging = *result_frame->staging_framebuffer;
+    uint8_t* u_staging = y_staging + info.y_size;
+    uint8_t* v_staging = u_staging + info.u_or_v_size;
 
     int result = 0;
     if (pixel_format == V4L2_PIX_FMT_YUV420) {
-        memcpy(y_staging, src_frame, framebuffer_size);
+        memcpy(y_staging, src_frame, staging_size);
     } else if (pixel_format == V4L2_PIX_FMT_YVU420) {
         // YVU420 is 16-byte aligned, but there is no way to specify alignment
         // with ConvertToI420; manually convert it to YUV420 (swapping U and V)
         // with libyuv's I420Copy.
         const uint8_t* src_y = src_frame;
-        const uint8_t* src_v = src_y + y_size;
-        const uint8_t* src_u = src_v + u_or_v_size;
+        const uint8_t* src_v = src_y + info.y_size;
+        const uint8_t* src_u = src_v + info.u_or_v_size;
 
-        result = I420Copy(src_y,          // src_y
-                          y_stride,       // src_stride_y
-                          src_u,          // src_u
-                          u_or_v_stride,  // src_stride_u
-                          src_v,          // src_v
-                          u_or_v_stride,  // src_stride_v
-                          y_staging,      // dst_y
-                          y_stride,       // dst_stride_y
-                          u_staging,      // dst_u
-                          u_or_v_stride,  // dst_stride_u
-                          v_staging,      // dst_v
-                          u_or_v_stride,  // dst_stride_v
-                          width,          // width
-                          height);        // height
+        result = I420Copy(src_y,               // src_y
+                          info.y_stride,       // src_stride_y
+                          src_u,               // src_u
+                          info.u_or_v_stride,  // src_stride_u
+                          src_v,               // src_v
+                          info.u_or_v_stride,  // src_stride_v
+                          y_staging,           // dst_y
+                          info.y_stride,       // dst_stride_y
+                          u_staging,           // dst_u
+                          info.u_or_v_stride,  // dst_stride_u
+                          v_staging,           // dst_v
+                          info.u_or_v_stride,  // dst_stride_v
+                          width,               // width
+                          height);             // height
     } else {
         const uint32_t src_format = pixel_format_to_libyuv(pixel_format);
 
-        result = ConvertToI420(src_frame,         // src_frame
-                               framebuffer_size,  // src_size
-                               y_staging,         // dst_y
-                               y_stride,          // dst_stride_y
-                               u_staging,         // dst_u
-                               u_or_v_stride,     // dst_stride_u
-                               v_staging,         // dst_v
-                               u_or_v_stride,     // dst_stride_v
-                               0,                 // crop_x
-                               0,                 // crop_y
-                               width,             // src_width
-                               height,            // src_height
-                               width,             // crop_width
-                               height,            // crop_height
-                               kRotate0,          // rotation
-                               src_format);       // format
+        result = ConvertToI420(src_frame,           // src_frame
+                               framebuffer_size,    // src_size
+                               y_staging,           // dst_y
+                               info.y_stride,       // dst_stride_y
+                               u_staging,           // dst_u
+                               info.u_or_v_stride,  // dst_stride_u
+                               v_staging,           // dst_v
+                               info.u_or_v_stride,  // dst_stride_v
+                               0,                   // crop_x
+                               0,                   // crop_y
+                               width,               // src_width
+                               height,              // src_height
+                               width,               // crop_width
+                               height,              // crop_height
+                               kRotate0,            // rotation
+                               src_format);         // format
     }
+
     if (result != 0) {
         T("%s: Could not convert to %.4s to I420, error %d", __FUNCTION__,
           (const char*)(&pixel_format), result);
         return -1;
     }
 
+    return 0;
+}
+
+int convert_frame_fast(const void* src_frame,
+                       uint32_t pixel_format,
+                       size_t framebuffer_size,
+                       int src_width,
+                       int src_height,
+                       int result_width,
+                       int result_height,
+                       ClientFrame* result_frame,
+                       float exp_comp) {
+    const bool has_resize =
+            (src_width != result_width || src_height != result_height);
+
+    YUVInfo src_info = get_yuv_info(src_width, src_height);
+    YUVInfo result_info = get_yuv_info(result_width, result_height);
+
+    size_t src_size = src_info.y_size + 2 * src_info.u_or_v_size;
+    const size_t result_size = result_info.y_size + 2 * result_info.u_or_v_size;
+
+    const size_t required_staging_size =
+            src_size + (has_resize ? result_size : 0);
+    if (!resize_staging(result_frame, required_staging_size)) {
+        D("%s: Failed to resize the camera staging buffer", __FUNCTION__);
+        return -1;
+    }
+
+    // Convert to I420, the intermediate format required for libyuv.
+    int result = convert_to_i420(src_frame, pixel_format, framebuffer_size,
+                                 src_width, src_height, src_info, result_frame);
+    if (result != 0) {
+        D("%s: Failed to convert the camera frame", __FUNCTION__);
+        return result;
+    }
+
+    uint8_t* src_y = *result_frame->staging_framebuffer;
+    uint8_t* src_u = src_y + src_info.y_size;
+    uint8_t* src_v = src_u + src_info.u_or_v_size;
+
+    // If there is a resize, resize to the destination size.
+    if (has_resize) {
+        uint8_t* dest_y = *result_frame->staging_framebuffer + src_size;
+        uint8_t* dest_u = dest_y + result_info.y_size;
+        uint8_t* dest_v = dest_u + result_info.u_or_v_size;
+
+        result = I420Scale(src_y,                      // src_y
+                           src_info.y_stride,          // src_stride_y
+                           src_u,                      // src_u
+                           src_info.u_or_v_stride,     // src_stride_u
+                           src_v,                      // src_v
+                           src_info.u_or_v_stride,     // src_stride_v
+                           src_width,                  // src_width
+                           src_height,                 // src_height
+                           dest_y,                     // dst_y
+                           result_info.y_stride,       // dst_stride_y
+                           dest_u,                     // dst_u
+                           result_info.u_or_v_stride,  // dst_stride_u
+                           dest_v,                     // dst_v
+                           result_info.u_or_v_stride,  // dst_stride_v
+                           result_width,               // dst_width
+                           result_height,              // dst_v
+                           kFilterNone);               // filtering
+        if (result != 0) {
+            W("%s: Failed to resize camera frame.", __FUNCTION__);
+            return -1;
+        }
+
+        // dest becomes the new src for the rest of the conversion.
+        src_y = dest_y;
+        src_u = dest_u;
+        src_v = dest_v;
+        src_info = result_info;
+        src_size = result_size;
+    }
+
     // Apply exposure compensation.
     if (exp_comp != 1.0f) {
-        int x, row;
-        for (row = 0; row < height; ++row) {
-            uint8_t* y_row = y_staging + row * y_stride;
-            for (x = 0; x < width; ++x) {
+        int row;
+        int x;
+        for (row = 0; row < result_height; ++row) {
+            uint8_t* y_row = src_y + row * src_info.y_stride;
+            for (x = 0; x < result_width; ++x) {
                 y_row[x] = _change_exposure(y_row[x], exp_comp);
             }
         }
     }
-
     // Convert to the target framebuffer formats.
     int n;
     for (n = 0; n < result_frame->framebuffers_count; ++n) {
@@ -1976,61 +2081,49 @@ int convert_frame_fast(const void* src_frame,
                 result_frame->framebuffers[n].pixel_format);
 
         if (dest_format == V4L2_PIX_FMT_YUV420) {
-            memcpy(dest, y_staging, required_framebuffer_size);
+            memcpy(dest, src_y, src_size);
         } else if (dest_format == V4L2_PIX_FMT_YVU420) {
             // YVU420 is 16-byte aligned, but there is no way to specify u and v
             // with ConvertFromI420; manually convert it to YUV420 (swapping U
             // and V) with libyuv's I420Copy.
             uint8_t* dest_y = dest;
-            uint8_t* dest_v = dest_y + y_size;
-            uint8_t* dest_u = dest_v + u_or_v_size;
+            uint8_t* dest_v = dest_y + src_info.y_size;
+            uint8_t* dest_u = dest_v + src_info.u_or_v_size;
 
-            result = I420Copy(y_staging,      // src_y
-                              y_stride,       // src_stride_y
-                              u_staging,      // src_u
-                              u_or_v_stride,  // src_stride_u
-                              v_staging,      // src_v
-                              u_or_v_stride,  // src_stride_v
-                              dest_y,         // dst_y
-                              y_stride,       // dst_stride_y
-                              dest_u,         // dst_u
-                              u_or_v_stride,  // dst_stride_u
-                              dest_v,         // dst_v
-                              u_or_v_stride,  // dst_stride_v
-                              width,          // width
-                              height);        // height
+            result = I420Copy(src_y,                   // src_y
+                              src_info.y_stride,       // src_stride_y
+                              src_u,                   // src_u
+                              src_info.u_or_v_stride,  // src_stride_u
+                              src_v,                   // src_v
+                              src_info.u_or_v_stride,  // src_stride_v
+                              dest_y,                  // dst_y
+                              src_info.y_stride,       // dst_stride_y
+                              dest_u,                  // dst_u
+                              src_info.u_or_v_stride,  // dst_stride_u
+                              dest_v,                  // dst_v
+                              src_info.u_or_v_stride,  // dst_stride_v
+                              result_width,            // width
+                              result_height);          // height
         } else {
-            result = ConvertFromI420(y_staging,      // y
-                                     y_stride,       // y_stride
-                                     u_staging,      // u
-                                     u_or_v_stride,  // u_stride
-                                     v_staging,      // v
-                                     u_or_v_stride,  // v_stride
-                                     dest,           // dst_sample
+            result = ConvertFromI420(src_y,                   // y
+                                     src_info.y_stride,       // y_stride
+                                     src_u,                   // u
+                                     src_info.u_or_v_stride,  // u_stride
+                                     src_v,                   // v
+                                     src_info.u_or_v_stride,  // v_stride
+                                     dest,                    // dst_sample
                                      0,              // dst_sample_stride
-                                     width,          // width
-                                     height,         // height
+                                     result_width,   // width
+                                     result_height,  // height
                                      dest_format);   // format
         }
 
         if (result != 0) {
             // Failed to convert with libyuv, fallback to original method for
             // this one frame.
-            W("%s: Could not convert frame with fast path to %.4s, "
-              "falling back to slow path",
+            W("%s: Could not convert frame with fast path to %.4s",
               __FUNCTION__, (const char*)(&dest_format));
-
-            result = convert_frame_slow(src_frame, pixel_format,
-                                        framebuffer_size, width, height,
-                                        &result_frame->framebuffers[n], 1,
-                                        1.0f,  // r_scale, default value.
-                                        1.0f,  // b_scale, default value.
-                                        1.0f,  // g_scale, default value.
-                                        exp_comp);
-
-            if (result != 0) {
-                return result;
-            }
+            return -1;
         }
     }
 
@@ -2058,7 +2151,8 @@ int convert_frame(const void* src_frame,
     if (r_scale == 1.0f && g_scale == 1.0f && b_scale == 1.0f &&
         libyuv_supported(src_desc, result_frame)) {
         if (convert_frame_fast(src_frame, pixel_format, framebuffer_size, width,
-                               height, result_frame, exp_comp) == 0) {
+                               height, width, height, result_frame,
+                               exp_comp) == 0) {
             // Successful conversion!
             return 0;
         }

@@ -86,6 +86,13 @@ struct FramebufferSizeParam {
         }
     }
 
+    double getThresholdForResize() const {
+        // Ignore edges and increase the maximum difference since this is for
+        // two convert operations.
+        return lerpThreshold(kDifferenceSq * 2, kCompletelyDifferentSq,
+                             edgePixelPercent());
+    }
+
 private:
     // Edge pixels are the bottom- and right-most rows/columns. For YUV images,
     // there are three planes (each at half-resolution), so for the last row
@@ -240,8 +247,8 @@ TEST_P(ConvertWithSize, SlowPathIdentity) {
 
 TEST_P(ConvertWithSize, FastPathIdentity) {
     const FramebufferSizeParam param = GetParam();
-    std::vector<uint8_t> stagingFramebuffer(
-            bufferSize(V4L2_PIX_FMT_YUV420, param.width, param.height));
+    uint8_t* stagingFramebuffer = nullptr;
+    size_t stagingFramebufferSize = 0;
 
     for (uint32_t format : kSupportedDestinationFormats) {
         SCOPED_TRACE(testing::Message() << "source=" << fourccToString(format)
@@ -259,11 +266,12 @@ TEST_P(ConvertWithSize, FastPathIdentity) {
         ClientFrame resultFrame = {};
         resultFrame.framebuffers = &framebuffer;
         resultFrame.framebuffers_count = 1;
-        resultFrame.staging_framebuffer = stagingFramebuffer.data();
-        resultFrame.staging_framebuffer_size = stagingFramebuffer.size();
+        resultFrame.staging_framebuffer = &stagingFramebuffer;
+        resultFrame.staging_framebuffer_size = &stagingFramebufferSize;
 
         EXPECT_EQ(0, convert_frame_fast(src.data(), format, src.size(),
-                                        param.width, param.height, &resultFrame,
+                                        param.width, param.height, param.width,
+                                        param.height, &resultFrame,
                                         kDefaultExpComp));
 
         compareSumOfSquaredDifferences(src, dest, param.getThreshold());
@@ -272,14 +280,73 @@ TEST_P(ConvertWithSize, FastPathIdentity) {
             return;
         }
     }
+
+    free(stagingFramebuffer);
+}
+
+TEST_P(ConvertWithSize, Resize) {
+    static constexpr size_t kScaleAmount = 4;
+
+    const FramebufferSizeParam param = GetParam();
+    uint8_t* stagingFramebuffer = nullptr;
+    size_t stagingFramebufferSize = 0;
+
+    for (uint32_t format : kSupportedDestinationFormats) {
+        SCOPED_TRACE(testing::Message() << "source=" << fourccToString(format)
+                                        << " dest=" << fourccToString(format));
+
+        std::vector<uint8_t> src = generateFramebuffer(
+                format, param.width, param.height, kAlpha, kRed, kGreen, kBlue);
+
+        const size_t intermediateSize =
+                bufferSize(format, param.width / kScaleAmount,
+                           param.height / kScaleAmount);
+        std::vector<uint8_t> intermediate(intermediateSize);
+
+        const size_t destSize = bufferSize(format, param.width, param.height);
+        std::vector<uint8_t> dest(destSize);
+
+        ClientFrameBuffer framebuffer = {};
+        framebuffer.pixel_format = format;
+        framebuffer.framebuffer = intermediate.data();
+
+        ClientFrame resultFrame = {};
+        resultFrame.framebuffers = &framebuffer;
+        resultFrame.framebuffers_count = 1;
+        resultFrame.staging_framebuffer = &stagingFramebuffer;
+        resultFrame.staging_framebuffer_size = &stagingFramebufferSize;
+
+        EXPECT_EQ(0, convert_frame_fast(src.data(), format, src.size(),
+                                        param.width, param.height,
+                                        param.width / kScaleAmount,
+                                        param.height / kScaleAmount,
+                                        &resultFrame, kDefaultExpComp));
+
+        memset(stagingFramebuffer, 0, stagingFramebufferSize);
+
+        framebuffer.framebuffer = dest.data();
+        EXPECT_EQ(0, convert_frame_fast(
+                             intermediate.data(), format, intermediate.size(),
+                             param.width / kScaleAmount,
+                             param.height / kScaleAmount, param.width,
+                             param.height, &resultFrame, kDefaultExpComp));
+
+        compareSumOfSquaredDifferences(src, dest,
+                                       param.getThresholdForResize());
+
+        if (HasFatalFailure()) {
+            return;
+        }
+    }
+
+    free(stagingFramebuffer);
 }
 
 // Validate conversions from all source formats to all dest formats.
 TEST_P(ConvertWithSize, SourceToDest) {
     const FramebufferSizeParam param = GetParam();
-    const size_t stagingSize =
-            bufferSize(V4L2_PIX_FMT_YUV420, param.width, param.height);
-    std::vector<uint8_t> stagingFramebuffer(stagingSize);
+    uint8_t* stagingFramebuffer = nullptr;
+    size_t stagingFramebufferSize = 0;
 
     for (uint32_t src_format : kSupportedSourceFormats) {
         std::vector<uint8_t> src =
@@ -302,8 +369,8 @@ TEST_P(ConvertWithSize, SourceToDest) {
             ClientFrame resultFrame = {};
             resultFrame.framebuffers = &framebuffer;
             resultFrame.framebuffers_count = 1;
-            resultFrame.staging_framebuffer = stagingFramebuffer.data();
-            resultFrame.staging_framebuffer_size = stagingFramebuffer.size();
+            resultFrame.staging_framebuffer = &stagingFramebuffer;
+            resultFrame.staging_framebuffer_size = &stagingFramebufferSize;
 
             EXPECT_EQ(0, convert_frame(src.data(), src_format, src.size(),
                                        param.width, param.height, &resultFrame,
@@ -330,6 +397,8 @@ TEST_P(ConvertWithSize, SourceToDest) {
             }
         }
     }
+
+    free(stagingFramebuffer);
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -360,8 +429,8 @@ TEST_P(FrameModifiers, ExpComp) {
 
     const float expComp = GetParam();
 
-    const size_t stagingSize = bufferSize(V4L2_PIX_FMT_YUV420, kWidth, kHeight);
-    std::vector<uint8_t> stagingFramebuffer(stagingSize);
+    uint8_t* stagingFramebuffer = nullptr;
+    size_t stagingFramebufferSize = 0;
 
     for (uint32_t src_format : kSupportedSourceFormats) {
         std::vector<uint8_t> src = generateFramebuffer(
@@ -382,8 +451,8 @@ TEST_P(FrameModifiers, ExpComp) {
             ClientFrame resultFrame = {};
             resultFrame.framebuffers = &framebuffer;
             resultFrame.framebuffers_count = 1;
-            resultFrame.staging_framebuffer = stagingFramebuffer.data();
-            resultFrame.staging_framebuffer_size = stagingFramebuffer.size();
+            resultFrame.staging_framebuffer = &stagingFramebuffer;
+            resultFrame.staging_framebuffer_size = &stagingFramebufferSize;
 
             EXPECT_EQ(0, convert_frame(src.data(), src_format, src.size(),
                                        kWidth, kHeight, &resultFrame,
@@ -409,6 +478,8 @@ TEST_P(FrameModifiers, ExpComp) {
             }
         }
     }
+
+    free(stagingFramebuffer);
 }
 
 INSTANTIATE_TEST_CASE_P(CameraFormatConverters,

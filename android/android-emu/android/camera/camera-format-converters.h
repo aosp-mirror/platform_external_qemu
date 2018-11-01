@@ -87,22 +87,28 @@ extern int convert_frame_slow(const void* src_frame,
 /* Converts a frame into multiple framebuffers using the fast path. If the frame
  * cannot be converted with the fast path, this function may return failure.
  *
+ * If different resolutions are specified, a resize may be performed.
+ *
  * Param:
  *  |src_frame| - Frame to convert.
  *  |pixel_format| - Defines pixel format for the converting framebuffer.
- *  |framebuffer_size|, |width|, |height| - Converting framebuffer byte size,
- *                                          width, and height.
+ *  |src_framebuffer_size|, |src_width|, |src_height| - Source framebuffer byte
+ *                                                      size,  width, and
+ *                                                      height.
+ *  |result_width|, |result_height| - Destination width and height.
  *  |result_frame| - ClientFrame struct containing an array of framebuffers
  *                   where to convert the frame.
  *  |exp_comp| - Exposure compensation.
  * Return:
  *  0 on success, or non-zero value on failure.
-*/
+ */
 extern int convert_frame_fast(const void* src_frame,
                               uint32_t pixel_format,
-                              size_t framebuffer_size,
-                              int width,
-                              int height,
+                              size_t src_framebuffer_size,
+                              int src_width,
+                              int src_height,
+                              int result_width,
+                              int result_height,
                               ClientFrame* result_frame,
                               float exp_comp);
 
