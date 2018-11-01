@@ -125,14 +125,13 @@ LOCAL_PATH := $(call my-dir)
 
 $(call emugl-begin-static-library,libvulkan_cereal_guest)
 $(call emugl-export,C_INCLUDES,$(LOCAL_PATH))
-$(call emugl-import,libOpenglSystemCommon)
 $(call emugl-import,libOpenglCodecCommon$(GOLDFISH_OPENGL_LIB_SUFFIX))
 
 # Vulkan include dir
 ifeq (true,$(GOLDFISH_OPENGL_BUILD_FOR_HOST))
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH) \
-    $(LOCAL_PATH)/../ \
+    $(LOCAL_PATH)/../vulkan_enc \
     $(HOST_EMUGL_PATH)/host/include \
     $(HOST_EMUGL_PATH)/host/include/vulkan
 endif
@@ -210,7 +209,7 @@ using DlSymFunc = void* (void*, const char*);
                 os.getcwd(),
                 "..", "..",
                 "device", "generic", "goldfish-opengl",
-                "system", "vulkan", "cereal")
+                "system", "vulkan_cereal")
 
         self.addGuestModule("goldfish_vk_marshaling_guest", extraHeader = marshalIncludeGuest)
         self.addGuestModule("goldfish_vk_frontend", extraHeader = marshalIncludeGuest)
