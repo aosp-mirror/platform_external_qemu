@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "78152f0f_d536b2ea",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-11-01T21:57:13Z",
+      "side": 1,
+      "message": "Can we make \"isConnected\" a local variable?\nIt is only used here and in \"tryConnect\" and the conditions are redundant.",
+      "revId": "4f3397c88663f22106a31f69917d7b240fe0fce0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b7401ba5_7723c32f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-11-01T21:57:13Z",
+      "side": 1,
+      "message": "Should this be named \"mServerAddr\"?",
+      "revId": "4f3397c88663f22106a31f69917d7b240fe0fce0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e708bfbb_6638dcb1",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-11-01T21:57:13Z",
+      "side": 1,
+      "message": "Same here: \"mIsConnected\"?",
+      "revId": "4f3397c88663f22106a31f69917d7b240fe0fce0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ecb7054f_797f1d47",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-11-01T21:57:13Z",
+      "side": 1,
+      "message": "Here you are calling to \"start()\" instead of your own \"startThread()\" method.",
+      "revId": "4f3397c88663f22106a31f69917d7b240fe0fce0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6615dde3_2330d8de",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-11-01T21:57:13Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this be calling mThread-\u003estopThread() here?",
+      "revId": "4f3397c88663f22106a31f69917d7b240fe0fce0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
