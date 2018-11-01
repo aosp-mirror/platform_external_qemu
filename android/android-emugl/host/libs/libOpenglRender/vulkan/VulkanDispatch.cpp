@@ -37,13 +37,29 @@ static void initIcdPaths(bool forTesting) {
     } else {
         // Assume there is a system loader in %PATH% or
         // %LD_LIBRARY_PATH%.
+        auto icd = System::get()->envGet("ANDROID_EMU_VK_ICD");
 
-        // TODO: Once Swiftshader is working, set the ICD accordingly.
-
-        // Mac: Use MoltenVK
+        // Mac: Use gfx-rs libportability-icd by default,
+        // and switch between that, its debug variant,
+        // and MoltenVK depending on the environment variable setting.
 #ifdef __APPLE__
-        setIcdPath(pj(System::get()->getProgramDirectory(), "lib64", "vulkan",
-                      "MoltenVK_icd.json"));
+        if (icd == "moltenvk") {
+            setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
+                          "vulkan", "MoltenVK_icd.json"));
+        } else if (icd == "portability") {
+            setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
+                          "vulkan", "portability-macos.json"));
+        } else if (icd == "portability-debug") {
+            setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
+                          "vulkan", "portability-macos-debug.json"));
+        } else {
+            setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
+                          "vulkan", "portability-macos.json"));
+        }
+        // TODO: Once Swiftshader is working, set the ICD accordingly.
+#else
+        // By default, on other platforms, just use whatever the system
+        // is packing.
 #endif
     }
 }
