@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3391e643_15742b65",
+        "filename": "android/build/cmake/test/CMakeLists.txt",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-01T22:40:07Z",
+      "side": 1,
+      "message": "nit: remove trailing",
+      "revId": "8b91953fea9acfeee472990920a7320e05945095",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
