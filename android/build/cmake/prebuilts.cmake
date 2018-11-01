@@ -125,6 +125,7 @@ endfunction(prebuilt pkg)
 # TODO: It would be nice if we could get these to propagate through link_libraries, so we would have
 # proper dependency resolution.
 function(android_target_dependency RUN_TARGET TARGET_TAG RUN_TARGET_DEPENDENCIES)
+  message(FATAL_ERROR "This will cause concurrency issues, do not use.")
   if(TARGET_TAG STREQUAL "${ANDROID_TARGET_TAG}" OR TARGET_TAG STREQUAL "all")
     list(REMOVE_DUPLICATES RUN_TARGET_DEPENDENCIES)
     foreach(DEP ${RUN_TARGET_DEPENDENCIES})

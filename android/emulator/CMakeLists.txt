@@ -4,6 +4,7 @@ set(WINDOWS_ICON ../images/emulator_icon.rc)
 
 add_executable(emulator main-emulator.cpp ${WINDOWS_ICON})
 target_link_libraries(emulator android-emu)
+add_dependencies(emulator Swiftshader)
 
 # Make sure we have the qemu dependencies available
 add_dependencies(emulator qemu-system-i386 qemu-system-x86_64 qemu-system-arm qemu-system-aarch64)
@@ -42,11 +43,11 @@ android_copy_file(emulator $<TARGET_FILE:qemu-system-arm> $<TARGET_FILE_DIR:emul
 android_copy_file(emulator $<TARGET_FILE:qemu-system-aarch64> $<TARGET_FILE_DIR:emulator>/qemu/${ANDROID_TARGET_TAG}/$<TARGET_FILE_NAME:qemu-system-aarch64>)
 
 # These are usually nops, but some code generators will not automatically binplace these (Xcode!)
-android_copy_shared_lib(emulator EGL_translator lib64EGL_translator)
-android_copy_shared_lib(emulator GLES_V2_translator lib64GLES_V2_translator)
-android_copy_shared_lib(emulator GLES_CM_translator lib64GLES_CM_translator)
-android_copy_shared_lib(emulator GLES12Translator lib64GLES12Translator)
-android_copy_shared_lib(emulator OpenglRender lib64OpenglRender)
+#android_copy_shared_lib(emulator EGL_translator lib64EGL_translator)
+#android_copy_shared_lib(emulator GLES_V2_translator lib64GLES_V2_translator)
+#android_copy_shared_lib(emulator GLES_CM_translator lib64GLES_CM_translator)
+#android_copy_shared_lib(emulator GLES12Translator lib64GLES12Translator)
+#android_copy_shared_lib(emulator OpenglRender lib64OpenglRender)
 
 # copy test files from test directory
 android_copy_test_files(emulator "${android-emu-prebuilt-resources}" resources)

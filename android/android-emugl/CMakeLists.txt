@@ -9,6 +9,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_definitions(emugl_base INTERFACE "-DEMUGL_DEBUG=1")
 endif()
 
+# If you are doing graphics related things, we will binplace swiftshader for you.
+add_dependencies(emugl_base Swiftshader)
+
 
 if(ANDROID_TARGET_TAG MATCHES "windows.*")
   message(STATUS "Including emugen as an external project")

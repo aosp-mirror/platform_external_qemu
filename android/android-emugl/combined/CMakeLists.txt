@@ -52,7 +52,6 @@ android_copy_shared_lib(emugl_combined_unittests gralloc.ranchu gralloc.ranchu)
 android_copy_shared_lib(emugl_combined_unittests gralloc.goldfish gralloc.goldfish)
 
 android_target_dependency(emugl_combined_unittests all "${EMULATOR_FEATURE_DEPENDENCIES}")
-android_target_dependency(emugl_combined_unittests all "${SWIFTSHADER_DEPENDENCIES}")
 android_target_properties(emugl_combined_unittests darwin-x86_64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
 android_target_properties(emugl_combined_unittests linux-x86_64 "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
 
@@ -69,7 +68,7 @@ target_link_libraries(aemugraphics_toplevel_unittests
                               OSWindow
                               gtest
                               gtest_main)
-android_target_dependency(aemugraphics_toplevel_unittests all "${SWIFTSHADER_DEPENDENCIES}")
+# android_target_dependency(aemugraphics_toplevel_unittests all "${SWIFTSHADER_DEPENDENCIES}")
 android_target_dependency(aemugraphics_toplevel_unittests all "${EMULATOR_FEATURE_DEPENDENCIES}")
 android_target_properties(aemugraphics_toplevel_unittests darwin-x86_64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
 android_target_properties(aemugraphics_toplevel_unittests linux-x86_64 "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")

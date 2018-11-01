@@ -29,15 +29,19 @@ internal_get_env_cache(RUNTIME_OS_PROPERTIES)
 internal_get_env_cache(RUNTIME_OS_DEPENDENCIES)
 if ("${RUNTIME_OS_DEPENDENCIES}" STREQUAL "")
     toolchain_cmd("${ANDROID_TARGET_TAG}" "--print=libcplusplus" "unused_param")
-    get_filename_component(RESOLVED_SO "${STD_OUT}" REALPATH)
-    get_filename_component(RESOLVED_FILENAME "${RESOLVED_SO}" NAME)
-
-    internal_set_env_cache(RUNTIME_OS_DEPENDENCIES "${STD_OUT}>lib64/${RESOLVED_FILENAME}")
-
+    internal_set_env_cache(RUNTIME_OS_DEPENDENCIES "${STD_OUT}")
     # Configure the RPATH be dynamic..
     internal_set_env_cache(RUNTIME_OS_PROPERTIES "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64'")
 endif()
 
+if (NOT TARGET RUNTIME_OS_DEPENDENCIES)
+
+    get_filename_component(RESOLVED_SO "${STD_OUT}" REALPATH)
+    get_filename_component(RESOLVED_FILENAME "${RESOLVED_SO}" NAME)
+    add_custom_target(RUNTIME_OS_DEPENDENCIES
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${RUNTIME_OS_DEPENDENCIES} ${CMAKE_BINARY_DIR}/lib64/${RESOLVED_FILENAME}
+    )
+endif()
 # here is the target environment located, used to
 # locate packages. We don't want to do any package resolution
 # with mingw, so we explicitly disable it.
