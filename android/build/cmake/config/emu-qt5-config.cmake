@@ -62,7 +62,7 @@ elseif(ANDROID_TARGET_TAG MATCHES "windows-x86.*")
   # function provided by qtmain which itself depends on qMain(). These must appear iemulator-libui_unittestsn LDFLAGS and not LDLIBS since
   # qMain() is provided by object/libraries that appear after these in the link command-line.
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/bin ${QT5_LIBRARIES} -lmingw32 ${PREBUILT_ROOT}/lib/libqtmain.a)
-  set(QT5_SHARED_DEPENDENCIES ${PREBUILT_ROOT}/plugins>>lib64/qt/;${PREBUILT_ROOT}/lib>>lib64/qt/)
+  set(QT5_SHARED_DEPENDENCIES ${PREBUILT_ROOT}/plugins>>lib64/qt/;${PREBUILT_ROOT}/bin/*dll>>lib64/qt/lib)
 elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
   set(QT5_SHARED_DEPENDENCIES ${PREBUILT_ROOT}/plugins>>lib64/qt/;${PREBUILT_ROOT}/lib>>lib64/qt/)
