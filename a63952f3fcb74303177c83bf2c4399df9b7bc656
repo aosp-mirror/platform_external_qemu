@@ -283,6 +283,30 @@
       "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b7eb07a4_d62adc16",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2025,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-11-01T19:32:38Z",
+      "side": 1,
+      "message": "Restructured the code so that we only have a single resize.",
+      "parentUuid": "2893c16c_5d6c26ae",
+      "range": {
+        "startLine": 2023,
+        "startChar": 0,
+        "endLine": 2025,
+        "endChar": 9
+      },
+      "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
