@@ -235,6 +235,30 @@
       "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eac5f879_881afb58",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2025,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-11-01T16:21:27Z",
+      "side": 1,
+      "message": "Yeah, this is true.  I was trying to keep everything resize-related aggregated in one block.  Worst case this will do two resizes on the first frame, but there wouldn\u0027t be any frame-to-frame resizing.  If you think it is clearer, I can move into another block to make sure there is only one resize.",
+      "parentUuid": "33113d02_7dc61f24",
+      "range": {
+        "startLine": 2023,
+        "startChar": 0,
+        "endLine": 2025,
+        "endChar": 9
+      },
+      "revId": "a63952f3fcb74303177c83bf2c4399df9b7bc656",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
