@@ -638,6 +638,14 @@ static int socketTcpLoopbackClientFor(int port, int domain) {
          errno == EINPROGRESS)) {
         int selectRes = HANDLE_EINTR(::select(fd + 1, 0, &my_set, 0, &tv));
         if (selectRes > 0) {
+            int err = 0;
+            socklen_t optLen = sizeof(err);
+            if (getsockopt(fd, SOL_SOCKET, SO_ERROR,
+                           reinterpret_cast<char*>(&err), &optLen) || err) {
+                // Either getsockopt failed or there was an error associated
+                // with the socket. The connection did not succeed.
+                return -1;
+            }
             socketSetBlocking(fd);
             return s.release();
         } else {
