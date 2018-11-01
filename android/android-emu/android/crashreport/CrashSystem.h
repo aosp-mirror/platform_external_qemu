@@ -66,6 +66,7 @@ public:
     // Returns URL for crash server
     virtual const std::string& getCrashURL() = 0;
 
+    virtual void setCrashURL(const std::string& s) = 0;
     // Returns predefined path to bundle required for curl init
     virtual const std::string& getCaBundlePath();
 

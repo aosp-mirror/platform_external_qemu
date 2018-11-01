@@ -135,6 +135,15 @@ void AdbBugReportServices::generateAdbLogcatInMemory(
             kAdbCommandTimeoutMs, true);
 }
 
+void AdbBugReportServices::generateDumpsys(StringView outputDirectoryPath,
+                                             ResultCallback resultCallback) {
+    if (mDumpsysCommand) {
+        resultCallback(Result::OperationInProgress, nullptr);
+        return;
+    }
+
+}
+
 std::string AdbBugReportServices::generateUniqueBugreportName() {
     const char* deviceName = avdInfo_getName(android_avdInfo);
     time_t now = System::get()->getUnixTime();

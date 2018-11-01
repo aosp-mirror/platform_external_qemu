@@ -58,6 +58,12 @@ public:
     // execution.
     bool isLogcatInFlight() const { return mAdbLogcatCommand != nullptr; }
 
+    void generateDumpsys(android::base::StringView outputDirectoryPath,
+                           ResultCallback resultCallback);
+
+    bool isDumpsysInFlight() const {
+        return mDumpsysCommand != nullptr;
+    }
     // bug report folder will be in the format of
     // bugreport-[deviceName]-[%Y-%m-%d%H:%M:%S]-[Uuid]
     static std::string generateUniqueBugreportName();
@@ -68,6 +74,7 @@ private:
     AdbInterface* mAdb;
     AdbCommandPtr mAdbBugReportCommand;
     AdbCommandPtr mAdbLogcatCommand;
+    AdbCommandPtr mDumpsysCommand;
 
     DISALLOW_COPY_AND_ASSIGN(AdbBugReportServices);
 };

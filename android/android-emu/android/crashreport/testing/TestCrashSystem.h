@@ -33,7 +33,7 @@ public:
     }
 
     virtual const std::string& getCrashURL(void) override { return mCrashURL; }
-
+    virtual void setCrashURL(const std::string& s) override { mCrashURL = s; }
 private:
     CrashSystem* mPrevCrashSystem;
     std::string mCrashDir;
