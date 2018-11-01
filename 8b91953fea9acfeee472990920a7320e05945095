@@ -16,6 +16,24 @@
       "revId": "8b91953fea9acfeee472990920a7320e05945095",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d1b0ab49_fa456dd1",
+        "filename": "android/build/cmake/test/CMakeLists.txt",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-01T23:21:08Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "3391e643_15742b65",
+      "revId": "8b91953fea9acfeee472990920a7320e05945095",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
