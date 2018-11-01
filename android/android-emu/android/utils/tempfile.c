@@ -181,6 +181,10 @@ void tempfile_unref_and_close(const char* filename) {
     return;
 }
 
+void tempfile_unref_and_close_file(TempFile* file) {
+    tempfile_unref_and_close(tempfile_path(file));
+}
+
 /** TEMP FILE CLEANUP
  **
  **/
