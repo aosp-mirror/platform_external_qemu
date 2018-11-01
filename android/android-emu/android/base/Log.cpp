@@ -13,7 +13,6 @@
 
 #include "android/base/Debug.h"
 #include "android/base/StringFormat.h"
-#include "android/base/threads/Thread.h"
 #include "android/base/files/PathUtils.h"
 
 #include <string>
