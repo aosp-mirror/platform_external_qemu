@@ -34,8 +34,6 @@ struct VulkanDispatch;
 } // namespace goldfish_vk
 using DlOpenFunc = void* (void);
 using DlSymFunc = void* (void*, const char*);
-using InstanceGetter = bool (const goldfish_vk::VulkanDispatch* vk, VkInstance* instance);
-using DeviceGetter = bool (const goldfish_vk::VulkanDispatch* vk, VkInstance instance, VkPhysicalDevice* physDeviceOut, uint32_t* physicalDeviceQueueFamilyInfoCountOut, VkQueueFamilyProperties* physicalDeviceQueueFamilyInfosOut, VkDevice* deviceOut, bool* presentCapable);
 
 
 namespace goldfish_vk {

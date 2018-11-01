@@ -24,7 +24,7 @@ import sys
 # Class capturing a .cpp file and a .h file (a "C++ module")
 class Module(object):
 
-    def __init__(self, directory, basename):
+    def __init__(self, directory, basename, customAbsDir = None):
         self.directory = directory
         self.basename = basename
 
@@ -37,15 +37,30 @@ class Module(object):
         self.headerFileHandle = ""
         self.implFileHandle = ""
 
+        self.customAbsDir = customAbsDir
+
     def getMakefileSrcEntry(self):
+        if self.customAbsDir:
+            return self.basename + ".cpp \\\n"
         dirName = self.directory
         baseName = self.basename
         joined = os.path.join(dirName, baseName)
         return "    " + joined + ".cpp \\\n"
 
+    def getCMakeSrcEntry(self):
+        if self.customAbsDir:
+            return self.basename + ".cpp "
+        dirName = self.directory
+        baseName = self.basename
+        joined = os.path.join(dirName, baseName)
+        return "    " + joined + ".cpp "
+
     def begin(self, globalDir):
         # Create subdirectory, if needed
-        absDir = os.path.join(globalDir, self.directory)
+        if self.customAbsDir:
+            absDir = self.customAbsDir
+        else:
+            absDir = os.path.join(globalDir, self.directory)
 
         filename = os.path.join(absDir, self.basename)
 
