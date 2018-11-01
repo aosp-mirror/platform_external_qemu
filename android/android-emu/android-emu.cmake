@@ -533,9 +533,8 @@ target_compile_definitions(android-emu-shared
 
 # The unit tests
 set(android-emu_unittests_src
-    # b/118717612
-    # android/automation/AutomationController_unittest.cpp
-    # android/automation/AutomationEventSink_unittest.cpp
+    android/automation/AutomationController_unittest.cpp
+    android/automation/AutomationEventSink_unittest.cpp
     android/avd/util_unittest.cpp
     android/avd/util_wrapper_unittest.cpp
     android/base/ArraySize_unittest.cpp
@@ -593,8 +592,7 @@ set(android-emu_unittests_src
     android/base/synchronization/MessageChannel_unittest.cpp
     android/base/system/System_unittest.cpp
     android/base/testing/MockUtils_unittest.cpp
-    # b/118717612
-    # android/base/testing/ProtobufMatchers.cpp
+    android/base/testing/ProtobufMatchers.cpp
     android/base/testing/TestEvent_unittest.cpp
     android/base/threads/Async_unittest.cpp
     android/base/threads/FunctorThread_unittest.cpp
@@ -616,8 +614,7 @@ set(android-emu_unittests_src
     android/emulation/AdbHostServer_unittest.cpp
     android/emulation/android_pipe_pingpong_unittest.cpp
     android/emulation/android_pipe_zero_unittest.cpp
-    # b/118717612
-    # android/emulation/AndroidAsyncMessagePipe_unittest.cpp
+    android/emulation/AndroidAsyncMessagePipe_unittest.cpp
     android/emulation/bufprint_config_dirs_unittest.cpp
     android/emulation/ComponentVersion_unittest.cpp
     android/emulation/ConfigDirs_unittest.cpp
@@ -659,8 +656,7 @@ set(android-emu_unittests_src
     android/location/Route_unittest.cpp
     android/network/control_unittest.cpp
     android/network/constants_unittest.cpp
-    # b/118717612
-    # android/offworld/OffworldPipe_unittest.cpp
+    android/offworld/OffworldPipe_unittest.cpp
     android/opengl/EmuglBackendList_unittest.cpp
     android/opengl/EmuglBackendScanner_unittest.cpp
     android/opengl/emugl_config_unittest.cpp
@@ -668,8 +664,7 @@ set(android-emu_unittests_src
     android/opengl/gpuinfo_unittest.cpp
     android/physics/AmbientEnvironment_unittest.cpp
     android/physics/InertialModel_unittest.cpp
-    # b/118717612
-    # android/physics/PhysicalModel_unittest.cpp
+    android/physics/PhysicalModel_unittest.cpp
     android/proxy/proxy_common_unittest.cpp
     android/proxy/ProxyUtils_unittest.cpp
     android/qt/qt_path_unittest.cpp
