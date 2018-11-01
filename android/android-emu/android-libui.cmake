@@ -242,7 +242,8 @@ android_target_link_libraries(emulator-libui
                               emulator-libyuv
                               ${FFMPEG_LIBRARIES}
                               ${QT5_LIBRARIES}
-                              ${ZLIB_LIBRARIES})
+                              ${ZLIB_LIBRARIES}
+                              android-emu-crash-service)
 
 # gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug. This implies a direct dependency to
 # libX11.so

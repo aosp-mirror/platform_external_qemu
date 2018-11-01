@@ -16,7 +16,7 @@ set(android-emu-crash-service_windows-x86_64_src android/crashreport/CrashServic
 android_add_library(android-emu-crash-service)
 target_link_libraries(android-emu-crash-service PRIVATE ${BREAKPAD_LIBRARIES} ${CURL_LIBRARIES})
 
-target_include_directories(android-emu-crash-service PRIVATE ${BREAKPAD_INCLUDE_DIRS} ${CURL_INCLUDE_DIRS})
+target_include_directories(android-emu-crash-service PUBLIC ${BREAKPAD_INCLUDE_DIRS} ${CURL_INCLUDE_DIRS})
 
 set(emulator-crash-service_src
     android/crashreport/main-crash-service.cpp 

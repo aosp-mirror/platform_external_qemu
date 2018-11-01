@@ -69,8 +69,8 @@ struct STAGING {
 };
 
 struct NONE {
-   static constexpr const char* CrashURL = "";
-
+    static constexpr const char* CrashURL =
+            "https://clients2.google.com/cr/report";
 };
 
 #if defined(_WIN32)
