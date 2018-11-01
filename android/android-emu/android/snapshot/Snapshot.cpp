@@ -611,11 +611,6 @@ const bool Snapshot::checkValid(bool writeFailure) {
         return false;
     }
 
-    if (mSnapshotPb.has_guest_data_partition_mounted()) {
-        guest_data_partition_mounted =
-                mSnapshotPb.guest_data_partition_mounted();
-    }
-
     if (mSnapshotPb.has_invalid_loads()) {
         mInvalidLoads = mSnapshotPb.invalid_loads();
     } else {
@@ -645,6 +640,11 @@ bool Snapshot::load() {
 
     if (!checkValid(true /* save the failure reason */)) {
         return false;
+    }
+
+    if (mSnapshotPb.has_guest_data_partition_mounted()) {
+        guest_data_partition_mounted =
+                mSnapshotPb.guest_data_partition_mounted();
     }
 
     if (mSnapshotPb.has_rotation() &&
