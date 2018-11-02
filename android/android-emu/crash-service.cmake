@@ -4,9 +4,21 @@ prebuilt(QT5)
 prebuilt(CURL)
 
 set(CRASH_WINDOWS_ICON ../images/emulator_icon.rc)
+set(android-emu-crash-service_src
+    android/crashreport/CrashService_common.cpp
+    # Make sure we are depending on HW_CONFIG
+    ${ANDROID_HW_CONFIG_H}
+    )
+
+set(android-emu-crash-service_linux-x86_64_src android/crashreport/CrashService_linux.cpp)
+set(android-emu-crash-service_darwin-x86_64_src android/crashreport/CrashService_darwin.cpp)
+set(android-emu-crash-service_windows-x86_64_src android/crashreport/CrashService_windows.cpp)
+
+android_add_library(android-emu-crash-service)
+target_link_libraries(android-emu-crash-service PRIVATE BREAKPAD::Breakpad CURL::libcurl)
+
 set(emulator-crash-service_src
     android/crashreport/main-crash-service.cpp 
-    android/crashreport/CrashService_common.cpp 
     android/crashreport/ui/ConfirmDialog.cpp 
     android/resource.c 
     android/skin/resource.c
@@ -15,16 +27,12 @@ set(emulator-crash-service_src
     android/crashreport/ui/ConfirmDialog.h 
 # The icon
     ${CRASH_WINDOWS_ICON}
-# Make sure we are depending on HW_CONFIG
-    ${ANDROID_HW_CONFIG_H}
     )
-set(emulator-crash-service_linux-x86_64_src android/crashreport/CrashService_linux.cpp)
-set(emulator-crash-service_darwin-x86_64_src android/crashreport/CrashService_darwin.cpp)
-set(emulator-crash-service_windows-x86_64_src android/crashreport/CrashService_windows.cpp)
+
 android_add_executable(emulator-crash-service)
 set_target_properties(emulator-crash-service PROPERTIES OUTPUT_NAME "emulator64-crash-service")
 target_compile_definitions(emulator-crash-service PRIVATE -DCONFIG_QT -DCRASHUPLOAD=${OPTION_CRASHUPLOAD})
-target_link_libraries(emulator-crash-service PRIVATE android-emu emulator-libui BREAKPAD::Breakpad Qt5::Core)
+target_link_libraries(emulator-crash-service PRIVATE android-emu-crash-service android-emu emulator-libui BREAKPAD::Breakpad Qt5::Core)
 
 set(emulator64_test_crasher_src android/crashreport/testing/main-test-crasher.cpp)
 android_add_executable(emulator64_test_crasher)
