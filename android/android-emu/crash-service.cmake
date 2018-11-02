@@ -2,6 +2,7 @@
 prebuilt(BREAKPAD)
 prebuilt(QT5)
 prebuilt(CURL)
+
 set(CRASH_WINDOWS_ICON ../images/emulator_icon.rc)
 set(emulator-crash-service_src
     android/crashreport/main-crash-service.cpp 
@@ -23,12 +24,11 @@ set(emulator-crash-service_windows-x86_64_src android/crashreport/CrashService_w
 android_add_executable(emulator-crash-service)
 set_target_properties(emulator-crash-service PROPERTIES OUTPUT_NAME "emulator64-crash-service")
 target_compile_definitions(emulator-crash-service PRIVATE -DCONFIG_QT -DCRASHUPLOAD=${OPTION_CRASHUPLOAD})
-target_include_directories(emulator-crash-service PRIVATE ${QT5_INCLUDE_DIRS} ${BREAKPAD_INCLUDE_DIRS} ${CURL_INCLUDE_DIRS})
-target_link_libraries(emulator-crash-service PRIVATE android-emu emulator-libui ${BREAKPAD_LIBRARIES} ${CURL_LIBRARIES})
+target_link_libraries(emulator-crash-service PRIVATE android-emu emulator-libui BREAKPAD::Breakpad Qt5::Core)
 
 set(emulator64_test_crasher_src android/crashreport/testing/main-test-crasher.cpp)
 android_add_executable(emulator64_test_crasher)
-target_link_libraries(emulator64_test_crasher PRIVATE android-emu ${BREAKPAD_LIBRARIES})
+target_link_libraries(emulator64_test_crasher PRIVATE android-emu BREAKPAD::Breakpad)
 
 set(emulator_crashreport_unittests_src
     android/crashreport/CrashService_common.cpp 
@@ -41,5 +41,4 @@ set(emulator_crashreport_unittests_darwin-x86_64_src android/crashreport/CrashSe
 set(emulator_crashreport_unittests_windows-x86_64_src android/crashreport/CrashService_windows.cpp)
 
 android_add_test(emulator_crashreport_unittests)
-target_include_directories(emulator_crashreport_unittests PRIVATE ${BREAKPAD_INCLUDE_DIRS})
-target_link_libraries(emulator_crashreport_unittests PRIVATE  android-emu ${BREAKPAD_LIBRARIES} gtest_main)
+target_link_libraries(emulator_crashreport_unittests PRIVATE  android-emu BREAKPAD::Breakpad gtest_main)

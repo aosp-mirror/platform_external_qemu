@@ -19,9 +19,9 @@ set(emulator-gbench_src
     ${src}/walltime.cc)
 android_add_library(emulator-gbench)
 
-android_target_include_directories(emulator-gbench all PUBLIC ${src}/../include)
+target_include_directories(emulator-gbench PUBLIC ${src}/../include)
 # NOTE HAVE_STD_REGEX doesn't seem to work with our toolchains.
-android_target_compile_definitions(emulator-gbench all PRIVATE -DHAVE_POSIX_REGEX=1)
+target_compile_definitions(emulator-gbench PRIVATE -DHAVE_POSIX_REGEX=1)
 
 android_target_link_libraries(emulator-gbench linux-x86_64 PUBLIC pthread)
 android_target_link_libraries(emulator-gbench darwin-x86_64 PUBLIC pthread)
