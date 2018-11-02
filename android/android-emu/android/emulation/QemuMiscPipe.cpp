@@ -14,6 +14,7 @@
 #include "android/emulation/AndroidMessagePipe.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/utils/debug.h"
+#include "android/utils/system.h"
 #include "android/globals.h"
 #include "android/hw-sensors.h"
 
@@ -59,6 +60,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
         output[1]='K';
         output[2]='\0';
         printf("emulator: INFO: boot completed\n");
+        printf("emulator: INFO: boot time %lld ms\n", get_uptime_ms());
         fflush(stdout);
         guest_boot_completed = 1;
         if (android_hw->test_quitAfterBootTimeOut > 0) {
