@@ -22,6 +22,30 @@
       "revId": "f3d7fc8bf0be7d481ffc250848c331b613c01063",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eeb0b640_081544ad",
+        "filename": "android/android-emu/android/network/NetworkPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2018-11-02T00:10:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57a60748_cf7506a3",
+      "range": {
+        "startLine": 138,
+        "startChar": 0,
+        "endLine": 138,
+        "endChar": 30
+      },
+      "revId": "f3d7fc8bf0be7d481ffc250848c331b613c01063",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
