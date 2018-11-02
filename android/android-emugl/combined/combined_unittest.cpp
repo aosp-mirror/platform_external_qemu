@@ -14,20 +14,16 @@
 #include <gtest/gtest.h>
 
 #include "android/base/files/PathUtils.h"
-#include "android/base/memory/OnDemand.h"
 #include "android/base/system/System.h"
-#include "android/emulation/AndroidPipe.h"
-#include "android/emulation/hostpipe/HostGoldfishPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/opengles.h"
-#include "android/opengles-pipe.h"
-#include "android/opengl/emugl_config.h"
 
 #include "AndroidBufferQueue.h"
 #include "AndroidWindow.h"
 #include "AndroidWindowBuffer.h"
 #include "ClientComposer.h"
 #include "Display.h"
+#include "GoldfishOpenglTestEnv.h"
 #include "GrallocDispatch.h"
 
 #include <hardware/gralloc.h>
@@ -45,69 +41,10 @@ using aemu::AndroidWindowBuffer;
 using aemu::ClientComposer;
 using aemu::Display;
 
-using android::AndroidPipe;
-using android::base::makeOnDemand;
-using android::base::OnDemandT;
 using android::base::pj;
 using android::base::System;
-using android::HostGoldfishPipeDevice;
 
 static constexpr int kWindowSize = 256;
-
-// The test environment configures the host-side render lib.
-// It will live for the duration of all tests.
-class GoldfishOpenglTestEnv {
-public:
-    GoldfishOpenglTestEnv() {
-        System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR", System::get()->getProgramDirectory());
-        android::featurecontrol::setEnabledOverride(
-                android::featurecontrol::GLESDynamicVersion, false);
-        android::featurecontrol::setEnabledOverride(
-                android::featurecontrol::GLDMA, false);
-        android::featurecontrol::setEnabledOverride(
-                android::featurecontrol::GLAsyncSwap, false);
-
-        EmuglConfig config;
-
-        emuglConfig_init(&config, true /* gpu enabled */, "auto",
-                         "swiftshader_indirect", /* gpu mode, option */
-                         64,                     /* bitness */
-                         true,                   /* no window */
-                         false,                  /* blacklisted */
-                         false,                  /* has guest renderer */
-                         WINSYS_GLESBACKEND_PREFERENCE_AUTO);
-
-        emuglConfig_setupEnv(&config);
-
-        android_initOpenglesEmulation();
-
-        int maj;
-        int min;
-
-        android_startOpenglesRenderer(
-            kWindowSize, kWindowSize, 1, 28, &maj, &min);
-
-        char* vendor = nullptr;
-        char* renderer = nullptr;
-        char* version = nullptr;
-
-        android_getOpenglesHardwareStrings(
-            &vendor, &renderer, &version);
-
-        printf("%s: GL strings; [%s] [%s] [%s].\n", __func__, vendor, renderer,
-               version);
-
-        HostGoldfishPipeDevice::get();
-
-        android_init_opengles_pipe();
-    }
-
-    ~GoldfishOpenglTestEnv() {
-        AndroidPipe::Service::resetAll();
-        android_stopOpenglesRenderer(true);
-    }
-};
-
 
 class CombinedGoldfishOpenglTest : public ::testing::Test {
 protected:

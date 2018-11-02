@@ -19,6 +19,7 @@ combined_C_INCLUDES := \
 combined_SRC_FILES := \
     ClientComposer.cpp \
     Display.cpp \
+    GoldfishOpenglTestEnv.cpp \
     Toplevel.cpp \
 
 # Shared library that combines guest driver with host drivers###################
@@ -35,7 +36,9 @@ $(call emugl-begin-executable,emugl_combined_unittests)
 $(call emugl-import,libaemugraphics libemugl_gtest)
 
 LOCAL_C_INCLUDES += $(combined_C_INCLUDES)
-LOCAL_SRC_FILES += combined_unittest.cpp
+LOCAL_SRC_FILES += \
+    GoldfishOpenglTestEnv.cpp \
+    combined_unittest.cpp \
 
 ifeq ($(BUILD_TARGET_OS),linux)
 LOCAL_LDFLAGS += '-Wl,-rpath,$$ORIGIN/lib$(BUILD_TARGET_SUFFIX),-rpath,$$ORIGIN/lib$(BUILD_TARGET_SUFFIX)/gles_swiftshader'
@@ -49,7 +52,8 @@ $(call emugl-begin-executable,libaemugraphics_toplevel_unittests)
 $(call emugl-import,libaemugraphics libemugl_gtest)
 
 LOCAL_C_INCLUDES += $(combined_C_INCLUDES)
-LOCAL_SRC_FILES += toplevel_unittest.cpp
+LOCAL_SRC_FILES +=  \
+    toplevel_unittest.cpp \
 
 ifeq ($(BUILD_TARGET_OS),linux)
 LOCAL_LDFLAGS += '-Wl,-rpath,$$ORIGIN/lib$(BUILD_TARGET_SUFFIX),-rpath,$$ORIGIN/lib$(BUILD_TARGET_SUFFIX)/gles_swiftshader'
