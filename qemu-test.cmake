@@ -5,7 +5,7 @@ set(libqemu-test_src
     ${ANDROID_AUTOGEN}/tests/test-qapi-events.c
     ${ANDROID_AUTOGEN}/tests/test-qapi-introspect.c)
 android_add_library(libqemu-test)
-android_target_link_libraries(libqemu-test all PUBLIC android-qemu-deps)
+target_link_libraries(libqemu-test PUBLIC android-qemu-deps)
 
 set(libqemu-test-crypto_src
     tests/libqtest.c
@@ -14,16 +14,16 @@ set(libqemu-test-crypto_src
     ${ANDROID_AUTOGEN}/tests/test-qapi-events.c
     ${ANDROID_AUTOGEN}/tests/test-qapi-introspect.c)
 android_add_library(libqemu-test-crypto)
-android_target_link_libraries(libqemu-test-crypto all PUBLIC libqemu-test ${CURL_LIBRARIES})
+target_link_libraries(libqemu-test-crypto PRIVATE libqemu-test OpenSSL::Crypto)
 
 # Adds a qemu test, note that these test should never bring in an android dependency
 function(add_qtest NAME DEPENDENCY)
   set(${NAME}_src tests/${NAME}.c)
   android_add_test(${NAME})
   android_target_dependency(${NAME} linux-x86_64 ${TCMALLOC_OS_DEPENDENCIES})
-  android_target_compile_definitions(${NAME} all PRIVATE -DCONFIG_ANDROID)
-  android_target_include_directories(${NAME} all PUBLIC ${ANDROID_AUTOGEN}/tests)
-  android_target_link_libraries(${NAME} all PRIVATE ${DEPENDENCY} libqemu2-common libqemu2-util android-qemu-deps)
+  target_compile_definitions(${NAME} PRIVATE -DCONFIG_ANDROID)
+  target_include_directories(${NAME} PUBLIC ${ANDROID_AUTOGEN}/tests)
+  target_link_libraries(${NAME} PRIVATE ${DEPENDENCY} libqemu2-common libqemu2-util android-qemu-deps)
 endfunction()
 
 # These tests rely on interaction with the qemu binary. These require a non- trivial test runner as they interact with a
@@ -117,5 +117,5 @@ endforeach()
 # Socket test is split in two, so we special case it
 set(test-util-sockets-qtest_src tests/test-util-sockets.c tests/socket-helpers.c)
 android_add_test(test-util-sockets-qtest)
-android_target_include_directories(test-util-sockets-qtest all PUBLIC ${ANDROID_AUTOGEN}/tests)
-android_target_link_libraries(test-util-sockets-qtest all PRIVATE libqemu2-util libqemu2-common android-qemu-deps)
+target_include_directories(test-util-sockets-qtest PUBLIC ${ANDROID_AUTOGEN}/tests)
+target_link_libraries(test-util-sockets-qtest PRIVATE libqemu2-util libqemu2-common android-qemu-deps)

@@ -204,9 +204,7 @@ set(emulator-libui_src
 
 android_add_library(emulator-libui)
 
-android_target_include_directories(emulator-libui all PRIVATE ${FFMPEG_INCLUDE_DIRS} ${QT5_INCLUDE_DIRS})
-
-android_target_compile_options(emulator-libui all PRIVATE "-DUSE_MMX=1" "-mmmx")
+target_compile_options(emulator-libui PRIVATE "-DUSE_MMX=1" "-mmmx")
 
 # Target specific compiler flags for windows, since we include FFMPEG C sources from C++ we need to make sure this flag
 # is set for c++ sources.
@@ -234,23 +232,21 @@ android_target_compile_options(emulator-libui
                                "-Wno-return-type-c-linkage"
                                "-Wno-invalid-constexpr")
 
-# dependencies will propagate.
-android_target_link_libraries(emulator-libui
-                              all
-                              PUBLIC
+# dependencies will remain internal, we should not be leaking out internal headers and defines.
+target_link_libraries(emulator-libui
+                              PRIVATE
                               android-emu
                               emulator-libyuv
-                              ${FFMPEG_LIBRARIES}
-                              ${QT5_LIBRARIES}
-                              ${ZLIB_LIBRARIES})
+                              FFMPEG::FFMPEG
+                              Qt5::Core
+                              Qt5::Widgets
+                              Qt5::Gui
+                              Qt5::Svg
+                              ZLIB::ZLIB)
 
 # gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug. This implies a direct dependency to
 # libX11.so
-android_target_link_libraries(emulator-libui linux-x86_64 PUBLIC -lX11)
-
-# Remove these later:
-android_target_include_directories(emulator-libui all PUBLIC ${PROTOBUF_INCLUDE_DIRS}
-                                   ${ANDROID_QEMU2_TOP_DIR}/../libyuv/files/include)
+android_target_link_libraries(emulator-libui linux-x86_64 PRIVATE -lX11)
 
 set(emulator-libui_unittests_src
     android/skin/keycode_unittest.cpp
@@ -262,8 +258,7 @@ set(emulator-libui_unittests_src
     android/recording/test/FfmpegRecorder_unittest.cpp)
 android_add_test(emulator-libui_unittests)
 
-android_target_compile_options(emulator-libui_unittests all PRIVATE -O0 -UNDEBUG)
-android_target_include_directories(emulator-libui_unittests all PRIVATE ${FFMPEG_INCLUDE_DIRS} ${QT5_INCLUDE_DIRS})
+target_compile_options(emulator-libui_unittests PRIVATE -O0 -UNDEBUG)
 
 # Target specific compiler flags for windows
 android_target_compile_options(emulator-libui_unittests windows PRIVATE
@@ -274,11 +269,12 @@ android_target_compile_options(emulator-libui_unittests linux-x86_64 PRIVATE "-W
 
 # Mac Os compiler settings
 android_target_compile_options(emulator-libui_unittests darwin-x86_64 PRIVATE "-Wno-reserved-user-defined-literal")
+
+
 android_target_dependency(emulator-libui_unittests all "${QT5_SHARED_DEPENDENCIES}")
 android_target_properties(emulator-libui_unittests all "${QT5_SHARED_PROPERTIES}")
 
 # Make sure we disable rtti in gtest
-android_target_compile_definitions(emulator-libui_unittests all PRIVATE -DGTEST_HAS_RTTI=0)
+target_compile_definitions(emulator-libui_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 
-android_target_link_libraries(emulator-libui_unittests all PUBLIC emulator-libui gmock_main)
-
+target_link_libraries(emulator-libui_unittests emulator-libui FFMPEG::FFMPEG gmock_main)
