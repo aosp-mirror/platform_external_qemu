@@ -186,7 +186,7 @@ def makeGenOpts(args):
     genOpts['cereal'] = [
             CerealGenerator,
             CGeneratorOptions(
-                filename          = "Android.mk",
+                filename          = "CMakeLists.txt",
                 directory         = directory,
                 apiname           = 'vulkan',
                 profile           = None,
