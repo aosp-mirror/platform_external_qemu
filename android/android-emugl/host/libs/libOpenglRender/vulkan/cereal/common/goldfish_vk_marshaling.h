@@ -58,6 +58,7 @@ void unmarshal_VkAllocationCallbacks(
     VulkanStream* vkStream,
     VkAllocationCallbacks* forUnmarshaling);
 
+#define OP_vkCreateInstance 20000
 VkResult marshal_vkCreateInstance(
     VulkanStream* vkStream,
     const VkInstanceCreateInfo* pCreateInfo,
@@ -70,6 +71,7 @@ VkResult unmarshal_vkCreateInstance(
     const VkAllocationCallbacks* pAllocator,
     VkInstance* pInstance);
 
+#define OP_vkDestroyInstance 20001
 void marshal_vkDestroyInstance(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -80,6 +82,7 @@ void unmarshal_vkDestroyInstance(
     VkInstance instance,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkEnumeratePhysicalDevices 20002
 VkResult marshal_vkEnumeratePhysicalDevices(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -100,6 +103,7 @@ void unmarshal_VkPhysicalDeviceFeatures(
     VulkanStream* vkStream,
     VkPhysicalDeviceFeatures* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceFeatures 20003
 void marshal_vkGetPhysicalDeviceFeatures(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -118,6 +122,7 @@ void unmarshal_VkFormatProperties(
     VulkanStream* vkStream,
     VkFormatProperties* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceFormatProperties 20004
 void marshal_vkGetPhysicalDeviceFormatProperties(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -146,6 +151,7 @@ void unmarshal_VkImageFormatProperties(
     VulkanStream* vkStream,
     VkImageFormatProperties* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceImageFormatProperties 20005
 VkResult marshal_vkGetPhysicalDeviceImageFormatProperties(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -190,6 +196,7 @@ void unmarshal_VkPhysicalDeviceProperties(
     VulkanStream* vkStream,
     VkPhysicalDeviceProperties* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceProperties 20006
 void marshal_vkGetPhysicalDeviceProperties(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -208,6 +215,7 @@ void unmarshal_VkQueueFamilyProperties(
     VulkanStream* vkStream,
     VkQueueFamilyProperties* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceQueueFamilyProperties 20007
 void marshal_vkGetPhysicalDeviceQueueFamilyProperties(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -244,6 +252,7 @@ void unmarshal_VkPhysicalDeviceMemoryProperties(
     VulkanStream* vkStream,
     VkPhysicalDeviceMemoryProperties* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceMemoryProperties 20008
 void marshal_vkGetPhysicalDeviceMemoryProperties(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -254,6 +263,7 @@ void unmarshal_vkGetPhysicalDeviceMemoryProperties(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceMemoryProperties* pMemoryProperties);
 
+#define OP_vkGetInstanceProcAddr 20009
 PFN_vkVoidFunction marshal_vkGetInstanceProcAddr(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -264,6 +274,7 @@ PFN_vkVoidFunction unmarshal_vkGetInstanceProcAddr(
     VkInstance instance,
     const char* pName);
 
+#define OP_vkGetDeviceProcAddr 20010
 PFN_vkVoidFunction marshal_vkGetDeviceProcAddr(
     VulkanStream* vkStream,
     VkDevice device,
@@ -290,6 +301,7 @@ void unmarshal_VkDeviceCreateInfo(
     VulkanStream* vkStream,
     VkDeviceCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateDevice 20011
 VkResult marshal_vkCreateDevice(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -304,6 +316,7 @@ VkResult unmarshal_vkCreateDevice(
     const VkAllocationCallbacks* pAllocator,
     VkDevice* pDevice);
 
+#define OP_vkDestroyDevice 20012
 void marshal_vkDestroyDevice(
     VulkanStream* vkStream,
     VkDevice device,
@@ -322,6 +335,7 @@ void unmarshal_VkExtensionProperties(
     VulkanStream* vkStream,
     VkExtensionProperties* forUnmarshaling);
 
+#define OP_vkEnumerateInstanceExtensionProperties 20013
 VkResult marshal_vkEnumerateInstanceExtensionProperties(
     VulkanStream* vkStream,
     const char* pLayerName,
@@ -334,6 +348,7 @@ VkResult unmarshal_vkEnumerateInstanceExtensionProperties(
     uint32_t* pPropertyCount,
     VkExtensionProperties* pProperties);
 
+#define OP_vkEnumerateDeviceExtensionProperties 20014
 VkResult marshal_vkEnumerateDeviceExtensionProperties(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -356,6 +371,7 @@ void unmarshal_VkLayerProperties(
     VulkanStream* vkStream,
     VkLayerProperties* forUnmarshaling);
 
+#define OP_vkEnumerateInstanceLayerProperties 20015
 VkResult marshal_vkEnumerateInstanceLayerProperties(
     VulkanStream* vkStream,
     uint32_t* pPropertyCount,
@@ -366,6 +382,7 @@ VkResult unmarshal_vkEnumerateInstanceLayerProperties(
     uint32_t* pPropertyCount,
     VkLayerProperties* pProperties);
 
+#define OP_vkEnumerateDeviceLayerProperties 20016
 VkResult marshal_vkEnumerateDeviceLayerProperties(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -378,6 +395,7 @@ VkResult unmarshal_vkEnumerateDeviceLayerProperties(
     uint32_t* pPropertyCount,
     VkLayerProperties* pProperties);
 
+#define OP_vkGetDeviceQueue 20017
 void marshal_vkGetDeviceQueue(
     VulkanStream* vkStream,
     VkDevice device,
@@ -400,6 +418,7 @@ void unmarshal_VkSubmitInfo(
     VulkanStream* vkStream,
     VkSubmitInfo* forUnmarshaling);
 
+#define OP_vkQueueSubmit 20018
 VkResult marshal_vkQueueSubmit(
     VulkanStream* vkStream,
     VkQueue queue,
@@ -414,6 +433,7 @@ VkResult unmarshal_vkQueueSubmit(
     const VkSubmitInfo* pSubmits,
     VkFence fence);
 
+#define OP_vkQueueWaitIdle 20019
 VkResult marshal_vkQueueWaitIdle(
     VulkanStream* vkStream,
     VkQueue queue);
@@ -422,6 +442,7 @@ VkResult unmarshal_vkQueueWaitIdle(
     VulkanStream* vkStream,
     VkQueue queue);
 
+#define OP_vkDeviceWaitIdle 20020
 VkResult marshal_vkDeviceWaitIdle(
     VulkanStream* vkStream,
     VkDevice device);
@@ -438,6 +459,7 @@ void unmarshal_VkMemoryAllocateInfo(
     VulkanStream* vkStream,
     VkMemoryAllocateInfo* forUnmarshaling);
 
+#define OP_vkAllocateMemory 20021
 VkResult marshal_vkAllocateMemory(
     VulkanStream* vkStream,
     VkDevice device,
@@ -452,6 +474,7 @@ VkResult unmarshal_vkAllocateMemory(
     const VkAllocationCallbacks* pAllocator,
     VkDeviceMemory* pMemory);
 
+#define OP_vkFreeMemory 20022
 void marshal_vkFreeMemory(
     VulkanStream* vkStream,
     VkDevice device,
@@ -464,6 +487,7 @@ void unmarshal_vkFreeMemory(
     VkDeviceMemory memory,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkMapMemory 20023
 VkResult marshal_vkMapMemory(
     VulkanStream* vkStream,
     VkDevice device,
@@ -482,6 +506,7 @@ VkResult unmarshal_vkMapMemory(
     VkMemoryMapFlags flags,
     void** ppData);
 
+#define OP_vkUnmapMemory 20024
 void marshal_vkUnmapMemory(
     VulkanStream* vkStream,
     VkDevice device,
@@ -500,6 +525,7 @@ void unmarshal_VkMappedMemoryRange(
     VulkanStream* vkStream,
     VkMappedMemoryRange* forUnmarshaling);
 
+#define OP_vkFlushMappedMemoryRanges 20025
 VkResult marshal_vkFlushMappedMemoryRanges(
     VulkanStream* vkStream,
     VkDevice device,
@@ -512,6 +538,7 @@ VkResult unmarshal_vkFlushMappedMemoryRanges(
     uint32_t memoryRangeCount,
     const VkMappedMemoryRange* pMemoryRanges);
 
+#define OP_vkInvalidateMappedMemoryRanges 20026
 VkResult marshal_vkInvalidateMappedMemoryRanges(
     VulkanStream* vkStream,
     VkDevice device,
@@ -524,6 +551,7 @@ VkResult unmarshal_vkInvalidateMappedMemoryRanges(
     uint32_t memoryRangeCount,
     const VkMappedMemoryRange* pMemoryRanges);
 
+#define OP_vkGetDeviceMemoryCommitment 20027
 void marshal_vkGetDeviceMemoryCommitment(
     VulkanStream* vkStream,
     VkDevice device,
@@ -536,6 +564,7 @@ void unmarshal_vkGetDeviceMemoryCommitment(
     VkDeviceMemory memory,
     VkDeviceSize* pCommittedMemoryInBytes);
 
+#define OP_vkBindBufferMemory 20028
 VkResult marshal_vkBindBufferMemory(
     VulkanStream* vkStream,
     VkDevice device,
@@ -550,6 +579,7 @@ VkResult unmarshal_vkBindBufferMemory(
     VkDeviceMemory memory,
     VkDeviceSize memoryOffset);
 
+#define OP_vkBindImageMemory 20029
 VkResult marshal_vkBindImageMemory(
     VulkanStream* vkStream,
     VkDevice device,
@@ -572,6 +602,7 @@ void unmarshal_VkMemoryRequirements(
     VulkanStream* vkStream,
     VkMemoryRequirements* forUnmarshaling);
 
+#define OP_vkGetBufferMemoryRequirements 20030
 void marshal_vkGetBufferMemoryRequirements(
     VulkanStream* vkStream,
     VkDevice device,
@@ -584,6 +615,7 @@ void unmarshal_vkGetBufferMemoryRequirements(
     VkBuffer buffer,
     VkMemoryRequirements* pMemoryRequirements);
 
+#define OP_vkGetImageMemoryRequirements 20031
 void marshal_vkGetImageMemoryRequirements(
     VulkanStream* vkStream,
     VkDevice device,
@@ -612,6 +644,7 @@ void unmarshal_VkSparseImageMemoryRequirements(
     VulkanStream* vkStream,
     VkSparseImageMemoryRequirements* forUnmarshaling);
 
+#define OP_vkGetImageSparseMemoryRequirements 20032
 void marshal_vkGetImageSparseMemoryRequirements(
     VulkanStream* vkStream,
     VkDevice device,
@@ -626,6 +659,7 @@ void unmarshal_vkGetImageSparseMemoryRequirements(
     uint32_t* pSparseMemoryRequirementCount,
     VkSparseImageMemoryRequirements* pSparseMemoryRequirements);
 
+#define OP_vkGetPhysicalDeviceSparseImageFormatProperties 20033
 void marshal_vkGetPhysicalDeviceSparseImageFormatProperties(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -712,6 +746,7 @@ void unmarshal_VkBindSparseInfo(
     VulkanStream* vkStream,
     VkBindSparseInfo* forUnmarshaling);
 
+#define OP_vkQueueBindSparse 20034
 VkResult marshal_vkQueueBindSparse(
     VulkanStream* vkStream,
     VkQueue queue,
@@ -734,6 +769,7 @@ void unmarshal_VkFenceCreateInfo(
     VulkanStream* vkStream,
     VkFenceCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateFence 20035
 VkResult marshal_vkCreateFence(
     VulkanStream* vkStream,
     VkDevice device,
@@ -748,6 +784,7 @@ VkResult unmarshal_vkCreateFence(
     const VkAllocationCallbacks* pAllocator,
     VkFence* pFence);
 
+#define OP_vkDestroyFence 20036
 void marshal_vkDestroyFence(
     VulkanStream* vkStream,
     VkDevice device,
@@ -760,6 +797,7 @@ void unmarshal_vkDestroyFence(
     VkFence fence,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkResetFences 20037
 VkResult marshal_vkResetFences(
     VulkanStream* vkStream,
     VkDevice device,
@@ -772,6 +810,7 @@ VkResult unmarshal_vkResetFences(
     uint32_t fenceCount,
     const VkFence* pFences);
 
+#define OP_vkGetFenceStatus 20038
 VkResult marshal_vkGetFenceStatus(
     VulkanStream* vkStream,
     VkDevice device,
@@ -782,6 +821,7 @@ VkResult unmarshal_vkGetFenceStatus(
     VkDevice device,
     VkFence fence);
 
+#define OP_vkWaitForFences 20039
 VkResult marshal_vkWaitForFences(
     VulkanStream* vkStream,
     VkDevice device,
@@ -806,6 +846,7 @@ void unmarshal_VkSemaphoreCreateInfo(
     VulkanStream* vkStream,
     VkSemaphoreCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateSemaphore 20040
 VkResult marshal_vkCreateSemaphore(
     VulkanStream* vkStream,
     VkDevice device,
@@ -820,6 +861,7 @@ VkResult unmarshal_vkCreateSemaphore(
     const VkAllocationCallbacks* pAllocator,
     VkSemaphore* pSemaphore);
 
+#define OP_vkDestroySemaphore 20041
 void marshal_vkDestroySemaphore(
     VulkanStream* vkStream,
     VkDevice device,
@@ -840,6 +882,7 @@ void unmarshal_VkEventCreateInfo(
     VulkanStream* vkStream,
     VkEventCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateEvent 20042
 VkResult marshal_vkCreateEvent(
     VulkanStream* vkStream,
     VkDevice device,
@@ -854,6 +897,7 @@ VkResult unmarshal_vkCreateEvent(
     const VkAllocationCallbacks* pAllocator,
     VkEvent* pEvent);
 
+#define OP_vkDestroyEvent 20043
 void marshal_vkDestroyEvent(
     VulkanStream* vkStream,
     VkDevice device,
@@ -866,6 +910,7 @@ void unmarshal_vkDestroyEvent(
     VkEvent event,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkGetEventStatus 20044
 VkResult marshal_vkGetEventStatus(
     VulkanStream* vkStream,
     VkDevice device,
@@ -876,6 +921,7 @@ VkResult unmarshal_vkGetEventStatus(
     VkDevice device,
     VkEvent event);
 
+#define OP_vkSetEvent 20045
 VkResult marshal_vkSetEvent(
     VulkanStream* vkStream,
     VkDevice device,
@@ -886,6 +932,7 @@ VkResult unmarshal_vkSetEvent(
     VkDevice device,
     VkEvent event);
 
+#define OP_vkResetEvent 20046
 VkResult marshal_vkResetEvent(
     VulkanStream* vkStream,
     VkDevice device,
@@ -904,6 +951,7 @@ void unmarshal_VkQueryPoolCreateInfo(
     VulkanStream* vkStream,
     VkQueryPoolCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateQueryPool 20047
 VkResult marshal_vkCreateQueryPool(
     VulkanStream* vkStream,
     VkDevice device,
@@ -918,6 +966,7 @@ VkResult unmarshal_vkCreateQueryPool(
     const VkAllocationCallbacks* pAllocator,
     VkQueryPool* pQueryPool);
 
+#define OP_vkDestroyQueryPool 20048
 void marshal_vkDestroyQueryPool(
     VulkanStream* vkStream,
     VkDevice device,
@@ -930,6 +979,7 @@ void unmarshal_vkDestroyQueryPool(
     VkQueryPool queryPool,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkGetQueryPoolResults 20049
 VkResult marshal_vkGetQueryPoolResults(
     VulkanStream* vkStream,
     VkDevice device,
@@ -960,6 +1010,7 @@ void unmarshal_VkBufferCreateInfo(
     VulkanStream* vkStream,
     VkBufferCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateBuffer 20050
 VkResult marshal_vkCreateBuffer(
     VulkanStream* vkStream,
     VkDevice device,
@@ -974,6 +1025,7 @@ VkResult unmarshal_vkCreateBuffer(
     const VkAllocationCallbacks* pAllocator,
     VkBuffer* pBuffer);
 
+#define OP_vkDestroyBuffer 20051
 void marshal_vkDestroyBuffer(
     VulkanStream* vkStream,
     VkDevice device,
@@ -994,6 +1046,7 @@ void unmarshal_VkBufferViewCreateInfo(
     VulkanStream* vkStream,
     VkBufferViewCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateBufferView 20052
 VkResult marshal_vkCreateBufferView(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1008,6 +1061,7 @@ VkResult unmarshal_vkCreateBufferView(
     const VkAllocationCallbacks* pAllocator,
     VkBufferView* pView);
 
+#define OP_vkDestroyBufferView 20053
 void marshal_vkDestroyBufferView(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1028,6 +1082,7 @@ void unmarshal_VkImageCreateInfo(
     VulkanStream* vkStream,
     VkImageCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateImage 20054
 VkResult marshal_vkCreateImage(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1042,6 +1097,7 @@ VkResult unmarshal_vkCreateImage(
     const VkAllocationCallbacks* pAllocator,
     VkImage* pImage);
 
+#define OP_vkDestroyImage 20055
 void marshal_vkDestroyImage(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1062,6 +1118,7 @@ void unmarshal_VkSubresourceLayout(
     VulkanStream* vkStream,
     VkSubresourceLayout* forUnmarshaling);
 
+#define OP_vkGetImageSubresourceLayout 20056
 void marshal_vkGetImageSubresourceLayout(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1100,6 +1157,7 @@ void unmarshal_VkImageViewCreateInfo(
     VulkanStream* vkStream,
     VkImageViewCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateImageView 20057
 VkResult marshal_vkCreateImageView(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1114,6 +1172,7 @@ VkResult unmarshal_vkCreateImageView(
     const VkAllocationCallbacks* pAllocator,
     VkImageView* pView);
 
+#define OP_vkDestroyImageView 20058
 void marshal_vkDestroyImageView(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1134,6 +1193,7 @@ void unmarshal_VkShaderModuleCreateInfo(
     VulkanStream* vkStream,
     VkShaderModuleCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateShaderModule 20059
 VkResult marshal_vkCreateShaderModule(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1148,6 +1208,7 @@ VkResult unmarshal_vkCreateShaderModule(
     const VkAllocationCallbacks* pAllocator,
     VkShaderModule* pShaderModule);
 
+#define OP_vkDestroyShaderModule 20060
 void marshal_vkDestroyShaderModule(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1168,6 +1229,7 @@ void unmarshal_VkPipelineCacheCreateInfo(
     VulkanStream* vkStream,
     VkPipelineCacheCreateInfo* forUnmarshaling);
 
+#define OP_vkCreatePipelineCache 20061
 VkResult marshal_vkCreatePipelineCache(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1182,6 +1244,7 @@ VkResult unmarshal_vkCreatePipelineCache(
     const VkAllocationCallbacks* pAllocator,
     VkPipelineCache* pPipelineCache);
 
+#define OP_vkDestroyPipelineCache 20062
 void marshal_vkDestroyPipelineCache(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1194,6 +1257,7 @@ void unmarshal_vkDestroyPipelineCache(
     VkPipelineCache pipelineCache,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkGetPipelineCacheData 20063
 VkResult marshal_vkGetPipelineCacheData(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1208,6 +1272,7 @@ VkResult unmarshal_vkGetPipelineCacheData(
     size_t* pDataSize,
     void* pData);
 
+#define OP_vkMergePipelineCaches 20064
 VkResult marshal_vkMergePipelineCaches(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1390,6 +1455,7 @@ void unmarshal_VkGraphicsPipelineCreateInfo(
     VulkanStream* vkStream,
     VkGraphicsPipelineCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateGraphicsPipelines 20065
 VkResult marshal_vkCreateGraphicsPipelines(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1416,6 +1482,7 @@ void unmarshal_VkComputePipelineCreateInfo(
     VulkanStream* vkStream,
     VkComputePipelineCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateComputePipelines 20066
 VkResult marshal_vkCreateComputePipelines(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1434,6 +1501,7 @@ VkResult unmarshal_vkCreateComputePipelines(
     const VkAllocationCallbacks* pAllocator,
     VkPipeline* pPipelines);
 
+#define OP_vkDestroyPipeline 20067
 void marshal_vkDestroyPipeline(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1462,6 +1530,7 @@ void unmarshal_VkPipelineLayoutCreateInfo(
     VulkanStream* vkStream,
     VkPipelineLayoutCreateInfo* forUnmarshaling);
 
+#define OP_vkCreatePipelineLayout 20068
 VkResult marshal_vkCreatePipelineLayout(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1476,6 +1545,7 @@ VkResult unmarshal_vkCreatePipelineLayout(
     const VkAllocationCallbacks* pAllocator,
     VkPipelineLayout* pPipelineLayout);
 
+#define OP_vkDestroyPipelineLayout 20069
 void marshal_vkDestroyPipelineLayout(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1496,6 +1566,7 @@ void unmarshal_VkSamplerCreateInfo(
     VulkanStream* vkStream,
     VkSamplerCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateSampler 20070
 VkResult marshal_vkCreateSampler(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1510,6 +1581,7 @@ VkResult unmarshal_vkCreateSampler(
     const VkAllocationCallbacks* pAllocator,
     VkSampler* pSampler);
 
+#define OP_vkDestroySampler 20071
 void marshal_vkDestroySampler(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1538,6 +1610,7 @@ void unmarshal_VkDescriptorSetLayoutCreateInfo(
     VulkanStream* vkStream,
     VkDescriptorSetLayoutCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateDescriptorSetLayout 20072
 VkResult marshal_vkCreateDescriptorSetLayout(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1552,6 +1625,7 @@ VkResult unmarshal_vkCreateDescriptorSetLayout(
     const VkAllocationCallbacks* pAllocator,
     VkDescriptorSetLayout* pSetLayout);
 
+#define OP_vkDestroyDescriptorSetLayout 20073
 void marshal_vkDestroyDescriptorSetLayout(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1580,6 +1654,7 @@ void unmarshal_VkDescriptorPoolCreateInfo(
     VulkanStream* vkStream,
     VkDescriptorPoolCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateDescriptorPool 20074
 VkResult marshal_vkCreateDescriptorPool(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1594,6 +1669,7 @@ VkResult unmarshal_vkCreateDescriptorPool(
     const VkAllocationCallbacks* pAllocator,
     VkDescriptorPool* pDescriptorPool);
 
+#define OP_vkDestroyDescriptorPool 20075
 void marshal_vkDestroyDescriptorPool(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1606,6 +1682,7 @@ void unmarshal_vkDestroyDescriptorPool(
     VkDescriptorPool descriptorPool,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkResetDescriptorPool 20076
 VkResult marshal_vkResetDescriptorPool(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1626,6 +1703,7 @@ void unmarshal_VkDescriptorSetAllocateInfo(
     VulkanStream* vkStream,
     VkDescriptorSetAllocateInfo* forUnmarshaling);
 
+#define OP_vkAllocateDescriptorSets 20077
 VkResult marshal_vkAllocateDescriptorSets(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1638,6 +1716,7 @@ VkResult unmarshal_vkAllocateDescriptorSets(
     const VkDescriptorSetAllocateInfo* pAllocateInfo,
     VkDescriptorSet* pDescriptorSets);
 
+#define OP_vkFreeDescriptorSets 20078
 VkResult marshal_vkFreeDescriptorSets(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1684,6 +1763,7 @@ void unmarshal_VkCopyDescriptorSet(
     VulkanStream* vkStream,
     VkCopyDescriptorSet* forUnmarshaling);
 
+#define OP_vkUpdateDescriptorSets 20079
 void marshal_vkUpdateDescriptorSets(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1708,6 +1788,7 @@ void unmarshal_VkFramebufferCreateInfo(
     VulkanStream* vkStream,
     VkFramebufferCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateFramebuffer 20080
 VkResult marshal_vkCreateFramebuffer(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1722,6 +1803,7 @@ VkResult unmarshal_vkCreateFramebuffer(
     const VkAllocationCallbacks* pAllocator,
     VkFramebuffer* pFramebuffer);
 
+#define OP_vkDestroyFramebuffer 20081
 void marshal_vkDestroyFramebuffer(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1774,6 +1856,7 @@ void unmarshal_VkRenderPassCreateInfo(
     VulkanStream* vkStream,
     VkRenderPassCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateRenderPass 20082
 VkResult marshal_vkCreateRenderPass(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1788,6 +1871,7 @@ VkResult unmarshal_vkCreateRenderPass(
     const VkAllocationCallbacks* pAllocator,
     VkRenderPass* pRenderPass);
 
+#define OP_vkDestroyRenderPass 20083
 void marshal_vkDestroyRenderPass(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1800,6 +1884,7 @@ void unmarshal_vkDestroyRenderPass(
     VkRenderPass renderPass,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkGetRenderAreaGranularity 20084
 void marshal_vkGetRenderAreaGranularity(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1820,6 +1905,7 @@ void unmarshal_VkCommandPoolCreateInfo(
     VulkanStream* vkStream,
     VkCommandPoolCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateCommandPool 20085
 VkResult marshal_vkCreateCommandPool(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1834,6 +1920,7 @@ VkResult unmarshal_vkCreateCommandPool(
     const VkAllocationCallbacks* pAllocator,
     VkCommandPool* pCommandPool);
 
+#define OP_vkDestroyCommandPool 20086
 void marshal_vkDestroyCommandPool(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1846,6 +1933,7 @@ void unmarshal_vkDestroyCommandPool(
     VkCommandPool commandPool,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkResetCommandPool 20087
 VkResult marshal_vkResetCommandPool(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1866,6 +1954,7 @@ void unmarshal_VkCommandBufferAllocateInfo(
     VulkanStream* vkStream,
     VkCommandBufferAllocateInfo* forUnmarshaling);
 
+#define OP_vkAllocateCommandBuffers 20088
 VkResult marshal_vkAllocateCommandBuffers(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1878,6 +1967,7 @@ VkResult unmarshal_vkAllocateCommandBuffers(
     const VkCommandBufferAllocateInfo* pAllocateInfo,
     VkCommandBuffer* pCommandBuffers);
 
+#define OP_vkFreeCommandBuffers 20089
 void marshal_vkFreeCommandBuffers(
     VulkanStream* vkStream,
     VkDevice device,
@@ -1908,6 +1998,7 @@ void unmarshal_VkCommandBufferBeginInfo(
     VulkanStream* vkStream,
     VkCommandBufferBeginInfo* forUnmarshaling);
 
+#define OP_vkBeginCommandBuffer 20090
 VkResult marshal_vkBeginCommandBuffer(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -1918,6 +2009,7 @@ VkResult unmarshal_vkBeginCommandBuffer(
     VkCommandBuffer commandBuffer,
     const VkCommandBufferBeginInfo* pBeginInfo);
 
+#define OP_vkEndCommandBuffer 20091
 VkResult marshal_vkEndCommandBuffer(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer);
@@ -1926,6 +2018,7 @@ VkResult unmarshal_vkEndCommandBuffer(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer);
 
+#define OP_vkResetCommandBuffer 20092
 VkResult marshal_vkResetCommandBuffer(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -1936,6 +2029,7 @@ VkResult unmarshal_vkResetCommandBuffer(
     VkCommandBuffer commandBuffer,
     VkCommandBufferResetFlags flags);
 
+#define OP_vkCmdBindPipeline 20093
 void marshal_vkCmdBindPipeline(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -1948,6 +2042,7 @@ void unmarshal_vkCmdBindPipeline(
     VkPipelineBindPoint pipelineBindPoint,
     VkPipeline pipeline);
 
+#define OP_vkCmdSetViewport 20094
 void marshal_vkCmdSetViewport(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -1962,6 +2057,7 @@ void unmarshal_vkCmdSetViewport(
     uint32_t viewportCount,
     const VkViewport* pViewports);
 
+#define OP_vkCmdSetScissor 20095
 void marshal_vkCmdSetScissor(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -1976,6 +2072,7 @@ void unmarshal_vkCmdSetScissor(
     uint32_t scissorCount,
     const VkRect2D* pScissors);
 
+#define OP_vkCmdSetLineWidth 20096
 void marshal_vkCmdSetLineWidth(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -1986,6 +2083,7 @@ void unmarshal_vkCmdSetLineWidth(
     VkCommandBuffer commandBuffer,
     float lineWidth);
 
+#define OP_vkCmdSetDepthBias 20097
 void marshal_vkCmdSetDepthBias(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2000,6 +2098,7 @@ void unmarshal_vkCmdSetDepthBias(
     float depthBiasClamp,
     float depthBiasSlopeFactor);
 
+#define OP_vkCmdSetBlendConstants 20098
 void marshal_vkCmdSetBlendConstants(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2010,6 +2109,7 @@ void unmarshal_vkCmdSetBlendConstants(
     VkCommandBuffer commandBuffer,
     const float blendConstants);
 
+#define OP_vkCmdSetDepthBounds 20099
 void marshal_vkCmdSetDepthBounds(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2022,6 +2122,7 @@ void unmarshal_vkCmdSetDepthBounds(
     float minDepthBounds,
     float maxDepthBounds);
 
+#define OP_vkCmdSetStencilCompareMask 20100
 void marshal_vkCmdSetStencilCompareMask(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2034,6 +2135,7 @@ void unmarshal_vkCmdSetStencilCompareMask(
     VkStencilFaceFlags faceMask,
     uint32_t compareMask);
 
+#define OP_vkCmdSetStencilWriteMask 20101
 void marshal_vkCmdSetStencilWriteMask(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2046,6 +2148,7 @@ void unmarshal_vkCmdSetStencilWriteMask(
     VkStencilFaceFlags faceMask,
     uint32_t writeMask);
 
+#define OP_vkCmdSetStencilReference 20102
 void marshal_vkCmdSetStencilReference(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2058,6 +2161,7 @@ void unmarshal_vkCmdSetStencilReference(
     VkStencilFaceFlags faceMask,
     uint32_t reference);
 
+#define OP_vkCmdBindDescriptorSets 20103
 void marshal_vkCmdBindDescriptorSets(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2080,6 +2184,7 @@ void unmarshal_vkCmdBindDescriptorSets(
     uint32_t dynamicOffsetCount,
     const uint32_t* pDynamicOffsets);
 
+#define OP_vkCmdBindIndexBuffer 20104
 void marshal_vkCmdBindIndexBuffer(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2094,6 +2199,7 @@ void unmarshal_vkCmdBindIndexBuffer(
     VkDeviceSize offset,
     VkIndexType indexType);
 
+#define OP_vkCmdBindVertexBuffers 20105
 void marshal_vkCmdBindVertexBuffers(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2110,6 +2216,7 @@ void unmarshal_vkCmdBindVertexBuffers(
     const VkBuffer* pBuffers,
     const VkDeviceSize* pOffsets);
 
+#define OP_vkCmdDraw 20106
 void marshal_vkCmdDraw(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2126,6 +2233,7 @@ void unmarshal_vkCmdDraw(
     uint32_t firstVertex,
     uint32_t firstInstance);
 
+#define OP_vkCmdDrawIndexed 20107
 void marshal_vkCmdDrawIndexed(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2144,6 +2252,7 @@ void unmarshal_vkCmdDrawIndexed(
     int32_t vertexOffset,
     uint32_t firstInstance);
 
+#define OP_vkCmdDrawIndirect 20108
 void marshal_vkCmdDrawIndirect(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2160,6 +2269,7 @@ void unmarshal_vkCmdDrawIndirect(
     uint32_t drawCount,
     uint32_t stride);
 
+#define OP_vkCmdDrawIndexedIndirect 20109
 void marshal_vkCmdDrawIndexedIndirect(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2176,6 +2286,7 @@ void unmarshal_vkCmdDrawIndexedIndirect(
     uint32_t drawCount,
     uint32_t stride);
 
+#define OP_vkCmdDispatch 20110
 void marshal_vkCmdDispatch(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2190,6 +2301,7 @@ void unmarshal_vkCmdDispatch(
     uint32_t groupCountY,
     uint32_t groupCountZ);
 
+#define OP_vkCmdDispatchIndirect 20111
 void marshal_vkCmdDispatchIndirect(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2210,6 +2322,7 @@ void unmarshal_VkBufferCopy(
     VulkanStream* vkStream,
     VkBufferCopy* forUnmarshaling);
 
+#define OP_vkCmdCopyBuffer 20112
 void marshal_vkCmdCopyBuffer(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2242,6 +2355,7 @@ void unmarshal_VkImageCopy(
     VulkanStream* vkStream,
     VkImageCopy* forUnmarshaling);
 
+#define OP_vkCmdCopyImage 20113
 void marshal_vkCmdCopyImage(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2270,6 +2384,7 @@ void unmarshal_VkImageBlit(
     VulkanStream* vkStream,
     VkImageBlit* forUnmarshaling);
 
+#define OP_vkCmdBlitImage 20114
 void marshal_vkCmdBlitImage(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2300,6 +2415,7 @@ void unmarshal_VkBufferImageCopy(
     VulkanStream* vkStream,
     VkBufferImageCopy* forUnmarshaling);
 
+#define OP_vkCmdCopyBufferToImage 20115
 void marshal_vkCmdCopyBufferToImage(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2318,6 +2434,7 @@ void unmarshal_vkCmdCopyBufferToImage(
     uint32_t regionCount,
     const VkBufferImageCopy* pRegions);
 
+#define OP_vkCmdCopyImageToBuffer 20116
 void marshal_vkCmdCopyImageToBuffer(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2336,6 +2453,7 @@ void unmarshal_vkCmdCopyImageToBuffer(
     uint32_t regionCount,
     const VkBufferImageCopy* pRegions);
 
+#define OP_vkCmdUpdateBuffer 20117
 void marshal_vkCmdUpdateBuffer(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2352,6 +2470,7 @@ void unmarshal_vkCmdUpdateBuffer(
     VkDeviceSize dataSize,
     const void* pData);
 
+#define OP_vkCmdFillBuffer 20118
 void marshal_vkCmdFillBuffer(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2376,6 +2495,7 @@ void unmarshal_VkClearColorValue(
     VulkanStream* vkStream,
     VkClearColorValue* forUnmarshaling);
 
+#define OP_vkCmdClearColorImage 20119
 void marshal_vkCmdClearColorImage(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2402,6 +2522,7 @@ void unmarshal_VkClearDepthStencilValue(
     VulkanStream* vkStream,
     VkClearDepthStencilValue* forUnmarshaling);
 
+#define OP_vkCmdClearDepthStencilImage 20120
 void marshal_vkCmdClearDepthStencilImage(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2444,6 +2565,7 @@ void unmarshal_VkClearRect(
     VulkanStream* vkStream,
     VkClearRect* forUnmarshaling);
 
+#define OP_vkCmdClearAttachments 20121
 void marshal_vkCmdClearAttachments(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2468,6 +2590,7 @@ void unmarshal_VkImageResolve(
     VulkanStream* vkStream,
     VkImageResolve* forUnmarshaling);
 
+#define OP_vkCmdResolveImage 20122
 void marshal_vkCmdResolveImage(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2488,6 +2611,7 @@ void unmarshal_vkCmdResolveImage(
     uint32_t regionCount,
     const VkImageResolve* pRegions);
 
+#define OP_vkCmdSetEvent 20123
 void marshal_vkCmdSetEvent(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2500,6 +2624,7 @@ void unmarshal_vkCmdSetEvent(
     VkEvent event,
     VkPipelineStageFlags stageMask);
 
+#define OP_vkCmdResetEvent 20124
 void marshal_vkCmdResetEvent(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2536,6 +2661,7 @@ void unmarshal_VkImageMemoryBarrier(
     VulkanStream* vkStream,
     VkImageMemoryBarrier* forUnmarshaling);
 
+#define OP_vkCmdWaitEvents 20125
 void marshal_vkCmdWaitEvents(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2564,6 +2690,7 @@ void unmarshal_vkCmdWaitEvents(
     uint32_t imageMemoryBarrierCount,
     const VkImageMemoryBarrier* pImageMemoryBarriers);
 
+#define OP_vkCmdPipelineBarrier 20126
 void marshal_vkCmdPipelineBarrier(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2590,6 +2717,7 @@ void unmarshal_vkCmdPipelineBarrier(
     uint32_t imageMemoryBarrierCount,
     const VkImageMemoryBarrier* pImageMemoryBarriers);
 
+#define OP_vkCmdBeginQuery 20127
 void marshal_vkCmdBeginQuery(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2604,6 +2732,7 @@ void unmarshal_vkCmdBeginQuery(
     uint32_t query,
     VkQueryControlFlags flags);
 
+#define OP_vkCmdEndQuery 20128
 void marshal_vkCmdEndQuery(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2616,6 +2745,7 @@ void unmarshal_vkCmdEndQuery(
     VkQueryPool queryPool,
     uint32_t query);
 
+#define OP_vkCmdResetQueryPool 20129
 void marshal_vkCmdResetQueryPool(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2630,6 +2760,7 @@ void unmarshal_vkCmdResetQueryPool(
     uint32_t firstQuery,
     uint32_t queryCount);
 
+#define OP_vkCmdWriteTimestamp 20130
 void marshal_vkCmdWriteTimestamp(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2644,6 +2775,7 @@ void unmarshal_vkCmdWriteTimestamp(
     VkQueryPool queryPool,
     uint32_t query);
 
+#define OP_vkCmdCopyQueryPoolResults 20131
 void marshal_vkCmdCopyQueryPoolResults(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2666,6 +2798,7 @@ void unmarshal_vkCmdCopyQueryPoolResults(
     VkDeviceSize stride,
     VkQueryResultFlags flags);
 
+#define OP_vkCmdPushConstants 20132
 void marshal_vkCmdPushConstants(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2692,6 +2825,7 @@ void unmarshal_VkRenderPassBeginInfo(
     VulkanStream* vkStream,
     VkRenderPassBeginInfo* forUnmarshaling);
 
+#define OP_vkCmdBeginRenderPass 20133
 void marshal_vkCmdBeginRenderPass(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2704,6 +2838,7 @@ void unmarshal_vkCmdBeginRenderPass(
     const VkRenderPassBeginInfo* pRenderPassBegin,
     VkSubpassContents contents);
 
+#define OP_vkCmdNextSubpass 20134
 void marshal_vkCmdNextSubpass(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2714,6 +2849,7 @@ void unmarshal_vkCmdNextSubpass(
     VkCommandBuffer commandBuffer,
     VkSubpassContents contents);
 
+#define OP_vkCmdEndRenderPass 20135
 void marshal_vkCmdEndRenderPass(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer);
@@ -2722,6 +2858,7 @@ void unmarshal_vkCmdEndRenderPass(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer);
 
+#define OP_vkCmdExecuteCommands 20136
 void marshal_vkCmdExecuteCommands(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2776,6 +2913,7 @@ void unmarshal_VkBaseInStructure(
 
 #endif
 #ifdef VK_VERSION_1_1
+#define OP_vkEnumerateInstanceVersion 20137
 VkResult marshal_vkEnumerateInstanceVersion(
     VulkanStream* vkStream,
     uint32_t* pApiVersion);
@@ -2808,6 +2946,7 @@ void unmarshal_VkBindImageMemoryInfo(
     VulkanStream* vkStream,
     VkBindImageMemoryInfo* forUnmarshaling);
 
+#define OP_vkBindBufferMemory2 20138
 VkResult marshal_vkBindBufferMemory2(
     VulkanStream* vkStream,
     VkDevice device,
@@ -2820,6 +2959,7 @@ VkResult unmarshal_vkBindBufferMemory2(
     uint32_t bindInfoCount,
     const VkBindBufferMemoryInfo* pBindInfos);
 
+#define OP_vkBindImageMemory2 20139
 VkResult marshal_vkBindImageMemory2(
     VulkanStream* vkStream,
     VkDevice device,
@@ -2896,6 +3036,7 @@ void unmarshal_VkDeviceGroupBindSparseInfo(
     VulkanStream* vkStream,
     VkDeviceGroupBindSparseInfo* forUnmarshaling);
 
+#define OP_vkGetDeviceGroupPeerMemoryFeatures 20140
 void marshal_vkGetDeviceGroupPeerMemoryFeatures(
     VulkanStream* vkStream,
     VkDevice device,
@@ -2912,6 +3053,7 @@ void unmarshal_vkGetDeviceGroupPeerMemoryFeatures(
     uint32_t remoteDeviceIndex,
     VkPeerMemoryFeatureFlags* pPeerMemoryFeatures);
 
+#define OP_vkCmdSetDeviceMask 20141
 void marshal_vkCmdSetDeviceMask(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2922,6 +3064,7 @@ void unmarshal_vkCmdSetDeviceMask(
     VkCommandBuffer commandBuffer,
     uint32_t deviceMask);
 
+#define OP_vkCmdDispatchBase 20142
 void marshal_vkCmdDispatchBase(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -2974,6 +3117,7 @@ void unmarshal_VkDeviceGroupDeviceCreateInfo(
     VulkanStream* vkStream,
     VkDeviceGroupDeviceCreateInfo* forUnmarshaling);
 
+#define OP_vkEnumeratePhysicalDeviceGroups 20143
 VkResult marshal_vkEnumeratePhysicalDeviceGroups(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -3026,6 +3170,7 @@ void unmarshal_VkSparseImageMemoryRequirements2(
     VulkanStream* vkStream,
     VkSparseImageMemoryRequirements2* forUnmarshaling);
 
+#define OP_vkGetImageMemoryRequirements2 20144
 void marshal_vkGetImageMemoryRequirements2(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3038,6 +3183,7 @@ void unmarshal_vkGetImageMemoryRequirements2(
     const VkImageMemoryRequirementsInfo2* pInfo,
     VkMemoryRequirements2* pMemoryRequirements);
 
+#define OP_vkGetBufferMemoryRequirements2 20145
 void marshal_vkGetBufferMemoryRequirements2(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3050,6 +3196,7 @@ void unmarshal_vkGetBufferMemoryRequirements2(
     const VkBufferMemoryRequirementsInfo2* pInfo,
     VkMemoryRequirements2* pMemoryRequirements);
 
+#define OP_vkGetImageSparseMemoryRequirements2 20146
 void marshal_vkGetImageSparseMemoryRequirements2(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3136,6 +3283,7 @@ void unmarshal_VkPhysicalDeviceSparseImageFormatInfo2(
     VulkanStream* vkStream,
     VkPhysicalDeviceSparseImageFormatInfo2* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceFeatures2 20147
 void marshal_vkGetPhysicalDeviceFeatures2(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -3146,6 +3294,7 @@ void unmarshal_vkGetPhysicalDeviceFeatures2(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceFeatures2* pFeatures);
 
+#define OP_vkGetPhysicalDeviceProperties2 20148
 void marshal_vkGetPhysicalDeviceProperties2(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -3156,6 +3305,7 @@ void unmarshal_vkGetPhysicalDeviceProperties2(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceProperties2* pProperties);
 
+#define OP_vkGetPhysicalDeviceFormatProperties2 20149
 void marshal_vkGetPhysicalDeviceFormatProperties2(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -3168,6 +3318,7 @@ void unmarshal_vkGetPhysicalDeviceFormatProperties2(
     VkFormat format,
     VkFormatProperties2* pFormatProperties);
 
+#define OP_vkGetPhysicalDeviceImageFormatProperties2 20150
 VkResult marshal_vkGetPhysicalDeviceImageFormatProperties2(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -3180,6 +3331,7 @@ VkResult unmarshal_vkGetPhysicalDeviceImageFormatProperties2(
     const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo,
     VkImageFormatProperties2* pImageFormatProperties);
 
+#define OP_vkGetPhysicalDeviceQueueFamilyProperties2 20151
 void marshal_vkGetPhysicalDeviceQueueFamilyProperties2(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -3192,6 +3344,7 @@ void unmarshal_vkGetPhysicalDeviceQueueFamilyProperties2(
     uint32_t* pQueueFamilyPropertyCount,
     VkQueueFamilyProperties2* pQueueFamilyProperties);
 
+#define OP_vkGetPhysicalDeviceMemoryProperties2 20152
 void marshal_vkGetPhysicalDeviceMemoryProperties2(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -3202,6 +3355,7 @@ void unmarshal_vkGetPhysicalDeviceMemoryProperties2(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceMemoryProperties2* pMemoryProperties);
 
+#define OP_vkGetPhysicalDeviceSparseImageFormatProperties2 20153
 void marshal_vkGetPhysicalDeviceSparseImageFormatProperties2(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -3216,6 +3370,7 @@ void unmarshal_vkGetPhysicalDeviceSparseImageFormatProperties2(
     uint32_t* pPropertyCount,
     VkSparseImageFormatProperties2* pProperties);
 
+#define OP_vkTrimCommandPool 20154
 void marshal_vkTrimCommandPool(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3332,6 +3487,7 @@ void unmarshal_VkProtectedSubmitInfo(
     VulkanStream* vkStream,
     VkProtectedSubmitInfo* forUnmarshaling);
 
+#define OP_vkGetDeviceQueue2 20155
 void marshal_vkGetDeviceQueue2(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3392,6 +3548,7 @@ void unmarshal_VkSamplerYcbcrConversionImageFormatProperties(
     VulkanStream* vkStream,
     VkSamplerYcbcrConversionImageFormatProperties* forUnmarshaling);
 
+#define OP_vkCreateSamplerYcbcrConversion 20156
 VkResult marshal_vkCreateSamplerYcbcrConversion(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3406,6 +3563,7 @@ VkResult unmarshal_vkCreateSamplerYcbcrConversion(
     const VkAllocationCallbacks* pAllocator,
     VkSamplerYcbcrConversion* pYcbcrConversion);
 
+#define OP_vkDestroySamplerYcbcrConversion 20157
 void marshal_vkDestroySamplerYcbcrConversion(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3434,6 +3592,7 @@ void unmarshal_VkDescriptorUpdateTemplateCreateInfo(
     VulkanStream* vkStream,
     VkDescriptorUpdateTemplateCreateInfo* forUnmarshaling);
 
+#define OP_vkCreateDescriptorUpdateTemplate 20158
 VkResult marshal_vkCreateDescriptorUpdateTemplate(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3448,6 +3607,7 @@ VkResult unmarshal_vkCreateDescriptorUpdateTemplate(
     const VkAllocationCallbacks* pAllocator,
     VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate);
 
+#define OP_vkDestroyDescriptorUpdateTemplate 20159
 void marshal_vkDestroyDescriptorUpdateTemplate(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3460,6 +3620,7 @@ void unmarshal_vkDestroyDescriptorUpdateTemplate(
     VkDescriptorUpdateTemplate descriptorUpdateTemplate,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkUpdateDescriptorSetWithTemplate 20160
 void marshal_vkUpdateDescriptorSetWithTemplate(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3522,6 +3683,7 @@ void unmarshal_VkPhysicalDeviceIDProperties(
     VulkanStream* vkStream,
     VkPhysicalDeviceIDProperties* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceExternalBufferProperties 20161
 void marshal_vkGetPhysicalDeviceExternalBufferProperties(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -3574,6 +3736,7 @@ void unmarshal_VkExternalFenceProperties(
     VulkanStream* vkStream,
     VkExternalFenceProperties* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceExternalFenceProperties 20162
 void marshal_vkGetPhysicalDeviceExternalFenceProperties(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -3618,6 +3781,7 @@ void unmarshal_VkExternalSemaphoreProperties(
     VulkanStream* vkStream,
     VkExternalSemaphoreProperties* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceExternalSemaphoreProperties 20163
 void marshal_vkGetPhysicalDeviceExternalSemaphoreProperties(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -3646,6 +3810,7 @@ void unmarshal_VkDescriptorSetLayoutSupport(
     VulkanStream* vkStream,
     VkDescriptorSetLayoutSupport* forUnmarshaling);
 
+#define OP_vkGetDescriptorSetLayoutSupport 20164
 void marshal_vkGetDescriptorSetLayoutSupport(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3668,6 +3833,7 @@ void unmarshal_VkPhysicalDeviceShaderDrawParameterFeatures(
 
 #endif
 #ifdef VK_KHR_surface
+#define OP_vkDestroySurfaceKHR 20165
 void marshal_vkDestroySurfaceKHR(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -3680,6 +3846,7 @@ void unmarshal_vkDestroySurfaceKHR(
     VkSurfaceKHR surface,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkGetPhysicalDeviceSurfaceSupportKHR 20166
 VkResult marshal_vkGetPhysicalDeviceSurfaceSupportKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -3702,6 +3869,7 @@ void unmarshal_VkSurfaceCapabilitiesKHR(
     VulkanStream* vkStream,
     VkSurfaceCapabilitiesKHR* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceSurfaceCapabilitiesKHR 20167
 VkResult marshal_vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -3722,6 +3890,7 @@ void unmarshal_VkSurfaceFormatKHR(
     VulkanStream* vkStream,
     VkSurfaceFormatKHR* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceSurfaceFormatsKHR 20168
 VkResult marshal_vkGetPhysicalDeviceSurfaceFormatsKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -3736,6 +3905,7 @@ VkResult unmarshal_vkGetPhysicalDeviceSurfaceFormatsKHR(
     uint32_t* pSurfaceFormatCount,
     VkSurfaceFormatKHR* pSurfaceFormats);
 
+#define OP_vkGetPhysicalDeviceSurfacePresentModesKHR 20169
 VkResult marshal_vkGetPhysicalDeviceSurfacePresentModesKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -3760,6 +3930,7 @@ void unmarshal_VkSwapchainCreateInfoKHR(
     VulkanStream* vkStream,
     VkSwapchainCreateInfoKHR* forUnmarshaling);
 
+#define OP_vkCreateSwapchainKHR 20170
 VkResult marshal_vkCreateSwapchainKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3774,6 +3945,7 @@ VkResult unmarshal_vkCreateSwapchainKHR(
     const VkAllocationCallbacks* pAllocator,
     VkSwapchainKHR* pSwapchain);
 
+#define OP_vkDestroySwapchainKHR 20171
 void marshal_vkDestroySwapchainKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3786,6 +3958,7 @@ void unmarshal_vkDestroySwapchainKHR(
     VkSwapchainKHR swapchain,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkGetSwapchainImagesKHR 20172
 VkResult marshal_vkGetSwapchainImagesKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3800,6 +3973,7 @@ VkResult unmarshal_vkGetSwapchainImagesKHR(
     uint32_t* pSwapchainImageCount,
     VkImage* pSwapchainImages);
 
+#define OP_vkAcquireNextImageKHR 20173
 VkResult marshal_vkAcquireNextImageKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3826,6 +4000,7 @@ void unmarshal_VkPresentInfoKHR(
     VulkanStream* vkStream,
     VkPresentInfoKHR* forUnmarshaling);
 
+#define OP_vkQueuePresentKHR 20174
 VkResult marshal_vkQueuePresentKHR(
     VulkanStream* vkStream,
     VkQueue queue,
@@ -3884,6 +4059,7 @@ void unmarshal_VkDeviceGroupSwapchainCreateInfoKHR(
     VulkanStream* vkStream,
     VkDeviceGroupSwapchainCreateInfoKHR* forUnmarshaling);
 
+#define OP_vkGetDeviceGroupPresentCapabilitiesKHR 20175
 VkResult marshal_vkGetDeviceGroupPresentCapabilitiesKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3894,6 +4070,7 @@ VkResult unmarshal_vkGetDeviceGroupPresentCapabilitiesKHR(
     VkDevice device,
     VkDeviceGroupPresentCapabilitiesKHR* pDeviceGroupPresentCapabilities);
 
+#define OP_vkGetDeviceGroupSurfacePresentModesKHR 20176
 VkResult marshal_vkGetDeviceGroupSurfacePresentModesKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3906,6 +4083,7 @@ VkResult unmarshal_vkGetDeviceGroupSurfacePresentModesKHR(
     VkSurfaceKHR surface,
     VkDeviceGroupPresentModeFlagsKHR* pModes);
 
+#define OP_vkGetPhysicalDevicePresentRectanglesKHR 20177
 VkResult marshal_vkGetPhysicalDevicePresentRectanglesKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -3920,6 +4098,7 @@ VkResult unmarshal_vkGetPhysicalDevicePresentRectanglesKHR(
     uint32_t* pRectCount,
     VkRect2D* pRects);
 
+#define OP_vkAcquireNextImage2KHR 20178
 VkResult marshal_vkAcquireNextImage2KHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -3990,6 +4169,7 @@ void unmarshal_VkDisplaySurfaceCreateInfoKHR(
     VulkanStream* vkStream,
     VkDisplaySurfaceCreateInfoKHR* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceDisplayPropertiesKHR 20179
 VkResult marshal_vkGetPhysicalDeviceDisplayPropertiesKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4002,6 +4182,7 @@ VkResult unmarshal_vkGetPhysicalDeviceDisplayPropertiesKHR(
     uint32_t* pPropertyCount,
     VkDisplayPropertiesKHR* pProperties);
 
+#define OP_vkGetPhysicalDeviceDisplayPlanePropertiesKHR 20180
 VkResult marshal_vkGetPhysicalDeviceDisplayPlanePropertiesKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4014,6 +4195,7 @@ VkResult unmarshal_vkGetPhysicalDeviceDisplayPlanePropertiesKHR(
     uint32_t* pPropertyCount,
     VkDisplayPlanePropertiesKHR* pProperties);
 
+#define OP_vkGetDisplayPlaneSupportedDisplaysKHR 20181
 VkResult marshal_vkGetDisplayPlaneSupportedDisplaysKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4028,6 +4210,7 @@ VkResult unmarshal_vkGetDisplayPlaneSupportedDisplaysKHR(
     uint32_t* pDisplayCount,
     VkDisplayKHR* pDisplays);
 
+#define OP_vkGetDisplayModePropertiesKHR 20182
 VkResult marshal_vkGetDisplayModePropertiesKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4042,6 +4225,7 @@ VkResult unmarshal_vkGetDisplayModePropertiesKHR(
     uint32_t* pPropertyCount,
     VkDisplayModePropertiesKHR* pProperties);
 
+#define OP_vkCreateDisplayModeKHR 20183
 VkResult marshal_vkCreateDisplayModeKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4058,6 +4242,7 @@ VkResult unmarshal_vkCreateDisplayModeKHR(
     const VkAllocationCallbacks* pAllocator,
     VkDisplayModeKHR* pMode);
 
+#define OP_vkGetDisplayPlaneCapabilitiesKHR 20184
 VkResult marshal_vkGetDisplayPlaneCapabilitiesKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4072,6 +4257,7 @@ VkResult unmarshal_vkGetDisplayPlaneCapabilitiesKHR(
     uint32_t planeIndex,
     VkDisplayPlaneCapabilitiesKHR* pCapabilities);
 
+#define OP_vkCreateDisplayPlaneSurfaceKHR 20185
 VkResult marshal_vkCreateDisplayPlaneSurfaceKHR(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -4096,6 +4282,7 @@ void unmarshal_VkDisplayPresentInfoKHR(
     VulkanStream* vkStream,
     VkDisplayPresentInfoKHR* forUnmarshaling);
 
+#define OP_vkCreateSharedSwapchainsKHR 20186
 VkResult marshal_vkCreateSharedSwapchainsKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -4122,6 +4309,7 @@ void unmarshal_VkXlibSurfaceCreateInfoKHR(
     VulkanStream* vkStream,
     VkXlibSurfaceCreateInfoKHR* forUnmarshaling);
 
+#define OP_vkCreateXlibSurfaceKHR 20187
 VkResult marshal_vkCreateXlibSurfaceKHR(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -4136,6 +4324,7 @@ VkResult unmarshal_vkCreateXlibSurfaceKHR(
     const VkAllocationCallbacks* pAllocator,
     VkSurfaceKHR* pSurface);
 
+#define OP_vkGetPhysicalDeviceXlibPresentationSupportKHR 20188
 VkBool32 marshal_vkGetPhysicalDeviceXlibPresentationSupportKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4160,6 +4349,7 @@ void unmarshal_VkXcbSurfaceCreateInfoKHR(
     VulkanStream* vkStream,
     VkXcbSurfaceCreateInfoKHR* forUnmarshaling);
 
+#define OP_vkCreateXcbSurfaceKHR 20189
 VkResult marshal_vkCreateXcbSurfaceKHR(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -4174,6 +4364,7 @@ VkResult unmarshal_vkCreateXcbSurfaceKHR(
     const VkAllocationCallbacks* pAllocator,
     VkSurfaceKHR* pSurface);
 
+#define OP_vkGetPhysicalDeviceXcbPresentationSupportKHR 20190
 VkBool32 marshal_vkGetPhysicalDeviceXcbPresentationSupportKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4198,6 +4389,7 @@ void unmarshal_VkWaylandSurfaceCreateInfoKHR(
     VulkanStream* vkStream,
     VkWaylandSurfaceCreateInfoKHR* forUnmarshaling);
 
+#define OP_vkCreateWaylandSurfaceKHR 20191
 VkResult marshal_vkCreateWaylandSurfaceKHR(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -4212,6 +4404,7 @@ VkResult unmarshal_vkCreateWaylandSurfaceKHR(
     const VkAllocationCallbacks* pAllocator,
     VkSurfaceKHR* pSurface);
 
+#define OP_vkGetPhysicalDeviceWaylandPresentationSupportKHR 20192
 VkBool32 marshal_vkGetPhysicalDeviceWaylandPresentationSupportKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4234,6 +4427,7 @@ void unmarshal_VkMirSurfaceCreateInfoKHR(
     VulkanStream* vkStream,
     VkMirSurfaceCreateInfoKHR* forUnmarshaling);
 
+#define OP_vkCreateMirSurfaceKHR 20193
 VkResult marshal_vkCreateMirSurfaceKHR(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -4248,6 +4442,7 @@ VkResult unmarshal_vkCreateMirSurfaceKHR(
     const VkAllocationCallbacks* pAllocator,
     VkSurfaceKHR* pSurface);
 
+#define OP_vkGetPhysicalDeviceMirPresentationSupportKHR 20194
 VkBool32 marshal_vkGetPhysicalDeviceMirPresentationSupportKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4270,6 +4465,7 @@ void unmarshal_VkAndroidSurfaceCreateInfoKHR(
     VulkanStream* vkStream,
     VkAndroidSurfaceCreateInfoKHR* forUnmarshaling);
 
+#define OP_vkCreateAndroidSurfaceKHR 20195
 VkResult marshal_vkCreateAndroidSurfaceKHR(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -4294,6 +4490,7 @@ void unmarshal_VkWin32SurfaceCreateInfoKHR(
     VulkanStream* vkStream,
     VkWin32SurfaceCreateInfoKHR* forUnmarshaling);
 
+#define OP_vkCreateWin32SurfaceKHR 20196
 VkResult marshal_vkCreateWin32SurfaceKHR(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -4308,6 +4505,7 @@ VkResult unmarshal_vkCreateWin32SurfaceKHR(
     const VkAllocationCallbacks* pAllocator,
     VkSurfaceKHR* pSurface);
 
+#define OP_vkGetPhysicalDeviceWin32PresentationSupportKHR 20197
 VkBool32 marshal_vkGetPhysicalDeviceWin32PresentationSupportKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4324,6 +4522,7 @@ VkBool32 unmarshal_vkGetPhysicalDeviceWin32PresentationSupportKHR(
 #ifdef VK_KHR_multiview
 #endif
 #ifdef VK_KHR_get_physical_device_properties2
+#define OP_vkGetPhysicalDeviceFeatures2KHR 20198
 void marshal_vkGetPhysicalDeviceFeatures2KHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4334,6 +4533,7 @@ void unmarshal_vkGetPhysicalDeviceFeatures2KHR(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceFeatures2* pFeatures);
 
+#define OP_vkGetPhysicalDeviceProperties2KHR 20199
 void marshal_vkGetPhysicalDeviceProperties2KHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4344,6 +4544,7 @@ void unmarshal_vkGetPhysicalDeviceProperties2KHR(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceProperties2* pProperties);
 
+#define OP_vkGetPhysicalDeviceFormatProperties2KHR 20200
 void marshal_vkGetPhysicalDeviceFormatProperties2KHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4356,6 +4557,7 @@ void unmarshal_vkGetPhysicalDeviceFormatProperties2KHR(
     VkFormat format,
     VkFormatProperties2* pFormatProperties);
 
+#define OP_vkGetPhysicalDeviceImageFormatProperties2KHR 20201
 VkResult marshal_vkGetPhysicalDeviceImageFormatProperties2KHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4368,6 +4570,7 @@ VkResult unmarshal_vkGetPhysicalDeviceImageFormatProperties2KHR(
     const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo,
     VkImageFormatProperties2* pImageFormatProperties);
 
+#define OP_vkGetPhysicalDeviceQueueFamilyProperties2KHR 20202
 void marshal_vkGetPhysicalDeviceQueueFamilyProperties2KHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4380,6 +4583,7 @@ void unmarshal_vkGetPhysicalDeviceQueueFamilyProperties2KHR(
     uint32_t* pQueueFamilyPropertyCount,
     VkQueueFamilyProperties2* pQueueFamilyProperties);
 
+#define OP_vkGetPhysicalDeviceMemoryProperties2KHR 20203
 void marshal_vkGetPhysicalDeviceMemoryProperties2KHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4390,6 +4594,7 @@ void unmarshal_vkGetPhysicalDeviceMemoryProperties2KHR(
     VkPhysicalDevice physicalDevice,
     VkPhysicalDeviceMemoryProperties2* pMemoryProperties);
 
+#define OP_vkGetPhysicalDeviceSparseImageFormatProperties2KHR 20204
 void marshal_vkGetPhysicalDeviceSparseImageFormatProperties2KHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4406,6 +4611,7 @@ void unmarshal_vkGetPhysicalDeviceSparseImageFormatProperties2KHR(
 
 #endif
 #ifdef VK_KHR_device_group
+#define OP_vkGetDeviceGroupPeerMemoryFeaturesKHR 20205
 void marshal_vkGetDeviceGroupPeerMemoryFeaturesKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -4422,6 +4628,7 @@ void unmarshal_vkGetDeviceGroupPeerMemoryFeaturesKHR(
     uint32_t remoteDeviceIndex,
     VkPeerMemoryFeatureFlags* pPeerMemoryFeatures);
 
+#define OP_vkCmdSetDeviceMaskKHR 20206
 void marshal_vkCmdSetDeviceMaskKHR(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -4432,6 +4639,7 @@ void unmarshal_vkCmdSetDeviceMaskKHR(
     VkCommandBuffer commandBuffer,
     uint32_t deviceMask);
 
+#define OP_vkCmdDispatchBaseKHR 20207
 void marshal_vkCmdDispatchBaseKHR(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -4456,6 +4664,7 @@ void unmarshal_vkCmdDispatchBaseKHR(
 #ifdef VK_KHR_shader_draw_parameters
 #endif
 #ifdef VK_KHR_maintenance1
+#define OP_vkTrimCommandPoolKHR 20208
 void marshal_vkTrimCommandPoolKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -4470,6 +4679,7 @@ void unmarshal_vkTrimCommandPoolKHR(
 
 #endif
 #ifdef VK_KHR_device_group_creation
+#define OP_vkEnumeratePhysicalDeviceGroupsKHR 20209
 VkResult marshal_vkEnumeratePhysicalDeviceGroupsKHR(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -4484,6 +4694,7 @@ VkResult unmarshal_vkEnumeratePhysicalDeviceGroupsKHR(
 
 #endif
 #ifdef VK_KHR_external_memory_capabilities
+#define OP_vkGetPhysicalDeviceExternalBufferPropertiesKHR 20210
 void marshal_vkGetPhysicalDeviceExternalBufferPropertiesKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4532,6 +4743,7 @@ void unmarshal_VkMemoryGetWin32HandleInfoKHR(
     VulkanStream* vkStream,
     VkMemoryGetWin32HandleInfoKHR* forUnmarshaling);
 
+#define OP_vkGetMemoryWin32HandleKHR 20211
 VkResult marshal_vkGetMemoryWin32HandleKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -4544,6 +4756,7 @@ VkResult unmarshal_vkGetMemoryWin32HandleKHR(
     const VkMemoryGetWin32HandleInfoKHR* pGetWin32HandleInfo,
     HANDLE* pHandle);
 
+#define OP_vkGetMemoryWin32HandlePropertiesKHR 20212
 VkResult marshal_vkGetMemoryWin32HandlePropertiesKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -4584,6 +4797,7 @@ void unmarshal_VkMemoryGetFdInfoKHR(
     VulkanStream* vkStream,
     VkMemoryGetFdInfoKHR* forUnmarshaling);
 
+#define OP_vkGetMemoryFdKHR 20213
 VkResult marshal_vkGetMemoryFdKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -4596,6 +4810,7 @@ VkResult unmarshal_vkGetMemoryFdKHR(
     const VkMemoryGetFdInfoKHR* pGetFdInfo,
     int* pFd);
 
+#define OP_vkGetMemoryFdPropertiesKHR 20214
 VkResult marshal_vkGetMemoryFdPropertiesKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -4622,6 +4837,7 @@ void unmarshal_VkWin32KeyedMutexAcquireReleaseInfoKHR(
 
 #endif
 #ifdef VK_KHR_external_semaphore_capabilities
+#define OP_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR 20215
 void marshal_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -4670,6 +4886,7 @@ void unmarshal_VkSemaphoreGetWin32HandleInfoKHR(
     VulkanStream* vkStream,
     VkSemaphoreGetWin32HandleInfoKHR* forUnmarshaling);
 
+#define OP_vkImportSemaphoreWin32HandleKHR 20216
 VkResult marshal_vkImportSemaphoreWin32HandleKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -4680,6 +4897,7 @@ VkResult unmarshal_vkImportSemaphoreWin32HandleKHR(
     VkDevice device,
     const VkImportSemaphoreWin32HandleInfoKHR* pImportSemaphoreWin32HandleInfo);
 
+#define OP_vkGetSemaphoreWin32HandleKHR 20217
 VkResult marshal_vkGetSemaphoreWin32HandleKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -4710,6 +4928,7 @@ void unmarshal_VkSemaphoreGetFdInfoKHR(
     VulkanStream* vkStream,
     VkSemaphoreGetFdInfoKHR* forUnmarshaling);
 
+#define OP_vkImportSemaphoreFdKHR 20218
 VkResult marshal_vkImportSemaphoreFdKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -4720,6 +4939,7 @@ VkResult unmarshal_vkImportSemaphoreFdKHR(
     VkDevice device,
     const VkImportSemaphoreFdInfoKHR* pImportSemaphoreFdInfo);
 
+#define OP_vkGetSemaphoreFdKHR 20219
 VkResult marshal_vkGetSemaphoreFdKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -4742,6 +4962,7 @@ void unmarshal_VkPhysicalDevicePushDescriptorPropertiesKHR(
     VulkanStream* vkStream,
     VkPhysicalDevicePushDescriptorPropertiesKHR* forUnmarshaling);
 
+#define OP_vkCmdPushDescriptorSetKHR 20220
 void marshal_vkCmdPushDescriptorSetKHR(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -4760,6 +4981,7 @@ void unmarshal_vkCmdPushDescriptorSetKHR(
     uint32_t descriptorWriteCount,
     const VkWriteDescriptorSet* pDescriptorWrites);
 
+#define OP_vkCmdPushDescriptorSetWithTemplateKHR 20221
 void marshal_vkCmdPushDescriptorSetWithTemplateKHR(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -4806,6 +5028,7 @@ void unmarshal_VkPresentRegionsKHR(
 
 #endif
 #ifdef VK_KHR_descriptor_update_template
+#define OP_vkCreateDescriptorUpdateTemplateKHR 20222
 VkResult marshal_vkCreateDescriptorUpdateTemplateKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -4820,6 +5043,7 @@ VkResult unmarshal_vkCreateDescriptorUpdateTemplateKHR(
     const VkAllocationCallbacks* pAllocator,
     VkDescriptorUpdateTemplate* pDescriptorUpdateTemplate);
 
+#define OP_vkDestroyDescriptorUpdateTemplateKHR 20223
 void marshal_vkDestroyDescriptorUpdateTemplateKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -4832,6 +5056,7 @@ void unmarshal_vkDestroyDescriptorUpdateTemplateKHR(
     VkDescriptorUpdateTemplate descriptorUpdateTemplate,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkUpdateDescriptorSetWithTemplateKHR 20224
 void marshal_vkUpdateDescriptorSetWithTemplateKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -4888,6 +5113,7 @@ void unmarshal_VkRenderPassCreateInfo2KHR(
     VulkanStream* vkStream,
     VkRenderPassCreateInfo2KHR* forUnmarshaling);
 
+#define OP_vkCreateRenderPass2KHR 20225
 VkResult marshal_vkCreateRenderPass2KHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -4910,6 +5136,7 @@ void unmarshal_VkSubpassBeginInfoKHR(
     VulkanStream* vkStream,
     VkSubpassBeginInfoKHR* forUnmarshaling);
 
+#define OP_vkCmdBeginRenderPass2KHR 20226
 void marshal_vkCmdBeginRenderPass2KHR(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -4930,6 +5157,7 @@ void unmarshal_VkSubpassEndInfoKHR(
     VulkanStream* vkStream,
     VkSubpassEndInfoKHR* forUnmarshaling);
 
+#define OP_vkCmdNextSubpass2KHR 20227
 void marshal_vkCmdNextSubpass2KHR(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -4942,6 +5170,7 @@ void unmarshal_vkCmdNextSubpass2KHR(
     const VkSubpassBeginInfoKHR* pSubpassBeginInfo,
     const VkSubpassEndInfoKHR* pSubpassEndInfo);
 
+#define OP_vkCmdEndRenderPass2KHR 20228
 void marshal_vkCmdEndRenderPass2KHR(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -4962,6 +5191,7 @@ void unmarshal_VkSharedPresentSurfaceCapabilitiesKHR(
     VulkanStream* vkStream,
     VkSharedPresentSurfaceCapabilitiesKHR* forUnmarshaling);
 
+#define OP_vkGetSwapchainStatusKHR 20229
 VkResult marshal_vkGetSwapchainStatusKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -4974,6 +5204,7 @@ VkResult unmarshal_vkGetSwapchainStatusKHR(
 
 #endif
 #ifdef VK_KHR_external_fence_capabilities
+#define OP_vkGetPhysicalDeviceExternalFencePropertiesKHR 20230
 void marshal_vkGetPhysicalDeviceExternalFencePropertiesKHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -5014,6 +5245,7 @@ void unmarshal_VkFenceGetWin32HandleInfoKHR(
     VulkanStream* vkStream,
     VkFenceGetWin32HandleInfoKHR* forUnmarshaling);
 
+#define OP_vkImportFenceWin32HandleKHR 20231
 VkResult marshal_vkImportFenceWin32HandleKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -5024,6 +5256,7 @@ VkResult unmarshal_vkImportFenceWin32HandleKHR(
     VkDevice device,
     const VkImportFenceWin32HandleInfoKHR* pImportFenceWin32HandleInfo);
 
+#define OP_vkGetFenceWin32HandleKHR 20232
 VkResult marshal_vkGetFenceWin32HandleKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -5054,6 +5287,7 @@ void unmarshal_VkFenceGetFdInfoKHR(
     VulkanStream* vkStream,
     VkFenceGetFdInfoKHR* forUnmarshaling);
 
+#define OP_vkImportFenceFdKHR 20233
 VkResult marshal_vkImportFenceFdKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -5064,6 +5298,7 @@ VkResult unmarshal_vkImportFenceFdKHR(
     VkDevice device,
     const VkImportFenceFdInfoKHR* pImportFenceFdInfo);
 
+#define OP_vkGetFenceFdKHR 20234
 VkResult marshal_vkGetFenceFdKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -5104,6 +5339,7 @@ void unmarshal_VkSurfaceFormat2KHR(
     VulkanStream* vkStream,
     VkSurfaceFormat2KHR* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceSurfaceCapabilities2KHR 20235
 VkResult marshal_vkGetPhysicalDeviceSurfaceCapabilities2KHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -5116,6 +5352,7 @@ VkResult unmarshal_vkGetPhysicalDeviceSurfaceCapabilities2KHR(
     const VkPhysicalDeviceSurfaceInfo2KHR* pSurfaceInfo,
     VkSurfaceCapabilities2KHR* pSurfaceCapabilities);
 
+#define OP_vkGetPhysicalDeviceSurfaceFormats2KHR 20236
 VkResult marshal_vkGetPhysicalDeviceSurfaceFormats2KHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -5174,6 +5411,7 @@ void unmarshal_VkDisplayPlaneCapabilities2KHR(
     VulkanStream* vkStream,
     VkDisplayPlaneCapabilities2KHR* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceDisplayProperties2KHR 20237
 VkResult marshal_vkGetPhysicalDeviceDisplayProperties2KHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -5186,6 +5424,7 @@ VkResult unmarshal_vkGetPhysicalDeviceDisplayProperties2KHR(
     uint32_t* pPropertyCount,
     VkDisplayProperties2KHR* pProperties);
 
+#define OP_vkGetPhysicalDeviceDisplayPlaneProperties2KHR 20238
 VkResult marshal_vkGetPhysicalDeviceDisplayPlaneProperties2KHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -5198,6 +5437,7 @@ VkResult unmarshal_vkGetPhysicalDeviceDisplayPlaneProperties2KHR(
     uint32_t* pPropertyCount,
     VkDisplayPlaneProperties2KHR* pProperties);
 
+#define OP_vkGetDisplayModeProperties2KHR 20239
 VkResult marshal_vkGetDisplayModeProperties2KHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -5212,6 +5452,7 @@ VkResult unmarshal_vkGetDisplayModeProperties2KHR(
     uint32_t* pPropertyCount,
     VkDisplayModeProperties2KHR* pProperties);
 
+#define OP_vkGetDisplayPlaneCapabilities2KHR 20240
 VkResult marshal_vkGetDisplayPlaneCapabilities2KHR(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -5232,6 +5473,7 @@ VkResult unmarshal_vkGetDisplayPlaneCapabilities2KHR(
 #ifdef VK_KHR_relaxed_block_layout
 #endif
 #ifdef VK_KHR_get_memory_requirements2
+#define OP_vkGetImageMemoryRequirements2KHR 20241
 void marshal_vkGetImageMemoryRequirements2KHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -5244,6 +5486,7 @@ void unmarshal_vkGetImageMemoryRequirements2KHR(
     const VkImageMemoryRequirementsInfo2* pInfo,
     VkMemoryRequirements2* pMemoryRequirements);
 
+#define OP_vkGetBufferMemoryRequirements2KHR 20242
 void marshal_vkGetBufferMemoryRequirements2KHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -5256,6 +5499,7 @@ void unmarshal_vkGetBufferMemoryRequirements2KHR(
     const VkBufferMemoryRequirementsInfo2* pInfo,
     VkMemoryRequirements2* pMemoryRequirements);
 
+#define OP_vkGetImageSparseMemoryRequirements2KHR 20243
 void marshal_vkGetImageSparseMemoryRequirements2KHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -5282,6 +5526,7 @@ void unmarshal_VkImageFormatListCreateInfoKHR(
 
 #endif
 #ifdef VK_KHR_sampler_ycbcr_conversion
+#define OP_vkCreateSamplerYcbcrConversionKHR 20244
 VkResult marshal_vkCreateSamplerYcbcrConversionKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -5296,6 +5541,7 @@ VkResult unmarshal_vkCreateSamplerYcbcrConversionKHR(
     const VkAllocationCallbacks* pAllocator,
     VkSamplerYcbcrConversion* pYcbcrConversion);
 
+#define OP_vkDestroySamplerYcbcrConversionKHR 20245
 void marshal_vkDestroySamplerYcbcrConversionKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -5310,6 +5556,7 @@ void unmarshal_vkDestroySamplerYcbcrConversionKHR(
 
 #endif
 #ifdef VK_KHR_bind_memory2
+#define OP_vkBindBufferMemory2KHR 20246
 VkResult marshal_vkBindBufferMemory2KHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -5322,6 +5569,7 @@ VkResult unmarshal_vkBindBufferMemory2KHR(
     uint32_t bindInfoCount,
     const VkBindBufferMemoryInfo* pBindInfos);
 
+#define OP_vkBindImageMemory2KHR 20247
 VkResult marshal_vkBindImageMemory2KHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -5336,6 +5584,7 @@ VkResult unmarshal_vkBindImageMemory2KHR(
 
 #endif
 #ifdef VK_KHR_maintenance3
+#define OP_vkGetDescriptorSetLayoutSupportKHR 20248
 void marshal_vkGetDescriptorSetLayoutSupportKHR(
     VulkanStream* vkStream,
     VkDevice device,
@@ -5350,6 +5599,7 @@ void unmarshal_vkGetDescriptorSetLayoutSupportKHR(
 
 #endif
 #ifdef VK_KHR_draw_indirect_count
+#define OP_vkCmdDrawIndirectCountKHR 20249
 void marshal_vkCmdDrawIndirectCountKHR(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -5370,6 +5620,7 @@ void unmarshal_vkCmdDrawIndirectCountKHR(
     uint32_t maxDrawCount,
     uint32_t stride);
 
+#define OP_vkCmdDrawIndexedIndirectCountKHR 20250
 void marshal_vkCmdDrawIndexedIndirectCountKHR(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -5410,6 +5661,7 @@ void unmarshal_VkDebugReportCallbackCreateInfoEXT(
     VulkanStream* vkStream,
     VkDebugReportCallbackCreateInfoEXT* forUnmarshaling);
 
+#define OP_vkCreateDebugReportCallbackEXT 20251
 VkResult marshal_vkCreateDebugReportCallbackEXT(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -5424,6 +5676,7 @@ VkResult unmarshal_vkCreateDebugReportCallbackEXT(
     const VkAllocationCallbacks* pAllocator,
     VkDebugReportCallbackEXT* pCallback);
 
+#define OP_vkDestroyDebugReportCallbackEXT 20252
 void marshal_vkDestroyDebugReportCallbackEXT(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -5436,6 +5689,7 @@ void unmarshal_vkDestroyDebugReportCallbackEXT(
     VkDebugReportCallbackEXT callback,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkDebugReportMessageEXT 20253
 void marshal_vkDebugReportMessageEXT(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -5504,6 +5758,7 @@ void unmarshal_VkDebugMarkerMarkerInfoEXT(
     VulkanStream* vkStream,
     VkDebugMarkerMarkerInfoEXT* forUnmarshaling);
 
+#define OP_vkDebugMarkerSetObjectTagEXT 20254
 VkResult marshal_vkDebugMarkerSetObjectTagEXT(
     VulkanStream* vkStream,
     VkDevice device,
@@ -5514,6 +5769,7 @@ VkResult unmarshal_vkDebugMarkerSetObjectTagEXT(
     VkDevice device,
     const VkDebugMarkerObjectTagInfoEXT* pTagInfo);
 
+#define OP_vkDebugMarkerSetObjectNameEXT 20255
 VkResult marshal_vkDebugMarkerSetObjectNameEXT(
     VulkanStream* vkStream,
     VkDevice device,
@@ -5524,6 +5780,7 @@ VkResult unmarshal_vkDebugMarkerSetObjectNameEXT(
     VkDevice device,
     const VkDebugMarkerObjectNameInfoEXT* pNameInfo);
 
+#define OP_vkCmdDebugMarkerBeginEXT 20256
 void marshal_vkCmdDebugMarkerBeginEXT(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -5534,6 +5791,7 @@ void unmarshal_vkCmdDebugMarkerBeginEXT(
     VkCommandBuffer commandBuffer,
     const VkDebugMarkerMarkerInfoEXT* pMarkerInfo);
 
+#define OP_vkCmdDebugMarkerEndEXT 20257
 void marshal_vkCmdDebugMarkerEndEXT(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer);
@@ -5542,6 +5800,7 @@ void unmarshal_vkCmdDebugMarkerEndEXT(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer);
 
+#define OP_vkCmdDebugMarkerInsertEXT 20258
 void marshal_vkCmdDebugMarkerInsertEXT(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -5582,6 +5841,7 @@ void unmarshal_VkDedicatedAllocationMemoryAllocateInfoNV(
 
 #endif
 #ifdef VK_AMD_draw_indirect_count
+#define OP_vkCmdDrawIndirectCountAMD 20259
 void marshal_vkCmdDrawIndirectCountAMD(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -5602,6 +5862,7 @@ void unmarshal_vkCmdDrawIndirectCountAMD(
     uint32_t maxDrawCount,
     uint32_t stride);
 
+#define OP_vkCmdDrawIndexedIndirectCountAMD 20260
 void marshal_vkCmdDrawIndexedIndirectCountAMD(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -5656,6 +5917,7 @@ void unmarshal_VkShaderStatisticsInfoAMD(
     VulkanStream* vkStream,
     VkShaderStatisticsInfoAMD* forUnmarshaling);
 
+#define OP_vkGetShaderInfoAMD 20261
 VkResult marshal_vkGetShaderInfoAMD(
     VulkanStream* vkStream,
     VkDevice device,
@@ -5688,6 +5950,7 @@ void unmarshal_VkExternalImageFormatPropertiesNV(
     VulkanStream* vkStream,
     VkExternalImageFormatPropertiesNV* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceExternalImageFormatPropertiesNV 20262
 VkResult marshal_vkGetPhysicalDeviceExternalImageFormatPropertiesNV(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -5746,6 +6009,7 @@ void unmarshal_VkExportMemoryWin32HandleInfoNV(
     VulkanStream* vkStream,
     VkExportMemoryWin32HandleInfoNV* forUnmarshaling);
 
+#define OP_vkGetMemoryWin32HandleNV 20263
 VkResult marshal_vkGetMemoryWin32HandleNV(
     VulkanStream* vkStream,
     VkDevice device,
@@ -5790,6 +6054,7 @@ void unmarshal_VkViSurfaceCreateInfoNN(
     VulkanStream* vkStream,
     VkViSurfaceCreateInfoNN* forUnmarshaling);
 
+#define OP_vkCreateViSurfaceNN 20264
 VkResult marshal_vkCreateViSurfaceNN(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -5834,6 +6099,7 @@ void unmarshal_VkCommandBufferInheritanceConditionalRenderingInfoEXT(
     VulkanStream* vkStream,
     VkCommandBufferInheritanceConditionalRenderingInfoEXT* forUnmarshaling);
 
+#define OP_vkCmdBeginConditionalRenderingEXT 20265
 void marshal_vkCmdBeginConditionalRenderingEXT(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -5844,6 +6110,7 @@ void unmarshal_vkCmdBeginConditionalRenderingEXT(
     VkCommandBuffer commandBuffer,
     const VkConditionalRenderingBeginInfoEXT* pConditionalRenderingBegin);
 
+#define OP_vkCmdEndConditionalRenderingEXT 20266
 void marshal_vkCmdEndConditionalRenderingEXT(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer);
@@ -5966,6 +6233,7 @@ void unmarshal_VkObjectTablePushConstantEntryNVX(
     VulkanStream* vkStream,
     VkObjectTablePushConstantEntryNVX* forUnmarshaling);
 
+#define OP_vkCmdProcessCommandsNVX 20267
 void marshal_vkCmdProcessCommandsNVX(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -5976,6 +6244,7 @@ void unmarshal_vkCmdProcessCommandsNVX(
     VkCommandBuffer commandBuffer,
     const VkCmdProcessCommandsInfoNVX* pProcessCommandsInfo);
 
+#define OP_vkCmdReserveSpaceForCommandsNVX 20268
 void marshal_vkCmdReserveSpaceForCommandsNVX(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -5986,6 +6255,7 @@ void unmarshal_vkCmdReserveSpaceForCommandsNVX(
     VkCommandBuffer commandBuffer,
     const VkCmdReserveSpaceForCommandsInfoNVX* pReserveSpaceInfo);
 
+#define OP_vkCreateIndirectCommandsLayoutNVX 20269
 VkResult marshal_vkCreateIndirectCommandsLayoutNVX(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6000,6 +6270,7 @@ VkResult unmarshal_vkCreateIndirectCommandsLayoutNVX(
     const VkAllocationCallbacks* pAllocator,
     VkIndirectCommandsLayoutNVX* pIndirectCommandsLayout);
 
+#define OP_vkDestroyIndirectCommandsLayoutNVX 20270
 void marshal_vkDestroyIndirectCommandsLayoutNVX(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6012,6 +6283,7 @@ void unmarshal_vkDestroyIndirectCommandsLayoutNVX(
     VkIndirectCommandsLayoutNVX indirectCommandsLayout,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkCreateObjectTableNVX 20271
 VkResult marshal_vkCreateObjectTableNVX(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6026,6 +6298,7 @@ VkResult unmarshal_vkCreateObjectTableNVX(
     const VkAllocationCallbacks* pAllocator,
     VkObjectTableNVX* pObjectTable);
 
+#define OP_vkDestroyObjectTableNVX 20272
 void marshal_vkDestroyObjectTableNVX(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6038,6 +6311,7 @@ void unmarshal_vkDestroyObjectTableNVX(
     VkObjectTableNVX objectTable,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkRegisterObjectsNVX 20273
 VkResult marshal_vkRegisterObjectsNVX(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6054,6 +6328,7 @@ VkResult unmarshal_vkRegisterObjectsNVX(
     const VkObjectTableEntryNVX* const* ppObjectTableEntries,
     const uint32_t* pObjectIndices);
 
+#define OP_vkUnregisterObjectsNVX 20274
 VkResult marshal_vkUnregisterObjectsNVX(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6070,6 +6345,7 @@ VkResult unmarshal_vkUnregisterObjectsNVX(
     const VkObjectEntryTypeNVX* pObjectEntryTypes,
     const uint32_t* pObjectIndices);
 
+#define OP_vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX 20275
 void marshal_vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -6100,6 +6376,7 @@ void unmarshal_VkPipelineViewportWScalingStateCreateInfoNV(
     VulkanStream* vkStream,
     VkPipelineViewportWScalingStateCreateInfoNV* forUnmarshaling);
 
+#define OP_vkCmdSetViewportWScalingNV 20276
 void marshal_vkCmdSetViewportWScalingNV(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -6116,6 +6393,7 @@ void unmarshal_vkCmdSetViewportWScalingNV(
 
 #endif
 #ifdef VK_EXT_direct_mode_display
+#define OP_vkReleaseDisplayEXT 20277
 VkResult marshal_vkReleaseDisplayEXT(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -6128,6 +6406,7 @@ VkResult unmarshal_vkReleaseDisplayEXT(
 
 #endif
 #ifdef VK_EXT_acquire_xlib_display
+#define OP_vkAcquireXlibDisplayEXT 20278
 VkResult marshal_vkAcquireXlibDisplayEXT(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -6140,6 +6419,7 @@ VkResult unmarshal_vkAcquireXlibDisplayEXT(
     Display* dpy,
     VkDisplayKHR display);
 
+#define OP_vkGetRandROutputDisplayEXT 20279
 VkResult marshal_vkGetRandROutputDisplayEXT(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -6164,6 +6444,7 @@ void unmarshal_VkSurfaceCapabilities2EXT(
     VulkanStream* vkStream,
     VkSurfaceCapabilities2EXT* forUnmarshaling);
 
+#define OP_vkGetPhysicalDeviceSurfaceCapabilities2EXT 20280
 VkResult marshal_vkGetPhysicalDeviceSurfaceCapabilities2EXT(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -6210,6 +6491,7 @@ void unmarshal_VkSwapchainCounterCreateInfoEXT(
     VulkanStream* vkStream,
     VkSwapchainCounterCreateInfoEXT* forUnmarshaling);
 
+#define OP_vkDisplayPowerControlEXT 20281
 VkResult marshal_vkDisplayPowerControlEXT(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6222,6 +6504,7 @@ VkResult unmarshal_vkDisplayPowerControlEXT(
     VkDisplayKHR display,
     const VkDisplayPowerInfoEXT* pDisplayPowerInfo);
 
+#define OP_vkRegisterDeviceEventEXT 20282
 VkResult marshal_vkRegisterDeviceEventEXT(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6236,6 +6519,7 @@ VkResult unmarshal_vkRegisterDeviceEventEXT(
     const VkAllocationCallbacks* pAllocator,
     VkFence* pFence);
 
+#define OP_vkRegisterDisplayEventEXT 20283
 VkResult marshal_vkRegisterDisplayEventEXT(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6252,6 +6536,7 @@ VkResult unmarshal_vkRegisterDisplayEventEXT(
     const VkAllocationCallbacks* pAllocator,
     VkFence* pFence);
 
+#define OP_vkGetSwapchainCounterEXT 20284
 VkResult marshal_vkGetSwapchainCounterEXT(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6300,6 +6585,7 @@ void unmarshal_VkPresentTimesInfoGOOGLE(
     VulkanStream* vkStream,
     VkPresentTimesInfoGOOGLE* forUnmarshaling);
 
+#define OP_vkGetRefreshCycleDurationGOOGLE 20285
 VkResult marshal_vkGetRefreshCycleDurationGOOGLE(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6312,6 +6598,7 @@ VkResult unmarshal_vkGetRefreshCycleDurationGOOGLE(
     VkSwapchainKHR swapchain,
     VkRefreshCycleDurationGOOGLE* pDisplayTimingProperties);
 
+#define OP_vkGetPastPresentationTimingGOOGLE 20286
 VkResult marshal_vkGetPastPresentationTimingGOOGLE(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6378,6 +6665,7 @@ void unmarshal_VkPipelineDiscardRectangleStateCreateInfoEXT(
     VulkanStream* vkStream,
     VkPipelineDiscardRectangleStateCreateInfoEXT* forUnmarshaling);
 
+#define OP_vkCmdSetDiscardRectangleEXT 20287
 void marshal_vkCmdSetDiscardRectangleEXT(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -6430,6 +6718,7 @@ void unmarshal_VkHdrMetadataEXT(
     VulkanStream* vkStream,
     VkHdrMetadataEXT* forUnmarshaling);
 
+#define OP_vkSetHdrMetadataEXT 20288
 void marshal_vkSetHdrMetadataEXT(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6454,6 +6743,7 @@ void unmarshal_VkIOSSurfaceCreateInfoMVK(
     VulkanStream* vkStream,
     VkIOSSurfaceCreateInfoMVK* forUnmarshaling);
 
+#define OP_vkCreateIOSSurfaceMVK 20289
 VkResult marshal_vkCreateIOSSurfaceMVK(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -6478,6 +6768,7 @@ void unmarshal_VkMacOSSurfaceCreateInfoMVK(
     VulkanStream* vkStream,
     VkMacOSSurfaceCreateInfoMVK* forUnmarshaling);
 
+#define OP_vkCreateMacOSSurfaceMVK 20290
 VkResult marshal_vkCreateMacOSSurfaceMVK(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -6538,6 +6829,7 @@ void unmarshal_VkDebugUtilsMessengerCreateInfoEXT(
     VulkanStream* vkStream,
     VkDebugUtilsMessengerCreateInfoEXT* forUnmarshaling);
 
+#define OP_vkSetDebugUtilsObjectNameEXT 20291
 VkResult marshal_vkSetDebugUtilsObjectNameEXT(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6548,6 +6840,7 @@ VkResult unmarshal_vkSetDebugUtilsObjectNameEXT(
     VkDevice device,
     const VkDebugUtilsObjectNameInfoEXT* pNameInfo);
 
+#define OP_vkSetDebugUtilsObjectTagEXT 20292
 VkResult marshal_vkSetDebugUtilsObjectTagEXT(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6558,6 +6851,7 @@ VkResult unmarshal_vkSetDebugUtilsObjectTagEXT(
     VkDevice device,
     const VkDebugUtilsObjectTagInfoEXT* pTagInfo);
 
+#define OP_vkQueueBeginDebugUtilsLabelEXT 20293
 void marshal_vkQueueBeginDebugUtilsLabelEXT(
     VulkanStream* vkStream,
     VkQueue queue,
@@ -6568,6 +6862,7 @@ void unmarshal_vkQueueBeginDebugUtilsLabelEXT(
     VkQueue queue,
     const VkDebugUtilsLabelEXT* pLabelInfo);
 
+#define OP_vkQueueEndDebugUtilsLabelEXT 20294
 void marshal_vkQueueEndDebugUtilsLabelEXT(
     VulkanStream* vkStream,
     VkQueue queue);
@@ -6576,6 +6871,7 @@ void unmarshal_vkQueueEndDebugUtilsLabelEXT(
     VulkanStream* vkStream,
     VkQueue queue);
 
+#define OP_vkQueueInsertDebugUtilsLabelEXT 20295
 void marshal_vkQueueInsertDebugUtilsLabelEXT(
     VulkanStream* vkStream,
     VkQueue queue,
@@ -6586,6 +6882,7 @@ void unmarshal_vkQueueInsertDebugUtilsLabelEXT(
     VkQueue queue,
     const VkDebugUtilsLabelEXT* pLabelInfo);
 
+#define OP_vkCmdBeginDebugUtilsLabelEXT 20296
 void marshal_vkCmdBeginDebugUtilsLabelEXT(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -6596,6 +6893,7 @@ void unmarshal_vkCmdBeginDebugUtilsLabelEXT(
     VkCommandBuffer commandBuffer,
     const VkDebugUtilsLabelEXT* pLabelInfo);
 
+#define OP_vkCmdEndDebugUtilsLabelEXT 20297
 void marshal_vkCmdEndDebugUtilsLabelEXT(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer);
@@ -6604,6 +6902,7 @@ void unmarshal_vkCmdEndDebugUtilsLabelEXT(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer);
 
+#define OP_vkCmdInsertDebugUtilsLabelEXT 20298
 void marshal_vkCmdInsertDebugUtilsLabelEXT(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -6614,6 +6913,7 @@ void unmarshal_vkCmdInsertDebugUtilsLabelEXT(
     VkCommandBuffer commandBuffer,
     const VkDebugUtilsLabelEXT* pLabelInfo);
 
+#define OP_vkCreateDebugUtilsMessengerEXT 20299
 VkResult marshal_vkCreateDebugUtilsMessengerEXT(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -6628,6 +6928,7 @@ VkResult unmarshal_vkCreateDebugUtilsMessengerEXT(
     const VkAllocationCallbacks* pAllocator,
     VkDebugUtilsMessengerEXT* pMessenger);
 
+#define OP_vkDestroyDebugUtilsMessengerEXT 20300
 void marshal_vkDestroyDebugUtilsMessengerEXT(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -6640,6 +6941,7 @@ void unmarshal_vkDestroyDebugUtilsMessengerEXT(
     VkDebugUtilsMessengerEXT messenger,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkSubmitDebugUtilsMessageEXT 20301
 void marshal_vkSubmitDebugUtilsMessageEXT(
     VulkanStream* vkStream,
     VkInstance instance,
@@ -6704,6 +7006,7 @@ void unmarshal_VkExternalFormatANDROID(
     VulkanStream* vkStream,
     VkExternalFormatANDROID* forUnmarshaling);
 
+#define OP_vkGetAndroidHardwareBufferPropertiesANDROID 20302
 VkResult marshal_vkGetAndroidHardwareBufferPropertiesANDROID(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6716,6 +7019,7 @@ VkResult unmarshal_vkGetAndroidHardwareBufferPropertiesANDROID(
     const AHardwareBuffer* buffer,
     VkAndroidHardwareBufferPropertiesANDROID* pProperties);
 
+#define OP_vkGetMemoryAndroidHardwareBufferANDROID 20303
 VkResult marshal_vkGetMemoryAndroidHardwareBufferANDROID(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6820,6 +7124,7 @@ void unmarshal_VkMultisamplePropertiesEXT(
     VulkanStream* vkStream,
     VkMultisamplePropertiesEXT* forUnmarshaling);
 
+#define OP_vkCmdSetSampleLocationsEXT 20304
 void marshal_vkCmdSetSampleLocationsEXT(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -6830,6 +7135,7 @@ void unmarshal_vkCmdSetSampleLocationsEXT(
     VkCommandBuffer commandBuffer,
     const VkSampleLocationsInfoEXT* pSampleLocationsInfo);
 
+#define OP_vkGetPhysicalDeviceMultisamplePropertiesEXT 20305
 void marshal_vkGetPhysicalDeviceMultisamplePropertiesEXT(
     VulkanStream* vkStream,
     VkPhysicalDevice physicalDevice,
@@ -6910,6 +7216,7 @@ void unmarshal_VkShaderModuleValidationCacheCreateInfoEXT(
     VulkanStream* vkStream,
     VkShaderModuleValidationCacheCreateInfoEXT* forUnmarshaling);
 
+#define OP_vkCreateValidationCacheEXT 20306
 VkResult marshal_vkCreateValidationCacheEXT(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6924,6 +7231,7 @@ VkResult unmarshal_vkCreateValidationCacheEXT(
     const VkAllocationCallbacks* pAllocator,
     VkValidationCacheEXT* pValidationCache);
 
+#define OP_vkDestroyValidationCacheEXT 20307
 void marshal_vkDestroyValidationCacheEXT(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6936,6 +7244,7 @@ void unmarshal_vkDestroyValidationCacheEXT(
     VkValidationCacheEXT validationCache,
     const VkAllocationCallbacks* pAllocator);
 
+#define OP_vkMergeValidationCachesEXT 20308
 VkResult marshal_vkMergeValidationCachesEXT(
     VulkanStream* vkStream,
     VkDevice device,
@@ -6950,6 +7259,7 @@ VkResult unmarshal_vkMergeValidationCachesEXT(
     uint32_t srcCacheCount,
     const VkValidationCacheEXT* pSrcCaches);
 
+#define OP_vkGetValidationCacheDataEXT 20309
 VkResult marshal_vkGetValidationCacheDataEXT(
     VulkanStream* vkStream,
     VkDevice device,
@@ -7044,6 +7354,7 @@ void unmarshal_VkPhysicalDeviceExternalMemoryHostPropertiesEXT(
     VulkanStream* vkStream,
     VkPhysicalDeviceExternalMemoryHostPropertiesEXT* forUnmarshaling);
 
+#define OP_vkGetMemoryHostPointerPropertiesEXT 20310
 VkResult marshal_vkGetMemoryHostPointerPropertiesEXT(
     VulkanStream* vkStream,
     VkDevice device,
@@ -7060,6 +7371,7 @@ VkResult unmarshal_vkGetMemoryHostPointerPropertiesEXT(
 
 #endif
 #ifdef VK_AMD_buffer_marker
+#define OP_vkCmdWriteBufferMarkerAMD 20311
 void marshal_vkCmdWriteBufferMarkerAMD(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -7132,6 +7444,7 @@ void unmarshal_VkCheckpointDataNV(
     VulkanStream* vkStream,
     VkCheckpointDataNV* forUnmarshaling);
 
+#define OP_vkCmdSetCheckpointNV 20312
 void marshal_vkCmdSetCheckpointNV(
     VulkanStream* vkStream,
     VkCommandBuffer commandBuffer,
@@ -7142,6 +7455,7 @@ void unmarshal_vkCmdSetCheckpointNV(
     VkCommandBuffer commandBuffer,
     const void* pCheckpointMarker);
 
+#define OP_vkGetQueueCheckpointDataNV 20313
 void marshal_vkGetQueueCheckpointDataNV(
     VulkanStream* vkStream,
     VkQueue queue,
