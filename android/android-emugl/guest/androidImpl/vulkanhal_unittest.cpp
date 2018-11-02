@@ -13,10 +13,13 @@
 // limitations under the License.
 #include <gtest/gtest.h>
 
+#include "GoldfishOpenglTestEnv.h"
+
 #include <vulkan/vulkan.h>
 
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/opengles.h"
 
 #include <atomic>
 #include <memory>
@@ -26,7 +29,33 @@ using android::base::System;
 
 namespace aemu {
 
-TEST(VulkanHal, Basic) {
+class VulkanHalTest : public ::testing::Test {
+protected:
+
+    static GoldfishOpenglTestEnv* testEnv;
+
+    static void SetUpTestCase() {
+        testEnv = new GoldfishOpenglTestEnv;
+    }
+
+    static void TearDownTestCase() {
+        delete testEnv;
+        testEnv = nullptr;
+    }
+
+    void SetUp() override {
+    }
+
+    void TearDown() override {
+        // Cancel all host threads as well
+        android_finishOpenglesRenderer();
+    }
+};
+
+// static
+GoldfishOpenglTestEnv* VulkanHalTest::testEnv = nullptr;
+
+TEST_F(VulkanHalTest, Basic) {
     VkInstance outInstance;
     VkInstanceCreateInfo createInfo = {
         VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
