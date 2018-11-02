@@ -1,4 +1,4 @@
-set(aemugraphics_src ClientComposer.cpp Display.cpp Toplevel.cpp)
+set(aemugraphics_src ClientComposer.cpp Display.cpp GoldfishOpenglTestEnv.cpp Toplevel.cpp)
 android_add_shared_library(aemugraphics)
 target_compile_options(aemugraphics PRIVATE -fvisibility=default)
 
