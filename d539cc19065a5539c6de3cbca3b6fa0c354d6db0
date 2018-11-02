@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fd5ea1eb_924beb82",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-02T19:08:12Z",
+      "side": 1,
+      "message": "potential race condition in mbuf? what if car widget gets destroyed and destroys this thread? this should really hapen in exit request handling on that thread (and for good measure, mbuf alloatd on that thread too)",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5949e055_eca225e9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-02T19:08:12Z",
+      "side": 1,
+      "message": "is there a conveient way to test this? is any of this unit testable?",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "63311d54_90adbc07",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-02T19:08:12Z",
+      "side": 1,
+      "message": "possible to spin and occupy cpu when there is no socket available? this should really be a timeout, and only active when the widget is active.",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "10869495_5107d566",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-02T19:08:12Z",
+      "side": 1,
+      "message": "style nit: space after // for all comments",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "04af16c9_27084fb8",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-02T19:08:12Z",
+      "side": 1,
+      "message": "atomic\u003cbool\u003e",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d181080f_ae64a8aa",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-02T19:08:12Z",
+      "side": 1,
+      "message": "please add apache 2.0 header above, e.g. from android/base/Pool.h (and in other files)",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "551664dd_cd61da4a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-02T19:08:12Z",
+      "side": 1,
+      "message": "no delete of the render thread? looks like we will leak threads",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
