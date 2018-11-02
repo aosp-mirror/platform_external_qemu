@@ -216,7 +216,6 @@ using DlSymFunc = void* (void*, const char*);
                 "system", "vulkan_cereal")
 
         self.addGuestModule("goldfish_vk_marshaling_guest", extraHeader = marshalIncludeGuest)
-        self.addGuestModule("goldfish_vk_frontend", extraHeader = marshalIncludeGuest)
 
         self.addModule("common", "goldfish_vk_marshaling", extraHeader = vulkanStreamInclude)
         self.addModule("common", "goldfish_vk_testing", extraHeader = testingInclude)
@@ -227,7 +226,6 @@ using DlSymFunc = void* (void*, const char*);
                        extraImpl = dispatchImplIncludes)
 
         self.addWrapper(cereal.VulkanMarshaling, "goldfish_vk_marshaling_guest")
-        self.addWrapper(cereal.VulkanFrontend, "goldfish_vk_frontend")
         self.addWrapper(cereal.VulkanMarshaling, "goldfish_vk_marshaling")
         self.addWrapper(cereal.VulkanTesting, "goldfish_vk_testing")
         self.addWrapper(cereal.VulkanDeepcopy, "goldfish_vk_deepcopy")

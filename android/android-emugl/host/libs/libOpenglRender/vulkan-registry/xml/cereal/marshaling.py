@@ -263,6 +263,10 @@ class VulkanMarshaling(VulkanWrapperGenerator):
             self.apiOutputCodegenForRead.cgen = cgen
             self.writeCodegen.cgen = cgen
 
+            cgen.stmt("uint32_t opcode = OP_%s" % (api.origName));
+            cgen.stmt("%s->write(&opcode, sizeof(uint32_t))" % \
+                      VULKAN_STREAM_VAR_NAME)
+
             for param in api.parameters:
                 if param.paramName == VULKAN_STREAM_VAR_NAME:
                     continue
@@ -277,8 +281,9 @@ class VulkanMarshaling(VulkanWrapperGenerator):
             else:
                 result_var_name = "%s_%s_return" % (api.name,
                                                     api.retType.typeName)
-                cgen.stmt("%s %s" % (cgen.makeCTypeDecl(
-                    api.retType, useParamName=False), result_var_name))
+                cgen.stmt("%s %s = (%s)0" % (cgen.makeCTypeDecl(
+                    api.retType, useParamName=False), result_var_name,
+                    api.retType.typeName))
                 cgen.stmt("%s->read(&%s, %s)" % (VULKAN_STREAM_VAR_NAME,
                                                  result_var_name,
                                                  cgen.sizeofExpr(api.retType)))
@@ -309,8 +314,9 @@ class VulkanMarshaling(VulkanWrapperGenerator):
             else:
                 result_var_name = "%s_%s_return" % (api.name,
                                                     api.retType.typeName)
-                cgen.stmt("%s %s" % (cgen.makeCTypeDecl(
-                    api.retType, useParamName=False), result_var_name))
+                cgen.stmt("%s %s = (%s)0" % (cgen.makeCTypeDecl(
+                    api.retType, useParamName=False), result_var_name,
+                    api.retType.typeName))
                 cgen.stmt("%s->write(&%s, %s)" % (VULKAN_STREAM_VAR_NAME,
                                                   result_var_name,
                                                   cgen.sizeofExpr(api.retType)))
@@ -324,6 +330,11 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 apiUnmarshalingDef)
 
         self.knownDefs = {}
+
+        # Begin Vulkan API opcodes from something high
+        # that is not going to interfere with renderControl
+        # opcodes
+        self.currentOpcode = 20000
 
     def onGenType(self, typeXml, name, alias):
         VulkanWrapperGenerator.onGenType(self, typeXml, name, alias)
@@ -374,6 +385,8 @@ class VulkanMarshaling(VulkanWrapperGenerator):
     def onGenCmd(self, cmdinfo, name, alias):
         VulkanWrapperGenerator.onGenCmd(self, cmdinfo, name, alias)
         self.module.appendHeader(
+            "#define OP_%s %d\n" % (name, self.currentOpcode))
+        self.module.appendHeader(
             self.marshalWrapper.makeDecl(self.typeInfo, name))
         self.module.appendImpl(
             self.marshalWrapper.makeDefinition(self.typeInfo, name))
@@ -381,3 +394,4 @@ class VulkanMarshaling(VulkanWrapperGenerator):
             self.unmarshalWrapper.makeDecl(self.typeInfo, name))
         self.module.appendImpl(
             self.unmarshalWrapper.makeDefinition(self.typeInfo, name))
+        self.currentOpcode += 1
