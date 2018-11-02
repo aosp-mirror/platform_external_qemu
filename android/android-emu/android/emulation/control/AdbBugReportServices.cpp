@@ -65,8 +65,8 @@ void AdbBugReportServices::generateBugReport(StringView outputDirectoryPath,
     // platform/frameworks/native/cmds/dumpstate/bugreport-format.md
     // Issue different command args given the API level
 
-    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
-    if (apiLevel != kDefaultUnknownAPILevel && apiLevel > 23) {
+    if (avdInfo_isMarshmallowOrHigher(android_avdInfo) &&
+        avdInfo_getApiLevel(android_avdInfo) > 23) {
         filePath.append(".zip");
         mAdbBugReportCommand = mAdb->runAdbCommand(
                 {"bugreport", filePath},
