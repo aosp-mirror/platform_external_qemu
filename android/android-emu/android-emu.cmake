@@ -311,14 +311,15 @@ target_link_libraries(android-emu
                               automation
                               offworld
                               # Prebuilt libraries
-                              ${BREAKPAD_CLIENT_LIBRARIES}
-                              ${CURL_LIBRARIES}
-                              ${LIBXML2_LIBRARIES}
-                              ${LIBPNG_LIBRARIES}
-                              ${PROTOBUF_LIBRARIES}
-                              ${LZ4_LIBRARIES}
-                              ${PNG_LIBRARIES}
-                              ${ZLIB_LIBRARIES})
+                              BREAKPAD::Client
+                              CURL::libcurl
+                              OpenSSL::SSL
+                              OpenSSL::Crypto
+                              LibXml2::LibXml2
+                              PNG::PNG
+                              LZ4::LZ4
+                              ZLIB::ZLIB
+)
 
 # Here are the windows library and link dependencies. They are public and will propagate onwards to others that depend
 # on android-emu
@@ -354,22 +355,7 @@ android_target_link_libraries(android-emu
                               "-weak_framework Hypervisor"
                               "-framework OpenGL")
 
-# Includes
-android_target_include_directories(android-emu
-                                   all
-                                   PRIVATE
-                                   ${BREAKPAD_INCLUDE_DIRS}
-                                   ${CURL_INCLUDE_DIRS}
-                                   ${LIBXML2_INCLUDE_DIRS}
-                                   ${LIBPNG_INCLUDE_DIRS}
-                                   ${LZ4_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS}
-                                   ${PROTOBUF_INCLUDE_DIRS}
-                                   ${LZ4_INCLUDE_DIRS}
-                                   ${PNG_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS})
-
-target_include_directories(android-emu PUBLIC ${LZ4_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS}
+target_include_directories(android-emu PUBLIC 
                                    # TODO(jansene): The next 2 imply a link dependendency on emugl libs, which
                                    # we have not yet made explicit
                                    ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
@@ -383,9 +369,6 @@ target_include_directories(android-emu PUBLIC ${LZ4_INCLUDE_DIRS} ${UUID_INCLUDE
 
 target_compile_options(android-emu PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
 android_target_compile_options(android-emu linux-x86_64 PRIVATE -idirafter ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
-
-# Definitions needed to compile our deps as static
-target_compile_definitions(android-emu PUBLIC ${CURL_DEFINITIONS} ${LIBXML2_DEFINITIONS})
 
 android_target_compile_definitions(android-emu
                                    darwin-x86_64
@@ -430,7 +413,7 @@ android_add_shared_library(android-emu-shared)
 
 # Note that these are basically the same as android-emu-shared. We should clean this up
 target_link_libraries(android-emu-shared
-                              PUBLIC
+                              PRIVATE 
                               emulator-libext4_utils
                               android-emu-base
                               emulator-libsparse
@@ -456,52 +439,36 @@ target_link_libraries(android-emu-shared
                               automation
                               offworld
                               # Prebuilt libraries
-                              ${BREAKPAD_CLIENT_LIBRARIES}
-                              ${CURL_LIBRARIES}
-                              ${LIBXML2_LIBRARIES}
-                              ${LIBPNG_LIBRARIES}
-                              ${PROTOBUF_LIBRARIES}
-                              ${LZ4_LIBRARIES}
-                              ${PNG_LIBRARIES}
-                              ${ZLIB_LIBRARIES})
+                              BREAKPAD::Client
+                              CURL::libcurl
+                              LibXml2::LibXml2
+                              PNG::PNG
+                              LZ4::LZ4
+                              ZLIB::ZLIB)
 
 # Here are the windows library and link dependencies. They are public and will propagate onwards to others that depend
 # on android-emu-shared
 android_target_link_libraries(android-emu-shared
                               windows
-                              PUBLIC
+                              PRIVATE
                               emulator-libmman-win32
                               -lpsapi
                               -ld3d9
 )
 
 # These are the libs needed for android-emu-shared on linux.
-android_target_link_libraries(android-emu-shared linux-x86_64 PUBLIC -lrt)
+android_target_link_libraries(android-emu-shared linux-x86_64 PRIVATE -lrt)
 
 # Here are the darwin library and link dependencies. They are public and will propagate onwards to others that depend on
 # android-emu-shared. You should really only add things that are crucial for this library to link
 # If you don't you might see bizarre errors. (Add opengl as a link dependency, you will have fun)
 android_target_link_libraries(android-emu-shared
                               darwin-x86_64
-                              PUBLIC
+                              PRIVATE
                               "-framework AppKit"
 )
 
-# Includes
-target_include_directories(android-emu-shared
-                                   PRIVATE
-                                   ${BREAKPAD_INCLUDE_DIRS}
-                                   ${CURL_INCLUDE_DIRS}
-                                   ${LIBXML2_INCLUDE_DIRS}
-                                   ${LIBPNG_INCLUDE_DIRS}
-                                   ${LZ4_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS}
-                                   ${PROTOBUF_INCLUDE_DIRS}
-                                   ${LZ4_INCLUDE_DIRS}
-                                   ${PNG_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS})
-
-target_include_directories(android-emu-shared PUBLIC ${LZ4_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS}
+target_include_directories(android-emu-shared PUBLIC
                                    # TODO(jansene): The next 2 imply a link dependendency on emugl libs, which
                                    # we have not yet made explicit
                                    ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
@@ -718,9 +685,8 @@ set(android-emu_unittests_linux_x86_64_src android/emulation/nand_limits_unittes
 android_add_test(android-emu_unittests)
 
 # Setup the targets compile config etc..
-android_target_compile_options(android-emu_unittests all PRIVATE -O0 -Wno-invalid-constexpr)
-android_target_include_directories(android-emu_unittests
-                                   all
+target_compile_options(android-emu_unittests PRIVATE -O0 -Wno-invalid-constexpr)
+target_include_directories(android-emu_unittests
                                    PRIVATE
                                    ../android-emugl/host/include/
                                    ${BREAKPAD_INCLUDE_DIRS}
@@ -734,7 +700,7 @@ android_target_include_directories(android-emu_unittests
                                    ${PNG_INCLUDE_DIRS}
                                    ${ZLIB_INCLUDE_DIRS})
 
-android_target_compile_definitions(android-emu_unittests all PRIVATE -DGTEST_HAS_RTTI=0)
+target_compile_definitions(android-emu_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 
 # Settings needed for darwin
 android_target_compile_definitions(android-emu_unittests
@@ -745,7 +711,7 @@ android_target_compile_definitions(android-emu_unittests
                                    "-Dfseeko64=fseek")
 
 # Dependecies are exported from android-emu.
-android_target_link_libraries(android-emu_unittests all PRIVATE android-emu gtest gmock gtest_main)
+target_link_libraries(android-emu_unittests PRIVATE android-emu gtest gmock gtest_main)
 
 list(APPEND android-emu-testdata
             testdata/snapshots/random-ram-100.bin
@@ -806,5 +772,5 @@ set(android-emu-metrics_unittests_src
     android/metrics/tests/SyncMetricsReporter_unittest.cpp)
 android_add_test(android-emu-metrics_unittests)
 
-android_target_compile_options(android-emu-metrics_unittests all PRIVATE -O0)
-android_target_link_libraries(android-emu-metrics_unittests all PRIVATE gmock_main android-emu)
+target_compile_options(android-emu-metrics_unittests PRIVATE -O0)
+target_link_libraries(android-emu-metrics_unittests PRIVATE gmock_main android-emu)

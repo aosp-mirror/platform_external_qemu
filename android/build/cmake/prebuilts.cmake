@@ -13,6 +13,25 @@
 
 set(PREBUILT_COMMON "BLUEZ;LZ4;X264")
 
+
+function(android_add_prebuilt_library PKG MODULE LOCATION INCLUDES DEFINTIONS)
+  if (NOT TARGET ${PKG}::${MODULE})
+    add_library(${PKG}::${MODULE} STATIC IMPORTED GLOBAL)
+    set_target_properties(${PKG}::${MODULE} PROPERTIES
+      IMPORTED_LOCATION "${LOCATION}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+      INTERFACE_INCLUDE_DIRECTORIES "${INCLUDES}"
+      INTERFACE_COMPILE_DEFINITIONS "${DEFINTIONS}"
+    )
+
+    android_log("set_target_properties(${PKG}::${MODULE} PROPERTIES
+        IMPORTED_LOCATION '${LOCATION}${CMAKE_STATIC_LIBRARY_SUFFIX}'
+        INTERFACE_INCLUDE_DIRECTORIES '${INCLUDES}'
+        INTERFACE_COMPILE_DEFINITIONS '${DEFINTIONS}'
+    )")
+  endif()
+endfunction()
+
+
 # Internal function for simple packages.
 function(simple_prebuilt Package)
   # A simple common package..
@@ -22,6 +41,7 @@ function(simple_prebuilt Package)
     PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/${pkg}/${ANDROID_TARGET_TAG}"
     ABSOLUTE)
 
+  android_add_prebuilt_library("${PKG}" "${PKG}" "${PREBUILT_ROOT}/lib/lib${pkg}" "${PREBUILT_ROOT}/include" "" "")
   set(${PKG}_INCLUDE_DIRS "${PREBUILT_ROOT}/include" PARENT_SCOPE)
   set(${PKG}_INCLUDE_DIR "${PREBUILT_ROOT}/include" PARENT_SCOPE)
   set(${PKG}_LIBRARIES "${PREBUILT_ROOT}/lib/lib${pkg}${CMAKE_STATIC_LIBRARY_SUFFIX}" PARENT_SCOPE)
