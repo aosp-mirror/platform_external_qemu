@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a501a5c_2043bd89",
+        "filename": ".vscode/settings.json",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-03T04:05:14Z",
+      "side": 1,
+      "message": "Should we make this point to a more portable dir if its being checked in?",
+      "revId": "f223894b3ce126e2fe596e21e81cb53301b6f449",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e9bdbe81_fce6b138",
+        "filename": "android/build/cmake/prebuilts.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-03T04:05:14Z",
+      "side": 1,
+      "message": "nit: remove trailing  \u0027s",
+      "revId": "f223894b3ce126e2fe596e21e81cb53301b6f449",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d17aaec8_c0ddb253",
+        "filename": "android/build/cmake/prebuilts.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-03T04:05:14Z",
+      "side": 1,
+      "message": "Could we then keep around some explicit post-build steps for popular generators as they come up, for xcode and friends ,to explicitly binplace things the right way even if they have to be the root?\n\nWhen I make visual studio projects that are apps that have asset or dll dependencies, that\u0027s what I do anyway; write a post build script to copy whatever is needed into some shippable target directory.",
+      "range": {
+        "startLine": 128,
+        "startChar": 0,
+        "endLine": 129,
+        "endChar": 55
+      },
+      "revId": "f223894b3ce126e2fe596e21e81cb53301b6f449",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e6d37573_691323f4",
+        "filename": "android/build/cmake/prebuilts.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-03T04:05:14Z",
+      "side": 1,
+      "message": "Some dependencies that are libraries, like swiftshader, are not explicitly linked in, and merely included in the rpath. Will this also properly avoid linking swiftshader in?",
+      "range": {
+        "startLine": 145,
+        "startChar": 0,
+        "endLine": 149,
+        "endChar": 11
+      },
+      "revId": "f223894b3ce126e2fe596e21e81cb53301b6f449",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
