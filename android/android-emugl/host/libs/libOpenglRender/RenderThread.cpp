@@ -378,6 +378,18 @@ intptr_t RenderThread::main() {
                 readBuf.consume(last);
                 progress = true;
             }
+
+            //
+            // try to process some of the command buffer using the
+            // Vulkan decoder
+            //
+            last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
+                                        &stream);
+            if (last > 0) {
+                readBuf.consume(last);
+                progress = true;
+            }
+
         } while (progress);
     }
 
