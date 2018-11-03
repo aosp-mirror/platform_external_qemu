@@ -71,6 +71,7 @@ target_link_libraries(OpenglRender
                               gtest
                               GLESv2_dec
                               renderControl_dec
+                              vulkan_dec
                               OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OpenGLESDispatch
@@ -122,6 +123,7 @@ target_link_libraries(OpenglRender_standalone_common
                               GLESv1_dec
                               GLESv2_dec
                               renderControl_dec
+                              vulkan_dec
                               OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OSWindow)
@@ -187,6 +189,7 @@ target_link_libraries(HelloTriangle
                               GLESv1_dec
                               GLESv2_dec
                               renderControl_dec
+                              vulkan_dec
                               OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OSWindow)
@@ -204,6 +207,7 @@ target_link_libraries(HelloSurfaceFlinger
                               GLESv1_dec
                               GLESv2_dec
                               renderControl_dec
+                              vulkan_dec
                               OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OSWindow)
@@ -221,6 +225,7 @@ target_link_libraries(CreateDestroyContext
                               GLESv1_dec
                               GLESv2_dec
                               renderControl_dec
+                              vulkan_dec
                               OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OSWindow)
@@ -238,6 +243,7 @@ target_link_libraries(HelloHostComposition
                               GLESv1_dec
                               GLESv2_dec
                               renderControl_dec
+                              vulkan_dec
                               OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OSWindow)
@@ -255,6 +261,7 @@ target_link_libraries(HelloVulkan
                       GLESv1_dec
                       GLESv2_dec
                       renderControl_dec
+                      vulkan_dec
                       OpenglRender_vulkan
                       OpenglRender_vulkan_cereal
                       OSWindow)
