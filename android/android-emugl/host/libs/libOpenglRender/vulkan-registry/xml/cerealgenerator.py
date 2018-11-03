@@ -20,8 +20,6 @@ from generator import *
 
 import cereal
 
-from copy import deepcopy
-
 # CerealGenerator - generates set of driver sources
 # while being agnostic to the stream implementation
 
