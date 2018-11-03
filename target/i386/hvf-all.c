@@ -63,7 +63,7 @@ const uint32_t hvf_min_version = 0x0;
 
 static void hvf_vcpu_sync_state(CPUArchState * env, int modified);
 static int hvf_arch_get_registers(CPUArchState * env);
-int hvf_handle_io(CPUArchState * env, uint16_t port, void* buffer, int direction, int size, int count);
+void hvf_handle_io( uint16_t port, void* buffer, int direction, int size, int count);
 
 struct hvf_state hvf_global;
 int ret_hvf_init = 0;
@@ -525,7 +525,7 @@ int hvf_vcpu_emulation_mode(CPUState* cpu) {
 }
 
 int hvf_vcpu_destroy(CPUState* cpu) {
-    // TODO
+    return 0;
 }
 
 void hvf_raise_event(CPUState* cpu) {
@@ -537,8 +537,8 @@ int hvf_process_events(CPUState *cpu);
 int hvf_get_registers(CPUState *cpu);
 int hvf_put_registers(CPUState *cpu);
 
-int hvf_handle_io(CPUArchState * env, uint16_t port, void* buffer,
-                  int direction, int size, int count) {
+void hvf_handle_io(uint16_t port, void* buffer,
+                   int direction, int size, int count) {
     int i;
     uint8_t *ptr = buffer;
 
@@ -551,9 +551,9 @@ int hvf_handle_io(CPUArchState * env, uint16_t port, void* buffer,
 }
 
 // TODO: synchronize vcpu state
-void __hvf_cpu_synchronize_state(void *data)
+void __hvf_cpu_synchronize_state(CPUState* cpu_state, run_on_cpu_data data)
 {
-    CPUState *cpu_state = (CPUState *)data;
+    (void)data;
     if (cpu_state->hvf_vcpu_dirty == 0)
         hvf_get_registers(cpu_state);
 
@@ -566,9 +566,9 @@ void hvf_cpu_synchronize_state(CPUState *cpu_state)
         run_on_cpu(cpu_state, __hvf_cpu_synchronize_state, RUN_ON_CPU_NULL);
 }
 
-void __hvf_cpu_synchronize_post_reset(void *data)
+void __hvf_cpu_synchronize_post_reset(CPUState* cpu_state, run_on_cpu_data data)
 {
-    CPUState *cpu_state = (CPUState *)data;
+    (void)data;
     hvf_put_registers(cpu_state);
     wvmcs(cpu_state->hvf_fd, VMCS_ENTRY_CTLS, 0);
     cpu_state->hvf_vcpu_dirty = false;
@@ -579,9 +579,9 @@ void hvf_cpu_synchronize_post_reset(CPUState *cpu_state)
     run_on_cpu(cpu_state, __hvf_cpu_synchronize_post_reset, RUN_ON_CPU_NULL);
 }
 
-void _hvf_cpu_synchronize_post_init(void *data)
+void _hvf_cpu_synchronize_post_init(CPUState* cpu_state, run_on_cpu_data data)
 {
-    CPUState *cpu_state = (CPUState *)data;
+    (void)data;
     hvf_put_registers(cpu_state);
     cpu_state->hvf_vcpu_dirty = false;
 }
@@ -895,7 +895,8 @@ again:
         int r  = hv_vcpu_run(cpu->hvf_fd);
 
         if (r) {
-            qemu_abort("%s: %ld: run failed with %x\n", __func__, rip, r);
+            qemu_abort("%s: 0x%llx: run failed with %x\n",
+                       __func__, (unsigned long long)rip, r);
         }
 
         /* handle VMEXIT */
@@ -980,7 +981,7 @@ again:
                 if (!string && in) {
                     uint64_t val = 0;
                     load_regs(cpu);
-                    hvf_handle_io(cpu, port, &val, 0, size, 1);
+                    hvf_handle_io(port, &val, 0, size, 1);
                     if (size == 1) AL(cpu) = val;
                     else if (size == 2) AX(cpu) = val;
                     else if (size == 4) RAX(cpu) = (uint32_t)val;
@@ -990,7 +991,7 @@ again:
                     break;
                 } else if (!string && !in) {
                     RAX(cpu) = rreg(cpu->hvf_fd, HV_X86_RAX);
-                    hvf_handle_io(cpu, port, &RAX(cpu), 1, size, 1);
+                    hvf_handle_io(port, &RAX(cpu), 1, size, 1);
                     macvm_set_rip(cpu, rip + ins_len);
                     break;
                 }
