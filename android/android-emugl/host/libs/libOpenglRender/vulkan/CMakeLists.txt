@@ -7,6 +7,8 @@ target_include_directories(
     PUBLIC
         .
         cereal
+        ${ANDROID_EMUGL_DIR}/host/include/OpenglRender
+        ${ANDROID_EMUGL_DIR}/shared/OpenglCodecCommon
         ${ANDROID_EMUGL_DIR}/host/include/vulkan)
 
 # Unit tests
@@ -22,4 +24,6 @@ target_include_directories(OpenglRender_vulkan_unittests
                                    PRIVATE
                                    .
                                    cereal
+                                   ${ANDROID_EMUGL_DIR}/host/include/OpenglRender
+                                   ${ANDROID_EMUGL_DIR}/shared/OpenglCodecCommon
                                    ${ANDROID_EMUGL_DIR}/host/include/vulkan)
