@@ -25,8 +25,12 @@
 #include "VkDecoder.h"
 
 
+#include "common/goldfish_vk_marshaling.h"
+
+#include "IOStream.h"
 #include "emugl/common/logging.h"
 
+#include "VulkanDispatch.h"
 #include "VulkanStream.h"
 
 void placeholder_vulkan_dec_symbol() { }
@@ -34,89 +38,2082 @@ void placeholder_vulkan_dec_symbol() { }
 
 
 
+
+using emugl::vkDispatch;
+
+using namespace goldfish_vk;
+
+class VkDecoder::Impl {
+public:
+    Impl() : m_vk(vkDispatch()) { }
+    VulkanStream* stream() { return &m_vkStream; }
+
+    size_t decode(void* buf, size_t bufsize, IOStream* stream);
+
+private:
+    VulkanDispatch* m_vk;
+    VulkanStream m_vkStream { nullptr };
+};
+
+VkDecoder::VkDecoder() :
+    mImpl(new VkDecoder::Impl()) { }
+
+VkDecoder::~VkDecoder() = default;
+
+size_t VkDecoder::decode(void* buf, size_t bufsize, IOStream* stream) {
+    return mImpl->decode(buf, bufsize, stream);
+}
+
+// VkDecoder::Impl::decode to follow
+size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* stream)
+{
+    if (len < 8) return 0;;
+    unsigned char *ptr = (unsigned char *)buf;
+    const unsigned char* const end = (const unsigned char*)buf + len;
+    while (end - ptr >= 8)
+    {
+        uint32_t opcode = *(uint32_t *)ptr;
+        int32_t packetLen = *(int32_t *)(ptr + 4);
+        if (end - ptr < packetLen) return ptr - (unsigned char*)buf;
+        m_vkStream.setStream(stream);
+        VulkanStream* vkStream = &m_vkStream;
+        switch (opcode)
+        {
 #ifdef VK_VERSION_1_0
+            case OP_vkCreateInstance:
+            {
+                VkInstanceCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkInstance pInstance;
+                VkResult ret = m_vk->vkCreateInstance(pCreateInfo, pAllocator, pInstance);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyInstance:
+            {
+                VkInstance instance;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyInstance(instance, pAllocator);
+            }
+            case OP_vkEnumeratePhysicalDevices:
+            {
+                VkInstance instance;
+                uint32_t pPhysicalDeviceCount;
+                VkPhysicalDevice pPhysicalDevices;
+                VkResult ret = m_vk->vkEnumeratePhysicalDevices(instance, pPhysicalDeviceCount, pPhysicalDevices);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDeviceFeatures:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceFeatures pFeatures;
+                m_vk->vkGetPhysicalDeviceFeatures(physicalDevice, pFeatures);
+            }
+            case OP_vkGetPhysicalDeviceFormatProperties:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkFormat format;
+                VkFormatProperties pFormatProperties;
+                m_vk->vkGetPhysicalDeviceFormatProperties(physicalDevice, format, pFormatProperties);
+            }
+            case OP_vkGetPhysicalDeviceImageFormatProperties:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkFormat format;
+                VkImageType type;
+                VkImageTiling tiling;
+                VkImageUsageFlags usage;
+                VkImageCreateFlags flags;
+                VkImageFormatProperties pImageFormatProperties;
+                VkResult ret = m_vk->vkGetPhysicalDeviceImageFormatProperties(physicalDevice, format, type, tiling, usage, flags, pImageFormatProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDeviceProperties:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceProperties pProperties;
+                m_vk->vkGetPhysicalDeviceProperties(physicalDevice, pProperties);
+            }
+            case OP_vkGetPhysicalDeviceQueueFamilyProperties:
+            {
+                VkPhysicalDevice physicalDevice;
+                uint32_t pQueueFamilyPropertyCount;
+                VkQueueFamilyProperties pQueueFamilyProperties;
+                m_vk->vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
+            }
+            case OP_vkGetPhysicalDeviceMemoryProperties:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceMemoryProperties pMemoryProperties;
+                m_vk->vkGetPhysicalDeviceMemoryProperties(physicalDevice, pMemoryProperties);
+            }
+            case OP_vkGetInstanceProcAddr:
+            {
+                VkInstance instance;
+                char pName;
+                PFN_vkVoidFunction ret = m_vk->vkGetInstanceProcAddr(instance, pName);
+                vkStream->write(&ret, sizeof(PFN_vkVoidFunction));
+            }
+            case OP_vkGetDeviceProcAddr:
+            {
+                VkDevice device;
+                char pName;
+                PFN_vkVoidFunction ret = m_vk->vkGetDeviceProcAddr(device, pName);
+                vkStream->write(&ret, sizeof(PFN_vkVoidFunction));
+            }
+            case OP_vkCreateDevice:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkDeviceCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkDevice pDevice;
+                VkResult ret = m_vk->vkCreateDevice(physicalDevice, pCreateInfo, pAllocator, pDevice);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyDevice:
+            {
+                VkDevice device;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyDevice(device, pAllocator);
+            }
+            case OP_vkEnumerateInstanceExtensionProperties:
+            {
+                char pLayerName;
+                uint32_t pPropertyCount;
+                VkExtensionProperties pProperties;
+                VkResult ret = m_vk->vkEnumerateInstanceExtensionProperties(pLayerName, pPropertyCount, pProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkEnumerateDeviceExtensionProperties:
+            {
+                VkPhysicalDevice physicalDevice;
+                char pLayerName;
+                uint32_t pPropertyCount;
+                VkExtensionProperties pProperties;
+                VkResult ret = m_vk->vkEnumerateDeviceExtensionProperties(physicalDevice, pLayerName, pPropertyCount, pProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkEnumerateInstanceLayerProperties:
+            {
+                uint32_t pPropertyCount;
+                VkLayerProperties pProperties;
+                VkResult ret = m_vk->vkEnumerateInstanceLayerProperties(pPropertyCount, pProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkEnumerateDeviceLayerProperties:
+            {
+                VkPhysicalDevice physicalDevice;
+                uint32_t pPropertyCount;
+                VkLayerProperties pProperties;
+                VkResult ret = m_vk->vkEnumerateDeviceLayerProperties(physicalDevice, pPropertyCount, pProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetDeviceQueue:
+            {
+                VkDevice device;
+                uint32_t queueFamilyIndex;
+                uint32_t queueIndex;
+                VkQueue pQueue;
+                m_vk->vkGetDeviceQueue(device, queueFamilyIndex, queueIndex, pQueue);
+            }
+            case OP_vkQueueSubmit:
+            {
+                VkQueue queue;
+                uint32_t submitCount;
+                VkSubmitInfo pSubmits;
+                VkFence fence;
+                VkResult ret = m_vk->vkQueueSubmit(queue, submitCount, pSubmits, fence);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkQueueWaitIdle:
+            {
+                VkQueue queue;
+                VkResult ret = m_vk->vkQueueWaitIdle(queue);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDeviceWaitIdle:
+            {
+                VkDevice device;
+                VkResult ret = m_vk->vkDeviceWaitIdle(device);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkAllocateMemory:
+            {
+                VkDevice device;
+                VkMemoryAllocateInfo pAllocateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkDeviceMemory pMemory;
+                VkResult ret = m_vk->vkAllocateMemory(device, pAllocateInfo, pAllocator, pMemory);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkFreeMemory:
+            {
+                VkDevice device;
+                VkDeviceMemory memory;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkFreeMemory(device, memory, pAllocator);
+            }
+            case OP_vkMapMemory:
+            {
+                VkDevice device;
+                VkDeviceMemory memory;
+                VkDeviceSize offset;
+                VkDeviceSize size;
+                VkMemoryMapFlags flags;
+                void ppData;
+                VkResult ret = m_vk->vkMapMemory(device, memory, offset, size, flags, ppData);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkUnmapMemory:
+            {
+                VkDevice device;
+                VkDeviceMemory memory;
+                m_vk->vkUnmapMemory(device, memory);
+            }
+            case OP_vkFlushMappedMemoryRanges:
+            {
+                VkDevice device;
+                uint32_t memoryRangeCount;
+                VkMappedMemoryRange pMemoryRanges;
+                VkResult ret = m_vk->vkFlushMappedMemoryRanges(device, memoryRangeCount, pMemoryRanges);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkInvalidateMappedMemoryRanges:
+            {
+                VkDevice device;
+                uint32_t memoryRangeCount;
+                VkMappedMemoryRange pMemoryRanges;
+                VkResult ret = m_vk->vkInvalidateMappedMemoryRanges(device, memoryRangeCount, pMemoryRanges);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetDeviceMemoryCommitment:
+            {
+                VkDevice device;
+                VkDeviceMemory memory;
+                VkDeviceSize pCommittedMemoryInBytes;
+                m_vk->vkGetDeviceMemoryCommitment(device, memory, pCommittedMemoryInBytes);
+            }
+            case OP_vkBindBufferMemory:
+            {
+                VkDevice device;
+                VkBuffer buffer;
+                VkDeviceMemory memory;
+                VkDeviceSize memoryOffset;
+                VkResult ret = m_vk->vkBindBufferMemory(device, buffer, memory, memoryOffset);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkBindImageMemory:
+            {
+                VkDevice device;
+                VkImage image;
+                VkDeviceMemory memory;
+                VkDeviceSize memoryOffset;
+                VkResult ret = m_vk->vkBindImageMemory(device, image, memory, memoryOffset);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetBufferMemoryRequirements:
+            {
+                VkDevice device;
+                VkBuffer buffer;
+                VkMemoryRequirements pMemoryRequirements;
+                m_vk->vkGetBufferMemoryRequirements(device, buffer, pMemoryRequirements);
+            }
+            case OP_vkGetImageMemoryRequirements:
+            {
+                VkDevice device;
+                VkImage image;
+                VkMemoryRequirements pMemoryRequirements;
+                m_vk->vkGetImageMemoryRequirements(device, image, pMemoryRequirements);
+            }
+            case OP_vkGetImageSparseMemoryRequirements:
+            {
+                VkDevice device;
+                VkImage image;
+                uint32_t pSparseMemoryRequirementCount;
+                VkSparseImageMemoryRequirements pSparseMemoryRequirements;
+                m_vk->vkGetImageSparseMemoryRequirements(device, image, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
+            }
+            case OP_vkGetPhysicalDeviceSparseImageFormatProperties:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkFormat format;
+                VkImageType type;
+                VkSampleCountFlagBits samples;
+                VkImageUsageFlags usage;
+                VkImageTiling tiling;
+                uint32_t pPropertyCount;
+                VkSparseImageFormatProperties pProperties;
+                m_vk->vkGetPhysicalDeviceSparseImageFormatProperties(physicalDevice, format, type, samples, usage, tiling, pPropertyCount, pProperties);
+            }
+            case OP_vkQueueBindSparse:
+            {
+                VkQueue queue;
+                uint32_t bindInfoCount;
+                VkBindSparseInfo pBindInfo;
+                VkFence fence;
+                VkResult ret = m_vk->vkQueueBindSparse(queue, bindInfoCount, pBindInfo, fence);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkCreateFence:
+            {
+                VkDevice device;
+                VkFenceCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkFence pFence;
+                VkResult ret = m_vk->vkCreateFence(device, pCreateInfo, pAllocator, pFence);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyFence:
+            {
+                VkDevice device;
+                VkFence fence;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyFence(device, fence, pAllocator);
+            }
+            case OP_vkResetFences:
+            {
+                VkDevice device;
+                uint32_t fenceCount;
+                VkFence pFences;
+                VkResult ret = m_vk->vkResetFences(device, fenceCount, pFences);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetFenceStatus:
+            {
+                VkDevice device;
+                VkFence fence;
+                VkResult ret = m_vk->vkGetFenceStatus(device, fence);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkWaitForFences:
+            {
+                VkDevice device;
+                uint32_t fenceCount;
+                VkFence pFences;
+                VkBool32 waitAll;
+                uint64_t timeout;
+                VkResult ret = m_vk->vkWaitForFences(device, fenceCount, pFences, waitAll, timeout);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkCreateSemaphore:
+            {
+                VkDevice device;
+                VkSemaphoreCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkSemaphore pSemaphore;
+                VkResult ret = m_vk->vkCreateSemaphore(device, pCreateInfo, pAllocator, pSemaphore);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroySemaphore:
+            {
+                VkDevice device;
+                VkSemaphore semaphore;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroySemaphore(device, semaphore, pAllocator);
+            }
+            case OP_vkCreateEvent:
+            {
+                VkDevice device;
+                VkEventCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkEvent pEvent;
+                VkResult ret = m_vk->vkCreateEvent(device, pCreateInfo, pAllocator, pEvent);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyEvent:
+            {
+                VkDevice device;
+                VkEvent event;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyEvent(device, event, pAllocator);
+            }
+            case OP_vkGetEventStatus:
+            {
+                VkDevice device;
+                VkEvent event;
+                VkResult ret = m_vk->vkGetEventStatus(device, event);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkSetEvent:
+            {
+                VkDevice device;
+                VkEvent event;
+                VkResult ret = m_vk->vkSetEvent(device, event);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkResetEvent:
+            {
+                VkDevice device;
+                VkEvent event;
+                VkResult ret = m_vk->vkResetEvent(device, event);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkCreateQueryPool:
+            {
+                VkDevice device;
+                VkQueryPoolCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkQueryPool pQueryPool;
+                VkResult ret = m_vk->vkCreateQueryPool(device, pCreateInfo, pAllocator, pQueryPool);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyQueryPool:
+            {
+                VkDevice device;
+                VkQueryPool queryPool;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyQueryPool(device, queryPool, pAllocator);
+            }
+            case OP_vkGetQueryPoolResults:
+            {
+                VkDevice device;
+                VkQueryPool queryPool;
+                uint32_t firstQuery;
+                uint32_t queryCount;
+                size_t dataSize;
+                void pData;
+                VkDeviceSize stride;
+                VkQueryResultFlags flags;
+                VkResult ret = m_vk->vkGetQueryPoolResults(device, queryPool, firstQuery, queryCount, dataSize, pData, stride, flags);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkCreateBuffer:
+            {
+                VkDevice device;
+                VkBufferCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkBuffer pBuffer;
+                VkResult ret = m_vk->vkCreateBuffer(device, pCreateInfo, pAllocator, pBuffer);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyBuffer:
+            {
+                VkDevice device;
+                VkBuffer buffer;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyBuffer(device, buffer, pAllocator);
+            }
+            case OP_vkCreateBufferView:
+            {
+                VkDevice device;
+                VkBufferViewCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkBufferView pView;
+                VkResult ret = m_vk->vkCreateBufferView(device, pCreateInfo, pAllocator, pView);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyBufferView:
+            {
+                VkDevice device;
+                VkBufferView bufferView;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyBufferView(device, bufferView, pAllocator);
+            }
+            case OP_vkCreateImage:
+            {
+                VkDevice device;
+                VkImageCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkImage pImage;
+                VkResult ret = m_vk->vkCreateImage(device, pCreateInfo, pAllocator, pImage);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyImage:
+            {
+                VkDevice device;
+                VkImage image;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyImage(device, image, pAllocator);
+            }
+            case OP_vkGetImageSubresourceLayout:
+            {
+                VkDevice device;
+                VkImage image;
+                VkImageSubresource pSubresource;
+                VkSubresourceLayout pLayout;
+                m_vk->vkGetImageSubresourceLayout(device, image, pSubresource, pLayout);
+            }
+            case OP_vkCreateImageView:
+            {
+                VkDevice device;
+                VkImageViewCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkImageView pView;
+                VkResult ret = m_vk->vkCreateImageView(device, pCreateInfo, pAllocator, pView);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyImageView:
+            {
+                VkDevice device;
+                VkImageView imageView;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyImageView(device, imageView, pAllocator);
+            }
+            case OP_vkCreateShaderModule:
+            {
+                VkDevice device;
+                VkShaderModuleCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkShaderModule pShaderModule;
+                VkResult ret = m_vk->vkCreateShaderModule(device, pCreateInfo, pAllocator, pShaderModule);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyShaderModule:
+            {
+                VkDevice device;
+                VkShaderModule shaderModule;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyShaderModule(device, shaderModule, pAllocator);
+            }
+            case OP_vkCreatePipelineCache:
+            {
+                VkDevice device;
+                VkPipelineCacheCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkPipelineCache pPipelineCache;
+                VkResult ret = m_vk->vkCreatePipelineCache(device, pCreateInfo, pAllocator, pPipelineCache);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyPipelineCache:
+            {
+                VkDevice device;
+                VkPipelineCache pipelineCache;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyPipelineCache(device, pipelineCache, pAllocator);
+            }
+            case OP_vkGetPipelineCacheData:
+            {
+                VkDevice device;
+                VkPipelineCache pipelineCache;
+                size_t pDataSize;
+                void pData;
+                VkResult ret = m_vk->vkGetPipelineCacheData(device, pipelineCache, pDataSize, pData);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkMergePipelineCaches:
+            {
+                VkDevice device;
+                VkPipelineCache dstCache;
+                uint32_t srcCacheCount;
+                VkPipelineCache pSrcCaches;
+                VkResult ret = m_vk->vkMergePipelineCaches(device, dstCache, srcCacheCount, pSrcCaches);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkCreateGraphicsPipelines:
+            {
+                VkDevice device;
+                VkPipelineCache pipelineCache;
+                uint32_t createInfoCount;
+                VkGraphicsPipelineCreateInfo pCreateInfos;
+                VkAllocationCallbacks pAllocator;
+                VkPipeline pPipelines;
+                VkResult ret = m_vk->vkCreateGraphicsPipelines(device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkCreateComputePipelines:
+            {
+                VkDevice device;
+                VkPipelineCache pipelineCache;
+                uint32_t createInfoCount;
+                VkComputePipelineCreateInfo pCreateInfos;
+                VkAllocationCallbacks pAllocator;
+                VkPipeline pPipelines;
+                VkResult ret = m_vk->vkCreateComputePipelines(device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyPipeline:
+            {
+                VkDevice device;
+                VkPipeline pipeline;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyPipeline(device, pipeline, pAllocator);
+            }
+            case OP_vkCreatePipelineLayout:
+            {
+                VkDevice device;
+                VkPipelineLayoutCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkPipelineLayout pPipelineLayout;
+                VkResult ret = m_vk->vkCreatePipelineLayout(device, pCreateInfo, pAllocator, pPipelineLayout);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyPipelineLayout:
+            {
+                VkDevice device;
+                VkPipelineLayout pipelineLayout;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyPipelineLayout(device, pipelineLayout, pAllocator);
+            }
+            case OP_vkCreateSampler:
+            {
+                VkDevice device;
+                VkSamplerCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkSampler pSampler;
+                VkResult ret = m_vk->vkCreateSampler(device, pCreateInfo, pAllocator, pSampler);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroySampler:
+            {
+                VkDevice device;
+                VkSampler sampler;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroySampler(device, sampler, pAllocator);
+            }
+            case OP_vkCreateDescriptorSetLayout:
+            {
+                VkDevice device;
+                VkDescriptorSetLayoutCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkDescriptorSetLayout pSetLayout;
+                VkResult ret = m_vk->vkCreateDescriptorSetLayout(device, pCreateInfo, pAllocator, pSetLayout);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyDescriptorSetLayout:
+            {
+                VkDevice device;
+                VkDescriptorSetLayout descriptorSetLayout;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyDescriptorSetLayout(device, descriptorSetLayout, pAllocator);
+            }
+            case OP_vkCreateDescriptorPool:
+            {
+                VkDevice device;
+                VkDescriptorPoolCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkDescriptorPool pDescriptorPool;
+                VkResult ret = m_vk->vkCreateDescriptorPool(device, pCreateInfo, pAllocator, pDescriptorPool);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyDescriptorPool:
+            {
+                VkDevice device;
+                VkDescriptorPool descriptorPool;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyDescriptorPool(device, descriptorPool, pAllocator);
+            }
+            case OP_vkResetDescriptorPool:
+            {
+                VkDevice device;
+                VkDescriptorPool descriptorPool;
+                VkDescriptorPoolResetFlags flags;
+                VkResult ret = m_vk->vkResetDescriptorPool(device, descriptorPool, flags);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkAllocateDescriptorSets:
+            {
+                VkDevice device;
+                VkDescriptorSetAllocateInfo pAllocateInfo;
+                VkDescriptorSet pDescriptorSets;
+                VkResult ret = m_vk->vkAllocateDescriptorSets(device, pAllocateInfo, pDescriptorSets);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkFreeDescriptorSets:
+            {
+                VkDevice device;
+                VkDescriptorPool descriptorPool;
+                uint32_t descriptorSetCount;
+                VkDescriptorSet pDescriptorSets;
+                VkResult ret = m_vk->vkFreeDescriptorSets(device, descriptorPool, descriptorSetCount, pDescriptorSets);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkUpdateDescriptorSets:
+            {
+                VkDevice device;
+                uint32_t descriptorWriteCount;
+                VkWriteDescriptorSet pDescriptorWrites;
+                uint32_t descriptorCopyCount;
+                VkCopyDescriptorSet pDescriptorCopies;
+                m_vk->vkUpdateDescriptorSets(device, descriptorWriteCount, pDescriptorWrites, descriptorCopyCount, pDescriptorCopies);
+            }
+            case OP_vkCreateFramebuffer:
+            {
+                VkDevice device;
+                VkFramebufferCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkFramebuffer pFramebuffer;
+                VkResult ret = m_vk->vkCreateFramebuffer(device, pCreateInfo, pAllocator, pFramebuffer);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyFramebuffer:
+            {
+                VkDevice device;
+                VkFramebuffer framebuffer;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyFramebuffer(device, framebuffer, pAllocator);
+            }
+            case OP_vkCreateRenderPass:
+            {
+                VkDevice device;
+                VkRenderPassCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkRenderPass pRenderPass;
+                VkResult ret = m_vk->vkCreateRenderPass(device, pCreateInfo, pAllocator, pRenderPass);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyRenderPass:
+            {
+                VkDevice device;
+                VkRenderPass renderPass;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyRenderPass(device, renderPass, pAllocator);
+            }
+            case OP_vkGetRenderAreaGranularity:
+            {
+                VkDevice device;
+                VkRenderPass renderPass;
+                VkExtent2D pGranularity;
+                m_vk->vkGetRenderAreaGranularity(device, renderPass, pGranularity);
+            }
+            case OP_vkCreateCommandPool:
+            {
+                VkDevice device;
+                VkCommandPoolCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkCommandPool pCommandPool;
+                VkResult ret = m_vk->vkCreateCommandPool(device, pCreateInfo, pAllocator, pCommandPool);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyCommandPool:
+            {
+                VkDevice device;
+                VkCommandPool commandPool;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyCommandPool(device, commandPool, pAllocator);
+            }
+            case OP_vkResetCommandPool:
+            {
+                VkDevice device;
+                VkCommandPool commandPool;
+                VkCommandPoolResetFlags flags;
+                VkResult ret = m_vk->vkResetCommandPool(device, commandPool, flags);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkAllocateCommandBuffers:
+            {
+                VkDevice device;
+                VkCommandBufferAllocateInfo pAllocateInfo;
+                VkCommandBuffer pCommandBuffers;
+                VkResult ret = m_vk->vkAllocateCommandBuffers(device, pAllocateInfo, pCommandBuffers);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkFreeCommandBuffers:
+            {
+                VkDevice device;
+                VkCommandPool commandPool;
+                uint32_t commandBufferCount;
+                VkCommandBuffer pCommandBuffers;
+                m_vk->vkFreeCommandBuffers(device, commandPool, commandBufferCount, pCommandBuffers);
+            }
+            case OP_vkBeginCommandBuffer:
+            {
+                VkCommandBuffer commandBuffer;
+                VkCommandBufferBeginInfo pBeginInfo;
+                VkResult ret = m_vk->vkBeginCommandBuffer(commandBuffer, pBeginInfo);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkEndCommandBuffer:
+            {
+                VkCommandBuffer commandBuffer;
+                VkResult ret = m_vk->vkEndCommandBuffer(commandBuffer);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkResetCommandBuffer:
+            {
+                VkCommandBuffer commandBuffer;
+                VkCommandBufferResetFlags flags;
+                VkResult ret = m_vk->vkResetCommandBuffer(commandBuffer, flags);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkCmdBindPipeline:
+            {
+                VkCommandBuffer commandBuffer;
+                VkPipelineBindPoint pipelineBindPoint;
+                VkPipeline pipeline;
+                m_vk->vkCmdBindPipeline(commandBuffer, pipelineBindPoint, pipeline);
+            }
+            case OP_vkCmdSetViewport:
+            {
+                VkCommandBuffer commandBuffer;
+                uint32_t firstViewport;
+                uint32_t viewportCount;
+                VkViewport pViewports;
+                m_vk->vkCmdSetViewport(commandBuffer, firstViewport, viewportCount, pViewports);
+            }
+            case OP_vkCmdSetScissor:
+            {
+                VkCommandBuffer commandBuffer;
+                uint32_t firstScissor;
+                uint32_t scissorCount;
+                VkRect2D pScissors;
+                m_vk->vkCmdSetScissor(commandBuffer, firstScissor, scissorCount, pScissors);
+            }
+            case OP_vkCmdSetLineWidth:
+            {
+                VkCommandBuffer commandBuffer;
+                float lineWidth;
+                m_vk->vkCmdSetLineWidth(commandBuffer, lineWidth);
+            }
+            case OP_vkCmdSetDepthBias:
+            {
+                VkCommandBuffer commandBuffer;
+                float depthBiasConstantFactor;
+                float depthBiasClamp;
+                float depthBiasSlopeFactor;
+                m_vk->vkCmdSetDepthBias(commandBuffer, depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
+            }
+            case OP_vkCmdSetBlendConstants:
+            {
+                VkCommandBuffer commandBuffer;
+                float blendConstants;
+                m_vk->vkCmdSetBlendConstants(commandBuffer, blendConstants);
+            }
+            case OP_vkCmdSetDepthBounds:
+            {
+                VkCommandBuffer commandBuffer;
+                float minDepthBounds;
+                float maxDepthBounds;
+                m_vk->vkCmdSetDepthBounds(commandBuffer, minDepthBounds, maxDepthBounds);
+            }
+            case OP_vkCmdSetStencilCompareMask:
+            {
+                VkCommandBuffer commandBuffer;
+                VkStencilFaceFlags faceMask;
+                uint32_t compareMask;
+                m_vk->vkCmdSetStencilCompareMask(commandBuffer, faceMask, compareMask);
+            }
+            case OP_vkCmdSetStencilWriteMask:
+            {
+                VkCommandBuffer commandBuffer;
+                VkStencilFaceFlags faceMask;
+                uint32_t writeMask;
+                m_vk->vkCmdSetStencilWriteMask(commandBuffer, faceMask, writeMask);
+            }
+            case OP_vkCmdSetStencilReference:
+            {
+                VkCommandBuffer commandBuffer;
+                VkStencilFaceFlags faceMask;
+                uint32_t reference;
+                m_vk->vkCmdSetStencilReference(commandBuffer, faceMask, reference);
+            }
+            case OP_vkCmdBindDescriptorSets:
+            {
+                VkCommandBuffer commandBuffer;
+                VkPipelineBindPoint pipelineBindPoint;
+                VkPipelineLayout layout;
+                uint32_t firstSet;
+                uint32_t descriptorSetCount;
+                VkDescriptorSet pDescriptorSets;
+                uint32_t dynamicOffsetCount;
+                uint32_t pDynamicOffsets;
+                m_vk->vkCmdBindDescriptorSets(commandBuffer, pipelineBindPoint, layout, firstSet, descriptorSetCount, pDescriptorSets, dynamicOffsetCount, pDynamicOffsets);
+            }
+            case OP_vkCmdBindIndexBuffer:
+            {
+                VkCommandBuffer commandBuffer;
+                VkBuffer buffer;
+                VkDeviceSize offset;
+                VkIndexType indexType;
+                m_vk->vkCmdBindIndexBuffer(commandBuffer, buffer, offset, indexType);
+            }
+            case OP_vkCmdBindVertexBuffers:
+            {
+                VkCommandBuffer commandBuffer;
+                uint32_t firstBinding;
+                uint32_t bindingCount;
+                VkBuffer pBuffers;
+                VkDeviceSize pOffsets;
+                m_vk->vkCmdBindVertexBuffers(commandBuffer, firstBinding, bindingCount, pBuffers, pOffsets);
+            }
+            case OP_vkCmdDraw:
+            {
+                VkCommandBuffer commandBuffer;
+                uint32_t vertexCount;
+                uint32_t instanceCount;
+                uint32_t firstVertex;
+                uint32_t firstInstance;
+                m_vk->vkCmdDraw(commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
+            }
+            case OP_vkCmdDrawIndexed:
+            {
+                VkCommandBuffer commandBuffer;
+                uint32_t indexCount;
+                uint32_t instanceCount;
+                uint32_t firstIndex;
+                int32_t vertexOffset;
+                uint32_t firstInstance;
+                m_vk->vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+            }
+            case OP_vkCmdDrawIndirect:
+            {
+                VkCommandBuffer commandBuffer;
+                VkBuffer buffer;
+                VkDeviceSize offset;
+                uint32_t drawCount;
+                uint32_t stride;
+                m_vk->vkCmdDrawIndirect(commandBuffer, buffer, offset, drawCount, stride);
+            }
+            case OP_vkCmdDrawIndexedIndirect:
+            {
+                VkCommandBuffer commandBuffer;
+                VkBuffer buffer;
+                VkDeviceSize offset;
+                uint32_t drawCount;
+                uint32_t stride;
+                m_vk->vkCmdDrawIndexedIndirect(commandBuffer, buffer, offset, drawCount, stride);
+            }
+            case OP_vkCmdDispatch:
+            {
+                VkCommandBuffer commandBuffer;
+                uint32_t groupCountX;
+                uint32_t groupCountY;
+                uint32_t groupCountZ;
+                m_vk->vkCmdDispatch(commandBuffer, groupCountX, groupCountY, groupCountZ);
+            }
+            case OP_vkCmdDispatchIndirect:
+            {
+                VkCommandBuffer commandBuffer;
+                VkBuffer buffer;
+                VkDeviceSize offset;
+                m_vk->vkCmdDispatchIndirect(commandBuffer, buffer, offset);
+            }
+            case OP_vkCmdCopyBuffer:
+            {
+                VkCommandBuffer commandBuffer;
+                VkBuffer srcBuffer;
+                VkBuffer dstBuffer;
+                uint32_t regionCount;
+                VkBufferCopy pRegions;
+                m_vk->vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, regionCount, pRegions);
+            }
+            case OP_vkCmdCopyImage:
+            {
+                VkCommandBuffer commandBuffer;
+                VkImage srcImage;
+                VkImageLayout srcImageLayout;
+                VkImage dstImage;
+                VkImageLayout dstImageLayout;
+                uint32_t regionCount;
+                VkImageCopy pRegions;
+                m_vk->vkCmdCopyImage(commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
+            }
+            case OP_vkCmdBlitImage:
+            {
+                VkCommandBuffer commandBuffer;
+                VkImage srcImage;
+                VkImageLayout srcImageLayout;
+                VkImage dstImage;
+                VkImageLayout dstImageLayout;
+                uint32_t regionCount;
+                VkImageBlit pRegions;
+                VkFilter filter;
+                m_vk->vkCmdBlitImage(commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions, filter);
+            }
+            case OP_vkCmdCopyBufferToImage:
+            {
+                VkCommandBuffer commandBuffer;
+                VkBuffer srcBuffer;
+                VkImage dstImage;
+                VkImageLayout dstImageLayout;
+                uint32_t regionCount;
+                VkBufferImageCopy pRegions;
+                m_vk->vkCmdCopyBufferToImage(commandBuffer, srcBuffer, dstImage, dstImageLayout, regionCount, pRegions);
+            }
+            case OP_vkCmdCopyImageToBuffer:
+            {
+                VkCommandBuffer commandBuffer;
+                VkImage srcImage;
+                VkImageLayout srcImageLayout;
+                VkBuffer dstBuffer;
+                uint32_t regionCount;
+                VkBufferImageCopy pRegions;
+                m_vk->vkCmdCopyImageToBuffer(commandBuffer, srcImage, srcImageLayout, dstBuffer, regionCount, pRegions);
+            }
+            case OP_vkCmdUpdateBuffer:
+            {
+                VkCommandBuffer commandBuffer;
+                VkBuffer dstBuffer;
+                VkDeviceSize dstOffset;
+                VkDeviceSize dataSize;
+                void pData;
+                m_vk->vkCmdUpdateBuffer(commandBuffer, dstBuffer, dstOffset, dataSize, pData);
+            }
+            case OP_vkCmdFillBuffer:
+            {
+                VkCommandBuffer commandBuffer;
+                VkBuffer dstBuffer;
+                VkDeviceSize dstOffset;
+                VkDeviceSize size;
+                uint32_t data;
+                m_vk->vkCmdFillBuffer(commandBuffer, dstBuffer, dstOffset, size, data);
+            }
+            case OP_vkCmdClearColorImage:
+            {
+                VkCommandBuffer commandBuffer;
+                VkImage image;
+                VkImageLayout imageLayout;
+                VkClearColorValue pColor;
+                uint32_t rangeCount;
+                VkImageSubresourceRange pRanges;
+                m_vk->vkCmdClearColorImage(commandBuffer, image, imageLayout, pColor, rangeCount, pRanges);
+            }
+            case OP_vkCmdClearDepthStencilImage:
+            {
+                VkCommandBuffer commandBuffer;
+                VkImage image;
+                VkImageLayout imageLayout;
+                VkClearDepthStencilValue pDepthStencil;
+                uint32_t rangeCount;
+                VkImageSubresourceRange pRanges;
+                m_vk->vkCmdClearDepthStencilImage(commandBuffer, image, imageLayout, pDepthStencil, rangeCount, pRanges);
+            }
+            case OP_vkCmdClearAttachments:
+            {
+                VkCommandBuffer commandBuffer;
+                uint32_t attachmentCount;
+                VkClearAttachment pAttachments;
+                uint32_t rectCount;
+                VkClearRect pRects;
+                m_vk->vkCmdClearAttachments(commandBuffer, attachmentCount, pAttachments, rectCount, pRects);
+            }
+            case OP_vkCmdResolveImage:
+            {
+                VkCommandBuffer commandBuffer;
+                VkImage srcImage;
+                VkImageLayout srcImageLayout;
+                VkImage dstImage;
+                VkImageLayout dstImageLayout;
+                uint32_t regionCount;
+                VkImageResolve pRegions;
+                m_vk->vkCmdResolveImage(commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
+            }
+            case OP_vkCmdSetEvent:
+            {
+                VkCommandBuffer commandBuffer;
+                VkEvent event;
+                VkPipelineStageFlags stageMask;
+                m_vk->vkCmdSetEvent(commandBuffer, event, stageMask);
+            }
+            case OP_vkCmdResetEvent:
+            {
+                VkCommandBuffer commandBuffer;
+                VkEvent event;
+                VkPipelineStageFlags stageMask;
+                m_vk->vkCmdResetEvent(commandBuffer, event, stageMask);
+            }
+            case OP_vkCmdWaitEvents:
+            {
+                VkCommandBuffer commandBuffer;
+                uint32_t eventCount;
+                VkEvent pEvents;
+                VkPipelineStageFlags srcStageMask;
+                VkPipelineStageFlags dstStageMask;
+                uint32_t memoryBarrierCount;
+                VkMemoryBarrier pMemoryBarriers;
+                uint32_t bufferMemoryBarrierCount;
+                VkBufferMemoryBarrier pBufferMemoryBarriers;
+                uint32_t imageMemoryBarrierCount;
+                VkImageMemoryBarrier pImageMemoryBarriers;
+                m_vk->vkCmdWaitEvents(commandBuffer, eventCount, pEvents, srcStageMask, dstStageMask, memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers, imageMemoryBarrierCount, pImageMemoryBarriers);
+            }
+            case OP_vkCmdPipelineBarrier:
+            {
+                VkCommandBuffer commandBuffer;
+                VkPipelineStageFlags srcStageMask;
+                VkPipelineStageFlags dstStageMask;
+                VkDependencyFlags dependencyFlags;
+                uint32_t memoryBarrierCount;
+                VkMemoryBarrier pMemoryBarriers;
+                uint32_t bufferMemoryBarrierCount;
+                VkBufferMemoryBarrier pBufferMemoryBarriers;
+                uint32_t imageMemoryBarrierCount;
+                VkImageMemoryBarrier pImageMemoryBarriers;
+                m_vk->vkCmdPipelineBarrier(commandBuffer, srcStageMask, dstStageMask, dependencyFlags, memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers, imageMemoryBarrierCount, pImageMemoryBarriers);
+            }
+            case OP_vkCmdBeginQuery:
+            {
+                VkCommandBuffer commandBuffer;
+                VkQueryPool queryPool;
+                uint32_t query;
+                VkQueryControlFlags flags;
+                m_vk->vkCmdBeginQuery(commandBuffer, queryPool, query, flags);
+            }
+            case OP_vkCmdEndQuery:
+            {
+                VkCommandBuffer commandBuffer;
+                VkQueryPool queryPool;
+                uint32_t query;
+                m_vk->vkCmdEndQuery(commandBuffer, queryPool, query);
+            }
+            case OP_vkCmdResetQueryPool:
+            {
+                VkCommandBuffer commandBuffer;
+                VkQueryPool queryPool;
+                uint32_t firstQuery;
+                uint32_t queryCount;
+                m_vk->vkCmdResetQueryPool(commandBuffer, queryPool, firstQuery, queryCount);
+            }
+            case OP_vkCmdWriteTimestamp:
+            {
+                VkCommandBuffer commandBuffer;
+                VkPipelineStageFlagBits pipelineStage;
+                VkQueryPool queryPool;
+                uint32_t query;
+                m_vk->vkCmdWriteTimestamp(commandBuffer, pipelineStage, queryPool, query);
+            }
+            case OP_vkCmdCopyQueryPoolResults:
+            {
+                VkCommandBuffer commandBuffer;
+                VkQueryPool queryPool;
+                uint32_t firstQuery;
+                uint32_t queryCount;
+                VkBuffer dstBuffer;
+                VkDeviceSize dstOffset;
+                VkDeviceSize stride;
+                VkQueryResultFlags flags;
+                m_vk->vkCmdCopyQueryPoolResults(commandBuffer, queryPool, firstQuery, queryCount, dstBuffer, dstOffset, stride, flags);
+            }
+            case OP_vkCmdPushConstants:
+            {
+                VkCommandBuffer commandBuffer;
+                VkPipelineLayout layout;
+                VkShaderStageFlags stageFlags;
+                uint32_t offset;
+                uint32_t size;
+                void pValues;
+                m_vk->vkCmdPushConstants(commandBuffer, layout, stageFlags, offset, size, pValues);
+            }
+            case OP_vkCmdBeginRenderPass:
+            {
+                VkCommandBuffer commandBuffer;
+                VkRenderPassBeginInfo pRenderPassBegin;
+                VkSubpassContents contents;
+                m_vk->vkCmdBeginRenderPass(commandBuffer, pRenderPassBegin, contents);
+            }
+            case OP_vkCmdNextSubpass:
+            {
+                VkCommandBuffer commandBuffer;
+                VkSubpassContents contents;
+                m_vk->vkCmdNextSubpass(commandBuffer, contents);
+            }
+            case OP_vkCmdEndRenderPass:
+            {
+                VkCommandBuffer commandBuffer;
+                m_vk->vkCmdEndRenderPass(commandBuffer);
+            }
+            case OP_vkCmdExecuteCommands:
+            {
+                VkCommandBuffer commandBuffer;
+                uint32_t commandBufferCount;
+                VkCommandBuffer pCommandBuffers;
+                m_vk->vkCmdExecuteCommands(commandBuffer, commandBufferCount, pCommandBuffers);
+            }
 #endif
 #ifdef VK_VERSION_1_1
+            case OP_vkEnumerateInstanceVersion:
+            {
+                uint32_t pApiVersion;
+                VkResult ret = m_vk->vkEnumerateInstanceVersion(pApiVersion);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkBindBufferMemory2:
+            {
+                VkDevice device;
+                uint32_t bindInfoCount;
+                VkBindBufferMemoryInfo pBindInfos;
+                VkResult ret = m_vk->vkBindBufferMemory2(device, bindInfoCount, pBindInfos);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkBindImageMemory2:
+            {
+                VkDevice device;
+                uint32_t bindInfoCount;
+                VkBindImageMemoryInfo pBindInfos;
+                VkResult ret = m_vk->vkBindImageMemory2(device, bindInfoCount, pBindInfos);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetDeviceGroupPeerMemoryFeatures:
+            {
+                VkDevice device;
+                uint32_t heapIndex;
+                uint32_t localDeviceIndex;
+                uint32_t remoteDeviceIndex;
+                VkPeerMemoryFeatureFlags pPeerMemoryFeatures;
+                m_vk->vkGetDeviceGroupPeerMemoryFeatures(device, heapIndex, localDeviceIndex, remoteDeviceIndex, pPeerMemoryFeatures);
+            }
+            case OP_vkCmdSetDeviceMask:
+            {
+                VkCommandBuffer commandBuffer;
+                uint32_t deviceMask;
+                m_vk->vkCmdSetDeviceMask(commandBuffer, deviceMask);
+            }
+            case OP_vkCmdDispatchBase:
+            {
+                VkCommandBuffer commandBuffer;
+                uint32_t baseGroupX;
+                uint32_t baseGroupY;
+                uint32_t baseGroupZ;
+                uint32_t groupCountX;
+                uint32_t groupCountY;
+                uint32_t groupCountZ;
+                m_vk->vkCmdDispatchBase(commandBuffer, baseGroupX, baseGroupY, baseGroupZ, groupCountX, groupCountY, groupCountZ);
+            }
+            case OP_vkEnumeratePhysicalDeviceGroups:
+            {
+                VkInstance instance;
+                uint32_t pPhysicalDeviceGroupCount;
+                VkPhysicalDeviceGroupProperties pPhysicalDeviceGroupProperties;
+                VkResult ret = m_vk->vkEnumeratePhysicalDeviceGroups(instance, pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetImageMemoryRequirements2:
+            {
+                VkDevice device;
+                VkImageMemoryRequirementsInfo2 pInfo;
+                VkMemoryRequirements2 pMemoryRequirements;
+                m_vk->vkGetImageMemoryRequirements2(device, pInfo, pMemoryRequirements);
+            }
+            case OP_vkGetBufferMemoryRequirements2:
+            {
+                VkDevice device;
+                VkBufferMemoryRequirementsInfo2 pInfo;
+                VkMemoryRequirements2 pMemoryRequirements;
+                m_vk->vkGetBufferMemoryRequirements2(device, pInfo, pMemoryRequirements);
+            }
+            case OP_vkGetImageSparseMemoryRequirements2:
+            {
+                VkDevice device;
+                VkImageSparseMemoryRequirementsInfo2 pInfo;
+                uint32_t pSparseMemoryRequirementCount;
+                VkSparseImageMemoryRequirements2 pSparseMemoryRequirements;
+                m_vk->vkGetImageSparseMemoryRequirements2(device, pInfo, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
+            }
+            case OP_vkGetPhysicalDeviceFeatures2:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceFeatures2 pFeatures;
+                m_vk->vkGetPhysicalDeviceFeatures2(physicalDevice, pFeatures);
+            }
+            case OP_vkGetPhysicalDeviceProperties2:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceProperties2 pProperties;
+                m_vk->vkGetPhysicalDeviceProperties2(physicalDevice, pProperties);
+            }
+            case OP_vkGetPhysicalDeviceFormatProperties2:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkFormat format;
+                VkFormatProperties2 pFormatProperties;
+                m_vk->vkGetPhysicalDeviceFormatProperties2(physicalDevice, format, pFormatProperties);
+            }
+            case OP_vkGetPhysicalDeviceImageFormatProperties2:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceImageFormatInfo2 pImageFormatInfo;
+                VkImageFormatProperties2 pImageFormatProperties;
+                VkResult ret = m_vk->vkGetPhysicalDeviceImageFormatProperties2(physicalDevice, pImageFormatInfo, pImageFormatProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDeviceQueueFamilyProperties2:
+            {
+                VkPhysicalDevice physicalDevice;
+                uint32_t pQueueFamilyPropertyCount;
+                VkQueueFamilyProperties2 pQueueFamilyProperties;
+                m_vk->vkGetPhysicalDeviceQueueFamilyProperties2(physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
+            }
+            case OP_vkGetPhysicalDeviceMemoryProperties2:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceMemoryProperties2 pMemoryProperties;
+                m_vk->vkGetPhysicalDeviceMemoryProperties2(physicalDevice, pMemoryProperties);
+            }
+            case OP_vkGetPhysicalDeviceSparseImageFormatProperties2:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceSparseImageFormatInfo2 pFormatInfo;
+                uint32_t pPropertyCount;
+                VkSparseImageFormatProperties2 pProperties;
+                m_vk->vkGetPhysicalDeviceSparseImageFormatProperties2(physicalDevice, pFormatInfo, pPropertyCount, pProperties);
+            }
+            case OP_vkTrimCommandPool:
+            {
+                VkDevice device;
+                VkCommandPool commandPool;
+                VkCommandPoolTrimFlags flags;
+                m_vk->vkTrimCommandPool(device, commandPool, flags);
+            }
+            case OP_vkGetDeviceQueue2:
+            {
+                VkDevice device;
+                VkDeviceQueueInfo2 pQueueInfo;
+                VkQueue pQueue;
+                m_vk->vkGetDeviceQueue2(device, pQueueInfo, pQueue);
+            }
+            case OP_vkCreateSamplerYcbcrConversion:
+            {
+                VkDevice device;
+                VkSamplerYcbcrConversionCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkSamplerYcbcrConversion pYcbcrConversion;
+                VkResult ret = m_vk->vkCreateSamplerYcbcrConversion(device, pCreateInfo, pAllocator, pYcbcrConversion);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroySamplerYcbcrConversion:
+            {
+                VkDevice device;
+                VkSamplerYcbcrConversion ycbcrConversion;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroySamplerYcbcrConversion(device, ycbcrConversion, pAllocator);
+            }
+            case OP_vkCreateDescriptorUpdateTemplate:
+            {
+                VkDevice device;
+                VkDescriptorUpdateTemplateCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkDescriptorUpdateTemplate pDescriptorUpdateTemplate;
+                VkResult ret = m_vk->vkCreateDescriptorUpdateTemplate(device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyDescriptorUpdateTemplate:
+            {
+                VkDevice device;
+                VkDescriptorUpdateTemplate descriptorUpdateTemplate;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyDescriptorUpdateTemplate(device, descriptorUpdateTemplate, pAllocator);
+            }
+            case OP_vkUpdateDescriptorSetWithTemplate:
+            {
+                VkDevice device;
+                VkDescriptorSet descriptorSet;
+                VkDescriptorUpdateTemplate descriptorUpdateTemplate;
+                void pData;
+                m_vk->vkUpdateDescriptorSetWithTemplate(device, descriptorSet, descriptorUpdateTemplate, pData);
+            }
+            case OP_vkGetPhysicalDeviceExternalBufferProperties:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceExternalBufferInfo pExternalBufferInfo;
+                VkExternalBufferProperties pExternalBufferProperties;
+                m_vk->vkGetPhysicalDeviceExternalBufferProperties(physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
+            }
+            case OP_vkGetPhysicalDeviceExternalFenceProperties:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceExternalFenceInfo pExternalFenceInfo;
+                VkExternalFenceProperties pExternalFenceProperties;
+                m_vk->vkGetPhysicalDeviceExternalFenceProperties(physicalDevice, pExternalFenceInfo, pExternalFenceProperties);
+            }
+            case OP_vkGetPhysicalDeviceExternalSemaphoreProperties:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceExternalSemaphoreInfo pExternalSemaphoreInfo;
+                VkExternalSemaphoreProperties pExternalSemaphoreProperties;
+                m_vk->vkGetPhysicalDeviceExternalSemaphoreProperties(physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
+            }
+            case OP_vkGetDescriptorSetLayoutSupport:
+            {
+                VkDevice device;
+                VkDescriptorSetLayoutCreateInfo pCreateInfo;
+                VkDescriptorSetLayoutSupport pSupport;
+                m_vk->vkGetDescriptorSetLayoutSupport(device, pCreateInfo, pSupport);
+            }
 #endif
 #ifdef VK_KHR_surface
+            case OP_vkDestroySurfaceKHR:
+            {
+                VkInstance instance;
+                VkSurfaceKHR surface;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroySurfaceKHR(instance, surface, pAllocator);
+            }
+            case OP_vkGetPhysicalDeviceSurfaceSupportKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                uint32_t queueFamilyIndex;
+                VkSurfaceKHR surface;
+                VkBool32 pSupported;
+                VkResult ret = m_vk->vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, queueFamilyIndex, surface, pSupported);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDeviceSurfaceCapabilitiesKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkSurfaceKHR surface;
+                VkSurfaceCapabilitiesKHR pSurfaceCapabilities;
+                VkResult ret = m_vk->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, pSurfaceCapabilities);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDeviceSurfaceFormatsKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkSurfaceKHR surface;
+                uint32_t pSurfaceFormatCount;
+                VkSurfaceFormatKHR pSurfaceFormats;
+                VkResult ret = m_vk->vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, pSurfaceFormatCount, pSurfaceFormats);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDeviceSurfacePresentModesKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkSurfaceKHR surface;
+                uint32_t pPresentModeCount;
+                VkPresentModeKHR pPresentModes;
+                VkResult ret = m_vk->vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, pPresentModeCount, pPresentModes);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_KHR_swapchain
+            case OP_vkCreateSwapchainKHR:
+            {
+                VkDevice device;
+                VkSwapchainCreateInfoKHR pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkSwapchainKHR pSwapchain;
+                VkResult ret = m_vk->vkCreateSwapchainKHR(device, pCreateInfo, pAllocator, pSwapchain);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroySwapchainKHR:
+            {
+                VkDevice device;
+                VkSwapchainKHR swapchain;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroySwapchainKHR(device, swapchain, pAllocator);
+            }
+            case OP_vkGetSwapchainImagesKHR:
+            {
+                VkDevice device;
+                VkSwapchainKHR swapchain;
+                uint32_t pSwapchainImageCount;
+                VkImage pSwapchainImages;
+                VkResult ret = m_vk->vkGetSwapchainImagesKHR(device, swapchain, pSwapchainImageCount, pSwapchainImages);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkAcquireNextImageKHR:
+            {
+                VkDevice device;
+                VkSwapchainKHR swapchain;
+                uint64_t timeout;
+                VkSemaphore semaphore;
+                VkFence fence;
+                uint32_t pImageIndex;
+                VkResult ret = m_vk->vkAcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, pImageIndex);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkQueuePresentKHR:
+            {
+                VkQueue queue;
+                VkPresentInfoKHR pPresentInfo;
+                VkResult ret = m_vk->vkQueuePresentKHR(queue, pPresentInfo);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetDeviceGroupPresentCapabilitiesKHR:
+            {
+                VkDevice device;
+                VkDeviceGroupPresentCapabilitiesKHR pDeviceGroupPresentCapabilities;
+                VkResult ret = m_vk->vkGetDeviceGroupPresentCapabilitiesKHR(device, pDeviceGroupPresentCapabilities);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetDeviceGroupSurfacePresentModesKHR:
+            {
+                VkDevice device;
+                VkSurfaceKHR surface;
+                VkDeviceGroupPresentModeFlagsKHR pModes;
+                VkResult ret = m_vk->vkGetDeviceGroupSurfacePresentModesKHR(device, surface, pModes);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDevicePresentRectanglesKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkSurfaceKHR surface;
+                uint32_t pRectCount;
+                VkRect2D pRects;
+                VkResult ret = m_vk->vkGetPhysicalDevicePresentRectanglesKHR(physicalDevice, surface, pRectCount, pRects);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkAcquireNextImage2KHR:
+            {
+                VkDevice device;
+                VkAcquireNextImageInfoKHR pAcquireInfo;
+                uint32_t pImageIndex;
+                VkResult ret = m_vk->vkAcquireNextImage2KHR(device, pAcquireInfo, pImageIndex);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_KHR_display
+            case OP_vkGetPhysicalDeviceDisplayPropertiesKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                uint32_t pPropertyCount;
+                VkDisplayPropertiesKHR pProperties;
+                VkResult ret = m_vk->vkGetPhysicalDeviceDisplayPropertiesKHR(physicalDevice, pPropertyCount, pProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDeviceDisplayPlanePropertiesKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                uint32_t pPropertyCount;
+                VkDisplayPlanePropertiesKHR pProperties;
+                VkResult ret = m_vk->vkGetPhysicalDeviceDisplayPlanePropertiesKHR(physicalDevice, pPropertyCount, pProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetDisplayPlaneSupportedDisplaysKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                uint32_t planeIndex;
+                uint32_t pDisplayCount;
+                VkDisplayKHR pDisplays;
+                VkResult ret = m_vk->vkGetDisplayPlaneSupportedDisplaysKHR(physicalDevice, planeIndex, pDisplayCount, pDisplays);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetDisplayModePropertiesKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkDisplayKHR display;
+                uint32_t pPropertyCount;
+                VkDisplayModePropertiesKHR pProperties;
+                VkResult ret = m_vk->vkGetDisplayModePropertiesKHR(physicalDevice, display, pPropertyCount, pProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkCreateDisplayModeKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkDisplayKHR display;
+                VkDisplayModeCreateInfoKHR pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkDisplayModeKHR pMode;
+                VkResult ret = m_vk->vkCreateDisplayModeKHR(physicalDevice, display, pCreateInfo, pAllocator, pMode);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetDisplayPlaneCapabilitiesKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkDisplayModeKHR mode;
+                uint32_t planeIndex;
+                VkDisplayPlaneCapabilitiesKHR pCapabilities;
+                VkResult ret = m_vk->vkGetDisplayPlaneCapabilitiesKHR(physicalDevice, mode, planeIndex, pCapabilities);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkCreateDisplayPlaneSurfaceKHR:
+            {
+                VkInstance instance;
+                VkDisplaySurfaceCreateInfoKHR pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkSurfaceKHR pSurface;
+                VkResult ret = m_vk->vkCreateDisplayPlaneSurfaceKHR(instance, pCreateInfo, pAllocator, pSurface);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_KHR_display_swapchain
+            case OP_vkCreateSharedSwapchainsKHR:
+            {
+                VkDevice device;
+                uint32_t swapchainCount;
+                VkSwapchainCreateInfoKHR pCreateInfos;
+                VkAllocationCallbacks pAllocator;
+                VkSwapchainKHR pSwapchains;
+                VkResult ret = m_vk->vkCreateSharedSwapchainsKHR(device, swapchainCount, pCreateInfos, pAllocator, pSwapchains);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_KHR_xlib_surface
+            case OP_vkCreateXlibSurfaceKHR:
+            {
+                VkInstance instance;
+                VkXlibSurfaceCreateInfoKHR pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkSurfaceKHR pSurface;
+                VkResult ret = m_vk->vkCreateXlibSurfaceKHR(instance, pCreateInfo, pAllocator, pSurface);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDeviceXlibPresentationSupportKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                uint32_t queueFamilyIndex;
+                Display dpy;
+                VisualID visualID;
+                VkBool32 ret = m_vk->vkGetPhysicalDeviceXlibPresentationSupportKHR(physicalDevice, queueFamilyIndex, dpy, visualID);
+                vkStream->write(&ret, sizeof(VkBool32));
+            }
 #endif
 #ifdef VK_KHR_xcb_surface
+            case OP_vkCreateXcbSurfaceKHR:
+            {
+                VkInstance instance;
+                VkXcbSurfaceCreateInfoKHR pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkSurfaceKHR pSurface;
+                VkResult ret = m_vk->vkCreateXcbSurfaceKHR(instance, pCreateInfo, pAllocator, pSurface);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDeviceXcbPresentationSupportKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                uint32_t queueFamilyIndex;
+                xcb_connection_t connection;
+                xcb_visualid_t visual_id;
+                VkBool32 ret = m_vk->vkGetPhysicalDeviceXcbPresentationSupportKHR(physicalDevice, queueFamilyIndex, connection, visual_id);
+                vkStream->write(&ret, sizeof(VkBool32));
+            }
 #endif
 #ifdef VK_KHR_wayland_surface
+            case OP_vkCreateWaylandSurfaceKHR:
+            {
+                VkInstance instance;
+                VkWaylandSurfaceCreateInfoKHR pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkSurfaceKHR pSurface;
+                VkResult ret = m_vk->vkCreateWaylandSurfaceKHR(instance, pCreateInfo, pAllocator, pSurface);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDeviceWaylandPresentationSupportKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                uint32_t queueFamilyIndex;
+                wl_display display;
+                VkBool32 ret = m_vk->vkGetPhysicalDeviceWaylandPresentationSupportKHR(physicalDevice, queueFamilyIndex, display);
+                vkStream->write(&ret, sizeof(VkBool32));
+            }
 #endif
 #ifdef VK_KHR_mir_surface
+            case OP_vkCreateMirSurfaceKHR:
+            {
+                VkInstance instance;
+                VkMirSurfaceCreateInfoKHR pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkSurfaceKHR pSurface;
+                VkResult ret = m_vk->vkCreateMirSurfaceKHR(instance, pCreateInfo, pAllocator, pSurface);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDeviceMirPresentationSupportKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                uint32_t queueFamilyIndex;
+                MirConnection connection;
+                VkBool32 ret = m_vk->vkGetPhysicalDeviceMirPresentationSupportKHR(physicalDevice, queueFamilyIndex, connection);
+                vkStream->write(&ret, sizeof(VkBool32));
+            }
 #endif
 #ifdef VK_KHR_android_surface
+            case OP_vkCreateAndroidSurfaceKHR:
+            {
+                VkInstance instance;
+                VkAndroidSurfaceCreateInfoKHR pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkSurfaceKHR pSurface;
+                VkResult ret = m_vk->vkCreateAndroidSurfaceKHR(instance, pCreateInfo, pAllocator, pSurface);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_KHR_win32_surface
+            case OP_vkCreateWin32SurfaceKHR:
+            {
+                VkInstance instance;
+                VkWin32SurfaceCreateInfoKHR pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkSurfaceKHR pSurface;
+                VkResult ret = m_vk->vkCreateWin32SurfaceKHR(instance, pCreateInfo, pAllocator, pSurface);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDeviceWin32PresentationSupportKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                uint32_t queueFamilyIndex;
+                VkBool32 ret = m_vk->vkGetPhysicalDeviceWin32PresentationSupportKHR(physicalDevice, queueFamilyIndex);
+                vkStream->write(&ret, sizeof(VkBool32));
+            }
 #endif
 #ifdef VK_KHR_sampler_mirror_clamp_to_edge
 #endif
 #ifdef VK_KHR_multiview
 #endif
 #ifdef VK_KHR_get_physical_device_properties2
+            case OP_vkGetPhysicalDeviceFeatures2KHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceFeatures2 pFeatures;
+                m_vk->vkGetPhysicalDeviceFeatures2KHR(physicalDevice, pFeatures);
+            }
+            case OP_vkGetPhysicalDeviceProperties2KHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceProperties2 pProperties;
+                m_vk->vkGetPhysicalDeviceProperties2KHR(physicalDevice, pProperties);
+            }
+            case OP_vkGetPhysicalDeviceFormatProperties2KHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkFormat format;
+                VkFormatProperties2 pFormatProperties;
+                m_vk->vkGetPhysicalDeviceFormatProperties2KHR(physicalDevice, format, pFormatProperties);
+            }
+            case OP_vkGetPhysicalDeviceImageFormatProperties2KHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceImageFormatInfo2 pImageFormatInfo;
+                VkImageFormatProperties2 pImageFormatProperties;
+                VkResult ret = m_vk->vkGetPhysicalDeviceImageFormatProperties2KHR(physicalDevice, pImageFormatInfo, pImageFormatProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDeviceQueueFamilyProperties2KHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                uint32_t pQueueFamilyPropertyCount;
+                VkQueueFamilyProperties2 pQueueFamilyProperties;
+                m_vk->vkGetPhysicalDeviceQueueFamilyProperties2KHR(physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
+            }
+            case OP_vkGetPhysicalDeviceMemoryProperties2KHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceMemoryProperties2 pMemoryProperties;
+                m_vk->vkGetPhysicalDeviceMemoryProperties2KHR(physicalDevice, pMemoryProperties);
+            }
+            case OP_vkGetPhysicalDeviceSparseImageFormatProperties2KHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceSparseImageFormatInfo2 pFormatInfo;
+                uint32_t pPropertyCount;
+                VkSparseImageFormatProperties2 pProperties;
+                m_vk->vkGetPhysicalDeviceSparseImageFormatProperties2KHR(physicalDevice, pFormatInfo, pPropertyCount, pProperties);
+            }
 #endif
 #ifdef VK_KHR_device_group
+            case OP_vkGetDeviceGroupPeerMemoryFeaturesKHR:
+            {
+                VkDevice device;
+                uint32_t heapIndex;
+                uint32_t localDeviceIndex;
+                uint32_t remoteDeviceIndex;
+                VkPeerMemoryFeatureFlags pPeerMemoryFeatures;
+                m_vk->vkGetDeviceGroupPeerMemoryFeaturesKHR(device, heapIndex, localDeviceIndex, remoteDeviceIndex, pPeerMemoryFeatures);
+            }
+            case OP_vkCmdSetDeviceMaskKHR:
+            {
+                VkCommandBuffer commandBuffer;
+                uint32_t deviceMask;
+                m_vk->vkCmdSetDeviceMaskKHR(commandBuffer, deviceMask);
+            }
+            case OP_vkCmdDispatchBaseKHR:
+            {
+                VkCommandBuffer commandBuffer;
+                uint32_t baseGroupX;
+                uint32_t baseGroupY;
+                uint32_t baseGroupZ;
+                uint32_t groupCountX;
+                uint32_t groupCountY;
+                uint32_t groupCountZ;
+                m_vk->vkCmdDispatchBaseKHR(commandBuffer, baseGroupX, baseGroupY, baseGroupZ, groupCountX, groupCountY, groupCountZ);
+            }
 #endif
 #ifdef VK_KHR_shader_draw_parameters
 #endif
 #ifdef VK_KHR_maintenance1
+            case OP_vkTrimCommandPoolKHR:
+            {
+                VkDevice device;
+                VkCommandPool commandPool;
+                VkCommandPoolTrimFlags flags;
+                m_vk->vkTrimCommandPoolKHR(device, commandPool, flags);
+            }
 #endif
 #ifdef VK_KHR_device_group_creation
+            case OP_vkEnumeratePhysicalDeviceGroupsKHR:
+            {
+                VkInstance instance;
+                uint32_t pPhysicalDeviceGroupCount;
+                VkPhysicalDeviceGroupProperties pPhysicalDeviceGroupProperties;
+                VkResult ret = m_vk->vkEnumeratePhysicalDeviceGroupsKHR(instance, pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_KHR_external_memory_capabilities
+            case OP_vkGetPhysicalDeviceExternalBufferPropertiesKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceExternalBufferInfo pExternalBufferInfo;
+                VkExternalBufferProperties pExternalBufferProperties;
+                m_vk->vkGetPhysicalDeviceExternalBufferPropertiesKHR(physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
+            }
 #endif
 #ifdef VK_KHR_external_memory
 #endif
 #ifdef VK_KHR_external_memory_win32
+            case OP_vkGetMemoryWin32HandleKHR:
+            {
+                VkDevice device;
+                VkMemoryGetWin32HandleInfoKHR pGetWin32HandleInfo;
+                HANDLE pHandle;
+                VkResult ret = m_vk->vkGetMemoryWin32HandleKHR(device, pGetWin32HandleInfo, pHandle);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetMemoryWin32HandlePropertiesKHR:
+            {
+                VkDevice device;
+                VkExternalMemoryHandleTypeFlagBits handleType;
+                HANDLE handle;
+                VkMemoryWin32HandlePropertiesKHR pMemoryWin32HandleProperties;
+                VkResult ret = m_vk->vkGetMemoryWin32HandlePropertiesKHR(device, handleType, handle, pMemoryWin32HandleProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_KHR_external_memory_fd
+            case OP_vkGetMemoryFdKHR:
+            {
+                VkDevice device;
+                VkMemoryGetFdInfoKHR pGetFdInfo;
+                int pFd;
+                VkResult ret = m_vk->vkGetMemoryFdKHR(device, pGetFdInfo, pFd);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetMemoryFdPropertiesKHR:
+            {
+                VkDevice device;
+                VkExternalMemoryHandleTypeFlagBits handleType;
+                int fd;
+                VkMemoryFdPropertiesKHR pMemoryFdProperties;
+                VkResult ret = m_vk->vkGetMemoryFdPropertiesKHR(device, handleType, fd, pMemoryFdProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_KHR_win32_keyed_mutex
 #endif
 #ifdef VK_KHR_external_semaphore_capabilities
+            case OP_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceExternalSemaphoreInfo pExternalSemaphoreInfo;
+                VkExternalSemaphoreProperties pExternalSemaphoreProperties;
+                m_vk->vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
+            }
 #endif
 #ifdef VK_KHR_external_semaphore
 #endif
 #ifdef VK_KHR_external_semaphore_win32
+            case OP_vkImportSemaphoreWin32HandleKHR:
+            {
+                VkDevice device;
+                VkImportSemaphoreWin32HandleInfoKHR pImportSemaphoreWin32HandleInfo;
+                VkResult ret = m_vk->vkImportSemaphoreWin32HandleKHR(device, pImportSemaphoreWin32HandleInfo);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetSemaphoreWin32HandleKHR:
+            {
+                VkDevice device;
+                VkSemaphoreGetWin32HandleInfoKHR pGetWin32HandleInfo;
+                HANDLE pHandle;
+                VkResult ret = m_vk->vkGetSemaphoreWin32HandleKHR(device, pGetWin32HandleInfo, pHandle);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_KHR_external_semaphore_fd
+            case OP_vkImportSemaphoreFdKHR:
+            {
+                VkDevice device;
+                VkImportSemaphoreFdInfoKHR pImportSemaphoreFdInfo;
+                VkResult ret = m_vk->vkImportSemaphoreFdKHR(device, pImportSemaphoreFdInfo);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetSemaphoreFdKHR:
+            {
+                VkDevice device;
+                VkSemaphoreGetFdInfoKHR pGetFdInfo;
+                int pFd;
+                VkResult ret = m_vk->vkGetSemaphoreFdKHR(device, pGetFdInfo, pFd);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_KHR_push_descriptor
+            case OP_vkCmdPushDescriptorSetKHR:
+            {
+                VkCommandBuffer commandBuffer;
+                VkPipelineBindPoint pipelineBindPoint;
+                VkPipelineLayout layout;
+                uint32_t set;
+                uint32_t descriptorWriteCount;
+                VkWriteDescriptorSet pDescriptorWrites;
+                m_vk->vkCmdPushDescriptorSetKHR(commandBuffer, pipelineBindPoint, layout, set, descriptorWriteCount, pDescriptorWrites);
+            }
+            case OP_vkCmdPushDescriptorSetWithTemplateKHR:
+            {
+                VkCommandBuffer commandBuffer;
+                VkDescriptorUpdateTemplate descriptorUpdateTemplate;
+                VkPipelineLayout layout;
+                uint32_t set;
+                void pData;
+                m_vk->vkCmdPushDescriptorSetWithTemplateKHR(commandBuffer, descriptorUpdateTemplate, layout, set, pData);
+            }
 #endif
 #ifdef VK_KHR_16bit_storage
 #endif
 #ifdef VK_KHR_incremental_present
 #endif
 #ifdef VK_KHR_descriptor_update_template
+            case OP_vkCreateDescriptorUpdateTemplateKHR:
+            {
+                VkDevice device;
+                VkDescriptorUpdateTemplateCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkDescriptorUpdateTemplate pDescriptorUpdateTemplate;
+                VkResult ret = m_vk->vkCreateDescriptorUpdateTemplateKHR(device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyDescriptorUpdateTemplateKHR:
+            {
+                VkDevice device;
+                VkDescriptorUpdateTemplate descriptorUpdateTemplate;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyDescriptorUpdateTemplateKHR(device, descriptorUpdateTemplate, pAllocator);
+            }
+            case OP_vkUpdateDescriptorSetWithTemplateKHR:
+            {
+                VkDevice device;
+                VkDescriptorSet descriptorSet;
+                VkDescriptorUpdateTemplate descriptorUpdateTemplate;
+                void pData;
+                m_vk->vkUpdateDescriptorSetWithTemplateKHR(device, descriptorSet, descriptorUpdateTemplate, pData);
+            }
 #endif
 #ifdef VK_KHR_create_renderpass2
+            case OP_vkCreateRenderPass2KHR:
+            {
+                VkDevice device;
+                VkRenderPassCreateInfo2KHR pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkRenderPass pRenderPass;
+                VkResult ret = m_vk->vkCreateRenderPass2KHR(device, pCreateInfo, pAllocator, pRenderPass);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkCmdBeginRenderPass2KHR:
+            {
+                VkCommandBuffer commandBuffer;
+                VkRenderPassBeginInfo pRenderPassBegin;
+                VkSubpassBeginInfoKHR pSubpassBeginInfo;
+                m_vk->vkCmdBeginRenderPass2KHR(commandBuffer, pRenderPassBegin, pSubpassBeginInfo);
+            }
+            case OP_vkCmdNextSubpass2KHR:
+            {
+                VkCommandBuffer commandBuffer;
+                VkSubpassBeginInfoKHR pSubpassBeginInfo;
+                VkSubpassEndInfoKHR pSubpassEndInfo;
+                m_vk->vkCmdNextSubpass2KHR(commandBuffer, pSubpassBeginInfo, pSubpassEndInfo);
+            }
+            case OP_vkCmdEndRenderPass2KHR:
+            {
+                VkCommandBuffer commandBuffer;
+                VkSubpassEndInfoKHR pSubpassEndInfo;
+                m_vk->vkCmdEndRenderPass2KHR(commandBuffer, pSubpassEndInfo);
+            }
 #endif
 #ifdef VK_KHR_shared_presentable_image
+            case OP_vkGetSwapchainStatusKHR:
+            {
+                VkDevice device;
+                VkSwapchainKHR swapchain;
+                VkResult ret = m_vk->vkGetSwapchainStatusKHR(device, swapchain);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_KHR_external_fence_capabilities
+            case OP_vkGetPhysicalDeviceExternalFencePropertiesKHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceExternalFenceInfo pExternalFenceInfo;
+                VkExternalFenceProperties pExternalFenceProperties;
+                m_vk->vkGetPhysicalDeviceExternalFencePropertiesKHR(physicalDevice, pExternalFenceInfo, pExternalFenceProperties);
+            }
 #endif
 #ifdef VK_KHR_external_fence
 #endif
 #ifdef VK_KHR_external_fence_win32
+            case OP_vkImportFenceWin32HandleKHR:
+            {
+                VkDevice device;
+                VkImportFenceWin32HandleInfoKHR pImportFenceWin32HandleInfo;
+                VkResult ret = m_vk->vkImportFenceWin32HandleKHR(device, pImportFenceWin32HandleInfo);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetFenceWin32HandleKHR:
+            {
+                VkDevice device;
+                VkFenceGetWin32HandleInfoKHR pGetWin32HandleInfo;
+                HANDLE pHandle;
+                VkResult ret = m_vk->vkGetFenceWin32HandleKHR(device, pGetWin32HandleInfo, pHandle);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_KHR_external_fence_fd
+            case OP_vkImportFenceFdKHR:
+            {
+                VkDevice device;
+                VkImportFenceFdInfoKHR pImportFenceFdInfo;
+                VkResult ret = m_vk->vkImportFenceFdKHR(device, pImportFenceFdInfo);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetFenceFdKHR:
+            {
+                VkDevice device;
+                VkFenceGetFdInfoKHR pGetFdInfo;
+                int pFd;
+                VkResult ret = m_vk->vkGetFenceFdKHR(device, pGetFdInfo, pFd);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_KHR_maintenance2
 #endif
 #ifdef VK_KHR_get_surface_capabilities2
+            case OP_vkGetPhysicalDeviceSurfaceCapabilities2KHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceSurfaceInfo2KHR pSurfaceInfo;
+                VkSurfaceCapabilities2KHR pSurfaceCapabilities;
+                VkResult ret = m_vk->vkGetPhysicalDeviceSurfaceCapabilities2KHR(physicalDevice, pSurfaceInfo, pSurfaceCapabilities);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDeviceSurfaceFormats2KHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkPhysicalDeviceSurfaceInfo2KHR pSurfaceInfo;
+                uint32_t pSurfaceFormatCount;
+                VkSurfaceFormat2KHR pSurfaceFormats;
+                VkResult ret = m_vk->vkGetPhysicalDeviceSurfaceFormats2KHR(physicalDevice, pSurfaceInfo, pSurfaceFormatCount, pSurfaceFormats);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_KHR_variable_pointers
 #endif
 #ifdef VK_KHR_get_display_properties2
+            case OP_vkGetPhysicalDeviceDisplayProperties2KHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                uint32_t pPropertyCount;
+                VkDisplayProperties2KHR pProperties;
+                VkResult ret = m_vk->vkGetPhysicalDeviceDisplayProperties2KHR(physicalDevice, pPropertyCount, pProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDeviceDisplayPlaneProperties2KHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                uint32_t pPropertyCount;
+                VkDisplayPlaneProperties2KHR pProperties;
+                VkResult ret = m_vk->vkGetPhysicalDeviceDisplayPlaneProperties2KHR(physicalDevice, pPropertyCount, pProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetDisplayModeProperties2KHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkDisplayKHR display;
+                uint32_t pPropertyCount;
+                VkDisplayModeProperties2KHR pProperties;
+                VkResult ret = m_vk->vkGetDisplayModeProperties2KHR(physicalDevice, display, pPropertyCount, pProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetDisplayPlaneCapabilities2KHR:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkDisplayPlaneInfo2KHR pDisplayPlaneInfo;
+                VkDisplayPlaneCapabilities2KHR pCapabilities;
+                VkResult ret = m_vk->vkGetDisplayPlaneCapabilities2KHR(physicalDevice, pDisplayPlaneInfo, pCapabilities);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_KHR_dedicated_allocation
 #endif
@@ -125,20 +2122,131 @@ void placeholder_vulkan_dec_symbol() { }
 #ifdef VK_KHR_relaxed_block_layout
 #endif
 #ifdef VK_KHR_get_memory_requirements2
+            case OP_vkGetImageMemoryRequirements2KHR:
+            {
+                VkDevice device;
+                VkImageMemoryRequirementsInfo2 pInfo;
+                VkMemoryRequirements2 pMemoryRequirements;
+                m_vk->vkGetImageMemoryRequirements2KHR(device, pInfo, pMemoryRequirements);
+            }
+            case OP_vkGetBufferMemoryRequirements2KHR:
+            {
+                VkDevice device;
+                VkBufferMemoryRequirementsInfo2 pInfo;
+                VkMemoryRequirements2 pMemoryRequirements;
+                m_vk->vkGetBufferMemoryRequirements2KHR(device, pInfo, pMemoryRequirements);
+            }
+            case OP_vkGetImageSparseMemoryRequirements2KHR:
+            {
+                VkDevice device;
+                VkImageSparseMemoryRequirementsInfo2 pInfo;
+                uint32_t pSparseMemoryRequirementCount;
+                VkSparseImageMemoryRequirements2 pSparseMemoryRequirements;
+                m_vk->vkGetImageSparseMemoryRequirements2KHR(device, pInfo, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
+            }
 #endif
 #ifdef VK_KHR_image_format_list
 #endif
 #ifdef VK_KHR_sampler_ycbcr_conversion
+            case OP_vkCreateSamplerYcbcrConversionKHR:
+            {
+                VkDevice device;
+                VkSamplerYcbcrConversionCreateInfo pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkSamplerYcbcrConversion pYcbcrConversion;
+                VkResult ret = m_vk->vkCreateSamplerYcbcrConversionKHR(device, pCreateInfo, pAllocator, pYcbcrConversion);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroySamplerYcbcrConversionKHR:
+            {
+                VkDevice device;
+                VkSamplerYcbcrConversion ycbcrConversion;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroySamplerYcbcrConversionKHR(device, ycbcrConversion, pAllocator);
+            }
 #endif
 #ifdef VK_KHR_bind_memory2
+            case OP_vkBindBufferMemory2KHR:
+            {
+                VkDevice device;
+                uint32_t bindInfoCount;
+                VkBindBufferMemoryInfo pBindInfos;
+                VkResult ret = m_vk->vkBindBufferMemory2KHR(device, bindInfoCount, pBindInfos);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkBindImageMemory2KHR:
+            {
+                VkDevice device;
+                uint32_t bindInfoCount;
+                VkBindImageMemoryInfo pBindInfos;
+                VkResult ret = m_vk->vkBindImageMemory2KHR(device, bindInfoCount, pBindInfos);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_KHR_maintenance3
+            case OP_vkGetDescriptorSetLayoutSupportKHR:
+            {
+                VkDevice device;
+                VkDescriptorSetLayoutCreateInfo pCreateInfo;
+                VkDescriptorSetLayoutSupport pSupport;
+                m_vk->vkGetDescriptorSetLayoutSupportKHR(device, pCreateInfo, pSupport);
+            }
 #endif
 #ifdef VK_KHR_draw_indirect_count
+            case OP_vkCmdDrawIndirectCountKHR:
+            {
+                VkCommandBuffer commandBuffer;
+                VkBuffer buffer;
+                VkDeviceSize offset;
+                VkBuffer countBuffer;
+                VkDeviceSize countBufferOffset;
+                uint32_t maxDrawCount;
+                uint32_t stride;
+                m_vk->vkCmdDrawIndirectCountKHR(commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
+            }
+            case OP_vkCmdDrawIndexedIndirectCountKHR:
+            {
+                VkCommandBuffer commandBuffer;
+                VkBuffer buffer;
+                VkDeviceSize offset;
+                VkBuffer countBuffer;
+                VkDeviceSize countBufferOffset;
+                uint32_t maxDrawCount;
+                uint32_t stride;
+                m_vk->vkCmdDrawIndexedIndirectCountKHR(commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
+            }
 #endif
 #ifdef VK_KHR_8bit_storage
 #endif
 #ifdef VK_EXT_debug_report
+            case OP_vkCreateDebugReportCallbackEXT:
+            {
+                VkInstance instance;
+                VkDebugReportCallbackCreateInfoEXT pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkDebugReportCallbackEXT pCallback;
+                VkResult ret = m_vk->vkCreateDebugReportCallbackEXT(instance, pCreateInfo, pAllocator, pCallback);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyDebugReportCallbackEXT:
+            {
+                VkInstance instance;
+                VkDebugReportCallbackEXT callback;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyDebugReportCallbackEXT(instance, callback, pAllocator);
+            }
+            case OP_vkDebugReportMessageEXT:
+            {
+                VkInstance instance;
+                VkDebugReportFlagsEXT flags;
+                VkDebugReportObjectTypeEXT objectType;
+                uint64_t object;
+                size_t location;
+                int32_t messageCode;
+                char pLayerPrefix;
+                char pMessage;
+                m_vk->vkDebugReportMessageEXT(instance, flags, objectType, object, location, messageCode, pLayerPrefix, pMessage);
+            }
 #endif
 #ifdef VK_NV_glsl_shader
 #endif
@@ -153,12 +2261,65 @@ void placeholder_vulkan_dec_symbol() { }
 #ifdef VK_AMD_shader_explicit_vertex_parameter
 #endif
 #ifdef VK_EXT_debug_marker
+            case OP_vkDebugMarkerSetObjectTagEXT:
+            {
+                VkDevice device;
+                VkDebugMarkerObjectTagInfoEXT pTagInfo;
+                VkResult ret = m_vk->vkDebugMarkerSetObjectTagEXT(device, pTagInfo);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDebugMarkerSetObjectNameEXT:
+            {
+                VkDevice device;
+                VkDebugMarkerObjectNameInfoEXT pNameInfo;
+                VkResult ret = m_vk->vkDebugMarkerSetObjectNameEXT(device, pNameInfo);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkCmdDebugMarkerBeginEXT:
+            {
+                VkCommandBuffer commandBuffer;
+                VkDebugMarkerMarkerInfoEXT pMarkerInfo;
+                m_vk->vkCmdDebugMarkerBeginEXT(commandBuffer, pMarkerInfo);
+            }
+            case OP_vkCmdDebugMarkerEndEXT:
+            {
+                VkCommandBuffer commandBuffer;
+                m_vk->vkCmdDebugMarkerEndEXT(commandBuffer);
+            }
+            case OP_vkCmdDebugMarkerInsertEXT:
+            {
+                VkCommandBuffer commandBuffer;
+                VkDebugMarkerMarkerInfoEXT pMarkerInfo;
+                m_vk->vkCmdDebugMarkerInsertEXT(commandBuffer, pMarkerInfo);
+            }
 #endif
 #ifdef VK_AMD_gcn_shader
 #endif
 #ifdef VK_NV_dedicated_allocation
 #endif
 #ifdef VK_AMD_draw_indirect_count
+            case OP_vkCmdDrawIndirectCountAMD:
+            {
+                VkCommandBuffer commandBuffer;
+                VkBuffer buffer;
+                VkDeviceSize offset;
+                VkBuffer countBuffer;
+                VkDeviceSize countBufferOffset;
+                uint32_t maxDrawCount;
+                uint32_t stride;
+                m_vk->vkCmdDrawIndirectCountAMD(commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
+            }
+            case OP_vkCmdDrawIndexedIndirectCountAMD:
+            {
+                VkCommandBuffer commandBuffer;
+                VkBuffer buffer;
+                VkDeviceSize offset;
+                VkBuffer countBuffer;
+                VkDeviceSize countBufferOffset;
+                uint32_t maxDrawCount;
+                uint32_t stride;
+                m_vk->vkCmdDrawIndexedIndirectCountAMD(commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
+            }
 #endif
 #ifdef VK_AMD_negative_viewport_height
 #endif
@@ -169,42 +2330,259 @@ void placeholder_vulkan_dec_symbol() { }
 #ifdef VK_AMD_texture_gather_bias_lod
 #endif
 #ifdef VK_AMD_shader_info
+            case OP_vkGetShaderInfoAMD:
+            {
+                VkDevice device;
+                VkPipeline pipeline;
+                VkShaderStageFlagBits shaderStage;
+                VkShaderInfoTypeAMD infoType;
+                size_t pInfoSize;
+                void pInfo;
+                VkResult ret = m_vk->vkGetShaderInfoAMD(device, pipeline, shaderStage, infoType, pInfoSize, pInfo);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_AMD_shader_image_load_store_lod
 #endif
 #ifdef VK_IMG_format_pvrtc
 #endif
 #ifdef VK_NV_external_memory_capabilities
+            case OP_vkGetPhysicalDeviceExternalImageFormatPropertiesNV:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkFormat format;
+                VkImageType type;
+                VkImageTiling tiling;
+                VkImageUsageFlags usage;
+                VkImageCreateFlags flags;
+                VkExternalMemoryHandleTypeFlagsNV externalHandleType;
+                VkExternalImageFormatPropertiesNV pExternalImageFormatProperties;
+                VkResult ret = m_vk->vkGetPhysicalDeviceExternalImageFormatPropertiesNV(physicalDevice, format, type, tiling, usage, flags, externalHandleType, pExternalImageFormatProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_NV_external_memory
 #endif
 #ifdef VK_NV_external_memory_win32
+            case OP_vkGetMemoryWin32HandleNV:
+            {
+                VkDevice device;
+                VkDeviceMemory memory;
+                VkExternalMemoryHandleTypeFlagsNV handleType;
+                HANDLE pHandle;
+                VkResult ret = m_vk->vkGetMemoryWin32HandleNV(device, memory, handleType, pHandle);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_NV_win32_keyed_mutex
 #endif
 #ifdef VK_EXT_validation_flags
 #endif
 #ifdef VK_NN_vi_surface
+            case OP_vkCreateViSurfaceNN:
+            {
+                VkInstance instance;
+                VkViSurfaceCreateInfoNN pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkSurfaceKHR pSurface;
+                VkResult ret = m_vk->vkCreateViSurfaceNN(instance, pCreateInfo, pAllocator, pSurface);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_EXT_shader_subgroup_ballot
 #endif
 #ifdef VK_EXT_shader_subgroup_vote
 #endif
 #ifdef VK_EXT_conditional_rendering
+            case OP_vkCmdBeginConditionalRenderingEXT:
+            {
+                VkCommandBuffer commandBuffer;
+                VkConditionalRenderingBeginInfoEXT pConditionalRenderingBegin;
+                m_vk->vkCmdBeginConditionalRenderingEXT(commandBuffer, pConditionalRenderingBegin);
+            }
+            case OP_vkCmdEndConditionalRenderingEXT:
+            {
+                VkCommandBuffer commandBuffer;
+                m_vk->vkCmdEndConditionalRenderingEXT(commandBuffer);
+            }
 #endif
 #ifdef VK_NVX_device_generated_commands
+            case OP_vkCmdProcessCommandsNVX:
+            {
+                VkCommandBuffer commandBuffer;
+                VkCmdProcessCommandsInfoNVX pProcessCommandsInfo;
+                m_vk->vkCmdProcessCommandsNVX(commandBuffer, pProcessCommandsInfo);
+            }
+            case OP_vkCmdReserveSpaceForCommandsNVX:
+            {
+                VkCommandBuffer commandBuffer;
+                VkCmdReserveSpaceForCommandsInfoNVX pReserveSpaceInfo;
+                m_vk->vkCmdReserveSpaceForCommandsNVX(commandBuffer, pReserveSpaceInfo);
+            }
+            case OP_vkCreateIndirectCommandsLayoutNVX:
+            {
+                VkDevice device;
+                VkIndirectCommandsLayoutCreateInfoNVX pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkIndirectCommandsLayoutNVX pIndirectCommandsLayout;
+                VkResult ret = m_vk->vkCreateIndirectCommandsLayoutNVX(device, pCreateInfo, pAllocator, pIndirectCommandsLayout);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyIndirectCommandsLayoutNVX:
+            {
+                VkDevice device;
+                VkIndirectCommandsLayoutNVX indirectCommandsLayout;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyIndirectCommandsLayoutNVX(device, indirectCommandsLayout, pAllocator);
+            }
+            case OP_vkCreateObjectTableNVX:
+            {
+                VkDevice device;
+                VkObjectTableCreateInfoNVX pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkObjectTableNVX pObjectTable;
+                VkResult ret = m_vk->vkCreateObjectTableNVX(device, pCreateInfo, pAllocator, pObjectTable);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyObjectTableNVX:
+            {
+                VkDevice device;
+                VkObjectTableNVX objectTable;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyObjectTableNVX(device, objectTable, pAllocator);
+            }
+            case OP_vkRegisterObjectsNVX:
+            {
+                VkDevice device;
+                VkObjectTableNVX objectTable;
+                uint32_t objectCount;
+                VkObjectTableEntryNVX ppObjectTableEntries;
+                uint32_t pObjectIndices;
+                VkResult ret = m_vk->vkRegisterObjectsNVX(device, objectTable, objectCount, ppObjectTableEntries, pObjectIndices);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkUnregisterObjectsNVX:
+            {
+                VkDevice device;
+                VkObjectTableNVX objectTable;
+                uint32_t objectCount;
+                VkObjectEntryTypeNVX pObjectEntryTypes;
+                uint32_t pObjectIndices;
+                VkResult ret = m_vk->vkUnregisterObjectsNVX(device, objectTable, objectCount, pObjectEntryTypes, pObjectIndices);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkDeviceGeneratedCommandsFeaturesNVX pFeatures;
+                VkDeviceGeneratedCommandsLimitsNVX pLimits;
+                m_vk->vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX(physicalDevice, pFeatures, pLimits);
+            }
 #endif
 #ifdef VK_NV_clip_space_w_scaling
+            case OP_vkCmdSetViewportWScalingNV:
+            {
+                VkCommandBuffer commandBuffer;
+                uint32_t firstViewport;
+                uint32_t viewportCount;
+                VkViewportWScalingNV pViewportWScalings;
+                m_vk->vkCmdSetViewportWScalingNV(commandBuffer, firstViewport, viewportCount, pViewportWScalings);
+            }
 #endif
 #ifdef VK_EXT_direct_mode_display
+            case OP_vkReleaseDisplayEXT:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkDisplayKHR display;
+                VkResult ret = m_vk->vkReleaseDisplayEXT(physicalDevice, display);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_EXT_acquire_xlib_display
+            case OP_vkAcquireXlibDisplayEXT:
+            {
+                VkPhysicalDevice physicalDevice;
+                Display dpy;
+                VkDisplayKHR display;
+                VkResult ret = m_vk->vkAcquireXlibDisplayEXT(physicalDevice, dpy, display);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetRandROutputDisplayEXT:
+            {
+                VkPhysicalDevice physicalDevice;
+                Display dpy;
+                RROutput rrOutput;
+                VkDisplayKHR pDisplay;
+                VkResult ret = m_vk->vkGetRandROutputDisplayEXT(physicalDevice, dpy, rrOutput, pDisplay);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_EXT_display_surface_counter
+            case OP_vkGetPhysicalDeviceSurfaceCapabilities2EXT:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkSurfaceKHR surface;
+                VkSurfaceCapabilities2EXT pSurfaceCapabilities;
+                VkResult ret = m_vk->vkGetPhysicalDeviceSurfaceCapabilities2EXT(physicalDevice, surface, pSurfaceCapabilities);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_EXT_display_control
+            case OP_vkDisplayPowerControlEXT:
+            {
+                VkDevice device;
+                VkDisplayKHR display;
+                VkDisplayPowerInfoEXT pDisplayPowerInfo;
+                VkResult ret = m_vk->vkDisplayPowerControlEXT(device, display, pDisplayPowerInfo);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkRegisterDeviceEventEXT:
+            {
+                VkDevice device;
+                VkDeviceEventInfoEXT pDeviceEventInfo;
+                VkAllocationCallbacks pAllocator;
+                VkFence pFence;
+                VkResult ret = m_vk->vkRegisterDeviceEventEXT(device, pDeviceEventInfo, pAllocator, pFence);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkRegisterDisplayEventEXT:
+            {
+                VkDevice device;
+                VkDisplayKHR display;
+                VkDisplayEventInfoEXT pDisplayEventInfo;
+                VkAllocationCallbacks pAllocator;
+                VkFence pFence;
+                VkResult ret = m_vk->vkRegisterDisplayEventEXT(device, display, pDisplayEventInfo, pAllocator, pFence);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetSwapchainCounterEXT:
+            {
+                VkDevice device;
+                VkSwapchainKHR swapchain;
+                VkSurfaceCounterFlagBitsEXT counter;
+                uint64_t pCounterValue;
+                VkResult ret = m_vk->vkGetSwapchainCounterEXT(device, swapchain, counter, pCounterValue);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_GOOGLE_display_timing
+            case OP_vkGetRefreshCycleDurationGOOGLE:
+            {
+                VkDevice device;
+                VkSwapchainKHR swapchain;
+                VkRefreshCycleDurationGOOGLE pDisplayTimingProperties;
+                VkResult ret = m_vk->vkGetRefreshCycleDurationGOOGLE(device, swapchain, pDisplayTimingProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetPastPresentationTimingGOOGLE:
+            {
+                VkDevice device;
+                VkSwapchainKHR swapchain;
+                uint32_t pPresentationTimingCount;
+                VkPastPresentationTimingGOOGLE pPresentationTimings;
+                VkResult ret = m_vk->vkGetPastPresentationTimingGOOGLE(device, swapchain, pPresentationTimingCount, pPresentationTimings);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_NV_sample_mask_override_coverage
 #endif
@@ -217,24 +2595,146 @@ void placeholder_vulkan_dec_symbol() { }
 #ifdef VK_NV_viewport_swizzle
 #endif
 #ifdef VK_EXT_discard_rectangles
+            case OP_vkCmdSetDiscardRectangleEXT:
+            {
+                VkCommandBuffer commandBuffer;
+                uint32_t firstDiscardRectangle;
+                uint32_t discardRectangleCount;
+                VkRect2D pDiscardRectangles;
+                m_vk->vkCmdSetDiscardRectangleEXT(commandBuffer, firstDiscardRectangle, discardRectangleCount, pDiscardRectangles);
+            }
 #endif
 #ifdef VK_EXT_conservative_rasterization
 #endif
 #ifdef VK_EXT_swapchain_colorspace
 #endif
 #ifdef VK_EXT_hdr_metadata
+            case OP_vkSetHdrMetadataEXT:
+            {
+                VkDevice device;
+                uint32_t swapchainCount;
+                VkSwapchainKHR pSwapchains;
+                VkHdrMetadataEXT pMetadata;
+                m_vk->vkSetHdrMetadataEXT(device, swapchainCount, pSwapchains, pMetadata);
+            }
 #endif
 #ifdef VK_MVK_ios_surface
+            case OP_vkCreateIOSSurfaceMVK:
+            {
+                VkInstance instance;
+                VkIOSSurfaceCreateInfoMVK pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkSurfaceKHR pSurface;
+                VkResult ret = m_vk->vkCreateIOSSurfaceMVK(instance, pCreateInfo, pAllocator, pSurface);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_MVK_macos_surface
+            case OP_vkCreateMacOSSurfaceMVK:
+            {
+                VkInstance instance;
+                VkMacOSSurfaceCreateInfoMVK pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkSurfaceKHR pSurface;
+                VkResult ret = m_vk->vkCreateMacOSSurfaceMVK(instance, pCreateInfo, pAllocator, pSurface);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_EXT_external_memory_dma_buf
 #endif
 #ifdef VK_EXT_queue_family_foreign
 #endif
 #ifdef VK_EXT_debug_utils
+            case OP_vkSetDebugUtilsObjectNameEXT:
+            {
+                VkDevice device;
+                VkDebugUtilsObjectNameInfoEXT pNameInfo;
+                VkResult ret = m_vk->vkSetDebugUtilsObjectNameEXT(device, pNameInfo);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkSetDebugUtilsObjectTagEXT:
+            {
+                VkDevice device;
+                VkDebugUtilsObjectTagInfoEXT pTagInfo;
+                VkResult ret = m_vk->vkSetDebugUtilsObjectTagEXT(device, pTagInfo);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkQueueBeginDebugUtilsLabelEXT:
+            {
+                VkQueue queue;
+                VkDebugUtilsLabelEXT pLabelInfo;
+                m_vk->vkQueueBeginDebugUtilsLabelEXT(queue, pLabelInfo);
+            }
+            case OP_vkQueueEndDebugUtilsLabelEXT:
+            {
+                VkQueue queue;
+                m_vk->vkQueueEndDebugUtilsLabelEXT(queue);
+            }
+            case OP_vkQueueInsertDebugUtilsLabelEXT:
+            {
+                VkQueue queue;
+                VkDebugUtilsLabelEXT pLabelInfo;
+                m_vk->vkQueueInsertDebugUtilsLabelEXT(queue, pLabelInfo);
+            }
+            case OP_vkCmdBeginDebugUtilsLabelEXT:
+            {
+                VkCommandBuffer commandBuffer;
+                VkDebugUtilsLabelEXT pLabelInfo;
+                m_vk->vkCmdBeginDebugUtilsLabelEXT(commandBuffer, pLabelInfo);
+            }
+            case OP_vkCmdEndDebugUtilsLabelEXT:
+            {
+                VkCommandBuffer commandBuffer;
+                m_vk->vkCmdEndDebugUtilsLabelEXT(commandBuffer);
+            }
+            case OP_vkCmdInsertDebugUtilsLabelEXT:
+            {
+                VkCommandBuffer commandBuffer;
+                VkDebugUtilsLabelEXT pLabelInfo;
+                m_vk->vkCmdInsertDebugUtilsLabelEXT(commandBuffer, pLabelInfo);
+            }
+            case OP_vkCreateDebugUtilsMessengerEXT:
+            {
+                VkInstance instance;
+                VkDebugUtilsMessengerCreateInfoEXT pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkDebugUtilsMessengerEXT pMessenger;
+                VkResult ret = m_vk->vkCreateDebugUtilsMessengerEXT(instance, pCreateInfo, pAllocator, pMessenger);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyDebugUtilsMessengerEXT:
+            {
+                VkInstance instance;
+                VkDebugUtilsMessengerEXT messenger;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyDebugUtilsMessengerEXT(instance, messenger, pAllocator);
+            }
+            case OP_vkSubmitDebugUtilsMessageEXT:
+            {
+                VkInstance instance;
+                VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity;
+                VkDebugUtilsMessageTypeFlagsEXT messageTypes;
+                VkDebugUtilsMessengerCallbackDataEXT pCallbackData;
+                m_vk->vkSubmitDebugUtilsMessageEXT(instance, messageSeverity, messageTypes, pCallbackData);
+            }
 #endif
 #ifdef VK_ANDROID_external_memory_android_hardware_buffer
+            case OP_vkGetAndroidHardwareBufferPropertiesANDROID:
+            {
+                VkDevice device;
+                AHardwareBuffer buffer;
+                VkAndroidHardwareBufferPropertiesANDROID pProperties;
+                VkResult ret = m_vk->vkGetAndroidHardwareBufferPropertiesANDROID(device, buffer, pProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetMemoryAndroidHardwareBufferANDROID:
+            {
+                VkDevice device;
+                VkMemoryGetAndroidHardwareBufferInfoANDROID pInfo;
+                AHardwareBuffer pBuffer;
+                VkResult ret = m_vk->vkGetMemoryAndroidHardwareBufferANDROID(device, pInfo, pBuffer);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_EXT_sampler_filter_minmax
 #endif
@@ -247,6 +2747,19 @@ void placeholder_vulkan_dec_symbol() { }
 #ifdef VK_EXT_shader_stencil_export
 #endif
 #ifdef VK_EXT_sample_locations
+            case OP_vkCmdSetSampleLocationsEXT:
+            {
+                VkCommandBuffer commandBuffer;
+                VkSampleLocationsInfoEXT pSampleLocationsInfo;
+                m_vk->vkCmdSetSampleLocationsEXT(commandBuffer, pSampleLocationsInfo);
+            }
+            case OP_vkGetPhysicalDeviceMultisamplePropertiesEXT:
+            {
+                VkPhysicalDevice physicalDevice;
+                VkSampleCountFlagBits samples;
+                VkMultisamplePropertiesEXT pMultisampleProperties;
+                m_vk->vkGetPhysicalDeviceMultisamplePropertiesEXT(physicalDevice, samples, pMultisampleProperties);
+            }
 #endif
 #ifdef VK_EXT_blend_operation_advanced
 #endif
@@ -259,6 +2772,40 @@ void placeholder_vulkan_dec_symbol() { }
 #ifdef VK_EXT_post_depth_coverage
 #endif
 #ifdef VK_EXT_validation_cache
+            case OP_vkCreateValidationCacheEXT:
+            {
+                VkDevice device;
+                VkValidationCacheCreateInfoEXT pCreateInfo;
+                VkAllocationCallbacks pAllocator;
+                VkValidationCacheEXT pValidationCache;
+                VkResult ret = m_vk->vkCreateValidationCacheEXT(device, pCreateInfo, pAllocator, pValidationCache);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkDestroyValidationCacheEXT:
+            {
+                VkDevice device;
+                VkValidationCacheEXT validationCache;
+                VkAllocationCallbacks pAllocator;
+                m_vk->vkDestroyValidationCacheEXT(device, validationCache, pAllocator);
+            }
+            case OP_vkMergeValidationCachesEXT:
+            {
+                VkDevice device;
+                VkValidationCacheEXT dstCache;
+                uint32_t srcCacheCount;
+                VkValidationCacheEXT pSrcCaches;
+                VkResult ret = m_vk->vkMergeValidationCachesEXT(device, dstCache, srcCacheCount, pSrcCaches);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
+            case OP_vkGetValidationCacheDataEXT:
+            {
+                VkDevice device;
+                VkValidationCacheEXT validationCache;
+                size_t pDataSize;
+                void pData;
+                VkResult ret = m_vk->vkGetValidationCacheDataEXT(device, validationCache, pDataSize, pData);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_EXT_descriptor_indexing
 #endif
@@ -267,8 +2814,26 @@ void placeholder_vulkan_dec_symbol() { }
 #ifdef VK_EXT_global_priority
 #endif
 #ifdef VK_EXT_external_memory_host
+            case OP_vkGetMemoryHostPointerPropertiesEXT:
+            {
+                VkDevice device;
+                VkExternalMemoryHandleTypeFlagBits handleType;
+                void pHostPointer;
+                VkMemoryHostPointerPropertiesEXT pMemoryHostPointerProperties;
+                VkResult ret = m_vk->vkGetMemoryHostPointerPropertiesEXT(device, handleType, pHostPointer, pMemoryHostPointerProperties);
+                vkStream->write(&ret, sizeof(VkResult));
+            }
 #endif
 #ifdef VK_AMD_buffer_marker
+            case OP_vkCmdWriteBufferMarkerAMD:
+            {
+                VkCommandBuffer commandBuffer;
+                VkPipelineStageFlagBits pipelineStage;
+                VkBuffer dstBuffer;
+                VkDeviceSize dstOffset;
+                uint32_t marker;
+                m_vk->vkCmdWriteBufferMarkerAMD(commandBuffer, pipelineStage, dstBuffer, dstOffset, marker);
+            }
 #endif
 #ifdef VK_AMD_shader_core_properties
 #endif
@@ -277,6 +2842,23 @@ void placeholder_vulkan_dec_symbol() { }
 #ifdef VK_NV_shader_subgroup_partitioned
 #endif
 #ifdef VK_NV_device_diagnostic_checkpoints
+            case OP_vkCmdSetCheckpointNV:
+            {
+                VkCommandBuffer commandBuffer;
+                void pCheckpointMarker;
+                m_vk->vkCmdSetCheckpointNV(commandBuffer, pCheckpointMarker);
+            }
+            case OP_vkGetQueueCheckpointDataNV:
+            {
+                VkQueue queue;
+                uint32_t pCheckpointDataCount;
+                VkCheckpointDataNV pCheckpointData;
+                m_vk->vkGetQueueCheckpointDataNV(queue, pCheckpointDataCount, pCheckpointData);
+            }
 #endif
+        }
+    }
+    return 0;;
+}
 
 

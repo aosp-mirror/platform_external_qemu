@@ -31,6 +31,10 @@ public:
 
     ~Impl() { }
 
+    void setStream(IOStream* stream) {
+        mStream = stream;
+    }
+
     bool valid() { return true; }
 
     void alloc(void **ptrAddr, size_t bytes) {
@@ -130,6 +134,10 @@ VulkanStream::VulkanStream(IOStream *stream) :
     mImpl(new VulkanStream::Impl(stream)) { }
 
 VulkanStream::~VulkanStream() = default;
+
+void VulkanStream::setStream(IOStream* stream) {
+    mImpl->setStream(stream);
+}
 
 bool VulkanStream::valid() {
     return mImpl->valid();

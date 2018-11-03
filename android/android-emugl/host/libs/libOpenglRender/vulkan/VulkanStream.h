@@ -27,6 +27,8 @@ public:
     VulkanStream(IOStream* stream);
     ~VulkanStream();
 
+    void setStream(IOStream* stream);
+
     // Returns whether the connection is valid.
     bool valid();
 
