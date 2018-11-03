@@ -45,17 +45,18 @@ AdbBugReportServices::~AdbBugReportServices() {
     }
 }
 
-void AdbBugReportServices::generateBugReport(StringView outputDirectoryPath,
-                                             ResultCallback resultCallback) {
-    if (isBugReportInFlight()) {
+AdbCommandPtr AdbBugReportServices::generateBugReport(
+        StringView outputDirectoryPath,
+        ResultCallback resultCallback) {
+    if (mAdbBugReportCommand && mAdbBugReportCommand->inFlight()) {
         resultCallback(Result::OperationInProgress, nullptr);
-        return;
+        return nullptr;
     }
 
     if (!System::get()->pathIsDir(outputDirectoryPath) ||
         !System::get()->pathCanWrite(outputDirectoryPath)) {
         resultCallback(Result::SaveLocationInvalid, nullptr);
-        return;
+        return nullptr;
     }
 
     auto filePath =
@@ -105,34 +106,40 @@ void AdbBugReportServices::generateBugReport(StringView outputDirectoryPath,
                 },
                 kAdbCommandTimeoutMs, true);
     }
+    return mAdbBugReportCommand;
 }
 
-void AdbBugReportServices::generateAdbLogcatInMemory(
+AdbCommandPtr AdbBugReportServices::generateAdbLogcatInMemory(
         ResultOutputCallback resultCallback) {
-    if (mAdbLogcatCommand) {
+    if (mAdbLogcatCommand && mAdbLogcatCommand->inFlight()) {
         resultCallback(Result::OperationInProgress, nullptr);
-        return;
+        return nullptr;
     }
+
     // After apiLevel 19, buffer "all" become available
     int apiLevel = avdInfo_getApiLevel(android_avdInfo);
     mAdbLogcatCommand = mAdb->runAdbCommand(
-            (apiLevel != kDefaultUnknownAPILevel && apiLevel > 19)
-                    ? std::vector<std::string>{"logcat", "-b", "all", "-d"}
-                    : std::vector<std::string>{"logcat", "-b", "events", "-b",
-                                               "main", "-b", "radio", "-b",
-                                               "system", "-d"},
-            [this, resultCallback](const OptionalAdbCommandResult& result) {
-                if (!result || result->exit_code || !result->output) {
-                    resultCallback(Result::GenerationFailed, nullptr);
-                } else {
-                    std::string s(
-                            std::istreambuf_iterator<char>(*result->output),
-                            {});
-                    resultCallback(Result::Success, s);
-                }
-                mAdbLogcatCommand.reset();
-            },
-            kAdbCommandTimeoutMs, true);
+                   (apiLevel != kDefaultUnknownAPILevel && apiLevel > 19)
+                           ? std::vector<std::string>{"logcat", "-b", "all",
+                                                      "-d"}
+                           : std::vector<std::string>{"logcat", "-b", "events",
+                                                      "-b", "main", "-b",
+                                                      "radio", "-b", "system",
+                                                      "-d"},
+                   [this,
+                    resultCallback](const OptionalAdbCommandResult& result) {
+                       if (!result || result->exit_code || !result->output) {
+                           resultCallback(Result::GenerationFailed, nullptr);
+                       } else {
+                           std::string s(std::istreambuf_iterator<char>(
+                                                 *result->output),
+                                         {});
+                           resultCallback(Result::Success, s);
+                       }
+                       mAdbLogcatCommand.reset();
+                   },
+                   kAdbCommandTimeoutMs, true);
+    return mAdbLogcatCommand;
 }
 
 std::string AdbBugReportServices::generateUniqueBugreportName() {
