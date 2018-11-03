@@ -752,7 +752,7 @@ android_copy_test_dir(android-emu_unittests test-sdk test-sdk)
 android_copy_file(android-emu_unittests  "${CMAKE_CURRENT_SOURCE_DIR}/android/emulation/CpuAccelerator_unittest.dat" "$<TARGET_FILE_DIR:android-emu_unittests>/android/android-emu/android/emulation/CpuAccelerator_unittest.dat")
 android_copy_file(android-emu_unittests  "${CMAKE_CURRENT_SOURCE_DIR}/android/emulation/CpuAccelerator_unittest.dat2" "$<TARGET_FILE_DIR:android-emu_unittests>/android/android-emu/android/emulation/CpuAccelerator_unittest.dat2")
 
-android_target_dependency(android-emu_unittests all "${E2FSPROGS_DEPENDENCIES}")
+android_target_dependency(android-emu_unittests all  E2FSPROGS_DEPENDENCIES)
 
 # Boo! We depend on makeext
 add_custom_command(TARGET android-emu_unittests POST_BUILD
