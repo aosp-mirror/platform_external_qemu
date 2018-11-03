@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5e377556_2f9d43e6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-11-03T00:31:45Z",
+      "side": 1,
+      "message": "I think it would be better to pass mBuf and BUF_SIZE as parameters.",
+      "revId": "8cd4914a9af9f96937fc00dbf91e1adcbb7e447e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "088ef43c_25c9e0db",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-11-03T00:31:45Z",
+      "side": 1,
+      "message": "As far as I see, only \u0027readPacket\u0027 and \u0027run\u0027 share the mBuf member.\nWhat about just making it a local variable in \"run\" and pass it around as parameter?",
+      "revId": "8cd4914a9af9f96937fc00dbf91e1adcbb7e447e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aae34ae4_e6869fdb",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-11-03T00:31:45Z",
+      "side": 1,
+      "message": "Please add a comment indicating that these methods are \"visible for testing\".",
+      "revId": "8cd4914a9af9f96937fc00dbf91e1adcbb7e447e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
