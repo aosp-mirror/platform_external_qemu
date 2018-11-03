@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9e0e8f21_31ebbba6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-03T00:29:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fd5ea1eb_924beb82",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5949e055_eca225e9",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
         "patchSetId": 16
@@ -30,6 +48,24 @@
       "writtenOn": "2018-11-02T19:08:12Z",
       "side": 1,
       "message": "is there a conveient way to test this? is any of this unit testable?",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "044d2775_5e320849",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-03T00:29:41Z",
+      "side": 1,
+      "message": "Currently as it is, not really. To improve testability, I\u0027ll use protected wrapper functions around the socket operations so that they could be better tested by overriding them in some subclass so it would no longer rely on an actual connection. Do you have any other suggestions?",
+      "parentUuid": "5949e055_eca225e9",
       "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "730747fc_6abee4fa",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-03T00:29:41Z",
+      "side": 1,
+      "message": "I\u0027ll add a sleep between connection attempts so that it isn\u0027t always busy-waiting. However, I\u0027m not sure how to nicely implement a time-out mechanism, since socket_select (which is what we were originally going to use) isn\u0027t available in the android utils\u0027s socket lib - do you know of any good alternatives?",
+      "parentUuid": "63311d54_90adbc07",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "10869495_5107d566",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
         "patchSetId": 16
@@ -67,6 +121,24 @@
       "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3eab94fc_1d28ca16",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-03T00:29:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "10869495_5107d566",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "15074387_b271b6f5",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-03T00:29:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04af16c9_27084fb8",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d181080f_ae64a8aa",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
         "patchSetId": 16
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "064c2321_61c29ee0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-03T00:29:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d181080f_ae64a8aa",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "551664dd_cd61da4a",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
         "patchSetId": 16
@@ -118,6 +226,24 @@
       "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f84a9c3_cacb900e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-03T00:29:41Z",
+      "side": 1,
+      "message": "When wait returns, the thread will have finished running, so the deleteLater slot on the thread is received, so it gets deleted.",
+      "parentUuid": "551664dd_cd61da4a",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
