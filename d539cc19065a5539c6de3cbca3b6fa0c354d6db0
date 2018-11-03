@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "fb5d6e7f_5c07103e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-03T04:23:04Z",
+      "side": 1,
+      "message": "Using mock socket operations sounds good, thanks!",
+      "parentUuid": "044d2775_5e320849",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "63311d54_90adbc07",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
         "patchSetId": 16
@@ -101,6 +119,24 @@
       "side": 1,
       "message": "I\u0027ll add a sleep between connection attempts so that it isn\u0027t always busy-waiting. However, I\u0027m not sure how to nicely implement a time-out mechanism, since socket_select (which is what we were originally going to use) isn\u0027t available in the android utils\u0027s socket lib - do you know of any good alternatives?",
       "parentUuid": "63311d54_90adbc07",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eea63d53_c8038b59",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-03T04:23:04Z",
+      "side": 1,
+      "message": "I believe we can try making sure the socket is in non blocking mode, calling connect() on it, then using regular select() with a timeout to wait for connection without busy waiting. For an example, see SocketUtils.cpp: socketTcpLoopbackClientFor",
+      "parentUuid": "730747fc_6abee4fa",
       "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -244,6 +280,24 @@
       "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "50ed30d5_378e523c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-03T04:23:04Z",
+      "side": 1,
+      "message": "Ah got it. Not too familiar with QThreads (we usually use android::base::Thread here, and in this particular case it seems well suited for android::base::WorkerThread (see m_postThread in FrameBuffer.cpp for a usage example).",
+      "parentUuid": "8f84a9c3_cacb900e",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
