@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from copy import deepcopy
+from copy import copy
 
 from .common.codegen import CodeGen, VulkanAPIWrapper
 from .common.vulkantypes import \
@@ -60,7 +60,7 @@ class VulkanMarshalingCodegen(object):
         return False
 
     def getTypeForStreaming(self, vulkanType):
-        res = deepcopy(vulkanType)
+        res = copy(vulkanType)
 
         if not vulkanType.accessibleAsPointer():
             res = res.getForAddressAccess()

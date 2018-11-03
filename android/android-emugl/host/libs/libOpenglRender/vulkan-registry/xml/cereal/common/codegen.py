@@ -15,7 +15,7 @@
 
 from .vulkantypes import VulkanType, VulkanCompoundType, VulkanAPI
 
-from copy import deepcopy
+from copy import copy
 
 import os
 import sys
@@ -98,8 +98,15 @@ class CodeGen(object):
         self.code = ""
         return res
 
-    def indent(self,):
-        return "".join("    " * self.indentLevel)
+    def indent(self,extra=0):
+        return "".join("    " * (self.indentLevel + extra))
+
+    def incrIndent(self,):
+        self.indentLevel += 1
+
+    def decrIndent(self,):
+        if self.indentLevel > 0:
+            self.indentLevel -= 1
 
     def beginBlock(self,):
         self.code += self.indent() + "{\n"
@@ -357,6 +364,9 @@ class CodeGen(object):
         if isinstance(vulkanType.parent, VulkanAPI):
             return self.accessParameter(vulkanType, asPtr=asPtr)
 
+        os.abort("Could not find a way to access Vulkan type %s" %
+                 vulkanType.name)
+
         raise
 
     def generalLengthAccess(self, vulkanType, parentVarName="parent"):
@@ -395,8 +405,9 @@ class VulkanAPIWrapper(object):
         self.definitionFunc = codegenDef
 
         # Private function
+
         def makeApiFunc(self, typeInfo, apiName):
-            customApi = deepcopy(typeInfo.apis[apiName])
+            customApi = copy(typeInfo.apis[apiName])
             customApi.name = self.customApiPrefix + customApi.name
             if self.extraParameters is not None:
                 if isinstance(self.extraParameters, list):
