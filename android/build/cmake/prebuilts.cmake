@@ -13,15 +13,16 @@
 
 set(PREBUILT_COMMON "BLUEZ;LZ4;X264")
 
-
 function(android_add_prebuilt_library PKG MODULE LOCATION INCLUDES DEFINTIONS)
-  if (NOT TARGET ${PKG}::${MODULE})
+  if(NOT TARGET ${PKG}::${MODULE})
     add_library(${PKG}::${MODULE} STATIC IMPORTED GLOBAL)
-    set_target_properties(${PKG}::${MODULE} PROPERTIES
-      IMPORTED_LOCATION "${LOCATION}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-      INTERFACE_INCLUDE_DIRECTORIES "${INCLUDES}"
-      INTERFACE_COMPILE_DEFINITIONS "${DEFINTIONS}"
-    )
+    set_target_properties(${PKG}::${MODULE}
+                          PROPERTIES IMPORTED_LOCATION
+                                     "${LOCATION}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+                                     INTERFACE_INCLUDE_DIRECTORIES
+                                     "${INCLUDES}"
+                                     INTERFACE_COMPILE_DEFINITIONS
+                                     "${DEFINTIONS}")
 
     android_log("set_target_properties(${PKG}::${MODULE} PROPERTIES
         IMPORTED_LOCATION '${LOCATION}${CMAKE_STATIC_LIBRARY_SUFFIX}'
@@ -30,7 +31,6 @@ function(android_add_prebuilt_library PKG MODULE LOCATION INCLUDES DEFINTIONS)
     )")
   endif()
 endfunction()
-
 
 # Internal function for simple packages.
 function(simple_prebuilt Package)
@@ -115,19 +115,49 @@ endfunction(prebuilt pkg)
 # TARGET_TAG The android target tag for which these are applicable, or all for all targets.
 #
 # RUN_TARGET_DEPENDENCIES:
-# .   List of SRC>DST pairs that contains individual file dependencies.
-# .   List of SRC_DIR>>DST pairs that contains directorie depedencies.
+#  .   List of SRC>DST pairs that contains individual file dependencies.
+#  .   List of SRC_DIR>>DST pairs that contains directorie depedencies.
 #
 # For example:
-#   set(MY_FOO_DEPENDENCIES "/tmp/a/b.txt>lib/some/dir/c.txt;" . # copy from /tmp/a/b.txt to lib/some/dir/c.txt
-#                           "/tmp/dirs>>lib/x")  # recursively copy /tmp/dirs to lib/x
+#     set(MY_FOO_DEPENDENCIES
+#          # copy from /tmp/a/b.txt to lib/some/dir/c.txt
+#          "/tmp/a/b.txt>lib/some/dir/c.txt;"
+#           # recursively copy /tmp/dirs to lib/x
+#           lib/some/dir/c.txt "/tmp/dirs/*>>lib/x")
 #
-# TODO: It would be nice if we could get these to propagate through link_libraries, so we would have
-# proper dependency resolution.
+# Note that this relies on every binary being binplaced in the root, which
+# implies that this will not work with every generator.
+#
+# This works by creating an empty dummy target that relies on a set of sources
+# that are the files we want to copy over. We construct the list of files
+# we want to copy over and create a custom command that does the copying.
+# next we feed the generated sources as a target to our dummy lib. Since they
+# are not .c/.cpp files they are required to be there but result in no action.
+# The generated archives will be empty, i.e:
+# nm -a archives/libSWIFTSHADER_DEPENDENCIES.a
+#
+# dummy.c.o:
+# 0000000000000000 a dummy.c
+#
+# Now this target can be used by others to take a dependency on. So we get:
+# 1. Fast rebuilds (as we use ninja/make file out sync detection)
+# 2. Binplace only once per dependency (no more concurrency problems)
+# 3. No more target dependent binplacing (i.e. if a target does not end up in the root)
+#   which likely breaks the xcode generator.
 function(android_target_dependency RUN_TARGET TARGET_TAG RUN_TARGET_DEPENDENCIES)
   if(TARGET_TAG STREQUAL "${ANDROID_TARGET_TAG}" OR TARGET_TAG STREQUAL "all")
-    list(REMOVE_DUPLICATES RUN_TARGET_DEPENDENCIES)
-    foreach(DEP ${RUN_TARGET_DEPENDENCIES})
+
+    # Link to existing target if there.
+    if(TARGET ${RUN_TARGET_DEPENDENCIES})
+      target_link_libraries(${RUN_TARGET} PRIVATE ${RUN_TARGET_DEPENDENCIES})
+      return()
+    endif()
+
+    # Okay let's construct our target.
+    set(DEPENDENCIES "${${RUN_TARGET_DEPENDENCIES}}")
+    set(DEP_SOURCES "")
+    list(REMOVE_DUPLICATES DEPENDENCIES)
+    foreach(DEP ${DEPENDENCIES})
       # Are we copying a directory or a file?
       if(DEP MATCHES ".*>>.*")
         string(REPLACE ">>" ";" SRC_DST ${DEP})
@@ -137,24 +167,31 @@ function(android_target_dependency RUN_TARGET TARGET_TAG RUN_TARGET_DEPENDENCIES
         if(NOT GLOBBED)
           message(
             FATAL_ERROR
-            "The target ${RUN_TARGET} depends on a dependency: [${SRC}]/[${GLOBBED}] that does not exist. Full list ${RUN_TARGET_DEPENDENCIES}!"
+              "The target ${RUN_TARGET} depends on a dependency: [${SRC}]/[${GLOBBED}] that does not exist. Full list ${RUN_TARGET_DEPENDENCIES}!"
             )
         endif()
-        if(HOST_TAG STREQUAL "windows_msvc-x86_64")
-          add_custom_command(TARGET ${RUN_TARGET} POST_BUILD
-                             COMMAND ${CMAKE_COMMAND} -E copy_directory "${SRC}"
-                                     "$<TARGET_FILE_DIR:${RUN_TARGET}>/${DST}"
-                             MAIN_DEPENDENCY ${SRC})
-        else()
-          # We want to keep symlinks intact, so we just rsync the thing
-          add_custom_command(TARGET ${RUN_TARGET} POST_BUILD
-              # Make sure the directory exists
-              COMMAND mkdir -p $$\( dirname "$<TARGET_FILE_DIR:${RUN_TARGET}>/${DST}" \)
-              # And copy all, leaving the symlinks intact.
-              COMMAND rsync -rl "${SRC}" "$<TARGET_FILE_DIR:${RUN_TARGET}>/${DST}"
-                             MAIN_DEPENDENCY ${SRC})
-        endif()
+
+        # Let's calculate the destination directory, so we can use this
+        # as our generated sources parameters.
+        get_filename_component(SRC_DIR "${SRC}" DIRECTORY)
+        set(DEST_SRC "")
+        set(DEST_DIR "${CMAKE_BINARY_DIR}/${DST}")
+        foreach(FNAME ${GLOBBED})
+           string(REPLACE "${SRC_DIR}" "${DEST_DIR}" DEST_FILE "${FNAME}")
+           list(APPEND DEST_SRC ${DEST_FILE})
+           list(APPEND DEP_SOURCES ${DEST_FILE})
+        endforeach()
+
+        # DEST_SRC will contain all the globbed files that will be copied over with rsync,
+        # leaving the symlinks to our local files intact (needed for macos)
+        add_custom_command(OUTPUT ${DEST_SRC}
+                           # Make sure the directory exists
+                           COMMAND mkdir -p $$\( dirname "${CMAKE_BINARY_DIR}/${DST}" \)
+                                   # And copy all, leaving the symlinks intact.
+                           COMMAND rsync -rl "${SRC}" "${CMAKE_BINARY_DIR}/${DST}"
+        )
       else()
+        # We are doing single file copies.
         # Turns src>dst into a list, so we can split out SRC --> DST
         string(REPLACE ">" ";" SRC_DST ${DEP})
         list(GET SRC_DST 0 SRC)
@@ -165,12 +202,20 @@ function(android_target_dependency RUN_TARGET TARGET_TAG RUN_TARGET_DEPENDENCIES
               "The target ${RUN_TARGET} depends on a dependency: ${SRC} that does not exist. Full list ${RUN_TARGET_DEPENDENCIES}!"
             )
         endif()
-        add_custom_command(TARGET ${RUN_TARGET} POST_BUILD
+
+        set(DEST_FILE "${CMAKE_BINARY_DIR}/${DST}")
+        add_custom_command(OUTPUT "${DEST_FILE}"
                            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${SRC}"
-                                   "$<TARGET_FILE_DIR:${RUN_TARGET}>/${DST}"
-                           MAIN_DEPENDENCY ${SRC})
+                                   "${CMAKE_BINARY_DIR}/${DST}")
+        list(APPEND DEP_SOURCES ${DEST_FILE})
       endif()
     endforeach()
+
+    # Generate the library, and have ${RUN_TARGET} depend on it.
+    android_log("add_library(${RUN_TARGET_DEPENDENCIES} ${DEP_SOURCES} ${ANDROID_QEMU2_TOP_DIR}/dummy.c)")
+    set_source_files_properties(${DEP_SOURCES} PROPERTIES GENERATED TRUE)
+    add_library(${RUN_TARGET_DEPENDENCIES} ${DEP_SOURCES} ${ANDROID_QEMU2_TOP_DIR}/dummy.c)
+    target_link_libraries(${RUN_TARGET} PRIVATE ${RUN_TARGET_DEPENDENCIES})
   endif()
 endfunction()
 
@@ -194,7 +239,7 @@ function(android_target_properties RUN_TARGET TARGET_TAG RUN_TARGET_PROPERTIES)
         # Note we are not treating the propery as a list!
         get_property(CURR_VAL TARGET ${RUN_TARGET} PROPERTY ${KEY})
         # Of course we deal with lists differently on different platforms!
-        if (APPLE)
+        if(APPLE)
           set_property(TARGET ${RUN_TARGET} PROPERTY "${KEY}" ${CURR_VAL};${VAL})
           android_log("set_property(TARGET ${RUN_TARGET} PROPERTY '${KEY}' ${CURR_VAL};${VAL})")
         else()

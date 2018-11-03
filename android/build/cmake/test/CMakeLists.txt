@@ -84,5 +84,5 @@ android_target_compile_options(hello linux-x86_64 PRIVATE  -fPIC -Wall)
 target_link_libraries(hello PRIVATE hello_base UUID::UUID Qt5::Core)
 
 # The prebuilt dependencies that do magical things to our target (Such as setting rpaths, and copying over dependencies)
-android_target_dependency(hello all "${QT5_SHARED_DEPENDENCIES}")
+android_target_dependency(hello all  QT5_SHARED_DEPENDENCIES)
 android_target_properties(hello all "${QT5_SHARED_PROPERTIES}")

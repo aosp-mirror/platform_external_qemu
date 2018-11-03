@@ -271,10 +271,10 @@ android_target_compile_options(emulator-libui_unittests linux-x86_64 PRIVATE "-W
 android_target_compile_options(emulator-libui_unittests darwin-x86_64 PRIVATE "-Wno-reserved-user-defined-literal")
 
 
-android_target_dependency(emulator-libui_unittests all "${QT5_SHARED_DEPENDENCIES}")
+android_target_dependency(emulator-libui_unittests all  QT5_SHARED_DEPENDENCIES)
 android_target_properties(emulator-libui_unittests all "${QT5_SHARED_PROPERTIES}")
 
 # Make sure we disable rtti in gtest
 target_compile_definitions(emulator-libui_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 
-target_link_libraries(emulator-libui_unittests emulator-libui FFMPEG::FFMPEG gmock_main)
+target_link_libraries(emulator-libui_unittests PRIVATE emulator-libui FFMPEG::FFMPEG gmock_main)
