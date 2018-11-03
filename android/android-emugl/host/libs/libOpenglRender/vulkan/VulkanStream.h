@@ -27,6 +27,8 @@ public:
     VulkanStream(IOStream* stream);
     ~VulkanStream();
 
+    void setStream(IOStream* stream);
+
     // Returns whether the connection is valid.
     bool valid();
 
@@ -41,9 +43,26 @@ public:
     virtual ssize_t read(void *buffer, size_t size);
     virtual ssize_t write(const void *buffer, size_t size);
 
+    void commitWrite();
+
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
+};
+
+class VulkanMemReadingStream : public VulkanStream {
+public:
+    VulkanMemReadingStream(uint8_t* start);
+    ~VulkanMemReadingStream();
+
+    void setBuf(uint8_t* buf);
+
+    ssize_t read(void *buffer, size_t size) override;
+    ssize_t write(const void *buffer, size_t size) override;
+
+private:
+    uint8_t* mStart;
+    uintptr_t mReadPos = 0;
 };
 
 } // namespace goldfish_vk

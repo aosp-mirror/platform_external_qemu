@@ -31,6 +31,10 @@ public:
 
     ~Impl() { }
 
+    void setStream(IOStream* stream) {
+        mStream = stream;
+    }
+
     bool valid() { return true; }
 
     void alloc(void **ptrAddr, size_t bytes) {
@@ -53,6 +57,10 @@ public:
             abort();
         }
         return size;
+    }
+
+    void flush() {
+        commitWrite();
     }
 
 private:
@@ -101,6 +109,10 @@ VulkanStream::VulkanStream(IOStream *stream) :
 
 VulkanStream::~VulkanStream() = default;
 
+void VulkanStream::setStream(IOStream* stream) {
+    mImpl->setStream(stream);
+}
+
 bool VulkanStream::valid() {
     return mImpl->valid();
 }
@@ -142,6 +154,33 @@ ssize_t VulkanStream::read(void *buffer, size_t size) {
 
 ssize_t VulkanStream::write(const void *buffer, size_t size) {
     return mImpl->write(buffer, size);
+}
+
+void VulkanStream::commitWrite() {
+    mImpl->flush();
+}
+
+VulkanMemReadingStream::VulkanMemReadingStream(uint8_t* start)
+    : mStart(start), VulkanStream(nullptr) {}
+
+VulkanMemReadingStream::~VulkanMemReadingStream() { }
+
+void VulkanMemReadingStream::setBuf(uint8_t* buf) {
+    mStart = buf;
+    mReadPos = 0;
+}
+
+ssize_t VulkanMemReadingStream::read(void* buffer, size_t size) {
+    memcpy(buffer, mStart + mReadPos, size);
+    mReadPos += size;
+    return size;
+}
+
+ssize_t VulkanMemReadingStream::write(const void* buffer, size_t size) {
+    fprintf(stderr,
+            "%s: FATAL: VulkanMemReadingStream does not support writing\n",
+            __func__);
+    abort();
 }
 
 } // namespace goldfish_vk

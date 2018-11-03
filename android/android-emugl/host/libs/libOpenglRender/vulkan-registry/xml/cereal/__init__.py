@@ -1,4 +1,5 @@
 from .common import *
+from .decoder import *
 from .encoder import *
 from .frontend import *
 from .marshaling import *

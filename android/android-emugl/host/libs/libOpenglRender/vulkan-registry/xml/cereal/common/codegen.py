@@ -199,6 +199,31 @@ class CodeGen(object):
 
         return "%s%s%s%s" % (constness, typeName, ptrSpec, paramStr)
 
+    def makeRichCTypeDecl(self, vulkanType, useParamName=True):
+        constness = "const " if vulkanType.isConst else ""
+        typeName = vulkanType.typeName
+
+        if vulkanType.pointerIndirectionLevels == 0:
+            ptrSpec = ""
+        elif vulkanType.isPointerToConstPointer:
+            ptrSpec = "* const*" if vulkanType.isConst else "**"
+            if vulkanType.pointerIndirectionLevels > 2:
+                ptrSpec += "*" * (vulkanType.pointerIndirectionLevels - 2)
+        else:
+            ptrSpec = "*" * vulkanType.pointerIndirectionLevels
+
+        if useParamName and (vulkanType.paramName is not None):
+            paramStr = (" " + vulkanType.paramName)
+        else:
+            paramStr = ""
+        
+        if vulkanType.staticArrExpr:
+            staticArrInfo = "[%s]" % vulkanType.staticArrExpr
+        else:
+            staticArrInfo = ""
+
+        return "%s%s%s%s%s" % (constness, typeName, ptrSpec, paramStr, staticArrInfo)
+
     # Given a VulkanAPI object, generate the C function protype:
     # <returntype> <funcname>(<parameters>)
     def makeFuncProto(self, vulkanApi):

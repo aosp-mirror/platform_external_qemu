@@ -21,6 +21,7 @@ target_include_directories(
     PUBLIC
         ${ANDROID_EMUGL_DIR}/host/libs/vulkan_dec
         ${ANDROID_EMUGL_DIR}/host/include/
+        ${ANDROID_EMUGL_DIR}/host/include/OpenglRender
         ${ANDROID_EMUGL_DIR}/shared/OpenglCodecCommon
     PRIVATE
         ${ANDROID_EMUGL_DIR}/shared

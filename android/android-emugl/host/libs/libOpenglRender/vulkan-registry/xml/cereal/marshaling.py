@@ -243,6 +243,9 @@ class VulkanMarshaling(VulkanWrapperGenerator):
     def __init__(self, module, typeInfo):
         VulkanWrapperGenerator.__init__(self, module, typeInfo)
 
+        self.cgenHeader = CodeGen()
+        self.cgenImpl = CodeGen()
+
         self.writeCodegen = \
             VulkanMarshalingCodegen(
                 None,
@@ -250,15 +253,6 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 MARSHAL_INPUT_VAR_NAME,
                 API_PREFIX_MARSHAL,
                 direction = "write")
-
-        self.apiOutputCodegenForRead = \
-            VulkanMarshalingCodegen(
-                None,
-                VULKAN_STREAM_VAR_NAME,
-                MARSHAL_INPUT_VAR_NAME,
-                API_PREFIX_MARSHAL,
-                direction = "read",
-                forApiOutput = True)
 
         self.readCodegen = \
             VulkanMarshalingCodegen(
@@ -268,86 +262,6 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 API_PREFIX_UNMARSHAL,
                 direction = "read",
                 dynAlloc = True)
-
-        self.apiOutputCodegenForWrite = \
-            VulkanMarshalingCodegen(
-                None,
-                VULKAN_STREAM_VAR_NAME,
-                UNMARSHAL_INPUT_VAR_NAME,
-                API_PREFIX_UNMARSHAL,
-                direction = "write",
-                forApiOutput = True,
-                dynAlloc = True)
-
-        def apiMarshalingDef(cgen, api):
-            self.apiOutputCodegenForRead.cgen = cgen
-            self.writeCodegen.cgen = cgen
-
-            cgen.stmt("uint32_t opcode = OP_%s" % (api.origName));
-            cgen.stmt("%s->write(&opcode, sizeof(uint32_t))" % \
-                      VULKAN_STREAM_VAR_NAME)
-
-            for param in api.parameters:
-                if param.paramName == VULKAN_STREAM_VAR_NAME:
-                    continue
-                if param.possiblyOutput():
-                    iterateVulkanType(typeInfo, param,
-                                      self.apiOutputCodegenForRead)
-                else:
-                    iterateVulkanType(typeInfo, param, self.writeCodegen)
-
-            if api.retType.isVoidWithNoSize():
-                pass
-            else:
-                result_var_name = "%s_%s_return" % (api.name,
-                                                    api.retType.typeName)
-                cgen.stmt("%s %s = (%s)0" % (cgen.makeCTypeDecl(
-                    api.retType, useParamName=False), result_var_name,
-                    api.retType.typeName))
-                cgen.stmt("%s->read(&%s, %s)" % (VULKAN_STREAM_VAR_NAME,
-                                                 result_var_name,
-                                                 cgen.sizeofExpr(api.retType)))
-                cgen.stmt("return %s" % result_var_name)
-
-        self.marshalWrapper = \
-            VulkanAPIWrapper(
-                API_PREFIX_MARSHAL,
-                PARAMETERS_MARSHALING,
-                None,
-                apiMarshalingDef)
-
-        def apiUnmarshalingDef(cgen, api):
-            self.apiOutputCodegenForWrite.cgen = cgen
-            self.readCodegen.cgen = cgen
-
-            for param in api.parameters:
-                if param.paramName == VULKAN_STREAM_VAR_NAME:
-                    continue
-                if param.possiblyOutput():
-                    iterateVulkanType(typeInfo, param,
-                                      self.apiOutputCodegenForWrite)
-                else:
-                    iterateVulkanType(typeInfo, param, self.readCodegen)
-
-            if api.retType.isVoidWithNoSize():
-                pass
-            else:
-                result_var_name = "%s_%s_return" % (api.name,
-                                                    api.retType.typeName)
-                cgen.stmt("%s %s = (%s)0" % (cgen.makeCTypeDecl(
-                    api.retType, useParamName=False), result_var_name,
-                    api.retType.typeName))
-                cgen.stmt("%s->write(&%s, %s)" % (VULKAN_STREAM_VAR_NAME,
-                                                  result_var_name,
-                                                  cgen.sizeofExpr(api.retType)))
-                cgen.stmt("return %s" % result_var_name)
-
-        self.unmarshalWrapper = \
-            VulkanAPIWrapper(
-                API_PREFIX_UNMARSHAL,
-                PARAMETERS_MARSHALING,
-                None,
-                apiUnmarshalingDef)
 
         self.knownDefs = {}
 
@@ -381,9 +295,9 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                     iterateVulkanType(self.typeInfo, member, self.writeCodegen)
 
             self.module.appendHeader(
-                self.marshalWrapper.codegen.makeFuncDecl(marshalPrototype))
+                self.cgenHeader.makeFuncDecl(marshalPrototype))
             self.module.appendImpl(
-                self.marshalWrapper.codegen.makeFuncImpl(
+                self.cgenImpl.makeFuncImpl(
                     marshalPrototype, structMarshalingDef))
 
             unmarshalPrototype = \
@@ -397,21 +311,13 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                     iterateVulkanType(self.typeInfo, member, self.readCodegen)
 
             self.module.appendHeader(
-                self.unmarshalWrapper.codegen.makeFuncDecl(unmarshalPrototype))
+                self.cgenHeader.makeFuncDecl(unmarshalPrototype))
             self.module.appendImpl(
-                self.unmarshalWrapper.codegen.makeFuncImpl(
+                self.cgenImpl.makeFuncImpl(
                     unmarshalPrototype, structUnmarshalingDef))
 
     def onGenCmd(self, cmdinfo, name, alias):
         VulkanWrapperGenerator.onGenCmd(self, cmdinfo, name, alias)
         self.module.appendHeader(
             "#define OP_%s %d\n" % (name, self.currentOpcode))
-        self.module.appendHeader(
-            self.marshalWrapper.makeDecl(self.typeInfo, name))
-        self.module.appendImpl(
-            self.marshalWrapper.makeDefinition(self.typeInfo, name))
-        self.module.appendHeader(
-            self.unmarshalWrapper.makeDecl(self.typeInfo, name))
-        self.module.appendImpl(
-            self.unmarshalWrapper.makeDefinition(self.typeInfo, name))
         self.currentOpcode += 1
