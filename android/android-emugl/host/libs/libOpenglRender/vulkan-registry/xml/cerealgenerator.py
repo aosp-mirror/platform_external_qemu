@@ -167,6 +167,7 @@ target_include_directories(
     PUBLIC
         ${ANDROID_EMUGL_DIR}/host/libs/vulkan_dec
         ${ANDROID_EMUGL_DIR}/host/include/
+        ${ANDROID_EMUGL_DIR}/host/include/OpenglRender
         ${ANDROID_EMUGL_DIR}/shared/OpenglCodecCommon
     PRIVATE
         ${ANDROID_EMUGL_DIR}/shared
@@ -228,20 +229,16 @@ using DlSymFunc = void* (void*, const char*);
 """
 
         decoderHeaderIncludes = """
-#include "OpenglRender/IOStream.h"
 #include <memory>
-
-struct VkDecoder {
-    size_t decode(void* buf, size_t bufsize, IOStream* stream) {
-        // Not decoding anything yet.
-        return 0;
-    }
-};
 """
 
         decoderImplIncludes = """
+#include "common/goldfish_vk_marshaling.h"
+
+#include "IOStream.h"
 #include "emugl/common/logging.h"
 
+#include "VulkanDispatch.h"
 #include "VulkanStream.h"
 
 void placeholder_vulkan_dec_symbol() { }
@@ -292,6 +289,7 @@ void placeholder_vulkan_dec_symbol() { }
         self.addWrapper(cereal.VulkanDeepcopy, "goldfish_vk_deepcopy")
         self.addWrapper(cereal.VulkanHandleMap, "goldfish_vk_handlemap")
         self.addWrapper(cereal.VulkanDispatch, "goldfish_vk_dispatch")
+        self.addWrapper(cereal.VulkanDecoder, "VkDecoder")
 
         self.guestAndroidMkCppFiles = ""
         self.hostCMakeCppFiles = ""

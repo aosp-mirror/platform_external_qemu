@@ -27,19 +27,24 @@
 #include <vulkan/vulkan.h>
 
 
-#include "OpenglRender/IOStream.h"
 #include <memory>
 
-struct VkDecoder {
-    size_t decode(void* buf, size_t bufsize, IOStream* stream) {
-        // Not decoding anything yet.
-        return 0;
-    }
+
+
+
+
+
+class IOStream;
+
+class VkDecoder {
+public:
+    VkDecoder();
+    ~VkDecoder();
+    size_t decode(void* buf, size_t bufsize, IOStream* stream);
+private:
+    class Impl;
+    std::unique_ptr<Impl> mImpl;
 };
-
-
-
-
 #ifdef VK_VERSION_1_0
 #endif
 #ifdef VK_VERSION_1_1
