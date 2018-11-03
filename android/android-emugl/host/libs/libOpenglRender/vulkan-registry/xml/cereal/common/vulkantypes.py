@@ -97,6 +97,10 @@ class VulkanType(object):
 
         return res
 
+    def getWithCustomName(self):
+        return self.getTransformed(
+            ptrIndirectionChoice=self.pointerIndirectionLevels + 1)
+
     def getForAddressAccess(self):
         return self.getTransformed(
             ptrIndirectionChoice=self.pointerIndirectionLevels + 1)
@@ -245,7 +249,10 @@ class VulkanAPI(object):
             if p.paramName == parameterName:
                 return p
         return None
-
+    
+    def withModifiedName(self, newName):
+        res = VulkanAPI(newName, self.retType, self.parameters)
+        return res
 
 # Parses everything about Vulkan types into a Python readable format.
 class VulkanTypeInfo(object):

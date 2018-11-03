@@ -109,14 +109,34 @@ class VulkanMarshalingCodegen(object):
         self.checked = True
 
         access = self.exprAccessor(vulkanType)
-        addrExpr = "&" + access
-        sizeExpr = self.cgen.sizeofExpr(vulkanType)
+
+        needConsistencyCheck = False
+
+        if (self.dynAlloc and self.direction == "read") or self.direction == "write":
+            checkAccess = self.exprAccessor(vulkanType)
+            addrExpr = "&" + checkAccess
+            sizeExpr = self.cgen.sizeofExpr(vulkanType)
+        else:
+            checkName = "check_%s" % vulkanType.paramName
+            self.cgen.stmt("%s %s" % (
+                self.cgen.makeCTypeDecl(vulkanType, useParamName = False), checkName))
+            checkAccess = checkName
+            addrExpr = "&" + checkAccess
+            sizeExpr = self.cgen.sizeofExpr(vulkanType)
+            needConsistencyCheck = True
+
         self.genStreamCall(vulkanType.getForAddressAccess(), addrExpr, sizeExpr)
 
         if self.needSkip(vulkanType):
             return
 
         self.cgen.beginIf(access)
+
+        if needConsistencyCheck:
+            self.cgen.beginIf("!(%s)" % checkName)
+            self.cgen.stmt(
+                "fprintf(stderr, \"fatal: %s inconsistent between guest and host\\n\")" % (access))
+            self.cgen.endIf()
 
     def endCheck(self, vulkanType):
 
