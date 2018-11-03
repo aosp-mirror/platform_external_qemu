@@ -159,7 +159,7 @@ function(android_add_executable name)
     list(APPEND ${name}_src ${${name}_${ANDROID_TARGET_TAG}_src})
   endif()
   add_executable(${name} ${${name}_src})
-  android_target_dependency(${name} all "${RUNTIME_OS_DEPENDENCIES}")
+  android_target_dependency(${name} all  RUNTIME_OS_DEPENDENCIES)
   android_target_properties(${name} all "${RUNTIME_OS_PROPERTIES}")
 
   if(ANDROID_CODE_COVERAGE)

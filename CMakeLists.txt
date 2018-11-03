@@ -26,6 +26,11 @@ set(CMAKE_CXX_STANDARD 14)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# Let's bin place everything in the root, with the shared libs in the right place
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib64)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/archives)
+
 # Pthreads from the prebuilts please!
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
@@ -237,11 +242,6 @@ target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN ZL
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE USB::USB)
 android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE USB::USB)
 
-
-# Let's bin place everything in the root, with the shared libs in the right place
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib64)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/archives)
 
 # Now we add the normal android libs, so we can use them
 add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../googletest googletest)
