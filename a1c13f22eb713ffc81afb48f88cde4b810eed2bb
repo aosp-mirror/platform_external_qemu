@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "968a1357_73941d8a",
+        "filename": "android/android-emu/android/emulation/QemuMiscPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-04T18:07:05Z",
+      "side": 1,
+      "message": "since snapshots isn\u0027t using this now, it would be good to save/load this value as well when snapshotting. since this is a global variable, we can save/load it in Snapshot.cpp like we do with guest data partition mounted.",
+      "range": {
+        "startLine": 117,
+        "startChar": 11,
+        "endLine": 117,
+        "endChar": 32
+      },
+      "revId": "a1c13f22eb713ffc81afb48f88cde4b810eed2bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
