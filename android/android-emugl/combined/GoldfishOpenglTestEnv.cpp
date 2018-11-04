@@ -28,6 +28,7 @@
 #include "ClientComposer.h"
 #include "Display.h"
 #include "GrallocDispatch.h"
+#include "VulkanDispatch.h"
 
 #include <hardware/gralloc.h>
 #include <EGL/egl.h>
@@ -95,6 +96,8 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     HostGoldfishPipeDevice::get();
 
     android_init_opengles_pipe();
+
+    emugl::vkDispatch(true /* get the test ICD */);
 }
 
 GoldfishOpenglTestEnv::~GoldfishOpenglTestEnv() {
