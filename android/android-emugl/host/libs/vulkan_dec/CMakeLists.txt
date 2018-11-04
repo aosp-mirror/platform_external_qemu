@@ -25,6 +25,7 @@ target_include_directories(
         ${ANDROID_EMUGL_DIR}/shared/OpenglCodecCommon
     PRIVATE
         ${ANDROID_EMUGL_DIR}/shared
+        ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/
         ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/vulkan/
         ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/vulkan/cereal)
 

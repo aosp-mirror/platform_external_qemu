@@ -53,6 +53,8 @@ set(OpenglRender_src
     SyncThread.cpp
     TextureDraw.cpp
     TextureResize.cpp
+    VulkanDispatch.cpp
+    VulkanStream.cpp
     WindowSurface.cpp
     YUVConverter.cpp)
 set(OpenglRender_linux-x86_64_src NativeSubWindow_x11.cpp)
@@ -72,7 +74,6 @@ target_link_libraries(OpenglRender
                               GLESv2_dec
                               renderControl_dec
                               vulkan_dec
-                              OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OpenGLESDispatch
                               GLSnapshot)
@@ -104,6 +105,8 @@ set(OpenglRender_standalone_common_src
     SyncThread.cpp
     TextureDraw.cpp
     TextureResize.cpp
+    VulkanDispatch.cpp
+    VulkanStream.cpp
     WindowSurface.cpp
     YUVConverter.cpp
     ../Translator/GLES_V2/ANGLEShaderParser.cpp
@@ -124,7 +127,6 @@ target_link_libraries(OpenglRender_standalone_common
                               GLESv2_dec
                               renderControl_dec
                               vulkan_dec
-                              OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OSWindow)
 target_link_libraries(OpenglRender_standalone_common PRIVATE emugl_base ANGLE::ANGLE)
@@ -190,7 +192,6 @@ target_link_libraries(HelloTriangle
                               GLESv2_dec
                               renderControl_dec
                               vulkan_dec
-                              OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OSWindow)
 add_opengl_dependencies(HelloTriangle)
@@ -208,7 +209,6 @@ target_link_libraries(HelloSurfaceFlinger
                               GLESv2_dec
                               renderControl_dec
                               vulkan_dec
-                              OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OSWindow)
 add_opengl_dependencies(HelloSurfaceFlinger)
@@ -226,7 +226,6 @@ target_link_libraries(CreateDestroyContext
                               GLESv2_dec
                               renderControl_dec
                               vulkan_dec
-                              OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OSWindow)
 add_opengl_dependencies(CreateDestroyContext)
@@ -244,7 +243,6 @@ target_link_libraries(HelloHostComposition
                               GLESv2_dec
                               renderControl_dec
                               vulkan_dec
-                              OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OSWindow)
 add_opengl_dependencies(HelloHostComposition)
@@ -262,7 +260,6 @@ target_link_libraries(HelloVulkan
                       GLESv2_dec
                       renderControl_dec
                       vulkan_dec
-                      OpenglRender_vulkan
                       OpenglRender_vulkan_cereal
                       OSWindow)
 add_opengl_dependencies(HelloVulkan)
