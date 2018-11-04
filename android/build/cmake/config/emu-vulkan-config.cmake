@@ -18,7 +18,7 @@ if(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
       "${PREBUILT_ROOT}/libVkICD_mock_icd.so>testlib64/libVkICD_mock_icd.so"
       "${PREBUILT_ROOT}/VkICD_mock_icd.json>testlib64/VkICD_mock_icd.json"
       # for translating shaders to SPIRV
-      "${PREBUILT_ROOT}/glslangValidator>lib64/glslangValidator")
+      "${PREBUILT_ROOT}/glslangValidator>lib64/vulkan/glslangValidator")
 elseif(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
   set(VULKAN_TEST_DEPENDENCIES "${PREBUILT_ROOT}/libvulkan.dylib>testlib64/libvulkan.dylib"
       "${PREBUILT_ROOT}/libVkICD_mock_icd.dylib>testlib64/libVkICD_mock_icd.dylib"
@@ -43,6 +43,6 @@ elseif(ANDROID_TARGET_TAG MATCHES "windows.*")
       "${PREBUILT_ROOT}/VkICD_mock_icd.dll>testlib64/VkICD_mock_icd.dll"
       "${PREBUILT_ROOT}/VkICD_mock_icd.json>testlib64/VkICD_mock_icd.json"
       # for translating shaders to SPIRV
-      "${PREBUILT_ROOT}/glslangValidator.exe>lib64/glslangValidator.exe")
+      "${PREBUILT_ROOT}/glslangValidator.exe>lib64/vulkan/glslangValidator.exe")
 endif()
 set(PACKAGE_EXPORT "VULKAN_TEST_DEPENDENCIES")

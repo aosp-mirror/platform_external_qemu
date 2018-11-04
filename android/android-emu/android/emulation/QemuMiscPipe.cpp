@@ -73,7 +73,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
     } else if (beginWith(input, "bootcomplete")) {
         fillWithOK(output);
         printf("emulator: INFO: boot completed\n");
-        printf("emulator: INFO: boot time %lld ms\n", get_uptime_ms());
+        printf("emulator: INFO: boot time %lld ms\n", (long long)get_uptime_ms());
         fflush(stdout);
         guest_boot_completed = 1;
         if (android_hw->test_quitAfterBootTimeOut > 0) {

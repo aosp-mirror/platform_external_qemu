@@ -14,6 +14,7 @@
 #include <gtest/gtest.h>
 
 #include "GoldfishOpenglTestEnv.h"
+#include "VulkanDispatch.h"
 
 #include <vulkan/vulkan.h>
 
@@ -56,15 +57,17 @@ protected:
 GoldfishOpenglTestEnv* VulkanHalTest::testEnv = nullptr;
 
 TEST_F(VulkanHalTest, Basic) {
-    VkInstance outInstance;
-    VkInstanceCreateInfo createInfo = {
-        VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-        0, 0,
-        0,
-        0, nullptr,
-        0, nullptr,
-    };
-    vkCreateInstance(&createInfo, nullptr, &outInstance);
+    uint32_t extCount = 0;
+    std::vector<VkExtensionProperties> exts;
+    EXPECT_EQ(VK_SUCCESS, vkEnumerateInstanceExtensionProperties(
+                                  nullptr, &extCount, nullptr));
+    exts.resize(extCount);
+    EXPECT_EQ(VK_SUCCESS, vkEnumerateInstanceExtensionProperties(
+                                  nullptr, &extCount, exts.data()));
+
+    for (uint32_t i = 0; i < extCount; ++i) {
+        printf("Available extension: %s\n", exts[i].extensionName);
+    }
 }
 
 }  // namespace aemu
