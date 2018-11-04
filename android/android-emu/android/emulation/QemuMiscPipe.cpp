@@ -112,3 +112,7 @@ extern "C" void android_init_qemu_misc_pipe(void) {
 extern "C" int get_guest_heart_beat_count(void) {
     return guest_heart_beat_count.load();
 }
+
+extern "C" bool get_guest_boot_completed(void) {
+    return guest_boot_completed == 1;
+}

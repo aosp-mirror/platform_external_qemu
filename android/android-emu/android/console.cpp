@@ -2447,6 +2447,13 @@ do_avd_heartbeat( ControlClient  client, char*  args )
 }
 
 static int
+do_avd_bootcomplete( ControlClient  client, char*  args )
+{
+    control_write(client, "bootcomplete: %s\r\n", get_guest_boot_completed() ? "yes" : "unknown");
+    return 0;
+}
+
+static int
 do_avd_name( ControlClient  client, char*  args )
 {
     control_write( client, "%s\r\n", android_hw->avd_name);
@@ -2470,6 +2477,10 @@ static const CommandDefRec  vm_commands[] =
     { "heartbeat", "query the heart beat number of the guest system",
     "'avd heartbeat' will report the number of heart beats from guest system running inside this avd\r\n",
     NULL, do_avd_heartbeat, NULL },
+
+    { "bootcomplete", "tell whether the guest system has completed booting",
+    "'avd bootcomplete' will report whether the guest system running inside this avd has completed booting or not\r\n",
+    NULL, do_avd_bootcomplete, NULL },
 
     { "name", "query virtual device name",
     "'avd name' will return the name of this virtual device\r\n",
