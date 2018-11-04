@@ -69,9 +69,6 @@ generate_emugen_lib(GLESv1_dec host/libs/GLESv1_dec gles1 host/libs/GLESv1_dec/G
 generate_emugen_lib(GLESv2_dec host/libs/GLESv2_dec gles2 host/libs/GLESv2_dec/GLESv2Decoder.cpp)
 generate_emugen_lib(renderControl_dec host/libs/renderControl_dec renderControl "")
 
-# Vulkan decoder is not auto generated; its sources are checked in.
-add_subdirectory(host/libs/vulkan_dec)
-
 add_subdirectory(host/libs/Translator/EGL)
 add_subdirectory(host/libs/Translator/GLES_CM)
 add_subdirectory(host/libs/Translator/GLES_V2)
@@ -80,7 +77,6 @@ add_subdirectory(host/libs/libGLES12Translator)
 add_subdirectory(host/libs/libGLSnapshot)
 add_subdirectory(host/libs/libOpenGLESDispatch)
 add_subdirectory(host/libs/libOpenglRender)
-add_subdirectory(host/libs/libOpenglRender/vulkan)
 add_subdirectory(host/libs/libOpenglRender/vulkan/cereal)
 add_subdirectory(shared/OpenglCodecCommon)
 add_subdirectory(shared/emugl/common)

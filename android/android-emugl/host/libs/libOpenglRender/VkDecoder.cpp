@@ -33,7 +33,6 @@
 #include "VulkanDispatch.h"
 #include "VulkanStream.h"
 
-void placeholder_vulkan_dec_symbol() { }
 
 
 
