@@ -23,7 +23,8 @@ target_link_libraries(aemugraphics
                               OpenglSystemCommon
                               EGL_emulation
                               GLESv2_emulation
-                              emugl_base)
+                              emugl_base
+                              OpenglRender_standalone_common)
 android_target_link_libraries(aemugraphics darwin-x86_64 PUBLIC "-framework CoreFoundation"
                               "-framework CoreGraphics")
 
