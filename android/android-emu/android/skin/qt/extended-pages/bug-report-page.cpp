@@ -17,6 +17,8 @@
 #include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/StringUtils.h"
+#include "android/crashreport/CrashReporter.h"
+#include "android/crashreport/CrashSystem.h"
 #include "android/emulation/ComponentVersion.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/CpuAccelerator.h"
@@ -36,6 +38,7 @@
 #include <QFontMetrics>
 #include <QFuture>
 #include <QMovie>
+#include <QVBoxLayout>
 #include <QtConcurrent/QtConcurrentRun>
 
 #include <algorithm>
@@ -47,15 +50,20 @@ using android::base::StringAppendFormat;
 using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
+using android::base::trim;
 using android::base::Uri;
 using android::base::Version;
-using android::base::trim;
+using android::crashreport::CrashReporter;
+using android::crashreport::CrashService;
+using android::crashreport::CrashSystem;
 using android::emulation::AdbBugReportServices;
 using android::emulation::AdbInterface;
 
 static const char FILE_BUG_URL[] =
         "https://issuetracker.google.com/issues/new"
         "?component=192727&description=%s&template=843117";
+
+static const std::string CrashURL = "https://clients2.google.com/cr/report";
 
 // In reference to
 // https://developer.android.com/studio/report-bugs.html#emulator-bugs
@@ -153,6 +161,18 @@ BugreportPage::BugreportPage(QWidget* parent)
     mDeviceDetailsDialog->setInformativeText(
             QString::fromStdString(mReportingFields.avdDetails));
     mUi->bug_sendToGoogle->setIcon(getIconForCurrentTheme("open_in_browser"));
+
+    mSavingStates.crashReporterLocation =
+        CrashReporter::get()->getDataExchangeDir();
+    CrashService* service =
+            CrashService::makeCrashService(
+                    EMULATOR_VERSION_STRING, EMULATOR_BUILD_STRING,
+                    mSavingStates.crashReporterLocation.c_str())
+                    .release();
+    service->shouldDeleteCrashDataOnExit(true);
+
+    CrashSystem::get()->setCrashURL(CrashURL);
+    mUploadDialog = new UploadDialog(this, service);
 }
 
 BugreportPage::~BugreportPage() {
@@ -205,9 +225,6 @@ void BugreportPage::showEvent(QShowEvent* event) {
     if (!mSavingStates.saveLocation.empty() &&
         System::get()->pathIsDir(mSavingStates.saveLocation) &&
         System::get()->pathCanWrite(mSavingStates.saveLocation)) {
-        // Reset the bugreportSavedSucceed to avoid using stale bugreport
-        // folder.
-        mSavingStates.bugreportSavedSucceed = false;
         loadAdbLogcat();
         loadAdbBugreport();
         loadScreenshotImage();
@@ -238,9 +255,9 @@ void BugreportPage::on_bug_saveButton_clicked() {
     enableInput(false);
     QFuture<bool> future = QtConcurrent::run(
             this, &BugreportPage::saveBugReportTo, savingPath);
-    mSavingStates.bugreportSavedSucceed = future.result();
+    bool success = future.result();
     enableInput(true);
-    if (!mSavingStates.bugreportSavedSucceed) {
+    if (!success) {
         showErrorDialog(tr("The bugreport save location is invalid.<br/>"
                            "Check the settings page and ensure the directory "
                            "exists and is writeable."),
@@ -249,11 +266,15 @@ void BugreportPage::on_bug_saveButton_clicked() {
 }
 
 void BugreportPage::on_bug_sendToGoogle_clicked() {
-    if (!mSavingStates.bugreportSavedSucceed) {
-        on_bug_saveButton_clicked();
-    }
-    // launch the issue tracker in a separate thread
-    QFuture<bool> future =
+    QSettings settings;
+    auto reportPreference =
+            static_cast<Ui::Settings::CRASHREPORT_PREFERENCE_VALUE>(
+                    settings.value(Ui::Settings::CRASHREPORT_PREFERENCE, 0)
+                            .toInt());
+
+    // If the preference is never, launch issue tracker in a separate thread
+    if (reportPreference == Ui::Settings::CRASHREPORT_PREFERENCE_NEVER) {
+        QFuture<bool> future =
                 QtConcurrent::run(this, &BugreportPage::launchIssueTracker);
         bool success = future.result();
         if (!success) {
@@ -263,6 +284,14 @@ void BugreportPage::on_bug_sendToGoogle_clicked() {
             // errMsg.append(error);
             showErrorDialog(errMsg, tr("File a Bug for Google"));
         }
+        return;
+    }
+
+    mUploadDialog->exec();
+    // If the preference is always, send directly to crash server
+    if (reportPreference == Ui::Settings::CRASHREPORT_PREFERENCE_ALWAYS) {
+        mUploadDialog->sendBugReport();
+    }
 }
 
 bool BugreportPage::saveBugReportTo(const std::string& savingPath) {
@@ -492,3 +521,54 @@ bool BugreportPage::eventFilter(QObject* object, QEvent* event) {
     return true;
 }
 
+UploadDialog::UploadDialog(QWidget* parent, CrashService* service)
+    : QDialog(parent) {
+    mCrashService.reset(service);
+    QVBoxLayout* dialogLayout = new QVBoxLayout(this);
+    mDialogLabel = new QLabel(tr(SEND_TO_GOOGLE));
+    dialogLayout->addWidget(mDialogLabel);
+    mButtonBox = new QDialogButtonBox(
+            QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal);
+    dialogLayout->addWidget(mButtonBox);
+    connect(mButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(mButtonBox, SIGNAL(accepted()), this, SLOT(sendBugReport()));
+    mProgressBar = new QProgressBar(this);
+    mProgressBar->hide();
+    mProgressBar->setMaximum(0);
+    mProgressBar->setValue(-1);
+    dialogLayout->addWidget(mProgressBar);
+
+    setWindowTitle("Upload bug report");
+    setLayout(dialogLayout);
+    setModal(true);
+}
+
+void UploadDialog::collectSysInfo() {
+    mDialogLabel->setText(COLLECT_INFO);
+    mProgressBar->show();
+    mButtonBox->hide();
+    QFuture<bool> future = QtConcurrent::run(mCrashService.get(),
+                                             &CrashService::collectSysInfo);
+    future.waitForFinished();
+}
+
+void UploadDialog::sendBugReport() {
+    collectSysInfo();
+    mDialogLabel->setText(SENDING_REPORT);
+
+    // Start the computation.
+    QFuture<bool> future =
+            QtConcurrent::run(mCrashService.get(), &CrashService::uploadCrash);
+    mProgressBar->hide();
+
+    bool success = future.result();
+    if (success) {
+        fprintf(stderr, "report upload succeed report id %s \n",
+                mCrashService->getReportId().c_str());
+    } else {
+        fprintf(stderr, "report upload failed \n");
+    }
+    mDialogLabel->setText(SEND_TO_GOOGLE);
+    mButtonBox->show();
+    accept();
+}

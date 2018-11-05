@@ -21,9 +21,9 @@
 namespace android {
 namespace emulation {
 
-// This class provides the interface to invoke adb bugreport and adb logcat
-// in the guest system for different API Levels. The underlying AdbInterface
-// instance must be unique to avoid conflicts.
+// This class provides the interface to invoke adb bugreport, adb logcat and
+// adb shell dumpsys in the guest system for different API Levels.
+// The underlying AdbInterface instance must be unique to avoid conflicts.
 class AdbBugReportServices {
 public:
     enum class Result {
@@ -53,6 +53,13 @@ public:
     AdbCommandPtr generateAdbLogcatInMemory(
             ResultOutputCallback resultCallback);
 
+    void generateDumpsys(android::base::StringView outputDirectoryPath,
+                           ResultCallback resultCallback);
+
+    bool isDumpsysInFlight() const {
+        return mDumpsysCommand != nullptr;
+    }
+
     // bug report folder will be in the format of
     // bugreport-[deviceName]-[%Y-%m-%d%H:%M:%S]-[Uuid]
     static std::string generateUniqueBugreportName();
@@ -63,7 +70,8 @@ private:
     AdbInterface* mAdb;
     AdbCommandPtr mAdbBugReportCommand;
     AdbCommandPtr mAdbLogcatCommand;
-
+    AdbCommandPtr mDumpsysCommand;
+    
     DISALLOW_COPY_AND_ASSIGN(AdbBugReportServices);
 };
 
