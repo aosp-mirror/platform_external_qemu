@@ -15,7 +15,7 @@
 
 from generator import noneStr
 
-from copy import deepcopy
+from copy import copy
 
 # Holds information about a Vulkan type instance (i.e., not a type definition).
 # Type instances are used as struct field definitions or function parameters,
@@ -84,8 +84,11 @@ class VulkanType(object):
     def isVoidWithNoSize(self,):
         return self.typeName == "void" and self.pointerIndirectionLevels == 0
 
+    def getCopy(self,):
+        return copy(self)
+
     def getTransformed(self, isConstChoice=None, ptrIndirectionChoice=None):
-        res = deepcopy(self)
+        res = self.getCopy()
 
         if isConstChoice is not None:
             res.isConst = isConstChoice
@@ -94,13 +97,17 @@ class VulkanType(object):
 
         return res
 
+    def getWithCustomName(self):
+        return self.getTransformed(
+            ptrIndirectionChoice=self.pointerIndirectionLevels + 1)
+
     def getForAddressAccess(self):
         return self.getTransformed(
             ptrIndirectionChoice=self.pointerIndirectionLevels + 1)
 
     def getForValueAccess(self):
         if self.typeName == "void" and self.pointerIndirectionLevels == 1:
-            asUint8Type = deepcopy(self)
+            asUint8Type = self.getCopy()
             asUint8Type.typeName = "uint8_t"
             return asUint8Type.getForValueAccess()
         return self.getTransformed(
@@ -209,7 +216,7 @@ class VulkanCompoundType(object):
         self.copy = None
 
     def initCopies(self):
-        self.copy = deepcopy(self)
+        self.copy = self
 
         for m in self.members:
             m.parent = self.copy
@@ -232,7 +239,7 @@ class VulkanAPI(object):
         self.copy = None
 
     def initCopies(self):
-        self.copy = deepcopy(self)
+        self.copy = self
 
         for m in self.parameters:
             m.parent = self.copy
@@ -242,7 +249,10 @@ class VulkanAPI(object):
             if p.paramName == parameterName:
                 return p
         return None
-
+    
+    def withModifiedName(self, newName):
+        res = VulkanAPI(newName, self.retType, self.parameters)
+        return res
 
 # Parses everything about Vulkan types into a Python readable format.
 class VulkanTypeInfo(object):

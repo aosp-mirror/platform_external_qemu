@@ -31,27 +31,28 @@ static void setIcdPath(const std::string& path) {
 }
 
 static void initIcdPaths(bool forTesting) {
-    if (forTesting) {
+    auto androidIcd = System::get()->envGet("ANDROID_EMU_VK_ICD");
+    if (forTesting || androidIcd == "mock") {
         auto res = pj(System::get()->getProgramDirectory(), "testlib64");
         setIcdPath(pj(res, "VkICD_mock_icd.json"));
+        System::get()->envSet("ANDROID_EMU_VK_ICD", "mock");
     } else {
-        // Assume there is a system loader in %PATH% or
-        // %LD_LIBRARY_PATH%.
-        auto icd = System::get()->envGet("ANDROID_EMU_VK_ICD");
-
         // Mac: Use gfx-rs libportability-icd by default,
         // and switch between that, its debug variant,
         // and MoltenVK depending on the environment variable setting.
 #ifdef __APPLE__
-        if (icd == "moltenvk") {
+        if (androidIcd == "moltenvk") {
             setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
                           "vulkan", "MoltenVK_icd.json"));
-        } else if (icd == "portability") {
+        } else if (androidIcd == "portability") {
             setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
                           "vulkan", "portability-macos.json"));
-        } else if (icd == "portability-debug") {
+        } else if (androidIcd == "portability-debug") {
             setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
                           "vulkan", "portability-macos-debug.json"));
+        } else if (androidIcd == "mock") {
+            setIcdPath(pj(System::get()->getProgramDirectory(), "testlib64",
+                          "VkICD_mock_icd.json"));
         } else {
             setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
                           "vulkan", "portability-macos.json"));
@@ -75,7 +76,8 @@ static void initIcdPaths(bool forTesting) {
 
 #endif
 static std::string getLoaderPath(bool forTesting) {
-    if (forTesting) {
+    auto androidIcd = System::get()->envGet("ANDROID_EMU_VK_ICD");
+    if (forTesting || androidIcd == "mock") {
         return pj(System::get()->getProgramDirectory(), "testlib64",
                   VULKAN_LOADER_FILENAME);
     } else {
@@ -95,6 +97,7 @@ public:
     VulkanDispatchImpl() = default;
 
     void setForTesting(bool forTesting) {
+        if (mInitialized) return;
         mForTesting = forTesting;
     }
 
