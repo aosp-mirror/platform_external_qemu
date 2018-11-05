@@ -162,6 +162,8 @@ class IOStream;
 #include "IOStream.h"
 #include "VulkanStream.h"
 
+#include "android/base/AlignedBuf.h"
+
 #include "goldfish_vk_marshaling_guest.h"
 """
         marshalIncludeGuest = """

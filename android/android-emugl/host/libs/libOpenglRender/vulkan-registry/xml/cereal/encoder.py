@@ -26,6 +26,9 @@ encoder_impl_preamble ="""
 using goldfish_vk::VulkanCountingStream;
 using goldfish_vk::VulkanStream;
 
+using android::aligned_buf_alloc;
+using android::aligned_buf_free;
+
 class VkEncoder::Impl {
 public:
     Impl(IOStream* stream) : m_stream(stream) { }
@@ -100,34 +103,34 @@ def emit_parameter_encode(typeInfo, api, cgen):
         emit_unmarshal(typeInfo, p, cgen)
 
 def emit_return_unmarshal(typeInfo, api, cgen):
-    if api.retType.typeName == "void":
+    retType = api.getRetTypeExpr()
+
+    if retType == "void":
         return
 
-    retType = api.retType.typeName
-    retVar = "%s_%s_return" % (api.name, retType)
+    retVar = api.getRetVarExpr()
     cgen.stmt("%s %s = (%s)0" % (retType, retVar, retType))
     cgen.stmt("%s->read(&%s, %s)" % \
               (STREAM, retVar, cgen.sizeofExpr(api.retType)))
 
 def emit_return(typeInfo, api, cgen):
-    if api.retType.typeName == "void":
+    if api.getRetTypeExpr() == "void":
         return
 
-    retType = api.retType.typeName
-    retVar = "%s_%s_return" % (api.name, retType)
+    retVar = api.getRetVarExpr()
     cgen.stmt("return %s" % retVar)
 
-# Functions where there is a custom encoding expression.
-# VKAPI_ATTR VkResult VKAPI_CALL vkMapMemory(
-#     VkDevice                                    device,
-#     VkDeviceMemory                              memory,
-#     VkDeviceSize                                offset,
-#     VkDeviceSize                                size,
-#     VkMemoryMapFlags                            flags,
-#     void**                                      ppData);
+## Custom encoding definitions##################################################
 def encode_vkMapMemory(typeInfo, api, cgen):
     emit_parameter_encode(typeInfo, api, cgen)
     emit_return_unmarshal(typeInfo, api, cgen)
+
+    needWriteback = \
+        "((%s == VK_SUCCESS) && ppData && size > 0)" % api.getRetVarExpr()
+    cgen.beginIf(needWriteback)
+    cgen.stmt("*ppData = aligned_buf_alloc(1024 /* pick large alignment */, size);");
+    cgen.stmt("%s->read(*ppData, size)" % (STREAM))
+    cgen.endIf()
 
     # TODO:
     # The custom part: Depending on the return value,
