@@ -28,6 +28,7 @@
 #include "ClientComposer.h"
 #include "Display.h"
 #include "GrallocDispatch.h"
+#include "VulkanDispatch.h"
 
 #include <hardware/gralloc.h>
 #include <EGL/egl.h>
@@ -61,6 +62,8 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
             android::featurecontrol::GLDMA, false);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLAsyncSwap, false);
+
+    emugl::vkDispatch(true /* get the test ICD */);
 
     EmuglConfig config;
 

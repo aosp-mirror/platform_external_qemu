@@ -15,11 +15,10 @@
 
 from .vulkantypes import VulkanType, VulkanCompoundType, VulkanAPI
 
-from copy import deepcopy
+from copy import copy
 
 import os
 import sys
-
 
 # Class capturing a .cpp file and a .h file (a "C++ module")
 class Module(object):
@@ -98,8 +97,15 @@ class CodeGen(object):
         self.code = ""
         return res
 
-    def indent(self,):
-        return "".join("    " * self.indentLevel)
+    def indent(self,extra=0):
+        return "".join("    " * (self.indentLevel + extra))
+    
+    def incrIndent(self,):
+        self.indentLevel += 1
+    
+    def decrIndent(self,):
+        if self.indentLevel > 0:
+            self.indentLevel -= 1
 
     def beginBlock(self,):
         self.code += self.indent() + "{\n"
@@ -164,6 +170,12 @@ class CodeGen(object):
 
         self.code += res
 
+    def funcCallRet(self, _lhs, funcName, parameters):
+        res = self.indent()
+        res += "return " + funcName + "(%s);\n" % (", ".join(parameters))
+
+        self.code += res
+
     # Given a VulkanType object, generate a C type declaration
     # with optional parameter name:
     # [const] [typename][*][const*] [paramName]
@@ -187,13 +199,38 @@ class CodeGen(object):
 
         return "%s%s%s%s" % (constness, typeName, ptrSpec, paramStr)
 
+    def makeRichCTypeDecl(self, vulkanType, useParamName=True):
+        constness = "const " if vulkanType.isConst else ""
+        typeName = vulkanType.typeName
+
+        if vulkanType.pointerIndirectionLevels == 0:
+            ptrSpec = ""
+        elif vulkanType.isPointerToConstPointer:
+            ptrSpec = "* const*" if vulkanType.isConst else "**"
+            if vulkanType.pointerIndirectionLevels > 2:
+                ptrSpec += "*" * (vulkanType.pointerIndirectionLevels - 2)
+        else:
+            ptrSpec = "*" * vulkanType.pointerIndirectionLevels
+
+        if useParamName and (vulkanType.paramName is not None):
+            paramStr = (" " + vulkanType.paramName)
+        else:
+            paramStr = ""
+        
+        if vulkanType.staticArrExpr:
+            staticArrInfo = "[%s]" % vulkanType.staticArrExpr
+        else:
+            staticArrInfo = ""
+
+        return "%s%s%s%s%s" % (constness, typeName, ptrSpec, paramStr, staticArrInfo)
+
     # Given a VulkanAPI object, generate the C function protype:
     # <returntype> <funcname>(<parameters>)
     def makeFuncProto(self, vulkanApi):
 
         protoBegin = "%s %s" % (self.makeCTypeDecl(
             vulkanApi.retType, useParamName=False), vulkanApi.name)
-        protoParams = "(\n    %s)" % (",\n    ".join(
+        protoParams = "(\n    %s)" % ((",\n%s" % self.indent(1)).join(
             list(map(self.makeCTypeDecl, vulkanApi.parameters))))
 
         return protoBegin + protoParams
@@ -356,8 +393,10 @@ class CodeGen(object):
 
         if isinstance(vulkanType.parent, VulkanAPI):
             return self.accessParameter(vulkanType, asPtr=asPtr)
+        
+        os.abort("Could not find a way to access Vulkan type %s" %
+                 vulkanType.name)
 
-        raise
 
     def generalLengthAccess(self, vulkanType, parentVarName="parent"):
         if vulkanType.parent is None:
@@ -370,7 +409,8 @@ class CodeGen(object):
         if isinstance(vulkanType.parent, VulkanAPI):
             return self.makeLengthAccessFromApi(vulkanType.parent, vulkanType)
 
-        raise
+        os.abort("Could not find a way to access length of Vulkan type %s" %
+                 vulkanType.name)
 
 
 # Class to wrap a Vulkan API call.
@@ -395,15 +435,18 @@ class VulkanAPIWrapper(object):
         self.definitionFunc = codegenDef
 
         # Private function
+
         def makeApiFunc(self, typeInfo, apiName):
-            customApi = deepcopy(typeInfo.apis[apiName])
+            customApi = copy(typeInfo.apis[apiName])
             customApi.name = self.customApiPrefix + customApi.name
             if self.extraParameters is not None:
                 if isinstance(self.extraParameters, list):
                     customApi.parameters = \
                         self.extraParameters + customApi.parameters
                 else:
-                    raise
+                    os.abort(
+                        "Type of extra parameters to custom API not valid. Expected list, got %s" % type(
+                            self.extraParameters))
 
             if self.returnTypeOverride is not None:
                 customApi.retType = self.returnTypeOverride
