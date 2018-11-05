@@ -102,6 +102,8 @@ public:
         return mCrashURL;
     }
 
+    virtual void setCrashURL(const std::string& s) { mCrashURL = s; }
+
     virtual bool validatePaths() override {
         bool valid = CrashSystem::validatePaths();
         std::string crashDir = getCrashDirectory();
