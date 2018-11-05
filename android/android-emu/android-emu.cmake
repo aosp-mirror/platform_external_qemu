@@ -66,6 +66,7 @@ set(android-emu-common
     android/emulation/control/LineConsumer.cpp
     android/emulation/control/AdbBugReportServices.cpp
     android/emulation/CpuAccelerator.cpp
+    android/emulation/CrossSessionSocket.cpp
     android/emulation/DmaMap.cpp
     android/emulation/GoldfishDma.cpp
     android/emulation/GoldfishSyncCommandQueue.cpp
