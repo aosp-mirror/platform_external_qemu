@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "92035b03_8d690806",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 8
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-11-05T21:28:03Z",
+      "side": 1,
+      "message": "That makes sense. I have changed the cmake file structure to have most of the new stuff within the darwinn folder with an additional darwinn.cmake and just included the files in android-emu.cmake. I have made these changes in part 2 of the change though (https://android-review.googlesource.com/c/platform/external/qemu/+/792935) as it is easier to have all of the changes in one CL instead of split it over multiple CLs.",
+      "parentUuid": "52f15611_68f275c1",
+      "revId": "aba2254bf549e3be19b8bc563072cff02d20eb77",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2565d088_8ade3fd8",
         "filename": "android/build/Makefile.top.mk",
         "patchSetId": 8
@@ -33,6 +51,24 @@
       "revId": "aba2254bf549e3be19b8bc563072cff02d20eb77",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "794b80e3_c3aa1b07",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 8
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-11-05T21:28:03Z",
+      "side": 1,
+      "message": "Have undone these changes as they are not used anymore",
+      "parentUuid": "2565d088_8ade3fd8",
+      "revId": "aba2254bf549e3be19b8bc563072cff02d20eb77",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
