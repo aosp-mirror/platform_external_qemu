@@ -19,6 +19,7 @@
 #include "android/base/threads/Thread.h"
 #include "android/emulation/AdbTypes.h"
 #include "android/emulation/AndroidPipe.h"
+#include "android/emulation/CrossSessionSocket.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/feature_control.h"
 
@@ -80,25 +81,6 @@ public:
     using StringView = ::android::base::StringView;
     using ScopedSocket = ::android::base::ScopedSocket;
 
-    class AdbScopedSocketWatcher {
-    public:
-        AdbScopedSocketWatcher() = default;
-        AdbScopedSocketWatcher(AdbScopedSocketWatcher&& other);
-        AdbScopedSocketWatcher& operator=(AdbScopedSocketWatcher&& other);
-        AdbScopedSocketWatcher(android::base::Looper::FdWatch* fdWatcher);
-        AdbScopedSocketWatcher(android::base::Looper::FdWatch* fdWatcher,
-                               ScopedSocket&& socket);
-        void swapSocketAndClear(ScopedSocket* socket);
-        void reset();
-        android::base::Looper::FdWatch* fdWatcher();
-        const android::base::Looper::FdWatch* fdWatcher() const;
-        bool valid() const;
-
-    private:
-        std::unique_ptr<android::base::Looper::FdWatch> mFdWatcher;
-        ScopedSocket mSocket;
-    };
-
     // AndroidPipe::Service class
     class Service : public AndroidPipe::Service, public AdbGuestAgent {
     public:
@@ -138,11 +120,7 @@ public:
         // For pipes in the middle of deletion to notify the service
         // that they are gone.
         void unregisterActivePipe(AdbGuestPipe* pipe);
-        // Check if a socket should be recycled for snapshot (if yes recycle it)
-        void recycleSocket(AdbScopedSocketWatcher&& socket);
-        void registerForRecycle(int socket);
         void hostCloseSocket(int fd);
-        android::base::ScopedSocket reclaimSocket(int fd);
 
     private:
 
@@ -200,25 +178,6 @@ private:
         ClosedByHost,
     };
 
-    class BufferedSocketReader {
-    public:
-        enum class DrainBehavior {
-            Clear,
-            AppendToBuffer
-        };
-        void drainSocket(int socket, DrainBehavior drainBehavior);
-        bool hasData() const;
-        size_t readData(void* data, size_t dataSize);
-        size_t getReadableDataSize() const;
-        void onSave(android::base::Stream* stream);
-        void onLoad(android::base::Stream* stream);
-
-    private:
-        std::vector<uint8_t> mRecvBuffer;
-        int mRecvBufferBegin = 0;
-        int mRecvBufferEnd = 0;
-    };
-
     // Used for debugging.
     static const char* toString(State);
 
@@ -257,10 +216,10 @@ private:
     size_t mBufferPos = 0;   // number of matched command bytes on input/output.
 
     State mState = State::WaitingForGuestAcceptCommand;  // current pipe state.
-    AdbScopedSocketWatcher mHostSocket;  // current host socket, if connected.
+    android::emulation::CrossSessionSocket mHostSocket;  // current host socket, if connected.
     AdbHostAgent* mHostAgent = nullptr;
     bool mPlayStoreImage = false;
-    BufferedSocketReader mRecvBuffer;
+    std::unique_ptr<android::base::Looper::FdWatch> mFdWatcher;
 };
 
 }  // namespace emulation
