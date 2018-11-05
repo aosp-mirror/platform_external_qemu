@@ -17,6 +17,8 @@
 #include <array>
 
 using android::AlignedBuf;
+using android::aligned_buf_alloc;
+using android::aligned_buf_free;
 
 TEST(AlignedBuf, Basic) {
     const int numItems = 10;
@@ -136,5 +138,28 @@ TEST(AlignedBuf, Resize) {
     for (size_t i = 0; i < 10; i++) {
         buf.resize(initialSize + i * 4096);
         check();
+    }
+}
+
+// Tests raw aligned alloc.
+TEST(AlignedBuf, Raw) {
+    constexpr size_t alignmentsToTest[] = {
+        1, 2, 4, 8, 16, 256, 1024, 4096,
+    };
+    constexpr size_t sizesToTest[] = {
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+        16, 17, 256, 400, 500, 4000, 4096,
+    };
+
+    size_t numAlignmentCases = sizeof(alignmentsToTest) / sizeof(size_t);
+    size_t numSizeCases = sizeof(alignmentsToTest) / sizeof(size_t);
+
+    for (size_t i = 0; i < numAlignmentCases; ++i) {
+        for (size_t j = 0; j < numSizeCases; ++j) {
+            void* buf = aligned_buf_alloc(alignmentsToTest[i], sizesToTest[j]);
+            EXPECT_NE(nullptr, buf);
+            EXPECT_EQ(0,(uintptr_t)buf & (alignmentsToTest[i] - 1));
+            aligned_buf_free(buf);
+        }
     }
 }
