@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "52f15611_68f275c1",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 8
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-05T18:08:43Z",
+      "side": 1,
+      "message": "Ideally darwinn would be it\u0027s own target that exports the right definition that lives in the darwinn directory.\n\nThat way we would just use android_target_link_libraries(android-emu linux-x86_64 PRIVATE darwinn). This will make it easier for us down the line to clean up android-emu (which is doing a bit much at the moment).\n\nit can be as simple as:\n\n\n\nset(darwinn_src android/darwinn/darwinn-service.cpp)\nandroid_add_library(darwinn)\ntarget_compile_options(darwinn PUBLIC \n                                   \"-DDARWINN_COMPILER_TEST_EXTERNAL\"\n                                   \"-DDARWINN_PORT_ANDROID_EMULATOR\u003d1\"\n                                   \"-DDARWINN_CHIP_TYPE\u003dUSB\"\n                                   \"-DDARWINN_CHIP_NAME\u003dbeagle\")\n\ntarget_link_libraries(darwinn PRIVATE darwinmoddelconfig)\ntarget_include_directories(darwinn PUBLIC include/dirs that propagate)\n\n\nand then have android_target_link_libraries(android-emu linux-x86_64 PRIVATE darwinn)\n\nSee also https://pabloariasal.github.io/2018/02/19/its-time-to-do-cmake-right/ for some background.",
+      "revId": "aba2254bf549e3be19b8bc563072cff02d20eb77",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2565d088_8ade3fd8",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 8
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-05T18:08:43Z",
+      "side": 1,
+      "message": "We have removed the android build make files.",
+      "revId": "aba2254bf549e3be19b8bc563072cff02d20eb77",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
