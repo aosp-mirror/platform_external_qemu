@@ -13,15 +13,22 @@
 
 #include "android/base/StringView.h"
 #include "android/emulation/control/AdbInterface.h"
+#include "android/crashreport/CrashService.h"
 #include "android/skin/qt/emulator-qt-window.h"
 
 #include "ui_bug-report-page.h"
 
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QLabel>
 #include <QMessageBox>
+#include <QProgressBar>
 #include <QWidget>
 
 #include <memory>
 #include <string>
+
+class UploadDialog;
 
 class BugreportPage : public QWidget {
     Q_OBJECT
@@ -45,13 +52,13 @@ public:
     };
 
     struct SavingStates {
+        std::string crashReporterLocation;
         std::string saveLocation;
         std::string adbBugreportFilePath;
         std::string screenshotFilePath;
         std::string bugreportFolderPath;
         bool adbBugreportSucceed;
         bool screenshotSucceed;
-        bool bugreportSavedSucceed;
     };
 
 private slots:
@@ -68,15 +75,42 @@ private:
     bool launchIssueTracker();
     void enableInput(bool enabled);
     bool saveBugReportTo(const std::string& location);
-    void adbBugreportCallback(bool success, android::base::StringView filePath);
+    void compressBugReport();
+    bool compresstoFile(uint8_t* src,
+                        size_t srcLength,
+                        android::base::StringView filePath);
+    bool saveToFile(android::base::StringView filePath,
+                    const char* content,
+                    size_t length);
     std::string generateUniqueBugreportName();
+
     EmulatorQtWindow* mEmulatorWindow;
     android::emulation::AdbInterface* mAdb;
     QMessageBox* mDeviceDetailsDialog;
+    UploadDialog* mUploadDialog;
     bool mFirstShowEvent = true;
     std::unique_ptr<Ui::BugreportPage> mUi;
     ReportingFields mReportingFields;
     SavingStates mSavingStates;
     android::emulation::AdbCommandPtr mAdbBugreport;
     android::emulation::AdbCommandPtr mAdbLogcat;
+};
+
+class UploadDialog : public QDialog {
+    Q_OBJECT
+public:
+    UploadDialog(QWidget* parent, android::crashreport::CrashService* service);
+    const char* SEND_TO_GOOGLE =
+            "Do you want to send the bug report to Google?";
+    const char* SENDING_REPORT =
+            "Sending bug report... This might take a minute.";
+public slots:
+    void sendBugReport();
+
+private:
+    void collectSysInfo();
+    QProgressBar* mProgressBar;
+    QLabel* mDialogLabel;
+    QDialogButtonBox* mButtonBox;
+    std::unique_ptr<android::crashreport::CrashService> mCrashService;
 };
