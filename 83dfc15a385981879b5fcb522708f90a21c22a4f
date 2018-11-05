@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a88d159d_758cbb88",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-05T23:35:22Z",
+      "side": 1,
+      "message": "We set some -D flags in protobuf generation related to not having rtti. Is this something to be concerned about for msvc?",
+      "revId": "83dfc15a385981879b5fcb522708f90a21c22a4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "94daf413_43a75ffd",
+        "filename": "android/CMakeLists.txt",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-05T23:35:22Z",
+      "side": 1,
+      "message": "I believe this can be ANDROID_TARGET_OS STREQUAL",
+      "revId": "83dfc15a385981879b5fcb522708f90a21c22a4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "124ad92c_8822ffb4",
+        "filename": "android/android-emu/android-emu-base.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-05T23:35:22Z",
+      "side": 1,
+      "message": "These can be private, unless includes directories (-Ixxx) and definitions (-Dxxx) need to propagate.",
+      "revId": "83dfc15a385981879b5fcb522708f90a21c22a4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "03140942_24469e56",
+        "filename": "android/build/cmake/android.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-05T23:35:22Z",
+      "side": 1,
+      "message": "Won\u0027t this rule match as well?",
+      "revId": "83dfc15a385981879b5fcb522708f90a21c22a4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
