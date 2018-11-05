@@ -283,80 +283,6 @@ void AdbGuestPipe::Service::unregisterActivePipe(AdbGuestPipe* pipe) {
     }
 }
 
-void AdbGuestPipe::Service::recycleSocket(
-        AdbScopedSocketWatcher&& socketWatch) {
-    if (!socketWatch.valid())
-        return;
-    int fd = socketWatch.fdWatcher()->fd();
-    auto ite = mRecycledSockets.find(fd);
-    DD("%s: recycling %d: %d", __func__, fd, ite != mRecycledSockets.end());
-    if (ite != mRecycledSockets.end()) {
-        assert(!ite->second.valid());
-        socketWatch.swapSocketAndClear(&ite->second);
-    }
-}
-
-void AdbGuestPipe::Service::registerForRecycle(int socket) {
-    if (!mRecycledSockets.count(socket)) {
-        mRecycledSockets.emplace(socket, -1);
-    }
-}
-
-android::base::ScopedSocket AdbGuestPipe::Service::reclaimSocket(int fd) {
-    auto ite = mRecycledSockets.find(fd);
-    if (ite == mRecycledSockets.end() || !ite->second.valid()) {
-        return ScopedSocket();
-    }
-    return std::move(ite->second);
-}
-
-AdbGuestPipe::AdbScopedSocketWatcher::AdbScopedSocketWatcher(
-        AdbGuestPipe::AdbScopedSocketWatcher&& other)
-    : mFdWatcher(std::move(other.mFdWatcher)),
-      mSocket(std::move(other.mSocket)) {}
-
-AdbGuestPipe::AdbScopedSocketWatcher& AdbGuestPipe::AdbScopedSocketWatcher::
-operator=(AdbGuestPipe::AdbScopedSocketWatcher&& other) {
-    mFdWatcher = std::move(other.mFdWatcher);
-    mSocket = std::move(other.mSocket);
-    return *this;
-}
-
-AdbGuestPipe::AdbScopedSocketWatcher::AdbScopedSocketWatcher(
-        android::base::Looper::FdWatch* fdWatcher)
-    : mFdWatcher(fdWatcher), mSocket(fdWatcher->fd()) {}
-
-AdbGuestPipe::AdbScopedSocketWatcher::AdbScopedSocketWatcher(
-        android::base::Looper::FdWatch* fdWatcher,
-        ScopedSocket&& socket)
-    : mFdWatcher(fdWatcher), mSocket(std::move(socket)) {}
-
-void AdbGuestPipe::AdbScopedSocketWatcher::swapSocketAndClear(
-        ScopedSocket* socket) {
-    mFdWatcher.reset();
-    mSocket.swap(socket);
-    mSocket.reset(-1);
-}
-
-void AdbGuestPipe::AdbScopedSocketWatcher::reset() {
-    mFdWatcher.reset();
-    mSocket.reset(-1);
-}
-
-android::base::Looper::FdWatch*
-AdbGuestPipe::AdbScopedSocketWatcher::fdWatcher() {
-    return mFdWatcher.get();
-}
-
-const android::base::Looper::FdWatch*
-AdbGuestPipe::AdbScopedSocketWatcher::fdWatcher() const {
-    return mFdWatcher.get();
-}
-
-bool AdbGuestPipe::AdbScopedSocketWatcher::valid() const {
-    return mSocket.valid();
-}
-
 void AdbGuestPipe::Service::hostCloseSocket(int fd) {
     DD("%s: [%p]", __func__, this);
     assert(!mRecycledSockets.count(fd) || !mRecycledSockets[fd].valid());
@@ -387,9 +313,7 @@ void AdbGuestPipe::onLoad(android::base::Stream* stream) {
         const bool needLoadBuffer = stream->getByte();
         assert(shouldUseRecvBuffer() == needLoadBuffer);
         if (needLoadBuffer) {
-            mRecvBuffer.onLoad(stream);
-            DD("%s: [%p] loaded buffer size %d", __func__, this,
-               mRecvBufferEnd - mRecvBufferBegin);
+            mHostSocket.onLoad(stream);
         }
     }
 
@@ -397,7 +321,7 @@ void AdbGuestPipe::onLoad(android::base::Stream* stream) {
         DD("%s: [%p] load socket %d", __func__, this, socket);
         // We do not register sockets that are in earlier states
         if (shouldUseRecvBuffer()) {
-            ScopedSocket scopedSocket = service()->reclaimSocket(socket);
+            ScopedSocket scopedSocket = CrossSessionSocket::reclaimSocket(socket);
             if (scopedSocket.valid()) {
                 auto fdWatch =
                         android::base::ThreadLooper::get()->createFdWatch(
@@ -408,15 +332,15 @@ void AdbGuestPipe::onLoad(android::base::Stream* stream) {
                                 },
                                 this);
                 assert(fdWatch);
-                mHostSocket = AdbScopedSocketWatcher(fdWatch,
+                mHostSocket = CrossSessionSocket(fdWatch,
                                                      std::move(scopedSocket));
-                mRecvBuffer.drainSocket(mHostSocket.fdWatcher()->fd(),
-                        BufferedSocketReader::DrainBehavior::Clear);
+                mHostSocket.drainSocket(
+                        CrossSessionSocket::DrainBehavior::Clear);
                 DD("%s: [%p] poll %d", __func__, this,
                    mHostSocket.fdWatcher()->poll());
                 mHostSocket.fdWatcher()->wantRead();
                 mHostSocket.fdWatcher()->wantWrite();
-                if (mRecvBuffer.hasData()) {
+                if (mHostSocket.hasStaleData()) {
                     signalWake(PIPE_WAKE_READ);
                 }
             }
@@ -429,8 +353,8 @@ void AdbGuestPipe::onLoad(android::base::Stream* stream) {
 
 void AdbGuestPipe::onSave(android::base::Stream* stream) {
     if (shouldUseRecvBuffer()) {
-        mRecvBuffer.drainSocket(mHostSocket.fdWatcher()->fd(),
-                BufferedSocketReader::DrainBehavior::AppendToBuffer);
+        mHostSocket.drainSocket(
+                CrossSessionSocket::DrainBehavior::AppendToBuffer);
     }
     stream->write(mBuffer, sizeof(mBuffer));
     stream->putBe32(mBufferSize);
@@ -444,15 +368,14 @@ void AdbGuestPipe::onSave(android::base::Stream* stream) {
            mHostSocket.fdWatcher()->fd(), needSaveBuffer);
         stream->putByte(needSaveBuffer);
         if (needSaveBuffer) {
-            DD("%s: [%p] saved buffer size %d", __func__, this,
-               mRecvBufferEnd - mRecvBufferBegin);
-            mRecvBuffer.onSave(stream);
+            mHostSocket.onSave(stream);
         }
         // We do not register the buffers that are in other states
         if (needSaveBuffer) {
-            service()->registerForRecycle(mHostSocket.fdWatcher()->fd());
+            CrossSessionSocket::registerForRecycle(
+                mHostSocket.fdWatcher()->fd());
         }
-        if (mRecvBuffer.hasData()) {
+        if (mHostSocket.hasStaleData()) {
             signalWake(PIPE_WAKE_READ);
         }
         DD("%s: [%p] poll %d", __func__, this, mHostSocket.fdWatcher()->poll());
@@ -460,7 +383,7 @@ void AdbGuestPipe::onSave(android::base::Stream* stream) {
 }
 
 AdbGuestPipe::~AdbGuestPipe() {
-    service()->recycleSocket(std::move(mHostSocket));
+    CrossSessionSocket::recycleSocket(std::move(mHostSocket));
     DD("%s: [%p] destroyed", __func__, this);
     CHECK(mState == State::ClosedByGuest ||
           mState == State::ClosedByHost);
@@ -471,7 +394,7 @@ void AdbGuestPipe::onGuestClose(PipeCloseReason reason) {
     DD("%s: [%p]", __func__, this);
     mState = State::ClosedByGuest;
     DINIT("%s: [%p] Adb closed by guest",__func__, this);
-    service()->recycleSocket(std::move(mHostSocket));
+    CrossSessionSocket::recycleSocket(std::move(mHostSocket));
     service()->onPipeClose(this);  // This deletes the instance.
 }
 
@@ -584,7 +507,7 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
             },
             this);
     assert(fdWatcher);
-    mHostSocket = AdbScopedSocketWatcher(fdWatcher);
+    mHostSocket = CrossSessionSocket(fdWatcher);
 
     DD("%s: [%p] sending reply", __func__, this);
     setReply("ok", State::SendingAcceptReplyOk);
@@ -651,8 +574,8 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
             ssize_t len;
             {
                 // Possible that the host socket has been reset.
-                if (mRecvBuffer.hasData()) {
-                    len = mRecvBuffer.readData(data, dataSize);
+                if (mHostSocket.hasStaleData()) {
+                    len = mHostSocket.readStaleData(data, dataSize);
                     DD("%s: [%p] loaded %d data from buffer", __func__, this,
                        (int)len);
                 } else if (mHostSocket.valid()) {
@@ -895,89 +818,6 @@ void AdbGuestPipe::waitForHostConnection() {
 
 bool AdbGuestPipe::shouldUseRecvBuffer() {
     return isProxyingData();
-}
-
-void AdbGuestPipe::BufferedSocketReader::drainSocket(int socket,
-                                                     DrainBehavior drainBehavior) {
-    android::base::Thread::sleepMs(50);
-    DD("%s: [%p] trying to drain recv socket", __func__, this);
-    const int kBufferSize = 4096;
-    // Set non-blocking socket
-#ifdef _WIN32
-    u_long mode = 1;
-    ioctlsocket(socket, FIONBIO, &mode);
-    int recvFlags = 0;
-#else
-    int recvFlags = MSG_DONTWAIT;
-#endif
-    if (drainBehavior == DrainBehavior::AppendToBuffer) {
-        if (!mRecvBuffer.size()) {
-            mRecvBuffer.resize(kBufferSize);
-        }
-        DD("%s: [%p] appending to recv buffer", __func__, this);
-        memmove((void*)mRecvBuffer.data(),
-                (void*)(mRecvBuffer.data() + mRecvBufferBegin),
-                mRecvBufferEnd - mRecvBufferBegin);
-        mRecvBufferEnd -= mRecvBufferBegin;
-        mRecvBufferBegin = 0;
-        ssize_t recvSize = 0;
-        do {
-            recvSize =
-                    ::recv(socket, (char*)mRecvBuffer.data() + mRecvBufferEnd,
-                           mRecvBuffer.size() - mRecvBufferEnd, recvFlags);
-            DD("%s: [%p] received %d bytes", __func__, this, (int)recvSize);
-            if (recvSize <= 0) {
-                DD("%s: [%p] recv errno %d", __func__, this, errno);
-                break;
-            }
-            mRecvBufferEnd += recvSize;
-            if (mRecvBuffer.size() == mRecvBufferEnd) {
-                mRecvBuffer.resize(mRecvBuffer.size() + kBufferSize);
-            }
-        } while (1);
-    } else {
-        std::vector<char> localBuffer(kBufferSize);
-        while (::recv(socket, localBuffer.data(), localBuffer.size(),
-                      recvFlags) > 0) {
-            DD("%s: [%p] clearing data from previous session", __func__, this);
-        }
-    }
-#ifdef _WIN32
-    // Set blocking socket
-    mode = 0;
-    ioctlsocket(socket, FIONBIO, &mode);
-#endif
-}
-
-void AdbGuestPipe::BufferedSocketReader::onSave(android::base::Stream* stream) {
-    stream->putBe32(mRecvBufferEnd - mRecvBufferBegin);
-    stream->write(mRecvBuffer.data() + mRecvBufferBegin,
-                  mRecvBufferEnd - mRecvBufferBegin);
-}
-
-void AdbGuestPipe::BufferedSocketReader::onLoad(android::base::Stream* stream) {
-    mRecvBufferEnd = stream->getBe32();
-    mRecvBufferBegin = 0;
-    if (mRecvBuffer.size() < mRecvBufferEnd) {
-        mRecvBuffer.resize(mRecvBufferEnd);
-    }
-    stream->read(mRecvBuffer.data(), mRecvBufferEnd);
-}
-
-bool AdbGuestPipe::BufferedSocketReader::hasData() const {
-    return mRecvBufferBegin != mRecvBufferEnd;
-}
-
-size_t AdbGuestPipe::BufferedSocketReader::readData(void* data,
-                                                    size_t dataSize) {
-    size_t len = std::min(dataSize, getReadableDataSize());
-    memcpy(data, mRecvBuffer.data() + mRecvBufferBegin, len);
-    mRecvBufferBegin += len;
-    return len;
-}
-
-size_t AdbGuestPipe::BufferedSocketReader::getReadableDataSize() const {
-    return mRecvBufferEnd - mRecvBufferBegin;
 }
 
 }  // namespace emulation
