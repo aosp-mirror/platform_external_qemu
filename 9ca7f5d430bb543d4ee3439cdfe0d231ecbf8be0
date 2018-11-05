@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d0e24aa0_70775a20",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 9
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-11-05T20:45:18Z",
+      "side": 1,
+      "message": "Nit: Whitespace at end of line (and below)",
+      "range": {
+        "startLine": 5,
+        "startChar": 32,
+        "endLine": 5,
+        "endChar": 33
+      },
+      "revId": "9ca7f5d430bb543d4ee3439cdfe0d231ecbf8be0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
