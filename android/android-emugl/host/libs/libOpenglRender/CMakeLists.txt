@@ -53,6 +53,9 @@ set(OpenglRender_src
     SyncThread.cpp
     TextureDraw.cpp
     TextureResize.cpp
+    VkDecoder.cpp
+    VulkanDispatch.cpp
+    VulkanStream.cpp
     WindowSurface.cpp
     YUVConverter.cpp)
 set(OpenglRender_linux-x86_64_src NativeSubWindow_x11.cpp)
@@ -71,13 +74,17 @@ target_link_libraries(OpenglRender
                               gtest
                               GLESv2_dec
                               renderControl_dec
-                              OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OpenGLESDispatch
                               GLSnapshot)
 target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
 target_link_libraries(OpenglRender PRIVATE emugl_base)
-target_include_directories(OpenglRender PUBLIC ${ANDROID_EMUGL_DIR}/host/libs/Translator/include .)
+target_include_directories(
+    OpenglRender
+    PUBLIC
+        ${ANDROID_EMUGL_DIR}/host/libs/Translator/include
+        .
+        ${ANDROID_EMUGL_DIR}/host/include/OpenglRender)
 android_target_link_libraries(OpenglRender linux-x86_64 PRIVATE "-WL,--version-script=render_api.entries")
 android_target_link_libraries(OpenglRender darwin-x86_64 PRIVATE "-WL,-exported_symbols_list,render_api.entries")
 
@@ -103,6 +110,9 @@ set(OpenglRender_standalone_common_src
     SyncThread.cpp
     TextureDraw.cpp
     TextureResize.cpp
+    VkDecoder.cpp
+    VulkanDispatch.cpp
+    VulkanStream.cpp
     WindowSurface.cpp
     YUVConverter.cpp
     ../Translator/GLES_V2/ANGLEShaderParser.cpp
@@ -122,7 +132,6 @@ target_link_libraries(OpenglRender_standalone_common
                               GLESv1_dec
                               GLESv2_dec
                               renderControl_dec
-                              OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OSWindow)
 target_link_libraries(OpenglRender_standalone_common PRIVATE emugl_base ANGLE::ANGLE)
@@ -175,6 +184,23 @@ target_link_libraries(OpenglRender_unittests
 
 add_opengl_dependencies(OpenglRender_unittests)
 
+# Unit tests
+set(OpenglRender_vulkan_unittests_src VulkanStream_unittest.cpp)
+android_add_test(OpenglRender_vulkan_unittests)
+target_link_libraries(OpenglRender_vulkan_unittests PRIVATE emugl_base)
+target_link_libraries(OpenglRender_vulkan_unittests
+                              PUBLIC
+                              OpenglRender_standalone_common
+                              OpenglRender_vulkan_cereal
+                              gmock_main)
+target_include_directories(OpenglRender_vulkan_unittests
+                                   PRIVATE
+                                   .
+                                   cereal
+                                   ${ANDROID_EMUGL_DIR}/host/include/OpenglRender
+                                   ${ANDROID_EMUGL_DIR}/shared/OpenglCodecCommon
+                                   ${ANDROID_EMUGL_DIR}/host/include/vulkan)
+
 set(HelloTriangle_src samples/HelloTriangle.cpp samples/HelloTriangleImp.cpp)
 android_add_executable(HelloTriangle)
 target_link_libraries(HelloTriangle
@@ -187,7 +213,6 @@ target_link_libraries(HelloTriangle
                               GLESv1_dec
                               GLESv2_dec
                               renderControl_dec
-                              OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OSWindow)
 add_opengl_dependencies(HelloTriangle)
@@ -204,7 +229,6 @@ target_link_libraries(HelloSurfaceFlinger
                               GLESv1_dec
                               GLESv2_dec
                               renderControl_dec
-                              OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OSWindow)
 add_opengl_dependencies(HelloSurfaceFlinger)
@@ -221,7 +245,6 @@ target_link_libraries(CreateDestroyContext
                               GLESv1_dec
                               GLESv2_dec
                               renderControl_dec
-                              OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OSWindow)
 add_opengl_dependencies(CreateDestroyContext)
@@ -238,7 +261,6 @@ target_link_libraries(HelloHostComposition
                               GLESv1_dec
                               GLESv2_dec
                               renderControl_dec
-                              OpenglRender_vulkan
                               OpenglRender_vulkan_cereal
                               OSWindow)
 add_opengl_dependencies(HelloHostComposition)
@@ -255,7 +277,6 @@ target_link_libraries(HelloVulkan
                       GLESv1_dec
                       GLESv2_dec
                       renderControl_dec
-                      OpenglRender_vulkan
                       OpenglRender_vulkan_cereal
                       OSWindow)
 add_opengl_dependencies(HelloVulkan)

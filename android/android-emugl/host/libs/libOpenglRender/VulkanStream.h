@@ -14,17 +14,23 @@
 #pragma once
 
 #include "android/base/files/Stream.h"
+#include "android/base/files/StreamSerializing.h"
 
-#include "android/base/Pool.h"
+#include <memory>
 
-#include <string>
-#include <vector>
+class IOStream;
 
 namespace goldfish_vk {
 
 class VulkanStream : public android::base::Stream {
 public:
-    VulkanStream();
+    VulkanStream(IOStream* stream);
+    ~VulkanStream();
+
+    void setStream(IOStream* stream);
+
+    // Returns whether the connection is valid.
+    bool valid();
 
     // General allocation function
     void alloc(void** ptrAddr, size_t bytes);
@@ -34,8 +40,29 @@ public:
     void loadStringInPlace(char** forOutput);
     void loadStringArrayInPlace(char*** forOutput);
 
+    virtual ssize_t read(void *buffer, size_t size);
+    virtual ssize_t write(const void *buffer, size_t size);
+
+    void commitWrite();
+
 private:
-    android::base::Pool mPool { 8, 4096, 64 };
+    class Impl;
+    std::unique_ptr<Impl> mImpl;
+};
+
+class VulkanMemReadingStream : public VulkanStream {
+public:
+    VulkanMemReadingStream(uint8_t* start);
+    ~VulkanMemReadingStream();
+
+    void setBuf(uint8_t* buf);
+
+    ssize_t read(void *buffer, size_t size) override;
+    ssize_t write(const void *buffer, size_t size) override;
+
+private:
+    uint8_t* mStart;
+    uintptr_t mReadPos = 0;
 };
 
 } // namespace goldfish_vk

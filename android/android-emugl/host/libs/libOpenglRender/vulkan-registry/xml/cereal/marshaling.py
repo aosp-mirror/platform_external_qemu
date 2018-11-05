@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from copy import deepcopy
+from copy import copy
 
 from .common.codegen import CodeGen, VulkanAPIWrapper
 from .common.vulkantypes import \
@@ -60,7 +60,7 @@ class VulkanMarshalingCodegen(object):
         return False
 
     def getTypeForStreaming(self, vulkanType):
-        res = deepcopy(vulkanType)
+        res = copy(vulkanType)
 
         if not vulkanType.accessibleAsPointer():
             res = res.getForAddressAccess()
@@ -109,14 +109,34 @@ class VulkanMarshalingCodegen(object):
         self.checked = True
 
         access = self.exprAccessor(vulkanType)
-        addrExpr = "&" + access
-        sizeExpr = self.cgen.sizeofExpr(vulkanType)
+
+        needConsistencyCheck = False
+
+        if (self.dynAlloc and self.direction == "read") or self.direction == "write":
+            checkAccess = self.exprAccessor(vulkanType)
+            addrExpr = "&" + checkAccess
+            sizeExpr = self.cgen.sizeofExpr(vulkanType)
+        else:
+            checkName = "check_%s" % vulkanType.paramName
+            self.cgen.stmt("%s %s" % (
+                self.cgen.makeCTypeDecl(vulkanType, useParamName = False), checkName))
+            checkAccess = checkName
+            addrExpr = "&" + checkAccess
+            sizeExpr = self.cgen.sizeofExpr(vulkanType)
+            needConsistencyCheck = True
+
         self.genStreamCall(vulkanType.getForAddressAccess(), addrExpr, sizeExpr)
 
         if self.needSkip(vulkanType):
             return
 
         self.cgen.beginIf(access)
+
+        if needConsistencyCheck:
+            self.cgen.beginIf("!(%s)" % checkName)
+            self.cgen.stmt(
+                "fprintf(stderr, \"fatal: %s inconsistent between guest and host\\n\")" % (access))
+            self.cgen.endIf()
 
     def endCheck(self, vulkanType):
 
@@ -223,6 +243,9 @@ class VulkanMarshaling(VulkanWrapperGenerator):
     def __init__(self, module, typeInfo):
         VulkanWrapperGenerator.__init__(self, module, typeInfo)
 
+        self.cgenHeader = CodeGen()
+        self.cgenImpl = CodeGen()
+
         self.writeCodegen = \
             VulkanMarshalingCodegen(
                 None,
@@ -230,15 +253,6 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 MARSHAL_INPUT_VAR_NAME,
                 API_PREFIX_MARSHAL,
                 direction = "write")
-
-        self.apiOutputCodegenForRead = \
-            VulkanMarshalingCodegen(
-                None,
-                VULKAN_STREAM_VAR_NAME,
-                MARSHAL_INPUT_VAR_NAME,
-                API_PREFIX_MARSHAL,
-                direction = "read",
-                forApiOutput = True)
 
         self.readCodegen = \
             VulkanMarshalingCodegen(
@@ -249,81 +263,12 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 direction = "read",
                 dynAlloc = True)
 
-        self.apiOutputCodegenForWrite = \
-            VulkanMarshalingCodegen(
-                None,
-                VULKAN_STREAM_VAR_NAME,
-                UNMARSHAL_INPUT_VAR_NAME,
-                API_PREFIX_UNMARSHAL,
-                direction = "write",
-                forApiOutput = True,
-                dynAlloc = True)
-
-        def apiMarshalingDef(cgen, api):
-            self.apiOutputCodegenForRead.cgen = cgen
-            self.writeCodegen.cgen = cgen
-
-            for param in api.parameters:
-                if param.paramName == VULKAN_STREAM_VAR_NAME:
-                    continue
-                if param.possiblyOutput():
-                    iterateVulkanType(typeInfo, param,
-                                      self.apiOutputCodegenForRead)
-                else:
-                    iterateVulkanType(typeInfo, param, self.writeCodegen)
-
-            if api.retType.isVoidWithNoSize():
-                pass
-            else:
-                result_var_name = "%s_%s_return" % (api.name,
-                                                    api.retType.typeName)
-                cgen.stmt("%s %s" % (cgen.makeCTypeDecl(
-                    api.retType, useParamName=False), result_var_name))
-                cgen.stmt("%s->read(&%s, %s)" % (VULKAN_STREAM_VAR_NAME,
-                                                 result_var_name,
-                                                 cgen.sizeofExpr(api.retType)))
-                cgen.stmt("return %s" % result_var_name)
-
-        self.marshalWrapper = \
-            VulkanAPIWrapper(
-                API_PREFIX_MARSHAL,
-                PARAMETERS_MARSHALING,
-                None,
-                apiMarshalingDef)
-
-        def apiUnmarshalingDef(cgen, api):
-            self.apiOutputCodegenForWrite.cgen = cgen
-            self.readCodegen.cgen = cgen
-
-            for param in api.parameters:
-                if param.paramName == VULKAN_STREAM_VAR_NAME:
-                    continue
-                if param.possiblyOutput():
-                    iterateVulkanType(typeInfo, param,
-                                      self.apiOutputCodegenForWrite)
-                else:
-                    iterateVulkanType(typeInfo, param, self.readCodegen)
-
-            if api.retType.isVoidWithNoSize():
-                pass
-            else:
-                result_var_name = "%s_%s_return" % (api.name,
-                                                    api.retType.typeName)
-                cgen.stmt("%s %s" % (cgen.makeCTypeDecl(
-                    api.retType, useParamName=False), result_var_name))
-                cgen.stmt("%s->write(&%s, %s)" % (VULKAN_STREAM_VAR_NAME,
-                                                  result_var_name,
-                                                  cgen.sizeofExpr(api.retType)))
-                cgen.stmt("return %s" % result_var_name)
-
-        self.unmarshalWrapper = \
-            VulkanAPIWrapper(
-                API_PREFIX_UNMARSHAL,
-                PARAMETERS_MARSHALING,
-                None,
-                apiUnmarshalingDef)
-
         self.knownDefs = {}
+
+        # Begin Vulkan API opcodes from something high
+        # that is not going to interfere with renderControl
+        # opcodes
+        self.currentOpcode = 20000
 
     def onGenType(self, typeXml, name, alias):
         VulkanWrapperGenerator.onGenType(self, typeXml, name, alias)
@@ -350,9 +295,9 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                     iterateVulkanType(self.typeInfo, member, self.writeCodegen)
 
             self.module.appendHeader(
-                self.marshalWrapper.codegen.makeFuncDecl(marshalPrototype))
+                self.cgenHeader.makeFuncDecl(marshalPrototype))
             self.module.appendImpl(
-                self.marshalWrapper.codegen.makeFuncImpl(
+                self.cgenImpl.makeFuncImpl(
                     marshalPrototype, structMarshalingDef))
 
             unmarshalPrototype = \
@@ -366,18 +311,13 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                     iterateVulkanType(self.typeInfo, member, self.readCodegen)
 
             self.module.appendHeader(
-                self.unmarshalWrapper.codegen.makeFuncDecl(unmarshalPrototype))
+                self.cgenHeader.makeFuncDecl(unmarshalPrototype))
             self.module.appendImpl(
-                self.unmarshalWrapper.codegen.makeFuncImpl(
+                self.cgenImpl.makeFuncImpl(
                     unmarshalPrototype, structUnmarshalingDef))
 
     def onGenCmd(self, cmdinfo, name, alias):
         VulkanWrapperGenerator.onGenCmd(self, cmdinfo, name, alias)
         self.module.appendHeader(
-            self.marshalWrapper.makeDecl(self.typeInfo, name))
-        self.module.appendImpl(
-            self.marshalWrapper.makeDefinition(self.typeInfo, name))
-        self.module.appendHeader(
-            self.unmarshalWrapper.makeDecl(self.typeInfo, name))
-        self.module.appendImpl(
-            self.unmarshalWrapper.makeDefinition(self.typeInfo, name))
+            "#define OP_%s %d\n" % (name, self.currentOpcode))
+        self.currentOpcode += 1

@@ -27,6 +27,8 @@ public:
     ChannelStream(RenderChannelImpl* channel, size_t bufSize);
 
     void forceStop();
+    int writeFully(const void* buf, size_t len) override;
+    const unsigned char *readFully( void *buf, size_t len) override;
 
 protected:
     virtual void* allocBuffer(size_t minSize) override final;

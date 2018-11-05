@@ -13,10 +13,14 @@
 // limitations under the License.
 #include <gtest/gtest.h>
 
+#include "GoldfishOpenglTestEnv.h"
+#include "VulkanDispatch.h"
+
 #include <vulkan/vulkan.h>
 
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/opengles.h"
 
 #include <atomic>
 #include <memory>
@@ -26,16 +30,44 @@ using android::base::System;
 
 namespace aemu {
 
-TEST(VulkanHal, Basic) {
-    VkInstance outInstance;
-    VkInstanceCreateInfo createInfo = {
-        VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-        0, 0,
-        0,
-        0, nullptr,
-        0, nullptr,
-    };
-    vkCreateInstance(&createInfo, nullptr, &outInstance);
+class VulkanHalTest : public ::testing::Test {
+protected:
+
+    static GoldfishOpenglTestEnv* testEnv;
+
+    static void SetUpTestCase() {
+        testEnv = new GoldfishOpenglTestEnv;
+    }
+
+    static void TearDownTestCase() {
+        delete testEnv;
+        testEnv = nullptr;
+    }
+
+    void SetUp() override {
+    }
+
+    void TearDown() override {
+        // Cancel all host threads as well
+        android_finishOpenglesRenderer();
+    }
+};
+
+// static
+GoldfishOpenglTestEnv* VulkanHalTest::testEnv = nullptr;
+
+TEST_F(VulkanHalTest, Basic) {
+    uint32_t extCount = 0;
+    std::vector<VkExtensionProperties> exts;
+    EXPECT_EQ(VK_SUCCESS, vkEnumerateInstanceExtensionProperties(
+                                  nullptr, &extCount, nullptr));
+    exts.resize(extCount);
+    EXPECT_EQ(VK_SUCCESS, vkEnumerateInstanceExtensionProperties(
+                                  nullptr, &extCount, exts.data()));
+
+    for (uint32_t i = 0; i < extCount; ++i) {
+        printf("Available extension: %s\n", exts[i].extensionName);
+    }
 }
 
 }  // namespace aemu

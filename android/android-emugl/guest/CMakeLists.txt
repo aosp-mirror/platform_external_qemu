@@ -64,5 +64,15 @@ target_link_libraries(vulkan_android PUBLIC emugl_base log gui cutils utils)
 
 set(vulkanhal_unittests_src androidImpl/vulkanhal_unittest.cpp)
 android_add_test(vulkanhal_unittests)
-target_include_directories(vulkanhal_unittests PRIVATE ${ANDROID_EMUGL_DIR}/host/include)
-target_link_libraries(vulkanhal_unittests PRIVATE vulkan_android PRIVATE gtest_main)
+target_include_directories(
+    vulkanhal_unittests PRIVATE
+    ${ANDROID_EMUGL_DIR}/host/include
+    ${ANDROID_EMUGL_DIR}/combined)
+target_link_libraries(
+    vulkanhal_unittests PRIVATE
+    vulkan_android aemugraphics PRIVATE
+    gtest_main)
+android_target_dependency(vulkanhal_unittests all "${EMULATOR_FEATURE_DEPENDENCIES}")
+android_target_dependency(vulkanhal_unittests all "${SWIFTSHADER_DEPENDENCIES}")
+android_target_properties(vulkanhal_unittests darwin-x86_64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
+android_target_properties(vulkanhal_unittests linux-x86_64 "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")

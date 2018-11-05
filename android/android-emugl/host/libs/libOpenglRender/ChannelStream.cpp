@@ -98,6 +98,18 @@ void ChannelStream::forceStop() {
     mChannel->stopFromHost();
 }
 
+int ChannelStream::writeFully(const void* buf, size_t len) {
+    void* dstBuf = alloc(len);
+    memcpy(dstBuf, buf, len);
+    flush();
+    return 0;
+}
+
+const unsigned char *ChannelStream::readFully( void *buf, size_t len) {
+    fprintf(stderr, "%s: FATAL: not intended for use with ChannelStream\n", __func__);
+    abort();
+}
+
 void ChannelStream::onSave(android::base::Stream* stream) {
     // Write only the data that's left in read buffer, but in the same format
     // as saveBuffer() does.
