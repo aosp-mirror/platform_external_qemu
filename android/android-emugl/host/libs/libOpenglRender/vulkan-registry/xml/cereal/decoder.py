@@ -89,10 +89,10 @@ def emit_decode_parameters(typeInfo, api, cgen):
 
 def emit_dispatch_call(api, cgen):
     callLhs = None
-    if api.retType.typeName != "void":
-        retType = api.retType.typeName
-        retVar = "%s_%s_return" % (api.name, retType)
-        cgen.stmt("%s %s = (%s)0" % (retType, retVar, retType))
+    retTypeName = api.getRetTypeExpr()
+    if retTypeName != "void":
+        retVar = api.getRetVarExpr()
+        cgen.stmt("%s %s = (%s)0" % (retTypeName, retVar, retTypeName))
         callLhs = retVar
 
     cgen.funcCall(
@@ -108,33 +108,30 @@ def emit_decode_parameters_writeback(typeInfo, api, cgen):
     for p in paramsToWrite:
         emit_marshal(typeInfo, p, cgen)
 
-def emit_decode_finish_return_writeback(api, cgen):
-    retType = api.retType
-    if retType.typeName != "void":
-        retTypeName = retType.typeName
-        retVar = "%s_%s_return" % (api.name, retTypeName)
+def emit_decode_return_writeback(api, cgen):
+    retTypeName = api.getRetTypeExpr()
+    if retTypeName != "void":
+        retVar = api.getRetVarExpr()
         cgen.stmt("%s->write(&%s, %s)" %
-            (WRITE_STREAM, retVar, cgen.sizeofExpr(retType)))
+            (WRITE_STREAM, retVar, cgen.sizeofExpr(api.retType)))
+
+def emit_decode_finish(cgen):
     cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
 
-# Functions where there is a custom encoding expression.
-# VKAPI_ATTR VkResult VKAPI_CALL vkMapMemory(
-#     VkDevice                                    device,
-#     VkDeviceMemory                              memory,
-#     VkDeviceSize                                offset,
-#     VkDeviceSize                                size,
-#     VkMemoryMapFlags                            flags,
-#     void**                                      ppData);
+## Custom decoding definitions##################################################
 def decode_vkMapMemory(typeInfo, api, cgen):
     emit_decode_parameters(typeInfo, api, cgen)
     emit_dispatch_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
-    emit_decode_finish_return_writeback(api, cgen)
+    emit_decode_return_writeback(api, cgen)
 
-    # TODO:
-    # The custom part: Depending on the return value,
-    # allocate some buffer (TODO: dma map) the result and return it to the user
-    # if ppData is not null.
+    needWriteback = \
+        "((%s == VK_SUCCESS) && ppData && size > 0)" % api.getRetVarExpr()
+    cgen.beginIf(needWriteback)
+    cgen.stmt("%s->write(*ppData, size)" % (WRITE_STREAM))
+    cgen.endIf()
+
+    emit_decode_finish(cgen)
 
 custom_decodes = {
     "vkMapMemory" : decode_vkMapMemory,
@@ -190,7 +187,8 @@ class VulkanDecoder(VulkanWrapperGenerator):
             emit_decode_parameters(typeInfo, api, cgen)
             emit_dispatch_call(api, cgen)
             emit_decode_parameters_writeback(typeInfo, api, cgen)
-            emit_decode_finish_return_writeback(api, cgen)
+            emit_decode_return_writeback(api, cgen)
+            emit_decode_finish(cgen)
 
         cgen.stmt("break")
         cgen.endBlock()

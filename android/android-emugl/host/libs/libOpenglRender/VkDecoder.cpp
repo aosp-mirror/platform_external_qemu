@@ -613,6 +613,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkStream->write((void**)ppData, sizeof(void*));
                 }
                 vkStream->write(&vkMapMemory_VkResult_return, sizeof(VkResult));
+                if (((vkMapMemory_VkResult_return == VK_SUCCESS) && ppData && size > 0))
+                {
+                    vkStream->write(*ppData, size);
+                }
                 vkStream->commitWrite();
                 break;
             }
