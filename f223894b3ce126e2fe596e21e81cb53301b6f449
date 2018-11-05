@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1dbbaed3_3f80d354",
+        "filename": ".vscode/settings.json",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-05T18:31:30Z",
+      "side": 1,
+      "message": "Thanks for catching this! It should not go in.",
+      "parentUuid": "3a501a5c_2043bd89",
+      "revId": "f223894b3ce126e2fe596e21e81cb53301b6f449",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e9bdbe81_fce6b138",
         "filename": "android/build/cmake/prebuilts.cmake",
         "patchSetId": 2
@@ -33,6 +51,24 @@
       "revId": "f223894b3ce126e2fe596e21e81cb53301b6f449",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca957981_b18c2683",
+        "filename": "android/build/cmake/prebuilts.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-05T18:31:30Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "e9bdbe81_fce6b138",
+      "revId": "f223894b3ce126e2fe596e21e81cb53301b6f449",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -59,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "92129819_6cf2f861",
+        "filename": "android/build/cmake/prebuilts.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-05T18:31:30Z",
+      "side": 1,
+      "message": "The root of the problem is that we want to use the value of a generator expression:\n\n$\u003cTARGET_FILE_DIR:${RUN_TARGET}\u003e which tells us which directory the generated target will end up in. This directory can change depending on the generator used. Xcode for example see to do something along the lines ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/${RUN_TARGET}. Whereas GNUMake/Ninja will use a single binplace directory (just like our old build system).",
+      "parentUuid": "d17aaec8_c0ddb253",
+      "range": {
+        "startLine": 128,
+        "startChar": 0,
+        "endLine": 129,
+        "endChar": 55
+      },
+      "revId": "f223894b3ce126e2fe596e21e81cb53301b6f449",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e6d37573_691323f4",
         "filename": "android/build/cmake/prebuilts.cmake",
         "patchSetId": 2
@@ -70,6 +130,30 @@
       "writtenOn": "2018-11-03T04:05:14Z",
       "side": 1,
       "message": "Some dependencies that are libraries, like swiftshader, are not explicitly linked in, and merely included in the rpath. Will this also properly avoid linking swiftshader in?",
+      "range": {
+        "startLine": 145,
+        "startChar": 0,
+        "endLine": 149,
+        "endChar": 11
+      },
+      "revId": "f223894b3ce126e2fe596e21e81cb53301b6f449",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "be76c8c7_84fc19c2",
+        "filename": "android/build/cmake/prebuilts.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-05T18:31:30Z",
+      "side": 1,
+      "message": "Nothing gets linked in. It merely states that the library depends on these set of files. Since the set of files or not source files the will not be part of the archive that gets linked against. \n\nThe archive that gets linked against will be an empty archive.",
+      "parentUuid": "e6d37573_691323f4",
       "range": {
         "startLine": 145,
         "startChar": 0,
