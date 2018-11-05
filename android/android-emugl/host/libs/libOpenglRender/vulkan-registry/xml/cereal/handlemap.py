@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from copy import deepcopy
-
 from .common.codegen import CodeGen
 from .common.vulkantypes import \
         VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
