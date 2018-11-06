@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30fc97ca_51654069",
+        "filename": "android/android-emu/android/darwinn/MockDarwinnDriverFactory.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-11-06T23:20:39Z",
+      "side": 1,
+      "message": "We typically use: LAZY_INSTANCE_INIT",
+      "range": {
+        "startLine": 64,
+        "startChar": 25,
+        "endLine": 64,
+        "endChar": 27
+      },
+      "revId": "4925d72530c87a304803ae34a456fd72843d049b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f4f3ebf5_0decfe57",
+        "filename": "android/android-emu/android/darwinn/MockDarwinnDriverFactory.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-11-06T23:20:39Z",
+      "side": 1,
+      "message": "Nit: Remove commented code?",
+      "range": {
+        "startLine": 70,
+        "startChar": 0,
+        "endLine": 71,
+        "endChar": 19
+      },
+      "revId": "4925d72530c87a304803ae34a456fd72843d049b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
