@@ -1,0 +1,146 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da973e83_80c17c7b",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-06T02:11:19Z",
+      "side": 1,
+      "message": "needs copyright header",
+      "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3d025b7c_336702ef",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-06T02:11:19Z",
+      "side": 1,
+      "message": "nit: bit less reordery with D(fmt,...) fprintf(fmt \"\\n\", ##__VA_RAGS__);",
+      "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "acd63321_3e3ef1cf",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-06T02:11:19Z",
+      "side": 1,
+      "message": "namespace android {\nnamespace emulation {\n\nto be consistent with other files?",
+      "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2585bc88_17086cca",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-06T02:11:19Z",
+      "side": 1,
+      "message": "Wonder if StaticMap can be used here if there is any concern with multithreading.",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 29
+      },
+      "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "be68524f_f95ae289",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-06T02:11:19Z",
+      "side": 1,
+      "message": "do we need ever need to erase the |socket| key in the map?",
+      "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "05d455fa_0c31f54e",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-06T02:11:19Z",
+      "side": 1,
+      "message": "add copyright header",
+      "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7b328388_7d09d795",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-06T02:11:19Z",
+      "side": 1,
+      "message": "size_t or ssize_t for those index typet hings",
+      "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "16295be0_27887a2b",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-06T02:11:19Z",
+      "side": 1,
+      "message": "put // namespace emulation\n// namespace android",
+      "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
