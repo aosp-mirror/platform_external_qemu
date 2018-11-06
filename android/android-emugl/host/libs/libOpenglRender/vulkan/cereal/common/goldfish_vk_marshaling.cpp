@@ -3046,8 +3046,6 @@ void marshal_VkClearColorValue(
     const VkClearColorValue* forMarshaling)
 {
     vkStream->write((float*)forMarshaling->float32, 4 * sizeof(float));
-    vkStream->write((int32_t*)forMarshaling->int32, 4 * sizeof(int32_t));
-    vkStream->write((uint32_t*)forMarshaling->uint32, 4 * sizeof(uint32_t));
 }
 
 void unmarshal_VkClearColorValue(
@@ -3055,8 +3053,6 @@ void unmarshal_VkClearColorValue(
     VkClearColorValue* forUnmarshaling)
 {
     vkStream->read((float*)forUnmarshaling->float32, 4 * sizeof(float));
-    vkStream->read((int32_t*)forUnmarshaling->int32, 4 * sizeof(int32_t));
-    vkStream->read((uint32_t*)forUnmarshaling->uint32, 4 * sizeof(uint32_t));
 }
 
 void marshal_VkClearDepthStencilValue(
@@ -3080,7 +3076,6 @@ void marshal_VkClearValue(
     const VkClearValue* forMarshaling)
 {
     marshal_VkClearColorValue(vkStream, (VkClearColorValue*)(&forMarshaling->color));
-    marshal_VkClearDepthStencilValue(vkStream, (VkClearDepthStencilValue*)(&forMarshaling->depthStencil));
 }
 
 void unmarshal_VkClearValue(
@@ -3088,7 +3083,6 @@ void unmarshal_VkClearValue(
     VkClearValue* forUnmarshaling)
 {
     unmarshal_VkClearColorValue(vkStream, (VkClearColorValue*)(&forUnmarshaling->color));
-    unmarshal_VkClearDepthStencilValue(vkStream, (VkClearDepthStencilValue*)(&forUnmarshaling->depthStencil));
 }
 
 void marshal_VkClearAttachment(
