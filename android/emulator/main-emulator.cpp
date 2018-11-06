@@ -86,10 +86,6 @@ using android::ConfigDirs;
 #  define DLL_EXTENSION  ".so"
 #endif
 
-// Name of GPU emulation main library for (32-bit and 64-bit versions)
-#define GLES_EMULATION_LIB    "libOpenglRender" DLL_EXTENSION
-#define GLES_EMULATION_LIB64  "lib64OpenglRender" DLL_EXTENSION
-
 /* Forward declarations */
 static char* getQemuExecutablePath(const char* programPath,
                                    const char* avdArch,

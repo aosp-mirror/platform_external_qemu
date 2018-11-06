@@ -55,9 +55,6 @@ set(OpenglRender_darwin-x86_64_src NativeSubWindow_cocoa.m)
 set(OpenglRender_windows_src NativeSubWindow_win32.cpp)
 android_add_shared_library(OpenglRender)
 
-# TODO: We are not consistent with our prefix naming, this should really be a global variable.
-set_target_properties(OpenglRender PROPERTIES PREFIX "lib64")
-
 target_link_libraries(OpenglRender
                               PUBLIC
                               GLESv1_dec
