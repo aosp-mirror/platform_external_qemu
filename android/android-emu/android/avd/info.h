@@ -417,4 +417,5 @@ bool avdInfo_sysImgGuestRenderingBlacklisted(const AvdInfo* i);
 /* Replace the disk.dataPartition.size in avd config.ini */
 void avdInfo_replaceDataPartitionSizeInConfigIni(AvdInfo* i, int64_t sizeBytes);
 
+bool avdInfo_isMarshmallowOrHigher(AvdInfo* i);
 ANDROID_END_HEADER
