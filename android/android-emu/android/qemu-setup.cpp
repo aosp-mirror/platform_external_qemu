@@ -33,6 +33,7 @@
 #include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
 #include "android/logcat-pipe.h"
+#include "android/network/NetworkPipe.h"
 #include "android/offworld/OffworldPipe.h"
 #include "android/opengles-pipe.h"
 #include "android/proxy/proxy_setup.h"
@@ -334,6 +335,9 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_init_logcat_pipe();
     if (fc::isEnabled(fc::RefCountPipe))
         android_init_refcount_pipe();
+    if (fc::isEnabled(fc::WifiConfigurable)) {
+        android::network::registerNetworkPipeService();
+    }
 
 #ifndef _WIN32
     // bug: 70566718
