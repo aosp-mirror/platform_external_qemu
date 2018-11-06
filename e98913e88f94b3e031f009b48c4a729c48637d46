@@ -136,6 +136,30 @@
     },
     {
       "key": {
+        "uuid": "24139d41_9925cf99",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-11-06T20:11:37Z",
+      "side": 1,
+      "message": "I was trying but StaticMap is not very friendly to std::move and its friends :(\n\nSo I do my own lock instead.",
+      "parentUuid": "a886e0f4_eb941e11",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 29
+      },
+      "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "be68524f_f95ae289",
         "filename": "android/android-emu/android/emulation/CrossSessionSocket.cpp",
         "patchSetId": 3
