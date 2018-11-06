@@ -14,6 +14,7 @@
 #include "android/avd/keys.h"
 #include "android/base/StringFormat.h"
 #include "android/base/Uri.h"
+#include "android/base/Uuid.h"
 #include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/StringUtils.h"
@@ -34,7 +35,9 @@
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QFontMetrics>
+#include <QFuture>
 #include <QMovie>
+#include <QtConcurrent/QtConcurrentRun>
 
 #include <algorithm>
 #include <fstream>
@@ -45,12 +48,15 @@ using android::base::StringAppendFormat;
 using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
-using android::base::Uri;
-using android::base::Version;
 using android::base::trim;
-using android::emulation::AdbBugReportServices;
+using android::base::Uri;
+using android::base::Uuid;
+using android::base::Version;
 using android::emulation::AdbInterface;
+using android::emulation::OptionalAdbCommandResult;
 
+static const int kDefaultUnknownAPILevel = 1000;
+static const System::Duration kAdbCommandTimeoutMs = System::kInfinite;
 static const char FILE_BUG_URL[] =
         "https://issuetracker.google.com/issues/new"
         "?component=192727&description=%s&template=843117";
@@ -162,9 +168,8 @@ BugreportPage::~BugreportPage() {
     }
 }
 
-void BugreportPage::initialize(EmulatorQtWindow* eW) {
-    mEmulatorWindow = eW;
-    mBugReportServices.reset(new AdbBugReportServices(eW->getAdbInterface()));
+void BugreportPage::setAdbInterface(AdbInterface* adb) {
+    mAdb = adb;
 }
 
 void BugreportPage::updateTheme() {
@@ -217,64 +222,27 @@ void BugreportPage::showEvent(QShowEvent* event) {
     }
 }
 
-void BugreportPage::saveBugReportFolder(bool willOpenIssueTracker) {
+void BugreportPage::enableInput(bool enabled) {
+    SettingsTheme theme = getSelectedTheme();
+    setButtonEnabled(mUi->bug_sendToGoogle, theme, enabled);
+    setButtonEnabled(mUi->bug_saveButton, theme, enabled);
+}
+
+void BugreportPage::on_bug_saveButton_clicked() {
     QString dirName = QString::fromStdString(mSavingStates.saveLocation);
     dirName = QFileDialog::getExistingDirectory(
             Q_NULLPTR, tr("Report Saving Location"), dirName);
-
-    if (dirName.isNull()) {
+    if (dirName.isNull())
         return;
-    } else {
-        // launch the bugreport folder saving task in a separate thread
-        std::string savingPath = PathUtils::join(
-                dirName.toStdString(),
-                AdbBugReportServices::generateUniqueBugreportName());
-        std::string adbBugreportFilePath =
-                (mUi->bug_bugReportCheckBox->isChecked() &&
-                 mSavingStates.adbBugreportSucceed)
-                        ? mSavingStates.adbBugreportFilePath
-                        : "";
-        std::string screenshotFilePath =
-                (mUi->bug_screenshotCheckBox->isChecked() &&
-                 mSavingStates.screenshotSucceed)
-                        ? mSavingStates.screenshotFilePath
-                        : "";
-        QString reproSteps = mUi->bug_reproStepsTextEdit->toPlainText();
-        reproSteps.truncate(2000);
-        mReportingFields.reproSteps = reproSteps.toStdString();
-        auto thread = new QThread();
-        auto task = new BugReportFolderSavingTask(
-                savingPath, adbBugreportFilePath, screenshotFilePath,
-                mReportingFields.avdDetails, mReportingFields.reproSteps,
-                willOpenIssueTracker);
-        task->moveToThread(thread);
-        connect(thread, SIGNAL(started()), task, SLOT(run()));
-        connect(task, SIGNAL(started()), this,
-                SLOT(saveBugreportFolderStarted()));
-        connect(task, SIGNAL(finished(bool, QString, bool)), this,
-                SLOT(saveBugreportFolderFinished(bool, QString, bool)));
-        connect(task, SIGNAL(finished(bool, QString, bool)), thread,
-                SLOT(quit()));
-        connect(thread, SIGNAL(finished()), task, SLOT(deleteLater()));
-        connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-        thread->start();
-    }
-}
+    std::string savingPath = PathUtils::join(dirName.toStdString(),
+                                             generateUniqueBugreportName());
 
-void BugreportPage::saveBugreportFolderFinished(bool success,
-                                                QString folderPath,
-                                                bool willOpenIssueTracker) {
-    SettingsTheme theme = getSelectedTheme();
-    setButtonEnabled(mUi->bug_sendToGoogle, theme, true);
-    setButtonEnabled(mUi->bug_saveButton, theme, true);
-    mSavingStates.bugreportSavedSucceed = success;
-    if (success) {
-        mSavingStates.bugreportFolderPath = folderPath.toStdString();
-        if (willOpenIssueTracker) {
-            // launch the issue tracker in a separate thread
-            launchIssueTrackerThread();
-        }
-    } else {
+    enableInput(false);
+    QFuture<bool> future = QtConcurrent::run(
+            this, &BugreportPage::saveBugReportTo, savingPath);
+    mSavingStates.bugreportSavedSucceed = future.result();
+    enableInput(true);
+    if (!mSavingStates.bugreportSavedSucceed) {
         showErrorDialog(tr("The bugreport save location is invalid.<br/>"
                            "Check the settings page and ensure the directory "
                            "exists and is writeable."),
@@ -282,111 +250,194 @@ void BugreportPage::saveBugreportFolderFinished(bool success,
     }
 }
 
-void BugreportPage::saveBugreportFolderStarted() {
-    SettingsTheme theme = getSelectedTheme();
-    setButtonEnabled(mUi->bug_sendToGoogle, theme, false);
-    setButtonEnabled(mUi->bug_saveButton, theme, false);
-}
-
-void BugreportPage::issueTrackerTaskFinished(bool success, QString error) {
+void BugreportPage::on_bug_sendToGoogle_clicked() {
+    if (!mSavingStates.bugreportSavedSucceed) {
+        on_bug_saveButton_clicked();
+    }
+    // launch the issue tracker in a separate thread
+    QFuture<bool> future =
+            QtConcurrent::run(this, &BugreportPage::launchIssueTracker);
+    bool success = future.result();
     if (!success) {
         QString errMsg =
                 tr("There was an error while opening the Google issue "
                    "tracker.<br/>");
-        errMsg.append(error);
         showErrorDialog(errMsg, tr("File a Bug for Google"));
     }
 }
 
-void BugreportPage::on_bug_saveButton_clicked() {
-    saveBugReportFolder(false);
-}
-
-void BugreportPage::on_bug_sendToGoogle_clicked() {
-    if (!mSavingStates.bugreportSavedSucceed) {
-        saveBugReportFolder(true);
-    } else {
-        QString reproSteps = mUi->bug_reproStepsTextEdit->toPlainText();
-        reproSteps.truncate(2000);
-        mReportingFields.reproSteps = reproSteps.toStdString();
-        // launch the issue tracker in a separate thread
-        launchIssueTrackerThread();
-        QString dirName = QFileDialog::getOpenFileName(
-                Q_NULLPTR, tr("Report Saving Location"),
-                QString::fromStdString(mSavingStates.bugreportFolderPath));
+bool BugreportPage::saveBugReportTo(const std::string& savingPath) {
+    if (savingPath.empty()) {
+        return false;
     }
+
+    if (path_mkdir_if_needed(savingPath.c_str(), 0755)) {
+        return false;
+    }
+
+    if (mUi->bug_bugReportCheckBox->isChecked() &&
+        mSavingStates.adbBugreportSucceed) {
+        StringView bugreportBaseName;
+        if (PathUtils::extension(mSavingStates.adbBugreportFilePath) ==
+            ".zip") {
+            bugreportBaseName = "bugreport.zip";
+        } else {
+            bugreportBaseName = "bugreport.txt";
+        }
+        path_copy_file(PathUtils::join(savingPath, bugreportBaseName).c_str(),
+                       mSavingStates.adbBugreportFilePath.c_str());
+    }
+
+    if (mUi->bug_screenshotCheckBox->isChecked() &&
+        mSavingStates.screenshotSucceed) {
+        StringView screenshotBaseName = "screenshot.png";
+        path_copy_file(PathUtils::join(savingPath, screenshotBaseName).c_str(),
+                       mSavingStates.screenshotFilePath.c_str());
+    }
+
+    if (!mReportingFields.avdDetails.empty()) {
+        auto avdDetailsFilePath =
+                PathUtils::join(savingPath, "avd_details.txt");
+        std::ofstream outFile(avdDetailsFilePath.c_str(),
+                              std::ios_base::out | std::ios_base::trunc);
+        outFile << mReportingFields.avdDetails << std::endl;
+    }
+
+    QString reproSteps = mUi->bug_reproStepsTextEdit->toPlainText();
+    reproSteps.truncate(2000);
+    mReportingFields.reproSteps = reproSteps.toStdString();
+    if (!mReportingFields.reproSteps.empty()) {
+        auto reproStepsFilePath =
+                PathUtils::join(savingPath, "repro_steps.txt");
+        std::ofstream outFile(reproStepsFilePath.c_str(),
+                              std::ios_base::out | std::ios_base::trunc);
+        outFile << mReportingFields.reproSteps << std::endl;
+    }
+    return true;
 }
 
-void BugreportPage::launchIssueTrackerThread() {
-    auto thread = new QThread();
-    auto task = new IssueTrackerTask(mReportingFields);
-    task->moveToThread(thread);
-    connect(thread, SIGNAL(started()), task, SLOT(run()));
-    connect(task, SIGNAL(finished(bool, QString)), thread, SLOT(quit()));
-    connect(task, SIGNAL(finished(bool, QString)), this,
-            SLOT(issueTrackerTaskFinished(bool, QString)));
-    connect(thread, SIGNAL(finished()), task, SLOT(deleteLater()));
-    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-    thread->start();
+bool BugreportPage::launchIssueTracker() {
+    QString reproSteps = mUi->bug_reproStepsTextEdit->toPlainText();
+    reproSteps.truncate(2000);
+    mReportingFields.reproSteps = reproSteps.toStdString();
+    // launch the issue tracker in a separate thread
+    std::string bugTemplate = StringFormat(
+            BUG_REPORT_TEMPLATE, mReportingFields.emulatorVer,
+            mReportingFields.hypervisorVer, mReportingFields.sdkToolsVer,
+            mReportingFields.hostOsName, trim(mReportingFields.cpuModel),
+            mReportingFields.reproSteps);
+    std::string unEncodedUrl =
+            Uri::FormatEncodeArguments(FILE_BUG_URL, bugTemplate);
+    QUrl url(QString::fromStdString(unEncodedUrl));
+    return url.isValid() && QDesktopServices::openUrl(url);
 }
 
 void BugreportPage::loadAdbBugreport() {
     // Avoid generating adb bugreport multiple times while in execution.
-    if (mBugReportServices->isBugReportInFlight())
+    if (mAdbBugreport && mAdbBugreport->inFlight())
         return;
+
     mSavingStates.adbBugreportSucceed = false;
-    SettingsTheme theme = getSelectedTheme();
-    setButtonEnabled(mUi->bug_sendToGoogle, theme, false);
-    setButtonEnabled(mUi->bug_saveButton, theme, false);
+    enableInput(false);
     mUi->bug_circularSpinner->show();
     mUi->bug_collectingLabel->show();
-    mBugReportServices->generateBugReport(
-            System::get()->getTempDir(),
-            [this, theme](AdbBugReportServices::Result result,
-                          StringView filePath) {
+    auto filePath = PathUtils::join(System::get()->getTempDir(),
+                                    generateUniqueBugreportName());
+    // In reference to
+    // platform/frameworks/native/cmds/dumpstate/bugreport-format.md
+    // Issue different command args given the API level
 
-                setButtonEnabled(mUi->bug_sendToGoogle, theme, true);
-                setButtonEnabled(mUi->bug_saveButton, theme, true);
-                mUi->bug_circularSpinner->hide();
-                mUi->bug_collectingLabel->hide();
-                if (System::get()->pathIsFile(
-                            mSavingStates.adbBugreportFilePath)) {
-                    System::get()->deleteFile(mSavingStates.adbBugreportFilePath);
-                    mSavingStates.adbBugreportFilePath.clear();
+    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
+    bool isNougatOrHigher =
+            (apiLevel != kDefaultUnknownAPILevel && apiLevel > 23);
+    if (apiLevel == kDefaultUnknownAPILevel &&
+        avdInfo_isMarshmallowOrHigher(android_avdInfo)) {
+        isNougatOrHigher = true;
+    }
+
+    if (isNougatOrHigher)
+        filePath.append(".zip");
+    else
+        filePath.append(".txt");
+
+    bool wantOutput = !isNougatOrHigher;
+
+    mAdbBugreport = mAdb->runAdbCommand(
+            (isNougatOrHigher) ? std::vector<std::string>{"bugreport", filePath}
+                               : std::vector<std::string>{"bugreport"},
+            [this, filePath,
+             wantOutput](const OptionalAdbCommandResult& result) {
+                mAdbBugreport.reset();
+                if (!result || result->exit_code) {
+                    adbBugreportCallback(false, nullptr);
                 }
-                if (result == AdbBugReportServices::Result::Success &&
-                    System::get()->pathIsFile(filePath) &&
-                    System::get()->pathCanRead(filePath)) {
-                    mSavingStates.adbBugreportSucceed = true;
-                    mSavingStates.adbBugreportFilePath = filePath;
-                } else {
-                    // TODO(wdu) Better error handling for failed adb bugreport
-                    // generation
-                    showErrorDialog(tr("Bug report interrupted by snapshot load? "
-                                       "There was an error while generating "
-                                       "adb bugreport"),
-                                    tr("Bugreport"));
+                if (wantOutput) {
+                    std::ofstream outFile(
+                            filePath.c_str(),
+                            std::ios_base::out | std::ios_base::trunc);
+                    if (!result->output || !outFile.is_open() ||
+                        !outFile.good()) {
+                        adbBugreportCallback(false, nullptr);
+                    } else {
+                        auto buf = result->output->rdbuf();
+                        outFile << buf;
+                        outFile.close();
+                    }
                 }
-            });
+                adbBugreportCallback(true, filePath);
+            },
+            kAdbCommandTimeoutMs, wantOutput);
+}
+
+void BugreportPage::adbBugreportCallback(bool success, StringView filePath) {
+    enableInput(true);
+    mUi->bug_circularSpinner->hide();
+    mUi->bug_collectingLabel->hide();
+    if (System::get()->pathIsFile(mSavingStates.adbBugreportFilePath)) {
+        System::get()->deleteFile(mSavingStates.adbBugreportFilePath);
+        mSavingStates.adbBugreportFilePath.clear();
+    }
+    if (success && System::get()->pathIsFile(filePath) &&
+        System::get()->pathCanRead(filePath)) {
+        mSavingStates.adbBugreportSucceed = true;
+        mSavingStates.adbBugreportFilePath = filePath;
+    } else {
+        // TODO(wdu) Better error handling for failed adb bugreport
+        // generation
+        showErrorDialog(tr("Bug report interrupted by snapshot load? "
+                           "There was an error while generating "
+                           "adb bugreport"),
+                        tr("Bugreport"));
+    }
 }
 
 void BugreportPage::loadAdbLogcat() {
     // Avoid generating adb logcat multiple times while in execution.
-    if (mBugReportServices->isLogcatInFlight()) {
+    if (mAdbLogcat && mAdbLogcat->inFlight()) {
         return;
     }
-    mBugReportServices->generateAdbLogcatInMemory(
-            [this](AdbBugReportServices::Result result, StringView output) {
-                if (result == AdbBugReportServices::Result::Success) {
+    // After apiLevel 19, buffer "all" become available
+    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
+    mAdbLogcat = mAdb->runAdbCommand(
+            (apiLevel != kDefaultUnknownAPILevel && apiLevel > 19)
+                    ? std::vector<std::string>{"logcat", "-b", "all", "-d"}
+                    : std::vector<std::string>{"logcat", "-b", "events", "-b",
+                                               "main", "-b", "radio", "-b",
+                                               "system", "-d"},
+            [this](const OptionalAdbCommandResult& result) {
+                mAdbLogcat.reset();
+                if (!result || result->exit_code || !result->output) {
                     mUi->bug_bugReportTextEdit->setPlainText(
-                            QString::fromStdString(output));
+                            tr("There was an error while loading adb logcat"));
                 } else {
-                    // TODO(wdu) Better error handling for failed adb logcat
-                    // generation
+                    std::string s(
+                            std::istreambuf_iterator<char>(*result->output),
+                            {});
                     mUi->bug_bugReportTextEdit->setPlainText(
-                            tr("There was an error while loading adb logact"));
+                            QString::fromStdString(s));
                 }
-            });
+            },
+            kAdbCommandTimeoutMs, true);
 }
 
 void BugreportPage::loadAvdDetails() {
@@ -488,84 +539,12 @@ bool BugreportPage::eventFilter(QObject* object, QEvent* event) {
     return true;
 }
 
-BugReportFolderSavingTask::BugReportFolderSavingTask(
-        std::string savingPath,
-        std::string adbBugreportFilePath,
-        std::string screenshotFilePath,
-        std::string avdDetails,
-        std::string reproSteps,
-        bool openIssueTracker)
-    : mSavingPath(std::move(savingPath)),
-      mAdbBugreportFilePath(std::move(adbBugreportFilePath)),
-      mScreenshotFilePath(std::move(screenshotFilePath)),
-      mAvdDetails(std::move(avdDetails)),
-      mReproSteps(std::move(reproSteps)),
-      mOpenIssueTracker(openIssueTracker) {}
-
-void BugReportFolderSavingTask::run() {
-    emit started();
-    if (mSavingPath.empty()) {
-        emit(finished(false, Q_NULLPTR, mOpenIssueTracker));
-    }
-
-    QString dirName = QString::fromStdString(mSavingPath);
-    if (path_mkdir_if_needed(mSavingPath.c_str(), 0755)) {
-        emit(finished(false, dirName, mOpenIssueTracker));
-        return;
-    }
-
-    if (!mAdbBugreportFilePath.empty()) {
-        StringView bugreportBaseName;
-        if (PathUtils::extension(mAdbBugreportFilePath) == ".zip") {
-            bugreportBaseName = "bugreport.zip";
-        } else {
-            bugreportBaseName = "bugreport.txt";
-        }
-        path_copy_file(PathUtils::join(mSavingPath, bugreportBaseName).c_str(),
-                       mAdbBugreportFilePath.c_str());
-    }
-
-    if (!mScreenshotFilePath.empty()) {
-        StringView screenshotBaseName = "screenshot.png";
-        path_copy_file(PathUtils::join(mSavingPath, screenshotBaseName).c_str(),
-                       mScreenshotFilePath.c_str());
-    }
-
-    if (!mAvdDetails.empty()) {
-        auto avdDetailsFilePath =
-                PathUtils::join(mSavingPath, "avd_details.txt");
-        std::ofstream outFile(avdDetailsFilePath.c_str(),
-                              std::ios_base::out | std::ios_base::trunc);
-        outFile << mAvdDetails << std::endl;
-    }
-
-    if (!mReproSteps.empty()) {
-        auto reproStepsFilePath =
-                PathUtils::join(mSavingPath, "repro_steps.txt");
-        std::ofstream outFile(reproStepsFilePath.c_str(),
-                              std::ios_base::out | std::ios_base::trunc);
-        outFile << mReproSteps << std::endl;
-    }
-
-    emit(finished(true, dirName, mOpenIssueTracker));
-}
-
-IssueTrackerTask::IssueTrackerTask(
-        BugreportPage::ReportingFields reportingFields)
-    : mReportingFields(reportingFields) {}
-
-void IssueTrackerTask::run() {
-    std::string bugTemplate = StringFormat(
-            BUG_REPORT_TEMPLATE, mReportingFields.emulatorVer,
-            mReportingFields.hypervisorVer, mReportingFields.sdkToolsVer,
-            mReportingFields.hostOsName, trim(mReportingFields.cpuModel),
-            mReportingFields.reproSteps);
-    std::string unEncodedUrl =
-            Uri::FormatEncodeArguments(FILE_BUG_URL, bugTemplate);
-    QUrl url(QString::fromStdString(unEncodedUrl));
-    if (!url.isValid() || !QDesktopServices::openUrl(url)) {
-        emit finished(false, Q_NULLPTR);
-    } else {
-        emit finished(true, url.errorString());
-    }
+std::string BugreportPage::generateUniqueBugreportName() {
+    const char* deviceName = avdInfo_getName(android_avdInfo);
+    time_t now = System::get()->getUnixTime();
+    char date[80];
+    strftime(date, sizeof(date), "%Y-%m-%d-%H-%M-%S", localtime(&now));
+    return StringFormat("bugreport-%s-%s-%s",
+                        deviceName ? deviceName : "UNKNOWN_DEVICE", date,
+                        Uuid::generate().toString());
 }

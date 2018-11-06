@@ -1907,3 +1907,7 @@ void avdInfo_replaceDataPartitionSizeInConfigIni(AvdInfo* i, int64_t sizeBytes) 
     char*  iniPath = _avdInfo_getContentFilePath(i, CORE_CONFIG_INI);
     iniFile_saveToFile(i->configIni, iniPath);
 }
+
+bool avdInfo_isMarshmallowOrHigher(AvdInfo* i) {
+    return i->isMarshmallowOrHigher;
+}
