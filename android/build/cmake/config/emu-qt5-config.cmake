@@ -45,7 +45,7 @@ set(QT5_FOUND TRUE)
 
 if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib)
-  set(QT5_SHARED_DEPENDENCIES ${PREBUILT_ROOT}/plugins>>lib64/qt/;${PREBUILT_ROOT}/lib>>lib64/qt/)
+  set(QT5_SHARED_DEPENDENCIES ${PREBUILT_ROOT}/plugins/*>>lib64/qt/plugins;${PREBUILT_ROOT}/lib/*.dylib>>lib64/qt/lib)
   # Note: this will only set the property for install targets, not during build.
   set(
     QT5_SHARED_PROPERTIES
@@ -55,16 +55,16 @@ if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
     # Clang/VS doesn't support linking directly to dlls. We linking to the import libraries
     # instead (.lib).
     set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib)
-    set(QT5_SHARED_DEPENDENCIES ${PREBUILT_ROOT}/plugins>>lib64/qt/;${PREBUILT_ROOT}/lib>>lib64/qt/)
+    set(QT5_SHARED_DEPENDENCIES ${PREBUILT_ROOT}/plugins/*>>lib64/qt/plugins;${PREBUILT_ROOT}/lib/*>>lib64/qt/lib)
 elseif(ANDROID_TARGET_TAG MATCHES "windows-x86.*")
   # On Windows, linking to mingw32 is required. The library is provided by the toolchain, and depends on a main()
   # function provided by qtmain which itself depends on qMain(). These must appear iemulator-libui_unittestsn LDFLAGS and not LDLIBS since
   # qMain() is provided by object/libraries that appear after these in the link command-line.
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/bin -lmingw32 ${PREBUILT_ROOT}/lib/libqtmain.a)
-  set(QT5_SHARED_DEPENDENCIES ${PREBUILT_ROOT}/plugins>>lib64/qt/;${PREBUILT_ROOT}/bin/*dll>>lib64/qt/lib)
+  set(QT5_SHARED_DEPENDENCIES ${PREBUILT_ROOT}/plugins/*>>lib64/qt/;${PREBUILT_ROOT}/bin/*dll>>lib64/qt/lib)
 elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
-  set(QT5_SHARED_DEPENDENCIES ${PREBUILT_ROOT}/plugins>>lib64/qt/;${PREBUILT_ROOT}/lib>>lib64/qt/)
+  set(QT5_SHARED_DEPENDENCIES ${PREBUILT_ROOT}/plugins/*>>lib64/qt/plugins;${PREBUILT_ROOT}/lib/*>>lib64/qt/lib)
   set(QT5_SHARED_PROPERTIES "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/lib';LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/lib/plugins'")
 endif()
 
