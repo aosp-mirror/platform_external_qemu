@@ -69,7 +69,15 @@ if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
       ${PREBUILT_ROOT}/plugins/imageformats/libqtga.dylib>lib64/qt/plugins/imageformats/libqtga.dylib;
       ${PREBUILT_ROOT}/plugins/imageformats/libqtiff.dylib>lib64/qt/plugins/imageformats/libqtiff.dylib;
       ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp.dylib>lib64/qt/plugins/imageformats/libqwbmp.dylib;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqwebp.dylib>lib64/qt/plugins/imageformats/libqwebp.dylib)
+      ${PREBUILT_ROOT}/plugins/imageformats/libqwebp.dylib>lib64/qt/plugins/imageformats/libqwebp.dylib
+      # Let's add the webengine dependencies
+      ${PREBUILT_ROOT}/translations/qtwebengine_locales/*pak>>lib64/qt/libexec/qtwebengine_locales;
+      ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/libexec/qtwebengine_devtools_resources.pak;
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/libexec/qtwebengine_resources.pak;
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/libexec/qtwebengine_resources_100p.pak;
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/libexec/qtwebengine_resources_200p.pak;
+      ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/libexec/icudtl.dat;
+      ${PREBUILT_ROOT}/libexec/QtWebEngineProcess>lib64/qt/libexec/QtWebEngineProcess;)
 
   # Note: this will only set the property for install targets, not during build.
   set(
@@ -95,7 +103,10 @@ elseif(ANDROID_TARGET_OS STREQUAL "windows_msvc")
       ${PREBUILT_ROOT}/plugins/imageformats/qtga.dll>lib64/qt//qt/plugins/imageformats/qtga.dll;
       ${PREBUILT_ROOT}/plugins/imageformats/qtiff.dll>lib64/qt//qt/plugins/imageformats/qtiff.dll;
       ${PREBUILT_ROOT}/plugins/imageformats/qwbmp.dll>lib64/qt//qt/plugins/imageformats/qwbmp.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qwebp.dll>lib64/qt//qt/plugins/imageformats/qwebp.dll;)
+      ${PREBUILT_ROOT}/plugins/imageformats/qwebp.dll>lib64/qt//qt/plugins/imageformats/qwebp.dll;
+      # Let's add the webengine dependencies, (Note we only have the executable available)
+      ${PREBUILT_ROOT}/bin/QtWebEngineProcess.exe>lib64/qt/libexec/QtWebEngineProcess.exe;)
+)
 elseif(ANDROID_TARGET_TAG MATCHES "windows-x86.*")
   # On Windows, linking to mingw32 is required. The library is provided by the toolchain, and depends on a main()
   # function provided by qtmain which itself depends on qMain(). These must appear iemulator-libui_unittestsn LDFLAGS
@@ -141,7 +152,16 @@ elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
     ${PREBUILT_ROOT}/plugins/imageformats/libqsvg.so>lib64/qt//plugins/imageformats/libqsvg.so;
     ${PREBUILT_ROOT}/plugins/imageformats/libqtga.so>lib64/qt//plugins/imageformats/libqtga.so;
     ${PREBUILT_ROOT}/plugins/imageformats/libqtiff.so>lib64/qt//plugins/imageformats/libqtiff.so;
-    ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp.so>lib64/qt//plugins/imageformats/libqwbmp.so)
+    ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp.so>lib64/qt//plugins/imageformats/libqwbmp.so
+    # Let's add the webengine dependencies
+    ${PREBUILT_ROOT}/translations/qtwebengine_locales/*pak>>lib64/qt/libexec/qtwebengine_locales;
+    ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/libexec/qtwebengine_devtools_resources.pak;
+    ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/libexec/qtwebengine_resources.pak;
+    ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/libexec/qtwebengine_resources_100p.pak;
+    ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/libexec/qtwebengine_resources_200p.pak;
+    ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/libexec/icudtl.dat;
+    ${PREBUILT_ROOT}/libexec/QtWebEngineProcess>lib64/qt/libexec/QtWebEngineProcess;)
+
   set(QT5_SHARED_PROPERTIES
       "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/lib';LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/lib/plugins'")
 endif()
