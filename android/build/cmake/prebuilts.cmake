@@ -11,7 +11,10 @@
 
 # This contains a set of definitions to make working with prebuilts easier and manageable.
 
-set(PREBUILT_COMMON "BLUEZ;LZ4;X264")
+set(PREBUILT_COMMON "BLUEZ;LZ4")
+if (NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
+  list(APPEND PREBUILT_COMMON "X264")
+endif()
 
 function(android_add_prebuilt_library PKG MODULE LOCATION INCLUDES DEFINTIONS)
   if(NOT TARGET ${PKG}::${MODULE})

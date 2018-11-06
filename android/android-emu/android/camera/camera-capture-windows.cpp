@@ -67,7 +67,6 @@ static constexpr GUID MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID = {
         0x4ae7,
         0x42d8,
         {0x99, 0xe0, 0x0a, 0x60, 0x13, 0xee, 0xf9, 0x0f}};
-#endif  // !_MSC_VER
 
 // Note: These are only available on Win8 and above.
 static constexpr GUID MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING = {
@@ -80,6 +79,7 @@ static constexpr GUID CLSID_VideoProcessorMFT = {
         0x5b24,
         0x49bd,
         {0xb2, 0xe7, 0xc, 0x44, 0x5c, 0x78, 0xc9, 0x82}};
+#endif  // !_MSC_VER
 
 static constexpr GUID kGuidNull = {};
 static constexpr uint32_t kMaxRetries = 30;

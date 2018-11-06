@@ -247,6 +247,10 @@ target_link_libraries(emulator-libui
 # gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug. This implies a direct dependency to
 # libX11.so
 android_target_link_libraries(emulator-libui linux-x86_64 PRIVATE -lX11)
+# Windows-msvc specific dependencies. Need these for posix support.
+android_target_link_libraries(emulator-libui windows_msvc PUBLIC
+        msvc-posix-compat
+        dirent-win32)
 
 set(emulator-libui_unittests_src
     android/skin/keycode_unittest.cpp
