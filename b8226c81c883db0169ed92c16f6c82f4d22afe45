@@ -16,6 +16,24 @@
       "revId": "b8226c81c883db0169ed92c16f6c82f4d22afe45",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "78ede9e6_0bf93f3e",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-06T05:52:53Z",
+      "side": 1,
+      "message": "everything we write in aosp unless it is internal to qemu and upstreamable there",
+      "parentUuid": "803daaa3_62ad9ede",
+      "revId": "b8226c81c883db0169ed92c16f6c82f4d22afe45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
