@@ -3,17 +3,9 @@ prebuilt(VULKAN)
 
 # Adds the proper graphic driver dependencies to the given target.
 function(add_opengl_dependencies TGT)
-
-  # Copying of the shared lib is usually a nop for most code generators however some (like Xcode) like to place them in
-  # their own spot, so we must make sure to copy them over.
-  android_copy_shared_lib(${TGT} EGL_translator lib64EGL_translator)
-  android_copy_shared_lib(${TGT} GLES_V2_translator lib64GLES_V2_translator)
-  android_copy_shared_lib(${TGT} GLES_CM_translator lib64GLES_CM_translator)
-  android_copy_shared_lib(${TGT} GLES12Translator lib64GLES12Translator)
-  android_copy_shared_lib(${TGT} OpenglRender lib64OpenglRender)
-
   # And setup the depedencies
-  android_target_dependency(${TGT} all "${SWIFTSHADER_DEPENDENCIES};${VULKAN_TEST_DEPENDENCIES}")
+  android_target_dependency(${TGT} all SWIFTSHADER_DEPENDENCIES)
+  android_target_dependency(${TGT} all VULKAN_TEST_DEPENDENCIES)
   android_target_properties(${TGT} linux-x86_64 "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
   android_target_properties(${TGT} darwin-x86_64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
 endfunction()
