@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "53e14c8c_68c137b9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-06T18:47:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5e377556_2f9d43e6",
+      "revId": "8cd4914a9af9f96937fc00dbf91e1adcbb7e447e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "088ef43c_25c9e0db",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
         "patchSetId": 17
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "4e879462_24f42194",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-06T18:47:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "088ef43c_25c9e0db",
+      "revId": "8cd4914a9af9f96937fc00dbf91e1adcbb7e447e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aae34ae4_e6869fdb",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.h",
         "patchSetId": 17
@@ -50,6 +86,24 @@
       "revId": "8cd4914a9af9f96937fc00dbf91e1adcbb7e447e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7ef97e0c_c322d708",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-06T18:47:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aae34ae4_e6869fdb",
+      "revId": "8cd4914a9af9f96937fc00dbf91e1adcbb7e447e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

@@ -143,6 +143,24 @@
     },
     {
       "key": {
+        "uuid": "1a918141_6beb3f5d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-06T18:47:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eea63d53_c8038b59",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "10869495_5107d566",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
         "patchSetId": 16
@@ -295,6 +313,24 @@
       "side": 1,
       "message": "Ah got it. Not too familiar with QThreads (we usually use android::base::Thread here, and in this particular case it seems well suited for android::base::WorkerThread (see m_postThread in FrameBuffer.cpp for a usage example).",
       "parentUuid": "8f84a9c3_cacb900e",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bca38b0d_2eb8f261",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-06T18:47:49Z",
+      "side": 1,
+      "message": "I\u0027m not sure that WorkerThread is entirely appropriate, since it seems to expect input data (while, in my case, the thread independently reads data for itself). FunctorThread might be a bit more appropriate, but getting the separate thread to send data to the main thread is something that isn\u0027t entirely obvious, but is something that QThreads makes really simple (i.e. I can just emit the desired image through a signal to communicate), which is why I\u0027m using one.",
+      "parentUuid": "50ed30d5_378e523c",
       "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
