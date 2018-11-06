@@ -64,7 +64,6 @@ set(android-emu-common
     android/emulation/control/FilePusher.cpp
     android/emulation/control/GooglePlayServices.cpp
     android/emulation/control/LineConsumer.cpp
-    android/emulation/control/AdbBugReportServices.cpp
     android/emulation/CpuAccelerator.cpp
     android/emulation/DmaMap.cpp
     android/emulation/GoldfishDma.cpp

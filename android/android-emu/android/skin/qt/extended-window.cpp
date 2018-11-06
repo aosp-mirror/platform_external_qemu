@@ -60,7 +60,8 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->microphonePage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->settingsPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
-    mExtendedUi->bugreportPage->initialize(mEmulatorWindow);
+    mExtendedUi->bugreportPage->setAdbInterface(
+            mEmulatorWindow->getAdbInterface());
 
     connect(
         mExtendedUi->settingsPage, SIGNAL(frameAlwaysChanged(bool)),
