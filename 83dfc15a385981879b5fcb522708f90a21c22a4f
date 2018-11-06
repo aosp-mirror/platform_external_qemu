@@ -67,6 +67,24 @@
       "revId": "83dfc15a385981879b5fcb522708f90a21c22a4f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0176534e_d38ea3c8",
+        "filename": "android/build/cmake/android.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-06T02:37:57Z",
+      "side": 1,
+      "message": "could the (DEFINED ${name}_windows_src) term help differentiate them?",
+      "parentUuid": "03140942_24469e56",
+      "revId": "83dfc15a385981879b5fcb522708f90a21c22a4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
