@@ -345,7 +345,10 @@ configure: ;
 
 $(call set-vpath, $(SRC_PATH))
 
-LIBS+=-lm -lz $(LIBS_TOOLS)
+ifndef CONFIG_MSVC
+LIBS+=-lm
+endif
+LIBS+=-lz $(LIBS_TOOLS)
 
 HELPERS-$(CONFIG_LINUX) = qemu-bridge-helper$(EXESUF)
 
