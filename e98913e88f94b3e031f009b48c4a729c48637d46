@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0e65e39a_0c7cd9e0",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-11-06T18:58:59Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "da973e83_80c17c7b",
+      "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3d025b7c_336702ef",
         "filename": "android/android-emu/android/emulation/CrossSessionSocket.cpp",
         "patchSetId": 3
@@ -33,6 +51,24 @@
       "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f423100d_3d7f3797",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-11-06T18:58:59Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "3d025b7c_336702ef",
+      "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -76,6 +112,30 @@
     },
     {
       "key": {
+        "uuid": "a886e0f4_eb941e11",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-11-06T18:58:59Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "2585bc88_17086cca",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 29
+      },
+      "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "be68524f_f95ae289",
         "filename": "android/android-emu/android/emulation/CrossSessionSocket.cpp",
         "patchSetId": 3
@@ -90,6 +150,24 @@
       "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "25618d2c_9f0309ee",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-11-06T18:58:59Z",
+      "side": 1,
+      "message": "No we don\u0027t. If it is registered once the emulator snapshot load might need it again so we keep it there for the whole emulator run.",
+      "parentUuid": "be68524f_f95ae289",
+      "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -110,6 +188,24 @@
     },
     {
       "key": {
+        "uuid": "41c194b2_e61b0c57",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-11-06T18:58:59Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "05d455fa_0c31f54e",
+      "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7b328388_7d09d795",
         "filename": "android/android-emu/android/emulation/CrossSessionSocket.h",
         "patchSetId": 3
@@ -127,6 +223,24 @@
     },
     {
       "key": {
+        "uuid": "a34f0caf_944211b1",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-11-06T18:58:59Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "7b328388_7d09d795",
+      "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16295be0_27887a2b",
         "filename": "android/android-emu/android/emulation/CrossSessionSocket.h",
         "patchSetId": 3
@@ -141,6 +255,24 @@
       "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f841d600_91d99d41",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-11-06T18:58:59Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "16295be0_27887a2b",
+      "revId": "e98913e88f94b3e031f009b48c4a729c48637d46",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
