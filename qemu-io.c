@@ -8,9 +8,15 @@
  * See the COPYING file in the top-level directory.
  */
 
+#ifdef _MSC_VER
+#define USE_QEMU_GETOPT
+#endif
+
 #include "qemu/osdep.h"
+#ifndef _MSC_VER
 #include <getopt.h>
 #include <libgen.h>
+#endif
 #ifndef _WIN32
 #include <termios.h>
 #endif
