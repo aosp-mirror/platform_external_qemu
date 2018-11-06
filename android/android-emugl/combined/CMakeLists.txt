@@ -44,11 +44,11 @@ target_include_directories(emugl_combined_unittests PRIVATE
 
 # These are usually nops, but some code generators will not automatically binplace these (Xcode!)
 # So let's just guarantee that it gets properly binplaced
-android_copy_shared_lib(emugl_combined_unittests EGL_translator lib64EGL_translator)
-android_copy_shared_lib(emugl_combined_unittests GLES_V2_translator lib64GLES_V2_translator)
-android_copy_shared_lib(emugl_combined_unittests GLES_CM_translator lib64GLES_CM_translator)
-android_copy_shared_lib(emugl_combined_unittests GLES12Translator lib64GLES12Translator)
-android_copy_shared_lib(emugl_combined_unittests OpenglRender lib64OpenglRender)
+android_copy_shared_lib(emugl_combined_unittests EGL_translator EGL_translator)
+android_copy_shared_lib(emugl_combined_unittests GLES_V2_translator GLES_V2_translator)
+android_copy_shared_lib(emugl_combined_unittests GLES_CM_translator GLES_CM_translator)
+android_copy_shared_lib(emugl_combined_unittests GLES12Translator GLES12Translator)
+android_copy_shared_lib(emugl_combined_unittests OpenglRender OpenglRender)
 android_copy_shared_lib(emugl_combined_unittests gralloc.ranchu gralloc.ranchu)
 android_copy_shared_lib(emugl_combined_unittests gralloc.goldfish gralloc.goldfish)
 

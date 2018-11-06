@@ -18,5 +18,3 @@ target_link_libraries(GLES_V2_translator
                               android-emu
                               ANGLE::ANGLE)
 target_link_libraries(GLES_V2_translator PRIVATE emugl_base)
-# TODO: We are not consistent with our prefix naming..
-set_target_properties(GLES_V2_translator PROPERTIES PREFIX "lib64")
