@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "803daaa3_62ad9ede",
+        "filename": "android/android-emu/android/base/AlignedBuf.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-11-06T04:57:44Z",
+      "side": 1,
+      "message": "Just curious. Which files should be licensed under Apache and which should be licensed under GPL?",
+      "revId": "b8226c81c883db0169ed92c16f6c82f4d22afe45",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
