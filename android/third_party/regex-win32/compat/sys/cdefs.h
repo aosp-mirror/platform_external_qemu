@@ -11,4 +11,8 @@ extern int reallocarr(void *ptr, size_t number, size_t size);
 #define strlcpy  __regex_strlcpy
 extern size_t strlcpy(char *dst, const char *src, size_t dsize);
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include_next <sys/cdefs.h>
+#endif

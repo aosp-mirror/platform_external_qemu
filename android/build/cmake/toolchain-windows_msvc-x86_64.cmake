@@ -30,6 +30,8 @@ get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../.
 
 # Cmake goes crazy if we set AR manually.. so let's not do that.
 toolchain_generate("${ANDROID_TARGET_TAG}")
+# need to set ar to llvm-ar to unpack windows static libs
+set(CMAKE_AR ${COMPILER_PREFIX}ar)
 
 # here is the target environment located, used to
 # locate packages. We don't want to do any package resolution
