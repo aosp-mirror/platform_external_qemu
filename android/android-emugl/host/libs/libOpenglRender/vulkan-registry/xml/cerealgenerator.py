@@ -148,7 +148,7 @@ LOCAL_CFLAGS += \\
     -DVK_USE_PLATFORM_ANDROID_KHR \\
     -DVK_NO_PROTOTYPES \\
 
-LOCAL_SRC_FILES := VulkanStream.cpp \\
+LOCAL_SRC_FILES := VulkanStream.cpp HandleWrappers.cpp \\
     %s
 
 $(call emugl-end-module)
