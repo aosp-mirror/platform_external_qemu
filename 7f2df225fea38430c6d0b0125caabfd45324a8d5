@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "831b9653_4ce8c302",
+        "filename": "android/android-emu/android/base/AlignedBuf_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-06T06:05:21Z",
+      "side": 1,
+      "message": "Since it is C++, maybe reinterpret_cast?",
+      "range": {
+        "startLine": 161,
+        "startChar": 24,
+        "endLine": 161,
+        "endChar": 35
+      },
+      "revId": "7f2df225fea38430c6d0b0125caabfd45324a8d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
