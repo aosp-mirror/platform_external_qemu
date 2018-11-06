@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "f9111cf2_bafbe81c",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-11-06T21:46:29Z",
+      "side": 1,
+      "message": "The msvc C++ headers are using Run-Time Type Information, so we have no choice but to enable it. https://developercommunity.visualstudio.com/content/problem/1029/error-in-header-memory-with-clang-with-microsoft-c.html",
+      "parentUuid": "a88d159d_758cbb88",
+      "revId": "83dfc15a385981879b5fcb522708f90a21c22a4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "94daf413_43a75ffd",
         "filename": "android/CMakeLists.txt",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "fc60dae7_8aef7d60",
+        "filename": "android/CMakeLists.txt",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-11-06T21:46:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "94daf413_43a75ffd",
+      "revId": "83dfc15a385981879b5fcb522708f90a21c22a4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "124ad92c_8822ffb4",
         "filename": "android/android-emu/android-emu-base.cmake",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2018-11-05T23:35:22Z",
       "side": 1,
       "message": "These can be private, unless includes directories (-Ixxx) and definitions (-Dxxx) need to propagate.",
+      "revId": "83dfc15a385981879b5fcb522708f90a21c22a4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9e4bc07b_65186ccf",
+        "filename": "android/android-emu/android-emu-base.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-11-06T21:46:29Z",
+      "side": 1,
+      "message": "The includes need to propagate as some headers from android-emu-base are including msvc-posix.h.",
+      "parentUuid": "124ad92c_8822ffb4",
       "revId": "83dfc15a385981879b5fcb522708f90a21c22a4f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -82,6 +136,24 @@
       "side": 1,
       "message": "could the (DEFINED ${name}_windows_src) term help differentiate them?",
       "parentUuid": "03140942_24469e56",
+      "revId": "83dfc15a385981879b5fcb522708f90a21c22a4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "043b1a13_38fa217a",
+        "filename": "android/build/cmake/android.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-11-06T21:46:29Z",
+      "side": 1,
+      "message": "I put this here because I only wanted the msvc-posix-compat library pull in the srcs if we were doing a msvc build, not mingw. \n\nContents of msvc-posix-compat/CMakeLists.txt:\n\nset(msvc-posix-compat_windows_msvc_src\n        src/msvc-posix.c\n        src/getopt.c\n        src/gettimeofday.c)\nandroid_add_library(msvc-posix-compat)\nandroid_target_include_directories(msvc-posix-compat windows_msvc PUBLIC include/)\n\nSo it will only include the files for windows_msvc build. I can also just check the tag myself in the CMakeLists.txt and remove this change. What do you think?",
+      "parentUuid": "0176534e_d38ea3c8",
       "revId": "83dfc15a385981879b5fcb522708f90a21c22a4f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
