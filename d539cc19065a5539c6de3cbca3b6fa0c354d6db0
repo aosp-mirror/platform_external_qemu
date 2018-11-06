@@ -334,6 +334,24 @@
       "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "50f2256c_26da60a1",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-06T21:13:47Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "bca38b0d_2eb8f261",
+      "revId": "d539cc19065a5539c6de3cbca3b6fa0c354d6db0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
