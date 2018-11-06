@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "64a55098_6e93564d",
+        "filename": "android/android-emu/android/darwinn/MockDarwinnDriverFactory.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-11-06T23:15:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "47ce384d_d9ba170c",
+      "revId": "1a978c76f09fdcfd86d3cf6c66986447cb974a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d1a3a3f4_5a39fca9",
         "filename": "android/android-emu/android/darwinn/darwinn.cmake",
         "patchSetId": 10
@@ -33,6 +51,24 @@
       "revId": "1a978c76f09fdcfd86d3cf6c66986447cb974a80",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "efae93e5_37b6d3b3",
+        "filename": "android/android-emu/android/darwinn/darwinn.cmake",
+        "patchSetId": 10
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-11-06T23:15:43Z",
+      "side": 1,
+      "message": "I had considered this initially, but discarded it as all the tests were together. I tried linking to android-emu but I get some weird dependencies not found error from AndroidAsyncMessagePipe.cpp which does seem to be a part of the sources for android-emu. To get this to build, I strangely seem to have to append android-emu_unittests_src as well. Will leave this as is for now.",
+      "parentUuid": "d1a3a3f4_5a39fca9",
+      "revId": "1a978c76f09fdcfd86d3cf6c66986447cb974a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
