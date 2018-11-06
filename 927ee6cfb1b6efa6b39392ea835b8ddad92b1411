@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "7ac994e1_5772e787",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-11-06T21:40:13Z",
+      "side": 1,
+      "message": "This checking for unregistered sockets. It doesn\u0027t really test any fd open or stuff. Let me rename the test.",
+      "parentUuid": "d3c9d445_58a80d8d",
+      "revId": "927ee6cfb1b6efa6b39392ea835b8ddad92b1411",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a7393577_9b8ed742",
         "filename": "android/android-emu/android/emulation/CrossSessionSocket_unittest.cpp",
         "patchSetId": 7
@@ -47,6 +65,24 @@
       "writtenOn": "2018-11-06T21:10:59Z",
       "side": 1,
       "message": "nit: Add comment explaining what kinds of buffer overruns we might expect here?\n\nIt\u0027s also ok for the test itself to segfault or abort if the code is wrong, esp. in asan build.",
+      "revId": "927ee6cfb1b6efa6b39392ea835b8ddad92b1411",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0250c67c_bc5f55d7",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-11-06T21:40:13Z",
+      "side": 1,
+      "message": "I will leave a comment. It is more like checking if there would be garbage after kContents",
+      "parentUuid": "a7393577_9b8ed742",
       "revId": "927ee6cfb1b6efa6b39392ea835b8ddad92b1411",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -73,6 +109,30 @@
       "revId": "927ee6cfb1b6efa6b39392ea835b8ddad92b1411",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e31d81f0_0507da39",
+        "filename": "android/android-emu/android/emulation/CrossSessionSocket_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-11-06T21:40:13Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "b52473c5_74e49cb3",
+      "range": {
+        "startLine": 104,
+        "startChar": 0,
+        "endLine": 105,
+        "endChar": 1
+      },
+      "revId": "927ee6cfb1b6efa6b39392ea835b8ddad92b1411",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
