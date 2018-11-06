@@ -107,7 +107,11 @@ add_cxx_flag("-Wno-invalid-offsetof")
 # space by using this flag. Note that exception handling uses the same information, but it will generate it as needed.
 # The  dynamic_cast operator can still be used for casts that do not require runtime type information, i.e. casts to
 # void * or to unambiguous base classes.
-add_cxx_flag("-fno-rtti")
+#
+# For msvc build, the msvc C++ headers are using RTTI features (typeid) so have cannot disable it.
+if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
+  add_cxx_flag("-fno-rtti")
+endif()
 
 # Compiling with -fno-exceptions disables exceptions support and uses the variant of C++ libraries without exceptions.
 # Use of try, catch, or throw results in an error message. Linking objects that have been compiled with -fno-exceptions
@@ -165,7 +169,9 @@ prebuilt(CURL)
 prebuilt(GLIB2)
 prebuilt(ZLIB)
 prebuilt(PIXMAN)
-prebuilt(VIRGLRENDERER)
+if (NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
+  prebuilt(VIRGLRENDERER)
+endif()
 prebuilt(TCMALLOC)
 prebuilt(OpenSSL)
 
@@ -203,10 +209,13 @@ target_include_directories(
 # any flags you set as not everyone is a compiler expert!
 target_compile_definitions(android-qemu-deps INTERFACE
                                    # Enable faster migration code when saving RAM to a snapshot
-                                   "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION"
+                                   "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION")
+if (NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
+    target_compile_definitions(android-qemu-deps INTERFACE
                                    # Enable VIRGL
-                                   "-DCONFIG_VIRGL"
-                           )
+                                   "-DCONFIG_VIRGL")
+endif()
+
 target_compile_options(android-qemu-deps INTERFACE "-Werror=implicit-function-declaration"
                                "-Wno-unused-function"
                                # Do not allow the compiler to assume the strictest aliasing rules
@@ -236,7 +245,12 @@ target_compile_options(android-qemu-deps INTERFACE "-Werror=implicit-function-de
                                "-fno-common")
 
 # Make sure we make our dependent libraries available.
-target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN ZLIB::ZLIB VIRGL::VIRGL)
+target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN ZLIB::ZLIB)
+
+if (NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
+    # no virglrenderer available for windows_msvc
+    target_link_libraries(android-qemu-deps INTERFACE VIRGL::VIRGL)
+endif()
 
 # We only support usb on mac/lin
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE USB::USB)
@@ -244,12 +258,26 @@ android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE USB::USB)
 
 
 # Now we add the normal android libs, so we can use them
-add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../googletest googletest)
+
 # Okay, google test is not happy under msvc
-if("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
-  # Don't include the custom TempDir function. It is for Android only.
-  target_compile_definitions(gtest PRIVATE -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
+if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
+  set(gtest_disable_pthreads ON CACHE BOOL "Disable uses of pthreads in gtest.")
+endif ()
+
+if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
+  # Including the top-level CMakeLists.txt file doesn't work because the Windows SDK
+  # library requires C++14 support. So let's just include this manually.
+  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../googletest/googlemock googlemock)
+else()
+  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../googletest googletest)
 endif()
+
+if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
+    # Don't include the custom TempDir function. It is for Android only.
+	target_compile_definitions(gtest PRIVATE
+            -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
+endif ()
+
 add_subdirectory(android)
 add_subdirectory(android-qemu2-glue)
 
@@ -281,8 +309,18 @@ set(ANDROID_QEMU_arm_STUBS_windows-x86 "hvf-stub.c;accel/stubs/hax-stub.c")
 set(ANDROID_QEMU_i386_STUBS_windows-x86 "hvf-stub.c;hw/i386/acpi-build.c;hw/i386/pc_piix.c")
 set(ANDROID_QEMU_arm_STUBS_windows-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
 set(ANDROID_QEMU_i386_STUBS_windows-x86_64 "hvf-stub.c;hw/i386/acpi-build.c;hw/i386/pc_piix.c")
+set(ANDROID_QEMU_arm_STUBS_windows_msvc-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
+set(ANDROID_QEMU_i386_STUBS_windows_msvc-x86_64 "hvf-stub.c;hw/i386/acpi-build.c;hw/i386/pc_piix.c")
 android_target_compile_options(android-qemu-deps
-                               windows
+                               windows_msvc
+                               INTERFACE
+                               "-Werror=implicit-function-declaration"
+                               "-mms-bitfields"
+                               "-Wno-unused-variable"
+                               "-mcx16"
+                               )
+android_target_compile_options(android-qemu-deps
+                               windows-x86
                                INTERFACE
                                "-Werror=implicit-function-declaration"
                                "-mms-bitfields"
