@@ -106,6 +106,21 @@ TEST(SocketUtils, socketGetPeerPort) {
     EXPECT_EQ(socketGetPort(s2.get()), socketGetPeerPort(s1.get()));
 }
 
+TEST(SocketUtils, socketFailedConnection) {
+    // Attempt to connect to a list of ports that are highly unlikely to be
+    // available. Just to be sure we'll attempt multiple different ports and
+    // only fail if all of them are indicated as successful.
+    bool atLeastOneFailed = false;
+    for (uint16_t port = 1; port < 1024; ++port) {
+        ScopedSocket s(socketTcp4LoopbackClient(port));
+        if (!s.valid()) {
+            atLeastOneFailed = true;
+            break;
+        }
+    }
+    ASSERT_TRUE(atLeastOneFailed);
+}
+
 #ifndef _WIN32
 namespace {
 
