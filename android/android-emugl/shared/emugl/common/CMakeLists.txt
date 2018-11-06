@@ -16,8 +16,6 @@ target_include_directories(emugl_common PRIVATE ${ANDROID_EMUGL_DIR}/host/includ
 
 set(emugl_test_shared_library_src testing/test_shared_library.cpp)
 android_add_shared_library(emugl_test_shared_library)
-# TODO: We are not consistent with our prefix naming..
-set_target_properties(emugl_test_shared_library PROPERTIES PREFIX "lib64")
 
 set(emugl_common_host_unittests_src shared_library_unittest.cpp stringparsing_unittest.cpp)
 android_add_test(emugl_common_host_unittests)

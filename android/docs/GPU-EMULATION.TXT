@@ -50,17 +50,11 @@ Values 'on', 'off' and 'auto' are also recognized. See -help-gpu for details.
 
 Host mode libraries are installed at the following locations:
 
-        $EXEC_DIR/lib/
-                libOpenglRender.so
-                libEGL_translator.so
-                libGLES_CM_translator.so
-                libGLESv2_translator.so
-
         $EXEC_DIR/lib64/
-                lib64OpenglRender.so
-                lib64EGL_translator.so
-                lib64GLES_CM_translator.so
-                lib64GLESv2_translator.so
+                OpenglRender.so
+                EGL_translator.so
+                GLES_CM_translator.so
+                GLESv2_translator.so
 
 The example above is for Linux, the shared libraries' extension will vary
 with the host platform (i.e. .dylib for Darwin, and .dll for Windows).

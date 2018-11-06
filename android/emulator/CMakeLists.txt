@@ -42,11 +42,11 @@ android_copy_file(emulator $<TARGET_FILE:qemu-system-arm> $<TARGET_FILE_DIR:emul
 android_copy_file(emulator $<TARGET_FILE:qemu-system-aarch64> $<TARGET_FILE_DIR:emulator>/qemu/${ANDROID_TARGET_TAG}/$<TARGET_FILE_NAME:qemu-system-aarch64>)
 
 # These are usually nops, but some code generators will not automatically binplace these (Xcode!)
-android_copy_shared_lib(emulator EGL_translator lib64EGL_translator)
-android_copy_shared_lib(emulator GLES_V2_translator lib64GLES_V2_translator)
-android_copy_shared_lib(emulator GLES_CM_translator lib64GLES_CM_translator)
-android_copy_shared_lib(emulator GLES12Translator lib64GLES12Translator)
-android_copy_shared_lib(emulator OpenglRender lib64OpenglRender)
+android_copy_shared_lib(emulator EGL_translator EGL_translator)
+android_copy_shared_lib(emulator GLES_V2_translator GLES_V2_translator)
+android_copy_shared_lib(emulator GLES_CM_translator GLES_CM_translator)
+android_copy_shared_lib(emulator GLES12Translator GLES12Translator)
+android_copy_shared_lib(emulator OpenglRender OpenglRender)
 
 # copy test files from test directory
 android_copy_test_files(emulator "${android-emu-prebuilt-resources}" resources)

@@ -349,23 +349,17 @@ of them:
     translation. This is the default GPU emulation mode also known as 'host'
     mode. The files are:
 
-        $EXEC_DIR/lib/                    -> for 32-bit host programs.
-                libOpenglRender.so
-                libEGL_translator.so
-                libGLES_CM_translator.so
-                libGLESv2_translator.so
-
-        $EXEC_DIR/lib64/                  -> for 64-bit host programs.
-                lib64OpenglRender.so
-                lib64EGL_translator.so
-                lib64GLES_CM_translator.so
-                lib64GLESv2_translator.so
+        $EXEC_DIR/lib64/
+                OpenglRender.so
+                EGL_translator.so
+                GLES_CM_translator.so
+                GLESv2_translator.so
 
     The libraries are loaded by the emulation engine programs when needed
-    (i.e. if the AVD has 'hw.gpu.enabled' set to 'yes'). In particular,
-    the 'emulator' launcher takes care of adding either $EXEC_DIR/lib/
-    or $EXEC_DIR/lib64/ to LD_LIBRARY_PATH (or PATH on Windows) before
-    launching the real emulation engine.
+    (i.e. if the AVD has 'hw.gpu.enabled' set to 'yes'). In particular, the
+    'emulator' launcher takes care of adding or $EXEC_DIR/lib64/ to
+    LD_LIBRARY_PATH (or PATH on Windows) before launching the real emulation
+    engine.
 
     There is also the possibility of supporting additional GPU emulation
     modes, through optional 'backends'. For example, the 'mesa' backend
@@ -375,7 +369,6 @@ of them:
 
     The files of a given backend <name> must be under:
 
-        $EXEC_DIR/lib/gles_<name>/ or
         $EXEC_DIR/lib64/gles_<name>/
 
     For more details, see docs/GPU-EMULATION.TXT

@@ -68,8 +68,6 @@ std::string EmuglBackendList::getLibDirPath(const char* name) {
             nameNoSuffix.c_str());
 }
 
-static const char kLibPrefix[] = "lib";
-
 #ifdef _WIN32
 static const char kLibSuffix[] = ".dll";
 #elif defined(__APPLE__)
@@ -80,7 +78,7 @@ static const char kLibSuffix[] = ".so";
 
 std::string EmuglBackendList::getGLES12TranslatorLibName() {
 
-    std::string res(kLibPrefix);
+    std::string res;
 
     if (mProgramBitness == 64) {
         res += "64";
@@ -110,12 +108,12 @@ bool EmuglBackendList::getBackendLibPath(const char* name,
     }
 
     std::string path = android::base::StringFormat(
-            "%s" PATH_SEP "%s%s%s",
+            "%s" PATH_SEP "lib%s%s",
             getLibDirPath(name),
-            kLibPrefix,
             libraryName,
             kLibSuffix);
 
+    fprintf(stderr, "%s: finding %s\n", __func__, path.c_str());
     if (!System::get()->pathIsFile(path)) {
         D("%s(name=%s lib=%s): File does not exist: %s\n",
           __FUNCTION__, name, libraryName, path.c_str());

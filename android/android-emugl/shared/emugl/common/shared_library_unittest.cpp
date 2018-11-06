@@ -37,17 +37,15 @@ namespace {
 // of the current executable's path!
 std::string GetTestLibraryName() {
 #ifdef __x86_64__
-    static const char kLibraryPrefix[] = "lib64";
     static const char kSubDir[] = "lib64";
 #else
-    static const char kLibraryPrefix[] = "lib";
     static const char kSubDir[] = "lib";
 #endif
-    static const char kTestLibrarySuffix[] = "emugl_test_shared_library";
+    static const char kTestLibraryBasename[] = "libemugl_test_shared_library";
 
     std::string path =
             PathUtils::join(System::get()->getProgramDirectory(), kSubDir,
-                            std::string(kLibraryPrefix) + kTestLibrarySuffix);
+                            kTestLibraryBasename);
     printf("Library path: %s\n", path.c_str());
     return path;
 }

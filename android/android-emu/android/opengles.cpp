@@ -56,13 +56,7 @@ using android::base::pj;
 using android::base::System;
 
 /* Name of the GLES rendering library we're going to use */
-#if UINTPTR_MAX == UINT32_MAX
-#define RENDERER_LIB_NAME  "libOpenglRender"
-#elif UINTPTR_MAX == UINT64_MAX
-#define RENDERER_LIB_NAME  "lib64OpenglRender"
-#else
-#error Unknown UINTPTR_MAX
-#endif
+#define RENDERER_LIB_NAME "libOpenglRender"
 
 /* Declared in "android/globals.h" */
 int  android_gles_fast_pipes = 1;
