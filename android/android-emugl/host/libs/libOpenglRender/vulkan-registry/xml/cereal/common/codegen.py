@@ -99,10 +99,10 @@ class CodeGen(object):
 
     def indent(self,extra=0):
         return "".join("    " * (self.indentLevel + extra))
-    
+
     def incrIndent(self,):
         self.indentLevel += 1
-    
+
     def decrIndent(self,):
         if self.indentLevel > 0:
             self.indentLevel -= 1
@@ -118,6 +118,10 @@ class CodeGen(object):
     def beginIf(self, cond):
         self.code += self.indent() + "if (" + cond + ")\n"
         self.beginBlock()
+
+    def condExpr(self, cond, cgenFunc):
+        self.beginIf(cond)
+        self.endIf()
 
     def beginElse(self, cond = None):
         if cond is not None:
@@ -176,6 +180,29 @@ class CodeGen(object):
 
         self.code += res
 
+    def vkApiCall(self, api, customPrefix = "", customParams = []):
+        callLhs = None
+
+        retVar = None
+        retTypeName = api.getRetTypeExpr()
+
+        if retTypeName != "void":
+            retVar = api.getRetVarExpr()
+            self.stmt("%s %s = (%s)0" % (retTypeName, retVar, retTypeName))
+            callLhs = retVar
+
+        if customParams == []:
+            params = [p.paramName for p in api.parameters]
+        else:
+            params = customParams
+
+        self.funcCall(callLhs, customPrefix + api.name, params)
+
+        return (retTypeName, retVar)
+
+    def makeVkSuccessCheck(self, expr):
+        return "(%s == VK_SUCCESS)" % expr
+
     # Given a VulkanType object, generate a C type declaration
     # with optional parameter name:
     # [const] [typename][*][const*] [paramName]
@@ -216,7 +243,7 @@ class CodeGen(object):
             paramStr = (" " + vulkanType.paramName)
         else:
             paramStr = ""
-        
+
         if vulkanType.staticArrExpr:
             staticArrInfo = "[%s]" % vulkanType.staticArrExpr
         else:
@@ -393,7 +420,7 @@ class CodeGen(object):
 
         if isinstance(vulkanType.parent, VulkanAPI):
             return self.accessParameter(vulkanType, asPtr=asPtr)
-        
+
         os.abort("Could not find a way to access Vulkan type %s" %
                  vulkanType.name)
 

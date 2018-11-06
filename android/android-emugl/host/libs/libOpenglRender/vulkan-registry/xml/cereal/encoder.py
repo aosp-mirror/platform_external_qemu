@@ -132,11 +132,6 @@ def encode_vkMapMemory(typeInfo, api, cgen):
     cgen.stmt("%s->read(*ppData, size)" % (STREAM))
     cgen.endIf()
 
-    # TODO:
-    # The custom part: Depending on the return value,
-    # allocate some buffer (TODO: dma map) the result and return it to the user
-    # if ppData is not null.
-
     emit_return(typeInfo, api, cgen)
 
 custom_encodes = {

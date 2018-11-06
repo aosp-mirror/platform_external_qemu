@@ -586,68 +586,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkStream->commitWrite();
                 break;
             }
-            case OP_vkMapMemory:
-            {
-                VkDevice device;
-                VkDeviceMemory memory;
-                VkDeviceSize offset;
-                VkDeviceSize size;
-                VkMemoryMapFlags flags;
-                void** ppData;
-                vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
-                vkReadStream->read((VkDeviceMemory*)&memory, sizeof(VkDeviceMemory));
-                vkReadStream->read((VkDeviceSize*)&offset, sizeof(VkDeviceSize));
-                vkReadStream->read((VkDeviceSize*)&size, sizeof(VkDeviceSize));
-                vkReadStream->read((VkMemoryMapFlags*)&flags, sizeof(VkMemoryMapFlags));
-                vkReadStream->read((void***)&ppData, sizeof(void**));
-                if (ppData)
-                {
-                    vkReadStream->alloc((void**)&ppData, sizeof(void*));
-                    vkReadStream->read((void**)ppData, sizeof(void*));
-                }
-                VkResult vkMapMemory_VkResult_return = (VkResult)0;
-                vkMapMemory_VkResult_return = m_vk->vkMapMemory(device, memory, offset, size, flags, ppData);
-                vkStream->write((void***)&ppData, sizeof(void**));
-                if (ppData)
-                {
-                    vkStream->write((void**)ppData, sizeof(void*));
-                }
-                vkStream->write(&vkMapMemory_VkResult_return, sizeof(VkResult));
-                if (((vkMapMemory_VkResult_return == VK_SUCCESS) && ppData && size > 0))
-                {
-                    vkStream->write(*ppData, size);
-                }
-                vkStream->commitWrite();
-                break;
-            }
-            case OP_vkUnmapMemory:
-            {
-                VkDevice device;
-                VkDeviceMemory memory;
-                vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
-                vkReadStream->read((VkDeviceMemory*)&memory, sizeof(VkDeviceMemory));
-                m_vk->vkUnmapMemory(device, memory);
-                vkStream->commitWrite();
-                break;
-            }
-            case OP_vkFlushMappedMemoryRanges:
-            {
-                VkDevice device;
-                uint32_t memoryRangeCount;
-                VkMappedMemoryRange* pMemoryRanges;
-                vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
-                vkReadStream->read((uint32_t*)&memoryRangeCount, sizeof(uint32_t));
-                vkReadStream->alloc((void**)&pMemoryRanges, ((memoryRangeCount)) * sizeof(const VkMappedMemoryRange));
-                for (uint32_t i = 0; i < (uint32_t)((memoryRangeCount)); ++i)
-                {
-                    unmarshal_VkMappedMemoryRange(vkReadStream, (VkMappedMemoryRange*)(pMemoryRanges + i));
-                }
-                VkResult vkFlushMappedMemoryRanges_VkResult_return = (VkResult)0;
-                vkFlushMappedMemoryRanges_VkResult_return = m_vk->vkFlushMappedMemoryRanges(device, memoryRangeCount, pMemoryRanges);
-                vkStream->write(&vkFlushMappedMemoryRanges_VkResult_return, sizeof(VkResult));
-                vkStream->commitWrite();
-                break;
-            }
             case OP_vkInvalidateMappedMemoryRanges:
             {
                 VkDevice device;
@@ -6534,6 +6472,96 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         marshal_VkCheckpointDataNV(vkStream, (VkCheckpointDataNV*)(pCheckpointData + i));
                     }
+                }
+                vkStream->commitWrite();
+                break;
+            }
+#endif
+#ifdef VK_VERSION_1_0
+            case OP_vkMapMemory:
+            {
+                VkDevice device;
+                VkDeviceMemory memory;
+                VkDeviceSize offset;
+                VkDeviceSize size;
+                VkMemoryMapFlags flags;
+                void** ppData;
+                vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
+                vkReadStream->read((VkDeviceMemory*)&memory, sizeof(VkDeviceMemory));
+                vkReadStream->read((VkDeviceSize*)&offset, sizeof(VkDeviceSize));
+                vkReadStream->read((VkDeviceSize*)&size, sizeof(VkDeviceSize));
+                vkReadStream->read((VkMemoryMapFlags*)&flags, sizeof(VkMemoryMapFlags));
+                vkReadStream->read((void***)&ppData, sizeof(void**));
+                if (ppData)
+                {
+                    vkReadStream->alloc((void**)&ppData, sizeof(void*));
+                    vkReadStream->read((void**)ppData, sizeof(void*));
+                }
+                VkResult vkMapMemory_VkResult_return = (VkResult)0;
+                vkMapMemory_VkResult_return = m_vk->vkMapMemory(device, memory, offset, size, flags, ppData);
+                vkStream->write((void***)&ppData, sizeof(void**));
+                if (ppData)
+                {
+                    vkStream->write((void**)ppData, sizeof(void*));
+                }
+                vkStream->write(&vkMapMemory_VkResult_return, sizeof(VkResult));
+                bool mapSuccess = (vkMapMemory_VkResult_return == VK_SUCCESS);
+                bool needWriteback = mapSuccess && (ppData && size > 0);
+                if (needWriteback)
+                {
+                    vkStream->write(*ppData, size);
+                }
+                if (mapSuccess)
+                {
+                    m_vk->vkUnmapMemory(device, memory);
+                }
+                vkStream->commitWrite();
+                break;
+            }
+#endif
+#ifdef VK_VERSION_1_0
+            case OP_vkUnmapMemory:
+            {
+                VkDevice device;
+                VkDeviceMemory memory;
+                vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
+                vkReadStream->read((VkDeviceMemory*)&memory, sizeof(VkDeviceMemory));
+                m_vk->vkUnmapMemory(device, memory);
+                vkStream->commitWrite();
+                break;
+            }
+#endif
+#ifdef VK_VERSION_1_0
+            case OP_vkFlushMappedMemoryRanges:
+            {
+                VkDevice device;
+                uint32_t memoryRangeCount;
+                VkMappedMemoryRange* pMemoryRanges;
+                vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
+                vkReadStream->read((uint32_t*)&memoryRangeCount, sizeof(uint32_t));
+                vkReadStream->alloc((void**)&pMemoryRanges, ((memoryRangeCount)) * sizeof(const VkMappedMemoryRange));
+                for (uint32_t i = 0; i < (uint32_t)((memoryRangeCount)); ++i)
+                {
+                    unmarshal_VkMappedMemoryRange(vkReadStream, (VkMappedMemoryRange*)(pMemoryRanges + i));
+                }
+                for (uint32_t i; i < memoryRangeCount; ++i)
+                {
+                    VkMemoryMapFlags flags = 0;
+                    VkDeviceMemory memory = pMemoryRanges[i].memory;
+                    VkDeviceSize offset = pMemoryRanges[i].offset;
+                    VkDeviceSize size = pMemoryRanges[i].size;
+                    void** ppData;;
+                    VkResult vkMapMemory_VkResult_return = (VkResult)0;
+                    vkMapMemory_VkResult_return = m_vk->vkMapMemory(device, memory, offset, size, flags, ppData);
+                    vkReadStream->read(*ppData, size);
+                }
+                VkResult vkFlushMappedMemoryRanges_VkResult_return = (VkResult)0;
+                vkFlushMappedMemoryRanges_VkResult_return = m_vk->vkFlushMappedMemoryRanges(device, memoryRangeCount, pMemoryRanges);
+                vkStream->write(&vkFlushMappedMemoryRanges_VkResult_return, sizeof(VkResult));
+                for (uint32_t i; i < memoryRangeCount; ++i)
+                {
+                    VkDeviceMemory memory = pMemoryRanges[i].memory;
+                    m_vk->vkUnmapMemory(device, memory);
                 }
                 vkStream->commitWrite();
                 break;

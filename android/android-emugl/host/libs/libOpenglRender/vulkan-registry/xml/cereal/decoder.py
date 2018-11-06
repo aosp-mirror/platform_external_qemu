@@ -88,15 +88,7 @@ def emit_decode_parameters(typeInfo, api, cgen):
         emit_unmarshal(typeInfo, p, cgen)
 
 def emit_dispatch_call(api, cgen):
-    callLhs = None
-    retTypeName = api.getRetTypeExpr()
-    if retTypeName != "void":
-        retVar = api.getRetVarExpr()
-        cgen.stmt("%s %s = (%s)0" % (retTypeName, retVar, retTypeName))
-        callLhs = retVar
-
-    cgen.funcCall(
-        callLhs, "m_vk->" + api.name, [p.paramName for p in api.parameters])
+    return cgen.vkApiCall(api, customPrefix="m_vk->")
 
 def emit_decode_parameters_writeback(typeInfo, api, cgen):
     paramsToWrite = []
@@ -119,22 +111,109 @@ def emit_decode_finish(cgen):
     cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
 
 ## Custom decoding definitions##################################################
-def decode_vkMapMemory(typeInfo, api, cgen):
+def emit_default_decoding(typeInfo, api, cgen):
+    emit_decode_parameters(typeInfo, api, cgen)
+    emit_dispatch_call(api, cgen)
+    emit_decode_parameters_writeback(typeInfo, api, cgen)
+    emit_decode_return_writeback(api, cgen)
+    emit_decode_finish(cgen)
+
+def emit_default_decoding_except_finish(typeInfo, api, cgen):
     emit_decode_parameters(typeInfo, api, cgen)
     emit_dispatch_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
 
-    needWriteback = \
-        "((%s == VK_SUCCESS) && ppData && size > 0)" % api.getRetVarExpr()
-    cgen.beginIf(needWriteback)
+def emit_default_decoding_except_parameters(typeInfo, api, cgen):
+    emit_dispatch_call(api, cgen)
+    emit_decode_parameters_writeback(typeInfo, api, cgen)
+    emit_decode_return_writeback(api, cgen)
+    emit_decode_finish(cgen)
+
+def emit_default_decoding_except_parameters_finish(typeInfo, api, cgen, skipCall=False):
+    if skipCall:
+        emit_dispatch_call(api, cgen)
+    emit_decode_parameters_writeback(typeInfo, api, cgen)
+    if skipCall:
+        emit_decode_return_writeback(api, cgen)
+
+def emit_default_decoding_except_parameters_finish(typeInfo, api, cgen):
+    emit_dispatch_call(api, cgen)
+    emit_decode_parameters_writeback(typeInfo, api, cgen)
+    emit_decode_return_writeback(api, cgen)
+
+def decode_vkMapMemory(typeInfo, api, cgen):
+    emit_default_decoding_except_finish(typeInfo, api, cgen)
+
+    mapSuccess = cgen.makeVkSuccessCheck(api.getRetVarExpr())
+    writebackCond = "(ppData && size > 0)"
+    cgen.stmt("bool mapSuccess = %s" % mapSuccess)
+    cgen.stmt("bool needWriteback = mapSuccess && %s" % writebackCond)
+
+    cgen.beginIf("needWriteback")
     cgen.stmt("%s->write(*ppData, size)" % (WRITE_STREAM))
     cgen.endIf()
+
+    cgen.beginIf("mapSuccess")
+    unmapApi = typeInfo.apis["vkUnmapMemory"]
+    cgen.vkApiCall(unmapApi, customPrefix="m_vk->")
+    cgen.endIf()
+
+    emit_decode_finish(cgen)
+
+def decode_vkUnmapMemory(typeInfo, api, cgen):
+    # It is assumed that vkUnmapMemory does not sync guest/host memory.
+    # We're explicitly saying to use the default decoding here
+    # to make this more prominent.
+    emit_default_decoding(typeInfo, api, cgen)
+
+def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
+    emit_decode_parameters(typeInfo, api, cgen)
+
+    # Read the result from the guest before emitting the call on host.
+    cgen.beginFor("uint32_t i", "i < memoryRangeCount", "++i")
+    cgen.stmt("VkMemoryMapFlags flags = 0")
+    cgen.stmt("VkDeviceMemory memory = pMemoryRanges[i].memory")
+    cgen.stmt("VkDeviceSize offset = pMemoryRanges[i].offset")
+    cgen.stmt("VkDeviceSize size = pMemoryRanges[i].size")
+    cgen.stmt("void** ppData;")
+    _, _ = cgen.vkApiCall(typeInfo.apis["vkMapMemory"], customPrefix="m_vk->")
+    cgen.stmt("%s->read(*ppData, size)" % READ_STREAM)
+    cgen.endFor()
+
+    emit_default_decoding_except_parameters_finish(typeInfo, api, cgen)
+
+    cgen.beginFore"uint32_t i", "i < memoryRangeCount", "++i")
+    cgen.stmt("VkDeviceMemory memory = pMemoryRanges[i].memory")
+    unmapApi = typeInfo.apis["vkUnmapMemory"]
+    cgen.vkApiCall(unmapApi, customPrefix="m_vk->")
+    cgen.endFor()
+
+    emit_decode_finish(cgen)
+
+def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
+    emit_decode_parameters(typeInfo, api, cgen)
+
+    # Read the result from the host before transmitting the data to the guest.
+    cgen.beginFor("uint32_t i", "i < memoryRangeCount", "++i")
+    cgen.stmt("VkMemoryMapFlags flags = 0")
+    cgen.stmt("VkDeviceMemory memory = pMemoryRanges[i].memory")
+    cgen.stmt("VkDeviceSize offset = pMemoryRanges[i].offset")
+    cgen.stmt("VkDeviceSize size = pMemoryRanges[i].size")
+    cgen.stmt("void** ppData;")
+    _, _ = cgen.vkApiCall(typeInfo.apis["vkMapMemory"], customPrefix="m_vk->")
+    cgen.stmt("%s->write(*ppData, size)" % READ_STREAM)
+    unmapApi = typeInfo.apis["vkUnmapMemory"]
+    cgen.vkApiCall(unmapApi, customPrefix="m_vk->")
+    cgen.endFor()
 
     emit_decode_finish(cgen)
 
 custom_decodes = {
     "vkMapMemory" : decode_vkMapMemory,
+    "vkUnmapMemory" : decode_vkUnmapMemory,
+    "vkFlushMappedMemoryRanges" : decode_vkFlushMappedMemoryRanges,
+    "vkInvalidateMappedMemoryRanges": decode_vkInvalidateMappedMemoryRanges,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):
@@ -173,38 +252,61 @@ class VulkanDecoder(VulkanWrapperGenerator):
 
         self.module.appendImpl(self.cgen.swapCode())
 
+        self.custom_decode_funcs = []
+
+        self.feature = None
+
+    def onBeginFeature(self, featureName):
+        self.feature = featureName
+
     def onGenCmd(self, cmdinfo, name, alias):
         typeInfo = self.typeInfo
         cgen = self.cgen
         api = typeInfo.apis[name]
 
-        cgen.line("case OP_%s:" % name)
-        cgen.beginBlock()
-
         if api.name in custom_decodes.keys():
-            custom_decodes[api.name](typeInfo, api, cgen)
+            self.custom_decode_funcs.append(
+                (self.feature, api.name,
+                 lambda: custom_decodes[api.name](typeInfo, api, cgen)))
         else:
+            cgen.line("case OP_%s:" % name)
+            cgen.beginBlock()
+
             emit_decode_parameters(typeInfo, api, cgen)
             emit_dispatch_call(api, cgen)
             emit_decode_parameters_writeback(typeInfo, api, cgen)
             emit_decode_return_writeback(api, cgen)
             emit_decode_finish(cgen)
 
-        cgen.stmt("break")
-        cgen.endBlock()
-        self.module.appendImpl(self.cgen.swapCode())
+            cgen.stmt("break")
+            cgen.endBlock()
+            self.module.appendImpl(self.cgen.swapCode())
 
     def onEnd(self,):
-        self.cgen.line("default:")
-        self.cgen.beginBlock()
-        self.cgen.stmt("return ptr - (unsigned char *)buf")
-        self.cgen.endBlock()
+        cgen = self.cgen
 
-        self.cgen.endBlock() # switch stmt
+        for feature, name, func in self.custom_decode_funcs:
+            cgen.leftline("#ifdef %s" % feature)
+            cgen.line("case OP_%s:" % name)
+            cgen.beginBlock()
 
-        self.cgen.stmt("ptr += packetLen")
-        self.cgen.endBlock() # while loop
+            func()
 
-        self.cgen.stmt("return ptr - (unsigned char*)buf;")
-        self.cgen.endBlock() # function body
+            cgen.stmt("break")
+            cgen.endBlock()
+            cgen.leftline("#endif")
+
+        cgen.line("default:")
+        cgen.beginBlock()
+        cgen.stmt("return ptr - (unsigned char *)buf")
+        cgen.endBlock()
+
+        cgen.endBlock() # switch stmt
+
+        cgen.stmt("ptr += packetLen")
+        cgen.endBlock() # while loop
+
+        cgen.stmt("return ptr - (unsigned char*)buf;")
+        cgen.endBlock() # function body
+
         self.module.appendImpl(self.cgen.swapCode())
