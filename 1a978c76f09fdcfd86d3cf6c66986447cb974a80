@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "47ce384d_d9ba170c",
+        "filename": "android/android-emu/android/darwinn/MockDarwinnDriverFactory.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-06T17:47:06Z",
+      "side": 1,
+      "message": "We have a type called LazyInstance that might be useful for what you are trying to do here.",
+      "revId": "1a978c76f09fdcfd86d3cf6c66986447cb974a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d1a3a3f4_5a39fca9",
+        "filename": "android/android-emu/android/darwinn/darwinn.cmake",
+        "patchSetId": 10
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-06T17:47:06Z",
+      "side": 1,
+      "message": "is it possible to add the tests here?\n\ni.e. android_add_test(darwin_unittests)\n(It\u0027s okay for these unit tests to depend on android-emu)",
+      "revId": "1a978c76f09fdcfd86d3cf6c66986447cb974a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
