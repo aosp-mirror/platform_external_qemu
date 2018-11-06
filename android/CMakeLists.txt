@@ -1,3 +1,6 @@
+if (ANDROID_TARGET_OS STREQUAL "windows_msvc")
+  add_subdirectory(msvc-posix-compat)
+endif()
 add_subdirectory(third_party)
 add_subdirectory(android-emu)
 add_subdirectory(android-emugl)

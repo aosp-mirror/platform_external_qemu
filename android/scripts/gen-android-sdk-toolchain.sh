@@ -264,8 +264,8 @@ gen_wrapper_toolchain () {
     local DST_DIR="$3"
     local CLANG_BINDIR="$4"
     local PROG
-    local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy"
-    local PROGRAMS="as ar ranlib strip strings nm objdump objcopy dlltool"
+    local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy ar"
+    local PROGRAMS="as ranlib strip strings nm objdump objcopy dlltool"
 
     log "Generating toolchain wrappers in: $DST_DIR"
     run mkdir -p "$DST_DIR"
@@ -481,6 +481,9 @@ prepare_build_for_windows_msvc() {
     var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/win10sdk/lib/$(aosp_winsdk_version)/ucrt/x64"
     var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/win10sdk/lib/$(aosp_winsdk_version)/um/x64"
     var_append CLANG_LINK_FLAGS "-Wl,-nodefaultlib:libcmt,-defaultlib:msvcrt,-defaultlib:oldnames"
+    # Other linker flags to make cross-compiling upstream-qemu work without adding any additional
+    # flags to it's makefile.
+    var_append CLANG_LINK_FLAGS "-lshell32 -luser32 -ladvapi32 -liphlpapi -lwldap32 -lmfuuid -lwinmm"
 
     if [ $(get_verbosity) -gt 3 ]; then
       # This will get pretty crazy, but useful if you want to debug linker issues.
@@ -503,6 +506,8 @@ prepare_build_for_windows_msvc() {
     var_append EXTRA_CFLAGS "-D_USE_MATH_DEFINES"
     var_append EXTRA_CFLAGS "-Wno-msvc-not-found"
     var_append EXTRA_CFLAGS "-Wno-address-of-packed-member"
+    var_append EXTRA_CFLAGS "-Wno-incompatible-ms-struct"
+    var_append EXTRA_CFLAGS "-Wno-c++11-narrowing"
     # Disable builtin #include directories
     var_append EXTRA_CFLAGS "-nobuiltininc"
     var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/clang-intrins/include"
@@ -526,6 +531,8 @@ prepare_build_for_windows_msvc() {
     var_append EXTRA_CXXFLAGS "-D_USE_MATH_DEFINES"
     var_append EXTRA_CXXFLAGS "-Wno-msvc-not-found"
     var_append EXTRA_CXXFLAGS "-Wno-address-of-packed-member"
+    var_append EXTRA_CXXFLAGS "-Wno-incompatible-ms-struct"
+    var_append EXTRA_CXXFLAGS "-Wno-c++11-narrowing"
     var_append EXTRA_CXXFLAGS "-fms-compatibility"
     var_append EXTRA_CXXFLAGS "-fdelayed-template-parsing"
     var_append EXTRA_CXXFLAGS "-fms-extensions"

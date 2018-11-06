@@ -75,14 +75,14 @@ endfunction()
 # For example: set(foo_src a.c b.c)  <-- sources for foo target set(foo_windows_src d.c) <-- sources only for the
 # windows target set(foo_darwin-x86_64_src d.c) <-- sources only for the darwin-x86_64 target
 function(android_add_library name)
+  if((ANDROID_TARGET_TAG MATCHES "windows_msvc.*") AND (DEFINED ${name}_windows_msvc_src))
+    list(APPEND ${name}_src ${${name}_windows_msvc_src})
+  endif()
   if((ANDROID_TARGET_TAG MATCHES "windows.*") AND (DEFINED ${name}_windows_src))
     list(APPEND ${name}_src ${${name}_windows_src})
   endif()
   if(DEFINED ${name}_${ANDROID_TARGET_TAG}_src)
     list(APPEND ${name}_src ${${name}_${ANDROID_TARGET_TAG}_src})
-  endif()
-  if(ANDROID_TARGET_TAG MATCHES "windows.*" AND DEFINED ${name}_windows_src)
-    list(APPEND ${name}_src ${${name}_windows_src})
   endif()
   add_library(${name} ${${name}_src})
 endfunction()
@@ -103,6 +103,31 @@ function(android_add_shared_library name)
     list(APPEND ${name}_src ${${name}_${ANDROID_TARGET_TAG}_src})
   endif()
   add_library(${name} SHARED ${${name}_src})
+  if(CMAKE_SYSTEM_NAME MATCHES "WinMSVCCrossCompile")
+    # For windows-msvc build (on linux), this generates a dll and a lib (import library) file.
+    # The files are being placed at ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} which is correct
+    # for the dll, but the lib file needs to be in the ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
+    # or we can't link to it. Most windows compilers, including clang, don't allow you
+    # to directly link to a dll (unlike mingw), and instead, need to link to it's import
+    # library.
+    #
+    # Another headache: it seems we attach a prefix to some of our shared libraries, which
+    # make cmake unable to locate the import library later on to whoever tries to link to it
+    # (e.g. OpenglRender -> lib64OpenglRender), as it will look for an import library by
+    # <target_library_name>.lib. So let's just move the import library to the archive directory
+    # and rename it back to the library name without the prefix.
+    add_custom_command(TARGET ${name}
+                       POST_BUILD
+                       COMMAND ${CMAKE_COMMAND}
+                           -E copy $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}>
+                           ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/$<TARGET_LINKER_FILE_NAME:${name}>
+                       COMMENT "Copying $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}> to ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/$<TARGET_LINKER_FILE_NAME:${name}>")
+    add_custom_command(TARGET ${name}
+                       POST_BUILD
+                       COMMAND ${CMAKE_COMMAND}
+                           -E remove $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}>
+                       COMMENT "Removing $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}>")
+  endif()
 endfunction()
 
 # Adds an interface library with the given name. The source files for this target will be resolved as follows: The
