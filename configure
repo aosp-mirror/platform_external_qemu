@@ -364,6 +364,7 @@ strip_opt="yes"
 tcg_interpreter="no"
 bigendian="no"
 mingw32="no"
+msvc="no"
 gcov="no"
 gcov_tool="gcov"
 EXESUF=""
@@ -718,6 +719,9 @@ HOST_VARIANT_DIR=""
 case $targetos in
 MINGW32*)
   mingw32="yes"
+  if check_define _MSC_VER ; then
+    msvc="yes"
+  fi
   hax="yes"
   audio_possible_drivers="dsound sdl winaudio"
   if check_include dsound.h; then
@@ -2042,7 +2046,19 @@ fi
 ##########################################
 # MinGW / Mingw-w64 localtime_r/gmtime_r check
 
-if test "$mingw32" = "yes"; then
+if test "$msvc" = "yes"; then
+    # For msvc build, we redirect localtime_r to localtime_s. So
+    # let's test localtime_s instead.
+cat > $TMPC << EOF
+#include <time.h>
+int main(void) { localtime_s(NULL, NULL); return 0; }
+EOF
+    if compile_prog "" "" ; then
+        localtime_r="yes"
+    else
+        error_exit "Need localtime_s for msvc build."
+    fi
+elif test "$mingw32" = "yes"; then
     # Some versions of MinGW / Mingw-w64 lack localtime_r
     # and gmtime_r entirely.
     #
@@ -6027,6 +6043,10 @@ if test "$mingw32" = "yes" ; then
   fi
 else
   echo "CONFIG_POSIX=y" >> $config_host_mak
+fi
+
+if test "$msvc" = "yes" ; then
+  echo "CONFIG_MSVC=y" >> $config_host_mak
 fi
 
 if test "$linux" = "yes" ; then
