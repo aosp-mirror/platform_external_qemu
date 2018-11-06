@@ -45,17 +45,18 @@ AdbBugReportServices::~AdbBugReportServices() {
     }
 }
 
-void AdbBugReportServices::generateBugReport(StringView outputDirectoryPath,
-                                             ResultCallback resultCallback) {
-    if (isBugReportInFlight()) {
+AdbCommandPtr AdbBugReportServices::generateBugReport(
+        StringView outputDirectoryPath,
+        ResultCallback resultCallback) {
+    if (mAdbBugReportCommand && mAdbBugReportCommand->inFlight()) {
         resultCallback(Result::OperationInProgress, nullptr);
-        return;
+        return nullptr;
     }
 
     if (!System::get()->pathIsDir(outputDirectoryPath) ||
         !System::get()->pathCanWrite(outputDirectoryPath)) {
         resultCallback(Result::SaveLocationInvalid, nullptr);
-        return;
+        return nullptr;
     }
 
     auto filePath =
@@ -105,14 +106,16 @@ void AdbBugReportServices::generateBugReport(StringView outputDirectoryPath,
                 },
                 kAdbCommandTimeoutMs, true);
     }
+    return mAdbBugReportCommand;
 }
 
-void AdbBugReportServices::generateAdbLogcatInMemory(
+AdbCommandPtr AdbBugReportServices::generateAdbLogcatInMemory(
         ResultOutputCallback resultCallback) {
-    if (mAdbLogcatCommand) {
+    if (mAdbLogcatCommand && mAdbLogcatCommand->inFlight()) {
         resultCallback(Result::OperationInProgress, nullptr);
-        return;
+        return nullptr;
     }
+
     // After apiLevel 19, buffer "all" become available
     int apiLevel = avdInfo_getApiLevel(android_avdInfo);
     mAdbLogcatCommand = mAdb->runAdbCommand(
@@ -133,6 +136,7 @@ void AdbBugReportServices::generateAdbLogcatInMemory(
                 mAdbLogcatCommand.reset();
             },
             kAdbCommandTimeoutMs, true);
+    return mAdbLogcatCommand;
 }
 
 std::string AdbBugReportServices::generateUniqueBugreportName() {
