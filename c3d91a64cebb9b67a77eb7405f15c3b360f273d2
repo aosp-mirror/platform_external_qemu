@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8026efc4_dba30a6c",
+        "filename": "android/android-emu/android/emulation/control/AdbBugReportServices.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-06T02:01:02Z",
+      "side": 1,
+      "message": "nit: please return mAdbLogcatCommand on a different line than the assignment",
+      "range": {
+        "startLine": 121,
+        "startChar": 4,
+        "endLine": 121,
+        "endChar": 51
+      },
+      "revId": "c3d91a64cebb9b67a77eb7405f15c3b360f273d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f68b53d8_18f651bc",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-06T02:01:02Z",
+      "side": 1,
+      "message": "nit: remove",
+      "revId": "c3d91a64cebb9b67a77eb7405f15c3b360f273d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f29074a9_be45655b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-06T02:01:02Z",
+      "side": 1,
+      "message": "return url.isValid() \u0026\u0026 QDesktopServices::openUrl(url)",
+      "range": {
+        "startLine": 331,
+        "startChar": 0,
+        "endLine": 335,
+        "endChar": 5
+      },
+      "revId": "c3d91a64cebb9b67a77eb7405f15c3b360f273d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
