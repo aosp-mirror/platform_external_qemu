@@ -231,6 +231,8 @@ if [ "$HOST_OS" = "linux" ]; then
         log "Checking that linux binaries have all needed dependencies in the lib64 dir"
         # Make sure we can load all dependencies of every dylib/executable we have.
         cache=$(ldconfig --print-cache | awk '{ print $1; }')
+        # Add libs that we can ignore..
+        cache="${cache} libsoftokn3.so"
         files=$(find $OPT_OUT/gradle-release \( -type f -and \( -executable -or -name '*.so.*' \) \))
         for file in $files; do
             log2 "Checking $file for dependencies on ld path, or our tree.."

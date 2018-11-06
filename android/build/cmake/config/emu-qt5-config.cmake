@@ -3,7 +3,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+# http:/www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -51,26 +51,36 @@ set(QT5_FOUND TRUE)
 if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
   set(QT_LIB_VERSION 5.11.1)
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib)
-  set(QT5_SHARED_DEPENDENCIES
-      ${PREBUILT_ROOT}/lib/libQt5Core.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Core.${QT_LIB_VERSION}.dylib;
-      ${PREBUILT_ROOT}/lib/libQt5Widgets.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Widgets.${QT_LIB_VERSION}.dylib;
-      ${PREBUILT_ROOT}/lib/libQt5Gui.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Gui.${QT_LIB_VERSION}.dylib;
-      ${PREBUILT_ROOT}/lib/libQt5Svg.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Svg.${QT_LIB_VERSION}.dylib;
-      ${PREBUILT_ROOT}/lib/libQt5PrintSupport.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5PrintSupport.${QT_LIB_VERSION}.dylib;
-      ${PREBUILT_ROOT}/plugins/platforms/libqcocoa.dylib>lib64/qt/plugins/platforms/libqcocoa.dylib;
-      ${PREBUILT_ROOT}/plugins/styles/libqmacstyle.dylib>lib64/qt/plugins/styles/libqmacstyle.dylib;
-      ${PREBUILT_ROOT}/plugins/iconengines/libqsvgicon.dylib>lib64/qt/plugins/iconengines/libqsvgicon.dylib;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqgif.dylib>lib64/qt/plugins/imageformats/libqgif.dylib;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqicns.dylib>lib64/qt/plugins/imageformats/libqicns.dylib;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqico.dylib>lib64/qt/plugins/imageformats/libqico.dylib;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqjpeg.dylib>lib64/qt/plugins/imageformats/libqjpeg.dylib;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqmacheif.dylib>lib64/qt/plugins/imageformats/libqmacheif.dylib;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqmacjp2.dylib>lib64/qt/plugins/imageformats/libqmacjp2.dylib;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqsvg.dylib>lib64/qt/plugins/imageformats/libqsvg.dylib;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqtga.dylib>lib64/qt/plugins/imageformats/libqtga.dylib;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqtiff.dylib>lib64/qt/plugins/imageformats/libqtiff.dylib;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp.dylib>lib64/qt/plugins/imageformats/libqwbmp.dylib;
-      ${PREBUILT_ROOT}/plugins/imageformats/libqwebp.dylib>lib64/qt/plugins/imageformats/libqwebp.dylib)
+  set(
+    QT5_SHARED_DEPENDENCIES
+    ${PREBUILT_ROOT}/lib/libQt5Core.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Core.${QT_LIB_VERSION}.dylib;
+    ${PREBUILT_ROOT}/lib/libQt5Widgets.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Widgets.${QT_LIB_VERSION}.dylib;
+    ${PREBUILT_ROOT}/lib/libQt5Gui.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Gui.${QT_LIB_VERSION}.dylib;
+    ${PREBUILT_ROOT}/lib/libQt5Svg.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Svg.${QT_LIB_VERSION}.dylib;
+    ${PREBUILT_ROOT}/lib/libQt5PrintSupport.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5PrintSupport.${QT_LIB_VERSION}.dylib;
+    ${PREBUILT_ROOT}/plugins/platforms/libqcocoa.dylib>lib64/qt/plugins/platforms/libqcocoa.dylib;
+    ${PREBUILT_ROOT}/plugins/styles/libqmacstyle.dylib>lib64/qt/plugins/styles/libqmacstyle.dylib;
+    ${PREBUILT_ROOT}/plugins/iconengines/libqsvgicon.dylib>lib64/qt/plugins/iconengines/libqsvgicon.dylib;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqgif.dylib>lib64/qt/plugins/imageformats/libqgif.dylib;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqicns.dylib>lib64/qt/plugins/imageformats/libqicns.dylib;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqico.dylib>lib64/qt/plugins/imageformats/libqico.dylib;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqjpeg.dylib>lib64/qt/plugins/imageformats/libqjpeg.dylib;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqmacheif.dylib>lib64/qt/plugins/imageformats/libqmacheif.dylib;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqmacjp2.dylib>lib64/qt/plugins/imageformats/libqmacjp2.dylib;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqsvg.dylib>lib64/qt/plugins/imageformats/libqsvg.dylib;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqtga.dylib>lib64/qt/plugins/imageformats/libqtga.dylib;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqtiff.dylib>lib64/qt/plugins/imageformats/libqtiff.dylib;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp.dylib>lib64/qt/plugins/imageformats/libqwbmp.dylib;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqwebp.dylib>lib64/qt/plugins/imageformats/libqwebp.dylib
+    # Let's add the webengine dependencies
+    ${PREBUILT_ROOT}/lib/libQt5WebEngineCore.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5WebEngineCore.${QT_LIB_VERSION}.dylib;
+    ${PREBUILT_ROOT}/translations/qtwebengine_locales/*pak>>lib64/qt/libexec/qtwebengine_locales;
+    ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/libexec/qtwebengine_devtools_resources.pak;
+    ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/libexec/qtwebengine_resources.pak;
+    ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/libexec/qtwebengine_resources_100p.pak;
+    ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/libexec/qtwebengine_resources_200p.pak;
+    ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/libexec/icudtl.dat;
+    ${PREBUILT_ROOT}/libexec/QtWebEngineProcess>lib64/qt/libexec/QtWebEngineProcess;)
 
   # Note: this will only set the property for install targets, not during build.
   set(
@@ -82,21 +92,23 @@ elseif(ANDROID_TARGET_OS STREQUAL "windows_msvc")
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib)
   # Obtained by running ListDlls.exe from sysinternals tool
   set(QT5_SHARED_DEPENDENCIES
-      ${PREBUILT_ROOT}/bin/Qt5Svg.dll>lib64/qt//qt/lib/Qt5Svg.dll;
-      ${PREBUILT_ROOT}/bin/Qt5Core.dll>lib64/qt//qt/lib/Qt5Core.dll;
-      ${PREBUILT_ROOT}/bin/Qt5Gui.dll>lib64/qt//qt/lib/Qt5Gui.dll;
-      ${PREBUILT_ROOT}/bin/Qt5Widgets.dll>lib64/qt//qt/lib/Qt5Widgets.dll;
-      ${PREBUILT_ROOT}/plugins/platforms/qwindows.dll>lib64/qt//qt/plugins/platforms/qwindows.dll;
-      ${PREBUILT_ROOT}/plugins/iconengines/qsvgicon.dll>lib64/qt//qt/plugins/iconengines/qsvgicon.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qgif.dll>lib64/qt//qt/plugins/imageformats/qgif.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qicns.dll>lib64/qt//qt/plugins/imageformats/qicns.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qico.dll>lib64/qt//qt/plugins/imageformats/qico.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qjpeg.dll>lib64/qt//qt/plugins/imageformats/qjpeg.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qsvg.dll>lib64/qt//qt/plugins/imageformats/qsvg.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qtga.dll>lib64/qt//qt/plugins/imageformats/qtga.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qtiff.dll>lib64/qt//qt/plugins/imageformats/qtiff.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qwbmp.dll>lib64/qt//qt/plugins/imageformats/qwbmp.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qwebp.dll>lib64/qt//qt/plugins/imageformats/qwebp.dll;)
+      ${PREBUILT_ROOT}/bin/Qt5Svg.dll>lib64/qt/qt/lib/Qt5Svg.dll;
+      ${PREBUILT_ROOT}/bin/Qt5Core.dll>lib64/qt/qt/lib/Qt5Core.dll;
+      ${PREBUILT_ROOT}/bin/Qt5Gui.dll>lib64/qt/qt/lib/Qt5Gui.dll;
+      ${PREBUILT_ROOT}/bin/Qt5Widgets.dll>lib64/qt/qt/lib/Qt5Widgets.dll;
+      ${PREBUILT_ROOT}/plugins/platforms/qwindows.dll>lib64/qt/qt/plugins/platforms/qwindows.dll;
+      ${PREBUILT_ROOT}/plugins/iconengines/qsvgicon.dll>lib64/qt/qt/plugins/iconengines/qsvgicon.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qgif.dll>lib64/qt/qt/plugins/imageformats/qgif.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qicns.dll>lib64/qt/qt/plugins/imageformats/qicns.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qico.dll>lib64/qt/qt/plugins/imageformats/qico.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qjpeg.dll>lib64/qt/qt/plugins/imageformats/qjpeg.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qsvg.dll>lib64/qt/qt/plugins/imageformats/qsvg.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qtga.dll>lib64/qt/qt/plugins/imageformats/qtga.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qtiff.dll>lib64/qt/qt/plugins/imageformats/qtiff.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qwbmp.dll>lib64/qt/qt/plugins/imageformats/qwbmp.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qwebp.dll>lib64/qt/qt/plugins/imageformats/qwebp.dll;
+      # Let's add the webengine dependencies, (Note we only have the executable available)
+      ${PREBUILT_ROOT}/bin/QtWebEngineProcess.exe>lib64/qt/libexec/QtWebEngineProcess.exe;)
 elseif(ANDROID_TARGET_TAG MATCHES "windows-x86.*")
   # On Windows, linking to mingw32 is required. The library is provided by the toolchain, and depends on a main()
   # function provided by qtmain which itself depends on qMain(). These must appear iemulator-libui_unittestsn LDFLAGS
@@ -104,45 +116,60 @@ elseif(ANDROID_TARGET_TAG MATCHES "windows-x86.*")
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/bin -lmingw32 ${PREBUILT_ROOT}/lib/libqtmain.a)
   # Obtained by running ListDlls.exe from sysinternals tool
   set(QT5_SHARED_DEPENDENCIES
-      ${PREBUILT_ROOT}/bin/Qt5Svg.dll>lib64/qt//qt/lib/Qt5Svg.dll;
-      ${PREBUILT_ROOT}/bin/Qt5Core.dll>lib64/qt//qt/lib/Qt5Core.dll;
-      ${PREBUILT_ROOT}/bin/Qt5Gui.dll>lib64/qt//qt/lib/Qt5Gui.dll;
-      ${PREBUILT_ROOT}/bin/Qt5Widgets.dll>lib64/qt//qt/lib/Qt5Widgets.dll;
-      ${PREBUILT_ROOT}/plugins/platforms/qwindows.dll>lib64/qt//qt/plugins/platforms/qwindows.dll;
-      ${PREBUILT_ROOT}/plugins/iconengines/qsvgicon.dll>lib64/qt//qt/plugins/iconengines/qsvgicon.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qgif.dll>lib64/qt//qt/plugins/imageformats/qgif.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qicns.dll>lib64/qt//qt/plugins/imageformats/qicns.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qico.dll>lib64/qt//qt/plugins/imageformats/qico.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qjpeg.dll>lib64/qt//qt/plugins/imageformats/qjpeg.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qsvg.dll>lib64/qt//qt/plugins/imageformats/qsvg.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qtga.dll>lib64/qt//qt/plugins/imageformats/qtga.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qtiff.dll>lib64/qt//qt/plugins/imageformats/qtiff.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qwbmp.dll>lib64/qt//qt/plugins/imageformats/qwbmp.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qwebp.dll>lib64/qt//qt/plugins/imageformats/qwebp.dll;)
+      ${PREBUILT_ROOT}/bin/Qt5Svg.dll>lib64/qt/qt/lib/Qt5Svg.dll;
+      ${PREBUILT_ROOT}/bin/Qt5Core.dll>lib64/qt/qt/lib/Qt5Core.dll;
+      ${PREBUILT_ROOT}/bin/Qt5Gui.dll>lib64/qt/qt/lib/Qt5Gui.dll;
+      ${PREBUILT_ROOT}/bin/Qt5Widgets.dll>lib64/qt/qt/lib/Qt5Widgets.dll;
+      ${PREBUILT_ROOT}/plugins/platforms/qwindows.dll>lib64/qt/qt/plugins/platforms/qwindows.dll;
+      ${PREBUILT_ROOT}/plugins/iconengines/qsvgicon.dll>lib64/qt/qt/plugins/iconengines/qsvgicon.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qgif.dll>lib64/qt/qt/plugins/imageformats/qgif.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qicns.dll>lib64/qt/qt/plugins/imageformats/qicns.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qico.dll>lib64/qt/qt/plugins/imageformats/qico.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qjpeg.dll>lib64/qt/qt/plugins/imageformats/qjpeg.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qsvg.dll>lib64/qt/qt/plugins/imageformats/qsvg.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qtga.dll>lib64/qt/qt/plugins/imageformats/qtga.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qtiff.dll>lib64/qt/qt/plugins/imageformats/qtiff.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qwbmp.dll>lib64/qt/qt/plugins/imageformats/qwbmp.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qwebp.dll>lib64/qt/qt/plugins/imageformats/qwebp.dll;)
 elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
   # LD_DEBUG=libs ./emulator @P_64 2>&1 | grep qt | grep init
   set(
     QT5_SHARED_DEPENDENCIES
-    ${PREBUILT_ROOT}/lib/libQt5Core.so.5>lib64/qt//lib/libQt5Core.so.5;
-    ${PREBUILT_ROOT}/lib/libQt5Gui.so.5>lib64/qt//lib/libQt5Gui.so.5;
-    ${PREBUILT_ROOT}/lib/libQt5Widgets.so.5>lib64/qt//lib/libQt5Widgets.so.5;
-    ${PREBUILT_ROOT}/lib/libQt5Svg.so.5>lib64/qt//lib/libQt5Svg.so.5;
-    ${PREBUILT_ROOT}/lib/libQt5DBus.so.5>lib64/qt//lib/libQt5DBus.so.5;
-    ${PREBUILT_ROOT}/lib/libQt5XcbQpa.so.5>lib64/qt//lib/libQt5XcbQpa.so.5;
-    ${PREBUILT_ROOT}/plugins/platforms/libqxcb.so>lib64/qt//plugins/platforms/libqxcb.so;
-    ${PREBUILT_ROOT}/plugins/xcbglintegrations/libqxcb-glx-integration.so>lib64/qt//plugins/xcbglintegrations/libqxcb-glx-integration.so;
-    ${PREBUILT_ROOT}/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so>lib64/qt//plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so;
-    ${PREBUILT_ROOT}/plugins/iconengines/libqsvgicon.so>lib64/qt//plugins/iconengines/libqsvgicon.so;
-    ${PREBUILT_ROOT}/plugins/imageformats/libqwebp.so>lib64/qt//plugins/imageformats/libqwebp.so;
-    ${PREBUILT_ROOT}/plugins/imageformats/libqgif.so>lib64/qt//plugins/imageformats/libqgif.so;
-    ${PREBUILT_ROOT}/plugins/imageformats/libqicns.so>lib64/qt//plugins/imageformats/libqicns.so;
-    ${PREBUILT_ROOT}/plugins/imageformats/libqico.so>lib64/qt//plugins/imageformats/libqico.so;
-    ${PREBUILT_ROOT}/plugins/imageformats/libqjpeg.so>lib64/qt//plugins/imageformats/libqjpeg.so;
-    ${PREBUILT_ROOT}/plugins/imageformats/libqsvg.so>lib64/qt//plugins/imageformats/libqsvg.so;
-    ${PREBUILT_ROOT}/plugins/imageformats/libqtga.so>lib64/qt//plugins/imageformats/libqtga.so;
-    ${PREBUILT_ROOT}/plugins/imageformats/libqtiff.so>lib64/qt//plugins/imageformats/libqtiff.so;
-    ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp.so>lib64/qt//plugins/imageformats/libqwbmp.so)
+    ${PREBUILT_ROOT}/lib/libQt5Core.so.5>lib64/qt/lib/libQt5Core.so.5;
+    ${PREBUILT_ROOT}/lib/libQt5Gui.so.5>lib64/qt/lib/libQt5Gui.so.5;
+    ${PREBUILT_ROOT}/lib/libQt5Widgets.so.5>lib64/qt/lib/libQt5Widgets.so.5;
+    ${PREBUILT_ROOT}/lib/libQt5Svg.so.5>lib64/qt/lib/libQt5Svg.so.5;
+    ${PREBUILT_ROOT}/lib/libQt5DBus.so.5>lib64/qt/lib/libQt5DBus.so.5;
+    ${PREBUILT_ROOT}/lib/libQt5XcbQpa.so.5>lib64/qt/lib/libQt5XcbQpa.so.5;
+    ${PREBUILT_ROOT}/plugins/platforms/libqxcb.so>lib64/qt/plugins/platforms/libqxcb.so;
+    ${PREBUILT_ROOT}/plugins/xcbglintegrations/libqxcb-glx-integration.so>lib64/qt/plugins/xcbglintegrations/libqxcb-glx-integration.so;
+    ${PREBUILT_ROOT}/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so>lib64/qt/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so;
+    ${PREBUILT_ROOT}/plugins/iconengines/libqsvgicon.so>lib64/qt/plugins/iconengines/libqsvgicon.so;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqwebp.so>lib64/qt/plugins/imageformats/libqwebp.so;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqgif.so>lib64/qt/plugins/imageformats/libqgif.so;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqicns.so>lib64/qt/plugins/imageformats/libqicns.so;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqico.so>lib64/qt/plugins/imageformats/libqico.so;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqjpeg.so>lib64/qt/plugins/imageformats/libqjpeg.so;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqsvg.so>lib64/qt/plugins/imageformats/libqsvg.so;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqtga.so>lib64/qt/plugins/imageformats/libqtga.so;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqtiff.so>lib64/qt/plugins/imageformats/libqtiff.so;
+    ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp.so>lib64/qt/plugins/imageformats/libqwbmp.so
+    # Let's add the webengine dependencies
+    ${PREBUILT_ROOT}/lib/libQt5WebEngineCore.so.5>lib64/qt/lib/libQt5WebEngineCore.so.5;
+    ${PREBUILT_ROOT}/lib/libQt5Quick.so.5>lib64/qt/lib/libQt5Quick.so.5;
+    ${PREBUILT_ROOT}/lib/libQt5Network.so.5>lib64/qt/lib/libQt5Network.so.5;
+    ${PREBUILT_ROOT}/lib/libQt5Qml.so.5>lib64/qt/lib/libQt5Qml.so.5;
+    ${PREBUILT_ROOT}/lib/libQt5WebChannel.so.5>lib64/qt/lib/libQt5WebChannel.so.5;
+
+    ${PREBUILT_ROOT}/translations/qtwebengine_locales/*pak>>lib64/qt/libexec/qtwebengine_locales;
+    ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/libexec/qtwebengine_devtools_resources.pak;
+    ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/libexec/qtwebengine_resources.pak;
+    ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/libexec/qtwebengine_resources_100p.pak;
+    ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/libexec/qtwebengine_resources_200p.pak;
+    ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/libexec/icudtl.dat;
+    ${PREBUILT_ROOT}/libexec/QtWebEngineProcess>lib64/qt/libexec/QtWebEngineProcess;)
+
   set(QT5_SHARED_PROPERTIES
       "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/lib';LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/lib/plugins'")
 endif()
