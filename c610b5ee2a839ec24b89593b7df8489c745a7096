@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8ee0896_65c7cc92",
+        "filename": "android/android-emu/android-libui.cmake",
+        "patchSetId": 18
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-11-06T17:38:59Z",
+      "side": 1,
+      "message": "We\u0027d like to have these listed in alphabetical order",
+      "range": {
+        "startLine": 60,
+        "startChar": 4,
+        "endLine": 62,
+        "endChar": 78
+      },
+      "revId": "c610b5ee2a839ec24b89593b7df8489c745a7096",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "25154107_10e8b976",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-11-06T17:38:59Z",
+      "side": 1,
+      "message": "Do we know we can use this port?",
+      "range": {
+        "startLine": 19,
+        "startChar": 28,
+        "endLine": 19,
+        "endChar": 32
+      },
+      "revId": "c610b5ee2a839ec24b89593b7df8489c745a7096",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cce1ab42_accbddea",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-11-06T17:38:59Z",
+      "side": 1,
+      "message": "I\u0027d make this its own statement, but that\u0027s just a personal preference.",
+      "range": {
+        "startLine": 67,
+        "startChar": 13,
+        "endLine": 67,
+        "endChar": 39
+      },
+      "revId": "c610b5ee2a839ec24b89593b7df8489c745a7096",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ddad5a27_43ba719a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-11-06T17:38:59Z",
+      "side": 1,
+      "message": "\u0027size\u0027 or \u0027packetSize\u0027?",
+      "range": {
+        "startLine": 118,
+        "startChar": 8,
+        "endLine": 118,
+        "endChar": 9
+      },
+      "revId": "c610b5ee2a839ec24b89593b7df8489c745a7096",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d1ca993_80ecdff6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-11-06T17:38:59Z",
+      "side": 1,
+      "message": "Separate statement?",
+      "range": {
+        "startLine": 121,
+        "startChar": 13,
+        "endLine": 121,
+        "endChar": 29
+      },
+      "revId": "c610b5ee2a839ec24b89593b7df8489c745a7096",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "53871cc8_0f2ccf33",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-11-06T17:38:59Z",
+      "side": 1,
+      "message": "Need a space after the comma. The backslash is not needed.",
+      "range": {
+        "startLine": 30,
+        "startChar": 43,
+        "endLine": 30,
+        "endChar": 52
+      },
+      "revId": "c610b5ee2a839ec24b89593b7df8489c745a7096",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
