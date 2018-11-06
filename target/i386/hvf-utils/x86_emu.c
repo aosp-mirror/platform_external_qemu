@@ -46,7 +46,7 @@
 #include "vmx.h"
 
 static void print_debug(struct CPUState *cpu);
-void hvf_handle_io(struct CPUState *cpu, uint16_t port, void *data, int direction, int size, uint32_t count);
+void hvf_handle_io(uint16_t port, void *data, int direction, int size, uint32_t count);
 
 #define EXEC_2OP_LOGIC_CMD(cpu, decode, cmd, FLAGS_FUNC, save_res) \
 {                                                       \
@@ -426,16 +426,16 @@ static void exec_out(struct CPUState *cpu, struct x86_decode *decode)
 {
     switch (decode->opcode[0]) {
         case 0xe6:
-            hvf_handle_io(cpu, decode->op[0].val, &AL(cpu), 1, 1, 1);
+            hvf_handle_io(decode->op[0].val, &AL(cpu), 1, 1, 1);
             break;
         case 0xe7:
-            hvf_handle_io(cpu, decode->op[0].val, &RAX(cpu), 1, decode->operand_size, 1);
+            hvf_handle_io(decode->op[0].val, &RAX(cpu), 1, decode->operand_size, 1);
             break;
         case 0xee:
-            hvf_handle_io(cpu, DX(cpu), &AL(cpu), 1, 1, 1);
+            hvf_handle_io(DX(cpu), &AL(cpu), 1, 1, 1);
             break;
         case 0xef:
-            hvf_handle_io(cpu, DX(cpu), &RAX(cpu), 1, decode->operand_size, 1);
+            hvf_handle_io(DX(cpu), &RAX(cpu), 1, decode->operand_size, 1);
             break;
         default:
             VM_PANIC("Bad out opcode\n");
@@ -449,20 +449,20 @@ static void exec_in(struct CPUState *cpu, struct x86_decode *decode)
     addr_t val = 0;
     switch (decode->opcode[0]) {
         case 0xe4:
-            hvf_handle_io(cpu, decode->op[0].val, &AL(cpu), 0, 1, 1);
+            hvf_handle_io(decode->op[0].val, &AL(cpu), 0, 1, 1);
             break;
         case 0xe5:
-            hvf_handle_io(cpu, decode->op[0].val, &val, 0, decode->operand_size, 1);
+            hvf_handle_io(decode->op[0].val, &val, 0, decode->operand_size, 1);
             if (decode->operand_size == 2)
                 AX(cpu) = val;
             else
                 RAX(cpu) = (uint32_t)val;
             break;
         case 0xec:
-            hvf_handle_io(cpu, DX(cpu), &AL(cpu), 0, 1, 1);
+            hvf_handle_io(DX(cpu), &AL(cpu), 0, 1, 1);
             break;
         case 0xed:
-            hvf_handle_io(cpu, DX(cpu), &val, 0, decode->operand_size, 1);
+            hvf_handle_io(DX(cpu), &val, 0, decode->operand_size, 1);
             if (decode->operand_size == 2)
                 AX(cpu) = val;
             else
@@ -504,7 +504,7 @@ static void exec_ins_single(struct CPUState *cpu, struct x86_decode *decode)
 {
     addr_t addr = linear_addr_size(cpu, RDI(cpu), decode->addressing_size, REG_SEG_ES);
 
-    hvf_handle_io(cpu, DX(cpu), cpu->hvf_x86->mmio_buf, 0, decode->operand_size, 1);
+    hvf_handle_io(DX(cpu), cpu->hvf_x86->mmio_buf, 0, decode->operand_size, 1);
     vmx_write_mem(cpu, addr, cpu->hvf_x86->mmio_buf, decode->operand_size);
 
     string_increment_reg(cpu, REG_RDI, decode);
@@ -525,7 +525,7 @@ static void exec_outs_single(struct CPUState *cpu, struct x86_decode *decode)
     addr_t addr = decode_linear_addr(cpu, decode, RSI(cpu), REG_SEG_DS);
 
     vmx_read_mem(cpu, cpu->hvf_x86->mmio_buf, addr, decode->operand_size);
-    hvf_handle_io(cpu, DX(cpu), cpu->hvf_x86->mmio_buf, 1, decode->operand_size, 1);
+    hvf_handle_io(DX(cpu), cpu->hvf_x86->mmio_buf, 1, decode->operand_size, 1);
 
     string_increment_reg(cpu, REG_RSI, decode);
 }
