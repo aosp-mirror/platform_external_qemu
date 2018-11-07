@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c3dca00c_e03c8eab",
+        "filename": "include/exec/memory.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 757,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-07T18:06:04Z",
+      "side": 1,
+      "message": "I don\u0027t see the ram address, is this intentional?",
+      "range": {
+        "startLine": 757,
+        "startChar": 49,
+        "endLine": 757,
+        "endChar": 53
+      },
+      "revId": "09f6e4521bcfa448cc8cb8c11b6819f53930cf90",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
