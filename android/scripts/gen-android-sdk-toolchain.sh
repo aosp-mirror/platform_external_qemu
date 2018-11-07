@@ -74,8 +74,8 @@ option_register_var "--no-ccache" OPT_NO_CCACHE "Don't try to probe and use ccac
 OPT_CXX11=
 option_register_var "--cxx11" OPT_CXX11 "Enable C++11 features."
 
-OPT_FETCH_MSVC=
-option_register_var "--fetch-msvc" OPT_FETCH_MSVC "Fetch the msvc build (google internal)"
+OPT_FORCE_FETCH_WINTOOLCHAIN=
+option_register_var "--force-fetch-wintoolchain" OPT_FORCE_FETCH_WINTOOLCHAIN "Force fetch the Windows toolchain (google internal)"
 
 OPT_VSDIR=
 option_register_var "--vsdir=<msvc_install_dir>" OPT_VSDIR "Location of the msvc sdk. See documentation for details."
@@ -486,19 +486,43 @@ configure_google_storage() {
 }
 
 fetch_dependencies_msvc() {
+    # Takes two parameters:
+    # $1: The path to the mount point for ciopfs,
+    # $2: The path to the data directory for ciopfs
+
+    # if you really want to force pull-down the sdk again, you can specify it in the rebuild script via
+    # --force-refresh-winsdk
     CLANG_VERSION=$(get_clang_version)
+    # The mount point for ciopfs (case-insensitive)
+    local MOUNT_POINT="$1"
+    # Where the windows sdk is actually stored in ciopfs
+    local DATA_POINT="$2"
 
-    local MSVC_DIR=${INSTALL_DIR}/msvc
-    local CIOPFS_DIR=${INSTALL_DIR}/.ciopfs
-    mkdir -p $MSVC_DIR
-    mkdir -p $CIOPFS_DIR
-    local CPIOFS="${AOSP_DIR}/prebuilts/android-emulator-build/common/ciopfs/linux-x86_64/ciopfs"
-    run $CPIOFS -o use_ino $CIOPFS_DIR $MSVC_DIR
+    if [ -d "$MOUNT_POINT" ] && [ -d "$DATA_POINT" ]; then
+      # We will cache the windows sdk and reuse it for each build, unless you specify to force pull it down
+      # via --force-fetch-wintoolchain
+      if [ "$OPT_FORCE_FETCH_WINTOOLCHAIN" ]; then
+        # Need to unmount $MOUNT_POINT first or we can't delete it
+        run fusermount -u ${MOUNT_POINT}
+        run rm -rf $MOUNT_POINT
+        run rm -rf $DATA_POINT
+      else
+        return 0
+      fi
+    fi
 
+    # Create the case-insensitive filesystem
+    run mkdir -p {$MOUNT_POINT,$DATA_POINT}
+    local CIOPFS="${AOSP_DIR}/prebuilts/android-emulator-build/common/ciopfs/linux-x86_64/ciopfs"
+    run $CIOPFS -o use_ino $DATA_POINT $MOUNT_POINT
+
+    # Download the windows sdk
     local DEPOT_TOOLS=$(aosp_depot_tools_dir)
     local MSVC_HASH=$(aosp_msvc_hash)
+
     log "Looking to get tools version: ${MSVC_HASH}"
-    run ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MSVC_DIR $MSVC_HASH
+    log "Downloading the SDK (this might take a couple of minutes ...)"
+    run ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MOUNT_POINT $MSVC_HASH
 }
 
 get_clang_version() {
@@ -515,27 +539,30 @@ prepare_build_for_windows_msvc() {
     CLANG_DIR=$(realpath $CLANG_BINDIR/..)
     CLANG_VERSION=$(get_clang_version)
 
+    # Let's cache the Windows SDK toolchain in the prebuilts/android-emulator-build/msvc 
+    # fetch_dependencies_msvc will pull down the sdk from google storage if the provided directories are
+    # not found.
+    MSVC_ROOT_DIR="${AOSP_DIR}/prebuilts/android-emulator-build/msvc"
+    CIOPFS_DIR="${AOSP_DIR}/prebuilts/android-emulator-build/.ciopfs"
+
     if [ "$OPT_VSDIR" ]; then
-      MSVC_DIR=$OPT_VSDIR
+      MSVC_ROOT_DIR=$OPT_VSDIR
     else
       MSVC_HASH=$(aosp_msvc_hash)
-      MSVC_DIR=$INSTALL_DIR/msvc/vs_files/${MSVC_HASH}/
+      MSVC_DIR=${MSVC_ROOT_DIR}/vs_files/${MSVC_HASH}
     fi
   
-    if [ "$OPT_FETCH_MSVC" ] || [ ! -d $MSVC_DIR ]; then
-      fetch_dependencies_msvc
-    fi
-
+    fetch_dependencies_msvc "${MSVC_ROOT_DIR}" "${CIOPFS_DIR}"
 
     # We cannot have multiple SDK versions in the same dir
-    MSVC_VER=$(ls -1 ${MSVC_DIR}/win_sdk/Include/)
+    MSVC_VER=$(ls -1 ${MSVC_DIR}/win_sdk/Include)
     log "Using version [${MSVC_VER}]"
 
     VC_VER=$(ls -1 ${MSVC_DIR}/VC/Tools/MSVC)
     log "Using visual studio version: ${VC_VER}"
 
-    run mkdir -p $MSVC_DIR/clang-intrins/include
-    run cp -rf ${CLANG_DIR}/lib64/clang/${CLANG_VERSION}/include  $MSVC_DIR/clang-intrins/
+    run mkdir -p $MSVC_ROOT_DIR/clang-intrins/include
+    run cp -rf ${CLANG_DIR}/lib64/clang/${CLANG_VERSION}/include  $MSVC_ROOT_DIR/clang-intrins/
 
     local CLANG_LINK_FLAGS=
     var_append CLANG_LINK_FLAGS "-fuse-ld=lld"
@@ -572,7 +599,7 @@ prepare_build_for_windows_msvc() {
     var_append EXTRA_CFLAGS "-Wno-c++11-narrowing"
     # Disable builtin #include directories
     var_append EXTRA_CFLAGS "-nobuiltininc"
-    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/clang-intrins/include"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_ROOT_DIR/clang-intrins/include"
     var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/VC/Tools/MSVC/${VC_VER}/include"
     var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/ucrt"
     var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/um"
@@ -601,7 +628,7 @@ prepare_build_for_windows_msvc() {
     var_append EXTRA_CXXFLAGS "-nobuiltininc"
     # Disable standard #include directories for the C++ standard library
     var_append EXTRA_CXXFLAGS "-nostdinc++"
-    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/clang-intrins/include"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_ROOT_DIR/clang-intrins/include"
     var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/VC/Tools/MSVC/${VC_VER}/include"
     var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/ucrt"
     var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/um"
@@ -698,6 +725,10 @@ prepare_build_for_host () {
 
     if [ "$OPT_PRINT" ]; then
         print_info $OPT_PRINT
+    elif [ "$OPT_FORCE_FETCH_WINTOOLCHAIN" ]; then
+        # The windows toolchain should have been refreshed in prepare_build_for_windows_msvc
+        # so don't need to do anything here.
+        return 0
     else
         log "Generating ${BINPREFIX%%-} wrapper toolchain in $INSTALL_DIR"
         gen_wrapper_toolchain "$BINPREFIX" "$DST_PREFIX" "$INSTALL_DIR" "$CLANG_BINDIR"

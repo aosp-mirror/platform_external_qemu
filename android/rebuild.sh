@@ -17,6 +17,7 @@ VERBOSE=1
 
 MINGW=
 WINDOWS_MSVC=
+FORCE_FETCH_WINTOOLCHAIN=
 NO_TESTS=
 OUT_DIR=objs
 HELP=
@@ -43,6 +44,9 @@ for OPT; do
               panic "Choose either mingw or windows-msvc, not both."
             fi
             WINDOWS_MSVC=true
+            ;;
+        --force-fetch-wintoolchain)
+            WINTOOLCHAIN=true
             ;;
         --verbose)
             VERBOSE=$(( $VERBOSE + 1 ))
