@@ -148,7 +148,7 @@ LOCAL_CFLAGS += \\
     -DVK_USE_PLATFORM_ANDROID_KHR \\
     -DVK_NO_PROTOTYPES \\
 
-LOCAL_SRC_FILES := VulkanStream.cpp \\
+LOCAL_SRC_FILES := VulkanStream.cpp HandleWrappers.cpp \\
     %s
 
 $(call emugl-end-module)
@@ -165,6 +165,17 @@ class IOStream;
 #include "android/base/AlignedBuf.h"
 
 #include "goldfish_vk_marshaling_guest.h"
+"""
+        functableImplInclude = """
+#include "VkEncoder.h"
+#include "HostConnection.h"
+
+// Stuff we are not going to use but if included,
+// will cause compile errors. These are Android Vulkan
+// required extensions, but the approach will be to
+// implement them completely on the guest side.
+#undef VK_KHR_android_surface
+#undef VK_ANDROID_external_memory_android_hardware_buffer
 """
         marshalIncludeGuest = """
 #include "goldfish_vk_marshaling_guest.h"
@@ -224,28 +235,36 @@ using DlSymFunc = void* (void*, const char*);
 
 """
 
-        self.guest_tag = "guest"
+        self.guest_encoder_tag = "guest_encoder"
+        self.guest_hal_tag = "guest_hal"
         self.host_tag = "host"
 
-        self.guest_abs_destination = \
+        self.guest_abs_encoder_destination = \
             os.path.join(
                 os.getcwd(),
                 "..", "..",
                 "device", "generic", "goldfish-opengl",
                 "system", "vulkan_enc")
+        self.guest_abs_hal_destination = \
+            os.path.join(
+                os.getcwd(),
+                "..", "..",
+                "device", "generic", "goldfish-opengl",
+                "system", "vulkan")
         self.host_abs_decoder_destination = \
             os.path.join(
                 os.getcwd(),
                 "android", "android-emugl", "host",
                 "libs", "libOpenglRender")
 
-        self.addGuestModule(
+        self.addGuestEncoderModule(
             "VkEncoder",
             extraHeader = encoderInclude,
             extraImpl = encoderImplInclude,
             useNamespace = False)
-        self.addGuestModule("goldfish_vk_marshaling_guest",
-                            extraHeader=marshalIncludeGuest)
+        self.addGuestEncoderModule("goldfish_vk_marshaling_guest",
+                                   extraHeader=marshalIncludeGuest)
+        self.addGuestHalModule("func_table", extraImpl=functableImplInclude)
         self.addModule("common", "goldfish_vk_marshaling",
                        extraHeader=vulkanStreamInclude)
         self.addModule("common", "goldfish_vk_testing",
@@ -264,6 +283,7 @@ using DlSymFunc = void* (void*, const char*);
 
         self.addWrapper(cereal.VulkanEncoder, "VkEncoder")
         self.addWrapper(cereal.VulkanMarshaling, "goldfish_vk_marshaling_guest")
+        self.addWrapper(cereal.VulkanFuncTable, "func_table")
         self.addWrapper(cereal.VulkanMarshaling, "goldfish_vk_marshaling")
         self.addWrapper(cereal.VulkanTesting, "goldfish_vk_testing")
         self.addWrapper(cereal.VulkanDeepcopy, "goldfish_vk_deepcopy")
@@ -278,21 +298,29 @@ using DlSymFunc = void* (void*, const char*);
         def addSrcEntry(m):
             mkSrcEntry = m.getMakefileSrcEntry()
             cmakeSrcEntry = m.getCMakeSrcEntry()
-            if m.directory == self.guest_tag:
+            if m.directory == self.guest_encoder_tag:
                 self.guestAndroidMkCppFiles += mkSrcEntry
             elif m.directory == self.host_tag:
                 self.hostDecoderCMakeCppFiles += cmakeSrcEntry
-            else:
+            elif m.directory != self.guest_hal_tag:
                 self.hostCMakeCppFiles += cmakeSrcEntry
 
         self.forEachModule(addSrcEntry)
 
-    def addGuestModule(self, basename, extraHeader = "", extraImpl = "", useNamespace = True):
-        self.addModule(self.guest_tag,
+    def addGuestEncoderModule(self, basename, extraHeader = "", extraImpl = "", useNamespace = True):
+        self.addModule(self.guest_encoder_tag,
                        basename,
                        extraHeader = extraHeader,
                        extraImpl = extraImpl,
-                       customAbsDir = self.guest_abs_destination,
+                       customAbsDir = self.guest_abs_encoder_destination,
+                       useNamespace = useNamespace)
+
+    def addGuestHalModule(self, basename, extraHeader = "", extraImpl = "", useNamespace = True):
+        self.addModule(self.guest_hal_tag,
+                       basename,
+                       extraHeader = extraHeader,
+                       extraImpl = extraImpl,
+                       customAbsDir = self.guest_abs_hal_destination,
                        useNamespace = useNamespace)
 
     def addHostModule(self, basename, extraHeader = "", extraImpl = "", useNamespace = True):
@@ -372,12 +400,12 @@ using DlSymFunc = void* (void*, const char*);
         write(self.host_cmake_generator(self.hostCMakeCppFiles),
               file = self.outFile)
 
-        guestAndroidMkPath = \
+        guestEncoderAndroidMkPath = \
             os.path.join( \
-                self.guest_abs_destination,
+                self.guest_abs_encoder_destination,
                 "Android.mk")
 
-        guestAndroidMkFile = open(guestAndroidMkPath, "w", encoding="utf-8")
+        guestAndroidMkFile = open(guestEncoderAndroidMkPath, "w", encoding="utf-8")
 
         write(self.guest_android_mk_generator(self.guestAndroidMkCppFiles),
               file = guestAndroidMkFile)
