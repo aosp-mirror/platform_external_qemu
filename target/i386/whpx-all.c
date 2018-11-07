@@ -1366,6 +1366,10 @@ static void whpx_process_section(MemoryRegionSection *section, int add)
         return;
     }
 
+    if (memory_region_is_user_backed(mr)) {
+        return;
+    }
+
     delta = qemu_real_host_page_size - (start_pa & ~qemu_real_host_page_mask);
     delta &= ~qemu_real_host_page_mask;
     if (delta > size) {

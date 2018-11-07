@@ -104,6 +104,9 @@ static MemoryRegion io_mem_unassigned;
 /* RAM is a mapped file */
 #define RAM_MAPPED (1 << 3)
 
+/* RAM backing is managed by user */
+#define RAM_USER_BACKED (1 << 4)
+
 /* UFFDIO_ZEROPAGE is available on this RAMBlock to atomically
  * zero the page and wake waiting processes.
  * (Set during postcopy)
@@ -2105,7 +2108,7 @@ static void ram_block_add(RAMBlock *new_block, Error **errp, bool shared)
     qemu_mutex_lock_ramlist();
     new_block->offset = find_ram_offset(new_block->max_length);
 
-    if (!new_block->host) {
+    if (!new_block->host && !(new_block->flags & RAM_USER_BACKED)) {
         if (xen_enabled()) {
             xen_ram_alloc(new_block->offset, new_block->max_length,
                           new_block->mr, &err);
@@ -2326,6 +2329,32 @@ RAMBlock *qemu_ram_alloc_resizeable(ram_addr_t size, ram_addr_t maxsz,
 {
     return qemu_ram_alloc_internal(size, maxsz, resized, NULL, true,
                                    false, mr, errp);
+}
+
+RAMBlock *qemu_ram_alloc_user_backed(ram_addr_t size, MemoryRegion *mr,
+                                     Error **errp)
+{
+    fprintf(stderr, "%s: call\n", __func__);
+    RAMBlock *new_block;
+    Error *local_err = NULL;
+
+    size = HOST_PAGE_ALIGN(size);
+    new_block = (RAMBlock*)g_malloc0(sizeof(*new_block));
+    new_block->mr = mr;
+    new_block->used_length = size;
+    new_block->max_length = size;
+    new_block->fd = -1;
+    new_block->page_size = getpagesize();
+    new_block->host = NULL;
+    new_block->flags |= RAM_PREALLOC;
+    new_block->flags |= RAM_USER_BACKED;
+    ram_block_add(new_block, &local_err, false /* not shared */);
+    if (local_err) {
+        g_free(new_block);
+        error_propagate(errp, local_err);
+        return NULL;
+    }
+    return new_block;
 }
 
 static void reclaim_ramblock(RAMBlock *block)
