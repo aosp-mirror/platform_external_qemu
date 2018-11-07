@@ -904,6 +904,23 @@ static MemoryListener kvm_io_listener = {
     .priority = 10,
 };
 
+// User backed memory region API
+static int user_backed_flags_to_kvm_flags(int flags) {
+    int kvm_flags = 0;
+    if (!(flags & USER_BACKED_RAM_FLAGS_WRITE)) {
+        kvm_flags |= KVM_MEM_READONLY;
+    }
+    return kvm_flags;
+}
+
+void qemu_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size, int flags) {
+    // TODO
+}
+
+void qemu_user_backed_ram_unmap(hwaddr gpa, void* hva, hwaddr size, int flags) {
+    // TODO
+}
+
 int kvm_set_irq(KVMState *s, int irq, int level)
 {
     struct kvm_irq_level event;

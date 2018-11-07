@@ -13,6 +13,7 @@
 #include "exec/address-spaces.h"
 #include "exec/exec-all.h"
 #include "exec/ioport.h"
+#include "exec/ram_addr.h"
 #include "qemu-common.h"
 #ifndef _MSC_VER
 #include "strings.h"
