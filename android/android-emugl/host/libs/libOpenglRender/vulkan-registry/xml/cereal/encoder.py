@@ -26,6 +26,9 @@ encoder_impl_preamble ="""
 using goldfish_vk::VulkanCountingStream;
 using goldfish_vk::VulkanStream;
 
+using android::aligned_buf_alloc;
+using android::aligned_buf_free;
+
 class VkEncoder::Impl {
 public:
     Impl(IOStream* stream) : m_stream(stream) { }
@@ -40,9 +43,110 @@ VkEncoder::VkEncoder(IOStream *stream) :
     mImpl(new VkEncoder::Impl(stream)) { }
 """
 
+COUNTING_STREAM = "countingStream"
+STREAM = "stream"
+
+# Common components of encoding a Vulkan API call
+def emit_count_marshal(typeInfo, param, cgen):
+    iterateVulkanType(
+        typeInfo, param,
+        VulkanMarshalingCodegen( \
+           cgen, COUNTING_STREAM, param.paramName,
+           API_PREFIX_MARSHAL, direction="write"))
+
+def emit_marshal(typeInfo, param, cgen):
+    iterateVulkanType(
+        typeInfo, param,
+        VulkanMarshalingCodegen( \
+           cgen, STREAM, param.paramName,
+           API_PREFIX_MARSHAL, direction="write"))
+
+def emit_unmarshal(typeInfo, param, cgen):
+    iterateVulkanType(
+        typeInfo, param,
+        VulkanMarshalingCodegen( \
+           cgen, STREAM, param.paramName,
+           API_PREFIX_UNMARSHAL, direction="read"))
+
+def emit_parameter_encode(typeInfo, api, cgen):
+    cgen.stmt("auto %s = mImpl->stream()" % STREAM)
+    cgen.stmt("auto %s = mImpl->countingStream()" % COUNTING_STREAM)
+    cgen.stmt("%s->rewind()" % COUNTING_STREAM)
+    
+    cgen.beginBlock()
+    
+    paramsToWrite = []
+    paramsToRead = []
+
+    for param in api.parameters:
+        paramsToWrite.append(param)
+        if param.possiblyOutput():
+            paramsToRead.append(param)
+    
+    # Use counting stream to calculate the packet size.    
+    for p in paramsToWrite:
+        emit_count_marshal(typeInfo, p, cgen)
+    
+    cgen.endBlock()
+    
+    cgen.stmt("uint32_t packetSize_%s = 4 + 4 + (uint32_t)%s->bytesWritten()" % \
+              (api.name, COUNTING_STREAM))
+    cgen.stmt("%s->rewind()" % COUNTING_STREAM)
+    
+    cgen.stmt("uint32_t opcode_%s = OP_%s" % (api.name, api.name))
+    cgen.stmt("%s->write(&opcode_%s, sizeof(uint32_t))" % (STREAM, api.name))
+    cgen.stmt("%s->write(&packetSize_%s, sizeof(uint32_t))" % (STREAM, api.name))
+    
+    for p in paramsToWrite:
+        emit_marshal(typeInfo, p, cgen)
+    for p in paramsToRead:
+        emit_unmarshal(typeInfo, p, cgen)
+
+def emit_return_unmarshal(typeInfo, api, cgen):
+    retType = api.getRetTypeExpr()
+
+    if retType == "void":
+        return
+
+    retVar = api.getRetVarExpr()
+    cgen.stmt("%s %s = (%s)0" % (retType, retVar, retType))
+    cgen.stmt("%s->read(&%s, %s)" % \
+              (STREAM, retVar, cgen.sizeofExpr(api.retType)))
+
+def emit_return(typeInfo, api, cgen):
+    if api.getRetTypeExpr() == "void":
+        return
+
+    retVar = api.getRetVarExpr()
+    cgen.stmt("return %s" % retVar)
+
+## Custom encoding definitions##################################################
+def encode_vkMapMemory(typeInfo, api, cgen):
+    emit_parameter_encode(typeInfo, api, cgen)
+    emit_return_unmarshal(typeInfo, api, cgen)
+
+    needWriteback = \
+        "((%s == VK_SUCCESS) && ppData && size > 0)" % api.getRetVarExpr()
+    cgen.beginIf(needWriteback)
+    cgen.stmt("*ppData = aligned_buf_alloc(1024 /* pick large alignment */, size);");
+    cgen.stmt("%s->read(*ppData, size)" % (STREAM))
+    cgen.endIf()
+
+    # TODO:
+    # The custom part: Depending on the return value,
+    # allocate some buffer (TODO: dma map) the result and return it to the user
+    # if ppData is not null.
+
+    emit_return(typeInfo, api, cgen)
+
+custom_encodes = {
+    "vkMapMemory" : encode_vkMapMemory,
+}
+
 class VulkanEncoder(VulkanWrapperGenerator):
     def __init__(self, module, typeInfo):
         VulkanWrapperGenerator.__init__(self, module, typeInfo)
+
         self.typeInfo = typeInfo
 
         self.cgenHeader = CodeGen()
@@ -62,63 +166,17 @@ class VulkanEncoder(VulkanWrapperGenerator):
         apiImpl = api.withModifiedName("VkEncoder::" + api.name)
 
         def makeImpl(cgen):
-            def streamParams(params, direction, streamVar):
-                if direction == "write":
-                    apiPrefix = API_PREFIX_MARSHAL
-                else:
-                    apiPrefix = API_PREFIX_UNMARSHAL
-
-                for p in params:
-                    codegen = \
-                        VulkanMarshalingCodegen(
-                            None,
-                            streamVar,
-                            p.paramName,
-                            apiPrefix,
-                            direction = direction)
-                    codegen.cgen = self.cgenImpl
-                    iterateVulkanType(self.typeInfo, p, codegen)
-
-            cgen.stmt("auto stream = mImpl->stream()")
-            cgen.stmt("auto countingStream = mImpl->countingStream()")
-            cgen.stmt("countingStream->rewind()")
-
-            cgen.beginBlock()
-
-            paramsToWrite = []
-            paramsToRead = []
-
-            for param in api.parameters:
-                paramsToWrite.append(param)
-                if param.possiblyOutput():
-                    paramsToRead.append(param)
-
-            streamParams(paramsToWrite, "write", "countingStream")
-
-            cgen.endBlock()
-
-            cgen.stmt("uint32_t packetSize_%s = 4 + 4 + (uint32_t)countingStream->bytesWritten()" % api.name)
-            cgen.stmt("countingStream->rewind()")
-
-            cgen.stmt("uint32_t opcode_%s = OP_%s" % (api.name, api.name))
-            cgen.stmt("stream->write(&opcode_%s, sizeof(uint32_t))" % api.name)
-            cgen.stmt("stream->write(&packetSize_%s, sizeof(uint32_t))" % api.name)
-
-            streamParams(paramsToWrite, "write", "stream")
-            streamParams(paramsToRead, "read", "stream")
-
-            if api.retType.typeName == "void":
-                return
-
-            retType = api.retType.typeName
-            retVar = "%s_%s_return" % (api.name, retType)
-            cgen.stmt("%s %s = (%s)0" % (retType, retVar, retType))
-            cgen.stmt("stream->read(&%s, %s)" % (retVar, cgen.sizeofExpr(api.retType)))
-            cgen.stmt("return %s" % retVar)
-
+            emit_parameter_encode(self.typeInfo, api, cgen)
+            emit_return_unmarshal(self.typeInfo, api, cgen)
+            emit_return(self.typeInfo, api, cgen)
 
         self.module.appendHeader(self.cgenHeader.swapCode())
-        self.module.appendImpl(self.cgenImpl.makeFuncImpl(apiImpl, makeImpl))
+
+        if api.name in custom_encodes.keys():
+            self.module.appendImpl(self.cgenImpl.makeFuncImpl(
+                apiImpl, lambda cgen: custom_encodes[api.name](self.typeInfo, api, cgen)))
+        else:
+            self.module.appendImpl(self.cgenImpl.makeFuncImpl(apiImpl, makeImpl))
 
     def onEnd(self,):
         self.module.appendHeader(encoder_decl_postamble)
