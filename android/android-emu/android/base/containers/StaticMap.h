@@ -69,6 +69,10 @@ public:
         }
     }
 
+    void clear() {
+        AutoLock lock(mLock);
+        mItems.clear();
+    }
 private:
     using AutoLock = android::base::AutoLock;
     using Lock = android::base::Lock;
