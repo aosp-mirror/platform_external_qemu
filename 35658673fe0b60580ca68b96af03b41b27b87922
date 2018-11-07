@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0e42dd1_05553036",
+        "filename": "android/scripts/run_tests.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-11-07T18:32:43Z",
+      "side": 1,
+      "message": "nit: yo",
+      "range": {
+        "startLine": 155,
+        "startChar": 5,
+        "endLine": 155,
+        "endChar": 10
+      },
+      "revId": "35658673fe0b60580ca68b96af03b41b27b87922",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b80bca5_5101bab4",
+        "filename": "android/scripts/run_tests.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-11-07T18:32:43Z",
+      "side": 1,
+      "message": "nit: trailing spaces",
+      "range": {
+        "startLine": 189,
+        "startChar": 89,
+        "endLine": 189,
+        "endChar": 90
+      },
+      "revId": "35658673fe0b60580ca68b96af03b41b27b87922",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5311faa2_3354070c",
+        "filename": "android/scripts/run_tests.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-11-07T18:32:43Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 261,
+        "startChar": 0,
+        "endLine": 261,
+        "endChar": 4
+      },
+      "revId": "35658673fe0b60580ca68b96af03b41b27b87922",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
