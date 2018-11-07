@@ -725,6 +725,8 @@ static void kvm_set_phys_mem(KVMMemoryListener *kml,
     hwaddr start_addr, size;
     void *ram;
 
+    if (memory_region_is_user_backed(mr)) return;
+
     if (!memory_region_is_ram(mr)) {
         if (writeable || !kvm_readonly_mem_allowed) {
             return;
