@@ -271,8 +271,15 @@ gen_wrapper_toolchain () {
     local DST_DIR="$3"
     local CLANG_BINDIR="$4"
     local PROG
-    local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy ar"
-    local PROGRAMS="as ranlib strip strings nm objdump objcopy dlltool"
+    case "$CURRENT_HOST" in
+        windows_msvc*)
+          local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy ar"
+          local PROGRAMS="as ranlib strip strings nm objdump objcopy dlltool"
+          ;;
+        *)
+          local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy"
+          local PROGRAMS="as ar ranlib strip strings nm objdump objcopy dlltool"
+    esac
 
     log "Generating toolchain wrappers in: $DST_DIR"
     run mkdir -p "$DST_DIR"
