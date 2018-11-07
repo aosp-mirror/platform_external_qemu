@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "12f2002c_92f07a8d",
+        "filename": "android/scripts/strip-symbols.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-11-07T23:25:30Z",
+      "side": 1,
+      "message": "Should this be \u0027*.so*\u0027?",
+      "range": {
+        "startLine": 130,
+        "startChar": 72,
+        "endLine": 130,
+        "endChar": 78
+      },
+      "revId": "93e8d083f1d9578211bad7f71be738c88387629e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
