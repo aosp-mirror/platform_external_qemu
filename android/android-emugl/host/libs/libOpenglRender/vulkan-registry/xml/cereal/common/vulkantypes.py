@@ -17,6 +17,91 @@ from generator import noneStr
 
 from copy import copy
 
+# Holds information about core Vulkan objects
+# and the API calls that are used to create/destroy each one.
+class HandleInfo(object):
+    def __init__(self, name, createApis, destroyApis):
+        self.name = name
+        self.createApis = createApis
+        self.destroyApis = destroyApis
+
+    def isCreateApi(self, apiName):
+        return apiName == self.createApis or (apiName in self.createApis)
+
+    def isDestroyApi(self, apiName):
+        return apiName == self.destroyApis or (apiName in self.destroyApis)
+
+DISPATCHABLE_HANDLE_TYPES = [
+    "VkInstance",
+    "VkPhysicalDevice",
+    "VkDevice",
+    "VkQueue",
+    "VkCommandBuffer",
+]
+
+NON_DISPATCHABLE_HANDLE_TYPES = [
+    "VkDeviceMemory",
+    "VkBuffer",
+    "VkBufferView",
+    "VkImage",
+    "VkImageView",
+    "VkShaderModule",
+    "VkDescriptorPool",
+    "VkDescriptorSetLayout",
+    "VkDescriptorSet",
+    "VkSampler",
+    "VkPipelineLayout",
+    "VkRenderPass",
+    "VkFramebuffer",
+    "VkPipelineCache",
+    "VkCommandPool",
+    "VkFence",
+    "VkSemaphore",
+    "VkEvent",
+    "VkQueryPool",
+]
+
+HANDLE_TYPES = DISPATCHABLE_HANDLE_TYPES + NON_DISPATCHABLE_HANDLE_TYPES
+
+CUSTOM_HANDLE_CREATE_TYPES = [
+    "VkQueue",
+    "VkPipeline",
+    "VkDeviceMemory",
+    "VkDescriptorSet",
+    "VkCommandBuffer",
+]
+
+HANDLE_INFO = {}
+
+for h in HANDLE_TYPES:
+    if h in CUSTOM_HANDLE_CREATE_TYPES:
+        if h == "VkQueue":
+            HANDLE_INFO[h] = \
+                HandleInfo(
+                    "VkQueue",
+                    "vkGetDeviceQueue", None)
+        if h == "VkPipeline":
+            HANDLE_INFO[h] = \
+                HandleInfo(
+                    "VkPipeline",
+                    ["vkCreateGraphicsPipelines", "vkCreateComputePipelines"],
+                    "vkDestroyPipeline")
+        if h == "VkDeviceMemory":
+            HANDLE_INFO[h] = \
+                HandleInfo("VkDeviceMemory",
+                           "vkAllocateMemory", "vkFreeMemory")
+        if h == "VkDescriptorSet":
+            HANDLE_INFO[h] = \
+                HandleInfo("VkDescriptorSet", "vkAllocateDescriptorSets",
+                           "vkFreeDescriptorSets")
+        if h == "VkCommandBuffer":
+            HANDLE_INFO[h] = \
+                HandleInfo("VkCommandBuffer", "vkAllocateCommandBuffers",
+                           "vkFreeCommandBuffers")
+    else:
+        HANDLE_INFO[h] = \
+            HandleInfo(h, "vkCreate" + h[2:], "vkDestroy" + h[2:])
+
 # Holds information about a Vulkan type instance (i.e., not a type definition).
 # Type instances are used as struct field definitions or function parameters,
 # to be later fed to code generation.
@@ -116,6 +201,11 @@ class VulkanType(object):
     def getForNonConstAccess(self):
         return self.getTransformed(isConstChoice=False)
 
+    def withModifiedName(self, newName):
+        res = self.getCopy()
+        res.paramName = newName
+        return res
+
     def isNextPointer(self):
         if self.paramName == "pNext":
             return True
@@ -123,44 +213,14 @@ class VulkanType(object):
 
     # Only deals with 'core' handle types here.
     def isDispatchableHandleType(self):
-        types = [
-            "VkInstance",
-            "VkPhysicalDevice",
-            "VkDevice",
-            "VkQueue",
-            "VkCommandBuffer",
-        ]
-        return self.typeName in types
+        return self.typeName in DISPATCHABLE_HANDLE_TYPES
+
+    def isNonDispatchableHandleType(self):
+        return self.typeName in NON_DISPATCHABLE_HANDLE_TYPES
 
     def isHandleType(self):
-        if self.isDispatchableHandleType():
-            return True
-
-        nonDispatchableHandleTypes = [
-            "VkDeviceMemory",
-            "VkBuffer",
-            "VkBufferView",
-            "VkImage",
-            "VkImageView",
-            "VkShaderModule",
-            "VkDescriptorPool",
-            "VkDescriptorSetLayout",
-            "VkDescriptorSet",
-            "VkSampler",
-            "VkPipelineLayout",
-            "VkRenderPass",
-            "VkFramebuffer",
-            "VkPipelineCache",
-            "VkPipeline",
-            "VkCommandPool",
-            "VkFence",
-            "VkSemaphore",
-            "VkEvent",
-            "VkQueryPool",
-        ]
-
-        return self.typeName in nonDispatchableHandleTypes
-
+        return self.isDispatchableHandleType() or \
+               self.isNonDispatchableHandleType()
 
 def makeVulkanTypeFromXMLTag(tag):
     res = VulkanType()

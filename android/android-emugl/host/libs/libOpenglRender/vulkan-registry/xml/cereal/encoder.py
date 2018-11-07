@@ -70,11 +70,6 @@ def emit_unmarshal(typeInfo, param, cgen):
 
 def emit_parameter_encode(typeInfo, api, cgen):
     cgen.stmt("auto %s = mImpl->stream()" % STREAM)
-    cgen.stmt("auto %s = mImpl->countingStream()" % COUNTING_STREAM)
-    cgen.stmt("%s->rewind()" % COUNTING_STREAM)
-    
-    cgen.beginBlock()
-    
     paramsToWrite = []
     paramsToRead = []
 
@@ -82,6 +77,26 @@ def emit_parameter_encode(typeInfo, api, cgen):
         paramsToWrite.append(param)
         if param.possiblyOutput():
             paramsToRead.append(param)
+
+    def unwrap_dispatchable_handle(p):
+        if p.isDispatchableHandleType() and not param.possiblyOutput():
+            cgen.line("// Should unwrap %s (is dispatchable handle)" % p.paramName)
+            unwrappedParamName = "%s_unwrapped" % p.paramName
+            cgen.stmt( \
+                "%s %s = get_host_%s(%s)" % ( \
+                    p.typeName,
+                    unwrappedParamName,
+                    p.typeName,
+                    p.paramName))
+            return p.withModifiedName(unwrappedParamName)
+        return p
+    
+    paramsToWrite = [unwrap_dispatchable_handle(p) for p in paramsToWrite]
+
+    cgen.stmt("auto %s = mImpl->countingStream()" % COUNTING_STREAM)
+    cgen.stmt("%s->rewind()" % COUNTING_STREAM)
+    
+    cgen.beginBlock()
     
     # Use counting stream to calculate the packet size.    
     for p in paramsToWrite:
