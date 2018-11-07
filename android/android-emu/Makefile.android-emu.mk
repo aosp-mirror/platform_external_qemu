@@ -666,6 +666,7 @@ LOCAL_SRC_FILES := \
   android/base/memory/SharedMemory_unittest.cpp \
   android/base/misc/FileUtils_unittest.cpp \
   android/base/misc/HttpUtils_unittest.cpp \
+  android/base/misc/IpcPipe_unittest.cpp \
   android/base/misc/StringUtils_unittest.cpp \
   android/base/misc/Utf8Utils_unittest.cpp \
   android/base/network/Dns_unittest.cpp \
