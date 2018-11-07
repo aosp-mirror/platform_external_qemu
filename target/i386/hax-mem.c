@@ -12,6 +12,7 @@
 #include "cpu.h"
 #include "exec/address-spaces.h"
 #include "exec/exec-all.h"
+#include "exec/ram_addr.h"
 
 #include "target/i386/hax-i386.h"
 #include "qemu/queue.h"
@@ -538,6 +539,25 @@ static void hax_log_sync(MemoryListener *listener,
     }
 
     memory_region_set_dirty(mr, 0, int128_get64(section->size));
+}
+
+// User backed memory region API
+static int
+user_backed_flags_to_hax(int flags) {
+    int hax_flags = 0;
+    if (!(flags & USER_BACKED_RAM_FLAGS_READ)) {
+        hax_flags |= HAX_RAM_INFO_ROM;
+    }
+    return hax_flags;
+}
+
+void qemu_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size, int flags) {
+    hax_set_ram(gpa, size, (uint64_t)(uintptr_t)hva,
+                user_backed_flags_to_hax(flags));
+}
+
+void qemu_user_backed_ram_unmap(hwaddr gpa, void* hva, hwaddr size, int flags) {
+    hax_set_ram(gpa, size, 0, HAX_RAM_INFO_INVALID);
 }
 
 static MemoryListener hax_memory_listener = {

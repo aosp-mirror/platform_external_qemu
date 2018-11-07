@@ -13,6 +13,7 @@
 #include "exec/address-spaces.h"
 #include "exec/exec-all.h"
 #include "exec/ioport.h"
+#include "exec/ram_addr.h"
 #include "qemu-common.h"
 #ifndef _MSC_VER
 #include "strings.h"
@@ -1387,6 +1388,56 @@ static void whpx_process_section(MemoryRegionSection *section, int add)
 
     whpx_update_mapping(start_pa, size, (void *)(uintptr_t)host_va, add,
                         memory_region_is_rom(mr), mr->name);
+}
+
+// User backed memory region API
+static WHV_MAP_GPA_RANGE_FLAGS
+user_backed_flags_to_whpx(int flags) {
+    WHV_MAP_GPA_RANGE_FLAGS whpx_flags = 0;
+    if (flags & USER_BACKED_RAM_FLAGS_READ) {
+        whpx_flags |= WHvMapGpaRangeFlagRead;
+    }
+    if (flags & USER_BACKED_RAM_FLAGS_WRITE) {
+        whpx_flags |= WHvMapGpaRangeFlagWrite;
+    }
+    if (flags & USER_BACKED_RAM_FLAGS_EXEC) {
+        whpx_flags |= WHvMapGpaRangeFlagExecute;
+    }
+    return whpx_flags;
+}
+
+void qemu_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size, int flags) {
+    struct whpx_state *whpx = &whpx_global;
+    HRESULT hr;
+
+    hr = whp_dispatch.WHvMapGpaRange(
+        whpx->partition, hva, gpa, size,
+        user_backed_flags_to_whpx(flags));
+
+    if (FAILED(hr)) {
+        error_report(
+            "WHPX: Failed to map GPA range "
+            "[0x%llx 0x%llx] to HVA %p. flags: 0x%x",
+            (unsigned long long)gpa,
+            (unsigned long long)(gpa + size),
+            hva, flags);
+    }
+}
+
+void qemu_user_backed_ram_unmap(hwaddr gpa, void* hva, hwaddr size, int flags) {
+    struct whpx_state *whpx = &whpx_global;
+    HRESULT hr;
+
+    hr = whp_dispatch.WHvUnmapGpaRange(whpx->partition,
+                                       gpa,
+                                       size);
+    if (FAILED(hr)) {
+        error_report(
+            "WHPX: Failed to unmap GPA range "
+            "[0x%llx 0x%llx]",
+            (unsigned long long)gpa,
+            (unsigned long long)(gpa + size));
+    }
 }
 
 static void whpx_region_add(MemoryListener *listener,
