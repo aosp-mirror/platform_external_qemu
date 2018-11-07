@@ -96,7 +96,7 @@ case $(get_build_os) in
         CMAKE=$AOSP_DIR/prebuilts/cmake/linux-x86/bin/cmake
         # On linux we can use the shipped ninja version
         if [ "$OPTION_GENERATOR" = "auto" ]; then
-           OPTION_GENERATOR=ninja 
+           OPTION_GENERATOR=ninja
         fi
         ;;
     darwin)
@@ -108,6 +108,8 @@ case $(get_build_os) in
     *)
         panic "Don't know how to build binaries on this system [$(get_build_os)]"
 esac
+
+echo TOOLCHAIN is $TOOLCHAIN
 
 if [ "$OPTION_LIST_GEN" ]; then
  $CMAKE --help | sed -n -e '/Generators/,$p'
@@ -160,13 +162,23 @@ else
    CMAKE_PARAMS="${CMAKE_PARAMS} -G \"${OPTION_GENERATOR}\""
 fi
 
+echo AAAA
 run rm -rf $OPTION_OUT_DIR
+echo BBBB
 run mkdir -p $OPTION_OUT_DIR
+echo CCCC
+echo Running: eval $CMAKE \
+       -H$QEMU_TOP \
+       -B$OPTION_OUT_DIR \
+       -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN \
+       -DOPTION_CRASHUPLOAD=$OPTION_CRASHUPLOAD \
+       $CMAKE_PARAMS
 run eval $CMAKE \
        -H$QEMU_TOP \
        -B$OPTION_OUT_DIR \
        -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN \
        -DOPTION_CRASHUPLOAD=$OPTION_CRASHUPLOAD \
        $CMAKE_PARAMS
+echo DDDD
 
 echo "Ready to go. Type ${GREEN}'${OPTION_GENERATOR} -C ${OPTION_OUT_DIR}'${RESET} to build emulator, and ${GREEN}'${OPTION_GENERATOR} -C ${OPTION_OUT_DIR} tests'${RESET} to run the unit tests."
