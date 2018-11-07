@@ -135,11 +135,11 @@ process_dir() {
             if [ "$OPT_MINGW" ]; then
                 OPT_HOST=windows-x86_64
             fi
-            FIND_CMD="find $DIR $DEPTH_CMD -type f -executable -print0"
+            FIND_CMD="find $DIR $DEPTH_CMD ( -type f -and ( -executable -or ( -name '*.so' -or -name '*.dll' ) ) ) -print0"
             ;;
         darwin)
             OPT_HOST=darwin-x86_64
-            FIND_CMD="find $DIR $DEPTH_CMD -type f -perm +111 -print0"
+            FIND_CMD="find $DIR $DEPTH_CMD ( -type f -and ( -perm +111 -or -name '*.dylib' ) ) -print0"
             ;;
         *)
             panic "Unable to process binaries on this system [$(get_build_os)]"
