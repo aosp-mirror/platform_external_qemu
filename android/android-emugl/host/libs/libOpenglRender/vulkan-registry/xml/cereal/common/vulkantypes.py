@@ -39,7 +39,7 @@ class VulkanType(object):
 
         self.staticArrExpr = ""  # "" means not static array
         # 0 means the array size is not a numeric literal
-        self.staticArrCount = 0 
+        self.staticArrCount = 0
         self.pointerIndirectionLevels = 0  # 0 means not pointer
         self.isPointerToConstPointer = False
 
@@ -120,6 +120,47 @@ class VulkanType(object):
         if self.paramName == "pNext":
             return True
         return False
+
+    # Only deals with 'core' handle types here.
+    def isDispatchableHandleType(self):
+        types = [
+            "VkInstance",
+            "VkPhysicalDevice",
+            "VkDevice",
+            "VkQueue",
+            "VkCommandBuffer",
+        ]
+        return self.typeName in types
+
+    def isHandleType(self):
+        if self.isDispatchableHandleType():
+            return True
+
+        nonDispatchableHandleTypes = [
+            "VkDeviceMemory",
+            "VkBuffer",
+            "VkBufferView",
+            "VkImage",
+            "VkImageView",
+            "VkShaderModule",
+            "VkDescriptorPool",
+            "VkDescriptorSetLayout",
+            "VkDescriptorSet",
+            "VkSampler",
+            "VkPipelineLayout",
+            "VkRenderPass",
+            "VkFramebuffer",
+            "VkPipelineCache",
+            "VkPipeline",
+            "VkCommandPool",
+            "VkFence",
+            "VkSemaphore",
+            "VkEvent",
+            "VkQueryPool",
+        ]
+
+        return self.typeName in nonDispatchableHandleTypes
+
 
 def makeVulkanTypeFromXMLTag(tag):
     res = VulkanType()
@@ -249,7 +290,7 @@ class VulkanAPI(object):
             if p.paramName == parameterName:
                 return p
         return None
-    
+
     def withModifiedName(self, newName):
         res = VulkanAPI(newName, self.retType, self.parameters)
         return res
@@ -258,7 +299,7 @@ class VulkanAPI(object):
         if self.retType == "void":
             return None
         return "%s_%s_return" % (self.name, self.retType.typeName)
-    
+
     def getRetTypeExpr(self):
         return self.retType.typeName
 
