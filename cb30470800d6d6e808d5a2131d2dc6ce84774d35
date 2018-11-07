@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "972e8a08_cc9b835b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-07T21:05:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f2c78601_a32593f7",
+      "range": {
+        "startLine": 132,
+        "startChar": 37,
+        "endLine": 132,
+        "endChar": 75
+      },
+      "revId": "cb30470800d6d6e808d5a2131d2dc6ce84774d35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a1c7949_1938786a",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.h",
         "patchSetId": 21
@@ -60,6 +84,24 @@
       "writtenOn": "2018-11-06T21:15:02Z",
       "side": 1,
       "message": "Is unit test added?",
+      "revId": "cb30470800d6d6e808d5a2131d2dc6ce84774d35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "272fe49b_131b5d7f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-07T21:05:24Z",
+      "side": 1,
+      "message": "Not yet, but the usage of sockets will also be replaced soon by using pipes, and a lot of this work will then be done by some service (to be implemented with its corresponding tests).",
+      "parentUuid": "4a1c7949_1938786a",
       "revId": "cb30470800d6d6e808d5a2131d2dc6ce84774d35",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
