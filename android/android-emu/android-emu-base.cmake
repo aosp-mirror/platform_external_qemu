@@ -22,6 +22,7 @@ set(android-emu-base_src
     android/base/files/StreamSerializing.cpp
     android/base/misc/FileUtils.cpp
     android/base/misc/HttpUtils.cpp
+    android/base/misc/IpcPipe.cpp
     android/base/misc/StringUtils.cpp
     android/base/misc/Utf8Utils.cpp
     android/base/network/IpAddress.cpp
