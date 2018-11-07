@@ -49,13 +49,14 @@ set(QT5_DEFINITIONS "-DQT5_STATICLIB")
 set(QT5_FOUND TRUE)
 
 if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
+  set(QT_LIB_VERSION 5.11.1)
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib)
   set(QT5_SHARED_DEPENDENCIES
-      ${PREBUILT_ROOT}/lib/libQt5Core.5.11.1.dylib>lib64/qt/lib/libQt5Core.5.11.1.dylib;
-      ${PREBUILT_ROOT}/lib/libQt5Widgets.5.11.1.dylib>lib64/qt/lib/libQt5Widgets.5.11.1.dylib;
-      ${PREBUILT_ROOT}/lib/libQt5Gui.5.11.1.dylib>lib64/qt/lib/libQt5Gui.5.11.1.dylib;
-      ${PREBUILT_ROOT}/lib/libQt5Svg.5.11.1.dylib>lib64/qt/lib/libQt5Svg.5.11.1.dylib;
-      ${PREBUILT_ROOT}/lib/libQt5PrintSupport.5.dylib>lib64/qt/lib/libQt5PrintSupport.5.dylib;
+      ${PREBUILT_ROOT}/lib/libQt5Core.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Core.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt5Widgets.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Widgets.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt5Gui.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Gui.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt5Svg.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Svg.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt5PrintSupport.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5PrintSupport.${QT_LIB_VERSION}.dylib;
       ${PREBUILT_ROOT}/plugins/platforms/libqcocoa.dylib>lib64/qt/plugins/platforms/libqcocoa.dylib;
       ${PREBUILT_ROOT}/plugins/styles/libqmacstyle.dylib>lib64/qt/plugins/styles/libqmacstyle.dylib;
       ${PREBUILT_ROOT}/plugins/iconengines/libqsvgicon.dylib>lib64/qt/plugins/iconengines/libqsvgicon.dylib;
