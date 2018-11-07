@@ -24,22 +24,26 @@ set(CERT_DEPEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/android/data/ca-bundle.pem>lib
 set(EMULATOR_HW_DEPEDNECIES "${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini")
 
 # Install all the depencies in the right place..
-android_target_dependency(emulator all  QT5_SHARED_DEPENDENCIES)
-android_target_dependency(emulator all  MESA_DEPENDENCIES)
-android_target_dependency(emulator all  EMULATOR_FEATURE_DEPENDENCIES)
-android_target_dependency(emulator all  EMULATOR_KEYMAP_DEPENDENCIES)
-android_target_dependency(emulator all  EMULATOR_BIOS_DEPENDENCIES)
-android_target_dependency(emulator all  SWIFTSHADER_DEPENDENCIES)
-android_target_dependency(emulator all  RUNTIME_OS_DEPENDENCIES)
-android_target_dependency(emulator all  E2FSPROGS_DEPENDENCIES)
-android_target_dependency(emulator all  CERT_DEPEPENDENCIES)
-android_target_dependency(emulator all  EMULATOR_HW_DEPENDENCIES)
+android_target_dependency(emulator all QT5_SHARED_DEPENDENCIES)
+android_target_dependency(emulator all MESA_DEPENDENCIES)
+android_target_dependency(emulator all EMULATOR_FEATURE_DEPENDENCIES)
+android_target_dependency(emulator all EMULATOR_KEYMAP_DEPENDENCIES)
+android_target_dependency(emulator all EMULATOR_BIOS_DEPENDENCIES)
+android_target_dependency(emulator all SWIFTSHADER_DEPENDENCIES)
+android_target_dependency(emulator all RUNTIME_OS_DEPENDENCIES)
+android_target_dependency(emulator all E2FSPROGS_DEPENDENCIES)
+android_target_dependency(emulator all CERT_DEPEPENDENCIES)
+android_target_dependency(emulator all EMULATOR_HW_DEPENDENCIES)
 
 # Make sure we binplace the qemu binaries.
-android_copy_file(emulator $<TARGET_FILE:qemu-system-i386> $<TARGET_FILE_DIR:emulator>/qemu/${ANDROID_TARGET_TAG}/$<TARGET_FILE_NAME:qemu-system-i386>)
-android_copy_file(emulator $<TARGET_FILE:qemu-system-x86_64> $<TARGET_FILE_DIR:emulator>/qemu/${ANDROID_TARGET_TAG}/$<TARGET_FILE_NAME:qemu-system-x86_64>)
-android_copy_file(emulator $<TARGET_FILE:qemu-system-arm> $<TARGET_FILE_DIR:emulator>/qemu/${ANDROID_TARGET_TAG}/$<TARGET_FILE_NAME:qemu-system-arm>)
-android_copy_file(emulator $<TARGET_FILE:qemu-system-aarch64> $<TARGET_FILE_DIR:emulator>/qemu/${ANDROID_TARGET_TAG}/$<TARGET_FILE_NAME:qemu-system-aarch64>)
+android_copy_file(emulator $<TARGET_FILE:qemu-system-i386>
+                  $<TARGET_FILE_DIR:emulator>/qemu/${ANDROID_TARGET_TAG}/$<TARGET_FILE_NAME:qemu-system-i386>)
+android_copy_file(emulator $<TARGET_FILE:qemu-system-x86_64>
+                  $<TARGET_FILE_DIR:emulator>/qemu/${ANDROID_TARGET_TAG}/$<TARGET_FILE_NAME:qemu-system-x86_64>)
+android_copy_file(emulator $<TARGET_FILE:qemu-system-arm>
+                  $<TARGET_FILE_DIR:emulator>/qemu/${ANDROID_TARGET_TAG}/$<TARGET_FILE_NAME:qemu-system-arm>)
+android_copy_file(emulator $<TARGET_FILE:qemu-system-aarch64>
+                  $<TARGET_FILE_DIR:emulator>/qemu/${ANDROID_TARGET_TAG}/$<TARGET_FILE_NAME:qemu-system-aarch64>)
 
 # These are usually nops, but some code generators will not automatically binplace these (Xcode!)
 android_copy_shared_lib(emulator EGL_translator EGL_translator)
@@ -51,6 +55,13 @@ android_copy_shared_lib(emulator OpenglRender OpenglRender)
 # copy test files from test directory
 android_copy_test_files(emulator "${android-emu-prebuilt-resources}" resources)
 
-
 # And set the os specific properties
 android_target_properties(emulator all "${RUNTIME_OS_PROPERTIES}")
+
+install(TARGETS emulator 
+        RUNTIME DESTINATION . 
+        LIBRARY DESTINATION lib64)
+
+#install(DIRECTORY $<TARGET_FILE_DIR:emulator>/lib64/gles_swiftshader DESTINATION emulator/lib64/gles_swiftshader)
+#install(DIRECTORY $<TARGET_FILE_DIR:emulator>/lib64/gles_swiftshader DESTINATION emulator/lib64/gles_swiftshader)
+

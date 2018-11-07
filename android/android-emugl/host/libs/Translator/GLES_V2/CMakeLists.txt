@@ -18,3 +18,6 @@ target_link_libraries(GLES_V2_translator
                               android-emu
                               ANGLE::ANGLE)
 target_link_libraries(GLES_V2_translator PRIVATE emugl_base)
+install(TARGETS  GLES_V2_translator
+        RUNTIME DESTINATION .
+        LIBRARY DESTINATION lib64)
