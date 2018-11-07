@@ -31,6 +31,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib64)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/archives)
 
+# Feeling courageous? Set this to $ANDROID_SDK_ROOT
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/gradle-release)
+
 # Pthreads from the prebuilts please!
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
@@ -259,6 +262,8 @@ android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE USB::USB)
 
 # Now we add the normal android libs, so we can use them
 
+# Let's not install gtest..
+set(INSTALL_GTEST OFF CACHE BOOL "Never install gtest" FORCE)
 # Okay, google test is not happy under msvc
 if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
   set(gtest_disable_pthreads ON CACHE BOOL "Disable uses of pthreads in gtest.")
@@ -385,6 +390,7 @@ set(qemu-img_src ${qemu-img_sources} block/qcow2-bitmap.c)
 set(qemu-img_linux-x86_64_src scsi/pr-manager.c)
 android_add_executable(qemu-img)
 target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub android-qemu-deps)
+install(TARGETS qemu-img RUNTIME DESTINATION .)
 
 # Create the qemu targets.
 android_add_qemu_executable(i386 x86 "${ANDROID_QEMU_i386_STUBS_${ANDROID_TARGET_TAG}}" i386)

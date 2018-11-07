@@ -38,6 +38,7 @@ android_add_executable(emulator-crash-service)
 set_target_properties(emulator-crash-service PROPERTIES OUTPUT_NAME "emulator64-crash-service")
 target_compile_definitions(emulator-crash-service PRIVATE -DCONFIG_QT -DCRASHUPLOAD=${OPTION_CRASHUPLOAD})
 target_link_libraries(emulator-crash-service PRIVATE android-emu-crash-service android-emu emulator-libui BREAKPAD::Breakpad Qt5::Core)
+install(TARGETS emulator-crash-service RUNTIME DESTINATION .)
 
 set(emulator64_test_crasher_src android/crashreport/testing/main-test-crasher.cpp)
 android_add_executable(emulator64_test_crasher)

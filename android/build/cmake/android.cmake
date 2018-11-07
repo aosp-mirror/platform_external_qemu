@@ -367,6 +367,9 @@ function(android_add_qemu_executable AARCH LOCAL_AARCH STUBS CPU)
   set_target_properties(qemu-system-${AARCH}
                         PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                                    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qemu/${ANDROID_TARGET_TAG}")
+   install(TARGETS qemu-system-${AARCH}
+           RUNTIME DESTINATION ./qemu/${ANDROID_TARGET_TAG}
+    )                      
 endfunction()
 
 # Copies a

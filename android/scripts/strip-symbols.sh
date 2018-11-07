@@ -154,9 +154,5 @@ done
 
 OLD_DIR=$PWD
 cd $OPT_OUT
-process_dir . 1
-process_dir lib64 20
-process_dir lib 20
-process_dir qemu 20
-
+process_dir gradle-release 20
 cd $OLD_DIR

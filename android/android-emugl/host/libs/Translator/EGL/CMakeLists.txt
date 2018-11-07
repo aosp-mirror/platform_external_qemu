@@ -26,3 +26,6 @@ target_compile_options(EGL_translator PRIVATE -fvisibility=hidden)
 android_target_link_libraries(EGL_translator darwin-x86_64 PUBLIC "-framework AppKit")
 android_target_link_libraries(EGL_translator linux-x86_64 PUBLIC "-lGL -lX11 -ldl -lpthread")
 android_target_link_libraries(EGL_translator windows PUBLIC "-lgdi32")
+install(TARGETS EGL_translator
+        RUNTIME DESTINATION .
+        LIBRARY DESTINATION lib64)

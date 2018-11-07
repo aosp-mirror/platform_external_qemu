@@ -20,15 +20,17 @@ WINDOWS_MSVC=
 NO_TESTS=
 OUT_DIR=objs
 HELP=
-
+OPT_INSTALL=
 
 for OPT; do
     case $OPT in
         --sdk-build-number=*)
             ANDROID_SDK_TOOLS_BUILD_NUMBER=${OPT##--sdk-build-number=}
+            OPT_INSTALL=install
             ;;
         --aosp-prebuilts-dir=*)
             ANDROID_EMULATOR_PREBUILTS_DIR=${OPT##--aosp-prebuilts-dir=}
+            OPT_INSTALL=install
             ;;
         --mingw)
             if [ "$WINDOWS_MSVC" ]; then
@@ -100,19 +102,16 @@ $PROGDIR/scripts/config-cmake.sh  "$@" ||
 
 
 
-OLD_DIR=$PWD
-cd  $OUT_DIR
-if [ -f build.ninja ]; then
+if [ -f $OUT_DIR/build.ninja ]; then
     echo "Building sources with ninja."
-    $NINJA || panic "Could not build sourcis, please run 'ninja -C $OUT_DIR' to see why."
+    $NINJA -C $OUT_DIR $OPT_INSTALL || panic "Could not build sourcis, please run 'ninja -C $OUT_DIR' to see why."
 else
     echo "Building sources with make."
-    make -j$HOST_NUM_CPUS ||
+    make -C $OUT_DIR -j$HOST_NUM_CPUS $OPT_INSTALL ||
         panic "Could not build sources, please run 'make -C $OUT_DIR' to see why."
 fi
 
 echo "Finished building sources."
-cd $OLD_DIR
 
 if [ -z "$NO_TESTS" ]; then
     # Let's not run all the tests parallel..
@@ -120,6 +119,7 @@ if [ -z "$NO_TESTS" ]; then
 else
     echo "Ignoring unit tests suite."
 fi
+
 
 # Strip out symbols if requested
 if [ "$OPT_SYMBOLS" ]; then

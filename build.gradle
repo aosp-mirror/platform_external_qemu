@@ -52,67 +52,18 @@ task packageCodeCoverage(type: Zip) {
 
 sdk {
     common(mac, linux) {
-        item('android/android-emu/android/avd/hardware-properties.ini') {
-            into 'lib'
-            notice null
-        }
-        item("$buildDefaultEmulator.output/emulator") {
-            executable true
+        item("$buildDefaultEmulator.output/gradle-release") {
+            into ''
             builtBy buildDefaultEmulator
         }
-        item("$buildDefaultEmulator.output/emulator-check") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-        item("$buildDefaultEmulator.output/bin64") {
-            into 'bin64'
-            builtBy buildDefaultEmulator
-        }
-        item("$buildDefaultEmulator.output/qemu") {
-            into 'qemu'
-            builtBy buildDefaultEmulator
-        }
-        item("$buildDefaultEmulator.output/build/debug_info/qemu") {
-            into 'qemu'
+        item("$buildDefaultEmulator.output/build/debug_info/gradle-release") {
+            into ''
             builtBy buildDefaultEmulator
             debug true
-        }
-        item("$buildDefaultEmulator.output/lib") {
-            into 'lib'
-            builtBy buildDefaultEmulator
-        }
-        item("$buildDefaultEmulator.output/lib64") {
-            into 'lib64'
-            builtBy buildDefaultEmulator
-        }
-        item("$buildDefaultEmulator.output/build/debug_info/lib64") {
-            into 'lib64'
-            builtBy buildDefaultEmulator
-            debug true
-        }
-        item("$buildDefaultEmulator.output/resources") {
-            into 'resources'
-            builtBy buildDefaultEmulator
-        }
-        item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/bios.bin") {
-            into 'lib/pc-bios'
-        }
-        item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/vgabios-cirrus.bin") {
-            into 'lib/pc-bios'
         }
         item("$project.rootDir/../external/qemu/android-info.txt") {
             into ''
         }
-        item("$buildDefaultEmulator.output/emulator64-crash-service") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-
-        item("$buildDefaultEmulator.output/qemu-img") {
-            executable true
-            builtBy buildDefaultEmulator
-        }
-
         // This will make it end up in the Debug configuration.
         item("$buildEmulatorCodeCoverage.output/code-coverage.zip") {
             debug true
@@ -135,77 +86,25 @@ sdk {
     }
 
     windows {
-        item(fprops_win) {
-            name 'source.properties'
-            notice null
+        item("$buildDefaultEmulator.output/gradle-release") {
+            into ''
+            builtBy buildDefaultEmulator
         }
-        item('android/android-emu/android/avd/hardware-properties.ini') {
-            into 'lib'
-            notice null
-        }
-        item("$buildWindowsEmulator.output/emulator.exe") {
-            executable true
-            builtBy buildWindowsEmulator
-        }
-        item("$buildWindowsEmulator.output/emulator-check.exe") {
-            executable true
-            builtBy buildWindowsEmulator
-        }
-        item("$buildWindowsEmulator.output/bin64") {
-            into 'bin'
-            builtBy buildWindowsEmulator
-        }
-        item("$buildWindowsEmulator.output/qemu") {
-            into 'qemu'
-            builtBy buildWindowsEmulator
-        }
-        item("$buildWindowsEmulator.output/build/debug_info/qemu") {
-            into 'qemu'
-            builtBy buildWindowsEmulator
+        item("$buildDefaultEmulator.output/build/debug_info/gradle-release") {
+            into ''
+            builtBy buildDefaultEmulator
             debug true
-        }
-        item("$buildWindowsEmulator.output/lib") {
-            into 'lib'
-            builtBy buildWindowsEmulator
-        }
-        item("$buildWindowsEmulator.output/build/debug_info/lib") {
-            into 'lib'
-            builtBy buildWindowsEmulator
-            debug true
-        }
-        item("$buildWindowsEmulator.output/lib64") {
-            into 'lib64'
-            builtBy buildWindowsEmulator
-        }
-        item("$buildWindowsEmulator.output/build/debug_info/lib64") {
-            into 'lib64'
-            builtBy buildWindowsEmulator
-            debug true
-        }
-        item("$buildWindowsEmulator.output/resources") {
-            into 'resources'
-            builtBy buildWindowsEmulator
-        }
-        item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/bios.bin") {
-            into 'lib/pc-bios'
-        }
-        item("$project.rootDir/../prebuilts/qemu-kernel/x86/pc-bios/vgabios-cirrus.bin") {
-            into 'lib/pc-bios'
         }
         item("$project.rootDir/../external/qemu/android-info.txt") {
             into ''
         }
-
-        item("$buildWindowsEmulator.output/emulator64-crash-service.exe") {
-            executable true
-            builtBy buildWindowsEmulator
+        item(fprops_win) {
+            name 'source.properties'
+            notice null
         }
-
-        item("$buildWindowsEmulator.output/qemu-img.exe") {
-            executable true
-            builtBy buildWindowsEmulator
+        item("$project.rootDir/../external/qemu/android-info.txt") {
+            into ''
         }
-
     }
 }
 
@@ -227,13 +126,9 @@ for (PlatformConfig platform : sdk.getPlatforms()) {
             if (!s.contains("emulator")) {
                 continue
             }
-            if (platform.getName().equals("win")) {
-                debugItemPath = debugItemPath.replaceFirst("$buildWindowsEmulator.output",
-                                "$buildWindowsEmulator.output/build/debug_info")
-            } else {
-                debugItemPath = debugItemPath.replaceFirst("$buildDefaultEmulator.output",
-                                "$buildDefaultEmulator.output/build/debug_info")
-            }
+           debugItemPath = debugItemPath.replaceFirst("$buildDefaultEmulator.output",
+                                "$buildDefaultEmulator.output/build/debug_info/gradle-release")
+            
             if (debugItemPath.equals(itemPath)) {
                 continue
             }

@@ -1,5 +1,7 @@
 prebuilt(QT5)
 prebuilt(MESA)
+prebuilt(VIRTUALSCENE)
+prebuilt(E2FSPROGS)
 set(WINDOWS_ICON ../images/emulator_icon.rc)
 
 add_executable(emulator main-emulator.cpp ${WINDOWS_ICON})
@@ -19,27 +21,35 @@ set(EMULATOR_BIOS_DEPENDENCIES
     "${PC_BIOS}/linuxboot.bin>lib/pc-bios/linuxboot.bin"
     "${PC_BIOS}/linuxboot_dma.bin>lib/pc-bios/linuxboot_dma.bin")
 
-set(EMULATOR_KEYMAP_DEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/pc-bios/keymaps/*>>lib/pc-bios")
+set(EMULATOR_KEYMAP_DEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/pc-bios/keymaps/*>>lib/pc-bios/keymaps")
 set(CERT_DEPEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/android/data/ca-bundle.pem>lib/ca-bundle.pem")
-set(EMULATOR_HW_DEPEDNECIES "${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini")
+set(EMULATOR_HW_DEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini>lib/hardware-properties.ini")
 
-# Install all the depencies in the right place..
-android_target_dependency(emulator all  QT5_SHARED_DEPENDENCIES)
-android_target_dependency(emulator all  MESA_DEPENDENCIES)
-android_target_dependency(emulator all  EMULATOR_FEATURE_DEPENDENCIES)
-android_target_dependency(emulator all  EMULATOR_KEYMAP_DEPENDENCIES)
-android_target_dependency(emulator all  EMULATOR_BIOS_DEPENDENCIES)
-android_target_dependency(emulator all  SWIFTSHADER_DEPENDENCIES)
-android_target_dependency(emulator all  RUNTIME_OS_DEPENDENCIES)
-android_target_dependency(emulator all  E2FSPROGS_DEPENDENCIES)
-android_target_dependency(emulator all  CERT_DEPEPENDENCIES)
-android_target_dependency(emulator all  EMULATOR_HW_DEPENDENCIES)
+# Install all the depencies in the right place during build
+android_target_dependency(emulator all QT5_SHARED_DEPENDENCIES)
+android_target_dependency(emulator all MESA_DEPENDENCIES)
+android_target_dependency(emulator all EMULATOR_FEATURE_DEPENDENCIES)
+android_target_dependency(emulator all EMULATOR_KEYMAP_DEPENDENCIES)
+android_target_dependency(emulator all EMULATOR_BIOS_DEPENDENCIES)
+android_target_dependency(emulator all SWIFTSHADER_DEPENDENCIES)
+android_target_dependency(emulator all RUNTIME_OS_DEPENDENCIES)
+android_target_dependency(emulator all E2FSPROGS_DEPENDENCIES)
+android_target_dependency(emulator all CERT_DEPEPENDENCIES)
+android_target_dependency(emulator all EMULATOR_HW_DEPENDENCIES)
+android_target_dependency(emulator all VIRTUAL_SCENE_DEPENDENCIES)
 
-# Make sure we binplace the qemu binaries.
-android_copy_file(emulator $<TARGET_FILE:qemu-system-i386> $<TARGET_FILE_DIR:emulator>/qemu/${ANDROID_TARGET_TAG}/$<TARGET_FILE_NAME:qemu-system-i386>)
-android_copy_file(emulator $<TARGET_FILE:qemu-system-x86_64> $<TARGET_FILE_DIR:emulator>/qemu/${ANDROID_TARGET_TAG}/$<TARGET_FILE_NAME:qemu-system-x86_64>)
-android_copy_file(emulator $<TARGET_FILE:qemu-system-arm> $<TARGET_FILE_DIR:emulator>/qemu/${ANDROID_TARGET_TAG}/$<TARGET_FILE_NAME:qemu-system-arm>)
-android_copy_file(emulator $<TARGET_FILE:qemu-system-aarch64> $<TARGET_FILE_DIR:emulator>/qemu/${ANDROID_TARGET_TAG}/$<TARGET_FILE_NAME:qemu-system-aarch64>)
+# And install them for a release.
+android_install_dependency(QT5_SHARED_DEPENDENCIES)
+android_install_dependency(MESA_DEPENDENCIES)
+android_install_dependency(EMULATOR_FEATURE_DEPENDENCIES)
+android_install_dependency(EMULATOR_KEYMAP_DEPENDENCIES)
+android_install_dependency(EMULATOR_BIOS_DEPENDENCIES)
+android_install_dependency(SWIFTSHADER_DEPENDENCIES)
+android_install_dependency(RUNTIME_OS_DEPENDENCIES)
+android_install_dependency(E2FSPROGS_DEPENDENCIES)
+android_install_dependency(CERT_DEPEPENDENCIES)
+android_install_dependency(EMULATOR_HW_DEPENDENCIES)
+android_install_dependency(VIRTUAL_SCENE_DEPENDENCIES)
 
 # These are usually nops, but some code generators will not automatically binplace these (Xcode!)
 android_copy_shared_lib(emulator EGL_translator EGL_translator)
@@ -48,9 +58,7 @@ android_copy_shared_lib(emulator GLES_CM_translator GLES_CM_translator)
 android_copy_shared_lib(emulator GLES12Translator GLES12Translator)
 android_copy_shared_lib(emulator OpenglRender OpenglRender)
 
-# copy test files from test directory
-android_copy_test_files(emulator "${android-emu-prebuilt-resources}" resources)
-
-
 # And set the os specific properties
 android_target_properties(emulator all "${RUNTIME_OS_PROPERTIES}")
+
+install(TARGETS emulator RUNTIME DESTINATION .)
