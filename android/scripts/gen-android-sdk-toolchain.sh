@@ -1,3 +1,4 @@
+
 #!/bin/sh
 
 # Copyright 2015 The Android Open Source Project
@@ -72,6 +73,12 @@ option_register_var "--no-ccache" OPT_NO_CCACHE "Don't try to probe and use ccac
 
 OPT_CXX11=
 option_register_var "--cxx11" OPT_CXX11 "Enable C++11 features."
+
+OPT_FETCH_MSVC=
+option_register_var "--fetch-msvc" OPT_FETCH_MSVC "Fetch the msvc build (google internal)"
+
+OPT_VSDIR=
+option_register_var "--vsdir=<msvc_install_dir>" OPT_VSDIR "Location of the msvc sdk. See documentation for details."
 
 option_parse "$@"
 
@@ -383,7 +390,7 @@ prepare_build_for_linux() {
     CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for linux)
     CLANG_DIR=$(realpath $CLANG_BINDIR/..)
     GNU_CONFIG_HOST=x86_64-linux
-    CLANG_VERSION=$(${CLANG_BINDIR}/clang -v 2>&1 | head -n 1 | awk '{print $4}')
+    CLANG_VERSION=$(get_clang_version)
     SYSROOT="${PREBUILT_TOOLCHAIN_DIR}/sysroot"
 
     # Clang will invoke the linker, but will not correctly infer the
@@ -466,20 +473,68 @@ prepare_build_for_windows () {
     var_append EXTRA_CXXFLAGS ${GCC_LINK_FLAGS}
  }
 
+configure_google_storage() {
+    local DEPOT_TOOLS=$(aosp_depot_tools_dir)
+    ${DEPOT_TOOLS}/download_from_google_storage --config
+}
+
+fetch_dependencies_msvc() {
+    CLANG_VERSION=$(get_clang_version)
+
+    local MSVC_DIR=${INSTALL_DIR}/msvc
+    local CIOPFS_DIR=${INSTALL_DIR}/.ciopfs
+    mkdir -p $MSVC_DIR
+    mkdir -p $CIOPFS_DIR
+    local CPIOFS="${AOSP_DIR}/prebuilts/android-emulator-build/common/ciopfs/linux-x86_64/ciopfs"
+    run $CPIOFS -o use_ino $CIOPFS_DIR $MSVC_DIR
+
+    local DEPOT_TOOLS=$(aosp_depot_tools_dir)
+    local MSVC_HASH=$(aosp_msvc_hash)
+    log "Looking to get tools version: ${MSVC_HASH}"
+    run ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MSVC_DIR $MSVC_HASH
+}
+
+get_clang_version() {
+    CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for linux)
+    CLANG_DIR=$(realpath $CLANG_BINDIR/..)
+    CLANG_VERSION=$(${CLANG_BINDIR}/clang -v 2>&1 | grep -P 'clang version \d+.\d+.\d' -o | grep -P '\d+.\d+.\d+' -o)
+    echo $CLANG_VERSION
+}
+
 prepare_build_for_windows_msvc() {
     # TODO(joshuaduong): Only linux enivronment is set up. Set up for
     # mac/windows as well.
     CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for linux)
     CLANG_DIR=$(realpath $CLANG_BINDIR/..)
-    CLANG_VERSION=$(${CLANG_BINDIR}/clang -v 2>&1 | head -n 1 | awk '{print $4}')
+    CLANG_VERSION=$(get_clang_version)
 
-    MSVC_DIR="${AOSP_DIR}/prebuilts/android-emulator-build/msvc"
+    if [ "$OPT_VSDIR" ]; then
+      MSVC_DIR=$OPT_VSDIR
+    else
+      MSVC_HASH=$(aosp_msvc_hash)
+      MSVC_DIR=$INSTALL_DIR/msvc/vs_files/${MSVC_HASH}/
+    fi
+  
+    if [ "$OPT_FETCH_MSVC" ] || [ ! -d $MSVC_DIR ]; then
+      fetch_dependencies_msvc
+    fi
+
+
+    # We cannot have multiple SDK versions in the same dir
+    MSVC_VER=$(ls -1 ${MSVC_DIR}/win_sdk/Include/)
+    log "Using version [${MSVC_VER}]"
+
+    VC_VER=$(ls -1 ${MSVC_DIR}/VC/Tools/MSVC)
+    log "Using visual studio version: ${VC_VER}"
+
+    run mkdir -p $MSVC_DIR/clang-intrins/include
+    run cp -rf ${CLANG_DIR}/lib64/clang/${CLANG_VERSION}/include  $MSVC_DIR/clang-intrins/
 
     local CLANG_LINK_FLAGS=
     var_append CLANG_LINK_FLAGS "-fuse-ld=lld"
-    var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/msvc/lib/x64"
-    var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/win10sdk/lib/$(aosp_winsdk_version)/ucrt/x64"
-    var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/win10sdk/lib/$(aosp_winsdk_version)/um/x64"
+    var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/VC/Tools/MSVC/${VC_VER}/lib/x64"
+    var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/win_sdk/lib/${MSVC_VER}/ucrt/x64"
+    var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/win_sdk/lib/${MSVC_VER}/um/x64"
     var_append CLANG_LINK_FLAGS "-Wl,-nodefaultlib:libcmt,-defaultlib:msvcrt,-defaultlib:oldnames"
     # Other linker flags to make cross-compiling upstream-qemu work without adding any additional
     # flags to it's makefile.
@@ -511,12 +566,11 @@ prepare_build_for_windows_msvc() {
     # Disable builtin #include directories
     var_append EXTRA_CFLAGS "-nobuiltininc"
     var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/clang-intrins/include"
-    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/msvc/include"
-    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win10sdk/include/$(aosp_winsdk_version)/ucrt"
-    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win10sdk/include/$(aosp_winsdk_version)/um"
-    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win10sdk/include/$(aosp_winsdk_version)/winrt"
-    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win10sdk/include/$(aosp_winsdk_version)/hypervisor"
-    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win10sdk/include/$(aosp_winsdk_version)/shared"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/VC/Tools/MSVC/${VC_VER}/include"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/ucrt"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/um"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/winrt"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/shared"
     var_append EXTRA_CFLAGS ${CLANG_LINK_FLAGS}
 
 
@@ -541,12 +595,11 @@ prepare_build_for_windows_msvc() {
     # Disable standard #include directories for the C++ standard library
     var_append EXTRA_CXXFLAGS "-nostdinc++"
     var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/clang-intrins/include"
-    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/msvc/include"
-    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win10sdk/include/$(aosp_winsdk_version)/ucrt"
-    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win10sdk/include/$(aosp_winsdk_version)/um"
-    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win10sdk/include/$(aosp_winsdk_version)/winrt"
-    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win10sdk/include/$(aosp_winsdk_version)/hypervisor"
-    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win10sdk/include/$(aosp_winsdk_version)/shared"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/VC/Tools/MSVC/${VC_VER}/include"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/ucrt"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/um"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/winrt"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/shared"
     var_append EXTRA_CXXFLAGS ${CLANG_LINK_FLAGS}
     var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
 

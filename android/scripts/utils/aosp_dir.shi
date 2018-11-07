@@ -174,6 +174,16 @@ aosp_prebuilt_toolchain_prefix_for () {
     esac
 }
 
+
+aosp_depot_tools_dir () {
+    echo ${AOSP_DIR}/external/qemu/android/third_party/chromium/depot_tools
+}
+
+aosp_msvc_hash () {
+  # This is the hash of the msvc version we are using (VS 2017)
+  echo "3bc0ec615cf20ee342f3bc29bc991b5ad66d8d2c"
+}
+
 # Find the AOSP top-level directory, starting from a given sub-directory.
 # $1: Starting directory, must be a sub-directory of the AOSP checkout.
 # Out: AOSP directory path on success, empty string on failure.
