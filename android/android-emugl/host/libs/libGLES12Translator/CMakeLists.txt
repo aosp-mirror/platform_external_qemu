@@ -29,3 +29,6 @@ android_add_shared_library(GLES12Translator)
 target_compile_options(GLES12Translator PRIVATE -fvisibility=hidden)
 target_link_libraries(GLES12Translator PRIVATE emugl_base)
 target_link_libraries(GLES12Translator PUBLIC GLESv1_dec OpenglCodecCommon emugl_common)
+install(TARGETS GLES12Translator
+        RUNTIME DESTINATION .
+        LIBRARY DESTINATION lib64)

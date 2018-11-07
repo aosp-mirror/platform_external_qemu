@@ -110,6 +110,53 @@ function(prebuilt Package)
   endif()
 endfunction(prebuilt pkg)
 
+# Installs the given src file into the given destination
+function(internal_android_install_file SRC DST_DIR)
+  get_filename_component(REAL_SRC "${SRC}" REALPATH)
+  get_filename_component(FNAME "${SRC}" NAME)
+  # Okay, we now need to determine if REAL_SRC is an executable, or file
+  set(PYTHON_SCRIPT "import os; print os.path.isfile('${REAL_SRC}') and os.access('${REAL_SRC}', os.X_OK)")
+  execute_process(COMMAND python -c "${PYTHON_SCRIPT}"
+                  WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
+                  RESULT_VARIABLE SUCCESS
+                  OUTPUT_VARIABLE STD_OUT
+                  ERROR_VARIABLE STD_ERR)
+  string(REPLACE "\n" "" STD_OUT "${STD_OUT}")
+  if(STD_OUT)
+    android_log(STATUS "install(PROGRAMS ${SRC} ${REAL_SRC} DESTINATION ${DST_DIR})")
+    install(PROGRAMS ${SRC} DESTINATION ${DST_DIR})
+    # Check if we have a symlink
+    if (NOT ${SRC} STREQUAL ${REAL_SRC})
+      message(STATUS "${SRC} ==> ${REAL_SRC}")
+      install(PROGRAMS ${REAL_SRC} DESTINATION ${DST_DIR})
+    endif()
+  else()
+    android_log("install(FILES ${SRC} ${REAL_SRC} DESTINATION ${DST_DIR})")
+    install(FILES ${SRC} DESTINATION ${DST_DIR})
+    if (NOT ${SRC} STREQUAL ${REAL_SRC})
+      message(STATUS "${SRC} ==> ${REAL_SRC}")
+      install(FILES ${REAL_SRC} DESTINATION ${DST_DIR})
+    endif()
+  endif()
+endfunction()
+
+# Installs the given dependency, this will make it part of the 
+# final release.
+function(android_install_dependency INSTALL_DEPENDENCIES)
+  # Link to existing target if there.
+  if(NOT TARGET ${INSTALL_DEPENDENCIES})
+    message(FATAL_ERROR "Dependencies ${INSTALL_DEPENDENCIES} has not been declared (yet?)")
+  endif()
+  get_target_property(FILE_LIST ${INSTALL_DEPENDENCIES} SOURCES)
+  foreach(FNAME ${FILE_LIST})
+    if (NOT FNAME MATCHES ".*dummy.c")
+       string(REPLACE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/" "" DST_FILE ${FNAME})
+       get_filename_component(DST_DIR "${DST_FILE}" DIRECTORY)
+       internal_android_install_file(${FNAME} ${DST_DIR})
+    endif()
+  endforeach()
+endfunction()
+
 # Add the runtime dependencies, i.e. the set of libs that need to be copied over to the proper location in order to run
 # the executable.
 #
@@ -117,36 +164,26 @@ endfunction(prebuilt pkg)
 #
 # TARGET_TAG The android target tag for which these are applicable, or all for all targets.
 #
-# RUN_TARGET_DEPENDENCIES:
-#  .   List of SRC>DST pairs that contains individual file dependencies.
-#  .   List of SRC_DIR>>DST pairs that contains directorie depedencies.
+# RUN_TARGET_DEPENDENCIES: .   List of SRC>DST pairs that contains individual file dependencies. .   List of
+# SRC_DIR>>DST pairs that contains directorie depedencies.
 #
-# For example:
-#     set(MY_FOO_DEPENDENCIES
-#          # copy from /tmp/a/b.txt to lib/some/dir/c.txt
-#          "/tmp/a/b.txt>lib/some/dir/c.txt;"
-#           # recursively copy /tmp/dirs to lib/x
-#           lib/some/dir/c.txt "/tmp/dirs/*>>lib/x")
+# For example: set(MY_FOO_DEPENDENCIES # copy from /tmp/a/b.txt to lib/some/dir/c.txt "/tmp/a/b.txt>lib/some/dir/c.txt;"
+# # recursively copy /tmp/dirs to lib/x lib/some/dir/c.txt "/tmp/dirs/*>>lib/x")
 #
-# Note that this relies on every binary being binplaced in the root, which
-# implies that this will not work with every generator.
+# 
+# Note that this relies on every binary being binplaced in the root, which implies that this will not work with every
+# generator.
 #
-# This works by creating an empty dummy target that relies on a set of sources
-# that are the files we want to copy over. We construct the list of files
-# we want to copy over and create a custom command that does the copying.
-# next we feed the generated sources as a target to our dummy lib. Since they
-# are not .c/.cpp files they are required to be there but result in no action.
-# The generated archives will be empty, i.e:
-# nm -a archives/libSWIFTSHADER_DEPENDENCIES.a
+# This works by creating an empty dummy target that relies on a set of sources that are the files we want to copy over.
+# We construct the list of files we want to copy over and create a custom command that does the copying. next we feed
+# the generated sources as a target to our dummy lib. Since they are not .c/.cpp files they are required to be there but
+# result in no action. The generated archives will be empty, i.e: nm -a archives/libSWIFTSHADER_DEPENDENCIES.a
 #
-# dummy.c.o:
-# 0000000000000000 a dummy.c
+# dummy.c.o: 0000000000000000 a dummy.c
 #
-# Now this target can be used by others to take a dependency on. So we get:
-# 1. Fast rebuilds (as we use ninja/make file out sync detection)
-# 2. Binplace only once per dependency (no more concurrency problems)
-# 3. No more target dependent binplacing (i.e. if a target does not end up in the root)
-#   which likely breaks the xcode generator.
+# Now this target can be used by others to take a dependency on. So we get: 1. Fast rebuilds (as we use ninja/make file
+# out sync detection) 2. Binplace only once per dependency (no more concurrency problems) 3. No more target dependent
+# binplacing (i.e. if a target does not end up in the root) which likely breaks the xcode generator.
 function(android_target_dependency RUN_TARGET TARGET_TAG RUN_TARGET_DEPENDENCIES)
   if(TARGET_TAG STREQUAL "${ANDROID_TARGET_TAG}" OR TARGET_TAG STREQUAL "all")
 
@@ -174,28 +211,25 @@ function(android_target_dependency RUN_TARGET TARGET_TAG RUN_TARGET_DEPENDENCIES
             )
         endif()
 
-        # Let's calculate the destination directory, so we can use this
-        # as our generated sources parameters.
+        # Let's calculate the destination directory, so we can use this as our generated sources parameters.
         get_filename_component(SRC_DIR "${SRC}" DIRECTORY)
         set(DEST_SRC "")
         set(DEST_DIR "${CMAKE_BINARY_DIR}/${DST}")
         foreach(FNAME ${GLOBBED})
-           string(REPLACE "${SRC_DIR}" "${DEST_DIR}" DEST_FILE "${FNAME}")
-           list(APPEND DEST_SRC ${DEST_FILE})
-           list(APPEND DEP_SOURCES ${DEST_FILE})
-        endforeach()
+          string(REPLACE "${SRC_DIR}" "${DEST_DIR}" DEST_FILE "${FNAME}")
+          list(APPEND DEST_SRC ${DEST_FILE})
+          list(APPEND DEP_SOURCES ${DEST_FILE})
+          endforeach()
 
-        # DEST_SRC will contain all the globbed files that will be copied over with rsync,
-        # leaving the symlinks to our local files intact (needed for macos)
+        # DEST_SRC will contain all the globbed files that will be copied over with rsync, leaving the symlinks to our
+        # local files intact (needed for macos)
         add_custom_command(OUTPUT ${DEST_SRC}
-                           # Make sure the directory exists
+                                  # Make sure the directory exists
                            COMMAND mkdir -p $$\( dirname "${CMAKE_BINARY_DIR}/${DST}" \)
                                    # And copy all, leaving the symlinks intact.
-                           COMMAND rsync -rl "${SRC}" "${CMAKE_BINARY_DIR}/${DST}"
-        )
+                           COMMAND rsync -rl "${SRC}" "${CMAKE_BINARY_DIR}/${DST}")
       else()
-        # We are doing single file copies.
-        # Turns src>dst into a list, so we can split out SRC --> DST
+        # We are doing single file copies. Turns src>dst into a list, so we can split out SRC --> DST
         string(REPLACE ">" ";" SRC_DST ${DEP})
         list(GET SRC_DST 0 SRC)
         list(GET SRC_DST 1 DST)
@@ -208,8 +242,7 @@ function(android_target_dependency RUN_TARGET TARGET_TAG RUN_TARGET_DEPENDENCIES
 
         set(DEST_FILE "${CMAKE_BINARY_DIR}/${DST}")
         add_custom_command(OUTPUT "${DEST_FILE}"
-                           COMMAND ${CMAKE_COMMAND} -E copy_if_different "${SRC}"
-                                   "${CMAKE_BINARY_DIR}/${DST}")
+                           COMMAND ${CMAKE_COMMAND} -E copy_if_different "${SRC}" "${CMAKE_BINARY_DIR}/${DST}")
         list(APPEND DEP_SOURCES ${DEST_FILE})
       endif()
     endforeach()
