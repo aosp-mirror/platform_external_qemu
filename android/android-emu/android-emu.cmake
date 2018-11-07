@@ -15,6 +15,7 @@ set(android-emu-common
     android/async-socket.c
     android/async-socket-connector.c
     android/async-utils.c
+    android/base/AlignedBuf.cpp
     android/base/async/AsyncReader.cpp
     android/base/async/AsyncSocketServer.cpp
     android/base/async/AsyncWriter.cpp
