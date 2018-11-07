@@ -68,6 +68,17 @@ TEST_F(VulkanHalTest, Basic) {
     for (uint32_t i = 0; i < extCount; ++i) {
         printf("Available extension: %s\n", exts[i].extensionName);
     }
+
+    VkInstanceCreateInfo instCi = {
+        VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO, 0, 0,
+        nullptr,
+        0, nullptr,
+        0, nullptr,
+    };
+
+    VkInstance inst;
+    EXPECT_EQ(VK_SUCCESS, vkCreateInstance(&instCi, nullptr, &inst));
+    vkDestroyInstance(inst, nullptr);
 }
 
 }  // namespace aemu
