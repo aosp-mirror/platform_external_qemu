@@ -1359,6 +1359,7 @@ void pc_memory_init(PCMachineState *pcms,
     memory_region_add_subregion(system_memory, 0, ram_below_4g);
     e820_add_entry(0, pcms->below_4g_mem_size, E820_RAM);
     if (pcms->above_4g_mem_size > 0) {
+        fprintf(stderr, "%s: above 4g size: %llx\n", __func__, (unsigned long long)pcms->above_4g_mem_size);
         ram_above_4g = g_malloc(sizeof(*ram_above_4g));
         memory_region_init_alias(ram_above_4g, NULL, "ram-above-4g", ram,
                                  pcms->below_4g_mem_size,
