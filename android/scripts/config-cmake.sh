@@ -64,6 +64,7 @@ option_register_var "--crash-prod" OPTION_CRASH_PROD "Send crashes to production
 option_register_var "--out-dir=<path>" OPTION_OUT_DIR "Use specific output directory"
 option_register_var "--mingw" OPTION_MINGW "Build Windows executable on Linux using mingw"
 option_register_var "--windows-msvc" OPTION_MSVC "Build Windows executable on Linux using Windows SDK + clang (only 64-bit for now)"
+option_register_var "--force-fetch-wintoolchain" OPTION_WINTOOLCHAIN "Force refresh the Windows SDK, and replace the current one if any (windows-msvc build)"
 option_register_var "--sanitizer=<..>" OPTION_SANITIZER "Build with LLVM sanitizer (sanitizer=[address, thread])"
 option_register_var "--generator=<..>" OPTION_GENERATOR "Use the given generator (ninja, make, Xcode, etc.)"
 option_register_var "--list-generators" OPTION_LIST_GEN "List available generators"
@@ -84,6 +85,9 @@ if [ "$OPTION_CRASH_STAGING" -a "$OPTION_CRASH_PROD" ]; then
     panic "Choose either --crash-staging or --crash-prod, not both."
 fi
 
+if [ "$OPTION_WINTOOLCHAIN" -a -z "$OPTION_MSVC" ]; then
+    panic "--force-fetch-wintoolchain only for --windows-msvc build."
+fi
 
 log_invocation
 QEMU_TOP=$AOSP_DIR/external/qemu
@@ -150,6 +154,10 @@ if [ "$OPTION_DEBUG" != "no" ]; then
    CMAKE_PARAMS="${CMAKE_PARAMS}  -DCMAKE_BUILD_TYPE=Debug"
 else
    CMAKE_PARAMS="${CMAKE_PARAMS}  -DCMAKE_BUILD_TYPE=Release"
+fi
+
+if [ "$OPTION_WINTOOLCHAIN" ]; then
+   CMAKE_PARAMS="${CMAKE_PARAMS}  -DOPTION_WINTOOLCHAIN=1"
 fi
 
 if [ "$OPTION_GENERATOR" = "ninja" ]; then
