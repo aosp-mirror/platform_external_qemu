@@ -125,27 +125,28 @@ build_symbols () {
 
 process_dir() {
     local DIR=$1
-    local DEPTH=$2
-    if [ "$DEPTH" ]; then
-        DEPTH_CMD="-maxdepth $DEPTH"
-    fi
     case $(get_build_os) in
         linux)
             OPT_HOST=linux-x86_64
             if [ "$OPT_MINGW" ]; then
-                OPT_HOST=windows-x86_64
+               OPT_HOST=windows-x86_64
+               FIND_CMD="find $DIR -type f -and ( -name *.exe -or -name *.dll ) -print0"  
+            else
+               FIND_CMD="find $DIR -type f -and ( -executable -or -name .*so.* ) -print0"  
             fi
-            FIND_CMD="find $DIR $DEPTH_CMD -type f -executable -print0"
+            
+
             ;;
         darwin)
             OPT_HOST=darwin-x86_64
-            FIND_CMD="find $DIR $DEPTH_CMD -type f -perm +111 -print0"
+            FIND_CMD="find $DIR ( -type f -and ( -perm +111 -or -name '*.dylib' ) ) -print0"
             ;;
         *)
             panic "Unable to process binaries on this system [$(get_build_os)]"
             ;;
     esac
-
+    # Disable globbing, so we don't start expanding our wildcards in unexpected ways.
+    set -f
     $FIND_CMD | while read -d $'\0' file; do
     line=$(echo $file| sed 's|\./||')
     build_symbols build $OPT_HOST "$line"
@@ -153,6 +154,6 @@ done
 }
 
 OLD_DIR=$PWD
-cd $OPT_OUT
-process_dir gradle-release 20
-cd $OLD_DIR
+run cd $OPT_OUT
+process_dir gradle-release
+run cd $OLD_DIR
