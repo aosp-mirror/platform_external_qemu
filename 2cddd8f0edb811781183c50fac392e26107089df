@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b937f27_5ff3aa95",
+        "filename": "android/android-emu/android/base/misc/PipeUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-07T20:12:05Z",
+      "side": 1,
+      "message": "can we call it IpcPipe.h or something more descriptive? \"Utils\" is not descriptive enough and \"Pipe\" is overloaded",
+      "revId": "2cddd8f0edb811781183c50fac392e26107089df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9fc476df_b5e509b4",
+        "filename": "android/android-emu/android/base/misc/PipeUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-07T20:12:05Z",
+      "side": 1,
+      "message": "maybe ipcPipe or something to make it more unique sounding? \"pipe\" is now overloaded with goldfish / android pipe :)",
+      "range": {
+        "startLine": 38,
+        "startChar": 8,
+        "endLine": 38,
+        "endChar": 16
+      },
+      "revId": "2cddd8f0edb811781183c50fac392e26107089df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
