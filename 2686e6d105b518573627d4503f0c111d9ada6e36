@@ -22,6 +22,30 @@
       "revId": "2686e6d105b518573627d4503f0c111d9ada6e36",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "37901734_2a0e2fda",
+        "filename": "memory.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1719,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-07T21:31:17Z",
+      "side": 1,
+      "message": "that should not be an issue:\n\nstatic void reclaim_ramblock(RAMBlock *block)\n{\n    if (block-\u003eflags \u0026 RAM_PREALLOC) { \u003c---------------we use the prealloc flag\n        ;\n    } else if (xen_enabled()) {\n        xen_invalidate_map_cache_entry(block-\u003ehost);\n    } else if (block-\u003efd \u003e\u003d 0) {\n        qemu_ram_munmap(block-\u003ehost, block-\u003emax_length);\n#ifdef _WIN32\n        _close(block-\u003efd);\n#else\n        close(block-\u003efd);\n#endif\n    } else {\n        qemu_anon_ram_free(block-\u003ehost, block-\u003emax_length);\n    }\n    g_free(block);\n}",
+      "parentUuid": "098a6a3f_91a684cf",
+      "range": {
+        "startLine": 1719,
+        "startChar": 21,
+        "endLine": 1719,
+        "endChar": 49
+      },
+      "revId": "2686e6d105b518573627d4503f0c111d9ada6e36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
