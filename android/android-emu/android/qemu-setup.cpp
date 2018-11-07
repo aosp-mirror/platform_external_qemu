@@ -34,6 +34,7 @@
 #include "android/hw-sensors.h"
 #include "android/logcat-pipe.h"
 #include "android/network/NetworkPipe.h"
+#include "android/network/WifiForwardPipe.h"
 #include "android/offworld/OffworldPipe.h"
 #include "android/opengles-pipe.h"
 #include "android/proxy/proxy_setup.h"
@@ -52,6 +53,8 @@
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
 namespace fc = android::featurecontrol;
+
+using android::network::WifiForwardMode;
 
 extern "C" {
     /* Contains arguments for -android-ports option. */
@@ -72,6 +75,10 @@ extern "C" {
     int    android_adb_port = 5037; // Default
     /* The device "serial number" is "emulator-<this number>" */
     int    android_serial_number_port;
+    /* The port to use for WiFi forwarding as a server */
+    uint16_t android_wifi_server_port = 0;
+    /* The port to use for WiFi forwarding as a client */
+    uint16_t android_wifi_client_port = 0;
 }
 
 // The following code is used to support the -report-console option,
@@ -318,36 +325,7 @@ static void inject_timezone_boot_property() {
     }
 }
 
-/* this function is called from qemu_main() once all arguments have been parsed
- * it should be used to setup any Android-specific items in the emulation before the
- * main loop runs
- */
-bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
-
-    // Register Android pipe services.
-    android_pipe_add_type_zero();
-    android_pipe_add_type_pingpong();
-    android_pipe_add_type_throttle();
-
-    android_unix_pipes_init();
-    android_init_opengles_pipe();
-    android_init_clipboard_pipe();
-    android_init_logcat_pipe();
-    if (fc::isEnabled(fc::RefCountPipe))
-        android_init_refcount_pipe();
-    if (fc::isEnabled(fc::WifiConfigurable)) {
-        android::network::registerNetworkPipeService();
-    }
-
-#ifndef _WIN32
-    // bug: 70566718
-    // for now, just use software keymaster3 in the guest
-    // on windows.
-    android_init_keymaster3();
-#endif
-    android_init_fake_camera_sensor();
-    android_init_qemu_misc_pipe();
-
+bool android_ports_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     if (android_op_port && android_op_ports) {
         derror("options -port and -ports cannot be used together.");
         return false;
@@ -406,14 +384,62 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
 
     /* Save base port and ADB port. */
     android_base_port = base_port;
+    android_adb_port = adb_port;
     android_serial_number_port = adb_port - 1;
+    return true;
+}
+
+/* this function is called from qemu_main() once all arguments have been parsed
+ * it should be used to setup any Android-specific items in the emulation before the
+ * main loop runs
+ */
+bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
+
+    // Register Android pipe services.
+    android_pipe_add_type_zero();
+    android_pipe_add_type_pingpong();
+    android_pipe_add_type_throttle();
+
+    android_unix_pipes_init();
+    android_init_opengles_pipe();
+    android_init_clipboard_pipe();
+    android_init_logcat_pipe();
+    if (fc::isEnabled(fc::RefCountPipe))
+        android_init_refcount_pipe();
+    if (fc::isEnabled(fc::WifiConfigurable)) {
+        android::network::registerNetworkPipeService();
+    }
+    if (android_wifi_server_port > 0 || android_wifi_client_port > 0) {
+        WifiForwardMode mode = WifiForwardMode::Client;
+        uint16_t port = android_wifi_client_port;
+        if (android_wifi_server_port > 0) {
+            mode = WifiForwardMode::Server;
+            port = android_wifi_server_port;
+        }
+        android::network::registerWifiForwardPipeService(mode, port);
+    }
+
+#ifndef _WIN32
+    // bug: 70566718
+    // for now, just use software keymaster3 in the guest
+    // on windows.
+    android_init_keymaster3();
+#endif
+    android_init_fake_camera_sensor();
+    android_init_qemu_misc_pipe();
+
+    if (!isQemu2) {
+        // QEMU 2 calls this before this function is called because it needs the
+        // ports earlier. Only call this for QEMU 1.
+        android_ports_setup(agents, isQemu2);
+    }
 
     /* send a simple message to the ADB host server to tell it we just started.
     * it should be listening on port 5037. if we can't reach it, don't bother
     */
-    android_adb_server_notify(adb_port);
+    android_adb_server_notify(android_adb_port);
 
-    android_validate_ports(base_port, adb_port);
+    android_validate_ports(android_base_port, android_adb_port);
 
     if (android_op_report_console) {
         if (report_console(android_op_report_console, android_base_port) < 0) {
