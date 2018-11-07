@@ -22,6 +22,30 @@
       "revId": "09f6e4521bcfa448cc8cb8c11b6819f53930cf90",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "722c3739_37c1c012",
+        "filename": "include/exec/memory.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 757,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-07T19:44:35Z",
+      "side": 1,
+      "message": "Discussed offline: at this point there is no physical address yet.",
+      "parentUuid": "c3dca00c_e03c8eab",
+      "range": {
+        "startLine": 757,
+        "startChar": 49,
+        "endLine": 757,
+        "endChar": 53
+      },
+      "revId": "09f6e4521bcfa448cc8cb8c11b6819f53930cf90",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
