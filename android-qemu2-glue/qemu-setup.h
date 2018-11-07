@@ -47,6 +47,9 @@ extern void rng_random_generic_read_random_bytes(void *buf, int size);
  * (e.g. custom DNS server list) into the network stack. */
 extern void qemu_android_emulation_init_slirp(void);
 
+/* Call this function to initialize telnet and ADB ports used by the emulator */
+extern bool qemu_android_ports_setup(void);
+
 /* Call this function after the QEMU main() function has inited the
  * machine, but before it has started it. */
 extern bool qemu_android_emulation_setup(void);

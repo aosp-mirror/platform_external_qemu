@@ -139,6 +139,9 @@ QemuParameters* qemu_parameters_create(const char* argv0,
         }
     }
 
+    params.add2If("-wifi-client-port", opts->wifi_client_port);
+    params.add2If("-wifi-server-port", opts->wifi_server_port);
+
     // TODO(digit): Add kernel parameters here.
 
     params.add2If("-android-ports", opts->ports);
