@@ -740,21 +740,14 @@ list(APPEND android-emu-testdata
             testdata/textureutils/rgba32_golden.bmp
             testdata/textureutils/rgba32.png)
 
-list(APPEND android-emu-prebuilt-resources
-            virtualscene/Toren1BD/Toren1BD.mtl
-            virtualscene/Toren1BD/Toren1BD.obj
-            virtualscene/Toren1BD/Toren1BD.posters
-            virtualscene/Toren1BD/Toren1BD_Decor.png
-            virtualscene/Toren1BD/Toren1BD_Main.png
-            virtualscene/Toren1BD/poster.png)
-
+prebuilt(VIRTUALSCENE)
 android_copy_test_files(android-emu_unittests "${android-emu-testdata}" testdata)
-android_copy_test_files(android-emu_unittests "${android-emu-prebuilt-resources}" resources)
+android_target_dependency(android-emu_unittests all VIRTUAL_SCENE_DEPENDENCIES)
 android_copy_test_dir(android-emu_unittests test-sdk test-sdk)
 android_copy_file(android-emu_unittests  "${CMAKE_CURRENT_SOURCE_DIR}/android/emulation/CpuAccelerator_unittest.dat" "$<TARGET_FILE_DIR:android-emu_unittests>/android/android-emu/android/emulation/CpuAccelerator_unittest.dat")
 android_copy_file(android-emu_unittests  "${CMAKE_CURRENT_SOURCE_DIR}/android/emulation/CpuAccelerator_unittest.dat2" "$<TARGET_FILE_DIR:android-emu_unittests>/android/android-emu/android/emulation/CpuAccelerator_unittest.dat2")
 
-android_target_dependency(android-emu_unittests all  E2FSPROGS_DEPENDENCIES)
+android_target_dependency(android-emu_unittests all release E2FSPROGS_DEPENDENCIES)
 
 # Boo! We depend on makeext
 add_custom_command(TARGET android-emu_unittests POST_BUILD
