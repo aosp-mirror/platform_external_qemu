@@ -273,6 +273,8 @@ extern char* android_op_ports;
 extern int android_op_ports_numbers[2];
 extern char* android_op_report_console;
 static const char* android_hw_file = NULL;
+extern uint16_t android_wifi_server_port;
+extern uint16_t android_wifi_client_port;
 #endif  // CONFIG_ANDROID
 const char *watchdog;
 QEMUOptionRom option_rom[MAX_OPTION_ROMS];
@@ -4515,6 +4517,30 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                     return 1;
                 }
                 break;
+            case QEMU_OPTION_android_wifi_client_port:
+                {
+                    int port = strtol(optarg, (char **) &optarg, 10);
+                    if (port < 1 || port > USHRT_MAX) {
+                        fprintf(stderr, "emulator: invalid WiFi client port "
+                                "number %d, must be in the range 1-%d",
+                                port, USHRT_MAX);
+                        return 1;
+                    }
+                    android_wifi_client_port = port;
+                }
+                break;
+            case QEMU_OPTION_android_wifi_server_port:
+                {
+                    int port = strtol(optarg, (char **) &optarg, 10);
+                    if (port < 1 || port > USHRT_MAX) {
+                        fprintf(stderr, "emulator: invalid WiFi server port "
+                                "number %d, must be in the range 1-%d",
+                                port, USHRT_MAX);
+                        return 1;
+                    }
+                    android_wifi_server_port = port;
+                }
+                break;
             case QEMU_OPTION_android_report_console:
                 android_op_report_console = (char*)optarg;
                 break;
@@ -5351,6 +5377,26 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     // so they take precedence
     process_cmd_properties();
 
+    if (!qemu_android_ports_setup()) {
+        // Errors have already been reported inside this function
+        return 1;
+    }
+
+    extern void android_emulator_set_base_port(int);
+    android_emulator_set_base_port(android_base_port);
+
+    {
+        // Now that we know the serial number we can set it as the MAC prefix
+        // for wifi. This keeps the MAC addresses unique across several
+        // emulators that may have connected WiFi networks.
+        char* combined = g_strdup_printf("%s mac80211_hwsim.mac_prefix=%d",
+                                         current_machine->kernel_cmdline,
+                                         android_serial_number_port);
+        g_free(current_machine->kernel_cmdline);
+        current_machine->kernel_cmdline = combined;
+    }
+
+
 #endif  // CONFIG_ANDROID
 
     /* This checkpoint is required by replay to separate prior clock
@@ -5384,9 +5430,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     if (snapshot_list) {
         androidSnapshot_listStdout();
     }
-
-    extern void android_emulator_set_base_port(int);
-    android_emulator_set_base_port(android_base_port);
 #endif  // CONFIG_ANDROID
 
     if (!realtime_init()) {

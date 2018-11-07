@@ -136,6 +136,8 @@ OPT_PARAM( dpi_device, "<dpi>", "specify device's resolution in dpi (default "
             STRINGIFY(DEFAULT_DEVICE_DPI) ")" )
 OPT_PARAM( scale, "<scale>", "scale emulator window (deprecated)" )
 
+OPT_PARAM( wifi_client_port, "<port>", "connect to other emulator for WiFi forwarding" )
+OPT_PARAM( wifi_server_port, "<port>", "listen to other emulator for WiFi forwarding" )
 OPT_PARAM( http_proxy, "<proxy>", "make TCP connections through a HTTP/HTTPS proxy" )
 OPT_PARAM( timezone, "<timezone>", "use this timezone instead of the host's default" )
 OPT_PARAM( dns_server, "<servers>", "use this DNS server(s) in the emulated system" )
