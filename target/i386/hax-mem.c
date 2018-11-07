@@ -150,6 +150,16 @@ void hax_set_phys_mem(MemoryRegionSection *section, bool add)
         goto end;
     }
 
+    if (memory_region_is_user_backed(area)) {
+#ifdef HAX_SLOT_DEBUG
+        fprintf(stderr, "%s: is user-backed ram, skip [0x%llx 0x%llx] for %s\n",
+                __func__,
+                (unsigned long long)start,
+                (unsigned long long)end, add ? "ADD" : "REMOVE");
+#endif
+        goto end;
+    }
+
     hva = memory_region_get_ram_ptr(area) + section->offset_within_region;
 
     if (memory_region_is_rom(area)) {

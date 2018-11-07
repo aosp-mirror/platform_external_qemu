@@ -279,6 +279,10 @@ int __hvf_set_memory(hvf_slot *slot) {
     macslot->gpa_start = slot->start;
     macslot->size = slot->size;
     macslot->hva = slot->mem;
+    fprintf(stderr, "%s: hv_vm_map for hva 0x%llx gpa [0x%llx 0x%llx]\n", __func__,
+            (unsigned long long)(slot->mem),
+            (unsigned long long)macslot->gpa_start,
+            (unsigned long long)(macslot->gpa_start + macslot->size));
     DPRINTF("%s: hv_vm_map for hva 0x%llx gpa [0x%llx 0x%llx]\n", __func__,
             (unsigned long long)(slot->mem),
             (unsigned long long)macslot->gpa_start,
@@ -294,6 +298,7 @@ void hvf_set_phys_mem(MemoryRegionSection* section, bool add) {
     MemoryRegion *area = section->mr;
 
     if (!memory_region_is_ram(area)) return;
+    if (memory_region_is_user_backed(area)) return;
 
     mem = hvf_find_overlap_slot(
             section->offset_within_address_space,

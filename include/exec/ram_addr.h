@@ -91,6 +91,9 @@ RAMBlock *qemu_ram_alloc_resizeable(ram_addr_t size, ram_addr_t max_size,
                                                     uint64_t length,
                                                     void *host),
                                     MemoryRegion *mr, Error **errp);
+RAMBlock *qemu_ram_alloc_user_backed(ram_addr_t size, MemoryRegion *mr,
+                                     Error **errp);
+
 void qemu_ram_free(RAMBlock *block);
 
 int qemu_ram_resize(RAMBlock *block, ram_addr_t newsize, Error **errp);
