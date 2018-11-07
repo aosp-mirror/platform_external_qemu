@@ -254,6 +254,14 @@ class VulkanAPI(object):
         res = VulkanAPI(newName, self.retType, self.parameters)
         return res
 
+    def getRetVarExpr(self):
+        if self.retType == "void":
+            return None
+        return "%s_%s_return" % (self.name, self.retType.typeName)
+    
+    def getRetTypeExpr(self):
+        return self.retType.typeName
+
 # Parses everything about Vulkan types into a Python readable format.
 class VulkanTypeInfo(object):
 
