@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "dee6d1d1_7d06278c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-11-07T15:34:01Z",
+      "side": 1,
+      "message": "Can this fail immediately, or will a failure always take CONNECT_TIMEOUT_SEC?\nIf it fails immediately, we\u0027ll retry immediately, without any sleep.",
+      "range": {
+        "startLine": 132,
+        "startChar": 37,
+        "endLine": 132,
+        "endChar": 75
+      },
+      "revId": "cb30470800d6d6e808d5a2131d2dc6ce84774d35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4a1c7949_1938786a",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.h",
         "patchSetId": 21
