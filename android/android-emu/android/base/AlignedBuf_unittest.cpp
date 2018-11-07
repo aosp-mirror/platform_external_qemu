@@ -11,12 +11,22 @@
 
 #include "android/base/AlignedBuf.h"
 
+#include "android/base/ArraySize.h"
+
 #include <gtest/gtest.h>
 
 #include <vector>
 #include <array>
 
 using android::AlignedBuf;
+using android::base::arraySize;
+using android::aligned_buf_alloc;
+using android::aligned_buf_free;
+
+static void checkAligned(size_t align, void* ptr) {
+    uintptr_t ptrVal = reinterpret_cast<uintptr_t>(ptr);
+    EXPECT_EQ(0, ptrVal & (align - 1));
+}
 
 TEST(AlignedBuf, Basic) {
     const int numItems = 10;
@@ -24,19 +34,19 @@ TEST(AlignedBuf, Basic) {
     // Check that the buffers are aligned
     {
         AlignedBuf<uint32_t, 64> buf(numItems);
-        EXPECT_EQ(0, (uintptr_t)buf.data() & (64 - 1));
+        checkAligned(64, buf.data());
         EXPECT_EQ(numItems, buf.size());
     }
 
     {
         AlignedBuf<uint32_t, 256> buf(numItems);
-        EXPECT_EQ(0, (uintptr_t)buf.data() & (256 - 1));
+        checkAligned(256, buf.data());
         EXPECT_EQ(numItems, buf.size());
     }
 
     {
         AlignedBuf<uint32_t, 4096> buf(numItems);
-        EXPECT_EQ(0, (uintptr_t)buf.data() & (4096 - 1));
+        checkAligned(4096, buf.data());
         EXPECT_EQ(numItems, buf.size());
     }
 
@@ -136,5 +146,28 @@ TEST(AlignedBuf, Resize) {
     for (size_t i = 0; i < 10; i++) {
         buf.resize(initialSize + i * 4096);
         check();
+    }
+}
+
+// Tests raw aligned alloc.
+TEST(AlignedBuf, Raw) {
+    constexpr size_t alignmentsToTest[] = {
+        1, 2, 4, 8, 16, 256, 1024, 4096,
+    };
+    constexpr size_t sizesToTest[] = {
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+        16, 17, 256, 400, 500, 4000, 4096,
+    };
+
+    size_t numAlignmentCases = arraySize(alignmentsToTest);
+    size_t numSizeCases = arraySize(sizesToTest);
+
+    for (size_t i = 0; i < numAlignmentCases; ++i) {
+        for (size_t j = 0; j < numSizeCases; ++j) {
+            void* buf = aligned_buf_alloc(alignmentsToTest[i], sizesToTest[j]);
+            EXPECT_NE(nullptr, buf);
+            checkAligned(alignmentsToTest[i], buf);
+            aligned_buf_free(buf);
+        }
     }
 }

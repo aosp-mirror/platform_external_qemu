@@ -53,6 +53,90 @@ size_t VkDecoder::decode(void* buf, size_t bufsize, IOStream* stream) {
 // VkDecoder::Impl::decode to follow
 """
 
+READ_STREAM = "vkReadStream"
+WRITE_STREAM = "vkStream"
+
+def emit_param_decl_for_reading(param, cgen):
+    cgen.stmt(cgen.makeRichCTypeDecl(param.getForNonConstAccess()))
+
+def emit_unmarshal(typeInfo, param, cgen):
+    iterateVulkanType(typeInfo, param, VulkanMarshalingCodegen(
+        cgen,
+        READ_STREAM,
+        param.paramName,
+        API_PREFIX_UNMARSHAL,
+        direction="read",
+        dynAlloc=True))
+
+def emit_marshal(typeInfo, param, cgen):
+    iterateVulkanType(typeInfo, param, VulkanMarshalingCodegen(
+        cgen,
+        WRITE_STREAM,
+        param.paramName,
+        API_PREFIX_MARSHAL,
+        direction="write"))
+
+def emit_decode_parameters(typeInfo, api, cgen):
+    paramsToRead = []
+
+    for param in api.parameters:
+        paramsToRead.append(param)
+
+    for p in paramsToRead:
+        emit_param_decl_for_reading(p, cgen)
+    for p in paramsToRead:
+        emit_unmarshal(typeInfo, p, cgen)
+
+def emit_dispatch_call(api, cgen):
+    callLhs = None
+    retTypeName = api.getRetTypeExpr()
+    if retTypeName != "void":
+        retVar = api.getRetVarExpr()
+        cgen.stmt("%s %s = (%s)0" % (retTypeName, retVar, retTypeName))
+        callLhs = retVar
+
+    cgen.funcCall(
+        callLhs, "m_vk->" + api.name, [p.paramName for p in api.parameters])
+
+def emit_decode_parameters_writeback(typeInfo, api, cgen):
+    paramsToWrite = []
+
+    for param in api.parameters:
+        if param.possiblyOutput():
+            paramsToWrite.append(param)
+
+    for p in paramsToWrite:
+        emit_marshal(typeInfo, p, cgen)
+
+def emit_decode_return_writeback(api, cgen):
+    retTypeName = api.getRetTypeExpr()
+    if retTypeName != "void":
+        retVar = api.getRetVarExpr()
+        cgen.stmt("%s->write(&%s, %s)" %
+            (WRITE_STREAM, retVar, cgen.sizeofExpr(api.retType)))
+
+def emit_decode_finish(cgen):
+    cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
+
+## Custom decoding definitions##################################################
+def decode_vkMapMemory(typeInfo, api, cgen):
+    emit_decode_parameters(typeInfo, api, cgen)
+    emit_dispatch_call(api, cgen)
+    emit_decode_parameters_writeback(typeInfo, api, cgen)
+    emit_decode_return_writeback(api, cgen)
+
+    needWriteback = \
+        "((%s == VK_SUCCESS) && ppData && size > 0)" % api.getRetVarExpr()
+    cgen.beginIf(needWriteback)
+    cgen.stmt("%s->write(*ppData, size)" % (WRITE_STREAM))
+    cgen.endIf()
+
+    emit_decode_finish(cgen)
+
+custom_decodes = {
+    "vkMapMemory" : decode_vkMapMemory,
+}
+
 class VulkanDecoder(VulkanWrapperGenerator):
     def __init__(self, module, typeInfo):
         VulkanWrapperGenerator.__init__(self, module, typeInfo)
@@ -80,8 +164,9 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("if (end - ptr < packetLen) return ptr - (unsigned char*)buf")
 
         self.cgen.stmt("stream()->setStream(ioStream)")
-        self.cgen.stmt("VulkanStream* vkStream = stream()")
-        self.cgen.stmt("VulkanMemReadingStream* vkReadStream = readStream()")
+        self.cgen.stmt("VulkanStream* %s = stream()" % WRITE_STREAM)
+        self.cgen.stmt("VulkanMemReadingStream* %s = readStream()" % READ_STREAM)
+        self.cgen.stmt("%s->setBuf((uint8_t*)(ptr + 8))" % READ_STREAM)
 
         self.cgen.line("switch (opcode)")
         self.cgen.beginBlock() # switch stmt
@@ -89,65 +174,22 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.module.appendImpl(self.cgen.swapCode())
 
     def onGenCmd(self, cmdinfo, name, alias):
+        typeInfo = self.typeInfo
         cgen = self.cgen
-
-        def streamParamsFromPacketBuffer(params):
-            for p in params:
-                cgen.stmt(cgen.makeRichCTypeDecl(p.getForNonConstAccess()))
-            cgen.stmt("vkReadStream->setBuf((uint8_t*)(ptr + 8))")
-            for p in params:
-                unmarshal = VulkanMarshalingCodegen(
-                    None,
-                    "vkReadStream",
-                    p.paramName,
-                    API_PREFIX_UNMARSHAL,
-                    direction = "read",
-                    dynAlloc = True)
-                unmarshal.cgen = cgen
-                iterateVulkanType(self.typeInfo, p, unmarshal)
-
-        def streamParamsBackToGuest(params):
-            for p in params:
-                marshal = VulkanMarshalingCodegen(
-                    None,
-                    "vkStream",
-                    p.paramName,
-                    API_PREFIX_MARSHAL,
-                    direction = "write")
-                marshal.cgen = cgen
-                iterateVulkanType(self.typeInfo, p, marshal)
-
-        api = self.typeInfo.apis[name]
+        api = typeInfo.apis[name]
 
         cgen.line("case OP_%s:" % name)
         cgen.beginBlock()
 
-        paramsToRead = []
-        paramsToWrite = []
+        if api.name in custom_decodes.keys():
+            custom_decodes[api.name](typeInfo, api, cgen)
+        else:
+            emit_decode_parameters(typeInfo, api, cgen)
+            emit_dispatch_call(api, cgen)
+            emit_decode_parameters_writeback(typeInfo, api, cgen)
+            emit_decode_return_writeback(api, cgen)
+            emit_decode_finish(cgen)
 
-        for param in api.parameters:
-            paramsToRead.append(param)
-            if param.possiblyOutput():
-                paramsToWrite.append(param)
-
-        streamParamsFromPacketBuffer(paramsToRead)
-
-        callLhs = None
-        if api.retType.typeName != "void":
-            retType = api.retType.typeName
-            retVar = "%s_%s_return" % (api.name, retType)
-            cgen.stmt("%s %s = (%s)0" % (retType, retVar, retType))
-            callLhs = retVar
-
-        self.cgen.funcCall(
-            callLhs, "m_vk->" + api.name, [p.paramName for p in api.parameters])
-
-        streamParamsBackToGuest(paramsToWrite)
-        if api.retType.typeName != "void":
-            cgen.stmt("vkStream->write(&%s, %s)" %
-                (retVar, cgen.sizeofExpr(api.retType)))
-
-        cgen.stmt("vkStream->commitWrite()")
         cgen.stmt("break")
         cgen.endBlock()
         self.module.appendImpl(self.cgen.swapCode())
