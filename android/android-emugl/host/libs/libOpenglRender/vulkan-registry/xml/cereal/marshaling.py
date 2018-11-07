@@ -291,8 +291,11 @@ class VulkanMarshaling(VulkanWrapperGenerator):
 
             def structMarshalingDef(cgen):
                 self.writeCodegen.cgen = cgen
-                for member in structInfo.members:
-                    iterateVulkanType(self.typeInfo, member, self.writeCodegen)
+                if category == "struct":
+                    for member in structInfo.members:
+                        iterateVulkanType(self.typeInfo, member, self.writeCodegen)
+                if category == "union":
+                    iterateVulkanType(self.typeInfo, structInfo.members[0], self.writeCodegen)
 
             self.module.appendHeader(
                 self.cgenHeader.makeFuncDecl(marshalPrototype))
@@ -307,8 +310,11 @@ class VulkanMarshaling(VulkanWrapperGenerator):
 
             def structUnmarshalingDef(cgen):
                 self.readCodegen.cgen = cgen
-                for member in structInfo.members:
-                    iterateVulkanType(self.typeInfo, member, self.readCodegen)
+                if category == "struct":
+                    for member in structInfo.members:
+                        iterateVulkanType(self.typeInfo, member, self.readCodegen)
+                if category == "union":
+                    iterateVulkanType(self.typeInfo, structInfo.members[0], self.readCodegen)
 
             self.module.appendHeader(
                 self.cgenHeader.makeFuncDecl(unmarshalPrototype))
