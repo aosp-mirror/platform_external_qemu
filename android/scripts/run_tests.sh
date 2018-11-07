@@ -145,13 +145,6 @@ case $TARGET_OS in
 esac
 
 
-# In linux we can use the chromium ninja included in third_party
-case $HOST_OS in
-    linux*)
-       NINJA=${PROGDIR}/../third_party/chromium/depot_tools/ninja
-       ;;
-esac
-
 export CTEST_OUTPUT_ON_FAILURE=1
 OLD_DIR=$PWD
 cd $OPT_OUT
@@ -187,6 +180,36 @@ if [ "$HOST_OS" = "darwin" ]; then
             FAILURES="$FAILURES $EXEC-darwin-target"
         fi
     done
+    # Let's make sure all our dependencies exist in a release.. So we don't fall over
+    # during launch.
+    if [ -d $OPT_OUT/gradle-release ]; then
+        log "Checking that darwin binaries have all needed dependencies in the lib64 dir"
+        # Make sure we can load all dependencies of every dylib/executable we have.
+        find $OPT_OUT/gradle-release \( -type f -and \( -perm +111 -or -name '*.dylib' \) \) -print0 | while read -d $'\0' file; do
+            log2 "Checking $file for dependencies"
+            needed=$(otool -L $file | tail -n +2 | awk '{print $1}')
+            for need in $needed; do
+                log2 "  Looking for $need"
+                case $need in
+                    @rpath/*)
+                        # We will accept an rpath it if we can find it under lib64/
+                        dylib="${need#@rpath/}"
+                        libs=$(find $OPT_OUT/gradle-release/lib64 -name $dylib);
+                        # Xcode interjects a bogus path, so we skip that one
+                        if [ -z $libs ] && [ ! $dylib = "libclang_rt.asan_osx_dynamic.dylib" ]; then
+                            panic "Unable to locate $need [$dylib], needed by $file"
+                        fi
+                        ;;
+                    *)
+                        # Should be on the system path..
+                        test -f $need || panic "Unable to locate $need, needed by $file"
+                        ;;
+                esac
+            done
+        done
+    else
+        log "$OPT_OUT/gradle-release not found, not checking dependencies"
+    fi
 fi
 
 
@@ -233,10 +256,11 @@ if [ "$RUN_GEN_ENTRIES_TESTS" ]; then
     cd $OLD_DIR
 fi
 
-# Check that the windows executables all have icons.
-# First need to locate the windres tool.
 case "TARGET_OS" in
+
     windows*)
+        # Check that the windows executables all have icons.
+        # First need to locate the windres tool.
         log "Checking windows executables icons."
         if [ ! -f "$CONFIG_MAKE" ]; then
             echo "FAIL: Could not find \$CONFIG_MAKE !?"
