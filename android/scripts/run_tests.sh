@@ -88,6 +88,19 @@ warn() {
     echo "${RED}$1${RESET}"
 }
 
+# Returns true if
+# $1: List
+# $2: element we are looking for
+contains() {
+    for item in $1; do
+      if [ "$item" = "$2" ]; then
+        echo "True"
+        return
+      fi
+    done
+    echo "False"
+}
+
 # Return true iff the file type string |$1| contains the expected
 # substring |$2|.
 # $1: executable file type
@@ -209,6 +222,36 @@ if [ "$HOST_OS" = "darwin" ]; then
         done
     else
         log "$OPT_OUT/gradle-release not found, not checking dependencies"
+    fi
+fi
+
+if [ "$HOST_OS" = "linux" ]; then
+   log "Checking that all the .so dependencies are met"
+   if [ -d $OPT_OUT/gradle-release ]; then
+        log "Checking that linux binaries have all needed dependencies in the lib64 dir"
+        # Make sure we can load all dependencies of every dylib/executable we have.
+        cache=$(ldconfig --print-cache | awk '{ print $1; }')
+        files=$(find $OPT_OUT/gradle-release \( -type f -and \( -executable -or -name '*.so.*' \) \))
+        for file in $files; do
+            log2 "Checking $file for dependencies on ld path, or our tree.."
+            needed=$(readelf -d $file | grep "Shared" | cut -d "[" -f2 | cut -d "]" -f1)
+            for need in $needed; do
+                libs=$(find $OPT_OUT/gradle-release/lib64 -name $need);
+                if [ $libs ]; then
+                  log2 "  Found $need in our release"
+                else
+                    ldpath=$(contains "$cache" $need)
+                    if [ $ldpath = "True" ]; then
+                        log2 "  -- Found $need in default ld_library_path (os dependency)"
+                    else
+                        panic "Unable to locate $need, needed by $file"
+                    fi
+                fi
+            done
+        done
+        log "Dependencies are looking good!"
+    else
+        warn "No release found in $OPT_OUT, not validating dependencies."
     fi
 fi
 
