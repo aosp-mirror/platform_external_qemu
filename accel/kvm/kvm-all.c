@@ -725,6 +725,8 @@ static void kvm_set_phys_mem(KVMMemoryListener *kml,
     hwaddr start_addr, size;
     void *ram;
 
+    if (memory_region_is_user_backed(mr)) return;
+
     if (!memory_region_is_ram(mr)) {
         if (writeable || !kvm_readonly_mem_allowed) {
             return;
@@ -901,6 +903,63 @@ static MemoryListener kvm_io_listener = {
     .eventfd_del = kvm_io_ioeventfd_del,
     .priority = 10,
 };
+
+// User backed memory region API
+static int user_backed_flags_to_kvm_flags(int flags) {
+    int kvm_flags = 0;
+    if (!(flags & USER_BACKED_RAM_FLAGS_WRITE)) {
+        kvm_flags |= KVM_MEM_READONLY;
+    }
+    return kvm_flags;
+}
+
+static void kvm_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size, int flags) {
+    KVMSlot *slot;
+    KVMMemoryListener* kml;
+    int err;
+
+    if (!kvm_state) {
+        qemu_abort("%s: attempted to map RAM before KVM initialized\n", __func__);
+    }
+
+    kml = &kvm_state->memory_listener;
+
+    slot = kvm_alloc_slot(kml);
+
+    slot->memory_size = size;
+    slot->start_addr = gpa;
+    slot->ram = hva;
+    slot->flags = user_backed_flags_to_kvm_flags(flags);
+    err = kvm_set_user_memory_region(kml, slot);
+
+    if (err) {
+        qemu_abort("%s: error registering slot: %s\n", __func__,
+                strerror(-err));
+    }
+}
+
+static void kvm_user_backed_ram_unmap(hwaddr gpa, hwaddr size) {
+    KVMSlot *slot;
+    KVMMemoryListener* kml;
+    int err;
+
+    if (!kvm_state) {
+        qemu_abort("%s: attempted to map RAM before KVM initialized\n", __func__);
+    }
+
+    slot = kvm_lookup_matching_slot(kml, gpa, size);
+    if (!slot) {
+        return;
+    }
+
+    /* unregister the slot */
+    slot->memory_size = 0;
+    err = kvm_set_user_memory_region(kml, slot);
+    if (err) {
+        qemu_abort("%s: error unregistering slot: %s\n",
+                __func__, strerror(-err));
+    }
+}
 
 int kvm_set_irq(KVMState *s, int irq, int level)
 {
@@ -1702,6 +1761,9 @@ static int kvm_init(MachineState *ms)
 
     s->sync_mmu = !!kvm_vm_check_extension(kvm_state, KVM_CAP_SYNC_MMU);
 
+    qemu_set_user_backed_mapping_funcs(
+        kvm_user_backed_ram_map,
+        kvm_user_backed_ram_unmap);
     return 0;
 
 err:
