@@ -945,6 +945,9 @@ extern "C" int main(int argc, char** argv) {
         args.add2("-boot-property", pl->param);
     }
 
+    args.add2If("-android-wifi-client-port", opts->wifi_client_port);
+    args.add2If("-android-wifi-server-port", opts->wifi_server_port);
+
     args.add2If("-android-ports", opts->ports);
     if (opts->port) {
         int console_port = -1;

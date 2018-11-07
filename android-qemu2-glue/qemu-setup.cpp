@@ -160,9 +160,7 @@ bool qemu_android_emulation_early_setup() {
     return true;
 }
 
-bool qemu_android_emulation_setup() {
-    android_qemu_init_slirp_shapers();
-
+static const AndroidConsoleAgents* getConsoleAgents() {
     // Initialize UI/console agents.
     static const AndroidConsoleAgents consoleAgents = {
             gQAndroidBatteryAgent,        gQAndroidDisplayAgent,
@@ -173,12 +171,21 @@ bool qemu_android_emulation_setup() {
             gQAndroidNetAgent,            gQAndroidLibuiAgent,
             gQCarDataAgent,
     };
+    return &consoleAgents;
+}
+
+bool qemu_android_ports_setup() {
+    return android_ports_setup(getConsoleAgents(), true);
+}
+
+bool qemu_android_emulation_setup() {
+    android_qemu_init_slirp_shapers();
 
     if (!qemu_android_setup_http_proxy(op_http_proxy)) {
         return false;
     }
 
-    if (!android_emulation_setup(&consoleAgents, true)) {
+    if (!android_emulation_setup(getConsoleAgents(), true)) {
         return false;
     }
 
