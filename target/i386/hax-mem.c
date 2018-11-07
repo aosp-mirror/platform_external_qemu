@@ -12,6 +12,7 @@
 #include "cpu.h"
 #include "exec/address-spaces.h"
 #include "exec/exec-all.h"
+#include "exec/ram_addr.h"
 
 #include "target/i386/hax-i386.h"
 #include "qemu/queue.h"
