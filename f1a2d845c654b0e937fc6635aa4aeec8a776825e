@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ad362616_732edd6c",
+        "filename": "android/android-emu/android/base/misc/IpcPipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-11-07T22:23:05Z",
+      "side": 1,
+      "message": "what about returning a pair (or struct) of ScopedPtr\u003c\u003e classes that would own and close the fds automatically? API that would not allow any leaks by default",
+      "range": {
+        "startLine": 29,
+        "startChar": 18,
+        "endLine": 29,
+        "endChar": 48
+      },
+      "revId": "f1a2d845c654b0e937fc6635aa4aeec8a776825e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6f9ff2ce_b2d34c5a",
+        "filename": "android/android-emu/android/base/misc/IpcPipe_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-11-07T22:23:05Z",
+      "side": 1,
+      "message": "check that the fds are \u003e\u003d 0?",
+      "range": {
+        "startLine": 23,
+        "startChar": 2,
+        "endLine": 24,
+        "endChar": 25
+      },
+      "revId": "f1a2d845c654b0e937fc6635aa4aeec8a776825e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
