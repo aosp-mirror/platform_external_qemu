@@ -1,5 +1,4 @@
-#!/bin/bash
-
+#!/bin/sh
 # Copyright 2018 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,24 +21,16 @@ shell_import utils/aosp_dir.shi
 shell_import utils/temp_dir.shi
 shell_import utils/option_parser.shi
 
-# Fancy colors in the terminal
-if [ -t 1 ] ; then
-    RED=`tput setaf 1`
-    GREEN=`tput setaf 2`
-    RESET=`tput sgr0`
-else
-    RED=
-    GREEN=
-    RESET=
-fi
-
-
 PROGRAM_PARAMETERS=""
 
 PROGRAM_DESCRIPTION="Strips all the binaries"
 
 OPT_OUT=objs
 option_register_var "--out-dir=<dir>" OPT_OUT "Use specific output directory"
+
+
+OPT_INSTALL=gradle-release
+option_register_var "--install-dir=<dir>" OPT_INSTALL "CMake install directory used"
 
 OPT_MINGW=
 option_register_var "--mingw" OPT_MINGW "Use mingw symbols stripper"
@@ -50,7 +41,11 @@ aosp_dir_parse_option
 
 log_invocation
 
-# Import the packagee builder
+if [ ! -d $OPT_OUT/$OPT_INSTALL ]; then
+  panic "The install directory $OPT_OUT/$OPT_INSTALL does not exist."
+fi
+
+# Import the package builder
 shell_import utils/package_builder.shi
 
 # Build breakpad symbols from unstripped binaries
@@ -102,7 +97,7 @@ build_symbols () {
         $SYMTOOL $BINARY > $SYMBOL_DIR/$BINARY.sym 2> $SYMBOL_DIR/$BINARY.err ||
             warn "Failed to create symbol file for $BINARY"
         # And strip the binary
-        run  strip -S $BINARY || panic "Could not strip $BINARY"
+        run strip -S $BINARY || panic "Could not strip $BINARY"
     else
         case $HOST in
             linux*)
@@ -125,34 +120,34 @@ build_symbols () {
 
 process_dir() {
     local DIR=$1
-    local DEPTH=$2
-    if [ "$DEPTH" ]; then
-        DEPTH_CMD="-maxdepth $DEPTH"
-    fi
     case $(get_build_os) in
         linux)
             OPT_HOST=linux-x86_64
             if [ "$OPT_MINGW" ]; then
-                OPT_HOST=windows-x86_64
+               OPT_HOST=windows-x86_64
+               files=$(find $DIR -name \*.exe -or -name \*.dll)
+            else
+               files=$(find $DIR -type f -and \( -executable -or -name \*.so\* \))
             fi
-            FIND_CMD="find $DIR $DEPTH_CMD -type f -executable -print0"
             ;;
         darwin)
             OPT_HOST=darwin-x86_64
-            FIND_CMD="find $DIR $DEPTH_CMD -type f -perm +111 -print0"
+            FIND_CMD="find $DIR ( -type f -and ( -perm +111 -or -name '*.dylib' ) )"
+            files=$(FIND_CMD)
             ;;
         *)
             panic "Unable to process binaries on this system [$(get_build_os)]"
             ;;
     esac
+    log2 "Stripping ${files}"
 
-    $FIND_CMD | while read -d $'\0' file; do
-    line=$(echo $file| sed 's|\./||')
-    build_symbols build $OPT_HOST "$line"
-done
+    for file in $files; do
+        line=$(echo $file| sed 's|\./||')
+        build_symbols build $OPT_HOST "$line"
+    done
 }
 
 OLD_DIR=$PWD
-cd $OPT_OUT
-process_dir gradle-release 20
-cd $OLD_DIR
+run cd $OPT_OUT
+process_dir $OPT_INSTALL
+run cd $OLD_DIR
