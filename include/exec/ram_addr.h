@@ -94,6 +94,21 @@ RAMBlock *qemu_ram_alloc_resizeable(ram_addr_t size, ram_addr_t max_size,
 RAMBlock *qemu_ram_alloc_user_backed(ram_addr_t size, MemoryRegion *mr,
                                      Error **errp);
 
+// API for adding and removing mappings of guest RAM and host addrs.
+// Implementation depends on the hypervisor.
+#define USER_BACKED_RAM_FLAGS_NONE 0x0
+#define USER_BACKED_RAM_FLAGS_READ 0x1
+#define USER_BACKED_RAM_FLAGS_WRITE 0x2
+#define USER_BACKED_RAM_FLAGS_EXEC 0x4
+void qemu_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size, int flags);
+void qemu_user_backed_ram_unmap(hwaddr gpa, hwaddr size);
+
+typedef void (*QemuUserBackedRamMapFunc)(hwaddr gpa, void* hva, hwaddr size, int flags);
+typedef void (*QemuUserBackedRamUnmapFunc)(hwaddr gpa, hwaddr size);
+
+void qemu_set_user_backed_mapping_funcs(QemuUserBackedRamMapFunc mapFunc,
+                                        QemuUserBackedRamUnmapFunc unmapFunc);
+
 void qemu_ram_free(RAMBlock *block);
 
 int qemu_ram_resize(RAMBlock *block, ram_addr_t newsize, Error **errp);

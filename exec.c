@@ -2357,6 +2357,38 @@ RAMBlock *qemu_ram_alloc_user_backed(ram_addr_t size, MemoryRegion *mr,
     return new_block;
 }
 
+static QemuUserBackedRamMapFunc s_user_backed_ram_map = 0;
+static QemuUserBackedRamUnmapFunc s_user_backed_ram_unmap = 0;
+
+void qemu_set_user_backed_mapping_funcs(QemuUserBackedRamMapFunc mapFunc,
+                                        QemuUserBackedRamUnmapFunc unmapFunc)
+{
+    s_user_backed_ram_map = mapFunc;
+    s_user_backed_ram_unmap = unmapFunc;
+}
+
+void qemu_user_backed_ram_map(hwaddr gpa, void *hva, hwaddr size, int flags)
+{
+    if (!s_user_backed_ram_map)
+    {
+        qemu_abort("FATAL: Did not set ram map function before mapping");
+    }
+
+    s_user_backed_ram_map(gpa, hva, size, flags);
+}
+
+void qemu_user_backed_ram_unmap(hwaddr gpa, hwaddr size)
+{
+    if (!s_user_backed_ram_unmap)
+    {
+        qemu_abort("FATAL: Did not set ram unmap function before unmapping");
+    }
+
+    s_user_backed_ram_unmap(gpa, size);
+}
+
+void qemu_user_backed_ram_unmap(hwaddr gpa, hwaddr size);
+
 static void reclaim_ramblock(RAMBlock *block)
 {
     if (block->flags & RAM_PREALLOC) {
