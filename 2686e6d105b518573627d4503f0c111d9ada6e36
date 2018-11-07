@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "098a6a3f_91a684cf",
+        "filename": "memory.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1719,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-07T21:27:04Z",
+      "side": 1,
+      "message": "I believe you want a dedicated destructor here.\n\nstatic void memory_region_destructor_ram(MemoryRegion *mr)\n{\n    qemu_ram_free(mr-\u003eram_block);\n}",
+      "range": {
+        "startLine": 1719,
+        "startChar": 21,
+        "endLine": 1719,
+        "endChar": 49
+      },
+      "revId": "2686e6d105b518573627d4503f0c111d9ada6e36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
