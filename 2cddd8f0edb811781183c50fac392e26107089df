@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "36805642_7df1c67a",
+        "filename": "android/android-emu/android/base/misc/PipeUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2018-11-07T20:20:50Z",
+      "side": 1,
+      "message": "That sounds good, I was thinking about the name but couldn\u0027t come up with anything good. I\u0027m not using it for IPC but I think a lot of the time that\u0027s the intention for these things so that works.",
+      "parentUuid": "4b937f27_5ff3aa95",
+      "revId": "2cddd8f0edb811781183c50fac392e26107089df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9fc476df_b5e509b4",
         "filename": "android/android-emu/android/base/misc/PipeUtils.h",
         "patchSetId": 1
