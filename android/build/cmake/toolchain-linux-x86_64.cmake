@@ -31,8 +31,9 @@ if ("${RUNTIME_OS_DEPENDENCIES}" STREQUAL "")
     toolchain_cmd("${ANDROID_TARGET_TAG}" "--print=libcplusplus" "unused_param")
     get_filename_component(RESOLVED_SO "${STD_OUT}" REALPATH)
     get_filename_component(RESOLVED_FILENAME "${RESOLVED_SO}" NAME)
+    get_filename_component(LINKED_FILENAME "${STD_OUT}" NAME)
 
-    internal_set_env_cache(RUNTIME_OS_DEPENDENCIES "${STD_OUT}>lib64/${RESOLVED_FILENAME}")
+    internal_set_env_cache(RUNTIME_OS_DEPENDENCIES "${STD_OUT}>lib64/${RESOLVED_FILENAME};${STD_OUT}>lib64/${LINKED_FILENAME}")
 
     # Configure the RPATH be dynamic..
     internal_set_env_cache(RUNTIME_OS_PROPERTIES "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64'")
