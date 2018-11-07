@@ -33,6 +33,7 @@
 #include "exec/address-spaces.h"
 #include "exec/exec-all.h"
 #include "exec/ioport.h"
+#include "exec/ram_addr.h"
 #include "hw/i386/apic_internal.h"
 #include "qemu/main-loop.h"
 #include "qemu/abort.h"
@@ -250,6 +251,31 @@ int hvf_remap_safe(void* hva, uint64_t gpa, uint64_t size, uint64_t flags) {
     return res;
 }
 
+// API for adding and removing mappings of guest RAM and host addrs.
+// Implementation depends on the hypervisor.
+static hv_memory_flags_t user_backed_flags_to_hvf_flags(int flags) {
+    hv_memory_flags_t hvf_flags = 0;
+    if (flags & USER_BACKED_RAM_FLAGS_READ) {
+        hvf_flags |= HV_MEMORY_READ;
+    }
+    if (flags & USER_BACKED_RAM_FLAGS_WRITE) {
+        hvf_flags |= HV_MEMORY_WRITE;
+    }
+    if (flags & USER_BACKED_RAM_FLAGS_EXEC) {
+        hvf_flags |= HV_MEMORY_EXEC;
+    }
+    return hvf_flags;
+}
+
+static void hvf_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size, int flags) {
+    hvf_map_safe(hva, (uint64_t)gpa, (uint64_t)size,
+                user_backed_flags_to_hvf_flags(flags));
+}
+
+static void hvf_user_backed_ram_unmap(hwaddr gpa, hwaddr size) {
+    hvf_unmap_safe((uint64_t)gpa, (uint64_t)size);
+}
+
 int __hvf_set_memory(hvf_slot *slot) {
     struct mac_slot *macslot;
     hv_memory_flags_t flags;
@@ -294,6 +320,7 @@ void hvf_set_phys_mem(MemoryRegionSection* section, bool add) {
     MemoryRegion *area = section->mr;
 
     if (!memory_region_is_ram(area)) return;
+    if (memory_region_is_user_backed(area)) return;
 
     mem = hvf_find_overlap_slot(
             section->offset_within_address_space,
@@ -1200,6 +1227,9 @@ static int hvf_accel_init(MachineState *ms) {
     cpu_interrupt_handler = hvf_handle_interrupt;
     memory_listener_register(&hvf_memory_listener, &address_space_memory);
     memory_listener_register(&hvf_io_listener, &address_space_io);
+    qemu_set_user_backed_mapping_funcs(
+        hvf_user_backed_ram_map,
+        hvf_user_backed_ram_unmap);
     return 0;
 }
 
