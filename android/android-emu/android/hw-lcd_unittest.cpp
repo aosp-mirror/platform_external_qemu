@@ -38,6 +38,9 @@ TEST(Hw_lcd, GetScreenSize) {
     // Nexus 5x (5.2 inches)
     EXPECT_EQ(LCD_SIZE_LARGE,  hwLcd_getScreenSize(1080, 1920, LCD_DENSITY_420DPI));
 
+    // Pixel 3 (5.46 inches)
+    EXPECT_EQ(LCD_SIZE_LARGE,  hwLcd_getScreenSize(1080, 2160, LCD_DENSITY_440DPI));
+
     // Nexus 9 (8.86 inches)
     EXPECT_EQ(LCD_SIZE_XLARGE, hwLcd_getScreenSize(2048, 1536, LCD_DENSITY_XHDPI));
 }

@@ -898,7 +898,7 @@ static int skin_file_load_from_v2(SkinFile* file,
             SkinPart*  part = skin_part_create_from_v2(
                     node, basepath, fb_funcs);
             if (part == NULL) {
-                dprint( "## WARNING: can't load part '%s' from skin\n", node->name ? "<NULL>" : node->name );
+                dprint( "## WARNING: can't load part '%s' from skin\n", node->name ? node->name : "<NULL>");
                 continue;
             }
 

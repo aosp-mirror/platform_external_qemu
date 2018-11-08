@@ -191,6 +191,7 @@ int androidHwConfig_getMinVmHeapSize(AndroidHwConfig* config, int apiLevel) {
             } else if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
                 minVMHeapSize = 384;
             } else if (config->hw_lcd_density >= LCD_DENSITY_420DPI) {
+                // Includes LCD_DENSITY_440DPI
                 minVMHeapSize = 336;
             } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
                 minVMHeapSize = 288;
@@ -217,6 +218,7 @@ int androidHwConfig_getMinVmHeapSize(AndroidHwConfig* config, int apiLevel) {
             } else if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
                 minVMHeapSize = 256;
             } else if (config->hw_lcd_density >= LCD_DENSITY_420DPI) {
+                // Includes LCD_DENSITY_440DPI
                 minVMHeapSize = 228;
             } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
                 minVMHeapSize = 192;
@@ -243,6 +245,7 @@ int androidHwConfig_getMinVmHeapSize(AndroidHwConfig* config, int apiLevel) {
             } else if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
                 minVMHeapSize = 128;
             } else if (config->hw_lcd_density >= LCD_DENSITY_420DPI) {
+                // Includes LCD_DENSITY_440DPI
                 minVMHeapSize = 112;
             } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
                 minVMHeapSize = 96;
