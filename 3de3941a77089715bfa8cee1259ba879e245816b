@@ -70,6 +70,30 @@
       "revId": "3de3941a77089715bfa8cee1259ba879e245816b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0c271a5_acdc307f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 495,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-11-08T22:46:30Z",
+      "side": 1,
+      "message": "Actually, after experimenting with the file limit on crash server, it is not clear what is the limit on file size. I had 600KB file that passed through but 500KB file that was said to be too large. So I am going to only upload adb logcat at this point to be safe.",
+      "parentUuid": "8da84327_538e05a2",
+      "range": {
+        "startLine": 484,
+        "startChar": 0,
+        "endLine": 495,
+        "endChar": 5
+      },
+      "revId": "3de3941a77089715bfa8cee1259ba879e245816b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
