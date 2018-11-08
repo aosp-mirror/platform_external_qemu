@@ -16,6 +16,24 @@
       "revId": "accc9e9e936d548325d2c1d4025ffed7bc3a412f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cbb926fc_0a5eb92b",
+        "filename": "android/android-emugl/guest/androidImpl/vulkanhal_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-08T19:08:51Z",
+      "side": 1,
+      "message": "currently debugging failureon build server but not lcoally :)",
+      "parentUuid": "3513a225_4757e1e5",
+      "revId": "accc9e9e936d548325d2c1d4025ffed7bc3a412f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
