@@ -69,6 +69,24 @@
       "revId": "1a978c76f09fdcfd86d3cf6c66986447cb974a80",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed6469fb_0ef10d72",
+        "filename": "android/android-emu/android/darwinn/darwinn.cmake",
+        "patchSetId": 10
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-11-08T20:19:20Z",
+      "side": 1,
+      "message": "I have made the change now so that the tests run within the cmake file instead",
+      "parentUuid": "efae93e5_37b6d3b3",
+      "revId": "1a978c76f09fdcfd86d3cf6c66986447cb974a80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
