@@ -82,21 +82,21 @@ elseif(ANDROID_TARGET_OS STREQUAL "windows_msvc")
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib)
   # Obtained by running ListDlls.exe from sysinternals tool
   set(QT5_SHARED_DEPENDENCIES
-      ${PREBUILT_ROOT}/bin/Qt5Svg.dll>lib64/qt//qt/lib/Qt5Svg.dll;
-      ${PREBUILT_ROOT}/bin/Qt5Core.dll>lib64/qt//qt/lib/Qt5Core.dll;
-      ${PREBUILT_ROOT}/bin/Qt5Gui.dll>lib64/qt//qt/lib/Qt5Gui.dll;
-      ${PREBUILT_ROOT}/bin/Qt5Widgets.dll>lib64/qt//qt/lib/Qt5Widgets.dll;
-      ${PREBUILT_ROOT}/plugins/platforms/qwindows.dll>lib64/qt//qt/plugins/platforms/qwindows.dll;
-      ${PREBUILT_ROOT}/plugins/iconengines/qsvgicon.dll>lib64/qt//qt/plugins/iconengines/qsvgicon.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qgif.dll>lib64/qt//qt/plugins/imageformats/qgif.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qicns.dll>lib64/qt//qt/plugins/imageformats/qicns.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qico.dll>lib64/qt//qt/plugins/imageformats/qico.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qjpeg.dll>lib64/qt//qt/plugins/imageformats/qjpeg.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qsvg.dll>lib64/qt//qt/plugins/imageformats/qsvg.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qtga.dll>lib64/qt//qt/plugins/imageformats/qtga.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qtiff.dll>lib64/qt//qt/plugins/imageformats/qtiff.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qwbmp.dll>lib64/qt//qt/plugins/imageformats/qwbmp.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qwebp.dll>lib64/qt//qt/plugins/imageformats/qwebp.dll;)
+      ${PREBUILT_ROOT}/bin/Qt5Svg.dll>lib64/qt/lib/Qt5Svg.dll;
+      ${PREBUILT_ROOT}/bin/Qt5Core.dll>lib64/qt/lib/Qt5Core.dll;
+      ${PREBUILT_ROOT}/bin/Qt5Gui.dll>lib64/qt/lib/Qt5Gui.dll;
+      ${PREBUILT_ROOT}/bin/Qt5Widgets.dll>lib64/qt/lib/Qt5Widgets.dll;
+      ${PREBUILT_ROOT}/plugins/platforms/qwindows.dll>lib64/qt/plugins/platforms/qwindows.dll;
+      ${PREBUILT_ROOT}/plugins/iconengines/qsvgicon.dll>lib64/qt/plugins/iconengines/qsvgicon.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qgif.dll>lib64/qt/plugins/imageformats/qgif.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qicns.dll>lib64/qt/plugins/imageformats/qicns.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qico.dll>lib64/qt/plugins/imageformats/qico.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qjpeg.dll>lib64/qt/plugins/imageformats/qjpeg.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qsvg.dll>lib64/qt/plugins/imageformats/qsvg.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qtga.dll>lib64/qt/plugins/imageformats/qtga.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qtiff.dll>lib64/qt/plugins/imageformats/qtiff.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qwbmp.dll>lib64/qt/plugins/imageformats/qwbmp.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qwebp.dll>lib64/qt/plugins/imageformats/qwebp.dll;)
 elseif(ANDROID_TARGET_TAG MATCHES "windows-x86.*")
   # On Windows, linking to mingw32 is required. The library is provided by the toolchain, and depends on a main()
   # function provided by qtmain which itself depends on qMain(). These must appear iemulator-libui_unittestsn LDFLAGS
@@ -104,21 +104,21 @@ elseif(ANDROID_TARGET_TAG MATCHES "windows-x86.*")
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/bin -lmingw32 ${PREBUILT_ROOT}/lib/libqtmain.a)
   # Obtained by running ListDlls.exe from sysinternals tool
   set(QT5_SHARED_DEPENDENCIES
-      ${PREBUILT_ROOT}/bin/Qt5Svg.dll>lib64/qt//qt/lib/Qt5Svg.dll;
-      ${PREBUILT_ROOT}/bin/Qt5Core.dll>lib64/qt//qt/lib/Qt5Core.dll;
-      ${PREBUILT_ROOT}/bin/Qt5Gui.dll>lib64/qt//qt/lib/Qt5Gui.dll;
-      ${PREBUILT_ROOT}/bin/Qt5Widgets.dll>lib64/qt//qt/lib/Qt5Widgets.dll;
-      ${PREBUILT_ROOT}/plugins/platforms/qwindows.dll>lib64/qt//qt/plugins/platforms/qwindows.dll;
-      ${PREBUILT_ROOT}/plugins/iconengines/qsvgicon.dll>lib64/qt//qt/plugins/iconengines/qsvgicon.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qgif.dll>lib64/qt//qt/plugins/imageformats/qgif.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qicns.dll>lib64/qt//qt/plugins/imageformats/qicns.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qico.dll>lib64/qt//qt/plugins/imageformats/qico.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qjpeg.dll>lib64/qt//qt/plugins/imageformats/qjpeg.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qsvg.dll>lib64/qt//qt/plugins/imageformats/qsvg.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qtga.dll>lib64/qt//qt/plugins/imageformats/qtga.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qtiff.dll>lib64/qt//qt/plugins/imageformats/qtiff.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qwbmp.dll>lib64/qt//qt/plugins/imageformats/qwbmp.dll;
-      ${PREBUILT_ROOT}/plugins/imageformats/qwebp.dll>lib64/qt//qt/plugins/imageformats/qwebp.dll;)
+      ${PREBUILT_ROOT}/bin/Qt5Svg.dll>lib64/qt/lib/Qt5Svg.dll;
+      ${PREBUILT_ROOT}/bin/Qt5Core.dll>lib64/qt/lib/Qt5Core.dll;
+      ${PREBUILT_ROOT}/bin/Qt5Gui.dll>lib64/qt/lib/Qt5Gui.dll;
+      ${PREBUILT_ROOT}/bin/Qt5Widgets.dll>lib64/qt/lib/Qt5Widgets.dll;
+      ${PREBUILT_ROOT}/plugins/platforms/qwindows.dll>lib64/qt/plugins/platforms/qwindows.dll;
+      ${PREBUILT_ROOT}/plugins/iconengines/qsvgicon.dll>lib64/qt/plugins/iconengines/qsvgicon.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qgif.dll>lib64/qt/plugins/imageformats/qgif.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qicns.dll>lib64/qt/plugins/imageformats/qicns.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qico.dll>lib64/qt/plugins/imageformats/qico.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qjpeg.dll>lib64/qt/plugins/imageformats/qjpeg.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qsvg.dll>lib64/qt/plugins/imageformats/qsvg.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qtga.dll>lib64/qt/plugins/imageformats/qtga.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qtiff.dll>lib64/qt/plugins/imageformats/qtiff.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qwbmp.dll>lib64/qt/plugins/imageformats/qwbmp.dll;
+      ${PREBUILT_ROOT}/plugins/imageformats/qwebp.dll>lib64/qt/plugins/imageformats/qwebp.dll;)
 elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
   # LD_DEBUG=libs ./emulator @P_64 2>&1 | grep qt | grep init
