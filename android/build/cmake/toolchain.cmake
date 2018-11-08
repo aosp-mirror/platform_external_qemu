@@ -61,6 +61,11 @@ function(toolchain_generate_internal TARGET_OS)
 
     # First we generate the toolchain.
     if (NOT EXISTS ${TOOLCHAIN})
+        # Force update the windows sdk if the flag is provided
+        if (${OPTION_WINTOOLCHAIN})
+		message(WARNING "Force downloading the Windows toolchain. This may take a couple of minutes...")
+            toolchain_cmd("${TARGET_OS}" "--force-fetch-wintoolchain" "unused")
+        endif ()
         message(STATUS "Creating the toolchain in ${TOOLCHAIN} with aosp: ${AOSP}")
         toolchain_cmd("${TARGET_OS}" "--aosp-dir=${AOSP}" "${TOOLCHAIN}")
     endif ()
