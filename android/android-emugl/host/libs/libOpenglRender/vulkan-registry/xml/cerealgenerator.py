@@ -168,11 +168,15 @@ class IOStream;
 """
         encoderImplInclude = """
 #include "IOStream.h"
+#include "ResourceTracker.h"
 #include "VulkanStream.h"
 
 #include "android/base/AlignedBuf.h"
+#include "android/base/Pool.h"
 
 #include "goldfish_vk_marshaling_guest.h"
+#include "goldfish_vk_deepcopy_guest.h"
+#include "goldfish_vk_handlemap_guest.h"
 """
         functableImplInclude = """
 #include "VkEncoder.h"
@@ -211,6 +215,25 @@ using android::base::Pool;
 """
         handleMapInclude = """
 #include "VulkanHandleMapping.h"
+"""
+        poolIncludeGuest = """
+#include "android/base/Pool.h"
+using android::base::Pool;
+// Stuff we are not going to use but if included,
+// will cause compile errors. These are Android Vulkan
+// required extensions, but the approach will be to
+// implement them completely on the guest side.
+#undef VK_KHR_android_surface
+#undef VK_ANDROID_external_memory_android_hardware_buffer
+"""
+        handleMapIncludeGuest = """
+#include "VulkanHandleMapping.h"
+// Stuff we are not going to use but if included,
+// will cause compile errors. These are Android Vulkan
+// required extensions, but the approach will be to
+// implement them completely on the guest side.
+#undef VK_KHR_android_surface
+#undef VK_ANDROID_external_memory_android_hardware_buffer
 """
         dispatchHeaderDefs = """
 namespace goldfish_vk {
@@ -277,7 +300,13 @@ using DlSymFunc = void* (void*, const char*);
 
         self.addGuestEncoderModule("goldfish_vk_marshaling_guest",
                                    extraHeader=marshalIncludeGuest)
+        self.addGuestEncoderModule("goldfish_vk_deepcopy_guest",
+                                   extraHeader=poolIncludeGuest)
+        self.addGuestEncoderModule("goldfish_vk_handlemap_guest",
+                                   extraHeader=handleMapIncludeGuest)
+
         self.addGuestHalModule("func_table", extraImpl=functableImplInclude)
+
         self.addModule("common", "goldfish_vk_marshaling",
                        extraHeader=vulkanStreamInclude)
         self.addModule("common", "goldfish_vk_testing",
@@ -297,6 +326,8 @@ using DlSymFunc = void* (void*, const char*);
         self.addWrapper(cereal.VulkanEncoder, "VkEncoder")
         self.addWrapper(cereal.ResourceTracker, "ResourceTracker")
         self.addWrapper(cereal.VulkanMarshaling, "goldfish_vk_marshaling_guest")
+        self.addWrapper(cereal.VulkanDeepcopy, "goldfish_vk_deepcopy_guest")
+        self.addWrapper(cereal.VulkanHandleMap, "goldfish_vk_handlemap_guest")
         self.addWrapper(cereal.VulkanFuncTable, "func_table")
         self.addWrapper(cereal.VulkanMarshaling, "goldfish_vk_marshaling")
         self.addWrapper(cereal.VulkanTesting, "goldfish_vk_testing")

@@ -125,6 +125,7 @@ class HandleMapCodegen(object):
 
         access = self.exprAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
+        lenAccess = "1" if lenAccess is None else lenAccess
 
         self.cgen.beginIf(access)
 
