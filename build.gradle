@@ -86,13 +86,13 @@ sdk {
     }
 
     windows {
-        item("$buildDefaultEmulator.output/gradle-release") {
+        item("$buildWindowsEmulator.output/gradle-release") {
             into ''
-            builtBy buildDefaultEmulator
+            builtBy buildWindowsEmulator
         }
-        item("$buildDefaultEmulator.output/build/debug_info/gradle-release") {
+        item("$buildWindowsEmulator.output/build/debug_info/gradle-release") {
             into ''
-            builtBy buildDefaultEmulator
+            builtBy buildWindowsEmulator
             debug true
         }
         item("$project.rootDir/../external/qemu/android-info.txt") {
