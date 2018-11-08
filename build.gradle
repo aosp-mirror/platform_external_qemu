@@ -86,11 +86,11 @@ sdk {
     }
 
     windows {
-        item("$buildDefaultEmulator.output/gradle-release") {
+        item("$buildWindowsEmulator.output/gradle-release") {
             into ''
             builtBy buildDefaultEmulator
         }
-        item("$buildDefaultEmulator.output/build/debug_info/gradle-release") {
+        item("$buildWindowsEmulator.output/build/debug_info/gradle-release") {
             into ''
             builtBy buildDefaultEmulator
             debug true
