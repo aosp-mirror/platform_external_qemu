@@ -20,20 +20,6 @@
 
 using namespace android::base;
 
-TEST(androidQtGetLibraryDir, Qt32) {
-#if _WIN32
-    const char basePath[]   = "\\foo";
-    const char resultPath[] = "\\foo\\lib\\qt\\lib";
-#else
-    const char basePath[]  = "/foo";
-    const char resultPath[] = "/foo/lib/qt/lib";
-#endif
-
-    TestSystem testSys(basePath, 32);
-
-    EXPECT_STREQ(resultPath, androidQtGetLibraryDir(32).c_str());
-}
-
 TEST(androidQtGetLibraryDir, Qt64) {
 #if _WIN32
     const char basePath[]   = "\\foo";
@@ -45,7 +31,7 @@ TEST(androidQtGetLibraryDir, Qt64) {
 
     TestSystem testSys(basePath, 64);
 
-    EXPECT_STREQ(resultPath, androidQtGetLibraryDir(64).c_str());
+    EXPECT_STREQ(resultPath, androidQtGetLibraryDir().c_str());
 }
 
 
@@ -66,20 +52,6 @@ TEST(androidQtGetLibraryDir, DetectBittness) {
     EXPECT_STREQ(resultPath.c_str(), androidQtGetLibraryDir(0).c_str());
 }
 
-TEST(androidQtGetPluginsDir, Qt32) {
-#if _WIN32
-    const char basePath[]   = "\\foo";
-    const char resultPath[] = "\\foo\\lib\\qt\\plugins";
-#else
-    const char basePath[]  = "/foo";
-    const char resultPath[] = "/foo/lib/qt/plugins";
-#endif
-
-    TestSystem testSys(basePath, 32);
-
-    EXPECT_STREQ(resultPath, androidQtGetPluginsDir(32).c_str());
-}
-
 TEST(androidQtGetPluginsDir, Qt64) {
 #if _WIN32
     const char basePath[]   = "\\foo";
@@ -91,7 +63,7 @@ TEST(androidQtGetPluginsDir, Qt64) {
 
     TestSystem testSys(basePath, 64);
 
-    EXPECT_STREQ(resultPath, androidQtGetPluginsDir(64).c_str());
+    EXPECT_STREQ(resultPath, androidQtGetPluginsDir().c_str());
 }
 
 TEST(androidQtGetPluginsDir, RespectEnv) {

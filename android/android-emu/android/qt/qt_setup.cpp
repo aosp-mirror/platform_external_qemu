@@ -19,9 +19,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-bool androidQtSetupEnv(int bitness, const char* emulatorDir) {
+bool androidQtSetupEnv(const char* emulatorDir) {
     // Add <progdir>/<lib>/qt/lib if it exists to the library search path.
-    std::string qtLibSubDir = androidQtGetLibraryDir(bitness, emulatorDir);
+    std::string qtLibSubDir = androidQtGetLibraryDir(emulatorDir);
     auto system = android::base::System::get();
 
     if (!system->pathIsDir(qtLibSubDir)) {
@@ -33,7 +33,7 @@ bool androidQtSetupEnv(int bitness, const char* emulatorDir) {
     system->addLibrarySearchDir(qtLibSubDir);
 
     // Set the platforms plugin path too.
-    std::string qtPluginsSubDir = androidQtGetPluginsDir(bitness, emulatorDir);
+    std::string qtPluginsSubDir = androidQtGetPluginsDir(emulatorDir);
 
     VERBOSE_PRINT(init,
         "Setting Qt plugin search path: QT_QPA_PLATFORM_PLUGIN_PATH=%s",

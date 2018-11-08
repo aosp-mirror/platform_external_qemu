@@ -88,11 +88,10 @@ using android::ConfigDirs;
 
 /* Forward declarations */
 static char* getQemuExecutablePath(const char* programPath,
-                                   const char* avdArch,
-                                   bool force64bitTarget,
-                                   int wantedBitness);
+                                   const char* avdArch);
+                                 
 
-static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const char* launcherDir);
+static void updateLibrarySearchPath(bool useSystemLibs, const char* launcherDir);
 
 static bool is32bitImageOn64bitRanchuKernel(const char* avdName,
                                              const char* avdArch,
@@ -463,47 +462,6 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    /* If ANDROID_EMULATOR_FORCE_32BIT is set to 'true' or '1' in the
-     * environment, set -force-32bit automatically.
-     */
-    {
-        const char kEnvVar[] = "ANDROID_EMULATOR_FORCE_32BIT";
-        const char* val = getenv(kEnvVar);
-        if (val && (!strcmp(val, "true") || !strcmp(val, "1"))) {
-            if (!force32bit) {
-                D("Auto-config: -force-32bit (%s=%s)", kEnvVar, val);
-                force32bit = true;
-            }
-        }
-    }
-
-    int hostBitness = android_getHostBitness();
-    int wantedBitness = hostBitness;
-
-#if defined(__linux__)
-    // Linux binaries are compiled for 64 bit, so none of the 32 bit settings
-    // will make any sense.
-    static_assert(sizeof(void*) == 8, "We only support 64 bit in linux (see: c5a2d4198cb)");
-    force32bit = false;
-    hostBitness = 64;
-    wantedBitness = 64;
-#endif  // __linux__
-
-    if (force32bit) {
-        wantedBitness = 32;
-    }
-
-#if defined(__APPLE__)
-    // Not sure when the android_getHostBitness will break again
-    // but we are not shiping 32bit for OSX long time ago.
-    // https://code.google.com/p/android/issues/detail?id=196779
-    if (force32bit) {
-        fprintf(stderr,
-"WARNING: 32-bit OSX Android emulator binaries are not supported, use 64bit.\n");
-    }
-    wantedBitness = 64;
-#endif
-
     // When running in a platform build environment, point to the output
     // directory where image partition files are located.
     const char* androidOut = NULL;
@@ -638,7 +596,7 @@ int main(int argc, char** argv)
         D("try dir %s", candidates[i].data());
         progDir = candidates[i];
         emulatorPath = getQemuExecutablePath(
-                progDir.data(), avdArch, force64bitTarget, wantedBitness);
+                progDir.data(), avdArch);
         D("Trying emulator path '%s'", emulatorPath);
         if (path_exists(emulatorPath)) {
             break;
@@ -651,7 +609,7 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    D("Found target-specific %d-bit emulator binary: %s", wantedBitness, emulatorPath);
+    D("Found target-specific 64-bit emulator binary: %s", emulatorPath);
 
     if (avdName) {
         /* Save restart parameters before we modify argv */
@@ -667,14 +625,14 @@ int main(int argc, char** argv)
     /* Setup library paths so that bundled standard shared libraries are picked
      * up by the re-exec'ed emulator
      */
-    updateLibrarySearchPath(wantedBitness, useSystemLibs, progDir.data());
+    updateLibrarySearchPath(useSystemLibs, progDir.data());
 
     /* We need to find the location of the GLES emulation shared libraries
      * and modify either LD_LIBRARY_PATH or PATH accordingly
      */
 
     /* Add <lib>/qt/ to the library search path. */
-    androidQtSetupEnv(wantedBitness, progDir.data());
+    androidQtSetupEnv(progDir.data());
 
 #ifdef _WIN32
     // Take care of quoting all parameters before sending them to execv().
@@ -722,29 +680,20 @@ int main(int argc, char** argv)
 
 // Convert an emulator-specific CPU architecture name |avdArch| into the
 // corresponding QEMU one. Return NULL if unknown.
-static const char* getQemuArch(const char* avdArch, bool force64bitTarget) {
+static const char* getQemuArch(const char* avdArch) {
     static const struct {
         const char* arch;
         const char* qemuArch;
     } kQemuArchs[] = {
-        {"arm", "armel"},
+        {"arm", "aarch64"},
         {"arm64", "aarch64"},
-        {"arm64", "aarch64"},
-        {"mips", "mipsel"},
-        {"mips64", "mips64el"},
-        {"mips64", "mips64el"},
-        {"x86","i386"},
-        {"x86_64","x86_64"},
+        {"x86","x86_64"},
         {"x86_64","x86_64"},
     };
     size_t n;
     for (n = 0; n < ARRAY_SIZE(kQemuArchs); ++n) {
         if (!strcmp(avdArch, kQemuArchs[n].arch)) {
-            if (force64bitTarget) {
-                return kQemuArchs[n+1].qemuArch;
-            } else {
                 return kQemuArchs[n].qemuArch;
-            }
         }
     }
     return NULL;
@@ -755,9 +704,7 @@ static const char* getQemuArch(const char* avdArch, bool force64bitTarget) {
 // of the current program (i.e. the 'emulator' launcher).
 // Return NULL in case of error.
 static char* getQemuExecutablePath(const char* progDir,
-                                   const char* avdArch,
-                                   bool force64bitTarget,
-                                   int wantedBitness) {
+                                   const char* avdArch) {
 // The host operating system name.
 #ifdef __linux__
     static const char kHostOs[] = "linux";
@@ -766,8 +713,8 @@ static char* getQemuExecutablePath(const char* progDir,
 #elif defined(_WIN32)
     static const char kHostOs[] = "windows";
 #endif
-    const char* hostArch = (wantedBitness == 64) ? "x86_64" : "x86";
-    const char* qemuArch = getQemuArch(avdArch, force64bitTarget);
+    const char* hostArch = "x86_64";
+    const char* qemuArch = getQemuArch(avdArch);
     if (!qemuArch) {
         APANIC("QEMU2 emulator does not support %s CPU architecture", avdArch);
     }
@@ -790,8 +737,8 @@ static char* getQemuExecutablePath(const char* progDir,
     return path_get_absolute(fullPath);
 }
 
-static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const char* launcherDir) {
-    const char* libSubDir = (wantedBitness == 64) ? "lib64" : "lib";
+static void updateLibrarySearchPath( bool useSystemLibs, const char* launcherDir) {
+    const char* libSubDir = "lib64";
     char fullPath[PATH_MAX];
     char* tail = fullPath;
 

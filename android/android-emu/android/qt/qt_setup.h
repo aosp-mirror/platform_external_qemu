@@ -26,6 +26,6 @@ ANDROID_BEGIN_HEADER
 // |emulatorDir| - the directory where 'emulator' is located; if not given,
 // it will be inferred based on the location of the calling binary of this
 // function
-bool androidQtSetupEnv(int bitness, const char* emulatorDir = nullptr);
+bool androidQtSetupEnv(const char* emulatorDir = nullptr);
 
 ANDROID_END_HEADER

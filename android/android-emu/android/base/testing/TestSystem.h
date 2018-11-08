@@ -130,8 +130,6 @@ public:
         return true;
     }
 
-    virtual int getHostBitness() const override { return mHostBitness; }
-
     virtual OsType getOsType() const override { return mOsType; }
 
     virtual std::string getOsName() override { return mOsName; }

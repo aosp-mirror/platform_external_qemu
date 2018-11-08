@@ -21,7 +21,7 @@
 // |emulatorDir| - the directory where 'emulator' is located; if not given,
 // it will be inferred based on the location of the calling binary of this
 // function
-std::string androidQtGetLibraryDir(int bitness = 0, const char* emulatorDir = nullptr);
+std::string androidQtGetLibraryDir(const char* emulatorDir = nullptr);
 
 // Return the path to the emulator's Qt plugins directory,
 // which holds Qt's plugins. It should be added to the
@@ -31,4 +31,4 @@ std::string androidQtGetLibraryDir(int bitness = 0, const char* emulatorDir = nu
 // |emulatorDir| - the directory where 'emulator' is located; if not given,
 // it will be inferred based on the location of the calling binary of this
 // function
-std::string androidQtGetPluginsDir(int bitness = 0, const char* emulatorDir = nullptr);
+std::string androidQtGetPluginsDir(const char* emulatorDir = nullptr);
