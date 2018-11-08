@@ -16,6 +16,24 @@
       "revId": "9142dfc3cc64e4509ad931957ec17d44f4b073ed",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7f81bdc6_ea66db4d",
+        "filename": "android/build/cmake/toolchain.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-11-08T19:06:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c4b770b9_65c6b2f4",
+      "revId": "9142dfc3cc64e4509ad931957ec17d44f4b073ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
