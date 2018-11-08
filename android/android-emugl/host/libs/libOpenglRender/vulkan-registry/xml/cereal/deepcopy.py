@@ -110,7 +110,9 @@ class DeepcopyCodegen(object):
             forIncr = "++%s" % loopVar
 
             if isPtr:
-                self.cgen.stmt("%s = %s" % (lenAccessRhs, lenAccessLhs))
+                # Avoid generating a self-assign.
+                if lenAccessRhs != lenAccessLhs:
+                    self.cgen.stmt("%s = %s" % (lenAccessRhs, lenAccessLhs))
 
             accessRhs = "%s + %s" % (accessRhs, loopVar)
             self.cgen.beginFor(forInit, forCond, forIncr)
@@ -147,7 +149,6 @@ class DeepcopyCodegen(object):
         accessRhs = self.exprAccessorRhs(vulkanType)
 
         lenAccessLhs = self.lenAccessorLhs(vulkanType)
-        lenAccessRhs = self.lenAccessorRhs(vulkanType)
 
         self.cgen.stmt("%s = nullptr" % accessRhs)
         self.cgen.beginIf("%s && %s" % (accessLhs, lenAccessLhs))
