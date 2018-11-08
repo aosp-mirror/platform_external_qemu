@@ -29,6 +29,8 @@ class HandleInfo(object):
         return apiName == self.createApis or (apiName in self.createApis)
 
     def isDestroyApi(self, apiName):
+        if self.destroyApis is None:
+            return False
         return apiName == self.destroyApis or (apiName in self.destroyApis)
 
 DISPATCHABLE_HANDLE_TYPES = [
@@ -59,6 +61,17 @@ NON_DISPATCHABLE_HANDLE_TYPES = [
     "VkSemaphore",
     "VkEvent",
     "VkQueryPool",
+    "VkSamplerYcbcrConversion",
+    "VkDescriptorUpdateTemplate",
+    "VkSurfaceKHR",
+    "VkSwapchainKHR",
+    "VkDisplayKHR",
+    "VkDisplayModeKHR",
+    "VkObjectTableNVX",
+    "VkIndirectCommandsLayoutNVX",
+    "VkValidationCacheEXT",
+    "VkDebugReportCallbackEXT",
+    "VkDebugUtilsMessengerEXT",
 ]
 
 CUSTOM_HANDLE_CREATE_TYPES = [
@@ -69,7 +82,8 @@ CUSTOM_HANDLE_CREATE_TYPES = [
     "VkCommandBuffer",
 ]
 
-HANDLE_TYPES = list(set(DISPATCHABLE_HANDLE_TYPES + NON_DISPATCHABLE_HANDLE_TYPES + CUSTOM_HANDLE_CREATE_TYPES))
+HANDLE_TYPES = list(sorted(list(set(DISPATCHABLE_HANDLE_TYPES +
+                                    NON_DISPATCHABLE_HANDLE_TYPES + CUSTOM_HANDLE_CREATE_TYPES))))
 
 HANDLE_INFO = {}
 
@@ -221,6 +235,16 @@ class VulkanType(object):
     def isHandleType(self):
         return self.isDispatchableHandleType() or \
                self.isNonDispatchableHandleType()
+    
+    def isCreatedBy(self, api):
+        if self.typeName in HANDLE_INFO.keys():
+            return HANDLE_INFO[self.typeName].isCreateApi(api.name)
+        return False
+
+    def isDestroyedBy(self, api):
+        if self.typeName in HANDLE_INFO.keys():
+            return HANDLE_INFO[self.typeName].isDestroyApi(api.name)
+        return False
 
 def makeVulkanTypeFromXMLTag(tag):
     res = VulkanType()

@@ -12,6 +12,7 @@ class ResourceTracker {
 public:
     ResourceTracker();
     ~ResourceTracker();
+    static ResourceTracker* get();
     VulkanHandleMapping* createMapping();
     VulkanHandleMapping* unwrapMapping();
     VulkanHandleMapping* destroyMapping();
@@ -44,10 +45,21 @@ VulkanHandleMapping* ResourceTracker::unwrapMapping() {
 VulkanHandleMapping* ResourceTracker::destroyMapping() {
     return &mImpl->destroyMapping;
 }
+
+static ResourceTracker* sTracker = nullptr;
+
+// static
+ResourceTracker* ResourceTracker::get() {
+    if (!sTracker) {
+        // To be initialized once on vulkan device open.
+        sTracker = new ResourceTracker;
+    }
+    return sTracker;
+}
 """
 
 def emit_begin_public_class(cgen, decl):
-    cgen.line(decl + "{")
+    cgen.line(decl + " {")
     cgen.line("public:")
     cgen.incrIndent()
 
@@ -57,6 +69,7 @@ def emit_end_class(cgen):
 
 def emit_mapping_impl(cgen, className, foreach):
     emit_begin_public_class(cgen, "class %s : public VulkanHandleMapping" % className)
+    cgen.line("virtual ~%s() { }" % className)
     for h in HANDLE_TYPES:
         cgen.line("void mapHandles_%s(%s* handles, size_t count) override" % (h, h))
         cgen.beginBlock()
