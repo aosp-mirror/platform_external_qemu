@@ -132,8 +132,7 @@ process_dir() {
             ;;
         darwin)
             OPT_HOST=darwin-x86_64
-            FIND_CMD="find $DIR ( -type f -and ( -perm +111 -or -name '*.dylib' ) )"
-            files=$(FIND_CMD)
+            files=$(find $DIR \( -type f -and \( -perm +111 -or -name '*.dylib' \) \))
             ;;
         *)
             panic "Unable to process binaries on this system [$(get_build_os)]"
