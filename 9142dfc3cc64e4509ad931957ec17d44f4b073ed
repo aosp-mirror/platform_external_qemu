@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4b770b9_65c6b2f4",
+        "filename": "android/build/cmake/toolchain.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-08T18:55:52Z",
+      "side": 1,
+      "message": "message(WARNING",
+      "revId": "9142dfc3cc64e4509ad931957ec17d44f4b073ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
