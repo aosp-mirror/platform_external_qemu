@@ -22,6 +22,30 @@
       "revId": "3de3941a77089715bfa8cee1259ba879e245816b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "38031bfe_6f205c61",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 495,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-11-08T18:25:20Z",
+      "side": 1,
+      "message": "We could make sure that adb logcat is always sent. So in compressToFile, we check the outSize is less than 1MB. If not, return false. and just send adb logcat. \n\n\nBut from my experiment. 5MB is compressed to roughly 600KB. So there is some buffer.",
+      "parentUuid": "0ce8649d_8f25f91e",
+      "range": {
+        "startLine": 484,
+        "startChar": 0,
+        "endLine": 495,
+        "endChar": 5
+      },
+      "revId": "3de3941a77089715bfa8cee1259ba879e245816b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
