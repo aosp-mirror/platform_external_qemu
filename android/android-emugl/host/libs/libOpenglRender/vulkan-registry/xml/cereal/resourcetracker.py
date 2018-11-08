@@ -12,6 +12,7 @@ class ResourceTracker {
 public:
     ResourceTracker();
     ~ResourceTracker();
+    static ResourceTracker* get();
     VulkanHandleMapping* createMapping();
     VulkanHandleMapping* unwrapMapping();
     VulkanHandleMapping* destroyMapping();
@@ -44,10 +45,21 @@ VulkanHandleMapping* ResourceTracker::unwrapMapping() {
 VulkanHandleMapping* ResourceTracker::destroyMapping() {
     return &mImpl->destroyMapping;
 }
+
+static ResourceTracker* sTracker = nullptr;
+
+// static
+ResourceTracker* ResourceTracker::get() {
+    if (!sTracker) {
+        // To be initialized once on vulkan device open.
+        sTracker = new ResourceTracker;
+    }
+    return sTracker;
+}
 """
 
 def emit_begin_public_class(cgen, decl):
-    cgen.line(decl + "{")
+    cgen.line(decl + " {")
     cgen.line("public:")
     cgen.incrIndent()
 

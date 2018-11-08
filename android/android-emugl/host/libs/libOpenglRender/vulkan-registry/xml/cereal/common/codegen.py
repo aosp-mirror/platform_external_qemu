@@ -381,18 +381,24 @@ class CodeGen(object):
 
     def generalAccess(self,
                       vulkanType,
-                      parentVarName="parent",
+                      parentVarName=None,
                       asPtr=True,
                       structAsPtr=True):
         if vulkanType.parent is None:
-            return self.accessParameter(vulkanType, asPtr=asPtr)
+            if parentVarName is None:
+                return self.accessParameter(vulkanType, asPtr=asPtr)
+            else:
+                return self.accessParameter(vulkanType.withModifiedName(parentVarName), asPtr=asPtr)
 
         if isinstance(vulkanType.parent, VulkanCompoundType):
             return self.makeStructAccess(
                 vulkanType, parentVarName, asPtr=asPtr, structAsPtr=structAsPtr)
 
         if isinstance(vulkanType.parent, VulkanAPI):
-            return self.accessParameter(vulkanType, asPtr=asPtr)
+            if parentVarName is None:
+                return self.accessParameter(vulkanType, asPtr=asPtr)
+            else:
+                return self.accessParameter(vulkanType.withModifiedName(parentVarName), asPtr=asPtr)
         
         os.abort("Could not find a way to access Vulkan type %s" %
                  vulkanType.name)
