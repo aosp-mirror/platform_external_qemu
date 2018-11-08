@@ -52,6 +52,24 @@
       "revId": "accc9e9e936d548325d2c1d4025ffed7bc3a412f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f79f4109_ff4d77e8",
+        "filename": "android/android-emugl/guest/androidImpl/vulkanhal_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-08T19:12:54Z",
+      "side": 1,
+      "message": "Will do if this cant get resolved.",
+      "parentUuid": "256439f3_b7e407d2",
+      "revId": "accc9e9e936d548325d2c1d4025ffed7bc3a412f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
