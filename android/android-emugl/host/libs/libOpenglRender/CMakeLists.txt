@@ -46,6 +46,7 @@ set(OpenglRender_src
     TextureDraw.cpp
     TextureResize.cpp
     VkDecoder.cpp
+    VkDecoderGlobalState.cpp
     VulkanDispatch.cpp
     VulkanStream.cpp
     WindowSurface.cpp
