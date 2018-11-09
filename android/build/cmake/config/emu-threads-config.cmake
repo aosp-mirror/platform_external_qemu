@@ -11,10 +11,15 @@
 
 # We now what kinds of threads we are using, and we've disabled finding of packages, so we just declare it explicitly
 
-
 add_library(Threads::Threads INTERFACE IMPORTED)
-set_property(TARGET Threads::Threads PROPERTY INTERFACE_COMPILE_OPTIONS "-pthread")
-set_property(TARGET Threads::Threads PROPERTY INTERFACE_LINK_LIBRARIES "-lpthread")
+
+if(ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
+  # Let's statically link the mingw thread library.. (Leaving out -lstdc++ will make it dynamic)
+  set_property(TARGET Threads::Threads PROPERTY INTERFACE_LINK_LIBRARIES "-Wl,-Bstatic;-lstdc++;-lwinpthread;-Wl,-Bdynamic")
+else()
+  set_property(TARGET Threads::Threads PROPERTY INTERFACE_COMPILE_OPTIONS "-pthread")
+  set_property(TARGET Threads::Threads PROPERTY INTERFACE_LINK_LIBRARIES "-lpthread")
+endif()
 set(CMAKE_USE_PTHREADS_INIT 1)
 set(Threads_FOUND TRUE)
 set(PACKAGE_EXPORT "Threads_FOUND;CMAKE_USE_PTHREADS_INIT")
