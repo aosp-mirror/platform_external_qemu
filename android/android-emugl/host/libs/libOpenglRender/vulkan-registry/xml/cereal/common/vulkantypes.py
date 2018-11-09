@@ -122,6 +122,10 @@ for h in HANDLE_TYPES:
         HANDLE_INFO[h] = \
             HandleInfo(h, "vkCreate" + h[2:], "vkDestroy" + h[2:])
 
+CUSTOM_CREATE_APIS = [
+    "vkAllocateMemory",
+]
+
 # Holds information about a Vulkan type instance (i.e., not a type definition).
 # Type instances are used as struct field definitions or function parameters,
 # to be later fed to code generation.
