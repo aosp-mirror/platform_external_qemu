@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "4b42c43f_557bfc5f",
+        "filename": "android/android-emu/android-libui.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-11-09T17:53:39Z",
+      "side": 1,
+      "message": "I think Josh is still working on that.",
+      "parentUuid": "d45f219a_598cb5ab",
+      "revId": "bb2bc3a3ea8d1a7bc0836bb1cba14067b3999686",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "79e5905e_7a36ca61",
         "filename": "android/build/cmake/config/emu-qt5-config.cmake",
         "patchSetId": 2
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "5c11c7cf_62f11f07",
+        "filename": "android/build/cmake/config/emu-qt5-config.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-11-09T17:53:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0b098d96_768ac30c",
+      "revId": "bb2bc3a3ea8d1a7bc0836bb1cba14067b3999686",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ab471bb6_da664c54",
         "filename": "android/build/cmake/config/emu-qt5-config.cmake",
         "patchSetId": 2
@@ -64,6 +100,24 @@
       "writtenOn": "2018-11-09T00:28:01Z",
       "side": 1,
       "message": "Yes, unfortunately our distribution right now doesn\u0027t handle symlinks.  For fun Look in ~/Android/Sdk/emulator/lib64/qt/lib\n\nWhy do they need to be in 2 places?",
+      "revId": "bb2bc3a3ea8d1a7bc0836bb1cba14067b3999686",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0bb910a4_37af0cce",
+        "filename": "android/build/cmake/config/emu-qt5-config.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-11-09T17:53:39Z",
+      "side": 1,
+      "message": "We\u0027re trying to get Qt to look in only one place, but haven\u0027t succeeded yet.",
+      "parentUuid": "ab471bb6_da664c54",
       "revId": "bb2bc3a3ea8d1a7bc0836bb1cba14067b3999686",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -87,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "414fec10_de24b054",
+        "filename": "android/scripts/config-cmake.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-11-09T17:53:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a00ac86d_e10ae753",
+      "revId": "bb2bc3a3ea8d1a7bc0836bb1cba14067b3999686",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a1bbbfee_bb2db689",
         "filename": "android/scripts/config-cmake.sh",
         "patchSetId": 2
@@ -101,6 +173,24 @@
       "revId": "bb2bc3a3ea8d1a7bc0836bb1cba14067b3999686",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "13d496ec_4c8a372c",
+        "filename": "android/scripts/config-cmake.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-11-09T17:53:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a1bbbfee_bb2db689",
+      "revId": "bb2bc3a3ea8d1a7bc0836bb1cba14067b3999686",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
