@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "0a4c5ecc_01250bb5",
+        "filename": "android/android-emu/android/darwinn/darwinn.cmake",
+        "patchSetId": 12
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-11-09T17:58:18Z",
+      "side": 1,
+      "message": "A very small amount of source has actually been imported with this change. Most of the files imported are only header files. The files imported reside in google3 (https://cs.corp.google.com/piper///depot/google3/platforms/darwinn/model/?q\u003ddarwinn\u0026sq\u003dpackage:piper+file://depot/google3+-file:google3/experimental\u0026dr) and have build dependencies with //base. I see quite a few problems with importing all of the source in order to be able to build the library from source\n\n1) Is all of the emulator code open source? If so, we would have to probably go through a review process for a significant chunk of code. I am not really sure how feasible it would be to ask to open source parts of //base from google3\n2) Even if we have the approval, the build system used to compile this is blaze. It would involve a significant amount of work to build the library from source using cmake.\n3) We would probably be updating the driver library once in a while by building it in google3 and importing the headers and the library. Changes in google3, like addition of new source files, new build dependencies would make it much tougher to keep the source and build on our side up to date. (If open source, we would have to go through the review process every time there is a change in the source)\n\nIs it possible to ask for exceptions for being able to directly import binaries? If it helps, binaries built from the same source has been added to a different android branch before (https://cs.corp.google.com/android/vendor/google/darwinn/external/?dr\u003dCSs\u0026g\u003d0) , even though it was for arm flavor for actual android devices rather than x86-64 flavor for linux.",
+      "parentUuid": "91b9d8a9_f146ddf8",
+      "revId": "642358fa323f0c22ad104701c0c7df14fee983e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "555f5f19_1c8d3cc4",
         "filename": "android/android-emu/android/darwinn/darwinn.cmake",
         "patchSetId": 12
@@ -70,6 +88,24 @@
     },
     {
       "key": {
+        "uuid": "d50ef4d3_3be9b7b4",
+        "filename": "android/android-emu/android/darwinn/darwinn.cmake",
+        "patchSetId": 12
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-11-09T17:58:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "555f5f19_1c8d3cc4",
+      "revId": "642358fa323f0c22ad104701c0c7df14fee983e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "62272e6f_fa304630",
         "filename": "android/android-emu/android/darwinn/darwinn.cmake",
         "patchSetId": 12
@@ -84,6 +120,24 @@
       "revId": "642358fa323f0c22ad104701c0c7df14fee983e3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2d11c16c_78ca82bb",
+        "filename": "android/android-emu/android/darwinn/darwinn.cmake",
+        "patchSetId": 12
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1368951
+      },
+      "writtenOn": "2018-11-09T17:58:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62272e6f_fa304630",
+      "revId": "642358fa323f0c22ad104701c0c7df14fee983e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
