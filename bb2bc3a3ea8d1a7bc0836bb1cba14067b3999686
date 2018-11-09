@@ -84,6 +84,23 @@
       "revId": "bb2bc3a3ea8d1a7bc0836bb1cba14067b3999686",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a1bbbfee_bb2db689",
+        "filename": "android/scripts/config-cmake.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-09T00:28:48Z",
+      "side": 1,
+      "message": "If you run with --verbose --verbose it will log the commands",
+      "revId": "bb2bc3a3ea8d1a7bc0836bb1cba14067b3999686",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
