@@ -246,7 +246,7 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
             deepcopyParams = \
                 [self.deepcopyPoolParam] + \
                 list(map(typeFromName, self.deepcopyVars))
-                
+
             deepcopyPrototype = \
                 VulkanAPI(self.deepcopyPrefix + name,
                           self.voidType,
@@ -254,9 +254,17 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
 
             def structDeepcopyDef(cgen):
                 self.deepcopyCodegen.cgen = cgen
+                canSimplyAssign = True
                 for member in structInfo.members:
-                    iterateVulkanType(self.typeInfo, member,
-                                      self.deepcopyCodegen)
+                    if not member.isSimpleValueType(self.typeInfo):
+                        canSimplyAssign = False
+
+                if canSimplyAssign:
+                    cgen.stmt("*to = *from")
+                else:
+                    for member in structInfo.members:
+                        iterateVulkanType(self.typeInfo, member,
+                                          self.deepcopyCodegen)
 
             self.module.appendHeader(
                 self.codegen.makeFuncDecl(deepcopyPrototype))
