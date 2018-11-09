@@ -246,6 +246,15 @@ class VulkanType(object):
             return HANDLE_INFO[self.typeName].isDestroyApi(api.name)
         return False
 
+    def isSimpleValueType(self, typeInfo):
+        if typeInfo.isCompoundType(self.typeName):
+            return False
+        if self.isString() or self.isArrayOfStrings():
+            return False
+        if self.staticArrExpr or self.pointerIndirectionLevels > 0:
+            return False
+        return True
+
 def makeVulkanTypeFromXMLTag(tag):
     res = VulkanType()
     # Process the length expression

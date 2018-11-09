@@ -20,11 +20,12 @@ from .common.vulkantypes import \
 from .wrapperdefs import VulkanWrapperGenerator
 
 class DeepcopyCodegen(object):
-    def __init__(self, cgen, inputVars, poolVarName, prefix):
+    def __init__(self, cgen, inputVars, poolVarName, prefix, skipValues=False):
         self.cgen = cgen
         self.inputVars = inputVars
         self.prefix = prefix
         self.poolVarName = poolVarName
+        self.skipValues = skipValues
 
         def makeAccess(varName, asPtr = True):
             return lambda t: self.cgen.generalAccess(t, parentVarName = varName, asPtr = asPtr)
@@ -198,6 +199,9 @@ class DeepcopyCodegen(object):
         self.cgen.endIf()
 
     def onValue(self, vulkanType):
+        if self.skipValues:
+            return
+
         accessLhs = self.exprAccessorValueLhs(vulkanType)
         accessRhs = self.exprAccessorValueRhs(vulkanType)
 
@@ -223,7 +227,8 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
                 None,
                 self.deepcopyVars,
                 self.deepcopyPoolVarName,
-                self.deepcopyPrefix)
+                self.deepcopyPrefix,
+                skipValues=True)
 
         self.knownDefs = {}
 
@@ -246,7 +251,7 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
             deepcopyParams = \
                 [self.deepcopyPoolParam] + \
                 list(map(typeFromName, self.deepcopyVars))
-                
+
             deepcopyPrototype = \
                 VulkanAPI(self.deepcopyPrefix + name,
                           self.voidType,
@@ -254,9 +259,18 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
 
             def structDeepcopyDef(cgen):
                 self.deepcopyCodegen.cgen = cgen
+                canSimplyAssign = True
                 for member in structInfo.members:
-                    iterateVulkanType(self.typeInfo, member,
-                                      self.deepcopyCodegen)
+                    if not member.isSimpleValueType(self.typeInfo):
+                        canSimplyAssign = False
+
+                cgen.stmt("*to = *from")
+                if canSimplyAssign:
+                    pass
+                else:
+                    for member in structInfo.members:
+                        iterateVulkanType(self.typeInfo, member,
+                                          self.deepcopyCodegen)
 
             self.module.appendHeader(
                 self.codegen.makeFuncDecl(deepcopyPrototype))
