@@ -34,6 +34,7 @@ void deepcopy_VkApplicationInfo(
     const VkApplicationInfo* from,
     VkApplicationInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pApplicationName = nullptr;
@@ -53,6 +54,7 @@ void deepcopy_VkInstanceCreateInfo(
     const VkInstanceCreateInfo* from,
     VkInstanceCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pApplicationInfo = nullptr;
@@ -78,6 +80,7 @@ void deepcopy_VkAllocationCallbacks(
     const VkAllocationCallbacks* from,
     VkAllocationCallbacks* to)
 {
+    (void)pool;
     *to = *from;
     to->pUserData = nullptr;
     if (from->pUserData)
@@ -91,6 +94,7 @@ void deepcopy_VkPhysicalDeviceFeatures(
     const VkPhysicalDeviceFeatures* from,
     VkPhysicalDeviceFeatures* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -99,6 +103,7 @@ void deepcopy_VkFormatProperties(
     const VkFormatProperties* from,
     VkFormatProperties* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -107,6 +112,7 @@ void deepcopy_VkExtent3D(
     const VkExtent3D* from,
     VkExtent3D* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -115,6 +121,7 @@ void deepcopy_VkImageFormatProperties(
     const VkImageFormatProperties* from,
     VkImageFormatProperties* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkExtent3D(pool, &from->maxExtent, (VkExtent3D*)(&to->maxExtent));
 }
@@ -124,6 +131,7 @@ void deepcopy_VkPhysicalDeviceLimits(
     const VkPhysicalDeviceLimits* from,
     VkPhysicalDeviceLimits* to)
 {
+    (void)pool;
     *to = *from;
     memcpy(to->maxComputeWorkGroupCount, from->maxComputeWorkGroupCount, 3 * sizeof(uint32_t));
     memcpy(to->maxComputeWorkGroupSize, from->maxComputeWorkGroupSize, 3 * sizeof(uint32_t));
@@ -138,6 +146,7 @@ void deepcopy_VkPhysicalDeviceSparseProperties(
     const VkPhysicalDeviceSparseProperties* from,
     VkPhysicalDeviceSparseProperties* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -146,6 +155,7 @@ void deepcopy_VkPhysicalDeviceProperties(
     const VkPhysicalDeviceProperties* from,
     VkPhysicalDeviceProperties* to)
 {
+    (void)pool;
     *to = *from;
     memcpy(to->deviceName, from->deviceName, VK_MAX_PHYSICAL_DEVICE_NAME_SIZE * sizeof(char));
     memcpy(to->pipelineCacheUUID, from->pipelineCacheUUID, VK_UUID_SIZE * sizeof(uint8_t));
@@ -158,6 +168,7 @@ void deepcopy_VkQueueFamilyProperties(
     const VkQueueFamilyProperties* from,
     VkQueueFamilyProperties* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkExtent3D(pool, &from->minImageTransferGranularity, (VkExtent3D*)(&to->minImageTransferGranularity));
 }
@@ -167,6 +178,7 @@ void deepcopy_VkMemoryType(
     const VkMemoryType* from,
     VkMemoryType* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -175,6 +187,7 @@ void deepcopy_VkMemoryHeap(
     const VkMemoryHeap* from,
     VkMemoryHeap* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -183,6 +196,7 @@ void deepcopy_VkPhysicalDeviceMemoryProperties(
     const VkPhysicalDeviceMemoryProperties* from,
     VkPhysicalDeviceMemoryProperties* to)
 {
+    (void)pool;
     *to = *from;
     for (uint32_t i = 0; i < (uint32_t)VK_MAX_MEMORY_TYPES; ++i)
     {
@@ -199,6 +213,7 @@ void deepcopy_VkDeviceQueueCreateInfo(
     const VkDeviceQueueCreateInfo* from,
     VkDeviceQueueCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pQueuePriorities = nullptr;
@@ -213,6 +228,7 @@ void deepcopy_VkDeviceCreateInfo(
     const VkDeviceCreateInfo* from,
     VkDeviceCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pQueueCreateInfos = nullptr;
@@ -248,6 +264,7 @@ void deepcopy_VkExtensionProperties(
     const VkExtensionProperties* from,
     VkExtensionProperties* to)
 {
+    (void)pool;
     *to = *from;
     memcpy(to->extensionName, from->extensionName, VK_MAX_EXTENSION_NAME_SIZE * sizeof(char));
 }
@@ -257,6 +274,7 @@ void deepcopy_VkLayerProperties(
     const VkLayerProperties* from,
     VkLayerProperties* to)
 {
+    (void)pool;
     *to = *from;
     memcpy(to->layerName, from->layerName, VK_MAX_EXTENSION_NAME_SIZE * sizeof(char));
     memcpy(to->description, from->description, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
@@ -267,6 +285,7 @@ void deepcopy_VkSubmitInfo(
     const VkSubmitInfo* from,
     VkSubmitInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pWaitSemaphores = nullptr;
@@ -296,6 +315,7 @@ void deepcopy_VkMemoryAllocateInfo(
     const VkMemoryAllocateInfo* from,
     VkMemoryAllocateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -305,6 +325,7 @@ void deepcopy_VkMappedMemoryRange(
     const VkMappedMemoryRange* from,
     VkMappedMemoryRange* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -314,6 +335,7 @@ void deepcopy_VkMemoryRequirements(
     const VkMemoryRequirements* from,
     VkMemoryRequirements* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -322,6 +344,7 @@ void deepcopy_VkSparseImageFormatProperties(
     const VkSparseImageFormatProperties* from,
     VkSparseImageFormatProperties* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkExtent3D(pool, &from->imageGranularity, (VkExtent3D*)(&to->imageGranularity));
 }
@@ -331,6 +354,7 @@ void deepcopy_VkSparseImageMemoryRequirements(
     const VkSparseImageMemoryRequirements* from,
     VkSparseImageMemoryRequirements* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkSparseImageFormatProperties(pool, &from->formatProperties, (VkSparseImageFormatProperties*)(&to->formatProperties));
 }
@@ -340,6 +364,7 @@ void deepcopy_VkSparseMemoryBind(
     const VkSparseMemoryBind* from,
     VkSparseMemoryBind* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -348,6 +373,7 @@ void deepcopy_VkSparseBufferMemoryBindInfo(
     const VkSparseBufferMemoryBindInfo* from,
     VkSparseBufferMemoryBindInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pBinds = nullptr;
     if (from->pBinds)
@@ -366,6 +392,7 @@ void deepcopy_VkSparseImageOpaqueMemoryBindInfo(
     const VkSparseImageOpaqueMemoryBindInfo* from,
     VkSparseImageOpaqueMemoryBindInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pBinds = nullptr;
     if (from->pBinds)
@@ -384,6 +411,7 @@ void deepcopy_VkImageSubresource(
     const VkImageSubresource* from,
     VkImageSubresource* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -392,6 +420,7 @@ void deepcopy_VkOffset3D(
     const VkOffset3D* from,
     VkOffset3D* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -400,6 +429,7 @@ void deepcopy_VkSparseImageMemoryBind(
     const VkSparseImageMemoryBind* from,
     VkSparseImageMemoryBind* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkImageSubresource(pool, &from->subresource, (VkImageSubresource*)(&to->subresource));
     deepcopy_VkOffset3D(pool, &from->offset, (VkOffset3D*)(&to->offset));
@@ -411,6 +441,7 @@ void deepcopy_VkSparseImageMemoryBindInfo(
     const VkSparseImageMemoryBindInfo* from,
     VkSparseImageMemoryBindInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pBinds = nullptr;
     if (from->pBinds)
@@ -429,6 +460,7 @@ void deepcopy_VkBindSparseInfo(
     const VkBindSparseInfo* from,
     VkBindSparseInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pWaitSemaphores = nullptr;
@@ -478,6 +510,7 @@ void deepcopy_VkFenceCreateInfo(
     const VkFenceCreateInfo* from,
     VkFenceCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -487,6 +520,7 @@ void deepcopy_VkSemaphoreCreateInfo(
     const VkSemaphoreCreateInfo* from,
     VkSemaphoreCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -496,6 +530,7 @@ void deepcopy_VkEventCreateInfo(
     const VkEventCreateInfo* from,
     VkEventCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -505,6 +540,7 @@ void deepcopy_VkQueryPoolCreateInfo(
     const VkQueryPoolCreateInfo* from,
     VkQueryPoolCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -514,6 +550,7 @@ void deepcopy_VkBufferCreateInfo(
     const VkBufferCreateInfo* from,
     VkBufferCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pQueueFamilyIndices = nullptr;
@@ -528,6 +565,7 @@ void deepcopy_VkBufferViewCreateInfo(
     const VkBufferViewCreateInfo* from,
     VkBufferViewCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -537,6 +575,7 @@ void deepcopy_VkImageCreateInfo(
     const VkImageCreateInfo* from,
     VkImageCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkExtent3D(pool, &from->extent, (VkExtent3D*)(&to->extent));
@@ -552,6 +591,7 @@ void deepcopy_VkSubresourceLayout(
     const VkSubresourceLayout* from,
     VkSubresourceLayout* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -560,6 +600,7 @@ void deepcopy_VkComponentMapping(
     const VkComponentMapping* from,
     VkComponentMapping* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -568,6 +609,7 @@ void deepcopy_VkImageSubresourceRange(
     const VkImageSubresourceRange* from,
     VkImageSubresourceRange* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -576,6 +618,7 @@ void deepcopy_VkImageViewCreateInfo(
     const VkImageViewCreateInfo* from,
     VkImageViewCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkComponentMapping(pool, &from->components, (VkComponentMapping*)(&to->components));
@@ -587,6 +630,7 @@ void deepcopy_VkShaderModuleCreateInfo(
     const VkShaderModuleCreateInfo* from,
     VkShaderModuleCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pCode = nullptr;
@@ -601,6 +645,7 @@ void deepcopy_VkPipelineCacheCreateInfo(
     const VkPipelineCacheCreateInfo* from,
     VkPipelineCacheCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pInitialData = nullptr;
@@ -615,6 +660,7 @@ void deepcopy_VkSpecializationMapEntry(
     const VkSpecializationMapEntry* from,
     VkSpecializationMapEntry* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -623,6 +669,7 @@ void deepcopy_VkSpecializationInfo(
     const VkSpecializationInfo* from,
     VkSpecializationInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pMapEntries = nullptr;
     if (from->pMapEntries)
@@ -646,6 +693,7 @@ void deepcopy_VkPipelineShaderStageCreateInfo(
     const VkPipelineShaderStageCreateInfo* from,
     VkPipelineShaderStageCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pName = nullptr;
@@ -666,6 +714,7 @@ void deepcopy_VkVertexInputBindingDescription(
     const VkVertexInputBindingDescription* from,
     VkVertexInputBindingDescription* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -674,6 +723,7 @@ void deepcopy_VkVertexInputAttributeDescription(
     const VkVertexInputAttributeDescription* from,
     VkVertexInputAttributeDescription* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -682,6 +732,7 @@ void deepcopy_VkPipelineVertexInputStateCreateInfo(
     const VkPipelineVertexInputStateCreateInfo* from,
     VkPipelineVertexInputStateCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pVertexBindingDescriptions = nullptr;
@@ -711,6 +762,7 @@ void deepcopy_VkPipelineInputAssemblyStateCreateInfo(
     const VkPipelineInputAssemblyStateCreateInfo* from,
     VkPipelineInputAssemblyStateCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -720,6 +772,7 @@ void deepcopy_VkPipelineTessellationStateCreateInfo(
     const VkPipelineTessellationStateCreateInfo* from,
     VkPipelineTessellationStateCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -729,6 +782,7 @@ void deepcopy_VkViewport(
     const VkViewport* from,
     VkViewport* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -737,6 +791,7 @@ void deepcopy_VkOffset2D(
     const VkOffset2D* from,
     VkOffset2D* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -745,6 +800,7 @@ void deepcopy_VkExtent2D(
     const VkExtent2D* from,
     VkExtent2D* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -753,6 +809,7 @@ void deepcopy_VkRect2D(
     const VkRect2D* from,
     VkRect2D* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkOffset2D(pool, &from->offset, (VkOffset2D*)(&to->offset));
     deepcopy_VkExtent2D(pool, &from->extent, (VkExtent2D*)(&to->extent));
@@ -763,6 +820,7 @@ void deepcopy_VkPipelineViewportStateCreateInfo(
     const VkPipelineViewportStateCreateInfo* from,
     VkPipelineViewportStateCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pViewports = nullptr;
@@ -792,6 +850,7 @@ void deepcopy_VkPipelineRasterizationStateCreateInfo(
     const VkPipelineRasterizationStateCreateInfo* from,
     VkPipelineRasterizationStateCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -801,6 +860,7 @@ void deepcopy_VkPipelineMultisampleStateCreateInfo(
     const VkPipelineMultisampleStateCreateInfo* from,
     VkPipelineMultisampleStateCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pSampleMask = nullptr;
@@ -815,6 +875,7 @@ void deepcopy_VkStencilOpState(
     const VkStencilOpState* from,
     VkStencilOpState* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -823,6 +884,7 @@ void deepcopy_VkPipelineDepthStencilStateCreateInfo(
     const VkPipelineDepthStencilStateCreateInfo* from,
     VkPipelineDepthStencilStateCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkStencilOpState(pool, &from->front, (VkStencilOpState*)(&to->front));
@@ -834,6 +896,7 @@ void deepcopy_VkPipelineColorBlendAttachmentState(
     const VkPipelineColorBlendAttachmentState* from,
     VkPipelineColorBlendAttachmentState* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -842,6 +905,7 @@ void deepcopy_VkPipelineColorBlendStateCreateInfo(
     const VkPipelineColorBlendStateCreateInfo* from,
     VkPipelineColorBlendStateCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pAttachments = nullptr;
@@ -862,6 +926,7 @@ void deepcopy_VkPipelineDynamicStateCreateInfo(
     const VkPipelineDynamicStateCreateInfo* from,
     VkPipelineDynamicStateCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pDynamicStates = nullptr;
@@ -876,6 +941,7 @@ void deepcopy_VkGraphicsPipelineCreateInfo(
     const VkGraphicsPipelineCreateInfo* from,
     VkGraphicsPipelineCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pStages = nullptr;
@@ -949,6 +1015,7 @@ void deepcopy_VkComputePipelineCreateInfo(
     const VkComputePipelineCreateInfo* from,
     VkComputePipelineCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkPipelineShaderStageCreateInfo(pool, &from->stage, (VkPipelineShaderStageCreateInfo*)(&to->stage));
@@ -959,6 +1026,7 @@ void deepcopy_VkPushConstantRange(
     const VkPushConstantRange* from,
     VkPushConstantRange* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -967,6 +1035,7 @@ void deepcopy_VkPipelineLayoutCreateInfo(
     const VkPipelineLayoutCreateInfo* from,
     VkPipelineLayoutCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pSetLayouts = nullptr;
@@ -991,6 +1060,7 @@ void deepcopy_VkSamplerCreateInfo(
     const VkSamplerCreateInfo* from,
     VkSamplerCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1000,6 +1070,7 @@ void deepcopy_VkDescriptorSetLayoutBinding(
     const VkDescriptorSetLayoutBinding* from,
     VkDescriptorSetLayoutBinding* to)
 {
+    (void)pool;
     *to = *from;
     to->pImmutableSamplers = nullptr;
     if (from->pImmutableSamplers)
@@ -1013,6 +1084,7 @@ void deepcopy_VkDescriptorSetLayoutCreateInfo(
     const VkDescriptorSetLayoutCreateInfo* from,
     VkDescriptorSetLayoutCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pBindings = nullptr;
@@ -1032,6 +1104,7 @@ void deepcopy_VkDescriptorPoolSize(
     const VkDescriptorPoolSize* from,
     VkDescriptorPoolSize* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -1040,6 +1113,7 @@ void deepcopy_VkDescriptorPoolCreateInfo(
     const VkDescriptorPoolCreateInfo* from,
     VkDescriptorPoolCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pPoolSizes = nullptr;
@@ -1059,6 +1133,7 @@ void deepcopy_VkDescriptorSetAllocateInfo(
     const VkDescriptorSetAllocateInfo* from,
     VkDescriptorSetAllocateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pSetLayouts = nullptr;
@@ -1073,6 +1148,7 @@ void deepcopy_VkDescriptorImageInfo(
     const VkDescriptorImageInfo* from,
     VkDescriptorImageInfo* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -1081,6 +1157,7 @@ void deepcopy_VkDescriptorBufferInfo(
     const VkDescriptorBufferInfo* from,
     VkDescriptorBufferInfo* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -1089,6 +1166,7 @@ void deepcopy_VkWriteDescriptorSet(
     const VkWriteDescriptorSet* from,
     VkWriteDescriptorSet* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pImageInfo = nullptr;
@@ -1123,6 +1201,7 @@ void deepcopy_VkCopyDescriptorSet(
     const VkCopyDescriptorSet* from,
     VkCopyDescriptorSet* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1132,6 +1211,7 @@ void deepcopy_VkFramebufferCreateInfo(
     const VkFramebufferCreateInfo* from,
     VkFramebufferCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pAttachments = nullptr;
@@ -1146,6 +1226,7 @@ void deepcopy_VkAttachmentDescription(
     const VkAttachmentDescription* from,
     VkAttachmentDescription* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -1154,6 +1235,7 @@ void deepcopy_VkAttachmentReference(
     const VkAttachmentReference* from,
     VkAttachmentReference* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -1162,6 +1244,7 @@ void deepcopy_VkSubpassDescription(
     const VkSubpassDescription* from,
     VkSubpassDescription* to)
 {
+    (void)pool;
     *to = *from;
     to->pInputAttachments = nullptr;
     if (from->pInputAttachments)
@@ -1211,6 +1294,7 @@ void deepcopy_VkSubpassDependency(
     const VkSubpassDependency* from,
     VkSubpassDependency* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -1219,6 +1303,7 @@ void deepcopy_VkRenderPassCreateInfo(
     const VkRenderPassCreateInfo* from,
     VkRenderPassCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pAttachments = nullptr;
@@ -1258,6 +1343,7 @@ void deepcopy_VkCommandPoolCreateInfo(
     const VkCommandPoolCreateInfo* from,
     VkCommandPoolCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1267,6 +1353,7 @@ void deepcopy_VkCommandBufferAllocateInfo(
     const VkCommandBufferAllocateInfo* from,
     VkCommandBufferAllocateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1276,6 +1363,7 @@ void deepcopy_VkCommandBufferInheritanceInfo(
     const VkCommandBufferInheritanceInfo* from,
     VkCommandBufferInheritanceInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1285,6 +1373,7 @@ void deepcopy_VkCommandBufferBeginInfo(
     const VkCommandBufferBeginInfo* from,
     VkCommandBufferBeginInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pInheritanceInfo = nullptr;
@@ -1300,6 +1389,7 @@ void deepcopy_VkBufferCopy(
     const VkBufferCopy* from,
     VkBufferCopy* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -1308,6 +1398,7 @@ void deepcopy_VkImageSubresourceLayers(
     const VkImageSubresourceLayers* from,
     VkImageSubresourceLayers* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -1316,6 +1407,7 @@ void deepcopy_VkImageCopy(
     const VkImageCopy* from,
     VkImageCopy* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkImageSubresourceLayers(pool, &from->srcSubresource, (VkImageSubresourceLayers*)(&to->srcSubresource));
     deepcopy_VkOffset3D(pool, &from->srcOffset, (VkOffset3D*)(&to->srcOffset));
@@ -1329,6 +1421,7 @@ void deepcopy_VkImageBlit(
     const VkImageBlit* from,
     VkImageBlit* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkImageSubresourceLayers(pool, &from->srcSubresource, (VkImageSubresourceLayers*)(&to->srcSubresource));
     for (uint32_t i = 0; i < (uint32_t)2; ++i)
@@ -1347,6 +1440,7 @@ void deepcopy_VkBufferImageCopy(
     const VkBufferImageCopy* from,
     VkBufferImageCopy* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkImageSubresourceLayers(pool, &from->imageSubresource, (VkImageSubresourceLayers*)(&to->imageSubresource));
     deepcopy_VkOffset3D(pool, &from->imageOffset, (VkOffset3D*)(&to->imageOffset));
@@ -1358,6 +1452,7 @@ void deepcopy_VkClearColorValue(
     const VkClearColorValue* from,
     VkClearColorValue* to)
 {
+    (void)pool;
     *to = *from;
     memcpy(to->float32, from->float32, 4 * sizeof(float));
     memcpy(to->int32, from->int32, 4 * sizeof(int32_t));
@@ -1369,6 +1464,7 @@ void deepcopy_VkClearDepthStencilValue(
     const VkClearDepthStencilValue* from,
     VkClearDepthStencilValue* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -1377,6 +1473,7 @@ void deepcopy_VkClearValue(
     const VkClearValue* from,
     VkClearValue* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkClearColorValue(pool, &from->color, (VkClearColorValue*)(&to->color));
     deepcopy_VkClearDepthStencilValue(pool, &from->depthStencil, (VkClearDepthStencilValue*)(&to->depthStencil));
@@ -1387,6 +1484,7 @@ void deepcopy_VkClearAttachment(
     const VkClearAttachment* from,
     VkClearAttachment* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkClearValue(pool, &from->clearValue, (VkClearValue*)(&to->clearValue));
 }
@@ -1396,6 +1494,7 @@ void deepcopy_VkClearRect(
     const VkClearRect* from,
     VkClearRect* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkRect2D(pool, &from->rect, (VkRect2D*)(&to->rect));
 }
@@ -1405,6 +1504,7 @@ void deepcopy_VkImageResolve(
     const VkImageResolve* from,
     VkImageResolve* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkImageSubresourceLayers(pool, &from->srcSubresource, (VkImageSubresourceLayers*)(&to->srcSubresource));
     deepcopy_VkOffset3D(pool, &from->srcOffset, (VkOffset3D*)(&to->srcOffset));
@@ -1418,6 +1518,7 @@ void deepcopy_VkMemoryBarrier(
     const VkMemoryBarrier* from,
     VkMemoryBarrier* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1427,6 +1528,7 @@ void deepcopy_VkBufferMemoryBarrier(
     const VkBufferMemoryBarrier* from,
     VkBufferMemoryBarrier* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1436,6 +1538,7 @@ void deepcopy_VkImageMemoryBarrier(
     const VkImageMemoryBarrier* from,
     VkImageMemoryBarrier* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkImageSubresourceRange(pool, &from->subresourceRange, (VkImageSubresourceRange*)(&to->subresourceRange));
@@ -1446,6 +1549,7 @@ void deepcopy_VkRenderPassBeginInfo(
     const VkRenderPassBeginInfo* from,
     VkRenderPassBeginInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkRect2D(pool, &from->renderArea, (VkRect2D*)(&to->renderArea));
@@ -1466,6 +1570,7 @@ void deepcopy_VkDispatchIndirectCommand(
     const VkDispatchIndirectCommand* from,
     VkDispatchIndirectCommand* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -1474,6 +1579,7 @@ void deepcopy_VkDrawIndexedIndirectCommand(
     const VkDrawIndexedIndirectCommand* from,
     VkDrawIndexedIndirectCommand* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -1482,6 +1588,7 @@ void deepcopy_VkDrawIndirectCommand(
     const VkDrawIndirectCommand* from,
     VkDrawIndirectCommand* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -1490,6 +1597,7 @@ void deepcopy_VkBaseOutStructure(
     const VkBaseOutStructure* from,
     VkBaseOutStructure* to)
 {
+    (void)pool;
     *to = *from;
     // TODO: Unsupported : VkBaseOutStructure* pNext
 }
@@ -1499,6 +1607,7 @@ void deepcopy_VkBaseInStructure(
     const VkBaseInStructure* from,
     VkBaseInStructure* to)
 {
+    (void)pool;
     *to = *from;
     // TODO: Unsupported : const VkBaseInStructure* pNext
 }
@@ -1510,6 +1619,7 @@ void deepcopy_VkPhysicalDeviceSubgroupProperties(
     const VkPhysicalDeviceSubgroupProperties* from,
     VkPhysicalDeviceSubgroupProperties* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1519,6 +1629,7 @@ void deepcopy_VkBindBufferMemoryInfo(
     const VkBindBufferMemoryInfo* from,
     VkBindBufferMemoryInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1528,6 +1639,7 @@ void deepcopy_VkBindImageMemoryInfo(
     const VkBindImageMemoryInfo* from,
     VkBindImageMemoryInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1537,6 +1649,7 @@ void deepcopy_VkPhysicalDevice16BitStorageFeatures(
     const VkPhysicalDevice16BitStorageFeatures* from,
     VkPhysicalDevice16BitStorageFeatures* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1546,6 +1659,7 @@ void deepcopy_VkMemoryDedicatedRequirements(
     const VkMemoryDedicatedRequirements* from,
     VkMemoryDedicatedRequirements* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1555,6 +1669,7 @@ void deepcopy_VkMemoryDedicatedAllocateInfo(
     const VkMemoryDedicatedAllocateInfo* from,
     VkMemoryDedicatedAllocateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1564,6 +1679,7 @@ void deepcopy_VkMemoryAllocateFlagsInfo(
     const VkMemoryAllocateFlagsInfo* from,
     VkMemoryAllocateFlagsInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1573,6 +1689,7 @@ void deepcopy_VkDeviceGroupRenderPassBeginInfo(
     const VkDeviceGroupRenderPassBeginInfo* from,
     VkDeviceGroupRenderPassBeginInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pDeviceRenderAreas = nullptr;
@@ -1592,6 +1709,7 @@ void deepcopy_VkDeviceGroupCommandBufferBeginInfo(
     const VkDeviceGroupCommandBufferBeginInfo* from,
     VkDeviceGroupCommandBufferBeginInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1601,6 +1719,7 @@ void deepcopy_VkDeviceGroupSubmitInfo(
     const VkDeviceGroupSubmitInfo* from,
     VkDeviceGroupSubmitInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pWaitSemaphoreDeviceIndices = nullptr;
@@ -1625,6 +1744,7 @@ void deepcopy_VkDeviceGroupBindSparseInfo(
     const VkDeviceGroupBindSparseInfo* from,
     VkDeviceGroupBindSparseInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1634,6 +1754,7 @@ void deepcopy_VkBindBufferMemoryDeviceGroupInfo(
     const VkBindBufferMemoryDeviceGroupInfo* from,
     VkBindBufferMemoryDeviceGroupInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pDeviceIndices = nullptr;
@@ -1648,6 +1769,7 @@ void deepcopy_VkBindImageMemoryDeviceGroupInfo(
     const VkBindImageMemoryDeviceGroupInfo* from,
     VkBindImageMemoryDeviceGroupInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pDeviceIndices = nullptr;
@@ -1672,6 +1794,7 @@ void deepcopy_VkPhysicalDeviceGroupProperties(
     const VkPhysicalDeviceGroupProperties* from,
     VkPhysicalDeviceGroupProperties* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     memcpy(to->physicalDevices, from->physicalDevices, VK_MAX_DEVICE_GROUP_SIZE * sizeof(VkPhysicalDevice));
@@ -1682,6 +1805,7 @@ void deepcopy_VkDeviceGroupDeviceCreateInfo(
     const VkDeviceGroupDeviceCreateInfo* from,
     VkDeviceGroupDeviceCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pPhysicalDevices = nullptr;
@@ -1696,6 +1820,7 @@ void deepcopy_VkBufferMemoryRequirementsInfo2(
     const VkBufferMemoryRequirementsInfo2* from,
     VkBufferMemoryRequirementsInfo2* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1705,6 +1830,7 @@ void deepcopy_VkImageMemoryRequirementsInfo2(
     const VkImageMemoryRequirementsInfo2* from,
     VkImageMemoryRequirementsInfo2* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1714,6 +1840,7 @@ void deepcopy_VkImageSparseMemoryRequirementsInfo2(
     const VkImageSparseMemoryRequirementsInfo2* from,
     VkImageSparseMemoryRequirementsInfo2* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1723,6 +1850,7 @@ void deepcopy_VkMemoryRequirements2(
     const VkMemoryRequirements2* from,
     VkMemoryRequirements2* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkMemoryRequirements(pool, &from->memoryRequirements, (VkMemoryRequirements*)(&to->memoryRequirements));
@@ -1733,6 +1861,7 @@ void deepcopy_VkSparseImageMemoryRequirements2(
     const VkSparseImageMemoryRequirements2* from,
     VkSparseImageMemoryRequirements2* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkSparseImageMemoryRequirements(pool, &from->memoryRequirements, (VkSparseImageMemoryRequirements*)(&to->memoryRequirements));
@@ -1743,6 +1872,7 @@ void deepcopy_VkPhysicalDeviceFeatures2(
     const VkPhysicalDeviceFeatures2* from,
     VkPhysicalDeviceFeatures2* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkPhysicalDeviceFeatures(pool, &from->features, (VkPhysicalDeviceFeatures*)(&to->features));
@@ -1753,6 +1883,7 @@ void deepcopy_VkPhysicalDeviceProperties2(
     const VkPhysicalDeviceProperties2* from,
     VkPhysicalDeviceProperties2* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkPhysicalDeviceProperties(pool, &from->properties, (VkPhysicalDeviceProperties*)(&to->properties));
@@ -1763,6 +1894,7 @@ void deepcopy_VkFormatProperties2(
     const VkFormatProperties2* from,
     VkFormatProperties2* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkFormatProperties(pool, &from->formatProperties, (VkFormatProperties*)(&to->formatProperties));
@@ -1773,6 +1905,7 @@ void deepcopy_VkImageFormatProperties2(
     const VkImageFormatProperties2* from,
     VkImageFormatProperties2* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkImageFormatProperties(pool, &from->imageFormatProperties, (VkImageFormatProperties*)(&to->imageFormatProperties));
@@ -1783,6 +1916,7 @@ void deepcopy_VkPhysicalDeviceImageFormatInfo2(
     const VkPhysicalDeviceImageFormatInfo2* from,
     VkPhysicalDeviceImageFormatInfo2* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1792,6 +1926,7 @@ void deepcopy_VkQueueFamilyProperties2(
     const VkQueueFamilyProperties2* from,
     VkQueueFamilyProperties2* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkQueueFamilyProperties(pool, &from->queueFamilyProperties, (VkQueueFamilyProperties*)(&to->queueFamilyProperties));
@@ -1802,6 +1937,7 @@ void deepcopy_VkPhysicalDeviceMemoryProperties2(
     const VkPhysicalDeviceMemoryProperties2* from,
     VkPhysicalDeviceMemoryProperties2* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkPhysicalDeviceMemoryProperties(pool, &from->memoryProperties, (VkPhysicalDeviceMemoryProperties*)(&to->memoryProperties));
@@ -1812,6 +1948,7 @@ void deepcopy_VkSparseImageFormatProperties2(
     const VkSparseImageFormatProperties2* from,
     VkSparseImageFormatProperties2* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkSparseImageFormatProperties(pool, &from->properties, (VkSparseImageFormatProperties*)(&to->properties));
@@ -1822,6 +1959,7 @@ void deepcopy_VkPhysicalDeviceSparseImageFormatInfo2(
     const VkPhysicalDeviceSparseImageFormatInfo2* from,
     VkPhysicalDeviceSparseImageFormatInfo2* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1831,6 +1969,7 @@ void deepcopy_VkPhysicalDevicePointClippingProperties(
     const VkPhysicalDevicePointClippingProperties* from,
     VkPhysicalDevicePointClippingProperties* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1840,6 +1979,7 @@ void deepcopy_VkInputAttachmentAspectReference(
     const VkInputAttachmentAspectReference* from,
     VkInputAttachmentAspectReference* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -1848,6 +1988,7 @@ void deepcopy_VkRenderPassInputAttachmentAspectCreateInfo(
     const VkRenderPassInputAttachmentAspectCreateInfo* from,
     VkRenderPassInputAttachmentAspectCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pAspectReferences = nullptr;
@@ -1867,6 +2008,7 @@ void deepcopy_VkImageViewUsageCreateInfo(
     const VkImageViewUsageCreateInfo* from,
     VkImageViewUsageCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1876,6 +2018,7 @@ void deepcopy_VkPipelineTessellationDomainOriginStateCreateInfo(
     const VkPipelineTessellationDomainOriginStateCreateInfo* from,
     VkPipelineTessellationDomainOriginStateCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1885,6 +2028,7 @@ void deepcopy_VkRenderPassMultiviewCreateInfo(
     const VkRenderPassMultiviewCreateInfo* from,
     VkRenderPassMultiviewCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pViewMasks = nullptr;
@@ -1909,6 +2053,7 @@ void deepcopy_VkPhysicalDeviceMultiviewFeatures(
     const VkPhysicalDeviceMultiviewFeatures* from,
     VkPhysicalDeviceMultiviewFeatures* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1918,6 +2063,7 @@ void deepcopy_VkPhysicalDeviceMultiviewProperties(
     const VkPhysicalDeviceMultiviewProperties* from,
     VkPhysicalDeviceMultiviewProperties* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1927,6 +2073,7 @@ void deepcopy_VkPhysicalDeviceVariablePointerFeatures(
     const VkPhysicalDeviceVariablePointerFeatures* from,
     VkPhysicalDeviceVariablePointerFeatures* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1936,6 +2083,7 @@ void deepcopy_VkPhysicalDeviceProtectedMemoryFeatures(
     const VkPhysicalDeviceProtectedMemoryFeatures* from,
     VkPhysicalDeviceProtectedMemoryFeatures* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1945,6 +2093,7 @@ void deepcopy_VkPhysicalDeviceProtectedMemoryProperties(
     const VkPhysicalDeviceProtectedMemoryProperties* from,
     VkPhysicalDeviceProtectedMemoryProperties* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1954,6 +2103,7 @@ void deepcopy_VkDeviceQueueInfo2(
     const VkDeviceQueueInfo2* from,
     VkDeviceQueueInfo2* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1963,6 +2113,7 @@ void deepcopy_VkProtectedSubmitInfo(
     const VkProtectedSubmitInfo* from,
     VkProtectedSubmitInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1972,6 +2123,7 @@ void deepcopy_VkSamplerYcbcrConversionCreateInfo(
     const VkSamplerYcbcrConversionCreateInfo* from,
     VkSamplerYcbcrConversionCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkComponentMapping(pool, &from->components, (VkComponentMapping*)(&to->components));
@@ -1982,6 +2134,7 @@ void deepcopy_VkSamplerYcbcrConversionInfo(
     const VkSamplerYcbcrConversionInfo* from,
     VkSamplerYcbcrConversionInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -1991,6 +2144,7 @@ void deepcopy_VkBindImagePlaneMemoryInfo(
     const VkBindImagePlaneMemoryInfo* from,
     VkBindImagePlaneMemoryInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2000,6 +2154,7 @@ void deepcopy_VkImagePlaneMemoryRequirementsInfo(
     const VkImagePlaneMemoryRequirementsInfo* from,
     VkImagePlaneMemoryRequirementsInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2009,6 +2164,7 @@ void deepcopy_VkPhysicalDeviceSamplerYcbcrConversionFeatures(
     const VkPhysicalDeviceSamplerYcbcrConversionFeatures* from,
     VkPhysicalDeviceSamplerYcbcrConversionFeatures* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2018,6 +2174,7 @@ void deepcopy_VkSamplerYcbcrConversionImageFormatProperties(
     const VkSamplerYcbcrConversionImageFormatProperties* from,
     VkSamplerYcbcrConversionImageFormatProperties* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2027,6 +2184,7 @@ void deepcopy_VkDescriptorUpdateTemplateEntry(
     const VkDescriptorUpdateTemplateEntry* from,
     VkDescriptorUpdateTemplateEntry* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -2035,6 +2193,7 @@ void deepcopy_VkDescriptorUpdateTemplateCreateInfo(
     const VkDescriptorUpdateTemplateCreateInfo* from,
     VkDescriptorUpdateTemplateCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pDescriptorUpdateEntries = nullptr;
@@ -2054,6 +2213,7 @@ void deepcopy_VkExternalMemoryProperties(
     const VkExternalMemoryProperties* from,
     VkExternalMemoryProperties* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -2062,6 +2222,7 @@ void deepcopy_VkPhysicalDeviceExternalImageFormatInfo(
     const VkPhysicalDeviceExternalImageFormatInfo* from,
     VkPhysicalDeviceExternalImageFormatInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2071,6 +2232,7 @@ void deepcopy_VkExternalImageFormatProperties(
     const VkExternalImageFormatProperties* from,
     VkExternalImageFormatProperties* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkExternalMemoryProperties(pool, &from->externalMemoryProperties, (VkExternalMemoryProperties*)(&to->externalMemoryProperties));
@@ -2081,6 +2243,7 @@ void deepcopy_VkPhysicalDeviceExternalBufferInfo(
     const VkPhysicalDeviceExternalBufferInfo* from,
     VkPhysicalDeviceExternalBufferInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2090,6 +2253,7 @@ void deepcopy_VkExternalBufferProperties(
     const VkExternalBufferProperties* from,
     VkExternalBufferProperties* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkExternalMemoryProperties(pool, &from->externalMemoryProperties, (VkExternalMemoryProperties*)(&to->externalMemoryProperties));
@@ -2100,6 +2264,7 @@ void deepcopy_VkPhysicalDeviceIDProperties(
     const VkPhysicalDeviceIDProperties* from,
     VkPhysicalDeviceIDProperties* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     memcpy(to->deviceUUID, from->deviceUUID, VK_UUID_SIZE * sizeof(uint8_t));
@@ -2112,6 +2277,7 @@ void deepcopy_VkExternalMemoryImageCreateInfo(
     const VkExternalMemoryImageCreateInfo* from,
     VkExternalMemoryImageCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2121,6 +2287,7 @@ void deepcopy_VkExternalMemoryBufferCreateInfo(
     const VkExternalMemoryBufferCreateInfo* from,
     VkExternalMemoryBufferCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2130,6 +2297,7 @@ void deepcopy_VkExportMemoryAllocateInfo(
     const VkExportMemoryAllocateInfo* from,
     VkExportMemoryAllocateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2139,6 +2307,7 @@ void deepcopy_VkPhysicalDeviceExternalFenceInfo(
     const VkPhysicalDeviceExternalFenceInfo* from,
     VkPhysicalDeviceExternalFenceInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2148,6 +2317,7 @@ void deepcopy_VkExternalFenceProperties(
     const VkExternalFenceProperties* from,
     VkExternalFenceProperties* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2157,6 +2327,7 @@ void deepcopy_VkExportFenceCreateInfo(
     const VkExportFenceCreateInfo* from,
     VkExportFenceCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2166,6 +2337,7 @@ void deepcopy_VkExportSemaphoreCreateInfo(
     const VkExportSemaphoreCreateInfo* from,
     VkExportSemaphoreCreateInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2175,6 +2347,7 @@ void deepcopy_VkPhysicalDeviceExternalSemaphoreInfo(
     const VkPhysicalDeviceExternalSemaphoreInfo* from,
     VkPhysicalDeviceExternalSemaphoreInfo* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2184,6 +2357,7 @@ void deepcopy_VkExternalSemaphoreProperties(
     const VkExternalSemaphoreProperties* from,
     VkExternalSemaphoreProperties* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2193,6 +2367,7 @@ void deepcopy_VkPhysicalDeviceMaintenance3Properties(
     const VkPhysicalDeviceMaintenance3Properties* from,
     VkPhysicalDeviceMaintenance3Properties* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2202,6 +2377,7 @@ void deepcopy_VkDescriptorSetLayoutSupport(
     const VkDescriptorSetLayoutSupport* from,
     VkDescriptorSetLayoutSupport* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2211,6 +2387,7 @@ void deepcopy_VkPhysicalDeviceShaderDrawParameterFeatures(
     const VkPhysicalDeviceShaderDrawParameterFeatures* from,
     VkPhysicalDeviceShaderDrawParameterFeatures* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2222,6 +2399,7 @@ void deepcopy_VkSurfaceCapabilitiesKHR(
     const VkSurfaceCapabilitiesKHR* from,
     VkSurfaceCapabilitiesKHR* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkExtent2D(pool, &from->currentExtent, (VkExtent2D*)(&to->currentExtent));
     deepcopy_VkExtent2D(pool, &from->minImageExtent, (VkExtent2D*)(&to->minImageExtent));
@@ -2233,6 +2411,7 @@ void deepcopy_VkSurfaceFormatKHR(
     const VkSurfaceFormatKHR* from,
     VkSurfaceFormatKHR* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -2243,6 +2422,7 @@ void deepcopy_VkSwapchainCreateInfoKHR(
     const VkSwapchainCreateInfoKHR* from,
     VkSwapchainCreateInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkExtent2D(pool, &from->imageExtent, (VkExtent2D*)(&to->imageExtent));
@@ -2258,6 +2438,7 @@ void deepcopy_VkPresentInfoKHR(
     const VkPresentInfoKHR* from,
     VkPresentInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pWaitSemaphores = nullptr;
@@ -2287,6 +2468,7 @@ void deepcopy_VkImageSwapchainCreateInfoKHR(
     const VkImageSwapchainCreateInfoKHR* from,
     VkImageSwapchainCreateInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2296,6 +2478,7 @@ void deepcopy_VkBindImageMemorySwapchainInfoKHR(
     const VkBindImageMemorySwapchainInfoKHR* from,
     VkBindImageMemorySwapchainInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2305,6 +2488,7 @@ void deepcopy_VkAcquireNextImageInfoKHR(
     const VkAcquireNextImageInfoKHR* from,
     VkAcquireNextImageInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2314,6 +2498,7 @@ void deepcopy_VkDeviceGroupPresentCapabilitiesKHR(
     const VkDeviceGroupPresentCapabilitiesKHR* from,
     VkDeviceGroupPresentCapabilitiesKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     memcpy(to->presentMask, from->presentMask, VK_MAX_DEVICE_GROUP_SIZE * sizeof(uint32_t));
@@ -2324,6 +2509,7 @@ void deepcopy_VkDeviceGroupPresentInfoKHR(
     const VkDeviceGroupPresentInfoKHR* from,
     VkDeviceGroupPresentInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pDeviceMasks = nullptr;
@@ -2338,6 +2524,7 @@ void deepcopy_VkDeviceGroupSwapchainCreateInfoKHR(
     const VkDeviceGroupSwapchainCreateInfoKHR* from,
     VkDeviceGroupSwapchainCreateInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2349,6 +2536,7 @@ void deepcopy_VkDisplayPropertiesKHR(
     const VkDisplayPropertiesKHR* from,
     VkDisplayPropertiesKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->displayName = nullptr;
     if (from->displayName)
@@ -2364,6 +2552,7 @@ void deepcopy_VkDisplayModeParametersKHR(
     const VkDisplayModeParametersKHR* from,
     VkDisplayModeParametersKHR* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkExtent2D(pool, &from->visibleRegion, (VkExtent2D*)(&to->visibleRegion));
 }
@@ -2373,6 +2562,7 @@ void deepcopy_VkDisplayModePropertiesKHR(
     const VkDisplayModePropertiesKHR* from,
     VkDisplayModePropertiesKHR* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkDisplayModeParametersKHR(pool, &from->parameters, (VkDisplayModeParametersKHR*)(&to->parameters));
 }
@@ -2382,6 +2572,7 @@ void deepcopy_VkDisplayModeCreateInfoKHR(
     const VkDisplayModeCreateInfoKHR* from,
     VkDisplayModeCreateInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkDisplayModeParametersKHR(pool, &from->parameters, (VkDisplayModeParametersKHR*)(&to->parameters));
@@ -2392,6 +2583,7 @@ void deepcopy_VkDisplayPlaneCapabilitiesKHR(
     const VkDisplayPlaneCapabilitiesKHR* from,
     VkDisplayPlaneCapabilitiesKHR* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkOffset2D(pool, &from->minSrcPosition, (VkOffset2D*)(&to->minSrcPosition));
     deepcopy_VkOffset2D(pool, &from->maxSrcPosition, (VkOffset2D*)(&to->maxSrcPosition));
@@ -2408,6 +2600,7 @@ void deepcopy_VkDisplayPlanePropertiesKHR(
     const VkDisplayPlanePropertiesKHR* from,
     VkDisplayPlanePropertiesKHR* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -2416,6 +2609,7 @@ void deepcopy_VkDisplaySurfaceCreateInfoKHR(
     const VkDisplaySurfaceCreateInfoKHR* from,
     VkDisplaySurfaceCreateInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkExtent2D(pool, &from->imageExtent, (VkExtent2D*)(&to->imageExtent));
@@ -2428,6 +2622,7 @@ void deepcopy_VkDisplayPresentInfoKHR(
     const VkDisplayPresentInfoKHR* from,
     VkDisplayPresentInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkRect2D(pool, &from->srcRect, (VkRect2D*)(&to->srcRect));
@@ -2441,6 +2636,7 @@ void deepcopy_VkXlibSurfaceCreateInfoKHR(
     const VkXlibSurfaceCreateInfoKHR* from,
     VkXlibSurfaceCreateInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->dpy = nullptr;
@@ -2457,6 +2653,7 @@ void deepcopy_VkXcbSurfaceCreateInfoKHR(
     const VkXcbSurfaceCreateInfoKHR* from,
     VkXcbSurfaceCreateInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->connection = nullptr;
@@ -2473,6 +2670,7 @@ void deepcopy_VkWaylandSurfaceCreateInfoKHR(
     const VkWaylandSurfaceCreateInfoKHR* from,
     VkWaylandSurfaceCreateInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->display = nullptr;
@@ -2494,6 +2692,7 @@ void deepcopy_VkMirSurfaceCreateInfoKHR(
     const VkMirSurfaceCreateInfoKHR* from,
     VkMirSurfaceCreateInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->connection = nullptr;
@@ -2515,6 +2714,7 @@ void deepcopy_VkAndroidSurfaceCreateInfoKHR(
     const VkAndroidSurfaceCreateInfoKHR* from,
     VkAndroidSurfaceCreateInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->window = nullptr;
@@ -2531,6 +2731,7 @@ void deepcopy_VkWin32SurfaceCreateInfoKHR(
     const VkWin32SurfaceCreateInfoKHR* from,
     VkWin32SurfaceCreateInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2560,6 +2761,7 @@ void deepcopy_VkImportMemoryWin32HandleInfoKHR(
     const VkImportMemoryWin32HandleInfoKHR* from,
     VkImportMemoryWin32HandleInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2569,6 +2771,7 @@ void deepcopy_VkExportMemoryWin32HandleInfoKHR(
     const VkExportMemoryWin32HandleInfoKHR* from,
     VkExportMemoryWin32HandleInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pAttributes = nullptr;
@@ -2583,6 +2786,7 @@ void deepcopy_VkMemoryWin32HandlePropertiesKHR(
     const VkMemoryWin32HandlePropertiesKHR* from,
     VkMemoryWin32HandlePropertiesKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2592,6 +2796,7 @@ void deepcopy_VkMemoryGetWin32HandleInfoKHR(
     const VkMemoryGetWin32HandleInfoKHR* from,
     VkMemoryGetWin32HandleInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2603,6 +2808,7 @@ void deepcopy_VkImportMemoryFdInfoKHR(
     const VkImportMemoryFdInfoKHR* from,
     VkImportMemoryFdInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2612,6 +2818,7 @@ void deepcopy_VkMemoryFdPropertiesKHR(
     const VkMemoryFdPropertiesKHR* from,
     VkMemoryFdPropertiesKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2621,6 +2828,7 @@ void deepcopy_VkMemoryGetFdInfoKHR(
     const VkMemoryGetFdInfoKHR* from,
     VkMemoryGetFdInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2632,6 +2840,7 @@ void deepcopy_VkWin32KeyedMutexAcquireReleaseInfoKHR(
     const VkWin32KeyedMutexAcquireReleaseInfoKHR* from,
     VkWin32KeyedMutexAcquireReleaseInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pAcquireSyncs = nullptr;
@@ -2672,6 +2881,7 @@ void deepcopy_VkImportSemaphoreWin32HandleInfoKHR(
     const VkImportSemaphoreWin32HandleInfoKHR* from,
     VkImportSemaphoreWin32HandleInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2681,6 +2891,7 @@ void deepcopy_VkExportSemaphoreWin32HandleInfoKHR(
     const VkExportSemaphoreWin32HandleInfoKHR* from,
     VkExportSemaphoreWin32HandleInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pAttributes = nullptr;
@@ -2695,6 +2906,7 @@ void deepcopy_VkD3D12FenceSubmitInfoKHR(
     const VkD3D12FenceSubmitInfoKHR* from,
     VkD3D12FenceSubmitInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pWaitSemaphoreValues = nullptr;
@@ -2714,6 +2926,7 @@ void deepcopy_VkSemaphoreGetWin32HandleInfoKHR(
     const VkSemaphoreGetWin32HandleInfoKHR* from,
     VkSemaphoreGetWin32HandleInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2725,6 +2938,7 @@ void deepcopy_VkImportSemaphoreFdInfoKHR(
     const VkImportSemaphoreFdInfoKHR* from,
     VkImportSemaphoreFdInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2734,6 +2948,7 @@ void deepcopy_VkSemaphoreGetFdInfoKHR(
     const VkSemaphoreGetFdInfoKHR* from,
     VkSemaphoreGetFdInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2745,6 +2960,7 @@ void deepcopy_VkPhysicalDevicePushDescriptorPropertiesKHR(
     const VkPhysicalDevicePushDescriptorPropertiesKHR* from,
     VkPhysicalDevicePushDescriptorPropertiesKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2758,6 +2974,7 @@ void deepcopy_VkRectLayerKHR(
     const VkRectLayerKHR* from,
     VkRectLayerKHR* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkOffset2D(pool, &from->offset, (VkOffset2D*)(&to->offset));
     deepcopy_VkExtent2D(pool, &from->extent, (VkExtent2D*)(&to->extent));
@@ -2768,6 +2985,7 @@ void deepcopy_VkPresentRegionKHR(
     const VkPresentRegionKHR* from,
     VkPresentRegionKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pRectangles = nullptr;
     if (from->pRectangles)
@@ -2786,6 +3004,7 @@ void deepcopy_VkPresentRegionsKHR(
     const VkPresentRegionsKHR* from,
     VkPresentRegionsKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pRegions = nullptr;
@@ -2809,6 +3028,7 @@ void deepcopy_VkAttachmentDescription2KHR(
     const VkAttachmentDescription2KHR* from,
     VkAttachmentDescription2KHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2818,6 +3038,7 @@ void deepcopy_VkAttachmentReference2KHR(
     const VkAttachmentReference2KHR* from,
     VkAttachmentReference2KHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2827,6 +3048,7 @@ void deepcopy_VkSubpassDescription2KHR(
     const VkSubpassDescription2KHR* from,
     VkSubpassDescription2KHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pInputAttachments = nullptr;
@@ -2877,6 +3099,7 @@ void deepcopy_VkSubpassDependency2KHR(
     const VkSubpassDependency2KHR* from,
     VkSubpassDependency2KHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2886,6 +3109,7 @@ void deepcopy_VkRenderPassCreateInfo2KHR(
     const VkRenderPassCreateInfo2KHR* from,
     VkRenderPassCreateInfo2KHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pAttachments = nullptr;
@@ -2930,6 +3154,7 @@ void deepcopy_VkSubpassBeginInfoKHR(
     const VkSubpassBeginInfoKHR* from,
     VkSubpassBeginInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2939,6 +3164,7 @@ void deepcopy_VkSubpassEndInfoKHR(
     const VkSubpassEndInfoKHR* from,
     VkSubpassEndInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2950,6 +3176,7 @@ void deepcopy_VkSharedPresentSurfaceCapabilitiesKHR(
     const VkSharedPresentSurfaceCapabilitiesKHR* from,
     VkSharedPresentSurfaceCapabilitiesKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2965,6 +3192,7 @@ void deepcopy_VkImportFenceWin32HandleInfoKHR(
     const VkImportFenceWin32HandleInfoKHR* from,
     VkImportFenceWin32HandleInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2974,6 +3202,7 @@ void deepcopy_VkExportFenceWin32HandleInfoKHR(
     const VkExportFenceWin32HandleInfoKHR* from,
     VkExportFenceWin32HandleInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pAttributes = nullptr;
@@ -2988,6 +3217,7 @@ void deepcopy_VkFenceGetWin32HandleInfoKHR(
     const VkFenceGetWin32HandleInfoKHR* from,
     VkFenceGetWin32HandleInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -2999,6 +3229,7 @@ void deepcopy_VkImportFenceFdInfoKHR(
     const VkImportFenceFdInfoKHR* from,
     VkImportFenceFdInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3008,6 +3239,7 @@ void deepcopy_VkFenceGetFdInfoKHR(
     const VkFenceGetFdInfoKHR* from,
     VkFenceGetFdInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3021,6 +3253,7 @@ void deepcopy_VkPhysicalDeviceSurfaceInfo2KHR(
     const VkPhysicalDeviceSurfaceInfo2KHR* from,
     VkPhysicalDeviceSurfaceInfo2KHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3030,6 +3263,7 @@ void deepcopy_VkSurfaceCapabilities2KHR(
     const VkSurfaceCapabilities2KHR* from,
     VkSurfaceCapabilities2KHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkSurfaceCapabilitiesKHR(pool, &from->surfaceCapabilities, (VkSurfaceCapabilitiesKHR*)(&to->surfaceCapabilities));
@@ -3040,6 +3274,7 @@ void deepcopy_VkSurfaceFormat2KHR(
     const VkSurfaceFormat2KHR* from,
     VkSurfaceFormat2KHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkSurfaceFormatKHR(pool, &from->surfaceFormat, (VkSurfaceFormatKHR*)(&to->surfaceFormat));
@@ -3054,6 +3289,7 @@ void deepcopy_VkDisplayProperties2KHR(
     const VkDisplayProperties2KHR* from,
     VkDisplayProperties2KHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkDisplayPropertiesKHR(pool, &from->displayProperties, (VkDisplayPropertiesKHR*)(&to->displayProperties));
@@ -3064,6 +3300,7 @@ void deepcopy_VkDisplayPlaneProperties2KHR(
     const VkDisplayPlaneProperties2KHR* from,
     VkDisplayPlaneProperties2KHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkDisplayPlanePropertiesKHR(pool, &from->displayPlaneProperties, (VkDisplayPlanePropertiesKHR*)(&to->displayPlaneProperties));
@@ -3074,6 +3311,7 @@ void deepcopy_VkDisplayModeProperties2KHR(
     const VkDisplayModeProperties2KHR* from,
     VkDisplayModeProperties2KHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkDisplayModePropertiesKHR(pool, &from->displayModeProperties, (VkDisplayModePropertiesKHR*)(&to->displayModeProperties));
@@ -3084,6 +3322,7 @@ void deepcopy_VkDisplayPlaneInfo2KHR(
     const VkDisplayPlaneInfo2KHR* from,
     VkDisplayPlaneInfo2KHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3093,6 +3332,7 @@ void deepcopy_VkDisplayPlaneCapabilities2KHR(
     const VkDisplayPlaneCapabilities2KHR* from,
     VkDisplayPlaneCapabilities2KHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkDisplayPlaneCapabilitiesKHR(pool, &from->capabilities, (VkDisplayPlaneCapabilitiesKHR*)(&to->capabilities));
@@ -3113,6 +3353,7 @@ void deepcopy_VkImageFormatListCreateInfoKHR(
     const VkImageFormatListCreateInfoKHR* from,
     VkImageFormatListCreateInfoKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pViewFormats = nullptr;
@@ -3137,6 +3378,7 @@ void deepcopy_VkPhysicalDevice8BitStorageFeaturesKHR(
     const VkPhysicalDevice8BitStorageFeaturesKHR* from,
     VkPhysicalDevice8BitStorageFeaturesKHR* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3148,6 +3390,7 @@ void deepcopy_VkDebugReportCallbackCreateInfoEXT(
     const VkDebugReportCallbackCreateInfoEXT* from,
     VkDebugReportCallbackCreateInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pUserData = nullptr;
@@ -3170,6 +3413,7 @@ void deepcopy_VkPipelineRasterizationStateRasterizationOrderAMD(
     const VkPipelineRasterizationStateRasterizationOrderAMD* from,
     VkPipelineRasterizationStateRasterizationOrderAMD* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3185,6 +3429,7 @@ void deepcopy_VkDebugMarkerObjectNameInfoEXT(
     const VkDebugMarkerObjectNameInfoEXT* from,
     VkDebugMarkerObjectNameInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pObjectName = nullptr;
@@ -3199,6 +3444,7 @@ void deepcopy_VkDebugMarkerObjectTagInfoEXT(
     const VkDebugMarkerObjectTagInfoEXT* from,
     VkDebugMarkerObjectTagInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pTag = nullptr;
@@ -3213,6 +3459,7 @@ void deepcopy_VkDebugMarkerMarkerInfoEXT(
     const VkDebugMarkerMarkerInfoEXT* from,
     VkDebugMarkerMarkerInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pMarkerName = nullptr;
@@ -3232,6 +3479,7 @@ void deepcopy_VkDedicatedAllocationImageCreateInfoNV(
     const VkDedicatedAllocationImageCreateInfoNV* from,
     VkDedicatedAllocationImageCreateInfoNV* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3241,6 +3489,7 @@ void deepcopy_VkDedicatedAllocationBufferCreateInfoNV(
     const VkDedicatedAllocationBufferCreateInfoNV* from,
     VkDedicatedAllocationBufferCreateInfoNV* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3250,6 +3499,7 @@ void deepcopy_VkDedicatedAllocationMemoryAllocateInfoNV(
     const VkDedicatedAllocationMemoryAllocateInfoNV* from,
     VkDedicatedAllocationMemoryAllocateInfoNV* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3269,6 +3519,7 @@ void deepcopy_VkTextureLODGatherFormatPropertiesAMD(
     const VkTextureLODGatherFormatPropertiesAMD* from,
     VkTextureLODGatherFormatPropertiesAMD* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3280,6 +3531,7 @@ void deepcopy_VkShaderResourceUsageAMD(
     const VkShaderResourceUsageAMD* from,
     VkShaderResourceUsageAMD* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -3288,6 +3540,7 @@ void deepcopy_VkShaderStatisticsInfoAMD(
     const VkShaderStatisticsInfoAMD* from,
     VkShaderStatisticsInfoAMD* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkShaderResourceUsageAMD(pool, &from->resourceUsage, (VkShaderResourceUsageAMD*)(&to->resourceUsage));
     memcpy(to->computeWorkGroupSize, from->computeWorkGroupSize, 3 * sizeof(uint32_t));
@@ -3304,6 +3557,7 @@ void deepcopy_VkExternalImageFormatPropertiesNV(
     const VkExternalImageFormatPropertiesNV* from,
     VkExternalImageFormatPropertiesNV* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkImageFormatProperties(pool, &from->imageFormatProperties, (VkImageFormatProperties*)(&to->imageFormatProperties));
 }
@@ -3315,6 +3569,7 @@ void deepcopy_VkExternalMemoryImageCreateInfoNV(
     const VkExternalMemoryImageCreateInfoNV* from,
     VkExternalMemoryImageCreateInfoNV* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3324,6 +3579,7 @@ void deepcopy_VkExportMemoryAllocateInfoNV(
     const VkExportMemoryAllocateInfoNV* from,
     VkExportMemoryAllocateInfoNV* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3335,6 +3591,7 @@ void deepcopy_VkImportMemoryWin32HandleInfoNV(
     const VkImportMemoryWin32HandleInfoNV* from,
     VkImportMemoryWin32HandleInfoNV* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3344,6 +3601,7 @@ void deepcopy_VkExportMemoryWin32HandleInfoNV(
     const VkExportMemoryWin32HandleInfoNV* from,
     VkExportMemoryWin32HandleInfoNV* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pAttributes = nullptr;
@@ -3360,6 +3618,7 @@ void deepcopy_VkWin32KeyedMutexAcquireReleaseInfoNV(
     const VkWin32KeyedMutexAcquireReleaseInfoNV* from,
     VkWin32KeyedMutexAcquireReleaseInfoNV* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pAcquireSyncs = nullptr;
@@ -3396,6 +3655,7 @@ void deepcopy_VkValidationFlagsEXT(
     const VkValidationFlagsEXT* from,
     VkValidationFlagsEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pDisabledValidationChecks = nullptr;
@@ -3412,6 +3672,7 @@ void deepcopy_VkViSurfaceCreateInfoNN(
     const VkViSurfaceCreateInfoNN* from,
     VkViSurfaceCreateInfoNN* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->window = nullptr;
@@ -3432,6 +3693,7 @@ void deepcopy_VkConditionalRenderingBeginInfoEXT(
     const VkConditionalRenderingBeginInfoEXT* from,
     VkConditionalRenderingBeginInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3441,6 +3703,7 @@ void deepcopy_VkPhysicalDeviceConditionalRenderingFeaturesEXT(
     const VkPhysicalDeviceConditionalRenderingFeaturesEXT* from,
     VkPhysicalDeviceConditionalRenderingFeaturesEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3450,6 +3713,7 @@ void deepcopy_VkCommandBufferInheritanceConditionalRenderingInfoEXT(
     const VkCommandBufferInheritanceConditionalRenderingInfoEXT* from,
     VkCommandBufferInheritanceConditionalRenderingInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3461,6 +3725,7 @@ void deepcopy_VkDeviceGeneratedCommandsFeaturesNVX(
     const VkDeviceGeneratedCommandsFeaturesNVX* from,
     VkDeviceGeneratedCommandsFeaturesNVX* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3470,6 +3735,7 @@ void deepcopy_VkDeviceGeneratedCommandsLimitsNVX(
     const VkDeviceGeneratedCommandsLimitsNVX* from,
     VkDeviceGeneratedCommandsLimitsNVX* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3479,6 +3745,7 @@ void deepcopy_VkIndirectCommandsTokenNVX(
     const VkIndirectCommandsTokenNVX* from,
     VkIndirectCommandsTokenNVX* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -3487,6 +3754,7 @@ void deepcopy_VkIndirectCommandsLayoutTokenNVX(
     const VkIndirectCommandsLayoutTokenNVX* from,
     VkIndirectCommandsLayoutTokenNVX* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -3495,6 +3763,7 @@ void deepcopy_VkIndirectCommandsLayoutCreateInfoNVX(
     const VkIndirectCommandsLayoutCreateInfoNVX* from,
     VkIndirectCommandsLayoutCreateInfoNVX* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pTokens = nullptr;
@@ -3514,6 +3783,7 @@ void deepcopy_VkCmdProcessCommandsInfoNVX(
     const VkCmdProcessCommandsInfoNVX* from,
     VkCmdProcessCommandsInfoNVX* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pIndirectCommandsTokens = nullptr;
@@ -3533,6 +3803,7 @@ void deepcopy_VkCmdReserveSpaceForCommandsInfoNVX(
     const VkCmdReserveSpaceForCommandsInfoNVX* from,
     VkCmdReserveSpaceForCommandsInfoNVX* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3542,6 +3813,7 @@ void deepcopy_VkObjectTableCreateInfoNVX(
     const VkObjectTableCreateInfoNVX* from,
     VkObjectTableCreateInfoNVX* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pObjectEntryTypes = nullptr;
@@ -3566,6 +3838,7 @@ void deepcopy_VkObjectTableEntryNVX(
     const VkObjectTableEntryNVX* from,
     VkObjectTableEntryNVX* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -3574,6 +3847,7 @@ void deepcopy_VkObjectTablePipelineEntryNVX(
     const VkObjectTablePipelineEntryNVX* from,
     VkObjectTablePipelineEntryNVX* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -3582,6 +3856,7 @@ void deepcopy_VkObjectTableDescriptorSetEntryNVX(
     const VkObjectTableDescriptorSetEntryNVX* from,
     VkObjectTableDescriptorSetEntryNVX* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -3590,6 +3865,7 @@ void deepcopy_VkObjectTableVertexBufferEntryNVX(
     const VkObjectTableVertexBufferEntryNVX* from,
     VkObjectTableVertexBufferEntryNVX* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -3598,6 +3874,7 @@ void deepcopy_VkObjectTableIndexBufferEntryNVX(
     const VkObjectTableIndexBufferEntryNVX* from,
     VkObjectTableIndexBufferEntryNVX* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -3606,6 +3883,7 @@ void deepcopy_VkObjectTablePushConstantEntryNVX(
     const VkObjectTablePushConstantEntryNVX* from,
     VkObjectTablePushConstantEntryNVX* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -3616,6 +3894,7 @@ void deepcopy_VkViewportWScalingNV(
     const VkViewportWScalingNV* from,
     VkViewportWScalingNV* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -3624,6 +3903,7 @@ void deepcopy_VkPipelineViewportWScalingStateCreateInfoNV(
     const VkPipelineViewportWScalingStateCreateInfoNV* from,
     VkPipelineViewportWScalingStateCreateInfoNV* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pViewportWScalings = nullptr;
@@ -3649,6 +3929,7 @@ void deepcopy_VkSurfaceCapabilities2EXT(
     const VkSurfaceCapabilities2EXT* from,
     VkSurfaceCapabilities2EXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkExtent2D(pool, &from->currentExtent, (VkExtent2D*)(&to->currentExtent));
@@ -3663,6 +3944,7 @@ void deepcopy_VkDisplayPowerInfoEXT(
     const VkDisplayPowerInfoEXT* from,
     VkDisplayPowerInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3672,6 +3954,7 @@ void deepcopy_VkDeviceEventInfoEXT(
     const VkDeviceEventInfoEXT* from,
     VkDeviceEventInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3681,6 +3964,7 @@ void deepcopy_VkDisplayEventInfoEXT(
     const VkDisplayEventInfoEXT* from,
     VkDisplayEventInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3690,6 +3974,7 @@ void deepcopy_VkSwapchainCounterCreateInfoEXT(
     const VkSwapchainCounterCreateInfoEXT* from,
     VkSwapchainCounterCreateInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3701,6 +3986,7 @@ void deepcopy_VkRefreshCycleDurationGOOGLE(
     const VkRefreshCycleDurationGOOGLE* from,
     VkRefreshCycleDurationGOOGLE* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -3709,6 +3995,7 @@ void deepcopy_VkPastPresentationTimingGOOGLE(
     const VkPastPresentationTimingGOOGLE* from,
     VkPastPresentationTimingGOOGLE* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -3717,6 +4004,7 @@ void deepcopy_VkPresentTimeGOOGLE(
     const VkPresentTimeGOOGLE* from,
     VkPresentTimeGOOGLE* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -3725,6 +4013,7 @@ void deepcopy_VkPresentTimesInfoGOOGLE(
     const VkPresentTimesInfoGOOGLE* from,
     VkPresentTimesInfoGOOGLE* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pTimes = nullptr;
@@ -3752,6 +4041,7 @@ void deepcopy_VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX(
     const VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX* from,
     VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3763,6 +4053,7 @@ void deepcopy_VkViewportSwizzleNV(
     const VkViewportSwizzleNV* from,
     VkViewportSwizzleNV* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -3771,6 +4062,7 @@ void deepcopy_VkPipelineViewportSwizzleStateCreateInfoNV(
     const VkPipelineViewportSwizzleStateCreateInfoNV* from,
     VkPipelineViewportSwizzleStateCreateInfoNV* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pViewportSwizzles = nullptr;
@@ -3792,6 +4084,7 @@ void deepcopy_VkPhysicalDeviceDiscardRectanglePropertiesEXT(
     const VkPhysicalDeviceDiscardRectanglePropertiesEXT* from,
     VkPhysicalDeviceDiscardRectanglePropertiesEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3801,6 +4094,7 @@ void deepcopy_VkPipelineDiscardRectangleStateCreateInfoEXT(
     const VkPipelineDiscardRectangleStateCreateInfoEXT* from,
     VkPipelineDiscardRectangleStateCreateInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pDiscardRectangles = nullptr;
@@ -3822,6 +4116,7 @@ void deepcopy_VkPhysicalDeviceConservativeRasterizationPropertiesEXT(
     const VkPhysicalDeviceConservativeRasterizationPropertiesEXT* from,
     VkPhysicalDeviceConservativeRasterizationPropertiesEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3831,6 +4126,7 @@ void deepcopy_VkPipelineRasterizationConservativeStateCreateInfoEXT(
     const VkPipelineRasterizationConservativeStateCreateInfoEXT* from,
     VkPipelineRasterizationConservativeStateCreateInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -3844,6 +4140,7 @@ void deepcopy_VkXYColorEXT(
     const VkXYColorEXT* from,
     VkXYColorEXT* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -3852,6 +4149,7 @@ void deepcopy_VkHdrMetadataEXT(
     const VkHdrMetadataEXT* from,
     VkHdrMetadataEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkXYColorEXT(pool, &from->displayPrimaryRed, (VkXYColorEXT*)(&to->displayPrimaryRed));
@@ -3867,6 +4165,7 @@ void deepcopy_VkIOSSurfaceCreateInfoMVK(
     const VkIOSSurfaceCreateInfoMVK* from,
     VkIOSSurfaceCreateInfoMVK* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pView = nullptr;
@@ -3883,6 +4182,7 @@ void deepcopy_VkMacOSSurfaceCreateInfoMVK(
     const VkMacOSSurfaceCreateInfoMVK* from,
     VkMacOSSurfaceCreateInfoMVK* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pView = nullptr;
@@ -3903,6 +4203,7 @@ void deepcopy_VkDebugUtilsObjectNameInfoEXT(
     const VkDebugUtilsObjectNameInfoEXT* from,
     VkDebugUtilsObjectNameInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pObjectName = nullptr;
@@ -3917,6 +4218,7 @@ void deepcopy_VkDebugUtilsObjectTagInfoEXT(
     const VkDebugUtilsObjectTagInfoEXT* from,
     VkDebugUtilsObjectTagInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pTag = nullptr;
@@ -3931,6 +4233,7 @@ void deepcopy_VkDebugUtilsLabelEXT(
     const VkDebugUtilsLabelEXT* from,
     VkDebugUtilsLabelEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pLabelName = nullptr;
@@ -3946,6 +4249,7 @@ void deepcopy_VkDebugUtilsMessengerCallbackDataEXT(
     const VkDebugUtilsMessengerCallbackDataEXT* from,
     VkDebugUtilsMessengerCallbackDataEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pMessageIdName = nullptr;
@@ -3995,6 +4299,7 @@ void deepcopy_VkDebugUtilsMessengerCreateInfoEXT(
     const VkDebugUtilsMessengerCreateInfoEXT* from,
     VkDebugUtilsMessengerCreateInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pUserData = nullptr;
@@ -4011,6 +4316,7 @@ void deepcopy_VkAndroidHardwareBufferUsageANDROID(
     const VkAndroidHardwareBufferUsageANDROID* from,
     VkAndroidHardwareBufferUsageANDROID* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4020,6 +4326,7 @@ void deepcopy_VkAndroidHardwareBufferPropertiesANDROID(
     const VkAndroidHardwareBufferPropertiesANDROID* from,
     VkAndroidHardwareBufferPropertiesANDROID* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4029,6 +4336,7 @@ void deepcopy_VkAndroidHardwareBufferFormatPropertiesANDROID(
     const VkAndroidHardwareBufferFormatPropertiesANDROID* from,
     VkAndroidHardwareBufferFormatPropertiesANDROID* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkComponentMapping(pool, &from->samplerYcbcrConversionComponents, (VkComponentMapping*)(&to->samplerYcbcrConversionComponents));
@@ -4039,6 +4347,7 @@ void deepcopy_VkImportAndroidHardwareBufferInfoANDROID(
     const VkImportAndroidHardwareBufferInfoANDROID* from,
     VkImportAndroidHardwareBufferInfoANDROID* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->buffer = nullptr;
@@ -4053,6 +4362,7 @@ void deepcopy_VkMemoryGetAndroidHardwareBufferInfoANDROID(
     const VkMemoryGetAndroidHardwareBufferInfoANDROID* from,
     VkMemoryGetAndroidHardwareBufferInfoANDROID* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4062,6 +4372,7 @@ void deepcopy_VkExternalFormatANDROID(
     const VkExternalFormatANDROID* from,
     VkExternalFormatANDROID* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4073,6 +4384,7 @@ void deepcopy_VkSamplerReductionModeCreateInfoEXT(
     const VkSamplerReductionModeCreateInfoEXT* from,
     VkSamplerReductionModeCreateInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4082,6 +4394,7 @@ void deepcopy_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT(
     const VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT* from,
     VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4101,6 +4414,7 @@ void deepcopy_VkSampleLocationEXT(
     const VkSampleLocationEXT* from,
     VkSampleLocationEXT* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -4109,6 +4423,7 @@ void deepcopy_VkSampleLocationsInfoEXT(
     const VkSampleLocationsInfoEXT* from,
     VkSampleLocationsInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkExtent2D(pool, &from->sampleLocationGridSize, (VkExtent2D*)(&to->sampleLocationGridSize));
@@ -4129,6 +4444,7 @@ void deepcopy_VkAttachmentSampleLocationsEXT(
     const VkAttachmentSampleLocationsEXT* from,
     VkAttachmentSampleLocationsEXT* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkSampleLocationsInfoEXT(pool, &from->sampleLocationsInfo, (VkSampleLocationsInfoEXT*)(&to->sampleLocationsInfo));
 }
@@ -4138,6 +4454,7 @@ void deepcopy_VkSubpassSampleLocationsEXT(
     const VkSubpassSampleLocationsEXT* from,
     VkSubpassSampleLocationsEXT* to)
 {
+    (void)pool;
     *to = *from;
     deepcopy_VkSampleLocationsInfoEXT(pool, &from->sampleLocationsInfo, (VkSampleLocationsInfoEXT*)(&to->sampleLocationsInfo));
 }
@@ -4147,6 +4464,7 @@ void deepcopy_VkRenderPassSampleLocationsBeginInfoEXT(
     const VkRenderPassSampleLocationsBeginInfoEXT* from,
     VkRenderPassSampleLocationsBeginInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pAttachmentInitialSampleLocations = nullptr;
@@ -4176,6 +4494,7 @@ void deepcopy_VkPipelineSampleLocationsStateCreateInfoEXT(
     const VkPipelineSampleLocationsStateCreateInfoEXT* from,
     VkPipelineSampleLocationsStateCreateInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkSampleLocationsInfoEXT(pool, &from->sampleLocationsInfo, (VkSampleLocationsInfoEXT*)(&to->sampleLocationsInfo));
@@ -4186,6 +4505,7 @@ void deepcopy_VkPhysicalDeviceSampleLocationsPropertiesEXT(
     const VkPhysicalDeviceSampleLocationsPropertiesEXT* from,
     VkPhysicalDeviceSampleLocationsPropertiesEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkExtent2D(pool, &from->maxSampleLocationGridSize, (VkExtent2D*)(&to->maxSampleLocationGridSize));
@@ -4197,6 +4517,7 @@ void deepcopy_VkMultisamplePropertiesEXT(
     const VkMultisamplePropertiesEXT* from,
     VkMultisamplePropertiesEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     deepcopy_VkExtent2D(pool, &from->maxSampleLocationGridSize, (VkExtent2D*)(&to->maxSampleLocationGridSize));
@@ -4209,6 +4530,7 @@ void deepcopy_VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT(
     const VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT* from,
     VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4218,6 +4540,7 @@ void deepcopy_VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT(
     const VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT* from,
     VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4227,6 +4550,7 @@ void deepcopy_VkPipelineColorBlendAdvancedStateCreateInfoEXT(
     const VkPipelineColorBlendAdvancedStateCreateInfoEXT* from,
     VkPipelineColorBlendAdvancedStateCreateInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4238,6 +4562,7 @@ void deepcopy_VkPipelineCoverageToColorStateCreateInfoNV(
     const VkPipelineCoverageToColorStateCreateInfoNV* from,
     VkPipelineCoverageToColorStateCreateInfoNV* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4249,6 +4574,7 @@ void deepcopy_VkPipelineCoverageModulationStateCreateInfoNV(
     const VkPipelineCoverageModulationStateCreateInfoNV* from,
     VkPipelineCoverageModulationStateCreateInfoNV* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pCoverageModulationTable = nullptr;
@@ -4269,6 +4595,7 @@ void deepcopy_VkValidationCacheCreateInfoEXT(
     const VkValidationCacheCreateInfoEXT* from,
     VkValidationCacheCreateInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pInitialData = nullptr;
@@ -4283,6 +4610,7 @@ void deepcopy_VkShaderModuleValidationCacheCreateInfoEXT(
     const VkShaderModuleValidationCacheCreateInfoEXT* from,
     VkShaderModuleValidationCacheCreateInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4294,6 +4622,7 @@ void deepcopy_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT(
     const VkDescriptorSetLayoutBindingFlagsCreateInfoEXT* from,
     VkDescriptorSetLayoutBindingFlagsCreateInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pBindingFlags = nullptr;
@@ -4308,6 +4637,7 @@ void deepcopy_VkPhysicalDeviceDescriptorIndexingFeaturesEXT(
     const VkPhysicalDeviceDescriptorIndexingFeaturesEXT* from,
     VkPhysicalDeviceDescriptorIndexingFeaturesEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4317,6 +4647,7 @@ void deepcopy_VkPhysicalDeviceDescriptorIndexingPropertiesEXT(
     const VkPhysicalDeviceDescriptorIndexingPropertiesEXT* from,
     VkPhysicalDeviceDescriptorIndexingPropertiesEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4326,6 +4657,7 @@ void deepcopy_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT(
     const VkDescriptorSetVariableDescriptorCountAllocateInfoEXT* from,
     VkDescriptorSetVariableDescriptorCountAllocateInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pDescriptorCounts = nullptr;
@@ -4340,6 +4672,7 @@ void deepcopy_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT(
     const VkDescriptorSetVariableDescriptorCountLayoutSupportEXT* from,
     VkDescriptorSetVariableDescriptorCountLayoutSupportEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4353,6 +4686,7 @@ void deepcopy_VkDeviceQueueGlobalPriorityCreateInfoEXT(
     const VkDeviceQueueGlobalPriorityCreateInfoEXT* from,
     VkDeviceQueueGlobalPriorityCreateInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4364,6 +4698,7 @@ void deepcopy_VkImportMemoryHostPointerInfoEXT(
     const VkImportMemoryHostPointerInfoEXT* from,
     VkImportMemoryHostPointerInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pHostPointer = nullptr;
@@ -4378,6 +4713,7 @@ void deepcopy_VkMemoryHostPointerPropertiesEXT(
     const VkMemoryHostPointerPropertiesEXT* from,
     VkMemoryHostPointerPropertiesEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4387,6 +4723,7 @@ void deepcopy_VkPhysicalDeviceExternalMemoryHostPropertiesEXT(
     const VkPhysicalDeviceExternalMemoryHostPropertiesEXT* from,
     VkPhysicalDeviceExternalMemoryHostPropertiesEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4400,6 +4737,7 @@ void deepcopy_VkPhysicalDeviceShaderCorePropertiesAMD(
     const VkPhysicalDeviceShaderCorePropertiesAMD* from,
     VkPhysicalDeviceShaderCorePropertiesAMD* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4411,6 +4749,7 @@ void deepcopy_VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT(
     const VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT* from,
     VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4420,6 +4759,7 @@ void deepcopy_VkVertexInputBindingDivisorDescriptionEXT(
     const VkVertexInputBindingDivisorDescriptionEXT* from,
     VkVertexInputBindingDivisorDescriptionEXT* to)
 {
+    (void)pool;
     *to = *from;
 }
 
@@ -4428,6 +4768,7 @@ void deepcopy_VkPipelineVertexInputDivisorStateCreateInfoEXT(
     const VkPipelineVertexInputDivisorStateCreateInfoEXT* from,
     VkPipelineVertexInputDivisorStateCreateInfoEXT* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pVertexBindingDivisors = nullptr;
@@ -4451,6 +4792,7 @@ void deepcopy_VkQueueFamilyCheckpointPropertiesNV(
     const VkQueueFamilyCheckpointPropertiesNV* from,
     VkQueueFamilyCheckpointPropertiesNV* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
 }
@@ -4460,6 +4802,7 @@ void deepcopy_VkCheckpointDataNV(
     const VkCheckpointDataNV* from,
     VkCheckpointDataNV* to)
 {
+    (void)pool;
     *to = *from;
     to->pNext = from->pNext;
     to->pCheckpointMarker = nullptr;

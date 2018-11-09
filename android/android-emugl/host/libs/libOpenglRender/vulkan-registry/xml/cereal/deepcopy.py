@@ -264,6 +264,7 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
                     if not member.isSimpleValueType(self.typeInfo):
                         canSimplyAssign = False
 
+                cgen.stmt("(void)%s" % self.deepcopyPoolVarName)
                 cgen.stmt("*to = *from")
                 if canSimplyAssign:
                     pass
