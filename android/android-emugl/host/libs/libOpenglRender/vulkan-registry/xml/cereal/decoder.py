@@ -119,22 +119,23 @@ def emit_decode_finish(cgen):
     cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
 
 ## Custom decoding definitions##################################################
-def decode_vkMapMemory(typeInfo, api, cgen):
+def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     emit_decode_parameters(typeInfo, api, cgen)
     emit_dispatch_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
+    emit_decode_finish(cgen)
 
-    needWriteback = \
-        "((%s == VK_SUCCESS) && ppData && size > 0)" % api.getRetVarExpr()
-    cgen.beginIf(needWriteback)
-    cgen.stmt("%s->write(*ppData, size)" % (WRITE_STREAM))
-    cgen.endIf()
-
+def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
+    emit_decode_parameters(typeInfo, api, cgen)
+    emit_dispatch_call(api, cgen)
+    emit_decode_parameters_writeback(typeInfo, api, cgen)
+    emit_decode_return_writeback(api, cgen)
     emit_decode_finish(cgen)
 
 custom_decodes = {
-    "vkMapMemory" : decode_vkMapMemory,
+    "vkFlushMappedMemoryRanges" : decode_vkFlushMappedMemoryRanges,
+    "vkInvalidateMappedMemoryRanges" : decode_vkInvalidateMappedMemoryRanges,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):

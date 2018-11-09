@@ -1,6 +1,6 @@
 from .common.codegen import CodeGen, VulkanWrapperGenerator
 from .common.vulkantypes import \
-        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
+        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, CUSTOM_CREATE_APIS
 
 from .marshaling import VulkanMarshalingCodegen
 from .handlemap import HandleMapCodegen
@@ -91,6 +91,13 @@ def emit_handlemap_create(typeInfo, param, cgen):
         lambda vtype: typeInfo.isHandleType(vtype)
     ))
 
+def emit_custom_create(typeInfo, api, cgen):
+    if api.name in CUSTOM_CREATE_APIS:
+        cgen.funcCall(
+            None,
+            "goldfish_" + api.name,
+            [p.paramName for p in api.parameters])
+
 def emit_handlemap_destroy(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, HandleMapCodegen(
         cgen, None, "resources->destroyMapping()", "handlemap_",
@@ -160,6 +167,7 @@ def emit_parameter_encode(typeInfo, api, cgen):
 
     for p in paramsToCreate:
         emit_handlemap_create(typeInfo, p, cgen)
+        emit_custom_create(typeInfo, api, cgen)
 
     for p in paramsToDestroy:
         emit_handlemap_destroy(typeInfo, p, cgen)
@@ -185,26 +193,20 @@ def emit_return(typeInfo, api, cgen):
     cgen.stmt("return %s" % retVar)
 
 ## Custom encoding definitions##################################################
-def encode_vkMapMemory(typeInfo, api, cgen):
+
+def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     emit_parameter_encode(typeInfo, api, cgen)
     emit_return_unmarshal(typeInfo, api, cgen)
+    emit_return(typeInfo, api, cgen)
 
-    needWriteback = \
-        "((%s == VK_SUCCESS) && ppData && size > 0)" % api.getRetVarExpr()
-    cgen.beginIf(needWriteback)
-    cgen.stmt("*ppData = aligned_buf_alloc(1024 /* pick large alignment */, size);");
-    cgen.stmt("%s->read(*ppData, size)" % (STREAM))
-    cgen.endIf()
-
-    # TODO:
-    # The custom part: Depending on the return value,
-    # allocate some buffer (TODO: dma map) the result and return it to the user
-    # if ppData is not null.
-
+def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
+    emit_parameter_encode(typeInfo, api, cgen)
+    emit_return_unmarshal(typeInfo, api, cgen)
     emit_return(typeInfo, api, cgen)
 
 custom_encodes = {
-    "vkMapMemory" : encode_vkMapMemory,
+    "vkFlushMappedMemoryRanges" : encode_vkFlushMappedMemoryRanges,
+    "vkInvalidateMappedMemoryRanges" : encode_vkInvalidateMappedMemoryRanges,
 }
 
 class VulkanEncoder(VulkanWrapperGenerator):

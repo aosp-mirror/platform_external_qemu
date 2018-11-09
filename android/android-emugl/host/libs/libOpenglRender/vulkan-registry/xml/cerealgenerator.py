@@ -168,6 +168,7 @@ class IOStream;
 """
         encoderImplInclude = """
 #include "IOStream.h"
+#include "Resources.h"
 #include "ResourceTracker.h"
 #include "VulkanStream.h"
 
