@@ -3,6 +3,8 @@ from .common.vulkantypes import \
         VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
 
 from .marshaling import VulkanMarshalingCodegen
+from .handlemap import HandleMapCodegen
+from .deepcopy import DeepcopyCodegen
 
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
@@ -23,20 +25,23 @@ private:
 
 encoder_impl_preamble ="""
 
-using goldfish_vk::VulkanCountingStream;
-using goldfish_vk::VulkanStream;
+using namespace goldfish_vk;
 
 using android::aligned_buf_alloc;
 using android::aligned_buf_free;
+using android::base::Pool;
 
 class VkEncoder::Impl {
 public:
     Impl(IOStream* stream) : m_stream(stream) { }
     VulkanCountingStream* countingStream() { return &m_countingStream; }
     VulkanStream* stream() { return &m_stream; }
+    Pool* pool() { return &m_pool; }
+    ResourceTracker* resources() { return ResourceTracker::get(); }
 private:
     VulkanCountingStream m_countingStream;
     VulkanStream m_stream;
+    Pool m_pool { 8, 4096, 64 };
 };
 
 VkEncoder::VkEncoder(IOStream *stream) :
@@ -45,6 +50,8 @@ VkEncoder::VkEncoder(IOStream *stream) :
 
 COUNTING_STREAM = "countingStream"
 STREAM = "stream"
+RESOURCES = "resources"
+POOL = "pool"
 
 # Common components of encoding a Vulkan API call
 def emit_count_marshal(typeInfo, param, cgen):
@@ -68,39 +75,96 @@ def emit_unmarshal(typeInfo, param, cgen):
            cgen, STREAM, param.paramName,
            API_PREFIX_UNMARSHAL, direction="read"))
 
+def emit_deepcopy(typeInfo, param, cgen):
+    iterateVulkanType(typeInfo, param, DeepcopyCodegen(
+        cgen, [param.paramName, "local_" + param.paramName], "pool", "deepcopy_"))
+
+def emit_handlemap_unwrap(typeInfo, param, cgen):
+    iterateVulkanType(typeInfo, param, HandleMapCodegen(
+        cgen, None, "resources->unwrapMapping()", "handlemap_",
+        lambda vtype: typeInfo.isHandleType(vtype)
+    ))
+
+def emit_handlemap_create(typeInfo, param, cgen):
+    iterateVulkanType(typeInfo, param, HandleMapCodegen(
+        cgen, None, "resources->createMapping()", "handlemap_",
+        lambda vtype: typeInfo.isHandleType(vtype)
+    ))
+
+def emit_handlemap_destroy(typeInfo, param, cgen):
+    iterateVulkanType(typeInfo, param, HandleMapCodegen(
+        cgen, None, "resources->destroyMapping()", "handlemap_",
+        lambda vtype: typeInfo.isHandleType(vtype)
+    ))
+
 def emit_parameter_encode(typeInfo, api, cgen):
     cgen.stmt("auto %s = mImpl->stream()" % STREAM)
     cgen.stmt("auto %s = mImpl->countingStream()" % COUNTING_STREAM)
-    cgen.stmt("%s->rewind()" % COUNTING_STREAM)
-    
-    cgen.beginBlock()
-    
-    paramsToWrite = []
+    cgen.stmt("auto %s = mImpl->resources()" % RESOURCES)
+    cgen.stmt("auto %s = mImpl->pool()" % POOL)
+
+    finalArgs = []
+
     paramsToRead = []
+    paramsToCreate = []
+
+    paramsToDestroy = []
+
+    localCopiedParams = []
+    paramsToWrite = []
 
     for param in api.parameters:
-        paramsToWrite.append(param)
         if param.possiblyOutput():
+            paramsToWrite.append(param)
             paramsToRead.append(param)
-    
-    # Use counting stream to calculate the packet size.    
+            if param.isCreatedBy(api):
+                paramsToCreate.append(param)
+            finalArgs.append(param)
+        elif param.isDestroyedBy(api):
+            paramsToWrite.append(param)
+            paramsToDestroy.append(param)
+            finalArgs.append(param)
+        else:
+            localCopyParam = \
+                param.getForNonConstAccess().withModifiedName( \
+                    "local_" + param.paramName)
+            localCopiedParams.append((param, localCopyParam))
+            finalArgs.append(localCopyParam)
+            cgen.stmt(cgen.makeRichCTypeDecl(localCopyParam))
+            emit_deepcopy(typeInfo, param, cgen)
+            emit_handlemap_unwrap(typeInfo, localCopyParam, cgen)
+            paramsToWrite.append(localCopyParam)
+
+    cgen.stmt("%s->rewind()" % COUNTING_STREAM)
+    cgen.beginBlock()
+
+    # Use counting stream to calculate the packet size.
     for p in paramsToWrite:
         emit_count_marshal(typeInfo, p, cgen)
-    
+
     cgen.endBlock()
-    
+
     cgen.stmt("uint32_t packetSize_%s = 4 + 4 + (uint32_t)%s->bytesWritten()" % \
               (api.name, COUNTING_STREAM))
     cgen.stmt("%s->rewind()" % COUNTING_STREAM)
-    
+
     cgen.stmt("uint32_t opcode_%s = OP_%s" % (api.name, api.name))
     cgen.stmt("%s->write(&opcode_%s, sizeof(uint32_t))" % (STREAM, api.name))
     cgen.stmt("%s->write(&packetSize_%s, sizeof(uint32_t))" % (STREAM, api.name))
-    
+
     for p in paramsToWrite:
         emit_marshal(typeInfo, p, cgen)
+
     for p in paramsToRead:
         emit_unmarshal(typeInfo, p, cgen)
+
+    for p in paramsToCreate:
+        emit_handlemap_create(typeInfo, p, cgen)
+
+    for p in paramsToDestroy:
+        emit_handlemap_destroy(typeInfo, p, cgen)
+
+    cgen.stmt("pool->freeAll()")
 
 def emit_return_unmarshal(typeInfo, api, cgen):
     retType = api.getRetTypeExpr()
