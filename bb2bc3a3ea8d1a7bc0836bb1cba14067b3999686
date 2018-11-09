@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d45f219a_598cb5ab",
+        "filename": "android/android-emu/android-libui.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-09T00:28:01Z",
+      "side": 1,
+      "message": "No msvc support?",
+      "revId": "bb2bc3a3ea8d1a7bc0836bb1cba14067b3999686",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "79e5905e_7a36ca61",
+        "filename": "android/build/cmake/config/emu-qt5-config.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-09T00:28:01Z",
+      "side": 1,
+      "message": "You could try this:\n\n${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak\u003e\u003elib64/qt/translations/qtwebengine_locales",
+      "revId": "bb2bc3a3ea8d1a7bc0836bb1cba14067b3999686",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b098d96_768ac30c",
+        "filename": "android/build/cmake/config/emu-qt5-config.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-09T00:28:01Z",
+      "side": 1,
+      "message": "one / is enough (qt//lib)",
+      "revId": "bb2bc3a3ea8d1a7bc0836bb1cba14067b3999686",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ab471bb6_da664c54",
+        "filename": "android/build/cmake/config/emu-qt5-config.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-09T00:28:01Z",
+      "side": 1,
+      "message": "Yes, unfortunately our distribution right now doesn\u0027t handle symlinks.  For fun Look in ~/Android/Sdk/emulator/lib64/qt/lib\n\nWhy do they need to be in 2 places?",
+      "revId": "bb2bc3a3ea8d1a7bc0836bb1cba14067b3999686",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a00ac86d_e10ae753",
+        "filename": "android/scripts/config-cmake.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-09T00:28:01Z",
+      "side": 1,
+      "message": ":-)",
+      "revId": "bb2bc3a3ea8d1a7bc0836bb1cba14067b3999686",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
