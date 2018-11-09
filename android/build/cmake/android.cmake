@@ -38,12 +38,11 @@ function(android_target_link_libraries TGT OS MODIFIER ITEMS)
     # HACK ATTACK! We cannot properly expand unknown linker args as they are treated in a magical fashion. Some
     # arguments need to be "grouped" together somehow (for example optimized;lib) since we cannot resolve this properly
     # we just pass on the individual arguments..
-    target_link_libraries(${TGT}
-                          ${MODIFIER} ${ARGV3} ${ARGV4} ${ARGV5} ${ARGV6} ${ARGV7} ${ARGV8} ${ARGV9} ${ARGV10}
-                          ${ARGV11} ${ARGV12} ${ARGV13} ${ARGV14} ${ARGV15} ${ARGV16} ${ARGV17} ${ARGV18} ${ARGV19} ${ARGV20}
-                          ${ARGV21} ${ARGV22} ${ARGV23} ${ARGV24} ${ARGV25} ${ARGV26} ${ARGV27} ${ARGV28} ${ARGV29} ${ARGV30}
-                          ${ARGV31} ${ARGV32} ${ARGV33} ${ARGV34} ${ARGV35} ${ARGV36} ${ARGV37} ${ARGV38} ${ARGV39} ${ARGV40}
-                          ${ARGV41} ${ARGV42} ${ARGV43} ${ARGV44} ${ARGV45} ${ARGV46} ${ARGV47} ${ARGV48} ${ARGV49})
+    target_link_libraries(${TGT} ${MODIFIER} ${ARGV3} ${ARGV4} ${ARGV5} ${ARGV6} ${ARGV7} ${ARGV8} ${ARGV9}
+                          ${ARGV10} ${ARGV11} ${ARGV12} ${ARGV13} ${ARGV14} ${ARGV15} ${ARGV16} ${ARGV17} ${ARGV18} ${ARGV19}
+                          ${ARGV20} ${ARGV21} ${ARGV22} ${ARGV23} ${ARGV24} ${ARGV25} ${ARGV26} ${ARGV27} ${ARGV28} ${ARGV29}
+                          ${ARGV30} ${ARGV31} ${ARGV32} ${ARGV33} ${ARGV34} ${ARGV35} ${ARGV36} ${ARGV37} ${ARGV38} ${ARGV39}
+                          ${ARGV40} ${ARGV41} ${ARGV42} ${ARGV43} ${ARGV44} ${ARGV45} ${ARGV46} ${ARGV47} ${ARGV48} ${ARGV49})
   endif()
 endfunction()
 
@@ -103,29 +102,30 @@ function(android_add_shared_library name)
     list(APPEND ${name}_src ${${name}_${ANDROID_TARGET_TAG}_src})
   endif()
   add_library(${name} SHARED ${${name}_src})
+  # We don't want cmake to binplace the shared libraries into the bin directory As this can make them show up in
+  # unexpected places!
+  if(ANDROID_TARGET_TAG MATCHES "windows.*")
+    set_target_properties(${name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+  endif()
   if(CMAKE_SYSTEM_NAME MATCHES "WinMSVCCrossCompile")
-    # For windows-msvc build (on linux), this generates a dll and a lib (import library) file.
-    # The files are being placed at ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} which is correct
-    # for the dll, but the lib file needs to be in the ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
-    # or we can't link to it. Most windows compilers, including clang, don't allow you
-    # to directly link to a dll (unlike mingw), and instead, need to link to it's import
-    # library.
+    # For windows-msvc build (on linux), this generates a dll and a lib (import library) file. The files are being
+    # placed at ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} which is correct for the dll, but the lib file needs to be in the
+    # ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY} or we can't link to it. Most windows compilers, including clang, don't allow you
+    # to directly link to a dll (unlike mingw), and instead, need to link to it's import library.
     #
-    # Another headache: it seems we attach a prefix to some of our shared libraries, which
-    # make cmake unable to locate the import library later on to whoever tries to link to it
-    # (e.g. OpenglRender -> lib64OpenglRender), as it will look for an import library by
-    # <target_library_name>.lib. So let's just move the import library to the archive directory
-    # and rename it back to the library name without the prefix.
-    add_custom_command(TARGET ${name}
-                       POST_BUILD
-                       COMMAND ${CMAKE_COMMAND}
-                           -E copy $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}>
-                           ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/$<TARGET_LINKER_FILE_NAME:${name}>
-                       COMMENT "Copying $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}> to ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/$<TARGET_LINKER_FILE_NAME:${name}>")
-    add_custom_command(TARGET ${name}
-                       POST_BUILD
-                       COMMAND ${CMAKE_COMMAND}
-                           -E remove $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}>
+    # Another headache: it seems we attach a prefix to some of our shared libraries, which make cmake unable to locate
+    # the import library later on to whoever tries to link to it (e.g. OpenglRender -> lib64OpenglRender), as it will
+    # look for an import library by <target_library_name>.lib. So let's just move the import library to the archive
+    # directory and rename it back to the library name without the prefix.
+    add_custom_command(
+      TARGET ${name} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}>
+              ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/$<TARGET_LINKER_FILE_NAME:${name}>
+      COMMENT
+        "Copying $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}> to ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/$<TARGET_LINKER_FILE_NAME:${name}>"
+      )
+    add_custom_command(TARGET ${name} POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E remove $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}>
                        COMMENT "Removing $<TARGET_FILE_DIR:${name}>/$<TARGET_LINKER_FILE_NAME:${name}>")
   endif()
 endfunction()
@@ -184,7 +184,7 @@ function(android_add_executable name)
     list(APPEND ${name}_src ${${name}_${ANDROID_TARGET_TAG}_src})
   endif()
   add_executable(${name} ${${name}_src})
-  android_target_dependency(${name} all  RUNTIME_OS_DEPENDENCIES)
+  android_target_dependency(${name} all RUNTIME_OS_DEPENDENCIES)
   android_target_properties(${name} all "${RUNTIME_OS_PROPERTIES}")
 
   if(ANDROID_CODE_COVERAGE)
@@ -367,9 +367,7 @@ function(android_add_qemu_executable AARCH LOCAL_AARCH STUBS CPU)
   set_target_properties(qemu-system-${AARCH}
                         PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                                    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qemu/${ANDROID_TARGET_TAG}")
-   install(TARGETS qemu-system-${AARCH}
-           RUNTIME DESTINATION ./qemu/${ANDROID_TARGET_TAG}
-    )                      
+  install(TARGETS qemu-system-${AARCH} RUNTIME DESTINATION ./qemu/${ANDROID_TARGET_TAG})
 endfunction()
 
 # Copies a

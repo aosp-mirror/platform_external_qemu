@@ -27,5 +27,5 @@ android_target_link_libraries(EGL_translator darwin-x86_64 PUBLIC "-framework Ap
 android_target_link_libraries(EGL_translator linux-x86_64 PUBLIC "-lGL -lX11 -ldl -lpthread")
 android_target_link_libraries(EGL_translator windows PUBLIC "-lgdi32")
 install(TARGETS EGL_translator
-        RUNTIME DESTINATION .
+        RUNTIME DESTINATION lib64 # We don't want windows to binplace dlls in the exe dir.
         LIBRARY DESTINATION lib64)

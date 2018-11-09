@@ -77,7 +77,7 @@ target_include_directories(
 android_target_link_libraries(OpenglRender linux-x86_64 PRIVATE "-WL,--version-script=render_api.entries")
 android_target_link_libraries(OpenglRender darwin-x86_64 PRIVATE "-WL,-exported_symbols_list,render_api.entries")
 install(TARGETS OpenglRender
-        RUNTIME DESTINATION .
+        RUNTIME DESTINATION lib64
         LIBRARY DESTINATION lib64)
 
 set(OpenglRender_standalone_common_src
