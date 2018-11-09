@@ -19,5 +19,5 @@ target_link_libraries(GLES_V2_translator
                               ANGLE::ANGLE)
 target_link_libraries(GLES_V2_translator PRIVATE emugl_base)
 install(TARGETS  GLES_V2_translator
-        RUNTIME DESTINATION .
+        RUNTIME DESTINATION lib64 # We don't want windows to binplace dlls in the exe dir.
         LIBRARY DESTINATION lib64)
