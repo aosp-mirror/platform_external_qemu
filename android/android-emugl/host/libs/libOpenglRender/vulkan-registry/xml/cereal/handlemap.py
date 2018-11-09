@@ -125,6 +125,7 @@ class HandleMapCodegen(object):
 
         access = self.exprAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
+        lenAccess = "1" if lenAccess is None else lenAccess
 
         self.cgen.beginIf(access)
 
@@ -191,7 +192,7 @@ class VulkanHandleMap(VulkanWrapperGenerator):
             handlemapParams = \
                 [self.handlemapParam] + \
                 list(map(typeFromName, [self.toMapVar]))
-                
+
             handlemapPrototype = \
                 VulkanAPI(self.handlemapPrefix + name,
                           self.voidType,
@@ -199,6 +200,8 @@ class VulkanHandleMap(VulkanWrapperGenerator):
 
             def funcDefGenerator(cgen):
                 self.handlemapCodegen.cgen = cgen
+                for p in handlemapParams:
+                    cgen.stmt("(void)%s" % p.paramName)
                 for member in structInfo.members:
                     iterateVulkanType(self.typeInfo, member,
                                       self.handlemapCodegen)

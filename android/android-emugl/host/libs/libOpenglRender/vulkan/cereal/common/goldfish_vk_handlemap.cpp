@@ -33,12 +33,16 @@ void handlemap_VkApplicationInfo(
     VulkanHandleMapping* handlemap,
     VkApplicationInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkInstanceCreateInfo(
     VulkanHandleMapping* handlemap,
     VkInstanceCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pApplicationInfo)
     {
         handlemap_VkApplicationInfo(handlemap, (VkApplicationInfo*)(toMap->pApplicationInfo));
@@ -49,30 +53,40 @@ void handlemap_VkAllocationCallbacks(
     VulkanHandleMapping* handlemap,
     VkAllocationCallbacks* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceFeatures(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceFeatures* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkFormatProperties(
     VulkanHandleMapping* handlemap,
     VkFormatProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkExtent3D(
     VulkanHandleMapping* handlemap,
     VkExtent3D* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkImageFormatProperties(
     VulkanHandleMapping* handlemap,
     VkImageFormatProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkExtent3D(handlemap, (VkExtent3D*)(&toMap->maxExtent));
 }
 
@@ -80,18 +94,24 @@ void handlemap_VkPhysicalDeviceLimits(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceLimits* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceSparseProperties(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceSparseProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceProperties(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkPhysicalDeviceLimits(handlemap, (VkPhysicalDeviceLimits*)(&toMap->limits));
     handlemap_VkPhysicalDeviceSparseProperties(handlemap, (VkPhysicalDeviceSparseProperties*)(&toMap->sparseProperties));
 }
@@ -100,6 +120,8 @@ void handlemap_VkQueueFamilyProperties(
     VulkanHandleMapping* handlemap,
     VkQueueFamilyProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkExtent3D(handlemap, (VkExtent3D*)(&toMap->minImageTransferGranularity));
 }
 
@@ -107,18 +129,24 @@ void handlemap_VkMemoryType(
     VulkanHandleMapping* handlemap,
     VkMemoryType* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkMemoryHeap(
     VulkanHandleMapping* handlemap,
     VkMemoryHeap* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceMemoryProperties(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceMemoryProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     for (uint32_t i = 0; i < (uint32_t)VK_MAX_MEMORY_TYPES; ++i)
     {
         handlemap_VkMemoryType(handlemap, (VkMemoryType*)(toMap->memoryTypes + i));
@@ -133,12 +161,16 @@ void handlemap_VkDeviceQueueCreateInfo(
     VulkanHandleMapping* handlemap,
     VkDeviceQueueCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDeviceCreateInfo(
     VulkanHandleMapping* handlemap,
     VkDeviceCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pQueueCreateInfos)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->queueCreateInfoCount; ++i)
@@ -156,18 +188,24 @@ void handlemap_VkExtensionProperties(
     VulkanHandleMapping* handlemap,
     VkExtensionProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkLayerProperties(
     VulkanHandleMapping* handlemap,
     VkLayerProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkSubmitInfo(
     VulkanHandleMapping* handlemap,
     VkSubmitInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pWaitSemaphores)
     {
         handlemap->mapHandles_VkSemaphore((VkSemaphore*)toMap->pWaitSemaphores, toMap->waitSemaphoreCount);
@@ -186,12 +224,16 @@ void handlemap_VkMemoryAllocateInfo(
     VulkanHandleMapping* handlemap,
     VkMemoryAllocateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkMappedMemoryRange(
     VulkanHandleMapping* handlemap,
     VkMappedMemoryRange* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)&toMap->memory);
 }
 
@@ -199,12 +241,16 @@ void handlemap_VkMemoryRequirements(
     VulkanHandleMapping* handlemap,
     VkMemoryRequirements* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkSparseImageFormatProperties(
     VulkanHandleMapping* handlemap,
     VkSparseImageFormatProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkExtent3D(handlemap, (VkExtent3D*)(&toMap->imageGranularity));
 }
 
@@ -212,6 +258,8 @@ void handlemap_VkSparseImageMemoryRequirements(
     VulkanHandleMapping* handlemap,
     VkSparseImageMemoryRequirements* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkSparseImageFormatProperties(handlemap, (VkSparseImageFormatProperties*)(&toMap->formatProperties));
 }
 
@@ -219,6 +267,8 @@ void handlemap_VkSparseMemoryBind(
     VulkanHandleMapping* handlemap,
     VkSparseMemoryBind* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)&toMap->memory);
 }
 
@@ -226,6 +276,8 @@ void handlemap_VkSparseBufferMemoryBindInfo(
     VulkanHandleMapping* handlemap,
     VkSparseBufferMemoryBindInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
     if (toMap->pBinds)
     {
@@ -240,6 +292,8 @@ void handlemap_VkSparseImageOpaqueMemoryBindInfo(
     VulkanHandleMapping* handlemap,
     VkSparseImageOpaqueMemoryBindInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
     if (toMap->pBinds)
     {
@@ -254,18 +308,24 @@ void handlemap_VkImageSubresource(
     VulkanHandleMapping* handlemap,
     VkImageSubresource* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkOffset3D(
     VulkanHandleMapping* handlemap,
     VkOffset3D* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkSparseImageMemoryBind(
     VulkanHandleMapping* handlemap,
     VkSparseImageMemoryBind* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkImageSubresource(handlemap, (VkImageSubresource*)(&toMap->subresource));
     handlemap_VkOffset3D(handlemap, (VkOffset3D*)(&toMap->offset));
     handlemap_VkExtent3D(handlemap, (VkExtent3D*)(&toMap->extent));
@@ -276,6 +336,8 @@ void handlemap_VkSparseImageMemoryBindInfo(
     VulkanHandleMapping* handlemap,
     VkSparseImageMemoryBindInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
     if (toMap->pBinds)
     {
@@ -290,6 +352,8 @@ void handlemap_VkBindSparseInfo(
     VulkanHandleMapping* handlemap,
     VkBindSparseInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pWaitSemaphores)
     {
         handlemap->mapHandles_VkSemaphore((VkSemaphore*)toMap->pWaitSemaphores, toMap->waitSemaphoreCount);
@@ -325,36 +389,48 @@ void handlemap_VkFenceCreateInfo(
     VulkanHandleMapping* handlemap,
     VkFenceCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkSemaphoreCreateInfo(
     VulkanHandleMapping* handlemap,
     VkSemaphoreCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkEventCreateInfo(
     VulkanHandleMapping* handlemap,
     VkEventCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkQueryPoolCreateInfo(
     VulkanHandleMapping* handlemap,
     VkQueryPoolCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkBufferCreateInfo(
     VulkanHandleMapping* handlemap,
     VkBufferCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkBufferViewCreateInfo(
     VulkanHandleMapping* handlemap,
     VkBufferViewCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
 }
 
@@ -362,6 +438,8 @@ void handlemap_VkImageCreateInfo(
     VulkanHandleMapping* handlemap,
     VkImageCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkExtent3D(handlemap, (VkExtent3D*)(&toMap->extent));
 }
 
@@ -369,24 +447,32 @@ void handlemap_VkSubresourceLayout(
     VulkanHandleMapping* handlemap,
     VkSubresourceLayout* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkComponentMapping(
     VulkanHandleMapping* handlemap,
     VkComponentMapping* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkImageSubresourceRange(
     VulkanHandleMapping* handlemap,
     VkImageSubresourceRange* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkImageViewCreateInfo(
     VulkanHandleMapping* handlemap,
     VkImageViewCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
     handlemap_VkComponentMapping(handlemap, (VkComponentMapping*)(&toMap->components));
     handlemap_VkImageSubresourceRange(handlemap, (VkImageSubresourceRange*)(&toMap->subresourceRange));
@@ -396,24 +482,32 @@ void handlemap_VkShaderModuleCreateInfo(
     VulkanHandleMapping* handlemap,
     VkShaderModuleCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPipelineCacheCreateInfo(
     VulkanHandleMapping* handlemap,
     VkPipelineCacheCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkSpecializationMapEntry(
     VulkanHandleMapping* handlemap,
     VkSpecializationMapEntry* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkSpecializationInfo(
     VulkanHandleMapping* handlemap,
     VkSpecializationInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pMapEntries)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->mapEntryCount; ++i)
@@ -427,6 +521,8 @@ void handlemap_VkPipelineShaderStageCreateInfo(
     VulkanHandleMapping* handlemap,
     VkPipelineShaderStageCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkShaderModule((VkShaderModule*)&toMap->module);
     if (toMap->pSpecializationInfo)
     {
@@ -438,18 +534,24 @@ void handlemap_VkVertexInputBindingDescription(
     VulkanHandleMapping* handlemap,
     VkVertexInputBindingDescription* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkVertexInputAttributeDescription(
     VulkanHandleMapping* handlemap,
     VkVertexInputAttributeDescription* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPipelineVertexInputStateCreateInfo(
     VulkanHandleMapping* handlemap,
     VkPipelineVertexInputStateCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pVertexBindingDescriptions)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->vertexBindingDescriptionCount; ++i)
@@ -470,36 +572,48 @@ void handlemap_VkPipelineInputAssemblyStateCreateInfo(
     VulkanHandleMapping* handlemap,
     VkPipelineInputAssemblyStateCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPipelineTessellationStateCreateInfo(
     VulkanHandleMapping* handlemap,
     VkPipelineTessellationStateCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkViewport(
     VulkanHandleMapping* handlemap,
     VkViewport* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkOffset2D(
     VulkanHandleMapping* handlemap,
     VkOffset2D* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkExtent2D(
     VulkanHandleMapping* handlemap,
     VkExtent2D* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkRect2D(
     VulkanHandleMapping* handlemap,
     VkRect2D* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkOffset2D(handlemap, (VkOffset2D*)(&toMap->offset));
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->extent));
 }
@@ -508,6 +622,8 @@ void handlemap_VkPipelineViewportStateCreateInfo(
     VulkanHandleMapping* handlemap,
     VkPipelineViewportStateCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pViewports)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->viewportCount; ++i)
@@ -528,24 +644,32 @@ void handlemap_VkPipelineRasterizationStateCreateInfo(
     VulkanHandleMapping* handlemap,
     VkPipelineRasterizationStateCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPipelineMultisampleStateCreateInfo(
     VulkanHandleMapping* handlemap,
     VkPipelineMultisampleStateCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkStencilOpState(
     VulkanHandleMapping* handlemap,
     VkStencilOpState* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPipelineDepthStencilStateCreateInfo(
     VulkanHandleMapping* handlemap,
     VkPipelineDepthStencilStateCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkStencilOpState(handlemap, (VkStencilOpState*)(&toMap->front));
     handlemap_VkStencilOpState(handlemap, (VkStencilOpState*)(&toMap->back));
 }
@@ -554,12 +678,16 @@ void handlemap_VkPipelineColorBlendAttachmentState(
     VulkanHandleMapping* handlemap,
     VkPipelineColorBlendAttachmentState* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPipelineColorBlendStateCreateInfo(
     VulkanHandleMapping* handlemap,
     VkPipelineColorBlendStateCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pAttachments)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->attachmentCount; ++i)
@@ -573,12 +701,16 @@ void handlemap_VkPipelineDynamicStateCreateInfo(
     VulkanHandleMapping* handlemap,
     VkPipelineDynamicStateCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkGraphicsPipelineCreateInfo(
     VulkanHandleMapping* handlemap,
     VkGraphicsPipelineCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pStages)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->stageCount; ++i)
@@ -631,6 +763,8 @@ void handlemap_VkComputePipelineCreateInfo(
     VulkanHandleMapping* handlemap,
     VkComputePipelineCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkPipelineShaderStageCreateInfo(handlemap, (VkPipelineShaderStageCreateInfo*)(&toMap->stage));
     handlemap->mapHandles_VkPipelineLayout((VkPipelineLayout*)&toMap->layout);
     handlemap->mapHandles_VkPipeline((VkPipeline*)&toMap->basePipelineHandle);
@@ -640,12 +774,16 @@ void handlemap_VkPushConstantRange(
     VulkanHandleMapping* handlemap,
     VkPushConstantRange* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPipelineLayoutCreateInfo(
     VulkanHandleMapping* handlemap,
     VkPipelineLayoutCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pSetLayouts)
     {
         handlemap->mapHandles_VkDescriptorSetLayout((VkDescriptorSetLayout*)toMap->pSetLayouts, toMap->setLayoutCount);
@@ -663,12 +801,16 @@ void handlemap_VkSamplerCreateInfo(
     VulkanHandleMapping* handlemap,
     VkSamplerCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDescriptorSetLayoutBinding(
     VulkanHandleMapping* handlemap,
     VkDescriptorSetLayoutBinding* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pImmutableSamplers)
     {
         handlemap->mapHandles_VkSampler((VkSampler*)toMap->pImmutableSamplers, toMap->descriptorCount);
@@ -679,6 +821,8 @@ void handlemap_VkDescriptorSetLayoutCreateInfo(
     VulkanHandleMapping* handlemap,
     VkDescriptorSetLayoutCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pBindings)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->bindingCount; ++i)
@@ -692,12 +836,16 @@ void handlemap_VkDescriptorPoolSize(
     VulkanHandleMapping* handlemap,
     VkDescriptorPoolSize* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDescriptorPoolCreateInfo(
     VulkanHandleMapping* handlemap,
     VkDescriptorPoolCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pPoolSizes)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->poolSizeCount; ++i)
@@ -711,6 +859,8 @@ void handlemap_VkDescriptorSetAllocateInfo(
     VulkanHandleMapping* handlemap,
     VkDescriptorSetAllocateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkDescriptorPool((VkDescriptorPool*)&toMap->descriptorPool);
     if (toMap->pSetLayouts)
     {
@@ -722,6 +872,8 @@ void handlemap_VkDescriptorImageInfo(
     VulkanHandleMapping* handlemap,
     VkDescriptorImageInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkSampler((VkSampler*)&toMap->sampler);
     handlemap->mapHandles_VkImageView((VkImageView*)&toMap->imageView);
 }
@@ -730,6 +882,8 @@ void handlemap_VkDescriptorBufferInfo(
     VulkanHandleMapping* handlemap,
     VkDescriptorBufferInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
 }
 
@@ -737,6 +891,8 @@ void handlemap_VkWriteDescriptorSet(
     VulkanHandleMapping* handlemap,
     VkWriteDescriptorSet* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkDescriptorSet((VkDescriptorSet*)&toMap->dstSet);
     if (toMap->pImageInfo)
     {
@@ -762,6 +918,8 @@ void handlemap_VkCopyDescriptorSet(
     VulkanHandleMapping* handlemap,
     VkCopyDescriptorSet* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkDescriptorSet((VkDescriptorSet*)&toMap->srcSet);
     handlemap->mapHandles_VkDescriptorSet((VkDescriptorSet*)&toMap->dstSet);
 }
@@ -770,6 +928,8 @@ void handlemap_VkFramebufferCreateInfo(
     VulkanHandleMapping* handlemap,
     VkFramebufferCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkRenderPass((VkRenderPass*)&toMap->renderPass);
     if (toMap->pAttachments)
     {
@@ -781,18 +941,24 @@ void handlemap_VkAttachmentDescription(
     VulkanHandleMapping* handlemap,
     VkAttachmentDescription* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkAttachmentReference(
     VulkanHandleMapping* handlemap,
     VkAttachmentReference* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkSubpassDescription(
     VulkanHandleMapping* handlemap,
     VkSubpassDescription* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pInputAttachments)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->inputAttachmentCount; ++i)
@@ -824,12 +990,16 @@ void handlemap_VkSubpassDependency(
     VulkanHandleMapping* handlemap,
     VkSubpassDependency* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkRenderPassCreateInfo(
     VulkanHandleMapping* handlemap,
     VkRenderPassCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pAttachments)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->attachmentCount; ++i)
@@ -857,12 +1027,16 @@ void handlemap_VkCommandPoolCreateInfo(
     VulkanHandleMapping* handlemap,
     VkCommandPoolCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkCommandBufferAllocateInfo(
     VulkanHandleMapping* handlemap,
     VkCommandBufferAllocateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkCommandPool((VkCommandPool*)&toMap->commandPool);
 }
 
@@ -870,6 +1044,8 @@ void handlemap_VkCommandBufferInheritanceInfo(
     VulkanHandleMapping* handlemap,
     VkCommandBufferInheritanceInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkRenderPass((VkRenderPass*)&toMap->renderPass);
     handlemap->mapHandles_VkFramebuffer((VkFramebuffer*)&toMap->framebuffer);
 }
@@ -878,6 +1054,8 @@ void handlemap_VkCommandBufferBeginInfo(
     VulkanHandleMapping* handlemap,
     VkCommandBufferBeginInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pInheritanceInfo)
     {
         handlemap_VkCommandBufferInheritanceInfo(handlemap, (VkCommandBufferInheritanceInfo*)(toMap->pInheritanceInfo));
@@ -888,18 +1066,24 @@ void handlemap_VkBufferCopy(
     VulkanHandleMapping* handlemap,
     VkBufferCopy* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkImageSubresourceLayers(
     VulkanHandleMapping* handlemap,
     VkImageSubresourceLayers* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkImageCopy(
     VulkanHandleMapping* handlemap,
     VkImageCopy* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkImageSubresourceLayers(handlemap, (VkImageSubresourceLayers*)(&toMap->srcSubresource));
     handlemap_VkOffset3D(handlemap, (VkOffset3D*)(&toMap->srcOffset));
     handlemap_VkImageSubresourceLayers(handlemap, (VkImageSubresourceLayers*)(&toMap->dstSubresource));
@@ -911,6 +1095,8 @@ void handlemap_VkImageBlit(
     VulkanHandleMapping* handlemap,
     VkImageBlit* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkImageSubresourceLayers(handlemap, (VkImageSubresourceLayers*)(&toMap->srcSubresource));
     for (uint32_t i = 0; i < (uint32_t)2; ++i)
     {
@@ -927,6 +1113,8 @@ void handlemap_VkBufferImageCopy(
     VulkanHandleMapping* handlemap,
     VkBufferImageCopy* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkImageSubresourceLayers(handlemap, (VkImageSubresourceLayers*)(&toMap->imageSubresource));
     handlemap_VkOffset3D(handlemap, (VkOffset3D*)(&toMap->imageOffset));
     handlemap_VkExtent3D(handlemap, (VkExtent3D*)(&toMap->imageExtent));
@@ -936,18 +1124,24 @@ void handlemap_VkClearColorValue(
     VulkanHandleMapping* handlemap,
     VkClearColorValue* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkClearDepthStencilValue(
     VulkanHandleMapping* handlemap,
     VkClearDepthStencilValue* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkClearValue(
     VulkanHandleMapping* handlemap,
     VkClearValue* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkClearColorValue(handlemap, (VkClearColorValue*)(&toMap->color));
     handlemap_VkClearDepthStencilValue(handlemap, (VkClearDepthStencilValue*)(&toMap->depthStencil));
 }
@@ -956,6 +1150,8 @@ void handlemap_VkClearAttachment(
     VulkanHandleMapping* handlemap,
     VkClearAttachment* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkClearValue(handlemap, (VkClearValue*)(&toMap->clearValue));
 }
 
@@ -963,6 +1159,8 @@ void handlemap_VkClearRect(
     VulkanHandleMapping* handlemap,
     VkClearRect* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkRect2D(handlemap, (VkRect2D*)(&toMap->rect));
 }
 
@@ -970,6 +1168,8 @@ void handlemap_VkImageResolve(
     VulkanHandleMapping* handlemap,
     VkImageResolve* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkImageSubresourceLayers(handlemap, (VkImageSubresourceLayers*)(&toMap->srcSubresource));
     handlemap_VkOffset3D(handlemap, (VkOffset3D*)(&toMap->srcOffset));
     handlemap_VkImageSubresourceLayers(handlemap, (VkImageSubresourceLayers*)(&toMap->dstSubresource));
@@ -981,12 +1181,16 @@ void handlemap_VkMemoryBarrier(
     VulkanHandleMapping* handlemap,
     VkMemoryBarrier* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkBufferMemoryBarrier(
     VulkanHandleMapping* handlemap,
     VkBufferMemoryBarrier* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
 }
 
@@ -994,6 +1198,8 @@ void handlemap_VkImageMemoryBarrier(
     VulkanHandleMapping* handlemap,
     VkImageMemoryBarrier* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
     handlemap_VkImageSubresourceRange(handlemap, (VkImageSubresourceRange*)(&toMap->subresourceRange));
 }
@@ -1002,6 +1208,8 @@ void handlemap_VkRenderPassBeginInfo(
     VulkanHandleMapping* handlemap,
     VkRenderPassBeginInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkRenderPass((VkRenderPass*)&toMap->renderPass);
     handlemap->mapHandles_VkFramebuffer((VkFramebuffer*)&toMap->framebuffer);
     handlemap_VkRect2D(handlemap, (VkRect2D*)(&toMap->renderArea));
@@ -1018,24 +1226,32 @@ void handlemap_VkDispatchIndirectCommand(
     VulkanHandleMapping* handlemap,
     VkDispatchIndirectCommand* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDrawIndexedIndirectCommand(
     VulkanHandleMapping* handlemap,
     VkDrawIndexedIndirectCommand* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDrawIndirectCommand(
     VulkanHandleMapping* handlemap,
     VkDrawIndirectCommand* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkBaseOutStructure(
     VulkanHandleMapping* handlemap,
     VkBaseOutStructure* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     // TODO: Unsupported : VkBaseOutStructure* pNext
 }
 
@@ -1043,6 +1259,8 @@ void handlemap_VkBaseInStructure(
     VulkanHandleMapping* handlemap,
     VkBaseInStructure* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     // TODO: Unsupported : const VkBaseInStructure* pNext
 }
 
@@ -1052,12 +1270,16 @@ void handlemap_VkPhysicalDeviceSubgroupProperties(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceSubgroupProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkBindBufferMemoryInfo(
     VulkanHandleMapping* handlemap,
     VkBindBufferMemoryInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
     handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)&toMap->memory);
 }
@@ -1066,6 +1288,8 @@ void handlemap_VkBindImageMemoryInfo(
     VulkanHandleMapping* handlemap,
     VkBindImageMemoryInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
     handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)&toMap->memory);
 }
@@ -1074,18 +1298,24 @@ void handlemap_VkPhysicalDevice16BitStorageFeatures(
     VulkanHandleMapping* handlemap,
     VkPhysicalDevice16BitStorageFeatures* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkMemoryDedicatedRequirements(
     VulkanHandleMapping* handlemap,
     VkMemoryDedicatedRequirements* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkMemoryDedicatedAllocateInfo(
     VulkanHandleMapping* handlemap,
     VkMemoryDedicatedAllocateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
 }
@@ -1094,12 +1324,16 @@ void handlemap_VkMemoryAllocateFlagsInfo(
     VulkanHandleMapping* handlemap,
     VkMemoryAllocateFlagsInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDeviceGroupRenderPassBeginInfo(
     VulkanHandleMapping* handlemap,
     VkDeviceGroupRenderPassBeginInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pDeviceRenderAreas)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->deviceRenderAreaCount; ++i)
@@ -1113,30 +1347,40 @@ void handlemap_VkDeviceGroupCommandBufferBeginInfo(
     VulkanHandleMapping* handlemap,
     VkDeviceGroupCommandBufferBeginInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDeviceGroupSubmitInfo(
     VulkanHandleMapping* handlemap,
     VkDeviceGroupSubmitInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDeviceGroupBindSparseInfo(
     VulkanHandleMapping* handlemap,
     VkDeviceGroupBindSparseInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkBindBufferMemoryDeviceGroupInfo(
     VulkanHandleMapping* handlemap,
     VkBindBufferMemoryDeviceGroupInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkBindImageMemoryDeviceGroupInfo(
     VulkanHandleMapping* handlemap,
     VkBindImageMemoryDeviceGroupInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pSplitInstanceBindRegions)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->splitInstanceBindRegionCount; ++i)
@@ -1150,6 +1394,8 @@ void handlemap_VkPhysicalDeviceGroupProperties(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceGroupProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkPhysicalDevice((VkPhysicalDevice*)toMap->physicalDevices, VK_MAX_DEVICE_GROUP_SIZE);
 }
 
@@ -1157,6 +1403,8 @@ void handlemap_VkDeviceGroupDeviceCreateInfo(
     VulkanHandleMapping* handlemap,
     VkDeviceGroupDeviceCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pPhysicalDevices)
     {
         handlemap->mapHandles_VkPhysicalDevice((VkPhysicalDevice*)toMap->pPhysicalDevices, toMap->physicalDeviceCount);
@@ -1167,6 +1415,8 @@ void handlemap_VkBufferMemoryRequirementsInfo2(
     VulkanHandleMapping* handlemap,
     VkBufferMemoryRequirementsInfo2* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
 }
 
@@ -1174,6 +1424,8 @@ void handlemap_VkImageMemoryRequirementsInfo2(
     VulkanHandleMapping* handlemap,
     VkImageMemoryRequirementsInfo2* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
 }
 
@@ -1181,6 +1433,8 @@ void handlemap_VkImageSparseMemoryRequirementsInfo2(
     VulkanHandleMapping* handlemap,
     VkImageSparseMemoryRequirementsInfo2* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
 }
 
@@ -1188,6 +1442,8 @@ void handlemap_VkMemoryRequirements2(
     VulkanHandleMapping* handlemap,
     VkMemoryRequirements2* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkMemoryRequirements(handlemap, (VkMemoryRequirements*)(&toMap->memoryRequirements));
 }
 
@@ -1195,6 +1451,8 @@ void handlemap_VkSparseImageMemoryRequirements2(
     VulkanHandleMapping* handlemap,
     VkSparseImageMemoryRequirements2* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkSparseImageMemoryRequirements(handlemap, (VkSparseImageMemoryRequirements*)(&toMap->memoryRequirements));
 }
 
@@ -1202,6 +1460,8 @@ void handlemap_VkPhysicalDeviceFeatures2(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceFeatures2* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkPhysicalDeviceFeatures(handlemap, (VkPhysicalDeviceFeatures*)(&toMap->features));
 }
 
@@ -1209,6 +1469,8 @@ void handlemap_VkPhysicalDeviceProperties2(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceProperties2* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkPhysicalDeviceProperties(handlemap, (VkPhysicalDeviceProperties*)(&toMap->properties));
 }
 
@@ -1216,6 +1478,8 @@ void handlemap_VkFormatProperties2(
     VulkanHandleMapping* handlemap,
     VkFormatProperties2* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkFormatProperties(handlemap, (VkFormatProperties*)(&toMap->formatProperties));
 }
 
@@ -1223,6 +1487,8 @@ void handlemap_VkImageFormatProperties2(
     VulkanHandleMapping* handlemap,
     VkImageFormatProperties2* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkImageFormatProperties(handlemap, (VkImageFormatProperties*)(&toMap->imageFormatProperties));
 }
 
@@ -1230,12 +1496,16 @@ void handlemap_VkPhysicalDeviceImageFormatInfo2(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceImageFormatInfo2* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkQueueFamilyProperties2(
     VulkanHandleMapping* handlemap,
     VkQueueFamilyProperties2* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkQueueFamilyProperties(handlemap, (VkQueueFamilyProperties*)(&toMap->queueFamilyProperties));
 }
 
@@ -1243,6 +1513,8 @@ void handlemap_VkPhysicalDeviceMemoryProperties2(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceMemoryProperties2* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkPhysicalDeviceMemoryProperties(handlemap, (VkPhysicalDeviceMemoryProperties*)(&toMap->memoryProperties));
 }
 
@@ -1250,6 +1522,8 @@ void handlemap_VkSparseImageFormatProperties2(
     VulkanHandleMapping* handlemap,
     VkSparseImageFormatProperties2* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkSparseImageFormatProperties(handlemap, (VkSparseImageFormatProperties*)(&toMap->properties));
 }
 
@@ -1257,24 +1531,32 @@ void handlemap_VkPhysicalDeviceSparseImageFormatInfo2(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceSparseImageFormatInfo2* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDevicePointClippingProperties(
     VulkanHandleMapping* handlemap,
     VkPhysicalDevicePointClippingProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkInputAttachmentAspectReference(
     VulkanHandleMapping* handlemap,
     VkInputAttachmentAspectReference* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkRenderPassInputAttachmentAspectCreateInfo(
     VulkanHandleMapping* handlemap,
     VkRenderPassInputAttachmentAspectCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pAspectReferences)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->aspectReferenceCount; ++i)
@@ -1288,66 +1570,88 @@ void handlemap_VkImageViewUsageCreateInfo(
     VulkanHandleMapping* handlemap,
     VkImageViewUsageCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPipelineTessellationDomainOriginStateCreateInfo(
     VulkanHandleMapping* handlemap,
     VkPipelineTessellationDomainOriginStateCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkRenderPassMultiviewCreateInfo(
     VulkanHandleMapping* handlemap,
     VkRenderPassMultiviewCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceMultiviewFeatures(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceMultiviewFeatures* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceMultiviewProperties(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceMultiviewProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceVariablePointerFeatures(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceVariablePointerFeatures* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceProtectedMemoryFeatures(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceProtectedMemoryFeatures* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceProtectedMemoryProperties(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceProtectedMemoryProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDeviceQueueInfo2(
     VulkanHandleMapping* handlemap,
     VkDeviceQueueInfo2* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkProtectedSubmitInfo(
     VulkanHandleMapping* handlemap,
     VkProtectedSubmitInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkSamplerYcbcrConversionCreateInfo(
     VulkanHandleMapping* handlemap,
     VkSamplerYcbcrConversionCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkComponentMapping(handlemap, (VkComponentMapping*)(&toMap->components));
 }
 
@@ -1355,6 +1659,8 @@ void handlemap_VkSamplerYcbcrConversionInfo(
     VulkanHandleMapping* handlemap,
     VkSamplerYcbcrConversionInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkSamplerYcbcrConversion((VkSamplerYcbcrConversion*)&toMap->conversion);
 }
 
@@ -1362,36 +1668,48 @@ void handlemap_VkBindImagePlaneMemoryInfo(
     VulkanHandleMapping* handlemap,
     VkBindImagePlaneMemoryInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkImagePlaneMemoryRequirementsInfo(
     VulkanHandleMapping* handlemap,
     VkImagePlaneMemoryRequirementsInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceSamplerYcbcrConversionFeatures(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceSamplerYcbcrConversionFeatures* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkSamplerYcbcrConversionImageFormatProperties(
     VulkanHandleMapping* handlemap,
     VkSamplerYcbcrConversionImageFormatProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDescriptorUpdateTemplateEntry(
     VulkanHandleMapping* handlemap,
     VkDescriptorUpdateTemplateEntry* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDescriptorUpdateTemplateCreateInfo(
     VulkanHandleMapping* handlemap,
     VkDescriptorUpdateTemplateCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pDescriptorUpdateEntries)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->descriptorUpdateEntryCount; ++i)
@@ -1407,18 +1725,24 @@ void handlemap_VkExternalMemoryProperties(
     VulkanHandleMapping* handlemap,
     VkExternalMemoryProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceExternalImageFormatInfo(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceExternalImageFormatInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkExternalImageFormatProperties(
     VulkanHandleMapping* handlemap,
     VkExternalImageFormatProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkExternalMemoryProperties(handlemap, (VkExternalMemoryProperties*)(&toMap->externalMemoryProperties));
 }
 
@@ -1426,12 +1750,16 @@ void handlemap_VkPhysicalDeviceExternalBufferInfo(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceExternalBufferInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkExternalBufferProperties(
     VulkanHandleMapping* handlemap,
     VkExternalBufferProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkExternalMemoryProperties(handlemap, (VkExternalMemoryProperties*)(&toMap->externalMemoryProperties));
 }
 
@@ -1439,78 +1767,104 @@ void handlemap_VkPhysicalDeviceIDProperties(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceIDProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkExternalMemoryImageCreateInfo(
     VulkanHandleMapping* handlemap,
     VkExternalMemoryImageCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkExternalMemoryBufferCreateInfo(
     VulkanHandleMapping* handlemap,
     VkExternalMemoryBufferCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkExportMemoryAllocateInfo(
     VulkanHandleMapping* handlemap,
     VkExportMemoryAllocateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceExternalFenceInfo(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceExternalFenceInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkExternalFenceProperties(
     VulkanHandleMapping* handlemap,
     VkExternalFenceProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkExportFenceCreateInfo(
     VulkanHandleMapping* handlemap,
     VkExportFenceCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkExportSemaphoreCreateInfo(
     VulkanHandleMapping* handlemap,
     VkExportSemaphoreCreateInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceExternalSemaphoreInfo(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceExternalSemaphoreInfo* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkExternalSemaphoreProperties(
     VulkanHandleMapping* handlemap,
     VkExternalSemaphoreProperties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceMaintenance3Properties(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceMaintenance3Properties* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDescriptorSetLayoutSupport(
     VulkanHandleMapping* handlemap,
     VkDescriptorSetLayoutSupport* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceShaderDrawParameterFeatures(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceShaderDrawParameterFeatures* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -1519,6 +1873,8 @@ void handlemap_VkSurfaceCapabilitiesKHR(
     VulkanHandleMapping* handlemap,
     VkSurfaceCapabilitiesKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->currentExtent));
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->minImageExtent));
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->maxImageExtent));
@@ -1528,6 +1884,8 @@ void handlemap_VkSurfaceFormatKHR(
     VulkanHandleMapping* handlemap,
     VkSurfaceFormatKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -1536,6 +1894,8 @@ void handlemap_VkSwapchainCreateInfoKHR(
     VulkanHandleMapping* handlemap,
     VkSwapchainCreateInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkSurfaceKHR((VkSurfaceKHR*)&toMap->surface);
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->imageExtent));
     handlemap->mapHandles_VkSwapchainKHR((VkSwapchainKHR*)&toMap->oldSwapchain);
@@ -1545,6 +1905,8 @@ void handlemap_VkPresentInfoKHR(
     VulkanHandleMapping* handlemap,
     VkPresentInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pWaitSemaphores)
     {
         handlemap->mapHandles_VkSemaphore((VkSemaphore*)toMap->pWaitSemaphores, toMap->waitSemaphoreCount);
@@ -1559,6 +1921,8 @@ void handlemap_VkImageSwapchainCreateInfoKHR(
     VulkanHandleMapping* handlemap,
     VkImageSwapchainCreateInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkSwapchainKHR((VkSwapchainKHR*)&toMap->swapchain);
 }
 
@@ -1566,6 +1930,8 @@ void handlemap_VkBindImageMemorySwapchainInfoKHR(
     VulkanHandleMapping* handlemap,
     VkBindImageMemorySwapchainInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkSwapchainKHR((VkSwapchainKHR*)&toMap->swapchain);
 }
 
@@ -1573,6 +1939,8 @@ void handlemap_VkAcquireNextImageInfoKHR(
     VulkanHandleMapping* handlemap,
     VkAcquireNextImageInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkSwapchainKHR((VkSwapchainKHR*)&toMap->swapchain);
     handlemap->mapHandles_VkSemaphore((VkSemaphore*)&toMap->semaphore);
     handlemap->mapHandles_VkFence((VkFence*)&toMap->fence);
@@ -1582,18 +1950,24 @@ void handlemap_VkDeviceGroupPresentCapabilitiesKHR(
     VulkanHandleMapping* handlemap,
     VkDeviceGroupPresentCapabilitiesKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDeviceGroupPresentInfoKHR(
     VulkanHandleMapping* handlemap,
     VkDeviceGroupPresentInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDeviceGroupSwapchainCreateInfoKHR(
     VulkanHandleMapping* handlemap,
     VkDeviceGroupSwapchainCreateInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -1602,6 +1976,8 @@ void handlemap_VkDisplayPropertiesKHR(
     VulkanHandleMapping* handlemap,
     VkDisplayPropertiesKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkDisplayKHR((VkDisplayKHR*)&toMap->display);
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->physicalDimensions));
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->physicalResolution));
@@ -1611,6 +1987,8 @@ void handlemap_VkDisplayModeParametersKHR(
     VulkanHandleMapping* handlemap,
     VkDisplayModeParametersKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->visibleRegion));
 }
 
@@ -1618,6 +1996,8 @@ void handlemap_VkDisplayModePropertiesKHR(
     VulkanHandleMapping* handlemap,
     VkDisplayModePropertiesKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkDisplayModeKHR((VkDisplayModeKHR*)&toMap->displayMode);
     handlemap_VkDisplayModeParametersKHR(handlemap, (VkDisplayModeParametersKHR*)(&toMap->parameters));
 }
@@ -1626,6 +2006,8 @@ void handlemap_VkDisplayModeCreateInfoKHR(
     VulkanHandleMapping* handlemap,
     VkDisplayModeCreateInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkDisplayModeParametersKHR(handlemap, (VkDisplayModeParametersKHR*)(&toMap->parameters));
 }
 
@@ -1633,6 +2015,8 @@ void handlemap_VkDisplayPlaneCapabilitiesKHR(
     VulkanHandleMapping* handlemap,
     VkDisplayPlaneCapabilitiesKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkOffset2D(handlemap, (VkOffset2D*)(&toMap->minSrcPosition));
     handlemap_VkOffset2D(handlemap, (VkOffset2D*)(&toMap->maxSrcPosition));
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->minSrcExtent));
@@ -1647,6 +2031,8 @@ void handlemap_VkDisplayPlanePropertiesKHR(
     VulkanHandleMapping* handlemap,
     VkDisplayPlanePropertiesKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkDisplayKHR((VkDisplayKHR*)&toMap->currentDisplay);
 }
 
@@ -1654,6 +2040,8 @@ void handlemap_VkDisplaySurfaceCreateInfoKHR(
     VulkanHandleMapping* handlemap,
     VkDisplaySurfaceCreateInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkDisplayModeKHR((VkDisplayModeKHR*)&toMap->displayMode);
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->imageExtent));
 }
@@ -1664,6 +2052,8 @@ void handlemap_VkDisplayPresentInfoKHR(
     VulkanHandleMapping* handlemap,
     VkDisplayPresentInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkRect2D(handlemap, (VkRect2D*)(&toMap->srcRect));
     handlemap_VkRect2D(handlemap, (VkRect2D*)(&toMap->dstRect));
 }
@@ -1674,6 +2064,8 @@ void handlemap_VkXlibSurfaceCreateInfoKHR(
     VulkanHandleMapping* handlemap,
     VkXlibSurfaceCreateInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -1682,6 +2074,8 @@ void handlemap_VkXcbSurfaceCreateInfoKHR(
     VulkanHandleMapping* handlemap,
     VkXcbSurfaceCreateInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -1690,6 +2084,8 @@ void handlemap_VkWaylandSurfaceCreateInfoKHR(
     VulkanHandleMapping* handlemap,
     VkWaylandSurfaceCreateInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -1698,6 +2094,8 @@ void handlemap_VkMirSurfaceCreateInfoKHR(
     VulkanHandleMapping* handlemap,
     VkMirSurfaceCreateInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -1706,6 +2104,8 @@ void handlemap_VkAndroidSurfaceCreateInfoKHR(
     VulkanHandleMapping* handlemap,
     VkAndroidSurfaceCreateInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -1714,6 +2114,8 @@ void handlemap_VkWin32SurfaceCreateInfoKHR(
     VulkanHandleMapping* handlemap,
     VkWin32SurfaceCreateInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -1740,24 +2142,32 @@ void handlemap_VkImportMemoryWin32HandleInfoKHR(
     VulkanHandleMapping* handlemap,
     VkImportMemoryWin32HandleInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkExportMemoryWin32HandleInfoKHR(
     VulkanHandleMapping* handlemap,
     VkExportMemoryWin32HandleInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkMemoryWin32HandlePropertiesKHR(
     VulkanHandleMapping* handlemap,
     VkMemoryWin32HandlePropertiesKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkMemoryGetWin32HandleInfoKHR(
     VulkanHandleMapping* handlemap,
     VkMemoryGetWin32HandleInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)&toMap->memory);
 }
 
@@ -1767,18 +2177,24 @@ void handlemap_VkImportMemoryFdInfoKHR(
     VulkanHandleMapping* handlemap,
     VkImportMemoryFdInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkMemoryFdPropertiesKHR(
     VulkanHandleMapping* handlemap,
     VkMemoryFdPropertiesKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkMemoryGetFdInfoKHR(
     VulkanHandleMapping* handlemap,
     VkMemoryGetFdInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)&toMap->memory);
 }
 
@@ -1788,6 +2204,8 @@ void handlemap_VkWin32KeyedMutexAcquireReleaseInfoKHR(
     VulkanHandleMapping* handlemap,
     VkWin32KeyedMutexAcquireReleaseInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pAcquireSyncs)
     {
         handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)toMap->pAcquireSyncs, toMap->acquireCount);
@@ -1808,6 +2226,8 @@ void handlemap_VkImportSemaphoreWin32HandleInfoKHR(
     VulkanHandleMapping* handlemap,
     VkImportSemaphoreWin32HandleInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkSemaphore((VkSemaphore*)&toMap->semaphore);
 }
 
@@ -1815,18 +2235,24 @@ void handlemap_VkExportSemaphoreWin32HandleInfoKHR(
     VulkanHandleMapping* handlemap,
     VkExportSemaphoreWin32HandleInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkD3D12FenceSubmitInfoKHR(
     VulkanHandleMapping* handlemap,
     VkD3D12FenceSubmitInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkSemaphoreGetWin32HandleInfoKHR(
     VulkanHandleMapping* handlemap,
     VkSemaphoreGetWin32HandleInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkSemaphore((VkSemaphore*)&toMap->semaphore);
 }
 
@@ -1836,6 +2262,8 @@ void handlemap_VkImportSemaphoreFdInfoKHR(
     VulkanHandleMapping* handlemap,
     VkImportSemaphoreFdInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkSemaphore((VkSemaphore*)&toMap->semaphore);
 }
 
@@ -1843,6 +2271,8 @@ void handlemap_VkSemaphoreGetFdInfoKHR(
     VulkanHandleMapping* handlemap,
     VkSemaphoreGetFdInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkSemaphore((VkSemaphore*)&toMap->semaphore);
 }
 
@@ -1852,6 +2282,8 @@ void handlemap_VkPhysicalDevicePushDescriptorPropertiesKHR(
     VulkanHandleMapping* handlemap,
     VkPhysicalDevicePushDescriptorPropertiesKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -1862,6 +2294,8 @@ void handlemap_VkRectLayerKHR(
     VulkanHandleMapping* handlemap,
     VkRectLayerKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkOffset2D(handlemap, (VkOffset2D*)(&toMap->offset));
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->extent));
 }
@@ -1870,6 +2304,8 @@ void handlemap_VkPresentRegionKHR(
     VulkanHandleMapping* handlemap,
     VkPresentRegionKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pRectangles)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->rectangleCount; ++i)
@@ -1883,6 +2319,8 @@ void handlemap_VkPresentRegionsKHR(
     VulkanHandleMapping* handlemap,
     VkPresentRegionsKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pRegions)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->swapchainCount; ++i)
@@ -1900,18 +2338,24 @@ void handlemap_VkAttachmentDescription2KHR(
     VulkanHandleMapping* handlemap,
     VkAttachmentDescription2KHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkAttachmentReference2KHR(
     VulkanHandleMapping* handlemap,
     VkAttachmentReference2KHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkSubpassDescription2KHR(
     VulkanHandleMapping* handlemap,
     VkSubpassDescription2KHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pInputAttachments)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->inputAttachmentCount; ++i)
@@ -1943,12 +2387,16 @@ void handlemap_VkSubpassDependency2KHR(
     VulkanHandleMapping* handlemap,
     VkSubpassDependency2KHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkRenderPassCreateInfo2KHR(
     VulkanHandleMapping* handlemap,
     VkRenderPassCreateInfo2KHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pAttachments)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->attachmentCount; ++i)
@@ -1976,12 +2424,16 @@ void handlemap_VkSubpassBeginInfoKHR(
     VulkanHandleMapping* handlemap,
     VkSubpassBeginInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkSubpassEndInfoKHR(
     VulkanHandleMapping* handlemap,
     VkSubpassEndInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -1990,6 +2442,8 @@ void handlemap_VkSharedPresentSurfaceCapabilitiesKHR(
     VulkanHandleMapping* handlemap,
     VkSharedPresentSurfaceCapabilitiesKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2002,6 +2456,8 @@ void handlemap_VkImportFenceWin32HandleInfoKHR(
     VulkanHandleMapping* handlemap,
     VkImportFenceWin32HandleInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkFence((VkFence*)&toMap->fence);
 }
 
@@ -2009,12 +2465,16 @@ void handlemap_VkExportFenceWin32HandleInfoKHR(
     VulkanHandleMapping* handlemap,
     VkExportFenceWin32HandleInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkFenceGetWin32HandleInfoKHR(
     VulkanHandleMapping* handlemap,
     VkFenceGetWin32HandleInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkFence((VkFence*)&toMap->fence);
 }
 
@@ -2024,6 +2484,8 @@ void handlemap_VkImportFenceFdInfoKHR(
     VulkanHandleMapping* handlemap,
     VkImportFenceFdInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkFence((VkFence*)&toMap->fence);
 }
 
@@ -2031,6 +2493,8 @@ void handlemap_VkFenceGetFdInfoKHR(
     VulkanHandleMapping* handlemap,
     VkFenceGetFdInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkFence((VkFence*)&toMap->fence);
 }
 
@@ -2042,6 +2506,8 @@ void handlemap_VkPhysicalDeviceSurfaceInfo2KHR(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceSurfaceInfo2KHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkSurfaceKHR((VkSurfaceKHR*)&toMap->surface);
 }
 
@@ -2049,6 +2515,8 @@ void handlemap_VkSurfaceCapabilities2KHR(
     VulkanHandleMapping* handlemap,
     VkSurfaceCapabilities2KHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkSurfaceCapabilitiesKHR(handlemap, (VkSurfaceCapabilitiesKHR*)(&toMap->surfaceCapabilities));
 }
 
@@ -2056,6 +2524,8 @@ void handlemap_VkSurfaceFormat2KHR(
     VulkanHandleMapping* handlemap,
     VkSurfaceFormat2KHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkSurfaceFormatKHR(handlemap, (VkSurfaceFormatKHR*)(&toMap->surfaceFormat));
 }
 
@@ -2067,6 +2537,8 @@ void handlemap_VkDisplayProperties2KHR(
     VulkanHandleMapping* handlemap,
     VkDisplayProperties2KHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkDisplayPropertiesKHR(handlemap, (VkDisplayPropertiesKHR*)(&toMap->displayProperties));
 }
 
@@ -2074,6 +2546,8 @@ void handlemap_VkDisplayPlaneProperties2KHR(
     VulkanHandleMapping* handlemap,
     VkDisplayPlaneProperties2KHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkDisplayPlanePropertiesKHR(handlemap, (VkDisplayPlanePropertiesKHR*)(&toMap->displayPlaneProperties));
 }
 
@@ -2081,6 +2555,8 @@ void handlemap_VkDisplayModeProperties2KHR(
     VulkanHandleMapping* handlemap,
     VkDisplayModeProperties2KHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkDisplayModePropertiesKHR(handlemap, (VkDisplayModePropertiesKHR*)(&toMap->displayModeProperties));
 }
 
@@ -2088,6 +2564,8 @@ void handlemap_VkDisplayPlaneInfo2KHR(
     VulkanHandleMapping* handlemap,
     VkDisplayPlaneInfo2KHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkDisplayModeKHR((VkDisplayModeKHR*)&toMap->mode);
 }
 
@@ -2095,6 +2573,8 @@ void handlemap_VkDisplayPlaneCapabilities2KHR(
     VulkanHandleMapping* handlemap,
     VkDisplayPlaneCapabilities2KHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkDisplayPlaneCapabilitiesKHR(handlemap, (VkDisplayPlaneCapabilitiesKHR*)(&toMap->capabilities));
 }
 
@@ -2112,6 +2592,8 @@ void handlemap_VkImageFormatListCreateInfoKHR(
     VulkanHandleMapping* handlemap,
     VkImageFormatListCreateInfoKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2128,6 +2610,8 @@ void handlemap_VkPhysicalDevice8BitStorageFeaturesKHR(
     VulkanHandleMapping* handlemap,
     VkPhysicalDevice8BitStorageFeaturesKHR* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2136,6 +2620,8 @@ void handlemap_VkDebugReportCallbackCreateInfoEXT(
     VulkanHandleMapping* handlemap,
     VkDebugReportCallbackCreateInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2150,6 +2636,8 @@ void handlemap_VkPipelineRasterizationStateRasterizationOrderAMD(
     VulkanHandleMapping* handlemap,
     VkPipelineRasterizationStateRasterizationOrderAMD* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2162,18 +2650,24 @@ void handlemap_VkDebugMarkerObjectNameInfoEXT(
     VulkanHandleMapping* handlemap,
     VkDebugMarkerObjectNameInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDebugMarkerObjectTagInfoEXT(
     VulkanHandleMapping* handlemap,
     VkDebugMarkerObjectTagInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDebugMarkerMarkerInfoEXT(
     VulkanHandleMapping* handlemap,
     VkDebugMarkerMarkerInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2184,18 +2678,24 @@ void handlemap_VkDedicatedAllocationImageCreateInfoNV(
     VulkanHandleMapping* handlemap,
     VkDedicatedAllocationImageCreateInfoNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDedicatedAllocationBufferCreateInfoNV(
     VulkanHandleMapping* handlemap,
     VkDedicatedAllocationBufferCreateInfoNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDedicatedAllocationMemoryAllocateInfoNV(
     VulkanHandleMapping* handlemap,
     VkDedicatedAllocationMemoryAllocateInfoNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
 }
@@ -2214,6 +2714,8 @@ void handlemap_VkTextureLODGatherFormatPropertiesAMD(
     VulkanHandleMapping* handlemap,
     VkTextureLODGatherFormatPropertiesAMD* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2222,12 +2724,16 @@ void handlemap_VkShaderResourceUsageAMD(
     VulkanHandleMapping* handlemap,
     VkShaderResourceUsageAMD* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkShaderStatisticsInfoAMD(
     VulkanHandleMapping* handlemap,
     VkShaderStatisticsInfoAMD* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkShaderResourceUsageAMD(handlemap, (VkShaderResourceUsageAMD*)(&toMap->resourceUsage));
 }
 
@@ -2241,6 +2747,8 @@ void handlemap_VkExternalImageFormatPropertiesNV(
     VulkanHandleMapping* handlemap,
     VkExternalImageFormatPropertiesNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkImageFormatProperties(handlemap, (VkImageFormatProperties*)(&toMap->imageFormatProperties));
 }
 
@@ -2250,12 +2758,16 @@ void handlemap_VkExternalMemoryImageCreateInfoNV(
     VulkanHandleMapping* handlemap,
     VkExternalMemoryImageCreateInfoNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkExportMemoryAllocateInfoNV(
     VulkanHandleMapping* handlemap,
     VkExportMemoryAllocateInfoNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2264,12 +2776,16 @@ void handlemap_VkImportMemoryWin32HandleInfoNV(
     VulkanHandleMapping* handlemap,
     VkImportMemoryWin32HandleInfoNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkExportMemoryWin32HandleInfoNV(
     VulkanHandleMapping* handlemap,
     VkExportMemoryWin32HandleInfoNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2278,6 +2794,8 @@ void handlemap_VkWin32KeyedMutexAcquireReleaseInfoNV(
     VulkanHandleMapping* handlemap,
     VkWin32KeyedMutexAcquireReleaseInfoNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pAcquireSyncs)
     {
         handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)toMap->pAcquireSyncs, toMap->acquireCount);
@@ -2294,6 +2812,8 @@ void handlemap_VkValidationFlagsEXT(
     VulkanHandleMapping* handlemap,
     VkValidationFlagsEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2302,6 +2822,8 @@ void handlemap_VkViSurfaceCreateInfoNN(
     VulkanHandleMapping* handlemap,
     VkViSurfaceCreateInfoNN* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2314,6 +2836,8 @@ void handlemap_VkConditionalRenderingBeginInfoEXT(
     VulkanHandleMapping* handlemap,
     VkConditionalRenderingBeginInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
 }
 
@@ -2321,12 +2845,16 @@ void handlemap_VkPhysicalDeviceConditionalRenderingFeaturesEXT(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceConditionalRenderingFeaturesEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkCommandBufferInheritanceConditionalRenderingInfoEXT(
     VulkanHandleMapping* handlemap,
     VkCommandBufferInheritanceConditionalRenderingInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2335,18 +2863,24 @@ void handlemap_VkDeviceGeneratedCommandsFeaturesNVX(
     VulkanHandleMapping* handlemap,
     VkDeviceGeneratedCommandsFeaturesNVX* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDeviceGeneratedCommandsLimitsNVX(
     VulkanHandleMapping* handlemap,
     VkDeviceGeneratedCommandsLimitsNVX* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkIndirectCommandsTokenNVX(
     VulkanHandleMapping* handlemap,
     VkIndirectCommandsTokenNVX* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
 }
 
@@ -2354,12 +2888,16 @@ void handlemap_VkIndirectCommandsLayoutTokenNVX(
     VulkanHandleMapping* handlemap,
     VkIndirectCommandsLayoutTokenNVX* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkIndirectCommandsLayoutCreateInfoNVX(
     VulkanHandleMapping* handlemap,
     VkIndirectCommandsLayoutCreateInfoNVX* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pTokens)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->tokenCount; ++i)
@@ -2373,6 +2911,8 @@ void handlemap_VkCmdProcessCommandsInfoNVX(
     VulkanHandleMapping* handlemap,
     VkCmdProcessCommandsInfoNVX* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkObjectTableNVX((VkObjectTableNVX*)&toMap->objectTable);
     handlemap->mapHandles_VkIndirectCommandsLayoutNVX((VkIndirectCommandsLayoutNVX*)&toMap->indirectCommandsLayout);
     if (toMap->pIndirectCommandsTokens)
@@ -2391,6 +2931,8 @@ void handlemap_VkCmdReserveSpaceForCommandsInfoNVX(
     VulkanHandleMapping* handlemap,
     VkCmdReserveSpaceForCommandsInfoNVX* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkObjectTableNVX((VkObjectTableNVX*)&toMap->objectTable);
     handlemap->mapHandles_VkIndirectCommandsLayoutNVX((VkIndirectCommandsLayoutNVX*)&toMap->indirectCommandsLayout);
 }
@@ -2399,18 +2941,24 @@ void handlemap_VkObjectTableCreateInfoNVX(
     VulkanHandleMapping* handlemap,
     VkObjectTableCreateInfoNVX* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkObjectTableEntryNVX(
     VulkanHandleMapping* handlemap,
     VkObjectTableEntryNVX* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkObjectTablePipelineEntryNVX(
     VulkanHandleMapping* handlemap,
     VkObjectTablePipelineEntryNVX* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkPipeline((VkPipeline*)&toMap->pipeline);
 }
 
@@ -2418,6 +2966,8 @@ void handlemap_VkObjectTableDescriptorSetEntryNVX(
     VulkanHandleMapping* handlemap,
     VkObjectTableDescriptorSetEntryNVX* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkPipelineLayout((VkPipelineLayout*)&toMap->pipelineLayout);
     handlemap->mapHandles_VkDescriptorSet((VkDescriptorSet*)&toMap->descriptorSet);
 }
@@ -2426,6 +2976,8 @@ void handlemap_VkObjectTableVertexBufferEntryNVX(
     VulkanHandleMapping* handlemap,
     VkObjectTableVertexBufferEntryNVX* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
 }
 
@@ -2433,6 +2985,8 @@ void handlemap_VkObjectTableIndexBufferEntryNVX(
     VulkanHandleMapping* handlemap,
     VkObjectTableIndexBufferEntryNVX* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
 }
 
@@ -2440,6 +2994,8 @@ void handlemap_VkObjectTablePushConstantEntryNVX(
     VulkanHandleMapping* handlemap,
     VkObjectTablePushConstantEntryNVX* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkPipelineLayout((VkPipelineLayout*)&toMap->pipelineLayout);
 }
 
@@ -2449,12 +3005,16 @@ void handlemap_VkViewportWScalingNV(
     VulkanHandleMapping* handlemap,
     VkViewportWScalingNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPipelineViewportWScalingStateCreateInfoNV(
     VulkanHandleMapping* handlemap,
     VkPipelineViewportWScalingStateCreateInfoNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pViewportWScalings)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->viewportCount; ++i)
@@ -2474,6 +3034,8 @@ void handlemap_VkSurfaceCapabilities2EXT(
     VulkanHandleMapping* handlemap,
     VkSurfaceCapabilities2EXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->currentExtent));
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->minImageExtent));
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->maxImageExtent));
@@ -2485,24 +3047,32 @@ void handlemap_VkDisplayPowerInfoEXT(
     VulkanHandleMapping* handlemap,
     VkDisplayPowerInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDeviceEventInfoEXT(
     VulkanHandleMapping* handlemap,
     VkDeviceEventInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDisplayEventInfoEXT(
     VulkanHandleMapping* handlemap,
     VkDisplayEventInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkSwapchainCounterCreateInfoEXT(
     VulkanHandleMapping* handlemap,
     VkSwapchainCounterCreateInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2511,24 +3081,32 @@ void handlemap_VkRefreshCycleDurationGOOGLE(
     VulkanHandleMapping* handlemap,
     VkRefreshCycleDurationGOOGLE* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPastPresentationTimingGOOGLE(
     VulkanHandleMapping* handlemap,
     VkPastPresentationTimingGOOGLE* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPresentTimeGOOGLE(
     VulkanHandleMapping* handlemap,
     VkPresentTimeGOOGLE* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPresentTimesInfoGOOGLE(
     VulkanHandleMapping* handlemap,
     VkPresentTimesInfoGOOGLE* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pTimes)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->swapchainCount; ++i)
@@ -2550,6 +3128,8 @@ void handlemap_VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2558,12 +3138,16 @@ void handlemap_VkViewportSwizzleNV(
     VulkanHandleMapping* handlemap,
     VkViewportSwizzleNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPipelineViewportSwizzleStateCreateInfoNV(
     VulkanHandleMapping* handlemap,
     VkPipelineViewportSwizzleStateCreateInfoNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pViewportSwizzles)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->viewportCount; ++i)
@@ -2579,12 +3163,16 @@ void handlemap_VkPhysicalDeviceDiscardRectanglePropertiesEXT(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceDiscardRectanglePropertiesEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPipelineDiscardRectangleStateCreateInfoEXT(
     VulkanHandleMapping* handlemap,
     VkPipelineDiscardRectangleStateCreateInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pDiscardRectangles)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->discardRectangleCount; ++i)
@@ -2600,12 +3188,16 @@ void handlemap_VkPhysicalDeviceConservativeRasterizationPropertiesEXT(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceConservativeRasterizationPropertiesEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPipelineRasterizationConservativeStateCreateInfoEXT(
     VulkanHandleMapping* handlemap,
     VkPipelineRasterizationConservativeStateCreateInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2616,12 +3208,16 @@ void handlemap_VkXYColorEXT(
     VulkanHandleMapping* handlemap,
     VkXYColorEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkHdrMetadataEXT(
     VulkanHandleMapping* handlemap,
     VkHdrMetadataEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkXYColorEXT(handlemap, (VkXYColorEXT*)(&toMap->displayPrimaryRed));
     handlemap_VkXYColorEXT(handlemap, (VkXYColorEXT*)(&toMap->displayPrimaryGreen));
     handlemap_VkXYColorEXT(handlemap, (VkXYColorEXT*)(&toMap->displayPrimaryBlue));
@@ -2634,6 +3230,8 @@ void handlemap_VkIOSSurfaceCreateInfoMVK(
     VulkanHandleMapping* handlemap,
     VkIOSSurfaceCreateInfoMVK* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2642,6 +3240,8 @@ void handlemap_VkMacOSSurfaceCreateInfoMVK(
     VulkanHandleMapping* handlemap,
     VkMacOSSurfaceCreateInfoMVK* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2654,24 +3254,32 @@ void handlemap_VkDebugUtilsObjectNameInfoEXT(
     VulkanHandleMapping* handlemap,
     VkDebugUtilsObjectNameInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDebugUtilsObjectTagInfoEXT(
     VulkanHandleMapping* handlemap,
     VkDebugUtilsObjectTagInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDebugUtilsLabelEXT(
     VulkanHandleMapping* handlemap,
     VkDebugUtilsLabelEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDebugUtilsMessengerCallbackDataEXT(
     VulkanHandleMapping* handlemap,
     VkDebugUtilsMessengerCallbackDataEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pQueueLabels)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->queueLabelCount; ++i)
@@ -2699,6 +3307,8 @@ void handlemap_VkDebugUtilsMessengerCreateInfoEXT(
     VulkanHandleMapping* handlemap,
     VkDebugUtilsMessengerCreateInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2707,18 +3317,24 @@ void handlemap_VkAndroidHardwareBufferUsageANDROID(
     VulkanHandleMapping* handlemap,
     VkAndroidHardwareBufferUsageANDROID* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkAndroidHardwareBufferPropertiesANDROID(
     VulkanHandleMapping* handlemap,
     VkAndroidHardwareBufferPropertiesANDROID* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkAndroidHardwareBufferFormatPropertiesANDROID(
     VulkanHandleMapping* handlemap,
     VkAndroidHardwareBufferFormatPropertiesANDROID* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkComponentMapping(handlemap, (VkComponentMapping*)(&toMap->samplerYcbcrConversionComponents));
 }
 
@@ -2726,12 +3342,16 @@ void handlemap_VkImportAndroidHardwareBufferInfoANDROID(
     VulkanHandleMapping* handlemap,
     VkImportAndroidHardwareBufferInfoANDROID* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkMemoryGetAndroidHardwareBufferInfoANDROID(
     VulkanHandleMapping* handlemap,
     VkMemoryGetAndroidHardwareBufferInfoANDROID* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)&toMap->memory);
 }
 
@@ -2739,6 +3359,8 @@ void handlemap_VkExternalFormatANDROID(
     VulkanHandleMapping* handlemap,
     VkExternalFormatANDROID* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2747,12 +3369,16 @@ void handlemap_VkSamplerReductionModeCreateInfoEXT(
     VulkanHandleMapping* handlemap,
     VkSamplerReductionModeCreateInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2769,12 +3395,16 @@ void handlemap_VkSampleLocationEXT(
     VulkanHandleMapping* handlemap,
     VkSampleLocationEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkSampleLocationsInfoEXT(
     VulkanHandleMapping* handlemap,
     VkSampleLocationsInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->sampleLocationGridSize));
     if (toMap->pSampleLocations)
     {
@@ -2789,6 +3419,8 @@ void handlemap_VkAttachmentSampleLocationsEXT(
     VulkanHandleMapping* handlemap,
     VkAttachmentSampleLocationsEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkSampleLocationsInfoEXT(handlemap, (VkSampleLocationsInfoEXT*)(&toMap->sampleLocationsInfo));
 }
 
@@ -2796,6 +3428,8 @@ void handlemap_VkSubpassSampleLocationsEXT(
     VulkanHandleMapping* handlemap,
     VkSubpassSampleLocationsEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkSampleLocationsInfoEXT(handlemap, (VkSampleLocationsInfoEXT*)(&toMap->sampleLocationsInfo));
 }
 
@@ -2803,6 +3437,8 @@ void handlemap_VkRenderPassSampleLocationsBeginInfoEXT(
     VulkanHandleMapping* handlemap,
     VkRenderPassSampleLocationsBeginInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pAttachmentInitialSampleLocations)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->attachmentInitialSampleLocationsCount; ++i)
@@ -2823,6 +3459,8 @@ void handlemap_VkPipelineSampleLocationsStateCreateInfoEXT(
     VulkanHandleMapping* handlemap,
     VkPipelineSampleLocationsStateCreateInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkSampleLocationsInfoEXT(handlemap, (VkSampleLocationsInfoEXT*)(&toMap->sampleLocationsInfo));
 }
 
@@ -2830,6 +3468,8 @@ void handlemap_VkPhysicalDeviceSampleLocationsPropertiesEXT(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceSampleLocationsPropertiesEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->maxSampleLocationGridSize));
 }
 
@@ -2837,6 +3477,8 @@ void handlemap_VkMultisamplePropertiesEXT(
     VulkanHandleMapping* handlemap,
     VkMultisamplePropertiesEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->maxSampleLocationGridSize));
 }
 
@@ -2846,18 +3488,24 @@ void handlemap_VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPipelineColorBlendAdvancedStateCreateInfoEXT(
     VulkanHandleMapping* handlemap,
     VkPipelineColorBlendAdvancedStateCreateInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2866,6 +3514,8 @@ void handlemap_VkPipelineCoverageToColorStateCreateInfoNV(
     VulkanHandleMapping* handlemap,
     VkPipelineCoverageToColorStateCreateInfoNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2874,6 +3524,8 @@ void handlemap_VkPipelineCoverageModulationStateCreateInfoNV(
     VulkanHandleMapping* handlemap,
     VkPipelineCoverageModulationStateCreateInfoNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2886,12 +3538,16 @@ void handlemap_VkValidationCacheCreateInfoEXT(
     VulkanHandleMapping* handlemap,
     VkValidationCacheCreateInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkShaderModuleValidationCacheCreateInfoEXT(
     VulkanHandleMapping* handlemap,
     VkShaderModuleValidationCacheCreateInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     handlemap->mapHandles_VkValidationCacheEXT((VkValidationCacheEXT*)&toMap->validationCache);
 }
 
@@ -2901,30 +3557,40 @@ void handlemap_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT(
     VulkanHandleMapping* handlemap,
     VkDescriptorSetLayoutBindingFlagsCreateInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceDescriptorIndexingFeaturesEXT(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceDescriptorIndexingFeaturesEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceDescriptorIndexingPropertiesEXT(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceDescriptorIndexingPropertiesEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT(
     VulkanHandleMapping* handlemap,
     VkDescriptorSetVariableDescriptorCountAllocateInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT(
     VulkanHandleMapping* handlemap,
     VkDescriptorSetVariableDescriptorCountLayoutSupportEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2935,6 +3601,8 @@ void handlemap_VkDeviceQueueGlobalPriorityCreateInfoEXT(
     VulkanHandleMapping* handlemap,
     VkDeviceQueueGlobalPriorityCreateInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2943,18 +3611,24 @@ void handlemap_VkImportMemoryHostPointerInfoEXT(
     VulkanHandleMapping* handlemap,
     VkImportMemoryHostPointerInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkMemoryHostPointerPropertiesEXT(
     VulkanHandleMapping* handlemap,
     VkMemoryHostPointerPropertiesEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPhysicalDeviceExternalMemoryHostPropertiesEXT(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceExternalMemoryHostPropertiesEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2965,6 +3639,8 @@ void handlemap_VkPhysicalDeviceShaderCorePropertiesAMD(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceShaderCorePropertiesAMD* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
@@ -2973,18 +3649,24 @@ void handlemap_VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkVertexInputBindingDivisorDescriptionEXT(
     VulkanHandleMapping* handlemap,
     VkVertexInputBindingDivisorDescriptionEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkPipelineVertexInputDivisorStateCreateInfoEXT(
     VulkanHandleMapping* handlemap,
     VkPipelineVertexInputDivisorStateCreateInfoEXT* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
     if (toMap->pVertexBindingDivisors)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->vertexBindingDivisorCount; ++i)
@@ -3002,12 +3684,16 @@ void handlemap_VkQueueFamilyCheckpointPropertiesNV(
     VulkanHandleMapping* handlemap,
     VkQueueFamilyCheckpointPropertiesNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 void handlemap_VkCheckpointDataNV(
     VulkanHandleMapping* handlemap,
     VkCheckpointDataNV* toMap)
 {
+    (void)handlemap;
+    (void)toMap;
 }
 
 #endif
