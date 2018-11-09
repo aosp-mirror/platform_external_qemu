@@ -30,13 +30,19 @@
 #include "IOStream.h"
 #include "emugl/common/logging.h"
 
+#include "VkDecoderGlobalState.h"
+
 #include "VulkanDispatch.h"
 #include "VulkanStream.h"
 
+#include <unordered_map>
 
 
 
 
+
+using android::base::AutoLock;
+using android::base::Lock;
 
 using emugl::vkDispatch;
 
@@ -44,16 +50,24 @@ using namespace goldfish_vk;
 
 class VkDecoder::Impl {
 public:
-    Impl() : m_vk(vkDispatch()) { }
+    Impl() : m_vk(vkDispatch()), m_state(VkDecoderGlobalState::get()) { }
     VulkanStream* stream() { return &m_vkStream; }
     VulkanMemReadingStream* readStream() { return &m_vkMemReadingStream; }
 
     size_t decode(void* buf, size_t bufsize, IOStream* stream);
 
 private:
+    struct MappedMemoryInfo {
+        void* hostPtr = nullptr;
+        VkDeviceSize size;
+    };
+
     VulkanDispatch* m_vk;
+    VkDecoderGlobalState* m_state;
     VulkanStream m_vkStream { nullptr };
     VulkanMemReadingStream m_vkMemReadingStream { nullptr };
+
+    std::unordered_map<VkDeviceMemory, MappedMemoryInfo> m_mappedMemoryInfo;
 };
 
 VkDecoder::VkDecoder() :
@@ -563,7 +577,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pMemory, sizeof(VkDeviceMemory));
                 vkReadStream->read((VkDeviceMemory*)pMemory, sizeof(VkDeviceMemory));
                 VkResult vkAllocateMemory_VkResult_return = (VkResult)0;
-                vkAllocateMemory_VkResult_return = m_vk->vkAllocateMemory(device, pAllocateInfo, pAllocator, pMemory);
+                vkAllocateMemory_VkResult_return = m_state->on_vkAllocateMemory(device, pAllocateInfo, pAllocator, pMemory);
                 vkStream->write((VkDeviceMemory*)pMemory, sizeof(VkDeviceMemory));
                 vkStream->write(&vkAllocateMemory_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
@@ -582,7 +596,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
-                m_vk->vkFreeMemory(device, memory, pAllocator);
+                m_state->on_vkFreeMemory(device, memory, pAllocator);
                 vkStream->commitWrite();
                 break;
             }
@@ -606,17 +620,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->read((void**)ppData, sizeof(void*));
                 }
                 VkResult vkMapMemory_VkResult_return = (VkResult)0;
-                vkMapMemory_VkResult_return = m_vk->vkMapMemory(device, memory, offset, size, flags, ppData);
+                vkMapMemory_VkResult_return = m_state->on_vkMapMemory(device, memory, offset, size, flags, ppData);
                 vkStream->write((void***)&ppData, sizeof(void**));
                 if (ppData)
                 {
                     vkStream->write((void**)ppData, sizeof(void*));
                 }
                 vkStream->write(&vkMapMemory_VkResult_return, sizeof(VkResult));
-                if (((vkMapMemory_VkResult_return == VK_SUCCESS) && ppData && size > 0))
-                {
-                    vkStream->write(*ppData, size);
-                }
                 vkStream->commitWrite();
                 break;
             }
@@ -626,7 +636,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDeviceMemory memory;
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->read((VkDeviceMemory*)&memory, sizeof(VkDeviceMemory));
-                m_vk->vkUnmapMemory(device, memory);
+                m_state->on_vkUnmapMemory(device, memory);
                 vkStream->commitWrite();
                 break;
             }
@@ -641,6 +651,17 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 for (uint32_t i = 0; i < (uint32_t)((memoryRangeCount)); ++i)
                 {
                     unmarshal_VkMappedMemoryRange(vkReadStream, (VkMappedMemoryRange*)(pMemoryRanges + i));
+                }
+                for (uint32_t i; i < memoryRangeCount; ++i)
+                {
+                    auto range = pMemoryRanges[i];
+                    auto memory = pMemoryRanges[i].memory;
+                    auto size = pMemoryRanges[i].size;
+                    auto offset = pMemoryRanges[i].offset;
+                    auto hostPtr = m_state->getMappedHostPointer(memory);
+                    if (!hostPtr) continue;
+                    uint8_t* targetRange = hostPtr + offset;
+                    vkReadStream->read(targetRange, size);
                 }
                 VkResult vkFlushMappedMemoryRanges_VkResult_return = (VkResult)0;
                 vkFlushMappedMemoryRanges_VkResult_return = m_vk->vkFlushMappedMemoryRanges(device, memoryRangeCount, pMemoryRanges);
@@ -663,6 +684,17 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkResult vkInvalidateMappedMemoryRanges_VkResult_return = (VkResult)0;
                 vkInvalidateMappedMemoryRanges_VkResult_return = m_vk->vkInvalidateMappedMemoryRanges(device, memoryRangeCount, pMemoryRanges);
                 vkStream->write(&vkInvalidateMappedMemoryRanges_VkResult_return, sizeof(VkResult));
+                for (uint32_t i; i < memoryRangeCount; ++i)
+                {
+                    auto range = pMemoryRanges[i];
+                    auto memory = pMemoryRanges[i].memory;
+                    auto size = pMemoryRanges[i].size;
+                    auto offset = pMemoryRanges[i].offset;
+                    auto hostPtr = m_state->getMappedHostPointer(memory);
+                    if (!hostPtr) continue;
+                    uint8_t* targetRange = hostPtr + offset;
+                    vkStream->write(targetRange, size);
+                }
                 vkStream->commitWrite();
                 break;
             }
