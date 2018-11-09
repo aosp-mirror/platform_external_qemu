@@ -99,10 +99,10 @@ class CodeGen(object):
 
     def indent(self,extra=0):
         return "".join("    " * (self.indentLevel + extra))
-    
+
     def incrIndent(self,):
         self.indentLevel += 1
-    
+
     def decrIndent(self,):
         if self.indentLevel > 0:
             self.indentLevel -= 1
@@ -216,7 +216,7 @@ class CodeGen(object):
             paramStr = (" " + vulkanType.paramName)
         else:
             paramStr = ""
-        
+
         if vulkanType.staticArrExpr:
             staticArrInfo = "[%s]" % vulkanType.staticArrExpr
         else:
@@ -381,19 +381,25 @@ class CodeGen(object):
 
     def generalAccess(self,
                       vulkanType,
-                      parentVarName="parent",
+                      parentVarName=None,
                       asPtr=True,
                       structAsPtr=True):
         if vulkanType.parent is None:
-            return self.accessParameter(vulkanType, asPtr=asPtr)
+            if parentVarName is None:
+                return self.accessParameter(vulkanType, asPtr=asPtr)
+            else:
+                return self.accessParameter(vulkanType.withModifiedName(parentVarName), asPtr=asPtr)
 
         if isinstance(vulkanType.parent, VulkanCompoundType):
             return self.makeStructAccess(
                 vulkanType, parentVarName, asPtr=asPtr, structAsPtr=structAsPtr)
 
         if isinstance(vulkanType.parent, VulkanAPI):
-            return self.accessParameter(vulkanType, asPtr=asPtr)
-        
+            if parentVarName is None:
+                return self.accessParameter(vulkanType, asPtr=asPtr)
+            else:
+                return self.accessParameter(vulkanType.withModifiedName(parentVarName), asPtr=asPtr)
+
         os.abort("Could not find a way to access Vulkan type %s" %
                  vulkanType.name)
 
