@@ -29,9 +29,7 @@ get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../.
 toolchain_generate("${ANDROID_TARGET_TAG}")
 
 list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/bin/libwinpthread-1.dll>lib64/libwinpthread-1.dll")
-list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/lib32/libwinpthread-1.dll>lib/libwinpthread-1.dll")
 list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/lib/libgcc_s_seh-1.dll>lib64/libgcc_s_seh-1.dll")
-list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/lib32/libgcc_s_sjlj-1.dll>lib/libgcc_s_sjlj-1.dll")
 
 list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-m64 -static-libgcc -Xlinker --build-id -mcx16")
 
