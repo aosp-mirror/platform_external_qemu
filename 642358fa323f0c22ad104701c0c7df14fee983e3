@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4dd06aec_1c22c3a4",
+        "filename": ".vscode/c_cpp_properties.json",
+        "patchSetId": 12
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-09T16:45:23Z",
+      "side": 1,
+      "message": "\"${workspaceFolder}/objs/build/intermediates64/cmake/android-emu-base\" is not used.",
+      "revId": "642358fa323f0c22ad104701c0c7df14fee983e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "635a945d_656526c1",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 12
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-09T16:45:23Z",
+      "side": 1,
+      "message": "Is it possible for darwinn to live outside android-emu? If not that\u0027s ok, but everyone who will take a dependency on android-emu will see your headers.",
+      "revId": "642358fa323f0c22ad104701c0c7df14fee983e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "91b9d8a9_f146ddf8",
+        "filename": "android/android-emu/android/darwinn/darwinn.cmake",
+        "patchSetId": 12
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-09T16:45:23Z",
+      "side": 1,
+      "message": "Precompiled code has to live in a different location. We use the following steps:\n\n1) Check in the source code as an archive in prebuilts/android-emulator-build/archive and update PACKAGES.TXT\n2) Create a build script that can compile the checked in archive. Our compile scripts live in ./android/scripts. See ./android/scripts/build-libusb.sh for example.\n3) Create an ./android/build/cmake/config/emu-PACKAGE-config.cmake which defines the precompiled target so we can use it.",
+      "revId": "642358fa323f0c22ad104701c0c7df14fee983e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "555f5f19_1c8d3cc4",
+        "filename": "android/android-emu/android/darwinn/darwinn.cmake",
+        "patchSetId": 12
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-09T16:45:23Z",
+      "side": 1,
+      "message": "You can use link_libraries protobuf::libprotobuf",
+      "revId": "642358fa323f0c22ad104701c0c7df14fee983e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "62272e6f_fa304630",
+        "filename": "android/android-emu/android/darwinn/darwinn.cmake",
+        "patchSetId": 12
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-09T16:45:23Z",
+      "side": 1,
+      "message": "gmock-main should be sufficient.",
+      "revId": "642358fa323f0c22ad104701c0c7df14fee983e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
