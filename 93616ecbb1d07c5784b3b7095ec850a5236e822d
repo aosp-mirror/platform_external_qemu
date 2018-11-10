@@ -36,6 +36,23 @@
     },
     {
       "key": {
+        "uuid": "3f90008a_f9a4bfab",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-10T07:32:50Z",
+      "side": 1,
+      "message": "psq:\n\n[win-rel] /usr/local/google/buildbot/src/android/emu-master-dev/external/qemu/hw/pci/goldfish_address_space.c: In function \u0027address_space_allocator_find_available_block\u0027:\n[win-rel] /usr/local/google/buildbot/src/android/emu-master-dev/external/qemu/hw/pci/goldfish_address_space.c:78:5: error: \u0027for\u0027 loop initial declarations are only allowed in C99 mode\n[win-rel]      for (struct memory_block *i \u003d allocator-\u003ehead; i; i \u003d i-\u003enext) {\n[",
+      "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "614b8dd9_9c6a5700",
         "filename": "hw/pci/goldfish_address_space.c",
         "patchSetId": 10
