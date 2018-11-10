@@ -127,10 +127,9 @@ class EncodingParameters(object):
                 self.toRead.append(param)
                 if param.isCreatedBy(api):
                     self.toCreate.append(param)
-            elif param.isDestroyedBy(api):
-                self.toWrite.append(param)
-                self.toDestroy.append(param)
             else:
+                if param.isDestroyedBy(api):
+                    self.toDestroy.append(param)
                 localCopyParam = \
                     param.getForNonConstAccess().withModifiedName( \
                         "local_" + param.paramName)
@@ -276,9 +275,13 @@ def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
         cgen.stmt("%s->read(targetRange, size)" % streamVar)
         cgen.endFor()
 
+    emit_invalidate_ranges(STREAM)
+
     emit_return(typeInfo, api, cgen)
 
 custom_encodes = {
+    "vkEnumerateDeviceExtensionProperties" : emit_only_goldfish_custom,
+    "vkGetPhysicalDeviceProperties2" : emit_only_goldfish_custom,
     "vkMapMemory" : emit_only_goldfish_custom,
     "vkUnmapMemory" : emit_only_goldfish_custom,
     "vkFlushMappedMemoryRanges" : encode_vkFlushMappedMemoryRanges,
