@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7114d02f_f2ef45c2",
+        "filename": "cmake-main.darwin-x86_64.inc",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-10T04:04:35Z",
+      "side": 1,
+      "message": "I notice that nearly everything has been nuked from the darwin qemu build. This is probably because the darwin version of build-qemu-android is missing, right?\n\nI also feel like there should be an easier process to add a new source file to qemu. If we were edcuated on the proper targets that any potential new source file should belong under, we could more easily and quickly make changes manually instead of going through the automatic process, which currently requires much more cognitive load (running scripts, syncing directories from remote darwin builds, making sure everything is just right) versus typing in the new filenames in a cmake file.",
+      "revId": "015a99c01cb5ad0f09bf6444cfe11fe2b0bdb701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
