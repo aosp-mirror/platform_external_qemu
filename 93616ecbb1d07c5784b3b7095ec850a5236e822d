@@ -2,6 +2,137 @@
   "comments": [
     {
       "key": {
+        "uuid": "a76760b5_4c0c342b",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-10T07:30:45Z",
+      "side": 1,
+      "message": "Roman, this allocator is quite cool / simple :) Awesome work.\n\nIt could be beneficial to add some more comments on the intent / how it works so it can be more easily maintained. I added some more comments throughout where I thought clarification could be beneficial.",
+      "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b4287021_2594e3df",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-10T07:30:45Z",
+      "side": 1,
+      "message": "Good to mention some context about the requirements of such an allocator, such as operating only for guest physical address and operating only in units of pages, aligned to page size. It makes it not the typical allocator.\n\nWhere it\u0027s used in graphics, this allocator could serve anything from a page to hundreds of MB at a time. So it could still be worth it to make it more sophisticated but we will need to see profiling on typical workloads first.",
+      "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "614b8dd9_9c6a5700",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-10T07:30:45Z",
+      "side": 1,
+      "message": "It seems like the strategy is to find the smallest block that fits in order  to get ahead of fragmentation early on? Probably deserves a comment here.",
+      "range": {
+        "startLine": 79,
+        "startChar": 0,
+        "endLine": 80,
+        "endChar": 50
+      },
+      "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3fe8007d_3a7d9ddf",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-10T07:30:45Z",
+      "side": 1,
+      "message": "Could there be a comment mentioning roughly what this does in terms of the state before/after and what conditions hold for valid behavior?\n\npre:\n\n- conditions such that size is always \u003c big_block-\u003esize\n\npost:\n\n- the new block ends up to the \"right\" of the old one",
+      "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "851c28c9_e63f5cbe",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-10T07:30:45Z",
+      "side": 1,
+      "message": "would int be better fitting with errno?",
+      "range": {
+        "startLine": 158,
+        "startChar": 7,
+        "endLine": 158,
+        "endChar": 16
+      },
+      "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "27cba263_6ab0da4c",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-10T07:30:45Z",
+      "side": 1,
+      "message": "should we multiply by page_size again? what about page_size * ((size + page_size - 1) / page_size)",
+      "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1304557_d654f09d",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-10T07:30:45Z",
+      "side": 1,
+      "message": "might need to describe conditions under which this is valid; offset has to be equal to an existing alloced block\u0027s offset?",
+      "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a005791f_8abcd513",
         "filename": "hw/pci/goldfish_address_space.c",
         "patchSetId": 10
