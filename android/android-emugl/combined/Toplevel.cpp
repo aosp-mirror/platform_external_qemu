@@ -32,6 +32,7 @@
 #include "Display.h"
 #include "SurfaceFlinger.h"
 #include "Vsync.h"
+#include "VulkanDispatch.h"
 
 #include <hardware/gralloc.h>
 #include <EGL/egl.h>
@@ -152,6 +153,8 @@ private:
                 mUseWindow, false,                    /* blacklisted */
                 false,                                /* has guest renderer */
                 WINSYS_GLESBACKEND_PREFERENCE_AUTO);
+
+        emugl::vkDispatch(false /* not for test only */);
 
         emuglConfig_setupEnv(&config);
 

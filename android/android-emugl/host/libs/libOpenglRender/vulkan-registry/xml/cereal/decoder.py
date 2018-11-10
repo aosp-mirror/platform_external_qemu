@@ -112,6 +112,7 @@ def emit_decode_return_writeback(api, cgen):
             (WRITE_STREAM, retVar, cgen.sizeofExpr(api.retType)))
 
 def emit_decode_finish(cgen):
+    cgen.stmt("%s->clearPool()" % READ_STREAM)
     cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
 
 def emit_default_decoding(typeInfo, api, cgen):
@@ -174,6 +175,8 @@ def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     emit_decode_finish(cgen)
 
 custom_decodes = {
+    "vkCreateDevice" : emit_global_state_wrapped_decoding,
+    "vkDestroyDevice" : emit_global_state_wrapped_decoding,
     "vkAllocateMemory" : emit_global_state_wrapped_decoding,
     "vkFreeMemory" : emit_global_state_wrapped_decoding,
     "vkMapMemory" : emit_global_state_wrapped_decoding,
