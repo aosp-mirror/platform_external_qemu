@@ -418,6 +418,29 @@ class CodeGen(object):
         os.abort("Could not find a way to access length of Vulkan type %s" %
                  vulkanType.name)
 
+    def vkApiCall(self, api, customPrefix="", customParameters=None, retVarDecl=True):
+        callLhs = None
+
+        retTypeName = api.getRetTypeExpr()
+        retVar = None
+
+        if retTypeName != "void":
+            retVar = api.getRetVarExpr()
+            if retVarDecl:
+                self.stmt("%s %s = (%s)0" % (retTypeName, retVar, retTypeName))
+            callLhs = retVar
+
+        if customParameters is None:
+            self.funcCall(
+            callLhs, customPrefix + api.name, [p.paramName for p in api.parameters])
+        else:
+            self.funcCall(
+                callLhs, customPrefix + api.name, customParameters)
+
+        return (retTypeName, retVar)
+
+    def makeCheckVkSuccess(self, expr):
+        return "((%s) == VK_SUCCESS)" % expr
 
 # Class to wrap a Vulkan API call.
 #

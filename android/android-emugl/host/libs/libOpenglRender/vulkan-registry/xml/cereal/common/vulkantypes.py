@@ -75,6 +75,7 @@ NON_DISPATCHABLE_HANDLE_TYPES = [
 ]
 
 CUSTOM_HANDLE_CREATE_TYPES = [
+    "VkPhysicalDevice",
     "VkQueue",
     "VkPipeline",
     "VkDeviceMemory",
@@ -89,6 +90,11 @@ HANDLE_INFO = {}
 
 for h in HANDLE_TYPES:
     if h in CUSTOM_HANDLE_CREATE_TYPES:
+        if h == "VkPhysicalDevice":
+            HANDLE_INFO[h] = \
+                HandleInfo(
+                    "VkPhysicalDevice",
+                    "vkEnumeratePhysicalDevices", None)
         if h == "VkQueue":
             HANDLE_INFO[h] = \
                 HandleInfo(
@@ -115,6 +121,10 @@ for h in HANDLE_TYPES:
     else:
         HANDLE_INFO[h] = \
             HandleInfo(h, "vkCreate" + h[2:], "vkDestroy" + h[2:])
+
+CUSTOM_CREATE_APIS = [
+    "vkAllocateMemory",
+]
 
 # Holds information about a Vulkan type instance (i.e., not a type definition).
 # Type instances are used as struct field definitions or function parameters,

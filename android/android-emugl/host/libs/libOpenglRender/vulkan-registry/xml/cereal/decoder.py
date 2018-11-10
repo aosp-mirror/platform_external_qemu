@@ -29,7 +29,7 @@ using namespace goldfish_vk;
 
 class VkDecoder::Impl {
 public:
-    Impl() : m_vk(vkDispatch()) { }
+    Impl() : m_vk(vkDispatch()), m_state(VkDecoderGlobalState::get()) { }
     VulkanStream* stream() { return &m_vkStream; }
     VulkanMemReadingStream* readStream() { return &m_vkMemReadingStream; }
 
@@ -37,6 +37,7 @@ public:
 
 private:
     VulkanDispatch* m_vk;
+    VkDecoderGlobalState* m_state;
     VulkanStream m_vkStream { nullptr };
     VulkanMemReadingStream m_vkMemReadingStream { nullptr };
 };
@@ -88,15 +89,10 @@ def emit_decode_parameters(typeInfo, api, cgen):
         emit_unmarshal(typeInfo, p, cgen)
 
 def emit_dispatch_call(api, cgen):
-    callLhs = None
-    retTypeName = api.getRetTypeExpr()
-    if retTypeName != "void":
-        retVar = api.getRetVarExpr()
-        cgen.stmt("%s %s = (%s)0" % (retTypeName, retVar, retTypeName))
-        callLhs = retVar
+    cgen.vkApiCall(api, customPrefix="m_vk->")
 
-    cgen.funcCall(
-        callLhs, "m_vk->" + api.name, [p.paramName for p in api.parameters])
+def emit_global_state_wrapped_call(api, cgen):
+    cgen.vkApiCall(api, customPrefix="m_state->on_")
 
 def emit_decode_parameters_writeback(typeInfo, api, cgen):
     paramsToWrite = []
@@ -118,23 +114,72 @@ def emit_decode_return_writeback(api, cgen):
 def emit_decode_finish(cgen):
     cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
 
+def emit_default_decoding(typeInfo, api, cgen):
+    emit_decode_parameters(typeInfo, api, cgen)
+    emit_dispatch_call(api, cgen)
+    emit_decode_parameters_writeback(typeInfo, api, cgen)
+    emit_decode_return_writeback(api, cgen)
+    emit_decode_finish(cgen)
+
+def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
+    emit_decode_parameters(typeInfo, api, cgen)
+    emit_global_state_wrapped_call(api, cgen)
+    emit_decode_parameters_writeback(typeInfo, api, cgen)
+    emit_decode_return_writeback(api, cgen)
+    emit_decode_finish(cgen)
+
 ## Custom decoding definitions##################################################
-def decode_vkMapMemory(typeInfo, api, cgen):
+def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
+    emit_decode_parameters(typeInfo, api, cgen)
+
+    cgen.beginFor("uint32_t i = 0", "i < memoryRangeCount", "++i")
+    cgen.stmt("auto range = pMemoryRanges[i]")
+    cgen.stmt("auto memory = pMemoryRanges[i].memory")
+    cgen.stmt("auto size = pMemoryRanges[i].size")
+    cgen.stmt("auto offset = pMemoryRanges[i].offset")
+    cgen.stmt("size_t readStream = 0")
+    cgen.stmt("%s->read(&readStream, sizeof(size_t))" % READ_STREAM)
+    cgen.stmt("auto hostPtr = m_state->getMappedHostPointer(memory)")
+    cgen.stmt("if (!hostPtr && readStream > 0) abort()")
+    cgen.stmt("if (!hostPtr) continue")
+    cgen.stmt("uint8_t* targetRange = hostPtr + offset")
+    cgen.stmt("%s->read(targetRange, readStream)" % READ_STREAM)
+    cgen.endFor()
+
+    emit_dispatch_call(api, cgen)
+    emit_decode_parameters_writeback(typeInfo, api, cgen)
+    emit_decode_return_writeback(api, cgen)
+    emit_decode_finish(cgen)
+
+def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     emit_decode_parameters(typeInfo, api, cgen)
     emit_dispatch_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
 
-    needWriteback = \
-        "((%s == VK_SUCCESS) && ppData && size > 0)" % api.getRetVarExpr()
-    cgen.beginIf(needWriteback)
-    cgen.stmt("%s->write(*ppData, size)" % (WRITE_STREAM))
-    cgen.endIf()
+    cgen.beginFor("uint32_t i = 0", "i < memoryRangeCount", "++i")
+    cgen.stmt("auto range = pMemoryRanges[i]")
+    cgen.stmt("auto memory = range.memory")
+    cgen.stmt("auto size = range.size")
+    cgen.stmt("auto offset = range.offset")
+    cgen.stmt("auto hostPtr = m_state->getMappedHostPointer(memory)")
+    cgen.stmt("size_t writeStream = 0")
+    cgen.stmt("if (!hostPtr) { %s->write(&writeStream, sizeof(size_t)); continue; }" % WRITE_STREAM)
+    cgen.stmt("uint8_t* targetRange = hostPtr + offset")
+    cgen.stmt("writeStream = size")
+    cgen.stmt("%s->write(&writeStream, sizeof(size_t))" % WRITE_STREAM)
+    cgen.stmt("%s->write(targetRange, size)" % WRITE_STREAM)
+    cgen.endFor()
 
     emit_decode_finish(cgen)
 
 custom_decodes = {
-    "vkMapMemory" : decode_vkMapMemory,
+    "vkAllocateMemory" : emit_global_state_wrapped_decoding,
+    "vkFreeMemory" : emit_global_state_wrapped_decoding,
+    "vkMapMemory" : emit_global_state_wrapped_decoding,
+    "vkUnmapMemory" : emit_global_state_wrapped_decoding,
+    "vkFlushMappedMemoryRanges" : decode_vkFlushMappedMemoryRanges,
+    "vkInvalidateMappedMemoryRanges" : decode_vkInvalidateMappedMemoryRanges,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):
