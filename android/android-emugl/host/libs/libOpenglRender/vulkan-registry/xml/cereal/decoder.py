@@ -89,6 +89,9 @@ def emit_decode_parameters(typeInfo, api, cgen):
         emit_unmarshal(typeInfo, p, cgen)
 
 def emit_dispatch_call(api, cgen):
+    cgen.beginIf("!(%s)" % ("m_vk->" + api.name))
+    cgen.stmt("fprintf(stderr, \"%s not found!\\n\")" % api.name)
+    cgen.endIf()
     cgen.vkApiCall(api, customPrefix="m_vk->")
 
 def emit_global_state_wrapped_call(api, cgen):

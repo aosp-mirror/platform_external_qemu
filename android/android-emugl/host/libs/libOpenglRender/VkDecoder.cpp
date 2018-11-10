@@ -102,6 +102,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pInstance, sizeof(VkInstance));
                 vkReadStream->read((VkInstance*)pInstance, sizeof(VkInstance));
+                if (!(m_vk->vkCreateInstance))
+                {
+                    fprintf(stderr, "vkCreateInstance not found!\n");
+                }
                 VkResult vkCreateInstance_VkResult_return = (VkResult)0;
                 vkCreateInstance_VkResult_return = m_vk->vkCreateInstance(pCreateInfo, pAllocator, pInstance);
                 vkStream->write((VkInstance*)pInstance, sizeof(VkInstance));
@@ -119,6 +123,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroyInstance))
+                {
+                    fprintf(stderr, "vkDestroyInstance not found!\n");
                 }
                 m_vk->vkDestroyInstance(instance, pAllocator);
                 vkStream->commitWrite();
@@ -141,6 +149,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pPhysicalDevices, (*(pPhysicalDeviceCount)) * sizeof(VkPhysicalDevice));
                     vkReadStream->read((VkPhysicalDevice*)pPhysicalDevices, (*(pPhysicalDeviceCount)) * sizeof(VkPhysicalDevice));
+                }
+                if (!(m_vk->vkEnumeratePhysicalDevices))
+                {
+                    fprintf(stderr, "vkEnumeratePhysicalDevices not found!\n");
                 }
                 VkResult vkEnumeratePhysicalDevices_VkResult_return = (VkResult)0;
                 vkEnumeratePhysicalDevices_VkResult_return = m_vk->vkEnumeratePhysicalDevices(instance, pPhysicalDeviceCount, pPhysicalDevices);
@@ -165,6 +177,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
                 vkReadStream->alloc((void**)&pFeatures, sizeof(VkPhysicalDeviceFeatures));
                 unmarshal_VkPhysicalDeviceFeatures(vkReadStream, (VkPhysicalDeviceFeatures*)(pFeatures));
+                if (!(m_vk->vkGetPhysicalDeviceFeatures))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceFeatures not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceFeatures(physicalDevice, pFeatures);
                 marshal_VkPhysicalDeviceFeatures(vkStream, (VkPhysicalDeviceFeatures*)(pFeatures));
                 vkStream->commitWrite();
@@ -179,6 +195,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkFormat*)&format, sizeof(VkFormat));
                 vkReadStream->alloc((void**)&pFormatProperties, sizeof(VkFormatProperties));
                 unmarshal_VkFormatProperties(vkReadStream, (VkFormatProperties*)(pFormatProperties));
+                if (!(m_vk->vkGetPhysicalDeviceFormatProperties))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceFormatProperties not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceFormatProperties(physicalDevice, format, pFormatProperties);
                 marshal_VkFormatProperties(vkStream, (VkFormatProperties*)(pFormatProperties));
                 vkStream->commitWrite();
@@ -201,6 +221,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkImageCreateFlags*)&flags, sizeof(VkImageCreateFlags));
                 vkReadStream->alloc((void**)&pImageFormatProperties, sizeof(VkImageFormatProperties));
                 unmarshal_VkImageFormatProperties(vkReadStream, (VkImageFormatProperties*)(pImageFormatProperties));
+                if (!(m_vk->vkGetPhysicalDeviceImageFormatProperties))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceImageFormatProperties not found!\n");
+                }
                 VkResult vkGetPhysicalDeviceImageFormatProperties_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceImageFormatProperties_VkResult_return = m_vk->vkGetPhysicalDeviceImageFormatProperties(physicalDevice, format, type, tiling, usage, flags, pImageFormatProperties);
                 marshal_VkImageFormatProperties(vkStream, (VkImageFormatProperties*)(pImageFormatProperties));
@@ -215,6 +239,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
                 vkReadStream->alloc((void**)&pProperties, sizeof(VkPhysicalDeviceProperties));
                 unmarshal_VkPhysicalDeviceProperties(vkReadStream, (VkPhysicalDeviceProperties*)(pProperties));
+                if (!(m_vk->vkGetPhysicalDeviceProperties))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceProperties not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceProperties(physicalDevice, pProperties);
                 marshal_VkPhysicalDeviceProperties(vkStream, (VkPhysicalDeviceProperties*)(pProperties));
                 vkStream->commitWrite();
@@ -241,6 +269,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         unmarshal_VkQueueFamilyProperties(vkReadStream, (VkQueueFamilyProperties*)(pQueueFamilyProperties + i));
                     }
                 }
+                if (!(m_vk->vkGetPhysicalDeviceQueueFamilyProperties))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceQueueFamilyProperties not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 vkStream->write((uint32_t**)&pQueueFamilyPropertyCount, sizeof(uint32_t*));
                 if (pQueueFamilyPropertyCount)
@@ -265,6 +297,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
                 vkReadStream->alloc((void**)&pMemoryProperties, sizeof(VkPhysicalDeviceMemoryProperties));
                 unmarshal_VkPhysicalDeviceMemoryProperties(vkReadStream, (VkPhysicalDeviceMemoryProperties*)(pMemoryProperties));
+                if (!(m_vk->vkGetPhysicalDeviceMemoryProperties))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceMemoryProperties not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceMemoryProperties(physicalDevice, pMemoryProperties);
                 marshal_VkPhysicalDeviceMemoryProperties(vkStream, (VkPhysicalDeviceMemoryProperties*)(pMemoryProperties));
                 vkStream->commitWrite();
@@ -276,6 +312,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 char* pName;
                 vkReadStream->read((VkInstance*)&instance, sizeof(VkInstance));
                 vkReadStream->loadStringInPlace((char**)&pName);
+                if (!(m_vk->vkGetInstanceProcAddr))
+                {
+                    fprintf(stderr, "vkGetInstanceProcAddr not found!\n");
+                }
                 PFN_vkVoidFunction vkGetInstanceProcAddr_PFN_vkVoidFunction_return = (PFN_vkVoidFunction)0;
                 vkGetInstanceProcAddr_PFN_vkVoidFunction_return = m_vk->vkGetInstanceProcAddr(instance, pName);
                 vkStream->write(&vkGetInstanceProcAddr_PFN_vkVoidFunction_return, sizeof(PFN_vkVoidFunction));
@@ -288,6 +328,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 char* pName;
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->loadStringInPlace((char**)&pName);
+                if (!(m_vk->vkGetDeviceProcAddr))
+                {
+                    fprintf(stderr, "vkGetDeviceProcAddr not found!\n");
+                }
                 PFN_vkVoidFunction vkGetDeviceProcAddr_PFN_vkVoidFunction_return = (PFN_vkVoidFunction)0;
                 vkGetDeviceProcAddr_PFN_vkVoidFunction_return = m_vk->vkGetDeviceProcAddr(device, pName);
                 vkStream->write(&vkGetDeviceProcAddr_PFN_vkVoidFunction_return, sizeof(PFN_vkVoidFunction));
@@ -311,8 +355,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pDevice, sizeof(VkDevice));
                 vkReadStream->read((VkDevice*)pDevice, sizeof(VkDevice));
+                if (!(m_vk->vkCreateDevice))
+                {
+                    fprintf(stderr, "vkCreateDevice not found!\n");
+                }
                 VkResult vkCreateDevice_VkResult_return = (VkResult)0;
                 vkCreateDevice_VkResult_return = m_vk->vkCreateDevice(physicalDevice, pCreateInfo, pAllocator, pDevice);
+                if (vkCreateDevice_VkResult_return == VK_SUCCESS) {
+                    fprintf(stderr, "%s: device creation succ\n", __func__);
+                } else {
+                    fprintf(stderr, "%s: device creation fail\n", __func__);
+
+                }
                 vkStream->write((VkDevice*)pDevice, sizeof(VkDevice));
                 vkStream->write(&vkCreateDevice_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
@@ -328,6 +382,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroyDevice))
+                {
+                    fprintf(stderr, "vkDestroyDevice not found!\n");
                 }
                 m_vk->vkDestroyDevice(device, pAllocator);
                 vkStream->commitWrite();
@@ -353,6 +411,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         unmarshal_VkExtensionProperties(vkReadStream, (VkExtensionProperties*)(pProperties + i));
                     }
+                }
+                if (!(m_vk->vkEnumerateInstanceExtensionProperties))
+                {
+                    fprintf(stderr, "vkEnumerateInstanceExtensionProperties not found!\n");
                 }
                 VkResult vkEnumerateInstanceExtensionProperties_VkResult_return = (VkResult)0;
                 vkEnumerateInstanceExtensionProperties_VkResult_return = m_vk->vkEnumerateInstanceExtensionProperties(pLayerName, pPropertyCount, pProperties);
@@ -396,6 +458,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         unmarshal_VkExtensionProperties(vkReadStream, (VkExtensionProperties*)(pProperties + i));
                     }
                 }
+                if (!(m_vk->vkEnumerateDeviceExtensionProperties))
+                {
+                    fprintf(stderr, "vkEnumerateDeviceExtensionProperties not found!\n");
+                }
                 VkResult vkEnumerateDeviceExtensionProperties_VkResult_return = (VkResult)0;
                 vkEnumerateDeviceExtensionProperties_VkResult_return = m_vk->vkEnumerateDeviceExtensionProperties(physicalDevice, pLayerName, pPropertyCount, pProperties);
                 vkStream->write((uint32_t**)&pPropertyCount, sizeof(uint32_t*));
@@ -433,6 +499,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         unmarshal_VkLayerProperties(vkReadStream, (VkLayerProperties*)(pProperties + i));
                     }
+                }
+                if (!(m_vk->vkEnumerateInstanceLayerProperties))
+                {
+                    fprintf(stderr, "vkEnumerateInstanceLayerProperties not found!\n");
                 }
                 VkResult vkEnumerateInstanceLayerProperties_VkResult_return = (VkResult)0;
                 vkEnumerateInstanceLayerProperties_VkResult_return = m_vk->vkEnumerateInstanceLayerProperties(pPropertyCount, pProperties);
@@ -474,6 +544,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         unmarshal_VkLayerProperties(vkReadStream, (VkLayerProperties*)(pProperties + i));
                     }
                 }
+                if (!(m_vk->vkEnumerateDeviceLayerProperties))
+                {
+                    fprintf(stderr, "vkEnumerateDeviceLayerProperties not found!\n");
+                }
                 VkResult vkEnumerateDeviceLayerProperties_VkResult_return = (VkResult)0;
                 vkEnumerateDeviceLayerProperties_VkResult_return = m_vk->vkEnumerateDeviceLayerProperties(physicalDevice, pPropertyCount, pProperties);
                 vkStream->write((uint32_t**)&pPropertyCount, sizeof(uint32_t*));
@@ -504,6 +578,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&queueIndex, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&pQueue, sizeof(VkQueue));
                 vkReadStream->read((VkQueue*)pQueue, sizeof(VkQueue));
+                if (!(m_vk->vkGetDeviceQueue))
+                {
+                    fprintf(stderr, "vkGetDeviceQueue not found!\n");
+                }
                 m_vk->vkGetDeviceQueue(device, queueFamilyIndex, queueIndex, pQueue);
                 vkStream->write((VkQueue*)pQueue, sizeof(VkQueue));
                 vkStream->commitWrite();
@@ -523,6 +601,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     unmarshal_VkSubmitInfo(vkReadStream, (VkSubmitInfo*)(pSubmits + i));
                 }
                 vkReadStream->read((VkFence*)&fence, sizeof(VkFence));
+                if (!(m_vk->vkQueueSubmit))
+                {
+                    fprintf(stderr, "vkQueueSubmit not found!\n");
+                }
                 VkResult vkQueueSubmit_VkResult_return = (VkResult)0;
                 vkQueueSubmit_VkResult_return = m_vk->vkQueueSubmit(queue, submitCount, pSubmits, fence);
                 vkStream->write(&vkQueueSubmit_VkResult_return, sizeof(VkResult));
@@ -533,6 +615,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkQueue queue;
                 vkReadStream->read((VkQueue*)&queue, sizeof(VkQueue));
+                if (!(m_vk->vkQueueWaitIdle))
+                {
+                    fprintf(stderr, "vkQueueWaitIdle not found!\n");
+                }
                 VkResult vkQueueWaitIdle_VkResult_return = (VkResult)0;
                 vkQueueWaitIdle_VkResult_return = m_vk->vkQueueWaitIdle(queue);
                 vkStream->write(&vkQueueWaitIdle_VkResult_return, sizeof(VkResult));
@@ -543,6 +629,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkDevice device;
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
+                if (!(m_vk->vkDeviceWaitIdle))
+                {
+                    fprintf(stderr, "vkDeviceWaitIdle not found!\n");
+                }
                 VkResult vkDeviceWaitIdle_VkResult_return = (VkResult)0;
                 vkDeviceWaitIdle_VkResult_return = m_vk->vkDeviceWaitIdle(device);
                 vkStream->write(&vkDeviceWaitIdle_VkResult_return, sizeof(VkResult));
@@ -656,6 +746,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     uint8_t* targetRange = hostPtr + offset;
                     vkReadStream->read(targetRange, readStream);
                 }
+                if (!(m_vk->vkFlushMappedMemoryRanges))
+                {
+                    fprintf(stderr, "vkFlushMappedMemoryRanges not found!\n");
+                }
                 VkResult vkFlushMappedMemoryRanges_VkResult_return = (VkResult)0;
                 vkFlushMappedMemoryRanges_VkResult_return = m_vk->vkFlushMappedMemoryRanges(device, memoryRangeCount, pMemoryRanges);
                 vkStream->write(&vkFlushMappedMemoryRanges_VkResult_return, sizeof(VkResult));
@@ -673,6 +767,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 for (uint32_t i = 0; i < (uint32_t)((memoryRangeCount)); ++i)
                 {
                     unmarshal_VkMappedMemoryRange(vkReadStream, (VkMappedMemoryRange*)(pMemoryRanges + i));
+                }
+                if (!(m_vk->vkInvalidateMappedMemoryRanges))
+                {
+                    fprintf(stderr, "vkInvalidateMappedMemoryRanges not found!\n");
                 }
                 VkResult vkInvalidateMappedMemoryRanges_VkResult_return = (VkResult)0;
                 vkInvalidateMappedMemoryRanges_VkResult_return = m_vk->vkInvalidateMappedMemoryRanges(device, memoryRangeCount, pMemoryRanges);
@@ -703,6 +801,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceMemory*)&memory, sizeof(VkDeviceMemory));
                 vkReadStream->alloc((void**)&pCommittedMemoryInBytes, sizeof(VkDeviceSize));
                 vkReadStream->read((VkDeviceSize*)pCommittedMemoryInBytes, sizeof(VkDeviceSize));
+                if (!(m_vk->vkGetDeviceMemoryCommitment))
+                {
+                    fprintf(stderr, "vkGetDeviceMemoryCommitment not found!\n");
+                }
                 m_vk->vkGetDeviceMemoryCommitment(device, memory, pCommittedMemoryInBytes);
                 vkStream->write((VkDeviceSize*)pCommittedMemoryInBytes, sizeof(VkDeviceSize));
                 vkStream->commitWrite();
@@ -718,6 +820,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkBuffer*)&buffer, sizeof(VkBuffer));
                 vkReadStream->read((VkDeviceMemory*)&memory, sizeof(VkDeviceMemory));
                 vkReadStream->read((VkDeviceSize*)&memoryOffset, sizeof(VkDeviceSize));
+                if (!(m_vk->vkBindBufferMemory))
+                {
+                    fprintf(stderr, "vkBindBufferMemory not found!\n");
+                }
                 VkResult vkBindBufferMemory_VkResult_return = (VkResult)0;
                 vkBindBufferMemory_VkResult_return = m_vk->vkBindBufferMemory(device, buffer, memory, memoryOffset);
                 vkStream->write(&vkBindBufferMemory_VkResult_return, sizeof(VkResult));
@@ -734,6 +840,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkImage*)&image, sizeof(VkImage));
                 vkReadStream->read((VkDeviceMemory*)&memory, sizeof(VkDeviceMemory));
                 vkReadStream->read((VkDeviceSize*)&memoryOffset, sizeof(VkDeviceSize));
+                if (!(m_vk->vkBindImageMemory))
+                {
+                    fprintf(stderr, "vkBindImageMemory not found!\n");
+                }
                 VkResult vkBindImageMemory_VkResult_return = (VkResult)0;
                 vkBindImageMemory_VkResult_return = m_vk->vkBindImageMemory(device, image, memory, memoryOffset);
                 vkStream->write(&vkBindImageMemory_VkResult_return, sizeof(VkResult));
@@ -749,6 +859,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkBuffer*)&buffer, sizeof(VkBuffer));
                 vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements));
                 unmarshal_VkMemoryRequirements(vkReadStream, (VkMemoryRequirements*)(pMemoryRequirements));
+                if (!(m_vk->vkGetBufferMemoryRequirements))
+                {
+                    fprintf(stderr, "vkGetBufferMemoryRequirements not found!\n");
+                }
                 m_vk->vkGetBufferMemoryRequirements(device, buffer, pMemoryRequirements);
                 marshal_VkMemoryRequirements(vkStream, (VkMemoryRequirements*)(pMemoryRequirements));
                 vkStream->commitWrite();
@@ -763,6 +877,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkImage*)&image, sizeof(VkImage));
                 vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements));
                 unmarshal_VkMemoryRequirements(vkReadStream, (VkMemoryRequirements*)(pMemoryRequirements));
+                if (!(m_vk->vkGetImageMemoryRequirements))
+                {
+                    fprintf(stderr, "vkGetImageMemoryRequirements not found!\n");
+                }
                 m_vk->vkGetImageMemoryRequirements(device, image, pMemoryRequirements);
                 marshal_VkMemoryRequirements(vkStream, (VkMemoryRequirements*)(pMemoryRequirements));
                 vkStream->commitWrite();
@@ -790,6 +908,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         unmarshal_VkSparseImageMemoryRequirements(vkReadStream, (VkSparseImageMemoryRequirements*)(pSparseMemoryRequirements + i));
                     }
+                }
+                if (!(m_vk->vkGetImageSparseMemoryRequirements))
+                {
+                    fprintf(stderr, "vkGetImageSparseMemoryRequirements not found!\n");
                 }
                 m_vk->vkGetImageSparseMemoryRequirements(device, image, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 vkStream->write((uint32_t**)&pSparseMemoryRequirementCount, sizeof(uint32_t*));
@@ -839,6 +961,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         unmarshal_VkSparseImageFormatProperties(vkReadStream, (VkSparseImageFormatProperties*)(pProperties + i));
                     }
                 }
+                if (!(m_vk->vkGetPhysicalDeviceSparseImageFormatProperties))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceSparseImageFormatProperties not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceSparseImageFormatProperties(physicalDevice, format, type, samples, usage, tiling, pPropertyCount, pProperties);
                 vkStream->write((uint32_t**)&pPropertyCount, sizeof(uint32_t*));
                 if (pPropertyCount)
@@ -870,6 +996,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     unmarshal_VkBindSparseInfo(vkReadStream, (VkBindSparseInfo*)(pBindInfo + i));
                 }
                 vkReadStream->read((VkFence*)&fence, sizeof(VkFence));
+                if (!(m_vk->vkQueueBindSparse))
+                {
+                    fprintf(stderr, "vkQueueBindSparse not found!\n");
+                }
                 VkResult vkQueueBindSparse_VkResult_return = (VkResult)0;
                 vkQueueBindSparse_VkResult_return = m_vk->vkQueueBindSparse(queue, bindInfoCount, pBindInfo, fence);
                 vkStream->write(&vkQueueBindSparse_VkResult_return, sizeof(VkResult));
@@ -893,6 +1023,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pFence, sizeof(VkFence));
                 vkReadStream->read((VkFence*)pFence, sizeof(VkFence));
+                if (!(m_vk->vkCreateFence))
+                {
+                    fprintf(stderr, "vkCreateFence not found!\n");
+                }
                 VkResult vkCreateFence_VkResult_return = (VkResult)0;
                 vkCreateFence_VkResult_return = m_vk->vkCreateFence(device, pCreateInfo, pAllocator, pFence);
                 vkStream->write((VkFence*)pFence, sizeof(VkFence));
@@ -913,6 +1047,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (!(m_vk->vkDestroyFence))
+                {
+                    fprintf(stderr, "vkDestroyFence not found!\n");
+                }
                 m_vk->vkDestroyFence(device, fence, pAllocator);
                 vkStream->commitWrite();
                 break;
@@ -926,6 +1064,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&fenceCount, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&pFences, ((fenceCount)) * sizeof(const VkFence));
                 vkReadStream->read((VkFence*)pFences, ((fenceCount)) * sizeof(const VkFence));
+                if (!(m_vk->vkResetFences))
+                {
+                    fprintf(stderr, "vkResetFences not found!\n");
+                }
                 VkResult vkResetFences_VkResult_return = (VkResult)0;
                 vkResetFences_VkResult_return = m_vk->vkResetFences(device, fenceCount, pFences);
                 vkStream->write(&vkResetFences_VkResult_return, sizeof(VkResult));
@@ -938,6 +1080,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkFence fence;
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->read((VkFence*)&fence, sizeof(VkFence));
+                if (!(m_vk->vkGetFenceStatus))
+                {
+                    fprintf(stderr, "vkGetFenceStatus not found!\n");
+                }
                 VkResult vkGetFenceStatus_VkResult_return = (VkResult)0;
                 vkGetFenceStatus_VkResult_return = m_vk->vkGetFenceStatus(device, fence);
                 vkStream->write(&vkGetFenceStatus_VkResult_return, sizeof(VkResult));
@@ -957,6 +1103,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkFence*)pFences, ((fenceCount)) * sizeof(const VkFence));
                 vkReadStream->read((VkBool32*)&waitAll, sizeof(VkBool32));
                 vkReadStream->read((uint64_t*)&timeout, sizeof(uint64_t));
+                if (!(m_vk->vkWaitForFences))
+                {
+                    fprintf(stderr, "vkWaitForFences not found!\n");
+                }
                 VkResult vkWaitForFences_VkResult_return = (VkResult)0;
                 vkWaitForFences_VkResult_return = m_vk->vkWaitForFences(device, fenceCount, pFences, waitAll, timeout);
                 vkStream->write(&vkWaitForFences_VkResult_return, sizeof(VkResult));
@@ -980,6 +1130,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pSemaphore, sizeof(VkSemaphore));
                 vkReadStream->read((VkSemaphore*)pSemaphore, sizeof(VkSemaphore));
+                if (!(m_vk->vkCreateSemaphore))
+                {
+                    fprintf(stderr, "vkCreateSemaphore not found!\n");
+                }
                 VkResult vkCreateSemaphore_VkResult_return = (VkResult)0;
                 vkCreateSemaphore_VkResult_return = m_vk->vkCreateSemaphore(device, pCreateInfo, pAllocator, pSemaphore);
                 vkStream->write((VkSemaphore*)pSemaphore, sizeof(VkSemaphore));
@@ -999,6 +1153,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroySemaphore))
+                {
+                    fprintf(stderr, "vkDestroySemaphore not found!\n");
                 }
                 m_vk->vkDestroySemaphore(device, semaphore, pAllocator);
                 vkStream->commitWrite();
@@ -1021,6 +1179,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pEvent, sizeof(VkEvent));
                 vkReadStream->read((VkEvent*)pEvent, sizeof(VkEvent));
+                if (!(m_vk->vkCreateEvent))
+                {
+                    fprintf(stderr, "vkCreateEvent not found!\n");
+                }
                 VkResult vkCreateEvent_VkResult_return = (VkResult)0;
                 vkCreateEvent_VkResult_return = m_vk->vkCreateEvent(device, pCreateInfo, pAllocator, pEvent);
                 vkStream->write((VkEvent*)pEvent, sizeof(VkEvent));
@@ -1041,6 +1203,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (!(m_vk->vkDestroyEvent))
+                {
+                    fprintf(stderr, "vkDestroyEvent not found!\n");
+                }
                 m_vk->vkDestroyEvent(device, event, pAllocator);
                 vkStream->commitWrite();
                 break;
@@ -1051,6 +1217,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkEvent event;
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->read((VkEvent*)&event, sizeof(VkEvent));
+                if (!(m_vk->vkGetEventStatus))
+                {
+                    fprintf(stderr, "vkGetEventStatus not found!\n");
+                }
                 VkResult vkGetEventStatus_VkResult_return = (VkResult)0;
                 vkGetEventStatus_VkResult_return = m_vk->vkGetEventStatus(device, event);
                 vkStream->write(&vkGetEventStatus_VkResult_return, sizeof(VkResult));
@@ -1063,6 +1233,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkEvent event;
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->read((VkEvent*)&event, sizeof(VkEvent));
+                if (!(m_vk->vkSetEvent))
+                {
+                    fprintf(stderr, "vkSetEvent not found!\n");
+                }
                 VkResult vkSetEvent_VkResult_return = (VkResult)0;
                 vkSetEvent_VkResult_return = m_vk->vkSetEvent(device, event);
                 vkStream->write(&vkSetEvent_VkResult_return, sizeof(VkResult));
@@ -1075,6 +1249,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkEvent event;
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->read((VkEvent*)&event, sizeof(VkEvent));
+                if (!(m_vk->vkResetEvent))
+                {
+                    fprintf(stderr, "vkResetEvent not found!\n");
+                }
                 VkResult vkResetEvent_VkResult_return = (VkResult)0;
                 vkResetEvent_VkResult_return = m_vk->vkResetEvent(device, event);
                 vkStream->write(&vkResetEvent_VkResult_return, sizeof(VkResult));
@@ -1098,6 +1276,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pQueryPool, sizeof(VkQueryPool));
                 vkReadStream->read((VkQueryPool*)pQueryPool, sizeof(VkQueryPool));
+                if (!(m_vk->vkCreateQueryPool))
+                {
+                    fprintf(stderr, "vkCreateQueryPool not found!\n");
+                }
                 VkResult vkCreateQueryPool_VkResult_return = (VkResult)0;
                 vkCreateQueryPool_VkResult_return = m_vk->vkCreateQueryPool(device, pCreateInfo, pAllocator, pQueryPool);
                 vkStream->write((VkQueryPool*)pQueryPool, sizeof(VkQueryPool));
@@ -1117,6 +1299,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroyQueryPool))
+                {
+                    fprintf(stderr, "vkDestroyQueryPool not found!\n");
                 }
                 m_vk->vkDestroyQueryPool(device, queryPool, pAllocator);
                 vkStream->commitWrite();
@@ -1141,6 +1327,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((void*)pData, ((dataSize)) * sizeof(uint8_t));
                 vkReadStream->read((VkDeviceSize*)&stride, sizeof(VkDeviceSize));
                 vkReadStream->read((VkQueryResultFlags*)&flags, sizeof(VkQueryResultFlags));
+                if (!(m_vk->vkGetQueryPoolResults))
+                {
+                    fprintf(stderr, "vkGetQueryPoolResults not found!\n");
+                }
                 VkResult vkGetQueryPoolResults_VkResult_return = (VkResult)0;
                 vkGetQueryPoolResults_VkResult_return = m_vk->vkGetQueryPoolResults(device, queryPool, firstQuery, queryCount, dataSize, pData, stride, flags);
                 vkStream->write((void*)pData, ((dataSize)) * sizeof(uint8_t));
@@ -1165,6 +1355,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pBuffer, sizeof(VkBuffer));
                 vkReadStream->read((VkBuffer*)pBuffer, sizeof(VkBuffer));
+                if (!(m_vk->vkCreateBuffer))
+                {
+                    fprintf(stderr, "vkCreateBuffer not found!\n");
+                }
                 VkResult vkCreateBuffer_VkResult_return = (VkResult)0;
                 vkCreateBuffer_VkResult_return = m_vk->vkCreateBuffer(device, pCreateInfo, pAllocator, pBuffer);
                 vkStream->write((VkBuffer*)pBuffer, sizeof(VkBuffer));
@@ -1184,6 +1378,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroyBuffer))
+                {
+                    fprintf(stderr, "vkDestroyBuffer not found!\n");
                 }
                 m_vk->vkDestroyBuffer(device, buffer, pAllocator);
                 vkStream->commitWrite();
@@ -1206,6 +1404,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pView, sizeof(VkBufferView));
                 vkReadStream->read((VkBufferView*)pView, sizeof(VkBufferView));
+                if (!(m_vk->vkCreateBufferView))
+                {
+                    fprintf(stderr, "vkCreateBufferView not found!\n");
+                }
                 VkResult vkCreateBufferView_VkResult_return = (VkResult)0;
                 vkCreateBufferView_VkResult_return = m_vk->vkCreateBufferView(device, pCreateInfo, pAllocator, pView);
                 vkStream->write((VkBufferView*)pView, sizeof(VkBufferView));
@@ -1225,6 +1427,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroyBufferView))
+                {
+                    fprintf(stderr, "vkDestroyBufferView not found!\n");
                 }
                 m_vk->vkDestroyBufferView(device, bufferView, pAllocator);
                 vkStream->commitWrite();
@@ -1247,6 +1453,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pImage, sizeof(VkImage));
                 vkReadStream->read((VkImage*)pImage, sizeof(VkImage));
+                if (!(m_vk->vkCreateImage))
+                {
+                    fprintf(stderr, "vkCreateImage not found!\n");
+                }
                 VkResult vkCreateImage_VkResult_return = (VkResult)0;
                 vkCreateImage_VkResult_return = m_vk->vkCreateImage(device, pCreateInfo, pAllocator, pImage);
                 vkStream->write((VkImage*)pImage, sizeof(VkImage));
@@ -1267,6 +1477,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (!(m_vk->vkDestroyImage))
+                {
+                    fprintf(stderr, "vkDestroyImage not found!\n");
+                }
                 m_vk->vkDestroyImage(device, image, pAllocator);
                 vkStream->commitWrite();
                 break;
@@ -1283,6 +1497,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkImageSubresource(vkReadStream, (VkImageSubresource*)(pSubresource));
                 vkReadStream->alloc((void**)&pLayout, sizeof(VkSubresourceLayout));
                 unmarshal_VkSubresourceLayout(vkReadStream, (VkSubresourceLayout*)(pLayout));
+                if (!(m_vk->vkGetImageSubresourceLayout))
+                {
+                    fprintf(stderr, "vkGetImageSubresourceLayout not found!\n");
+                }
                 m_vk->vkGetImageSubresourceLayout(device, image, pSubresource, pLayout);
                 marshal_VkSubresourceLayout(vkStream, (VkSubresourceLayout*)(pLayout));
                 vkStream->commitWrite();
@@ -1305,6 +1523,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pView, sizeof(VkImageView));
                 vkReadStream->read((VkImageView*)pView, sizeof(VkImageView));
+                if (!(m_vk->vkCreateImageView))
+                {
+                    fprintf(stderr, "vkCreateImageView not found!\n");
+                }
                 VkResult vkCreateImageView_VkResult_return = (VkResult)0;
                 vkCreateImageView_VkResult_return = m_vk->vkCreateImageView(device, pCreateInfo, pAllocator, pView);
                 vkStream->write((VkImageView*)pView, sizeof(VkImageView));
@@ -1324,6 +1546,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroyImageView))
+                {
+                    fprintf(stderr, "vkDestroyImageView not found!\n");
                 }
                 m_vk->vkDestroyImageView(device, imageView, pAllocator);
                 vkStream->commitWrite();
@@ -1346,6 +1572,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pShaderModule, sizeof(VkShaderModule));
                 vkReadStream->read((VkShaderModule*)pShaderModule, sizeof(VkShaderModule));
+                if (!(m_vk->vkCreateShaderModule))
+                {
+                    fprintf(stderr, "vkCreateShaderModule not found!\n");
+                }
                 VkResult vkCreateShaderModule_VkResult_return = (VkResult)0;
                 vkCreateShaderModule_VkResult_return = m_vk->vkCreateShaderModule(device, pCreateInfo, pAllocator, pShaderModule);
                 vkStream->write((VkShaderModule*)pShaderModule, sizeof(VkShaderModule));
@@ -1365,6 +1595,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroyShaderModule))
+                {
+                    fprintf(stderr, "vkDestroyShaderModule not found!\n");
                 }
                 m_vk->vkDestroyShaderModule(device, shaderModule, pAllocator);
                 vkStream->commitWrite();
@@ -1387,6 +1621,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pPipelineCache, sizeof(VkPipelineCache));
                 vkReadStream->read((VkPipelineCache*)pPipelineCache, sizeof(VkPipelineCache));
+                if (!(m_vk->vkCreatePipelineCache))
+                {
+                    fprintf(stderr, "vkCreatePipelineCache not found!\n");
+                }
                 VkResult vkCreatePipelineCache_VkResult_return = (VkResult)0;
                 vkCreatePipelineCache_VkResult_return = m_vk->vkCreatePipelineCache(device, pCreateInfo, pAllocator, pPipelineCache);
                 vkStream->write((VkPipelineCache*)pPipelineCache, sizeof(VkPipelineCache));
@@ -1406,6 +1644,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroyPipelineCache))
+                {
+                    fprintf(stderr, "vkDestroyPipelineCache not found!\n");
                 }
                 m_vk->vkDestroyPipelineCache(device, pipelineCache, pAllocator);
                 vkStream->commitWrite();
@@ -1430,6 +1672,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pData, (*(pDataSize)) * sizeof(uint8_t));
                     vkReadStream->read((void*)pData, (*(pDataSize)) * sizeof(uint8_t));
+                }
+                if (!(m_vk->vkGetPipelineCacheData))
+                {
+                    fprintf(stderr, "vkGetPipelineCacheData not found!\n");
                 }
                 VkResult vkGetPipelineCacheData_VkResult_return = (VkResult)0;
                 vkGetPipelineCacheData_VkResult_return = m_vk->vkGetPipelineCacheData(device, pipelineCache, pDataSize, pData);
@@ -1458,6 +1704,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&srcCacheCount, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&pSrcCaches, ((srcCacheCount)) * sizeof(const VkPipelineCache));
                 vkReadStream->read((VkPipelineCache*)pSrcCaches, ((srcCacheCount)) * sizeof(const VkPipelineCache));
+                if (!(m_vk->vkMergePipelineCaches))
+                {
+                    fprintf(stderr, "vkMergePipelineCaches not found!\n");
+                }
                 VkResult vkMergePipelineCaches_VkResult_return = (VkResult)0;
                 vkMergePipelineCaches_VkResult_return = m_vk->vkMergePipelineCaches(device, dstCache, srcCacheCount, pSrcCaches);
                 vkStream->write(&vkMergePipelineCaches_VkResult_return, sizeof(VkResult));
@@ -1488,6 +1738,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pPipelines, ((createInfoCount)) * sizeof(VkPipeline));
                 vkReadStream->read((VkPipeline*)pPipelines, ((createInfoCount)) * sizeof(VkPipeline));
+                if (!(m_vk->vkCreateGraphicsPipelines))
+                {
+                    fprintf(stderr, "vkCreateGraphicsPipelines not found!\n");
+                }
                 VkResult vkCreateGraphicsPipelines_VkResult_return = (VkResult)0;
                 vkCreateGraphicsPipelines_VkResult_return = m_vk->vkCreateGraphicsPipelines(device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
                 vkStream->write((VkPipeline*)pPipelines, ((createInfoCount)) * sizeof(VkPipeline));
@@ -1519,6 +1773,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pPipelines, ((createInfoCount)) * sizeof(VkPipeline));
                 vkReadStream->read((VkPipeline*)pPipelines, ((createInfoCount)) * sizeof(VkPipeline));
+                if (!(m_vk->vkCreateComputePipelines))
+                {
+                    fprintf(stderr, "vkCreateComputePipelines not found!\n");
+                }
                 VkResult vkCreateComputePipelines_VkResult_return = (VkResult)0;
                 vkCreateComputePipelines_VkResult_return = m_vk->vkCreateComputePipelines(device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
                 vkStream->write((VkPipeline*)pPipelines, ((createInfoCount)) * sizeof(VkPipeline));
@@ -1538,6 +1796,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroyPipeline))
+                {
+                    fprintf(stderr, "vkDestroyPipeline not found!\n");
                 }
                 m_vk->vkDestroyPipeline(device, pipeline, pAllocator);
                 vkStream->commitWrite();
@@ -1560,6 +1822,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pPipelineLayout, sizeof(VkPipelineLayout));
                 vkReadStream->read((VkPipelineLayout*)pPipelineLayout, sizeof(VkPipelineLayout));
+                if (!(m_vk->vkCreatePipelineLayout))
+                {
+                    fprintf(stderr, "vkCreatePipelineLayout not found!\n");
+                }
                 VkResult vkCreatePipelineLayout_VkResult_return = (VkResult)0;
                 vkCreatePipelineLayout_VkResult_return = m_vk->vkCreatePipelineLayout(device, pCreateInfo, pAllocator, pPipelineLayout);
                 vkStream->write((VkPipelineLayout*)pPipelineLayout, sizeof(VkPipelineLayout));
@@ -1579,6 +1845,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroyPipelineLayout))
+                {
+                    fprintf(stderr, "vkDestroyPipelineLayout not found!\n");
                 }
                 m_vk->vkDestroyPipelineLayout(device, pipelineLayout, pAllocator);
                 vkStream->commitWrite();
@@ -1601,6 +1871,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pSampler, sizeof(VkSampler));
                 vkReadStream->read((VkSampler*)pSampler, sizeof(VkSampler));
+                if (!(m_vk->vkCreateSampler))
+                {
+                    fprintf(stderr, "vkCreateSampler not found!\n");
+                }
                 VkResult vkCreateSampler_VkResult_return = (VkResult)0;
                 vkCreateSampler_VkResult_return = m_vk->vkCreateSampler(device, pCreateInfo, pAllocator, pSampler);
                 vkStream->write((VkSampler*)pSampler, sizeof(VkSampler));
@@ -1620,6 +1894,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroySampler))
+                {
+                    fprintf(stderr, "vkDestroySampler not found!\n");
                 }
                 m_vk->vkDestroySampler(device, sampler, pAllocator);
                 vkStream->commitWrite();
@@ -1642,6 +1920,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pSetLayout, sizeof(VkDescriptorSetLayout));
                 vkReadStream->read((VkDescriptorSetLayout*)pSetLayout, sizeof(VkDescriptorSetLayout));
+                if (!(m_vk->vkCreateDescriptorSetLayout))
+                {
+                    fprintf(stderr, "vkCreateDescriptorSetLayout not found!\n");
+                }
                 VkResult vkCreateDescriptorSetLayout_VkResult_return = (VkResult)0;
                 vkCreateDescriptorSetLayout_VkResult_return = m_vk->vkCreateDescriptorSetLayout(device, pCreateInfo, pAllocator, pSetLayout);
                 vkStream->write((VkDescriptorSetLayout*)pSetLayout, sizeof(VkDescriptorSetLayout));
@@ -1661,6 +1943,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroyDescriptorSetLayout))
+                {
+                    fprintf(stderr, "vkDestroyDescriptorSetLayout not found!\n");
                 }
                 m_vk->vkDestroyDescriptorSetLayout(device, descriptorSetLayout, pAllocator);
                 vkStream->commitWrite();
@@ -1683,6 +1969,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pDescriptorPool, sizeof(VkDescriptorPool));
                 vkReadStream->read((VkDescriptorPool*)pDescriptorPool, sizeof(VkDescriptorPool));
+                if (!(m_vk->vkCreateDescriptorPool))
+                {
+                    fprintf(stderr, "vkCreateDescriptorPool not found!\n");
+                }
                 VkResult vkCreateDescriptorPool_VkResult_return = (VkResult)0;
                 vkCreateDescriptorPool_VkResult_return = m_vk->vkCreateDescriptorPool(device, pCreateInfo, pAllocator, pDescriptorPool);
                 vkStream->write((VkDescriptorPool*)pDescriptorPool, sizeof(VkDescriptorPool));
@@ -1703,6 +1993,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (!(m_vk->vkDestroyDescriptorPool))
+                {
+                    fprintf(stderr, "vkDestroyDescriptorPool not found!\n");
+                }
                 m_vk->vkDestroyDescriptorPool(device, descriptorPool, pAllocator);
                 vkStream->commitWrite();
                 break;
@@ -1715,6 +2009,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->read((VkDescriptorPool*)&descriptorPool, sizeof(VkDescriptorPool));
                 vkReadStream->read((VkDescriptorPoolResetFlags*)&flags, sizeof(VkDescriptorPoolResetFlags));
+                if (!(m_vk->vkResetDescriptorPool))
+                {
+                    fprintf(stderr, "vkResetDescriptorPool not found!\n");
+                }
                 VkResult vkResetDescriptorPool_VkResult_return = (VkResult)0;
                 vkResetDescriptorPool_VkResult_return = m_vk->vkResetDescriptorPool(device, descriptorPool, flags);
                 vkStream->write(&vkResetDescriptorPool_VkResult_return, sizeof(VkResult));
@@ -1731,6 +2029,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkDescriptorSetAllocateInfo(vkReadStream, (VkDescriptorSetAllocateInfo*)(pAllocateInfo));
                 vkReadStream->alloc((void**)&pDescriptorSets, pAllocateInfo->descriptorSetCount * sizeof(VkDescriptorSet));
                 vkReadStream->read((VkDescriptorSet*)pDescriptorSets, pAllocateInfo->descriptorSetCount * sizeof(VkDescriptorSet));
+                if (!(m_vk->vkAllocateDescriptorSets))
+                {
+                    fprintf(stderr, "vkAllocateDescriptorSets not found!\n");
+                }
                 VkResult vkAllocateDescriptorSets_VkResult_return = (VkResult)0;
                 vkAllocateDescriptorSets_VkResult_return = m_vk->vkAllocateDescriptorSets(device, pAllocateInfo, pDescriptorSets);
                 vkStream->write((VkDescriptorSet*)pDescriptorSets, pAllocateInfo->descriptorSetCount * sizeof(VkDescriptorSet));
@@ -1752,6 +2054,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pDescriptorSets, ((descriptorSetCount)) * sizeof(const VkDescriptorSet));
                     vkReadStream->read((VkDescriptorSet*)pDescriptorSets, ((descriptorSetCount)) * sizeof(const VkDescriptorSet));
+                }
+                if (!(m_vk->vkFreeDescriptorSets))
+                {
+                    fprintf(stderr, "vkFreeDescriptorSets not found!\n");
                 }
                 VkResult vkFreeDescriptorSets_VkResult_return = (VkResult)0;
                 vkFreeDescriptorSets_VkResult_return = m_vk->vkFreeDescriptorSets(device, descriptorPool, descriptorSetCount, pDescriptorSets);
@@ -1779,6 +2085,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkCopyDescriptorSet(vkReadStream, (VkCopyDescriptorSet*)(pDescriptorCopies + i));
                 }
+                if (!(m_vk->vkUpdateDescriptorSets))
+                {
+                    fprintf(stderr, "vkUpdateDescriptorSets not found!\n");
+                }
                 m_vk->vkUpdateDescriptorSets(device, descriptorWriteCount, pDescriptorWrites, descriptorCopyCount, pDescriptorCopies);
                 vkStream->commitWrite();
                 break;
@@ -1800,6 +2110,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pFramebuffer, sizeof(VkFramebuffer));
                 vkReadStream->read((VkFramebuffer*)pFramebuffer, sizeof(VkFramebuffer));
+                if (!(m_vk->vkCreateFramebuffer))
+                {
+                    fprintf(stderr, "vkCreateFramebuffer not found!\n");
+                }
                 VkResult vkCreateFramebuffer_VkResult_return = (VkResult)0;
                 vkCreateFramebuffer_VkResult_return = m_vk->vkCreateFramebuffer(device, pCreateInfo, pAllocator, pFramebuffer);
                 vkStream->write((VkFramebuffer*)pFramebuffer, sizeof(VkFramebuffer));
@@ -1819,6 +2133,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroyFramebuffer))
+                {
+                    fprintf(stderr, "vkDestroyFramebuffer not found!\n");
                 }
                 m_vk->vkDestroyFramebuffer(device, framebuffer, pAllocator);
                 vkStream->commitWrite();
@@ -1841,6 +2159,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pRenderPass, sizeof(VkRenderPass));
                 vkReadStream->read((VkRenderPass*)pRenderPass, sizeof(VkRenderPass));
+                if (!(m_vk->vkCreateRenderPass))
+                {
+                    fprintf(stderr, "vkCreateRenderPass not found!\n");
+                }
                 VkResult vkCreateRenderPass_VkResult_return = (VkResult)0;
                 vkCreateRenderPass_VkResult_return = m_vk->vkCreateRenderPass(device, pCreateInfo, pAllocator, pRenderPass);
                 vkStream->write((VkRenderPass*)pRenderPass, sizeof(VkRenderPass));
@@ -1861,6 +2183,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (!(m_vk->vkDestroyRenderPass))
+                {
+                    fprintf(stderr, "vkDestroyRenderPass not found!\n");
+                }
                 m_vk->vkDestroyRenderPass(device, renderPass, pAllocator);
                 vkStream->commitWrite();
                 break;
@@ -1874,6 +2200,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkRenderPass*)&renderPass, sizeof(VkRenderPass));
                 vkReadStream->alloc((void**)&pGranularity, sizeof(VkExtent2D));
                 unmarshal_VkExtent2D(vkReadStream, (VkExtent2D*)(pGranularity));
+                if (!(m_vk->vkGetRenderAreaGranularity))
+                {
+                    fprintf(stderr, "vkGetRenderAreaGranularity not found!\n");
+                }
                 m_vk->vkGetRenderAreaGranularity(device, renderPass, pGranularity);
                 marshal_VkExtent2D(vkStream, (VkExtent2D*)(pGranularity));
                 vkStream->commitWrite();
@@ -1896,6 +2226,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pCommandPool, sizeof(VkCommandPool));
                 vkReadStream->read((VkCommandPool*)pCommandPool, sizeof(VkCommandPool));
+                if (!(m_vk->vkCreateCommandPool))
+                {
+                    fprintf(stderr, "vkCreateCommandPool not found!\n");
+                }
                 VkResult vkCreateCommandPool_VkResult_return = (VkResult)0;
                 vkCreateCommandPool_VkResult_return = m_vk->vkCreateCommandPool(device, pCreateInfo, pAllocator, pCommandPool);
                 vkStream->write((VkCommandPool*)pCommandPool, sizeof(VkCommandPool));
@@ -1916,6 +2250,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (!(m_vk->vkDestroyCommandPool))
+                {
+                    fprintf(stderr, "vkDestroyCommandPool not found!\n");
+                }
                 m_vk->vkDestroyCommandPool(device, commandPool, pAllocator);
                 vkStream->commitWrite();
                 break;
@@ -1928,6 +2266,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->read((VkCommandPool*)&commandPool, sizeof(VkCommandPool));
                 vkReadStream->read((VkCommandPoolResetFlags*)&flags, sizeof(VkCommandPoolResetFlags));
+                if (!(m_vk->vkResetCommandPool))
+                {
+                    fprintf(stderr, "vkResetCommandPool not found!\n");
+                }
                 VkResult vkResetCommandPool_VkResult_return = (VkResult)0;
                 vkResetCommandPool_VkResult_return = m_vk->vkResetCommandPool(device, commandPool, flags);
                 vkStream->write(&vkResetCommandPool_VkResult_return, sizeof(VkResult));
@@ -1944,6 +2286,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkCommandBufferAllocateInfo(vkReadStream, (VkCommandBufferAllocateInfo*)(pAllocateInfo));
                 vkReadStream->alloc((void**)&pCommandBuffers, pAllocateInfo->commandBufferCount * sizeof(VkCommandBuffer));
                 vkReadStream->read((VkCommandBuffer*)pCommandBuffers, pAllocateInfo->commandBufferCount * sizeof(VkCommandBuffer));
+                if (!(m_vk->vkAllocateCommandBuffers))
+                {
+                    fprintf(stderr, "vkAllocateCommandBuffers not found!\n");
+                }
                 VkResult vkAllocateCommandBuffers_VkResult_return = (VkResult)0;
                 vkAllocateCommandBuffers_VkResult_return = m_vk->vkAllocateCommandBuffers(device, pAllocateInfo, pCommandBuffers);
                 vkStream->write((VkCommandBuffer*)pCommandBuffers, pAllocateInfo->commandBufferCount * sizeof(VkCommandBuffer));
@@ -1966,6 +2312,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pCommandBuffers, ((commandBufferCount)) * sizeof(const VkCommandBuffer));
                     vkReadStream->read((VkCommandBuffer*)pCommandBuffers, ((commandBufferCount)) * sizeof(const VkCommandBuffer));
                 }
+                if (!(m_vk->vkFreeCommandBuffers))
+                {
+                    fprintf(stderr, "vkFreeCommandBuffers not found!\n");
+                }
                 m_vk->vkFreeCommandBuffers(device, commandPool, commandBufferCount, pCommandBuffers);
                 vkStream->commitWrite();
                 break;
@@ -1977,6 +2327,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->alloc((void**)&pBeginInfo, sizeof(const VkCommandBufferBeginInfo));
                 unmarshal_VkCommandBufferBeginInfo(vkReadStream, (VkCommandBufferBeginInfo*)(pBeginInfo));
+                if (!(m_vk->vkBeginCommandBuffer))
+                {
+                    fprintf(stderr, "vkBeginCommandBuffer not found!\n");
+                }
                 VkResult vkBeginCommandBuffer_VkResult_return = (VkResult)0;
                 vkBeginCommandBuffer_VkResult_return = m_vk->vkBeginCommandBuffer(commandBuffer, pBeginInfo);
                 vkStream->write(&vkBeginCommandBuffer_VkResult_return, sizeof(VkResult));
@@ -1987,6 +2341,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+                if (!(m_vk->vkEndCommandBuffer))
+                {
+                    fprintf(stderr, "vkEndCommandBuffer not found!\n");
+                }
                 VkResult vkEndCommandBuffer_VkResult_return = (VkResult)0;
                 vkEndCommandBuffer_VkResult_return = m_vk->vkEndCommandBuffer(commandBuffer);
                 vkStream->write(&vkEndCommandBuffer_VkResult_return, sizeof(VkResult));
@@ -1999,6 +2357,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkCommandBufferResetFlags flags;
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->read((VkCommandBufferResetFlags*)&flags, sizeof(VkCommandBufferResetFlags));
+                if (!(m_vk->vkResetCommandBuffer))
+                {
+                    fprintf(stderr, "vkResetCommandBuffer not found!\n");
+                }
                 VkResult vkResetCommandBuffer_VkResult_return = (VkResult)0;
                 vkResetCommandBuffer_VkResult_return = m_vk->vkResetCommandBuffer(commandBuffer, flags);
                 vkStream->write(&vkResetCommandBuffer_VkResult_return, sizeof(VkResult));
@@ -2013,6 +2375,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->read((VkPipelineBindPoint*)&pipelineBindPoint, sizeof(VkPipelineBindPoint));
                 vkReadStream->read((VkPipeline*)&pipeline, sizeof(VkPipeline));
+                if (!(m_vk->vkCmdBindPipeline))
+                {
+                    fprintf(stderr, "vkCmdBindPipeline not found!\n");
+                }
                 m_vk->vkCmdBindPipeline(commandBuffer, pipelineBindPoint, pipeline);
                 vkStream->commitWrite();
                 break;
@@ -2030,6 +2396,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 for (uint32_t i = 0; i < (uint32_t)((viewportCount)); ++i)
                 {
                     unmarshal_VkViewport(vkReadStream, (VkViewport*)(pViewports + i));
+                }
+                if (!(m_vk->vkCmdSetViewport))
+                {
+                    fprintf(stderr, "vkCmdSetViewport not found!\n");
                 }
                 m_vk->vkCmdSetViewport(commandBuffer, firstViewport, viewportCount, pViewports);
                 vkStream->commitWrite();
@@ -2049,6 +2419,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkRect2D(vkReadStream, (VkRect2D*)(pScissors + i));
                 }
+                if (!(m_vk->vkCmdSetScissor))
+                {
+                    fprintf(stderr, "vkCmdSetScissor not found!\n");
+                }
                 m_vk->vkCmdSetScissor(commandBuffer, firstScissor, scissorCount, pScissors);
                 vkStream->commitWrite();
                 break;
@@ -2059,6 +2433,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 float lineWidth;
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->read((float*)&lineWidth, sizeof(float));
+                if (!(m_vk->vkCmdSetLineWidth))
+                {
+                    fprintf(stderr, "vkCmdSetLineWidth not found!\n");
+                }
                 m_vk->vkCmdSetLineWidth(commandBuffer, lineWidth);
                 vkStream->commitWrite();
                 break;
@@ -2073,6 +2451,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((float*)&depthBiasConstantFactor, sizeof(float));
                 vkReadStream->read((float*)&depthBiasClamp, sizeof(float));
                 vkReadStream->read((float*)&depthBiasSlopeFactor, sizeof(float));
+                if (!(m_vk->vkCmdSetDepthBias))
+                {
+                    fprintf(stderr, "vkCmdSetDepthBias not found!\n");
+                }
                 m_vk->vkCmdSetDepthBias(commandBuffer, depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
                 vkStream->commitWrite();
                 break;
@@ -2083,6 +2465,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 float blendConstants[4];
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->read((float*)&blendConstants, 4 * sizeof(const float));
+                if (!(m_vk->vkCmdSetBlendConstants))
+                {
+                    fprintf(stderr, "vkCmdSetBlendConstants not found!\n");
+                }
                 m_vk->vkCmdSetBlendConstants(commandBuffer, blendConstants);
                 vkStream->commitWrite();
                 break;
@@ -2095,6 +2481,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->read((float*)&minDepthBounds, sizeof(float));
                 vkReadStream->read((float*)&maxDepthBounds, sizeof(float));
+                if (!(m_vk->vkCmdSetDepthBounds))
+                {
+                    fprintf(stderr, "vkCmdSetDepthBounds not found!\n");
+                }
                 m_vk->vkCmdSetDepthBounds(commandBuffer, minDepthBounds, maxDepthBounds);
                 vkStream->commitWrite();
                 break;
@@ -2107,6 +2497,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->read((VkStencilFaceFlags*)&faceMask, sizeof(VkStencilFaceFlags));
                 vkReadStream->read((uint32_t*)&compareMask, sizeof(uint32_t));
+                if (!(m_vk->vkCmdSetStencilCompareMask))
+                {
+                    fprintf(stderr, "vkCmdSetStencilCompareMask not found!\n");
+                }
                 m_vk->vkCmdSetStencilCompareMask(commandBuffer, faceMask, compareMask);
                 vkStream->commitWrite();
                 break;
@@ -2119,6 +2513,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->read((VkStencilFaceFlags*)&faceMask, sizeof(VkStencilFaceFlags));
                 vkReadStream->read((uint32_t*)&writeMask, sizeof(uint32_t));
+                if (!(m_vk->vkCmdSetStencilWriteMask))
+                {
+                    fprintf(stderr, "vkCmdSetStencilWriteMask not found!\n");
+                }
                 m_vk->vkCmdSetStencilWriteMask(commandBuffer, faceMask, writeMask);
                 vkStream->commitWrite();
                 break;
@@ -2131,6 +2529,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->read((VkStencilFaceFlags*)&faceMask, sizeof(VkStencilFaceFlags));
                 vkReadStream->read((uint32_t*)&reference, sizeof(uint32_t));
+                if (!(m_vk->vkCmdSetStencilReference))
+                {
+                    fprintf(stderr, "vkCmdSetStencilReference not found!\n");
+                }
                 m_vk->vkCmdSetStencilReference(commandBuffer, faceMask, reference);
                 vkStream->commitWrite();
                 break;
@@ -2155,6 +2557,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&dynamicOffsetCount, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&pDynamicOffsets, ((dynamicOffsetCount)) * sizeof(const uint32_t));
                 vkReadStream->read((uint32_t*)pDynamicOffsets, ((dynamicOffsetCount)) * sizeof(const uint32_t));
+                if (!(m_vk->vkCmdBindDescriptorSets))
+                {
+                    fprintf(stderr, "vkCmdBindDescriptorSets not found!\n");
+                }
                 m_vk->vkCmdBindDescriptorSets(commandBuffer, pipelineBindPoint, layout, firstSet, descriptorSetCount, pDescriptorSets, dynamicOffsetCount, pDynamicOffsets);
                 vkStream->commitWrite();
                 break;
@@ -2169,6 +2575,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkBuffer*)&buffer, sizeof(VkBuffer));
                 vkReadStream->read((VkDeviceSize*)&offset, sizeof(VkDeviceSize));
                 vkReadStream->read((VkIndexType*)&indexType, sizeof(VkIndexType));
+                if (!(m_vk->vkCmdBindIndexBuffer))
+                {
+                    fprintf(stderr, "vkCmdBindIndexBuffer not found!\n");
+                }
                 m_vk->vkCmdBindIndexBuffer(commandBuffer, buffer, offset, indexType);
                 vkStream->commitWrite();
                 break;
@@ -2187,6 +2597,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkBuffer*)pBuffers, ((bindingCount)) * sizeof(const VkBuffer));
                 vkReadStream->alloc((void**)&pOffsets, ((bindingCount)) * sizeof(const VkDeviceSize));
                 vkReadStream->read((VkDeviceSize*)pOffsets, ((bindingCount)) * sizeof(const VkDeviceSize));
+                if (!(m_vk->vkCmdBindVertexBuffers))
+                {
+                    fprintf(stderr, "vkCmdBindVertexBuffers not found!\n");
+                }
                 m_vk->vkCmdBindVertexBuffers(commandBuffer, firstBinding, bindingCount, pBuffers, pOffsets);
                 vkStream->commitWrite();
                 break;
@@ -2203,6 +2617,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&instanceCount, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&firstVertex, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&firstInstance, sizeof(uint32_t));
+                if (!(m_vk->vkCmdDraw))
+                {
+                    fprintf(stderr, "vkCmdDraw not found!\n");
+                }
                 m_vk->vkCmdDraw(commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
                 vkStream->commitWrite();
                 break;
@@ -2221,6 +2639,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&firstIndex, sizeof(uint32_t));
                 vkReadStream->read((int32_t*)&vertexOffset, sizeof(int32_t));
                 vkReadStream->read((uint32_t*)&firstInstance, sizeof(uint32_t));
+                if (!(m_vk->vkCmdDrawIndexed))
+                {
+                    fprintf(stderr, "vkCmdDrawIndexed not found!\n");
+                }
                 m_vk->vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
                 vkStream->commitWrite();
                 break;
@@ -2237,6 +2659,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&offset, sizeof(VkDeviceSize));
                 vkReadStream->read((uint32_t*)&drawCount, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&stride, sizeof(uint32_t));
+                if (!(m_vk->vkCmdDrawIndirect))
+                {
+                    fprintf(stderr, "vkCmdDrawIndirect not found!\n");
+                }
                 m_vk->vkCmdDrawIndirect(commandBuffer, buffer, offset, drawCount, stride);
                 vkStream->commitWrite();
                 break;
@@ -2253,6 +2679,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&offset, sizeof(VkDeviceSize));
                 vkReadStream->read((uint32_t*)&drawCount, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&stride, sizeof(uint32_t));
+                if (!(m_vk->vkCmdDrawIndexedIndirect))
+                {
+                    fprintf(stderr, "vkCmdDrawIndexedIndirect not found!\n");
+                }
                 m_vk->vkCmdDrawIndexedIndirect(commandBuffer, buffer, offset, drawCount, stride);
                 vkStream->commitWrite();
                 break;
@@ -2267,6 +2697,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&groupCountX, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&groupCountY, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&groupCountZ, sizeof(uint32_t));
+                if (!(m_vk->vkCmdDispatch))
+                {
+                    fprintf(stderr, "vkCmdDispatch not found!\n");
+                }
                 m_vk->vkCmdDispatch(commandBuffer, groupCountX, groupCountY, groupCountZ);
                 vkStream->commitWrite();
                 break;
@@ -2279,6 +2713,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->read((VkBuffer*)&buffer, sizeof(VkBuffer));
                 vkReadStream->read((VkDeviceSize*)&offset, sizeof(VkDeviceSize));
+                if (!(m_vk->vkCmdDispatchIndirect))
+                {
+                    fprintf(stderr, "vkCmdDispatchIndirect not found!\n");
+                }
                 m_vk->vkCmdDispatchIndirect(commandBuffer, buffer, offset);
                 vkStream->commitWrite();
                 break;
@@ -2298,6 +2736,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 for (uint32_t i = 0; i < (uint32_t)((regionCount)); ++i)
                 {
                     unmarshal_VkBufferCopy(vkReadStream, (VkBufferCopy*)(pRegions + i));
+                }
+                if (!(m_vk->vkCmdCopyBuffer))
+                {
+                    fprintf(stderr, "vkCmdCopyBuffer not found!\n");
                 }
                 m_vk->vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, regionCount, pRegions);
                 vkStream->commitWrite();
@@ -2322,6 +2764,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 for (uint32_t i = 0; i < (uint32_t)((regionCount)); ++i)
                 {
                     unmarshal_VkImageCopy(vkReadStream, (VkImageCopy*)(pRegions + i));
+                }
+                if (!(m_vk->vkCmdCopyImage))
+                {
+                    fprintf(stderr, "vkCmdCopyImage not found!\n");
                 }
                 m_vk->vkCmdCopyImage(commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
                 vkStream->commitWrite();
@@ -2349,6 +2795,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     unmarshal_VkImageBlit(vkReadStream, (VkImageBlit*)(pRegions + i));
                 }
                 vkReadStream->read((VkFilter*)&filter, sizeof(VkFilter));
+                if (!(m_vk->vkCmdBlitImage))
+                {
+                    fprintf(stderr, "vkCmdBlitImage not found!\n");
+                }
                 m_vk->vkCmdBlitImage(commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions, filter);
                 vkStream->commitWrite();
                 break;
@@ -2370,6 +2820,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 for (uint32_t i = 0; i < (uint32_t)((regionCount)); ++i)
                 {
                     unmarshal_VkBufferImageCopy(vkReadStream, (VkBufferImageCopy*)(pRegions + i));
+                }
+                if (!(m_vk->vkCmdCopyBufferToImage))
+                {
+                    fprintf(stderr, "vkCmdCopyBufferToImage not found!\n");
                 }
                 m_vk->vkCmdCopyBufferToImage(commandBuffer, srcBuffer, dstImage, dstImageLayout, regionCount, pRegions);
                 vkStream->commitWrite();
@@ -2393,6 +2847,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkBufferImageCopy(vkReadStream, (VkBufferImageCopy*)(pRegions + i));
                 }
+                if (!(m_vk->vkCmdCopyImageToBuffer))
+                {
+                    fprintf(stderr, "vkCmdCopyImageToBuffer not found!\n");
+                }
                 m_vk->vkCmdCopyImageToBuffer(commandBuffer, srcImage, srcImageLayout, dstBuffer, regionCount, pRegions);
                 vkStream->commitWrite();
                 break;
@@ -2410,6 +2868,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&dataSize, sizeof(VkDeviceSize));
                 vkReadStream->alloc((void**)&pData, ((dataSize)) * sizeof(const uint8_t));
                 vkReadStream->read((void*)pData, ((dataSize)) * sizeof(const uint8_t));
+                if (!(m_vk->vkCmdUpdateBuffer))
+                {
+                    fprintf(stderr, "vkCmdUpdateBuffer not found!\n");
+                }
                 m_vk->vkCmdUpdateBuffer(commandBuffer, dstBuffer, dstOffset, dataSize, pData);
                 vkStream->commitWrite();
                 break;
@@ -2426,6 +2888,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&dstOffset, sizeof(VkDeviceSize));
                 vkReadStream->read((VkDeviceSize*)&size, sizeof(VkDeviceSize));
                 vkReadStream->read((uint32_t*)&data, sizeof(uint32_t));
+                if (!(m_vk->vkCmdFillBuffer))
+                {
+                    fprintf(stderr, "vkCmdFillBuffer not found!\n");
+                }
                 m_vk->vkCmdFillBuffer(commandBuffer, dstBuffer, dstOffset, size, data);
                 vkStream->commitWrite();
                 break;
@@ -2449,6 +2915,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkImageSubresourceRange(vkReadStream, (VkImageSubresourceRange*)(pRanges + i));
                 }
+                if (!(m_vk->vkCmdClearColorImage))
+                {
+                    fprintf(stderr, "vkCmdClearColorImage not found!\n");
+                }
                 m_vk->vkCmdClearColorImage(commandBuffer, image, imageLayout, pColor, rangeCount, pRanges);
                 vkStream->commitWrite();
                 break;
@@ -2471,6 +2941,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 for (uint32_t i = 0; i < (uint32_t)((rangeCount)); ++i)
                 {
                     unmarshal_VkImageSubresourceRange(vkReadStream, (VkImageSubresourceRange*)(pRanges + i));
+                }
+                if (!(m_vk->vkCmdClearDepthStencilImage))
+                {
+                    fprintf(stderr, "vkCmdClearDepthStencilImage not found!\n");
                 }
                 m_vk->vkCmdClearDepthStencilImage(commandBuffer, image, imageLayout, pDepthStencil, rangeCount, pRanges);
                 vkStream->commitWrite();
@@ -2496,6 +2970,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkClearRect(vkReadStream, (VkClearRect*)(pRects + i));
                 }
+                if (!(m_vk->vkCmdClearAttachments))
+                {
+                    fprintf(stderr, "vkCmdClearAttachments not found!\n");
+                }
                 m_vk->vkCmdClearAttachments(commandBuffer, attachmentCount, pAttachments, rectCount, pRects);
                 vkStream->commitWrite();
                 break;
@@ -2520,6 +2998,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkImageResolve(vkReadStream, (VkImageResolve*)(pRegions + i));
                 }
+                if (!(m_vk->vkCmdResolveImage))
+                {
+                    fprintf(stderr, "vkCmdResolveImage not found!\n");
+                }
                 m_vk->vkCmdResolveImage(commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, regionCount, pRegions);
                 vkStream->commitWrite();
                 break;
@@ -2532,6 +3014,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->read((VkEvent*)&event, sizeof(VkEvent));
                 vkReadStream->read((VkPipelineStageFlags*)&stageMask, sizeof(VkPipelineStageFlags));
+                if (!(m_vk->vkCmdSetEvent))
+                {
+                    fprintf(stderr, "vkCmdSetEvent not found!\n");
+                }
                 m_vk->vkCmdSetEvent(commandBuffer, event, stageMask);
                 vkStream->commitWrite();
                 break;
@@ -2544,6 +3030,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->read((VkEvent*)&event, sizeof(VkEvent));
                 vkReadStream->read((VkPipelineStageFlags*)&stageMask, sizeof(VkPipelineStageFlags));
+                if (!(m_vk->vkCmdResetEvent))
+                {
+                    fprintf(stderr, "vkCmdResetEvent not found!\n");
+                }
                 m_vk->vkCmdResetEvent(commandBuffer, event, stageMask);
                 vkStream->commitWrite();
                 break;
@@ -2585,6 +3075,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkImageMemoryBarrier(vkReadStream, (VkImageMemoryBarrier*)(pImageMemoryBarriers + i));
                 }
+                if (!(m_vk->vkCmdWaitEvents))
+                {
+                    fprintf(stderr, "vkCmdWaitEvents not found!\n");
+                }
                 m_vk->vkCmdWaitEvents(commandBuffer, eventCount, pEvents, srcStageMask, dstStageMask, memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers, imageMemoryBarrierCount, pImageMemoryBarriers);
                 vkStream->commitWrite();
                 break;
@@ -2623,6 +3117,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkImageMemoryBarrier(vkReadStream, (VkImageMemoryBarrier*)(pImageMemoryBarriers + i));
                 }
+                if (!(m_vk->vkCmdPipelineBarrier))
+                {
+                    fprintf(stderr, "vkCmdPipelineBarrier not found!\n");
+                }
                 m_vk->vkCmdPipelineBarrier(commandBuffer, srcStageMask, dstStageMask, dependencyFlags, memoryBarrierCount, pMemoryBarriers, bufferMemoryBarrierCount, pBufferMemoryBarriers, imageMemoryBarrierCount, pImageMemoryBarriers);
                 vkStream->commitWrite();
                 break;
@@ -2637,6 +3135,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkQueryPool*)&queryPool, sizeof(VkQueryPool));
                 vkReadStream->read((uint32_t*)&query, sizeof(uint32_t));
                 vkReadStream->read((VkQueryControlFlags*)&flags, sizeof(VkQueryControlFlags));
+                if (!(m_vk->vkCmdBeginQuery))
+                {
+                    fprintf(stderr, "vkCmdBeginQuery not found!\n");
+                }
                 m_vk->vkCmdBeginQuery(commandBuffer, queryPool, query, flags);
                 vkStream->commitWrite();
                 break;
@@ -2649,6 +3151,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->read((VkQueryPool*)&queryPool, sizeof(VkQueryPool));
                 vkReadStream->read((uint32_t*)&query, sizeof(uint32_t));
+                if (!(m_vk->vkCmdEndQuery))
+                {
+                    fprintf(stderr, "vkCmdEndQuery not found!\n");
+                }
                 m_vk->vkCmdEndQuery(commandBuffer, queryPool, query);
                 vkStream->commitWrite();
                 break;
@@ -2663,6 +3169,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkQueryPool*)&queryPool, sizeof(VkQueryPool));
                 vkReadStream->read((uint32_t*)&firstQuery, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&queryCount, sizeof(uint32_t));
+                if (!(m_vk->vkCmdResetQueryPool))
+                {
+                    fprintf(stderr, "vkCmdResetQueryPool not found!\n");
+                }
                 m_vk->vkCmdResetQueryPool(commandBuffer, queryPool, firstQuery, queryCount);
                 vkStream->commitWrite();
                 break;
@@ -2677,6 +3187,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkPipelineStageFlagBits*)&pipelineStage, sizeof(VkPipelineStageFlagBits));
                 vkReadStream->read((VkQueryPool*)&queryPool, sizeof(VkQueryPool));
                 vkReadStream->read((uint32_t*)&query, sizeof(uint32_t));
+                if (!(m_vk->vkCmdWriteTimestamp))
+                {
+                    fprintf(stderr, "vkCmdWriteTimestamp not found!\n");
+                }
                 m_vk->vkCmdWriteTimestamp(commandBuffer, pipelineStage, queryPool, query);
                 vkStream->commitWrite();
                 break;
@@ -2699,6 +3213,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&dstOffset, sizeof(VkDeviceSize));
                 vkReadStream->read((VkDeviceSize*)&stride, sizeof(VkDeviceSize));
                 vkReadStream->read((VkQueryResultFlags*)&flags, sizeof(VkQueryResultFlags));
+                if (!(m_vk->vkCmdCopyQueryPoolResults))
+                {
+                    fprintf(stderr, "vkCmdCopyQueryPoolResults not found!\n");
+                }
                 m_vk->vkCmdCopyQueryPoolResults(commandBuffer, queryPool, firstQuery, queryCount, dstBuffer, dstOffset, stride, flags);
                 vkStream->commitWrite();
                 break;
@@ -2718,6 +3236,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&size, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&pValues, ((size)) * sizeof(const uint8_t));
                 vkReadStream->read((void*)pValues, ((size)) * sizeof(const uint8_t));
+                if (!(m_vk->vkCmdPushConstants))
+                {
+                    fprintf(stderr, "vkCmdPushConstants not found!\n");
+                }
                 m_vk->vkCmdPushConstants(commandBuffer, layout, stageFlags, offset, size, pValues);
                 vkStream->commitWrite();
                 break;
@@ -2731,6 +3253,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pRenderPassBegin, sizeof(const VkRenderPassBeginInfo));
                 unmarshal_VkRenderPassBeginInfo(vkReadStream, (VkRenderPassBeginInfo*)(pRenderPassBegin));
                 vkReadStream->read((VkSubpassContents*)&contents, sizeof(VkSubpassContents));
+                if (!(m_vk->vkCmdBeginRenderPass))
+                {
+                    fprintf(stderr, "vkCmdBeginRenderPass not found!\n");
+                }
                 m_vk->vkCmdBeginRenderPass(commandBuffer, pRenderPassBegin, contents);
                 vkStream->commitWrite();
                 break;
@@ -2741,6 +3267,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkSubpassContents contents;
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->read((VkSubpassContents*)&contents, sizeof(VkSubpassContents));
+                if (!(m_vk->vkCmdNextSubpass))
+                {
+                    fprintf(stderr, "vkCmdNextSubpass not found!\n");
+                }
                 m_vk->vkCmdNextSubpass(commandBuffer, contents);
                 vkStream->commitWrite();
                 break;
@@ -2749,6 +3279,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+                if (!(m_vk->vkCmdEndRenderPass))
+                {
+                    fprintf(stderr, "vkCmdEndRenderPass not found!\n");
+                }
                 m_vk->vkCmdEndRenderPass(commandBuffer);
                 vkStream->commitWrite();
                 break;
@@ -2762,6 +3296,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&commandBufferCount, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&pCommandBuffers, ((commandBufferCount)) * sizeof(const VkCommandBuffer));
                 vkReadStream->read((VkCommandBuffer*)pCommandBuffers, ((commandBufferCount)) * sizeof(const VkCommandBuffer));
+                if (!(m_vk->vkCmdExecuteCommands))
+                {
+                    fprintf(stderr, "vkCmdExecuteCommands not found!\n");
+                }
                 m_vk->vkCmdExecuteCommands(commandBuffer, commandBufferCount, pCommandBuffers);
                 vkStream->commitWrite();
                 break;
@@ -2773,6 +3311,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t* pApiVersion;
                 vkReadStream->alloc((void**)&pApiVersion, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)pApiVersion, sizeof(uint32_t));
+                if (!(m_vk->vkEnumerateInstanceVersion))
+                {
+                    fprintf(stderr, "vkEnumerateInstanceVersion not found!\n");
+                }
                 VkResult vkEnumerateInstanceVersion_VkResult_return = (VkResult)0;
                 vkEnumerateInstanceVersion_VkResult_return = m_vk->vkEnumerateInstanceVersion(pApiVersion);
                 vkStream->write((uint32_t*)pApiVersion, sizeof(uint32_t));
@@ -2792,6 +3334,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkBindBufferMemoryInfo(vkReadStream, (VkBindBufferMemoryInfo*)(pBindInfos + i));
                 }
+                if (!(m_vk->vkBindBufferMemory2))
+                {
+                    fprintf(stderr, "vkBindBufferMemory2 not found!\n");
+                }
                 VkResult vkBindBufferMemory2_VkResult_return = (VkResult)0;
                 vkBindBufferMemory2_VkResult_return = m_vk->vkBindBufferMemory2(device, bindInfoCount, pBindInfos);
                 vkStream->write(&vkBindBufferMemory2_VkResult_return, sizeof(VkResult));
@@ -2809,6 +3355,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 for (uint32_t i = 0; i < (uint32_t)((bindInfoCount)); ++i)
                 {
                     unmarshal_VkBindImageMemoryInfo(vkReadStream, (VkBindImageMemoryInfo*)(pBindInfos + i));
+                }
+                if (!(m_vk->vkBindImageMemory2))
+                {
+                    fprintf(stderr, "vkBindImageMemory2 not found!\n");
                 }
                 VkResult vkBindImageMemory2_VkResult_return = (VkResult)0;
                 vkBindImageMemory2_VkResult_return = m_vk->vkBindImageMemory2(device, bindInfoCount, pBindInfos);
@@ -2829,6 +3379,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&remoteDeviceIndex, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&pPeerMemoryFeatures, sizeof(VkPeerMemoryFeatureFlags));
                 vkReadStream->read((VkPeerMemoryFeatureFlags*)pPeerMemoryFeatures, sizeof(VkPeerMemoryFeatureFlags));
+                if (!(m_vk->vkGetDeviceGroupPeerMemoryFeatures))
+                {
+                    fprintf(stderr, "vkGetDeviceGroupPeerMemoryFeatures not found!\n");
+                }
                 m_vk->vkGetDeviceGroupPeerMemoryFeatures(device, heapIndex, localDeviceIndex, remoteDeviceIndex, pPeerMemoryFeatures);
                 vkStream->write((VkPeerMemoryFeatureFlags*)pPeerMemoryFeatures, sizeof(VkPeerMemoryFeatureFlags));
                 vkStream->commitWrite();
@@ -2840,6 +3394,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t deviceMask;
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->read((uint32_t*)&deviceMask, sizeof(uint32_t));
+                if (!(m_vk->vkCmdSetDeviceMask))
+                {
+                    fprintf(stderr, "vkCmdSetDeviceMask not found!\n");
+                }
                 m_vk->vkCmdSetDeviceMask(commandBuffer, deviceMask);
                 vkStream->commitWrite();
                 break;
@@ -2860,6 +3418,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&groupCountX, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&groupCountY, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&groupCountZ, sizeof(uint32_t));
+                if (!(m_vk->vkCmdDispatchBase))
+                {
+                    fprintf(stderr, "vkCmdDispatchBase not found!\n");
+                }
                 m_vk->vkCmdDispatchBase(commandBuffer, baseGroupX, baseGroupY, baseGroupZ, groupCountX, groupCountY, groupCountZ);
                 vkStream->commitWrite();
                 break;
@@ -2884,6 +3446,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         unmarshal_VkPhysicalDeviceGroupProperties(vkReadStream, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i));
                     }
+                }
+                if (!(m_vk->vkEnumeratePhysicalDeviceGroups))
+                {
+                    fprintf(stderr, "vkEnumeratePhysicalDeviceGroups not found!\n");
                 }
                 VkResult vkEnumeratePhysicalDeviceGroups_VkResult_return = (VkResult)0;
                 vkEnumeratePhysicalDeviceGroups_VkResult_return = m_vk->vkEnumeratePhysicalDeviceGroups(instance, pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
@@ -2914,6 +3480,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkImageMemoryRequirementsInfo2(vkReadStream, (VkImageMemoryRequirementsInfo2*)(pInfo));
                 vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements2));
                 unmarshal_VkMemoryRequirements2(vkReadStream, (VkMemoryRequirements2*)(pMemoryRequirements));
+                if (!(m_vk->vkGetImageMemoryRequirements2))
+                {
+                    fprintf(stderr, "vkGetImageMemoryRequirements2 not found!\n");
+                }
                 m_vk->vkGetImageMemoryRequirements2(device, pInfo, pMemoryRequirements);
                 marshal_VkMemoryRequirements2(vkStream, (VkMemoryRequirements2*)(pMemoryRequirements));
                 vkStream->commitWrite();
@@ -2929,6 +3499,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkBufferMemoryRequirementsInfo2(vkReadStream, (VkBufferMemoryRequirementsInfo2*)(pInfo));
                 vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements2));
                 unmarshal_VkMemoryRequirements2(vkReadStream, (VkMemoryRequirements2*)(pMemoryRequirements));
+                if (!(m_vk->vkGetBufferMemoryRequirements2))
+                {
+                    fprintf(stderr, "vkGetBufferMemoryRequirements2 not found!\n");
+                }
                 m_vk->vkGetBufferMemoryRequirements2(device, pInfo, pMemoryRequirements);
                 marshal_VkMemoryRequirements2(vkStream, (VkMemoryRequirements2*)(pMemoryRequirements));
                 vkStream->commitWrite();
@@ -2958,6 +3532,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         unmarshal_VkSparseImageMemoryRequirements2(vkReadStream, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i));
                     }
                 }
+                if (!(m_vk->vkGetImageSparseMemoryRequirements2))
+                {
+                    fprintf(stderr, "vkGetImageSparseMemoryRequirements2 not found!\n");
+                }
                 m_vk->vkGetImageSparseMemoryRequirements2(device, pInfo, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 vkStream->write((uint32_t**)&pSparseMemoryRequirementCount, sizeof(uint32_t*));
                 if (pSparseMemoryRequirementCount)
@@ -2982,6 +3560,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
                 vkReadStream->alloc((void**)&pFeatures, sizeof(VkPhysicalDeviceFeatures2));
                 unmarshal_VkPhysicalDeviceFeatures2(vkReadStream, (VkPhysicalDeviceFeatures2*)(pFeatures));
+                if (!(m_vk->vkGetPhysicalDeviceFeatures2))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceFeatures2 not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceFeatures2(physicalDevice, pFeatures);
                 marshal_VkPhysicalDeviceFeatures2(vkStream, (VkPhysicalDeviceFeatures2*)(pFeatures));
                 vkStream->commitWrite();
@@ -2994,6 +3576,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
                 vkReadStream->alloc((void**)&pProperties, sizeof(VkPhysicalDeviceProperties2));
                 unmarshal_VkPhysicalDeviceProperties2(vkReadStream, (VkPhysicalDeviceProperties2*)(pProperties));
+                if (!(m_vk->vkGetPhysicalDeviceProperties2))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceProperties2 not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceProperties2(physicalDevice, pProperties);
                 marshal_VkPhysicalDeviceProperties2(vkStream, (VkPhysicalDeviceProperties2*)(pProperties));
                 vkStream->commitWrite();
@@ -3008,6 +3594,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkFormat*)&format, sizeof(VkFormat));
                 vkReadStream->alloc((void**)&pFormatProperties, sizeof(VkFormatProperties2));
                 unmarshal_VkFormatProperties2(vkReadStream, (VkFormatProperties2*)(pFormatProperties));
+                if (!(m_vk->vkGetPhysicalDeviceFormatProperties2))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceFormatProperties2 not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceFormatProperties2(physicalDevice, format, pFormatProperties);
                 marshal_VkFormatProperties2(vkStream, (VkFormatProperties2*)(pFormatProperties));
                 vkStream->commitWrite();
@@ -3023,6 +3613,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkPhysicalDeviceImageFormatInfo2(vkReadStream, (VkPhysicalDeviceImageFormatInfo2*)(pImageFormatInfo));
                 vkReadStream->alloc((void**)&pImageFormatProperties, sizeof(VkImageFormatProperties2));
                 unmarshal_VkImageFormatProperties2(vkReadStream, (VkImageFormatProperties2*)(pImageFormatProperties));
+                if (!(m_vk->vkGetPhysicalDeviceImageFormatProperties2))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceImageFormatProperties2 not found!\n");
+                }
                 VkResult vkGetPhysicalDeviceImageFormatProperties2_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceImageFormatProperties2_VkResult_return = m_vk->vkGetPhysicalDeviceImageFormatProperties2(physicalDevice, pImageFormatInfo, pImageFormatProperties);
                 marshal_VkImageFormatProperties2(vkStream, (VkImageFormatProperties2*)(pImageFormatProperties));
@@ -3051,6 +3645,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         unmarshal_VkQueueFamilyProperties2(vkReadStream, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i));
                     }
                 }
+                if (!(m_vk->vkGetPhysicalDeviceQueueFamilyProperties2))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceQueueFamilyProperties2 not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceQueueFamilyProperties2(physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 vkStream->write((uint32_t**)&pQueueFamilyPropertyCount, sizeof(uint32_t*));
                 if (pQueueFamilyPropertyCount)
@@ -3075,6 +3673,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
                 vkReadStream->alloc((void**)&pMemoryProperties, sizeof(VkPhysicalDeviceMemoryProperties2));
                 unmarshal_VkPhysicalDeviceMemoryProperties2(vkReadStream, (VkPhysicalDeviceMemoryProperties2*)(pMemoryProperties));
+                if (!(m_vk->vkGetPhysicalDeviceMemoryProperties2))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceMemoryProperties2 not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceMemoryProperties2(physicalDevice, pMemoryProperties);
                 marshal_VkPhysicalDeviceMemoryProperties2(vkStream, (VkPhysicalDeviceMemoryProperties2*)(pMemoryProperties));
                 vkStream->commitWrite();
@@ -3104,6 +3706,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         unmarshal_VkSparseImageFormatProperties2(vkReadStream, (VkSparseImageFormatProperties2*)(pProperties + i));
                     }
                 }
+                if (!(m_vk->vkGetPhysicalDeviceSparseImageFormatProperties2))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceSparseImageFormatProperties2 not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceSparseImageFormatProperties2(physicalDevice, pFormatInfo, pPropertyCount, pProperties);
                 vkStream->write((uint32_t**)&pPropertyCount, sizeof(uint32_t*));
                 if (pPropertyCount)
@@ -3129,6 +3735,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->read((VkCommandPool*)&commandPool, sizeof(VkCommandPool));
                 vkReadStream->read((VkCommandPoolTrimFlags*)&flags, sizeof(VkCommandPoolTrimFlags));
+                if (!(m_vk->vkTrimCommandPool))
+                {
+                    fprintf(stderr, "vkTrimCommandPool not found!\n");
+                }
                 m_vk->vkTrimCommandPool(device, commandPool, flags);
                 vkStream->commitWrite();
                 break;
@@ -3143,6 +3753,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkDeviceQueueInfo2(vkReadStream, (VkDeviceQueueInfo2*)(pQueueInfo));
                 vkReadStream->alloc((void**)&pQueue, sizeof(VkQueue));
                 vkReadStream->read((VkQueue*)pQueue, sizeof(VkQueue));
+                if (!(m_vk->vkGetDeviceQueue2))
+                {
+                    fprintf(stderr, "vkGetDeviceQueue2 not found!\n");
+                }
                 m_vk->vkGetDeviceQueue2(device, pQueueInfo, pQueue);
                 vkStream->write((VkQueue*)pQueue, sizeof(VkQueue));
                 vkStream->commitWrite();
@@ -3165,6 +3779,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pYcbcrConversion, sizeof(VkSamplerYcbcrConversion));
                 vkReadStream->read((VkSamplerYcbcrConversion*)pYcbcrConversion, sizeof(VkSamplerYcbcrConversion));
+                if (!(m_vk->vkCreateSamplerYcbcrConversion))
+                {
+                    fprintf(stderr, "vkCreateSamplerYcbcrConversion not found!\n");
+                }
                 VkResult vkCreateSamplerYcbcrConversion_VkResult_return = (VkResult)0;
                 vkCreateSamplerYcbcrConversion_VkResult_return = m_vk->vkCreateSamplerYcbcrConversion(device, pCreateInfo, pAllocator, pYcbcrConversion);
                 vkStream->write((VkSamplerYcbcrConversion*)pYcbcrConversion, sizeof(VkSamplerYcbcrConversion));
@@ -3184,6 +3802,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroySamplerYcbcrConversion))
+                {
+                    fprintf(stderr, "vkDestroySamplerYcbcrConversion not found!\n");
                 }
                 m_vk->vkDestroySamplerYcbcrConversion(device, ycbcrConversion, pAllocator);
                 vkStream->commitWrite();
@@ -3206,6 +3828,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pDescriptorUpdateTemplate, sizeof(VkDescriptorUpdateTemplate));
                 vkReadStream->read((VkDescriptorUpdateTemplate*)pDescriptorUpdateTemplate, sizeof(VkDescriptorUpdateTemplate));
+                if (!(m_vk->vkCreateDescriptorUpdateTemplate))
+                {
+                    fprintf(stderr, "vkCreateDescriptorUpdateTemplate not found!\n");
+                }
                 VkResult vkCreateDescriptorUpdateTemplate_VkResult_return = (VkResult)0;
                 vkCreateDescriptorUpdateTemplate_VkResult_return = m_vk->vkCreateDescriptorUpdateTemplate(device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
                 vkStream->write((VkDescriptorUpdateTemplate*)pDescriptorUpdateTemplate, sizeof(VkDescriptorUpdateTemplate));
@@ -3226,6 +3852,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (!(m_vk->vkDestroyDescriptorUpdateTemplate))
+                {
+                    fprintf(stderr, "vkDestroyDescriptorUpdateTemplate not found!\n");
+                }
                 m_vk->vkDestroyDescriptorUpdateTemplate(device, descriptorUpdateTemplate, pAllocator);
                 vkStream->commitWrite();
                 break;
@@ -3245,6 +3875,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pData, sizeof(const uint8_t));
                     vkReadStream->read((void*)pData, sizeof(const uint8_t));
                 }
+                if (!(m_vk->vkUpdateDescriptorSetWithTemplate))
+                {
+                    fprintf(stderr, "vkUpdateDescriptorSetWithTemplate not found!\n");
+                }
                 m_vk->vkUpdateDescriptorSetWithTemplate(device, descriptorSet, descriptorUpdateTemplate, pData);
                 vkStream->commitWrite();
                 break;
@@ -3259,6 +3893,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkPhysicalDeviceExternalBufferInfo(vkReadStream, (VkPhysicalDeviceExternalBufferInfo*)(pExternalBufferInfo));
                 vkReadStream->alloc((void**)&pExternalBufferProperties, sizeof(VkExternalBufferProperties));
                 unmarshal_VkExternalBufferProperties(vkReadStream, (VkExternalBufferProperties*)(pExternalBufferProperties));
+                if (!(m_vk->vkGetPhysicalDeviceExternalBufferProperties))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceExternalBufferProperties not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceExternalBufferProperties(physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
                 marshal_VkExternalBufferProperties(vkStream, (VkExternalBufferProperties*)(pExternalBufferProperties));
                 vkStream->commitWrite();
@@ -3274,6 +3912,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkPhysicalDeviceExternalFenceInfo(vkReadStream, (VkPhysicalDeviceExternalFenceInfo*)(pExternalFenceInfo));
                 vkReadStream->alloc((void**)&pExternalFenceProperties, sizeof(VkExternalFenceProperties));
                 unmarshal_VkExternalFenceProperties(vkReadStream, (VkExternalFenceProperties*)(pExternalFenceProperties));
+                if (!(m_vk->vkGetPhysicalDeviceExternalFenceProperties))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceExternalFenceProperties not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceExternalFenceProperties(physicalDevice, pExternalFenceInfo, pExternalFenceProperties);
                 marshal_VkExternalFenceProperties(vkStream, (VkExternalFenceProperties*)(pExternalFenceProperties));
                 vkStream->commitWrite();
@@ -3289,6 +3931,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkPhysicalDeviceExternalSemaphoreInfo(vkReadStream, (VkPhysicalDeviceExternalSemaphoreInfo*)(pExternalSemaphoreInfo));
                 vkReadStream->alloc((void**)&pExternalSemaphoreProperties, sizeof(VkExternalSemaphoreProperties));
                 unmarshal_VkExternalSemaphoreProperties(vkReadStream, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
+                if (!(m_vk->vkGetPhysicalDeviceExternalSemaphoreProperties))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceExternalSemaphoreProperties not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceExternalSemaphoreProperties(physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
                 marshal_VkExternalSemaphoreProperties(vkStream, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
                 vkStream->commitWrite();
@@ -3304,6 +3950,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkDescriptorSetLayoutCreateInfo(vkReadStream, (VkDescriptorSetLayoutCreateInfo*)(pCreateInfo));
                 vkReadStream->alloc((void**)&pSupport, sizeof(VkDescriptorSetLayoutSupport));
                 unmarshal_VkDescriptorSetLayoutSupport(vkReadStream, (VkDescriptorSetLayoutSupport*)(pSupport));
+                if (!(m_vk->vkGetDescriptorSetLayoutSupport))
+                {
+                    fprintf(stderr, "vkGetDescriptorSetLayoutSupport not found!\n");
+                }
                 m_vk->vkGetDescriptorSetLayoutSupport(device, pCreateInfo, pSupport);
                 marshal_VkDescriptorSetLayoutSupport(vkStream, (VkDescriptorSetLayoutSupport*)(pSupport));
                 vkStream->commitWrite();
@@ -3324,6 +3974,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (!(m_vk->vkDestroySurfaceKHR))
+                {
+                    fprintf(stderr, "vkDestroySurfaceKHR not found!\n");
+                }
                 m_vk->vkDestroySurfaceKHR(instance, surface, pAllocator);
                 vkStream->commitWrite();
                 break;
@@ -3339,6 +3993,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkSurfaceKHR*)&surface, sizeof(VkSurfaceKHR));
                 vkReadStream->alloc((void**)&pSupported, sizeof(VkBool32));
                 vkReadStream->read((VkBool32*)pSupported, sizeof(VkBool32));
+                if (!(m_vk->vkGetPhysicalDeviceSurfaceSupportKHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceSurfaceSupportKHR not found!\n");
+                }
                 VkResult vkGetPhysicalDeviceSurfaceSupportKHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceSurfaceSupportKHR_VkResult_return = m_vk->vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, queueFamilyIndex, surface, pSupported);
                 vkStream->write((VkBool32*)pSupported, sizeof(VkBool32));
@@ -3355,6 +4013,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkSurfaceKHR*)&surface, sizeof(VkSurfaceKHR));
                 vkReadStream->alloc((void**)&pSurfaceCapabilities, sizeof(VkSurfaceCapabilitiesKHR));
                 unmarshal_VkSurfaceCapabilitiesKHR(vkReadStream, (VkSurfaceCapabilitiesKHR*)(pSurfaceCapabilities));
+                if (!(m_vk->vkGetPhysicalDeviceSurfaceCapabilitiesKHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR not found!\n");
+                }
                 VkResult vkGetPhysicalDeviceSurfaceCapabilitiesKHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceSurfaceCapabilitiesKHR_VkResult_return = m_vk->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, pSurfaceCapabilities);
                 marshal_VkSurfaceCapabilitiesKHR(vkStream, (VkSurfaceCapabilitiesKHR*)(pSurfaceCapabilities));
@@ -3384,6 +4046,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         unmarshal_VkSurfaceFormatKHR(vkReadStream, (VkSurfaceFormatKHR*)(pSurfaceFormats + i));
                     }
+                }
+                if (!(m_vk->vkGetPhysicalDeviceSurfaceFormatsKHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceSurfaceFormatsKHR not found!\n");
                 }
                 VkResult vkGetPhysicalDeviceSurfaceFormatsKHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceSurfaceFormatsKHR_VkResult_return = m_vk->vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, pSurfaceFormatCount, pSurfaceFormats);
@@ -3424,6 +4090,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pPresentModes, (*(pPresentModeCount)) * sizeof(VkPresentModeKHR));
                     vkReadStream->read((VkPresentModeKHR*)pPresentModes, (*(pPresentModeCount)) * sizeof(VkPresentModeKHR));
                 }
+                if (!(m_vk->vkGetPhysicalDeviceSurfacePresentModesKHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceSurfacePresentModesKHR not found!\n");
+                }
                 VkResult vkGetPhysicalDeviceSurfacePresentModesKHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceSurfacePresentModesKHR_VkResult_return = m_vk->vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, pPresentModeCount, pPresentModes);
                 vkStream->write((uint32_t**)&pPresentModeCount, sizeof(uint32_t*));
@@ -3459,6 +4129,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pSwapchain, sizeof(VkSwapchainKHR));
                 vkReadStream->read((VkSwapchainKHR*)pSwapchain, sizeof(VkSwapchainKHR));
+                if (!(m_vk->vkCreateSwapchainKHR))
+                {
+                    fprintf(stderr, "vkCreateSwapchainKHR not found!\n");
+                }
                 VkResult vkCreateSwapchainKHR_VkResult_return = (VkResult)0;
                 vkCreateSwapchainKHR_VkResult_return = m_vk->vkCreateSwapchainKHR(device, pCreateInfo, pAllocator, pSwapchain);
                 vkStream->write((VkSwapchainKHR*)pSwapchain, sizeof(VkSwapchainKHR));
@@ -3478,6 +4152,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroySwapchainKHR))
+                {
+                    fprintf(stderr, "vkDestroySwapchainKHR not found!\n");
                 }
                 m_vk->vkDestroySwapchainKHR(device, swapchain, pAllocator);
                 vkStream->commitWrite();
@@ -3502,6 +4180,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pSwapchainImages, (*(pSwapchainImageCount)) * sizeof(VkImage));
                     vkReadStream->read((VkImage*)pSwapchainImages, (*(pSwapchainImageCount)) * sizeof(VkImage));
+                }
+                if (!(m_vk->vkGetSwapchainImagesKHR))
+                {
+                    fprintf(stderr, "vkGetSwapchainImagesKHR not found!\n");
                 }
                 VkResult vkGetSwapchainImagesKHR_VkResult_return = (VkResult)0;
                 vkGetSwapchainImagesKHR_VkResult_return = m_vk->vkGetSwapchainImagesKHR(device, swapchain, pSwapchainImageCount, pSwapchainImages);
@@ -3534,6 +4216,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkFence*)&fence, sizeof(VkFence));
                 vkReadStream->alloc((void**)&pImageIndex, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)pImageIndex, sizeof(uint32_t));
+                if (!(m_vk->vkAcquireNextImageKHR))
+                {
+                    fprintf(stderr, "vkAcquireNextImageKHR not found!\n");
+                }
                 VkResult vkAcquireNextImageKHR_VkResult_return = (VkResult)0;
                 vkAcquireNextImageKHR_VkResult_return = m_vk->vkAcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, pImageIndex);
                 vkStream->write((uint32_t*)pImageIndex, sizeof(uint32_t));
@@ -3548,6 +4234,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkQueue*)&queue, sizeof(VkQueue));
                 vkReadStream->alloc((void**)&pPresentInfo, sizeof(const VkPresentInfoKHR));
                 unmarshal_VkPresentInfoKHR(vkReadStream, (VkPresentInfoKHR*)(pPresentInfo));
+                if (!(m_vk->vkQueuePresentKHR))
+                {
+                    fprintf(stderr, "vkQueuePresentKHR not found!\n");
+                }
                 VkResult vkQueuePresentKHR_VkResult_return = (VkResult)0;
                 vkQueuePresentKHR_VkResult_return = m_vk->vkQueuePresentKHR(queue, pPresentInfo);
                 vkStream->write(&vkQueuePresentKHR_VkResult_return, sizeof(VkResult));
@@ -3561,6 +4251,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->alloc((void**)&pDeviceGroupPresentCapabilities, sizeof(VkDeviceGroupPresentCapabilitiesKHR));
                 unmarshal_VkDeviceGroupPresentCapabilitiesKHR(vkReadStream, (VkDeviceGroupPresentCapabilitiesKHR*)(pDeviceGroupPresentCapabilities));
+                if (!(m_vk->vkGetDeviceGroupPresentCapabilitiesKHR))
+                {
+                    fprintf(stderr, "vkGetDeviceGroupPresentCapabilitiesKHR not found!\n");
+                }
                 VkResult vkGetDeviceGroupPresentCapabilitiesKHR_VkResult_return = (VkResult)0;
                 vkGetDeviceGroupPresentCapabilitiesKHR_VkResult_return = m_vk->vkGetDeviceGroupPresentCapabilitiesKHR(device, pDeviceGroupPresentCapabilities);
                 marshal_VkDeviceGroupPresentCapabilitiesKHR(vkStream, (VkDeviceGroupPresentCapabilitiesKHR*)(pDeviceGroupPresentCapabilities));
@@ -3580,6 +4274,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pModes, sizeof(VkDeviceGroupPresentModeFlagsKHR));
                     vkReadStream->read((VkDeviceGroupPresentModeFlagsKHR*)pModes, sizeof(VkDeviceGroupPresentModeFlagsKHR));
+                }
+                if (!(m_vk->vkGetDeviceGroupSurfacePresentModesKHR))
+                {
+                    fprintf(stderr, "vkGetDeviceGroupSurfacePresentModesKHR not found!\n");
                 }
                 VkResult vkGetDeviceGroupSurfacePresentModesKHR_VkResult_return = (VkResult)0;
                 vkGetDeviceGroupSurfacePresentModesKHR_VkResult_return = m_vk->vkGetDeviceGroupSurfacePresentModesKHR(device, surface, pModes);
@@ -3615,6 +4313,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         unmarshal_VkRect2D(vkReadStream, (VkRect2D*)(pRects + i));
                     }
                 }
+                if (!(m_vk->vkGetPhysicalDevicePresentRectanglesKHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDevicePresentRectanglesKHR not found!\n");
+                }
                 VkResult vkGetPhysicalDevicePresentRectanglesKHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDevicePresentRectanglesKHR_VkResult_return = m_vk->vkGetPhysicalDevicePresentRectanglesKHR(physicalDevice, surface, pRectCount, pRects);
                 vkStream->write((uint32_t**)&pRectCount, sizeof(uint32_t*));
@@ -3644,6 +4346,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkAcquireNextImageInfoKHR(vkReadStream, (VkAcquireNextImageInfoKHR*)(pAcquireInfo));
                 vkReadStream->alloc((void**)&pImageIndex, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)pImageIndex, sizeof(uint32_t));
+                if (!(m_vk->vkAcquireNextImage2KHR))
+                {
+                    fprintf(stderr, "vkAcquireNextImage2KHR not found!\n");
+                }
                 VkResult vkAcquireNextImage2KHR_VkResult_return = (VkResult)0;
                 vkAcquireNextImage2KHR_VkResult_return = m_vk->vkAcquireNextImage2KHR(device, pAcquireInfo, pImageIndex);
                 vkStream->write((uint32_t*)pImageIndex, sizeof(uint32_t));
@@ -3673,6 +4379,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         unmarshal_VkDisplayPropertiesKHR(vkReadStream, (VkDisplayPropertiesKHR*)(pProperties + i));
                     }
+                }
+                if (!(m_vk->vkGetPhysicalDeviceDisplayPropertiesKHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceDisplayPropertiesKHR not found!\n");
                 }
                 VkResult vkGetPhysicalDeviceDisplayPropertiesKHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceDisplayPropertiesKHR_VkResult_return = m_vk->vkGetPhysicalDeviceDisplayPropertiesKHR(physicalDevice, pPropertyCount, pProperties);
@@ -3714,6 +4424,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         unmarshal_VkDisplayPlanePropertiesKHR(vkReadStream, (VkDisplayPlanePropertiesKHR*)(pProperties + i));
                     }
                 }
+                if (!(m_vk->vkGetPhysicalDeviceDisplayPlanePropertiesKHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceDisplayPlanePropertiesKHR not found!\n");
+                }
                 VkResult vkGetPhysicalDeviceDisplayPlanePropertiesKHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceDisplayPlanePropertiesKHR_VkResult_return = m_vk->vkGetPhysicalDeviceDisplayPlanePropertiesKHR(physicalDevice, pPropertyCount, pProperties);
                 vkStream->write((uint32_t**)&pPropertyCount, sizeof(uint32_t*));
@@ -3752,6 +4466,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pDisplays, (*(pDisplayCount)) * sizeof(VkDisplayKHR));
                     vkReadStream->read((VkDisplayKHR*)pDisplays, (*(pDisplayCount)) * sizeof(VkDisplayKHR));
+                }
+                if (!(m_vk->vkGetDisplayPlaneSupportedDisplaysKHR))
+                {
+                    fprintf(stderr, "vkGetDisplayPlaneSupportedDisplaysKHR not found!\n");
                 }
                 VkResult vkGetDisplayPlaneSupportedDisplaysKHR_VkResult_return = (VkResult)0;
                 vkGetDisplayPlaneSupportedDisplaysKHR_VkResult_return = m_vk->vkGetDisplayPlaneSupportedDisplaysKHR(physicalDevice, planeIndex, pDisplayCount, pDisplays);
@@ -3792,6 +4510,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         unmarshal_VkDisplayModePropertiesKHR(vkReadStream, (VkDisplayModePropertiesKHR*)(pProperties + i));
                     }
                 }
+                if (!(m_vk->vkGetDisplayModePropertiesKHR))
+                {
+                    fprintf(stderr, "vkGetDisplayModePropertiesKHR not found!\n");
+                }
                 VkResult vkGetDisplayModePropertiesKHR_VkResult_return = (VkResult)0;
                 vkGetDisplayModePropertiesKHR_VkResult_return = m_vk->vkGetDisplayModePropertiesKHR(physicalDevice, display, pPropertyCount, pProperties);
                 vkStream->write((uint32_t**)&pPropertyCount, sizeof(uint32_t*));
@@ -3830,6 +4552,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pMode, sizeof(VkDisplayModeKHR));
                 vkReadStream->read((VkDisplayModeKHR*)pMode, sizeof(VkDisplayModeKHR));
+                if (!(m_vk->vkCreateDisplayModeKHR))
+                {
+                    fprintf(stderr, "vkCreateDisplayModeKHR not found!\n");
+                }
                 VkResult vkCreateDisplayModeKHR_VkResult_return = (VkResult)0;
                 vkCreateDisplayModeKHR_VkResult_return = m_vk->vkCreateDisplayModeKHR(physicalDevice, display, pCreateInfo, pAllocator, pMode);
                 vkStream->write((VkDisplayModeKHR*)pMode, sizeof(VkDisplayModeKHR));
@@ -3848,6 +4574,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&planeIndex, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&pCapabilities, sizeof(VkDisplayPlaneCapabilitiesKHR));
                 unmarshal_VkDisplayPlaneCapabilitiesKHR(vkReadStream, (VkDisplayPlaneCapabilitiesKHR*)(pCapabilities));
+                if (!(m_vk->vkGetDisplayPlaneCapabilitiesKHR))
+                {
+                    fprintf(stderr, "vkGetDisplayPlaneCapabilitiesKHR not found!\n");
+                }
                 VkResult vkGetDisplayPlaneCapabilitiesKHR_VkResult_return = (VkResult)0;
                 vkGetDisplayPlaneCapabilitiesKHR_VkResult_return = m_vk->vkGetDisplayPlaneCapabilitiesKHR(physicalDevice, mode, planeIndex, pCapabilities);
                 marshal_VkDisplayPlaneCapabilitiesKHR(vkStream, (VkDisplayPlaneCapabilitiesKHR*)(pCapabilities));
@@ -3872,6 +4602,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pSurface, sizeof(VkSurfaceKHR));
                 vkReadStream->read((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
+                if (!(m_vk->vkCreateDisplayPlaneSurfaceKHR))
+                {
+                    fprintf(stderr, "vkCreateDisplayPlaneSurfaceKHR not found!\n");
+                }
                 VkResult vkCreateDisplayPlaneSurfaceKHR_VkResult_return = (VkResult)0;
                 vkCreateDisplayPlaneSurfaceKHR_VkResult_return = m_vk->vkCreateDisplayPlaneSurfaceKHR(instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -3903,6 +4637,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pSwapchains, ((swapchainCount)) * sizeof(VkSwapchainKHR));
                 vkReadStream->read((VkSwapchainKHR*)pSwapchains, ((swapchainCount)) * sizeof(VkSwapchainKHR));
+                if (!(m_vk->vkCreateSharedSwapchainsKHR))
+                {
+                    fprintf(stderr, "vkCreateSharedSwapchainsKHR not found!\n");
+                }
                 VkResult vkCreateSharedSwapchainsKHR_VkResult_return = (VkResult)0;
                 vkCreateSharedSwapchainsKHR_VkResult_return = m_vk->vkCreateSharedSwapchainsKHR(device, swapchainCount, pCreateInfos, pAllocator, pSwapchains);
                 vkStream->write((VkSwapchainKHR*)pSwapchains, ((swapchainCount)) * sizeof(VkSwapchainKHR));
@@ -3929,6 +4667,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pSurface, sizeof(VkSurfaceKHR));
                 vkReadStream->read((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
+                if (!(m_vk->vkCreateXlibSurfaceKHR))
+                {
+                    fprintf(stderr, "vkCreateXlibSurfaceKHR not found!\n");
+                }
                 VkResult vkCreateXlibSurfaceKHR_VkResult_return = (VkResult)0;
                 vkCreateXlibSurfaceKHR_VkResult_return = m_vk->vkCreateXlibSurfaceKHR(instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -3947,6 +4689,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&dpy, sizeof(Display));
                 vkReadStream->read((Display*)dpy, sizeof(Display));
                 vkReadStream->read((VisualID*)&visualID, sizeof(VisualID));
+                if (!(m_vk->vkGetPhysicalDeviceXlibPresentationSupportKHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceXlibPresentationSupportKHR not found!\n");
+                }
                 VkBool32 vkGetPhysicalDeviceXlibPresentationSupportKHR_VkBool32_return = (VkBool32)0;
                 vkGetPhysicalDeviceXlibPresentationSupportKHR_VkBool32_return = m_vk->vkGetPhysicalDeviceXlibPresentationSupportKHR(physicalDevice, queueFamilyIndex, dpy, visualID);
                 vkStream->write((Display*)dpy, sizeof(Display));
@@ -3973,6 +4719,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pSurface, sizeof(VkSurfaceKHR));
                 vkReadStream->read((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
+                if (!(m_vk->vkCreateXcbSurfaceKHR))
+                {
+                    fprintf(stderr, "vkCreateXcbSurfaceKHR not found!\n");
+                }
                 VkResult vkCreateXcbSurfaceKHR_VkResult_return = (VkResult)0;
                 vkCreateXcbSurfaceKHR_VkResult_return = m_vk->vkCreateXcbSurfaceKHR(instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -3991,6 +4741,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&connection, sizeof(xcb_connection_t));
                 vkReadStream->read((xcb_connection_t*)connection, sizeof(xcb_connection_t));
                 vkReadStream->read((xcb_visualid_t*)&visual_id, sizeof(xcb_visualid_t));
+                if (!(m_vk->vkGetPhysicalDeviceXcbPresentationSupportKHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceXcbPresentationSupportKHR not found!\n");
+                }
                 VkBool32 vkGetPhysicalDeviceXcbPresentationSupportKHR_VkBool32_return = (VkBool32)0;
                 vkGetPhysicalDeviceXcbPresentationSupportKHR_VkBool32_return = m_vk->vkGetPhysicalDeviceXcbPresentationSupportKHR(physicalDevice, queueFamilyIndex, connection, visual_id);
                 vkStream->write((xcb_connection_t*)connection, sizeof(xcb_connection_t));
@@ -4017,6 +4771,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pSurface, sizeof(VkSurfaceKHR));
                 vkReadStream->read((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
+                if (!(m_vk->vkCreateWaylandSurfaceKHR))
+                {
+                    fprintf(stderr, "vkCreateWaylandSurfaceKHR not found!\n");
+                }
                 VkResult vkCreateWaylandSurfaceKHR_VkResult_return = (VkResult)0;
                 vkCreateWaylandSurfaceKHR_VkResult_return = m_vk->vkCreateWaylandSurfaceKHR(instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -4033,6 +4791,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&queueFamilyIndex, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&display, sizeof(wl_display));
                 vkReadStream->read((wl_display*)display, sizeof(wl_display));
+                if (!(m_vk->vkGetPhysicalDeviceWaylandPresentationSupportKHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceWaylandPresentationSupportKHR not found!\n");
+                }
                 VkBool32 vkGetPhysicalDeviceWaylandPresentationSupportKHR_VkBool32_return = (VkBool32)0;
                 vkGetPhysicalDeviceWaylandPresentationSupportKHR_VkBool32_return = m_vk->vkGetPhysicalDeviceWaylandPresentationSupportKHR(physicalDevice, queueFamilyIndex, display);
                 vkStream->write((wl_display*)display, sizeof(wl_display));
@@ -4059,6 +4821,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pSurface, sizeof(VkSurfaceKHR));
                 vkReadStream->read((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
+                if (!(m_vk->vkCreateMirSurfaceKHR))
+                {
+                    fprintf(stderr, "vkCreateMirSurfaceKHR not found!\n");
+                }
                 VkResult vkCreateMirSurfaceKHR_VkResult_return = (VkResult)0;
                 vkCreateMirSurfaceKHR_VkResult_return = m_vk->vkCreateMirSurfaceKHR(instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -4075,6 +4841,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&queueFamilyIndex, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&connection, sizeof(MirConnection));
                 vkReadStream->read((MirConnection*)connection, sizeof(MirConnection));
+                if (!(m_vk->vkGetPhysicalDeviceMirPresentationSupportKHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceMirPresentationSupportKHR not found!\n");
+                }
                 VkBool32 vkGetPhysicalDeviceMirPresentationSupportKHR_VkBool32_return = (VkBool32)0;
                 vkGetPhysicalDeviceMirPresentationSupportKHR_VkBool32_return = m_vk->vkGetPhysicalDeviceMirPresentationSupportKHR(physicalDevice, queueFamilyIndex, connection);
                 vkStream->write((MirConnection*)connection, sizeof(MirConnection));
@@ -4101,6 +4871,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pSurface, sizeof(VkSurfaceKHR));
                 vkReadStream->read((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
+                if (!(m_vk->vkCreateAndroidSurfaceKHR))
+                {
+                    fprintf(stderr, "vkCreateAndroidSurfaceKHR not found!\n");
+                }
                 VkResult vkCreateAndroidSurfaceKHR_VkResult_return = (VkResult)0;
                 vkCreateAndroidSurfaceKHR_VkResult_return = m_vk->vkCreateAndroidSurfaceKHR(instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -4127,6 +4901,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pSurface, sizeof(VkSurfaceKHR));
                 vkReadStream->read((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
+                if (!(m_vk->vkCreateWin32SurfaceKHR))
+                {
+                    fprintf(stderr, "vkCreateWin32SurfaceKHR not found!\n");
+                }
                 VkResult vkCreateWin32SurfaceKHR_VkResult_return = (VkResult)0;
                 vkCreateWin32SurfaceKHR_VkResult_return = m_vk->vkCreateWin32SurfaceKHR(instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -4140,6 +4918,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t queueFamilyIndex;
                 vkReadStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
                 vkReadStream->read((uint32_t*)&queueFamilyIndex, sizeof(uint32_t));
+                if (!(m_vk->vkGetPhysicalDeviceWin32PresentationSupportKHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceWin32PresentationSupportKHR not found!\n");
+                }
                 VkBool32 vkGetPhysicalDeviceWin32PresentationSupportKHR_VkBool32_return = (VkBool32)0;
                 vkGetPhysicalDeviceWin32PresentationSupportKHR_VkBool32_return = m_vk->vkGetPhysicalDeviceWin32PresentationSupportKHR(physicalDevice, queueFamilyIndex);
                 vkStream->write(&vkGetPhysicalDeviceWin32PresentationSupportKHR_VkBool32_return, sizeof(VkBool32));
@@ -4159,6 +4941,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
                 vkReadStream->alloc((void**)&pFeatures, sizeof(VkPhysicalDeviceFeatures2));
                 unmarshal_VkPhysicalDeviceFeatures2(vkReadStream, (VkPhysicalDeviceFeatures2*)(pFeatures));
+                if (!(m_vk->vkGetPhysicalDeviceFeatures2KHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceFeatures2KHR not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceFeatures2KHR(physicalDevice, pFeatures);
                 marshal_VkPhysicalDeviceFeatures2(vkStream, (VkPhysicalDeviceFeatures2*)(pFeatures));
                 vkStream->commitWrite();
@@ -4171,6 +4957,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
                 vkReadStream->alloc((void**)&pProperties, sizeof(VkPhysicalDeviceProperties2));
                 unmarshal_VkPhysicalDeviceProperties2(vkReadStream, (VkPhysicalDeviceProperties2*)(pProperties));
+                if (!(m_vk->vkGetPhysicalDeviceProperties2KHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceProperties2KHR not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceProperties2KHR(physicalDevice, pProperties);
                 marshal_VkPhysicalDeviceProperties2(vkStream, (VkPhysicalDeviceProperties2*)(pProperties));
                 vkStream->commitWrite();
@@ -4185,6 +4975,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkFormat*)&format, sizeof(VkFormat));
                 vkReadStream->alloc((void**)&pFormatProperties, sizeof(VkFormatProperties2));
                 unmarshal_VkFormatProperties2(vkReadStream, (VkFormatProperties2*)(pFormatProperties));
+                if (!(m_vk->vkGetPhysicalDeviceFormatProperties2KHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceFormatProperties2KHR not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceFormatProperties2KHR(physicalDevice, format, pFormatProperties);
                 marshal_VkFormatProperties2(vkStream, (VkFormatProperties2*)(pFormatProperties));
                 vkStream->commitWrite();
@@ -4200,6 +4994,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkPhysicalDeviceImageFormatInfo2(vkReadStream, (VkPhysicalDeviceImageFormatInfo2*)(pImageFormatInfo));
                 vkReadStream->alloc((void**)&pImageFormatProperties, sizeof(VkImageFormatProperties2));
                 unmarshal_VkImageFormatProperties2(vkReadStream, (VkImageFormatProperties2*)(pImageFormatProperties));
+                if (!(m_vk->vkGetPhysicalDeviceImageFormatProperties2KHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceImageFormatProperties2KHR not found!\n");
+                }
                 VkResult vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return = m_vk->vkGetPhysicalDeviceImageFormatProperties2KHR(physicalDevice, pImageFormatInfo, pImageFormatProperties);
                 marshal_VkImageFormatProperties2(vkStream, (VkImageFormatProperties2*)(pImageFormatProperties));
@@ -4228,6 +5026,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         unmarshal_VkQueueFamilyProperties2(vkReadStream, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i));
                     }
                 }
+                if (!(m_vk->vkGetPhysicalDeviceQueueFamilyProperties2KHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceQueueFamilyProperties2KHR not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceQueueFamilyProperties2KHR(physicalDevice, pQueueFamilyPropertyCount, pQueueFamilyProperties);
                 vkStream->write((uint32_t**)&pQueueFamilyPropertyCount, sizeof(uint32_t*));
                 if (pQueueFamilyPropertyCount)
@@ -4252,6 +5054,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
                 vkReadStream->alloc((void**)&pMemoryProperties, sizeof(VkPhysicalDeviceMemoryProperties2));
                 unmarshal_VkPhysicalDeviceMemoryProperties2(vkReadStream, (VkPhysicalDeviceMemoryProperties2*)(pMemoryProperties));
+                if (!(m_vk->vkGetPhysicalDeviceMemoryProperties2KHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceMemoryProperties2KHR not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceMemoryProperties2KHR(physicalDevice, pMemoryProperties);
                 marshal_VkPhysicalDeviceMemoryProperties2(vkStream, (VkPhysicalDeviceMemoryProperties2*)(pMemoryProperties));
                 vkStream->commitWrite();
@@ -4280,6 +5086,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         unmarshal_VkSparseImageFormatProperties2(vkReadStream, (VkSparseImageFormatProperties2*)(pProperties + i));
                     }
+                }
+                if (!(m_vk->vkGetPhysicalDeviceSparseImageFormatProperties2KHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceSparseImageFormatProperties2KHR not found!\n");
                 }
                 m_vk->vkGetPhysicalDeviceSparseImageFormatProperties2KHR(physicalDevice, pFormatInfo, pPropertyCount, pProperties);
                 vkStream->write((uint32_t**)&pPropertyCount, sizeof(uint32_t*));
@@ -4313,6 +5123,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&remoteDeviceIndex, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&pPeerMemoryFeatures, sizeof(VkPeerMemoryFeatureFlags));
                 vkReadStream->read((VkPeerMemoryFeatureFlags*)pPeerMemoryFeatures, sizeof(VkPeerMemoryFeatureFlags));
+                if (!(m_vk->vkGetDeviceGroupPeerMemoryFeaturesKHR))
+                {
+                    fprintf(stderr, "vkGetDeviceGroupPeerMemoryFeaturesKHR not found!\n");
+                }
                 m_vk->vkGetDeviceGroupPeerMemoryFeaturesKHR(device, heapIndex, localDeviceIndex, remoteDeviceIndex, pPeerMemoryFeatures);
                 vkStream->write((VkPeerMemoryFeatureFlags*)pPeerMemoryFeatures, sizeof(VkPeerMemoryFeatureFlags));
                 vkStream->commitWrite();
@@ -4324,6 +5138,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint32_t deviceMask;
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->read((uint32_t*)&deviceMask, sizeof(uint32_t));
+                if (!(m_vk->vkCmdSetDeviceMaskKHR))
+                {
+                    fprintf(stderr, "vkCmdSetDeviceMaskKHR not found!\n");
+                }
                 m_vk->vkCmdSetDeviceMaskKHR(commandBuffer, deviceMask);
                 vkStream->commitWrite();
                 break;
@@ -4344,6 +5162,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&groupCountX, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&groupCountY, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&groupCountZ, sizeof(uint32_t));
+                if (!(m_vk->vkCmdDispatchBaseKHR))
+                {
+                    fprintf(stderr, "vkCmdDispatchBaseKHR not found!\n");
+                }
                 m_vk->vkCmdDispatchBaseKHR(commandBuffer, baseGroupX, baseGroupY, baseGroupZ, groupCountX, groupCountY, groupCountZ);
                 vkStream->commitWrite();
                 break;
@@ -4360,6 +5182,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->read((VkCommandPool*)&commandPool, sizeof(VkCommandPool));
                 vkReadStream->read((VkCommandPoolTrimFlags*)&flags, sizeof(VkCommandPoolTrimFlags));
+                if (!(m_vk->vkTrimCommandPoolKHR))
+                {
+                    fprintf(stderr, "vkTrimCommandPoolKHR not found!\n");
+                }
                 m_vk->vkTrimCommandPoolKHR(device, commandPool, flags);
                 vkStream->commitWrite();
                 break;
@@ -4386,6 +5212,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         unmarshal_VkPhysicalDeviceGroupProperties(vkReadStream, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i));
                     }
+                }
+                if (!(m_vk->vkEnumeratePhysicalDeviceGroupsKHR))
+                {
+                    fprintf(stderr, "vkEnumeratePhysicalDeviceGroupsKHR not found!\n");
                 }
                 VkResult vkEnumeratePhysicalDeviceGroupsKHR_VkResult_return = (VkResult)0;
                 vkEnumeratePhysicalDeviceGroupsKHR_VkResult_return = m_vk->vkEnumeratePhysicalDeviceGroupsKHR(instance, pPhysicalDeviceGroupCount, pPhysicalDeviceGroupProperties);
@@ -4418,6 +5248,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkPhysicalDeviceExternalBufferInfo(vkReadStream, (VkPhysicalDeviceExternalBufferInfo*)(pExternalBufferInfo));
                 vkReadStream->alloc((void**)&pExternalBufferProperties, sizeof(VkExternalBufferProperties));
                 unmarshal_VkExternalBufferProperties(vkReadStream, (VkExternalBufferProperties*)(pExternalBufferProperties));
+                if (!(m_vk->vkGetPhysicalDeviceExternalBufferPropertiesKHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceExternalBufferPropertiesKHR not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceExternalBufferPropertiesKHR(physicalDevice, pExternalBufferInfo, pExternalBufferProperties);
                 marshal_VkExternalBufferProperties(vkStream, (VkExternalBufferProperties*)(pExternalBufferProperties));
                 vkStream->commitWrite();
@@ -4437,6 +5271,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkMemoryGetWin32HandleInfoKHR(vkReadStream, (VkMemoryGetWin32HandleInfoKHR*)(pGetWin32HandleInfo));
                 vkReadStream->alloc((void**)&pHandle, sizeof(HANDLE));
                 vkReadStream->read((HANDLE*)pHandle, sizeof(HANDLE));
+                if (!(m_vk->vkGetMemoryWin32HandleKHR))
+                {
+                    fprintf(stderr, "vkGetMemoryWin32HandleKHR not found!\n");
+                }
                 VkResult vkGetMemoryWin32HandleKHR_VkResult_return = (VkResult)0;
                 vkGetMemoryWin32HandleKHR_VkResult_return = m_vk->vkGetMemoryWin32HandleKHR(device, pGetWin32HandleInfo, pHandle);
                 vkStream->write((HANDLE*)pHandle, sizeof(HANDLE));
@@ -4455,6 +5293,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((HANDLE*)&handle, sizeof(HANDLE));
                 vkReadStream->alloc((void**)&pMemoryWin32HandleProperties, sizeof(VkMemoryWin32HandlePropertiesKHR));
                 unmarshal_VkMemoryWin32HandlePropertiesKHR(vkReadStream, (VkMemoryWin32HandlePropertiesKHR*)(pMemoryWin32HandleProperties));
+                if (!(m_vk->vkGetMemoryWin32HandlePropertiesKHR))
+                {
+                    fprintf(stderr, "vkGetMemoryWin32HandlePropertiesKHR not found!\n");
+                }
                 VkResult vkGetMemoryWin32HandlePropertiesKHR_VkResult_return = (VkResult)0;
                 vkGetMemoryWin32HandlePropertiesKHR_VkResult_return = m_vk->vkGetMemoryWin32HandlePropertiesKHR(device, handleType, handle, pMemoryWin32HandleProperties);
                 marshal_VkMemoryWin32HandlePropertiesKHR(vkStream, (VkMemoryWin32HandlePropertiesKHR*)(pMemoryWin32HandleProperties));
@@ -4474,6 +5316,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkMemoryGetFdInfoKHR(vkReadStream, (VkMemoryGetFdInfoKHR*)(pGetFdInfo));
                 vkReadStream->alloc((void**)&pFd, sizeof(int));
                 vkReadStream->read((int*)pFd, sizeof(int));
+                if (!(m_vk->vkGetMemoryFdKHR))
+                {
+                    fprintf(stderr, "vkGetMemoryFdKHR not found!\n");
+                }
                 VkResult vkGetMemoryFdKHR_VkResult_return = (VkResult)0;
                 vkGetMemoryFdKHR_VkResult_return = m_vk->vkGetMemoryFdKHR(device, pGetFdInfo, pFd);
                 vkStream->write((int*)pFd, sizeof(int));
@@ -4492,6 +5338,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((int*)&fd, sizeof(int));
                 vkReadStream->alloc((void**)&pMemoryFdProperties, sizeof(VkMemoryFdPropertiesKHR));
                 unmarshal_VkMemoryFdPropertiesKHR(vkReadStream, (VkMemoryFdPropertiesKHR*)(pMemoryFdProperties));
+                if (!(m_vk->vkGetMemoryFdPropertiesKHR))
+                {
+                    fprintf(stderr, "vkGetMemoryFdPropertiesKHR not found!\n");
+                }
                 VkResult vkGetMemoryFdPropertiesKHR_VkResult_return = (VkResult)0;
                 vkGetMemoryFdPropertiesKHR_VkResult_return = m_vk->vkGetMemoryFdPropertiesKHR(device, handleType, fd, pMemoryFdProperties);
                 marshal_VkMemoryFdPropertiesKHR(vkStream, (VkMemoryFdPropertiesKHR*)(pMemoryFdProperties));
@@ -4513,6 +5363,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkPhysicalDeviceExternalSemaphoreInfo(vkReadStream, (VkPhysicalDeviceExternalSemaphoreInfo*)(pExternalSemaphoreInfo));
                 vkReadStream->alloc((void**)&pExternalSemaphoreProperties, sizeof(VkExternalSemaphoreProperties));
                 unmarshal_VkExternalSemaphoreProperties(vkReadStream, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
+                if (!(m_vk->vkGetPhysicalDeviceExternalSemaphorePropertiesKHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceExternalSemaphorePropertiesKHR not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
                 marshal_VkExternalSemaphoreProperties(vkStream, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
                 vkStream->commitWrite();
@@ -4529,6 +5383,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->alloc((void**)&pImportSemaphoreWin32HandleInfo, sizeof(const VkImportSemaphoreWin32HandleInfoKHR));
                 unmarshal_VkImportSemaphoreWin32HandleInfoKHR(vkReadStream, (VkImportSemaphoreWin32HandleInfoKHR*)(pImportSemaphoreWin32HandleInfo));
+                if (!(m_vk->vkImportSemaphoreWin32HandleKHR))
+                {
+                    fprintf(stderr, "vkImportSemaphoreWin32HandleKHR not found!\n");
+                }
                 VkResult vkImportSemaphoreWin32HandleKHR_VkResult_return = (VkResult)0;
                 vkImportSemaphoreWin32HandleKHR_VkResult_return = m_vk->vkImportSemaphoreWin32HandleKHR(device, pImportSemaphoreWin32HandleInfo);
                 vkStream->write(&vkImportSemaphoreWin32HandleKHR_VkResult_return, sizeof(VkResult));
@@ -4545,6 +5403,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkSemaphoreGetWin32HandleInfoKHR(vkReadStream, (VkSemaphoreGetWin32HandleInfoKHR*)(pGetWin32HandleInfo));
                 vkReadStream->alloc((void**)&pHandle, sizeof(HANDLE));
                 vkReadStream->read((HANDLE*)pHandle, sizeof(HANDLE));
+                if (!(m_vk->vkGetSemaphoreWin32HandleKHR))
+                {
+                    fprintf(stderr, "vkGetSemaphoreWin32HandleKHR not found!\n");
+                }
                 VkResult vkGetSemaphoreWin32HandleKHR_VkResult_return = (VkResult)0;
                 vkGetSemaphoreWin32HandleKHR_VkResult_return = m_vk->vkGetSemaphoreWin32HandleKHR(device, pGetWin32HandleInfo, pHandle);
                 vkStream->write((HANDLE*)pHandle, sizeof(HANDLE));
@@ -4561,6 +5423,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->alloc((void**)&pImportSemaphoreFdInfo, sizeof(const VkImportSemaphoreFdInfoKHR));
                 unmarshal_VkImportSemaphoreFdInfoKHR(vkReadStream, (VkImportSemaphoreFdInfoKHR*)(pImportSemaphoreFdInfo));
+                if (!(m_vk->vkImportSemaphoreFdKHR))
+                {
+                    fprintf(stderr, "vkImportSemaphoreFdKHR not found!\n");
+                }
                 VkResult vkImportSemaphoreFdKHR_VkResult_return = (VkResult)0;
                 vkImportSemaphoreFdKHR_VkResult_return = m_vk->vkImportSemaphoreFdKHR(device, pImportSemaphoreFdInfo);
                 vkStream->write(&vkImportSemaphoreFdKHR_VkResult_return, sizeof(VkResult));
@@ -4577,6 +5443,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkSemaphoreGetFdInfoKHR(vkReadStream, (VkSemaphoreGetFdInfoKHR*)(pGetFdInfo));
                 vkReadStream->alloc((void**)&pFd, sizeof(int));
                 vkReadStream->read((int*)pFd, sizeof(int));
+                if (!(m_vk->vkGetSemaphoreFdKHR))
+                {
+                    fprintf(stderr, "vkGetSemaphoreFdKHR not found!\n");
+                }
                 VkResult vkGetSemaphoreFdKHR_VkResult_return = (VkResult)0;
                 vkGetSemaphoreFdKHR_VkResult_return = m_vk->vkGetSemaphoreFdKHR(device, pGetFdInfo, pFd);
                 vkStream->write((int*)pFd, sizeof(int));
@@ -4604,6 +5474,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkWriteDescriptorSet(vkReadStream, (VkWriteDescriptorSet*)(pDescriptorWrites + i));
                 }
+                if (!(m_vk->vkCmdPushDescriptorSetKHR))
+                {
+                    fprintf(stderr, "vkCmdPushDescriptorSetKHR not found!\n");
+                }
                 m_vk->vkCmdPushDescriptorSetKHR(commandBuffer, pipelineBindPoint, layout, set, descriptorWriteCount, pDescriptorWrites);
                 vkStream->commitWrite();
                 break;
@@ -4624,6 +5498,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pData, sizeof(const uint8_t));
                     vkReadStream->read((void*)pData, sizeof(const uint8_t));
+                }
+                if (!(m_vk->vkCmdPushDescriptorSetWithTemplateKHR))
+                {
+                    fprintf(stderr, "vkCmdPushDescriptorSetWithTemplateKHR not found!\n");
                 }
                 m_vk->vkCmdPushDescriptorSetWithTemplateKHR(commandBuffer, descriptorUpdateTemplate, layout, set, pData);
                 vkStream->commitWrite();
@@ -4652,6 +5530,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pDescriptorUpdateTemplate, sizeof(VkDescriptorUpdateTemplate));
                 vkReadStream->read((VkDescriptorUpdateTemplate*)pDescriptorUpdateTemplate, sizeof(VkDescriptorUpdateTemplate));
+                if (!(m_vk->vkCreateDescriptorUpdateTemplateKHR))
+                {
+                    fprintf(stderr, "vkCreateDescriptorUpdateTemplateKHR not found!\n");
+                }
                 VkResult vkCreateDescriptorUpdateTemplateKHR_VkResult_return = (VkResult)0;
                 vkCreateDescriptorUpdateTemplateKHR_VkResult_return = m_vk->vkCreateDescriptorUpdateTemplateKHR(device, pCreateInfo, pAllocator, pDescriptorUpdateTemplate);
                 vkStream->write((VkDescriptorUpdateTemplate*)pDescriptorUpdateTemplate, sizeof(VkDescriptorUpdateTemplate));
@@ -4672,6 +5554,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (!(m_vk->vkDestroyDescriptorUpdateTemplateKHR))
+                {
+                    fprintf(stderr, "vkDestroyDescriptorUpdateTemplateKHR not found!\n");
+                }
                 m_vk->vkDestroyDescriptorUpdateTemplateKHR(device, descriptorUpdateTemplate, pAllocator);
                 vkStream->commitWrite();
                 break;
@@ -4690,6 +5576,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pData, sizeof(const uint8_t));
                     vkReadStream->read((void*)pData, sizeof(const uint8_t));
+                }
+                if (!(m_vk->vkUpdateDescriptorSetWithTemplateKHR))
+                {
+                    fprintf(stderr, "vkUpdateDescriptorSetWithTemplateKHR not found!\n");
                 }
                 m_vk->vkUpdateDescriptorSetWithTemplateKHR(device, descriptorSet, descriptorUpdateTemplate, pData);
                 vkStream->commitWrite();
@@ -4714,6 +5604,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pRenderPass, sizeof(VkRenderPass));
                 vkReadStream->read((VkRenderPass*)pRenderPass, sizeof(VkRenderPass));
+                if (!(m_vk->vkCreateRenderPass2KHR))
+                {
+                    fprintf(stderr, "vkCreateRenderPass2KHR not found!\n");
+                }
                 VkResult vkCreateRenderPass2KHR_VkResult_return = (VkResult)0;
                 vkCreateRenderPass2KHR_VkResult_return = m_vk->vkCreateRenderPass2KHR(device, pCreateInfo, pAllocator, pRenderPass);
                 vkStream->write((VkRenderPass*)pRenderPass, sizeof(VkRenderPass));
@@ -4731,6 +5625,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkRenderPassBeginInfo(vkReadStream, (VkRenderPassBeginInfo*)(pRenderPassBegin));
                 vkReadStream->alloc((void**)&pSubpassBeginInfo, sizeof(const VkSubpassBeginInfoKHR));
                 unmarshal_VkSubpassBeginInfoKHR(vkReadStream, (VkSubpassBeginInfoKHR*)(pSubpassBeginInfo));
+                if (!(m_vk->vkCmdBeginRenderPass2KHR))
+                {
+                    fprintf(stderr, "vkCmdBeginRenderPass2KHR not found!\n");
+                }
                 m_vk->vkCmdBeginRenderPass2KHR(commandBuffer, pRenderPassBegin, pSubpassBeginInfo);
                 vkStream->commitWrite();
                 break;
@@ -4745,6 +5643,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkSubpassBeginInfoKHR(vkReadStream, (VkSubpassBeginInfoKHR*)(pSubpassBeginInfo));
                 vkReadStream->alloc((void**)&pSubpassEndInfo, sizeof(const VkSubpassEndInfoKHR));
                 unmarshal_VkSubpassEndInfoKHR(vkReadStream, (VkSubpassEndInfoKHR*)(pSubpassEndInfo));
+                if (!(m_vk->vkCmdNextSubpass2KHR))
+                {
+                    fprintf(stderr, "vkCmdNextSubpass2KHR not found!\n");
+                }
                 m_vk->vkCmdNextSubpass2KHR(commandBuffer, pSubpassBeginInfo, pSubpassEndInfo);
                 vkStream->commitWrite();
                 break;
@@ -4756,6 +5658,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->alloc((void**)&pSubpassEndInfo, sizeof(const VkSubpassEndInfoKHR));
                 unmarshal_VkSubpassEndInfoKHR(vkReadStream, (VkSubpassEndInfoKHR*)(pSubpassEndInfo));
+                if (!(m_vk->vkCmdEndRenderPass2KHR))
+                {
+                    fprintf(stderr, "vkCmdEndRenderPass2KHR not found!\n");
+                }
                 m_vk->vkCmdEndRenderPass2KHR(commandBuffer, pSubpassEndInfo);
                 vkStream->commitWrite();
                 break;
@@ -4768,6 +5674,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkSwapchainKHR swapchain;
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->read((VkSwapchainKHR*)&swapchain, sizeof(VkSwapchainKHR));
+                if (!(m_vk->vkGetSwapchainStatusKHR))
+                {
+                    fprintf(stderr, "vkGetSwapchainStatusKHR not found!\n");
+                }
                 VkResult vkGetSwapchainStatusKHR_VkResult_return = (VkResult)0;
                 vkGetSwapchainStatusKHR_VkResult_return = m_vk->vkGetSwapchainStatusKHR(device, swapchain);
                 vkStream->write(&vkGetSwapchainStatusKHR_VkResult_return, sizeof(VkResult));
@@ -4786,6 +5696,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkPhysicalDeviceExternalFenceInfo(vkReadStream, (VkPhysicalDeviceExternalFenceInfo*)(pExternalFenceInfo));
                 vkReadStream->alloc((void**)&pExternalFenceProperties, sizeof(VkExternalFenceProperties));
                 unmarshal_VkExternalFenceProperties(vkReadStream, (VkExternalFenceProperties*)(pExternalFenceProperties));
+                if (!(m_vk->vkGetPhysicalDeviceExternalFencePropertiesKHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceExternalFencePropertiesKHR not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceExternalFencePropertiesKHR(physicalDevice, pExternalFenceInfo, pExternalFenceProperties);
                 marshal_VkExternalFenceProperties(vkStream, (VkExternalFenceProperties*)(pExternalFenceProperties));
                 vkStream->commitWrite();
@@ -4802,6 +5716,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->alloc((void**)&pImportFenceWin32HandleInfo, sizeof(const VkImportFenceWin32HandleInfoKHR));
                 unmarshal_VkImportFenceWin32HandleInfoKHR(vkReadStream, (VkImportFenceWin32HandleInfoKHR*)(pImportFenceWin32HandleInfo));
+                if (!(m_vk->vkImportFenceWin32HandleKHR))
+                {
+                    fprintf(stderr, "vkImportFenceWin32HandleKHR not found!\n");
+                }
                 VkResult vkImportFenceWin32HandleKHR_VkResult_return = (VkResult)0;
                 vkImportFenceWin32HandleKHR_VkResult_return = m_vk->vkImportFenceWin32HandleKHR(device, pImportFenceWin32HandleInfo);
                 vkStream->write(&vkImportFenceWin32HandleKHR_VkResult_return, sizeof(VkResult));
@@ -4818,6 +5736,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkFenceGetWin32HandleInfoKHR(vkReadStream, (VkFenceGetWin32HandleInfoKHR*)(pGetWin32HandleInfo));
                 vkReadStream->alloc((void**)&pHandle, sizeof(HANDLE));
                 vkReadStream->read((HANDLE*)pHandle, sizeof(HANDLE));
+                if (!(m_vk->vkGetFenceWin32HandleKHR))
+                {
+                    fprintf(stderr, "vkGetFenceWin32HandleKHR not found!\n");
+                }
                 VkResult vkGetFenceWin32HandleKHR_VkResult_return = (VkResult)0;
                 vkGetFenceWin32HandleKHR_VkResult_return = m_vk->vkGetFenceWin32HandleKHR(device, pGetWin32HandleInfo, pHandle);
                 vkStream->write((HANDLE*)pHandle, sizeof(HANDLE));
@@ -4834,6 +5756,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->alloc((void**)&pImportFenceFdInfo, sizeof(const VkImportFenceFdInfoKHR));
                 unmarshal_VkImportFenceFdInfoKHR(vkReadStream, (VkImportFenceFdInfoKHR*)(pImportFenceFdInfo));
+                if (!(m_vk->vkImportFenceFdKHR))
+                {
+                    fprintf(stderr, "vkImportFenceFdKHR not found!\n");
+                }
                 VkResult vkImportFenceFdKHR_VkResult_return = (VkResult)0;
                 vkImportFenceFdKHR_VkResult_return = m_vk->vkImportFenceFdKHR(device, pImportFenceFdInfo);
                 vkStream->write(&vkImportFenceFdKHR_VkResult_return, sizeof(VkResult));
@@ -4850,6 +5776,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkFenceGetFdInfoKHR(vkReadStream, (VkFenceGetFdInfoKHR*)(pGetFdInfo));
                 vkReadStream->alloc((void**)&pFd, sizeof(int));
                 vkReadStream->read((int*)pFd, sizeof(int));
+                if (!(m_vk->vkGetFenceFdKHR))
+                {
+                    fprintf(stderr, "vkGetFenceFdKHR not found!\n");
+                }
                 VkResult vkGetFenceFdKHR_VkResult_return = (VkResult)0;
                 vkGetFenceFdKHR_VkResult_return = m_vk->vkGetFenceFdKHR(device, pGetFdInfo, pFd);
                 vkStream->write((int*)pFd, sizeof(int));
@@ -4871,6 +5801,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkPhysicalDeviceSurfaceInfo2KHR(vkReadStream, (VkPhysicalDeviceSurfaceInfo2KHR*)(pSurfaceInfo));
                 vkReadStream->alloc((void**)&pSurfaceCapabilities, sizeof(VkSurfaceCapabilities2KHR));
                 unmarshal_VkSurfaceCapabilities2KHR(vkReadStream, (VkSurfaceCapabilities2KHR*)(pSurfaceCapabilities));
+                if (!(m_vk->vkGetPhysicalDeviceSurfaceCapabilities2KHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceSurfaceCapabilities2KHR not found!\n");
+                }
                 VkResult vkGetPhysicalDeviceSurfaceCapabilities2KHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceSurfaceCapabilities2KHR_VkResult_return = m_vk->vkGetPhysicalDeviceSurfaceCapabilities2KHR(physicalDevice, pSurfaceInfo, pSurfaceCapabilities);
                 marshal_VkSurfaceCapabilities2KHR(vkStream, (VkSurfaceCapabilities2KHR*)(pSurfaceCapabilities));
@@ -4901,6 +5835,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         unmarshal_VkSurfaceFormat2KHR(vkReadStream, (VkSurfaceFormat2KHR*)(pSurfaceFormats + i));
                     }
+                }
+                if (!(m_vk->vkGetPhysicalDeviceSurfaceFormats2KHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceSurfaceFormats2KHR not found!\n");
                 }
                 VkResult vkGetPhysicalDeviceSurfaceFormats2KHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceSurfaceFormats2KHR_VkResult_return = m_vk->vkGetPhysicalDeviceSurfaceFormats2KHR(physicalDevice, pSurfaceInfo, pSurfaceFormatCount, pSurfaceFormats);
@@ -4946,6 +5884,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         unmarshal_VkDisplayProperties2KHR(vkReadStream, (VkDisplayProperties2KHR*)(pProperties + i));
                     }
                 }
+                if (!(m_vk->vkGetPhysicalDeviceDisplayProperties2KHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceDisplayProperties2KHR not found!\n");
+                }
                 VkResult vkGetPhysicalDeviceDisplayProperties2KHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceDisplayProperties2KHR_VkResult_return = m_vk->vkGetPhysicalDeviceDisplayProperties2KHR(physicalDevice, pPropertyCount, pProperties);
                 vkStream->write((uint32_t**)&pPropertyCount, sizeof(uint32_t*));
@@ -4985,6 +5927,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         unmarshal_VkDisplayPlaneProperties2KHR(vkReadStream, (VkDisplayPlaneProperties2KHR*)(pProperties + i));
                     }
+                }
+                if (!(m_vk->vkGetPhysicalDeviceDisplayPlaneProperties2KHR))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceDisplayPlaneProperties2KHR not found!\n");
                 }
                 VkResult vkGetPhysicalDeviceDisplayPlaneProperties2KHR_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceDisplayPlaneProperties2KHR_VkResult_return = m_vk->vkGetPhysicalDeviceDisplayPlaneProperties2KHR(physicalDevice, pPropertyCount, pProperties);
@@ -5028,6 +5974,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         unmarshal_VkDisplayModeProperties2KHR(vkReadStream, (VkDisplayModeProperties2KHR*)(pProperties + i));
                     }
                 }
+                if (!(m_vk->vkGetDisplayModeProperties2KHR))
+                {
+                    fprintf(stderr, "vkGetDisplayModeProperties2KHR not found!\n");
+                }
                 VkResult vkGetDisplayModeProperties2KHR_VkResult_return = (VkResult)0;
                 vkGetDisplayModeProperties2KHR_VkResult_return = m_vk->vkGetDisplayModeProperties2KHR(physicalDevice, display, pPropertyCount, pProperties);
                 vkStream->write((uint32_t**)&pPropertyCount, sizeof(uint32_t*));
@@ -5057,6 +6007,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkDisplayPlaneInfo2KHR(vkReadStream, (VkDisplayPlaneInfo2KHR*)(pDisplayPlaneInfo));
                 vkReadStream->alloc((void**)&pCapabilities, sizeof(VkDisplayPlaneCapabilities2KHR));
                 unmarshal_VkDisplayPlaneCapabilities2KHR(vkReadStream, (VkDisplayPlaneCapabilities2KHR*)(pCapabilities));
+                if (!(m_vk->vkGetDisplayPlaneCapabilities2KHR))
+                {
+                    fprintf(stderr, "vkGetDisplayPlaneCapabilities2KHR not found!\n");
+                }
                 VkResult vkGetDisplayPlaneCapabilities2KHR_VkResult_return = (VkResult)0;
                 vkGetDisplayPlaneCapabilities2KHR_VkResult_return = m_vk->vkGetDisplayPlaneCapabilities2KHR(physicalDevice, pDisplayPlaneInfo, pCapabilities);
                 marshal_VkDisplayPlaneCapabilities2KHR(vkStream, (VkDisplayPlaneCapabilities2KHR*)(pCapabilities));
@@ -5082,6 +6036,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkImageMemoryRequirementsInfo2(vkReadStream, (VkImageMemoryRequirementsInfo2*)(pInfo));
                 vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements2));
                 unmarshal_VkMemoryRequirements2(vkReadStream, (VkMemoryRequirements2*)(pMemoryRequirements));
+                if (!(m_vk->vkGetImageMemoryRequirements2KHR))
+                {
+                    fprintf(stderr, "vkGetImageMemoryRequirements2KHR not found!\n");
+                }
                 m_vk->vkGetImageMemoryRequirements2KHR(device, pInfo, pMemoryRequirements);
                 marshal_VkMemoryRequirements2(vkStream, (VkMemoryRequirements2*)(pMemoryRequirements));
                 vkStream->commitWrite();
@@ -5097,6 +6055,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkBufferMemoryRequirementsInfo2(vkReadStream, (VkBufferMemoryRequirementsInfo2*)(pInfo));
                 vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements2));
                 unmarshal_VkMemoryRequirements2(vkReadStream, (VkMemoryRequirements2*)(pMemoryRequirements));
+                if (!(m_vk->vkGetBufferMemoryRequirements2KHR))
+                {
+                    fprintf(stderr, "vkGetBufferMemoryRequirements2KHR not found!\n");
+                }
                 m_vk->vkGetBufferMemoryRequirements2KHR(device, pInfo, pMemoryRequirements);
                 marshal_VkMemoryRequirements2(vkStream, (VkMemoryRequirements2*)(pMemoryRequirements));
                 vkStream->commitWrite();
@@ -5125,6 +6087,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         unmarshal_VkSparseImageMemoryRequirements2(vkReadStream, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i));
                     }
+                }
+                if (!(m_vk->vkGetImageSparseMemoryRequirements2KHR))
+                {
+                    fprintf(stderr, "vkGetImageSparseMemoryRequirements2KHR not found!\n");
                 }
                 m_vk->vkGetImageSparseMemoryRequirements2KHR(device, pInfo, pSparseMemoryRequirementCount, pSparseMemoryRequirements);
                 vkStream->write((uint32_t**)&pSparseMemoryRequirementCount, sizeof(uint32_t*));
@@ -5164,6 +6130,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pYcbcrConversion, sizeof(VkSamplerYcbcrConversion));
                 vkReadStream->read((VkSamplerYcbcrConversion*)pYcbcrConversion, sizeof(VkSamplerYcbcrConversion));
+                if (!(m_vk->vkCreateSamplerYcbcrConversionKHR))
+                {
+                    fprintf(stderr, "vkCreateSamplerYcbcrConversionKHR not found!\n");
+                }
                 VkResult vkCreateSamplerYcbcrConversionKHR_VkResult_return = (VkResult)0;
                 vkCreateSamplerYcbcrConversionKHR_VkResult_return = m_vk->vkCreateSamplerYcbcrConversionKHR(device, pCreateInfo, pAllocator, pYcbcrConversion);
                 vkStream->write((VkSamplerYcbcrConversion*)pYcbcrConversion, sizeof(VkSamplerYcbcrConversion));
@@ -5184,6 +6154,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (!(m_vk->vkDestroySamplerYcbcrConversionKHR))
+                {
+                    fprintf(stderr, "vkDestroySamplerYcbcrConversionKHR not found!\n");
+                }
                 m_vk->vkDestroySamplerYcbcrConversionKHR(device, ycbcrConversion, pAllocator);
                 vkStream->commitWrite();
                 break;
@@ -5201,6 +6175,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 for (uint32_t i = 0; i < (uint32_t)((bindInfoCount)); ++i)
                 {
                     unmarshal_VkBindBufferMemoryInfo(vkReadStream, (VkBindBufferMemoryInfo*)(pBindInfos + i));
+                }
+                if (!(m_vk->vkBindBufferMemory2KHR))
+                {
+                    fprintf(stderr, "vkBindBufferMemory2KHR not found!\n");
                 }
                 VkResult vkBindBufferMemory2KHR_VkResult_return = (VkResult)0;
                 vkBindBufferMemory2KHR_VkResult_return = m_vk->vkBindBufferMemory2KHR(device, bindInfoCount, pBindInfos);
@@ -5220,6 +6198,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkBindImageMemoryInfo(vkReadStream, (VkBindImageMemoryInfo*)(pBindInfos + i));
                 }
+                if (!(m_vk->vkBindImageMemory2KHR))
+                {
+                    fprintf(stderr, "vkBindImageMemory2KHR not found!\n");
+                }
                 VkResult vkBindImageMemory2KHR_VkResult_return = (VkResult)0;
                 vkBindImageMemory2KHR_VkResult_return = m_vk->vkBindImageMemory2KHR(device, bindInfoCount, pBindInfos);
                 vkStream->write(&vkBindImageMemory2KHR_VkResult_return, sizeof(VkResult));
@@ -5238,6 +6220,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkDescriptorSetLayoutCreateInfo(vkReadStream, (VkDescriptorSetLayoutCreateInfo*)(pCreateInfo));
                 vkReadStream->alloc((void**)&pSupport, sizeof(VkDescriptorSetLayoutSupport));
                 unmarshal_VkDescriptorSetLayoutSupport(vkReadStream, (VkDescriptorSetLayoutSupport*)(pSupport));
+                if (!(m_vk->vkGetDescriptorSetLayoutSupportKHR))
+                {
+                    fprintf(stderr, "vkGetDescriptorSetLayoutSupportKHR not found!\n");
+                }
                 m_vk->vkGetDescriptorSetLayoutSupportKHR(device, pCreateInfo, pSupport);
                 marshal_VkDescriptorSetLayoutSupport(vkStream, (VkDescriptorSetLayoutSupport*)(pSupport));
                 vkStream->commitWrite();
@@ -5261,6 +6247,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&countBufferOffset, sizeof(VkDeviceSize));
                 vkReadStream->read((uint32_t*)&maxDrawCount, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&stride, sizeof(uint32_t));
+                if (!(m_vk->vkCmdDrawIndirectCountKHR))
+                {
+                    fprintf(stderr, "vkCmdDrawIndirectCountKHR not found!\n");
+                }
                 m_vk->vkCmdDrawIndirectCountKHR(commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 vkStream->commitWrite();
                 break;
@@ -5281,6 +6271,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&countBufferOffset, sizeof(VkDeviceSize));
                 vkReadStream->read((uint32_t*)&maxDrawCount, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&stride, sizeof(uint32_t));
+                if (!(m_vk->vkCmdDrawIndexedIndirectCountKHR))
+                {
+                    fprintf(stderr, "vkCmdDrawIndexedIndirectCountKHR not found!\n");
+                }
                 m_vk->vkCmdDrawIndexedIndirectCountKHR(commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 vkStream->commitWrite();
                 break;
@@ -5306,6 +6300,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pCallback, sizeof(VkDebugReportCallbackEXT));
                 vkReadStream->read((VkDebugReportCallbackEXT*)pCallback, sizeof(VkDebugReportCallbackEXT));
+                if (!(m_vk->vkCreateDebugReportCallbackEXT))
+                {
+                    fprintf(stderr, "vkCreateDebugReportCallbackEXT not found!\n");
+                }
                 VkResult vkCreateDebugReportCallbackEXT_VkResult_return = (VkResult)0;
                 vkCreateDebugReportCallbackEXT_VkResult_return = m_vk->vkCreateDebugReportCallbackEXT(instance, pCreateInfo, pAllocator, pCallback);
                 vkStream->write((VkDebugReportCallbackEXT*)pCallback, sizeof(VkDebugReportCallbackEXT));
@@ -5325,6 +6323,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroyDebugReportCallbackEXT))
+                {
+                    fprintf(stderr, "vkDestroyDebugReportCallbackEXT not found!\n");
                 }
                 m_vk->vkDestroyDebugReportCallbackEXT(instance, callback, pAllocator);
                 vkStream->commitWrite();
@@ -5348,6 +6350,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((int32_t*)&messageCode, sizeof(int32_t));
                 vkReadStream->loadStringInPlace((char**)&pLayerPrefix);
                 vkReadStream->loadStringInPlace((char**)&pMessage);
+                if (!(m_vk->vkDebugReportMessageEXT))
+                {
+                    fprintf(stderr, "vkDebugReportMessageEXT not found!\n");
+                }
                 m_vk->vkDebugReportMessageEXT(instance, flags, objectType, object, location, messageCode, pLayerPrefix, pMessage);
                 vkStream->commitWrite();
                 break;
@@ -5373,6 +6379,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->alloc((void**)&pTagInfo, sizeof(const VkDebugMarkerObjectTagInfoEXT));
                 unmarshal_VkDebugMarkerObjectTagInfoEXT(vkReadStream, (VkDebugMarkerObjectTagInfoEXT*)(pTagInfo));
+                if (!(m_vk->vkDebugMarkerSetObjectTagEXT))
+                {
+                    fprintf(stderr, "vkDebugMarkerSetObjectTagEXT not found!\n");
+                }
                 VkResult vkDebugMarkerSetObjectTagEXT_VkResult_return = (VkResult)0;
                 vkDebugMarkerSetObjectTagEXT_VkResult_return = m_vk->vkDebugMarkerSetObjectTagEXT(device, pTagInfo);
                 vkStream->write(&vkDebugMarkerSetObjectTagEXT_VkResult_return, sizeof(VkResult));
@@ -5386,6 +6396,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->alloc((void**)&pNameInfo, sizeof(const VkDebugMarkerObjectNameInfoEXT));
                 unmarshal_VkDebugMarkerObjectNameInfoEXT(vkReadStream, (VkDebugMarkerObjectNameInfoEXT*)(pNameInfo));
+                if (!(m_vk->vkDebugMarkerSetObjectNameEXT))
+                {
+                    fprintf(stderr, "vkDebugMarkerSetObjectNameEXT not found!\n");
+                }
                 VkResult vkDebugMarkerSetObjectNameEXT_VkResult_return = (VkResult)0;
                 vkDebugMarkerSetObjectNameEXT_VkResult_return = m_vk->vkDebugMarkerSetObjectNameEXT(device, pNameInfo);
                 vkStream->write(&vkDebugMarkerSetObjectNameEXT_VkResult_return, sizeof(VkResult));
@@ -5399,6 +6413,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->alloc((void**)&pMarkerInfo, sizeof(const VkDebugMarkerMarkerInfoEXT));
                 unmarshal_VkDebugMarkerMarkerInfoEXT(vkReadStream, (VkDebugMarkerMarkerInfoEXT*)(pMarkerInfo));
+                if (!(m_vk->vkCmdDebugMarkerBeginEXT))
+                {
+                    fprintf(stderr, "vkCmdDebugMarkerBeginEXT not found!\n");
+                }
                 m_vk->vkCmdDebugMarkerBeginEXT(commandBuffer, pMarkerInfo);
                 vkStream->commitWrite();
                 break;
@@ -5407,6 +6425,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+                if (!(m_vk->vkCmdDebugMarkerEndEXT))
+                {
+                    fprintf(stderr, "vkCmdDebugMarkerEndEXT not found!\n");
+                }
                 m_vk->vkCmdDebugMarkerEndEXT(commandBuffer);
                 vkStream->commitWrite();
                 break;
@@ -5418,6 +6440,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->alloc((void**)&pMarkerInfo, sizeof(const VkDebugMarkerMarkerInfoEXT));
                 unmarshal_VkDebugMarkerMarkerInfoEXT(vkReadStream, (VkDebugMarkerMarkerInfoEXT*)(pMarkerInfo));
+                if (!(m_vk->vkCmdDebugMarkerInsertEXT))
+                {
+                    fprintf(stderr, "vkCmdDebugMarkerInsertEXT not found!\n");
+                }
                 m_vk->vkCmdDebugMarkerInsertEXT(commandBuffer, pMarkerInfo);
                 vkStream->commitWrite();
                 break;
@@ -5444,6 +6470,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&countBufferOffset, sizeof(VkDeviceSize));
                 vkReadStream->read((uint32_t*)&maxDrawCount, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&stride, sizeof(uint32_t));
+                if (!(m_vk->vkCmdDrawIndirectCountAMD))
+                {
+                    fprintf(stderr, "vkCmdDrawIndirectCountAMD not found!\n");
+                }
                 m_vk->vkCmdDrawIndirectCountAMD(commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 vkStream->commitWrite();
                 break;
@@ -5464,6 +6494,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDeviceSize*)&countBufferOffset, sizeof(VkDeviceSize));
                 vkReadStream->read((uint32_t*)&maxDrawCount, sizeof(uint32_t));
                 vkReadStream->read((uint32_t*)&stride, sizeof(uint32_t));
+                if (!(m_vk->vkCmdDrawIndexedIndirectCountAMD))
+                {
+                    fprintf(stderr, "vkCmdDrawIndexedIndirectCountAMD not found!\n");
+                }
                 m_vk->vkCmdDrawIndexedIndirectCountAMD(commandBuffer, buffer, offset, countBuffer, countBufferOffset, maxDrawCount, stride);
                 vkStream->commitWrite();
                 break;
@@ -5501,6 +6535,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pInfo, (*(pInfoSize)) * sizeof(uint8_t));
                     vkReadStream->read((void*)pInfo, (*(pInfoSize)) * sizeof(uint8_t));
+                }
+                if (!(m_vk->vkGetShaderInfoAMD))
+                {
+                    fprintf(stderr, "vkGetShaderInfoAMD not found!\n");
                 }
                 VkResult vkGetShaderInfoAMD_VkResult_return = (VkResult)0;
                 vkGetShaderInfoAMD_VkResult_return = m_vk->vkGetShaderInfoAMD(device, pipeline, shaderStage, infoType, pInfoSize, pInfo);
@@ -5543,6 +6581,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkExternalMemoryHandleTypeFlagsNV*)&externalHandleType, sizeof(VkExternalMemoryHandleTypeFlagsNV));
                 vkReadStream->alloc((void**)&pExternalImageFormatProperties, sizeof(VkExternalImageFormatPropertiesNV));
                 unmarshal_VkExternalImageFormatPropertiesNV(vkReadStream, (VkExternalImageFormatPropertiesNV*)(pExternalImageFormatProperties));
+                if (!(m_vk->vkGetPhysicalDeviceExternalImageFormatPropertiesNV))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceExternalImageFormatPropertiesNV not found!\n");
+                }
                 VkResult vkGetPhysicalDeviceExternalImageFormatPropertiesNV_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceExternalImageFormatPropertiesNV_VkResult_return = m_vk->vkGetPhysicalDeviceExternalImageFormatPropertiesNV(physicalDevice, format, type, tiling, usage, flags, externalHandleType, pExternalImageFormatProperties);
                 marshal_VkExternalImageFormatPropertiesNV(vkStream, (VkExternalImageFormatPropertiesNV*)(pExternalImageFormatProperties));
@@ -5565,6 +6607,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkExternalMemoryHandleTypeFlagsNV*)&handleType, sizeof(VkExternalMemoryHandleTypeFlagsNV));
                 vkReadStream->alloc((void**)&pHandle, sizeof(HANDLE));
                 vkReadStream->read((HANDLE*)pHandle, sizeof(HANDLE));
+                if (!(m_vk->vkGetMemoryWin32HandleNV))
+                {
+                    fprintf(stderr, "vkGetMemoryWin32HandleNV not found!\n");
+                }
                 VkResult vkGetMemoryWin32HandleNV_VkResult_return = (VkResult)0;
                 vkGetMemoryWin32HandleNV_VkResult_return = m_vk->vkGetMemoryWin32HandleNV(device, memory, handleType, pHandle);
                 vkStream->write((HANDLE*)pHandle, sizeof(HANDLE));
@@ -5595,6 +6641,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pSurface, sizeof(VkSurfaceKHR));
                 vkReadStream->read((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
+                if (!(m_vk->vkCreateViSurfaceNN))
+                {
+                    fprintf(stderr, "vkCreateViSurfaceNN not found!\n");
+                }
                 VkResult vkCreateViSurfaceNN_VkResult_return = (VkResult)0;
                 vkCreateViSurfaceNN_VkResult_return = m_vk->vkCreateViSurfaceNN(instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -5615,6 +6665,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->alloc((void**)&pConditionalRenderingBegin, sizeof(const VkConditionalRenderingBeginInfoEXT));
                 unmarshal_VkConditionalRenderingBeginInfoEXT(vkReadStream, (VkConditionalRenderingBeginInfoEXT*)(pConditionalRenderingBegin));
+                if (!(m_vk->vkCmdBeginConditionalRenderingEXT))
+                {
+                    fprintf(stderr, "vkCmdBeginConditionalRenderingEXT not found!\n");
+                }
                 m_vk->vkCmdBeginConditionalRenderingEXT(commandBuffer, pConditionalRenderingBegin);
                 vkStream->commitWrite();
                 break;
@@ -5623,6 +6677,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+                if (!(m_vk->vkCmdEndConditionalRenderingEXT))
+                {
+                    fprintf(stderr, "vkCmdEndConditionalRenderingEXT not found!\n");
+                }
                 m_vk->vkCmdEndConditionalRenderingEXT(commandBuffer);
                 vkStream->commitWrite();
                 break;
@@ -5636,6 +6694,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->alloc((void**)&pProcessCommandsInfo, sizeof(const VkCmdProcessCommandsInfoNVX));
                 unmarshal_VkCmdProcessCommandsInfoNVX(vkReadStream, (VkCmdProcessCommandsInfoNVX*)(pProcessCommandsInfo));
+                if (!(m_vk->vkCmdProcessCommandsNVX))
+                {
+                    fprintf(stderr, "vkCmdProcessCommandsNVX not found!\n");
+                }
                 m_vk->vkCmdProcessCommandsNVX(commandBuffer, pProcessCommandsInfo);
                 vkStream->commitWrite();
                 break;
@@ -5647,6 +6709,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->alloc((void**)&pReserveSpaceInfo, sizeof(const VkCmdReserveSpaceForCommandsInfoNVX));
                 unmarshal_VkCmdReserveSpaceForCommandsInfoNVX(vkReadStream, (VkCmdReserveSpaceForCommandsInfoNVX*)(pReserveSpaceInfo));
+                if (!(m_vk->vkCmdReserveSpaceForCommandsNVX))
+                {
+                    fprintf(stderr, "vkCmdReserveSpaceForCommandsNVX not found!\n");
+                }
                 m_vk->vkCmdReserveSpaceForCommandsNVX(commandBuffer, pReserveSpaceInfo);
                 vkStream->commitWrite();
                 break;
@@ -5668,6 +6734,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pIndirectCommandsLayout, sizeof(VkIndirectCommandsLayoutNVX));
                 vkReadStream->read((VkIndirectCommandsLayoutNVX*)pIndirectCommandsLayout, sizeof(VkIndirectCommandsLayoutNVX));
+                if (!(m_vk->vkCreateIndirectCommandsLayoutNVX))
+                {
+                    fprintf(stderr, "vkCreateIndirectCommandsLayoutNVX not found!\n");
+                }
                 VkResult vkCreateIndirectCommandsLayoutNVX_VkResult_return = (VkResult)0;
                 vkCreateIndirectCommandsLayoutNVX_VkResult_return = m_vk->vkCreateIndirectCommandsLayoutNVX(device, pCreateInfo, pAllocator, pIndirectCommandsLayout);
                 vkStream->write((VkIndirectCommandsLayoutNVX*)pIndirectCommandsLayout, sizeof(VkIndirectCommandsLayoutNVX));
@@ -5687,6 +6757,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
+                }
+                if (!(m_vk->vkDestroyIndirectCommandsLayoutNVX))
+                {
+                    fprintf(stderr, "vkDestroyIndirectCommandsLayoutNVX not found!\n");
                 }
                 m_vk->vkDestroyIndirectCommandsLayoutNVX(device, indirectCommandsLayout, pAllocator);
                 vkStream->commitWrite();
@@ -5709,6 +6783,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pObjectTable, sizeof(VkObjectTableNVX));
                 vkReadStream->read((VkObjectTableNVX*)pObjectTable, sizeof(VkObjectTableNVX));
+                if (!(m_vk->vkCreateObjectTableNVX))
+                {
+                    fprintf(stderr, "vkCreateObjectTableNVX not found!\n");
+                }
                 VkResult vkCreateObjectTableNVX_VkResult_return = (VkResult)0;
                 vkCreateObjectTableNVX_VkResult_return = m_vk->vkCreateObjectTableNVX(device, pCreateInfo, pAllocator, pObjectTable);
                 vkStream->write((VkObjectTableNVX*)pObjectTable, sizeof(VkObjectTableNVX));
@@ -5729,6 +6807,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (!(m_vk->vkDestroyObjectTableNVX))
+                {
+                    fprintf(stderr, "vkDestroyObjectTableNVX not found!\n");
+                }
                 m_vk->vkDestroyObjectTableNVX(device, objectTable, pAllocator);
                 vkStream->commitWrite();
                 break;
@@ -5745,6 +6827,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&objectCount, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&pObjectIndices, ((objectCount)) * sizeof(const uint32_t));
                 vkReadStream->read((uint32_t*)pObjectIndices, ((objectCount)) * sizeof(const uint32_t));
+                if (!(m_vk->vkRegisterObjectsNVX))
+                {
+                    fprintf(stderr, "vkRegisterObjectsNVX not found!\n");
+                }
                 VkResult vkRegisterObjectsNVX_VkResult_return = (VkResult)0;
                 vkRegisterObjectsNVX_VkResult_return = m_vk->vkRegisterObjectsNVX(device, objectTable, objectCount, ppObjectTableEntries, pObjectIndices);
                 vkStream->write(&vkRegisterObjectsNVX_VkResult_return, sizeof(VkResult));
@@ -5765,6 +6851,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkObjectEntryTypeNVX*)pObjectEntryTypes, ((objectCount)) * sizeof(const VkObjectEntryTypeNVX));
                 vkReadStream->alloc((void**)&pObjectIndices, ((objectCount)) * sizeof(const uint32_t));
                 vkReadStream->read((uint32_t*)pObjectIndices, ((objectCount)) * sizeof(const uint32_t));
+                if (!(m_vk->vkUnregisterObjectsNVX))
+                {
+                    fprintf(stderr, "vkUnregisterObjectsNVX not found!\n");
+                }
                 VkResult vkUnregisterObjectsNVX_VkResult_return = (VkResult)0;
                 vkUnregisterObjectsNVX_VkResult_return = m_vk->vkUnregisterObjectsNVX(device, objectTable, objectCount, pObjectEntryTypes, pObjectIndices);
                 vkStream->write(&vkUnregisterObjectsNVX_VkResult_return, sizeof(VkResult));
@@ -5781,6 +6871,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkDeviceGeneratedCommandsFeaturesNVX(vkReadStream, (VkDeviceGeneratedCommandsFeaturesNVX*)(pFeatures));
                 vkReadStream->alloc((void**)&pLimits, sizeof(VkDeviceGeneratedCommandsLimitsNVX));
                 unmarshal_VkDeviceGeneratedCommandsLimitsNVX(vkReadStream, (VkDeviceGeneratedCommandsLimitsNVX*)(pLimits));
+                if (!(m_vk->vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX(physicalDevice, pFeatures, pLimits);
                 marshal_VkDeviceGeneratedCommandsFeaturesNVX(vkStream, (VkDeviceGeneratedCommandsFeaturesNVX*)(pFeatures));
                 marshal_VkDeviceGeneratedCommandsLimitsNVX(vkStream, (VkDeviceGeneratedCommandsLimitsNVX*)(pLimits));
@@ -5803,6 +6897,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkViewportWScalingNV(vkReadStream, (VkViewportWScalingNV*)(pViewportWScalings + i));
                 }
+                if (!(m_vk->vkCmdSetViewportWScalingNV))
+                {
+                    fprintf(stderr, "vkCmdSetViewportWScalingNV not found!\n");
+                }
                 m_vk->vkCmdSetViewportWScalingNV(commandBuffer, firstViewport, viewportCount, pViewportWScalings);
                 vkStream->commitWrite();
                 break;
@@ -5815,6 +6913,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkDisplayKHR display;
                 vkReadStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
                 vkReadStream->read((VkDisplayKHR*)&display, sizeof(VkDisplayKHR));
+                if (!(m_vk->vkReleaseDisplayEXT))
+                {
+                    fprintf(stderr, "vkReleaseDisplayEXT not found!\n");
+                }
                 VkResult vkReleaseDisplayEXT_VkResult_return = (VkResult)0;
                 vkReleaseDisplayEXT_VkResult_return = m_vk->vkReleaseDisplayEXT(physicalDevice, display);
                 vkStream->write(&vkReleaseDisplayEXT_VkResult_return, sizeof(VkResult));
@@ -5832,6 +6934,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&dpy, sizeof(Display));
                 vkReadStream->read((Display*)dpy, sizeof(Display));
                 vkReadStream->read((VkDisplayKHR*)&display, sizeof(VkDisplayKHR));
+                if (!(m_vk->vkAcquireXlibDisplayEXT))
+                {
+                    fprintf(stderr, "vkAcquireXlibDisplayEXT not found!\n");
+                }
                 VkResult vkAcquireXlibDisplayEXT_VkResult_return = (VkResult)0;
                 vkAcquireXlibDisplayEXT_VkResult_return = m_vk->vkAcquireXlibDisplayEXT(physicalDevice, dpy, display);
                 vkStream->write((Display*)dpy, sizeof(Display));
@@ -5851,6 +6957,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((RROutput*)&rrOutput, sizeof(RROutput));
                 vkReadStream->alloc((void**)&pDisplay, sizeof(VkDisplayKHR));
                 vkReadStream->read((VkDisplayKHR*)pDisplay, sizeof(VkDisplayKHR));
+                if (!(m_vk->vkGetRandROutputDisplayEXT))
+                {
+                    fprintf(stderr, "vkGetRandROutputDisplayEXT not found!\n");
+                }
                 VkResult vkGetRandROutputDisplayEXT_VkResult_return = (VkResult)0;
                 vkGetRandROutputDisplayEXT_VkResult_return = m_vk->vkGetRandROutputDisplayEXT(physicalDevice, dpy, rrOutput, pDisplay);
                 vkStream->write((Display*)dpy, sizeof(Display));
@@ -5870,6 +6980,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkSurfaceKHR*)&surface, sizeof(VkSurfaceKHR));
                 vkReadStream->alloc((void**)&pSurfaceCapabilities, sizeof(VkSurfaceCapabilities2EXT));
                 unmarshal_VkSurfaceCapabilities2EXT(vkReadStream, (VkSurfaceCapabilities2EXT*)(pSurfaceCapabilities));
+                if (!(m_vk->vkGetPhysicalDeviceSurfaceCapabilities2EXT))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceSurfaceCapabilities2EXT not found!\n");
+                }
                 VkResult vkGetPhysicalDeviceSurfaceCapabilities2EXT_VkResult_return = (VkResult)0;
                 vkGetPhysicalDeviceSurfaceCapabilities2EXT_VkResult_return = m_vk->vkGetPhysicalDeviceSurfaceCapabilities2EXT(physicalDevice, surface, pSurfaceCapabilities);
                 marshal_VkSurfaceCapabilities2EXT(vkStream, (VkSurfaceCapabilities2EXT*)(pSurfaceCapabilities));
@@ -5888,6 +7002,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDisplayKHR*)&display, sizeof(VkDisplayKHR));
                 vkReadStream->alloc((void**)&pDisplayPowerInfo, sizeof(const VkDisplayPowerInfoEXT));
                 unmarshal_VkDisplayPowerInfoEXT(vkReadStream, (VkDisplayPowerInfoEXT*)(pDisplayPowerInfo));
+                if (!(m_vk->vkDisplayPowerControlEXT))
+                {
+                    fprintf(stderr, "vkDisplayPowerControlEXT not found!\n");
+                }
                 VkResult vkDisplayPowerControlEXT_VkResult_return = (VkResult)0;
                 vkDisplayPowerControlEXT_VkResult_return = m_vk->vkDisplayPowerControlEXT(device, display, pDisplayPowerInfo);
                 vkStream->write(&vkDisplayPowerControlEXT_VkResult_return, sizeof(VkResult));
@@ -5911,6 +7029,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pFence, sizeof(VkFence));
                 vkReadStream->read((VkFence*)pFence, sizeof(VkFence));
+                if (!(m_vk->vkRegisterDeviceEventEXT))
+                {
+                    fprintf(stderr, "vkRegisterDeviceEventEXT not found!\n");
+                }
                 VkResult vkRegisterDeviceEventEXT_VkResult_return = (VkResult)0;
                 vkRegisterDeviceEventEXT_VkResult_return = m_vk->vkRegisterDeviceEventEXT(device, pDeviceEventInfo, pAllocator, pFence);
                 vkStream->write((VkFence*)pFence, sizeof(VkFence));
@@ -5937,6 +7059,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pFence, sizeof(VkFence));
                 vkReadStream->read((VkFence*)pFence, sizeof(VkFence));
+                if (!(m_vk->vkRegisterDisplayEventEXT))
+                {
+                    fprintf(stderr, "vkRegisterDisplayEventEXT not found!\n");
+                }
                 VkResult vkRegisterDisplayEventEXT_VkResult_return = (VkResult)0;
                 vkRegisterDisplayEventEXT_VkResult_return = m_vk->vkRegisterDisplayEventEXT(device, display, pDisplayEventInfo, pAllocator, pFence);
                 vkStream->write((VkFence*)pFence, sizeof(VkFence));
@@ -5955,6 +7081,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkSurfaceCounterFlagBitsEXT*)&counter, sizeof(VkSurfaceCounterFlagBitsEXT));
                 vkReadStream->alloc((void**)&pCounterValue, sizeof(uint64_t));
                 vkReadStream->read((uint64_t*)pCounterValue, sizeof(uint64_t));
+                if (!(m_vk->vkGetSwapchainCounterEXT))
+                {
+                    fprintf(stderr, "vkGetSwapchainCounterEXT not found!\n");
+                }
                 VkResult vkGetSwapchainCounterEXT_VkResult_return = (VkResult)0;
                 vkGetSwapchainCounterEXT_VkResult_return = m_vk->vkGetSwapchainCounterEXT(device, swapchain, counter, pCounterValue);
                 vkStream->write((uint64_t*)pCounterValue, sizeof(uint64_t));
@@ -5973,6 +7103,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkSwapchainKHR*)&swapchain, sizeof(VkSwapchainKHR));
                 vkReadStream->alloc((void**)&pDisplayTimingProperties, sizeof(VkRefreshCycleDurationGOOGLE));
                 unmarshal_VkRefreshCycleDurationGOOGLE(vkReadStream, (VkRefreshCycleDurationGOOGLE*)(pDisplayTimingProperties));
+                if (!(m_vk->vkGetRefreshCycleDurationGOOGLE))
+                {
+                    fprintf(stderr, "vkGetRefreshCycleDurationGOOGLE not found!\n");
+                }
                 VkResult vkGetRefreshCycleDurationGOOGLE_VkResult_return = (VkResult)0;
                 vkGetRefreshCycleDurationGOOGLE_VkResult_return = m_vk->vkGetRefreshCycleDurationGOOGLE(device, swapchain, pDisplayTimingProperties);
                 marshal_VkRefreshCycleDurationGOOGLE(vkStream, (VkRefreshCycleDurationGOOGLE*)(pDisplayTimingProperties));
@@ -6002,6 +7136,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         unmarshal_VkPastPresentationTimingGOOGLE(vkReadStream, (VkPastPresentationTimingGOOGLE*)(pPresentationTimings + i));
                     }
+                }
+                if (!(m_vk->vkGetPastPresentationTimingGOOGLE))
+                {
+                    fprintf(stderr, "vkGetPastPresentationTimingGOOGLE not found!\n");
                 }
                 VkResult vkGetPastPresentationTimingGOOGLE_VkResult_return = (VkResult)0;
                 vkGetPastPresentationTimingGOOGLE_VkResult_return = m_vk->vkGetPastPresentationTimingGOOGLE(device, swapchain, pPresentationTimingCount, pPresentationTimings);
@@ -6048,6 +7186,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkRect2D(vkReadStream, (VkRect2D*)(pDiscardRectangles + i));
                 }
+                if (!(m_vk->vkCmdSetDiscardRectangleEXT))
+                {
+                    fprintf(stderr, "vkCmdSetDiscardRectangleEXT not found!\n");
+                }
                 m_vk->vkCmdSetDiscardRectangleEXT(commandBuffer, firstDiscardRectangle, discardRectangleCount, pDiscardRectangles);
                 vkStream->commitWrite();
                 break;
@@ -6073,6 +7215,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkHdrMetadataEXT(vkReadStream, (VkHdrMetadataEXT*)(pMetadata + i));
                 }
+                if (!(m_vk->vkSetHdrMetadataEXT))
+                {
+                    fprintf(stderr, "vkSetHdrMetadataEXT not found!\n");
+                }
                 m_vk->vkSetHdrMetadataEXT(device, swapchainCount, pSwapchains, pMetadata);
                 vkStream->commitWrite();
                 break;
@@ -6096,6 +7242,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pSurface, sizeof(VkSurfaceKHR));
                 vkReadStream->read((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
+                if (!(m_vk->vkCreateIOSSurfaceMVK))
+                {
+                    fprintf(stderr, "vkCreateIOSSurfaceMVK not found!\n");
+                }
                 VkResult vkCreateIOSSurfaceMVK_VkResult_return = (VkResult)0;
                 vkCreateIOSSurfaceMVK_VkResult_return = m_vk->vkCreateIOSSurfaceMVK(instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -6122,6 +7272,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pSurface, sizeof(VkSurfaceKHR));
                 vkReadStream->read((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
+                if (!(m_vk->vkCreateMacOSSurfaceMVK))
+                {
+                    fprintf(stderr, "vkCreateMacOSSurfaceMVK not found!\n");
+                }
                 VkResult vkCreateMacOSSurfaceMVK_VkResult_return = (VkResult)0;
                 vkCreateMacOSSurfaceMVK_VkResult_return = m_vk->vkCreateMacOSSurfaceMVK(instance, pCreateInfo, pAllocator, pSurface);
                 vkStream->write((VkSurfaceKHR*)pSurface, sizeof(VkSurfaceKHR));
@@ -6142,6 +7296,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->alloc((void**)&pNameInfo, sizeof(const VkDebugUtilsObjectNameInfoEXT));
                 unmarshal_VkDebugUtilsObjectNameInfoEXT(vkReadStream, (VkDebugUtilsObjectNameInfoEXT*)(pNameInfo));
+                if (!(m_vk->vkSetDebugUtilsObjectNameEXT))
+                {
+                    fprintf(stderr, "vkSetDebugUtilsObjectNameEXT not found!\n");
+                }
                 VkResult vkSetDebugUtilsObjectNameEXT_VkResult_return = (VkResult)0;
                 vkSetDebugUtilsObjectNameEXT_VkResult_return = m_vk->vkSetDebugUtilsObjectNameEXT(device, pNameInfo);
                 vkStream->write(&vkSetDebugUtilsObjectNameEXT_VkResult_return, sizeof(VkResult));
@@ -6155,6 +7313,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
                 vkReadStream->alloc((void**)&pTagInfo, sizeof(const VkDebugUtilsObjectTagInfoEXT));
                 unmarshal_VkDebugUtilsObjectTagInfoEXT(vkReadStream, (VkDebugUtilsObjectTagInfoEXT*)(pTagInfo));
+                if (!(m_vk->vkSetDebugUtilsObjectTagEXT))
+                {
+                    fprintf(stderr, "vkSetDebugUtilsObjectTagEXT not found!\n");
+                }
                 VkResult vkSetDebugUtilsObjectTagEXT_VkResult_return = (VkResult)0;
                 vkSetDebugUtilsObjectTagEXT_VkResult_return = m_vk->vkSetDebugUtilsObjectTagEXT(device, pTagInfo);
                 vkStream->write(&vkSetDebugUtilsObjectTagEXT_VkResult_return, sizeof(VkResult));
@@ -6168,6 +7330,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkQueue*)&queue, sizeof(VkQueue));
                 vkReadStream->alloc((void**)&pLabelInfo, sizeof(const VkDebugUtilsLabelEXT));
                 unmarshal_VkDebugUtilsLabelEXT(vkReadStream, (VkDebugUtilsLabelEXT*)(pLabelInfo));
+                if (!(m_vk->vkQueueBeginDebugUtilsLabelEXT))
+                {
+                    fprintf(stderr, "vkQueueBeginDebugUtilsLabelEXT not found!\n");
+                }
                 m_vk->vkQueueBeginDebugUtilsLabelEXT(queue, pLabelInfo);
                 vkStream->commitWrite();
                 break;
@@ -6176,6 +7342,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkQueue queue;
                 vkReadStream->read((VkQueue*)&queue, sizeof(VkQueue));
+                if (!(m_vk->vkQueueEndDebugUtilsLabelEXT))
+                {
+                    fprintf(stderr, "vkQueueEndDebugUtilsLabelEXT not found!\n");
+                }
                 m_vk->vkQueueEndDebugUtilsLabelEXT(queue);
                 vkStream->commitWrite();
                 break;
@@ -6187,6 +7357,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkQueue*)&queue, sizeof(VkQueue));
                 vkReadStream->alloc((void**)&pLabelInfo, sizeof(const VkDebugUtilsLabelEXT));
                 unmarshal_VkDebugUtilsLabelEXT(vkReadStream, (VkDebugUtilsLabelEXT*)(pLabelInfo));
+                if (!(m_vk->vkQueueInsertDebugUtilsLabelEXT))
+                {
+                    fprintf(stderr, "vkQueueInsertDebugUtilsLabelEXT not found!\n");
+                }
                 m_vk->vkQueueInsertDebugUtilsLabelEXT(queue, pLabelInfo);
                 vkStream->commitWrite();
                 break;
@@ -6198,6 +7372,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->alloc((void**)&pLabelInfo, sizeof(const VkDebugUtilsLabelEXT));
                 unmarshal_VkDebugUtilsLabelEXT(vkReadStream, (VkDebugUtilsLabelEXT*)(pLabelInfo));
+                if (!(m_vk->vkCmdBeginDebugUtilsLabelEXT))
+                {
+                    fprintf(stderr, "vkCmdBeginDebugUtilsLabelEXT not found!\n");
+                }
                 m_vk->vkCmdBeginDebugUtilsLabelEXT(commandBuffer, pLabelInfo);
                 vkStream->commitWrite();
                 break;
@@ -6206,6 +7384,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             {
                 VkCommandBuffer commandBuffer;
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
+                if (!(m_vk->vkCmdEndDebugUtilsLabelEXT))
+                {
+                    fprintf(stderr, "vkCmdEndDebugUtilsLabelEXT not found!\n");
+                }
                 m_vk->vkCmdEndDebugUtilsLabelEXT(commandBuffer);
                 vkStream->commitWrite();
                 break;
@@ -6217,6 +7399,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->alloc((void**)&pLabelInfo, sizeof(const VkDebugUtilsLabelEXT));
                 unmarshal_VkDebugUtilsLabelEXT(vkReadStream, (VkDebugUtilsLabelEXT*)(pLabelInfo));
+                if (!(m_vk->vkCmdInsertDebugUtilsLabelEXT))
+                {
+                    fprintf(stderr, "vkCmdInsertDebugUtilsLabelEXT not found!\n");
+                }
                 m_vk->vkCmdInsertDebugUtilsLabelEXT(commandBuffer, pLabelInfo);
                 vkStream->commitWrite();
                 break;
@@ -6238,6 +7424,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pMessenger, sizeof(VkDebugUtilsMessengerEXT));
                 vkReadStream->read((VkDebugUtilsMessengerEXT*)pMessenger, sizeof(VkDebugUtilsMessengerEXT));
+                if (!(m_vk->vkCreateDebugUtilsMessengerEXT))
+                {
+                    fprintf(stderr, "vkCreateDebugUtilsMessengerEXT not found!\n");
+                }
                 VkResult vkCreateDebugUtilsMessengerEXT_VkResult_return = (VkResult)0;
                 vkCreateDebugUtilsMessengerEXT_VkResult_return = m_vk->vkCreateDebugUtilsMessengerEXT(instance, pCreateInfo, pAllocator, pMessenger);
                 vkStream->write((VkDebugUtilsMessengerEXT*)pMessenger, sizeof(VkDebugUtilsMessengerEXT));
@@ -6258,6 +7448,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (!(m_vk->vkDestroyDebugUtilsMessengerEXT))
+                {
+                    fprintf(stderr, "vkDestroyDebugUtilsMessengerEXT not found!\n");
+                }
                 m_vk->vkDestroyDebugUtilsMessengerEXT(instance, messenger, pAllocator);
                 vkStream->commitWrite();
                 break;
@@ -6273,6 +7467,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkDebugUtilsMessageTypeFlagsEXT*)&messageTypes, sizeof(VkDebugUtilsMessageTypeFlagsEXT));
                 vkReadStream->alloc((void**)&pCallbackData, sizeof(const VkDebugUtilsMessengerCallbackDataEXT));
                 unmarshal_VkDebugUtilsMessengerCallbackDataEXT(vkReadStream, (VkDebugUtilsMessengerCallbackDataEXT*)(pCallbackData));
+                if (!(m_vk->vkSubmitDebugUtilsMessageEXT))
+                {
+                    fprintf(stderr, "vkSubmitDebugUtilsMessageEXT not found!\n");
+                }
                 m_vk->vkSubmitDebugUtilsMessageEXT(instance, messageSeverity, messageTypes, pCallbackData);
                 vkStream->commitWrite();
                 break;
@@ -6289,6 +7487,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((AHardwareBuffer*)buffer, sizeof(const AHardwareBuffer));
                 vkReadStream->alloc((void**)&pProperties, sizeof(VkAndroidHardwareBufferPropertiesANDROID));
                 unmarshal_VkAndroidHardwareBufferPropertiesANDROID(vkReadStream, (VkAndroidHardwareBufferPropertiesANDROID*)(pProperties));
+                if (!(m_vk->vkGetAndroidHardwareBufferPropertiesANDROID))
+                {
+                    fprintf(stderr, "vkGetAndroidHardwareBufferPropertiesANDROID not found!\n");
+                }
                 VkResult vkGetAndroidHardwareBufferPropertiesANDROID_VkResult_return = (VkResult)0;
                 vkGetAndroidHardwareBufferPropertiesANDROID_VkResult_return = m_vk->vkGetAndroidHardwareBufferPropertiesANDROID(device, buffer, pProperties);
                 marshal_VkAndroidHardwareBufferPropertiesANDROID(vkStream, (VkAndroidHardwareBufferPropertiesANDROID*)(pProperties));
@@ -6306,6 +7508,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkMemoryGetAndroidHardwareBufferInfoANDROID(vkReadStream, (VkMemoryGetAndroidHardwareBufferInfoANDROID*)(pInfo));
                 vkReadStream->alloc((void**)&pBuffer, sizeof(AHardwareBuffer*));
                 vkReadStream->read((AHardwareBuffer**)pBuffer, sizeof(AHardwareBuffer*));
+                if (!(m_vk->vkGetMemoryAndroidHardwareBufferANDROID))
+                {
+                    fprintf(stderr, "vkGetMemoryAndroidHardwareBufferANDROID not found!\n");
+                }
                 VkResult vkGetMemoryAndroidHardwareBufferANDROID_VkResult_return = (VkResult)0;
                 vkGetMemoryAndroidHardwareBufferANDROID_VkResult_return = m_vk->vkGetMemoryAndroidHardwareBufferANDROID(device, pInfo, pBuffer);
                 vkStream->write((AHardwareBuffer**)pBuffer, sizeof(AHardwareBuffer*));
@@ -6332,6 +7538,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkCommandBuffer*)&commandBuffer, sizeof(VkCommandBuffer));
                 vkReadStream->alloc((void**)&pSampleLocationsInfo, sizeof(const VkSampleLocationsInfoEXT));
                 unmarshal_VkSampleLocationsInfoEXT(vkReadStream, (VkSampleLocationsInfoEXT*)(pSampleLocationsInfo));
+                if (!(m_vk->vkCmdSetSampleLocationsEXT))
+                {
+                    fprintf(stderr, "vkCmdSetSampleLocationsEXT not found!\n");
+                }
                 m_vk->vkCmdSetSampleLocationsEXT(commandBuffer, pSampleLocationsInfo);
                 vkStream->commitWrite();
                 break;
@@ -6345,6 +7555,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkSampleCountFlagBits*)&samples, sizeof(VkSampleCountFlagBits));
                 vkReadStream->alloc((void**)&pMultisampleProperties, sizeof(VkMultisamplePropertiesEXT));
                 unmarshal_VkMultisamplePropertiesEXT(vkReadStream, (VkMultisamplePropertiesEXT*)(pMultisampleProperties));
+                if (!(m_vk->vkGetPhysicalDeviceMultisamplePropertiesEXT))
+                {
+                    fprintf(stderr, "vkGetPhysicalDeviceMultisamplePropertiesEXT not found!\n");
+                }
                 m_vk->vkGetPhysicalDeviceMultisamplePropertiesEXT(physicalDevice, samples, pMultisampleProperties);
                 marshal_VkMultisamplePropertiesEXT(vkStream, (VkMultisamplePropertiesEXT*)(pMultisampleProperties));
                 vkStream->commitWrite();
@@ -6379,6 +7593,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pValidationCache, sizeof(VkValidationCacheEXT));
                 vkReadStream->read((VkValidationCacheEXT*)pValidationCache, sizeof(VkValidationCacheEXT));
+                if (!(m_vk->vkCreateValidationCacheEXT))
+                {
+                    fprintf(stderr, "vkCreateValidationCacheEXT not found!\n");
+                }
                 VkResult vkCreateValidationCacheEXT_VkResult_return = (VkResult)0;
                 vkCreateValidationCacheEXT_VkResult_return = m_vk->vkCreateValidationCacheEXT(device, pCreateInfo, pAllocator, pValidationCache);
                 vkStream->write((VkValidationCacheEXT*)pValidationCache, sizeof(VkValidationCacheEXT));
@@ -6399,6 +7617,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
+                if (!(m_vk->vkDestroyValidationCacheEXT))
+                {
+                    fprintf(stderr, "vkDestroyValidationCacheEXT not found!\n");
+                }
                 m_vk->vkDestroyValidationCacheEXT(device, validationCache, pAllocator);
                 vkStream->commitWrite();
                 break;
@@ -6414,6 +7636,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)&srcCacheCount, sizeof(uint32_t));
                 vkReadStream->alloc((void**)&pSrcCaches, ((srcCacheCount)) * sizeof(const VkValidationCacheEXT));
                 vkReadStream->read((VkValidationCacheEXT*)pSrcCaches, ((srcCacheCount)) * sizeof(const VkValidationCacheEXT));
+                if (!(m_vk->vkMergeValidationCachesEXT))
+                {
+                    fprintf(stderr, "vkMergeValidationCachesEXT not found!\n");
+                }
                 VkResult vkMergeValidationCachesEXT_VkResult_return = (VkResult)0;
                 vkMergeValidationCachesEXT_VkResult_return = m_vk->vkMergeValidationCachesEXT(device, dstCache, srcCacheCount, pSrcCaches);
                 vkStream->write(&vkMergeValidationCachesEXT_VkResult_return, sizeof(VkResult));
@@ -6439,6 +7665,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pData, (*(pDataSize)) * sizeof(uint8_t));
                     vkReadStream->read((void*)pData, (*(pDataSize)) * sizeof(uint8_t));
+                }
+                if (!(m_vk->vkGetValidationCacheDataEXT))
+                {
+                    fprintf(stderr, "vkGetValidationCacheDataEXT not found!\n");
                 }
                 VkResult vkGetValidationCacheDataEXT_VkResult_return = (VkResult)0;
                 vkGetValidationCacheDataEXT_VkResult_return = m_vk->vkGetValidationCacheDataEXT(device, validationCache, pDataSize, pData);
@@ -6480,6 +7710,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 }
                 vkReadStream->alloc((void**)&pMemoryHostPointerProperties, sizeof(VkMemoryHostPointerPropertiesEXT));
                 unmarshal_VkMemoryHostPointerPropertiesEXT(vkReadStream, (VkMemoryHostPointerPropertiesEXT*)(pMemoryHostPointerProperties));
+                if (!(m_vk->vkGetMemoryHostPointerPropertiesEXT))
+                {
+                    fprintf(stderr, "vkGetMemoryHostPointerPropertiesEXT not found!\n");
+                }
                 VkResult vkGetMemoryHostPointerPropertiesEXT_VkResult_return = (VkResult)0;
                 vkGetMemoryHostPointerPropertiesEXT_VkResult_return = m_vk->vkGetMemoryHostPointerPropertiesEXT(device, handleType, pHostPointer, pMemoryHostPointerProperties);
                 marshal_VkMemoryHostPointerPropertiesEXT(vkStream, (VkMemoryHostPointerPropertiesEXT*)(pMemoryHostPointerProperties));
@@ -6501,6 +7735,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkBuffer*)&dstBuffer, sizeof(VkBuffer));
                 vkReadStream->read((VkDeviceSize*)&dstOffset, sizeof(VkDeviceSize));
                 vkReadStream->read((uint32_t*)&marker, sizeof(uint32_t));
+                if (!(m_vk->vkCmdWriteBufferMarkerAMD))
+                {
+                    fprintf(stderr, "vkCmdWriteBufferMarkerAMD not found!\n");
+                }
                 m_vk->vkCmdWriteBufferMarkerAMD(commandBuffer, pipelineStage, dstBuffer, dstOffset, marker);
                 vkStream->commitWrite();
                 break;
@@ -6523,6 +7761,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     vkReadStream->alloc((void**)&pCheckpointMarker, sizeof(const uint8_t));
                     vkReadStream->read((void*)pCheckpointMarker, sizeof(const uint8_t));
+                }
+                if (!(m_vk->vkCmdSetCheckpointNV))
+                {
+                    fprintf(stderr, "vkCmdSetCheckpointNV not found!\n");
                 }
                 m_vk->vkCmdSetCheckpointNV(commandBuffer, pCheckpointMarker);
                 vkStream->commitWrite();
@@ -6548,6 +7790,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     {
                         unmarshal_VkCheckpointDataNV(vkReadStream, (VkCheckpointDataNV*)(pCheckpointData + i));
                     }
+                }
+                if (!(m_vk->vkGetQueueCheckpointDataNV))
+                {
+                    fprintf(stderr, "vkGetQueueCheckpointDataNV not found!\n");
                 }
                 m_vk->vkGetQueueCheckpointDataNV(queue, pCheckpointDataCount, pCheckpointData);
                 vkStream->write((uint32_t**)&pCheckpointDataCount, sizeof(uint32_t*));

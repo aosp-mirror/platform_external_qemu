@@ -127,10 +127,9 @@ class EncodingParameters(object):
                 self.toRead.append(param)
                 if param.isCreatedBy(api):
                     self.toCreate.append(param)
-            elif param.isDestroyedBy(api):
-                self.toWrite.append(param)
-                self.toDestroy.append(param)
             else:
+                if param.isDestroyedBy(api):
+                    self.toDestroy.append(param)
                 localCopyParam = \
                     param.getForNonConstAccess().withModifiedName( \
                         "local_" + param.paramName)
