@@ -88,15 +88,10 @@ def emit_decode_parameters(typeInfo, api, cgen):
         emit_unmarshal(typeInfo, p, cgen)
 
 def emit_dispatch_call(api, cgen):
-    callLhs = None
-    retTypeName = api.getRetTypeExpr()
-    if retTypeName != "void":
-        retVar = api.getRetVarExpr()
-        cgen.stmt("%s %s = (%s)0" % (retTypeName, retVar, retTypeName))
-        callLhs = retVar
+    cgen.vkApiCall(api, customPrefix="m_vk->")
 
-    cgen.funcCall(
-        callLhs, "m_vk->" + api.name, [p.paramName for p in api.parameters])
+def emit_global_state_wrapped_call(api, cgen):
+    cgen.vkApiCall(api, customPrefix="m_state->on_")
 
 def emit_decode_parameters_writeback(typeInfo, api, cgen):
     paramsToWrite = []

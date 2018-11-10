@@ -75,6 +75,7 @@ NON_DISPATCHABLE_HANDLE_TYPES = [
 ]
 
 CUSTOM_HANDLE_CREATE_TYPES = [
+    "VkPhysicalDevice",
     "VkQueue",
     "VkPipeline",
     "VkDeviceMemory",
@@ -89,6 +90,11 @@ HANDLE_INFO = {}
 
 for h in HANDLE_TYPES:
     if h in CUSTOM_HANDLE_CREATE_TYPES:
+        if h == "VkPhysicalDevice":
+            HANDLE_INFO[h] = \
+                HandleInfo(
+                    "VkPhysicalDevice",
+                    "vkEnumeratePhysicalDevices", None)
         if h == "VkQueue":
             HANDLE_INFO[h] = \
                 HandleInfo(
