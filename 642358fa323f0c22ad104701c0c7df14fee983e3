@@ -71,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "4509d771_3d16b0ae",
+        "filename": "android/android-emu/android/darwinn/darwinn.cmake",
+        "patchSetId": 12
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-10T03:58:05Z",
+      "side": 1,
+      "message": "I recommend putting such prebuilt objects in the emu-master-dev branch\u0027s platform/prebuilts/android-emulator-build/common in a new darwinn/linux-x86_64 directory; it\u0027s our current common practice",
+      "parentUuid": "0a4c5ecc_01250bb5",
+      "revId": "642358fa323f0c22ad104701c0c7df14fee983e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "555f5f19_1c8d3cc4",
         "filename": "android/android-emu/android/darwinn/darwinn.cmake",
         "patchSetId": 12
