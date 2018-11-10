@@ -169,6 +169,7 @@ class IOStream;
 """
         encoderImplInclude = """
 #include "IOStream.h"
+#include "Resources.h"
 #include "ResourceTracker.h"
 #include "VulkanStream.h"
 
@@ -262,9 +263,12 @@ using DlSymFunc = void* (void*, const char*);
 #include "IOStream.h"
 #include "emugl/common/logging.h"
 
+#include "VkDecoderGlobalState.h"
+
 #include "VulkanDispatch.h"
 #include "VulkanStream.h"
 
+#include <unordered_map>
 """
 
         self.guest_encoder_tag = "guest_encoder"
