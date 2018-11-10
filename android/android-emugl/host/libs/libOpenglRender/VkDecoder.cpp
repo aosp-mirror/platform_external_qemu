@@ -312,7 +312,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->alloc((void**)&pDevice, sizeof(VkDevice));
                 vkReadStream->read((VkDevice*)pDevice, sizeof(VkDevice));
                 VkResult vkCreateDevice_VkResult_return = (VkResult)0;
-                vkCreateDevice_VkResult_return = m_vk->vkCreateDevice(physicalDevice, pCreateInfo, pAllocator, pDevice);
+                vkCreateDevice_VkResult_return = m_state->on_vkCreateDevice(physicalDevice, pCreateInfo, pAllocator, pDevice);
                 vkStream->write((VkDevice*)pDevice, sizeof(VkDevice));
                 vkStream->write(&vkCreateDevice_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
@@ -329,7 +329,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
-                m_vk->vkDestroyDevice(device, pAllocator);
+                m_state->on_vkDestroyDevice(device, pAllocator);
                 vkStream->commitWrite();
                 break;
             }
