@@ -468,7 +468,7 @@ class VulkanTypeInfo(object):
 def iterateVulkanType(typeInfo, vulkanType, forEachType):
     if not vulkanType.isArrayOfStrings():
         if vulkanType.isPointerToConstPointer:
-            return
+            return False
 
     needCheck = \
         vulkanType.isOptional and \
@@ -507,3 +507,5 @@ def iterateVulkanType(typeInfo, vulkanType, forEachType):
         else:
 
             forEachType.onValue(vulkanType)
+
+    return True

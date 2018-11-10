@@ -55,18 +55,24 @@ POOL = "pool"
 
 # Common components of encoding a Vulkan API call
 def emit_count_marshal(typeInfo, param, cgen):
-    iterateVulkanType(
-        typeInfo, param,
-        VulkanMarshalingCodegen( \
-           cgen, COUNTING_STREAM, param.paramName,
-           API_PREFIX_MARSHAL, direction="write"))
+    res = \
+        iterateVulkanType(
+            typeInfo, param,
+            VulkanMarshalingCodegen( \
+               cgen, COUNTING_STREAM, param.paramName,
+               API_PREFIX_MARSHAL, direction="write"))
+    if not res:
+        cgen.stmt("(void)%s" % param.paramName)
 
 def emit_marshal(typeInfo, param, cgen):
-    iterateVulkanType(
-        typeInfo, param,
-        VulkanMarshalingCodegen( \
-           cgen, STREAM, param.paramName,
-           API_PREFIX_MARSHAL, direction="write"))
+    res = \
+        iterateVulkanType(
+            typeInfo, param,
+            VulkanMarshalingCodegen( \
+               cgen, STREAM, param.paramName,
+               API_PREFIX_MARSHAL, direction="write"))
+    if not res:
+        cgen.stmt("(void)%s" % param.paramName)
 
 def emit_unmarshal(typeInfo, param, cgen):
     iterateVulkanType(
@@ -76,8 +82,11 @@ def emit_unmarshal(typeInfo, param, cgen):
            API_PREFIX_UNMARSHAL, direction="read"))
 
 def emit_deepcopy(typeInfo, param, cgen):
-    iterateVulkanType(typeInfo, param, DeepcopyCodegen(
-        cgen, [param.paramName, "local_" + param.paramName], "pool", "deepcopy_"))
+    res = \
+        iterateVulkanType(typeInfo, param, DeepcopyCodegen(
+            cgen, [param.paramName, "local_" + param.paramName], "pool", "deepcopy_"))
+    if not res:
+        cgen.stmt("(void)%s" % param.paramName)
 
 def emit_handlemap_unwrap(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, HandleMapCodegen(
