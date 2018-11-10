@@ -108,6 +108,13 @@ public:
             auto loaderPath = getLoaderPath(mForTesting);
             mVulkanLoader = emugl::SharedLibrary::open(loaderPath.c_str());
         }
+#ifdef __linux__
+        // On Linux, it might not be called libvulkan.so.
+        // Try libvulkan.so.1 if that doesn't work.
+        if (!mVulkanLoader) {
+            mVulkanLoader = emugl::SharedLibrary::open("libvulkan.so.1");
+        }
+#endif
         return (void*)mVulkanLoader;
     }
 
