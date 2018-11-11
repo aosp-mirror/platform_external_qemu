@@ -45,6 +45,9 @@ public:
 
     void commitWrite();
 
+    // Frees everything that got alloc'ed.
+    void clearPool();
+
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
