@@ -63,6 +63,10 @@ public:
         commitWrite();
     }
 
+    void clearPool() {
+        mPool.freeAll();
+    }
+
 private:
     size_t oustandingWriteBuffer() const {
         return mWritePos;
@@ -118,6 +122,12 @@ bool VulkanStream::valid() {
 }
 
 void VulkanStream::alloc(void** ptrAddr, size_t bytes) {
+    // Do not free *ptrAddr if bytes == 0, which causes problems
+    // with the protocol and overwrites guest user data.
+    if (bytes == 0) {
+        return;
+    }
+
     mImpl->alloc(ptrAddr, bytes);
 }
 
@@ -158,6 +168,10 @@ ssize_t VulkanStream::write(const void *buffer, size_t size) {
 
 void VulkanStream::commitWrite() {
     mImpl->flush();
+}
+
+void VulkanStream::clearPool() {
+    mImpl->clearPool();
 }
 
 VulkanMemReadingStream::VulkanMemReadingStream(uint8_t* start)

@@ -127,10 +127,9 @@ class EncodingParameters(object):
                 self.toRead.append(param)
                 if param.isCreatedBy(api):
                     self.toCreate.append(param)
-            elif param.isDestroyedBy(api):
-                self.toWrite.append(param)
-                self.toDestroy.append(param)
             else:
+                if param.isDestroyedBy(api):
+                    self.toDestroy.append(param)
                 localCopyParam = \
                     param.getForNonConstAccess().withModifiedName( \
                         "local_" + param.paramName)
@@ -149,6 +148,8 @@ def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
         cgen.stmt(cgen.makeRichCTypeDecl(localCopyParam))
         emit_deepcopy(typeInfo, origParam, cgen)
         emit_handlemap_unwrap(typeInfo, localCopyParam, cgen)
+        if localCopyParam.typeName == "VkAllocationCallbacks":
+            cgen.stmt("%s = nullptr" % localCopyParam.paramName)
 
     cgen.stmt("%s->rewind()" % COUNTING_STREAM)
     cgen.beginBlock()
@@ -234,11 +235,12 @@ def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
         cgen.stmt("size_t streamSize = 0")
         cgen.stmt("if (!goldfishMem) { %s->write(&streamSize, sizeof(size_t)); continue; }" % streamVar)
         cgen.stmt("auto hostPtr = goldfishMem->ptr")
+        cgen.stmt("auto actualSize = size == VK_WHOLE_SIZE ? goldfishMem->size : size")
         cgen.stmt("if (!hostPtr) { %s->write(&streamSize, sizeof(size_t)); continue; }" % streamVar)
-        cgen.stmt("streamSize = size")
+        cgen.stmt("streamSize = actualSize")
         cgen.stmt("%s->write(&streamSize, sizeof(size_t))" % streamVar)
         cgen.stmt("uint8_t* targetRange = hostPtr + offset")
-        cgen.stmt("%s->write(targetRange, size)" % streamVar)
+        cgen.stmt("%s->write(targetRange, actualSize)" % streamVar)
         cgen.endFor()
     
     emit_flush_ranges(COUNTING_STREAM)
@@ -269,16 +271,22 @@ def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
         cgen.stmt("size_t streamSize = 0")
         cgen.stmt("if (!goldfishMem) { %s->read(&streamSize, sizeof(size_t)); continue; }" % streamVar)
         cgen.stmt("auto hostPtr = goldfishMem->ptr")
+        cgen.stmt("auto actualSize = size == VK_WHOLE_SIZE ? goldfishMem->size : size")
         cgen.stmt("if (!hostPtr) { %s->read(&streamSize, sizeof(size_t)); continue; }" % streamVar)
-        cgen.stmt("streamSize = size")
+        cgen.stmt("streamSize = actualSize")
         cgen.stmt("%s->read(&streamSize, sizeof(size_t))" % streamVar)
         cgen.stmt("uint8_t* targetRange = hostPtr + offset")
-        cgen.stmt("%s->read(targetRange, size)" % streamVar)
+        cgen.stmt("%s->read(targetRange, actualSize)" % streamVar)
         cgen.endFor()
+
+    emit_invalidate_ranges(STREAM)
 
     emit_return(typeInfo, api, cgen)
 
 custom_encodes = {
+    "vkEnumerateInstanceVersion" : emit_only_goldfish_custom,
+    "vkEnumerateDeviceExtensionProperties" : emit_only_goldfish_custom,
+    "vkGetPhysicalDeviceProperties2" : emit_only_goldfish_custom,
     "vkMapMemory" : emit_only_goldfish_custom,
     "vkUnmapMemory" : emit_only_goldfish_custom,
     "vkFlushMappedMemoryRanges" : encode_vkFlushMappedMemoryRanges,
