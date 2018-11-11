@@ -35,6 +35,12 @@ public:
     // per process
     static VkDecoderGlobalState* get();
 
+    // Override memory types advertised from host
+    //
+    void on_vkGetPhysicalDeviceMemoryProperties(
+        VkPhysicalDevice physicalDevice,
+        VkPhysicalDeviceMemoryProperties* pMemoryProperties);
+
     VkResult on_vkCreateDevice(
         VkPhysicalDevice physicalDevice,
         const VkDeviceCreateInfo* pCreateInfo,

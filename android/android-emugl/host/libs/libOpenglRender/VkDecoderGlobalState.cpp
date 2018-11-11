@@ -32,6 +32,20 @@ public:
     Impl() : m_vk(emugl::vkDispatch()) { }
     ~Impl() = default;
 
+    void on_vkGetPhysicalDeviceMemoryProperties(
+        VkPhysicalDevice physicalDevice,
+        VkPhysicalDeviceMemoryProperties* pMemoryProperties) {
+
+        m_vk->vkGetPhysicalDeviceMemoryProperties(
+            physicalDevice, pMemoryProperties);
+
+        for (uint32_t i = 0; i < pMemoryProperties->memoryTypeCount; ++i) {
+            pMemoryProperties->memoryTypes[i].propertyFlags =
+                pMemoryProperties->memoryTypes[i].propertyFlags &
+                ~(VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        }
+    }
+
     VkResult on_vkCreateDevice(VkPhysicalDevice physicalDevice,
                            const VkDeviceCreateInfo* pCreateInfo,
                            const VkAllocationCallbacks* pAllocator,
@@ -256,6 +270,13 @@ static LazyInstance<VkDecoderGlobalState> sGlobalDecoderState =
 // static
 VkDecoderGlobalState* VkDecoderGlobalState::get() {
     return sGlobalDecoderState.ptr();
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceMemoryProperties(
+    VkPhysicalDevice physicalDevice,
+    VkPhysicalDeviceMemoryProperties* pMemoryProperties) {
+    mImpl->on_vkGetPhysicalDeviceMemoryProperties(
+        physicalDevice, pMemoryProperties);
 }
 
 VkResult VkDecoderGlobalState::on_vkCreateDevice(
