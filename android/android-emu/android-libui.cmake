@@ -100,8 +100,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/recording/video/VideoProducer.cpp
     android/recording/video/VideoFrameSharer.cpp)
 
-# Note, these are separated for historical reasons only, the
-# uic compiler will find this automatically
+# Note, these are seperated for historical reasons only, the uic compiler will find this automatically
 set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended.ui
     android/skin/qt/extended-pages/battery-page.ui
@@ -189,19 +188,10 @@ set(ANDROID_SKIN_SOURCES
     android/skin/qt/QtLogger.cpp)
 
 # Set the target specific sources.
-set(emulator-libui_darwin-x86_64_src
-    android/skin/qt/mac-native-window.mm
-    android/skin/qt/websockets/websocketclientwrapper.cpp
-    android/skin/qt/websockets/websockettransport.cpp)
-set(emulator-libui_windows-x86_64_src
-    android/skin/qt/windows-native-window.cpp)
-set(emulator-libui_windows-x86_src
-    android/skin/qt/windows-native-window.cpp)
-set(emulator-libui_windows_msvc-x86_64_src
-    android/skin/qt/windows-native-window.cpp)
-set(emulator-libui_linux-x86_64_src
-    android/skin/qt/websockets/websocketclientwrapper.cpp
-    android/skin/qt/websockets/websockettransport.cpp)
+set(emulator-libui_darwin-x86_64_src android/skin/qt/mac-native-window.mm)
+set(emulator-libui_windows-x86_64_src android/skin/qt/windows-native-window.cpp)
+set(emulator-libui_windows-x86_src android/skin/qt/windows-native-window.cpp)
+set(emulator-libui_windows_msvc-x86_64_src android/skin/qt/windows-native-window.cpp)
 
 # Set the sources
 set(emulator-libui_src
