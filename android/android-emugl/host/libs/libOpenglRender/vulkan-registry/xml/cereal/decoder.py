@@ -27,15 +27,18 @@ using emugl::vkDispatch;
 
 using namespace goldfish_vk;
 
+using android::base::System;
+
 class VkDecoder::Impl {
 public:
-    Impl() : m_vk(vkDispatch()), m_state(VkDecoderGlobalState::get()) { }
+    Impl() : m_logCalls(System::get()->envGet("ANDROID_EMU_VK_LOG_CALLS") == "1"), m_vk(vkDispatch()), m_state(VkDecoderGlobalState::get()) { }
     VulkanStream* stream() { return &m_vkStream; }
     VulkanMemReadingStream* readStream() { return &m_vkMemReadingStream; }
 
     size_t decode(void* buf, size_t bufsize, IOStream* stream);
 
 private:
+    bool m_logCalls;
     VulkanDispatch* m_vk;
     VkDecoderGlobalState* m_state;
     VulkanStream m_vkStream { nullptr };
@@ -89,6 +92,9 @@ def emit_decode_parameters(typeInfo, api, cgen):
         emit_unmarshal(typeInfo, p, cgen)
 
 def emit_dispatch_call(api, cgen):
+    cgen.beginIf("m_logCalls")
+    cgen.stmt("fprintf(stderr, \"call %s\\n\");" % api.name)
+    cgen.endIf()
     cgen.vkApiCall(api, customPrefix="m_vk->")
 
 def emit_global_state_wrapped_call(api, cgen):
@@ -112,6 +118,7 @@ def emit_decode_return_writeback(api, cgen):
             (WRITE_STREAM, retVar, cgen.sizeofExpr(api.retType)))
 
 def emit_decode_finish(cgen):
+    cgen.stmt("%s->clearPool()" % READ_STREAM)
     cgen.stmt("%s->commitWrite()" % WRITE_STREAM)
 
 def emit_default_decoding(typeInfo, api, cgen):
@@ -163,17 +170,20 @@ def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     cgen.stmt("auto size = range.size")
     cgen.stmt("auto offset = range.offset")
     cgen.stmt("auto hostPtr = m_state->getMappedHostPointer(memory)")
+    cgen.stmt("auto actualSize = size == VK_WHOLE_SIZE ? m_state->getDeviceMemorySize(memory) : size")
     cgen.stmt("size_t writeStream = 0")
     cgen.stmt("if (!hostPtr) { %s->write(&writeStream, sizeof(size_t)); continue; }" % WRITE_STREAM)
     cgen.stmt("uint8_t* targetRange = hostPtr + offset")
-    cgen.stmt("writeStream = size")
+    cgen.stmt("writeStream = actualSize")
     cgen.stmt("%s->write(&writeStream, sizeof(size_t))" % WRITE_STREAM)
-    cgen.stmt("%s->write(targetRange, size)" % WRITE_STREAM)
+    cgen.stmt("%s->write(targetRange, actualSize)" % WRITE_STREAM)
     cgen.endFor()
 
     emit_decode_finish(cgen)
 
 custom_decodes = {
+    "vkCreateDevice" : emit_global_state_wrapped_decoding,
+    "vkDestroyDevice" : emit_global_state_wrapped_decoding,
     "vkAllocateMemory" : emit_global_state_wrapped_decoding,
     "vkFreeMemory" : emit_global_state_wrapped_decoding,
     "vkMapMemory" : emit_global_state_wrapped_decoding,

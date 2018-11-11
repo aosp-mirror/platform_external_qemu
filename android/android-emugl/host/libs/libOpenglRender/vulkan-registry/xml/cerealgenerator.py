@@ -260,6 +260,8 @@ using DlSymFunc = void* (void*, const char*);
         decoderImplIncludes = """
 #include "common/goldfish_vk_marshaling.h"
 
+#include "android/base/system/System.h"
+
 #include "IOStream.h"
 #include "emugl/common/logging.h"
 

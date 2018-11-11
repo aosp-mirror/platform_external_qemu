@@ -178,7 +178,7 @@ class DeepcopyCodegen(object):
         accessRhs = self.exprAccessorRhs(vulkanType)
 
         if self.needSkip(vulkanType):
-            self.cgen.stmt("%s = %s" % (accessRhs, accessLhs))
+            self.cgen.stmt("%s = nullptr" % accessRhs)
             return
 
         lenAccessLhs = self.lenAccessorLhs(vulkanType)
