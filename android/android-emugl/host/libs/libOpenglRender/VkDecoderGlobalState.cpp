@@ -206,6 +206,20 @@ public:
         return (uint8_t*)(info->ptr);
     }
 
+    VkDeviceSize getDeviceMemorySize(VkDeviceMemory memory) {
+        AutoLock lock(mLock);
+
+        auto info = android::base::find(mMapInfo, memory);
+
+        if (!info) {
+            // Invalid usage.
+            return 0;
+        }
+
+        return info->size;
+    }
+
+
 private:
     // We always map the whole size on host.
     // This makes it much easier to implement
@@ -289,4 +303,8 @@ void VkDecoderGlobalState::on_vkUnmapMemory(VkDevice device,
 
 uint8_t* VkDecoderGlobalState::getMappedHostPointer(VkDeviceMemory memory) {
     return mImpl->getMappedHostPointer(memory);
+}
+
+VkDeviceSize VkDecoderGlobalState::getDeviceMemorySize(VkDeviceMemory memory) {
+    return mImpl->getDeviceMemorySize(memory);
 }

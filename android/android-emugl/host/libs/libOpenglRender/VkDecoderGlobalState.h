@@ -76,6 +76,7 @@ public:
     void on_vkUnmapMemory(VkDevice device, VkDeviceMemory memory);
 
     uint8_t* getMappedHostPointer(VkDeviceMemory memory);
+    VkDeviceSize getDeviceMemorySize(VkDeviceMemory memory);
 
 private:
     class Impl;

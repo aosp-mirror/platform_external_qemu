@@ -137,13 +137,14 @@ class VulkanLibrary : public vk::Library
 {
 public:
 	VulkanLibrary(void)
-		: m_library(GOLDFISH_VULKAN_LIBRARY),
+		: m_toplevel(sInitToplevel()), m_library(GOLDFISH_VULKAN_LIBRARY),
 		  m_driver(m_library) { }
 
 	const vk::PlatformInterface& getPlatformInterface(void) const { return m_driver; }
 	const tcu::FunctionLibrary& getFunctionLibrary(void) const { return m_library; }
 
 private:
+    aemu::Toplevel* m_toplevel = nullptr;
 	const tcu::DynamicFunctionLibrary m_library;
 	const vk::PlatformDriver m_driver;
 };
@@ -168,7 +169,7 @@ class VulkanWindow : public vk::wsi::AndroidWindowInterface
 class VulkanDisplay : public vk::wsi::Display
 {
 public:
-	VulkanDisplay () { }
+	VulkanDisplay () { sInitToplevel(); }
 
 	vk::wsi::Window* createWindow (const Maybe<UVec2>& initialSize) const
 	{
