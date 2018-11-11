@@ -7,6 +7,7 @@
             "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/common/include/QtCore",
             "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/common/include/QtGui",
             "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/common/include/QtSvg",
+            "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/common/include/QtWebChannel",
             "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/common/include/QtWidgets",
             "${workspaceFolder}/../googletest/googlemock/include",
             "${workspaceFolder}/../googletest/googletest/include",
