@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1e9b730b_c7d3c9fa",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-11-12T19:31:19Z",
+      "side": 1,
+      "message": "Should this be on an \u0027else\u0027 path?",
+      "range": {
+        "startLine": 313,
+        "startChar": 4,
+        "endLine": 313,
+        "endChar": 26
+      },
+      "revId": "6a071716de41abcfd89b94dca57b464779c2ab94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
