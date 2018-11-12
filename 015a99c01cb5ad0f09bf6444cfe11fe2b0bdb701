@@ -16,6 +16,24 @@
       "revId": "015a99c01cb5ad0f09bf6444cfe11fe2b0bdb701",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f12de31e_e9548711",
+        "filename": "cmake-main.darwin-x86_64.inc",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-12T22:12:59Z",
+      "side": 1,
+      "message": "Yes it looks like this is causing a crazy amount of pain. Options:\n\n- We generate this file during build, i.e. we always do a build of qemu first which we use to extract this file. \n- We add another layer on top of qemu that is android-qemu only, we could place devices in android-qemu2-glue, or it\u0027s own library all together (just be careful with the static initializers)",
+      "parentUuid": "7114d02f_f2ef45c2",
+      "revId": "015a99c01cb5ad0f09bf6444cfe11fe2b0bdb701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
