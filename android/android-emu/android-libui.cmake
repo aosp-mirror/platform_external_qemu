@@ -41,15 +41,12 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/bug-report-page.cpp
     android/skin/qt/extended-pages/camera-page.cpp
     android/skin/qt/extended-pages/camera-virtualscene-subpage.cpp
-    android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp
     android/skin/qt/extended-pages/car-data-page.cpp
     android/skin/qt/extended-pages/cellular-page.cpp
     android/skin/qt/extended-pages/dpad-page.cpp
     android/skin/qt/extended-pages/finger-page.cpp
     android/skin/qt/extended-pages/google-play-page.cpp
     android/skin/qt/extended-pages/help-page.cpp
-    android/skin/qt/extended-pages/instr-cluster-render/car-cluster-render-thread.cpp
-    android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp
     android/skin/qt/extended-pages/location-page.cpp
     android/skin/qt/extended-pages/microphone-page.cpp
     android/skin/qt/extended-pages/record-screen-page.cpp
@@ -60,6 +57,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/snapshot-page.cpp
     android/skin/qt/extended-pages/telephony-page.cpp
     android/skin/qt/extended-pages/virtual-sensors-page.cpp
+    android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp
     android/skin/qt/extended-window.cpp
     android/skin/qt/FramelessDetector.cpp
     android/skin/qt/ModalOverlay.cpp
