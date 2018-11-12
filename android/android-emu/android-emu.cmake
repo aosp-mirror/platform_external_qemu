@@ -143,6 +143,10 @@ set(android-emu-common
     android/network/globals.c
     android/network/NetworkPipe.cpp
     android/network/wifi.cpp
+    android/network/WifiForwardClient.cpp
+    android/network/WifiForwardPeer.cpp
+    android/network/WifiForwardPipe.cpp
+    android/network/WifiForwardServer.cpp
     android/opengl/EmuglBackendList.cpp
     android/opengl/EmuglBackendScanner.cpp
     android/opengl/emugl_config.cpp

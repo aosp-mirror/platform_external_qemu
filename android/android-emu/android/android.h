@@ -97,6 +97,10 @@ extern int   android_parse_network_latency(const char*  delay);
 // See android/console.h
 struct AndroidConsoleAgents;
 
+// Setup Android adb and telnet ports. Return true on success.
+extern bool android_ports_setup(const struct AndroidConsoleAgents* agents,
+                                bool isQemu2);
+
 // Setup Android emulation. Return true on success.
 extern bool android_emulation_setup(const struct AndroidConsoleAgents* agents,
                                     bool isQemu2);

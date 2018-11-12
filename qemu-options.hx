@@ -4662,6 +4662,38 @@ STEXI
 TCP ports used for the emulator instance and adb bridge
 ETEXI
 
+DEF("android-wifi-client-port", HAS_ARG, QEMU_OPTION_android_wifi_client_port,
+    "-android-wifi-client-port <client port>"
+    " TCP port used to connect to another emulator running as a WiFi server.\n"
+    " This allows WiFi traffic to pass between two emulators, one acting as a\n"
+    " client and one as a server. The decision which is the server and which\n"
+    " is the client does not affect WiFi functionality\n",
+    QEMU_ARCH_ALL)
+STEXI
+@item -android-wifi-client-port @var{client port}
+@findex -android-wifi-client-port
+TCP port used to connect to another emulator running as a WiFi server.
+This allows WiFi traffic to pass between two emulators, one acting as a
+client and one as a server. The decision which is the server and which
+is the client does not affect WiFi functionality
+ETEXI
+
+DEF("android-wifi-server-port", HAS_ARG, QEMU_OPTION_android_wifi_server_port,
+    "-android-wifi-server-port <server port>"
+    " TCP port to listen on that another emulator can connect to as a WiFi\n"
+    " client. This allows WiFi traffic to pass between two emulators, one\n"
+    " acting as a client and one as a server. The decision which is the\n"
+    " server and which is the client does not affect WiFi functionality\n",
+    QEMU_ARCH_ALL)
+STEXI
+@item -android-wifi-server-port @var{server port}
+@findex -android-wifi-server-port
+TCP port to listen on that another emulator can connect to as a WiFi
+client. This allows WiFi traffic to pass between two emulators, one
+acting as a client and one as a server. The decision which is the
+server and which is the client does not affect WiFi functionality
+ETEXI
+
 DEF("android-report-console", HAS_ARG, QEMU_OPTION_android_report_console, \
     "-android-report-console <socket>"
     " report console port to remote socket\n", QEMU_ARCH_ALL)
