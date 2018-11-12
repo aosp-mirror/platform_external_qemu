@@ -62,7 +62,7 @@ ExtendedWindow::ExtendedWindow(
             mEmulatorWindow->getAdbInterface());
     mExtendedUi->bugreportPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
-
+    mExtendedUi->bugreportPage->setExtendedWindow(this);
     connect(
         mExtendedUi->settingsPage, SIGNAL(frameAlwaysChanged(bool)),
         this, SLOT(switchFrameAlways(bool)));
