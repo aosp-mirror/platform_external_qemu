@@ -32,6 +32,13 @@ public:
     Impl() : m_vk(emugl::vkDispatch()) { }
     ~Impl() = default;
 
+    void on_vkGetPhysicalDeviceFeatures2(VkPhysicalDevice physicalDevice,
+                                         VkPhysicalDeviceFeatures2* pFeatures) {
+        VkPhysicalDeviceFeatures features;
+        m_vk->vkGetPhysicalDeviceFeatures(physicalDevice, &features);
+        pFeatures->features = features;
+    }
+
     void on_vkGetPhysicalDeviceMemoryProperties(
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceMemoryProperties* pMemoryProperties) {
@@ -270,6 +277,12 @@ static LazyInstance<VkDecoderGlobalState> sGlobalDecoderState =
 // static
 VkDecoderGlobalState* VkDecoderGlobalState::get() {
     return sGlobalDecoderState.ptr();
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceFeatures2(
+        VkPhysicalDevice physicalDevice,
+        VkPhysicalDeviceFeatures2* pFeatures) {
+    mImpl->on_vkGetPhysicalDeviceFeatures2(physicalDevice, pFeatures);
 }
 
 void VkDecoderGlobalState::on_vkGetPhysicalDeviceMemoryProperties(
