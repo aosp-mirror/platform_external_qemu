@@ -518,7 +518,6 @@ private:
     };
 
     static WebcamInfo getWebcamInfo(const ComPtr<IMFMediaSource>& source);
-    static bool webcamSupportedWithoutConverters(const WebcamInfo& source);
 
     // Handles calling MFStartup and loading the MF API, should be first member
     // in class so it is destructed last.
@@ -545,6 +544,10 @@ private:
     // Framebuffer width and height.
     int mFramebufferWidth = 0;
     int mFramebufferHeight = 0;
+
+    // Source framebuffer width, different if the frame needs software resizing.
+    int mSourceFramebufferWidth = 0;
+    int mSourceFramebufferHeight = 0;
 
     uint32_t mRetries = 0;
 };
@@ -585,7 +588,6 @@ MediaFoundationCameraDevice::getWebcamInfo(
         hr = mediaHandler->GetMediaTypeCount(&mediaTypeCount);
     }
 
-    std::vector<CameraFrameDim> allDims = getAllFrameDims();
     std::map<CameraFrameDim, std::set<GUID>> supportedDimsAndFormats;
     std::map<CameraFrameDim, std::set<GUID>> unsupportedDimsAndFormats;
     if (SUCCEEDED(hr)) {
@@ -611,23 +613,18 @@ MediaFoundationCameraDevice::getWebcamInfo(
                     continue;
                 }
 
+                const CameraFrameDim dim = {static_cast<int>(width),
+                                            static_cast<int>(height)};
                 if (major == MFMediaType_Video && !compressed &&
                     subtypeValidForMediaSource(subtype)) {
-                    const CameraFrameDim dim = {static_cast<int>(width),
-                                                static_cast<int>(height)};
-
-                    if (std::find(allDims.begin(), allDims.end(), dim) !=
-                        allDims.end()) {
-                        supportedDimsAndFormats[dim].insert(subtype);
-                    } else {
-                        unsupportedDimsAndFormats[dim].insert(subtype);
-                    }
+                    supportedDimsAndFormats[dim].insert(subtype);
                 } else {
                     VLOG(camera) << "Media type #" << i
                                  << " is not a video format or has a null "
                                     "subtype, type "
                                  << guidToString(major) << ", subtype "
                                  << subtypeHumanReadableName(subtype);
+                    unsupportedDimsAndFormats[dim].insert(subtype);
                 }
             }
         }
@@ -657,7 +654,7 @@ MediaFoundationCameraDevice::getWebcamInfo(
         subtypes.insert(item.mfSubtype);
     }
 
-    for (const auto& dim : allDims) {
+    for (const auto& dim : getAllFrameDims()) {
         auto item = supportedDimsAndFormats.find(dim);
         if (item == supportedDimsAndFormats.end()) {
             continue;
@@ -690,22 +687,6 @@ MediaFoundationCameraDevice::getWebcamInfo(
     }
 
     return info;
-}
-
-bool MediaFoundationCameraDevice::webcamSupportedWithoutConverters(
-        const WebcamInfo& info) {
-    auto it = info.dims.begin();
-    for (auto& dim : kRequiredDimensions) {
-        // All required dims should appear in the dims list, in order, before
-        // any other dims.
-        if (it == info.dims.end() || *it != dim) {
-            return false;
-        }
-
-        ++it;
-    }
-
-    return true;
 }
 
 int MediaFoundationCameraDevice::enumerateDevices(MFInitialize& mf,
@@ -789,22 +770,15 @@ int MediaFoundationCameraDevice::enumerateDevices(MFInitialize& mf,
                 QLOG(VERBOSE) << "Pixel Format: "
                               << subtypeHumanReadableName(webcamInfo.subtype);
             }
-
-            if (mf.getMFApi().supportsAdvancedVideoProcessor()) {
-                webcamInfo.dims = getAllFrameDims();
-            } else if (!webcamSupportedWithoutConverters(webcamInfo)) {
-                QLOG(INFO) << "Webcam device '" << deviceName.toString()
-                           << "' does not support required configuration.";
-                // Skip to next camera.
-                continue;
-            }
         }
+
+        const std::vector<CameraFrameDim> allDims = getAllFrameDims();
 
         if (SUCCEEDED(hr)) {
             CameraInfo& info = cameraInfoList[found];
 
             info.frame_sizes = reinterpret_cast<CameraFrameDim*>(
-                    malloc(webcamInfo.dims.size() * sizeof(CameraFrameDim)));
+                    malloc(allDims.size() * sizeof(CameraFrameDim)));
             if (!info.frame_sizes) {
                 LOG(ERROR) << "Unable to allocate dimensions";
                 break;
@@ -816,9 +790,9 @@ int MediaFoundationCameraDevice::enumerateDevices(MFInitialize& mf,
             info.device_name = ASTRDUP(deviceName.toString().c_str());
             info.direction = ASTRDUP("front");
             info.inp_channel = 0;
-            info.frame_sizes_num = static_cast<int>(webcamInfo.dims.size());
-            for (size_t j = 0; j < webcamInfo.dims.size(); ++j) {
-                info.frame_sizes[j] = webcamInfo.dims[j];
+            info.frame_sizes_num = static_cast<int>(allDims.size());
+            for (size_t j = 0; j < allDims.size(); ++j) {
+                info.frame_sizes[j] = allDims[j];
             }
             info.pixel_format = subtypeToPixelFormat(webcamInfo.subtype);
             info.in_use = 0;
@@ -870,18 +844,9 @@ int MediaFoundationCameraDevice::startCapturing(uint32_t pixelFormat,
 
     QLOG(VERBOSE) << "Getting webcam info for '" << mDeviceName << "'";
     WebcamInfo info = getWebcamInfo(source);
-    if (mMF.getMFApi().supportsAdvancedVideoProcessor()) {
-        // If the video processor is supported, allow all resolutions.
-        info.dims = getAllFrameDims();
-    }
-
-    if (info.dims.empty()) {
-        QLOG(INFO) << "Webcam has no supported resolutions.";
-        return -1;
-    }
 
     bool foundDim = false;
-    for (const auto& dim : info.dims) {
+    for (const auto& dim : getAllFrameDims()) {
         if (dim.width == frameWidth && dim.height == frameHeight) {
             foundDim = true;
             break;
@@ -893,6 +858,8 @@ int MediaFoundationCameraDevice::startCapturing(uint32_t pixelFormat,
         return -1;
     }
 
+    mSourceFramebufferWidth = frameWidth;
+    mSourceFramebufferHeight = frameHeight;
     mFramebufferWidth = frameWidth;
     mFramebufferHeight = frameHeight;
     mSubtype = info.subtype;
@@ -936,6 +903,8 @@ void MediaFoundationCameraDevice::stopCapturing() {
     mCallback.Reset();
     mFramebufferWidth = 0;
     mFramebufferHeight = 0;
+    mSourceFramebufferWidth = 0;
+    mSourceFramebufferHeight = 0;
     mSubtype = {};
     mRetries = 0;
 }
@@ -983,7 +952,11 @@ int MediaFoundationCameraDevice::readFrame(ClientFrame* resultFrame,
     if (!sample) {
         if (mRetries > kMaxRetries) {
             VLOG(camera) << "Sample not available, returning empty frame.";
-            return 0;
+            uint32_t emptyPixel = 0;
+            return convert_frame_fast(&emptyPixel, V4L2_PIX_FMT_BGR32,
+                                      sizeof(emptyPixel), 1, 1,
+                                      mFramebufferWidth, mFramebufferHeight,
+                                      resultFrame, expComp);
         }
 
         ++mRetries;
@@ -1024,10 +997,10 @@ int MediaFoundationCameraDevice::readFrame(ClientFrame* resultFrame,
     }
 
     // Convert frame to the receiving buffers.
-    const int result =
-            convert_frame(data, subtypeToPixelFormat(mSubtype), currentLength,
-                          mFramebufferWidth, mFramebufferHeight, resultFrame,
-                          rScale, gScale, bScale, expComp);
+    const int result = convert_frame_fast(
+            data, subtypeToPixelFormat(mSubtype), currentLength,
+            mSourceFramebufferWidth, mSourceFramebufferHeight,
+            mFramebufferWidth, mFramebufferHeight, resultFrame, expComp);
     (void)buffer->Unlock();
 
     return result;
@@ -1070,7 +1043,14 @@ HRESULT MediaFoundationCameraDevice::configureMediaSource(
                 }
 
                 if (major != MFMediaType_Video || compressed ||
-                    !subtypeValidForMediaSource(subtype)) {
+                    subtypeToPixelFormat(subtype) == 0) {
+                    continue;
+                }
+
+                // Only explicitly set formats if it is a known subtype.  If the
+                // media source isn't explicitly configured SourceReader will do
+                // it instead (but it may not select the same resolution).
+                if (subtypeToPixelFormat(subtype) == 0 && subtype != mSubtype) {
                     continue;
                 }
 
@@ -1080,34 +1060,25 @@ HRESULT MediaFoundationCameraDevice::configureMediaSource(
                 // If the host supports video processor, we can choose the
                 // closest resolution and a non-matching pixel format.
                 UINT32 score = 0;
-                if (mMF.getMFApi().supportsAdvancedVideoProcessor()) {
-                    // Prefer matching resolution, then by matching aspect
-                    // ratio.  Don't check for the subtype, it can be converted
-                    // by the VideoProcessor.
-                    bool ratioMultiplier = 1;
-                    if (width == static_cast<UINT32>(mFramebufferWidth) &&
-                        height == static_cast<UINT32>(mFramebufferHeight)) {
-                        score += 1000;
-                    } else if (width * mFramebufferHeight ==
-                               height * mFramebufferWidth) {
-                        ratioMultiplier = 2;
-                    }
+                // Prefer matching resolution, then by matching aspect
+                // ratio.  Don't check for the subtype, it can be converted
+                // by the VideoProcessor.
+                bool ratioMultiplier = 1;
+                if (width == static_cast<UINT32>(mFramebufferWidth) &&
+                    height == static_cast<UINT32>(mFramebufferHeight)) {
+                    score += 1000;
+                } else if (width * mFramebufferHeight ==
+                           height * mFramebufferWidth) {
+                    ratioMultiplier = 2;
+                }
 
-                    // Prefer larger sizes.
-                    if (width > static_cast<UINT32>(mFramebufferWidth)) {
-                        score += 125 * ratioMultiplier;
-                    } else {
-                        score += static_cast<UINT32>(125.0f * width /
-                                                     mFramebufferWidth) *
-                                 ratioMultiplier;
-                    }
+                // Prefer larger sizes.
+                if (width > static_cast<UINT32>(mFramebufferWidth)) {
+                    score += 125 * ratioMultiplier;
                 } else {
-                    // If the video processor isn't supported, require the exact
-                    // resolution requested.
-                    if (width != static_cast<UINT32>(mFramebufferWidth) ||
-                        height != static_cast<UINT32>(mFramebufferHeight)) {
-                        continue;
-                    }
+                    score += static_cast<UINT32>(125.0f * width /
+                                                 mFramebufferWidth) *
+                             ratioMultiplier;
                 }
 
                 // Prefer 30 FPS, but accept the greatest one.
@@ -1131,30 +1102,42 @@ HRESULT MediaFoundationCameraDevice::configureMediaSource(
     }
 
     if (SUCCEEDED(hr) && bestMediaType) {
-        // Trace the selected type. Ignore errors and use default values since
-        // this is debug-only code.
-        GUID subtype = {};
         UINT32 width = 0;
         UINT32 height = 0;
-        UINT32 frameRateNum = 0;
-        UINT32 frameRateDenom = 0;
-        (void)bestMediaType->GetGUID(MF_MT_SUBTYPE, &subtype);
-        (void)MFGetAttributeSize(bestMediaType.Get(), MF_MT_FRAME_SIZE, &width,
-                                 &height);
-        (void)MFGetAttributeRatio(bestMediaType.Get(), MF_MT_FRAME_RATE,
-                                  &frameRateNum, &frameRateDenom);
-        // Note that the subtype may not have a mapping in the camera format
-        // mapping list, so subtypeToPixelFormat cannot be used here. In this
-        // situation, the SourceReader's advanced video processing will convert
-        // to a supported format.
-        LOG(VERBOSE) << "SetCurrentMediaType to subtype "
-                     << subtypeHumanReadableName(subtype) << ", size " << width
-                     << "x" << height << ", frame rate " << frameRateNum << "/"
-                     << frameRateDenom << " (~"
-                     << static_cast<float>(frameRateNum) / frameRateDenom
-                     << " fps)";
+        hr = MFGetAttributeSize(bestMediaType.Get(), MF_MT_FRAME_SIZE, &width,
+                                &height);
 
-        hr = mediaHandler->SetCurrentMediaType(bestMediaType.Get());
+        if (SUCCEEDED(hr)) {
+            if (mMF.getMFApi().supportsAdvancedVideoProcessor()) {
+                // The frame will be resized by MF.
+                mSourceFramebufferWidth = mFramebufferWidth;
+                mSourceFramebufferHeight = mFramebufferHeight;
+            } else {
+                mSourceFramebufferWidth = width;
+                mSourceFramebufferHeight = height;
+            }
+
+            // Trace the selected type. Ignore errors and use default values
+            // since this is debug-only code.
+            GUID subtype = {};
+            UINT32 frameRateNum = 0;
+            UINT32 frameRateDenom = 0;
+            (void)bestMediaType->GetGUID(MF_MT_SUBTYPE, &subtype);
+            (void)MFGetAttributeRatio(bestMediaType.Get(), MF_MT_FRAME_RATE,
+                                      &frameRateNum, &frameRateDenom);
+            // Note that the subtype may not have a mapping in the camera format
+            // mapping list, so subtypeToPixelFormat cannot be used here. In
+            // this situation, the SourceReader's advanced video processing will
+            // convert to a supported format.
+            LOG(VERBOSE) << "SetCurrentMediaType to subtype "
+                         << subtypeHumanReadableName(subtype) << ", size "
+                         << width << "x" << height << ", frame rate "
+                         << frameRateNum << "/" << frameRateDenom << " (~"
+                         << static_cast<float>(frameRateNum) / frameRateDenom
+                         << " fps)";
+
+            hr = mediaHandler->SetCurrentMediaType(bestMediaType.Get());
+        }
     }
 
     return hr;
@@ -1198,9 +1181,10 @@ HRESULT MediaFoundationCameraDevice::createSourceReader(
         }
 
         if (SUCCEEDED(hr)) {
-            hr = MFSetAttributeSize(type.Get(), MF_MT_FRAME_SIZE,
-                                    static_cast<UINT32>(mFramebufferWidth),
-                                    static_cast<UINT32>(mFramebufferHeight));
+            hr = MFSetAttributeSize(
+                    type.Get(), MF_MT_FRAME_SIZE,
+                    static_cast<UINT32>(mSourceFramebufferWidth),
+                    static_cast<UINT32>(mSourceFramebufferHeight));
         }
 
         if (SUCCEEDED(hr)) {
@@ -1211,7 +1195,8 @@ HRESULT MediaFoundationCameraDevice::createSourceReader(
         if (SUCCEEDED(hr)) {
             LOG(INFO) << "Creating webcam source reader with format "
                       << subtypeHumanReadableName(mSubtype) << ", size "
-                      << mFramebufferWidth << "x" << mFramebufferHeight;
+                      << mSourceFramebufferWidth << "x"
+                      << mSourceFramebufferHeight;
 
             hr = mSourceReader->SetCurrentMediaType(
                     static_cast<DWORD>(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
