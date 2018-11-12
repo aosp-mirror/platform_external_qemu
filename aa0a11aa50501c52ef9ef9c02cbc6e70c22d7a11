@@ -46,6 +46,30 @@
       "revId": "aa0a11aa50501c52ef9ef9c02cbc6e70c22d7a11",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "12ef98f0_5faf451c",
+        "filename": "android/android-emu/android/qemu-setup.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2018-11-12T19:59:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c66c255c_9720f4b9",
+      "range": {
+        "startLine": 412,
+        "startChar": 65,
+        "endLine": 412,
+        "endChar": 66
+      },
+      "revId": "aa0a11aa50501c52ef9ef9c02cbc6e70c22d7a11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
