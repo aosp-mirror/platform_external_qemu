@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "457c89cf_84258646",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-12T20:37:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a76760b5_4c0c342b",
+      "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b4287021_2594e3df",
         "filename": "hw/pci/goldfish_address_space.c",
         "patchSetId": 10
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "4eaa1118_a30e4b97",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-12T20:37:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b4287021_2594e3df",
+      "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3f90008a_f9a4bfab",
         "filename": "hw/pci/goldfish_address_space.c",
         "patchSetId": 10
@@ -50,6 +86,24 @@
       "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "257e755c_fce95b69",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-12T20:37:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3f90008a_f9a4bfab",
+      "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -76,6 +130,30 @@
     },
     {
       "key": {
+        "uuid": "14a07643_5cacfcd1",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-12T20:37:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "614b8dd9_9c6a5700",
+      "range": {
+        "startLine": 79,
+        "startChar": 0,
+        "endLine": 80,
+        "endChar": 50
+      },
+      "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3fe8007d_3a7d9ddf",
         "filename": "hw/pci/goldfish_address_space.c",
         "patchSetId": 10
@@ -93,6 +171,24 @@
     },
     {
       "key": {
+        "uuid": "f5c5461f_7d695242",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-12T20:37:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3fe8007d_3a7d9ddf",
+      "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "851c28c9_e63f5cbe",
         "filename": "hw/pci/goldfish_address_space.c",
         "patchSetId": 10
@@ -104,6 +200,30 @@
       "writtenOn": "2018-11-10T07:30:45Z",
       "side": 1,
       "message": "would int be better fitting with errno?",
+      "range": {
+        "startLine": 158,
+        "startChar": 7,
+        "endLine": 158,
+        "endChar": 16
+      },
+      "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "535e222f_250e1e37",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-12T20:37:49Z",
+      "side": 1,
+      "message": "I put uint32_t here because we have to put the error code into a uint32_t register.",
+      "parentUuid": "851c28c9_e63f5cbe",
       "range": {
         "startLine": 158,
         "startChar": 7,
@@ -168,6 +288,24 @@
     },
     {
       "key": {
+        "uuid": "6f2582c3_9932722e",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-12T20:37:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f1304557_d654f09d",
+      "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a005791f_8abcd513",
         "filename": "hw/pci/goldfish_address_space.c",
         "patchSetId": 10
@@ -179,6 +317,30 @@
       "writtenOn": "2018-11-10T06:56:20Z",
       "side": 1,
       "message": "this seems to fix an assert in debug mode on startup; there is an assertion somewhere in hw/pci/pci.c that requires all pci device objects to specify interface as \u0027conventional\u0027 or \u0027pcie\u0027",
+      "range": {
+        "startLine": 461,
+        "startChar": 0,
+        "endLine": 464,
+        "endChar": 6
+      },
+      "revId": "93616ecbb1d07c5784b3b7095ec850a5236e822d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3e303314_cf0d551b",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 464,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-12T20:37:49Z",
+      "side": 1,
+      "message": "I copy-pasted it from somewhere else.",
+      "parentUuid": "a005791f_8abcd513",
       "range": {
         "startLine": 461,
         "startChar": 0,
