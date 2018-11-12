@@ -250,11 +250,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkPhysicalDevice*)&physicalDevice, sizeof(VkPhysicalDevice));
                 vkReadStream->alloc((void**)&pProperties, sizeof(VkPhysicalDeviceProperties));
                 unmarshal_VkPhysicalDeviceProperties(vkReadStream, (VkPhysicalDeviceProperties*)(pProperties));
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceProperties\n");;
-                }
-                m_vk->vkGetPhysicalDeviceProperties(physicalDevice, pProperties);
+                m_state->on_vkGetPhysicalDeviceProperties(physicalDevice, pProperties);
                 marshal_VkPhysicalDeviceProperties(vkStream, (VkPhysicalDeviceProperties*)(pProperties));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();

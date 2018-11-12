@@ -182,6 +182,7 @@ def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     emit_decode_finish(cgen)
 
 custom_decodes = {
+    "vkGetPhysicalDeviceProperties" : emit_global_state_wrapped_decoding,
     "vkGetPhysicalDeviceMemoryProperties" : emit_global_state_wrapped_decoding,
     "vkCreateDevice" : emit_global_state_wrapped_decoding,
     "vkDestroyDevice" : emit_global_state_wrapped_decoding,
