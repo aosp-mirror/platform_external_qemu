@@ -167,14 +167,14 @@ TEST(AdbHostListener, startListening) {
         // startListening()
         // is called. Even if we run the current thread looper for 10 ms.
         testThread.start();
-        ThreadLooper::get()->runWithTimeoutMs(10);
+        ThreadLooper::get()->runWithTimeoutMs(100);
         EXPECT_EQ(-1, testAgent.socket());
         EXPECT_EQ(1, testAgent.id());
 
         // Start listening and run the thread looper again, this time the
         // send should work.
         testListener.startListening();
-        ThreadLooper::get()->runWithTimeoutMs(10);
+        ThreadLooper::get()->runWithTimeoutMs(100);
         EXPECT_EQ(2, testAgent.id());
         EXPECT_EQ(TestConnectThread::kDisconnected, testThread.state());
     }
@@ -186,13 +186,13 @@ TEST(AdbHostListener, startListening) {
         // startListening() is called again. Even if we run the current
         // thread looper for 10 ms.
         testThread.start();
-        ThreadLooper::get()->runWithTimeoutMs(10);
+        ThreadLooper::get()->runWithTimeoutMs(100);
         EXPECT_EQ(2, testAgent.id());
 
         // Start listening and run the thread looper again, this time the
         // send should work.
         testListener.startListening();
-        ThreadLooper::get()->runWithTimeoutMs(10);
+        ThreadLooper::get()->runWithTimeoutMs(100);
         EXPECT_EQ(3, testAgent.id());
         EXPECT_EQ(TestConnectThread::kDisconnected, testThread.state());
     }
