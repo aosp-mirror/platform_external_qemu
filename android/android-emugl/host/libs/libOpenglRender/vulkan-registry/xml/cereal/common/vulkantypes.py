@@ -126,6 +126,10 @@ CUSTOM_CREATE_APIS = [
     "vkAllocateMemory",
 ]
 
+EXCLUDED_APIS = [
+    "vkEnumeratePhysicalDeviceGroups",
+]
+
 # Holds information about a Vulkan type instance (i.e., not a type definition).
 # Type instances are used as struct field definitions or function parameters,
 # to be later fed to code generation.

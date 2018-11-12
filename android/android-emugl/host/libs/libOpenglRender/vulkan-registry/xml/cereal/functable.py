@@ -1,6 +1,7 @@
 from .common.codegen import CodeGen, VulkanWrapperGenerator
 from .common.vulkantypes import \
         VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
+from .common.vulkantypes import EXCLUDED_APIS
 
 class VulkanFuncTable(VulkanWrapperGenerator):
     def __init__(self, module, typeInfo):
@@ -67,7 +68,10 @@ class VulkanFuncTable(VulkanWrapperGenerator):
                 self.cgen.leftline("#ifdef %s" % f)
 
             self.cgen.beginIf("!strcmp(name, \"%s\")" % e.name)
-            self.cgen.stmt("return (void*)%s" % ("entry_" + e.name))
+            if e.name in EXCLUDED_APIS:
+                self.cgen.stmt("return nullptr")
+            else:
+                self.cgen.stmt("return (void*)%s" % ("entry_" + e.name))
             self.cgen.endIf()
             prevFeature = f
 
