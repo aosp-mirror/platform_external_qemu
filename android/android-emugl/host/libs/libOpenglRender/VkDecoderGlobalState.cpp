@@ -32,6 +32,19 @@ public:
     Impl() : m_vk(emugl::vkDispatch()) { }
     ~Impl() = default;
 
+    void on_vkGetPhysicalDeviceProperties(
+            VkPhysicalDevice physicalDevice,
+            VkPhysicalDeviceProperties* pProperties) {
+        m_vk->vkGetPhysicalDeviceProperties(
+            physicalDevice, pProperties);
+
+        static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 0, 65);
+
+        if (pProperties->apiVersion > kMaxSafeVersion) {
+            pProperties->apiVersion = kMaxSafeVersion;
+        }
+    }
+
     void on_vkGetPhysicalDeviceMemoryProperties(
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceMemoryProperties* pMemoryProperties) {
@@ -270,6 +283,12 @@ static LazyInstance<VkDecoderGlobalState> sGlobalDecoderState =
 // static
 VkDecoderGlobalState* VkDecoderGlobalState::get() {
     return sGlobalDecoderState.ptr();
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceProperties(
+        VkPhysicalDevice physicalDevice,
+        VkPhysicalDeviceProperties* pProperties) {
+    mImpl->on_vkGetPhysicalDeviceProperties(physicalDevice, pProperties);
 }
 
 void VkDecoderGlobalState::on_vkGetPhysicalDeviceMemoryProperties(
