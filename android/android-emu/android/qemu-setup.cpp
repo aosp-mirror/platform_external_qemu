@@ -16,6 +16,7 @@
 #include "android/base/async/ThreadLooper.h"
 #include "android/boot-properties.h"
 #include "android/car.h"
+#include "android/car-cluster.h"
 #include "android/clipboard-pipe.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
@@ -465,6 +466,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     /* initialize the car data emulation if the system image is a Android Auto build */
     if (flavor == AVD_ANDROID_AUTO) {
         android_car_init();
+        android_car_cluster_init();
     }
 
     /* for TV/Wear/... and anything that does not use ril, this is needed
