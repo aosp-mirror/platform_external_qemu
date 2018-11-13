@@ -439,6 +439,7 @@ private:
     HandleType genHandle_locked();
 
     bool bindSubwin_locked();
+    bool bindFakeWindow_locked();
     bool removeSubWindow_locked();
     void cleanupProcGLObjects_locked(uint64_t puid, bool forced = false);
 
@@ -508,6 +509,9 @@ private:
     EGLContext m_eglContext = EGL_NO_CONTEXT;
     EGLSurface m_pbufSurface = EGL_NO_SURFACE;
     EGLContext m_pbufContext = EGL_NO_CONTEXT;
+
+    EGLSurface m_eglFakeWindowSurface = EGL_NO_SURFACE;
+    EGLContext m_eglFakeWindowContext = EGL_NO_CONTEXT;
 
     EGLContext m_prevContext = EGL_NO_CONTEXT;
     EGLSurface m_prevReadSurf = EGL_NO_SURFACE;
