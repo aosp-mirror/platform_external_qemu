@@ -829,6 +829,41 @@ help_shaper(stralloc_t*  out)
 }
 
 static void
+help_wifi_client_port(stralloc_t* out)
+{
+    PRINTF(
+    "  the Android emulator allows forwarding of WiFi traffic from one emulator\n"
+    "  to another emulator. This makes it appear as if the two emulators are on\n"
+    "  the same WiFi network. In order to do this one emulator acts as a server\n"
+    "  and the other emulators acts as a client. The client emulator connects\n"
+    "  to the server emulator and the WiFi traffic is then sent between them.\n"
+    "  Setting this parameter indicates that this emulator should act as a client\n"
+    "  and attempt to connect to a server emulator on the provided port. The\n"
+    "  client emulator will continually attempt to connect on the given port\n"
+    "  so the order that the emulators start in does not matter. If the server\n"
+    "  emulator is shut down the client will be disconnected but will try to\n"
+    "  reconnect again. Starting a new server emulator will establish the\n"
+    "  connection once more.\n\n" );
+}
+
+static void
+help_wifi_server_port(stralloc_t* out)
+{
+    PRINTF(
+    "  the Android emulator allows forwarding of WiFi traffic from one emulator\n"
+    "  to another emulator. This makes it appear as if the two emulators are on\n"
+    "  the same WiFi network. In order to do this one emulator acts as a server\n"
+    "  and the other emulators acts as a client. The client emulator connects\n"
+    "  to the server emulator and the WiFi traffic is then sent between them.\n"
+    "  Setting this parameter indicates that this emulator should act as a server\n"
+    "  and listen to connection attempts from client emulators on the provided\n"
+    "  port. The server emulator will stop listening as soon as a client emulator\n"
+    "  connects, allowing only one client at a time. If a client disconnects the\n"
+    "  server emulator will start listening for connections again and a new client\n"
+    "  can connect.\n\n" );
+}
+
+static void
 help_http_proxy(stralloc_t*  out)
 {
     PRINTF(

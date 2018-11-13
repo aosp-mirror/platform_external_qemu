@@ -1139,7 +1139,8 @@ message EmulatorFeatureFlagState {
     REFCOUNT_PIPE = 34;
     HOST_COMPOSITION_V1 = 36;
     ON_DEMAND_SNAPSHOT_LOAD = 37;
-    // Next tag: 38
+    WIFI_CONFIGURABLE = 38;
+    // Next tag: 39
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

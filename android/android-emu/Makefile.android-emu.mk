@@ -311,6 +311,12 @@ android_emu_LOCAL_SRC_FILES := \
     android/network/control.cpp \
     android/network/constants.c \
     android/network/globals.c \
+    android/network/NetworkPipe.cpp \
+    android/network/wifi.cpp \
+    android/network/WifiForwardClient.cpp \
+    android/network/WifiForwardPeer.cpp \
+    android/network/WifiForwardPipe.cpp \
+    android/network/WifiForwardServer.cpp \
     android/opengl/EmuglBackendList.cpp \
     android/opengl/EmuglBackendScanner.cpp \
     android/opengl/emugl_config.cpp \
@@ -664,6 +670,7 @@ LOCAL_SRC_FILES := \
   android/base/memory/SharedMemory_unittest.cpp \
   android/base/misc/FileUtils_unittest.cpp \
   android/base/misc/HttpUtils_unittest.cpp \
+  android/base/misc/IpcPipe_unittest.cpp \
   android/base/misc/StringUtils_unittest.cpp \
   android/base/misc/Utf8Utils_unittest.cpp \
   android/base/network/Dns_unittest.cpp \
