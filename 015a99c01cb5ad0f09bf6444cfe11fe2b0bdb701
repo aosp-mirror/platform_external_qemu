@@ -34,6 +34,24 @@
       "revId": "015a99c01cb5ad0f09bf6444cfe11fe2b0bdb701",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "92008185_3a5da8e7",
+        "filename": "cmake-main.darwin-x86_64.inc",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-13T01:01:17Z",
+      "side": 1,
+      "message": "I like the second option more; let\u0027s add another layer on top of qemu that is android-qemu only. Ideally it should be controlled by CONFIG_ANDROID so there\u0027s no independent setting to get wrong later on.",
+      "parentUuid": "f12de31e_e9548711",
+      "revId": "015a99c01cb5ad0f09bf6444cfe11fe2b0bdb701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
