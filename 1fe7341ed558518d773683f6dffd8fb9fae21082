@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aa83514_1d97596f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page-point.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-13T22:43:45Z",
+      "side": 1,
+      "message": ":D",
+      "range": {
+        "startLine": 124,
+        "startChar": 15,
+        "endLine": 124,
+        "endChar": 24
+      },
+      "revId": "1fe7341ed558518d773683f6dffd8fb9fae21082",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bd2f5ad3_aaddb8f7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page-point.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-13T22:43:45Z",
+      "side": 1,
+      "message": "nit: remove",
+      "revId": "1fe7341ed558518d773683f6dffd8fb9fae21082",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "47cfd520_2ec27642",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page-point.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-13T22:43:45Z",
+      "side": 1,
+      "message": "This pattern seems to recur a lot. Could it be beneficial to factor this into a common function that has a few flags / arguments telling whether or not to call scanForPoints / setCurrentItem?",
+      "range": {
+        "startLine": 338,
+        "startChar": 0,
+        "endLine": 341,
+        "endChar": 39
+      },
+      "revId": "1fe7341ed558518d773683f6dffd8fb9fae21082",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7bb64232_4774243c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-13T22:43:45Z",
+      "side": 1,
+      "message": "Should this also be under the preprocessor to communicate it is for web engine builds? (same for the new defs in the header)",
+      "revId": "1fe7341ed558518d773683f6dffd8fb9fae21082",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
