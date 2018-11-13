@@ -1,6 +1,7 @@
 from .common import *
 from .decoder import *
 from .encoder import *
+from .extensionstructs import *
 from .frontend import *
 from .functable import *
 from .marshaling import *

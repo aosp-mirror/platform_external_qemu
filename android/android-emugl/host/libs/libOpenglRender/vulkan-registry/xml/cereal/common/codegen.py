@@ -516,6 +516,7 @@ class VulkanWrapperGenerator(object):
     def __init__(self, module, typeInfo):
         self.module = module
         self.typeInfo = typeInfo
+        self.extensionStructTypes = []
 
     def onBegin(self):
         pass
@@ -530,9 +531,14 @@ class VulkanWrapperGenerator(object):
         pass
 
     def onGenType(self, typeInfo, name, alias):
+        category = self.typeInfo.categoryOf(name)
+        if category in ["struct", "union"] and not alias:
+            structInfo = self.typeInfo.structs[name]
+            if structInfo.structExtendsExpr:
+                self.extensionStructTypes.append(structInfo)
         pass
 
-    def onGenStruct(self, typeInfo, typeName, alias):
+    def onGenStruct(self, typeInfo, name, alias):
         pass
 
     def onGenGroup(self, groupinfo, groupName, alias=None):
