@@ -477,6 +477,8 @@ using DlSymFunc = void* (void*, const char*);
         # Start processing in superclass
         OutputGenerator.beginFeature(self, interface, emit)
 
+        self.typeInfo.onBeginFeature(self.featureName)
+
         self.forEachModule(lambda m: m.appendHeader("#ifdef %s\n" % self.featureName))
         self.forEachModule(lambda m: m.appendImpl("#ifdef %s\n" % self.featureName))
         self.forEachWrapper(lambda w: w.onBeginFeature(self.featureName))
@@ -484,6 +486,8 @@ using DlSymFunc = void* (void*, const char*);
     def endFeature(self):
         # Finish processing in superclass
         OutputGenerator.endFeature(self)
+
+        self.typeInfo.onEndFeature()
 
         self.forEachModule(lambda m: m.appendHeader("#endif\n"))
         self.forEachModule(lambda m: m.appendImpl("#endif\n"))

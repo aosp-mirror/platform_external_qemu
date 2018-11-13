@@ -28,6 +28,11 @@
 
 namespace goldfish_vk {
 
+void checkEqual_extension_struct(
+    const void* structExtension,
+    void* structExtension_out,
+    OnFailCompareFunc onFail);
+
 #ifdef VK_VERSION_1_0
 void checkEqual_VkApplicationInfo(
     const VkApplicationInfo* a,
@@ -36,6 +41,10 @@ void checkEqual_VkApplicationInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((!(a->pApplicationName) && !(b->pApplicationName)) || ((a->pApplicationName) && (b->pApplicationName)))) { onFail("a->pApplicationName (Error: Mismatch in string pointer nullness)"); };
     if ((a->pApplicationName) && (b->pApplicationName))
     {
@@ -58,6 +67,10 @@ void checkEqual_VkInstanceCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((!(a->pApplicationInfo) && !(b->pApplicationInfo)) || ((a->pApplicationInfo) && (b->pApplicationInfo)))) { onFail("a->pApplicationInfo (Error: Mismatch in optional field)"); };
     if (a->pApplicationInfo && b->pApplicationInfo)
@@ -394,6 +407,10 @@ void checkEqual_VkDeviceQueueCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->queueFamilyIndex) == (b->queueFamilyIndex))) { onFail("a->queueFamilyIndex (Error: Value not equal)"); };
     if (!((a->queueCount) == (b->queueCount))) { onFail("a->queueCount (Error: Value not equal)"); };
@@ -408,6 +425,10 @@ void checkEqual_VkDeviceCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->queueCreateInfoCount) == (b->queueCreateInfoCount))) { onFail("a->queueCreateInfoCount (Error: Value not equal)"); };
     if ((a->pQueueCreateInfos) && (b->pQueueCreateInfos))
@@ -480,6 +501,10 @@ void checkEqual_VkSubmitInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->waitSemaphoreCount) == (b->waitSemaphoreCount))) { onFail("a->waitSemaphoreCount (Error: Value not equal)"); };
     if (!((a->waitSemaphoreCount) == (b->waitSemaphoreCount))) { onFail("a->pWaitSemaphores (Error: Lengths not equal)"); };
     if (!((memcmp(a->pWaitSemaphores, b->pWaitSemaphores, a->waitSemaphoreCount * sizeof(const VkSemaphore)) == 0))) { onFail("a->pWaitSemaphores (Error: Unequal dyn array)"); };
@@ -500,6 +525,10 @@ void checkEqual_VkMemoryAllocateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->allocationSize) == (b->allocationSize))) { onFail("a->allocationSize (Error: Value not equal)"); };
     if (!((a->memoryTypeIndex) == (b->memoryTypeIndex))) { onFail("a->memoryTypeIndex (Error: Value not equal)"); };
 }
@@ -511,6 +540,10 @@ void checkEqual_VkMappedMemoryRange(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->memory) == (b->memory))) { onFail("a->memory (Error: Value not equal)"); };
     if (!((a->offset) == (b->offset))) { onFail("a->offset (Error: Value not equal)"); };
     if (!((a->size) == (b->size))) { onFail("a->size (Error: Value not equal)"); };
@@ -660,6 +693,10 @@ void checkEqual_VkBindSparseInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->waitSemaphoreCount) == (b->waitSemaphoreCount))) { onFail("a->waitSemaphoreCount (Error: Value not equal)"); };
     if (!((a->waitSemaphoreCount) == (b->waitSemaphoreCount))) { onFail("a->pWaitSemaphores (Error: Lengths not equal)"); };
     if (!((memcmp(a->pWaitSemaphores, b->pWaitSemaphores, a->waitSemaphoreCount * sizeof(const VkSemaphore)) == 0))) { onFail("a->pWaitSemaphores (Error: Unequal dyn array)"); };
@@ -711,6 +748,10 @@ void checkEqual_VkFenceCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
 }
 
@@ -721,6 +762,10 @@ void checkEqual_VkSemaphoreCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
 }
 
@@ -731,6 +776,10 @@ void checkEqual_VkEventCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
 }
 
@@ -741,6 +790,10 @@ void checkEqual_VkQueryPoolCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->queryType) == (b->queryType))) { onFail("a->queryType (Error: Value not equal)"); };
     if (!((a->queryCount) == (b->queryCount))) { onFail("a->queryCount (Error: Value not equal)"); };
@@ -754,6 +807,10 @@ void checkEqual_VkBufferCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->size) == (b->size))) { onFail("a->size (Error: Value not equal)"); };
     if (!((a->usage) == (b->usage))) { onFail("a->usage (Error: Value not equal)"); };
@@ -774,6 +831,10 @@ void checkEqual_VkBufferViewCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->buffer) == (b->buffer))) { onFail("a->buffer (Error: Value not equal)"); };
     if (!((a->format) == (b->format))) { onFail("a->format (Error: Value not equal)"); };
@@ -788,6 +849,10 @@ void checkEqual_VkImageCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->imageType) == (b->imageType))) { onFail("a->imageType (Error: Value not equal)"); };
     if (!((a->format) == (b->format))) { onFail("a->format (Error: Value not equal)"); };
@@ -850,6 +915,10 @@ void checkEqual_VkImageViewCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->image) == (b->image))) { onFail("a->image (Error: Value not equal)"); };
     if (!((a->viewType) == (b->viewType))) { onFail("a->viewType (Error: Value not equal)"); };
@@ -865,6 +934,10 @@ void checkEqual_VkShaderModuleCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->codeSize) == (b->codeSize))) { onFail("a->codeSize (Error: Value not equal)"); };
     if (!(((a->codeSize / 4)) == ((b->codeSize / 4)))) { onFail("a->pCode (Error: Lengths not equal)"); };
@@ -878,6 +951,10 @@ void checkEqual_VkPipelineCacheCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->initialDataSize) == (b->initialDataSize))) { onFail("a->initialDataSize (Error: Value not equal)"); };
 }
@@ -919,6 +996,10 @@ void checkEqual_VkPipelineShaderStageCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->stage) == (b->stage))) { onFail("a->stage (Error: Value not equal)"); };
     if (!((a->module) == (b->module))) { onFail("a->module (Error: Value not equal)"); };
@@ -965,6 +1046,10 @@ void checkEqual_VkPipelineVertexInputStateCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->vertexBindingDescriptionCount) == (b->vertexBindingDescriptionCount))) { onFail("a->vertexBindingDescriptionCount (Error: Value not equal)"); };
     if ((a->pVertexBindingDescriptions) && (b->pVertexBindingDescriptions))
@@ -999,6 +1084,10 @@ void checkEqual_VkPipelineInputAssemblyStateCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->topology) == (b->topology))) { onFail("a->topology (Error: Value not equal)"); };
     if (!((a->primitiveRestartEnable) == (b->primitiveRestartEnable))) { onFail("a->primitiveRestartEnable (Error: Value not equal)"); };
@@ -1011,6 +1100,10 @@ void checkEqual_VkPipelineTessellationStateCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->patchControlPoints) == (b->patchControlPoints))) { onFail("a->patchControlPoints (Error: Value not equal)"); };
 }
@@ -1062,6 +1155,10 @@ void checkEqual_VkPipelineViewportStateCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->viewportCount) == (b->viewportCount))) { onFail("a->viewportCount (Error: Value not equal)"); };
     if (!((!(a->pViewports) && !(b->pViewports)) || ((a->pViewports) && (b->pViewports)))) { onFail("a->pViewports (Error: Mismatch in optional field)"); };
@@ -1104,6 +1201,10 @@ void checkEqual_VkPipelineRasterizationStateCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->depthClampEnable) == (b->depthClampEnable))) { onFail("a->depthClampEnable (Error: Value not equal)"); };
     if (!((a->rasterizerDiscardEnable) == (b->rasterizerDiscardEnable))) { onFail("a->rasterizerDiscardEnable (Error: Value not equal)"); };
@@ -1124,6 +1225,10 @@ void checkEqual_VkPipelineMultisampleStateCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->rasterizationSamples) == (b->rasterizationSamples))) { onFail("a->rasterizationSamples (Error: Value not equal)"); };
     if (!((a->sampleShadingEnable) == (b->sampleShadingEnable))) { onFail("a->sampleShadingEnable (Error: Value not equal)"); };
@@ -1159,6 +1264,10 @@ void checkEqual_VkPipelineDepthStencilStateCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->depthTestEnable) == (b->depthTestEnable))) { onFail("a->depthTestEnable (Error: Value not equal)"); };
     if (!((a->depthWriteEnable) == (b->depthWriteEnable))) { onFail("a->depthWriteEnable (Error: Value not equal)"); };
@@ -1193,6 +1302,10 @@ void checkEqual_VkPipelineColorBlendStateCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->logicOpEnable) == (b->logicOpEnable))) { onFail("a->logicOpEnable (Error: Value not equal)"); };
     if (!((a->logicOp) == (b->logicOp))) { onFail("a->logicOp (Error: Value not equal)"); };
@@ -1218,6 +1331,10 @@ void checkEqual_VkPipelineDynamicStateCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->dynamicStateCount) == (b->dynamicStateCount))) { onFail("a->dynamicStateCount (Error: Value not equal)"); };
     if (!((a->dynamicStateCount) == (b->dynamicStateCount))) { onFail("a->pDynamicStates (Error: Lengths not equal)"); };
@@ -1231,6 +1348,10 @@ void checkEqual_VkGraphicsPipelineCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->stageCount) == (b->stageCount))) { onFail("a->stageCount (Error: Value not equal)"); };
     if ((a->pStages) && (b->pStages))
@@ -1318,6 +1439,10 @@ void checkEqual_VkComputePipelineCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     checkEqual_VkPipelineShaderStageCreateInfo(&a->stage, &b->stage, onFail);
     if (!((a->layout) == (b->layout))) { onFail("a->layout (Error: Value not equal)"); };
@@ -1342,6 +1467,10 @@ void checkEqual_VkPipelineLayoutCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->setLayoutCount) == (b->setLayoutCount))) { onFail("a->setLayoutCount (Error: Value not equal)"); };
     if (!((a->setLayoutCount) == (b->setLayoutCount))) { onFail("a->pSetLayouts (Error: Lengths not equal)"); };
@@ -1367,6 +1496,10 @@ void checkEqual_VkSamplerCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->magFilter) == (b->magFilter))) { onFail("a->magFilter (Error: Value not equal)"); };
     if (!((a->minFilter) == (b->minFilter))) { onFail("a->minFilter (Error: Value not equal)"); };
@@ -1409,6 +1542,10 @@ void checkEqual_VkDescriptorSetLayoutCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->bindingCount) == (b->bindingCount))) { onFail("a->bindingCount (Error: Value not equal)"); };
     if ((a->pBindings) && (b->pBindings))
@@ -1440,6 +1577,10 @@ void checkEqual_VkDescriptorPoolCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->maxSets) == (b->maxSets))) { onFail("a->maxSets (Error: Value not equal)"); };
     if (!((a->poolSizeCount) == (b->poolSizeCount))) { onFail("a->poolSizeCount (Error: Value not equal)"); };
@@ -1463,6 +1604,10 @@ void checkEqual_VkDescriptorSetAllocateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->descriptorPool) == (b->descriptorPool))) { onFail("a->descriptorPool (Error: Value not equal)"); };
     if (!((a->descriptorSetCount) == (b->descriptorSetCount))) { onFail("a->descriptorSetCount (Error: Value not equal)"); };
     if (!((a->descriptorSetCount) == (b->descriptorSetCount))) { onFail("a->pSetLayouts (Error: Lengths not equal)"); };
@@ -1496,6 +1641,10 @@ void checkEqual_VkWriteDescriptorSet(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->dstSet) == (b->dstSet))) { onFail("a->dstSet (Error: Value not equal)"); };
     if (!((a->dstBinding) == (b->dstBinding))) { onFail("a->dstBinding (Error: Value not equal)"); };
     if (!((a->dstArrayElement) == (b->dstArrayElement))) { onFail("a->dstArrayElement (Error: Value not equal)"); };
@@ -1546,6 +1695,10 @@ void checkEqual_VkCopyDescriptorSet(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->srcSet) == (b->srcSet))) { onFail("a->srcSet (Error: Value not equal)"); };
     if (!((a->srcBinding) == (b->srcBinding))) { onFail("a->srcBinding (Error: Value not equal)"); };
     if (!((a->srcArrayElement) == (b->srcArrayElement))) { onFail("a->srcArrayElement (Error: Value not equal)"); };
@@ -1562,6 +1715,10 @@ void checkEqual_VkFramebufferCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->renderPass) == (b->renderPass))) { onFail("a->renderPass (Error: Value not equal)"); };
     if (!((a->attachmentCount) == (b->attachmentCount))) { onFail("a->attachmentCount (Error: Value not equal)"); };
@@ -1677,6 +1834,10 @@ void checkEqual_VkRenderPassCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->attachmentCount) == (b->attachmentCount))) { onFail("a->attachmentCount (Error: Value not equal)"); };
     if ((a->pAttachments) && (b->pAttachments))
@@ -1723,6 +1884,10 @@ void checkEqual_VkCommandPoolCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->queueFamilyIndex) == (b->queueFamilyIndex))) { onFail("a->queueFamilyIndex (Error: Value not equal)"); };
 }
@@ -1734,6 +1899,10 @@ void checkEqual_VkCommandBufferAllocateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->commandPool) == (b->commandPool))) { onFail("a->commandPool (Error: Value not equal)"); };
     if (!((a->level) == (b->level))) { onFail("a->level (Error: Value not equal)"); };
     if (!((a->commandBufferCount) == (b->commandBufferCount))) { onFail("a->commandBufferCount (Error: Value not equal)"); };
@@ -1746,6 +1915,10 @@ void checkEqual_VkCommandBufferInheritanceInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->renderPass) == (b->renderPass))) { onFail("a->renderPass (Error: Value not equal)"); };
     if (!((a->subpass) == (b->subpass))) { onFail("a->subpass (Error: Value not equal)"); };
     if (!((a->framebuffer) == (b->framebuffer))) { onFail("a->framebuffer (Error: Value not equal)"); };
@@ -1761,6 +1934,10 @@ void checkEqual_VkCommandBufferBeginInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((!(a->pInheritanceInfo) && !(b->pInheritanceInfo)) || ((a->pInheritanceInfo) && (b->pInheritanceInfo)))) { onFail("a->pInheritanceInfo (Error: Mismatch in optional field)"); };
     if (a->pInheritanceInfo && b->pInheritanceInfo)
@@ -1904,6 +2081,10 @@ void checkEqual_VkMemoryBarrier(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->srcAccessMask) == (b->srcAccessMask))) { onFail("a->srcAccessMask (Error: Value not equal)"); };
     if (!((a->dstAccessMask) == (b->dstAccessMask))) { onFail("a->dstAccessMask (Error: Value not equal)"); };
 }
@@ -1915,6 +2096,10 @@ void checkEqual_VkBufferMemoryBarrier(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->srcAccessMask) == (b->srcAccessMask))) { onFail("a->srcAccessMask (Error: Value not equal)"); };
     if (!((a->dstAccessMask) == (b->dstAccessMask))) { onFail("a->dstAccessMask (Error: Value not equal)"); };
     if (!((a->srcQueueFamilyIndex) == (b->srcQueueFamilyIndex))) { onFail("a->srcQueueFamilyIndex (Error: Value not equal)"); };
@@ -1931,6 +2116,10 @@ void checkEqual_VkImageMemoryBarrier(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->srcAccessMask) == (b->srcAccessMask))) { onFail("a->srcAccessMask (Error: Value not equal)"); };
     if (!((a->dstAccessMask) == (b->dstAccessMask))) { onFail("a->dstAccessMask (Error: Value not equal)"); };
     if (!((a->oldLayout) == (b->oldLayout))) { onFail("a->oldLayout (Error: Value not equal)"); };
@@ -1948,6 +2137,10 @@ void checkEqual_VkRenderPassBeginInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->renderPass) == (b->renderPass))) { onFail("a->renderPass (Error: Value not equal)"); };
     if (!((a->framebuffer) == (b->framebuffer))) { onFail("a->framebuffer (Error: Value not equal)"); };
     checkEqual_VkRect2D(&a->renderArea, &b->renderArea, onFail);
@@ -2043,6 +2236,10 @@ void checkEqual_VkPhysicalDeviceSubgroupProperties(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->subgroupSize) == (b->subgroupSize))) { onFail("a->subgroupSize (Error: Value not equal)"); };
     if (!((a->supportedStages) == (b->supportedStages))) { onFail("a->supportedStages (Error: Value not equal)"); };
     if (!((a->supportedOperations) == (b->supportedOperations))) { onFail("a->supportedOperations (Error: Value not equal)"); };
@@ -2056,6 +2253,10 @@ void checkEqual_VkBindBufferMemoryInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->buffer) == (b->buffer))) { onFail("a->buffer (Error: Value not equal)"); };
     if (!((a->memory) == (b->memory))) { onFail("a->memory (Error: Value not equal)"); };
     if (!((a->memoryOffset) == (b->memoryOffset))) { onFail("a->memoryOffset (Error: Value not equal)"); };
@@ -2068,6 +2269,10 @@ void checkEqual_VkBindImageMemoryInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->image) == (b->image))) { onFail("a->image (Error: Value not equal)"); };
     if (!((a->memory) == (b->memory))) { onFail("a->memory (Error: Value not equal)"); };
     if (!((a->memoryOffset) == (b->memoryOffset))) { onFail("a->memoryOffset (Error: Value not equal)"); };
@@ -2080,6 +2285,10 @@ void checkEqual_VkPhysicalDevice16BitStorageFeatures(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->storageBuffer16BitAccess) == (b->storageBuffer16BitAccess))) { onFail("a->storageBuffer16BitAccess (Error: Value not equal)"); };
     if (!((a->uniformAndStorageBuffer16BitAccess) == (b->uniformAndStorageBuffer16BitAccess))) { onFail("a->uniformAndStorageBuffer16BitAccess (Error: Value not equal)"); };
     if (!((a->storagePushConstant16) == (b->storagePushConstant16))) { onFail("a->storagePushConstant16 (Error: Value not equal)"); };
@@ -2093,6 +2302,10 @@ void checkEqual_VkMemoryDedicatedRequirements(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->prefersDedicatedAllocation) == (b->prefersDedicatedAllocation))) { onFail("a->prefersDedicatedAllocation (Error: Value not equal)"); };
     if (!((a->requiresDedicatedAllocation) == (b->requiresDedicatedAllocation))) { onFail("a->requiresDedicatedAllocation (Error: Value not equal)"); };
 }
@@ -2104,6 +2317,10 @@ void checkEqual_VkMemoryDedicatedAllocateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->image) == (b->image))) { onFail("a->image (Error: Value not equal)"); };
     if (!((a->buffer) == (b->buffer))) { onFail("a->buffer (Error: Value not equal)"); };
 }
@@ -2115,6 +2332,10 @@ void checkEqual_VkMemoryAllocateFlagsInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->deviceMask) == (b->deviceMask))) { onFail("a->deviceMask (Error: Value not equal)"); };
 }
@@ -2126,6 +2347,10 @@ void checkEqual_VkDeviceGroupRenderPassBeginInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->deviceMask) == (b->deviceMask))) { onFail("a->deviceMask (Error: Value not equal)"); };
     if (!((a->deviceRenderAreaCount) == (b->deviceRenderAreaCount))) { onFail("a->deviceRenderAreaCount (Error: Value not equal)"); };
     if ((a->pDeviceRenderAreas) && (b->pDeviceRenderAreas))
@@ -2148,6 +2373,10 @@ void checkEqual_VkDeviceGroupCommandBufferBeginInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->deviceMask) == (b->deviceMask))) { onFail("a->deviceMask (Error: Value not equal)"); };
 }
 
@@ -2158,6 +2387,10 @@ void checkEqual_VkDeviceGroupSubmitInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->waitSemaphoreCount) == (b->waitSemaphoreCount))) { onFail("a->waitSemaphoreCount (Error: Value not equal)"); };
     if (!((a->waitSemaphoreCount) == (b->waitSemaphoreCount))) { onFail("a->pWaitSemaphoreDeviceIndices (Error: Lengths not equal)"); };
     if (!((memcmp(a->pWaitSemaphoreDeviceIndices, b->pWaitSemaphoreDeviceIndices, a->waitSemaphoreCount * sizeof(const uint32_t)) == 0))) { onFail("a->pWaitSemaphoreDeviceIndices (Error: Unequal dyn array)"); };
@@ -2176,6 +2409,10 @@ void checkEqual_VkDeviceGroupBindSparseInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->resourceDeviceIndex) == (b->resourceDeviceIndex))) { onFail("a->resourceDeviceIndex (Error: Value not equal)"); };
     if (!((a->memoryDeviceIndex) == (b->memoryDeviceIndex))) { onFail("a->memoryDeviceIndex (Error: Value not equal)"); };
 }
@@ -2187,6 +2424,10 @@ void checkEqual_VkBindBufferMemoryDeviceGroupInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->deviceIndexCount) == (b->deviceIndexCount))) { onFail("a->deviceIndexCount (Error: Value not equal)"); };
     if (!((a->deviceIndexCount) == (b->deviceIndexCount))) { onFail("a->pDeviceIndices (Error: Lengths not equal)"); };
     if (!((memcmp(a->pDeviceIndices, b->pDeviceIndices, a->deviceIndexCount * sizeof(const uint32_t)) == 0))) { onFail("a->pDeviceIndices (Error: Unequal dyn array)"); };
@@ -2199,6 +2440,10 @@ void checkEqual_VkBindImageMemoryDeviceGroupInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->deviceIndexCount) == (b->deviceIndexCount))) { onFail("a->deviceIndexCount (Error: Value not equal)"); };
     if (!((a->deviceIndexCount) == (b->deviceIndexCount))) { onFail("a->pDeviceIndices (Error: Lengths not equal)"); };
     if (!((memcmp(a->pDeviceIndices, b->pDeviceIndices, a->deviceIndexCount * sizeof(const uint32_t)) == 0))) { onFail("a->pDeviceIndices (Error: Unequal dyn array)"); };
@@ -2223,6 +2468,10 @@ void checkEqual_VkPhysicalDeviceGroupProperties(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->physicalDeviceCount) == (b->physicalDeviceCount))) { onFail("a->physicalDeviceCount (Error: Value not equal)"); };
     if (!((memcmp(a->physicalDevices, b->physicalDevices, VK_MAX_DEVICE_GROUP_SIZE * sizeof(VkPhysicalDevice)) == 0))) { onFail("a->physicalDevices (Error: Unequal static array)"); };
     if (!((a->subsetAllocation) == (b->subsetAllocation))) { onFail("a->subsetAllocation (Error: Value not equal)"); };
@@ -2235,6 +2484,10 @@ void checkEqual_VkDeviceGroupDeviceCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->physicalDeviceCount) == (b->physicalDeviceCount))) { onFail("a->physicalDeviceCount (Error: Value not equal)"); };
     if (!((a->physicalDeviceCount) == (b->physicalDeviceCount))) { onFail("a->pPhysicalDevices (Error: Lengths not equal)"); };
     if (!((memcmp(a->pPhysicalDevices, b->pPhysicalDevices, a->physicalDeviceCount * sizeof(const VkPhysicalDevice)) == 0))) { onFail("a->pPhysicalDevices (Error: Unequal dyn array)"); };
@@ -2247,6 +2500,10 @@ void checkEqual_VkBufferMemoryRequirementsInfo2(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->buffer) == (b->buffer))) { onFail("a->buffer (Error: Value not equal)"); };
 }
 
@@ -2257,6 +2514,10 @@ void checkEqual_VkImageMemoryRequirementsInfo2(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->image) == (b->image))) { onFail("a->image (Error: Value not equal)"); };
 }
 
@@ -2267,6 +2528,10 @@ void checkEqual_VkImageSparseMemoryRequirementsInfo2(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->image) == (b->image))) { onFail("a->image (Error: Value not equal)"); };
 }
 
@@ -2277,6 +2542,10 @@ void checkEqual_VkMemoryRequirements2(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkMemoryRequirements(&a->memoryRequirements, &b->memoryRequirements, onFail);
 }
 
@@ -2287,6 +2556,10 @@ void checkEqual_VkSparseImageMemoryRequirements2(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkSparseImageMemoryRequirements(&a->memoryRequirements, &b->memoryRequirements, onFail);
 }
 
@@ -2297,6 +2570,10 @@ void checkEqual_VkPhysicalDeviceFeatures2(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkPhysicalDeviceFeatures(&a->features, &b->features, onFail);
 }
 
@@ -2307,6 +2584,10 @@ void checkEqual_VkPhysicalDeviceProperties2(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkPhysicalDeviceProperties(&a->properties, &b->properties, onFail);
 }
 
@@ -2317,6 +2598,10 @@ void checkEqual_VkFormatProperties2(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkFormatProperties(&a->formatProperties, &b->formatProperties, onFail);
 }
 
@@ -2327,6 +2612,10 @@ void checkEqual_VkImageFormatProperties2(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkImageFormatProperties(&a->imageFormatProperties, &b->imageFormatProperties, onFail);
 }
 
@@ -2337,6 +2626,10 @@ void checkEqual_VkPhysicalDeviceImageFormatInfo2(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->format) == (b->format))) { onFail("a->format (Error: Value not equal)"); };
     if (!((a->type) == (b->type))) { onFail("a->type (Error: Value not equal)"); };
     if (!((a->tiling) == (b->tiling))) { onFail("a->tiling (Error: Value not equal)"); };
@@ -2351,6 +2644,10 @@ void checkEqual_VkQueueFamilyProperties2(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkQueueFamilyProperties(&a->queueFamilyProperties, &b->queueFamilyProperties, onFail);
 }
 
@@ -2361,6 +2658,10 @@ void checkEqual_VkPhysicalDeviceMemoryProperties2(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkPhysicalDeviceMemoryProperties(&a->memoryProperties, &b->memoryProperties, onFail);
 }
 
@@ -2371,6 +2672,10 @@ void checkEqual_VkSparseImageFormatProperties2(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkSparseImageFormatProperties(&a->properties, &b->properties, onFail);
 }
 
@@ -2381,6 +2686,10 @@ void checkEqual_VkPhysicalDeviceSparseImageFormatInfo2(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->format) == (b->format))) { onFail("a->format (Error: Value not equal)"); };
     if (!((a->type) == (b->type))) { onFail("a->type (Error: Value not equal)"); };
     if (!((a->samples) == (b->samples))) { onFail("a->samples (Error: Value not equal)"); };
@@ -2395,6 +2704,10 @@ void checkEqual_VkPhysicalDevicePointClippingProperties(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->pointClippingBehavior) == (b->pointClippingBehavior))) { onFail("a->pointClippingBehavior (Error: Value not equal)"); };
 }
 
@@ -2415,6 +2728,10 @@ void checkEqual_VkRenderPassInputAttachmentAspectCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->aspectReferenceCount) == (b->aspectReferenceCount))) { onFail("a->aspectReferenceCount (Error: Value not equal)"); };
     if ((a->pAspectReferences) && (b->pAspectReferences))
     {
@@ -2436,6 +2753,10 @@ void checkEqual_VkImageViewUsageCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->usage) == (b->usage))) { onFail("a->usage (Error: Value not equal)"); };
 }
 
@@ -2446,6 +2767,10 @@ void checkEqual_VkPipelineTessellationDomainOriginStateCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->domainOrigin) == (b->domainOrigin))) { onFail("a->domainOrigin (Error: Value not equal)"); };
 }
 
@@ -2456,6 +2781,10 @@ void checkEqual_VkRenderPassMultiviewCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->subpassCount) == (b->subpassCount))) { onFail("a->subpassCount (Error: Value not equal)"); };
     if (!((a->subpassCount) == (b->subpassCount))) { onFail("a->pViewMasks (Error: Lengths not equal)"); };
     if (!((memcmp(a->pViewMasks, b->pViewMasks, a->subpassCount * sizeof(const uint32_t)) == 0))) { onFail("a->pViewMasks (Error: Unequal dyn array)"); };
@@ -2474,6 +2803,10 @@ void checkEqual_VkPhysicalDeviceMultiviewFeatures(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->multiview) == (b->multiview))) { onFail("a->multiview (Error: Value not equal)"); };
     if (!((a->multiviewGeometryShader) == (b->multiviewGeometryShader))) { onFail("a->multiviewGeometryShader (Error: Value not equal)"); };
     if (!((a->multiviewTessellationShader) == (b->multiviewTessellationShader))) { onFail("a->multiviewTessellationShader (Error: Value not equal)"); };
@@ -2486,6 +2819,10 @@ void checkEqual_VkPhysicalDeviceMultiviewProperties(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->maxMultiviewViewCount) == (b->maxMultiviewViewCount))) { onFail("a->maxMultiviewViewCount (Error: Value not equal)"); };
     if (!((a->maxMultiviewInstanceIndex) == (b->maxMultiviewInstanceIndex))) { onFail("a->maxMultiviewInstanceIndex (Error: Value not equal)"); };
 }
@@ -2497,6 +2834,10 @@ void checkEqual_VkPhysicalDeviceVariablePointerFeatures(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->variablePointersStorageBuffer) == (b->variablePointersStorageBuffer))) { onFail("a->variablePointersStorageBuffer (Error: Value not equal)"); };
     if (!((a->variablePointers) == (b->variablePointers))) { onFail("a->variablePointers (Error: Value not equal)"); };
 }
@@ -2508,6 +2849,10 @@ void checkEqual_VkPhysicalDeviceProtectedMemoryFeatures(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->protectedMemory) == (b->protectedMemory))) { onFail("a->protectedMemory (Error: Value not equal)"); };
 }
 
@@ -2518,6 +2863,10 @@ void checkEqual_VkPhysicalDeviceProtectedMemoryProperties(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->protectedNoFault) == (b->protectedNoFault))) { onFail("a->protectedNoFault (Error: Value not equal)"); };
 }
 
@@ -2528,6 +2877,10 @@ void checkEqual_VkDeviceQueueInfo2(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->queueFamilyIndex) == (b->queueFamilyIndex))) { onFail("a->queueFamilyIndex (Error: Value not equal)"); };
     if (!((a->queueIndex) == (b->queueIndex))) { onFail("a->queueIndex (Error: Value not equal)"); };
@@ -2540,6 +2893,10 @@ void checkEqual_VkProtectedSubmitInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->protectedSubmit) == (b->protectedSubmit))) { onFail("a->protectedSubmit (Error: Value not equal)"); };
 }
 
@@ -2550,6 +2907,10 @@ void checkEqual_VkSamplerYcbcrConversionCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->format) == (b->format))) { onFail("a->format (Error: Value not equal)"); };
     if (!((a->ycbcrModel) == (b->ycbcrModel))) { onFail("a->ycbcrModel (Error: Value not equal)"); };
     if (!((a->ycbcrRange) == (b->ycbcrRange))) { onFail("a->ycbcrRange (Error: Value not equal)"); };
@@ -2567,6 +2928,10 @@ void checkEqual_VkSamplerYcbcrConversionInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->conversion) == (b->conversion))) { onFail("a->conversion (Error: Value not equal)"); };
 }
 
@@ -2577,6 +2942,10 @@ void checkEqual_VkBindImagePlaneMemoryInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->planeAspect) == (b->planeAspect))) { onFail("a->planeAspect (Error: Value not equal)"); };
 }
 
@@ -2587,6 +2956,10 @@ void checkEqual_VkImagePlaneMemoryRequirementsInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->planeAspect) == (b->planeAspect))) { onFail("a->planeAspect (Error: Value not equal)"); };
 }
 
@@ -2597,6 +2970,10 @@ void checkEqual_VkPhysicalDeviceSamplerYcbcrConversionFeatures(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->samplerYcbcrConversion) == (b->samplerYcbcrConversion))) { onFail("a->samplerYcbcrConversion (Error: Value not equal)"); };
 }
 
@@ -2607,6 +2984,10 @@ void checkEqual_VkSamplerYcbcrConversionImageFormatProperties(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->combinedImageSamplerDescriptorCount) == (b->combinedImageSamplerDescriptorCount))) { onFail("a->combinedImageSamplerDescriptorCount (Error: Value not equal)"); };
 }
 
@@ -2630,6 +3011,10 @@ void checkEqual_VkDescriptorUpdateTemplateCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->descriptorUpdateEntryCount) == (b->descriptorUpdateEntryCount))) { onFail("a->descriptorUpdateEntryCount (Error: Value not equal)"); };
     if ((a->pDescriptorUpdateEntries) && (b->pDescriptorUpdateEntries))
@@ -2667,6 +3052,10 @@ void checkEqual_VkPhysicalDeviceExternalImageFormatInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
 }
 
@@ -2677,6 +3066,10 @@ void checkEqual_VkExternalImageFormatProperties(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkExternalMemoryProperties(&a->externalMemoryProperties, &b->externalMemoryProperties, onFail);
 }
 
@@ -2687,6 +3080,10 @@ void checkEqual_VkPhysicalDeviceExternalBufferInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->usage) == (b->usage))) { onFail("a->usage (Error: Value not equal)"); };
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
@@ -2699,6 +3096,10 @@ void checkEqual_VkExternalBufferProperties(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkExternalMemoryProperties(&a->externalMemoryProperties, &b->externalMemoryProperties, onFail);
 }
 
@@ -2709,6 +3110,10 @@ void checkEqual_VkPhysicalDeviceIDProperties(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((memcmp(a->deviceUUID, b->deviceUUID, VK_UUID_SIZE * sizeof(uint8_t)) == 0))) { onFail("a->deviceUUID (Error: Unequal static array)"); };
     if (!((memcmp(a->driverUUID, b->driverUUID, VK_UUID_SIZE * sizeof(uint8_t)) == 0))) { onFail("a->driverUUID (Error: Unequal static array)"); };
     if (!((memcmp(a->deviceLUID, b->deviceLUID, VK_LUID_SIZE * sizeof(uint8_t)) == 0))) { onFail("a->deviceLUID (Error: Unequal static array)"); };
@@ -2723,6 +3128,10 @@ void checkEqual_VkExternalMemoryImageCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->handleTypes) == (b->handleTypes))) { onFail("a->handleTypes (Error: Value not equal)"); };
 }
 
@@ -2733,6 +3142,10 @@ void checkEqual_VkExternalMemoryBufferCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->handleTypes) == (b->handleTypes))) { onFail("a->handleTypes (Error: Value not equal)"); };
 }
 
@@ -2743,6 +3156,10 @@ void checkEqual_VkExportMemoryAllocateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->handleTypes) == (b->handleTypes))) { onFail("a->handleTypes (Error: Value not equal)"); };
 }
 
@@ -2753,6 +3170,10 @@ void checkEqual_VkPhysicalDeviceExternalFenceInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
 }
 
@@ -2763,6 +3184,10 @@ void checkEqual_VkExternalFenceProperties(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->exportFromImportedHandleTypes) == (b->exportFromImportedHandleTypes))) { onFail("a->exportFromImportedHandleTypes (Error: Value not equal)"); };
     if (!((a->compatibleHandleTypes) == (b->compatibleHandleTypes))) { onFail("a->compatibleHandleTypes (Error: Value not equal)"); };
     if (!((a->externalFenceFeatures) == (b->externalFenceFeatures))) { onFail("a->externalFenceFeatures (Error: Value not equal)"); };
@@ -2775,6 +3200,10 @@ void checkEqual_VkExportFenceCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->handleTypes) == (b->handleTypes))) { onFail("a->handleTypes (Error: Value not equal)"); };
 }
 
@@ -2785,6 +3214,10 @@ void checkEqual_VkExportSemaphoreCreateInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->handleTypes) == (b->handleTypes))) { onFail("a->handleTypes (Error: Value not equal)"); };
 }
 
@@ -2795,6 +3228,10 @@ void checkEqual_VkPhysicalDeviceExternalSemaphoreInfo(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
 }
 
@@ -2805,6 +3242,10 @@ void checkEqual_VkExternalSemaphoreProperties(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->exportFromImportedHandleTypes) == (b->exportFromImportedHandleTypes))) { onFail("a->exportFromImportedHandleTypes (Error: Value not equal)"); };
     if (!((a->compatibleHandleTypes) == (b->compatibleHandleTypes))) { onFail("a->compatibleHandleTypes (Error: Value not equal)"); };
     if (!((a->externalSemaphoreFeatures) == (b->externalSemaphoreFeatures))) { onFail("a->externalSemaphoreFeatures (Error: Value not equal)"); };
@@ -2817,6 +3258,10 @@ void checkEqual_VkPhysicalDeviceMaintenance3Properties(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->maxPerSetDescriptors) == (b->maxPerSetDescriptors))) { onFail("a->maxPerSetDescriptors (Error: Value not equal)"); };
     if (!((a->maxMemoryAllocationSize) == (b->maxMemoryAllocationSize))) { onFail("a->maxMemoryAllocationSize (Error: Value not equal)"); };
 }
@@ -2828,6 +3273,10 @@ void checkEqual_VkDescriptorSetLayoutSupport(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->supported) == (b->supported))) { onFail("a->supported (Error: Value not equal)"); };
 }
 
@@ -2838,6 +3287,10 @@ void checkEqual_VkPhysicalDeviceShaderDrawParameterFeatures(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->shaderDrawParameters) == (b->shaderDrawParameters))) { onFail("a->shaderDrawParameters (Error: Value not equal)"); };
 }
 
@@ -2878,6 +3331,10 @@ void checkEqual_VkSwapchainCreateInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->surface) == (b->surface))) { onFail("a->surface (Error: Value not equal)"); };
     if (!((a->minImageCount) == (b->minImageCount))) { onFail("a->minImageCount (Error: Value not equal)"); };
@@ -2908,6 +3365,10 @@ void checkEqual_VkPresentInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->waitSemaphoreCount) == (b->waitSemaphoreCount))) { onFail("a->waitSemaphoreCount (Error: Value not equal)"); };
     if (!((a->waitSemaphoreCount) == (b->waitSemaphoreCount))) { onFail("a->pWaitSemaphores (Error: Lengths not equal)"); };
     if (!((memcmp(a->pWaitSemaphores, b->pWaitSemaphores, a->waitSemaphoreCount * sizeof(const VkSemaphore)) == 0))) { onFail("a->pWaitSemaphores (Error: Unequal dyn array)"); };
@@ -2931,6 +3392,10 @@ void checkEqual_VkImageSwapchainCreateInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->swapchain) == (b->swapchain))) { onFail("a->swapchain (Error: Value not equal)"); };
 }
 
@@ -2941,6 +3406,10 @@ void checkEqual_VkBindImageMemorySwapchainInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->swapchain) == (b->swapchain))) { onFail("a->swapchain (Error: Value not equal)"); };
     if (!((a->imageIndex) == (b->imageIndex))) { onFail("a->imageIndex (Error: Value not equal)"); };
 }
@@ -2952,6 +3421,10 @@ void checkEqual_VkAcquireNextImageInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->swapchain) == (b->swapchain))) { onFail("a->swapchain (Error: Value not equal)"); };
     if (!((a->timeout) == (b->timeout))) { onFail("a->timeout (Error: Value not equal)"); };
     if (!((a->semaphore) == (b->semaphore))) { onFail("a->semaphore (Error: Value not equal)"); };
@@ -2966,6 +3439,10 @@ void checkEqual_VkDeviceGroupPresentCapabilitiesKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((memcmp(a->presentMask, b->presentMask, VK_MAX_DEVICE_GROUP_SIZE * sizeof(uint32_t)) == 0))) { onFail("a->presentMask (Error: Unequal static array)"); };
     if (!((a->modes) == (b->modes))) { onFail("a->modes (Error: Value not equal)"); };
 }
@@ -2977,6 +3454,10 @@ void checkEqual_VkDeviceGroupPresentInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->swapchainCount) == (b->swapchainCount))) { onFail("a->swapchainCount (Error: Value not equal)"); };
     if (!((a->swapchainCount) == (b->swapchainCount))) { onFail("a->pDeviceMasks (Error: Lengths not equal)"); };
     if (!((memcmp(a->pDeviceMasks, b->pDeviceMasks, a->swapchainCount * sizeof(const uint32_t)) == 0))) { onFail("a->pDeviceMasks (Error: Unequal dyn array)"); };
@@ -2990,6 +3471,10 @@ void checkEqual_VkDeviceGroupSwapchainCreateInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->modes) == (b->modes))) { onFail("a->modes (Error: Value not equal)"); };
 }
 
@@ -3038,6 +3523,10 @@ void checkEqual_VkDisplayModeCreateInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     checkEqual_VkDisplayModeParametersKHR(&a->parameters, &b->parameters, onFail);
 }
@@ -3074,6 +3563,10 @@ void checkEqual_VkDisplaySurfaceCreateInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->displayMode) == (b->displayMode))) { onFail("a->displayMode (Error: Value not equal)"); };
     if (!((a->planeIndex) == (b->planeIndex))) { onFail("a->planeIndex (Error: Value not equal)"); };
@@ -3093,6 +3586,10 @@ void checkEqual_VkDisplayPresentInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkRect2D(&a->srcRect, &b->srcRect, onFail);
     checkEqual_VkRect2D(&a->dstRect, &b->dstRect, onFail);
     if (!((a->persistent) == (b->persistent))) { onFail("a->persistent (Error: Value not equal)"); };
@@ -3107,6 +3604,10 @@ void checkEqual_VkXlibSurfaceCreateInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((!(a->dpy) && !(b->dpy)) || ((a->dpy) && (b->dpy)))) { onFail("a->dpy (Error: Mismatch in optional field)"); };
     if (a->dpy && b->dpy)
@@ -3125,6 +3626,10 @@ void checkEqual_VkXcbSurfaceCreateInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((!(a->connection) && !(b->connection)) || ((a->connection) && (b->connection)))) { onFail("a->connection (Error: Mismatch in optional field)"); };
     if (a->connection && b->connection)
@@ -3143,6 +3648,10 @@ void checkEqual_VkWaylandSurfaceCreateInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((!(a->display) && !(b->display)) || ((a->display) && (b->display)))) { onFail("a->display (Error: Mismatch in optional field)"); };
     if (a->display && b->display)
@@ -3165,6 +3674,10 @@ void checkEqual_VkMirSurfaceCreateInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((!(a->connection) && !(b->connection)) || ((a->connection) && (b->connection)))) { onFail("a->connection (Error: Mismatch in optional field)"); };
     if (a->connection && b->connection)
@@ -3187,6 +3700,10 @@ void checkEqual_VkAndroidSurfaceCreateInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((!(a->window) && !(b->window)) || ((a->window) && (b->window)))) { onFail("a->window (Error: Mismatch in optional field)"); };
     if (a->window && b->window)
@@ -3204,6 +3721,10 @@ void checkEqual_VkWin32SurfaceCreateInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->hinstance) == (b->hinstance))) { onFail("a->hinstance (Error: Value not equal)"); };
     if (!((a->hwnd) == (b->hwnd))) { onFail("a->hwnd (Error: Value not equal)"); };
@@ -3236,6 +3757,10 @@ void checkEqual_VkImportMemoryWin32HandleInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
     if (!((a->handle) == (b->handle))) { onFail("a->handle (Error: Value not equal)"); };
     if (!((a->name) == (b->name))) { onFail("a->name (Error: Value not equal)"); };
@@ -3248,6 +3773,10 @@ void checkEqual_VkExportMemoryWin32HandleInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((!(a->pAttributes) && !(b->pAttributes)) || ((a->pAttributes) && (b->pAttributes)))) { onFail("a->pAttributes (Error: Mismatch in optional field)"); };
     if (a->pAttributes && b->pAttributes)
     {
@@ -3264,6 +3793,10 @@ void checkEqual_VkMemoryWin32HandlePropertiesKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->memoryTypeBits) == (b->memoryTypeBits))) { onFail("a->memoryTypeBits (Error: Value not equal)"); };
 }
 
@@ -3274,6 +3807,10 @@ void checkEqual_VkMemoryGetWin32HandleInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->memory) == (b->memory))) { onFail("a->memory (Error: Value not equal)"); };
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
 }
@@ -3287,6 +3824,10 @@ void checkEqual_VkImportMemoryFdInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
     if (!((a->fd) == (b->fd))) { onFail("a->fd (Error: Value not equal)"); };
 }
@@ -3298,6 +3839,10 @@ void checkEqual_VkMemoryFdPropertiesKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->memoryTypeBits) == (b->memoryTypeBits))) { onFail("a->memoryTypeBits (Error: Value not equal)"); };
 }
 
@@ -3308,6 +3853,10 @@ void checkEqual_VkMemoryGetFdInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->memory) == (b->memory))) { onFail("a->memory (Error: Value not equal)"); };
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
 }
@@ -3321,6 +3870,10 @@ void checkEqual_VkWin32KeyedMutexAcquireReleaseInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->acquireCount) == (b->acquireCount))) { onFail("a->acquireCount (Error: Value not equal)"); };
     if (!((a->acquireCount) == (b->acquireCount))) { onFail("a->pAcquireSyncs (Error: Lengths not equal)"); };
     if (!((memcmp(a->pAcquireSyncs, b->pAcquireSyncs, a->acquireCount * sizeof(const VkDeviceMemory)) == 0))) { onFail("a->pAcquireSyncs (Error: Unequal dyn array)"); };
@@ -3348,6 +3901,10 @@ void checkEqual_VkImportSemaphoreWin32HandleInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->semaphore) == (b->semaphore))) { onFail("a->semaphore (Error: Value not equal)"); };
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
@@ -3362,6 +3919,10 @@ void checkEqual_VkExportSemaphoreWin32HandleInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((!(a->pAttributes) && !(b->pAttributes)) || ((a->pAttributes) && (b->pAttributes)))) { onFail("a->pAttributes (Error: Mismatch in optional field)"); };
     if (a->pAttributes && b->pAttributes)
     {
@@ -3378,6 +3939,10 @@ void checkEqual_VkD3D12FenceSubmitInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->waitSemaphoreValuesCount) == (b->waitSemaphoreValuesCount))) { onFail("a->waitSemaphoreValuesCount (Error: Value not equal)"); };
     if (!((!(a->pWaitSemaphoreValues) && !(b->pWaitSemaphoreValues)) || ((a->pWaitSemaphoreValues) && (b->pWaitSemaphoreValues)))) { onFail("a->pWaitSemaphoreValues (Error: Mismatch in optional field)"); };
     if (a->pWaitSemaphoreValues && b->pWaitSemaphoreValues)
@@ -3401,6 +3966,10 @@ void checkEqual_VkSemaphoreGetWin32HandleInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->semaphore) == (b->semaphore))) { onFail("a->semaphore (Error: Value not equal)"); };
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
 }
@@ -3414,6 +3983,10 @@ void checkEqual_VkImportSemaphoreFdInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->semaphore) == (b->semaphore))) { onFail("a->semaphore (Error: Value not equal)"); };
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
@@ -3427,6 +4000,10 @@ void checkEqual_VkSemaphoreGetFdInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->semaphore) == (b->semaphore))) { onFail("a->semaphore (Error: Value not equal)"); };
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
 }
@@ -3440,6 +4017,10 @@ void checkEqual_VkPhysicalDevicePushDescriptorPropertiesKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->maxPushDescriptors) == (b->maxPushDescriptors))) { onFail("a->maxPushDescriptors (Error: Value not equal)"); };
 }
 
@@ -3487,6 +4068,10 @@ void checkEqual_VkPresentRegionsKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->swapchainCount) == (b->swapchainCount))) { onFail("a->swapchainCount (Error: Value not equal)"); };
     if (!((!(a->pRegions) && !(b->pRegions)) || ((a->pRegions) && (b->pRegions)))) { onFail("a->pRegions (Error: Mismatch in optional field)"); };
     if (a->pRegions && b->pRegions)
@@ -3516,6 +4101,10 @@ void checkEqual_VkAttachmentDescription2KHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->format) == (b->format))) { onFail("a->format (Error: Value not equal)"); };
     if (!((a->samples) == (b->samples))) { onFail("a->samples (Error: Value not equal)"); };
@@ -3534,6 +4123,10 @@ void checkEqual_VkAttachmentReference2KHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->attachment) == (b->attachment))) { onFail("a->attachment (Error: Value not equal)"); };
     if (!((a->layout) == (b->layout))) { onFail("a->layout (Error: Value not equal)"); };
     if (!((a->aspectMask) == (b->aspectMask))) { onFail("a->aspectMask (Error: Value not equal)"); };
@@ -3546,6 +4139,10 @@ void checkEqual_VkSubpassDescription2KHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->pipelineBindPoint) == (b->pipelineBindPoint))) { onFail("a->pipelineBindPoint (Error: Value not equal)"); };
     if (!((a->viewMask) == (b->viewMask))) { onFail("a->viewMask (Error: Value not equal)"); };
@@ -3608,6 +4205,10 @@ void checkEqual_VkSubpassDependency2KHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->srcSubpass) == (b->srcSubpass))) { onFail("a->srcSubpass (Error: Value not equal)"); };
     if (!((a->dstSubpass) == (b->dstSubpass))) { onFail("a->dstSubpass (Error: Value not equal)"); };
     if (!((a->srcStageMask) == (b->srcStageMask))) { onFail("a->srcStageMask (Error: Value not equal)"); };
@@ -3625,6 +4226,10 @@ void checkEqual_VkRenderPassCreateInfo2KHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->attachmentCount) == (b->attachmentCount))) { onFail("a->attachmentCount (Error: Value not equal)"); };
     if ((a->pAttachments) && (b->pAttachments))
@@ -3674,6 +4279,10 @@ void checkEqual_VkSubpassBeginInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->contents) == (b->contents))) { onFail("a->contents (Error: Value not equal)"); };
 }
 
@@ -3684,6 +4293,10 @@ void checkEqual_VkSubpassEndInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
 }
 
 #endif
@@ -3695,6 +4308,10 @@ void checkEqual_VkSharedPresentSurfaceCapabilitiesKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->sharedPresentSupportedUsageFlags) == (b->sharedPresentSupportedUsageFlags))) { onFail("a->sharedPresentSupportedUsageFlags (Error: Value not equal)"); };
 }
 
@@ -3711,6 +4328,10 @@ void checkEqual_VkImportFenceWin32HandleInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->fence) == (b->fence))) { onFail("a->fence (Error: Value not equal)"); };
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
@@ -3725,6 +4346,10 @@ void checkEqual_VkExportFenceWin32HandleInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((!(a->pAttributes) && !(b->pAttributes)) || ((a->pAttributes) && (b->pAttributes)))) { onFail("a->pAttributes (Error: Mismatch in optional field)"); };
     if (a->pAttributes && b->pAttributes)
     {
@@ -3741,6 +4366,10 @@ void checkEqual_VkFenceGetWin32HandleInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->fence) == (b->fence))) { onFail("a->fence (Error: Value not equal)"); };
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
 }
@@ -3754,6 +4383,10 @@ void checkEqual_VkImportFenceFdInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->fence) == (b->fence))) { onFail("a->fence (Error: Value not equal)"); };
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
@@ -3767,6 +4400,10 @@ void checkEqual_VkFenceGetFdInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->fence) == (b->fence))) { onFail("a->fence (Error: Value not equal)"); };
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
 }
@@ -3782,6 +4419,10 @@ void checkEqual_VkPhysicalDeviceSurfaceInfo2KHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->surface) == (b->surface))) { onFail("a->surface (Error: Value not equal)"); };
 }
 
@@ -3792,6 +4433,10 @@ void checkEqual_VkSurfaceCapabilities2KHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkSurfaceCapabilitiesKHR(&a->surfaceCapabilities, &b->surfaceCapabilities, onFail);
 }
 
@@ -3802,6 +4447,10 @@ void checkEqual_VkSurfaceFormat2KHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkSurfaceFormatKHR(&a->surfaceFormat, &b->surfaceFormat, onFail);
 }
 
@@ -3816,6 +4465,10 @@ void checkEqual_VkDisplayProperties2KHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkDisplayPropertiesKHR(&a->displayProperties, &b->displayProperties, onFail);
 }
 
@@ -3826,6 +4479,10 @@ void checkEqual_VkDisplayPlaneProperties2KHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkDisplayPlanePropertiesKHR(&a->displayPlaneProperties, &b->displayPlaneProperties, onFail);
 }
 
@@ -3836,6 +4493,10 @@ void checkEqual_VkDisplayModeProperties2KHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkDisplayModePropertiesKHR(&a->displayModeProperties, &b->displayModeProperties, onFail);
 }
 
@@ -3846,6 +4507,10 @@ void checkEqual_VkDisplayPlaneInfo2KHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->mode) == (b->mode))) { onFail("a->mode (Error: Value not equal)"); };
     if (!((a->planeIndex) == (b->planeIndex))) { onFail("a->planeIndex (Error: Value not equal)"); };
 }
@@ -3857,6 +4522,10 @@ void checkEqual_VkDisplayPlaneCapabilities2KHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkDisplayPlaneCapabilitiesKHR(&a->capabilities, &b->capabilities, onFail);
 }
 
@@ -3877,6 +4546,10 @@ void checkEqual_VkImageFormatListCreateInfoKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->viewFormatCount) == (b->viewFormatCount))) { onFail("a->viewFormatCount (Error: Value not equal)"); };
     if (!((a->viewFormatCount) == (b->viewFormatCount))) { onFail("a->pViewFormats (Error: Lengths not equal)"); };
     if (!((memcmp(a->pViewFormats, b->pViewFormats, a->viewFormatCount * sizeof(const VkFormat)) == 0))) { onFail("a->pViewFormats (Error: Unequal dyn array)"); };
@@ -3899,6 +4572,10 @@ void checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->storageBuffer8BitAccess) == (b->storageBuffer8BitAccess))) { onFail("a->storageBuffer8BitAccess (Error: Value not equal)"); };
     if (!((a->uniformAndStorageBuffer8BitAccess) == (b->uniformAndStorageBuffer8BitAccess))) { onFail("a->uniformAndStorageBuffer8BitAccess (Error: Value not equal)"); };
     if (!((a->storagePushConstant8) == (b->storagePushConstant8))) { onFail("a->storagePushConstant8 (Error: Value not equal)"); };
@@ -3913,6 +4590,10 @@ void checkEqual_VkDebugReportCallbackCreateInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->pfnCallback) == (b->pfnCallback))) { onFail("a->pfnCallback (Error: Value not equal)"); };
     if (!((!(a->pUserData) && !(b->pUserData)) || ((a->pUserData) && (b->pUserData)))) { onFail("a->pUserData (Error: Mismatch in optional field)"); };
@@ -3933,6 +4614,10 @@ void checkEqual_VkPipelineRasterizationStateRasterizationOrderAMD(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->rasterizationOrder) == (b->rasterizationOrder))) { onFail("a->rasterizationOrder (Error: Value not equal)"); };
 }
 
@@ -3949,6 +4634,10 @@ void checkEqual_VkDebugMarkerObjectNameInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->objectType) == (b->objectType))) { onFail("a->objectType (Error: Value not equal)"); };
     if (!((a->object) == (b->object))) { onFail("a->object (Error: Value not equal)"); };
     if (!((!(a->pObjectName) && !(b->pObjectName)) || ((a->pObjectName) && (b->pObjectName)))) { onFail("a->pObjectName (Error: Mismatch in string pointer nullness)"); };
@@ -3965,6 +4654,10 @@ void checkEqual_VkDebugMarkerObjectTagInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->objectType) == (b->objectType))) { onFail("a->objectType (Error: Value not equal)"); };
     if (!((a->object) == (b->object))) { onFail("a->object (Error: Value not equal)"); };
     if (!((a->tagName) == (b->tagName))) { onFail("a->tagName (Error: Value not equal)"); };
@@ -3978,6 +4671,10 @@ void checkEqual_VkDebugMarkerMarkerInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((!(a->pMarkerName) && !(b->pMarkerName)) || ((a->pMarkerName) && (b->pMarkerName)))) { onFail("a->pMarkerName (Error: Mismatch in string pointer nullness)"); };
     if ((a->pMarkerName) && (b->pMarkerName))
     {
@@ -3997,6 +4694,10 @@ void checkEqual_VkDedicatedAllocationImageCreateInfoNV(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->dedicatedAllocation) == (b->dedicatedAllocation))) { onFail("a->dedicatedAllocation (Error: Value not equal)"); };
 }
 
@@ -4007,6 +4708,10 @@ void checkEqual_VkDedicatedAllocationBufferCreateInfoNV(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->dedicatedAllocation) == (b->dedicatedAllocation))) { onFail("a->dedicatedAllocation (Error: Value not equal)"); };
 }
 
@@ -4017,6 +4722,10 @@ void checkEqual_VkDedicatedAllocationMemoryAllocateInfoNV(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->image) == (b->image))) { onFail("a->image (Error: Value not equal)"); };
     if (!((a->buffer) == (b->buffer))) { onFail("a->buffer (Error: Value not equal)"); };
 }
@@ -4038,6 +4747,10 @@ void checkEqual_VkTextureLODGatherFormatPropertiesAMD(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->supportsTextureGatherLODBiasAMD) == (b->supportsTextureGatherLODBiasAMD))) { onFail("a->supportsTextureGatherLODBiasAMD (Error: Value not equal)"); };
 }
 
@@ -4095,6 +4808,10 @@ void checkEqual_VkExternalMemoryImageCreateInfoNV(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->handleTypes) == (b->handleTypes))) { onFail("a->handleTypes (Error: Value not equal)"); };
 }
 
@@ -4105,6 +4822,10 @@ void checkEqual_VkExportMemoryAllocateInfoNV(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->handleTypes) == (b->handleTypes))) { onFail("a->handleTypes (Error: Value not equal)"); };
 }
 
@@ -4117,6 +4838,10 @@ void checkEqual_VkImportMemoryWin32HandleInfoNV(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
     if (!((a->handle) == (b->handle))) { onFail("a->handle (Error: Value not equal)"); };
 }
@@ -4128,6 +4853,10 @@ void checkEqual_VkExportMemoryWin32HandleInfoNV(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((!(a->pAttributes) && !(b->pAttributes)) || ((a->pAttributes) && (b->pAttributes)))) { onFail("a->pAttributes (Error: Mismatch in optional field)"); };
     if (a->pAttributes && b->pAttributes)
     {
@@ -4145,6 +4874,10 @@ void checkEqual_VkWin32KeyedMutexAcquireReleaseInfoNV(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->acquireCount) == (b->acquireCount))) { onFail("a->acquireCount (Error: Value not equal)"); };
     if (!((a->acquireCount) == (b->acquireCount))) { onFail("a->pAcquireSyncs (Error: Lengths not equal)"); };
     if (!((memcmp(a->pAcquireSyncs, b->pAcquireSyncs, a->acquireCount * sizeof(const VkDeviceMemory)) == 0))) { onFail("a->pAcquireSyncs (Error: Unequal dyn array)"); };
@@ -4168,6 +4901,10 @@ void checkEqual_VkValidationFlagsEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->disabledValidationCheckCount) == (b->disabledValidationCheckCount))) { onFail("a->disabledValidationCheckCount (Error: Value not equal)"); };
     if (!((a->disabledValidationCheckCount) == (b->disabledValidationCheckCount))) { onFail("a->pDisabledValidationChecks (Error: Lengths not equal)"); };
     if (!((memcmp(a->pDisabledValidationChecks, b->pDisabledValidationChecks, a->disabledValidationCheckCount * sizeof(const VkValidationCheckEXT)) == 0))) { onFail("a->pDisabledValidationChecks (Error: Unequal dyn array)"); };
@@ -4182,6 +4919,10 @@ void checkEqual_VkViSurfaceCreateInfoNN(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((!(a->window) && !(b->window)) || ((a->window) && (b->window)))) { onFail("a->window (Error: Mismatch in optional field)"); };
 }
@@ -4199,6 +4940,10 @@ void checkEqual_VkConditionalRenderingBeginInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->buffer) == (b->buffer))) { onFail("a->buffer (Error: Value not equal)"); };
     if (!((a->offset) == (b->offset))) { onFail("a->offset (Error: Value not equal)"); };
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
@@ -4211,6 +4956,10 @@ void checkEqual_VkPhysicalDeviceConditionalRenderingFeaturesEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->conditionalRendering) == (b->conditionalRendering))) { onFail("a->conditionalRendering (Error: Value not equal)"); };
     if (!((a->inheritedConditionalRendering) == (b->inheritedConditionalRendering))) { onFail("a->inheritedConditionalRendering (Error: Value not equal)"); };
 }
@@ -4222,6 +4971,10 @@ void checkEqual_VkCommandBufferInheritanceConditionalRenderingInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->conditionalRenderingEnable) == (b->conditionalRenderingEnable))) { onFail("a->conditionalRenderingEnable (Error: Value not equal)"); };
 }
 
@@ -4234,6 +4987,10 @@ void checkEqual_VkDeviceGeneratedCommandsFeaturesNVX(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->computeBindingPointSupport) == (b->computeBindingPointSupport))) { onFail("a->computeBindingPointSupport (Error: Value not equal)"); };
 }
 
@@ -4244,6 +5001,10 @@ void checkEqual_VkDeviceGeneratedCommandsLimitsNVX(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->maxIndirectCommandsLayoutTokenCount) == (b->maxIndirectCommandsLayoutTokenCount))) { onFail("a->maxIndirectCommandsLayoutTokenCount (Error: Value not equal)"); };
     if (!((a->maxObjectEntryCounts) == (b->maxObjectEntryCounts))) { onFail("a->maxObjectEntryCounts (Error: Value not equal)"); };
     if (!((a->minSequenceCountBufferOffsetAlignment) == (b->minSequenceCountBufferOffsetAlignment))) { onFail("a->minSequenceCountBufferOffsetAlignment (Error: Value not equal)"); };
@@ -4279,6 +5040,10 @@ void checkEqual_VkIndirectCommandsLayoutCreateInfoNVX(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->pipelineBindPoint) == (b->pipelineBindPoint))) { onFail("a->pipelineBindPoint (Error: Value not equal)"); };
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->tokenCount) == (b->tokenCount))) { onFail("a->tokenCount (Error: Value not equal)"); };
@@ -4302,6 +5067,10 @@ void checkEqual_VkCmdProcessCommandsInfoNVX(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->objectTable) == (b->objectTable))) { onFail("a->objectTable (Error: Value not equal)"); };
     if (!((a->indirectCommandsLayout) == (b->indirectCommandsLayout))) { onFail("a->indirectCommandsLayout (Error: Value not equal)"); };
     if (!((a->indirectCommandsTokenCount) == (b->indirectCommandsTokenCount))) { onFail("a->indirectCommandsTokenCount (Error: Value not equal)"); };
@@ -4331,6 +5100,10 @@ void checkEqual_VkCmdReserveSpaceForCommandsInfoNVX(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->objectTable) == (b->objectTable))) { onFail("a->objectTable (Error: Value not equal)"); };
     if (!((a->indirectCommandsLayout) == (b->indirectCommandsLayout))) { onFail("a->indirectCommandsLayout (Error: Value not equal)"); };
     if (!((a->maxSequencesCount) == (b->maxSequencesCount))) { onFail("a->maxSequencesCount (Error: Value not equal)"); };
@@ -4343,6 +5116,10 @@ void checkEqual_VkObjectTableCreateInfoNVX(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->objectCount) == (b->objectCount))) { onFail("a->objectCount (Error: Value not equal)"); };
     if (!((a->objectCount) == (b->objectCount))) { onFail("a->pObjectEntryTypes (Error: Lengths not equal)"); };
     if (!((memcmp(a->pObjectEntryTypes, b->pObjectEntryTypes, a->objectCount * sizeof(const VkObjectEntryTypeNVX)) == 0))) { onFail("a->pObjectEntryTypes (Error: Unequal dyn array)"); };
@@ -4437,6 +5214,10 @@ void checkEqual_VkPipelineViewportWScalingStateCreateInfoNV(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->viewportWScalingEnable) == (b->viewportWScalingEnable))) { onFail("a->viewportWScalingEnable (Error: Value not equal)"); };
     if (!((a->viewportCount) == (b->viewportCount))) { onFail("a->viewportCount (Error: Value not equal)"); };
     if (!((!(a->pViewportWScalings) && !(b->pViewportWScalings)) || ((a->pViewportWScalings) && (b->pViewportWScalings)))) { onFail("a->pViewportWScalings (Error: Mismatch in optional field)"); };
@@ -4469,6 +5250,10 @@ void checkEqual_VkSurfaceCapabilities2EXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->minImageCount) == (b->minImageCount))) { onFail("a->minImageCount (Error: Value not equal)"); };
     if (!((a->maxImageCount) == (b->maxImageCount))) { onFail("a->maxImageCount (Error: Value not equal)"); };
     checkEqual_VkExtent2D(&a->currentExtent, &b->currentExtent, onFail);
@@ -4491,6 +5276,10 @@ void checkEqual_VkDisplayPowerInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->powerState) == (b->powerState))) { onFail("a->powerState (Error: Value not equal)"); };
 }
 
@@ -4501,6 +5290,10 @@ void checkEqual_VkDeviceEventInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->deviceEvent) == (b->deviceEvent))) { onFail("a->deviceEvent (Error: Value not equal)"); };
 }
 
@@ -4511,6 +5304,10 @@ void checkEqual_VkDisplayEventInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->displayEvent) == (b->displayEvent))) { onFail("a->displayEvent (Error: Value not equal)"); };
 }
 
@@ -4521,6 +5318,10 @@ void checkEqual_VkSwapchainCounterCreateInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->surfaceCounters) == (b->surfaceCounters))) { onFail("a->surfaceCounters (Error: Value not equal)"); };
 }
 
@@ -4562,6 +5363,10 @@ void checkEqual_VkPresentTimesInfoGOOGLE(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->swapchainCount) == (b->swapchainCount))) { onFail("a->swapchainCount (Error: Value not equal)"); };
     if (!((!(a->pTimes) && !(b->pTimes)) || ((a->pTimes) && (b->pTimes)))) { onFail("a->pTimes (Error: Mismatch in optional field)"); };
     if (a->pTimes && b->pTimes)
@@ -4595,6 +5400,10 @@ void checkEqual_VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->perViewPositionAllComponents) == (b->perViewPositionAllComponents))) { onFail("a->perViewPositionAllComponents (Error: Value not equal)"); };
 }
 
@@ -4618,6 +5427,10 @@ void checkEqual_VkPipelineViewportSwizzleStateCreateInfoNV(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->viewportCount) == (b->viewportCount))) { onFail("a->viewportCount (Error: Value not equal)"); };
     if (!((!(a->pViewportSwizzles) && !(b->pViewportSwizzles)) || ((a->pViewportSwizzles) && (b->pViewportSwizzles)))) { onFail("a->pViewportSwizzles (Error: Mismatch in optional field)"); };
@@ -4646,6 +5459,10 @@ void checkEqual_VkPhysicalDeviceDiscardRectanglePropertiesEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->maxDiscardRectangles) == (b->maxDiscardRectangles))) { onFail("a->maxDiscardRectangles (Error: Value not equal)"); };
 }
 
@@ -4656,6 +5473,10 @@ void checkEqual_VkPipelineDiscardRectangleStateCreateInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->discardRectangleMode) == (b->discardRectangleMode))) { onFail("a->discardRectangleMode (Error: Value not equal)"); };
     if (!((a->discardRectangleCount) == (b->discardRectangleCount))) { onFail("a->discardRectangleCount (Error: Value not equal)"); };
@@ -4685,6 +5506,10 @@ void checkEqual_VkPhysicalDeviceConservativeRasterizationPropertiesEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->primitiveOverestimationSize) == (b->primitiveOverestimationSize))) { onFail("a->primitiveOverestimationSize (Error: Value not equal)"); };
     if (!((a->maxExtraPrimitiveOverestimationSize) == (b->maxExtraPrimitiveOverestimationSize))) { onFail("a->maxExtraPrimitiveOverestimationSize (Error: Value not equal)"); };
     if (!((a->extraPrimitiveOverestimationSizeGranularity) == (b->extraPrimitiveOverestimationSizeGranularity))) { onFail("a->extraPrimitiveOverestimationSizeGranularity (Error: Value not equal)"); };
@@ -4703,6 +5528,10 @@ void checkEqual_VkPipelineRasterizationConservativeStateCreateInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->conservativeRasterizationMode) == (b->conservativeRasterizationMode))) { onFail("a->conservativeRasterizationMode (Error: Value not equal)"); };
     if (!((a->extraPrimitiveOverestimationSize) == (b->extraPrimitiveOverestimationSize))) { onFail("a->extraPrimitiveOverestimationSize (Error: Value not equal)"); };
@@ -4728,6 +5557,10 @@ void checkEqual_VkHdrMetadataEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkXYColorEXT(&a->displayPrimaryRed, &b->displayPrimaryRed, onFail);
     checkEqual_VkXYColorEXT(&a->displayPrimaryGreen, &b->displayPrimaryGreen, onFail);
     checkEqual_VkXYColorEXT(&a->displayPrimaryBlue, &b->displayPrimaryBlue, onFail);
@@ -4747,6 +5580,10 @@ void checkEqual_VkIOSSurfaceCreateInfoMVK(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((!(a->pView) && !(b->pView)) || ((a->pView) && (b->pView)))) { onFail("a->pView (Error: Mismatch in optional field)"); };
 }
@@ -4760,6 +5597,10 @@ void checkEqual_VkMacOSSurfaceCreateInfoMVK(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((!(a->pView) && !(b->pView)) || ((a->pView) && (b->pView)))) { onFail("a->pView (Error: Mismatch in optional field)"); };
 }
@@ -4777,6 +5618,10 @@ void checkEqual_VkDebugUtilsObjectNameInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->objectType) == (b->objectType))) { onFail("a->objectType (Error: Value not equal)"); };
     if (!((a->objectHandle) == (b->objectHandle))) { onFail("a->objectHandle (Error: Value not equal)"); };
     if (!((!(a->pObjectName) && !(b->pObjectName)) || ((a->pObjectName) && (b->pObjectName)))) { onFail("a->pObjectName (Error: Mismatch in string pointer nullness)"); };
@@ -4793,6 +5638,10 @@ void checkEqual_VkDebugUtilsObjectTagInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->objectType) == (b->objectType))) { onFail("a->objectType (Error: Value not equal)"); };
     if (!((a->objectHandle) == (b->objectHandle))) { onFail("a->objectHandle (Error: Value not equal)"); };
     if (!((a->tagName) == (b->tagName))) { onFail("a->tagName (Error: Value not equal)"); };
@@ -4806,6 +5655,10 @@ void checkEqual_VkDebugUtilsLabelEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((!(a->pLabelName) && !(b->pLabelName)) || ((a->pLabelName) && (b->pLabelName)))) { onFail("a->pLabelName (Error: Mismatch in string pointer nullness)"); };
     if ((a->pLabelName) && (b->pLabelName))
     {
@@ -4821,6 +5674,10 @@ void checkEqual_VkDebugUtilsMessengerCallbackDataEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((!(a->pMessageIdName) && !(b->pMessageIdName)) || ((a->pMessageIdName) && (b->pMessageIdName)))) { onFail("a->pMessageIdName (Error: Mismatch in string pointer nullness)"); };
     if ((a->pMessageIdName) && (b->pMessageIdName))
@@ -4890,6 +5747,10 @@ void checkEqual_VkDebugUtilsMessengerCreateInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->messageSeverity) == (b->messageSeverity))) { onFail("a->messageSeverity (Error: Value not equal)"); };
     if (!((a->messageType) == (b->messageType))) { onFail("a->messageType (Error: Value not equal)"); };
@@ -4906,6 +5767,10 @@ void checkEqual_VkAndroidHardwareBufferUsageANDROID(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->androidHardwareBufferUsage) == (b->androidHardwareBufferUsage))) { onFail("a->androidHardwareBufferUsage (Error: Value not equal)"); };
 }
 
@@ -4916,6 +5781,10 @@ void checkEqual_VkAndroidHardwareBufferPropertiesANDROID(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->allocationSize) == (b->allocationSize))) { onFail("a->allocationSize (Error: Value not equal)"); };
     if (!((a->memoryTypeBits) == (b->memoryTypeBits))) { onFail("a->memoryTypeBits (Error: Value not equal)"); };
 }
@@ -4927,6 +5796,10 @@ void checkEqual_VkAndroidHardwareBufferFormatPropertiesANDROID(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->format) == (b->format))) { onFail("a->format (Error: Value not equal)"); };
     if (!((a->externalFormat) == (b->externalFormat))) { onFail("a->externalFormat (Error: Value not equal)"); };
     if (!((a->formatFeatures) == (b->formatFeatures))) { onFail("a->formatFeatures (Error: Value not equal)"); };
@@ -4944,6 +5817,10 @@ void checkEqual_VkImportAndroidHardwareBufferInfoANDROID(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((memcmp(a->buffer, b->buffer, sizeof(AHardwareBuffer)) == 0))) { onFail("a->buffer (Error: Unequal dyn array)"); };
 }
 
@@ -4954,6 +5831,10 @@ void checkEqual_VkMemoryGetAndroidHardwareBufferInfoANDROID(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->memory) == (b->memory))) { onFail("a->memory (Error: Value not equal)"); };
 }
 
@@ -4964,6 +5845,10 @@ void checkEqual_VkExternalFormatANDROID(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->externalFormat) == (b->externalFormat))) { onFail("a->externalFormat (Error: Value not equal)"); };
 }
 
@@ -4976,6 +5861,10 @@ void checkEqual_VkSamplerReductionModeCreateInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->reductionMode) == (b->reductionMode))) { onFail("a->reductionMode (Error: Value not equal)"); };
 }
 
@@ -4986,6 +5875,10 @@ void checkEqual_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->filterMinmaxSingleComponentFormats) == (b->filterMinmaxSingleComponentFormats))) { onFail("a->filterMinmaxSingleComponentFormats (Error: Value not equal)"); };
     if (!((a->filterMinmaxImageComponentMapping) == (b->filterMinmaxImageComponentMapping))) { onFail("a->filterMinmaxImageComponentMapping (Error: Value not equal)"); };
 }
@@ -5016,6 +5909,10 @@ void checkEqual_VkSampleLocationsInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->sampleLocationsPerPixel) == (b->sampleLocationsPerPixel))) { onFail("a->sampleLocationsPerPixel (Error: Value not equal)"); };
     checkEqual_VkExtent2D(&a->sampleLocationGridSize, &b->sampleLocationGridSize, onFail);
     if (!((a->sampleLocationsCount) == (b->sampleLocationsCount))) { onFail("a->sampleLocationsCount (Error: Value not equal)"); };
@@ -5057,6 +5954,10 @@ void checkEqual_VkRenderPassSampleLocationsBeginInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->attachmentInitialSampleLocationsCount) == (b->attachmentInitialSampleLocationsCount))) { onFail("a->attachmentInitialSampleLocationsCount (Error: Value not equal)"); };
     if ((a->pAttachmentInitialSampleLocations) && (b->pAttachmentInitialSampleLocations))
     {
@@ -5090,6 +5991,10 @@ void checkEqual_VkPipelineSampleLocationsStateCreateInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->sampleLocationsEnable) == (b->sampleLocationsEnable))) { onFail("a->sampleLocationsEnable (Error: Value not equal)"); };
     checkEqual_VkSampleLocationsInfoEXT(&a->sampleLocationsInfo, &b->sampleLocationsInfo, onFail);
 }
@@ -5101,6 +6006,10 @@ void checkEqual_VkPhysicalDeviceSampleLocationsPropertiesEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->sampleLocationSampleCounts) == (b->sampleLocationSampleCounts))) { onFail("a->sampleLocationSampleCounts (Error: Value not equal)"); };
     checkEqual_VkExtent2D(&a->maxSampleLocationGridSize, &b->maxSampleLocationGridSize, onFail);
     if (!((memcmp(a->sampleLocationCoordinateRange, b->sampleLocationCoordinateRange, 2 * sizeof(float)) == 0))) { onFail("a->sampleLocationCoordinateRange (Error: Unequal static array)"); };
@@ -5115,6 +6024,10 @@ void checkEqual_VkMultisamplePropertiesEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     checkEqual_VkExtent2D(&a->maxSampleLocationGridSize, &b->maxSampleLocationGridSize, onFail);
 }
 
@@ -5127,6 +6040,10 @@ void checkEqual_VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->advancedBlendCoherentOperations) == (b->advancedBlendCoherentOperations))) { onFail("a->advancedBlendCoherentOperations (Error: Value not equal)"); };
 }
 
@@ -5137,6 +6054,10 @@ void checkEqual_VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->advancedBlendMaxColorAttachments) == (b->advancedBlendMaxColorAttachments))) { onFail("a->advancedBlendMaxColorAttachments (Error: Value not equal)"); };
     if (!((a->advancedBlendIndependentBlend) == (b->advancedBlendIndependentBlend))) { onFail("a->advancedBlendIndependentBlend (Error: Value not equal)"); };
     if (!((a->advancedBlendNonPremultipliedSrcColor) == (b->advancedBlendNonPremultipliedSrcColor))) { onFail("a->advancedBlendNonPremultipliedSrcColor (Error: Value not equal)"); };
@@ -5152,6 +6073,10 @@ void checkEqual_VkPipelineColorBlendAdvancedStateCreateInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->srcPremultiplied) == (b->srcPremultiplied))) { onFail("a->srcPremultiplied (Error: Value not equal)"); };
     if (!((a->dstPremultiplied) == (b->dstPremultiplied))) { onFail("a->dstPremultiplied (Error: Value not equal)"); };
     if (!((a->blendOverlap) == (b->blendOverlap))) { onFail("a->blendOverlap (Error: Value not equal)"); };
@@ -5166,6 +6091,10 @@ void checkEqual_VkPipelineCoverageToColorStateCreateInfoNV(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->coverageToColorEnable) == (b->coverageToColorEnable))) { onFail("a->coverageToColorEnable (Error: Value not equal)"); };
     if (!((a->coverageToColorLocation) == (b->coverageToColorLocation))) { onFail("a->coverageToColorLocation (Error: Value not equal)"); };
@@ -5180,6 +6109,10 @@ void checkEqual_VkPipelineCoverageModulationStateCreateInfoNV(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->coverageModulationMode) == (b->coverageModulationMode))) { onFail("a->coverageModulationMode (Error: Value not equal)"); };
     if (!((a->coverageModulationTableEnable) == (b->coverageModulationTableEnable))) { onFail("a->coverageModulationTableEnable (Error: Value not equal)"); };
@@ -5205,6 +6138,10 @@ void checkEqual_VkValidationCacheCreateInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
     if (!((a->initialDataSize) == (b->initialDataSize))) { onFail("a->initialDataSize (Error: Value not equal)"); };
 }
@@ -5216,6 +6153,10 @@ void checkEqual_VkShaderModuleValidationCacheCreateInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->validationCache) == (b->validationCache))) { onFail("a->validationCache (Error: Value not equal)"); };
 }
 
@@ -5228,6 +6169,10 @@ void checkEqual_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->bindingCount) == (b->bindingCount))) { onFail("a->bindingCount (Error: Value not equal)"); };
     if (!((a->bindingCount) == (b->bindingCount))) { onFail("a->pBindingFlags (Error: Lengths not equal)"); };
     if (!((memcmp(a->pBindingFlags, b->pBindingFlags, a->bindingCount * sizeof(const VkDescriptorBindingFlagsEXT)) == 0))) { onFail("a->pBindingFlags (Error: Unequal dyn array)"); };
@@ -5240,6 +6185,10 @@ void checkEqual_VkPhysicalDeviceDescriptorIndexingFeaturesEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->shaderInputAttachmentArrayDynamicIndexing) == (b->shaderInputAttachmentArrayDynamicIndexing))) { onFail("a->shaderInputAttachmentArrayDynamicIndexing (Error: Value not equal)"); };
     if (!((a->shaderUniformTexelBufferArrayDynamicIndexing) == (b->shaderUniformTexelBufferArrayDynamicIndexing))) { onFail("a->shaderUniformTexelBufferArrayDynamicIndexing (Error: Value not equal)"); };
     if (!((a->shaderStorageTexelBufferArrayDynamicIndexing) == (b->shaderStorageTexelBufferArrayDynamicIndexing))) { onFail("a->shaderStorageTexelBufferArrayDynamicIndexing (Error: Value not equal)"); };
@@ -5269,6 +6218,10 @@ void checkEqual_VkPhysicalDeviceDescriptorIndexingPropertiesEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->maxUpdateAfterBindDescriptorsInAllPools) == (b->maxUpdateAfterBindDescriptorsInAllPools))) { onFail("a->maxUpdateAfterBindDescriptorsInAllPools (Error: Value not equal)"); };
     if (!((a->shaderUniformBufferArrayNonUniformIndexingNative) == (b->shaderUniformBufferArrayNonUniformIndexingNative))) { onFail("a->shaderUniformBufferArrayNonUniformIndexingNative (Error: Value not equal)"); };
     if (!((a->shaderSampledImageArrayNonUniformIndexingNative) == (b->shaderSampledImageArrayNonUniformIndexingNative))) { onFail("a->shaderSampledImageArrayNonUniformIndexingNative (Error: Value not equal)"); };
@@ -5301,6 +6254,10 @@ void checkEqual_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->descriptorSetCount) == (b->descriptorSetCount))) { onFail("a->descriptorSetCount (Error: Value not equal)"); };
     if (!((a->descriptorSetCount) == (b->descriptorSetCount))) { onFail("a->pDescriptorCounts (Error: Lengths not equal)"); };
     if (!((memcmp(a->pDescriptorCounts, b->pDescriptorCounts, a->descriptorSetCount * sizeof(const uint32_t)) == 0))) { onFail("a->pDescriptorCounts (Error: Unequal dyn array)"); };
@@ -5313,6 +6270,10 @@ void checkEqual_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->maxVariableDescriptorCount) == (b->maxVariableDescriptorCount))) { onFail("a->maxVariableDescriptorCount (Error: Value not equal)"); };
 }
 
@@ -5327,6 +6288,10 @@ void checkEqual_VkDeviceQueueGlobalPriorityCreateInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->globalPriority) == (b->globalPriority))) { onFail("a->globalPriority (Error: Value not equal)"); };
 }
 
@@ -5339,6 +6304,10 @@ void checkEqual_VkImportMemoryHostPointerInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->handleType) == (b->handleType))) { onFail("a->handleType (Error: Value not equal)"); };
     if (!((!(a->pHostPointer) && !(b->pHostPointer)) || ((a->pHostPointer) && (b->pHostPointer)))) { onFail("a->pHostPointer (Error: Mismatch in optional field)"); };
 }
@@ -5350,6 +6319,10 @@ void checkEqual_VkMemoryHostPointerPropertiesEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->memoryTypeBits) == (b->memoryTypeBits))) { onFail("a->memoryTypeBits (Error: Value not equal)"); };
 }
 
@@ -5360,6 +6333,10 @@ void checkEqual_VkPhysicalDeviceExternalMemoryHostPropertiesEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->minImportedHostPointerAlignment) == (b->minImportedHostPointerAlignment))) { onFail("a->minImportedHostPointerAlignment (Error: Value not equal)"); };
 }
 
@@ -5374,6 +6351,10 @@ void checkEqual_VkPhysicalDeviceShaderCorePropertiesAMD(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->shaderEngineCount) == (b->shaderEngineCount))) { onFail("a->shaderEngineCount (Error: Value not equal)"); };
     if (!((a->shaderArraysPerEngineCount) == (b->shaderArraysPerEngineCount))) { onFail("a->shaderArraysPerEngineCount (Error: Value not equal)"); };
     if (!((a->computeUnitsPerShaderArray) == (b->computeUnitsPerShaderArray))) { onFail("a->computeUnitsPerShaderArray (Error: Value not equal)"); };
@@ -5399,6 +6380,10 @@ void checkEqual_VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->maxVertexAttribDivisor) == (b->maxVertexAttribDivisor))) { onFail("a->maxVertexAttribDivisor (Error: Value not equal)"); };
 }
 
@@ -5418,6 +6403,10 @@ void checkEqual_VkPipelineVertexInputDivisorStateCreateInfoEXT(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->vertexBindingDivisorCount) == (b->vertexBindingDivisorCount))) { onFail("a->vertexBindingDivisorCount (Error: Value not equal)"); };
     if ((a->pVertexBindingDivisors) && (b->pVertexBindingDivisors))
     {
@@ -5443,6 +6432,10 @@ void checkEqual_VkQueueFamilyCheckpointPropertiesNV(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->checkpointExecutionStageMask) == (b->checkpointExecutionStageMask))) { onFail("a->checkpointExecutionStageMask (Error: Value not equal)"); };
 }
 
@@ -5453,10 +6446,669 @@ void checkEqual_VkCheckpointDataNV(
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
     if (!((!(a->pNext) && !(b->pNext)) || ((a->pNext) && (b->pNext)))) { onFail("a->pNext (Error: Mismatch in optional field)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
     if (!((a->stage) == (b->stage))) { onFail("a->stage (Error: Value not equal)"); };
     if (!((!(a->pCheckpointMarker) && !(b->pCheckpointMarker)) || ((a->pCheckpointMarker) && (b->pCheckpointMarker)))) { onFail("a->pCheckpointMarker (Error: Mismatch in optional field)"); };
 }
 
 #endif
+void checkEqual_extension_struct(
+    const void* structExtension,
+    void* structExtension_out,
+    OnFailCompareFunc onFail)
+{
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkPhysicalDeviceSubgroupProperties*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES)
+    {
+        checkEqual_VkPhysicalDeviceSubgroupProperties(reinterpret_cast<const VkPhysicalDeviceSubgroupProperties*>(structExtension), reinterpret_cast<VkPhysicalDeviceSubgroupProperties*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkPhysicalDevice16BitStorageFeatures*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES)
+    {
+        checkEqual_VkPhysicalDevice16BitStorageFeatures(reinterpret_cast<const VkPhysicalDevice16BitStorageFeatures*>(structExtension), reinterpret_cast<VkPhysicalDevice16BitStorageFeatures*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkMemoryDedicatedRequirements*>(structExtension)->sType == VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS)
+    {
+        checkEqual_VkMemoryDedicatedRequirements(reinterpret_cast<const VkMemoryDedicatedRequirements*>(structExtension), reinterpret_cast<VkMemoryDedicatedRequirements*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkMemoryDedicatedAllocateInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO)
+    {
+        checkEqual_VkMemoryDedicatedAllocateInfo(reinterpret_cast<const VkMemoryDedicatedAllocateInfo*>(structExtension), reinterpret_cast<VkMemoryDedicatedAllocateInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkMemoryAllocateFlagsInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO)
+    {
+        checkEqual_VkMemoryAllocateFlagsInfo(reinterpret_cast<const VkMemoryAllocateFlagsInfo*>(structExtension), reinterpret_cast<VkMemoryAllocateFlagsInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkDeviceGroupRenderPassBeginInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_DEVICE_GROUP_RENDER_PASS_BEGIN_INFO)
+    {
+        checkEqual_VkDeviceGroupRenderPassBeginInfo(reinterpret_cast<const VkDeviceGroupRenderPassBeginInfo*>(structExtension), reinterpret_cast<VkDeviceGroupRenderPassBeginInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkDeviceGroupCommandBufferBeginInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_DEVICE_GROUP_COMMAND_BUFFER_BEGIN_INFO)
+    {
+        checkEqual_VkDeviceGroupCommandBufferBeginInfo(reinterpret_cast<const VkDeviceGroupCommandBufferBeginInfo*>(structExtension), reinterpret_cast<VkDeviceGroupCommandBufferBeginInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkDeviceGroupSubmitInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_DEVICE_GROUP_SUBMIT_INFO)
+    {
+        checkEqual_VkDeviceGroupSubmitInfo(reinterpret_cast<const VkDeviceGroupSubmitInfo*>(structExtension), reinterpret_cast<VkDeviceGroupSubmitInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkDeviceGroupBindSparseInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_DEVICE_GROUP_BIND_SPARSE_INFO)
+    {
+        checkEqual_VkDeviceGroupBindSparseInfo(reinterpret_cast<const VkDeviceGroupBindSparseInfo*>(structExtension), reinterpret_cast<VkDeviceGroupBindSparseInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkBindBufferMemoryDeviceGroupInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_BIND_BUFFER_MEMORY_DEVICE_GROUP_INFO)
+    {
+        checkEqual_VkBindBufferMemoryDeviceGroupInfo(reinterpret_cast<const VkBindBufferMemoryDeviceGroupInfo*>(structExtension), reinterpret_cast<VkBindBufferMemoryDeviceGroupInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkBindImageMemoryDeviceGroupInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_BIND_IMAGE_MEMORY_DEVICE_GROUP_INFO)
+    {
+        checkEqual_VkBindImageMemoryDeviceGroupInfo(reinterpret_cast<const VkBindImageMemoryDeviceGroupInfo*>(structExtension), reinterpret_cast<VkBindImageMemoryDeviceGroupInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkDeviceGroupDeviceCreateInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_DEVICE_GROUP_DEVICE_CREATE_INFO)
+    {
+        checkEqual_VkDeviceGroupDeviceCreateInfo(reinterpret_cast<const VkDeviceGroupDeviceCreateInfo*>(structExtension), reinterpret_cast<VkDeviceGroupDeviceCreateInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkPhysicalDeviceFeatures2*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2)
+    {
+        checkEqual_VkPhysicalDeviceFeatures2(reinterpret_cast<const VkPhysicalDeviceFeatures2*>(structExtension), reinterpret_cast<VkPhysicalDeviceFeatures2*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkPhysicalDevicePointClippingProperties*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_POINT_CLIPPING_PROPERTIES)
+    {
+        checkEqual_VkPhysicalDevicePointClippingProperties(reinterpret_cast<const VkPhysicalDevicePointClippingProperties*>(structExtension), reinterpret_cast<VkPhysicalDevicePointClippingProperties*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkRenderPassInputAttachmentAspectCreateInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_RENDER_PASS_INPUT_ATTACHMENT_ASPECT_CREATE_INFO)
+    {
+        checkEqual_VkRenderPassInputAttachmentAspectCreateInfo(reinterpret_cast<const VkRenderPassInputAttachmentAspectCreateInfo*>(structExtension), reinterpret_cast<VkRenderPassInputAttachmentAspectCreateInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkImageViewUsageCreateInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_IMAGE_VIEW_USAGE_CREATE_INFO)
+    {
+        checkEqual_VkImageViewUsageCreateInfo(reinterpret_cast<const VkImageViewUsageCreateInfo*>(structExtension), reinterpret_cast<VkImageViewUsageCreateInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkPipelineTessellationDomainOriginStateCreateInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_DOMAIN_ORIGIN_STATE_CREATE_INFO)
+    {
+        checkEqual_VkPipelineTessellationDomainOriginStateCreateInfo(reinterpret_cast<const VkPipelineTessellationDomainOriginStateCreateInfo*>(structExtension), reinterpret_cast<VkPipelineTessellationDomainOriginStateCreateInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkRenderPassMultiviewCreateInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_RENDER_PASS_MULTIVIEW_CREATE_INFO)
+    {
+        checkEqual_VkRenderPassMultiviewCreateInfo(reinterpret_cast<const VkRenderPassMultiviewCreateInfo*>(structExtension), reinterpret_cast<VkRenderPassMultiviewCreateInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkPhysicalDeviceMultiviewFeatures*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES)
+    {
+        checkEqual_VkPhysicalDeviceMultiviewFeatures(reinterpret_cast<const VkPhysicalDeviceMultiviewFeatures*>(structExtension), reinterpret_cast<VkPhysicalDeviceMultiviewFeatures*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkPhysicalDeviceMultiviewProperties*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_PROPERTIES)
+    {
+        checkEqual_VkPhysicalDeviceMultiviewProperties(reinterpret_cast<const VkPhysicalDeviceMultiviewProperties*>(structExtension), reinterpret_cast<VkPhysicalDeviceMultiviewProperties*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkPhysicalDeviceVariablePointerFeatures*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTER_FEATURES)
+    {
+        checkEqual_VkPhysicalDeviceVariablePointerFeatures(reinterpret_cast<const VkPhysicalDeviceVariablePointerFeatures*>(structExtension), reinterpret_cast<VkPhysicalDeviceVariablePointerFeatures*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkPhysicalDeviceProtectedMemoryFeatures*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_FEATURES)
+    {
+        checkEqual_VkPhysicalDeviceProtectedMemoryFeatures(reinterpret_cast<const VkPhysicalDeviceProtectedMemoryFeatures*>(structExtension), reinterpret_cast<VkPhysicalDeviceProtectedMemoryFeatures*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkPhysicalDeviceProtectedMemoryProperties*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_PROPERTIES)
+    {
+        checkEqual_VkPhysicalDeviceProtectedMemoryProperties(reinterpret_cast<const VkPhysicalDeviceProtectedMemoryProperties*>(structExtension), reinterpret_cast<VkPhysicalDeviceProtectedMemoryProperties*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkProtectedSubmitInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_PROTECTED_SUBMIT_INFO)
+    {
+        checkEqual_VkProtectedSubmitInfo(reinterpret_cast<const VkProtectedSubmitInfo*>(structExtension), reinterpret_cast<VkProtectedSubmitInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkSamplerYcbcrConversionInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_INFO)
+    {
+        checkEqual_VkSamplerYcbcrConversionInfo(reinterpret_cast<const VkSamplerYcbcrConversionInfo*>(structExtension), reinterpret_cast<VkSamplerYcbcrConversionInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkBindImagePlaneMemoryInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_BIND_IMAGE_PLANE_MEMORY_INFO)
+    {
+        checkEqual_VkBindImagePlaneMemoryInfo(reinterpret_cast<const VkBindImagePlaneMemoryInfo*>(structExtension), reinterpret_cast<VkBindImagePlaneMemoryInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkImagePlaneMemoryRequirementsInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_IMAGE_PLANE_MEMORY_REQUIREMENTS_INFO)
+    {
+        checkEqual_VkImagePlaneMemoryRequirementsInfo(reinterpret_cast<const VkImagePlaneMemoryRequirementsInfo*>(structExtension), reinterpret_cast<VkImagePlaneMemoryRequirementsInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkPhysicalDeviceSamplerYcbcrConversionFeatures*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_YCBCR_CONVERSION_FEATURES)
+    {
+        checkEqual_VkPhysicalDeviceSamplerYcbcrConversionFeatures(reinterpret_cast<const VkPhysicalDeviceSamplerYcbcrConversionFeatures*>(structExtension), reinterpret_cast<VkPhysicalDeviceSamplerYcbcrConversionFeatures*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkSamplerYcbcrConversionImageFormatProperties*>(structExtension)->sType == VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_IMAGE_FORMAT_PROPERTIES)
+    {
+        checkEqual_VkSamplerYcbcrConversionImageFormatProperties(reinterpret_cast<const VkSamplerYcbcrConversionImageFormatProperties*>(structExtension), reinterpret_cast<VkSamplerYcbcrConversionImageFormatProperties*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkPhysicalDeviceExternalImageFormatInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO)
+    {
+        checkEqual_VkPhysicalDeviceExternalImageFormatInfo(reinterpret_cast<const VkPhysicalDeviceExternalImageFormatInfo*>(structExtension), reinterpret_cast<VkPhysicalDeviceExternalImageFormatInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkExternalImageFormatProperties*>(structExtension)->sType == VK_STRUCTURE_TYPE_EXTERNAL_IMAGE_FORMAT_PROPERTIES)
+    {
+        checkEqual_VkExternalImageFormatProperties(reinterpret_cast<const VkExternalImageFormatProperties*>(structExtension), reinterpret_cast<VkExternalImageFormatProperties*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkPhysicalDeviceIDProperties*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES)
+    {
+        checkEqual_VkPhysicalDeviceIDProperties(reinterpret_cast<const VkPhysicalDeviceIDProperties*>(structExtension), reinterpret_cast<VkPhysicalDeviceIDProperties*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkExternalMemoryImageCreateInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO)
+    {
+        checkEqual_VkExternalMemoryImageCreateInfo(reinterpret_cast<const VkExternalMemoryImageCreateInfo*>(structExtension), reinterpret_cast<VkExternalMemoryImageCreateInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkExternalMemoryBufferCreateInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO)
+    {
+        checkEqual_VkExternalMemoryBufferCreateInfo(reinterpret_cast<const VkExternalMemoryBufferCreateInfo*>(structExtension), reinterpret_cast<VkExternalMemoryBufferCreateInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkExportMemoryAllocateInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO)
+    {
+        checkEqual_VkExportMemoryAllocateInfo(reinterpret_cast<const VkExportMemoryAllocateInfo*>(structExtension), reinterpret_cast<VkExportMemoryAllocateInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkExportFenceCreateInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_EXPORT_FENCE_CREATE_INFO)
+    {
+        checkEqual_VkExportFenceCreateInfo(reinterpret_cast<const VkExportFenceCreateInfo*>(structExtension), reinterpret_cast<VkExportFenceCreateInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkExportSemaphoreCreateInfo*>(structExtension)->sType == VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO)
+    {
+        checkEqual_VkExportSemaphoreCreateInfo(reinterpret_cast<const VkExportSemaphoreCreateInfo*>(structExtension), reinterpret_cast<VkExportSemaphoreCreateInfo*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkPhysicalDeviceMaintenance3Properties*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_3_PROPERTIES)
+    {
+        checkEqual_VkPhysicalDeviceMaintenance3Properties(reinterpret_cast<const VkPhysicalDeviceMaintenance3Properties*>(structExtension), reinterpret_cast<VkPhysicalDeviceMaintenance3Properties*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_VERSION_1_1
+    if (reinterpret_cast<const VkPhysicalDeviceShaderDrawParameterFeatures*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETER_FEATURES)
+    {
+        checkEqual_VkPhysicalDeviceShaderDrawParameterFeatures(reinterpret_cast<const VkPhysicalDeviceShaderDrawParameterFeatures*>(structExtension), reinterpret_cast<VkPhysicalDeviceShaderDrawParameterFeatures*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_swapchain
+    if (reinterpret_cast<const VkImageSwapchainCreateInfoKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_IMAGE_SWAPCHAIN_CREATE_INFO_KHR)
+    {
+        checkEqual_VkImageSwapchainCreateInfoKHR(reinterpret_cast<const VkImageSwapchainCreateInfoKHR*>(structExtension), reinterpret_cast<VkImageSwapchainCreateInfoKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_swapchain
+    if (reinterpret_cast<const VkBindImageMemorySwapchainInfoKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_BIND_IMAGE_MEMORY_SWAPCHAIN_INFO_KHR)
+    {
+        checkEqual_VkBindImageMemorySwapchainInfoKHR(reinterpret_cast<const VkBindImageMemorySwapchainInfoKHR*>(structExtension), reinterpret_cast<VkBindImageMemorySwapchainInfoKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_swapchain
+    if (reinterpret_cast<const VkDeviceGroupPresentInfoKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_DEVICE_GROUP_PRESENT_INFO_KHR)
+    {
+        checkEqual_VkDeviceGroupPresentInfoKHR(reinterpret_cast<const VkDeviceGroupPresentInfoKHR*>(structExtension), reinterpret_cast<VkDeviceGroupPresentInfoKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_swapchain
+    if (reinterpret_cast<const VkDeviceGroupSwapchainCreateInfoKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_DEVICE_GROUP_SWAPCHAIN_CREATE_INFO_KHR)
+    {
+        checkEqual_VkDeviceGroupSwapchainCreateInfoKHR(reinterpret_cast<const VkDeviceGroupSwapchainCreateInfoKHR*>(structExtension), reinterpret_cast<VkDeviceGroupSwapchainCreateInfoKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_display_swapchain
+    if (reinterpret_cast<const VkDisplayPresentInfoKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_DISPLAY_PRESENT_INFO_KHR)
+    {
+        checkEqual_VkDisplayPresentInfoKHR(reinterpret_cast<const VkDisplayPresentInfoKHR*>(structExtension), reinterpret_cast<VkDisplayPresentInfoKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_external_memory_win32
+    if (reinterpret_cast<const VkImportMemoryWin32HandleInfoKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR)
+    {
+        checkEqual_VkImportMemoryWin32HandleInfoKHR(reinterpret_cast<const VkImportMemoryWin32HandleInfoKHR*>(structExtension), reinterpret_cast<VkImportMemoryWin32HandleInfoKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_external_memory_win32
+    if (reinterpret_cast<const VkExportMemoryWin32HandleInfoKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_EXPORT_MEMORY_WIN32_HANDLE_INFO_KHR)
+    {
+        checkEqual_VkExportMemoryWin32HandleInfoKHR(reinterpret_cast<const VkExportMemoryWin32HandleInfoKHR*>(structExtension), reinterpret_cast<VkExportMemoryWin32HandleInfoKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_external_memory_fd
+    if (reinterpret_cast<const VkImportMemoryFdInfoKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR)
+    {
+        checkEqual_VkImportMemoryFdInfoKHR(reinterpret_cast<const VkImportMemoryFdInfoKHR*>(structExtension), reinterpret_cast<VkImportMemoryFdInfoKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_win32_keyed_mutex
+    if (reinterpret_cast<const VkWin32KeyedMutexAcquireReleaseInfoKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_WIN32_KEYED_MUTEX_ACQUIRE_RELEASE_INFO_KHR)
+    {
+        checkEqual_VkWin32KeyedMutexAcquireReleaseInfoKHR(reinterpret_cast<const VkWin32KeyedMutexAcquireReleaseInfoKHR*>(structExtension), reinterpret_cast<VkWin32KeyedMutexAcquireReleaseInfoKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_external_semaphore_win32
+    if (reinterpret_cast<const VkExportSemaphoreWin32HandleInfoKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR)
+    {
+        checkEqual_VkExportSemaphoreWin32HandleInfoKHR(reinterpret_cast<const VkExportSemaphoreWin32HandleInfoKHR*>(structExtension), reinterpret_cast<VkExportSemaphoreWin32HandleInfoKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_external_semaphore_win32
+    if (reinterpret_cast<const VkD3D12FenceSubmitInfoKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_D3D12_FENCE_SUBMIT_INFO_KHR)
+    {
+        checkEqual_VkD3D12FenceSubmitInfoKHR(reinterpret_cast<const VkD3D12FenceSubmitInfoKHR*>(structExtension), reinterpret_cast<VkD3D12FenceSubmitInfoKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_push_descriptor
+    if (reinterpret_cast<const VkPhysicalDevicePushDescriptorPropertiesKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PUSH_DESCRIPTOR_PROPERTIES_KHR)
+    {
+        checkEqual_VkPhysicalDevicePushDescriptorPropertiesKHR(reinterpret_cast<const VkPhysicalDevicePushDescriptorPropertiesKHR*>(structExtension), reinterpret_cast<VkPhysicalDevicePushDescriptorPropertiesKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_incremental_present
+    if (reinterpret_cast<const VkPresentRegionsKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_PRESENT_REGIONS_KHR)
+    {
+        checkEqual_VkPresentRegionsKHR(reinterpret_cast<const VkPresentRegionsKHR*>(structExtension), reinterpret_cast<VkPresentRegionsKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_shared_presentable_image
+    if (reinterpret_cast<const VkSharedPresentSurfaceCapabilitiesKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_SHARED_PRESENT_SURFACE_CAPABILITIES_KHR)
+    {
+        checkEqual_VkSharedPresentSurfaceCapabilitiesKHR(reinterpret_cast<const VkSharedPresentSurfaceCapabilitiesKHR*>(structExtension), reinterpret_cast<VkSharedPresentSurfaceCapabilitiesKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_external_fence_win32
+    if (reinterpret_cast<const VkExportFenceWin32HandleInfoKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_EXPORT_FENCE_WIN32_HANDLE_INFO_KHR)
+    {
+        checkEqual_VkExportFenceWin32HandleInfoKHR(reinterpret_cast<const VkExportFenceWin32HandleInfoKHR*>(structExtension), reinterpret_cast<VkExportFenceWin32HandleInfoKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_image_format_list
+    if (reinterpret_cast<const VkImageFormatListCreateInfoKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO_KHR)
+    {
+        checkEqual_VkImageFormatListCreateInfoKHR(reinterpret_cast<const VkImageFormatListCreateInfoKHR*>(structExtension), reinterpret_cast<VkImageFormatListCreateInfoKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_KHR_8bit_storage
+    if (reinterpret_cast<const VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR)
+    {
+        checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR(reinterpret_cast<const VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension), reinterpret_cast<VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_debug_report
+    if (reinterpret_cast<const VkDebugReportCallbackCreateInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT)
+    {
+        checkEqual_VkDebugReportCallbackCreateInfoEXT(reinterpret_cast<const VkDebugReportCallbackCreateInfoEXT*>(structExtension), reinterpret_cast<VkDebugReportCallbackCreateInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_AMD_rasterization_order
+    if (reinterpret_cast<const VkPipelineRasterizationStateRasterizationOrderAMD*>(structExtension)->sType == VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_RASTERIZATION_ORDER_AMD)
+    {
+        checkEqual_VkPipelineRasterizationStateRasterizationOrderAMD(reinterpret_cast<const VkPipelineRasterizationStateRasterizationOrderAMD*>(structExtension), reinterpret_cast<VkPipelineRasterizationStateRasterizationOrderAMD*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_NV_dedicated_allocation
+    if (reinterpret_cast<const VkDedicatedAllocationImageCreateInfoNV*>(structExtension)->sType == VK_STRUCTURE_TYPE_DEDICATED_ALLOCATION_IMAGE_CREATE_INFO_NV)
+    {
+        checkEqual_VkDedicatedAllocationImageCreateInfoNV(reinterpret_cast<const VkDedicatedAllocationImageCreateInfoNV*>(structExtension), reinterpret_cast<VkDedicatedAllocationImageCreateInfoNV*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_NV_dedicated_allocation
+    if (reinterpret_cast<const VkDedicatedAllocationBufferCreateInfoNV*>(structExtension)->sType == VK_STRUCTURE_TYPE_DEDICATED_ALLOCATION_BUFFER_CREATE_INFO_NV)
+    {
+        checkEqual_VkDedicatedAllocationBufferCreateInfoNV(reinterpret_cast<const VkDedicatedAllocationBufferCreateInfoNV*>(structExtension), reinterpret_cast<VkDedicatedAllocationBufferCreateInfoNV*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_NV_dedicated_allocation
+    if (reinterpret_cast<const VkDedicatedAllocationMemoryAllocateInfoNV*>(structExtension)->sType == VK_STRUCTURE_TYPE_DEDICATED_ALLOCATION_MEMORY_ALLOCATE_INFO_NV)
+    {
+        checkEqual_VkDedicatedAllocationMemoryAllocateInfoNV(reinterpret_cast<const VkDedicatedAllocationMemoryAllocateInfoNV*>(structExtension), reinterpret_cast<VkDedicatedAllocationMemoryAllocateInfoNV*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_AMD_texture_gather_bias_lod
+    if (reinterpret_cast<const VkTextureLODGatherFormatPropertiesAMD*>(structExtension)->sType == VK_STRUCTURE_TYPE_TEXTURE_LOD_GATHER_FORMAT_PROPERTIES_AMD)
+    {
+        checkEqual_VkTextureLODGatherFormatPropertiesAMD(reinterpret_cast<const VkTextureLODGatherFormatPropertiesAMD*>(structExtension), reinterpret_cast<VkTextureLODGatherFormatPropertiesAMD*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_NV_external_memory
+    if (reinterpret_cast<const VkExternalMemoryImageCreateInfoNV*>(structExtension)->sType == VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO_NV)
+    {
+        checkEqual_VkExternalMemoryImageCreateInfoNV(reinterpret_cast<const VkExternalMemoryImageCreateInfoNV*>(structExtension), reinterpret_cast<VkExternalMemoryImageCreateInfoNV*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_NV_external_memory
+    if (reinterpret_cast<const VkExportMemoryAllocateInfoNV*>(structExtension)->sType == VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO_NV)
+    {
+        checkEqual_VkExportMemoryAllocateInfoNV(reinterpret_cast<const VkExportMemoryAllocateInfoNV*>(structExtension), reinterpret_cast<VkExportMemoryAllocateInfoNV*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_NV_external_memory_win32
+    if (reinterpret_cast<const VkImportMemoryWin32HandleInfoNV*>(structExtension)->sType == VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_NV)
+    {
+        checkEqual_VkImportMemoryWin32HandleInfoNV(reinterpret_cast<const VkImportMemoryWin32HandleInfoNV*>(structExtension), reinterpret_cast<VkImportMemoryWin32HandleInfoNV*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_NV_external_memory_win32
+    if (reinterpret_cast<const VkExportMemoryWin32HandleInfoNV*>(structExtension)->sType == VK_STRUCTURE_TYPE_EXPORT_MEMORY_WIN32_HANDLE_INFO_NV)
+    {
+        checkEqual_VkExportMemoryWin32HandleInfoNV(reinterpret_cast<const VkExportMemoryWin32HandleInfoNV*>(structExtension), reinterpret_cast<VkExportMemoryWin32HandleInfoNV*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_NV_win32_keyed_mutex
+    if (reinterpret_cast<const VkWin32KeyedMutexAcquireReleaseInfoNV*>(structExtension)->sType == VK_STRUCTURE_TYPE_WIN32_KEYED_MUTEX_ACQUIRE_RELEASE_INFO_NV)
+    {
+        checkEqual_VkWin32KeyedMutexAcquireReleaseInfoNV(reinterpret_cast<const VkWin32KeyedMutexAcquireReleaseInfoNV*>(structExtension), reinterpret_cast<VkWin32KeyedMutexAcquireReleaseInfoNV*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_validation_flags
+    if (reinterpret_cast<const VkValidationFlagsEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_VALIDATION_FLAGS_EXT)
+    {
+        checkEqual_VkValidationFlagsEXT(reinterpret_cast<const VkValidationFlagsEXT*>(structExtension), reinterpret_cast<VkValidationFlagsEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_conditional_rendering
+    if (reinterpret_cast<const VkPhysicalDeviceConditionalRenderingFeaturesEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CONDITIONAL_RENDERING_FEATURES_EXT)
+    {
+        checkEqual_VkPhysicalDeviceConditionalRenderingFeaturesEXT(reinterpret_cast<const VkPhysicalDeviceConditionalRenderingFeaturesEXT*>(structExtension), reinterpret_cast<VkPhysicalDeviceConditionalRenderingFeaturesEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_conditional_rendering
+    if (reinterpret_cast<const VkCommandBufferInheritanceConditionalRenderingInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_CONDITIONAL_RENDERING_INFO_EXT)
+    {
+        checkEqual_VkCommandBufferInheritanceConditionalRenderingInfoEXT(reinterpret_cast<const VkCommandBufferInheritanceConditionalRenderingInfoEXT*>(structExtension), reinterpret_cast<VkCommandBufferInheritanceConditionalRenderingInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_NV_clip_space_w_scaling
+    if (reinterpret_cast<const VkPipelineViewportWScalingStateCreateInfoNV*>(structExtension)->sType == VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_W_SCALING_STATE_CREATE_INFO_NV)
+    {
+        checkEqual_VkPipelineViewportWScalingStateCreateInfoNV(reinterpret_cast<const VkPipelineViewportWScalingStateCreateInfoNV*>(structExtension), reinterpret_cast<VkPipelineViewportWScalingStateCreateInfoNV*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_display_control
+    if (reinterpret_cast<const VkSwapchainCounterCreateInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_SWAPCHAIN_COUNTER_CREATE_INFO_EXT)
+    {
+        checkEqual_VkSwapchainCounterCreateInfoEXT(reinterpret_cast<const VkSwapchainCounterCreateInfoEXT*>(structExtension), reinterpret_cast<VkSwapchainCounterCreateInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_GOOGLE_display_timing
+    if (reinterpret_cast<const VkPresentTimesInfoGOOGLE*>(structExtension)->sType == VK_STRUCTURE_TYPE_PRESENT_TIMES_INFO_GOOGLE)
+    {
+        checkEqual_VkPresentTimesInfoGOOGLE(reinterpret_cast<const VkPresentTimesInfoGOOGLE*>(structExtension), reinterpret_cast<VkPresentTimesInfoGOOGLE*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_NVX_multiview_per_view_attributes
+    if (reinterpret_cast<const VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_PER_VIEW_ATTRIBUTES_PROPERTIES_NVX)
+    {
+        checkEqual_VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX(reinterpret_cast<const VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX*>(structExtension), reinterpret_cast<VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_NV_viewport_swizzle
+    if (reinterpret_cast<const VkPipelineViewportSwizzleStateCreateInfoNV*>(structExtension)->sType == VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_SWIZZLE_STATE_CREATE_INFO_NV)
+    {
+        checkEqual_VkPipelineViewportSwizzleStateCreateInfoNV(reinterpret_cast<const VkPipelineViewportSwizzleStateCreateInfoNV*>(structExtension), reinterpret_cast<VkPipelineViewportSwizzleStateCreateInfoNV*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_discard_rectangles
+    if (reinterpret_cast<const VkPhysicalDeviceDiscardRectanglePropertiesEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DISCARD_RECTANGLE_PROPERTIES_EXT)
+    {
+        checkEqual_VkPhysicalDeviceDiscardRectanglePropertiesEXT(reinterpret_cast<const VkPhysicalDeviceDiscardRectanglePropertiesEXT*>(structExtension), reinterpret_cast<VkPhysicalDeviceDiscardRectanglePropertiesEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_discard_rectangles
+    if (reinterpret_cast<const VkPipelineDiscardRectangleStateCreateInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_PIPELINE_DISCARD_RECTANGLE_STATE_CREATE_INFO_EXT)
+    {
+        checkEqual_VkPipelineDiscardRectangleStateCreateInfoEXT(reinterpret_cast<const VkPipelineDiscardRectangleStateCreateInfoEXT*>(structExtension), reinterpret_cast<VkPipelineDiscardRectangleStateCreateInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_conservative_rasterization
+    if (reinterpret_cast<const VkPhysicalDeviceConservativeRasterizationPropertiesEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CONSERVATIVE_RASTERIZATION_PROPERTIES_EXT)
+    {
+        checkEqual_VkPhysicalDeviceConservativeRasterizationPropertiesEXT(reinterpret_cast<const VkPhysicalDeviceConservativeRasterizationPropertiesEXT*>(structExtension), reinterpret_cast<VkPhysicalDeviceConservativeRasterizationPropertiesEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_conservative_rasterization
+    if (reinterpret_cast<const VkPipelineRasterizationConservativeStateCreateInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_CONSERVATIVE_STATE_CREATE_INFO_EXT)
+    {
+        checkEqual_VkPipelineRasterizationConservativeStateCreateInfoEXT(reinterpret_cast<const VkPipelineRasterizationConservativeStateCreateInfoEXT*>(structExtension), reinterpret_cast<VkPipelineRasterizationConservativeStateCreateInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_debug_utils
+    if (reinterpret_cast<const VkDebugUtilsMessengerCreateInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT)
+    {
+        checkEqual_VkDebugUtilsMessengerCreateInfoEXT(reinterpret_cast<const VkDebugUtilsMessengerCreateInfoEXT*>(structExtension), reinterpret_cast<VkDebugUtilsMessengerCreateInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_ANDROID_external_memory_android_hardware_buffer
+    if (reinterpret_cast<const VkAndroidHardwareBufferUsageANDROID*>(structExtension)->sType == VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_USAGE_ANDROID)
+    {
+        checkEqual_VkAndroidHardwareBufferUsageANDROID(reinterpret_cast<const VkAndroidHardwareBufferUsageANDROID*>(structExtension), reinterpret_cast<VkAndroidHardwareBufferUsageANDROID*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_ANDROID_external_memory_android_hardware_buffer
+    if (reinterpret_cast<const VkAndroidHardwareBufferFormatPropertiesANDROID*>(structExtension)->sType == VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_FORMAT_PROPERTIES_ANDROID)
+    {
+        checkEqual_VkAndroidHardwareBufferFormatPropertiesANDROID(reinterpret_cast<const VkAndroidHardwareBufferFormatPropertiesANDROID*>(structExtension), reinterpret_cast<VkAndroidHardwareBufferFormatPropertiesANDROID*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_ANDROID_external_memory_android_hardware_buffer
+    if (reinterpret_cast<const VkImportAndroidHardwareBufferInfoANDROID*>(structExtension)->sType == VK_STRUCTURE_TYPE_IMPORT_ANDROID_HARDWARE_BUFFER_INFO_ANDROID)
+    {
+        checkEqual_VkImportAndroidHardwareBufferInfoANDROID(reinterpret_cast<const VkImportAndroidHardwareBufferInfoANDROID*>(structExtension), reinterpret_cast<VkImportAndroidHardwareBufferInfoANDROID*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_ANDROID_external_memory_android_hardware_buffer
+    if (reinterpret_cast<const VkExternalFormatANDROID*>(structExtension)->sType == VK_STRUCTURE_TYPE_EXTERNAL_FORMAT_ANDROID)
+    {
+        checkEqual_VkExternalFormatANDROID(reinterpret_cast<const VkExternalFormatANDROID*>(structExtension), reinterpret_cast<VkExternalFormatANDROID*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_sampler_filter_minmax
+    if (reinterpret_cast<const VkSamplerReductionModeCreateInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_SAMPLER_REDUCTION_MODE_CREATE_INFO_EXT)
+    {
+        checkEqual_VkSamplerReductionModeCreateInfoEXT(reinterpret_cast<const VkSamplerReductionModeCreateInfoEXT*>(structExtension), reinterpret_cast<VkSamplerReductionModeCreateInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_sampler_filter_minmax
+    if (reinterpret_cast<const VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_FILTER_MINMAX_PROPERTIES_EXT)
+    {
+        checkEqual_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT(reinterpret_cast<const VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT*>(structExtension), reinterpret_cast<VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_sample_locations
+    if (reinterpret_cast<const VkSampleLocationsInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_SAMPLE_LOCATIONS_INFO_EXT)
+    {
+        checkEqual_VkSampleLocationsInfoEXT(reinterpret_cast<const VkSampleLocationsInfoEXT*>(structExtension), reinterpret_cast<VkSampleLocationsInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_sample_locations
+    if (reinterpret_cast<const VkRenderPassSampleLocationsBeginInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_RENDER_PASS_SAMPLE_LOCATIONS_BEGIN_INFO_EXT)
+    {
+        checkEqual_VkRenderPassSampleLocationsBeginInfoEXT(reinterpret_cast<const VkRenderPassSampleLocationsBeginInfoEXT*>(structExtension), reinterpret_cast<VkRenderPassSampleLocationsBeginInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_sample_locations
+    if (reinterpret_cast<const VkPipelineSampleLocationsStateCreateInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_PIPELINE_SAMPLE_LOCATIONS_STATE_CREATE_INFO_EXT)
+    {
+        checkEqual_VkPipelineSampleLocationsStateCreateInfoEXT(reinterpret_cast<const VkPipelineSampleLocationsStateCreateInfoEXT*>(structExtension), reinterpret_cast<VkPipelineSampleLocationsStateCreateInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_sample_locations
+    if (reinterpret_cast<const VkPhysicalDeviceSampleLocationsPropertiesEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLE_LOCATIONS_PROPERTIES_EXT)
+    {
+        checkEqual_VkPhysicalDeviceSampleLocationsPropertiesEXT(reinterpret_cast<const VkPhysicalDeviceSampleLocationsPropertiesEXT*>(structExtension), reinterpret_cast<VkPhysicalDeviceSampleLocationsPropertiesEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_blend_operation_advanced
+    if (reinterpret_cast<const VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BLEND_OPERATION_ADVANCED_FEATURES_EXT)
+    {
+        checkEqual_VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT(reinterpret_cast<const VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT*>(structExtension), reinterpret_cast<VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_blend_operation_advanced
+    if (reinterpret_cast<const VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BLEND_OPERATION_ADVANCED_PROPERTIES_EXT)
+    {
+        checkEqual_VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT(reinterpret_cast<const VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT*>(structExtension), reinterpret_cast<VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_blend_operation_advanced
+    if (reinterpret_cast<const VkPipelineColorBlendAdvancedStateCreateInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_ADVANCED_STATE_CREATE_INFO_EXT)
+    {
+        checkEqual_VkPipelineColorBlendAdvancedStateCreateInfoEXT(reinterpret_cast<const VkPipelineColorBlendAdvancedStateCreateInfoEXT*>(structExtension), reinterpret_cast<VkPipelineColorBlendAdvancedStateCreateInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_NV_fragment_coverage_to_color
+    if (reinterpret_cast<const VkPipelineCoverageToColorStateCreateInfoNV*>(structExtension)->sType == VK_STRUCTURE_TYPE_PIPELINE_COVERAGE_TO_COLOR_STATE_CREATE_INFO_NV)
+    {
+        checkEqual_VkPipelineCoverageToColorStateCreateInfoNV(reinterpret_cast<const VkPipelineCoverageToColorStateCreateInfoNV*>(structExtension), reinterpret_cast<VkPipelineCoverageToColorStateCreateInfoNV*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_NV_framebuffer_mixed_samples
+    if (reinterpret_cast<const VkPipelineCoverageModulationStateCreateInfoNV*>(structExtension)->sType == VK_STRUCTURE_TYPE_PIPELINE_COVERAGE_MODULATION_STATE_CREATE_INFO_NV)
+    {
+        checkEqual_VkPipelineCoverageModulationStateCreateInfoNV(reinterpret_cast<const VkPipelineCoverageModulationStateCreateInfoNV*>(structExtension), reinterpret_cast<VkPipelineCoverageModulationStateCreateInfoNV*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_validation_cache
+    if (reinterpret_cast<const VkShaderModuleValidationCacheCreateInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_SHADER_MODULE_VALIDATION_CACHE_CREATE_INFO_EXT)
+    {
+        checkEqual_VkShaderModuleValidationCacheCreateInfoEXT(reinterpret_cast<const VkShaderModuleValidationCacheCreateInfoEXT*>(structExtension), reinterpret_cast<VkShaderModuleValidationCacheCreateInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_descriptor_indexing
+    if (reinterpret_cast<const VkDescriptorSetLayoutBindingFlagsCreateInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT)
+    {
+        checkEqual_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT(reinterpret_cast<const VkDescriptorSetLayoutBindingFlagsCreateInfoEXT*>(structExtension), reinterpret_cast<VkDescriptorSetLayoutBindingFlagsCreateInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_descriptor_indexing
+    if (reinterpret_cast<const VkPhysicalDeviceDescriptorIndexingFeaturesEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT)
+    {
+        checkEqual_VkPhysicalDeviceDescriptorIndexingFeaturesEXT(reinterpret_cast<const VkPhysicalDeviceDescriptorIndexingFeaturesEXT*>(structExtension), reinterpret_cast<VkPhysicalDeviceDescriptorIndexingFeaturesEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_descriptor_indexing
+    if (reinterpret_cast<const VkPhysicalDeviceDescriptorIndexingPropertiesEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES_EXT)
+    {
+        checkEqual_VkPhysicalDeviceDescriptorIndexingPropertiesEXT(reinterpret_cast<const VkPhysicalDeviceDescriptorIndexingPropertiesEXT*>(structExtension), reinterpret_cast<VkPhysicalDeviceDescriptorIndexingPropertiesEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_descriptor_indexing
+    if (reinterpret_cast<const VkDescriptorSetVariableDescriptorCountAllocateInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT)
+    {
+        checkEqual_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT(reinterpret_cast<const VkDescriptorSetVariableDescriptorCountAllocateInfoEXT*>(structExtension), reinterpret_cast<VkDescriptorSetVariableDescriptorCountAllocateInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_descriptor_indexing
+    if (reinterpret_cast<const VkDescriptorSetVariableDescriptorCountLayoutSupportEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_LAYOUT_SUPPORT_EXT)
+    {
+        checkEqual_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT(reinterpret_cast<const VkDescriptorSetVariableDescriptorCountLayoutSupportEXT*>(structExtension), reinterpret_cast<VkDescriptorSetVariableDescriptorCountLayoutSupportEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_global_priority
+    if (reinterpret_cast<const VkDeviceQueueGlobalPriorityCreateInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_DEVICE_QUEUE_GLOBAL_PRIORITY_CREATE_INFO_EXT)
+    {
+        checkEqual_VkDeviceQueueGlobalPriorityCreateInfoEXT(reinterpret_cast<const VkDeviceQueueGlobalPriorityCreateInfoEXT*>(structExtension), reinterpret_cast<VkDeviceQueueGlobalPriorityCreateInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_external_memory_host
+    if (reinterpret_cast<const VkImportMemoryHostPointerInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_IMPORT_MEMORY_HOST_POINTER_INFO_EXT)
+    {
+        checkEqual_VkImportMemoryHostPointerInfoEXT(reinterpret_cast<const VkImportMemoryHostPointerInfoEXT*>(structExtension), reinterpret_cast<VkImportMemoryHostPointerInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_external_memory_host
+    if (reinterpret_cast<const VkPhysicalDeviceExternalMemoryHostPropertiesEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_MEMORY_HOST_PROPERTIES_EXT)
+    {
+        checkEqual_VkPhysicalDeviceExternalMemoryHostPropertiesEXT(reinterpret_cast<const VkPhysicalDeviceExternalMemoryHostPropertiesEXT*>(structExtension), reinterpret_cast<VkPhysicalDeviceExternalMemoryHostPropertiesEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_AMD_shader_core_properties
+    if (reinterpret_cast<const VkPhysicalDeviceShaderCorePropertiesAMD*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CORE_PROPERTIES_AMD)
+    {
+        checkEqual_VkPhysicalDeviceShaderCorePropertiesAMD(reinterpret_cast<const VkPhysicalDeviceShaderCorePropertiesAMD*>(structExtension), reinterpret_cast<VkPhysicalDeviceShaderCorePropertiesAMD*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_vertex_attribute_divisor
+    if (reinterpret_cast<const VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_ATTRIBUTE_DIVISOR_PROPERTIES_EXT)
+    {
+        checkEqual_VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT(reinterpret_cast<const VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT*>(structExtension), reinterpret_cast<VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_EXT_vertex_attribute_divisor
+    if (reinterpret_cast<const VkPipelineVertexInputDivisorStateCreateInfoEXT*>(structExtension)->sType == VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_DIVISOR_STATE_CREATE_INFO_EXT)
+    {
+        checkEqual_VkPipelineVertexInputDivisorStateCreateInfoEXT(reinterpret_cast<const VkPipelineVertexInputDivisorStateCreateInfoEXT*>(structExtension), reinterpret_cast<VkPipelineVertexInputDivisorStateCreateInfoEXT*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_NV_device_diagnostic_checkpoints
+    if (reinterpret_cast<const VkQueueFamilyCheckpointPropertiesNV*>(structExtension)->sType == VK_STRUCTURE_TYPE_QUEUE_FAMILY_CHECKPOINT_PROPERTIES_NV)
+    {
+        checkEqual_VkQueueFamilyCheckpointPropertiesNV(reinterpret_cast<const VkQueueFamilyCheckpointPropertiesNV*>(structExtension), reinterpret_cast<VkQueueFamilyCheckpointPropertiesNV*>(structExtension_out), onFail);
+    }
+#endif
+}
+
 
 } // namespace goldfish_vk
