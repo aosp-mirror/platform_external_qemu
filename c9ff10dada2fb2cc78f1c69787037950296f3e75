@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3f310404_bad9539b",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-13T07:12:01Z",
+      "side": 1,
+      "message": "this line seems to be causing the problem; please see patch set 10",
+      "revId": "c9ff10dada2fb2cc78f1c69787037950296f3e75",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
