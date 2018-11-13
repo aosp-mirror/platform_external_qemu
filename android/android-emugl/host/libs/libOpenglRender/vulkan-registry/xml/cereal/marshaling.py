@@ -25,6 +25,7 @@ from .wrapperdefs import STREAM_RET_TYPE
 from .wrapperdefs import MARSHAL_INPUT_VAR_NAME
 from .wrapperdefs import UNMARSHAL_INPUT_VAR_NAME
 from .wrapperdefs import PARAMETERS_MARSHALING
+from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
 
@@ -55,8 +56,6 @@ class VulkanMarshalingCodegen(object):
         self.dynAlloc = dynAlloc
 
     def needSkip(self, vulkanType):
-        if vulkanType.isNextPointer():
-            return True
         return False
 
     def getTypeForStreaming(self, vulkanType):
@@ -214,6 +213,15 @@ class VulkanMarshalingCodegen(object):
         finalLenExpr = "%s * %s" % (lenAccess, self.cgen.sizeofExpr(vulkanType))
         self.genStreamCall(vulkanType, access, finalLenExpr)
 
+    def makeExtensionMarshalingCall(self, accessExpr):
+        if self.direction == "read":
+            castedAccessExpr = "(%s)(%s)" % ("void*", accessExpr)
+        else:
+            castedAccessExpr = accessExpr
+
+        self.cgen.funcCall(None, self.marshalPrefix + "extension_struct",
+                           [self.streamVarName, castedAccessExpr])
+
     def onPointer(self, vulkanType):
         if self.needSkip(vulkanType):
             self.cgen.line("// TODO: Unsupported : %s" %
@@ -221,6 +229,11 @@ class VulkanMarshalingCodegen(object):
             return
 
         access = self.exprAccessor(vulkanType)
+
+        if vulkanType.isNextPointer():
+            self.makeExtensionMarshalingCall(access)
+            return
+
         lenAccess = self.lenAccessor(vulkanType)
 
         self.doAllocSpace(vulkanType)
@@ -236,7 +249,6 @@ class VulkanMarshalingCodegen(object):
     def onValue(self, vulkanType):
         access = self.exprAccessor(vulkanType)
         self.genStreamCall(vulkanType, access, self.cgen.sizeofExpr(vulkanType))
-
 
 class VulkanMarshaling(VulkanWrapperGenerator):
 
@@ -270,6 +282,25 @@ class VulkanMarshaling(VulkanWrapperGenerator):
         # opcodes
         self.currentOpcode = 20000
 
+        self.extensionMarshalPrototype = \
+            VulkanAPI(API_PREFIX_MARSHAL + "extension_struct",
+                      STREAM_RET_TYPE,
+                      PARAMETERS_MARSHALING +
+                      [STRUCT_EXTENSION_PARAM])
+
+        self.extensionUnmarshalPrototype = \
+            VulkanAPI(API_PREFIX_UNMARSHAL + "extension_struct",
+                      STREAM_RET_TYPE,
+                      PARAMETERS_MARSHALING +
+                      [STRUCT_EXTENSION_PARAM_FOR_WRITE])
+
+        self.extensionStructTypes = []
+
+    def onBegin(self,):
+        VulkanWrapperGenerator.onBegin(self)
+        self.module.appendImpl(self.cgenImpl.makeFuncDecl(self.extensionMarshalPrototype))
+        self.module.appendImpl(self.cgenImpl.makeFuncDecl(self.extensionUnmarshalPrototype))
+
     def onGenType(self, typeXml, name, alias):
         VulkanWrapperGenerator.onGenType(self, typeXml, name, alias)
 
@@ -281,6 +312,9 @@ class VulkanMarshaling(VulkanWrapperGenerator):
         if category in ["struct", "union"] and not alias:
 
             structInfo = self.typeInfo.structs[name]
+            
+            if structInfo.structExtendsExpr:
+                self.extensionStructTypes.append(structInfo)
 
             marshalParams = PARAMETERS_MARSHALING + \
                 [makeVulkanTypeSimple(True, name, 1, MARSHAL_INPUT_VAR_NAME)]
@@ -327,3 +361,46 @@ class VulkanMarshaling(VulkanWrapperGenerator):
         self.module.appendHeader(
             "#define OP_%s %d\n" % (name, self.currentOpcode))
         self.currentOpcode += 1
+
+    def onEnd(self,):
+        VulkanWrapperGenerator.onEnd(self)
+
+        def castAsStruct(varName, typeName, const=True):
+            return "reinterpret_cast<%s%s*>(%s)" % \
+                   ("const " if const else "", typeName, varName)
+
+        def emitStructTagCheckAndProcess(cgen, varName, typeName, matchExpr, onMatch, const=True):
+            cgen.beginIf("%s->sType == %s" %
+                         (castAsStruct(varName, typeName, const=const), matchExpr))
+            onMatch(cgen)
+            cgen.endIf()
+
+        def checkAndProcess(apiPrefix, const, cgen):
+            for ext in self.extensionStructTypes:
+                if ext.feature:
+                    cgen.leftline("#ifdef %s" % ext.feature)
+
+                varName = STRUCT_EXTENSION_PARAM.paramName
+                typeName = ext.name
+                enum = ext.structEnumExpr
+                accessWithCast = castAsStruct(varName, typeName, const=const)
+
+                def onMatch(cgen):
+                    cgen.funcCall(None, apiPrefix + typeName,
+                                  [VULKAN_STREAM_VAR_NAME, accessWithCast])
+                
+                emitStructTagCheckAndProcess( \
+                    cgen, varName, typeName, enum, onMatch, const=const)
+
+                if ext.feature:
+                    cgen.leftline("#endif")
+
+        self.module.appendImpl(
+            self.cgenImpl.makeFuncImpl(
+                self.extensionMarshalPrototype,
+                lambda cgen: checkAndProcess(API_PREFIX_MARSHAL, True, cgen)))
+
+        self.module.appendImpl(
+            self.cgenImpl.makeFuncImpl(
+                self.extensionUnmarshalPrototype,
+                lambda cgen: checkAndProcess(API_PREFIX_UNMARSHAL, False, cgen)))

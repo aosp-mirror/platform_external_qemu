@@ -43,6 +43,12 @@ PARAMETERS_VALIDATE = [
     makeVulkanTypeSimple(False, VALIDATE_RESULT_TYPE, 1, VALIDATE_VAR_NAME)
 ]
 
+STRUCT_EXTENSION_PARAM = \
+    makeVulkanTypeSimple(True, "void", 1, "structExtension")
+
+STRUCT_EXTENSION_PARAM_FOR_WRITE = \
+    STRUCT_EXTENSION_PARAM.getForNonConstAccess()
+
 VOID_TYPE = makeVulkanTypeSimple(False, "void", 0)
 STREAM_RET_TYPE = makeVulkanTypeSimple(False, "void", 0)
 
