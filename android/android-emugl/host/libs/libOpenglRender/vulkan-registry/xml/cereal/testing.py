@@ -25,6 +25,7 @@ from .wrapperdefs import EQUALITY_ON_FAIL_VAR
 from .wrapperdefs import EQUALITY_ON_FAIL_VAR_TYPE
 from .wrapperdefs import EQUALITY_RET_TYPE
 from .wrapperdefs import API_PREFIX_EQUALITY
+from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE
 
 class VulkanEqualityCodegen(object):
 
@@ -241,13 +242,25 @@ class VulkanEqualityCodegen(object):
             self.makeEqualBufExpr(accessLhs, accessRhs, finalLenExpr),
             vulkanType, "Unequal static array")
 
+    def onStructExtension(self, vulkanType):
+        lhs = self.exprAccessorLhs(vulkanType)
+        rhs = self.exprAccessorRhs(vulkanType)
+
+        lhsExpr = lhs
+        rhsExpr = "(%s)(%s)" % ("void*", rhs)
+
+        self.cgen.beginIf(lhs)
+        self.cgen.funcCall(None, self.prefix + "extension_struct",
+                           [lhsExpr, rhsExpr, self.onFailCompareVar])
+        self.cgen.endIf()
+
     def onPointer(self, vulkanType):
+        accessLhs = self.exprAccessorLhs(vulkanType)
+        accessRhs = self.exprAccessorRhs(vulkanType)
+
         skipStreamInternal = vulkanType.typeName == "void"
         if skipStreamInternal:
             return
-
-        accessLhs = self.exprAccessorLhs(vulkanType)
-        accessRhs = self.exprAccessorRhs(vulkanType)
 
         lenAccessLhs = self.lenAccessorLhs(vulkanType)
         lenAccessRhs = self.lenAccessorRhs(vulkanType)
@@ -291,6 +304,18 @@ class VulkanTesting(VulkanWrapperGenerator):
 
         self.knownDefs = {}
 
+        self.extensionTestingPrototype = \
+            VulkanAPI(API_PREFIX_EQUALITY + "extension_struct",
+                      EQUALITY_RET_TYPE,
+                      [STRUCT_EXTENSION_PARAM,
+                       STRUCT_EXTENSION_PARAM_FOR_WRITE,
+                       EQUALITY_ON_FAIL_VAR_TYPE])
+
+    def onBegin(self,):
+        VulkanWrapperGenerator.onBegin(self)
+        self.module.appendImpl(self.codegen.makeFuncDecl(
+            self.extensionTestingPrototype))
+
     def onGenType(self, typeXml, name, alias):
         VulkanWrapperGenerator.onGenType(self, typeXml, name, alias)
 
@@ -329,4 +354,47 @@ class VulkanTesting(VulkanWrapperGenerator):
     def onGenCmd(self, cmdinfo, name, alias):
         VulkanWrapperGenerator.onGenCmd(self, cmdinfo, name, alias)
 
-        # TODO: Figure something out for API testing
+    def onEnd(self,):
+        VulkanWrapperGenerator.onEnd(self)
+
+        def castAsStruct(varName, typeName, const=True):
+            return "reinterpret_cast<%s%s*>(%s)" % \
+                   ("const " if const else "", typeName, varName)
+
+        def emitStructTagCheckAndProcess(cgen, varName, typeName, matchExpr, onMatch, const=True):
+            cgen.beginIf("%s->sType == %s" %
+                         (castAsStruct(varName, typeName, const=const), matchExpr))
+            onMatch(cgen)
+            cgen.endIf()
+
+        def checkAndProcess(apiPrefix, cgen):
+            for ext in self.extensionStructTypes:
+                if ext.feature:
+                    cgen.leftline("#ifdef %s" % ext.feature)
+
+                typeName = ext.name
+                enum = ext.structEnumExpr
+                accessNormal = STRUCT_EXTENSION_PARAM.paramName
+                accessNonConst = STRUCT_EXTENSION_PARAM_FOR_WRITE.paramName
+
+                accessNormalCasted = castAsStruct(accessNormal, typeName)
+                accessNonConstCasted = castAsStruct(
+                    accessNonConst, typeName, const=False)
+
+                def onMatch(cgen):
+                    cgen.funcCall(None, apiPrefix + typeName,
+                                  [accessNormalCasted,
+                                   accessNonConstCasted,
+                                   EQUALITY_ON_FAIL_VAR])
+
+                emitStructTagCheckAndProcess( \
+                    cgen, accessNormal, typeName, enum, onMatch)
+
+                if ext.feature:
+                    cgen.leftline("#endif")
+
+        self.module.appendImpl(
+            self.codegen.makeFuncImpl(
+                self.extensionTestingPrototype,
+                lambda cgen: checkAndProcess(API_PREFIX_EQUALITY, cgen)))
+

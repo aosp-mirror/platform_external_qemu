@@ -591,4 +591,61 @@ TEST(VulkanStream, testDeepcopyEquivalence) {
     });
 }
 
+// Tests that a struct with an extension struct attached
+// is properly marshaled/unmarshaled.
+TEST(VulkanStream, testStructExtension) {
+    Pool pool;
+    TestStream testStream;
+    VulkanStream stream(&testStream);
+
+    VkImage image = (VkImage)1;
+    VkBuffer buffer = (VkBuffer)2;
+
+    VkMemoryDedicatedAllocateInfo dedicatedAllocInfo = {
+        VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO, 0,
+        image, buffer,
+    };
+
+    VkMemoryAllocateInfo forMarshaling = {
+        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        &dedicatedAllocInfo,
+        4096,
+        5,
+    };
+
+    marshal_VkMemoryAllocateInfo(&stream, &forMarshaling);
+
+    VkMemoryAllocateInfo forUnmarshaling;
+    unmarshal_VkMemoryAllocateInfo(&stream, &forUnmarshaling);
+
+    VkMemoryDedicatedAllocateInfo* copiedDedicated =
+        (VkMemoryDedicatedAllocateInfo*)forUnmarshaling.pNext;
+
+    EXPECT_EQ(VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO,
+              copiedDedicated->sType);
+    EXPECT_EQ(image, copiedDedicated->image);
+    EXPECT_EQ(buffer, copiedDedicated->buffer);
+
+    checkEqual_VkMemoryAllocateInfo(
+        &forMarshaling, &forUnmarshaling, [](const char* errMsg) {
+        EXPECT_TRUE(false) << errMsg;
+    });
+
+    VkMemoryAllocateInfo forDeepcopy;
+    deepcopy_VkMemoryAllocateInfo(&pool, &forMarshaling, &forDeepcopy);
+
+    copiedDedicated =
+        (VkMemoryDedicatedAllocateInfo*)forDeepcopy.pNext;
+
+    EXPECT_EQ(VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO,
+              copiedDedicated->sType);
+    EXPECT_EQ(image, copiedDedicated->image);
+    EXPECT_EQ(buffer, copiedDedicated->buffer);
+
+    checkEqual_VkMemoryAllocateInfo(
+        &forMarshaling, &forDeepcopy, [](const char* errMsg) {
+        EXPECT_TRUE(false) << errMsg;
+    });
+}
+
 } // namespace goldfish_vk
