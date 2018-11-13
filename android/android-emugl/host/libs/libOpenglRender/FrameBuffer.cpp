@@ -663,7 +663,13 @@ FrameBuffer::postWorkerFunc(const Post& post) {
 
 void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
     if (!m_postThread.isStarted()) {
-        m_postWorker.reset(new PostWorker([this]() { return bindSubwin_locked(); }));
+        m_postWorker.reset(new PostWorker([this]() {
+            if (m_subWin) {
+                return bindSubwin_locked();
+            } else {
+                return bindFakeWindow_locked();
+            }
+        }));
         m_postThread.start();
     }
 
@@ -1659,6 +1665,30 @@ bool FrameBuffer::bindSubwin_locked() {
     m_prevContext = prevContext;
     m_prevReadSurf = prevReadSurf;
     m_prevDrawSurf = prevDrawSurf;
+    return true;
+}
+
+bool FrameBuffer::bindFakeWindow_locked() {
+    if (m_eglFakeWindowSurface == EGL_NO_SURFACE) {
+        // initialize here
+        m_eglFakeWindowContext = s_egl.eglCreateContext(
+                m_eglDisplay, m_eglConfig, m_eglContext,
+                getGlesMaxContextAttribs());
+
+        static const EGLint kFakeWindowPbufAttribs[] = {
+                EGL_WIDTH,          m_framebufferWidth, EGL_HEIGHT,
+                m_framebufferWidth, EGL_NONE,
+        };
+
+        m_eglFakeWindowSurface = s_egl.eglCreatePbufferSurface(
+                m_eglDisplay, m_eglConfig, kFakeWindowPbufAttribs);
+    }
+
+    if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglFakeWindowSurface,
+                              m_eglFakeWindowSurface, m_eglFakeWindowContext)) {
+        ERR("eglMakeCurrent failed in binding fake window!\n");
+        return false;
+    }
     return true;
 }
 
