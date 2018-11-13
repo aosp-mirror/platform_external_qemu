@@ -412,40 +412,8 @@ define-emulator-prebuilt-library = \
     $(eval LOCAL_SRC_FILES := $2) \
     $(eval $(end-emulator-module-ev)) \
 
-# A variant of start-emulator-library to start the definition of a host
-# program instead. Use with end-emulator-program
-start-emulator-program = \
-    $(call start-emulator-library,$1) \
-    $(eval LOCAL_MODULE_CLASS := EXECUTABLES) \
-    $(eval LOCAL_BUILD_FILE := $(BUILD_HOST_EXECUTABLE))
-
-# A variant of end-emulator-library for host programs instead
-end-emulator-program = \
-    $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
-    $(if $(filter linux,$(BUILD_TARGET_OS)), \
-      $(eval LOCAL_LDFLAGS += -Wl,-rpath=\$$$$ORIGIN/lib64:\$$$$ORIGIN/lib)) \
-    $(eval $(end-emulator-module-ev)) \
-
-# A variant that enables incorporation of cmake subprojects.
-start-cmake-project = \
-    $(eval include $(CLEAR_VARS)) \
-    $(eval PRODUCED_EXECUTABLES:=) \
-    $(eval PRODUCED_TESTS:=) \
-    $(eval PRODUCED_SHARED_LIBS:=) \
-    $(eval PRODUCED_STATIC_LIBS:=) \
-    $(eval PRODUCED_PROTO_LIBS:=) \
-    $(eval CONSUMED_STATIC_LIBS:=) \
-    $(eval LOCAL_MODULE:=$(1)$(LOCAL_BITS)) \
-    $(eval LOCAL_BUILD_FILE := $(BUILD_CMAKE))
-
-# A variant of end-emulator-library for host programs instead
-end-cmake-project = \
-    $(eval $(end-emulator-module-ev)) \
-
-
-# Same thing for shared libraries
 start-emulator-shared-lib = \
-    $(call start-emulator-library,$1) \
+    $(call start-emulator-shared-lib,$1) \
     $(eval LOCAL_MODULE_CLASS := SHARED_LIBRARIES) \
     $(eval LOCAL_BUILD_FILE := $(BUILD_HOST_SHARED_LIBRARY)) \
 

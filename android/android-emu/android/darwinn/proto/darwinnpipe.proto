@@ -1,0 +1,108 @@
+syntax = "proto2";
+
+package darwinn;
+
+// The protocol is implemented on top of qemu pipe service, and the underlying
+// encoding of the pipe is a stream of protobufs, with the length of each
+// message encoded as a little-endian uint32 immediately before it:
+//
+// <uint32 length> <length bytes of binary-serialized protobuf>
+//
+// Upon receiving each message, the protobuf is deserialized from its binary
+// form and dispatched.
+//
+// After the connection is established, the guest may send Request messages, and
+// will receive synchronous replies with a Response message.  The response may
+// include a pending_async_id, in which case there may be additional messages
+// with an AsyncResponse payload corresponding to that async_id.
+
+message ConnectHandshake {
+  optional uint32 version = 1;
+}
+
+message ConnectHandshakeResponse {
+  enum Result {
+    RESULT_NO_ERROR = 0;
+    RESULT_ERROR_UNKNOWN = 1;
+    RESULT_ERROR_VERSION_MISMATCH = 2;
+  }
+
+  optional Result result = 1;
+}
+
+//
+// Requests
+//
+
+message Request {
+  enum DriverType {
+    DRIVER_TYPE_MOCK = 1;
+    DRIVER_TYPE_DARWINN = 2;
+  }
+
+  message AddInputToRequest {
+    optional Buffer buffer = 1;
+    optional int32 request_id = 2;
+  }
+
+  message DarwinnSubmitRequest {
+    optional int32 request_id = 1;
+
+    message DarwinnOutputArguments {
+      optional string name = 1;
+      optional int32 size = 2;
+    }
+
+    repeated DarwinnOutputArguments output_args = 2;
+  }
+
+  oneof request_type {
+    DriverType open_driver = 1;
+    string create_executable = 2;
+    int32 delete_executable = 3;
+    int32 create_request = 4;
+    int32 delete_request = 5;
+    AddInputToRequest add_input = 6;
+    DarwinnSubmitRequest submit_request = 7;
+    DriverType close_driver = 8;
+  }
+}
+
+message Response {
+  enum Result {
+    RESULT_NO_ERROR = 0;
+    RESULT_UNKNOWN_ERROR = 1;
+    RESULT_PARSING_FAILED = 2;
+    RESULT_INVALID_ARGUMENTS = 3;
+    RESULT_EXECUTABLE_NOT_FOUND = 4;
+    RESULT_REQUEST_NOT_FOUND = 5;
+    RESULT_DRIVER_NOT_OPEN = 6;
+  }
+
+  message ResponseOutput {
+    message DarwinnOutput {
+      repeated Buffer output_buffer = 1;
+      optional int32 request_id = 2;
+    }
+
+    oneof output_type {
+      int32 executable_id = 1;
+      int32 request_id = 2;
+      DarwinnOutput output = 3;
+    }
+  }
+
+  optional ResponseOutput output = 1;
+
+  optional Result result = 2;
+
+  optional int32 pending_async_id = 3;
+
+  optional string response_message = 4;
+}
+
+message Buffer {
+  optional bytes data = 1;
+  optional int32 size = 2;
+  optional string name = 3;
+}
