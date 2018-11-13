@@ -18,6 +18,7 @@ from .common.vulkantypes import \
         VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
 
 from .wrapperdefs import VulkanWrapperGenerator
+from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE
 
 class DeepcopyCodegen(object):
     def __init__(self, cgen, inputVars, poolVarName, prefix, skipValues=False):
@@ -45,8 +46,6 @@ class DeepcopyCodegen(object):
         self.checked = False
 
     def needSkip(self, vulkanType):
-        if vulkanType.isNextPointer():
-            return True
         return False
 
     def makeCastExpr(self, vulkanType):
@@ -78,6 +77,15 @@ class DeepcopyCodegen(object):
     def endCheck(self, vulkanType):
         pass
 
+    def makeExtensionMarshalingCall(self, lhs, rhs):
+        lhsExpr = lhs
+        rhsExpr = "(%s)(%s)" % ("void*", rhs)
+
+        self.cgen.beginIf(lhs)
+        self.cgen.funcCall(None, self.prefix + "extension_struct",
+                           [self.poolVarName, lhsExpr, rhsExpr])
+        self.cgen.endIf()
+
     def onCompoundType(self, vulkanType):
 
         if self.needSkip(vulkanType):
@@ -87,6 +95,10 @@ class DeepcopyCodegen(object):
 
         accessLhs = self.exprAccessorLhs(vulkanType)
         accessRhs = self.exprAccessorRhs(vulkanType)
+
+        if vulkanType.isNextPointer():
+            self.makeExtensionMarshalingCall(accessLhs, accessRhs)
+            return
 
         lenAccessLhs = self.lenAccessorLhs(vulkanType)
         lenAccessRhs = self.lenAccessorRhs(vulkanType)
@@ -181,6 +193,10 @@ class DeepcopyCodegen(object):
             self.cgen.stmt("%s = nullptr" % accessRhs)
             return
 
+        if vulkanType.isNextPointer():
+            self.makeExtensionMarshalingCall(accessLhs, accessRhs)
+            return
+
         lenAccessLhs = self.lenAccessorLhs(vulkanType)
 
         self.cgen.stmt("%s = nullptr" % accessRhs)
@@ -232,6 +248,20 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
 
         self.knownDefs = {}
 
+        self.extensionDeepcopyPrototype = \
+            VulkanAPI(self.deepcopyPrefix + "extension_struct",
+                      self.voidType,
+                      [self.deepcopyPoolParam,
+                       STRUCT_EXTENSION_PARAM,
+                       STRUCT_EXTENSION_PARAM_FOR_WRITE])
+
+        self.extensionStructTypes = []
+
+    def onBegin(self,):
+        VulkanWrapperGenerator.onBegin(self)
+        self.module.appendImpl(self.codegen.makeFuncDecl(
+            self.extensionDeepcopyPrototype))
+
     def onGenType(self, typeXml, name, alias):
         VulkanWrapperGenerator.onGenType(self, typeXml, name, alias)
 
@@ -243,6 +273,9 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
         if category in ["struct", "union"] and not alias:
 
             structInfo = self.typeInfo.structs[name]
+
+            if structInfo.structExtendsExpr:
+                self.extensionStructTypes.append(structInfo)
 
             typeFromName = \
                 lambda varname: \
@@ -280,3 +313,47 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
 
     def onGenCmd(self, cmdinfo, name, alias):
         VulkanWrapperGenerator.onGenCmd(self, cmdinfo, name, alias)
+
+    def onEnd(self,):
+        VulkanWrapperGenerator.onEnd(self)
+
+        def castAsStruct(varName, typeName, const=True):
+            return "reinterpret_cast<%s%s*>(%s)" % \
+                   ("const " if const else "", typeName, varName)
+
+        def emitStructTagCheckAndProcess(cgen, varName, typeName, matchExpr, onMatch, const=True):
+            cgen.beginIf("%s->sType == %s" %
+                         (castAsStruct(varName, typeName, const=const), matchExpr))
+            onMatch(cgen)
+            cgen.endIf()
+
+        def checkAndProcess(apiPrefix, cgen):
+            for ext in self.extensionStructTypes:
+                if ext.feature:
+                    cgen.leftline("#ifdef %s" % ext.feature)
+
+                typeName = ext.name
+                enum = ext.structEnumExpr
+                accessNormal = STRUCT_EXTENSION_PARAM.paramName
+                accessNonConst = STRUCT_EXTENSION_PARAM_FOR_WRITE.paramName
+
+                accessNormalCasted = castAsStruct(accessNormal, typeName)
+                accessNonConstCasted = castAsStruct(
+                    accessNonConst, typeName, const=False)
+
+                def onMatch(cgen):
+                    cgen.funcCall(None, apiPrefix + typeName,
+                                  [self.deepcopyPoolVarName,
+                                   accessNormalCasted,
+                                   accessNonConstCasted])
+
+                emitStructTagCheckAndProcess( \
+                    cgen, accessNormal, typeName, enum, onMatch)
+
+                if ext.feature:
+                    cgen.leftline("#endif")
+
+        self.module.appendImpl(
+            self.codegen.makeFuncImpl(
+                self.extensionDeepcopyPrototype,
+                lambda cgen: checkAndProcess(self.deepcopyPrefix, cgen)))

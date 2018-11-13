@@ -591,4 +591,29 @@ TEST(VulkanStream, testDeepcopyEquivalence) {
     });
 }
 
+// Tests that a struct with an extension struct attached
+// is properly marshaled/unmarshaled.
+TEST(VulkanStream, testStructExtension) {
+    Pool pool;
+    TestStream testStream;
+    VulkanStream stream(&testStream);
+
+    VkImage image = (VkImage)1;
+    VkBuffer buffer = (VkBuffer)2;
+
+    VkMemoryDedicatedAllocateInfo dedicatedAllocInfo = {
+        VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO, 0,
+        image, buffer,
+    };
+
+    VkMemoryAllocateInfo forMarshaling = {
+        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        &dedicatedAllocInfo,
+        4096,
+        5,
+    };
+
+    marshal_VkMemoryAllocateInfo(&stream, &forMarshaling);
+}
+
 } // namespace goldfish_vk
