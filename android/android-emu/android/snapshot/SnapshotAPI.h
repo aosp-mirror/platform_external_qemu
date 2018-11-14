@@ -31,7 +31,8 @@ void gotoCheckpoint(
         android::base::Optional<android::base::FileShare> shareMode);
 
 void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe, int forkTotal);
-void doneInstance(android::AsyncMessagePipeHandle pipe);
+void doneInstance(android::AsyncMessagePipeHandle pipe,
+        android::base::StringView metadata);
 
 void onOffworldSave(base::Stream* stream);
 void onOffworldLoad(base::Stream* stream);
