@@ -1414,6 +1414,20 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
     return true;
 }
 
+bool FrameBuffer::replaceColorBufferContents(HandleType p_colorbuffer, void* pixels) {
+    AutoLock mutex(m_lock);
+
+    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+    if (c == m_colorbuffers.end()) {
+        // bad colorbuffer handle
+        return false;
+    }
+
+    (*c).second.cb->replaceContents(pixels);
+
+    return true;
+}
+
 bool FrameBuffer::bindColorBufferToTexture(HandleType p_colorbuffer) {
     AutoLock mutex(m_lock);
 
