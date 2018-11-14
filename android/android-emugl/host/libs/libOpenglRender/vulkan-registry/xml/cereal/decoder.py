@@ -182,16 +182,28 @@ def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     emit_decode_finish(cgen)
 
 custom_decodes = {
+    # overwrite host-side device props and track devices
     "vkGetPhysicalDeviceProperties" : emit_global_state_wrapped_decoding,
     "vkGetPhysicalDeviceMemoryProperties" : emit_global_state_wrapped_decoding,
     "vkCreateDevice" : emit_global_state_wrapped_decoding,
     "vkDestroyDevice" : emit_global_state_wrapped_decoding,
+
+    # VkDeviceMemory customization
     "vkAllocateMemory" : emit_global_state_wrapped_decoding,
     "vkFreeMemory" : emit_global_state_wrapped_decoding,
     "vkMapMemory" : emit_global_state_wrapped_decoding,
     "vkUnmapMemory" : emit_global_state_wrapped_decoding,
     "vkFlushMappedMemoryRanges" : decode_vkFlushMappedMemoryRanges,
     "vkInvalidateMappedMemoryRanges" : decode_vkInvalidateMappedMemoryRanges,
+
+     # VK_ANDROID_native_buffer implementation
+    "vkGetDeviceQueue" : emit_global_state_wrapped_decoding,
+    "vkCreateImage" : emit_global_state_wrapped_decoding,
+    "vkDestroyImage" : emit_global_state_wrapped_decoding,
+    "vkGetSwapchainGrallocUsage2ANDROID" : emit_global_state_wrapped_decoding,
+    "vkGetSwapchainGrallocUsageANDROID" : emit_global_state_wrapped_decoding,
+    "vkAcquireImageANDROID" : emit_global_state_wrapped_decoding,
+    "vkQueueSignalReleaseImageANDROID" : emit_global_state_wrapped_decoding,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):
