@@ -27,6 +27,7 @@
 #include <vulkan/vulkan.h>
 
 
+#include "goldfish_vk_private_defs.h"
 #include "VulkanHandleMapping.h"
 
 
@@ -1102,6 +1103,12 @@ void handlemap_VkImageFormatListCreateInfoKHR(
 void handlemap_VkPhysicalDevice8BitStorageFeaturesKHR(
     VulkanHandleMapping* handlemap,
     VkPhysicalDevice8BitStorageFeaturesKHR* toMap);
+
+#endif
+#ifdef VK_ANDROID_native_buffer
+void handlemap_VkNativeBufferANDROID(
+    VulkanHandleMapping* handlemap,
+    VkNativeBufferANDROID* toMap);
 
 #endif
 #ifdef VK_EXT_debug_report

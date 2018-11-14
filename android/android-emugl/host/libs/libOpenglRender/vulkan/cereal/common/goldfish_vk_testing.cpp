@@ -26,6 +26,7 @@
 
 
 #include "goldfish_vk_extension_structs.h"
+#include "goldfish_vk_private_defs.h"
 
 
 namespace goldfish_vk {
@@ -4405,6 +4406,24 @@ void checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR(
     if (!((a->storageBuffer8BitAccess) == (b->storageBuffer8BitAccess))) { onFail("a->storageBuffer8BitAccess (Error: Value not equal)"); };
     if (!((a->uniformAndStorageBuffer8BitAccess) == (b->uniformAndStorageBuffer8BitAccess))) { onFail("a->uniformAndStorageBuffer8BitAccess (Error: Value not equal)"); };
     if (!((a->storagePushConstant8) == (b->storagePushConstant8))) { onFail("a->storagePushConstant8 (Error: Value not equal)"); };
+}
+
+#endif
+#ifdef VK_ANDROID_native_buffer
+void checkEqual_VkNativeBufferANDROID(
+    const VkNativeBufferANDROID* a,
+    const VkNativeBufferANDROID* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
+    if (!((memcmp(a->handle, b->handle, sizeof(const uint32_t)) == 0))) { onFail("a->handle (Error: Unequal dyn array)"); };
+    if (!((a->stride) == (b->stride))) { onFail("a->stride (Error: Value not equal)"); };
+    if (!((a->format) == (b->format))) { onFail("a->format (Error: Value not equal)"); };
+    if (!((a->usage) == (b->usage))) { onFail("a->usage (Error: Value not equal)"); };
 }
 
 #endif

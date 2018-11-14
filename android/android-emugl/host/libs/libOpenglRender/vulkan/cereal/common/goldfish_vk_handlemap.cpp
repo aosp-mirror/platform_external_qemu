@@ -26,6 +26,7 @@
 
 
 #include "goldfish_vk_extension_structs.h"
+#include "goldfish_vk_private_defs.h"
 
 
 namespace goldfish_vk {
@@ -3289,6 +3290,20 @@ void handlemap_VkImageFormatListCreateInfoKHR(
 void handlemap_VkPhysicalDevice8BitStorageFeaturesKHR(
     VulkanHandleMapping* handlemap,
     VkPhysicalDevice8BitStorageFeaturesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_ANDROID_native_buffer
+void handlemap_VkNativeBufferANDROID(
+    VulkanHandleMapping* handlemap,
+    VkNativeBufferANDROID* toMap)
 {
     (void)handlemap;
     (void)toMap;

@@ -26,6 +26,7 @@
 
 
 #include "goldfish_vk_extension_structs.h"
+#include "goldfish_vk_private_defs.h"
 
 
 namespace goldfish_vk {
@@ -8848,6 +8849,47 @@ void unmarshal_VkPhysicalDevice8BitStorageFeaturesKHR(
     vkStream->read((VkBool32*)&forUnmarshaling->storageBuffer8BitAccess, sizeof(VkBool32));
     vkStream->read((VkBool32*)&forUnmarshaling->uniformAndStorageBuffer8BitAccess, sizeof(VkBool32));
     vkStream->read((VkBool32*)&forUnmarshaling->storagePushConstant8, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_ANDROID_native_buffer
+void marshal_VkNativeBufferANDROID(
+    VulkanStream* vkStream,
+    const VkNativeBufferANDROID* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size = goldfish_vk_extension_struct_size(forMarshaling->pNext);
+    vkStream->write(&pNext_size, sizeof(size_t));
+    if (pNext_size)
+    {
+        vkStream->write((const void*)forMarshaling->pNext, sizeof(VkStructureType));
+        marshal_extension_struct(vkStream, forMarshaling->pNext);
+    }
+    vkStream->write((const uint32_t*)forMarshaling->handle, sizeof(const uint32_t));
+    vkStream->write((int*)&forMarshaling->stride, sizeof(int));
+    vkStream->write((int*)&forMarshaling->format, sizeof(int));
+    vkStream->write((int*)&forMarshaling->usage, sizeof(int));
+}
+
+void unmarshal_VkNativeBufferANDROID(
+    VulkanStream* vkStream,
+    VkNativeBufferANDROID* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    vkStream->read(&pNext_size, sizeof(size_t));
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->read((void*)(void*)(forUnmarshaling->pNext), sizeof(VkStructureType));
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->alloc((void**)&forUnmarshaling->handle, sizeof(const uint32_t));
+    vkStream->read((uint32_t*)forUnmarshaling->handle, sizeof(const uint32_t));
+    vkStream->read((int*)&forUnmarshaling->stride, sizeof(int));
+    vkStream->read((int*)&forUnmarshaling->format, sizeof(int));
+    vkStream->read((int*)&forUnmarshaling->usage, sizeof(int));
 }
 
 #endif

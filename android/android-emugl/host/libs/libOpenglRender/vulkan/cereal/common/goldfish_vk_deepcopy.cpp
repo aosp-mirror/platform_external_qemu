@@ -26,6 +26,7 @@
 
 
 #include "goldfish_vk_extension_structs.h"
+#include "goldfish_vk_private_defs.h"
 
 
 namespace goldfish_vk {
@@ -4407,6 +4408,29 @@ void deepcopy_VkPhysicalDevice8BitStorageFeaturesKHR(
     {
         to->pNext = (void*)pool->alloc(pNext_size);
         deepcopy_extension_struct(pool, from->pNext, (void*)(to->pNext));
+    }
+}
+
+#endif
+#ifdef VK_ANDROID_native_buffer
+void deepcopy_VkNativeBufferANDROID(
+    Pool* pool,
+    const VkNativeBufferANDROID* from,
+    VkNativeBufferANDROID* to)
+{
+    (void)pool;
+    *to = *from;
+    size_t pNext_size = goldfish_vk_extension_struct_size(from->pNext);
+    to->pNext = nullptr;
+    if (pNext_size)
+    {
+        to->pNext = (const void*)pool->alloc(pNext_size);
+        deepcopy_extension_struct(pool, from->pNext, (void*)(to->pNext));
+    }
+    to->handle = nullptr;
+    if (from->handle)
+    {
+        to->handle = (uint32_t*)pool->dupArray(from->handle, sizeof(const uint32_t));
     }
 }
 
