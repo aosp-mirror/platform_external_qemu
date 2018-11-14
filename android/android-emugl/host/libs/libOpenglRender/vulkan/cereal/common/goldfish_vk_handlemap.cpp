@@ -26,6 +26,7 @@
 
 
 #include "goldfish_vk_extension_structs.h"
+#include "goldfish_vk_private_defs.h"
 
 
 namespace goldfish_vk {
@@ -3299,6 +3300,20 @@ void handlemap_VkPhysicalDevice8BitStorageFeaturesKHR(
 }
 
 #endif
+#ifdef VK_ANDROID_native_buffer
+void handlemap_VkNativeBufferANDROID(
+    VulkanHandleMapping* handlemap,
+    VkNativeBufferANDROID* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
 #ifdef VK_EXT_debug_report
 void handlemap_VkDebugReportCallbackCreateInfoEXT(
     VulkanHandleMapping* handlemap,
@@ -4709,7 +4724,7 @@ void handlemap_extension_struct(
     {
         return;
     }
-    VkStructureType structType = goldfish_vk_struct_type(structExtension_out);
+    uint32_t structType = (uint32_t)goldfish_vk_struct_type(structExtension_out);
     switch(structType)
     {
 #ifdef VK_VERSION_1_1
@@ -5015,6 +5030,13 @@ void handlemap_extension_struct(
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
         {
             handlemap_VkPhysicalDevice8BitStorageFeaturesKHR(handlemap, reinterpret_cast<VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_ANDROID_native_buffer
+        case VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID:
+        {
+            handlemap_VkNativeBufferANDROID(handlemap, reinterpret_cast<VkNativeBufferANDROID*>(structExtension_out));
             break;
         }
 #endif

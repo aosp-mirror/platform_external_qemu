@@ -27,6 +27,7 @@
 #include <vulkan/vulkan.h>
 
 
+#include "goldfish_vk_private_defs.h"
 #include "android/base/Pool.h"
 using android::base::Pool;
 
@@ -1345,6 +1346,13 @@ void deepcopy_VkPhysicalDevice8BitStorageFeaturesKHR(
     Pool* pool,
     const VkPhysicalDevice8BitStorageFeaturesKHR* from,
     VkPhysicalDevice8BitStorageFeaturesKHR* to);
+
+#endif
+#ifdef VK_ANDROID_native_buffer
+void deepcopy_VkNativeBufferANDROID(
+    Pool* pool,
+    const VkNativeBufferANDROID* from,
+    VkNativeBufferANDROID* to);
 
 #endif
 #ifdef VK_EXT_debug_report
