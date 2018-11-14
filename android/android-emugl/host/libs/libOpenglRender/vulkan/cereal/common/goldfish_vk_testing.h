@@ -27,6 +27,7 @@
 #include <vulkan/vulkan.h>
 
 
+#include "goldfish_vk_private_defs.h"
 #include <string.h>
 #include <functional>
 using OnFailCompareFunc = std::function<void(const char*)>;
@@ -1345,6 +1346,13 @@ void checkEqual_VkImageFormatListCreateInfoKHR(
 void checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR(
     const VkPhysicalDevice8BitStorageFeaturesKHR* a,
     const VkPhysicalDevice8BitStorageFeaturesKHR* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_ANDROID_native_buffer
+void checkEqual_VkNativeBufferANDROID(
+    const VkNativeBufferANDROID* a,
+    const VkNativeBufferANDROID* b,
     OnFailCompareFunc onFail);
 
 #endif

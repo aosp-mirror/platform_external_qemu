@@ -104,6 +104,7 @@ class CerealGenerator(OutputGenerator):
         self.host_cmake_generator = lambda cppFiles: """%s
 set(OpenglRender_vulkan_cereal_src %s)
 android_add_library(OpenglRender_vulkan_cereal)
+target_compile_definitions(OpenglRender_vulkan_cereal PRIVATE -DVK_ANDROID_native_buffer)
 target_link_libraries(OpenglRender_vulkan_cereal PRIVATE emugl_base)
 target_link_libraries(OpenglRender_vulkan_cereal PUBLIC android-emu-base)
 
@@ -143,6 +144,7 @@ endif
 
 LOCAL_CFLAGS += \\
     -DLOG_TAG=\\"goldfish_vulkan\\" \\
+    -DVK_ANDROID_native_buffer \\
     -Wno-missing-field-initializers \\
     -Werror \\
     -fstrict-aliasing \\
@@ -164,6 +166,7 @@ $(call emugl-end-module)
 """
 
         encoderInclude = """
+#include "goldfish_vk_private_defs.h"
 #include <memory>
 class IOStream;
 """
@@ -179,10 +182,13 @@ class IOStream;
 #include "goldfish_vk_marshaling_guest.h"
 #include "goldfish_vk_deepcopy_guest.h"
 #include "goldfish_vk_handlemap_guest.h"
+#include "goldfish_vk_private_defs.h"
 """
         functableImplInclude = """
 #include "VkEncoder.h"
 #include "HostConnection.h"
+
+#include "goldfish_vk_private_defs.h"
 
 // Stuff we are not going to use but if included,
 // will cause compile errors. These are Android Vulkan
@@ -193,6 +199,7 @@ class IOStream;
 """
         marshalIncludeGuest = """
 #include "goldfish_vk_marshaling_guest.h"
+#include "goldfish_vk_private_defs.h"
 #include "VulkanStream.h"
 
 // Stuff we are not going to use but if included,
@@ -203,22 +210,28 @@ class IOStream;
 #undef VK_ANDROID_external_memory_android_hardware_buffer
 """
         vulkanStreamInclude = """
+#include "goldfish_vk_private_defs.h"
+
 #include "VulkanStream.h"
 #include "android/base/files/StreamSerializing.h"
 """
         testingInclude = """
+#include "goldfish_vk_private_defs.h"
 #include <string.h>
 #include <functional>
 using OnFailCompareFunc = std::function<void(const char*)>;
 """
         poolInclude = """
+#include "goldfish_vk_private_defs.h"
 #include "android/base/Pool.h"
 using android::base::Pool;
 """
         handleMapInclude = """
+#include "goldfish_vk_private_defs.h"
 #include "VulkanHandleMapping.h"
 """
         poolIncludeGuest = """
+#include "goldfish_vk_private_defs.h"
 #include "android/base/Pool.h"
 using android::base::Pool;
 // Stuff we are not going to use but if included,
@@ -229,6 +242,7 @@ using android::base::Pool;
 #undef VK_ANDROID_external_memory_android_hardware_buffer
 """
         handleMapIncludeGuest = """
+#include "goldfish_vk_private_defs.h"
 #include "VulkanHandleMapping.h"
 // Stuff we are not going to use but if included,
 // will cause compile errors. These are Android Vulkan
@@ -238,6 +252,7 @@ using android::base::Pool;
 #undef VK_ANDROID_external_memory_android_hardware_buffer
 """
         dispatchHeaderDefs = """
+#include "goldfish_vk_private_defs.h"
 namespace goldfish_vk {
 
 struct VulkanDispatch;
@@ -247,7 +262,12 @@ using DlOpenFunc = void* (void);
 using DlSymFunc = void* (void*, const char*);
 """
 
+        extensionStructsInclude = """
+#include "goldfish_vk_private_defs.h"
+"""
+
         extensionStructsIncludeGuest = """
+#include "goldfish_vk_private_defs.h"
 // Stuff we are not going to use but if included,
 // will cause compile errors. These are Android Vulkan
 // required extensions, but the approach will be to
@@ -257,9 +277,11 @@ using DlSymFunc = void* (void*, const char*);
 """
         commonCerealImplIncludes = """
 #include "goldfish_vk_extension_structs.h"
+#include "goldfish_vk_private_defs.h"
 """
         commonCerealImplIncludesGuest = """
 #include "goldfish_vk_extension_structs_guest.h"
+#include "goldfish_vk_private_defs.h"
 """
 
         dispatchImplIncludes = """
@@ -274,6 +296,7 @@ using DlSymFunc = void* (void*, const char*);
 
         decoderImplIncludes = """
 #include "common/goldfish_vk_marshaling.h"
+#include "common/goldfish_vk_private_defs.h"
 
 #include "android/base/system/System.h"
 
@@ -334,7 +357,8 @@ using DlSymFunc = void* (void*, const char*);
 
         self.addGuestHalModule("func_table", extraImpl=functableImplInclude)
 
-        self.addModule("common", "goldfish_vk_extension_structs")
+        self.addModule("common", "goldfish_vk_extension_structs",
+                       extraHeader=extensionStructsInclude)
         self.addModule("common", "goldfish_vk_marshaling",
                        extraHeader=vulkanStreamInclude,
                        extraImpl=commonCerealImplIncludes)
