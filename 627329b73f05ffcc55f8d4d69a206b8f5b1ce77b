@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1309c53a_ba88a448",
+        "filename": "android/android-emu/android/snapshot/SnapshotAPI.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-14T01:55:14Z",
+      "side": 1,
+      "message": "should there be a default argumetn nullptr for createForkIdResponse?",
+      "range": {
+        "startLine": 101,
+        "startChar": 20,
+        "endLine": 101,
+        "endChar": 27
+      },
+      "revId": "627329b73f05ffcc55f8d4d69a206b8f5b1ce77b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
