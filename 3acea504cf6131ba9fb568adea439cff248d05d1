@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a4ff9eaa_632aca8f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_deepcopy.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-14T19:17:39Z",
+      "side": 1,
+      "message": "I don\u0027t think this casting is useful here.",
+      "range": {
+        "startLine": 50,
+        "startChar": 20,
+        "endLine": 50,
+        "endChar": 33
+      },
+      "revId": "3acea504cf6131ba9fb568adea439cff248d05d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5749141a_3c364e14",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_deepcopy.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-14T19:17:39Z",
+      "side": 1,
+      "message": "and here.",
+      "range": {
+        "startLine": 51,
+        "startChar": 53,
+        "endLine": 51,
+        "endChar": 60
+      },
+      "revId": "3acea504cf6131ba9fb568adea439cff248d05d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d12d377b_42589e1a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_deepcopy.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 6329,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-14T19:17:39Z",
+      "side": 1,
+      "message": "Isn\u0027t it safer to cast to the type of sType? I assume this is the first field in all these structs. Or we can introduce a function like getType(const void *). Or put switch (...) here.",
+      "range": {
+        "startLine": 6329,
+        "startChar": 25,
+        "endLine": 6329,
+        "endChar": 66
+      },
+      "revId": "3acea504cf6131ba9fb568adea439cff248d05d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dc12d4d4_65a73dcc",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_extension_structs.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-14T19:17:39Z",
+      "side": 1,
+      "message": "Replace with switch here as well?",
+      "range": {
+        "startLine": 283,
+        "startChar": 4,
+        "endLine": 283,
+        "endChar": 6
+      },
+      "revId": "3acea504cf6131ba9fb568adea439cff248d05d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b4ef604a_4811eb3c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-14T19:17:39Z",
+      "side": 1,
+      "message": "Do we need this?",
+      "range": {
+        "startLine": 117,
+        "startChar": 23,
+        "endLine": 117,
+        "endChar": 37
+      },
+      "revId": "3acea504cf6131ba9fb568adea439cff248d05d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a7175737_5907932a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 2419,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-14T19:17:39Z",
+      "side": 1,
+      "message": "Maybe we want to use fixed size types?",
+      "range": {
+        "startLine": 2419,
+        "startChar": 40,
+        "endLine": 2419,
+        "endChar": 46
+      },
+      "revId": "3acea504cf6131ba9fb568adea439cff248d05d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
