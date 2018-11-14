@@ -50,6 +50,7 @@ BUILD_CMAKE               := $(_BUILD_CORE_DIR)/emulator/cmake.make
 BUILD_HOST_STATIC_LIBRARY := $(_BUILD_CORE_DIR)/emulator/host_static_library.make
 BUILD_HOST_SHARED_LIBRARY := $(_BUILD_CORE_DIR)/emulator/host_shared_library.make
 PREBUILT_STATIC_LIBRARY   := $(_BUILD_CORE_DIR)/emulator/prebuilt_static_library.make
+PREBUILT_SHARED_LIBRARY   := $(_BUILD_CORE_DIR)/emulator/prebuilt_shared_library.make
 
 _BUILD_DEPENDENCY_DIRS :=
 
