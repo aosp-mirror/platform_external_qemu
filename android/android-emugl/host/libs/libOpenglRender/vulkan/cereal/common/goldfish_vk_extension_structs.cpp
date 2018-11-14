@@ -132,6 +132,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_KHR_8bit_storage
 #endif
+#ifdef VK_ANDROID_native_buffer
+#endif
 #ifdef VK_EXT_debug_report
 #endif
 #ifdef VK_NV_glsl_shader
@@ -272,10 +274,10 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_NV_device_diagnostic_checkpoints
 #endif
-VkStructureType goldfish_vk_struct_type(
+uint32_t goldfish_vk_struct_type(
     const void* structExtension)
 {
-    const VkStructureType asStructType = *(reinterpret_cast<const VkStructureType*>(structExtension));
+    const uint32_t asStructType = *(reinterpret_cast<const uint32_t*>(structExtension));
     return asStructType;
 }
 
@@ -286,7 +288,7 @@ size_t goldfish_vk_extension_struct_size(
     {
         return (size_t)0;
     }
-    VkStructureType structType = goldfish_vk_struct_type(structExtension);
+    uint32_t structType = (uint32_t)goldfish_vk_struct_type(structExtension);
     switch(structType)
     {
 #ifdef VK_VERSION_1_1
@@ -537,6 +539,12 @@ size_t goldfish_vk_extension_struct_size(
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
         {
             return sizeof(VkPhysicalDevice8BitStorageFeaturesKHR);
+        }
+#endif
+#ifdef VK_ANDROID_native_buffer
+        case VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID:
+        {
+            return sizeof(VkNativeBufferANDROID);
         }
 #endif
 #ifdef VK_EXT_debug_report

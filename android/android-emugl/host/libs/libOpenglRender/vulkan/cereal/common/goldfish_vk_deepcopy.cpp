@@ -26,6 +26,7 @@
 
 
 #include "goldfish_vk_extension_structs.h"
+#include "goldfish_vk_private_defs.h"
 
 
 namespace goldfish_vk {
@@ -4411,6 +4412,29 @@ void deepcopy_VkPhysicalDevice8BitStorageFeaturesKHR(
 }
 
 #endif
+#ifdef VK_ANDROID_native_buffer
+void deepcopy_VkNativeBufferANDROID(
+    Pool* pool,
+    const VkNativeBufferANDROID* from,
+    VkNativeBufferANDROID* to)
+{
+    (void)pool;
+    *to = *from;
+    size_t pNext_size = goldfish_vk_extension_struct_size(from->pNext);
+    to->pNext = nullptr;
+    if (pNext_size)
+    {
+        to->pNext = (const void*)pool->alloc(pNext_size);
+        deepcopy_extension_struct(pool, from->pNext, (void*)(to->pNext));
+    }
+    to->handle = nullptr;
+    if (from->handle)
+    {
+        to->handle = (uint32_t*)pool->dupArray(from->handle, sizeof(const uint32_t));
+    }
+}
+
+#endif
 #ifdef VK_EXT_debug_report
 void deepcopy_VkDebugReportCallbackCreateInfoEXT(
     Pool* pool,
@@ -6329,7 +6353,7 @@ void deepcopy_extension_struct(
     {
         return;
     }
-    VkStructureType structType = goldfish_vk_struct_type(structExtension);
+    uint32_t structType = (uint32_t)goldfish_vk_struct_type(structExtension);
     switch(structType)
     {
 #ifdef VK_VERSION_1_1
@@ -6635,6 +6659,13 @@ void deepcopy_extension_struct(
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
         {
             deepcopy_VkPhysicalDevice8BitStorageFeaturesKHR(pool, reinterpret_cast<const VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension), reinterpret_cast<VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_ANDROID_native_buffer
+        case VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID:
+        {
+            deepcopy_VkNativeBufferANDROID(pool, reinterpret_cast<const VkNativeBufferANDROID*>(structExtension), reinterpret_cast<VkNativeBufferANDROID*>(structExtension_out));
             break;
         }
 #endif
