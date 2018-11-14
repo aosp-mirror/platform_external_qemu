@@ -26,6 +26,7 @@
 
 
 #include "goldfish_vk_extension_structs.h"
+#include "goldfish_vk_private_defs.h"
 
 
 namespace goldfish_vk {
@@ -8851,6 +8852,59 @@ void unmarshal_VkPhysicalDevice8BitStorageFeaturesKHR(
 }
 
 #endif
+#ifdef VK_ANDROID_native_buffer
+void marshal_VkNativeBufferANDROID(
+    VulkanStream* vkStream,
+    const VkNativeBufferANDROID* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size = goldfish_vk_extension_struct_size(forMarshaling->pNext);
+    vkStream->putBe32(pNext_size);
+    if (pNext_size)
+    {
+        vkStream->write((const void*)forMarshaling->pNext, sizeof(VkStructureType));
+        marshal_extension_struct(vkStream, forMarshaling->pNext);
+    }
+    vkStream->write((const uint32_t**)&forMarshaling->handle, sizeof(const uint32_t*));
+    if (forMarshaling->handle)
+    {
+        vkStream->write((const uint32_t*)forMarshaling->handle, sizeof(const uint32_t));
+    }
+    vkStream->write((int*)&forMarshaling->stride, sizeof(int));
+    vkStream->write((int*)&forMarshaling->format, sizeof(int));
+    vkStream->write((int*)&forMarshaling->usage, sizeof(int));
+    vkStream->write((uint64_t*)&forMarshaling->consumer, sizeof(uint64_t));
+    vkStream->write((uint64_t*)&forMarshaling->producer, sizeof(uint64_t));
+}
+
+void unmarshal_VkNativeBufferANDROID(
+    VulkanStream* vkStream,
+    VkNativeBufferANDROID* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t**)&forUnmarshaling->handle, sizeof(const uint32_t*));
+    if (forUnmarshaling->handle)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->handle, sizeof(const uint32_t));
+        vkStream->read((uint32_t*)forUnmarshaling->handle, sizeof(const uint32_t));
+    }
+    vkStream->read((int*)&forUnmarshaling->stride, sizeof(int));
+    vkStream->read((int*)&forUnmarshaling->format, sizeof(int));
+    vkStream->read((int*)&forUnmarshaling->usage, sizeof(int));
+    vkStream->read((uint64_t*)&forUnmarshaling->consumer, sizeof(uint64_t));
+    vkStream->read((uint64_t*)&forUnmarshaling->producer, sizeof(uint64_t));
+}
+
+#endif
 #ifdef VK_EXT_debug_report
 void marshal_VkDebugReportCallbackCreateInfoEXT(
     VulkanStream* vkStream,
@@ -12897,6 +12951,13 @@ void marshal_extension_struct(
             break;
         }
 #endif
+#ifdef VK_ANDROID_native_buffer
+        case VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID:
+        {
+            marshal_VkNativeBufferANDROID(vkStream, reinterpret_cast<const VkNativeBufferANDROID*>(structExtension));
+            break;
+        }
+#endif
 #ifdef VK_EXT_debug_report
         case VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT:
         {
@@ -13538,6 +13599,13 @@ void unmarshal_extension_struct(
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
         {
             unmarshal_VkPhysicalDevice8BitStorageFeaturesKHR(vkStream, reinterpret_cast<VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_ANDROID_native_buffer
+        case VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID:
+        {
+            unmarshal_VkNativeBufferANDROID(vkStream, reinterpret_cast<VkNativeBufferANDROID*>(structExtension_out));
             break;
         }
 #endif

@@ -26,6 +26,7 @@
 
 
 #include "common/goldfish_vk_marshaling.h"
+#include "common/goldfish_vk_private_defs.h"
 
 #include "android/base/system/System.h"
 
@@ -6516,6 +6517,80 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
 #endif
 #ifdef VK_KHR_8bit_storage
+#endif
+#ifdef VK_ANDROID_native_buffer
+            case OP_vkGetSwapchainGrallocUsageANDROID:
+            {
+                VkDevice device;
+                VkFormat format;
+                VkImageUsageFlags imageUsage;
+                int* grallocUsage;
+                vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
+                vkReadStream->read((VkFormat*)&format, sizeof(VkFormat));
+                vkReadStream->read((VkImageUsageFlags*)&imageUsage, sizeof(VkImageUsageFlags));
+                vkReadStream->alloc((void**)&grallocUsage, sizeof(int));
+                vkReadStream->read((int*)grallocUsage, sizeof(int));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetSwapchainGrallocUsageANDROID\n");;
+                }
+                VkResult vkGetSwapchainGrallocUsageANDROID_VkResult_return = (VkResult)0;
+                vkGetSwapchainGrallocUsageANDROID_VkResult_return = m_vk->vkGetSwapchainGrallocUsageANDROID(device, format, imageUsage, grallocUsage);
+                vkStream->write((int*)grallocUsage, sizeof(int));
+                vkStream->write(&vkGetSwapchainGrallocUsageANDROID_VkResult_return, sizeof(VkResult));
+                vkReadStream->clearPool();
+                vkStream->commitWrite();
+                break;
+            }
+            case OP_vkAcquireImageANDROID:
+            {
+                VkDevice device;
+                VkImage image;
+                int nativeFenceFd;
+                VkSemaphore semaphore;
+                VkFence fence;
+                vkReadStream->read((VkDevice*)&device, sizeof(VkDevice));
+                vkReadStream->read((VkImage*)&image, sizeof(VkImage));
+                vkReadStream->read((int*)&nativeFenceFd, sizeof(int));
+                vkReadStream->read((VkSemaphore*)&semaphore, sizeof(VkSemaphore));
+                vkReadStream->read((VkFence*)&fence, sizeof(VkFence));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkAcquireImageANDROID\n");;
+                }
+                VkResult vkAcquireImageANDROID_VkResult_return = (VkResult)0;
+                vkAcquireImageANDROID_VkResult_return = m_vk->vkAcquireImageANDROID(device, image, nativeFenceFd, semaphore, fence);
+                vkStream->write(&vkAcquireImageANDROID_VkResult_return, sizeof(VkResult));
+                vkReadStream->clearPool();
+                vkStream->commitWrite();
+                break;
+            }
+            case OP_vkQueueSignalReleaseImageANDROID:
+            {
+                VkQueue queue;
+                uint32_t waitSemaphoreCount;
+                VkSemaphore* pWaitSemaphores;
+                VkImage image;
+                int* pNativeFenceFd;
+                vkReadStream->read((VkQueue*)&queue, sizeof(VkQueue));
+                vkReadStream->read((uint32_t*)&waitSemaphoreCount, sizeof(uint32_t));
+                vkReadStream->alloc((void**)&pWaitSemaphores, sizeof(const VkSemaphore));
+                vkReadStream->read((VkSemaphore*)pWaitSemaphores, sizeof(const VkSemaphore));
+                vkReadStream->read((VkImage*)&image, sizeof(VkImage));
+                vkReadStream->alloc((void**)&pNativeFenceFd, sizeof(int));
+                vkReadStream->read((int*)pNativeFenceFd, sizeof(int));
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkQueueSignalReleaseImageANDROID\n");;
+                }
+                VkResult vkQueueSignalReleaseImageANDROID_VkResult_return = (VkResult)0;
+                vkQueueSignalReleaseImageANDROID_VkResult_return = m_vk->vkQueueSignalReleaseImageANDROID(queue, waitSemaphoreCount, pWaitSemaphores, image, pNativeFenceFd);
+                vkStream->write((int*)pNativeFenceFd, sizeof(int));
+                vkStream->write(&vkQueueSignalReleaseImageANDROID_VkResult_return, sizeof(VkResult));
+                vkReadStream->clearPool();
+                vkStream->commitWrite();
+                break;
+            }
 #endif
 #ifdef VK_EXT_debug_report
             case OP_vkCreateDebugReportCallbackEXT:

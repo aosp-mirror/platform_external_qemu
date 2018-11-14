@@ -2863,13 +2863,15 @@ server.
             <member noautovalidity="true"><type>void</type>*                            <name>pNext</name></member>
             <member><type>VkBool32</type>                         <name>shaderDrawParameters</name></member>
         </type>
-        <type category="struct" name="VkNativeBufferANDROID">
+        <type category="struct" name="VkNativeBufferANDROID" structextends="VkImageCreateInfo">
             <member values="VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID"><type>VkStructureType</type> <name>sType</name></member>
             <member>const <type>void</type>* <name>pNext</name></member>
-            <member>const <type>void</type>* <name>handle</name></member>
+            <member noautovalidity="true">const <type>uint32_t</type>* <name>handle</name></member>
             <member><type>int</type> <name>stride</name></member>
             <member><type>int</type> <name>format</name></member>
             <member><type>int</type> <name>usage</name></member>
+            <member><type>uint64_t</type> <name>consumer</name></member>
+            <member><type>uint64_t</type> <name>producer</name></member>
         </type>
         <type category="struct" name="VkShaderResourceUsageAMD" returnedonly="true">
             <member><type>uint32_t</type> <name>numUsedVgprs</name></member>
@@ -6979,9 +6981,9 @@ server.
                 <command name="vkGetPhysicalDeviceWin32PresentationSupportKHR"/>
             </require>
         </extension>
-        <extension name="VK_ANDROID_native_buffer" number="11" type="device" author="ANDROID" platform="android" contact="Jesse Hall @critsec" supported="disabled">
+        <extension name="VK_ANDROID_native_buffer" number="11" type="device" author="ANDROID" platform="android" contact="Jesse Hall @critsec" supported="vulkan">
             <require>
-                <enum value="5"                                                 name="VK_ANDROID_NATIVE_BUFFER_SPEC_VERSION"/>
+                <enum value="6"                                                 name="VK_ANDROID_NATIVE_BUFFER_SPEC_VERSION"/>
                 <enum value="11"                                                name="VK_ANDROID_NATIVE_BUFFER_NUMBER"/>
                 <enum value="&quot;VK_ANDROID_native_buffer&quot;"              name="VK_ANDROID_NATIVE_BUFFER_NAME"/>
                 <enum offset="0" extends="VkStructureType"                      name="VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID"/>
