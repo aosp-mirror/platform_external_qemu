@@ -112,6 +112,7 @@ target_include_directories(OpenglRender_vulkan_cereal
                            PUBLIC
                            ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/vulkan/cereal
                            PRIVATE
+                           ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/vulkan/
                            ${ANDROID_EMUGL_DIR}/host/include
                            ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/
                            ${ANDROID_EMUGL_DIR}/host/include/vulkan)
@@ -345,7 +346,7 @@ using DlSymFunc = void* (void*, const char*);
             os.path.join(
                 os.getcwd(),
                 "android", "android-emugl", "host",
-                "libs", "libOpenglRender")
+                "libs", "libOpenglRender", "vulkan")
 
         self.addGuestEncoderModule(
             "VkEncoder",

@@ -671,11 +671,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_49;
                 vkReadStream->read((uint64_t*)&cgen_var_49, 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_49, (VkQueue*)pQueue, 1);
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetDeviceQueue\n");;
-                }
-                m_vk->vkGetDeviceQueue(device, queueFamilyIndex, queueIndex, pQueue);
+                m_state->on_vkGetDeviceQueue(device, queueFamilyIndex, queueIndex, pQueue);
                 uint64_t cgen_var_50;
                 vkStream->handleMapping()->mapHandles_VkQueue_u64(pQueue, &cgen_var_50, 1);
                 vkStream->write((uint64_t*)&cgen_var_50, 8);
@@ -1780,12 +1776,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_154;
                 vkReadStream->read((uint64_t*)&cgen_var_154, 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_154, (VkImage*)pImage, 1);
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateImage\n");;
-                }
                 VkResult vkCreateImage_VkResult_return = (VkResult)0;
-                vkCreateImage_VkResult_return = m_vk->vkCreateImage(device, pCreateInfo, pAllocator, pImage);
+                vkCreateImage_VkResult_return = m_state->on_vkCreateImage(device, pCreateInfo, pAllocator, pImage);
                 uint64_t cgen_var_155;
                 vkStream->handleMapping()->mapHandles_VkImage_u64(pImage, &cgen_var_155, 1);
                 vkStream->write((uint64_t*)&cgen_var_155, 8);
@@ -1812,11 +1804,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkDestroyImage\n");;
-                }
-                m_vk->vkDestroyImage(device, image, pAllocator);
+                m_state->on_vkDestroyImage(device, image, pAllocator);
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
                 break;
@@ -7792,12 +7780,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkImageUsageFlags*)&imageUsage, sizeof(VkImageUsageFlags));
                 vkReadStream->alloc((void**)&grallocUsage, sizeof(int));
                 vkReadStream->read((int*)grallocUsage, sizeof(int));
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetSwapchainGrallocUsageANDROID\n");;
-                }
                 VkResult vkGetSwapchainGrallocUsageANDROID_VkResult_return = (VkResult)0;
-                vkGetSwapchainGrallocUsageANDROID_VkResult_return = m_vk->vkGetSwapchainGrallocUsageANDROID(device, format, imageUsage, grallocUsage);
+                vkGetSwapchainGrallocUsageANDROID_VkResult_return = m_state->on_vkGetSwapchainGrallocUsageANDROID(device, format, imageUsage, grallocUsage);
                 vkStream->write((int*)grallocUsage, sizeof(int));
                 vkStream->write(&vkGetSwapchainGrallocUsageANDROID_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
@@ -7824,12 +7808,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_651;
                 vkReadStream->read((uint64_t*)&cgen_var_651, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_651, (VkFence*)&fence, 1);
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkAcquireImageANDROID\n");;
-                }
                 VkResult vkAcquireImageANDROID_VkResult_return = (VkResult)0;
-                vkAcquireImageANDROID_VkResult_return = m_vk->vkAcquireImageANDROID(device, image, nativeFenceFd, semaphore, fence);
+                vkAcquireImageANDROID_VkResult_return = m_state->on_vkAcquireImageANDROID(device, image, nativeFenceFd, semaphore, fence);
                 vkStream->write(&vkAcquireImageANDROID_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
@@ -7855,12 +7835,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_654, (VkImage*)&image, 1);
                 vkReadStream->alloc((void**)&pNativeFenceFd, sizeof(int));
                 vkReadStream->read((int*)pNativeFenceFd, sizeof(int));
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkQueueSignalReleaseImageANDROID\n");;
-                }
                 VkResult vkQueueSignalReleaseImageANDROID_VkResult_return = (VkResult)0;
-                vkQueueSignalReleaseImageANDROID_VkResult_return = m_vk->vkQueueSignalReleaseImageANDROID(queue, waitSemaphoreCount, pWaitSemaphores, image, pNativeFenceFd);
+                vkQueueSignalReleaseImageANDROID_VkResult_return = m_state->on_vkQueueSignalReleaseImageANDROID(queue, waitSemaphoreCount, pWaitSemaphores, image, pNativeFenceFd);
                 vkStream->write((int*)pNativeFenceFd, sizeof(int));
                 vkStream->write(&vkQueueSignalReleaseImageANDROID_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
