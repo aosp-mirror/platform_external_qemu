@@ -31,7 +31,7 @@ class VulkanExtensionStructs(VulkanWrapperGenerator):
         self.codegen = CodeGen()
 
         self.structTypeRetType = \
-            makeVulkanTypeSimple(False, "VkStructureType", 0)
+            makeVulkanTypeSimple(False, "uint32_t", 0)
         self.structTypePrototype = \
             VulkanAPI(STRUCT_TYPE_API_NAME,
                       self.structTypeRetType,
@@ -66,8 +66,8 @@ class VulkanExtensionStructs(VulkanWrapperGenerator):
 
         def structTypeImpl(cgen):
             cgen.stmt(
-                "const VkStructureType asStructType = *(%s)" %
-                (castAsStruct(STRUCT_EXTENSION_PARAM.paramName, "VkStructureType")))
+                "const uint32_t asStructType = *(%s)" %
+                (castAsStruct(STRUCT_EXTENSION_PARAM.paramName, "uint32_t")))
             cgen.stmt("return asStructType")
 
         self.module.appendImpl(
