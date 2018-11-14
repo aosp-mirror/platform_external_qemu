@@ -186,7 +186,7 @@ elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
     ${PREBUILT_ROOT}/lib/libsoftokn3.so>lib64/qt/lib/libsoftokn3.so;
     ${PREBUILT_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so;
     ${PREBUILT_ROOT}/lib/libQt5XcbQpa.so.5>lib64/qt/lib/libQt5XcbQpa.so.5;
-    ${PREBUILT_ROOT}/plugins/platforms/libqxcb.so>lib64/qt/plugins/platforms/libqxcb.so;
+    ${PREBUILT_ROOT}/plugins/platforms/*>>lib64/qt/plugins/platforms/;
     ${PREBUILT_ROOT}/plugins/xcbglintegrations/libqxcb-glx-integration.so>lib64/qt/plugins/xcbglintegrations/libqxcb-glx-integration.so;
     ${PREBUILT_ROOT}/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so>lib64/qt/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so;
     ${PREBUILT_ROOT}/plugins/iconengines/libqsvgicon.so>lib64/qt/plugins/iconengines/libqsvgicon.so;
