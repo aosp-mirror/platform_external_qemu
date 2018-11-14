@@ -78,12 +78,14 @@ offworld::Response createCheckpointMetadataResponse(
     return response;
 }
 
-offworld::Response createForkIdResponse(int forkId) {
+offworld::Response createForkIdResponse(int forkId,
+        android::base::StringView metadata) {
     offworld::Response response;
     response.set_result(offworld::Response::RESULT_NO_ERROR);
-    response.mutable_snapshot()
-            ->mutable_fork_read_only_instances()
-            ->set_instance_id(forkId);
+    auto forkReadOnlyInstance = response.mutable_snapshot()
+            ->mutable_fork_read_only_instances();
+    forkReadOnlyInstance->set_instance_id(forkId);
+    forkReadOnlyInstance->set_metadata(metadata);
     return response;
 }
 
@@ -95,7 +97,8 @@ void sendDefaultResponse(android::AsyncMessagePipeHandle pipe,
             break;
         }
         case RequestType::Fork: {
-            android::offworld::sendResponse(pipe, createForkIdResponse(0));
+            android::offworld::sendResponse(pipe, createForkIdResponse(0,
+                    nullptr));
             break;
         }
         default: {
@@ -177,7 +180,7 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
 
     sSnapshotCrossSession->mPipesAwaitingResponse[pipe] = RequestType::Fork;
     sSnapshotCrossSession->mOverrideResponse[RequestType::Fork] =
-            createForkIdResponse(0);
+            createForkIdResponse(0, nullptr);
 
     gQAndroidVmOperations->vmStop();
     android::base::ThreadLooper::runOnMainLooper([pipe]() {
@@ -203,13 +206,15 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
     });
 }
 
-void doneInstance(android::AsyncMessagePipeHandle pipe) {
+void doneInstance(android::AsyncMessagePipeHandle pipe,
+        android::base::StringView metadata) {
     if (sSnapshotCrossSession->sForkId <
         sSnapshotCrossSession->sForkTotal - 1) {
         sSnapshotCrossSession->sForkId++;
 
         sSnapshotCrossSession->mOverrideResponse[RequestType::Fork] =
-                createForkIdResponse(sSnapshotCrossSession->sForkId);
+                createForkIdResponse(sSnapshotCrossSession->sForkId,
+                        metadata);
 
         gQAndroidVmOperations->vmStop();
         // Load back to write mode for the last run
