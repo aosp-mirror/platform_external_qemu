@@ -68,6 +68,7 @@ target_link_libraries(OpenglRender
                               OpenglRender_vulkan_cereal
                               OpenGLESDispatch
                               GLSnapshot)
+target_compile_definitions(OpenglRender PRIVATE -DVK_ANDROID_native_buffer)
 target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
 target_link_libraries(OpenglRender PRIVATE emugl_base)
 target_include_directories(
