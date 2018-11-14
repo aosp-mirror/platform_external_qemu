@@ -24,6 +24,8 @@ PROGRAM_PARAMETERS=""
 PROGRAM_DESCRIPTION=\
 "Build dEQP against emulator combined guest/host driver."
 
+option_register_var "--case=<dEQP-case-pattern>" OPT_DEQP_CASE "Run a particular set of dEQP tests"
+
 aosp_dir_register_option
 package_builder_register_options
 
@@ -40,7 +42,14 @@ DEQP_DIR=$AOSP_DIR/external/deqp
 VK_CTS_MUSTPASS_CASELIST=$AOSP_DIR/external/deqp/android/cts/master/vk-master.txt
 DEQP_BUILD_DIR=$AOSP_DIR/external/deqp/build
 DEQP_VK_EXEC_DIR=$DEQP_BUILD_DIR/external/vulkancts/modules/vulkan/
-DEQP_VK_EXEC_NAME="./deqp-vk --deqp-caselist-file=$VK_CTS_MUSTPASS_CASELIST"
+DEQP_TESTLOG_DST=$AOSP_DIR/external/qemu/dEQP-Log.qpa
+DEQP_CASES="--deqp-caselist-file=$VK_CTS_MUSTPASS_CASELIST"
+
+if [ "$OPT_DEQP_CASE" ]; then
+DEQP_CASES="--deqp-case=$OPT_DEQP_CASE"
+fi
+
+DEQP_VK_EXEC_NAME="./deqp-vk $DEQP_CASES --deqp-log-filename=$DEQP_TESTLOG_DST"
 
 cd $DEQP_VK_EXEC_DIR
 
