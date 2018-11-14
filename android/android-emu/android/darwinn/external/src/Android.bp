@@ -1,0 +1,205 @@
+// Generated file. Do not edit.
+// by gendep.sh from src/Android.bp.m4.
+cc_defaults {
+    name: "third_party_darwinn_src_defaults",
+    defaults: [
+      "darwinn_driver_defaults",
+    ],
+    shared_libs: [
+        "libcrypto",
+        "libcutils",
+        "libutils",
+    ],
+    static_libs: [
+        "libneuralnetworks_common",
+    ],
+}
+
+cc_library_static {
+    name: "darwinn_beagle_all_driver_provider",
+    defaults: [
+        "third_party_darwinn_src_defaults",
+    ],
+    header_libs: [
+        "darwinn_flatbuffer_headers",
+    ],
+    static_libs: [
+        "libusb",
+        "darwinn_port_default_port",
+    ],
+    srcs: [
+        // from //third_party/darwinn/driver/beagle:beagle_all_driver_provider
+        "third_party/darwinn/api/allocated_buffer.cc",
+        "third_party/darwinn/api/buffer.cc",
+        "third_party/darwinn/api/driver_factory.cc",
+        "third_party/darwinn/api/driver_options_helper.cc",
+        "third_party/darwinn/api/layer_information.cc",
+        "third_party/darwinn/driver/aligned_allocator.cc",
+        "third_party/darwinn/driver/allocator.cc",
+        "third_party/darwinn/driver/beagle/beagle_kernel_top_level_handler.cc",
+        "third_party/darwinn/driver/beagle/beagle_pci_driver_provider.cc",
+        "third_party/darwinn/driver/beagle/beagle_top_level_handler.cc",
+        "third_party/darwinn/driver/beagle/beagle_top_level_interrupt_manager.cc",
+        "third_party/darwinn/driver/beagle/beagle_usb_driver_provider.cc",
+        "third_party/darwinn/driver/device_buffer.cc",
+        "third_party/darwinn/driver/device_buffer_mapper.cc",
+        "third_party/darwinn/driver/dma_chunker.cc",
+        "third_party/darwinn/driver/dma_info.cc",
+        "third_party/darwinn/driver/dma_info_extractor.cc",
+        "third_party/darwinn/driver/driver.cc",
+        "third_party/darwinn/driver/driver_factory.cc",
+        "third_party/darwinn/driver/executable_registry.cc",
+        "third_party/darwinn/driver/executable_util.cc",
+        "third_party/darwinn/driver/executable_verifier.cc",
+        "third_party/darwinn/driver/instruction_buffers.cc",
+        "third_party/darwinn/driver/interrupt/grouped_interrupt_controller.cc",
+        "third_party/darwinn/driver/interrupt/interrupt_controller.cc",
+        "third_party/darwinn/driver/interrupt/top_level_interrupt_manager.cc",
+        "third_party/darwinn/driver/interrupt/wire_interrupt_handler.cc",
+        "third_party/darwinn/driver/kernel/kernel_coherent_allocator.cc",
+        "third_party/darwinn/driver/kernel/kernel_event_handler.cc",
+        "third_party/darwinn/driver/kernel/kernel_interrupt_handler.cc",
+        "third_party/darwinn/driver/kernel/kernel_mmu_mapper.cc",
+        "third_party/darwinn/driver/kernel/kernel_registers.cc",
+        "third_party/darwinn/driver/kernel/kernel_wire_interrupt_handler.cc",
+        "third_party/darwinn/driver/memory/buddy_address_space.cc",
+        "third_party/darwinn/driver/memory/dual_address_space.cc",
+        "third_party/darwinn/driver/memory/mmio_address_space.cc",
+        "third_party/darwinn/driver/memory/mmu_mapper.cc",
+        "third_party/darwinn/driver/memory/nop_address_space.cc",
+        "third_party/darwinn/driver/mmio/coherent_allocator.cc",
+        "third_party/darwinn/driver/mmio_driver.cc",
+        "third_party/darwinn/driver/registers/registers.cc",
+        "third_party/darwinn/driver/request.cc",
+        "third_party/darwinn/driver/run_controller.cc",
+        "third_party/darwinn/driver/scalar_core_controller.cc",
+        "third_party/darwinn/driver/single_queue_dma_scheduler.cc",
+        "third_party/darwinn/driver/usb/local_usb_device.cc",
+        "third_party/darwinn/driver/usb/usb_dfu_commands.cc",
+        "third_party/darwinn/driver/usb/usb_dfu_util.cc",
+        "third_party/darwinn/driver/usb/usb_driver.cc",
+        "third_party/darwinn/driver/usb/usb_io_request.cc",
+        "third_party/darwinn/driver/usb/usb_ml_commands.cc",
+        "third_party/darwinn/driver/usb/usb_registers.cc",
+        "third_party/darwinn/driver/usb/usb_standard_commands.cc",
+        "third_party/darwinn/port/blocking_counter.cc",
+    ],
+}
+
+// Provides Noronha Driver.
+cc_library_static {
+    name: "darwinn_driver_noronha_noronha_driver_provider",
+    defaults: [
+        "third_party_darwinn_src_defaults",
+    ],
+    header_libs: [
+        "darwinn_flatbuffer_headers",
+    ],
+    srcs: [
+        // from //third_party/darwinn/driver/noronha:noronha_driver_provider
+        "third_party/darwinn/api/allocated_buffer.cc",
+        "third_party/darwinn/api/buffer.cc",
+        "third_party/darwinn/api/driver_factory.cc",
+        "third_party/darwinn/api/driver_options_helper.cc",
+        "third_party/darwinn/api/layer_information.cc",
+        "third_party/darwinn/driver/aligned_allocator.cc",
+        "third_party/darwinn/driver/allocator.cc",
+        "third_party/darwinn/driver/device_buffer.cc",
+        "third_party/darwinn/driver/device_buffer_mapper.cc",
+        "third_party/darwinn/driver/dma_info.cc",
+        "third_party/darwinn/driver/dma_info_extractor.cc",
+        "third_party/darwinn/driver/driver.cc",
+        "third_party/darwinn/driver/driver_factory.cc",
+        "third_party/darwinn/driver/executable_registry.cc",
+        "third_party/darwinn/driver/executable_util.cc",
+        "third_party/darwinn/driver/executable_verifier.cc",
+        "third_party/darwinn/driver/instruction_buffers.cc",
+        "third_party/darwinn/driver/interrupt/grouped_interrupt_controller.cc",
+        "third_party/darwinn/driver/interrupt/interrupt_controller.cc",
+        "third_party/darwinn/driver/interrupt/top_level_interrupt_manager.cc",
+        "third_party/darwinn/driver/interrupt/wire_interrupt_handler.cc",
+        "third_party/darwinn/driver/kernel/kernel_coherent_allocator.cc",
+        "third_party/darwinn/driver/kernel/kernel_event_handler.cc",
+        "third_party/darwinn/driver/kernel/kernel_interrupt_handler.cc",
+        "third_party/darwinn/driver/kernel/kernel_mmu_mapper.cc",
+        "third_party/darwinn/driver/kernel/kernel_registers.cc",
+        "third_party/darwinn/driver/kernel/kernel_wire_interrupt_handler.cc",
+        "third_party/darwinn/driver/memory/buddy_address_space.cc",
+        "third_party/darwinn/driver/memory/dual_address_space.cc",
+        "third_party/darwinn/driver/memory/mmio_address_space.cc",
+        "third_party/darwinn/driver/memory/mmu_mapper.cc",
+        "third_party/darwinn/driver/mmio/coherent_allocator.cc",
+        "third_party/darwinn/driver/mmio_driver.cc",
+        "third_party/darwinn/driver/noronha/noronha_driver_provider.cc",
+        "third_party/darwinn/driver/noronha/noronha_mmu_mapper.cc",
+        "third_party/darwinn/driver/registers/registers.cc",
+        "third_party/darwinn/driver/request.cc",
+        "third_party/darwinn/driver/run_controller.cc",
+        "third_party/darwinn/driver/scalar_core_controller.cc",
+        "third_party/darwinn/driver/single_queue_dma_scheduler.cc",
+        "third_party/darwinn/port/blocking_counter.cc",
+    ],
+}
+
+cc_library_static {
+    name: "darwinn_driver_test_util",
+    defaults: [
+        "third_party_darwinn_src_defaults",
+    ],
+    header_libs: [
+        "darwinn_flatbuffer_headers",
+    ],
+    static_libs: [
+        "darwinn_port_default_port",
+    ],
+    srcs: [
+        // from //third_party/darwinn/driver:test_util
+        "third_party/darwinn/api/allocated_buffer.cc",
+        "third_party/darwinn/api/buffer.cc",
+        "third_party/darwinn/api/layer_information.cc",
+        "third_party/darwinn/driver/aligned_allocator.cc",
+        "third_party/darwinn/driver/allocator.cc",
+        "third_party/darwinn/driver/test_util.cc",
+    ],
+}
+
+cc_library_shared {
+    name: "libbeagle",
+    defaults: [
+        "third_party_darwinn_src_defaults",
+    ],
+    shared_libs: [
+        "liblog",
+    ],
+    static_libs: [
+        "libusb",
+    ],
+    whole_static_libs: [
+        "darwinn_beagle_all_driver_provider",
+        // This dependeny only shows up when
+        // -DDARWINN_PORT_ANDROID_SYSTEM=1, so we'd manually add it here.
+        "darwinn_port_default_port",
+    ],
+}
+
+cc_library_shared {
+    name: "libnoronha-pci",
+    defaults: [
+        "third_party_darwinn_src_defaults",
+    ],
+    shared_libs: [
+        "liblog",
+    ],
+    whole_static_libs: [
+        "darwinn_driver_noronha_noronha_driver_provider",
+        // This dependeny only shows up when
+        // -DDARWINN_PORT_ANDROID_SYSTEM=1, so we'd manually add it here.
+        "darwinn_port_default_port",
+    ],
+}
+
+// End of Generated Targets
+//
+subdirs = [
+    "third_party"
+]

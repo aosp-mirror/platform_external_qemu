@@ -1,0 +1,156 @@
+syntax = "proto2";
+
+package platforms.darwinn.model.config;
+
+// This file contains the ArrayInfo and ConstantArray messages, and their
+// associated types.
+//
+// Inspired by:
+// https://cs.corp.google.com/piper///depot/google3/photos/vision/learning/tensorflow/mini/model.proto?rcl=156858393&l=111
+
+// Describes a multidimensional array with regular dimensions, i.e. an edge in
+// the model's graph, connecting two nodes (Layers).
+//
+// Usually this is used to describe an activation array. Said array could be the
+// input to a model, the output from a model, or an intermediate (between
+// Layers) array. Note that ArrayInfo is metadata only; it does not contain a
+// field to store activation/parameter/bias data. See ConstantArray for the type
+// used to represent a parameter (weight) or bias array.
+//
+// AKA 'tensor' in TensorFlow, but that's an incorrect usage of the term (which
+// has origins in physics and math). Contrary to the TensorFlow GraphDef format,
+// arrays are represented as first-class objects in DarwiNN, with various data
+// fields attached to them.
+message ArrayInfo {
+  // Optional. The name of the array. Not used by DarwiNN compiler, but useful
+  // for debugging, comparing to original TensorFlow graph, etc. In fact, a
+  // Layer refers to the Arrays it uses (for input and output) with an index
+  // into the model's arrays container.
+  optional string name = 1;
+
+  // Required. Determines the output type and bitwidth when this is a layer
+  // output (e.g. activations). Determines how constant_buffer is interpreted
+  // when this is a constant input to a layer (e.g. model weights).
+  optional DataType data_type = 2;
+
+  // Required. Indicates the length (AKA cardinality) of dimensions represented
+  // by this Array, as well as the number of dimensions (by looking at the
+  // number of elements in this field). Ordered from most-major (index 0) to
+  // most-minor (last element).
+  //
+  // E.g. for a 3D array of dimensions Y, X, and Z (which has RGB data):
+  // dimensions = [128,64,3]
+  repeated int32 dimension_length = 3;
+
+  // Optional, but one of {real_range, quantization_parameters} is required. The
+  // real (in the mathematical sense of the word) range of values that should be
+  // representable by values of this array. Typically this range is recorded
+  // during fixed-point friendly training, and used for fixed-point inference.
+  // quantization_parameters is preferred over real_range. Superceded by
+  // quantization_parameters if it's present.
+  //
+  // Will be set to {-inf, inf} if data_type is a floating point type.
+  // TODO(b/109807523): CHECK that it's not set by the user (and don't set it
+  // ourselves).
+  //
+  // This is a repeated field to support per-zout (AKA per-column or
+  // per-feature) scaling.
+  repeated Range real_range = 4;
+
+  // Optional. If present, this will be used over real_range; otherwise, this
+  // information will be derived from real_range. If this information is known
+  // (e.g. fixed-point friendly training was performed, using these exact
+  // values), it should be provided here, to ensure that DarwiNN uses these
+  // values exactly (e.g. to ensure differences in rounding don't affect the
+  // deriviation of these values).
+  //
+  // Must not be present if data_type is a floating point type.
+  //
+  // This is a repeated field to support per-zout (AKA per-column or
+  // per-feature) scaling.
+  repeated QuantizationParameters quantization_parameters = 5;
+}
+
+// This represents parameters (weights) and biases that are constant inputs to a
+// model, i.e. known at model compilation time. It contains both the metadata
+// (e.g. element type, # of dimensions and size of each), and the actual data
+// (e.g. the parameters).
+message ConstantArray {
+  // Metadata that describes this parameter or bias array.
+  optional ArrayInfo array_info = 1;
+
+  // Required. Contains the parameters or biases.
+  //
+  // Use data_type to interpret this.
+  //
+  // All multi-byte values (e.g. UINT16) must use little endian format
+  // (DarwiNN's format).
+  //
+  // For conversion routines, see
+  // https://cs.corp.google.com/piper///depot/google3/util/endian/endian.h?l=160&cl=CS
+  //
+  // Sadly, protocol buffer does not have a type for 16 bit values. Otherwise,
+  // we would have used multiple repeated types: uint32, float32, etc. and let
+  // protocol buffer library take care of endianness.
+  //
+  // The large id (starting at 100) is to ensure that when viewing the contents
+  // of the protobuf, this huge field will appear last (that's what tools
+  // usually do).
+  optional bytes constant_data = 100;
+}
+
+// For a given Array, all elements are of one of these possible types.
+//
+// Note that if you want to store an 8 bit integer, use FIXED_POINT8 and set
+// quantization_parameters to {scale=1, zero_point=0}. Do similar for
+// FIXED_POINT16.
+// Note: The DataType enum should be synced with
+// third_party/darwinn/api/executable.fbs.
+// LINT.IfChange
+enum DataType {
+  // Fixed point means there is a scale and zero point associated with this
+  // tensor, used to transform fixed-point values to real values:
+  // real_value = (fixed-point_value - zero_point) * scale
+  FIXED_POINT8 = 0;
+  FIXED_POINT16 = 1;
+  FIXED_POINT32 = 2;
+
+  // BFLOAT is Google’s own floating point format, with 8 bit exponent and 8 bit
+  // significand (7 bit stored significand).
+  BFLOAT = 3;
+  // HALF is industry standard IEEE 754-2008 binary16, with 5 bit exponent and
+  // 11 bit significand (10 bit stored significand).
+  HALF = 4;
+  // SINGLE is industry standard IEEE 754-2008 binary32, with 8 bit exponent and
+  // 24 bit significant (23 bit stored signficand).
+  SINGLE = 5;
+}
+// LINT.ThenChange(//depot/google3/third_party/darwinn/api/executable.fbs)
+
+// A minimum and corresponding maximum
+message Range {
+  optional double minimum = 1;
+  optional double maximum = 2;
+}
+
+// Quantization parameters indicate how the stored values in a fixed-point array
+// correspond to mathematical real numbers. For floating point array, stored
+// values are taken 'literally' (as if scale = 1 and zero_point = 0) and this
+// message must not be present. The conversion from fixed-point to real value
+// is:
+//
+//    real_value = scale * (fixed_point_value - zero_point);
+//
+// Notice that zero_point is an integer; that is because if it weren't integral,
+// no quantized_value would correspond to the real_value 0.0, so 0 wouldn't be
+// exactly representable, which would be make some useful runtime implementation
+// techniques impossible, such as zero-padding buffers to handle boundaries.
+//
+// More details about the quantization paradigm outlined here and how the path
+// to it is fairly narrow:
+//
+//     https://github.com/google/gemmlowp/blob/master/doc/quantization.md
+message QuantizationParameters {
+  optional double scale = 1;
+  optional int32 zero_point = 2;
+}

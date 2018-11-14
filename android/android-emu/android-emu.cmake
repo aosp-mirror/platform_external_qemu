@@ -1,5 +1,8 @@
 # This file defines android-emu library
 
+# Add darwinn external libraries and includes
+include(android/darwinn/darwinn.cmake)
+
 # This is the set of sources that are common in both the shared libary and the archive. We currently have to split them
 # up due to dependencies on external variables/functions that are implemented in other libraries.
 set(android-emu-common
@@ -283,8 +286,11 @@ set(android-emu_darwin-x86_64_src
     android/crashreport/CrashReporter_darwin.cpp)
 
 # Linux specific sources.
-set(android-emu_linux-x86_64_src android/opengl/NativeGpuInfo_linux.cpp android/snapshot/MemoryWatch_linux.cpp
-    android/camera/camera-capture-linux.c android/crashreport/CrashReporter_linux.cpp)
+set(android-emu_linux-x86_64_src
+    android/opengl/NativeGpuInfo_linux.cpp
+    android/snapshot/MemoryWatch_linux.cpp
+    android/camera/camera-capture-linux.c
+    android/crashreport/CrashReporter_linux.cpp)
 
 android_add_library(android-emu)
 
@@ -346,7 +352,7 @@ android_target_link_libraries(android-emu
                               -liphlpapi)
 
 # These are the libs needed for android-emu on linux.
-android_target_link_libraries(android-emu linux-x86_64 PUBLIC -lrt -lX11 -lGL -lc++)
+android_target_link_libraries(android-emu linux-x86_64 PUBLIC darwinn -lrt -lX11 -lGL -lc++)
 
 # Here are the darwin library and link dependencies. They are public and will propagate onwards to others that depend on
 # android-emu. You should really only add things that are crucial for this library to link
@@ -362,7 +368,7 @@ android_target_link_libraries(android-emu
                               "-weak_framework Hypervisor"
                               "-framework OpenGL")
 
-target_include_directories(android-emu PUBLIC 
+target_include_directories(android-emu PUBLIC
                                    # TODO(jansene): The next 2 imply a link dependendency on emugl libs, which
                                    # we have not yet made explicit
                                    ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
@@ -372,7 +378,8 @@ target_include_directories(android-emu PUBLIC
                                    # this has to be sorted out,
                                    ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
                                    # If you use our library, you get access to our headers.
-                                   ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+                                   ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+                                   ${DARWINN_INCLUDE_DIRS})
 
 target_compile_options(android-emu PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
 android_target_compile_options(android-emu linux-x86_64 PRIVATE -idirafter ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
@@ -420,7 +427,7 @@ android_add_shared_library(android-emu-shared)
 
 # Note that these are basically the same as android-emu-shared. We should clean this up
 target_link_libraries(android-emu-shared
-                              PRIVATE 
+                              PRIVATE
                               emulator-libext4_utils
                               android-emu-base
                               emulator-libsparse
@@ -687,8 +694,10 @@ set(android-emu_unittests_windows_src
     android/windows_installer_unittest.cpp)
 
 # Darwin & Linux only tests
-set(android-emu_unittests_darwin_x86_64_src android/emulation/nand_limits_unittest.cpp)
-set(android-emu_unittests_linux_x86_64_src android/emulation/nand_limits_unittest.cpp)
+set(android-emu_unittests_darwin-x86_64_src android/emulation/nand_limits_unittest.cpp)
+
+set(android-emu_unittests_linux-x86_64_src
+    android/emulation/nand_limits_unittest.cpp)
 
 # And declare the test
 android_add_test(android-emu_unittests)
@@ -707,7 +716,8 @@ target_include_directories(android-emu_unittests
                                    ${PROTOBUF_INCLUDE_DIRS}
                                    ${LZ4_INCLUDE_DIRS}
                                    ${PNG_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS})
+                                   ${ZLIB_INCLUDE_DIRS}
+                                   ${DARWINN_INCLUDE_DIRS})
 
 target_compile_definitions(android-emu_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 
