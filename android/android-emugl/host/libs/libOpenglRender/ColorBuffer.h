@@ -173,6 +173,10 @@ public:
                    GLenum p_type,
                    void* pixels);
 
+    // Completely replaces contents, assuming that |pixels| is a buffer
+    // that is allocated and filled with the same format.
+    void replaceContents(void* pixels);
+
     // Draw a ColorBuffer instance, i.e. blit it to the current guest
     // framebuffer object / window surface. This doesn't display anything.
     bool draw();
