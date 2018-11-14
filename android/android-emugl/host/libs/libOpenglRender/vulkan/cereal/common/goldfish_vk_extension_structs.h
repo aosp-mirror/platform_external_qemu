@@ -27,6 +27,8 @@
 #include <vulkan/vulkan.h>
 
 
+#include "goldfish_vk_private_defs.h"
+
 
 namespace goldfish_vk {
 
@@ -136,6 +138,8 @@ size_t goldfish_vk_extension_struct_size(
 #ifdef VK_KHR_draw_indirect_count
 #endif
 #ifdef VK_KHR_8bit_storage
+#endif
+#ifdef VK_ANDROID_native_buffer
 #endif
 #ifdef VK_EXT_debug_report
 #endif

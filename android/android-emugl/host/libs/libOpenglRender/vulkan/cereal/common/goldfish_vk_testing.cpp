@@ -26,6 +26,7 @@
 
 
 #include "goldfish_vk_extension_structs.h"
+#include "goldfish_vk_private_defs.h"
 
 
 namespace goldfish_vk {
@@ -4408,6 +4409,30 @@ void checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR(
 }
 
 #endif
+#ifdef VK_ANDROID_native_buffer
+void checkEqual_VkNativeBufferANDROID(
+    const VkNativeBufferANDROID* a,
+    const VkNativeBufferANDROID* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, (void*)(b->pNext), onFail);
+    }
+    if (!((!(a->handle) && !(b->handle)) || ((a->handle) && (b->handle)))) { onFail("a->handle (Error: Mismatch in optional field)"); };
+    if (a->handle && b->handle)
+    {
+        if (!((memcmp(a->handle, b->handle, sizeof(const uint32_t)) == 0))) { onFail("a->handle (Error: Unequal dyn array)"); };
+    }
+    if (!((a->stride) == (b->stride))) { onFail("a->stride (Error: Value not equal)"); };
+    if (!((a->format) == (b->format))) { onFail("a->format (Error: Value not equal)"); };
+    if (!((a->usage) == (b->usage))) { onFail("a->usage (Error: Value not equal)"); };
+    if (!((a->consumer) == (b->consumer))) { onFail("a->consumer (Error: Value not equal)"); };
+    if (!((a->producer) == (b->producer))) { onFail("a->producer (Error: Value not equal)"); };
+}
+
+#endif
 #ifdef VK_EXT_debug_report
 void checkEqual_VkDebugReportCallbackCreateInfoEXT(
     const VkDebugReportCallbackCreateInfoEXT* a,
@@ -6540,6 +6565,12 @@ void checkEqual_extension_struct(
     if (reinterpret_cast<const VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension)->sType == VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR)
     {
         checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR(reinterpret_cast<const VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension), reinterpret_cast<VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension_out), onFail);
+    }
+#endif
+#ifdef VK_ANDROID_native_buffer
+    if (reinterpret_cast<const VkNativeBufferANDROID*>(structExtension)->sType == VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID)
+    {
+        checkEqual_VkNativeBufferANDROID(reinterpret_cast<const VkNativeBufferANDROID*>(structExtension), reinterpret_cast<VkNativeBufferANDROID*>(structExtension_out), onFail);
     }
 #endif
 #ifdef VK_EXT_debug_report
