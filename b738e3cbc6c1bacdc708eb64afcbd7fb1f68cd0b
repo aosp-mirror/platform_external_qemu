@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b86007e4_f037191b",
+        "filename": "android/android-emu/android/snapshot/SnapshotAPI.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-14T18:37:38Z",
+      "side": 1,
+      "message": "nit: LGTM overall, though just a few more calls with createForkIdResponse(0, nullptr) not using the default arg.",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 101,
+        "endChar": 30
+      },
+      "revId": "b738e3cbc6c1bacdc708eb64afcbd7fb1f68cd0b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
