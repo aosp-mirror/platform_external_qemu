@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ec5211a9_f80861dd",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-15T19:26:11Z",
+      "side": 1,
+      "message": "Recommend testing if QFile works on Windows with the maps key in something like ~/.android/👽🤪/maps.key",
+      "revId": "e344b781100b178ef27b4fbf45a3096c090b1191",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
