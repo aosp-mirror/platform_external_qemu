@@ -16,6 +16,24 @@
       "revId": "e344b781100b178ef27b4fbf45a3096c090b1191",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0980fd5a_3aefbebd",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-11-15T19:30:02Z",
+      "side": 1,
+      "message": "Why did you use such menacing emojis?\nNothing can work with that bad karma!",
+      "parentUuid": "ec5211a9_f80861dd",
+      "revId": "e344b781100b178ef27b4fbf45a3096c090b1191",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
