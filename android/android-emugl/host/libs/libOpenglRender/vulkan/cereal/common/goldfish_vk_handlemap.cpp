@@ -25,8 +25,14 @@
 #include "goldfish_vk_handlemap.h"
 
 
+#include "goldfish_vk_extension_structs.h"
+
 
 namespace goldfish_vk {
+
+void handlemap_extension_struct(
+    VulkanHandleMapping* handlemap,
+    void* structExtension_out);
 
 #ifdef VK_VERSION_1_0
 void handlemap_VkApplicationInfo(
@@ -35,6 +41,10 @@ void handlemap_VkApplicationInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkInstanceCreateInfo(
@@ -43,6 +53,10 @@ void handlemap_VkInstanceCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pApplicationInfo)
     {
         handlemap_VkApplicationInfo(handlemap, (VkApplicationInfo*)(toMap->pApplicationInfo));
@@ -163,6 +177,10 @@ void handlemap_VkDeviceQueueCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDeviceCreateInfo(
@@ -171,6 +189,10 @@ void handlemap_VkDeviceCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pQueueCreateInfos)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->queueCreateInfoCount; ++i)
@@ -206,6 +228,10 @@ void handlemap_VkSubmitInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pWaitSemaphores)
     {
         handlemap->mapHandles_VkSemaphore((VkSemaphore*)toMap->pWaitSemaphores, toMap->waitSemaphoreCount);
@@ -226,6 +252,10 @@ void handlemap_VkMemoryAllocateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkMappedMemoryRange(
@@ -234,6 +264,10 @@ void handlemap_VkMappedMemoryRange(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)&toMap->memory);
 }
 
@@ -354,6 +388,10 @@ void handlemap_VkBindSparseInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pWaitSemaphores)
     {
         handlemap->mapHandles_VkSemaphore((VkSemaphore*)toMap->pWaitSemaphores, toMap->waitSemaphoreCount);
@@ -391,6 +429,10 @@ void handlemap_VkFenceCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkSemaphoreCreateInfo(
@@ -399,6 +441,10 @@ void handlemap_VkSemaphoreCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkEventCreateInfo(
@@ -407,6 +453,10 @@ void handlemap_VkEventCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkQueryPoolCreateInfo(
@@ -415,6 +465,10 @@ void handlemap_VkQueryPoolCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkBufferCreateInfo(
@@ -423,6 +477,10 @@ void handlemap_VkBufferCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkBufferViewCreateInfo(
@@ -431,6 +489,10 @@ void handlemap_VkBufferViewCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
 }
 
@@ -440,6 +502,10 @@ void handlemap_VkImageCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkExtent3D(handlemap, (VkExtent3D*)(&toMap->extent));
 }
 
@@ -473,6 +539,10 @@ void handlemap_VkImageViewCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
     handlemap_VkComponentMapping(handlemap, (VkComponentMapping*)(&toMap->components));
     handlemap_VkImageSubresourceRange(handlemap, (VkImageSubresourceRange*)(&toMap->subresourceRange));
@@ -484,6 +554,10 @@ void handlemap_VkShaderModuleCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPipelineCacheCreateInfo(
@@ -492,6 +566,10 @@ void handlemap_VkPipelineCacheCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkSpecializationMapEntry(
@@ -523,6 +601,10 @@ void handlemap_VkPipelineShaderStageCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkShaderModule((VkShaderModule*)&toMap->module);
     if (toMap->pSpecializationInfo)
     {
@@ -552,6 +634,10 @@ void handlemap_VkPipelineVertexInputStateCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pVertexBindingDescriptions)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->vertexBindingDescriptionCount; ++i)
@@ -574,6 +660,10 @@ void handlemap_VkPipelineInputAssemblyStateCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPipelineTessellationStateCreateInfo(
@@ -582,6 +672,10 @@ void handlemap_VkPipelineTessellationStateCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkViewport(
@@ -624,6 +718,10 @@ void handlemap_VkPipelineViewportStateCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pViewports)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->viewportCount; ++i)
@@ -646,6 +744,10 @@ void handlemap_VkPipelineRasterizationStateCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPipelineMultisampleStateCreateInfo(
@@ -654,6 +756,10 @@ void handlemap_VkPipelineMultisampleStateCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkStencilOpState(
@@ -670,6 +776,10 @@ void handlemap_VkPipelineDepthStencilStateCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkStencilOpState(handlemap, (VkStencilOpState*)(&toMap->front));
     handlemap_VkStencilOpState(handlemap, (VkStencilOpState*)(&toMap->back));
 }
@@ -688,6 +798,10 @@ void handlemap_VkPipelineColorBlendStateCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pAttachments)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->attachmentCount; ++i)
@@ -703,6 +817,10 @@ void handlemap_VkPipelineDynamicStateCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkGraphicsPipelineCreateInfo(
@@ -711,6 +829,10 @@ void handlemap_VkGraphicsPipelineCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pStages)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->stageCount; ++i)
@@ -765,6 +887,10 @@ void handlemap_VkComputePipelineCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkPipelineShaderStageCreateInfo(handlemap, (VkPipelineShaderStageCreateInfo*)(&toMap->stage));
     handlemap->mapHandles_VkPipelineLayout((VkPipelineLayout*)&toMap->layout);
     handlemap->mapHandles_VkPipeline((VkPipeline*)&toMap->basePipelineHandle);
@@ -784,6 +910,10 @@ void handlemap_VkPipelineLayoutCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pSetLayouts)
     {
         handlemap->mapHandles_VkDescriptorSetLayout((VkDescriptorSetLayout*)toMap->pSetLayouts, toMap->setLayoutCount);
@@ -803,6 +933,10 @@ void handlemap_VkSamplerCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDescriptorSetLayoutBinding(
@@ -823,6 +957,10 @@ void handlemap_VkDescriptorSetLayoutCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pBindings)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->bindingCount; ++i)
@@ -846,6 +984,10 @@ void handlemap_VkDescriptorPoolCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pPoolSizes)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->poolSizeCount; ++i)
@@ -861,6 +1003,10 @@ void handlemap_VkDescriptorSetAllocateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkDescriptorPool((VkDescriptorPool*)&toMap->descriptorPool);
     if (toMap->pSetLayouts)
     {
@@ -893,6 +1039,10 @@ void handlemap_VkWriteDescriptorSet(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkDescriptorSet((VkDescriptorSet*)&toMap->dstSet);
     if (toMap->pImageInfo)
     {
@@ -920,6 +1070,10 @@ void handlemap_VkCopyDescriptorSet(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkDescriptorSet((VkDescriptorSet*)&toMap->srcSet);
     handlemap->mapHandles_VkDescriptorSet((VkDescriptorSet*)&toMap->dstSet);
 }
@@ -930,6 +1084,10 @@ void handlemap_VkFramebufferCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkRenderPass((VkRenderPass*)&toMap->renderPass);
     if (toMap->pAttachments)
     {
@@ -1000,6 +1158,10 @@ void handlemap_VkRenderPassCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pAttachments)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->attachmentCount; ++i)
@@ -1029,6 +1191,10 @@ void handlemap_VkCommandPoolCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkCommandBufferAllocateInfo(
@@ -1037,6 +1203,10 @@ void handlemap_VkCommandBufferAllocateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkCommandPool((VkCommandPool*)&toMap->commandPool);
 }
 
@@ -1046,6 +1216,10 @@ void handlemap_VkCommandBufferInheritanceInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkRenderPass((VkRenderPass*)&toMap->renderPass);
     handlemap->mapHandles_VkFramebuffer((VkFramebuffer*)&toMap->framebuffer);
 }
@@ -1056,6 +1230,10 @@ void handlemap_VkCommandBufferBeginInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pInheritanceInfo)
     {
         handlemap_VkCommandBufferInheritanceInfo(handlemap, (VkCommandBufferInheritanceInfo*)(toMap->pInheritanceInfo));
@@ -1183,6 +1361,10 @@ void handlemap_VkMemoryBarrier(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkBufferMemoryBarrier(
@@ -1191,6 +1373,10 @@ void handlemap_VkBufferMemoryBarrier(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
 }
 
@@ -1200,6 +1386,10 @@ void handlemap_VkImageMemoryBarrier(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
     handlemap_VkImageSubresourceRange(handlemap, (VkImageSubresourceRange*)(&toMap->subresourceRange));
 }
@@ -1210,6 +1400,10 @@ void handlemap_VkRenderPassBeginInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkRenderPass((VkRenderPass*)&toMap->renderPass);
     handlemap->mapHandles_VkFramebuffer((VkFramebuffer*)&toMap->framebuffer);
     handlemap_VkRect2D(handlemap, (VkRect2D*)(&toMap->renderArea));
@@ -1252,7 +1446,10 @@ void handlemap_VkBaseOutStructure(
 {
     (void)handlemap;
     (void)toMap;
-    // TODO: Unsupported : VkBaseOutStructure* pNext
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkBaseInStructure(
@@ -1261,7 +1458,10 @@ void handlemap_VkBaseInStructure(
 {
     (void)handlemap;
     (void)toMap;
-    // TODO: Unsupported : const VkBaseInStructure* pNext
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -1272,6 +1472,10 @@ void handlemap_VkPhysicalDeviceSubgroupProperties(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkBindBufferMemoryInfo(
@@ -1280,6 +1484,10 @@ void handlemap_VkBindBufferMemoryInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
     handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)&toMap->memory);
 }
@@ -1290,6 +1498,10 @@ void handlemap_VkBindImageMemoryInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
     handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)&toMap->memory);
 }
@@ -1300,6 +1512,10 @@ void handlemap_VkPhysicalDevice16BitStorageFeatures(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkMemoryDedicatedRequirements(
@@ -1308,6 +1524,10 @@ void handlemap_VkMemoryDedicatedRequirements(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkMemoryDedicatedAllocateInfo(
@@ -1316,6 +1536,10 @@ void handlemap_VkMemoryDedicatedAllocateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
 }
@@ -1326,6 +1550,10 @@ void handlemap_VkMemoryAllocateFlagsInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDeviceGroupRenderPassBeginInfo(
@@ -1334,6 +1562,10 @@ void handlemap_VkDeviceGroupRenderPassBeginInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pDeviceRenderAreas)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->deviceRenderAreaCount; ++i)
@@ -1349,6 +1581,10 @@ void handlemap_VkDeviceGroupCommandBufferBeginInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDeviceGroupSubmitInfo(
@@ -1357,6 +1593,10 @@ void handlemap_VkDeviceGroupSubmitInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDeviceGroupBindSparseInfo(
@@ -1365,6 +1605,10 @@ void handlemap_VkDeviceGroupBindSparseInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkBindBufferMemoryDeviceGroupInfo(
@@ -1373,6 +1617,10 @@ void handlemap_VkBindBufferMemoryDeviceGroupInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkBindImageMemoryDeviceGroupInfo(
@@ -1381,6 +1629,10 @@ void handlemap_VkBindImageMemoryDeviceGroupInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pSplitInstanceBindRegions)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->splitInstanceBindRegionCount; ++i)
@@ -1396,6 +1648,10 @@ void handlemap_VkPhysicalDeviceGroupProperties(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkPhysicalDevice((VkPhysicalDevice*)toMap->physicalDevices, VK_MAX_DEVICE_GROUP_SIZE);
 }
 
@@ -1405,6 +1661,10 @@ void handlemap_VkDeviceGroupDeviceCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pPhysicalDevices)
     {
         handlemap->mapHandles_VkPhysicalDevice((VkPhysicalDevice*)toMap->pPhysicalDevices, toMap->physicalDeviceCount);
@@ -1417,6 +1677,10 @@ void handlemap_VkBufferMemoryRequirementsInfo2(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
 }
 
@@ -1426,6 +1690,10 @@ void handlemap_VkImageMemoryRequirementsInfo2(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
 }
 
@@ -1435,6 +1703,10 @@ void handlemap_VkImageSparseMemoryRequirementsInfo2(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
 }
 
@@ -1444,6 +1716,10 @@ void handlemap_VkMemoryRequirements2(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkMemoryRequirements(handlemap, (VkMemoryRequirements*)(&toMap->memoryRequirements));
 }
 
@@ -1453,6 +1729,10 @@ void handlemap_VkSparseImageMemoryRequirements2(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkSparseImageMemoryRequirements(handlemap, (VkSparseImageMemoryRequirements*)(&toMap->memoryRequirements));
 }
 
@@ -1462,6 +1742,10 @@ void handlemap_VkPhysicalDeviceFeatures2(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkPhysicalDeviceFeatures(handlemap, (VkPhysicalDeviceFeatures*)(&toMap->features));
 }
 
@@ -1471,6 +1755,10 @@ void handlemap_VkPhysicalDeviceProperties2(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkPhysicalDeviceProperties(handlemap, (VkPhysicalDeviceProperties*)(&toMap->properties));
 }
 
@@ -1480,6 +1768,10 @@ void handlemap_VkFormatProperties2(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkFormatProperties(handlemap, (VkFormatProperties*)(&toMap->formatProperties));
 }
 
@@ -1489,6 +1781,10 @@ void handlemap_VkImageFormatProperties2(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkImageFormatProperties(handlemap, (VkImageFormatProperties*)(&toMap->imageFormatProperties));
 }
 
@@ -1498,6 +1794,10 @@ void handlemap_VkPhysicalDeviceImageFormatInfo2(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkQueueFamilyProperties2(
@@ -1506,6 +1806,10 @@ void handlemap_VkQueueFamilyProperties2(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkQueueFamilyProperties(handlemap, (VkQueueFamilyProperties*)(&toMap->queueFamilyProperties));
 }
 
@@ -1515,6 +1819,10 @@ void handlemap_VkPhysicalDeviceMemoryProperties2(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkPhysicalDeviceMemoryProperties(handlemap, (VkPhysicalDeviceMemoryProperties*)(&toMap->memoryProperties));
 }
 
@@ -1524,6 +1832,10 @@ void handlemap_VkSparseImageFormatProperties2(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkSparseImageFormatProperties(handlemap, (VkSparseImageFormatProperties*)(&toMap->properties));
 }
 
@@ -1533,6 +1845,10 @@ void handlemap_VkPhysicalDeviceSparseImageFormatInfo2(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPhysicalDevicePointClippingProperties(
@@ -1541,6 +1857,10 @@ void handlemap_VkPhysicalDevicePointClippingProperties(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkInputAttachmentAspectReference(
@@ -1557,6 +1877,10 @@ void handlemap_VkRenderPassInputAttachmentAspectCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pAspectReferences)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->aspectReferenceCount; ++i)
@@ -1572,6 +1896,10 @@ void handlemap_VkImageViewUsageCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPipelineTessellationDomainOriginStateCreateInfo(
@@ -1580,6 +1908,10 @@ void handlemap_VkPipelineTessellationDomainOriginStateCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkRenderPassMultiviewCreateInfo(
@@ -1588,6 +1920,10 @@ void handlemap_VkRenderPassMultiviewCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPhysicalDeviceMultiviewFeatures(
@@ -1596,6 +1932,10 @@ void handlemap_VkPhysicalDeviceMultiviewFeatures(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPhysicalDeviceMultiviewProperties(
@@ -1604,6 +1944,10 @@ void handlemap_VkPhysicalDeviceMultiviewProperties(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPhysicalDeviceVariablePointerFeatures(
@@ -1612,6 +1956,10 @@ void handlemap_VkPhysicalDeviceVariablePointerFeatures(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPhysicalDeviceProtectedMemoryFeatures(
@@ -1620,6 +1968,10 @@ void handlemap_VkPhysicalDeviceProtectedMemoryFeatures(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPhysicalDeviceProtectedMemoryProperties(
@@ -1628,6 +1980,10 @@ void handlemap_VkPhysicalDeviceProtectedMemoryProperties(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDeviceQueueInfo2(
@@ -1636,6 +1992,10 @@ void handlemap_VkDeviceQueueInfo2(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkProtectedSubmitInfo(
@@ -1644,6 +2004,10 @@ void handlemap_VkProtectedSubmitInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkSamplerYcbcrConversionCreateInfo(
@@ -1652,6 +2016,10 @@ void handlemap_VkSamplerYcbcrConversionCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkComponentMapping(handlemap, (VkComponentMapping*)(&toMap->components));
 }
 
@@ -1661,6 +2029,10 @@ void handlemap_VkSamplerYcbcrConversionInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkSamplerYcbcrConversion((VkSamplerYcbcrConversion*)&toMap->conversion);
 }
 
@@ -1670,6 +2042,10 @@ void handlemap_VkBindImagePlaneMemoryInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkImagePlaneMemoryRequirementsInfo(
@@ -1678,6 +2054,10 @@ void handlemap_VkImagePlaneMemoryRequirementsInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPhysicalDeviceSamplerYcbcrConversionFeatures(
@@ -1686,6 +2066,10 @@ void handlemap_VkPhysicalDeviceSamplerYcbcrConversionFeatures(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkSamplerYcbcrConversionImageFormatProperties(
@@ -1694,6 +2078,10 @@ void handlemap_VkSamplerYcbcrConversionImageFormatProperties(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDescriptorUpdateTemplateEntry(
@@ -1710,6 +2098,10 @@ void handlemap_VkDescriptorUpdateTemplateCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pDescriptorUpdateEntries)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->descriptorUpdateEntryCount; ++i)
@@ -1735,6 +2127,10 @@ void handlemap_VkPhysicalDeviceExternalImageFormatInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkExternalImageFormatProperties(
@@ -1743,6 +2139,10 @@ void handlemap_VkExternalImageFormatProperties(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkExternalMemoryProperties(handlemap, (VkExternalMemoryProperties*)(&toMap->externalMemoryProperties));
 }
 
@@ -1752,6 +2152,10 @@ void handlemap_VkPhysicalDeviceExternalBufferInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkExternalBufferProperties(
@@ -1760,6 +2164,10 @@ void handlemap_VkExternalBufferProperties(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkExternalMemoryProperties(handlemap, (VkExternalMemoryProperties*)(&toMap->externalMemoryProperties));
 }
 
@@ -1769,6 +2177,10 @@ void handlemap_VkPhysicalDeviceIDProperties(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkExternalMemoryImageCreateInfo(
@@ -1777,6 +2189,10 @@ void handlemap_VkExternalMemoryImageCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkExternalMemoryBufferCreateInfo(
@@ -1785,6 +2201,10 @@ void handlemap_VkExternalMemoryBufferCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkExportMemoryAllocateInfo(
@@ -1793,6 +2213,10 @@ void handlemap_VkExportMemoryAllocateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPhysicalDeviceExternalFenceInfo(
@@ -1801,6 +2225,10 @@ void handlemap_VkPhysicalDeviceExternalFenceInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkExternalFenceProperties(
@@ -1809,6 +2237,10 @@ void handlemap_VkExternalFenceProperties(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkExportFenceCreateInfo(
@@ -1817,6 +2249,10 @@ void handlemap_VkExportFenceCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkExportSemaphoreCreateInfo(
@@ -1825,6 +2261,10 @@ void handlemap_VkExportSemaphoreCreateInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPhysicalDeviceExternalSemaphoreInfo(
@@ -1833,6 +2273,10 @@ void handlemap_VkPhysicalDeviceExternalSemaphoreInfo(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkExternalSemaphoreProperties(
@@ -1841,6 +2285,10 @@ void handlemap_VkExternalSemaphoreProperties(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPhysicalDeviceMaintenance3Properties(
@@ -1849,6 +2297,10 @@ void handlemap_VkPhysicalDeviceMaintenance3Properties(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDescriptorSetLayoutSupport(
@@ -1857,6 +2309,10 @@ void handlemap_VkDescriptorSetLayoutSupport(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPhysicalDeviceShaderDrawParameterFeatures(
@@ -1865,6 +2321,10 @@ void handlemap_VkPhysicalDeviceShaderDrawParameterFeatures(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -1896,6 +2356,10 @@ void handlemap_VkSwapchainCreateInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkSurfaceKHR((VkSurfaceKHR*)&toMap->surface);
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->imageExtent));
     handlemap->mapHandles_VkSwapchainKHR((VkSwapchainKHR*)&toMap->oldSwapchain);
@@ -1907,6 +2371,10 @@ void handlemap_VkPresentInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pWaitSemaphores)
     {
         handlemap->mapHandles_VkSemaphore((VkSemaphore*)toMap->pWaitSemaphores, toMap->waitSemaphoreCount);
@@ -1923,6 +2391,10 @@ void handlemap_VkImageSwapchainCreateInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkSwapchainKHR((VkSwapchainKHR*)&toMap->swapchain);
 }
 
@@ -1932,6 +2404,10 @@ void handlemap_VkBindImageMemorySwapchainInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkSwapchainKHR((VkSwapchainKHR*)&toMap->swapchain);
 }
 
@@ -1941,6 +2417,10 @@ void handlemap_VkAcquireNextImageInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkSwapchainKHR((VkSwapchainKHR*)&toMap->swapchain);
     handlemap->mapHandles_VkSemaphore((VkSemaphore*)&toMap->semaphore);
     handlemap->mapHandles_VkFence((VkFence*)&toMap->fence);
@@ -1952,6 +2432,10 @@ void handlemap_VkDeviceGroupPresentCapabilitiesKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDeviceGroupPresentInfoKHR(
@@ -1960,6 +2444,10 @@ void handlemap_VkDeviceGroupPresentInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDeviceGroupSwapchainCreateInfoKHR(
@@ -1968,6 +2456,10 @@ void handlemap_VkDeviceGroupSwapchainCreateInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2008,6 +2500,10 @@ void handlemap_VkDisplayModeCreateInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkDisplayModeParametersKHR(handlemap, (VkDisplayModeParametersKHR*)(&toMap->parameters));
 }
 
@@ -2042,6 +2538,10 @@ void handlemap_VkDisplaySurfaceCreateInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkDisplayModeKHR((VkDisplayModeKHR*)&toMap->displayMode);
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->imageExtent));
 }
@@ -2054,6 +2554,10 @@ void handlemap_VkDisplayPresentInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkRect2D(handlemap, (VkRect2D*)(&toMap->srcRect));
     handlemap_VkRect2D(handlemap, (VkRect2D*)(&toMap->dstRect));
 }
@@ -2066,6 +2570,10 @@ void handlemap_VkXlibSurfaceCreateInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2076,6 +2584,10 @@ void handlemap_VkXcbSurfaceCreateInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2086,6 +2598,10 @@ void handlemap_VkWaylandSurfaceCreateInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2096,6 +2612,10 @@ void handlemap_VkMirSurfaceCreateInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2106,6 +2626,10 @@ void handlemap_VkAndroidSurfaceCreateInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2116,6 +2640,10 @@ void handlemap_VkWin32SurfaceCreateInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2144,6 +2672,10 @@ void handlemap_VkImportMemoryWin32HandleInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkExportMemoryWin32HandleInfoKHR(
@@ -2152,6 +2684,10 @@ void handlemap_VkExportMemoryWin32HandleInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkMemoryWin32HandlePropertiesKHR(
@@ -2160,6 +2696,10 @@ void handlemap_VkMemoryWin32HandlePropertiesKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkMemoryGetWin32HandleInfoKHR(
@@ -2168,6 +2708,10 @@ void handlemap_VkMemoryGetWin32HandleInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)&toMap->memory);
 }
 
@@ -2179,6 +2723,10 @@ void handlemap_VkImportMemoryFdInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkMemoryFdPropertiesKHR(
@@ -2187,6 +2735,10 @@ void handlemap_VkMemoryFdPropertiesKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkMemoryGetFdInfoKHR(
@@ -2195,6 +2747,10 @@ void handlemap_VkMemoryGetFdInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)&toMap->memory);
 }
 
@@ -2206,6 +2762,10 @@ void handlemap_VkWin32KeyedMutexAcquireReleaseInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pAcquireSyncs)
     {
         handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)toMap->pAcquireSyncs, toMap->acquireCount);
@@ -2228,6 +2788,10 @@ void handlemap_VkImportSemaphoreWin32HandleInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkSemaphore((VkSemaphore*)&toMap->semaphore);
 }
 
@@ -2237,6 +2801,10 @@ void handlemap_VkExportSemaphoreWin32HandleInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkD3D12FenceSubmitInfoKHR(
@@ -2245,6 +2813,10 @@ void handlemap_VkD3D12FenceSubmitInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkSemaphoreGetWin32HandleInfoKHR(
@@ -2253,6 +2825,10 @@ void handlemap_VkSemaphoreGetWin32HandleInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkSemaphore((VkSemaphore*)&toMap->semaphore);
 }
 
@@ -2264,6 +2840,10 @@ void handlemap_VkImportSemaphoreFdInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkSemaphore((VkSemaphore*)&toMap->semaphore);
 }
 
@@ -2273,6 +2853,10 @@ void handlemap_VkSemaphoreGetFdInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkSemaphore((VkSemaphore*)&toMap->semaphore);
 }
 
@@ -2284,6 +2868,10 @@ void handlemap_VkPhysicalDevicePushDescriptorPropertiesKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2321,6 +2909,10 @@ void handlemap_VkPresentRegionsKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pRegions)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->swapchainCount; ++i)
@@ -2340,6 +2932,10 @@ void handlemap_VkAttachmentDescription2KHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkAttachmentReference2KHR(
@@ -2348,6 +2944,10 @@ void handlemap_VkAttachmentReference2KHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkSubpassDescription2KHR(
@@ -2356,6 +2956,10 @@ void handlemap_VkSubpassDescription2KHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pInputAttachments)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->inputAttachmentCount; ++i)
@@ -2389,6 +2993,10 @@ void handlemap_VkSubpassDependency2KHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkRenderPassCreateInfo2KHR(
@@ -2397,6 +3005,10 @@ void handlemap_VkRenderPassCreateInfo2KHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pAttachments)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->attachmentCount; ++i)
@@ -2426,6 +3038,10 @@ void handlemap_VkSubpassBeginInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkSubpassEndInfoKHR(
@@ -2434,6 +3050,10 @@ void handlemap_VkSubpassEndInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2444,6 +3064,10 @@ void handlemap_VkSharedPresentSurfaceCapabilitiesKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2458,6 +3082,10 @@ void handlemap_VkImportFenceWin32HandleInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkFence((VkFence*)&toMap->fence);
 }
 
@@ -2467,6 +3095,10 @@ void handlemap_VkExportFenceWin32HandleInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkFenceGetWin32HandleInfoKHR(
@@ -2475,6 +3107,10 @@ void handlemap_VkFenceGetWin32HandleInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkFence((VkFence*)&toMap->fence);
 }
 
@@ -2486,6 +3122,10 @@ void handlemap_VkImportFenceFdInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkFence((VkFence*)&toMap->fence);
 }
 
@@ -2495,6 +3135,10 @@ void handlemap_VkFenceGetFdInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkFence((VkFence*)&toMap->fence);
 }
 
@@ -2508,6 +3152,10 @@ void handlemap_VkPhysicalDeviceSurfaceInfo2KHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkSurfaceKHR((VkSurfaceKHR*)&toMap->surface);
 }
 
@@ -2517,6 +3165,10 @@ void handlemap_VkSurfaceCapabilities2KHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkSurfaceCapabilitiesKHR(handlemap, (VkSurfaceCapabilitiesKHR*)(&toMap->surfaceCapabilities));
 }
 
@@ -2526,6 +3178,10 @@ void handlemap_VkSurfaceFormat2KHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkSurfaceFormatKHR(handlemap, (VkSurfaceFormatKHR*)(&toMap->surfaceFormat));
 }
 
@@ -2539,6 +3195,10 @@ void handlemap_VkDisplayProperties2KHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkDisplayPropertiesKHR(handlemap, (VkDisplayPropertiesKHR*)(&toMap->displayProperties));
 }
 
@@ -2548,6 +3208,10 @@ void handlemap_VkDisplayPlaneProperties2KHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkDisplayPlanePropertiesKHR(handlemap, (VkDisplayPlanePropertiesKHR*)(&toMap->displayPlaneProperties));
 }
 
@@ -2557,6 +3221,10 @@ void handlemap_VkDisplayModeProperties2KHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkDisplayModePropertiesKHR(handlemap, (VkDisplayModePropertiesKHR*)(&toMap->displayModeProperties));
 }
 
@@ -2566,6 +3234,10 @@ void handlemap_VkDisplayPlaneInfo2KHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkDisplayModeKHR((VkDisplayModeKHR*)&toMap->mode);
 }
 
@@ -2575,6 +3247,10 @@ void handlemap_VkDisplayPlaneCapabilities2KHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkDisplayPlaneCapabilitiesKHR(handlemap, (VkDisplayPlaneCapabilitiesKHR*)(&toMap->capabilities));
 }
 
@@ -2594,6 +3270,10 @@ void handlemap_VkImageFormatListCreateInfoKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2612,6 +3292,10 @@ void handlemap_VkPhysicalDevice8BitStorageFeaturesKHR(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2622,6 +3306,10 @@ void handlemap_VkDebugReportCallbackCreateInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2638,6 +3326,10 @@ void handlemap_VkPipelineRasterizationStateRasterizationOrderAMD(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2652,6 +3344,10 @@ void handlemap_VkDebugMarkerObjectNameInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDebugMarkerObjectTagInfoEXT(
@@ -2660,6 +3356,10 @@ void handlemap_VkDebugMarkerObjectTagInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDebugMarkerMarkerInfoEXT(
@@ -2668,6 +3368,10 @@ void handlemap_VkDebugMarkerMarkerInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2680,6 +3384,10 @@ void handlemap_VkDedicatedAllocationImageCreateInfoNV(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDedicatedAllocationBufferCreateInfoNV(
@@ -2688,6 +3396,10 @@ void handlemap_VkDedicatedAllocationBufferCreateInfoNV(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDedicatedAllocationMemoryAllocateInfoNV(
@@ -2696,6 +3408,10 @@ void handlemap_VkDedicatedAllocationMemoryAllocateInfoNV(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
 }
@@ -2716,6 +3432,10 @@ void handlemap_VkTextureLODGatherFormatPropertiesAMD(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2760,6 +3480,10 @@ void handlemap_VkExternalMemoryImageCreateInfoNV(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkExportMemoryAllocateInfoNV(
@@ -2768,6 +3492,10 @@ void handlemap_VkExportMemoryAllocateInfoNV(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2778,6 +3506,10 @@ void handlemap_VkImportMemoryWin32HandleInfoNV(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkExportMemoryWin32HandleInfoNV(
@@ -2786,6 +3518,10 @@ void handlemap_VkExportMemoryWin32HandleInfoNV(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2796,6 +3532,10 @@ void handlemap_VkWin32KeyedMutexAcquireReleaseInfoNV(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pAcquireSyncs)
     {
         handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)toMap->pAcquireSyncs, toMap->acquireCount);
@@ -2814,6 +3554,10 @@ void handlemap_VkValidationFlagsEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2824,6 +3568,10 @@ void handlemap_VkViSurfaceCreateInfoNN(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2838,6 +3586,10 @@ void handlemap_VkConditionalRenderingBeginInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
 }
 
@@ -2847,6 +3599,10 @@ void handlemap_VkPhysicalDeviceConditionalRenderingFeaturesEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkCommandBufferInheritanceConditionalRenderingInfoEXT(
@@ -2855,6 +3611,10 @@ void handlemap_VkCommandBufferInheritanceConditionalRenderingInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -2865,6 +3625,10 @@ void handlemap_VkDeviceGeneratedCommandsFeaturesNVX(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDeviceGeneratedCommandsLimitsNVX(
@@ -2873,6 +3637,10 @@ void handlemap_VkDeviceGeneratedCommandsLimitsNVX(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkIndirectCommandsTokenNVX(
@@ -2898,6 +3666,10 @@ void handlemap_VkIndirectCommandsLayoutCreateInfoNVX(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pTokens)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->tokenCount; ++i)
@@ -2913,6 +3685,10 @@ void handlemap_VkCmdProcessCommandsInfoNVX(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkObjectTableNVX((VkObjectTableNVX*)&toMap->objectTable);
     handlemap->mapHandles_VkIndirectCommandsLayoutNVX((VkIndirectCommandsLayoutNVX*)&toMap->indirectCommandsLayout);
     if (toMap->pIndirectCommandsTokens)
@@ -2933,6 +3709,10 @@ void handlemap_VkCmdReserveSpaceForCommandsInfoNVX(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkObjectTableNVX((VkObjectTableNVX*)&toMap->objectTable);
     handlemap->mapHandles_VkIndirectCommandsLayoutNVX((VkIndirectCommandsLayoutNVX*)&toMap->indirectCommandsLayout);
 }
@@ -2943,6 +3723,10 @@ void handlemap_VkObjectTableCreateInfoNVX(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkObjectTableEntryNVX(
@@ -3015,6 +3799,10 @@ void handlemap_VkPipelineViewportWScalingStateCreateInfoNV(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pViewportWScalings)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->viewportCount; ++i)
@@ -3036,6 +3824,10 @@ void handlemap_VkSurfaceCapabilities2EXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->currentExtent));
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->minImageExtent));
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->maxImageExtent));
@@ -3049,6 +3841,10 @@ void handlemap_VkDisplayPowerInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDeviceEventInfoEXT(
@@ -3057,6 +3853,10 @@ void handlemap_VkDeviceEventInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDisplayEventInfoEXT(
@@ -3065,6 +3865,10 @@ void handlemap_VkDisplayEventInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkSwapchainCounterCreateInfoEXT(
@@ -3073,6 +3877,10 @@ void handlemap_VkSwapchainCounterCreateInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -3107,6 +3915,10 @@ void handlemap_VkPresentTimesInfoGOOGLE(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pTimes)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->swapchainCount; ++i)
@@ -3130,6 +3942,10 @@ void handlemap_VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -3148,6 +3964,10 @@ void handlemap_VkPipelineViewportSwizzleStateCreateInfoNV(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pViewportSwizzles)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->viewportCount; ++i)
@@ -3165,6 +3985,10 @@ void handlemap_VkPhysicalDeviceDiscardRectanglePropertiesEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPipelineDiscardRectangleStateCreateInfoEXT(
@@ -3173,6 +3997,10 @@ void handlemap_VkPipelineDiscardRectangleStateCreateInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pDiscardRectangles)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->discardRectangleCount; ++i)
@@ -3190,6 +4018,10 @@ void handlemap_VkPhysicalDeviceConservativeRasterizationPropertiesEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPipelineRasterizationConservativeStateCreateInfoEXT(
@@ -3198,6 +4030,10 @@ void handlemap_VkPipelineRasterizationConservativeStateCreateInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -3218,6 +4054,10 @@ void handlemap_VkHdrMetadataEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkXYColorEXT(handlemap, (VkXYColorEXT*)(&toMap->displayPrimaryRed));
     handlemap_VkXYColorEXT(handlemap, (VkXYColorEXT*)(&toMap->displayPrimaryGreen));
     handlemap_VkXYColorEXT(handlemap, (VkXYColorEXT*)(&toMap->displayPrimaryBlue));
@@ -3232,6 +4072,10 @@ void handlemap_VkIOSSurfaceCreateInfoMVK(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -3242,6 +4086,10 @@ void handlemap_VkMacOSSurfaceCreateInfoMVK(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -3256,6 +4104,10 @@ void handlemap_VkDebugUtilsObjectNameInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDebugUtilsObjectTagInfoEXT(
@@ -3264,6 +4116,10 @@ void handlemap_VkDebugUtilsObjectTagInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDebugUtilsLabelEXT(
@@ -3272,6 +4128,10 @@ void handlemap_VkDebugUtilsLabelEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDebugUtilsMessengerCallbackDataEXT(
@@ -3280,6 +4140,10 @@ void handlemap_VkDebugUtilsMessengerCallbackDataEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pQueueLabels)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->queueLabelCount; ++i)
@@ -3309,6 +4173,10 @@ void handlemap_VkDebugUtilsMessengerCreateInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -3319,6 +4187,10 @@ void handlemap_VkAndroidHardwareBufferUsageANDROID(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkAndroidHardwareBufferPropertiesANDROID(
@@ -3327,6 +4199,10 @@ void handlemap_VkAndroidHardwareBufferPropertiesANDROID(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkAndroidHardwareBufferFormatPropertiesANDROID(
@@ -3335,6 +4211,10 @@ void handlemap_VkAndroidHardwareBufferFormatPropertiesANDROID(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkComponentMapping(handlemap, (VkComponentMapping*)(&toMap->samplerYcbcrConversionComponents));
 }
 
@@ -3344,6 +4224,10 @@ void handlemap_VkImportAndroidHardwareBufferInfoANDROID(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkMemoryGetAndroidHardwareBufferInfoANDROID(
@@ -3352,6 +4236,10 @@ void handlemap_VkMemoryGetAndroidHardwareBufferInfoANDROID(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)&toMap->memory);
 }
 
@@ -3361,6 +4249,10 @@ void handlemap_VkExternalFormatANDROID(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -3371,6 +4263,10 @@ void handlemap_VkSamplerReductionModeCreateInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT(
@@ -3379,6 +4275,10 @@ void handlemap_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -3405,6 +4305,10 @@ void handlemap_VkSampleLocationsInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->sampleLocationGridSize));
     if (toMap->pSampleLocations)
     {
@@ -3439,6 +4343,10 @@ void handlemap_VkRenderPassSampleLocationsBeginInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pAttachmentInitialSampleLocations)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->attachmentInitialSampleLocationsCount; ++i)
@@ -3461,6 +4369,10 @@ void handlemap_VkPipelineSampleLocationsStateCreateInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkSampleLocationsInfoEXT(handlemap, (VkSampleLocationsInfoEXT*)(&toMap->sampleLocationsInfo));
 }
 
@@ -3470,6 +4382,10 @@ void handlemap_VkPhysicalDeviceSampleLocationsPropertiesEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->maxSampleLocationGridSize));
 }
 
@@ -3479,6 +4395,10 @@ void handlemap_VkMultisamplePropertiesEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->maxSampleLocationGridSize));
 }
 
@@ -3490,6 +4410,10 @@ void handlemap_VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT(
@@ -3498,6 +4422,10 @@ void handlemap_VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPipelineColorBlendAdvancedStateCreateInfoEXT(
@@ -3506,6 +4434,10 @@ void handlemap_VkPipelineColorBlendAdvancedStateCreateInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -3516,6 +4448,10 @@ void handlemap_VkPipelineCoverageToColorStateCreateInfoNV(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -3526,6 +4462,10 @@ void handlemap_VkPipelineCoverageModulationStateCreateInfoNV(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -3540,6 +4480,10 @@ void handlemap_VkValidationCacheCreateInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkShaderModuleValidationCacheCreateInfoEXT(
@@ -3548,6 +4492,10 @@ void handlemap_VkShaderModuleValidationCacheCreateInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     handlemap->mapHandles_VkValidationCacheEXT((VkValidationCacheEXT*)&toMap->validationCache);
 }
 
@@ -3559,6 +4507,10 @@ void handlemap_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPhysicalDeviceDescriptorIndexingFeaturesEXT(
@@ -3567,6 +4519,10 @@ void handlemap_VkPhysicalDeviceDescriptorIndexingFeaturesEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPhysicalDeviceDescriptorIndexingPropertiesEXT(
@@ -3575,6 +4531,10 @@ void handlemap_VkPhysicalDeviceDescriptorIndexingPropertiesEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT(
@@ -3583,6 +4543,10 @@ void handlemap_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT(
@@ -3591,6 +4555,10 @@ void handlemap_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -3603,6 +4571,10 @@ void handlemap_VkDeviceQueueGlobalPriorityCreateInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -3613,6 +4585,10 @@ void handlemap_VkImportMemoryHostPointerInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkMemoryHostPointerPropertiesEXT(
@@ -3621,6 +4597,10 @@ void handlemap_VkMemoryHostPointerPropertiesEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkPhysicalDeviceExternalMemoryHostPropertiesEXT(
@@ -3629,6 +4609,10 @@ void handlemap_VkPhysicalDeviceExternalMemoryHostPropertiesEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -3641,6 +4625,10 @@ void handlemap_VkPhysicalDeviceShaderCorePropertiesAMD(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
@@ -3651,6 +4639,10 @@ void handlemap_VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkVertexInputBindingDivisorDescriptionEXT(
@@ -3667,6 +4659,10 @@ void handlemap_VkPipelineVertexInputDivisorStateCreateInfoEXT(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
     if (toMap->pVertexBindingDivisors)
     {
         for (uint32_t i = 0; i < (uint32_t)toMap->vertexBindingDivisorCount; ++i)
@@ -3686,6 +4682,10 @@ void handlemap_VkQueueFamilyCheckpointPropertiesNV(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 void handlemap_VkCheckpointDataNV(
@@ -3694,8 +4694,656 @@ void handlemap_VkCheckpointDataNV(
 {
     (void)handlemap;
     (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
 }
 
 #endif
+void handlemap_extension_struct(
+    VulkanHandleMapping* handlemap,
+    void* structExtension_out)
+{
+    if (!structExtension_out)
+    {
+        return;
+    }
+    VkStructureType structType = goldfish_vk_struct_type(structExtension_out);
+    switch(structType)
+    {
+#ifdef VK_VERSION_1_1
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES:
+        {
+            handlemap_VkPhysicalDeviceSubgroupProperties(handlemap, reinterpret_cast<VkPhysicalDeviceSubgroupProperties*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES:
+        {
+            handlemap_VkPhysicalDevice16BitStorageFeatures(handlemap, reinterpret_cast<VkPhysicalDevice16BitStorageFeatures*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS:
+        {
+            handlemap_VkMemoryDedicatedRequirements(handlemap, reinterpret_cast<VkMemoryDedicatedRequirements*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO:
+        {
+            handlemap_VkMemoryDedicatedAllocateInfo(handlemap, reinterpret_cast<VkMemoryDedicatedAllocateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO:
+        {
+            handlemap_VkMemoryAllocateFlagsInfo(handlemap, reinterpret_cast<VkMemoryAllocateFlagsInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_GROUP_RENDER_PASS_BEGIN_INFO:
+        {
+            handlemap_VkDeviceGroupRenderPassBeginInfo(handlemap, reinterpret_cast<VkDeviceGroupRenderPassBeginInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_GROUP_COMMAND_BUFFER_BEGIN_INFO:
+        {
+            handlemap_VkDeviceGroupCommandBufferBeginInfo(handlemap, reinterpret_cast<VkDeviceGroupCommandBufferBeginInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_GROUP_SUBMIT_INFO:
+        {
+            handlemap_VkDeviceGroupSubmitInfo(handlemap, reinterpret_cast<VkDeviceGroupSubmitInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_GROUP_BIND_SPARSE_INFO:
+        {
+            handlemap_VkDeviceGroupBindSparseInfo(handlemap, reinterpret_cast<VkDeviceGroupBindSparseInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_BIND_BUFFER_MEMORY_DEVICE_GROUP_INFO:
+        {
+            handlemap_VkBindBufferMemoryDeviceGroupInfo(handlemap, reinterpret_cast<VkBindBufferMemoryDeviceGroupInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_BIND_IMAGE_MEMORY_DEVICE_GROUP_INFO:
+        {
+            handlemap_VkBindImageMemoryDeviceGroupInfo(handlemap, reinterpret_cast<VkBindImageMemoryDeviceGroupInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_GROUP_DEVICE_CREATE_INFO:
+        {
+            handlemap_VkDeviceGroupDeviceCreateInfo(handlemap, reinterpret_cast<VkDeviceGroupDeviceCreateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2:
+        {
+            handlemap_VkPhysicalDeviceFeatures2(handlemap, reinterpret_cast<VkPhysicalDeviceFeatures2*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_POINT_CLIPPING_PROPERTIES:
+        {
+            handlemap_VkPhysicalDevicePointClippingProperties(handlemap, reinterpret_cast<VkPhysicalDevicePointClippingProperties*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_RENDER_PASS_INPUT_ATTACHMENT_ASPECT_CREATE_INFO:
+        {
+            handlemap_VkRenderPassInputAttachmentAspectCreateInfo(handlemap, reinterpret_cast<VkRenderPassInputAttachmentAspectCreateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_VIEW_USAGE_CREATE_INFO:
+        {
+            handlemap_VkImageViewUsageCreateInfo(handlemap, reinterpret_cast<VkImageViewUsageCreateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_DOMAIN_ORIGIN_STATE_CREATE_INFO:
+        {
+            handlemap_VkPipelineTessellationDomainOriginStateCreateInfo(handlemap, reinterpret_cast<VkPipelineTessellationDomainOriginStateCreateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_RENDER_PASS_MULTIVIEW_CREATE_INFO:
+        {
+            handlemap_VkRenderPassMultiviewCreateInfo(handlemap, reinterpret_cast<VkRenderPassMultiviewCreateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES:
+        {
+            handlemap_VkPhysicalDeviceMultiviewFeatures(handlemap, reinterpret_cast<VkPhysicalDeviceMultiviewFeatures*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_PROPERTIES:
+        {
+            handlemap_VkPhysicalDeviceMultiviewProperties(handlemap, reinterpret_cast<VkPhysicalDeviceMultiviewProperties*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTER_FEATURES:
+        {
+            handlemap_VkPhysicalDeviceVariablePointerFeatures(handlemap, reinterpret_cast<VkPhysicalDeviceVariablePointerFeatures*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_FEATURES:
+        {
+            handlemap_VkPhysicalDeviceProtectedMemoryFeatures(handlemap, reinterpret_cast<VkPhysicalDeviceProtectedMemoryFeatures*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_PROPERTIES:
+        {
+            handlemap_VkPhysicalDeviceProtectedMemoryProperties(handlemap, reinterpret_cast<VkPhysicalDeviceProtectedMemoryProperties*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PROTECTED_SUBMIT_INFO:
+        {
+            handlemap_VkProtectedSubmitInfo(handlemap, reinterpret_cast<VkProtectedSubmitInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_INFO:
+        {
+            handlemap_VkSamplerYcbcrConversionInfo(handlemap, reinterpret_cast<VkSamplerYcbcrConversionInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_BIND_IMAGE_PLANE_MEMORY_INFO:
+        {
+            handlemap_VkBindImagePlaneMemoryInfo(handlemap, reinterpret_cast<VkBindImagePlaneMemoryInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_PLANE_MEMORY_REQUIREMENTS_INFO:
+        {
+            handlemap_VkImagePlaneMemoryRequirementsInfo(handlemap, reinterpret_cast<VkImagePlaneMemoryRequirementsInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_YCBCR_CONVERSION_FEATURES:
+        {
+            handlemap_VkPhysicalDeviceSamplerYcbcrConversionFeatures(handlemap, reinterpret_cast<VkPhysicalDeviceSamplerYcbcrConversionFeatures*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_IMAGE_FORMAT_PROPERTIES:
+        {
+            handlemap_VkSamplerYcbcrConversionImageFormatProperties(handlemap, reinterpret_cast<VkSamplerYcbcrConversionImageFormatProperties*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO:
+        {
+            handlemap_VkPhysicalDeviceExternalImageFormatInfo(handlemap, reinterpret_cast<VkPhysicalDeviceExternalImageFormatInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_EXTERNAL_IMAGE_FORMAT_PROPERTIES:
+        {
+            handlemap_VkExternalImageFormatProperties(handlemap, reinterpret_cast<VkExternalImageFormatProperties*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES:
+        {
+            handlemap_VkPhysicalDeviceIDProperties(handlemap, reinterpret_cast<VkPhysicalDeviceIDProperties*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO:
+        {
+            handlemap_VkExternalMemoryImageCreateInfo(handlemap, reinterpret_cast<VkExternalMemoryImageCreateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO:
+        {
+            handlemap_VkExternalMemoryBufferCreateInfo(handlemap, reinterpret_cast<VkExternalMemoryBufferCreateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO:
+        {
+            handlemap_VkExportMemoryAllocateInfo(handlemap, reinterpret_cast<VkExportMemoryAllocateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_EXPORT_FENCE_CREATE_INFO:
+        {
+            handlemap_VkExportFenceCreateInfo(handlemap, reinterpret_cast<VkExportFenceCreateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO:
+        {
+            handlemap_VkExportSemaphoreCreateInfo(handlemap, reinterpret_cast<VkExportSemaphoreCreateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_3_PROPERTIES:
+        {
+            handlemap_VkPhysicalDeviceMaintenance3Properties(handlemap, reinterpret_cast<VkPhysicalDeviceMaintenance3Properties*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETER_FEATURES:
+        {
+            handlemap_VkPhysicalDeviceShaderDrawParameterFeatures(handlemap, reinterpret_cast<VkPhysicalDeviceShaderDrawParameterFeatures*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_swapchain
+        case VK_STRUCTURE_TYPE_IMAGE_SWAPCHAIN_CREATE_INFO_KHR:
+        {
+            handlemap_VkImageSwapchainCreateInfoKHR(handlemap, reinterpret_cast<VkImageSwapchainCreateInfoKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_BIND_IMAGE_MEMORY_SWAPCHAIN_INFO_KHR:
+        {
+            handlemap_VkBindImageMemorySwapchainInfoKHR(handlemap, reinterpret_cast<VkBindImageMemorySwapchainInfoKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_GROUP_PRESENT_INFO_KHR:
+        {
+            handlemap_VkDeviceGroupPresentInfoKHR(handlemap, reinterpret_cast<VkDeviceGroupPresentInfoKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_GROUP_SWAPCHAIN_CREATE_INFO_KHR:
+        {
+            handlemap_VkDeviceGroupSwapchainCreateInfoKHR(handlemap, reinterpret_cast<VkDeviceGroupSwapchainCreateInfoKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_display_swapchain
+        case VK_STRUCTURE_TYPE_DISPLAY_PRESENT_INFO_KHR:
+        {
+            handlemap_VkDisplayPresentInfoKHR(handlemap, reinterpret_cast<VkDisplayPresentInfoKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_external_memory_win32
+        case VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR:
+        {
+            handlemap_VkImportMemoryWin32HandleInfoKHR(handlemap, reinterpret_cast<VkImportMemoryWin32HandleInfoKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_EXPORT_MEMORY_WIN32_HANDLE_INFO_KHR:
+        {
+            handlemap_VkExportMemoryWin32HandleInfoKHR(handlemap, reinterpret_cast<VkExportMemoryWin32HandleInfoKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_external_memory_fd
+        case VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR:
+        {
+            handlemap_VkImportMemoryFdInfoKHR(handlemap, reinterpret_cast<VkImportMemoryFdInfoKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_win32_keyed_mutex
+        case VK_STRUCTURE_TYPE_WIN32_KEYED_MUTEX_ACQUIRE_RELEASE_INFO_KHR:
+        {
+            handlemap_VkWin32KeyedMutexAcquireReleaseInfoKHR(handlemap, reinterpret_cast<VkWin32KeyedMutexAcquireReleaseInfoKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_external_semaphore_win32
+        case VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR:
+        {
+            handlemap_VkExportSemaphoreWin32HandleInfoKHR(handlemap, reinterpret_cast<VkExportSemaphoreWin32HandleInfoKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_D3D12_FENCE_SUBMIT_INFO_KHR:
+        {
+            handlemap_VkD3D12FenceSubmitInfoKHR(handlemap, reinterpret_cast<VkD3D12FenceSubmitInfoKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_push_descriptor
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PUSH_DESCRIPTOR_PROPERTIES_KHR:
+        {
+            handlemap_VkPhysicalDevicePushDescriptorPropertiesKHR(handlemap, reinterpret_cast<VkPhysicalDevicePushDescriptorPropertiesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_incremental_present
+        case VK_STRUCTURE_TYPE_PRESENT_REGIONS_KHR:
+        {
+            handlemap_VkPresentRegionsKHR(handlemap, reinterpret_cast<VkPresentRegionsKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_shared_presentable_image
+        case VK_STRUCTURE_TYPE_SHARED_PRESENT_SURFACE_CAPABILITIES_KHR:
+        {
+            handlemap_VkSharedPresentSurfaceCapabilitiesKHR(handlemap, reinterpret_cast<VkSharedPresentSurfaceCapabilitiesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_external_fence_win32
+        case VK_STRUCTURE_TYPE_EXPORT_FENCE_WIN32_HANDLE_INFO_KHR:
+        {
+            handlemap_VkExportFenceWin32HandleInfoKHR(handlemap, reinterpret_cast<VkExportFenceWin32HandleInfoKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_image_format_list
+        case VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO_KHR:
+        {
+            handlemap_VkImageFormatListCreateInfoKHR(handlemap, reinterpret_cast<VkImageFormatListCreateInfoKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_8bit_storage
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
+        {
+            handlemap_VkPhysicalDevice8BitStorageFeaturesKHR(handlemap, reinterpret_cast<VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_debug_report
+        case VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT:
+        {
+            handlemap_VkDebugReportCallbackCreateInfoEXT(handlemap, reinterpret_cast<VkDebugReportCallbackCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_AMD_rasterization_order
+        case VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_RASTERIZATION_ORDER_AMD:
+        {
+            handlemap_VkPipelineRasterizationStateRasterizationOrderAMD(handlemap, reinterpret_cast<VkPipelineRasterizationStateRasterizationOrderAMD*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_dedicated_allocation
+        case VK_STRUCTURE_TYPE_DEDICATED_ALLOCATION_IMAGE_CREATE_INFO_NV:
+        {
+            handlemap_VkDedicatedAllocationImageCreateInfoNV(handlemap, reinterpret_cast<VkDedicatedAllocationImageCreateInfoNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DEDICATED_ALLOCATION_BUFFER_CREATE_INFO_NV:
+        {
+            handlemap_VkDedicatedAllocationBufferCreateInfoNV(handlemap, reinterpret_cast<VkDedicatedAllocationBufferCreateInfoNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DEDICATED_ALLOCATION_MEMORY_ALLOCATE_INFO_NV:
+        {
+            handlemap_VkDedicatedAllocationMemoryAllocateInfoNV(handlemap, reinterpret_cast<VkDedicatedAllocationMemoryAllocateInfoNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_AMD_texture_gather_bias_lod
+        case VK_STRUCTURE_TYPE_TEXTURE_LOD_GATHER_FORMAT_PROPERTIES_AMD:
+        {
+            handlemap_VkTextureLODGatherFormatPropertiesAMD(handlemap, reinterpret_cast<VkTextureLODGatherFormatPropertiesAMD*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_external_memory
+        case VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO_NV:
+        {
+            handlemap_VkExternalMemoryImageCreateInfoNV(handlemap, reinterpret_cast<VkExternalMemoryImageCreateInfoNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO_NV:
+        {
+            handlemap_VkExportMemoryAllocateInfoNV(handlemap, reinterpret_cast<VkExportMemoryAllocateInfoNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_external_memory_win32
+        case VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_NV:
+        {
+            handlemap_VkImportMemoryWin32HandleInfoNV(handlemap, reinterpret_cast<VkImportMemoryWin32HandleInfoNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_EXPORT_MEMORY_WIN32_HANDLE_INFO_NV:
+        {
+            handlemap_VkExportMemoryWin32HandleInfoNV(handlemap, reinterpret_cast<VkExportMemoryWin32HandleInfoNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_win32_keyed_mutex
+        case VK_STRUCTURE_TYPE_WIN32_KEYED_MUTEX_ACQUIRE_RELEASE_INFO_NV:
+        {
+            handlemap_VkWin32KeyedMutexAcquireReleaseInfoNV(handlemap, reinterpret_cast<VkWin32KeyedMutexAcquireReleaseInfoNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_validation_flags
+        case VK_STRUCTURE_TYPE_VALIDATION_FLAGS_EXT:
+        {
+            handlemap_VkValidationFlagsEXT(handlemap, reinterpret_cast<VkValidationFlagsEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_conditional_rendering
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CONDITIONAL_RENDERING_FEATURES_EXT:
+        {
+            handlemap_VkPhysicalDeviceConditionalRenderingFeaturesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceConditionalRenderingFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_CONDITIONAL_RENDERING_INFO_EXT:
+        {
+            handlemap_VkCommandBufferInheritanceConditionalRenderingInfoEXT(handlemap, reinterpret_cast<VkCommandBufferInheritanceConditionalRenderingInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_clip_space_w_scaling
+        case VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_W_SCALING_STATE_CREATE_INFO_NV:
+        {
+            handlemap_VkPipelineViewportWScalingStateCreateInfoNV(handlemap, reinterpret_cast<VkPipelineViewportWScalingStateCreateInfoNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_display_control
+        case VK_STRUCTURE_TYPE_SWAPCHAIN_COUNTER_CREATE_INFO_EXT:
+        {
+            handlemap_VkSwapchainCounterCreateInfoEXT(handlemap, reinterpret_cast<VkSwapchainCounterCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_GOOGLE_display_timing
+        case VK_STRUCTURE_TYPE_PRESENT_TIMES_INFO_GOOGLE:
+        {
+            handlemap_VkPresentTimesInfoGOOGLE(handlemap, reinterpret_cast<VkPresentTimesInfoGOOGLE*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NVX_multiview_per_view_attributes
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_PER_VIEW_ATTRIBUTES_PROPERTIES_NVX:
+        {
+            handlemap_VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX(handlemap, reinterpret_cast<VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_viewport_swizzle
+        case VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_SWIZZLE_STATE_CREATE_INFO_NV:
+        {
+            handlemap_VkPipelineViewportSwizzleStateCreateInfoNV(handlemap, reinterpret_cast<VkPipelineViewportSwizzleStateCreateInfoNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_discard_rectangles
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DISCARD_RECTANGLE_PROPERTIES_EXT:
+        {
+            handlemap_VkPhysicalDeviceDiscardRectanglePropertiesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceDiscardRectanglePropertiesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_DISCARD_RECTANGLE_STATE_CREATE_INFO_EXT:
+        {
+            handlemap_VkPipelineDiscardRectangleStateCreateInfoEXT(handlemap, reinterpret_cast<VkPipelineDiscardRectangleStateCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_conservative_rasterization
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CONSERVATIVE_RASTERIZATION_PROPERTIES_EXT:
+        {
+            handlemap_VkPhysicalDeviceConservativeRasterizationPropertiesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceConservativeRasterizationPropertiesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_CONSERVATIVE_STATE_CREATE_INFO_EXT:
+        {
+            handlemap_VkPipelineRasterizationConservativeStateCreateInfoEXT(handlemap, reinterpret_cast<VkPipelineRasterizationConservativeStateCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_debug_utils
+        case VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT:
+        {
+            handlemap_VkDebugUtilsMessengerCreateInfoEXT(handlemap, reinterpret_cast<VkDebugUtilsMessengerCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_ANDROID_external_memory_android_hardware_buffer
+        case VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_USAGE_ANDROID:
+        {
+            handlemap_VkAndroidHardwareBufferUsageANDROID(handlemap, reinterpret_cast<VkAndroidHardwareBufferUsageANDROID*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_FORMAT_PROPERTIES_ANDROID:
+        {
+            handlemap_VkAndroidHardwareBufferFormatPropertiesANDROID(handlemap, reinterpret_cast<VkAndroidHardwareBufferFormatPropertiesANDROID*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_ANDROID_HARDWARE_BUFFER_INFO_ANDROID:
+        {
+            handlemap_VkImportAndroidHardwareBufferInfoANDROID(handlemap, reinterpret_cast<VkImportAndroidHardwareBufferInfoANDROID*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_EXTERNAL_FORMAT_ANDROID:
+        {
+            handlemap_VkExternalFormatANDROID(handlemap, reinterpret_cast<VkExternalFormatANDROID*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_sampler_filter_minmax
+        case VK_STRUCTURE_TYPE_SAMPLER_REDUCTION_MODE_CREATE_INFO_EXT:
+        {
+            handlemap_VkSamplerReductionModeCreateInfoEXT(handlemap, reinterpret_cast<VkSamplerReductionModeCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_FILTER_MINMAX_PROPERTIES_EXT:
+        {
+            handlemap_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_sample_locations
+        case VK_STRUCTURE_TYPE_SAMPLE_LOCATIONS_INFO_EXT:
+        {
+            handlemap_VkSampleLocationsInfoEXT(handlemap, reinterpret_cast<VkSampleLocationsInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_RENDER_PASS_SAMPLE_LOCATIONS_BEGIN_INFO_EXT:
+        {
+            handlemap_VkRenderPassSampleLocationsBeginInfoEXT(handlemap, reinterpret_cast<VkRenderPassSampleLocationsBeginInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_SAMPLE_LOCATIONS_STATE_CREATE_INFO_EXT:
+        {
+            handlemap_VkPipelineSampleLocationsStateCreateInfoEXT(handlemap, reinterpret_cast<VkPipelineSampleLocationsStateCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLE_LOCATIONS_PROPERTIES_EXT:
+        {
+            handlemap_VkPhysicalDeviceSampleLocationsPropertiesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceSampleLocationsPropertiesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_blend_operation_advanced
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BLEND_OPERATION_ADVANCED_FEATURES_EXT:
+        {
+            handlemap_VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BLEND_OPERATION_ADVANCED_PROPERTIES_EXT:
+        {
+            handlemap_VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceBlendOperationAdvancedPropertiesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_ADVANCED_STATE_CREATE_INFO_EXT:
+        {
+            handlemap_VkPipelineColorBlendAdvancedStateCreateInfoEXT(handlemap, reinterpret_cast<VkPipelineColorBlendAdvancedStateCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_fragment_coverage_to_color
+        case VK_STRUCTURE_TYPE_PIPELINE_COVERAGE_TO_COLOR_STATE_CREATE_INFO_NV:
+        {
+            handlemap_VkPipelineCoverageToColorStateCreateInfoNV(handlemap, reinterpret_cast<VkPipelineCoverageToColorStateCreateInfoNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_framebuffer_mixed_samples
+        case VK_STRUCTURE_TYPE_PIPELINE_COVERAGE_MODULATION_STATE_CREATE_INFO_NV:
+        {
+            handlemap_VkPipelineCoverageModulationStateCreateInfoNV(handlemap, reinterpret_cast<VkPipelineCoverageModulationStateCreateInfoNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_validation_cache
+        case VK_STRUCTURE_TYPE_SHADER_MODULE_VALIDATION_CACHE_CREATE_INFO_EXT:
+        {
+            handlemap_VkShaderModuleValidationCacheCreateInfoEXT(handlemap, reinterpret_cast<VkShaderModuleValidationCacheCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_descriptor_indexing
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT:
+        {
+            handlemap_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT(handlemap, reinterpret_cast<VkDescriptorSetLayoutBindingFlagsCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT:
+        {
+            handlemap_VkPhysicalDeviceDescriptorIndexingFeaturesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceDescriptorIndexingFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES_EXT:
+        {
+            handlemap_VkPhysicalDeviceDescriptorIndexingPropertiesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceDescriptorIndexingPropertiesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT:
+        {
+            handlemap_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT(handlemap, reinterpret_cast<VkDescriptorSetVariableDescriptorCountAllocateInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_LAYOUT_SUPPORT_EXT:
+        {
+            handlemap_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT(handlemap, reinterpret_cast<VkDescriptorSetVariableDescriptorCountLayoutSupportEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_global_priority
+        case VK_STRUCTURE_TYPE_DEVICE_QUEUE_GLOBAL_PRIORITY_CREATE_INFO_EXT:
+        {
+            handlemap_VkDeviceQueueGlobalPriorityCreateInfoEXT(handlemap, reinterpret_cast<VkDeviceQueueGlobalPriorityCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_external_memory_host
+        case VK_STRUCTURE_TYPE_IMPORT_MEMORY_HOST_POINTER_INFO_EXT:
+        {
+            handlemap_VkImportMemoryHostPointerInfoEXT(handlemap, reinterpret_cast<VkImportMemoryHostPointerInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_MEMORY_HOST_PROPERTIES_EXT:
+        {
+            handlemap_VkPhysicalDeviceExternalMemoryHostPropertiesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceExternalMemoryHostPropertiesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_AMD_shader_core_properties
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CORE_PROPERTIES_AMD:
+        {
+            handlemap_VkPhysicalDeviceShaderCorePropertiesAMD(handlemap, reinterpret_cast<VkPhysicalDeviceShaderCorePropertiesAMD*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_vertex_attribute_divisor
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_ATTRIBUTE_DIVISOR_PROPERTIES_EXT:
+        {
+            handlemap_VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_DIVISOR_STATE_CREATE_INFO_EXT:
+        {
+            handlemap_VkPipelineVertexInputDivisorStateCreateInfoEXT(handlemap, reinterpret_cast<VkPipelineVertexInputDivisorStateCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_device_diagnostic_checkpoints
+        case VK_STRUCTURE_TYPE_QUEUE_FAMILY_CHECKPOINT_PROPERTIES_NV:
+        {
+            handlemap_VkQueueFamilyCheckpointPropertiesNV(handlemap, reinterpret_cast<VkQueueFamilyCheckpointPropertiesNV*>(structExtension_out));
+            break;
+        }
+#endif
+        default:
+        {
+            return;
+        }
+    }
+}
+
 
 } // namespace goldfish_vk

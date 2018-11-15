@@ -25,6 +25,7 @@ from .wrapperdefs import EQUALITY_ON_FAIL_VAR
 from .wrapperdefs import EQUALITY_ON_FAIL_VAR_TYPE
 from .wrapperdefs import EQUALITY_RET_TYPE
 from .wrapperdefs import API_PREFIX_EQUALITY
+from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM2
 
 class VulkanEqualityCodegen(object):
 
@@ -241,13 +242,22 @@ class VulkanEqualityCodegen(object):
             self.makeEqualBufExpr(accessLhs, accessRhs, finalLenExpr),
             vulkanType, "Unequal static array")
 
+    def onStructExtension(self, vulkanType):
+        lhs = self.exprAccessorLhs(vulkanType)
+        rhs = self.exprAccessorRhs(vulkanType)
+
+        self.cgen.beginIf(lhs)
+        self.cgen.funcCall(None, self.prefix + "extension_struct",
+                           [lhs, rhs, self.onFailCompareVar])
+        self.cgen.endIf()
+
     def onPointer(self, vulkanType):
+        accessLhs = self.exprAccessorLhs(vulkanType)
+        accessRhs = self.exprAccessorRhs(vulkanType)
+
         skipStreamInternal = vulkanType.typeName == "void"
         if skipStreamInternal:
             return
-
-        accessLhs = self.exprAccessorLhs(vulkanType)
-        accessRhs = self.exprAccessorRhs(vulkanType)
 
         lenAccessLhs = self.lenAccessorLhs(vulkanType)
         lenAccessRhs = self.lenAccessorRhs(vulkanType)
@@ -291,6 +301,18 @@ class VulkanTesting(VulkanWrapperGenerator):
 
         self.knownDefs = {}
 
+        self.extensionTestingPrototype = \
+            VulkanAPI(API_PREFIX_EQUALITY + "extension_struct",
+                      EQUALITY_RET_TYPE,
+                      [STRUCT_EXTENSION_PARAM,
+                       STRUCT_EXTENSION_PARAM2,
+                       EQUALITY_ON_FAIL_VAR_TYPE])
+
+    def onBegin(self,):
+        VulkanWrapperGenerator.onBegin(self)
+        self.module.appendImpl(self.codegen.makeFuncDecl(
+            self.extensionTestingPrototype))
+
     def onGenType(self, typeXml, name, alias):
         VulkanWrapperGenerator.onGenType(self, typeXml, name, alias)
 
@@ -309,7 +331,7 @@ class VulkanTesting(VulkanWrapperGenerator):
             compareParams = \
                 list(map(typeFromName, EQUALITY_VAR_NAMES)) + \
                 [EQUALITY_ON_FAIL_VAR_TYPE]
-                
+
             comparePrototype = \
                 VulkanAPI(API_PREFIX_EQUALITY + name,
                           EQUALITY_RET_TYPE,
@@ -329,4 +351,21 @@ class VulkanTesting(VulkanWrapperGenerator):
     def onGenCmd(self, cmdinfo, name, alias):
         VulkanWrapperGenerator.onGenCmd(self, cmdinfo, name, alias)
 
-        # TODO: Figure something out for API testing
+    def onEnd(self,):
+        VulkanWrapperGenerator.onEnd(self)
+
+        def forEachExtensionCompare(ext, castedAccess, cgen):
+            cgen.funcCall(None, API_PREFIX_EQUALITY + ext.name,
+                          [castedAccess,
+                           cgen.makeReinterpretCast(
+                               STRUCT_EXTENSION_PARAM2.paramName, ext.name),
+                           EQUALITY_ON_FAIL_VAR])
+
+        self.module.appendImpl(
+            self.codegen.makeFuncImpl(
+                self.extensionTestingPrototype,
+                lambda cgen: self.emitForEachStructExtension(
+                    cgen,
+                    EQUALITY_RET_TYPE,
+                    STRUCT_EXTENSION_PARAM,
+                    forEachExtensionCompare)))
