@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Android Emulator Location Picker</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+<style>
+#map {
+    height: 100%;
+}
+
+html, body {
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+#description {
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+      }
+
+      #infowindow-content .title {
+        font-weight: bold;
+      }
+
+      #infowindow-content {
+        display: none;
+      }
+
+      #map #infowindow-content {
+        display: inline;
+      }
+
+      .pac-card {
+        margin: 10px 10px 0 0;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        background-color: #fff;
+        font-family: Roboto;
+      }
+
+      #pac-container {
+        padding-bottom: 12px;
+        margin-right: 12px;
+      }
+
+      .pac-controls {
+        display: inline-block;
+        padding: 5px 11px;
+      }
+
+      .pac-controls label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+
+      #pac-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 85%;
+        margin-top: 12px;
+        height: 36px;
+      }
+
+      #pac-input:focus {
+        border-color: #4d90fe;
+      }
+
+      #title {
+        color: #fff;
+        background-color: #4d90fe;
+        font-size: 25px;
+        font-weight: 500;
+        padding: 6px 12px;
+      }
+      #target {
+        width: 345px;
+      }
+</style>
+</head>
+<body>
+    <input id="pac-input" class="controls" type="text" placeholder="Search">
+    <div id="map"></div>
+    <script>
+    // Googleplex!
+    var lastLatLng = {lat: 37.4220919, lng: -122.0826088};
+    var sevDeviceLocation;
+    var gMap;
+    var gGeocoder;
+    var gCurrentMarker; // The blue dot
+    var gPendingMarker; // The red "pin"
+    var gSearchResultMarkers = [];
+
+    // Callback function for Maps API
+    function initMap() {
+        var infoWindow = new google.maps.InfoWindow;
+        // Create a map object and specify the DOM element for display.
+        gMap = new google.maps.Map(document.getElementById('map'), {
+            center: lastLatLng,
+            zoom: 10,
+            zoomControl: true,
+            disableDefaultUI: true
+        });
+        gGeocoder = new google.maps.Geocoder;
+
+        function showPin(latLng) {
+            // Clear current pin
+            if (gPendingMarker != null) {
+                gPendingMarker.setMap(null);
+            }
+            // Clear all current search markers
+            for (var i = 0, marker; marker = gSearchResultMarkers[i]; i++) {
+                marker.setMap(null);
+            }
+            gSearchResultMarkers = [];
+
+            // Create a new pin at this location
+            gPendingMarker = new google.maps.Marker({
+                map: gMap,
+                position: latLng
+            });
+            var bounds = gMap.getBounds();
+            if (bounds == null || !bounds.contains(latLng)) {
+                gMap.setCenter(latLng);
+            }
+        }
+        function sendAddress(latLng) {
+          gGeocoder.geocode({ 'location': latLng },
+                            function(results, status) {
+                              var address = "";
+                              if (status === 'OK' && results[0]) {
+                                address = results[0].formatted_address;
+                              }
+                              channel.objects.emulocationserver
+                                  .sendLocation(latLng.lat(), latLng.lng(), address);
+                            });
+        }
+
+        // Register a listener that sets a new marker wherever the
+        // user clicks on the map.
+        google.maps.event.addListener(gMap, 'click', function(event) {
+            showPin(event.latLng);
+
+            // Send the location coordinates to the emulator
+            lastLatLng = event.latLng;
+            sendAddress(lastLatLng);
+        });
+
+        showPendingLocation = function(lat, lng) {
+            // Called from Qt code to show a pending location on the UI map.
+            // This point has NOT been sent to the AVD.
+            showPin(new google.maps.LatLng(lat, lng));
+        }
+
+        setDeviceLocation = function(lat, lng) {
+            // Called from Qt code to show the blue marker to display the emulator location on the map.
+            // Code to set location marker on the map. Move this to a signal event handler.
+
+            // Clear any existing blue dot and red pin
+            if (gCurrentMarker != null) {
+                gCurrentMarker.setMap(null);
+            }
+            if (gPendingMarker != null) {
+                gPendingMarker.setMap(null);
+            }
+
+            var latLng = new google.maps.LatLng(lat, lng);
+            gCurrentMarker = new google.maps.Marker({ map: gMap, position: latLng});
+
+            var blueDot = 'data:image/svg+xml, \
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" \
+                            viewBox="0 0 24 24" fill="#000000"> \
+                        <circle cx="12" cy="12" r="10" fill="black" opacity=".1" /> \
+                        <circle cx="12" cy="12" r="8" stroke="white" stroke-width="2" \
+                            fill="#4286f5" /> \
+                    </svg>';
+            var image = {
+              url: blueDot,
+              size: new google.maps.Size(24, 24),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(12, 12),
+              scaledSize: new google.maps.Size(25, 25)
+            };
+            var bounds = gMap.getBounds();
+            if (bounds == null || !bounds.contains(latLng)) {
+                gMap.setCenter(latLng);
+            }
+            gCurrentMarker.setIcon(image);
+        }
+
+        function markerListener(event) {
+            lastLatLng = event.latLng;
+            showPin(lastLatLng);
+            sendAddress(lastLatLng);
+        }
+
+        // Add Google search box
+        // Create the search box and link it to the UI element.
+        var input = /** @type {HTMLInputElement} */ (
+                document.getElementById('pac-input'));
+        gMap.controls[google.maps.ControlPosition.TOP_CENTER].push(input);
+
+        var searchBox = new google.maps.places.SearchBox(
+                /** @type {HTMLInputElement} */
+                (input));
+
+        // Listen for the event fired when the user selects an item from the
+        // pick list.
+        google.maps.event.addListener(searchBox, 'places_changed', function() {
+            // Clear the red pin and any existing search markers
+            if (gPendingMarker != null) {
+                gPendingMarker.setMap(null);
+            }
+            for (var i = 0, marker; marker = gSearchResultMarkers[i]; i++) {
+                marker.setMap(null);
+            }
+            gSearchResultMarkers = [];
+
+            var places = searchBox.getPlaces();
+            if (places.length == 0) return;
+            // If the search gave exactly one place, use it directly
+            if (places.length == 1) {
+                lastLatLng = places[0].geometry.location;
+                showPendingLocation(lastLatLng.lat(), lastLatLng.lng());
+                sendAddress(lastLatLng);
+                return;
+            }
+
+            // For each place, get the icon and location.
+            var bounds = new google.maps.LatLngBounds();
+            var place = null;
+            var viewport = null;
+            for (var i = 0; place = places[i]; i++) {
+                var image = {
+                    url: place.icon,
+                    size: new google.maps.Size(71, 71),
+                    origin: new google.maps.Point(0, 0),
+                    anchor: new google.maps.Point(17, 34),
+                    scaledSize: new google.maps.Size(25, 25)
+                };
+
+                // Create a marker for each place.
+                var marker = new google.maps.Marker({
+                    map: gMap,
+                    icon: image,
+                    title: place.name,
+                    position: place.geometry.location
+                });
+                viewport = place.geometry.viewport;
+                google.maps.event.addListener(marker, 'click', markerListener);
+                gSearchResultMarkers.push(marker);
+
+                bounds.extend(place.geometry.location);
+            }
+            gMap.setCenter(bounds.getCenter());
+        });
+
+        // Bias the SearchBox results towards places that are within the bounds of the
+        // current map's viewport.
+        google.maps.event.addListener(gMap, 'bounds_changed', function() {
+          var bounds = gMap.getBounds();
+          searchBox.setBounds(bounds);
+        });
+    }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=YOUR_API_KEY&callback=initMap" async defer></script>
+</body>
+</html>

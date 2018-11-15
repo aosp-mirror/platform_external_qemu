@@ -163,6 +163,11 @@ QIcon getIconForCurrentTheme(const QString& icon_name) {
     return QIcon(":/" + iconType + "/" + icon_name);
 }
 
+QColor getColorForCurrentTheme(const QString& colorName) {
+    QString colorValues = Ui::stylesheetValues(getSelectedTheme())[colorName];
+    return QColor(colorValues);
+}
+
 void setFrameOnTop(QFrame* frame, bool onTop) {
 #ifndef __linux__
     // On Linux, the Qt::WindowStaysOnTopHint only works if X11 window
