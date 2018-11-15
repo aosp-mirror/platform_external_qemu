@@ -18,6 +18,7 @@ from .common.vulkantypes import \
         VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
 
 from .wrapperdefs import VulkanWrapperGenerator
+from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE
 
 class HandleMapCodegen(object):
     def __init__(self, cgen, inputVar, handlemapVarName, prefix, isHandleFunc):
@@ -40,8 +41,6 @@ class HandleMapCodegen(object):
         self.isHandleFunc = isHandleFunc
 
     def needSkip(self, vulkanType):
-        if vulkanType.isNextPointer():
-            return True
         return False
 
     def makeCastExpr(self, vulkanType):
@@ -69,7 +68,6 @@ class HandleMapCodegen(object):
             self.cgen.line("// TODO: Unsupported : %s" %
                            self.cgen.makeCTypeDecl(vulkanType))
             return
-
         access = self.exprAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
 
@@ -116,11 +114,20 @@ class HandleMapCodegen(object):
              self.makeCastExpr(vulkanType.getForAddressAccess().getForNonConstAccess()),
              accessLhs, lenAccess))
 
+    def onStructExtension(self, vulkanType):
+        access = self.exprAccessor(vulkanType)
+
+        castedAccessExpr = "(%s)(%s)" % ("void*", access)
+        self.cgen.beginIf(access)
+        self.cgen.funcCall(None, self.prefix + "extension_struct",
+                           [self.handlemapVarName, castedAccessExpr])
+        self.cgen.endIf()
+
     def onPointer(self, vulkanType):
-        if not self.isHandleFunc(vulkanType):
+        if self.needSkip(vulkanType):
             return
 
-        if self.needSkip(vulkanType):
+        if not self.isHandleFunc(vulkanType):
             return
 
         access = self.exprAccessor(vulkanType)
@@ -173,6 +180,16 @@ class VulkanHandleMap(VulkanWrapperGenerator):
 
         self.knownDefs = {}
 
+        self.extensionHandlemapPrototype = \
+            VulkanAPI(self.handlemapPrefix + "extension_struct",
+                      self.voidType,
+                      [self.handlemapParam, STRUCT_EXTENSION_PARAM_FOR_WRITE])
+
+    def onBegin(self,):
+        VulkanWrapperGenerator.onBegin(self)
+        self.module.appendImpl(self.codegen.makeFuncDecl(
+            self.extensionHandlemapPrototype))
+
     def onGenType(self, typeXml, name, alias):
         VulkanWrapperGenerator.onGenType(self, typeXml, name, alias)
 
@@ -213,3 +230,19 @@ class VulkanHandleMap(VulkanWrapperGenerator):
 
     def onGenCmd(self, cmdinfo, name, alias):
         VulkanWrapperGenerator.onGenCmd(self, cmdinfo, name, alias)
+
+    def onEnd(self,):
+        VulkanWrapperGenerator.onEnd(self)
+
+        def forEachExtensionHandlemap(ext, castedAccess, cgen):
+            cgen.funcCall(None, self.handlemapPrefix + ext.name,
+                          [self.handlemapVarName, castedAccess])
+
+        self.module.appendImpl(
+            self.codegen.makeFuncImpl(
+                self.extensionHandlemapPrototype,
+                lambda cgen: self.emitForEachStructExtension(
+                    cgen,
+                    self.voidType,
+                    STRUCT_EXTENSION_PARAM_FOR_WRITE,
+                    forEachExtensionHandlemap)))

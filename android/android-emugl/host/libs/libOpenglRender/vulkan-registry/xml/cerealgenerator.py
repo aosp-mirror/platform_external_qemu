@@ -247,6 +247,21 @@ using DlOpenFunc = void* (void);
 using DlSymFunc = void* (void*, const char*);
 """
 
+        extensionStructsIncludeGuest = """
+// Stuff we are not going to use but if included,
+// will cause compile errors. These are Android Vulkan
+// required extensions, but the approach will be to
+// implement them completely on the guest side.
+#undef VK_KHR_android_surface
+#undef VK_ANDROID_external_memory_android_hardware_buffer
+"""
+        commonCerealImplIncludes = """
+#include "goldfish_vk_extension_structs.h"
+"""
+        commonCerealImplIncludesGuest = """
+#include "goldfish_vk_extension_structs_guest.h"
+"""
+
         dispatchImplIncludes = """
 #include <stdio.h>
 #include <stdlib.h>
@@ -305,23 +320,33 @@ using DlSymFunc = void* (void*, const char*);
             extraImpl = encoderImplInclude,
             useNamespace = False)
 
+        self.addGuestEncoderModule("goldfish_vk_extension_structs_guest",
+                                   extraHeader=extensionStructsIncludeGuest)
         self.addGuestEncoderModule("goldfish_vk_marshaling_guest",
-                                   extraHeader=marshalIncludeGuest)
+                                   extraHeader=marshalIncludeGuest,
+                                   extraImpl=commonCerealImplIncludesGuest)
         self.addGuestEncoderModule("goldfish_vk_deepcopy_guest",
-                                   extraHeader=poolIncludeGuest)
+                                   extraHeader=poolIncludeGuest,
+                                   extraImpl=commonCerealImplIncludesGuest)
         self.addGuestEncoderModule("goldfish_vk_handlemap_guest",
-                                   extraHeader=handleMapIncludeGuest)
+                                   extraHeader=handleMapIncludeGuest,
+                                   extraImpl=commonCerealImplIncludesGuest)
 
         self.addGuestHalModule("func_table", extraImpl=functableImplInclude)
 
+        self.addModule("common", "goldfish_vk_extension_structs")
         self.addModule("common", "goldfish_vk_marshaling",
-                       extraHeader=vulkanStreamInclude)
+                       extraHeader=vulkanStreamInclude,
+                       extraImpl=commonCerealImplIncludes)
         self.addModule("common", "goldfish_vk_testing",
-                       extraHeader=testingInclude)
+                       extraHeader=testingInclude,
+                       extraImpl=commonCerealImplIncludes)
         self.addModule("common", "goldfish_vk_deepcopy",
-                       extraHeader=poolInclude)
+                       extraHeader=poolInclude,
+                       extraImpl=commonCerealImplIncludes)
         self.addModule("common", "goldfish_vk_handlemap",
-                       extraHeader=handleMapInclude)
+                       extraHeader=handleMapInclude,
+                       extraImpl=commonCerealImplIncludes)
         self.addModule("common", "goldfish_vk_dispatch",
                        extraHeader=dispatchHeaderDefs,
                        extraImpl=dispatchImplIncludes)
@@ -332,10 +357,12 @@ using DlSymFunc = void* (void*, const char*);
 
         self.addWrapper(cereal.VulkanEncoder, "VkEncoder")
         self.addWrapper(cereal.ResourceTracker, "ResourceTracker")
+        self.addWrapper(cereal.VulkanExtensionStructs, "goldfish_vk_extension_structs_guest")
         self.addWrapper(cereal.VulkanMarshaling, "goldfish_vk_marshaling_guest")
         self.addWrapper(cereal.VulkanDeepcopy, "goldfish_vk_deepcopy_guest")
         self.addWrapper(cereal.VulkanHandleMap, "goldfish_vk_handlemap_guest")
         self.addWrapper(cereal.VulkanFuncTable, "func_table")
+        self.addWrapper(cereal.VulkanExtensionStructs, "goldfish_vk_extension_structs")
         self.addWrapper(cereal.VulkanMarshaling, "goldfish_vk_marshaling")
         self.addWrapper(cereal.VulkanTesting, "goldfish_vk_testing")
         self.addWrapper(cereal.VulkanDeepcopy, "goldfish_vk_deepcopy")
@@ -477,6 +504,8 @@ using DlSymFunc = void* (void*, const char*);
         # Start processing in superclass
         OutputGenerator.beginFeature(self, interface, emit)
 
+        self.typeInfo.onBeginFeature(self.featureName)
+
         self.forEachModule(lambda m: m.appendHeader("#ifdef %s\n" % self.featureName))
         self.forEachModule(lambda m: m.appendImpl("#ifdef %s\n" % self.featureName))
         self.forEachWrapper(lambda w: w.onBeginFeature(self.featureName))
@@ -484,6 +513,8 @@ using DlSymFunc = void* (void*, const char*);
     def endFeature(self):
         # Finish processing in superclass
         OutputGenerator.endFeature(self)
+
+        self.typeInfo.onEndFeature()
 
         self.forEachModule(lambda m: m.appendHeader("#endif\n"))
         self.forEachModule(lambda m: m.appendImpl("#endif\n"))

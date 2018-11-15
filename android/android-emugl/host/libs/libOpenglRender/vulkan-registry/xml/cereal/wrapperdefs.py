@@ -43,6 +43,18 @@ PARAMETERS_VALIDATE = [
     makeVulkanTypeSimple(False, VALIDATE_RESULT_TYPE, 1, VALIDATE_VAR_NAME)
 ]
 
+STRUCT_EXTENSION_PARAM = \
+    makeVulkanTypeSimple(True, "void", 1, "structExtension")
+
+STRUCT_EXTENSION_PARAM2 = \
+    makeVulkanTypeSimple(True, "void", 1, "structExtension2")
+
+STRUCT_EXTENSION_PARAM_FOR_WRITE = \
+    makeVulkanTypeSimple(False, "void", 1, "structExtension_out")
+
+STRUCT_TYPE_API_NAME = "goldfish_vk_struct_type"
+EXTENSION_SIZE_API_NAME = "goldfish_vk_extension_struct_size"
+
 VOID_TYPE = makeVulkanTypeSimple(False, "void", 0)
 STREAM_RET_TYPE = makeVulkanTypeSimple(False, "void", 0)
 

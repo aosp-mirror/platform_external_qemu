@@ -269,6 +269,9 @@ class VulkanType(object):
             return False
         return True
 
+    def getStructEnumExpr(self,):
+        return None
+
 def makeVulkanTypeFromXMLTag(tag):
     res = VulkanType()
     # Process the length expression
@@ -356,10 +359,14 @@ def makeVulkanTypeSimple(isConst,
 # Classes for describing aggregate types (unions, structs) and API calls.
 class VulkanCompoundType(object):
 
-    def __init__(self, name, members, isUnion=False):
-        self.isUnion = isUnion
+    def __init__(self, name, members, isUnion=False, structEnumExpr=None, structExtendsExpr=None, feature=None):
         self.name = name
         self.members = members
+
+        self.isUnion = isUnion
+        self.structEnumExpr = structEnumExpr
+        self.structExtendsExpr = structExtendsExpr
+        self.feature = feature
 
         self.copy = None
 
@@ -375,6 +382,8 @@ class VulkanCompoundType(object):
                 return m
         return None
 
+    def getStructEnumExpr(self,):
+        return self.structEnumExpr
 
 class VulkanAPI(object):
 
@@ -422,6 +431,8 @@ class VulkanTypeInfo(object):
 
         self.apis = {}
 
+        self.feature = None
+
     def categoryOf(self, name):
         return self.typeCategories[name]
 
@@ -437,6 +448,12 @@ class VulkanTypeInfo(object):
         else:
             return False
 
+    def onBeginFeature(self, featureName):
+        self.feature = featureName
+
+    def onEndFeature(self):
+        self.feature = None
+
     def onGenType(self, typeinfo, name, alias):
         category = typeinfo.elem.get("category")
         self.typeCategories[name] = category
@@ -447,14 +464,26 @@ class VulkanTypeInfo(object):
     def onGenStruct(self, typeinfo, typeName, alias):
         if not alias:
             members = []
+
+            structExtendsExpr = typeinfo.elem.get("structextends")
+
+            structEnumExpr = None
+
             for member in typeinfo.elem.findall(".//member"):
-                members.append(makeVulkanTypeFromXMLTag(member))
+                vulkanType = makeVulkanTypeFromXMLTag(member)
+                members.append(vulkanType)
+                if vulkanType.typeName == "VkStructureType" and \
+                   member.get("values"):
+                   structEnumExpr = member.get("values")
 
             self.structs[typeName] = \
                 VulkanCompoundType( \
                     typeName,
                     members,
-                    isUnion = self.categoryOf(typeName) == "union")
+                    isUnion = self.categoryOf(typeName) == "union",
+                    structEnumExpr = structEnumExpr,
+                    structExtendsExpr = structExtendsExpr,
+                    feature = self.feature)
             self.structs[typeName].initCopies()
 
     def onGenGroup(self, _groupinfo, groupName, _alias=None):
@@ -486,9 +515,10 @@ def iterateVulkanType(typeInfo, vulkanType, forEachType):
 
     needCheck = \
         vulkanType.isOptional and \
-        vulkanType.pointerIndirectionLevels > 0
+        vulkanType.pointerIndirectionLevels > 0 and \
+        (not vulkanType.isNextPointer())
 
-    if typeInfo.isCompoundType(vulkanType.typeName):
+    if typeInfo.isCompoundType(vulkanType.typeName) and not vulkanType.isNextPointer():
 
         if needCheck:
             forEachType.onCheck(vulkanType)
@@ -511,6 +541,14 @@ def iterateVulkanType(typeInfo, vulkanType, forEachType):
         elif vulkanType.staticArrExpr:
 
             forEachType.onStaticArr(vulkanType)
+
+        elif vulkanType.isNextPointer():
+
+            if needCheck:
+                forEachType.onCheck(vulkanType)
+            forEachType.onStructExtension(vulkanType)
+            if needCheck:
+                forEachType.endCheck(vulkanType)
 
         elif vulkanType.pointerIndirectionLevels > 0:
             if needCheck:
