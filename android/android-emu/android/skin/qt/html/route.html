@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Android Emulator Location Picker</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+<style>
+#map {
+    height: 100%;
+}
+
+html, body {
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+#description {
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+      }
+
+      #infowindow-content .title {
+        font-weight: bold;
+      }
+
+      #infowindow-content {
+        display: none;
+      }
+
+      #map #infowindow-content {
+        display: inline;
+      }
+
+      .pac-card {
+        margin: 10px 10px 0 0;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        background-color: #fff;
+        font-family: Roboto;
+      }
+
+      #pac-container {
+        padding-bottom: 12px;
+        margin-right: 12px;
+      }
+
+      .pac-controls {
+        display: inline-block;
+        padding: 5px 11px;
+      }
+
+      .pac-controls label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+
+      #pac-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 85%;
+        margin-top: 12px;
+        height: 36px;
+      }
+
+      #pac-input:focus {
+        border-color: #4d90fe;
+      }
+
+      #title {
+        color: #fff;
+        background-color: #4d90fe;
+        font-size: 25px;
+        font-weight: 500;
+        padding: 6px 12px;
+      }
+      #target {
+        width: 345px;
+      }
+</style>
+</head>
+<body>
+    <input id="pac-input" class="controls" type="text" placeholder="Start">
+    <div id="map"></div>
+    <script>
+    // Googleplex!
+    var lastLatLng = {lat: 37.4220919, lng: -122.0826088};
+    var gMap;
+    var gFirstPoint;
+    var gStartLatLng;
+    var gEndLatLng;
+    var gHaveActiveRoute;
+    var gMarkers = [];
+    var gDirectionsService;
+    var gDirectionsDisplay;
+    var gStartMarker;
+    var gTravelModeString = "DRIVING";
+
+    // Callback function for Maps API
+    function initMap() {
+        var infoWindow = new google.maps.InfoWindow;
+        // Create a map object and specify the DOM element for display.
+        gMap = new google.maps.Map(document.getElementById('map'), {
+            center: lastLatLng,
+            zoom: 10,
+            zoomControl: true,
+            disableDefaultUI: true
+        });
+
+        gFirstPoint = true;
+        gHaveActiveRoute = false;
+
+        gBlueMarker = new google.maps.Marker({map: null, position: lastLatLng});
+
+        // Register a listener that sets a new marker wherever user clicks
+        // on the map.
+        google.maps.event.addListener(gMap, 'click', function(event) {
+            setStartOrEnd(event.latLng);
+        });
+
+
+        function setStartOrEnd(latLng) {
+            if (gFirstPoint) {
+                gStartLatLng = latLng;
+
+                // Place the 'start' marker
+                gStartMarker = new google.maps.Marker({
+                    map: gMap,
+                    position: latLng
+                });
+                // Remove the old path
+                if (gDirectionsDisplay != null) {
+                    gDirectionsDisplay.setMap(null);
+                    gDirectionsDisplay = null;
+                }
+                // Ensure that the starting point is visible
+                if (!gMap.getBounds().contains(latLng)) {
+                    gMap.setCenter(latLng);
+                }
+                gHaveActiveRoute = false;
+                // Give the Emulator an empty route, so it knows we've
+                // got something new under way.
+                channel.objects.emulocationserver.sendFullRouteToEmu(0, 0.0, null);
+            } else {
+                gEndLatLng = latLng;
+                // Remove the start marker; the route has its own markers
+                gStartMarker.setMap(null);
+                calcRoute();
+            }
+            gFirstPoint = !gFirstPoint;
+            // Reset the search box
+            gInputBox['value'] = '';
+            gInputBox.setAttribute('placeholder', gFirstPoint ? 'Start' : 'End');
+        }
+
+        function markerListener(event) {
+            // Clear the markers
+            for (var i = 0, marker; marker = gMarkers[i]; i++) {
+                marker.setMap(null);
+            }
+            gMarkers = [];
+
+            setStartOrEnd(event.latLng);
+        }
+
+        setDeviceLocation = function(lat, lng) {
+            // Called from Qt code to show the blue marker to display the emulator location on the map.
+
+            var latLng = new google.maps.LatLng(lat, lng);
+            gBlueMarker.setMap(null); // Remove the old marker
+            gBlueMarker = new google.maps.Marker({map: gMap, position: latLng});
+
+            var blueDot = 'data:image/svg+xml, \
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" \
+                            viewBox="0 0 24 24" fill="#000000"> \
+                        <circle cx="12" cy="12" r="10" fill="black" opacity=".1" /> \
+                        <circle cx="12" cy="12" r="8" stroke="white" stroke-width="2" \
+                            fill="#4286f5" /> \
+                    </svg>';
+            var image = {
+              url: blueDot,
+              size: new google.maps.Size(24, 24),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(12, 12),
+              scaledSize: new google.maps.Size(25, 25)
+            };
+            gBlueMarker.setIcon(image);
+            gMap.setCenter(latLng);
+        }
+
+        // Receive the mode of travel from the host
+        setTravelMode = function(mode) {
+            switch (mode) {
+                case 0:
+                default: gTravelModeString = "DRIVING";   break;
+                case 1:  gTravelModeString = "WALKING";   break;
+                case 2:  gTravelModeString = "BICYCLING"; break;
+                case 3:  gTravelModeString = "TRANSIT";   break;
+            }
+            if (gHaveActiveRoute) {
+                // Remove the old path
+                if (gDirectionsDisplay != null) {
+                    gDirectionsDisplay.setMap(null);
+                    gDirectionsDisplay = null;
+                }
+                // Re-calculate the route using this travel mode
+                calcRoute();
+            }
+        }
+
+        // Receive the selected route from the host
+        setRouteOnMap = function(routeJson) {
+            if (routeJson.length > 0) {
+                var theRoute = JSON.parse(routeJson);
+                if (gDirectionsDisplay != null) {
+                    // Clear any previous route
+                    gDirectionsDisplay.setMap(null);
+                }
+                gDirectionsDisplay = new google.maps.DirectionsRenderer();
+                gDirectionsDisplay.setMap(gMap);
+                gDirectionsDisplay.setDirections(theRoute);
+
+                gStartLatLng = theRoute['request']['origin']['location'];
+                gEndLatLng = theRoute['request']['destination']['location'];
+                gTravelModeString = theRoute['request']['travelMode'];
+                gHaveActiveRoute = true;
+            }
+            gFirstPoint = true;
+            if (gStartMarker != null) gStartMarker.setMap(null);
+            gInputBox['value'] = '';
+            gInputBox.setAttribute('placeholder', 'Start');
+        }
+
+        // Add Google search box
+        // Create the search box and link it to the UI element.
+        var gInputBox = /** @type {HTMLInputElement} */ (
+                document.getElementById('pac-input'));
+        gMap.controls[google.maps.ControlPosition.TOP_CENTER].push(gInputBox);
+
+        var searchBox = new google.maps.places.SearchBox(
+                /** @type {HTMLInputElement} */
+                (gInputBox));
+
+        // Listen for the event fired when the user selects an item from the
+        // pick list.
+        google.maps.event.addListener(searchBox, 'places_changed', function() {
+            // Clear any existing markers
+            for (var i = 0, marker; marker = gMarkers[i]; i++) {
+                marker.setMap(null);
+            }
+            gMarkers = [];
+
+            var places = searchBox.getPlaces();
+            // If the search gave exactly one place, use it directly
+            if (places.length == 1) {
+                setStartOrEnd(places[0].geometry.location);
+                return;
+            }
+
+            // For each place, get the icon and location.
+            var bounds = new google.maps.LatLngBounds();
+            var place = null;
+            var viewport = null;
+            for (var i = 0; place = places[i]; i++) {
+                var image = {
+                    url: place.icon,
+                    size: new google.maps.Size(71, 71),
+                    origin: new google.maps.Point(0, 0),
+                    anchor: new google.maps.Point(17, 34),
+                    scaledSize: new google.maps.Size(25, 25)
+                };
+
+                // Create a marker for each place.
+                var marker = new google.maps.Marker({
+                    map: gMap,
+                    icon: image,
+                    title: place.name,
+                    position: place.geometry.location
+                });
+                viewport = place.geometry.viewport;
+                google.maps.event.addListener(marker, 'click', markerListener);
+                gMarkers.push(marker);
+
+                bounds.extend(place.geometry.location);
+            }
+            gMap.setCenter(bounds.getCenter());
+        });
+
+        // Bias the SearchBox results towards places that are within the bounds of the
+        // current map's viewport.
+        google.maps.event.addListener(gMap, 'bounds_changed', function() {
+          var bounds = gMap.getBounds();
+          searchBox.setBounds(bounds);
+        });
+
+        // Set up to retrieve directions
+        gDirectionsService = new google.maps.DirectionsService();
+    }
+
+    function calcRoute() {
+        var request = {
+            origin: gStartLatLng,
+            destination: gEndLatLng,
+            travelMode: gTravelModeString
+        };
+        gDirectionsDisplay = new google.maps.DirectionsRenderer();
+        gDirectionsDisplay.setMap(gMap);
+        gDirectionsService.route(request, function(result, status) {
+            if (status != 'OK') {
+                return;
+            }
+            gDirectionsDisplay.setDirections(result);
+            gHaveActiveRoute = true;
+
+            // Calculate the number of points and the total duration of the route
+            var numPoints = 0;
+            var totalDuration = 0.0;
+            for (var legIdx = 0;
+                 legIdx < result.routes[0].legs.length;
+                 legIdx++)
+            {
+                totalDuration += result.routes[0].legs[legIdx].duration.value;
+
+                var numSteps = result.routes[0].legs[legIdx].steps.length;
+                for (var stepIdx = 0; stepIdx < numSteps; stepIdx++) {
+                    numPoints += result.routes[0].legs[legIdx].steps[stepIdx].path.length;
+                }
+                numPoints -= (numSteps - 1); // Don't count the duplicate first points
+            }
+
+            var fullResult = JSON.stringify(result);
+            channel.objects.emulocationserver.sendFullRouteToEmu(numPoints, totalDuration, fullResult);
+        });
+    }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=YOUR_API_KEY&callback=initMap" async defer></script>
+</body>
+</html>
