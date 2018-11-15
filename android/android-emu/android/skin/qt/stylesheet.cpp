@@ -23,11 +23,13 @@
 
 namespace Ui {
 
+const char TABLE_BOTTOM_COLOR_VAR[] = "TABLE_BOTTOM_COLOR";
 const char THEME_PATH_VAR[] = "PATH";
 const char THEME_TEXT_COLOR[] = "TEXT_COLOR";
 const char MAJOR_TAB_COLOR_VAR[] = "MAJOR_TAB_COLOR";
 const char TAB_BKG_COLOR_VAR[] = "TAB_BKG_COLOR";
 const char TAB_SELECTED_COLOR_VAR[] = "TAB_SELECTED_COLOR";
+const char TABLE_SELECTED_VAR[] = "TABLE_SELECTED";
 
 // As of now low density font stylesheet is exactly the same.
 // static QString loDensityFontStylesheet;
@@ -261,7 +263,8 @@ struct StylesheetValues {
         {TAB_SELECTED_COLOR_VAR,            "#f5f5f5"},  // Background of the selected major tab
         {"TAB_DARKENED_COLOR",              "#e6e6e6"},
         {"TABLE_BOTTOM_COLOR",              "#e0e0e0"},
-        {"TEXT_COLOR",                "rgb(33,33,33)"},  // Main page text
+        {"TABLE_SELECTED",                  "#72a4fb"},  // Background of selected table row
+        {"TEXT_COLOR",                      "#212121"},  // Main page text
         {"INACTIVE_TEXT_COLOR",  "rgba(33,33,33,50%)"},
         {"TITLE_COLOR",                     "#757575"},  // Main page titles
         {"TOOL_COLOR",                      "#00bea4"},  // Checkboxes, sliders, etc.
@@ -299,7 +302,8 @@ struct StylesheetValues {
         {TAB_SELECTED_COLOR_VAR,         "#313c42"},
         {"TAB_DARKENED_COLOR",           "#20292e"},
         {"TABLE_BOTTOM_COLOR",           "#1d272c"},
-        {"TEXT_COLOR",          "rgb(238,238,238)"},
+        {"TABLE_SELECTED",               "#4286f5"},
+        {"TEXT_COLOR",                   "#eeeeee"},
         {"INACTIVE_TEXT_COLOR", "rgba(238,238,238,50%)"},
         {"TITLE_COLOR",                  "#bec1c3"},
         {"TOOL_COLOR",                   "#00bea4"},
