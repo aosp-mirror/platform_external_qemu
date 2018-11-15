@@ -72,6 +72,7 @@ TEST(Point, WriteReadFile) {
     ptMetadata.set_longitude(-123.4567);
     ptMetadata.set_altitude(11.1111);
     ptMetadata.set_description("A single point");
+    ptMetadata.set_address("123 Main St., Anytown, USA");
 
     // Write to protobuf to disk
     TestTempDir myDir("location_point_tests");
@@ -99,5 +100,7 @@ TEST(Point, WriteReadFile) {
     EXPECT_FLOAT_EQ(-123.4567,     inputMetadata->longitude());
     EXPECT_FLOAT_EQ(  11.1111,     inputMetadata->altitude());
     EXPECT_STREQ("A single point", inputMetadata->description().c_str());
+    EXPECT_STREQ("123 Main St., Anytown, USA",
+                                   inputMetadata->address().c_str());
 }
 }

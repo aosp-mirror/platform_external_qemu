@@ -17,6 +17,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/emulation/control/location_agent.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
@@ -26,9 +27,15 @@
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/stylesheet.h"
 
 #include <QFileDialog>
+#include <QItemDelegate>
 #include <QSettings>
+#ifdef USE_WEBENGINE
+#include <QWebEngineProfile>
+#endif
+
 #include <algorithm>
 #include <string>
 #include <utility>
@@ -39,21 +46,48 @@
 using android::base::AutoLock;
 using android::base::LazyInstance;
 
-static constexpr double kGplexLon = -122.084;
-static constexpr double kGplexLat =   37.422;
-static constexpr double kGplexAlt =    5.0; // Meters
-static constexpr double MAX_SPEED =  666.0; // Arbitrary (~speed of sound in knots)
+static constexpr double kGplexLon       = -122.084;
+static constexpr double kGplexLat       =   37.422;
+static constexpr double kGplexAlt       =    5.0; // Meters
+static constexpr double MAX_SPEED       =  666.0; // Arbitrary (~speed of sound in knots)
+static constexpr double UPDATE_INTERVAL = 1000.0; // 1 second
 
 static double getHeading(double startLat, double startLon, double endLat, double endLon);
 static double getDistanceNm(double startLat, double startLon, double endLat, double endLon);
 static void sendLocationToDevice();
-static void getDeviceLocation(double* pLatitude, double* pLongitude,
-                              double* pAltitude, double* pVelocity, double* pHeading);
 static void getDeviceLocationFromSettings(double* pOutLatitude,
                                           double* pOutLongitude,
                                           double* pOutAltitude,
                                           double* pOutVelocity,
                                           double* pOutHeading);
+
+#ifdef USE_WEBENGINE
+class BackgroundDelegate : public QItemDelegate {
+public:
+  explicit BackgroundDelegate(QObject *parent = 0)
+      : QItemDelegate(parent){}
+  void paint(QPainter *painter, const QStyleOptionViewItem &option,
+             const QModelIndex &index) const {
+    QStyleOptionViewItem nonSelect(option);
+    if (option.state & QStyle::State_Selected) {
+        // Put the "selected" color in the background
+        painter->fillRect(option.rect, QBrush(getColorForCurrentTheme(Ui::TABLE_SELECTED_VAR)));
+        // Don't have the default highlighting of the selected row;
+        // we'll deal with that explicitly.
+        nonSelect.state = option.state & ~QStyle::State_Selected;
+    }
+    if (index.row() > 0) {
+        // Draw a dividing line at the top of this row
+        painter->setPen(getColorForCurrentTheme(Ui::TABLE_BOTTOM_COLOR_VAR));
+        painter->drawLine(option.rect.x(),
+                          option.rect.y(),
+                          option.rect.x() + option.rect.width() - 1,
+                          option.rect.y());
+    }
+    QItemDelegate::paint(painter, nonSelect, index);
+  }
+};
+#endif // USE_WEBENGINE
 
 static const QAndroidLocationAgent* sLocationAgent = nullptr;
 
@@ -105,54 +139,92 @@ LocationPage::LocationPage(QWidget *parent) :
 {
     sGlobals->locationPagePtr = this;
     mUi->setupUi(this);
-    mTimer.setSingleShot(true);
 
-    mUi->loc_latitudeInput->setMinValue(-90.0);
-    mUi->loc_latitudeInput->setMaxValue(90.0);
-    QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout);
-    QObject::connect(this, &LocationPage::locationUpdateRequired,
-                     this, &LocationPage::updateDisplayedLocation);
-    QObject::connect(this, &LocationPage::populateNextGeoDataChunk,
-                     this, &LocationPage::populateTableByChunks,
-                     Qt::QueuedConnection);
+#ifdef USE_WEBENGINE
+    bool useLocationV2 = feature_is_enabled(kFeature_LocationUiV2);
+#else
+    bool useLocationV2 = false;
+#endif
 
-    setButtonEnabled(mUi->loc_playStopButton, getSelectedTheme(), false);
+    if (useLocationV2) {
+        // Hide the old tab on the Location page
+        mUi->locationTabs->removeTab(3);
+        // Hide the V2 widgets that are not functional yet
+        mUi->locationTabs->removeTab(2); // "Settings"
+        mUi->locationTabs->removeTab(1); // "Routes"
+        mUi->loc_pointSortBox->hide();   // "Sort by ..."
+    } else {
+        mUi->locationTabs->setTabText(3, ""); // "V1"
+        // Hide the new tabs on the Location page
+        mUi->locationTabs->removeTab(2); // "Settings"
+        mUi->locationTabs->removeTab(1); // "Routes"
+        mUi->locationTabs->removeTab(0); // "Single points"
+        mUi->loc_pointList->setRowCount(0);
+    }
 
-    // Set the GUI to the current values
-    double curLat, curLon, curAlt, curVelocity, curHeading;
-    getDeviceLocation(&curLat, &curLon, &curAlt, &curVelocity, &curHeading);
-    updateDisplayedLocation(curLat, curLon, curAlt, curVelocity, curHeading);
+    if (useLocationV2) {
+#ifdef USE_WEBENGINE
+        setUpWebEngine(mUi->loc_pointWebEngineView->page(), "qrc:/html/index.html");
 
-    mUi->loc_altitudeInput->setText(QString::number(curAlt, 'f', 1));
-    mUi->loc_speedInput->setText(QString::number(curVelocity, 'f', 1));
-    mUi->loc_latitudeInput->setValue(curLat);
-    mUi->loc_longitudeInput->setValue(curLon);
+        mPointItemBuilder = new PointItemBuilder(mUi->loc_pointList);
 
-    QSettings settings;
-    mUi->loc_playbackSpeed->setCurrentIndex(
-            getLocationPlaybackSpeedFromSettings());
-    mUi->loc_pathTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    QString location_data_file =
-        getLocationPlaybackFilePathFromSettings();
-    mGeoDataLoader = GeoDataLoaderThread::newInstance(
-            this,
-            SLOT(geoDataThreadStarted()),
-            SLOT(startupGeoDataThreadFinished(QString, bool, QString)));
-    mGeoDataLoader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
+        mUi->loc_pointList->setItemDelegateForColumn(0, new BackgroundDelegate(this));
+        mUi->loc_pointList->setItemDelegateForColumn(1, new BackgroundDelegate(this));
 
-    using android::metrics::PeriodicReporter;
-    mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
-            60 * 10 * 1000,  // reporting period
-            [this](android_studio::AndroidStudioEvent* event) {
-                if (mLocationUsed) {
-                    event->mutable_emulator_details()
-                            ->mutable_used_features()
-                            ->set_gps(true);
-                    mMetricsReportingToken.reset();  // Report it only once.
-                    return true;
-                }
-                return false;
-    });
+        scanForPoints();
+        populatePointListWidget();
+        highlightPointListWidget();
+#endif
+    } else { // !useLocationV2
+        mTimer.setSingleShot(true);
+
+        mUi->loc_latitudeInput->setMinValue(-90.0);
+        mUi->loc_latitudeInput->setMaxValue(90.0);
+        QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout);
+        QObject::connect(this, &LocationPage::locationUpdateRequired,
+                         this, &LocationPage::updateDisplayedLocation);
+        QObject::connect(this, &LocationPage::populateNextGeoDataChunk,
+                         this, &LocationPage::populateTableByChunks,
+                         Qt::QueuedConnection);
+
+        setButtonEnabled(mUi->loc_playStopButton, getSelectedTheme(), false);
+
+        // Set the GUI to the current values
+        double curLat, curLon, curAlt, curVelocity, curHeading;
+        getDeviceLocation(&curLat, &curLon, &curAlt, &curVelocity, &curHeading);
+        updateDisplayedLocation(curLat, curLon, curAlt, curVelocity, curHeading);
+
+        mUi->loc_altitudeInput->setText(QString::number(curAlt, 'f', 1));
+        mUi->loc_speedInput->setText(QString::number(curVelocity, 'f', 1));
+        mUi->loc_latitudeInput->setValue(curLat);
+        mUi->loc_longitudeInput->setValue(curLon);
+
+        QSettings settings;
+        mUi->loc_playbackSpeed->setCurrentIndex(
+                getLocationPlaybackSpeedFromSettings());
+        mUi->loc_pathTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        QString location_data_file =
+            getLocationPlaybackFilePathFromSettings();
+        mGeoDataLoader = GeoDataLoaderThread::newInstance(
+                this,
+                SLOT(geoDataThreadStarted()),
+                SLOT(startupGeoDataThreadFinished(QString, bool, QString)));
+        mGeoDataLoader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
+
+        using android::metrics::PeriodicReporter;
+        mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
+                60 * 10 * 1000,  // reporting period
+                [this](android_studio::AndroidStudioEvent* event) {
+                    if (mLocationUsed) {
+                        event->mutable_emulator_details()
+                                ->mutable_used_features()
+                                ->set_gps(true);
+                        mMetricsReportingToken.reset();  // Report it only once.
+                        return true;
+                    }
+                    return false;
+        });
+    }
 }
 
 LocationPage::~LocationPage() {
@@ -199,6 +271,18 @@ void LocationPage::shutDown() {
     sGlobals->shouldCloseUpdateThread = true;
     sGlobals->updateThreadCv.signalAndUnlock(&lock);
     sGlobals->updateThread.wait();
+}
+
+void LocationPage::updateTheme() {
+    // Set the icons in the Mode of Travel pull-down.
+    // (I couldn't figure out how to extend adjustAllButtonsForTheme()
+    //  to include QComboBox items that have icons. I could find all
+    //  QComboBox items that have icons, but I could not read their
+    //  properties to get 'iconThemeName'.)
+    mUi->loc_travelMode->setItemIcon(0, getIconForCurrentTheme("car"));
+    mUi->loc_travelMode->setItemIcon(1, getIconForCurrentTheme("walk"));
+    mUi->loc_travelMode->setItemIcon(2, getIconForCurrentTheme("bike"));
+    mUi->loc_travelMode->setItemIcon(3, getIconForCurrentTheme("transit"));
 }
 
 void LocationPage::on_loc_GpxKmlButton_clicked()
@@ -461,7 +545,6 @@ void LocationPage::locationPlaybackStop()
     mNowPlaying = false;
 }
 
-
 void LocationPage::timeout() {
     bool cellOK;
     QTableWidgetItem *theItem;
@@ -608,6 +691,18 @@ void LocationPage::updateControlsAfterLoading() {
     mNowLoadingGeoData = false;
 }
 
+// Give the device the location that is now showing on
+// the map UI
+void LocationPage::sendMostRecentUiLocation() {
+    // Update the location marker on the map
+    emit locationChanged(mLastLat, mLastLng);
+
+    writeDeviceLocationToSettings(mLastLat.toDouble(),
+                                  mLastLng.toDouble(),
+                                  0.0, 0.0, 0.0);
+    sendLocationToDevice();
+}
+
 // static
 void LocationPage::writeLocationPlaybackFilePathToSettings(const QString& file) {
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
@@ -724,9 +819,10 @@ void LocationPage::writeDeviceLocationToSettings(double lat,
 
 // Get the current location from the device. If that fails, use
 // the saved location from this UI.
-static void getDeviceLocation(double* pLatitude, double* pLongitude,
-                              double* pAltitude,
-                              double* pVelocity, double* pHeading)
+// static
+void LocationPage::getDeviceLocation(double* pLatitude, double* pLongitude,
+                                     double* pAltitude,
+                                     double* pVelocity, double* pHeading)
 {
     bool gotDeviceLoc = false;
 
@@ -750,7 +846,7 @@ static void sendLocationToDevice() {
         double altitude;
         double velocity;
         double heading;
-        getDeviceLocation(&latitude, &longitude, &altitude, &velocity, &heading);
+        LocationPage::getDeviceLocation(&latitude, &longitude, &altitude, &velocity, &heading);
 
         timeval timeVal = {};
         gettimeofday(&timeVal, nullptr);

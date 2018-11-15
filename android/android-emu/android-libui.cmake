@@ -48,6 +48,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/google-play-page.cpp
     android/skin/qt/extended-pages/help-page.cpp
     android/skin/qt/extended-pages/location-page.cpp
+    android/skin/qt/extended-pages/location-page-point.cpp
     android/skin/qt/extended-pages/microphone-page.cpp
     android/skin/qt/extended-pages/record-screen-page.cpp
     android/skin/qt/extended-pages/rotary-input-dial.cpp
@@ -114,7 +115,6 @@ set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended-pages/finger-page.ui
     android/skin/qt/extended-pages/google-play-page.ui
     android/skin/qt/extended-pages/help-page.ui
-    android/skin/qt/extended-pages/location-page.ui
     android/skin/qt/extended-pages/microphone-page.ui
     android/skin/qt/extended-pages/record-screen-page.ui
     android/skin/qt/extended-pages/rotary-input-page.ui
@@ -192,16 +192,21 @@ set(ANDROID_SKIN_SOURCES
 set(emulator-libui_darwin-x86_64_src
     android/skin/qt/mac-native-window.mm
     android/skin/qt/websockets/websocketclientwrapper.cpp
-    android/skin/qt/websockets/websockettransport.cpp)
+    android/skin/qt/websockets/websockettransport.cpp
+    android/skin/qt/extended-pages/location-page.ui)
 set(emulator-libui_windows-x86_64_src
-    android/skin/qt/windows-native-window.cpp)
+    android/skin/qt/windows-native-window.cpp
+    android/skin/qt/extended-pages/location-page_noMaps.ui)
 set(emulator-libui_windows-x86_src
-    android/skin/qt/windows-native-window.cpp)
+    android/skin/qt/windows-native-window.cpp
+    android/skin/qt/extended-pages/location-page_noMaps.ui)
 set(emulator-libui_windows_msvc-x86_64_src
-    android/skin/qt/windows-native-window.cpp)
+    android/skin/qt/windows-native-window.cpp
+    android/skin/qt/extended-pages/location-page_noMaps.ui)
 set(emulator-libui_linux-x86_64_src
     android/skin/qt/websockets/websocketclientwrapper.cpp
-    android/skin/qt/websockets/websockettransport.cpp)
+    android/skin/qt/websockets/websockettransport.cpp
+    android/skin/qt/extended-pages/location-page.ui)
 
 # Set the sources
 set(emulator-libui_src
