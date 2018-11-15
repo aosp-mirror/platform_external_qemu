@@ -352,6 +352,7 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
     this->setStyleSheet(styleString);
     mToolWindow->updateTheme(styleString);
     mExtendedUi->rotaryInputPage->updateTheme();
+    mExtendedUi->location_page->updateTheme();
     mExtendedUi->bugreportPage->updateTheme();
     mExtendedUi->recordScreenPage->updateTheme();
 

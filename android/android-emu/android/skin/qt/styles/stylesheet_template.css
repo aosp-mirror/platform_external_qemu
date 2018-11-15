@@ -189,8 +189,9 @@ QTextBrowser, QTableWidget {
     background: %%TAB_BKG_COLOR%%;
     border: 1px solid %%EDIT_COLOR%%;
     alternate-background-color: %%BKG_COLOR%%;
+    selection-background-color: %%TABLE_SELECTED%%;
 }
-QTableView::item {
+QTableView::item[class="AddPadding"] {
     padding-left: 16;
     padding-right: 16;
     border: 0;
