@@ -442,6 +442,11 @@ class CodeGen(object):
     def makeCheckVkSuccess(self, expr):
         return "((%s) == VK_SUCCESS)" % expr
 
+    def makeReinterpretCast(self, varName, typeName, const=True):
+        return "reinterpret_cast<%s%s*>(%s)" % \
+               ("const " if const else "", typeName, varName)
+
+
 # Class to wrap a Vulkan API call.
 #
 # The user gives a generic callback, |codegenDef|,
@@ -516,6 +521,7 @@ class VulkanWrapperGenerator(object):
     def __init__(self, module, typeInfo):
         self.module = module
         self.typeInfo = typeInfo
+        self.extensionStructTypes = []
 
     def onBegin(self):
         pass
@@ -530,9 +536,14 @@ class VulkanWrapperGenerator(object):
         pass
 
     def onGenType(self, typeInfo, name, alias):
+        category = self.typeInfo.categoryOf(name)
+        if category in ["struct", "union"] and not alias:
+            structInfo = self.typeInfo.structs[name]
+            if structInfo.structExtendsExpr:
+                self.extensionStructTypes.append(structInfo)
         pass
 
-    def onGenStruct(self, typeInfo, typeName, alias):
+    def onGenStruct(self, typeInfo, name, alias):
         pass
 
     def onGenGroup(self, groupinfo, groupName, alias=None):
@@ -543,3 +554,61 @@ class VulkanWrapperGenerator(object):
 
     def onGenCmd(self, cmdinfo, name, alias):
         pass
+
+    def emitForEachStructExtension(self, cgen, retType, triggerVar, forEachFunc, autoBreak=True):
+        def readStructType(structTypeName, structVarName, cgen):
+            cgen.stmt("VkStructureType %s = %s(%s)" % \
+                (structTypeName, "goldfish_vk_struct_type", structVarName))
+
+        def castAsStruct(varName, typeName, const=True):
+            return "reinterpret_cast<%s%s*>(%s)" % \
+                   ("const " if const else "", typeName, varName)
+
+        def doDefaultReturn(cgen):
+            if retType.typeName == "void":
+                cgen.stmt("return")
+            else:
+                cgen.stmt("return (%s)0" % retType.typeName)
+
+        cgen.beginIf("!%s" % triggerVar.paramName)
+        doDefaultReturn(cgen)
+        cgen.endIf()
+
+        readStructType("structType", triggerVar.paramName, cgen)
+
+        cgen.line("switch(structType)")
+        cgen.beginBlock()
+
+        currFeature = None
+
+        for ext in self.extensionStructTypes:
+            if not currFeature:
+                cgen.leftline("#ifdef %s" % ext.feature)
+                currFeature = ext.feature
+
+            if currFeature and ext.feature != currFeature:
+                cgen.leftline("#endif")
+                cgen.leftline("#ifdef %s" % ext.feature)
+                currFeature = ext.feature
+
+            enum = ext.structEnumExpr
+            cgen.line("case %s:" % enum)
+            cgen.beginBlock()
+
+            castedAccess = castAsStruct(
+                triggerVar.paramName, ext.name, const=triggerVar.isConst)
+            forEachFunc(ext, castedAccess, cgen)
+
+            if autoBreak:
+                cgen.stmt("break")
+            cgen.endBlock()
+
+        if currFeature:
+            cgen.leftline("#endif")
+
+        cgen.line("default:")
+        cgen.beginBlock()
+        doDefaultReturn(cgen)
+        cgen.endBlock()
+
+        cgen.endBlock()

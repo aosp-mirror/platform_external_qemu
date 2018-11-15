@@ -25,6 +25,7 @@ from .wrapperdefs import STREAM_RET_TYPE
 from .wrapperdefs import MARSHAL_INPUT_VAR_NAME
 from .wrapperdefs import UNMARSHAL_INPUT_VAR_NAME
 from .wrapperdefs import PARAMETERS_MARSHALING
+from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE, EXTENSION_SIZE_API_NAME
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
 
@@ -53,11 +54,6 @@ class VulkanMarshalingCodegen(object):
         self.lenAccessor = lambda t: self.cgen.generalLengthAccess(t, parentVarName = self.inputVarName)
 
         self.dynAlloc = dynAlloc
-
-    def needSkip(self, vulkanType):
-        if vulkanType.isNextPointer():
-            return True
-        return False
 
     def getTypeForStreaming(self, vulkanType):
         res = copy(vulkanType)
@@ -127,9 +123,6 @@ class VulkanMarshalingCodegen(object):
 
         self.genStreamCall(vulkanType.getForAddressAccess(), addrExpr, sizeExpr)
 
-        if self.needSkip(vulkanType):
-            return
-
         self.cgen.beginIf(access)
 
         if needConsistencyCheck:
@@ -140,19 +133,11 @@ class VulkanMarshalingCodegen(object):
 
     def endCheck(self, vulkanType):
 
-        if self.needSkip(vulkanType):
-            return
-
         if self.checked:
             self.cgen.endIf()
             self.checked = False
 
     def onCompoundType(self, vulkanType):
-
-        if self.needSkip(vulkanType):
-            self.cgen.line("// TODO: Unsupported : %s" %
-                           self.cgen.makeCTypeDecl(vulkanType))
-            return
 
         access = self.exprAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
@@ -214,13 +199,43 @@ class VulkanMarshalingCodegen(object):
         finalLenExpr = "%s * %s" % (lenAccess, self.cgen.sizeofExpr(vulkanType))
         self.genStreamCall(vulkanType, access, finalLenExpr)
 
-    def onPointer(self, vulkanType):
-        if self.needSkip(vulkanType):
-            self.cgen.line("// TODO: Unsupported : %s" %
-                           self.cgen.makeCTypeDecl(vulkanType))
-            return
-
+    def onStructExtension(self, vulkanType):
         access = self.exprAccessor(vulkanType)
+
+        sizeVar = "%s_size" % vulkanType.paramName
+
+        if self.direction == "write":
+            self.cgen.stmt("size_t %s = %s(%s)" % (sizeVar, EXTENSION_SIZE_API_NAME, access))
+            self.cgen.stmt("%s->putBe32(%s)" % \
+                (self.streamVarName, sizeVar))
+        else:
+            self.cgen.stmt("size_t %s" % sizeVar)
+            self.cgen.stmt("%s = %s->getBe32()" % \
+                (sizeVar, self.streamVarName))
+
+        if self.direction == "read":
+            self.cgen.stmt("%s = nullptr" % access)
+
+        self.cgen.beginIf(sizeVar)
+
+        if self.direction == "read":
+            if self.dynAlloc:
+                self.cgen.stmt( \
+                    "%s->alloc((void**)&%s, %s_size)" %
+                    (self.streamVarName, access, vulkanType.paramName))
+            castedAccessExpr = "(%s)(%s)" % ("void*", access)
+        else:
+            castedAccessExpr = access
+
+        self.genStreamCall(vulkanType, access, "sizeof(VkStructureType)")
+        self.cgen.funcCall(None, self.marshalPrefix + "extension_struct",
+                           [self.streamVarName, castedAccessExpr])
+
+        self.cgen.endIf()
+
+    def onPointer(self, vulkanType):
+        access = self.exprAccessor(vulkanType)
+
         lenAccess = self.lenAccessor(vulkanType)
 
         self.doAllocSpace(vulkanType)
@@ -236,7 +251,6 @@ class VulkanMarshalingCodegen(object):
     def onValue(self, vulkanType):
         access = self.exprAccessor(vulkanType)
         self.genStreamCall(vulkanType, access, self.cgen.sizeofExpr(vulkanType))
-
 
 class VulkanMarshaling(VulkanWrapperGenerator):
 
@@ -269,6 +283,23 @@ class VulkanMarshaling(VulkanWrapperGenerator):
         # that is not going to interfere with renderControl
         # opcodes
         self.currentOpcode = 20000
+
+        self.extensionMarshalPrototype = \
+            VulkanAPI(API_PREFIX_MARSHAL + "extension_struct",
+                      STREAM_RET_TYPE,
+                      PARAMETERS_MARSHALING +
+                      [STRUCT_EXTENSION_PARAM])
+
+        self.extensionUnmarshalPrototype = \
+            VulkanAPI(API_PREFIX_UNMARSHAL + "extension_struct",
+                      STREAM_RET_TYPE,
+                      PARAMETERS_MARSHALING +
+                      [STRUCT_EXTENSION_PARAM_FOR_WRITE])
+
+    def onBegin(self,):
+        VulkanWrapperGenerator.onBegin(self)
+        self.module.appendImpl(self.cgenImpl.makeFuncDecl(self.extensionMarshalPrototype))
+        self.module.appendImpl(self.cgenImpl.makeFuncDecl(self.extensionUnmarshalPrototype))
 
     def onGenType(self, typeXml, name, alias):
         VulkanWrapperGenerator.onGenType(self, typeXml, name, alias)
@@ -327,3 +358,32 @@ class VulkanMarshaling(VulkanWrapperGenerator):
         self.module.appendHeader(
             "#define OP_%s %d\n" % (name, self.currentOpcode))
         self.currentOpcode += 1
+
+    def onEnd(self,):
+        VulkanWrapperGenerator.onEnd(self)
+
+        def forEachExtensionMarshal(ext, castedAccess, cgen):
+            cgen.funcCall(None, API_PREFIX_MARSHAL + ext.name,
+                          [VULKAN_STREAM_VAR_NAME, castedAccess])
+
+        def forEachExtensionUnmarshal(ext, castedAccess, cgen):
+            cgen.funcCall(None, API_PREFIX_UNMARSHAL + ext.name,
+                          [VULKAN_STREAM_VAR_NAME, castedAccess])
+
+        self.module.appendImpl(
+            self.cgenImpl.makeFuncImpl(
+                self.extensionMarshalPrototype,
+                lambda cgen: self.emitForEachStructExtension(
+                    cgen,
+                    STREAM_RET_TYPE,
+                    STRUCT_EXTENSION_PARAM,
+                    forEachExtensionMarshal)))
+
+        self.module.appendImpl(
+            self.cgenImpl.makeFuncImpl(
+                self.extensionUnmarshalPrototype,
+                lambda cgen: self.emitForEachStructExtension(
+                    cgen,
+                    STREAM_RET_TYPE,
+                    STRUCT_EXTENSION_PARAM_FOR_WRITE,
+                    forEachExtensionUnmarshal)))
