@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "17d1ce52_2a08b67e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_deepcopy.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-15T07:31:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a4ff9eaa_632aca8f",
+      "range": {
+        "startLine": 50,
+        "startChar": 20,
+        "endLine": 50,
+        "endChar": 33
+      },
+      "revId": "3acea504cf6131ba9fb568adea439cff248d05d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5749141a_3c364e14",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_deepcopy.cpp",
         "patchSetId": 10
@@ -45,6 +69,30 @@
       "revId": "3acea504cf6131ba9fb568adea439cff248d05d1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cfdb5fad_4170cdbc",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_deepcopy.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-15T07:31:30Z",
+      "side": 1,
+      "message": "We will be directly writing in there, while most Vulkan structs have their pNext member as const void*; this will be needed to prevent compilation errors.",
+      "parentUuid": "5749141a_3c364e14",
+      "range": {
+        "startLine": 51,
+        "startChar": 53,
+        "endLine": 51,
+        "endChar": 60
+      },
+      "revId": "3acea504cf6131ba9fb568adea439cff248d05d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "e94e8225_eba4ffc3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_deepcopy.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 6329,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-15T07:31:30Z",
+      "side": 1,
+      "message": "Thanks for the suggestion. Added a new utility function getType, and converted to switch statements.",
+      "parentUuid": "d12d377b_42589e1a",
+      "range": {
+        "startLine": 6329,
+        "startChar": 25,
+        "endLine": 6329,
+        "endChar": 66
+      },
+      "revId": "3acea504cf6131ba9fb568adea439cff248d05d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dc12d4d4_65a73dcc",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_extension_structs.cpp",
         "patchSetId": 10
@@ -91,6 +163,30 @@
       "revId": "3acea504cf6131ba9fb568adea439cff248d05d1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "080a5c08_5b023cf1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_extension_structs.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-15T07:31:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dc12d4d4_65a73dcc",
+      "range": {
+        "startLine": 283,
+        "startChar": 4,
+        "endLine": 283,
+        "endChar": 6
+      },
+      "revId": "3acea504cf6131ba9fb568adea439cff248d05d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "ab13cba7_e8f74599",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-15T07:31:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b4ef604a_4811eb3c",
+      "range": {
+        "startLine": 117,
+        "startChar": 23,
+        "endLine": 117,
+        "endChar": 37
+      },
+      "revId": "3acea504cf6131ba9fb568adea439cff248d05d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a7175737_5907932a",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
         "patchSetId": 10
@@ -137,6 +257,30 @@
       "revId": "3acea504cf6131ba9fb568adea439cff248d05d1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a1ee9916_4d23d48b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/goldfish_vk_marshaling.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 2419,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-15T07:31:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a7175737_5907932a",
+      "range": {
+        "startLine": 2419,
+        "startChar": 40,
+        "endLine": 2419,
+        "endChar": 46
+      },
+      "revId": "3acea504cf6131ba9fb568adea439cff248d05d1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
