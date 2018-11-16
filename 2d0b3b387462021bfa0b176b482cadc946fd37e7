@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "901c137b_b8a0c297",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/GLESv2Decoder.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-16T00:02:33Z",
+      "side": 1,
+      "message": "It is up to you to find the best solution, but one approach is to do this by plumbing through the following functions from ram_addr.h:\n\nvoid qemu_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size, int flags);\nvoid qemu_user_backed_ram_unmap(hwaddr gpa, hwaddr size);\n\n\nfirst in ./android-qemu2-glue/qemu-vm-operations-impl.cpp, then exposing some safe version of them in ./android/android-emu/android/emulation/control/vm_operations.h, then adding the function pointeres from vm_operations.h to Renderer.h / RendererImpl.h / RendererImpl.cpp, then adding them at OpenGL init time, as in opengles.cpp:android_startOpenglesRenderer\u0027s sRenderLib-\u003esetDmaOps(dma_ops).\n\n As this will be called from a render thread, I believe one way to do it safely is, in ./android-qemu2-glue/qemu-vm-operations-impl.cpp, to take the BQL (RecursiveScopedVmLock) or even stop the VM altogether (as in static bool qemu_snapshot_remap(bool shared,\n                                void* opaque,\n                                LineConsumerCallback errConsumer) {\n)\n\nMerely taking the BQL seemes to allow us to update hypervisor mappings safely on Mac/Windows, but for Linux KVM it looks like the VM has to be stopped and started 🎉",
+      "revId": "2d0b3b387462021bfa0b176b482cadc946fd37e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
