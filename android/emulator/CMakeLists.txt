@@ -8,7 +8,7 @@ add_executable(emulator main-emulator.cpp ${WINDOWS_ICON})
 target_link_libraries(emulator PRIVATE android-emu)
 
 # Make sure we have the qemu dependencies available
-add_dependencies(emulator qemu-system-i386 qemu-system-x86_64 qemu-system-arm qemu-system-aarch64)
+add_dependencies(emulator qemu-system-i386 qemu-system-x86_64 qemu-system-armel qemu-system-aarch64)
 
 set(PC_BIOS "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/qemu-kernel/x86/pc-bios")
 set(EMULATOR_BIOS_DEPENDENCIES
