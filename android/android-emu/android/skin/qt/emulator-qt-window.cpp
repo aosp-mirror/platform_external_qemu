@@ -19,6 +19,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/base/system/System.h"
 #include "android/base/threads/Async.h"
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
@@ -104,6 +105,7 @@ using android::base::makeOptional;
 using android::base::PathUtils;
 using android::base::ScopedCPtr;
 using android::base::StringView;
+using android::base::System;
 using android::crashreport::CrashReporter;
 using android::emulation::ApkInstaller;
 using android::emulation::FilePusher;
@@ -302,6 +304,13 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mSkinGapBottom(0),
       mSkinGapLeft(0),
       mMainLoopThread(nullptr),
+      mWin32WarningBox(QMessageBox::Information,
+                       tr("Windows 32-bit Deprecation"),
+                       tr("We strongly recommend using the 64-bit version "
+                          "of the Windows emulator; the 32-bit version is deprecated "
+                          "and will be removed soon."),
+                       QMessageBox::Ok,
+                       this),
       mAvdWarningBox(QMessageBox::Information,
                      tr("Recommended AVD"),
                      tr("Running an x86 based Android Virtual Device (AVD) is "
@@ -657,6 +666,15 @@ EmulatorQtWindow::~EmulatorQtWindow() {
     lock.unlock();
 
     delete mMainLoopThread;
+}
+
+void EmulatorQtWindow::showWin32DeprecationWarning() {
+#ifdef _WIN32
+    auto programBitness = System::get()->getProgramBitness();
+    if (programBitness != 32) return;
+
+    mWin32WarningBox->show();
+#endif
 }
 
 void EmulatorQtWindow::showAvdArchWarning() {
@@ -1629,6 +1647,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
     // x86 AVD. This cannot be done on the construction of the window since the
     // Qt UI thread has not been properly initialized yet.
     if (mFirstShowWindowCall) {
+        showWin32DeprecationWarning();
         showAvdArchWarning();
         checkShouldShowGpuWarning();
         showGpuWarning();
