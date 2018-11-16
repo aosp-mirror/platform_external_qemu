@@ -52,6 +52,24 @@
       "revId": "e344b781100b178ef27b4fbf45a3096c090b1191",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6b36f338_2c308ebb",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-11-16T16:59:38Z",
+      "side": 1,
+      "message": ":)\nOn my Windows I created a directory including both symbols. In File Explorer, the\nfirst emoji displays correctly, but the second shows as general box. The command\nline \u0027dir\u0027 shows each emoji as 4 gibberishy characters.\n\nRegardless, the code found the file and read the contents correctly.",
+      "parentUuid": "da726975_c00b8dc2",
+      "revId": "e344b781100b178ef27b4fbf45a3096c090b1191",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
