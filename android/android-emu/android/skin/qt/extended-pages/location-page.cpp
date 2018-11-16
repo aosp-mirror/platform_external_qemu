@@ -16,6 +16,7 @@
 #include "android/skin/qt/extended-pages/location-page.h"
 
 #include "android/base/memory/LazyInstance.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
@@ -140,10 +141,23 @@ LocationPage::LocationPage(QWidget *parent) :
     sGlobals->locationPagePtr = this;
     mUi->setupUi(this);
 
-#ifdef USE_WEBENGINE
-    bool useLocationV2 = feature_is_enabled(kFeature_LocationUiV2);
-#else
     bool useLocationV2 = false;
+
+#ifdef USE_WEBENGINE
+    if (feature_is_enabled(kFeature_LocationUiV2)) {
+        // Get the Maps API key from 'maps.key' (nominally in ~/.android/)
+        QString mapsKeyPath = QString::fromStdString(android::ConfigDirs::getUserDirectory());
+        mapsKeyPath += "/maps.key"; // QFile is OK with '/' even on Windows
+        QFile mapsKeyFile(mapsKeyPath);
+        if (mapsKeyFile.open(QFile::ReadOnly | QFile::Text)) {
+            QByteArray theKey = mapsKeyFile.readLine().trimmed();
+            if (!theKey.isEmpty()) {
+                // There is a non-empty key
+                mMapsApiKey = theKey;
+                useLocationV2 = true;
+            }
+        }
+    }
 #endif
 
     if (useLocationV2) {
@@ -164,7 +178,7 @@ LocationPage::LocationPage(QWidget *parent) :
 
     if (useLocationV2) {
 #ifdef USE_WEBENGINE
-        setUpWebEngine(mUi->loc_pointWebEngineView->page(), "qrc:/html/index.html");
+        setUpWebEngine(mUi->loc_pointWebEngineView->page());
 
         mPointItemBuilder = new PointItemBuilder(mUi->loc_pointList);
 

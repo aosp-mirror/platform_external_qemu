@@ -427,7 +427,7 @@ void LocationPage::writePointProtobufFullPath(
     protobuf.SerializeToOstream(&outStream);
 }
 
-void LocationPage::setUpWebEngine(QWebEnginePage* webEnginePage, const char* pageName) {
+void LocationPage::setUpWebEngine(QWebEnginePage* webEnginePage) {
     QFile webChannelJsFile(":/html/js/qwebchannel.js");
     if(!webChannelJsFile.open(QIODevice::ReadOnly)) {
         qDebug() << QString("Couldn't open qwebchannel.js file: %1").arg(webChannelJsFile.errorString());
@@ -498,9 +498,21 @@ void LocationPage::setUpWebEngine(QWebEnginePage* webEnginePage, const char* pag
     QObject::connect(mClientWrapper.get(), &WebSocketClientWrapper::clientConnected,
                      mWebChannel.get(), &QWebChannel::connectTo);
 
-    // setup the dialog and publish it to the QWebChannel
+    // Setup the dialog
     mWebChannel->registerObject(QStringLiteral("emulocationserver"), this);
-    webEnginePage->load(QUrl(pageName));
+
+    // Insert the Maps API key into 'index.html' and publish
+    // that to QWebChannel
+    QFile indexHtmlFile(":/html/index.html");
+    if (indexHtmlFile.open(QFile::ReadOnly | QFile::Text)) {
+        QByteArray htmlByteArray = indexHtmlFile.readAll();
+        if (!htmlByteArray.isEmpty()) {
+            // Change the placeholder to the real Maps API key
+            htmlByteArray.replace("YOUR_API_KEY", mMapsApiKey.toUtf8());
+            // Publish it
+            webEnginePage->setHtml(htmlByteArray);
+        }
+    }
 }
 
 
@@ -525,5 +537,5 @@ std::string LocationPage::writePointProtobufByName(
 void LocationPage::writePointProtobufFullPath(
         const QString& protoFullPath,
         const emulator_location::PointMetadata& protobuf) { }
-void LocationPage::setUpWebEngine(QWebEnginePage* webEnginePage, const char* pageName) { }
+void LocationPage::setUpWebEngine(QWebEnginePage* webEnginePage) { }
 #endif // !USE_WEBENGINE

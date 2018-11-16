@@ -191,7 +191,7 @@ private:
     void writePointProtobufFullPath(const QString& protoFullPath,
                                     const emulator_location::PointMetadata& protobuf);
 
-    void setUpWebEngine(QWebEnginePage* webEnginePage, const char* pageName);
+    void setUpWebEngine(QWebEnginePage* webEnginePage);
 
     static bool validateCell(QTableWidget* table,
                              int row,
@@ -217,6 +217,7 @@ private:
     QString mLastLng = "37.422";
     // Street address corresponding to (mLastLat, mLastLng)
     QString mLastAddr = "";
+    QString mMapsApiKey = "";
 
     void editPoint(int row);
     void deletePoint(int row);
