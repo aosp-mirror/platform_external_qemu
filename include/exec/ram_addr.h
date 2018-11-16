@@ -70,7 +70,8 @@ static inline unsigned long int ramblock_recv_bitmap_offset(void *host_addr,
                                                             RAMBlock *rb)
 {
     uint64_t host_addr_offset =
-            (uint64_t)(uintptr_t)(host_addr - (void *)rb->host);
+            (uint64_t)(uintptr_t)((char *)host_addr - (char *)rb->host);
+
     return host_addr_offset >> TARGET_PAGE_BITS;
 }
 
@@ -94,17 +95,8 @@ RAMBlock *qemu_ram_alloc_resizeable(ram_addr_t size, ram_addr_t max_size,
 RAMBlock *qemu_ram_alloc_user_backed(ram_addr_t size, MemoryRegion *mr,
                                      Error **errp);
 
-// API for adding and removing mappings of guest RAM and host addrs.
-// Implementation depends on the hypervisor.
-#define USER_BACKED_RAM_FLAGS_NONE 0x0
-#define USER_BACKED_RAM_FLAGS_READ 0x1
-#define USER_BACKED_RAM_FLAGS_WRITE 0x2
-#define USER_BACKED_RAM_FLAGS_EXEC 0x4
-void qemu_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size, int flags);
-void qemu_user_backed_ram_unmap(hwaddr gpa, hwaddr size);
-
-typedef void (*QemuUserBackedRamMapFunc)(hwaddr gpa, void* hva, hwaddr size, int flags);
-typedef void (*QemuUserBackedRamUnmapFunc)(hwaddr gpa, hwaddr size);
+typedef void (*QemuUserBackedRamMapFunc)(uint64_t gpa, void* hva, uint64_t size, int flags);
+typedef void (*QemuUserBackedRamUnmapFunc)(uint64_t gpa, uint64_t size);
 
 void qemu_set_user_backed_mapping_funcs(QemuUserBackedRamMapFunc mapFunc,
                                         QemuUserBackedRamUnmapFunc unmapFunc);
