@@ -498,6 +498,18 @@ static void set_snapshot_callbacks(void* opaque,
     }
 }
 
+static void map_user_backed_ram(uint64_t gpa, void* hva, uint64_t size) {
+    android::RecursiveScopedVmLock vmlock;
+
+    qemu_user_backed_ram_map(gpa, hva, size, USER_BACKED_RAM_FLAGS_READ | USER_BACKED_RAM_FLAGS_WRITE);
+}
+
+static void unmap_user_backed_ram(uint64_t gpa, uint64_t size) {
+    android::RecursiveScopedVmLock vmlock;
+
+    qemu_user_backed_ram_unmap(gpa, size);
+}
+
 // These are QEMU's functions to check for each specific hypervisor status.
 #ifdef CONFIG_HAX
   extern "C" int hax_enabled(void);
@@ -563,6 +575,8 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .snapshotDelete = qemu_snapshot_delete,
         .snapshotRemap = qemu_snapshot_remap,
         .setSnapshotCallbacks = set_snapshot_callbacks,
+        .mapUserBackedRam = map_user_backed_ram,
+        .unmapUserBackedRam = unmap_user_backed_ram,
         .getVmConfiguration = get_vm_config,
         .setFailureReason = set_failure_reason,
         .setExiting = set_exiting,
