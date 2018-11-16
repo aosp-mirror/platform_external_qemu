@@ -25,6 +25,7 @@ PROGRAM_DESCRIPTION=\
 "Build dEQP against emulator combined guest/host driver."
 
 option_register_var "--case=<dEQP-case-pattern>" OPT_DEQP_CASE "Run a particular set of dEQP tests"
+option_register_var "--validation=<enable|disable>" OPT_VALIDATION "Enable vulkan validation layer while running tests"
 
 aosp_dir_register_option
 package_builder_register_options
@@ -49,7 +50,12 @@ if [ "$OPT_DEQP_CASE" ]; then
 DEQP_CASES="--deqp-case=$OPT_DEQP_CASE"
 fi
 
-DEQP_VK_EXEC_NAME="./deqp-vk $DEQP_CASES --deqp-log-filename=$DEQP_TESTLOG_DST"
+if [ "$OPT_VALIDATION" ]; then
+DEQP_VALIDATION="--deqp-validation=$OPT_VALIDATION"
+export VULKAN_SDK=$AOSP_DIR/prebuilts/android-emulator-build/common/vulkan/linux-x86_64/
+fi
+
+DEQP_VK_EXEC_NAME="./deqp-vk $DEQP_CASES $DEQP_VALIDATION --deqp-log-filename=$DEQP_TESTLOG_DST"
 
 cd $DEQP_VK_EXEC_DIR
 

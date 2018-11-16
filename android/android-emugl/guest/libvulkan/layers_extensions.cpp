@@ -402,6 +402,10 @@ void DiscoverLayers() {
     auto layerDiscoveryPath =
         pj(System::get()->getProgramDirectory(), "lib64");
     DiscoverLayersInPathList(layerDiscoveryPath);
+    std::string vkSdkPath = android::base::System::get()->envGet("VULKAN_SDK");
+    if (vkSdkPath != "") {
+        DiscoverLayersInPathList(vkSdkPath);
+    }
 }
 
 uint32_t GetLayerCount() {
