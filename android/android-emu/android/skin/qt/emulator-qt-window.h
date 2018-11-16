@@ -348,6 +348,7 @@ private:
     // depend on AVD info, GPU info, etc.,
     // so they must be collected before the window shows up.
     void checkAdbVersionAndWarn();
+    void showWin32DeprecationWarning();
     void showAvdArchWarning();
     void checkShouldShowGpuWarning();
     void showGpuWarning();
@@ -434,6 +435,7 @@ private:
                                            QMessageBox::StandardButton,
                                            QWidget*>;
 
+    OnDemandMessageBox mWin32WarningBox;
     OnDemandMessageBox mAvdWarningBox;
     OnDemandMessageBox mGpuWarningBox;
     OnDemandMessageBox mAdbWarningBox;
