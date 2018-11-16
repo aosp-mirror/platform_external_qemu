@@ -330,7 +330,8 @@ endfunction()
 
 # Constructs a linker command that will make sure the whole archive is included, not just the ones referenced.
 #
-# LIBCMD The variable which will contain the complete linker command LIBNAME The archive that needs to be included
+# . LIBCMD The variable which will contain the complete linker command
+# . LIBNAME The archive that needs to be included
 # completely
 function(android_complete_archive LIBCMD LIBNAME)
   if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
@@ -340,17 +341,26 @@ function(android_complete_archive LIBCMD LIBNAME)
   endif()
 endfunction()
 
-function(android_add_qemu_executable AARCH LOCAL_AARCH STUBS CPU)
+# Constructs the qemu executable.
+#
+# ANDROID_AARCH The android architecture name
+# QEMU_AARCH The qemu architecture name.
+# CONFIG_AARCH The configuration architecture used.
+# STUBS The set of stub sources to use.
+# CPU The target cpu architecture used by qemu
+#
+# (Maybe on one day we will standardize all the naming, between qemu and configs and cpus..)
+function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS CPU)
   android_complete_archive(QEMU_COMPLETE_LIB "libqemu2-common")
-  add_executable(qemu-system-${AARCH}
+  add_executable(qemu-system-${ANDROID_AARCH}
                  android-qemu2-glue/main.cpp
                  vl.c
                  ${STUBS}
-                 ${qemu-system-${AARCH}_sources}
-                 ${qemu-system-${AARCH}_generated_sources})
-  target_include_directories(qemu-system-${AARCH} PRIVATE android-qemu2-glue/config/target-${LOCAL_AARCH} target/${CPU})
-  target_compile_definitions(qemu-system-${AARCH} PRIVATE -DNEED_CPU_H -DCONFIG_ANDROID)
-  target_link_libraries(qemu-system-${AARCH}
+                 ${qemu-system-${QEMU_AARCH}_sources}
+                 ${qemu-system-${QEMU_AARCH}_generated_sources})
+  target_include_directories(qemu-system-${ANDROID_AARCH} PRIVATE android-qemu2-glue/config/target-${CONFIG_AARCH} target/${CPU})
+  target_compile_definitions(qemu-system-${ANDROID_AARCH} PRIVATE -DNEED_CPU_H -DCONFIG_ANDROID)
+  target_link_libraries(qemu-system-${ANDROID_AARCH}
                         PRIVATE android-qemu-deps
                                 -w
                                 ${QEMU_COMPLETE_LIB}
@@ -362,12 +372,12 @@ function(android_add_qemu_executable AARCH LOCAL_AARCH STUBS CPU)
                                 ${VIRGLRENDERER_LIBRARIES}
                                 android-qemu-deps)
   # Make the common dependency explicit, as some generators might not detect it properly (Xcode)
-  add_dependencies(qemu-system-${AARCH} libqemu2-common)
+  add_dependencies(qemu-system-${ANDROID_AARCH} libqemu2-common)
   # XCode bin places this not where we want this...
-  set_target_properties(qemu-system-${AARCH}
+  set_target_properties(qemu-system-${ANDROID_AARCH}
                         PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                                    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qemu/${ANDROID_TARGET_TAG}")
-  install(TARGETS qemu-system-${AARCH} RUNTIME DESTINATION ./qemu/${ANDROID_TARGET_TAG})
+  install(TARGETS qemu-system-${ANDROID_AARCH} RUNTIME DESTINATION ./qemu/${ANDROID_TARGET_TAG})
 endfunction()
 
 # Copies a
