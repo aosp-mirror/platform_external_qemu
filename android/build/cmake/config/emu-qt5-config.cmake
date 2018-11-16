@@ -149,6 +149,10 @@ elseif(ANDROID_TARGET_TAG MATCHES "windows-x86.*")
       ${PREBUILT_ROOT}/plugins/imageformats/qwbmp.dll>lib64/qt/plugins/imageformats/qwbmp.dll;
       ${PREBUILT_ROOT}/plugins/imageformats/qwebp.dll>lib64/qt/plugins/imageformats/qwebp.dll;)
 elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
+  get_filename_component(PREBUILT_WEBENGINE_DEPS_ROOT
+                        "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/qtwebengine-deps/${ANDROID_TARGET_TAG}"
+                        ABSOLUTE)
+
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
   # LD_DEBUG=libs ./emulator @P_64 2>&1 | grep qt | grep init
   set(
@@ -186,6 +190,7 @@ elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
     ${PREBUILT_ROOT}/lib/libsoftokn3.so>lib64/qt/lib/libsoftokn3.so;
     ${PREBUILT_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so;
     ${PREBUILT_ROOT}/lib/libQt5XcbQpa.so.5>lib64/qt/lib/libQt5XcbQpa.so.5;
+    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6;
     ${PREBUILT_ROOT}/plugins/platforms/libqxcb.so>lib64/qt/plugins/platforms/libqxcb.so;
     ${PREBUILT_ROOT}/plugins/xcbglintegrations/libqxcb-glx-integration.so>lib64/qt/plugins/xcbglintegrations/libqxcb-glx-integration.so;
     ${PREBUILT_ROOT}/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so>lib64/qt/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so;
