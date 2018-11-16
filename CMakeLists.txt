@@ -393,10 +393,10 @@ target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub android-qemu-de
 install(TARGETS qemu-img RUNTIME DESTINATION .)
 
 # Create the qemu targets.
-android_add_qemu_executable(i386 x86 "${ANDROID_QEMU_i386_STUBS_${ANDROID_TARGET_TAG}}" i386)
-android_add_qemu_executable(x86_64 x86_64 "${ANDROID_QEMU_i386_STUBS_${ANDROID_TARGET_TAG}}" i386)
-android_add_qemu_executable(aarch64 arm64 "${ANDROID_QEMU_arm_STUBS_${ANDROID_TARGET_TAG}}" arm)
-android_add_qemu_executable(arm arm "${ANDROID_QEMU_arm_STUBS_${ANDROID_TARGET_TAG}}" arm)
+android_add_qemu_executable(i386 i386 x86 "${ANDROID_QEMU_i386_STUBS_${ANDROID_TARGET_TAG}}" i386)
+android_add_qemu_executable(x86_64 x86_64 x86_64 "${ANDROID_QEMU_i386_STUBS_${ANDROID_TARGET_TAG}}" i386)
+android_add_qemu_executable(aarch64 aarch64 arm64 "${ANDROID_QEMU_arm_STUBS_${ANDROID_TARGET_TAG}}" arm)
+android_add_qemu_executable(armel arm arm "${ANDROID_QEMU_arm_STUBS_${ANDROID_TARGET_TAG}}" arm)
 
 # The tests currently work on linux only.
 if(ANDROID_TARGET_TAG MATCHES "linux.*")
