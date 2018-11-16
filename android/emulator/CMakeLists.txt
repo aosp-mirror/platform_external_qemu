@@ -1,5 +1,4 @@
 prebuilt(QT5)
-prebuilt(MESA)
 prebuilt(VIRTUALSCENE)
 prebuilt(E2FSPROGS)
 set(WINDOWS_ICON ../images/emulator_icon.rc)
@@ -27,7 +26,6 @@ set(EMULATOR_HW_DEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/android/android-emu/andro
 
 # Install all the depencies in the right place during build
 android_target_dependency(emulator all QT5_SHARED_DEPENDENCIES)
-android_target_dependency(emulator all MESA_DEPENDENCIES)
 android_target_dependency(emulator all EMULATOR_FEATURE_DEPENDENCIES)
 android_target_dependency(emulator all EMULATOR_KEYMAP_DEPENDENCIES)
 android_target_dependency(emulator all EMULATOR_BIOS_DEPENDENCIES)
@@ -42,7 +40,6 @@ android_target_dependency(emulator linux-x86_64 DARWINN_DEPENDENCIES)
 
 # And install them for a release.
 android_install_dependency(all QT5_SHARED_DEPENDENCIES)
-android_install_dependency(all MESA_DEPENDENCIES)
 android_install_dependency(all EMULATOR_FEATURE_DEPENDENCIES)
 android_install_dependency(all EMULATOR_KEYMAP_DEPENDENCIES)
 android_install_dependency(all EMULATOR_BIOS_DEPENDENCIES)

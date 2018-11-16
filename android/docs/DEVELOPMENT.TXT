@@ -360,12 +360,11 @@ of them:
     'emulator' launcher takes care of adding or $EXEC_DIR/lib64/ to
     LD_LIBRARY_PATH (or PATH on Windows) before launching the real emulation
     engine.
-
+    
     There is also the possibility of supporting additional GPU emulation
-    modes, through optional 'backends'. For example, the 'mesa' backend
-    is used to perform software-based OpenGL rendering, and can be activated
-    by using '-gpu mesa' or setting 'hw.gpu.mode' to 'mesa' in the AVD
-    configuration.
+    modes, through optional 'backends'. For example, the
+    'swiftshader_indirect' backend is used to perform software-based OpenGL
+    rendering, and can be activated by using '-gpu swiftshader_indirect'.
 
     The files of a given backend <name> must be under:
 

@@ -436,7 +436,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
 
     if (!strcmp(config->backend, "mesa")) {
         fprintf(stderr, "WARNING: The Mesa software renderer is deprecated. "
-                        "Use Swiftshader (-gpu swiftshader) for software rendering.\n");
+                        "Use Swiftshader (-gpu swiftshader_indirect) for software rendering.\n");
         system->envSet("ANDROID_GL_LIB", "mesa");
         system->envSet("ANDROID_GL_SOFTWARE_RENDERER", "1");
     }

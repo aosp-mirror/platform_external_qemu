@@ -39,7 +39,7 @@ DEFAULT_REVISION=$(date +%Y%m%d)
 EMUGL_LIBRARIES="OpenglRender EGL_translator GLES_CM_translator GLES_V2_translator GLES12Translator"
 
 # The list of Emugl backend directories under $EXEC_DIR/<lib>/
-EMUGL_BACKEND_DIRS="gles_mesa gles_swiftshader gles_angle"
+EMUGL_BACKEND_DIRS="gles_swiftshader gles_angle"
 
 ###
 ###  UTILITY FUNCTIONS

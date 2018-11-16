@@ -40,9 +40,9 @@ bool androidEmuglConfigInit(EmuglConfig* config,
             fprintf(stderr,
                     "Your AVD has been configured with the Mesa renderer, "
                     "which is deprecated. This AVD is being auto-switched to "
-                    "the current and better-supported \'swiftshader\' renderer. "
+                    "the current and better-supported \'swiftshader_indirect\' renderer. "
                     "Please update your AVD config.ini's hw.gpu.mode to match.\n");
-            str_reset(hwGpuModePtr, "swiftshader");
+            str_reset(hwGpuModePtr, "swiftshader_indirect");
         }
     } else if (!gpuOption) {
         // In the case of a platform build, use the 'auto' mode by default.

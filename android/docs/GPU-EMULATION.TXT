@@ -62,30 +62,6 @@ with the host platform (i.e. .dylib for Darwin, and .dll for Windows).
 Please read the android/android-emugl/DESIGN document first, which describes
 host mode emulation in detail.
 
-The Mesa libraries are built using the android/scripts/build-mesa.sh script,
-and installed differently, depending on the platform. For Linux, this will be:
-
-        $EXEC_DIR/lib/
-                gles_mesa/
-                    libGL.so
-                    libGL.so.1 -> libGL.so
-
-        $EXEC_DIR/lib64/
-                gles_mesa/
-                    libGL.so
-                    libGL.so.1 -> libGL.so
-
-For Windows:
-
-        $EXEC_DIR/lib/
-                gles_mesa/
-                    opengl32.dll
-
-        $EXEC_DIR/lib64/
-                gles_mesa/
-                    opengl32.dll
-
-
 The 'emulator' launcher program works as follows:
 
   - Parse the AVD configuration to see if GPU emulation is enabled.
@@ -93,9 +69,6 @@ The 'emulator' launcher program works as follows:
   - If enabled, prepend $EXEC_DIR/<lib>/ to LD_LIBRARY_PATH (or PATH on
     Windows). This ensures that the host libraries will always be loaded
     properly through dlopen() / LoadLibrary() later.
-
-  - If 'mesa' mode is enabled, it will also prepend $EXEC_DIR/<lib>/gles_mesa/
-    to LD_LIBRARY_PATH / PATH, to ensure the corresponding library is loaded.
 
 Note that on Linux, the mesa sub-directory includes a link from libGL.so.1
 to libGL.so. The latter is the Mesa rendering library. The former is a link
