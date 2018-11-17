@@ -13,6 +13,7 @@
 #include "exec/address-spaces.h"
 #include "exec/exec-all.h"
 #include "exec/ram_addr.h"
+#include "exec/memory-remap.h"
 
 #include "target/i386/hax-i386.h"
 #include "qemu/queue.h"
@@ -551,12 +552,12 @@ user_backed_flags_to_hax(int flags) {
     return hax_flags;
 }
 
-static void hax_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size, int flags) {
+static void hax_user_backed_ram_map(uint64_t gpa, void* hva, uint64_t size, int flags) {
     hax_set_ram(gpa, size, (uint64_t)(uintptr_t)hva,
                 user_backed_flags_to_hax(flags));
 }
 
-static void hax_user_backed_ram_unmap(hwaddr gpa, hwaddr size) {
+static void hax_user_backed_ram_unmap(uint64_t gpa, uint64_t size) {
     hax_set_ram(gpa, size, 0, HAX_RAM_INFO_INVALID);
 }
 
