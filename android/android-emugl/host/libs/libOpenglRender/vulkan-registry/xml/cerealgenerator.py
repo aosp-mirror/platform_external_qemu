@@ -501,6 +501,8 @@ using DlSymFunc = void* (void*, const char*);
     def endFile(self):
         OutputGenerator.endFile(self)
 
+        self.typeInfo.onEnd()
+
         self.forEachWrapper(lambda w: w.onEnd())
         self.forEachModule(lambda m: m.end())
 
