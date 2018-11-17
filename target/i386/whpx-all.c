@@ -14,6 +14,7 @@
 #include "exec/exec-all.h"
 #include "exec/ioport.h"
 #include "exec/ram_addr.h"
+#include "exec/memory-remap.h"
 #include "qemu-common.h"
 #ifndef _MSC_VER
 #include "strings.h"
@@ -1406,7 +1407,7 @@ user_backed_flags_to_whpx(int flags) {
     return whpx_flags;
 }
 
-static void whpx_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size, int flags) {
+static void whpx_user_backed_ram_map(uint64_t gpa, void* hva, uint64_t size, int flags) {
     struct whpx_state *whpx = &whpx_global;
     HRESULT hr;
 
@@ -1424,7 +1425,7 @@ static void whpx_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size, int fla
     }
 }
 
-static void whpx_user_backed_ram_unmap(hwaddr gpa, hwaddr size) {
+static void whpx_user_backed_ram_unmap(uint64_t gpa, uint64_t size) {
     struct whpx_state *whpx = &whpx_global;
     HRESULT hr;
 

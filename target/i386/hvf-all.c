@@ -34,6 +34,7 @@
 #include "exec/exec-all.h"
 #include "exec/ioport.h"
 #include "exec/ram_addr.h"
+#include "exec/memory-remap.h"
 #include "hw/i386/apic_internal.h"
 #include "qemu/main-loop.h"
 #include "qemu/abort.h"
@@ -267,13 +268,12 @@ static hv_memory_flags_t user_backed_flags_to_hvf_flags(int flags) {
     return hvf_flags;
 }
 
-static void hvf_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size, int flags) {
-    hvf_map_safe(hva, (uint64_t)gpa, (uint64_t)size,
-                user_backed_flags_to_hvf_flags(flags));
+static void hvf_user_backed_ram_map(uint64_t gpa, void* hva, uint64_t size, int flags) {
+    hvf_map_safe(hva, gpa, size, user_backed_flags_to_hvf_flags(flags));
 }
 
-static void hvf_user_backed_ram_unmap(hwaddr gpa, hwaddr size) {
-    hvf_unmap_safe((uint64_t)gpa, (uint64_t)size);
+static void hvf_user_backed_ram_unmap(uint64_t gpa, uint64_t size) {
+    hvf_unmap_safe(gpa, size);
 }
 
 int __hvf_set_memory(hvf_slot *slot) {
