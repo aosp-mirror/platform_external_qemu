@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88402957_89acc9c5",
+        "filename": "android/android-emu/android/emulation/control/vm_operations.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-17T01:31:47Z",
+      "side": 1,
+      "message": "nit: just the cpp is good",
+      "range": {
+        "startLine": 156,
+        "startChar": 14,
+        "endLine": 156,
+        "endChar": 22
+      },
+      "revId": "da3cd952cee45a0c742a2553dbdb1c7085a673ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
