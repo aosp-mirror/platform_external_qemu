@@ -52,6 +52,7 @@ NON_DISPATCHABLE_HANDLE_TYPES = [
     "VkDescriptorSetLayout",
     "VkDescriptorSet",
     "VkSampler",
+    "VkPipeline",
     "VkPipelineLayout",
     "VkRenderPass",
     "VkFramebuffer",
@@ -130,6 +131,22 @@ EXCLUDED_APIS = [
     "vkEnumeratePhysicalDeviceGroups",
 ]
 
+EXPLICITLY_ABI_PORTABLE_TYPES = [
+    "VkResult",
+    "VkBool32",
+    "VkSampleMask",
+    "VkFlags",
+    "VkDeviceSize",
+]
+
+EXPLICITLY_ABI_NON_PORTABLE_TYPES = [
+]
+
+NON_ABI_PORTABLE_TYPE_CATEGORIES = [
+    "handle",
+    "funcpointer",
+]
+
 # Holds information about a Vulkan type instance (i.e., not a type definition).
 # Type instances are used as struct field definitions or function parameters,
 # to be later fed to code generation.
@@ -156,6 +173,8 @@ class VulkanType(object):
         self.pointerIndirectionLevels = 0  # 0 means not pointer
         self.isPointerToConstPointer = False
 
+        self.primitiveEncodingSize = None
+
     def __str__(self,):
         return ("(vulkantype %s %s paramName %s len %s optional? %s "
                 "staticArrExpr %s %s)") % (
@@ -169,6 +188,9 @@ class VulkanType(object):
 
     def isArrayOfStrings(self,):
         return self.isPointerToConstPointer and (self.typeName == "char")
+
+    def primEncodingSize(self,):
+        return self.primitiveEncodingSize
 
     # Utility functions to make codegen life easier.
     # This method derives the correct "count" expression if possible.
@@ -272,8 +294,9 @@ class VulkanType(object):
     def getStructEnumExpr(self,):
         return None
 
-def makeVulkanTypeFromXMLTag(tag):
+def makeVulkanTypeFromXMLTag(typeInfo, tag):
     res = VulkanType()
+
     # Process the length expression
 
     if tag.attrib.get("len") is not None:
@@ -339,6 +362,9 @@ def makeVulkanTypeFromXMLTag(tag):
     if res.paramName == "pNext":
         res.isOptional = True
 
+    res.primitiveEncodingSize = \
+        typeInfo.getPrimitiveEncodingSize(res.typeName)
+
     return res
 
 
@@ -353,6 +379,7 @@ def makeVulkanTypeSimple(isConst,
     res.pointerIndirectionLevels = ptrIndirectionLevels
     res.isPointerToConstPointer = False
     res.paramName = paramName
+    res.primitiveEncodingSize = None
 
     return res
 
@@ -423,21 +450,33 @@ class VulkanAPI(object):
 class VulkanTypeInfo(object):
 
     def __init__(self,):
+        self.categories = set([])
+
+        # Tracks what Vulkan type is part of what category.
         self.typeCategories = {}
 
+        # Tracks the primitve encoding size for each type,
+        # if applicable.
+        self.encodingSizes = {}
+
         self.structs = {}
-
-        self.enums = {}
-
         self.apis = {}
 
         self.feature = None
 
+    def initType(self, name, category):
+        self.categories.add(category)
+        self.typeCategories[name] = category
+        self.encodingSizes[name] = self.setPrimitiveEncodingSize(name)
+
     def categoryOf(self, name):
         return self.typeCategories[name]
 
-    def isHandleType(self, vulkantype):
-        name = vulkantype.typeName
+    def getPrimitiveEncodingSize(self, name):
+        return self.encodingSizes[name]
+
+    # Queries relating to categories of Vulkan types.
+    def isHandleType(self, name):
         if name in self.typeCategories:
             return self.typeCategories[name] == "handle"
         return False
@@ -448,6 +487,51 @@ class VulkanTypeInfo(object):
         else:
             return False
 
+    # Gets the best size in bytes
+    # for encoding/decoding a particular Vulkan type.
+    # If not applicable, returns None.
+    def setPrimitiveEncodingSize(self, name):
+        baseEncodingSizes = {
+            "void" : 8,
+            "char" : 1,
+            "float" : 4,
+            "uint8_t" : 1,
+            "uint16_t" : 2,
+            "uint32_t" : 4,
+            "uint64_t" : 8,
+            "size_t" : 8,
+            "ssize_t" : 8,
+        }
+
+        if name in baseEncodingSizes:
+            return baseEncodingSizes[name]
+
+        category = self.typeCategories[name]
+
+        if category in [None, "api", "bitmask", "include", "define", "struct", "union"]:
+            return None
+
+        # Must be 8---handles are pointers and basetype includes VkDeviceSize
+        # which is 8 bytes
+        if category in ["handle", "basetype", "funcpointer"]:
+            return 8
+
+        # Most of the time, enums are only 4 bytes, but this is
+        # vague enough to be the source of a future headache, and
+        # it's easy to just stream 8 bytes there anyway.
+        if category in ["enum"]:
+            return 8
+
+    def isNonAbiPortableType(self, typeName):
+        if typeName in EXPLICITLY_ABI_PORTABLE_TYPES:
+            return False
+
+        if typeName in EXPLICITLY_ABI_NON_PORTABLE_TYPES:
+            return False
+
+        category = self.typeCategories[typeName]
+        return category in NON_ABI_PORTABLE_TYPE_CATEGORIES
+
     def onBeginFeature(self, featureName):
         self.feature = featureName
 
@@ -456,7 +540,7 @@ class VulkanTypeInfo(object):
 
     def onGenType(self, typeinfo, name, alias):
         category = typeinfo.elem.get("category")
-        self.typeCategories[name] = category
+        self.initType(name, category)
 
         if category in ["struct", "union"]:
             self.onGenStruct(typeinfo, name, alias)
@@ -470,7 +554,7 @@ class VulkanTypeInfo(object):
             structEnumExpr = None
 
             for member in typeinfo.elem.findall(".//member"):
-                vulkanType = makeVulkanTypeFromXMLTag(member)
+                vulkanType = makeVulkanTypeFromXMLTag(self, member)
                 members.append(vulkanType)
                 if vulkanType.typeName == "VkStructureType" and \
                    member.get("values"):
@@ -487,13 +571,13 @@ class VulkanTypeInfo(object):
             self.structs[typeName].initCopies()
 
     def onGenGroup(self, _groupinfo, groupName, _alias=None):
-        self.enums[groupName] = 1
+        self.initType(groupName, "enum")
 
     def onGenEnum(self, _enuminfo, name, _alias):
-        self.enums[name] = 1
+        self.initType(name, "enum")
 
     def onGenCmd(self, cmdinfo, name, _alias):
-        self.typeCategories[name] = "api"
+        self.initType(name, "api")
 
         proto = cmdinfo.elem.find("proto")
         params = cmdinfo.elem.findall("param")
@@ -501,10 +585,13 @@ class VulkanTypeInfo(object):
         self.apis[name] = \
             VulkanAPI(
                 name,
-                makeVulkanTypeFromXMLTag(proto),
-                list(map(makeVulkanTypeFromXMLTag, params)))
+                makeVulkanTypeFromXMLTag(self, proto),
+                list(map(lambda p: makeVulkanTypeFromXMLTag(self, p),
+                         params)))
         self.apis[name].initCopies()
 
+    def onEnd(self,):
+        pass
 
 # General function to iterate over a vulkan type and call code that processes
 # each of its sub-components, if any.
@@ -512,6 +599,8 @@ def iterateVulkanType(typeInfo, vulkanType, forEachType):
     if not vulkanType.isArrayOfStrings():
         if vulkanType.isPointerToConstPointer:
             return False
+
+    forEachType.registerTypeInfo(typeInfo)
 
     needCheck = \
         vulkanType.isOptional and \
@@ -561,3 +650,10 @@ def iterateVulkanType(typeInfo, vulkanType, forEachType):
             forEachType.onValue(vulkanType)
 
     return True
+
+class VulkanTypeIterator(object):
+    def __init__(self,):
+        self.typeInfo = None
+
+    def registerTypeInfo(self, typeInfo):
+        self.typeInfo = typeInfo
