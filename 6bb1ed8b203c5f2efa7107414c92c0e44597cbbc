@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a5325283_b3b88936",
+        "filename": "target/i386/whpx-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-17T00:02:54Z",
+      "side": 1,
+      "message": "also in hvf-all.c",
+      "revId": "6bb1ed8b203c5f2efa7107414c92c0e44597cbbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
