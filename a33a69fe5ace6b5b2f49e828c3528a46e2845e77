@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4adbc57a_215b66f2",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-17T00:04:11Z",
+      "side": 1,
+      "message": "please test; this may involve some sync operations such as \n\n   android::RecursiveScopedVmLock vmlock;",
+      "revId": "a33a69fe5ace6b5b2f49e828c3528a46e2845e77",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
