@@ -17,7 +17,7 @@ from copy import copy
 
 from .common.codegen import CodeGen
 from .common.vulkantypes import \
-        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
+        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, VulkanTypeIterator
 
 from .wrapperdefs import VulkanWrapperGenerator
 from .wrapperdefs import EQUALITY_VAR_NAMES
@@ -27,7 +27,7 @@ from .wrapperdefs import EQUALITY_RET_TYPE
 from .wrapperdefs import API_PREFIX_EQUALITY
 from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM2
 
-class VulkanEqualityCodegen(object):
+class VulkanEqualityCodegen(VulkanTypeIterator):
 
     def __init__(self, cgen, inputVars, onFailCompareVar, prefix):
         self.cgen = cgen

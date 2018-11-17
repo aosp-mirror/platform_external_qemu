@@ -17,7 +17,7 @@ from copy import copy
 
 from .common.codegen import CodeGen, VulkanAPIWrapper
 from .common.vulkantypes import \
-        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
+        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, VulkanTypeIterator
 
 from .wrapperdefs import VulkanWrapperGenerator
 from .wrapperdefs import VULKAN_STREAM_VAR_NAME
@@ -29,7 +29,7 @@ from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRIT
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
 
-class VulkanMarshalingCodegen(object):
+class VulkanMarshalingCodegen(VulkanTypeIterator):
 
     def __init__(self,
                  cgen,
@@ -51,6 +51,7 @@ class VulkanMarshalingCodegen(object):
         self.marshalPrefix = marshalPrefix
 
         self.exprAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = True)
+        self.exprPrimitiveValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
         self.lenAccessor = lambda t: self.cgen.generalLengthAccess(t, parentVarName = self.inputVarName)
 
         self.dynAlloc = dynAlloc
@@ -81,6 +82,16 @@ class VulkanMarshalingCodegen(object):
         self.cgen.stmt(
             "%s->%s(%s%s, %s)" % (varname, func, cast, toStreamExpr, sizeExpr))
 
+    def genPrimitiveStreamCall(self, vulkanType, access):
+        varname = self.streamVarName
+
+        self.cgen.streamPrimitive(
+            self.typeInfo,
+            varname,
+            access,
+            vulkanType,
+            direction=self.direction)
+
     def doAllocSpace(self, vulkanType):
         if self.dynAlloc and self.direction == "read":
             access = self.exprAccessor(vulkanType)
@@ -108,6 +119,7 @@ class VulkanMarshalingCodegen(object):
 
         needConsistencyCheck = False
 
+        self.cgen.line("// WARNING PTR CHECK")
         if (self.dynAlloc and self.direction == "read") or self.direction == "write":
             checkAccess = self.exprAccessor(vulkanType)
             addrExpr = "&" + checkAccess
@@ -121,7 +133,9 @@ class VulkanMarshalingCodegen(object):
             sizeExpr = self.cgen.sizeofExpr(vulkanType)
             needConsistencyCheck = True
 
-        self.genStreamCall(vulkanType.getForAddressAccess(), addrExpr, sizeExpr)
+        self.genPrimitiveStreamCall(
+            vulkanType,
+            checkAccess)
 
         self.cgen.beginIf(access)
 
@@ -240,6 +254,9 @@ class VulkanMarshalingCodegen(object):
 
         self.doAllocSpace(vulkanType)
 
+        if vulkanType.isHandleType():
+            self.cgen.line("// WARNING HANDLE TYPE POINTER")
+
         if lenAccess is not None:
             finalLenExpr = "%s * %s" % (
                 lenAccess, self.cgen.sizeofExpr(vulkanType.getForValueAccess()))
@@ -249,8 +266,12 @@ class VulkanMarshalingCodegen(object):
         self.genStreamCall(vulkanType, access, finalLenExpr)
 
     def onValue(self, vulkanType):
-        access = self.exprAccessor(vulkanType)
-        self.genStreamCall(vulkanType, access, self.cgen.sizeofExpr(vulkanType))
+        if self.typeInfo.isNonAbiPortableType(vulkanType.typeName):
+            access = self.exprPrimitiveValueAccessor(vulkanType)
+            self.genPrimitiveStreamCall(vulkanType, access)
+        else:
+            access = self.exprAccessor(vulkanType)
+            self.genStreamCall(vulkanType, access, self.cgen.sizeofExpr(vulkanType))
 
 class VulkanMarshaling(VulkanWrapperGenerator):
 

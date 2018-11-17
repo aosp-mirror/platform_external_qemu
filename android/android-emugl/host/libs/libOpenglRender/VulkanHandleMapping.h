@@ -1,4 +1,5 @@
 // Copyright (C) 2018 The Android Open Source Project
+// Copyright (C) 2018 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,13 +14,14 @@
 // limitations under the License.
 #pragma once
 
-#include <vulkan.h>
+#include <vulkan/vulkan.h>
 
 namespace goldfish_vk {
 
 class VulkanHandleMapping {
 public:
     VulkanHandleMapping() = default;
+    virtual ~VulkanHandleMapping() { }
 
     virtual void mapHandles_VkInstance(VkInstance* handles, size_t count = 1) = 0;
     virtual void mapHandles_VkDevice(VkDevice* handles, size_t count = 1) = 0;
@@ -34,6 +36,7 @@ public:
     virtual void mapHandles_VkPipelineLayout(VkPipelineLayout* handles, size_t count = 1) = 0;
     virtual void mapHandles_VkRenderPass(VkRenderPass* handles, size_t count = 1) = 0;
     virtual void mapHandles_VkPipeline(VkPipeline* handles, size_t count = 1) = 0;
+    virtual void mapHandles_VkPipelineCache(VkPipelineCache* handles, size_t count = 1) = 0;
     virtual void mapHandles_VkDescriptorSetLayout(VkDescriptorSetLayout* handles, size_t count = 1) = 0;
     virtual void mapHandles_VkSampler(VkSampler* handles, size_t count = 1) = 0;
     virtual void mapHandles_VkDescriptorPool(VkDescriptorPool* handles, size_t count = 1) = 0;
@@ -43,8 +46,12 @@ public:
     virtual void mapHandles_VkCommandPool(VkCommandPool* handles, size_t count = 1) = 0;
     virtual void mapHandles_VkFramebuffer(VkFramebuffer* handles, size_t count = 1) = 0;
     virtual void mapHandles_VkPhysicalDevice(VkPhysicalDevice* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkSamplerYcbcrConversion(VkSamplerYcbcrConversion* handles, size_t count = 1) = 0;
     virtual void mapHandles_VkFence(VkFence* handles, size_t count = 1) = 0;
+    virtual void mapHandles_VkEvent(VkEvent* handles, size_t count = 1) = 0;
+    virtual void mapHandles_VkQueryPool(VkQueryPool* handles, size_t count = 1) = 0;
+
+    virtual void mapHandles_VkSamplerYcbcrConversion(VkSamplerYcbcrConversion* handles, size_t count = 1) = 0;
+    virtual void mapHandles_VkDescriptorUpdateTemplate(VkDescriptorUpdateTemplate* handles, size_t count = 1) = 0;
 
 #ifdef VK_KHR_swapchain
     virtual void mapHandles_VkSurfaceKHR(VkSurfaceKHR* handles, size_t count = 1) = 0;
@@ -63,6 +70,11 @@ public:
 
 #ifdef VK_EXT_validation_cache
     virtual void mapHandles_VkValidationCacheEXT(VkValidationCacheEXT* handles, size_t count = 1) = 0;
+#endif
+
+#ifdef VK_EXT_debug_report
+    virtual void mapHandles_VkDebugReportCallbackEXT(VkDebugReportCallbackEXT* handles, size_t count = 1) = 0;
+    virtual void mapHandles_VkDebugUtilsMessengerEXT(VkDebugUtilsMessengerEXT* handles, size_t count = 1) = 0;
 #endif
 
 };

@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .vulkantypes import VulkanType, VulkanCompoundType, VulkanAPI
+from .vulkantypes import VulkanType, VulkanTypeInfo, VulkanCompoundType, VulkanAPI
 
 from copy import copy
 
@@ -91,6 +91,12 @@ class CodeGen(object):
     def __init__(self,):
         self.code = ""
         self.indentLevel = 0
+        self.gensymCounter = 0
+
+    def var(self, prefix="cgen_var"):
+        res = "%s_%d" % (prefix, self.gensymCounter)
+        self.gensymCounter += 1
+        return res
 
     def swapCode(self,):
         res = "%s" % self.code
@@ -149,6 +155,15 @@ class CodeGen(object):
         self.beginBlock()
 
     def endFor(self):
+        self.endBlock()
+
+    def beginLoop(self, loopVarType, loopVar, loopInit, loopBound):
+        self.beginFor(
+            "%s %s = %s" % (loopVarType, loopVar, loopInit),
+            "%s < %s" % (loopVar, loopBound),
+            "++%s" % (loopVar))
+
+    def endLoop(self):
         self.endBlock()
 
     def stmt(self, code):
@@ -445,6 +460,77 @@ class CodeGen(object):
     def makeReinterpretCast(self, varName, typeName, const=True):
         return "reinterpret_cast<%s%s*>(%s)" % \
                ("const " if const else "", typeName, varName)
+
+    def validPrimitive(self, typeInfo, typeName):
+        size = typeInfo.getPrimitiveEncodingSize(typeName)
+        return size != None
+
+    def makePrimitiveStreamMethod(self, typeInfo, typeName, direction="write"):
+        if not self.validPrimitive(typeInfo, typeName):
+            return None
+
+        size = typeInfo.getPrimitiveEncodingSize(typeName)
+        prefix = "put" if direction == "write" else "get"
+        suffix = None
+        if size == 1:
+            suffix = "Byte"
+        elif size == 2:
+            suffix = "Be16"
+        elif size == 4:
+            suffix = "Be32"
+        elif size == 8:
+            suffix = "Be64"
+
+        if suffix:
+            return prefix + suffix
+
+        return None
+
+    def streamPrimitive(self, typeInfo, streamVar, accessExpr, accessType, direction="write"):
+        accessTypeName = accessType.typeName
+
+        if accessType.pointerIndirectionLevels == 0 and not self.validPrimitive(typeInfo, accessTypeName):
+            print("Tried to stream a non-primitive type: %s" % accessTypeName)
+            os.abort()
+
+        needPtrCast = False
+
+        if accessType.pointerIndirectionLevels > 0:
+            streamSize = 8
+            streamStorageVarType = "uint64_t"
+            needPtrCast = True
+            streamMethod = "putBe64" if direction == "write" else "getBe64"
+        else:
+            streamSize = typeInfo.getPrimitiveEncodingSize(accessTypeName)
+            if streamSize == 1:
+                streamStorageVarType = "uint8_t"
+            elif streamSize == 2:
+                streamStorageVarType = "uint16_t"
+            elif streamSize == 4:
+                streamStorageVarType = "uint32_t"
+            elif streamSize == 8:
+                streamStorageVarType = "uint64_t"
+            streamMethod = self.makePrimitiveStreamMethod(
+                typeInfo, accessTypeName, direction=direction)
+
+        streamStorageVar = self.var()
+
+        accessCast = self.makeRichCTypeDecl(accessType, useParamName=False)
+
+        ptrCast = "(uintptr_t)" if needPtrCast else ""
+
+        if direction == "read":
+            self.stmt("%s = (%s)%s%s->%s()" % \
+                (accessExpr,
+                 accessCast,
+                 ptrCast,
+                 streamVar,
+                 streamMethod))
+        else:
+            self.stmt("%s %s = (%s)%s%s" %
+                      (streamStorageVarType, streamStorageVar,
+                       streamStorageVarType, ptrCast, accessExpr))
+            self.stmt("%s->%s(%s)" % (streamVar, streamMethod, streamStorageVar))
 
 
 # Class to wrap a Vulkan API call.

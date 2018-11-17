@@ -91,13 +91,13 @@ def emit_deepcopy(typeInfo, param, cgen):
 def emit_handlemap_unwrap(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, HandleMapCodegen(
         cgen, None, "resources->unwrapMapping()", "handlemap_",
-        lambda vtype: typeInfo.isHandleType(vtype)
+        lambda vtype: typeInfo.isHandleType(vtype.typeName)
     ))
 
 def emit_handlemap_create(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, HandleMapCodegen(
         cgen, None, "resources->createMapping()", "handlemap_",
-        lambda vtype: typeInfo.isHandleType(vtype)
+        lambda vtype: typeInfo.isHandleType(vtype.typeName)
     ))
 
 def emit_custom_create(typeInfo, api, cgen):
@@ -110,7 +110,7 @@ def emit_custom_create(typeInfo, api, cgen):
 def emit_handlemap_destroy(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, HandleMapCodegen(
         cgen, None, "resources->destroyMapping()", "handlemap_",
-        lambda vtype: typeInfo.isHandleType(vtype)
+        lambda vtype: typeInfo.isHandleType(vtype.typeName)
     ))
 
 class EncodingParameters(object):

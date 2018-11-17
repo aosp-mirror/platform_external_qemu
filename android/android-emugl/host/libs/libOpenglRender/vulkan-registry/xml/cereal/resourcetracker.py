@@ -67,16 +67,25 @@ def emit_end_class(cgen):
     cgen.decrIndent()
     cgen.line("};")
 
-def emit_mapping_impl(cgen, className, foreach):
+def emit_mapping_impl(cgen, className, foreachNormal, foreach_u64):
     emit_begin_public_class(cgen, "class %s : public VulkanHandleMapping" % className)
     cgen.line("virtual ~%s() { }" % className)
     for h in HANDLE_TYPES:
+
         cgen.line("void mapHandles_%s(%s* handles, size_t count) override" % (h, h))
         cgen.beginBlock()
         cgen.beginFor("size_t i = 0", "i < count", "++i")
-        foreach(cgen, h)
+        foreachNormal(cgen, h)
         cgen.endFor()
         cgen.endBlock()
+
+        cgen.line("void mapHandles_%s_u64(const %s* handles, uint64_t* handle_u64s, size_t count) override" % (h, h))
+        cgen.beginBlock()
+        cgen.beginFor("size_t i = 0", "i < count", "++i")
+        foreach_u64(cgen, h)
+        cgen.endFor()
+        cgen.endBlock()
+
     emit_end_class(cgen)
 
 class ResourceTracker(VulkanWrapperGenerator):
@@ -94,13 +103,16 @@ class ResourceTracker(VulkanWrapperGenerator):
         cgen = self.cgen
 
         emit_mapping_impl(cgen, "CreateMapping",
-            lambda cgen, h: cgen.stmt("handles[i] = new_from_host_%s(handles[i])" % h))
+            lambda cgen, h: cgen.stmt("handles[i] = new_from_host_%s(handles[i])" % h),
+            lambda cgen, h: cgen.stmt("handle_u64s[i] = (uint64_t)(uintptr_t)new_from_host_%s(handles[i])" % h))
 
         emit_mapping_impl(cgen, "UnwrapMapping",
-            lambda cgen, h: cgen.stmt("handles[i] = get_host_%s(handles[i])" % h))
+            lambda cgen, h: cgen.stmt("handles[i] = get_host_%s(handles[i])" % h),
+            lambda cgen, h: cgen.stmt("handle_u64s[i] = (uint64_t)(uintptr_t)get_host_%s(handles[i])" % h))
 
         emit_mapping_impl(cgen, "DestroyMapping",
-            lambda cgen, h: cgen.stmt("delete_goldfish_%s(handles[i])" % h))
+            lambda cgen, h: cgen.stmt("delete_goldfish_%s(handles[i])" % h),
+            lambda cgen, h: cgen.stmt("(void)handle_u64s[i]; delete_goldfish_%s(handles[i])" % h))
 
         self.module.appendImpl(cgen.swapCode())
         self.module.appendImpl(resourcetracker_impl_postamble)
