@@ -16,6 +16,24 @@
       "revId": "2d0b3b387462021bfa0b176b482cadc946fd37e7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "62781e98_1f0f24d4",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/GLESv2Decoder.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-17T00:39:01Z",
+      "side": 1,
+      "message": "Why do we need to put our memory related operations into OpenGL? Can I reference gQAndroidVmOperations  directly?",
+      "parentUuid": "901c137b_b8a0c297",
+      "revId": "2d0b3b387462021bfa0b176b482cadc946fd37e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
