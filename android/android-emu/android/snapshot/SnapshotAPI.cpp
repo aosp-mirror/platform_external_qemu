@@ -30,8 +30,6 @@
 #include <sstream>
 #include <vector>
 
-extern "C" const QAndroidVmOperations* const gQAndroidVmOperations;
-
 namespace {
 
 enum class RequestType : uint32_t {
