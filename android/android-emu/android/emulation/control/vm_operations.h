@@ -153,4 +153,7 @@ typedef struct QAndroidVmOperations {
 
 } QAndroidVmOperations;
 
+// Defined in android/qemu-android-vm-operations.cpp
+extern const QAndroidVmOperations* const gQAndroidVmOperations;
+
 ANDROID_END_HEADER
