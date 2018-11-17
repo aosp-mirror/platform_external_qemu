@@ -70,7 +70,8 @@ def emit_unmarshal(typeInfo, param, cgen):
         param.paramName,
         API_PREFIX_UNMARSHAL,
         direction="read",
-        dynAlloc=True))
+        dynAlloc=True,
+        typeInfo=typeInfo))
 
 def emit_marshal(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, VulkanMarshalingCodegen(
@@ -78,7 +79,8 @@ def emit_marshal(typeInfo, param, cgen):
         WRITE_STREAM,
         param.paramName,
         API_PREFIX_MARSHAL,
-        direction="write"))
+        direction="write",
+        typeInfo=typeInfo))
 
 def emit_decode_parameters(typeInfo, api, cgen):
     paramsToRead = []
@@ -110,12 +112,11 @@ def emit_decode_parameters_writeback(typeInfo, api, cgen):
     for p in paramsToWrite:
         emit_marshal(typeInfo, p, cgen)
 
-def emit_decode_return_writeback(api, cgen):
+def emit_decode_return_writeback(api, typeInfo, cgen):
     retTypeName = api.getRetTypeExpr()
     if retTypeName != "void":
         retVar = api.getRetVarExpr()
-        cgen.stmt("%s->write(&%s, %s)" %
-            (WRITE_STREAM, retVar, cgen.sizeofExpr(api.retType)))
+        cgen.streamPrimitive(typeInfo, WRITE_STREAM, retVar, retTypeName, direction="write")
 
 def emit_decode_finish(cgen):
     cgen.stmt("%s->clearPool()" % READ_STREAM)
@@ -125,14 +126,14 @@ def emit_default_decoding(typeInfo, api, cgen):
     emit_decode_parameters(typeInfo, api, cgen)
     emit_dispatch_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
-    emit_decode_return_writeback(api, cgen)
+    emit_decode_return_writeback(api, typeInfo, cgen)
     emit_decode_finish(cgen)
 
 def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
     emit_decode_parameters(typeInfo, api, cgen)
     emit_global_state_wrapped_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
-    emit_decode_return_writeback(api, cgen)
+    emit_decode_return_writeback(api, typeInfo, cgen)
     emit_decode_finish(cgen)
 
 ## Custom decoding definitions##################################################
@@ -155,14 +156,14 @@ def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
 
     emit_dispatch_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
-    emit_decode_return_writeback(api, cgen)
+    emit_decode_return_writeback(api, typeInfo, cgen)
     emit_decode_finish(cgen)
 
 def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     emit_decode_parameters(typeInfo, api, cgen)
     emit_dispatch_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
-    emit_decode_return_writeback(api, cgen)
+    emit_decode_return_writeback(api, typeInfo, cgen)
 
     cgen.beginFor("uint32_t i = 0", "i < memoryRangeCount", "++i")
     cgen.stmt("auto range = pMemoryRanges[i]")
@@ -244,7 +245,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
             emit_decode_parameters(typeInfo, api, cgen)
             emit_dispatch_call(api, cgen)
             emit_decode_parameters_writeback(typeInfo, api, cgen)
-            emit_decode_return_writeback(api, cgen)
+            emit_decode_return_writeback(api, typeInfo, cgen)
             emit_decode_finish(cgen)
 
         cgen.stmt("break")

@@ -60,7 +60,8 @@ def emit_count_marshal(typeInfo, param, cgen):
             typeInfo, param,
             VulkanMarshalingCodegen( \
                cgen, COUNTING_STREAM, param.paramName,
-               API_PREFIX_MARSHAL, direction="write"))
+               API_PREFIX_MARSHAL, direction="write",
+               typeInfo=typeInfo))
     if not res:
         cgen.stmt("(void)%s" % param.paramName)
 
@@ -70,7 +71,8 @@ def emit_marshal(typeInfo, param, cgen):
             typeInfo, param,
             VulkanMarshalingCodegen( \
                cgen, STREAM, param.paramName,
-               API_PREFIX_MARSHAL, direction="write"))
+               API_PREFIX_MARSHAL, direction="write",
+               typeInfo=typeInfo))
     if not res:
         cgen.stmt("(void)%s" % param.paramName)
 
@@ -79,7 +81,8 @@ def emit_unmarshal(typeInfo, param, cgen):
         typeInfo, param,
         VulkanMarshalingCodegen( \
            cgen, STREAM, param.paramName,
-           API_PREFIX_UNMARSHAL, direction="read"))
+           API_PREFIX_UNMARSHAL, direction="read",
+           typeInfo=typeInfo))
 
 def emit_deepcopy(typeInfo, param, cgen):
     res = \
@@ -91,13 +94,13 @@ def emit_deepcopy(typeInfo, param, cgen):
 def emit_handlemap_unwrap(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, HandleMapCodegen(
         cgen, None, "resources->unwrapMapping()", "handlemap_",
-        lambda vtype: typeInfo.isHandleType(vtype)
+        lambda vtype: typeInfo.isHandleType(vtype.typeName)
     ))
 
 def emit_handlemap_create(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, HandleMapCodegen(
         cgen, None, "resources->createMapping()", "handlemap_",
-        lambda vtype: typeInfo.isHandleType(vtype)
+        lambda vtype: typeInfo.isHandleType(vtype.typeName)
     ))
 
 def emit_custom_create(typeInfo, api, cgen):
@@ -110,7 +113,7 @@ def emit_custom_create(typeInfo, api, cgen):
 def emit_handlemap_destroy(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, HandleMapCodegen(
         cgen, None, "resources->destroyMapping()", "handlemap_",
-        lambda vtype: typeInfo.isHandleType(vtype)
+        lambda vtype: typeInfo.isHandleType(vtype.typeName)
     ))
 
 class EncodingParameters(object):
@@ -198,8 +201,7 @@ def emit_return_unmarshal(typeInfo, api, cgen):
 
     retVar = api.getRetVarExpr()
     cgen.stmt("%s %s = (%s)0" % (retType, retVar, retType))
-    cgen.stmt("%s->read(&%s, %s)" % \
-              (STREAM, retVar, cgen.sizeofExpr(api.retType)))
+    cgen.streamPrimitive(typeInfo, STREAM, retVar, retType, direction="read")
 
 def emit_return(typeInfo, api, cgen):
     if api.getRetTypeExpr() == "void":

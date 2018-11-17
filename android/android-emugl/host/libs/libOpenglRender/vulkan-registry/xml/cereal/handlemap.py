@@ -176,7 +176,7 @@ class VulkanHandleMap(VulkanWrapperGenerator):
                 self.toMapVar,
                 self.handlemapVarName,
                 self.handlemapPrefix,
-                lambda vtype : typeInfo.isHandleType(vtype))
+                lambda vtype : typeInfo.isHandleType(vtype.typeName))
 
         self.knownDefs = {}
 
