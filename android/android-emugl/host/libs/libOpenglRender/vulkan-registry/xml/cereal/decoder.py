@@ -61,7 +61,12 @@ READ_STREAM = "vkReadStream"
 WRITE_STREAM = "vkStream"
 
 def emit_param_decl_for_reading(param, cgen):
-    cgen.stmt(cgen.makeRichCTypeDecl(param.getForNonConstAccess()))
+    if param.staticArrExpr:
+        cgen.stmt(
+            cgen.makeRichCTypeDecl(param.getForNonConstAccess()))
+    else:
+        cgen.stmt(
+            cgen.makeRichCTypeDecl(param))
 
 def emit_unmarshal(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, VulkanMarshalingCodegen(
