@@ -34,6 +34,24 @@
       "revId": "2d0b3b387462021bfa0b176b482cadc946fd37e7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "932e7a07_1c218a26",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/GLESv2Decoder.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-17T00:53:13Z",
+      "side": 1,
+      "message": "Why do we declare gQAndroidVmOperations by typing instead of including a header file?\n\nShould we put its declaration next to the struct definition?",
+      "parentUuid": "62781e98_1f0f24d4",
+      "revId": "2d0b3b387462021bfa0b176b482cadc946fd37e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
