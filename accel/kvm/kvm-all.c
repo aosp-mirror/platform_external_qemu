@@ -34,6 +34,7 @@
 #include "sysemu/cpus.h"
 #include "qemu/bswap.h"
 #include "exec/memory.h"
+#include "exec/memory-remap.h"
 #include "exec/ram_addr.h"
 #include "exec/address-spaces.h"
 #include "qemu/event_notifier.h"
@@ -913,7 +914,7 @@ static int user_backed_flags_to_kvm_flags(int flags) {
     return kvm_flags;
 }
 
-static void kvm_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size, int flags) {
+static void kvm_user_backed_ram_map(uint64_t gpa, void* hva, uint64_t size, int flags) {
     KVMSlot *slot;
     KVMMemoryListener* kml;
     int err;
@@ -938,7 +939,7 @@ static void kvm_user_backed_ram_map(hwaddr gpa, void* hva, hwaddr size, int flag
     }
 }
 
-static void kvm_user_backed_ram_unmap(hwaddr gpa, hwaddr size) {
+static void kvm_user_backed_ram_unmap(uint64_t gpa, uint64_t size) {
     KVMSlot *slot;
     KVMMemoryListener* kml;
     int err;
