@@ -248,6 +248,7 @@ using DlSymFunc = void* (void*, const char*);
 """
 
         extensionStructsIncludeGuest = """
+#include "vk_platform_compat.h"
 // Stuff we are not going to use but if included,
 // will cause compile errors. These are Android Vulkan
 // required extensions, but the approach will be to
@@ -257,6 +258,9 @@ using DlSymFunc = void* (void*, const char*);
 """
         commonCerealImplIncludes = """
 #include "goldfish_vk_extension_structs.h"
+"""
+        commonCerealIncludesGuest = """
+#include "vk_platform_compat.h"
 """
         commonCerealImplIncludesGuest = """
 #include "goldfish_vk_extension_structs_guest.h"
@@ -323,13 +327,13 @@ using DlSymFunc = void* (void*, const char*);
         self.addGuestEncoderModule("goldfish_vk_extension_structs_guest",
                                    extraHeader=extensionStructsIncludeGuest)
         self.addGuestEncoderModule("goldfish_vk_marshaling_guest",
-                                   extraHeader=marshalIncludeGuest,
+                                   extraHeader=commonCerealIncludesGuest + marshalIncludeGuest,
                                    extraImpl=commonCerealImplIncludesGuest)
         self.addGuestEncoderModule("goldfish_vk_deepcopy_guest",
-                                   extraHeader=poolIncludeGuest,
+                                   extraHeader=commonCerealIncludesGuest + poolIncludeGuest,
                                    extraImpl=commonCerealImplIncludesGuest)
         self.addGuestEncoderModule("goldfish_vk_handlemap_guest",
-                                   extraHeader=handleMapIncludeGuest,
+                                   extraHeader=commonCerealIncludesGuest + handleMapIncludeGuest,
                                    extraImpl=commonCerealImplIncludesGuest)
 
         self.addGuestHalModule("func_table", extraImpl=functableImplInclude)
