@@ -591,7 +591,6 @@ class VulkanTypeInfo(object):
         self.apis[name].initCopies()
 
     def onEnd(self,):
-        print(self.typeCategories["VkPipeline"])
         pass
 
 # General function to iterate over a vulkan type and call code that processes
