@@ -33,7 +33,9 @@ using android::base::Pool;
 
 class VkEncoder::Impl {
 public:
-    Impl(IOStream* stream) : m_stream(stream) { }
+    Impl(IOStream* stream) : m_stream(stream) {
+        m_stream.registerHandleMapping(resources()->identityMapping());
+    }
     VulkanCountingStream* countingStream() { return &m_countingStream; }
     VulkanStream* stream() { return &m_stream; }
     Pool* pool() { return &m_pool; }
