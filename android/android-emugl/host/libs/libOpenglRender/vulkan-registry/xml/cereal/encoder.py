@@ -65,6 +65,10 @@ def emit_count_marshal(typeInfo, param, cgen):
         cgen.stmt("(void)%s" % param.paramName)
 
 def emit_marshal(typeInfo, param, cgen):
+    forOutput = param.isHandleType() and ("out" in param.inout)
+    if forOutput:
+        cgen.stmt("%s->unsetHandleMapping() /* emit_marshal, is handle, possibly out */" % STREAM)
+
     res = \
         iterateVulkanType(
             typeInfo, param,
@@ -73,6 +77,9 @@ def emit_marshal(typeInfo, param, cgen):
                API_PREFIX_MARSHAL, direction="write"))
     if not res:
         cgen.stmt("(void)%s" % param.paramName)
+
+    if forOutput:
+        cgen.stmt("%s->setHandleMapping(resources->unwrapMapping())" % STREAM)
 
 def emit_unmarshal(typeInfo, param, cgen):
     iterateVulkanType(
@@ -87,12 +94,6 @@ def emit_deepcopy(typeInfo, param, cgen):
             cgen, [param.paramName, "local_" + param.paramName], "pool", "deepcopy_"))
     if not res:
         cgen.stmt("(void)%s" % param.paramName)
-
-def emit_handlemap_unwrap(typeInfo, param, cgen):
-    iterateVulkanType(typeInfo, param, HandleMapCodegen(
-        cgen, None, "resources->unwrapMapping()", "handlemap_",
-        lambda vtype: typeInfo.isHandleType(vtype.typeName)
-    ))
 
 def emit_handlemap_create(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, HandleMapCodegen(
@@ -122,14 +123,20 @@ class EncodingParameters(object):
         self.toDestroy = []
 
         for param in api.parameters:
+            param.action = None
+            param.inout = "in"
+
             if param.possiblyOutput():
+                param.inout += "out"
                 self.toWrite.append(param)
                 self.toRead.append(param)
                 if param.isCreatedBy(api):
                     self.toCreate.append(param)
+                    param.action = "create"
             else:
                 if param.isDestroyedBy(api):
                     self.toDestroy.append(param)
+                    param.action = "destroy"
                 localCopyParam = \
                     param.getForNonConstAccess().withModifiedName( \
                         "local_" + param.paramName)
@@ -141,13 +148,13 @@ def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
     cgen.stmt("auto %s = mImpl->countingStream()" % COUNTING_STREAM)
     cgen.stmt("auto %s = mImpl->resources()" % RESOURCES)
     cgen.stmt("auto %s = mImpl->pool()" % POOL)
+    cgen.stmt("%s->setHandleMapping(%s->unwrapMapping())" % (STREAM, RESOURCES))
 
     encodingParams = EncodingParameters(api)
 
     for (origParam, localCopyParam) in encodingParams.localCopied:
         cgen.stmt(cgen.makeRichCTypeDecl(localCopyParam))
         emit_deepcopy(typeInfo, origParam, cgen)
-        emit_handlemap_unwrap(typeInfo, localCopyParam, cgen)
         if localCopyParam.typeName == "VkAllocationCallbacks":
             cgen.stmt("%s = nullptr" % localCopyParam.paramName)
 
@@ -179,16 +186,20 @@ def emit_parameter_encode_read(typeInfo, api, cgen):
     encodingParams = EncodingParameters(api)
 
     for p in encodingParams.toRead:
+        if p.action == "create":
+            cgen.stmt(
+                "%s->setHandleMapping(%s->createMapping())" % \
+                (STREAM, RESOURCES))
         emit_unmarshal(typeInfo, p, cgen)
+        if p.action == "create":
+            cgen.stmt(
+                "%s->unsetHandleMapping()" % STREAM)
 
     for p in encodingParams.toCreate:
-        emit_handlemap_create(typeInfo, p, cgen)
         emit_custom_create(typeInfo, api, cgen)
 
     for p in encodingParams.toDestroy:
         emit_handlemap_destroy(typeInfo, p, cgen)
-
-    cgen.stmt("pool->freeAll()")
 
 def emit_return_unmarshal(typeInfo, api, cgen):
     retType = api.getRetTypeExpr()
@@ -202,6 +213,7 @@ def emit_return_unmarshal(typeInfo, api, cgen):
               (STREAM, retVar, cgen.sizeofExpr(api.retType)))
     cgen.stmt("%s->clearPool()" % COUNTING_STREAM)
     cgen.stmt("%s->clearPool()" % STREAM)
+    cgen.stmt("pool->freeAll()")
 
 def emit_return(typeInfo, api, cgen):
     if api.getRetTypeExpr() == "void":
