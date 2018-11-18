@@ -16,6 +16,7 @@ public:
     VulkanHandleMapping* createMapping();
     VulkanHandleMapping* unwrapMapping();
     VulkanHandleMapping* destroyMapping();
+    VulkanHandleMapping* identityMapping();
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
@@ -29,6 +30,7 @@ public:
     CreateMapping createMapping;
     UnwrapMapping unwrapMapping;
     DestroyMapping destroyMapping;
+    IdentityMapping identityMapping;
 };
 
 ResourceTracker::ResourceTracker() : mImpl(new ResourceTracker::Impl()) { }
@@ -44,6 +46,10 @@ VulkanHandleMapping* ResourceTracker::unwrapMapping() {
 
 VulkanHandleMapping* ResourceTracker::destroyMapping() {
     return &mImpl->destroyMapping;
+}
+
+VulkanHandleMapping* ResourceTracker::identityMapping() {
+    return &mImpl->identityMapping;
 }
 
 static ResourceTracker* sTracker = nullptr;
@@ -67,7 +73,7 @@ def emit_end_class(cgen):
     cgen.decrIndent()
     cgen.line("};")
 
-def emit_mapping_impl(cgen, className, foreachNormal, foreach_u64):
+def emit_mapping_impl(cgen, className, foreachNormal, foreach_u64, foreach_from_u64):
     emit_begin_public_class(cgen, "class %s : public VulkanHandleMapping" % className)
     cgen.line("virtual ~%s() { }" % className)
     for h in HANDLE_TYPES:
@@ -83,6 +89,13 @@ def emit_mapping_impl(cgen, className, foreachNormal, foreach_u64):
         cgen.beginBlock()
         cgen.beginFor("size_t i = 0", "i < count", "++i")
         foreach_u64(cgen, h)
+        cgen.endFor()
+        cgen.endBlock()
+
+        cgen.line("void mapHandles_u64_%s(const uint64_t* handle_u64s, %s* handles, size_t count) override" % (h, h))
+        cgen.beginBlock()
+        cgen.beginFor("size_t i = 0", "i < count", "++i")
+        foreach_from_u64(cgen, h)
         cgen.endFor()
         cgen.endBlock()
 
@@ -104,15 +117,23 @@ class ResourceTracker(VulkanWrapperGenerator):
 
         emit_mapping_impl(cgen, "CreateMapping",
             lambda cgen, h: cgen.stmt("handles[i] = new_from_host_%s(handles[i])" % h),
-            lambda cgen, h: cgen.stmt("handle_u64s[i] = (uint64_t)(uintptr_t)new_from_host_%s(handles[i])" % h))
+            lambda cgen, h: cgen.stmt("handle_u64s[i] = (uint64_t)(uintptr_t)new_from_host_%s(handles[i])" % h),
+            lambda cgen, h: cgen.stmt("handles[i] = (%s)(uintptr_t)new_from_host_%s((%s)(uintptr_t)handle_u64s[i])" % (h, h, h)))
 
         emit_mapping_impl(cgen, "UnwrapMapping",
             lambda cgen, h: cgen.stmt("handles[i] = get_host_%s(handles[i])" % h),
-            lambda cgen, h: cgen.stmt("handle_u64s[i] = (uint64_t)(uintptr_t)get_host_%s(handles[i])" % h))
+            lambda cgen, h: cgen.stmt("handle_u64s[i] = (uint64_t)(uintptr_t)get_host_%s(handles[i])" % h),
+            lambda cgen, h: cgen.stmt("handles[i] = (%s)(uintptr_t)get_host_%s((%s)(uintptr_t)handle_u64s[i])" % (h, h, h)))
 
         emit_mapping_impl(cgen, "DestroyMapping",
             lambda cgen, h: cgen.stmt("delete_goldfish_%s(handles[i])" % h),
-            lambda cgen, h: cgen.stmt("(void)handle_u64s[i]; delete_goldfish_%s(handles[i])" % h))
+            lambda cgen, h: cgen.stmt("(void)handle_u64s[i]; delete_goldfish_%s(handles[i])" % h),
+            lambda cgen, h: cgen.stmt("(void)handles[i]; delete_goldfish_%s((%s)(uintptr_t)handle_u64s[i])" % (h, h)))
+
+        emit_mapping_impl(cgen, "IdentityMapping",
+            lambda cgen, h: cgen.stmt("handles[i] = vk_handle_identity_%s(handles[i])" % h),
+            lambda cgen, h: cgen.stmt("handle_u64s[i] = (uint64_t)(uintptr_t)vk_handle_identity_%s(handles[i])" % h),
+            lambda cgen, h: cgen.stmt("handles[i] = (%s)(uintptr_t)vk_handle_identity_%s((%s)(uintptr_t)handle_u64s[i])" % (h, h, h)))
 
         self.module.appendImpl(cgen.swapCode())
         self.module.appendImpl(resourcetracker_impl_postamble)
