@@ -200,6 +200,8 @@ def emit_return_unmarshal(typeInfo, api, cgen):
     cgen.stmt("%s %s = (%s)0" % (retType, retVar, retType))
     cgen.stmt("%s->read(&%s, %s)" % \
               (STREAM, retVar, cgen.sizeofExpr(api.retType)))
+    cgen.stmt("%s->clearPool()" % COUNTING_STREAM)
+    cgen.stmt("%s->clearPool()" % STREAM)
 
 def emit_return(typeInfo, api, cgen):
     if api.getRetTypeExpr() == "void":
