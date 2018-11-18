@@ -33,7 +33,9 @@ using android::base::Pool;
 
 class VkEncoder::Impl {
 public:
-    Impl(IOStream* stream) : m_stream(stream) { }
+    Impl(IOStream* stream) : m_stream(stream) {
+        m_stream.registerHandleMapping(resources()->identityMapping());
+    }
     VulkanCountingStream* countingStream() { return &m_countingStream; }
     VulkanStream* stream() { return &m_stream; }
     Pool* pool() { return &m_pool; }
@@ -200,6 +202,8 @@ def emit_return_unmarshal(typeInfo, api, cgen):
     cgen.stmt("%s %s = (%s)0" % (retType, retVar, retType))
     cgen.stmt("%s->read(&%s, %s)" % \
               (STREAM, retVar, cgen.sizeofExpr(api.retType)))
+    cgen.stmt("%s->clearPool()" % COUNTING_STREAM)
+    cgen.stmt("%s->clearPool()" % STREAM)
 
 def emit_return(typeInfo, api, cgen):
     if api.getRetTypeExpr() == "void":
