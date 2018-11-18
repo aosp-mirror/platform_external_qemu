@@ -200,6 +200,8 @@ def emit_return_unmarshal(typeInfo, api, cgen):
     cgen.stmt("%s %s = (%s)0" % (retType, retVar, retType))
     cgen.stmt("%s->read(&%s, %s)" % \
               (STREAM, retVar, cgen.sizeofExpr(api.retType)))
+    cgen.stmt("%s->clearPool()" % COUNTING_STREAM)
+    cgen.stmt("%s->clearPool()" % STREAM)
 
 def emit_return(typeInfo, api, cgen):
     if api.getRetTypeExpr() == "void":
@@ -242,7 +244,7 @@ def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
         cgen.stmt("uint8_t* targetRange = hostPtr + offset")
         cgen.stmt("%s->write(targetRange, actualSize)" % streamVar)
         cgen.endFor()
-    
+
     emit_flush_ranges(COUNTING_STREAM)
 
     emit_parameter_encode_write_packet_info(typeInfo, api, cgen)
