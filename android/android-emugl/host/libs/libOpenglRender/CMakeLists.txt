@@ -48,6 +48,7 @@ set(OpenglRender_src
     VkDecoder.cpp
     VkDecoderGlobalState.cpp
     VulkanDispatch.cpp
+    VulkanHandleMapping.cpp
     VulkanStream.cpp
     WindowSurface.cpp
     YUVConverter.cpp)
@@ -106,6 +107,7 @@ set(OpenglRender_standalone_common_src
     VkDecoder.cpp
     VkDecoderGlobalState.cpp
     VulkanDispatch.cpp
+    VulkanHandleMapping.cpp
     VulkanStream.cpp
     WindowSurface.cpp
     YUVConverter.cpp
