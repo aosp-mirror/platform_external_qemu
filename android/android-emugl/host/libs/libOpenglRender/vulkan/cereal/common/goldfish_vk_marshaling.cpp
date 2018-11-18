@@ -867,14 +867,11 @@ void marshal_VkSubmitInfo(
         marshal_extension_struct(vkStream, forMarshaling->pNext);
     }
     vkStream->write((uint32_t*)&forMarshaling->waitSemaphoreCount, sizeof(uint32_t));
-    // WARNING HANDLE TYPE POINTER
     vkStream->write((const VkSemaphore*)forMarshaling->pWaitSemaphores, forMarshaling->waitSemaphoreCount * sizeof(const VkSemaphore));
     vkStream->write((const VkPipelineStageFlags*)forMarshaling->pWaitDstStageMask, forMarshaling->waitSemaphoreCount * sizeof(const VkPipelineStageFlags));
     vkStream->write((uint32_t*)&forMarshaling->commandBufferCount, sizeof(uint32_t));
-    // WARNING HANDLE TYPE POINTER
     vkStream->write((const VkCommandBuffer*)forMarshaling->pCommandBuffers, forMarshaling->commandBufferCount * sizeof(const VkCommandBuffer));
     vkStream->write((uint32_t*)&forMarshaling->signalSemaphoreCount, sizeof(uint32_t));
-    // WARNING HANDLE TYPE POINTER
     vkStream->write((const VkSemaphore*)forMarshaling->pSignalSemaphores, forMarshaling->signalSemaphoreCount * sizeof(const VkSemaphore));
 }
 
@@ -894,17 +891,14 @@ void unmarshal_VkSubmitInfo(
     }
     vkStream->read((uint32_t*)&forUnmarshaling->waitSemaphoreCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pWaitSemaphores, forUnmarshaling->waitSemaphoreCount * sizeof(const VkSemaphore));
-    // WARNING HANDLE TYPE POINTER
     vkStream->read((VkSemaphore*)forUnmarshaling->pWaitSemaphores, forUnmarshaling->waitSemaphoreCount * sizeof(const VkSemaphore));
     vkStream->alloc((void**)&forUnmarshaling->pWaitDstStageMask, forUnmarshaling->waitSemaphoreCount * sizeof(const VkPipelineStageFlags));
     vkStream->read((VkPipelineStageFlags*)forUnmarshaling->pWaitDstStageMask, forUnmarshaling->waitSemaphoreCount * sizeof(const VkPipelineStageFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->commandBufferCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pCommandBuffers, forUnmarshaling->commandBufferCount * sizeof(const VkCommandBuffer));
-    // WARNING HANDLE TYPE POINTER
     vkStream->read((VkCommandBuffer*)forUnmarshaling->pCommandBuffers, forUnmarshaling->commandBufferCount * sizeof(const VkCommandBuffer));
     vkStream->read((uint32_t*)&forUnmarshaling->signalSemaphoreCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pSignalSemaphores, forUnmarshaling->signalSemaphoreCount * sizeof(const VkSemaphore));
-    // WARNING HANDLE TYPE POINTER
     vkStream->read((VkSemaphore*)forUnmarshaling->pSignalSemaphores, forUnmarshaling->signalSemaphoreCount * sizeof(const VkSemaphore));
 }
 
@@ -1212,7 +1206,6 @@ void marshal_VkBindSparseInfo(
         marshal_extension_struct(vkStream, forMarshaling->pNext);
     }
     vkStream->write((uint32_t*)&forMarshaling->waitSemaphoreCount, sizeof(uint32_t));
-    // WARNING HANDLE TYPE POINTER
     vkStream->write((const VkSemaphore*)forMarshaling->pWaitSemaphores, forMarshaling->waitSemaphoreCount * sizeof(const VkSemaphore));
     vkStream->write((uint32_t*)&forMarshaling->bufferBindCount, sizeof(uint32_t));
     for (uint32_t i = 0; i < (uint32_t)forMarshaling->bufferBindCount; ++i)
@@ -1230,7 +1223,6 @@ void marshal_VkBindSparseInfo(
         marshal_VkSparseImageMemoryBindInfo(vkStream, (const VkSparseImageMemoryBindInfo*)(forMarshaling->pImageBinds + i));
     }
     vkStream->write((uint32_t*)&forMarshaling->signalSemaphoreCount, sizeof(uint32_t));
-    // WARNING HANDLE TYPE POINTER
     vkStream->write((const VkSemaphore*)forMarshaling->pSignalSemaphores, forMarshaling->signalSemaphoreCount * sizeof(const VkSemaphore));
 }
 
@@ -1250,7 +1242,6 @@ void unmarshal_VkBindSparseInfo(
     }
     vkStream->read((uint32_t*)&forUnmarshaling->waitSemaphoreCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pWaitSemaphores, forUnmarshaling->waitSemaphoreCount * sizeof(const VkSemaphore));
-    // WARNING HANDLE TYPE POINTER
     vkStream->read((VkSemaphore*)forUnmarshaling->pWaitSemaphores, forUnmarshaling->waitSemaphoreCount * sizeof(const VkSemaphore));
     vkStream->read((uint32_t*)&forUnmarshaling->bufferBindCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pBufferBinds, forUnmarshaling->bufferBindCount * sizeof(const VkSparseBufferMemoryBindInfo));
@@ -1272,7 +1263,6 @@ void unmarshal_VkBindSparseInfo(
     }
     vkStream->read((uint32_t*)&forUnmarshaling->signalSemaphoreCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pSignalSemaphores, forUnmarshaling->signalSemaphoreCount * sizeof(const VkSemaphore));
-    // WARNING HANDLE TYPE POINTER
     vkStream->read((VkSemaphore*)forUnmarshaling->pSignalSemaphores, forUnmarshaling->signalSemaphoreCount * sizeof(const VkSemaphore));
 }
 
@@ -2684,7 +2674,6 @@ void marshal_VkPipelineLayoutCreateInfo(
     }
     vkStream->write((VkPipelineLayoutCreateFlags*)&forMarshaling->flags, sizeof(VkPipelineLayoutCreateFlags));
     vkStream->write((uint32_t*)&forMarshaling->setLayoutCount, sizeof(uint32_t));
-    // WARNING HANDLE TYPE POINTER
     vkStream->write((const VkDescriptorSetLayout*)forMarshaling->pSetLayouts, forMarshaling->setLayoutCount * sizeof(const VkDescriptorSetLayout));
     vkStream->write((uint32_t*)&forMarshaling->pushConstantRangeCount, sizeof(uint32_t));
     for (uint32_t i = 0; i < (uint32_t)forMarshaling->pushConstantRangeCount; ++i)
@@ -2710,7 +2699,6 @@ void unmarshal_VkPipelineLayoutCreateInfo(
     vkStream->read((VkPipelineLayoutCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineLayoutCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->setLayoutCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pSetLayouts, forUnmarshaling->setLayoutCount * sizeof(const VkDescriptorSetLayout));
-    // WARNING HANDLE TYPE POINTER
     vkStream->read((VkDescriptorSetLayout*)forUnmarshaling->pSetLayouts, forUnmarshaling->setLayoutCount * sizeof(const VkDescriptorSetLayout));
     vkStream->read((uint32_t*)&forUnmarshaling->pushConstantRangeCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pPushConstantRanges, forUnmarshaling->pushConstantRangeCount * sizeof(const VkPushConstantRange));
@@ -2795,7 +2783,6 @@ void marshal_VkDescriptorSetLayoutBinding(
     vkStream->putBe64(cgen_var_68);
     if (forMarshaling->pImmutableSamplers)
     {
-        // WARNING HANDLE TYPE POINTER
         vkStream->write((const VkSampler*)forMarshaling->pImmutableSamplers, forMarshaling->descriptorCount * sizeof(const VkSampler));
     }
 }
@@ -2813,7 +2800,6 @@ void unmarshal_VkDescriptorSetLayoutBinding(
     if (forUnmarshaling->pImmutableSamplers)
     {
         vkStream->alloc((void**)&forUnmarshaling->pImmutableSamplers, forUnmarshaling->descriptorCount * sizeof(const VkSampler));
-        // WARNING HANDLE TYPE POINTER
         vkStream->read((VkSampler*)forUnmarshaling->pImmutableSamplers, forUnmarshaling->descriptorCount * sizeof(const VkSampler));
     }
 }
@@ -2937,7 +2923,6 @@ void marshal_VkDescriptorSetAllocateInfo(
     uint64_t cgen_var_70 = (uint64_t)forMarshaling->descriptorPool;
     vkStream->putBe64(cgen_var_70);
     vkStream->write((uint32_t*)&forMarshaling->descriptorSetCount, sizeof(uint32_t));
-    // WARNING HANDLE TYPE POINTER
     vkStream->write((const VkDescriptorSetLayout*)forMarshaling->pSetLayouts, forMarshaling->descriptorSetCount * sizeof(const VkDescriptorSetLayout));
 }
 
@@ -2958,7 +2943,6 @@ void unmarshal_VkDescriptorSetAllocateInfo(
     forUnmarshaling->descriptorPool = (VkDescriptorPool)vkStream->getBe64();
     vkStream->read((uint32_t*)&forUnmarshaling->descriptorSetCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pSetLayouts, forUnmarshaling->descriptorSetCount * sizeof(const VkDescriptorSetLayout));
-    // WARNING HANDLE TYPE POINTER
     vkStream->read((VkDescriptorSetLayout*)forUnmarshaling->pSetLayouts, forUnmarshaling->descriptorSetCount * sizeof(const VkDescriptorSetLayout));
 }
 
@@ -3044,7 +3028,6 @@ void marshal_VkWriteDescriptorSet(
     vkStream->putBe64(cgen_var_81);
     if (forMarshaling->pTexelBufferView)
     {
-        // WARNING HANDLE TYPE POINTER
         vkStream->write((const VkBufferView*)forMarshaling->pTexelBufferView, forMarshaling->descriptorCount * sizeof(const VkBufferView));
     }
 }
@@ -3093,7 +3076,6 @@ void unmarshal_VkWriteDescriptorSet(
     if (forUnmarshaling->pTexelBufferView)
     {
         vkStream->alloc((void**)&forUnmarshaling->pTexelBufferView, forUnmarshaling->descriptorCount * sizeof(const VkBufferView));
-        // WARNING HANDLE TYPE POINTER
         vkStream->read((VkBufferView*)forUnmarshaling->pTexelBufferView, forUnmarshaling->descriptorCount * sizeof(const VkBufferView));
     }
 }
@@ -3160,7 +3142,6 @@ void marshal_VkFramebufferCreateInfo(
     uint64_t cgen_var_90 = (uint64_t)forMarshaling->renderPass;
     vkStream->putBe64(cgen_var_90);
     vkStream->write((uint32_t*)&forMarshaling->attachmentCount, sizeof(uint32_t));
-    // WARNING HANDLE TYPE POINTER
     vkStream->write((const VkImageView*)forMarshaling->pAttachments, forMarshaling->attachmentCount * sizeof(const VkImageView));
     vkStream->write((uint32_t*)&forMarshaling->width, sizeof(uint32_t));
     vkStream->write((uint32_t*)&forMarshaling->height, sizeof(uint32_t));
@@ -3185,7 +3166,6 @@ void unmarshal_VkFramebufferCreateInfo(
     forUnmarshaling->renderPass = (VkRenderPass)vkStream->getBe64();
     vkStream->read((uint32_t*)&forUnmarshaling->attachmentCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pAttachments, forUnmarshaling->attachmentCount * sizeof(const VkImageView));
-    // WARNING HANDLE TYPE POINTER
     vkStream->read((VkImageView*)forUnmarshaling->pAttachments, forUnmarshaling->attachmentCount * sizeof(const VkImageView));
     vkStream->read((uint32_t*)&forUnmarshaling->width, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->height, sizeof(uint32_t));
@@ -4633,7 +4613,6 @@ void marshal_VkDeviceGroupDeviceCreateInfo(
         marshal_extension_struct(vkStream, forMarshaling->pNext);
     }
     vkStream->write((uint32_t*)&forMarshaling->physicalDeviceCount, sizeof(uint32_t));
-    // WARNING HANDLE TYPE POINTER
     vkStream->write((const VkPhysicalDevice*)forMarshaling->pPhysicalDevices, forMarshaling->physicalDeviceCount * sizeof(const VkPhysicalDevice));
 }
 
@@ -4653,7 +4632,6 @@ void unmarshal_VkDeviceGroupDeviceCreateInfo(
     }
     vkStream->read((uint32_t*)&forUnmarshaling->physicalDeviceCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pPhysicalDevices, forUnmarshaling->physicalDeviceCount * sizeof(const VkPhysicalDevice));
-    // WARNING HANDLE TYPE POINTER
     vkStream->read((VkPhysicalDevice*)forUnmarshaling->pPhysicalDevices, forUnmarshaling->physicalDeviceCount * sizeof(const VkPhysicalDevice));
 }
 
@@ -6571,10 +6549,8 @@ void marshal_VkPresentInfoKHR(
         marshal_extension_struct(vkStream, forMarshaling->pNext);
     }
     vkStream->write((uint32_t*)&forMarshaling->waitSemaphoreCount, sizeof(uint32_t));
-    // WARNING HANDLE TYPE POINTER
     vkStream->write((const VkSemaphore*)forMarshaling->pWaitSemaphores, forMarshaling->waitSemaphoreCount * sizeof(const VkSemaphore));
     vkStream->write((uint32_t*)&forMarshaling->swapchainCount, sizeof(uint32_t));
-    // WARNING HANDLE TYPE POINTER
     vkStream->write((const VkSwapchainKHR*)forMarshaling->pSwapchains, forMarshaling->swapchainCount * sizeof(const VkSwapchainKHR));
     vkStream->write((const uint32_t*)forMarshaling->pImageIndices, forMarshaling->swapchainCount * sizeof(const uint32_t));
     // WARNING PTR CHECK
@@ -6602,11 +6578,9 @@ void unmarshal_VkPresentInfoKHR(
     }
     vkStream->read((uint32_t*)&forUnmarshaling->waitSemaphoreCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pWaitSemaphores, forUnmarshaling->waitSemaphoreCount * sizeof(const VkSemaphore));
-    // WARNING HANDLE TYPE POINTER
     vkStream->read((VkSemaphore*)forUnmarshaling->pWaitSemaphores, forUnmarshaling->waitSemaphoreCount * sizeof(const VkSemaphore));
     vkStream->read((uint32_t*)&forUnmarshaling->swapchainCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pSwapchains, forUnmarshaling->swapchainCount * sizeof(const VkSwapchainKHR));
-    // WARNING HANDLE TYPE POINTER
     vkStream->read((VkSwapchainKHR*)forUnmarshaling->pSwapchains, forUnmarshaling->swapchainCount * sizeof(const VkSwapchainKHR));
     vkStream->alloc((void**)&forUnmarshaling->pImageIndices, forUnmarshaling->swapchainCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)forUnmarshaling->pImageIndices, forUnmarshaling->swapchainCount * sizeof(const uint32_t));
@@ -7660,12 +7634,10 @@ void marshal_VkWin32KeyedMutexAcquireReleaseInfoKHR(
         marshal_extension_struct(vkStream, forMarshaling->pNext);
     }
     vkStream->write((uint32_t*)&forMarshaling->acquireCount, sizeof(uint32_t));
-    // WARNING HANDLE TYPE POINTER
     vkStream->write((const VkDeviceMemory*)forMarshaling->pAcquireSyncs, forMarshaling->acquireCount * sizeof(const VkDeviceMemory));
     vkStream->write((const uint64_t*)forMarshaling->pAcquireKeys, forMarshaling->acquireCount * sizeof(const uint64_t));
     vkStream->write((const uint32_t*)forMarshaling->pAcquireTimeouts, forMarshaling->acquireCount * sizeof(const uint32_t));
     vkStream->write((uint32_t*)&forMarshaling->releaseCount, sizeof(uint32_t));
-    // WARNING HANDLE TYPE POINTER
     vkStream->write((const VkDeviceMemory*)forMarshaling->pReleaseSyncs, forMarshaling->releaseCount * sizeof(const VkDeviceMemory));
     vkStream->write((const uint64_t*)forMarshaling->pReleaseKeys, forMarshaling->releaseCount * sizeof(const uint64_t));
 }
@@ -7686,7 +7658,6 @@ void unmarshal_VkWin32KeyedMutexAcquireReleaseInfoKHR(
     }
     vkStream->read((uint32_t*)&forUnmarshaling->acquireCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pAcquireSyncs, forUnmarshaling->acquireCount * sizeof(const VkDeviceMemory));
-    // WARNING HANDLE TYPE POINTER
     vkStream->read((VkDeviceMemory*)forUnmarshaling->pAcquireSyncs, forUnmarshaling->acquireCount * sizeof(const VkDeviceMemory));
     vkStream->alloc((void**)&forUnmarshaling->pAcquireKeys, forUnmarshaling->acquireCount * sizeof(const uint64_t));
     vkStream->read((uint64_t*)forUnmarshaling->pAcquireKeys, forUnmarshaling->acquireCount * sizeof(const uint64_t));
@@ -7694,7 +7665,6 @@ void unmarshal_VkWin32KeyedMutexAcquireReleaseInfoKHR(
     vkStream->read((uint32_t*)forUnmarshaling->pAcquireTimeouts, forUnmarshaling->acquireCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->releaseCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pReleaseSyncs, forUnmarshaling->releaseCount * sizeof(const VkDeviceMemory));
-    // WARNING HANDLE TYPE POINTER
     vkStream->read((VkDeviceMemory*)forUnmarshaling->pReleaseSyncs, forUnmarshaling->releaseCount * sizeof(const VkDeviceMemory));
     vkStream->alloc((void**)&forUnmarshaling->pReleaseKeys, forUnmarshaling->releaseCount * sizeof(const uint64_t));
     vkStream->read((uint64_t*)forUnmarshaling->pReleaseKeys, forUnmarshaling->releaseCount * sizeof(const uint64_t));
@@ -9665,12 +9635,10 @@ void marshal_VkWin32KeyedMutexAcquireReleaseInfoNV(
         marshal_extension_struct(vkStream, forMarshaling->pNext);
     }
     vkStream->write((uint32_t*)&forMarshaling->acquireCount, sizeof(uint32_t));
-    // WARNING HANDLE TYPE POINTER
     vkStream->write((const VkDeviceMemory*)forMarshaling->pAcquireSyncs, forMarshaling->acquireCount * sizeof(const VkDeviceMemory));
     vkStream->write((const uint64_t*)forMarshaling->pAcquireKeys, forMarshaling->acquireCount * sizeof(const uint64_t));
     vkStream->write((const uint32_t*)forMarshaling->pAcquireTimeoutMilliseconds, forMarshaling->acquireCount * sizeof(const uint32_t));
     vkStream->write((uint32_t*)&forMarshaling->releaseCount, sizeof(uint32_t));
-    // WARNING HANDLE TYPE POINTER
     vkStream->write((const VkDeviceMemory*)forMarshaling->pReleaseSyncs, forMarshaling->releaseCount * sizeof(const VkDeviceMemory));
     vkStream->write((const uint64_t*)forMarshaling->pReleaseKeys, forMarshaling->releaseCount * sizeof(const uint64_t));
 }
@@ -9691,7 +9659,6 @@ void unmarshal_VkWin32KeyedMutexAcquireReleaseInfoNV(
     }
     vkStream->read((uint32_t*)&forUnmarshaling->acquireCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pAcquireSyncs, forUnmarshaling->acquireCount * sizeof(const VkDeviceMemory));
-    // WARNING HANDLE TYPE POINTER
     vkStream->read((VkDeviceMemory*)forUnmarshaling->pAcquireSyncs, forUnmarshaling->acquireCount * sizeof(const VkDeviceMemory));
     vkStream->alloc((void**)&forUnmarshaling->pAcquireKeys, forUnmarshaling->acquireCount * sizeof(const uint64_t));
     vkStream->read((uint64_t*)forUnmarshaling->pAcquireKeys, forUnmarshaling->acquireCount * sizeof(const uint64_t));
@@ -9699,7 +9666,6 @@ void unmarshal_VkWin32KeyedMutexAcquireReleaseInfoNV(
     vkStream->read((uint32_t*)forUnmarshaling->pAcquireTimeoutMilliseconds, forUnmarshaling->acquireCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->releaseCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pReleaseSyncs, forUnmarshaling->releaseCount * sizeof(const VkDeviceMemory));
-    // WARNING HANDLE TYPE POINTER
     vkStream->read((VkDeviceMemory*)forUnmarshaling->pReleaseSyncs, forUnmarshaling->releaseCount * sizeof(const VkDeviceMemory));
     vkStream->alloc((void**)&forUnmarshaling->pReleaseKeys, forUnmarshaling->releaseCount * sizeof(const uint64_t));
     vkStream->read((uint64_t*)forUnmarshaling->pReleaseKeys, forUnmarshaling->releaseCount * sizeof(const uint64_t));

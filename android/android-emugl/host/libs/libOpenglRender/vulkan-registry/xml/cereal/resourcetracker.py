@@ -16,6 +16,7 @@ public:
     VulkanHandleMapping* createMapping();
     VulkanHandleMapping* unwrapMapping();
     VulkanHandleMapping* destroyMapping();
+    VulkanHandleMapping* identityMapping();
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
@@ -29,6 +30,7 @@ public:
     CreateMapping createMapping;
     UnwrapMapping unwrapMapping;
     DestroyMapping destroyMapping;
+    IdentityMapping identityMapping;
 };
 
 ResourceTracker::ResourceTracker() : mImpl(new ResourceTracker::Impl()) { }
@@ -44,6 +46,10 @@ VulkanHandleMapping* ResourceTracker::unwrapMapping() {
 
 VulkanHandleMapping* ResourceTracker::destroyMapping() {
     return &mImpl->destroyMapping;
+}
+
+VulkanHandleMapping* ResourceTracker::identityMapping() {
+    return &mImpl->identityMapping;
 }
 
 static ResourceTracker* sTracker = nullptr;
@@ -113,6 +119,10 @@ class ResourceTracker(VulkanWrapperGenerator):
         emit_mapping_impl(cgen, "DestroyMapping",
             lambda cgen, h: cgen.stmt("delete_goldfish_%s(handles[i])" % h),
             lambda cgen, h: cgen.stmt("(void)handle_u64s[i]; delete_goldfish_%s(handles[i])" % h))
+
+        emit_mapping_impl(cgen, "IdentityMapping",
+            lambda cgen, h: cgen.stmt("handles[i] = vk_handle_identity_%s(handles[i])" % h),
+            lambda cgen, h: cgen.stmt("handle_u64s[i] = (uint64_t)(uintptr_t)vk_handle_identity_%s(handles[i])" % h))
 
         self.module.appendImpl(cgen.swapCode())
         self.module.appendImpl(resourcetracker_impl_postamble)

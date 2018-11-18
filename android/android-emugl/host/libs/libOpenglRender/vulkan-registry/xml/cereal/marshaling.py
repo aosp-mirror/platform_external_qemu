@@ -38,7 +38,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
                  marshalPrefix,
                  direction = "write",
                  forApiOutput = False,
-                 dynAlloc = False):
+                 dynAlloc = False,
+                 mapHandles = False):
         self.cgen = cgen
         self.direction = direction
         self.processSimple = "write" if self.direction == "write" else "read"
@@ -55,6 +56,7 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         self.lenAccessor = lambda t: self.cgen.generalLengthAccess(t, parentVarName = self.inputVarName)
 
         self.dynAlloc = dynAlloc
+        self.mapHandles = mapHandles
 
     def getTypeForStreaming(self, vulkanType):
         res = copy(vulkanType)
@@ -254,7 +256,7 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
 
         self.doAllocSpace(vulkanType)
 
-        if vulkanType.isHandleType():
+        if vulkanType.isHandleType() and self.mapHandles:
             self.cgen.line("// WARNING HANDLE TYPE POINTER")
 
         if lenAccess is not None:
