@@ -140,6 +140,7 @@ EXPLICITLY_ABI_PORTABLE_TYPES = [
 ]
 
 EXPLICITLY_ABI_NON_PORTABLE_TYPES = [
+    "size_t"
 ]
 
 NON_ABI_PORTABLE_TYPE_CATEGORIES = [
@@ -527,7 +528,7 @@ class VulkanTypeInfo(object):
             return False
 
         if typeName in EXPLICITLY_ABI_NON_PORTABLE_TYPES:
-            return False
+            return True
 
         category = self.typeCategories[typeName]
         return category in NON_ABI_PORTABLE_TYPE_CATEGORIES
