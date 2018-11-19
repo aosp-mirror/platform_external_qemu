@@ -16,6 +16,24 @@
       "revId": "a33a69fe5ace6b5b2f49e828c3528a46e2845e77",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1ac20259_b330d773",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-19T19:39:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4adbc57a_215b66f2",
+      "revId": "a33a69fe5ace6b5b2f49e828c3528a46e2845e77",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
