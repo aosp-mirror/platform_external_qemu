@@ -16,9 +16,14 @@
 
 #include "GLcommon/NamedObject.h"
 
-#include "emugl/common/mutex.h"
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/ObjectNameSpace.h"
+#include "emugl/common/gl_object_counter.h"
+#include "emugl/common/mutex.h"
+
+static constexpr int toIndex(NamedObjectType type) {
+    return static_cast<int>(type);
+}
 
 NamedObject::NamedObject(GenNameInfo genNameInfo,
                          GlobalNameSpace *globalNameSpace) {
@@ -76,6 +81,11 @@ NamedObject::NamedObject(GenNameInfo genNameInfo,
             default:
                 m_globalName = 0;
         }
+
+        if (m_globalName != 0 && m_type > NamedObjectType::NULLTYPE &&
+            genNameInfo.m_type < NamedObjectType::NUM_OBJECT_TYPES) {
+            GL_OBJECT_COUNT_INC(toIndex(genNameInfo.m_type));
+        }
     }
 }
 
@@ -113,6 +123,11 @@ NamedObject::~NamedObject() {
         break;
     default:
         break;
+    }
+
+    if (m_type > NamedObjectType::NULLTYPE &&
+        m_type < NamedObjectType::NUM_OBJECT_TYPES) {
+        GL_OBJECT_COUNT_DEC(toIndex(m_type));
     }
 }
 

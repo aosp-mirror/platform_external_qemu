@@ -74,3 +74,21 @@ android_target_dependency(aemugraphics_toplevel_unittests all  SWIFTSHADER_DEPEN
 android_target_dependency(aemugraphics_toplevel_unittests all  EMULATOR_FEATURE_DEPENDENCIES)
 android_target_properties(aemugraphics_toplevel_unittests darwin-x86_64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
 android_target_properties(aemugraphics_toplevel_unittests linux-x86_64 "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
+
+#MemoryUsage unit tests
+set(emugl_memory_usage_unittests_src memoryusage_test.cpp)
+android_add_test(emugl_memory_usage_unittests)
+target_link_libraries(emugl_memory_usage_unittests
+                              PUBLIC
+                              aemugraphics
+                              gtest
+                              gtest_main)
+target_include_directories(emugl_memory_usage_unittests PRIVATE 
+                                   ${GOLDFISH_EMUGL_DIR}/host/include/libOpenglRender
+                                   ${GOLDFISH_EMUGL_DIR}/system/include
+                                   ${ANDROID_EMUGL_DIR}/guest/androidImpl)
+
+android_target_dependency(emugl_memory_usage_unittests all  EMULATOR_FEATURE_DEPENDENCIES)
+android_target_dependency(emugl_memory_usage_unittests all  SWIFTSHADER_DEPENDENCIES)
+android_target_properties(emugl_memory_usage_unittests darwin-x86_64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
+android_target_properties(emugl_memory_usage_unittests linux-x86_64 "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")

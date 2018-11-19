@@ -124,6 +124,7 @@ set(android-emu-common
     android/metrics/CrashMetricsReporting.cpp
     android/metrics/FileMetricsWriter.cpp
     android/metrics/MemoryUsageReporter.cpp
+    android/metrics/opengl_object_counter.cpp
     android/metrics/metrics.cpp
     android/metrics/MetricsPaths.cpp
     android/metrics/MetricsReporter.cpp
