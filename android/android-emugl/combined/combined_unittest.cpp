@@ -15,7 +15,8 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
-#include "android/featurecontrol/FeatureControl.h"
+#include "android/base/threads/FunctorThread.h"
+#include "android/opengl/GLObjectCounter.h"
 #include "android/opengles.h"
 
 #include "AndroidBufferQueue.h"
@@ -41,6 +42,7 @@ using aemu::AndroidWindowBuffer;
 using aemu::ClientComposer;
 using aemu::Display;
 
+using android::base::FunctorThread;
 using android::base::pj;
 using android::base::System;
 
@@ -70,9 +72,14 @@ protected:
     void SetUp() override {
         setupGralloc();
         setupEGLAndMakeCurrent();
+        android::opengl::getOpenGLObjectCounts(&mBeforeTest);
     }
 
     void TearDown() override {
+        android::opengl::getOpenGLObjectCounts(&mAfterTest);
+        for (int i = 0; i < mBeforeTest.size(); i++) {
+            EXPECT_TRUE(mBeforeTest[i] >= mAfterTest[i]);
+        }
         teardownEGL();
         teardownGralloc();
     }
@@ -138,15 +145,25 @@ protected:
     }
 
     void teardownEGL() {
-        EXPECT_EQ(EGL_TRUE, eglMakeCurrent(mEGL.display, EGL_NO_SURFACE,
-                                           EGL_NO_SURFACE, EGL_NO_CONTEXT));
-        EXPECT_EQ(EGL_TRUE, eglDestroyContext(mEGL.display, mEGL.context));
-        EXPECT_EQ(EGL_TRUE, eglDestroySurface(mEGL.display, mEGL.surface));
-        EXPECT_EQ(EGL_TRUE, eglTerminate(mEGL.display));
-        EXPECT_EQ(EGL_TRUE, eglReleaseThread());
+        eglRelease();
 
         // Cancel all host threads as well
         android_finishOpenglesRenderer();
+    }
+
+    void eglRelease() {
+        if (mEGL.display != EGL_NO_DISPLAY) {
+            EXPECT_EQ(EGL_TRUE, eglMakeCurrent(mEGL.display, EGL_NO_SURFACE,
+                                               EGL_NO_SURFACE, EGL_NO_CONTEXT));
+            EXPECT_EQ(EGL_TRUE, eglDestroyContext(mEGL.display, mEGL.context));
+            EXPECT_EQ(EGL_TRUE, eglDestroySurface(mEGL.display, mEGL.surface));
+            EXPECT_EQ(EGL_TRUE, eglTerminate(mEGL.display));
+            EXPECT_EQ(EGL_TRUE, eglReleaseThread());
+        }
+
+        mEGL.display = EGL_NO_DISPLAY;
+        mEGL.context = EGL_NO_CONTEXT;
+        mEGL.surface = EGL_NO_SURFACE;
     }
 
     buffer_handle_t createTestGrallocBuffer(
@@ -210,6 +227,8 @@ protected:
 
     struct gralloc_implementation mGralloc;
     EGLState mEGL;
+    std::vector<int> mBeforeTest;
+    std::vector<int> mAfterTest;
 };
 
 // static
@@ -217,6 +236,7 @@ GoldfishOpenglTestEnv* CombinedGoldfishOpenglTest::testEnv = nullptr;
 
 // Tests that the pipe connection can be made and that
 // gralloc/EGL can be set up.
+
 TEST_F(CombinedGoldfishOpenglTest, Basic) { }
 
 // Tests allocation and deletion of a gralloc buffer.
@@ -273,7 +293,6 @@ TEST_F(CombinedGoldfishOpenglTest, ClientCompositionSetup) {
 
 // Client composition, but also advances a frame.
 TEST_F(CombinedGoldfishOpenglTest, ClientCompositionAdvanceFrame) {
-
     WindowWithBacking composeWindow(this);
     WindowWithBacking appWindow(this);
 
@@ -292,7 +311,6 @@ TEST_F(CombinedGoldfishOpenglTest, ClientCompositionAdvanceFrame) {
 TEST_F(CombinedGoldfishOpenglTest, ShowWindow) {
     bool useWindow =
             System::get()->envGet("ANDROID_EMU_TEST_WITH_WINDOW") == "1";
-
     aemu::Display disp(useWindow, kWindowSize, kWindowSize);
 
     if (useWindow) {
@@ -308,4 +326,35 @@ TEST_F(CombinedGoldfishOpenglTest, ShowWindow) {
     }
 
     if (useWindow) android_hideOpenglesWindow();
+}
+
+TEST_F(CombinedGoldfishOpenglTest, ThreadCleanup) {
+    // initial clean up.
+    eglRelease();
+    android::opengl::getOpenGLObjectCounts(&mBeforeTest);
+    for (int i = 0; i < 100; i++) {
+        std::unique_ptr<FunctorThread> th(new FunctorThread([this]() {
+            setupEGLAndMakeCurrent();
+            eglRelease();
+        }));
+        ;
+        th->start();
+        th->wait();
+    }
+}
+
+// Test case adapted from https://buganizer.corp.google.com/issues/111228391
+TEST_F(CombinedGoldfishOpenglTest, SwitchContext) {
+    EXPECT_EQ(EGL_TRUE, eglMakeCurrent(mEGL.display, EGL_NO_SURFACE,
+                                       EGL_NO_SURFACE, EGL_NO_CONTEXT));
+    for (int i = 0; i < 100; i++) {
+        std::unique_ptr<FunctorThread> th(new FunctorThread([this]() {
+            EXPECT_EQ(EGL_TRUE, eglMakeCurrent(mEGL.display, mEGL.surface,
+                                               mEGL.surface, mEGL.context));
+            EXPECT_EQ(EGL_TRUE, eglMakeCurrent(mEGL.display, EGL_NO_SURFACE,
+                                               EGL_NO_SURFACE, EGL_NO_CONTEXT));
+        }));
+        th->start();
+        th->wait();
+    }
 }
