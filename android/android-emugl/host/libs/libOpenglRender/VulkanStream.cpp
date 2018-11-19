@@ -27,7 +27,8 @@ namespace goldfish_vk {
 
 class VulkanStream::Impl : public android::base::Stream {
 public:
-    Impl(IOStream* stream) : mStream(stream) { }
+    Impl(IOStream* stream)
+        : mStream(stream) { unsetHandleMapping(); }
 
     ~Impl() { }
 
@@ -65,6 +66,18 @@ public:
 
     void clearPool() {
         mPool.freeAll();
+    }
+
+    void setHandleMapping(VulkanHandleMapping* mapping) {
+        mCurrentHandleMapping = mapping;
+    }
+
+    void unsetHandleMapping() {
+        mCurrentHandleMapping = &mDefaultHandleMapping;
+    }
+
+    VulkanHandleMapping* handleMapping() const {
+        return mCurrentHandleMapping;
     }
 
 private:
@@ -106,6 +119,8 @@ private:
     size_t mWritePos = 0;
     std::vector<uint8_t> mWriteBuffer;
     IOStream* mStream = nullptr;
+    DefaultHandleMapping mDefaultHandleMapping;
+    VulkanHandleMapping* mCurrentHandleMapping;
 };
 
 VulkanStream::VulkanStream(IOStream *stream) :
@@ -172,6 +187,18 @@ void VulkanStream::commitWrite() {
 
 void VulkanStream::clearPool() {
     mImpl->clearPool();
+}
+
+void VulkanStream::setHandleMapping(VulkanHandleMapping* mapping) {
+    mImpl->setHandleMapping(mapping);
+}
+
+void VulkanStream::unsetHandleMapping() {
+    mImpl->unsetHandleMapping();
+}
+
+VulkanHandleMapping* VulkanStream::handleMapping() const {
+    return mImpl->handleMapping();
 }
 
 VulkanMemReadingStream::VulkanMemReadingStream(uint8_t* start)

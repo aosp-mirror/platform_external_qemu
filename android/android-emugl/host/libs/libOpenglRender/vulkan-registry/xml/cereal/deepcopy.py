@@ -15,12 +15,12 @@
 
 from .common.codegen import CodeGen
 from .common.vulkantypes import \
-        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
+        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, VulkanTypeIterator
 
 from .wrapperdefs import VulkanWrapperGenerator
 from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE, EXTENSION_SIZE_API_NAME
 
-class DeepcopyCodegen(object):
+class DeepcopyCodegen(VulkanTypeIterator):
     def __init__(self, cgen, inputVars, poolVarName, prefix, skipValues=False):
         self.cgen = cgen
         self.inputVars = inputVars
