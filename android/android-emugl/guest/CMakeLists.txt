@@ -43,19 +43,19 @@ android_add_shared_library(grallocusage)
 target_link_libraries(grallocusage PUBLIC emugl_base)
 
 set(vulkan_android_src
-    libvulkan/api.cpp 
-    libvulkan/api_gen.cpp 
-    libvulkan/debug_report.cpp 
-    libvulkan/driver.cpp 
-    libvulkan/driver_gen.cpp 
-    libvulkan/layers_extensions.cpp 
-    libvulkan/stubhal.cpp 
-    libvulkan/swapchain.cpp 
+    libvulkan/api.cpp
+    libvulkan/api_gen.cpp
+    libvulkan/debug_report.cpp
+    libvulkan/driver.cpp
+    libvulkan/driver_gen.cpp
+    libvulkan/layers_extensions.cpp
+    libvulkan/stubhal.cpp
+    libvulkan/swapchain.cpp
 )
 android_add_shared_library(vulkan_android)
 target_compile_definitions(vulkan_android PRIVATE
-   -DLOG_TAG=\"vulkan\" 
-   -DVK_USE_PLATFORM_ANDROID_KHR 
+   -DLOG_TAG=\"vulkan\"
+   -DVK_USE_PLATFORM_ANDROID_KHR
    -DVK_NO_PROTOTYPES)
 target_include_directories(vulkan_android PRIVATE ${ANDROID_EMUGL_DIR}/host/include)
 target_compile_options(vulkan_android PRIVATE -fvisibility=hidden -fstrict-aliasing)
@@ -70,9 +70,9 @@ target_include_directories(
     ${ANDROID_EMUGL_DIR}/combined)
 target_link_libraries(
     vulkanhal_unittests PRIVATE
-    vulkan_android aemugraphics PRIVATE
+    vulkan_android aemugraphics
+    swiftshader
     gtest_main)
 android_target_dependency(vulkanhal_unittests all EMULATOR_FEATURE_DEPENDENCIES)
-android_target_dependency(vulkanhal_unittests all SWIFTSHADER_DEPENDENCIES)
 android_target_properties(vulkanhal_unittests darwin-x86_64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
 android_target_properties(vulkanhal_unittests linux-x86_64 "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")

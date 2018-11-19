@@ -4,7 +4,7 @@ prebuilt(VULKAN)
 # Adds the proper graphic driver dependencies to the given target.
 function(add_opengl_dependencies TGT)
   # And setup the depedencies
-  android_target_dependency(${TGT} all SWIFTSHADER_DEPENDENCIES)
+  target_link_libraries(${TGT} PRIVATE swiftshader)
   android_target_dependency(${TGT} all VULKAN_TEST_DEPENDENCIES)
   android_target_properties(${TGT} linux-x86_64 "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
   android_target_properties(${TGT} darwin-x86_64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")

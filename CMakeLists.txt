@@ -161,12 +161,29 @@ set(EMULATOR_FEATURE_DEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/android/data/advance
     "${ANDROID_QEMU2_TOP_DIR}/android/data/advancedFeaturesCanary.ini>lib/advancedFeaturesCanary.ini"
     "${ANDROID_QEMU2_TOP_DIR}/android/data/emu-original-feature-flags.protobuf>lib/emu-original-feature-flags.protobuf")
 
-set(
-  SWIFTSHADER_DEPENDENCIES
-  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_TAG}/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
-  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_TAG}/lib/libGLES_CM${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLES_CM${CMAKE_SHARED_LIBRARY_SUFFIX}"
-  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_TAG}/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
-  )
+
+# Let's configure swiftshader
+set(BUILD_SAMPLES OFF CACHE BOOL "Do not build swiftshader samples" FORCE)
+set(BUILD_TESTS OFF CACHE BOOL "Do not build swiftshader samples" FORCE)
+add_subdirectory(../swiftshader swiftshader)
+
+# Add an interface lib which anyone can depend on, this will bring in all the swiftshader dependenciies.
+add_library(swiftshader INTERFACE)
+target_link_libraries(swiftshader INTERFACE libEGL libGLESv2 libGLES_CM)
+
+# Make sure we binplace swiftshader during build in an emulator friendly location.
+set_target_properties(libEGL libGLESv2 libGLES_CM
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib64/gles_swiftshader"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib64/gles_swiftshader"
+)
+
+# And during install.. (TODO: this will only work for CMake 3.13 and later)
+#install(TARGETS libEGL libGLESv2 libGLES_CM
+#        RUNTIME DESTINATION lib64/gles_swiftshader # We don't want windows to binplace dlls in the exe dir
+#        LIBRARY DESTINATION lib64/gles_swiftshader)
+install(FILES "$<TARGET_FILE:libEGL>" "$<TARGET_FILE:libGLESv2>" "$<TARGET_FILE:libGLES_CM>" DESTINATION lib64/gles_swiftshader)
+
 
 prebuilt(CURL)
 prebuilt(GLIB2)
