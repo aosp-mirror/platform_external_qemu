@@ -17,7 +17,7 @@ from copy import copy
 
 from .common.codegen import CodeGen, VulkanAPIWrapper
 from .common.vulkantypes import \
-        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
+        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, VulkanTypeIterator
 
 from .wrapperdefs import VulkanWrapperGenerator
 from .wrapperdefs import VULKAN_STREAM_VAR_NAME
@@ -29,7 +29,7 @@ from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRIT
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
 
-class VulkanMarshalingCodegen(object):
+class VulkanMarshalingCodegen(VulkanTypeIterator):
 
     def __init__(self,
                  cgen,
@@ -38,7 +38,8 @@ class VulkanMarshalingCodegen(object):
                  marshalPrefix,
                  direction = "write",
                  forApiOutput = False,
-                 dynAlloc = False):
+                 dynAlloc = False,
+                 mapHandles = True):
         self.cgen = cgen
         self.direction = direction
         self.processSimple = "write" if self.direction == "write" else "read"
@@ -51,9 +52,11 @@ class VulkanMarshalingCodegen(object):
         self.marshalPrefix = marshalPrefix
 
         self.exprAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = True)
+        self.exprPrimitiveValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
         self.lenAccessor = lambda t: self.cgen.generalLengthAccess(t, parentVarName = self.inputVarName)
 
         self.dynAlloc = dynAlloc
+        self.mapHandles = mapHandles
 
     def getTypeForStreaming(self, vulkanType):
         res = copy(vulkanType)
@@ -80,6 +83,58 @@ class VulkanMarshalingCodegen(object):
 
         self.cgen.stmt(
             "%s->%s(%s%s, %s)" % (varname, func, cast, toStreamExpr, sizeExpr))
+
+    def genPrimitiveStreamCall(self, vulkanType, access):
+        varname = self.streamVarName
+
+        self.cgen.streamPrimitive(
+            self.typeInfo,
+            varname,
+            access,
+            vulkanType,
+            direction=self.direction)
+
+    def genHandleMappingCall(self, vulkanType, access, lenAccess):
+        if lenAccess is None:
+            lenAccess = "1"
+            handle64Bytes = "8"
+        else:
+            handle64Bytes = "%s * 8" % lenAccess
+
+        handle64Var = self.cgen.var()
+        if lenAccess != "1":
+            self.cgen.beginIf(lenAccess)
+            self.cgen.stmt("uint64_t* %s" % handle64Var)
+            self.cgen.stmt(
+                "%s->alloc((void**)&%s, %s * 8)" % \
+                (self.streamVarName, handle64Var, lenAccess))
+            handle64VarAccess = handle64Var
+            handle64VarType = \
+                makeVulkanTypeSimple(False, "uint64_t", 1, paramName=handle64Var)
+        else:
+            self.cgen.stmt("uint64_t %s" % handle64Var)
+            handle64VarAccess = "&%s" % handle64Var
+            handle64VarType = \
+                makeVulkanTypeSimple(False, "uint64_t", 0, paramName=handle64Var)
+
+        if self.direction == "write":
+            self.cgen.stmt(
+                "%s->handleMapping()->mapHandles_%s_u64(%s, %s, %s)" %
+                (self.streamVarName, vulkanType.typeName,
+                access,
+                handle64VarAccess, lenAccess))
+            self.genStreamCall(handle64VarType, handle64VarAccess, handle64Bytes)
+        else:
+            self.genStreamCall(handle64VarType, handle64VarAccess, handle64Bytes)
+            self.cgen.stmt(
+                "%s->handleMapping()->mapHandles_u64_%s(%s, %s%s, %s)" %
+                (self.streamVarName, vulkanType.typeName,
+                handle64VarAccess,
+                self.makeCastExpr(vulkanType.getForNonConstAccess()), access,
+                lenAccess))
+
+        if lenAccess != "1":
+            self.cgen.endIf()
 
     def doAllocSpace(self, vulkanType):
         if self.dynAlloc and self.direction == "read":
@@ -108,6 +163,7 @@ class VulkanMarshalingCodegen(object):
 
         needConsistencyCheck = False
 
+        self.cgen.line("// WARNING PTR CHECK")
         if (self.dynAlloc and self.direction == "read") or self.direction == "write":
             checkAccess = self.exprAccessor(vulkanType)
             addrExpr = "&" + checkAccess
@@ -121,7 +177,9 @@ class VulkanMarshalingCodegen(object):
             sizeExpr = self.cgen.sizeofExpr(vulkanType)
             needConsistencyCheck = True
 
-        self.genStreamCall(vulkanType.getForAddressAccess(), addrExpr, sizeExpr)
+        self.genPrimitiveStreamCall(
+            vulkanType,
+            checkAccess)
 
         self.cgen.beginIf(access)
 
@@ -240,17 +298,28 @@ class VulkanMarshalingCodegen(object):
 
         self.doAllocSpace(vulkanType)
 
-        if lenAccess is not None:
-            finalLenExpr = "%s * %s" % (
-                lenAccess, self.cgen.sizeofExpr(vulkanType.getForValueAccess()))
+        if vulkanType.isHandleType() and self.mapHandles:
+            self.genHandleMappingCall(vulkanType, access, lenAccess)
         else:
-            finalLenExpr = self.cgen.sizeofExpr(vulkanType.getForValueAccess())
+            if lenAccess is not None:
+                finalLenExpr = "%s * %s" % (
+                    lenAccess, self.cgen.sizeofExpr(vulkanType.getForValueAccess()))
+            else:
+                finalLenExpr = self.cgen.sizeofExpr(vulkanType.getForValueAccess())
 
-        self.genStreamCall(vulkanType, access, finalLenExpr)
+            self.genStreamCall(vulkanType, access, finalLenExpr)
 
     def onValue(self, vulkanType):
-        access = self.exprAccessor(vulkanType)
-        self.genStreamCall(vulkanType, access, self.cgen.sizeofExpr(vulkanType))
+        if vulkanType.isHandleType() and self.mapHandles:
+            access = self.exprAccessor(vulkanType)
+            self.genHandleMappingCall(
+                vulkanType.getForAddressAccess(), access, "1")
+        elif self.typeInfo.isNonAbiPortableType(vulkanType.typeName):
+            access = self.exprPrimitiveValueAccessor(vulkanType)
+            self.genPrimitiveStreamCall(vulkanType, access)
+        else:
+            access = self.exprAccessor(vulkanType)
+            self.genStreamCall(vulkanType, access, self.cgen.sizeofExpr(vulkanType))
 
 class VulkanMarshaling(VulkanWrapperGenerator):
 
