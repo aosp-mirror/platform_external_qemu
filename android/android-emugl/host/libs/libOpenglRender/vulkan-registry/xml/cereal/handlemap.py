@@ -15,12 +15,12 @@
 
 from .common.codegen import CodeGen
 from .common.vulkantypes import \
-        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
+        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, VulkanTypeIterator
 
 from .wrapperdefs import VulkanWrapperGenerator
 from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE
 
-class HandleMapCodegen(object):
+class HandleMapCodegen(VulkanTypeIterator):
     def __init__(self, cgen, inputVar, handlemapVarName, prefix, isHandleFunc):
         self.cgen = cgen
         self.inputVar = inputVar
@@ -176,7 +176,7 @@ class VulkanHandleMap(VulkanWrapperGenerator):
                 self.toMapVar,
                 self.handlemapVarName,
                 self.handlemapPrefix,
-                lambda vtype : typeInfo.isHandleType(vtype))
+                lambda vtype : typeInfo.isHandleType(vtype.typeName))
 
         self.knownDefs = {}
 
