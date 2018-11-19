@@ -16,6 +16,7 @@
 #include "Toplevel.h"
 
 #include "android/base/system/System.h"
+#include "android/opengl/GLObjectCounter.h"
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -26,10 +27,12 @@ using android::base::System;
 namespace aemu {
 
 TEST(Toplevel, Basic) {
+    std::vector<int> beforeTest, afterTest;
     System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR", System::get()->getProgramDirectory());
-    Toplevel t;
-    auto win = t.createWindow();
+    Toplevel* t = new Toplevel();
+    android::opengl::getOpenGLObjectCounts(&beforeTest);
 
+    auto win = t->createWindow();
     EGLDisplay d = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     EGLint maj, min;
     eglInitialize(d, &maj, &min);
@@ -76,15 +79,24 @@ TEST(Toplevel, Basic) {
     EGLSurface s = eglCreateWindowSurface(d, match, win, 0);
 
     eglMakeCurrent(d, s, s, c);
-
     for (int i = 0; i < 120; i++) {
         glViewport(0, 0, 256, 256);
         glClearColor(1.0f, 0.0f, i / 120.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glFinish();
         eglSwapBuffers(d, s);
-        t.loop();
+        t->loop();
+    }
+    EXPECT_EQ(EGL_TRUE, eglMakeCurrent(d, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                                       EGL_NO_CONTEXT));
+    EXPECT_EQ(EGL_TRUE, eglDestroyContext(d, c));
+    EXPECT_EQ(EGL_TRUE, eglDestroySurface(d, s));
+    eglReleaseThread();
+    delete t;
+    android::opengl::getOpenGLObjectCounts(&afterTest);
+    for (int i = 0; i < beforeTest.size(); i++) {
+        EXPECT_TRUE(beforeTest[i] >= afterTest[i]);
     }
 }
 
-}
+}  // namespace aemu
