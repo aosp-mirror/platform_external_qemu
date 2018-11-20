@@ -92,7 +92,9 @@ message SnapshotRequest {
   message ForkReadOnlyInstances {
     optional int32 num_instances = 1;
   }
-  message DoneInstance {}
+  message DoneInstance {
+    optional bytes metadata = 1;
+  }
 
   oneof function {
     CreateCheckpoint create_checkpoint = 1;
@@ -171,6 +173,7 @@ message SnapshotResponse {
   message GotoCheckpoint {}
   message ForkReadOnlyInstances {
     optional int32 instance_id = 1;
+    optional bytes metadata = 2;
   }
   message DoneInstance {}
 
