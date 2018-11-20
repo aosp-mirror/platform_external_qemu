@@ -512,6 +512,28 @@ target_compile_definitions(android-emu-shared
                                    "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
                                    "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
 
+set(android-mock-vm-operations_src
+    android/emulation/testing/MockAndroidVmOperations.cpp)
+
+android_add_library(android-mock-vm-operations)
+
+target_compile_options(android-mock-vm-operations PRIVATE -O0 -Wno-invalid-constexpr)
+target_include_directories(android-mock-vm-operations
+                                   PRIVATE
+                                   ../android-emugl/host/include/
+                                   ${BREAKPAD_INCLUDE_DIRS}
+                                   ${CURL_INCLUDE_DIRS}
+                                   ${LIBXML2_INCLUDE_DIRS}
+                                   ${LIBPNG_INCLUDE_DIRS}
+                                   ${LZ4_INCLUDE_DIRS}
+                                   ${ZLIB_INCLUDE_DIRS}
+                                   ${PROTOBUF_INCLUDE_DIRS}
+                                   ${LZ4_INCLUDE_DIRS}
+                                   ${PNG_INCLUDE_DIRS}
+                                   ${ZLIB_INCLUDE_DIRS}
+                                   ${DARWINN_INCLUDE_DIRS})
+target_link_libraries(android-mock-vm-operations PRIVATE gmock)
+
 # The unit tests
 set(android-emu_unittests_src
     android/automation/AutomationController_unittest.cpp
@@ -618,7 +640,6 @@ set(android-emu_unittests_src
     android/emulation/SetupParameters_unittest.cpp
     android/emulation/testing/TestAndroidPipeDevice.cpp
     android/emulation/testing/MockAndroidEmulatorWindowAgent.cpp
-    android/emulation/testing/MockAndroidVmOperations.cpp
     android/emulation/VmLock_unittest.cpp
     android/error-messages_unittest.cpp
     android/featurecontrol/FeatureControl_unittest.cpp
@@ -730,7 +751,7 @@ android_target_compile_definitions(android-emu_unittests
                                    "-Dfseeko64=fseek")
 
 # Dependecies are exported from android-emu.
-target_link_libraries(android-emu_unittests PRIVATE android-emu gtest gmock gtest_main)
+target_link_libraries(android-emu_unittests PRIVATE android-emu android-mock-vm-operations gtest gmock gtest_main)
 
 list(APPEND android-emu-testdata
             testdata/snapshots/random-ram-100.bin
