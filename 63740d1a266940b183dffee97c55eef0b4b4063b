@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d247f2fa_db12f184",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-11-20T17:22:33Z",
+      "side": 1,
+      "message": "std::vector\u003cRoutePoint\u003e ?",
+      "range": {
+        "startLine": 302,
+        "startChar": 4,
+        "endLine": 302,
+        "endChar": 44
+      },
+      "revId": "63740d1a266940b183dffee97c55eef0b4b4063b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
