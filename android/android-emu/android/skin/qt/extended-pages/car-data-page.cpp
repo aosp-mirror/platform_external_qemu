@@ -11,6 +11,7 @@
 #include "android/skin/qt/extended-pages/car-data-page.h"
 
 #include "android/emulation/control/car_data_agent.h"
+#undef ERROR_INVALID_OPERATION
 #include "android/emulation/proto/VehicleHalProto.pb.h"
 #include "android/main-common.h"
 #include "android/skin/qt/qt-settings.h"
