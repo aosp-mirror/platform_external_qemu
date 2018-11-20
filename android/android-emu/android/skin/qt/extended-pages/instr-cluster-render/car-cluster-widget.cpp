@@ -21,6 +21,9 @@
 
 #include <QPainter>
 
+static constexpr int FRAME_WIDTH = 1280;
+static constexpr int FRAME_HEIGHT = 720;
+
 static constexpr int PIPE_START = 1;
 static constexpr int PIPE_STOP = 2;
 static constexpr int PIPE_CONTINUE = 3;
@@ -28,9 +31,38 @@ static constexpr int PIPE_CONTINUE = 3;
 static CarClusterWidget* instance;
 
 CarClusterWidget::CarClusterWidget(QWidget* parent)
-    : QWidget(parent) {
+    : QWidget(parent),
+      mWorkerThread([this](CarClusterWidget::FrameInfo &&frameInfo) {
+          return workerProcessFrame(frameInfo);
+      }) {
+
       instance = this;
+
       set_car_cluster_call_back(processFrame);
+
+      WelsCreateDecoder(&mDecoder);
+
+      mDecodeParams = {nullptr};
+      mDecodeParams.sVideoProperty.size = sizeof(mDecodeParams.sVideoProperty);
+      mDecodeParams.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_AVC;
+      mDecoder->Initialize(&mDecodeParams);
+
+      mCtx = sws_getContext(FRAME_WIDTH, FRAME_HEIGHT, AV_PIX_FMT_YUV420P,
+                     FRAME_WIDTH, FRAME_HEIGHT, AV_PIX_FMT_RGB32, SWS_BICUBIC,
+                     NULL, NULL, NULL);
+
+      mRgbData = new uint8_t[4 * FRAME_WIDTH * FRAME_HEIGHT];
+
+      connect(this, SIGNAL(sendImage(QImage)), this, SLOT(updatePixmap(QImage)), Qt::QueuedConnection);
+      mWorkerThread.start();
+}
+
+CarClusterWidget::~CarClusterWidget() {
+    mWorkerThread.enqueue({});
+    mWorkerThread.join();
+    mDecoder->Uninitialize();
+    WelsDestroyDecoder(mDecoder);
+    delete[] mRgbData;
 }
 
 void CarClusterWidget::paintEvent(QPaintEvent* event) {
@@ -46,11 +78,32 @@ void CarClusterWidget::paintEvent(QPaintEvent* event) {
     }
 }
 
-void CarClusterWidget::processFrame(const char* frame, int frameSize) {
-    // TODO: decode input frame to form image & render it
-    std::cout << "current frame size: " << frameSize << std::endl;
-    sendCarClusterMsg(PIPE_CONTINUE);
-    return;
+void CarClusterWidget::processFrame(const char* buf, int bufSize) {
+    instance->mWorkerThread.enqueue({bufSize, std::vector<char>(buf, buf + bufSize)});
+}
+
+WorkerProcessingResult CarClusterWidget::workerProcessFrame(const FrameInfo& frameInfo) {
+    if (!frameInfo.size) {
+        return WorkerProcessingResult::Stop;
+    }
+    uint8_t* yuvData[3];
+    memset(&mBufferInfo, 0, sizeof(SBufferInfo));
+    const uint8_t* currFrame = reinterpret_cast<const uint8_t*>(frameInfo.data.data());
+    if (mDecoder->DecodeFrameNoDelay(&currFrame[0], frameInfo.size, yuvData, &mBufferInfo) != 0) {
+        // received a bad frame, we can just continue for now
+        return WorkerProcessingResult::Continue;
+    }
+
+    int ht = mBufferInfo.UsrData.sSystemBuffer.iHeight;
+    int wd = mBufferInfo.UsrData.sSystemBuffer.iWidth;
+
+    int stride[3] = {mBufferInfo.UsrData.sSystemBuffer.iStride[0],
+                                 mBufferInfo.UsrData.sSystemBuffer.iStride[1],
+                                 mBufferInfo.UsrData.sSystemBuffer.iStride[1]};
+    int rgbStride[1] = { 4*wd };
+    sws_scale(mCtx, yuvData, stride, 0, ht, &mRgbData, rgbStride);
+    emit sendImage(QImage(mRgbData, wd, ht, QImage::Format_RGB32).copy());
+    return WorkerProcessingResult::Continue;
 }
 
 void CarClusterWidget::showEvent(QShowEvent* event) {

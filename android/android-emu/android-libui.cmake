@@ -2,6 +2,7 @@
 prebuilt(QT5)
 prebuilt(FFMPEG)
 prebuilt(ZLIB)
+prebuilt(OPENH264)
 
 set(ANDROID_LIBUI_SRC_FILES
     android/skin/charmap.c
@@ -257,6 +258,7 @@ target_link_libraries(emulator-libui
                               android-emu
                               emulator-libyuv
                               FFMPEG::FFMPEG
+			      OPENH264::OPENH264
                               Qt5::Core
                               Qt5::Widgets
                               Qt5::Gui
