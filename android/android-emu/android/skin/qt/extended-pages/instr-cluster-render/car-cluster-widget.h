@@ -17,13 +17,30 @@
 #include <QWidget>
 #include <QImage>
 
+#include "android/base/threads/WorkerThread.h"
+
+extern "C" {
+#include "libswscale/swscale.h"
+#include "libavcodec/avcodec.h"
+#include "libavformat/avformat.h"
+#include "libavutil/log.h"
+}
+
+
+using android::base::WorkerProcessingResult;
+
 class CarClusterWidget : public QWidget
 {
     Q_OBJECT
 
 public:
     CarClusterWidget(QWidget* parent = 0);
-    static void processFrame(const uint8_t* frame, int frameSize);
+    ~CarClusterWidget();
+
+    static void processFrame(uint8_t* frame, int frameSize);
+
+signals:
+    void sendImage(const QImage &image);
 
 protected:
     void paintEvent(QPaintEvent* event);
@@ -35,5 +52,22 @@ private slots:
 
 private:
     static void sendCarClusterMsg(uint8_t flag);
+
+    struct FrameInfo {
+        int size;
+        std::vector<uint8_t> data;
+    };
+
+    android::base::WorkerThread<FrameInfo> mWorkerThread;
+    android::base::WorkerProcessingResult workerProcessFrame(FrameInfo& frameInfo);
+
     QPixmap mPixmap;
+
+    AVCodec* mCodec;
+    AVCodecContext* mCodecCtx;
+    AVFrame* mFrame;
+
+    SwsContext* mCtx;
+
+    uint8_t* mRgbData;
 };

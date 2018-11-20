@@ -16,7 +16,7 @@
 #include <stdint.h>
 
 ANDROID_BEGIN_HEADER
-typedef void (*car_cluster_callback_t)(const uint8_t*, int);
+typedef void (*car_cluster_callback_t)(uint8_t*, int);
 
 extern void set_car_cluster_call_back(car_cluster_callback_t callback);
 
