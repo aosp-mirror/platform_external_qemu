@@ -20,9 +20,8 @@ package emulator_location;
 // a route (path) of Location data.
 //
 // The actual points that define the route
-// are in a separate file in the same
-// directory as the .pb file. (The separate
-// file is probably a JSON or XML.)
+// are in a 'route.json' file in the same
+// directory as the .pb file.
 
 message RouteMetadata {
   // Name that the user gave this route
@@ -34,29 +33,18 @@ message RouteMetadata {
   // Descriptive string given by the user
   optional string description = 3;
 
-  // Mode of transportation
+  // Mode of travel
   enum Mode {
-    UNKNOWN = 0;
-    BIKE = 1;
-    CAR = 2;
-    RUN = 3;
-    WALK = 4;
+    DRIVING = 0;
+    WALKING = 1;
+    BICYCLING = 2;
+    TRANSIT = 3;
   }
-  optional Mode mode_of_transportation = 4;
+  optional Mode mode_of_travel = 4;
 
-  // On playback, should we continuously repeat this route?
-  // Default = false = play only once
-  optional bool loop = 5;
+  // Duration of the route (the time taken at 1x, in seconds)
+  optional int64 duration = 5;
 
-  // Playback speed factor
-  enum PlaybackSpeed {
-    SPEED_1x = 0;
-    SPEED_2x = 1;
-    SPEED_3x = 2;
-    SPEED_4x = 3;
-  }
-  optional PlaybackSpeed speed_factor = 6;
-
-  // Duration of the route (the time taken at 1x)
-  optional int64 duration = 7;
+  // Number of lat/lng pairs in the route
+  optional int64 number_of_points = 6;
 }

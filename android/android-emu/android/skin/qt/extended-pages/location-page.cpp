@@ -165,7 +165,6 @@ LocationPage::LocationPage(QWidget *parent) :
         mUi->locationTabs->removeTab(3);
         // Hide the V2 widgets that are not functional yet
         mUi->locationTabs->removeTab(2); // "Settings"
-        mUi->locationTabs->removeTab(1); // "Routes"
         mUi->loc_pointSortBox->hide();   // "Sort by ..."
     } else {
         mUi->locationTabs->setTabText(3, ""); // "V1"
@@ -174,11 +173,15 @@ LocationPage::LocationPage(QWidget *parent) :
         mUi->locationTabs->removeTab(1); // "Routes"
         mUi->locationTabs->removeTab(0); // "Single points"
         mUi->loc_pointList->setRowCount(0);
+        mUi->loc_routeList->setRowCount(0);
     }
 
     if (useLocationV2) {
 #ifdef USE_WEBENGINE
-        setUpWebEngine(mUi->loc_pointWebEngineView->page());
+        mTimer.setSingleShot(true);
+        QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout_v2);
+
+        setUpWebEngine(); // Set up the Points and Routes web engines
 
         mPointItemBuilder = new PointItemBuilder(mUi->loc_pointList);
 
@@ -188,12 +191,22 @@ LocationPage::LocationPage(QWidget *parent) :
         scanForPoints();
         populatePointListWidget();
         highlightPointListWidget();
+
+        mRouteItemBuilder = new RouteItemBuilder(mUi->loc_routeList);
+
+        mUi->loc_routeList->setItemDelegateForColumn(0, new BackgroundDelegate(this));
+        mUi->loc_routeList->setItemDelegateForColumn(1, new BackgroundDelegate(this));
+
+        scanForRoutes();
+        populateRouteListWidget();
+        highlightRouteListWidget();
+        mUi->loc_playRouteButton->setEnabled(false);
+        mUi->loc_saveRoute->setEnabled(false);
 #endif
     } else { // !useLocationV2
-        mTimer.setSingleShot(true);
-
         mUi->loc_latitudeInput->setMinValue(-90.0);
         mUi->loc_latitudeInput->setMaxValue(90.0);
+        mTimer.setSingleShot(true);
         QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout);
         QObject::connect(this, &LocationPage::locationUpdateRequired,
                          this, &LocationPage::updateDisplayedLocation);
@@ -297,6 +310,10 @@ void LocationPage::updateTheme() {
     mUi->loc_travelMode->setItemIcon(1, getIconForCurrentTheme("walk"));
     mUi->loc_travelMode->setItemIcon(2, getIconForCurrentTheme("bike"));
     mUi->loc_travelMode->setItemIcon(3, getIconForCurrentTheme("transit"));
+
+    // Re-do the lists of routes and points
+    highlightPointListWidget();
+    highlightRouteListWidget();
 }
 
 void LocationPage::on_loc_GpxKmlButton_clicked()
@@ -559,6 +576,15 @@ void LocationPage::locationPlaybackStop()
     mNowPlaying = false;
 }
 
+void LocationPage::locationPlaybackStop_v2()
+{
+    mTimer.stop();
+    mNextRoutePointIdx = -1;
+    mUi->loc_playRouteButton->setText(tr("PLAY ROUTE"));
+
+    mNowPlaying = false;
+}
+
 void LocationPage::timeout() {
     bool cellOK;
     QTableWidgetItem *theItem;
@@ -652,6 +678,76 @@ void LocationPage::timeout() {
         mTimer.setInterval(mSec);
         mTimer.start();
     }
+}
+
+// Advance (up to) one second along the route
+void LocationPage::timeout_v2() {
+    double latNow = 0.0;
+    double lngNow = 0.0;
+
+    if (mMsIntoSegment >= mSegmentDurationMs) {
+        // Advance to the next segment in the route
+        mNextRoutePointIdx++;
+        if (mNextRoutePointIdx >= mRouteNumPoints) {
+            // End of the route
+            if (mUi->loc_repeatRoute->isChecked()) {
+                // We are at the end and should repeat
+                mTimer.stop();
+                locationPlaybackStart_v2();
+            } else {
+                // We are at the end and should stop
+                locationPlaybackStop_v2();
+            }
+            return;
+        }
+        double deltaTimeSec = mPlaybackElements[mNextRoutePointIdx].delayBefore /
+                                  (mUi->loc_routeSpeed->currentIndex() + 1.0);
+
+        mSegmentDurationMs = deltaTimeSec * 1000.0;
+
+        double prevLat = mPlaybackElements[mNextRoutePointIdx-1].lat;
+        double prevLng = mPlaybackElements[mNextRoutePointIdx-1].lng;
+        double nextLat = mPlaybackElements[mNextRoutePointIdx  ].lat;
+        double nextLng = mPlaybackElements[mNextRoutePointIdx  ].lng;
+
+        double distance = getDistanceNm(prevLat, prevLng, nextLat, nextLng);
+        double deltaTimeHours = deltaTimeSec / (60.0 * 60.0);
+
+        mVelocityOnRoute = (deltaTimeHours <= 0.0) ? 0.0
+                             : std::min(distance / deltaTimeHours, MAX_SPEED);
+        mHeadingOnRoute = getHeading(prevLat, prevLng, nextLat, nextLng);
+        latNow = prevLat;
+        lngNow = prevLng;
+        mMsIntoSegment = 0.0;
+    } else {
+        // We are within a segment, between point [mNextRoutePointIdx-1] and [mNextRoutePointIdx]
+        mMsIntoSegment = std::min(mMsIntoSegment + UPDATE_INTERVAL, mSegmentDurationMs);
+
+        double prevLat = mPlaybackElements[mNextRoutePointIdx-1].lat;
+        double prevLng = mPlaybackElements[mNextRoutePointIdx-1].lng;
+        double nextLat = mPlaybackElements[mNextRoutePointIdx  ].lat;
+        double nextLng = mPlaybackElements[mNextRoutePointIdx  ].lng;
+
+        double alpha = mMsIntoSegment / mSegmentDurationMs;
+        latNow = (alpha * nextLat) + ((1.0 - alpha) * prevLat);
+        lngNow = (alpha * nextLng) + ((1.0 - alpha) * prevLng);
+    }
+
+    double altNow = 0.0;
+
+    // Send the current location
+    AutoLock lock (sGlobals->updateThreadLock);
+    LocationPage::writeDeviceLocationToSettings(latNow, lngNow, altNow,
+                                                mVelocityOnRoute, mHeadingOnRoute);
+    sGlobals->updateThreadCv.signalAndUnlock(&lock);
+
+    // Update the location marker on the UI map
+    emit locationChanged(QString::number(latNow, 'g', 12), QString::number(lngNow, 'g', 12));
+    emit targetHeadingChanged(mHeadingOnRoute); // Update the magnetometer repeatedly
+
+    int sleepTime = mSegmentDurationMs - mMsIntoSegment;
+    mTimer.setInterval(std::min((int)UPDATE_INTERVAL, sleepTime));
+    mTimer.start();
 }
 
 void LocationPage::geoDataThreadStarted() {
