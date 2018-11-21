@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c57b68e7_3e41bc9d",
+        "filename": "android/android-emu/android/opengles.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-21T01:25:25Z",
+      "side": 1,
+      "message": "Do we need to pass this from the outside?",
+      "range": {
+        "startLine": 229,
+        "startChar": 41,
+        "endLine": 229,
+        "endChar": 62
+      },
+      "revId": "7a85faddbfc78d6d217360d037d9c343d583c566",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
