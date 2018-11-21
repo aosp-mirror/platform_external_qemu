@@ -1203,7 +1203,7 @@ VkResult EnumerateInstanceLayerProperties(uint32_t* pPropertyCount,
         return VK_SUCCESS;
     }
 
-    uint32_t copied = std::min(*pPropertyCount, count);
+    uint32_t copied = (std::min)(*pPropertyCount, count);
     for (uint32_t i = 0; i < copied; i++)
         pProperties[i] = GetLayerProperties(GetLayer(i));
     *pPropertyCount = copied;
@@ -1252,7 +1252,7 @@ VkResult EnumerateDeviceLayerProperties(VkPhysicalDevice physicalDevice,
         return VK_SUCCESS;
     }
 
-    uint32_t copied = std::min(*pPropertyCount, count);
+    uint32_t copied = (std::min)(*pPropertyCount, count);
     for (uint32_t i = 0; i < copied; i++)
         pProperties[i] = GetLayerProperties(*layers[i].ref);
     *pPropertyCount = copied;

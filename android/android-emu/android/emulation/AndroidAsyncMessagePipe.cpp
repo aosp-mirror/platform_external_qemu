@@ -234,7 +234,7 @@ void AndroidAsyncMessagePipe::OutgoingPacket::copyToBuffer(
     }
 
     // Copy the data.
-    const size_t maxWrite = std::min(length() - offset, bytesAvailable);
+    const size_t maxWrite = (std::min)(length() - offset, bytesAvailable);
     if (maxWrite > 0) {
         memcpy(buffer.data + currentWriteOffset,
                data.data() + offset - sizeof(messageLength), maxWrite);
@@ -301,7 +301,7 @@ size_t AndroidAsyncMessagePipe::IncomingPacket::copyFromBuffer(
     // If the length isn't known at this point, currentReadOffset must equal
     // buffer.size.  If not, bytesRemaining().value() will assert.
     if (currentReadOffset < buffer.size && !complete()) {
-        const size_t maxRead = std::min(buffer.size - currentReadOffset,
+        const size_t maxRead = (std::min)(buffer.size - currentReadOffset,
                                         bytesRemaining().value());
         const uint8_t* readStart = buffer.data + currentReadOffset;
         data.insert(data.end(), readStart, readStart + maxRead);

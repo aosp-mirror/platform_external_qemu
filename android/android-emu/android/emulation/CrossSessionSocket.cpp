@@ -187,7 +187,7 @@ bool CrossSessionSocket::hasStaleData() const {
 }
 
 size_t CrossSessionSocket::readStaleData(void* data, size_t dataSize) {
-    size_t len = std::min(dataSize, getReadableDataSize());
+    size_t len = (std::min)(dataSize, getReadableDataSize());
     memcpy(data, mRecvBuffer.data() + mRecvBufferBegin, len);
     mRecvBufferBegin += len;
     return len;

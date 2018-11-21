@@ -123,7 +123,7 @@ void VirtualSceneControlWindow::dockMainWindow() {
                                   mEmulatorWindow->getLeftTransparency() -
                                   mEmulatorWindow->getRightTransparency();
     const int virtualSceneWidgetWidth =
-            std::min(parentWidgetWidth, kVirtualSceneControlWindowMaxWidth);
+            (std::min)(parentWidgetWidth, kVirtualSceneControlWindowMaxWidth);
 
     setWidth(virtualSceneWidgetWidth);
     move(parentWidget()->frameGeometry().left() +

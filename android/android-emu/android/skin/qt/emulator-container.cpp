@@ -496,7 +496,7 @@ void EmulatorContainer::adjustModalOverlayGeometry() {
         return;
     }
 
-    auto overlaySize = QSize(std::min(300, width()), std::min(300, height()));
+    auto overlaySize = QSize((std::min)(300, width()), (std::min)(300, height()));
     mModalOverlay->resize(overlaySize, size());
     mModalOverlay->move(
             mapToGlobal({(width() - mModalOverlay->width()) / 2,
@@ -520,7 +520,7 @@ void EmulatorContainer::adjustMessagesOverlayGeometry() {
     }
 
     auto scaleFactor = SizeTweaker::scaleFactor(this).x();
-    auto w = std::min<int>(width() - 2 * 30 * scaleFactor,
+    auto w = (std::min<int>)(width() - 2 * 30 * scaleFactor,
                            std::max<int>(300 * scaleFactor,
                                          (width() - 2 * 150 * scaleFactor)));
     mMessages->setFixedWidth(w);

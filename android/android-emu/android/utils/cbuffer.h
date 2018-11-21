@@ -14,6 +14,9 @@
 
 #include <stdint.h>
 
+#ifdef _MSC_VER
+#define __inline__ inline
+#endif
 /* Basic circular buffer type and methods */
 
 typedef struct {

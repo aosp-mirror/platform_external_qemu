@@ -713,11 +713,11 @@ VkResult GetPhysicalDeviceSurfaceFormatsKHR(VkPhysicalDevice pdev,
         uint32_t transfer_count = 0;
         if (*count < total_num_formats)
             result = VK_INCOMPLETE;
-        transfer_count = std::min(*count, kNumFormats);
+        transfer_count = (std::min)(*count, kNumFormats);
         std::copy(kFormats, kFormats + transfer_count, formats);
         out_count += transfer_count;
         if (wide_color_support) {
-            transfer_count = std::min(*count - out_count, kNumWideColorFormats);
+            transfer_count = (std::min)(*count - out_count, kNumWideColorFormats);
             std::copy(kWideColorFormats, kWideColorFormats + transfer_count,
                       formats + out_count);
             out_count += transfer_count;
@@ -839,7 +839,7 @@ VkResult GetPhysicalDeviceSurfacePresentModesKHR(VkPhysicalDevice pdev,
     if (modes) {
         if (*count < num_modes)
             result = VK_INCOMPLETE;
-        *count = std::min(*count, num_modes);
+        *count = (std::min)(*count, num_modes);
         std::copy(present_modes.begin(), present_modes.begin() + int(*count), modes);
     } else {
         *count = num_modes;
@@ -885,7 +885,7 @@ VkResult GetPhysicalDevicePresentRectanglesKHR(VkPhysicalDevice,
     if (!pRects) {
         *pRectCount = 1;
     } else {
-        uint32_t count = std::min(*pRectCount, 1u);
+        uint32_t count = (std::min)(*pRectCount, 1u);
         bool incomplete = *pRectCount < 1;
 
         *pRectCount = count;

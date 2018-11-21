@@ -185,7 +185,7 @@ void**  _areflist_at(const ARefList*  l, int  n);
     })
 
 #define  AREFLIST_FOREACH_CONST(list_,item_,statement_) \
-    ({ const ARefList*  _reflist = (list_); \
+    { const ARefList*  _reflist = (list_); \
        int        _reflist_i = 0; \
        int        _reflist_n = _reflist->size; \
        for ( ; _reflist_i < _reflist_n; _reflist_i++ ) { \
@@ -195,7 +195,7 @@ void**  _areflist_at(const ARefList*  l, int  n);
                statement_; \
            } \
        } \
-    })
+    }
 
 /* use this to delete the currently iterated element */
 #define  AREFLIST_DEL_ITERATED()  \

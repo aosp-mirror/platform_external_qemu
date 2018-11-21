@@ -61,6 +61,10 @@ using android::base::ScopedFileHandle;
 using android::base::Win32UnicodeString;
 #endif  // _WIN32
 
+#ifdef _MSC_VER
+  #define __inline__ inline
+#endif
+
 using android::base::PathUtils;
 
 /** PATH HANDLING ROUTINES

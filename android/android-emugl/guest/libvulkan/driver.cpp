@@ -471,7 +471,7 @@ VkResult CreateInfoWrapper::InitExtensionFilter() {
     uint32_t enabled_ext_count = (is_instance_)
                                      ? instance_info_.enabledExtensionCount
                                      : dev_info_.enabledExtensionCount;
-    count = std::min(filter.ext_count, enabled_ext_count);
+    count = (std::min)(filter.ext_count, enabled_ext_count);
     filter.names = reinterpret_cast<const char**>(allocator_.pfnAllocation(
         allocator_.pUserData, sizeof(const char*) * count, alignof(const char*),
         VK_SYSTEM_ALLOCATION_SCOPE_COMMAND));
@@ -778,7 +778,7 @@ VkResult EnumerateInstanceExtensionProperties(
 
     // enumerate our extensions first
     if (!pLayerName && pProperties) {
-        uint32_t count = std::min(
+        uint32_t count = (std::min)(
             *pPropertyCount, static_cast<uint32_t>(loader_extensions.size()));
 
         std::copy_n(loader_extensions.begin(), count, pProperties);
@@ -813,7 +813,7 @@ VkResult EnumerateInstanceExtensionProperties(
         } else if (pProperties &&
                    static_cast<uint32_t>(idx) < *pPropertyCount) {
             pProperties[idx].specVersion =
-                std::min(pProperties[idx].specVersion,
+                (std::min)(pProperties[idx].specVersion,
                          loader_debug_report_extension.specVersion);
         }
 
@@ -897,7 +897,7 @@ VkResult EnumerateDeviceExtensionProperties(
 
     // enumerate our extensions first
     if (!pLayerName && pProperties) {
-        uint32_t count = std::min(
+        uint32_t count = (std::min)(
             *pPropertyCount, static_cast<uint32_t>(loader_extensions.size()));
 
         std::copy_n(loader_extensions.begin(), count, pProperties);
@@ -1155,7 +1155,7 @@ VkResult EnumeratePhysicalDeviceGroups(
             *pPhysicalDeviceGroupCount = 0;
             return result;
         }
-        device_count = std::min(device_count, *pPhysicalDeviceGroupCount);
+        device_count = (std::min)(device_count, *pPhysicalDeviceGroupCount);
         if (!device_count)
             return VK_INCOMPLETE;
 

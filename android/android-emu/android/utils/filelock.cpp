@@ -158,7 +158,7 @@ static int filelock_lock(FileLock* lock, int timeout) {
 
     HANDLE lockHandle = INVALID_HANDLE_VALUE;
     bool createFileResult = false;
-    int sleep_duration_ms = std::min(200, timeout);
+    int sleep_duration_ms = (std::min)(200, timeout);
     for (;;) {
         bool slept = false;
         if (!::CreateDirectoryW(unicodeDir.c_str(), nullptr) &&
@@ -237,7 +237,7 @@ static int filelock_lock(FileLock* lock, int timeout) {
             }
             timeout -= sleep_duration_ms;
         }
-        sleep_duration_ms = std::min(sleep_duration_ms, timeout);
+        sleep_duration_ms = (std::min)(sleep_duration_ms, timeout);
     }
 
     if (!createFileResult) {
@@ -424,7 +424,7 @@ static int filelock_lock(FileLock* lock, int timeout) {
                 System::get()->sleepMs(sleep_duration_ms);
             }
         }
-        sleep_duration_ms = std::min(timeout,
+        sleep_duration_ms = (std::min)(timeout,
                 sleep_duration_ms + kSleepDurationMsIncrement);
     }
     D("file '%s' is already in use by another process", lock->file);

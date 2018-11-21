@@ -420,7 +420,7 @@ void Accelerometer3DWidget::repaintGL() {
 }
 
 static float clamp(float a, float b, float x) {
-    return std::max(a, std::min(b, x));
+    return std::max(a, (std::min)(b, x));
 }
 
 void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent* event) {

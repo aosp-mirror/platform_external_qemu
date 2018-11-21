@@ -79,7 +79,7 @@ void Vector::GetLinearMapping(int32_t* params, size_t count) const {
 
 void Vector::Clamp(float minv, float maxv) {
   for (size_t i = 0; i < kEntries; i++)
-    entries_[i] = std::min(std::max(entries_[i], minv), maxv);
+    entries_[i] = (std::min)(std::max(entries_[i], minv), maxv);
 }
 
 template <typename T>
@@ -140,7 +140,7 @@ void Vector::GetLinearMappingHelper(T* params, size_t count) const {
   for (size_t i = 0; i < count; i++) {
     double v = entries_[i];
     v = (v - minf) * (maxi - mini) / (maxf - minf) + mini;
-    v = std::min(std::max(v, mini), maxi);
+    v = (std::min)(std::max(v, mini), maxi);
     params[i] = static_cast<T>(v);
   }
 }

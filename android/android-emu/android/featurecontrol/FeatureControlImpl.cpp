@@ -286,7 +286,7 @@ FeatureControlImpl::FeatureControlImpl() {
                              (int)feature.name, feature.currentVal,
                              feature.defaultVal, feature.isOverridden);
             HANDLE_EINTR(write(file.get(),
-                               buffer, std::min<int>(count, sizeof(buffer))));
+                               buffer, (std::min<int>)(count, sizeof(buffer))));
         }
     });
 }

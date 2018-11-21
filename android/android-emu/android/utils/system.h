@@ -60,9 +60,17 @@ void   android_free( void*  block );
 #define  AMEM_COPY(dst,src,size)  memcpy((char*)(dst),(const char*)(src),(size_t)(size))
 #define  AMEM_MOVE(dst,src,size)  memmove((char*)(dst),(const char*)(src),(size_t)(size))
 
-#define  AARRAY_NEW(p,count)          (AASSERT_LOC(), (p) = _android_array_alloc(sizeof(*p),(count)))
-#define  AARRAY_NEW0(p,count)         (AASSERT_LOC(), (p) = _android_array_alloc0(sizeof(*p),(count)))
-#define  AARRAY_RENEW(p,count)        (AASSERT_LOC(), (p) = _android_array_realloc((p),sizeof(*(p)),(count)))
+#ifdef _MSC_VER
+    #define  AARRAY_NEW(p,count)          (p) = _android_array_alloc(sizeof(*p),(count))
+    #define  AARRAY_NEW0(p,count)         (p) = _android_array_alloc0(sizeof(*p),(count))
+    #define  AARRAY_RENEW(p,count)        (p) = _android_array_realloc((p),sizeof(*(p)),(count))
+    #define  AARRAY_RENEW_SIZE(p,size,count)        (p) = _android_array_realloc((p),(size),(count))
+#else
+    #define  AARRAY_NEW(p,count)          (AASSERT_LOC(), (p) = _android_array_alloc(sizeof(*p),(count)))
+    #define  AARRAY_NEW0(p,count)         (AASSERT_LOC(), (p) = _android_array_alloc0(sizeof(*p),(count)))
+    #define  AARRAY_RENEW(p,count)        (AASSERT_LOC(), (p) = _android_array_realloc((p),sizeof(*(p)),(count)))
+    #define  AARRAY_RENEW_SIZE(p,size,count)        (AASSERT_LOC(), (p) = _android_array_realloc((p),(size),(count)))
+#endif
 
 #define  AARRAY_COPY(dst,src,count)   AMEM_COPY(dst,src,(count)*sizeof((dst)[0]))
 #define  AARRAY_MOVE(dst,src,count)   AMEM_MOVE(dst,src,(count)*sizeof((dst)[0]))
@@ -70,7 +78,11 @@ void   android_free( void*  block );
 
 #define  AARRAY_STATIC_LEN(a)         (sizeof((a))/sizeof((a)[0]))
 
+#ifdef _MSC_VER
+#define  AINLINED  static inline
+#else
 #define  AINLINED  static __inline__
+#endif
 
 /* unlike strdup(), this accepts NULL as valid input (and will return NULL then) */
 char*   android_strdup(const char*  src);

@@ -33,20 +33,20 @@ const short RND_INV_ROW = 2048;
 const short RND_INV_COL = 16;
 const short RND_INV_CORR = 15;
 
-static const short __attribute__ ((aligned(16))) M128_one_corr[8] = {1,1,1,1,1,1,1,1};
-static const short __attribute__ ((aligned(16))) M128_round_inv_row[8] = {2048,0,2048,0,2048,0,2048,0};
-static const short __attribute__ ((aligned(16))) M128_round_inv_col[8] = {16,16,16,16,16,16,16,16};
-static const short __attribute__ ((aligned(16))) M128_round_inv_corr[8] = {15,15,15,15,15,15,15,15};
+static const short ALIGN(16) M128_one_corr[8] = {1,1,1,1,1,1,1,1};
+static const short ALIGN(16) M128_round_inv_row[8] = {2048,0,2048,0,2048,0,2048,0};
+static const short ALIGN(16) M128_round_inv_col[8] = {16,16,16,16,16,16,16,16};
+static const short ALIGN(16) M128_round_inv_corr[8] = {15,15,15,15,15,15,15,15};
 
-static const short __attribute__ ((aligned(16))) M128_tg_1_16[8] = {13036, 13036, 13036, 13036, 13036, 13036, 13036, 13036};
-static const short __attribute__ ((aligned(16))) M128_tg_2_16[8] = {27146, 27146, 27146, 27146, 27146, 27146, 27146, 27146};
-static const short __attribute__ ((aligned(16))) M128_tg_3_16[8] = {-21746, -21746, -21746, -21746, -21746, -21746, -21746, -21746};
-static const short __attribute__ ((aligned(16))) M128_cos_4_16[8] = {-19195, -19195, -19195, -19195, -19195, -19195, -19195, -19195};
+static const short ALIGN(16) M128_tg_1_16[8] = {13036, 13036, 13036, 13036, 13036, 13036, 13036, 13036};
+static const short ALIGN(16) M128_tg_2_16[8] = {27146, 27146, 27146, 27146, 27146, 27146, 27146, 27146};
+static const short ALIGN(16) M128_tg_3_16[8] = {-21746, -21746, -21746, -21746, -21746, -21746, -21746, -21746};
+static const short ALIGN(16) M128_cos_4_16[8] = {-19195, -19195, -19195, -19195, -19195, -19195, -19195, -19195};
 
-static const short __attribute__ ((aligned(16))) jpeg_adjust[8] = {128, 128, 128, 128, 128, 128, 128, 128};
+static const short ALIGN(16) jpeg_adjust[8] = {128, 128, 128, 128, 128, 128, 128, 128};
 
 // Table for rows 0,4
-static const short __attribute__ ((aligned(16))) M128_tab_i_04[32] = {
+static const short ALIGN(16) M128_tab_i_04[32] = {
 16384, 21407, 16384, 8867,
 16384, -8867, 16384, -21407,
 16384, 8867, -16384, -21407,
@@ -58,7 +58,7 @@ static const short __attribute__ ((aligned(16))) M128_tab_i_04[32] = {
 };
 
 // Table for rows 1,7
-static const short __attribute__ ((aligned(16))) M128_tab_i_17[32] = {
+static const short ALIGN(16) M128_tab_i_17[32] = {
 22725, 29692, 22725, 12299,
 22725, -12299, 22725, -29692,
 22725, 12299, -22725, -29692,
@@ -70,7 +70,7 @@ static const short __attribute__ ((aligned(16))) M128_tab_i_17[32] = {
 };
 
 // Table for rows 2,6
-static const short __attribute__ ((aligned(16))) M128_tab_i_26[32] = {
+static const short ALIGN(16) M128_tab_i_26[32] = {
 21407, 27969, 21407, 11585,
 21407, -11585, 21407, -27969,
 21407, 11585, -21407, -27969,
@@ -82,7 +82,7 @@ static const short __attribute__ ((aligned(16))) M128_tab_i_26[32] = {
 };
 
 // Table for rows 3,5
-static const short __attribute__ ((aligned(16))) M128_tab_i_35[32] = {
+static const short ALIGN(16) M128_tab_i_35[32] = {
 19266, 25172, 19266, 10426,
 19266, -10426, 19266, -25172,
 19266, 10426, -19266, -25172,

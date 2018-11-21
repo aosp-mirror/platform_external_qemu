@@ -16,16 +16,27 @@
 
 #undef EXT4FS_DEBUG
 
-#ifdef EXT4FS_DEBUG
-#define ext4_debug(f, a...)   do {   printk(KERN_DEBUG "EXT4-fs DEBUG (%s, %d): %s:",   __FILE__, __LINE__, __func__);   printk(KERN_DEBUG f, ## a);   } while (0)
+#ifdef _MSC_VER
+  #ifdef EXT4FS_DEBUG
+  #define ext4_debug(f, ...)   do {   printk(KERN_DEBUG "EXT4-fs DEBUG (%s, %d): %s:",   __FILE__, __LINE__, __func__);   printk(KERN_DEBUG f, __VA_ARGS__);   } while (0)
+  #else
+  #define ext4_debug(f, ...) do {} while (0)
+#endif
 #else
-#define ext4_debug(f, a...) do {} while (0)
+  #ifdef EXT4FS_DEBUG
+  #define ext4_debug(f, a...)   do {   printk(KERN_DEBUG "EXT4-fs DEBUG (%s, %d): %s:",   __FILE__, __LINE__, __func__);   printk(KERN_DEBUG f, ## a);   } while (0)
+  #else
+  #define ext4_debug(f, a...) do {} while (0)
+  #endif
 #endif
 
-#define EXT4_ERROR_INODE(inode, fmt, a...)   ext4_error_inode(__func__, (inode), (fmt), ## a);
-
-#define EXT4_ERROR_FILE(file, fmt, a...)   ext4_error_file(__func__, (file), (fmt), ## a);
-
+#ifndef _MSC_VER
+  #define EXT4_ERROR_INODE(inode, fmt, a...)   ext4_error_inode(__func__, (inode), (fmt), ## a);
+  #define EXT4_ERROR_FILE(file, fmt, a...)   ext4_error_file(__func__, (file), (fmt), ## a);
+#else
+#define EXT4_ERROR_INODE(inode, fmt, ...)   ext4_error_inode(__func__, (inode), (fmt), __VA_ARGS__);
+#define EXT4_ERROR_FILE(file, fmt, ...)   ext4_error_file(__func__, (file), (fmt), __VA_ARGS__);
+#endif
 typedef int ext4_grpblk_t;
 
 typedef unsigned long long ext4_fsblk_t;

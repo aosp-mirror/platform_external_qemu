@@ -301,7 +301,7 @@ int Keymaster1Engine::rsa_sign_raw(RSA* rsa, size_t* out_len, uint8_t* out, size
         return 0;
     unique_ptr<uint8_t, Malloc_Delete> output_deleter(const_cast<uint8_t*>(output.data));
 
-    *out_len = std::min(output.data_length, max_out);
+    *out_len = (std::min)(output.data_length, max_out);
     memcpy(out, output.data, *out_len);
     return 1;
 }
@@ -326,7 +326,7 @@ int Keymaster1Engine::rsa_decrypt(RSA* rsa, size_t* out_len, uint8_t* out, size_
         return 0;
     unique_ptr<uint8_t, Malloc_Delete> output_deleter(const_cast<uint8_t*>(output.data));
 
-    *out_len = std::min(output.data_length, max_out);
+    *out_len = (std::min)(output.data_length, max_out);
     memcpy(out, output.data, *out_len);
     return 1;
 }
@@ -350,7 +350,7 @@ int Keymaster1Engine::ecdsa_sign(const uint8_t* digest, size_t digest_len, uint8
         return 0;
     unique_ptr<uint8_t, Malloc_Delete> output_deleter(const_cast<uint8_t*>(output.data));
 
-    *sig_len = std::min(output.data_length, ECDSA_size(ec_key));
+    *sig_len = (std::min)(output.data_length, ECDSA_size(ec_key));
     memcpy(sig, output.data, *sig_len);
     return 1;
 }

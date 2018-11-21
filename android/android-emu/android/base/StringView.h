@@ -170,7 +170,7 @@ public:
         // Trivial case
         if (!other.mSize) return 0;
 
-        size_t safeOff = std::min(off, mSize);
+        size_t safeOff = (std::min)(off, mSize);
 
         const char* searchStart = mString + safeOff;
         const char* searchEnd = searchStart + mSize - safeOff;
@@ -196,8 +196,8 @@ public:
         if (len == std::string::npos) {
             len = mSize - begin;
         }
-        size_t safeOff = std::min(begin, mSize);
-        size_t safeLen = std::min(len, mSize - safeOff);
+        size_t safeOff = (std::min)(begin, mSize);
+        size_t safeLen = (std::min)(len, mSize - safeOff);
         return { mString + safeOff, safeLen };
     }
 

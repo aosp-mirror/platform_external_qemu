@@ -74,7 +74,7 @@ size_t format_printable(char* dst, size_t dstLen, const void* srcVoid, size_t sr
 size_t format_hex_printable(char* dst, size_t dstLen, const void* src, size_t srcLen) {
     size_t result = format_hex(dst, dstLen, src, srcLen);
 
-    size_t dstPos = (dstLen == 0) ? 0 : std::min(result,dstLen-1);
+    size_t dstPos = (dstLen == 0) ? 0 : (std::min)(result,dstLen-1);
 
     DST_APPEND_SAFE(' ');
     DST_APPEND_SAFE(' ');

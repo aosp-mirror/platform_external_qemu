@@ -1,18 +1,35 @@
 [
     {
-    "name": "Darwin",
-    "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-darwin-x86_64.cmake"
-},
+        "name": "Darwin",
+        "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-darwin-x86_64.cmake"
+    },
     {
-    "name": "Linux",
-    "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-linux-x86_64.cmake"
-},
+        "name": "Linux",
+        "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-linux-x86_64.cmake"
+    },
     {
-    "name": "Linux -> (MingW)",
-    "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-windows-x86_64.cmake"
-},
+        "name": "Linux -> (MingW)",
+        "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-windows-x86_64.cmake"
+    },
     {
-    "name": "Linux -> (msvc)",
-    "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-windows_msvc-x86_64.cmake"
-}
+        "name": "Linux -> (msvc)",
+        "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-windows_msvc-x86_64.cmake"
+    },
+    {
+        "name": "Visual Studio Professional 2017 - amd64",
+        "visualStudio": "555ec4fc",
+        "visualStudioArchitecture": "amd64",
+        "preferredGenerator": {
+            "name": "Visual Studio 15 2017",
+            "platform": "x64"
+        }
+    },
+    {
+        "name": "VisualStudio.14.0 - x86_amd64",
+        "visualStudio": "VisualStudio.14.0",
+        "visualStudioArchitecture": "x86_amd64",
+        "preferredGenerator": {
+            "name": "Visual Studio 14 2015"
+        }
+    }
 ]

@@ -95,7 +95,7 @@ public:
             if (buffers[i].size == 0) {
                 continue;
             }
-            size_t bytesToTransfer = std::min(mTxBuffer.size() - pos,
+            size_t bytesToTransfer = (std::min)(mTxBuffer.size() - pos,
                                               buffers[i].size);
             if (bytesToTransfer > static_cast<size_t>(std::numeric_limits<int>::max()) ||
                 static_cast<size_t>(std::numeric_limits<int>::max()) - bytesToTransfer < pos) {
