@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e191c93e_91bea434",
+        "filename": "android/android-emu/android/opengl/GLObjectCounter.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-11-21T00:16:37Z",
+      "side": 1,
+      "message": "atomic?",
+      "range": {
+        "startLine": 38,
+        "startChar": 4,
+        "endLine": 38,
+        "endChar": 7
+      },
+      "revId": "1fbc1a28eb04b92f2f302888b4b90de2fa1c0b3f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
