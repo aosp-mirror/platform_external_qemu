@@ -25,6 +25,7 @@
 #include "android/base/threads/FunctorThread.h"
 #include "android/gps/GpsFix.h"
 #include "android/location/Point.h"
+#include "android/location/Route.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/skin/qt/websockets/websocketclientwrapper.h"
 #include "android/skin/qt/websockets/websockettransport.h"
@@ -57,6 +58,7 @@ public:
     bool isLoadingGeoData() const { return mNowLoadingGeoData; }
     void requestStopLoadingGeoData() { mGpsNextPopulateIndex = mGpsFixesArray.size(); }
     Q_INVOKABLE void sendLocation(const QString& lat, const QString& lng, const QString& address);
+    Q_INVOKABLE void sendFullRouteToEmu(int numPoints, double durationSeconds, const QString& routeJSON);
 
     void updateTheme();
 
@@ -76,6 +78,7 @@ signals:
     // Ways to send updates to the js code
     void locationChanged(QString lat, QString lng);
     void showLocation(QString lat, QString lng);
+    void showRouteOnMap(const QString& routeJson);
     void travelModeChanged(int mode);
 
 private slots:
@@ -110,10 +113,20 @@ private slots:
     void locationPlaybackStop();
     void timeout();
 
+    void locationPlaybackStart_v2();
+    void locationPlaybackStop_v2();
+    void timeout_v2();
+
     void on_loc_savePoint_clicked();
     void on_loc_singlePoint_setLocationButton_clicked();
     void on_loc_pointList_cellClicked(int row, int column);
     void on_loc_pointList_itemSelectionChanged();
+
+    void on_loc_travelMode_currentIndexChanged(int index);
+    void on_loc_playRouteButton_clicked();
+    void on_loc_routeList_cellClicked(int row, int column);
+    void on_loc_routeList_itemSelectionChanged();
+    void on_loc_saveRoute_clicked();
 
 private:
     typedef struct {
@@ -125,7 +138,23 @@ private:
         QString address;
     } PointListElement;
 
+    typedef struct {
+        QString protoFilePath;
+        QString logicalName;
+        QString description;
+        int     modeIndex;
+        int     numPoints;
+        int     duration; // Route duration at 1x (seconds)
+    } RouteListElement;
+
+    typedef struct {
+        double lat;
+        double lng;
+        double delayBefore; // Seconds
+    } RoutePoint;
+
     class PointWidgetItem;
+    class RouteWidgetItem;
 
     class PointItemBuilder {
     public:
@@ -135,12 +164,38 @@ private:
             if (tableWidget != nullptr) {
                 mFieldWidth = tableWidget->columnWidth(0);
                 mFieldHeight = tableWidget->rowHeight(0) - ROW_SEPARATION;
-
                 tableWidget->setIconSize(QSize(mFieldWidth, mFieldHeight));
             }
         }
 
         void highlightPointWidgetItem(LocationPage::PointWidgetItem* theItem,
+                                      bool isSelected);
+        void highlightDotDotWidgetItem(QTableWidgetItem* dotDotItem, bool isSelected);
+
+    private:
+        const int ICON_SIZE = 20;
+        const int ROW_SEPARATION = 2;
+        const int TEXT_SEPARATION = 4;
+        const int HORIZ_PADDING = 6;
+
+        QTableWidget* mTableWidget = nullptr;
+        int mFieldWidth;
+        int mFieldHeight;
+    };
+
+    class RouteItemBuilder {
+    public:
+        RouteItemBuilder(QTableWidget* tableWidget) :
+            mTableWidget(tableWidget)
+        {
+            if (tableWidget != nullptr) {
+                mFieldWidth = tableWidget->columnWidth(0);
+                mFieldHeight = tableWidget->rowHeight(0) - ROW_SEPARATION;
+                tableWidget->setIconSize(QSize(mFieldWidth, mFieldHeight));
+            }
+        }
+
+        void highlightRouteWidgetItem(LocationPage::RouteWidgetItem* theItem,
                                       bool isSelected);
         void highlightDotDotWidgetItem(QTableWidgetItem* dotDotItem, bool isSelected);
 
@@ -171,6 +226,22 @@ private:
             const PointListElement* pointElement;
     };
 
+    class RouteWidgetItem : public QTableWidgetItem {
+        public:
+            RouteWidgetItem(const RouteListElement* boundRouteElement) :
+                routeElement(boundRouteElement)
+            {
+                QTableWidgetItem();
+            }
+
+            // Sort by the logical name
+            bool operator < (const QTableWidgetItem &other) const {
+                const RouteListElement* otherElement = ((RouteWidgetItem&)other).routeElement;
+                return routeElement->logicalName < otherElement->logicalName;
+            }
+            const RouteListElement* routeElement;
+    };
+
     void finishGeoDataLoading(
         const QString& file_name,
         bool ok,
@@ -186,12 +257,21 @@ private:
     void writeLocationPlaybackSpeedToSettings(int speed);
     int getLocationPlaybackSpeedFromSettings();
 
+    void showPendingRouteDetails();
+    void showRouteDetails(const RouteListElement* theElement);
     std::string writePointProtobufByName(const QString& pointFormalName,
                                          const emulator_location::PointMetadata& protobuf);
     void writePointProtobufFullPath(const QString& protoFullPath,
                                     const emulator_location::PointMetadata& protobuf);
 
-    void setUpWebEngine(QWebEnginePage* webEnginePage);
+    std::string writeRouteProtobufByName(const QString& routeFormalName,
+                                         const emulator_location::RouteMetadata& protobuf);
+    void writeRouteProtobufFullPath(const QString& protoFullPath,
+                                    const emulator_location::RouteMetadata& protobuf);
+    QString readRouteJsonFile(const QString& pathOfProtoFile);
+    bool parsePointsFromJson();
+    void writeRouteJsonFile(const std::string& pathOfProtoFile);
+    void setUpWebEngine();
 
     static bool validateCell(QTableWidget* table,
                              int row,
@@ -200,6 +280,7 @@ private:
 
     std::unique_ptr<Ui::LocationPage> mUi;
     static double getDistanceMeters(double startLat, double startLng, double endLat, double endLng);
+    static double getDistanceNm    (double startLat, double startLng, double endLat, double endLng);
 
     GpsFixArray          mGpsFixesArray;
     int                  mGpsNextPopulateIndex = 0;
@@ -211,6 +292,20 @@ private:
     bool mLocationUsed = false;
     int mRowToSend;
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
+
+    // Route information
+    QDateTime mRouteCreationTime;
+    int mRouteTravelMode = 0;
+    int mRouteNumPoints = 0;
+    double mRouteTotalTime = 0.0; // Seconds
+    QString mRouteJson;
+    std::vector<RoutePoint> mPlaybackElements;
+
+    int        mNextRoutePointIdx  = 0;
+    double     mSegmentDurationMs  = 0.0;
+    double     mMsIntoSegment      = 0.0; // How far we are through the current segment
+    double     mHeadingOnRoute     = 0.0;
+    double     mVelocityOnRoute    = 0.0; // Knots
 
     // Last point sent to the emulator from the map
     QString mLastLat = "-122.084";
@@ -225,6 +320,12 @@ private:
     void populatePointListWidget();
     void scanForPoints();
 
+    void editRoute(int row);
+    void deleteRoute(int row);
+    void highlightRouteListWidget();
+    void populateRouteListWidget();
+    void scanForRoutes();
+
     std::unique_ptr<QWebSocketServer> mServer;
     std::unique_ptr<WebSocketClientWrapper> mClientWrapper;
     std::unique_ptr<QWebChannel> mWebChannel;
@@ -232,6 +333,10 @@ private:
     QVector<PointListElement> mPointList;
     QString mSelectedPointName;
     PointItemBuilder*    mPointItemBuilder;
+
+    QVector<RouteListElement> mRouteList;
+    QString                   mSelectedRouteName;
+    RouteItemBuilder*         mRouteItemBuilder;
 };
 
 class GeoDataLoaderThread : public QThread {
