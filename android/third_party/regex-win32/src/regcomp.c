@@ -80,7 +80,6 @@ __RCSID("$NetBSD: regcomp.c,v 1.36 2015/09/12 19:08:47 christos Exp $");
 #endif
 #endif /* LIBC_SCCS and not lint */
 
-#include "namespace.h"
 #include <sys/types.h>
 
 #include <assert.h>
@@ -90,6 +89,10 @@ __RCSID("$NetBSD: regcomp.c,v 1.36 2015/09/12 19:08:47 christos Exp $");
 #include <stdlib.h>
 #include <string.h>
 #include <regex.h>
+
+#ifdef _MSC_VER
+  #include "msvc-reg-defs.h"
+#endif
 
 #ifdef __weak_alias
 __weak_alias(regcomp,_regcomp)
@@ -1144,7 +1147,7 @@ repeat(
 
 	_DIAGASSERT(p != NULL);
 
-	if (reclimit++ > RECLIMIT) 
+	if (reclimit++ > RECLIMIT)
 		p->error = REG_ESPACE;
 	if (p->error)
 		return;

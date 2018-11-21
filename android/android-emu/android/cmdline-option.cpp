@@ -153,7 +153,8 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
                         {
                             ParamList**  head = (ParamList**)field;
                             ParamList*   pl;
-                            ANEW0(pl);
+                            pl = new ParamList();
+                            //ANEW0(pl);
                             /* note: store list items in reverse order here
                              *       the list is reversed later in this function.
                              */

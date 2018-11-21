@@ -14,6 +14,11 @@
 // windows.h must come before any of these files, or bad things will happen
 #include <windows.h>
 
+#ifndef _WINSOCK2API_
+// We are likely going lean and mean, so pull in winsock for the timeval struct
+    #include <WinSock2.h>
+#endif
+
 #include <direct.h>
 #include <ehstorioctl.h>
 #include <fcntl.h>
@@ -22,7 +27,7 @@
 #include <stdint.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <winsock2.h>
+// #include <winsock2.h>  This will cause failures in VS2017.
 //#include <basetsd.h>
 
 // From <unistd.h>

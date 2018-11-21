@@ -23,6 +23,7 @@
 
 #include "android/console.h"
 #include "android/console_internal.h"
+#include "android/utils/compiler.h"
 
 #include "android/android.h"
 #include "android/automation/AutomationController.h"
@@ -3429,7 +3430,7 @@ static const CommandDefRec  qemu_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 
-static void __attribute__((noreturn)) crash() {
+static void __ANDROID__NO_RETURN__ crash() {
     crashhandler_die("console-initiated crash");
 }
 

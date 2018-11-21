@@ -87,7 +87,6 @@ __RCSID("$NetBSD: regexec.c,v 1.22 2012/03/13 21:13:43 christos Exp $");
  * macros that code uses.  This lets the same code operate on two different
  * representations for state sets.
  */
-#include "namespace.h"
 #include <sys/types.h>
 
 #include <assert.h>

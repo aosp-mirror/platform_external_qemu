@@ -39,7 +39,7 @@ void jpeg_idct_armv6 (j_decompress_ptr cinfo, jpeg_component_info * compptr,
 #endif
 
 #ifdef ANDROID_INTELSSE2_IDCT
-extern short __attribute__((aligned(16))) quantptrSSE[DCTSIZE2];
+extern short ALIGN(16) quantptrSSE[DCTSIZE2];
 extern void jpeg_idct_intelsse (j_decompress_ptr cinfo, jpeg_component_info * compptr,
 		JCOEFPTR coef_block,
 		JSAMPARRAY output_buf, JDIMENSION output_col);

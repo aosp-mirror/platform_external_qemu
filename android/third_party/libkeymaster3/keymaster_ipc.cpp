@@ -25,6 +25,7 @@ extern "C" {
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
+#include <WinSock2.h>
 #else
 #include <sys/time.h>
 #endif

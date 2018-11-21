@@ -654,7 +654,7 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
                         msgSize -= dataSize;
                         assert(msgSize >= 0);
                     } else {
-                        msgSize = parseMsgSize(data);
+                        msgSize = parseMsgSize((const char*)data);
                         assert(msgSize >= 0);
                     }
 #endif

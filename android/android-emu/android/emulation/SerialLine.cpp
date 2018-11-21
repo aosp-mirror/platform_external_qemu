@@ -28,8 +28,8 @@ static bool nullOpenPipe(SerialLine** pfirst, SerialLine** psecond) {
 };
 
 static const SerialLine::Funcs kNullFuncs = {
-    .openBuffer = nullOpenBuffer,
-    .openPipe = nullOpenPipe,
+    /* .openBuffer = */ nullOpenBuffer,
+    /* .openPipe = */ nullOpenPipe,
 };
 
 static const SerialLine::Funcs* sFuncs = &kNullFuncs;

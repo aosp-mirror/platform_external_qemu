@@ -334,10 +334,10 @@ bool android_partition_configuration_setup(
         char** error_message) {
     // Setup shared state.
     PartitionConfigState state[1] = {{
-            .error_message = error_message,
-            .setup_func = setup_func,
-            .setup_opaque = setup_opaque,
-            .backend = PartitionConfigBackend::get(),
+            /* .error_message = */ error_message,
+            /* .setup_func = */ setup_func,
+            /* .setup_opaque = */ setup_opaque,
+            /* .backend = */ PartitionConfigBackend::get(),
     }};
 
     // Determine format of all partition images, if possible.

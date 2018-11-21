@@ -25,8 +25,12 @@
 #include <stdint.h>
 #ifdef _MSC_VER
 #include "msvc-posix.h"
+#define PREALIGN(x)  __declspec(align(x)) 
+#define POSTALIGN(x)  
 #else
 #include <sys/cdefs.h>
+#define PREALIGN(x)  
+#define POSTALIGN(x)   __attribute__((__aligned__(x)))
 #endif
 #include <sys/types.h>
 
@@ -41,6 +45,7 @@
  */
 
 /* The following structure is stored little endian */
+PREALIGN(8)
 struct fs_path_config_from_file {
     uint16_t len;
     uint16_t mode;
@@ -48,7 +53,7 @@ struct fs_path_config_from_file {
     uint16_t gid;
     uint64_t capabilities;
     char prefix[];
-} __attribute__((__aligned__(sizeof(uint64_t))));
+} POSTALIGN(8);
 
 struct fs_path_config {
     unsigned mode;

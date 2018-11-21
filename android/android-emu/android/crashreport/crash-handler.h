@@ -51,7 +51,7 @@ void crashhandler_append_message_format_v(const char* format, va_list args);
 // Abort the program execution immediately; when showing a crash dialog, use
 // show |message| to the user instead of standard 'emulator have crashed'
 ANDROID_NORETURN void crashhandler_die(const char* message)
-    __attribute__((noinline));
+    __ANDROID_NO_INLINE__;
 
 // A variadic overload with C interface
 ANDROID_NORETURN void crashhandler_die_format(const char* format, ...);

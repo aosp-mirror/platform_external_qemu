@@ -116,16 +116,17 @@
                 "${workspaceFolder}/objs/build/intermediates64/cmake/android-emu-base"
             ],
             "defines": [
-              "${sharedDefines}",
-              "DARWINN_PORT_ANDROID_EMULATOR",
-              "DARWINN_CHIP_NAME=beagle",
-              "DARWINN_CHIP_TYPE=USB"
+                "${sharedDefines}",
+                "DARWINN_PORT_ANDROID_EMULATOR",
+                "DARWINN_CHIP_NAME=beagle",
+                "DARWINN_CHIP_TYPE=USB"
             ],
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c11",
             "cppStandard": "c++14",
             "intelliSenseMode": "clang-x64",
-            "configurationProvider": "vector-of-bool.cmake-tools"
+            "configurationProvider": "vector-of-bool.cmake-tools",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         }
     ],
     "version": 4

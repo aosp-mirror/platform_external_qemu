@@ -44,32 +44,32 @@
 #include "openssl_utils.h"
 
 struct keystore_module soft_keymaster1_device_module = {
-    .common =
+    /* .common = */
         {
-            .tag = HARDWARE_MODULE_TAG,
-            .module_api_version = KEYMASTER_MODULE_API_VERSION_1_0,
-            .hal_api_version = HARDWARE_HAL_API_VERSION,
-            .id = KEYSTORE_HARDWARE_MODULE_ID,
-            .name = "OpenSSL-based SoftKeymaster HAL",
-            .author = "The Android Open Source Project",
-            .methods = nullptr,
-            .dso = 0,
-            .reserved = {},
+            /* .tag = */ HARDWARE_MODULE_TAG,
+            /* .module_api_version = */ KEYMASTER_MODULE_API_VERSION_1_0,
+            /* .hal_api_version = */ HARDWARE_HAL_API_VERSION,
+            /* .id = */ KEYSTORE_HARDWARE_MODULE_ID,
+            /* .name = */ "OpenSSL-based SoftKeymaster HAL",
+            /* .author = */ "The Android Open Source Project",
+            /* .methods = */ nullptr,
+            /* .dso = */ 0,
+            /* .reserved = */ {},
         },
 };
 
 struct keystore_module soft_keymaster2_device_module = {
-    .common =
+    /* .common = */
         {
-            .tag = HARDWARE_MODULE_TAG,
-            .module_api_version = KEYMASTER_MODULE_API_VERSION_2_0,
-            .hal_api_version = HARDWARE_HAL_API_VERSION,
-            .id = KEYSTORE_HARDWARE_MODULE_ID,
-            .name = "OpenSSL-based SoftKeymaster HAL",
-            .author = "The Android Open Source Project",
-            .methods = nullptr,
-            .dso = 0,
-            .reserved = {},
+            /* .tag = */ HARDWARE_MODULE_TAG,
+            /* .module_api_version = */ KEYMASTER_MODULE_API_VERSION_2_0,
+            /* .hal_api_version = */ HARDWARE_HAL_API_VERSION,
+            /* .id = */ KEYSTORE_HARDWARE_MODULE_ID,
+            /* .name = */ "OpenSSL-based SoftKeymaster HAL",
+            /* .author = */ "The Android Open Source Project",
+            /* .methods = */ nullptr,
+            /* .dso = */ 0,
+            /* .reserved = */ {},
         },
 };
 

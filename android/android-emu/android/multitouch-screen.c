@@ -87,7 +87,7 @@ typedef struct MTSState {
 } MTSState;
 
 /* Default multi-touch screen descriptor */
-static MTSState _MTSState = { };
+static MTSState _MTSState = {0};
 
 /* Our very own stash of a pointer to the device that handles user events. */
 static const QAndroidUserEventAgent* _UserEventAgent;

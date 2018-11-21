@@ -1,4 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
+
+if(MSVC)
+  list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/android/build/cmake")
+  include("visual-studio")
+  message(STATUS "Using compiler: ${CMAKE_CXX_COMPILER_ID}")
+endif()
+
 message(STATUS "Compiling for target: ${ANDROID_TARGET_TAG}")
 if(NOT DEFINED ANDROID_TARGET_TAG)
   message(STATUS "ANDROID_TARGET_TAG is undefined [${ANDROID_TARGET_TAG}]")
@@ -40,13 +47,15 @@ set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 prebuilt(Threads)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  add_c_flag("-O0")
   add_definitions("-DANDROID_DEBUG")
-  if(NOT OPTION_ASAN)
-    set(OPTION_ASAN address)
+  if (NOT MSVC)
+    add_c_flag("-O0")
   endif()
-
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if(NOT OPTION_ASAN)
+      set(OPTION_ASAN address)
+    endif()
+
     # Build an instrumented version of the code  that generates coverage mapping to enable code coverage analysis
     set(ANDROID_CODE_COVERAGE TRUE)
     add_c_flag("-fcoverage-mapping")
@@ -103,7 +112,9 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_c_flag("-Wswitch")
 endif()
 
-add_cxx_flag("-Wno-invalid-offsetof")
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  add_cxx_flag("-Wno-invalid-offsetof")
+endif()
 
 # Disable generation of information about every class with virtual functions for use by the C++ runtime type
 # identification features (dynamic_cast and typeid). If you don't use those parts of the language, you can save some
@@ -121,7 +132,10 @@ endif()
 # automatically selects the libraries without exceptions. You can use the linker option --no_exceptions to diagnose
 # whether the objects being linked contain exceptions. If an exception propagates into a function that has been compiled
 # without exceptions support, then the program terminates.
-add_cxx_flag("-fno-exceptions")
+
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  add_cxx_flag("-fno-exceptions")
+endif()
 
 # Ensure that <inttypes.h> always defines all interesting macros.
 add_definitions("-D__STDC_LIMIT_MACROS=1" "-D__STDC_FORMAT_MACROS=1")
@@ -141,7 +155,7 @@ add_definitions("-D_GNU_SOURCE=1")
 # Enable large-file support (i.e. make off_t a 64-bit value).
 add_definitions("-D_FILE_OFFSET_BITS=64" "-D_LARGEFILE_SOURCE")
 
-if(OPTION_ASAN)
+if(OPTION_ASAN AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   message(STATUS "Enabling ASAN with: ${OPTION_ASAN}")
   add_c_flag("-fsanitize=${OPTION_ASAN}")
   add_c_flag("-g3")
@@ -163,9 +177,9 @@ set(EMULATOR_FEATURE_DEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/android/data/advance
 
 set(
   SWIFTSHADER_DEPENDENCIES
-  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_TAG}/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
-  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_TAG}/lib/libGLES_CM${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLES_CM${CMAKE_SHARED_LIBRARY_SUFFIX}"
-  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_TAG}/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_OS_FLAVOR}-x86_64/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_OS_FLAVOR}-x86_64/lib/libGLES_CM${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLES_CM${CMAKE_SHARED_LIBRARY_SUFFIX}"
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_OS_FLAVOR}-x86_64/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
   )
 
 prebuilt(CURL)
@@ -218,6 +232,7 @@ if (NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
                                    # Enable VIRGL
                                    "-DCONFIG_VIRGL")
 endif()
+
 
 target_compile_options(android-qemu-deps INTERFACE "-Werror=implicit-function-declaration"
                                "-Wno-unused-function"
@@ -273,6 +288,12 @@ if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
   # Including the top-level CMakeLists.txt file doesn't work because the Windows SDK
   # library requires C++14 support. So let's just include this manually.
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../googletest/googlemock googlemock)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    # Okay, google test is not happy under msvc compile
+    target_compile_definitions(gmock_main PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
+    target_compile_definitions(gmock PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
+    target_compile_definitions(gtest PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
+  endif()
 else()
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../googletest googletest)
 endif()

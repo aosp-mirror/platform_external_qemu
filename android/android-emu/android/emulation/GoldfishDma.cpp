@@ -43,12 +43,12 @@ static void android_goldfish_dma_load_mappings(android::base::Stream* stream) {
 }
 
 GoldfishDmaOps android_goldfish_dma_ops = {
-    .add_buffer = android_goldfish_dma_add_buffer,
-    .remove_buffer = android_goldfish_dma_remove_buffer,
-    .get_host_addr = android_goldfish_dma_get_host_addr,
-    .invalidate_host_mappings = android_goldfish_dma_invalidate_host_mappings,
-    .unlock = android_goldfish_dma_unlock,
-    .reset_host_mappings = android_goldfish_dma_reset_host_mappings,
-    .save_mappings = android_goldfish_dma_save_mappings,
-    .load_mappings = android_goldfish_dma_load_mappings,
+    /*.add_buffer = */ android_goldfish_dma_add_buffer,
+    /* ,remove_buffer = */ android_goldfish_dma_remove_buffer,
+    /* .get_host_addr = */ android_goldfish_dma_get_host_addr,
+    /* .invalidate_host_mappings = */ android_goldfish_dma_invalidate_host_mappings,
+    /* .unlock = */ android_goldfish_dma_unlock,
+    /* .reset_host_mappings = */ android_goldfish_dma_reset_host_mappings,
+    /* .save_mappings = */ android_goldfish_dma_save_mappings,
+    /* .load_mappings = */ android_goldfish_dma_load_mappings,
 };

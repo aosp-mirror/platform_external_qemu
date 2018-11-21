@@ -355,7 +355,7 @@ void crashhandler_die(const char* message) {
     }
 }
 
-void __attribute__((noreturn)) crashhandler_die_format_v(const char* format, va_list args) {
+void __ANDROID_NO_RETURN__ crashhandler_die_format_v(const char* format, va_list args) {
     char message[2048] = {};
     vsnprintf(message, sizeof(message) - 1, format, args);
     crashhandler_die(message);

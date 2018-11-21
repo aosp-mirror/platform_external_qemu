@@ -240,11 +240,11 @@ UpdateChannel updateChannel() {
     // b) a previous call to updateChannel() did not succeed
     if (!sUpdateChannelInfo->initialized) {
         static const StudioXml channelInfo = {
-                .filename = "updates.xml",
-                .nodename = "option",
-                .propname = "name",
-                .propvalue = "UPDATE_CHANNEL_TYPE",
-                .keyname = "value",
+                /* .filename = */ "updates.xml",
+                /* .nodename = */ "option",
+                /* .propname = */ "name",
+                /* .propvalue = */ "UPDATE_CHANNEL_TYPE",
+                /* .keyname = */ "value",
         };
         const auto channelStr = parseStudioXML(&channelInfo);
         if (!channelStr) {

@@ -24,7 +24,7 @@ static bool isEof(std::istream& in) {
     return in.peek() == std::char_traits<char>::eof();
 }
 
-Version::Version(StringView ver) : mData() {
+ Version::Version(StringView ver) : mData() {
     std::istringstream in(ver.str());
     in >> std::noskipws;
 

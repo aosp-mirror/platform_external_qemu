@@ -69,14 +69,39 @@ LIST_RENDER_API_FUNCTIONS(FUNCTION_)
 
 // Define a function that initializes the function pointers by looking up
 // the symbols from the shared library.
+
+// static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
+//     void*  symbol;
+//     char*  error;
+
+//     symbol = adynamicLibrary_findSymbol(rendererLib, "initLibrary", &error); 
+//     if (symbol != 0) 
+//     { 
+//         using type = emugl::RenderLibPtr(());
+//      initLibrary = (type*)symbol; 
+//      }
+//      else 
+//      {
+//           do {
+         
+//           derror("GLES emulation: Could not find required symbol (%s): %s","initLibrary", error); 
+//           android_opengl_logger_write("GLES emulation: Could not find required symbol (%s): %s" "\n","initLibrary", error); 
+//           } 
+//           while(0);
+//           ; free(error);
+//            return -1; 
+//      }
+
+
+//     return 0;
+// }
 static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
     void*  symbol;
     char*  error;
-
 #define FUNCTION_(ret, name, sig, params) \
     symbol = adynamicLibrary_findSymbol(rendererLib, #name, &error); \
     if (symbol != NULL) { \
-        using type = ret(sig); \
+        using type = ret(); \
         name = (type*)symbol; \
     } else { \
         E("GLES emulation: Could not find required symbol (%s): %s", #name, error); \
@@ -85,7 +110,7 @@ static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
     }
     LIST_RENDER_API_FUNCTIONS(FUNCTION_)
 #undef FUNCTION_
-
+#undef TMP_TYPE
     return 0;
 }
 

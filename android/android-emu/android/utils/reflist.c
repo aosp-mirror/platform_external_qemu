@@ -114,9 +114,9 @@ areflist_add(ARefList*  l, void*  item)
 void
 areflist_append(ARefList*  l, const ARefList*  l2)
 {
-    AREFLIST_FOREACH_CONST(l2, item, {
-        areflist_add(l, item);
-    });
+    AREFLIST_FOREACH_CONST(l2, item,
+        areflist_add(l, item)
+    );
 }
 
 void*

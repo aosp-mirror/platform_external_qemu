@@ -40,7 +40,8 @@ int SharedMemory::openInternal(AccessMode access, bool doMapping) {
     if (mCreate) {
         return EEXIST;
     }
-    LARGE_INTEGER memory = {.QuadPart = (LONGLONG)mSize};
+    LARGE_INTEGER memory;
+    memory.QuadPart = (LONGLONG)mSize;
 
     // Allows views to be mapped for read-only or copy-on-write access.
     DWORD protection = PAGE_READONLY;

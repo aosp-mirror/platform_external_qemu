@@ -61,7 +61,7 @@ typedef x86_thread_state64_t my_thread_state_t;
    exception handlers in the debugger or whatever.  So we're forced to
    define our own copies of these structures.  Makes a bit of a nonsense of
    having them in /usr/include or mig at all, really.
-   
+
    See http://stackoverflow.com/questions/2824105/handling-mach-exceptions-in-64bit-os-x-application
    about MACH_EXCEPTION_CODES. */
 
@@ -119,8 +119,8 @@ typedef struct {
     int flavor;
     mach_msg_type_number_t new_stateCnt;
     natural_t new_state[224];
-} __Reply__mach_exception_raise_state_identity_t __attribute__((unused));
-    
+} __Reply__mach_exception_raise_state_identity_t _ANDROID_UNUSED_;
+
 #ifdef  __MigPackStructs
 #pragma pack()
 #endif

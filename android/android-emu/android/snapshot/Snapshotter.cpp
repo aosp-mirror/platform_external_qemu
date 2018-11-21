@@ -35,6 +35,7 @@
 #include "android/snapshot/TextureSaver.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
+#include "android/utils/compiler.h"
 #include "android/utils/path.h"
 #include "android/utils/system.h"
 
@@ -57,7 +58,7 @@ namespace pb = android_studio;
 // Inspired by QEMU's bufferzero.c implementation, but simplified for the case
 // when checking the whole aligned memory page.
 static bool buffer_zero_sse2(const void* buf, int len) {
-    buf = __builtin_assume_aligned(buf, 1024);
+    buf = __ANDROID_ASSUME_ALINGED__(buf, 1024);
     __m128i t = _mm_load_si128(static_cast<const __m128i*>(buf));
     auto p = reinterpret_cast<__m128i*>(
             (reinterpret_cast<intptr_t>(buf) + 5 * 16));
@@ -67,7 +68,7 @@ static bool buffer_zero_sse2(const void* buf, int len) {
 
     /* Loop over 16-byte aligned blocks of 64.  */
     do {
-        __builtin_prefetch(p);
+        __ANDROID_PREFETCH__(p);
         t = _mm_cmpeq_epi32(t, zero);
         if (_mm_movemask_epi8(t) != 0xFFFF) {
             return false;
