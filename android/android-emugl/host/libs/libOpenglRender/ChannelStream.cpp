@@ -57,7 +57,7 @@ const unsigned char* ChannelStream::readRaw(void* buf, size_t* inout_len) {
     D("wanted %d bytes", (int)wanted);
     while (count < wanted) {
         if (mReadBufferLeft > 0) {
-            size_t avail = std::min<size_t>(wanted - count, mReadBufferLeft);
+            size_t avail = (std::min<size_t>)(wanted - count, mReadBufferLeft);
             memcpy(dst + count,
                    mReadBuffer.data() + (mReadBuffer.size() - mReadBufferLeft),
                    avail);

@@ -19,7 +19,7 @@ add_library(emulator-astc-codec
 target_include_directories(emulator-astc-codec PUBLIC ${src}/../include)
 target_include_directories(emulator-astc-codec PRIVATE ${src}/..)
 
-if (WIN32 OR ("${ANDROID_TARGET_TAG}" MATCHES "windows.*"))
+if ("${ANDROID_TARGET_TAG}" MATCHES "windows-x86_64")
     # Work around some gcc/mingw issues
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         # MinGW has some additional warnings that are safe to ignore:

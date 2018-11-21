@@ -381,7 +381,7 @@ target_include_directories(android-emu PUBLIC
                                    ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
                                    ${DARWINN_INCLUDE_DIRS})
 
-target_compile_options(android-emu PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
+android_target_compile_options(android-emu Clang PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
 android_target_compile_options(android-emu linux-x86_64 PRIVATE -idirafter ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
 
 android_target_compile_definitions(android-emu
@@ -494,7 +494,7 @@ target_include_directories(android-emu-shared PUBLIC
                                    # If you use our library, you get access to our headers.
                                    ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-target_compile_options(android-emu-shared PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
+android_target_compile_options(android-emu-shared Clang PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
 android_target_compile_options(android-emu-shared linux-x86_64 PRIVATE -idirafter ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
 
 # Definitions needed to compile our deps as static
@@ -703,7 +703,7 @@ set(android-emu_unittests_linux-x86_64_src
 android_add_test(android-emu_unittests)
 
 # Setup the targets compile config etc..
-target_compile_options(android-emu_unittests PRIVATE -O0 -Wno-invalid-constexpr)
+android_target_compile_options(android-emu_unittests Clang PRIVATE -O0 -Wno-invalid-constexpr)
 target_include_directories(android-emu_unittests
                                    PRIVATE
                                    ../android-emugl/host/include/

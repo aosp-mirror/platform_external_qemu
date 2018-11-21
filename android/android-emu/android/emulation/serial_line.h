@@ -39,7 +39,12 @@
 ANDROID_BEGIN_HEADER
 
 // A handle to the serial line object
-typedef struct CSerialLine {} CSerialLine;
+typedef struct CSerialLine {
+ #ifdef _MSC_VER
+ int unused;
+ #endif
+
+} CSerialLine;
 
 // Read callbacks for the serial line
 

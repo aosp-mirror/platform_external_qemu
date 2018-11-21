@@ -19,15 +19,15 @@
 ANDROID_BEGIN_HEADER
 
 /* Print formatted panic message and halts the process */
-void __attribute__((noreturn)) android_panic ( const char*  fmt, ... );
+void __ANDROID_NO_RETURN__ android_panic ( const char*  fmt, ... );
 
 /* Variant of android_vpanic which take va_list formating arguments */
-void __attribute__((noreturn)) android_vpanic( const char*  fmt, va_list  args );
+void __ANDROID_NO_RETURN__ android_vpanic( const char*  fmt, va_list  args );
 
 /* Convenience macro */
 #define  APANIC(...)    android_panic(__VA_ARGS__)
 
-typedef void (*APanicHandlerFunc)(const char*, va_list) __attribute__((noreturn));
+typedef void (*APanicHandlerFunc)(const char*, va_list) __ANDROID_NO_RETURN__;
 
 /* Register a new panic handler. This should only be used for unit-testing */
 void android_panic_registerHandler( APanicHandlerFunc  handler );

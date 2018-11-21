@@ -21,10 +21,18 @@
 #define CHECK_BINSEARCH__
 
 #define EXT_DEBUG__
-#ifdef EXT_DEBUG
-#define ext_debug(a...) printk(a)
+#ifndef _MSC_VER
+  #ifdef EXT_DEBUG
+  #define ext_debug(a...) printk(a)
+  #else
+  #define ext_debug(a...)
+  #endif
 #else
-#define ext_debug(a...)
+  #ifdef EXT_DEBUG
+  #define ext_debug(...) printk(__VA_ARGS__)
+  #else
+  #define ext_debug(...)
+  #endif
 #endif
 
 #define EXT_STATS_

@@ -282,7 +282,9 @@ static Version versionFromProto(const emulator_features::EmulatorVersion& ver) {
 
 static bool featureActionAppliesToEmulatorVersion(
         const emulator_features::FeatureFlagAction& action) {
-    Version currentVersion(EMULATOR_VERSION_STRING_SHORT);
+    Version currentVersion;
+     //(StringView(EMULATOR_VERSION_STRING_SHORT));
+
     // if invalid version, then all min-version constrained features
     // apply and all max-version constrained features don't apply.
     if (!currentVersion.isValid()) {

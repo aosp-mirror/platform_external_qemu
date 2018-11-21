@@ -39,8 +39,11 @@
 
 #include "android/utils/file_io.h"
 #if defined(USE_MINGW) || defined(_MSC_VER)
-
+// Let's not double include it in VS2017
+#ifndef _WINSOCK2API_
 #include <winsock2.h>
+#endif
+
 
 /* These match the Linux definitions of these flags.
    L_xx is defined to avoid conflicting with the win32 versions.

@@ -342,7 +342,7 @@ public:
                 }
             }
 
-            const size_t curSize = std::min<size_t>(buff->size - buffOffset,
+            const size_t curSize = (std::min<size_t>)(buff->size - buffOffset,
                                                     mDataForReadingLeft);
             memcpy(buff->data + buffOffset,
                    mDataForReading.data() +

@@ -10,6 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "android/telephony/gsm.h"
+#include "android/utils/compiler.h"
 
 #include <stdlib.h>
 #include <string.h>

@@ -10,10 +10,12 @@
 ** GNU General Public License for more details.
 */
 #include "android/utils/panic.h"
+#include "android/utils/compiler.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-static void __attribute__((noreturn))
+
+static void __ANDROID_NO_RETURN__
 _android_panic_defaultHandler( const char*  fmt, va_list  args )
 {
     fprintf(stderr, "PANIC: ");

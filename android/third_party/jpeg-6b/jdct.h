@@ -8,7 +8,7 @@
  * This include file contains common declarations for the forward and
  * inverse DCT modules.  These declarations are private to the DCT managers
  * (jcdctmgr.c, jddctmgr.c) and the individual DCT algorithms.
- * The individual DCT algorithms are kept in separate files to ease 
+ * The individual DCT algorithms are kept in separate files to ease
  * machine-dependent tuning (e.g., assembly coding).
  */
 
@@ -173,4 +173,11 @@ EXTERN(void) jpeg_idct_1x1
 
 #ifndef MULTIPLY16V16		/* default definition */
 #define MULTIPLY16V16(var1,var2)  ((var1) * (var2))
+#endif
+
+// Some visual studio workarounds
+#ifdef _MSC_VER
+#define ALIGN(x) __declspec(align(x))
+#else
+#define ALIGN(x) __attribute__ ((aligned(x)))
 #endif
