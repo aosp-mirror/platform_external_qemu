@@ -85,7 +85,4 @@ extern const QCarDataAgent* const gQCarDataAgent;
 // and call a function on the device directly.
 extern void qemu_control_setEventDevice(void* opaque);
 
-// Defined in android/qemu-android-vm-operations.cpp
-extern const QAndroidVmOperations* const gQAndroidVmOperations;
-
 ANDROID_END_HEADER
