@@ -25,8 +25,6 @@
 #include <random>
 #include <vector>
 
-extern "C" const QAndroidVmOperations* const gQAndroidVmOperations;
-
 // This indicates the number of heartbeats from guest
 static std::atomic<int> guest_heart_beat_count {};
 
