@@ -39,6 +39,7 @@ extern "C" {
 #include "sysemu/hvf.h"
 #include "sysemu/kvm.h"
 #include "sysemu/hax.h"
+#include "sysemu/whpx.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/cpus.h"
 #include "exec/cpu-common.h"
@@ -509,23 +510,6 @@ static void unmap_user_backed_ram(uint64_t gpa, uint64_t size) {
 
     qemu_user_backed_ram_unmap(gpa, size);
 }
-
-// These are QEMU's functions to check for each specific hypervisor status.
-#ifdef CONFIG_HAX
-  extern "C" int hax_enabled(void);
-#else
-  // Under configurations where CONFIG_HAX is not defined we will not
-  // have hax_enabled() defined during link time.
-  #define hax_enabled() (0)
-#endif
-
-#ifdef CONFIG_WHPX
-  extern "C" int whpx_enabled(void);
-#else
-  #define whpx_enabled() (0)
-#endif
-
-extern "C" int hvf_enabled(void);
 
 static void get_vm_config(VmConfiguration* out) {
     out->numberOfCpuCores = smp_cpus * smp_cores * smp_threads;
