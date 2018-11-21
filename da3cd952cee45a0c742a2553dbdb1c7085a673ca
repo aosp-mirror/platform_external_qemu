@@ -46,6 +46,30 @@
       "revId": "da3cd952cee45a0c742a2553dbdb1c7085a673ca",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4205fcae_9aa4cf0c",
+        "filename": "android/android-emu/android/emulation/control/vm_operations.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-21T00:05:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4287d3e7_41c3fbbd",
+      "range": {
+        "startLine": 156,
+        "startChar": 14,
+        "endLine": 156,
+        "endChar": 22
+      },
+      "revId": "da3cd952cee45a0c742a2553dbdb1c7085a673ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
