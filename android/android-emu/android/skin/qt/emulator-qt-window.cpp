@@ -2000,7 +2000,7 @@ void EmulatorQtWindow::doResize(const QSize& size,
     double widthScale = (double)newSize.width() / (double)originalWidth;
     double heightScale = (double)newSize.height() / (double)originalHeight;
 
-    simulateSetScale(std::max(.2, std::min(widthScale, heightScale)));
+    simulateSetScale(std::max(.2, (std::min)(widthScale, heightScale)));
 
     maskWindowFrame();
 }
@@ -2313,7 +2313,7 @@ void EmulatorQtWindow::zoomIn(const QPoint& focus,
     double maxZoom = mZoomFactor * 2.0 / scale;
 
     if (scale < 2) {
-        simulateSetZoom(std::min(mZoomFactor + .25, maxZoom));
+        simulateSetZoom((std::min)(mZoomFactor + .25, maxZoom));
     }
 }
 
@@ -2358,7 +2358,7 @@ void EmulatorQtWindow::zoomTo(const QPoint& focus, const QSize& rectSize) {
     double idealHeightZoom = mZoomFactor * (double)mContainer.height() /
                              (double)(rectSize.height() + 20);
 
-    simulateSetZoom(std::min({idealWidthZoom, idealHeightZoom, maxZoom}));
+    simulateSetZoom((std::min)({idealWidthZoom, idealHeightZoom, maxZoom}));
 }
 
 void EmulatorQtWindow::panHorizontal(bool left) {

@@ -51,11 +51,19 @@ extern "C" {
 
 extern int force;
 
-#define warn(fmt, args...) do { fprintf(stderr, "warning: %s: " fmt "\n", __func__, ## args); } while (0)
-#define error(fmt, args...) do { fprintf(stderr, "error: %s: " fmt "\n", __func__, ## args); if (!force) longjmp(setjmp_env, EXIT_FAILURE); } while (0)
-#define error_errno(s, args...) error(s ": %s", ##args, strerror(errno))
-#define critical_error(fmt, args...) do { fprintf(stderr, "critical error: %s: " fmt "\n", __func__, ## args); longjmp(setjmp_env, EXIT_FAILURE); } while (0)
-#define critical_error_errno(s, args...) critical_error(s ": %s", ##args, strerror(errno))
+#ifndef _MSC_VER
+  #define warn(fmt, args...) do { fprintf(stderr, "warning: %s: " fmt "\n", __func__, ## args); } while (0)
+  #define error(fmt, args...) do { fprintf(stderr, "error: %s: " fmt "\n", __func__, ## args); if (!force) longjmp(setjmp_env, EXIT_FAILURE); } while (0)
+  #define error_errno(s, args...) error(s ": %s", ##args, strerror(errno))
+  #define critical_error(fmt, args...) do { fprintf(stderr, "critical error: %s: " fmt "\n", __func__, ## args); longjmp(setjmp_env, EXIT_FAILURE); } while (0)
+  #define critical_error_errno(s, args...) critical_error(s ": %s", ##args, strerror(errno))
+#else
+  #define warn(fmt, ...) do { fprintf(stderr, "warning: %s: " fmt "\n", __func__, __VA_ARGS__); } while (0)
+  #define error(fmt, ...) do { fprintf(stderr, "error: %s: " fmt "\n", __func__, __VA_ARGS__); if (!force) longjmp(setjmp_env, EXIT_FAILURE); } while (0)
+  #define error_errno(s, ...) error(s ": %s", ##args, strerror(errno))
+  #define critical_error(fmt, ...) do { fprintf(stderr, "critical error: %s: " fmt "\n", __func__, __VA_ARGS__); longjmp(setjmp_env, EXIT_FAILURE); } while (0)
+  #define critical_error_errno(s) critical_error(s ": %s", strerror(errno))
+#endif 
 
 #define EXT4_JNL_BACKUP_BLOCKS 1
 

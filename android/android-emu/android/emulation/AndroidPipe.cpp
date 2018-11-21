@@ -157,7 +157,7 @@ public:
         for (; !foundZero && avail > 0 && numBuffers > 0;
              buffers++, numBuffers--) {
             const uint8_t* data = buffers[0].data;
-            size_t count = std::min(avail, buffers[0].size);
+            size_t count = (std::min)(avail, buffers[0].size);
             // Read up to |count| bytes, stopping after the first zero.
             size_t n = 0;
             while (n < count) {

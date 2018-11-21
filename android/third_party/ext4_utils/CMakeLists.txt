@@ -22,7 +22,10 @@ target_link_libraries(emulator-libext4_utils
                               PUBLIC
                               emulator-libsparse
                               emulator-libselinux)
-target_compile_options(emulator-libext4_utils PRIVATE -Wno-error)
+if(NOT MSVC)
+    target_compile_options(emulator-libext4_utils PRIVATE -Wno-error)
+endif()
+
 target_compile_definitions(emulator-libext4_utils PRIVATE -DHOST)
 
 # Windows specific settings

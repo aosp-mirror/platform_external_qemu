@@ -105,7 +105,7 @@ size_t AndroidMessagePipe::copyData(uint8_t** bufdatap,
     uint8_t*& bufdata = *bufdatap;
     size_t& bufsize = *bufsizep;
     assert(m_expected > 0);
-    size_t toCopy = std::min(bufsize, (size_t)m_expected);
+    size_t toCopy = (std::min)(bufsize, (size_t)m_expected);
     if (fromBufdata) {
         memcpy(m_curPos, bufdata, toCopy);
     } else {

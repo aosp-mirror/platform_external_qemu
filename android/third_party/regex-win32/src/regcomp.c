@@ -80,7 +80,6 @@ __RCSID("$NetBSD: regcomp.c,v 1.36 2015/09/12 19:08:47 christos Exp $");
 #endif
 #endif /* LIBC_SCCS and not lint */
 
-#include "namespace.h"
 #include <sys/types.h>
 
 #include <assert.h>
@@ -1144,7 +1143,7 @@ repeat(
 
 	_DIAGASSERT(p != NULL);
 
-	if (reclimit++ > RECLIMIT) 
+	if (reclimit++ > RECLIMIT)
 		p->error = REG_ESPACE;
 	if (p->error)
 		return;

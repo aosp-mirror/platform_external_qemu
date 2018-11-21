@@ -98,7 +98,7 @@ void InertialModel::setTargetPosition(
         const float maxTimeScale = sqrt(0.1f);
 
         transitionTime = kMinStateChangeTimeSeconds +
-                (std::min(timeScale, maxTimeScale) / maxTimeScale) *
+                ((std::min)(timeScale, maxTimeScale) / maxTimeScale) *
                 (kMaxStateChangeTimeSeconds - kMinStateChangeTimeSeconds);
 
         const float stateChangeTime1 = transitionTime;
@@ -269,7 +269,7 @@ void InertialModel::setTargetVelocity(
         constexpr float maxTimeScale = 1.f;
 
         transitionTime = kMinStateChangeTimeSeconds +
-                (std::min(timeScale, maxTimeScale) / maxTimeScale) *
+                ((std::min)(timeScale, maxTimeScale) / maxTimeScale) *
                 (kMaxStateChangeTimeSeconds - kMinStateChangeTimeSeconds);
 
         const float stateChangeTime1 = transitionTime;
@@ -509,7 +509,7 @@ void InertialModel::setTargetRotation(
         const float maxTimeScale = sqrt(2.f);
 
         transitionTime = kMinStateChangeTimeSeconds +
-                (std::min(timeScale, maxTimeScale) / maxTimeScale) *
+                ((std::min)(timeScale, maxTimeScale) / maxTimeScale) *
                 (kMaxStateChangeTimeSeconds - kMinStateChangeTimeSeconds);
 
         const float stateChangeTime1 = transitionTime;

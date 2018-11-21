@@ -151,7 +151,7 @@ int UniformValue::GetArrayPos(int idx) const {
 
 bool UniformValue::CopyFrom(const UniformValue& src) {
   ResetData();
-  const int size_to_copy = std::min(array_size_, src.array_size_);
+  const int size_to_copy = (std::min)(array_size_, src.array_size_);
   for (int i = 0; i < size_to_copy; ++i) {
     if (!CopyElementFrom(i, src, i)) {
       // When data is not convertible, the first call to CopyElementFrom()

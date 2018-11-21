@@ -149,7 +149,7 @@ void OverlayChildWidget::updateDisplayedText() {
                                                firstLine.textLength()))
                                 .arg(mText.mid(
                                         secondLine.textStart(),
-                                        std::min(
+                                        (std::min)(
                                                 std::max(
                                                         3,
                                                         secondLine.textLength() -
@@ -260,7 +260,7 @@ static Optional<int> calcTimeout(int timeoutMs) {
             return {};
 
         default:
-            return std::max(2000, std::min(timeoutMs, 60000));
+            return std::max(2000, (std::min)(timeoutMs, 60000));
     }
 }
 

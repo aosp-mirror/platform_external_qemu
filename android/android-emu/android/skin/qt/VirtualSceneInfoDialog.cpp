@@ -84,8 +84,8 @@ void VirtualSceneInfoDialog::resize(const QSize& parentSize) {
 
         const QSize hint = minimumSizeHint();
         const QSize overlaySize =
-                QSize(std::min(hint.width(), parentSize.width()),
-                      std::min(hint.height(), parentSize.height()));
+                QSize((std::min)(hint.width(), parentSize.width()),
+                      (std::min)(hint.height(), parentSize.height()));
         QWidget::resize(overlaySize);
     }
 }

@@ -21,7 +21,11 @@
 
 #define JBD2_DEFAULT_MAX_COMMIT_AGE 5
 
+#ifndef _MSC_VER
 #define jbd_debug(f, a...)  
+#else
+#define jbd_debug(f, ...)  
+#endif
 
 #define JBD2_MIN_JOURNAL_BLOCKS 1024
 

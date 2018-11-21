@@ -53,7 +53,7 @@ static ElementRange GetElementRange(GLsizei count, GLenum type,
     range.first = arr[0];
     range.last = arr[0];
     for (int i = 1; i < count; ++i) {
-      range.first = std::min<size_t>(arr[i], range.first);
+      range.first = (std::min<size_t>)(arr[i], range.first);
       range.last = std::max<size_t>(arr[i], range.last);
     }
   } else if (type == GL_UNSIGNED_SHORT) {
@@ -61,7 +61,7 @@ static ElementRange GetElementRange(GLsizei count, GLenum type,
     range.first = arr[0];
     range.last = arr[0];
     for (int i = 1; i < count; ++i) {
-      range.first = std::min<size_t>(arr[i], range.first);
+      range.first = (std::min<size_t>)(arr[i], range.first);
       range.last = std::max<size_t>(arr[i], range.last);
     }
   } else if (type == GL_UNSIGNED_INT) {
@@ -69,7 +69,7 @@ static ElementRange GetElementRange(GLsizei count, GLenum type,
     range.first = arr[0];
     range.last = arr[0];
     for (int i = 1; i < count; ++i) {
-      range.first = std::min<size_t>(arr[i], range.first);
+      range.first = (std::min<size_t>)(arr[i], range.first);
       range.last = std::max<size_t>(arr[i], range.last);
     }
   } else {

@@ -98,7 +98,7 @@ void PosterSceneObject::update() {
 
     // The minimum scale is the minimum size that the poster can be without
     // being smaller than mMinSize (on the smallest side).
-    const float posterSize = std::min(scale.x, scale.y);
+    const float posterSize = (std::min)(scale.x, scale.y);
     float minScale = mMinSize / posterSize;
     if (minScale > 1.0f) {
         // This indicates that a poster in the scene is smaller than the

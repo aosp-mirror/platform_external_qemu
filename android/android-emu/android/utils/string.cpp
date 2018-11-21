@@ -30,7 +30,7 @@ size_t strlcpy(char* dst, const char * src, size_t size)
 {
     size_t srcLen = strlen(src);
     if (size > 0) {
-        size_t copyLen = std::min(srcLen, size-1);
+        size_t copyLen = (std::min)(srcLen, size-1);
         memcpy(dst, src, copyLen);
         dst[copyLen] = 0;
     }

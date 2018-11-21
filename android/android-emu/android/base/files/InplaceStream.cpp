@@ -25,14 +25,14 @@ namespace android {
 namespace base {
 
 ssize_t InplaceStream::read(void* buffer, size_t size) {
-    const auto sizeToRead = std::min<int>(size, readSize());
+    const auto sizeToRead = (std::min<int>)(size, readSize());
     memcpy(buffer, mData + readPos(), sizeToRead);
     mReadPos += sizeToRead;
     return sizeToRead;
 }
 
 ssize_t InplaceStream::write(const void* buffer, size_t size) {
-    const auto sizeToWrite = std::min<int>(mDataLen - writtenSize(), size);
+    const auto sizeToWrite = (std::min<int>)(mDataLen - writtenSize(), size);
     memcpy(mData + mWritePos, buffer, sizeToWrite);
     mWritePos += sizeToWrite;
     return sizeToWrite;
@@ -73,13 +73,13 @@ char* InplaceStream::currentWrite() const {
 }
 
 ssize_t InplaceStream::advanceRead(size_t size) {
-    const auto toAdvance = std::min<int>(size, readSize());
+    const auto toAdvance = (std::min<int>)(size, readSize());
     mReadPos += toAdvance;
     return toAdvance;
 }
 
 ssize_t InplaceStream::advanceWrite(size_t size) {
-    const auto toAdvance = std::min<int>(size, mDataLen - writtenSize());
+    const auto toAdvance = (std::min<int>)(size, mDataLen - writtenSize());
     mWritePos += toAdvance;
     return toAdvance;
 }
