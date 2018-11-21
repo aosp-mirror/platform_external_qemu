@@ -140,6 +140,11 @@ typedef struct QAndroidVmOperations {
     void (*setSnapshotCallbacks)(void* opaque,
                                  const SnapshotCallbacks* callbacks);
 
+    // callbacks to "plug" and "unplug" memory into the provided address range
+    // on fly.
+    void (*mapUserBackedRam)(uint64_t gpa, void* hva, uint64_t size);
+    void (*unmapUserBackedRam)(uint64_t gpa, uint64_t size);
+
     // Fills in the supplied |out| with current VM configuration.
     void (*getVmConfiguration)(VmConfiguration* out);
 
