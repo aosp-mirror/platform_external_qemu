@@ -427,90 +427,107 @@ void LocationPage::writePointProtobufFullPath(
     protobuf.SerializeToOstream(&outStream);
 }
 
-void LocationPage::setUpWebEngine(QWebEnginePage* webEnginePage) {
-    QFile webChannelJsFile(":/html/js/qwebchannel.js");
-    if(!webChannelJsFile.open(QIODevice::ReadOnly)) {
-        qDebug() << QString("Couldn't open qwebchannel.js file: %1").arg(webChannelJsFile.errorString());
-        return;
-    }
-
-    QByteArray webChannelJs = webChannelJsFile.readAll();
-
-
+void LocationPage::setUpWebEngine() {
     double initialLat, initialLng, unusedAlt, unusedVelocity, unusedHeading;
     getDeviceLocation(&initialLat, &initialLng, &unusedAlt, &unusedVelocity, &unusedHeading);
 
-    webChannelJs.append(
-            "\n"
-            "var initialLat = '");
-    webChannelJs.append(QString::number(initialLat, 'g', 12));
-    webChannelJs.append(
-            "'; var initialLng = '");
-    webChannelJs.append(QString::number(initialLng, 'g', 12));
-    webChannelJs.append(
-            "';\n"
-            "var wsUri = 'ws://localhost:12345';"
-            "var socket = new WebSocket(wsUri);"
-            "socket.onclose = function() {"
-                "console.error('web channel closed');"
-            "};"
-            "socket.onerror = function(error) {"
-                "console.error('web channel error: ' + error);"
-            "};"
-            "socket.onopen = function() {"
-                "window.channel = new QWebChannel(socket, function(channel) {"
-                    "channel.objects.emulocationserver.showLocation.connect(function(lat, lng) {"
-                        "if (showPendingLocation) {"
-                            "showPendingLocation(lat, lng);"
-                        "}"
+    // Set up two web engines: one for the Points page and one for the Routes page
+    for (int webEnginePageIdx = 0; webEnginePageIdx < 2; webEnginePageIdx++) {
+        bool isPoint = (webEnginePageIdx == 0);
+        QWebEnginePage* webEnginePage = isPoint ? mUi->loc_pointWebEngineView->page()
+                                                : mUi->loc_routeWebEngineView->page();
+        QFile webChannelJsFile(":/html/js/qwebchannel.js");
+        if(!webChannelJsFile.open(QIODevice::ReadOnly)) {
+            qDebug() << QString("Couldn't open qwebchannel.js file: %1").arg(webChannelJsFile.errorString());
+            continue;
+        }
+        QByteArray webChannelJs = webChannelJsFile.readAll();
+
+        // Send the current location to each page
+        webChannelJs.append(
+                "\n"
+                "var initialLat = '");
+        webChannelJs.append(QString::number(initialLat, 'g', 12));
+        webChannelJs.append(
+                "'; var initialLng = '");
+        webChannelJs.append(QString::number(initialLng, 'g', 12));
+        webChannelJs.append(
+                "';\n"
+                "var wsUri = 'ws://localhost:12345';"
+                "var socket = new WebSocket(wsUri);"
+                "socket.onclose = function() {"
+                    "console.error('web channel closed');"
+                "};"
+                "socket.onerror = function(error) {"
+                    "console.error('web channel error: ' + error);"
+                "};"
+                "socket.onopen = function() {"
+                    "window.channel = new QWebChannel(socket, function(channel) {"
+                        "channel.objects.emulocationserver.locationChanged.connect(function(lat, lng) {"
+                            "if (setDeviceLocation) setDeviceLocation(lat, lng);"
+                        "});");
+        if (isPoint) {
+            // Define Points-specific interfaces
+            webChannelJs.append(
+                        "channel.objects.emulocationserver.showLocation.connect(function(lat, lng) {"
+                            "if (showPendingLocation) showPendingLocation(lat, lng);"
+                        "});");
+        } else {
+            // Define Routes-specific interfaces
+            webChannelJs.append(
+                        "channel.objects.emulocationserver.travelModeChanged.connect(function(mode) {"
+                            "if (setTravelMode) setTravelMode(mode);"
+                        "});"
+                        "channel.objects.emulocationserver.showRouteOnMap.connect(function(routeJson) {"
+                            "if (setRouteOnMap) setRouteOnMap(routeJson);"
+                        "});");
+        }
+        webChannelJs.append(
                     "});"
-                    "channel.objects.emulocationserver.locationChanged.connect(function(lat, lng) {"
-                        "if (setDeviceLocation) {"
-                            "setDeviceLocation(lat, lng);"
-                        "}"
-                    "});"
-                "});"
-                "if (typeof setDeviceLocation != 'undefined' && setDeviceLocation != null) {"
-                  "setDeviceLocation(initialLat, initialLng);"
-                "}"
-            "}");
+                    "if (typeof setDeviceLocation != 'undefined' && setDeviceLocation != null) {"
+                        "setDeviceLocation(initialLat, initialLng);"
+                    "}"
+                "}");
 
-    QWebEngineScript script;
-    script.setSourceCode(webChannelJs);
-    script.setName("qwebchannel.js");
-    script.setWorldId(QWebEngineScript::MainWorld);
-    script.setInjectionPoint(QWebEngineScript::DocumentCreation);
-    script.setRunsOnSubFrames(false);
+        QWebEngineScript script;
+        script.setSourceCode(webChannelJs);
+        script.setName("qwebchannel.js");
+        script.setWorldId(QWebEngineScript::MainWorld);
+        script.setInjectionPoint(QWebEngineScript::DocumentCreation);
+        script.setRunsOnSubFrames(false);
 
-    webEnginePage->scripts().insert(script);
+        webEnginePage->scripts().insert(script);
 
-    mServer.reset(new QWebSocketServer(QStringLiteral("QWebChannel Standalone Example Server"),
-                        QWebSocketServer::NonSecureMode));
-    if (!mServer->listen(QHostAddress::LocalHost, 12345)) {
-        printf("Unable to open web socket port 12345.");
-    }
+        mServer.reset(new QWebSocketServer(QStringLiteral("QWebChannel Standalone Example Server"),
+                            QWebSocketServer::NonSecureMode));
+        if (!mServer->listen(QHostAddress::LocalHost, 12345)) {
+            printf("Unable to open web socket port 12345.");
+        }
 
-    // wrap WebSocket clients in QWebChannelAbstractTransport objects
-    mClientWrapper.reset(new WebSocketClientWrapper(mServer.get()));
+        // wrap WebSocket clients in QWebChannelAbstractTransport objects
+        mClientWrapper.reset(new WebSocketClientWrapper(mServer.get()));
 
-    // setup the channel
-    mWebChannel.reset(new QWebChannel(webEnginePage));
-    QObject::connect(mClientWrapper.get(), &WebSocketClientWrapper::clientConnected,
-                     mWebChannel.get(), &QWebChannel::connectTo);
+        // setup the channel
+        mWebChannel.reset(new QWebChannel(webEnginePage));
+        QObject::connect(mClientWrapper.get(), &WebSocketClientWrapper::clientConnected,
+                         mWebChannel.get(), &QWebChannel::connectTo);
 
-    // Setup the dialog
-    mWebChannel->registerObject(QStringLiteral("emulocationserver"), this);
+        // setup the dialog and publish it to the QWebChannel
+        mWebChannel->registerObject(QStringLiteral("emulocationserver"), this);
 
-    // Insert the Maps API key into 'index.html' and publish
-    // that to QWebChannel
-    QFile indexHtmlFile(":/html/index.html");
-    if (indexHtmlFile.open(QFile::ReadOnly | QFile::Text)) {
-        QByteArray htmlByteArray = indexHtmlFile.readAll();
-        if (!htmlByteArray.isEmpty()) {
-            // Change the placeholder to the real Maps API key
-            htmlByteArray.replace("YOUR_API_KEY", mMapsApiKey.toUtf8());
-            // Publish it
-            webEnginePage->setHtml(htmlByteArray);
+        // Get the HTML file (either 'index.html' or route.html')
+        QFile indexHtmlFile(isPoint ? ":/html/index.html" : ":/html/route.html");
+
+        // Insert the Maps API key into the HTML and publish
+        // that to QWebChannel
+        if (indexHtmlFile.open(QFile::ReadOnly | QFile::Text)) {
+            QByteArray htmlByteArray = indexHtmlFile.readAll();
+            if (!htmlByteArray.isEmpty()) {
+                // Change the placeholder to the real Maps API key
+                htmlByteArray.replace("YOUR_API_KEY", mMapsApiKey.toUtf8());
+                // Publish it
+                webEnginePage->setHtml(htmlByteArray);
+            }
         }
     }
 }
@@ -537,5 +554,5 @@ std::string LocationPage::writePointProtobufByName(
 void LocationPage::writePointProtobufFullPath(
         const QString& protoFullPath,
         const emulator_location::PointMetadata& protobuf) { }
-void LocationPage::setUpWebEngine(QWebEnginePage* webEnginePage) { }
+void LocationPage::setUpWebEngine() { }
 #endif // !USE_WEBENGINE
