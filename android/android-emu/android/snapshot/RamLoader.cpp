@@ -381,7 +381,7 @@ void RamLoader::readBlockPages(base::Stream* stream,
 
         for (int64_t i = 0; i < totalSz; i += kReadChunkSize) {
             HANDLE_EINTR(base::pread(ramFileFd, hostPtr + i,
-                                     std::min(kReadChunkSize, totalSz - i), i));
+                                     (std::min)(kReadChunkSize, totalSz - i), i));
         }
 
         // Mark that we loaded this directly

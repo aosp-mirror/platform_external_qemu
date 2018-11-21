@@ -20,7 +20,11 @@
 #if 0
 #define LOG(x...) fprintf(stderr,"WebP decode error: " x)
 #else
+#ifdef _MSC_VER
+#define LOG(...) do {} while (0)
+#else
 #define LOG(x...) do {} while (0)
+#endif
 #endif
 
 ////////////////////////////////////////////////////////////

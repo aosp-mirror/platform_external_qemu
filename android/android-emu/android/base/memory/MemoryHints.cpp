@@ -68,7 +68,7 @@ static void rewriteMemory(void* toRewrite, uint64_t length) {
     for (uint64_t i = 0; i < length; i += kPageSize) {
         rewriter.add(
             (uintptr_t)start + i,
-            std::min(length - i, (uint64_t)kPageSize));
+            (std::min)(length - i, (uint64_t)kPageSize));
     }
 }
 

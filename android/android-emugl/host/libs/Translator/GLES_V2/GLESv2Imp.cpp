@@ -1556,7 +1556,7 @@ static void s_getActiveAttribOrUniform(bool isUniform, GLEScontext* ctx,
 
     // Don't overstate how many non-nullterminator characters
     // we are returning.
-    int strlenForGuest = std::min((int)(bufsize - 1), (int)guestVarName.size());
+    int strlenForGuest = (std::min)((int)(bufsize - 1), (int)guestVarName.size());
 
     if (length) *length = strlenForGuest;
     if (size) *size = hostSize;

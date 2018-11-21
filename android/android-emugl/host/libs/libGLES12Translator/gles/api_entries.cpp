@@ -580,7 +580,7 @@ APIENTRY_IMPL(void, BindTexture, GLenum target, GLuint texture) {
         const GLuint global_texture_name =
             c->GetShareGroup()->GetTextureGlobalName(texture);
         PASS_THROUGH(c, BindTexture, target, global_texture_name);
-    } 
+    }
     GL_DLOG("exit function");
 }
 
@@ -1128,7 +1128,7 @@ namespace {
         // the corner case of a 1 x 1 4bpp image, which requires only 4 bits of
         // storage, but actually ends up taking a full byte. The code ends up
         // unpacking both the real 4 bit value as well as the "padding" 4 bits.
-        std::vector<uint8_t> uncompressed_level(std::min(2, width * height) *
+        std::vector<uint8_t> uncompressed_level((std::min)(2, width * height) *
                 palette_entry_size);
 
         const GLint unpack_alignment = c->pixel_store_unpack_alignment_.Get();

@@ -466,7 +466,7 @@ void LocationPage::populateTableByChunks() {
         // Special case, the first row will have delay 0
         time_t previousTime = fixes[std::max(mGpsNextPopulateIndex - 1, 0)].time;
         // Calculate the last chunk index.
-        const int endIndex = std::min<int>(mGpsNextPopulateIndex + 100, fixes.size());
+        const int endIndex = (std::min<int>)(mGpsNextPopulateIndex + 100, fixes.size());
         int i = mGpsNextPopulateIndex;
         for (; i < endIndex; i++) {
             const GpsFix& fix = fixes[i];
@@ -610,7 +610,7 @@ void LocationPage::timeout() {
         double distance = getDistanceNm(lat, lon, nextLat, nextLon);
         double deltaTimeHours = deltaTimeSec / (60.0 * 60.0);
         if (deltaTimeHours > 0.0) {
-            speed = std::min(distance / deltaTimeHours, MAX_SPEED);
+            speed = (std::min)(distance / deltaTimeHours, MAX_SPEED);
         }
         direction = getHeading(lat, lon, nextLat, nextLon);
     } else {

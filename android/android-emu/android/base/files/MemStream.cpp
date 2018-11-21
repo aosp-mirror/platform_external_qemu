@@ -26,7 +26,7 @@ MemStream::MemStream(int reserveSize) {
 MemStream::MemStream(Buffer&& data) : mData(std::move(data)) {}
 
 ssize_t MemStream::read(void* buffer, size_t size) {
-    const auto sizeToRead = std::min<int>(size, readSize());
+    const auto sizeToRead = (std::min<int>)(size, readSize());
     memcpy(buffer, mData.data() + mReadPos, sizeToRead);
     mReadPos += sizeToRead;
     return sizeToRead;

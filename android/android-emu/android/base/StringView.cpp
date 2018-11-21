@@ -17,7 +17,7 @@ namespace android {
 namespace base {
 
 int StringView::compare(const StringView& other) const {
-    size_t minSize = std::min(mSize, other.size());
+    size_t minSize = (std::min)(mSize, other.size());
     if (minSize == 0) {
         return mSize < other.size() ? -1 : (mSize > other.size() ? +1 : 0);
     }

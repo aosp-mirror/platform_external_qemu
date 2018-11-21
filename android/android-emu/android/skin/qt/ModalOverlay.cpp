@@ -112,7 +112,7 @@ void ModalOverlay::resize(const QSize& size, const QSize& parentSize) {
     const auto diff = std::max(parentSize.width() - size.width(),
                                parentSize.height() - size.height());
     const auto newBorderRadius =
-            std::min(std::max(0, diff), kDefaultBorderRadius);
+            (std::min)(std::max(0, diff), kDefaultBorderRadius);
     updateStylesheet(newBorderRadius);
 }
 

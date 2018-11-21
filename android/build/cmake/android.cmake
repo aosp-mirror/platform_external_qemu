@@ -16,9 +16,9 @@ include(prebuilts)
 
 # This function is the same as target_compile_definitions
 # (https://cmake.org/cmake/help/v3.5/command/target_compile_definitions.html) The only difference is that the
-# definitions will only be applied if the OS parameter matches the ANDROID_TARGET_TAG variable.
+# definitions will only be applied if the OS parameter matches the ANDROID_TARGET_TAG or compiler variable.
 function(android_target_compile_definitions TGT OS MODIFIER ITEMS)
-  if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR ${OS} STREQUAL "all")
+  if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR OS STREQUAL "all" OR OS MATCHES "${CMAKE_CXX_COMPILER_ID}")
     target_compile_definitions(${TGT} ${MODIFIER} ${ITEMS})
     foreach(DEF ${ARGN})
       target_compile_definitions(${TGT} ${MODIFIER} ${DEF})
@@ -28,13 +28,13 @@ endfunction()
 
 # This function is the same as target_link_libraries
 # (https://cmake.org/cmake/help/v3.5/command/target_link_libraries.html) The only difference is that the definitions
-# will only be applied if the OS parameter matches the ANDROID_TARGET_TAG variable.
+# will only be applied if the OS parameter matches the ANDROID_TARGET_TAG or Compiler variable.
 function(android_target_link_libraries TGT OS MODIFIER ITEMS)
   if(ARGC GREATER "49")
     message(
       FATAL_ERROR "Currently cannot link more than 49 dependecies due to some weirdness with calling target_link_libs")
   endif()
-  if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR ${OS} STREQUAL "all")
+  if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR OS STREQUAL "all" OR OS MATCHES "${CMAKE_CXX_COMPILER_ID}")
     # HACK ATTACK! We cannot properly expand unknown linker args as they are treated in a magical fashion. Some
     # arguments need to be "grouped" together somehow (for example optimized;lib) since we cannot resolve this properly
     # we just pass on the individual arguments..
@@ -50,7 +50,7 @@ endfunction()
 # (https://cmake.org/cmake/help/v3.5/command/target_include_directories.html) The only difference is that the
 # definitions will only be applied if the OS parameter matches the ANDROID_TARGET_TAG variable.
 function(android_target_include_directories TGT OS MODIFIER ITEMS)
-  if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR ${OS} STREQUAL "all")
+  if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR OS STREQUAL "all" OR OS MATCHES "${CMAKE_CXX_COMPILER_ID}")
     target_include_directories(${TGT} ${MODIFIER} ${ITEMS})
     foreach(DIR ${ARGN})
       target_include_directories(${TGT} ${MODIFIER} ${DIR})
@@ -62,7 +62,7 @@ endfunction()
 # (https://cmake.org/cmake/help/v3.5/command/target_compile_options.html) The only difference is that the definitions
 # will only be applied if the OS parameter matches the ANDROID_TARGET_TAG variable.
 function(android_target_compile_options TGT OS MODIFIER ITEMS)
-  if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR ${OS} STREQUAL "all")
+  if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR OS STREQUAL "all" OR OS MATCHES "${CMAKE_CXX_COMPILER_ID}")
     target_compile_options(${TGT} ${MODIFIER} "${ITEMS};${ARGN}")
   endif()
 endfunction()
@@ -272,7 +272,11 @@ function(android_copy_test_dir TGT SRC_DIR DST_DIR)
 endfunction()
 
 # Append the given flags to the existing CMAKE_C_FLAGS. Be careful as these flags are global and used for every target!
+# Note this will not do anything under vs for now
 function(add_c_flag FLGS)
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    message(WARNING "Not adding ${FLGS} under visual studio compiler")
+  endif()
   foreach(FLAG ${FLGS})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FLAG}" PARENT_SCOPE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAG}" PARENT_SCOPE)
@@ -280,6 +284,9 @@ function(add_c_flag FLGS)
 endfunction()
 
 function(add_cxx_flag FLGS)
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    message(WARNING "Not adding ${FLGS} under visual studio compiler")
+  endif()
   foreach(FLAG ${FLGS})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAG}" PARENT_SCOPE)
   endforeach()
@@ -296,13 +303,21 @@ function(get_git_version VER)
                   ERROR_VARIABLE STD_ERR)
   if(NOT "${GIT_RES}" STREQUAL "0")
     message(WARNING "Unable to retrieve git version from ${ANDROID_QEMU2_TOP_DIR}, out: ${STD_OUT}, err: ${STD_ERR}")
-    execute_process(COMMAND "date" "+%Y-%m-%d"
+    if (NOT MSVC)
+      execute_process(COMMAND "date" "+%Y-%m-%d"
+                      WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
+                      RESULT_VARIABLE DATE_RES
+                      OUTPUT_VARIABLE STD_OUT
+                      ERROR_VARIABLE STD_ERR)
+      if(NOT "${DATE_RES}" STREQUAL "0")
+        message(FATAL_ERROR "Unable to retrieve date!")
+      endif()
+    else()
+    execute_process(COMMAND "date" "/T"
                     WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
                     RESULT_VARIABLE DATE_RES
                     OUTPUT_VARIABLE STD_OUT
                     ERROR_VARIABLE STD_ERR)
-    if(NOT "${DATE_RES}" STREQUAL "0")
-      message(FATAL_ERROR "Unable to retrieve date!")
     endif()
   endif()
 
@@ -313,6 +328,11 @@ endfunction()
 
 # VER The variable to set the sha in Sets ${VER} The latest sha as reported by git
 function(get_git_sha VER)
+  if (MSVC)
+    # Mission abort!
+    set(${VER} "Visual Studio, unknown SHA")
+    return()
+  endif()
   execute_process(COMMAND "git" "log" "-n" "1" "--pretty=format:'%H'"
                   WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
                   RESULT_VARIABLE GIT_RES

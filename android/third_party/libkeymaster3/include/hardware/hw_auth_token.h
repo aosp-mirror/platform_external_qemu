@@ -24,7 +24,11 @@ extern "C" {
 #endif  // __cplusplus
 
 #define HW_AUTH_TOKEN_VERSION 0
-
+#ifdef _MSC_VER
+ #define __ANDROID__PACKED__
+#else
+  #define __ANDROID_PACKED__  __attribute__((__packed__))
+#endif
 typedef enum {
     HW_AUTH_NONE = 0,
     HW_AUTH_PASSWORD = 1 << 0,
@@ -36,7 +40,10 @@ typedef enum {
 /**
  * Data format for an authentication record used to prove successful authentication.
  */
-typedef struct __attribute__((__packed__)) {
+#ifdef _MSC_VER
+#pragma pack(push,1)
+#endif
+typedef struct __ANDROID__PACKED__ {
     uint8_t version;  // Current version is 0
     uint64_t challenge;
     uint64_t user_id;             // secure user ID, not Android user ID
@@ -45,7 +52,9 @@ typedef struct __attribute__((__packed__)) {
     uint64_t timestamp;           // in network order
     uint8_t hmac[32];
 } hw_auth_token_t;
-
+#ifdef _MSC_VER
+#pragma pack(pop)
+#endif
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus

@@ -25,7 +25,7 @@ namespace snapshot {
 namespace compress {
 
 int workerCount() {
-    return std::max(2, std::min(4, base::System::get()->getCpuCoreCount() - 1));
+    return std::max(2, (std::min)(4, base::System::get()->getCpuCoreCount() - 1));
 }
 
 int32_t compress(const uint8_t* data,

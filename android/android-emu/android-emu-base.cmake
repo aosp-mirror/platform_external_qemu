@@ -138,7 +138,7 @@ android_target_compile_definitions(android-emu-base
 
 # Compiler flags, not that these should never propagate (i.e. set to public) as we really want to limit the usage of
 # these flags.
-target_compile_options(android-emu-base
+android_target_compile_options(android-emu-base Clang
                                PRIVATE
                                "-Wno-parentheses"
                                "-Wno-invalid-constexpr")

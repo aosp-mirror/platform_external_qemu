@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-typedef uint32_t u_int32_t;
 
 #define _DIAGASSERT(e) /* nothing */
 #define _POSIX2_RE_DUP_MAX 256

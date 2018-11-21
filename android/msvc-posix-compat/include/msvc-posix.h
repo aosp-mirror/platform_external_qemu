@@ -22,7 +22,7 @@
 #include <stdint.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <winsock2.h>
+// #include <winsock2.h>  This will cause failures in VS2017.
 //#include <basetsd.h>
 
 // From <unistd.h>

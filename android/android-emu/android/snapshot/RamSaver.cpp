@@ -139,7 +139,7 @@ RamSaver::RamSaver(const std::string& fileName,
     mWriteCombineBuffer.resize(kCompressBufferBatchSize * kDefaultPageSize);
 
     mWorkers.emplace(
-            std::min(System::get()->getCpuCoreCount() - 1, 2),
+            (std::min)(System::get()->getCpuCoreCount() - 1, 2),
             [this](QueuedPageInfo&& pi) {
                 mIncStats.measure(StatTime::TotalHandlingPageSave, [&] {
                     handlePageSave(std::move(pi));

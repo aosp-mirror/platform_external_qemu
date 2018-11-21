@@ -37,7 +37,7 @@ FILE* android::base::fsopenWithTimeout(const char* filename, const char* mode,
         if (ret) {
             return ret;
         }
-        int wait = std::min(timeoutMs - waited, 200);
+        int wait = (std::min)(timeoutMs - waited, 200);
         android::base::Thread::sleepMs(wait);
         waited += wait;
     }

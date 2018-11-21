@@ -84,12 +84,10 @@ aintMap_getWithDefault( AIntMap*  map, int key, void*  def )
     int  index   = 0;
     int* keys    = map->keys;
 
-    index = 0;
-    DUFF4(limit,{
+    for(index = 0; index < limit; index++) {
         if (keys[index] == key)
             return map->values[index];
-        index++;
-    });
+    };
     return def;
 }
 
@@ -98,7 +96,7 @@ aintMap_grow( AIntMap* map )
 {
     int   oldCapacity = map->capacity;
     int   newCapacity;
-    void* keys = map->keys;
+    int*  keys = map->keys;
     void* values = map->values;
 
     if (keys == map->keys0)
@@ -112,8 +110,9 @@ aintMap_grow( AIntMap* map )
     else
         newCapacity = oldCapacity + (oldCapacity >> 2);
 
-    AARRAY_RENEW(keys, newCapacity);
-    AARRAY_RENEW(values, newCapacity);
+    // void* p; sizeof(*p) will not resolve in MSVC
+    AARRAY_RENEW_SIZE(keys, sizeof(int), newCapacity);
+    AARRAY_RENEW_SIZE(values, sizeof(void*), newCapacity);
 
     map->keys = keys;
     map->values = values;
@@ -131,12 +130,10 @@ aintMap_set( AIntMap* map, int key, void* value )
     /* First, try to find the item in our heap */
     keys  = map->keys;
     limit = map->size;
-    index = 0;
-    DUFF4(limit,{
+    for(index = 0; index < limit; index++) {
         if (keys[index] == key)
             goto FOUND;
-        index++;
-    });
+    };
 
     /* Not found, need to add it */
     if (map->size >= map->capacity)
@@ -163,12 +160,10 @@ aintMap_del( AIntMap* map, int key )
 
     keys  = map->keys;
     limit = map->size;
-    index = 0;
-    DUFF4(limit,{
+    for(index = 0; index < limit; index++) {
         if (keys[index] == key)
             goto FOUND;
-        index++;
-    });
+    }
     return NULL;
 
 FOUND:

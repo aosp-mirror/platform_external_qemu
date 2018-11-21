@@ -30,7 +30,8 @@ void  _android_assert_loc(const char*  fileName,
 /* Call this after _android_assert_loc() to dump an assertion failed message
  * just before panicking, i.e. abort the current program
  */
-void __attribute__((noreturn)) android_assert_fail(const char*  messageFmt, ...);
+void __ANDROID_NO_RETURN__ android_assert_fail(const char*  messageFmt, ...);
+
 
 /* See _android_assert_loc() */
 #define  _ANDROID_ASSERT_LOC()  \
