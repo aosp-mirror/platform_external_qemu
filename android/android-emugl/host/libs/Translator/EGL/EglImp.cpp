@@ -57,6 +57,9 @@ static bool createAndBindAuxiliaryContext(
     EGLContext* context_out, EGLSurface* surface_out);
 static bool unbindAndDestroyAuxiliaryContext(
     EGLContext context, EGLSurface surface);
+static bool bindAuxiliaryContext(
+    EGLContext context, EGLSurface surface);
+static bool unbindAuxiliaryContext();
 
 #define tls_thread  EglThreadInfo::get()
 
@@ -78,6 +81,8 @@ static const EGLiface s_eglIface = {
     .eglGetGlLibrary = getGlLibrary,
     .createAndBindAuxiliaryContext = createAndBindAuxiliaryContext,
     .unbindAndDestroyAuxiliaryContext = unbindAndDestroyAuxiliaryContext,
+    .bindAuxiliaryContext = bindAuxiliaryContext,
+    .unbindAuxiliaryContext = unbindAuxiliaryContext,
 };
 
 static void initGLESx(GLESVersion version) {
@@ -294,6 +299,34 @@ static bool unbindAndDestroyAuxiliaryContext(EGLContext context, EGLSurface surf
 
     if (!eglDestroyContext(dpy, context)) {
         fprintf(stderr, "%s: failure to destroy context!\n",
+                __func__);
+        return false;
+    }
+
+    return true;
+}
+
+static bool bindAuxiliaryContext(EGLContext context, EGLSurface surface) {
+    // create the context
+    EGLDisplay dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+
+    if (!eglMakeCurrent(dpy, surface, surface, context)) {
+        fprintf(stderr, "%s: eglMakeCurrent failed\n", __func__);
+        return false;
+    }
+
+    return true;
+}
+
+static bool unbindAuxiliaryContext() {
+
+    // create the context
+    EGLDisplay dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+
+    if (!eglMakeCurrent(
+            dpy, EGL_NO_SURFACE, EGL_NO_SURFACE,
+            EGL_NO_CONTEXT)) {
+        fprintf(stderr, "%s: failure to unbind current context!\n",
                 __func__);
         return false;
     }

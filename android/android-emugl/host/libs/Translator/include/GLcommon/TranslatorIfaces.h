@@ -127,6 +127,10 @@ struct EGLiface {
     // destroys the surface and context. Returns false if any step of cleanup failed,
     // true otherwise.
     bool (*unbindAndDestroyAuxiliaryContext)(EGLContext context, EGLSurface surface);
+    // Makes |context| and |surface| current, assuming they have been created already.
+    bool (*bindAuxiliaryContext)(EGLContext context, EGLSurface surface);
+    // Makes EGL_NO_SURFACE and EGL_NO_CONTEXT current, unbinding whatever is the current context.
+    bool (*unbindAuxiliaryContext)();
 };
 
 typedef GLESiface* (*__translator_getGLESIfaceFunc)(const EGLiface*);
