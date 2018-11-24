@@ -24,14 +24,18 @@
 #include <EGL/eglext.h>
 #include <GLES2/gl2.h>
 
+EGLContext s_context = EGL_NO_CONTEXT;
+EGLSurface s_surface = EGL_NO_SURFACE;
+
 intptr_t GLBackgroundLoader::main() {
 #if SNAPSHOT_PROFILE > 1
     const auto start = get_uptime_ms();
     printf("Starting GL background loading at %" PRIu64 " ms\n", start);
 #endif
-
-    if (!m_eglIface.createAndBindAuxiliaryContext(&m_context, &m_surface)) {
-        return 0;
+    if (s_context == EGL_NO_CONTEXT) {
+        if (!m_eglIface.createAndBindAuxiliaryContext(&s_context, &s_surface)) {
+            return 0;
+        }
     }
 
     for (const auto& it : m_textureMap) {
@@ -54,7 +58,6 @@ intptr_t GLBackgroundLoader::main() {
         }
     }
 
-    m_eglIface.unbindAndDestroyAuxiliaryContext(m_context, m_surface);
     m_textureMap.clear();
 
 #if SNAPSHOT_PROFILE > 1
