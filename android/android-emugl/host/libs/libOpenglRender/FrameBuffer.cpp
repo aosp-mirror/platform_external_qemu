@@ -2148,6 +2148,15 @@ bool FrameBuffer::onLoad(Stream* stream,
     }
 
     registerTriggerWait();
+
+    {
+        ScopedBind scopedBind(m_colorBufferHelper);
+        for (auto it : m_colorbuffers) {
+            if (it.second.cb) {
+                it.second.cb->touch();
+            }
+        }
+    }
     return true;
     // TODO: restore memory management
 }
