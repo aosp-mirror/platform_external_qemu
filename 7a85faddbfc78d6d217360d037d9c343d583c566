@@ -22,6 +22,30 @@
       "revId": "7a85faddbfc78d6d217360d037d9c343d583c566",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "328beb50_474d3750",
+        "filename": "android/android-emu/android/opengles.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-24T03:58:52Z",
+      "side": 1,
+      "message": "Most likely; this would ensure there is only one copy of this struct even across DLLs",
+      "parentUuid": "c57b68e7_3e41bc9d",
+      "range": {
+        "startLine": 229,
+        "startChar": 41,
+        "endLine": 229,
+        "endChar": 62
+      },
+      "revId": "7a85faddbfc78d6d217360d037d9c343d583c566",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
