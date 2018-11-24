@@ -51,8 +51,5 @@ private:
     const EGLiface& m_eglIface;
     const GLESiface& m_glesIface;
 
-    EGLContext m_context = nullptr;
-    EGLSurface m_surface = nullptr;
-
     SaveableTextureMap& m_textureMap;
 };
