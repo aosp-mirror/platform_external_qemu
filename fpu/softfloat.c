@@ -191,7 +191,11 @@ static inline flag extractFloat64Sign(float64 a)
  * is a NaN so cls >= float_class_qnan is any NaN.
  */
 
-typedef enum __attribute__ ((__packed__)) {
+/* BUG: 119800861 - bug in mingw gcc makes it so
+ * using the packed attribute here causes memory corruption
+ * in int64_to_float64 */
+// typedef enum __attribute__ ((__packed__)) {
+typedef enum {
     float_class_unclassified,
     float_class_zero,
     float_class_normal,
