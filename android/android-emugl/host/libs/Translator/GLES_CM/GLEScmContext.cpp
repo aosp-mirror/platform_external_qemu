@@ -640,9 +640,8 @@ GLEScmContext::MatrixStack& GLEScmContext::currMatrixStack() {
     case GL_MODELVIEW:
         return mModelviewMatrices;
     default:
-        emugl_crash_reporter(
-            "error: matrix mode set to 0x%x!",
-            mCurrMatrixMode);
+        emugl::emugl_crash_reporter("error: matrix mode set to 0x%x!",
+                                    mCurrMatrixMode);
     }
     // Make compiler happy
     return mModelviewMatrices;

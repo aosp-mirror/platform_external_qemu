@@ -203,6 +203,7 @@ target_link_libraries(HelloTriangle
                               PUBLIC
                               OpenglRender_standalone_common
                               OpenglCodecCommon
+                              android-emu-base
                               emugl_common
                               gmock_main
                               OpenglRender
@@ -219,6 +220,7 @@ target_link_libraries(HelloSurfaceFlinger
                               PUBLIC
                               OpenglRender_standalone_common
                               OpenglCodecCommon
+                              android-emu-base
                               emugl_common
                               gmock_main
                               OpenglRender
@@ -235,6 +237,7 @@ target_link_libraries(CreateDestroyContext
                               PUBLIC
                               OpenglRender_standalone_common
                               OpenglCodecCommon
+                              android-emu-base
                               emugl_common
                               gmock_main
                               OpenglRender
@@ -251,6 +254,7 @@ target_link_libraries(HelloHostComposition
                               PUBLIC
                               OpenglRender_standalone_common
                               OpenglCodecCommon
+                              android-emu-base
                               emugl_common
                               gmock_main
                               OpenglRender
@@ -267,6 +271,7 @@ target_link_libraries(HelloVulkan
                       PUBLIC
                       OpenglRender_standalone_common
                       OpenglCodecCommon
+                      android-emu-base
                       emugl_common
                       gmock_main
                       OpenglRender

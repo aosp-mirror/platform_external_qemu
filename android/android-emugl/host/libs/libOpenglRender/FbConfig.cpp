@@ -121,7 +121,8 @@ FbConfig::FbConfig(EGLConfig hostConfig, EGLDisplay hostDisplay) :
 
         // Don't report ES3 renderable type if we don't support it.
         if (kConfigAttributes[i] == EGL_RENDERABLE_TYPE) {
-            if (!emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion) &&
+            if (!emugl::emugl_feature_is_enabled(
+                        android::featurecontrol::GLESDynamicVersion) &&
                 mAttribValues[i] & EGL_OPENGL_ES3_BIT) {
                 mAttribValues[i] &= ~EGL_OPENGL_ES3_BIT;
             }
@@ -196,8 +197,10 @@ int FbConfigList::chooseConfig(const EGLint* attribs,
         if (attribs[numAttribs] == EGL_RENDERABLE_TYPE) {
             if (attribs[numAttribs + 1] != EGL_DONT_CARE &&
                 attribs[numAttribs + 1] & EGL_OPENGL_ES3_BIT_KHR &&
-                (!emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion) ||
-                 FrameBuffer::getMaxGLESVersion() < GLES_DISPATCH_MAX_VERSION_3_0)) {
+                (!emugl::emugl_feature_is_enabled(
+                         android::featurecontrol::GLESDynamicVersion) ||
+                 FrameBuffer::getMaxGLESVersion() <
+                         GLES_DISPATCH_MAX_VERSION_3_0)) {
                 return 0;
             }
         }
