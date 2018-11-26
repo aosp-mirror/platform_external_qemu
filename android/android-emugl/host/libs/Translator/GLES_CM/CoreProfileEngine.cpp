@@ -201,9 +201,9 @@ static std::string sMakeGeometryDrawShader(bool isGles, GLenum shaderType, bool 
         shaderTemplate = kGeometryDrawFShaderSrcTemplateCore;
         break;
     default:
-        emugl_crash_reporter(
-            "%s: unknown shader type 0x%x (memory corrupt)\n", __func__,
-            shaderType);
+        emugl::emugl_crash_reporter(
+                "%s: unknown shader type 0x%x (memory corrupt)\n", __func__,
+                shaderType);
     }
 
     if (shaderTemplate) {

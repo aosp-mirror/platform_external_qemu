@@ -17,6 +17,9 @@
 #pragma once
 
 #include "OpenglRender/render_api_types.h"
+namespace emugl {
 
 extern emugl_feature_is_enabled_t emugl_feature_is_enabled;
 void set_emugl_feature_is_enabled(emugl_feature_is_enabled_t feature_is_enabled);
+
+}  // namespace emugl

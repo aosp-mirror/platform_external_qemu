@@ -22,6 +22,9 @@ GLESv1Dispatch s_gles1;
 GLESv2Dispatch s_gles2;
 
 using android::base::LazyInstance;
+using emugl::LazyLoadedGLESv1Dispatch;
+using emugl::LazyLoadedGLESv2Dispatch;
+using emugl::LazyLoadedEGLDispatch;
 
 // Must be declared outside of LazyLoaded*Dispatch scope due to the use of
 // sizeof(T) within the template definition.
