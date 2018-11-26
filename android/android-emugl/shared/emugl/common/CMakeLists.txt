@@ -7,8 +7,8 @@ set(emugl_common_src
     shared_library.cpp
     stringparsing.cpp
     sync_device.cpp)
-android_add_library(emugl_common)
-target_compile_options(emugl_common PRIVATE -fvisibility=hidden)
+android_add_shared_library(emugl_common)
+target_compile_options(emugl_common PRIVATE -fvisibility=default)
 target_link_libraries(emugl_common PRIVATE emugl_base)
 target_link_libraries(emugl_common PUBLIC android-emu-base)
 target_include_directories(emugl_common PRIVATE ${ANDROID_EMUGL_DIR}/host/include

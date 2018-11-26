@@ -17,6 +17,7 @@
 #include "crash_reporter.h"
 
 #include <cstdlib>
+namespace emugl {
 
 void default_crash_reporter(const char* format, ...) {
     abort();
@@ -31,3 +32,5 @@ void set_emugl_crash_reporter(emugl_crash_reporter_t crash_reporter) {
         emugl_crash_reporter = default_crash_reporter;
     }
 }
+
+}  // namespace emugl

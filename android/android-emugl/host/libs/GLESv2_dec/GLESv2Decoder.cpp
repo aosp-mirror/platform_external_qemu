@@ -370,7 +370,7 @@ void GLESv2Decoder::s_glMapBufferRangeDMA(void* self, GLenum target, GLintptr of
     // Check if this is a read or write request and not an invalidate one.
     if ((access & (GL_MAP_READ_BIT | GL_MAP_WRITE_BIT)) &&
         !(access & (GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT))) {
-        void* guest_buffer = g_emugl_dma_get_host_addr(paddr);
+        void* guest_buffer = emugl::g_emugl_dma_get_host_addr(paddr);
         void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
 
         // map failed, no need to copy or unmap
@@ -394,7 +394,7 @@ void GLESv2Decoder::s_glUnmapBufferDMA(void* self, GLenum target, GLintptr offse
 
     if (access & GL_MAP_WRITE_BIT) {
         if (!paddr) fprintf(stderr, "%s: error: wanted to write to a mapped buffer with NULL!\n", __FUNCTION__);
-        void* guest_buffer = g_emugl_dma_get_host_addr(paddr);
+        void* guest_buffer = emugl::g_emugl_dma_get_host_addr(paddr);
         void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
         if (!gpu_ptr) {
             fprintf(stderr, "%s: could not get host gpu pointer!\n", __FUNCTION__);
