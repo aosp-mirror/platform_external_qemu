@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "77d3a9bb_ec8582da",
+        "filename": "fpu/softfloat.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-26T17:41:50Z",
+      "side": 1,
+      "message": "Crazy!",
+      "range": {
+        "startLine": 194,
+        "startChar": 8,
+        "endLine": 194,
+        "endChar": 17
+      },
+      "revId": "ef28eaf19419358a63690a3f6552021c6d27cf8d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
