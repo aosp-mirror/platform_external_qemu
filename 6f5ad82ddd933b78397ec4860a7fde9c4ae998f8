@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "41969112_1562ed26",
+        "filename": "android/android-emu/android/base/files/FileShareOpen.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-11-26T19:58:13Z",
+      "side": 1,
+      "message": "We can also define NOMINMAX for our project to get rid of the min/max macro errors.",
+      "range": {
+        "startLine": 40,
+        "startChar": 19,
+        "endLine": 40,
+        "endChar": 30
+      },
+      "revId": "6f5ad82ddd933b78397ec4860a7fde9c4ae998f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
