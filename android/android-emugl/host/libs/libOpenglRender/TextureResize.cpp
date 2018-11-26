@@ -328,18 +328,12 @@ void TextureResize::setupFramebuffers(unsigned int factor) {
         GL_TEXTURE_2D, 0, GL_RGB, mWidth / factor, mHeight, 0, GL_RGB,
                 mTextureDataType, nullptr);
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
-    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBWidth.framebuffer);
-    s_gles2.glFramebufferTexture2D(
-        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFBWidth.texture, 0);
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBHeight.texture);
     s_gles2.glTexImage2D(
         GL_TEXTURE_2D, 0, GL_RGB, mWidth / factor, mHeight / factor, 0, GL_RGB,
                 mTextureDataType, nullptr);
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
-    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBHeight.framebuffer);
-    s_gles2.glFramebufferTexture2D(
-        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFBHeight.texture, 0);
 
     // Update the shaders to the new factor. First detach the old shaders...
     detachShaders(mFBWidth.program);
@@ -355,7 +349,6 @@ void TextureResize::setupFramebuffers(unsigned int factor) {
     mFactor = factor;
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
-    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void TextureResize::resize(GLuint texture) {
@@ -364,6 +357,8 @@ void TextureResize::resize(GLuint texture) {
 
     // First scale the horizontal dimension by rendering the input texture to a scaled framebuffer.
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBWidth.framebuffer);
+    s_gles2.glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFBWidth.texture, 0);
     s_gles2.glClear(GL_COLOR_BUFFER_BIT);
     s_gles2.glViewport(0, 0, mWidth / mFactor, mHeight);
     s_gles2.glUseProgram(mFBWidth.program);
@@ -387,6 +382,8 @@ void TextureResize::resize(GLuint texture) {
         GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
     // Secondly, scale the vertical dimension using the second framebuffer.
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBHeight.framebuffer);
+    s_gles2.glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mFBHeight.texture, 0);
     s_gles2.glClear(GL_COLOR_BUFFER_BIT);
     s_gles2.glViewport(0, 0, mWidth / mFactor, mHeight / mFactor);
     s_gles2.glUseProgram(mFBHeight.program);
