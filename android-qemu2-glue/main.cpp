@@ -287,8 +287,34 @@ static void prepareDataFolder(const char* destDirectory,
     path_copy_dir(destDirectory, srcDirectory);
     std::string adbKeyPath = PathUtils::join(
             android::ConfigDirs::getUserDirectory(), "adbkey.pub");
-    if (path_is_regular(adbKeyPath.c_str()) &&
-        path_can_read(adbKeyPath.c_str())) {
+    
+    bool adbKeyPresent =
+        path_is_regular(adbKeyPath.c_str()) &&
+        path_can_read(adbKeyPath.c_str());
+    
+    if (!adbKeyPresent) {
+        dwarning("cannot read adb public key file: %s", adbKeyPath.c_str());
+        dwarning("trying again by copying from home dir");
+
+        auto home = System::get()->getHomeDirectory();
+        if (home.empty()) {
+            home = System::get()->getTempDir();
+            if (home.empty()) {
+                home = "/tmp";
+            }
+        }
+
+        auto guessedSrcAdbKeyPub = PathUtils::join(home, ".android", "adbkey.pub");
+        path_copy_file(
+            adbKeyPath.c_str(),
+            guessedSrcAdbKeyPub.c_str());
+
+        adbKeyPresent =
+            path_is_regular(adbKeyPath.c_str()) &&
+            path_can_read(adbKeyPath.c_str());
+    }
+
+    if (adbKeyPresent) {
         std::string guestAdbKeyDir =
                 PathUtils::join(destDirectory, "misc", "adb");
         std::string guestAdbKeyPath =
@@ -298,7 +324,7 @@ static void prepareDataFolder(const char* destDirectory,
         path_copy_file(guestAdbKeyPath.c_str(), adbKeyPath.c_str());
         android_chmod(guestAdbKeyPath.c_str(), 0640);
     } else {
-        dwarning("cannot read adb public key file: %s", adbKeyPath.c_str());
+        dwarning("cannot read adb public key file (failed): %s", adbKeyPath.c_str());
     }
 }
 
