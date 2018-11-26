@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "1cf7d92c_aa916adf",
+        "filename": "android/android-emugl/combined/combined_unittest.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-11-26T22:02:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cebf2928_0991721d",
+      "range": {
+        "startLine": 80,
+        "startChar": 19,
+        "endLine": 80,
+        "endChar": 26
+      },
+      "revId": "1fbc1a28eb04b92f2f302888b4b90de2fa1c0b3f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "367fd224_efb6a96b",
         "filename": "android/android-emugl/shared/emugl/common/CMakeLists.txt",
         "patchSetId": 3
@@ -95,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "75cf10e5_6910f39a",
+        "filename": "android/android-emugl/shared/emugl/common/CMakeLists.txt",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-11-26T22:02:10Z",
+      "side": 1,
+      "message": "For shared library, it looks like we use fvisibility\u003ddefault cmake build system. Otherwise, we need explicitly export each symbol.",
+      "parentUuid": "367fd224_efb6a96b",
+      "range": {
+        "startLine": 12,
+        "startChar": 57,
+        "endLine": 12,
+        "endChar": 65
+      },
+      "revId": "1fbc1a28eb04b92f2f302888b4b90de2fa1c0b3f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "da5fecd9_619548d3",
         "filename": "android/android-emugl/shared/emugl/common/gl_object_counter.h",
         "patchSetId": 3
@@ -106,6 +154,30 @@
       "writtenOn": "2018-11-26T20:38:49Z",
       "side": 1,
       "message": "we can add header entries for object inc/dec here to keep fvisibility\u003dhidden",
+      "range": {
+        "startLine": 23,
+        "startChar": 1,
+        "endLine": 23,
+        "endChar": 62
+      },
+      "revId": "1fbc1a28eb04b92f2f302888b4b90de2fa1c0b3f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "83adc8fb_e67935b1",
+        "filename": "android/android-emugl/shared/emugl/common/gl_object_counter.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-11-26T22:02:10Z",
+      "side": 1,
+      "message": "I think we probably want to add namespace here. \nAlso, if fvisibility is hidden for shared library, we will need to explicitly export all the interfaces in the header files.",
+      "parentUuid": "da5fecd9_619548d3",
       "range": {
         "startLine": 23,
         "startChar": 1,
