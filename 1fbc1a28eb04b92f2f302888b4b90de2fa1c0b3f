@@ -22,6 +22,30 @@
       "revId": "1fbc1a28eb04b92f2f302888b4b90de2fa1c0b3f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "57ee610d_8a09d290",
+        "filename": "android/android-emu/android/opengl/GLObjectCounter.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-11-26T18:38:57Z",
+      "side": 1,
+      "message": "Atomic for std::array is probably okay but it would replace the entire std::array each time, not a specific element of the array.",
+      "parentUuid": "e191c93e_91bea434",
+      "range": {
+        "startLine": 38,
+        "startChar": 4,
+        "endLine": 38,
+        "endChar": 7
+      },
+      "revId": "1fbc1a28eb04b92f2f302888b4b90de2fa1c0b3f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
