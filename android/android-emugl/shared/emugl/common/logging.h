@@ -17,23 +17,27 @@
 #pragma once
 
 #include "OpenglRender/render_api_types.h"
+namespace emugl {
 
 extern emugl_logger_t emugl_logger;
 extern emugl_logger_t emugl_cxt_logger;
 void set_emugl_logger(emugl_logger_t f);
 void set_emugl_cxt_logger(emugl_logger_t f);
 
+}  // namespace emugl
 #define GL_LOGGING 1
 
 #if GL_LOGGING
 
-#define GL_LOG(...) do { \
-    emugl_logger(__VA_ARGS__); \
-} while (0)
+#define GL_LOG(...)                       \
+    do {                                  \
+        emugl::emugl_logger(__VA_ARGS__); \
+    } while (0)
 
-#define GL_CXT_LOG(...) do { \
-    emugl_cxt_logger(__VA_ARGS__); \
-} while (0)
+#define GL_CXT_LOG(...)                       \
+    do {                                      \
+        emugl::emugl_cxt_logger(__VA_ARGS__); \
+    } while (0)
 
 #else
 #define GL_LOG(...) 0

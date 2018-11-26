@@ -76,7 +76,7 @@ void NameSpace::postLoad(const ObjectData::getObjDataPtr_t& getObjDataPtr) {
     for (const auto& objData : m_objectDataMap) {
         GL_LOG("NameSpace::%s: %p: try to load object %llu\n", __func__, this, objData.first);
         if (!objData.second) {
-            emugl_crash_reporter(
+            emugl::emugl_crash_reporter(
                     "Fatal: null object data ptr on restore\n");
         }
         objData.second->postLoad(getObjDataPtr);
@@ -103,7 +103,9 @@ void NameSpace::touchTextures() {
         if (!texNamedObj) {
             GL_LOG("NameSpace::%s: %p: fatal: global object null for texture data %p\n",
                     __func__, this, texData);
-            emugl_crash_reporter("fatal: null global texture object in NameSpace::touchTextures");
+            emugl::emugl_crash_reporter(
+                    "fatal: null global texture object in "
+                    "NameSpace::touchTextures");
         }
         setGlobalObject(obj.first, texNamedObj);
         texData->setGlobalName(texNamedObj->getGlobalName());
@@ -288,7 +290,7 @@ void GlobalNameSpace::preSaveAddEglImage(EglImage* eglImage) {
     if (!eglImage->globalTexObj) {
         GL_LOG("GlobalNameSpace::%s: %p: egl image %p with null texture object\n",
                __func__, this, eglImage);
-        emugl_crash_reporter(
+        emugl::emugl_crash_reporter(
                 "Fatal: egl image with null texture object\n");
     }
     unsigned int globalName = eglImage->globalTexObj->getGlobalName();
@@ -377,7 +379,7 @@ void GlobalNameSpace::onLoad(android::base::Stream* stream,
     if (!textureLoader->start()) {
         fprintf(stderr,
                 "Error: texture file unsupported version or corrupted.\n");
-        emugl_crash_reporter(
+        emugl::emugl_crash_reporter(
                 "Error: texture file unsupported version or corrupted.\n");
         return;
     }

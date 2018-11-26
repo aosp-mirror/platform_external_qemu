@@ -21,8 +21,12 @@ static bool defaultFeatureIsEnabled(android::featurecontrol::Feature feature) {
     return false;
 }
 
+namespace emugl {
+
 emugl_feature_is_enabled_t emugl_feature_is_enabled = defaultFeatureIsEnabled;
 
 void set_emugl_feature_is_enabled(emugl_feature_is_enabled_t feature_is_enabled) {
     emugl_feature_is_enabled = feature_is_enabled;
 }
+
+}  // namespace emugl
