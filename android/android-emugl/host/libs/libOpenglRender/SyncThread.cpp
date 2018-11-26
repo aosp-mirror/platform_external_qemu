@@ -156,7 +156,7 @@ void SyncThread::sendAsync(SyncThreadCmd& cmd) {
 }
 
 void SyncThread::doSyncContextInit() {
-    const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+    const EGLDispatch* egl = emugl::LazyLoadedEGLDispatch::get();
 
     mDisplay = egl->eglGetDisplay(EGL_DEFAULT_DISPLAY);
     int eglMaj, eglMin;
@@ -198,7 +198,7 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
         FenceSync::getFromHandle((uint64_t)(uintptr_t)cmd->fenceSync);
 
     if (!fenceSync) {
-        emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
+        emugl::emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
         return;
     }
 
@@ -242,7 +242,7 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
     //   incrementing the timeline means that the app's rendering freezes.
     //   So, despite the faulty GPU driver, not incrementing is too heavyweight a response.
 
-    emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
+    emugl::emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
     FenceSync::incrementTimelineAndDeleteOldFences();
 
     DPRINT("done timeline increment");
@@ -254,7 +254,7 @@ void SyncThread::doExit() {
 
     if (mContext == EGL_NO_CONTEXT) return;
 
-    const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+    const EGLDispatch* egl = emugl::LazyLoadedEGLDispatch::get();
 
     egl->eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     egl->eglDestroyContext(mDisplay, mContext);

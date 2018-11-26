@@ -17,6 +17,7 @@
 #pragma once
 
 #include "OpenglRender/render_api_types.h"
+namespace emugl {
 
 extern emugl_sync_create_timeline_t emugl_sync_create_timeline;
 extern emugl_sync_create_fence_t emugl_sync_create_fence;
@@ -31,3 +32,5 @@ void set_emugl_sync_timeline_inc(emugl_sync_timeline_inc_t);
 void set_emugl_sync_destroy_timeline(emugl_sync_destroy_timeline_t);
 void set_emugl_sync_register_trigger_wait(emugl_sync_register_trigger_wait_t trigger_fn);
 void set_emugl_sync_device_exists(emugl_sync_device_exists_t);
+
+}  // namespace emugl
