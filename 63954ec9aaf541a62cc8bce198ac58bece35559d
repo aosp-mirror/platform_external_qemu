@@ -46,6 +46,30 @@
       "revId": "63954ec9aaf541a62cc8bce198ac58bece35559d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "235510f2_0ffece4d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-27T19:59:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7483a735_87359a1c",
+      "range": {
+        "startLine": 66,
+        "startChar": 16,
+        "endLine": 66,
+        "endChar": 25
+      },
+      "revId": "63954ec9aaf541a62cc8bce198ac58bece35559d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
