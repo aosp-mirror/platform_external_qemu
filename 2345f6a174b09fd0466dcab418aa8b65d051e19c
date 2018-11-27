@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "7378087f_b2be73b8",
+        "filename": "android/android-emu/android/car-cluster.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1290474
+      },
+      "writtenOn": "2018-11-27T23:48:18Z",
+      "side": 1,
+      "message": "Sure, no problem, I don\u0027t want to start a religious war :)",
+      "parentUuid": "0bdf5bf8_b76ed9f3",
+      "range": {
+        "startLine": 51,
+        "startChar": 34,
+        "endLine": 51,
+        "endChar": 47
+      },
+      "revId": "2345f6a174b09fd0466dcab418aa8b65d051e19c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "42ae77fe_025a675d",
         "filename": "android/android-emu/android/car-cluster.cpp",
         "patchSetId": 4
