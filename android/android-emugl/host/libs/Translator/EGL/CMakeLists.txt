@@ -19,7 +19,7 @@ set(EGL_translator_windows_src EglOsApi_wgl.cpp EglOsApi_egl.cpp CoreProfileConf
 android_add_shared_library(EGL_translator)
 
 target_link_libraries(EGL_translator PUBLIC GLcommon emugl_common)
-target_link_libraries(EGL_translator PRIVATE emugl_base android-emu-base emulator-astc-codec)
+target_link_libraries(EGL_translator PRIVATE emugl_base android-emu-base astc-codec)
 target_compile_options(EGL_translator PRIVATE -fvisibility=hidden)
 
 # OS specific link dependencies

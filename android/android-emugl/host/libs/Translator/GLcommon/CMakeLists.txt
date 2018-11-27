@@ -23,7 +23,7 @@ target_include_directories(GLcommon PUBLIC
     ${ANDROID_EMUGL_DIR}/host/libs/Translator/include
     ${ANDROID_EMUGL_DIR}/shared
     ${ANDROID_EMUGL_DIR}/host/include)
-target_link_libraries(GLcommon PUBLIC android-emu-base emulator-astc-codec)
+target_link_libraries(GLcommon PUBLIC android-emu-base astc-codec)
 target_compile_options(GLcommon PRIVATE -fvisibility=hidden)
 target_link_libraries(GLcommon PRIVATE emugl_base)
 android_target_link_libraries(GLcommon linux-x86_64 PRIVATE "-ldl" "-Wl,-Bsymbolic")

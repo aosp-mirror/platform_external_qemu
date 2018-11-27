@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 add_library(emulator-tinyobjloader ../../../tinyobjloader/tiny_obj_loader.cc)
 target_include_directories(emulator-tinyobjloader PUBLIC ../../../tinyobjloader)
 
-add_subdirectory(astc-codec)
+# Include astc-codec as a subproject.
+add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../astc-codec astc-codec)
+
 add_subdirectory(jpeg-6b)
 add_subdirectory(libdtb)
 add_subdirectory(libselinux)
