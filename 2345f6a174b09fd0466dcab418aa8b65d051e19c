@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b958ea5a_cafb79a6",
+        "filename": "android/android-emu/android/car-cluster.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1290474
+      },
+      "writtenOn": "2018-11-27T23:35:30Z",
+      "side": 1,
+      "message": "I don\u0027t know about Android style, but the google3 styleguide explicitly forbits C-style casts in C++ code. I think that\u0027s good practice anyway. For example, this particular case would be static_cast\u003cHwCarCluster *\u003e(opaque).",
+      "range": {
+        "startLine": 51,
+        "startChar": 34,
+        "endLine": 51,
+        "endChar": 47
+      },
+      "revId": "2345f6a174b09fd0466dcab418aa8b65d051e19c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "42ae77fe_025a675d",
+        "filename": "android/android-emu/android/car-cluster.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1290474
+      },
+      "writtenOn": "2018-11-27T23:35:30Z",
+      "side": 1,
+      "message": "What happens if you receive a data packet that\u0027s 4 bytes?\n\nYou should instead have some member variable that you use to track what you expect to receive. For example, you could set nextSize to MAX_INT when you expect to get a new size and then your code would be something like:\n\nif (hwCarCluster-\u003enextSize \u003d\u003d MAX_INT) {\n  if (msglen !\u003d 4) {\n    // some sort of error\n  }\n  hwCarCluster-\u003enextSize \u003d (reinterpret_cast\u003cint32_t *\u003e msg)[0];\n} else {\n  hwCarCluster-\u003ecallback(reinterpret_cast\u003cchar *\u003emsg, hwCarCluster-\u003enextSize);\n  hwCarCluster-\u003enextSize \u003d MAX_INT;\n}\n\nAlternatively just have an explicit boolean for \"expectingData\" or something.",
+      "range": {
+        "startLine": 57,
+        "startChar": 8,
+        "endLine": 57,
+        "endChar": 19
+      },
+      "revId": "2345f6a174b09fd0466dcab418aa8b65d051e19c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2fa99b66_a727abeb",
+        "filename": "android/android-emu/android/car-cluster.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1290474
+      },
+      "writtenOn": "2018-11-27T23:35:30Z",
+      "side": 1,
+      "message": "Same here, make this uint8_t.",
+      "range": {
+        "startLine": 125,
+        "startChar": 41,
+        "endLine": 125,
+        "endChar": 45
+      },
+      "revId": "2345f6a174b09fd0466dcab418aa8b65d051e19c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1566c653_9d6fa978",
+        "filename": "android/android-emu/android/car-cluster.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1290474
+      },
+      "writtenOn": "2018-11-27T23:35:30Z",
+      "side": 1,
+      "message": "If you made this uint8_t then you wouldn\u0027t need to cast the msg pointer you receive. It also makes it clear that you\u0027re expecting an array of bytes.",
+      "range": {
+        "startLine": 18,
+        "startChar": 45,
+        "endLine": 18,
+        "endChar": 49
+      },
+      "revId": "2345f6a174b09fd0466dcab418aa8b65d051e19c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
