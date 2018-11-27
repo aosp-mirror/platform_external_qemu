@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "79a197f9_cd8ffdd1",
+        "filename": "android/third_party/astc-codec/CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-11-27T20:52:10Z",
+      "side": 0,
+      "message": "To confirm, unittests still run as part of the build, right?  Does the new cmakelists generate a test binary in the objs directory?",
+      "range": {
+        "startLine": 39,
+        "startChar": 15,
+        "endLine": 39,
+        "endChar": 38
+      },
+      "revId": "af17c4cf0ef8cd88c819e2f8cee99df2a743db17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
