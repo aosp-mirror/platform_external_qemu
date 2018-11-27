@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "088f7966_d859cb55",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-27T19:52:15Z",
+      "side": 1,
+      "message": "Is it safe to override just .size?",
+      "range": {
+        "startLine": 66,
+        "startChar": 16,
+        "endLine": 66,
+        "endChar": 25
+      },
+      "revId": "63954ec9aaf541a62cc8bce198ac58bece35559d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
