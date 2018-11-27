@@ -22,6 +22,30 @@
       "revId": "63954ec9aaf541a62cc8bce198ac58bece35559d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7483a735_87359a1c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-11-27T19:56:24Z",
+      "side": 1,
+      "message": "Should be; this is part of the struct that is returned by the Vulkan implementation to tell the app how much memory could maximally be in use. The other field, flags, should be ignored and passed through as we don\u0027t want to mess with device-localness / multi-instanceness at least for now.",
+      "parentUuid": "088f7966_d859cb55",
+      "range": {
+        "startLine": 66,
+        "startChar": 16,
+        "endLine": 66,
+        "endChar": 25
+      },
+      "revId": "63954ec9aaf541a62cc8bce198ac58bece35559d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
