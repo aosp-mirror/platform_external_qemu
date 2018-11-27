@@ -33,6 +33,24 @@
       "revId": "774407664575b717c481ffd6352a472cc86b8e89",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "728aaedd_e1a8ebea",
+        "filename": "android/android-emugl/shared/emugl/common/CMakeLists.txt",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-11-27T19:08:35Z",
+      "side": 1,
+      "message": "If it is public, windows build will complain there are multiple definitions of functions defined in android-emu-base. I assume the problem is that we should not allow emugl_common export symbols from android-emu-base. A better way to solve this is to have android-emu-base-shared probably.",
+      "parentUuid": "ff496b03_5f28550f",
+      "revId": "774407664575b717c481ffd6352a472cc86b8e89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
