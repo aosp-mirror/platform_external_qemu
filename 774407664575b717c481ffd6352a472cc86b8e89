@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab9f0da0_4c83e664",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/CMakeLists.txt",
+        "patchSetId": 4
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-27T19:01:37Z",
+      "side": 1,
+      "message": "It looks like android-emu-base is a requirement for one of the existing libraries in this list.",
+      "revId": "774407664575b717c481ffd6352a472cc86b8e89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ff496b03_5f28550f",
+        "filename": "android/android-emugl/shared/emugl/common/CMakeLists.txt",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-11-27T19:01:37Z",
+      "side": 1,
+      "message": "You can just add android-emu-base after emugl_base. Why did it become private?",
+      "revId": "774407664575b717c481ffd6352a472cc86b8e89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
