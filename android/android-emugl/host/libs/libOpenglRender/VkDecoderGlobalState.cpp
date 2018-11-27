@@ -52,7 +52,22 @@ public:
         m_vk->vkGetPhysicalDeviceMemoryProperties(
             physicalDevice, pMemoryProperties);
 
+        // Pick a max heap size that will work around
+        // drivers that give bad suggestions (such as 0xFFFFFFFFFFFFFFFF for the heap size)
+        // plus won't break the bank on 32-bit userspace.
+        static constexpr VkDeviceSize kMaxSafeHeapSize =
+            2ULL * 1024ULL * 1024ULL * 1024ULL;
+
         for (uint32_t i = 0; i < pMemoryProperties->memoryTypeCount; ++i) {
+            uint32_t heapIndex = pMemoryProperties->memoryTypes[i].heapIndex;
+            auto& heap = pMemoryProperties->memoryHeaps[heapIndex];
+
+            if (heap.size > kMaxSafeHeapSize) {
+                heap.size = kMaxSafeHeapSize;
+            }
+
+            // Un-advertise coherent mappings until goldfish_address_space
+            // is landed.
             pMemoryProperties->memoryTypes[i].propertyFlags =
                 pMemoryProperties->memoryTypes[i].propertyFlags &
                 ~(VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -67,7 +82,7 @@ public:
         VkResult result =
             m_vk->vkCreateDevice(
                 physicalDevice, pCreateInfo, pAllocator, pDevice);
-        
+
         if (result != VK_SUCCESS) {
             // Allow invalid usage.
             return result;
@@ -108,7 +123,7 @@ public:
 
         VkResult result =
             m_vk->vkAllocateMemory(device, pAllocateInfo, pAllocator, pMemory);
-        
+
         if (result != VK_SUCCESS) {
             return result;
         }
@@ -126,7 +141,7 @@ public:
 
         auto memProps =
                 android::base::find(mPhysicalDeviceMemoryProperties, *physdev);
-        
+
         if (!memProps) {
             // If this fails, we crash, as we assume that the memory properties
             // map should have the info.
@@ -152,14 +167,14 @@ public:
         VkMemoryPropertyFlags flags =
                 memProps->memoryTypes[pAllocateInfo->memoryTypeIndex]
                         .propertyFlags;
-        
+
         bool shouldMap = flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
 
         if (!shouldMap) return result;
 
         VkResult mapResult = m_vk->vkMapMemory(device, *pMemory, 0,
                                                mapInfo.size, 0, &mapInfo.ptr);
-    
+
 
         if (mapResult != VK_SUCCESS) {
             return VK_ERROR_OUT_OF_HOST_MEMORY;
