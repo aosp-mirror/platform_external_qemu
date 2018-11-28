@@ -2387,8 +2387,6 @@ void qemu_user_backed_ram_unmap(uint64_t gpa, uint64_t size)
     s_user_backed_ram_unmap(gpa, size);
 }
 
-void qemu_user_backed_ram_unmap(hwaddr gpa, hwaddr size);
-
 static void reclaim_ramblock(RAMBlock *block)
 {
     if (block->flags & RAM_PREALLOC) {

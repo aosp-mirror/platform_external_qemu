@@ -948,6 +948,8 @@ static void kvm_user_backed_ram_unmap(uint64_t gpa, uint64_t size) {
         qemu_abort("%s: attempted to map RAM before KVM initialized\n", __func__);
     }
 
+    kml = &kvm_state->memory_listener;
+
     slot = kvm_lookup_matching_slot(kml, gpa, size);
     if (!slot) {
         return;
