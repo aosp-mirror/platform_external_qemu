@@ -551,7 +551,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     }
 
     // Start up the single sync thread if GLAsyncSwap enabled
-    if (emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap)) {
+    if (emugl::emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap)) {
         SyncThread::get();
     }
 
@@ -588,8 +588,8 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_useSubWindow(useSubWindow),
       m_fpsStats(getenv("SHOW_FPS_STATS") != nullptr),
       m_colorBufferHelper(new ColorBufferHelper(this)),
-      m_refCountPipeEnabled(
-              emugl_feature_is_enabled(android::featurecontrol::RefCountPipe)),
+      m_refCountPipeEnabled(emugl::emugl_feature_is_enabled(
+              android::featurecontrol::RefCountPipe)),
       m_readbackThread([this](FrameBuffer::Readback&& readback) {
           return sendReadbackWorkerCmd(readback);
       }),

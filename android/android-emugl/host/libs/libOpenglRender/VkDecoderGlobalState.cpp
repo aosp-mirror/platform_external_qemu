@@ -145,7 +145,7 @@ public:
         if (!memProps) {
             // If this fails, we crash, as we assume that the memory properties
             // map should have the info.
-            emugl_crash_reporter(
+            emugl::emugl_crash_reporter(
                     "FATAL: Could not get memory properties for "
                     "VkPhysicalDevice");
         }
