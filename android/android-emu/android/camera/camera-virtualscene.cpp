@@ -223,8 +223,8 @@ int VirtualSceneCameraDevice::readFrame(ClientFrame* resultFrame,
 }
 
 bool VirtualSceneCameraDevice::initializeEgl() {
-    mEglDispatch = LazyLoadedEGLDispatch::get();
-    mGles2 = LazyLoadedGLESv2Dispatch::get();
+    mEglDispatch = emugl::LazyLoadedEGLDispatch::get();
+    mGles2 = emugl::LazyLoadedGLESv2Dispatch::get();
     mEglDisplay = mEglDispatch->eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
     if (mEglDisplay == EGL_NO_DISPLAY) {

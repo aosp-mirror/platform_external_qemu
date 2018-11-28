@@ -217,9 +217,10 @@ static void blitFromCurrentReadBufferANDROID(EGLImage image) {
     ImagePtr img = s_eglIface->getEGLImage(imagehndl);
     if (!img ||
         !ctx->shareGroup().get()) {
-        emugl_crash_reporter("FATAL: blitFromCurrentReadBufferANDROID: "
-                             "image (%p) or share group (%p) not found",
-                             img.get(), ctx->shareGroup().get());
+        emugl::emugl_crash_reporter(
+                "FATAL: blitFromCurrentReadBufferANDROID: "
+                "image (%p) or share group (%p) not found",
+                img.get(), ctx->shareGroup().get());
         return;
     }
 

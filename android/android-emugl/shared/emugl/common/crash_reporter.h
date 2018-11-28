@@ -17,6 +17,9 @@
 #pragma once
 
 #include "OpenglRender/render_api_types.h"
+namespace emugl {
 
 extern emugl_crash_reporter_t emugl_crash_reporter;
 void set_emugl_crash_reporter(emugl_crash_reporter_t crash_reporter);
+
+}  // namespace emugl
