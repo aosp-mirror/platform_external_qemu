@@ -24,6 +24,8 @@ PROGRAM_PARAMETERS=""
 PROGRAM_DESCRIPTION=\
 "Build dEQP against emulator combined guest/host driver."
 
+option_register_var "--sanitizer=<clang-fsanitizer-arg>" OPT_SANITIZER "Build dEQP with sanitizer(s) enabled"
+
 aosp_dir_register_option
 package_builder_register_options
 
@@ -70,12 +72,18 @@ cp -r $EMU_DIR/android/scripts/deqp-src-to-copy/* $DEQP_DIR/
 
 cd $DEQP_BUILD_DIR
 
+SANITIZER=""
+if [ "$OPT_SANITIZER" ]; then
+SANITIZER="-fsanitize=$OPT_SANITIZER"
+fi
+
 cmake $DEQP_BUILD_DIR $DEQP_DIR \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DDEQP_TARGET=aemu \
     -DGOLDFISH_OPENGL_INCLUDE_DIR=$GOLDFISH_OPENGL_DIR/system/include \
     -DAEMU_INCLUDE_DIR=$EMU_DIR/android/android-emugl/combined \
     -DAEMU_LIBRARY_DIR=$EMU_OUTPUT_DIR/lib64 \
+    -DAEMU_SANITIZER=$SANITIZER \
 
 make -j $NUM_JOBS
 
