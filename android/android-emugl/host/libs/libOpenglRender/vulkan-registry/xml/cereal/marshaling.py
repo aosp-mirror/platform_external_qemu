@@ -301,13 +301,21 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         if vulkanType.isHandleType() and self.mapHandles:
             self.genHandleMappingCall(vulkanType, access, lenAccess)
         else:
-            if lenAccess is not None:
-                finalLenExpr = "%s * %s" % (
-                    lenAccess, self.cgen.sizeofExpr(vulkanType.getForValueAccess()))
+            if self.typeInfo.isNonAbiPortableType(vulkanType.typeName):
+                if lenAccess is not None:
+                    self.cgen.beginFor("uint32_t i = 0", "i < (uint32_t)%s" % lenAccess, "++i")
+                    self.genPrimitiveStreamCall(vulkanType.getForValueAccess(), "%s[i]" % access)
+                    self.cgen.endFor()
+                else:
+                    self.genPrimitiveStreamCall(vulkanType.getForValueAccess(), "(*%s)" % access)
             else:
-                finalLenExpr = self.cgen.sizeofExpr(vulkanType.getForValueAccess())
-
-            self.genStreamCall(vulkanType, access, finalLenExpr)
+                if lenAccess is not None:
+                    finalLenExpr = "%s * %s" % (
+                        lenAccess, self.cgen.sizeofExpr(vulkanType.getForValueAccess()))
+                else:
+                    finalLenExpr = "%s" % (
+                        self.cgen.sizeofExpr(vulkanType.getForValueAccess()))
+                self.genStreamCall(vulkanType, access, finalLenExpr)
 
     def onValue(self, vulkanType):
         if vulkanType.isHandleType() and self.mapHandles:
