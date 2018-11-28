@@ -43,6 +43,9 @@
 
 using android::base::AutoLock;
 using android::base::Lock;
+using emugl::emugl_feature_is_enabled;
+using emugl::emugl_sync_device_exists;
+using emugl::emugl_sync_register_trigger_wait;
 
 #define DEBUG_GRALLOC_SYNC 0
 #define DEBUG_EGL_SYNC 0
