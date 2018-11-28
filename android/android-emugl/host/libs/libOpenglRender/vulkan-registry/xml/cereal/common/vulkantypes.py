@@ -125,6 +125,7 @@ for h in HANDLE_TYPES:
 
 CUSTOM_CREATE_APIS = [
     "vkAllocateMemory",
+    "vkCreateDevice",
 ]
 
 EXCLUDED_APIS = [
@@ -440,7 +441,7 @@ class VulkanAPI(object):
         return res
 
     def getRetVarExpr(self):
-        if self.retType == "void":
+        if self.retType.typeName == "void":
             return None
         return "%s_%s_return" % (self.name, self.retType.typeName)
 
