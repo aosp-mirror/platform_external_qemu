@@ -18,6 +18,8 @@
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
+namespace emugl {
+
 // Helper classes to hold global EGLDispatch, GLESv1Dispatch and GLESv2Dispatch
 // objects, initialized lazily in a thread-safe way. The instances are leaked on
 // program exit.
@@ -56,3 +58,5 @@ struct LazyLoadedEGLDispatch {
 private:
     bool mValid;
 };
+
+}  // namespace emugl

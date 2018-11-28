@@ -44,6 +44,8 @@ static bool defaultDeviceExists() {
     return false;
 }
 
+namespace emugl {
+
 emugl_sync_create_timeline_t emugl_sync_create_timeline = defaultCreateTimeline;
 emugl_sync_create_fence_t emugl_sync_create_fence = defaultCreateFence;
 emugl_sync_timeline_inc_t emugl_sync_timeline_inc = defaultTimelineInc;
@@ -74,3 +76,5 @@ void set_emugl_sync_register_trigger_wait(emugl_sync_register_trigger_wait_t f) 
 void set_emugl_sync_device_exists(emugl_sync_device_exists_t f) {
     emugl_sync_device_exists = f;
 }
+
+}  // namespace emugl

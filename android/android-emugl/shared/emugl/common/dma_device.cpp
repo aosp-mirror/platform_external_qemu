@@ -11,6 +11,8 @@ static void defaultDmaInvalidateHostMappings() { }
 
 static void defaultDmaUnlock(uint64_t addr) { }
 
+namespace emugl {
+
 emugl_dma_add_buffer_t g_emugl_dma_add_buffer = defaultDmaAddBuffer;
 emugl_dma_remove_buffer_t g_emugl_dma_remove_buffer = defaultDmaRemoveBuffer;
 emugl_dma_get_host_addr_t g_emugl_dma_get_host_addr = defaultDmaGetHostAddr;
@@ -36,3 +38,5 @@ void set_emugl_dma_invalidate_host_mappings(emugl_dma_invalidate_host_mappings_t
 void set_emugl_dma_unlock(emugl_dma_unlock_t f) {
     g_emugl_dma_unlock = f;
 }
+
+}  // namespace emugl
