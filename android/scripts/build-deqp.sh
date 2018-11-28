@@ -42,6 +42,7 @@ DEQP_DIR=$AOSP_DIR/external/deqp
 DEQP_BUILD_DIR=$AOSP_DIR/external/deqp/build
 GOLDFISH_OPENGL_DIR=$AOSP_DIR/device/generic/goldfish-opengl
 EMU_DIR=$AOSP_DIR/external/qemu
+EMU_CUSTOM_DEQP_SRC_DIR=$AOSP_DIR/external/qemu/android/scripts/deqp-src-to-copy
 EMU_OUTPUT_DIR=$AOSP_DIR/external/qemu/objs
 
 rm -rf $DEQP_BUILD_DIR
@@ -66,9 +67,20 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     esac
 done
 
-log "Copying custom dEQP sources for Android Emulator."
+log "Copying/patching custom dEQP sources for Android Emulator."
 
-cp -r $EMU_DIR/android/scripts/deqp-src-to-copy/* $DEQP_DIR/
+cd $DEQP_DIR
+
+cp -r $EMU_CUSTOM_DEQP_SRC_DIR/* .
+
+for f in *.patch; do
+    log "Applying patch: $f"
+    if git apply $f; then
+        log "Successfully applied $f"
+    else
+        log "WARNING: could not apply $f"
+    fi
+done
 
 cd $DEQP_BUILD_DIR
 
