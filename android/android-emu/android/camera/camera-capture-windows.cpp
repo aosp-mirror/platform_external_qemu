@@ -50,36 +50,34 @@
 using namespace Microsoft::WRL;
 using namespace android::base;
 
-#ifndef _MSC_VER
 // These are already defined in msvc
-static constexpr GUID MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE = {
+static constexpr GUID ANDROID_MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE = {
         0xc60ac5fe,
         0x252a,
         0x478f,
         {0xa0, 0xef, 0xbc, 0x8f, 0xa5, 0xf7, 0xca, 0xd3}};
-static constexpr GUID MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK = {
+static constexpr GUID ANDROID_MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK = {
         0x58f0aad8,
         0x22bf,
         0x4f8a,
         {0xbb, 0x3d, 0xd2, 0xc4, 0x97, 0x8c, 0x6e, 0x2f}};
-static constexpr GUID MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID = {
+static constexpr GUID ANDROID_MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID = {
         0x8ac3587a,
         0x4ae7,
         0x42d8,
         {0x99, 0xe0, 0x0a, 0x60, 0x13, 0xee, 0xf9, 0x0f}};
 
 // Note: These are only available on Win8 and above.
-static constexpr GUID MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING = {
+static constexpr GUID ANDROID_MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING = {
         0xf81da2c,
         0xb537,
         0x4672,
         {0xa8, 0xb2, 0xa6, 0x81, 0xb1, 0x73, 0x7, 0xa3}};
-static constexpr GUID CLSID_VideoProcessorMFT = {
+static constexpr GUID ANDROID_CLSID_VideoProcessorMFT = {
         0x88753b26,
         0x5b24,
         0x49bd,
         {0xb2, 0xe7, 0xc, 0x44, 0x5c, 0x78, 0xc9, 0x82}};
-#endif  // !_MSC_VER
 
 static constexpr GUID kGuidNull = {};
 static constexpr uint32_t kMaxRetries = 30;
@@ -303,10 +301,10 @@ public:
           mfCreateMediaType("mfplat.dll", "MFCreateMediaType") {
         if (isValid()) {
             // Detect if this platform supports the VideoProcessorMFT, used by
-            // MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING.
+            // ANDROID_MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING.
             ComPtr<IUnknown> obj;
             const HRESULT hr =
-                    CoCreateInstance(CLSID_VideoProcessorMFT, nullptr,
+                    CoCreateInstance(ANDROID_CLSID_VideoProcessorMFT, nullptr,
                                      CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&obj));
 
             if (SUCCEEDED(hr)) {
@@ -699,8 +697,8 @@ int MediaFoundationCameraDevice::enumerateDevices(MFInitialize& mf,
     }
 
     // Get webcam media sources.
-    hr = attributes->SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
-                             MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
+    hr = attributes->SetGUID(ANDROID_MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
+                             ANDROID_MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
     if (FAILED(hr)) {
         LOG(INFO) << "Failed setting attributes, hr=" << hrToString(hr);
         return -1;
@@ -729,7 +727,7 @@ int MediaFoundationCameraDevice::enumerateDevices(MFInitialize& mf,
             WCHAR* symbolicLink = nullptr;
             UINT32 symbolicLinkLength = 0;
             hr = devices[i]->GetAllocatedString(
-                    MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
+                    ANDROID_MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
                     &symbolicLink, &symbolicLinkLength);
 
             if (SUCCEEDED(hr)) {
@@ -819,15 +817,15 @@ int MediaFoundationCameraDevice::startCapturing(uint32_t pixelFormat,
     }
 
     // Specify that we want to create a webcam with a specific id.
-    hr = attributes->SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
-                             MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
+    hr = attributes->SetGUID(ANDROID_MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
+                             ANDROID_MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
     if (FAILED(hr)) {
         LOG(INFO) << "Failed setting attributes, hr=" << hrToString(hr);
         return -1;
     }
 
     hr = attributes->SetString(
-            MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
+            ANDROID_MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK,
             Win32UnicodeString(mDeviceName).data());
     if (FAILED(hr)) {
         LOG(INFO) << "Failed setting attributes, hr=" << hrToString(hr);
@@ -1149,7 +1147,7 @@ HRESULT MediaFoundationCameraDevice::createSourceReader(
     if (SUCCEEDED(hr)) {
         if (mMF.getMFApi().supportsAdvancedVideoProcessor()) {
             hr = attributes->SetUINT32(
-                    MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING, TRUE);
+                    ANDROID_MF_SOURCE_READER_ENABLE_ADVANCED_VIDEO_PROCESSING, TRUE);
         } else {
             hr = attributes->SetUINT32(MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING,
                                        TRUE);
