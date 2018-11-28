@@ -101,11 +101,18 @@ def emit_handlemap_create(typeInfo, param, cgen):
         lambda vtype: typeInfo.isHandleType(vtype.typeName)
     ))
 
+def custom_encoder_args(api):
+    params = ["this"]
+    if api.getRetVarExpr() is not None:
+        params.append(api.getRetVarExpr())
+    return params
+
 def emit_custom_create(typeInfo, api, cgen):
     if api.name in CUSTOM_CREATE_APIS:
         cgen.funcCall(
             None,
             "goldfish_" + api.name,
+            custom_encoder_args(api) + \
             [p.paramName for p in api.parameters])
 
 def emit_handlemap_destroy(typeInfo, param, cgen):
@@ -195,6 +202,9 @@ def emit_parameter_encode_read(typeInfo, api, cgen):
             cgen.stmt(
                 "%s->unsetHandleMapping()" % STREAM)
 
+def emit_custom_create_destroy(typeInfo, api, cgen):
+    encodingParams = EncodingParameters(api)
+
     for p in encodingParams.toCreate:
         emit_custom_create(typeInfo, api, cgen)
 
@@ -228,10 +238,15 @@ def emit_default_encoding(typeInfo, api, cgen):
     emit_parameter_encode_do_parameter_write(typeInfo, api, cgen)
     emit_parameter_encode_read(typeInfo, api, cgen)
     emit_return_unmarshal(typeInfo, api, cgen)
+    emit_custom_create_destroy(typeInfo, api, cgen)
     emit_return(typeInfo, api, cgen)
 
 def emit_only_goldfish_custom(typeInfo, api, cgen):
-    cgen.vkApiCall(api, customPrefix="goldfish_")
+    cgen.vkApiCall( \
+        api,
+        customPrefix="goldfish_",
+        customParameters=custom_encoder_args(api) + \
+            [p.paramName for p in api.parameters])
     emit_return(typeInfo, api, cgen)
 
 ## Custom encoding definitions##################################################
