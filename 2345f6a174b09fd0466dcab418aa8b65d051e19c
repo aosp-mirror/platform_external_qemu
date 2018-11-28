@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "bb3449ff_1581a524",
+        "filename": "android/android-emu/android/car-cluster.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-28T01:06:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7378087f_b2be73b8",
+      "range": {
+        "startLine": 51,
+        "startChar": 34,
+        "endLine": 51,
+        "endChar": 47
+      },
+      "revId": "2345f6a174b09fd0466dcab418aa8b65d051e19c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "42ae77fe_025a675d",
         "filename": "android/android-emu/android/car-cluster.cpp",
         "patchSetId": 4
@@ -93,6 +117,30 @@
       "revId": "2345f6a174b09fd0466dcab418aa8b65d051e19c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eb6d50ac_588d1273",
+        "filename": "android/android-emu/android/car-cluster.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-28T01:06:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "42ae77fe_025a675d",
+      "range": {
+        "startLine": 57,
+        "startChar": 8,
+        "endLine": 57,
+        "endChar": 19
+      },
+      "revId": "2345f6a174b09fd0466dcab418aa8b65d051e19c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -119,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "28ae9da4_ab1c035d",
+        "filename": "android/android-emu/android/car-cluster.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-28T01:06:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2fa99b66_a727abeb",
+      "range": {
+        "startLine": 125,
+        "startChar": 41,
+        "endLine": 125,
+        "endChar": 45
+      },
+      "revId": "2345f6a174b09fd0466dcab418aa8b65d051e19c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1566c653_9d6fa978",
         "filename": "android/android-emu/android/car-cluster.h",
         "patchSetId": 4
@@ -142,6 +214,30 @@
     },
     {
       "key": {
+        "uuid": "892174af_68b6500f",
+        "filename": "android/android-emu/android/car-cluster.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-28T01:06:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1566c653_9d6fa978",
+      "range": {
+        "startLine": 18,
+        "startChar": 45,
+        "endLine": 18,
+        "endChar": 49
+      },
+      "revId": "2345f6a174b09fd0466dcab418aa8b65d051e19c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b31641c1_72757d34",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
         "patchSetId": 4
@@ -162,6 +258,30 @@
       "revId": "2345f6a174b09fd0466dcab418aa8b65d051e19c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "819adda9_1f27abf3",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-11-28T01:06:11Z",
+      "side": 1,
+      "message": "Oops, forgot to take this out. It\u0027ll be used in a later implementation though.",
+      "parentUuid": "b31641c1_72757d34",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 34
+      },
+      "revId": "2345f6a174b09fd0466dcab418aa8b65d051e19c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
