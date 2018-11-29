@@ -450,6 +450,30 @@
     },
     {
       "key": {
+        "uuid": "121ff468_f48d49e9",
+        "filename": "android/android-emugl/combined/toplevel_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-29T22:48:04Z",
+      "side": 1,
+      "message": "Could you please fix one? And please allocate it with std::make_unique, if available.",
+      "parentUuid": "8d5c17aa_09bc1863",
+      "range": {
+        "startLine": 32,
+        "startChar": 12,
+        "endLine": 32,
+        "endChar": 13
+      },
+      "revId": "9244f8035cd6a5cb5859448dbf7b9a4bb9476d38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "af5fc044_6838a6e3",
         "filename": "android/android-emugl/shared/emugl/common/gl_object_counter.cpp",
         "patchSetId": 7
