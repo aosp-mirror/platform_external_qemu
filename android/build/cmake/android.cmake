@@ -86,6 +86,39 @@ function(android_add_library name)
   add_library(${name} ${${name}_src})
 endfunction()
 
+
+# Discovers all the targets that are registered by this subdirectory.
+#
+# result: The variable containing all the targets defined by this project
+# subdir: The directory of interest
+function(android_discover_targets result subdir)
+  if (CMAKE_VERSION VERSION_LESS "3.7.0")
+    message(FATAL_ERROR "This function cannot be used by older cmake versions (${CMAKE_VERSION}<3.7.0)")
+  endif()
+  get_directory_property(subdirs DIRECTORY "${subdir}" SUBDIRECTORIES)
+  foreach(subdir IN LISTS subdirs)
+    android_discover_targets(${result} "${subdir}")
+  endforeach()
+  get_property(targets_in_dir DIRECTORY "${subdir}" PROPERTY BUILDSYSTEM_TARGETS)
+  set(${result} ${${result}} ${targets_in_dir} PARENT_SCOPE)
+endfunction()
+
+# Adds an external project, transforming all external "executables" to include the runtime properties.
+# On linux for example this will set the rpath to find libc++
+#
+# NOTE: This function requires CMake version > 3.7
+function(android_add_subdirectory external_directory name)
+  get_filename_component(abs_dir ${external_directory} ABSOLUTE)
+  add_subdirectory(${abs_dir} ${name})
+  android_discover_targets(targets ${abs_dir})
+  foreach(target IN LISTS targets)
+    get_target_property(tgt_type ${target} TYPE)
+    if(tgt_type STREQUAL "EXECUTABLE")
+      android_target_properties(${target} all "${RUNTIME_OS_PROPERTIES}")
+    endif()
+  endforeach()
+endfunction()
+
 # Adds a shared library with the given name. The source files for this target will be resolved as follows: The variable
 # ${name}_src should have the set of sources The variable ${name}_${ANDROID_TARGET_TAG}_src should have the sources only
 # specific for the given target.
