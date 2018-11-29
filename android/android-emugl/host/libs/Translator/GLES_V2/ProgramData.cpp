@@ -742,6 +742,9 @@ static bool sCheckVariables(ProgramData* pData,
 static void sInitializeUniformLocs(ProgramData* pData,
                                    const std::vector<sh::ShaderVariable>& uniforms);
 
+//#define LOG_LINE fprintf(stderr, "%s, %s %d\n", __func__, __FILE__, __LINE__);
+#define LOG_LINE (void)0;
+
 bool ProgramData::validateLink(ShaderParser* frag, ShaderParser* vert) {
     const ANGLEShaderParser::ShaderLinkInfo& fragLinkInfo =
         frag->getShaderLinkInfo();
@@ -751,9 +754,21 @@ bool ProgramData::validateLink(ShaderParser* frag, ShaderParser* vert) {
     bool res = true;
 
     res = res && sCheckUndecl(this, fragLinkInfo, vertLinkInfo);
+    if (!res) {
+        LOG_LINE;
+    }
     res = res && sCheckLimits(this, ANGLEShaderParser::kResources,
                               fragLinkInfo, vertLinkInfo);
+    if (!res) {
+        LOG_LINE;
+    }
     res = res && sCheckVariables(this, fragLinkInfo, vertLinkInfo);
+    if (!res) {
+        LOG_LINE;
+        /*fprintf(stderr, "%s\n", validationInfoLog.c_str());
+        fprintf(stderr, "%s\n", frag->getOriginalSrc().c_str());
+        fprintf(stderr, "%s\n", vert->getOriginalSrc().c_str());*/
+    }
 
     return res;
 }
@@ -833,14 +848,14 @@ static bool sVarCheck(ProgramData* pData,
                       const sh::ShaderVariable& b) {
     bool res = true;
 
-    if (qualifier == ValidationQualifier::UNIFORM &&
+    /*if (qualifier == ValidationQualifier::UNIFORM &&
         a.precision != b.precision) {
         std::ostringstream err;
         err << sQualifierString(qualifier) << " " << a.name << " ";
         err << kDifferentPrecisionErr;
         pData->appendValidationErrMsg(err);
         res = false;
-    }
+    }*/
 
     if (a.isStruct() != b.isStruct() ||
         a.type != b.type) {
@@ -972,6 +987,9 @@ static bool sCheckVariables(ProgramData* pData,
         for (const auto& belt : b.uniforms) {
             if (aelt.name != belt.name) continue;
             res = res && sVarCheck(pData, ValidationQualifier::UNIFORM, aelt, belt);
+            if (!res) {
+                LOG_LINE;
+            }
         }
     }
 
@@ -979,6 +997,9 @@ static bool sCheckVariables(ProgramData* pData,
         for (const auto& belt : b.varyings) {
             if (aelt.name != belt.name) continue;
             res = res && sVarCheck(pData, ValidationQualifier::VARYING, aelt, belt);
+            if (!res) {
+                LOG_LINE;
+            }
         }
     }
 
@@ -986,6 +1007,9 @@ static bool sCheckVariables(ProgramData* pData,
         for (const auto& belt : b.interfaceBlocks) {
             if (aelt.name != belt.name) continue;
             res = res && sInterfaceBlockCheck(pData, aelt, belt);
+            if (!res) {
+                LOG_LINE;
+            }
         }
     }
 

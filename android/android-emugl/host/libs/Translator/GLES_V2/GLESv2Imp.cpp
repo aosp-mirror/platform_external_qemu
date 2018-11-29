@@ -702,6 +702,7 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
             ctx->dispatcher().glGetShaderiv(globalShaderName,GL_COMPILE_STATUS,&compileStatus);
             sp->setCompileStatus(compileStatus == GL_FALSE ? false : true);
         } else {
+            fprintf(stderr, "%s: Warning: shader compile failed!\n", __func__);
             ctx->dispatcher().glCompileShader(globalShaderName);
             sp->setCompileStatus(false);
             ctx->dispatcher().glGetShaderiv(globalShaderName,GL_COMPILE_STATUS,&compileStatus);
@@ -2794,6 +2795,8 @@ GL_APICALL void  GL_APIENTRY glLineWidth(GLfloat width){
 #endif
 }
 
+#define LOG_LINE fprintf(stderr, "%s, %s %d\n", __func__, __FILE__, __LINE__);
+
 GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
     GET_CTX_V2();
     GLint linkStatus = GL_FALSE;
@@ -2815,7 +2818,9 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
             ctx->dispatcher().glLinkProgram(globalProgramName);
             ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
         } else {
+            LOG_LINE
             if (vertexShader != 0 && fragmentShader!=0) {
+                LOG_LINE
                 auto fragObjData = ctx->shareGroup()->getObjectData(
                         NamedObjectType::SHADER_OR_PROGRAM, fragmentShader);
                 auto vertObjData = ctx->shareGroup()->getObjectData(
@@ -2824,10 +2829,13 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
                 ShaderParser* vertSp = (ShaderParser*)vertObjData;
 
                 if(fragSp->getCompileStatus() && vertSp->getCompileStatus()) {
+                    LOG_LINE
                     if (programData->validateLink(fragSp, vertSp)) {
+                        LOG_LINE
                         ctx->dispatcher().glLinkProgram(globalProgramName);
                         ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
                     } else {
+                        LOG_LINE
                         programData->setLinkStatus(GL_FALSE);
                         programData->setErrInfoLog();
                         return;
