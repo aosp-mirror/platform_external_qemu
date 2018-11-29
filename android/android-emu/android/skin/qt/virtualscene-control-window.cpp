@@ -54,6 +54,30 @@ static const char* kTextStyleFormatString =
 
 const QAndroidSensorsAgent* VirtualSceneControlWindow::sSensorsAgent = nullptr;
 
+static QPoint setMousePosition(QPoint position) {
+#ifdef __APPLE__
+    CGPoint pos;
+    pos.x = position.x();
+    pos.y = position.y();
+
+    // On OS X 10.14, QCursor::setPos requires accessibility permissions and may
+    // silently fail if access is denied (without ever reprompting). Instead of
+    // setPos, use CGWarpMouseCursorPosition, which is intended to recenter the
+    // mouse position for mouselook in games.
+    if (CGWarpMouseCursorPosition(pos) == kCGErrorSuccess) {
+        CGAssociateMouseAndMouseCursorPosition(true);
+        return position;
+    } else {
+        // If this fails, return the current mouse position, which allows
+        // limited control but is bounded by screen edges.
+        return QCursor::pos();
+    }
+#else
+    QCursor::setPos(position);
+    return position;
+#endif
+}
+
 VirtualSceneControlWindow::VirtualSceneControlWindow(
         EmulatorQtWindow* emulatorWindow,
         ToolWindow* toolWindow)
@@ -188,8 +212,7 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
         parentWidget()->grabMouse(cursor);
 
         // Move cursor to the center of the window.
-        mPreviousMousePosition = getMouseCaptureCenter();
-        QCursor::setPos(mPreviousMousePosition);
+        mPreviousMousePosition = setMousePosition(getMouseCaptureCenter());
 
         // Qt only sends mouse move events when the mouse is in the application
         // bounds, set up a timer to poll for mouse position changes in case the
@@ -198,7 +221,7 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
     } else {
         mMousePoller.stop();
 
-        QCursor::setPos(mOriginalMousePosition);
+        setMousePosition(mOriginalMousePosition);
         parentWidget()->releaseMouse();
 
         if (mInputHandler) {
@@ -478,8 +501,7 @@ void VirtualSceneControlWindow::slot_virtualSceneInfoDialogHasBeenSeen() {
 
 void VirtualSceneControlWindow::updateMouselook() {
     QPoint offset = QCursor::pos() - mPreviousMousePosition;
-    mPreviousMousePosition = getMouseCaptureCenter();
-    QCursor::setPos(mPreviousMousePosition);
+    mPreviousMousePosition = setMousePosition(getMouseCaptureCenter());
 
     if (mInputHandler) {
         mInputHandler->mouseMove(offset.x(), offset.y());
