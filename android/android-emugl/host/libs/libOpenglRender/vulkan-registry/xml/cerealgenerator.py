@@ -150,6 +150,7 @@ LOCAL_CFLAGS += \\
     -DVK_NO_PROTOTYPES \\
 
 LOCAL_SRC_FILES := Resources.cpp \\
+    Validation.cpp \\
     VulkanStream.cpp \\
     VulkanHandleMapping.cpp \\
     ResourceTracker.cpp \\
@@ -166,6 +167,7 @@ class IOStream;
 #include "IOStream.h"
 #include "Resources.h"
 #include "ResourceTracker.h"
+#include "Validation.h"
 #include "VulkanStream.h"
 
 #include "android/base/AlignedBuf.h"
