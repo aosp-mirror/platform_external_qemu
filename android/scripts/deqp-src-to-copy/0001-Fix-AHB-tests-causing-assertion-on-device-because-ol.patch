@@ -1,0 +1,68 @@
+From eef85df63fcf727336d08db3ed125c848284c783 Mon Sep 17 00:00:00 2001
+From: Lingfeng Yang <lfy@google.com>
+Date: Wed, 28 Nov 2018 18:23:40 -0800
+Subject: [PATCH] Fix AHB tests causing assertion on device because old NDK
+
+Change-Id: I519353fc3ff345d077f3a86f807ca37ce5bea61b
+---
+ .../modules/vulkan/vktExternalMemoryUtil.cpp  | 31 +++++--------------
+ 1 file changed, 7 insertions(+), 24 deletions(-)
+
+diff --git a/external/vulkancts/modules/vulkan/vktExternalMemoryUtil.cpp b/external/vulkancts/modules/vulkan/vktExternalMemoryUtil.cpp
+index 1e8f82fec..40d1f1125 100644
+--- a/external/vulkancts/modules/vulkan/vktExternalMemoryUtil.cpp
++++ b/external/vulkancts/modules/vulkan/vktExternalMemoryUtil.cpp
+@@ -40,6 +40,8 @@
+ #   include <sys/system_properties.h>
+ #endif
+ 
++#define __ANDROID_API_O__ 26
++
+ #if (DE_OS == DE_OS_ANDROID) && defined(__ANDROID_API_O__) && (DE_ANDROID_API >= __ANDROID_API_O__)
+ #	include <android/hardware_buffer.h>
+ #	include "deDynamicLibrary.hpp"
+@@ -1167,36 +1169,17 @@ vk::Move<vk::VkImage> createExternalImage (const vk::DeviceInterface&					vkd,
+ #      define BUILT_WITH_ANDROID_P_HARDWARE_BUFFER 1
+ #  endif
+ 
+-static deInt32 androidGetSdkVersion()
+-{
+-	static deInt32 sdkVersion = -1;
+-	if (sdkVersion < 0)
+-	{
+-		char value[128] = {0};
+-		__system_property_get("ro.build.version.sdk", value);
+-		sdkVersion = static_cast<deInt32>(strtol(value, DE_NULL, 10));
+-		printf("SDK Version is %d\n", sdkVersion);
+-	}
+-	return sdkVersion;
+-}
+-
++// TODO: Support AHB for emulator build.
++// This is not needed in ToT dEQP as the latest NDK
++// can be used and api level 28 can be the build target.
+ static deInt32 checkAnbApiBuild()
+ {
+-	deInt32 sdkVersion = androidGetSdkVersion();
+-#if !defined(BUILT_WITH_ANDROID_HARDWARE_BUFFER)
+-	// When testing AHB on Android-O and newer the CTS must be compiled against API26 or newer.
+-	DE_TEST_ASSERT(!(sdkVersion >= 26)); /* __ANDROID_API_O__ */
+-#endif // !defined(BUILT_WITH_ANDROID_HARDWARE_BUFFER)
+-#if !defined(BUILT_WITH_ANDROID_P_HARDWARE_BUFFER)
+-	// When testing AHB on Android-P and newer the CTS must be compiled against API28 or newer.
+-	DE_TEST_ASSERT(!(sdkVersion >= 28)); /*__ANDROID_API_P__ */
+-#endif // !defined(BUILT_WITH_ANDROID_P_HARDWARE_BUFFER)
+-	return sdkVersion;
++    return 28;
+ }
+ 
+ bool AndroidHardwareBufferExternalApi::supportsAhb()
+ {
+-	return (checkAnbApiBuild() >= __ANDROID_API_O__);
++    return false;
+ }
+ 
+ AndroidHardwareBufferExternalApi::AndroidHardwareBufferExternalApi()
+-- 
+2.19.0.605.g01d371f741-goog
+
