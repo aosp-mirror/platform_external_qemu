@@ -175,20 +175,21 @@ class CodeGen(object):
     def leftline(self, code):
         self.code += code + "\n"
 
+    def makeCallExpr(self, funcName, parameters):
+        return funcName + "(%s)" % (", ".join(parameters))
+
     def funcCall(self, lhs, funcName, parameters):
         res = self.indent()
 
         if lhs is not None:
             res += lhs + " = "
 
-        res += funcName + "(%s);\n" % (", ".join(parameters))
-
+        res += self.makeCallExpr(funcName, parameters) + ";\n"
         self.code += res
 
     def funcCallRet(self, _lhs, funcName, parameters):
         res = self.indent()
-        res += "return " + funcName + "(%s);\n" % (", ".join(parameters))
-
+        res += "return " + self.makeCallExpr(funcName, parameters) + ";\n"
         self.code += res
 
     # Given a VulkanType object, generate a C type declaration
