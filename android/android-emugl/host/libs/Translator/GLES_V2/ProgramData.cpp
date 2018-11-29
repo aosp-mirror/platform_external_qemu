@@ -833,14 +833,14 @@ static bool sVarCheck(ProgramData* pData,
                       const sh::ShaderVariable& b) {
     bool res = true;
 
-    if (qualifier == ValidationQualifier::UNIFORM &&
+    /*if (qualifier == ValidationQualifier::UNIFORM &&
         a.precision != b.precision) {
         std::ostringstream err;
         err << sQualifierString(qualifier) << " " << a.name << " ";
         err << kDifferentPrecisionErr;
         pData->appendValidationErrMsg(err);
         res = false;
-    }
+    }*/
 
     if (a.isStruct() != b.isStruct() ||
         a.type != b.type) {
