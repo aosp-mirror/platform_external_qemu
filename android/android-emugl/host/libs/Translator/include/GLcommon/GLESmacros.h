@@ -51,4 +51,8 @@
 #define RET_AND_SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(func, ret) \
             RET_AND_SET_ERROR_IF(!ctx->dispatcher().func, GL_INVALID_OPERATION, ret)
 
+// Define the following flag to work around cocos2d rendering bug
+// BUG: 119568237
+#define TOLERATE_PROGRAM_LINK_ERROR 1
+
 #endif

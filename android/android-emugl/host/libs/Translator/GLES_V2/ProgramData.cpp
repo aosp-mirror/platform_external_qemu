@@ -21,10 +21,10 @@
 #include "android/base/files/StreamSerializing.h"
 #include "ANGLEShaderParser.h"
 #include "GLcommon/GLutils.h"
+#include "GLcommon/GLESmacros.h"
+#include "GLcommon/ShareGroup.h"
 
-#include <GLcommon/ShareGroup.h>
 #include <GLES3/gl31.h>
-
 #include <string.h>
 #include <unordered_set>
 
@@ -763,6 +763,9 @@ void ProgramData::setLinkStatus(GLint status) {
     mUniNameToGuestLoc.clear();
     mGuestLocToHostLoc.clear();
     mGuestLocToHostLoc[-1] = -1;
+#if defined(TOLERATE_PROGRAM_LINK_ERROR) && TOLERATE_PROGRAM_LINK_ERROR == 1
+    status = 1;
+#endif
     if (status) {
         std::vector<sh::ShaderVariable> allUniforms;
         bool is310 = false;

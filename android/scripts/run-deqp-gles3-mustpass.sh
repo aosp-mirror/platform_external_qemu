@@ -40,7 +40,8 @@ DEQP_DIR=$AOSP_DIR/external/deqp
 GLES3_CTS_MUSTPASS_CASELIST=$AOSP_DIR/external/deqp/android/cts/master/gles3-master.txt
 DEQP_BUILD_DIR=$AOSP_DIR/external/deqp/build
 DEQP_GLES3_EXEC_DIR=$DEQP_BUILD_DIR/modules/gles3
-DEQP_GLES3_EXEC_NAME="./deqp-gles3 --deqp-caselist-file=$GLES3_CTS_MUSTPASS_CASELIST"
+#DEQP_GLES3_EXEC_NAME="./deqp-gles3 --deqp-caselist-file=$GLES3_CTS_MUSTPASS_CASELIST"
+DEQP_GLES3_EXEC_NAME="./deqp-gles3 --deqp-case=dEQP-GLES3.functional.shaders.linkage.uniform.struct.*"
 
 cd $DEQP_GLES3_EXEC_DIR
 
