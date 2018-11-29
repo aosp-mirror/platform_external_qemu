@@ -183,6 +183,29 @@
       "revId": "9244f8035cd6a5cb5859448dbf7b9a4bb9476d38",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af5fc044_6838a6e3",
+        "filename": "android/android-emugl/shared/emugl/common/gl_object_counter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-29T02:50:57Z",
+      "side": 1,
+      "message": "Could you please initialize them with empty or crashing functions instead of leaving them zeroed?",
+      "range": {
+        "startLine": 21,
+        "startChar": 16,
+        "endLine": 21,
+        "endChar": 38
+      },
+      "revId": "9244f8035cd6a5cb5859448dbf7b9a4bb9476d38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
