@@ -474,6 +474,30 @@
     },
     {
       "key": {
+        "uuid": "07d4abb7_b0f6d040",
+        "filename": "android/android-emugl/combined/toplevel_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-11-29T22:52:59Z",
+      "side": 1,
+      "message": "I am not sure what difference will std::unique_ptr make here if I explicitly delete the object later. I need to make sure that before I verify the gl object counts, toplevel object is already deleted. \n\nI could do unique_ptr(new Toplevel()) then reset() but I am not sure what the difference would be.",
+      "parentUuid": "121ff468_f48d49e9",
+      "range": {
+        "startLine": 32,
+        "startChar": 12,
+        "endLine": 32,
+        "endChar": 13
+      },
+      "revId": "9244f8035cd6a5cb5859448dbf7b9a4bb9476d38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "af5fc044_6838a6e3",
         "filename": "android/android-emugl/shared/emugl/common/gl_object_counter.cpp",
         "patchSetId": 7
