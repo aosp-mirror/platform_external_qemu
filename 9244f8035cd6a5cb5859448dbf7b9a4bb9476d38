@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa1b282_1611c946",
+        "filename": "android/android-emu/android/opengl/GLObjectCounter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-29T02:47:40Z",
+      "side": 1,
+      "message": "Will it be set to zeroes?",
+      "range": {
+        "startLine": 38,
+        "startChar": 8,
+        "endLine": 38,
+        "endChar": 16
+      },
+      "revId": "9244f8035cd6a5cb5859448dbf7b9a4bb9476d38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b86afb02_c617ee07",
+        "filename": "android/android-emu/android/opengl/GLObjectCounter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-29T02:47:40Z",
+      "side": 1,
+      "message": "\u003e\u003d",
+      "range": {
+        "startLine": 44,
+        "startChar": 13,
+        "endLine": 44,
+        "endChar": 14
+      },
+      "revId": "9244f8035cd6a5cb5859448dbf7b9a4bb9476d38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ace732ea_f531cad6",
+        "filename": "android/android-emu/android/opengl/GLObjectCounter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-29T02:47:40Z",
+      "side": 1,
+      "message": "Is this required?",
+      "range": {
+        "startLine": 44,
+        "startChar": 15,
+        "endLine": 44,
+        "endChar": 22
+      },
+      "revId": "9244f8035cd6a5cb5859448dbf7b9a4bb9476d38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9185eb8c_9d578863",
+        "filename": "android/android-emu/android/opengl/GLObjectCounter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-29T02:47:40Z",
+      "side": 1,
+      "message": "\u003e\u003d",
+      "range": {
+        "startLine": 51,
+        "startChar": 13,
+        "endLine": 51,
+        "endChar": 14
+      },
+      "revId": "9244f8035cd6a5cb5859448dbf7b9a4bb9476d38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5bace420_0b8a53cd",
+        "filename": "android/android-emu/android/opengl/GLObjectCounter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-29T02:47:40Z",
+      "side": 1,
+      "message": "Maybe just return the vector here?",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 60,
+        "endChar": 4
+      },
+      "revId": "9244f8035cd6a5cb5859448dbf7b9a4bb9476d38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3efb3eb9_3fdaa972",
+        "filename": "android/android-emu/android/opengl/GLObjectCounter.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-29T02:47:40Z",
+      "side": 1,
+      "message": "std::begin(sGlobal-\u003emCounter), std::end(sGlobal-\u003emCounter)",
+      "range": {
+        "startLine": 63,
+        "startChar": 12,
+        "endLine": 63,
+        "endChar": 29
+      },
+      "revId": "9244f8035cd6a5cb5859448dbf7b9a4bb9476d38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8d5c17aa_09bc1863",
+        "filename": "android/android-emugl/combined/toplevel_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-29T02:47:40Z",
+      "side": 1,
+      "message": "std::unique_ptr",
+      "range": {
+        "startLine": 32,
+        "startChar": 12,
+        "endLine": 32,
+        "endChar": 13
+      },
+      "revId": "9244f8035cd6a5cb5859448dbf7b9a4bb9476d38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c7f1da8a_2a860f4c",
+        "filename": "android/android-emugl/combined/toplevel_unittest.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-11-29T02:47:40Z",
+      "side": 1,
+      "message": "Why is this change required?",
+      "range": {
+        "startLine": 32,
+        "startChar": 18,
+        "endLine": 32,
+        "endChar": 21
+      },
+      "revId": "9244f8035cd6a5cb5859448dbf7b9a4bb9476d38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
