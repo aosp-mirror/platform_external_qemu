@@ -46,6 +46,15 @@ private:
 
 VkEncoder::VkEncoder(IOStream *stream) :
     mImpl(new VkEncoder::Impl(stream)) { }
+
+#define VALIDATE_RET(retType, success, validate) \\
+    retType goldfish_vk_validateResult = validate; \\
+    if (goldfish_vk_validateResult != success) return goldfish_vk_validateResult; \\
+
+#define VALIDATE_VOID(validate) \\
+    VkResult goldfish_vk_validateResult = validate; \\
+    if (goldfish_vk_validateResult != VK_SUCCESS) return; \\
+
 """
 
 COUNTING_STREAM = "countingStream"
@@ -53,7 +62,30 @@ STREAM = "stream"
 RESOURCES = "resources"
 POOL = "pool"
 
+ENCODER_PREVALIDATED_APIS = [
+    "vkFlushMappedMemoryRanges",
+    "vkInvalidateMappedMemoryRanges",
+]
+
+SUCCESS_RET_TYPES = {
+    "VkResult" : "VK_SUCCESS",
+    # TODO: Put up success results for other return types here.
+}
+
 # Common components of encoding a Vulkan API call
+def emit_custom_prevalidate(typeInfo, api, cgen):
+    if api.name in ENCODER_PREVALIDATED_APIS:
+        if api.getRetTypeExpr() == "void":
+            cgen.stmt("VALIDATE_VOID(%s)" % \
+                cgen.makeCallExpr("validate_%s" % api.name,
+                    [p.paramName for p in api.parameters]))
+        else:
+            cgen.stmt("VALIDATE_RET(%s, %s, %s)" % \
+                (api.getRetTypeExpr(), \
+                 SUCCESS_RET_TYPES[api.getRetTypeExpr()],
+                    cgen.makeCallExpr("validate_%s" % api.name, \
+                        [p.paramName for p in api.parameters]))) \
+
 def emit_count_marshal(typeInfo, param, cgen):
     res = \
         iterateVulkanType(
@@ -101,11 +133,18 @@ def emit_handlemap_create(typeInfo, param, cgen):
         lambda vtype: typeInfo.isHandleType(vtype.typeName)
     ))
 
+def custom_encoder_args(api):
+    params = ["this"]
+    if api.getRetVarExpr() is not None:
+        params.append(api.getRetVarExpr())
+    return params
+
 def emit_custom_create(typeInfo, api, cgen):
     if api.name in CUSTOM_CREATE_APIS:
         cgen.funcCall(
             None,
             "goldfish_" + api.name,
+            custom_encoder_args(api) + \
             [p.paramName for p in api.parameters])
 
 def emit_handlemap_destroy(typeInfo, param, cgen):
@@ -144,6 +183,8 @@ class EncodingParameters(object):
                 self.toWrite.append(localCopyParam)
 
 def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
+    emit_custom_prevalidate(typeInfo, api, cgen);
+
     cgen.stmt("auto %s = mImpl->stream()" % STREAM)
     cgen.stmt("auto %s = mImpl->countingStream()" % COUNTING_STREAM)
     cgen.stmt("auto %s = mImpl->resources()" % RESOURCES)
@@ -195,6 +236,9 @@ def emit_parameter_encode_read(typeInfo, api, cgen):
             cgen.stmt(
                 "%s->unsetHandleMapping()" % STREAM)
 
+def emit_custom_create_destroy(typeInfo, api, cgen):
+    encodingParams = EncodingParameters(api)
+
     for p in encodingParams.toCreate:
         emit_custom_create(typeInfo, api, cgen)
 
@@ -228,10 +272,15 @@ def emit_default_encoding(typeInfo, api, cgen):
     emit_parameter_encode_do_parameter_write(typeInfo, api, cgen)
     emit_parameter_encode_read(typeInfo, api, cgen)
     emit_return_unmarshal(typeInfo, api, cgen)
+    emit_custom_create_destroy(typeInfo, api, cgen)
     emit_return(typeInfo, api, cgen)
 
 def emit_only_goldfish_custom(typeInfo, api, cgen):
-    cgen.vkApiCall(api, customPrefix="goldfish_")
+    cgen.vkApiCall( \
+        api,
+        customPrefix="goldfish_",
+        customParameters=custom_encoder_args(api) + \
+            [p.paramName for p in api.parameters])
     emit_return(typeInfo, api, cgen)
 
 ## Custom encoding definitions##################################################
