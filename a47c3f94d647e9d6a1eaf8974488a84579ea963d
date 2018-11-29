@@ -22,6 +22,30 @@
       "revId": "a47c3f94d647e9d6a1eaf8974488a84579ea963d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "79d7381b_c0437937",
+        "filename": "android/android-emu/android/opengl/GLObjectCounter.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2018-11-29T22:29:20Z",
+      "side": 1,
+      "message": "I think so. because NULLTYPE should not matter.",
+      "parentUuid": "1a5ced29_1a300d04",
+      "range": {
+        "startLine": 51,
+        "startChar": 13,
+        "endLine": 51,
+        "endChar": 14
+      },
+      "revId": "a47c3f94d647e9d6a1eaf8974488a84579ea963d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
