@@ -24,6 +24,8 @@ PROGRAM_PARAMETERS=""
 PROGRAM_DESCRIPTION=\
 "Build dEQP against emulator combined guest/host driver."
 
+option_register_var "--sanitizer=<clang-fsanitizer-arg>" OPT_SANITIZER "Build dEQP with sanitizer(s) enabled"
+
 aosp_dir_register_option
 package_builder_register_options
 
@@ -40,6 +42,7 @@ DEQP_DIR=$AOSP_DIR/external/deqp
 DEQP_BUILD_DIR=$AOSP_DIR/external/deqp/build
 GOLDFISH_OPENGL_DIR=$AOSP_DIR/device/generic/goldfish-opengl
 EMU_DIR=$AOSP_DIR/external/qemu
+EMU_CUSTOM_DEQP_SRC_DIR=$AOSP_DIR/external/qemu/android/scripts/deqp-src-to-copy
 EMU_OUTPUT_DIR=$AOSP_DIR/external/qemu/objs
 
 rm -rf $DEQP_BUILD_DIR
@@ -64,11 +67,27 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     esac
 done
 
-log "Copying custom dEQP sources for Android Emulator."
+log "Copying/patching custom dEQP sources for Android Emulator."
 
-cp -r $EMU_DIR/android/scripts/deqp-src-to-copy/* $DEQP_DIR/
+cd $DEQP_DIR
+
+cp -r $EMU_CUSTOM_DEQP_SRC_DIR/* .
+
+for f in *.patch; do
+    log "Applying patch: $f"
+    if git apply $f; then
+        log "Successfully applied $f"
+    else
+        log "WARNING: could not apply $f"
+    fi
+done
 
 cd $DEQP_BUILD_DIR
+
+SANITIZER=""
+if [ "$OPT_SANITIZER" ]; then
+SANITIZER="-fsanitize=$OPT_SANITIZER"
+fi
 
 cmake $DEQP_BUILD_DIR $DEQP_DIR \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -76,6 +95,7 @@ cmake $DEQP_BUILD_DIR $DEQP_DIR \
     -DGOLDFISH_OPENGL_INCLUDE_DIR=$GOLDFISH_OPENGL_DIR/system/include \
     -DAEMU_INCLUDE_DIR=$EMU_DIR/android/android-emugl/combined \
     -DAEMU_LIBRARY_DIR=$EMU_OUTPUT_DIR/lib64 \
+    -DAEMU_SANITIZER=$SANITIZER \
 
 make -j $NUM_JOBS
 
