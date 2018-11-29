@@ -56,6 +56,9 @@ bool android::multiinstance::initInstanceShareMode(
 bool android::multiinstance::updateInstanceShareMode(
         const char* snapshotName,
         base::FileShare shareMode) {
+    // Disable instance share mode updates until we stabalize it
+    // BUG: 117775757
+    return true;
     assert(sMultiInstanceState.hasInstance());
     if (sMultiInstanceState->shareMode == shareMode) {
         return true;
