@@ -20,9 +20,10 @@
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/hostpipe/HostGoldfishPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
-#include "android/opengles.h"
-#include "android/opengles-pipe.h"
 #include "android/opengl/emugl_config.h"
+#include "android/opengles-pipe.h"
+#include "android/opengles.h"
+#include "android/refcount-pipe.h"
 
 #include "AndroidBufferQueue.h"
 #include "AndroidWindow.h"
@@ -142,7 +143,8 @@ private:
                 android::featurecontrol::GLAsyncSwap, false);
         android::featurecontrol::setEnabledOverride(
                 android::featurecontrol::GLDMA, false);
-
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::RefCountPipe, true);
         EmuglConfig config;
 
         emuglConfig_init(
@@ -185,6 +187,8 @@ private:
         HostGoldfishPipeDevice::get();
 
         android_init_opengles_pipe();
+
+        android_init_refcount_pipe();
     }
 
     void teardownAndroidEmugl() {
