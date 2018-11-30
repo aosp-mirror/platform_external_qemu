@@ -155,6 +155,7 @@ set(android-emu-common
     android/opengl/emugl_config.cpp
     android/opengl/GpuFrameBridge.cpp
     android/opengl/GLProcessPipe.cpp
+    android/opengl/GLObjectCounter.cpp
     android/opengl/gpuinfo.cpp
     android/opengl/logger.cpp
     android/opengl/OpenglEsPipe.cpp
