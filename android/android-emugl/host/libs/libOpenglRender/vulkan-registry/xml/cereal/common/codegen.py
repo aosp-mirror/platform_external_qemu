@@ -644,7 +644,7 @@ class VulkanWrapperGenerator(object):
 
     def emitForEachStructExtension(self, cgen, retType, triggerVar, forEachFunc, autoBreak=True):
         def readStructType(structTypeName, structVarName, cgen):
-            cgen.stmt("VkStructureType %s = %s(%s)" % \
+            cgen.stmt("uint32_t %s = (uint32_t)%s(%s)" % \
                 (structTypeName, "goldfish_vk_struct_type", structVarName))
 
         def castAsStruct(varName, typeName, const=True):

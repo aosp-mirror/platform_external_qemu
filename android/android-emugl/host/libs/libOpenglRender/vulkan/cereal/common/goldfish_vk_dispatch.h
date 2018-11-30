@@ -27,6 +27,7 @@
 #include <vulkan/vulkan.h>
 
 
+#include "goldfish_vk_private_defs.h"
 namespace goldfish_vk {
 
 struct VulkanDispatch;
@@ -399,6 +400,11 @@ PFN_vkCmdDrawIndirectCountKHR vkCmdDrawIndirectCountKHR;
 PFN_vkCmdDrawIndexedIndirectCountKHR vkCmdDrawIndexedIndirectCountKHR;
 #endif
 #ifdef VK_KHR_8bit_storage
+#endif
+#ifdef VK_ANDROID_native_buffer
+PFN_vkGetSwapchainGrallocUsageANDROID vkGetSwapchainGrallocUsageANDROID;
+PFN_vkAcquireImageANDROID vkAcquireImageANDROID;
+PFN_vkQueueSignalReleaseImageANDROID vkQueueSignalReleaseImageANDROID;
 #endif
 #ifdef VK_EXT_debug_report
 PFN_vkCreateDebugReportCallbackEXT vkCreateDebugReportCallbackEXT;
