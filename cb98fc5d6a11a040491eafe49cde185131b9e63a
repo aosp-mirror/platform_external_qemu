@@ -16,6 +16,24 @@
       "revId": "cb98fc5d6a11a040491eafe49cde185131b9e63a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80d23ccd_ee035291",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-11-30T19:38:11Z",
+      "side": 1,
+      "message": "Good question!  The change that makes QCursor::setPos is actually a macOS 10.14 security change, which makes the accessibility permission required to call CGEventPost to inject fake input events.  The first time CGEventPost is called, a dialog will pop up asking the user to give the app accessibility permissions, and if the user denies it all future CGEventPost calls will silently no-op.  I haven\u0027t found any way to detect if we\u0027re no-oping, since event when the API works it is async.\n\nThis blog post details why this change was made: https://objective-see.com/blog/blog_0x36.html\n\nQt already encountered this API change, and had an issue where dragging would trigger the dialog, but the QCursor::setPos behavior is by-design: https://bugreports.qt.io/browse/QTBUG-68830?focusedCommentId\u003d426669\u0026page\u003dcom.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-426669\n\nThe API I changed is not really a replacement for CGEventPost-- CGEventPost basically generates input events that apps recognize as mouse movement, while CGWarpMouseCursorPosition changes the position of the cursor without generating any events (purely for use-cases like moving the mouse back to the center of the window).",
+      "parentUuid": "42a64c73_17f2532f",
+      "revId": "cb98fc5d6a11a040491eafe49cde185131b9e63a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
