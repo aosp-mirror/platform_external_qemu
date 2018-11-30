@@ -416,13 +416,16 @@ class VulkanCompoundType(object):
 
 class VulkanAPI(object):
 
-    def __init__(self, name, retType, parameters):
+    def __init__(self, name, retType, parameters, origName=None):
         self.name = name
         self.origName = name
         self.retType = retType
         self.parameters = parameters
 
         self.copy = None
+
+        if origName:
+            self.origName = origName
 
     def initCopies(self):
         self.copy = self
