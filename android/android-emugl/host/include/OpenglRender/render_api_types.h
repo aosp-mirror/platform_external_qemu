@@ -43,6 +43,13 @@ typedef struct {
     emugl_logger_t fine;
 } emugl_logger_struct;
 
+// OpenGL object counter
+typedef void (*emugl_counter_t)(int type);
+typedef struct {
+    emugl_counter_t inc;
+    emugl_counter_t dec;
+} emugl_counter_struct;
+
 // Function type that describes functions for
 // reading from the Goldfish DMA region
 // at a specified offset.
