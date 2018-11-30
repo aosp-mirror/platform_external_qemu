@@ -925,6 +925,8 @@ android_tzoffset_in_seconds(time_t* utc_time)
 {
     struct tm local = *localtime(utc_time);
     time_t local_time = mktime(&local);
-    return (long)difftime(*utc_time, local_time);
+    // mktime() converts struct tm according to local timezone.
+    time_t gmt_time = mktime(gmtime(utc_time));
+    return (long)difftime(gmt_time, local_time);
 }
 
