@@ -136,6 +136,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_KHR_8bit_storage
 #endif
+#ifdef VK_ANDROID_native_buffer
+#endif
 #ifdef VK_EXT_debug_report
 #endif
 #ifdef VK_NV_glsl_shader
@@ -640,6 +642,11 @@ void init_vulkan_dispatch_from_system_loader(
 #ifdef VK_KHR_draw_indirect_count
     out->vkCmdDrawIndirectCountKHR = (PFN_vkCmdDrawIndirectCountKHR)dlSymFunc(lib, "vkCmdDrawIndirectCountKHR");
     out->vkCmdDrawIndexedIndirectCountKHR = (PFN_vkCmdDrawIndexedIndirectCountKHR)dlSymFunc(lib, "vkCmdDrawIndexedIndirectCountKHR");
+#endif
+#ifdef VK_ANDROID_native_buffer
+    out->vkGetSwapchainGrallocUsageANDROID = (PFN_vkGetSwapchainGrallocUsageANDROID)dlSymFunc(lib, "vkGetSwapchainGrallocUsageANDROID");
+    out->vkAcquireImageANDROID = (PFN_vkAcquireImageANDROID)dlSymFunc(lib, "vkAcquireImageANDROID");
+    out->vkQueueSignalReleaseImageANDROID = (PFN_vkQueueSignalReleaseImageANDROID)dlSymFunc(lib, "vkQueueSignalReleaseImageANDROID");
 #endif
 #ifdef VK_EXT_debug_marker
     out->vkDebugMarkerSetObjectTagEXT = (PFN_vkDebugMarkerSetObjectTagEXT)dlSymFunc(lib, "vkDebugMarkerSetObjectTagEXT");
