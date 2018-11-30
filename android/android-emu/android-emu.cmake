@@ -34,6 +34,7 @@ set(android-emu-common
     android/base/threads/internal/ParallelTaskBase.cpp
     android/boot-properties.c
     android/car.cpp
+    android/car-cluster.cpp
     android/cmdline-option.cpp
     android/CommonReportedInfo.cpp
     android/console_auth.cpp
