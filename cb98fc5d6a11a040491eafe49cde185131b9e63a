@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "42a64c73_17f2532f",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-11-30T07:41:58Z",
+      "side": 1,
+      "message": "what about reporting this bug to Qt to be able to get rid of the workaround when it\u0027s fixed there?",
+      "revId": "cb98fc5d6a11a040491eafe49cde185131b9e63a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
