@@ -242,12 +242,14 @@ class CodeGen(object):
 
     # Given a VulkanAPI object, generate the C function protype:
     # <returntype> <funcname>(<parameters>)
-    def makeFuncProto(self, vulkanApi):
+    def makeFuncProto(self, vulkanApi, useParamName=True):
 
         protoBegin = "%s %s" % (self.makeCTypeDecl(
             vulkanApi.retType, useParamName=False), vulkanApi.name)
         protoParams = "(\n    %s)" % ((",\n%s" % self.indent(1)).join(
-            list(map(self.makeCTypeDecl, vulkanApi.parameters))))
+            list(map(
+                lambda x: self.makeCTypeDecl(x, useParamName=useParamName),
+                vulkanApi.parameters))))
 
         return protoBegin + protoParams
 

@@ -187,6 +187,13 @@ class IOStream;
 #include "goldfish_vk_handlemap_guest.h"
 #include "goldfish_vk_private_defs.h"
 """
+        eventHandlerInclude = """
+#include "goldfish_vk_private_defs.h"
+"""
+        eventHandlerImplInclude = """
+#include "VkEncoder.h"
+"""
+
         functableImplInclude = """
 #include "VkEncoder.h"
 #include "HostConnection.h"
@@ -343,8 +350,12 @@ using DlSymFunc = void* (void*, const char*);
         self.addGuestEncoderModule(
             "VkEncoder",
             extraHeader = encoderInclude,
-            extraImpl = encoderImplInclude,
-            useNamespace = False)
+            extraImpl = encoderImplInclude)
+
+        self.addGuestEncoderModule(
+            "VkEventHandler",
+            extraHeader=eventHandlerInclude,
+            extraImpl=eventHandlerImplInclude);
 
         self.addGuestEncoderModule("goldfish_vk_extension_structs_guest",
                                    extraHeader=extensionStructsIncludeGuest)
@@ -395,6 +406,8 @@ using DlSymFunc = void* (void*, const char*);
         self.addWrapper(cereal.VulkanHandleMap, "goldfish_vk_handlemap")
         self.addWrapper(cereal.VulkanDispatch, "goldfish_vk_dispatch")
         self.addWrapper(cereal.VulkanDecoder, "VkDecoder")
+
+        self.addWrapper(cereal.VulkanEventHandler, "VkEventHandler")
 
         self.guestAndroidMkCppFiles = ""
         self.hostCMakeCppFiles = ""
