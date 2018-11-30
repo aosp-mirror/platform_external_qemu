@@ -192,12 +192,34 @@ def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
     cgen.stmt("%s->setHandleMapping(%s->unwrapMapping())" % (STREAM, RESOURCES))
 
     encodingParams = EncodingParameters(api)
+    for (_, localCopyParam) in encodingParams.localCopied:
+        cgen.stmt(cgen.makeRichCTypeDecl(localCopyParam))
+
+def emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen, customUnwrap=None):
+    encodingParams = EncodingParameters(api)
 
     for (origParam, localCopyParam) in encodingParams.localCopied:
-        cgen.stmt(cgen.makeRichCTypeDecl(localCopyParam))
-        emit_deepcopy(typeInfo, origParam, cgen)
-        if localCopyParam.typeName == "VkAllocationCallbacks":
-            cgen.stmt("%s = nullptr" % localCopyParam.paramName)
+        shouldCustomCopy = \
+            customUnwrap and \
+            origParam.paramName in customUnwrap and \
+            "copyOp" in customUnwrap[origParam.paramName]
+
+        if shouldCustomCopy:
+            customUnwrap[origParam.paramName]["copyOp"](cgen, origParam, localCopyParam)
+        else:
+            emit_deepcopy(typeInfo, origParam, cgen)
+
+    for (origParam, localCopyParam) in encodingParams.localCopied:
+        shouldCustomMap = \
+            customUnwrap and \
+            origParam.paramName in customUnwrap and \
+            "mapOp" in customUnwrap[origParam.paramName]
+
+        if shouldCustomMap:
+            customUnwrap[origParam.paramName]["mapOp"](cgen, origParam, localCopyParam)
+        else:
+            if localCopyParam.typeName == "VkAllocationCallbacks":
+                cgen.stmt("%s = nullptr" % localCopyParam.paramName)
 
     cgen.stmt("%s->rewind()" % COUNTING_STREAM)
     cgen.beginBlock()
@@ -268,12 +290,15 @@ def emit_return(typeInfo, api, cgen):
 
 def emit_default_encoding(typeInfo, api, cgen):
     emit_parameter_encode_preamble_write(typeInfo, api, cgen)
+    emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen)
     emit_parameter_encode_write_packet_info(typeInfo, api, cgen)
     emit_parameter_encode_do_parameter_write(typeInfo, api, cgen)
     emit_parameter_encode_read(typeInfo, api, cgen)
     emit_return_unmarshal(typeInfo, api, cgen)
     emit_custom_create_destroy(typeInfo, api, cgen)
     emit_return(typeInfo, api, cgen)
+
+## Custom encoding definitions##################################################
 
 def emit_only_goldfish_custom(typeInfo, api, cgen):
     cgen.vkApiCall( \
@@ -283,10 +308,21 @@ def emit_only_goldfish_custom(typeInfo, api, cgen):
             [p.paramName for p in api.parameters])
     emit_return(typeInfo, api, cgen)
 
-## Custom encoding definitions##################################################
+def emit_with_custom_unwrap(custom):
+    def call(typeInfo, api, cgen):
+        emit_parameter_encode_preamble_write(typeInfo, api, cgen)
+        emit_parameter_encode_copy_unwrap_count(
+            typeInfo, api, cgen, customUnwrap=custom)
+        emit_parameter_encode_write_packet_info(typeInfo, api, cgen)
+        emit_parameter_encode_do_parameter_write(typeInfo, api, cgen)
+        emit_parameter_encode_read(typeInfo, api, cgen)
+        emit_return_unmarshal(typeInfo, api, cgen)
+        emit_return(typeInfo, api, cgen)
+    return call
 
 def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     emit_parameter_encode_preamble_write(typeInfo, api, cgen)
+    emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen)
 
     def emit_flush_ranges(streamVar):
         cgen.beginFor("uint32_t i = 0", "i < memoryRangeCount", "++i")
@@ -319,6 +355,7 @@ def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
 
 def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     emit_parameter_encode_preamble_write(typeInfo, api, cgen)
+    emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen)
     emit_parameter_encode_write_packet_info(typeInfo, api, cgen)
     emit_parameter_encode_do_parameter_write(typeInfo, api, cgen)
     emit_parameter_encode_read(typeInfo, api, cgen)
@@ -346,6 +383,18 @@ def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
 
     emit_return(typeInfo, api, cgen)
 
+def unwrap_VkNativeBufferANDROID():
+    def mapOp(cgen, orig, local):
+        cgen.stmt("goldfish_unwrap_VkNativeBufferANDROID(%s, %s)" %
+                  (orig.paramName, local.paramName))
+    return { "pCreateInfo" : { "mapOp" : mapOp } }
+
+def unwrap_vkAcquireImageANDROID_nativeFenceFd():
+    def mapOp(cgen, orig, local):
+        cgen.stmt("goldfish_unwrap_vkAcquireImageANDROID_nativeFenceFd(%s, &%s)" %
+                  (orig.paramName, local.paramName))
+    return { "nativeFenceFd" : { "mapOp" : mapOp } }
+
 custom_encodes = {
     "vkEnumerateInstanceVersion" : emit_only_goldfish_custom,
     "vkEnumerateDeviceExtensionProperties" : emit_only_goldfish_custom,
@@ -354,6 +403,8 @@ custom_encodes = {
     "vkUnmapMemory" : emit_only_goldfish_custom,
     "vkFlushMappedMemoryRanges" : encode_vkFlushMappedMemoryRanges,
     "vkInvalidateMappedMemoryRanges" : encode_vkInvalidateMappedMemoryRanges,
+    "vkCreateImage" : emit_with_custom_unwrap(unwrap_VkNativeBufferANDROID()),
+    "vkAcquireImageANDROID" : emit_with_custom_unwrap(unwrap_vkAcquireImageANDROID_nativeFenceFd()),
 }
 
 class VulkanEncoder(VulkanWrapperGenerator):
