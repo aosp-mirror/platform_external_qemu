@@ -35,16 +35,14 @@ CarClusterWidget::CarClusterWidget(QWidget* parent)
       mWorkerThread([this](CarClusterWidget::FrameInfo &&frameInfo) {
           return workerProcessFrame(frameInfo);
       }) {
+      instance = this;
 
       avcodec_register_all();
-      instance = this;
 
       mCodec = avcodec_find_decoder(AV_CODEC_ID_H264);
       mCodecCtx = avcodec_alloc_context3(mCodec);
       avcodec_open2(mCodecCtx,mCodec,0);
-      mFrame = avcodec_alloc_frame();
-
-      set_car_cluster_call_back(processFrame);
+      mFrame = av_frame_alloc();
 
       mCtx = sws_getContext(FRAME_WIDTH, FRAME_HEIGHT, AV_PIX_FMT_YUV420P,
                      FRAME_WIDTH, FRAME_HEIGHT, AV_PIX_FMT_RGB32, SWS_BICUBIC,
@@ -53,16 +51,21 @@ CarClusterWidget::CarClusterWidget(QWidget* parent)
       mRgbData = new uint8_t[4 * FRAME_WIDTH * FRAME_HEIGHT];
 
       connect(this, SIGNAL(sendImage(QImage)), this, SLOT(updatePixmap(QImage)), Qt::QueuedConnection);
+
       mWorkerThread.start();
+
+      set_car_cluster_call_back(processFrame);
 }
 
 CarClusterWidget::~CarClusterWidget() {
-    // Stop worker thread's processing
+    // Send message to worker thread to stop processing
     mWorkerThread.enqueue({});
     mWorkerThread.join();
+
     av_free(mFrame);
     avcodec_close(mCodecCtx);
     avcodec_free_context(&mCodecCtx);
+
     delete[] mRgbData;
 }
 
@@ -91,7 +94,7 @@ WorkerProcessingResult CarClusterWidget::workerProcessFrame(FrameInfo& frameInfo
 
     AVPacket        packet;
     av_init_packet(&packet);
-    packet.data= frameInfo.data.data();
+    packet.data = frameInfo.frameData.data();
     packet.size = (int) frameInfo.size;
     int frameFinished = 0;
 
@@ -104,6 +107,7 @@ WorkerProcessingResult CarClusterWidget::workerProcessFrame(FrameInfo& frameInfo
         sws_scale(mCtx, mFrame->extended_data, mFrame->linesize, 0, FRAME_HEIGHT, &mRgbData, rgbStride);
         emit sendImage(QImage(mRgbData, FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_RGB32));
     }
+
     av_free_packet(&packet);
     return WorkerProcessingResult::Continue;
 }

@@ -11,8 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #pragma once
+
 #include <QPixmap>
 #include <QWidget>
 #include <QImage>
@@ -25,7 +25,6 @@ extern "C" {
 #include "libavformat/avformat.h"
 #include "libavutil/log.h"
 }
-
 
 using android::base::WorkerProcessingResult;
 
@@ -55,7 +54,7 @@ private:
 
     struct FrameInfo {
         int size;
-        std::vector<uint8_t> data;
+        std::vector<uint8_t> frameData;
     };
 
     android::base::WorkerThread<FrameInfo> mWorkerThread;

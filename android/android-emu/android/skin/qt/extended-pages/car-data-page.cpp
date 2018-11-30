@@ -8,10 +8,10 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
+#include "android/emulation/proto/VehicleHalProto.pb.h"
 #include "android/skin/qt/extended-pages/car-data-page.h"
 
 #include "android/emulation/control/car_data_agent.h"
-#include "android/emulation/proto/VehicleHalProto.pb.h"
 #include "android/main-common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/utils/debug.h"
