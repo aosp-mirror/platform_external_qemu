@@ -38,10 +38,13 @@ public:
     VulkanStream* stream() { return &m_stream; }
     Pool* pool() { return &m_pool; }
     ResourceTracker* resources() { return ResourceTracker::get(); }
+    Validation* validation() { return &m_validation; }
 private:
     VulkanCountingStream m_countingStream;
     VulkanStream m_stream;
     Pool m_pool { 8, 4096, 64 };
+
+    Validation m_validation;
 };
 
 VkEncoder::VkEncoder(IOStream *stream) :
@@ -72,19 +75,36 @@ SUCCESS_RET_TYPES = {
     # TODO: Put up success results for other return types here.
 }
 
+ENCODER_THIS_PARAM = makeVulkanTypeSimple(False, "VkEncoder", 1, "this")
+
 # Common components of encoding a Vulkan API call
+def make_event_handler_call(
+    handler_access,
+    api,
+    context_param,
+    input_result_param,
+    cgen):
+    return cgen.makeCallExpr( \
+               "%s->on_%s" % (handler_access, api.name),
+               [context_param.paramName, input_result_param] + \
+               [p.paramName for p in api.parameters])
+
 def emit_custom_prevalidate(typeInfo, api, cgen):
     if api.name in ENCODER_PREVALIDATED_APIS:
+        callExpr = \
+            make_event_handler_call( \
+                "mImpl->validation()", api,
+                ENCODER_THIS_PARAM,
+                SUCCESS_RET_TYPES[api.getRetTypeExpr()],
+                cgen)
+
         if api.getRetTypeExpr() == "void":
-            cgen.stmt("VALIDATE_VOID(%s)" % \
-                cgen.makeCallExpr("validate_%s" % api.name,
-                    [p.paramName for p in api.parameters]))
+            cgen.stmt("VALIDATE_VOID(%s)" % callExpr)
         else:
             cgen.stmt("VALIDATE_RET(%s, %s, %s)" % \
-                (api.getRetTypeExpr(), \
+                (api.getRetTypeExpr(),
                  SUCCESS_RET_TYPES[api.getRetTypeExpr()],
-                    cgen.makeCallExpr("validate_%s" % api.name, \
-                        [p.paramName for p in api.parameters]))) \
+                 callExpr))
 
 def emit_count_marshal(typeInfo, param, cgen):
     res = \
