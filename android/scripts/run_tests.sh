@@ -46,6 +46,9 @@ option_register_var "--jobs=<count>" OPT_NUM_JOBS "Same as -j<count>."
 OPT_OUT=objs
 option_register_var "--out-dir=<dir>" OPT_OUT "Use specific output directory"
 
+OPT_DEBS=
+option_register_var "--debs" OPT_DEBS "Discover the debian package dependencies, needed to launch the emulator (Debian/Ubuntu only)."
+
 aosp_dir_register_option
 option_parse "$@"
 aosp_dir_parse_option
@@ -243,6 +246,14 @@ if [ "$TARGET_OS" = "linux-x86_64" ]; then
                     ldpath=$(contains "$cache" $need)
                     if [ $ldpath = "True" ]; then
                         log2 "  -- Found $need in default ld_library_path (os dependency)"
+                        if [ $OPT_DEBS ]; then
+                            log2 "  -- Discovering which packages provide $file with $need"
+                            actual=$(ldd $file | grep $need | cut -d " " -f3)
+                            if [ $actual ]; then
+                                wanted=$(dpkg -S $actual | cut -d " " -f1 | cut -d ":" -f1)
+                                log "apt-get install $wanted"
+                            fi;
+                        fi
                     else
                         panic "Unable to locate $need, needed by $file"
                     fi
