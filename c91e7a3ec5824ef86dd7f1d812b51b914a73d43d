@@ -16,6 +16,24 @@
       "revId": "c91e7a3ec5824ef86dd7f1d812b51b914a73d43d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9dc5f601_d9b88591",
+        "filename": "android/android-emu/android/car-cluster.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-12-03T23:19:06Z",
+      "side": 0,
+      "message": "Oops, that was from before I was using a vector (\u0026 the worker thread). Fixed.",
+      "parentUuid": "0fbd7501_b8398dc4",
+      "revId": "c91e7a3ec5824ef86dd7f1d812b51b914a73d43d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

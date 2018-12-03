@@ -16,6 +16,24 @@
       "revId": "cabeabde251fc27af370dd0a6f38fef1819b0e28",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c49b6f5e_95171b95",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-12-03T23:19:06Z",
+      "side": 1,
+      "message": "There are a lot of errors that seem nonsensical to me (since I would think they seem to be indicative of syntax errors, but the file itself seems fine and compiles fine without --mingw, and compiles fine if I re-order the includes as such).\n\nHere is a portion of the errors without the re-ordering:\n\nandroid/android-emu/android/emulation/proto/VehicleHalProto.pb.h:71:3: error: expected identifier before numeric constant\n   ERROR_INVALID_OPERATION \u003d 8\n   ^\nandroid/android-emu/android/emulation/proto/VehicleHalProto.pb.h:71:3: error: expected \u0027}\u0027 before numeric constant\nandroid/android-emu/android/emulation/proto/VehicleHalProto.pb.h:71:3: error: expected unqualified-id before numeric constant\nIn file included from ../android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp:12:0:\nandroid/android-emu/android/emulation/proto/VehicleHalProto.pb.h:74:7: error: \u0027Status\u0027 does not name a type\n const Status Status_MIN \u003d RESULT_OK;\n       ^\nandroid/android-emu/android/emulation/proto/VehicleHalProto.pb.h:75:7: error: \u0027Status\u0027 does not name a type\n const Status Status_MAX \u003d ERROR_INVALID_OPERATION;\n       ^\nandroid/android-emu/android/emulation/proto/VehicleHalProto.pb.h:76:30: error: \u0027Status_MAX\u0027 was not declared in this scope\n const int Status_ARRAYSIZE \u003d Status_MAX + 1;\n\namong others.",
+      "parentUuid": "1c7feabb_1718e7b4",
+      "revId": "cabeabde251fc27af370dd0a6f38fef1819b0e28",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
