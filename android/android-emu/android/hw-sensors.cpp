@@ -378,7 +378,7 @@ static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
             snprintf(buffer, sizeof(buffer), "guest-sync:%" PRId64,
             ((int64_t)now_ns) + cl->sensors->time_offset_ns);
     assert(buffer_len < sizeof(buffer));
-    _hwSensorClient_send(cl, (uint8_t*)buffer, buffer_len);
+    //_hwSensorClient_send(cl, (uint8_t*)buffer, buffer_len);
 
     buffer_len =
             snprintf(buffer, sizeof(buffer), "sync:%" PRId64, now_ns / 1000);
