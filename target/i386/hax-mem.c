@@ -119,17 +119,14 @@ static bool is_compatible_mapping(hax_slot *slot,
            ((uintptr_t)slot->hva - (uintptr_t)hva == slot->start - start_gpa);
 }
 
-void hax_set_phys_mem(MemoryRegionSection *section, bool add)
+void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add, int flags)
 {
 #ifdef HAX_SLOT_DEBUG
     fprintf(stderr, "%s begin=======================================================\n", __func__);
 #endif
 
     hax_slot *mem;
-    MemoryRegion *area = section->mr;
-    uint64_t start, size, end;
-    int flags;
-    void *hva;
+    uint64_t end;
     int i;
     int free_slots[HAX_MAX_SLOTS];
     int overlap_slots[HAX_MAX_SLOTS];
@@ -138,37 +135,7 @@ void hax_set_phys_mem(MemoryRegionSection *section, bool add)
     int split_slot_id;
     int split_needed_free_slots;
 
-    start = section->offset_within_address_space;
-    size = int128_get64(section->size);
     end = start + size;
-
-    if (!memory_region_is_ram(area)) {
-#ifdef HAX_SLOT_DEBUG
-        fprintf(stderr, "%s: is not ram, skip [0x%llx 0x%llx] for %s\n",
-                __func__,
-                (unsigned long long)start,
-                (unsigned long long)end, add ? "ADD" : "REMOVE");
-#endif
-        goto end;
-    }
-
-    if (memory_region_is_user_backed(area)) {
-#ifdef HAX_SLOT_DEBUG
-        fprintf(stderr, "%s: is user-backed ram, skip [0x%llx 0x%llx] for %s\n",
-                __func__,
-                (unsigned long long)start,
-                (unsigned long long)end, add ? "ADD" : "REMOVE");
-#endif
-        goto end;
-    }
-
-    hva = memory_region_get_ram_ptr(area) + section->offset_within_region;
-
-    if (memory_region_is_rom(area)) {
-        flags = HAX_RAM_INFO_ROM;
-    } else {
-        flags = 0;
-    }
 
     memset(free_slots, 0, HAX_MAX_SLOTS * sizeof(int));
     memset(overlap_slots, 0, HAX_MAX_SLOTS * sizeof(int));
@@ -516,16 +483,63 @@ end:
     return;
 }
 
+void hax_set_phys_mem_from_memory_region(MemoryRegionSection *section, bool add)
+{
+#ifdef HAX_SLOT_DEBUG
+    fprintf(stderr, "%s begin=======================================================\n", __func__);
+#endif
+
+    MemoryRegion *area = section->mr;
+    uint64_t start, size, end;
+    int flags;
+    void *hva;
+
+    start = section->offset_within_address_space;
+    size = int128_get64(section->size);
+    end = start + size;
+
+    if (!memory_region_is_ram(area)) {
+#ifdef HAX_SLOT_DEBUG
+        fprintf(stderr, "%s: is not ram, skip [0x%llx 0x%llx] for %s\n",
+                __func__,
+                (unsigned long long)start,
+                (unsigned long long)end, add ? "ADD" : "REMOVE");
+#endif
+        return;
+    }
+
+    if (memory_region_is_user_backed(area)) {
+#ifdef HAX_SLOT_DEBUG
+        fprintf(stderr, "%s: is user-backed ram, skip [0x%llx 0x%llx] for %s\n",
+                __func__,
+                (unsigned long long)start,
+                (unsigned long long)end, add ? "ADD" : "REMOVE");
+#endif
+        return;
+    }
+
+    hva = memory_region_get_ram_ptr(area) + section->offset_within_region;
+
+    if (memory_region_is_rom(area)) {
+        flags = HAX_RAM_INFO_ROM;
+    } else {
+        flags = 0;
+    }
+
+    hax_set_phys_mem_general(hva, start, size, add, flags);
+    return;
+}
+
 static void hax_region_add(MemoryListener * listener,
                            MemoryRegionSection * section)
 {
-    hax_set_phys_mem(section, true);
+    hax_set_phys_mem_from_memory_region(section, true);
 }
 
 static void hax_region_del(MemoryListener * listener,
                            MemoryRegionSection * section)
 {
-    hax_set_phys_mem(section, false);
+    hax_set_phys_mem_from_memory_region(section, false);
 }
 
 /* currently we fake the dirty bitmap sync, always dirty */
@@ -553,12 +567,11 @@ user_backed_flags_to_hax(int flags) {
 }
 
 static void hax_user_backed_ram_map(uint64_t gpa, void* hva, uint64_t size, int flags) {
-    hax_set_ram(gpa, size, (uint64_t)(uintptr_t)hva,
-                user_backed_flags_to_hax(flags));
+    hax_set_phys_mem_general(hva, gpa, size, true /* add */, user_backed_flags_to_hax(flags));
 }
 
 static void hax_user_backed_ram_unmap(uint64_t gpa, uint64_t size) {
-    hax_set_ram(gpa, size, 0, HAX_RAM_INFO_INVALID);
+    hax_set_phys_mem_general(0, gpa, size, false /* del */, HAX_RAM_INFO_INVALID);
 }
 
 static MemoryListener hax_memory_listener = {

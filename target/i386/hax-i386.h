@@ -32,7 +32,7 @@ typedef struct hax_slot {
     int id;
 } hax_slot;
 
-#define HAX_MAX_SLOTS 32
+#define HAX_MAX_SLOTS 64
 
 extern struct hax_state hax_global;
 struct hax_vcpu_state {
