@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "21a9b642_e915ac75",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-12-03T20:29:48Z",
+      "side": 1,
+      "message": "The inclusion of this header causes building problems for windows (running build with the --mingw flag) if some headers are included before it (namely, android/base/threads/WorkerThread.h \u0026 some others in android/base/ I tested), so this is a workaround for that.",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 55
+      },
+      "revId": "0112c63b106e70e73e9a13ca0ce973d3b9765197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
