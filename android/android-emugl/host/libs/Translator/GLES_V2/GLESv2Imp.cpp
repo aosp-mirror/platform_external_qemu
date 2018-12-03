@@ -1642,8 +1642,10 @@ GL_APICALL int GL_APIENTRY glGetAttribLocation(GLuint program, const GLchar* nam
          RET_AND_SET_ERROR_IF(objData->getDataType() != PROGRAM_DATA,
                               GL_INVALID_OPERATION, -1);
          ProgramData* pData = (ProgramData*)objData;
+#if !defined(TOLERATE_PROGRAM_LINK_ERROR) || !TOLERATE_PROGRAM_LINK_ERROR
          RET_AND_SET_ERROR_IF(!pData->getLinkStatus(), GL_INVALID_OPERATION,
                               -1);
+#endif
          int ret = ctx->dispatcher().glGetAttribLocation(
                  globalProgramName, c_str(pData->getTranslatedName(name)));
          if (ret != -1) {
@@ -2550,7 +2552,9 @@ GL_APICALL void  GL_APIENTRY glGetUniformfv(GLuint program, GLint location, GLfl
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
         ProgramData* pData = (ProgramData *)objData;
+#if !defined(TOLERATE_PROGRAM_LINK_ERROR) || !TOLERATE_PROGRAM_LINK_ERROR
         SET_ERROR_IF(!pData->getLinkStatus(), GL_INVALID_OPERATION);
+#endif
         ctx->dispatcher().glGetUniformfv(globalProgramName,
             pData->getHostUniformLocation(location), params);
     }
@@ -2567,7 +2571,9 @@ GL_APICALL void  GL_APIENTRY glGetUniformiv(GLuint program, GLint location, GLin
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
         ProgramData* pData = (ProgramData *)objData;
+#if !defined(TOLERATE_PROGRAM_LINK_ERROR) || !TOLERATE_PROGRAM_LINK_ERROR
         SET_ERROR_IF(!pData->getLinkStatus(), GL_INVALID_OPERATION);
+#endif
         ctx->dispatcher().glGetUniformiv(globalProgramName,
             pData->getHostUniformLocation(location), params);
     }
@@ -2583,7 +2589,9 @@ GL_APICALL int GL_APIENTRY glGetUniformLocation(GLuint program, const GLchar* na
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         RET_AND_SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION,-1);
         ProgramData* pData = (ProgramData *)objData;
+#if !defined(TOLERATE_PROGRAM_LINK_ERROR) || !TOLERATE_PROGRAM_LINK_ERROR
         RET_AND_SET_ERROR_IF(!pData->getLinkStatus(), GL_INVALID_OPERATION, -1);
+#endif
         return pData->getGuestUniformLocation(name);
     }
     return -1;
@@ -2824,10 +2832,9 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
                 ShaderParser* vertSp = (ShaderParser*)vertObjData;
 
                 if(fragSp->getCompileStatus() && vertSp->getCompileStatus()) {
-                    if (programData->validateLink(fragSp, vertSp)) {
-                        ctx->dispatcher().glLinkProgram(globalProgramName);
-                        ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
-                    } else {
+                    ctx->dispatcher().glLinkProgram(globalProgramName);
+                    ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
+                    if (!programData->validateLink(fragSp, vertSp)) {
                         programData->setLinkStatus(GL_FALSE);
                         programData->setErrInfoLog();
                         return;
