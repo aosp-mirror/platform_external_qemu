@@ -70,6 +70,30 @@
       "revId": "0112c63b106e70e73e9a13ca0ce973d3b9765197",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "45f5a4ed_0e5a6efb",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-12-04T00:59:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a8a445d_1782db51",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 55
+      },
+      "revId": "0112c63b106e70e73e9a13ca0ce973d3b9765197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
