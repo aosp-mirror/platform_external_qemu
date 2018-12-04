@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "07766011_eb78aadc",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1290474
+      },
+      "writtenOn": "2018-12-04T00:48:00Z",
+      "side": 1,
+      "message": "File a bug to get this constant renamed in VehicleHalProto.proto and put a link to this code in the bug to get this updated as well. The comment this code with a TODO like:\n\n// TODO(b/\u003cwhatever\u003e) rename ERROR_INVALID_OPERATION and remove this. ERROR_INVALID_OPERATION is defined in windows.h, and redefined in VehicleHalProto.proto, causing conflicts.",
+      "range": {
+        "startLine": 14,
+        "startChar": 7,
+        "endLine": 14,
+        "endChar": 30
+      },
+      "revId": "cb174629cc047d927d3bc064bf7d249af9747887",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
