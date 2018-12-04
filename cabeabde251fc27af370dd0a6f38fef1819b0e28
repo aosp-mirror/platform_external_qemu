@@ -52,6 +52,24 @@
       "revId": "cabeabde251fc27af370dd0a6f38fef1819b0e28",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "90be6f29_30c4f8b8",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1290474
+      },
+      "writtenOn": "2018-12-04T00:25:17Z",
+      "side": 1,
+      "message": "ERROR_INVALID_OPERATION is a constant defined by windows.h, so could be related to that somehow.",
+      "parentUuid": "42602861_5a04fa74",
+      "revId": "cabeabde251fc27af370dd0a6f38fef1819b0e28",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
