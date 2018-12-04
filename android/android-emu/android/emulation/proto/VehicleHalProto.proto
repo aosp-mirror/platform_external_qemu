@@ -43,7 +43,6 @@ enum Status {
     ERROR_PROPERTY_UNINITIALIZED        = 5;
     ERROR_WRITE_ONLY_PROPERTY           = 6;
     ERROR_MEMORY_ALLOC_FAILED           = 7;
-    ERROR_INVALID_OPERATION             = 8;
 }
 
 message VehicleAreaConfig {
