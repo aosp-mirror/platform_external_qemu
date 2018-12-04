@@ -71,6 +71,8 @@ struct hvf_state hvf_global;
 int ret_hvf_init = 0;
 static int hvf_disabled = 1;
 
+#define HVF_MAX_SLOTS 512
+
 typedef struct hvf_slot {
     uint64_t start;
     uint64_t size;
@@ -89,7 +91,7 @@ struct hvf_vcpu_caps {
 
 struct hvf_accel_state {
     AccelState parent;
-    hvf_slot slots[32];
+    hvf_slot slots[HVF_MAX_SLOTS];
     int num_slots;
 };
 
@@ -156,8 +158,7 @@ struct mac_slot {
     void* hva;
 };
 
-#define MAC_SLOTS_COUNT 32
-struct mac_slot mac_slots[MAC_SLOTS_COUNT];
+struct mac_slot mac_slots[HVF_MAX_SLOTS];
 
 #define ALIGN(x, y)  (((x)+(y)-1) & ~((y)-1))
 
@@ -165,7 +166,7 @@ void* hvf_gpa2hva(uint64_t gpa, bool* found) {
     struct mac_slot *mslot;
     *found = false;
 
-    for (uint32_t i = 0; i < MAC_SLOTS_COUNT; i++) {
+    for (uint32_t i = 0; i < HVF_MAX_SLOTS; i++) {
         mslot = &mac_slots[i];
         if (!mslot->present) continue;
         if (gpa >= mslot->gpa_start &&
@@ -184,7 +185,7 @@ int hvf_hva2gpa(void* hva, uint64_t length, int array_size,
     struct mac_slot *mslot;
     int count = 0;
 
-    for (uint32_t i = 0; i < MAC_SLOTS_COUNT; i++) {
+    for (uint32_t i = 0; i < HVF_MAX_SLOTS; i++) {
         mslot = &mac_slots[i];
         if (!mslot->present) continue;
 
@@ -221,16 +222,95 @@ int hvf_hva2gpa(void* hva, uint64_t length, int array_size,
     return count;
 }
 
+hvf_slot* hvf_next_free_slot() {
+    hvf_slot* mem = 0;
+    int x;
+
+    for (x = 0; x < hvf_state->num_slots; ++x) {
+        mem = &hvf_state->slots[x];
+        if (!mem->size) {
+            return mem;
+        }
+    }
+    return mem;
+}
+
+int __hvf_set_memory(hvf_slot *slot);
+int __hvf_set_memory_with_flags_locked(hvf_slot *slot, hv_memory_flags_t flags);
+
 int hvf_map_safe(void* hva, uint64_t gpa, uint64_t size, uint64_t flags) {
     pthread_rwlock_wrlock(&mem_lock);
-    int res = hv_vm_map(hva, gpa, size, flags);
+
+    hvf_slot *mem;
+    mem = hvf_find_overlap_slot(gpa, gpa + size);
+
+    if (mem &&
+        mem->mem == hva &&
+        mem->start == gpa &&
+        mem->size == size) {
+
+        pthread_rwlock_unlock(&mem_lock);
+        return HV_SUCCESS;
+    } else if (mem &&
+        mem->start == gpa &&
+        mem->size == size) {
+        // unmap existing mapping, but only if it coincides
+        mem->size = 0;
+        __hvf_set_memory_with_flags_locked(mem, 0);
+    } else if (mem) {
+        // TODO: Manage and support partially-overlapping user-backed RAM mappings.
+        // for now, consider it fatal.
+        pthread_rwlock_unlock(&mem_lock);
+        qemu_abort("%s: FATAL: tried to map [0x%llx 0x%llx) to %p "
+                   "while it was mapped to [0x%llx 0x%llx), %p",
+                   __func__,
+                   (unsigned long long)gpa,
+                   (unsigned long long)gpa + size,
+                   hva,
+                   (unsigned long long)mem->start,
+                   (unsigned long long)mem->start + mem->size,
+                   mem->mem);
+    }
+
+    mem = hvf_next_free_slot();
+    mem->mem = (uint8_t*)hva;
+    mem->start = gpa;
+    mem->size = size;
+
+    if (!mem) {
+        qemu_abort("%s: no free slots", __func__);
+    }
+
+    int res = __hvf_set_memory_with_flags_locked(mem, (hv_memory_flags_t)flags);
+
     pthread_rwlock_unlock(&mem_lock);
     return res;
 }
 
 int hvf_unmap_safe(uint64_t gpa, uint64_t size) {
     pthread_rwlock_wrlock(&mem_lock);
-    int res = hv_vm_unmap(gpa, size);
+
+    hvf_slot *mem;
+    int res = 0;
+    mem = hvf_find_overlap_slot(gpa, gpa + size);
+
+    if (mem &&
+        (mem->start != gpa ||
+         mem->size != size)) {
+
+        pthread_rwlock_unlock(&mem_lock);
+
+        qemu_abort("%s: tried to unmap [0x%llx 0x%llx) but partially overlapping "
+                   "[0x%llx 0x%llx), %p was encountered",
+                   __func__, gpa, gpa + size,
+                   mem->start, mem->start + mem->size, mem->mem);
+    } else if (mem) {
+        mem->size = 0;
+        res = __hvf_set_memory_with_flags_locked(mem, 0);
+    } else {
+        // fall through, allow res to be 0 still if slot was not found.
+    }
+
     pthread_rwlock_unlock(&mem_lock);
     return res;
 }
@@ -277,9 +357,14 @@ static void hvf_user_backed_ram_unmap(uint64_t gpa, uint64_t size) {
 }
 
 int __hvf_set_memory(hvf_slot *slot) {
-    struct mac_slot *macslot;
-    hv_memory_flags_t flags;
     pthread_rwlock_wrlock(&mem_lock);
+    int res = __hvf_set_memory_with_flags_locked(slot, HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
+    pthread_rwlock_unlock(&mem_lock);
+    return res;
+}
+
+int __hvf_set_memory_with_flags_locked(hvf_slot *slot, hv_memory_flags_t flags) {
+    struct mac_slot *macslot;
 
     macslot = &mac_slots[slot->slot_id];
 
@@ -295,11 +380,8 @@ int __hvf_set_memory(hvf_slot *slot) {
     }
 
     if (!slot->size) {
-        pthread_rwlock_unlock(&mem_lock);
         return 0;
     }
-
-    flags = HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC;
 
     macslot->present = 1;
     macslot->gpa_start = slot->start;
@@ -311,7 +393,6 @@ int __hvf_set_memory(hvf_slot *slot) {
             (unsigned long long)(macslot->gpa_start + macslot->size));
     int mapres = (hv_vm_map((hv_uvaddr_t)slot->mem, slot->start, slot->size, flags));
     assert_hvf_ok(mapres);
-    pthread_rwlock_unlock(&mem_lock);
     return 0;
 }
 
@@ -346,13 +427,9 @@ void hvf_set_phys_mem(MemoryRegionSection* section, bool add) {
     // Now make a new slot.
     int x;
 
-    for (x = 0; x < hvf_state->num_slots; ++x) {
-        mem = &hvf_state->slots[x];
-        if (!mem->size)
-            break;
-    }
+    mem = hvf_next_free_slot();
 
-    if (x == hvf_state->num_slots) {
+    if (!mem) {
         qemu_abort("%s: no free slots\n", __func__);
     }
 
