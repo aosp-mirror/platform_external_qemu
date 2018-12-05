@@ -7,7 +7,14 @@ if(ANDROID_TARGET_TAG MATCHES "windows.*")
   set(OPTION_ASTC_TESTS OFF CACHE BOOL "No tests astc when cross-compiling" FORCE)
 endif()
 # Include astc-codec as a subproject.
-add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../astc-codec astc-codec)
+
+if(ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
+  # astc-codec defines CMAKE_CXX_STANDARD=11, which won't work with msvc. We did the same for googletest.
+  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../astc-codec/src/base astc-codec-base)
+  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../astc-codec/src/decoder astc-codec-decoder)
+else()
+  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../astc-codec astc-codec)
+endif()
 
 # Our magical toolchain will likely not create runnable executables due to libc++ dependencies.
 # So we must make sure we set the runtime_os_properties.

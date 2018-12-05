@@ -17,7 +17,11 @@
 #include "android/base/sockets/SocketUtils.h"
 
 #include <stdio.h>
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <unistd.h>
+#endif
 
 namespace android {
 namespace network {

@@ -17,12 +17,23 @@
 #pragma once
 
 #include "OpenglRender/render_api_types.h"
+
+#ifdef _MSC_VER
+# ifdef BUILDING_EMUGL_COMMON_SHARED
+#  define EMUGL_COMMON_API __declspec(dllexport)
+# else
+#  define EMUGL_COMMON_API __declspec(dllimport)
+#endif
+#else
+# define EMUGL_COMMON_API
+#endif
+
 namespace emugl {
 
-extern emugl_logger_t emugl_logger;
-extern emugl_logger_t emugl_cxt_logger;
-void set_emugl_logger(emugl_logger_t f);
-void set_emugl_cxt_logger(emugl_logger_t f);
+EMUGL_COMMON_API extern emugl_logger_t emugl_logger;
+EMUGL_COMMON_API extern emugl_logger_t emugl_cxt_logger;
+EMUGL_COMMON_API void set_emugl_logger(emugl_logger_t f);
+EMUGL_COMMON_API void set_emugl_cxt_logger(emugl_logger_t f);
 
 }  // namespace emugl
 #define GL_LOGGING 1
