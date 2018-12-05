@@ -15,59 +15,26 @@
 #include "android/base/async/Looper.h"
 #include "android/emulation/control/AdbInterface.h"
 
-#include <QObject>
-
-#include <memory>
-
-// Task is a simple wrapper class, used to move the execution
-// of function f to a separate QT Thread
-
-class Task : public QObject {
-    Q_OBJECT
-
-public:
-    Task(std::function<void()> f);
-
-public slots:
-    void run();
-
-signals:
-    void finished();
-
-private:
-    std::function<void()> fptr;
-};
-
-// The EmulatorQTNoWindow class is used to build a QT-Widget-less
+// The EmulatorNoQtNoWindow class is used to build a QT-Widget-less
 // event loop when the parameter -no-window is passed to the android
 // emulator. Much like EmulatorQtWindow, startThread(f) will spawn
-// a new QT Thread to execute function f (qemu main loop).
+// a new thread to execute function f (qemu main loop).
 
-class EmulatorQtNoWindow final : public QObject {
-    Q_OBJECT
+class EmulatorNoQtNoWindow final {
 
 public:
-    using Ptr = std::shared_ptr<EmulatorQtNoWindow>;
+    using Ptr = std::shared_ptr<EmulatorNoQtNoWindow>;
 
     static void create();
-    static EmulatorQtNoWindow* getInstance();
+    static EmulatorNoQtNoWindow* getInstance();
     static Ptr getInstancePtr();
 
-    void startThread(std::function<void()> f);
-
-signals:
+    void startThread(std::function<void()> looperFunction);
     void requestClose();
 
 private:
-    explicit EmulatorQtNoWindow(QObject* parent = 0);
+    explicit EmulatorNoQtNoWindow();
 
-private slots:
-    void slot_clearInstance();
-    void slot_finished();
-    void slot_requestClose();
-
-private:
     android::base::Looper* mLooper;
     std::unique_ptr<android::emulation::AdbInterface> mAdbInterface;
-    bool mRunning = true;
 };
