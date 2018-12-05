@@ -46,6 +46,7 @@ using ITextureLoaderWPtr = std::weak_ptr<ITextureLoader>;
 // are for the |flags| field in SnapshotRamBlock.
 #define SNAPSHOT_RAM_MAPPED_SHARED (1 << 1)
 #define SNAPSHOT_RAM_MAPPED (1 << 3)
+#define SNAPSHOT_RAM_USER_BACKED (1 << 4)
 
 using RamBlock = ::SnapshotRamBlock;
 

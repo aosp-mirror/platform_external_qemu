@@ -521,6 +521,9 @@ static const VMStateDescription vmstate_address_space_pci = {
     .name = GOLDFISH_ADDRESS_SPACE_NAME,
     .version_id = 1,
     .minimum_version_id = 1,
+    .fields = (VMStateField[]) {
+        VMSTATE_END_OF_LIST()
+    }
 };
 
 static void address_space_class_init(ObjectClass *klass, void *data) {
