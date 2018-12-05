@@ -4777,6 +4777,14 @@ STEXI
 Abandon changes on exit
 ETEXI
 
+DEF("fuchsia", 0, QEMU_OPTION_fuchsia,
+"-fuchsia Fuchsia kernel/image run", QEMU_ARCH_ALL)
+STEXI
+@item -fuchsia
+@findex -fuchsia
+Run Fuchsia kernel/image
+ETEXI
+
 #endif  // CONFIG_ANDROID
 
 HXCOMM This is the last statement. Insert new options before this line!

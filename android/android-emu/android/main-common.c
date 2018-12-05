@@ -1449,6 +1449,8 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         return false;
     }
 
+    if (opts->fuchsia) return false;
+
     android_cmdLineOptions = opts;
 
     opts->ranchu = is_qemu2;

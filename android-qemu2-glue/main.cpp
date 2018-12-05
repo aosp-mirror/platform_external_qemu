@@ -685,15 +685,27 @@ extern "C" int main(int argc, char** argv) {
                 &argc, &argv, kTarget.androidArch,
                 true,  // is_qemu2
                 opts, hw, &android_avdInfo, &exitStatus)) {
-        // Special case for QEMU positional parameters.
-        if (exitStatus == EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER) {
+        // Special case for QEMU positional parameters, or in fuchsia.
+        if (opts->fuchsia || exitStatus == EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER) {
             // Copy all QEMU options to |args|, and set |n| to the number
             // of options in |args| (|argc| must be positive here).
             // NOTE: emulator_parseCommonCommandLineOptions has side effects
             // and modififes argc, as well as argv. Because of these magical
             // side effects we are *NOT* just copying over argc, argv.
-            for (int n = 1; n <= argc; ++n) {
-                args.add(argv[n - 1]);
+            fprintf(stderr, "%s: k: %s\n", __func__, opts->kernel);
+            if (opts->fuchsia) {
+                args.add("-kernel");
+                args.add(opts->kernel);
+                for (int n = 1; n <= argc; ++n) {
+                    fprintf(stderr, "%s: a: %s\n", __func__, argv[n]);
+                    if (argv[n]) {
+                    args.add(argv[n]);
+                    }
+                }
+            } else {
+                for (int n = 1; n <= argc; ++n) {
+                    args.add(argv[n - 1]);
+                }
             }
 
             // Skip the translation of command-line options and jump

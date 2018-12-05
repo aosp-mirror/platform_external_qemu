@@ -1995,7 +1995,7 @@ void qemu_system_reset_request(ShutdownCause reason)
         shutdown_requested = reason;
     } else {
         reset_requested = reason;
-#ifdef CONFIG_ANDROID
+#ifdef CONFIG_ANDROID_SPECIFIC
         s_reset_request_uptime_ms = get_uptime_ms();
 #endif
     }
@@ -2118,7 +2118,7 @@ static bool main_loop_should_exit(void)
     }
     request = qemu_shutdown_requested();
     if (request) {
-#ifdef CONFIG_ANDROID
+#ifdef CONFIG_ANDROID_SPECIFIC
         if (invalidate_exit_snapshot) {
             androidSnapshot_quickbootInvalidate(NULL);
         } else {
@@ -2748,7 +2748,7 @@ static int serial_parse(const char *devname)
                      " to character backend '%s'", devname);
         return -1;
     }
-#ifdef CONFIG_ANDROID
+#ifdef CONFIG_ANDROID_SPECIFIC
     // Restore the terminal input echo in case it was disabled: it won't get
     // undone on crash, and Mac's default terminal is dumb enough to never
     // restore it by itself.
@@ -3419,7 +3419,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
            (long long)get_uptime_ms());
 #endif
 
-#ifdef CONFIG_ANDROID
+#ifdef CONFIG_ANDROID_SPECIFIC
     android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
     char* android_op_dns_server = NULL;
 #endif
@@ -4475,7 +4475,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                     return 1;
                 }
                 break;
-#ifdef CONFIG_ANDROID
+#ifdef CONFIG_ANDROID_SPECIFIC
             case QEMU_OPTION_boot_property:
                 save_cmd_property((char*)optarg);
                 break;
@@ -4571,7 +4571,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     replay_configure(icount_opts);
 
-#ifdef CONFIG_ANDROID
+#ifdef CONFIG_ANDROID_SPECIFIC
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
 #endif
 
@@ -4597,7 +4597,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         return 1;
     }
 
-#ifdef CONFIG_ANDROID
+#ifdef CONFIG_ANDROID_SPECIFIC
 
     // setup device-tree callback
 #if defined(TARGET_AARCH64) || defined(TARGET_ARM) || defined(TARGET_MIPS)
@@ -5018,7 +5018,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     page_size_init();
 
-#ifndef CONFIG_ANDROID
+#ifndef CONFIG_ANDROID_SPECIFIC
     // When using AndroidEmu, this "main" is no longer the entry point on the
     // main thread. It is in fact called on a secondary thread, and socket
     // initialization is long finished (See android-qemu2-glue/main.cpp).
@@ -5154,7 +5154,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         return 1;
     }
 
-#ifdef CONFIG_ANDROID
+#ifdef CONFIG_ANDROID_SPECIFIC
     int dns_count = 0;
     if (android_op_dns_server) {
         if (!qemu_android_emulation_setup_dns_servers(
@@ -5226,7 +5226,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                           NULL, NULL);
     }
 
-#ifdef CONFIG_ANDROID
+#ifdef CONFIG_ANDROID_SPECIFIC
     if (android_drive_share_init(
             android_op_wipe_data, read_only,
             loadvm ? loadvm : android_get_quick_boot_name(),
@@ -5308,7 +5308,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
      */
     migration_object_init();
 
-#if defined(CONFIG_ANDROID)
+#if defined(CONFIG_ANDROID_SPECIFIC)
     /* Configure goldfish events device */
     {
         bool have_multitouch = androidHwConfig_isScreenMultiTouch(android_hw);
@@ -5424,7 +5424,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         return 1;
     }
 
-#ifdef CONFIG_ANDROID
+#ifdef CONFIG_ANDROID_SPECIFIC
     if (!qemu_android_emulation_setup()) {
         return 1;
     }
@@ -5535,7 +5535,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     register_global_state();
 
     bool tryDefaultVmLoad = true;
-#ifdef CONFIG_ANDROID
+#ifdef CONFIG_ANDROID_SPECIFIC
     // Initialize reporting right before starting the real VM work (load/boot
     // and the main loop). We want to track performance of a running emulator,
     // ignoring any too early exits as a result of incorrect setup.
@@ -5585,12 +5585,12 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     os_setup_post();
 
-#ifdef CONFIG_ANDROID
+#ifdef CONFIG_ANDROID_SPECIFIC
     skin_winsys_report_entering_main_loop();
 #endif
     main_loop();
 
-#ifdef CONFIG_ANDROID
+#ifdef CONFIG_ANDROID_SPECIFIC
     android_report_session_phase(ANDROID_SESSION_PHASE_EXIT);
     crashhandler_exitmode("after main_loop");
     socket_drainer_stop();
@@ -5610,7 +5610,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     tpm_cleanup();
 #endif
 
-#ifdef CONFIG_ANDROID
+#ifdef CONFIG_ANDROID_SPECIFIC
     qemu_android_emulation_teardown();
     android_wear_agent_stop();
     android_reporting_teardown();
@@ -5636,7 +5636,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     fflush(stdout);
     fflush(stderr);
 
-#ifdef CONFIG_ANDROID
+#ifdef CONFIG_ANDROID_SPECIFIC
     handle_emulator_restart();
 #endif
     return 0;
