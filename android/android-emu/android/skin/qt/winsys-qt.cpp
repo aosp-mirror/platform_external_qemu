@@ -22,8 +22,8 @@
 #include "android/skin/rect.h"
 #include "android/skin/resource.h"
 #include "android/skin/winsys.h"
+#include "android/skin/qt/emulator-no-qt-no-window.h"
 #include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/emulator-qt-no-window.h"
 #include "android/skin/qt/extended-pages/snapshot-page.h"
 #include "android/skin/qt/init-qt.h"
 #include "android/skin/qt/qt-settings.h"
@@ -97,6 +97,12 @@ static GlobalState* globalState() {
     return &sGlobalState;
 }
 
+static bool sMainLoopShouldExit = false;
+
+#ifdef _WIN32
+static HANDLE sWakeEvent;
+#endif
+
 static void enableSigChild() {
     // The issue only occurs on Darwin so to be safe just do this on Darwin
     // to prevent potential issues. The function exists on all platforms to
@@ -128,16 +134,53 @@ std::shared_ptr<void> skin_winsys_get_shared_ptr() {
 }
 
 extern void skin_winsys_enter_main_loop(bool no_window) {
-    D("Starting QT main loop\n");
 
-    // In order for QProcess to correctly handle processes that exit we need
-    // to enable SIGCHLD. That's how Qt knows to wait for the child process. If
-    // it doesn't wait the process will be left as a zombie and the finished
-    // signal will not be emitted from QProcess.
-    enableSigChild();
-    GlobalState* g = globalState();
-    g->app->exec();
-    D("Finished QT main loop\n");
+    if (no_window) {
+        D("Starting QEMU main loop\n");
+#ifdef _WIN32
+        sWakeEvent = CreateEvent(NULL,                             // Default security attributes
+                                 TRUE,                             // Manual reset
+                                 FALSE,                            // Initially nonsignaled
+                                 TEXT("winsys-qt::sWakeEvent"));   // Object name
+
+        while (1) {
+            WaitForSingleObject(sWakeEvent, INFINITE);
+            if (sMainLoopShouldExit) break;
+            // Loop and wait again
+        }
+#else
+        while (1) {
+            sigset_t mask;
+            sigset_t origMask;
+
+            sigemptyset (&mask);
+            if (sigprocmask(SIG_BLOCK, &mask, &origMask) < 0) {
+                fprintf(stderr, "%s %s: sigprocmask() failed!\n", __FILE__, __FUNCTION__);
+                break;
+            }
+            sigsuspend(&mask);
+            if (sMainLoopShouldExit) break;
+            // Loop and wait again
+        }
+#endif
+        // We're in windowless mode and ready to exit
+        auto noQtNoWindow = EmulatorNoQtNoWindow::getInstance();
+        if (noQtNoWindow) {
+            noQtNoWindow->requestClose();
+        }
+        D("Finished QEMU main loop\n");
+    } else {
+        // We're using Qt
+        D("Starting QT main loop\n");
+        // In order for QProcess to correctly handle processes that exit we need
+        // to enable SIGCHLD. That's how Qt knows to wait for the child process. If
+        // it doesn't wait the process will be left as a zombie and the finished
+        // signal will not be emitted from QProcess.
+        enableSigChild();
+        GlobalState* g = globalState();
+        g->app->exec();
+        D("Finished QT main loop\n");
+    }
 }
 
 extern void skin_winsys_get_monitor_rect(SkinRect *rect)
@@ -356,8 +399,17 @@ extern void skin_winsys_quit_request()
     D(__FUNCTION__);
     if (auto window = EmulatorQtWindow::getInstance()) {
         window->requestClose();
-    } else if (auto nowindow = EmulatorQtNoWindow::getInstance()){
-        nowindow->requestClose();
+    } else if (auto nowindow = EmulatorNoQtNoWindow::getInstance()){
+        sMainLoopShouldExit = true;
+#ifdef _WIN32
+        if ( !SetEvent(sWakeEvent) ) {
+            fprintf(stderr, "%s %s: SetEvent() failed!\n", __FILE__, __FUNCTION__);
+        }
+#else
+        if ( kill(getpid(), SIGUSR1) ) {
+           fprintf(stderr, "%s %s: kill() failed!\n", __FILE__, __FUNCTION__);
+        }
+#endif
     } else {
         D("%s: Could not get window handle", __FUNCTION__);
     }
@@ -369,7 +421,7 @@ void skin_winsys_destroy() {
     QtLogger::stop();
 
     // Mac is still causing us troubles - it somehow manages to not call the
-    // main window destructor (in qemi1 only!) and crashes if QApplication
+    // main window destructor (in qemu1 only!) and crashes if QApplication
     // is destroyed right here. So let's delay the deletion for now
 #ifdef __APPLE__
     atexit([] {
@@ -504,7 +556,7 @@ extern void skin_winsys_spawn_thread(bool no_window,
                                      char** argv) {
     D("skin_spawn_thread");
     if (no_window) {
-        EmulatorQtNoWindow* guiless_window = EmulatorQtNoWindow::getInstance();
+        EmulatorNoQtNoWindow* guiless_window = EmulatorNoQtNoWindow::getInstance();
         if (guiless_window == NULL) {
             D("%s: Could not get window handle", __FUNCTION__);
             return;
@@ -594,8 +646,8 @@ extern void skin_winsys_start(bool no_window) {
 
     qInstallMessageHandler(myMessageOutput);
     if (no_window) {
-        g->app = new QCoreApplication(g->argc, g->argv);
-        EmulatorQtNoWindow::create();
+        g->app = nullptr;
+        EmulatorNoQtNoWindow::create();
     } else {
         g->app = new QApplication(g->argc, g->argv);
         g->app->setAttribute(Qt::AA_UseHighDpiPixmaps);
