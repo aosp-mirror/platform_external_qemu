@@ -248,7 +248,7 @@ static void pc_init1(MachineState *machine,
 
     pc_register_ferr_irq(pcms->gsi[13]);
 
-#if defined(CONFIG_ANDROID)
+#if defined(CONFIG_ANDROID_SPECIFIC)
     sysbus_create_simple("goldfish_battery", GOLDFISH_BATTERY_IOMEM_BASE,
                          pcms->gsi[GOLDFISH_BATTERY_IRQ]);
     sysbus_create_simple("goldfish-events", GOLDFISH_EVENTS_IOMEM_BASE,

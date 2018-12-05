@@ -2011,7 +2011,7 @@ build_dsdt(GArray *table_data, BIOSLinker *linker,
         build_isa_devices_aml(dsdt);
         build_q35_pci0_int(dsdt);
     }
-#ifdef CONFIG_ANDROID
+#ifdef CONFIG_ANDROID_SPECIFIC
     build_goldfish_aml(dsdt);
 #endif
 
