@@ -45,6 +45,30 @@
       "revId": "e99d71ee37329632e67b5461d7e9a803e366ec0e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d10bffc6_4e200946",
+        "filename": "vl.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1999,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-05T21:09:56Z",
+      "side": 1,
+      "message": "That\u0027s to be determined; theres a lot of potential common pieces, we just want to start off from stock QEMU here.",
+      "parentUuid": "441fc6ba_9ad9834b",
+      "range": {
+        "startLine": 1999,
+        "startChar": 12,
+        "endLine": 1999,
+        "endChar": 29
+      },
+      "revId": "e99d71ee37329632e67b5461d7e9a803e366ec0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
