@@ -2012,7 +2012,9 @@ build_dsdt(GArray *table_data, BIOSLinker *linker,
         build_q35_pci0_int(dsdt);
     }
 #ifdef CONFIG_ANDROID
-    build_goldfish_aml(dsdt);
+    if (android_qemu_mode) {
+        build_goldfish_aml(dsdt);
+    }
 #endif
 
     if (pcmc->legacy_cpu_hotplug) {

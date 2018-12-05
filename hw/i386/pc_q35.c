@@ -139,6 +139,7 @@ static void pc_q35_init(MachineState *machine)
         rom_memory = get_system_memory();
     }
 
+
     pc_guest_info_init(pcms);
 
     if (pcmc->smbios_defaults) {
