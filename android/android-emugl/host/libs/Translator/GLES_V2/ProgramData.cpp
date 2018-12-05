@@ -1156,6 +1156,10 @@ int ProgramData::getHostUniformLocation(int guestLocation) {
         if (location != mGuestLocToHostLoc.end()) {
             return location->second;
         } else {
+            printf("cannot find guest location %d\n", guestLocation);
+            for (const auto& uni : mUniNameToGuestLoc) {
+                printf("uniform: %s -> %d\n", uni.first.c_str(), uni.second);
+            }
             return -2;
         }
     } else {

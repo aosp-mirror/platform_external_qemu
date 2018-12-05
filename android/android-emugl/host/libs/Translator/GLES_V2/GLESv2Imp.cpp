@@ -2592,6 +2592,7 @@ GL_APICALL int GL_APIENTRY glGetUniformLocation(GLuint program, const GLchar* na
 #if !defined(TOLERATE_PROGRAM_LINK_ERROR) || !TOLERATE_PROGRAM_LINK_ERROR
         RET_AND_SET_ERROR_IF(!pData->getLinkStatus(), GL_INVALID_OPERATION, -1);
 #endif
+        printf("get uniform location %s %d\n", name, pData->getGuestUniformLocation(name));
         return pData->getGuestUniformLocation(name);
     }
     return -1;
@@ -3422,6 +3423,9 @@ GL_APICALL void  GL_APIENTRY glUniform4fv(GLint location, GLsizei count, const G
     GET_CTX();
     int hostLoc = s_getHostLocOrSetError(location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
+    if (hostLoc < -1) {
+        printf("bad uniform location %d", location);
+    }
     ctx->dispatcher().glUniform4fv(hostLoc,count,v);
 }
 
