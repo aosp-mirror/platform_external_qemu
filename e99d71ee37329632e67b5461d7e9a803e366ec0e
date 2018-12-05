@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "441fc6ba_9ad9834b",
+        "filename": "vl.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1999,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-12-05T21:00:41Z",
+      "side": 1,
+      "message": "just curious, does fuchsia use none of the CONFIG_ANDROID stuff? Do they plan to use any part of our android specific code?",
+      "range": {
+        "startLine": 1999,
+        "startChar": 12,
+        "endLine": 1999,
+        "endChar": 29
+      },
+      "revId": "e99d71ee37329632e67b5461d7e9a803e366ec0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
