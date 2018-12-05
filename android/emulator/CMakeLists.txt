@@ -14,6 +14,7 @@ set(PC_BIOS "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/qemu-kernel/x86/pc-bios")
 set(EMULATOR_BIOS_DEPENDENCIES
     "${PC_BIOS}/bios.bin>lib/pc-bios/bios.bin"
     "${PC_BIOS}/vgabios-cirrus.bin>lib/pc-bios/vgabios-cirrus.bin"
+    "${PC_BIOS}/vgabios-stdvga.bin>lib/pc-bios/vgabios-stdvga.bin"
     "${PC_BIOS}/vgabios-virtio.bin>lib/pc-bios/vgabios-virtio.bin"
     "${PC_BIOS}/bios-256k.bin>lib/pc-bios/bios-256k.bin"
     "${PC_BIOS}/efi-virtio.rom>lib/pc-bios/efi-virtio.rom"

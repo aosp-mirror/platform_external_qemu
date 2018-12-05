@@ -59,6 +59,7 @@
 #include "sysemu/numa.h"
 
 #ifdef CONFIG_ANDROID
+#include "android/globals.h"
 #include "hw/acpi/goldfish_defs.h"
 #endif
 
@@ -249,22 +250,24 @@ static void pc_init1(MachineState *machine,
     pc_register_ferr_irq(pcms->gsi[13]);
 
 #if defined(CONFIG_ANDROID)
-    sysbus_create_simple("goldfish_battery", GOLDFISH_BATTERY_IOMEM_BASE,
-                         pcms->gsi[GOLDFISH_BATTERY_IRQ]);
-    sysbus_create_simple("goldfish-events", GOLDFISH_EVENTS_IOMEM_BASE,
-                         pcms->gsi[GOLDFISH_EVENTS_IRQ]);
-    sysbus_create_simple("goldfish_pipe", GOLDFISH_PIPE_IOMEM_BASE,
-                         pcms->gsi[GOLDFISH_PIPE_IRQ]);
-    sysbus_create_simple("goldfish_fb", GOLDFISH_FB_IOMEM_BASE,
-                         pcms->gsi[GOLDFISH_FB_IRQ]);
-    sysbus_create_simple("goldfish_audio", GOLDFISH_AUDIO_IOMEM_BASE,
-                         pcms->gsi[GOLDFISH_AUDIO_IRQ]);
-    sysbus_create_simple("goldfish_rtc", GOLDFISH_RTC_IOMEM_BASE,
-                         pcms->gsi[GOLDFISH_RTC_IRQ]);
-    sysbus_create_simple("goldfish_sync", GOLDFISH_SYNC_IOMEM_BASE,
-                         pcms->gsi[GOLDFISH_SYNC_IRQ]);
-    sysbus_create_simple("goldfish_rotary", GOLDFISH_ROTARY_IOMEM_BASE,
-                         pcms->gsi[GOLDFISH_ROTARY_IRQ]);
+    if (android_qemu_mode) {
+        sysbus_create_simple("goldfish_battery", GOLDFISH_BATTERY_IOMEM_BASE,
+                             pcms->gsi[GOLDFISH_BATTERY_IRQ]);
+        sysbus_create_simple("goldfish-events", GOLDFISH_EVENTS_IOMEM_BASE,
+                             pcms->gsi[GOLDFISH_EVENTS_IRQ]);
+        sysbus_create_simple("goldfish_pipe", GOLDFISH_PIPE_IOMEM_BASE,
+                             pcms->gsi[GOLDFISH_PIPE_IRQ]);
+        sysbus_create_simple("goldfish_fb", GOLDFISH_FB_IOMEM_BASE,
+                             pcms->gsi[GOLDFISH_FB_IRQ]);
+        sysbus_create_simple("goldfish_audio", GOLDFISH_AUDIO_IOMEM_BASE,
+                             pcms->gsi[GOLDFISH_AUDIO_IRQ]);
+        sysbus_create_simple("goldfish_rtc", GOLDFISH_RTC_IOMEM_BASE,
+                             pcms->gsi[GOLDFISH_RTC_IRQ]);
+        sysbus_create_simple("goldfish_sync", GOLDFISH_SYNC_IOMEM_BASE,
+                             pcms->gsi[GOLDFISH_SYNC_IRQ]);
+        sysbus_create_simple("goldfish_rotary", GOLDFISH_ROTARY_IOMEM_BASE,
+                             pcms->gsi[GOLDFISH_ROTARY_IRQ]);
+    }
 #endif  // CONFIG_ANDROID
 
     pc_vga_init(isa_bus, pcmc->pci_enabled ? pci_bus : NULL);
