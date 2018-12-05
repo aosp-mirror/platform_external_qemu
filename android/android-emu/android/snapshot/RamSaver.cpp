@@ -205,6 +205,11 @@ void RamSaver::savePage(int64_t blockOffset,
         return;
     }
 
+    if (block.ramBlock.flags & SNAPSHOT_RAM_USER_BACKED) {
+        // No need to save this block as it's readonly
+        return;
+    }
+
     if ((block.ramBlock.flags & SNAPSHOT_RAM_MAPPED_SHARED) &&
         nonzero(mFlags & RamSaver::Flags::Async)) {
         // No need to save this block as it's mapped as shared
@@ -559,6 +564,10 @@ void RamSaver::writeIndex() {
             }
 
             if (b.ramBlock.readonly) {
+                continue;
+            }
+
+            if (b.ramBlock.flags & SNAPSHOT_RAM_USER_BACKED) {
                 continue;
             }
 
