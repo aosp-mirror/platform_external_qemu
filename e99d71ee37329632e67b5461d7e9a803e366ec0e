@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "4340e4bc_73ec2d1c",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-05T21:02:17Z",
+      "side": 1,
+      "message": "If this is unrelated to fuchsia, could you please submit this as a separate change?",
+      "range": {
+        "startLine": 595,
+        "startChar": 19,
+        "endLine": 595,
+        "endChar": 25
+      },
+      "revId": "e99d71ee37329632e67b5461d7e9a803e366ec0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "441fc6ba_9ad9834b",
         "filename": "vl.c",
         "patchSetId": 5
