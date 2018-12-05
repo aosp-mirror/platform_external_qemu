@@ -685,15 +685,39 @@ extern "C" int main(int argc, char** argv) {
                 &argc, &argv, kTarget.androidArch,
                 true,  // is_qemu2
                 opts, hw, &android_avdInfo, &exitStatus)) {
-        // Special case for QEMU positional parameters.
+        // Special case for QEMU positional parameters (or Fuchsia path)
         if (exitStatus == EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER) {
             // Copy all QEMU options to |args|, and set |n| to the number
             // of options in |args| (|argc| must be positive here).
             // NOTE: emulator_parseCommonCommandLineOptions has side effects
-            // and modififes argc, as well as argv. Because of these magical
+            // and modifies argc, as well as argv. Because of these magical
             // side effects we are *NOT* just copying over argc, argv.
-            for (int n = 1; n <= argc; ++n) {
-                args.add(argv[n - 1]);
+
+            // If running Fuchsia, the kernel argument needs to be passed through
+            // as when opts->fuchsia is true, since it is not a Linux kernel,
+            // we do not run it through the usual parsing scheme that writes the
+            // kernel path to android_hw->kernel_path (android_hw is currently
+            // not used in the Fuchsia path).
+            if (opts->fuchsia) {
+                args.add({"-kernel", opts->kernel});
+                std::string dataDir = getNthParentDir(executable, 3U);
+                if (dataDir.empty()) {
+                    dataDir = "lib/pc-bios";
+                } else {
+                    dataDir += "/lib/pc-bios";
+                }
+                args.add({"-L", dataDir});
+                for (int n = 1; n < argc; ++n) {
+                    args.add(argv[n]);
+                }
+            } else {
+                for (int n = 1; n <= argc; ++n) {
+                    args.add(argv[n - 1]);
+                }
+            }
+
+            for (int i = 0; i < args.size(); i++) {
+                fprintf(stderr, "%s: arg: %s\n", __func__, args[i].c_str());
             }
 
             // Skip the translation of command-line options and jump

@@ -876,6 +876,7 @@ static void load_linux(PCMachineState *pcms,
     if (ldl_p(header+0x202) == 0x53726448) {
         protocol = lduw_p(header+0x206);
     } else {
+        fprintf(stderr, "%s: multib kernel\n", __func__);
         /* This looks like a multiboot kernel. If it is, let's stop
            treating it like a Linux kernel. */
         if (load_multiboot(fw_cfg, f, kernel_filename, initrd_filename,
@@ -1061,6 +1062,7 @@ static void load_linux(PCMachineState *pcms,
         option_rom[nb_option_roms].name = "linuxboot_dma.bin";
     }
     nb_option_roms++;
+    fprintf(stderr, "%s: added option rom %d\n", __func__, nb_option_roms);
 }
 
 #define NE2000_NB_MAX 6
@@ -1305,6 +1307,7 @@ void pc_acpi_init(const char *default_dsdt)
 
 void xen_load_linux(PCMachineState *pcms)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     int i;
     FWCfgState *fw_cfg;
 
@@ -1454,6 +1457,7 @@ void pc_memory_init(PCMachineState *pcms,
     }
 
     for (i = 0; i < nb_option_roms; i++) {
+        fprintf(stderr, "%s: rom %d: %s\n", __func__, i, option_rom[i].name);
         rom_add_option(option_rom[i].name, option_rom[i].bootindex);
     }
     pcms->fw_cfg = fw_cfg;
