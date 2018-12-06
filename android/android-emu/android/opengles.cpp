@@ -174,6 +174,7 @@ BAD_EXIT:
 
 int
 android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int guestApiLevel,
+                              const QAndroidVmOperations *vm_operations,
                               int* glesMajorVersion_out,
                               int* glesMinorVersion_out)
 {
@@ -227,8 +228,10 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     dma_ops.invalidate_host_mappings = android_goldfish_dma_ops.invalidate_host_mappings;
     dma_ops.unlock = android_goldfish_dma_ops.unlock;
     sRenderLib->setDmaOps(dma_ops);
+    sRenderLib->setVmOps(*vm_operations);
 
     sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow, sEgl2egl);
+
     android::snapshot::Snapshotter::get().addOperationCallback(
             [](android::snapshot::Snapshotter::Operation op,
                android::snapshot::Snapshotter::Stage stage) {

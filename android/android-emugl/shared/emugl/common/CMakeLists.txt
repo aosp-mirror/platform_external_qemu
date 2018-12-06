@@ -1,6 +1,7 @@
 set(emugl_common_src
     crash_reporter.cpp
     dma_device.cpp
+    vm_operations.cpp
     feature_control.cpp
     logging.cpp
     misc.cpp

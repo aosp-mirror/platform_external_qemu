@@ -16,6 +16,7 @@
 #include "OpenglRender/RenderLib.h"
 
 #include "android/base/Compiler.h"
+#include "emugl/common/vm_operations.h"
 
 #include <memory>
 
@@ -40,6 +41,8 @@ public:
                                emugl_sync_device_exists_t) override;
 
     virtual void setDmaOps(emugl_dma_ops) override;
+
+    virtual void setVmOps(const QAndroidVmOperations &vm_operations) override;
 
     virtual void* getGL(void) override;
 
