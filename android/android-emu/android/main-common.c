@@ -84,6 +84,7 @@ bool android_op_writable_system = false;
 const char *savevm_on_exit = NULL;
 int guest_data_partition_mounted = 0;
 int guest_boot_completed = 0;
+int android_qemu_mode = 1;
 
 bool emulator_has_network_option = false;
 
@@ -1446,6 +1447,12 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     *exit_status = 1;
 
     if (android_parse_options(p_argc, p_argv, opts) < 0) {
+        return false;
+    }
+
+    if (opts->fuchsia) {
+        android_qemu_mode = 0;
+        *exit_status = EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER;
         return false;
     }
 

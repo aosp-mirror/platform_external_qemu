@@ -43,4 +43,7 @@ extern int guest_data_partition_mounted;
 /* this indicates that guest has boot completed */
 extern int guest_boot_completed;
 
+/* are we using the emulator in the android mode or plain qemu? */
+extern int android_qemu_mode;
+
 ANDROID_END_HEADER
