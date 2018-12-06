@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4ff0973d_f42b40ad",
+        "filename": "android/android-emu/android/emulation/proto/VehicleHalProto.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-12-06T00:37:46Z",
+      "side": 1,
+      "message": "Given Steve\u0027s comment, let\u0027s just remove this value.",
+      "revId": "6a5544d7f3f4adeeb7d0c9d8d5636892f5cd9c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
