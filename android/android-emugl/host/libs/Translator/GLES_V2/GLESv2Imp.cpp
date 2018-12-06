@@ -2834,6 +2834,7 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
                 if(fragSp->getCompileStatus() && vertSp->getCompileStatus()) {
                     ctx->dispatcher().glLinkProgram(globalProgramName);
                     ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
+                    programData->setHostLinkStatus(linkStatus);
                     if (!programData->validateLink(fragSp, vertSp)) {
                         programData->setLinkStatus(GL_FALSE);
                         programData->setErrInfoLog();

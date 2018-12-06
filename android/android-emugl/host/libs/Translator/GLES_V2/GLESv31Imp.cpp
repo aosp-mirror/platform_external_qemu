@@ -112,6 +112,8 @@ extern "C" GL_APICALL GLuint GL_APIENTRY glCreateShaderProgramv(GLenum type, GLs
         ctx->shareGroup()->genName(ShaderProgramType::PROGRAM, 0, true, glCreateShaderProgramvRET);
 
     ProgramData* progdata = new ProgramData(ctx->getMajorVersion(), ctx->getMinorVersion());
+    // Host link status not considered in GLES3.1 because we don't use uniform location
+    // virtualization there
     progdata->setLinkStatus(GL_TRUE);
 
     ctx->shareGroup()->setObjectData(NamedObjectType::SHADER_OR_PROGRAM, localProgramName, ObjectDataPtr(progdata));
