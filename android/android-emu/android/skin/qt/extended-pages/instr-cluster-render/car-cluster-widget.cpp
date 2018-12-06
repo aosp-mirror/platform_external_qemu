@@ -23,11 +23,49 @@
 
 static constexpr uint8_t PIPE_START = 1;
 static constexpr uint8_t PIPE_STOP = 2;
-static constexpr uint8_t PIPE_CONTINUE = 3;
+
+static constexpr int FRAME_WIDTH = 1280;
+static constexpr int FRAME_HEIGHT = 720;
+
+static CarClusterWidget* instance;
 
 CarClusterWidget::CarClusterWidget(QWidget* parent)
-    : QWidget(parent) {
+    : QWidget(parent),
+      mWorkerThread([this](CarClusterWidget::FrameInfo &&frameInfo) {
+          return workerProcessFrame(frameInfo);
+      }) {
+      instance = this;
+
+      avcodec_register_all();
+
+      mCodec = avcodec_find_decoder(AV_CODEC_ID_H264);
+      mCodecCtx = avcodec_alloc_context3(mCodec);
+      avcodec_open2(mCodecCtx,mCodec,0);
+      mFrame = av_frame_alloc();
+
+      mCtx = sws_getContext(FRAME_WIDTH, FRAME_HEIGHT, AV_PIX_FMT_YUV420P,
+                     FRAME_WIDTH, FRAME_HEIGHT, AV_PIX_FMT_RGB32, SWS_BICUBIC,
+                     NULL, NULL, NULL);
+
+      mRgbData = new uint8_t[4 * FRAME_WIDTH * FRAME_HEIGHT];
+
+      connect(this, SIGNAL(sendImage(QImage)),
+                this, SLOT(updatePixmap(QImage)), Qt::QueuedConnection);
+      mWorkerThread.start();
+
       set_car_cluster_call_back(processFrame);
+}
+
+CarClusterWidget::~CarClusterWidget() {
+    // Send message to worker thread to stop processing
+    mWorkerThread.enqueue({});
+    mWorkerThread.join();
+
+    av_free(mFrame);
+    avcodec_close(mCodecCtx);
+    avcodec_free_context(&mCodecCtx);
+
+    delete[] mRgbData;
 }
 
 void CarClusterWidget::paintEvent(QPaintEvent* event) {
@@ -44,10 +82,34 @@ void CarClusterWidget::paintEvent(QPaintEvent* event) {
 }
 
 void CarClusterWidget::processFrame(const uint8_t* frame, int frameSize) {
-    // TODO: decode input frame to form image & render it
-    std::cout << "current frame size: " << frameSize << std::endl;
-    sendCarClusterMsg(PIPE_CONTINUE);
-    return;
+    instance->mWorkerThread.enqueue({frameSize, std::vector<uint8_t>(frame, frame + frameSize)});
+}
+
+WorkerProcessingResult CarClusterWidget::workerProcessFrame(FrameInfo& frameInfo) {
+    if (!frameInfo.size) {
+        return WorkerProcessingResult::Stop;
+    }
+    int rgbStride[1] = {4 * FRAME_WIDTH};
+
+    AVPacket packet;
+    av_init_packet(&packet);
+    packet.data = frameInfo.frameData.data();
+    packet.size = (int) frameInfo.size;
+    int frameFinished = 0;
+
+    // TODO: Find better way to silence ffmpeg warning on first packets
+    av_log_set_level(AV_LOG_FATAL);
+    int nres = avcodec_decode_video2(mCodecCtx,mFrame,&frameFinished,&packet);
+    av_log_set_level(AV_LOG_INFO);
+
+    if (frameFinished > 0) {
+        sws_scale(mCtx, mFrame->extended_data, mFrame->linesize,
+                    0, FRAME_HEIGHT, &mRgbData, rgbStride);
+        emit sendImage(QImage(mRgbData, FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_RGB32));
+    }
+
+    av_free_packet(&packet);
+    return WorkerProcessingResult::Continue;
 }
 
 void CarClusterWidget::showEvent(QShowEvent* event) {
