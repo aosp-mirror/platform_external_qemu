@@ -17,9 +17,19 @@
 #include <string>
 #include <vector>
 
+#ifdef _MSC_VER
+# ifdef BUILDING_EMUGL_COMMON_SHARED
+#  define EMUGL_COMMON_API __declspec(dllexport)
+# else
+#  define EMUGL_COMMON_API __declspec(dllimport)
+#endif
+#else
+# define EMUGL_COMMON_API
+#endif
+
 // Replaces |rm| with |rep| in |str|.
 // Example: rm = "a", rep = "bb", str = "abcd" returns "bbbcd"
-std::string replace_with(const std::string& rm,
+EMUGL_COMMON_API std::string replace_with(const std::string& rm,
                          const std::string& rep,
                          const std::string& str);
 
@@ -35,7 +45,7 @@ std::string replace_with(const std::string& rm,
 // Example: src = "a (1 2 (3))"
 //          in = "(", out = ")"
 //          returns "a )"
-std::string remove_in_out(const std::string& src,
+EMUGL_COMMON_API std::string remove_in_out(const std::string& src,
                           const std::string& in,
                           const std::string& out,
                           bool* err);
@@ -52,7 +62,7 @@ std::string remove_in_out(const std::string& src,
 // Example: src = "a (1 2 (3))"
 //          in = "(", out = ")"
 //          returns vector with ["1 2 (3"]
-std::vector<std::string> isolate_in_out(
+EMUGL_COMMON_API std::vector<std::string> isolate_in_out(
                           const std::string& src,
                           const std::string& in,
                           const std::string& out,
@@ -61,13 +71,13 @@ std::vector<std::string> isolate_in_out(
 // Splits a string |src| delimited by |delim|.
 // Example: delim = ",", src = "1,2,3"
 //          returns vector with ["1","2","3"]
-std::vector<std::string> split(const std::string& delim,
+EMUGL_COMMON_API std::vector<std::string> split(const std::string& delim,
                                const std::string& src);
 
 // Attempts to find any string in to_find in src.
 // Returns the position of the last match, or std::string::npos
 // Example: src = "abcdef", to_find = ["b", "c", "d"]
 //          returns 3
-size_t multi_find(const std::string& src,
+EMUGL_COMMON_API size_t multi_find(const std::string& src,
                   const std::vector<std::string>& to_find);
 

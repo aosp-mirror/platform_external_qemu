@@ -17,10 +17,21 @@
 #pragma once
 
 #include "OpenglRender/render_api_types.h"
+
+#ifdef _MSC_VER
+# ifdef BUILDING_EMUGL_COMMON_SHARED
+#  define EMUGL_COMMON_API __declspec(dllexport)
+# else
+#  define EMUGL_COMMON_API __declspec(dllimport)
+#endif
+#else
+# define EMUGL_COMMON_API
+#endif
+
 namespace emugl {
-extern emugl_counter_t emugl_object_count_inc;
-extern emugl_counter_t emugl_object_count_dec;
-void set_emugl_gl_object_counter(emugl_counter_struct counter);
+EMUGL_COMMON_API extern emugl_counter_t emugl_object_count_inc;
+EMUGL_COMMON_API extern emugl_counter_t emugl_object_count_dec;
+EMUGL_COMMON_API void set_emugl_gl_object_counter(emugl_counter_struct counter);
 }
 #define GL_OBJECT_COUNT_INC(TYPE)       \
     do {                                \
