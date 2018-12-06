@@ -11,9 +11,7 @@ set(emugl_common_src
     gl_object_counter.cpp)
 
 android_add_shared_library(emugl_common)
-if (ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
-  target_compile_definitions(emugl_common PRIVATE "-DBUILDING_EMUGL_COMMON_SHARED")
-endif()
+android_target_compile_definitions(emugl_common windows_msvc-x86_64 PRIVATE "-DBUILDING_EMUGL_COMMON_SHARED")
 target_compile_options(emugl_common PRIVATE -fvisibility=default)
 target_link_libraries(emugl_common PRIVATE emugl_base)
 target_link_libraries(emugl_common PRIVATE android-emu-base)
@@ -26,6 +24,7 @@ install(TARGETS emugl_common
 
 set(emugl_test_shared_library_src testing/test_shared_library.cpp)
 android_add_shared_library(emugl_test_shared_library)
+android_target_compile_definitions(emugl_test_shared_library windows_msvc-x86_64 PRIVATE "-DBUILDING_EMUGL_COMMON_SHARED")
 
 set(emugl_common_host_unittests_src shared_library_unittest.cpp stringparsing_unittest.cpp)
 android_add_test(emugl_common_host_unittests)

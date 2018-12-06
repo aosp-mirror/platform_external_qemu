@@ -9,7 +9,7 @@ target_include_directories(cutils PRIVATE ${ANDROID_EMUGL_DIR}/host/include .)
 target_include_directories(cutils PUBLIC .)
 target_link_libraries(cutils PUBLIC android-emu-base)
 target_link_libraries(cutils PRIVATE emugl_base)
-target_compile_options(cutils PRIVATE -fvisibility=default -Wno-invalid-constexpr)
+android_target_compile_options(cutils Clang PRIVATE -fvisibility=default -Wno-invalid-constexpr)
 
 # A small logging library
 set(log_src androidImpl/Log.cpp)
@@ -43,19 +43,19 @@ android_add_shared_library(grallocusage)
 target_link_libraries(grallocusage PUBLIC emugl_base)
 
 set(vulkan_android_src
-    libvulkan/api.cpp 
-    libvulkan/api_gen.cpp 
-    libvulkan/debug_report.cpp 
-    libvulkan/driver.cpp 
-    libvulkan/driver_gen.cpp 
-    libvulkan/layers_extensions.cpp 
-    libvulkan/stubhal.cpp 
-    libvulkan/swapchain.cpp 
+    libvulkan/api.cpp
+    libvulkan/api_gen.cpp
+    libvulkan/debug_report.cpp
+    libvulkan/driver.cpp
+    libvulkan/driver_gen.cpp
+    libvulkan/layers_extensions.cpp
+    libvulkan/stubhal.cpp
+    libvulkan/swapchain.cpp
 )
 android_add_shared_library(vulkan_android)
 target_compile_definitions(vulkan_android PRIVATE
-   -DLOG_TAG=\"vulkan\" 
-   -DVK_USE_PLATFORM_ANDROID_KHR 
+   -DLOG_TAG=\"vulkan\"
+   -DVK_USE_PLATFORM_ANDROID_KHR
    -DVK_NO_PROTOTYPES)
 target_include_directories(vulkan_android PRIVATE ${ANDROID_EMUGL_DIR}/host/include)
 target_compile_options(vulkan_android PRIVATE -fvisibility=hidden -fstrict-aliasing)

@@ -16,7 +16,7 @@
 from enum import Enum
 import os
 import platform
-
+import shutil
 
 from absl import flags
 
@@ -48,6 +48,10 @@ def get_cmake_dir():
 
 def get_cmake():
     '''Return the path of cmake executable.'''
+    if platform.system() == 'Windows':
+        # Temporary use visual studio cmake until we have upgraded
+        # cmake to 3.12 (see b/121393952)
+        return 'cmake.exe'
     return os.path.join(get_cmake_dir(), 'cmake%s' % EXE_POSTFIX)
 
 
@@ -55,7 +59,20 @@ def get_ctest():
     '''Return the path of ctest executable.'''
     return os.path.join(get_cmake_dir(), 'ctest%s' % EXE_POSTFIX)
 
+def get_visual_studio():
+    '''Gets the path to visual studio.
 
+    TODO(jansene): Use https://github.com/Microsoft/vswhere vs this here'''
+    return os.path.join(os.sep, "Program Files (x86)", "Microsoft Visual Studio", "2017", "Enterprise", "VC" ,"Auxiliary", "Build", "vcvars64.bat")
+
+def get_windows_clang():
+    '''Gets the clang-cl.exe compiler for windows.'''
+    clang_ver = 'clang-r346389b'
+    clang_dir = os.path.join(get_aosp_root(), 'prebuilts','clang','host','windows-x86',clang_ver,'bin')
+    clang_cl = os.path.join(clang_dir, 'clang-cl.exe')
+    if not os.path.exists(clang_cl):
+        shutil.copyfile(os.path.join(clang_dir, 'clang.exe'), clang_cl)
+    return clang_cl
 
 # Functions that determine if a file is executable.
 is_executable = {
