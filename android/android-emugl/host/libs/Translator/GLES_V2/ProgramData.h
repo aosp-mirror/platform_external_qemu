@@ -89,6 +89,7 @@ public:
     void setValidateStatus(bool status) { ValidateStatus = status; }
 
     // setLinkStatus resets uniform location virtualization as well
+    void setHostLinkStatus(GLint status);
     void setLinkStatus(GLint status);
     bool getLinkStatus() const;
 
@@ -132,6 +133,7 @@ private:
     std::string infoLog;
     bool ValidateStatus;
     bool LinkStatus;
+    bool HostLinkStatus;
     bool IsInUse;
     bool DeleteStatus;
     GLuint  ProgramName;
