@@ -209,6 +209,8 @@ OPT_PARAM(phone_number, "<phone_number>", "Sets the phone number of the emulated
 
 CFG_PARAM(acpi_config, "<file>", "specify acpi device proprerties (hierarchical key=value pair)")
 
+OPT_FLAG(fuchsia, "Run Fuchsia image. Bypasses android-specific setup; args after are treated as standard QEMU args")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

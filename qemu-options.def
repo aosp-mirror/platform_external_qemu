@@ -991,5 +991,8 @@ DEF("mem-file-shared", 0, QEMU_OPTION_mem_file_shared,
 DEF("read-only", 0, QEMU_OPTION_read_only,
 "-read-only mark the session as read-only and abandon all snapshot or any disk changes at exit.\n", QEMU_ARCH_ALL)
 
+DEF("fuchsia", 0, QEMU_OPTION_fuchsia,
+"-fuchsia Fuchsia kernel/image run. Only standard QEMU options are allowed after, and emulator does not start Android virtual devices automatically.", QEMU_ARCH_ALL)
+
 #endif  // CONFIG_ANDROID
 

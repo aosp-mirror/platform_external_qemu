@@ -14,11 +14,13 @@ set(PC_BIOS "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/qemu-kernel/x86/pc-bios")
 set(EMULATOR_BIOS_DEPENDENCIES
     "${PC_BIOS}/bios.bin>lib/pc-bios/bios.bin"
     "${PC_BIOS}/vgabios-cirrus.bin>lib/pc-bios/vgabios-cirrus.bin"
+    "${PC_BIOS}/vgabios-stdvga.bin>lib/pc-bios/vgabios-stdvga.bin"
     "${PC_BIOS}/vgabios-virtio.bin>lib/pc-bios/vgabios-virtio.bin"
     "${PC_BIOS}/bios-256k.bin>lib/pc-bios/bios-256k.bin"
     "${PC_BIOS}/efi-virtio.rom>lib/pc-bios/efi-virtio.rom"
     "${PC_BIOS}/kvmvapic.bin>lib/pc-bios/kvmvapic.bin"
     "${PC_BIOS}/linuxboot.bin>lib/pc-bios/linuxboot.bin"
+    "${PC_BIOS}/multiboot.bin>lib/pc-bios/multiboot.bin"
     "${PC_BIOS}/linuxboot_dma.bin>lib/pc-bios/linuxboot_dma.bin")
 
 set(EMULATOR_KEYMAP_DEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/pc-bios/keymaps/*>>lib/pc-bios/keymaps")

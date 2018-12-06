@@ -4777,6 +4777,14 @@ STEXI
 Abandon changes on exit
 ETEXI
 
+DEF("fuchsia", 0, QEMU_OPTION_fuchsia,
+"-fuchsia Fuchsia kernel/image run. Only standard QEMU options are allowed after, and emulator does not start Android virtual devices automatically.", QEMU_ARCH_ALL)
+STEXI
+@item -fuchsia
+@findex -fuchsia
+Run Fuchsia kernel/image. Only standard QEMU options are allowed after -fuchsia, and emulator does not start Android virtual devices automatically.
+ETEXI
+
 #endif  // CONFIG_ANDROID
 
 HXCOMM This is the last statement. Insert new options before this line!
