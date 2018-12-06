@@ -10,6 +10,9 @@ set(emugl_common_src
     gl_object_counter.cpp)
 
 android_add_shared_library(emugl_common)
+if (ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
+  target_compile_definitions(emugl_common PRIVATE "-DBUILDING_EMUGL_COMMON_SHARED")
+endif()
 target_compile_options(emugl_common PRIVATE -fvisibility=default)
 target_link_libraries(emugl_common PRIVATE emugl_base)
 target_link_libraries(emugl_common PRIVATE android-emu-base)

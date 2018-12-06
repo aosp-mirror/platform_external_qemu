@@ -17,17 +17,28 @@
 #pragma once
 
 #include "OpenglRender/render_api_types.h"
+
+#ifdef _MSC_VER
+# ifdef BUILDING_EMUGL_COMMON_SHARED
+#  define EMUGL_COMMON_API __declspec(dllexport)
+# else
+#  define EMUGL_COMMON_API __declspec(dllimport)
+#endif
+#else
+# define EMUGL_COMMON_API
+#endif
+
 namespace emugl {
 
-extern emugl_dma_add_buffer_t g_emugl_dma_add_buffer;
-extern emugl_dma_remove_buffer_t g_emugl_dma_remove_buffer;
-extern emugl_dma_get_host_addr_t g_emugl_dma_get_host_addr;
-extern emugl_dma_unlock_t g_emugl_dma_unlock;
+EMUGL_COMMON_API extern emugl_dma_add_buffer_t g_emugl_dma_add_buffer;
+EMUGL_COMMON_API extern emugl_dma_remove_buffer_t g_emugl_dma_remove_buffer;
+EMUGL_COMMON_API extern emugl_dma_get_host_addr_t g_emugl_dma_get_host_addr;
+EMUGL_COMMON_API extern emugl_dma_unlock_t g_emugl_dma_unlock;
 
-void set_emugl_dma_add_buffer(emugl_dma_add_buffer_t);
-void set_emugl_dma_remove_buffer(emugl_dma_remove_buffer_t);
-void set_emugl_dma_get_host_addr(emugl_dma_get_host_addr_t);
-void set_emugl_dma_invalidate_host_mappings(emugl_dma_invalidate_host_mappings_t);
-void set_emugl_dma_unlock(emugl_dma_unlock_t);
+EMUGL_COMMON_API void set_emugl_dma_add_buffer(emugl_dma_add_buffer_t);
+EMUGL_COMMON_API void set_emugl_dma_remove_buffer(emugl_dma_remove_buffer_t);
+EMUGL_COMMON_API void set_emugl_dma_get_host_addr(emugl_dma_get_host_addr_t);
+EMUGL_COMMON_API void set_emugl_dma_invalidate_host_mappings(emugl_dma_invalidate_host_mappings_t);
+EMUGL_COMMON_API void set_emugl_dma_unlock(emugl_dma_unlock_t);
 
 }  // namespace emugl

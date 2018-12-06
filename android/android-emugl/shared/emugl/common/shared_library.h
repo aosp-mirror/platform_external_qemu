@@ -24,6 +24,16 @@
 #include <windows.h>
 #endif
 
+#ifdef _MSC_VER
+# ifdef BUILDING_EMUGL_COMMON_SHARED
+#  define EMUGL_COMMON_API __declspec(dllexport)
+# else
+#  define EMUGL_COMMON_API __declspec(dllimport)
+#endif
+#else
+# define EMUGL_COMMON_API
+#endif
+
 namespace emugl {
 
 // A class used to open a platform-specific shared library, and probe
@@ -39,7 +49,7 @@ namespace emugl {
 //    FunctionPtr my_func = library->findSymbol("my_func");
 //
 //  A shared library will be unloaded on program exit.
-class SharedLibrary {
+class EMUGL_COMMON_API SharedLibrary {
 private:
     struct Deleter {
         void operator()(SharedLibrary* lib) const { delete lib; }

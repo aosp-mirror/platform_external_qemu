@@ -30,6 +30,7 @@
 #include "android/skin/qt/websockets/websocketclientwrapper.h"
 #include "android/skin/qt/websockets/websockettransport.h"
 
+#include <QDateTime>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QTimer>
