@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fe7ad5d9_3b797bb5",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1087,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-06T08:19:49Z",
+      "side": 1,
+      "message": "running this line if the host side GL did not successfully link causes a GL error",
+      "revId": "0e294441102975c51d07d390688cf44f55cf2127",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
