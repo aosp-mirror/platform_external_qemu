@@ -2,8 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 if (WIN32 OR ("${LOCAL_OS_FLAVOR}" STREQUAL "windows"))
     # Create an empty dummy lib..
-    add_library(emulator-libselinux src/label_internal.h)
-    set_property(TARGET emulator-libselinux PROPERTY LINKER_LANGUAGE CXX)
+    add_library(emulator-libselinux ${ANDROID_QEMU2_TOP_DIR}/dummy.c)
 else ()
     add_library(emulator-libselinux
             src/callbacks.c
