@@ -21,10 +21,10 @@
 #include "android/base/files/StreamSerializing.h"
 #include "ANGLEShaderParser.h"
 #include "GLcommon/GLutils.h"
+#include "GLcommon/GLESmacros.h"
+#include "GLcommon/ShareGroup.h"
 
-#include <GLcommon/ShareGroup.h>
 #include <GLES3/gl31.h>
-
 #include <string.h>
 #include <unordered_set>
 
@@ -389,7 +389,11 @@ void ProgramData::restore(ObjectLocalName localName,
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     assert(mGuestLocToHostLoc.size() == 0);
     mGuestLocToHostLoc[-1] = -1;
-    if (LinkStatus) {
+    bool shoudLoadLinked = LinkStatus;
+#if defined(TOLERATE_PROGRAM_LINK_ERROR) && TOLERATE_PROGRAM_LINK_ERROR == 1
+    shoudLoadLinked = 1;
+#endif
+    if (shoudLoadLinked) {
         // Really, each program name corresponds to 2 programs:
         // the one that is already linked, and the one that is not yet linked.
         // We need to restore both.
@@ -763,6 +767,9 @@ void ProgramData::setLinkStatus(GLint status) {
     mUniNameToGuestLoc.clear();
     mGuestLocToHostLoc.clear();
     mGuestLocToHostLoc[-1] = -1;
+#if defined(TOLERATE_PROGRAM_LINK_ERROR) && TOLERATE_PROGRAM_LINK_ERROR == 1
+    status = 1;
+#endif
     if (status) {
         std::vector<sh::ShaderVariable> allUniforms;
         bool is310 = false;
