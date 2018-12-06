@@ -16,6 +16,24 @@
       "revId": "6a5544d7f3f4adeeb7d0c9d8d5636892f5cd9c35",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1155baef_12f717f6",
+        "filename": "android/android-emu/android/emulation/proto/VehicleHalProto.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-12-06T21:32:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4ff0973d_f42b40ad",
+      "revId": "6a5544d7f3f4adeeb7d0c9d8d5636892f5cd9c35",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
