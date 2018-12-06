@@ -181,10 +181,15 @@ static void GL_APIENTRY glDrawElementsBaseVertex(GLenum mode,
     }
 }
 
+#ifdef _MSC_VER
+void  (__stdcall *epoxy_glDrawElementsBaseVertex)(GLenum, GLsizei, GLenum,
+                                                    GLintptr, GLint)
+        = &glDrawElementsBaseVertex;
+#else
 void GL_APIENTRY (* epoxy_glDrawElementsBaseVertex)(GLenum, GLsizei, GLenum,
                                                     GLintptr, GLint)
         = &glDrawElementsBaseVertex;
-
+#endif
 extern "C" {
 
 bool epoxy_is_desktop_gl() {

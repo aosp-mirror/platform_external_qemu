@@ -140,7 +140,7 @@ function(internal_android_install_file SRC DST_DIR)
   endif()
 endfunction()
 
-# Installs the given dependency, this will make it part of the 
+# Installs the given dependency, this will make it part of the
 # final release.
 function(android_install_dependency TARGET_TAG INSTALL_DEPENDENCIES)
   if(TARGET_TAG STREQUAL "${ANDROID_TARGET_TAG}" OR TARGET_TAG STREQUAL "all")
@@ -172,7 +172,7 @@ endfunction()
 # For example: set(MY_FOO_DEPENDENCIES # copy from /tmp/a/b.txt to lib/some/dir/c.txt "/tmp/a/b.txt>lib/some/dir/c.txt;"
 # # recursively copy /tmp/dirs to lib/x lib/some/dir/c.txt "/tmp/dirs/*>>lib/x")
 #
-# 
+#
 # Note that this relies on every binary being binplaced in the root, which implies that this will not work with every
 # generator.
 #
@@ -219,17 +219,11 @@ function(android_target_dependency RUN_TARGET TARGET_TAG RUN_TARGET_DEPENDENCIES
         set(DEST_DIR "${CMAKE_BINARY_DIR}/${DST}")
         foreach(FNAME ${GLOBBED})
           string(REPLACE "${SRC_DIR}" "${DEST_DIR}" DEST_FILE "${FNAME}")
-          list(APPEND DEST_SRC ${DEST_FILE})
           list(APPEND DEP_SOURCES ${DEST_FILE})
-          endforeach()
+          add_custom_command(OUTPUT "${DEST_FILE}"
+                            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${FNAME}" "${CMAKE_BINARY_DIR}/${DST}")
 
-        # DEST_SRC will contain all the globbed files that will be copied over with rsync, leaving the symlinks to our
-        # local files intact (needed for macos)
-        add_custom_command(OUTPUT ${DEST_SRC}
-                                  # Make sure the directory exists
-                           COMMAND mkdir -p $$\( dirname "${CMAKE_BINARY_DIR}/${DST}" \)
-                                   # And copy all, leaving the symlinks intact.
-                           COMMAND rsync -rl "${SRC}" "${CMAKE_BINARY_DIR}/${DST}")
+          endforeach()
       else()
         # We are doing single file copies. Turns src>dst into a list, so we can split out SRC --> DST
         string(REPLACE ">" ";" SRC_DST ${DEP})

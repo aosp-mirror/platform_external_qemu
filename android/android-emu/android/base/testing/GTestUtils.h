@@ -32,8 +32,8 @@ namespace base {
 // Where |range1| and |range2| must have the same item type, and size.
 template <typename Range1,
           typename Range2,
-          typename = enable_if_c<is_range<Range1>::value &&
-                                 is_range<Range2>::value>>
+          typename = enable_if_c<details::is_range<Range1>::value &&
+                                 details::is_range<Range2>::value>>
 inline ::testing::AssertionResult RangesMatch(const Range1& expected,
                                               const Range2& actual) {
     const auto expectedSize =

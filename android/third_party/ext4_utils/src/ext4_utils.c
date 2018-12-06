@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "ext4_utils.h"
 #include "uuid.h"
 #include "allocate.h"
@@ -29,7 +28,7 @@
 #include <string.h>
 
 #if defined(USE_MINGW) || defined(_MSC_VER)
-#include <winsock2.h>
+
 #else
 #include <arpa/inet.h>
 #include <sys/ioctl.h>

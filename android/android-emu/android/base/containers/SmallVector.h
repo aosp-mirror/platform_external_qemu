@@ -306,12 +306,12 @@ public:
     // Note: template constructor is never a copy/move-ctor.
     template <class Range,
               class = enable_if_c<!std::is_same<Range, T>::value &&
-                                  is_range<Range>::value>>
+                                  details::is_range<Range>::value>>
     explicit SmallFixedVector(const Range& r)
         : SmallFixedVector(std::begin(r), std::end(r)) {}
     template <class Range,
               class = enable_if_c<!std::is_same<Range, T>::value &&
-                                  is_range<Range>::value>>
+                                  details::is_range<Range>::value>>
     explicit SmallFixedVector(Range&& r)
         : SmallFixedVector(std::make_move_iterator(std::begin(r)),
                            std::make_move_iterator(std::end(r))) {}

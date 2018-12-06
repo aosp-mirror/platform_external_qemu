@@ -1830,7 +1830,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         //  from the -dns-server list.
         // qemu2: the opts->dns_server is NULL, just get the dns servers of the
         //  host.
-        SockAddress dnsServers[ANDROID_MAX_DNS_SERVERS] = {};
+        SockAddress dnsServers[ANDROID_MAX_DNS_SERVERS] = {0};
         int dnsCount = android_dns_get_servers(opts->dns_server, dnsServers);
         if (dnsCount < 0) {
             return false;
