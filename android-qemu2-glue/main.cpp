@@ -30,6 +30,7 @@
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/control/ScreenCapturer.h"
+#include "android/emulation/control/vm_operations.h"
 #include "android/error-messages.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/feature_control.h"
@@ -1522,8 +1523,8 @@ extern "C" int main(int argc, char** argv) {
         }
 
         RendererConfig rendererConfig;
-        configAndStartRenderer(avd, opts, hw, uiPreferredGlesBackend,
-                               &rendererConfig);
+        configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
+                               uiPreferredGlesBackend, &rendererConfig);
 
         // Gpu configuration is set, now initialize the screen recorder
         // and screenshot callback

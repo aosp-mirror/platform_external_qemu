@@ -1949,6 +1949,7 @@ static bool isGuestRendererChoice(const char* choice) {
 
 bool configAndStartRenderer(
          AvdInfo* avd, AndroidOptions* opts, AndroidHwConfig* hw,
+         const QAndroidVmOperations *vm_operations,
          enum WinsysPreferredGlesBackend uiPreferredBackend,
          RendererConfig* config_out) {
     EmuglConfig config;
@@ -2062,6 +2063,7 @@ bool configAndStartRenderer(
                     hw->hw_lcd_height,
                     avdInfo_getAvdFlavor(avd) == AVD_PHONE,
                     avdInfo_getApiLevel(avd),
+                    vm_operations,
                     &gles_major_version,
                     &gles_minor_version);
         if (gles_init_res || renderer_startup_res) {
