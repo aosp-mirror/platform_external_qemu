@@ -87,7 +87,6 @@ __RCSID("$NetBSD: regexec.c,v 1.22 2012/03/13 21:13:43 christos Exp $");
  * macros that code uses.  This lets the same code operate on two different
  * representations for state sets.
  */
-#include "namespace.h"
 #include <sys/types.h>
 
 #include <assert.h>
@@ -214,7 +213,6 @@ regexec(
 #else
 #	define	GOODFLAGS(f)	((f)&(REG_NOTBOL|REG_NOTEOL|REG_STARTEND))
 #endif
-
 	_DIAGASSERT(preg != NULL);
 	_DIAGASSERT(string != NULL);
 

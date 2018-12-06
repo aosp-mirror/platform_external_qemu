@@ -70,9 +70,11 @@ private:
 
 private:
     static constexpr Timing defaultTiming() {
-        return {.hangLoopIterationTimeoutMs = 5 * 1000,
-                .taskProcessingTimeoutMs = 15 * 1000,
-                .hangCheckTimeoutMs = 15 * 1000};
+        return {
+            /* .hangLoopIterationTimeoutMs = */ 5 * 1000,
+                /* .taskProcessingTimeoutMs = */ 15 * 1000,
+                /* .hangCheckTimeoutMs = */ 15 * 1000
+        };
     }
 
     base::System::Duration hangTimeoutMs();

@@ -72,9 +72,11 @@
  */
 
 /* utility definitions */
+#ifndef _MSC_VER
 #define	DUPMAX		_POSIX2_RE_DUP_MAX	/* xxx is this right? */
 #define	INFINITY	(DUPMAX + 1)
 #define	NC		(CHAR_MAX - CHAR_MIN + 1)
+#endif
 typedef unsigned char uch;
 
 /* switch off assertions (if not already off) if no REDEBUG */

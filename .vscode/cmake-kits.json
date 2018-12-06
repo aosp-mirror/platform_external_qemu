@@ -1,18 +1,32 @@
 [
     {
-    "name": "Darwin",
-    "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-darwin-x86_64.cmake"
-},
+        "name": "Darwin",
+        "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-darwin-x86_64.cmake"
+    },
     {
-    "name": "Linux",
-    "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-linux-x86_64.cmake"
-},
+        "name": "Linux",
+        "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-linux-x86_64.cmake"
+    },
     {
-    "name": "Linux -> (MingW)",
-    "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-windows-x86_64.cmake"
-},
+        "name": "Linux -> (MingW)",
+        "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-windows-x86_64.cmake"
+    },
     {
-    "name": "Linux -> (msvc)",
-    "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-windows_msvc-x86_64.cmake"
-}
+        "name": "Linux -> (msvc)",
+        "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-windows_msvc-x86_64.cmake"
+    },
+    {
+        "name": "Windows -> Clang 7.0.0 for MSVC with Visual Studio Enterprise 2017 (amd64)",
+        "visualStudio": "VisualStudio.15.0",
+        "visualStudioArchitecture": "Amd64",
+        "compilers": {
+            "C": "C:\\Users\\jansene\\Documents\\src\\windows-x86\\clang-r346389\\bin\\clang-cl.exe",
+            "CXX": "C:\\Users\\jansene\\Documents\\src\\windows-x86\\clang-r346389\\bin\\clang-cl.exe",
+       
+          }
+                  // "compilers": {
+        //   "C": "C:\\Program Files\\LLVM\\bin\\clang-cl.exe",
+        //   "CXX": "C:\\Program Files\\LLVM\\bin\\clang-cl.exe"
+        // }
+      }
 ]

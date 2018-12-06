@@ -51,8 +51,15 @@
 #define COPY_BUF_SIZE (1024U*1024U)
 static char *copybuf;
 
+#ifdef _MSC_VER
+#define min(_a, _b) ((_a < _b) ? _a : _b)
+
+#else
 #define min(a, b) \
 	({ typeof(a) _a = (a); typeof(b) _b = (b); (_a < _b) ? _a : _b; })
+
+#endif // _MSC_VER
+
 
 static void verbose_error(bool verbose, int err, const char *fmt, ...)
 {

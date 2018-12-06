@@ -55,8 +55,14 @@
 #define off64_t off_t
 #endif
 
+#ifdef _MSC_VER
+#define min(a, b) ((a < b) ? a : b)
+#else
 #define min(a, b) \
 	({ typeof(a) _a = (a); typeof(b) _b = (b); (_a < _b) ? _a : _b; })
+
+#endif // !_MSC_VER
+
 
 #define SPARSE_HEADER_MAJOR_VER 1
 #define SPARSE_HEADER_MINOR_VER 0
@@ -150,7 +156,7 @@ static int file_skip(struct output_file *out, int64_t cnt)
 
 	ret = lseek64(outn->fd, cnt, SEEK_CUR);
 	if (ret < 0) {
-		error_errno("lseek64");
+        error("lseek64: %s", strerror(errno));
 		return -1;
 	}
 	return 0;
@@ -162,7 +168,7 @@ static int file_pad(struct output_file *out, int64_t len)
 #if defined(USE_MINGW) || defined(_MSC_VER)
 	HANDLE h = (HANDLE)_get_osfhandle(outn->fd);
 	LARGE_INTEGER prevPos;
-	LARGE_INTEGER newPos = {};
+	LARGE_INTEGER newPos = {0};
 	if (!SetFilePointerEx(h, newPos, &prevPos, FILE_CURRENT)) {
 		return -(errno = EIO);
 	}

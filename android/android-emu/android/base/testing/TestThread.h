@@ -40,7 +40,7 @@ public:
 #ifdef _WIN32
         mThread = CreateThread(NULL,
                                stackSize,
-                               (DWORD WINAPI (*)(void*))func,
+                               (LPTHREAD_START_ROUTINE) func,
                                funcParam,
                                0,
                                NULL);
