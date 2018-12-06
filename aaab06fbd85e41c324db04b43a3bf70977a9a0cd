@@ -1,0 +1,573 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fc32b742_11ce9529",
+        "filename": ".vscode/cmake-kits.json",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 7
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0ccbf97c_184e2b3e",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 2
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aff71e09_c147e5a8",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 265,
+        "startChar": 52,
+        "endLine": 265,
+        "endChar": 53
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "adbbce4e_9bddf950",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 471,
+        "startChar": 54,
+        "endLine": 471,
+        "endChar": 62
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "15d33322_ef70c465",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 474,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 474,
+        "startChar": 63,
+        "endLine": 474,
+        "endChar": 65
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e7898867_1842efc5",
+        "filename": "android/android-emu/android-libui.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 258,
+        "startChar": 14,
+        "endLine": 258,
+        "endChar": 26
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f56d2d5_b61b8a24",
+        "filename": "android/android-emu/android-libui.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4eea77e3_7c418689",
+        "filename": "android/android-emu/android/base/memory/SharedMemory_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 85,
+        "startChar": 1,
+        "endLine": 85,
+        "endChar": 2
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c8faf445_3d680c70",
+        "filename": "android/android-emu/android/base/misc/FileUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 36,
+        "startChar": 62,
+        "endLine": 36,
+        "endChar": 63
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5a64d99b_6d3ea67e",
+        "filename": "android/android-emu/android/base/misc/FileUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 66,
+        "startChar": 2,
+        "endLine": 66,
+        "endChar": 3
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca42cb5c_da12ae20",
+        "filename": "android/android-emu/android/base/misc/FileUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 70,
+        "startChar": 8,
+        "endLine": 70,
+        "endChar": 11
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "64b7f2da_131f050f",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1078,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "Was this not compiling? I defined gettimeofday() in msvc-posix. If that implementation is not right, can you fix it?",
+      "range": {
+        "startLine": 1078,
+        "startChar": 8,
+        "endLine": 1078,
+        "endChar": 35
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "66e5e8de_40121192",
+        "filename": "android/android-emu/android/loadpng.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "Were you running into the ERROR \u003d\u003d 0 error? I think I fixed that by defining WIN32_LEAN_AND_MEAN to all files to get rid of that error.",
+      "range": {
+        "startLine": 14,
+        "startChar": 8,
+        "endLine": 14,
+        "endChar": 16
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0031b4e_00de1b32",
+        "filename": "android/build/cmake/config/emu-mesa-config.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 24,
+        "startChar": 36,
+        "endLine": 24,
+        "endChar": 37
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b32edcd4_41919082",
+        "filename": "android/build/cmake/config/emu-virtualscene-config.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 3,
+        "startChar": 30,
+        "endLine": 3,
+        "endChar": 31
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b975047f_57206f87",
+        "filename": "android/build/cmake/visual-studio.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 49,
+        "startChar": 95,
+        "endLine": 49,
+        "endChar": 96
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "39081b52_af500403",
+        "filename": "android/docs/WINDOWS-DEV.MD",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 24,
+        "startChar": 346,
+        "endLine": 24,
+        "endChar": 347
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "93637186_94e0dad2",
+        "filename": "android/docs/WINDOWS-DEV.MD",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 33,
+        "startChar": 7,
+        "endLine": 33,
+        "endChar": 8
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b29f468f_0477d66d",
+        "filename": "android/msvc-posix-compat/CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "Make sure we\u0027re not building this project for llinux and mac.",
+      "range": {
+        "startLine": 4,
+        "startChar": 18,
+        "endLine": 4,
+        "endChar": 25
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a4807a31_4b3b4076",
+        "filename": "android/third_party/ext4_utils/include/private/fs_config.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 28,
+        "startChar": 41,
+        "endLine": 28,
+        "endChar": 42
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ec01a3be_2dad556b",
+        "filename": "android/third_party/ext4_utils/src/jbd2.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 25,
+        "startChar": 27,
+        "endLine": 25,
+        "endChar": 28
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7f5669eb_c0f5016a",
+        "filename": "android/third_party/libsparse/src/sparse_defs.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 47,
+        "startChar": 16,
+        "endLine": 47,
+        "endChar": 17
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "72ab3297_284bb0d0",
+        "filename": "android/third_party/libsparse/src/sparse_read.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "Do we still need this (NOMINMAX issues)?",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 41
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b71837ef_32badce5",
+        "filename": "android/third_party/libwebp/CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "MSVC?",
+      "range": {
+        "startLine": 102,
+        "startChar": 40,
+        "endLine": 102,
+        "endChar": 45
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7b71f235_b42a9c77",
+        "filename": "android/third_party/libwebp/loadwebp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 1,
+      "message": "WIN32_LEAN_AND_MEAN?",
+      "range": {
+        "startLine": 24,
+        "startChar": 12,
+        "endLine": 24,
+        "endChar": 15
+      },
+      "revId": "aaab06fbd85e41c324db04b43a3bf70977a9a0cd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

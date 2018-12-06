@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "59e8ab2a_2dad552b",
+        "filename": "android/android-emu/crash-service.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2018-12-06T18:24:39Z",
+      "side": 0,
+      "message": "?",
+      "range": {
+        "startLine": 30,
+        "startChar": 46,
+        "endLine": 30,
+        "endChar": 48
+      },
+      "revId": "06f3c76cdf48a82f0f71867d45de5da5cabbe6b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
