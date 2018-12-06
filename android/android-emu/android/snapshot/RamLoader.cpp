@@ -348,6 +348,10 @@ void RamLoader::readBlockPages(base::Stream* stream,
     // Ram block was a file mapping, and current emulator session is using the
     // same file. No need to do anything more, even if we mapped privately in
     // this session instead of shared.
+    if (savedFlags & SNAPSHOT_RAM_USER_BACKED) {
+        return;
+    }
+
     if ((savedFlags & SNAPSHOT_RAM_MAPPED_SHARED) &&
         (activeFlags & SNAPSHOT_RAM_MAPPED) && savedMemPath == activeMemPath) {
         mLazyLoadingFromFileBacking = true;
