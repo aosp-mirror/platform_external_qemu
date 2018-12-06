@@ -10,11 +10,6 @@
 // GNU General Public License for more details.
 #pragma once
 
-// TODO: Remove this when we get WebEngine working on Windows
-#ifndef _WIN32
-#define USE_WEBENGINE
-#endif
-
 #ifdef USE_WEBENGINE
 #include "ui_location-page.h"
 #else
