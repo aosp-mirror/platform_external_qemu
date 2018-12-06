@@ -24,6 +24,8 @@ PROGRAM_PARAMETERS=""
 PROGRAM_DESCRIPTION=\
 "Build dEQP against emulator combined guest/host driver."
 
+option_register_var "--case=<dEQP-case-pattern>" OPT_DEQP_CASE "Run a particular set of dEQP tests"
+
 aosp_dir_register_option
 package_builder_register_options
 
@@ -40,7 +42,13 @@ DEQP_DIR=$AOSP_DIR/external/deqp
 GLES3_CTS_MUSTPASS_CASELIST=$AOSP_DIR/external/deqp/android/cts/master/gles3-master.txt
 DEQP_BUILD_DIR=$AOSP_DIR/external/deqp/build
 DEQP_GLES3_EXEC_DIR=$DEQP_BUILD_DIR/modules/gles3
-DEQP_GLES3_EXEC_NAME="./deqp-gles3 --deqp-caselist-file=$GLES3_CTS_MUSTPASS_CASELIST"
+DEQP_CASES="--deqp-caselist-file=$GLES3_CTS_MUSTPASS_CASELIST"
+
+if [ "$OPT_DEQP_CASE" ]; then
+DEQP_CASES="--deqp-case=$OPT_DEQP_CASE"
+fi
+
+DEQP_GLES3_EXEC_NAME="./deqp-gles3 $DEQP_CASES"
 
 cd $DEQP_GLES3_EXEC_DIR
 
