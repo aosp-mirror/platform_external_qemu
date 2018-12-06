@@ -134,8 +134,15 @@ private:
                 continue;
             }
             std::string entry_path = StringFormat("%s/%s", path, entry->d_name);
+#ifdef _WIN32
+            struct _stati64 stats;
+            android_lstat(entry_path.c_str(), reinterpret_cast<struct stat*>(&stats));
+#else
             struct stat stats;
             android_lstat(entry_path.c_str(), &stats);
+#endif
+
+
             if (S_ISDIR(stats.st_mode)) {
                 DeleteRecursive(entry_path);
             } else {
@@ -171,10 +178,10 @@ private:
     char* mkdtemp(char* path) {
         char* sep = ::strrchr(path, '/');
         if (sep) {
-            struct stat st;
+            struct _stati64 st;
             int ret;
             *sep = '\0';  // temporarily zero-terminate the dirname.
-            ret = android_stat(path, &st);
+            ret = android_stat(path, reinterpret_cast<struct stat*>(&st));
             *sep = '/';   // restore full path.
             if (ret < 0) {
                 return NULL;

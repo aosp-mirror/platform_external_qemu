@@ -29,7 +29,7 @@ import platform
 import shutil
 
 from aemu.process import run
-from aemu.definitions import Generator, Crash, BuildConfig, SymbolUris, Toolchain, get_qemu_root, get_cmake, Make
+from aemu.definitions import Generator, Crash, BuildConfig, SymbolUris, Toolchain, get_qemu_root, get_cmake, Make, get_aosp_root
 from aemu.run_tests import run_tests
 from aemu.upload_symbols import upload_symbols
 
@@ -78,7 +78,6 @@ def configure():
 
     # Configure..
     cmake_cmd = [get_cmake(), '-H%s' % get_qemu_root(), '-B%s' % FLAGS.out]
-    cmake_cmd += Toolchain.from_string(FLAGS.target).to_cmd()
     cmake_cmd += Crash.from_string(FLAGS.crash).to_cmd()
     cmake_cmd += BuildConfig.from_string(FLAGS.config).to_cmd()
     if FLAGS.qtwebengine:
@@ -90,6 +89,12 @@ def configure():
     cmake_cmd += Generator.from_string(FLAGS.generator).to_cmd()
     cmake_cmd = filter(None, cmake_cmd)
 
+    if platform.system() == 'Windows':
+        cmake_cmd += ["-DCMAKE_C_COMPILER:PATH={0}/prebuilts/clang/host/windows-x86/clang-r346389b/bin/clang-cl.exe".format(get_aosp_root()),
+                      "-DCMAKE_CXX_COMPILER:PATH={0}/prebuilts/clang/host/windows-x86/clang-r346389b/bin/clang-cl.exe".format(get_aosp_root())]
+    else:
+        cmake_cmd += Toolchain.from_string(FLAGS.target).to_cmd()
+   
     run(cmake_cmd)
 
 
