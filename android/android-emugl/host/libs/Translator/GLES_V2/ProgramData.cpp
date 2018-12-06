@@ -74,6 +74,7 @@ ProgramData::ProgramData(int glesMaj, int glesMin)
     : ObjectData(PROGRAM_DATA),
       ValidateStatus(false),
       LinkStatus(false),
+      HostLinkStatus(false),
       IsInUse(false),
       DeleteStatus(false),
       mGlesMajorVersion(glesMaj),
@@ -762,6 +763,10 @@ bool ProgramData::validateLink(ShaderParser* frag, ShaderParser* vert) {
     return res;
 }
 
+void ProgramData::setHostLinkStatus(GLint status) {
+    HostLinkStatus = (status == GL_FALSE) ? false : true;
+}
+
 void ProgramData::setLinkStatus(GLint status) {
     LinkStatus = (status == GL_FALSE) ? false : true;
     mUniNameToGuestLoc.clear();
@@ -770,7 +775,7 @@ void ProgramData::setLinkStatus(GLint status) {
 #if defined(TOLERATE_PROGRAM_LINK_ERROR) && TOLERATE_PROGRAM_LINK_ERROR == 1
     status = 1;
 #endif
-    if (status) {
+    if (status && HostLinkStatus) {
         std::vector<sh::ShaderVariable> allUniforms;
         bool is310 = false;
         for (auto& s : attachedShaders) {
