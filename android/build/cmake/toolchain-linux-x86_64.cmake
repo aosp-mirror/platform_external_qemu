@@ -22,6 +22,7 @@ include(toolchain)
 get_host_tag(ANDROID_HOST_TAG)
 set(ANDROID_TARGET_TAG "linux-x86_64")
 set(ANDROID_TARGET_OS "linux")
+set(ANDROID_TARGET_OS_FLAVOR "linux")
 get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../" ABSOLUTE)
 toolchain_generate("${ANDROID_TARGET_TAG}")
 

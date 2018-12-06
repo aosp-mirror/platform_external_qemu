@@ -23,7 +23,8 @@ set(darwinn_unittests_src
     ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/external/src/third_party/darwinn/api/buffer.cc)
 
 android_add_test(darwinn_unittests)
-target_compile_options(darwinn_unittests PRIVATE -O0 -Wno-invalid-constexpr)
+target_compile_options(darwinn_unittests PRIVATE -O0)
+android_target_compile_options(darwinn_unittests Clang PRIVATE -Wno-invalid-constexpr)
 target_compile_definitions(darwinn_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 target_link_libraries(darwinn_unittests PRIVATE android-emu libqemu2-glue gmock_main)
 

@@ -29,7 +29,7 @@ import platform
 import shutil
 
 from aemu.process import run
-from aemu.definitions import Generator, Crash, BuildConfig, SymbolUris, Toolchain, get_qemu_root, get_cmake, Make
+from aemu.definitions import Generator, Crash, BuildConfig, SymbolUris, Toolchain, get_qemu_root, get_cmake, Make, get_aosp_root, get_windows_clang
 from aemu.run_tests import run_tests
 from aemu.upload_symbols import upload_symbols
 
@@ -77,20 +77,31 @@ def configure():
             os.makedirs(FLAGS.out)
 
     # Configure..
-    cmake_cmd = [get_cmake(), '-H%s' % get_qemu_root(), '-B%s' % FLAGS.out]
-    cmake_cmd += Toolchain.from_string(FLAGS.target).to_cmd()
+    cmake_cmd = [get_cmake(), '-B%s' % FLAGS.out]
+
+    # Setup the right toolchain/compiler configuration.
+    if platform.system() == 'Windows':
+        cmake_cmd += ["-DCMAKE_C_COMPILER:PATH={0}".format(get_windows_clang()),
+                      "-DCMAKE_CXX_COMPILER:PATH={0}".format(get_windows_clang())]
+    else:
+        cmake_cmd += Toolchain.from_string(FLAGS.target).to_cmd()
+
     cmake_cmd += Crash.from_string(FLAGS.crash).to_cmd()
     cmake_cmd += BuildConfig.from_string(FLAGS.config).to_cmd()
     if FLAGS.qtwebengine:
         cmake_cmd += ['-DNO_QTWEBENGINE=1']
-    cmake_cmd += ['-DOPTION_SDK_TOOLS_REVISION=%s' % FLAGS.sdk_revision]
-    cmake_cmd += ['-DOPTION_SDK_TOOLS_BUILD_NUMBER=%s' %
+    if FLAGS.sdk_revision:
+        cmake_cmd += ['-DOPTION_SDK_TOOLS_REVISION=%s' % FLAGS.sdk_revision]
+    if FLAGS.sdk_build_number:
+        cmake_cmd += ['-DOPTION_SDK_TOOLS_BUILD_NUMBER=%s' %
                   FLAGS.sdk_build_number]
-    cmake_cmd += ['-DOPTION_ASAN=%s' % (','.join(FLAGS.sanitizer))]
-    cmake_cmd += Generator.from_string(FLAGS.generator).to_cmd()
-    cmake_cmd = filter(None, cmake_cmd)
+    if FLAGS.sanitizer:
+        cmake_cmd += ['-DOPTION_ASAN=%s' % (','.join(FLAGS.sanitizer))]
 
-    run(cmake_cmd)
+    cmake_cmd += Generator.from_string(FLAGS.generator).to_cmd()
+    cmake_cmd += [get_qemu_root()]
+
+    run(cmake_cmd, FLAGS.out)
 
 
 def get_build_cmd():
