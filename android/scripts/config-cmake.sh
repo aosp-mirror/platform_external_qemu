@@ -37,6 +37,7 @@ OPTION_SYMBOLS=no
 OPTION_SDK_REVISION=
 OPTION_SDK_BUILD=
 OPTION_GOLDFISH_OPENGL_DIR=no
+OPTION_NO_QTWEBENGINE=
 
 # Select a default generator, ninja is very fast, so you should pick that
 # if available..
@@ -65,6 +66,7 @@ option_register_var "--out-dir=<path>" OPTION_OUT_DIR "Use specific output direc
 option_register_var "--mingw" OPTION_MINGW "Build Windows executable on Linux using mingw"
 option_register_var "--windows-msvc" OPTION_MSVC "Build Windows executable on Linux using Windows SDK + clang (only 64-bit for now)"
 option_register_var "--force-fetch-wintoolchain" OPTION_WINTOOLCHAIN "Force refresh the Windows SDK, and replace the current one if any (windows-msvc build)"
+option_register_var "--no-qtwebengine" OPTION_NO_QTWEBENGINE "Build without QtWebEngine support"
 option_register_var "--sanitizer=<..>" OPTION_SANITIZER "Build with LLVM sanitizer (sanitizer=[address, thread])"
 option_register_var "--generator=<..>" OPTION_GENERATOR "Use the given generator (ninja, make, Xcode, etc.)"
 option_register_var "--list-generators" OPTION_LIST_GEN "List available generators"
@@ -158,6 +160,10 @@ fi
 
 if [ "$OPTION_WINTOOLCHAIN" ]; then
    CMAKE_PARAMS="${CMAKE_PARAMS}  -DOPTION_WINTOOLCHAIN=1"
+fi
+
+if [ "$OPTION_NO_QTWEBENGINE" ]; then
+   CMAKE_PARAMS="${CMAKE_PARAMS}  -DNO_QTWEBENGINE=1"
 fi
 
 if [ "$OPTION_GENERATOR" = "ninja" ]; then

@@ -193,24 +193,41 @@ set(ANDROID_SKIN_SOURCES
     android/skin/qt/QtLogger.cpp)
 
 # Set the target specific sources.
-set(emulator-libui_darwin-x86_64_src
-    android/skin/qt/mac-native-window.mm
-    android/skin/qt/websockets/websocketclientwrapper.cpp
-    android/skin/qt/websockets/websockettransport.cpp
-    android/skin/qt/extended-pages/location-page.ui)
-set(emulator-libui_windows-x86_64_src
-    android/skin/qt/windows-native-window.cpp
-    android/skin/qt/extended-pages/location-page_noMaps.ui)
-set(emulator-libui_windows-x86_src
-    android/skin/qt/windows-native-window.cpp
-    android/skin/qt/extended-pages/location-page_noMaps.ui)
-set(emulator-libui_windows_msvc-x86_64_src
-    android/skin/qt/windows-native-window.cpp
-    android/skin/qt/extended-pages/location-page_noMaps.ui)
-set(emulator-libui_linux-x86_64_src
-    android/skin/qt/websockets/websocketclientwrapper.cpp
-    android/skin/qt/websockets/websockettransport.cpp
-    android/skin/qt/extended-pages/location-page.ui)
+if (NO_QTWEBENGINE)
+  set(emulator-libui_darwin-x86_64_src
+      android/skin/qt/mac-native-window.mm
+      android/skin/qt/extended-pages/location-page_noMaps.ui)
+  set(emulator-libui_windows-x86_64_src
+      android/skin/qt/windows-native-window.cpp
+      android/skin/qt/extended-pages/location-page_noMaps.ui)
+  set(emulator-libui_windows-x86_src
+      android/skin/qt/windows-native-window.cpp
+      android/skin/qt/extended-pages/location-page_noMaps.ui)
+  set(emulator-libui_windows_msvc-x86_64_src
+      android/skin/qt/windows-native-window.cpp
+      android/skin/qt/extended-pages/location-page_noMaps.ui)
+  set(emulator-libui_linux-x86_64_src
+      android/skin/qt/extended-pages/location-page_noMaps.ui)
+else ()
+  set(emulator-libui_darwin-x86_64_src
+      android/skin/qt/mac-native-window.mm
+      android/skin/qt/websockets/websocketclientwrapper.cpp
+      android/skin/qt/websockets/websockettransport.cpp
+      android/skin/qt/extended-pages/location-page.ui)
+  set(emulator-libui_windows-x86_64_src
+      android/skin/qt/windows-native-window.cpp
+      android/skin/qt/extended-pages/location-page_noMaps.ui)
+  set(emulator-libui_windows-x86_src
+      android/skin/qt/windows-native-window.cpp
+      android/skin/qt/extended-pages/location-page_noMaps.ui)
+  set(emulator-libui_windows_msvc-x86_64_src
+      android/skin/qt/windows-native-window.cpp
+      android/skin/qt/extended-pages/location-page_noMaps.ui)
+  set(emulator-libui_linux-x86_64_src
+      android/skin/qt/websockets/websocketclientwrapper.cpp
+      android/skin/qt/websockets/websockettransport.cpp
+      android/skin/qt/extended-pages/location-page.ui)
+endif()
 
 # Set the sources
 set(emulator-libui_src
@@ -222,6 +239,15 @@ set(emulator-libui_src
     ${ANDROID_SKIN_SOURCES})
 
 android_add_library(emulator-libui)
+
+# TODO: Remove this and the "USE_WEBENGINE" defines once we have two things:
+#   1) Webengine working on all platforms
+#   2) --no-window mode has no dependency on Qt
+if (NOT NO_QTWEBENGINE)
+  # only mac and linux works, so enable for those platforms
+  android_target_compile_definitions(emulator-libui linux-x86_64 PRIVATE "-DUSE_WEBENGINE")
+  android_target_compile_definitions(emulator-libui darwin-x86_64 PRIVATE "-DUSE_WEBENGINE")
+endif()
 
 target_compile_options(emulator-libui PRIVATE "-DUSE_MMX=1" "-mmmx")
 
