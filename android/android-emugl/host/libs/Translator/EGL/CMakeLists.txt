@@ -25,7 +25,7 @@ target_compile_options(EGL_translator PRIVATE -fvisibility=hidden)
 # OS specific link dependencies
 android_target_link_libraries(EGL_translator darwin-x86_64 PUBLIC "-framework AppKit")
 android_target_link_libraries(EGL_translator linux-x86_64 PUBLIC "-lGL -lX11 -ldl -lpthread")
-android_target_link_libraries(EGL_translator windows PUBLIC "-lgdi32")
+android_target_link_libraries(EGL_translator windows PUBLIC "gdi32::gdi32")
 install(TARGETS EGL_translator
         RUNTIME DESTINATION lib64 # We don't want windows to binplace dlls in the exe dir.
         LIBRARY DESTINATION lib64)

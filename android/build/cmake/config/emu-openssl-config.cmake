@@ -26,7 +26,7 @@ if(ANDROID_TARGET_TAG MATCHES "windows.*" AND NOT TARGET OpenSSL::Crypto)
     add_library(OpenSSL::Crypto INTERFACE IMPORTED GLOBAL)
         set_target_properties(OpenSSL::Crypto PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIRS}"
-        INTERFACE_LINK_LIBRARIES "${PREBUILT_ROOT}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX};-lws2_32"
+        INTERFACE_LINK_LIBRARIES "${PREBUILT_ROOT}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX};ws2_32::ws2_32"
     )
 else()
   android_add_prebuilt_library(OpenSSL Crypto "${PREBUILT_ROOT}/lib/libcrypto" "${PREBUILT_ROOT}/include" "" "")
