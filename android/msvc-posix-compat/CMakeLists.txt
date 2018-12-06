@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 # This is a posix wrapper for windows-msvc build.
-set(msvc-posix-compat_windows_msvc_src
+set(msvc-posix-compat_src
         src/msvc-posix.c
         src/getopt.c
         src/gettimeofday.c)

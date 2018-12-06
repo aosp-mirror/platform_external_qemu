@@ -1,3 +1,4 @@
+
 set(emulator-regex-win32_src
     compat/reallocarr.c
     compat/strlcpy.c
@@ -9,5 +10,4 @@ android_add_library(emulator-regex-win32)
 
 target_include_directories(emulator-regex-win32 PUBLIC include)
 target_include_directories(emulator-regex-win32 PRIVATE compat)
-android_target_link_libraries(emulator-regex-win32 windows_msvc PUBLIC
-        msvc-posix-compat)
+android_target_link_libraries(emulator-regex-win32 windows_msvc PUBLIC msvc-posix-compat)

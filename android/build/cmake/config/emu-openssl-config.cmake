@@ -8,12 +8,12 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+prebuilt(GLIB2)
 
 get_filename_component(PREBUILT_ROOT
                        "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/curl/${ANDROID_TARGET_TAG}"
                        ABSOLUTE)
-                       
+
 set(OPENSSL_INCLUDE_DIR "${PREBUILT_ROOT}/include")
 set(OPENSSL_INCLUDE_DIRS "${PREBUILT_ROOT}/include")
 set(OPENSSL_LIBRARIES "${PREBUILT_ROOT}/lib/libssl${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX}")
@@ -26,7 +26,7 @@ if(ANDROID_TARGET_TAG MATCHES "windows.*" AND NOT TARGET OpenSSL::Crypto)
     add_library(OpenSSL::Crypto INTERFACE IMPORTED GLOBAL)
         set_target_properties(OpenSSL::Crypto PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIRS}"
-        INTERFACE_LINK_LIBRARIES "${PREBUILT_ROOT}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX};-lws2_32"
+        INTERFACE_LINK_LIBRARIES "${PREBUILT_ROOT}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX};GLIB2::GLIB2"
     )
 else()
   android_add_prebuilt_library(OpenSSL Crypto "${PREBUILT_ROOT}/lib/libcrypto" "${PREBUILT_ROOT}/include" "" "")
