@@ -16,6 +16,24 @@
       "revId": "c9ff10dada2fb2cc78f1c69787037950296f3e75",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "457b53d1_fd002a2b",
+        "filename": "hw/pci/goldfish_address_space.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-06T19:32:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3f310404_bad9539b",
+      "revId": "c9ff10dada2fb2cc78f1c69787037950296f3e75",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

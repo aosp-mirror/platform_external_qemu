@@ -52,6 +52,24 @@
       "revId": "015a99c01cb5ad0f09bf6444cfe11fe2b0bdb701",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "77f32561_5f0644d7",
+        "filename": "cmake-main.darwin-x86_64.inc",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-06T19:32:09Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "92008185_3a5da8e7",
+      "revId": "015a99c01cb5ad0f09bf6444cfe11fe2b0bdb701",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

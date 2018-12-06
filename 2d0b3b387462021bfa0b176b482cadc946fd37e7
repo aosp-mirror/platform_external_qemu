@@ -70,6 +70,24 @@
       "revId": "2d0b3b387462021bfa0b176b482cadc946fd37e7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9e486e65_20b2804c",
+        "filename": "android/android-emugl/host/libs/GLESv2_dec/GLESv2Decoder.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-06T19:32:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "40615f06_75511029",
+      "revId": "2d0b3b387462021bfa0b176b482cadc946fd37e7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
