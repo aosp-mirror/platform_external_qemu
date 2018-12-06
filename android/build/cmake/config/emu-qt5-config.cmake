@@ -9,14 +9,26 @@
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-get_filename_component(PREBUILT_ROOT
-                       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_TARGET_TAG}"
-                       ABSOLUTE)
+# TODO: Remove this once we have -no-window working with absolutely no Qt dependencies
+if (NO_QTWEBENGINE AND ANDROID_TARGET_TAG MATCHES "linux-x86_64")
+  get_filename_component(PREBUILT_ROOT
+                         "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_TARGET_TAG}-nowebengine"
+                         ABSOLUTE)
 
-# Use the host compatible moc, rcc and uic
-get_filename_component(HOST_PREBUILT_ROOT
-                       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_HOST_TAG}"
-                       ABSOLUTE)
+  # Use the host compatible moc, rcc and uic
+  get_filename_component(HOST_PREBUILT_ROOT
+                         "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_HOST_TAG}-nowebengine"
+                         ABSOLUTE)
+else()
+  get_filename_component(PREBUILT_ROOT
+                         "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_TARGET_TAG}"
+                         ABSOLUTE)
+
+  # Use the host compatible moc, rcc and uic
+  get_filename_component(HOST_PREBUILT_ROOT
+                         "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_HOST_TAG}"
+                         ABSOLUTE)
+endif()
 
 if(NOT TARGET Qt5::moc)
   set(QT_VERSION_MAJOR 5)
@@ -41,10 +53,10 @@ set(QT5_INCLUDE_DIRS
     ${PREBUILT_ROOT}/include/QtCore
     ${PREBUILT_ROOT}/include/QtGui
     ${PREBUILT_ROOT}/include/QtSvg
+    ${PREBUILT_ROOT}/include/QtWidgets
     ${PREBUILT_ROOT}/include/QtWebChannel
     ${PREBUILT_ROOT}/include/QtWebEngineWidgets
-    ${PREBUILT_ROOT}/include/QtWebSockets
-    ${PREBUILT_ROOT}/include/QtWidgets)
+    ${PREBUILT_ROOT}/include/QtWebSockets)
 
 set(QT5_INCLUDE_DIR ${QT5_INCLUDE_DIRS})
 
@@ -55,36 +67,12 @@ if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
   set(QT_LIB_VERSION 5.11.1)
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
   set(QT5_SHARED_DEPENDENCIES
-    ${PREBUILT_ROOT}/libexec/QtWebEngineProcess>lib64/qt/libexec/QtWebEngineProcess
-    ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/translations/qtwebengine_locales
-    ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/resources/icudtl.dat
-    ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/resources/qtwebengine_devtools_resources.pak
-    ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/resources/qtwebengine_resources.pak
-    ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/resources/qtwebengine_resources_100p.pak
-    ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/resources/qtwebengine_resources_200p.pak
-
-    # TODO: These 6 are copies of the files immediately above. It would be nice to make
-    #       these symbolic links rather than copies.
-    ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/libexec/icudtl.dat
-    ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/libexec/qtwebengine_devtools_resources.pak
-    ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/libexec/qtwebengine_resources.pak
-    ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/libexec/qtwebengine_resources_100p.pak
-    ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/libexec/qtwebengine_resources_200p.pak
-    ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/libexec/translations/qtwebengine_locales
-
     ${PREBUILT_ROOT}/lib/libQt5Core.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Core.${QT_LIB_VERSION}.dylib;
     ${PREBUILT_ROOT}/lib/libQt5Widgets.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Widgets.${QT_LIB_VERSION}.dylib;
     ${PREBUILT_ROOT}/lib/libQt5Gui.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Gui.${QT_LIB_VERSION}.dylib;
     ${PREBUILT_ROOT}/lib/libQt5Svg.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Svg.${QT_LIB_VERSION}.dylib;
     ${PREBUILT_ROOT}/lib/libQt5PrintSupport.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5PrintSupport.${QT_LIB_VERSION}.dylib;
     ${PREBUILT_ROOT}/lib/libQt5Network.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Network.${QT_LIB_VERSION}.dylib;
-    ${PREBUILT_ROOT}/lib/libQt5Qml.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Qml.${QT_LIB_VERSION}.dylib;
-    ${PREBUILT_ROOT}/lib/libQt5Quick.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Quick.${QT_LIB_VERSION}.dylib;
-    ${PREBUILT_ROOT}/lib/libQt5QuickWidgets.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5QuickWidgets.${QT_LIB_VERSION}.dylib;
-    ${PREBUILT_ROOT}/lib/libQt5WebChannel.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5WebChannel.${QT_LIB_VERSION}.dylib;
-    ${PREBUILT_ROOT}/lib/libQt5WebEngineCore.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5WebEngineCore.${QT_LIB_VERSION}.dylib;
-    ${PREBUILT_ROOT}/lib/libQt5WebEngineWidgets.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5WebEngineWidgets.${QT_LIB_VERSION}.dylib;
-    ${PREBUILT_ROOT}/lib/libQt5WebSockets.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5WebSockets.${QT_LIB_VERSION}.dylib;
     ${PREBUILT_ROOT}/plugins/platforms/libqcocoa.dylib>lib64/qt/plugins/platforms/libqcocoa.dylib;
     ${PREBUILT_ROOT}/plugins/styles/libqmacstyle.dylib>lib64/qt/plugins/styles/libqmacstyle.dylib;
     ${PREBUILT_ROOT}/plugins/iconengines/libqsvgicon.dylib>lib64/qt/plugins/iconengines/libqsvgicon.dylib;
@@ -99,6 +87,34 @@ if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
     ${PREBUILT_ROOT}/plugins/imageformats/libqtiff.dylib>lib64/qt/plugins/imageformats/libqtiff.dylib;
     ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp.dylib>lib64/qt/plugins/imageformats/libqwbmp.dylib;
     ${PREBUILT_ROOT}/plugins/imageformats/libqwebp.dylib>lib64/qt/plugins/imageformats/libqwebp.dylib)
+
+  if (NOT NO_QTWEBENGINE)
+    list(APPEND QT5_SHARED_DEPENDENCIES
+      ${PREBUILT_ROOT}/libexec/QtWebEngineProcess>lib64/qt/libexec/QtWebEngineProcess
+      ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/translations/qtwebengine_locales
+      ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/resources/icudtl.dat
+      ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/resources/qtwebengine_devtools_resources.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/resources/qtwebengine_resources.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/resources/qtwebengine_resources_100p.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/resources/qtwebengine_resources_200p.pak
+
+      # TODO: These 6 are copies of the files immediately above. It would be nice to make
+      #       these symbolic links rather than copies.
+      ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/libexec/icudtl.dat
+      ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/libexec/qtwebengine_devtools_resources.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/libexec/qtwebengine_resources.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/libexec/qtwebengine_resources_100p.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/libexec/qtwebengine_resources_200p.pak
+      ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/libexec/translations/qtwebengine_locales
+
+      ${PREBUILT_ROOT}/lib/libQt5Qml.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Qml.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt5Quick.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5Quick.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt5QuickWidgets.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5QuickWidgets.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt5WebChannel.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5WebChannel.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt5WebEngineCore.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5WebEngineCore.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt5WebEngineWidgets.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5WebEngineWidgets.${QT_LIB_VERSION}.dylib;
+      ${PREBUILT_ROOT}/lib/libQt5WebSockets.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt5WebSockets.${QT_LIB_VERSION}.dylib)
+  endif()
 
   # Note: this will only set the property for install targets, not during build.
   set(
@@ -149,30 +165,10 @@ elseif(ANDROID_TARGET_TAG MATCHES "windows-x86.*")
       ${PREBUILT_ROOT}/plugins/imageformats/qwbmp.dll>lib64/qt/plugins/imageformats/qwbmp.dll;
       ${PREBUILT_ROOT}/plugins/imageformats/qwebp.dll>lib64/qt/plugins/imageformats/qwebp.dll;)
 elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
-  get_filename_component(PREBUILT_WEBENGINE_DEPS_ROOT
-                        "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/qtwebengine-deps/${ANDROID_TARGET_TAG}"
-                        ABSOLUTE)
-
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
   # LD_DEBUG=libs ./emulator @P_64 2>&1 | grep qt | grep init
   set(
     QT5_SHARED_DEPENDENCIES
-    ${PREBUILT_ROOT}/libexec/QtWebEngineProcess>lib64/qt/libexec/QtWebEngineProcess
-    ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/translations/qtwebengine_locales
-    ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/resources/icudtl.dat
-    ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/resources/qtwebengine_devtools_resources.pak
-    ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/resources/qtwebengine_resources.pak
-    ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/resources/qtwebengine_resources_100p.pak
-    ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/resources/qtwebengine_resources_200p.pak
-
-    # TODO: These six are copies of the files immediately above. It would be nice
-    #       to make these symbolic links rather than copies.
-    ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/libexec/icudtl.dat
-    ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/libexec/qtwebengine_devtools_resources.pak
-    ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/libexec/qtwebengine_resources.pak
-    ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/libexec/qtwebengine_resources_100p.pak
-    ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/libexec/qtwebengine_resources_200p.pak
-    ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/libexec/translations/qtwebengine_locales
     ${PREBUILT_ROOT}/lib/libQt5Core.so.5>lib64/qt/lib/libQt5Core.so.5;
     ${PREBUILT_ROOT}/lib/libQt5Gui.so.5>lib64/qt/lib/libQt5Gui.so.5;
     ${PREBUILT_ROOT}/lib/libQt5Widgets.so.5>lib64/qt/lib/libQt5Widgets.so.5;
@@ -180,17 +176,7 @@ elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
     ${PREBUILT_ROOT}/lib/libQt5PrintSupport.so.5>lib64/qt/lib/libQt5PrintSupport.so.5;
     ${PREBUILT_ROOT}/lib/libQt5DBus.so.5>lib64/qt/lib/libQt5DBus.so.5;
     ${PREBUILT_ROOT}/lib/libQt5Network.so.5>lib64/qt/lib/libQt5Network.so.5;
-    ${PREBUILT_ROOT}/lib/libQt5Qml.so.5>lib64/qt/lib/libQt5Qml.so.5;
-    ${PREBUILT_ROOT}/lib/libQt5Quick.so.5>lib64/qt/lib/libQt5Quick.so.5;
-    ${PREBUILT_ROOT}/lib/libQt5QuickWidgets.so.5>lib64/qt/lib/libQt5QuickWidgets.so.5;
-    ${PREBUILT_ROOT}/lib/libQt5WebChannel.so.5>lib64/qt/lib/libQt5WebChannel.so.5;
-    ${PREBUILT_ROOT}/lib/libQt5WebEngineCore.so.5>lib64/qt/lib/libQt5WebEngineCore.so.5;
-    ${PREBUILT_ROOT}/lib/libQt5WebEngineWidgets.so.5>lib64/qt/lib/libQt5WebEngineWidgets.so.5;
-    ${PREBUILT_ROOT}/lib/libQt5WebSockets.so.5>lib64/qt/lib/libQt5WebSockets.so.5;
-    ${PREBUILT_ROOT}/lib/libsoftokn3.so>lib64/qt/lib/libsoftokn3.so;
-    ${PREBUILT_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so;
     ${PREBUILT_ROOT}/lib/libQt5XcbQpa.so.5>lib64/qt/lib/libQt5XcbQpa.so.5;
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6;
     ${PREBUILT_ROOT}/plugins/platforms/libqxcb.so>lib64/qt/plugins/platforms/libqxcb.so;
     ${PREBUILT_ROOT}/plugins/xcbglintegrations/libqxcb-glx-integration.so>lib64/qt/plugins/xcbglintegrations/libqxcb-glx-integration.so;
     ${PREBUILT_ROOT}/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so>lib64/qt/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so;
@@ -206,9 +192,45 @@ elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
     ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp.so>lib64/qt/plugins/imageformats/libqwbmp.so)
   set(QT5_SHARED_PROPERTIES
       "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/lib';LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/lib/plugins'")
-  set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5Network -lQt5WebChannel -lQt5WebEngineWidgets -lQt5WebSockets)
-  list(APPEND QT5_SHARED_PROPERTIES
-       "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/libexec'")
+  set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5Network)
+
+  if (NOT NO_QTWEBENGINE)
+    get_filename_component(PREBUILT_WEBENGINE_DEPS_ROOT
+                          "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/qtwebengine-deps/${ANDROID_TARGET_TAG}"
+                          ABSOLUTE)
+
+    list(APPEND QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5WebChannel -lQt5WebEngineWidgets -lQt5WebSockets)
+    list(APPEND QT5_SHARED_DEPENDENCIES
+      ${PREBUILT_ROOT}/libexec/QtWebEngineProcess>lib64/qt/libexec/QtWebEngineProcess
+      ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/translations/qtwebengine_locales
+      ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/resources/icudtl.dat
+      ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/resources/qtwebengine_devtools_resources.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/resources/qtwebengine_resources.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/resources/qtwebengine_resources_100p.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/resources/qtwebengine_resources_200p.pak
+ 
+      # TODO: These six are copies of the files immediately above. It would be nice
+      #       to make these symbolic links rather than copies.
+      ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/libexec/icudtl.dat
+      ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/libexec/qtwebengine_devtools_resources.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/libexec/qtwebengine_resources.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/libexec/qtwebengine_resources_100p.pak
+      ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/libexec/qtwebengine_resources_200p.pak
+      ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/libexec/translations/qtwebengine_locales
+      ${PREBUILT_ROOT}/lib/libQt5Qml.so.5>lib64/qt/lib/libQt5Qml.so.5;
+      ${PREBUILT_ROOT}/lib/libQt5Quick.so.5>lib64/qt/lib/libQt5Quick.so.5;
+      ${PREBUILT_ROOT}/lib/libQt5QuickWidgets.so.5>lib64/qt/lib/libQt5QuickWidgets.so.5;
+      ${PREBUILT_ROOT}/lib/libQt5WebChannel.so.5>lib64/qt/lib/libQt5WebChannel.so.5;
+      ${PREBUILT_ROOT}/lib/libQt5WebEngineCore.so.5>lib64/qt/lib/libQt5WebEngineCore.so.5;
+      ${PREBUILT_ROOT}/lib/libQt5WebEngineWidgets.so.5>lib64/qt/lib/libQt5WebEngineWidgets.so.5;
+      ${PREBUILT_ROOT}/lib/libQt5WebSockets.so.5>lib64/qt/lib/libQt5WebSockets.so.5;
+      ${PREBUILT_ROOT}/lib/libsoftokn3.so>lib64/qt/lib/libsoftokn3.so;
+      ${PREBUILT_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so;
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6)
+
+      list(APPEND QT5_SHARED_PROPERTIES
+           "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/libexec'")
+  endif()
 endif()
 
 # Define Qt5 Compatible targets
