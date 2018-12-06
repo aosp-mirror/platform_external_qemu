@@ -11,39 +11,41 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# Note this is a pseudo toolchain file compiling on windows with VS
+if (NOT MSVC)
+   message(FATAL_ERROR "This definition should only be used by visual studio.")
+endif()
+
 get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
 list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
-# cmake will look for WinMSVCCrossCompile in Platform/WinMSVCCrossCompile.cmake
 list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}/Modules")
-set(CMAKE_SYSTEM_NAME WinMSVCCrossCompile)
 
 include(toolchain)
 
-# First we create the toolchain
+# First we configure our variables.
 get_host_tag(ANDROID_HOST_TAG)
+
+# We are mostly compatible with windows_msvc
 set (ANDROID_TARGET_TAG "windows_msvc-x86_64")
+set (ANDROID_HOST_TAG "windows_msvc-x86_64")
 set (ANDROID_TARGET_OS "windows_msvc")
 set (ANDROID_TARGET_OS_FLAVOR "windows")
-set(CMAKE_SYSTEM_PROCESSOR AMD64)
+
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -MD")
+
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -MD")
 
 get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../../" ABSOLUTE)
 
-# Cmake goes crazy if we set AR manually.. so let's not do that.
-toolchain_generate("${ANDROID_TARGET_TAG}")
-# need to set ar to llvm-ar to unpack windows static libs
-set(CMAKE_AR ${COMPILER_PREFIX}ar)
+# Make sure nobody is accidently trying to do a 32 bit build.
+if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+    message(FATAL_ERROR "Please configure the compiler for a x64 build!")
+endif()
 
-# here is the target environment located, used to
-# locate packages. We don't want to do any package resolution
-# with windows-msvc, so we explicitly disable it.
-set(CMAKE_FIND_ROOT_PATH  "${ANDROID_SYSROOT}")
+# Including windows.h will cause issues with std::min/std::max
+add_definitions(-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -D_USE_MATH_DEFINES -DWIN32_LEAN_AND_MEAN) 
 
-# Disable any searching as it might lead to unexpected behavior
-# that varies amongst build environments
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY NEVER)
-set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE NEVER)
-set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE NEVER)
-
-add_definitions(-DWINDOWS_CROSS_COMPILE)
 include(emu-windows-libs)

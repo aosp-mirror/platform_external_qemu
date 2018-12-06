@@ -84,18 +84,18 @@ TEST(CrossSessionSocket, DrainStale) {
     ssize_t sendSize = base::socketSend(fd2, kContents, kContentSize);
     EXPECT_EQ(kContentSize, sendSize);
     socket.drainSocket(CrossSessionSocket::DrainBehavior::AppendToBuffer);
-    char snapshotBuffer[kSnapshotSize];
-    base::InplaceStream snapshotStream(snapshotBuffer, kSnapshotSize);
+    std::unique_ptr<char> snapshotBuffer(new char[kSnapshotSize]);
+    base::InplaceStream snapshotStream(snapshotBuffer.get(), kSnapshotSize);
     socket.onSave(&snapshotStream);
 
     CrossSessionSocket::recycleSocket(std::move(socket));
     CrossSessionSocket socket2 = CrossSessionSocket::reclaimSocket(fd1);
     socket2.onLoad(&snapshotStream);
 
-    char readbackBuffer[kBufferSize];
-    ssize_t readSize = socket2.readStaleData(readbackBuffer, kBufferSize);
+    std::unique_ptr<char> readbackBuffer(new char[kBufferSize]);
+    ssize_t readSize = socket2.readStaleData(readbackBuffer.get(), kBufferSize);
     EXPECT_EQ(kContentSize, readSize);
-    EXPECT_EQ(0, memcmp(kContents, readbackBuffer, kContentSize));
+    EXPECT_EQ(0, memcmp(kContents, readbackBuffer.get(), kContentSize));
 
     // fd1 will be closed automatically
     base::socketClose(fd2);
