@@ -11,6 +11,9 @@
 #include "android/skin/qt/extended-pages/car-data-page.h"
 
 #include "android/emulation/control/car_data_agent.h"
+// TODO: (b/120444474) rename ERROR_INVALID_OPERATION & remove this, since it is
+// defined in windows.h & redefined in VehicleHalProto.proto, causing conflicts.
+#undef ERROR_INVALID_OPERATION
 #include "android/emulation/proto/VehicleHalProto.pb.h"
 #include "android/main-common.h"
 #include "android/skin/qt/qt-settings.h"
