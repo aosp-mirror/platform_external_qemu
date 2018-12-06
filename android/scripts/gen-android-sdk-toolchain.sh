@@ -77,7 +77,7 @@ option_register_var "--cxx11" OPT_CXX11 "Enable C++11 features."
 OPT_FORCE_FETCH_WINTOOLCHAIN=
 option_register_var "--force-fetch-wintoolchain" OPT_FORCE_FETCH_WINTOOLCHAIN "Force fetch the Windows toolchain (google internal)"
 
-OPT_VSDIR=
+OPT_VSDIR=/mnt/msvc/win8sdk
 option_register_var "--vsdir=<msvc_install_dir>" OPT_VSDIR "Location of the msvc sdk. See documentation for details."
 
 option_parse "$@"
@@ -539,20 +539,21 @@ prepare_build_for_windows_msvc() {
     CLANG_DIR=$(realpath $CLANG_BINDIR/..)
     CLANG_VERSION=$(get_clang_version)
 
-    # Let's cache the Windows SDK toolchain in the prebuilts/android-emulator-build/msvc 
+    # Let's cache the Windows SDK toolchain in the prebuilts/android-emulator-build/msvc
     # fetch_dependencies_msvc will pull down the sdk from google storage if the provided directories are
     # not found.
     MSVC_ROOT_DIR="${AOSP_DIR}/prebuilts/android-emulator-build/msvc"
     CIOPFS_DIR="${AOSP_DIR}/prebuilts/android-emulator-build/.ciopfs"
 
-    if [ "$OPT_VSDIR" ]; then
-      MSVC_ROOT_DIR=$OPT_VSDIR
+    # Check to see if we need to fetch the toolchain..
+    if [ -d "$OPT_VSDIR" ]; then
+      MSVC_DIR=$OPT_VSDIR
     else
+      log "Configuring msvc.."
       MSVC_HASH=$(aosp_msvc_hash)
       MSVC_DIR=${MSVC_ROOT_DIR}/vs_files/${MSVC_HASH}
+      fetch_dependencies_msvc "${MSVC_ROOT_DIR}" "${CIOPFS_DIR}"
     fi
-  
-    fetch_dependencies_msvc "${MSVC_ROOT_DIR}" "${CIOPFS_DIR}"
 
     # We cannot have multiple SDK versions in the same dir
     MSVC_VER=$(ls -1 ${MSVC_DIR}/win_sdk/Include)
@@ -561,8 +562,8 @@ prepare_build_for_windows_msvc() {
     VC_VER=$(ls -1 ${MSVC_DIR}/VC/Tools/MSVC)
     log "Using visual studio version: ${VC_VER}"
 
-    run mkdir -p $MSVC_ROOT_DIR/clang-intrins/include
-    run cp -rf ${CLANG_DIR}/lib64/clang/${CLANG_VERSION}/include  $MSVC_ROOT_DIR/clang-intrins/
+    run mkdir -p $MSVC_DIR/clang-intrins/${CLANG_VERSION}/include
+    run rsync -r ${CLANG_DIR}/lib64/clang/${CLANG_VERSION}/include  $MSVC_DIR/clang-intrins/${CLANG_VERSION}
 
     local CLANG_LINK_FLAGS=
     var_append CLANG_LINK_FLAGS "-fuse-ld=lld"
@@ -599,7 +600,7 @@ prepare_build_for_windows_msvc() {
     var_append EXTRA_CFLAGS "-Wno-c++11-narrowing"
     # Disable builtin #include directories
     var_append EXTRA_CFLAGS "-nobuiltininc"
-    var_append EXTRA_CFLAGS "-isystem $MSVC_ROOT_DIR/clang-intrins/include"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/clang-intrins/${CLANG_VERSION}/include"
     var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/VC/Tools/MSVC/${VC_VER}/include"
     var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/ucrt"
     var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/um"
@@ -628,7 +629,7 @@ prepare_build_for_windows_msvc() {
     var_append EXTRA_CXXFLAGS "-nobuiltininc"
     # Disable standard #include directories for the C++ standard library
     var_append EXTRA_CXXFLAGS "-nostdinc++"
-    var_append EXTRA_CXXFLAGS "-isystem $MSVC_ROOT_DIR/clang-intrins/include"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/clang-intrins/${CLANG_VERSION}/include"
     var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/VC/Tools/MSVC/${VC_VER}/include"
     var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/ucrt"
     var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/um"
