@@ -1,4 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
+
+if(MSVC)
+  list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/android/build/cmake")
+  include("toolchain-windows_msvc-x86_64")
+endif()
+
 message(STATUS "Compiling for target: ${ANDROID_TARGET_TAG}")
 if(NOT DEFINED ANDROID_TARGET_TAG)
   message(STATUS "ANDROID_TARGET_TAG is undefined [${ANDROID_TARGET_TAG}]")
@@ -40,21 +46,30 @@ set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 prebuilt(Threads)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  add_c_flag("-O0")
   add_definitions("-DANDROID_DEBUG")
-  if(NOT OPTION_ASAN)
-    set(OPTION_ASAN address)
+
+  if (MSVC)
+    # Clang will be running in cl compatibility mode.
+    add_c_flag("/Od /RTC1 /EHsc")
+  else()
+    add_c_flag("-O0")
   endif()
 
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    # Build an instrumented version of the code  that generates coverage mapping to enable code coverage analysis
-    set(ANDROID_CODE_COVERAGE TRUE)
-    add_c_flag("-fcoverage-mapping")
-    add_c_flag("-fprofile-instr-generate")
-    add_c_flag("-fprofile-arcs")
-    add_c_flag("-ftest-coverage")
-    add_c_flag("--coverage")
-  endif()
+      if(NOT OPTION_ASAN)
+        set(OPTION_ASAN address)
+      endif()
+
+      if (NOT MSVC)
+        # Build an instrumented version of the code  that generates coverage mapping to enable code coverage analysis
+        set(ANDROID_CODE_COVERAGE TRUE)
+        add_c_flag("-fcoverage-mapping")
+        add_c_flag("-fprofile-instr-generate")
+        add_c_flag("-fprofile-arcs")
+        add_c_flag("-ftest-coverage")
+        add_c_flag("--coverage")
+      endif()
+    endif()
 else()
   add_definitions("-DNDEBUG=1")
   if(ANDROID_TARGET_TAG MATCHES "windows.*")
@@ -64,6 +79,7 @@ else()
   endif()
 endif()
 
+# Note that clang in windows act as a drop in replacement for cl
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_definitions("-D__STDC_CONSTANT_MACROS" "-D_LIBCPP_VERSION=__GLIBCPP__")
 
@@ -103,7 +119,17 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_c_flag("-Wswitch")
 endif()
 
-add_cxx_flag("-Wno-invalid-offsetof")
+if (MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  add_c_flag("-Wno-microsoft-enum-forward-reference")
+  add_c_flag("-Wno-address-of-packed-member")
+  add_c_flag("-Wno-incompatible-ms-struct")
+  add_c_flag("-Wno-c++11-narrowing")
+  add_c_flag("-Wno-unknown-argument")
+  add_c_flag("-Wno-return-type")
+  add_c_flag("-Wno-microsoft-include")
+  add_c_flag("-Wno-incompatible-pointer-types")
+  add_c_flag("-MD")
+endif()
 
 # Disable generation of information about every class with virtual functions for use by the C++ runtime type
 # identification features (dynamic_cast and typeid). If you don't use those parts of the language, you can save some
@@ -112,16 +138,19 @@ add_cxx_flag("-Wno-invalid-offsetof")
 # void * or to unambiguous base classes.
 #
 # For msvc build, the msvc C++ headers are using RTTI features (typeid) so have cannot disable it.
-if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
+if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*" AND NOT MSVC)
   add_cxx_flag("-fno-rtti")
 endif()
 
-# Compiling with -fno-exceptions disables exceptions support and uses the variant of C++ libraries without exceptions.
-# Use of try, catch, or throw results in an error message. Linking objects that have been compiled with -fno-exceptions
-# automatically selects the libraries without exceptions. You can use the linker option --no_exceptions to diagnose
-# whether the objects being linked contain exceptions. If an exception propagates into a function that has been compiled
-# without exceptions support, then the program terminates.
-add_cxx_flag("-fno-exceptions")
+if(NOT MSVC)
+  # Compiling with -fno-exceptions disables exceptions support and uses the variant of C++ libraries without exceptions.
+  # Use of try, catch, or throw results in an error message. Linking objects that have been compiled with -fno-exceptions
+  # automatically selects the libraries without exceptions. You can use the linker option --no_exceptions to diagnose
+  # whether the objects being linked contain exceptions. If an exception propagates into a function that has been compiled
+  # without exceptions support, then the program terminates.
+  add_cxx_flag("-fno-exceptions")
+  add_cxx_flag("-Wno-invalid-offsetof")
+endif()
 
 # Ensure that <inttypes.h> always defines all interesting macros.
 add_definitions("-D__STDC_LIMIT_MACROS=1" "-D__STDC_FORMAT_MACROS=1")
@@ -141,7 +170,7 @@ add_definitions("-D_GNU_SOURCE=1")
 # Enable large-file support (i.e. make off_t a 64-bit value).
 add_definitions("-D_FILE_OFFSET_BITS=64" "-D_LARGEFILE_SOURCE")
 
-if(OPTION_ASAN)
+if(OPTION_ASAN AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT MSVC)
   message(STATUS "Enabling ASAN with: ${OPTION_ASAN}")
   add_c_flag("-fsanitize=${OPTION_ASAN}")
   add_c_flag("-g3")
@@ -163,14 +192,15 @@ set(EMULATOR_FEATURE_DEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/android/data/advance
 
 set(
   SWIFTSHADER_DEPENDENCIES
-  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_TAG}/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
-  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_TAG}/lib/libGLES_CM${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLES_CM${CMAKE_SHARED_LIBRARY_SUFFIX}"
-  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_TAG}/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_OS_FLAVOR}-x86_64/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_OS_FLAVOR}-x86_64/lib/libGLES_CM${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLES_CM${CMAKE_SHARED_LIBRARY_SUFFIX}"
+  "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/swiftshader/${ANDROID_TARGET_OS_FLAVOR}-x86_64/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_swiftshader/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
   )
 
 prebuilt(CURL)
 prebuilt(GLIB2)
 prebuilt(ZLIB)
+prebuilt(FDT)
 prebuilt(PIXMAN)
 if (NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
   prebuilt(VIRGLRENDERER)
@@ -219,6 +249,7 @@ if (NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
                                    "-DCONFIG_VIRGL")
 endif()
 
+
 target_compile_options(android-qemu-deps INTERFACE "-Werror=implicit-function-declaration"
                                "-Wno-unused-function"
                                # Do not allow the compiler to assume the strictest aliasing rules
@@ -228,7 +259,10 @@ target_compile_options(android-qemu-deps INTERFACE "-Werror=implicit-function-de
                                # a different type, unless the types are almost the same.  Supposedly this
                                # can introduce weird failures esp. on older gcc versions (MINGW)
                                # (See http://thiemonagel.de/2010/01/no-strict-aliasing/)
-                               "-fno-strict-aliasing"
+                               "-fno-strict-aliasing")
+
+if (NOT MSVC)
+  target_compile_options(android-qemu-deps INTERFACE
                                # This option instructs the compiler to assume that signed arithmetic
                                # overflow of addition, subtraction and multiplication wraps around using
                                # twos-complement representation. This flag enables some optimizations and
@@ -246,7 +280,7 @@ target_compile_options(android-qemu-deps INTERFACE "-Werror=implicit-function-de
                                # variable definitions this way.
                                # Remove this and you'll get all sorts of fun linker issues.
                                "-fno-common")
-
+endif()
 # Make sure we make our dependent libraries available.
 target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN ZLIB::ZLIB)
 
@@ -264,15 +298,23 @@ android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE USB::USB)
 
 # Let's not install gtest..
 set(INSTALL_GTEST OFF CACHE BOOL "Never install gtest" FORCE)
-# Okay, google test is not happy under msvc
-if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
-  set(gtest_disable_pthreads ON CACHE BOOL "Disable uses of pthreads in gtest.")
-endif ()
 
 if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
   # Including the top-level CMakeLists.txt file doesn't work because the Windows SDK
   # library requires C++14 support. So let's just include this manually.
+
+  set(gtest_disable_pthreads ON CACHE BOOL "Disable uses of pthreads in gtest.")
+  # All right, we must make sure we don't start adding the /MT flag
+  if (MSVC)
+    set(gtest_force_shared_crt ON CACHE BOOL "Use shared (DLL) run-time lib even when Google Test is built as static lib." FORCE)
+  endif()
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../googletest/googlemock googlemock)
+  if(MSVC)
+    # Okay, google test is not happy under msvc compile
+    target_compile_definitions(gmock_main PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
+    target_compile_definitions(gmock PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
+    target_compile_definitions(gtest PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
+  endif()
 else()
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../googletest googletest)
 endif()
@@ -322,10 +364,12 @@ android_target_compile_options(android-qemu-deps
                                windows_msvc
                                INTERFACE
                                "-Werror=implicit-function-declaration"
-                               "-mms-bitfields"
                                "-Wno-unused-variable"
                                "-mcx16"
                                )
+if (NOT MSVC)
+  android_target_compile_options(android-qemu-deps windows_msvc INTERFACE "-mms-bitfields")
+endif()
 android_target_compile_options(android-qemu-deps
                                windows-x86
                                INTERFACE
@@ -366,21 +410,26 @@ android_target_compile_options(android-qemu-deps linux-x86_64 INTERFACE
                                "-Wno-unused-variable")
 android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE "${TCMALLOC_LIBRARIES} -lpulse -lutil")
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE "-framework CoreAudio")
-android_target_link_libraries(android-qemu-deps windows-x86_64 INTERFACE "-lwinmm -ldxguid")
 
 set(ANDROID_AUTOGEN "qemu2-auto-generated")
 set(ANDROID_QEMU2_TOP_DIR ${ANDROID_QEMU2_TOP_DIR})
 include(cmake-main.${ANDROID_TARGET_TAG}.inc)
 
 set(qemu2-common_src ${qemu2-shared_sources} ${qemu2-shared_generated_sources})
-android_add_library(qemu2-common)
+if(MSVC)
+  # Once we have a newer version of cmake we can generate the object library in a platform
+  # independent way b/121393952
+  android_add_object_library(qemu2-common)
+else()
+  android_add_library(qemu2-common)
+endif()
 target_compile_definitions(qemu2-common PRIVATE "-DPOISON_CONFIG_ANDROID")
 target_link_libraries(qemu2-common PUBLIC android-qemu-deps)
 
 set(libqemu2-util_src ${libqemuutil_sources} ${libqemuutil_generated_sources})
 android_add_library(libqemu2-util)
-target_link_libraries(libqemu2-util PRIVATE android-qemu-deps -lfdt)
-android_target_link_libraries(libqemu2-util windows PRIVATE -lpsapi)
+target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
+android_target_link_libraries(libqemu2-util windows PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
 target_compile_definitions(libqemu2-util PRIVATE "-DPOISON_CONFIG_ANDROID")
 
 set(libqemustub_src ${libqemustub_sources} ${libqemuutil_generated_sources})
