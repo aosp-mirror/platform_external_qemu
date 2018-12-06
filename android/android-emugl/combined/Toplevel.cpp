@@ -18,6 +18,7 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/emulation/AndroidPipe.h"
+#include "android/emulation/control/vm_operations.h"
 #include "android/emulation/hostpipe/HostGoldfishPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/opengl/emugl_config.h"
@@ -165,8 +166,9 @@ private:
         int maj;
         int min;
 
-        android_startOpenglesRenderer(kWindowSize, kWindowSize, 1, 28, &maj,
-                                      &min);
+        android_startOpenglesRenderer(kWindowSize, kWindowSize, 1, 28,
+                                      gQAndroidVmOperations,
+                                      &maj, &min);
 
         char* vendor = nullptr;
         char* renderer = nullptr;

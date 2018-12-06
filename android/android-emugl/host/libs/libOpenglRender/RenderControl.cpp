@@ -166,6 +166,7 @@ static constexpr android::base::StringView kAsyncSwapStrV3 = "ANDROID_EMU_native
 // "ANDROID_EMU_dma_v2": adds DMA support glMapBufferRange (and unmap)
 static constexpr android::base::StringView kDma1Str = "ANDROID_EMU_dma_v1";
 static constexpr android::base::StringView kDma2Str = "ANDROID_EMU_dma_v2";
+static constexpr android::base::StringView kDirectMemStr = "ANDROID_EMU_direct_mem";
 
 // GLESDynamicVersion: up to 3.1 so far
 static constexpr android::base::StringView kGLESDynamicVersion_2 = "ANDROID_EMU_gles_max_version_2";
@@ -344,6 +345,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         emugl_feature_is_enabled(android::featurecontrol::GLDMA);
     bool dma2Enabled =
         emugl_feature_is_enabled(android::featurecontrol::GLDMA2);
+    bool directMemEnabled =
+        emugl_feature_is_enabled(android::featurecontrol::GLDirectMem);
     bool hostCompositionEnabled = shouleEnableHostCompose();
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
@@ -368,6 +371,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 
     if (dma2Enabled && name == GL_EXTENSIONS) {
         glStr += kDma2Str;
+        glStr += " ";
+    }
+
+    if (directMemEnabled && name == GL_EXTENSIONS) {
+        glStr += kDirectMemStr;
         glStr += " ";
     }
 
