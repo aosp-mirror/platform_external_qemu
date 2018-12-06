@@ -159,6 +159,7 @@ int load_image_targphys_as(const char *filename,
 
 int load_image_mr(const char *filename, MemoryRegion *mr)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     int size;
 
     if (!memory_access_is_direct(mr, false)) {
@@ -929,7 +930,7 @@ int rom_add_file(const char *file, const char *fw_dir,
 
     fd = open(rom->path, O_RDONLY | O_BINARY);
     if (fd == -1) {
-        fprintf(stderr, "Could not open option rom '%s': %s\n",
+        fprintf(stderr, "**********Couldd not open option rom '%s': %s\n",
                 rom->path, strerror(errno));
         goto err;
     }

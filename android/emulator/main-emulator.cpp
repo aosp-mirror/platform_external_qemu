@@ -295,6 +295,11 @@ int main(int argc, char** argv)
             break;
         }
 
+        if (!strcmp(opt,"-fuchsia")) {
+            forceEngineLaunch = true;
+            break;
+        }
+
         // NOTE: Process -help options immediately, ignoring all other
         // parameters.
         int helpStatus = emulator_parseHelpOption(opt);
@@ -587,7 +592,7 @@ int main(int argc, char** argv)
     }
 
     if (avdArch == NULL) {
-        avdArch = "x86";
+        avdArch = "x86_64";
         D("Can't determine target AVD architecture: defaulting to %s", avdArch);
     }
 

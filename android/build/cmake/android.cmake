@@ -384,7 +384,7 @@ endfunction()
 #
 # (Maybe on one day we will standardize all the naming, between qemu and configs and cpus..)
 function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS CPU)
-  android_complete_archive(QEMU_COMPLETE_LIB "libqemu2-common")
+  android_complete_archive(QEMU_COMPLETE_LIB "qemu2-common")
   add_executable(qemu-system-${ANDROID_AARCH}
                  android-qemu2-glue/main.cpp
                  vl.c
@@ -405,7 +405,7 @@ function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS
                                 ${VIRGLRENDERER_LIBRARIES}
                                 android-qemu-deps)
   # Make the common dependency explicit, as some generators might not detect it properly (Xcode)
-  add_dependencies(qemu-system-${ANDROID_AARCH} libqemu2-common)
+  add_dependencies(qemu-system-${ANDROID_AARCH} qemu2-common)
   # XCode bin places this not where we want this...
   set_target_properties(qemu-system-${ANDROID_AARCH}
                         PROPERTIES RUNTIME_OUTPUT_DIRECTORY
