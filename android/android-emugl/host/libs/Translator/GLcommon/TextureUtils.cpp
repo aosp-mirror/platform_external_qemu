@@ -274,6 +274,36 @@ GLenum decompressedInternalFormat(GLEScontext* ctx, GLenum compressedFormat) {
     }
 }
 
+class ScopedFetchUnpackData {
+    public:
+        ScopedFetchUnpackData(GLEScontext* ctx, GLintptr offset,
+            GLsizei dataSize) : mCtx(ctx) {
+            mData = ctx->dispatcher().glMapBufferRange(
+                    GL_PIXEL_UNPACK_BUFFER,
+                    offset, dataSize, GL_MAP_READ_BIT);
+            if (mData) {
+                ctx->dispatcher().glGetIntegerv(GL_PIXEL_UNPACK_BUFFER_BINDING,
+                        &mUnpackBuffer);
+                ctx->dispatcher().glBindBuffer(GL_PIXEL_UNPACK_BUFFER,
+                        0);
+            }
+        }
+        ~ScopedFetchUnpackData() {
+            if (mData) {
+                mCtx->dispatcher().glBindBuffer(GL_PIXEL_UNPACK_BUFFER,
+                        mUnpackBuffer);
+                mCtx->dispatcher().glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+            }
+        }
+        void* data() {
+            return mData;
+        }
+    private:
+        const GLEScontext* mCtx;
+        void* mData = nullptr;
+        GLint mUnpackBuffer = 0;
+};
+
 void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
                             GLenum internalformat, GLsizei width,
                             GLsizei height, GLint border,
@@ -289,6 +319,13 @@ void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
 
     glTexImage2DPtr_t glTexImage2DPtr;
     glTexImage2DPtr = (glTexImage2DPtr_t)funcPtr;*/
+    bool needUnpackBuffer = false;
+    if (ctx->getMajorVersion() >= 3) {
+        GLint unpackBuffer = 0;
+        ctx->dispatcher().glGetIntegerv(GL_PIXEL_UNPACK_BUFFER_BINDING,
+                &unpackBuffer);
+        needUnpackBuffer = unpackBuffer;
+    }
 
     if (isEtcFormat(internalformat)) {
         GLint format = GL_RGB;
@@ -338,22 +375,27 @@ void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
                 format = GL_RGBA;
                 break;
         }
-
         int pixelSize = etc_get_decoded_pixel_size(etcFormat);
         GLsizei compressedSize =
             etc_get_encoded_data_size(etcFormat, width, height);
         SET_ERROR_IF((compressedSize != imageSize), GL_INVALID_VALUE);
-
+        std::unique_ptr<ScopedFetchUnpackData> unpackData;
         bool emulateCompressedData = false;
-        if (!data) {
-            emulateCompressedData = true;
-            data = new char[compressedSize];
+        if (needUnpackBuffer) {
+            unpackData.reset(new ScopedFetchUnpackData(ctx,
+                    reinterpret_cast<GLintptr>(data), compressedSize));
+            data = unpackData->data();
+            SET_ERROR_IF(!data, GL_INVALID_OPERATION);
+        } else {
+            if (!data) {
+                emulateCompressedData = true;
+                data = new char[compressedSize];
+            }
         }
 
         const int32_t align = ctx->getUnpackAlignment()-1;
         const int32_t bpr = ((width * pixelSize) + align) & ~align;
         const size_t size = bpr * height;
-
         std::unique_ptr<etc1_byte[]> pOut(new etc1_byte[size]);
 
         int res =
@@ -364,11 +406,11 @@ void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
 
         glTexImage2DPtr(target, level, convertedInternalFormat,
                         width, height, border, format, type, pOut.get());
-
         if (emulateCompressedData) {
             delete [] (char*)data;
         }
     } else if (isAstcFormat(internalformat)) {
+        // TODO: fix the case when GL_PIXEL_UNPACK_BUFFER is bound
         astc_codec::FootprintType footprint;
         bool srgb;
         getAstcFormatInfo(internalformat, &footprint, &srgb);
@@ -390,6 +432,7 @@ void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
                         alignedUncompressedData.data());
 
     } else if (isPaletteFormat(internalformat)) {
+        // TODO: fix the case when GL_PIXEL_UNPACK_BUFFER is bound
         SET_ERROR_IF(
             level > log2(ctx->getMaxTexSize()) ||
             border !=0 || level > 0 ||
