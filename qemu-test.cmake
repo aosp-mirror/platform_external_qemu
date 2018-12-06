@@ -1,3 +1,7 @@
+# Work around for the fact we cannot use target object libraries in arbitrary functions
+add_library(qemu2-test-common dummy.c)
+target_sources(qemu2-test-common PRIVATE $<TARGET_OBJECTS:qemu2-common>)
+
 set(libqemu-test_src
     tests/libqtest.c
     ${ANDROID_AUTOGEN}/tests/test-qapi-visit.c
@@ -23,7 +27,7 @@ function(add_qtest NAME DEPENDENCY)
   android_target_dependency(${NAME} linux-x86_64 TCMALLOC_OS_DEPENDENCIES)
   target_compile_definitions(${NAME} PRIVATE -DCONFIG_ANDROID)
   target_include_directories(${NAME} PUBLIC ${ANDROID_AUTOGEN}/tests)
-  target_link_libraries(${NAME} PRIVATE ${DEPENDENCY} qemu2-common libqemu2-util android-qemu-deps)
+  target_link_libraries(${NAME} PRIVATE ${DEPENDENCY} qemu2-test-common libqemu2-util android-qemu-deps)
 endfunction()
 
 # These tests rely on interaction with the qemu binary. These require a non- trivial test runner as they interact with a
@@ -118,4 +122,4 @@ endforeach()
 set(test-util-sockets-qtest_src tests/test-util-sockets.c tests/socket-helpers.c)
 android_add_test(test-util-sockets-qtest)
 target_include_directories(test-util-sockets-qtest PUBLIC ${ANDROID_AUTOGEN}/tests)
-target_link_libraries(test-util-sockets-qtest PRIVATE libqemu2-util qemu2-common android-qemu-deps)
+target_link_libraries(test-util-sockets-qtest PRIVATE libqemu2-util qemu2-test-common android-qemu-deps)

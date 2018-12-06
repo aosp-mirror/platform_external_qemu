@@ -25,8 +25,7 @@ target_compile_definitions(emulator-gbench PRIVATE -DHAVE_POSIX_REGEX=1)
 
 android_target_link_libraries(emulator-gbench linux-x86_64 PUBLIC pthread)
 android_target_link_libraries(emulator-gbench darwin-x86_64 PUBLIC pthread)
-android_target_include_directories(emulator-gbench windows PUBLIC compat)
-android_target_link_libraries(emulator-gbench windows PUBLIC emulator-regex-win32 -lshlwapi)
-
-android_target_include_directories(emulator-gbench windows PUBLIC compat)
-android_target_link_libraries(emulator-gbench windows PUBLIC emulator-regex-win32 -lshlwapi)
+if (NOT MSVC)
+  android_target_include_directories(emulator-gbench windows PUBLIC compat)
+endif()
+android_target_link_libraries(emulator-gbench windows PUBLIC emulator-regex-win32 shlwapi::shlwapi)
