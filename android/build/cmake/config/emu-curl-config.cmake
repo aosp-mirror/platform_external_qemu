@@ -21,5 +21,8 @@ set(CURL_DEFINITIONS "-DCURL_STATICLIB")
 set(CURL_FOUND TRUE)
 
 android_add_prebuilt_library(CURL libcurl "${PREBUILT_ROOT}/lib/libcurl" "${PREBUILT_ROOT}/include" "CURL_STATICLIB" "")
+if(MSVC)
+  target_link_libraries(CURL::libcurl INTERFACE Wldap32::Wldap32)
+endif()
 
 set(PACKAGE_EXPORT "CURL_INCLUDE_DIR;CURL_INCLUDE_DIRS;CURL_LIBRARIES;CURL_FOUND;CURL_DEFINITIONS")

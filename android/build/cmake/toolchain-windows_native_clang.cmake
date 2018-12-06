@@ -15,9 +15,6 @@ get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
 list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 # cmake will look for WinMSVCCrossCompile in Platform/WinMSVCCrossCompile.cmake
 list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}/Modules")
-set(CMAKE_SYSTEM_NAME WinMSVCCrossCompile)
-
-include(toolchain)
 
 # First we create the toolchain
 get_host_tag(ANDROID_HOST_TAG)
@@ -27,23 +24,8 @@ set (ANDROID_TARGET_OS_FLAVOR "windows")
 set(CMAKE_SYSTEM_PROCESSOR AMD64)
 
 get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../../" ABSOLUTE)
+set(CMAKE_C_COMPILER clang-cl)
+set(CMAKE_CXX_COMPILER clang-cl)
 
-# Cmake goes crazy if we set AR manually.. so let's not do that.
-toolchain_generate("${ANDROID_TARGET_TAG}")
-# need to set ar to llvm-ar to unpack windows static libs
-set(CMAKE_AR ${COMPILER_PREFIX}ar)
 
-# here is the target environment located, used to
-# locate packages. We don't want to do any package resolution
-# with windows-msvc, so we explicitly disable it.
-set(CMAKE_FIND_ROOT_PATH  "${ANDROID_SYSROOT}")
-
-# Disable any searching as it might lead to unexpected behavior
-# that varies amongst build environments
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY NEVER)
-set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE NEVER)
-set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE NEVER)
-
-add_definitions(-DWINDOWS_CROSS_COMPILE)
 include(emu-windows-libs)
