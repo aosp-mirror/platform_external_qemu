@@ -1085,6 +1085,16 @@ static void sInitializeUniformLocs(ProgramData* pData,
 void ProgramData::initGuestUniformLocForKey(StringView key) {
     if (mUniNameToGuestLoc.find(key) == mUniNameToGuestLoc.end()) {
         mUniNameToGuestLoc[key] = mCurrUniformBaseLoc;
+        // Emplace host location beforehand to workaround Unreal bug
+        // BUG: 120548998
+        GLDispatch& dispatcher = GLEScontext::dispatcher();
+        std::string translatedName = getTranslatedName(key);
+        int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
+                translatedName.c_str());
+        if (hostLoc != -1) {
+            mGuestLocToHostLoc.emplace(mCurrUniformBaseLoc, hostLoc);
+        }
+
         mCurrUniformBaseLoc++;
     }
 }
@@ -1101,6 +1111,16 @@ void ProgramData::initGuestUniformLocForKey(StringView key, StringView key2) {
     }
 
     if (newUniform) {
+        // Emplace host location beforehand to workaround Unreal bug
+        // BUG: 120548998
+        GLDispatch& dispatcher = GLEScontext::dispatcher();
+        std::string translatedName = getTranslatedName(key);
+        int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
+                translatedName.c_str());
+        if (hostLoc != -1) {
+            mGuestLocToHostLoc.emplace(mCurrUniformBaseLoc, hostLoc);
+        }
+
         mCurrUniformBaseLoc++;
     }
 }
