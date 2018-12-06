@@ -22,6 +22,30 @@
       "revId": "a22bff73606b7f8ba2c8569ff850c64dc9bdf754",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "72f8c793_1e36c010",
+        "filename": "android/data/advancedFeaturesCanary.ini",
+        "patchSetId": 29
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-06T05:00:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5db35b48_1dc85330",
+      "range": {
+        "startLine": 109,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 16
+      },
+      "revId": "a22bff73606b7f8ba2c8569ff850c64dc9bdf754",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

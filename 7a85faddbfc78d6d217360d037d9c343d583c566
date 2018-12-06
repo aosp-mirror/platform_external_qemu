@@ -46,6 +46,30 @@
       "revId": "7a85faddbfc78d6d217360d037d9c343d583c566",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "226e2f25_81b71b60",
+        "filename": "android/android-emu/android/opengles.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-06T05:00:39Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "328beb50_474d3750",
+      "range": {
+        "startLine": 229,
+        "startChar": 41,
+        "endLine": 229,
+        "endChar": 62
+      },
+      "revId": "7a85faddbfc78d6d217360d037d9c343d583c566",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
