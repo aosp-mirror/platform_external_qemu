@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2579bdf5_1d13d780",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1058860
+      },
+      "writtenOn": "2018-12-06T23:44:05Z",
+      "side": 1,
+      "message": "nit: This CL does not fix the bug (move to newer Clang) itself right?",
+      "revId": "5ce3a3600fbf8e06a41a6b997e1c76dee3da30a4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
