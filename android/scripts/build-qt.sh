@@ -55,10 +55,10 @@ package_builder_parse_package_list
 ###
 ###  Download the source tarball if needed.
 ###
-QT_SRC_NAME=qt-everywhere-opensource-src-5.7.0
+QT_SRC_NAME=qt-everywhere-src-5.11.1
 QT_SRC_PACKAGE=$QT_SRC_NAME.tar.xz
-QT_SRC_URL=http://download.qt.io/archive/qt/5.7/5.7.0/single/$QT_SRC_PACKAGE
-QT_SRC_PACKAGE_SHA1=bfc3d07ffba27d96cf070f74148f34a668646a19
+QT_SRC_URL=http://download.qt.io/archive/qt/5.11/5.11.1/single/$QT_SRC_PACKAGE
+QT_SRC_PACKAGE_SHA1=0ac866442a960d4038a51ba3096b2cc5d796b5ee
 
 QT_SRC_PATCH_FOLDER=${QT_SRC_NAME}-patches
 QT_ARCHIVE_DIR=$(builder_archive_dir)
@@ -197,6 +197,10 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         LD_LIBRARY_PATH=
         EXTRA_CONFIGURE_FLAGS=
+        # qtlocation cannot be built using our version of clang, since it is
+        # using <experimental/optional>, which got moved to <optional> in our
+        # clang toolchain. Adding "stdc++ c++11" will build qtlocation, but will
+        # make qtwebengine build fail, since chromium requires c++14 or later.
         var_append EXTRA_CONFIGURE_FLAGS \
                 -opensource \
                 -confirm-license \
@@ -206,18 +210,37 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 -shared \
                 -nomake examples \
                 -nomake tests \
+                -skip qtlocation \
                 -no-strip \
 
         if [ "$(get_verbosity)" -gt 2 ]; then
             var_append EXTRA_CONFIGURE_FLAGS "-v"
         fi
 
+        # This variable needs to be exported during the build for linux as
+        # there's a patch in qt's chromium build system to add custom search
+        # paths for dependencies that chromium thinks is in the standard
+        # directory (/usr/include).
+        QTWEBENGINE_DEPS_DIR="$PREBUILTS_DIR/common/qtwebengine-deps/linux-x86_64"
+        # QtWebEngine needs <KHR/khrplatform.h>, so just include it from the
+        # swiftshader code inside of qt's chromium
+        KHR_INCLUDE="$(builder_src_dir)/$QT_SRC_NAME/qtwebengine/src/3rdparty/chromium/third_party/swiftshader/include"
+
         case $SYSTEM in
             linux-x86_64)
+                if [ ! -d $QTWEBENGINE_DEPS_DIR ]; then
+                    panic "$QTWEBENGINE_DEPS_DIR missing. Run build-qtwebengine-deps.sh first."
+                fi
+                var_append CPPFLAGS "-I$KHR_INCLUDE"
+                var_append CPPFLAGS "-I$QTWEBENGINE_DEPS_DIR/include"
+                var_append EXTRA_PKG_CONFIGS "$QTWEBENGINE_DEPS_DIR/lib/pkgconfig"
+                var_append QMAKE_CXXFLAGS $CPPFLAGS
                 var_append EXTRA_CONFIGURE_FLAGS \
                         -qt-xcb \
                         -no-use-gold-linker \
-                        -platform linux-g++-64
+                        -platform linux-clang \
+                        "QMAKE_CXXFLAGS+=$QMAKE_CXXFLAGS" \
+
                 var_append LD_LIBRARY_PATH \
                   $(dirname $(aosp_clang_libcplusplus))
                 ;;
@@ -255,8 +278,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 var_append EXTRA_CONFIGURE_FLAGS \
                     -no-framework \
                     -sdk macosx
-                var_append CFLAGS -mmacosx-version-min=10.8
-                var_append LDFLAGS -mmacosx-version-min=10.8
+                var_append CFLAGS -mmacosx-version-min=10.11
+                var_append LDFLAGS -mmacosx-version-min=10.11
                 var_append LDFLAGS -lc++
                 ;;
         esac
@@ -274,15 +297,16 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             export LDFLAGS &&
             export CPPFLAGS &&
             export LD_LIBRARY_PATH &&
+            export GN_HOST_TOOLCHAIN_EXTRA_CPPFLAGS &&
             export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
-            export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
+            export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH:$EXTRA_PKG_CONFIGS" &&
             run "$(builder_src_dir)"/$QT_SRC_NAME/configure \
                 -prefix $_SHU_BUILDER_PREFIX \
                 $EXTRA_CONFIGURE_FLAGS
         ) || panic "Could not configure Qt build!"
 
         # Build everything now.
-        QT_MODULES="qtbase qtsvg qtimageformats"
+        QT_MODULES="qtbase qtsvg qtimageformats qtwebengine"
         QT_TARGET_BUILD_MODULES=
         QT_TARGET_INSTALL_MODULES=
         for QT_MODULE in $QT_MODULES; do
@@ -298,7 +322,12 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         dump "$(builder_text) Building Qt binaries"
         (
             run cd "$QT_BUILD_DIR" &&
+            export CPPFLAGS &&
+            export CXXFLAGS &&
+            export QTWEBENGINE_DEPS_DIR &&
             export LD_LIBRARY_PATH &&
+            export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
+            export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH:$EXTRA_PKG_CONFIGS" &&
             run make $QT_MAKE_FLAGS $QT_TARGET_BUILD_MODULES
         ) || panic "Could not build Qt binaries!"
 
@@ -376,6 +405,11 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             linux*)
                 # Copy over libc++.so, so we can use it during build.
                 cp $(aosp_clang_libcplusplus) "$INSTALL_DIR/$SYSTEM/lib"
+                (cd "$INSTALL_DIR/$SYSTEM/lib" && ln -sf libc++.so libc++.so.1)
+                # also need libsoftokn.so and libsqlite3.so from
+                # qtwebengine-deps
+                cp "$QTWEBENGINE_DEPS_DIR/lib/libsoftokn3.so" "$INSTALL_DIR/$SYSTEM/lib"
+                cp "$QTWEBENGINE_DEPS_DIR/lib/libsqlite3.so" "$INSTALL_DIR/$SYSTEM/lib"
                 ;;
         esac
 
@@ -394,6 +428,36 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 "$INSTALL_DIR"/common/include.new
 
         (cd "$INSTALL_DIR/$SYSTEM" && rm -f include && ln -sf ../common/include include)
+
+        # Copy over the libexec, resources and translations folder for QtWebEngine
+        # TODO: Only mac for now, since we can't build QtWebEngine on Linux or
+        # Windows yet.
+        case $SYSTEM in
+            windows*)
+            ;;
+            *)
+                copy_directory \
+                        "$(builder_install_prefix)"/libexec \
+                        "$INSTALL_DIR/$SYSTEM"/libexec.new
+                directory_atomic_update \
+                        "$INSTALL_DIR/$SYSTEM"/libexec \
+                        "$INSTALL_DIR/$SYSTEM"/libexec.new
+
+                copy_directory \
+                        "$(builder_install_prefix)"/resources \
+                        "$INSTALL_DIR/$SYSTEM"/resources.new
+                directory_atomic_update \
+                        "$INSTALL_DIR/$SYSTEM"/resources \
+                        "$INSTALL_DIR/$SYSTEM"/resources.new
+
+                copy_directory \
+                        "$(builder_install_prefix)"/translations \
+                        "$INSTALL_DIR/$SYSTEM"/translations.new
+                directory_atomic_update \
+                        "$INSTALL_DIR/$SYSTEM"/translations \
+                        "$INSTALL_DIR/$SYSTEM"/translations.new
+                ;;
+        esac
 
         # Move qconfig.h into its platform-specific directory now
         run mkdir -p "$INSTALL_DIR/$SYSTEM"/include.system/QtCore/
