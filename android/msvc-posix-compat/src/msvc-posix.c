@@ -59,7 +59,7 @@ int asprintf(char** buf, const char* format, ...) {
 }
 
 // From https://msdn.microsoft.com/en-us/library/28d5ce15.aspx
-static int vasprintf(char** buf, const char* format, va_list args) {
+ int vasprintf(char** buf, const char* format, va_list args) {
     int len;
 
     if (buf == NULL) {

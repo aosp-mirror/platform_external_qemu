@@ -10,8 +10,16 @@
 #if 0
 #define LOG(x...) fprintf(stderr,"error: " x)
 #else
+#ifdef _MSC_VER
+#define LOG(...) do {} while (0)
+#else
 #define LOG(x...) do {} while (0)
 #endif
+#endif
+
+
+#define dibHeaderSize  40
+#define offset  (14 + dibHeaderSize)
 
 void *loadpng(const char *fn, unsigned *_width, unsigned *_height)
 {
@@ -160,7 +168,7 @@ void savepng(const char* fn, unsigned int nChannels, unsigned int width,
     if (rotation == SKIN_ROTATION_0) {
         unsigned int i = 0;
         for (i = 0; i < height; i++) {
-            png_write_row(p, pixels + i * nChannels * width);
+            png_write_row(p, ((uint8_t*)pixels) + i * nChannels * width);
         }
     } else {
         char* rowBuffer = malloc(nChannels * cols);
@@ -177,17 +185,17 @@ void savepng(const char* fn, unsigned int nChannels, unsigned int width,
             case SKIN_ROTATION_90:
                 srcDelta0 = - nChannels - nChannels * width;
                 srcDelta1 = nChannels + nChannels * width * height;
-                src = pixels + nChannels * width * (height - 1);
+                src = ((uint8_t*)pixels) + nChannels * width * (height - 1);
                 break;
             case SKIN_ROTATION_180:
                 srcDelta0 = - nChannels * 2;
                 srcDelta1 = 0;
-                src = pixels + nChannels * (width * height - 1);
+                src = ((uint8_t*)pixels) + nChannels * (width * height - 1);
                 break;
             case SKIN_ROTATION_270:
                 srcDelta0 = - nChannels + nChannels * width;
                 srcDelta1 = - nChannels - nChannels * width * height;
-                src = pixels + nChannels * (width - 1);
+                src = ((uint8_t*)pixels) + nChannels * (width - 1);
                 break;
         }
         unsigned int i;
@@ -238,8 +246,6 @@ void savebmp(const char* fn, unsigned int nChannels, unsigned int width,
     }
     uint32_t w = (uint32_t)width;
     uint32_t h = (uint32_t)height;
-    const uint32_t dibHeaderSize = 40;
-    const uint32_t offset = 14 + dibHeaderSize;
     uint32_t imgSize = nChannels * w * h;
     uint32_t fileSize = offset + imgSize;
     uint16_t nClrPln = 1;
@@ -267,7 +273,7 @@ void savebmp(const char* fn, unsigned int nChannels, unsigned int width,
     putUint32_t(header + 46, nClrPalette);
     putUint32_t(header + 50, nImptClr);
     fwrite(header, 1, offset, fp);
-    const unsigned char* src = pixels + nChannels * w * (h - 1);
+    const unsigned char* src = ((uint8_t*)pixels) + nChannels * w * (h - 1);
     unsigned char padding[3] = {0, 0, 0};
     unsigned char* data = (unsigned char*)malloc(nChannels * w);
     int paddingBytes = (4 - nChannels * w % 4) % 4;

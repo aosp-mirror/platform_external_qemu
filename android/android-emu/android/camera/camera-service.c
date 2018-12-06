@@ -383,7 +383,7 @@ _camera_service_init(CameraServiceDesc* csd)
     if (!strncmp(android_hw->hw_camera_back, "webcam", 6) ||
         !strncmp(android_hw->hw_camera_front, "webcam", 6)) {
         int connected_cnt = 0;
-        CameraInfo ci[MAX_CAMERA] = {};
+        CameraInfo ci[MAX_CAMERA] = {0};
 
         /* Enumerate web cameras connected to the host. */
         connected_cnt = camera_enumerate_devices(ci, MAX_CAMERA);
@@ -1185,7 +1185,7 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
     float r_scale = 1.0f, g_scale = 1.0f, b_scale = 1.0f, exp_comp = 1.0f;
     char tmp[256];
     int send_frame_time = 0;
-    ClientFrame frame = {};
+    ClientFrame frame = {0};
 
     /* Sanity check. */
     if (cc->video_frame == NULL) {

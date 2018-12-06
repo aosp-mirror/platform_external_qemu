@@ -117,6 +117,8 @@ template <typename T, size_t N> inline bool array_contains(const T (&a)[N], T va
  */
 #ifdef __clang__
 #define OPTNONE __attribute__((optnone))
+#elif defined(_MSC_VER)
+#define OPTNONE
 #else  // not __clang__
 #define OPTNONE __attribute__((optimize("O0")))
 #endif  // not __clang__

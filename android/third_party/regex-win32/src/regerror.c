@@ -80,7 +80,6 @@ __RCSID("$NetBSD: regerror.c,v 1.23 2007/02/09 23:44:18 junyoung Exp $");
 #endif
 #endif /* LIBC_SCCS and not lint */
 
-#include "namespace.h"
 #include <sys/types.h>
 
 #include <assert.h>
@@ -180,7 +179,7 @@ regerror(
 		for (r = rerrs; r->code != 0; r++)
 			if (r->code == target)
 				break;
-	
+
 		if (errcode & REG_ITOA) {
 			if (r->code != 0) {
 				(void)strlcpy(convbuf, r->name, sizeof convbuf);

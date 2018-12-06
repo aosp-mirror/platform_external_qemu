@@ -18,7 +18,7 @@ set(OSWindow_windows_src standalone_common/angle-util/windows/WindowsTimer.cpp
 android_add_library(OSWindow)
 
 android_target_link_libraries(OSWindow linux-x86_64 PUBLIC "-lX11" "-lrt" android-emu-shared)
-android_target_link_libraries(OSWindow windows PUBLIC "-lgdi32")
+android_target_link_libraries(OSWindow windows PUBLIC "gdi32::gdi32")
 android_target_link_libraries(OSWindow darwin-x86_64 PUBLIC "-framework AppKit")
 target_link_libraries(OSWindow PRIVATE emugl_base)
 target_include_directories(OSWindow PUBLIC ${ANDROID_EMUGL_DIR}/host/include standalone_common/angle-util)

@@ -109,16 +109,16 @@
  * In state representations, an operator's bit is on to signify a state
  * immediately *preceding* "execution" of that operator.
  */
-typedef u_int32_t sop;	/* strip operator */
+typedef uint32_t sop;	/* strip operator */
 typedef size_t sopno;
-#define	OPRMASK	((u_int32_t)0xf8000000UL)
-#define	OPDMASK	((u_int32_t)0x07ffffffUL)
+#define	OPRMASK	((uint32_t)0xf8000000UL)
+#define	OPDMASK	((uint32_t)0x07ffffffUL)
 #define	OPSHIFT	((unsigned)27)
 #define	OP(n)	((n)&OPRMASK)
 #define	OPND(n)	((int)((n)&OPDMASK))
 #define	SOP(op, opnd)	((op)|(opnd))
 
-#define OPC(n)	(((u_int32_t)(n))<<OPSHIFT)
+#define OPC(n)	(((uint32_t)(n))<<OPSHIFT)
 /* operators		   meaning	operand			*/
 /*					(back, fwd are offsets)	*/
 #define	OEND	OPC(1)	/* endmarker	-			*/
@@ -205,5 +205,8 @@ struct re_guts {
 };
 
 /* misc utilities */
+#ifdef OUT
+#undef OUT
+#endif
 #define	OUT	(CHAR_MAX+1)	/* a non-character value */
 #define	ISWORD(c)	(isalnum((unsigned char)c) || (c) == '_')

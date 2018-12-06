@@ -195,3 +195,4 @@ docker-src.*
 .vscode/cquery_cached_index
 *.ast_raw
 *.depend_raw
+.vs/

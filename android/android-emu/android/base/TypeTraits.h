@@ -111,7 +111,6 @@ struct is_template_instantiation_of<U<Args...>, U> : std::true_type {};
 //
 // It makes sure that expressions std::begin(t) and std::end(t) are well-formed
 // and those return the same type.
-//
 // Note: with expression SFINAE from C++14 is_range_helper<> could be renamed to
 //   is_range<> with no extra code. C++11 needs an extra level of enable_if<>
 //   to make it work when the type isn't a range.
@@ -136,6 +135,8 @@ struct is_range<
         T,
         typename std::enable_if<details::is_range_helper<T>::value>::type>
         : std::true_type {};
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //

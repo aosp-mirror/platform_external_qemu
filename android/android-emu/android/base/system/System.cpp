@@ -1058,11 +1058,27 @@ public:
         return time(NULL);
     }
 
+    #ifdef _MSC_VER
+    Duration getUnixTimeUs() const override {
+        // 100ns between 1601-01-01 00:00:00 UTC and 1970-01-01 00:00:00 UTC
+        // (134774 days)
+        constexpr uint64_t epoch = ((uint64_t) 116444736000000000ULL);
+        FILETIME    file_time;
+        ULARGE_INTEGER ularge;
+
+        GetSystemTimePreciseAsFileTime(&file_time);
+        ularge.LowPart = file_time.dwLowDateTime;
+        ularge.HighPart = file_time.dwHighDateTime;
+
+        return ((ularge.QuadPart - epoch) / 10L);
+    }
+    #else
     Duration getUnixTimeUs() const override {
         timeval tv;
         gettimeofday(&tv, nullptr);
         return tv.tv_sec * 1000000LL + tv.tv_usec;
     }
+    #endif
 
     WallDuration getHighResTimeUs() const override {
         return kTickCount.getUs();
@@ -1561,7 +1577,8 @@ Win32UnicodeString win32Path(StringView path) {
     return wpath;
 }
 
-using PathStat = struct _stat64;
+// MSVC is not liking: using PathStat = struct _stat64;
+typedef struct _stat64 PathStat;
 
 #else  // _WIN32
 

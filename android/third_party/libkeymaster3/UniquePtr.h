@@ -40,7 +40,11 @@ struct DefaultDelete<T[]> {
         delete[] p;
     }
 };
-
+#ifdef _MSC_VER
+  #define __ANDROID_UNUSED_RESULT__
+  #else
+  #define __ANDROID_UNUSED_RESULT__  __attribute__((warn_unused_result))
+#endif
 // A smart pointer that deletes the given pointer on destruction.
 // Equivalent to C++0x's std::unique_ptr (a combination of boost::scoped_ptr
 // and boost::scoped_array).
@@ -67,7 +71,7 @@ public:
 
     // Returns the raw pointer and hands over ownership to the caller.
     // The pointer will not be deleted by UniquePtr.
-    T* release() __attribute__((warn_unused_result)) {
+    T* release() __ANDROID_UNUSED_RESULT__ {
         T* result = mPtr;
         mPtr = NULL;
         return result;
@@ -118,7 +122,7 @@ public:
     }
     T* get() const { return mPtr; }
 
-    T* release() __attribute__((warn_unused_result)) {
+    T* release() __ANDROID_UNUSED_RESULT__ {
         T* result = mPtr;
         mPtr = NULL;
         return result;
