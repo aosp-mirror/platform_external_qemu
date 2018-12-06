@@ -82,6 +82,10 @@ void RenderLibImpl::setDmaOps(emugl_dma_ops ops) {
     set_emugl_dma_unlock(ops.unlock);
 }
 
+void RenderLibImpl::setVmOps(const QAndroidVmOperations &vm_operations) {
+    set_emugl_vm_operations(vm_operations);
+}
+
 void* RenderLibImpl::getGL(void) {
     return &s_gles2;
 }

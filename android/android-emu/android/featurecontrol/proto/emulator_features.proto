@@ -3,7 +3,7 @@ syntax = "proto2";
 package emulator_features;
 
 // Must match emulator's featurecontrol defs.
-// Next tag: 33
+// Next tag: 34
 enum Feature {
     GLPipeChecksum = 0;
     GrallocSync = 1;
@@ -12,6 +12,7 @@ enum Feature {
     GLAsyncSwap = 4;
     GLDMA = 5;
     GLDMA2 = 30;
+    GLDirectMem = 33;
     GLESDynamicVersion = 6;
 
     // Forced renderer enums

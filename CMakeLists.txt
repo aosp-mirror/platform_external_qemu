@@ -286,9 +286,11 @@ endif ()
 add_subdirectory(android)
 add_subdirectory(android-qemu2-glue)
 
+set(ANDROID_QEMU_COMMON_DEVICES "hw/pci/goldfish_address_space.c;hw/i386/pc_piix.c")
+
 # Darwin definitions
-set(ANDROID_QEMU_i386_STUBS_darwin-x86_64 "hw/i386/acpi-build.c;hw/i386/pc_piix.c")
-set(ANDROID_QEMU_arm_STUBS_darwin-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
+set(ANDROID_QEMU_i386_DEVICES_darwin-x86_64 "hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
+set(ANDROID_QEMU_arm_DEVICES_darwin-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
 android_target_compile_options(android-qemu-deps darwin-x86_64 INTERFACE
                                # Emit extra code to check for buffer overflows, such as stack smashing
                                # attacks. This is done by adding a guard variable to functions with
@@ -310,12 +312,12 @@ android_target_compile_definitions(android-qemu-deps darwin-x86_64 INTERFACE "-D
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE "-framework IOKit" "-framework CoreFoundation")
 
 # Windows x86 definitions
-set(ANDROID_QEMU_arm_STUBS_windows-x86 "hvf-stub.c;accel/stubs/hax-stub.c")
-set(ANDROID_QEMU_i386_STUBS_windows-x86 "hvf-stub.c;hw/i386/acpi-build.c;hw/i386/pc_piix.c")
-set(ANDROID_QEMU_arm_STUBS_windows-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
-set(ANDROID_QEMU_i386_STUBS_windows-x86_64 "hvf-stub.c;hw/i386/acpi-build.c;hw/i386/pc_piix.c")
-set(ANDROID_QEMU_arm_STUBS_windows_msvc-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
-set(ANDROID_QEMU_i386_STUBS_windows_msvc-x86_64 "hvf-stub.c;hw/i386/acpi-build.c;hw/i386/pc_piix.c")
+set(ANDROID_QEMU_arm_DEVICES_windows-x86 "hvf-stub.c;accel/stubs/hax-stub.c")
+set(ANDROID_QEMU_i386_DEVICES_windows-x86 "hvf-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
+set(ANDROID_QEMU_arm_DEVICES_windows-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
+set(ANDROID_QEMU_i386_DEVICES_windows-x86_64 "hvf-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
+set(ANDROID_QEMU_arm_DEVICES_windows_msvc-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
+set(ANDROID_QEMU_i386_DEVICES_windows_msvc-x86_64 "hvf-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
 android_target_compile_options(android-qemu-deps
                                windows_msvc
                                INTERFACE
@@ -342,8 +344,8 @@ android_target_compile_definitions(android-qemu-deps
                                    "-D__USE_MINGW_ANSI_STDIO=1")
 
 # Linux settings
-set(ANDROID_QEMU_i386_STUBS_linux-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c;hw/i386/acpi-build.c;hw/i386/pc_piix.c")
-set(ANDROID_QEMU_arm_STUBS_linux-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
+set(ANDROID_QEMU_i386_DEVICES_linux-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
+set(ANDROID_QEMU_arm_DEVICES_linux-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
 android_target_include_directories(android-qemu-deps linux-x86_64 INTERFACE linux-headers)
 android_target_compile_options(android-qemu-deps linux-x86_64 INTERFACE
                                # Emit extra code to check for buffer overflows, such as stack smashing
@@ -393,10 +395,10 @@ target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub android-qemu-de
 install(TARGETS qemu-img RUNTIME DESTINATION .)
 
 # Create the qemu targets.
-android_add_qemu_executable(i386 i386 x86 "${ANDROID_QEMU_i386_STUBS_${ANDROID_TARGET_TAG}}" i386)
-android_add_qemu_executable(x86_64 x86_64 x86_64 "${ANDROID_QEMU_i386_STUBS_${ANDROID_TARGET_TAG}}" i386)
-android_add_qemu_executable(aarch64 aarch64 arm64 "${ANDROID_QEMU_arm_STUBS_${ANDROID_TARGET_TAG}}" arm)
-android_add_qemu_executable(armel arm arm "${ANDROID_QEMU_arm_STUBS_${ANDROID_TARGET_TAG}}" arm)
+android_add_qemu_executable(i386 i386 x86 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}" i386)
+android_add_qemu_executable(x86_64 x86_64 x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}" i386)
+android_add_qemu_executable(aarch64 aarch64 arm64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}" arm)
+android_add_qemu_executable(armel arm arm "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}" arm)
 
 # The tests currently work on linux only.
 if(ANDROID_TARGET_TAG MATCHES "linux.*")
