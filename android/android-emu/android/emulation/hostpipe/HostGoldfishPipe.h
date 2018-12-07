@@ -60,6 +60,10 @@ public:
     // flags.
     void setWakeCallback(void* pipe, std::function<void(int)> callback);
 
+    // Callbacks for AndroidPipeHwFuncs.
+    static void resetPipeCallback(void* hwpipe, void* internal_pipe);
+    static void closeFromHostCallback(void* hwpipe);
+    static void signalWakeCallback(void* hwpipe, unsigned wakes);
 private:
     void initialize();
     // Opens a new pipe connection, returns a pointer to the host connector
@@ -86,11 +90,6 @@ private:
     void closeHwPipe(void* hwpipe);
     // Wake a hwpipe.
     void signalWake(void* hwpipe, int wakes);
-
-    // Callbacks for AndroidPipeHwFuncs.
-    static void resetPipeCallback(void* hwpipe, void* internal_pipe);
-    static void closeFromHostCallback(void* hwpipe);
-    static void signalWakeCallback(void* hwpipe, unsigned wakes);
 
     uintptr_t mNextHwPipe = 1;
 
