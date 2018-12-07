@@ -208,14 +208,15 @@ void HostGoldfishPipeDevice::setWakeCallback(
     }
 }
 
+static const AndroidPipeHwFuncs sHostGoldfishPipeHwFuncs = {
+    &HostGoldfishPipeDevice::resetPipeCallback,
+    &HostGoldfishPipeDevice::closeFromHostCallback,
+    &HostGoldfishPipeDevice::signalWakeCallback,
+};
+
 void HostGoldfishPipeDevice::initialize() {
     if (mInitialized) return;
-    const AndroidPipeHwFuncs funcs = {
-            &HostGoldfishPipeDevice::resetPipeCallback,
-            &HostGoldfishPipeDevice::closeFromHostCallback,
-            &HostGoldfishPipeDevice::signalWakeCallback,
-    };
-    android_pipe_set_hw_funcs(&funcs);
+    android_pipe_set_hw_funcs(&sHostGoldfishPipeHwFuncs);
     AndroidPipe::Service::resetAll();
     AndroidPipe::initThreading(android::HostVmLock::getInstance());
     mInitialized = true;
