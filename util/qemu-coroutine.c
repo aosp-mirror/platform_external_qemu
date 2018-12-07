@@ -56,6 +56,7 @@ static void coroutine_pool_cleanup(Notifier *n, void *value)
 
 Coroutine *qemu_coroutine_create(CoroutineEntry *entry, void *opaque)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     Coroutine *co = NULL;
 
     if (CONFIG_COROUTINE_POOL) {
@@ -86,6 +87,7 @@ Coroutine *qemu_coroutine_create(CoroutineEntry *entry, void *opaque)
 
     if (!co) {
         co = qemu_coroutine_new();
+        fprintf(stderr, "%s: created coroutine %p\n", __func__, co);
     }
 
     co->entry = entry;
@@ -158,6 +160,7 @@ void qemu_aio_coroutine_enter(AioContext *ctx, Coroutine *co)
          */
         smp_wmb();
 
+        fprintf(stderr, "%s: switch from co %p to %p\n", __func__, from, to);
         ret = qemu_coroutine_switch(from, to, COROUTINE_ENTER);
 
         /* Queued coroutines are run depth-first; previously pending coroutines
