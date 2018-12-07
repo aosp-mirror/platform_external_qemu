@@ -76,7 +76,10 @@ aosp_dir_parse_option
 
 option_parse "$@"
 
-
+echo "${RED}*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*${RESET}"
+echo "${RED}*-* DEPRECATION WARNING, WE ARE TRANSITIONING TO PYTHON BASED BUILD SCRIPTS *-*${RESET}"
+echo "${RED}*-* see: ${GREEN} python android/build/cmake.py --helpfull ${RED}                         *-*${RESET}"
+echo "${RED}*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*${RESET}"
 
 # Some sanity checks.
 if [ "$OPTION_MINGW" -a "$OPTION_MSVC" ]; then
@@ -102,7 +105,7 @@ case $(get_build_os) in
         CMAKE=$AOSP_DIR/prebuilts/cmake/linux-x86/bin/cmake
         # On linux we can use the shipped ninja version
         if [ "$OPTION_GENERATOR" = "auto" ]; then
-           OPTION_GENERATOR=ninja 
+           OPTION_GENERATOR=ninja
         fi
         ;;
     darwin)
@@ -182,5 +185,10 @@ run eval $CMAKE \
        -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN \
        -DOPTION_CRASHUPLOAD=$OPTION_CRASHUPLOAD \
        $CMAKE_PARAMS
+
+echo "${RED}*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*${RESET}"
+echo "${RED}*-* DEPRECATION WARNING, WE ARE TRANSITIONING TO PYTHON BASED BUILD SCRIPTS *-*${RESET}"
+echo "${RED}*-* see: ${GREEN} python android/build/cmake.py --helpfull ${RED}                         *-*${RESET}"
+echo "${RED}*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*${RESET}"
 
 echo "Ready to go. Type ${GREEN}'${OPTION_GENERATOR} -C ${OPTION_OUT_DIR}'${RESET} to build emulator, and ${GREEN}'${OPTION_GENERATOR} -C ${OPTION_OUT_DIR} tests'${RESET} to run the unit tests."
