@@ -56,6 +56,7 @@ static void coroutine_pool_cleanup(Notifier *n, void *value)
 
 Coroutine *qemu_coroutine_create(CoroutineEntry *entry, void *opaque)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     Coroutine *co = NULL;
 
     if (CONFIG_COROUTINE_POOL) {
@@ -86,6 +87,9 @@ Coroutine *qemu_coroutine_create(CoroutineEntry *entry, void *opaque)
 
     if (!co) {
         co = qemu_coroutine_new();
+        fprintf(stderr, "%s: created coroutine %p\n", __func__, co);
+    } else {
+        fprintf(stderr, "%s: use existing co %p\n", __func__, co);
     }
 
     co->entry = entry;
@@ -96,18 +100,23 @@ Coroutine *qemu_coroutine_create(CoroutineEntry *entry, void *opaque)
 
 static void coroutine_delete(Coroutine *co)
 {
+    fprintf(stderr, "%s: delete co %p\n", __func__, co);
+    qemu_coroutine_switchback(co);
     co->caller = NULL;
+
 
     if (CONFIG_COROUTINE_POOL) {
         if (release_pool_size < POOL_BATCH_SIZE * 2) {
             QSLIST_INSERT_HEAD_ATOMIC(&release_pool, co, pool_next);
             atomic_inc(&release_pool_size);
+            fprintf(stderr, "%s: added to release pool\n", __func__);
             return;
         }
         CoroutinePool* pool = QEMU_THREAD_LOCAL_GET_PTR(co_alloc_pool);
         if (pool->size < POOL_BATCH_SIZE) {
             QSLIST_INSERT_HEAD(&pool->pool, co, pool_next);
             pool->size++;
+            fprintf(stderr, "%s: added to release pool (increased pool size)\n", __func__);
             return;
         }
     }
@@ -158,6 +167,7 @@ void qemu_aio_coroutine_enter(AioContext *ctx, Coroutine *co)
          */
         smp_wmb();
 
+        fprintf(stderr, "%s: switch from co %p to %p\n", __func__, from, to);
         ret = qemu_coroutine_switch(from, to, COROUTINE_ENTER);
 
         /* Queued coroutines are run depth-first; previously pending coroutines

@@ -70,6 +70,7 @@ struct Coroutine {
 };
 
 Coroutine *qemu_coroutine_new(void);
+void qemu_coroutine_switchback(Coroutine *co);
 void qemu_coroutine_delete(Coroutine *co);
 CoroutineAction qemu_coroutine_switch(Coroutine *from, Coroutine *to,
                                       CoroutineAction action);
