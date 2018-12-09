@@ -251,8 +251,12 @@ function(android_target_dependency RUN_TARGET TARGET_TAG RUN_TARGET_DEPENDENCIES
 
     # Generate the library, and have ${RUN_TARGET} depend on it.
     android_log("add_library(${RUN_TARGET_DEPENDENCIES} ${DEP_SOURCES} ${ANDROID_QEMU2_TOP_DIR}/dummy.c)")
-    set_source_files_properties(${DEP_SOURCES} PROPERTIES GENERATED TRUE)
-    add_library(${RUN_TARGET_DEPENDENCIES} ${DEP_SOURCES} ${ANDROID_QEMU2_TOP_DIR}/dummy.c)
+    add_library(${RUN_TARGET_DEPENDENCIES} ${ANDROID_QEMU2_TOP_DIR}/dummy.c)
+    if(DEP_SOURCES)
+      # This causes the dummy file in this target to depend on all the files we are going to copy.
+      # Without them ending up in the library.
+      set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/dummy.c PROPERTIES OBJECT_DEPENDS "${DEP_SOURCES}")
+    endif()
     target_link_libraries(${RUN_TARGET} PRIVATE ${RUN_TARGET_DEPENDENCIES})
   endif()
 endfunction()
