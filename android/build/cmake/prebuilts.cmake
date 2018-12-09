@@ -12,7 +12,7 @@
 # This contains a set of definitions to make working with prebuilts easier and manageable.
 
 set(PREBUILT_COMMON "BLUEZ;LZ4")
-if (NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
+if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
   list(APPEND PREBUILT_COMMON "X264")
 endif()
 
@@ -126,22 +126,21 @@ function(internal_android_install_file SRC DST_DIR)
     android_log(STATUS "install(PROGRAMS ${SRC} ${REAL_SRC} DESTINATION ${DST_DIR})")
     install(PROGRAMS ${SRC} DESTINATION ${DST_DIR})
     # Check if we have a symlink
-    if (NOT ${SRC} STREQUAL ${REAL_SRC})
+    if(NOT ${SRC} STREQUAL ${REAL_SRC})
       android_log("${SRC} ==> ${REAL_SRC}")
       install(PROGRAMS ${REAL_SRC} DESTINATION ${DST_DIR})
     endif()
   else()
     android_log("install(FILES ${SRC} ${REAL_SRC} DESTINATION ${DST_DIR})")
     install(FILES ${SRC} DESTINATION ${DST_DIR})
-    if (NOT ${SRC} STREQUAL ${REAL_SRC})
+    if(NOT ${SRC} STREQUAL ${REAL_SRC})
       android_log("${SRC} ==> ${REAL_SRC}")
       install(FILES ${REAL_SRC} DESTINATION ${DST_DIR})
     endif()
   endif()
 endfunction()
 
-# Installs the given dependency, this will make it part of the 
-# final release.
+# Installs the given dependency, this will make it part of the final release.
 function(android_install_dependency TARGET_TAG INSTALL_DEPENDENCIES)
   if(TARGET_TAG STREQUAL "${ANDROID_TARGET_TAG}" OR TARGET_TAG STREQUAL "all")
     # Link to existing target if there.
@@ -150,7 +149,7 @@ function(android_install_dependency TARGET_TAG INSTALL_DEPENDENCIES)
     endif()
     get_target_property(FILE_LIST ${INSTALL_DEPENDENCIES} SOURCES)
     foreach(FNAME ${FILE_LIST})
-      if (NOT FNAME MATCHES ".*dummy.c")
+      if(NOT FNAME MATCHES ".*dummy.c")
         string(REPLACE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/" "" DST_FILE ${FNAME})
         get_filename_component(DST_DIR "${DST_FILE}" DIRECTORY)
         internal_android_install_file(${FNAME} ${DST_DIR})
@@ -172,7 +171,6 @@ endfunction()
 # For example: set(MY_FOO_DEPENDENCIES # copy from /tmp/a/b.txt to lib/some/dir/c.txt "/tmp/a/b.txt>lib/some/dir/c.txt;"
 # # recursively copy /tmp/dirs to lib/x lib/some/dir/c.txt "/tmp/dirs/*>>lib/x")
 #
-# 
 # Note that this relies on every binary being binplaced in the root, which implies that this will not work with every
 # generator.
 #
@@ -196,6 +194,8 @@ function(android_target_dependency RUN_TARGET TARGET_TAG RUN_TARGET_DEPENDENCIES
     endif()
 
     # Okay let's construct our target.
+    add_library(${RUN_TARGET_DEPENDENCIES} ${ANDROID_QEMU2_TOP_DIR}/dummy.c)
+
     set(DEPENDENCIES "${${RUN_TARGET_DEPENDENCIES}}")
     set(DEP_SOURCES "")
     list(REMOVE_DUPLICATES DEPENDENCIES)
@@ -219,15 +219,21 @@ function(android_target_dependency RUN_TARGET TARGET_TAG RUN_TARGET_DEPENDENCIES
         set(DEST_DIR "${CMAKE_BINARY_DIR}/${DST}")
         foreach(FNAME ${GLOBBED})
           string(REPLACE "${SRC_DIR}" "${DEST_DIR}" DEST_FILE "${FNAME}")
-          list(APPEND DEST_SRC ${DEST_FILE})
-          list(APPEND DEP_SOURCES ${DEST_FILE})
-          endforeach()
+          if(DEST_FILE MATCHES ".*[O|o][B|b][J|j]" AND MSVC)
+            # We don't want to expose .OBJ files to the MSVC linker, so we will post copy those.
+            message(
+              STATUS "Marking ${DEST_FILE} as post copy for windows. Modifications to this file will not be detected.")
+          else()
+            list(APPEND DEST_SRC ${DEST_FILE})
+            target_sources(${RUN_TARGET_DEPENDENCIES} PRIVATE ${DEST_FILE})
+          endif()
+        endforeach()
 
         # DEST_SRC will contain all the globbed files that will be copied over with rsync, leaving the symlinks to our
         # local files intact (needed for macos)
         add_custom_command(OUTPUT ${DEST_SRC}
                                   # Make sure the directory exists
-                           COMMAND mkdir -p $$\( dirname "${CMAKE_BINARY_DIR}/${DST}" \)
+                           COMMAND mkdir -p $$\(dirname "${CMAKE_BINARY_DIR}/${DST}" \)
                                    # And copy all, leaving the symlinks intact.
                            COMMAND rsync -rl "${SRC}" "${CMAKE_BINARY_DIR}/${DST}")
       else()
@@ -243,16 +249,20 @@ function(android_target_dependency RUN_TARGET TARGET_TAG RUN_TARGET_DEPENDENCIES
         endif()
 
         set(DEST_FILE "${CMAKE_BINARY_DIR}/${DST}")
-        add_custom_command(OUTPUT "${DEST_FILE}"
-                           COMMAND ${CMAKE_COMMAND} -E copy_if_different "${SRC}" "${CMAKE_BINARY_DIR}/${DST}")
-        list(APPEND DEP_SOURCES ${DEST_FILE})
+        if(DEST_FILE MATCHES ".*[O|o][B|b][J|j]" AND MSVC)
+          # We don't want to expose .OBJ files to the MSVC linker, so we will post copy those.
+          message(
+            STATUS "Marking ${DEST_FILE} as post copy for windows. Modifications to this file will not be detected.")
+          add_custom_command(TARGET ${RUN_TARGET_DEPENDENCIES} POST_BUILD
+                             COMMAND ${CMAKE_COMMAND} -E copy_if_different "${SRC}" "${DEST_FILE}")
+        else()
+          target_sources(${RUN_TARGET_DEPENDENCIES} PRIVATE ${DEST_FILE})
+          add_custom_command(OUTPUT "${DEST_FILE}"
+                             COMMAND ${CMAKE_COMMAND} -E copy_if_different "${SRC}" "${DEST_FILE}")
+
+        endif()
       endif()
     endforeach()
-
-    # Generate the library, and have ${RUN_TARGET} depend on it.
-    android_log("add_library(${RUN_TARGET_DEPENDENCIES} ${DEP_SOURCES} ${ANDROID_QEMU2_TOP_DIR}/dummy.c)")
-    set_source_files_properties(${DEP_SOURCES} PROPERTIES GENERATED TRUE)
-    add_library(${RUN_TARGET_DEPENDENCIES} ${DEP_SOURCES} ${ANDROID_QEMU2_TOP_DIR}/dummy.c)
     target_link_libraries(${RUN_TARGET} PRIVATE ${RUN_TARGET_DEPENDENCIES})
   endif()
 endfunction()
