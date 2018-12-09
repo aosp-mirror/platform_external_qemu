@@ -2822,6 +2822,7 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
         if (ctx->getMajorVersion() >= 3 && ctx->getMinorVersion() >= 1) {
             ctx->dispatcher().glLinkProgram(globalProgramName);
             ctx->dispatcher().glGetProgramiv(globalProgramName,GL_LINK_STATUS,&linkStatus);
+            programData->setHostLinkStatus(linkStatus);
         } else {
             if (vertexShader != 0 && fragmentShader!=0) {
                 auto fragObjData = ctx->shareGroup()->getObjectData(
