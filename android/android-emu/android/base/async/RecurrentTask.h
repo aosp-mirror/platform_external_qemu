@@ -66,11 +66,16 @@ public:
 
     ~RecurrentTask() { stopAndWait(); }
 
+    void setIntervalMs(int interval) {
+        mTaskIntervalMs = interval;
+    }
+
     void start(bool runImmediately = false) {
         {
             AutoLock lock(mLock);
             mInFlight = true;
         }
+        if (!mTimer) { fprintf(stderr, "%s; oops no timer\n", __func__); }
         mTimer->startRelative(runImmediately ? 0 : mTaskIntervalMs);
     }
 
@@ -147,7 +152,7 @@ protected:
 private:
     Looper* const mLooper;
     const TaskFunction mFunction;
-    const int mTaskIntervalMs;
+    int mTaskIntervalMs;
     bool mInTimerCallback = false;
     bool mInFlight = false;
     const std::unique_ptr<Looper::Timer> mTimer;
