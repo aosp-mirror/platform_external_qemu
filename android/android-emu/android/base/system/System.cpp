@@ -92,13 +92,14 @@ CF_EXPORT const CFStringRef _kCFSystemVersionProductVersionKey;
 #include "msvc-posix.h"
 #include "dirent.h"
 #else
-#include <sys/time.h>
 #include <unistd.h>
 #endif
 
 #if defined (__linux__)
 #include <fstream>
 #include <string>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <sys/vfs.h>
 #endif
 
@@ -2681,6 +2682,7 @@ void System::disableCopyOnWriteForPath(StringView path) {
 
 #ifdef __APPLE__
 void disableAppNap_macImpl(void);
+void cpuUsageCurrentThread_macImpl(uint64_t* wall, uint64_t* user, uint64_t* sys);
 #endif
 
 // static
@@ -2688,6 +2690,54 @@ void System::disableAppNap() {
 #ifdef __APPLE__
     disableAppNap_macImpl();
 #endif
+}
+
+// static
+CpuTime System::cpuTime() {
+    uint64_t wall_time;
+    uint64_t user_time;
+    uint64_t system_time;
+#ifdef __APPLE__
+    cpuUsageCurrentThread_macImpl(&wall_time, &user_time, &system_time);
+#else // TODO
+
+    wall_time = System::get()->getHighResTimeUs();
+
+#ifdef __linux__
+    struct rusage usage;
+    getrusage(RUSAGE_THREAD, &usage);
+    user_time =
+        usage.ru_utime.tv_sec * 1000000ULL +
+        usage.ru_utime.tv_usec;
+    system_time =
+        usage.ru_stime.tv_sec * 1000000ULL +
+        usage.ru_stime.tv_usec;
+#else // Windows
+    FILETIME creation_time_struct;
+    FILETIME exit_time_struct;
+    FILETIME kernel_time_struct;
+    FILETIME user_time_struct;
+    GetThreadTimes(
+        GetCurrentThread(),
+        &creation_time_struct,
+        &exit_time_struct,
+        &kernel_time_struct,
+        &user_time_struct);
+    (void)creation_time_struct;
+    (void)exit_time_struct;
+    uint64_t user_time_100ns =
+        user_time.dwLowDateTime |
+        (user_time.dwHighDateTime << 32);
+    uint64_t system_time_100ns =
+        kernel_time.dwLowDateTime |
+        (kernel_time.dwHighDateTime << 32);
+    user_time = user_time_100ns / 10;
+    system_time = system_time_100ns / 10;
+#endif
+
+#endif
+
+    return { wall_time, user_time, system_time };
 }
 
 }  // namespace base
