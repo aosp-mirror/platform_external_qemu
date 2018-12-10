@@ -24,21 +24,21 @@
 
 namespace android_studio {
 
-class EmulatorMemoryUsage;
+class EmulatorPerformanceStats;
 
 } // namespace android_studio
 
 namespace android {
 namespace metrics {
 
-// A MemoryUsageReporter is an object that runs in the background to track
-// memory usage.
-class MemoryUsageReporter final
-        : public std::enable_shared_from_this<MemoryUsageReporter> {
+// A PerfStatReporter is an object that runs in the background to track
+// usage of various resources such as RAM and CPU usage.
+class PerfStatReporter final
+        : public std::enable_shared_from_this<PerfStatReporter> {
 public:
-    using Ptr = std::shared_ptr<MemoryUsageReporter>;
+    using Ptr = std::shared_ptr<PerfStatReporter>;
 
-    // Entry point to create a MemoryUsageReporter
+    // Entry point to create a PerfStatReporter
     // Objects of this type are managed via shared_ptr.
     static Ptr create(
             android::base::Looper* looper,
@@ -47,27 +47,26 @@ public:
     void start();
     void stop();
 
-    ~MemoryUsageReporter();
-
-    static void fillProto(const base::System::MemUsage& memUsage,
-                          android_studio::EmulatorMemoryUsage* memUsageProto);
+    ~PerfStatReporter();
 
 protected:
     // Use |create| to correctly initialize the shared_ptr count.
-    MemoryUsageReporter(android::base::Looper* looper,
-                       android::base::Looper::Duration checkIntervalMs);
+    PerfStatReporter(android::base::Looper* looper,
+                     android::base::Looper::Duration checkIntervalMs);
 
 private:
-    bool checkMemoryUsage();
+    bool checkPerfStats();
+    void fillProto(android_studio::EmulatorPerformanceStats* perfStatProto);
 
     android::base::Looper* const mLooper;
     const android::base::Looper::Duration mCheckIntervalMs;
     android::base::RecurrentTask mRecurrentTask;
 
+    // TODO: Add more perf stats here.
     android::base::System::MemUsage mCurrUsage;
     android::base::Lock mLock;
 
-    DISALLOW_COPY_AND_ASSIGN(MemoryUsageReporter);
+    DISALLOW_COPY_AND_ASSIGN(PerfStatReporter);
 };
 
 }  // namespace base

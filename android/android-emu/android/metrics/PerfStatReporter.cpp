@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/metrics/MemoryUsageReporter.h"
+#include "android/metrics/PerfStatReporter.h"
 
 #include "android/CommonReportedInfo.h"
 #include "android/metrics/PeriodicReporter.h"
@@ -34,14 +34,14 @@ using android::base::System;
 using std::shared_ptr;
 
 // static
-MemoryUsageReporter::Ptr MemoryUsageReporter::create(
+PerfStatReporter::Ptr PerfStatReporter::create(
         android::base::Looper* looper,
         android::base::Looper::Duration checkIntervalMs) {
-    auto inst = Ptr(new MemoryUsageReporter(looper, checkIntervalMs));
+    auto inst = Ptr(new PerfStatReporter(looper, checkIntervalMs));
     return inst;
 }
 
-MemoryUsageReporter::MemoryUsageReporter(
+PerfStatReporter::PerfStatReporter(
         android::base::Looper* looper,
         android::base::Looper::Duration checkIntervalMs)
     : mLooper(looper),
@@ -50,7 +50,7 @@ MemoryUsageReporter::MemoryUsageReporter(
       // ownership. mRecurrentTask promises to cancel any outstanding tasks when
       // it's destructed.
       mRecurrentTask(looper,
-                     [this]() { return checkMemoryUsage(); },
+                     [this]() { return checkPerfStats(); },
                      mCheckIntervalMs) {
 
     // Also start up a periodic reporter that takes whatever is in the
@@ -61,23 +61,12 @@ MemoryUsageReporter::MemoryUsageReporter(
 
             if (sStopping) return true;
 
-            android_studio::EmulatorMemoryUsage* memUsageProto =
-                event->mutable_emulator_performance_stats()->add_memory_usage();
+            android_studio::EmulatorPerformanceStats* perfStatProto =
+                event->mutable_emulator_performance_stats();
 
-            android::base::AutoLock lock(mLock);
-            System::MemUsage forMetrics = mCurrUsage;
-            lock.unlock();
+            fillProto(perfStatProto);
 
-            fillProto(forMetrics, memUsageProto);
-
-            {
-                // TODO: Move performance stats setter to a separate location
-                // once we are tracking more performance stats
-                android_studio::EmulatorPerformanceStats forCommonInfo =
-                    event->emulator_performance_stats();
-                CommonReportedInfo::setPerformanceStats(
-                    &forCommonInfo);
-            }
+            CommonReportedInfo::setPerformanceStats(perfStatProto);
             return true;
         });
 
@@ -86,31 +75,35 @@ MemoryUsageReporter::MemoryUsageReporter(
     // |this|. We can't guarantee that until the constructor call returns.
 }
 
-MemoryUsageReporter::~MemoryUsageReporter() {
+PerfStatReporter::~PerfStatReporter() {
     stop();
 }
 
-void MemoryUsageReporter::start() {
+void PerfStatReporter::start() {
     mRecurrentTask.start();
 }
 
-void MemoryUsageReporter::stop() {
+void PerfStatReporter::stop() {
     sStopping = true;
     mRecurrentTask.stopAndWait();
 }
 
-// static
-void MemoryUsageReporter::fillProto(const System::MemUsage& memUsage,
-                                    android_studio::EmulatorMemoryUsage* memUsageProto) {
-    memUsageProto->set_resident_memory(memUsage.resident);
-    memUsageProto->set_resident_memory_max(memUsage.resident_max);
-    memUsageProto->set_virtual_memory(memUsage.virt);
-    memUsageProto->set_virtual_memory_max(memUsage.virt_max);
-    memUsageProto->set_total_phys_memory(memUsage.total_phys_memory);
-    memUsageProto->set_total_page_file(memUsage.total_page_file);
+void PerfStatReporter::fillProto(android_studio::EmulatorPerformanceStats* perfStatProto) {
+
+    android::base::AutoLock lock(mLock);
+    System::MemUsage memUsageForMetrics = mCurrUsage;
+    lock.unlock();
+
+    auto memUsageProto = perfStatProto->add_memory_usage();
+    memUsageProto->set_resident_memory(memUsageForMetrics.resident);
+    memUsageProto->set_resident_memory_max(memUsageForMetrics.resident_max);
+    memUsageProto->set_virtual_memory(memUsageForMetrics.virt);
+    memUsageProto->set_virtual_memory_max(memUsageForMetrics.virt_max);
+    memUsageProto->set_total_phys_memory(memUsageForMetrics.total_phys_memory);
+    memUsageProto->set_total_page_file(memUsageForMetrics.total_page_file);
 }
 
-bool MemoryUsageReporter::checkMemoryUsage() {
+bool PerfStatReporter::checkPerfStats() {
     System::MemUsage usage = System::get()->getMemUsage();
     uint64_t uptime = System::get()->getProcessTimes().wallClockMs;
 
