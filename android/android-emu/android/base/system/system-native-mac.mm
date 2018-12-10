@@ -22,6 +22,10 @@
 #import <Foundation/Foundation.h>
 #import <Foundation/NSProcessInfo.h>
 
+#include <mach/mach_init.h>
+#include <mach/thread_act.h>
+#include <mach/mach_port.h>
+
 #include <stdlib.h>
 #include <sys/stat.h>
 
@@ -37,6 +41,57 @@ void disableAppNap_macImpl(void) {
        beginActivityWithOptions:0x00FFFFFF
        reason:@"Not sleepy and don't want to nap"];
    }
+}
+
+struct mac_cpu_thread_info {
+    uint64_t wall_time_us;
+    uint64_t user_time_us;
+    uint64_t sys_time_us;
+};
+
+// based on https://stackoverflow.com/questions/13893134/get-current-pthread-cpu-usage-mac-os-x
+float cpuUsageCurrentThread_macImpl(void) {
+    thread_local mac_cpu_thread_info prev_info;
+    thread_local mac_cpu_thread_info curr_info;
+    kern_return_t kr;
+    mach_msg_type_number_t count;
+    mach_port_t thread;
+    thread_basic_info_data_t info;
+    float usagePart = 0.0f;
+
+    thread = mach_thread_self();
+    curr_info.wall_time_us = System::get()->getUnixTimeUs();
+    Duration elapsed = curr_info.wall_time_us - prev_info.wall_time_us;
+
+    count = THREAD_BASIC_INFO_COUNT;
+    kr = thread_info(
+        thread,
+        THREAD_BASIC_INFO,
+        (thread_info_t)&info,
+        &count);
+
+    if (kr == KERN_SUCCESS && (info.flags & TH_FLAGS_IDLE) == 0) {
+        curr_info.user_time_us =
+            info.user_time.seconds * 1000000ULL +
+            info.user_time.microseconds;
+        curr_info.sys_time_us =
+            info.system_time.seconds * 1000000ULL +
+            info.system_time.microseconds;
+    } else {
+        curr_info.user_time_us = prev_info.user_time_us;
+        curr_info.sys_time_us = prev_info.sys_time_us;
+    }
+
+    uint64_t user_time_elapsed =
+        curr_info.user_time_us - prev_info.user_time_us;
+    uint64_t sys_time_elapsed =
+        curr_info.sys_time_us - prev_info.sys_time_us;
+
+    usagePart = (float)(user_time_elapsed + sys_time_elapsed) / (float)elapsed;
+    prev_info = curr_info;
+    mach_port_deallocate(mach_task_self(), thread);
+
+    return usagePart;
 }
 
 Optional<System::DiskKind> nativeDiskKind(int st_dev) {

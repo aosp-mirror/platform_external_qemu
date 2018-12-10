@@ -463,6 +463,9 @@ public:
     // On other platforms, this function doesn't do anything.
     static void disableAppNap();
 
+    // CPU usage tracking
+    static float cpuUsageCurrentThread();
+
 protected:
     size_t mMemorySize = 0;
 

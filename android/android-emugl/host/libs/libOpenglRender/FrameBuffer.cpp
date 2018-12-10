@@ -1803,9 +1803,10 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
         if (currTime - m_statsStartTime >= 1000) {
             float dt = (float)(currTime - m_statsStartTime) / 1000.0f;
             auto usage = System::get()->getMemUsage();
-            printf("FPS: %5.3f resident memory: %f mb\n",
+            printf("FPS: %5.3f resident memory: %f mb. current thread cpu usage: %f\n",
                    (float)m_statsNumFrames / dt,
-                   (float)usage.resident / 1048576.0f);
+                   (float)usage.resident / 1048576.0f,
+                   System::get()->cpuUsageCurrentThread());
             m_statsStartTime = currTime;
             m_statsNumFrames = 0;
         }

@@ -2681,12 +2681,22 @@ void System::disableCopyOnWriteForPath(StringView path) {
 
 #ifdef __APPLE__
 void disableAppNap_macImpl(void);
+float cpuUsageCurrentThread_macImpl(void);
 #endif
 
 // static
 void System::disableAppNap() {
 #ifdef __APPLE__
     disableAppNap_macImpl();
+#endif
+}
+
+// static
+float System::cpuUsageCurrentThread() {
+#ifdef __APPLE__
+    return cpuUsageCurrentThread_macImpl();
+#else // TODO
+    return 0.0f;
 #endif
 }
 

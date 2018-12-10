@@ -90,6 +90,7 @@ void HangDetector::LooperWatcher::cancelHangCheck() {
 void HangDetector::LooperWatcher::process(const HangCallback& hangCallback) {
     base::AutoLock l(*mLock);
 
+    fprintf(stderr, "%s: usage: %f\n", __func__, base::System::get()->cpuUsageCurrentThread());
     const auto now = base::System::get()->getUnixTimeUs();
     if (mIsTaskRunning) {
         // Heuristic: If the looper watcher itself took much longer than
