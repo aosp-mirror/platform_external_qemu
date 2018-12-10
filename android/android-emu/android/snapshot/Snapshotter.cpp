@@ -20,9 +20,9 @@
 #include "android/emulation/VmLock.h"
 #include "android/globals.h"
 #include "android/metrics/AdbLivenessChecker.h"
-#include "android/metrics/MemoryUsageReporter.h"
 #include "android/metrics/metrics.h"
 #include "android/metrics/MetricsReporter.h"
+#include "android/metrics/PerfStatReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/metrics/StudioConfig.h"
 #include "android/opengl/emugl_config.h"
@@ -370,7 +370,7 @@ void Snapshotter::fillSnapshotMetrics(pb::AndroidStudioEvent* event,
     // Also report some common host machine stats so we can correlate performance with
     // host machine config.
     auto memUsageProto = event->mutable_emulator_performance_stats()->add_memory_usage();
-    metrics::MemoryUsageReporter::fillProto(stats.memUsage, memUsageProto);
+    metrics::PerfStatReporter::fillProto(stats.memUsage, memUsageProto);
     android_metrics_fill_common_info(true /* opengl alive */, event);
 }
 

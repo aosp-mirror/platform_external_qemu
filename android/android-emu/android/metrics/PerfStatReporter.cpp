@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/metrics/MemoryUsageReporter.h"
+#include "android/metrics/PerfStatReporter.h"
 
 #include "android/CommonReportedInfo.h"
 #include "android/metrics/PeriodicReporter.h"
@@ -34,14 +34,14 @@ using android::base::System;
 using std::shared_ptr;
 
 // static
-MemoryUsageReporter::Ptr MemoryUsageReporter::create(
+PerfStatReporter::Ptr PerfStatReporter::create(
         android::base::Looper* looper,
         android::base::Looper::Duration checkIntervalMs) {
-    auto inst = Ptr(new MemoryUsageReporter(looper, checkIntervalMs));
+    auto inst = Ptr(new PerfStatReporter(looper, checkIntervalMs));
     return inst;
 }
 
-MemoryUsageReporter::MemoryUsageReporter(
+PerfStatReporter::PerfStatReporter(
         android::base::Looper* looper,
         android::base::Looper::Duration checkIntervalMs)
     : mLooper(looper),
@@ -86,21 +86,21 @@ MemoryUsageReporter::MemoryUsageReporter(
     // |this|. We can't guarantee that until the constructor call returns.
 }
 
-MemoryUsageReporter::~MemoryUsageReporter() {
+PerfStatReporter::~PerfStatReporter() {
     stop();
 }
 
-void MemoryUsageReporter::start() {
+void PerfStatReporter::start() {
     mRecurrentTask.start();
 }
 
-void MemoryUsageReporter::stop() {
+void PerfStatReporter::stop() {
     sStopping = true;
     mRecurrentTask.stopAndWait();
 }
 
 // static
-void MemoryUsageReporter::fillProto(const System::MemUsage& memUsage,
+void PerfStatReporter::fillProto(const System::MemUsage& memUsage,
                                     android_studio::EmulatorMemoryUsage* memUsageProto) {
     memUsageProto->set_resident_memory(memUsage.resident);
     memUsageProto->set_resident_memory_max(memUsage.resident_max);
@@ -110,7 +110,7 @@ void MemoryUsageReporter::fillProto(const System::MemUsage& memUsage,
     memUsageProto->set_total_page_file(memUsage.total_page_file);
 }
 
-bool MemoryUsageReporter::checkMemoryUsage() {
+bool PerfStatReporter::checkMemoryUsage() {
     System::MemUsage usage = System::get()->getMemUsage();
     uint64_t uptime = System::get()->getProcessTimes().wallClockMs;
 
