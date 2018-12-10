@@ -2681,6 +2681,7 @@ void System::disableCopyOnWriteForPath(StringView path) {
 
 #ifdef __APPLE__
 void disableAppNap_macImpl(void);
+void cpuUsageCurrentThread_macImpl(uint64_t* wall, uint64_t* user, uint64_t* sys);
 #endif
 
 // static
@@ -2688,6 +2689,19 @@ void System::disableAppNap() {
 #ifdef __APPLE__
     disableAppNap_macImpl();
 #endif
+}
+
+// static
+CpuTime System::cpuTime() {
+    uint64_t wall_time;
+    uint64_t user_time;
+    uint64_t system_time;
+#ifdef __APPLE__
+    cpuUsageCurrentThread_macImpl(&wall_time, &user_time, &system_time);
+#else // TODO
+#endif
+
+    return { wall_time, user_time, system_time };
 }
 
 }  // namespace base
