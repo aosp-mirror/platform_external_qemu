@@ -147,7 +147,7 @@ protected:
 private:
     Looper* const mLooper;
     const TaskFunction mFunction;
-    const int mTaskIntervalMs;
+    int mTaskIntervalMs;
     bool mInTimerCallback = false;
     bool mInFlight = false;
     const std::unique_ptr<Looper::Timer> mTimer;
