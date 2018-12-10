@@ -8,6 +8,8 @@ prebuilt(UUID)
 # Source configuration, the following set is shared amongst all targets
 set(android-emu-base_src
     android/base/ContiguousRangeMapper.cpp
+    android/base/CpuTime.cpp
+    android/base/CpuUsage.cpp
     android/base/Debug.cpp
     android/base/files/CompressingStream.cpp
     android/base/files/DecompressingStream.cpp
