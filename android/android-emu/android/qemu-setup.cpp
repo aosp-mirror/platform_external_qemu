@@ -14,6 +14,7 @@
 #include "android/android.h"
 #include "android/automation/AutomationController.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/CpuUsage.h"
 #include "android/boot-properties.h"
 #include "android/car.h"
 #include "android/car-cluster.h"
@@ -478,10 +479,14 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
 
     android::crashreport::CrashReporter::get()->hangDetector().addWatchedLooper(
                 android::base::ThreadLooper::get());
+    android::base::CpuUsage::get()->addLooper(
+                (int)android::base::CpuUsage::UsageArea::MainLoop,
+                android::base::ThreadLooper::get());
 
     return true;
 }
 
 void android_emulation_teardown() {
     android::automation::AutomationController::shutdown();
+    android::base::CpuUsage::get()->stop();
 }
