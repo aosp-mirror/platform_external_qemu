@@ -27,6 +27,20 @@ using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Lock;
 
+VKAPI_ATTR VkBool32 VKAPI_CALL MyDebugReportCallback(
+        VkDebugReportFlagsEXT       flags,
+        VkDebugReportObjectTypeEXT  objectType,
+        uint64_t                    object,
+        size_t                      location,
+        int32_t                     messageCode,
+        const char*                 pLayerPrefix,
+        const char*                 pMessage,
+        void*                       pUserData)
+{
+    fprintf(stderr, "dbg report: %s\n", pMessage);
+    return VK_FALSE;
+}
+
 class VkDecoderGlobalState::Impl {
 public:
     Impl() : m_vk(emugl::vkDispatch()) { }
@@ -262,6 +276,97 @@ public:
     }
 
 
+    VkResult on_vkCreateInstance(const VkInstanceCreateInfo* pCreateInfo,
+                                 const VkAllocationCallbacks* pAllocator,
+                                 VkInstance* pInstance) {
+
+        fprintf(stderr, "%s: layer %u ext %u\n", __func__,
+                pCreateInfo->enabledLayerCount,
+                pCreateInfo->enabledExtensionCount);
+        std::vector<const char*> editedLayers;
+
+        uint32_t layerCount;
+        m_vk->vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+        std::vector<VkLayerProperties> availableLayers(layerCount);
+        m_vk->vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+        for (uint32_t i = 0; i < layerCount; ++i) {
+            fprintf(stderr, "%s: layer name: %s\n", __func__, availableLayers[i].layerName);
+        }
+
+        for (uint32_t i = 0; i < pCreateInfo->enabledLayerCount; ++i) {
+            fprintf(stderr, "%s: user layer: %s\n", __func__, pCreateInfo->ppEnabledLayerNames[i]);
+            editedLayers.push_back(pCreateInfo->ppEnabledLayerNames[i]);
+        }
+
+          editedLayers.push_back("VK_LAYER_GOOGLE_threading");
+          editedLayers.push_back("VK_LAYER_LUNARG_parameter_validation");
+          editedLayers.push_back("VK_LAYER_LUNARG_object_tracker");
+          editedLayers.push_back("VK_LAYER_LUNARG_core_validation");
+          editedLayers.push_back("VK_LAYER_GOOGLE_unique_objects");
+
+
+        std::vector<const char*> editedExts;
+
+        for (uint32_t i = 0; i < pCreateInfo->enabledExtensionCount; ++i) {
+            fprintf(stderr, "%s: user ext: %s\n", __func__, pCreateInfo->ppEnabledExtensionNames[i]);
+            editedExts.push_back(pCreateInfo->ppEnabledExtensionNames[i]);
+        }
+
+        editedExts.push_back("VK_EXT_debug_report");
+
+        VkInstanceCreateInfo local_createInfo = {
+            VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+            pCreateInfo->pNext,
+            pCreateInfo->flags,
+            pCreateInfo->pApplicationInfo,
+            (uint32_t)editedLayers.size(),
+            editedLayers.data(),
+            (uint32_t)editedExts.size(),
+            editedExts.data(),
+        };
+
+        VkResult res = m_vk->vkCreateInstance(&local_createInfo, pAllocator, pInstance);
+
+        if (res == VK_SUCCESS) {
+
+            VkDebugReportCallbackCreateInfoEXT callback1 = {
+                VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,    // sType
+                NULL,                                                       // pNext
+                VK_DEBUG_REPORT_INFORMATION_BIT_EXT |
+                VK_DEBUG_REPORT_WARNING_BIT_EXT |
+                VK_DEBUG_REPORT_ERROR_BIT_EXT |
+                VK_DEBUG_REPORT_DEBUG_BIT_EXT,
+                &MyDebugReportCallback,                                      // pfnCallback
+                NULL                                                        // pUserData
+            };
+
+            VkDebugReportCallbackEXT callback;
+            PFN_vkCreateDebugReportCallbackEXT func =
+                (PFN_vkCreateDebugReportCallbackEXT)
+                m_vk->vkGetInstanceProcAddr(*pInstance, "vkCreateDebugReportCallbackEXT");
+            func(*pInstance, &callback1, nullptr, &callback);
+
+            AutoLock lock(mLock);
+            mDebugReportCallbacks[*pInstance] = callback;
+        } else {
+            fprintf(stderr, "%s: some other error\n", __func__);
+        }
+        return res;
+    }
+
+    void on_vkDestroyInstance(VkInstance instance, const VkAllocationCallbacks* pAllocator) {
+        AutoLock lock(mLock);
+        auto it = mDebugReportCallbacks.find(instance);
+        if (it != mDebugReportCallbacks.end()) {
+            PFN_vkDestroyDebugReportCallbackEXT func =
+                (PFN_vkDestroyDebugReportCallbackEXT)m_vk->vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT");
+           func(instance, it->second, nullptr);
+        }
+        m_vk->vkDestroyInstance(instance, pAllocator);
+    }
+
 private:
     // We always map the whole size on host.
     // This makes it much easier to implement
@@ -285,6 +390,8 @@ private:
         mPhysicalDeviceMemoryProperties;
 
     std::unordered_map<VkDeviceMemory, MappedMemoryInfo> mMapInfo;
+
+    std::unordered_map<VkInstance, VkDebugReportCallbackEXT> mDebugReportCallbacks;
 };
 
 VkDecoderGlobalState::VkDecoderGlobalState()
@@ -362,4 +469,15 @@ uint8_t* VkDecoderGlobalState::getMappedHostPointer(VkDeviceMemory memory) {
 
 VkDeviceSize VkDecoderGlobalState::getDeviceMemorySize(VkDeviceMemory memory) {
     return mImpl->getDeviceMemorySize(memory);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateInstance(
+        const VkInstanceCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkInstance* pInstance) {
+    return mImpl->on_vkCreateInstance(pCreateInfo, pAllocator, pInstance);
+}
+
+void VkDecoderGlobalState::on_vkDestroyInstance(VkInstance instance, const VkAllocationCallbacks* pAllocator) {
+    mImpl->on_vkDestroyInstance(instance, pAllocator);
 }
