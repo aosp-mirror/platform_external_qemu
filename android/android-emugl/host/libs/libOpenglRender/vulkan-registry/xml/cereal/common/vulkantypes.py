@@ -123,11 +123,6 @@ for h in HANDLE_TYPES:
         HANDLE_INFO[h] = \
             HandleInfo(h, "vkCreate" + h[2:], "vkDestroy" + h[2:])
 
-CUSTOM_CREATE_APIS = [
-    "vkAllocateMemory",
-    "vkCreateDevice",
-]
-
 EXCLUDED_APIS = [
     "vkEnumeratePhysicalDeviceGroups",
 ]
