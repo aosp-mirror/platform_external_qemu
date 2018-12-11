@@ -268,6 +268,12 @@ message AndroidStudioEvent {
   // set when kind = RUN_EVENT
   optional RunEvent run_event = 72;
 
+  // set when kind = NAV_EDITOR_EVENT
+  optional NavEditorEvent nav_editor_event = 73;
+
+  // set when kind = DIALOG_STATS
+  optional DialogStats dialog_stats = 74;
+
   enum EventCategory {
     // The event was not grouped into any specific category (default).
     NO_EVENT_CATEGORY = 0;
@@ -684,6 +690,15 @@ message AndroidStudioEvent {
 
     // Studio's LowMemoryWatcher triggered
     STUDIO_LOW_MEMORY_EVENT = 168;
+
+    // Project Structure Dialog repository search events.
+    PROJECT_STRUCTURE_DIALOG_REPOSITORIES_SEARCH = 169;
+
+    // Navigation Editor event
+    NAV_EDITOR_EVENT = 170;
+
+    // User took an action on a dialog (open or close)
+    DIALOG_STATS = 171;
   }
 
   // Represents different Performance Monitoring types.
@@ -1107,8 +1122,6 @@ message EmulatorFeatureFlagState {
     INTEL_PERFORMANCE_MONITORING_UNIT = 4;
     GL_ASYNC_SWAP = 5;
     GLDMA = 6;
-    GLDMA2 = 35;
-    GLDirectMem = 39;
     GLES_DYNAMIC_VERSION = 7;
     FORCE_ANGLE = 8;
     FORCE_SWIFTSHADER = 9;
@@ -1137,10 +1150,12 @@ message EmulatorFeatureFlagState {
     OFFWORLD = 31;
     OFFWORLD_DISABLE_SECURITY = 32;
     QUICKBOOT_FILE_BACKED = 33;
-    REFCOUNT_PIPE = 34;
-    HOST_COMPOSITION_V1 = 36;
-    ON_DEMAND_SNAPSHOT_LOAD = 37;
-    WIFI_CONFIGURABLE = 38;
+    REFCOUNT_PIPE=34;
+    GLDMA2 = 35;
+    HOST_COMPOSITION_V1=36;
+    ON_DEMAND_SNAPSHOT_LOAD=37;
+    WIFI_CONFIGURABLE=38;
+    GLDirectMem = 39;
     // Next tag: 40
   }
   // Which features were enabled by default or through the server-side config.
@@ -2259,6 +2274,8 @@ message GradleBuildProject {
     COM_ANDROID_BUILD_GRADLE_LINTPLUGIN = 52;
     COM_ANDROID_BUILD_GRADLE_REPORTINGPLUGIN = 53;
     COM_ANDROID_BUILD_GRADLE_TESTPLUGIN = 54;
+    ORG_GRADLE_BUILDINIT_PLUGINS_BUILDINITPLUGIN = 55;
+    ORG_GRADLE_BUILDINIT_PLUGINS_WRAPPERPLUGIN = 56;
   }
 }
 
@@ -3183,10 +3200,57 @@ message JvmDetails {
 
 // Details for an indexing operation.
 message IntellijIndexingStats {
+  // Major operations on indexes.
+  enum Operation {
+    UNKNOWN_OPERATION = 0;
+    MAP_INPUT = 1;
+    WRITE_LOCK = 2;
+    UPDATE_DATA = 3;
+    GET_DATA = 4;
+  }
+
+  // Details for a specific indexing operation.
+  message OperationStats {
+    // Operation described by this message.
+    optional Operation operation = 1;
+    // Total CPU time.
+    optional int64 total_cpu_nanos = 2;
+    // Total wall time.
+    optional int64 total_wall_nanos = 3;
+    // Maximum observed CPU time.
+    optional int32 max_cpu_nanos = 4;
+    // Maximum observed wall time.
+    optional int32 max_wall_nanos = 5;
+    // Total number of operations aggregated in this record.
+    optional int32 total_count = 6;
+  }
+
+  // IDE's major indexes.
+  enum Index {
+    UNKNOWN_INDEX = 0;
+    ID_INDEX = 1;
+    STUB_INDEX = 2;
+    TRIGRAM_INDEX = 3;
+    OTHER = 4;
+  }
+
+  // Details for indexing operations of a specific specific index.
+  message IndexStats {
+    // Index described by this message.
+    optional Index index = 1;
+    // Details for specific operations.
+    repeated OperationStats operation_stats = 2;
+  }
+
   // How long the indexing operation took in milliseconds.
   optional int32 duration_ms = 1;
   // Number of files indexed during this indexing operation.
   optional int32 file_count = 2;
+  // Number of threads configured to run indexing tasks.
+  optional int32 indexer_threads = 3;
+
+  // Indexing operation details for specific indexes.
+  repeated IndexStats index_stats = 4;
 }
 
 // Stats on Studio's performance
@@ -3371,9 +3435,11 @@ message AndroidAttribute {
     TOOLS = 3;
   }
 
-  // Specifies an attribute name of an Android View class.
-  // Only properties defined on Google View classes will be specified by name.
-  // Properties defined on custom views will be left unspecified.
+  // Specifies an attribute name of an Android View class or Navigation element.
+  // Only properties defined on Google View classes or Google-provided
+  // Navigation destinations will be specified by name.
+  // Properties defined on custom views or destinations, or custom properties on
+  // Google-provided destinations will be left unspecified.
   optional string attribute_name = 1;
   // The namespace of this attribute
   optional AttributeNamespace attribute_namespace = 2;
@@ -3548,6 +3614,217 @@ message LayoutEditorEvent {
   optional LayoutAttributeChangeEvent attribute_change_event = 5;
   // Details related to favorite attribute changes (type = FAVORITE_CHANGE)
   optional LayoutFavoriteAttributeChangeEvent favorite_change_event = 6;
+}
+
+// Details for navigation editor events
+message NavEditorEvent {
+  enum NavEditorEventType {
+    UNKNOWN_EVENT_TYPE = 0;
+
+    OPEN_FILE = 1;
+
+    SELECT_DESIGN_TAB = 2;
+    SELECT_XML_TAB = 3;
+
+    CREATE_ACTION = 4;
+    EDIT_ACTION = 5;
+    CREATE_ARGUMENT = 6;
+    EDIT_ARGUMENT = 36;
+    CREATE_DEEP_LINK = 7;
+    EDIT_DEEP_LINK = 37;
+
+    CHANGE_PROPERTY = 8;
+
+    ADD_DESTINATION = 9;
+    CREATE_FRAGMENT = 10;
+    ADD_INCLUDE = 11;
+
+    CREATE_NESTED_GRAPH = 12;
+    MOVE_TO_GRAPH = 38;
+
+    ACTIVATE_LAYOUT = 13;
+    ACTIVATE_CLASS = 14;
+    ACTIVATE_NESTED = 15;
+    ACTIVATE_INCLUDE = 16;
+
+    EXIT_NESTED_GRAPH = 17;
+
+    SET_START_DESTINATION = 18;
+
+    AUTO_ARRANGE = 19;
+    POSITION_DESTINATION = 20;
+
+    RESTORE_ERROR_PANEL = 21;
+    MINIMIZE_ERROR_PANEL = 22;
+
+    DELETE_DESTINATION = 23;
+    DELETE_INCLUDE = 24;
+    DELETE_NESTED = 25;
+    DELETE_ACTION = 26;
+    DELETE_DEEPLINK = 27;
+    DELETE_ARGUMENT = 28;
+
+    SCHEMA_CREATED = 29;
+
+    ZOOM_IN = 30;
+    ZOOM_OUT = 31;
+    ZOOM_FIT = 32;
+
+    CUT = 33;
+    COPY = 34;
+    PASTE = 35;
+
+    // next index: 39
+  }
+
+  enum Source {
+    UNKNOWN = 0;
+    TOOLBAR = 1;
+    DESIGN_SURFACE = 2;
+    PROPERTY_INSPECTOR = 3;
+    SHORTCUT = 4;
+    CONTEXT_MENU = 5;
+  }
+
+  // Type of event
+  optional NavEditorEventType type = 1;
+  // Where the event was triggered
+  optional Source source = 2;
+  // If the event is property-related, information about the affected property
+  optional NavPropertyInfo property_info = 3;
+  // If the event is action-related, information about the relevant action
+  optional NavActionInfo action_info = 4;
+  // If the event is destination-related, information about the relevant
+  // destination
+  optional NavDestinationInfo destination_info = 5;
+  // Information about the current NavigationSchema
+  optional NavSchemaInfo schema_info = 6;
+  // Information on the current contents of the navigation file
+  optional NavigationContents contents = 7;
+}
+
+message NavPropertyInfo {
+  enum Property {
+    UNKNOWN = 0;
+    CUSTOM = 1;
+
+    ACTION = 2;
+    ARG_TYPE = 3;
+    AUTO_VERIFY = 4;
+    UNUSED_1 = 5;
+    DATA = 6;
+    DATA_PATTERN = 7;
+    DEFAULT_NAV_HOST = 8;
+    DEFAULT_VALUE = 9;
+    DESTINATION = 10;
+    ENTER_ANIM = 11;
+    EXIT_ANIM = 12;
+    GRAPH = 13;
+    ID = 14;
+    LABEL = 15;
+    UNUSED_2 = 16;
+    LAUNCH_SINGLE_TOP = 17;
+    NAME = 18;
+    NAV_GRAPH = 19;
+    NULLABLE = 20;
+    POP_ENTER_ANIM = 21;
+    POP_EXIT_ANIM = 22;
+    POP_UP_TO = 23;
+    POP_UP_TO_INCLUSIVE = 24;
+    START_DESTINATION = 25;
+    URI = 26;
+  }
+  enum TagType {
+    UNKNOWN_TAG = 0;
+    CUSTOM_TAG = 1;
+    ACTION_TAG = 2;
+    DEEPLINK_TAG = 3;
+    FRAGMENT_TAG = 4;
+    ACTIVITY_TAG = 5;
+    NAVIGATION_TAG = 6;
+    INCLUDE_TAG = 7;
+    ARGUMENT_TAG = 8;
+  }
+  // The property affected.
+  optional Property property = 1;
+  // Type of the containing tag.
+  optional TagType containing_tag = 2;
+  // Whether the property was empty prior to being set just now.
+  optional bool was_empty = 3;
+}
+
+message NavActionInfo {
+  enum ActionType {
+    UNKNOWN = 0;
+    REGULAR = 1;
+    EXIT = 2;
+    GLOBAL = 3;
+    SELF = 4;
+  }
+
+  // Type of the action affected
+  optional ActionType type = 1;
+  // Whether the action has popTo set
+  optional bool has_pop = 2;
+  // Whether the action has popToInclusive set
+  optional bool inclusive = 3;
+  // The number of actions originating from the same destination as this one
+  optional uint32 count_from_source = 4;
+  // The number of actions targeting the same destination as this one
+  optional uint32 count_to_destination = 5;
+  // The number of actions with the same source and destination as this one
+  optional uint32 count_same = 6;
+}
+
+message NavDestinationInfo {
+  enum DestinationType {
+    UNKNOWN = 0;
+    FRAGMENT = 1;
+    ACTIVITY = 2;
+    OTHER = 3;
+  }
+
+  // The type of the destination
+  optional DestinationType type = 1;
+  // Whether the destination has a class (android:name) specified
+  optional bool has_class = 2;
+  // Whether the destination has a layout (tools:layout) specified
+  optional bool has_layout = 3;
+}
+
+message NavSchemaInfo {
+  // The number of custom navigators in the current schema
+  optional uint32 custom_navigators = 1;
+  // The number of custom tags in the current schema
+  optional uint32 custom_tags = 2;
+  // The number of custom destination classes in the current schema
+  optional uint32 custom_destinations = 3;
+  // The number of custom attributes in the current schema
+  optional uint32 custom_attributes = 4;
+}
+
+message NavigationContents {
+  // The number of fragments in the current file
+  optional uint32 fragments = 1;
+  // The number of activities in the current file
+  optional uint32 activities = 2;
+  // The number of custom destinations in the current file
+  optional uint32 custom_destinations = 3;
+  // The number of regular actions in the current file
+  optional uint32 regular_actions = 4;
+  // The number of exit actions in the current file
+  optional uint32 exit_actions = 5;
+  // The number of global actions in the current file
+  optional uint32 global_actions = 6;
+  // The number of self actions in the current file
+  optional uint32 self_actions = 10;
+  // The number of includes in the current file
+  optional uint32 includes = 7;
+  // The number of nested graphs in the current file
+  optional uint32 nested_graphs = 8;
+  // The number of placeholders (destinations with android:name not set) in the
+  // current file
+  optional uint32 placeholders = 9;
 }
 
 // App links assistant user event detail.
@@ -3727,6 +4004,8 @@ message CpuCaptureMetadata {
     PARSING_FAILURE = 3;
     // User aborted parsing the trace after being notified it was too large
     USER_ABORTED_PARSING = 4;
+    // There was an error while preprocessing the trace file
+    PREPROCESS_FAILURE = 5;
   }
 
   // The result of a CPU capture
@@ -4123,8 +4402,10 @@ message GradleSyncStats {
   optional int64 ide_time_ms = 4;
   // Whether the embedded maven repository is enabled
   optional bool embedded_repo_enabled = 5;
-  // What type of sync was performed
+  // What type of sync was requested
   optional GradleSyncType sync_type = 6;
+  // What type of sync was actually performed
+  optional GradleSyncType actual_sync_type = 7;
 
   // List of triggers for gradle Sync
   enum Trigger {
@@ -4142,6 +4423,8 @@ message GradleSyncStats {
     TRIGGER_VARIANT_SELECTION_CHANGED_BY_USER = 5;
     // Project modifications done by PSD
     TRIGGER_PSD_CHANGES = 6;
+    // Sync done while running tests
+    TRIGGER_TEST_REQUESTED = 7;
   }
 
   // List of sync types
@@ -4900,6 +5183,25 @@ message PSDEvent {
     // From Suggestions
   }
 
+  // Repository usage statistics in PSD.
+  message PSDRepositoryUsage {
+    // Types of repositories that can be searched.
+    enum PSDRepository {
+      PROJECT_STRUCTURE_DIALOG_REPOSITORY_UNKNOWN = 0;
+      PROJECT_STRUCTURE_DIALOG_REPOSITORY_GOOGLE = 1;
+      PROJECT_STRUCTURE_DIALOG_REPOSITORY_MAVEN_CENTRAL = 2;
+      PROJECT_STRUCTURE_DIALOG_REPOSITORY_JCENTER = 3;
+      PROJECT_STRUCTURE_DIALOG_REPOSITORY_LOCAL = 4;
+      PROJECT_STRUCTURE_DIALOG_REPOSITORY_OTHER = 5;
+    }
+    // The repository being accessed.
+    optional PSDRepository repository = 1;
+    // How long did it take to search the repository for a specific library
+    // from the user's perspective. Some repositories like Google's one
+    // requires multiple files to be fetched to complete the search.
+    optional uint64 duration_ms = 2;
+  }
+
   // What PSD generation is used?
   optional PSDGeneration generation = 1;
   // Left Configurable from which the event was created
@@ -4910,6 +5212,8 @@ message PSDEvent {
   optional uint64 duration_ms = 4;
   // List of fields that were modified
   repeated PSDField modified_fields = 5;
+  // Repositories searched.
+  repeated PSDRepositoryUsage repositories_searched = 6;
 }
 
 // UserSentiment describes how users feel about the product.
@@ -4937,4 +5241,21 @@ message EmulatorBootInfo {
   optional BootStatus boot_status = 1;
   // How long it took to boot, either successfully or not.
   optional uint64 duration_ms = 2;
+}
+
+// Reports information about how users invoke available dialogs.
+message DialogStats {
+  enum DialogState {
+    UNKNOWN_DIALOG_STATE = 0;
+    SHOW = 1;
+    SELECT = 2;
+    APPLY = 3;
+    RESET = 4;
+    CLOSE = 5;
+  }
+  // java class name (our code, not customer) of the Dialog reported on
+  // e.g. ' com.intellij.openapi.options.newEditor.SettingsDialog'
+  optional string dialog_class_name = 1;
+  // State the dialog is transitioning to.
+  optional DialogState state = 2;
 }
