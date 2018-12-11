@@ -27,9 +27,24 @@ using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Lock;
 
+VKAPI_ATTR VkBool32 VKAPI_CALL MyDebugReportCallback(
+        VkDebugReportFlagsEXT       flags,
+        VkDebugReportObjectTypeEXT  objectType,
+        uint64_t                    object,
+        size_t                      location,
+        int32_t                     messageCode,
+        const char*                 pLayerPrefix,
+        const char*                 pMessage,
+        void*                       pUserData)
+{
+    fprintf(stderr, "dbg report: %s\n", pMessage);
+    return VK_FALSE;
+}
+
 class VkDecoderGlobalState::Impl {
 public:
-    Impl() : m_vk(emugl::vkDispatch()) { }
+    Impl() : m_vk(emugl::vkDispatch()),
+             mEnableDebugReport(android::base::System::get()->envGet("ANDROID_EMU_VK_ENABLE_DEBUG_REPORT") == "1") { }
     ~Impl() = default;
 
     void on_vkGetPhysicalDeviceProperties(
@@ -262,6 +277,75 @@ public:
     }
 
 
+    VkResult on_vkCreateInstance(const VkInstanceCreateInfo* pCreateInfo,
+                                 const VkAllocationCallbacks* pAllocator,
+                                 VkInstance* pInstance) {
+
+        std::vector<const char*> editedExts;
+
+        for (uint32_t i = 0; i < pCreateInfo->enabledExtensionCount; ++i) {
+            editedExts.push_back(pCreateInfo->ppEnabledExtensionNames[i]);
+        }
+
+        if (mEnableDebugReport) {
+            editedExts.push_back("VK_EXT_debug_report");
+        }
+
+        VkInstanceCreateInfo local_createInfo = {
+            VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+            pCreateInfo->pNext,
+            pCreateInfo->flags,
+            pCreateInfo->pApplicationInfo,
+            pCreateInfo->enabledLayerCount,
+            pCreateInfo->ppEnabledLayerNames,
+            (uint32_t)editedExts.size(),
+            editedExts.data(),
+        };
+
+        VkResult res = m_vk->vkCreateInstance(&local_createInfo, pAllocator, pInstance);
+
+        if (mEnableDebugReport && res == VK_SUCCESS) {
+
+            VkDebugReportCallbackCreateInfoEXT callback1 = {
+                VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,
+                NULL,
+                VK_DEBUG_REPORT_INFORMATION_BIT_EXT |
+                VK_DEBUG_REPORT_WARNING_BIT_EXT |
+                VK_DEBUG_REPORT_ERROR_BIT_EXT |
+                VK_DEBUG_REPORT_DEBUG_BIT_EXT,
+                &MyDebugReportCallback,
+                NULL
+            };
+
+            VkDebugReportCallbackEXT callback;
+            if (!mCreateDebugReportCallback) {
+                mCreateDebugReportCallback =
+                    (PFN_vkCreateDebugReportCallbackEXT)
+                    m_vk->vkGetInstanceProcAddr(*pInstance, "vkCreateDebugReportCallbackEXT");
+                mDestroyDebugReportCallback =
+                    (PFN_vkDestroyDebugReportCallbackEXT)
+                    m_vk->vkGetInstanceProcAddr(*pInstance, "vkDestroyDebugReportCallbackEXT");
+            }
+            mCreateDebugReportCallback(*pInstance, &callback1, nullptr, &callback);
+
+            AutoLock lock(mLock);
+            mDebugReportCallbacks[*pInstance] = callback;
+        }
+
+        return res;
+    }
+
+    void on_vkDestroyInstance(VkInstance instance, const VkAllocationCallbacks* pAllocator) {
+        AutoLock lock(mLock);
+        if (mEnableDebugReport) {
+            auto it = mDebugReportCallbacks.find(instance);
+            if (it != mDebugReportCallbacks.end()) {
+                mDestroyDebugReportCallback(instance, it->second, nullptr);
+            }
+        }
+        m_vk->vkDestroyInstance(instance, pAllocator);
+    }
+
 private:
     // We always map the whole size on host.
     // This makes it much easier to implement
@@ -275,6 +359,11 @@ private:
 
     VulkanDispatch* m_vk;
 
+    // Enable debug report if user specified the environment variable.
+    bool mEnableDebugReport = false;
+    PFN_vkCreateDebugReportCallbackEXT mCreateDebugReportCallback = 0;
+    PFN_vkDestroyDebugReportCallbackEXT mDestroyDebugReportCallback = 0;
+
     Lock mLock;
 
     // Back-reference to the physical device associated
@@ -285,6 +374,8 @@ private:
         mPhysicalDeviceMemoryProperties;
 
     std::unordered_map<VkDeviceMemory, MappedMemoryInfo> mMapInfo;
+
+    std::unordered_map<VkInstance, VkDebugReportCallbackEXT> mDebugReportCallbacks;
 };
 
 VkDecoderGlobalState::VkDecoderGlobalState()
@@ -362,4 +453,15 @@ uint8_t* VkDecoderGlobalState::getMappedHostPointer(VkDeviceMemory memory) {
 
 VkDeviceSize VkDecoderGlobalState::getDeviceMemorySize(VkDeviceMemory memory) {
     return mImpl->getDeviceMemorySize(memory);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateInstance(
+        const VkInstanceCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkInstance* pInstance) {
+    return mImpl->on_vkCreateInstance(pCreateInfo, pAllocator, pInstance);
+}
+
+void VkDecoderGlobalState::on_vkDestroyInstance(VkInstance instance, const VkAllocationCallbacks* pAllocator) {
+    mImpl->on_vkDestroyInstance(instance, pAllocator);
 }
