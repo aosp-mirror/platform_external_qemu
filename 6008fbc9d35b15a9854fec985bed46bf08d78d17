@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f5309d19_62b99b2a",
+        "filename": "android/android-emu/android/base/CpuTime.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-11T18:38:15Z",
+      "side": 1,
+      "message": "Should it return 50.0 for (1+1)/4?",
+      "range": {
+        "startLine": 34,
+        "startChar": 15,
+        "endLine": 34,
+        "endChar": 22
+      },
+      "revId": "6008fbc9d35b15a9854fec985bed46bf08d78d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "95c3f189_5ff1c574",
+        "filename": "android/android-emu/android/base/CpuTime.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-11T18:38:15Z",
+      "side": 1,
+      "message": "Do we need a constructor?",
+      "range": {
+        "startLine": 24,
+        "startChar": 7,
+        "endLine": 24,
+        "endChar": 14
+      },
+      "revId": "6008fbc9d35b15a9854fec985bed46bf08d78d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca37f27f_dd9a1605",
+        "filename": "android/android-emu/android/base/CpuTime.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-11T18:38:15Z",
+      "side": 1,
+      "message": "stl prefers free functions here.\n\nCpuTime operator-(CpuTime a, CpuTime b) { a -\u003d b; return a; }",
+      "range": {
+        "startLine": 29,
+        "startChar": 12,
+        "endLine": 29,
+        "endChar": 21
+      },
+      "revId": "6008fbc9d35b15a9854fec985bed46bf08d78d17",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
