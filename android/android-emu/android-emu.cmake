@@ -127,7 +127,6 @@ set(android-emu-common
     android/metrics/AsyncMetricsReporter.cpp
     android/metrics/CrashMetricsReporting.cpp
     android/metrics/FileMetricsWriter.cpp
-    android/metrics/MemoryUsageReporter.cpp
     android/metrics/metrics.cpp
     android/metrics/MetricsPaths.cpp
     android/metrics/MetricsReporter.cpp
@@ -135,6 +134,7 @@ set(android-emu-common
     android/metrics/NullMetricsReporter.cpp
     android/metrics/NullMetricsWriter.cpp
     android/metrics/Percentiles.cpp
+    android/metrics/PerfStatReporter.cpp
     android/metrics/PeriodicReporter.cpp
     android/metrics/SyncMetricsReporter.cpp
     android/metrics/StudioConfig.cpp
