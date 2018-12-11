@@ -1,6 +1,6 @@
 from .common.codegen import CodeGen, VulkanWrapperGenerator
 from .common.vulkantypes import \
-        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, CUSTOM_CREATE_APIS
+        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
 
 from .marshaling import VulkanMarshalingCodegen
 from .handlemap import HandleMapCodegen
@@ -65,6 +65,11 @@ STREAM = "stream"
 RESOURCES = "resources"
 POOL = "pool"
 
+ENCODER_CUSTOM_CREATE_APIS = [
+    "vkAllocateMemory",
+    "vkCreateDevice",
+]
+
 ENCODER_PREVALIDATED_APIS = [
     "vkFlushMappedMemoryRanges",
     "vkInvalidateMappedMemoryRanges",
@@ -89,7 +94,7 @@ def make_event_handler_call(
                [context_param.paramName, input_result_param] + \
                [p.paramName for p in api.parameters])
 
-def emit_custom_prevalidate(typeInfo, api, cgen):
+def emit_custom_pre_validate(typeInfo, api, cgen):
     if api.name in ENCODER_PREVALIDATED_APIS:
         callExpr = \
             make_event_handler_call( \
@@ -105,6 +110,15 @@ def emit_custom_prevalidate(typeInfo, api, cgen):
                 (api.getRetTypeExpr(),
                  SUCCESS_RET_TYPES[api.getRetTypeExpr()],
                  callExpr))
+
+def emit_custom_post_create(typeInfo, api, cgen):
+    if api.name in ENCODER_CUSTOM_CREATE_APIS:
+        cgen.stmt(make_event_handler_call( \
+            "mImpl->resources()",
+            api,
+            ENCODER_THIS_PARAM,
+            api.getRetVarExpr(),
+            cgen))
 
 def emit_count_marshal(typeInfo, param, cgen):
     res = \
@@ -159,14 +173,6 @@ def custom_encoder_args(api):
         params.append(api.getRetVarExpr())
     return params
 
-def emit_custom_create(typeInfo, api, cgen):
-    if api.name in CUSTOM_CREATE_APIS:
-        cgen.funcCall(
-            None,
-            "goldfish_" + api.name,
-            custom_encoder_args(api) + \
-            [p.paramName for p in api.parameters])
-
 def emit_handlemap_destroy(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, HandleMapCodegen(
         cgen, None, "resources->destroyMapping()", "handlemap_",
@@ -203,7 +209,7 @@ class EncodingParameters(object):
                 self.toWrite.append(localCopyParam)
 
 def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
-    emit_custom_prevalidate(typeInfo, api, cgen);
+    emit_custom_pre_validate(typeInfo, api, cgen);
 
     cgen.stmt("auto %s = mImpl->stream()" % STREAM)
     cgen.stmt("auto %s = mImpl->countingStream()" % COUNTING_STREAM)
@@ -278,11 +284,11 @@ def emit_parameter_encode_read(typeInfo, api, cgen):
             cgen.stmt(
                 "%s->unsetHandleMapping()" % STREAM)
 
-def emit_custom_create_destroy(typeInfo, api, cgen):
+def emit_custom_post_create_destroy(typeInfo, api, cgen):
     encodingParams = EncodingParameters(api)
 
     for p in encodingParams.toCreate:
-        emit_custom_create(typeInfo, api, cgen)
+        emit_custom_post_create(typeInfo, api, cgen)
 
     for p in encodingParams.toDestroy:
         emit_handlemap_destroy(typeInfo, p, cgen)
@@ -315,7 +321,7 @@ def emit_default_encoding(typeInfo, api, cgen):
     emit_parameter_encode_do_parameter_write(typeInfo, api, cgen)
     emit_parameter_encode_read(typeInfo, api, cgen)
     emit_return_unmarshal(typeInfo, api, cgen)
-    emit_custom_create_destroy(typeInfo, api, cgen)
+    emit_custom_post_create_destroy(typeInfo, api, cgen)
     emit_return(typeInfo, api, cgen)
 
 ## Custom encoding definitions##################################################
