@@ -89,6 +89,10 @@ public:
     uint8_t* getMappedHostPointer(VkDeviceMemory memory);
     VkDeviceSize getDeviceMemorySize(VkDeviceMemory memory);
 
+    VkResult on_vkCreateInstance(const VkInstanceCreateInfo* pCreateInfo,
+                                 const VkAllocationCallbacks* pAllocator,
+                                 VkInstance* pInstance);
+    void on_vkDestroyInstance(VkInstance instance, const VkAllocationCallbacks* pAllocator);
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
