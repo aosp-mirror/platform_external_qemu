@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/base/Compiler.h"
+#include "android/base/CpuTime.h"
 #include "android/base/EnumFlags.h"
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"
@@ -462,6 +463,10 @@ public:
     // and cause mayhem like hang detection.
     // On other platforms, this function doesn't do anything.
     static void disableAppNap();
+
+    // Returns the wallclock (high res time us) user, and system time spent
+    // in the current thread.
+    static CpuTime cpuTime();
 
 protected:
     size_t mMemorySize = 0;
