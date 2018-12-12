@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9bf84024_a736fd0d",
+        "filename": "android/envsetup.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-12-12T22:35:39Z",
+      "side": 1,
+      "message": "nothing changed in this file?",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 2
+      },
+      "revId": "3d38e015852046809f80273beca25ad8ab6fe8c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
