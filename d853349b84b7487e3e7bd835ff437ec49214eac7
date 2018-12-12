@@ -22,6 +22,30 @@
       "revId": "d853349b84b7487e3e7bd835ff437ec49214eac7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "33b84a2c_77d89b3b",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-no-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-12-12T00:22:12Z",
+      "side": 0,
+      "message": "It is now.",
+      "parentUuid": "03a68fd4_2fc9004c",
+      "range": {
+        "startLine": 102,
+        "startChar": 1,
+        "endLine": 129,
+        "endChar": 5
+      },
+      "revId": "d853349b84b7487e3e7bd835ff437ec49214eac7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
