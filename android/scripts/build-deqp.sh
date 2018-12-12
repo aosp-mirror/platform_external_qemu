@@ -99,17 +99,22 @@ cmake $DEQP_BUILD_DIR $DEQP_DIR \
 
 make -j $NUM_JOBS
 
-log "Linking lib64 dir into gles3 module."
+log "Linking lib64/testlib64 dirs into dEQP modules."
 
 cd $DEQP_BUILD_DIR/modules/gles3
 ln -s $EMU_OUTPUT_DIR/lib64 lib64
+ln -s $EMU_OUTPUT_DIR/testlib64 testlib64
 cd $DEQP_BUILD_DIR/modules/gles31
 ln -s $EMU_OUTPUT_DIR/lib64 lib64
+ln -s $EMU_OUTPUT_DIR/testlib64 testlib64
 cd $DEQP_BUILD_DIR/modules/gles2
 ln -s $EMU_OUTPUT_DIR/lib64 lib64
+ln -s $EMU_OUTPUT_DIR/testlib64 testlib64
 cd $DEQP_BUILD_DIR/modules/egl
 ln -s $EMU_OUTPUT_DIR/lib64 lib64
+ln -s $EMU_OUTPUT_DIR/testlib64 testlib64
 cd $DEQP_BUILD_DIR/external/vulkancts/modules/vulkan
 ln -s $EMU_OUTPUT_DIR/lib64 lib64
+ln -s $EMU_OUTPUT_DIR/testlib64 testlib64
 
 log "Done building dEQP."

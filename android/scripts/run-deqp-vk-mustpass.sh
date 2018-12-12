@@ -64,12 +64,16 @@ cd $DEQP_VK_EXEC_DIR
 # Known issue: swiftshader not quite working yet due to library rpath issues.
 export ANDROID_EMU_TEST_WITH_HOST_GPU=1
 
+# Add layer path.
+export VK_LAYER_PATH=testlib64/layers
+
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     case $SYSTEM in
         linux*)
             log "LINUX"
             # Allow running via SSH
-            export LD_LIBRARY_PATH=lib64:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+            # Add layer library path as well
+            export LD_LIBRARY_PATH=lib64:testlib64/layers:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
             export DISPLAY=:0
             ;;
     esac
