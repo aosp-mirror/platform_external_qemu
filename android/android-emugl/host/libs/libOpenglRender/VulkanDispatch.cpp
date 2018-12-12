@@ -33,7 +33,8 @@ static void setIcdPath(const std::string& path) {
 static void initIcdPaths(bool forTesting) {
     auto androidIcd = System::get()->envGet("ANDROID_EMU_VK_ICD");
     if (forTesting || androidIcd == "mock") {
-        auto res = pj(System::get()->getProgramDirectory(), "testlib64");
+        auto res = pj(System::get()->getProgramDirectory(),
+                     "testlib64", "icds");
         setIcdPath(pj(res, "VkICD_mock_icd.json"));
         System::get()->envSet("ANDROID_EMU_VK_ICD", "mock");
     } else {
@@ -43,19 +44,19 @@ static void initIcdPaths(bool forTesting) {
 #ifdef __APPLE__
         if (androidIcd == "moltenvk") {
             setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
-                          "vulkan", "MoltenVK_icd.json"));
+                          "vulkan", "icds", "MoltenVK_icd.json"));
         } else if (androidIcd == "portability") {
             setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
-                          "vulkan", "portability-macos.json"));
+                          "vulkan", "icds", "portability-macos.json"));
         } else if (androidIcd == "portability-debug") {
             setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
-                          "vulkan", "portability-macos-debug.json"));
+                          "vulkan", "icds", "portability-macos-debug.json"));
         } else if (androidIcd == "mock") {
             setIcdPath(pj(System::get()->getProgramDirectory(), "testlib64",
-                          "VkICD_mock_icd.json"));
+                          "icds", "VkICD_mock_icd.json"));
         } else {
             setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
-                          "vulkan", "portability-macos.json"));
+                          "vulkan", "icds", "portability-macos.json"));
         }
         // TODO: Once Swiftshader is working, set the ICD accordingly.
 #else
