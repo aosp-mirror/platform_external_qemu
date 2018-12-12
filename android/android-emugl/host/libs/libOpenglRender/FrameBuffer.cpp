@@ -26,6 +26,7 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 
 #include "android/base/containers/Lookup.h"
+#include "android/base/CpuUsage.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
@@ -1803,11 +1804,15 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
         if (currTime - m_statsStartTime >= 1000) {
             float dt = (float)(currTime - m_statsStartTime) / 1000.0f;
             auto usage = System::get()->getMemUsage();
-            printf("FPS: %5.3f resident memory: %f mb\n",
-                   (float)m_statsNumFrames / dt,
-                   (float)usage.resident / 1048576.0f);
             m_statsStartTime = currTime;
             m_statsNumFrames = 0;
+
+            auto cpuUsage = emugl::getCpuUsage();
+            auto lastStats = cpuUsage->printUsage();
+            printf("FPS: %5.3f resident memory: %f mb %s\n",
+                   (float)m_statsNumFrames / dt,
+                   (float)usage.resident / 1048576.0f,
+                   lastStats.c_str());
         }
     }
 
