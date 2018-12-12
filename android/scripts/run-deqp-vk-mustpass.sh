@@ -69,7 +69,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         linux*)
             log "LINUX"
             # Allow running via SSH
-            export LD_LIBRARY_PATH=lib64:/usr/lib/x86_64-linux-gnu
+            export LD_LIBRARY_PATH=lib64:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
             export DISPLAY=:0
             ;;
     esac
