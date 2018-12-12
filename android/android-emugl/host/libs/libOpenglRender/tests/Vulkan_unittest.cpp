@@ -44,7 +44,7 @@ namespace emugl {
 static std::string loaderAndMockTestLibsDir() {
     return
         pj(TestSystem::getProgramDirectoryFromPlatform(),
-           "testlib64");
+           "testlib64", "icds");
 }
 
 static std::string testIcdFilename() {
