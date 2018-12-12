@@ -29,7 +29,16 @@ struct RenderOpt {
     void* surface;
     void* config;
 };
+
 using android::emulation::OnLastColorBufferRef;
+
+namespace android {
+namespace base {
+
+class CpuUsage;
+
+} // namespace base
+} // namespace android
 
 // RenderLib - root interface for the GPU emulation library
 //  Use it to set the library-wide parameters (logging, crash reporting) and
@@ -60,6 +69,8 @@ public:
     virtual void setDmaOps(emugl_dma_ops) = 0;
 
     virtual void setVmOps(const QAndroidVmOperations &vm_operations) = 0;
+
+    virtual void setCpUsage(android::base::CpuUsage* usage) = 0;
 
     virtual void* getGL(void) = 0;
 
