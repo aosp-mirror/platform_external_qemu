@@ -26,6 +26,7 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 
 #include "android/base/containers/Lookup.h"
+#include "android/base/CpuUsage.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"

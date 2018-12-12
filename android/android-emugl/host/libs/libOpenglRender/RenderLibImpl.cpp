@@ -16,6 +16,7 @@
 #include "FrameBuffer.h"
 #include "RendererImpl.h"
 
+#include "android/base/CpuUsage.h"
 #include "android/base/files/Stream.h"
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/dma_device.h"
@@ -84,6 +85,10 @@ void RenderLibImpl::setDmaOps(emugl_dma_ops ops) {
 
 void RenderLibImpl::setVmOps(const QAndroidVmOperations &vm_operations) {
     set_emugl_vm_operations(vm_operations);
+}
+
+void RenderLibImpl::setCpuUsage(android::base::CpuUsage* usage) {
+    emugl::setCpuUsage(usage);
 }
 
 void* RenderLibImpl::getGL(void) {
