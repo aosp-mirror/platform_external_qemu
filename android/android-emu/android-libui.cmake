@@ -25,9 +25,9 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/angle-input-widget.cpp
     android/skin/qt/editable-slider-widget.cpp
     android/skin/qt/emulator-container.cpp
+    android/skin/qt/emulator-no-qt-no-window.cpp
     android/skin/qt/emulator-overlay.cpp
     android/skin/qt/emulator-qt-window.cpp
-    android/skin/qt/emulator-qt-no-window.cpp
     android/skin/qt/event-capturer.cpp
     android/skin/qt/event-serializer.cpp
     android/skin/qt/event-subscriber.cpp
@@ -139,9 +139,9 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/editable-slider-widget.h
     android/skin/qt/gl-widget.h
     android/skin/qt/emulator-container.h
+    android/skin/qt/emulator-no-qt-no-window.h
     android/skin/qt/emulator-overlay.h
     android/skin/qt/emulator-qt-window.h
-    android/skin/qt/emulator-qt-no-window.h
     android/skin/qt/event-capturer.h
     android/skin/qt/event-subscriber.h
     android/skin/qt/extended-pages/battery-page.h
