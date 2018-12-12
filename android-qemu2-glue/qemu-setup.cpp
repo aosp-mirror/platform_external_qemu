@@ -15,6 +15,7 @@
 #include "android-qemu2-glue/qemu-setup.h"
 
 #include "android/android.h"
+#include "android/base/CpuUsage.h"
 #include "android/base/Log.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/memory/ScopedPtr.h"
@@ -195,8 +196,12 @@ bool qemu_android_emulation_setup() {
             arch && (strstr(arch.get(), "x86") || strstr(arch.get(), "i386"));
     const int nCores = isX86 ? android_hw->hw_cpu_ncore : 1;
     for (int i = 0; i < nCores; ++i) {
+        auto cpuLooper = new android::qemu::CpuLooper(i);
         android::crashreport::CrashReporter::get()->hangDetector().
-                addWatchedLooper(new android::qemu::CpuLooper(i));
+                addWatchedLooper(cpuLooper);
+        android::base::CpuUsage::get()->addLooper(
+                    (int)android::base::CpuUsage::UsageArea::Vcpu + i,
+                    cpuLooper);
     }
 
     if (android_cmdLineOptions && android_cmdLineOptions->detect_image_hang) {
