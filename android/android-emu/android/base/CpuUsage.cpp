@@ -21,6 +21,7 @@
 #include "android/base/threads/FunctorThread.h"
 
 #include <array>
+#include <sstream>
 
 #include <stdio.h>
 
@@ -158,16 +159,43 @@ void CpuUsage::forEachUsage(UsageArea area, CpuTimeReader readerFunc) {
     }
 }
 
+std::string CpuUsage::printUsage() {
+    float mainLoopUsage = 0.0f;
+    std::vector<float> vcpuUsages;
+
+    forEachUsage(
+        CpuUsage::UsageArea::MainLoop,
+        [&mainLoopUsage](const CpuTime& cputime) {
+        mainLoopUsage = cputime.usage();
+    });
+
+    forEachUsage(
+        CpuUsage::UsageArea::Vcpu,
+        [&vcpuUsages](const CpuTime& cputime) {
+        vcpuUsages.push_back(cputime.usage());
+    });
+
+    std::stringstream ss;
+    ss << "cpu: ";
+    ss << "main loop: ";
+    ss << mainLoopUsage * 100.0f;
+    ss << "vcpus: ";
+    for (auto usage : vcpuUsages) {
+        ss << usage * 100.0f << " ";
+    }
+
+    return ss.str();
+}
+
+void CpuUsage::stop() {
+    mImpl->stop();
+}
+
 static LazyInstance<CpuUsage> sCpuUsage = LAZY_INSTANCE_INIT;
 
 // static
 CpuUsage* CpuUsage::get() {
     return sCpuUsage.ptr();
-}
-
-// static
-void CpuUsage::stop() {
-    mImpl->stop();
 }
 
 } // namespace android
