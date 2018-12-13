@@ -17,6 +17,8 @@
 
 #include <memory>
 
+namespace goldfish_vk {
+
 // Class for tracking host-side state. Currently we only care about
 // tracking VkDeviceMemory to make it easier to pass the right data
 // from mapped pointers to the guest, but this could get more stuff
@@ -93,3 +95,5 @@ private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
 };
+
+} // namespace goldfish_vk
