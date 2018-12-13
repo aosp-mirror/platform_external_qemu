@@ -39,6 +39,7 @@ public:
     int queueBuffer(ANativeWindowBuffer* buffer, int fenceFd);
 
     int query(int what, int* value) const;
+    int perform(int operation, va_list args);
 
     AndroidBufferQueue* fromProducer = nullptr;
     AndroidBufferQueue* toProducer = nullptr;
