@@ -7,6 +7,7 @@ prebuilt(UUID)
 
 # Source configuration, the following set is shared amongst all targets
 set(android-emu-base_src
+    android/base/AlignedBuf.cpp
     android/base/ContiguousRangeMapper.cpp
     android/base/CpuTime.cpp
     android/base/CpuUsage.cpp
@@ -29,6 +30,7 @@ set(android-emu-base_src
     android/base/misc/Utf8Utils.cpp
     android/base/network/IpAddress.cpp
     android/base/network/NetworkUtils.cpp
+    android/base/Pool.cpp
     android/base/Stopwatch.cpp
     android/base/StringFormat.cpp
     android/base/StringParse.cpp
