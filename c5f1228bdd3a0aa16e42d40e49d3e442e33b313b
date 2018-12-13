@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a1c72379_f1f02a7f",
+        "filename": "android/android-emu/android/base/Backtrace.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-13T01:12:29Z",
+      "side": 1,
+      "message": "Maybe \"not implemented\"?",
+      "range": {
+        "startLine": 35,
+        "startChar": 26,
+        "endLine": 35,
+        "endChar": 28
+      },
+      "revId": "c5f1228bdd3a0aa16e42d40e49d3e442e33b313b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
