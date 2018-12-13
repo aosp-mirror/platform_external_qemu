@@ -54,6 +54,12 @@ public:
         const VkAllocationCallbacks* pAllocator,
         VkDevice* pDevice);
 
+    void on_vkGetDeviceQueue(
+        VkDevice device,
+        uint32_t queueFamilyIndex,
+        uint32_t queueIndex,
+        VkQueue* pQueue);
+
     void on_vkDestroyDevice(
         VkDevice device,
         const VkAllocationCallbacks* pAllocator);
