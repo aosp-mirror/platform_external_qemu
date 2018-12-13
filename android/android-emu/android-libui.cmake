@@ -306,6 +306,8 @@ set(emulator-libui_unittests_src
     android/recording/test/DummyVideoProducer.cpp
     android/recording/FfmpegRecorder.cpp
     android/recording/test/FfmpegRecorder_unittest.cpp)
+set(emulator-libui_unittests_windows_src
+    android/skin/qt/qtmain_dummy_test.cpp)
 android_add_test(emulator-libui_unittests)
 
 target_compile_options(emulator-libui_unittests PRIVATE -O0 -UNDEBUG)
@@ -327,4 +329,4 @@ android_target_properties(emulator-libui_unittests all "${QT5_SHARED_PROPERTIES}
 # Make sure we disable rtti in gtest
 target_compile_definitions(emulator-libui_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 
-target_link_libraries(emulator-libui_unittests PRIVATE emulator-libui FFMPEG::FFMPEG gmock_main)
+target_link_libraries(emulator-libui_unittests PRIVATE emulator-libui android-mock-vm-operations OpenGLESDispatch FFMPEG::FFMPEG gmock_main)
