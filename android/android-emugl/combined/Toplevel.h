@@ -24,7 +24,10 @@ public:
     Toplevel(int refreshRate = 60);
     ~Toplevel();
 
-    ANativeWindow* createWindow();
+    static constexpr int kWindowSize = 256;
+
+    ANativeWindow* createWindow(int width = kWindowSize,
+                                int height = kWindowSize);
     void destroyWindow(ANativeWindow* window);
     void destroyWindow(void* window);
 
