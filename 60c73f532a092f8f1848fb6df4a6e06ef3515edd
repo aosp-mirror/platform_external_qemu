@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "56bf0e4f_0fabd810",
+        "filename": "android/android-emu/android/base/CpuUsage.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-13T00:52:03Z",
+      "side": 1,
+      "message": "setUsage in RenderLib.h confused me because I thought CpuUsage is a a kind of a value there (like std::complex\u003cdouble\u003e) but it is more like a process.",
+      "range": {
+        "startLine": 30,
+        "startChar": 6,
+        "endLine": 30,
+        "endChar": 14
+      },
+      "revId": "60c73f532a092f8f1848fb6df4a6e06ef3515edd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0d9630f_0f4316f9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1812,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-13T00:52:03Z",
+      "side": 1,
+      "message": "Do we want to put precision here to avoid \"0.00000043\"?",
+      "range": {
+        "startLine": 1812,
+        "startChar": 48,
+        "endLine": 1812,
+        "endChar": 50
+      },
+      "revId": "60c73f532a092f8f1848fb6df4a6e06ef3515edd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
