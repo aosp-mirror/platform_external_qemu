@@ -123,8 +123,16 @@ if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
     )
   set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5Network -lQt5WebChannel -lQt5WebEngineWidgets -lQt5WebSockets)
 elseif(ANDROID_TARGET_OS STREQUAL "windows_msvc")
+  # On Windows, Qt provides us with a qtmain.lib which helps us write a cross-platform main() function (because WinMain() is the entry point
+  # to a GUI application on Windows). Exactly how qtmain does this is it defines WinMain() for us, and inside WinMain(), it calls a function
+  # that we provide. For mingw, this function is qMain(), and for msvc, it's just main() (see qt-src/.../qtmain_lib.cpp for more info).
+  # So, in short, for msvc,
+  #     qtmain.lib --> WinMain() --> main() --> qt_main()
+  # and for mingw,
+  #     qtmain.a --> WinMain() --> qMain() --> qt_main()
+  #
   # Clang/VS doesn't support linking directly to dlls. We linking to the import libraries instead (.lib).
-  set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib)
+  set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${PREBUILT_ROOT}/lib/qtmain.lib)
   # Obtained by running ListDlls.exe from sysinternals tool
   set(QT5_SHARED_DEPENDENCIES
       ${PREBUILT_ROOT}/bin/Qt5Svg.dll>lib64/qt/lib/Qt5Svg.dll;
@@ -144,7 +152,7 @@ elseif(ANDROID_TARGET_OS STREQUAL "windows_msvc")
       ${PREBUILT_ROOT}/plugins/imageformats/qwebp.dll>lib64/qt/plugins/imageformats/qwebp.dll;)
 elseif(ANDROID_TARGET_TAG MATCHES "windows-x86.*")
   # On Windows, linking to mingw32 is required. The library is provided by the toolchain, and depends on a main()
-  # function provided by qtmain which itself depends on qMain(). These must appear iemulator-libui_unittestsn LDFLAGS
+  # function provided by qtmain which itself depends on qMain(). These must appear in emulator-libui_unittests LDFLAGS
   # and not LDLIBS since qMain() is provided by object/libraries that appear after these in the link command-line.
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/bin -lmingw32 ${PREBUILT_ROOT}/lib/libqtmain.a)
   # Obtained by running ListDlls.exe from sysinternals tool

@@ -620,9 +620,11 @@ static void enter_qemu_main_loop(int argc, char** argv) {
     }
 }
 
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(_MSC_VER)
 // On Windows, link against qtmain.lib which provides a WinMain()
-// implementation, that later calls qMain().
+// implementation, that later calls qMain(). In the MSVC build, qtmain.lib calls
+// main() instead of qMain(), so we need to make sure qMain is redefined to
+// main for that case.
 #define main qt_main
 #endif
 

@@ -757,7 +757,13 @@ void skin_winsys_report_entering_main_loop(void) {
 #ifdef _WIN32
 extern "C" int qt_main(int, char**);
 
+#ifdef _MSC_VER
+// For msvc build, qt calls main() instead of qMain (see
+// qt-src/.../qtmain_win.cpp)
+int main(int argc, char** argv) {
+#else
 int qMain(int argc, char** argv) {
+#endif
     // The arguments coming in here are encoded in whatever local code page
     // Windows is configured with but we need them to be UTF-8 encoded. So we
     // use GetCommandLineW and CommandLineToArgvW to get a UTF-16 encoded argv
