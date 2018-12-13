@@ -308,7 +308,7 @@ Toplevel::Toplevel(int refreshRate) : mImpl(new Toplevel::Impl(refreshRate)) {}
 Toplevel::~Toplevel() = default;
 
 ANativeWindow* Toplevel::createWindow(int width, int height) {
-    return (ANativeWindow*)(mImpl->createAppWindowAndSetCurrent(width, height));
+    return static_cast<ANativeWindow*>(mImpl->createAppWindowAndSetCurrent(width, height));
 }
 
 void Toplevel::destroyWindow(ANativeWindow* window) {

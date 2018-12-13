@@ -193,6 +193,7 @@ int AndroidWindow::perform(int operation, va_list args)
 
     default:
         E("Unknown perform 0x%x, not implemented.", operation);
+        res = -EINVAL;
         break;
     }
     return res;
@@ -230,6 +231,7 @@ static int hook_perform(struct ANativeWindow* window, int operation, ... ) {
     va_start(args, operation);
     AndroidWindow* w = AndroidWindow::getSelf(window);
     int result = w->perform(operation, args);
+    va_end(args);
     return result;
 }
 
