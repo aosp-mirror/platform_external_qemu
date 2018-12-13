@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4bfd2ab9_4c53fe26",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-13T02:06:14Z",
+      "side": 0,
+      "message": "Does this move have to be a part of this change?",
+      "range": {
+        "startLine": 21,
+        "startChar": 4,
+        "endLine": 21,
+        "endChar": 31
+      },
+      "revId": "3fe30d61e9d7a1e951d0876bef52ae3e9d11af1f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
