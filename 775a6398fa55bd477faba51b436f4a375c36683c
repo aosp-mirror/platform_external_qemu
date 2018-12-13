@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "86781ae6_e75bfb11",
+        "filename": "android/build/cmake/prebuilts.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-12-13T23:10:28Z",
+      "side": 1,
+      "message": "No the problem comes from the fact that we (ab)use cmake to \"generate\" source files. The source files are not .c .cpp files so they are created, but not used during compilation.\n\nHowever on windows some of the \"sources\" are .obj files, and cmake will expose these .obj files to msvc linker. The msvc linker will reject this file as it is not a valid compilation unit. \n\nThe real culprit is that CMake does not have a good mechanism to declare file level dependencies like GNUMake has. There is no solution that captures all the bases like GNUmake does :-(",
+      "parentUuid": "a8fa5c9f_1be4b3b3",
+      "range": {
+        "startLine": 197,
+        "startChar": 0,
+        "endLine": 197,
+        "endChar": 76
+      },
+      "revId": "775a6398fa55bd477faba51b436f4a375c36683c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a9fd7943_b267192b",
         "filename": "android/build/cmake/prebuilts.cmake",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "d0be4909_a5a5e502",
+        "filename": "android/build/cmake/prebuilts.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-12-13T23:10:28Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a9fd7943_b267192b",
+      "range": {
+        "startLine": 252,
+        "startChar": 12,
+        "endLine": 252,
+        "endChar": 57
+      },
+      "revId": "775a6398fa55bd477faba51b436f4a375c36683c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "55d84aa0_1386ff92",
         "filename": "android/build/cmake/prebuilts.cmake",
         "patchSetId": 2
@@ -68,6 +116,30 @@
       "revId": "775a6398fa55bd477faba51b436f4a375c36683c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9abbb988_593334b2",
+        "filename": "android/build/cmake/prebuilts.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-12-13T23:10:28Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "55d84aa0_1386ff92",
+      "range": {
+        "startLine": 253,
+        "startChar": 0,
+        "endLine": 255,
+        "endChar": 117
+      },
+      "revId": "775a6398fa55bd477faba51b436f4a375c36683c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
