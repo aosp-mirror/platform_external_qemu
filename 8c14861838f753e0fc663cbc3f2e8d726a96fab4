@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cba33fe8_a26b712b",
+        "filename": "android/android-emugl/combined/Toplevel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-13T17:40:57Z",
+      "side": 1,
+      "message": "Maybe C++ cast instead?",
+      "range": {
+        "startLine": 311,
+        "startChar": 12,
+        "endLine": 311,
+        "endChar": 25
+      },
+      "revId": "8c14861838f753e0fc663cbc3f2e8d726a96fab4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f170e5a8_266d623c",
+        "filename": "android/android-emugl/guest/androidImpl/AndroidWindow.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-13T17:40:57Z",
+      "side": 1,
+      "message": "Should update \u0027res\u0027 here?",
+      "range": {
+        "startLine": 196,
+        "startChar": 8,
+        "endLine": 196,
+        "endChar": 13
+      },
+      "revId": "8c14861838f753e0fc663cbc3f2e8d726a96fab4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "df479a45_e42f9ccd",
+        "filename": "android/android-emugl/guest/androidImpl/AndroidWindow.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-13T17:40:57Z",
+      "side": 1,
+      "message": "va_end is missing",
+      "range": {
+        "startLine": 230,
+        "startChar": 4,
+        "endLine": 230,
+        "endChar": 12
+      },
+      "revId": "8c14861838f753e0fc663cbc3f2e8d726a96fab4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
