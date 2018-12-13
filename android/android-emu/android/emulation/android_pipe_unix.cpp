@@ -227,13 +227,13 @@ static void* socketPipe_initFromAddress(void* hwpipe,
         pipe->io = loopIo_new(looper, fd, socketPipe_io_func, pipe);
         status = asyncConnector_init(pipe->connector, address, pipe->io);
         pipe->state = STATE_CONNECTING;
+        pipe->socket = android::emulation::CrossSessionSocket(fd);
 
         if (status == ASYNC_ERROR) {
             D("%s: Could not connect to socket: %s", __FUNCTION__, errno_str);
             socketPipe_free(pipe);
             return NULL;
         }
-        pipe->socket = android::emulation::CrossSessionSocket(fd);
         if (status == ASYNC_COMPLETE) {
             pipe->state = STATE_CONNECTED;
             socketPipe_resetState(pipe);
