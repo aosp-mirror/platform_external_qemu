@@ -1868,6 +1868,7 @@ const char* avdInfo_getSdCardSize(const AvdInfo* i) {
 bool avdInfo_sysImgGuestRenderingBlacklisted(const AvdInfo* i) {
     switch (i->apiLevel) {
     // Allow guest rendering for older API levels
+    case 9:
     case 10:
     case 15:
     case 16:
