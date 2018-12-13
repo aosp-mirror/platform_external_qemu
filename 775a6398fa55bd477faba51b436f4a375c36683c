@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "ede9b3c0_bfb43bc5",
+        "filename": "android/build/cmake/prebuilts.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-13T23:59:27Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "86781ae6_e75bfb11",
+      "range": {
+        "startLine": 197,
+        "startChar": 0,
+        "endLine": 197,
+        "endChar": 76
+      },
+      "revId": "775a6398fa55bd477faba51b436f4a375c36683c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a9fd7943_b267192b",
         "filename": "android/build/cmake/prebuilts.cmake",
         "patchSetId": 2
