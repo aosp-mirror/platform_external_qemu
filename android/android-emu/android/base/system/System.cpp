@@ -2215,7 +2215,7 @@ System::FileSize System::getFilePageSizeForPath(StringView path) {
     } while (ret != 0 && errno == EINTR);
 
     if (ret != 0) {
-        fprintf(stderr, "Couldn't statvfs() path: %s\n",
+        fprintf(stderr, "statvfs('%s') failed: %s\n", c_str(path).get(),
                 strerror(errno));
         pageSize = (System::FileSize)getpagesize();
     } else {
