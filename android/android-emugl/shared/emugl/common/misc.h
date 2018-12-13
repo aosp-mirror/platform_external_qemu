@@ -27,6 +27,14 @@
 # define EMUGL_COMMON_API
 #endif
 
+namespace android {
+namespace base {
+
+class CpuUsage;
+
+} // namespace base
+} // namespace android
+
 namespace emugl {
 
     // Set and get API version of system image.
@@ -44,6 +52,10 @@ namespace emugl {
     // Extension string query
     EMUGL_COMMON_API bool hasExtension(const char* extensionsStr,
                       const char* wantedExtension);
+
+    // CPU usage get/set.
+    EMUGL_COMMON_API void setCpuUsage(android::base::CpuUsage* usage);
+    EMUGL_COMMON_API android::base::CpuUsage* getCpuUsage();
 
     using Profiler = android::base::Profiler;
 }
