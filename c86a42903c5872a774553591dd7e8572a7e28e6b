@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ef8b14a_73d65540",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-13T01:11:46Z",
+      "side": 1,
+      "message": "Can you give a more detailed description here? At least for me I find it hard to follow all the qt_main vs WinMain vs main vs qMain definitions, and in the end, whether were supposed to call qtmain_win.cpp\u0027s WinMain or not, and whether or not that has to do with a mingw quirk or that we\u0027re linking as a console app or not.",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 5
+      },
+      "revId": "c86a42903c5872a774553591dd7e8572a7e28e6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
