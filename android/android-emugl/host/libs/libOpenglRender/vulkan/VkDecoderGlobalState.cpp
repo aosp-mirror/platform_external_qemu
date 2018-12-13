@@ -13,11 +13,15 @@
 // limitations under the License.
 #include "VkDecoderGlobalState.h"
 
+#include "AuxiliaryResources.h"
 #include "VulkanDispatch.h"
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/Pool.h"
 #include "android/base/synchronization/Lock.h"
+
+#include "common/goldfish_vk_deepcopy.h"
 
 #include "emugl/common/crash_reporter.h"
 
@@ -26,6 +30,7 @@
 using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Lock;
+using android::base::Pool;
 
 namespace goldfish_vk {
 
@@ -92,15 +97,35 @@ public:
 
         {
             AutoLock lock(mLock);
+
+            auto& deviceInfo = mDeviceInfo[*pDevice];
+            deepcopy_VkDeviceCreateInfo(
+                &mPool,
+                pCreateInfo,
+                &deviceInfo.createInfo);
+
             mDevices[*pDevice] = physicalDevice;
-        }
 
-        VkPhysicalDeviceMemoryProperties props;
-        m_vk->vkGetPhysicalDeviceMemoryProperties(physicalDevice, &props);
+            auto it = mPhysdevInfo.find(physicalDevice);
+            if (it != mPhysdevInfo.end()) return result;
 
-        {
-            AutoLock lock(mLock);
-            mPhysicalDeviceMemoryProperties[physicalDevice] = props;
+fprintf(stderr, "%s: pop phys dev info\n", __func__);
+            auto& physdevInfo = mPhysdevInfo[physicalDevice];
+
+            VkPhysicalDeviceMemoryProperties props;
+            m_vk->vkGetPhysicalDeviceMemoryProperties(physicalDevice, &props);
+            physdevInfo.memoryProperties = props;
+
+            uint32_t queueFamilyPropCount = 0;
+
+            m_vk->vkGetPhysicalDeviceQueueFamilyProperties(
+                    physicalDevice, &queueFamilyPropCount, nullptr);
+
+            physdevInfo.queueFamilyProperties.resize((size_t)queueFamilyPropCount);
+
+            m_vk->vkGetPhysicalDeviceQueueFamilyProperties(
+                    physicalDevice, &queueFamilyPropCount,
+                    physdevInfo.queueFamilyProperties.data());
         }
 
         return result;
@@ -141,10 +166,10 @@ public:
             return VK_ERROR_DEVICE_LOST;
         }
 
-        auto memProps =
-                android::base::find(mPhysicalDeviceMemoryProperties, *physdev);
+        auto physdevInfo =
+                android::base::find(mPhysdevInfo, *physdev);
 
-        if (!memProps) {
+        if (!physdevInfo) {
             // If this fails, we crash, as we assume that the memory properties
             // map should have the info.
             emugl::emugl_crash_reporter(
@@ -157,7 +182,8 @@ public:
         // thing.
 
         // First, check validity of the user's type index.
-        if (pAllocateInfo->memoryTypeIndex >= memProps->memoryTypeCount) {
+        if (pAllocateInfo->memoryTypeIndex >=
+            physdevInfo->memoryProperties.memoryTypeCount) {
             // Continue allowing invalid behavior.
             return VK_ERROR_INCOMPATIBLE_DRIVER;
         }
@@ -167,15 +193,18 @@ public:
         mapInfo.size = pAllocateInfo->allocationSize;
 
         VkMemoryPropertyFlags flags =
-                memProps->memoryTypes[pAllocateInfo->memoryTypeIndex]
+                physdevInfo->
+                    memoryProperties
+                        .memoryTypes[pAllocateInfo->memoryTypeIndex]
                         .propertyFlags;
 
         bool shouldMap = flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
 
         if (!shouldMap) return result;
 
-        VkResult mapResult = m_vk->vkMapMemory(device, *pMemory, 0,
-                                               mapInfo.size, 0, &mapInfo.ptr);
+        VkResult mapResult =
+            m_vk->vkMapMemory(device, *pMemory, 0,
+                              mapInfo.size, 0, &mapInfo.ptr);
 
 
         if (mapResult != VK_SUCCESS) {
@@ -279,14 +308,29 @@ private:
 
     Lock mLock;
 
-    // Back-reference to the physical device associated
-    // with a particular VkDevice.
+    struct PhysicalDeviceInfo {
+        VkPhysicalDeviceMemoryProperties memoryProperties;
+        std::vector<VkQueueFamilyProperties> queueFamilyProperties;
+    };
+
+    struct DeviceInfo {
+        VkDeviceCreateInfo createInfo;
+        AndroidNativeBuffers androidNativeBuffers;
+    };
+
+    std::unordered_map<VkPhysicalDevice, PhysicalDeviceInfo>
+        mPhysdevInfo;
+    std::unordered_map<VkDevice, DeviceInfo>
+        mDeviceInfo;
+
+    // Back-reference to the physical device associated with a particular
+    // VkDevice, and the VkDevice associated with a particular VkQueue.
     std::unordered_map<VkDevice, VkPhysicalDevice> mDevices;
-    // Keep the physical device memory properties around.
-    std::unordered_map<VkPhysicalDevice, VkPhysicalDeviceMemoryProperties>
-        mPhysicalDeviceMemoryProperties;
+    std::unordered_map<VkQueue, VkDevice> mQueues;
 
     std::unordered_map<VkDeviceMemory, MappedMemoryInfo> mMapInfo;
+
+    Pool mPool { 8, 4096, 64 };
 };
 
 VkDecoderGlobalState::VkDecoderGlobalState()
