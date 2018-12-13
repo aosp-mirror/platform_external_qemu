@@ -671,11 +671,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_49;
                 vkReadStream->read((uint64_t*)&cgen_var_49, 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkQueue(&cgen_var_49, (VkQueue*)pQueue, 1);
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetDeviceQueue\n");;
-                }
-                m_vk->vkGetDeviceQueue(device, queueFamilyIndex, queueIndex, pQueue);
+                m_state->on_vkGetDeviceQueue(device, queueFamilyIndex, queueIndex, pQueue);
                 uint64_t cgen_var_50;
                 vkStream->handleMapping()->mapHandles_VkQueue_u64(pQueue, &cgen_var_50, 1);
                 vkStream->write((uint64_t*)&cgen_var_50, 8);
