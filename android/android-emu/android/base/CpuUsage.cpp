@@ -21,6 +21,8 @@
 #include "android/base/threads/FunctorThread.h"
 
 #include <array>
+#include <iomanip>
+#include <sstream>
 
 #include <stdio.h>
 
@@ -158,16 +160,48 @@ void CpuUsage::forEachUsage(UsageArea area, CpuTimeReader readerFunc) {
     }
 }
 
+std::string CpuUsage::printUsage() {
+    float mainLoopUsage = 0.0f;
+    std::vector<float> vcpuUsages;
+    float total = 0.0f;
+
+    forEachUsage(
+        CpuUsage::UsageArea::MainLoop,
+        [&total, &mainLoopUsage](const CpuTime& cputime) {
+        mainLoopUsage = cputime.usage();
+        total += mainLoopUsage;
+    });
+
+    forEachUsage(
+        CpuUsage::UsageArea::Vcpu,
+        [&total, &vcpuUsages](const CpuTime& cputime) {
+        auto usage = cputime.usage();
+        vcpuUsages.push_back(usage);
+        total += usage;
+    });
+
+    std::stringstream ss;
+    ss << "cpu: ";
+    ss << "main loop: ";
+    ss << std::fixed << std::setprecision(2) << mainLoopUsage * 100.0f << "% ";
+    ss << "vcpus: ";
+    for (auto usage : vcpuUsages) {
+        ss << std::fixed << std::setprecision(2) << usage * 100.0f << "% ";
+    }
+    ss << "total: " << std::fixed << std::setprecision(2) << total * 100.0f << "%";
+
+    return ss.str();
+}
+
+void CpuUsage::stop() {
+    mImpl->stop();
+}
+
 static LazyInstance<CpuUsage> sCpuUsage = LAZY_INSTANCE_INIT;
 
 // static
 CpuUsage* CpuUsage::get() {
     return sCpuUsage.ptr();
-}
-
-// static
-void CpuUsage::stop() {
-    mImpl->stop();
 }
 
 } // namespace android

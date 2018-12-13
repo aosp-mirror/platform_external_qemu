@@ -22,6 +22,14 @@
 #include "android/emulation/control/vm_operations.h"
 #include "android/opengl/emugl_config.h"
 
+namespace android {
+namespace base {
+
+class CpuUsage;
+
+} // namespace base
+} // namespace android
+
 namespace emugl {
 
 struct RenderOpt {
@@ -29,6 +37,7 @@ struct RenderOpt {
     void* surface;
     void* config;
 };
+
 using android::emulation::OnLastColorBufferRef;
 
 // RenderLib - root interface for the GPU emulation library
@@ -60,6 +69,8 @@ public:
     virtual void setDmaOps(emugl_dma_ops) = 0;
 
     virtual void setVmOps(const QAndroidVmOperations &vm_operations) = 0;
+
+    virtual void setCpuUsage(android::base::CpuUsage* usage) = 0;
 
     virtual void* getGL(void) = 0;
 
