@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <memory>
+#include <string>
 
 #include <inttypes.h>
 
@@ -42,13 +43,16 @@ public:
     CpuUsage();
 
     static CpuUsage* get();
-    void stop();
+
 
     void addLooper(int usageArea, Looper* looper);
     void setEnabled(bool enable);
     void setMeasurementInterval(IntervalUs interval);
 
     void forEachUsage(UsageArea area, CpuTimeReader readerFunc);
+    std::string printUsage();
+
+    void stop();
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

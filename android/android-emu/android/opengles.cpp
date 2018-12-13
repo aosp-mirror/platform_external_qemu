@@ -12,6 +12,7 @@
 
 #include "android/opengles.h"
 
+#include "android/base/CpuUsage.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/crashreport/crash-handler.h"
@@ -229,6 +230,7 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     dma_ops.unlock = android_goldfish_dma_ops.unlock;
     sRenderLib->setDmaOps(dma_ops);
     sRenderLib->setVmOps(*vm_operations);
+    sRenderLib->setCpuUsage(android::base::CpuUsage::get());
 
     sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow, sEgl2egl);
 

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "android/base/CpuUsage.h"
+
 #include "emugl/common/misc.h"
 
 static int s_apiLevel = -1;
@@ -19,6 +21,8 @@ static bool s_isPhone = false;
 
 static int s_glesMajorVersion = 2;
 static int s_glesMinorVersion = 0;
+
+android::base::CpuUsage* s_cpu_usage = nullptr;
 
 static SelectedRenderer s_renderer =
     SELECTED_RENDERER_HOST;
@@ -60,4 +64,12 @@ bool emugl::hasExtension(const char* extensionsStr, const char* wantedExtension)
         return true;
     }
     return false;
+}
+
+void emugl::setCpuUsage(android::base::CpuUsage* usage) {
+    s_cpu_usage = usage;
+}
+
+android::base::CpuUsage* emugl::getCpuUsage() {
+    return s_cpu_usage;
 }
