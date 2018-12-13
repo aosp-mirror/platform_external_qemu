@@ -1314,8 +1314,12 @@ extern "C" int main(int argc, char** argv) {
     args.add("-nodefaults");
 
     if (!hw->hw_arc) {
-        args.add(
-                {"-kernel", hw->kernel_path, "-initrd", hw->disk_ramdisk_path});
+        if (hw->disk_ramdisk_path) {
+            args.add({"-kernel", hw->kernel_path, "-initrd", hw->disk_ramdisk_path});
+        } else {
+            derror("disk_ramdisk_path is required but missing");
+            return 1;
+        }
         // add partition parameters with the sequence pre-defined in
         // targetInfo.imagePartitionTypes
         args.add(PartitionParameters::create(hw, avd));
