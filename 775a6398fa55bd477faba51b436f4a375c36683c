@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8fa5c9f_1be4b3b3",
+        "filename": "android/build/cmake/prebuilts.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-13T21:55:36Z",
+      "side": 1,
+      "message": "Does this mean dummy.c wasn\u0027t working before?",
+      "range": {
+        "startLine": 197,
+        "startChar": 0,
+        "endLine": 197,
+        "endChar": 76
+      },
+      "revId": "775a6398fa55bd477faba51b436f4a375c36683c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a9fd7943_b267192b",
+        "filename": "android/build/cmake/prebuilts.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-13T21:55:36Z",
+      "side": 1,
+      "message": "can we come up with a common function for this?",
+      "range": {
+        "startLine": 252,
+        "startChar": 12,
+        "endLine": 252,
+        "endChar": 57
+      },
+      "revId": "775a6398fa55bd477faba51b436f4a375c36683c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "55d84aa0_1386ff92",
+        "filename": "android/build/cmake/prebuilts.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-13T21:55:36Z",
+      "side": 1,
+      "message": "same here, might also be a common component",
+      "range": {
+        "startLine": 253,
+        "startChar": 0,
+        "endLine": 255,
+        "endChar": 117
+      },
+      "revId": "775a6398fa55bd477faba51b436f4a375c36683c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
