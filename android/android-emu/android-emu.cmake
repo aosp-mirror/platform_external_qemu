@@ -18,7 +18,6 @@ set(android-emu-common
     android/async-socket.c
     android/async-socket-connector.c
     android/async-utils.c
-    android/base/AlignedBuf.cpp
     android/base/async/AsyncReader.cpp
     android/base/async/AsyncSocketServer.cpp
     android/base/async/AsyncWriter.cpp
@@ -27,7 +26,6 @@ set(android-emu-common
     android/base/async/ScopedSocketWatch.cpp
     android/base/async/ThreadLooper.cpp
     android/base/network/Dns.cpp
-    android/base/Pool.cpp
     android/base/sockets/SocketDrainer.cpp
     android/base/sockets/SocketUtils.cpp
     android/base/sockets/SocketWaiter.cpp
