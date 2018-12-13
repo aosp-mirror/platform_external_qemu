@@ -62,8 +62,6 @@ using android::base::pj;
 using android::base::System;
 using android::HostGoldfishPipeDevice;
 
-static constexpr int kWindowSize = 256;
-
 namespace aemu {
 
 class Toplevel::Impl {
@@ -88,11 +86,11 @@ public:
         teardownAndroidEmugl();
     }
 
-    AndroidWindow* createAppWindowAndSetCurrent() {
+    AndroidWindow* createAppWindowAndSetCurrent(int width, int height) {
         AutoLock lock(mLock);
         if (!mSf) startDisplay();
 
-        AndroidWindow* window = new AndroidWindow(kWindowSize, kWindowSize);
+        AndroidWindow* window = new AndroidWindow(width, height);
 
         mSf->connectWindow(window);
         mWindows.insert(window);
@@ -309,8 +307,8 @@ private:
 Toplevel::Toplevel(int refreshRate) : mImpl(new Toplevel::Impl(refreshRate)) {}
 Toplevel::~Toplevel() = default;
 
-ANativeWindow* Toplevel::createWindow() {
-    return (ANativeWindow*)(mImpl->createAppWindowAndSetCurrent());
+ANativeWindow* Toplevel::createWindow(int width, int height) {
+    return (ANativeWindow*)(mImpl->createAppWindowAndSetCurrent(width, height));
 }
 
 void Toplevel::destroyWindow(ANativeWindow* window) {
