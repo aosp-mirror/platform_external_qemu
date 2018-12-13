@@ -20,5 +20,6 @@ target_include_directories(OpenglRender_vulkan_cereal
                            PRIVATE
                            ${ANDROID_EMUGL_DIR}/host/include
                            ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/
+                           ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/vulkan
                            ${ANDROID_EMUGL_DIR}/host/include/vulkan)
 
