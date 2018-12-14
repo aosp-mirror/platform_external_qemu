@@ -24,6 +24,7 @@ target_link_libraries(OSWindow PRIVATE emugl_base)
 target_include_directories(OSWindow PUBLIC ${ANDROID_EMUGL_DIR}/host/include standalone_common/angle-util)
 
 set(OpenglRender_vulkan_src
+    vulkan/VkAndroidNativeBuffer.cpp
     vulkan/VkDecoder.cpp
     vulkan/VkDecoderGlobalState.cpp
     vulkan/VulkanDispatch.cpp

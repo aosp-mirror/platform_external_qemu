@@ -191,6 +191,8 @@ custom_decodes = {
     "vkGetPhysicalDeviceMemoryProperties" : emit_global_state_wrapped_decoding,
     "vkGetDeviceQueue" : emit_global_state_wrapped_decoding,
     "vkCreateDevice" : emit_global_state_wrapped_decoding,
+    "vkCreateImage" : emit_global_state_wrapped_decoding,
+    "vkDestroyImage" : emit_global_state_wrapped_decoding,
     "vkDestroyDevice" : emit_global_state_wrapped_decoding,
     "vkAllocateMemory" : emit_global_state_wrapped_decoding,
     "vkFreeMemory" : emit_global_state_wrapped_decoding,

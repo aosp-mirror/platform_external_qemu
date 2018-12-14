@@ -64,6 +64,17 @@ public:
         VkDevice device,
         const VkAllocationCallbacks* pAllocator);
 
+    VkResult on_vkCreateImage(
+        VkDevice device,
+        const VkImageCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkImage* pImage);
+
+    void on_vkDestroyImage(
+        VkDevice device,
+        VkImage image,
+        const VkAllocationCallbacks* pAllocator);
+
     // Do we need to wrap vk(Create|Destroy)Instance to
     // update our maps of VkDevices? Spec suggests no:
     // https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkDestroyInstance.html
