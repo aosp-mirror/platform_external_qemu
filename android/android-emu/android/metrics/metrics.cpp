@@ -339,7 +339,7 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
         case android::featurecontrol::GLDMA2:
             return android_studio::EmulatorFeatureFlagState::GLDMA2;
         case android::featurecontrol::GLDirectMem:
-            return android_studio::EmulatorFeatureFlagState::GLDirectMem;
+            return android_studio::EmulatorFeatureFlagState::GL_DIRECT_MEM;
         case android::featurecontrol::GLESDynamicVersion:
             return android_studio::EmulatorFeatureFlagState::GLES_DYNAMIC_VERSION;
         case android::featurecontrol::ForceANGLE:
