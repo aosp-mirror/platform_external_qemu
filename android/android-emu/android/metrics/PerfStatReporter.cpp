@@ -14,6 +14,7 @@
 
 #include "android/metrics/PerfStatReporter.h"
 
+#include "android/base/CpuUsage.h"
 #include "android/CommonReportedInfo.h"
 #include "android/metrics/PeriodicReporter.h"
 
@@ -22,13 +23,15 @@
 
 #define  D(...)  do {  if (VERBOSE_CHECK(memory)) dprint(__VA_ARGS__); } while (0)
 
-static const uint32_t kMemUsageMetricsReportIntervalMs = 60 * 1000;
+static const uint32_t kPerfStatReportIntervalMs = 10 * 1000;
 
 static bool sStopping = false;
 
 namespace android {
 namespace metrics {
 
+using android::base::CpuTime;
+using android::base::CpuUsage;
 using android::base::Lock;
 using android::base::System;
 using std::shared_ptr;
@@ -44,19 +47,20 @@ PerfStatReporter::Ptr PerfStatReporter::create(
 PerfStatReporter::PerfStatReporter(
         android::base::Looper* looper,
         android::base::Looper::Duration checkIntervalMs)
-    : mLooper(looper),
+    : mCurrPerfStats(new android_studio::EmulatorPerformanceStats),
+      mLooper(looper),
       mCheckIntervalMs(checkIntervalMs),
       // We use raw pointer to |this| instead of a shared_ptr to avoid cicrular
       // ownership. mRecurrentTask promises to cancel any outstanding tasks when
       // it's destructed.
       mRecurrentTask(looper,
-                     [this]() { return checkPerfStats(); },
+                     [this]() { refreshPerfStats(); return true; },
                      mCheckIntervalMs) {
 
     // Also start up a periodic reporter that takes whatever is in the
     // current struct.
     using android::metrics::PeriodicReporter;
-    PeriodicReporter::get().addTask(kMemUsageMetricsReportIntervalMs,
+    PeriodicReporter::get().addTask(kPerfStatReportIntervalMs,
         [this](android_studio::AndroidStudioEvent* event) {
 
             if (sStopping) return true;
@@ -89,36 +93,67 @@ void PerfStatReporter::stop() {
 }
 
 void PerfStatReporter::fillProto(android_studio::EmulatorPerformanceStats* perfStatProto) {
-
     android::base::AutoLock lock(mLock);
-    System::MemUsage memUsageForMetrics = mCurrUsage;
-    lock.unlock();
-
-    auto memUsageProto = perfStatProto->add_memory_usage();
-    memUsageProto->set_resident_memory(memUsageForMetrics.resident);
-    memUsageProto->set_resident_memory_max(memUsageForMetrics.resident_max);
-    memUsageProto->set_virtual_memory(memUsageForMetrics.virt);
-    memUsageProto->set_virtual_memory_max(memUsageForMetrics.virt_max);
-    memUsageProto->set_total_phys_memory(memUsageForMetrics.total_phys_memory);
-    memUsageProto->set_total_page_file(memUsageForMetrics.total_page_file);
+    *perfStatProto = *mCurrPerfStats;
 }
 
-bool PerfStatReporter::checkPerfStats() {
-    System::MemUsage usage = System::get()->getMemUsage();
+static void fillProtoMemUsage(android_studio::EmulatorPerformanceStats* stats_out);
+static void fillProtoCpuUsage(android_studio::EmulatorPerformanceStats* stats_out);
+
+void PerfStatReporter::refreshPerfStats() {
+    android::base::AutoLock lock(mLock);
+    mCurrPerfStats->Clear();
+
     uint64_t uptime = System::get()->getProcessTimes().wallClockMs;
+    mCurrPerfStats->set_process_uptime_us(uptime);
+    uint64_t guest_uptime = 0; // TODO
+    mCurrPerfStats->set_guest_uptime_us(guest_uptime);
+
+    fillProtoMemUsage(mCurrPerfStats.get());
+    fillProtoCpuUsage(mCurrPerfStats.get());
+}
+
+static void fillProtoMemUsage(android_studio::EmulatorPerformanceStats* stats_out) {
+    System::MemUsage rawMemUsage = System::get()->getMemUsage();
+    auto resources = stats_out->mutable_resource_usage();
+    auto memUsageProto = resources->mutable_memory_usage();
+    memUsageProto->set_resident_memory(rawMemUsage.resident);
+    memUsageProto->set_resident_memory_max(rawMemUsage.resident_max);
+    memUsageProto->set_virtual_memory(rawMemUsage.virt);
+    memUsageProto->set_virtual_memory_max(rawMemUsage.virt_max);
+    memUsageProto->set_total_phys_memory(rawMemUsage.total_phys_memory);
+    memUsageProto->set_total_page_file(rawMemUsage.total_page_file);
 
     D("MemoryReport: uptime: %" PRIu64 ", Res/ResMax/Virt/VirtMax: "
       "%" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64,
-      uptime,
-      usage.resident,
-      usage.resident_max,
-      usage.virt,
-      usage.virt_max);
+      stats_out->process_uptime_us(),
+      rawMemUsage.resident,
+      rawMemUsage.resident_max,
+      rawMemUsage.virt,
+      rawMemUsage.virt_max);
+}
 
-    android::base::AutoLock lock(mLock);
-    mCurrUsage = usage;
+static void fillProtoCpuUsage(android_studio::EmulatorPerformanceStats* stats_out) {
+    CpuUsage* cpu = CpuUsage::get();
+    auto resources = stats_out->mutable_resource_usage();
+    auto mainLoopCpu = resources->mutable_main_loop_slice();
 
-    return true;
+    cpu->forEachUsage(
+        CpuUsage::UsageArea::MainLoop,
+        [mainLoopCpu](const CpuTime& cpuTime) {
+            mainLoopCpu->set_wall_time_us(cpuTime.wall_time_us);
+            mainLoopCpu->set_user_time_us(cpuTime.user_time_us);
+            mainLoopCpu->set_system_time_us(cpuTime.system_time_us);
+        });
+
+    cpu->forEachUsage(
+        CpuUsage::UsageArea::Vcpu,
+        [resources](const CpuTime& cpuTime) {
+            auto vCpu = resources->add_vcpu_slices();
+            vCpu->set_wall_time_us(cpuTime.wall_time_us);
+            vCpu->set_user_time_us(cpuTime.user_time_us);
+            vCpu->set_system_time_us(cpuTime.system_time_us);
+        });
 }
 
 }  // namespace metrics
