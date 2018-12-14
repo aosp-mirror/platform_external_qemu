@@ -118,6 +118,30 @@
       "revId": "4fd0cb8d089e14a3c3481bef707284b1be448816",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e4481970_8b76e64f",
+        "filename": "android/android-emu/android/metrics/PerfStatReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-14T22:28:26Z",
+      "side": 1,
+      "message": "You are right. You can put an incomplete type here as long as you don\u0027t call destructor for std::unique_ptr here.",
+      "parentUuid": "480b19ef_529e99c2",
+      "range": {
+        "startLine": 61,
+        "startChar": 9,
+        "endLine": 61,
+        "endChar": 19
+      },
+      "revId": "4fd0cb8d089e14a3c3481bef707284b1be448816",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
