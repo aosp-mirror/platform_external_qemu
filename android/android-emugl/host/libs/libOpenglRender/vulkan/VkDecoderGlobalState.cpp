@@ -202,15 +202,33 @@ public:
         const VkImageCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkImage* pImage) {
-        auto res = m_vk->vkCreateImage(device, pCreateInfo, pAllocator, pImage);
 
-        if (res != VK_SUCCESS) return res;
+        AndroidNativeBufferInfo anbInfo;
+        bool isAndroidNativeBuffer =
+            parseAndroidNativeBufferInfo(pCreateInfo, &anbInfo);
+
+        VkResult createRes = VK_SUCCESS;
+
+        if (isAndroidNativeBuffer) {
+            createRes =
+                prepareAndroidNativeBufferImage(
+                    m_vk, device, pCreateInfo, pAllocator, &anbInfo);
+            if (createRes == VK_SUCCESS) {
+                *pImage = anbInfo.image;
+            }
+        } else {
+            createRes =
+                m_vk->vkCreateImage(device, pCreateInfo, pAllocator, pImage);
+        }
+
+        if (createRes != VK_SUCCESS) return createRes;
 
         AutoLock lock(mLock);
-        auto& imageInfo = mImageInfo[*pImage];
-        parseAndroidNativeBufferInfo(pCreateInfo, &imageInfo.anbInfo);
 
-        return res;
+        auto& imageInfo = mImageInfo[*pImage];
+        imageInfo.anbInfo = anbInfo;
+
+        return createRes;
     }
 
     void on_vkDestroyImage(

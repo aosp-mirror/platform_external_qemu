@@ -21,6 +21,8 @@
 
 namespace goldfish_vk {
 
+class VulkanDispatch;
+
 // This class provides methods to create and query information about Android
 // native buffers in the context of creating Android swapchain images that have
 // Android native buffer backing.
@@ -34,11 +36,27 @@ struct AndroidNativeBufferInfo {
     int format;
     int stride;
     uint32_t colorBufferHandle;
+
+    // To be populatd later as we go.
+    VkImage image = VK_NULL_HANDLE;
+    VkMemoryRequirements memReqs;
+
+    VkDeviceMemory imageMemory;
+    VkDeviceMemory stagingMemory;
+
+    uint32_t stagingMemoryTypeIndex;
 };
 
 bool parseAndroidNativeBufferInfo(
     const VkImageCreateInfo* pCreateInfo,
     AndroidNativeBufferInfo* info_out);
+
+VkResult prepareAndroidNativeBufferImage(
+    VulkanDispatch* vk,
+    VkDevice device,
+    const VkImageCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    AndroidNativeBufferInfo* out);
 
 void getGralloc0Usage(VkFormat format, VkImageUsageFlags imageUsage,
                       int* usage_out);
