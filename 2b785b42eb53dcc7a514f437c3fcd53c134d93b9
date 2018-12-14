@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "06c521fc_175041b0",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-14T01:37:24Z",
+      "side": 1,
+      "message": "Why do you need this variable?",
+      "range": {
+        "startLine": 196,
+        "startChar": 16,
+        "endLine": 196,
+        "endChar": 24
+      },
+      "revId": "2b785b42eb53dcc7a514f437c3fcd53c134d93b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f0fc4a6e_3267e2cb",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-14T01:37:24Z",
+      "side": 1,
+      "message": "Will std::remove_if fit here?",
+      "range": {
+        "startLine": 205,
+        "startChar": 16,
+        "endLine": 205,
+        "endChar": 25
+      },
+      "revId": "2b785b42eb53dcc7a514f437c3fcd53c134d93b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
