@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "71f57a1d_7deec8d8",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-14T02:11:58Z",
+      "side": 1,
+      "message": "Should we erase queues first (to avoid references to nowhere)?",
+      "range": {
+        "startLine": 192,
+        "startChar": 23,
+        "endLine": 192,
+        "endChar": 37
+      },
+      "revId": "28d2d29b5108358c90e9c6866c8810a7aa14d6f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
