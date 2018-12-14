@@ -439,6 +439,7 @@ void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add
 
     // Obtain the free slot.
     {
+        int ret;
         hax_slot* slot = NULL;
         for (i = 0; i < HAX_MAX_SLOTS; ++i) {
             if (free_slots[i]) {
@@ -468,10 +469,14 @@ void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add
         slot->size = end - start;
         slot->hva = hva;
         slot->flags = flags;
-        hax_set_ram(slot->start,
-                    slot->size,
-                    (uint64_t)(uintptr_t)slot->hva,
-                    slot->flags);
+        ret = hax_set_ram(slot->start,
+                          slot->size,
+                          (uint64_t)(uintptr_t)slot->hva,
+                          slot->flags);
+        if (ret) {
+            qemu_abort("%s: FATAL: final hax_set_ram() failed, ret=%d\n",
+                       __func__, ret);
+        }
         HAX_SET_PHYS_MEM_DUMP("After addition of new slot")
     }
 end:
@@ -567,10 +572,19 @@ user_backed_flags_to_hax(int flags) {
 }
 
 static void hax_user_backed_ram_map(uint64_t gpa, void* hva, uint64_t size, int flags) {
+    int ret;
+
+    ret = hax_populate_ram((uint64_t)(uintptr_t)hva, size);
+    if (ret < 0) {
+        fprintf(stderr, "%s: Failed to add RAM block, ret=%d\n", __func__, ret);
+        abort();
+    }
+
     hax_set_phys_mem_general(hva, gpa, size, true /* add */, user_backed_flags_to_hax(flags));
 }
 
 static void hax_user_backed_ram_unmap(uint64_t gpa, uint64_t size) {
+    /* HAXM will take care of freeing the RAM block [hva, hva + size) */
     hax_set_phys_mem_general(0, gpa, size, false /* del */, HAX_RAM_INFO_INVALID);
 }
 
