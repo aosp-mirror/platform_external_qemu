@@ -478,6 +478,7 @@ static void pc_i440fx_2_12_machine_options(MachineClass *m)
     pc_i440fx_machine_options(m);
     m->alias = "pc";
     m->is_default = 1;
+    m->teardown = pc_memory_teardown;
 }
 
 DEFINE_I440FX_MACHINE(v2_12, "pc-i440fx-2.12", NULL,
