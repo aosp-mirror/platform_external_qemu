@@ -102,6 +102,7 @@ void qemu_set_user_backed_mapping_funcs(QemuUserBackedRamMapFunc mapFunc,
                                         QemuUserBackedRamUnmapFunc unmapFunc);
 
 void qemu_ram_free(RAMBlock *block);
+void qemu_set_ram_blocks_exiting(void);
 
 int qemu_ram_resize(RAMBlock *block, ram_addr_t newsize, Error **errp);
 
