@@ -368,6 +368,11 @@ struct MemoryRegionSection {
     bool readonly;
 };
 
+/* memory_region_set_exiting: Set the memoryregion api state to 'exiting' mode,
+ * which will allow memory_region_finalize to remove regions from mappings on exit.
+ */
+void memory_region_set_exiting(void);
+
 /**
  * memory_region_init: Initialize a memory region
  *
