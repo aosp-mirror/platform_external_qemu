@@ -43,6 +43,7 @@ static unsigned memory_region_transaction_depth;
 static bool memory_region_update_pending;
 static bool ioeventfd_update_pending;
 static bool global_dirty_log = false;
+static bool memory_region_exiting_teardown = false;
 
 static QTAILQ_HEAD(memory_listeners, MemoryListener) memory_listeners
     = QTAILQ_HEAD_INITIALIZER(memory_listeners);
@@ -1177,6 +1178,11 @@ static void memory_region_do_init(MemoryRegion *mr,
     }
 }
 
+void memory_region_set_exiting() {
+    memory_region_exiting_teardown = true;
+    qemu_set_ram_blocks_exiting();
+}
+
 void memory_region_init(MemoryRegion *mr,
                         Object *owner,
                         const char *name,
@@ -1736,7 +1742,7 @@ static void memory_region_finalize(Object *obj)
      * memory_region_set_enabled instead could trigger a transaction
      * and cause an infinite loop.
      */
-    mr->enabled = false;
+    mr->enabled = memory_region_exiting_teardown;
     memory_region_transaction_begin();
     while (!QTAILQ_EMPTY(&mr->subregions)) {
         MemoryRegion *subregion = QTAILQ_FIRST(&mr->subregions);
