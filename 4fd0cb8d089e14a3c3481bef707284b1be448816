@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "af1539c2_848fbdc2",
+        "filename": "android/android-emu/android/metrics/PerfStatReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-14T22:11:52Z",
+      "side": 1,
+      "message": "What is the benefit having it as a pointer?",
+      "range": {
+        "startLine": 61,
+        "startChar": 9,
+        "endLine": 61,
+        "endChar": 19
+      },
+      "revId": "4fd0cb8d089e14a3c3481bef707284b1be448816",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
