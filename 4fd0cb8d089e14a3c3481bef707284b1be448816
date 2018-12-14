@@ -46,6 +46,30 @@
       "revId": "4fd0cb8d089e14a3c3481bef707284b1be448816",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "55c31a09_8a97043e",
+        "filename": "android/android-emu/android/metrics/PerfStatReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-14T22:23:41Z",
+      "side": 1,
+      "message": "But you can\u0027t do this. std::unique_ptr\u003cT\u003e requires you to have T fully defined.",
+      "parentUuid": "8d9844e2_de442da9",
+      "range": {
+        "startLine": 61,
+        "startChar": 9,
+        "endLine": 61,
+        "endChar": 19
+      },
+      "revId": "4fd0cb8d089e14a3c3481bef707284b1be448816",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
