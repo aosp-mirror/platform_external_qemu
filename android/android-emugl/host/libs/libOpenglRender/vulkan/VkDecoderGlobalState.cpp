@@ -383,7 +383,8 @@ public:
         VkFormat format,
         VkImageUsageFlags imageUsage,
         int* grallocUsage) {
-        return VK_ERROR_INCOMPATIBLE_DRIVER;
+        getGralloc0Usage(format, imageUsage, grallocUsage);
+        return VK_SUCCESS;
     }
 
     VkResult on_vkGetSwapchainGrallocUsage2ANDROID(
@@ -393,7 +394,10 @@ public:
         VkSwapchainImageUsageFlagsANDROID swapchainImageUsage,
         uint64_t* grallocConsumerUsage,
         uint64_t* grallocProducerUsage) {
-        return VK_ERROR_INCOMPATIBLE_DRIVER;
+        getGralloc1Usage(format, imageUsage, swapchainImageUsage,
+                         grallocConsumerUsage,
+                         grallocProducerUsage);
+        return VK_SUCCESS;
     }
 
     VkResult on_vkAcquireImageANDROID(
