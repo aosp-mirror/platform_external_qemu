@@ -13,6 +13,7 @@
 // limitations under the License.
 #include "VkDecoderGlobalState.h"
 
+#include "VkAndroidNativeBuffer.h"
 #include "VulkanDispatch.h"
 
 #include "android/base/containers/Lookup.h"
@@ -196,6 +197,36 @@ public:
         m_vk->vkDestroyDevice(device, pAllocator);
     }
 
+    VkResult on_vkCreateImage(
+        VkDevice device,
+        const VkImageCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkImage* pImage) {
+        auto res = m_vk->vkCreateImage(device, pCreateInfo, pAllocator, pImage);
+
+        if (res != VK_SUCCESS) return res;
+
+        AutoLock lock(mLock);
+        auto& imageInfo = mImageInfo[*pImage];
+        parseAndroidNativeBufferInfo(pCreateInfo, &imageInfo.anbInfo);
+
+        return res;
+    }
+
+    void on_vkDestroyImage(
+        VkDevice device,
+        VkImage image,
+        const VkAllocationCallbacks* pAllocator) {
+
+        AutoLock lock(mLock);
+        auto it = mImageInfo.find(image);
+
+        if (it == mImageInfo.end()) return;
+        mImageInfo.erase(image);
+
+        m_vk->vkDestroyImage(device, image, pAllocator);
+    }
+
     VkResult on_vkAllocateMemory(
         VkDevice device,
         const VkMemoryAllocateInfo* pAllocateInfo,
@@ -371,10 +402,16 @@ private:
         std::unordered_map<uint32_t, std::vector<VkQueue>> queues;
     };
 
+    struct ImageInfo {
+        AndroidNativeBufferInfo anbInfo;
+    };
+
     std::unordered_map<VkPhysicalDevice, PhysicalDeviceInfo>
         mPhysdevInfo;
     std::unordered_map<VkDevice, DeviceInfo>
         mDeviceInfo;
+    std::unordered_map<VkImage, ImageInfo>
+        mImageInfo;
 
     // Back-reference to the physical device associated with a particular
     // VkDevice, and the VkDevice corresponding to a VkQueue.
@@ -430,6 +467,21 @@ void VkDecoderGlobalState::on_vkDestroyDevice(
     VkDevice device,
     const VkAllocationCallbacks* pAllocator) {
     mImpl->on_vkDestroyDevice(device, pAllocator);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateImage(
+    VkDevice device,
+    const VkImageCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkImage* pImage) {
+    return mImpl->on_vkCreateImage(device, pCreateInfo, pAllocator, pImage);
+}
+
+void VkDecoderGlobalState::on_vkDestroyImage(
+    VkDevice device,
+    VkImage image,
+    const VkAllocationCallbacks* pAllocator) {
+    mImpl->on_vkDestroyImage(device, image, pAllocator);
 }
 
 VkResult VkDecoderGlobalState::on_vkAllocateMemory(
