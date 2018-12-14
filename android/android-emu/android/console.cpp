@@ -2523,6 +2523,20 @@ do_avd_name( ControlClient  client, char*  args )
     return 0;
 }
 
+static int
+do_avd_pause( ControlClient  client, char*  args )
+{
+    bool success = vmopers(client)->vmPause();
+    return success ? 0 : -1;
+}
+
+static int
+do_avd_resume( ControlClient  client, char*  args )
+{
+    bool success = vmopers(client)->vmResume();
+    return success ? 0 : -1;
+}
+
 static const CommandDefRec  vm_commands[] =
 {
     { "stop", "stop the virtual device",
@@ -2548,6 +2562,15 @@ static const CommandDefRec  vm_commands[] =
     { "snapshot", "state snapshot commands",
     "allows you to save and restore the virtual device state in snapshots\r\n",
     NULL, NULL, snapshot_commands },
+
+    { "pause", "pause the virtual device",
+    "'avd pause' pauses the virtual device. This is useful for saving system resources\r\n"
+    "when the virtual device is not immediately needed.",
+    NULL, do_avd_pause, NULL },
+
+    { "resume", "resume the virtual device",
+    "'avd resume' resumes a previously-paused virtual device.\r\n",
+    NULL, do_avd_resume, NULL },
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
