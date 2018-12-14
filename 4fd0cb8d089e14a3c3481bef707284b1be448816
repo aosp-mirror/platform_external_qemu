@@ -94,6 +94,30 @@
       "revId": "4fd0cb8d089e14a3c3481bef707284b1be448816",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "90d8848c_53e572d0",
+        "filename": "android/android-emu/android/metrics/PerfStatReporter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-14T22:28:22Z",
+      "side": 1,
+      "message": "It seems like a fwd decl is ok as long as certain conditions are met about having the destructor defined:\n\nhttps://howardhinnant.github.io/incomplete.html",
+      "parentUuid": "480b19ef_529e99c2",
+      "range": {
+        "startLine": 61,
+        "startChar": 9,
+        "endLine": 61,
+        "endChar": 19
+      },
+      "revId": "4fd0cb8d089e14a3c3481bef707284b1be448816",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
