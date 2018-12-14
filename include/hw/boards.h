@@ -169,6 +169,7 @@ struct MachineClass {
 
     void (*init)(MachineState *state);
     void (*reset)(void);
+    void (*teardown)(void); /* Stuff to run when vl.c is exiting */
     void (*hot_add_cpu)(const int64_t id, Error **errp);
     int (*kvm_type)(const char *arg);
 

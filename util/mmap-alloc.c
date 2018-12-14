@@ -199,6 +199,7 @@ void *qemu_ram_mmap(int fd, size_t size, size_t align, bool shared)
 
 void qemu_ram_munmap(void *ptr, size_t size)
 {
+    fprintf(stderr, "%s: %p %zu\n", __func__, ptr, size);
 #ifndef _WIN32
     if (ptr) {
         /* Unmap both the RAM block and the guard page */

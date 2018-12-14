@@ -5658,6 +5658,15 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     migration_object_finalize();
     /* TODO: unref root container, check all devices are ok */
 
+    /* bug: 120951634 Eagerly tear down the MemoryRegion here */
+    {
+        MachineClass *mc;
+        mc = current_machine ? MACHINE_GET_CLASS(current_machine) : NULL;
+        if (mc && mc->teardown) {
+            mc->teardown();
+        }
+    }
+
     if (qemu_mutex_iothread_locked()) {
         qemu_mutex_unlock_iothread();
     } else {
