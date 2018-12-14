@@ -22,6 +22,30 @@
       "revId": "1b6b5cd9692a7a225c1f44715fc95acc55c8000c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "89048a16_3564385a",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-14T16:06:54Z",
+      "side": 1,
+      "message": "Yes; if glGenRenderbuffers is called, ther eis a new RenderbufferData, but everBound is false. This is what the spec says to do as well.",
+      "parentUuid": "a980cfbd_6fab7df7",
+      "range": {
+        "startLine": 519,
+        "startChar": 33,
+        "endLine": 519,
+        "endChar": 37
+      },
+      "revId": "1b6b5cd9692a7a225c1f44715fc95acc55c8000c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
