@@ -1776,12 +1776,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_154;
                 vkReadStream->read((uint64_t*)&cgen_var_154, 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_154, (VkImage*)pImage, 1);
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateImage\n");;
-                }
                 VkResult vkCreateImage_VkResult_return = (VkResult)0;
-                vkCreateImage_VkResult_return = m_vk->vkCreateImage(device, pCreateInfo, pAllocator, pImage);
+                vkCreateImage_VkResult_return = m_state->on_vkCreateImage(device, pCreateInfo, pAllocator, pImage);
                 uint64_t cgen_var_155;
                 vkStream->handleMapping()->mapHandles_VkImage_u64(pImage, &cgen_var_155, 1);
                 vkStream->write((uint64_t*)&cgen_var_155, 8);
@@ -1808,11 +1804,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkDestroyImage\n");;
-                }
-                m_vk->vkDestroyImage(device, image, pAllocator);
+                m_state->on_vkDestroyImage(device, image, pAllocator);
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
                 break;
