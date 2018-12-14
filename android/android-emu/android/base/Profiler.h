@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #pragma once
 
 #include "android/base/Compiler.h"
@@ -23,41 +22,6 @@
 
 namespace android {
 namespace base {
-
-class Profiler {
-public:
-    Profiler() = default;
-    void start() {
-        mStartUs = System::get()->getHighResTimeUs();
-    }
-    uint64_t elapsedUs() {
-        return System::get()->getHighResTimeUs() - mStartUs;
-    }
-private:
-    uint64_t mStartUs = 0;
-    DISALLOW_COPY_ASSIGN_AND_MOVE(Profiler);
-};
-
-class ScopedProfiler {
-public:
-    using Callback = std::function<void(const char*, uint64_t)>;
-    ScopedProfiler(const std::string& tag, Callback c) :
-        mProfiler(), mTag(tag), mCallback(c) {
-        mProfiler.start();
-    }
-    ~ScopedProfiler() {
-        mCallback(mTag.c_str(), mProfiler.elapsedUs());
-    }
-private:
-    Profiler mProfiler;
-    std::string mTag;
-    Callback mCallback;
-    DISALLOW_COPY_ASSIGN_AND_MOVE(ScopedProfiler);
-};
-
-#define PROFILE_CALL_STDERR(tag) \
-    android::base::ScopedProfiler __scoped_profiler(tag, [](const char* tag2, uint64_t elapsed) \
-            { fprintf(stderr, "%s: %" PRIu64 " us\n", tag2, elapsed); }); \
 
 class MemoryProfiler {
 public:

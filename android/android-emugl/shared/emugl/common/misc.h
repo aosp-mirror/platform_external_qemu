@@ -14,7 +14,6 @@
 
 #pragma once
 
-#include "android/base/Profiler.h"
 #include "android/opengl/emugl_config.h"
 
 #ifdef _MSC_VER
@@ -56,6 +55,4 @@ namespace emugl {
     // CPU usage get/set.
     EMUGL_COMMON_API void setCpuUsage(android::base::CpuUsage* usage);
     EMUGL_COMMON_API android::base::CpuUsage* getCpuUsage();
-
-    using Profiler = android::base::Profiler;
 }
