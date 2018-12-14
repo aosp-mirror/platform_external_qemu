@@ -92,6 +92,7 @@ RAMBlock *qemu_ram_alloc_resizeable(ram_addr_t size, ram_addr_t max_size,
                                                     void *host),
                                     MemoryRegion *mr, Error **errp);
 void qemu_ram_free(RAMBlock *block);
+void qemu_set_ram_blocks_exiting(void);
 
 int qemu_ram_resize(RAMBlock *block, ram_addr_t newsize, Error **errp);
 
