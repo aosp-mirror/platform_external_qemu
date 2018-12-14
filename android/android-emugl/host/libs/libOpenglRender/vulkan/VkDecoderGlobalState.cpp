@@ -377,6 +377,43 @@ public:
         return info->size;
     }
 
+    // VK_ANDROID_native_buffer
+    VkResult on_vkGetSwapchainGrallocUsageANDROID(
+        VkDevice device,
+        VkFormat format,
+        VkImageUsageFlags imageUsage,
+        int* grallocUsage) {
+        return VK_ERROR_INCOMPATIBLE_DRIVER;
+    }
+
+    VkResult on_vkGetSwapchainGrallocUsage2ANDROID(
+        VkDevice device,
+        VkFormat format,
+        VkImageUsageFlags imageUsage,
+        VkSwapchainImageUsageFlagsANDROID swapchainImageUsage,
+        uint64_t* grallocConsumerUsage,
+        uint64_t* grallocProducerUsage) {
+        return VK_ERROR_INCOMPATIBLE_DRIVER;
+    }
+
+    VkResult on_vkAcquireImageANDROID(
+        VkDevice device,
+        VkImage image,
+        int nativeFenceFd,
+        VkSemaphore semaphore,
+        VkFence fence) {
+        return VK_ERROR_INCOMPATIBLE_DRIVER;
+    }
+
+    VkResult on_vkQueueSignalReleaseImageANDROID(
+        VkQueue queue,
+        uint32_t waitSemaphoreCount,
+        const VkSemaphore* pWaitSemaphores,
+        VkImage image,
+        int* pNativeFenceFd) {
+        return VK_ERROR_INCOMPATIBLE_DRIVER;
+    }
+
 private:
 
     VulkanDispatch* m_vk;
@@ -521,4 +558,48 @@ VkDeviceSize VkDecoderGlobalState::getDeviceMemorySize(VkDeviceMemory memory) {
     return mImpl->getDeviceMemorySize(memory);
 }
 
+// VK_ANDROID_native_buffer
+VkResult VkDecoderGlobalState::on_vkGetSwapchainGrallocUsageANDROID(
+    VkDevice device,
+    VkFormat format,
+    VkImageUsageFlags imageUsage,
+    int* grallocUsage) {
+    return mImpl->on_vkGetSwapchainGrallocUsageANDROID(
+        device, format, imageUsage, grallocUsage);
+}
+
+VkResult VkDecoderGlobalState::on_vkGetSwapchainGrallocUsage2ANDROID(
+    VkDevice device,
+    VkFormat format,
+    VkImageUsageFlags imageUsage,
+    VkSwapchainImageUsageFlagsANDROID swapchainImageUsage,
+    uint64_t* grallocConsumerUsage,
+    uint64_t* grallocProducerUsage) {
+    return mImpl->on_vkGetSwapchainGrallocUsage2ANDROID(
+        device, format, imageUsage,
+        swapchainImageUsage,
+        grallocConsumerUsage,
+        grallocProducerUsage);
+}
+
+VkResult VkDecoderGlobalState::on_vkAcquireImageANDROID(
+    VkDevice device,
+    VkImage image,
+    int nativeFenceFd,
+    VkSemaphore semaphore,
+    VkFence fence) {
+    return mImpl->on_vkAcquireImageANDROID(
+        device, image, nativeFenceFd, semaphore, fence);
+}
+
+VkResult VkDecoderGlobalState::on_vkQueueSignalReleaseImageANDROID(
+    VkQueue queue,
+    uint32_t waitSemaphoreCount,
+    const VkSemaphore* pWaitSemaphores,
+    VkImage image,
+    int* pNativeFenceFd) {
+    return mImpl->on_vkQueueSignalReleaseImageANDROID(
+        queue, waitSemaphoreCount, pWaitSemaphores,
+        image, pNativeFenceFd);
+}
 } // namespace goldfish_vk

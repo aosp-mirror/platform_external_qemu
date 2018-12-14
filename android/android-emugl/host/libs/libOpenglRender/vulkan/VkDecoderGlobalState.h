@@ -17,6 +17,8 @@
 
 #include <memory>
 
+#include "cereal/common/goldfish_vk_private_defs.h"
+
 namespace goldfish_vk {
 
 // Class for tracking host-side state. Currently we only care about
@@ -107,6 +109,32 @@ public:
 
     uint8_t* getMappedHostPointer(VkDeviceMemory memory);
     VkDeviceSize getDeviceMemorySize(VkDeviceMemory memory);
+
+    // VK_ANDROID_native_buffer
+    VkResult on_vkGetSwapchainGrallocUsageANDROID(
+        VkDevice device,
+        VkFormat format,
+        VkImageUsageFlags imageUsage,
+        int* grallocUsage);
+    VkResult on_vkGetSwapchainGrallocUsage2ANDROID(
+        VkDevice device,
+        VkFormat format,
+        VkImageUsageFlags imageUsage,
+        VkSwapchainImageUsageFlagsANDROID swapchainImageUsage,
+        uint64_t* grallocConsumerUsage,
+        uint64_t* grallocProducerUsage);
+    VkResult on_vkAcquireImageANDROID(
+        VkDevice device,
+        VkImage image,
+        int nativeFenceFd,
+        VkSemaphore semaphore,
+        VkFence fence);
+    VkResult on_vkQueueSignalReleaseImageANDROID(
+        VkQueue queue,
+        uint32_t waitSemaphoreCount,
+        const VkSemaphore* pWaitSemaphores,
+        VkImage image,
+        int* pNativeFenceFd);
 
 private:
     class Impl;
