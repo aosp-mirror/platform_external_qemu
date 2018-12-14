@@ -55,15 +55,15 @@ protected:
                      android::base::Looper::Duration checkIntervalMs);
 
 private:
-    bool checkPerfStats();
+    void refreshPerfStats();
     void fillProto(android_studio::EmulatorPerformanceStats* perfStatProto);
 
+    std::unique_ptr<android_studio::EmulatorPerformanceStats> mCurrPerfStats;
     android::base::Looper* const mLooper;
     const android::base::Looper::Duration mCheckIntervalMs;
     android::base::RecurrentTask mRecurrentTask;
 
     // TODO: Add more perf stats here.
-    android::base::System::MemUsage mCurrUsage;
     android::base::Lock mLock;
 
     DISALLOW_COPY_AND_ASSIGN(PerfStatReporter);
