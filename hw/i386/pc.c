@@ -1324,6 +1324,8 @@ void xen_load_linux(PCMachineState *pcms)
     pcms->fw_cfg = fw_cfg;
 }
 
+static MemoryRegion* pc_ram_region = NULL;
+
 void pc_memory_init(PCMachineState *pcms,
                     MemoryRegion *system_memory,
                     MemoryRegion *rom_memory,
@@ -1353,6 +1355,7 @@ void pc_memory_init(PCMachineState *pcms,
         return;
     }
     *ram_memory = ram;
+    pc_ram_region = ram;
     ram_below_4g = g_malloc(sizeof(*ram_below_4g));
     memory_region_init_alias(ram_below_4g, NULL, "ram-below-4g", ram,
                              0, pcms->below_4g_mem_size);
@@ -1460,6 +1463,29 @@ void pc_memory_init(PCMachineState *pcms,
 
     /* Init default IOAPIC address space */
     pcms->ioapic_as = &address_space_memory;
+}
+
+void pc_memory_teardown()
+{
+    // Teardown system memory, then pc.ram.
+    memory_region_set_exiting();
+    {
+        Object* system_mem = OBJECT(get_system_memory());
+        uint32_t ref = system_mem ? system_mem->ref : 0;
+        uint32_t i = 0;
+        for (; i < ref; ++i) {
+            object_unref(system_mem);
+        }
+    }
+
+    {
+        Object* pc_mem = OBJECT(pc_ram_region);
+        uint32_t ref = pc_mem ? pc_mem->ref : 0;
+        uint32_t i = 0;
+        for (; i < ref; ++i) {
+            object_unref(pc_mem);
+        }
+    }
 }
 
 /*
