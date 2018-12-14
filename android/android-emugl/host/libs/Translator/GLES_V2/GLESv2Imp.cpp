@@ -515,9 +515,11 @@ GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuff
         if(!globalRenderBufferName){
             ctx->shareGroup()->genName(NamedObjectType::RENDERBUFFER,
                                        renderbuffer);
+            RenderbufferData* rboData = new RenderbufferData();
+            rboData->everBound = true;
             ctx->shareGroup()->setObjectData(
                     NamedObjectType::RENDERBUFFER, renderbuffer,
-                    ObjectDataPtr(new RenderbufferData()));
+                    ObjectDataPtr(rboData));
             globalRenderBufferName = ctx->shareGroup()->getGlobalName(
                     NamedObjectType::RENDERBUFFER, renderbuffer);
         }
@@ -1352,7 +1354,9 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
                                          renderbuffer)) {
             ctx->shareGroup()->genName(NamedObjectType::RENDERBUFFER,
                                        renderbuffer);
-            obj = ObjectDataPtr(new RenderbufferData());
+            RenderbufferData* rboData = new RenderbufferData();
+            rboData->everBound = true;
+            obj = ObjectDataPtr(rboData);
             ctx->shareGroup()->setObjectData(NamedObjectType::RENDERBUFFER,
                                              renderbuffer, obj);
         }
@@ -2747,11 +2751,12 @@ GL_APICALL GLboolean    GL_APIENTRY glIsFramebuffer(GLuint framebuffer){
 GL_APICALL GLboolean    GL_APIENTRY glIsRenderbuffer(GLuint renderbuffer){
     GET_CTX_RET(GL_FALSE)
     if(renderbuffer && ctx->shareGroup().get()){
-        return (ctx->shareGroup()->isObject(NamedObjectType::RENDERBUFFER,
-                                            renderbuffer) &&
-                ctx->getRenderbufferBinding() == renderbuffer)
-                       ? GL_TRUE
-                       : GL_FALSE;
+        auto obj = ctx->shareGroup()->getObjectDataPtr(
+                NamedObjectType::RENDERBUFFER, renderbuffer);
+        if (obj) {
+            RenderbufferData *rboData = (RenderbufferData *)obj.get();
+            return rboData->everBound ? GL_TRUE : GL_FALSE;
+        }
     }
     return GL_FALSE;
 }
