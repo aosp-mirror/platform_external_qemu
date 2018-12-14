@@ -26,6 +26,8 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         },
         .vmReset = nullptr,       // Not currently mocked.
         .vmShutdown = nullptr,    // Not currently mocked.
+        .vmPause = nullptr,       // Not currently mocked.
+        .vmResume = nullptr,      // Not currently mocked.
         .vmIsRunning = nullptr,   // Not currently mocked.
         .snapshotList = nullptr,  // Not currently mocked.
         .snapshotSave = [](const char* name,
