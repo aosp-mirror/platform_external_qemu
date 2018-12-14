@@ -27,6 +27,8 @@ using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Lock;
 
+namespace goldfish_vk {
+
 class VkDecoderGlobalState::Impl {
 public:
     Impl() : m_vk(emugl::vkDispatch()) { }
@@ -363,3 +365,5 @@ uint8_t* VkDecoderGlobalState::getMappedHostPointer(VkDeviceMemory memory) {
 VkDeviceSize VkDecoderGlobalState::getDeviceMemorySize(VkDeviceMemory memory) {
     return mImpl->getDeviceMemorySize(memory);
 }
+
+} // namespace goldfish_vk
