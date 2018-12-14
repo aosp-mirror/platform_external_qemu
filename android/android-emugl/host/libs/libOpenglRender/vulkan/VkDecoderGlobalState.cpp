@@ -202,6 +202,21 @@ public:
         m_vk->vkDestroyDevice(device, pAllocator);
     }
 
+    VkResult on_vkCreateImage(
+        VkDevice device,
+        const VkImageCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkImage* pImage) {
+        return m_vk->vkCreateImage(device, pCreateInfo, pAllocator, pImage);
+    }
+
+    void on_vkDestroyImage(
+        VkDevice device,
+        VkImage image,
+        const VkAllocationCallbacks* pAllocator) {
+        m_vk->vkDestroyImage(device, image, pAllocator);
+    }
+
     VkResult on_vkAllocateMemory(
         VkDevice device,
         const VkMemoryAllocateInfo* pAllocateInfo,
@@ -439,6 +454,21 @@ void VkDecoderGlobalState::on_vkDestroyDevice(
     VkDevice device,
     const VkAllocationCallbacks* pAllocator) {
     mImpl->on_vkDestroyDevice(device, pAllocator);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateImage(
+    VkDevice device,
+    const VkImageCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkImage* pImage) {
+    return mImpl->on_vkCreateImage(device, pCreateInfo, pAllocator, pImage);
+}
+
+void VkDecoderGlobalState::on_vkDestroyImage(
+    VkDevice device,
+    VkImage image,
+    const VkAllocationCallbacks* pAllocator) {
+    mImpl->on_vkDestroyImage(device, image, pAllocator);
 }
 
 VkResult VkDecoderGlobalState::on_vkAllocateMemory(
