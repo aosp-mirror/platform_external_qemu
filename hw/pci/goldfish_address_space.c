@@ -550,6 +550,10 @@ static const TypeInfo address_space_pci_info = {
     .parent        = TYPE_PCI_DEVICE,
     .instance_size = sizeof(struct address_space_state),
     .class_init    = address_space_class_init,
+    .interfaces = (InterfaceInfo[]) {
+        { INTERFACE_CONVENTIONAL_PCI_DEVICE },
+        { },
+    },
 };
 
 static void address_space_register(void) {
