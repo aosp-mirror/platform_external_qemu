@@ -15,6 +15,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include "cereal/common/goldfish_vk_private_defs.h"
+
 #include <vector>
 
 namespace goldfish_vk {
@@ -37,5 +39,12 @@ struct AndroidNativeBufferInfo {
 bool parseAndroidNativeBufferInfo(
     const VkImageCreateInfo* pCreateInfo,
     AndroidNativeBufferInfo* info_out);
+
+void getGralloc0Usage(VkFormat format, VkImageUsageFlags imageUsage,
+                      int* usage_out);
+void getGralloc1Usage(VkFormat format, VkImageUsageFlags imageUsage,
+                      VkSwapchainImageUsageFlagsANDROID swapchainImageUsage,
+                      uint64_t* consumerUsage_out,
+                      uint64_t* producerUsage_out);
 
 } // namespace goldfish_vk
