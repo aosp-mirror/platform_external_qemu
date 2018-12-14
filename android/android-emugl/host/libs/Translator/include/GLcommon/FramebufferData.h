@@ -51,6 +51,8 @@ public:
     GLsizei width = 0;
     GLsizei height = 0;
     GLint samples = 0;
+
+    bool everBound = false;
 };
 
 const int MAX_ATTACH_POINTS = 19;
