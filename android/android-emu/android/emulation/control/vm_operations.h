@@ -112,6 +112,8 @@ typedef struct QAndroidVmOperations {
     bool (*vmStart)(void);
     void (*vmReset)(void);
     void (*vmShutdown)(void);
+    bool (*vmPause)(void);
+    bool (*vmResume)(void);
 
     bool (*vmIsRunning)(void);
 

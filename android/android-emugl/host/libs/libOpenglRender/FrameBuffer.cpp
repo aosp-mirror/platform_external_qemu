@@ -1805,7 +1805,6 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
             float dt = (float)(currTime - m_statsStartTime) / 1000.0f;
             auto usage = System::get()->getMemUsage();
             m_statsStartTime = currTime;
-            m_statsNumFrames = 0;
 
             auto cpuUsage = emugl::getCpuUsage();
             auto lastStats = cpuUsage->printUsage();
@@ -1813,6 +1812,8 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
                    (float)m_statsNumFrames / dt,
                    (float)usage.resident / 1048576.0f,
                    lastStats.c_str());
+
+            m_statsNumFrames = 0;
         }
     }
 
