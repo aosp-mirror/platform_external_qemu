@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "638c0f7f_d3ec97e0",
+        "filename": "exec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2437,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-14T17:42:39Z",
+      "side": 1,
+      "message": "Do we need to acquire any locks here (in the reading part as well)?",
+      "range": {
+        "startLine": 2437,
+        "startChar": 4,
+        "endLine": 2437,
+        "endChar": 22
+      },
+      "revId": "5f91735105c6ea50a65c9e00b49dce444b8b8bf8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1fb94cbf_adcc5650",
+        "filename": "hw/i386/pc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1477,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-14T17:42:39Z",
+      "side": 1,
+      "message": "Are we supposed to do unref one object in cycle? Will this produce dangling references?",
+      "range": {
+        "startLine": 1477,
+        "startChar": 12,
+        "endLine": 1477,
+        "endChar": 24
+      },
+      "revId": "5f91735105c6ea50a65c9e00b49dce444b8b8bf8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
