@@ -89,9 +89,12 @@ def make_event_handler_call(
     context_param,
     input_result_param,
     cgen):
+    extraParams = [context_param.paramName]
+    if input_result_param:
+        extraParams.append(input_result_param)
     return cgen.makeCallExpr( \
                "%s->on_%s" % (handler_access, api.name),
-               [context_param.paramName, input_result_param] + \
+               extraParams + \
                [p.paramName for p in api.parameters])
 
 def emit_custom_pre_validate(typeInfo, api, cgen):
@@ -329,10 +332,30 @@ def emit_default_encoding(typeInfo, api, cgen):
 def emit_only_goldfish_custom(typeInfo, api, cgen):
     cgen.vkApiCall( \
         api,
-        customPrefix="goldfish_",
+        customPrefix="mImpl->resources()->on_",
         customParameters=custom_encoder_args(api) + \
             [p.paramName for p in api.parameters])
     emit_return(typeInfo, api, cgen)
+
+def emit_only_resource_event(typeInfo, api, cgen):
+    input_result = None
+    retExpr = api.getRetVarExpr()
+
+    if retExpr:
+        retType = api.getRetTypeExpr()
+        input_result = SUCCESS_RET_TYPES[retType]
+        cgen.stmt("%s %s = (%s)0" % (retType, retExpr, retType))
+
+    cgen.stmt(
+        (("%s = " % retExpr) if retExpr else "") +
+        make_event_handler_call(
+            "mImpl->resources()",
+            api,
+            ENCODER_THIS_PARAM,
+            input_result, cgen))
+
+    if retExpr:
+        emit_return(typeInfo, api, cgen)
 
 def emit_with_custom_unwrap(custom):
     def call(typeInfo, api, cgen):
@@ -356,11 +379,10 @@ def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
         cgen.stmt("auto memory = pMemoryRanges[i].memory")
         cgen.stmt("auto size = pMemoryRanges[i].size")
         cgen.stmt("auto offset = pMemoryRanges[i].offset")
-        cgen.stmt("auto goldfishMem = as_goldfish_VkDeviceMemory(memory)")
         cgen.stmt("uint64_t streamSize = 0")
-        cgen.stmt("if (!goldfishMem) { %s->write(&streamSize, sizeof(uint64_t)); continue; }" % streamVar)
-        cgen.stmt("auto hostPtr = goldfishMem->ptr")
-        cgen.stmt("auto actualSize = size == VK_WHOLE_SIZE ? goldfishMem->size : size")
+        cgen.stmt("if (!memory) { %s->write(&streamSize, sizeof(uint64_t)); continue; }" % streamVar)
+        cgen.stmt("auto hostPtr = resources->getMappedPointer(memory)")
+        cgen.stmt("auto actualSize = size == VK_WHOLE_SIZE ? resources->getMappedSize(memory) : size")
         cgen.stmt("if (!hostPtr) { %s->write(&streamSize, sizeof(uint64_t)); continue; }" % streamVar)
         cgen.stmt("streamSize = actualSize")
         cgen.stmt("%s->write(&streamSize, sizeof(uint64_t))" % streamVar)
@@ -393,11 +415,10 @@ def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
         cgen.stmt("auto memory = pMemoryRanges[i].memory")
         cgen.stmt("auto size = pMemoryRanges[i].size")
         cgen.stmt("auto offset = pMemoryRanges[i].offset")
-        cgen.stmt("auto goldfishMem = as_goldfish_VkDeviceMemory(memory)")
         cgen.stmt("uint64_t streamSize = 0")
-        cgen.stmt("if (!goldfishMem) { %s->read(&streamSize, sizeof(uint64_t)); continue; }" % streamVar)
-        cgen.stmt("auto hostPtr = goldfishMem->ptr")
-        cgen.stmt("auto actualSize = size == VK_WHOLE_SIZE ? goldfishMem->size : size")
+        cgen.stmt("if (!memory) { %s->read(&streamSize, sizeof(uint64_t)); continue; }" % streamVar)
+        cgen.stmt("auto hostPtr = resources->getMappedPointer(memory)")
+        cgen.stmt("auto actualSize = size == VK_WHOLE_SIZE ? resources->getMappedSize(memory) : size")
         cgen.stmt("if (!hostPtr) { %s->read(&streamSize, sizeof(uint64_t)); continue; }" % streamVar)
         cgen.stmt("streamSize = actualSize")
         cgen.stmt("%s->read(&streamSize, sizeof(uint64_t))" % streamVar)
@@ -411,22 +432,22 @@ def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
 
 def unwrap_VkNativeBufferANDROID():
     def mapOp(cgen, orig, local):
-        cgen.stmt("goldfish_unwrap_VkNativeBufferANDROID(%s, %s)" %
+        cgen.stmt("mImpl->resources()->unwrap_VkNativeBufferANDROID(%s, %s)" %
                   (orig.paramName, local.paramName))
     return { "pCreateInfo" : { "mapOp" : mapOp } }
 
 def unwrap_vkAcquireImageANDROID_nativeFenceFd():
     def mapOp(cgen, orig, local):
-        cgen.stmt("goldfish_unwrap_vkAcquireImageANDROID_nativeFenceFd(%s, &%s)" %
+        cgen.stmt("mImpl->resources()->unwrap_vkAcquireImageANDROID_nativeFenceFd(%s, &%s)" %
                   (orig.paramName, local.paramName))
     return { "nativeFenceFd" : { "mapOp" : mapOp } }
 
 custom_encodes = {
-    "vkEnumerateInstanceVersion" : emit_only_goldfish_custom,
-    "vkEnumerateDeviceExtensionProperties" : emit_only_goldfish_custom,
-    "vkGetPhysicalDeviceProperties2" : emit_only_goldfish_custom,
-    "vkMapMemory" : emit_only_goldfish_custom,
-    "vkUnmapMemory" : emit_only_goldfish_custom,
+    "vkEnumerateInstanceVersion" : emit_only_resource_event,
+    "vkEnumerateDeviceExtensionProperties" : emit_only_resource_event,
+    "vkGetPhysicalDeviceProperties2" : emit_only_resource_event,
+    "vkMapMemory" : emit_only_resource_event,
+    "vkUnmapMemory" : emit_only_resource_event,
     "vkFlushMappedMemoryRanges" : encode_vkFlushMappedMemoryRanges,
     "vkInvalidateMappedMemoryRanges" : encode_vkInvalidateMappedMemoryRanges,
     "vkCreateImage" : emit_with_custom_unwrap(unwrap_VkNativeBufferANDROID()),
