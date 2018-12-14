@@ -36,6 +36,7 @@ CarDataPage::CarDataPage(QWidget* parent)
         sendCarEmulatorMessageLogged(msg, log);
     };
     mUi->tab_sensor->setSendEmulatorMsgCallback(sendFunc);
+    mUi->car_property_table->setSendEmulatorMsgCallback(sendFunc);
     if (sCarDataAgent != nullptr) {
         sCarDataAgent->setCarCallback(&CarDataPage::carDataCallback, this);
     }
@@ -66,6 +67,7 @@ void CarDataPage::onReceiveData(const char* msg, int length) {
     } else {
         printMsg = "Received raw string: " + protoStr;
     }
+    mUi->car_property_table->processMsg(emulatorMsg);
     D(printMsg.c_str());
 }
 
