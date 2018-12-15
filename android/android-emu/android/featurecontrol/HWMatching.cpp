@@ -390,6 +390,7 @@ bool downloadFeaturePatternsText(emulator_features::EmulatorFeaturePatterns* pat
             &curlDownloadFeaturePatternsCallback,
             &res, &curlError)) {
         D("failed to download feature flags from server.\n");
+        free(curlError);
         return false;
     }
 
@@ -412,6 +413,7 @@ bool downloadFeaturePatternsBinary(emulator_features::EmulatorFeaturePatterns* p
             &curlDownloadFeaturePatternsCallback,
             &res, &curlError)) {
         D("failed to download feature flags from server.\n");
+        free(curlError);
         return false;
     }
 
