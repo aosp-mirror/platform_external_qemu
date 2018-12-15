@@ -15,7 +15,6 @@
 */
 #include "EglOsApi.h"
 
-#include "android/base/Profiler.h"
 #include "android/base/synchronization/Lock.h"
 
 #include "CoreProfileConfigs.h"
@@ -34,21 +33,10 @@
 
 #include <unordered_map>
 
-#define PROFILE_SLOW_EGL 0
 #define DEBUG_PBUF_POOL 0
 
-#if PROFILE_SLOW_EGL
-
-// Log everything slower than 6 ms.
-#define PROFILE_SLOW(tag) \
-    android::base::ScopedProfiler __profile_slow(tag, [](const char* tag2, uint64_t elapsed) { \
-            if (elapsed >= 6000) { fprintf(stderr, "%s: slow, %f ms\n", tag2, elapsed / 1000.0f); }}); \
-
-#else
-
+// TODO: Replace with latency tracker.
 #define PROFILE_SLOW(tag)
-
-#endif
 
 namespace {
 
