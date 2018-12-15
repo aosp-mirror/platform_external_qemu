@@ -232,6 +232,7 @@ static bool parseQemuOptForQcow2(bool wipeData) {
         free(qcow2_path_buffer);
         if (img_creation_error) {
             error_report("%s", error_get_pretty(img_creation_error));
+            error_free(img_creation_error);
             return false;
         }
     }
@@ -295,6 +296,7 @@ static std::string initDrivePath(const char* id,
         if (img_creation_error) {
             tempfile_close(img);
             error_report("%s", error_get_pretty(img_creation_error));
+            error_free(img_creation_error);
             return "";
         }
         return imgPath;
@@ -317,6 +319,7 @@ static void mirrorTmpCache(const char* dst, const char* src) {
             &local_err);
     if (!blk) {
         error_report("Could not open '%s': ", dst);
+        error_free(local_err);
     } else {
         BlockDriverState* bs = blk_bs(blk);
         bdrv_change_backing_file(bs,
@@ -499,6 +502,7 @@ static bool updateDriveShareMode(const char* snapshotName,
                                 &error);
     if (res) {
         error_report("%s", error_get_pretty(error));
+        error_free(error);
         return false;
     }
     return true;
