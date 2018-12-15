@@ -16,6 +16,8 @@
 
 #include "emugl/common/misc.h"
 
+#include <cstring>
+
 static int s_apiLevel = -1;
 static bool s_isPhone = false;
 
