@@ -1313,28 +1313,31 @@ extern "C" int main(int argc, char** argv) {
     // won't appreciate it.
     args.add("-nodefaults");
 
-    if (!hw->hw_arc) {
-        if (hw->disk_ramdisk_path) {
-            args.add({"-kernel", hw->kernel_path, "-initrd", hw->disk_ramdisk_path});
-        } else {
-            derror("disk_ramdisk_path is required but missing");
-            return 1;
-        }
-        // add partition parameters with the sequence pre-defined in
-        // targetInfo.imagePartitionTypes
-        args.add(PartitionParameters::create(hw, avd));
-    } else {
+    if (hw->hw_arc) {
         args.add2("-kernel", hw->kernel_path);
+
         // hw->hw_arc: ChromeOS single disk image, use regular block device
         // instead of virtio block device
         args.add("-drive");
         const char* avd_dir = avdInfo_getContentPath(avd);
+
         args.addFormat("format=raw,file=cat:%s" PATH_SEP
                        "system.img.qcow2|"
                        "%s" PATH_SEP
                        "userdata-qemu.img.qcow2|"
                        "%s" PATH_SEP "vendor.img.qcow2",
                        avd_dir, avd_dir, avd_dir);
+    } else {
+        if (hw->disk_ramdisk_path) {
+            args.add({"-kernel", hw->kernel_path, "-initrd", hw->disk_ramdisk_path});
+        } else {
+            derror("disk_ramdisk_path is required but missing");
+            return 1;
+        }
+
+        // add partition parameters with the sequence pre-defined in
+        // targetInfo.imagePartitionTypes
+        args.add(PartitionParameters::create(hw, avd));
     }
 
     if (fc::isEnabled(fc::KernelDeviceTreeBlobSupport)) {
