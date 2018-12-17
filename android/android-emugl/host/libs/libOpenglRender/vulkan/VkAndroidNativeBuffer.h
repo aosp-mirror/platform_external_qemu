@@ -111,4 +111,13 @@ void getGralloc1Usage(VkFormat format, VkImageUsageFlags imageUsage,
                       uint64_t* consumerUsage_out,
                       uint64_t* producerUsage_out);
 
+VkResult syncImageToColorBuffer(
+    VulkanDispatch* vk,
+    uint32_t queueFamilyIndex,
+    VkQueue queue,
+    uint32_t waitSemaphoreCount,
+    const VkSemaphore* pWaitSemaphores,
+    int* pNativeFenceFd,
+    AndroidNativeBufferInfo* anbInfo);
+
 } // namespace goldfish_vk
