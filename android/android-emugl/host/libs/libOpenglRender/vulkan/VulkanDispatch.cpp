@@ -17,10 +17,13 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
+#include "android/base/synchronization/Lock.h"
 
 #include "emugl/common/shared_library.h"
 
+using android::base::AutoLock;
 using android::base::LazyInstance;
+using android::base::Lock;
 using android::base::pj;
 using android::base::System;
 
@@ -96,12 +99,13 @@ class VulkanDispatchImpl {
 public:
     VulkanDispatchImpl() = default;
 
-    void setForTesting(bool forTesting) {
-        if (mInitialized) return;
-        mForTesting = forTesting;
+    void initialize() {
+        initializeImpl(false /* not for testing*/);
     }
 
-    void initialize();
+    void initializeForTesting() {
+        initializeImpl(true /* for testing*/);
+    }
 
     void* dlopen() {
         if (!mVulkanLoader) {
@@ -125,6 +129,9 @@ public:
     VulkanDispatch* dispatch() { return &mDispatch; }
 
 private:
+    void initializeImpl(bool forTesting);
+
+    Lock mLock;
     bool mForTesting = false;
     bool mInitialized = false;
     VulkanDispatch mDispatch;
@@ -142,13 +149,16 @@ static void* sVulkanDispatchDlSym(void* lib, const char* sym) {
     return sDispatchImpl->dlsym(lib, sym);
 }
 
-void VulkanDispatchImpl::initialize() {
+void VulkanDispatchImpl::initializeImpl(bool forTesting) {
+    AutoLock lock(mLock);
+
     if (mInitialized) return;
 
+    mForTesting = forTesting;
     initIcdPaths(mForTesting);
 
     goldfish_vk::init_vulkan_dispatch_from_system_loader(
-            sVulkanDispatchDlOpen, 
+            sVulkanDispatchDlOpen,
             sVulkanDispatchDlSym,
             &mDispatch);
 
@@ -156,8 +166,11 @@ void VulkanDispatchImpl::initialize() {
 }
 
 VulkanDispatch* vkDispatch(bool forTesting) {
-    sDispatchImpl->setForTesting(forTesting);
-    sDispatchImpl->initialize();
+    if (forTesting) {
+        sDispatchImpl->initializeForTesting();
+    } else {
+        sDispatchImpl->initialize();
+    }
     return sDispatchImpl->dispatch();
 }
 
