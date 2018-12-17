@@ -141,7 +141,7 @@ public:
                 m_vk->vkGetDeviceQueue(
                     *pDevice, index, i, &queueOut);
                 queues.push_back(queueOut);
-                mQueueToDevice[queueOut] = *pDevice;
+                mQueueInfo[queueOut] = { *pDevice, index };
             }
         }
 
@@ -181,10 +181,10 @@ public:
         auto it = mDeviceInfo.find(device);
         if (it == mDeviceInfo.end()) return;
 
-        auto eraseIt = mQueueToDevice.begin();
-        for(; eraseIt != mQueueToDevice.end();) {
-            if (eraseIt->second == device) {
-                eraseIt = mQueueToDevice.erase(eraseIt);
+        auto eraseIt = mQueueInfo.begin();
+        for(; eraseIt != mQueueInfo.end();) {
+            if (eraseIt->second.device == device) {
+                eraseIt = mQueueInfo.erase(eraseIt);
             } else {
                 ++eraseIt;
             }
@@ -456,6 +456,12 @@ private:
         return &physdevInfo->memoryProperties;
     }
 
+    uint32_t* queueFamilyOfQueueLocked(VkQueue queue) {
+        auto queueInfo = android::base::find(mQueueInfo, queue);
+        if (!queueInfo) return nullptr;
+        return &queueInfo->queueFamilyIndex;
+    }
+
     VulkanDispatch* m_vk;
 
     Lock mLock;
@@ -479,6 +485,11 @@ private:
         std::unordered_map<uint32_t, std::vector<VkQueue>> queues;
     };
 
+    struct QueueInfo {
+        VkDevice device;
+        uint32_t queueFamilyIndex;
+    };
+
     struct ImageInfo {
         AndroidNativeBufferInfo anbInfo;
     };
@@ -493,7 +504,7 @@ private:
     // Back-reference to the physical device associated with a particular
     // VkDevice, and the VkDevice corresponding to a VkQueue.
     std::unordered_map<VkDevice, VkPhysicalDevice> mDeviceToPhysicalDevice;
-    std::unordered_map<VkQueue, VkDevice> mQueueToDevice;
+    std::unordered_map<VkQueue, QueueInfo> mQueueInfo;
 
     std::unordered_map<VkDeviceMemory, MappedMemoryInfo> mMapInfo;
 };
