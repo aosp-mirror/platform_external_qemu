@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d9f7575c_0f86389b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VulkanDispatch.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-17T23:41:23Z",
+      "side": 1,
+      "message": "Maybe\n\ninitialize() { initializeImpl(false); }\ninitializeForTesting() { initializeImpl(true); }\n\nprivate:\ninitializeImpl(bool forTesting) {}",
+      "range": {
+        "startLine": 102,
+        "startChar": 20,
+        "endLine": 102,
+        "endChar": 35
+      },
+      "revId": "fd7eea9a406fabfae5f759f7e544611598758884",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
