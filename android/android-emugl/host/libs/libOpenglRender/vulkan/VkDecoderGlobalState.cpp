@@ -18,6 +18,7 @@
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/Optional.h"
 #include "android/base/synchronization/Lock.h"
 
 #include "common/goldfish_vk_deepcopy.h"
@@ -29,6 +30,7 @@
 using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Lock;
+using android::base::Optional;
 
 namespace goldfish_vk {
 
@@ -489,7 +491,25 @@ public:
         const VkSemaphore* pWaitSemaphores,
         VkImage image,
         int* pNativeFenceFd) {
-        return VK_ERROR_INCOMPATIBLE_DRIVER;
+
+        AutoLock lock(mLock);
+
+        auto queueFamilyIndex = queueFamilyIndexOfQueueLocked(queue);
+
+        if (!queueFamilyIndex) {
+            return VK_ERROR_INITIALIZATION_FAILED;
+        }
+
+        auto imageInfo = android::base::find(mImageInfo, image);
+        AndroidNativeBufferInfo* anbInfo = &imageInfo->anbInfo;
+
+        return
+            syncImageToColorBuffer(
+                m_vk,
+                *queueFamilyIndex,
+                queue,
+                waitSemaphoreCount, pWaitSemaphores,
+                pNativeFenceFd, anbInfo);
     }
 
 private:
@@ -523,6 +543,25 @@ private:
         return &physdevInfo->memoryProperties;
     }
 
+    Optional<uint32_t> queueFamilyIndexOfQueueLocked(VkQueue queue) {
+        auto device = android::base::find(mQueueToDevice, queue);
+        if (!device) return {};
+
+        auto deviceInfo = android::base::find(mDeviceInfo, *device);
+        if (!deviceInfo) return {};
+
+        for (auto it : deviceInfo->queues) {
+            auto index = it.first;
+            for (auto deviceQueue : it.second) {
+                if (deviceQueue == queue) {
+                    return index;
+                }
+            }
+        }
+
+        return {};
+    }
+
     VulkanDispatch* m_vk;
 
     Lock mLock;
@@ -544,6 +583,11 @@ private:
 
     struct DeviceInfo {
         std::unordered_map<uint32_t, std::vector<VkQueue>> queues;
+    };
+
+    struct QueueInfo {
+        VkDevice device;
+        uint32_t queueFamilyIndex;
     };
 
     struct ImageInfo {
