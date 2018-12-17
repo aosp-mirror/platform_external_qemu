@@ -185,6 +185,7 @@ protected:
 
         EXPECT_EQ(VK_SUCCESS, vkCreateDevice(physdevs[bestPhysicalDevice], &dCi,
                                              nullptr, &mDevice));
+        vkGetDeviceQueue(mDevice, mGraphicsQueueFamily, 0, &mQueue);
     }
 
     void teardownVulkan() {
@@ -248,6 +249,7 @@ protected:
     VkInstance mInstance;
     VkPhysicalDevice mPhysicalDevice;
     VkDevice mDevice;
+    VkQueue mQueue;
     uint32_t mHostVisibleMemoryTypeIndex;
     uint32_t mGraphicsQueueFamily;
 };
@@ -338,6 +340,25 @@ TEST_F(VulkanHalTest, AndroidNativeImageCreation) {
     VkImage image;
     buffer_handle_t buffer;
     createAndroidNativeImage(&buffer, &image);
+    destroyAndroidNativeImage(buffer, image);
+}
+
+TEST_F(VulkanHalTest, AndroidNativeImageQueueSignal) {
+    VkImage image;
+    buffer_handle_t buffer;
+    int fenceFd;
+
+    createAndroidNativeImage(&buffer, &image);
+
+    PFN_vkQueueSignalReleaseImageANDROID func =
+        (PFN_vkQueueSignalReleaseImageANDROID)
+        vkGetDeviceProcAddr(mDevice, "vkQueueSignalReleaseImageANDROID");
+
+    if (func) {
+        fprintf(stderr, "%s: qsig\n", __func__);
+        func(mQueue, 0, nullptr, image, &fenceFd);
+    }
+
     destroyAndroidNativeImage(buffer, image);
 }
 
