@@ -159,6 +159,11 @@ TEST_F(VulkanHalTest, Basic) {
 
     VkPhysicalDevice physdev = physdevs[bestPhysicalDevice];
 
+    VkPhysicalDeviceProperties physdevProps;
+    vkGetPhysicalDeviceProperties(physdev, &physdevProps);
+
+    fprintf(stderr, "%s: device name: %s\n", __func__, physdevProps.deviceName);
+
     VkPhysicalDeviceMemoryProperties memProps;
     vkGetPhysicalDeviceMemoryProperties(physdev, &memProps);
 
