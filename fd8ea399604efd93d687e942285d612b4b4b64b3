@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "486f652f_c526ec18",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkAndroidNativeBuffer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-12-17T22:18:14Z",
+      "side": 1,
+      "message": "set all fields in out to be nullptr? In case an uninitialized \"out\" ran into one of those teardowns.",
+      "revId": "fd8ea399604efd93d687e942285d612b4b4b64b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
