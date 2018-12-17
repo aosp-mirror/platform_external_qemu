@@ -34,6 +34,52 @@
       "revId": "fd8ea399604efd93d687e942285d612b4b4b64b3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "01d3e984_0cce124b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkAndroidNativeBuffer.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-17T22:50:52Z",
+      "side": 1,
+      "message": "Maybe typedef?",
+      "range": {
+        "startLine": 32,
+        "startChar": 1,
+        "endLine": 32,
+        "endChar": 7
+      },
+      "revId": "fd8ea399604efd93d687e942285d612b4b4b64b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a460bac9_d729afa9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkAndroidNativeBuffer.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-17T22:50:52Z",
+      "side": 1,
+      "message": "INVALID_HANDLE_VALUE\n\nhttps://docs.microsoft.com/en-us/windows/desktop/api/fileapi/nf-fileapi-createfilea",
+      "range": {
+        "startLine": 33,
+        "startChar": 41,
+        "endLine": 33,
+        "endChar": 42
+      },
+      "revId": "fd8ea399604efd93d687e942285d612b4b4b64b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
