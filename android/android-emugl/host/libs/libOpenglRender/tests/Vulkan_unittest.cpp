@@ -14,6 +14,7 @@
 
 #include <gtest/gtest.h>
 
+#include "VkCommonOperations.h"
 #include "VulkanDispatch.h"
 
 #include "android/base/ArraySize.h"
@@ -450,13 +451,24 @@ protected:
             "VK_ICD_FILENAMES", "");
     }
 
-private:
     VulkanDispatch mVk;
     VkInstance mInstance;
     VkPhysicalDevice mPhysicalDevice;
     VkDevice mDevice;
 };
 
+// Basic Vulkan instance/device setup.
 TEST_F(VulkanTest, Basic) { }
+
+// Checks that staging memory query is successful.
+TEST_F(VulkanTest, StagingMemoryQuery) {
+    VkPhysicalDeviceMemoryProperties memProps;
+    uint32_t typeIndex;
+
+    mVk.vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &memProps);
+
+    EXPECT_TRUE(goldfish_vk::getStagingMemoryTypeIndex(
+        &mVk, mDevice, &memProps, &typeIndex));
+}
 
 } // namespace emugl
