@@ -14,10 +14,13 @@
 #include <gtest/gtest.h>
 
 #include "GoldfishOpenglTestEnv.h"
-#include "VulkanDispatch.h"
+#include "GrallocDispatch.h"
+#include "GrallocUsageConversion.h"
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vk_android_native_buffer.h>
 
+#include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/opengles.h"
@@ -26,9 +29,12 @@
 #include <memory>
 #include <vector>
 
+using android::base::pj;
 using android::base::System;
 
 namespace aemu {
+
+static constexpr int kWindowSize = 256;
 
 class VulkanHalTest : public ::testing::Test {
 protected:
@@ -45,12 +51,46 @@ protected:
     }
 
     void SetUp() override {
+        setupGralloc();
     }
 
     void TearDown() override {
+        teardownGralloc();
         // Cancel all host threads as well
         android_finishOpenglesRenderer();
     }
+
+    void setupGralloc() {
+        auto grallocPath = pj(System::get()->getProgramDirectory(), "lib64",
+                              "gralloc.ranchu" LIBSUFFIX);
+
+        load_gralloc_module(grallocPath.c_str(), &mGralloc);
+
+        EXPECT_NE(nullptr, mGralloc.fb_dev);
+        EXPECT_NE(nullptr, mGralloc.alloc_dev);
+        EXPECT_NE(nullptr, mGralloc.fb_module);
+        EXPECT_NE(nullptr, mGralloc.alloc_module);
+    }
+
+    void teardownGralloc() { unload_gralloc_module(&mGralloc); }
+
+    buffer_handle_t createTestGrallocBuffer(
+            int usage, int format,
+            int width, int height, int* stride_out) {
+        buffer_handle_t buffer;
+
+        mGralloc.alloc(width, height, format, usage, &buffer, stride_out);
+        mGralloc.registerBuffer(buffer);
+
+        return buffer;
+    }
+
+    void destroyTestGrallocBuffer(buffer_handle_t buffer) {
+        mGralloc.unregisterBuffer(buffer);
+        mGralloc.free(buffer);
+    }
+
+    struct gralloc_implementation mGralloc;
 };
 
 // static
@@ -173,6 +213,48 @@ TEST_F(VulkanHalTest, Basic) {
     for (uint32_t i = 0; i < kTestAlloc; ++i) {
         EXPECT_EQ(0xff, *((uint8_t*)hostPtr + i));
     }
+
+    int usage = GRALLOC_USAGE_HW_RENDER;
+    int format = HAL_PIXEL_FORMAT_RGBA_8888;
+    int stride;
+    buffer_handle_t buffer =
+        createTestGrallocBuffer(
+            usage, format, kWindowSize, kWindowSize, &stride);
+
+    uint64_t producerUsage, consumerUsage;
+    android_convertGralloc0To1Usage(usage, &producerUsage, &consumerUsage);
+
+    VkNativeBufferANDROID nativeBufferInfo = {
+        VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID, nullptr,
+        buffer, stride,
+        format,
+        usage,
+        {
+            consumerUsage,
+            producerUsage,
+        },
+    };
+
+    VkImageCreateInfo testImageCi = {
+        VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, (const void*)&nativeBufferInfo,
+        0,
+        VK_IMAGE_TYPE_2D,
+        VK_FORMAT_R8G8B8A8_UNORM,
+        { kWindowSize, kWindowSize, 1, },
+        1, 1,
+        VK_SAMPLE_COUNT_1_BIT,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+        VK_SHARING_MODE_EXCLUSIVE,
+        0, nullptr /* shared queue families */,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+    };
+
+    VkImage testAndroidNativeImage;
+    EXPECT_EQ(VK_SUCCESS, vkCreateImage(device, &testImageCi, nullptr,
+                                        &testAndroidNativeImage));
+    vkDestroyImage(device, testAndroidNativeImage, nullptr);
+    destroyTestGrallocBuffer(buffer);
 
     vkUnmapMemory(device, mem);
     vkFreeMemory(device, mem, nullptr);
