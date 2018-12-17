@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b2a7e098_2fe7a4ea",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkAndroidNativeBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2018-12-17T20:16:39Z",
+      "side": 1,
+      "message": "should we undo the memory allocation if it fails at a later step?",
+      "revId": "629fac3fd20dc2c769bf0c03bfbc8e2c78e17d1a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
