@@ -159,6 +159,11 @@ TEST_F(VulkanHalTest, Basic) {
 
     VkPhysicalDevice physdev = physdevs[bestPhysicalDevice];
 
+    VkPhysicalDeviceProperties physdevProps;
+    vkGetPhysicalDeviceProperties(physdev, &physdevProps);
+
+    fprintf(stderr, "%s: device name: %s\n", __func__, physdevProps.deviceName);
+
     VkPhysicalDeviceMemoryProperties memProps;
     vkGetPhysicalDeviceMemoryProperties(physdev, &memProps);
 
@@ -250,11 +255,15 @@ TEST_F(VulkanHalTest, Basic) {
         VK_IMAGE_LAYOUT_UNDEFINED,
     };
 
+    fprintf(stderr, "%s: creating ANB image\n", __func__);
     VkImage testAndroidNativeImage;
     EXPECT_EQ(VK_SUCCESS, vkCreateImage(device, &testImageCi, nullptr,
                                         &testAndroidNativeImage));
+    fprintf(stderr, "%s: created ANB image\n", __func__);
     vkDestroyImage(device, testAndroidNativeImage, nullptr);
+    fprintf(stderr, "%s: destroyed ANB image\n", __func__);
     destroyTestGrallocBuffer(buffer);
+    fprintf(stderr, "%s: destroyed gralloc buffer\n", __func__);
 
     vkUnmapMemory(device, mem);
     vkFreeMemory(device, mem, nullptr);
