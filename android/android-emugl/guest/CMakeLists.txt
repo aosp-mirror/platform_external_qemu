@@ -67,10 +67,11 @@ android_add_test(vulkanhal_unittests)
 target_include_directories(
     vulkanhal_unittests PRIVATE
     ${ANDROID_EMUGL_DIR}/host/include
-    ${ANDROID_EMUGL_DIR}/combined)
+    ${ANDROID_EMUGL_DIR}/combined
+    ${ANDROID_EMUGL_DIR}/guest/grallocusage)
 target_link_libraries(
     vulkanhal_unittests PRIVATE
-    vulkan_android aemugraphics PRIVATE
+    grallocusage vulkan_android aemugraphics PRIVATE
     gtest_main)
 android_target_dependency(vulkanhal_unittests all EMULATOR_FEATURE_DEPENDENCIES)
 android_target_dependency(vulkanhal_unittests all SWIFTSHADER_DEPENDENCIES)

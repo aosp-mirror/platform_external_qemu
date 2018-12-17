@@ -17,6 +17,7 @@
 #include "cereal/common/goldfish_vk_extension_structs.h"
 
 #include "GrallocDefs.h"
+#include "VulkanDispatch.h"
 
 namespace goldfish_vk {
 
@@ -49,6 +50,29 @@ bool parseAndroidNativeBufferInfo(
     info_out->colorBufferHandle = *(nativeBufferANDROID->handle);
 
     return true;
+}
+
+VkResult prepareAndroidNativeBufferImage(
+    VulkanDispatch* vk,
+    VkDevice device,
+    const VkImageCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    AndroidNativeBufferInfo* out) {
+
+    // delete the info struct and pass to vkCreateImage, and also add
+    // transfer src capability to allow us to copy to CPU.
+    VkImageCreateInfo infoNoNative = *pCreateInfo;
+    infoNoNative.pNext = nullptr;
+    infoNoNative.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+
+    VkResult createResult =
+            vk->vkCreateImage(device, &infoNoNative, pAllocator, &out->image);
+
+    if (createResult != VK_SUCCESS) return createResult;
+
+    vk->vkGetImageMemoryRequirements(device, out->image, &out->memReqs);
+
+    return createResult;
 }
 
 void getGralloc0Usage(VkFormat format, VkImageUsageFlags imageUsage,
