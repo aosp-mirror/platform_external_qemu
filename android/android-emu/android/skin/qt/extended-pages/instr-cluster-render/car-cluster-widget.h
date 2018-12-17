@@ -25,8 +25,6 @@ extern "C" {
 #include "libavutil/log.h"
 }
 
-using android::base::WorkerProcessingResult;
-
 class CarClusterWidget : public QWidget
 {
     Q_OBJECT

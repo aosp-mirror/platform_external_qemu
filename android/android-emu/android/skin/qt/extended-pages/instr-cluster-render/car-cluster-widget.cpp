@@ -21,6 +21,8 @@
 
 #include <QPainter>
 
+using android::base::WorkerProcessingResult;
+
 static constexpr uint8_t PIPE_START = 1;
 static constexpr uint8_t PIPE_STOP = 2;
 

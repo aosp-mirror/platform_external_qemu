@@ -49,10 +49,10 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/google-play-page.cpp
     android/skin/qt/extended-pages/help-page.cpp
     android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp
-    android/skin/qt/extended-pages/location-page.cpp
     android/skin/qt/extended-pages/location-page-point.cpp
     android/skin/qt/extended-pages/location-page-route.cpp
     android/skin/qt/extended-pages/location-page-route-playback.cpp
+    android/skin/qt/extended-pages/location-page.cpp
     android/skin/qt/extended-pages/microphone-page.cpp
     android/skin/qt/extended-pages/record-screen-page.cpp
     android/skin/qt/extended-pages/rotary-input-dial.cpp
@@ -62,7 +62,6 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/snapshot-page.cpp
     android/skin/qt/extended-pages/telephony-page.cpp
     android/skin/qt/extended-pages/virtual-sensors-page.cpp
-    android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp
     android/skin/qt/extended-window.cpp
     android/skin/qt/FramelessDetector.cpp
     android/skin/qt/ModalOverlay.cpp
