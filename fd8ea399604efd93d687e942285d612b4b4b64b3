@@ -16,6 +16,24 @@
       "revId": "fd8ea399604efd93d687e942285d612b4b4b64b3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "92664ca6_cb5eb4ea",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkAndroidNativeBuffer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-17T22:26:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "486f652f_c526ec18",
+      "revId": "fd8ea399604efd93d687e942285d612b4b4b64b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
