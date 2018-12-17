@@ -77,10 +77,19 @@ struct AndroidNativeBufferInfo {
         VkQueue queue = VK_NULL_HANDLE;
         VkCommandPool pool = VK_NULL_HANDLE;
         VkCommandBuffer cb = VK_NULL_HANDLE;
+        VkFence fence = VK_NULL_HANDLE;
     };
     // We keep one QueueState for each queue family index used by the guest
     // in vkQueuePresentKHR.
     std::vector<QueueState> queueStates;
+    // Did we ever sync the Vulkan image with a ColorBuffer?
+    // If so, set everSynced along with the queue family index
+    // used to do that.
+    // If the swapchain image was created with exclusive sharing
+    // mode (reflected in this struct's |sharingMode| field),
+    // this part doesn't really matter.
+    bool everSynced = false;
+    uint32_t lastUsedQueueFamilyIndex;
 
     // TODO: Use external memory features when available.
     bool externalMemorySupported = false;
@@ -110,5 +119,14 @@ void getGralloc1Usage(VkFormat format, VkImageUsageFlags imageUsage,
                       VkSwapchainImageUsageFlagsANDROID swapchainImageUsage,
                       uint64_t* consumerUsage_out,
                       uint64_t* producerUsage_out);
+
+VkResult syncImageToColorBuffer(
+    VulkanDispatch* vk,
+    uint32_t queueFamilyIndex,
+    VkQueue queue,
+    uint32_t waitSemaphoreCount,
+    const VkSemaphore* pWaitSemaphores,
+    int* pNativeFenceFd,
+    AndroidNativeBufferInfo* anbInfo);
 
 } // namespace goldfish_vk
