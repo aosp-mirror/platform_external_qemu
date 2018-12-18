@@ -1807,7 +1807,8 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
             m_statsStartTime = currTime;
 
             auto cpuUsage = emugl::getCpuUsage();
-            auto lastStats = cpuUsage->printUsage();
+            std::string lastStats =
+                cpuUsage ? cpuUsage->printUsage() : "";
             printf("FPS: %5.3f resident memory: %f mb %s\n",
                    (float)m_statsNumFrames / dt,
                    (float)usage.resident / 1048576.0f,
