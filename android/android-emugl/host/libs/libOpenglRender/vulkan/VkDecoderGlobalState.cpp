@@ -210,9 +210,14 @@ public:
         VkResult createRes = VK_SUCCESS;
 
         if (isAndroidNativeBuffer) {
+            AutoLock lock(mLock);
+
+            auto memProps = memPropsOfDeviceLocked(device);
+
             createRes =
                 prepareAndroidNativeBufferImage(
-                    m_vk, device, pCreateInfo, pAllocator, &anbInfo);
+                    m_vk, device, pCreateInfo, pAllocator,
+                    memProps, &anbInfo);
             if (createRes == VK_SUCCESS) {
                 *pImage = anbInfo.image;
             }
@@ -240,6 +245,10 @@ public:
         auto it = mImageInfo.find(image);
 
         if (it == mImageInfo.end()) return;
+
+        auto info = it->second;
+        teardownAndroidNativeBufferImage(m_vk, &info.anbInfo);
+
         mImageInfo.erase(image);
 
         m_vk->vkDestroyImage(device, image, pAllocator);
@@ -437,6 +446,15 @@ public:
     }
 
 private:
+    VkPhysicalDeviceMemoryProperties* memPropsOfDeviceLocked(VkDevice device) {
+        auto physdev = android::base::find(mDeviceToPhysicalDevice, device);
+        if (!physdev) return nullptr;
+
+        auto physdevInfo = android::base::find(mPhysdevInfo, *physdev);
+        if (!physdevInfo) return nullptr;
+
+        return &physdevInfo->memoryProperties;
+    }
 
     VulkanDispatch* m_vk;
 
