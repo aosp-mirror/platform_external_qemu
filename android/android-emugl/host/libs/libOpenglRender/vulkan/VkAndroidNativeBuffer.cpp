@@ -478,7 +478,8 @@ VkResult syncImageToColorBuffer(
     FrameBuffer::getFB()->
         replaceColorBufferContents(
             colorBufferHandle,
-            anbInfo->mappedStagingPtr);
+            anbInfo->mappedStagingPtr,
+            bpp * anbInfo->extent.width * anbInfo->extent.height);
 
     return VK_SUCCESS;
 }
