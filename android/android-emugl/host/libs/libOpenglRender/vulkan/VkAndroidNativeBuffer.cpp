@@ -37,25 +37,7 @@ bool parseAndroidNativeBufferInfo(
 
     uint32_t structType = goldfish_vk_struct_type(curr_pNext);
 
-    if (structType != VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID)
-        return false;
-
-    const VkNativeBufferANDROID* nativeBufferANDROID =
-        reinterpret_cast<const VkNativeBufferANDROID*>(curr_pNext);
-
-    info_out->vkFormat = pCreateInfo->format;
-    info_out->extent = pCreateInfo->extent;
-    info_out->usage = pCreateInfo->usage;
-    for (uint32_t i = 0; i < pCreateInfo->queueFamilyIndexCount; ++i) {
-        info_out->queueFamilyIndices.push_back(
-                pCreateInfo->pQueueFamilyIndices[i]);
-    }
-
-    info_out->format = nativeBufferANDROID->format;
-    info_out->stride = nativeBufferANDROID->stride;
-    info_out->colorBufferHandle = *(nativeBufferANDROID->handle);
-
-    return true;
+    return structType == VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID;
 }
 
 VkResult prepareAndroidNativeBufferImage(
@@ -69,6 +51,20 @@ VkResult prepareAndroidNativeBufferImage(
     *out = {};
 
     out->device = device;
+    out->vkFormat = pCreateInfo->format;
+    out->extent = pCreateInfo->extent;
+    out->usage = pCreateInfo->usage;
+    for (uint32_t i = 0; i < pCreateInfo->queueFamilyIndexCount; ++i) {
+        out->queueFamilyIndices.push_back(
+                pCreateInfo->pQueueFamilyIndices[i]);
+    }
+
+    const VkNativeBufferANDROID* nativeBufferANDROID =
+        reinterpret_cast<const VkNativeBufferANDROID*>(pCreateInfo->pNext);
+
+    out->format = nativeBufferANDROID->format;
+    out->stride = nativeBufferANDROID->stride;
+    out->colorBufferHandle = *(nativeBufferANDROID->handle);
 
     // delete the info struct and pass to vkCreateImage, and also add
     // transfer src capability to allow us to copy to CPU.
@@ -237,6 +233,7 @@ void teardownAndroidNativeBufferImage(
 
     anbInfo->queueStates.clear();
 
+    fprintf(stderr, "%s: %p owned\n", __func__, image);
     *anbInfo = {};
 }
 
@@ -403,7 +400,7 @@ VkResult syncImageToColorBuffer(
     uint32_t bpp = 4; /* format always rgba8 */
     VkBufferImageCopy region = {
         0 /* buffer offset */,
-        anbInfo->extent.width * bpp /* row length */,
+        anbInfo->extent.width,
         anbInfo->extent.height,
         {
             VK_IMAGE_ASPECT_COLOR_BIT,
@@ -447,10 +444,13 @@ VkResult syncImageToColorBuffer(
 
     vk->vkEndCommandBuffer(queueState.cb);
 
+    std::vector<VkPipelineStageFlags> pipelineStageFlags;
+    pipelineStageFlags.resize(waitSemaphoreCount, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+
     VkSubmitInfo submitInfo = {
         VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
         waitSemaphoreCount, pWaitSemaphores,
-        nullptr /* no dst stage mask */,
+        pipelineStageFlags.data(),
         1, &queueState.cb,
         0, nullptr,
     };
@@ -478,7 +478,8 @@ VkResult syncImageToColorBuffer(
     FrameBuffer::getFB()->
         replaceColorBufferContents(
             colorBufferHandle,
-            anbInfo->mappedStagingPtr);
+            anbInfo->mappedStagingPtr,
+            bpp * anbInfo->extent.width * anbInfo->extent.height);
 
     return VK_SUCCESS;
 }
