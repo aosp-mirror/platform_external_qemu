@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "55801c17_2b6fbbd9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-12-18T21:47:09Z",
+      "side": 1,
+      "message": "\\n",
+      "range": {
+        "startLine": 426,
+        "startChar": 69,
+        "endLine": 426,
+        "endChar": 71
+      },
+      "revId": "5c9268115faeee5cfc6d2e11c61cb3d315e9fd09",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
