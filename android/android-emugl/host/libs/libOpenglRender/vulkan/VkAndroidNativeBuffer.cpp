@@ -37,25 +37,7 @@ bool parseAndroidNativeBufferInfo(
 
     uint32_t structType = goldfish_vk_struct_type(curr_pNext);
 
-    if (structType != VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID)
-        return false;
-
-    const VkNativeBufferANDROID* nativeBufferANDROID =
-        reinterpret_cast<const VkNativeBufferANDROID*>(curr_pNext);
-
-    info_out->vkFormat = pCreateInfo->format;
-    info_out->extent = pCreateInfo->extent;
-    info_out->usage = pCreateInfo->usage;
-    for (uint32_t i = 0; i < pCreateInfo->queueFamilyIndexCount; ++i) {
-        info_out->queueFamilyIndices.push_back(
-                pCreateInfo->pQueueFamilyIndices[i]);
-    }
-
-    info_out->format = nativeBufferANDROID->format;
-    info_out->stride = nativeBufferANDROID->stride;
-    info_out->colorBufferHandle = *(nativeBufferANDROID->handle);
-
-    return true;
+    return structType == VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID;
 }
 
 VkResult prepareAndroidNativeBufferImage(
@@ -69,6 +51,21 @@ VkResult prepareAndroidNativeBufferImage(
     *out = {};
 
     out->device = device;
+    out->vkFormat = pCreateInfo->format;
+    out->extent = pCreateInfo->extent;
+    out->usage = pCreateInfo->usage;
+
+    for (uint32_t i = 0; i < pCreateInfo->queueFamilyIndexCount; ++i) {
+        out->queueFamilyIndices.push_back(
+                pCreateInfo->pQueueFamilyIndices[i]);
+    }
+
+    const VkNativeBufferANDROID* nativeBufferANDROID =
+        reinterpret_cast<const VkNativeBufferANDROID*>(pCreateInfo->pNext);
+
+    out->format = nativeBufferANDROID->format;
+    out->stride = nativeBufferANDROID->stride;
+    out->colorBufferHandle = *(nativeBufferANDROID->handle);
 
     // delete the info struct and pass to vkCreateImage, and also add
     // transfer src capability to allow us to copy to CPU.
@@ -226,16 +223,11 @@ void teardownAndroidNativeBufferImage(
     if (stagingMemory) vk->vkFreeMemory(device, stagingMemory, nullptr);
 
     for (auto queueState : anbInfo->queueStates) {
-        auto cmdPool = queueState.pool;
-        auto cmdBuf = queueState.cb;
-        auto fence = queueState.fence;
-
-        if (cmdBuf) vk->vkFreeCommandBuffers(device, cmdPool, 1, &cmdBuf);
-        if (cmdPool) vk->vkDestroyCommandPool(device, cmdPool, nullptr);
-        if (fence) vk->vkDestroyFence(device, fence, nullptr);
+        queueState.teardown(vk, device);
     }
-
     anbInfo->queueStates.clear();
+
+    anbInfo->acquireQueueState.teardown(vk, device);
 
     *anbInfo = {};
 }
@@ -305,6 +297,114 @@ void getGralloc1Usage(VkFormat format, VkImageUsageFlags imageUsage,
     }
 }
 
+void AndroidNativeBufferInfo::QueueState::setup(
+    VulkanDispatch* vk,
+    VkDevice device,
+    VkQueue queueIn,
+    uint32_t queueFamilyIndexIn) {
+
+    queue = queueIn;
+    queueFamilyIndex = queueFamilyIndexIn;
+
+    VkCommandPoolCreateInfo poolCreateInfo = {
+        VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, 0,
+        VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+        queueFamilyIndex,
+    };
+
+    vk->vkCreateCommandPool(
+        device,
+        &poolCreateInfo,
+        nullptr,
+        &pool);
+
+    VkCommandBufferAllocateInfo cbAllocInfo = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO, 0,
+        pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1,
+    };
+
+    vk->vkAllocateCommandBuffers(
+        device,
+        &cbAllocInfo,
+        &cb);
+
+    VkFenceCreateInfo fenceCreateInfo = {
+        VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, 0, 0,
+    };
+
+    vk->vkCreateFence(
+        device,
+        &fenceCreateInfo,
+        nullptr,
+        &fence);
+}
+
+void AndroidNativeBufferInfo::QueueState::teardown(
+    VulkanDispatch* vk, VkDevice device) {
+
+    if (cb) vk->vkFreeCommandBuffers(device, pool, 1, &cb);
+    if (pool) vk->vkDestroyCommandPool(device, pool, nullptr);
+    if (fence) vk->vkDestroyFence(device, fence, nullptr);
+
+    queue = VK_NULL_HANDLE;
+    pool = VK_NULL_HANDLE;
+    cb = VK_NULL_HANDLE;
+    fence = VK_NULL_HANDLE;
+    queueFamilyIndex = 0;
+}
+
+VkResult setAndroidNativeImageSemaphoreSignaled(
+    VulkanDispatch* vk,
+    VkDevice device,
+    VkQueue defaultQueue,
+    uint32_t defaultQueueFamilyIndex,
+    VkSemaphore semaphore,
+    VkFence fence,
+    AndroidNativeBufferInfo* anbInfo) {
+
+    fprintf(stderr, "%s: call. device: %p image: %p\n", __func__, device, anbInfo->image);
+
+    bool firstTimeSetup =
+        !anbInfo->everSynced &&
+        !anbInfo->everAcquired;
+
+    anbInfo->everAcquired = true;
+
+    if (firstTimeSetup) {
+        fprintf(stderr, "%s: first time setup. use the default queue %p with index %u\n", __func__, defaultQueue, defaultQueueFamilyIndex);
+        // anbInfo->acquireQueueState.setup(
+            // vk, device, defaultQueue, defaultQueueFamilyIndex);
+            //
+        VkSubmitInfo submitInfo = {
+            VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
+            0, nullptr, nullptr,
+            0, nullptr,
+            1, &semaphore,
+        };
+
+        vk->vkQueueSubmit(defaultQueue, 1, &submitInfo, fence);
+    } else {
+
+        const AndroidNativeBufferInfo::QueueState&
+            queueState = anbInfo->queueStates[anbInfo->lastUsedQueueFamilyIndex];
+
+        fprintf(stderr, "%s: 'twas previously synced, so we can use queue %p with index %u\n", __func__,
+                queueState.queue, anbInfo->lastUsedQueueFamilyIndex);
+
+        VkSubmitInfo submitInfo = {
+            VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
+            0, nullptr, nullptr,
+            0, nullptr,
+            1, &semaphore,
+        };
+
+        vk->vkQueueSubmit(queueState.queue, 1, &submitInfo, fence);
+
+    }
+
+    return VK_SUCCESS;
+}
+
 VkResult syncImageToColorBuffer(
     VulkanDispatch* vk,
     uint32_t queueFamilyIndex,
@@ -317,6 +417,9 @@ VkResult syncImageToColorBuffer(
     // Implicitly synchronized
     *pNativeFenceFd = -1;
 
+    anbInfo->everSynced = true;
+    anbInfo->lastUsedQueueFamilyIndex = queueFamilyIndex;
+
     // Setup queue state for this queue family index.
     if (queueFamilyIndex >= anbInfo->queueStates.size()) {
         anbInfo->queueStates.resize(queueFamilyIndex + 1);
@@ -325,38 +428,8 @@ VkResult syncImageToColorBuffer(
     auto& queueState = anbInfo->queueStates[queueFamilyIndex];
 
     if (!queueState.queue) {
-        queueState.queue = queue;
-
-        VkCommandPoolCreateInfo poolCreateInfo = {
-            VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, 0,
-            VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-            queueFamilyIndex,
-        };
-
-        vk->vkCreateCommandPool(
-            anbInfo->device,
-            &poolCreateInfo,
-            nullptr,
-            &queueState.pool);
-
-        VkCommandBufferAllocateInfo cbAllocInfo = {
-            VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO, 0,
-            queueState.pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1,
-        };
-
-        vk->vkAllocateCommandBuffers(
-            anbInfo->device,
-            &cbAllocInfo,
-            &queueState.cb);
-
-        VkFenceCreateInfo fenceCreateInfo = {
-            VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, 0, 0,
-        };
-        vk->vkCreateFence(
-            anbInfo->device,
-            &fenceCreateInfo,
-            nullptr,
-            &queueState.fence);
+        queueState.setup(
+            vk, anbInfo->device, queue, queueFamilyIndex);
     }
 
     // Record our synchronization commands.
@@ -403,7 +476,7 @@ VkResult syncImageToColorBuffer(
     uint32_t bpp = 4; /* format always rgba8 */
     VkBufferImageCopy region = {
         0 /* buffer offset */,
-        anbInfo->extent.width * bpp /* row length */,
+        anbInfo->extent.width,
         anbInfo->extent.height,
         {
             VK_IMAGE_ASPECT_COLOR_BIT,
@@ -443,14 +516,17 @@ VkResult syncImageToColorBuffer(
         0,
         0, nullptr,
         0, nullptr,
-        1, &presentToTransferSrc);
+        1, &backToPresentSrc);
 
     vk->vkEndCommandBuffer(queueState.cb);
+
+    std::vector<VkPipelineStageFlags> pipelineStageFlags;
+    pipelineStageFlags.resize(waitSemaphoreCount, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 
     VkSubmitInfo submitInfo = {
         VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
         waitSemaphoreCount, pWaitSemaphores,
-        nullptr /* no dst stage mask */,
+        pipelineStageFlags.data(),
         1, &queueState.cb,
         0, nullptr,
     };
@@ -478,7 +554,8 @@ VkResult syncImageToColorBuffer(
     FrameBuffer::getFB()->
         replaceColorBufferContents(
             colorBufferHandle,
-            anbInfo->mappedStagingPtr);
+            anbInfo->mappedStagingPtr,
+            bpp * anbInfo->extent.width * anbInfo->extent.height);
 
     return VK_SUCCESS;
 }
