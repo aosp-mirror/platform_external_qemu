@@ -39,6 +39,27 @@ public:
     Impl() : m_vk(emugl::vkDispatch()) { }
     ~Impl() = default;
 
+    VkResult on_vkCreateInstance(
+        const VkInstanceCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkInstance* pInstance) {
+
+        std::vector<const char*> finalExts;
+        for (uint32_t i = 0; i < pCreateInfo->enabledExtensionCount; ++i) {
+            auto extName =
+                pCreateInfo->ppEnabledExtensionNames[i];
+            if (strcmp("VK_ANDROID_native_buffer", extName)) {
+                finalExts.push_back(extName);
+            }
+        }
+
+        VkInstanceCreateInfo createInfoFiltered = *pCreateInfo;
+        createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
+        createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
+
+        return m_vk->vkCreateInstance(&createInfoFiltered, pAllocator, pInstance);
+    }
+
     void on_vkGetPhysicalDeviceProperties(
             VkPhysicalDevice physicalDevice,
             VkPhysicalDeviceProperties* pProperties) {
@@ -85,16 +106,9 @@ public:
                            const VkDeviceCreateInfo* pCreateInfo,
                            const VkAllocationCallbacks* pAllocator,
                            VkDevice* pDevice) {
-        // Run the underlying API call.
-        VkResult result =
-            m_vk->vkCreateDevice(
-                physicalDevice, pCreateInfo, pAllocator, pDevice);
 
-        if (result != VK_SUCCESS) return result;
 
         AutoLock lock(mLock);
-
-        mDeviceToPhysicalDevice[*pDevice] = physicalDevice;
 
         auto it = mPhysdevInfo.find(physicalDevice);
 
@@ -116,6 +130,30 @@ public:
             m_vk->vkGetPhysicalDeviceQueueFamilyProperties(
                     physicalDevice, &queueFamilyPropCount,
                     physdevInfo.queueFamilyProperties.data());
+        }
+
+        // Run the underlying API call, filtering extensions.
+        {
+            std::vector<const char*> finalExts;
+            for (uint32_t i = 0; i < pCreateInfo->enabledExtensionCount; ++i) {
+                auto extName =
+                    pCreateInfo->ppEnabledExtensionNames[i];
+                if (strcmp("VK_ANDROID_native_buffer", extName)) {
+                    finalExts.push_back(extName);
+                }
+            }
+
+            VkDeviceCreateInfo createInfoFiltered = *pCreateInfo;
+            createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
+            createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
+
+            VkResult result =
+                m_vk->vkCreateDevice(
+                    physicalDevice, &createInfoFiltered, pAllocator, pDevice);
+
+            if (result != VK_SUCCESS) return result;
+
+            mDeviceToPhysicalDevice[*pDevice] = physicalDevice;
         }
 
         // Fill out information about the logical device here.
@@ -143,11 +181,12 @@ public:
                 m_vk->vkGetDeviceQueue(
                     *pDevice, index, i, &queueOut);
                 queues.push_back(queueOut);
-                mQueueToDevice[queueOut] = *pDevice;
+                mQueueInfo[queueOut].device = *pDevice;
+                mQueueInfo[queueOut].queueFamilyIndex = index;
             }
         }
 
-        return result;
+        return VK_SUCCESS;
     }
 
     void on_vkGetDeviceQueue(
@@ -183,10 +222,10 @@ public:
         auto it = mDeviceInfo.find(device);
         if (it == mDeviceInfo.end()) return;
 
-        auto eraseIt = mQueueToDevice.begin();
-        for(; eraseIt != mQueueToDevice.end();) {
-            if (eraseIt->second == device) {
-                eraseIt = mQueueToDevice.erase(eraseIt);
+        auto eraseIt = mQueueInfo.begin();
+        for(; eraseIt != mQueueInfo.end();) {
+            if (eraseIt->second.device == device) {
+                eraseIt = mQueueInfo.erase(eraseIt);
             } else {
                 ++eraseIt;
             }
@@ -249,11 +288,14 @@ public:
         if (it == mImageInfo.end()) return;
 
         auto info = it->second;
-        teardownAndroidNativeBufferImage(m_vk, &info.anbInfo);
+
+        if (info.anbInfo.image) {
+            teardownAndroidNativeBufferImage(m_vk, &info.anbInfo);
+        } else {
+            m_vk->vkDestroyImage(device, image, pAllocator);
+        }
 
         mImageInfo.erase(image);
-
-        m_vk->vkDestroyImage(device, image, pAllocator);
     }
 
     VkResult on_vkAllocateMemory(
@@ -435,7 +477,29 @@ public:
         int nativeFenceFd,
         VkSemaphore semaphore,
         VkFence fence) {
-        return VK_ERROR_INCOMPATIBLE_DRIVER;
+
+        AutoLock lock(mLock);
+
+        auto imageInfo = android::base::find(mImageInfo, image);
+        if (!imageInfo) {
+            return VK_ERROR_INITIALIZATION_FAILED;
+        }
+
+        VkQueue defaultQueue;
+        uint32_t defaultQueueFamilyIndex;
+        if (!getDefaultQueueForDeviceLocked(
+                device, &defaultQueue, &defaultQueueFamilyIndex)) {
+                    fprintf(stderr, "%s: cant get the default q\n", __func__);
+            return VK_ERROR_INITIALIZATION_FAILED;
+        }
+
+        AndroidNativeBufferInfo* anbInfo = &imageInfo->anbInfo;
+
+        return
+            setAndroidNativeImageSemaphoreSignaled(
+                m_vk, device,
+                defaultQueue, defaultQueueFamilyIndex,
+                semaphore, fence, anbInfo);
     }
 
     VkResult on_vkQueueSignalReleaseImageANDROID(
@@ -448,13 +512,18 @@ public:
         AutoLock lock(mLock);
 
         auto queueFamilyIndex = queueFamilyIndexOfQueueLocked(queue);
+
+        if (!queueFamilyIndex) {
+            return VK_ERROR_INITIALIZATION_FAILED;
+        }
+
         auto imageInfo = android::base::find(mImageInfo, image);
         AndroidNativeBufferInfo* anbInfo = &imageInfo->anbInfo;
 
         return
             syncImageToColorBuffer(
                 m_vk,
-                queueFamilyIndex,
+                *queueFamilyIndex,
                 queue,
                 waitSemaphoreCount, pWaitSemaphores,
                 pNativeFenceFd, anbInfo);
@@ -472,22 +541,41 @@ private:
     }
 
     Optional<uint32_t> queueFamilyIndexOfQueueLocked(VkQueue queue) {
-        auto device = android::base::find(mQueueToDevice, queue);
-        if (!device) return {};
+        auto info = android::base::find(mQueueInfo, queue);
+        if (!info) return {};
 
-        auto deviceInfo = android::base::find(mDeviceInfo, *device);
-        if (!deviceInfo) return {};
+        return info->queueFamilyIndex;
+    }
 
-        for (auto it : deviceInfo->queues) {
-            auto index = it.first;
-            for (auto deviceQueue : it.second) {
-                if (deviceQueue == queue) {
-                    return index;
+    bool getDefaultQueueForDeviceLocked(
+        VkDevice device, VkQueue* queue, uint32_t* queueFamilyIndex) {
+
+        auto deviceInfo = android::base::find(mDeviceInfo, device);
+        if (!deviceInfo) return false;
+
+        auto zeroIt = deviceInfo->queues.find(0);
+        if (zeroIt == deviceInfo->queues.end() ||
+            zeroIt->second.size() == 0) {
+            // Get the first queue / queueFamilyIndex
+            // that does show up.
+            for (auto it : deviceInfo->queues) {
+                auto index = it.first;
+                for (auto deviceQueue : it.second) {
+                    *queue = deviceQueue;
+                    *queueFamilyIndex = index;
+                    return true;
                 }
             }
+            // Didn't find anything, fail.
+            return false;
+        } else {
+            // Use queue family index 0.
+            *queue = zeroIt->second[0];
+            *queueFamilyIndex = 0;
+            return true;
         }
 
-        return {};
+        return false;
     }
 
     VulkanDispatch* m_vk;
@@ -532,7 +620,7 @@ private:
     // Back-reference to the physical device associated with a particular
     // VkDevice, and the VkDevice corresponding to a VkQueue.
     std::unordered_map<VkDevice, VkPhysicalDevice> mDeviceToPhysicalDevice;
-    std::unordered_map<VkQueue, VkDevice> mQueueToDevice;
+    std::unordered_map<VkQueue, QueueInfo> mQueueInfo;
 
     std::unordered_map<VkDeviceMemory, MappedMemoryInfo> mMapInfo;
 };
@@ -548,6 +636,13 @@ static LazyInstance<VkDecoderGlobalState> sGlobalDecoderState =
 // static
 VkDecoderGlobalState* VkDecoderGlobalState::get() {
     return sGlobalDecoderState.ptr();
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateInstance(
+    const VkInstanceCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkInstance* pInstance) {
+    return mImpl->on_vkCreateInstance(pCreateInfo, pAllocator, pInstance);
 }
 
 void VkDecoderGlobalState::on_vkGetPhysicalDeviceProperties(

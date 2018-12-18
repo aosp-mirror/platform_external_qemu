@@ -37,6 +37,7 @@ public:
                      AndroidBufferQueue* toProducer);
     int dequeueBuffer(ANativeWindowBuffer** buffer, int* fenceFd);
     int queueBuffer(ANativeWindowBuffer* buffer, int fenceFd);
+    int cancelBuffer(ANativeWindowBuffer* buffer, int fenceFd);
 
     int query(int what, int* value) const;
     int perform(int operation, va_list args);
