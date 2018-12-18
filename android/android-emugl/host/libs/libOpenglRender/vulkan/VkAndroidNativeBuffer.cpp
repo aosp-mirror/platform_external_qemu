@@ -223,16 +223,11 @@ void teardownAndroidNativeBufferImage(
     if (stagingMemory) vk->vkFreeMemory(device, stagingMemory, nullptr);
 
     for (auto queueState : anbInfo->queueStates) {
-        auto cmdPool = queueState.pool;
-        auto cmdBuf = queueState.cb;
-        auto fence = queueState.fence;
-
-        if (cmdBuf) vk->vkFreeCommandBuffers(device, cmdPool, 1, &cmdBuf);
-        if (cmdPool) vk->vkDestroyCommandPool(device, cmdPool, nullptr);
-        if (fence) vk->vkDestroyFence(device, fence, nullptr);
+        queueState.teardown(vk, device);
     }
-
     anbInfo->queueStates.clear();
+
+    anbInfo->acquireQueueState.teardown(vk, device);
 
     *anbInfo = {};
 }
@@ -302,6 +297,106 @@ void getGralloc1Usage(VkFormat format, VkImageUsageFlags imageUsage,
     }
 }
 
+void AndroidNativeBufferInfo::QueueState::setup(
+    VulkanDispatch* vk,
+    VkDevice device,
+    VkQueue queueIn,
+    uint32_t queueFamilyIndexIn) {
+
+    queue = queueIn;
+    queueFamilyIndex = queueFamilyIndexIn;
+
+    VkCommandPoolCreateInfo poolCreateInfo = {
+        VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, 0,
+        VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+        queueFamilyIndex,
+    };
+
+    vk->vkCreateCommandPool(
+        device,
+        &poolCreateInfo,
+        nullptr,
+        &pool);
+
+    VkCommandBufferAllocateInfo cbAllocInfo = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO, 0,
+        pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1,
+    };
+
+    vk->vkAllocateCommandBuffers(
+        device,
+        &cbAllocInfo,
+        &cb);
+
+    VkFenceCreateInfo fenceCreateInfo = {
+        VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, 0, 0,
+    };
+
+    vk->vkCreateFence(
+        device,
+        &fenceCreateInfo,
+        nullptr,
+        &fence);
+}
+
+void AndroidNativeBufferInfo::QueueState::teardown(
+    VulkanDispatch* vk, VkDevice device) {
+
+    if (cb) vk->vkFreeCommandBuffers(device, pool, 1, &cb);
+    if (pool) vk->vkDestroyCommandPool(device, pool, nullptr);
+    if (fence) vk->vkDestroyFence(device, fence, nullptr);
+
+    queue = VK_NULL_HANDLE;
+    pool = VK_NULL_HANDLE;
+    cb = VK_NULL_HANDLE;
+    fence = VK_NULL_HANDLE;
+    queueFamilyIndex = 0;
+}
+
+VkResult setAndroidNativeImageSemaphoreSignaled(
+    VulkanDispatch* vk,
+    VkDevice device,
+    VkQueue defaultQueue,
+    uint32_t defaultQueueFamilyIndex,
+    VkSemaphore semaphore,
+    VkFence fence,
+    AndroidNativeBufferInfo* anbInfo) {
+
+    bool firstTimeSetup =
+        !anbInfo->everSynced &&
+        !anbInfo->everAcquired;
+
+    anbInfo->everAcquired = true;
+
+    if (firstTimeSetup) {
+
+        VkSubmitInfo submitInfo = {
+            VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
+            0, nullptr, nullptr,
+            0, nullptr,
+            1, &semaphore,
+        };
+
+        vk->vkQueueSubmit(defaultQueue, 1, &submitInfo, fence);
+    } else {
+
+        const AndroidNativeBufferInfo::QueueState&
+            queueState = anbInfo->queueStates[anbInfo->lastUsedQueueFamilyIndex];
+
+        VkSubmitInfo submitInfo = {
+            VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
+            0, nullptr, nullptr,
+            0, nullptr,
+            1, &semaphore,
+        };
+
+        vk->vkQueueSubmit(queueState.queue, 1, &submitInfo, fence);
+
+    }
+
+    return VK_SUCCESS;
+}
+
 VkResult syncImageToColorBuffer(
     VulkanDispatch* vk,
     uint32_t queueFamilyIndex,
@@ -325,38 +420,8 @@ VkResult syncImageToColorBuffer(
     auto& queueState = anbInfo->queueStates[queueFamilyIndex];
 
     if (!queueState.queue) {
-        queueState.queue = queue;
-
-        VkCommandPoolCreateInfo poolCreateInfo = {
-            VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, 0,
-            VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-            queueFamilyIndex,
-        };
-
-        vk->vkCreateCommandPool(
-            anbInfo->device,
-            &poolCreateInfo,
-            nullptr,
-            &queueState.pool);
-
-        VkCommandBufferAllocateInfo cbAllocInfo = {
-            VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO, 0,
-            queueState.pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1,
-        };
-
-        vk->vkAllocateCommandBuffers(
-            anbInfo->device,
-            &cbAllocInfo,
-            &queueState.cb);
-
-        VkFenceCreateInfo fenceCreateInfo = {
-            VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, 0, 0,
-        };
-        vk->vkCreateFence(
-            anbInfo->device,
-            &fenceCreateInfo,
-            nullptr,
-            &queueState.fence);
+        queueState.setup(
+            vk, anbInfo->device, queue, queueFamilyIndex);
     }
 
     // Record our synchronization commands.

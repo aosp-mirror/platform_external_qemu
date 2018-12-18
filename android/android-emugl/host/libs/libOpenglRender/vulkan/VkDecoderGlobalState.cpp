@@ -187,11 +187,12 @@ public:
                 m_vk->vkGetDeviceQueue(
                     *pDevice, index, i, &queueOut);
                 queues.push_back(queueOut);
-                mQueueToDevice[queueOut] = *pDevice;
+                mQueueInfo[queueOut].device = *pDevice;
+                mQueueInfo[queueOut].queueFamilyIndex = index;
             }
         }
 
-        return result;
+        return VK_SUCCESS;
     }
 
     void on_vkGetDeviceQueue(
@@ -227,10 +228,10 @@ public:
         auto it = mDeviceInfo.find(device);
         if (it == mDeviceInfo.end()) return;
 
-        auto eraseIt = mQueueToDevice.begin();
-        for(; eraseIt != mQueueToDevice.end();) {
-            if (eraseIt->second == device) {
-                eraseIt = mQueueToDevice.erase(eraseIt);
+        auto eraseIt = mQueueInfo.begin();
+        for(; eraseIt != mQueueInfo.end();) {
+            if (eraseIt->second.device == device) {
+                eraseIt = mQueueInfo.erase(eraseIt);
             } else {
                 ++eraseIt;
             }
@@ -482,7 +483,29 @@ public:
         int nativeFenceFd,
         VkSemaphore semaphore,
         VkFence fence) {
-        return VK_ERROR_INCOMPATIBLE_DRIVER;
+
+        AutoLock lock(mLock);
+
+        auto imageInfo = android::base::find(mImageInfo, image);
+        if (!imageInfo) {
+            return VK_ERROR_INITIALIZATION_FAILED;
+        }
+
+        VkQueue defaultQueue;
+        uint32_t defaultQueueFamilyIndex;
+        if (!getDefaultQueueForDeviceLocked(
+                device, &defaultQueue, &defaultQueueFamilyIndex)) {
+                    fprintf(stderr, "%s: cant get the default q\n", __func__);
+            return VK_ERROR_INITIALIZATION_FAILED;
+        }
+
+        AndroidNativeBufferInfo* anbInfo = &imageInfo->anbInfo;
+
+        return
+            setAndroidNativeImageSemaphoreSignaled(
+                m_vk, device,
+                defaultQueue, defaultQueueFamilyIndex,
+                semaphore, fence, anbInfo);
     }
 
     VkResult on_vkQueueSignalReleaseImageANDROID(
@@ -544,22 +567,41 @@ private:
     }
 
     Optional<uint32_t> queueFamilyIndexOfQueueLocked(VkQueue queue) {
-        auto device = android::base::find(mQueueToDevice, queue);
-        if (!device) return {};
+        auto info = android::base::find(mQueueInfo, queue);
+        if (!info) return {};
 
-        auto deviceInfo = android::base::find(mDeviceInfo, *device);
-        if (!deviceInfo) return {};
+        return info->queueFamilyIndex;
+    }
 
-        for (auto it : deviceInfo->queues) {
-            auto index = it.first;
-            for (auto deviceQueue : it.second) {
-                if (deviceQueue == queue) {
-                    return index;
+    bool getDefaultQueueForDeviceLocked(
+        VkDevice device, VkQueue* queue, uint32_t* queueFamilyIndex) {
+
+        auto deviceInfo = android::base::find(mDeviceInfo, device);
+        if (!deviceInfo) return false;
+
+        auto zeroIt = deviceInfo->queues.find(0);
+        if (zeroIt == deviceInfo->queues.end() ||
+            zeroIt->second.size() == 0) {
+            // Get the first queue / queueFamilyIndex
+            // that does show up.
+            for (auto it : deviceInfo->queues) {
+                auto index = it.first;
+                for (auto deviceQueue : it.second) {
+                    *queue = deviceQueue;
+                    *queueFamilyIndex = index;
+                    return true;
                 }
             }
+            // Didn't find anything, fail.
+            return false;
+        } else {
+            // Use queue family index 0.
+            *queue = zeroIt->second[0];
+            *queueFamilyIndex = 0;
+            return true;
         }
 
-        return {};
+        return false;
     }
 
     VulkanDispatch* m_vk;
@@ -604,7 +646,7 @@ private:
     // Back-reference to the physical device associated with a particular
     // VkDevice, and the VkDevice corresponding to a VkQueue.
     std::unordered_map<VkDevice, VkPhysicalDevice> mDeviceToPhysicalDevice;
-    std::unordered_map<VkQueue, VkDevice> mQueueToDevice;
+    std::unordered_map<VkQueue, QueueInfo> mQueueInfo;
 
     std::unordered_map<VkDeviceMemory, MappedMemoryInfo> mMapInfo;
 };

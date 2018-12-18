@@ -78,6 +78,13 @@ struct AndroidNativeBufferInfo {
         VkCommandPool pool = VK_NULL_HANDLE;
         VkCommandBuffer cb = VK_NULL_HANDLE;
         VkFence fence = VK_NULL_HANDLE;
+        uint32_t queueFamilyIndex = 0;
+        void setup(
+            VulkanDispatch* vk,
+            VkDevice device,
+            VkQueue queue,
+            uint32_t queueFamilyIndex);
+        void teardown(VulkanDispatch* vk, VkDevice device);
     };
     // We keep one QueueState for each queue family index used by the guest
     // in vkQueuePresentKHR.
@@ -90,6 +97,12 @@ struct AndroidNativeBufferInfo {
     // this part doesn't really matter.
     bool everSynced = false;
     uint32_t lastUsedQueueFamilyIndex;
+
+    // On first acquire, we might use a different queue family
+    // to initially set the semaphore/fence to be signaled.
+    // Track that here.
+    bool everAcquired = false;
+    QueueState acquireQueueState;
 
     // TODO: Use external memory features when available.
     bool externalMemorySupported = false;
@@ -119,6 +132,15 @@ void getGralloc1Usage(VkFormat format, VkImageUsageFlags imageUsage,
                       VkSwapchainImageUsageFlagsANDROID swapchainImageUsage,
                       uint64_t* consumerUsage_out,
                       uint64_t* producerUsage_out);
+
+VkResult setAndroidNativeImageSemaphoreSignaled(
+    VulkanDispatch* vk,
+    VkDevice device,
+    VkQueue defaultQueue,
+    uint32_t defaultQueueFamilyIndex,
+    VkSemaphore semaphore,
+    VkFence fence,
+    AndroidNativeBufferInfo* anbInfo);
 
 VkResult syncImageToColorBuffer(
     VulkanDispatch* vk,
