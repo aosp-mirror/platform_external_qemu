@@ -39,6 +39,11 @@ public:
     // per process
     static VkDecoderGlobalState* get();
 
+    VkResult on_vkCreateInstance(
+        const VkInstanceCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkInstance* pInstance);
+
     // Override API version
     void on_vkGetPhysicalDeviceProperties(
             VkPhysicalDevice physicalDevice,
