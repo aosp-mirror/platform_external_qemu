@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "a3b52379_cab9fd58",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-18T21:09:29Z",
+      "side": 1,
+      "message": "It\u0027s more predictable behavior to make the contract for this to not change the format/size of the ColorBuffer. I\u0027ll look into enforcing that.",
+      "parentUuid": "09ff514a_ac365afa",
+      "range": {
+        "startLine": 176,
+        "startChar": 4,
+        "endLine": 178,
+        "endChar": 45
+      },
+      "revId": "bac3db508946de7ca33b890eb757d28dd5b081fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e9d20f9e_23651c36",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 1
