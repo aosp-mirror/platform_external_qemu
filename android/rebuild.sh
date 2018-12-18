@@ -22,7 +22,7 @@ NO_TESTS=
 OUT_DIR=objs
 HELP=
 OPT_INSTALL=
-NO_QTWEBENGINE=
+NO_QTWEBENGINE=true
 
 for OPT; do
     case $OPT in
@@ -49,8 +49,8 @@ for OPT; do
         --force-fetch-wintoolchain)
             WINTOOLCHAIN=true
             ;;
-        --no-qtwebnengine)
-            NO_QTWEBENGINE=true
+        --with-qtwebnengine)
+            NO_QTWEBENGINE=
             ;;
         --verbose)
             VERBOSE=$(( $VERBOSE + 1 ))
