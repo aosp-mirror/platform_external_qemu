@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5c7f9626_367845cf",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1810,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-18T02:22:36Z",
+      "side": 1,
+      "message": "Could you please put \"string\" here to avoid temptation to apply .c_str() to -\u003eprintUsage()?",
+      "range": {
+        "startLine": 1810,
+        "startChar": 12,
+        "endLine": 1810,
+        "endChar": 16
+      },
+      "revId": "1c3074f2b30eccc0fd33ad6ab1813d55df0d197b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
