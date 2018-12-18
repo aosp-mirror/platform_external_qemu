@@ -25,6 +25,53 @@
     },
     {
       "key": {
+        "uuid": "7af1a69f_38c3556c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 393,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-12-18T20:05:33Z",
+      "side": 1,
+      "message": "+1, this would be good to log, at least to with -verbose.",
+      "parentUuid": "f3083c8b_b3811e2c",
+      "range": {
+        "startLine": 393,
+        "startChar": 8,
+        "endLine": 393,
+        "endChar": 14
+      },
+      "revId": "bac3db508946de7ca33b890eb757d28dd5b081fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "09ff514a_ac365afa",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-12-18T20:05:33Z",
+      "side": 1,
+      "message": "How does the caller know the correct format when calling update?  It seems like this would be really easy to call incorrectly.\n\nIs there any downside to making this take the format/width/height as parameters?\n\nWe could either enforce that they match, or potentially replace the width/height/format with the given parameters.  Is there any issue with making it possible to change the width/height/format here?",
+      "range": {
+        "startLine": 176,
+        "startChar": 4,
+        "endLine": 178,
+        "endChar": 45
+      },
+      "revId": "bac3db508946de7ca33b890eb757d28dd5b081fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e9d20f9e_23651c36",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 1
