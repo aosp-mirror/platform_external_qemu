@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eea3f37d_c79f56b6",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkAndroidNativeBuffer.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-18T00:21:10Z",
+      "side": 1,
+      "message": "*out",
+      "range": {
+        "startLine": 68,
+        "startChar": 28,
+        "endLine": 68,
+        "endChar": 51
+      },
+      "revId": "ca604939839e4bc3ae9ab5353f86320a7a15caa7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
