@@ -58,7 +58,7 @@ typedef struct {
 
 } CoroutineUContext;
 
-#define UC_DEBUG 1
+#define UC_DEBUG 0
 
 #if UC_DEBUG
 #define UC_TRACE(fmt,...) fprintf(stderr, "%s:%d:0x%lx:%p " fmt "\n", __func__, __LINE__, pthread_self(), __tsan_get_current_fiber(), ##__VA_ARGS__);
@@ -108,15 +108,21 @@ static void coroutine_trampoline(int i0, int i1)
 
     /* Initialize longjmp environment and switch back the caller */
     void* curr_fiber = __tsan_get_current_fiber();
+    __tsan_acquire(curr_fiber);
     if (!sigsetjmp(self->env, 0)) {
         UC_TRACE("Current fiber: %p. Set co %p to env 0x%lx", __tsan_get_current_fiber(), self, (unsigned long)self->env);
         start_switch_fiber(&fake_stack_save,
                            leader.stack, leader.stack_size);
         UC_TRACE("Jump to co %p caller fiber %p env 0x%lx", co, self->tsan_caller_fiber, *(unsigned long*)co->entry_arg);
+        __tsan_release(self->tsan_co_fiber);
+        __tsan_release(self->tsan_caller_fiber);
         __tsan_switch_to_fiber(self->tsan_caller_fiber);
+        __tsan_acquire(self->tsan_co_fiber);
+        __tsan_acquire(self->tsan_caller_fiber);
         siglongjmp(*(sigjmp_buf *)co->entry_arg, 1);
     }
     __tsan_switch_to_fiber(curr_fiber);
+    __tsan_release(curr_fiber);
 
     UC_TRACE("After first siglongjmp");
 
@@ -170,6 +176,8 @@ Coroutine *qemu_coroutine_new(void)
     void* fiber = __tsan_create_fiber();
     co->tsan_co_fiber = fiber;
     co->tsan_caller_fiber = __tsan_get_current_fiber();
+    __tsan_acquire(co->tsan_co_fiber);
+    __tsan_acquire(co->tsan_caller_fiber);
     UC_TRACE("Create new TSAN co fiber. co: %p co fiber: %p caller fiber: %p ",
              co, co->tsan_co_fiber, co->tsan_caller_fiber);
 
@@ -182,16 +190,26 @@ Coroutine *qemu_coroutine_new(void)
         UC_TRACE("Current fiber: %p. Set co %p to env 0x%lx", __tsan_get_current_fiber(), co, (unsigned long)old_env);
         start_switch_fiber(&fake_stack_save, co->stack, co->stack_size);
         UC_TRACE("from sigsetjmp, switch to co %p fiber %p\n", co, co->tsan_co_fiber);
+        __tsan_release(co->tsan_co_fiber);
+        __tsan_release(co->tsan_caller_fiber);
         __tsan_switch_to_fiber(co->tsan_co_fiber);
+        __tsan_acquire(co->tsan_co_fiber);
+        __tsan_acquire(co->tsan_caller_fiber);
         swapcontext(&old_uc, &uc);
     }
     __tsan_switch_to_fiber(curr_fiber);
+    __tsan_release(curr_fiber);
 
     UC_TRACE("After swapcontext");
 
     finish_switch_fiber(fake_stack_save);
 
     return &co->base;
+}
+
+void qemu_coroutine_reuse(Coroutine* co_) {
+    CoroutineUContext *co = DO_UPCAST(CoroutineUContext, base, co_);
+    __tsan_acquire(co->tsan_co_fiber);
 }
 
 #ifdef CONFIG_VALGRIND_H
@@ -213,7 +231,6 @@ void qemu_coroutine_switchback(Coroutine *co_)
 {
     CoroutineUContext *co = DO_UPCAST(CoroutineUContext, base, co_);
     UC_TRACE("Switching back TSAN state for cp %p. caller fiber: %p", co, co->tsan_caller_fiber);
-    // __tsan_switch_to_fiber(co->tsan_caller_fiber);
 }
 
 void qemu_coroutine_delete(Coroutine *co_)
@@ -259,10 +276,15 @@ qemu_coroutine_switch(Coroutine *from_, Coroutine *to_,
         start_switch_fiber(action == COROUTINE_TERMINATE ?
                            NULL : &fake_stack_save, to->stack, to->stack_size);
         UC_TRACE("Jump to co %p fiber %p. Terminate? %d longjmp buf: 0x%lx", to, to->tsan_co_fiber, action == COROUTINE_TERMINATE, (unsigned long)to->env);
+        __tsan_release(to->tsan_co_fiber);
+        __tsan_release(to->tsan_caller_fiber);
         __tsan_switch_to_fiber(to->tsan_co_fiber);
+        __tsan_acquire(to->tsan_co_fiber);
+        __tsan_acquire(to->tsan_caller_fiber);
         siglongjmp(to->env, action);
     }
     __tsan_switch_to_fiber(curr_fiber);
+    __tsan_release(curr_fiber);
 
     finish_switch_fiber(fake_stack_save);
 
