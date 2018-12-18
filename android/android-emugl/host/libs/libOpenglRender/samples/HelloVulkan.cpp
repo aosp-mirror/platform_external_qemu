@@ -252,7 +252,7 @@ protected:
                     fprintf(stderr, "%s: found graphics queue family at %d\n",
                             __func__, graphicsQueueFamilyIndex);
                     hasGraphicsQueueCapability = true;
-                    graphicsQueueFamilyIndex = j;
+                    mGraphicsQueueFamilyIndex = j;
                     graphicsQueueFamilyCount = props.queueCount;
                     hasTransferQueueCapability = true;
                     transferQueueFamilyIndex = j;
@@ -287,9 +287,6 @@ protected:
         }
         mPhysicalDevice = physdevs[bestPhysicalDeviceIndex];
 
-        static const char* const wantedDeviceExts[] = {
-            "VK_KHR_swapchain",
-        };
 
         if (graphicsQueueFamilyIndex == transferQueueFamilyIndex) {
             float priority = 1.0f;
@@ -301,7 +298,7 @@ protected:
             VkDeviceCreateInfo dCi = {
                 VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO, 0, 0, 1,
                 &graphicsDQCi, 0, nullptr,
-                arraySize(wantedDeviceExts), wantedDeviceExts,
+                0, nullptr,
                 nullptr, /* no features */
             };
             ASSERT_VK_RESULT(VK_SUCCESS,
@@ -325,7 +322,7 @@ protected:
             VkDeviceCreateInfo dCi = {
                 VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO, 0, 0,
                 2, queueCis, 0, nullptr,
-                arraySize(wantedDeviceExts), wantedDeviceExts,
+                0, nullptr,
                 nullptr, /* no features */
             };
             ASSERT_VK_RESULT(VK_SUCCESS,
@@ -664,7 +661,7 @@ protected:
             VK_ATTACHMENT_LOAD_OP_DONT_CARE,
             VK_ATTACHMENT_STORE_OP_DONT_CARE,
             VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
         };
         VkAttachmentReference colorRef = {
             0 /* index */,
@@ -975,6 +972,30 @@ protected:
 
         vk->vkCmdEndRenderPass(mCommandBuffer_graphics);
 
+        VkImageMemoryBarrier imgToTransferSrc = {
+            VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, 0,
+            0,
+            VK_ACCESS_HOST_READ_BIT,
+            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+            VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            mGraphicsQueueFamilyIndex,
+            mGraphicsQueueFamilyIndex,
+            mVkImageToPaint,
+            {
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                0, 1, 0, 1,
+            },
+        };
+
+        vk->vkCmdPipelineBarrier(
+                mCommandBuffer_graphics,
+                VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+                VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+                0,
+                0, nullptr,
+                0, nullptr,
+                1, &imgToTransferSrc);
+
         // image should be transferred to TRANSFER_SRC_OPTIMAL at end of render pass,
         // so no need for an explicit barrier
         VkBufferImageCopy imgCopy = {
@@ -1035,6 +1056,7 @@ protected:
     VkDevice mDevice = nullptr;
     VkQueue mQueue = nullptr;
     VkQueue mTransferQueue = nullptr;
+    uint32_t mGraphicsQueueFamilyIndex = 0;
 
     static constexpr VkDeviceSize kAllocSize =
             64 * 1024;  // 64 kb is much more than enough.
