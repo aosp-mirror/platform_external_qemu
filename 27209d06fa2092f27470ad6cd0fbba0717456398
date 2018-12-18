@@ -22,6 +22,30 @@
       "revId": "27209d06fa2092f27470ad6cd0fbba0717456398",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eb268d66_21538a77",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkCommonOperations.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-18T00:13:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b02da7ae_976f9062",
+      "range": {
+        "startLine": 90,
+        "startChar": 12,
+        "endLine": 90,
+        "endChar": 39
+      },
+      "revId": "27209d06fa2092f27470ad6cd0fbba0717456398",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
