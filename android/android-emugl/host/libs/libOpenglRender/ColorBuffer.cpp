@@ -386,6 +386,26 @@ void ColorBuffer::subUpdate(int x,
     }
 }
 
+void ColorBuffer::replaceContents(const void* newContents) {
+    RecursiveScopedHelperContext context(m_helper);
+
+    if (!context.isOk()) {
+        return;
+    }
+
+    touch();
+
+    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_format,
+                            m_type, newContents);
+
+    if (m_fastBlitSupported) {
+        s_gles2.glFlush();
+        m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
+    }
+}
+
 bool ColorBuffer::blitFromCurrentReadBuffer() {
 
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
