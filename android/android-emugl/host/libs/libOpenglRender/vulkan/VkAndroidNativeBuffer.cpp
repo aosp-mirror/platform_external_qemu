@@ -314,6 +314,7 @@ VkResult syncImageToColorBuffer(
     int* pNativeFenceFd,
     AndroidNativeBufferInfo* anbInfo) {
 
+        fprintf(stderr, "%s: sup\n", __func__);
     // Implicitly synchronized
     *pNativeFenceFd = -1;
 
@@ -447,10 +448,13 @@ VkResult syncImageToColorBuffer(
 
     vk->vkEndCommandBuffer(queueState.cb);
 
+    std::vector<VkPipelineStageFlags> pipelineStageFlags;
+    pipelineStageFlags.resize(waitSemaphoreCount, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+
     VkSubmitInfo submitInfo = {
         VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
         waitSemaphoreCount, pWaitSemaphores,
-        nullptr /* no dst stage mask */,
+        pipelineStageFlags.data(),
         1, &queueState.cb,
         0, nullptr,
     };
@@ -478,8 +482,10 @@ VkResult syncImageToColorBuffer(
     FrameBuffer::getFB()->
         replaceColorBufferContents(
             colorBufferHandle,
-            anbInfo->mappedStagingPtr);
+            anbInfo->mappedStagingPtr,
+            bpp * anbInfo->extent.width * anbInfo->extent.height);
 
+        fprintf(stderr, "%s: meh. 0x%x\n", __func__, *(uint32_t*)(anbInfo->mappedStagingPtr));
     return VK_SUCCESS;
 }
 
