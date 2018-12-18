@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f3083c8b_b3811e2c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 393,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-18T20:00:26Z",
+      "side": 1,
+      "message": "Do we want to report this error (to help debugging)?",
+      "range": {
+        "startLine": 393,
+        "startChar": 8,
+        "endLine": 393,
+        "endChar": 14
+      },
+      "revId": "bac3db508946de7ca33b890eb757d28dd5b081fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e9d20f9e_23651c36",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1418,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-18T20:00:26Z",
+      "side": 1,
+      "message": "We report success here, could you please apply the same for replaceContents?",
+      "range": {
+        "startLine": 1418,
+        "startChar": 0,
+        "endLine": 1418,
+        "endChar": 4
+      },
+      "revId": "bac3db508946de7ca33b890eb757d28dd5b081fa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
