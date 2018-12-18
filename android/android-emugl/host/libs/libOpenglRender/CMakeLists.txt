@@ -25,6 +25,7 @@ target_include_directories(OSWindow PUBLIC ${ANDROID_EMUGL_DIR}/host/include sta
 
 set(OpenglRender_vulkan_src
     vulkan/VkAndroidNativeBuffer.cpp
+    vulkan/VkCommonOperations.cpp
     vulkan/VkDecoder.cpp
     vulkan/VkDecoderGlobalState.cpp
     vulkan/VulkanDispatch.cpp
