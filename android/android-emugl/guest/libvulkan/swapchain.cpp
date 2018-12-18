@@ -1244,6 +1244,8 @@ VkResult CreateSwapchainKHR(VkDevice device,
         img.buffer = buffer;
         img.dequeued = true;
 
+        fprintf(stderr, "%s: extent: %d %d\n", __func__,
+        img.buffer->width, img.buffer->height);
         image_create.extent =
             VkExtent3D{static_cast<uint32_t>(img.buffer->width),
                        static_cast<uint32_t>(img.buffer->height),
