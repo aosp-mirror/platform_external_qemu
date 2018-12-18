@@ -305,6 +305,13 @@ public:
     bool updateColorBuffer(HandleType p_colorbuffer,
                            int x, int y, int width, int height,
                            GLenum format, GLenum type, void *pixels);
+    // Replaces contents completely using the color buffer's current format,
+    // with row length equal to width of a row in bytes.
+    // The number of bytes is passed as a check.
+    bool replaceColorBufferContents(
+        HandleType p_colorbuffer,
+        const void *pixels,
+        size_t numBytes);
 
     // Display the content of a given ColorBuffer into the framebuffer's
     // sub-window. |p_colorbuffer| is a handle value.
