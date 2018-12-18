@@ -42,7 +42,7 @@ typedef int VK_ANB_EXT_MEMORY_HANDLE;
 #endif
 
 struct AndroidNativeBufferInfo {
-    VkDevice device;
+    VkDevice device = VK_NULL_HANDLE;
     VkFormat vkFormat;
     VkExtent3D extent;
     VkImageUsageFlags usage;
@@ -74,9 +74,9 @@ struct AndroidNativeBufferInfo {
     // It is assumed that the VkImage object has been created by Android swapchain layer
     // with all the relevant queue family indices for sharing set properly.
     struct QueueState {
-        VkQueue queue;
-        VkCommandPool pool;
-        VkCommandBuffer cb;
+        VkQueue queue = VK_NULL_HANDLE;
+        VkCommandPool pool = VK_NULL_HANDLE;
+        VkCommandBuffer cb = VK_NULL_HANDLE;
     };
     // We keep one QueueState for each queue family index used by the guest
     // in vkQueuePresentKHR.
@@ -102,7 +102,7 @@ VkResult prepareAndroidNativeBufferImage(
 
 void teardownAndroidNativeBufferImage(
     VulkanDispatch* vk,
-    const AndroidNativeBufferInfo* anbInfo);
+    AndroidNativeBufferInfo* anbInfo);
 
 void getGralloc0Usage(VkFormat format, VkImageUsageFlags imageUsage,
                       int* usage_out);

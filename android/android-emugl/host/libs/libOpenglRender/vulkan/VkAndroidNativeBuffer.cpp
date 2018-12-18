@@ -65,8 +65,7 @@ VkResult prepareAndroidNativeBufferImage(
     const VkPhysicalDeviceMemoryProperties* memProps,
     AndroidNativeBufferInfo* out) {
 
-    memset(out, 0x0, sizeof(*out));
-    out->externalMemory = VK_ANB_EXT_MEMORY_HANDLE_INVALID;
+    *out = {};
 
     out->device = device;
 
@@ -209,7 +208,7 @@ VkResult prepareAndroidNativeBufferImage(
 }
 
 void teardownAndroidNativeBufferImage(
-    VulkanDispatch* vk, const AndroidNativeBufferInfo* anbInfo) {
+    VulkanDispatch* vk, AndroidNativeBufferInfo* anbInfo) {
     auto device = anbInfo->device;
 
     auto image = anbInfo->image;
@@ -224,6 +223,8 @@ void teardownAndroidNativeBufferImage(
     if (stagingBuffer) vk->vkDestroyBuffer(device, stagingBuffer, nullptr);
     if (mappedPtr) vk->vkUnmapMemory(device, stagingMemory);
     if (stagingMemory) vk->vkFreeMemory(device, stagingMemory, nullptr);
+
+    *anbInfo = {};
 }
 
 void getGralloc0Usage(VkFormat format, VkImageUsageFlags imageUsage,
