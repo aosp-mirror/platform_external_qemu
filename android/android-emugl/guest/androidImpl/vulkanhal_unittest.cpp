@@ -46,18 +46,21 @@ protected:
     }
 
     static void TearDownTestCase() {
+        // Cancel all host threads as well
+        android_finishOpenglesRenderer();
+
         delete testEnv;
         testEnv = nullptr;
     }
 
     void SetUp() override {
         setupGralloc();
+        setupVulkan();
     }
 
     void TearDown() override {
+        teardownVulkan();
         teardownGralloc();
-        // Cancel all host threads as well
-        android_finishOpenglesRenderer();
     }
 
     void setupGralloc() {
@@ -90,7 +93,163 @@ protected:
         mGralloc.free(buffer);
     }
 
+    void setupVulkan() {
+        uint32_t extCount = 0;
+        std::vector<VkExtensionProperties> exts;
+        EXPECT_EQ(VK_SUCCESS, vkEnumerateInstanceExtensionProperties(
+                                      nullptr, &extCount, nullptr));
+        exts.resize(extCount);
+        EXPECT_EQ(VK_SUCCESS, vkEnumerateInstanceExtensionProperties(
+                                      nullptr, &extCount, exts.data()));
+
+        VkInstanceCreateInfo instCi = {
+            VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+            0, 0, nullptr,
+            0, nullptr,
+            0, nullptr,
+        };
+
+        EXPECT_EQ(VK_SUCCESS, vkCreateInstance(&instCi, nullptr, &mInstance));
+
+        uint32_t physdevCount = 0;
+        std::vector<VkPhysicalDevice> physdevs;
+        EXPECT_EQ(VK_SUCCESS,
+                  vkEnumeratePhysicalDevices(mInstance, &physdevCount, nullptr));
+        physdevs.resize(physdevCount);
+        EXPECT_EQ(VK_SUCCESS, vkEnumeratePhysicalDevices(mInstance, &physdevCount,
+                                                         physdevs.data()));
+
+        uint32_t bestPhysicalDevice = 0;
+        bool queuesGood = false;
+
+        for (uint32_t i = 0; i < physdevCount; ++i) {
+            uint32_t queueFamilyCount = 0;
+            std::vector<VkQueueFamilyProperties> queueFamilyProps;
+            vkGetPhysicalDeviceQueueFamilyProperties(
+                    physdevs[i], &queueFamilyCount, nullptr);
+            queueFamilyProps.resize(queueFamilyCount);
+            vkGetPhysicalDeviceQueueFamilyProperties(
+                    physdevs[i], &queueFamilyCount, queueFamilyProps.data());
+
+            for (uint32_t j = 0; j < queueFamilyCount; ++j) {
+                auto count = queueFamilyProps[j].queueCount;
+                auto flags = queueFamilyProps[j].queueFlags;
+                if (count > 0 && (flags & VK_QUEUE_GRAPHICS_BIT)) {
+                    bestPhysicalDevice = i;
+                    mGraphicsQueueFamily = j;
+                    queuesGood = true;
+                    break;
+                }
+            }
+
+            if (queuesGood) {
+                break;
+            }
+        }
+
+        EXPECT_TRUE(queuesGood);
+
+        mPhysicalDevice = physdevs[bestPhysicalDevice];
+
+        VkPhysicalDeviceMemoryProperties memProps;
+        vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &memProps);
+
+        bool foundHostVisibleMemoryTypeIndex = false;
+
+        for (uint32_t i = 0; i < memProps.memoryTypeCount; ++i) {
+            if (memProps.memoryTypes[i].propertyFlags &
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
+                mHostVisibleMemoryTypeIndex = i;
+                foundHostVisibleMemoryTypeIndex = true;
+                break;
+            }
+        }
+
+        EXPECT_TRUE(foundHostVisibleMemoryTypeIndex);
+
+        float priority = 1.0f;
+        VkDeviceQueueCreateInfo dqCi = {
+            VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+            0, 0,
+            mGraphicsQueueFamily, 1,
+            &priority,
+        };
+
+        VkDeviceCreateInfo dCi = {
+            VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO, 0, 0,
+            1, &dqCi,
+            0, nullptr,  // no layers
+            0, nullptr,  // no extensions
+            nullptr,  // no features
+        };
+
+        EXPECT_EQ(VK_SUCCESS, vkCreateDevice(physdevs[bestPhysicalDevice], &dCi,
+                                             nullptr, &mDevice));
+    }
+
+    void teardownVulkan() {
+        vkDestroyDevice(mDevice, nullptr);
+        vkDestroyInstance(mInstance, nullptr);
+    }
+
+    void createAndroidNativeImage(buffer_handle_t* buffer_out, VkImage* image_out) {
+    
+        int usage = GRALLOC_USAGE_HW_RENDER;
+        int format = HAL_PIXEL_FORMAT_RGBA_8888;
+        int stride;
+        buffer_handle_t buffer =
+            createTestGrallocBuffer(
+                usage, format, kWindowSize, kWindowSize, &stride);
+    
+        uint64_t producerUsage, consumerUsage;
+        android_convertGralloc0To1Usage(usage, &producerUsage, &consumerUsage);
+    
+        VkNativeBufferANDROID nativeBufferInfo = {
+            VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID, nullptr,
+            buffer, stride,
+            format,
+            usage,
+            {
+                consumerUsage,
+                producerUsage,
+            },
+        };
+    
+        VkImageCreateInfo testImageCi = {
+            VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, (const void*)&nativeBufferInfo,
+            0,
+            VK_IMAGE_TYPE_2D,
+            VK_FORMAT_R8G8B8A8_UNORM,
+            { kWindowSize, kWindowSize, 1, },
+            1, 1,
+            VK_SAMPLE_COUNT_1_BIT,
+            VK_IMAGE_TILING_OPTIMAL,
+            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+            VK_SHARING_MODE_EXCLUSIVE,
+            0, nullptr /* shared queue families */,
+            VK_IMAGE_LAYOUT_UNDEFINED,
+        };
+    
+        VkImage testAndroidNativeImage;
+        EXPECT_EQ(VK_SUCCESS, vkCreateImage(mDevice, &testImageCi, nullptr,
+                                            &testAndroidNativeImage));
+    
+        *buffer_out = buffer;
+        *image_out = testAndroidNativeImage;
+    }
+
+    void destroyAndroidNativeImage(buffer_handle_t buffer, VkImage image) {
+        vkDestroyImage(mDevice, image, nullptr);
+        destroyTestGrallocBuffer(buffer);
+    }
+
     struct gralloc_implementation mGralloc;
+
+    VkInstance mInstance;
+    VkPhysicalDevice mPhysicalDevice;
+    VkDevice mDevice;
+    uint32_t mHostVisibleMemoryTypeIndex;
+    uint32_t mGraphicsQueueFamily;
 };
 
 // static
@@ -98,107 +257,21 @@ GoldfishOpenglTestEnv* VulkanHalTest::testEnv = nullptr;
 
 // A basic test of Vulkan HAL:
 // - Touch the Android loader at global, instance, and device level.
-// - Allocate, map, flush, invalidate some host visible memory.
-TEST_F(VulkanHalTest, Basic) {
-    uint32_t extCount = 0;
-    std::vector<VkExtensionProperties> exts;
-    EXPECT_EQ(VK_SUCCESS, vkEnumerateInstanceExtensionProperties(
-                                  nullptr, &extCount, nullptr));
-    exts.resize(extCount);
-    EXPECT_EQ(VK_SUCCESS, vkEnumerateInstanceExtensionProperties(
-                                  nullptr, &extCount, exts.data()));
+TEST_F(VulkanHalTest, Basic) { }
 
-    for (uint32_t i = 0; i < extCount; ++i) {
-        printf("Available extension: %s\n", exts[i].extensionName);
-    }
-
-    VkInstanceCreateInfo instCi = {
-        VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO, 0, 0,
-        nullptr,
-        0, nullptr,
-        0, nullptr,
-    };
-
-    VkInstance inst;
-    EXPECT_EQ(VK_SUCCESS, vkCreateInstance(&instCi, nullptr, &inst));
-
-    uint32_t physdevCount = 0;
-    std::vector<VkPhysicalDevice> physdevs;
-    EXPECT_EQ(VK_SUCCESS, vkEnumeratePhysicalDevices(inst, &physdevCount, nullptr));
-    physdevs.resize(physdevCount);
-    EXPECT_EQ(VK_SUCCESS,
-              vkEnumeratePhysicalDevices(inst, &physdevCount, physdevs.data()));
-
-    uint32_t bestPhysicalDevice = 0;
-    uint32_t bestQueueFamily = 0;
-    for (uint32_t i = 0; i < physdevCount; ++i) {
-        uint32_t queueFamilyCount = 0;
-        std::vector<VkQueueFamilyProperties> queueFamilyProps;
-        vkGetPhysicalDeviceQueueFamilyProperties(physdevs[i], &queueFamilyCount,
-                                                 nullptr);
-        queueFamilyProps.resize(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(physdevs[i], &queueFamilyCount,
-                                                 queueFamilyProps.data());
-        bool queuesGood = false;
-
-        for (uint32_t j = 0; j < queueFamilyCount; ++j) {
-            auto count = queueFamilyProps[j].queueCount;
-            auto flags = queueFamilyProps[j].queueFlags;
-            if (count > 0 && (flags & VK_QUEUE_GRAPHICS_BIT)) {
-                bestPhysicalDevice = i;
-                bestQueueFamily = j;
-                queuesGood = true;
-                break;
-            }
-        }
-
-        if (queuesGood) {
-            break;
-        }
-    }
-
-    VkPhysicalDevice physdev = physdevs[bestPhysicalDevice];
-
-    VkPhysicalDeviceMemoryProperties memProps;
-    vkGetPhysicalDeviceMemoryProperties(physdev, &memProps);
-
-    uint32_t hostVisibleMemoryTypeIndex = 0;
-    for (uint32_t i = 0; i < memProps.memoryTypeCount; ++i) {
-        if (memProps.memoryTypes[i].propertyFlags &
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
-            hostVisibleMemoryTypeIndex = i;
-            break;
-        }
-    }
-
-    float priority = 1.0f;
-    VkDeviceQueueCreateInfo dqCi = {
-        VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO, 0, 0,
-        bestQueueFamily, 1, &priority,
-    };
-
-    VkDeviceCreateInfo dCi = {
-        VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO, 0, 0,
-        1, &dqCi,
-        0, nullptr, // no layers
-        0, nullptr, // no extensions
-        nullptr, // no features
-    };
-
-    VkDevice device;
-    EXPECT_EQ(VK_SUCCESS, vkCreateDevice(physdevs[bestPhysicalDevice], &dCi, nullptr, &device));
-
+// Test: Allocate, map, flush, invalidate some host visible memory.
+TEST_F(VulkanHalTest, MemoryMapping) {
     static constexpr VkDeviceSize kTestAlloc = 16 * 1024;
     VkMemoryAllocateInfo allocInfo = {
         VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, 0,
         kTestAlloc,
-        hostVisibleMemoryTypeIndex,
+        mHostVisibleMemoryTypeIndex,
     };
     VkDeviceMemory mem;
-    EXPECT_EQ(VK_SUCCESS, vkAllocateMemory(device, &allocInfo, nullptr, &mem));
+    EXPECT_EQ(VK_SUCCESS, vkAllocateMemory(mDevice, &allocInfo, nullptr, &mem));
 
     void* hostPtr;
-    EXPECT_EQ(VK_SUCCESS, vkMapMemory(device, mem, 0, VK_WHOLE_SIZE, 0, &hostPtr));
+    EXPECT_EQ(VK_SUCCESS, vkMapMemory(mDevice, mem, 0, VK_WHOLE_SIZE, 0, &hostPtr));
 
     memset(hostPtr, 0xff, kTestAlloc);
 
@@ -207,8 +280,8 @@ TEST_F(VulkanHalTest, Basic) {
         mem, 0, kTestAlloc,
     };
 
-    EXPECT_EQ(VK_SUCCESS, vkFlushMappedMemoryRanges(device, 1, &toFlush));
-    EXPECT_EQ(VK_SUCCESS, vkInvalidateMappedMemoryRanges(device, 1, &toFlush));
+    EXPECT_EQ(VK_SUCCESS, vkFlushMappedMemoryRanges(mDevice, 1, &toFlush));
+    EXPECT_EQ(VK_SUCCESS, vkInvalidateMappedMemoryRanges(mDevice, 1, &toFlush));
 
     for (uint32_t i = 0; i < kTestAlloc; ++i) {
         EXPECT_EQ(0xff, *((uint8_t*)hostPtr + i));
@@ -251,16 +324,21 @@ TEST_F(VulkanHalTest, Basic) {
     };
 
     VkImage testAndroidNativeImage;
-    EXPECT_EQ(VK_SUCCESS, vkCreateImage(device, &testImageCi, nullptr,
+    EXPECT_EQ(VK_SUCCESS, vkCreateImage(mDevice, &testImageCi, nullptr,
                                         &testAndroidNativeImage));
-    vkDestroyImage(device, testAndroidNativeImage, nullptr);
+    vkDestroyImage(mDevice, testAndroidNativeImage, nullptr);
     destroyTestGrallocBuffer(buffer);
 
-    vkUnmapMemory(device, mem);
-    vkFreeMemory(device, mem, nullptr);
+    vkUnmapMemory(mDevice, mem);
+    vkFreeMemory(mDevice, mem, nullptr);
+}
 
-    vkDestroyDevice(device, nullptr);
-    vkDestroyInstance(inst, nullptr);
+// Tests creation of VkImages backed by gralloc buffers.
+TEST_F(VulkanHalTest, AndroidNativeImageCreation) {
+    VkImage image;
+    buffer_handle_t buffer;
+    createAndroidNativeImage(&buffer, &image);
+    destroyAndroidNativeImage(buffer, image);
 }
 
 }  // namespace aemu
