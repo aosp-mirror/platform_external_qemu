@@ -162,7 +162,7 @@ if [ "$OPTION_WINTOOLCHAIN" ]; then
    CMAKE_PARAMS="${CMAKE_PARAMS}  -DOPTION_WINTOOLCHAIN=1"
 fi
 
-if [ -z "$OPTION_WITH_QTWEBENGINE" ]; then
+if [ -z "$OPTION_WITH_QTWEBENGINE" -a "$(get_build_os)" = "linux" -a -z "$OPTION_MSVC" -a -z "$OPTION_MINGW" ]; then
    CMAKE_PARAMS="${CMAKE_PARAMS}  -DNO_QTWEBENGINE=1"
 fi
 
