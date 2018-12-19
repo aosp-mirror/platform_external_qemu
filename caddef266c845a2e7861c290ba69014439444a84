@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f3997e04_5fc99cbf",
+        "filename": "android/android-emu/android/camera/camera-videoplayback.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-19T16:37:30Z",
+      "side": 1,
+      "message": "nit: 2018 (2019?) and in all other new files",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 21
+      },
+      "revId": "caddef266c845a2e7861c290ba69014439444a84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
