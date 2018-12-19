@@ -1449,6 +1449,7 @@ help_camera_back(stralloc_t* out)
     "     emulated     -> camera will be emulated using software ('fake') camera emulation\n"
     "     webcam<N>    -> camera will be emulated using a webcamera connected to the host\n"
     "     virtualscene -> If the feature is enabled, camera will render a virtual scene\n"
+    "     videoplayback -> If the feature is enabled, camera will support playing back a video\n"
     "     none         -> camera emulation will be disabled\n\n"
     );
 }
