@@ -63,4 +63,6 @@ enum Feature {
     HostComposition = 31;
 
     WifiConfigurable = 32;
+
+    VideoPlayback = 34;
 }
