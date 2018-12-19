@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "f4704075_64a24f05",
+        "filename": "android/android-emu/android/featurecontrol/proto/emulator_features.proto",
+        "patchSetId": 3
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2018-12-19T17:36:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ac5713da_5d089e20",
+      "range": {
+        "startLine": 6,
+        "startChar": 13,
+        "endLine": 6,
+        "endChar": 15
+      },
+      "revId": "caddef266c845a2e7861c290ba69014439444a84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f3af5b1b_fd9a2995",
         "filename": "android/android-emu/android/main-common.c",
         "patchSetId": 3
@@ -92,6 +116,30 @@
       "revId": "caddef266c845a2e7861c290ba69014439444a84",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "211baceb_fae3ae49",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1927,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2018-12-19T17:36:46Z",
+      "side": 1,
+      "message": "Thanks for the suggestion. Back camera is all we need for testing.",
+      "parentUuid": "f3af5b1b_fd9a2995",
+      "range": {
+        "startLine": 1927,
+        "startChar": 8,
+        "endLine": 1927,
+        "endChar": 75
+      },
+      "revId": "caddef266c845a2e7861c290ba69014439444a84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
