@@ -20,15 +20,16 @@
 
 #include "android/camera/camera-service.h"
 
+#include "android/boot-properties.h"
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
 #include "android/camera/camera-metrics.h"
+#include "android/camera/camera-videoplayback.h"
 #include "android/camera/camera-virtualscene.h"
 #include "android/emulation/android_qemud.h"
 #include "android/featurecontrol/feature_control.h"
-#include "android/globals.h"  /* for android_hw */
+#include "android/globals.h" /* for android_hw */
 #include "android/hw-sensors.h"
-#include "android/boot-properties.h"
 #include "android/utils/debug.h"
 #include "android/utils/looper.h"
 #include "android/utils/misc.h"
@@ -324,6 +325,47 @@ static void _virtualscenecamera_setup(CameraServiceDesc* csd) {
     csd->camera_count++;
 }
 
+/* Initialize video playback camera record in camera service descriptor.
+ * Param:
+ *  csd - Camera service descriptor to initialize a record in.
+ */
+static void _videoplaybackcamera_setup(CameraServiceDesc* csd) {
+    /* Array containing emulated camera frame dimensions
+     * expected by framework. */
+    static const CameraFrameDim kEmulateDims[] = {
+            {640, 480},
+            /* The following dimensions are required by the camera framework. */
+            {352, 288},
+            {320, 240},
+            {176, 144},
+            {1280, 720},
+            /* Additional resolutions. */
+            {1280, 960}};
+
+    csd->camera_info[csd->camera_count].frame_sizes =
+            (CameraFrameDim*)malloc(sizeof(kEmulateDims));
+    if (csd->camera_info[csd->camera_count].frame_sizes != NULL) {
+        csd->camera_info[csd->camera_count].frame_sizes_num =
+                sizeof(kEmulateDims) / sizeof(*kEmulateDims);
+        memcpy(csd->camera_info[csd->camera_count].frame_sizes, kEmulateDims,
+               sizeof(kEmulateDims));
+
+        csd->camera_info[csd->camera_count].display_name =
+                ASTRDUP("videoplayback");
+        csd->camera_info[csd->camera_count].device_name =
+                ASTRDUP("videoplayback");
+        csd->camera_info[csd->camera_count].camera_source = kVideoPlayback;
+        csd->camera_info[csd->camera_count].inp_channel = 0;
+
+        csd->camera_info[csd->camera_count].pixel_format =
+                camera_videoplayback_preferred_format();
+        csd->camera_info[csd->camera_count].direction = ASTRDUP("back");
+        csd->camera_info[csd->camera_count].in_use = 0;
+    }
+
+    csd->camera_count++;
+}
+
 /* Initialized webcam emulation record in camera service descriptor.
  * Param:
  *  csd - Camera service descriptor to initialize a record in.
@@ -377,6 +419,10 @@ _camera_service_init(CameraServiceDesc* csd)
     if (androidHwConfig_hasVirtualSceneCamera(android_hw)) {
         /* Set up virtual scene camera emulation. */
         _virtualscenecamera_setup(csd);
+    }
+
+    if (androidHwConfig_hasVideoPlaybackCamera(android_hw)) {
+        _videoplaybackcamera_setup(csd);
     }
 
     /* Lets see if HW config uses emulated cameras. */
@@ -807,6 +853,12 @@ _camera_client_create(CameraServiceDesc* csd, const char* param)
         cc->stop_capturing = camera_virtualscene_stop_capturing;
         cc->read_frame = camera_virtualscene_read_frame;
         cc->close = camera_virtualscene_close;
+    } else if (ci->camera_source == kVideoPlayback) {
+        cc->open = camera_videoplayback_open;
+        cc->start_capturing = camera_videoplayback_start_capturing;
+        cc->stop_capturing = camera_videoplayback_stop_capturing;
+        cc->read_frame = camera_videoplayback_read_frame;
+        cc->close = camera_videoplayback_close;
     } else {
         cc->open = camera_device_open;
         cc->start_capturing = camera_device_start_capturing;
