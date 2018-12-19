@@ -368,6 +368,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::SCREEN_RECORDING;
         case android::featurecontrol::VirtualScene:
             return android_studio::EmulatorFeatureFlagState::VIRTUAL_SCENE;
+        case android::featurecontrol::VideoPlayback:
+            return android_studio::EmulatorFeatureFlagState::VIDEO_PLAYBACK;
         case android::featurecontrol::IgnoreHostOpenGLErrors:
             return android_studio::EmulatorFeatureFlagState::IGNORE_HOST_OPENGL_ERRORS;
         case android::featurecontrol::GenericSnapshotsUI:

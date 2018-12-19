@@ -819,15 +819,22 @@ extern "C" int main(int argc, char** argv) {
         return 1;
     }
 
-    // If the virtual scene camera is selected in the avd, but not supported,
-    // use the emulated camera instead.
-    const bool isVirtualScene = !strcmp(hw->hw_camera_back, "virtualscene");
-    if (isVirtualScene && !feature_is_enabled(kFeature_VirtualScene)) {
-        str_reset(&hw->hw_camera_back, "emulated");
+    if (!strcmp(hw->hw_camera_back, "virtualscene")) {
+        if (!feature_is_enabled(kFeature_VirtualScene)) {
+            // If the virtual scene camera is selected in the avd, but not
+            // supported, use the emulated camera instead.
+            str_reset(&hw->hw_camera_back, "emulated");
+        } else {
+            // Parse virtual scene command line options, if enabled.
+            camera_virtualscene_parse_cmdline();
+        }
+    } else if (!strcmp(hw->hw_camera_back, "videoplayback")) {
+        if (!feature_is_enabled(kFeature_VideoPlayback)) {
+            // If the video playback camera is selected in the avd, but not
+            // supported, use the emulated camera instead.
+            str_reset(&hw->hw_camera_back, "emulated");
+        }
     }
-
-    // Parse virtual scene command line options, if enabled.
-    camera_virtualscene_parse_cmdline();
 
     if (opts->shared_net_id) {
         char* end;
