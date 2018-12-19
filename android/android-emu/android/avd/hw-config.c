@@ -524,3 +524,7 @@ void androidHwConfig_stripDefaults(CIniFile* source, CIniFile* target) {
 int androidHwConfig_hasVirtualSceneCamera(AndroidHwConfig* config) {
     return strcmp(config->hw_camera_back, "virtualscene") == 0;
 }
+
+int androidHwConfig_hasVideoPlaybackCamera(AndroidHwConfig* config) {
+    return strcmp(config->hw_camera_back, "videoplayback") == 0;
+}

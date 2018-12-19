@@ -35,6 +35,7 @@ FEATURE_CONTROL_ITEM(WindowsOnDemandSnapshotLoad)
 FEATURE_CONTROL_ITEM(LocationUiV2)
 FEATURE_CONTROL_ITEM(ScreenRecording)
 FEATURE_CONTROL_ITEM(VirtualScene)
+FEATURE_CONTROL_ITEM(VideoPlayback)
 FEATURE_CONTROL_ITEM(GenericSnapshotsUI)
 // File-backed Quickboot
 FEATURE_CONTROL_ITEM(QuickbootFileBacked)
