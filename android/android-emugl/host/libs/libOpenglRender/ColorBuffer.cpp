@@ -94,6 +94,65 @@ static GLenum sGetUnsizedColorBufferFormat(GLenum format) {
             return format;
     }
 }
+
+static bool sGetFormatParameters(
+    GLint internalFormat,
+    GLenum* texFormat,
+    GLenum* pixelType,
+    int* bytesPerPixel) {
+
+    switch (internalFormat) {
+        case GL_RGB:
+        case GL_RGB8:
+            *texFormat = GL_RGB;
+            *pixelType = GL_UNSIGNED_BYTE;
+            *bytesPerPixel = 3;
+            return true;
+        case GL_RGB565_OES:
+            *texFormat = GL_RGB;
+            *pixelType = GL_UNSIGNED_SHORT_5_6_5;
+            *bytesPerPixel = 2;
+            return true;
+        case GL_RGBA:
+        case GL_RGBA8:
+        case GL_RGB5_A1_OES:
+        case GL_RGBA4_OES:
+            *texFormat = GL_RGBA;
+            *pixelType = GL_UNSIGNED_BYTE;
+            *bytesPerPixel = 4;
+            return true;
+        case GL_UNSIGNED_INT_10_10_10_2_OES:
+            *texFormat = GL_RGBA;
+            *pixelType = GL_UNSIGNED_SHORT;
+            *bytesPerPixel = 4;
+            return true;
+        case GL_RGB10_A2:
+            *texFormat = GL_RGBA;
+            *pixelType = GL_UNSIGNED_INT_2_10_10_10_REV;
+            *bytesPerPixel = 4;
+            return true;
+        case GL_RGB16F:
+            *texFormat = GL_RGB;
+            *pixelType = GL_HALF_FLOAT;
+            *bytesPerPixel = 6;
+            return true;
+        case GL_RGBA16F:
+            *texFormat = GL_RGBA;
+            *pixelType = GL_HALF_FLOAT;
+            *bytesPerPixel = 8;
+            return true;
+        case GL_LUMINANCE:
+            *texFormat = GL_LUMINANCE;
+            *pixelType = GL_UNSIGNED_SHORT;
+            *bytesPerPixel = 2;
+            return true;
+        default:
+            fprintf(stderr, "%s: Unknown format 0x%x\n",
+                    __func__, internalFormat);
+            return false;
+    }
+}
+
 // static
 ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  int p_width,
@@ -104,58 +163,17 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  Helper* helper,
                                  bool fastBlitSupported) {
     GLenum texFormat = 0;
-
     GLenum pixelType = GL_UNSIGNED_BYTE;
-    int bytesPerPixel = 3;
-    switch (p_internalFormat) {
-        case GL_RGB:
-            texFormat = GL_RGB;
-            bytesPerPixel = 3;
-            break;
+    int bytesPerPixel = 4;
 
-        case GL_RGB565_OES: // and GL_RGB565
-            // Still say "GL_RGB" for compatibility
-            // with older drivers
-            texFormat = GL_RGB;
-            pixelType = GL_UNSIGNED_SHORT_5_6_5;
-            bytesPerPixel = 2;
-            break;
-
-        case GL_RGBA:
-        case GL_RGB5_A1_OES:
-        case GL_RGBA4_OES:
-            texFormat = GL_RGBA;
-            bytesPerPixel = 4;
-            break;
-
-        case GL_UNSIGNED_INT_10_10_10_2_OES:
-            texFormat = GL_RGBA;
-            pixelType = GL_UNSIGNED_SHORT;
-            bytesPerPixel = 4;
-            break;
-
-        case GL_RGB10_A2:
-            texFormat = GL_RGBA;
-            pixelType = GL_UNSIGNED_INT_2_10_10_10_REV;
-            bytesPerPixel = 4;
-            break;
-
-        case GL_RGBA16F:
-            texFormat = GL_RGBA;
-            pixelType = GL_HALF_FLOAT;
-            bytesPerPixel = 8;
-            break;
-
-        case GL_LUMINANCE:
-            texFormat = GL_LUMINANCE;
-            pixelType = GL_UNSIGNED_SHORT;
-            bytesPerPixel = 2;
-            break;
-        default:
-            fprintf(stderr, "ColorBuffer::create invalid format 0x%x\n",
-                    p_internalFormat);
-            return NULL;
+    if (!sGetFormatParameters(
+            p_internalFormat,
+            &texFormat, &pixelType, &bytesPerPixel)) {
+        fprintf(stderr, "ColorBuffer::create invalid format 0x%x\n",
+                p_internalFormat);
+        return NULL;
     }
+
     const unsigned long bufsize = ((unsigned long)bytesPerPixel) * p_width
             * p_height;
     android::base::ScopedCPtr<char> initialImage(
@@ -244,6 +262,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
         cb->m_asyncReadbackType = GL_UNSIGNED_INT_8_8_8_8_REV;
     }
 
+    cb->m_numBytes = (size_t)bufsize;
+
     s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
 
     s_gles2.glFinish();
@@ -304,18 +324,23 @@ void ColorBuffer::readPixels(int x,
     }
 }
 
-void ColorBuffer::reformat(GLint internalformat,
-                           GLenum format, GLenum type) {
+void ColorBuffer::reformat(GLint internalformat) {
 
-    format = sGetUnsizedColorBufferFormat(format);
+    GLenum texFormat = internalformat;
+    GLenum pixelType = GL_UNSIGNED_BYTE;
+    int bpp = 4;
+    if (!sGetFormatParameters(internalformat, &texFormat, &pixelType, &bpp)) {
+        fprintf(stderr, "%s: WARNING: reformat failed. internal format: 0x%x\n",
+                __func__, internalformat);
+    }
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
-                         0, format, type, nullptr);
+                         0, texFormat, pixelType, nullptr);
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_blitTex);
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
-                         0, format, type, nullptr);
+                         0, texFormat, pixelType, nullptr);
 
     // EGL images need to be recreated because the EGL_KHR_image_base spec
     // states that respecifying an image (i.e. glTexImage2D) will generally
@@ -331,9 +356,12 @@ void ColorBuffer::reformat(GLint internalformat,
             (EGLClientBuffer)SafePointerFromUInt(m_blitTex), NULL);
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
+
     m_internalFormat = internalformat;
-    m_format = format;
-    m_type = type;
+    m_format = texFormat;
+    m_type = pixelType;
+
+    m_numBytes = bpp * m_width * m_height;
 }
 
 void ColorBuffer::subUpdate(int x,
@@ -351,11 +379,9 @@ void ColorBuffer::subUpdate(int x,
 
     touch();
 
-    p_format = sGetUnsizedColorBufferFormat(p_format);
-
     if (m_needFormatCheck) {
         if (p_type != m_type || p_format != m_format) {
-            reformat((GLint)p_format, p_format, p_type);
+            reformat((GLint)p_format);
         }
         m_needFormatCheck = false;
     }
@@ -384,6 +410,42 @@ void ColorBuffer::subUpdate(int x,
         s_gles2.glFlush();
         m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
     }
+}
+
+bool ColorBuffer::replaceContents(const void* newContents, size_t numBytes) {
+    RecursiveScopedHelperContext context(m_helper);
+
+    if (!context.isOk()) {
+        fprintf(stderr, "%s: Failed: Could not get current context\n", __func__);
+        return false;
+    }
+
+    if (m_numBytes != numBytes) {
+        fprintf(stderr,
+            "%s: Error: Tried to replace contents of ColorBuffer with "
+            "%zu bytes (expected %zu; GL format info: 0x%x 0x%x 0x%x); ",
+            __func__,
+            numBytes,
+            m_numBytes,
+            m_internalFormat,
+            m_format,
+            m_type);
+        return false;
+    }
+
+    touch();
+
+    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_format,
+                            m_type, newContents);
+
+    if (m_fastBlitSupported) {
+        s_gles2.glFlush();
+        m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
+    }
+
+    return true;
 }
 
 bool ColorBuffer::blitFromCurrentReadBuffer() {
