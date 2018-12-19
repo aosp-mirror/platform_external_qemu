@@ -34,7 +34,11 @@ enum {
     BATTERY_TEMP = 0x20,
     BATTERY_CHARGE_COUNTER = 0x24,
     BATTERY_VOLTAGE_MAX = 0x28,
-    BATTERY_CURRENT_MAX = 0x2c,
+    BATTERY_CURRENT_MAX = 0x2C,
+    BATTERY_CURRENT_NOW = 0x30,
+    BATTERY_CURRENT_AVG = 0x34,
+    BATTERY_CHARGE_FULL_UAH = 0x38,
+    BATTERY_CYCLE_COUNT = 0x40,
 
     BATTERY_STATUS_CHANGED = 1U << 0,
     AC_STATUS_CHANGED = 1U << 1,
@@ -66,6 +70,10 @@ struct goldfish_battery_state {
     uint32_t charge_counter;
     uint32_t voltage_max;
     uint32_t current_max;
+    uint32_t current_now;
+    uint32_t current_avg;
+    uint32_t charge_full_uah;
+    uint32_t cycle_count;
 };
 
 /* update this each time you update the battery_state struct */
@@ -214,6 +222,18 @@ int goldfish_battery_read_prop(int property)
         case POWER_SUPPLY_PROP_CURRENT_MAX:
             retVal = battery_state->current_max;
             break;
+        case POWER_SUPPLY_PROP_CURRENT_NOW:
+            retVal = battery_state->current_now;
+            break;
+        case POWER_SUPPLY_PROP_CURRENT_AVG:
+            retVal = battery_state->current_avg;
+            break;
+        case POWER_SUPPLY_PROP_CHARGE_FULL:
+            retVal = battery_state->charge_full_uah;
+            break;
+        case POWER_SUPPLY_PROP_CYCLE_COUNT:
+            retVal = battery_state->cycle_count;
+            break;
         default:
             retVal = 0;
             break;
@@ -260,6 +280,18 @@ void goldfish_battery_set_prop(int ac, int property, int value)
             break;
         case POWER_SUPPLY_PROP_CAPACITY:
             battery_state->capacity = value;
+            break;
+        case POWER_SUPPLY_PROP_CURRENT_NOW:
+            battery_state->current_now = value;
+            break;
+        case POWER_SUPPLY_PROP_CURRENT_AVG:
+            battery_state->current_avg = value;
+            break;
+        case POWER_SUPPLY_PROP_CHARGE_FULL:
+            battery_state->charge_full_uah = value;
+            break;
+        case POWER_SUPPLY_PROP_CYCLE_COUNT:
+            battery_state->cycle_count = value;
             break;
         }
     }
@@ -309,6 +341,14 @@ static uint64_t goldfish_battery_read(void *opaque, hwaddr offset, unsigned size
             return s->voltage_max;
         case BATTERY_CURRENT_MAX:
             return s->current_max;
+        case BATTERY_CURRENT_NOW:
+            return s->current_now;
+        case BATTERY_CURRENT_AVG:
+            return s->current_avg;
+        case BATTERY_CHARGE_FULL_UAH:
+            return s->charge_full_uah;
+        case BATTERY_CYCLE_COUNT:
+            return s->cycle_count;
         default:
             return 0;
     }
@@ -362,6 +402,11 @@ static void goldfish_battery_realize(DeviceState *dev, Error **errp)
     s->temp = 250;         // 25 celsuis
     s->voltage_max = 5000000;  // 5 volt
     s->current_max = 5000000;  // 5 amp
+    s->current_now = 900000;   // 0.9A
+    s->current_avg = 900000;   // 0.9A
+    s->charge_full_uah = 3000000;  // 3AH
+    s->cycle_count = 10;
+
     if (sDeviceHasBattery) {
         s->hw_has_battery = 1;
         s->status = POWER_SUPPLY_STATUS_CHARGING;
