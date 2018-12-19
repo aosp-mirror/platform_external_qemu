@@ -141,8 +141,8 @@ public:
 
     // Sometimes things happen and we need to reformat the GL texture
     // used. This function replaces the format of the underlying texture
-    // with the internalformat / format / type combination specified.
-    void reformat(GLint internalformat, GLenum format, GLenum type);
+    // with the internalformat specified.
+    void reformat(GLint internalformat);
 
     // Destructor.
     ~ColorBuffer();
@@ -172,6 +172,10 @@ public:
                    GLenum p_format,
                    GLenum p_type,
                    void* pixels);
+
+    // Completely replaces contents, assuming that |pixels| is a buffer
+    // that is allocated and filled with the same format.
+    bool replaceContents(const void* pixels, size_t numBytes);
 
     // Draw a ColorBuffer instance, i.e. blit it to the current guest
     // framebuffer object / window surface. This doesn't display anything.
@@ -268,6 +272,7 @@ private:
     bool m_fastBlitSupported = false;
 
     GLenum m_asyncReadbackType = GL_UNSIGNED_BYTE;
+    size_t m_numBytes = 0;
 };
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;
