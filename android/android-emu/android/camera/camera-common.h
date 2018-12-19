@@ -148,7 +148,9 @@ typedef enum CameraSourceType {
     /* A webcam camera device enumerated on the host. */
     kWebcam,
     /* A virtual scene camera, renders a virtual environment on the host. */
-    kVirtualScene
+    kVirtualScene,
+    /* A video playback camera, feeds in frames from a video file. */
+    kVideoPlayback
 } CameraSourceType;
 
 /* Camera information descriptor, containing properties of a camera connected

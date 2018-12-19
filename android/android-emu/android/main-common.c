@@ -1923,16 +1923,20 @@ bool emulator_parseFeatureCommandLineOptions(AndroidOptions* opts,
     if (opts->camera_back) {
         bool supportsVirtualScene = feature_is_enabled(kFeature_VirtualScene);
         bool isVirtualScene = !strcmp(opts->camera_back, "virtualscene");
+        bool supportsVideoPlayback = feature_is_enabled(kFeature_VideoPlayback);
+        bool isVideoPlayback = !strcmp(opts->camera_back, "videoplayback");
         /* Validate parameter. */
         if (memcmp(opts->camera_back, "webcam", 6) &&
             strcmp(opts->camera_back, "emulated") &&
             (!isVirtualScene || !supportsVirtualScene) &&
+            (!isVideoPlayback || !supportsVideoPlayback) &&
             strcmp(opts->camera_back, "none")) {
             derror("Invalid value for -camera-back <mode> parameter: %s\n"
-                   "Valid values are: 'emulated', 'webcam<N>'%s, "
+                   "Valid values are: 'emulated', 'webcam<N>'%s%s, "
                    "or 'none'\n",
                    opts->camera_back,
-                   supportsVirtualScene? ", 'virtualscene'": "");
+                   supportsVirtualScene ? ", 'virtualscene'" : "",
+                   supportsVideoPlayback ? ", 'videoplayback'" : "");
             return false;
         }
         str_reset(&hw->hw_camera_back, opts->camera_back);
