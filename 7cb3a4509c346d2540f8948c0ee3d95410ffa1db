@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "4972fbb0_ab86825b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-12-19T19:58:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d627b796_ddfea381",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 76
+      },
+      "revId": "7cb3a4509c346d2540f8948c0ee3d95410ffa1db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0fa1eac4_ce9e426c",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp",
         "patchSetId": 4
@@ -96,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "e11980f3_54d52d8a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-12-19T19:58:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fe9b9113_092e9567",
+      "range": {
+        "startLine": 214,
+        "startChar": 0,
+        "endLine": 214,
+        "endChar": 102
+      },
+      "revId": "7cb3a4509c346d2540f8948c0ee3d95410ffa1db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9f3b713a_0bc47d0a",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp",
         "patchSetId": 4
@@ -128,6 +176,24 @@
       "revId": "7cb3a4509c346d2540f8948c0ee3d95410ffa1db",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b71516fe_53bdb7e6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-12-19T19:58:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c0f10aba_76ef7338",
+      "revId": "7cb3a4509c346d2540f8948c0ee3d95410ffa1db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
