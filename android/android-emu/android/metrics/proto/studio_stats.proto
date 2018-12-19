@@ -1156,7 +1156,8 @@ message EmulatorFeatureFlagState {
     ON_DEMAND_SNAPSHOT_LOAD = 37;
     WIFI_CONFIGURABLE = 38;
     GL_DIRECT_MEM = 39;
-    // Next tag: 40
+    VIDEO_PLAYBACK = 40;
+    // Next tag: 41
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
@@ -1455,6 +1456,8 @@ message EmulatorCameraSession {
     EMULATOR_CAMERA_TYPE_WEBCAM = 1;
     // Camera source is the virtual scene camera.
     EMULATOR_CAMERA_TYPE_VIRTUAL_SCENE = 2;
+    // Camera source is the video playback camera.
+    EMULATOR_CAMERA_TYPE_VIDEO_PLAYBACK = 3;
   }
 
   // List of possible camera directions.
