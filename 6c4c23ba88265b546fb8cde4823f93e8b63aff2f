@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "56c945ee_ed74e65b",
+        "filename": "android/android-emu/android/camera/camera-videoplayback.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2018-12-19T18:24:26Z",
+      "side": 1,
+      "message": "Remove.",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 6
+      },
+      "revId": "6c4c23ba88265b546fb8cde4823f93e8b63aff2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b710fc39_21966d8f",
+        "filename": "android/android-emu/android/camera/camera-videoplayback.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2018-12-19T18:24:26Z",
+      "side": 1,
+      "message": "Document this as nullptr, because we can\u0027t compare nullptr to 0 like we can for NULL.",
+      "range": {
+        "startLine": 46,
+        "startChar": 63,
+        "endLine": 46,
+        "endChar": 67
+      },
+      "revId": "6c4c23ba88265b546fb8cde4823f93e8b63aff2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7cb3f116_266548d0",
+        "filename": "android/android-emu/android/camera/camera-videoplayback.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2018-12-19T18:24:26Z",
+      "side": 1,
+      "message": "const char\u0026, even though we\u0027re not using it.",
+      "range": {
+        "startLine": 47,
+        "startChar": 40,
+        "endLine": 47,
+        "endChar": 51
+      },
+      "revId": "6c4c23ba88265b546fb8cde4823f93e8b63aff2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b270bb3e_b23276b4",
+        "filename": "android/android-emu/android/camera/camera-videoplayback.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2018-12-19T18:24:26Z",
+      "side": 1,
+      "message": "frame_width, frame_height",
+      "range": {
+        "startLine": 55,
+        "startChar": 3,
+        "endLine": 55,
+        "endChar": 20
+      },
+      "revId": "6c4c23ba88265b546fb8cde4823f93e8b63aff2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b723c296_7e8bff20",
+        "filename": "android/android-emu/android/camera/camera-videoplayback.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2018-12-19T18:24:26Z",
+      "side": 1,
+      "message": "Is this an output? If so, please document it clearly. Otherwise, const ClientFrame\u0026 if it is only an input.",
+      "range": {
+        "startLine": 84,
+        "startChar": 36,
+        "endLine": 84,
+        "endChar": 61
+      },
+      "revId": "6c4c23ba88265b546fb8cde4823f93e8b63aff2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
