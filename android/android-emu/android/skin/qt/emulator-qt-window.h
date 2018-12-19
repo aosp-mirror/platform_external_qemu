@@ -336,6 +336,10 @@ public slots:
     void onScreenConfigChanged();
     void onScreenChanged(QScreen* newScreen);
 
+#ifndef __WIN32
+    bool event(QEvent* ev);  // Used to un-minimize on Mac and Linux
+#endif
+
 private:
     static const android::base::StringView kRemoteDownloadsDir;
     static const android::base::StringView kRemoteDownloadsDirApi10;
@@ -407,7 +411,11 @@ private:
                                                                 | Qt::FramelessWindowHint);
     static constexpr Qt::WindowFlags FRAMED_WINDOW_FLAGS     = (  Qt::Window
                                                                 | Qt::WindowTitleHint
-                                                                | Qt::CustomizeWindowHint);
+#ifndef __APPLE__
+                                                                | Qt::CustomizeWindowHint
+#endif
+                                                               );
+
     static constexpr Qt::WindowFlags FRAME_WINDOW_FLAGS_MASK = (  FRAMELESS_WINDOW_FLAGS
                                                                 | FRAMED_WINDOW_FLAGS);
 
@@ -487,6 +495,9 @@ private:
     bool         mHaveBeenFrameless;
     unsigned int mHardRefreshCountDown = 0;
     SkinRotation mOrientation;       // Rotation of the main window
+#ifndef _WIN32
+    bool         mWindowIsMinimized = false;
+#endif
 
     QScreen* mCurrentScreen = nullptr;
 

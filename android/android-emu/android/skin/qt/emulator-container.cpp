@@ -46,7 +46,11 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
 
     // The following hints prevent the minimize/maximize/close buttons from
     // appearing.
-    setWindowFlags(Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::Window);
+#ifdef __APPLE__
+    setWindowFlags(Qt::WindowTitleHint | Qt::Window);
+#else
+    setWindowFlags(Qt::WindowTitleHint | Qt::Window | Qt::CustomizeWindowHint);
+#endif
 
 #ifdef __APPLE__
     // Digging into the Qt source code reveals that if the above flags are set

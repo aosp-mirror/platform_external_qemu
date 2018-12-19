@@ -768,7 +768,7 @@ void EmulatorQtWindow::slot_startupTick() {
     mStartupDialog->setWindowTitle(tr("Android Emulator"));
     // Hide close/minimize/maximize buttons
     mStartupDialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint |
-                                  Qt::WindowTitleHint);
+                                   Qt::WindowTitleHint);
     // Make sure the icon is the same as in the main window
     mStartupDialog->setWindowIcon(QApplication::windowIcon());
 
@@ -1186,7 +1186,7 @@ void EmulatorQtWindow::show() {
     QObject::connect(window()->windowHandle(), &QWindow::screenChanged, this,
                      &EmulatorQtWindow::onScreenChanged);
     // On Mac, the above function won't be triggered when you plug in a new
-    // monitor and the OS move the emulator to the new screen. In such
+    // monitor and the OS moves the emulator to the new screen. In such
     // situation, it will trigger screenCountChanged.
     QObject::connect(qApp->desktop(), &QDesktopWidget::screenCountChanged, this,
                      &EmulatorQtWindow::onScreenConfigChanged);
@@ -1220,8 +1220,66 @@ void EmulatorQtWindow::setIgnoreWheelEvent(bool ignore) {
 }
 
 void EmulatorQtWindow::showMinimized() {
+#ifndef _WIN32
+    // For Mac and Linux, ensure that the window has a frame and
+    // minimize buttons while it is minimized.
+    // Why?
+    //   -  Mac won't un-minimize unless those exist.
+    //   -  Linux adds those in automatically on minimize. This
+    //      code path gets us to remove them on un-minimize.
+
+    Qt::WindowFlags flags = mContainer.windowFlags();
+#ifdef __linux__
+    flags &= ~FRAME_WINDOW_FLAGS_MASK;
+    flags |= FRAMED_WINDOW_FLAGS;
+#else // __APPLE__
+    if (hasFrame()) {
+        flags |= Qt::NoDropShadowWindowHint;
+    } else {
+        // Ignore the previous flags
+        flags = Qt::Window | Qt::WindowMinMaxButtonsHint;
+    }
+#endif // __APPLE__
+    mContainer.setWindowFlags(flags);
+    mWindowIsMinimized = true;
+
+#endif // !_WIN32
     mContainer.showMinimized();
 }
+
+#ifndef _WIN32
+bool EmulatorQtWindow::event(QEvent* ev) {
+    if (ev->type() == QEvent::WindowActivate && mWindowIsMinimized) {
+        // We just un-minimized.
+        // When we minimized, we re-enabled the window frame (because Mac won't un-minimize
+        // a frameless window). Disable the window frame now, if it should be disabled.
+        mWindowIsMinimized = false;
+        Qt::WindowFlags flags = mContainer.windowFlags();
+#ifdef __linux__
+        flags &= ~FRAME_WINDOW_FLAGS_MASK;
+        flags |= (hasFrame() ? FRAMED_WINDOW_FLAGS : FRAMELESS_WINDOW_FLAGS);
+        flags &= ~Qt::WindowMinimizeButtonHint;
+#else // __APPLE__
+        if (hasFrame()) {
+            flags &= ~Qt::NoDropShadowWindowHint;
+        } else {
+            flags &= ~FRAME_WINDOW_FLAGS_MASK;
+            flags |= FRAMELESS_WINDOW_FLAGS;
+        }
+#endif
+        mContainer.setWindowFlags(flags);
+        show();
+
+        // Trigger a ScreenChanged event so the device
+        // screen will refresh immediately
+        SkinEvent* event = new SkinEvent();
+        event->type = kEventScreenChanged;
+        queueSkinEvent(event);
+    }
+
+    return QWidget::event(ev);
+}
+#endif
 
 void EmulatorQtWindow::startThread(StartFunction f, int argc, char** argv) {
     if (!mMainLoopThread) {
