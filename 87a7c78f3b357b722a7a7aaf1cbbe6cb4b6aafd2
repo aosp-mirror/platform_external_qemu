@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "38e35136_f9a65d10",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-12-19T17:49:11Z",
+      "side": 1,
+      "message": "Should we wrap these strings with \"tr\" as Jim suggested?",
+      "revId": "87a7c78f3b357b722a7a7aaf1cbbe6cb4b6aafd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aac8d8e9_50291edf",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-12-19T17:49:11Z",
+      "side": 1,
+      "message": "Should we use the val.prop() instead of the label as key?\nI feel val.prop() is truly unique, whereas label could potentially repeated (if all by mistake).",
+      "revId": "87a7c78f3b357b722a7a7aaf1cbbe6cb4b6aafd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ba1892b2_eddaa0f3",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
         "patchSetId": 6
@@ -19,6 +53,57 @@
         "endLine": 113,
         "endChar": 20
       },
+      "revId": "87a7c78f3b357b722a7a7aaf1cbbe6cb4b6aafd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c3292636_71499d6b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-12-19T17:49:11Z",
+      "side": 1,
+      "message": "maybe \"PropertyDescription\"?\n(I personally tend to dislike the word \"wrapper\").",
+      "revId": "87a7c78f3b357b722a7a7aaf1cbbe6cb4b6aafd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2807ce6_576106df",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-12-19T17:49:11Z",
+      "side": 1,
+      "message": "Please add some documentation on what does this map contain, and what is the key. \nFor example: \"A map from VHAL property ids to the description used to convert their name and values to human readable form\", or something similar.",
+      "revId": "87a7c78f3b357b722a7a7aaf1cbbe6cb4b6aafd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2c0f428a_2d5ceb52",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-12-19T17:49:11Z",
+      "side": 1,
+      "message": "Add a comment about this widget. Something like \"A table displaying all the properties of the emulated car and their values\".",
       "revId": "87a7c78f3b357b722a7a7aaf1cbbe6cb4b6aafd2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -111,6 +196,23 @@
         "endLine": 264,
         "endChar": 39
       },
+      "revId": "87a7c78f3b357b722a7a7aaf1cbbe6cb4b6aafd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3fdc329f_77c33c0d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-12-19T17:49:11Z",
+      "side": 1,
+      "message": "Nit: \"Vector is either treated specially as...\"",
       "revId": "87a7c78f3b357b722a7a7aaf1cbbe6cb4b6aafd2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
