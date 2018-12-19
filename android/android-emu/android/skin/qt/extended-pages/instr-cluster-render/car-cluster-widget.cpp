@@ -67,6 +67,8 @@ CarClusterWidget::~CarClusterWidget() {
     avcodec_close(mCodecCtx);
     avcodec_free_context(&mCodecCtx);
 
+    sws_freeContext(mCtx);
+
     delete[] mRgbData;
 }
 
