@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba1892b2_eddaa0f3",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-12-19T16:21:55Z",
+      "side": 1,
+      "message": "I\u0027m surprised I saw this",
+      "range": {
+        "startLine": 112,
+        "startChar": 74,
+        "endLine": 113,
+        "endChar": 20
+      },
+      "revId": "87a7c78f3b357b722a7a7aaf1cbbe6cb4b6aafd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "843b4644_236866b9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-12-19T16:21:55Z",
+      "side": 1,
+      "message": "Although we only support English now, we\u0027ve tried to ease the way to internationalization (i18n) by enclosing translatable strings in Qt\u0027s tr(). So this line would be\n{ (int32_t) VehicleAreaMirror::DRIVER_LEFT, tr(\"Driver left\") },\nIf the code doesn\u0027t compile with this change, it\u0027s OK as-is, but better if you can add those markers.",
+      "range": {
+        "startLine": 58,
+        "startChar": 48,
+        "endLine": 58,
+        "endChar": 62
+      },
+      "revId": "87a7c78f3b357b722a7a7aaf1cbbe6cb4b6aafd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f78cc6bf_17ad5344",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-12-19T16:21:55Z",
+      "side": 1,
+      "message": "The Android style calls for \"Sentence caps\" (\"As Opposed to Title Caps\"), so I\u0027d recommend \"Critically low\", \"85\\% ethanol/gasoline blend\", \"Liquified petroleum gas\", \"Starting shut down\", etc.\nActually: tr(\"Critically low\"), etc.",
+      "range": {
+        "startLine": 157,
+        "startChar": 48,
+        "endLine": 157,
+        "endChar": 65
+      },
+      "revId": "87a7c78f3b357b722a7a7aaf1cbbe6cb4b6aafd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "58102287_775beb4b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-12-19T16:21:55Z",
+      "side": 1,
+      "message": "Do you want to get the degree symbol in here (somehow)?",
+      "range": {
+        "startLine": 253,
+        "startChar": 47,
+        "endLine": 253,
+        "endChar": 50
+      },
+      "revId": "87a7c78f3b357b722a7a7aaf1cbbe6cb4b6aafd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "926829c0_2396eecb",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-12-19T16:21:55Z",
+      "side": 1,
+      "message": "(km)?",
+      "range": {
+        "startLine": 264,
+        "startChar": 35,
+        "endLine": 264,
+        "endChar": 39
+      },
+      "revId": "87a7c78f3b357b722a7a7aaf1cbbe6cb4b6aafd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "10a91bf3_878b25ca",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-page.ui",
+        "patchSetId": 6
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-12-19T16:21:55Z",
+      "side": 1,
+      "message": "Car properties",
+      "range": {
+        "startLine": 56,
+        "startChar": 13,
+        "endLine": 56,
+        "endChar": 27
+      },
+      "revId": "87a7c78f3b357b722a7a7aaf1cbbe6cb4b6aafd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

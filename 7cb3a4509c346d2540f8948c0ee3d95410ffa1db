@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d627b796_ddfea381",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-12-19T16:21:55Z",
+      "side": 1,
+      "message": "What you\u0027ve done seems reasonable to me.",
+      "parentUuid": "f97c5b35_26bd3f16",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 76
+      },
+      "revId": "7cb3a4509c346d2540f8948c0ee3d95410ffa1db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0fa1eac4_ce9e426c",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp",
         "patchSetId": 4
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "fe9b9113_092e9567",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-12-19T16:21:55Z",
+      "side": 1,
+      "message": "We try to limit lines to ~100 characters. I think that\u0027s a good idea, but I also believe in going against the general rule if it makes the code more readable.\nI\u0027d probably put the string literal on the next line for these long cases, but if you think that it looks better as-is, I\u0027m OK with that.",
+      "parentUuid": "0fa1eac4_ce9e426c",
+      "range": {
+        "startLine": 214,
+        "startChar": 0,
+        "endLine": 214,
+        "endChar": 102
+      },
+      "revId": "7cb3a4509c346d2540f8948c0ee3d95410ffa1db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9f3b713a_0bc47d0a",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp",
         "patchSetId": 4
@@ -59,6 +107,24 @@
       "writtenOn": "2018-12-14T20:08:44Z",
       "side": 1,
       "message": "Is it stylistically better to include the nullptrs when creating the structs?",
+      "revId": "7cb3a4509c346d2540f8948c0ee3d95410ffa1db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c0f10aba_76ef7338",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-12-19T16:21:55Z",
+      "side": 1,
+      "message": "It\u0027s your choice.\nYour case statement has to deal with a LOT of invalid numbers, so I don\u0027t see much value in explicitly mentioning 0.",
+      "parentUuid": "9f3b713a_0bc47d0a",
       "revId": "7cb3a4509c346d2540f8948c0ee3d95410ffa1db",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
