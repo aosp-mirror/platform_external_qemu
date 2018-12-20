@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "24fae47b_2d523060",
+        "filename": "android/build/python/aemu/cmake.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-12-20T22:57:08Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "7cf02900_e48450b0",
+      "range": {
+        "startLine": 49,
+        "startChar": 33,
+        "endLine": 49,
+        "endChar": 38
+      },
+      "revId": "b4ee80a95fa859395dcbc9a41ca266b860fa65f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "de755f64_74deea42",
         "filename": "android/build/python/aemu/cmake.py",
         "patchSetId": 7
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "ba789094_e1929f99",
+        "filename": "android/build/python/aemu/cmake.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-12-20T22:57:08Z",
+      "side": 1,
+      "message": "Currently it is called OPTION_ASAN in our cmake scripts. Changing this will require more files to be changes.",
+      "parentUuid": "de755f64_74deea42",
+      "range": {
+        "startLine": 81,
+        "startChar": 21,
+        "endLine": 81,
+        "endChar": 32
+      },
+      "revId": "b4ee80a95fa859395dcbc9a41ca266b860fa65f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "bb915f53_dcefce8a",
         "filename": "android/build/python/setup.py",
         "patchSetId": 7
@@ -59,6 +107,30 @@
       "writtenOn": "2018-12-20T20:50:50Z",
       "side": 1,
       "message": "how much setup is needed to use those build scripts? is absl-py / urlfetch readily available? can we do this with a standard python install?\n\nIdeally there should be another script to install what the build script requires, if it\u0027s impossible not to depend only on a standard python 2.7 install.",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 6
+      },
+      "revId": "b4ee80a95fa859395dcbc9a41ca266b860fa65f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ab919c57_b38050d9",
+        "filename": "android/build/python/setup.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-12-20T22:57:08Z",
+      "side": 1,
+      "message": "Both libraries are readily available on our build bots. Let me create a bug (b/121342226) to get rid of the google dependencies in favor of standard python.",
+      "parentUuid": "bb915f53_dcefce8a",
       "range": {
         "startLine": 47,
         "startChar": 0,
