@@ -64,6 +64,11 @@ public:
     SaveableTexture& operator=(SaveableTexture&&) = delete;
 
     SaveableTexture(const TextureData& texture);
+    // preSave and postSave should be called exactly once before and after
+    // all texture saves.
+    // The bound context cannot be changed from preSave to onSave to postSave
+    static void preSave();
+    static void postSave();
     // precondition: a context must be properly bound
     void onSave(android::base::Stream* stream);
     // getGlobalObject() will touch and load data onto GPU if it is not yet
