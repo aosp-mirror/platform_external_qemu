@@ -19,6 +19,7 @@
 #include "android/base/ArraySize.h"
 #include "android/base/containers/SmallVector.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/Profiler.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
@@ -33,6 +34,7 @@
 #include <algorithm>
 
 using android::base::ScopedMemoryProfiler;
+using android::base::LazyInstance;
 using android::base::MemoryProfiler;
 using android::base::StringView;
 
@@ -327,6 +329,160 @@ static uint32_t s_texImageSize(GLenum internalformat,
     return totalSize;
 }
 
+struct TextureDataReader {
+    GLESVersion glesVersion = GLES_2_0;
+    GLenum fbTarget = GL_FRAMEBUFFER;
+    GLint prevViewport[4] = { 0, 0, 0, 0 };
+    GLuint fbo = 0;
+    GLuint prevFbo = 0;
+
+    void setupFbo() {
+        GLenum fbBindingTarget;
+        auto gl = GLEScontext::dispatcher();
+
+        glesVersion = gl.getGLESVersion();
+        if (glesVersion >= GLES_3_0) {
+            fbTarget = GL_READ_FRAMEBUFFER;
+            fbBindingTarget = GL_READ_FRAMEBUFFER_BINDING;
+        } else {
+            fbTarget = GL_FRAMEBUFFER;
+            fbBindingTarget = GL_FRAMEBUFFER_BINDING;
+        }
+        gl.glGetIntegerv(GL_VIEWPORT, prevViewport);
+        gl.glGenFramebuffers(1, &fbo);
+        gl.glGetIntegerv(fbBindingTarget, (GLint*)&prevFbo);
+        gl.glBindFramebuffer(fbBindingTarget, fbo);
+    }
+
+    void teardownFbo() {
+        if (!fbo) return;
+        auto gl = GLEScontext::dispatcher();
+
+        gl.glBindFramebuffer(fbTarget, prevFbo);
+        gl.glDeleteFramebuffers(1, &fbo);
+        gl.glViewport(prevViewport[0], prevViewport[1], prevViewport[2], prevViewport[3]);
+
+        *this = {};
+    }
+
+    bool shouldUseReadPixels(
+        GLenum target, GLenum level, GLenum format, GLenum type) {
+        // TODO: if (isGles2Gles()) return true
+
+        // TODO: Query extensions for support for these kinds of things
+        if (target != GL_TEXTURE_2D || level != 0) return false;
+
+#define KNOWN_GOOD_READ_PIXELS_COMBINATION(goodFormat, goodType) \
+        if (format == goodFormat && type == goodType) return true;
+
+        KNOWN_GOOD_READ_PIXELS_COMBINATION(GL_RGB, GL_UNSIGNED_BYTE)
+
+        return false;
+    }
+
+    void getTexImage(
+        GLuint globalName, GLenum target, GLenum level, GLenum format, GLenum type,
+        GLint width, GLint height, GLint depth, uint8_t* data) {
+
+        fprintf(stderr, "%s: Reading: %u 0x%x %u 0x%x 0x%x %d x %d x %d...",
+            __func__, globalName, target, level, format, type,
+            width, height, depth);
+
+        auto gl = GLEScontext::dispatcher();
+
+        if (!shouldUseReadPixels(target, level, format, type)) {
+            fprintf(stderr, "with underlying glGetTexImage\n");
+            gl.glGetTexImage(target, level, format, type, data);
+            return;
+        }
+
+        fprintf(stderr, "with glReadPixels\n");
+
+        GLenum attachment = GL_COLOR_ATTACHMENT0;
+
+        switch (format) {
+            case GL_DEPTH_COMPONENT:
+                attachment = GL_DEPTH_ATTACHMENT;
+                break;
+            case GL_DEPTH_STENCIL:
+                attachment = GL_DEPTH_STENCIL_ATTACHMENT;
+                break;
+        }
+
+        switch (target) {
+            case GL_TEXTURE_2D:
+            case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+            case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+            case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+            case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+            case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+            case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+                gl.glFramebufferTexture2D(
+                        fbTarget, attachment, target,
+                        globalName, level);
+                gl.glReadPixels(0, 0, width, height,
+                        format, type,
+                        data);
+                gl.glFramebufferTexture2D(
+                        fbTarget, attachment, target,
+                        0, level);
+                break;
+            case GL_TEXTURE_3D: {
+                unsigned int layerImgSize = s_texImageSize(
+                        format, type, 1, width, height);
+                for (unsigned int d = 0; d < depth; d++) {
+                    gl.glFramebufferTexture3DOES(
+                            fbTarget, attachment, target,
+                            globalName, level, d);
+                    gl.glReadPixels(0, 0, width,
+                            height, format,
+                            type, data +
+                            layerImgSize * d);
+                    gl.glFramebufferTexture3DOES(
+                            fbTarget, attachment, target,
+                            0, level, d);
+                }
+                break;
+            }
+            case GL_TEXTURE_2D_ARRAY: {
+                unsigned int layerImgSize = s_texImageSize(
+                        format, type, 1, width, height);
+                for (unsigned int d = 0; d < depth; d++) {
+                    gl.glFramebufferTextureLayer(
+                            fbTarget, attachment,
+                            globalName, level, d);
+                    gl.glReadPixels(0, 0, width,
+                            height, format,
+                            type, data +
+                            layerImgSize * d);
+                    gl.glFramebufferTextureLayer(
+                            fbTarget, attachment,
+                            0, level, d);
+                }
+                break;
+            }
+        }
+    }
+
+    void preSave() {
+        setupFbo();
+    }
+
+    void postSave() {
+        teardownFbo();
+    }
+};
+
+static LazyInstance<TextureDataReader> sTextureDataReader = LAZY_INSTANCE_INIT;
+
+void SaveableTexture::preSave() {
+    sTextureDataReader->preSave();
+}
+
+void SaveableTexture::postSave() {
+    sTextureDataReader->postSave();
+}
+
 SaveableTexture::SaveableTexture(const TextureData& texture)
     : m_target(texture.target),
       m_width(texture.width),
@@ -554,9 +710,8 @@ void SaveableTexture::onSave(
                             neededBufferFormat =
                                 getCoreProfileEmulatedFormat(m_format);
                         }
-                        dispatcher.glGetTexImage(target, level,
-                                neededBufferFormat, m_type,
-                                buffer.data());
+                        sTextureDataReader->getTexImage(
+                            m_globalName, target, level, neededBufferFormat, m_type, width, height, depth, buffer.data());
                     }
                 }
             }
