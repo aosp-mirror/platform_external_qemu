@@ -140,6 +140,30 @@
       "revId": "b4ee80a95fa859395dcbc9a41ca266b860fa65f2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ecc21e2_350c18d1",
+        "filename": "android/build/python/setup.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-20T23:00:26Z",
+      "side": 1,
+      "message": "Note that we have external developers who depend on the build scripts, so switching over will break them if we merge this with google dependencies.",
+      "parentUuid": "ab919c57_b38050d9",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 6
+      },
+      "revId": "b4ee80a95fa859395dcbc9a41ca266b860fa65f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
