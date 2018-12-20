@@ -164,6 +164,30 @@
       "revId": "b4ee80a95fa859395dcbc9a41ca266b860fa65f2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "66fea6f0_53ccef8a",
+        "filename": "android/build/python/setup.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-20T23:10:10Z",
+      "side": 1,
+      "message": "(both ext developers who use the gradle build and ones who use android/rebuild.sh, or just the gradle build?)",
+      "parentUuid": "8ecc21e2_350c18d1",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 6
+      },
+      "revId": "b4ee80a95fa859395dcbc9a41ca266b860fa65f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
