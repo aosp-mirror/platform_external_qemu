@@ -61,7 +61,8 @@ user_config_init( void )
 void
 user_config_done( void )
 {
-    int  win_x, win_y;
+    int  win_x, win_y, win_w, win_h;
+    int  frame_x, frame_y, frame_w, frame_h;
 
     if (!userConfig) {
         D("no user configuration?");
@@ -69,19 +70,38 @@ user_config_done( void )
     }
 
     skin_winsys_get_window_pos(&win_x, &win_y);
-    auserConfig_setWindowPos(userConfig, win_x, win_y);
+    skin_winsys_get_window_size(&win_w, &win_h);
+    skin_winsys_get_frame_pos(&frame_x, &frame_y);
+    skin_winsys_get_frame_size(&frame_w, &frame_h);
+
+    auserConfig_setWindowGeo(userConfig, win_x, win_y, win_w, win_h,
+                             frame_x, frame_y, frame_w, frame_h);
     auserConfig_save(userConfig);
     auserConfig_free(userConfig);
     userConfig = NULL;
 }
 
 void
-user_config_get_window_pos( int *window_x, int *window_y )
+user_config_get_window_geo( int* window_x, int* window_y,
+                            int* window_w, int* window_h,
+                            int* frame_x,  int* frame_y,
+                            int* frame_w,  int* frame_h  )
 {
-    *window_x = *window_y = 10;
+    *window_x =  10;
+    *window_y =  10;
+    *window_w = 365; // Arbitrary, but reasonable
+    *window_h = 676;
+
+    *frame_x  = *window_x;
+    *frame_y  = *window_y;
+    *frame_w  = *window_w;
+    *frame_h  = *window_h;
 
     if (userConfig)
-        auserConfig_getWindowPos(userConfig, window_x, window_y);
+        auserConfig_getWindowGeo(userConfig, window_x, window_y,
+                                 window_w, window_h,
+                                 frame_x, frame_y,
+                                 frame_w, frame_h);
 }
 
 /***********************************************************************/
@@ -338,7 +358,8 @@ ui_init(const AConfig* skinConfig,
         const AndroidOptions*   opts,
         const UiEmuAgent* uiEmuAgent)
 {
-    int  win_x, win_y;
+    int  win_x, win_y, win_w, win_h;
+    int  frame_x, frame_y, frame_w, frame_h;
 
     signal(SIGINT, SIG_DFL);
 #ifndef _WIN32
@@ -394,10 +415,18 @@ ui_init(const AConfig* skinConfig,
         }
     }
 
-    user_config_get_window_pos(&win_x, &win_y);
+    user_config_get_window_geo(&win_x, &win_y, &win_w, &win_h,
+                               &frame_x, &frame_y, &frame_w, &frame_h);
+
+#ifndef __linux__
+    // On Windows and Mac, position the window based on the saved Frame
+    // position.
+    win_x = frame_x;
+    win_y = frame_y;
+#endif
 
     if (emulator_window_init(emulator_window_get(), skinConfig, skinPath,
-                             win_x, win_y, opts, uiEmuAgent) < 0) {
+                             win_x, win_y, win_w, win_h, opts, uiEmuAgent) < 0) {
         derror("Could not load emulator skin from '%s'", skinPath);
         return false;
     }

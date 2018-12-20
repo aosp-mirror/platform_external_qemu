@@ -37,11 +37,15 @@ void           auserConfig_free( AUserConfig* uconfig );
 /* Retrieve the unique UID for this AVD */
 uint64_t       auserConfig_getUUID( AUserConfig*  uconfig );
 
-/* Retrieve the stored window position for this AVD */
-void           auserConfig_getWindowPos( AUserConfig*  uconfig, int  *pX, int  *pY );
+/* Retrieve the stored window position and size for this AVD */
+void           auserConfig_getWindowGeo( AUserConfig* uconfig,
+                                         int* pX, int* pY, int* pW, int* pH,
+                                         int* pFrameX, int* pFrameY, int* pFrameW, int* pFrameH );
 
-/* Change the stored window position for this AVD */
-void           auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y );
+/* Change the stored window position and size for this AVD */
+void           auserConfig_setWindowGeo( AUserConfig* uconfig,
+                                         int x, int y, int w, int h,
+                                         int frameX, int frameY, int frameW, int frameH );
 
 /* Save the user configuration back to the content directory.
  * Should be used in an atexit() handler. This will effectively
