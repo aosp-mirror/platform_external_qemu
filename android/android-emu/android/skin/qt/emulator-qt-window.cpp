@@ -1241,19 +1241,29 @@ void EmulatorQtWindow::showMinimized() {
     }
 #endif // __APPLE__
     mContainer.setWindowFlags(flags);
-    mWindowIsMinimized = true;
 
 #endif // !_WIN32
     mContainer.showMinimized();
+    mWindowIsMinimized = true;
+
+    // Pause the virtual machine to avoid using CPU while
+    // we're minimized.
+    android::base::ThreadLooper::runOnMainLooper([] {
+        gQAndroidVmOperations->vmPause();
+    });
 }
 
-#ifndef _WIN32
 bool EmulatorQtWindow::event(QEvent* ev) {
     if (ev->type() == QEvent::WindowActivate && mWindowIsMinimized) {
-        // We just un-minimized.
+        // We just un-minimized. Resume the VM.
+        mWindowIsMinimized = false;
+        android::base::ThreadLooper::runOnMainLooper([] {
+            gQAndroidVmOperations->vmResume();
+        });
+
+#ifndef _WIN32
         // When we minimized, we re-enabled the window frame (because Mac won't un-minimize
         // a frameless window). Disable the window frame now, if it should be disabled.
-        mWindowIsMinimized = false;
         Qt::WindowFlags flags = mContainer.windowFlags();
 #ifdef __linux__
         flags &= ~FRAME_WINDOW_FLAGS_MASK;
@@ -1275,11 +1285,11 @@ bool EmulatorQtWindow::event(QEvent* ev) {
         SkinEvent* event = new SkinEvent();
         event->type = kEventScreenChanged;
         queueSkinEvent(event);
+#endif // !_WIN32
     }
 
     return QWidget::event(ev);
 }
-#endif
 
 void EmulatorQtWindow::startThread(StartFunction f, int argc, char** argv) {
     if (!mMainLoopThread) {

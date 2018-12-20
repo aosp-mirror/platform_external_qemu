@@ -336,9 +336,7 @@ public slots:
     void onScreenConfigChanged();
     void onScreenChanged(QScreen* newScreen);
 
-#ifndef __WIN32
-    bool event(QEvent* ev);  // Used to un-minimize on Mac and Linux
-#endif
+    bool event(QEvent* ev);  // Used to resume the MV on un-minimize
 
 private:
     static const android::base::StringView kRemoteDownloadsDir;
@@ -495,9 +493,7 @@ private:
     bool         mHaveBeenFrameless;
     unsigned int mHardRefreshCountDown = 0;
     SkinRotation mOrientation;       // Rotation of the main window
-#ifndef _WIN32
     bool         mWindowIsMinimized = false;
-#endif
 
     QScreen* mCurrentScreen = nullptr;
 
