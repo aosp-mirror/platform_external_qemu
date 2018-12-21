@@ -36,25 +36,7 @@ bool parseAndroidNativeBufferInfo(
 
     uint32_t structType = goldfish_vk_struct_type(curr_pNext);
 
-    if (structType != VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID)
-        return false;
-
-    const VkNativeBufferANDROID* nativeBufferANDROID =
-        reinterpret_cast<const VkNativeBufferANDROID*>(curr_pNext);
-
-    info_out->vkFormat = pCreateInfo->format;
-    info_out->extent = pCreateInfo->extent;
-    info_out->usage = pCreateInfo->usage;
-    for (uint32_t i = 0; i < pCreateInfo->queueFamilyIndexCount; ++i) {
-        info_out->queueFamilyIndices.push_back(
-                pCreateInfo->pQueueFamilyIndices[i]);
-    }
-
-    info_out->format = nativeBufferANDROID->format;
-    info_out->stride = nativeBufferANDROID->stride;
-    info_out->colorBufferHandle = *(nativeBufferANDROID->handle);
-
-    return true;
+    return structType == VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID;
 }
 
 VkResult prepareAndroidNativeBufferImage(
@@ -68,6 +50,21 @@ VkResult prepareAndroidNativeBufferImage(
     *out = {};
 
     out->device = device;
+    out->vkFormat = pCreateInfo->format;
+    out->extent = pCreateInfo->extent;
+    out->usage = pCreateInfo->usage;
+
+    for (uint32_t i = 0; i < pCreateInfo->queueFamilyIndexCount; ++i) {
+        out->queueFamilyIndices.push_back(
+                pCreateInfo->pQueueFamilyIndices[i]);
+    }
+
+    const VkNativeBufferANDROID* nativeBufferANDROID =
+        reinterpret_cast<const VkNativeBufferANDROID*>(pCreateInfo->pNext);
+
+    out->format = nativeBufferANDROID->format;
+    out->stride = nativeBufferANDROID->stride;
+    out->colorBufferHandle = *(nativeBufferANDROID->handle);
 
     // delete the info struct and pass to vkCreateImage, and also add
     // transfer src capability to allow us to copy to CPU.
