@@ -185,6 +185,7 @@ protected:
 
         EXPECT_EQ(VK_SUCCESS, vkCreateDevice(physdevs[bestPhysicalDevice], &dCi,
                                              nullptr, &mDevice));
+        vkGetDeviceQueue(mDevice, mGraphicsQueueFamily, 0, &mQueue);
     }
 
     void teardownVulkan() {
@@ -193,17 +194,17 @@ protected:
     }
 
     void createAndroidNativeImage(buffer_handle_t* buffer_out, VkImage* image_out) {
-    
+
         int usage = GRALLOC_USAGE_HW_RENDER;
         int format = HAL_PIXEL_FORMAT_RGBA_8888;
         int stride;
         buffer_handle_t buffer =
             createTestGrallocBuffer(
                 usage, format, kWindowSize, kWindowSize, &stride);
-    
+
         uint64_t producerUsage, consumerUsage;
         android_convertGralloc0To1Usage(usage, &producerUsage, &consumerUsage);
-    
+
         VkNativeBufferANDROID nativeBufferInfo = {
             VK_STRUCTURE_TYPE_NATIVE_BUFFER_ANDROID, nullptr,
             buffer, stride,
@@ -214,7 +215,7 @@ protected:
                 producerUsage,
             },
         };
-    
+
         VkImageCreateInfo testImageCi = {
             VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, (const void*)&nativeBufferInfo,
             0,
@@ -229,11 +230,11 @@ protected:
             0, nullptr /* shared queue families */,
             VK_IMAGE_LAYOUT_UNDEFINED,
         };
-    
+
         VkImage testAndroidNativeImage;
         EXPECT_EQ(VK_SUCCESS, vkCreateImage(mDevice, &testImageCi, nullptr,
                                             &testAndroidNativeImage));
-    
+
         *buffer_out = buffer;
         *image_out = testAndroidNativeImage;
     }
@@ -248,6 +249,7 @@ protected:
     VkInstance mInstance;
     VkPhysicalDevice mPhysicalDevice;
     VkDevice mDevice;
+    VkQueue mQueue;
     uint32_t mHostVisibleMemoryTypeIndex;
     uint32_t mGraphicsQueueFamily;
 };
@@ -338,6 +340,25 @@ TEST_F(VulkanHalTest, AndroidNativeImageCreation) {
     VkImage image;
     buffer_handle_t buffer;
     createAndroidNativeImage(&buffer, &image);
+    destroyAndroidNativeImage(buffer, image);
+}
+
+TEST_F(VulkanHalTest, AndroidNativeImageQueueSignal) {
+    VkImage image;
+    buffer_handle_t buffer;
+    int fenceFd;
+
+    createAndroidNativeImage(&buffer, &image);
+
+    PFN_vkQueueSignalReleaseImageANDROID func =
+        (PFN_vkQueueSignalReleaseImageANDROID)
+        vkGetDeviceProcAddr(mDevice, "vkQueueSignalReleaseImageANDROID");
+
+    if (func) {
+        fprintf(stderr, "%s: qsig\n", __func__);
+        func(mQueue, 0, nullptr, image, &fenceFd);
+    }
+
     destroyAndroidNativeImage(buffer, image);
 }
 
