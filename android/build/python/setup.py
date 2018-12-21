@@ -45,7 +45,7 @@ setuptools.setup(
         "console_scripts": ["aemu-build=aemu.cmake:launch"],
     },
     install_requires=[
-        "absl-py", "urlfetch"
+        "absl-py", "urlfetch", "enum34"
     ],
     license="Apache License, Version 2.0",
     classifiers=[
