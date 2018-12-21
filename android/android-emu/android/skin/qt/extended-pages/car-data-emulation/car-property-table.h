@@ -24,6 +24,7 @@
 namespace carpropertyutils {
     struct PropertyDescription {
         QString label;
+        bool writable;
         std::map<int32_t, QString>* lookupTable;
         QString (*int32ToString)(int32_t val);
         QString (*int32VecToString)(std::vector<int32_t> vals);
@@ -60,7 +61,7 @@ public:
     void setSendEmulatorMsgCallback(CarSensorData::EmulatorMsgCallback&&);
 
 signals:
-    void updateData(int row, int col, QString info);
+    void updateData(int row, int col, QTableWidgetItem* info);
     void sort(int column);
     void setRowCount(int size);
 
@@ -68,14 +69,40 @@ protected:
     void showEvent(QShowEvent* event);
 
 private slots:
-    void updateTable(int row, int col, QString info);
+    void updateTable(int row, int col, QTableWidgetItem* info);
     void sortTable(int column);
     void changeRowCount(int size);
+    void on_table_cellClicked(int row, int column);
 
 private:
     std::unique_ptr<Ui::CarPropertyTable> mUi;
     CarSensorData::EmulatorMsgCallback mSendEmulatorMsg;
     Qt::SortOrder mNextOrder;
-    void updateIndices();
+
+    QString getLabel(int row);
+    QString getValueText(int row);
+    QString getArea(int row);
+    int getPropertyId(int row);
+    int getAreaId(int row);
+    int getType(int row);
+
+    QTableWidgetItem* createTableTextItem(QString info);
+    QTableWidgetItem* createTableBoolItem(bool val);
+
+    void updateIndex();
+
     void sendGetAllPropertiesRequest();
+
+    emulator::EmulatorMessage makeGetPropMsg(int32_t prop, int areaId);
+    emulator::EmulatorMessage makeSetPropMsg(int propId, emulator::VehiclePropValue** valueRef,
+                                              int areaId);
+    emulator::EmulatorMessage makeSetPropMsgInt32(int32_t propId, int val, int areaId);
+    emulator::EmulatorMessage makeSetPropMsgFloat(int32_t propId, float val, int areaId);
+
+    int32_t getUserBoolValue(carpropertyutils::PropertyDescription propDesc,
+                              int row, bool* pressedOk);
+    float getUserFloatValue(carpropertyutils::PropertyDescription propDesc,
+                             int row, bool* pressedOk);
+    int32_t getUserInt32Value(carpropertyutils::PropertyDescription propDesc,
+                               int row, bool* pressedOk);
 };
