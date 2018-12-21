@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f5687dd5_b5a0d9f1",
+        "filename": "android/docs/CMAKE.MD",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-21T17:41:09Z",
+      "side": 1,
+      "message": "python2",
+      "range": {
+        "startLine": 96,
+        "startChar": 20,
+        "endLine": 96,
+        "endChar": 28
+      },
+      "revId": "c535780f96f3100f60d0d960d4640231e113b66a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
