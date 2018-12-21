@@ -247,11 +247,14 @@ public:
         if (it == mImageInfo.end()) return;
 
         auto info = it->second;
-        teardownAndroidNativeBufferImage(m_vk, &info.anbInfo);
+
+        if (info.anbInfo.image) {
+            teardownAndroidNativeBufferImage(m_vk, &info.anbInfo);
+        } else {
+            m_vk->vkDestroyImage(device, image, pAllocator);
+        }
 
         mImageInfo.erase(image);
-
-        m_vk->vkDestroyImage(device, image, pAllocator);
     }
 
     VkResult on_vkAllocateMemory(
