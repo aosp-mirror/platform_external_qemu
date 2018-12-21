@@ -35,26 +35,34 @@ from aemu.upload_symbols import upload_symbols
 
 FLAGS = flags.FLAGS
 flags.DEFINE_enum('symbol_dest', 'none', SymbolUris.values(),
-                  'Symbol server, if we are processing symbols.')
-flags.DEFINE_string('sdk_revision', None, 'The emulator sdk revision')
-flags.DEFINE_string('sdk_build_number', None, 'The emulator sdk build number')
+                  'Environment where we are uploading the symbols to. '
+                  'None will not upload any symbols.')
+flags.DEFINE_string('sdk_revision', None, 'The emulator sdk revision.')
+flags.DEFINE_string('sdk_build_number', None, 'The emulator sdk build number.')
 flags.DEFINE_enum('config', 'release', BuildConfig.values(),
-                  'Build configuration for the emulator.')
+                  'Whether we are building a release or debug configuration.')
 flags.DEFINE_enum('crash', 'none', Crash.values(),
-                  'Which crash server to use.')
+                  'Which crash server to use or none if you do not want crash uploads.')
 flags.DEFINE_string('out', os.path.abspath('objs'),
-                    'Use specific output directory')
+                    'Use specific output directory.')
 flags.DEFINE_boolean('qtwebengine', False, 'Build with QtWebEngine support')
 flags.DEFINE_list(
-    'sanitizer', [], 'Build with sanitizer ([address, thread])')
+    'sanitizer', [], 'List of sanitizers ([address, thread]) to enable in the built binaries.')
 flags.DEFINE_enum('generator', 'ninja', Generator.values(),
-                  'Cmake generator to use')
+                  'CMake generator to use.')
 flags.DEFINE_enum('target',  platform.system().lower(), Toolchain.values(),
-                  'Which platform to target')
+                  'Which platform to target. '
+                  'This will attempt to cross compile '
+                  'if the target does not match the current platform (%s)' % platform.system().lower())
 flags.DEFINE_enum('build', 'check', Make.values(),
-                  'Target we want to build, if any')
-flags.DEFINE_boolean('clean', True, 'Clean the destination build directory')
-flags.DEFINE_boolean('symbols', False, 'Strip and generate symbols')
+                  'Target that should be build after configuration. '
+                  'The config target will only configure the build, '
+                  'no symbol processing or testing will take place.')
+flags.DEFINE_boolean(
+    'clean', True, 'Clean the destination build directory before configuring. '
+    'Setting this to false will attempt an incremental build. '
+    'Note that this can introduce cmake caching issues.')
+flags.DEFINE_boolean('symbols', False, 'Strip binaries and generate symbols after build.')
 
 
 def configure():
@@ -134,7 +142,8 @@ def main(argv=None):
         upload_symbols(FLAGS.out, uri)
 
     if platform.system() != 'Windows' and FLAGS.config == 'debug':
-        overrides = open(os.path.join(get_qemu_root(), 'android', 'asan_overrides')).read()
+        overrides = open(os.path.join(
+            get_qemu_root(), 'android', 'asan_overrides')).read()
         print("Debug build enabled.")
         print("ASAN may be in use; recommend disabling some ASAN checks as build is not")
         print("universally ASANified. This can be done with")
@@ -142,7 +151,6 @@ def main(argv=None):
         print(". android/envsetup.sh")
         print("")
         print("or export ASAN_OPTIONS=%s" % overrides)
-
 
 
 def launch():
