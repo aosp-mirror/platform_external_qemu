@@ -97,6 +97,12 @@ int AndroidWindow::queueBuffer(ANativeWindowBuffer* buffer, int fenceFd) {
     return 0;
 }
 
+int AndroidWindow::cancelBuffer(ANativeWindowBuffer* buffer, int fenceFd) {
+    assert(toProducer);
+    fromProducer->cancelBuffer({buffer, fenceFd});
+    return 0;
+}
+
 int AndroidWindow::query(int what, int* value) const {
     switch (what) {
         case ANATIVEWINDOW_QUERY_DEFAULT_WIDTH:
@@ -114,10 +120,10 @@ int AndroidWindow::query(int what, int* value) const {
             *value = 0;
             break;
         case NATIVE_WINDOW_MAX_BUFFER_COUNT:
-            *value = 3;
+            *value = 2;
             break;
         case NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS:
-            *value = 1;
+            *value = 2;
             break;
 
         case NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER:
@@ -151,6 +157,7 @@ int AndroidWindow::perform(int operation, va_list args)
         *usage =
             GRALLOC_USAGE_HW_TEXTURE |
             GRALLOC_USAGE_HW_RENDER;
+        va_end(args);
         break;
     }
     case NATIVE_WINDOW_API_CONNECT:
@@ -160,36 +167,42 @@ int AndroidWindow::perform(int operation, va_list args)
     case NATIVE_WINDOW_GET_WIDE_COLOR_SUPPORT: {
         bool* outSupport = va_arg(args, bool*);
         *outSupport = false;
+        va_end(args);
         break;
     }
-    case NATIVE_WINDOW_SET_USAGE:
-    case NATIVE_WINDOW_SET_CROP:
-    case NATIVE_WINDOW_SET_BUFFER_COUNT:
-    case NATIVE_WINDOW_SET_BUFFERS_GEOMETRY:
+    case NATIVE_WINDOW_SET_BUFFER_COUNT: {
+        size_t bufferCount = va_arg(args, size_t);
+        va_end(args);
+        break;
+    }
+    case NATIVE_WINDOW_SET_AUTO_REFRESH:
+    case NATIVE_WINDOW_SET_SHARED_BUFFER_MODE:
+    case NATIVE_WINDOW_SET_BUFFERS_FORMAT:
+    case NATIVE_WINDOW_SET_BUFFERS_DATASPACE:
+    case NATIVE_WINDOW_SET_BUFFERS_DIMENSIONS:
     case NATIVE_WINDOW_SET_BUFFERS_TRANSFORM:
+    case NATIVE_WINDOW_SET_SCALING_MODE:
+    case NATIVE_WINDOW_SET_USAGE:
+    case NATIVE_WINDOW_SET_USAGE64:
+    case NATIVE_WINDOW_GET_REFRESH_CYCLE_DURATION:
+    case NATIVE_WINDOW_SET_SURFACE_DAMAGE:
+        break;
+    case NATIVE_WINDOW_SET_CROP:
+    case NATIVE_WINDOW_SET_BUFFERS_GEOMETRY:
     case NATIVE_WINDOW_SET_BUFFERS_STICKY_TRANSFORM:
     case NATIVE_WINDOW_SET_BUFFERS_TIMESTAMP:
-    case NATIVE_WINDOW_SET_BUFFERS_DIMENSIONS:
     case NATIVE_WINDOW_SET_BUFFERS_USER_DIMENSIONS:
-    case NATIVE_WINDOW_SET_BUFFERS_FORMAT:
     case NATIVE_WINDOW_LOCK:
     case NATIVE_WINDOW_UNLOCK_AND_POST:
-    case NATIVE_WINDOW_SET_SCALING_MODE:
     case NATIVE_WINDOW_SET_SIDEBAND_STREAM:
-    case NATIVE_WINDOW_SET_BUFFERS_DATASPACE:
     case NATIVE_WINDOW_SET_BUFFERS_SMPTE2086_METADATA:
     case NATIVE_WINDOW_SET_BUFFERS_CTA861_3_METADATA:
     // case NATIVE_WINDOW_SET_BUFFERS_HDR10_PLUS_METADATA:
-    case NATIVE_WINDOW_SET_SURFACE_DAMAGE:
-    case NATIVE_WINDOW_SET_SHARED_BUFFER_MODE:
-    case NATIVE_WINDOW_SET_AUTO_REFRESH:
-    case NATIVE_WINDOW_GET_REFRESH_CYCLE_DURATION:
     case NATIVE_WINDOW_GET_NEXT_FRAME_ID:
     case NATIVE_WINDOW_ENABLE_FRAME_TIMESTAMPS:
     case NATIVE_WINDOW_GET_COMPOSITOR_TIMING:
     case NATIVE_WINDOW_GET_FRAME_TIMESTAMPS:
     case NATIVE_WINDOW_GET_HDR_SUPPORT:
-    case NATIVE_WINDOW_SET_USAGE64:
 
     default:
         E("Unknown perform 0x%x, not implemented.", operation);
@@ -251,8 +264,8 @@ static int hook_queueBuffer(struct ANativeWindow* window, struct ANativeWindowBu
 }
 
 static int hook_cancelBuffer(struct ANativeWindow* window, struct ANativeWindowBuffer* buffer, int fenceFd) {
-    E("Not implemented");
-    return 0;
+    AndroidWindow* aw = AndroidWindow::getSelf(window);
+    return aw->cancelBuffer(buffer, fenceFd);
 }
 
 static void hook_incRef(struct android_native_base_t* common) {
