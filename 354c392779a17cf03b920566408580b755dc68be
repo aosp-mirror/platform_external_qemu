@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d70a1454_b745bfb7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-12-21T18:03:23Z",
+      "side": 1,
+      "message": "For my own understanding: are we still keeping editable cells? Or is this something needed to detect click events on a cell?",
+      "revId": "354c392779a17cf03b920566408580b755dc68be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "657c336e_1155db12",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-12-21T18:03:23Z",
+      "side": 1,
+      "message": "For my own knowledge: does this method run in the UI thread or in a separated one? (Just trying to understand if blocking on \"getUserXXXValue()\" methods would cause the UI to freeze.",
+      "revId": "354c392779a17cf03b920566408580b755dc68be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "859db3c4_339e8340",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-12-21T18:03:23Z",
+      "side": 1,
+      "message": "What would happen if -1 is a valid input (e.g.: temperature). \nWouldn\u0027t be better to make \"getUserInt32Value()\" return a boolean (true \u003d user accepted, false \u003d user cancelled) and receive the int value through a parameter passed by reference?\nOr you can follow Qt\u0027s style where \"pressedOk\" is passed by reference.",
+      "revId": "354c392779a17cf03b920566408580b755dc68be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb5a9ffa_ac4a8548",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-12-21T18:03:23Z",
+      "side": 1,
+      "message": "Both methods do \"add_value()\", \"set_prop\" and \"set_area_id\".\nIs there a way you can move those three lines into the \"makeSetPropMsg\"? (I\u0027m not sure if the API has a way for you to set the actual value ones it has been already added to the emulatorMsg.",
+      "revId": "354c392779a17cf03b920566408580b755dc68be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "00d15afa_b962ea2f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-12-21T18:03:23Z",
+      "side": 1,
+      "message": "For my own knowledge: who calls this method?",
+      "revId": "354c392779a17cf03b920566408580b755dc68be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5b38230d_c864a27e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-12-21T18:03:23Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this be \"onTableCellClicked\"? or is this a requirement of Qt?",
+      "revId": "354c392779a17cf03b920566408580b755dc68be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "27f12571_665b762c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2018-12-21T18:03:23Z",
+      "side": 1,
+      "message": "Maybe \"makeGetPropMsg\"? or \"makeRequestPropMsg\"? (for symmetry with other methods)",
+      "revId": "354c392779a17cf03b920566408580b755dc68be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
