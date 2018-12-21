@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2352f2b1_762ecac6",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-21T17:36:21Z",
+      "side": 1,
+      "message": "Do we want all but VK_ANDROID_native_buffer here? Could you please add a comment why?",
+      "range": {
+        "startLine": 50,
+        "startChar": 26,
+        "endLine": 50,
+        "endChar": 35
+      },
+      "revId": "2bc92cd216976968fd3c201e4669803d65990853",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3a3d2acf_9fbcda9e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-21T17:36:21Z",
+      "side": 1,
+      "message": "Maybe we want a function IsBadExtension to avoid copying this?",
+      "range": {
+        "startLine": 113,
+        "startChar": 16,
+        "endLine": 113,
+        "endChar": 22
+      },
+      "revId": "2bc92cd216976968fd3c201e4669803d65990853",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
