@@ -22,6 +22,30 @@
       "revId": "c535780f96f3100f60d0d960d4640231e113b66a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "579f85a8_6863d6c9",
+        "filename": "android/docs/CMAKE.MD",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2018-12-21T18:13:02Z",
+      "side": 1,
+      "message": "According to choco this is the release we are looking for: https://chocolatey.org/packages/python2",
+      "parentUuid": "f5687dd5_b5a0d9f1",
+      "range": {
+        "startLine": 96,
+        "startChar": 20,
+        "endLine": 96,
+        "endChar": 28
+      },
+      "revId": "c535780f96f3100f60d0d960d4640231e113b66a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
