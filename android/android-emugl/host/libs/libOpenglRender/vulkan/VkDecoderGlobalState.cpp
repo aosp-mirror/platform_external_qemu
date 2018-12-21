@@ -32,10 +32,35 @@ using android::base::Lock;
 
 namespace goldfish_vk {
 
+static constexpr const char* const
+kEmulatedExtensions[] = {
+    "VK_ANDROID_native_buffer",
+};
+
 class VkDecoderGlobalState::Impl {
 public:
     Impl() : m_vk(emugl::vkDispatch()) { }
     ~Impl() = default;
+
+    // A list of extensions that should not be passed to the host driver.
+    // These will mainly include Vulkan features that we emulate ourselves.
+
+    VkResult on_vkCreateInstance(
+        const VkInstanceCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkInstance* pInstance) {
+
+        std::vector<const char*> finalExts =
+            filteredExtensionNames(
+                pCreateInfo->enabledExtensionCount,
+                pCreateInfo->ppEnabledExtensionNames);
+
+        VkInstanceCreateInfo createInfoFiltered = *pCreateInfo;
+        createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
+        createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
+
+        return m_vk->vkCreateInstance(&createInfoFiltered, pAllocator, pInstance);
+    }
 
     void on_vkGetPhysicalDeviceProperties(
             VkPhysicalDevice physicalDevice,
@@ -83,10 +108,29 @@ public:
                            const VkDeviceCreateInfo* pCreateInfo,
                            const VkAllocationCallbacks* pAllocator,
                            VkDevice* pDevice) {
-        // Run the underlying API call.
+
+        std::vector<const char*> finalExts =
+            filteredExtensionNames(
+                pCreateInfo->enabledExtensionCount,
+                pCreateInfo->ppEnabledExtensionNames);
+
+
+        for (uint32_t i = 0; i < pCreateInfo->enabledExtensionCount; ++i) {
+            auto extName =
+                pCreateInfo->ppEnabledExtensionNames[i];
+            if (!isEmulatedExtension(extName)) {
+                finalExts.push_back(extName);
+            }
+        }
+
+        // Run the underlying API call, filtering extensions.
+        VkDeviceCreateInfo createInfoFiltered = *pCreateInfo;
+        createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
+        createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
+
         VkResult result =
             m_vk->vkCreateDevice(
-                physicalDevice, pCreateInfo, pAllocator, pDevice);
+                physicalDevice, &createInfoFiltered, pAllocator, pDevice);
 
         if (result != VK_SUCCESS) return result;
 
@@ -449,6 +493,26 @@ public:
     }
 
 private:
+    bool isEmulatedExtension(const char* name) const {
+        for (auto emulatedExt : kEmulatedExtensions) {
+            if (!strcmp(emulatedExt, name)) return true;
+        }
+        return false;
+    }
+
+    std::vector<const char*>
+    filteredExtensionNames(
+            uint32_t count, const char* const* extNames) {
+        std::vector<const char*> res;
+        for (uint32_t i = 0; i < count; ++i) {
+            auto extName = extNames[i];
+            if (!isEmulatedExtension(extName)) {
+                res.push_back(extName);
+            }
+        }
+        return res;
+    }
+
     VkPhysicalDeviceMemoryProperties* memPropsOfDeviceLocked(VkDevice device) {
         auto physdev = android::base::find(mDeviceToPhysicalDevice, device);
         if (!physdev) return nullptr;
@@ -512,6 +576,13 @@ static LazyInstance<VkDecoderGlobalState> sGlobalDecoderState =
 // static
 VkDecoderGlobalState* VkDecoderGlobalState::get() {
     return sGlobalDecoderState.ptr();
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateInstance(
+    const VkInstanceCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkInstance* pInstance) {
+    return mImpl->on_vkCreateInstance(pCreateInfo, pAllocator, pInstance);
 }
 
 void VkDecoderGlobalState::on_vkGetPhysicalDeviceProperties(
