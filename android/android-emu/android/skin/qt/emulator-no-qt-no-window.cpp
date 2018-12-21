@@ -72,12 +72,10 @@ static std::function<void()> sQemuMainLoop;
 
 void EmulatorNoQtNoWindow::startThread(std::function<void()> looperFunction) {
 
-    pthread_t eventThread;
-
     sQemuMainLoop = looperFunction;
 
     // Spawn a thread to run the QEMU main loop
-#ifdef __WIN32
+#if defined(__WIN32) || defined(_MSC_VER)
     DWORD  threadId;
     HANDLE threadHandle = CreateThread(nullptr,        // Default security attributes
                                        0,              // Default stack size
@@ -89,6 +87,7 @@ void EmulatorNoQtNoWindow::startThread(std::function<void()> looperFunction) {
         fprintf(stderr, "%s %s: CreateThread() failed!\n", __FILE__, __FUNCTION__);
     }
 #else
+    pthread_t eventThread;
     int createFailed = pthread_create(&eventThread, nullptr, threadWrapper, nullptr);
 
     if (createFailed) {

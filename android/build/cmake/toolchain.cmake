@@ -15,7 +15,7 @@
 # This file contains a set of functions that make it easier to configure the toolchain used by the emulator
 # It's main responsibility is to create the toolchain by invoking the toolchain shell script that generates
 # the proper wrappers around the compilers and sysroot that are found in the build tree.
-# 
+#
 # We need this to make sure that are builds are consistent accross different development environments.
 
 
@@ -28,14 +28,22 @@
 # Sets STD_OUT
 #   The output produced by the script
 function(toolchain_cmd HOST PARAM1 PARAM2)
+    set(VERBOSITY "2")
+    if (PARAM2 MATCHES ".*unused.*")
+        set(VERBOSITY "0")
+    endif()
     get_filename_component(GEN_SDK "${CMAKE_CURRENT_LIST_FILE}/../../../scripts/gen-android-sdk-toolchain.sh" ABSOLUTE)
-    execute_process(COMMAND ${GEN_SDK} "--host=${HOST}" "${PARAM1}" "${PARAM2}" "--verbosity=0"
+    get_filename_component(AOSP "${CMAKE_CURRENT_LIST_DIR}/../../../../.." ABSOLUTE)
+
+    message("Running ${GEN_SDK} '--host=${HOST}' '${PARAM1}' '${PARAM2}' '--aosp-dir=${AOSP}'--verbosity=${VERBOSITY}'")
+    execute_process(COMMAND ${GEN_SDK} "--host=${HOST}" "${PARAM1}" "${PARAM2}" "--aosp-dir=${AOSP}" "--verbosity=${VERBOSITY}"
         RESULT_VARIABLE GEN_SDK_RES
         OUTPUT_VARIABLE STD_OUT
         ERROR_VARIABLE STD_ERR)
     if(NOT "${GEN_SDK_RES}" STREQUAL "0")
-        message(FATAL_ERROR "Unable to retrieve sdk info from ${GEN_SDK} : ${STD_OUT}, ${STD_ERR}")
+        message(FATAL_ERROR "Unable to retrieve sdk info from ${GEN_SDK} --host=${HOST} ${PARAM1} ${PARAM2}: ${STD_OUT}, ${STD_ERR}")
     endif()
+    message("${STD_OUT}")
 
     # Clean up and make visibile
     string(REPLACE "\n" "" STD_OUT "${STD_OUT}")
@@ -66,8 +74,7 @@ function(toolchain_generate_internal TARGET_OS)
 		message(WARNING "Force downloading the Windows toolchain. This may take a couple of minutes...")
             toolchain_cmd("${TARGET_OS}" "--force-fetch-wintoolchain" "unused")
         endif ()
-        message(STATUS "Creating the toolchain in ${TOOLCHAIN} with aosp: ${AOSP}")
-        toolchain_cmd("${TARGET_OS}" "--aosp-dir=${AOSP}" "${TOOLCHAIN}")
+        toolchain_cmd("${TARGET_OS}" "${TOOLCHAIN}" "")
     endif ()
 
     # Let's find the bin-prefix
