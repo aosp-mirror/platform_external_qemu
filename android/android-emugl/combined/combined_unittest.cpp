@@ -76,9 +76,14 @@ protected:
     }
 
     void TearDown() override {
+        if (eglGetCurrentContext() != EGL_NO_CONTEXT) {
+            glFinish(); // sync the pipe
+        }
+
         android::opengl::getOpenGLObjectCounts(&mAfterTest);
         for (int i = 0; i < mBeforeTest.size(); i++) {
-            EXPECT_TRUE(mBeforeTest[i] >= mAfterTest[i]);
+            EXPECT_TRUE(mBeforeTest[i] >= mAfterTest[i]) <<
+                "Leaked objects of type " << i;
         }
         teardownEGL();
         teardownGralloc();
@@ -357,4 +362,44 @@ TEST_F(CombinedGoldfishOpenglTest, SwitchContext) {
         th->start();
         th->wait();
     }
+}
+
+// Test that direct mapped memory works.
+TEST_F(CombinedGoldfishOpenglTest, MappedMemory) {
+    constexpr GLsizei kBufferSize = 64;
+
+    GLuint buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, kBufferSize, 0, GL_DYNAMIC_DRAW);
+
+    std::vector<uint8_t> data(kBufferSize);
+    for (uint8_t i = 0; i < kBufferSize; ++i) {
+        data[i] = i;
+    }
+
+    uint8_t* mapped =
+        (uint8_t*)
+            glMapBufferRange(
+                GL_ARRAY_BUFFER, 0, kBufferSize, GL_MAP_WRITE_BIT);
+
+    for (uint8_t i = 0; i < kBufferSize; ++i) {
+        mapped[i] = data[i];
+    }
+
+    glUnmapBuffer(GL_ARRAY_BUFFER);
+
+    mapped =
+        (uint8_t*)
+            glMapBufferRange(
+                GL_ARRAY_BUFFER, 0, kBufferSize, GL_MAP_READ_BIT);
+
+    for (uint8_t i = 0; i < kBufferSize; ++i) {
+        EXPECT_EQ(data[i], mapped[i]);
+    }
+
+    glUnmapBuffer(GL_ARRAY_BUFFER);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDeleteBuffers(1, &buffer);
 }
