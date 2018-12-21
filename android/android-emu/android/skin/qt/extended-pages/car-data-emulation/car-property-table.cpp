@@ -12,9 +12,13 @@
 
 #include "android/skin/qt/qt-settings.h"
 #include "android/utils/debug.h"
+#include "android/skin/qt/extended-pages/car-data-emulation/vehicle_constants_generated.h"
+
+#include <cfloat>
 
 #include <QObject>
 #include <QSettings>
+#include <QInputDialog>
 #define D(...) VERBOSE_PRINT(car, __VA_ARGS__)
 
 using std::string;
@@ -24,12 +28,20 @@ using emulator::EmulatorMessage;
 using emulator::MsgType;
 using emulator::Status;
 using emulator::VehiclePropValue;
+using emulator::VehiclePropertyType;
+using emulator::VehiclePropGet;
 
+using carpropertyutils::PropertyDescription;
 using carpropertyutils::propMap;
 
 static constexpr int LABEL_COLUMN = 0;
 static constexpr int VALUE_COLUMN = 1;
 static constexpr int AREA_COLUMN = 2;
+static constexpr int PROPERTY_ID_COLUMN = 3;
+static constexpr int AREA_ID_COLUMN = 4;
+static constexpr int TYPE_COLUMN = 5;
+
+static constexpr int CANCEL_USER_INPUT = -1;
 
 static map<QString, int> tableIndex;
 
@@ -38,7 +50,11 @@ CarPropertyTable::CarPropertyTable(QWidget* parent)
     mUi->setupUi(this);
 
     QStringList colHeaders;
-    colHeaders << tr("Labels") << tr("Values") << tr("Area");
+    colHeaders << tr("Labels") << tr("Values") << tr("Area")
+                << tr("Property IDs") << tr("Area IDs") << tr("Type");
+    // This "hidden" data is necessary when sending changes.
+    mUi->table->setColumnHidden(AREA_ID_COLUMN, true);
+    mUi->table->setColumnHidden(TYPE_COLUMN, true);
     mUi->table->setHorizontalHeaderLabels(colHeaders);
 
     connect(this, SIGNAL(updateData(int, int, QString)),
@@ -46,9 +62,32 @@ CarPropertyTable::CarPropertyTable(QWidget* parent)
     connect(this, SIGNAL(sort(int)), this, SLOT(sortTable(int)), Qt::BlockingQueuedConnection);
     connect(this, SIGNAL(setRowCount(int)), this, SLOT(changeRowCount(int)), Qt::QueuedConnection);
     connect(mUi->table->horizontalHeader(), SIGNAL(sectionClicked(int)),
-              this, SLOT(sortTable(int)), Qt::QueuedConnection);
+             this, SLOT(sortTable(int)), Qt::QueuedConnection);
 };
 
+QString CarPropertyTable::getLabel(int row) {
+    return mUi->table->item(row, LABEL_COLUMN)->text();
+}
+
+QString CarPropertyTable::getValueText(int row) {
+    return mUi->table->item(row, VALUE_COLUMN)->text();
+}
+
+QString CarPropertyTable::getArea(int row) {
+    return mUi->table->item(row, AREA_COLUMN)->text();
+}
+
+int CarPropertyTable::getPropertyId(int row) {
+    return mUi->table->item(row, PROPERTY_ID_COLUMN)->text().toInt();
+}
+
+int CarPropertyTable::getAreaId(int row) {
+    return mUi->table->item(row, AREA_ID_COLUMN)->text().toInt();
+}
+
+int CarPropertyTable::getType(int row) {
+    return mUi->table->item(row, TYPE_COLUMN)->text().toInt();
+}
 
 // Wrapper slots to call the GUI-modifying functions from callback thread
 void CarPropertyTable::sortTable(int column) {
@@ -70,7 +109,9 @@ void CarPropertyTable::changeRowCount(int size) {
 }
 
 void CarPropertyTable::updateTable(int row, int col, QString info) {
-    mUi->table->setItem(row, col, new QTableWidgetItem(info));
+    QTableWidgetItem* item = new QTableWidgetItem(info);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    mUi->table->setItem(row, col, item);
 }
 
 void CarPropertyTable::updateIndices() {
@@ -116,6 +157,9 @@ void CarPropertyTable::processMsg(EmulatorMessage emulatorMsg) {
                 emit updateData(valIndex, LABEL_COLUMN, label);
                 emit updateData(valIndex, VALUE_COLUMN, value);
                 emit updateData(valIndex, AREA_COLUMN, area);
+                emit updateData(valIndex, PROPERTY_ID_COLUMN, QString::number(val.prop()));
+                emit updateData(valIndex, AREA_ID_COLUMN, QString::number(val.area_id()));
+                emit updateData(valIndex, TYPE_COLUMN, QString::number(val.value_type()));
             }
         }
         if (addedNewEntries) {
@@ -125,19 +169,157 @@ void CarPropertyTable::processMsg(EmulatorMessage emulatorMsg) {
     }
 }
 
-void CarPropertyTable::setSendEmulatorMsgCallback(CarSensorData::EmulatorMsgCallback&& func) {
-    mSendEmulatorMsg = std::move(func);
+void CarPropertyTable::on_table_cellClicked(int row, int column) {
+    int prop = getPropertyId(row);
+    PropertyDescription propDesc = propMap[prop];
+    if (column != VALUE_COLUMN || !propDesc.writable) {
+        return;
+    }
+    int areaId = getAreaId(row);
+    int type = getType(row);
+
+    int32_t int32Value;
+    float floatValue;
+
+    EmulatorMessage writeMsg;
+    string writeLog;
+    switch (type) {
+        // TODO: Account for the other types, although there aren't too many
+        // more writable ones that fit well on the table.
+        case (int32_t) VehiclePropertyType::BOOLEAN :
+            // Booleans are actually sent as ints with values of 0/1.
+            int32Value = getUserBoolValue(propDesc, row);
+            if (int32Value == CANCEL_USER_INPUT) {
+                return;
+            }
+            writeMsg = makeSetPropMsgInt32(prop, int32Value, areaId);
+            writeLog = "Setting value for " + getLabel(row).toStdString();
+            mSendEmulatorMsg(writeMsg, writeLog);
+            break;
+
+        case (int32_t) VehiclePropertyType::INT32 :
+            int32Value = getUserInt32Value(propDesc, row);
+            if (int32Value == CANCEL_USER_INPUT) {
+                return;
+            }
+            writeMsg = makeSetPropMsgInt32(prop, int32Value, areaId);
+            writeLog = "Setting value for " + getLabel(row).toStdString();
+            mSendEmulatorMsg(writeMsg, writeLog);
+            break;
+
+        case (int32_t) VehiclePropertyType::FLOAT :
+            floatValue = getUserFloatValue(propDesc, row);
+            if (floatValue == CANCEL_USER_INPUT) {
+                return;
+            }
+            writeMsg = makeSetPropMsgFloat(prop, floatValue, areaId);
+            writeLog = "Setting value for " + getLabel(row).toStdString();
+            mSendEmulatorMsg(writeMsg, writeLog);
+            break;
+    }
+
+    mSendEmulatorMsg(writeMsg, writeLog);
+    EmulatorMessage getMsg = makeGetRequest(prop, areaId);
+    string getLog = "Sending get request for " + getLabel(row).toStdString();
+    mSendEmulatorMsg(getMsg, getLog);
+}
+
+int32_t CarPropertyTable::getUserBoolValue(PropertyDescription propDesc, int row) {
+    bool pressedOk;
+    QString oldValueString = getValueText(row);
+    QStringList items;
+    items << tr("True") << tr("False");
+    QString item = QInputDialog::getItem(this, QString(),
+            propDesc.label, items, items.indexOf(oldValueString), false, &pressedOk);
+    int32_t retVal = (item == "True") ? 1 : 0;
+    return pressedOk ? retVal : CANCEL_USER_INPUT;
+}
+
+int32_t CarPropertyTable::getUserInt32Value(PropertyDescription propDesc, int row) {
+    bool pressedOk;
+    QString newValueString;
+    QString oldValueString = getValueText(row);
+    int32_t value;
+    if (propDesc.lookupTable != nullptr) {
+        QStringList items;
+        for (const auto &detail : *(propDesc.lookupTable)) {
+            items << detail.second;
+        }
+        QString item = QInputDialog::getItem(this, QString(), propDesc.label, items,
+                                              items.indexOf(oldValueString), false, &pressedOk);
+        for (const auto &detail : *(propDesc.lookupTable)) {
+            if (item == detail.second) {
+                value = detail.first;
+                break;
+            }
+        }
+        newValueString = item;
+    } else {
+        int32_t oldValue = getValueText(row).toInt();
+        value = QInputDialog::getInt(this, QString(), propDesc.label, oldValue,
+                                INT_MIN, INT_MAX, 1, &pressedOk);
+        newValueString = carpropertyutils::int32ToString(propDesc, value);
+    }
+    return pressedOk ? value : CANCEL_USER_INPUT;
+}
+
+float CarPropertyTable::getUserFloatValue(PropertyDescription propDesc, int row) {
+    // No property interprets floats with table, so we only deal with raw numbers.
+    bool pressedOk;
+    double oldValue = getValueText(row).toDouble();
+    double value = QInputDialog::getDouble(this, QString(), propDesc.label, oldValue,
+                                              FLT_MIN, FLT_MAX, 3, &pressedOk);
+    return pressedOk ? value : CANCEL_USER_INPUT;
+}
+
+EmulatorMessage CarPropertyTable::makeSetPropMsg() {
+    EmulatorMessage emulatorMsg;
+    emulatorMsg.set_msg_type(MsgType::SET_PROPERTY_CMD);
+    emulatorMsg.set_status(Status::RESULT_OK);
+    return emulatorMsg;
+}
+
+EmulatorMessage CarPropertyTable::makeSetPropMsgInt32(int32_t propId, int val, int areaId) {
+    EmulatorMessage emulatorMsg = makeSetPropMsg();
+    VehiclePropValue* value = emulatorMsg.add_value();
+    value->set_prop(propId);
+    value->add_int32_values(val);
+    value->set_area_id(areaId);
+    return emulatorMsg;
+}
+
+EmulatorMessage CarPropertyTable::makeSetPropMsgFloat(int32_t propId, float val, int areaId) {
+    EmulatorMessage emulatorMsg = makeSetPropMsg();
+    VehiclePropValue* value = emulatorMsg.add_value();
+    value->set_prop(propId);
+    value->add_float_values(val);
+    value->set_area_id(areaId);
+    return emulatorMsg;
+}
+
+EmulatorMessage CarPropertyTable::makeGetRequest(int32_t prop, int areaId) {
+    EmulatorMessage emulatorMsg;
+    emulatorMsg.set_msg_type(MsgType::GET_PROPERTY_CMD);
+    emulatorMsg.set_status(Status::RESULT_OK);
+    VehiclePropGet* getMsg = emulatorMsg.add_prop();
+    getMsg->set_prop(prop);
+    getMsg->set_area_id(areaId);
+    return emulatorMsg;
 }
 
 void CarPropertyTable::sendGetAllPropertiesRequest() {
     EmulatorMessage emulatorMsg;
     emulatorMsg.set_msg_type(MsgType::GET_PROPERTY_ALL_CMD);
     emulatorMsg.set_status(Status::RESULT_OK);
-    string log = "Requesting all props";
+    string log = "Requesting all properties";
     mSendEmulatorMsg(emulatorMsg, log);
 }
 
 void CarPropertyTable::showEvent(QShowEvent*) {
     // Update data when we open the tab
     if (mSendEmulatorMsg != nullptr) { sendGetAllPropertiesRequest(); }
+}
+
+void CarPropertyTable::setSendEmulatorMsgCallback(CarSensorData::EmulatorMsgCallback&& func) {
+    mSendEmulatorMsg = std::move(func);
 }

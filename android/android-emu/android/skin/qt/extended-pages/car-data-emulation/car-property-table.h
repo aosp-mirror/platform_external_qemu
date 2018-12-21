@@ -24,6 +24,7 @@
 namespace carpropertyutils {
     struct PropertyDescription {
         QString label;
+        bool writable;
         std::map<int32_t, QString>* lookupTable;
         QString (*int32ToString)(int32_t val);
         QString (*int32VecToString)(std::vector<int32_t> vals);
@@ -71,11 +72,30 @@ private slots:
     void updateTable(int row, int col, QString info);
     void sortTable(int column);
     void changeRowCount(int size);
+    void on_table_cellClicked(int row, int column);
 
 private:
     std::unique_ptr<Ui::CarPropertyTable> mUi;
     CarSensorData::EmulatorMsgCallback mSendEmulatorMsg;
     Qt::SortOrder mNextOrder;
+
+    QString getLabel(int row);
+    QString getValueText(int row);
+    QString getArea(int row);
+    int getPropertyId(int row);
+    int getAreaId(int row);
+    int getType(int row);
+
     void updateIndices();
+
     void sendGetAllPropertiesRequest();
+
+    emulator::EmulatorMessage makeGetRequest(int32_t prop, int areaId);
+    emulator::EmulatorMessage makeSetPropMsg();
+    emulator::EmulatorMessage makeSetPropMsgInt32(int32_t propId, int val, int areaId);
+    emulator::EmulatorMessage makeSetPropMsgFloat(int32_t propId, float val, int areaId);
+
+    int32_t getUserBoolValue(carpropertyutils::PropertyDescription propDesc, int row);
+    float getUserFloatValue(carpropertyutils::PropertyDescription propDesc, int row);
+    int32_t getUserInt32Value(carpropertyutils::PropertyDescription propDesc, int row);
 };
