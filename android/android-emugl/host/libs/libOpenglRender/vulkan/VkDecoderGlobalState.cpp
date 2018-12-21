@@ -37,6 +37,27 @@ public:
     Impl() : m_vk(emugl::vkDispatch()) { }
     ~Impl() = default;
 
+    VkResult on_vkCreateInstance(
+        const VkInstanceCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkInstance* pInstance) {
+
+        std::vector<const char*> finalExts;
+        for (uint32_t i = 0; i < pCreateInfo->enabledExtensionCount; ++i) {
+            auto extName =
+                pCreateInfo->ppEnabledExtensionNames[i];
+            if (strcmp("VK_ANDROID_native_buffer", extName)) {
+                finalExts.push_back(extName);
+            }
+        }
+
+        VkInstanceCreateInfo createInfoFiltered = *pCreateInfo;
+        createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
+        createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
+
+        return m_vk->vkCreateInstance(&createInfoFiltered, pAllocator, pInstance);
+    }
+
     void on_vkGetPhysicalDeviceProperties(
             VkPhysicalDevice physicalDevice,
             VkPhysicalDeviceProperties* pProperties) {
@@ -83,10 +104,25 @@ public:
                            const VkDeviceCreateInfo* pCreateInfo,
                            const VkAllocationCallbacks* pAllocator,
                            VkDevice* pDevice) {
-        // Run the underlying API call.
+
+        std::vector<const char*> finalExts;
+
+        for (uint32_t i = 0; i < pCreateInfo->enabledExtensionCount; ++i) {
+            auto extName =
+                pCreateInfo->ppEnabledExtensionNames[i];
+            if (strcmp("VK_ANDROID_native_buffer", extName)) {
+                finalExts.push_back(extName);
+            }
+        }
+
+        // Run the underlying API call, filtering extensions.
+        VkDeviceCreateInfo createInfoFiltered = *pCreateInfo;
+        createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
+        createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
+
         VkResult result =
             m_vk->vkCreateDevice(
-                physicalDevice, pCreateInfo, pAllocator, pDevice);
+                physicalDevice, &createInfoFiltered, pAllocator, pDevice);
 
         if (result != VK_SUCCESS) return result;
 
@@ -512,6 +548,13 @@ static LazyInstance<VkDecoderGlobalState> sGlobalDecoderState =
 // static
 VkDecoderGlobalState* VkDecoderGlobalState::get() {
     return sGlobalDecoderState.ptr();
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateInstance(
+    const VkInstanceCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkInstance* pInstance) {
+    return mImpl->on_vkCreateInstance(pCreateInfo, pAllocator, pInstance);
 }
 
 void VkDecoderGlobalState::on_vkGetPhysicalDeviceProperties(
