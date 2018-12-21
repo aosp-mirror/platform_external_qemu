@@ -34,6 +34,8 @@ public:
     AndroidBufferQueue();
     ~AndroidBufferQueue();
 
+    void cancelBuffer(const Item& item);
+
     void queueBuffer(const Item& item);
     void dequeueBuffer(Item* outItem);
 
