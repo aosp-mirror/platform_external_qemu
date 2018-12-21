@@ -25,6 +25,8 @@ public:
     ~Impl() = default;
     MessageChannel<AndroidBufferQueue::Item,
                    AndroidBufferQueue::kCapacity> queue;
+    MessageChannel<AndroidBufferQueue::Item,
+                   AndroidBufferQueue::kCapacity> canceled;
 };
 
 AndroidBufferQueue::AndroidBufferQueue() {
@@ -33,6 +35,11 @@ AndroidBufferQueue::AndroidBufferQueue() {
 
 AndroidBufferQueue::~AndroidBufferQueue() = default;
 
+void AndroidBufferQueue::cancelBuffer(
+    const AndroidBufferQueue::Item& item) {
+    mImpl->canceled.send(item);
+}
+
 void AndroidBufferQueue::queueBuffer(
     const AndroidBufferQueue::Item& item) {
     mImpl->queue.send(item);
@@ -40,11 +47,15 @@ void AndroidBufferQueue::queueBuffer(
 
 void AndroidBufferQueue::dequeueBuffer(
     AndroidBufferQueue::Item* outItem) {
+    if (mImpl->canceled.tryReceive(outItem)) {
+        return;
+    }
     mImpl->queue.receive(outItem);
 }
 
 bool AndroidBufferQueue::try_dequeueBuffer(
     AndroidBufferQueue::Item* outItem) {
+    if (mImpl->canceled.tryReceive(outItem)) return true;
     return mImpl->queue.tryReceive(outItem);
 }
 

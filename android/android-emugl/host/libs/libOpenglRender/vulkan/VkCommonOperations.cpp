@@ -84,8 +84,10 @@ bool getStagingMemoryTypeIndex(
         const auto& typeInfo = memProps->memoryTypes[i];
         bool hostVisible =
             typeInfo.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+        bool hostCached =
+            typeInfo.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
         bool allowedInBuffer = (1 << i) & memReqs.memoryTypeBits;
-        if (hostVisible && allowedInBuffer) {
+        if (hostVisible && hostCached && allowedInBuffer) {
             foundSuitableStagingMemoryType = true;
             stagingMemoryTypeIndex = i;
             break;
@@ -105,6 +107,10 @@ bool getStagingMemoryTypeIndex(
             if (memProps->memoryTypes[i].propertyFlags &
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
                 ss << "Host visible memory type index: %u" << i << "\n";
+            }
+            if (memProps->memoryTypes[i].propertyFlags &
+                VK_MEMORY_PROPERTY_HOST_CACHED_BIT) {
+                ss << "Host cached memory type index: %u" << i << "\n";
             }
         }
 

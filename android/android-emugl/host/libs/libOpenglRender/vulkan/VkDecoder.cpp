@@ -111,12 +111,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_1;
                 vkReadStream->read((uint64_t*)&cgen_var_1, 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkInstance(&cgen_var_1, (VkInstance*)pInstance, 1);
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateInstance\n");;
-                }
                 VkResult vkCreateInstance_VkResult_return = (VkResult)0;
-                vkCreateInstance_VkResult_return = m_vk->vkCreateInstance(pCreateInfo, pAllocator, pInstance);
+                vkCreateInstance_VkResult_return = m_state->on_vkCreateInstance(pCreateInfo, pAllocator, pInstance);
                 uint64_t cgen_var_2;
                 vkStream->handleMapping()->mapHandles_VkInstance_u64(pInstance, &cgen_var_2, 1);
                 vkStream->write((uint64_t*)&cgen_var_2, 8);
