@@ -66,6 +66,8 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
             android::featurecontrol::GLAsyncSwap, false);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::RefCountPipe, true);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::GLDirectMem, true);
 
     emugl::vkDispatch(true /* get the test ICD */);
 
