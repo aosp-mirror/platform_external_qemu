@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3b345f7e_29a2835e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-12-22T00:06:57Z",
+      "side": 1,
+      "message": "This is so that users can\u0027t actually double click and directly access the box\u0027s contents - they have to interact with the dialog to edit the cell (it\u0027s kind of confusingly named in this regard).",
+      "parentUuid": "d70a1454_b745bfb7",
+      "revId": "354c392779a17cf03b920566408580b755dc68be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "657c336e_1155db12",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
         "patchSetId": 2
@@ -33,6 +51,24 @@
       "revId": "354c392779a17cf03b920566408580b755dc68be",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "54852409_5335c081",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-12-22T00:06:57Z",
+      "side": 1,
+      "message": "Separate one, I think (since I recall accidentally manipulating the UI from this thread and causing random exceptions).",
+      "parentUuid": "657c336e_1155db12",
+      "revId": "354c392779a17cf03b920566408580b755dc68be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7414ab18_a889b72e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-12-22T00:06:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "859db3c4_339e8340",
+      "revId": "354c392779a17cf03b920566408580b755dc68be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fb5a9ffa_ac4a8548",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
         "patchSetId": 2
@@ -67,6 +121,24 @@
       "revId": "354c392779a17cf03b920566408580b755dc68be",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1aa303d7_7c3f246a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-12-22T00:06:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fb5a9ffa_ac4a8548",
+      "revId": "354c392779a17cf03b920566408580b755dc68be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "97cacf78_58dd2403",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-12-22T00:06:57Z",
+      "side": 1,
+      "message": "CarDataPage (car-data-page.cpp).",
+      "parentUuid": "00d15afa_b962ea2f",
+      "revId": "354c392779a17cf03b920566408580b755dc68be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b38230d_c864a27e",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.h",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2018-12-21T18:03:23Z",
       "side": 1,
       "message": "Shouldn\u0027t this be \"onTableCellClicked\"? or is this a requirement of Qt?",
+      "revId": "354c392779a17cf03b920566408580b755dc68be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5337a64d_412b7768",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-12-22T00:06:57Z",
+      "side": 1,
+      "message": "It\u0027s something with Qt if I want to use a pre-existing slot (that goes with that signal) without having to externally connect it again. I\u0027m not sure whether it\u0027s better to take advantage of the fact that Qt has this built in or to just write another method with proper capitalization and connect that externally, but car-sensor-data uses these prebuilt callbacks, so I figured I\u0027d follow that.",
+      "parentUuid": "5b38230d_c864a27e",
       "revId": "354c392779a17cf03b920566408580b755dc68be",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -118,6 +226,24 @@
       "revId": "354c392779a17cf03b920566408580b755dc68be",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1e13bcd9_30bd5a47",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1374464
+      },
+      "writtenOn": "2018-12-22T00:06:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "27f12571_665b762c",
+      "revId": "354c392779a17cf03b920566408580b755dc68be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
