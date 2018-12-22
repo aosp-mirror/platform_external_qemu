@@ -284,5 +284,7 @@ size_t goldfish_vk_extension_struct_size(
 #endif
 #ifdef VK_NV_device_diagnostic_checkpoints
 #endif
+#ifdef VK_GOOGLE_address_space
+#endif
 
 } // namespace goldfish_vk
