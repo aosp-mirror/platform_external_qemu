@@ -104,7 +104,7 @@ class CerealGenerator(OutputGenerator):
         self.host_cmake_generator = lambda cppFiles: """%s
 set(OpenglRender_vulkan_cereal_src %s)
 android_add_library(OpenglRender_vulkan_cereal)
-target_compile_definitions(OpenglRender_vulkan_cereal PRIVATE -DVK_ANDROID_native_buffer)
+target_compile_definitions(OpenglRender_vulkan_cereal PRIVATE -DVK_ANDROID_native_buffer -DVK_GOOGLE_address_space)
 target_link_libraries(OpenglRender_vulkan_cereal PRIVATE emugl_base)
 target_link_libraries(OpenglRender_vulkan_cereal PUBLIC android-emu-base)
 
@@ -146,6 +146,7 @@ endif
 LOCAL_CFLAGS += \\
     -DLOG_TAG=\\"goldfish_vulkan\\" \\
     -DVK_ANDROID_native_buffer \\
+    -DVK_GOOGLE_address_space \\
     -Wno-missing-field-initializers \\
     -Werror \\
     -fstrict-aliasing \\

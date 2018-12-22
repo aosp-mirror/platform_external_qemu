@@ -10,7 +10,7 @@
 
 set(OpenglRender_vulkan_cereal_src     common/goldfish_vk_extension_structs.cpp     common/goldfish_vk_marshaling.cpp     common/goldfish_vk_testing.cpp     common/goldfish_vk_deepcopy.cpp     common/goldfish_vk_handlemap.cpp     common/goldfish_vk_dispatch.cpp )
 android_add_library(OpenglRender_vulkan_cereal)
-target_compile_definitions(OpenglRender_vulkan_cereal PRIVATE -DVK_ANDROID_native_buffer)
+target_compile_definitions(OpenglRender_vulkan_cereal PRIVATE -DVK_ANDROID_native_buffer -DVK_GOOGLE_address_space)
 target_link_libraries(OpenglRender_vulkan_cereal PRIVATE emugl_base)
 target_link_libraries(OpenglRender_vulkan_cereal PUBLIC android-emu-base)
 
