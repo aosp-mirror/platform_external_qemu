@@ -211,6 +211,9 @@ custom_decodes = {
     "vkGetSwapchainGrallocUsage2ANDROID" : emit_global_state_wrapped_decoding,
     "vkAcquireImageANDROID" : emit_global_state_wrapped_decoding,
     "vkQueueSignalReleaseImageANDROID" : emit_global_state_wrapped_decoding,
+
+    # VK_GOOGLE_address_space
+    "vkMapMemoryIntoAddressSpaceGOOGLE" : emit_global_state_wrapped_decoding,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):
