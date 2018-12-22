@@ -114,6 +114,7 @@ public:
 
     uint8_t* getMappedHostPointer(VkDeviceMemory memory);
     VkDeviceSize getDeviceMemorySize(VkDeviceMemory memory);
+    bool usingDirectMapping() const;
 
     // VK_ANDROID_native_buffer
     VkResult on_vkGetSwapchainGrallocUsageANDROID(
@@ -140,6 +141,12 @@ public:
         const VkSemaphore* pWaitSemaphores,
         VkImage image,
         int* pNativeFenceFd);
+
+    // VK_GOOGLE_address_space
+    VkResult on_vkMapMemoryIntoAddressSpaceGOOGLE(
+       VkDevice device,
+       VkDeviceMemory memory,
+       uint64_t* pAddress);
 
 private:
     class Impl;
