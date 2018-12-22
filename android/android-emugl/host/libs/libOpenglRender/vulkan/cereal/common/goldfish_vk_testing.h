@@ -2001,5 +2001,7 @@ void checkEqual_VkCheckpointDataNV(
     OnFailCompareFunc onFail);
 
 #endif
+#ifdef VK_GOOGLE_address_space
+#endif
 
 } // namespace goldfish_vk

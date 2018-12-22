@@ -9707,6 +9707,40 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 break;
             }
 #endif
+#ifdef VK_GOOGLE_address_space
+            case OP_vkMapMemoryIntoAddressSpaceGOOGLE:
+            {
+                VkDevice device;
+                VkDeviceMemory memory;
+                uint64_t* pAddress;
+                uint64_t cgen_var_804;
+                vkReadStream->read((uint64_t*)&cgen_var_804, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_804, (VkDevice*)&device, 1);
+                uint64_t cgen_var_805;
+                vkReadStream->read((uint64_t*)&cgen_var_805, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_805, (VkDeviceMemory*)&memory, 1);
+                // WARNING PTR CHECK
+                pAddress = (uint64_t*)(uintptr_t)vkReadStream->getBe64();
+                if (pAddress)
+                {
+                    vkReadStream->alloc((void**)&pAddress, sizeof(uint64_t));
+                    vkReadStream->read((uint64_t*)pAddress, sizeof(uint64_t));
+                }
+                VkResult vkMapMemoryIntoAddressSpaceGOOGLE_VkResult_return = (VkResult)0;
+                vkMapMemoryIntoAddressSpaceGOOGLE_VkResult_return = m_state->on_vkMapMemoryIntoAddressSpaceGOOGLE(device, memory, pAddress);
+                // WARNING PTR CHECK
+                uint64_t cgen_var_807 = (uint64_t)(uintptr_t)pAddress;
+                vkStream->putBe64(cgen_var_807);
+                if (pAddress)
+                {
+                    vkStream->write((uint64_t*)pAddress, sizeof(uint64_t));
+                }
+                vkStream->write(&vkMapMemoryIntoAddressSpaceGOOGLE_VkResult_return, sizeof(VkResult));
+                vkReadStream->clearPool();
+                vkStream->commitWrite();
+                break;
+            }
+#endif
             default:
             {
                 return ptr - (unsigned char *)buf;
