@@ -3350,5 +3350,8 @@ void unmarshal_VkCheckpointDataNV(
 #define OP_vkCmdSetCheckpointNV 20315
 #define OP_vkGetQueueCheckpointDataNV 20316
 #endif
+#ifdef VK_GOOGLE_address_space
+#define OP_vkMapMemoryIntoAddressSpaceGOOGLE 20317
+#endif
 
 } // namespace goldfish_vk

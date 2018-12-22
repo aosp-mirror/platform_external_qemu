@@ -24,6 +24,8 @@
 #include "common/goldfish_vk_deepcopy.h"
 
 #include "emugl/common/crash_reporter.h"
+#include "emugl/common/feature_control.h"
+#include "emugl/common/vm_operations.h"
 
 #include <unordered_map>
 
@@ -98,11 +100,12 @@ public:
                 heap.size = kMaxSafeHeapSize;
             }
 
-            // Un-advertise coherent mappings until goldfish_address_space
-            // is landed.
-            pMemoryProperties->memoryTypes[i].propertyFlags =
-                pMemoryProperties->memoryTypes[i].propertyFlags &
-                ~(VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+            if (!emugl::emugl_feature_is_enabled(
+                    android::featurecontrol::GLDirectMem)) {
+                pMemoryProperties->memoryTypes[i].propertyFlags =
+                    pMemoryProperties->memoryTypes[i].propertyFlags &
+                    ~(VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+            }
         }
     }
 
@@ -360,9 +363,13 @@ public:
                         .memoryTypes[pAllocateInfo->memoryTypeIndex]
                         .propertyFlags;
 
-        bool shouldMap = flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+        bool hostVisible =
+            flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+        bool shouldMapIndirect =
+            hostVisible &&
+            !emugl::emugl_feature_is_enabled(android::featurecontrol::GLDirectMem);
 
-        if (!shouldMap) return result;
+        if (!shouldMapIndirect) return result;
 
         VkResult mapResult =
             m_vk->vkMapMemory(device, *pMemory, 0,
@@ -388,6 +395,12 @@ public:
         if (!info) {
             // Invalid usage.
             return;
+        }
+
+        if (info->directMapped) {
+            get_emugl_vm_operations().unmapUserBackedRam(
+                info->guestPhysAddr,
+                info->sizeToPage);
         }
 
         if (info->ptr) {
@@ -452,6 +465,11 @@ public:
         }
 
         return info->size;
+    }
+
+    bool usingDirectMapping() const {
+        return emugl::emugl_feature_is_enabled(
+                android::featurecontrol::GLDirectMem);
     }
 
     // VK_ANDROID_native_buffer
@@ -535,6 +553,55 @@ public:
                 pNativeFenceFd, anbInfo);
     }
 
+    VkResult on_vkMapMemoryIntoAddressSpaceGOOGLE(
+        VkDevice device, VkDeviceMemory memory, uint64_t* pAddress) {
+
+        if (!emugl::emugl_feature_is_enabled(
+                android::featurecontrol::GLDirectMem)) {
+            emugl::emugl_crash_reporter(
+                "FATAL: Tried to use direct mapping "
+                "while GLDirectMem is not enabled!");
+        }
+
+        AutoLock lock(mLock);
+
+        auto info = android::base::find(mMapInfo, memory);
+
+        if (!info) {
+            return VK_ERROR_INITIALIZATION_FAILED;
+        }
+
+        m_vk->vkMapMemory(
+            device, memory, 0,
+            info->size, 0, &info->ptr);
+
+        info->guestPhysAddr = *pAddress;
+
+        constexpr size_t PAGE_BITS = 12;
+        constexpr size_t PAGE_SIZE = 1u << PAGE_BITS;
+        constexpr size_t PAGE_OFFSET_MASK = PAGE_SIZE - 1;
+
+        uintptr_t addr = reinterpret_cast<uintptr_t>(info->ptr);
+        uintptr_t pageOffset = addr & PAGE_OFFSET_MASK;
+
+        info->pageAlignedHva =
+            reinterpret_cast<void*>(addr - pageOffset);
+        info->sizeToPage =
+            ((info->size + pageOffset + PAGE_SIZE - 1) >>
+                 PAGE_BITS) << PAGE_BITS;
+
+        get_emugl_vm_operations().mapUserBackedRam(
+            info->guestPhysAddr,
+            info->pageAlignedHva,
+            info->sizeToPage);
+
+        info->directMapped = true;
+
+        *pAddress = (uint64_t)(uintptr_t)info->ptr;
+
+        return VK_SUCCESS;
+    }
+
 private:
     bool isEmulatedExtension(const char* name) const {
         for (auto emulatedExt : kEmulatedExtensions) {
@@ -616,6 +683,11 @@ private:
         // was not allocated with the HOST_VISIBLE property.
         void* ptr = nullptr;
         VkDeviceSize size;
+        // GLDirectMem info
+        bool directMapped = false;
+        uint64_t guestPhysAddr = 0;
+        void* pageAlignedHva = nullptr;
+        uint64_t sizeToPage = 0;
     };
 
     struct PhysicalDeviceInfo {
@@ -758,6 +830,10 @@ VkDeviceSize VkDecoderGlobalState::getDeviceMemorySize(VkDeviceMemory memory) {
     return mImpl->getDeviceMemorySize(memory);
 }
 
+bool VkDecoderGlobalState::usingDirectMapping() const {
+    return mImpl->usingDirectMapping();
+}
+
 // VK_ANDROID_native_buffer
 VkResult VkDecoderGlobalState::on_vkGetSwapchainGrallocUsageANDROID(
     VkDevice device,
@@ -802,4 +878,12 @@ VkResult VkDecoderGlobalState::on_vkQueueSignalReleaseImageANDROID(
         queue, waitSemaphoreCount, pWaitSemaphores,
         image, pNativeFenceFd);
 }
+
+// VK_GOOGLE_address_space
+VkResult VkDecoderGlobalState::on_vkMapMemoryIntoAddressSpaceGOOGLE(
+    VkDevice device, VkDeviceMemory memory, uint64_t* pAddress) {
+    return mImpl->on_vkMapMemoryIntoAddressSpaceGOOGLE(
+        device, memory, pAddress);
+}
+
 } // namespace goldfish_vk

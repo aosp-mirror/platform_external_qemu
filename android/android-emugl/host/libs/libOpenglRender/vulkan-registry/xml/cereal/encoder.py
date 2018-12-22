@@ -65,14 +65,19 @@ STREAM = "stream"
 RESOURCES = "resources"
 POOL = "pool"
 
-ENCODER_CUSTOM_CREATE_APIS = [
-    "vkAllocateMemory",
-    "vkCreateDevice",
-]
-
 ENCODER_PREVALIDATED_APIS = [
     "vkFlushMappedMemoryRanges",
     "vkInvalidateMappedMemoryRanges",
+]
+
+ENCODER_CUSTOM_RESOURCE_PREPROCESS = [
+    "vkMapMemoryIntoAddressSpaceGOOGLE",
+]
+
+ENCODER_CUSTOM_RESOURCE_POSTPROCESS = [
+    "vkAllocateMemory",
+    "vkCreateDevice",
+    "vkMapMemoryIntoAddressSpaceGOOGLE",
 ]
 
 SUCCESS_RET_TYPES = {
@@ -88,12 +93,13 @@ def make_event_handler_call(
     api,
     context_param,
     input_result_param,
-    cgen):
+    cgen,
+    suffix=""):
     extraParams = [context_param.paramName]
     if input_result_param:
         extraParams.append(input_result_param)
     return cgen.makeCallExpr( \
-               "%s->on_%s" % (handler_access, api.name),
+               "%s->on_%s%s" % (handler_access, api.name, suffix),
                extraParams + \
                [p.paramName for p in api.parameters])
 
@@ -114,8 +120,17 @@ def emit_custom_pre_validate(typeInfo, api, cgen):
                  SUCCESS_RET_TYPES[api.getRetTypeExpr()],
                  callExpr))
 
-def emit_custom_post_create(typeInfo, api, cgen):
-    if api.name in ENCODER_CUSTOM_CREATE_APIS:
+def emit_custom_resource_preprocess(typeInfo, api, cgen):
+    if api.name in ENCODER_CUSTOM_RESOURCE_PREPROCESS:
+        cgen.stmt( \
+            make_event_handler_call( \
+                "mImpl->resources()", api,
+                ENCODER_THIS_PARAM,
+                SUCCESS_RET_TYPES[api.getRetTypeExpr()],
+                cgen, suffix="_pre"))
+
+def emit_custom_resource_postprocess(typeInfo, api, cgen):
+    if api.name in ENCODER_CUSTOM_RESOURCE_POSTPROCESS:
         cgen.stmt(make_event_handler_call( \
             "mImpl->resources()",
             api,
@@ -213,6 +228,7 @@ class EncodingParameters(object):
 
 def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
     emit_custom_pre_validate(typeInfo, api, cgen);
+    emit_custom_resource_preprocess(typeInfo, api, cgen);
 
     cgen.stmt("auto %s = mImpl->stream()" % STREAM)
     cgen.stmt("auto %s = mImpl->countingStream()" % COUNTING_STREAM)
@@ -287,11 +303,10 @@ def emit_parameter_encode_read(typeInfo, api, cgen):
             cgen.stmt(
                 "%s->unsetHandleMapping()" % STREAM)
 
-def emit_custom_post_create_destroy(typeInfo, api, cgen):
+def emit_post(typeInfo, api, cgen):
     encodingParams = EncodingParameters(api)
 
-    for p in encodingParams.toCreate:
-        emit_custom_post_create(typeInfo, api, cgen)
+    emit_custom_resource_postprocess(typeInfo, api, cgen)
 
     for p in encodingParams.toDestroy:
         emit_handlemap_destroy(typeInfo, p, cgen)
@@ -324,7 +339,7 @@ def emit_default_encoding(typeInfo, api, cgen):
     emit_parameter_encode_do_parameter_write(typeInfo, api, cgen)
     emit_parameter_encode_read(typeInfo, api, cgen)
     emit_return_unmarshal(typeInfo, api, cgen)
-    emit_custom_post_create_destroy(typeInfo, api, cgen)
+    emit_post(typeInfo, api, cgen)
     emit_return(typeInfo, api, cgen)
 
 ## Custom encoding definitions##################################################
@@ -374,6 +389,7 @@ def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen)
 
     def emit_flush_ranges(streamVar):
+        cgen.beginIf("!resources->usingDirectMapping()")
         cgen.beginFor("uint32_t i = 0", "i < memoryRangeCount", "++i")
         cgen.stmt("auto range = pMemoryRanges[i]")
         cgen.stmt("auto memory = pMemoryRanges[i].memory")
@@ -389,6 +405,7 @@ def encode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
         cgen.stmt("uint8_t* targetRange = hostPtr + offset")
         cgen.stmt("%s->write(targetRange, actualSize)" % streamVar)
         cgen.endFor()
+        cgen.endIf()
 
     emit_flush_ranges(COUNTING_STREAM)
 
@@ -410,6 +427,7 @@ def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     emit_return_unmarshal(typeInfo, api, cgen)
 
     def emit_invalidate_ranges(streamVar):
+        cgen.beginIf("!resources->usingDirectMapping()")
         cgen.beginFor("uint32_t i = 0", "i < memoryRangeCount", "++i")
         cgen.stmt("auto range = pMemoryRanges[i]")
         cgen.stmt("auto memory = pMemoryRanges[i].memory")
@@ -425,6 +443,7 @@ def encode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
         cgen.stmt("uint8_t* targetRange = hostPtr + offset")
         cgen.stmt("%s->read(targetRange, actualSize)" % streamVar)
         cgen.endFor()
+        cgen.endIf()
 
     emit_invalidate_ranges(STREAM)
 

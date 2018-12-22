@@ -6267,6 +6267,12 @@ server.
             <param optional="false,true"><type>uint32_t</type>* <name>pCheckpointDataCount</name></param>
             <param optional="true" len="pCheckpointDataCount"><type>VkCheckpointDataNV</type>* <name>pCheckpointData</name></param>
         </command>
+        <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_OUT_OF_HOST_MEMORY,VK_ERROR_OUT_OF_DEVICE_MEMORY,VK_ERROR_MEMORY_MAP_FAILED">
+            <proto><type>VkResult</type> <name>vkMapMemoryIntoAddressSpaceGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param externsync="true"><type>VkDeviceMemory</type> <name>memory</name></param>
+            <param optional="false,true"><type>uint64_t</type>* <name>pAddress</name></param>
+        </command>
     </commands>
 
     <feature api="vulkan" name="VK_VERSION_1_0" number="1.0" comment="Vulkan core API interface definitions">
@@ -9073,6 +9079,14 @@ server.
             <require>
                 <enum value="0"                                             name="VK_KHR_EXTENSION_217_SPEC_VERSION"/>
                 <enum value="&quot;VK_KHR_extension_217&quot;"              name="VK_KHR_EXTENSION_217_EXTENSION_NAME"/>
+            </require>
+        </extension>
+        <extension name="VK_GOOGLE_address_space" number="218" author="GOOGLE" contact="Roman Kiryanov @rkir,Lingfeng Yang @frank" supported="vulkan">
+            <require>
+                <enum value="0"                                             name="VK_GOOGLE_ADDRESS_SPACE_SPEC_VERSION"/>
+                <enum value="218"                                           name="VK_GOOGLE_ADDRESS_SPACE_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_address_space&quot;"           name="VK_GOOGLE_ADDRESS_SPACE_EXTENSION_NAME"/>
+                <command name="vkMapMemoryIntoAddressSpaceGOOGLE"/>
             </require>
         </extension>
     </extensions>

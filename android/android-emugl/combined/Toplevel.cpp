@@ -144,6 +144,8 @@ private:
                 android::featurecontrol::GLDMA, false);
         android::featurecontrol::setEnabledOverride(
                 android::featurecontrol::RefCountPipe, true);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::GLDirectMem, true);
         EmuglConfig config;
 
         emuglConfig_init(
