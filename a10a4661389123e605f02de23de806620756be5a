@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4b82ac7_f09a7aab",
+        "filename": ".vscode/cmake-kits.json",
+        "patchSetId": 10
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-22T01:01:40Z",
+      "side": 1,
+      "message": "nit: check for trailing whitespace throughout",
+      "revId": "a10a4661389123e605f02de23de806620756be5a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
