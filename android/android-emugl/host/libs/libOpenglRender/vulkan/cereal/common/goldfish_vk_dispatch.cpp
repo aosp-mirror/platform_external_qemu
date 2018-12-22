@@ -278,6 +278,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_NV_device_diagnostic_checkpoints
 #endif
+#ifdef VK_GOOGLE_address_space
+#endif
 
 void init_vulkan_dispatch_from_system_loader(
     DlOpenFunc dlOpenFunc,
@@ -745,6 +747,9 @@ void init_vulkan_dispatch_from_system_loader(
 #ifdef VK_NV_device_diagnostic_checkpoints
     out->vkCmdSetCheckpointNV = (PFN_vkCmdSetCheckpointNV)dlSymFunc(lib, "vkCmdSetCheckpointNV");
     out->vkGetQueueCheckpointDataNV = (PFN_vkGetQueueCheckpointDataNV)dlSymFunc(lib, "vkGetQueueCheckpointDataNV");
+#endif
+#ifdef VK_GOOGLE_address_space
+    out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)dlSymFunc(lib, "vkMapMemoryIntoAddressSpaceGOOGLE");
 #endif
 #ifdef VK_VERSION_1_0
     out->vkDestroyInstance = (PFN_vkDestroyInstance)dlSymFunc(lib, "vkDestroyInstance");
