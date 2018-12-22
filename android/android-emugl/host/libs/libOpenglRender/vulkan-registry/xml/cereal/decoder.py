@@ -144,6 +144,7 @@ def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
 def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     emit_decode_parameters(typeInfo, api, cgen)
 
+    cgen.beginIf("!m_state->usingDirectMapping()")
     cgen.beginFor("uint32_t i = 0", "i < memoryRangeCount", "++i")
     cgen.stmt("auto range = pMemoryRanges[i]")
     cgen.stmt("auto memory = pMemoryRanges[i].memory")
@@ -157,6 +158,7 @@ def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     cgen.stmt("uint8_t* targetRange = hostPtr + offset")
     cgen.stmt("%s->read(targetRange, readStream)" % READ_STREAM)
     cgen.endFor()
+    cgen.endIf()
 
     emit_dispatch_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
@@ -169,6 +171,7 @@ def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     emit_decode_parameters_writeback(typeInfo, api, cgen)
     emit_decode_return_writeback(api, cgen)
 
+    cgen.beginIf("!m_state->usingDirectMapping()")
     cgen.beginFor("uint32_t i = 0", "i < memoryRangeCount", "++i")
     cgen.stmt("auto range = pMemoryRanges[i]")
     cgen.stmt("auto memory = range.memory")
@@ -183,6 +186,7 @@ def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     cgen.stmt("%s->write(&writeStream, sizeof(uint64_t))" % WRITE_STREAM)
     cgen.stmt("%s->write(targetRange, actualSize)" % WRITE_STREAM)
     cgen.endFor()
+    cgen.endIf()
 
     emit_decode_finish(cgen)
 
@@ -211,6 +215,9 @@ custom_decodes = {
     "vkGetSwapchainGrallocUsage2ANDROID" : emit_global_state_wrapped_decoding,
     "vkAcquireImageANDROID" : emit_global_state_wrapped_decoding,
     "vkQueueSignalReleaseImageANDROID" : emit_global_state_wrapped_decoding,
+
+    # VK_GOOGLE_address_space
+    "vkMapMemoryIntoAddressSpaceGOOGLE" : emit_global_state_wrapped_decoding,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):
