@@ -141,6 +141,12 @@ public:
         VkImage image,
         int* pNativeFenceFd);
 
+    // VK_GOOGLE_address_space
+    VkResult on_vkMapMemoryIntoAddressSpaceGOOGLE(
+       VkDevice device,
+       VkDeviceMemory memory,
+       void** ppData);
+
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
