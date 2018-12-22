@@ -13363,6 +13363,8 @@ void unmarshal_VkCheckpointDataNV(
 }
 
 #endif
+#ifdef VK_GOOGLE_address_space
+#endif
 void marshal_extension_struct(
     VulkanStream* vkStream,
     const void* structExtension)

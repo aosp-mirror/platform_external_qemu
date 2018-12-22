@@ -2000,5 +2000,7 @@ void deepcopy_VkCheckpointDataNV(
     VkCheckpointDataNV* to);
 
 #endif
+#ifdef VK_GOOGLE_address_space
+#endif
 
 } // namespace goldfish_vk
