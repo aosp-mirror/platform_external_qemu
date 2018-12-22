@@ -291,5 +291,7 @@ private:
 #endif
 #ifdef VK_NV_device_diagnostic_checkpoints
 #endif
+#ifdef VK_GOOGLE_address_space
+#endif
 
 

@@ -860,19 +860,22 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkMappedMemoryRange(vkReadStream, (VkMappedMemoryRange*)(pMemoryRanges + i));
                 }
-                for (uint32_t i = 0; i < memoryRangeCount; ++i)
+                if (!m_state->usingDirectMapping())
                 {
-                    auto range = pMemoryRanges[i];
-                    auto memory = pMemoryRanges[i].memory;
-                    auto size = pMemoryRanges[i].size;
-                    auto offset = pMemoryRanges[i].offset;
-                    uint64_t readStream = 0;
-                    vkReadStream->read(&readStream, sizeof(uint64_t));
-                    auto hostPtr = m_state->getMappedHostPointer(memory);
-                    if (!hostPtr && readStream > 0) abort();
-                    if (!hostPtr) continue;
-                    uint8_t* targetRange = hostPtr + offset;
-                    vkReadStream->read(targetRange, readStream);
+                    for (uint32_t i = 0; i < memoryRangeCount; ++i)
+                    {
+                        auto range = pMemoryRanges[i];
+                        auto memory = pMemoryRanges[i].memory;
+                        auto size = pMemoryRanges[i].size;
+                        auto offset = pMemoryRanges[i].offset;
+                        uint64_t readStream = 0;
+                        vkReadStream->read(&readStream, sizeof(uint64_t));
+                        auto hostPtr = m_state->getMappedHostPointer(memory);
+                        if (!hostPtr && readStream > 0) abort();
+                        if (!hostPtr) continue;
+                        uint8_t* targetRange = hostPtr + offset;
+                        vkReadStream->read(targetRange, readStream);
+                    }
                 }
                 if (m_logCalls)
                 {
@@ -906,20 +909,23 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 VkResult vkInvalidateMappedMemoryRanges_VkResult_return = (VkResult)0;
                 vkInvalidateMappedMemoryRanges_VkResult_return = m_vk->vkInvalidateMappedMemoryRanges(device, memoryRangeCount, pMemoryRanges);
                 vkStream->write(&vkInvalidateMappedMemoryRanges_VkResult_return, sizeof(VkResult));
-                for (uint32_t i = 0; i < memoryRangeCount; ++i)
+                if (!m_state->usingDirectMapping())
                 {
-                    auto range = pMemoryRanges[i];
-                    auto memory = range.memory;
-                    auto size = range.size;
-                    auto offset = range.offset;
-                    auto hostPtr = m_state->getMappedHostPointer(memory);
-                    auto actualSize = size == VK_WHOLE_SIZE ? m_state->getDeviceMemorySize(memory) : size;
-                    uint64_t writeStream = 0;
-                    if (!hostPtr) { vkStream->write(&writeStream, sizeof(uint64_t)); continue; };
-                    uint8_t* targetRange = hostPtr + offset;
-                    writeStream = actualSize;
-                    vkStream->write(&writeStream, sizeof(uint64_t));
-                    vkStream->write(targetRange, actualSize);
+                    for (uint32_t i = 0; i < memoryRangeCount; ++i)
+                    {
+                        auto range = pMemoryRanges[i];
+                        auto memory = range.memory;
+                        auto size = range.size;
+                        auto offset = range.offset;
+                        auto hostPtr = m_state->getMappedHostPointer(memory);
+                        auto actualSize = size == VK_WHOLE_SIZE ? m_state->getDeviceMemorySize(memory) : size;
+                        uint64_t writeStream = 0;
+                        if (!hostPtr) { vkStream->write(&writeStream, sizeof(uint64_t)); continue; };
+                        uint8_t* targetRange = hostPtr + offset;
+                        writeStream = actualSize;
+                        vkStream->write(&writeStream, sizeof(uint64_t));
+                        vkStream->write(targetRange, actualSize);
+                    }
                 }
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
@@ -9702,6 +9708,40 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         marshal_VkCheckpointDataNV(vkStream, (VkCheckpointDataNV*)(pCheckpointData + i));
                     }
                 }
+                vkReadStream->clearPool();
+                vkStream->commitWrite();
+                break;
+            }
+#endif
+#ifdef VK_GOOGLE_address_space
+            case OP_vkMapMemoryIntoAddressSpaceGOOGLE:
+            {
+                VkDevice device;
+                VkDeviceMemory memory;
+                uint64_t* pAddress;
+                uint64_t cgen_var_804;
+                vkReadStream->read((uint64_t*)&cgen_var_804, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_804, (VkDevice*)&device, 1);
+                uint64_t cgen_var_805;
+                vkReadStream->read((uint64_t*)&cgen_var_805, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_805, (VkDeviceMemory*)&memory, 1);
+                // WARNING PTR CHECK
+                pAddress = (uint64_t*)(uintptr_t)vkReadStream->getBe64();
+                if (pAddress)
+                {
+                    vkReadStream->alloc((void**)&pAddress, sizeof(uint64_t));
+                    vkReadStream->read((uint64_t*)pAddress, sizeof(uint64_t));
+                }
+                VkResult vkMapMemoryIntoAddressSpaceGOOGLE_VkResult_return = (VkResult)0;
+                vkMapMemoryIntoAddressSpaceGOOGLE_VkResult_return = m_state->on_vkMapMemoryIntoAddressSpaceGOOGLE(device, memory, pAddress);
+                // WARNING PTR CHECK
+                uint64_t cgen_var_807 = (uint64_t)(uintptr_t)pAddress;
+                vkStream->putBe64(cgen_var_807);
+                if (pAddress)
+                {
+                    vkStream->write((uint64_t*)pAddress, sizeof(uint64_t));
+                }
+                vkStream->write(&vkMapMemoryIntoAddressSpaceGOOGLE_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
                 break;

@@ -609,6 +609,9 @@ PFN_vkCmdWriteBufferMarkerAMD vkCmdWriteBufferMarkerAMD;
 PFN_vkCmdSetCheckpointNV vkCmdSetCheckpointNV;
 PFN_vkGetQueueCheckpointDataNV vkGetQueueCheckpointDataNV;
 #endif
+#ifdef VK_GOOGLE_address_space
+PFN_vkMapMemoryIntoAddressSpaceGOOGLE vkMapMemoryIntoAddressSpaceGOOGLE;
+#endif
 };
 
 } // namespace goldfish_vk

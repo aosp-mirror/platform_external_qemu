@@ -6344,6 +6344,8 @@ void deepcopy_VkCheckpointDataNV(
 }
 
 #endif
+#ifdef VK_GOOGLE_address_space
+#endif
 void deepcopy_extension_struct(
     Pool* pool,
     const void* structExtension,
