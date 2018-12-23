@@ -4,6 +4,13 @@
 #include "hw/sysbus.h"
 #include "hw/pci/pci.h"
 
+#define ANDROID_EMU_ADDRESS_SPACE_ASSERT_FUNC g_assert
+#define ANDROID_EMU_ADDRESS_SPACE_MALLOC0_FUNC g_malloc0
+#define ANDROID_EMU_ADDRESS_SPACE_REALLOC_FUNC g_realloc
+#define ANDROID_EMU_ADDRESS_SPACE_FREE_FUNC g_free
+
+#include "android/base/address_space.h"
+
 enum address_space_register_id {
 	ADDRESS_SPACE_REGISTER_COMMAND = 0,
 	ADDRESS_SPACE_REGISTER_STATUS = 4,
@@ -28,254 +35,6 @@ struct address_space_registers {
     uint32_t offset_low;
     uint32_t offset_high;
 };
-
-/* Represents a continuous range of addresses and a flag if this block is
- * available
- */
-struct address_block {
-    uint64_t offset;
-    uint64_t size : 63;
-    uint64_t available : 1;
-};
-
-/* A dynamic array of address blocks, with the following invariant:
- * blocks[i].size > 0
- * blocks[i+1].offset = blocks[i].offset + blocks[i].size
- */
-struct address_space_allocator {
-    struct address_block *blocks;
-    int size;
-    int capacity;
-};
-
-#define BAD_OFFSET (~(uint64_t)0)
-#define DEFAULT_GUEST_PAGE_SIZE 4096
-
-/* Looks for the smallest (to reduce fragmentation) available block with size to
- * fit the requested amount and returns its index or -1 if none is available.
- */
-int address_space_allocator_find_available_block(struct address_block *block,
-                                                 int n_blocks,
-                                                 uint64_t size_at_least)
-{
-    int index = -1;
-    uint64_t size_at_index = 0;
-    int i;
-
-    g_assert(n_blocks >= 1);
-
-    for (i = 0; i < n_blocks; ++i, ++block) {
-        uint64_t this_size = block->size;
-        g_assert(this_size > 0);
-
-        if (this_size >= size_at_least && block->available &&
-            (index < 0 || this_size < size_at_index)) {
-            index = i;
-            size_at_index = this_size;
-        }
-    }
-
-    return index;
-}
-
-int address_space_allocator_grow_capacity(int old_capacity)
-{
-    g_assert(old_capacity >= 1);
-
-    return old_capacity + old_capacity;
-}
-
-/* Inserts one more address block right after i'th (by borrowing i'th size) and
- * adjusts sizes:
- * pre:
- *   size > blocks[i].size
- *
- * post:
- *   * might reallocate allocator->blocks if there is no capacity to insert one
- *   * blocks[i].size -= size;
- *   * blocks[i+1].size = size;
- */
-struct address_block *address_space_allocator_split_block(struct address_space_allocator *allocator,
-                                                          int i,
-                                                          uint64_t size)
-{
-    g_assert(allocator->capacity >= 1);
-    g_assert(allocator->size >= 1);
-    g_assert(allocator->size <= allocator->capacity);
-    g_assert(i >= 0);
-    g_assert(i < allocator->size);
-    g_assert(size < allocator->blocks[i].size);
-
-    if (allocator->size == allocator->capacity) {
-        int new_capacity = address_space_allocator_grow_capacity(allocator->capacity);
-        allocator->blocks = g_realloc(allocator->blocks,
-                                      sizeof(struct address_block) * new_capacity);
-        g_assert(allocator->blocks);
-        allocator->capacity = new_capacity;
-    }
-
-    struct address_block *blocks = allocator->blocks;
-
-    /*   size = 5, i = 1
-     *   [ 0 | 1 |  2  |  3  | 4 ]  =>  [ 0 | 1 | new |  2  | 3 | 4 ]
-     *         i  (i+1) (i+2)                 i  (i+1) (i+2)
-     */
-    memmove(&blocks[i + 2], &blocks[i + 1],
-            sizeof(struct address_block) * (allocator->size - i - 1));
-
-    struct address_block *to_borrow_from = &blocks[i];
-    struct address_block *new_block = to_borrow_from + 1;
-
-    uint64_t new_size = to_borrow_from->size - size;
-
-    to_borrow_from->size = new_size;
-
-    new_block->offset = to_borrow_from->offset + new_size;
-    new_block->size = size;
-    new_block->available = 1;
-
-    ++allocator->size;
-
-    return new_block;
-}
-
-/* Marks i'th block as available. If adjacent ((i-1) and (i+1)) blocks are also
- * available, it merges i'th block with them.
- * pre:
- *   i < allocator->size
- * post:
- *   i'th block is merged with adjacent ones if they are available, blocks that
- *   were merged from are removed. allocator->size is updated if blocks were
- *   removed.
- */
-void address_space_allocator_release_block(struct address_space_allocator *allocator,
-                                           int i)
-{
-    struct address_block *blocks = allocator->blocks;
-    int before = i - 1;
-    int after = i + 1;
-    int size = allocator->size;
-
-    g_assert(i >= 0);
-    g_assert(i < size);
-
-    blocks[i].available = 1;
-
-    if (before >= 0 && blocks[before].available) {
-        if (after < size && blocks[after].available) {
-            // merge (before, i, after) into before
-            blocks[before].size += (blocks[i].size + blocks[after].size);
-
-            size -= 2;
-            memmove(&blocks[i], &blocks[i + 2],
-                sizeof(struct address_block) * (size - i));
-            allocator->size = size;
-        } else {
-            // merge (before, i) into before
-            blocks[before].size += blocks[i].size;
-
-            --size;
-            memmove(&blocks[i], &blocks[i + 1],
-                sizeof(struct address_block) * (size - i));
-            allocator->size = size;
-        }
-    } else if (after < size && blocks[after].available) {
-        // merge (i, after) into i
-        blocks[i].size += blocks[after].size;
-
-        --size;
-        memmove(&blocks[after], &blocks[after + 1],
-            sizeof(struct address_block) * (size - after));
-        allocator->size = size;
-    }
-
-}
-
-/* Takes a size to allocate an address block and returns an offset where this
- * block is allocated. This block will not be available for other callers unless
- * it is explicitly deallocated (see address_space_allocator_deallocate below).
- */
-static uint64_t address_space_allocator_allocate(struct address_space_allocator *allocator,
-                                                 uint64_t size)
-{
-    int i = address_space_allocator_find_available_block(allocator->blocks,
-                                                         allocator->size,
-                                                         size);
-    if (i < 0) {
-        return BAD_OFFSET;
-    } else {
-        g_assert(i < allocator->size);
-
-        struct address_block *block = &allocator->blocks[i];
-        g_assert(block->size >= size);
-
-        if (block->size > size) {
-            block = address_space_allocator_split_block(allocator, i, size);
-        }
-
-        g_assert(block->size == size);
-        block->available = 0;
-
-        return block->offset;
-    }
-}
-
-/* Takes an offset returned from address_space_allocator_allocate ealier
- * (see above) and marks this block as available for further allocation.
- */
-static uint32_t address_space_allocator_deallocate(struct address_space_allocator *allocator,
-                                                   uint64_t offset)
-{
-    struct address_block *block = allocator->blocks;
-    int size = allocator->size;
-    int i;
-
-    g_assert(size >= 1);
-
-    for (i = 0; i < size; ++i, ++block) {
-        if (block->offset == offset) {
-            if (block->available) {
-                return EINVAL;
-            } else {
-                address_space_allocator_release_block(allocator, i);
-                return 0;
-            }
-        }
-    }
-
-    return EINVAL;
-}
-
-/* Creates a seed block. */
-static void address_space_allocator_init(struct address_space_allocator *allocator,
-                                         uint64_t size,
-                                         int initial_capacity)
-{
-    g_assert(initial_capacity >= 1);
-
-    allocator->blocks = g_malloc0(sizeof(struct address_block) * initial_capacity);
-    g_assert(allocator->blocks);
-
-    struct address_block *block = allocator->blocks;
-
-    block->offset = 0;
-    block->size = size;
-    block->available = 1;
-
-    allocator->size = 1;
-    allocator->capacity = initial_capacity;
-}
-
-/* At this point there should be no used blocks and all available blocks must
- * have been merged into one block.
- */
-static void address_space_allocator_destroy(struct address_space_allocator *allocator)
-{
-    g_assert(allocator->size == 1);
-    g_assert(allocator->capacity >= allocator->size);
-    g_assert(allocator->blocks[0].available);
-    g_free(allocator->blocks);
-}
 
 /* We need to cover 'size' bytes given at any offset with aligned pages. */
 static uint64_t address_space_align_size(uint64_t page_size, uint64_t size)
@@ -334,7 +93,7 @@ static uint32_t address_space_allocate_block(struct address_space_state *state)
     regs->size_low = lower_32_bits(aligned_size);
     regs->size_high = upper_32_bits(aligned_size);
 
-    if (offset == BAD_OFFSET) {
+    if (offset == ANDROID_EMU_ADDRESS_SPACE_BAD_OFFSET) {
         return ENOMEM;
     } else {
         return 0;
@@ -470,6 +229,8 @@ static void address_space_pci_set_config(PCIDevice *dev)
     pci_set_long(dev->config + PCI_BASE_ADDRESS_1,
                  GOLDFISH_ADDRESS_SPACE_CONTROL_SIZE);
 }
+
+#define DEFAULT_GUEST_PAGE_SIZE 4096
 
 static void address_space_pci_realize(PCIDevice *dev, Error **errp) {
     struct address_space_state* state = GOLDFISH_ADDRESS_SPACE(dev);
