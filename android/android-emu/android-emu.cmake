@@ -591,6 +591,7 @@ set(android-emu_unittests_src
     android/base/StringFormat_unittest.cpp
     android/base/StringParse_unittest.cpp
     android/base/StringView_unittest.cpp
+    android/base/SubAllocator_unittest.cpp
     android/base/synchronization/ConditionVariable_unittest.cpp
     android/base/synchronization/Lock_unittest.cpp
     android/base/synchronization/ReadWriteLock_unittest.cpp
