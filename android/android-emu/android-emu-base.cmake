@@ -36,6 +36,7 @@ set(android-emu-base_src
     android/base/StringFormat.cpp
     android/base/StringParse.cpp
     android/base/StringView.cpp
+    android/base/SubAllocator.cpp
     android/base/synchronization/MessageChannel.cpp
     android/base/Log.cpp
     android/base/memory/LazyInstance.cpp
