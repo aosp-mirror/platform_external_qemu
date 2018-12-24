@@ -188,6 +188,7 @@ class IOStream;
 #include "goldfish_vk_deepcopy_guest.h"
 #include "goldfish_vk_handlemap_guest.h"
 #include "goldfish_vk_private_defs.h"
+#include "goldfish_vk_transform.h"
 """
         eventHandlerInclude = """
 #include "goldfish_vk_private_defs.h"
@@ -241,6 +242,9 @@ using android::base::Pool;
         handleMapInclude = """
 #include "goldfish_vk_private_defs.h"
 #include "VulkanHandleMapping.h"
+"""
+        transformInclude = """
+#include "ResourceTracker.h"
 """
         poolIncludeGuest = """
 #include "goldfish_vk_private_defs.h"
@@ -370,6 +374,9 @@ using DlSymFunc = void* (void*, const char*);
         self.addGuestEncoderModule("goldfish_vk_handlemap_guest",
                                    extraHeader=commonCerealIncludesGuest + handleMapIncludeGuest,
                                    extraImpl=commonCerealImplIncludesGuest)
+        self.addGuestEncoderModule("goldfish_vk_transform",
+                                   extraHeader=commonCerealIncludesGuest + transformInclude,
+                                   extraImpl=commonCerealImplIncludesGuest)
 
         self.addGuestHalModule("func_table", extraImpl=functableImplInclude)
 
@@ -400,6 +407,7 @@ using DlSymFunc = void* (void*, const char*);
         self.addWrapper(cereal.VulkanMarshaling, "goldfish_vk_marshaling_guest")
         self.addWrapper(cereal.VulkanDeepcopy, "goldfish_vk_deepcopy_guest")
         self.addWrapper(cereal.VulkanHandleMap, "goldfish_vk_handlemap_guest")
+        self.addWrapper(cereal.VulkanTransform, "goldfish_vk_transform")
         self.addWrapper(cereal.VulkanFuncTable, "func_table")
         self.addWrapper(cereal.VulkanExtensionStructs, "goldfish_vk_extension_structs")
         self.addWrapper(cereal.VulkanMarshaling, "goldfish_vk_marshaling")
