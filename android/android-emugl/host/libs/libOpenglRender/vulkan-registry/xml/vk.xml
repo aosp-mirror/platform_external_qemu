@@ -695,12 +695,12 @@ server.
             <member values="VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO"><type>VkStructureType</type> <name>sType</name></member>
             <member>const <type>void</type>*            <name>pNext</name></member>
             <member><type>VkDeviceSize</type>           <name>allocationSize</name><comment>Size of memory allocation</comment></member>
-            <member><type>uint32_t</type>               <name>memoryTypeIndex</name><comment>Index of the of the memory type to allocate from</comment></member>
+            <member devicememorytypeindex="1"><type>uint32_t</type>               <name>memoryTypeIndex</name><comment>Index of the of the memory type to allocate from</comment></member>
         </type>
         <type category="struct" name="VkMemoryRequirements" returnedonly="true">
             <member><type>VkDeviceSize</type>           <name>size</name><comment>Specified in bytes</comment></member>
             <member><type>VkDeviceSize</type>           <name>alignment</name><comment>Specified in bytes</comment></member>
-            <member><type>uint32_t</type>               <name>memoryTypeBits</name><comment>Bitmask of the allowed memory type indices into memoryTypes[] for this object</comment></member>
+            <member devicememorytypebits="1"><type>uint32_t</type>               <name>memoryTypeBits</name><comment>Bitmask of the allowed memory type indices into memoryTypes[] for this object</comment></member>
         </type>
         <type category="struct" name="VkSparseImageFormatProperties" returnedonly="true">
             <member optional="true"><type>VkImageAspectFlags</type>     <name>aspectMask</name></member>
@@ -725,9 +725,9 @@ server.
         <type category="struct" name="VkMappedMemoryRange">
             <member values="VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE"><type>VkStructureType</type> <name>sType</name></member>
             <member>const <type>void</type>*            <name>pNext</name></member>
-            <member><type>VkDeviceMemory</type>         <name>memory</name><comment>Mapped memory object</comment></member>
-            <member><type>VkDeviceSize</type>           <name>offset</name><comment>Offset within the memory object where the range starts</comment></member>
-            <member><type>VkDeviceSize</type>           <name>size</name><comment>Size of the range within the memory object</comment></member>
+            <member devicememoryhandle="1"><type>VkDeviceMemory</type>         <name>memory</name><comment>Mapped memory object</comment></member>
+            <member devicememoryoffset="1"><type>VkDeviceSize</type>           <name>offset</name><comment>Offset within the memory object where the range starts</comment></member>
+            <member devicememorysize="1"><type>VkDeviceSize</type>           <name>size</name><comment>Size of the range within the memory object</comment></member>
         </type>
         <type category="struct" name="VkFormatProperties" returnedonly="true">
             <member optional="true"><type>VkFormatFeatureFlags</type>   <name>linearTilingFeatures</name><comment>Format features in case of linear tiling</comment></member>
@@ -882,16 +882,16 @@ server.
         <type category="struct" name="VkSparseMemoryBind">
             <member><type>VkDeviceSize</type>           <name>resourceOffset</name><comment>Specified in bytes</comment></member>
             <member><type>VkDeviceSize</type>           <name>size</name><comment>Specified in bytes</comment></member>
-            <member optional="true"><type>VkDeviceMemory</type>         <name>memory</name></member>
-            <member><type>VkDeviceSize</type>           <name>memoryOffset</name><comment>Specified in bytes</comment></member>
+            <member optional="true" devicememoryhandle="1"><type>VkDeviceMemory</type>         <name>memory</name></member>
+            <member devicememoryoffset="1"><type>VkDeviceSize</type>           <name>memoryOffset</name><comment>Specified in bytes</comment></member>
             <member optional="true"><type>VkSparseMemoryBindFlags</type><name>flags</name></member>
         </type>
         <type category="struct" name="VkSparseImageMemoryBind">
             <member><type>VkImageSubresource</type>     <name>subresource</name></member>
             <member><type>VkOffset3D</type>             <name>offset</name></member>
             <member><type>VkExtent3D</type>             <name>extent</name></member>
-            <member optional="true"><type>VkDeviceMemory</type>         <name>memory</name></member>
-            <member><type>VkDeviceSize</type>           <name>memoryOffset</name><comment>Specified in bytes</comment></member>
+            <member optional="true" devicememoryhandle="1"><type>VkDeviceMemory</type>         <name>memory</name></member>
+            <member devicememoryoffset="1"><type>VkDeviceSize</type>           <name>memoryOffset</name><comment>Specified in bytes</comment></member>
             <member optional="true"><type>VkSparseMemoryBindFlags</type><name>flags</name></member>
         </type>
         <type category="struct" name="VkSparseBufferMemoryBindInfo">
@@ -1786,11 +1786,11 @@ server.
             <member values="VK_STRUCTURE_TYPE_WIN32_KEYED_MUTEX_ACQUIRE_RELEASE_INFO_NV"><type>VkStructureType</type> <name>sType</name></member>
             <member>const <type>void</type>*                      <name>pNext</name></member>
             <member optional="true"><type>uint32_t</type>                         <name>acquireCount</name></member>
-            <member len="acquireCount">const <type>VkDeviceMemory</type>*            <name>pAcquireSyncs</name></member>
+            <member len="acquireCount" devicememoryhandle="1">const <type>VkDeviceMemory</type>*            <name>pAcquireSyncs</name></member>
             <member len="acquireCount">const <type>uint64_t</type>*                  <name>pAcquireKeys</name></member>
             <member len="acquireCount">const <type>uint32_t</type>*                  <name>pAcquireTimeoutMilliseconds</name></member>
             <member optional="true"><type>uint32_t</type>                         <name>releaseCount</name></member>
-            <member len="releaseCount">const <type>VkDeviceMemory</type>*            <name>pReleaseSyncs</name></member>
+            <member len="releaseCount" devicememoryhandle="1">const <type>VkDeviceMemory</type>*            <name>pReleaseSyncs</name></member>
             <member len="releaseCount">const <type>uint64_t</type>*                  <name>pReleaseKeys</name></member>
         </type>
         <type category="struct" name="VkDeviceGeneratedCommandsFeaturesNVX">
@@ -2059,12 +2059,12 @@ server.
         <type category="struct" name="VkMemoryWin32HandlePropertiesKHR" returnedonly="true">
             <member values="VK_STRUCTURE_TYPE_MEMORY_WIN32_HANDLE_PROPERTIES_KHR"><type>VkStructureType</type> <name>sType</name></member>
             <member><type>void</type>*                            <name>pNext</name></member>
-            <member><type>uint32_t</type>                         <name>memoryTypeBits</name></member>
+            <member devicememorytypebits="1"><type>uint32_t</type>                         <name>memoryTypeBits</name></member>
         </type>
         <type category="struct" name="VkMemoryGetWin32HandleInfoKHR">
             <member values="VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR"><type>VkStructureType</type> <name>sType</name></member>
             <member>const <type>void</type>*                      <name>pNext</name></member>
-            <member><type>VkDeviceMemory</type>                   <name>memory</name></member>
+            <member devicememoryhandle="1"><type>VkDeviceMemory</type>                   <name>memory</name></member>
             <member><type>VkExternalMemoryHandleTypeFlagBits</type> <name>handleType</name></member>
         </type>
         <type category="struct" name="VkImportMemoryFdInfoKHR" structextends="VkMemoryAllocateInfo">
@@ -2076,23 +2076,23 @@ server.
         <type category="struct" name="VkMemoryFdPropertiesKHR" returnedonly="true">
             <member values="VK_STRUCTURE_TYPE_MEMORY_FD_PROPERTIES_KHR"><type>VkStructureType</type> <name>sType</name></member>
             <member><type>void</type>*                            <name>pNext</name></member>
-            <member><type>uint32_t</type>                         <name>memoryTypeBits</name></member>
+            <member devicememorytypebits="1"><type>uint32_t</type>                         <name>memoryTypeBits</name></member>
         </type>
         <type category="struct" name="VkMemoryGetFdInfoKHR">
             <member values="VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR"><type>VkStructureType</type> <name>sType</name></member>
             <member>const <type>void</type>*                      <name>pNext</name></member>
-            <member><type>VkDeviceMemory</type>                   <name>memory</name></member>
+            <member devicememoryhandle="1"><type>VkDeviceMemory</type>                   <name>memory</name></member>
             <member><type>VkExternalMemoryHandleTypeFlagBits</type> <name>handleType</name></member>
         </type>
         <type category="struct" name="VkWin32KeyedMutexAcquireReleaseInfoKHR" structextends="VkSubmitInfo">
             <member values="VK_STRUCTURE_TYPE_WIN32_KEYED_MUTEX_ACQUIRE_RELEASE_INFO_KHR"><type>VkStructureType</type> <name>sType</name></member>
             <member>const <type>void</type>*                      <name>pNext</name></member>
             <member optional="true"><type>uint32_t</type>         <name>acquireCount</name></member>
-            <member len="acquireCount">const <type>VkDeviceMemory</type>* <name>pAcquireSyncs</name></member>
+            <member len="acquireCount" devicememoryhandle="1">const <type>VkDeviceMemory</type>* <name>pAcquireSyncs</name></member>
             <member len="acquireCount">const <type>uint64_t</type>* <name>pAcquireKeys</name></member>
             <member len="acquireCount">const <type>uint32_t</type>* <name>pAcquireTimeouts</name></member>
             <member optional="true"><type>uint32_t</type>         <name>releaseCount</name></member>
-            <member len="releaseCount">const <type>VkDeviceMemory</type>* <name>pReleaseSyncs</name></member>
+            <member len="releaseCount" devicememoryhandle="1">const <type>VkDeviceMemory</type>* <name>pReleaseSyncs</name></member>
             <member len="releaseCount">const <type>uint64_t</type>* <name>pReleaseKeys</name></member>
         </type>
         <type category="struct" name="VkPhysicalDeviceExternalSemaphoreInfo">
@@ -2295,8 +2295,8 @@ server.
             <member values="VK_STRUCTURE_TYPE_BIND_BUFFER_MEMORY_INFO"><type>VkStructureType</type> <name>sType</name></member>
             <member>const <type>void</type>*                      <name>pNext</name></member>
             <member><type>VkBuffer</type>                         <name>buffer</name></member>
-            <member><type>VkDeviceMemory</type>                   <name>memory</name></member>
-            <member><type>VkDeviceSize</type>                     <name>memoryOffset</name></member>
+            <member devicememoryhandle="1"><type>VkDeviceMemory</type>                   <name>memory</name></member>
+            <member devicememoryoffset="1"><type>VkDeviceSize</type>                     <name>memoryOffset</name></member>
         </type>
         <type category="struct" name="VkBindBufferMemoryInfoKHR"                               alias="VkBindBufferMemoryInfo"/>
         <type category="struct" name="VkBindBufferMemoryDeviceGroupInfo" structextends="VkBindBufferMemoryInfo">
@@ -2310,8 +2310,8 @@ server.
             <member values="VK_STRUCTURE_TYPE_BIND_IMAGE_MEMORY_INFO"><type>VkStructureType</type> <name>sType</name></member>
             <member>const <type>void</type>*                      <name>pNext</name></member>
             <member><type>VkImage</type>                          <name>image</name></member>
-            <member noautovalidity="true"><type>VkDeviceMemory</type>                   <name>memory</name></member>
-            <member><type>VkDeviceSize</type>                     <name>memoryOffset</name></member>
+            <member noautovalidity="true" devicememoryhandle="1"><type>VkDeviceMemory</type>                   <name>memory</name></member>
+            <member devicememoryhandle="1"><type>VkDeviceSize</type>                     <name>memoryOffset</name></member>
         </type>
         <type category="struct" name="VkBindImageMemoryInfoKHR"                                alias="VkBindImageMemoryInfo"/>
         <type category="struct" name="VkBindImageMemoryDeviceGroupInfo" structextends="VkBindImageMemoryInfo">
@@ -2948,7 +2948,7 @@ server.
         <type category="struct" name="VkMemoryHostPointerPropertiesEXT">
             <member values="VK_STRUCTURE_TYPE_MEMORY_HOST_POINTER_PROPERTIES_EXT"><type>VkStructureType</type> <name>sType</name></member>
             <member><type>void</type>* <name>pNext</name></member>
-            <member><type>uint32_t</type> <name>memoryTypeBits</name></member>
+            <member devicememorytypebits="1"><type>uint32_t</type> <name>memoryTypeBits</name></member>
         </type>
         <type category="struct" name="VkPhysicalDeviceExternalMemoryHostPropertiesEXT" structextends="VkPhysicalDeviceProperties2">
             <member values="VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_MEMORY_HOST_PROPERTIES_EXT"><type>VkStructureType</type> <name>sType</name></member>
@@ -3159,12 +3159,12 @@ server.
             <member values="VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_PROPERTIES_ANDROID"><type>VkStructureType</type> <name>sType</name></member>
             <member><type>void</type>*                              <name>pNext</name></member>
             <member><type>VkDeviceSize</type>                       <name>allocationSize</name></member>
-            <member><type>uint32_t</type>                           <name>memoryTypeBits</name></member>
+            <member devicememorytypebits="1"><type>uint32_t</type>                           <name>memoryTypeBits</name></member>
         </type>
         <type category="struct" name="VkMemoryGetAndroidHardwareBufferInfoANDROID">
             <member values="VK_STRUCTURE_TYPE_MEMORY_GET_ANDROID_HARDWARE_BUFFER_INFO_ANDROID"><type>VkStructureType</type> <name>sType</name></member>
             <member>const <type>void</type>*                        <name>pNext</name></member>
-            <member><type>VkDeviceMemory</type>                     <name>memory</name></member>
+            <member devicememoryhandle="1"><type>VkDeviceMemory</type>                     <name>memory</name></member>
         </type>
         <type category="struct" name="VkAndroidHardwareBufferFormatPropertiesANDROID" structextends="VkAndroidHardwareBufferPropertiesANDROID" returnedonly="true">
             <member values="VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_FORMAT_PROPERTIES_ANDROID"><type>VkStructureType</type> <name>sType</name></member>
@@ -4436,18 +4436,18 @@ server.
             <param><type>VkDevice</type> <name>device</name></param>
             <param>const <type>VkMemoryAllocateInfo</type>* <name>pAllocateInfo</name></param>
             <param optional="true">const <type>VkAllocationCallbacks</type>* <name>pAllocator</name></param>
-            <param><type>VkDeviceMemory</type>* <name>pMemory</name></param>
+            <param devicememoryhandle="1"><type>VkDeviceMemory</type>* <name>pMemory</name></param>
         </command>
         <command>
             <proto><type>void</type> <name>vkFreeMemory</name></proto>
             <param><type>VkDevice</type> <name>device</name></param>
-            <param optional="true" externsync="true"><type>VkDeviceMemory</type> <name>memory</name></param>
+            <param optional="true" externsync="true" devicememoryhandle="1"><type>VkDeviceMemory</type> <name>memory</name></param>
             <param optional="true">const <type>VkAllocationCallbacks</type>* <name>pAllocator</name></param>
         </command>
         <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_OUT_OF_HOST_MEMORY,VK_ERROR_OUT_OF_DEVICE_MEMORY,VK_ERROR_MEMORY_MAP_FAILED">
             <proto><type>VkResult</type> <name>vkMapMemory</name></proto>
             <param><type>VkDevice</type> <name>device</name></param>
-            <param externsync="true"><type>VkDeviceMemory</type> <name>memory</name></param>
+            <param externsync="true" devicememoryhandle="1"><type>VkDeviceMemory</type> <name>memory</name></param>
             <param><type>VkDeviceSize</type> <name>offset</name></param>
             <param><type>VkDeviceSize</type> <name>size</name></param>
             <param optional="true"><type>VkMemoryMapFlags</type> <name>flags</name></param>
@@ -4456,7 +4456,7 @@ server.
         <command>
             <proto><type>void</type> <name>vkUnmapMemory</name></proto>
             <param><type>VkDevice</type> <name>device</name></param>
-            <param externsync="true"><type>VkDeviceMemory</type> <name>memory</name></param>
+            <param externsync="true" devicememoryhandle="1"><type>VkDeviceMemory</type> <name>memory</name></param>
         </command>
         <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_OUT_OF_HOST_MEMORY,VK_ERROR_OUT_OF_DEVICE_MEMORY">
             <proto><type>VkResult</type> <name>vkFlushMappedMemoryRanges</name></proto>
@@ -4473,7 +4473,7 @@ server.
         <command>
             <proto><type>void</type> <name>vkGetDeviceMemoryCommitment</name></proto>
             <param><type>VkDevice</type> <name>device</name></param>
-            <param><type>VkDeviceMemory</type> <name>memory</name></param>
+            <param devicememoryhandle="1"><type>VkDeviceMemory</type> <name>memory</name></param>
             <param><type>VkDeviceSize</type>* <name>pCommittedMemoryInBytes</name></param>
         </command>
         <command>
@@ -4486,7 +4486,7 @@ server.
             <proto><type>VkResult</type> <name>vkBindBufferMemory</name></proto>
             <param><type>VkDevice</type> <name>device</name></param>
             <param externsync="true"><type>VkBuffer</type> <name>buffer</name></param>
-            <param><type>VkDeviceMemory</type> <name>memory</name></param>
+            <param devicememoryhandle="1"><type>VkDeviceMemory</type> <name>memory</name></param>
             <param><type>VkDeviceSize</type> <name>memoryOffset</name></param>
         </command>
         <command>
@@ -4499,7 +4499,7 @@ server.
             <proto><type>VkResult</type> <name>vkBindImageMemory</name></proto>
             <param><type>VkDevice</type> <name>device</name></param>
             <param externsync="true"><type>VkImage</type> <name>image</name></param>
-            <param><type>VkDeviceMemory</type> <name>memory</name></param>
+            <param devicememoryhandle="1"><type>VkDeviceMemory</type> <name>memory</name></param>
             <param><type>VkDeviceSize</type> <name>memoryOffset</name></param>
         </command>
         <command>
@@ -5526,7 +5526,7 @@ server.
         <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_TOO_MANY_OBJECTS,VK_ERROR_OUT_OF_HOST_MEMORY">
             <proto><type>VkResult</type> <name>vkGetMemoryWin32HandleNV</name></proto>
             <param><type>VkDevice</type> <name>device</name></param>
-            <param><type>VkDeviceMemory</type> <name>memory</name></param>
+            <param devicememoryhandle="1"><type>VkDeviceMemory</type> <name>memory</name></param>
             <param><type>VkExternalMemoryHandleTypeFlagsNV</type> <name>handleType</name></param>
             <param><type>HANDLE</type>* <name>pHandle</name></param>
         </command>
@@ -6270,7 +6270,7 @@ server.
         <command successcodes="VK_SUCCESS" errorcodes="VK_ERROR_OUT_OF_HOST_MEMORY,VK_ERROR_OUT_OF_DEVICE_MEMORY,VK_ERROR_MEMORY_MAP_FAILED">
             <proto><type>VkResult</type> <name>vkMapMemoryIntoAddressSpaceGOOGLE</name></proto>
             <param><type>VkDevice</type> <name>device</name></param>
-            <param externsync="true"><type>VkDeviceMemory</type> <name>memory</name></param>
+            <param externsync="true" devicememoryhandle="1"><type>VkDeviceMemory</type> <name>memory</name></param>
             <param optional="false,true"><type>uint64_t</type>* <name>pAddress</name></param>
         </command>
     </commands>
