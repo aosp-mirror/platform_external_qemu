@@ -5,6 +5,7 @@ from .common.vulkantypes import \
 from .marshaling import VulkanMarshalingCodegen
 from .handlemap import HandleMapCodegen
 from .deepcopy import DeepcopyCodegen
+from .transform import TransformCodegen, genTransformsForVulkanType
 
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
@@ -179,6 +180,13 @@ def emit_deepcopy(typeInfo, param, cgen):
     if not res:
         cgen.stmt("(void)%s" % param.paramName)
 
+def emit_transform(typeInfo, param, cgen):
+    res = \
+        iterateVulkanType(typeInfo, param, TransformCodegen( \
+            cgen, param.paramName, "mImpl->resources()", "transform_"))
+    if not res:
+        cgen.stmt("(void)%s" % param.paramName)
+
 def emit_handlemap_create(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, HandleMapCodegen(
         cgen, None, "resources->createMapping()", "handlemap_",
@@ -265,6 +273,32 @@ def emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen, customUnwrap=No
         else:
             if localCopyParam.typeName == "VkAllocationCallbacks":
                 cgen.stmt("%s = nullptr" % localCopyParam.paramName)
+
+    if api.deviceMemoryInfoParameterIndices:
+        for (k, v) in api.deviceMemoryInfoParameterIndices.items():
+            print(v.__dict__)
+
+    apiForTransform = \
+        api.withCustomParameters( \
+            map(lambda p: p[1], \
+                encodingParams.localCopied))
+
+    if apiForTransform.deviceMemoryInfoParameterIndices:
+        for (k, v) in apiForTransform.deviceMemoryInfoParameterIndices.items():
+            print(v.__dict__)
+
+    # Apply transforms if applicable.
+    # Apply transform to API itself:
+    genTransformsForVulkanType(
+        "mImpl->resources()",
+        apiForTransform,
+        lambda p: cgen.generalAccess(p, parentVarName = None, asPtr = True),
+        lambda p: cgen.generalLengthAccess(p, parentVarName = None),
+        cgen)
+
+    # For all local copied parameters, run the transforms
+    for localParam in apiForTransform.parameters:
+        emit_transform(typeInfo, localParam, cgen)
 
     cgen.stmt("%s->rewind()" % COUNTING_STREAM)
     cgen.beginBlock()

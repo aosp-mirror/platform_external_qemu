@@ -2311,7 +2311,7 @@ server.
             <member>const <type>void</type>*                      <name>pNext</name></member>
             <member><type>VkImage</type>                          <name>image</name></member>
             <member noautovalidity="true" devicememoryhandle="1"><type>VkDeviceMemory</type>                   <name>memory</name></member>
-            <member devicememoryhandle="1"><type>VkDeviceSize</type>                     <name>memoryOffset</name></member>
+            <member devicememorysize="1"><type>VkDeviceSize</type>                     <name>memoryOffset</name></member>
         </type>
         <type category="struct" name="VkBindImageMemoryInfoKHR"                                alias="VkBindImageMemoryInfo"/>
         <type category="struct" name="VkBindImageMemoryDeviceGroupInfo" structextends="VkBindImageMemoryInfo">
@@ -4436,7 +4436,7 @@ server.
             <param><type>VkDevice</type> <name>device</name></param>
             <param>const <type>VkMemoryAllocateInfo</type>* <name>pAllocateInfo</name></param>
             <param optional="true">const <type>VkAllocationCallbacks</type>* <name>pAllocator</name></param>
-            <param devicememoryhandle="1"><type>VkDeviceMemory</type>* <name>pMemory</name></param>
+            <param><type>VkDeviceMemory</type>* <name>pMemory</name></param>
         </command>
         <command>
             <proto><type>void</type> <name>vkFreeMemory</name></proto>
@@ -4487,7 +4487,7 @@ server.
             <param><type>VkDevice</type> <name>device</name></param>
             <param externsync="true"><type>VkBuffer</type> <name>buffer</name></param>
             <param devicememoryhandle="1"><type>VkDeviceMemory</type> <name>memory</name></param>
-            <param><type>VkDeviceSize</type> <name>memoryOffset</name></param>
+            <param devicememoryoffset="1"><type>VkDeviceSize</type> <name>memoryOffset</name></param>
         </command>
         <command>
             <proto><type>void</type> <name>vkGetImageMemoryRequirements</name></proto>
@@ -4500,7 +4500,7 @@ server.
             <param><type>VkDevice</type> <name>device</name></param>
             <param externsync="true"><type>VkImage</type> <name>image</name></param>
             <param devicememoryhandle="1"><type>VkDeviceMemory</type> <name>memory</name></param>
-            <param><type>VkDeviceSize</type> <name>memoryOffset</name></param>
+            <param devicememoryoffset="1"><type>VkDeviceSize</type> <name>memoryOffset</name></param>
         </command>
         <command>
             <proto><type>void</type> <name>vkGetImageSparseMemoryRequirements</name></proto>
