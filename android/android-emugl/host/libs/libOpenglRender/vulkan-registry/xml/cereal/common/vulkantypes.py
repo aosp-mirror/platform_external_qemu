@@ -144,6 +144,14 @@ NON_ABI_PORTABLE_TYPE_CATEGORIES = [
     "funcpointer",
 ]
 
+DEVICE_MEMORY_INFO_KEYS = [
+    "devicememoryhandle",
+    "devicememoryoffset",
+    "devicememorysize",
+    "devicememorytypeindex",
+    "devicememorytypebits",
+]
+
 # Holds information about a Vulkan type instance (i.e., not a type definition).
 # Type instances are used as struct field definitions or function parameters,
 # to be later fed to code generation.
@@ -171,6 +179,16 @@ class VulkanType(object):
         self.isPointerToConstPointer = False
 
         self.primitiveEncodingSize = None
+
+        # self.deviceMemoryAttrib/Val stores
+        # device memory info attributes from the XML.
+        # devicememoryhandle
+        # devicememoryoffset
+        # devicememorysize
+        # devicememorytypeindex
+        # devicememorytypebits
+        self.deviceMemoryAttrib = None
+        self.deviceMemoryVal = None
 
     def __str__(self,):
         return ("(vulkantype %s %s paramName %s len %s optional? %s "
@@ -362,6 +380,15 @@ def makeVulkanTypeFromXMLTag(typeInfo, tag):
     res.primitiveEncodingSize = \
         typeInfo.getPrimitiveEncodingSize(res.typeName)
 
+    # it is assumed only one such key
+    # applies to any field.
+    for k in DEVICE_MEMORY_INFO_KEYS:
+        if tag.attrib.get(k) is not None:
+            res.deviceMemoryAttrib = k
+            res.deviceMemoryVal = \
+                tag.attrib.get(k)
+            break;
+
     return res
 
 
@@ -380,6 +407,59 @@ def makeVulkanTypeSimple(isConst,
 
     return res
 
+# A class for holding the parameter indices corresponding to various
+# attributes about a VkDeviceMemory, such as the handle, size, offset, etc.
+class DeviceMemoryInfoParameterIndices(object):
+    def __init__(self, handle, offset, size, typeIndex, typeBits):
+        self.handle = handle
+        self.offset = offset
+        self.size = size
+        self.typeIndex = typeIndex
+        self.typeBits = typeBits
+
+# initializes DeviceMemoryInfoParameterIndices for each
+# abstract VkDeviceMemory encountered over |parameters|
+def initDeviceMemoryInfoParameterIndices(parameters):
+
+    use = False
+    deviceMemoryInfoById = {}
+
+    for (i, p) in enumerate(parameters):
+        a = p.deviceMemoryAttrib
+        if not a:
+            continue
+
+        if a in DEVICE_MEMORY_INFO_KEYS:
+            use = True
+            deviceMemoryInfoById[
+                p.deviceMemoryVal] = \
+                    DeviceMemoryInfoParameterIndices(
+                        None, None, None, None, None)
+
+    for (i, p) in enumerate(parameters):
+        a = p.deviceMemoryAttrib
+        if not a:
+            continue
+
+        info = \
+            deviceMemoryInfoById[p.deviceMemoryVal]
+
+        if a == "devicememoryhandle":
+            info.handle = i
+        if a == "devicememoryoffset":
+            info.offset = i
+        if a == "devicememorysize":
+            info.size = i
+        if a == "devicememorytypeindex":
+            info.typeIndex = i
+        if a == "devicememorytypebits":
+            info.typeBits = i
+
+    if not use:
+        return None
+
+    return deviceMemoryInfoById
+
 # Classes for describing aggregate types (unions, structs) and API calls.
 class VulkanCompoundType(object):
 
@@ -391,6 +471,9 @@ class VulkanCompoundType(object):
         self.structEnumExpr = structEnumExpr
         self.structExtendsExpr = structExtendsExpr
         self.feature = feature
+
+        self.deviceMemoryInfoParameterIndices = \
+            initDeviceMemoryInfoParameterIndices(self.members)
 
         self.copy = None
 
@@ -416,6 +499,9 @@ class VulkanAPI(object):
         self.origName = name
         self.retType = retType
         self.parameters = parameters
+
+        self.deviceMemoryInfoParameterIndices = \
+            initDeviceMemoryInfoParameterIndices(self.parameters)
 
         self.copy = None
 
