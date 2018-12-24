@@ -514,6 +514,9 @@ class VulkanAPI(object):
         for m in self.parameters:
             m.parent = self.copy
 
+    def getCopy(self,):
+        return copy(self)
+
     def getParameter(self, parameterName):
         for p in self.parameters:
             if p.paramName == parameterName:
@@ -531,6 +534,32 @@ class VulkanAPI(object):
 
     def getRetTypeExpr(self):
         return self.retType.typeName
+
+    def withCustomParameters(self, customParams):
+        res = self.getCopy()
+        res.parameters = customParams
+        return res
+
+# Whether or not special handling of virtual elements
+# such as VkDeviceMemory is needed.
+def vulkanTypeNeedsTransform(structOrApi):
+    return structOrApi.deviceMemoryInfoParameterIndices != None
+
+def vulkanTypeGetNeededTransformTypes(structOrApi):
+    res = []
+    if structOrApi.deviceMemoryInfoParameterIndices != None:
+        res.append("devicememory")
+    return res
+
+def vulkanTypeforEachSubType(structOrApi, f):
+    toLoop = None
+    if type(structOrApi) == VulkanCompoundType:
+        toLoop = structOrApi.members
+    if type(structOrApi) == VulkanAPI:
+        toLoop = structOrApi.parameters
+
+    for (i, x) in enumerate(toLoop):
+        f(i, x)
 
 # Parses everything about Vulkan types into a Python readable format.
 class VulkanTypeInfo(object):
