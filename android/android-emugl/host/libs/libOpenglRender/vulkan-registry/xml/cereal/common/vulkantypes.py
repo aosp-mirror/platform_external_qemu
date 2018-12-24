@@ -532,6 +532,27 @@ class VulkanAPI(object):
     def getRetTypeExpr(self):
         return self.retType.typeName
 
+# Whether or not special handling of virtual elements
+# such as VkDeviceMemory is needed.
+def vulkanTypeNeedsTransform(structOrApi):
+    return structOrApi.deviceMemoryInfoParameterIndices != None
+
+def vulkanTypeGetNeededTransformTypes(structOrApi):
+    res = []
+    if structOrApi.deviceMemoryInfoParameterIndices != None:
+        res.append("devicememory")
+    return res
+
+def vulkanTypeforEachSubType(structOrApi, f):
+    toLoop = None
+    if type(structOrApi) == VulkanCompoundType:
+        toLoop = structOrApi.members
+    if type(structOrApi) == VulkanAPI:
+        toLoop = structOrApi.parameters
+
+    for (i, x) in enumerate(toLoop):
+        f(i, x)
+
 # Parses everything about Vulkan types into a Python readable format.
 class VulkanTypeInfo(object):
 
