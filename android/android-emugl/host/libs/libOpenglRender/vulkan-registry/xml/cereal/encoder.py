@@ -76,7 +76,6 @@ ENCODER_CUSTOM_RESOURCE_PREPROCESS = [
 ]
 
 ENCODER_CUSTOM_RESOURCE_POSTPROCESS = [
-    "vkAllocateMemory",
     "vkCreateDevice",
     "vkMapMemoryIntoAddressSpaceGOOGLE",
     "vkGetPhysicalDeviceMemoryProperties",
