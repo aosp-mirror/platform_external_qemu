@@ -41,11 +41,11 @@ def deviceMemoryTransform(resourceTrackerVarName, structOrApiInfo, getExpr, getL
         }
     
         lenAccesses = {
-            "handle" : "1",
-            "offset" : "1",
-            "size" : "1",
-            "typeIndex" : "1",
-            "typeBits" : "1",
+            "handle" : "0",
+            "offset" : "0",
+            "size" : "0",
+            "typeIndex" : "0",
+            "typeBits" : "0",
         }
 
         def doParam(i, vulkanType):
@@ -57,6 +57,8 @@ def deviceMemoryTransform(resourceTrackerVarName, structOrApiInfo, getExpr, getL
                     accesses[k] = access
                     if lenAccess is not None:
                         lenAccesses[k] = lenAccess
+                    else:
+                        lenAccesses[k] = "1"
     
         vulkanTypeforEachSubType(structOrApiInfo, doParam)
 
