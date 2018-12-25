@@ -20,7 +20,7 @@ from .common.vulkantypes import \
 from .wrapperdefs import VulkanWrapperGenerator
 from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE
 
-def deviceMemoryTransform(resourceTrackerVarName, structOrApiInfo, getExpr, getLen, cgen):
+def deviceMemoryTransform(resourceTrackerVarName, structOrApiInfo, getExpr, getLen, cgen, variant="tohost"):
     paramIndices = \
         structOrApiInfo.deviceMemoryInfoParameterIndices
 
@@ -64,16 +64,20 @@ def deviceMemoryTransform(resourceTrackerVarName, structOrApiInfo, getExpr, getL
             ["%s, %s" % (accesses[k], lenAccesses[k]) \
                 for k in orderedKeys])
 
-        cgen.stmt("%s->deviceMemoryTransform(%s)" % \
-            (resourceTrackerVarName, callParams))
+        if variant == "tohost":
+            cgen.stmt("%s->deviceMemoryTransform_tohost(%s)" % \
+                (resourceTrackerVarName, callParams))
+        else:
+            cgen.stmt("%s->deviceMemoryTransform_fromhost(%s)" % \
+                (resourceTrackerVarName, callParams))
 
-def genTransformsForVulkanType(resourceTrackerVarName, structOrApiInfo, getExpr, getLen, cgen):
+def genTransformsForVulkanType(resourceTrackerVarName, structOrApiInfo, getExpr, getLen, cgen, variant="tohost"):
     for transform in vulkanTypeGetNeededTransformTypes(structOrApiInfo):
         if transform == "devicememory":
             deviceMemoryTransform( \
                 resourceTrackerVarName,
                 structOrApiInfo,
-                getExpr, getLen, cgen)
+                getExpr, getLen, cgen, variant=variant)
 
 class TransformCodegen(VulkanTypeIterator):
     def __init__(self, cgen, inputVar, resourceTrackerVarName, prefix):
@@ -175,6 +179,11 @@ class VulkanTransform(VulkanWrapperGenerator):
         self.codegen = CodeGen()
 
         self.transformPrefix = "transform_"
+
+        self.tohostpart = "tohost"
+        self.fromhostpart = "fromhost"
+        self.variants = [self.tohostpart, self.fromhostpart]
+
         self.toTransformVar = "toTransform"
         self.resourceTrackerVarName = "resourceTracker"
         self.transformParam = \
@@ -182,18 +191,22 @@ class VulkanTransform(VulkanWrapperGenerator):
                                  self.resourceTrackerVarName)
         self.voidType = makeVulkanTypeSimple(False, "void", 0)
 
-        self.extensionTransformPrototype = \
-            VulkanAPI(self.transformPrefix + "extension_struct",
-                      self.voidType,
-                      [self.transformParam, STRUCT_EXTENSION_PARAM_FOR_WRITE])
+        self.extensionTransformPrototypes = []
+
+        for variant in self.variants:
+            self.extensionTransformPrototypes.append( \
+                VulkanAPI(self.transformPrefix + variant + "_extension_struct",
+                          self.voidType,
+                          [self.transformParam, STRUCT_EXTENSION_PARAM_FOR_WRITE]))
 
         self.knownStructs = {}
         self.needsTransform = set([])
 
     def onBegin(self,):
         VulkanWrapperGenerator.onBegin(self)
-        self.module.appendImpl(self.codegen.makeFuncDecl(
-            self.extensionTransformPrototype))
+        for prototype in self.extensionTransformPrototypes:
+            self.module.appendImpl(self.codegen.makeFuncDecl(
+                prototype))
 
     def onGenType(self, typeXml, name, alias):
         VulkanWrapperGenerator.onGenType(self, typeXml, name, alias)
@@ -207,40 +220,42 @@ class VulkanTransform(VulkanWrapperGenerator):
             structInfo = self.typeInfo.structs[name]
             self.knownStructs[name] = structInfo
 
-            api = VulkanAPI( \
-                self.transformPrefix + name,
-                self.voidType,
-                [self.transformParam] + \
-                [makeVulkanTypeSimple( \
-                    False, name, 1, self.toTransformVar)])
+            for variant in self.variants:
+                api = VulkanAPI( \
+                    self.transformPrefix + variant + "_" + name,
+                    self.voidType,
+                    [self.transformParam] + \
+                    [makeVulkanTypeSimple( \
+                        False, name, 1, self.toTransformVar)])
 
-            transformer = TransformCodegen(
-                None,
-                self.toTransformVar,
-                self.resourceTrackerVarName,
-                self.transformPrefix)
-
-            def funcDefGenerator(cgen):
-                transformer.cgen = cgen
-                for p in api.parameters:
-                    cgen.stmt("(void)%s" % p.paramName)
-
-                genTransformsForVulkanType(
+                transformer = TransformCodegen(
+                    None,
+                    self.toTransformVar,
                     self.resourceTrackerVarName,
-                    structInfo,
-                    transformer.exprAccessor,
-                    transformer.lenAccessor,
-                    cgen)
+                    self.transformPrefix + variant + "_")
 
-                for member in structInfo.members:
-                    iterateVulkanType(
-                        self.typeInfo, member,
-                        transformer)
+                def funcDefGenerator(cgen):
+                    transformer.cgen = cgen
+                    for p in api.parameters:
+                        cgen.stmt("(void)%s" % p.paramName)
 
-            self.module.appendHeader(
-                self.codegen.makeFuncDecl(api))
-            self.module.appendImpl(
-                self.codegen.makeFuncImpl(api, funcDefGenerator))
+                    genTransformsForVulkanType(
+                        self.resourceTrackerVarName,
+                        structInfo,
+                        transformer.exprAccessor,
+                        transformer.lenAccessor,
+                        cgen,
+                        variant=variant)
+
+                    for member in structInfo.members:
+                        iterateVulkanType(
+                            self.typeInfo, member,
+                            transformer)
+
+                self.module.appendHeader(
+                    self.codegen.makeFuncDecl(api))
+                self.module.appendImpl(
+                    self.codegen.makeFuncImpl(api, funcDefGenerator))
 
 
     def onGenCmd(self, cmdinfo, name, alias):
@@ -249,15 +264,16 @@ class VulkanTransform(VulkanWrapperGenerator):
     def onEnd(self,):
         VulkanWrapperGenerator.onEnd(self)
 
-        def forEachExtensionTransform(ext, castedAccess, cgen):
-            cgen.funcCall(None, self.transformPrefix + ext.name,
-                          [self.resourceTrackerVarName, castedAccess])
+        for (variant, prototype) in zip(self.variants, self.extensionTransformPrototypes):
+            def forEachExtensionTransform(ext, castedAccess, cgen):
+                cgen.funcCall(None, self.transformPrefix + variant + "_" + ext.name,
+                              [self.resourceTrackerVarName, castedAccess])
 
-        self.module.appendImpl(
-            self.codegen.makeFuncImpl(
-                self.extensionTransformPrototype,
-                lambda cgen: self.emitForEachStructExtension(
-                    cgen,
-                    self.voidType,
-                    STRUCT_EXTENSION_PARAM_FOR_WRITE,
-                    forEachExtensionTransform)))
+            self.module.appendImpl(
+                self.codegen.makeFuncImpl(
+                    prototype,
+                    lambda cgen: self.emitForEachStructExtension(
+                        cgen,
+                        self.voidType,
+                        STRUCT_EXTENSION_PARAM_FOR_WRITE,
+                        forEachExtensionTransform)))
