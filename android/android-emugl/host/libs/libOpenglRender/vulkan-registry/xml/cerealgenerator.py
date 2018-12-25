@@ -153,7 +153,8 @@ LOCAL_CFLAGS += \\
     -DVK_USE_PLATFORM_ANDROID_KHR \\
     -DVK_NO_PROTOTYPES \\
 
-LOCAL_SRC_FILES := Resources.cpp \\
+LOCAL_SRC_FILES := HostVisibleMemoryVirtualization.cpp \\
+    Resources.cpp \\
     Validation.cpp \\
     VulkanStream.cpp \\
     VulkanHandleMapping.cpp \\
@@ -190,13 +191,6 @@ class IOStream;
 #include "goldfish_vk_private_defs.h"
 #include "goldfish_vk_transform.h"
 """
-        eventHandlerInclude = """
-#include "goldfish_vk_private_defs.h"
-"""
-        eventHandlerImplInclude = """
-#include "VkEncoder.h"
-"""
-
         functableImplInclude = """
 #include "VkEncoder.h"
 #include "HostConnection.h"
@@ -244,6 +238,7 @@ using android::base::Pool;
 #include "VulkanHandleMapping.h"
 """
         transformInclude = """
+#include "goldfish_vk_private_defs.h"
 #include "ResourceTracker.h"
 """
         poolIncludeGuest = """
@@ -358,11 +353,6 @@ using DlSymFunc = void* (void*, const char*);
             extraHeader = encoderInclude,
             extraImpl = encoderImplInclude)
 
-        self.addGuestEncoderModule(
-            "VkEventHandler",
-            extraHeader=eventHandlerInclude,
-            extraImpl=eventHandlerImplInclude);
-
         self.addGuestEncoderModule("goldfish_vk_extension_structs_guest",
                                    extraHeader=extensionStructsIncludeGuest)
         self.addGuestEncoderModule("goldfish_vk_marshaling_guest",
@@ -416,8 +406,6 @@ using DlSymFunc = void* (void*, const char*);
         self.addWrapper(cereal.VulkanHandleMap, "goldfish_vk_handlemap")
         self.addWrapper(cereal.VulkanDispatch, "goldfish_vk_dispatch")
         self.addWrapper(cereal.VulkanDecoder, "VkDecoder")
-
-        self.addWrapper(cereal.VulkanEventHandler, "VkEventHandler")
 
         self.guestAndroidMkCppFiles = ""
         self.hostCMakeCppFiles = ""
