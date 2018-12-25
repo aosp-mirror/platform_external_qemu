@@ -79,6 +79,7 @@ ENCODER_CUSTOM_RESOURCE_POSTPROCESS = [
     "vkAllocateMemory",
     "vkCreateDevice",
     "vkMapMemoryIntoAddressSpaceGOOGLE",
+    "vkGetPhysicalDeviceMemoryProperties",
 ]
 
 SUCCESS_RET_TYPES = {
@@ -180,10 +181,10 @@ def emit_deepcopy(typeInfo, param, cgen):
     if not res:
         cgen.stmt("(void)%s" % param.paramName)
 
-def emit_transform(typeInfo, param, cgen):
+def emit_transform(typeInfo, param, cgen, variant="tohost"):
     res = \
         iterateVulkanType(typeInfo, param, TransformCodegen( \
-            cgen, param.paramName, "mImpl->resources()", "transform_"))
+            cgen, param.paramName, "mImpl->resources()", "transform_%s_" % variant))
     if not res:
         cgen.stmt("(void)%s" % param.paramName)
 
@@ -274,18 +275,10 @@ def emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen, customUnwrap=No
             if localCopyParam.typeName == "VkAllocationCallbacks":
                 cgen.stmt("%s = nullptr" % localCopyParam.paramName)
 
-    if api.deviceMemoryInfoParameterIndices:
-        for (k, v) in api.deviceMemoryInfoParameterIndices.items():
-            print(v.__dict__)
-
     apiForTransform = \
         api.withCustomParameters( \
             map(lambda p: p[1], \
                 encodingParams.localCopied))
-
-    if apiForTransform.deviceMemoryInfoParameterIndices:
-        for (k, v) in apiForTransform.deviceMemoryInfoParameterIndices.items():
-            print(v.__dict__)
 
     # Apply transforms if applicable.
     # Apply transform to API itself:
@@ -298,7 +291,7 @@ def emit_parameter_encode_copy_unwrap_count(typeInfo, api, cgen, customUnwrap=No
 
     # For all local copied parameters, run the transforms
     for localParam in apiForTransform.parameters:
-        emit_transform(typeInfo, localParam, cgen)
+        emit_transform(typeInfo, localParam, cgen, variant="tohost")
 
     cgen.stmt("%s->rewind()" % COUNTING_STREAM)
     cgen.beginBlock()
@@ -336,6 +329,7 @@ def emit_parameter_encode_read(typeInfo, api, cgen):
         if p.action == "create":
             cgen.stmt(
                 "%s->unsetHandleMapping()" % STREAM)
+        emit_transform(typeInfo, p, cgen, variant="fromhost")
 
 def emit_post(typeInfo, api, cgen):
     encodingParams = EncodingParameters(api)
