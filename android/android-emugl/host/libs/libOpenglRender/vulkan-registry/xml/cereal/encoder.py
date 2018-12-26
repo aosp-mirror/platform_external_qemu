@@ -73,6 +73,7 @@ ENCODER_PREVALIDATED_APIS = [
 
 ENCODER_CUSTOM_RESOURCE_PREPROCESS = [
     "vkMapMemoryIntoAddressSpaceGOOGLE",
+    "vkDestroyDevice",
 ]
 
 ENCODER_CUSTOM_RESOURCE_POSTPROCESS = [
@@ -83,6 +84,7 @@ ENCODER_CUSTOM_RESOURCE_POSTPROCESS = [
 
 SUCCESS_RET_TYPES = {
     "VkResult" : "VK_SUCCESS",
+    "void" : None,
     # TODO: Put up success results for other return types here.
 }
 
