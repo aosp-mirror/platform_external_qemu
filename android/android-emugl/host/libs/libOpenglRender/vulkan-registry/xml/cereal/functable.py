@@ -3,6 +3,15 @@ from .common.vulkantypes import \
         VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
 from .common.vulkantypes import EXCLUDED_APIS
 
+RESOURCE_TRACKER_ENTRIES = [
+    "vkAllocateMemory",
+    "vkFreeMemory",
+]
+
+SUCCESS_VAL = {
+    "VkResult" : ["VK_SUCCESS"],
+}
+
 class VulkanFuncTable(VulkanWrapperGenerator):
     def __init__(self, module, typeInfo):
         VulkanWrapperGenerator.__init__(self, module, typeInfo)
@@ -39,8 +48,15 @@ class VulkanFuncTable(VulkanWrapperGenerator):
             cgen.stmt("%s %s = (%s)0" % (retTypeName, retVar, retTypeName))
             callLhs = retVar
 
-        cgen.funcCall(
-            callLhs, "vkEnc->" + api.name, [p.paramName for p in api.parameters])
+        if name in RESOURCE_TRACKER_ENTRIES:
+            cgen.stmt("auto resources = ResourceTracker::get()")
+            cgen.funcCall(
+                callLhs, "resources->" + "on_" + api.name,
+                ["vkEnc"] + SUCCESS_VAL.get(retTypeName, []) + \
+                [p.paramName for p in api.parameters])
+        else:
+            cgen.funcCall(
+                callLhs, "vkEnc->" + api.name, [p.paramName for p in api.parameters])
 
         if retTypeName != "void":
             cgen.stmt("return %s" % retVar)
