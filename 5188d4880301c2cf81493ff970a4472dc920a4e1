@@ -22,6 +22,30 @@
       "revId": "5188d4880301c2cf81493ff970a4472dc920a4e1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0f33e1f3_45f6fb16",
+        "filename": "include/hw/acpi/goldfish_defs.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-26T18:29:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e2278219_4622b5d8",
+      "range": {
+        "startLine": 78,
+        "startChar": 53,
+        "endLine": 78,
+        "endChar": 70
+      },
+      "revId": "5188d4880301c2cf81493ff970a4472dc920a4e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
