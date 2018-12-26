@@ -40,6 +40,7 @@ public:
     void* alloc(size_t wantedSize);
     void free(void* ptr);
     void freeAll();
+    uint64_t getOffset(void* ptr);
 
     // Convenience function to allocate an array
     // of objects of type T.
