@@ -75,6 +75,6 @@
 #define GOLDFISH_ADDRESS_SPACE_CONTROL_SIZE         0x00001000
 #define GOLDFISH_ADDRESS_SPACE_AREA_BAR             1
 #define GOLDFISH_ADDRESS_SPACE_AREA_NAME            "goldfish_address_space_area"
-#define GOLDFISH_ADDRESS_SPACE_AREA_SIZE            (64 << 20)
+#define GOLDFISH_ADDRESS_SPACE_AREA_SIZE            (16ULL << 30ULL)
 
 #endif  /* !ACPI_GOLDFISH_DEFS_H */
