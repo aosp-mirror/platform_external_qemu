@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "fd0e9863_2fc6fdaa",
+        "filename": "android/android-emu/android/emulation/HostMemoryService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-27T23:14:12Z",
+      "side": 1,
+      "message": "If I call create twice, will it leak? Do we need a static lock when we have sService?",
+      "range": {
+        "startLine": 46,
+        "startChar": 24,
+        "endLine": 46,
+        "endChar": 30
+      },
+      "revId": "6a5ff5ef33248df4c0c4112f8cf2080e09df6cde",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "20f98659_5b5dc9b9",
         "filename": "android/android-emu/android/emulation/HostMemoryService.cpp",
         "patchSetId": 2
