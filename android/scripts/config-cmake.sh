@@ -125,7 +125,7 @@ if [ "$OPTION_LIST_GEN" ]; then
 fi
 
 if [ "$OPTION_MSVC" ]; then
-    if [ !-d /mnt/msvc/vs_files ]; then
+    if [ ! -d /mnt/msvc/vs_files ]; then
         warn "No MSVC install detected in /mnt/msvc, installation of msvc toolchain is an interactive process."
         warn "We will attempt to autoconfigure, but failures are likely."
         warn "The preferred way is to run $QEMU_TOP/android/scripts/activate-msvc.sh"
