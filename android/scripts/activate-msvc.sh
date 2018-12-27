@@ -22,13 +22,17 @@ DEFINE_string ciopfs "/mnt/ciopfs" "Source location of the case insensitive file
 
 gbash::init_google "$@"
 
+RED=$(colors::get_color red)
+GREEN=$(colors::get_color green)
+RESET=$(colors::get_color endcolor)
+
 if [ "${FLAGS_ciopfs}" == "/mnt/msvc" ]
   then warn "This cannot point to /mnt/msvc as this will be used for the overlay."
   exit
 fi
 
 function approve() {
-    read -p "$(colors::get_color green)I read the --help flag, and I trust it will work out. [Y/N]?$(colors::get_color endcolor)" -n 1 -r
+    read -p "${GREEN}I know what I'm doing..[Y/N]?${RESET}" -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]
     then
@@ -44,15 +48,22 @@ function fetch_dependencies_msvc() {
     local MOUNT_POINT="$1"
     # Where the windows sdk is actually stored in ciopfs
     local DATA_POINT="$2"
+    # fuser mount it with this..
+    local CIOPFS="../../prebuilts/android-emulator-build/common/ciopfs/linux-x86_64/ciopfs"
+
+    # Wipe out the existing directories..
+    echo "${RED}Deleting and then creating (using sudo) ${DATA_POINT}${RESET}"
+    approve
+    sudo rm -rf ${DATA_POINT}
+    sudo umount ${MOUNT_POINT}
 
     # Create the case-insensitive filesystem
     [[ -d ${MOUNT_POINT} ]] || sudo mkdir -p ${MOUNT_POINT} || LOG WARN "Failed to create ${MOUNT_POINT}"
-    [[ -d ${DATA_POINT}/clang-intrins ]] || sudo mkdir -p ${DATA_POINT}/clang-intrins || LOG WARN "Failed to create ${DATA_POINT}"
+    [[ -d ${DATA_POINT} ]] || sudo mkdir -p ${DATA_POINT} || LOG WARN "Failed to create ${DATA_POINT}"
 
 
-    sudo chmod a+rx ${MOUNT_POINT}
+    sudo chmod a+rwx ${MOUNT_POINT}
     sudo chmod a+rwx ${DATA_POINT}
-    chmod a+rwx ${DATA_POINT}/clang-intrins
 
     [[ -d ${MOUNT_POINT} ]] || gbash::die "Mount point ${MOUNT_POINT} does not exist."
     [[ -d ${DATA_POINT} ]] || gbash::die "Data source ${DATA_POINT} does not exist."
@@ -62,14 +73,28 @@ function fetch_dependencies_msvc() {
     # This is the hash of the msvc version we are using (VS 2017)
     local MSVC_HASH="3bc0ec615cf20ee342f3bc29bc991b5ad66d8d2c"
 
-
     [[ -d $DEPOT_TOOLS ]] || gbash::die "Cannot find depot tools: $DEPOT_TOOLS, are you running the script for {aosp}/external/qemu ?"
 
+    LOG INFO "User mounting $DATA_POINT under $MOUNT_POINT"
+    $CIOPFS -o use_ino $DATA_POINT $MOUNT_POINT
     LOG INFO "Looking to get tools version: ${MSVC_HASH}"
-    LOG INFO "Downloading the SDK (this might take a couple of minutes ...)"
-    ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$DATA_POINT $MSVC_HASH
+    LOG INFO "Downloading and copying the SDK (this might take a couple of minutes ...)"
+    ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MOUNT_POINT $MSVC_HASH
+    if [ $? -ne 0 ]; then
+      echo "${RED}Likely not authenticated... Trying to authenticate${RESET}"
+      echo "${RED}Please follow the instructions below. ${RESET}"
+      echo "${RED}Your project code is 0.${RESET}"
+      
+      
+      ${DEPOT_TOOLS}/download_from_google_storage --config
+      LOG INFO "Downloading and copying the SDK (this might take a couple of minutes ...)"
+      ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MOUNT_POINT $MSVC_HASH || gbash::die "Unable to fetch toolchain"
+    fi
 
+    # Setup the symlink to a well known location for the build system.
+    ln -sf $MOUNT_POINT/vs_files/$MSVC_HASH $MOUNT_POINT/win8sdk
 }
+
 
 function config_fstab() {
     # Where the windows sdk is actually stored in ciopfs
@@ -79,20 +104,22 @@ function config_fstab() {
 
     [[ -f $CIOPFS ]] || gbash::die "Cannot find ciopfs: $CIOPFS, are you running the script for {aosp}/external/qemu ?"
 
-    LOG INFO "Copying ciopfs to -> /usr/bin and setting mount link"
+    echo "${RED}Copying ciopfs so you can automount at boot. (using sudo) ${DATA_POINT}${RESET}"
+    approve
     sudo cp $CIOPFS /usr/bin/ciopfs
     sudo ln -sf /usr/bin/ciopfs /sbin/mount.ciopfs
 
-    LOG INFO "add this line below to /etc/fstab and run sudo mount -a"
-    echo ${FSTAB}
+    echo "add the lines below to /etc/fstab if you wish to automount upon restarts"
+    echo "${GREEN}# Automount case insensitive fs for android emulator builds.${RESET}"
+    echo "${GREEN}${FSTAB}${RESET}"
 }
 
 
 echo "This script will install windows sdk in ${FLAGS_ciopfs} and create a mount point in /mnt/msvc"
 echo "It will install androids version of ciopfs and will suggest you modify fstab to automount /mnt/msvc"
 echo "Note that getting the sdk is likely an interactive process, as you will need to obtain some permissions."
-echo "$(colors::get_color red)Install of ciopfs requires sudo privileges"
-echo "You will still need to modify fstab yourself, or mount the filesystem manually under /mnt/msvc$(colors::get_color endcolor)"
+echo "${RED}Install of ciopfs requires sudo privileges"
+echo "You will still need to modify fstab yourself, or mount the filesystem manually under /mnt/msvc${RESET}"
 approve
 
 fetch_dependencies_msvc "/mnt/msvc" ${FLAGS_ciopfs}
