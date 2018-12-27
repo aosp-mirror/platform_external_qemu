@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "36957cce_08e40c34",
+        "filename": "android/android-emu/android/emulation/HostMemoryService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-27T22:52:27Z",
+      "side": 1,
+      "message": "delete for uint8_t* looks suspicious. I believe this should be aligned_buf_free or something.",
+      "range": {
+        "startLine": 42,
+        "startChar": 19,
+        "endLine": 42,
+        "endChar": 39
+      },
+      "revId": "6a5ff5ef33248df4c0c4112f8cf2080e09df6cde",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "20f98659_5b5dc9b9",
+        "filename": "android/android-emu/android/emulation/HostMemoryService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2018-12-27T22:52:27Z",
+      "side": 1,
+      "message": "Do we need this state machine here? Do we expect the other side to feed us with partial messages?",
+      "range": {
+        "startLine": 175,
+        "startChar": 25,
+        "endLine": 175,
+        "endChar": 30
+      },
+      "revId": "6a5ff5ef33248df4c0c4112f8cf2080e09df6cde",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
