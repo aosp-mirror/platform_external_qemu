@@ -57,7 +57,8 @@ if(WIN32)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -MD")
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD")
   set(CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -MD")
-
+  # Let's not go crazy over missing pdbs..
+  internal_set_env_cache(RUNTIME_OS_PROPERTIES "LINK_FLAGS>=/ignore:4099")
 
   # Make sure nobody is accidently trying to do a 32 bit build.
   if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)

@@ -35,11 +35,16 @@ def _reader(pipe, queue):
 def log_std_out(proc):
     """Logs the output of the given process."""
     q = Queue()
+    is_windows = (platform.system() == 'Windows')
     Thread(target=_reader, args=[proc.stdout, q]).start()
     Thread(target=_reader, args=[proc.stderr, q]).start()
     for _ in range(2):
         for _, line in iter(q.get, None):
-            logging.info(line)
+            if is_windows:
+                # 2 problems on windows, output of \r, and error 0 when writing to log concurrently
+                print (line.replace('\r', ''))
+            else:
+                logging.info(line)
 
 
 
