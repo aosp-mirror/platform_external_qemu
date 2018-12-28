@@ -342,16 +342,19 @@ android_target_link_libraries(android-emu
                               windows
                               PUBLIC
                               emulator-libmman-win32
-                              -lpsapi
-                              -ld3d9
+                              d3d9::d3d9
+                              mfuuid::mfuuid
                               # For CoTaskMemFree used in camera-capture-windows.cpp
-                              -lole32
+                              ole32::ole32
                               # For GetPerformanceInfo in CrashService_windows.cpp
-                              -lpsapi
+                              psapi::psapi
                               # Winsock functions
-                              -lws2_32
+                              ws2_32::ws2_32
                               # GetNetworkParams() for android/utils/dns.c
-                              -liphlpapi)
+                              iphlpapi::iphlpapi)
+
+
+android_target_link_libraries(android-emu windows_msvc-x86_64 PUBLIC msvc-posix-compat)
 
 # These are the libs needed for android-emu on linux.
 android_target_link_libraries(android-emu linux-x86_64 PUBLIC darwinn -lrt -lX11 -lGL -lc++)
@@ -383,7 +386,7 @@ target_include_directories(android-emu PUBLIC
                                    ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
                                    ${DARWINN_INCLUDE_DIRS})
 
-target_compile_options(android-emu PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
+android_target_compile_options(android-emu Clang PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
 android_target_compile_options(android-emu linux-x86_64 PRIVATE -idirafter ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
 
 android_target_compile_definitions(android-emu
@@ -467,10 +470,23 @@ target_link_libraries(android-emu-shared
 android_target_link_libraries(android-emu-shared
                               windows
                               PRIVATE
-                              emulator-libmman-win32
-                              -lpsapi
-                              -ld3d9
+                              emulator-libmman-win32                              
+                              d3d9::d3d9
+                              # IID_IMFSourceReaderCallback
+                              mfuuid::mfuuid                               
+                              # For CoTaskMemFree used in camera-capture-windows.cpp
+                              ole32::ole32
+                              # For GetPerformanceInfo in CrashService_windows.cpp
+                              psapi::psapi
+                              # Winsock functions
+                              ws2_32::ws2_32
+                              # GetNetworkParams() for android/utils/dns.c
+                              iphlpapi::iphlpapi
 )
+
+if(MSVC)
+    target_link_libraries(android-emu-shared PRIVATE msvc-posix-compat)
+endif()
 
 # These are the libs needed for android-emu-shared on linux.
 android_target_link_libraries(android-emu-shared linux-x86_64 PRIVATE -lrt)
@@ -496,7 +512,7 @@ target_include_directories(android-emu-shared PUBLIC
                                    # If you use our library, you get access to our headers.
                                    ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-target_compile_options(android-emu-shared PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
+android_target_compile_options(android-emu-shared Clang PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
 android_target_compile_options(android-emu-shared linux-x86_64 PRIVATE -idirafter ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
 
 # Definitions needed to compile our deps as static
@@ -519,7 +535,7 @@ set(android-mock-vm-operations_src
 
 android_add_library(android-mock-vm-operations)
 
-target_compile_options(android-mock-vm-operations PRIVATE -O0 -Wno-invalid-constexpr)
+android_target_compile_options(android-mock-vm-operations Clang PRIVATE -O0 -Wno-invalid-constexpr)
 target_include_directories(android-mock-vm-operations
                                    PRIVATE
                                    ../android-emugl/host/include/
@@ -728,7 +744,7 @@ set(android-emu_unittests_linux-x86_64_src
 android_add_test(android-emu_unittests)
 
 # Setup the targets compile config etc..
-target_compile_options(android-emu_unittests PRIVATE -O0 -Wno-invalid-constexpr)
+android_target_compile_options(android-emu_unittests Clang PRIVATE -O0 -Wno-invalid-constexpr)
 target_include_directories(android-emu_unittests
                                    PRIVATE
                                    ../android-emugl/host/include/

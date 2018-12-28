@@ -127,8 +127,7 @@ target_include_directories(android-emu-base PUBLIC .)
 # & UUID
 target_link_libraries(android-emu-base PRIVATE LZ4::LZ4 UUID::UUID)
 android_target_link_libraries(android-emu-base linux-x86_64 PUBLIC -ldl Threads::Threads -lrt)
-android_target_link_libraries(android-emu-base windows-x86_64 PUBLIC -lpsapi Threads::Threads -liphlpapi)
-android_target_link_libraries(android-emu-base windows-x86 PUBLIC -lpsapi Threads::Threads -liphlpapi)
+android_target_link_libraries(android-emu-base windows-x86_64 PUBLIC psapi::psapi Threads::Threads iphlpapi::iphlpapi)
 android_target_link_libraries(android-emu-base
                               darwin-x86_64
                               PUBLIC
@@ -144,7 +143,7 @@ android_target_compile_definitions(android-emu-base
 
 # Compiler flags, not that these should never propagate (i.e. set to public) as we really want to limit the usage of
 # these flags.
-target_compile_options(android-emu-base
+android_target_compile_options(android-emu-base Clang
                                PRIVATE
                                "-Wno-parentheses"
                                "-Wno-invalid-constexpr")

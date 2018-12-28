@@ -18,7 +18,7 @@ namespace android {
 namespace base {
 
 SharedMemory::SharedMemory(StringView name, size_t size)
-    : mName(std::string("SHM_") + std::string(name)) { }
+    : mName(std::string("SHM_") + std::string(name)), mSize(size) { }
 
 // Creates a shared region, you will be considered the owner, and will have
 // write access. Returns 0 on success, or an error code otheriwse.
@@ -40,7 +40,8 @@ int SharedMemory::openInternal(AccessMode access, bool doMapping) {
     if (mCreate) {
         return EEXIST;
     }
-    LARGE_INTEGER memory = {.QuadPart = (LONGLONG)mSize};
+    LARGE_INTEGER memory;
+    memory.QuadPart = (LONGLONG)mSize;
 
     // Allows views to be mapped for read-only or copy-on-write access.
     DWORD protection = PAGE_READONLY;
@@ -75,13 +76,14 @@ int SharedMemory::openInternal(AccessMode access, bool doMapping) {
 
         mAddr = MapViewOfFile(hMapFile, protection, 0, 0, mSize);
 
-        if (hMapFile == NULL) {
+        if (mAddr == NULL) {
             int err = -GetLastError();
             close();
             return err;
         }
     }
 
+    mFd = hMapFile;
     mCreate = true;
     return 0;
 }

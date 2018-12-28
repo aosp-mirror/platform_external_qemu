@@ -225,7 +225,9 @@ else ()
       android/skin/qt/extended-pages/location-page_noMaps.ui)
   set(emulator-libui_windows_msvc-x86_64_src
       android/skin/qt/windows-native-window.cpp
-      android/skin/qt/extended-pages/location-page_noMaps.ui)
+      android/skin/qt/websockets/websocketclientwrapper.cpp
+      android/skin/qt/websockets/websockettransport.cpp
+      android/skin/qt/extended-pages/location-page.ui)
   set(emulator-libui_linux-x86_64_src
       android/skin/qt/websockets/websocketclientwrapper.cpp
       android/skin/qt/websockets/websockettransport.cpp
@@ -256,7 +258,9 @@ target_compile_options(emulator-libui PRIVATE "-DUSE_MMX=1" "-mmmx")
 
 # Target specific compiler flags for windows, since we include FFMPEG C sources from C++ we need to make sure this flag
 # is set for c++ sources.
-android_target_compile_options(emulator-libui windows PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
+if(NOT MSVC)
+  android_target_compile_options(emulator-libui windows PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
+endif()
 
 # Linux compiler settings
 android_target_compile_options(emulator-libui
@@ -280,6 +284,12 @@ android_target_compile_options(emulator-libui
                                "-Wno-return-type-c-linkage"
                                "-Wno-invalid-constexpr")
 
+
+android_target_compile_options(emulator-libui
+                               windows_msvc-x86_64
+                               PRIVATE
+                               "-DUSE_WEBENGINE=1")
+
 # dependencies will remain internal, we should not be leaking out internal headers and defines.
 target_link_libraries(emulator-libui
                               PRIVATE
@@ -292,6 +302,15 @@ target_link_libraries(emulator-libui
                               Qt5::Svg
                               ZLIB::ZLIB
                               android-emu-crash-service)
+
+if (NOT NO_QTWEBENGINE AND NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
+    target_link_libraries(emulator-libui
+                              PRIVATE
+                              Qt5::Network
+                              Qt5::WebEngineWidgets
+                              Qt5::WebChannel
+                              Qt5::WebSockets)
+endif()
 
 # gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug. This implies a direct dependency to
 # libX11.so
