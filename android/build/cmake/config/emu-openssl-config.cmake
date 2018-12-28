@@ -23,10 +23,11 @@ set(OPENSSL_VERSION "1.0.2j")
 android_add_prebuilt_library(OpenSSL SSL "${PREBUILT_ROOT}/lib/libssl" "${PREBUILT_ROOT}/include" "" "")
 
 if(ANDROID_TARGET_TAG MATCHES "windows.*" AND NOT TARGET OpenSSL::Crypto)
+   prebuilt(GLIB2)
     add_library(OpenSSL::Crypto INTERFACE IMPORTED GLOBAL)
         set_target_properties(OpenSSL::Crypto PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIRS}"
-        INTERFACE_LINK_LIBRARIES "${PREBUILT_ROOT}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX};-lws2_32"
+        INTERFACE_LINK_LIBRARIES "${PREBUILT_ROOT}/lib/libcrypto${CMAKE_STATIC_LIBRARY_SUFFIX};ws2_32::ws2_32;GLIB2::GLIB2"
     )
 else()
   android_add_prebuilt_library(OpenSSL Crypto "${PREBUILT_ROOT}/lib/libcrypto" "${PREBUILT_ROOT}/include" "" "")

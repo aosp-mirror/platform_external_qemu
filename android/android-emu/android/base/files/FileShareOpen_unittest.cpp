@@ -43,7 +43,7 @@ using android::base::fsopen;
 
 TEST_F(FileShareTest, shareRead) {
     FILE* f1 = fsopen(mFilePath.c_str(), "r", FileShare::Read);
-    EXPECT_TRUE(f1);
+    EXPECT_TRUE(f1) << "File: " << mFilePath << " was not opened: errno: " << errno;
     FILE* f2 = fsopen(mFilePath.c_str(), "r", FileShare::Read);
     EXPECT_TRUE(f2);
     if (f1) {
@@ -56,9 +56,9 @@ TEST_F(FileShareTest, shareRead) {
 
 TEST_F(FileShareTest, readWriteRefuse) {
     FILE* f1 = fsopen(mFilePath.c_str(), "r", FileShare::Read);
-    EXPECT_TRUE(f1);
+    EXPECT_TRUE(f1) << "File: " << mFilePath << " was not opened: errno: " << errno;
     FILE* f2 = fsopen(mFilePath.c_str(), "w", FileShare::Write);
-    EXPECT_FALSE(f2);
+    EXPECT_FALSE(f2) << "File: " << mFilePath << " was not opened: errno: " << errno;
     if (f1) {
         fclose(f1);
     }
@@ -82,7 +82,7 @@ TEST_F(FileShareTest, writeWriteRefuse) {
 
 TEST_F(FileShareTest, writeReadRefuse) {
     FILE* f1 = fsopen(mFilePath.c_str(), "w", FileShare::Write);
-    EXPECT_TRUE(f1);
+    EXPECT_TRUE(f1) << "File: " << mFilePath << " was not opened: errno: " << errno;
     FILE* f2 = fsopen(mFilePath.c_str(), "r", FileShare::Read);
     EXPECT_FALSE(f2);
     if (f1) {
