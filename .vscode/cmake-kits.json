@@ -14,5 +14,11 @@
     {
         "name": "Linux -> (msvc)",
         "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-windows_msvc-x86_64.cmake"
+    },
+    {
+        "name": "Windows",
+        "visualStudio": "Visual Studio Enterprise 2017",
+        "visualStudioArchitecture": "amd64",
+        "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-windows_msvc-x86_64.cmake"
     }
 ]

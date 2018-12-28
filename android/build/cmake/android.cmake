@@ -216,6 +216,15 @@ function(android_add_test name)
            WORKING_DIRECTORY $<TARGET_FILE_DIR:${name}>)
   set_property(TEST ${name} PROPERTY ENVIRONMENT "ASAN_OPTIONS=${ASAN_OVERRIDES}")
   set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "LLVM_PROFILE_FILE=$<TARGET_FILE_NAME:${name}>.profraw")
+
+  if(MSVC)
+    # Let's include the .dll path for our test runner and set a timeout so we are guaranteed to complete the tests
+    string(REPLACE "/" "\\" WIN_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_swiftshader;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_mesa;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/qt/lib")
+    set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "PATH=${WIN_PATH};$ENV{PATH}")
+    set_property(TEST ${name} PROPERTY TIMEOUT 300)
+  endif()
+
+
 endfunction()
 
 # Adds an executable target. The RUNTIME_OS_DEPENDENCIES and RUNTIME_OS_PROPERTIES will registed for the given target,
