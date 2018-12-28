@@ -166,7 +166,7 @@ function(android_binplace TARGET SRC_FILE DEST_FILE)
     message(FATAL_ERROR "The target ${TARGET} depends on a dependency: ${SRC_FILE} that does not exist!")
   endif()
 
-  if(DEST_FILE MATCHES ".*[O|o][B|b][J|j]" AND MSVC)
+  if(DEST_FILE MATCHES ".*\\.[O|o][B|b][J|j]" AND MSVC)
     # We don't want to expose .OBJ files to the MSVC linker, so we will post copy those.
     message(STATUS "Marking ${DEST_FILE} as post copy for windows. Modifications to this file will not be detected.")
     add_custom_command(TARGET ${TARGET} POST_BUILD
