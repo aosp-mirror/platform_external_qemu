@@ -80,12 +80,7 @@ def configure():
     cmake_cmd = [get_cmake(), '-B%s' % FLAGS.out]
 
     # Setup the right toolchain/compiler configuration.
-    if platform.system() == 'Windows':
-        cmake_cmd += ["-DCMAKE_C_COMPILER:PATH={0}".format(get_windows_clang()),
-                      "-DCMAKE_CXX_COMPILER:PATH={0}".format(get_windows_clang())]
-    else:
-        cmake_cmd += Toolchain.from_string(FLAGS.target).to_cmd()
-
+    cmake_cmd += Toolchain.from_string(FLAGS.target).to_cmd()
     cmake_cmd += Crash.from_string(FLAGS.crash).to_cmd()
     cmake_cmd += BuildConfig.from_string(FLAGS.config).to_cmd()
     if FLAGS.qtwebengine:
