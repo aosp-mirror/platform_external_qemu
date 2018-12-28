@@ -24,6 +24,7 @@
 #include "android/constants.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/emulation/FakeRotatingCameraSensor.h"
+#include "android/emulation/HostMemoryService.h"
 #include "android/emulation/Keymaster3.h"
 #include "android/emulation/QemuMiscPipe.h"
 #include "android/emulation/android_pipe_pingpong.h"
@@ -462,6 +463,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_hw_sensors_init();
     android::automation::AutomationController::initialize();
     android::offworld::registerOffworldPipeService();
+    android_host_memory_service_init();
 
     AvdFlavor flavor = avdInfo_getAvdFlavor(android_avdInfo);
     /* initialize the car data emulation if the system image is a Android Auto build */

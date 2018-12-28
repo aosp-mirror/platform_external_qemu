@@ -237,6 +237,7 @@ set(android_emu_dependent_src
     android/camera/camera-virtualscene.cpp
     android/emulation/control/ScreenCapturer.cpp
     android/emulation/FakeRotatingCameraSensor.cpp
+    android/emulation/HostMemoryService.cpp
     android/emulation/Keymaster3.cpp
     android/emulation/QemuMiscPipe.cpp
     android/console.cpp
@@ -634,6 +635,7 @@ set(android-emu_unittests_src
     android/emulation/control/LineConsumer_unittest.cpp
     android/emulation/CpuAccelerator_unittest.cpp
     android/emulation/CrossSessionSocket_unittest.cpp
+    android/emulation/HostMemoryService_unittest.cpp
     android/emulation/Hypervisor_unittest.cpp
     android/emulation/hostpipe/HostGoldfishPipe_unittest.cpp
     android/emulation/ParameterList_unittest.cpp
