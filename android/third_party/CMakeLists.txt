@@ -45,7 +45,7 @@ add_subdirectory(google-benchmark)
 add_library(picosha2 INTERFACE)
 target_include_directories(picosha2 INTERFACE picosha2)
 
-if(WIN32 OR ("${ANDROID_TARGET_TAG}" MATCHES "windows.*") )
+if("${ANDROID_TARGET_TAG}" MATCHES "windows.*")
   add_subdirectory(mman-win32)
   add_subdirectory(regex-win32)
   if("${ANDROID_TARGET_TAG}" MATCHES "windows_msvc.*")

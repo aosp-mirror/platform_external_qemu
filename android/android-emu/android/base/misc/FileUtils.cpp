@@ -34,6 +34,10 @@
 namespace android {
 
 bool readFileIntoString(int fd, std::string* file_contents) {
+#ifdef _MSC_VER
+    if (fd < 0) return false; // msvc does not handle fd -1 very well.
+#endif
+
     off_t size = lseek(fd, 0, SEEK_END);
     if (size == (off_t)-1) {
         return false;
@@ -53,8 +57,17 @@ bool readFileIntoString(int fd, std::string* file_contents) {
 }
 
 bool writeStringToFile(int fd, const std::string& file_contents) {
+#ifdef _MSC_VER
+    // msvc does not handle fd -1 very well.
+    if (fd < 0)  return false;
+
+    ssize_t result = HANDLE_EINTR(
+            _write(fd, file_contents.c_str(), file_contents.size()));
+
+#else
     ssize_t result = HANDLE_EINTR(
             write(fd, file_contents.c_str(), file_contents.size()));
+#endif
     if (result != (ssize_t)file_contents.size()) {
         return false;
     }
@@ -74,6 +87,9 @@ base::Optional<std::string> readFileIntoString(base::StringView name) {
 
 bool setFileSize(int fd, int64_t size) {
 #ifdef _WIN32
+#ifdef _MSC_VER
+    if (fd < 0) return false; // msvc does not handle fd -1 very well.
+#endif
     return _chsize_s(fd, size) == 0;
 #else
     return ftruncate(fd, size) == 0;

@@ -16,7 +16,16 @@
 // will be used by shared_library_unittest.cpp to verify that the
 // emugl::SharedLibrary class works properly.
 
+#ifdef _MSC_VER
+# ifdef BUILDING_EMUGL_COMMON_SHARED
+#  define EMUGL_COMMON_API __declspec(dllexport)
+# else
+#  define EMUGL_COMMON_API __declspec(dllimport)
+#endif
+#else
+# define EMUGL_COMMON_API
+#endif
 
-extern "C" int foo_function(void) {
+EMUGL_COMMON_API extern "C" int foo_function(void) {
     return 42;
 }
