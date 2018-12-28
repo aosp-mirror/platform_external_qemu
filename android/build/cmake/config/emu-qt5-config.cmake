@@ -176,6 +176,16 @@ elseif(ANDROID_TARGET_OS STREQUAL "windows_msvc")
       ${PREBUILT_ROOT}/bin/Qt5Core.dll>lib64/qt/lib/Qt5Core.dll;
       ${PREBUILT_ROOT}/bin/Qt5Gui.dll>lib64/qt/lib/Qt5Gui.dll;
       ${PREBUILT_ROOT}/bin/Qt5Widgets.dll>lib64/qt/lib/Qt5Widgets.dll;
+      ${PREBUILT_ROOT}/bin/Qt5Network.dll>lib64/qt/lib/Qt5Network.dll;
+      ${PREBUILT_ROOT}/bin/Qt5PrintSupport.dll>lib64/qt/lib/Qt5PrintSupport.dll;
+      ${PREBUILT_ROOT}/bin/Qt5Qml.dll>lib64/qt/lib/Qt5Qml.dll;
+      ${PREBUILT_ROOT}/bin/Qt5Positioning.dll>lib64/qt/lib/Qt5Positioning.dll;
+      ${PREBUILT_ROOT}/bin/Qt5Quick.dll>lib64/qt/lib/Qt5Quick.dll;
+      ${PREBUILT_ROOT}/bin/Qt5QuickWidgets.dll>lib64/qt/lib/Qt5QuickWidgets.dll;
+      ${PREBUILT_ROOT}/bin/Qt5WebChannel.dll>lib64/qt/lib/Qt5WebChannel.dll;
+      ${PREBUILT_ROOT}/bin/Qt5WebEngineCore.dll>lib64/qt/lib/Qt5WebEngineCore.dll;
+      ${PREBUILT_ROOT}/bin/Qt5WebEngineWidgets.dll>lib64/qt/lib/Qt5WebEngineWidgets.dll;
+      ${PREBUILT_ROOT}/bin/Qt5WebSockets.dll>lib64/qt/lib/Qt5WebSockets.dll;
       ${PREBUILT_ROOT}/plugins/platforms/qwindows.dll>lib64/qt/plugins/platforms/qwindows.dll;
       ${PREBUILT_ROOT}/plugins/iconengines/qsvgicon.dll>lib64/qt/plugins/iconengines/qsvgicon.dll;
       ${PREBUILT_ROOT}/plugins/imageformats/qgif.dll>lib64/qt/plugins/imageformats/qgif.dll;
@@ -199,6 +209,8 @@ elseif(ANDROID_TARGET_OS STREQUAL "windows_msvc")
   add_qt_shared_lib(WebChannel "${PREBUILT_ROOT}/lib/Qt5WebChannel.lib" "Qt5::WebEngineCore;Qt5::Qml")
   add_qt_shared_lib(WebSockets "${PREBUILT_ROOT}/lib/Qt5WebSockets.lib" "Qt5::WebEngineCore;Qt5::Qml")
   add_qt_shared_lib(WebEngineWidgets "${PREBUILT_ROOT}/lib/Qt5WebEngineWidgets.lib" "Qt5::WebEngineCore;Qt5::Qml")
+
+
 elseif(ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
   # On Windows, linking to mingw32 is required. The library is provided by the toolchain, and depends on a main()
   # function provided by qtmain which itself depends on qMain(). These must appear in emulator-libui_unittests LDFLAGS
