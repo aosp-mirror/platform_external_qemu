@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c20f70d6_98f5ec07",
+        "filename": "android/android-emu/android/emulation/HostMemoryService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-28T02:02:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "36957cce_08e40c34",
+      "range": {
+        "startLine": 42,
+        "startChar": 19,
+        "endLine": 42,
+        "endChar": 39
+      },
+      "revId": "6a5ff5ef33248df4c0c4112f8cf2080e09df6cde",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fd0e9863_2fc6fdaa",
         "filename": "android/android-emu/android/emulation/HostMemoryService.cpp",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "e66665b5_98350d19",
+        "filename": "android/android-emu/android/emulation/HostMemoryService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-28T02:02:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fd0e9863_2fc6fdaa",
+      "range": {
+        "startLine": 46,
+        "startChar": 24,
+        "endLine": 46,
+        "endChar": 30
+      },
+      "revId": "6a5ff5ef33248df4c0c4112f8cf2080e09df6cde",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "20f98659_5b5dc9b9",
         "filename": "android/android-emu/android/emulation/HostMemoryService.cpp",
         "patchSetId": 2
@@ -68,6 +116,30 @@
       "revId": "6a5ff5ef33248df4c0c4112f8cf2080e09df6cde",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ba33b4b4_a66d4865",
+        "filename": "android/android-emu/android/emulation/HostMemoryService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-12-28T02:02:48Z",
+      "side": 1,
+      "message": "Done (no need; removed)",
+      "parentUuid": "20f98659_5b5dc9b9",
+      "range": {
+        "startLine": 175,
+        "startChar": 25,
+        "endLine": 175,
+        "endChar": 30
+      },
+      "revId": "6a5ff5ef33248df4c0c4112f8cf2080e09df6cde",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
