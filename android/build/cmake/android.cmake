@@ -16,9 +16,9 @@ include(prebuilts)
 
 # This function is the same as target_compile_definitions
 # (https://cmake.org/cmake/help/v3.5/command/target_compile_definitions.html) The only difference is that the
-# definitions will only be applied if the OS parameter matches the ANDROID_TARGET_TAG variable.
+# definitions will only be applied if the OS parameter matches the ANDROID_TARGET_TAG or compiler variable.
 function(android_target_compile_definitions TGT OS MODIFIER ITEMS)
-  if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR ${OS} STREQUAL "all")
+  if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR OS STREQUAL "all" OR OS MATCHES "${CMAKE_CXX_COMPILER_ID}")
     target_compile_definitions(${TGT} ${MODIFIER} ${ITEMS})
     foreach(DEF ${ARGN})
       target_compile_definitions(${TGT} ${MODIFIER} ${DEF})
@@ -28,13 +28,13 @@ endfunction()
 
 # This function is the same as target_link_libraries
 # (https://cmake.org/cmake/help/v3.5/command/target_link_libraries.html) The only difference is that the definitions
-# will only be applied if the OS parameter matches the ANDROID_TARGET_TAG variable.
+# will only be applied if the OS parameter matches the ANDROID_TARGET_TAG or Compiler variable.
 function(android_target_link_libraries TGT OS MODIFIER ITEMS)
   if(ARGC GREATER "49")
     message(
       FATAL_ERROR "Currently cannot link more than 49 dependecies due to some weirdness with calling target_link_libs")
   endif()
-  if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR ${OS} STREQUAL "all")
+  if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR OS STREQUAL "all" OR OS MATCHES "${CMAKE_CXX_COMPILER_ID}")
     # HACK ATTACK! We cannot properly expand unknown linker args as they are treated in a magical fashion. Some
     # arguments need to be "grouped" together somehow (for example optimized;lib) since we cannot resolve this properly
     # we just pass on the individual arguments..
@@ -50,7 +50,7 @@ endfunction()
 # (https://cmake.org/cmake/help/v3.5/command/target_include_directories.html) The only difference is that the
 # definitions will only be applied if the OS parameter matches the ANDROID_TARGET_TAG variable.
 function(android_target_include_directories TGT OS MODIFIER ITEMS)
-  if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR ${OS} STREQUAL "all")
+  if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR OS STREQUAL "all" OR OS MATCHES "${CMAKE_CXX_COMPILER_ID}")
     target_include_directories(${TGT} ${MODIFIER} ${ITEMS})
     foreach(DIR ${ARGN})
       target_include_directories(${TGT} ${MODIFIER} ${DIR})
@@ -62,7 +62,7 @@ endfunction()
 # (https://cmake.org/cmake/help/v3.5/command/target_compile_options.html) The only difference is that the definitions
 # will only be applied if the OS parameter matches the ANDROID_TARGET_TAG variable.
 function(android_target_compile_options TGT OS MODIFIER ITEMS)
-  if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR ${OS} STREQUAL "all")
+  if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR OS STREQUAL "all" OR OS MATCHES "${CMAKE_CXX_COMPILER_ID}")
     target_compile_options(${TGT} ${MODIFIER} "${ITEMS};${ARGN}")
   endif()
 endfunction()
@@ -84,6 +84,24 @@ function(android_add_library name)
     list(APPEND ${name}_src ${${name}_${ANDROID_TARGET_TAG}_src})
   endif()
   add_library(${name} ${${name}_src})
+endfunction()
+
+# Adds an object library with the given name. The source files for this target will be resolved as follows: The variable
+# ${name}_src should have the set of sources The variable ${name}_${ANDROID_TARGET_TAG}_src should have the sources only
+# specific for the given target.
+#
+# An object library is not a "real" library, but just a collection objects that can be included in a dependency.
+function(android_add_object_library name)
+  if((ANDROID_TARGET_TAG MATCHES "windows_msvc.*") AND (DEFINED ${name}_windows_msvc_src))
+    list(APPEND ${name}_src ${${name}_windows_msvc_src})
+  endif()
+  if((ANDROID_TARGET_TAG MATCHES "windows.*") AND (DEFINED ${name}_windows_src))
+    list(APPEND ${name}_src ${${name}_windows_src})
+  endif()
+  if(DEFINED ${name}_${ANDROID_TARGET_TAG}_src)
+    list(APPEND ${name}_src ${${name}_${ANDROID_TARGET_TAG}_src})
+  endif()
+  add_library(${name} OBJECT ${${name}_src})
 endfunction()
 
 
@@ -187,7 +205,7 @@ function(android_add_test name)
 
   # We are not registering tests when cross compiling to windows - The build bots do not have wine installed - Some
   # tests are flaky under wine
-  if(ANDROID_TARGET_TAG MATCHES "windows.*")
+  if(ANDROID_TARGET_TAG MATCHES "windows.*" AND NOT MSVC)
     return()
   endif()
 
@@ -305,7 +323,11 @@ function(android_copy_test_dir TGT SRC_DIR DST_DIR)
 endfunction()
 
 # Append the given flags to the existing CMAKE_C_FLAGS. Be careful as these flags are global and used for every target!
+# Note this will not do anything under vs for now
 function(add_c_flag FLGS)
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    message(WARNING "Not adding ${FLGS} under visual studio compiler")
+  endif()
   foreach(FLAG ${FLGS})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FLAG}" PARENT_SCOPE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAG}" PARENT_SCOPE)
@@ -313,6 +335,9 @@ function(add_c_flag FLGS)
 endfunction()
 
 function(add_cxx_flag FLGS)
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    message(WARNING "Not adding ${FLGS} under visual studio compiler")
+  endif()
   foreach(FLAG ${FLGS})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAG}" PARENT_SCOPE)
   endforeach()
@@ -329,13 +354,21 @@ function(get_git_version VER)
                   ERROR_VARIABLE STD_ERR)
   if(NOT "${GIT_RES}" STREQUAL "0")
     message(WARNING "Unable to retrieve git version from ${ANDROID_QEMU2_TOP_DIR}, out: ${STD_OUT}, err: ${STD_ERR}")
-    execute_process(COMMAND "date" "+%Y-%m-%d"
+    if (NOT MSVC)
+      execute_process(COMMAND "date" "+%Y-%m-%d"
+                      WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
+                      RESULT_VARIABLE DATE_RES
+                      OUTPUT_VARIABLE STD_OUT
+                      ERROR_VARIABLE STD_ERR)
+      if(NOT "${DATE_RES}" STREQUAL "0")
+        message(FATAL_ERROR "Unable to retrieve date!")
+      endif()
+    else()
+    execute_process(COMMAND "date" "/T"
                     WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
                     RESULT_VARIABLE DATE_RES
                     OUTPUT_VARIABLE STD_OUT
                     ERROR_VARIABLE STD_ERR)
-    if(NOT "${DATE_RES}" STREQUAL "0")
-      message(FATAL_ERROR "Unable to retrieve date!")
     endif()
   endif()
 
@@ -346,6 +379,11 @@ endfunction()
 
 # VER The variable to set the sha in Sets ${VER} The latest sha as reported by git
 function(get_git_sha VER)
+  if (MSVC)
+    # Mission abort!
+    set(${VER} "Visual Studio, unknown SHA")
+    return()
+  endif()
   execute_process(COMMAND "git" "log" "-n" "1" "--pretty=format:'%H'"
                   WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
                   RESULT_VARIABLE GIT_RES
@@ -369,6 +407,8 @@ endfunction()
 function(android_complete_archive LIBCMD LIBNAME)
   if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
     set(${LIBCMD} "-Wl,-force_load,$<TARGET_FILE:${LIBNAME}>" PARENT_SCOPE)
+  elseif(MSVC)
+    set(${LIBCMD} "")
   else()
     set(${LIBCMD} "-Wl,-whole-archive" ${LIBNAME} "-Wl,-no-whole-archive" PARENT_SCOPE)
   endif()
@@ -384,7 +424,10 @@ endfunction()
 #
 # (Maybe on one day we will standardize all the naming, between qemu and configs and cpus..)
 function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS CPU)
-  android_complete_archive(QEMU_COMPLETE_LIB "qemu2-common")
+  # Workaround b/121393952, older cmake does not have proper object archives
+  if (NOT MSVC)
+    android_complete_archive(QEMU_COMPLETE_LIB "qemu2-common")
+  endif()
   add_executable(qemu-system-${ANDROID_AARCH}
                  android-qemu2-glue/main.cpp
                  vl.c
@@ -404,6 +447,14 @@ function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS
                                 OpenGLESDispatch
                                 ${VIRGLRENDERER_LIBRARIES}
                                 android-qemu-deps)
+  if (MSVC)
+       # Workaround b/121393952, msvc linker does not have notion of whole-archive.
+       # so we need to use the general approach supported by newer cmake versions
+       target_link_libraries(qemu-system-${ANDROID_AARCH} PRIVATE $<TARGET_OBJECTS:qemu2-common>)
+       set_target_properties(qemu-system-${ANDROID_AARCH}
+                             PROPERTIES LINK_FLAGS "/FORCE:multiple /NODEFAULTLIB:LIBCMT")
+
+  endif()
   # Make the common dependency explicit, as some generators might not detect it properly (Xcode)
   add_dependencies(qemu-system-${ANDROID_AARCH} qemu2-common)
   # XCode bin places this not where we want this...

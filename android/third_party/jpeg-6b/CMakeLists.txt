@@ -50,11 +50,13 @@ add_library(emulator-libjpeg
     jutils.c
 )
 target_include_directories(emulator-libjpeg PUBLIC .)
-target_compile_options(emulator-libjpeg PRIVATE
-    -O3
-    -fstrict-aliasing
-    -msse2
-    -Wno-all)
+if (NOT MSVC)
+    target_compile_options(emulator-libjpeg PRIVATE
+        -O3
+        -fstrict-aliasing
+        -msse2
+        -Wno-all)
+endif()
 target_compile_definitions(emulator-libjpeg PRIVATE
     -DAVOID_TABLES
     -DANDROID_INTELSSE2_IDCT

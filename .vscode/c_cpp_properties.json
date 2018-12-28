@@ -97,6 +97,37 @@
             "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         },
         {
+            "name": "Win32",
+            "includePath": [
+                "${sharedIncludePaths}",
+                "${sharedGeneratedIncludePaths}",
+                "${workspaceFolder}/../../prebuilts/android-emulator-build/common/ffmpeg/windows-x86_64/include",
+                "${workspaceFolder}/../../prebuilts/android-emulator-build/common/lz4/windows-x86_64/include",
+                "${workspaceFolder}/../../prebuilts/android-emulator-build/curl/windows-x86_64/include",
+                "${workspaceFolder}/../../prebuilts/android-emulator-build/protobuf/windows-x86_64/include",
+                "${workspaceFolder}/../../prebuilts/android-emulator-build/qemu-android-deps/windows-x86_64/include",
+                "${workspaceFolder}/../../prebuilts/android-emulator-build/qemu-android-deps/windows-x86_64/include/pixman-1",
+                "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/windows-x86_64/include.system",
+                "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/windows-x86_64/include.system/QtCore",
+                "${workspaceFolder}/android-qemu2-glue/config/windows-x86_64",
+                "${workspaceFolder}/android/android-emu/android/darwinn/external/include",
+                "${workspaceFolder}/android/android-emu/android/darwinn/external/generated",
+                "${workspaceFolder}/objs/build/intermediates64/cmake/android-emu-base"
+            ],
+            "defines": [
+                "${sharedDefines}",
+                "DARWINN_PORT_ANDROID_EMULATOR",
+                "DARWINN_CHIP_NAME=beagle",
+                "DARWINN_CHIP_TYPE=USB"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "clang-x64",
+            "configurationProvider": "vector-of-bool.cmake-tools",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+        },
+        {
             "name": "Linux",
             "includePath": [
                 "/usr/local/include",
@@ -116,16 +147,17 @@
                 "${workspaceFolder}/objs/build/intermediates64/cmake/android-emu-base"
             ],
             "defines": [
-              "${sharedDefines}",
-              "DARWINN_PORT_ANDROID_EMULATOR",
-              "DARWINN_CHIP_NAME=beagle",
-              "DARWINN_CHIP_TYPE=USB"
+                "${sharedDefines}",
+                "DARWINN_PORT_ANDROID_EMULATOR",
+                "DARWINN_CHIP_NAME=beagle",
+                "DARWINN_CHIP_TYPE=USB"
             ],
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c11",
             "cppStandard": "c++14",
             "intelliSenseMode": "clang-x64",
-            "configurationProvider": "vector-of-bool.cmake-tools"
+            "configurationProvider": "vector-of-bool.cmake-tools",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         }
     ],
     "version": 4

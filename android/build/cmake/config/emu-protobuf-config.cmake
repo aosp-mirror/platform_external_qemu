@@ -28,6 +28,7 @@ set(PROTOBUF_FOUND TRUE)
 # See: https://cmake.org/cmake/help/v3.5/module/FindProtobuf.html vs
 # https://cmake.org/cmake/help/v3.7/module/FindProtobuf.html
 set(Protobuf_FOUND TRUE)
+set(Protobuf_INCLUDE_DIR "${PROTOBUF_INCLUDE_DIR}")
 set(Protobuf_INCLUDE_DIRS "${PROTOBUF_INCLUDE_DIRS}")
 set(Protobuf_LIBRARIES "${PROTOBUF_LIBRARIES}")
 set(Protobuf_LIBRARY "${PROTOBUF_LIBRARY}")
@@ -38,9 +39,20 @@ if(ANDROID_TARGET_TAG MATCHES ".*windows.*")
   get_filename_component(PROTO_EXEC_ROOT
                          "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/protobuf/linux-x86_64"
                          ABSOLUTE)
-  set(PROTOBUF_PROTOC_EXECUTABLE "${PROTO_EXEC_ROOT}/bin/protoc")
-  set(Protobuf_PROTOC_EXECUTABLE "${PROTOBUF_PROTOC_EXECUTABLE}")
-  message(STATUS "Cross compiling using linux protoc")
+
+  # Let's not try to run elf on windows :-)
+  if (NOT MSVC)
+    set(PROTOBUF_PROTOC_EXECUTABLE "${PROTO_EXEC_ROOT}/bin/protoc")
+    set(Protobuf_PROTOC_EXECUTABLE "${PROTOBUF_PROTOC_EXECUTABLE}")
+    message(STATUS "Cross compiling using linux protoc")
+  else()
+    message(STATUS "Using windows protoc..")
+    set(Protobuf_PROTOC_LIBRARIES "")
+    set(PROTOBUF_PROTOC_EXECUTABLE "${PREBUILT_ROOT}/bin/protoc.exe")
+    set(Protobuf_PROTOC_EXECUTABLE "${PROTOBUF_PROTOC_EXECUTABLE}")
+    add_executable(protobuf::protoc IMPORTED GLOBAL)
+    set_property(TARGET protobuf::protoc PROPERTY IMPORTED_LOCATION ${PROTOBUF_PROTOC_EXECUTABLE})
+  endif()
 else()
   set(PROTOBUF_PROTOC_EXECUTABLE "${PREBUILT_ROOT}/bin/protoc")
   set(Protobuf_PROTOC_EXECUTABLE "${PROTOBUF_PROTOC_EXECUTABLE}")
@@ -59,11 +71,8 @@ if (NOT TARGET protobuf::libprotobuf)
   )
 endif()
 
-
 # We've configured everything, so now let's make sure cmake sets up the right macros
 find_package(Protobuf REQUIRED)
-
-
 
 # Prevent find_package from overring our lib
 set(PROTOBUF_LIBRARIES "${PREBUILT_ROOT}/lib/libprotobuf${CMAKE_STATIC_LIBRARY_SUFFIX}")

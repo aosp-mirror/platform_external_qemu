@@ -10,7 +10,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 
-if(ANDROID_TARGET_TAG MATCHES "windows.*")
+if(ANDROID_TARGET_TAG MATCHES "windows.*" AND NOT MSVC)
   message(STATUS "Including emugen as an external project")
   include(ExternalProject)
 
