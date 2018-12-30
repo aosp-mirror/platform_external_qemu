@@ -11,10 +11,10 @@
 
 #pragma once
 
+#include "android/base/Compiler.h"
 #include "android/base/containers/SmallVector.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/system/SystemDefs.h"
-#include "android/snapshot/common.h"
 
 #include <functional>
 #include <vector>

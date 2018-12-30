@@ -20,8 +20,6 @@
 #include "android/base/threads/Types.h"
 
 #include <functional>
-#include <memory>
-#include <utility>
 
 namespace android {
 namespace base {

@@ -35,6 +35,7 @@
 #include "android/avd/scanner.h"
 #include "android/avd/util.h"
 #include "android/base/ArraySize.h"
+#include "android/base/EnumFlags.h"
 #include "android/base/StringView.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"

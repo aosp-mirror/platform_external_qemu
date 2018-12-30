@@ -13,6 +13,7 @@
 
 #include "android/base/synchronization/Lock.h"
 
+#include <cstring>
 #include <map>
 #include <string>
 

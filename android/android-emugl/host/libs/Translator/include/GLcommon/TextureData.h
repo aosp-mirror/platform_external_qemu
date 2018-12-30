@@ -16,13 +16,12 @@
 
 #pragma once
 
-#include "android/base/files/Stream.h"
-
 #include "GLcommon/ObjectData.h"
 
 #include <memory>
 #include <unordered_map>
-#include <vector>
+
+namespace android { namespace base { class Stream; } }
 
 class SaveableTexture;
 typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "android/avd/generate.h"
+#include "android/base/EnumFlags.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/FileUtils.h"
 #include "android/base/StringView.h"

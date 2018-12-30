@@ -26,6 +26,8 @@
 
 #include <atomic>
 
+#include <assert.h>
+
 // The FenceSync class wraps actual EGLSyncKHR objects
 // and issues calls to eglCreateSyncKHR, eglClientWaitSyncKHR,
 // and eglDestroySyncKHR.

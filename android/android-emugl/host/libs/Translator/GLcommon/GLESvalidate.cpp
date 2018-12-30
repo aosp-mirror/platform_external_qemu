@@ -15,12 +15,14 @@
 */
 
 #include <GLcommon/GLESvalidate.h>
+
+#include <GLcommon/GLEScontext.h>
+
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <OpenglCodecCommon/ErrorLog.h>
-
 
 bool  GLESvalidate::textureEnum(GLenum e,unsigned int maxTex) {
     return e >= GL_TEXTURE0 && e < (GL_TEXTURE0 + maxTex);

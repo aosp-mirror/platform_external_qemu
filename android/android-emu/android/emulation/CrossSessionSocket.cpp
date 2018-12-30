@@ -11,6 +11,7 @@
 
 #include "android/emulation/CrossSessionSocket.h"
 
+#include "android/base/files/Stream.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 
@@ -21,6 +22,8 @@
 #else
 #include <sys/socket.h>
 #endif
+
+#include <assert.h>
 
 #define DEBUG 0
 

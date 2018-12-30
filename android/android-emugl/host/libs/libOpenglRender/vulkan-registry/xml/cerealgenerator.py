@@ -208,6 +208,7 @@ class IOStream;
         marshalIncludeGuest = """
 #include "goldfish_vk_marshaling_guest.h"
 #include "goldfish_vk_private_defs.h"
+#include "VulkanHandleMapping.h"
 #include "VulkanStream.h"
 
 // Stuff we are not going to use but if included,
@@ -291,6 +292,7 @@ using DlSymFunc = void* (void*, const char*);
         commonCerealImplIncludes = """
 #include "goldfish_vk_extension_structs.h"
 #include "goldfish_vk_private_defs.h"
+#include "VulkanHandleMapping.h"
 """
         commonCerealIncludesGuest = """
 #include "vk_platform_compat.h"
@@ -311,6 +313,8 @@ using DlSymFunc = void* (void*, const char*);
 """
 
         decoderImplIncludes = """
+#include "VkDecoderGlobalState.h"
+
 #include "common/goldfish_vk_marshaling.h"
 #include "common/goldfish_vk_private_defs.h"
 
@@ -319,9 +323,8 @@ using DlSymFunc = void* (void*, const char*);
 #include "IOStream.h"
 #include "emugl/common/logging.h"
 
-#include "VkDecoderGlobalState.h"
-
 #include "VulkanDispatch.h"
+#include "VulkanHandleMapping.h"
 #include "VulkanStream.h"
 
 #include <unordered_map>

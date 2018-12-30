@@ -15,6 +15,9 @@
 */
 #include <GLcommon/GLESbuffer.h>
 #include <GLcommon/GLEScontext.h>
+
+#include <android/base/files/Stream.h>
+
 #include <string.h>
 
 bool  GLESbuffer::setBuffer(GLuint size,GLuint usage,const GLvoid* data) {

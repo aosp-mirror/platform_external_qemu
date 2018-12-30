@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include "vulkan/cereal/common/goldfish_vk_dispatch.h"
+#include "common/goldfish_vk_dispatch.h"
 
 using goldfish_vk::VulkanDispatch;
 

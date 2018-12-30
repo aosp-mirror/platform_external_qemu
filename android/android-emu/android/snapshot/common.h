@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/snapshot/interface.h"
 

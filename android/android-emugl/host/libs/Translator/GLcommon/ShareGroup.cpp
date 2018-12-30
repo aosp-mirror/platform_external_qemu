@@ -18,6 +18,7 @@
 #include <GLcommon/GLEScontext.h>
 
 #include "android/base/containers/Lookup.h"
+#include "android/base/files/Stream.h"
 #include "GLcommon/FramebufferData.h"
 
 #include "emugl/common/logging.h"

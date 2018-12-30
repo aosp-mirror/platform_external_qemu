@@ -28,6 +28,7 @@
 #include "android/virtualscene/Renderer.h"
 #include "android/virtualscene/Scene.h"
 
+#include <algorithm>
 #include <deque>
 #include <unordered_map>
 

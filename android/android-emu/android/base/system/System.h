@@ -16,15 +16,12 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/CpuTime.h"
-#include "android/base/EnumFlags.h"
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"
 
-#include <algorithm>
 #include <string>
 #include <vector>
 
-#include <limits.h>
 #include <stdint.h>
 #include <time.h>
 

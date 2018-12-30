@@ -8,15 +8,13 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
 #pragma once
 
-#include "android/base/Compiler.h"
-#include "android/base/system/System.h"
+#include "android/base/Compiler.h"  // for DISALLOW_COPY_ASSIGN_AND_MOVE
 
-#include <memory>
-#include <string>
-#include <unordered_set>
+#include <memory>                   // for shared_ptr
+#include <string>                   // for string
+#include <unordered_set>            // for unordered_set
 
 namespace wireless_android_play_playlog {
 class LogEvent;

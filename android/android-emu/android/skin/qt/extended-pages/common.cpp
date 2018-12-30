@@ -8,18 +8,28 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
 #include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/raised-material-button.h"
-#include "android/skin/qt/stylesheet.h"
-#include "android/skin/qt/qt-settings.h"
-#include <QApplication>
-#include <QDir>
-#include <QSettings>
-#include <QStandardPaths>
-#include <QStringList>
-#include <QTemporaryFile>
-#include <QVariant>
+
+#include "android/skin/qt/qt-settings.h"             // for SAVE_PATH, SCREE...
+#include "android/skin/qt/raised-material-button.h"  // for RaisedMaterialBu...
+#include "android/skin/qt/stylesheet.h"              // for stylesheetValues
+
+#include <qapplication.h>                            // for QApplication
+#include <qdir.h>                                    // for QDir
+#include <qhash.h>                                   // for QHash
+#include <qlist.h>                                   // for QList
+#include <qobject.h>                                 // for qobject_cast
+#include <qpixmap.h>                                 // for QPixmap
+#include <qpushbutton.h>                             // for QPushButton
+#include <qsettings.h>                               // for QSettings
+#include <qstandardpaths.h>                          // for QStandardPaths
+#include <qstringlist.h>                             // for QStringList
+#include <qtemporaryfile.h>                          // for QTemporaryFile
+#include <qvariant.h>                                // for QVariant
+#include <qwidget.h>                                 // for QWidget
+#include <qwindowdefs.h>                             // for QWidgetList
+
+class QFrame;
 
 void setButtonEnabled(QPushButton*  button, SettingsTheme theme, bool isEnabled)
 {

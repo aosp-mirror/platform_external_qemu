@@ -17,6 +17,7 @@
 #include "android/avd/info.h"
 #include "android/avd/util.h"
 #include "android/base/ArraySize.h"
+#include "android/base/async/Looper.h"
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"

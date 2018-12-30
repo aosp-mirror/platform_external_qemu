@@ -13,6 +13,8 @@
 
 #include "android/base/async/DefaultLooper.h"
 
+#include "android/base/files/Stream.h"
+
 #include <utility>
 
 namespace android {

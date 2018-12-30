@@ -45,10 +45,11 @@
 
 #include "ANGLEShaderParser.h"
 
-#include <stdio.h>
-
 #include <numeric>
 #include <unordered_map>
+
+#include <math.h>
+#include <stdio.h>
 
 using android::base::c_str;
 

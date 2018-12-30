@@ -17,7 +17,6 @@
 #pragma once
 
 #include "android/base/containers/SmallVector.h"
-#include "android/base/files/Stream.h"
 #include "android/snapshot/LazySnapshotObj.h"
 #include "GLcommon/NamedObject.h"
 #include "GLcommon/TextureData.h"
@@ -28,6 +27,8 @@
 #include <atomic>
 #include <functional>
 #include <memory>
+
+namespace android { namespace base { class Stream; } }
 
 class GLDispatch;
 class GlobalNameSpace;

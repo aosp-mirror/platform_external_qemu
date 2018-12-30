@@ -13,13 +13,18 @@
 // limitations under the License.
 #include "VulkanStream.h"
 
-#include "IOStream.h"
+#include "IOStream.h"             // for IOStream
+#include "VulkanHandleMapping.h"  // for VulkanHandleMapping (ptr only), Def...
 
-#include "android/base/Pool.h"
+#include "android/base/Pool.h"    // for Pool
 
-#include <vector>
+#include <algorithm>              // for copy, max
+#include <cstdint>                // for uint8_t
+#include <vector>                 // for vector
 
-#include <inttypes.h>
+#include <stdio.h>                // for fprintf, stderr
+#include <stdlib.h>               // for abort, size_t
+#include <string.h>               // for memcpy, memset
 
 #define E(fmt,...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
 
