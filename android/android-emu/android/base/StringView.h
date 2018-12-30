@@ -11,10 +11,8 @@
 
 #pragma once
 
-#include "android/base/Optional.h"
 #include "android/base/TypeTraits.h"
 
-#include <algorithm>
 #include <cstring>
 #include <string>
 
@@ -132,86 +130,38 @@ public:
     constexpr bool empty() const { return !size(); }
     constexpr bool isNullTerminated() const { return *end() == '\0'; }
 
-    void clear() {
-        mSize = 0;
-        mString = "";
-    }
+    void clear();
 
     constexpr char operator[](size_t index) const {
         return mString[index];
     }
 
-    void set(const char* data, size_t len) {
-        mString = data ? data : "";
-        mSize = len;
-    }
-
-    void set(const char* str) {
-        mString = str ? str : "";
-        mSize = ::strlen(mString);
-    }
-
-    void set(const StringView& other) {
-        mString = other.mString;
-        mSize = other.mSize;
-    }
+    void set(const char* data, size_t len);
+    void set(const StringView& other);
 
     // Compare with another StringView.
     int compare(const StringView& other) const;
 
-    StringView& operator=(const StringView& other) {
-        set(other);
-        return *this;
-    }
+    StringView& operator=(const StringView& other);
 
     // find() first occurrence of |other| with an initial offset.
     // Returns absolute offset (does not include |off|).
-    size_t find(StringView other, size_t off = 0) {
-        // Trivial case
-        if (!other.mSize) return 0;
-
-        size_t safeOff = std::min(off, mSize);
-
-        const char* searchStart = mString + safeOff;
-        const char* searchEnd = searchStart + mSize - safeOff;
-
-        const char* res =
-            std::search(searchStart, searchEnd,
-                        other.mString, other.mString + other.mSize);
-        if (res == searchEnd) return std::string::npos;
-        return (size_t)((uintptr_t)res - (uintptr_t)mString);
-    }
+    size_t find(StringView other, size_t off = 0);
 
     // getSubstr(); returns this string starting at the first place |other|
     // occurs, otherwise a blank string.
-    StringView getSubstr(StringView other, size_t off = 0) {
-        size_t loc = find(other, off);
-        if (loc == std::string::npos) return StringView("");
-        return { mString + loc, end() };
-    }
+    StringView getSubstr(StringView other, size_t off = 0);
 
     // Returns substring starting at |begin| and running for |len|,
     // or the rest of the string if |len| is std::string::npos.
-    StringView substr(size_t begin, size_t len = std::string::npos) {
-        if (len == std::string::npos) {
-            len = mSize - begin;
-        }
-        size_t safeOff = std::min(begin, mSize);
-        size_t safeLen = std::min(len, mSize - safeOff);
-        return { mString + safeOff, safeLen };
-    }
+    StringView substr(size_t begin, size_t len = std::string::npos);
 
     // Returns substring starting at |begin| ending at |end|,
     // or the rest of the string if |end is std::string::npos.
-    StringView substrAbs(size_t begin, size_t end = std::string::npos) {
-        if (end == std::string::npos) {
-            end = begin + mSize;
-        }
-        return substr(begin, end - begin);
-    }
+    StringView substrAbs(size_t begin, size_t end = std::string::npos);
 
     // Convert to std::string when needed.
-    operator std::string() const { return std::string(mString, mSize); }
+    operator std::string() const;
 
 private:
     const char* mString;
@@ -222,26 +172,11 @@ private:
 // conversions with C strings and std::string objects.
 
 bool operator==(const StringView& x, const StringView& y);
-
-inline bool operator!=(const StringView& x, const StringView& y) {
-    return !(x == y);
-}
-
-inline bool operator<(const StringView& x, const StringView& y) {
-    return x.compare(y) < 0;
-}
-
-inline bool operator>=(const StringView& x, const StringView& y) {
-    return !(x < y);
-}
-
-inline bool operator >(const StringView& x, const StringView& y) {
-    return x.compare(y) > 0;
-}
-
-inline bool operator<=(const StringView& x, const StringView& y) {
-    return !(x > y);
-}
+bool operator!=(const StringView& x, const StringView& y);
+bool operator<(const StringView& x, const StringView& y);
+bool operator>=(const StringView& x, const StringView& y);
+bool operator >(const StringView& x, const StringView& y);
+bool operator<=(const StringView& x, const StringView& y);
 
 // Helper to get a null-terminated const char* from a string view.
 // Only allocates if the StringView is not null terminated.
@@ -262,29 +197,18 @@ inline bool operator<=(const StringView& x, const StringView& y) {
 //
 class CStrWrapper {
 public:
-    CStrWrapper(StringView stringView) : mStringView(stringView) {}
+    CStrWrapper(StringView stringView);
+    ~CStrWrapper();
 
     // Returns a null-terminated char*, potentially creating a copy to add a
     // null terminator.
-    const char* get() {
-        if (mStringView.isNullTerminated()) {
-            return mStringView.data();
-        } else {
-            // Create the std::string copy on-demand.
-            if (!mStringCopy) {
-                mStringCopy.emplace(mStringView.str());
-            }
-
-            return mStringCopy->c_str();
-        }
-    }
-
+    const char* get();
     // Enable casting to const char*
-    operator const char*() { return get(); }
+    operator const char*();
 
 private:
-    const StringView mStringView;
-    Optional<std::string> mStringCopy;
+    class Impl;
+    Impl* mImpl = nullptr;
 };
 
 inline CStrWrapper c_str(StringView stringView) {

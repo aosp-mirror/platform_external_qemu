@@ -28,6 +28,7 @@
 #ifndef _WIN32
 
 #include "android/async-utils.h"
+#include "android/base/Log.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/emulation/CrossSessionSocket.h"
 #include "android/emulation/android_pipe_host.h"
