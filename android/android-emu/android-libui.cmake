@@ -255,6 +255,7 @@ if (NOT NO_QTWEBENGINE)
 endif()
 
 target_compile_options(emulator-libui PRIVATE "-DUSE_MMX=1" "-mmmx")
+add_compile_options(-mmmx)
 
 # Target specific compiler flags for windows, since we include FFMPEG C sources from C++ we need to make sure this flag
 # is set for c++ sources.
@@ -332,7 +333,7 @@ set(emulator-libui_unittests_windows_src
     android/skin/qt/qtmain_dummy_test.cpp)
 android_add_test(emulator-libui_unittests)
 
-target_compile_options(emulator-libui_unittests PRIVATE -O0 -UNDEBUG)
+target_compile_options(emulator-libui_unittests PRIVATE -UNDEBUG)
 
 # Target specific compiler flags for windows
 android_target_compile_options(emulator-libui_unittests windows PRIVATE

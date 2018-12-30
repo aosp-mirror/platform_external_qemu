@@ -15,6 +15,8 @@ if(NOT DEFINED ANDROID_TARGET_TAG)
 endif()
 message(STATUS "Using toolchain for ${ANDROID_TARGET_TAG}")
 
+include(cotire)
+
 include(android)
 include(prebuilts)
 
@@ -33,7 +35,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # experimental: include-what-you-use
-set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "/usr/local/google/home/lfy/include-what-you-use/build/bin/include-what-you-use")
+# set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "/usr/local/google/home/lfy/include-what-you-use/build/bin/include-what-you-use")
 
 # Let's bin place everything in the root, with the shared libs in the right place
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib64)

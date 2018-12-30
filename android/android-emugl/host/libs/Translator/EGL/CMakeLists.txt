@@ -17,6 +17,8 @@ set(EGL_translator_linux-x86_64_src EglOsApi_glx.cpp EglOsApi_egl.cpp CoreProfil
 set(EGL_translator_windows_src EglOsApi_wgl.cpp EglOsApi_egl.cpp CoreProfileConfigs_windows.cpp)
 
 android_add_shared_library(EGL_translator)
+set_target_properties(EGL_translator PROPERTIES CXX_VISIBILITY_PRESET hidden)
+cotire(EGL_translator)
 
 target_link_libraries(EGL_translator PUBLIC GLcommon emugl_common)
 target_link_libraries(EGL_translator PRIVATE emugl_base android-emu-base astc-codec)

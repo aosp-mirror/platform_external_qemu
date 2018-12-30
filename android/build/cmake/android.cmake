@@ -443,6 +443,8 @@ function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS
                  ${STUBS}
                  ${qemu-system-${QEMU_AARCH}_sources}
                  ${qemu-system-${QEMU_AARCH}_generated_sources})
+             set_target_properties(qemu-system-${ANDROID_AARCH} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
+  cotire(qemu-system-${ANDROID_AARCH})
   target_include_directories(qemu-system-${ANDROID_AARCH} PRIVATE android-qemu2-glue/config/target-${CONFIG_AARCH} target/${CPU})
   target_compile_definitions(qemu-system-${ANDROID_AARCH} PRIVATE -DNEED_CPU_H -DCONFIG_ANDROID)
   target_link_libraries(qemu-system-${ANDROID_AARCH}

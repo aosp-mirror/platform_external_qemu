@@ -75,6 +75,8 @@ set(OpenglRender_linux-x86_64_src NativeSubWindow_x11.cpp)
 set(OpenglRender_darwin-x86_64_src NativeSubWindow_cocoa.m)
 set(OpenglRender_windows_src NativeSubWindow_win32.cpp)
 android_add_shared_library(OpenglRender)
+set_target_properties(OpenglRender PROPERTIES CXX_VISIBILITY_PRESET hidden)
+cotire(OpenglRender)
 
 target_link_libraries(OpenglRender
                               PUBLIC

@@ -535,7 +535,7 @@ set(android-mock-vm-operations_src
 
 android_add_library(android-mock-vm-operations)
 
-android_target_compile_options(android-mock-vm-operations Clang PRIVATE -O0 -Wno-invalid-constexpr)
+android_target_compile_options(android-mock-vm-operations Clang PRIVATE -Wno-invalid-constexpr)
 target_include_directories(android-mock-vm-operations
                                    PRIVATE
                                    ../android-emugl/host/include/
@@ -742,9 +742,10 @@ set(android-emu_unittests_linux-x86_64_src
 
 # And declare the test
 android_add_test(android-emu_unittests)
+cotire(android-emu_unittests)
 
 # Setup the targets compile config etc..
-android_target_compile_options(android-emu_unittests Clang PRIVATE -O0 -Wno-invalid-constexpr)
+android_target_compile_options(android-emu_unittests Clang PRIVATE -Wno-invalid-constexpr)
 target_include_directories(android-emu_unittests
                                    PRIVATE
                                    ../android-emugl/host/include/
@@ -825,5 +826,4 @@ set(android-emu-metrics_unittests_src
     android/metrics/tests/SyncMetricsReporter_unittest.cpp)
 android_add_test(android-emu-metrics_unittests)
 
-target_compile_options(android-emu-metrics_unittests PRIVATE -O0)
 target_link_libraries(android-emu-metrics_unittests PRIVATE gmock_main android-emu)
