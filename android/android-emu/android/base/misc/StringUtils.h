@@ -16,7 +16,6 @@
 
 #include "android/base/StringView.h"
 
-#include <functional>
 #include <iterator>
 #include <sstream>
 

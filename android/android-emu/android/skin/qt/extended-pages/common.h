@@ -8,13 +8,14 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
+#include "android/settings-agent.h"  // for SettingsTheme
 
-#include "android/settings-agent.h"
+#include <qcolor.h>                  // for QColor
+#include <qicon.h>                   // for QIcon
+#include <qstring.h>                 // for QString
 
-#include <QFrame>
-#include <QIcon>
-#include <QPushButton>
-#include <QString>
+class QFrame;
+class QPushButton;
 
 // Sets the button state to enabled or disabled, and sets the
 // corresponding icon for the button.

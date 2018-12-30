@@ -16,6 +16,7 @@
 
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
+#include "android/base/StringView.h"
 #include "android/base/testing/GTestUtils.h"
 #include "android/base/testing/TestNetworkInterfaceNameResolver.h"
 

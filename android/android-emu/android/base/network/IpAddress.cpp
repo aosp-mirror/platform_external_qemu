@@ -31,6 +31,9 @@
 #include <netinet/in.h>
 #endif
 
+#include <cstring>
+#include <string.h>
+
 namespace android {
 namespace base {
 

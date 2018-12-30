@@ -12,7 +12,7 @@
 #pragma once
 
 #include <android/base/Compiler.h>
-#include <android/base/files/Stream.h>
+#include <android/base/StringView.h>
 
 #include <functional>
 #include <memory>
@@ -24,6 +24,8 @@
 
 namespace android {
 namespace base {
+
+class Stream;
 
 // A Looper is an abstraction for an event loop that can wait for either
 // I/O events on file descriptors, or timers.

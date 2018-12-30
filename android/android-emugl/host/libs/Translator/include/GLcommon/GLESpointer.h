@@ -16,12 +16,19 @@
 #ifndef GLES_POINTER_H
 #define GLES_POINTER_H
 
-#include <android/base/files/Stream.h>
 #include <GLES/gl.h>
 #include "GLESbuffer.h"
 
 #include <functional>
 #include <vector>
+
+namespace android {
+namespace base {
+
+class Stream;
+
+} // namespace base
+} // namespace android
 
 class GLESpointer {
 public:

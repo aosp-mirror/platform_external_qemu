@@ -16,6 +16,8 @@
 
 #include "GLcommon/ObjectData.h"
 
+#include "android/base/files/Stream.h"
+
 NamedObjectType ObjectDataType2NamedObjectType(ObjectDataType objDataType) {
     switch (objDataType) {
         case SHADER_DATA:

@@ -11,6 +11,7 @@
 
 #include "android/base/async/DefaultLooper.h"
 
+#include "android/base/files/Stream.h"
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/base/sockets/SocketErrors.h"

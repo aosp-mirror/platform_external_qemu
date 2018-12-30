@@ -14,6 +14,8 @@
 * limitations under the License.
 */
 #include "GLESv2Validate.h"
+
+#include <GLcommon/GLEScontext.h>
 #include <string.h>
 
 #define LIST_VALID_TEXFORMATS(f) \

@@ -16,11 +16,12 @@
 
 #pragma once
 
-#include "android/base/files/Stream.h"
 #include "emugl/common/smart_ptr.h"
 #include "GLcommon/NamedObject.h"
 
 #include <functional>
+
+namespace android { namespace base { class Stream; } }
 
 enum ObjectDataType {
     SHADER_DATA,

@@ -17,7 +17,9 @@
 #define GLES_VALIDATE_H
 
 #include <GLES/gl.h>
-#include "GLEScontext.h"
+
+class GLEScontext;
+
 struct GLESvalidate
 {
 static bool textureEnum(GLenum e,unsigned int maxTex);

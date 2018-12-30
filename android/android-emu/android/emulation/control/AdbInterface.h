@@ -16,7 +16,6 @@
 
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"
-#include "android/base/async/Looper.h"
 #include "android/base/system/SystemDefs.h"
 #include "android/base/threads/ParallelTask.h"
 
@@ -25,6 +24,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+
+namespace android { namespace base { class Looper; } }
 
 namespace android {
 namespace emulation {

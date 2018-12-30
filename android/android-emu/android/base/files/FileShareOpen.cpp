@@ -8,15 +8,17 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
-#include <algorithm>
-#include <errno.h>
-#include <cstdio>
-
 #include "android/base/files/FileShareOpen.h"
+
 #include "android/base/files/FileShareOpenImpl.h"
 #include "android/base/StringFormat.h"
 #include "android/base/threads/Thread.h"
+
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
+
+#include <errno.h>
 
 void android::base::createFileForShare(const char* filename) {
     void* handle = internal::openFileForShare(filename);

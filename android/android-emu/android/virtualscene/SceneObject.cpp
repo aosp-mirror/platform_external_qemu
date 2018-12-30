@@ -20,6 +20,8 @@
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"
 
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
+
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
 #define D(...) VERBOSE_PRINT(virtualscene, __VA_ARGS__)

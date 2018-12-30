@@ -15,6 +15,8 @@
 */
 #include "GLcommon/GLESpointer.h"
 
+#include "android/base/files/Stream.h"
+
 #include <stdlib.h>
 
 GLenum GLESpointer::getType() const {
