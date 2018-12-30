@@ -11,15 +11,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #include "VulkanDispatch.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/system/System.h"
-#include "android/base/synchronization/Lock.h"
+#include "emugl/common/shared_library.h"        // for SharedLibrary
 
-#include "emugl/common/shared_library.h"
+#include "android/base/files/PathUtils.h"       // for pj
+#include "android/base/memory/LazyInstance.h"   // for LazyInstance, LAZY_IN...
+#include "android/base/synchronization/Lock.h"  // for Lock, AutoLock
+#include "android/base/system/System.h"         // for System
+
+#include <string>                               // for operator==, basic_string
 
 using android::base::AutoLock;
 using android::base::LazyInstance;

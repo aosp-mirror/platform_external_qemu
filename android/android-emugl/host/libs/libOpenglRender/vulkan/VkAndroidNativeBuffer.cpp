@@ -13,17 +13,18 @@
 // limitations under the License.
 #include "VkAndroidNativeBuffer.h"
 
-#include "android/base/Log.h"
+#include "FrameBuffer.h"                                  // for FrameBuffer
+#include "GrallocDefs.h"                                  // for GRALLOC_USA...
+#include "VkCommonOperations.h"                           // for getStagingM...
+#include "VulkanDispatch.h"                               // for VulkanDispatch
 
-#include "cereal/common/goldfish_vk_private_defs.h"
-#include "cereal/common/goldfish_vk_extension_structs.h"
+#include "cereal/common/goldfish_vk_extension_structs.h"  // for goldfish_vk...
+#include "cereal/common/goldfish_vk_private_defs.h"       // for VkNativeBuf...
+#include "common/goldfish_vk_dispatch.h"                  // for VulkanDispatch
 
-#include "FrameBuffer.h"
-#include "GrallocDefs.h"
-#include "VkCommonOperations.h"
-#include "VulkanDispatch.h"
+#include "android/base/Log.h"                             // for LOG, LogMes...
 
-#include <string.h>
+#include <cstdint>                                        // for uint32_t
 
 namespace goldfish_vk {
 

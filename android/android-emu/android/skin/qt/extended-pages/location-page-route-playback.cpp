@@ -17,6 +17,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include "math.h"
+
 void LocationPage::on_loc_playRouteButton_clicked() {
     if (mNowPlaying) {
         // STOP

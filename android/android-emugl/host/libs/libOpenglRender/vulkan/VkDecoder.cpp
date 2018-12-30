@@ -25,6 +25,8 @@
 #include "VkDecoder.h"
 
 
+#include "VkDecoderGlobalState.h"
+
 #include "common/goldfish_vk_marshaling.h"
 #include "common/goldfish_vk_private_defs.h"
 
@@ -33,9 +35,8 @@
 #include "IOStream.h"
 #include "emugl/common/logging.h"
 
-#include "VkDecoderGlobalState.h"
-
 #include "VulkanDispatch.h"
+#include "VulkanHandleMapping.h"
 #include "VulkanStream.h"
 
 #include <unordered_map>

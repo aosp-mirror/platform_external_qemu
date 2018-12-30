@@ -13,11 +13,12 @@
 // limitations under the License.
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>                      // for VK_NULL_HANDLE
+#include "cereal/common/goldfish_vk_private_defs.h"  // for VkSwapchainImage...
 
-#include "cereal/common/goldfish_vk_private_defs.h"
+#include <vector>                                    // for vector
 
-#include <vector>
+#include <stdint.h>                                  // for uint32_t, uint64_t
 
 #ifdef _WIN32
 typedef void* HANDLE;

@@ -14,9 +14,10 @@
 // limitations under the License.
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include "VulkanHandles.h"  // for GOLDFISH_VK_LIST_HANDLE_TYPES
 
-#include "VulkanHandles.h"
+#include <stddef.h>         // for size_t
+#include <inttypes.h>       // for uint64_t
 
 namespace goldfish_vk {
 
