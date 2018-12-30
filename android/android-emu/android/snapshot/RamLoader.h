@@ -16,7 +16,7 @@
 #include "android/base/Optional.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/synchronization/MessageChannel.h"
-#include "android/base/system/System.h"
+#include "android/base/system/SystemDefs.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/base/threads/ThreadPool.h"
 #include "android/snapshot/GapTracker.h"
@@ -110,7 +110,7 @@ public:
     void acquireGapTracker(GapTracker::Ptr gaps) { mGaps = std::move(gaps); }
     GapTracker::Ptr releaseGapTracker() { return std::move(mGaps); }
 
-    bool getDuration(base::System::Duration* duration) {
+    bool getDuration(base::Duration* duration) {
         if (mEndTime < mStartTime) {
             return false;
         }
@@ -174,8 +174,8 @@ private:
     uint64_t mIndexPos = 0;
     int mVersion = 0;
 
-    base::System::Duration mStartTime = 0;
-    base::System::Duration mEndTime = 0;
+    base::Duration mStartTime = 0;
+    base::Duration mEndTime = 0;
 
     // Assumed to be a power of 2 for convenient
     // rounding and aligning

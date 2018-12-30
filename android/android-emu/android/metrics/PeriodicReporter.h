@@ -16,7 +16,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/Optional.h"
 #include "android/base/synchronization/Lock.h"
-#include "android/base/system/System.h"
+#include "android/base/system/SystemDefs.h"
 #include "android/metrics/MetricsReporter.h"
 
 #include <functional>
@@ -98,10 +98,10 @@ public:
     ~PeriodicReporter();
 
     // Add a new periodic reporting task that runs every |periodMs| milliseconds
-    void addTask(base::System::Duration periodMs, Callback callback);
+    void addTask(base::Duration periodMs, Callback callback);
     // Same as addTask(), but the task can be canceled by destroying the
     // returned TaskToken.
-    TaskToken addCancelableTask(base::System::Duration periodMs,
+    TaskToken addCancelableTask(base::Duration periodMs,
                                 Callback callback);
 
 private:
@@ -120,16 +120,16 @@ private:
     void startImpl(MetricsReporter* metricsReporter, base::Looper* looper);
 
     void createPerPeriodTimerNoLock(PerPeriodData* dataPtr,
-                                    base::System::Duration periodMs);
+                                    base::Duration periodMs);
 
     void reportForPerPeriodData(PerPeriodData* data);
 
     // The implementation of task adding.
     // |mLock| has to be help during the call.
     CallbackList::iterator addTaskInternalNoLock(
-            base::System::Duration periodMs,
+            base::Duration periodMs,
             Callback callback);
-    void removeTask(base::System::Duration periodMs,
+    void removeTask(base::Duration periodMs,
                     CallbackList::iterator iter);
 
     MetricsReporter* mMetricsReporter = nullptr;
@@ -142,7 +142,7 @@ private:
     //  on all operations other than erasing the specific element for that
     //  iterator. We store the iterators (and, actually, addresses of stored
     //  PerPeriodData objects) and later use them, so they *must* be stable.
-    std::map<base::System::Duration, PerPeriodData> mPeriodDataByPeriod;
+    std::map<base::Duration, PerPeriodData> mPeriodDataByPeriod;
 };
 
 }  // namespace metrics

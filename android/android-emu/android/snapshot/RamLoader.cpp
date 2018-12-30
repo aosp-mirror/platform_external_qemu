@@ -22,6 +22,7 @@
 #include "android/base/files/preadwrite.h"
 #include "android/base/memory/MemoryHints.h"
 #include "android/base/misc/StringUtils.h"
+#include "android/base/system/System.h"
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/Decompressor.h"
 #include "android/snapshot/PathUtils.h"

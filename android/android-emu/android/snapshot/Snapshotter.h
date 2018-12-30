@@ -20,9 +20,11 @@
 #include "android/emulation/control/window_agent.h"
 
 #include <functional>
+#include <memory>
 #include <string>
-#include <utility>
 #include <vector>
+
+#include <inttypes.h>
 
 // Fwd-declare the protobuf class
 namespace android_studio {

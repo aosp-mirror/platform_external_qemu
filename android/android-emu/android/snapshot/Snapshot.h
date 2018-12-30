@@ -14,7 +14,7 @@
 #include "android/base/containers/CircularBuffer.h"
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"
-#include "android/base/system/System.h"
+#include "android/base/system/SystemDefs.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/proto/snapshot.pb.h"
@@ -43,7 +43,7 @@ public:
     void incrementSuccessfulLoads();
     bool shouldInvalidate() const;
     void addSaveStats(bool incremental,
-                      const base::System::Duration duration,
+                      const base::Duration duration,
                       uint64_t ramChangedBytes);
     bool areSavesSlow() const;
 

@@ -13,7 +13,7 @@
 
 #include "android/base/containers/SmallVector.h"
 #include "android/base/files/StdioStream.h"
-#include "android/base/system/System.h"
+#include "android/base/system/SystemDefs.h"
 #include "android/snapshot/common.h"
 
 #include <functional>
@@ -39,7 +39,7 @@ public:
     virtual bool hasError() const = 0;
     virtual uint64_t diskSize() const = 0;
     virtual bool compressed() const = 0;
-    virtual bool getDuration(base::System::Duration* duration) = 0;
+    virtual bool getDuration(base::Duration* duration) = 0;
 };
 
 class TextureSaver final : public ITextureSaver {
@@ -59,7 +59,7 @@ public:
     // Returns true if there was save with measurable time
     // (and writes it to |duration| if |duration| is not null),
     // otherwise returns false.
-    bool getDuration(base::System::Duration* duration) {
+    bool getDuration(base::Duration* duration) {
         if (mEndTime < mStartTime) {
             return false;
         }
@@ -93,8 +93,8 @@ private:
     bool mFinished = false;
     bool mHasError = false;
 
-    android::base::System::Duration mStartTime = 0;
-    android::base::System::Duration mEndTime = 0;
+    android::base::Duration mStartTime = 0;
+    android::base::Duration mEndTime = 0;
 };
 
 }  // namespace snapshot

@@ -91,7 +91,7 @@ public:
 
     AdbCommandPtr runAdbCommand(const std::vector<std::string>& args,
                                 ResultCallback&& result_callback,
-                                System::Duration timeout_ms,
+                                android::base::Duration timeout_ms,
                                 bool want_output = true) final;
 
 private:
@@ -253,7 +253,7 @@ AdbInterfaceImpl::AdbInterfaceImpl(Looper* looper,
 AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         const std::vector<std::string>& args,
         ResultCallback&& result_callback,
-        System::Duration timeout_ms,
+        android::base::Duration timeout_ms,
         bool want_output) {
     auto command = std::shared_ptr<AdbCommand>(
             new AdbCommand(mLooper, adbPath(), mSerialString, args, want_output,
@@ -268,7 +268,7 @@ AdbCommand::AdbCommand(Looper* looper,
                        const std::string& serial_string,
                        const std::vector<std::string>& command,
                        bool want_output,
-                       System::Duration timeoutMs,
+                       android::base::Duration timeoutMs,
                        ResultCallback&& callback)
     : mLooper(looper),
       mResultCallback(std::move(callback)),
@@ -369,7 +369,7 @@ void AdbCommand::taskFunction(OptionalAdbCommandResult* result) {
     }
 }
 
-AdbCommandResult::AdbCommandResult(System::ProcessExitCode exitCode,
+AdbCommandResult::AdbCommandResult(android::base::ProcessExitCode exitCode,
                                    const std::string& outputName)
     : exit_code(exitCode),
       output(outputName.empty() ? nullptr

@@ -694,7 +694,7 @@ void Snapshot::incrementSuccessfulLoads() {
 }
 
 void Snapshot::addSaveStats(bool incremental,
-                            const base::System::Duration duration,
+                            const base::Duration duration,
                             uint64_t ramChangedBytes) {
 
     emulator_snapshot::SaveStats stats;

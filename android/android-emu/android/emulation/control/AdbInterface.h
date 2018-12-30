@@ -17,7 +17,7 @@
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"
 #include "android/base/async/Looper.h"
-#include "android/base/system/System.h"
+#include "android/base/system/SystemDefs.h"
 #include "android/base/threads/ParallelTask.h"
 
 #include <functional>
@@ -38,14 +38,14 @@ using AdbCommandPtr = std::shared_ptr<AdbCommand>;
 // Encapsulates the result of running an ADB command.
 struct AdbCommandResult {
     // Exit code returned by ADB.
-    android::base::System::ProcessExitCode exit_code;
+    android::base::ProcessExitCode exit_code;
 
     // The command's output.
     // NOTE: we're using unique_ptr here because there's a bug in g++ 4 due to
     // which file streams are unmovable.
     std::unique_ptr<std::istream> output;
 
-    AdbCommandResult(android::base::System::ProcessExitCode exitCode,
+    AdbCommandResult(android::base::ProcessExitCode exitCode,
                      const std::string& outputName);
 
     ~AdbCommandResult();
@@ -111,7 +111,7 @@ public:
 
     virtual AdbCommandPtr runAdbCommand(const std::vector<std::string>& args,
                                         ResultCallback&& result_callback,
-                                        base::System::Duration timeout_ms,
+                                        base::Duration timeout_ms,
                                         bool want_output = true) = 0;
 
     // Creates a new instance of the AdbInterface.
@@ -140,7 +140,7 @@ private:
                const std::string& serial_string,
                const std::vector<std::string>& command,
                bool want_output,
-               base::System::Duration timeoutMs,
+               base::Duration timeoutMs,
                ResultCallback&& callback);
     void start(int checkTimeoutMs = 1000);
     void taskFunction(OptionalAdbCommandResult* result);

@@ -78,13 +78,13 @@ PeriodicReporter::~PeriodicReporter() {
     mPeriodDataByPeriod.clear();
 }
 
-void PeriodicReporter::addTask(System::Duration periodMs, Callback callback) {
+void PeriodicReporter::addTask(android::base::Duration periodMs, Callback callback) {
     AutoLock lock(mLock);
     addTaskInternalNoLock(periodMs, std::move(callback));
 }
 
 PeriodicReporter::TaskToken PeriodicReporter::addCancelableTask(
-        System::Duration periodMs,
+        android::base::Duration periodMs,
         PeriodicReporter::Callback callback) {
     // Capture a weak pointer to |this| into the task guard to make sure it can
     // outlive |this| and won't try to call into a dangling pointer.
@@ -152,7 +152,7 @@ void PeriodicReporter::reportForPerPeriodData(
 }
 
 void PeriodicReporter::createPerPeriodTimerNoLock(PerPeriodData* const data,
-                                                  System::Duration periodMs) {
+                                                  android::base::Duration periodMs) {
     assert(mLooper);
     data->task.emplace(mLooper,
                        [this, data]() {
@@ -164,7 +164,7 @@ void PeriodicReporter::createPerPeriodTimerNoLock(PerPeriodData* const data,
 }
 
 PeriodicReporter::CallbackList::iterator
-PeriodicReporter::addTaskInternalNoLock(System::Duration periodMs,
+PeriodicReporter::addTaskInternalNoLock(android::base::Duration periodMs,
                                         PeriodicReporter::Callback callback) {
     PerPeriodData& data = mPeriodDataByPeriod[periodMs];
     data.callbacks.push_back(std::move(callback));
@@ -176,7 +176,7 @@ PeriodicReporter::addTaskInternalNoLock(System::Duration periodMs,
     return myIt;
 }
 
-void PeriodicReporter::removeTask(System::Duration periodMs,
+void PeriodicReporter::removeTask(android::base::Duration periodMs,
                                   CallbackList::iterator iter) {
     AutoLock lock(mLock);
 
