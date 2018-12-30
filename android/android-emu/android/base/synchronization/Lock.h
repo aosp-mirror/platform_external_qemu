@@ -15,16 +15,6 @@
 #pragma once
 
 #include "android/base/Compiler.h"
-#include "android/base/Debug.h"
-
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN 1
-#include <windows.h>
-#else
-#include <pthread.h>
-#endif
-
-#include <assert.h>
 
 namespace android {
 namespace base {
@@ -39,100 +29,42 @@ class AutoReadLock;
 class StaticLock {
 public:
     using AutoLock = android::base::AutoLock;
-
-    constexpr StaticLock() = default;
-
-    // Acquire the lock.
-    void lock() {
-#ifdef _WIN32
-        ::AcquireSRWLockExclusive(&mLock);
-#else
-        ::pthread_mutex_lock(&mLock);
-#endif
-        ANDROID_IF_DEBUG(mIsLocked = true;)
-    }
-
-    bool tryLock() {
-        bool ret = false;
-#ifdef _WIN32
-        ret = ::TryAcquireSRWLockExclusive(&mLock);
-#else
-        ret = ::pthread_mutex_trylock(&mLock) == 0;
-#endif
-        ANDROID_IF_DEBUG(mIsLocked = ret;)
-        return ret;
-    }
-
-    ANDROID_IF_DEBUG(bool isLocked() const { return mIsLocked; })
-
-    // Release the lock.
-    void unlock() {
-        ANDROID_IF_DEBUG(mIsLocked = false;)
-#ifdef _WIN32
-        ::ReleaseSRWLockExclusive(&mLock);
-#else
-        ::pthread_mutex_unlock(&mLock);
-#endif
-    }
-
+    StaticLock();
+    void lock();
+    bool tryLock();
+    void unlock();
 protected:
     friend class ConditionVariable;
+    void* getPlatformLock();
 
-#ifdef _WIN32
-    // Benchmarks show that on Windows SRWLOCK performs a little bit better than
-    // CRITICAL_SECTION for uncontended mode and much better in case of
-    // contention.
-    SRWLOCK mLock = SRWLOCK_INIT;
-#else
-    pthread_mutex_t mLock = PTHREAD_MUTEX_INITIALIZER;
-#endif
-    // Both POSIX threads and WinAPI don't allow move (undefined behavior).
+    class Impl;
+    Impl* mImpl;
     DISALLOW_COPY_ASSIGN_AND_MOVE(StaticLock);
-
-    ANDROID_IF_DEBUG(bool mIsLocked = false;)
 };
 
 // Simple wrapper class for mutexes used in non-static context.
 class Lock : public StaticLock {
 public:
     using StaticLock::AutoLock;
-
-    constexpr Lock() = default;
-#ifndef _WIN32
-    // The only difference is that POSIX requires a deallocation function call
-    // for its mutexes.
-    ~Lock() { ::pthread_mutex_destroy(&mLock); }
-#endif
+    Lock();
+    ~Lock();
 };
 
 class ReadWriteLock {
 public:
     using AutoWriteLock = android::base::AutoWriteLock;
     using AutoReadLock = android::base::AutoReadLock;
+    ReadWriteLock();
+    ~ReadWriteLock();
+    void lockRead();
+    void lockWrite();
+    void unlockRead();
+    void unlockWrite();
+protected:
+    void* getPlatformLock();
 
-#ifdef _WIN32
-    constexpr ReadWriteLock() = default;
-    ~ReadWriteLock() = default;
-    void lockRead() { ::AcquireSRWLockShared(&mLock); }
-    void unlockRead() { ::ReleaseSRWLockShared(&mLock); }
-    void lockWrite() { ::AcquireSRWLockExclusive(&mLock); }
-    void unlockWrite() { ::ReleaseSRWLockExclusive(&mLock); }
-
-private:
-    SRWLOCK mLock = SRWLOCK_INIT;
-#else   // !_WIN32
-    ReadWriteLock() { ::pthread_rwlock_init(&mLock, NULL); }
-    ~ReadWriteLock() { ::pthread_rwlock_destroy(&mLock); }
-    void lockRead() { ::pthread_rwlock_rdlock(&mLock); }
-    void unlockRead() { ::pthread_rwlock_unlock(&mLock); }
-    void lockWrite() { ::pthread_rwlock_wrlock(&mLock); }
-    void unlockWrite() { ::pthread_rwlock_unlock(&mLock); }
-
-private:
-    pthread_rwlock_t mLock;
-#endif  // !_WIN32
-
-    friend class ConditionVariable;
+    class Impl;
+    Impl* mImpl;
     DISALLOW_COPY_ASSIGN_AND_MOVE(ReadWriteLock);
 };
 
@@ -141,36 +73,17 @@ private:
 // NB: not thread-safe (as opposed to the Lock class)
 class AutoLock {
 public:
-    AutoLock(StaticLock& lock) : mLock(lock) { mLock.lock(); }
+    AutoLock(StaticLock& lock);
+    AutoLock(AutoLock&& other);
+    ~AutoLock();
 
-    AutoLock(AutoLock&& other) : mLock(other.mLock), mLocked(other.mLocked) {
-        other.mLocked = false;
-    }
-
-    void lock() {
-        assert(!mLocked);
-        mLock.lock();
-        mLocked = true;
-    }
-
-    void unlock() {
-        assert(mLocked);
-        mLock.unlock();
-        mLocked = false;
-    }
-
-    bool isLocked() const { return mLocked; }
-
-    ~AutoLock() {
-        if (mLocked) {
-            mLock.unlock();
-        }
-    }
+    void lock();
+    void unlock();
+    bool isLocked() const;
 
 private:
     StaticLock& mLock;
     bool mLocked = true;
-
     friend class ConditionVariable;
     // Don't allow move because this class has a non-movable object.
     DISALLOW_COPY_AND_ASSIGN(AutoLock);
@@ -178,26 +91,10 @@ private:
 
 class AutoWriteLock {
 public:
-    AutoWriteLock(ReadWriteLock& lock) : mLock(lock) { mLock.lockWrite(); }
-
-    void lockWrite() {
-        assert(!mWriteLocked);
-        mLock.lockWrite();
-        mWriteLocked = true;
-    }
-
-    void unlockWrite() {
-        assert(mWriteLocked);
-        mLock.unlockWrite();
-        mWriteLocked = false;
-    }
-
-    ~AutoWriteLock() {
-        if (mWriteLocked) {
-            mLock.unlockWrite();
-        }
-    }
-
+    AutoWriteLock(ReadWriteLock& lock);
+    ~AutoWriteLock();
+    void lockWrite();
+    void unlockWrite();
 private:
     ReadWriteLock& mLock;
     bool mWriteLocked = true;
@@ -207,26 +104,10 @@ private:
 
 class AutoReadLock {
 public:
-    AutoReadLock(ReadWriteLock& lock) : mLock(lock) { mLock.lockRead(); }
-
-    void lockRead() {
-        assert(!mReadLocked);
-        mLock.lockRead();
-        mReadLocked = true;
-    }
-
-    void unlockRead() {
-        assert(mReadLocked);
-        mLock.unlockRead();
-        mReadLocked = false;
-    }
-
-    ~AutoReadLock() {
-        if (mReadLocked) {
-            mLock.unlockRead();
-        }
-    }
-
+    AutoReadLock(ReadWriteLock& lock);
+    ~AutoReadLock();
+    void lockRead();
+    void unlockRead();
 private:
     ReadWriteLock& mLock;
     bool mReadLocked = true;

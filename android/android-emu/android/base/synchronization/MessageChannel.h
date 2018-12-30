@@ -28,6 +28,8 @@ namespace base {
 // specialization.
 class MessageChannelBase {
 public:
+    using Duration = long long;
+
     // Get the current channel size
     size_t size() const;
 
@@ -80,7 +82,7 @@ protected:
     // Same as beforeRead(), but returns an empty optional if no data arrived
     // by the |wallTimeUs| absolute time. One still needs to call
     // afterWrite() anyway.
-    Optional<size_t> beforeTimedRead(System::Duration wallTimeUs);
+    Optional<size_t> beforeTimedRead(Duration wallTimeUs);
 
     // To be called after reading a fixed-size message from the channel (which
     // must happen after beforeRead() or beforeTryRead()).
@@ -187,7 +189,7 @@ public:
         return pos;
     }
 
-    Optional<T> timedReceive(System::Duration wallTimeUs) {
+    Optional<T> timedReceive(Duration wallTimeUs) {
         const auto pos = beforeTimedRead(wallTimeUs);
         if (pos && !isStoppedLocked()) {
             Optional<T> res(std::move(mItems[*pos]));

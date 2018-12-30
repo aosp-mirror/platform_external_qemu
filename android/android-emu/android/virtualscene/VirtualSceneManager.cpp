@@ -18,6 +18,7 @@
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/system/System.h"
 #include "android/cmdline-option.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"

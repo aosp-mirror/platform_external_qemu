@@ -18,6 +18,8 @@
 
 #include <memory>
 
+#include <stdio.h>
+
 namespace android {
 namespace base {
 

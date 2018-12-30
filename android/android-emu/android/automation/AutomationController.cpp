@@ -24,6 +24,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/base/system/System.h"
 #include "android/hw-sensors.h"
 #include "android/offworld/OffworldPipe.h"
 #include "android/physics/PhysicalModel.h"

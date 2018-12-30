@@ -11,28 +11,25 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #pragma once
 
 #include "android/base/Compiler.h"
 #include "android/base/synchronization/Lock.h"
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <pthread.h>
-#endif
-
-#include <assert.h>
-
 namespace android {
 namespace base {
+
+class StaticLock;
+class AutoLock;
 
 // A class that implements a condition variable, which can be used in
 // association with a Lock to blocking-wait for specific conditions.
 // Useful to implement various synchronization data structures.
 class ConditionVariable {
 public:
+    ConditionVariable();
+    ~ConditionVariable();
+
     // A set of functions to efficiently unlock the lock used with
     // the current condition variable and signal or broadcast it.
     //
@@ -46,10 +43,7 @@ public:
     void broadcastAndUnlock(StaticLock* lock);
     void broadcastAndUnlock(AutoLock* lock);
 
-    void wait(AutoLock* userLock) {
-        assert(userLock->mLocked);
-        wait(&userLock->mLock);
-    }
+    void wait(AutoLock* userLock);
 
     //
     // Convenience functions to get rid of the loop in condition variable usage
@@ -68,7 +62,6 @@ public:
     // |pred| - a functor predicate that's compatible with "bool pred()"
     //          signature and returns a condition when one should stop waiting.
     //
-
     template <class Predicate>
     void wait(StaticLock* lock, Predicate pred) {
         while (!pred()) {
@@ -81,87 +74,16 @@ public:
         this->wait(&lock->mLock, pred);
     }
 
-#ifdef _WIN32
+    void wait(StaticLock* userLock);
 
-    ConditionVariable() {
-        ::InitializeConditionVariable(&mCond);
-    }
-
-    // There's no special function to destroy CONDITION_VARIABLE in Windows.
-    ~ConditionVariable() = default;
-
-    // Wait until the condition variable is signaled. Note that spurious
-    // wakeups are always a possibility, so always check the condition
-    // in a loop, i.e. do:
-    //
-    //    while (!condition) { condVar.wait(&lock); }
-    //
-    // instead of:
-    //
-    //    if (!condition) { condVar.wait(&lock); }
-    //
-    void wait(StaticLock* userLock) {
-        ::SleepConditionVariableSRW(&mCond, &userLock->mLock, INFINITE, 0);
-    }
-
-    bool timedWait(StaticLock *userLock, System::Duration waitUntilUs) {
-        const auto now = System::get()->getUnixTimeUs();
-        const auto timeout =
-                std::max<System::Duration>(0, waitUntilUs  - now) / 1000;
-        return ::SleepConditionVariableSRW(
-                    &mCond, &userLock->mLock, timeout, 0) != 0;
-    }
-
-    // Signal that a condition was reached. This will wake at least (and
-    // preferrably) one waiting thread that is blocked on wait().
-    void signal() {
-        ::WakeConditionVariable(&mCond);
-    }
-
-    // Like signal(), but wakes all of the waiting threads.
-    void broadcast() {
-        ::WakeAllConditionVariable(&mCond);
-    }
+    using WaitDeadline = long long;
+    bool timedWait(StaticLock *userLock, WaitDeadline waitUntilUs);
+    void signal();
+    void broadcast();
 
 private:
-    CONDITION_VARIABLE mCond;
-
-#else  // !_WIN32
-
-    // Note: on Posix systems, make it a naive wrapper around pthread_cond_t.
-
-    ConditionVariable() {
-        pthread_cond_init(&mCond, NULL);
-    }
-
-    ~ConditionVariable() {
-        pthread_cond_destroy(&mCond);
-    }
-
-    void wait(StaticLock* userLock) {
-        pthread_cond_wait(&mCond, &userLock->mLock);
-    }
-
-    bool timedWait(StaticLock* userLock, System::Duration waitUntilUs) {
-        timespec abstime;
-        abstime.tv_sec = waitUntilUs / 1000000LL;
-        abstime.tv_nsec = (waitUntilUs % 1000000LL) * 1000;
-        return pthread_cond_timedwait(&mCond, &userLock->mLock, &abstime) == 0;
-    }
-
-    void signal() {
-        pthread_cond_signal(&mCond);
-    }
-
-    void broadcast() {
-        pthread_cond_broadcast(&mCond);
-    }
-
-private:
-    pthread_cond_t mCond;
-
-#endif  // !_WIN32
-
+    class Impl;
+    Impl* mImpl;
     DISALLOW_COPY_ASSIGN_AND_MOVE(ConditionVariable);
 };
 

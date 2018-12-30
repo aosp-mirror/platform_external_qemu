@@ -14,6 +14,7 @@
 
 #include "android/base/synchronization/MessageChannel.h"
 
+#include "android/base/system/System.h"
 #include "android/base/testing/TestThread.h"
 
 #include <gtest/gtest.h>

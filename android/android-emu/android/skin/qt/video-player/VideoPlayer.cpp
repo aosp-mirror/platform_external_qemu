@@ -32,6 +32,7 @@
 #include "android/skin/qt/video-player/VideoPlayer.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/base/threads/Thread.h"
 #include "android/emulation/AudioOutputEngine.h"

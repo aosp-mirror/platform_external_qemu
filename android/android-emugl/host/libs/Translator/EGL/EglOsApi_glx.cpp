@@ -31,6 +31,7 @@
 
 #include <EGL/eglext.h>
 
+#include <vector>
 #include <unordered_map>
 
 #define DEBUG_PBUF_POOL 0

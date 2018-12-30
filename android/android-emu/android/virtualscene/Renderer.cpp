@@ -19,6 +19,7 @@
 #include "android/base/ArraySize.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/synchronization/MessageChannel.h"
+#include "android/base/system/System.h"
 #include "android/base/threads/WorkerThread.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"

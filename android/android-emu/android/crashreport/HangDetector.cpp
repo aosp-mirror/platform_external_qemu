@@ -14,6 +14,7 @@
 
 #include "android/crashreport/HangDetector.h"
 
+#include "android/base/Debug.h"
 #include "android/base/Optional.h"
 #include "android/base/StringFormat.h"
 #include "android/globals.h"

@@ -96,7 +96,7 @@ Optional<size_t> MessageChannelBase::beforeTryRead() {
 }
 
 Optional<size_t> MessageChannelBase::beforeTimedRead(
-        System::Duration wallTimeUs) {
+        MessageChannelBase::Duration wallTimeUs) {
     mLock.lock();
 
     while (mCount == 0 && !mStopped) {

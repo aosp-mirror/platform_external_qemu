@@ -24,6 +24,7 @@
 #include <iomanip>
 #include <ostream>
 #include <sstream>
+#include <string>
 
 using android::base::LazyInstance;
 using android::base::StaticMap;
@@ -114,7 +115,8 @@ bool getStagingMemoryTypeIndex(
             }
         }
 
-        LOG(ERROR) << ss.str();
+        std::string errString = ss.str();
+        LOG(ERROR) << errString.c_str();
 
         return false;
     }
