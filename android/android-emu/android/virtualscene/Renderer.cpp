@@ -26,6 +26,8 @@
 #include "android/virtualscene/RenderTarget.h"
 #include "android/virtualscene/TextureUtils.h"
 
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
+
 #include <algorithm>
 #include <cmath>
 #include <functional>

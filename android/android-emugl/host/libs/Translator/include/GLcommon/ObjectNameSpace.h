@@ -18,21 +18,20 @@
 
 #include "android/snapshot/common.h"
 #include "emugl/common/mutex.h"
-#include "GLcommon/GLBackgroundLoader.h"
 #include "GLcommon/NamedObject.h"
 #include "GLcommon/ObjectData.h"
 #include "GLcommon/SaveableTexture.h"
 #include "GLcommon/TranslatorIfaces.h"
 
-#include <GLES/gl.h>
 #include <unordered_map>
-#include <unordered_set>
 
 typedef std::unordered_map<ObjectLocalName, NamedObjectPtr> NamesMap;
 typedef std::unordered_map<ObjectLocalName, ObjectDataPtr> ObjectDataMap;
 typedef std::unordered_map<unsigned int, ObjectLocalName> GlobalToLocalNamesMap;
 
 class GlobalNameSpace;
+class GLBackgroundLoader;
+namespace android { namespace base { class Stream; } }
 
 //
 // Class NameSpace - this class manages allocations and deletions of objects

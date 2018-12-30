@@ -12,6 +12,8 @@
 
 #include "android/emulation/GoldfishSyncCommandQueue.h"
 
+#include "android/base/files/Stream.h"
+
 #include <memory>
 #include <string>
 #include <vector>

@@ -16,13 +16,13 @@
 
 #include "GLcommon/GLBackgroundLoader.h"
 
-#include "GLcommon/GLEScontext.h"
-#include "GLcommon/SaveableTexture.h"
-#include "android/base/system/System.h"
-#include "android/utils/system.h"
+#include <EGL/egl.h>                     // for EGL_NO_CONTEXT, EGLContext
+#include "GLcommon/SaveableTexture.h"    // for SaveableTexturePtr
 
-#include <EGL/eglext.h>
-#include <GLES2/gl2.h>
+#include "android/base/system/System.h"  // for System
+
+#include <memory>                        // for shared_ptr
+#include <utility>                       // for pair
 
 EGLContext s_context = EGL_NO_CONTEXT;
 EGLSurface s_surface = EGL_NO_SURFACE;

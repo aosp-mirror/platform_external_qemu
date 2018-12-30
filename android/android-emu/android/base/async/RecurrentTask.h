@@ -14,8 +14,6 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
-
 #include <functional>
 
 namespace android {

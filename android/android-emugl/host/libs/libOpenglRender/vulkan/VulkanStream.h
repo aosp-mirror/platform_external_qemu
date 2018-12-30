@@ -13,16 +13,19 @@
 // limitations under the License.
 #pragma once
 
-#include "android/base/files/Stream.h"
-#include "android/base/files/StreamSerializing.h"
+#include "android/base/files/Stream.h"  // for Stream
 
-#include "VulkanHandleMapping.h"
+#include <memory>                       // for unique_ptr
 
-#include <memory>
+#include <stddef.h>                     // for size_t
+#include <inttypes.h>                   // for uint8_t, uintptr_t
+#include <sys/types.h>                  // for ssize_t
 
 class IOStream;
 
 namespace goldfish_vk {
+
+class VulkanHandleMapping;
 
 class VulkanStream : public android::base::Stream {
 public:

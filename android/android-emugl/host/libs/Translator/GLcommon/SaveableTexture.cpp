@@ -18,6 +18,7 @@
 
 #include "android/base/ArraySize.h"
 #include "android/base/containers/SmallVector.h"
+#include "android/base/files/Stream.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/Profiler.h"

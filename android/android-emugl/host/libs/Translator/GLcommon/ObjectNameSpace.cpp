@@ -24,8 +24,13 @@
 #include "android/snapshot/TextureSaver.h"
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/logging.h"
+#include "GLcommon/GLBackgroundLoader.h"
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/TranslatorIfaces.h"
+
+#include <GLES/gl.h>
+
+#include <unordered_set>
 
 #include <assert.h>
 

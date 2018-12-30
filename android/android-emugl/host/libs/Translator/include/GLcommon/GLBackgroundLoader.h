@@ -15,16 +15,15 @@
 */
 #pragma once
 
-#include "android/snapshot/TextureLoader.h"
-#include "emugl/common/thread.h"
-#include "GLcommon/TranslatorIfaces.h"
-
-#include <EGL/egl.h>
+#include <inttypes.h>                     // for intptr_t
+#include <atomic>                         // for atomic
+#include "GLcommon/TranslatorIfaces.h"    // for SaveableTextureMap, EGLifac...
+#include "android/base/threads/Thread.h"  // for InterruptibleThread
+#include "android/snapshot/common.h"      // for ITextureLoaderWPtr
 
 #include <atomic>
-#include <memory>
 
-class GLBackgroundLoader : public emugl::InterruptibleThread {
+class GLBackgroundLoader : public android::base::InterruptibleThread {
 public:
     GLBackgroundLoader(const android::snapshot::ITextureLoaderWPtr& textureLoaderWeak,
                        const EGLiface& eglIface,

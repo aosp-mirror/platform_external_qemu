@@ -22,12 +22,13 @@
  * MeshSceneObject.
  */
 
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/Compiler.h"
 #include "android/utils/compiler.h"
 #include "android/virtualscene/Renderer.h"
 
 #include <glm/glm.hpp>
+
+struct GLESv2Dispatch;
 
 namespace android {
 namespace virtualscene {

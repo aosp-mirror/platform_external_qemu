@@ -27,6 +27,7 @@
 
 #include "goldfish_vk_extension_structs.h"
 #include "goldfish_vk_private_defs.h"
+#include "VulkanHandleMapping.h"
 
 
 namespace goldfish_vk {

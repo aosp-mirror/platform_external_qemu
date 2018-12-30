@@ -20,14 +20,17 @@
  * Defines the Virtual Scene Renderer, used by the Virtual Scene Camera
  */
 
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/utils/compiler.h"
 #include "android/virtualscene/VertexTypes.h"
 
+#include <GLES3/gl3.h>
+
 #include <memory>
 #include <vector>
+
+struct GLESv2Dispatch;
 
 namespace android {
 namespace virtualscene {

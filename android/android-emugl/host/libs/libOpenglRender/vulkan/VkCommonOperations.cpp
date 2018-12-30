@@ -13,18 +13,16 @@
 // limitations under the License.
 #include "VkCommonOperations.h"
 
-#include "android/base/containers/StaticMap.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/Log.h"
+#include "VulkanDispatch.h"                     // for VulkanDispatch
+#include "common/goldfish_vk_dispatch.h"        // for VulkanDispatch
 
-#include "VulkanDispatch.h"
+#include "android/base/Log.h"                   // for LOG, LogMessage, LogS...
+#include "android/base/Optional.h"              // for Optional
+#include "android/base/containers/StaticMap.h"  // for StaticMap
+#include "android/base/memory/LazyInstance.h"   // for LazyInstance, LAZY_IN...
 
-#include <stdio.h>
-
-#include <iomanip>
-#include <ostream>
-#include <sstream>
-#include <string>
+#include <sstream>                              // for operator<<, basic_ost...
+#include <string>                               // for char_traits, string
 
 using android::base::LazyInstance;
 using android::base::StaticMap;

@@ -17,12 +17,14 @@
 #include "GLcommon/TextureData.h"
 
 #include "android/base/containers/Lookup.h"
+#include "android/base/files/Stream.h"
 #include "android/base/files/StreamSerializing.h"
 
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/GLutils.h"
 
 #include <cassert>
+#include <vector>
 
 using android::base::find;
 

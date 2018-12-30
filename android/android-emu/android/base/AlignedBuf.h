@@ -14,11 +14,7 @@
 
 #pragma once
 
-#include "android/base/Compiler.h"
-
 #include <algorithm>
-#include <atomic>
-#include <cinttypes>
 #include <cstdlib>
 #include <cstring>
 #include <type_traits>
