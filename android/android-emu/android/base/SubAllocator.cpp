@@ -61,6 +61,8 @@ public:
     }
 
     uint64_t getOffset(void* checkedPtr) {
+        if (!checkedPtr) return kFailedAlloc;
+
         uint64_t addr = (uintptr_t)checkedPtr;
         return addr - startAddr;
     }
@@ -71,6 +73,12 @@ public:
         rangeCheck("free", ptr);
         address_space_allocator_deallocate(
             &addr_alloc, getOffset(ptr));
+    }
+
+    void freeOffset(uint64_t offset) {
+        rangeCheck("free", (void*)(offset + startAddr));
+        address_space_allocator_deallocate(
+            &addr_alloc, offset);
     }
 
     void freeAll() {
@@ -131,6 +139,10 @@ void SubAllocator::freeAll() {
 
 uint64_t SubAllocator::getOffset(void* ptr) {
     return mImpl->getOffset(ptr);
+}
+
+void SubAllocator::freeOffset(uint64_t offset) {
+    return mImpl->freeOffset(offset);
 }
 
 } // namespace base

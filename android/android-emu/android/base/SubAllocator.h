@@ -37,10 +37,14 @@ public:
     ~SubAllocator();
 
     // returns null if the allocation cannot be satisfied.
+    static constexpr uint64_t kFailedAlloc =
+        (uint64_t)(-1);
+
     void* alloc(size_t wantedSize);
     void free(void* ptr);
     void freeAll();
     uint64_t getOffset(void* ptr);
+    void freeOffset(uint64_t offset);
 
     // Convenience function to allocate an array
     // of objects of type T.

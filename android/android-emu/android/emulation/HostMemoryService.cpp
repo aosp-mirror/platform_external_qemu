@@ -15,11 +15,13 @@
 
 #include "android/base/AlignedBuf.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/SubAllocator.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
 #include "android/emulation/control/vm_operations.h"
 
 #include <iomanip>
+#include <memory>
 #include <sstream>
 #include <unordered_map>
 #include <vector>
@@ -28,6 +30,7 @@ using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Lock;
 using android::base::StaticLock;
+using android::base::SubAllocator;
 
 namespace android {
 
@@ -36,6 +39,9 @@ public:
     class Service : public AndroidAsyncMessagePipe::Service<HostMemoryPipe> {
     typedef AndroidAsyncMessagePipe::Service<HostMemoryPipe> Super;
     public:
+        // Allocate at page granularity
+        static constexpr uint64_t kAtomSize = 4096;
+
         Service() : Super("HostMemoryPipe") {}
 
         ~Service() {
@@ -71,31 +77,40 @@ public:
             mSharedRegionHostBuf.resize(size);
             mSharedRegionPhysAddr = physAddr;
             mSharedRegionSize = size;
-
             gQAndroidVmOperations->mapUserBackedRam(
                 mSharedRegionPhysAddr,
                 sharedRegionHostAddrLocked(),
                 mSharedRegionSize);
+            mSubAlloc.reset(
+                new SubAllocator(
+                    mSharedRegionHostBuf.data(),
+                    mSharedRegionSize,
+                    kAtomSize));
         }
 
         bool isSharedRegionAllocatedLocked() const {
             return mSharedRegionSize > 0;
         }
 
-        void onSubRegionAllocatedLocked(uint64_t offset, uint64_t size) {
-            auto& subregion = subRegions[offset];
-            subregion.hva = sharedRegionHostAddrLocked() + offset;
-            subregion.offset = offset;
-            subregion.size = size;
+        uint64_t allocSubRegionLocked(size_t size) {
+            if (!mSubAlloc) {
+                fprintf(stderr, "%s: shared region not allocated. fail\n", __func__);
+                return SubAllocator::kFailedAlloc;
+            }
+
+            auto ptr = mSubAlloc->alloc(size);
+
+            if (!ptr) {
+                fprintf(stderr, "%s: ran out of space in shared region. fail\n", __func__);
+                return SubAllocator::kFailedAlloc;
+            }
+
+            auto offset = mSubAlloc->getOffset(ptr);
+            return offset;
         }
 
-        void onSubRegionFreedLocked(uint64_t offset) {
-            auto it = subRegions.find(offset);
-            if (it == subRegions.end()) {
-                fprintf(stderr, "%s: warning: subregion offset 0x%llx not found\n", __func__,
-                        (unsigned long long)offset);
-            }
-            subRegions.erase(it);
+        void freeSubRegionLocked(size_t offset) {
+            mSubAlloc->freeOffset(offset);
         }
 
         static StaticLock sServiceLock;
@@ -103,9 +118,7 @@ public:
         uint64_t mSharedRegionPhysAddr = 0;
         uint64_t mSharedRegionSize = 0;
         AlignedBuf<uint8_t, 4096> mSharedRegionHostBuf { 0 };
-        std::unordered_map<uint64_t, SubRegion> subRegions = {};
-        uint64_t currentSubRegionPhysAddr = 0;
-        uint64_t currentSubRegionSize = 0;
+        std::unique_ptr<android::base::SubAllocator> mSubAlloc = {};
     private:
         static Service* sService;
     };
@@ -150,8 +163,6 @@ private:
                 send(std::move(cmdResponse));
                 break;
             case HostMemoryServiceCommand::AllocSharedRegion:
-            case HostMemoryServiceCommand::AllocSubRegion:
-            case HostMemoryServiceCommand::FreeSubRegion:
                 if (payloadBytes < 2 * sizeof(uint64_t)) {
                     fprintf(stderr, "%s: Error: not enough bytes to read region cmd info\n",
                             __func__);
@@ -161,8 +172,31 @@ private:
                         *reinterpret_cast<const uint64_t*>(data);
                     uint64_t size =
                         *reinterpret_cast<const uint64_t*>(data + sizeof(uint64_t));
-                    onRegionCommandLocked(
-                        service, cmd, addr, size);
+                    service->allocSharedRegionLocked(addr, size);
+                }
+                break;
+            case HostMemoryServiceCommand::AllocSubRegion:
+            case HostMemoryServiceCommand::FreeSubRegion:
+                if (payloadBytes < sizeof(uint64_t)) {
+                    fprintf(stderr, "%s: Error: not enough bytes to read subregion cmd info\n",
+                            __func__);
+                    return;
+                } else {
+                    uint64_t sizeOrOffset =
+                        *reinterpret_cast<const uint64_t*>(data);
+                    switch (cmd) {
+                        case HostMemoryServiceCommand::AllocSubRegion:
+                            *(uint64_t*)(dataResponse.data()) =
+                                (uintptr_t)(service->allocSubRegionLocked(sizeOrOffset));
+                            send(std::move(dataResponse));
+                            break;
+                        case HostMemoryServiceCommand::FreeSubRegion:
+                            service->freeSubRegionLocked(sizeOrOffset);
+                            break;
+                        default:
+                            fprintf(stderr, "%s: unreachable\n", __func__);
+                            abort();
+                    }
                 }
                 break;
             case HostMemoryServiceCommand::GetHostAddrOfSharedRegion:
@@ -171,27 +205,6 @@ private:
                 send(std::move(dataResponse));
                 break;
             default:
-                break;
-        }
-    }
-
-    void onRegionCommandLocked(Service* service,
-                               HostMemoryServiceCommand cmd,
-                               uint64_t addr,
-                               uint64_t size) {
-        switch (cmd) {
-            case HostMemoryServiceCommand::AllocSharedRegion:
-                service->allocSharedRegionLocked(addr, size);
-                break;
-            case HostMemoryServiceCommand::AllocSubRegion:
-                service->onSubRegionAllocatedLocked(addr, size);
-                break;
-            case HostMemoryServiceCommand::FreeSubRegion:
-                service->onSubRegionFreedLocked(addr);
-                break;
-            default:
-                fprintf(stderr, "%s: invalid command 0x%x\n",
-                        __func__, (uint32_t)(cmd));
                 break;
         }
     }
