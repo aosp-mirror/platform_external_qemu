@@ -53,6 +53,7 @@ set(android-emu-base_src
     android/base/perflogger/Metric.cpp
     android/base/perflogger/WindowDeviationAnalyzer.cpp
     android/base/ProcessControl.cpp
+    android/base/ring_buffer.c
     android/base/system/System.cpp
     android/base/threads/Async.cpp
     android/base/threads/FunctorThread.cpp
