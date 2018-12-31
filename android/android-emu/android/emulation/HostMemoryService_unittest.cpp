@@ -83,7 +83,7 @@ protected:
         EXPECT_THAT(mDevice->write(pipe, payload), IsOk());
     }
 
-    void writeCmdWithData(void* pipe, uint32_t cmd, uint64_t addr, uint64_t size) {
+    void writeCmd2Args(void* pipe, uint32_t cmd, uint64_t addr, uint64_t size) {
         size_t totalSize = sizeof(uint32_t) + 2 * sizeof(uint64_t);
 
         std::vector<uint8_t> payload(totalSize);
@@ -92,6 +92,20 @@ protected:
                &addr, sizeof(uint64_t));
         memcpy(payload.data() + sizeof(uint32_t) + sizeof(uint64_t),
                &size, sizeof(uint64_t));
+
+        uint32_t bytes = (uint32_t)payload.size();
+        EXPECT_EQ(sizeof(uint32_t),
+                  mDevice->write(pipe, &bytes, sizeof(uint32_t)));
+        EXPECT_THAT(mDevice->write(pipe, payload), IsOk());
+    }
+
+    void writeCmd1Arg(void* pipe, uint32_t cmd, uint64_t arg) {
+        size_t totalSize = sizeof(uint32_t) + 2 * sizeof(uint64_t);
+
+        std::vector<uint8_t> payload(totalSize);
+        memcpy(payload.data(), &cmd, sizeof(uint32_t));
+        memcpy(payload.data() + sizeof(uint32_t),
+               &arg, sizeof(uint64_t));
 
         uint32_t bytes = (uint32_t)payload.size();
         EXPECT_EQ(sizeof(uint32_t),
@@ -169,7 +183,7 @@ TEST_F(HostMemoryServiceTest, QuerySharedRegionAllocated) {
 // Allocate the region.
 TEST_F(HostMemoryServiceTest, AllocateSharedRegion) {
     void* pipe = connectService();
-    writeCmdWithData(
+    writeCmd2Args(
         pipe,
         (uint32_t)HostMemoryServiceCommand::AllocSharedRegion,
         0xabcde000,
@@ -183,15 +197,26 @@ TEST_F(HostMemoryServiceTest, AllocateSharedRegion) {
 // Test alloc/free of subregions.
 TEST_F(HostMemoryServiceTest, AllocFreeSubRegion) {
     void* pipe = connectService();
-    writeCmdWithData(
+    writeCmd2Args(
+        pipe,
+        (uint32_t)HostMemoryServiceCommand::AllocSharedRegion,
+        0xabcde000,
+        0x1000);
+    writeCmd(pipe, (uint32_t)HostMemoryServiceCommand::IsSharedRegionAllocated);
+    auto res = readCmdResponseBlocking(pipe);
+    EXPECT_NE(0, res);
+
+    writeCmd1Arg(
         pipe,
         (uint32_t)HostMemoryServiceCommand::AllocSubRegion,
-        0x0,
         0x100);
-    writeCmdWithData(
+    auto res64 = readDataResponseBlocking(pipe);
+    EXPECT_NE((uint64_t)(-1), res64);
+
+    writeCmd1Arg(
         pipe,
-        (uint32_t)HostMemoryServiceCommand::AllocSubRegion,
-        0x0,
-        0x100);
+        (uint32_t)HostMemoryServiceCommand::FreeSubRegion,
+        res64);
+
     mDevice->close(pipe);
 }
