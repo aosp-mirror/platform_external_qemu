@@ -17,6 +17,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
+#include "android/emulation/control/vm_operations.h"
 
 #include <iomanip>
 #include <sstream>
@@ -40,6 +41,9 @@ public:
         ~Service() {
             AutoLock lock(sServiceLock);
             sService = nullptr;
+            gQAndroidVmOperations->unmapUserBackedRam(
+                mSharedRegionPhysAddr,
+                mSharedRegionSize);
         }
 
         static Service* create() {
@@ -67,6 +71,11 @@ public:
             mSharedRegionHostBuf.resize(size);
             mSharedRegionPhysAddr = physAddr;
             mSharedRegionSize = size;
+
+            gQAndroidVmOperations->mapUserBackedRam(
+                mSharedRegionPhysAddr,
+                sharedRegionHostAddrLocked(),
+                mSharedRegionSize);
         }
 
         bool isSharedRegionAllocatedLocked() const {
