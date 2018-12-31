@@ -42,6 +42,7 @@ set(android-emu-base_src
     android/base/memory/LazyInstance.cpp
     android/base/memory/MemoryHints.cpp
     android/base/ProcessControl.cpp
+    android/base/ring_buffer.c
     android/base/system/System.cpp
     android/base/threads/Async.cpp
     android/base/threads/FunctorThread.cpp
