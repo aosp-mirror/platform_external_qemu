@@ -625,6 +625,7 @@ set(android-emu_unittests_src
     android/base/Pool_unittest.cpp
     android/base/ProcessControl_unittest.cpp
     android/base/Result_unittest.cpp
+    android/base/ring_buffer_unittest.cpp
     android/base/sockets/ScopedSocket_unittest.cpp
     android/base/sockets/SocketDrainer_unittest.cpp
     android/base/sockets/SocketUtils_unittest.cpp
