@@ -948,6 +948,13 @@ static int rcCompose(uint32_t bufferSize, void* buffer) {
     return fb->compose(bufferSize, buffer);
 }
 
+static void rcInitSharedRegion(uint64_t offset) {
+}
+
+static void rcMakeCurrentRING(uint32_t context,
+                              uint32_t drawSurf, uint32_t readSurf) {
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -988,4 +995,6 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateColorBufferDMA = rcCreateColorBufferDMA;
     dec->rcWaitSyncKHR = rcWaitSyncKHR;
     dec->rcCompose = rcCompose;
+    dec->rcInitSharedRegion = rcInitSharedRegion;
+    dec->rcMakeCurrentRING = rcMakeCurrentRING;
 }
