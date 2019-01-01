@@ -18,6 +18,7 @@
 #include "OpenglRender/Renderer.h"
 #include "OpenglRender/render_api_types.h"
 #include "android/base/files/Stream.h"
+#include "android/emulation/HostMemoryService.h"
 #include "android/emulation/RefcountPipe.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/opengl/emugl_config.h"
@@ -71,6 +72,8 @@ public:
     virtual void setVmOps(const QAndroidVmOperations &vm_operations) = 0;
 
     virtual void setCpuUsage(android::base::CpuUsage* usage) = 0;
+
+    virtual void setHostMemoryPtrGet(host_memory_ptr_get_t) = 0;
 
     virtual void* getGL(void) = 0;
 

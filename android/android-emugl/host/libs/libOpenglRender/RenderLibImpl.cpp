@@ -91,6 +91,10 @@ void RenderLibImpl::setCpuUsage(android::base::CpuUsage* usage) {
     emugl::setCpuUsage(usage);
 }
 
+void RenderLibImpl::setHostMemoryPtrGet(host_memory_ptr_get_t func) {
+    emugl::setHostMemoryPtrGet(func);
+}
+
 void* RenderLibImpl::getGL(void) {
     return &s_gles2;
 }

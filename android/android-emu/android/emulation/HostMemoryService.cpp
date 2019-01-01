@@ -117,6 +117,11 @@ public:
             mSharedRegionBaseOffset = offset;
         }
 
+        void* getPtrFromGuestOffset(uint64_t offset) {
+            uint64_t relativeToBase = offset - mSharedRegionBaseOffset;
+            return (void*)(mSharedRegionHostBuf.data() + relativeToBase);
+        }
+
         static StaticLock sServiceLock;
 
         uint64_t mSharedRegionPhysAddr = 0;
@@ -124,7 +129,6 @@ public:
         uint64_t mSharedRegionBaseOffset = 0;
         AlignedBuf<uint8_t, 4096> mSharedRegionHostBuf { 0 };
         std::unique_ptr<android::base::SubAllocator> mSubAlloc = {};
-    private:
         static Service* sService;
     };
 
@@ -230,4 +234,8 @@ HostMemoryPipe::Service* HostMemoryPipe::Service::sService = nullptr;
 void android_host_memory_service_init(void) {
     registerAsyncMessagePipeService(
         android::HostMemoryPipe::Service::create());
+}
+
+void* android_host_memory_service_get_ptr_from_guest_offset(uint64_t offset) {
+    return android::HostMemoryPipe::Service::sService->getPtrFromGuestOffset(offset);
 }

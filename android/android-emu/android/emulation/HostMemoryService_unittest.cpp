@@ -166,7 +166,7 @@ TEST_F(HostMemoryServiceTest, Connect) {
 // Check that sending a null command does nothing.
 TEST_F(HostMemoryServiceTest, NullCommand) {
     void* pipe = connectService();
-    writeCmd(pipe, (uint32_t)HostMemoryServiceCommand::None);
+    writeCmd(pipe, (uint32_t)HostMemoryServiceCommand::NoCommand);
     mDevice->close(pipe);
 }
 

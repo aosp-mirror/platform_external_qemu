@@ -17,6 +17,7 @@
 #include "android/base/system/System.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/GoldfishDma.h"
+#include "android/emulation/HostMemoryService.h"
 #include "android/emulation/RefcountPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
@@ -231,6 +232,7 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     sRenderLib->setDmaOps(dma_ops);
     sRenderLib->setVmOps(*vm_operations);
     sRenderLib->setCpuUsage(android::base::CpuUsage::get());
+    sRenderLib->setHostMemoryPtrGet(vm_operations->hostMemoryPtrGet);
 
     sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow, sEgl2egl);
 

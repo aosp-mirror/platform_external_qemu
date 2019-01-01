@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "android/base/CpuUsage.h"
+#include "android/emulation/HostMemoryService.h"
 
 #include "emugl/common/misc.h"
 
@@ -25,6 +26,8 @@ static int s_glesMajorVersion = 2;
 static int s_glesMinorVersion = 0;
 
 android::base::CpuUsage* s_cpu_usage = nullptr;
+
+static host_memory_ptr_get_t s_host_memory_ptr_get = nullptr;
 
 static SelectedRenderer s_renderer =
     SELECTED_RENDERER_HOST;
@@ -74,4 +77,13 @@ void emugl::setCpuUsage(android::base::CpuUsage* usage) {
 
 android::base::CpuUsage* emugl::getCpuUsage() {
     return s_cpu_usage;
+}
+
+void emugl::setHostMemoryPtrGet(host_memory_ptr_get_t func) {
+    s_host_memory_ptr_get = func;
+}
+
+void* emugl::hostMemoryPtrGet(uint64_t off) {
+    if (!s_host_memory_ptr_get) return nullptr;
+    return s_host_memory_ptr_get(off);
 }

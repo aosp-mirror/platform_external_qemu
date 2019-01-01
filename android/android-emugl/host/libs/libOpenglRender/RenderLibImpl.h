@@ -46,6 +46,8 @@ public:
 
     virtual void setCpuUsage(android::base::CpuUsage* usage) override;
 
+    virtual void setHostMemoryPtrGet(host_memory_ptr_get_t) override;
+
     virtual void* getGL(void) override;
 
     virtual void* getEGL(void) override;

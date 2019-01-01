@@ -13,8 +13,10 @@
 // limitations under the License.
 #pragma once
 
+#include <inttypes.h>
+
 enum class HostMemoryServiceCommand {
-    None = 0,
+    NoCommand = 0,
     IsSharedRegionAllocated = 1,
     AllocSharedRegion = 2,
     GetHostAddrOfSharedRegion = 3,
@@ -23,10 +25,8 @@ enum class HostMemoryServiceCommand {
     SetBaseOffsetOfSharedRegion = 6,
 };
 
-enum class CommandStage {
-    None = 0,
-    GetAddress = 1,
-    GetSize = 2,
-};
-
 extern void android_host_memory_service_init(void);
+
+typedef void* (*host_memory_ptr_get_t)(uint64_t);
+
+extern void* android_host_memory_service_get_ptr_from_guest_offset(uint64_t offset);

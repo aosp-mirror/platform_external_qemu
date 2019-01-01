@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/opengl/emugl_config.h"
+#include "android/emulation/HostMemoryService.h"
 
 #ifdef _MSC_VER
 # ifdef BUILDING_EMUGL_COMMON_SHARED
@@ -55,4 +56,8 @@ namespace emugl {
     // CPU usage get/set.
     EMUGL_COMMON_API void setCpuUsage(android::base::CpuUsage* usage);
     EMUGL_COMMON_API android::base::CpuUsage* getCpuUsage();
+
+    // Host memory service
+    EMUGL_COMMON_API void setHostMemoryPtrGet(host_memory_ptr_get_t func);
+    EMUGL_COMMON_API void* hostMemoryPtrGet(uint64_t offset);
 }

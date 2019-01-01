@@ -158,6 +158,8 @@ typedef struct QAndroidVmOperations {
     // QEMU snapshot save calls work.
     void (*setExiting)(void);
 
+    void* (*hostMemoryPtrGet)(uint64_t off);
+
 } QAndroidVmOperations;
 
 // gQAndroidVmOperations is defined in .cpp depending on the target it used for,

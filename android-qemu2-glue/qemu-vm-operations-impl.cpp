@@ -21,6 +21,7 @@
 #include "android/emulation/control/callbacks.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/CpuAccelerator.h"
+#include "android/emulation/HostMemoryService.h"
 #include "android/emulation/VmLock.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
@@ -576,6 +577,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .getVmConfiguration = get_vm_config,
         .setFailureReason = set_failure_reason,
         .setExiting = set_exiting,
+        .hostMemoryPtrGet = android_host_memory_service_get_ptr_from_guest_offset,
 };
 const QAndroidVmOperations* const gQAndroidVmOperations =
         &sQAndroidVmOperations;
