@@ -196,7 +196,6 @@ private:
                         *reinterpret_cast<const uint64_t*>(data);
                     switch (cmd) {
                         case HostMemoryServiceCommand::AllocSubRegion:
-                            fprintf(stderr, "%s: run alloc sub region\n", __func__);
                             *(uint64_t*)(dataResponse.data()) =
                                 (uintptr_t)(service->allocSubRegionLocked(sizeOrOffset));
                             send(std::move(dataResponse));
@@ -205,7 +204,6 @@ private:
                             service->freeSubRegionLocked(sizeOrOffset);
                             break;
                         case HostMemoryServiceCommand::SetBaseOffsetOfSharedRegion:
-                            fprintf(stderr, "%s: set base offset\n", __func__);
                             service->setBaseOffsetOfSharedRegion(sizeOrOffset);
                             break;
                         default:

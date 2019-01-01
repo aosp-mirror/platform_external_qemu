@@ -64,3 +64,6 @@ rcCompose
     dir buffer in
     len buffer bufferSize
     flag flushOnEncode
+
+rcMakeCurrentRING
+    flag flushOnEncode

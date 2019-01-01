@@ -28,6 +28,7 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 
 #include "android/utils/debug.h"
+#include "android/base/ring_buffer.h"
 #include "android/base/StringView.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
@@ -948,6 +949,29 @@ static int rcCompose(uint32_t bufferSize, void* buffer) {
     return fb->compose(bufferSize, buffer);
 }
 
+static void rcInitSharedRegion(uint64_t offset) {
+    RenderThreadInfo* tInfo = RenderThreadInfo::get();
+    tInfo->m_sharedRegion = emugl::hostMemoryPtrGet(offset);
+    ring_buffer* ring =
+        reinterpret_cast<ring_buffer*>(tInfo->m_sharedRegion);
+    ring_buffer_init(ring);
+}
+
+static void rcMakeCurrentRING(uint32_t context,
+                              uint32_t drawSurf, uint32_t readSurf) {
+    RenderThreadInfo* tInfo = RenderThreadInfo::get();
+    ring_buffer* ring =
+        reinterpret_cast<ring_buffer*>(tInfo->m_sharedRegion);
+    EGLint res = rcMakeCurrent(context, drawSurf, readSurf);
+
+    long writtenInts = 0;
+    while (writtenInts < 1) {
+        long writtenThisTime =
+            ring_buffer_write_general(ring, &res, 4, 1);
+        writtenInts += writtenThisTime;
+    }
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -988,4 +1012,6 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateColorBufferDMA = rcCreateColorBufferDMA;
     dec->rcWaitSyncKHR = rcWaitSyncKHR;
     dec->rcCompose = rcCompose;
+    dec->rcInitSharedRegion = rcInitSharedRegion;
+    dec->rcMakeCurrentRING = rcMakeCurrentRING;
 }

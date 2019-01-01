@@ -56,6 +56,9 @@ struct RenderThreadInfo {
     renderControl_decoder_context_t m_rcDec;
     VkDecoder                       m_vkDec;
 
+    // Shared region
+    void* m_sharedRegion = nullptr;
+
     // All the contexts that are created by this render thread.
     // New emulator manages contexts in guest process level,
     // m_contextSet should be deprecated. It is only kept for
