@@ -20,6 +20,7 @@ enum class HostMemoryServiceCommand {
     GetHostAddrOfSharedRegion = 3,
     AllocSubRegion = 4,
     FreeSubRegion = 5,
+    SetBaseOffsetOfSharedRegion = 6,
 };
 
 enum class CommandStage {

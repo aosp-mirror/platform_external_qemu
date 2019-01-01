@@ -106,17 +106,22 @@ public:
             }
 
             auto offset = mSubAlloc->getOffset(ptr);
-            return offset;
+            return offset + mSharedRegionBaseOffset;
         }
 
         void freeSubRegionLocked(size_t offset) {
             mSubAlloc->freeOffset(offset);
         }
 
+        void setBaseOffsetOfSharedRegion(uint64_t offset) {
+            mSharedRegionBaseOffset = offset;
+        }
+
         static StaticLock sServiceLock;
 
         uint64_t mSharedRegionPhysAddr = 0;
         uint64_t mSharedRegionSize = 0;
+        uint64_t mSharedRegionBaseOffset = 0;
         AlignedBuf<uint8_t, 4096> mSharedRegionHostBuf { 0 };
         std::unique_ptr<android::base::SubAllocator> mSubAlloc = {};
     private:
@@ -177,6 +182,7 @@ private:
                 break;
             case HostMemoryServiceCommand::AllocSubRegion:
             case HostMemoryServiceCommand::FreeSubRegion:
+            case HostMemoryServiceCommand::SetBaseOffsetOfSharedRegion:
                 if (payloadBytes < sizeof(uint64_t)) {
                     fprintf(stderr, "%s: Error: not enough bytes to read subregion cmd info\n",
                             __func__);
@@ -186,12 +192,17 @@ private:
                         *reinterpret_cast<const uint64_t*>(data);
                     switch (cmd) {
                         case HostMemoryServiceCommand::AllocSubRegion:
+                            fprintf(stderr, "%s: run alloc sub region\n", __func__);
                             *(uint64_t*)(dataResponse.data()) =
                                 (uintptr_t)(service->allocSubRegionLocked(sizeOrOffset));
                             send(std::move(dataResponse));
                             break;
                         case HostMemoryServiceCommand::FreeSubRegion:
                             service->freeSubRegionLocked(sizeOrOffset);
+                            break;
+                        case HostMemoryServiceCommand::SetBaseOffsetOfSharedRegion:
+                            fprintf(stderr, "%s: set base offset\n", __func__);
+                            service->setBaseOffsetOfSharedRegion(sizeOrOffset);
                             break;
                         default:
                             fprintf(stderr, "%s: unreachable\n", __func__);
