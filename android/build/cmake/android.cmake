@@ -444,7 +444,10 @@ function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS
                  ${qemu-system-${QEMU_AARCH}_sources}
                  ${qemu-system-${QEMU_AARCH}_generated_sources})
   target_include_directories(qemu-system-${ANDROID_AARCH} PRIVATE android-qemu2-glue/config/target-${CONFIG_AARCH} target/${CPU})
-  target_compile_definitions(qemu-system-${ANDROID_AARCH} PRIVATE -DNEED_CPU_H -DCONFIG_ANDROID)
+  target_compile_definitions(qemu-system-${ANDROID_AARCH} PRIVATE
+      -DNEED_CPU_H -DCONFIG_ANDROID
+      -DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}
+      -DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER})
   target_link_libraries(qemu-system-${ANDROID_AARCH}
                         PRIVATE android-qemu-deps
                                 -w
