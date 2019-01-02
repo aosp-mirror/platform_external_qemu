@@ -1435,3 +1435,15 @@ glUnmapBufferDirect
 glFlushMappedBufferRangeDirect
     flag custom_decoder
     flag not_api
+
+glReadnPixelsEXT
+    dir data out
+    len data bufSize
+
+glGetnUniformfvEXT
+    dir params out
+    len params bufSize
+
+glGetnUniformivEXT
+    dir params out
+    len params bufSize

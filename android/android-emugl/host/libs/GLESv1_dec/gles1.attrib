@@ -702,3 +702,8 @@ glExtGetProgramsQCOM
 #void glExtGetProgramBinarySourceQCOM(GLuint program, GLenum shadertype, GLchar *source, GLint *length)
 glExtGetProgramBinarySourceQCOM
 	flag unsupported
+
+#void glReadnPixelsEXT(void* self, GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, GLvoid* pixels)
+glReadnPixelsEXT
+    dir data out
+    len data bufSize
