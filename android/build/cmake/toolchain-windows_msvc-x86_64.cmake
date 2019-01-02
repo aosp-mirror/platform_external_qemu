@@ -29,25 +29,14 @@ get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../.
 
 # Cmake goes crazy if we set AR manually.. so let's not do that.
 if(WIN32)
-  message(STATUS "Native windows")
   set(CLANG_VER "clang-r346389b")
+  message(STATUS "Configuring native windows build using clang-cl: ${CLANG_VER}")
   get_filename_component(CLANG_DIR "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/clang/host/windows-x86/${CLANG_VER}"
                          REALPATH)
   if(NOT EXISTS "${CLANG_DIR}/bin/clang-cl.exe")
-    execute_process(COMMAND copy "${CLANG_DIR}/bin/clang.exe" "${CLANG_DIR}/bin/clang-cl.exe"
-                    WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
-                    RESULT_VARIABLE CP_RES
-                    OUTPUT_VARIABLE STD_OUT
-                    ERROR_VARIABLE STD_ERR)
-    message(
-      STATUS
-        "'copy ${CLANG_VER} ${CLANG_DIR}/bin/clang.exe ${CLANG_DIR}/bin/clang-cl.exe', out: ${STD_OUT}, err: ${STD_ERR}"
-      )
-    if(NOT "${CP_RES}" STREQUAL "0")
-      message(
-        WARNING
-          "Unable to 'copy ${CLANG_DIR}/bin/clang.exe ${CLANG_DIR}/bin/clang-cl.exe', out: ${STD_OUT}, err: ${STD_ERR}")
-    endif()
+    message(FATAL_ERROR
+        "${CLANG_DIR}/bin/clang-cl.exe does not exists, will not be able to compile properly. Make sure the symlink ${CLANG_DIR}/bin/clang-cl.exe <===> ${CLANG_DIR}/bin/clang.exe exists!"
+     )
   endif()
   set(CMAKE_C_COMPILER "${CLANG_DIR}/bin/clang-cl.exe")
   set(CMAKE_CXX_COMPILER "${CLANG_DIR}/bin/clang-cl.exe")

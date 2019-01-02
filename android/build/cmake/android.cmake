@@ -469,8 +469,8 @@ function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS
   # XCode bin places this not where we want this...
   set_target_properties(qemu-system-${ANDROID_AARCH}
                         PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                                   "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qemu/${ANDROID_TARGET_TAG}")
-  install(TARGETS qemu-system-${ANDROID_AARCH} RUNTIME DESTINATION ./qemu/${ANDROID_TARGET_TAG})
+                                   "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
+  install(TARGETS qemu-system-${ANDROID_AARCH} RUNTIME DESTINATION "./qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
 endfunction()
 
 # Copies a
