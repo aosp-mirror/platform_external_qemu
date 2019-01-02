@@ -112,6 +112,7 @@ CrashService::CrashService(const std::string& version,
       mReportId(),
       mComments(),
       mDidCrashOnExit(false) {
+    fprintf(stderr, "%s: version: %s\n", __func__, version.c_str());
     mVersionId = version;
     mVersionId += "-";
     mVersionId += build;
