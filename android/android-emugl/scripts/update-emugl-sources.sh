@@ -82,7 +82,7 @@ if [ "$OPT_EMUGEN" ]; then
         fatal "Missing emugen binary: $EMUGEN"
     fi
 else
-    EMUGEN=$PROGDIR/../../../objs/build/intermediates64/emugen/emugen
+    EMUGEN=$PROGDIR/../../../objs/emugen
     if [ ! -f "$EMUGEN" ]; then
         fatal "Missing emugen binary: $EMUGEN, please build it or use --emugen=<program>"
     fi
