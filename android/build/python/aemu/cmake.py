@@ -29,7 +29,7 @@ import platform
 import shutil
 
 from aemu.process import run
-from aemu.definitions import Generator, Crash, BuildConfig, SymbolUris, Toolchain, get_qemu_root, get_cmake, Make, get_aosp_root, get_windows_clang
+from aemu.definitions import Generator, Crash, BuildConfig, SymbolUris, Toolchain, get_qemu_root, get_cmake, Make, get_aosp_root, fixup_windows_clang
 from aemu.run_tests import run_tests
 from aemu.upload_symbols import upload_symbols
 
@@ -70,8 +70,8 @@ def configure():
 
     # Clear out the existing directory.
     if FLAGS.clean:
-        logging.info('Clearing out %s', FLAGS.out)
         if os.path.exists(FLAGS.out):
+            logging.info('Clearing out %s', FLAGS.out)
             shutil.rmtree(FLAGS.out)
         if not os.path.exists(FLAGS.out):
             os.makedirs(FLAGS.out)
@@ -96,8 +96,11 @@ def configure():
     cmake_cmd += Generator.from_string(FLAGS.generator).to_cmd()
     cmake_cmd += [get_qemu_root()]
 
-    run(cmake_cmd, FLAGS.out)
+    # Make sure we fixup clang in windows builds
+    if platform.system() == 'Windows':
+        fixup_windows_clang()
 
+    run(cmake_cmd, FLAGS.out)
 
 def get_build_cmd():
     '''Gets the command that will build all the sources.'''
