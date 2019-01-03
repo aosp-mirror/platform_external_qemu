@@ -19,18 +19,17 @@ Install the following:
     - [Python](https://www.python.org/downloads/windows/). You only need this if your version of visual studio does not come with python.
     - [Cmake](https://cmake.org/download/). You only need this if your version of visual studio does not come with cmake.
 - [Git](https://git-scm.com/downloads). Make sure that the install updates your path, so git will be on the path.
-- Add %USERPROFILE%\bin to the [path](https://www.windows-commandline.com/set-path-command-line/). 
+- Add %USERPROFILE%\bin to the [path](https://www.windows-commandline.com/set-path-command-line/).
 
-Once you have installed these open the "Developer Command Prompt for VS 2017". Make sure your account has **[SeCreateSymbolicLinkPrivilege](https://security.stackexchange.com/questions/10194/why-do-you-have-to-be-an-admin-to-create-a-symlink-in-windows)**. The easiest way to make sure you have this is to open this with administrator privileges. 
+Once you have installed these open a cmd prompt. Make sure your account has **[SeCreateSymbolicLinkPrivilege](https://security.stackexchange.com/questions/10194/why-do-you-have-to-be-an-admin-to-create-a-symlink-in-windows)**. The easiest way to make sure you have this is to open this with administrator privileges.
 
 1. First check that all dependencies are on the path:
 
     ```
-    C:\> where git && where python && where cmake
+    C:\> where git && where python
     C:\Program Files\Git\cmd\git.exe
     C:\python_27_amd64\files\python.exe
-    C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe
-    ``` 
+    ```
 
 2. The next step is to obtain a copy of [git-remote-sso.exe](https://x20web.corp.google.com/teams/gerritcodereview/bin/git-remote-sso.exe), and place it in the git\cmd directory (or anywhere else on the PATH).  **Optional, you can live without**
 
@@ -48,7 +47,7 @@ Once you have installed these open the "Developer Command Prompt for VS 2017". M
 
     ```
     C:> echo @call python "%USERPROFILE%\src\git-repo-windows\repo" %* > "%USERPROFILE%\bin\repo.cmd"
-    C:> repo help 
+    C:> repo help
     usage: repo COMMAND [ARGS]
 
     repo is not yet installed.  Use "repo init" to install it here.
@@ -65,10 +64,10 @@ Once you have installed these open the "Developer Command Prompt for VS 2017". M
 
   5. Initialize the repository:
 
-      ``` 
+      ```
       C:> cd %USERPROFILE%\src && mkdir emu-master-dev && cd emu-master-dev
-      C:> repo init -u https://android.googlesource.com/platform/manifest -b emu-master-dev          
-      ```  
+      C:> repo init -u https://android.googlesource.com/platform/manifest -b emu-master-dev
+      ```
 
       ***Note:** we are not using persistent-https to initialize the repo*
 
@@ -87,7 +86,7 @@ Once you have installed these open the "Developer Command Prompt for VS 2017". M
 
    8. Setup git cookies so you can repo upload by following this link: [https://www.googlesource.com/new-password](https://www.googlesource.com/new-password)
 
-## Using Debian. 
+## Using Debian.
 
 **NOTE: Currently does not work due symlinks not being visible in NTFS**
 

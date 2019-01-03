@@ -17,8 +17,10 @@ from enum import Enum
 import os
 import platform
 import shutil
+import aemu.process
 
 from absl import flags
+from absl import logging
 
 FLAGS = flags.FLAGS
 
@@ -61,26 +63,31 @@ def get_ctest():
 
 
 def get_visual_studio():
-    '''Gets the path to visual studio.
+    '''Gets the path to visual studio, or None if not found.
 
     TODO(jansene): Use https://github.com/Microsoft/vswhere vs this here'''
-    releases = ['Community', 'Enterprise', 'Professional']
-    for release in releases:
-        candidate = os.path.join(os.sep, "Program Files (x86)", "Microsoft Visual Studio",
-                                  "2017", release, "VC", "Auxiliary", "Build", "vcvars64.bat")
-        if os.path.exists(candidate):
-            return candidate
+    candidates = recursive_iglob(os.path.join(os.sep, "Program Files (x86)", "Microsoft Visual Studio",
+                                  "2017"), [lambda f: f.endswith('vcvars64.bat')])
+    vs_release = next(candidates, None)
+    logging.info("Using visual studio %s", vs_release)
+    return vs_release
 
+def fixup_windows_clang():
+    '''Fixes the clang-cl symlinks in our repo.
 
-def get_windows_clang():
-    '''Gets the clang-cl.exe compiler for windows.'''
-    clang_ver = 'clang-r346389b'
-    clang_dir = os.path.join(get_aosp_root(), 'prebuilts',
-                             'clang', 'host', 'windows-x86', clang_ver, 'bin')
-    clang_cl = os.path.join(clang_dir, 'clang-cl.exe')
-    if not os.path.exists(clang_cl):
-        shutil.copyfile(os.path.join(clang_dir, 'clang.exe'), clang_cl)
-    return clang_cl
+    clang-cl.exe is a frontend to clang.exe that configures clang to work with MSVC on windowws.
+    The current release of clang do not contain clang-cl.exe. Setting this as a symlink will
+    treat clang.exe as clang-cl.exe, so it will properly configure it self.'''
+
+    clang_base_dir = os.path.join(get_aosp_root(), 'prebuilts',
+                             'clang', 'host', 'windows-x86')
+    for clang_ver in os.listdir(clang_base_dir):
+        if clang_ver.startswith('clang') and os.path.isdir(os.path.join(clang_base_dir, clang_ver)):
+            clang_dir = os.path.join(clang_base_dir, clang_ver, 'bin')
+            clang_cl = os.path.join(clang_dir, 'clang-cl.exe')
+            if not os.path.exists(clang_cl):
+                logging.info("Setting symlink for %s", clang_cl)
+                aemu.process.run(['mklink', clang_cl, os.path.join(clang_dir, 'clang.exe')])
 
 
 # Functions that determine if a file is executable.
