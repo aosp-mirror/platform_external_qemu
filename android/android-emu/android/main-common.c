@@ -2073,6 +2073,7 @@ bool configAndStartRenderer(
                     avdInfo_getAvdFlavor(avd) == AVD_PHONE,
                     avdInfo_getApiLevel(avd),
                     vm_operations,
+                    NULL /* no custom dma ops */,
                     &gles_major_version,
                     &gles_minor_version);
         if (gles_init_res || renderer_startup_res) {

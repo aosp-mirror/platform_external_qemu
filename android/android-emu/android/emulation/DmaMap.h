@@ -68,8 +68,15 @@ protected:
 
     // These are meant to be replaced by a real implementation
     // in subclasses.
-    virtual void* doMap(uint64_t addr, uint64_t bufferSize) = 0;
-    virtual void doUnmap(void* mapped, uint64_t bufferSize) = 0;
+    virtual void* doMap(uint64_t addr, uint64_t bufferSize) {
+        (void)bufferSize;
+        return (void*)(uintptr_t)(addr);
+    }
+
+    virtual void doUnmap(void* mapped, uint64_t bufferSize) {
+        (void)mapped;
+        (void)bufferSize;
+    }
 
     DmaBufferMap mDmaBuffers;
     android::base::ReadWriteLock mLock;
