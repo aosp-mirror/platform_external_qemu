@@ -52,3 +52,23 @@ GoldfishDmaOps android_goldfish_dma_ops = {
     .save_mappings = android_goldfish_dma_save_mappings,
     .load_mappings = android_goldfish_dma_load_mappings,
 };
+
+static void* test_dma_get_host_addr(uint64_t guest_paddr) {
+    return (void*)(uintptr_t)(guest_paddr);
+}
+
+static void test_dma_unlock(uint64_t guest_paddr) {
+    (void)guest_paddr;
+    return;
+}
+
+GoldfishDmaOps android_goldfish_dma_ops_for_testing = {
+    .add_buffer = android_goldfish_dma_add_buffer,
+    .remove_buffer = android_goldfish_dma_remove_buffer,
+    .get_host_addr = test_dma_get_host_addr,
+    .invalidate_host_mappings = android_goldfish_dma_invalidate_host_mappings,
+    .unlock = test_dma_unlock,
+    .reset_host_mappings = android_goldfish_dma_reset_host_mappings,
+    .save_mappings = android_goldfish_dma_save_mappings,
+    .load_mappings = android_goldfish_dma_load_mappings,
+};
