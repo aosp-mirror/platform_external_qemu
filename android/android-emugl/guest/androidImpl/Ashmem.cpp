@@ -36,14 +36,14 @@ public:
     SharedMemoryStore() = default;
 
     int create(const char* name, size_t size) {
-        std::unique_ptr<SharedMemory> mem =
-            std::make_unique<SharedMemory>(name, size);
+        SharedMemory* mem =
+            new SharedMemory(name, size);
 
         mem->createNoMapping(0755);
 
         int fd = mem->getFd();
         if (fd >= 0) {
-            mMemories[fd] = std::move(mem);
+            mMemories[fd] = mem;
         } else {
             fprintf(stderr, "%s: SharedMemory creation failed! errno: %d\n",
                     __func__, errno);
@@ -52,10 +52,19 @@ public:
     }
 
     void clear() {
+        for (auto it : mMemories) {
+            delete it.second;
+        }
+
         mMemories.clear();
     }
 
     void close(int fd) {
+        auto it = mMemories.find(fd);
+        if (it != mMemories.end()) {
+            delete it->second;
+        }
+
         mMemories.erase(fd);
     }
 
@@ -65,7 +74,7 @@ public:
 
 private:
     std::atomic<int> mNextId = { 0 };
-    std::unordered_map<int, std::unique_ptr<SharedMemory>> mMemories;
+    std::unordered_map<int, SharedMemory*> mMemories;
 };
 
 static LazyInstance<SharedMemoryStore> sStore = LAZY_INSTANCE_INIT;
