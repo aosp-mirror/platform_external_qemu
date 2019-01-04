@@ -176,6 +176,7 @@ BAD_EXIT:
 int
 android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int guestApiLevel,
                               const QAndroidVmOperations *vm_operations,
+                              const GoldfishDmaOps *custom_dma_ops,
                               int* glesMajorVersion_out,
                               int* glesMinorVersion_out)
 {
@@ -223,11 +224,19 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     countfuncs.dec = opengl_object_count_dec;
     sRenderLib->setGLObjCounter(countfuncs);
     emugl_dma_ops dma_ops;
-    dma_ops.add_buffer = android_goldfish_dma_ops.add_buffer;
-    dma_ops.remove_buffer = android_goldfish_dma_ops.remove_buffer;
-    dma_ops.get_host_addr = android_goldfish_dma_ops.get_host_addr;
-    dma_ops.invalidate_host_mappings = android_goldfish_dma_ops.invalidate_host_mappings;
-    dma_ops.unlock = android_goldfish_dma_ops.unlock;
+    if (custom_dma_ops) {
+        dma_ops.add_buffer = custom_dma_ops->add_buffer;
+        dma_ops.remove_buffer = custom_dma_ops->remove_buffer;
+        dma_ops.get_host_addr = custom_dma_ops->get_host_addr;
+        dma_ops.invalidate_host_mappings = custom_dma_ops->invalidate_host_mappings;
+        dma_ops.unlock = custom_dma_ops->unlock;
+    } else {
+        dma_ops.add_buffer = android_goldfish_dma_ops.add_buffer;
+        dma_ops.remove_buffer = android_goldfish_dma_ops.remove_buffer;
+        dma_ops.get_host_addr = android_goldfish_dma_ops.get_host_addr;
+        dma_ops.invalidate_host_mappings = android_goldfish_dma_ops.invalidate_host_mappings;
+        dma_ops.unlock = android_goldfish_dma_ops.unlock;
+    }
     sRenderLib->setDmaOps(dma_ops);
     sRenderLib->setVmOps(*vm_operations);
     sRenderLib->setCpuUsage(android::base::CpuUsage::get());

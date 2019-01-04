@@ -29,6 +29,8 @@ ANDROID_BEGIN_HEADER
  */
 int android_initOpenglesEmulation(void);
 
+struct GoldfishDmaOps;
+
 /* Tries to start the renderer process. Returns 0 on success, -1 on error.
  * At the moment, this must be done before the VM starts. The onPost callback
  * may be NULL.
@@ -40,6 +42,7 @@ int android_initOpenglesEmulation(void);
 int android_startOpenglesRenderer(int width, int height,
                                   bool isPhone, int guestApiLevel,
                                   const QAndroidVmOperations *vm_operations,
+                                  const struct GoldfishDmaOps* custom_dma_ops,
                                   int* glesMajorVersion_out,
                                   int* glesMinorVersion_out);
 
