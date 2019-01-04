@@ -17,6 +17,8 @@
 #include "android/base/system/System.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/emulation/DmaMap.h"
+#include "android/emulation/GoldfishDma.h"
 #include "android/emulation/hostpipe/HostGoldfishPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/opengl/emugl_config.h"
@@ -50,9 +52,12 @@ using aemu::Display;
 using android::AndroidPipe;
 using android::base::pj;
 using android::base::System;
+using android::DmaMap;
 using android::HostGoldfishPipeDevice;
 
 static constexpr int kWindowSize = 256;
+
+static DmaMap* sDmaMap = nullptr;
 
 GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR",
@@ -61,7 +66,7 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLESDynamicVersion, false);
     android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::GLDMA, false);
+            android::featurecontrol::GLDMA, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLAsyncSwap, false);
     android::featurecontrol::setEnabledOverride(
@@ -89,7 +94,10 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     int min;
 
     android_startOpenglesRenderer(
-        kWindowSize, kWindowSize, 1, 28, gQAndroidVmOperations, &maj, &min);
+        kWindowSize, kWindowSize, 1, 28,
+        gQAndroidVmOperations,
+        nullptr,
+        &maj, &min);
 
     char* vendor = nullptr;
     char* renderer = nullptr;
@@ -101,6 +109,9 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     printf("%s: GL strings; [%s] [%s] [%s].\n", __func__, vendor, renderer,
            version);
 
+    sDmaMap = new android::DmaMap();
+    DmaMap::set(sDmaMap);
+
     HostGoldfishPipeDevice::get();
 
     android_init_opengles_pipe();
@@ -111,4 +122,7 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 GoldfishOpenglTestEnv::~GoldfishOpenglTestEnv() {
     AndroidPipe::Service::resetAll();
     android_stopOpenglesRenderer(true);
+
+    DmaMap::set(nullptr);
+    delete sDmaMap;
 }

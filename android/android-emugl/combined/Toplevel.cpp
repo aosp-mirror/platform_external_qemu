@@ -19,6 +19,8 @@
 #include "android/base/system/System.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/emulation/DmaMap.h"
+#include "android/emulation/GoldfishDma.h"
 #include "android/emulation/hostpipe/HostGoldfishPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/opengl/emugl_config.h"
@@ -60,6 +62,7 @@ using android::base::makeOnDemand;
 using android::base::OnDemandT;
 using android::base::pj;
 using android::base::System;
+using android::DmaMap;
 using android::HostGoldfishPipeDevice;
 
 namespace aemu {
@@ -141,7 +144,7 @@ private:
         android::featurecontrol::setEnabledOverride(
                 android::featurecontrol::GLAsyncSwap, false);
         android::featurecontrol::setEnabledOverride(
-                android::featurecontrol::GLDMA, false);
+                android::featurecontrol::GLDMA, true);
         android::featurecontrol::setEnabledOverride(
                 android::featurecontrol::RefCountPipe, true);
         android::featurecontrol::setEnabledOverride(
@@ -168,6 +171,7 @@ private:
 
         android_startOpenglesRenderer(kWindowSize, kWindowSize, 1, 28,
                                       gQAndroidVmOperations,
+                                      nullptr,
                                       &maj, &min);
 
         char* vendor = nullptr;
@@ -186,6 +190,9 @@ private:
             mDisplay.loop();
         }
 
+        mDmaMap.reset(new android::DmaMap());
+        DmaMap::set(mDmaMap.get());
+
         HostGoldfishPipeDevice::get();
 
         android_init_opengles_pipe();
@@ -197,7 +204,7 @@ private:
         AndroidPipe::Service::resetAll();
         android_finishOpenglesRenderer();
         android_hideOpenglesWindow();
-        android_stopOpenglesRenderer(true);
+        DmaMap::set(nullptr);
     }
 
     void setupGralloc() {
@@ -284,6 +291,8 @@ private:
     }
 
     Lock mLock;
+
+    std::unique_ptr<DmaMap> mDmaMap;
 
     int mRefreshRate;
 
