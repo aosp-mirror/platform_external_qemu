@@ -28,7 +28,7 @@ static const uint32_t kDmaBufSizeMB = 32;
 //
 // for more details.
 // Host / virtual device interface:
-typedef struct {
+struct GoldfishDmaOps {
 // add_buffer():
 // Tell us that there is a physically-contiguous buffer in the guest
 // starting at |guest_paddr|. This should be used upon allocation
@@ -59,6 +59,7 @@ void (*reset_host_mappings)(void);
 // For snapshots.
 void (*save_mappings)(android::base::Stream* stream);
 void (*load_mappings)(android::base::Stream* stream);
-} GoldfishDmaOps;
+};
 
 extern GoldfishDmaOps android_goldfish_dma_ops;
+extern GoldfishDmaOps android_goldfish_dma_ops_for_testing;
