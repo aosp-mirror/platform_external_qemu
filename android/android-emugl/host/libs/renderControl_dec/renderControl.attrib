@@ -64,3 +64,9 @@ rcCompose
     dir buffer in
     len buffer bufferSize
     flag flushOnEncode
+
+rcInitSharedMemory
+    flag flushOnEncode
+
+rcStartSharedMemoryCommands
+    flag flushOnEncode
