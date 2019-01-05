@@ -22,6 +22,10 @@
   X(void, glFramebufferRenderbufferEXT, (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer), (target, attachment, renderbuffertarget, renderbuffer)) \
   X(void, glGetFramebufferAttachmentParameterivEXT, (GLenum target, GLenum attachment, GLenum pname, GLint * params), (target, attachment, pname, params)) \
   X(void, glGenerateMipmapEXT, (GLenum target), (target)) \
+  X(GLenum, glGetGraphicsResetStatusEXT, (), ()) \
+  X(void, glReadnPixelsEXT, (GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, void * data), (x, y, width, height, format, type, bufSize, data)) \
+  X(void, glGetnUniformfvEXT, (GLuint program, GLint location, GLsizei bufSize, float * params), (program, location, bufSize, params)) \
+  X(void, glGetnUniformivEXT, (GLuint program, GLint location, GLsizei bufSize, GLint * params), (program, location, bufSize, params)) \
   X(void, glEGLImageTargetTexture2DOES, (GLenum target, GLeglImageOES image), (target, image)) \
   X(void, glEGLImageTargetRenderbufferStorageOES, (GLenum target, GLeglImageOES image), (target, image)) \
 
