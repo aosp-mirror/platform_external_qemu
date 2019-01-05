@@ -948,6 +948,33 @@ static int rcCompose(uint32_t bufferSize, void* buffer) {
     return fb->compose(bufferSize, buffer);
 }
 
+static uint64_t rcInitSharedMemory(
+    uint64_t toHostAddr, uint64_t fromHostAddr,
+    uint64_t toHostBufferAddr, uint64_t fromHostBufferAddr) {
+
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+
+    return tInfo->initSharedMemoryCommandRings(
+        toHostAddr,
+        fromHostAddr,
+        toHostBufferAddr,
+        fromHostBufferAddr,
+        emugl::g_emugl_dma_get_host_addr(toHostAddr),
+        emugl::g_emugl_dma_get_host_addr(fromHostAddr),
+        emugl::g_emugl_dma_get_host_addr(toHostBufferAddr),
+        emugl::g_emugl_dma_get_host_addr(fromHostBufferAddr));
+}
+
+static void rcStartSharedMemoryCommands() {
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    tInfo->setSharedMemoryCommandMode(true);
+}
+
+static void rcEndSharedMemoryCommands() {
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    tInfo->setSharedMemoryCommandMode(false);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -988,4 +1015,7 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateColorBufferDMA = rcCreateColorBufferDMA;
     dec->rcWaitSyncKHR = rcWaitSyncKHR;
     dec->rcCompose = rcCompose;
+    dec->rcInitSharedMemory = rcInitSharedMemory;
+    dec->rcStartSharedMemoryCommands = rcStartSharedMemoryCommands;
+    dec->rcEndSharedMemoryCommands = rcEndSharedMemoryCommands;
 }
