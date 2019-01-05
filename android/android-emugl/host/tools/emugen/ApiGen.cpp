@@ -655,6 +655,8 @@ int ApiGen::genEncoderImpl(const std::string &filename)
             if (nvars == 0 || j > nvars) {
                 const char* plus = "";
 
+                fprintf(fp, "\tstream->prepareEncode();\n");
+
                 if (nvars == 0 && j == maxvars) {
                     // Simple shortcut for the common case where we don't have large variables;
                     fprintf(fp, "\tbuf = stream->alloc(totalSize);\n");
