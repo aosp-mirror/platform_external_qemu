@@ -948,6 +948,14 @@ static int rcCompose(uint32_t bufferSize, void* buffer) {
     return fb->compose(bufferSize, buffer);
 }
 
+static void rcInitSharedMemory(uint64_t toHostAddr, uint64_t fromHostAddr) {
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+}
+
+static void rcStartSharedMemoryCommands() {
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -988,4 +996,6 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateColorBufferDMA = rcCreateColorBufferDMA;
     dec->rcWaitSyncKHR = rcWaitSyncKHR;
     dec->rcCompose = rcCompose;
+    dec->rcInitSharedMemory = rcInitSharedMemory;
+    dec->rcStartSharedMemoryCommands = rcStartSharedMemoryCommands;
 }
