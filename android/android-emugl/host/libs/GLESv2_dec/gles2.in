@@ -570,3 +570,8 @@ GL_ENTRY(void, glUnmapBufferDMA, GLenum target, GLintptr offset, GLsizeiptr leng
 GL_ENTRY(uint64_t, glMapBufferRangeDirect, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr)
 GL_ENTRY(void, glUnmapBufferDirect, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr, uint64_t guest_ptr, GLboolean* out_res)
 GL_ENTRY(void, glFlushMappedBufferRangeDirect, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access)
+
+GL_ENTRY(GLenum, glGetGraphicsResetStatusEXT, void)
+GL_ENTRY(void, glReadnPixelsEXT, GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, GLvoid *data)
+GL_ENTRY(void, glGetnUniformfvEXT, GLuint program, GLint location, GLsizei bufSize, GLfloat *params)
+GL_ENTRY(void, glGetnUniformivEXT, GLuint program, GLint location, GLsizei bufSize, GLint *params)
