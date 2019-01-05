@@ -258,6 +258,7 @@ def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
     emit_custom_resource_preprocess(typeInfo, api, cgen);
 
     cgen.stmt("auto %s = mImpl->stream()" % STREAM)
+    cgen.stmt("%s->prepareEncode()" % STREAM)
     cgen.stmt("auto %s = mImpl->countingStream()" % COUNTING_STREAM)
     cgen.stmt("auto %s = mImpl->resources()" % RESOURCES)
     cgen.stmt("auto %s = mImpl->pool()" % POOL)

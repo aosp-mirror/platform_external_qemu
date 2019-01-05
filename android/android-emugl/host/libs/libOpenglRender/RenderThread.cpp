@@ -214,6 +214,9 @@ intptr_t RenderThread::main() {
     }
 
     ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
+
+    tInfo.setStreamAddr((void*)&stream);
+
     ReadBuffer readBuf(kStreamBufferSize);
 
     const SnapshotObjects snapshotObjects = {
