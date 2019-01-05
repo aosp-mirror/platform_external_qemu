@@ -27,7 +27,8 @@ FLAGS = flags.FLAGS
 # Beware! This depends on this file NOT being installed!
 flags.DEFINE_string('aosp_root', os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(
     __file__)), '..', '..', '..', '..', '..', '..')), 'The aosp directory')
-
+flags.DEFINE_string('visual_studio', None,
+                    'Preferred visual studio version. Can be a starting search path, or substring. Example values: "Enterprise" or "D:\\MyVs\\2013\\Path"')
 
 EXE_POSTFIX = ''
 if platform.system() == 'Windows':
@@ -65,12 +66,23 @@ def get_ctest():
 def get_visual_studio():
     '''Gets the path to visual studio, or None if not found.
 
-    TODO(jansene): Use https://github.com/Microsoft/vswhere vs this here'''
-    candidates = recursive_iglob(os.path.join(os.sep, "Program Files (x86)", "Microsoft Visual Studio",
-                                  "2017"), [lambda f: f.endswith('vcvars64.bat')])
+    The visual_studio flag can be:
+       - the starting path from which we start to search for vcvars64
+       - substring that should be in the path.
+
+    TODO(jansene): Use https://github.com/Microsoft/vswhere to really find all paths'''
+
+    if FLAGS.visual_studio and os.path.exists(FLAGS.visual_studio):
+        start_dir = FLAGS.visual_studio
+    else:
+        start_dir = os.path.join(
+            os.sep, "Program Files (x86)", "Microsoft Visual Studio",  "2017")
+    candidates = recursive_iglob(start_dir, [lambda f: f.endswith(
+        'vcvars64.bat') and (FLAGS.visual_studio == None or FLAGS.visual_studio in f)])
     vs_release = next(candidates, None)
     logging.info("Using visual studio %s", vs_release)
     return vs_release
+
 
 def fixup_windows_clang():
     '''Fixes the clang-cl symlinks in our repo.
@@ -80,14 +92,15 @@ def fixup_windows_clang():
     treat clang.exe as clang-cl.exe, so it will properly configure it self.'''
 
     clang_base_dir = os.path.join(get_aosp_root(), 'prebuilts',
-                             'clang', 'host', 'windows-x86')
+                                  'clang', 'host', 'windows-x86')
     for clang_ver in os.listdir(clang_base_dir):
         if clang_ver.startswith('clang') and os.path.isdir(os.path.join(clang_base_dir, clang_ver)):
             clang_dir = os.path.join(clang_base_dir, clang_ver, 'bin')
             clang_cl = os.path.join(clang_dir, 'clang-cl.exe')
             if not os.path.exists(clang_cl):
                 logging.info("Setting symlink for %s", clang_cl)
-                aemu.process.run(['mklink', clang_cl, os.path.join(clang_dir, 'clang.exe')])
+                aemu.process.run(
+                    ['mklink', clang_cl, os.path.join(clang_dir, 'clang.exe')])
 
 
 # Functions that determine if a file is executable.

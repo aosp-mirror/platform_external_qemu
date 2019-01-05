@@ -15,11 +15,15 @@
 # limitations under the License.
 import os
 import platform
-from Queue import Queue
+try:
+    from Queue import Queue
+except:
+    from queue import Queue # Python 3 wants lowercase.
+
 import subprocess
 from threading import Thread
 
-from aemu.definitions import get_qemu_root, get_visual_studio
+import aemu.definitions
 from absl import logging
 
 
@@ -41,9 +45,8 @@ def log_std_out(proc):
     for _ in range(2):
         for _, line in iter(q.get, None):
             if is_windows:
-                # 2 problems on windows, output of \r, and error 0 when writing to log concurrently
-                # So we will just directly print vs, going to logging infra structure.
-                print (line.replace('\r', ''))
+                # THere are some concurrency issues in the logger on windows.
+                print (line)
             else:
                 logging.info(line)
 
@@ -59,14 +62,16 @@ def get_system_env():
 
     local_env = os.environ.copy()
     if platform.system() == 'Windows':
-        env_lines = subprocess.check_output(["cmd", "/c", get_visual_studio(), "&&",  "set"]).splitlines()
+        env_lines = subprocess.check_output(["cmd", "/c", aemu.definitions.get_visual_studio(), "&&",  "set"]).splitlines()
         for env_line in env_lines:
+            env_line = str(env_line) # Python3 returns bytes, not strings..
             if '=' in env_line:
                 env = env_line.split('=')
                 # Variables in windows are case insensitive, but not in python dict!
                 local_env[env[0].upper()] = env[1]
     else:
-        local_env['PATH'] = os.path.join(get_qemu_root(), 'android', 'third_party', 'chromium', 'depot_tools') + os.pathsep + local_env['PATH']
+        local_env['PATH'] = os.path.join(aemu.definitions.get_qemu_root(),
+                    'android', 'third_party', 'chromium', 'depot_tools') + os.pathsep + local_env['PATH']
 
     _CACHED_ENV = local_env
     return local_env
