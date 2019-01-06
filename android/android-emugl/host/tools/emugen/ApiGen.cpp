@@ -1025,10 +1025,10 @@ R"(        // Do this on every iteration, as some commands may change the checks
         enum Pass_t {
             PASS_FIRST = 0,
             PASS_VariableDeclarations = PASS_FIRST,
-            PASS_Protocol,
             PASS_TmpBuffAlloc,
             PASS_MemAlloc,
             PASS_DebugPrint,
+            PASS_Protocol,
             PASS_FunctionCall,
             PASS_FlushOutput,
             PASS_Epilog,

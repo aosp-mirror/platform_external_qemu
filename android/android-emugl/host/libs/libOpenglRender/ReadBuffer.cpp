@@ -15,6 +15,8 @@
 */
 #include "ReadBuffer.h"
 
+#include "android/base/system/System.h"
+
 #include "ErrorLog.h"
 
 #include <algorithm>
@@ -22,6 +24,8 @@
 #include <assert.h>
 #include <string.h>
 #include <limits.h>
+
+using android::base::System;
 
 namespace emugl {
 
@@ -36,9 +40,81 @@ ReadBuffer::~ReadBuffer() {
     free(m_buf);
 }
 
+int ReadBuffer::getDataSharedMem(ChannelStream* stream, int minSize) {
+    // fprintf(stderr, "%s:%p valid data: %zu want total: %d\n", __func__, stream, m_validData, minSize);
+    // if (m_validData != 0) {
+    //  fprintf(stderr, "%s: sharedMem read with previous valid data!\n", __func__);
+    //  abort();
+    // }
+
+    // assume we are in hung up mode
+    uint32_t fromGuestTotal = 0;
+
+    uint32_t minSizeToRead = minSize - m_validData;
+
+    uint32_t readAlready = (uint32_t)(uintptr_t)(m_readPtr - m_buf);
+    uint32_t currentOccupancy = readAlready + m_validData;
+
+    while (fromGuestTotal < minSizeToRead) {
+        uint32_t fromGuestSize = stream->waitForGuestPingAndTrafficSize();
+
+        if (fromGuestSize == 0) {
+            fprintf(stderr, "%s: need exit\n", __func__);
+            if (fromGuestTotal > 0) {
+                return fromGuestTotal;
+            } else {
+                return -1;
+            }
+        }
+
+        fromGuestTotal += fromGuestSize;
+        currentOccupancy += fromGuestSize;
+
+        // fprintf(stderr, "%s:%p got %u (total: %u)\n", __func__, stream, fromGuestSize, fromGuestTotal);
+
+        if (currentOccupancy > m_size ||
+            minSize > m_size) {
+            
+            fprintf(stderr, "%s: service new alloc. currOcc %u readAlready %u validData %u minSize %u limit %u (2x: %u)\n", __func__,
+                    currentOccupancy, readAlready, m_validData, minSize, m_size, m_size * 2);
+
+            size_t needed =
+                minSize > currentOccupancy ? minSize : currentOccupancy;
+
+            if (readAlready >= needed &&
+                readAlready >= m_validData) {
+                fprintf(stderr, "%s: with memcpy\n", __func__);
+                memcpy(m_buf, m_readPtr, m_validData);
+                m_readPtr = m_buf;
+            } else {
+                size_t bigger =
+                    (minSize > currentOccupancy) ?
+                    minSize : currentOccupancy;
+                
+                m_size = bigger * 2;
+
+                unsigned char* new_buf = (unsigned char*)malloc(m_size);
+                memcpy(new_buf, m_readPtr, m_validData);
+                free(m_buf);
+                m_buf = new_buf;
+                m_readPtr = m_buf;
+            }
+        }
+
+        stream->readFullyAndHangUp(m_readPtr + m_validData, fromGuestSize);
+
+        m_validData += fromGuestSize;
+    }
+
+    // fprintf(stderr, "%s:%p done with %u\n", __func__, stream, fromGuestTotal);
+    return (int)fromGuestTotal;
+}
+
 int ReadBuffer::getData(IOStream* stream, int minSize) {
     assert(stream);
     assert(minSize > (int)m_validData);
+
+uint64_t start_us = System::get()->getHighResTimeUs();
 
     const int minSizeToRead = minSize - m_validData;
     int maxSizeToRead;
@@ -79,6 +155,10 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
         m_readPtr = m_buf;
     }
 
+uint64_t prep_end_us = System::get()->getHighResTimeUs();
+
+m_timePrepping += (prep_end_us - start_us);
+
     // get fresh data into the buffer;
     int readTotal = 0;
     do {
@@ -86,8 +166,14 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
                                             maxSizeToRead - readTotal);
         if (!readNow) {
             if (readTotal > 0) {
+
+                uint64_t read_end_us0 = System::get()->getHighResTimeUs();
+                m_timeChannelReading += (read_end_us0 - prep_end_us);
+
                 return readTotal;
             } else {
+                uint64_t read_end_us1 = System::get()->getHighResTimeUs();
+                m_timeChannelReading += (read_end_us1 - prep_end_us);
                 return -1;
             }
         }
@@ -95,13 +181,27 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
         m_validData += readNow;
     } while (readTotal < minSizeToRead);
 
+                uint64_t read_end_us2 = System::get()->getHighResTimeUs();
+                m_timeChannelReading += (read_end_us2 - prep_end_us);
     return readTotal;
+}
+
+void ReadBuffer::printAndResetStats() {
+    fprintf(stderr, "%s: time prepping: %f s channel reading: %f s\n", __func__,
+            m_timePrepping / 1000000.0f,
+            m_timeChannelReading / 1000000.0f);
+    m_timePrepping = 0;
+    m_timeChannelReading = 0;
 }
 
 void ReadBuffer::consume(size_t amount) {
     assert(amount <= m_validData);
     m_validData -= amount;
     m_readPtr += amount;
+
+    if (m_validData == 0) {
+        m_readPtr = m_buf;
+    }
 }
 
 void ReadBuffer::onSave(android::base::Stream* stream) {

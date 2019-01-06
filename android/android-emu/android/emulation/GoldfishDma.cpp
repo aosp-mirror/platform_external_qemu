@@ -42,6 +42,14 @@ static void android_goldfish_dma_load_mappings(android::base::Stream* stream) {
     android::DmaMap::get()->load(stream);
 }
 
+static void android_goldfish_dma_ping(uint64_t guest_paddr) {
+    android::DmaMap::get()->ping(guest_paddr);
+}
+
+static void android_goldfish_dma_register_ping_callback(uint64_t guest_paddr, std::function<void()> cb) {
+    android::DmaMap::get()->registerPingCallback(guest_paddr, cb);
+}
+
 GoldfishDmaOps android_goldfish_dma_ops = {
     .add_buffer = android_goldfish_dma_add_buffer,
     .remove_buffer = android_goldfish_dma_remove_buffer,
@@ -51,6 +59,8 @@ GoldfishDmaOps android_goldfish_dma_ops = {
     .reset_host_mappings = android_goldfish_dma_reset_host_mappings,
     .save_mappings = android_goldfish_dma_save_mappings,
     .load_mappings = android_goldfish_dma_load_mappings,
+    .ping = android_goldfish_dma_ping,
+    .register_ping_callback = android_goldfish_dma_register_ping_callback,
 };
 
 static void* test_dma_get_host_addr(uint64_t guest_paddr) {
