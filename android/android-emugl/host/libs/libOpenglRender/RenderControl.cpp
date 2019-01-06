@@ -949,11 +949,17 @@ static int rcCompose(uint32_t bufferSize, void* buffer) {
 }
 
 static void rcInitSharedMemory(uint64_t toHostAddr, uint64_t fromHostAddr) {
+    fprintf(stderr, "%s: call\n", __func__);
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    tInfo->initSharedMemoryCommandRings(
+        emugl::g_emugl_dma_get_host_addr(toHostAddr),
+        emugl::g_emugl_dma_get_host_addr(fromHostAddr));
 }
 
 static void rcStartSharedMemoryCommands() {
+    fprintf(stderr, "%s: call\n", __func__);
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    tInfo->setSharedMemoryCommandMode(true);
 }
 
 void initRenderControlContext(renderControl_decoder_context_t *dec)

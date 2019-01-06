@@ -116,6 +116,9 @@ bool ring_buffer_view_can_read(
     const struct ring_buffer* r,
     const struct ring_buffer_view* v,
     uint32_t bytes);
+uint32_t ring_buffer_available_read(
+    const struct ring_buffer* r,
+    const struct ring_buffer_view* v);
 
 // Lockless synchronization where the consumer is allowed to hang up and go to
 // sleep. This can be considered a sort of asymmetric lock for two threads,

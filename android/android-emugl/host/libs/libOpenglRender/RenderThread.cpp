@@ -216,6 +216,11 @@ intptr_t RenderThread::main() {
     ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
     ReadBuffer readBuf(kStreamBufferSize);
 
+    stream.setSharedMemoryCommandInfo(
+        &tInfo.m_sharedMemoryCommandMode,
+        (ring_buffer**)&tInfo.m_toHostRing,
+        (ring_buffer**)&tInfo.m_fromHostRing);
+
     const SnapshotObjects snapshotObjects = {
         &tInfo, &checksumCalc, &stream, &readBuf
     };
@@ -271,16 +276,19 @@ intptr_t RenderThread::main() {
         // Let's make sure we read enough data for at least some processing.
         int packetSize;
         if (readBuf.validData() >= 8) {
+            // fprintf(stderr, "%s: got packet size 1\n", __func__);
             // We know that packet size is the second int32_t from the start.
             packetSize = *(const int32_t*)(readBuf.buf() + 4);
         } else {
             // Read enough data to at least be able to get the packet size next
             // time.
             packetSize = 8;
+            fprintf(stderr, "%s: got packet size 2\n", __func__);
         }
 
         int stat = 0;
         if (packetSize > (int)readBuf.validData()) {
+            fprintf(stderr, "%s: try getting %zu\n", __func__, packetSize);
             stat = readBuf.getData(&stream, packetSize);
             if (stat <= 0) {
                 if (doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
@@ -377,6 +385,7 @@ intptr_t RenderThread::main() {
             if (last > 0) {
                 readBuf.consume(last);
                 progress = true;
+                fprintf(stderr, "%s: rcProgress\n", __func__);
             }
 
             //
@@ -391,6 +400,7 @@ intptr_t RenderThread::main() {
             }
 
         } while (progress);
+                // fprintf(stderr, "%s: end progress\n", __func__);
     }
 
     if (dumpFP) {

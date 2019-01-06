@@ -141,6 +141,19 @@ bool ring_buffer_view_can_read(
             v, write_view - r->read_pos) >= bytes;
 }
 
+uint32_t ring_buffer_available_read(
+    const struct ring_buffer* r,
+    const struct ring_buffer_view* v) {
+    uint32_t write_view;
+    __atomic_load(&r->write_pos, &write_view, __ATOMIC_SEQ_CST);
+    if (v) {
+        return ring_buffer_view_get_ring_pos(
+                v, write_view - r->read_pos);
+    } else {
+        return get_ring_pos(write_view - r->read_pos);
+    }
+}
+
 long ring_buffer_view_write(
     struct ring_buffer* r,
     struct ring_buffer_view* v,
@@ -235,7 +248,7 @@ bool ring_buffer_wait_write(
             ring_buffer_can_write(r, bytes);
 
     while (!can_write) {
-        curr_wait_us = ring_buffer_curr_us();
+        curr_wait_us = ring_buffer_curr_us() - start_us;
 
         if (curr_wait_us > yield_backoff_us) {
             ring_buffer_yield();
@@ -267,7 +280,7 @@ bool ring_buffer_wait_read(
             ring_buffer_can_read(r, bytes);
 
     while (!can_read) {
-        curr_wait_us = ring_buffer_curr_us();
+        curr_wait_us = ring_buffer_curr_us() - start_us;
 
         if (curr_wait_us > yield_backoff_us) {
             ring_buffer_yield();

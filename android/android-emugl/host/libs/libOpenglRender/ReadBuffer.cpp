@@ -82,6 +82,10 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
     // get fresh data into the buffer;
     int readTotal = 0;
     do {
+        fprintf(stderr, "%s: try reading raw. %zu. maxSize %zu readTotal %zu\n", __func__,
+        maxSizeToRead - readTotal,
+        maxSizeToRead,
+        readTotal);
         const size_t readNow = stream->read(m_readPtr + m_validData,
                                             maxSizeToRead - readTotal);
         if (!readNow) {
