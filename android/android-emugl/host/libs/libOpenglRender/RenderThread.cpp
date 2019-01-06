@@ -216,6 +216,11 @@ intptr_t RenderThread::main() {
     ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
     ReadBuffer readBuf(kStreamBufferSize);
 
+    stream.setSharedMemoryCommandInfo(
+        &tInfo.m_sharedMemoryCommandMode,
+        (ring_buffer**)&tInfo.m_toHostRing,
+        (ring_buffer**)&tInfo.m_fromHostRing);
+
     const SnapshotObjects snapshotObjects = {
         &tInfo, &checksumCalc, &stream, &readBuf
     };

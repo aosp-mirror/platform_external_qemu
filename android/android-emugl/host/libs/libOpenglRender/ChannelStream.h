@@ -18,6 +18,8 @@
 
 #include <memory>
 
+struct ring_buffer;
+
 namespace emugl {
 
 // An IOStream instance that can be used by the host RenderThread to
@@ -29,6 +31,11 @@ public:
     void forceStop();
     int writeFully(const void* buf, size_t len) override;
     const unsigned char *readFully( void *buf, size_t len) override;
+
+    void setSharedMemoryCommandInfo(
+        bool* modePtr,
+        ring_buffer** toHostRingHandle,
+        ring_buffer** fromHostRingHandle);
 
 protected:
     virtual void* allocBuffer(size_t minSize) override final;
@@ -46,6 +53,11 @@ private:
     RenderChannel::Buffer mWriteBuffer;
     RenderChannel::Buffer mReadBuffer;
     size_t mReadBufferLeft = 0;
+
+    bool* mSharedMemoryCommandModePtr = nullptr;
+    ring_buffer** mToHostRingHandle = nullptr;
+    ring_buffer** mFromHostRingHandle = nullptr;
+    bool mLastReadUsingSharedMemory = false;
 };
 
 }  // namespace emugl
