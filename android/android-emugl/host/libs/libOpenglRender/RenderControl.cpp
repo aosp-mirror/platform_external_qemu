@@ -949,21 +949,20 @@ static int rcCompose(uint32_t bufferSize, void* buffer) {
 }
 
 static void rcInitSharedMemory(uint64_t toHostAddr, uint64_t fromHostAddr) {
-    // TODO
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
-    (void)tInfo;
+    tInfo->initSharedMemoryCommandRings(
+        emugl::g_emugl_dma_get_host_addr(toHostAddr),
+        emugl::g_emugl_dma_get_host_addr(fromHostAddr));
 }
 
 static void rcStartSharedMemoryCommands() {
-    // TODO
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
-    (void)tInfo;
+    tInfo->setSharedMemoryCommandMode(true);
 }
 
 static void rcEndSharedMemoryCommands() {
-    // TODO
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
-    (void)tInfo;
+    tInfo->setSharedMemoryCommandMode(false);
 }
 
 void initRenderControlContext(renderControl_decoder_context_t *dec)
