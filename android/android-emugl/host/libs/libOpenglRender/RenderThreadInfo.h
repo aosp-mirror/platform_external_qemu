@@ -17,6 +17,7 @@
 #define _LIB_OPENGL_RENDER_THREAD_INFO_H
 
 #include "android/base/files/Stream.h"
+#include "android/base/ring_buffer.h"
 #include "RenderContext.h"
 #include "WindowSurface.h"
 #include "GLESv1Decoder.h"
@@ -45,6 +46,17 @@ struct RenderThreadInfo {
     // Return the current thread's instance, if any, or NULL.
     static RenderThreadInfo* get();
 
+    void initSharedMemoryCommandRings(uint64_t toHostAddr,
+                                      uint64_t fromHostAddr,
+                                      uint64_t toHostBufferAddr,
+                                      uint64_t fromHostBufferAddr,
+                                      void* toHost,
+                                      void* fromHost,
+                                      void* toHostBuffer,
+                                      void* fromHostBuffer);
+    void setSharedMemoryCommandMode(bool active);
+    bool inSharedMemoryCommandMode() const;
+
     // Current EGL context, draw surface and read surface.
     RenderContextPtr currContext;
     WindowSurfacePtr currDrawSurf;
@@ -55,6 +67,17 @@ struct RenderThreadInfo {
     GLESv2Decoder                   m_gl2Dec;
     renderControl_decoder_context_t m_rcDec;
     VkDecoder                       m_vkDec;
+
+    // Shared ring buffer addresses.
+    uint64_t m_toHostRingAddr = 0;
+    uint64_t m_fromHostRingAddr = 0;
+    void* m_toHostRing = nullptr;
+    void* m_fromHostRing = nullptr;
+    void* m_toHostBuffer = nullptr;
+    void* m_fromHostBuffer = nullptr;
+    ring_buffer_view m_toHostRingBufferView;
+    ring_buffer_view m_fromHostRingBufferView;
+    bool m_sharedMemoryCommandMode = false;
 
     // All the contexts that are created by this render thread.
     // New emulator manages contexts in guest process level,

@@ -15,9 +15,10 @@ target_include_directories(aemugraphics
                                    ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/standalone_common/angle-util)
 target_compile_options(aemugraphics PRIVATE -fvisibility=default)
 target_link_libraries(aemugraphics
+                              PRIVATE
+                              android-emu-shared
                               PUBLIC
                               OSWindow
-                              android-emu-shared
                               cutils
                               gui
                               OpenglSystemCommon
