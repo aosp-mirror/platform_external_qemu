@@ -178,6 +178,8 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
             QemuFileStream stream(file);
             android_goldfish_dma_ops.load_mappings(&stream);
         },
+        // dma_ping()
+        [](uint64_t paddr) { android_goldfish_dma_ops.ping(paddr); },
 };
 
 // These callbacks are called from the pipe service into the virtual device.

@@ -14,6 +14,8 @@
 
 #include "android/base/files/Stream.h"
 
+#include <functional>
+
 #include <inttypes.h>
 
 static const uint32_t kDmaBufSizeMB = 32;
@@ -59,6 +61,8 @@ void (*reset_host_mappings)(void);
 // For snapshots.
 void (*save_mappings)(android::base::Stream* stream);
 void (*load_mappings)(android::base::Stream* stream);
+void (*ping)(uint64_t guest_paddr);
+void (*register_ping_callback)(uint64_t guest_paddr, std::function<void()> cb);
 };
 
 extern GoldfishDmaOps android_goldfish_dma_ops;
