@@ -45,6 +45,10 @@ struct RenderThreadInfo {
     // Return the current thread's instance, if any, or NULL.
     static RenderThreadInfo* get();
 
+    void initSharedMemoryCommandRings(void* toHost, void* fromHost);
+    void setSharedMemoryCommandMode(bool active);
+    bool inSharedMemoryCommandMode() const;
+
     // Current EGL context, draw surface and read surface.
     RenderContextPtr currContext;
     WindowSurfacePtr currDrawSurf;
@@ -55,6 +59,11 @@ struct RenderThreadInfo {
     GLESv2Decoder                   m_gl2Dec;
     renderControl_decoder_context_t m_rcDec;
     VkDecoder                       m_vkDec;
+
+    // Shared ring buffer addresses.
+    void* m_toHostRing = nullptr;
+    void* m_fromHostRing = nullptr;
+    bool m_sharedMemoryCommandMode = false;
 
     // All the contexts that are created by this render thread.
     // New emulator manages contexts in guest process level,
