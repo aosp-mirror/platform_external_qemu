@@ -325,6 +325,9 @@ void GLESv2Decoder::s_glDrawElementsData(void *self, GLenum mode, GLsizei count,
 void GLESv2Decoder::s_glDrawElementsOffset(void *self, GLenum mode, GLsizei count, GLenum type, GLuint offset)
 {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+
+    if (!ctx->m_actuallyDraw) return;
+
     ctx->glDrawElements(mode, count, type, SafePointerFromUInt(offset));
 }
 
@@ -951,3 +954,7 @@ SNAPSHOT_PROGRAM_CALL(glGetProgramResourceiv, (void* self,  GLuint program, GLen
 SNAPSHOT_PROGRAM_CALL_RET(GLuint, glGetProgramResourceIndex, (void* self, GLuint program, GLenum programInterface, const char * name), (program, programInterface, name))
 SNAPSHOT_PROGRAM_CALL_RET(GLint, glGetProgramResourceLocation, (void* self, GLuint program, GLenum programInterface, const char * name), (program, programInterface, name))
 SNAPSHOT_PROGRAM_CALL(glGetProgramResourceName, (void* self,  GLuint program, GLenum programInterface, GLuint index, GLsizei bufSize, GLsizei* length, char* name), (program, programInterface, index, bufSize, length, name))
+
+void GLESv2Decoder::setActuallyDraw(bool actuallyDraw) {
+    m_actuallyDraw = actuallyDraw;
+}

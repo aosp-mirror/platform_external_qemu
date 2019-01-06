@@ -34,11 +34,13 @@ EMUGL_COMMON_API extern emugl_dma_add_buffer_t g_emugl_dma_add_buffer;
 EMUGL_COMMON_API extern emugl_dma_remove_buffer_t g_emugl_dma_remove_buffer;
 EMUGL_COMMON_API extern emugl_dma_get_host_addr_t g_emugl_dma_get_host_addr;
 EMUGL_COMMON_API extern emugl_dma_unlock_t g_emugl_dma_unlock;
+EMUGL_COMMON_API extern emugl_dma_register_ping_callback_t g_emugl_dma_register_ping_callback;
 
 EMUGL_COMMON_API void set_emugl_dma_add_buffer(emugl_dma_add_buffer_t);
 EMUGL_COMMON_API void set_emugl_dma_remove_buffer(emugl_dma_remove_buffer_t);
 EMUGL_COMMON_API void set_emugl_dma_get_host_addr(emugl_dma_get_host_addr_t);
 EMUGL_COMMON_API void set_emugl_dma_invalidate_host_mappings(emugl_dma_invalidate_host_mappings_t);
 EMUGL_COMMON_API void set_emugl_dma_unlock(emugl_dma_unlock_t);
+EMUGL_COMMON_API void set_emugl_dma_register_ping_callback(emugl_dma_register_ping_callback_t);
 
 }  // namespace emugl

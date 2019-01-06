@@ -126,6 +126,7 @@ typedef enum PipeCmd {
     PIPE_CMD_WAKE_ON_DONE_IO,
     PIPE_CMD_DMA_MAPHOST,
     PIPE_CMD_DMA_UNMAPHOST,
+    PIPE_CMD_DMA_PING,
 } PipeCmd;
 
 enum {
@@ -990,6 +991,10 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                     pipe->command_buffer->dma_maphost_params.dma_paddr);
             pipe->command_buffer->status = 0;
             break;
+        case PIPE_CMD_DMA_PING:
+            service_ops->dma_ping(
+                    pipe->command_buffer->dma_maphost_params.dma_paddr);
+            pipe->command_buffer->status = 0;
         default:
             D("%s: command=%d (0x%x)\n", __func__, command, command);
     }
