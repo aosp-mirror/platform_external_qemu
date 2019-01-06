@@ -15,11 +15,13 @@
 #include "android-qemu2-glue/qemu-control-impl.h"
 
 #include "android/base/files/PathUtils.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/StringFormat.h"
 #include "android/base/StringView.h"
 #include "android/emulation/control/callbacks.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/emulation/FaultHandler.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "android/emulation/VmLock.h"
 #include "android/snapshot/common.h"
@@ -479,6 +481,7 @@ static void set_snapshot_callbacks(void* opaque,
         qemu_set_ram_load_callback([](void* hostRam, uint64_t size) {
             sSnapshotCallbacks.ramOps.loadRam(sSnapshotCallbacksOpaque, hostRam,
                                               size);
+            android::FaultHandler::get()->runHandlersForFault(hostRam, size);
         });
 
         switch (android::GetCurrentCpuAccelerator()) {
@@ -537,6 +540,35 @@ static void set_exiting() {
     sExiting = true;
 }
 
+static void init_guest_memory_mapping_funcs() {
+    switch (android::GetCurrentCpuAccelerator()) {
+    case android::CPU_ACCELERATOR_HVF:
+        set_address_translation_funcs(hvf_hva2gpa, hvf_gpa2hva);
+        set_memory_mapping_funcs(hvf_map_safe, hvf_unmap_safe,
+                                 hvf_protect_safe, hvf_remap_safe, NULL);
+        android::FaultHandler::get()->registerMemoryMappingFuncs(
+            hvf_map_safe,
+            hvf_unmap_safe,
+            hvf_protect_safe,
+            hvf_remap_safe,
+            NULL);
+
+        break;
+    case android::CPU_ACCELERATOR_HAX:
+        set_address_translation_funcs(hax_hva2gpa, hax_gpa2hva);
+        set_memory_mapping_funcs(NULL, NULL, hax_gpa_protect, NULL,
+                                 hax_gpa_protection_supported);
+        android::FaultHandler::get()->registerMemoryMappingFuncs(
+            NULL, NULL, hax_gpa_protect, NULL, hax_gpa_protection_supported);
+        break;
+    default:
+        break;
+    }
+}
+
+static void* get_fault_handler() {
+    return android::FaultHandler::get();
+}
 
 static void system_reset_request() {
     qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
@@ -576,6 +608,8 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .getVmConfiguration = get_vm_config,
         .setFailureReason = set_failure_reason,
         .setExiting = set_exiting,
+        .initGuestMemoryMappingFuncs = init_guest_memory_mapping_funcs,
+        .getFaultHandler = get_fault_handler,
 };
 const QAndroidVmOperations* const gQAndroidVmOperations =
         &sQAndroidVmOperations;

@@ -148,6 +148,7 @@ bool qemu_android_emulation_early_setup() {
         return false;
     }
 
+    gQAndroidVmOperations->initGuestMemoryMappingFuncs();
     androidSnapshot_initialize(gQAndroidVmOperations,
                                gQAndroidEmulatorWindowAgent);
     qemu_snapshot_compression_setup();
