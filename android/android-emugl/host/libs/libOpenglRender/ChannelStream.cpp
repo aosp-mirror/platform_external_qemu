@@ -13,14 +13,28 @@
 // limitations under the License.
 #include "ChannelStream.h"
 
+#include "android/base/ring_buffer.h"
+
 #include "OpenglRender/RenderChannel.h"
 
 #define EMUGL_DEBUG_LEVEL  0
 #include "emugl/common/debug.h"
 #include "emugl/common/dma_device.h"
 
+#include <iomanip>
+#include <sstream>
+#include <string>
+
 #include <assert.h>
 #include <memory.h>
+
+#define CHANNEL_STREAM_DEBUG 0
+
+#if CHANNEL_STREAM_DEBUG
+#define D(fmt,...) fprintf(stderr, "%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
+#else
+#define D(fmt,...)
+#endif
 
 namespace emugl {
 
@@ -39,13 +53,25 @@ void* ChannelStream::allocBuffer(size_t minSize) {
 }
 
 int ChannelStream::commitBuffer(size_t size) {
+    D("committing %zu bytes from host", size);
     assert(size <= mWriteBuffer.size());
-    if (mWriteBuffer.isAllocated()) {
-        mWriteBuffer.resize(size);
-        mChannel->writeToGuest(std::move(mWriteBuffer));
+    if (*mSharedMemoryCommandModePtr) {
+        D("with ring");
+        ring_buffer* fromHost = *mFromHostRingHandle;
+        if (!fromHost) {
+            fprintf(stderr, "%s: FATAL: did not init ring buffer!\n", __func__);
+            abort();
+        }
+        ring_buffer_write_fully(fromHost, nullptr, mWriteBuffer.data(), size);
     } else {
-        mChannel->writeToGuest(
-                RenderChannel::Buffer(mWriteBuffer.data(), mWriteBuffer.data() + size));
+        D("with pipe");
+        if (mWriteBuffer.isAllocated()) {
+            mWriteBuffer.resize(size);
+            mChannel->writeToGuest(std::move(mWriteBuffer));
+        } else {
+            mChannel->writeToGuest(
+                    RenderChannel::Buffer(mWriteBuffer.data(), mWriteBuffer.data() + size));
+        }
     }
     return size;
 }
@@ -54,33 +80,92 @@ const unsigned char* ChannelStream::readRaw(void* buf, size_t* inout_len) {
     size_t wanted = *inout_len;
     size_t count = 0U;
     auto dst = static_cast<uint8_t*>(buf);
-    D("wanted %d bytes", (int)wanted);
-    while (count < wanted) {
-        if (mReadBufferLeft > 0) {
-            size_t avail = std::min<size_t>(wanted - count, mReadBufferLeft);
-            memcpy(dst + count,
-                   mReadBuffer.data() + (mReadBuffer.size() - mReadBufferLeft),
-                   avail);
-            count += avail;
-            mReadBufferLeft -= avail;
-            continue;
+
+    if (*mSharedMemoryCommandModePtr) {
+        mLastReadUsingSharedMemory = true;
+        D("Reading commands with ring");
+        ring_buffer* toHost = *mToHostRingHandle;
+        if (!toHost) {
+            fprintf(stderr, "%s: FATAL: did not init ring buffer!\n", __func__);
+            abort();
         }
-        bool blocking = (count == 0);
-        auto result = mChannel->readFromGuest(&mReadBuffer, blocking);
-        D("readFromGuest() returned %d, size %d", (int)result, (int)mReadBuffer.size());
-        if (result == IoResult::Ok) {
-            mReadBufferLeft = mReadBuffer.size();
-            continue;
+
+        D("%p want %zu. ring write/read positions: %u %u",
+          toHost, wanted, toHost->write_pos, toHost->read_pos);
+
+        while (count < wanted) {
+            bool blocking = (count == 0);
+            if (blocking) {
+                uint32_t avail = ring_buffer_available_read(toHost, nullptr);
+                if (avail) {
+                    uint32_t* forPrinting = (uint32_t*)(dst + count);
+                    ring_buffer_read_fully(toHost, nullptr, dst + count, avail);
+                    count += avail;
+                } else {
+                    uint32_t smallWanted = 8;
+                    bool exiting = false;
+                    while (!ring_buffer_wait_read(toHost, nullptr, smallWanted, 4000)) {
+                        if (mChannel->isStopped()) {
+                            exiting = true;
+                            break;
+                        }
+                    }
+                    if (!exiting) {
+                        ring_buffer_read_fully(toHost, nullptr, dst + count,
+                                               smallWanted);
+                        count += smallWanted;
+                    } else {
+                        break;
+                    }
+                }
+            } else {
+                uint32_t avail = ring_buffer_available_read(toHost, nullptr);
+                if (!avail) {
+                    break;
+                }
+            }
+
+            if (count > 0) {
+                break;
+            }
         }
-        if (count > 0) {  // There is some data to return.
-            break;
+    } else {
+
+        if (mLastReadUsingSharedMemory) {
+            ring_buffer* toHost = *mToHostRingHandle;
+            ring_buffer_consumer_hung_up(toHost);
+            mLastReadUsingSharedMemory = false;
         }
-        // Result can only be IoResult::Error if |count| == 0
-        // since |blocking| was true, it cannot be IoResult::TryAgain.
-        assert(result == IoResult::Error);
-        D("error while trying to read");
-        return nullptr;
+
+        D("wanted %d bytes", (int)wanted);
+        while (count < wanted) {
+            if (mReadBufferLeft > 0) {
+                size_t avail = std::min<size_t>(wanted - count, mReadBufferLeft);
+                memcpy(dst + count,
+                       mReadBuffer.data() + (mReadBuffer.size() - mReadBufferLeft),
+                       avail);
+                count += avail;
+                mReadBufferLeft -= avail;
+                continue;
+            }
+            bool blocking = (count == 0);
+            auto result = mChannel->readFromGuest(&mReadBuffer, blocking);
+            D("readFromGuest() returned %d, size %d", (int)result, (int)mReadBuffer.size());
+            if (result == IoResult::Ok) {
+                mReadBufferLeft = mReadBuffer.size();
+                continue;
+            }
+            if (count > 0) {  // There is some data to return.
+                break;
+            }
+            // Result can only be IoResult::Error if |count| == 0
+            // since |blocking| was true, it cannot be IoResult::TryAgain.
+            assert(result == IoResult::Error);
+            D("error while trying to read");
+            return nullptr;
+        }
     }
+
     *inout_len = count;
     D("read %d bytes", (int)count);
     return (const unsigned char*)buf;
@@ -108,6 +193,16 @@ int ChannelStream::writeFully(const void* buf, size_t len) {
 const unsigned char *ChannelStream::readFully( void *buf, size_t len) {
     fprintf(stderr, "%s: FATAL: not intended for use with ChannelStream\n", __func__);
     abort();
+}
+
+void ChannelStream::setSharedMemoryCommandInfo(
+    bool* modePtr,
+    ring_buffer** toHostRingHandle,
+    ring_buffer** fromHostRingHandle) {
+
+    mSharedMemoryCommandModePtr = modePtr; 
+    mToHostRingHandle = toHostRingHandle;
+    mFromHostRingHandle = fromHostRingHandle;
 }
 
 void ChannelStream::onSave(android::base::Stream* stream) {
