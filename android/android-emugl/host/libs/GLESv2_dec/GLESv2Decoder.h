@@ -44,9 +44,13 @@ public:
     ~GLESv2Decoder();
     int initGL(get_proc_func_t getProcFunc, void *getProcFuncData);
     void setContextData(GLDecoderContextData *contextData) { m_contextData = contextData; }
+
+    void setActuallyDraw(bool actuallyDraw);
+
 protected:
     GLSnapshot::GLSnapshotState *m_snapshot;
 private:
+    bool m_actuallyDraw = true;
     GLDecoderContextData *m_contextData;
     emugl::SharedLibrary* m_GL2library;
 

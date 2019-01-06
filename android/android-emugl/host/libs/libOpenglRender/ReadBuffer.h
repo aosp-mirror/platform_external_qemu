@@ -17,6 +17,8 @@
 #include "android/base/files/Stream.h"
 #include "OpenglRender/IOStream.h"
 
+#include "ChannelStream.h"
+
 namespace emugl {
 
 class ReadBuffer {
@@ -24,6 +26,9 @@ public:
     explicit ReadBuffer(size_t bufSize);
     ~ReadBuffer();
     int getData(IOStream *stream, int minSize); // get fresh data from the stream
+
+    int getDataSharedMem(ChannelStream* stream, int minSize);
+
     unsigned char *buf() { return m_readPtr; } // return the next read location
     size_t validData() { return m_validData; } // return the amount of valid data in readptr
     void consume(size_t amount); // notify that 'amount' data has been consumed;
@@ -31,11 +36,16 @@ public:
     void onLoad(android::base::Stream* stream);
     void onSave(android::base::Stream* stream);
 
+    void printAndResetStats();
+
 private:
     unsigned char *m_buf;
     unsigned char *m_readPtr;
     size_t m_size;
     size_t m_validData;
+
+    uint64_t m_timeChannelReading = 0;
+    uint64_t m_timePrepping = 0;
 };
 
 }  // namespace emugl

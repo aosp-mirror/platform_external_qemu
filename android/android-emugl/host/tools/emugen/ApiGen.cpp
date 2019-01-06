@@ -655,6 +655,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
             if (nvars == 0 || j > nvars) {
                 const char* plus = "";
 
+                // fprintf(fp, "\tALOGD(\"%s start\");\n", e->name().c_str());
                 fprintf(fp, "\tstream->prepareEncode();\n");
 
                 if (nvars == 0 && j == maxvars) {
@@ -826,10 +827,14 @@ int ApiGen::genEncoderImpl(const std::string &filename)
                     (unsigned) e->retval().type()->bytes());
             writeEncodingChecksumValidatorOnReturn(e->name().c_str(), fp);
             addGuestTimePrinting(e, hasTimeBeforeReadback, fp);
+                // fprintf(fp, "\tALOGD(\"%s end (with return)\");\n", e->name().c_str());
             fprintf(fp, "\treturn retval;\n");
         } else {
             if (e->flushOnEncode()) fprintf(fp, "\tstream->flush();\n");
             if (hasReadbackChecksum) writeEncodingChecksumValidatorOnReturn(e->name().c_str(), fp);
+
+                // fprintf(fp, "\tALOGD(\"%s end (no return)\");\n", e->name().c_str());
+
             addGuestTimePrinting(e, hasTimeBeforeReadback, fp);
         }
         fprintf(fp, "}\n\n");
@@ -972,8 +977,9 @@ int ApiGen::genDecoderImpl(const std::string &filename)
 
     // helper macros
     fprintf(fp,
+            // "#define OPENGL_DEBUG_PRINTOUT\n"
             "#ifdef OPENGL_DEBUG_PRINTOUT\n"
-            "#  define DEBUG(...) do { if (emugl_cxt_logger) { emugl_cxt_logger(__VA_ARGS__); } } while(0)\n"
+            "#  define DEBUG(...) do { fprintf(stderr, __VA_ARGS__); } while(0)\n"
             "#else\n"
             "#  define DEBUG(...)  ((void)0)\n"
             "#endif\n\n");
@@ -1025,10 +1031,10 @@ R"(        // Do this on every iteration, as some commands may change the checks
         enum Pass_t {
             PASS_FIRST = 0,
             PASS_VariableDeclarations = PASS_FIRST,
-            PASS_Protocol,
             PASS_TmpBuffAlloc,
             PASS_MemAlloc,
             PASS_DebugPrint,
+            PASS_Protocol,
             PASS_FunctionCall,
             PASS_FlushOutput,
             PASS_Epilog,

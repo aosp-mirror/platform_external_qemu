@@ -19,6 +19,8 @@
 #include "android/emulation/goldfish_sync.h"
 #include "android/featurecontrol/FeatureControl.h"
 
+#include <functional>
+
 // Crash reporter
 typedef void (*emugl_crash_reporter_t)(const char* format, ...);
 
@@ -58,6 +60,7 @@ typedef void (*emugl_dma_remove_buffer_t)(uint64_t);
 typedef void* (*emugl_dma_get_host_addr_t)(uint64_t);
 typedef void (*emugl_dma_invalidate_host_mappings_t)(void);
 typedef void (*emugl_dma_unlock_t)(uint64_t);
+typedef void (*emugl_dma_register_ping_callback_t)(uint64_t, std::function<void()>);
 
 typedef struct {
     emugl_dma_add_buffer_t add_buffer;
@@ -65,4 +68,5 @@ typedef struct {
     emugl_dma_get_host_addr_t get_host_addr;
     emugl_dma_invalidate_host_mappings_t invalidate_host_mappings;
     emugl_dma_unlock_t unlock;
+    emugl_dma_register_ping_callback_t register_ping_callback;
 } emugl_dma_ops;

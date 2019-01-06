@@ -39,6 +39,7 @@
 #include <assert.h>
 
 using android::base::AutoLock;
+using android::base::System;
 
 namespace emugl {
 
@@ -50,7 +51,7 @@ struct RenderThread::SnapshotObjects {
 };
 
 // Start with a smaller buffer to not waste memory on a low-used render threads.
-static constexpr int kStreamBufferSize = 128 * 1024;
+static constexpr int kStreamBufferSize = 1048576;
 
 RenderThread::RenderThread(RenderChannelImpl* channel,
                            android::base::Stream* loadStream)
@@ -208,13 +209,26 @@ intptr_t RenderThread::main() {
     initRenderControlContext(&tInfo.m_rcDec);
 
     if (!mChannel) {
-        DBG("Exited a loader RenderThread @%p\n", this);
+        fprintf(stderr, "Exited a loader RenderThread @%p\n", this);
         mFinished.store(true, std::memory_order_relaxed);
         return 0;
     }
 
     ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
+
+    tInfo.setStreamAddr((void*)&stream);
+
     ReadBuffer readBuf(kStreamBufferSize);
+    // fprintf(stderr, "RenderThread stream: %p %p\n", this, &stream);
+
+    stream.setSharedMemoryCommandInfo(
+        &tInfo.m_sharedMemoryCommandMode,
+        &tInfo.m_toHostRingAddr,
+        &tInfo.m_fromHostRingAddr,
+        (ring_buffer**)&tInfo.m_toHostRing,
+        (ring_buffer**)&tInfo.m_fromHostRing,
+        &tInfo.m_toHostRingBufferView,
+        &tInfo.m_fromHostRingBufferView);
 
     const SnapshotObjects snapshotObjects = {
         &tInfo, &checksumCalc, &stream, &readBuf
@@ -238,7 +252,7 @@ intptr_t RenderThread::main() {
             // Stream read may fail because of a pending snapshot.
             if (!doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
                 setFinished();
-                DBG("Exited a RenderThread @%p early\n", this);
+                // fprintf(stderr, "Exited a RenderThread @%p early. stream: %p\n", this, &stream);
                 return 0;
             }
         }
@@ -248,6 +262,11 @@ intptr_t RenderThread::main() {
     }
 
     int stats_totalBytes = 0;
+    uint64_t stats_timeCmdExec = 0;
+            uint64_t stats_timeGlExec = 0;
+            uint64_t stats_timeRcExec = 0;
+    uint64_t stats_timePacketGetting = 0;
+    uint64_t stats_timeTotal = 0;
     auto stats_t0 = android::base::System::get()->getHighResTimeUs() / 1000;
 
     //
@@ -268,6 +287,8 @@ intptr_t RenderThread::main() {
     }
 
     while (1) {
+        uint64_t total_start_us = System::get()->getHighResTimeUs();
+
         // Let's make sure we read enough data for at least some processing.
         int packetSize;
         if (readBuf.validData() >= 8) {
@@ -281,7 +302,14 @@ intptr_t RenderThread::main() {
 
         int stat = 0;
         if (packetSize > (int)readBuf.validData()) {
-            stat = readBuf.getData(&stream, packetSize);
+            if (stream.isSharedMemory()) {
+                stat = readBuf.getDataSharedMem(&stream, packetSize);
+            } else {
+                if (stream.firstSharedMemoryRead()) {
+                    fprintf(stderr, "%s: first shared memory read. read buf: packet size %zu valid data %d\n", __func__, packetSize, readBuf.validData());
+                }
+                stat = readBuf.getData(&stream, packetSize);
+            }
             if (stat <= 0) {
                 if (doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
                     continue;
@@ -303,6 +331,9 @@ intptr_t RenderThread::main() {
             }
         }
 
+        uint64_t packets_end_us = System::get()->getHighResTimeUs();
+        stats_timePacketGetting += (packets_end_us - total_start_us);
+
         DD("render thread read %d bytes, op %d, packet size %d",
            (int)readBuf.validData(), *(int32_t*)readBuf.buf(),
            *(int32_t*)(readBuf.buf() + 4));
@@ -313,9 +344,32 @@ intptr_t RenderThread::main() {
         stats_totalBytes += readBuf.validData();
         auto dt = android::base::System::get()->getHighResTimeUs() / 1000 - stats_t0;
         if (dt > 1000) {
-            // float dts = (float)dt / 1000.0f;
-            // printf("Used Bandwidth %5.3f MB/s\n", ((float)stats_totalBytes /
-            // dts) / (1024.0f*1024.0f));
+            bool shouldPrintMore = stream.printStats();
+            float dts = (float)dt / 1000.0f;
+            if (shouldPrintMore) {
+                fprintf(stderr,
+                "%s: exec time: (est total %f percent) packet get: %f percent, host driver: %f percent gl vs rc: %f %% %f %%\n", __func__,
+                100.0f * stats_timeTotal / 1000000.0f,
+                100.0f * stats_timePacketGetting / 1000000.0f,
+                100.0f * stats_timeCmdExec / 1000000.0f,
+                100.0f * stats_timeGlExec / 1000000.0f,
+                100.0f * stats_timeRcExec / 1000000.0f);
+                readBuf.printAndResetStats();
+            }
+            // bool shouldActuallyDraw =
+                // !stream.isHighTraffic();
+            
+            // if (!shouldActuallyDraw) {
+                // fprintf(stderr, "//////////--------------------**********Skipping draws**********--------------------//////////\n");
+            // }
+            // tInfo.m_gl2Dec.setActuallyDraw(shouldActuallyDraw);
+
+            stats_timeTotal = 0;
+            stats_timePacketGetting = 0;
+            stats_timeCmdExec = 0;
+            stats_timeGlExec = 0;
+            stats_timeRcExec = 0;
+            // printf("Used Bandwidth %5.3f MB/s\n", ((float)stats_totalBytes / dts) / (1024.0f*1024.0f));
             stats_totalBytes = 0;
             stats_t0 = android::base::System::get()->getHighResTimeUs() / 1000;
         }
@@ -330,8 +384,11 @@ intptr_t RenderThread::main() {
         }
 
         bool progress;
+            uint64_t cmdexec_start_us = android::base::System::get()->getHighResTimeUs();
         do {
             progress = false;
+
+            uint64_t cmdexec_gl_start_us = android::base::System::get()->getHighResTimeUs();
 
             // try to process some of the command buffer using the GLESv1
             // decoder
@@ -368,6 +425,9 @@ intptr_t RenderThread::main() {
                 readBuf.consume(last);
             }
 
+            uint64_t cmdexec_gl_end_us = android::base::System::get()->getHighResTimeUs();
+            stats_timeGlExec += (cmdexec_gl_end_us - cmdexec_gl_start_us);
+
             //
             // try to process some of the command buffer using the
             // renderControl decoder
@@ -379,6 +439,8 @@ intptr_t RenderThread::main() {
                 progress = true;
             }
 
+            uint64_t cmdexec_rc_end_us = android::base::System::get()->getHighResTimeUs();
+            stats_timeRcExec += (cmdexec_rc_end_us - cmdexec_gl_end_us);
             //
             // try to process some of the command buffer using the
             // Vulkan decoder
@@ -391,6 +453,10 @@ intptr_t RenderThread::main() {
             }
 
         } while (progress);
+
+            uint64_t cmdexec_end_us = android::base::System::get()->getHighResTimeUs();
+            stats_timeCmdExec += (cmdexec_end_us - cmdexec_start_us);
+            stats_timeTotal += (cmdexec_end_us - total_start_us);
     }
 
     if (dumpFP) {
@@ -412,7 +478,7 @@ intptr_t RenderThread::main() {
     }
 
     setFinished();
-    DBG("Exited a RenderThread @%p\n", this);
+    // fprintf(stderr, "Exited a RenderThread @%p %p\n", this, &stream);
 
     return 0;
 }
