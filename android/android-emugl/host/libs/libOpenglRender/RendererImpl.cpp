@@ -219,8 +219,8 @@ RenderChannelPtr RendererImpl::createRenderChannel(
             mLoaderRenderThread.reset();
         }
 
-        DBG("Started new RenderThread (total %" PRIu64 ") @%p\n",
-            static_cast<uint64_t>(mChannels.size()), channel->renderThread());
+        // fprintf(stderr, "Started new RenderThread (total %" PRIu64 ") @%p\n",
+            // static_cast<uint64_t>(mChannels.size()), channel->renderThread());
     }
 
     return channel;
