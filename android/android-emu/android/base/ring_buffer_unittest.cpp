@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 #include "android/base/ring_buffer.h"
 
+#include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 
 #include <gtest/gtest.h>
@@ -17,6 +18,7 @@
 #include <random>
 
 #include <errno.h>
+#include <sys/time.h>
 
 namespace android {
 namespace base {
@@ -471,6 +473,73 @@ TEST(ring_buffer, ProducerDrivenSync) {
     consumer.wait();
 
     EXPECT_EQ(elements, result);
+}
+
+// Tests the read/write fully operations
+TEST(ring_buffer, SpeedTest) {
+    std::default_random_engine generator;
+    generator.seed(0);
+
+    // int for toolchain compatibility
+    std::uniform_int_distribution<int>
+        eltDistribution(0, 255);
+
+    size_t testSize = 1048576 * 8;
+    size_t bufSize = 16384;
+
+    std::vector<uint8_t> elements(testSize);
+
+    for (size_t i = 0; i < testSize; ++i) {
+        elements[i] = static_cast<uint8_t>(eltDistribution(generator));
+    }
+
+    std::vector<uint8_t> result(testSize);
+
+    std::vector<uint8_t> buf(bufSize, 0);
+
+    ring_buffer r;
+    ring_buffer_view v;
+    ring_buffer_view_init(&r, &v, buf.data(), buf.size());
+
+    size_t bytesSent = 0;
+    size_t totalCycles = 100;
+
+    float mbPerSec = 0.0f;
+
+    struct timeval tv;
+
+    for (size_t i = 0; i < totalCycles; ++i) {
+
+        ring_buffer_view_init(&r, &v, buf.data(), buf.size());
+
+        uint64_t start_us = System::get()->getHighResTimeUs();
+
+        FunctorThread producer([&r, &v, &elements]() {
+            ring_buffer_write_fully(&r, &v, elements.data(), elements.size());
+        });
+
+        FunctorThread consumer([&r, &v, &result]() {
+            ring_buffer_read_fully(&r, &v, result.data(), result.size());
+        });
+
+        producer.start();
+        consumer.start();
+        consumer.wait();
+
+        uint64_t end_us = System::get()->getHighResTimeUs();
+
+        if (i % 10 == 0) {
+            fprintf(stderr, "%s: ring stats: live yield sleep %lu %lu %lu\n", __func__,
+            r.read_live_count,
+            r.read_yield_count,
+            r.read_sleep_us_count);
+        }
+        mbPerSec += (float(testSize) / (end_us - start_us));
+    }
+
+    mbPerSec = mbPerSec / totalCycles;
+
+    fprintf(stderr, "%s: avg mb per sec: %f\n", __func__, mbPerSec);
 }
 
 } // namespace android

@@ -17,6 +17,8 @@
 #include <string.h>
 #include <sys/time.h>
 
+#include <emmintrin.h>
+
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -29,6 +31,10 @@
 void ring_buffer_init(struct ring_buffer* r) {
     r->write_pos = 0;
     r->read_pos = 0;
+
+    r->read_live_count = 0;
+    r->read_yield_count = 0;
+    r->read_sleep_us_count = 0;
 }
 
 static uint32_t get_ring_pos(uint32_t index) {
@@ -132,6 +138,25 @@ void ring_buffer_view_init(
     uint32_t size) {
     ring_buffer_init(r);
 
+    uint32_t shift = 0;
+    while ((1 << shift) < size) {
+        ++shift;
+    }
+
+    // if size is not a power of 2,
+    if ((1 << shift) > size) {
+        --shift;
+    }
+
+    v->buf = buf;
+    v->size = (1 << shift);
+    v->mask = (1 << shift) - 1;
+}
+
+void ring_buffer_init_view_only(
+    struct ring_buffer_view* v,
+    uint8_t* buf,
+    uint32_t size) {
     uint32_t shift = 0;
     while ((1 << shift) < size) {
         ++shift;
@@ -270,8 +295,8 @@ long ring_buffer_view_read(
 
 static void ring_buffer_yield() {
 #ifdef _WIN32
-    if (!::SwitchToThread()) {
-        ::Sleep(0);
+    if (!SwitchToThread()) {
+        Sleep(0);
     }
 #else
     sched_yield();
@@ -280,7 +305,7 @@ static void ring_buffer_yield() {
 
 static void ring_buffer_sleep() {
 #ifdef _WIN32
-    ::Sleep(2);
+    Sleep(2);
 #else
     usleep(2000);
 #endif
@@ -311,6 +336,7 @@ bool ring_buffer_wait_write(
             ring_buffer_can_write(r, bytes);
 
     while (!can_write) {
+        _mm_pause();
         curr_wait_us = ring_buffer_curr_us() - start_us;
 
         if (curr_wait_us > yield_backoff_us) {
@@ -347,14 +373,17 @@ bool ring_buffer_wait_read(
             ring_buffer_can_read(r, bytes);
 
     while (!can_read) {
+        _mm_pause();
         curr_wait_us = ring_buffer_curr_us() - start_us;
 
         if (curr_wait_us > yield_backoff_us) {
             ring_buffer_yield();
+            ((struct ring_buffer*)r)->read_yield_count++;
         }
 
         if (curr_wait_us > sleep_backoff_us) {
             ring_buffer_sleep();
+            ((struct ring_buffer*)r)->read_sleep_us_count += 2000;
         }
 
         if (curr_wait_us > timeout_us) {
@@ -366,6 +395,7 @@ bool ring_buffer_wait_read(
                 ring_buffer_can_read(r, bytes);
     }
 
+    ((struct ring_buffer*)r)->read_live_count++;
     return true;
 }
 
@@ -422,6 +452,7 @@ void ring_buffer_read_fully(
     uint8_t* dst = (uint8_t*)data;
 
     while (processed < bytes) {
+        _mm_pause();
         if (bytes - processed < candidate_step) {
             candidate_step = bytes - processed;
         }

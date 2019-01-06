@@ -29,7 +29,10 @@ struct ring_buffer {
     uint32_t write_pos; // Atomically updated for the consumer
     uint32_t unused0[15]; // Separate cache line
     uint32_t read_pos; // Atomically updated for the producer
-    uint32_t unused1[15]; // Separate cache line
+    uint32_t read_live_count;
+    uint32_t read_yield_count;
+    uint32_t read_sleep_us_count;
+    uint32_t unused1[12]; // Separate cache line
     uint8_t buf[RING_BUFFER_SIZE];
     uint32_t state; // An atomically updated variable from both
                     // producer and consumer for other forms of
@@ -60,6 +63,11 @@ struct ring_buffer_view {
 // less than |size|.
 void ring_buffer_view_init(
     struct ring_buffer* r,
+    struct ring_buffer_view* v,
+    uint8_t* buf,
+    uint32_t size);
+
+void ring_buffer_init_view_only(
     struct ring_buffer_view* v,
     uint8_t* buf,
     uint32_t size);
