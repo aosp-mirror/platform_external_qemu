@@ -52,6 +52,21 @@ RenderThreadInfo* RenderThreadInfo::get() {
     return static_cast<RenderThreadInfo*>(s_tls->get());
 }
 
+void RenderThreadInfo::initSharedMemoryCommandRings(uint64_t toHostAddr, uint64_t fromHostAddr, void* toHost, void* fromHost) {
+    m_toHostRingAddr = toHostAddr;
+    m_fromHostRingAddr = fromHostAddr;
+    m_toHostRing = toHost;
+    m_fromHostRing = fromHost;
+}
+
+void RenderThreadInfo::setSharedMemoryCommandMode(bool active) {
+    m_sharedMemoryCommandMode = active;
+}
+
+bool RenderThreadInfo::inSharedMemoryCommandMode() const {
+    return m_sharedMemoryCommandMode;
+}
+
 void RenderThreadInfo::onSave(Stream* stream) {
     if (currContext) {
         stream->putBe32(currContext->getHndl());
