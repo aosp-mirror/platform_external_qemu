@@ -50,7 +50,7 @@ struct RenderThread::SnapshotObjects {
 };
 
 // Start with a smaller buffer to not waste memory on a low-used render threads.
-static constexpr int kStreamBufferSize = 128 * 1024;
+static constexpr int kStreamBufferSize = 1048576;
 
 RenderThread::RenderThread(RenderChannelImpl* channel,
                            android::base::Stream* loadStream)
@@ -215,6 +215,11 @@ intptr_t RenderThread::main() {
 
     ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
     ReadBuffer readBuf(kStreamBufferSize);
+
+    stream.setSharedMemoryCommandInfo(
+        &tInfo.m_sharedMemoryCommandMode,
+        (ring_buffer**)&tInfo.m_toHostRing,
+        (ring_buffer**)&tInfo.m_fromHostRing);
 
     const SnapshotObjects snapshotObjects = {
         &tInfo, &checksumCalc, &stream, &readBuf
