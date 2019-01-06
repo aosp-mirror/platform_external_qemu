@@ -52,6 +52,33 @@ RenderThreadInfo* RenderThreadInfo::get() {
     return static_cast<RenderThreadInfo*>(s_tls->get());
 }
 
+void RenderThreadInfo::initSharedMemoryCommandRings(
+    uint64_t toHostAddr, uint64_t fromHostAddr,
+    uint64_t toHostBufferAddr, uint64_t fromHostBufferAddr,
+    void* toHost, void* fromHost, void* toHostBuffer, void* fromHostBuffer) {
+
+    m_toHostRingAddr = toHostAddr;
+    m_fromHostRingAddr = fromHostAddr;
+
+    m_toHostRing = toHost;
+    m_fromHostRing = fromHost;
+
+    m_toHostBuffer = toHostBuffer;
+    m_fromHostBuffer = fromHostBuffer;
+
+    fprintf(stderr, "%s: tohost ring %p buf %p\n", __func__, m_toHostRing, m_toHostBuffer);
+    ring_buffer_init_view_only(&m_toHostRingBufferView, (uint8_t*)m_toHostBuffer, 8 * 4096);
+    ring_buffer_init_view_only(&m_fromHostRingBufferView, (uint8_t*)m_fromHostBuffer, 8 * 4096);
+}
+
+void RenderThreadInfo::setSharedMemoryCommandMode(bool active) {
+    m_sharedMemoryCommandMode = active;
+}
+
+bool RenderThreadInfo::inSharedMemoryCommandMode() const {
+    return m_sharedMemoryCommandMode;
+}
+
 void RenderThreadInfo::onSave(Stream* stream) {
     if (currContext) {
         stream->putBe32(currContext->getHndl());

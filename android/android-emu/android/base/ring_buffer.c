@@ -147,6 +147,25 @@ void ring_buffer_view_init(
     v->mask = (1 << shift) - 1;
 }
 
+void ring_buffer_init_view_only(
+    struct ring_buffer_view* v,
+    uint8_t* buf,
+    uint32_t size) {
+    uint32_t shift = 0;
+    while ((1 << shift) < size) {
+        ++shift;
+    }
+
+    // if size is not a power of 2,
+    if ((1 << shift) > size) {
+        --shift;
+    }
+
+    v->buf = buf;
+    v->size = (1 << shift);
+    v->mask = (1 << shift) - 1;
+}
+
 static uint32_t ring_buffer_view_get_ring_pos(
     const struct ring_buffer_view* v,
     uint32_t index) {
@@ -294,8 +313,8 @@ static uint64_t ring_buffer_curr_us() {
     return res;
 }
 
-static const uint32_t yield_backoff_us = 1000;
-static const uint32_t sleep_backoff_us = 2000;
+static const uint32_t yield_backoff_us = 500;
+static const uint32_t sleep_backoff_us = 1000;
 
 bool ring_buffer_wait_write(
     const struct ring_buffer* r,

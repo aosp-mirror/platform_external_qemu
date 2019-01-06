@@ -50,7 +50,7 @@ struct RenderThread::SnapshotObjects {
 };
 
 // Start with a smaller buffer to not waste memory on a low-used render threads.
-static constexpr int kStreamBufferSize = 128 * 1024;
+static constexpr int kStreamBufferSize = 1048576;
 
 RenderThread::RenderThread(RenderChannelImpl* channel,
                            android::base::Stream* loadStream)
@@ -208,13 +208,23 @@ intptr_t RenderThread::main() {
     initRenderControlContext(&tInfo.m_rcDec);
 
     if (!mChannel) {
-        DBG("Exited a loader RenderThread @%p\n", this);
+        fprintf(stderr, "Exited a loader RenderThread @%p\n", this);
         mFinished.store(true, std::memory_order_relaxed);
         return 0;
     }
 
     ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
     ReadBuffer readBuf(kStreamBufferSize);
+    fprintf(stderr, "RenderThread stream: %p %p\n", this, &stream);
+
+    stream.setSharedMemoryCommandInfo(
+        &tInfo.m_sharedMemoryCommandMode,
+        &tInfo.m_toHostRingAddr,
+        &tInfo.m_fromHostRingAddr,
+        (ring_buffer**)&tInfo.m_toHostRing,
+        (ring_buffer**)&tInfo.m_fromHostRing,
+        &tInfo.m_toHostRingBufferView,
+        &tInfo.m_fromHostRingBufferView);
 
     const SnapshotObjects snapshotObjects = {
         &tInfo, &checksumCalc, &stream, &readBuf
@@ -238,7 +248,7 @@ intptr_t RenderThread::main() {
             // Stream read may fail because of a pending snapshot.
             if (!doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
                 setFinished();
-                DBG("Exited a RenderThread @%p early\n", this);
+                fprintf(stderr, "Exited a RenderThread @%p early. stream: %p\n", this, &stream);
                 return 0;
             }
         }
@@ -412,7 +422,7 @@ intptr_t RenderThread::main() {
     }
 
     setFinished();
-    DBG("Exited a RenderThread @%p\n", this);
+    fprintf(stderr, "Exited a RenderThread @%p %p\n", this, &stream);
 
     return 0;
 }

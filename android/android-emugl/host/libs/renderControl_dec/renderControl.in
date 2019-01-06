@@ -36,6 +36,6 @@ GL_ENTRY(int, rcUpdateColorBufferDMA, uint32_t colorbuffer, GLint x, GLint y, GL
 GL_ENTRY(uint32_t, rcCreateColorBufferDMA, uint32_t width, uint32_t height, GLenum internalFormat, int frameworkFormat)
 GL_ENTRY(void, rcWaitSyncKHR, uint64_t sync, EGLint flags);
 GL_ENTRY(GLint, rcCompose, uint32_t bufferSize, void *buffer);
-GL_ENTRY(void, rcInitSharedMemory, uint64_t toHostAddr, uint64_t fromHostAddr);
+GL_ENTRY(void, rcInitSharedMemory, uint64_t toHostAddr, uint64_t fromHostAddr, uint64_t toHostBufferAddr, uint64_t fromHostBufferAddr);
 GL_ENTRY(void, rcStartSharedMemoryCommands);
 GL_ENTRY(void, rcEndSharedMemoryCommands);
