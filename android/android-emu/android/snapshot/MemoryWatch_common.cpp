@@ -33,6 +33,7 @@ void set_memory_mapping_funcs(
         guest_mem_protect_t guest_mem_protect,
         guest_mem_remap_t guest_mem_remap,
         guest_mem_protection_supported_t guest_mem_protection_supported) {
+            fprintf(stderr, "%s: call\n", __func__);
     guest_mem_map_call = guest_mem_map;
     guest_mem_unmap_call = guest_mem_unmap;
     guest_mem_protect_call = guest_mem_protect;

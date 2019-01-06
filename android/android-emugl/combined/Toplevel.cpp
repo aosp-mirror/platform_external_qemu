@@ -197,9 +197,9 @@ private:
 
     void teardownAndroidEmugl() {
         AndroidPipe::Service::resetAll();
+        android_stopOpenglesRenderer(true);
         android_finishOpenglesRenderer();
         android_hideOpenglesWindow();
-        android_stopOpenglesRenderer(true);
     }
 
     void setupGralloc() {

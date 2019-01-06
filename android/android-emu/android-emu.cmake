@@ -70,6 +70,7 @@ set(android-emu-common
     android/emulation/CpuAccelerator.cpp
     android/emulation/CrossSessionSocket.cpp
     android/emulation/DmaMap.cpp
+    android/emulation/FaultHandler.cpp
     android/emulation/GoldfishDma.cpp
     android/emulation/GoldfishSyncCommandQueue.cpp
     android/emulation/goldfish_sync.cpp
