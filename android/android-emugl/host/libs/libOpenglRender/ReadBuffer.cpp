@@ -15,6 +15,8 @@
 */
 #include "ReadBuffer.h"
 
+#include "android/base/system/System.h"
+
 #include "ErrorLog.h"
 
 #include <algorithm>
@@ -22,6 +24,8 @@
 #include <assert.h>
 #include <string.h>
 #include <limits.h>
+
+using android::base::System;
 
 namespace emugl {
 
@@ -39,6 +43,8 @@ ReadBuffer::~ReadBuffer() {
 int ReadBuffer::getData(IOStream* stream, int minSize) {
     assert(stream);
     assert(minSize > (int)m_validData);
+
+uint64_t start_us = System::get()->getHighResTimeUs();
 
     const int minSizeToRead = minSize - m_validData;
     int maxSizeToRead;
@@ -79,6 +85,10 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
         m_readPtr = m_buf;
     }
 
+uint64_t prep_end_us = System::get()->getHighResTimeUs();
+
+m_timePrepping += (prep_end_us - start_us);
+
     // get fresh data into the buffer;
     int readTotal = 0;
     do {
@@ -86,8 +96,14 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
                                             maxSizeToRead - readTotal);
         if (!readNow) {
             if (readTotal > 0) {
+
+                uint64_t read_end_us0 = System::get()->getHighResTimeUs();
+                m_timeChannelReading += (read_end_us0 - prep_end_us);
+
                 return readTotal;
             } else {
+                uint64_t read_end_us1 = System::get()->getHighResTimeUs();
+                m_timeChannelReading += (read_end_us1 - prep_end_us);
                 return -1;
             }
         }
@@ -95,7 +111,17 @@ int ReadBuffer::getData(IOStream* stream, int minSize) {
         m_validData += readNow;
     } while (readTotal < minSizeToRead);
 
+                uint64_t read_end_us2 = System::get()->getHighResTimeUs();
+                m_timeChannelReading += (read_end_us2 - prep_end_us);
     return readTotal;
+}
+
+void ReadBuffer::printAndResetStats() {
+    fprintf(stderr, "%s: time prepping: %f s channel reading: %f s\n", __func__,
+            m_timePrepping / 1000000.0f,
+            m_timeChannelReading / 1000000.0f);
+    m_timePrepping = 0;
+    m_timeChannelReading = 0;
 }
 
 void ReadBuffer::consume(size_t amount) {

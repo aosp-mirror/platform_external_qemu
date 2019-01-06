@@ -2,6 +2,8 @@
 #include "android/emulation/GoldfishDma.h"
 #include "emugl/common/dma_device.h"
 
+#include <functional>
+
 static void defaultDmaAddBuffer(void* pipe, uint64_t guest_paddr, uint64_t size) { }
 static void defaultDmaRemoveBuffer(uint64_t guest_paddr) { }
 static void* defaultDmaGetHostAddr(uint64_t guest_paddr) {
@@ -11,6 +13,8 @@ static void defaultDmaInvalidateHostMappings() { }
 
 static void defaultDmaUnlock(uint64_t addr) { }
 
+static void defaultDmaRegisterPingCallback(uint64_t addr, std::function<void()>) { }
+
 namespace emugl {
 
 emugl_dma_add_buffer_t g_emugl_dma_add_buffer = defaultDmaAddBuffer;
@@ -18,6 +22,7 @@ emugl_dma_remove_buffer_t g_emugl_dma_remove_buffer = defaultDmaRemoveBuffer;
 emugl_dma_get_host_addr_t g_emugl_dma_get_host_addr = defaultDmaGetHostAddr;
 emugl_dma_invalidate_host_mappings_t g_emugl_dma_invalidate_host_mappings = defaultDmaInvalidateHostMappings;
 emugl_dma_unlock_t g_emugl_dma_unlock = defaultDmaUnlock;
+emugl_dma_register_ping_callback_t g_emugl_dma_register_ping_callback = defaultDmaRegisterPingCallback;
 
 void set_emugl_dma_add_buffer(emugl_dma_add_buffer_t f) {
     g_emugl_dma_add_buffer = f;
@@ -37,6 +42,10 @@ void set_emugl_dma_invalidate_host_mappings(emugl_dma_invalidate_host_mappings_t
 
 void set_emugl_dma_unlock(emugl_dma_unlock_t f) {
     g_emugl_dma_unlock = f;
+}
+
+void set_emugl_dma_register_ping_callback(emugl_dma_register_ping_callback_t f) {
+    g_emugl_dma_register_ping_callback = f;
 }
 
 }  // namespace emugl
