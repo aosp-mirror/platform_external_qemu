@@ -13,10 +13,15 @@
 // limitations under the License.
 #pragma once
 
+#include "android/base/synchronization/Lock.h"
+
 #include "OpenglRender/IOStream.h"
 #include "RenderChannelImpl.h"
 
 #include <memory>
+
+struct ring_buffer;
+struct ring_buffer_view;
 
 namespace emugl {
 
@@ -29,6 +34,15 @@ public:
     void forceStop();
     int writeFully(const void* buf, size_t len) override;
     const unsigned char *readFully( void *buf, size_t len) override;
+
+    void setSharedMemoryCommandInfo(
+        bool* modePtr,
+        uint64_t* toHostRingAddr,
+        uint64_t* fromHostRingAddr,
+        ring_buffer** toHostRingHandle,
+        ring_buffer** fromHostRingHandle,
+        ring_buffer_view* toHostRingBufferView,
+        ring_buffer_view* fromHostRingBufferView);
 
 protected:
     virtual void* allocBuffer(size_t minSize) override final;
@@ -46,6 +60,20 @@ private:
     RenderChannel::Buffer mWriteBuffer;
     RenderChannel::Buffer mReadBuffer;
     size_t mReadBufferLeft = 0;
+
+    bool* mSharedMemoryCommandModePtr = nullptr;
+    uint64_t* mToHostRingAddrPtr = nullptr;
+    uint64_t* mFromHostRingAddrPtr = nullptr;
+    ring_buffer** mToHostRingHandle = nullptr;
+    ring_buffer** mFromHostRingHandle = nullptr;
+    ring_buffer_view* mToHostRingBufferView = nullptr;
+    ring_buffer_view* mFromHostRingBufferView = nullptr;
+    bool mLastReadUsingSharedMemory = false;
+
+    android::base::Lock mLock;
+    android::base::ConditionVariable mCv;
+    uint64_t mLastPingTimeUs = 0;
+    bool mSleeping = true;
 };
 
 }  // namespace emugl

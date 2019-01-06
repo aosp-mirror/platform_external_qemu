@@ -64,6 +64,11 @@ void ring_buffer_view_init(
     uint8_t* buf,
     uint32_t size);
 
+void ring_buffer_init_view_only(
+    struct ring_buffer_view* v,
+    uint8_t* buf,
+    uint32_t size);
+
 // Read/write functions with the view.
 long ring_buffer_view_write(
     struct ring_buffer* r,

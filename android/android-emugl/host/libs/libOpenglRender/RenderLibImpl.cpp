@@ -81,6 +81,7 @@ void RenderLibImpl::setDmaOps(emugl_dma_ops ops) {
     set_emugl_dma_get_host_addr(ops.get_host_addr);
     set_emugl_dma_invalidate_host_mappings(ops.invalidate_host_mappings);
     set_emugl_dma_unlock(ops.unlock);
+    set_emugl_dma_register_ping_callback(ops.register_ping_callback);
 }
 
 void RenderLibImpl::setVmOps(const QAndroidVmOperations &vm_operations) {
