@@ -202,6 +202,7 @@ private:
 
     void teardownAndroidEmugl() {
         AndroidPipe::Service::resetAll();
+        android_stopOpenglesRenderer(true);
         android_finishOpenglesRenderer();
         android_hideOpenglesWindow();
         DmaMap::set(nullptr);

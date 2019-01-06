@@ -19,6 +19,7 @@
 #include "android/base/Optional.h"
 #include "android/base/synchronization/Lock.h"
 
+#include <functional>
 #include <unordered_map>
 #include <inttypes.h>
 
@@ -28,16 +29,19 @@ using android::base::kNullopt;
 namespace android {
 
 struct DmaBufferInfo {
+    using PingCallback = std::function<void()>;
     void* hwpipe = nullptr;
     uint64_t guestAddr = 0;
     uint64_t bufferSize = 0;
     Optional<void*> currHostAddr = kNullopt;
+    PingCallback cb = {};
 };
 
 using DmaBufferMap = std::unordered_map<uint64_t, DmaBufferInfo>;
 
 class DmaMap {
 public:
+
     // Constructor.
     DmaMap() = default;
 
@@ -50,6 +54,9 @@ public:
     void invalidateHostMappings();
     void resetHostMappings();
     void* getPipeInstance(uint64_t addr);
+    void ping(uint64_t addr);
+
+    void registerPingCallback(uint64_t addr, DmaBufferInfo::PingCallback cb);
 
     // get() / set are NOT thread-safe,
     // but we don't expect multiple threads to call this

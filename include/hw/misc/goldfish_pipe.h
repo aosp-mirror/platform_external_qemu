@@ -148,6 +148,8 @@ typedef struct {
     // For snapshot save/load of DMA buffer state.
     void (*dma_save_mappings)(QEMUFile* file);
     void (*dma_load_mappings)(QEMUFile* file);
+    // Ping
+    void (*dma_ping)(uint64_t guest_paddr);
 } GoldfishPipeServiceOps;
 
 /* Called by the service implementation to register its callbacks.
