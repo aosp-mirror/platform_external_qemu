@@ -406,17 +406,19 @@ TEST_F(CombinedGoldfishOpenglTest, MappedMemory) {
 
 // Test big buffer transfer
 TEST_F(CombinedGoldfishOpenglTest, BigBuffer) {
-    constexpr GLsizei kBufferSize = 4096;
+    constexpr GLsizei kBufferSize = 65536;
 
     std::vector<uint8_t> buf(kBufferSize);
 
+    for (uint32_t i = 0; i < kBufferSize; ++i) {
     GLuint buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     glGetError();
-    glBufferData(GL_ARRAY_BUFFER, kBufferSize, buf.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, i, buf.data(), GL_DYNAMIC_DRAW);
 
     glGetError();
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glDeleteBuffers(1, &buffer);
+    }
 }
