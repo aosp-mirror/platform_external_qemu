@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f18dbb56_f538b3b5",
+        "filename": "android/android-emu/android/emulation/android_pipe_unix.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 562,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-01-07T19:46:25Z",
+      "side": 1,
+      "message": "Could you please use std::unique_ptr to avoid using delete later?",
+      "range": {
+        "startLine": 562,
+        "startChar": 4,
+        "endLine": 562,
+        "endChar": 14
+      },
+      "revId": "dae06b78e2e3de0a0c9eb8c5b075fb9a3b81f3ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
