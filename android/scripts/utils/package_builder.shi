@@ -19,7 +19,7 @@ shell_import utils/option_parser.shi
 shell_import utils/package_list_parser.shi
 
 # List of valid host systems.
-_SHU_VALID_HOST_SYSTEMS="linux-x86,linux-x86_64,windows-x86,windows-x86_64,darwin-x86,darwin-x86_64,windows_msvc-x86_64"
+_SHU_VALID_HOST_SYSTEMS="linux-x86_64,windows-x86_64,darwin-x86_64,windows_msvc-x86_64"
 
 # Call this function before 'option_parse' to register options related to
 # building packages. This registers the following options:
@@ -45,7 +45,7 @@ package_builder_register_options () {
   if [ -z "$DEFAULT_HOST_SYSTEMS" ]; then
     case $(get_build_os) in
       linux)
-        DEFAULT_HOST_SYSTEMS="linux-x86_64,windows-x86_64,windows-x86,windows_msvc-x86_64"
+        DEFAULT_HOST_SYSTEMS="linux-x86_64,windows-x86_64,windows_msvc-x86_64"
         ;;
       darwin)
         DEFAULT_HOST_SYSTEMS="darwin-x86_64"
@@ -506,9 +506,6 @@ _shu_builder_prepare_for_host () {
         linux-x86)
             _SHU_BUILDER_GNU_CONFIG_HOST=i686-linux
             ;;
-        windows-x86)
-            _SHU_BUILDER_GNU_CONFIG_HOST=i686-w64-mingw32
-            ;;
         windows-x86_64)
             _SHU_BUILDER_GNU_CONFIG_HOST=x86_64-w64-mingw32
             ;;
@@ -605,10 +602,6 @@ EOF
     local EXTRA_WINEPATH=
     if type "winepath" > /dev/null; then
         case $_SHU_BUILDER_CURRENT_HOST in
-            windows-x86)
-                EXTRA_WINEPATH=`winepath -w \
-                    "$AOSP_DIR/$(aosp_prebuilt_toolchain_sysroot_subdir_for $_SHU_BUILDER_CURRENT_HOST)/lib32"`
-                ;;
             windows-x86_64)
                 EXTRA_WINEPATH=`winepath -w \
                     "$AOSP_DIR/$(aosp_prebuilt_toolchain_sysroot_subdir_for $_SHU_BUILDER_CURRENT_HOST)/bin"`
