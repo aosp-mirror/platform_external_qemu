@@ -536,8 +536,6 @@ static void socketPipe_save(void* service_pipe, Stream* file) {
     auto pipe = static_cast<SocketPipe*>(service_pipe);
     auto stream = reinterpret_cast<android::base::Stream*>(file);
     if (pipe->socket.valid()) {
-        // TODO: handle STATE_CONNECTING
-        CHECK(STATE_CONNECTING != pipe->state);
         pipe->socket.drainSocket(android::emulation::CrossSessionSocket::
                                          DrainBehavior::AppendToBuffer);
         android::emulation::CrossSessionSocket::registerForRecycle(
@@ -563,8 +561,6 @@ static void* socketPipe_load(void* hwpipe,
     auto stream = reinterpret_cast<android::base::Stream*>(file);
     SocketPipe* pipe = new SocketPipe;
     pipe->state = static_cast<State>(stream->getBe32());
-    // TODO: handle STATE_CONNECTING
-    CHECK(STATE_CONNECTING != pipe->state);
     pipe->wakeWanted = stream->getBe32();
     pipe->connector->error = stream->getBe32();
     pipe->connector->state = stream->getBe32();
@@ -572,13 +568,20 @@ static void* socketPipe_load(void* hwpipe,
     if (fd > 0) {
         pipe->socket =
                 android::emulation::CrossSessionSocket::reclaimSocket(fd);
+    }
+    pipe->socket.onLoad(stream);
+
+    if (pipe->socket.valid()) {
         pipe->io = loopIo_new(static_cast<Looper*>(serviceOpaque), fd,
                               socketPipe_io_func, pipe);
         pipe->connector->io = pipe->io;
+        pipe->hwpipe = hwpipe;
+        socketPipe_resetState(pipe);
+        return pipe;
+    } else {
+        delete pipe;
+        return nullptr;
     }
-    pipe->hwpipe = hwpipe;
-    socketPipe_resetState(pipe);
-    return pipe;
 }
 
 static AndroidPipeFuncs s_unix_pipe_funcs = {
