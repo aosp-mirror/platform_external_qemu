@@ -294,8 +294,8 @@ static uint64_t ring_buffer_curr_us() {
     return res;
 }
 
-static const uint32_t yield_backoff_us = 1000;
-static const uint32_t sleep_backoff_us = 2000;
+static const uint32_t yield_backoff_us = 500;
+static const uint32_t sleep_backoff_us = 1000;
 
 bool ring_buffer_wait_write(
     const struct ring_buffer* r,
@@ -495,6 +495,10 @@ void ring_buffer_consumer_wait_producer_idle(struct ring_buffer* r) {
            RING_BUFFER_SYNC_PRODUCER_IDLE) {
         ring_buffer_yield();
     }
+}
+
+void ring_buffer_consumer_hanging_up(struct ring_buffer* r) {
+    __atomic_store_n(&r->state, RING_BUFFER_SYNC_CONSUMER_HANGING_UP, __ATOMIC_SEQ_CST);
 }
 
 void ring_buffer_consumer_hung_up(struct ring_buffer* r) {

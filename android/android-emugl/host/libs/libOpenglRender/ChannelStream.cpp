@@ -63,6 +63,9 @@ int ChannelStream::commitBuffer(size_t size) {
             abort();
         }
         ring_buffer_write_fully(fromHost, nullptr, mWriteBuffer.data(), size);
+        if (mHangingUp) {
+            mHangupTrafficSentFromHostSinceLast = size;
+        }
     } else {
         D("with pipe");
         if (mWriteBuffer.isAllocated()) {
@@ -95,27 +98,58 @@ const unsigned char* ChannelStream::readRaw(void* buf, size_t* inout_len) {
 
         while (count < wanted) {
             bool blocking = (count == 0);
+            uint32_t leftToRead = wanted - count;
             if (blocking) {
                 uint32_t avail = ring_buffer_available_read(toHost, nullptr);
-                avail = avail > wanted ? wanted : avail;
+                avail = avail > leftToRead ? leftToRead : avail;
                 if (avail) {
                     uint32_t* forPrinting = (uint32_t*)(dst + count);
                     ring_buffer_read_fully(toHost, nullptr, dst + count, avail);
                     count += avail;
+                    if (mHangingUp) {
+                        mHangupPendingTrafficToHost -= count;
+                        mHangupTrafficSentFromHostSinceLast = 0;
+                        break;
+                    }
                 } else {
                     uint32_t smallWanted = 8;
                     bool exiting = false;
-                    while (!ring_buffer_wait_read(toHost, nullptr, smallWanted, 4000)) {
+                    bool startHangup = false;
+                    if (!ring_buffer_wait_read(toHost, nullptr, smallWanted, 16000)) {
+                        if (mHangingUp) {
+                            if (mHangupPendingTrafficToHost == 0 &&
+                                mHangupTrafficSentFromHostSinceLast == 0) {
+                                fprintf(stderr, "%s: should hang up here\n", __func__);
+                                ring_buffer_consumer_hung_up(toHost);
+                                *mSharedMemoryCommandModePtr = false;
+                                break;
+                            }
+                        }
                         if (mChannel->isStopped()) {
                             exiting = true;
                             break;
+                        } else {
+                            startHangup = true;
                         }
                     }
-                    if (!exiting) {
+                    if (!exiting && !startHangup) {
                         ring_buffer_read_fully(toHost, nullptr, dst + count,
                                                smallWanted);
                         count += smallWanted;
+                    } else if (startHangup) {
+                        if (!ring_buffer_consumer_hangup(toHost)) {
+                            ring_buffer_consumer_wait_producer_idle(toHost);
+                            uint32_t avail = ring_buffer_available_read(toHost, nullptr);
+                            mHangingUp = true;
+                            mHangupPendingTrafficToHost = avail;
+                            mHangupTrafficSentFromHostSinceLast = 0;
+                            ring_buffer_consumer_hanging_up(toHost);
+                        }
+                    } else if (mHangingUp && toHost->state == RING_BUFFER_SYNC_CONSUMER_HUNG_UP) {
+                        fprintf(stderr, "%s: hung up the shared memory buffer\n", __func__);
+                        break;
                     } else {
+                        fprintf(stderr, "%s: renderthread exiting\n", __func__);
                         break;
                     }
                 }

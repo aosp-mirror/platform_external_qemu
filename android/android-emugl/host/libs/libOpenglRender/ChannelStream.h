@@ -58,6 +58,9 @@ private:
     ring_buffer** mToHostRingHandle = nullptr;
     ring_buffer** mFromHostRingHandle = nullptr;
     bool mLastReadUsingSharedMemory = false;
+    bool mHangingUp = false;
+    uint32_t mHangupPendingTrafficToHost = 0;
+    uint32_t mHangupTrafficSentFromHostSinceLast = 0;
 };
 
 }  // namespace emugl

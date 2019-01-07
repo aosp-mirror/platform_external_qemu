@@ -159,6 +159,8 @@ bool ring_buffer_consumer_hangup(struct ring_buffer* r);
 // Waits until the producer has set the state to
 // RING_BUFFER_SYNC_PRODUCER_IDLE.
 void ring_buffer_consumer_wait_producer_idle(struct ring_buffer* r);
+// Sets the state to hanging up.
+void ring_buffer_consumer_hanging_up(struct ring_buffer* r);
 // Sets the state to hung up.
 void ring_buffer_consumer_hung_up(struct ring_buffer* r);
 
