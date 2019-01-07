@@ -30,6 +30,8 @@
 #include <sstream>
 #include <vector>
 
+extern "C" void android_modem_driver_send_nitz_now();
+
 namespace {
 
 enum class RequestType : uint32_t {
@@ -126,6 +128,7 @@ void createCheckpoint(AsyncMessagePipeHandle pipe,
     android::base::ThreadLooper::runOnMainLooper([pipe, snapshotName]() {
         const AndroidSnapshotStatus result =
                 androidSnapshot_save(snapshotName.c_str());
+        android_modem_driver_send_nitz_now();
         gQAndroidVmOperations->vmStart();
 
         sSnapshotCrossSession->mPipesAwaitingResponse.erase(pipe);
@@ -159,6 +162,7 @@ void gotoCheckpoint(
 
         const AndroidSnapshotStatus result =
                 androidSnapshot_load(snapshotName.c_str());
+        android_modem_driver_send_nitz_now();
         gQAndroidVmOperations->vmStart();
         if (result != AndroidSnapshotStatus::SNAPSHOT_STATUS_OK) {
             android::offworld::sendResponse(pipe, createErrorResponse());
@@ -198,6 +202,7 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
         assert(res);
         const AndroidSnapshotStatus result =
                 androidSnapshot_load(android::snapshot::kDefaultBootSnapshot);
+        android_modem_driver_send_nitz_now();
         gQAndroidVmOperations->vmStart();
         if (result != AndroidSnapshotStatus::SNAPSHOT_STATUS_OK) {
             android::offworld::sendResponse(pipe, createErrorResponse());
@@ -228,6 +233,7 @@ void doneInstance(android::AsyncMessagePipeHandle pipe,
             LOG_IF(WARNING, !res) << "Share mode update failure";
             res = gQAndroidVmOperations->snapshotRemap(
                     mode == android::base::FileShare::Write, nullptr, nullptr);
+            android_modem_driver_send_nitz_now();
             gQAndroidVmOperations->vmStart();
         });
     } else if (sSnapshotCrossSession->sForkId ==
