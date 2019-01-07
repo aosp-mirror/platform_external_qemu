@@ -2890,3 +2890,9 @@ const char*  amodem_send( AModem  modem, const char*  cmd )
         }
     }
 }
+
+const char* amodem_send_unsol_nitz( AModem  modem )
+{
+    amodem_addTimeUpdate(modem);
+    REPLY(amodem_end_line(modem));
+}
