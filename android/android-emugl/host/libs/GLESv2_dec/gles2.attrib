@@ -286,6 +286,7 @@ glGetVertexAttribiv
 glReadPixels
     dir pixels out
     len pixels glesv2_enc::pixelDataSize(self, width, height, format, type, 1)
+	custom_guest_unpack pixels stream->readbackPixels(self, width, height, format, type, pixels)
 
 glReadPixelsOffsetAEMU
     flag custom_decoder
