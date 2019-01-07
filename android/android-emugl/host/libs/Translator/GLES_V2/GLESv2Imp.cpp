@@ -764,6 +764,7 @@ GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint leve
                 SET_ERROR_IF(xoffset % 4, GL_INVALID_OPERATION);
                 SET_ERROR_IF(yoffset % 4, GL_INVALID_OPERATION);
             }
+            printf("format %d texData->compressedFormat %d\n", format, texData->compressedFormat);
             SET_ERROR_IF(format != texData->compressedFormat, GL_INVALID_OPERATION);
         }
         SET_ERROR_IF(ctx->getMajorVersion() < 3 && !data, GL_INVALID_OPERATION);

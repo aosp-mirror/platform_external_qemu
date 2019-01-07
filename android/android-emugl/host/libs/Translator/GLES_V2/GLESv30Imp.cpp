@@ -730,6 +730,7 @@ GL_APICALL void GL_APIENTRY glTexStorage2D(GLenum target, GLsizei levels, GLenum
     TextureData *texData = getTextureTargetData(target);
     texData->texStorageLevels = levels;
     ctx->dispatcher().glTexStorage2D(target, levels, internalformat, width, height);
+    printf("glTexStorage2D\n");
 }
 
 GL_APICALL void GL_APIENTRY glBeginTransformFeedback(GLenum primitiveMode) {
