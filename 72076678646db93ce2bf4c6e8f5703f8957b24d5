@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c9d2f27c_a33213ed",
+        "filename": "android/android-emu/android/snapshot/SnapshotAPI.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-01-07T23:39:18Z",
+      "side": 1,
+      "message": "Could you please put this line into modem\u0027s header file and include it? This will match the header file with modem\u0027s .c file.",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 53
+      },
+      "revId": "72076678646db93ce2bf4c6e8f5703f8957b24d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
