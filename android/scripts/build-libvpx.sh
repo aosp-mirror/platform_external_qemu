@@ -71,12 +71,6 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         linux-x86_64)
             MY_FLAGS="--target=x86_64-linux-gcc"
             ;;
-        linux-x86)
-            MY_FLAGS="--target=x86-linux-gcc"
-            ;;
-        windows-x86)
-            MY_FLAGS="--target=x86-win32-gcc --disable-libyuv"
-            ;;
         windows-x86_64)
             MY_FLAGS="--target=x86_64-win64-gcc"
             ;;

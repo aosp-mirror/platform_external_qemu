@@ -16,7 +16,6 @@
 
 # how to use:
 #  android/scripts/build-libusb.sh --host=linux-x86_64 --verbose --force
-#  android/scripts/build-libusb.sh --host=linux-x86 --verbose --force
 #
 
 . $(dirname "$0")/utils/common.shi

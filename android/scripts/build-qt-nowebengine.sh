@@ -224,9 +224,6 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 ;;
             windows*)
                 case $SYSTEM in
-                    windows-x86)
-                        BINPREFIX=i686-w64-mingw32-
-                        ;;
                     windows-x86_64)
                         BINPREFIX=x86_64-w64-mingw32-
                         ;;

@@ -55,10 +55,6 @@ build_windows_zlib_package () {
     local PREFIX=$(builder_install_prefix)
     local BUILD_DIR=$(builder_build_dir)
     case $(builder_host) in
-        windows-x86)
-            LOC=-m32
-            LDFLAGS=-m32
-            ;;
         windows-x86_64)
             LOC=-m64
             LDFLAGS=-m64
@@ -147,12 +143,6 @@ build_package_openssl () {
       case $(builder_host) in
         linux-x86_64)
           CONFIG_FLAGS="linux-x86_64 -fPIC"
-          ;;
-        linux-x86)
-          CONFIG_FLAGS="linux-generic32 386 -m32 -fPIC"
-          ;;
-        windows-x86)
-          CONFIG_FLAGS="mingw 386 -m32"
           ;;
         windows-x86_64)
           CONFIG_FLAGS="mingw64"
