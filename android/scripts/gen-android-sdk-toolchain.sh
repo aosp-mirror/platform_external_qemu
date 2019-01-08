@@ -116,7 +116,7 @@ aosp_dir_parse_option
 # Handle --host option.
 if [ "$OPT_HOST" ]; then
     case $OPT_HOST in
-        linux-x86_64|darwin-x86_64|windows-x86|windows-x86_64|windows_msvc-x86_64)
+        linux-x86_64|darwin-x86_64|windows-x86_64|windows_msvc-x86_64)
             ;;
         *)
             panic "Invalid --host value: $OPT_HOST"
@@ -291,11 +291,6 @@ gen_wrapper_toolchain () {
     case $SRC_PREFIX in
         *mingw*)
             PROGRAMS="$PROGRAMS windres"
-            case $CURRENT_HOST in
-                windows-x86)
-                    EXTRA_WINDRESFLAGS="--target=pe-i386"
-                    ;;
-            esac
             ;;
     esac
 
@@ -460,11 +455,6 @@ prepare_build_for_windows () {
     local GCC_LINK_FLAGS="-Wno-missing-braces -Wno-aggressive-loop-optimizations"
 
     case $CURRENT_HOST in
-      windows-x86)
-          GNU_CONFIG_HOST=i686-w64-mingw32
-          EXTRA_CFLAGS="-m32"
-          EXTRA_CXXFLAGS="-m32"
-          ;;
       windows-x86_64)
           GNU_CONFIG_HOST=x86_64-w64-mingw32
           EXTRA_CFLAGS="-m64"

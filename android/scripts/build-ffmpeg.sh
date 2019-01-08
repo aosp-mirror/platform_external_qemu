@@ -16,7 +16,6 @@
 
 # how to use:
 #  android/scripts/build-ffmpeg.sh --host=linux-x86_64 --verbose --force
-#  android/scripts/build-ffmpeg.sh --host=linux-x86 --verbose --force
 #  android/scripts/build-ffmpeg.sh --host=windows-x86_64 --verbose --force
 #
 # yasm is required to build:
@@ -85,12 +84,6 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         case $SYSTEM in
         linux-x86_64)
             MY_FLAGS="--extra-ldflags=\"-ldl\""
-            ;;
-        linux-x86)
-            MY_FLAGS="--target-os=linux --arch=x86 --enable-cross-compile --cc=gcc --extra-ldflags=\"-ldl\""
-            ;;
-        windows-x86)
-            MY_FLAGS="--target-os=mingw32 --arch=x86 --enable-cross-compile --cc=gcc"
             ;;
         windows-x86_64)
             MY_FLAGS="--target-os=mingw32 --arch=x86_64 --enable-cross-compile --cc=gcc "
