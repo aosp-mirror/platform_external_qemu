@@ -71,8 +71,6 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         case $SYSTEM in
         linux-x86_64)
             ;;
-        linux-x86)
-            ;;
         *)
             echo "${RED}Ignoring unsupported system ${SYSTEM}.${RESET}"
             continue

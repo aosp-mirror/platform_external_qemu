@@ -129,13 +129,6 @@ mingw_build_angle_package() {
     # Setup the right version of mingw
     local MINGW_PREFIX GYP_TARGET
     case $SYSTEM in
-        windows-x86)
-            MINGW_PREFIX=i686
-            GYP_TARGET=win32
-            $AOSP_DIR/external/qemu/android/scripts/gen-android-sdk-toolchain.sh \
-                --host=windows-x86 \
-                ./mingw-toolchain
-            ;;
         windows-x86_64)
             MINGW_PREFIX=x86_64
             GYP_TARGET=win64
@@ -182,9 +175,6 @@ mingw_build_angle_package() {
     # Set build flags, make sure all header files are found
     local ARCHFLAG=""
     case $SYSTEM in
-        windows-x86)
-            ARCHFLAG=" -m32"
-            ;;
         windows-x86_64)
             ARCHFLAG=" -m64"
             ;;

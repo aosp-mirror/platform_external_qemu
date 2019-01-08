@@ -112,10 +112,6 @@ do_windows_zlib_package () {
     local PREFIX=$(builder_install_prefix)
     local BUILD_DIR=$(builder_build_dir)
     case $(builder_host) in
-        windows-x86)
-            LOC=-m32
-            LDFLAGS=-m32
-            ;;
         windows-x86_64)
             LOC=-m64
             LDFLAGS=-m64
@@ -361,9 +357,6 @@ build_qemu_android_deps () {
 
     # glib is required by pkg-config and qemu-android
     case $1 in
-        windows-x86)
-            do_windows_glib_package 32
-            ;;
         windows-x86_64)
             do_windows_glib_package 64
             ;;
