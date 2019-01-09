@@ -28,6 +28,7 @@ extern AModem  android_modem;
 
 /* must be called before the VM runs if there is a modem to emulate */
 extern void   android_modem_init( int  base_port, int sim_present );
+extern void   android_modem_driver_send_nitz_now();
 
 AModem android_modem_get();
 
