@@ -189,6 +189,14 @@ extern int    amodem_disconnect_call( AModem  modem, const char*  number );
 extern void   amodem_state_save( AModem modem, SysFile* file );
 extern int    amodem_state_load( AModem modem, SysFile* file, int version_id);
 
+
+/** return ">> %CTZV: yy/mm/dd,hh:mm:ss(+/-)tz[tzname]"
+ *   mm is 0-based
+ *   tz is in number of quarter-hours"
+ *   tzname is optional and will be in the format of Area!Location
+ **/
+extern const char* amodem_send_unsol_nitz( AModem  modem );
+
 /**/
 
 #ifdef __cplusplus
