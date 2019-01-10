@@ -297,9 +297,7 @@ GLuint TextureResize::update(GLuint texture) {
     }
 
     // No resizing needed if factor == 1
-    if (factor == 1) {
-        return texture;
-    }
+    return texture;
 
     s_gles2.glGetError(); // Clear any GL errors.
     setupFramebuffers(factor);

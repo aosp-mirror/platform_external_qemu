@@ -1847,6 +1847,10 @@ static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc
             *params = 0;
         break;
 
+    case GL_MAX_VERTEX_ATTRIBS:
+        *params = kMaxVertexAttributes;
+        break;
+
     case GL_MAX_VERTEX_UNIFORM_VECTORS:
         if(es2)
             getter(pname,params);
@@ -2616,7 +2620,7 @@ GL_APICALL int GL_APIENTRY glGetUniformLocation(GLuint program, const GLchar* na
 static bool s_invalidVertexAttribIndex(GLuint index) {
     GLint param=0;
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &param);
-    return (param < 0 || index >= (GLuint)param);
+    return (param < 0 || index > kMaxVertexAttributes);
 }
 
 GL_APICALL void  GL_APIENTRY glGetVertexAttribfv(GLuint index, GLenum pname, GLfloat* params){

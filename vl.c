@@ -208,6 +208,7 @@ int main(int argc, char **argv)
 
 /////////////////////////////////////////////////////////////
 
+#define  LCD_DENSITY_SLDPI     60
 #define  LCD_DENSITY_LDPI      120
 #define  LCD_DENSITY_MDPI      160
 #define  LCD_DENSITY_TVDPI     213
@@ -4490,6 +4491,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             case QEMU_OPTION_lcd_density:
                 lcd_density = strtol(optarg, (char **) &optarg, 10);
                 switch (lcd_density) {
+                    case LCD_DENSITY_SLDPI:
                     case LCD_DENSITY_LDPI:
                     case LCD_DENSITY_MDPI:
                     case LCD_DENSITY_TVDPI:
