@@ -28,11 +28,11 @@ for OPT; do
     case $OPT in
         --sdk-build-number=*)
             ANDROID_SDK_TOOLS_BUILD_NUMBER=${OPT##--sdk-build-number=}
-            OPT_INSTALL=install
+            OPT_INSTALL=install/strip
             ;;
         --aosp-prebuilts-dir=*)
             ANDROID_EMULATOR_PREBUILTS_DIR=${OPT##--aosp-prebuilts-dir=}
-            OPT_INSTALL=install
+            OPT_INSTALL=install/strip
             ;;
         --mingw)
             if [ "$WINDOWS_MSVC" ]; then
@@ -112,10 +112,10 @@ $PROGDIR/scripts/config-cmake.sh  "$@" ||
 
 if [ -f $OUT_DIR/build.ninja ]; then
     echo "Building sources with ninja."
-    $NINJA -C $OUT_DIR $OPT_INSTALL || panic "Could not build sourcis, please run 'ninja -C $OUT_DIR' to see why."
+    run $NINJA -C $OUT_DIR $OPT_INSTALL || panic "Could not build sources, please run 'ninja -C $OUT_DIR' to see why."
 else
     echo "Building sources with make."
-    make -C $OUT_DIR -j$HOST_NUM_CPUS $OPT_INSTALL ||
+    run eval make -C $OUT_DIR -j$HOST_NUM_CPUS $OPT_INSTALL ||
         panic "Could not build sources, please run 'make -C $OUT_DIR' to see why."
 fi
 
@@ -126,17 +126,6 @@ if [ -z "$NO_TESTS" ]; then
    $PROGDIR/scripts/run_tests.sh --verbose --verbose --out-dir=$OUT_DIR --jobs=1
 else
     echo "Ignoring unit tests suite."
-fi
-
-
-# Strip out symbols if requested
-if [ "$OPT_SYMBOLS" ]; then
-    echo "Generating symbols"
-    if [ "$MINGW" ]; then
-       $PROGDIR/scripts/strip-symbols.sh --out-dir=$OUT_DIR --mingw --verbosity=$VERBOSE
-    else
-       $PROGDIR/scripts/strip-symbols.sh --out-dir=$OUT_DIR --verbosity=$VERBOSE
-    fi
 fi
 
 echo "Done. !!"
