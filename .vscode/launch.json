@@ -49,6 +49,23 @@
                 // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
                 "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
             },
+        },
+        {
+            // You need root access to attach debugger
+            "name": "(lldb) Debug attach Emulator",
+            "type": "lldb",
+            "request": "attach",
+            // Resolved by CMake Tools:
+            "program": "${command:cmake.launchTargetPath}",
+            "pid": 0, // replace pid with your real pid
+            // Ignore signal SIGUSR1
+            "postRunCommands": ["pro hand -p true -s false SIGUSR1"],
+        },
+        {
+            "name": "(lldb) Debug core dump",
+            "type": "lldb",
+            "request": "custom",
+            "targetCreateCommands": ["target create -c ${workspaceFolder}/core"],
         }
     ]
 }
