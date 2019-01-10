@@ -31,6 +31,8 @@
 #include <vector>
 #include <functional>
 
+static constexpr int kMaxVertexAttributes = 16;
+
 typedef std::unordered_map<GLenum,GLESpointer*>  ArraysMap;
 
 enum TextureTarget {
@@ -116,21 +118,26 @@ struct BufferBinding {
     void onSave(android::base::Stream* stream) const;
 };
 
+typedef std::vector<GLESpointer> VertexAttribInfoVector;
 typedef std::vector<BufferBinding> VertexAttribBindingVector;
 
 struct VAOState {
     VAOState() : VAOState(0, NULL, 0) { }
     VAOState(GLuint ibo, ArraysMap* arr, int numVertexAttribBindings) :
         element_array_buffer_binding(ibo),
+        vertexAttribInfo(numVertexAttribBindings),
+        legacy(arr != nullptr),
         arraysMap(arr),
         bindingState(numVertexAttribBindings),
         everBound(false) { }
     VAOState(android::base::Stream* stream);
     GLuint element_array_buffer_binding;
-    ArraysMap* arraysMap;
+    VertexAttribInfoVector vertexAttribInfo;
     VertexAttribBindingVector bindingState;
     bool bufferBacked;
     bool everBound;
+    bool legacy = false;
+    ArraysMap* arraysMap;
     void onSave(android::base::Stream* stream) const;
 };
 
@@ -141,6 +148,14 @@ struct VAOStateRef {
     VAOStateRef(VAOStateMap::iterator iter) : it(iter) { }
     GLuint vaoId() const { return it->first; }
     GLuint& iboId() { return it->second.element_array_buffer_binding; }
+
+    const VertexAttribInfoVector& attribInfo_const() const {
+        return it->second.vertexAttribInfo;
+    }
+
+    VertexAttribInfoVector& attribInfo() {
+        return it->second.vertexAttribInfo;
+    }
 
     ArraysMap::iterator begin() {
         return it->second.arraysMap->begin();
@@ -212,7 +227,7 @@ public:
     GLint getUnpackAlignment();
 
     bool  isArrEnabled(GLenum);
-    void  enableArr(GLenum arr,bool enable);
+    virtual void  enableArr(GLenum arr,bool enable);
 
     void addVertexArrayObjects(GLsizei n, GLuint* arrays);
     void removeVertexArrayObjects(GLsizei n, const GLuint* arrays);
@@ -454,7 +469,7 @@ protected:
     static void buildStrings(const char* baseVendor, const char* baseRenderer, const char* baseVersion, const char* version);
 
     void freeVAOState();
-    void addVertexArrayObject(GLuint array);
+    virtual void addVertexArrayObject(GLuint array);
     void removeVertexArrayObject(GLuint array);
 
     virtual bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) = 0;

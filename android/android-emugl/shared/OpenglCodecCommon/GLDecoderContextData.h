@@ -66,7 +66,7 @@ public:
     }
 
 private:
-    static const int kMaxVertexAttributes = 64;
+    static const int kMaxVertexAttributes = 16;
 
     std::array<std::vector<char>, kMaxVertexAttributes> mPointerData = {};
 };
