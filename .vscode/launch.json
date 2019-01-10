@@ -37,13 +37,14 @@
             "type": "lldb",
             "request": "launch",
             // Resolved by CMake Tools:
-            "program": "${command:cmake.launchTargetPath}",
+            "program": "${workspaceFolder}/build/emulator",
             "args": [
                 // You will likely have to change these for emulator launch..
-                "@P_64",
+                "@28_64",
                 "-verbose",
                 "-show-kernel"
             ],
+            "postRunCommands": ["pro handle -p true -s false SIGUSR1"],
             "cwd": "${workspaceFolder}",
             "env": {
                 // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
