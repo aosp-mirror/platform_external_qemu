@@ -46,7 +46,7 @@ public:
     // Store |len| bytes from |data| into the buffer associated with
     // vertex attribute index |loc|.
     void storePointerData(unsigned int loc, void *data, size_t len) {
-        if (loc < mPointerData.size()) {
+           if (loc < mPointerData.size()) {
             auto& ptrData = mPointerData[loc];
             ptrData.assign(reinterpret_cast<char*>(data),
                            reinterpret_cast<char*>(data) + len);
@@ -66,7 +66,7 @@ public:
     }
 
 private:
-    static const int kMaxVertexAttributes = 64;
+    static const int kMaxVertexAttributes = 16;
 
     std::array<std::vector<char>, kMaxVertexAttributes> mPointerData = {};
 };
