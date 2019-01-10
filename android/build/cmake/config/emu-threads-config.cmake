@@ -10,8 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 # We now what kinds of threads we are using, and we've disabled finding of packages, so we just declare it explicitly
-
-add_library(Threads::Threads INTERFACE IMPORTED)
+if (NOT TARGET Threads::Threads)
+  add_library(Threads::Threads INTERFACE IMPORTED)
+endif()
 
 if(ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
   # Let's statically link the mingw thread library.. (Leaving out -lstdc++ will make it dynamic)
