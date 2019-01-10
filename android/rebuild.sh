@@ -28,11 +28,11 @@ for OPT; do
     case $OPT in
         --sdk-build-number=*)
             ANDROID_SDK_TOOLS_BUILD_NUMBER=${OPT##--sdk-build-number=}
-            OPT_INSTALL=install
+            OPT_INSTALL=install/strip
             ;;
         --aosp-prebuilts-dir=*)
             ANDROID_EMULATOR_PREBUILTS_DIR=${OPT##--aosp-prebuilts-dir=}
-            OPT_INSTALL=install
+            OPT_INSTALL=install/strip
             ;;
         --mingw)
             if [ "$WINDOWS_MSVC" ]; then
@@ -126,17 +126,6 @@ if [ -z "$NO_TESTS" ]; then
    $PROGDIR/scripts/unix/run_tests.sh --verbose --verbose --out-dir=$OUT_DIR --jobs=1
 else
     echo "Ignoring unit tests suite."
-fi
-
-
-# Strip out symbols if requested
-if [ "$OPT_SYMBOLS" ]; then
-    echo "Generating symbols"
-    if [ "$MINGW" ]; then
-       $PROGDIR/scripts/unix/strip-symbols.sh --out-dir=$OUT_DIR --mingw --verbosity=$VERBOSE
-    else
-       $PROGDIR/scripts/unix/strip-symbols.sh --out-dir=$OUT_DIR --verbosity=$VERBOSE
-    fi
 fi
 
 echo "Done. !!"
