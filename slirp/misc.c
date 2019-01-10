@@ -189,7 +189,10 @@ fork_exec(struct socket *so, const char *ex, int do_pty)
                     so->s = accept(s, (struct sockaddr *)&addr, &addrlen);
                 } while (so->s < 0 && errno == EINTR);
                 closesocket(s);
-                socket_set_fast_reuse(so->s);
+                /*
+                 * Do not call socket_set_fast_reuse() on a connected socket.
+                 * Some kernels disallow it.
+                 */
                 opt = 1;
                 qemu_setsockopt(so->s, SOL_SOCKET, SO_OOBINLINE, &opt, sizeof(int));
 		qemu_set_nonblock(so->s);

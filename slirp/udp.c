@@ -382,11 +382,16 @@ udp_listen(Slirp *slirp, uint32_t haddr, u_int hport, uint32_t laddr,
 	addr.sin_addr.s_addr = haddr;
 	addr.sin_port = hport;
 
+	/*
+	 * SO_REUSEADDR has to be set before binding the socket.
+	 * Some kernels disallow doing this on a connected/bound socket.
+	 */
+	socket_set_fast_reuse(so->s);
+
 	if (bind(so->s,(struct sockaddr *)&addr, addrlen) < 0) {
 		udp_detach(so);
 		return NULL;
 	}
-	socket_set_fast_reuse(so->s);
 
 	getsockname(so->s,(struct sockaddr *)&addr,&addrlen);
 	so->fhost.sin = addr;
