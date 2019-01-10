@@ -327,7 +327,7 @@ target_link_libraries(android-emu
                               automation
                               offworld
                               # Prebuilt libraries
-                              BREAKPAD::Client
+                              breakpad_client
                               CURL::libcurl
                               OpenSSL::SSL
                               OpenSSL::Crypto
@@ -459,7 +459,7 @@ target_link_libraries(android-emu-shared
                               automation
                               offworld
                               # Prebuilt libraries
-                              BREAKPAD::Client
+                              breakpad_client
                               CURL::libcurl
                               LibXml2::LibXml2
                               PNG::PNG
