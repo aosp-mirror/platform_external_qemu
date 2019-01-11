@@ -108,7 +108,12 @@ void RenderChannelImpl::stop() {
     AutoLock lock(mLock);
     mFromGuest.closeLocked();
     mToGuest.closeLocked();
+    if (mStopCallback) mStopCallback();
     mEventCallback = [](State state) {};
+}
+
+void RenderChannelImpl::registerStopCallback(std::function<void()> f) {
+    mStopCallback = f;
 }
 
 bool RenderChannelImpl::writeToGuest(Buffer&& buffer) {
@@ -145,6 +150,7 @@ void RenderChannelImpl::stopFromHost() {
     mFromGuest.closeLocked();
     mToGuest.closeLocked();
     mState |= State::Stopped;
+    if (mStopCallback) mStopCallback();
     notifyStateChangeLocked();
     mEventCallback = [](State state) {};
 }

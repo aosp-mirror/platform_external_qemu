@@ -62,7 +62,7 @@ void (*reset_host_mappings)(void);
 void (*save_mappings)(android::base::Stream* stream);
 void (*load_mappings)(android::base::Stream* stream);
 void (*ping)(uint64_t guest_paddr);
-void (*register_ping_callback)(uint64_t guest_paddr, std::function<void()> cb);
+void (*register_ping_callback)(uint64_t guest_paddr, std::function<void(bool)> cb);
 };
 
 extern GoldfishDmaOps android_goldfish_dma_ops;

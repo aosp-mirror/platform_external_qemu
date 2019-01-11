@@ -57,6 +57,8 @@ public:
     // Close the channel from the guest.
     virtual void stop() override final;
 
+    void registerStopCallback(std::function<void()>) override;
+
     // Callback function when snapshotting the virtual machine.
     virtual void onSave(android::base::Stream* stream) override;
 
@@ -108,6 +110,8 @@ private:
     State mWantedEvents = State::Empty;
     BufferQueue<RenderChannel::Buffer> mFromGuest;
     BufferQueue<RenderChannel::Buffer> mToGuest;
+
+    std::function<void()> mStopCallback;
 };
 
 }  // namespace emugl

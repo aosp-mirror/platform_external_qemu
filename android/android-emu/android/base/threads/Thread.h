@@ -106,6 +106,8 @@ public:
     // thread that's ready to run.
     static void yield();
 
+    void setAffinity(int mask);
+
 private:
 #ifdef _WIN32
     static DWORD WINAPI thread_main(void* arg);

@@ -44,6 +44,9 @@ public:
     void stop(bool wait);
     void finish();
 
+    static RendererImpl* get();
+    int renderThreadCount() const;
+
 public:
     RenderChannelPtr createRenderChannel(android::base::Stream* loadStream) final;
     HardwareStrings getHardwareStrings() final;
