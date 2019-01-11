@@ -191,6 +191,12 @@ void RenderThread::setFinished() {
 }
 
 intptr_t RenderThread::main() {
+    setAffinity(
+        (1 << 4) |
+        (1 << 5) |
+        (1 << 6) |
+        (1 << 7));
+
     if (mFinished.load(std::memory_order_relaxed)) {
         DBG("Error: fail loading a RenderThread @%p\n", this);
         return 0;

@@ -14,6 +14,7 @@
 #pragma once
 
 #include "android/base/synchronization/Lock.h"
+#include "android/base/synchronization/MessageChannel.h"
 
 #include "OpenglRender/IOStream.h"
 #include "RenderChannelImpl.h"
@@ -35,6 +36,8 @@ public:
     void forceStop();
     int writeFully(const void* buf, size_t len) override;
     const unsigned char *readFully( void *buf, size_t len) override;
+
+    void enableSharedMemoryPings();
 
     void setSharedMemoryCommandInfo(
         bool* modePtr,
@@ -59,6 +62,9 @@ public:
 
     uint32_t waitForGuestPingAndTrafficSize();
     void readFullyAndHangUp(uint8_t* dst, uint32_t len);
+
+    uint32_t waitForGuestPingAndTrafficSizePageAddrs();
+    void readFullyAndHangUpPageAddrs(uint8_t* dst, uint32_t len);
 
 protected:
     virtual void* allocBuffer(size_t minSize) override final;
@@ -86,8 +92,17 @@ private:
     ring_buffer_view* mFromHostRingBufferView = nullptr;
     bool mLastReadUsingSharedMemory = false;
 
+    struct PageAddrTransfer {
+        uint32_t numPages;
+        uint64_t firstPageOffset;
+        uint64_t lastPageSize;
+        std::vector<uint64_t> pages { 1024 };
+    };
+    PageAddrTransfer mCurrentTransfer;
+
     android::base::Lock mLock;
     android::base::ConditionVariable mCv;
+    android::base::MessageChannel<int, 1024> mGuestPings;
     uint64_t mLastPingTimeUs = 0;
     bool mSleeping = true;
 
@@ -101,6 +116,7 @@ private:
     uint64_t mCommitBufferTime = 0;
     uint64_t mSpinReceiveTime = 0;
     float mLastRate = 0.0f;
+
 };
 
 }  // namespace emugl
