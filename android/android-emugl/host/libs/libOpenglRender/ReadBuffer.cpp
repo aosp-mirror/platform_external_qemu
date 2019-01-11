@@ -41,6 +41,7 @@ ReadBuffer::~ReadBuffer() {
 }
 
 int ReadBuffer::getDataSharedMem(ChannelStream* stream, int minSize) {
+uint64_t start_us = System::get()->getHighResTimeUs();
     // fprintf(stderr, "%s:%p valid data: %zu want total: %d\n", __func__, stream, m_validData, minSize);
     // if (m_validData != 0) {
     //  fprintf(stderr, "%s: sharedMem read with previous valid data!\n", __func__);
@@ -57,6 +58,9 @@ int ReadBuffer::getDataSharedMem(ChannelStream* stream, int minSize) {
 
     while (fromGuestTotal < minSizeToRead) {
         uint32_t fromGuestSize = stream->waitForGuestPingAndTrafficSize();
+        // uint32_t fromGuestSize = stream->waitForGuestPingAndTrafficSizePageAddrs();
+
+        uint64_t readBufferStuff_start_us = System::get()->getHighResTimeUs();
 
         if (fromGuestSize == 0) {
             // fprintf(stderr, "%s: need exit\n", __func__);
@@ -100,11 +104,20 @@ int ReadBuffer::getDataSharedMem(ChannelStream* stream, int minSize) {
             }
         }
 
+        uint64_t readBufferStuff_end_us = System::get()->getHighResTimeUs();
+        uint64_t readBufferStuff_duration = (readBufferStuff_end_us - readBufferStuff_start_us);
+
+        if (readBufferStuff_duration > 10000) {
+            fprintf(stderr, "==========slow read buffer! %f ms\n", readBufferStuff_duration / 1000.0f);
+        }
         stream->readFullyAndHangUp(m_readPtr + m_validData, fromGuestSize);
+        // stream->readFullyAndHangUpPageAddrs(m_readPtr + m_validData, fromGuestSize);
 
         m_validData += fromGuestSize;
     }
 
+                uint64_t read_end_us2 = System::get()->getHighResTimeUs();
+                m_timeChannelReading += (read_end_us2 - start_us);
     // fprintf(stderr, "%s:%p done with %u\n", __func__, stream, fromGuestTotal);
     return (int)fromGuestTotal;
 }

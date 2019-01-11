@@ -14,6 +14,7 @@
 #pragma once
 
 #include "android/base/synchronization/Lock.h"
+#include "android/base/synchronization/MessageChannel.h"
 
 #include "OpenglRender/IOStream.h"
 #include "RenderChannelImpl.h"
@@ -35,6 +36,8 @@ public:
     void forceStop();
     int writeFully(const void* buf, size_t len) override;
     const unsigned char *readFully( void *buf, size_t len) override;
+
+    void enableSharedMemoryPings();
 
     void setSharedMemoryCommandInfo(
         bool* modePtr,
@@ -59,6 +62,11 @@ public:
 
     uint32_t waitForGuestPingAndTrafficSize();
     void readFullyAndHangUp(uint8_t* dst, uint32_t len);
+
+    uint32_t waitForGuestPingAndTrafficSizePageAddrs();
+    void readFullyAndHangUpPageAddrs(uint8_t* dst, uint32_t len);
+
+    void setCmdLatency(uint64_t time);
 
 protected:
     virtual void* allocBuffer(size_t minSize) override final;
@@ -86,10 +94,42 @@ private:
     ring_buffer_view* mFromHostRingBufferView = nullptr;
     bool mLastReadUsingSharedMemory = false;
 
+    struct DirectMemTransfer {
+        uint32_t xferLen;
+        std::vector<uint8_t> buffer;
+    };
+    std::vector<DirectMemTransfer> mDirectMemTransfers;
+    int mCurrentDirectMemTransferIndex = 0;
+
+    struct PageAddrTransfer {
+        uint32_t numPages;
+        uint64_t firstPageOffset;
+        uint64_t lastPageSize;
+        uint32_t xferLen;
+        uint64_t spinReceiveTime1;
+        uint64_t spinReceiveTime2;
+        uint64_t latencyStartUs;
+        uint64_t latencyEndUs;
+        uint64_t receiveSleepUs;
+        uint64_t allocedChannelLockTime;
+        std::vector<uint64_t> pages;
+        std::vector<uint8_t> buffer;
+    };
+    std::vector<PageAddrTransfer> mCurrentTransfers;
+
     android::base::Lock mLock;
     android::base::ConditionVariable mCv;
+    android::base::MessageChannel<int, 1024> mGuestPings;
+    android::base::MessageChannel<int, 1024> mHostReplies;
     uint64_t mLastPingTimeUs = 0;
     bool mSleeping = true;
+
+#define PING_STATE_IDLE 0
+#define PING_STATE_GOT_XFER_INFO 1
+
+    int mPingState = PING_STATE_IDLE;
+    int mCurrentTransferIndex = 0;
+
 
     uint64_t mLastCheckTime = 0;
     uint64_t mLastPrintTime = 0;
@@ -100,7 +140,12 @@ private:
     uint64_t mLastSleep = 0;
     uint64_t mCommitBufferTime = 0;
     uint64_t mSpinReceiveTime = 0;
+    uint64_t mSpinReceiveTime2 = 0;
+
     float mLastRate = 0.0f;
+
+    bool mSlept = false;
+
 };
 
 }  // namespace emugl

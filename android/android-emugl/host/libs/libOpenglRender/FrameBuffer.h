@@ -441,6 +441,9 @@ public:
     ColorBuffer::Helper* getColorBufferHelper() { return m_colorBufferHelper; }
     ColorBufferPtr findColorBuffer(HandleType p_colorbuffer);
 
+    void onGuestThreadIdle();
+    void onGuestThreadWake();
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
@@ -601,5 +604,6 @@ private:
     void sendPostWorkerCmd(Post post);
 
     bool m_fastBlitSupported = false;
+    int mIdleThreads = 0;
 };
 #endif

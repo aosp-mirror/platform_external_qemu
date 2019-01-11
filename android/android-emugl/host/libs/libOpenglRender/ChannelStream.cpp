@@ -18,11 +18,13 @@
 #include "android/base/ring_buffer.h"
 #include "android/base/system/System.h"
 
+#include "FrameBuffer.h"
 #include "OpenglRender/RenderChannel.h"
 
 #define EMUGL_DEBUG_LEVEL  0
 #include "emugl/common/debug.h"
 #include "emugl/common/dma_device.h"
+#include "emugl/common/vm_operations.h"
 
 #include <iomanip>
 #include <sstream>
@@ -47,9 +49,8 @@ using android::base::System;
 
 namespace emugl {
 
-static StaticLock sAllocatedChannelLock;
-static LazyInstance<StaticMap<ChannelStream*, bool>> sAllocatedChannels =
-    LAZY_INSTANCE_INIT;
+// static StaticLock sAllocatedChannelLock;
+// static LazyInstance<StaticMap<ChannelStream*, bool>> sAllocatedChannels = LAZY_INSTANCE_INIT;
 
 using IoResult = RenderChannel::IoResult;
 
@@ -59,8 +60,10 @@ ChannelStream::ChannelStream(RenderChannelImpl* channel, size_t bufSize)
 }
 
 ChannelStream::~ChannelStream() {
-    AutoLock lock(sAllocatedChannelLock);
-    sAllocatedChannels->erase(this);
+    mChannel->registerStopCallback({});
+            // mHostReplies.send(0);
+    // AutoLock lock(sAllocatedChannelLock);
+    // sAllocatedChannels->erase(this);
 }
 
 void* ChannelStream::allocBuffer(size_t minSize) {
@@ -73,7 +76,7 @@ void* ChannelStream::allocBuffer(size_t minSize) {
 int ChannelStream::commitBuffer(size_t size) {
     D("committing %zu bytes from host", size);
     assert(size <= mWriteBuffer.size());
-    uint64_t commit_start_us = System::get()->getHighResTimeUs();
+    // uint64_t commit_start_us = System::get()->getHighResTimeUs();
     if (*mSharedMemoryCommandModePtr) {
         D("with ring");
         ring_buffer* fromHost = *mFromHostRingHandle;
@@ -92,14 +95,16 @@ int ChannelStream::commitBuffer(size_t size) {
                     RenderChannel::Buffer(mWriteBuffer.data(), mWriteBuffer.data() + size));
         }
     }
-    uint64_t commit_end_us = System::get()->getHighResTimeUs();
+    // uint64_t commit_end_us = System::get()->getHighResTimeUs();
 
-    mCommitBufferTime += (commit_end_us - commit_start_us);
+    // mCommitBufferTime += (commit_end_us - commit_start_us);
     return size;
 }
 
 bool ChannelStream::printStats() {
-    if (mReceivedBytes < 1000000ULL * 50ULL) return false;
+    return false;
+
+    if (mReceivedBytes < 1000000ULL * 2ULL) return false;
 
     ring_buffer* toHost = *mToHostRingHandle;
 
@@ -119,7 +124,7 @@ bool ChannelStream::printStats() {
     float printSec = (thisTime - mLastPrintTime) / 1000000.0f;
 
     if (printSec > 0.99f) {
-        fprintf(stderr, "%s: since last: l/y/s %lu %lu %lu. rate last: %f mb/s. spin receive time: %f s (implied live rate: %f mb/s) commit time: %f s\n", __func__,
+        fprintf(stderr, "%s: since last: l/y/s %lu %lu %lu. rate last: %f mb/s. spin receive time: %f s (implied live rate: %f mb/s) (rt side: %f s %f mb/s) commit time: %f s\n", __func__,
     toHost->read_live_count - mLastLive,
     toHost->read_yield_count - mLastYield,
     toHost->read_sleep_us_count - mLastSleep,
@@ -127,6 +132,8 @@ bool ChannelStream::printStats() {
 
     mSpinReceiveTime / 1000000.0f,
     (float)bytesSentThisTime / mSpinReceiveTime,
+    mSpinReceiveTime2 / 1000000.0f,
+    (float)bytesSentThisTime / mSpinReceiveTime2,
 
     mCommitBufferTime / 1000000.0f);
     mLastPrintTime = thisTime;
@@ -134,7 +141,7 @@ bool ChannelStream::printStats() {
 
     mLastRate = (float)bytesSentThisTime / 1048576.0f / intervalSec;
 
-mCommitBufferTime = 0;
+    mCommitBufferTime = 0;
     mReceivedBytesSinceLast = mReceivedBytes;
     mLastCheckTime = thisTime;
 
@@ -143,6 +150,7 @@ mCommitBufferTime = 0;
     mLastSleep = toHost->read_sleep_us_count;
 
     mSpinReceiveTime = 0;
+    mSpinReceiveTime2 = 0;
     return true;
 }
 
@@ -154,46 +162,48 @@ bool ChannelStream::isHighTraffic() const {
 uint32_t ChannelStream::waitForGuestPingAndTrafficSize() {
     if (firstSharedMemoryRead()) {
         mLastReadUsingSharedMemory = true;
-        sAllocatedChannels->set(this, true);
-        emugl::g_emugl_dma_register_ping_callback(*mToHostRingAddrPtr, [this]() {
-
-            AutoLock lockAlloced(sAllocatedChannelLock);
-            auto alloced = sAllocatedChannels->get(this);
-            if (!alloced || !(*alloced)) {
-                // fprintf(stderr, "%s: pinged unalloced channel\n", __func__);
-                return;
-            }
-
-            AutoLock lock(mLock);
-            mCv.signal();
-        });
     }
 
     ring_buffer* toHost = *mToHostRingHandle;
 
-    {
-            // fprintf(stderr, "acq lock...");
-        AutoLock lock(mLock);
-            // fprintf(stderr, "..acqd and wait\n");
-        while (toHost->state != RING_BUFFER_SYNC_PRODUCER_ACTIVE) {
-            // fprintf(stderr, "%s: %p wait\n", __func__, this);
-            mCv.wait(&mLock);
-            toHost->state = RING_BUFFER_SYNC_PRODUCER_ACTIVE;
-        }
-            // fprintf(stderr, "passed wait\n");
-    }
+    mGuestPings.receive(&mCurrentDirectMemTransferIndex);
 
-    uint64_t spinReceiveTime1_start_us = System::get()->getHighResTimeUs();
+    // auto future = System::get()->getUnixTimeUs() + 1000000ULL;
+    // auto message = mGuestPings.timedReceive(future);
+
+    // if (message) {
+
+    // } else {
+    //     mSlept = true;
+    //     auto fb = FrameBuffer::getFB();
+    //     if (fb) {
+    //         fb->onGuestThreadIdle();
+    //     }
+    //     int message = 0;
+    // }
+
+    // if (mSlept) {
+    //     auto fb = FrameBuffer::getFB();
+    //     if (fb) {
+    //         fb->onGuestThreadWake();
+    //     }
+    //     mSlept = false;
+    // }
+
+    // fprintf(stderr, "%s: received a message\n", __func__);
+    toHost->state = RING_BUFFER_SYNC_PRODUCER_ACTIVE;
+
+    // uint64_t spinReceiveTime1_start_us = System::get()->getHighResTimeUs();
     bool exiting = false;
 
     if (mChannel->isStopped()) {
-        emugl::g_emugl_dma_register_ping_callback(*mToHostRingAddrPtr, [this]() { });
+        // emugl::g_emugl_dma_register_ping_callback(*mToHostRingAddrPtr, [this]() { });
         fprintf(stderr, "%s: %p channel stopped\n", __func__, this);
         exiting = true;
     }
 
     if (!g_emugl_dma_get_host_addr(*mToHostRingAddrPtr)) {
-        emugl::g_emugl_dma_register_ping_callback(*mToHostRingAddrPtr, [this]() { });
+        // emugl::g_emugl_dma_register_ping_callback(*mToHostRingAddrPtr, [this]() { });
         fprintf(stderr, "%s: %p channel stopped because dma mapping invalid\n", __func__, this);
         mChannel->stopFromHost();
         exiting = true;
@@ -201,37 +211,123 @@ uint32_t ChannelStream::waitForGuestPingAndTrafficSize() {
 
     if (exiting){
         toHost->state = RING_BUFFER_SYNC_CONSUMER_HANGING_UP;
+        // unlockDma(*mToHostRingAddrPtr);
         return 0;
     }
 
-    while (toHost->state != RING_BUFFER_SYNC_PRODUCER_ACTIVE) {
-        ring_buffer_yield();
-    }
-
-    uint32_t len;
-    ring_buffer_read_fully(toHost, mToHostRingBufferView, &len, sizeof(uint32_t));
-            if (!len) {
-                toHost->state = RING_BUFFER_SYNC_CONSUMER_HANGING_UP;
-            }
-    uint64_t spinReceiveTime1_end_us = System::get()->getHighResTimeUs();
-
-    mSpinReceiveTime += (spinReceiveTime1_end_us - spinReceiveTime1_start_us);
-
-    return len;
+    auto& x = mDirectMemTransfers[mCurrentDirectMemTransferIndex];
+    return x.xferLen;
+    // uint32_t len;
+    // ring_buffer_read_fully(toHost, mToHostRingBufferView, &len, sizeof(uint32_t));
+    // // fprintf(stderr, "%s: msg len: %u\n", __func__, len);
+    // if (!len) {
+        // toHost->state = RING_BUFFER_SYNC_CONSUMER_HANGING_UP;
+        // // unlockDma(*mToHostRingAddrPtr);
+    // }
+    // // uint64_t spinReceiveTime1_end_us = System::get()->getHighResTimeUs();
+// 
+    // // mSpinReceiveTime += (spinReceiveTime1_end_us - spinReceiveTime1_start_us);
+// 
+    // return len;
 }
 
 void ChannelStream::readFullyAndHangUp(uint8_t* dst, uint32_t len) {
-    uint64_t spinReceiveTime2_start_us = System::get()->getHighResTimeUs();
+    auto& x = mDirectMemTransfers[mCurrentDirectMemTransferIndex];
+    memcpy(dst, x.buffer.data(), len);
+    mReceivedBytes += len;
+    mHostReplies.send(mCurrentDirectMemTransferIndex);
+    // uint64_t spinReceiveTime2_start_us = System::get()->getHighResTimeUs();
+
+    // ring_buffer* toHost = *mToHostRingHandle;
+    // ring_buffer_read_fully(toHost, mToHostRingBufferView, dst, len);
+    // mReceivedBytes += len;
+
+    // uint64_t spinReceiveTime2_end_us = System::get()->getHighResTimeUs();
+
+    // mSpinReceiveTime += (spinReceiveTime2_end_us - spinReceiveTime2_start_us);
+
+    // toHost->state = RING_BUFFER_SYNC_CONSUMER_HANGING_UP;
+    // unlockDma(*mToHostRingAddrPtr);
+}
+
+uint32_t ChannelStream::waitForGuestPingAndTrafficSizePageAddrs() {
+    if (firstSharedMemoryRead()) {
+        mLastReadUsingSharedMemory = true;
+    }
 
     ring_buffer* toHost = *mToHostRingHandle;
-    ring_buffer_read_fully(toHost, mToHostRingBufferView, dst, len);
-    mReceivedBytes += len;
 
-    uint64_t spinReceiveTime2_end_us = System::get()->getHighResTimeUs();
+    int nextTransferIndex = 0;
 
-    mSpinReceiveTime += (spinReceiveTime2_end_us - spinReceiveTime2_start_us);
+    // uint64_t sleep_start_us = System::get()->getHighResTimeUs();
+    mGuestPings.receive(&nextTransferIndex);
+    // uint64_t sleep_end_us = System::get()->getHighResTimeUs();
 
-    toHost->state = RING_BUFFER_SYNC_CONSUMER_HANGING_UP;
+    toHost->state = RING_BUFFER_SYNC_PRODUCER_ACTIVE;
+
+    bool exiting = false;
+
+    if (nextTransferIndex == -1) {
+        fprintf(stderr, "%s: %p channel stopped\n", __func__, this);
+        exiting = true;
+    }
+
+    if (mChannel->isStopped()) {
+        // emugl::g_emugl_dma_register_ping_callback(*mToHostRingAddrPtr, [this]() { });
+        fprintf(stderr, "%s: %p channel stopped\n", __func__, this);
+        exiting = true;
+    }
+
+    if (!g_emugl_dma_get_host_addr(*mToHostRingAddrPtr)) {
+        // emugl::g_emugl_dma_register_ping_callback(*mToHostRingAddrPtr, [this]() { });
+        fprintf(stderr, "%s: %p channel stopped because dma mapping invalid\n", __func__, this);
+        mChannel->stopFromHost();
+        exiting = true;
+    }
+
+    if (exiting){
+        toHost->state = RING_BUFFER_SYNC_CONSUMER_HANGING_UP;
+        mHostReplies.send(0);
+        // unlockDma(*mToHostRingAddrPtr);
+        return 0;
+    }
+
+    auto& x = mCurrentTransfers[nextTransferIndex];
+    // x.receiveSleepUs = sleep_end_us - sleep_start_us;
+    mCurrentTransferIndex = nextTransferIndex;
+    return x.xferLen;
+}
+
+void ChannelStream::readFullyAndHangUpPageAddrs(uint8_t* dst, uint32_t len) {
+    auto& x = mCurrentTransfers[mCurrentTransferIndex];
+
+    // uint64_t spinReceiveTime2_start_us = System::get()->getHighResTimeUs();
+    memcpy(dst, x.buffer.data(), len);
+    // uint64_t spinReceiveTime2_end_us = System::get()->getHighResTimeUs();
+    // x.spinReceiveTime2 = spinReceiveTime2_end_us - spinReceiveTime2_start_us;
+    // x.latencyEndUs = spinReceiveTime2_end_us;
+
+    uint64_t latencyUs = x.latencyEndUs - x.latencyStartUs;
+
+    if (latencyUs > 10000) {
+        fprintf(stderr,
+                "%s: **********high latency transfer: %f ms. spin recv 1/2 %f "
+                "ms %f ms (total live %f ms). sleep for this xfer: %f ms channel lock time %f ms. live rates: %f mb/s, %f mb/s "
+                "latency rate: %f mb/s\n",
+                __func__, latencyUs / 1000.0f,
+                x.spinReceiveTime1 / 1000.0f,
+                x.spinReceiveTime2 / 1000.0f,
+                x.spinReceiveTime1 / 1000.0f + x.spinReceiveTime2 / 1000.0f,
+                x.receiveSleepUs / 1000.0f,
+                x.allocedChannelLockTime / 1000.0f,
+                1000000.0f * x.xferLen / 1048576.0f / (float)x.spinReceiveTime1,
+                1000000.0f * x.xferLen / 1048576.0f / (float)x.spinReceiveTime1,
+                1000000.0f * x.xferLen / 1048576.0f / (float)latencyUs);
+    }
+
+    mHostReplies.send(mCurrentTransferIndex);
+    // mSpinReceiveTime2 += (spinReceiveTime2_end_us - spinReceiveTime2_start_us);
+
 }
 
 const unsigned char* ChannelStream::readRaw(void* buf, size_t* inout_len) {
@@ -241,7 +337,7 @@ const unsigned char* ChannelStream::readRaw(void* buf, size_t* inout_len) {
 
     if (*mSharedMemoryCommandModePtr) {
         if (!mLastReadUsingSharedMemory) {
-            emugl::g_emugl_dma_register_ping_callback(*mToHostRingAddrPtr, [this]() {
+            emugl::g_emugl_dma_register_ping_callback(*mToHostRingAddrPtr, [this](bool removing) {
                 mLastPingTimeUs = System::get()->getUnixTimeUs();
             });
         }
@@ -279,13 +375,13 @@ const unsigned char* ChannelStream::readRaw(void* buf, size_t* inout_len) {
 
                     while (!ring_buffer_wait_read(toHost, mToHostRingBufferView, smallWanted, wait)) {
                         if (mChannel->isStopped()) {
-                            emugl::g_emugl_dma_register_ping_callback(*mToHostRingAddrPtr, [this]() { });
+                            emugl::g_emugl_dma_register_ping_callback(*mToHostRingAddrPtr, [this](bool remove) { });
                             // fprintf(stderr, "%s: %p channel stopped\n", __func__, this);
                             exiting = true;
                             break;
                         }
                         if (!g_emugl_dma_get_host_addr(*mToHostRingAddrPtr)) {
-                            emugl::g_emugl_dma_register_ping_callback(*mToHostRingAddrPtr, [this]() { });
+                            emugl::g_emugl_dma_register_ping_callback(*mToHostRingAddrPtr, [this](bool remove) { });
                             // fprintf(stderr, "%s: %p channel stopped because dma mapping invalid\n", __func__, this);
                             mChannel->stopFromHost();
                             exiting = true;
@@ -327,10 +423,10 @@ const unsigned char* ChannelStream::readRaw(void* buf, size_t* inout_len) {
 
         if (mLastReadUsingSharedMemory) {
             // fprintf(stderr, "%p Ended shared mem commands********************************************************************************\n", this);
-            emugl::g_emugl_dma_register_ping_callback(*mToHostRingAddrPtr, [this]() { });
             ring_buffer* toHost = *mToHostRingHandle;
             ring_buffer_consumer_hung_up(toHost);
             mLastReadUsingSharedMemory = false;
+            mHostReplies.send(0);
         }
 
         D("wanted %d bytes", (int)wanted);
@@ -388,8 +484,137 @@ int ChannelStream::writeFully(const void* buf, size_t len) {
 }
 
 const unsigned char *ChannelStream::readFully( void *buf, size_t len) {
-    // fprintf(stderr, "%s: FATAL: not intended for use with ChannelStream\n", __func__);
+    fprintf(stderr, "%s: FATAL: not intended for use with ChannelStream\n", __func__);
     abort();
+}
+
+void ChannelStream::enableSharedMemoryPings() {
+    mChannel->registerStopCallback([this]() {
+     mGuestPings.send(0);
+    });
+
+#define MAX_PENDING_TRANSFERS 32
+
+    mCurrentTransfers.resize(MAX_PENDING_TRANSFERS);
+    mDirectMemTransfers.resize(MAX_PENDING_TRANSFERS);
+    for (int i = 0; i < MAX_PENDING_TRANSFERS; ++i) {
+        mHostReplies.send(i);
+    }
+
+    // struct sched_param sp;
+    // memset(&sp, 0, sizeof(struct sched_param));
+    // sp.sched_priority=0;
+    // if (pthread_setschedparam(pthread_self(), SCHED_RR, &sp)  == -1) {
+        // printf("Failed to change priority.\n");
+    // }
+
+    // sAllocatedChannels->set(this, true);
+    emugl::g_emugl_dma_register_ping_callback(*mToHostRingAddrPtr, [this](bool remove) {
+        // uint64_t allocedChannelLock_start_us = System::get()->getHighResTimeUs();
+        // AutoLock lockAlloced(sAllocatedChannelLock);
+        // uint64_t allocedChannelLock_end_us = System::get()->getHighResTimeUs();
+// 
+        // auto alloced = sAllocatedChannels->get(this);
+        // if (!alloced || !(*alloced)) {
+            // // fprintf(stderr, "%s: pinged unalloced channel\n", __func__);
+            // return;
+        // }
+
+        int newTransferIndex = 0;
+        mHostReplies.receive(&newTransferIndex);
+
+        auto& x = mDirectMemTransfers[newTransferIndex];
+        auto r = *mToHostRingHandle;
+        auto v = mToHostRingBufferView;
+        ring_buffer_read_fully(r, v, &x.xferLen, 4);
+
+        if (x.buffer.size() < x.xferLen) {
+            x.buffer.resize(x.xferLen * 2);
+        }
+
+        ring_buffer_read_fully(r, v, x.buffer.data(), x.xferLen);
+
+        mGuestPings.send(newTransferIndex);
+/*
+        if (remove) {
+            mGuestPings.send(-1);
+            return;
+        }
+
+        int nextTransferIndex;
+        uint64_t spinReceiveTime1_start_us = System::get()->getHighResTimeUs();
+        mHostReplies.receive(&nextTransferIndex);
+
+        auto& x = mCurrentTransfers[nextTransferIndex];
+
+        x.allocedChannelLockTime = (allocedChannelLock_end_us - allocedChannelLock_start_us);
+        x.latencyStartUs = spinReceiveTime1_start_us;
+
+        ring_buffer_read_fully(*mToHostRingHandle, mToHostRingBufferView,
+                               &x.numPages, sizeof(uint32_t));
+        ring_buffer_read_fully(*mToHostRingHandle, mToHostRingBufferView,
+                               &x.firstPageOffset,
+                               sizeof(uint64_t));
+        ring_buffer_read_fully(*mToHostRingHandle, mToHostRingBufferView,
+                               &x.lastPageSize,
+                               sizeof(uint64_t));
+        x.xferLen = 0;
+
+        for (uint32_t i = 0; i < x.numPages; ++i) {
+            if (i == 0 && x.numPages == 1) {
+                x.xferLen += x.lastPageSize - x.firstPageOffset;
+            } else if (i == 0) {
+                x.xferLen += 4096 - x.firstPageOffset;
+            } else if (i == x.numPages - 1) {
+                x.xferLen += x.lastPageSize;
+            } else {
+                x.xferLen += 4096;
+            }
+        }
+
+        if (x.pages.size() < x.numPages) {
+            x.pages.resize(x.numPages * 2);
+        }
+
+        for (uint32_t i = 0; i < x.numPages; ++i) {
+            ring_buffer_read_fully(*mToHostRingHandle, mToHostRingBufferView,
+                                   &x.pages[i],
+                                   sizeof(uint64_t));
+        }
+
+        const auto& vmOps = get_emugl_vm_operations();
+
+        if (x.xferLen > x.buffer.size()) {
+            x.buffer.resize(x.xferLen * 2);
+        }
+
+        uint8_t* current_dst = x.buffer.data();
+
+        for (uint32_t i = 0; i < x.numPages; ++i) {
+            uint8_t* pageHva = vmOps.gpa2hva(x.pages[i]);
+            // fprintf(stderr, "%s: %d: page 0x%llx hva %p\n", __func__, i,
+            // pageHva, x.pages[i]);
+            if (i == 0 && x.numPages == 1) {
+                memcpy(current_dst, pageHva + x.firstPageOffset, x.xferLen);
+            } else if (i == 0) {
+                memcpy(current_dst, pageHva + x.firstPageOffset,
+                       4096 - x.firstPageOffset);
+                current_dst += 4096 - x.firstPageOffset;
+            } else if (i == x.numPages - 1) {
+                memcpy(current_dst, pageHva, x.lastPageSize);
+            } else {
+                memcpy(current_dst, pageHva, 4096);
+                current_dst += 4096;
+            }
+        }
+
+        mReceivedBytes += x.xferLen;
+
+        mGuestPings.send(nextTransferIndex);
+        uint64_t spinReceiveTime1_end_us = System::get()->getHighResTimeUs();
+        x.spinReceiveTime1 = (spinReceiveTime1_end_us - spinReceiveTime1_start_us);
+        mSpinReceiveTime += x.spinReceiveTime1;*/
+    });
 }
 
 void ChannelStream::setSharedMemoryCommandInfo(

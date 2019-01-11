@@ -20,6 +20,7 @@
 #include "GLESVersionDetector.h"
 #include "NativeSubWindow.h"
 #include "RenderControl.h"
+#include "RendererImpl.h"
 #include "RenderThreadInfo.h"
 #include "gles2_dec.h"
 
@@ -1822,8 +1823,11 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
             auto cpuUsage = emugl::getCpuUsage();
             std::string lastStats =
                 cpuUsage ? cpuUsage->printUsage() : "";
-            printf("FPS: %5.3f resident memory: %f mb %s\n",
+            printf("FPS: %5.3f (idle threads %d / %d, contexts %zu) resident memory: %f mb %s\n",
                    (float)m_statsNumFrames / dt,
+                   mIdleThreads,
+                   emugl::RendererImpl::get()->renderThreadCount(),
+                   m_contexts.size(),
                    (float)usage.resident / 1048576.0f,
                    lastStats.c_str());
 
@@ -2197,4 +2201,22 @@ ColorBufferPtr FrameBuffer::findColorBuffer(HandleType p_colorbuffer) {
     else {
         return c->second.cb;
     }
+}
+
+void FrameBuffer::onGuestThreadIdle() {
+   AutoLock mutex(m_lock);
+   s_egl.eglMakeCurrent(m_eglDisplay, 0, 0, 0);
+   mIdleThreads++;
+}
+
+void FrameBuffer::onGuestThreadWake() {
+   AutoLock mutex(m_lock);
+   RenderThreadInfo* tInfo = RenderThreadInfo::get();
+   if (!s_egl.eglMakeCurrent(m_eglDisplay,
+                             tInfo->currDrawSurf ? tInfo->currDrawSurf->getEGLSurface() : EGL_NO_SURFACE,
+                             tInfo->currReadSurf ? tInfo->currReadSurf->getEGLSurface() : EGL_NO_SURFACE,
+                             tInfo->currContext ? tInfo->currContext->getEGLContext() : EGL_NO_CONTEXT)) {
+       ERR("eglMakeCurrent failed on wake\n");
+   }
+   mIdleThreads--;
 }
