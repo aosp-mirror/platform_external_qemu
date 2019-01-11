@@ -115,7 +115,7 @@ def strip_symbols(out_dir):
         return
 
     # revert to old mechanism as we do not yet have support on all platforms.
-    cmd = [os.path.join(get_qemu_root(), 'android', 'scripts', 'strip-symbols.sh'),
+    cmd = [os.path.join(get_qemu_root(), 'android', 'scripts', 'unix', 'strip-symbols.sh'),
            '--out-dir=%s' % out_dir]
     if FLAGS.target == 'windows' or FLAGS.target == 'mingw':
         cmd.append('--mingw')

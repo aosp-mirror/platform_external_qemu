@@ -12,7 +12,7 @@ export LC_ALL=C
 
 # The posix way of getting the full path..
 PROGDIR="$( cd "$(dirname "$0")" ; pwd -P )"
-. $(dirname "$0")/scripts/utils/common.shi
+. $(dirname "$0")/scripts/unix/utils/common.shi
 VERBOSE=1
 
 MINGW=
@@ -105,7 +105,7 @@ esac
 
 log_invocation
 
-$PROGDIR/scripts/config-cmake.sh  "$@" ||
+$PROGDIR/scripts/unix/config-cmake.sh  "$@" ||
     panic "Configuration error, please run ./android/scripts/config-cmake.sh to see why."
 
 
@@ -123,7 +123,7 @@ echo "Finished building sources."
 
 if [ -z "$NO_TESTS" ]; then
     # Let's not run all the tests parallel..
-   $PROGDIR/scripts/run_tests.sh --verbose --verbose --out-dir=$OUT_DIR --jobs=1
+   $PROGDIR/scripts/unix/run_tests.sh --verbose --verbose --out-dir=$OUT_DIR --jobs=1
 else
     echo "Ignoring unit tests suite."
 fi
@@ -133,9 +133,9 @@ fi
 if [ "$OPT_SYMBOLS" ]; then
     echo "Generating symbols"
     if [ "$MINGW" ]; then
-       $PROGDIR/scripts/strip-symbols.sh --out-dir=$OUT_DIR --mingw --verbosity=$VERBOSE
+       $PROGDIR/scripts/unix/strip-symbols.sh --out-dir=$OUT_DIR --mingw --verbosity=$VERBOSE
     else
-       $PROGDIR/scripts/strip-symbols.sh --out-dir=$OUT_DIR --verbosity=$VERBOSE
+       $PROGDIR/scripts/unix/strip-symbols.sh --out-dir=$OUT_DIR --verbosity=$VERBOSE
     fi
 fi
 
