@@ -429,35 +429,18 @@ static std::pair<void*, GLsizeiptr> align_pointer_size(void* ptr, GLsizeiptr len
 uint64_t GLESv2Decoder::s_glMapBufferRangeDirect(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr)
 {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
-    // Check if this is a read or write request and not an invalidate one.
-    if (access & (GL_MAP_READ_BIT | GL_MAP_WRITE_BIT)) {
-        void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
-
-        if (gpu_ptr) {
-            std::pair<void*, GLsizeiptr> aligned = align_pointer_size(gpu_ptr, length);
-            get_emugl_vm_operations().mapUserBackedRam(paddr, aligned.first, aligned.second);
-            return reinterpret_cast<uint64_t>(gpu_ptr);
-        } else {
-            fprintf(stderr, "%s: error: could not map host gpu buffer\n", __func__);
-            return 0;
-        }
-    } else {
-        // if writing while not wanting to preserve previous contents,
-        // let |mapped| stay as garbage.
-        return 0;
-    }
+    void* gpu_ptr = ctx->glMapBufferRange(target, offset, length, access);
+    std::pair<void*, GLsizeiptr> aligned = align_pointer_size(gpu_ptr, length);
+    get_emugl_vm_operations().mapUserBackedRam(paddr, aligned.first, aligned.second);
+    return reinterpret_cast<uint64_t>(gpu_ptr);
 }
 
 void GLESv2Decoder::s_glUnmapBufferDirect(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr, uint64_t gpu_ptr, GLboolean* out_res)
 {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     GLboolean res = GL_TRUE;
-
-    if (access & (GL_MAP_READ_BIT | GL_MAP_WRITE_BIT)) {
-        get_emugl_vm_operations().unmapUserBackedRam(paddr, align_pointer_size(reinterpret_cast<void*>(gpu_ptr), length).second);
-        res = ctx->glUnmapBuffer(target);
-    }
-
+    get_emugl_vm_operations().unmapUserBackedRam(paddr, align_pointer_size(reinterpret_cast<void*>(gpu_ptr), length).second);
+    res = ctx->glUnmapBuffer(target);
     *out_res = res;
 }
 

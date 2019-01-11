@@ -57,7 +57,7 @@ static void initIcdPaths(bool forTesting) {
             setIcdPath(pj(System::get()->getProgramDirectory(), "testlib64",
                           "VkICD_mock_icd.json"));
         } else {
-            setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
+            setIcdPath(pj(System::get()->getLauncherDirectory(), "lib64",
                           "vulkan", "portability-macos.json"));
         }
         // TODO: Once Swiftshader is working, set the ICD accordingly.
@@ -87,7 +87,7 @@ static std::string getLoaderPath(bool forTesting) {
 
 #ifdef __APPLE__
         // on Mac, the loader isn't in the system libraries.
-        return pj(System::get()->getProgramDirectory(), "lib64", "vulkan",
+        return pj(System::get()->getLauncherDirectory(), "lib64", "vulkan",
                   VULKAN_LOADER_FILENAME);
 #else
         return VULKAN_LOADER_FILENAME;
