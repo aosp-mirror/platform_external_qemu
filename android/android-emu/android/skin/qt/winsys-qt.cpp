@@ -80,9 +80,15 @@ struct GlobalState {
     int argc;
     char** argv;
     QCoreApplication* app;
-    bool window_pos_saved;
-    int window_pos_x;
-    int window_pos_y;
+    bool geo_saved;
+    int window_geo_x;
+    int window_geo_y;
+    int window_geo_w;
+    int window_geo_h;
+    int frame_geo_x;
+    int frame_geo_y;
+    int frame_geo_w;
+    int frame_geo_h;
 };
 
 static GlobalState* globalState() {
@@ -90,9 +96,15 @@ static GlobalState* globalState() {
         .argc = 0,
         .argv = NULL,
         .app = NULL,
-        .window_pos_saved = false,
-        .window_pos_x = 0,
-        .window_pos_y = 0,
+        .geo_saved = false,
+        .window_geo_x = 0,
+        .window_geo_y = 0,
+        .window_geo_w = 0,
+        .window_geo_h = 0,
+        .frame_geo_x = 0,
+        .frame_geo_y = 0,
+        .frame_geo_w = 0,
+        .frame_geo_h = 0,
     };
     return &sGlobalState;
 }
@@ -239,13 +251,15 @@ extern void skin_winsys_get_window_pos(int *x, int *y)
 {
     D("skin_winsys_get_window_pos");
     GlobalState* g = globalState();
-    if (g->window_pos_saved) {
-        *x = g->window_pos_x;
-        *y = g->window_pos_y;
+    if (g->geo_saved) {
+        *x = g->window_geo_x;
+        *y = g->window_geo_y;
     } else {
         EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
         if (window == NULL) {
             D("%s: Could not get window handle", __FUNCTION__);
+            *x = 0;
+            *y = 0;
             return;
         }
 
@@ -262,32 +276,81 @@ extern void skin_winsys_get_window_pos(int *x, int *y)
 
 extern void skin_winsys_get_window_size(int *w, int *h)
 {
-    D("skin_winsys_get_frame_size");
+    GlobalState* g = globalState();
+    if (g->geo_saved) {
+        *w = g->window_geo_w;
+        *h = g->window_geo_h;
+    } else {
+        EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+        if (window == NULL) {
+            D("%s: Could not get window handle", __FUNCTION__);
+            *w = 0;
+            *h = 0;
+            return;
+        }
 
-    QSemaphore semaphore;
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
-    if (window == NULL) {
-        D("%s: Could not get window handle", __FUNCTION__);
-        return;
+        if (onMainQtThread()) {
+            window->getWindowSize(w, h, nullptr);
+        } else {
+            QSemaphore semaphore;
+            window->getWindowSize(w, h, &semaphore);
+            semaphore.acquire();
+        }
     }
-    window->getWindowSize(w, h, &semaphore);
-    semaphore.acquire();
-
     D("%s: size: %d x %d", __FUNCTION__, *w, *h);
 }
 
 extern void skin_winsys_get_frame_pos(int *x, int *y)
 {
-    QSemaphore semaphore;
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
-    if (window == NULL) {
-        D("%s: Could not get window handle", __FUNCTION__);
-        return;
-    }
-    window->getFramePos(x, y, &semaphore);
-    semaphore.acquire();
+    D("skin_winsys_get_frame_pos");
+    GlobalState* g = globalState();
+    if (g->geo_saved) {
+        *x = g->frame_geo_x;
+        *y = g->frame_geo_y;
+    } else {
+        EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+        if (window == NULL) {
+            D("%s: Could not get window handle", __FUNCTION__);
+            *x = 0;
+            *y = 0;
+            return;
+        }
 
+        if (onMainQtThread()) {
+            window->getFramePos(x, y, nullptr);
+        } else {
+            QSemaphore semaphore;
+            window->getFramePos(x, y, &semaphore);
+            semaphore.acquire();
+        }
+    }
     D("%s: x=%d y=%d", __FUNCTION__, *x, *y);
+}
+
+extern void skin_winsys_get_frame_size(int *w, int *h)
+{
+    GlobalState* g = globalState();
+    if (g->geo_saved) {
+        *w = g->frame_geo_w;
+        *h = g->frame_geo_h;
+    } else {
+        EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+        if (window == NULL) {
+            D("%s: Could not get window handle", __FUNCTION__);
+            *w = 0;
+            *h = 0;
+            return;
+        }
+
+        if (onMainQtThread()) {
+            window->getFrameSize(w, h, nullptr);
+        } else {
+            QSemaphore semaphore;
+            window->getFrameSize(w, h, &semaphore);
+            semaphore.acquire();
+        }
+    }
+    D("%s: size: %d x %d", __FUNCTION__, *w, *h);
 }
 
 extern bool skin_winsys_window_has_frame()
@@ -316,13 +379,23 @@ extern void skin_winsys_set_device_geometry(const SkinRect* rect) {
     window->setDeviceGeometry(qrect, nullptr);
 }
 
-extern void skin_winsys_save_window_pos() {
-    int x = 0, y = 0;
+extern void skin_winsys_save_window_geo() {
+    int x = 0, y = 0, w = 0, h = 0;
+    int frameX = 0, frameY = 0, frameW = 0, frameH = 0;
     skin_winsys_get_window_pos(&x, &y);
+    skin_winsys_get_window_size(&w, &h);
+    skin_winsys_get_frame_pos(&frameX, &frameY);
+    skin_winsys_get_frame_size(&frameW, &frameH);
     GlobalState* g = globalState();
-    g->window_pos_saved = true;
-    g->window_pos_x = x;
-    g->window_pos_y = y;
+    g->geo_saved = true;
+    g->window_geo_x = x;
+    g->window_geo_y = y;
+    g->window_geo_w = w;
+    g->window_geo_h = h;
+    g->frame_geo_x = frameX;
+    g->frame_geo_y = frameY;
+    g->frame_geo_w = frameW;
+    g->frame_geo_h = frameH;
 }
 
 extern bool skin_winsys_is_window_fully_visible()

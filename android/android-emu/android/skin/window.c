@@ -1046,6 +1046,8 @@ struct SkinWindow {
 
     int           x_pos;
     int           y_pos;
+    int           width;
+    int           height;
     double        scale;
 
     // For dragging and resizing the window
@@ -1395,12 +1397,12 @@ static void skin_window_ensure_fully_visible(void* ptr) {
     EnsureFullyVisibleData* data = ptr;
     if (!skin_winsys_is_window_fully_visible()) {
         int new_x, new_y;
+        int win_w = skin_surface_width(data->window->surface);
+        int win_h = skin_surface_height(data->window->surface);
 
         if (VERBOSE_CHECK(init)) {
-            int win_x, win_y, win_w, win_h;
+            int win_x, win_y;
             skin_winsys_get_window_pos(&win_x, &win_y);
-            win_w = skin_surface_width(data->window->surface);
-            win_h = skin_surface_height(data->window->surface);
 
             dprint("Window was not fully visible: "
                     "monitor=[%d,%d,%d,%d] window=[%d,%d,%d,%d]",
@@ -1414,22 +1416,17 @@ static void skin_window_ensure_fully_visible(void* ptr) {
                     win_h);
         }
 
-        /* First, we recenter the window */
-        new_x = (data->monitor.size.w - data->win_w)/2;
-        new_y = (data->monitor.size.h - data->win_h)/2;
+        /* First, we center the window */
+        new_x = (data->monitor.size.w - win_w)/2;
+        new_y = (data->monitor.size.h - win_h)/2;
 
-        /* If it is still too large, we ensure the top-border is visible */
+        /* If it is too tall, ensure the top is visible */
         if (new_y < 0)
             new_y = 0;
 
-        /* If it is somehow off screen horizontally, put it back */
+        /* If it is too wide, ensure the left is visible */
         if (new_x < 0)
             new_x = 0;
-
-        /* Don't try to put it back if the emulator is only partially too
-           far to the right, because that invites bouncing. */
-        if (new_x >= data->monitor.size.w)
-            new_x -= data->win_w;
 
         VERBOSE_PRINT(init, "Window repositioned to [%d,%d]", new_x, new_y);
 
@@ -1443,6 +1440,8 @@ static void skin_window_ensure_fully_visible(void* ptr) {
 SkinWindow* skin_window_create(SkinLayout* slayout,
                                int x,
                                int y,
+                               int w,
+                               int h,
                                bool enable_scale,
                                bool use_emugl_subwindow,
                                const SkinWindowFuncs* win_funcs) {
@@ -1462,6 +1461,8 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
 
     window->x_pos = x;
     window->y_pos = y;
+    window->width = w;
+    window->height = h;
     window->scroll_h = 0;
 
     window->drag_x_start = 0;
@@ -1473,14 +1474,26 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
     double    scale_w = 1.0;
     double    scale_h = 1.0;
 
+    // Orient the layout to match the window
+    bool windowIsPortrait = w <= h;
+    bool layoutIsPortrait = win_w <= win_h;
+    if (windowIsPortrait != layoutIsPortrait) {
+        int temp = win_w;
+        win_w = win_h;
+        win_h = temp;
+    }
+
     skin_winsys_get_monitor_rect(&monitor);
 
-    // Make the default scale about 80% of the screen size.
-    if (enable_scale && monitor.size.w < win_w && win_w > 1.)
-        scale_w = 0.80 * monitor.size.w / win_w;
-    if (enable_scale && monitor.size.h < win_h && win_h > 1.)
-        scale_h = 0.80 * monitor.size.h / win_h;
-
+    if (enable_scale) {
+        scale_w = ((double)w) / win_w;
+        scale_h = ((double)h) / win_h;
+    }
+#ifdef __APPLE__
+    // Force a change to the scale. (But make it visually imperceptible.)
+    scale_w *= 1.0001;
+    scale_h *= 1.0001;
+#endif // __APPLE__
     window->scale = (scale_w <= scale_h) ? scale_w : scale_h;
 
     if (skin_window_reset_internal(window, slayout) < 0) {
@@ -1488,6 +1501,7 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
         return NULL;
     }
     skin_winsys_set_window_pos(x, y);
+    skin_winsys_set_window_size(w, h);
 
     /* Ensure that the window is fully visible */
     if (enable_scale) {

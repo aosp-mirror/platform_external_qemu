@@ -68,6 +68,9 @@ bool skin_winsys_window_has_frame();
 // Get the main window's frame's position.
 void skin_winsys_get_frame_pos(int* window_x, int* window_y);
 
+// Get the main window's size including the frame.
+void skin_winsys_get_frame_size(int* frame_w, int* frame_h);
+
 // Inform the main window of the subwindow geometry
 void skin_winsys_set_device_geometry(const SkinRect* rect);
 

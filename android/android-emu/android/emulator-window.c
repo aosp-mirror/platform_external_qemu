@@ -233,6 +233,8 @@ emulator_window_setup( EmulatorWindow*  emulator )
 
         .window_x = emulator->win_x,
         .window_y = emulator->win_y,
+        .window_w = emulator->win_w,
+        .window_h = emulator->win_h,
 
         .keyboard_charmap = emulator->opts->charmap
     };
@@ -267,8 +269,10 @@ emulator_window_setup( EmulatorWindow*  emulator )
         VERBOSE_PRINT(gles, "Using glReadPixels() for GPU display");
     }
 
+    bool isPortrait = emulator->win_w <= emulator->win_h;
+    char* orientation = isPortrait ? "Portrait" : "Landscape";
     emulator->ui = skin_ui_create(
-            emulator->layout_file, android_hw->hw_initialOrientation,
+            emulator->layout_file, orientation,
             &my_ui_funcs, &my_ui_params, s_use_emugl_subwindow);
     if (!emulator->ui) {
         return;
@@ -318,6 +322,10 @@ emulator_window_fb_update( void*   _emulator, int  x, int  y, int  w, int  h )
 
     if (!emulator->ui) {
         emulator_window_setup(emulator);
+        x = emulator->win_x;
+        y = emulator->win_y;
+        w = emulator->win_w;
+        h = emulator->win_h;
     }
 
     if (!s_use_emugl_subwindow) {
@@ -379,6 +387,8 @@ int emulator_window_init(EmulatorWindow* emulator,
                          const char* basepath,
                          int x,
                          int y,
+                         int w,
+                         int h,
                          const AndroidOptions* opts,
                          const UiEmuAgent* uiEmuAgent) {
     static const SkinFramebufferFuncs skin_fb_funcs = {
@@ -400,6 +410,8 @@ int emulator_window_init(EmulatorWindow* emulator,
     emulator->ui = NULL;
     emulator->win_x = x;
     emulator->win_y = y;
+    emulator->win_w = w;
+    emulator->win_h = h;
     *(emulator->opts) = *opts;
     *(emulator->uiEmuAgent) = *uiEmuAgent;
 
