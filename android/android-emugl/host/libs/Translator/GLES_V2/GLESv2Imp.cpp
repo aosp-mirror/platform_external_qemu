@@ -1857,6 +1857,10 @@ static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc
             *params = 0;
         break;
 
+    case GL_MAX_VERTEX_ATTRIBS:
+        *params = 16;
+        break;
+
     case GL_MAX_VERTEX_UNIFORM_VECTORS:
         if(es2)
             getter(pname,params);
@@ -3350,8 +3354,7 @@ static int s_getHostLocOrSetError(GLint location) {
 static int s_getHostLocOrSetError(GLuint program,
         GLint location) {
     GET_CTX_V2_RET(-1);
-    ProgramData* pData = (ProgramData*)ctx->shareGroup()->getObjectDataPtr(
-            NamedObjectType::SHADER_OR_PROGRAM, program).get();
+    ProgramData* pData = ctx->getUseProgram();
     RET_AND_SET_ERROR_IF(!pData, GL_INVALID_OPERATION, -2);
     return pData->getHostUniformLocation(location);
 }
@@ -4009,6 +4012,12 @@ fprintf(stderr, "%s: begin count %d\n", __func__, count);
     while (drawCount < count) {
         gl->glUniformMatrix4fv(transformLoc, 1, GL_FALSE, matrix);
         gl->glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        gl->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
+                                  sizeof(VertexAttributes), 0);
+        gl->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                                  sizeof(VertexAttributes),
+                                  (GLvoid*)offsetof(VertexAttributes, color));
+        gl->glUniformMatrix4fv(transformLoc, 1, GL_FALSE, matrix);
         gl->glDrawArrays(GL_TRIANGLES, 0, 3);
         ++drawCount;
     }

@@ -96,6 +96,8 @@ RendererImpl::~RendererImpl() {
     mRenderWindow.reset();
 }
 
+static RendererImpl* sRendererImpl = nullptr;
+
 bool RendererImpl::initialize(int width, int height, bool useSubWindow, bool egl2egl) {
     if (mRenderWindow) {
         return false;
@@ -120,6 +122,8 @@ bool RendererImpl::initialize(int width, int height, bool useSubWindow, bool egl
     // for the real threads to start faster.
     mLoaderRenderThread.reset(new RenderThread(nullptr));
     mLoaderRenderThread->start();
+
+    sRendererImpl = this;
 
     return true;
 }
@@ -156,6 +160,14 @@ void RendererImpl::stop(bool wait) {
         c->renderThread()->wait();
     }
     mStoppedChannels.clear();
+}
+
+RendererImpl* RendererImpl::get() {
+    return sRendererImpl;
+}
+
+int RendererImpl::renderThreadCount() const {
+    return mChannels.size();
 }
 
 void RendererImpl::finish() {
@@ -219,8 +231,7 @@ RenderChannelPtr RendererImpl::createRenderChannel(
             mLoaderRenderThread.reset();
         }
 
-        // fprintf(stderr, "Started new RenderThread (total %" PRIu64 ") @%p\n",
-            // static_cast<uint64_t>(mChannels.size()), channel->renderThread());
+        // fprintf(stderr, "Started new RenderThread (total %" PRIu64 ") @%p\n", static_cast<uint64_t>(mChannels.size()), channel->renderThread());
     }
 
     return channel;

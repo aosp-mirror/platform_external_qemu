@@ -158,6 +158,9 @@ typedef struct QAndroidVmOperations {
     // QEMU snapshot save calls work.
     void (*setExiting)(void);
 
+    // Get the host pointer corresponding to a physical address.
+    uint8_t* (*gpa2hva)(uint64_t addr);
+
 } QAndroidVmOperations;
 
 // gQAndroidVmOperations is defined in .cpp depending on the target it used for,

@@ -133,6 +133,12 @@ void Thread::yield() {
     }
 }
 
+void Thread::setAffinity(int cpuMask) {
+    DWORD mask = (DWORD)cpuMask;
+     ::SetThreadAffinityMask(
+         mThread, &mask);
+}
+
 unsigned long getCurrentThreadId() {
     return static_cast<unsigned long>(GetCurrentThreadId());
 }

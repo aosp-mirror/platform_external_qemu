@@ -514,17 +514,34 @@ TEST_F(CombinedGoldfishOpenglTest, DrawCallRate) {
         float color[3];
     };
 
-    const VertexAttributes vertexAttrs[] = {
+    static constexpr uint32_t numVerts = 3;
+    std::vector<VertexAttributes> vertexAttrs;
+    std::vector<uint32_t> indices;
+    const VertexAttributes oneTriangleAttrs[] = {
         { { -0.5f, -0.5f,}, { 0.2, 0.1, 0.9, }, },
         { { 0.5f, -0.5f,}, { 0.8, 0.3, 0.1,}, },
         { { 0.0f, 0.5f,}, { 0.1, 0.9, 0.6,}, },
     };
 
+    for (uint32_t i = 0; i < numVerts / 3; ++i) {
+        vertexAttrs.push_back(oneTriangleAttrs[i]);
+        vertexAttrs.push_back(oneTriangleAttrs[i + 1]);
+        vertexAttrs.push_back(oneTriangleAttrs[i + 2]);
+        indices.push_back(i);
+        indices.push_back(i + 1);
+        indices.push_back(i + 2);
+    }
+
     GLuint buffer;
+    GLuint ibo;
     glGenBuffers(1, &buffer);
+    glGenBuffers(1, &ibo);
+
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexAttrs), vertexAttrs,
-                     GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexAttrs) * numVerts, vertexAttrs.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * numVerts, indices.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
                           sizeof(VertexAttributes), 0);
@@ -548,6 +565,7 @@ TEST_F(CombinedGoldfishOpenglTest, DrawCallRate) {
     };
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, matrix);
 
     uint32_t drawCount = 0;
     static constexpr uint32_t kDrawCallLimit = 50000;
@@ -555,8 +573,9 @@ TEST_F(CombinedGoldfishOpenglTest, DrawCallRate) {
     auto cpuTimeStart = System::cpuTime();
 
     while (drawCount < kDrawCallLimit) {
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, matrix);
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        // glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+        // glDrawElements(GL_TRIANGLES, numVerts, GL_UNSIGNED_INT, 0);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         ++drawCount;
     }
