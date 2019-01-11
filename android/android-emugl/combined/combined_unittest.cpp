@@ -35,6 +35,7 @@
 #include <string>
 
 #include <stdio.h>
+#include <sys/time.h>
 
 using aemu::AndroidBufferQueue;
 using aemu::AndroidWindow;
@@ -419,4 +420,151 @@ TEST_F(CombinedGoldfishOpenglTest, BigBuffer) {
     glGetError();
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glDeleteBuffers(1, &buffer);
+}
+
+static GLuint compileShader(GLenum shaderType, const char* src) {
+    GLuint shader = glCreateShader(shaderType);
+    glShaderSource(shader, 1, (const GLchar* const*)&src, nullptr);
+    glCompileShader(shader);
+
+    GLint compileStatus;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+
+    if (compileStatus != GL_TRUE) {
+        GLsizei infoLogLength = 0;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::vector<char> infoLog(infoLogLength + 1, 0);
+        glGetShaderInfoLog(shader, infoLogLength, nullptr, infoLog.data());
+        fprintf(stderr, "Failed to compile shader. Info log: [%s]\n", infoLog.data());
+    }
+
+    return shader;
+}
+
+static GLint compileAndLinkShaderProgram(const char* vshaderSrc,
+                                         const char* fshaderSrc) {
+    GLuint vshader = compileShader(GL_VERTEX_SHADER, vshaderSrc);
+    GLuint fshader = compileShader(GL_FRAGMENT_SHADER, fshaderSrc);
+
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vshader);
+    glAttachShader(program, fshader);
+    glLinkProgram(program);
+
+    glDeleteShader(vshader);
+    glDeleteShader(fshader);
+
+    GLint linkStatus;
+    glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+
+    glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
+
+    if (linkStatus != GL_TRUE) {
+        GLsizei infoLogLength = 0;
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::vector<char> infoLog(infoLogLength + 1, 0);
+        glGetProgramInfoLog(program, infoLogLength, nullptr,
+                            infoLog.data());
+        fprintf(stderr, "Failed to link program. Info log: [%s]\n", infoLog.data());
+    }
+
+    return program;
+}
+// Test draw call rate
+TEST_F(CombinedGoldfishOpenglTest, DrawCallRate) {
+        constexpr char vshaderSrc[] = R"(#version 300 es
+    precision highp float;
+
+    layout (location = 0) in vec2 pos;
+    layout (location = 1) in vec3 color;
+
+    uniform mat4 transform;
+
+    out vec3 color_varying;
+
+    void main() {
+        gl_Position = transform * vec4(pos, 0.0, 1.0);
+        color_varying = (transform * vec4(color, 1.0)).xyz;
+    }
+    )";
+    constexpr char fshaderSrc[] = R"(#version 300 es
+    precision highp float;
+
+    in vec3 color_varying;
+
+    out vec4 fragColor;
+
+    void main() {
+        fragColor = vec4(color_varying, 1.0);
+    }
+    )";
+
+    GLuint program = compileAndLinkShaderProgram(vshaderSrc, fshaderSrc);
+
+    GLint transformLoc = glGetUniformLocation(program, "transform");
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    struct VertexAttributes {
+        float position[2];
+        float color[3];
+    };
+
+    const VertexAttributes vertexAttrs[] = {
+        { { -0.5f, -0.5f,}, { 0.2, 0.1, 0.9, }, },
+        { { 0.5f, -0.5f,}, { 0.8, 0.3, 0.1,}, },
+        { { 0.0f, 0.5f,}, { 0.1, 0.9, 0.6,}, },
+    };
+
+    GLuint buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexAttrs), vertexAttrs,
+                     GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
+                          sizeof(VertexAttributes), 0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                              sizeof(VertexAttributes),
+                              (GLvoid*)offsetof(VertexAttributes, color));
+
+    glUseProgram(program);
+
+    glClearColor(0.2f, 0.2f, 0.3f, 0.0f);
+
+    float matrix[16] = {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f,
+    };
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    uint32_t drawCount = 0;
+    static constexpr uint32_t kDrawCallLimit = 2000000;
+
+    struct timeval tv;
+
+    gettimeofday(&tv, nullptr);
+    uint64_t start_us = tv.tv_sec * 1000000ULL + tv.tv_usec;
+
+    while (drawCount < kDrawCallLimit) {
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, matrix);
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        ++drawCount;
+    }
+
+    gettimeofday(&tv, nullptr);
+    uint64_t end_us = tv.tv_sec * 1000000ULL + tv.tv_usec;
+
+    float ms = (end_us - start_us) / 1000.0f;
+    float sec = (end_us - start_us) / 1000000.0f;
+
+    fprintf(stderr, "%s: Drew %u times in %f ms. Rate: %f Hz\n", __func__,
+        kDrawCallLimit,
+        ms,
+        kDrawCallLimit / sec);
 }
