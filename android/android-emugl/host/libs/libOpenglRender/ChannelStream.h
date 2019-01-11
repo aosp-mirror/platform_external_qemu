@@ -14,6 +14,7 @@
 #pragma once
 
 #include "android/base/synchronization/Lock.h"
+#include "android/base/synchronization/MessageChannel.h"
 
 #include "OpenglRender/IOStream.h"
 #include "RenderChannelImpl.h"
@@ -35,6 +36,8 @@ public:
     void forceStop();
     int writeFully(const void* buf, size_t len) override;
     const unsigned char *readFully( void *buf, size_t len) override;
+
+    void enableSharedMemoryPings();
 
     void setSharedMemoryCommandInfo(
         bool* modePtr,
@@ -88,6 +91,7 @@ private:
 
     android::base::Lock mLock;
     android::base::ConditionVariable mCv;
+    android::base::MessageChannel<int, 1024> mGuestPings;
     uint64_t mLastPingTimeUs = 0;
     bool mSleeping = true;
 
@@ -101,6 +105,7 @@ private:
     uint64_t mCommitBufferTime = 0;
     uint64_t mSpinReceiveTime = 0;
     float mLastRate = 0.0f;
+
 };
 
 }  // namespace emugl

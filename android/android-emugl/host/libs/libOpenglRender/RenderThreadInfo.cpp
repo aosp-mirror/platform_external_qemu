@@ -21,6 +21,8 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 
+#include "ChannelStream.h"
+
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/thread_store.h"
 #include "FrameBuffer.h"
@@ -72,6 +74,11 @@ uint64_t RenderThreadInfo::initSharedMemoryCommandRings(
 
     ring_buffer_init_view_only(&m_toHostRingBufferView, (uint8_t*)m_toHostBuffer, 32 * 4096);
     ring_buffer_init_view_only(&m_fromHostRingBufferView, (uint8_t*)m_fromHostBuffer, 32 * 4096);
+
+    emugl::ChannelStream* stream =
+        reinterpret_cast<emugl::ChannelStream*>(m_streamAddr);
+
+    stream->enableSharedMemoryPings();
 
     return m_streamAddr;
 }
