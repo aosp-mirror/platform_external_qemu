@@ -1287,7 +1287,7 @@ GL_APICALL void  GL_APIENTRY glDrawArrays(GLenum mode, GLint first, GLsizei coun
 
     if (ctx->vertexAttributesBufferBacked()) {
         s_glDrawPre(ctx, mode);
-        // ctx->dispatcher().glDrawArrays(mode,first,count);
+        ctx->dispatcher().glDrawArrays(mode,first,count);
         s_glDrawPost(ctx, mode);
     } else {
         ctx->drawWithEmulations(
@@ -1849,6 +1849,10 @@ static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc
             getter(pname,params);
         else
             *params = 0;
+        break;
+
+    case GL_MAX_VERTEX_ATTRIBS:
+        *params = 16;
         break;
 
     case GL_MAX_VERTEX_UNIFORM_VECTORS:
@@ -3482,11 +3486,13 @@ GL_APICALL void  GL_APIENTRY glUniformMatrix3fv(GLint location, GLsizei count, G
 
 GL_APICALL void  GL_APIENTRY glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value){
     GET_CTX_V2();
+    ctx->beginCallTime();
     SET_ERROR_IF(ctx->getMajorVersion() < 3 &&
                  transpose != GL_FALSE,GL_INVALID_VALUE);
     int hostLoc = s_getHostLocOrSetError(location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniformMatrix4fv(hostLoc,count,transpose,value);
+    ctx->endCallTime();
 }
 
 static void s_unUseCurrentProgram() {
@@ -3962,8 +3968,13 @@ GL_APICALL void  GL_APIENTRY glTestHostDriverPerformance(void) {
     uint64_t start_us = tv.tv_sec * 1000000ULL + tv.tv_usec;
 
     while (drawCount < kDrawCallLimit) {
-        gl->glUniformMatrix4fv(transformLoc, 1, GL_FALSE, matrix);
         gl->glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        gl->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
+                                  sizeof(VertexAttributes), 0);
+        gl->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                                  sizeof(VertexAttributes),
+                                  (GLvoid*)offsetof(VertexAttributes, color));
+        gl->glUniformMatrix4fv(transformLoc, 1, GL_FALSE, matrix);
         gl->glDrawArrays(GL_TRIANGLES, 0, 3);
         ++drawCount;
     }

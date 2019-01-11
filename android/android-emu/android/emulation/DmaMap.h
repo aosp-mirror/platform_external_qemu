@@ -29,7 +29,7 @@ using android::base::kNullopt;
 namespace android {
 
 struct DmaBufferInfo {
-    using PingCallback = std::function<void()>;
+    using PingCallback = std::function<void(bool remove)>;
     void* hwpipe = nullptr;
     uint64_t guestAddr = 0;
     uint64_t bufferSize = 0;

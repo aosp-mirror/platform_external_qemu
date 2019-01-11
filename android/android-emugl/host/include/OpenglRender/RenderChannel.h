@@ -100,6 +100,8 @@ public:
     // Once a channel is stopped, it cannot be re-started.
     virtual void stop() = 0;
 
+    virtual void registerStopCallback(std::function<void()>) = 0;
+
     // Callback function when snapshotting the virtual machine.
     virtual void onSave(android::base::Stream* stream) = 0;
 

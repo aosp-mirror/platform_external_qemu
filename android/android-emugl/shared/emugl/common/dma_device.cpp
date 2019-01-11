@@ -13,7 +13,7 @@ static void defaultDmaInvalidateHostMappings() { }
 
 static void defaultDmaUnlock(uint64_t addr) { }
 
-static void defaultDmaRegisterPingCallback(uint64_t addr, std::function<void()>) { }
+static void defaultDmaRegisterPingCallback(uint64_t addr, std::function<void(bool)>) { }
 
 namespace emugl {
 

@@ -551,7 +551,7 @@ TEST_F(CombinedGoldfishOpenglTest, DrawCallRate) {
     uint64_t start_us = tv.tv_sec * 1000000ULL + tv.tv_usec;
 
     while (drawCount < kDrawCallLimit) {
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, matrix);
+        // glUniformMatrix4fv(transformLoc, 1, GL_FALSE, matrix);
         glBindBuffer(GL_ARRAY_BUFFER, buffer);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         ++drawCount;
