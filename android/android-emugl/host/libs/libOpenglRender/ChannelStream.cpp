@@ -201,6 +201,7 @@ uint32_t ChannelStream::waitForGuestPingAndTrafficSize() {
 
     if (exiting){
         toHost->state = RING_BUFFER_SYNC_CONSUMER_HANGING_UP;
+        unlockDma(*mToHostRingAddrPtr);
         return 0;
     }
 
@@ -210,9 +211,10 @@ uint32_t ChannelStream::waitForGuestPingAndTrafficSize() {
 
     uint32_t len;
     ring_buffer_read_fully(toHost, mToHostRingBufferView, &len, sizeof(uint32_t));
-            if (!len) {
-                toHost->state = RING_BUFFER_SYNC_CONSUMER_HANGING_UP;
-            }
+    if (!len) {
+        toHost->state = RING_BUFFER_SYNC_CONSUMER_HANGING_UP;
+        unlockDma(*mToHostRingAddrPtr);
+    }
     uint64_t spinReceiveTime1_end_us = System::get()->getHighResTimeUs();
 
     mSpinReceiveTime += (spinReceiveTime1_end_us - spinReceiveTime1_start_us);
@@ -232,6 +234,7 @@ void ChannelStream::readFullyAndHangUp(uint8_t* dst, uint32_t len) {
     mSpinReceiveTime += (spinReceiveTime2_end_us - spinReceiveTime2_start_us);
 
     toHost->state = RING_BUFFER_SYNC_CONSUMER_HANGING_UP;
+    unlockDma(*mToHostRingAddrPtr);
 }
 
 const unsigned char* ChannelStream::readRaw(void* buf, size_t* inout_len) {
