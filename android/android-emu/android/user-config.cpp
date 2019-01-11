@@ -38,6 +38,12 @@ struct AUserConfig {
     ABool        changed;
     int          windowX;
     int          windowY;
+    int          windowW;
+    int          windowH;
+    int          frameX;
+    int          frameY;
+    int          frameW;
+    int          frameH;
     uint64_t     uuid;
     char*        iniPath;
 };
@@ -47,10 +53,22 @@ struct AUserConfig {
 
 #define  KEY_WINDOW_X  "window.x"
 #define  KEY_WINDOW_Y  "window.y"
+#define  KEY_WINDOW_W  "window.w"
+#define  KEY_WINDOW_H  "window.h"
+#define  KEY_FRAME_X   "frame.x"
+#define  KEY_FRAME_Y   "frame.y"
+#define  KEY_FRAME_W   "frame.w"
+#define  KEY_FRAME_H   "frame.h"
 #define  KEY_UUID      "uuid"
 
-#define  DEFAULT_X  100
-#define  DEFAULT_Y  100
+#define  DEFAULT_X        100
+#define  DEFAULT_Y        100
+#define  DEFAULT_W        365 // Arbitrary, but reasonable
+#define  DEFAULT_H        676
+#define  DEFAULT_FRAME_X  DEFAULT_X
+#define  DEFAULT_FRAME_Y  DEFAULT_Y
+#define  DEFAULT_FRAME_W  DEFAULT_W
+#define  DEFAULT_FRAME_H  DEFAULT_H
 
 void auserConfig_free( AUserConfig* uconfig) {
     if (uconfig->iniPath) {
@@ -136,6 +154,24 @@ auserConfig_new( AvdInfo*  info )
         uc->windowY = iniFile_getInteger(ini, KEY_WINDOW_Y, DEFAULT_Y);
         DD("    found %s = %d", KEY_WINDOW_Y, uc->windowY);
 
+        uc->windowW = iniFile_getInteger(ini, KEY_WINDOW_W, DEFAULT_W);
+        DD("    found %s = %d", KEY_WINDOW_W, uc->windowW);
+
+        uc->windowH = iniFile_getInteger(ini, KEY_WINDOW_H, DEFAULT_H);
+        DD("    found %s = %d", KEY_WINDOW_H, uc->windowH);
+
+        uc->frameX = iniFile_getInteger(ini, KEY_FRAME_X, DEFAULT_FRAME_X);
+        DD("    found %s = %d", KEY_FRAME_X, uc->frameX);
+
+        uc->frameY = iniFile_getInteger(ini, KEY_FRAME_Y, DEFAULT_FRAME_Y);
+        DD("    found %s = %d", KEY_FRAME_Y, uc->frameY);
+
+        uc->frameW = iniFile_getInteger(ini, KEY_FRAME_W, DEFAULT_FRAME_W);
+        DD("    found %s = %d", KEY_FRAME_W, uc->frameW);
+
+        uc->frameH = iniFile_getInteger(ini, KEY_FRAME_H, DEFAULT_FRAME_H);
+        DD("    found %s = %d", KEY_FRAME_H, uc->frameH);
+
         if (iniFile_hasKey(ini, KEY_UUID)) {
             uc->uuid = (uint64_t) iniFile_getInt64(ini, KEY_UUID, 0LL);
             needUUID = 0;
@@ -147,6 +183,12 @@ auserConfig_new( AvdInfo*  info )
     else {
         uc->windowX  = DEFAULT_X;
         uc->windowY  = DEFAULT_Y;
+        uc->windowW  = DEFAULT_W;
+        uc->windowH  = DEFAULT_H;
+        uc->frameX   = DEFAULT_FRAME_X;
+        uc->frameY   = DEFAULT_FRAME_Y;
+        uc->frameW   = DEFAULT_FRAME_W;
+        uc->frameH   = DEFAULT_FRAME_H;
         uc->changed  = 1;
     }
 
@@ -173,19 +215,40 @@ auserConfig_getUUID( AUserConfig*  uconfig )
 }
 
 void
-auserConfig_getWindowPos( AUserConfig*  uconfig, int  *pX, int  *pY )
+auserConfig_getWindowGeo( AUserConfig* uconfig,
+                          int* pX, int* pY, int* pW, int* pH,
+                          int* pFrameX, int* pFrameY, int* pFrameW, int* pFrameH )
 {
     *pX = uconfig->windowX;
     *pY = uconfig->windowY;
+    *pW = uconfig->windowW;
+    *pH = uconfig->windowH;
+
+    *pFrameX = uconfig->frameX;
+    *pFrameY = uconfig->frameY;
+    *pFrameW = uconfig->frameW;
+    *pFrameH = uconfig->frameH;
 }
 
 
 void
-auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y )
+auserConfig_setWindowGeo( AUserConfig* uconfig,
+                          int x, int y, int w, int h,
+                          int frameX, int frameY, int frameW, int frameH )
 {
-    if (x != uconfig->windowX || y != uconfig->windowY) {
+    if (x      != uconfig->windowX || y      != uconfig->windowY ||
+        w      != uconfig->windowW || h      != uconfig->windowH ||
+        frameX != uconfig->frameX  || frameY != uconfig->frameY  ||
+        frameW != uconfig->frameW  || frameH != uconfig->frameH    )
+    {
         uconfig->windowX = x;
         uconfig->windowY = y;
+        uconfig->windowW = w;
+        uconfig->windowH = h;
+        uconfig->frameX  = frameX;
+        uconfig->frameY  = frameY;
+        uconfig->frameW  = frameW;
+        uconfig->frameH  = frameH;
         uconfig->changed = 1;
     }
 }
@@ -210,6 +273,12 @@ auserConfig_save( AUserConfig*  uconfig )
 
     iniFile_setInteger(ini, KEY_WINDOW_X, uconfig->windowX);
     iniFile_setInteger(ini, KEY_WINDOW_Y, uconfig->windowY);
+    iniFile_setInteger(ini, KEY_WINDOW_W, uconfig->windowW);
+    iniFile_setInteger(ini, KEY_WINDOW_H, uconfig->windowH);
+    iniFile_setInteger(ini, KEY_FRAME_X,  uconfig->frameX);
+    iniFile_setInteger(ini, KEY_FRAME_Y,  uconfig->frameY);
+    iniFile_setInteger(ini, KEY_FRAME_W,  uconfig->frameW);
+    iniFile_setInteger(ini, KEY_FRAME_H,  uconfig->frameH);
     iniFile_setInt64(ini, KEY_UUID, uconfig->uuid);
     if (iniFile_saveToFile(ini, uconfig->iniPath) < 0) {
         dwarning("could not save user configuration: %s: %s",
