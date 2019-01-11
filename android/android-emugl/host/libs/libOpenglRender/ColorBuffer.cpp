@@ -266,7 +266,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 
     s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
 
-    s_gles2.glFinish();
+    // s_gles2.glFinish();
     return cb;
 }
 

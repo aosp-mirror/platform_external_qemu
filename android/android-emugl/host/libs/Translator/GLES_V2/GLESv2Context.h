@@ -23,6 +23,8 @@
 
 #include <memory>
 
+#include <sys/time.h>
+
 // Extra desktop-specific OpenGL enums that we need to properly emulate OpenGL ES.
 #define GL_FRAMEBUFFER_SRGB 0x8DB9
 #define GL_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
@@ -98,6 +100,27 @@ public:
     void enableArr(GLenum arr, bool enable) override;
     const GLESpointer* getPointer(GLenum arrType) override;
 
+    uint64_t curr_time_us() {
+        struct timeval tv;
+        gettimeofday(&tv, nullptr);
+        return tv.tv_sec * 1000000ULL + tv.tv_usec;
+    }
+
+    void beginCallTime() {
+        m_callStartUs = curr_time_us();
+    }
+
+    void endCallTime() {
+        m_callEndUs = curr_time_us();
+        m_callTimeUs += (m_callEndUs - m_callStartUs);
+        ++m_callReportCounter;
+
+        if (m_callReportCounter % 10000 == 0) {
+            fprintf(stderr, "%s: time so far for 10k: %f ms\n", __func__,
+            m_callTimeUs / 1000.0f);
+        }
+    }
+
 protected:
     void addVertexArrayObject(GLuint array) override;
 
@@ -120,6 +143,11 @@ private:
 
     std::vector<GLuint> m_emulatedClientVBOs;
     GLuint m_emulatedClientIBO = 0;
+
+    uint64_t m_callStartUs = 0;
+    uint64_t m_callEndUs = 0;
+    uint64_t m_callTimeUs = 0;
+    uint64_t m_callReportCounter = 0;
 };
 
 #endif

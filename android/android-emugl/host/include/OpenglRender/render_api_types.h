@@ -60,7 +60,7 @@ typedef void (*emugl_dma_remove_buffer_t)(uint64_t);
 typedef void* (*emugl_dma_get_host_addr_t)(uint64_t);
 typedef void (*emugl_dma_invalidate_host_mappings_t)(void);
 typedef void (*emugl_dma_unlock_t)(uint64_t);
-typedef void (*emugl_dma_register_ping_callback_t)(uint64_t, std::function<void()>);
+typedef void (*emugl_dma_register_ping_callback_t)(uint64_t, std::function<void(bool)>);
 
 typedef struct {
     emugl_dma_add_buffer_t add_buffer;
