@@ -319,8 +319,8 @@ static uint64_t ring_buffer_curr_us() {
     return res;
 }
 
-static const uint32_t yield_backoff_us = 1000;
-static const uint32_t sleep_backoff_us = 2000;
+static const uint32_t yield_backoff_us = 100000;
+static const uint32_t sleep_backoff_us = 200000;
 
 bool ring_buffer_wait_write(
     const struct ring_buffer* r,
