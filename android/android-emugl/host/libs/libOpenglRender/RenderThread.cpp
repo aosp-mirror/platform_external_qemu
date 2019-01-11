@@ -191,6 +191,8 @@ void RenderThread::setFinished() {
 }
 
 intptr_t RenderThread::main() {
+    // setAffinity(0xf0);
+
     if (mFinished.load(std::memory_order_relaxed)) {
         DBG("Error: fail loading a RenderThread @%p\n", this);
         return 0;
@@ -263,6 +265,7 @@ intptr_t RenderThread::main() {
 
     int stats_totalBytes = 0;
     uint64_t stats_timeCmdExec = 0;
+            uint64_t stats_timeLocking = 0;
             uint64_t stats_timeGlExec = 0;
             uint64_t stats_timeRcExec = 0;
     uint64_t stats_timePacketGetting = 0;
@@ -347,14 +350,15 @@ intptr_t RenderThread::main() {
             bool shouldPrintMore = stream.printStats();
             float dts = (float)dt / 1000.0f;
             if (shouldPrintMore) {
-                fprintf(stderr,
-                "%s: exec time: (est total %f percent) packet get: %f percent, host driver: %f percent gl vs rc: %f %% %f %%\n", __func__,
-                100.0f * stats_timeTotal / 1000000.0f,
-                100.0f * stats_timePacketGetting / 1000000.0f,
-                100.0f * stats_timeCmdExec / 1000000.0f,
-                100.0f * stats_timeGlExec / 1000000.0f,
-                100.0f * stats_timeRcExec / 1000000.0f);
-                readBuf.printAndResetStats();
+             fprintf(stderr,
+             "%s: exec time: (est total %f percent) packet get: %f percent, host driver: %f percent gl vs rc: %f %% %f %% locking: %f %%\n", __func__,
+             100.0f * stats_timeTotal / 1000000.0f,
+             100.0f * stats_timePacketGetting / 1000000.0f,
+             100.0f * stats_timeCmdExec / 1000000.0f,
+             100.0f * stats_timeGlExec / 1000000.0f,
+             100.0f * stats_timeRcExec / 1000000.0f,
+             100.0f * stats_timeLocking / 1000000.0f);
+             readBuf.printAndResetStats();
             }
             // bool shouldActuallyDraw =
                 // !stream.isHighTraffic();
@@ -369,6 +373,7 @@ intptr_t RenderThread::main() {
             stats_timeCmdExec = 0;
             stats_timeGlExec = 0;
             stats_timeRcExec = 0;
+            stats_timeLocking = 0;
             // printf("Used Bandwidth %5.3f MB/s\n", ((float)stats_totalBytes / dts) / (1024.0f*1024.0f));
             stats_totalBytes = 0;
             stats_t0 = android::base::System::get()->getHighResTimeUs() / 1000;
@@ -404,7 +409,11 @@ intptr_t RenderThread::main() {
             // To fix, this driver workaround avoids calling
             // any sort of GLES call when we are creating/destroying EGL
             // contexts.
-            FrameBuffer::getFB()->lockContextStructureRead();
+            // FrameBuffer::getFB()->lockContextStructureRead();
+
+            uint64_t cmdexec_lock_end_us = android::base::System::get()->getHighResTimeUs();
+            stats_timeLocking += (cmdexec_lock_end_us - cmdexec_gl_start_us);
+
             size_t last = tInfo.m_glDec.decode(
                     readBuf.buf(), readBuf.validData(), &stream, &checksumCalc);
             if (last > 0) {
@@ -418,7 +427,7 @@ intptr_t RenderThread::main() {
             //
             last = tInfo.m_gl2Dec.decode(readBuf.buf(), readBuf.validData(),
                                          &stream, &checksumCalc);
-            FrameBuffer::getFB()->unlockContextStructureRead();
+            // FrameBuffer::getFB()->unlockContextStructureRead();
 
             if (last > 0) {
                 progress = true;

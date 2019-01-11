@@ -537,6 +537,14 @@ static void set_exiting() {
     sExiting = true;
 }
 
+static uint8_t* qemu_gpa2hva(uint64_t gpa) {
+    bool found;
+    void* res = gpa2hva_call(gpa, &found);
+
+    if (!found) return nullptr;
+
+    return (uint8_t*)res;
+}
 
 static void system_reset_request() {
     qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
@@ -576,6 +584,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .getVmConfiguration = get_vm_config,
         .setFailureReason = set_failure_reason,
         .setExiting = set_exiting,
+        .gpa2hva = qemu_gpa2hva,
 };
 const QAndroidVmOperations* const gQAndroidVmOperations =
         &sQAndroidVmOperations;

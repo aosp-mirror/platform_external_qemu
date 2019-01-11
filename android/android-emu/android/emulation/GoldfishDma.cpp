@@ -46,7 +46,7 @@ static void android_goldfish_dma_ping(uint64_t guest_paddr) {
     android::DmaMap::get()->ping(guest_paddr);
 }
 
-static void android_goldfish_dma_register_ping_callback(uint64_t guest_paddr, std::function<void()> cb) {
+static void android_goldfish_dma_register_ping_callback(uint64_t guest_paddr, std::function<void(bool)> cb) {
     android::DmaMap::get()->registerPingCallback(guest_paddr, cb);
 }
 

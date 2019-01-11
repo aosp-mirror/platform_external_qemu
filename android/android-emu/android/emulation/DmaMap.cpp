@@ -135,7 +135,7 @@ void* DmaMap::getPipeInstance(uint64_t guest_paddr) {
 void DmaMap::ping(uint64_t addr) {
     android::base::AutoReadLock lock(mLock);
     if (auto info = android::base::find(mDmaBuffers, addr)) {
-        if (info->cb) info->cb();
+        if (info->cb) info->cb(false);
     } else {
         E("guest paddr 0x%llx not alloced!",
           (unsigned long long)addr);
@@ -160,7 +160,7 @@ void DmaMap::removeMappingLocked(DmaBufferInfo* info ) {
     if (info->currHostAddr) {
         doUnmap(*(info->currHostAddr), info->bufferSize);
         info->currHostAddr = kNullopt;
-        if (info->cb) info->cb();
+        // if (info->cb) info->cb(true);
         D("guest addr 0x%llx host mapping 0x%llx removed.",
           (unsigned long long)info->guestAddr,
           (unsigned long long)info->currHostAddr);
