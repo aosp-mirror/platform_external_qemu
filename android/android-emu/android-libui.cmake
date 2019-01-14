@@ -300,8 +300,7 @@ target_link_libraries(emulator-libui
                               Qt5::Widgets
                               Qt5::Gui
                               Qt5::Svg
-                              ZLIB::ZLIB
-                              android-emu-crash-service)
+                              ZLIB::ZLIB)
 
 if (NOT NO_QTWEBENGINE AND NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
     target_link_libraries(emulator-libui

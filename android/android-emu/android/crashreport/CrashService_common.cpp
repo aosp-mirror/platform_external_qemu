@@ -217,8 +217,7 @@ bool CrashService::uploadCrash() {
 
     addReportValue(kNameKey, kName);
     addReportValue(kVersionKey, mVersionId);
-    if (!mDumpFile.empty())
-        addReportFile("upload_file_minidump", mDumpFile);
+    addReportFile("upload_file_minidump", mDumpFile);
 
     for (auto const& x : mReportValues) {
         curl_formadd(&formpost, &lastptr, CURLFORM_COPYNAME, x.first.c_str(),
