@@ -52,6 +52,7 @@ or path, *instead* of creating a toolchain. Valid values for <tool> are:
                       toolchain."
 
 aosp_dir_register_option
+aosp_register_clang_option
 
 OPT_HOST=
 option_register_var "--host=<system>" OPT_HOST "Host system to support."
@@ -79,6 +80,7 @@ option_register_var "--force-fetch-wintoolchain" OPT_FORCE_FETCH_WINTOOLCHAIN "F
 
 OPT_VSDIR=/mnt/msvc/win8sdk
 option_register_var "--vsdir=<msvc_install_dir>" OPT_VSDIR "Location of the msvc sdk. See documentation for details."
+
 
 option_parse "$@"
 

@@ -19,6 +19,13 @@
 # We need this to make sure that are builds are consistent accross different development environments.
 
 
+# Gets the desired clang version used by the various toolchains.
+# Update this if you need to change the compiler
+function(get_clang_version RET_VAL)
+  set(${RET_VAL} "clang-r346389c" PARENT_SCOPE)
+endfunction()
+
+
 # This invokes the toolchain generator
 # HOST
 #   The host to use
@@ -34,9 +41,13 @@ function(toolchain_cmd HOST PARAM1 PARAM2)
     endif()
     get_filename_component(GEN_SDK "${CMAKE_CURRENT_LIST_FILE}/../../../scripts/unix/gen-android-sdk-toolchain.sh" ABSOLUTE)
     get_filename_component(AOSP "${CMAKE_CURRENT_LIST_DIR}/../../../../.." ABSOLUTE)
+    get_clang_version(CLANG_VER)
 
-    message("Running ${GEN_SDK} '--host=${HOST}' '${PARAM1}' '${PARAM2}' '--aosp-dir=${AOSP}'--verbosity=${VERBOSITY}'")
-    execute_process(COMMAND ${GEN_SDK} "--host=${HOST}" "${PARAM1}" "${PARAM2}" "--aosp-dir=${AOSP}" "--verbosity=${VERBOSITY}"
+    message("Running ${GEN_SDK} '--host=${HOST}' '${PARAM1}' '${PARAM2}' '--aosp-dir=${AOSP}' '--aosp-clang_ver=${CLANG_VER}' --verbosity=${VERBOSITY}'")
+    execute_process(COMMAND ${GEN_SDK} "--host=${HOST}" "${PARAM1}" "${PARAM2}" 
+                                       "--aosp-clang_ver=${CLANG_VER}"
+                                       "--aosp-dir=${AOSP}" 
+                                       "--verbosity=${VERBOSITY}"
         RESULT_VARIABLE GEN_SDK_RES
         OUTPUT_VARIABLE STD_OUT
         ERROR_VARIABLE STD_ERR)
