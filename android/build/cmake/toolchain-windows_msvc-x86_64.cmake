@@ -29,7 +29,7 @@ get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../.
 
 # Cmake goes crazy if we set AR manually.. so let's not do that.
 if(WIN32)
-  set(CLANG_VER "clang-r346389b")
+  get_clang_version(CLANG_VER)
   message(STATUS "Configuring native windows build using clang-cl: ${CLANG_VER}")
   get_filename_component(CLANG_DIR "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/clang/host/windows-x86/${CLANG_VER}"
                          REALPATH)
