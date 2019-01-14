@@ -26,7 +26,7 @@
 #     On success, this defines AOSP_DIR and AOSP_PREBUILTS_GCC_DIR
 
 shell_import utils/option_parser.shi
-
+OPT_AOSP_CLANG_VERSION=clang-r346389c
 
 aosp_dir_register_option () {
 
@@ -34,6 +34,12 @@ aosp_dir_register_option () {
     option_register_var "--aosp-dir=<dir>" OPT_AOSP_DIR \
             "Specify AOSP root directory. [autodetect]"
 }
+
+aosp_register_clang_option() {
+    option_register_var "--aosp-clang_ver=<clang_version_dir>" OPT_AOSP_CLANG_VERSION \
+           "Clang compiler to use from AOSP_DIR/prebuilts/clang/host/$(get_build_os)-x86/$CLANG_VERSION_DIR"
+}
+
 
 aosp_dir_parse_option () {
     if [ "$OPT_AOSP_DIR" ]; then
@@ -81,9 +87,10 @@ aosp_linux_glibc_version () {
    printf "glibc2.15-4.8"
 }
 
+
 # Returns the version of Clang to use.
 aosp_clang_version () {
-  printf "clang-4679922" # Make sure that libc++ links against glibc2.15 or lower
+  printf "${OPT_AOSP_CLANG_VERSION}" # Make sure that libc++ links against glibc2.15 or lower
 }
 
 # Returns the version of the Windows SDK we are using
