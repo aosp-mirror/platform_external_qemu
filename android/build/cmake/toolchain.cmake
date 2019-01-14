@@ -32,7 +32,7 @@ function(toolchain_cmd HOST PARAM1 PARAM2)
     if (PARAM2 MATCHES ".*unused.*")
         set(VERBOSITY "0")
     endif()
-    get_filename_component(GEN_SDK "${CMAKE_CURRENT_LIST_FILE}/../../../scripts/gen-android-sdk-toolchain.sh" ABSOLUTE)
+    get_filename_component(GEN_SDK "${CMAKE_CURRENT_LIST_FILE}/../../../scripts/unix/gen-android-sdk-toolchain.sh" ABSOLUTE)
     get_filename_component(AOSP "${CMAKE_CURRENT_LIST_DIR}/../../../../.." ABSOLUTE)
 
     message("Running ${GEN_SDK} '--host=${HOST}' '${PARAM1}' '${PARAM2}' '--aosp-dir=${AOSP}'--verbosity=${VERBOSITY}'")

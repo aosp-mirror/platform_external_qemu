@@ -35,7 +35,7 @@ def run_tests(out_dir):
         run_emugen_test(out_dir)
         run_ctest(out_dir)
     else:
-        run([os.path.join(get_qemu_root(), 'android', 'scripts', 'run_tests.sh'), '--out-dir=%s' % out_dir, '--verbose', '--verbose'])
+        run([os.path.join(get_qemu_root(), 'android', 'scripts', 'unix', 'run_tests.sh'), '--out-dir=%s' % out_dir, '--verbose', '--verbose'])
 
 
 def run_binary_exists(out_dir):
