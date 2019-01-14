@@ -13,7 +13,6 @@
 
 #include "android/base/StringView.h"
 #include "android/emulation/control/AdbInterface.h"
-#include "android/skin/qt/emulator-qt-window.h"
 
 #include "ui_bug-report-page.h"
 
@@ -35,6 +34,7 @@ public:
     struct ReportingFields {
         std::string androidVer;
         std::string avdDetails;
+        std::string buildFingerprint;
         std::string cpuModel;
         std::string deviceName;
         std::string emulatorVer;
@@ -67,10 +67,11 @@ private:
     bool eventFilter(QObject* object, QEvent* event) override;
     bool launchIssueTracker();
     void enableInput(bool enabled);
-    bool saveBugReportTo(const std::string& location);
-    void adbBugreportCallback(bool success, android::base::StringView filePath);
+    bool saveBugReportTo(android::base::StringView location);
+    bool saveToFile(android::base::StringView filePath,
+                    const char* content,
+                    size_t length);
     std::string generateUniqueBugreportName();
-    EmulatorQtWindow* mEmulatorWindow;
     android::emulation::AdbInterface* mAdb;
     QMessageBox* mDeviceDetailsDialog;
     bool mFirstShowEvent = true;
