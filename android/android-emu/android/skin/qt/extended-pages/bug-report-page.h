@@ -12,23 +12,16 @@
 #pragma once
 
 #include "android/base/StringView.h"
-#include "android/crashreport/CrashService.h"
 #include "android/emulation/control/AdbInterface.h"
-#include "android/skin/qt/extended-window.h"
+#include "android/skin/qt/emulator-qt-window.h"
 
 #include "ui_bug-report-page.h"
 
-#include <QDialog>
-#include <QDialogButtonBox>
-#include <QLabel>
 #include <QMessageBox>
-#include <QProgressBar>
 #include <QWidget>
 
 #include <memory>
 #include <string>
-
-class UploadDialog;
 
 class BugreportPage : public QWidget {
     Q_OBJECT
@@ -37,7 +30,6 @@ public:
     explicit BugreportPage(QWidget* parent = 0);
     ~BugreportPage();
     void setAdbInterface(android::emulation::AdbInterface* adb);
-    void setExtendedWindow(ExtendedWindow* extendedWindow);
     void showEvent(QShowEvent* event);
     void updateTheme();
     struct ReportingFields {
@@ -53,14 +45,13 @@ public:
     };
 
     struct SavingStates {
-        std::string crashReporterLocation;
         std::string saveLocation;
         std::string adbBugreportFilePath;
         std::string screenshotFilePath;
         std::string bugreportFolderPath;
-        std::string adbLogcatOutput;
         bool adbBugreportSucceed;
         bool screenshotSucceed;
+        bool bugreportSavedSucceed;
     };
 
 private slots:
@@ -77,42 +68,15 @@ private:
     bool launchIssueTracker();
     void enableInput(bool enabled);
     bool saveBugReportTo(const std::string& location);
-    bool compressToFile(android::base::StringView filePath,
-                        const uint8_t* src,
-                        size_t srcLength);
-    bool saveToFile(android::base::StringView filePath,
-                    const char* content,
-                    size_t length);
+    void adbBugreportCallback(bool success, android::base::StringView filePath);
     std::string generateUniqueBugreportName();
-
-    ExtendedWindow* mExtendedWindow;
+    EmulatorQtWindow* mEmulatorWindow;
     android::emulation::AdbInterface* mAdb;
     QMessageBox* mDeviceDetailsDialog;
-    UploadDialog* mUploadDialog = nullptr;
     bool mFirstShowEvent = true;
     std::unique_ptr<Ui::BugreportPage> mUi;
     ReportingFields mReportingFields;
     SavingStates mSavingStates;
     android::emulation::AdbCommandPtr mAdbBugreport;
     android::emulation::AdbCommandPtr mAdbLogcat;
-};
-
-class UploadDialog : public QDialog {
-    Q_OBJECT
-public:
-    UploadDialog(QWidget* parent, android::crashreport::CrashService* service);
-    const char* SEND_TO_GOOGLE =
-            "Do you want to send the bug report to Google?";
-    const char* SENDING_REPORT =
-            "Sending bug report... This might take a minute.";
-public slots:
-    void sendBugReport();
-
-private:
-    void showEvent(QShowEvent* e) override;
-    void collectSysInfo();
-    QProgressBar* mProgressBar;
-    QLabel* mDialogLabel;
-    QDialogButtonBox* mButtonBox;
-    std::unique_ptr<android::crashreport::CrashService> mCrashService;
 };
