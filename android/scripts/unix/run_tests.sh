@@ -61,12 +61,13 @@ else
     log2 "Auto-config: --jobs=$NUM_JOBS"
 fi
 
-cd $PROGDIR/../..
+cd $PROGDIR/../../..
 
 QEMU2_TOP_DIR=${AOSP_DIR}/external/qemu
 HOST_OS=$(get_build_os)
 CONFIG_MAKE=${OPT_OUT}/target.tag
 # Extract the target os from target.tag
+echo "current_dir=$PWD"
 TARGET_OS=$(cat ${CONFIG_MAKE})
 FAILURES=""
 EXE_SUFFIX=
