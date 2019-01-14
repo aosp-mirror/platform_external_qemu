@@ -23,9 +23,9 @@ TOPDIR=$(cd $PROGDIR/../.. && pwd -P)
 PROGDIR=${PROGDIR#./}
 
 # Assume we are under .../android/scripts/tests/gen-entries/
-# and look for .../android/scripts/utils/common.shi
+# and look for .../android/scripts/unix/utils/common.shi
 
-_SHU_PROGDIR=$TOPDIR/utils
+_SHU_PROGDIR=$TOPDIR/unix/utils
 . $_SHU_PROGDIR/common.shi
 
 shell_import option_parser.shi
