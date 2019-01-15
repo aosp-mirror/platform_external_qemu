@@ -41,7 +41,7 @@ android_target_dependency(emulator all EMULATOR_HW_DEPENDENCIES)
 android_target_dependency(emulator all VIRTUAL_SCENE_DEPENDENCIES)
 android_target_dependency(emulator linux-x86_64 TCMALLOC_OS_DEPENDENCIES)
 android_target_dependency(emulator linux-x86_64 DARWINN_DEPENDENCIES)
-
+android_target_dependency(emulator windows_msvc-x86_64 GLIB2_WINDOWS_DEPENDENCIES)
 # And install them for a release.
 android_install_dependency(all QT5_SHARED_DEPENDENCIES)
 android_install_dependency(all MESA_DEPENDENCIES)
@@ -56,6 +56,7 @@ android_install_dependency(all EMULATOR_HW_DEPENDENCIES)
 android_install_dependency(all VIRTUAL_SCENE_DEPENDENCIES)
 android_install_dependency(linux-x86_64 TCMALLOC_OS_DEPENDENCIES)
 android_install_dependency(linux-x86_64 DARWINN_DEPENDENCIES)
+android_install_dependency(windows_msvc-x86_64 GLIB2_WINDOWS_DEPENDENCIES)
 
 # These are usually nops, but some code generators will not automatically binplace these (Xcode!)
 android_copy_shared_lib(emulator EGL_translator EGL_translator)
