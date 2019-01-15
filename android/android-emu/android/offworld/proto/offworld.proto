@@ -116,11 +116,16 @@ message AutomationRequest {
   message Listen {}
   message StopListening {}
 
+  message VideoPlayback {
+    optional string command = 1;
+  }
+
   oneof function {
     ReplayInitialState replay_initial_state = 1;
     Replay replay = 2;
     Listen listen = 3;
     StopListening stop_listening = 4;
+    VideoPlayback playback_video = 5;
   }
 }
 
