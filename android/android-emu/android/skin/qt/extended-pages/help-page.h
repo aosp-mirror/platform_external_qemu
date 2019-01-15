@@ -11,8 +11,9 @@
 
 #pragma once
 
-#include "android/skin/qt/shortcut-key-store.h"
+#include "android/avd/BugreportInfo.h"
 #include "android/skin/qt/qt-ui-commands.h"
+#include "android/skin/qt/shortcut-key-store.h"
 
 #include "ui_help-page.h"
 #include <QWidget>
@@ -36,6 +37,7 @@ private:
     void initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand>* key_store);
 
     std::unique_ptr<Ui::HelpPage> mUi;
+    android::avd::BugreportInfo mBugreportInfo;
 };
 
 class LatestVersionLoadTask : public QObject {
