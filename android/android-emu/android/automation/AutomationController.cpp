@@ -123,6 +123,36 @@ std::ostream& operator<<(std::ostream& os, const ListenError& value) {
     return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const VideoPlaybackError& value) {
+    switch (value) {
+        case VideoPlaybackError::InvalidFilename:
+            os << "Invalid filename";
+            break;
+        case VideoPlaybackError::FileOpenError:
+            os << "Could not open file";
+            break;
+        case VideoPlaybackError::InvalidCommand:
+            os << "Invalid command for video playback";
+            break;
+        case VideoPlaybackError::FileIsNotLoaded:
+            os << "Video file is not loaded";
+            break;
+        case VideoPlaybackError::AnotherVideoIsPlaying:
+            os << "Another video is currently playing";
+            break;
+        case VideoPlaybackError::VideoIsNotStarted:
+            os << "Video is not started";
+            break;
+        case VideoPlaybackError::InternalError:
+            os << "Internal error";
+            break;
+            // Default intentionally omitted so that missing statements generate
+            // errors.
+    }
+
+    return os;
+}
+
 class ListenPipeStream : public android::base::Stream {
 public:
     ListenPipeStream(android::AsyncMessagePipeHandle pipe,
@@ -378,6 +408,9 @@ public:
 
     void pipeClosed(android::AsyncMessagePipeHandle pipe) override;
 
+    VideoPlaybackResult playbackVideo(android::AsyncMessagePipeHandle pipe,
+                                      StringView command) override;
+
 private:
     // Helper to replay the last event in the playback stream, must be called
     // under lock.
@@ -405,6 +438,10 @@ private:
     std::function<void(android::AsyncMessagePipeHandle,
                        const ::offworld::Response&)>
             mSendMessageCallback;
+
+    // Video playback state.
+    Lock mVideoPlaybackLock;
+    VideoPlaybackState mVideoPlaybackState = VideoPlaybackState::Idle;
 };
 
 static AutomationControllerImpl* sInstance = nullptr;
@@ -773,6 +810,65 @@ void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
         mPlaybackEventSource.reset();
         mOffworldEventSource = nullptr;
     }
+}
+
+VideoPlaybackResult AutomationControllerImpl::playbackVideo(
+    android::AsyncMessagePipeHandle pipe,
+    android::base::StringView command) {
+    AutoLock lock(mVideoPlaybackLock);
+
+    pb::VideoPlaybackCommand videoPlaybackCommand;
+    if (!videoPlaybackCommand.ParseFromString(command)) {
+        VLOG(automation) << "Video playback command parse failed";
+        return Err(VideoPlaybackError::InvalidCommand);
+    }
+
+    switch (videoPlaybackCommand.stream_case()) {
+        case pb::VideoPlaybackCommand::StreamCase::kLoad:
+            if (mVideoPlaybackState == VideoPlaybackState::Playing ||
+                mVideoPlaybackState == VideoPlaybackState::Paused) {
+                return Err(VideoPlaybackError::AnotherVideoIsPlaying);
+            }
+            // to-do: load file
+            mVideoPlaybackState = VideoPlaybackState::FileLoaded;
+            break;
+        case pb::VideoPlaybackCommand::StreamCase::kPlay:
+            if (mVideoPlaybackState == VideoPlaybackState::Idle) {
+                return Err(VideoPlaybackError::FileIsNotLoaded);
+            }
+            break;
+        case pb::VideoPlaybackCommand::StreamCase::kPause:
+            if (videoPlaybackCommand.pause().pause_now()) {
+                if (mVideoPlaybackState != VideoPlaybackState::Playing ||
+                    mVideoPlaybackState != VideoPlaybackState::Paused) {
+                    return Err(VideoPlaybackError::VideoIsNotStarted);
+                }
+                // to-do: pause now
+            } else {
+                if (mVideoPlaybackState == VideoPlaybackState::Idle) {
+                    return Err(VideoPlaybackError::FileIsNotLoaded);
+                }
+                // to-do: pause at
+            }
+
+            mVideoPlaybackState = VideoPlaybackState::Paused;
+            break;
+        case pb::VideoPlaybackCommand::StreamCase::kStop:
+            // to-do: stop the video if any and close the file.
+            mVideoPlaybackState = VideoPlaybackState::Idle;
+            break;
+        case pb::VideoPlaybackCommand::StreamCase::kDisplayDefaultFrame:
+            // to-do: call stop first, and display the default frame
+            mVideoPlaybackState = VideoPlaybackState::Idle;
+            break;
+        default:
+            VLOG(automation) << "Unhandled stream type: "
+                             << static_cast<uint32_t>(
+                                 videoPlaybackCommand.stream_case());
+            break;
+    }
+
+    return Ok();
 }
 
 }  // namespace automation
