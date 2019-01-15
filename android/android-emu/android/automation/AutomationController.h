@@ -67,6 +67,26 @@ enum class ListenError {
 using ListenResult = base::Result<std::string, ListenError>;
 std::ostream& operator<<(std::ostream& os, const ListenError& value);
 
+enum class VideoInjectionError {
+    InvalidFilename,
+    FileOpenError,
+    InvalidCommand,
+    FileIsNotLoaded,
+    AnotherVideoIsPlaying,
+    VideoIsNotStarted,
+    InternalError,
+};
+
+using VideoInjectionResult = base::Result<void, VideoInjectionError>;
+std::ostream& operator<<(std::ostream& os, const VideoInjectionError& value);
+
+enum class VideoInjectionState {
+    Idle,
+    FileLoaded,
+    Playing,
+    Paused
+};
+
 //
 // Controls recording and playback of emulator automation events.
 //

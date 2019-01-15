@@ -1,0 +1,16 @@
+{
+  "files.associations": {
+    "ios": "cpp",
+    "__config": "cpp",
+    "__nullptr": "cpp",
+    "cstddef": "cpp",
+    "exception": "cpp",
+    "initializer_list": "cpp",
+    "stdexcept": "cpp",
+    "type_traits": "cpp",
+    "typeinfo": "cpp",
+    "variant": "cpp",
+    "algorithm": "cpp",
+    "sstream": "cpp"
+  }
+}
