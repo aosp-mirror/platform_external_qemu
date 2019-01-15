@@ -14,6 +14,7 @@ set(android-emu-common
     android/avd/scanner.c
     android/avd/util.c
     android/avd/util_wrapper.cpp
+    android/avd/BugreportInfo.cpp
     android/async-console.c
     android/async-socket.c
     android/async-socket-connector.c

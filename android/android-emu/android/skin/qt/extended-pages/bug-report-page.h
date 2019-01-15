@@ -11,9 +11,9 @@
 
 #pragma once
 
+#include "android/avd/BugreportInfo.h"
 #include "android/base/StringView.h"
 #include "android/emulation/control/AdbInterface.h"
-#include "android/skin/qt/emulator-qt-window.h"
 
 #include "ui_bug-report-page.h"
 
@@ -32,17 +32,6 @@ public:
     void setAdbInterface(android::emulation::AdbInterface* adb);
     void showEvent(QShowEvent* event);
     void updateTheme();
-    struct ReportingFields {
-        std::string androidVer;
-        std::string avdDetails;
-        std::string cpuModel;
-        std::string deviceName;
-        std::string emulatorVer;
-        std::string hypervisorVer;
-        std::string hostOsName;
-        std::string reproSteps;
-        std::string sdkToolsVer;
-    };
 
     struct SavingStates {
         std::string saveLocation;
@@ -61,22 +50,23 @@ private slots:
 private:
     void loadAdbBugreport();
     void loadAdbLogcat();
-    void loadAvdDetails();
     void loadCircularSpinner(SettingsTheme theme);
     void loadScreenshotImage();
     bool eventFilter(QObject* object, QEvent* event) override;
     bool launchIssueTracker();
     void enableInput(bool enabled);
-    bool saveBugReportTo(const std::string& location);
-    void adbBugreportCallback(bool success, android::base::StringView filePath);
+    bool saveBugReportTo(android::base::StringView location);
+    bool saveToFile(android::base::StringView filePath,
+                    const char* content,
+                    size_t length);
     std::string generateUniqueBugreportName();
-    EmulatorQtWindow* mEmulatorWindow;
     android::emulation::AdbInterface* mAdb;
     QMessageBox* mDeviceDetailsDialog;
     bool mFirstShowEvent = true;
     std::unique_ptr<Ui::BugreportPage> mUi;
-    ReportingFields mReportingFields;
     SavingStates mSavingStates;
+    android::avd::BugreportInfo mReportingFields;
+    std::string mReproSteps;
     android::emulation::AdbCommandPtr mAdbBugreport;
     android::emulation::AdbCommandPtr mAdbLogcat;
 };

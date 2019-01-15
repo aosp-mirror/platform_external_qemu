@@ -15,18 +15,13 @@
 #include "android/base/StringFormat.h"
 #include "android/base/Uri.h"
 #include "android/base/Uuid.h"
-#include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
-#include "android/base/misc/StringUtils.h"
-#include "android/emulation/ComponentVersion.h"
-#include "android/emulation/ConfigDirs.h"
-#include "android/emulation/CpuAccelerator.h"
+#include "android/emulation/control/ScreenCapturer.h"
 #include "android/globals.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
-#include "android/update-check/VersionExtractor.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
 
@@ -42,21 +37,20 @@
 #include <algorithm>
 #include <fstream>
 
-using android::base::IniFile;
 using android::base::PathUtils;
 using android::base::StringAppendFormat;
 using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
-using android::base::trim;
 using android::base::Uri;
 using android::base::Uuid;
-using android::base::Version;
 using android::emulation::AdbInterface;
 using android::emulation::OptionalAdbCommandResult;
 
 static const int kDefaultUnknownAPILevel = 1000;
+static const int kReproStepsCharacterLimit = 2000;
 static const System::Duration kAdbCommandTimeoutMs = System::kInfinite;
+
 static const char FILE_BUG_URL[] =
         "https://issuetracker.google.com/issues/new"
         "?component=192727&description=%s&template=843117";
@@ -64,79 +58,26 @@ static const char FILE_BUG_URL[] =
 // In reference to
 // https://developer.android.com/studio/report-bugs.html#emulator-bugs
 static const char BUG_REPORT_TEMPLATE[] =
-        R"(Please Read:
-https://developer.android.com/studio/report-bugs.html#emulator-bugs
-
-Android Studio Version:
-
-Emulator Version (Emulator--> Extended Controls--> Emulator Version): %s
-
-HAXM / KVM Version: %s
-
-Android SDK Tools: %s
-
-Host Operating System: %s
-
-CPU Manufacturer: %s
-
-Steps to Reproduce Bug:
-%s
-
+        R"(Steps to Reproduce Bug:%s
 Expected Behavior:
 
 Observed Behavior:)";
-
 BugreportPage::BugreportPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::BugreportPage) {
     mUi->setupUi(this);
     mUi->bug_deviceLabel->installEventFilter(this);
-
-    // Set emulator version and affix it with CPU accelerator version if
-    // applicable
-    android::update_check::VersionExtractor vEx;
-    Version curEmuVersion = vEx.getCurrentVersion();
-    mReportingFields.emulatorVer =
-            curEmuVersion.isValid() ? curEmuVersion.toString() : "Unknown";
-    android::CpuAccelerator accel = android::GetCurrentCpuAccelerator();
-    Version accelVersion = android::GetCurrentCpuAcceleratorVersion();
-    if (accelVersion.isValid()) {
-        mReportingFields.hypervisorVer =
-                (StringFormat("%s %s", android::CpuAcceleratorToString(accel),
-                              accelVersion.toString()));
-    }
     mUi->bug_emulatorVersionLabel->setText(QString::fromStdString(
             StringFormat("%s (%s)", mReportingFields.emulatorVer,
                          mReportingFields.hypervisorVer)));
-
-    // Set android guest system version
-    char versionString[128];
-    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
-    avdInfo_getFullApiName(apiLevel, versionString, 128);
-    mUi->bug_androidVersionLabel->setText(QString(versionString));
-    mReportingFields.androidVer = versionString;
-
-    // Set AVD name
-    mReportingFields.deviceName = StringView(avdInfo_getName(android_avdInfo));
+    mUi->bug_androidVersionLabel->setText(
+            QString::fromStdString(mReportingFields.androidVer));
     QFontMetrics metrics(mUi->bug_deviceLabel->font());
     QString elidedText = metrics.elidedText(
             QString::fromStdString(mReportingFields.deviceName), Qt::ElideRight,
             mUi->bug_deviceLabel->width());
     mUi->bug_deviceLabel->setText(elidedText);
-
-    // Set OS Description
-    mReportingFields.hostOsName = System::get()->getOsName();
     mUi->bug_hostMachineLabel->setText(
             QString::fromStdString(mReportingFields.hostOsName));
-
-    // Set SDK tools version
-    mReportingFields.sdkToolsVer =
-            android::getCurrentSdkVersion(
-                    android::ConfigDirs::getSdkRootDirectory(),
-                    android::SdkComponentType::Tools)
-                    .toString();
-
-    // Set CPU model
-    mReportingFields.cpuModel = android::GetCpuInfo().second;
 
     SettingsTheme theme = getSelectedTheme();
     QMovie* movie = new QMovie(this);
@@ -147,7 +88,6 @@ BugreportPage::BugreportPage(QWidget* parent)
         mUi->bug_circularSpinner->setMovie(movie);
     }
 
-    loadAvdDetails();
     mDeviceDetailsDialog = new QMessageBox(
             QMessageBox::NoIcon,
             QString::fromStdString(StringFormat("Details for %s",
@@ -234,8 +174,8 @@ void BugreportPage::on_bug_saveButton_clicked() {
             Q_NULLPTR, tr("Report Saving Location"), dirName);
     if (dirName.isNull())
         return;
-    std::string savingPath = PathUtils::join(dirName.toStdString(),
-                                             generateUniqueBugreportName());
+    auto savingPath = PathUtils::join(dirName.toStdString(),
+                                      generateUniqueBugreportName());
 
     enableInput(false);
     QFuture<bool> future = QtConcurrent::run(
@@ -246,7 +186,7 @@ void BugreportPage::on_bug_saveButton_clicked() {
         showErrorDialog(tr("The bugreport save location is invalid.<br/>"
                            "Check the settings page and ensure the directory "
                            "exists and is writeable."),
-                        tr("Bugreport"));
+                        tr("Bug Report"));
     }
 }
 
@@ -266,12 +206,12 @@ void BugreportPage::on_bug_sendToGoogle_clicked() {
     }
 }
 
-bool BugreportPage::saveBugReportTo(const std::string& savingPath) {
+bool BugreportPage::saveBugReportTo(StringView savingPath) {
     if (savingPath.empty()) {
         return false;
     }
 
-    if (path_mkdir_if_needed(savingPath.c_str(), 0755)) {
+    if (path_mkdir_if_needed(savingPath.data(), 0755)) {
         return false;
     }
 
@@ -298,37 +238,32 @@ bool BugreportPage::saveBugReportTo(const std::string& savingPath) {
     if (!mReportingFields.avdDetails.empty()) {
         auto avdDetailsFilePath =
                 PathUtils::join(savingPath, "avd_details.txt");
-        std::ofstream outFile(avdDetailsFilePath.c_str(),
-                              std::ios_base::out | std::ios_base::trunc);
-        outFile << mReportingFields.avdDetails << std::endl;
+        saveToFile(avdDetailsFilePath, mReportingFields.avdDetails.c_str(),
+                   mReportingFields.avdDetails.length());
     }
-
     QString reproSteps = mUi->bug_reproStepsTextEdit->toPlainText();
-    reproSteps.truncate(2000);
-    mReportingFields.reproSteps = reproSteps.toStdString();
-    if (!mReportingFields.reproSteps.empty()) {
+    reproSteps.truncate(kReproStepsCharacterLimit);
+    mReproSteps = reproSteps.toStdString();
+    if (!mReproSteps.empty()) {
         auto reproStepsFilePath =
                 PathUtils::join(savingPath, "repro_steps.txt");
-        std::ofstream outFile(reproStepsFilePath.c_str(),
-                              std::ios_base::out | std::ios_base::trunc);
-        outFile << mReportingFields.reproSteps << std::endl;
+        saveToFile(reproStepsFilePath, mReproSteps.c_str(),
+                   mReproSteps.length());
     }
     return true;
 }
 
 bool BugreportPage::launchIssueTracker() {
     QString reproSteps = mUi->bug_reproStepsTextEdit->toPlainText();
-    reproSteps.truncate(2000);
-    mReportingFields.reproSteps = reproSteps.toStdString();
+    reproSteps.truncate(kReproStepsCharacterLimit);
+    mReproSteps = reproSteps.toStdString();
     // launch the issue tracker in a separate thread
-    std::string bugTemplate = StringFormat(
-            BUG_REPORT_TEMPLATE, mReportingFields.emulatorVer,
-            mReportingFields.hypervisorVer, mReportingFields.sdkToolsVer,
-            mReportingFields.hostOsName, trim(mReportingFields.cpuModel),
-            mReportingFields.reproSteps);
-    std::string unEncodedUrl =
+    std::string bugTemplate = mReportingFields.dump();
+
+    StringAppendFormat(&bugTemplate, BUG_REPORT_TEMPLATE, mReproSteps);
+    std::string encodedArgs =
             Uri::FormatEncodeArguments(FILE_BUG_URL, bugTemplate);
-    QUrl url(QString::fromStdString(unEncodedUrl));
+    QUrl url(QString::fromStdString(encodedArgs));
     return url.isValid() && QDesktopServices::openUrl(url);
 }
 
@@ -359,7 +294,6 @@ void BugreportPage::loadAdbBugreport() {
         filePath.append(".zip");
     else
         filePath.append(".txt");
-
     bool wantOutput = !isNougatOrHigher;
 
     mAdbBugreport = mAdb->runAdbCommand(
@@ -368,47 +302,37 @@ void BugreportPage::loadAdbBugreport() {
             [this, filePath,
              wantOutput](const OptionalAdbCommandResult& result) {
                 mAdbBugreport.reset();
-                if (!result || result->exit_code) {
-                    adbBugreportCallback(false, nullptr);
+                bool success = (result && result->exit_code == 0);
+                if (success && wantOutput) {
+                    std::string s(
+                            std::istreambuf_iterator<char>(*result->output),
+                            {});
+                    success = saveToFile(filePath, s.c_str(), s.length());
                 }
-                if (wantOutput) {
-                    std::ofstream outFile(
-                            filePath.c_str(),
-                            std::ios_base::out | std::ios_base::trunc);
-                    if (!result->output || !outFile.is_open() ||
-                        !outFile.good()) {
-                        adbBugreportCallback(false, nullptr);
-                    } else {
-                        auto buf = result->output->rdbuf();
-                        outFile << buf;
-                        outFile.close();
-                    }
+
+                enableInput(true);
+                mUi->bug_circularSpinner->hide();
+                mUi->bug_collectingLabel->hide();
+                if (System::get()->pathIsFile(
+                            mSavingStates.adbBugreportFilePath)) {
+                    System::get()->deleteFile(
+                            mSavingStates.adbBugreportFilePath);
+                    mSavingStates.adbBugreportFilePath.clear();
                 }
-                adbBugreportCallback(true, filePath);
+                if (success) {
+                    mSavingStates.adbBugreportSucceed = true;
+                    mSavingStates.adbBugreportFilePath = filePath;
+                } else {
+                    // TODO(wdu) Better error handling for failed adb bugreport
+                    // generation
+                    showErrorDialog(
+                            tr("Bug report interrupted by snapshot load? "
+                               "There was an error while generating "
+                               "adb bugreport"),
+                            tr("Bug Report"));
+                }
             },
             kAdbCommandTimeoutMs, wantOutput);
-}
-
-void BugreportPage::adbBugreportCallback(bool success, StringView filePath) {
-    enableInput(true);
-    mUi->bug_circularSpinner->hide();
-    mUi->bug_collectingLabel->hide();
-    if (System::get()->pathIsFile(mSavingStates.adbBugreportFilePath)) {
-        System::get()->deleteFile(mSavingStates.adbBugreportFilePath);
-        mSavingStates.adbBugreportFilePath.clear();
-    }
-    if (success && System::get()->pathIsFile(filePath) &&
-        System::get()->pathCanRead(filePath)) {
-        mSavingStates.adbBugreportSucceed = true;
-        mSavingStates.adbBugreportFilePath = filePath;
-    } else {
-        // TODO(wdu) Better error handling for failed adb bugreport
-        // generation
-        showErrorDialog(tr("Bug report interrupted by snapshot load? "
-                           "There was an error while generating "
-                           "adb bugreport"),
-                        tr("Bugreport"));
-    }
 }
 
 void BugreportPage::loadAdbLogcat() {
@@ -440,69 +364,6 @@ void BugreportPage::loadAdbLogcat() {
             kAdbCommandTimeoutMs, true);
 }
 
-void BugreportPage::loadAvdDetails() {
-    static constexpr StringView kAvdDetailsNoDisplayKeys[] = {
-            ABI_TYPE,    CPU_ARCH,    SKIN_NAME, SKIN_PATH,
-            SDCARD_SIZE, SDCARD_PATH, IMAGES_2};
-
-    if (const auto configIni = reinterpret_cast<const IniFile*>(
-                avdInfo_getConfigIni(android_avdInfo))) {
-        StringAppendFormat(&mReportingFields.avdDetails, "Name: %s\n",
-                           mReportingFields.deviceName);
-        auto cpuArch = avdInfo_getTargetCpuArch(android_avdInfo);
-        StringAppendFormat(&mReportingFields.avdDetails, "CPU/ABI: %s\n",
-                           cpuArch);
-        free(cpuArch);
-        StringAppendFormat(&mReportingFields.avdDetails, "Path: %s\n",
-                           avdInfo_getContentPath(android_avdInfo));
-        auto tag = avdInfo_getTag(android_avdInfo);
-        StringAppendFormat(&mReportingFields.avdDetails,
-                           "Target: %s (API level %d)\n", tag,
-                           avdInfo_getApiLevel(android_avdInfo));
-        free((char*)tag);
-
-        char* skinName = nullptr;
-        char* skinDir = nullptr;
-        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
-        if (skinName) {
-            StringAppendFormat(&mReportingFields.avdDetails, "Skin: %s\n",
-                               skinName);
-            free(skinName);
-        }
-        free(skinDir);
-
-        const char* sdcard = avdInfo_getSdCardSize(android_avdInfo);
-        if (!sdcard) {
-            sdcard = avdInfo_getSdCardPath(android_avdInfo);
-        }
-        if (!sdcard || !*sdcard) {
-            sdcard = android::base::strDup("<none>");
-        }
-        StringAppendFormat(&mReportingFields.avdDetails, "SD Card: %s\n",
-                           sdcard);
-        free((char*)sdcard);
-
-        if (configIni->hasKey(SNAPSHOT_PRESENT)) {
-            StringAppendFormat(
-                    &mReportingFields.avdDetails, "Snapshot: %s",
-                    avdInfo_getSnapshotPresent(android_avdInfo) ? "yes" : "no");
-        }
-
-        for (const std::string& key : *configIni) {
-            const std::string& value = configIni->getString(key, "");
-            // check if the key is already displayed
-            if (std::find_if(std::begin(kAvdDetailsNoDisplayKeys),
-                             std::end(kAvdDetailsNoDisplayKeys),
-                             [&key](StringView noDisplayKey) {
-                                 return noDisplayKey == key;
-                             }) == std::end(kAvdDetailsNoDisplayKeys)) {
-                StringAppendFormat(&mReportingFields.avdDetails, "%s: %s\n",
-                                   key, value);
-            }
-        }
-    }
-}
-
 void BugreportPage::loadScreenshotImage() {
     // Delete previously taken screenshot if it exists
     if (System::get()->pathIsFile(mSavingStates.screenshotFilePath)) {
@@ -529,6 +390,18 @@ void BugreportPage::loadScreenshotImage() {
                 tr("There was an error while capturing the "
                    "screenshot."));
     }
+}
+
+bool BugreportPage::saveToFile(StringView filePath,
+                               const char* content,
+                               size_t length) {
+    std::ofstream outFile(c_str(filePath),
+                          std::ios_base::out | std::ios_base::binary);
+    if (!outFile.is_open() || !outFile.good())
+        return false;
+    outFile.write(content, length);
+    outFile.close();
+    return true;
 }
 
 bool BugreportPage::eventFilter(QObject* object, QEvent* event) {
