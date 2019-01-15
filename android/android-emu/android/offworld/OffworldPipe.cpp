@@ -300,6 +300,22 @@ private:
                 sendResponse(createOkResponse());
                 break;
             }
+            case autor::FunctionCase::kPlaybackVideo: {
+                auto result = getAutomationController().playbackVideo(
+                    getHandle(), request.playback_video().command());
+
+                if (result.ok()) {
+                  offworld::Response response = createOkResponse();
+                  response.mutable_automation();
+                  sendResponse(response);
+                } else {
+                  std::stringstream ss;
+                  ss << result.unwrapErr();
+                  sendError(offworld::Response::RESULT_ERROR_UNKNOWN,
+                            ss.str());
+                }
+                break;
+            }
             default:
                 LOG(ERROR) << "Unrecognized offworld automation message";
                 sendError(offworld::Response::RESULT_ERROR_NOT_IMPLEMENTED);

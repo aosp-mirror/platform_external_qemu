@@ -123,6 +123,36 @@ std::ostream& operator<<(std::ostream& os, const ListenError& value) {
     return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const VideoInjectionError& value) {
+    switch (value) {
+        case VideoInjectionError::InvalidFilename:
+            os << "Invalid filename";
+            break;
+        case VideoInjectionError::FileOpenError:
+            os << "Could not open file";
+            break;
+        case VideoInjectionError::InvalidCommand:
+            os << "Invalid command for video playback";
+            break;
+        case VideoInjectionError::FileIsNotLoaded:
+            os << "Video file is not loaded";
+            break;
+        case VideoInjectionError::AnotherVideoIsPlaying:
+            os << "Another video is currently playing";
+            break;
+        case VideoInjectionError::VideoIsNotStarted:
+            os << "Video is not started";
+            break;
+        case VideoInjectionError::InternalError:
+            os << "Internal error";
+            break;
+            // Default intentionally omitted so that missing statements generate
+            // errors.
+    }
+
+    return os;
+}
+
 class ListenPipeStream : public android::base::Stream {
 public:
     ListenPipeStream(android::AsyncMessagePipeHandle pipe,
@@ -378,12 +408,25 @@ public:
 
     void pipeClosed(android::AsyncMessagePipeHandle pipe) override;
 
+    VideoInjectionResult playbackVideo(android::AsyncMessagePipeHandle pipe,
+                                       StringView command) override;
+
 private:
     // Helper to replay the last event in the playback stream, must be called
     // under lock.
     //
     // If the playback stream reaches EOF, automatically ends playback.
     void replayNextEvent(const AutoLock& proofOfLock);
+
+    ReplayResult addToOffworldPhysicalModelEventSource(
+        android::AsyncMessagePipeHandle pipe,
+        android::base::StringView event,
+        uint32_t asyncId);
+
+    ReplayResult addToOffworldVideoInjectionEventSource(
+        android::AsyncMessagePipeHandle pipe,
+        android::base::StringView event,
+        uint32_t asyncId);
 
     AutomationEventSink mEventSink;
     PhysicalModel* const mPhysicalModel;
@@ -393,18 +436,23 @@ private:
     bool mShutdown = false;
     std::unique_ptr<android::base::Stream> mRecordingStream;
 
-    // Playback state.
+    // Physical model playback state.
     bool mPlayingFromFile = false;
     std::unique_ptr<EventSource> mPlaybackEventSource;
     DurationNs mNextPlaybackCommandTime = 0L;
 
-    // Offworld state.
-    OffworldEventSource* mOffworldEventSource = nullptr;
+    // Physical model offworld state.
+    OffworldEventSource* mOffworldPhysicalModelEventSource = nullptr;
     std::unique_ptr<ListenPipeStream> mPipeListener;
 
     std::function<void(android::AsyncMessagePipeHandle,
                        const ::offworld::Response&)>
             mSendMessageCallback;
+
+    // Video injection offworld state.
+    Lock mVideoInjectionLock;
+    VideoInjectionState mVideoInjectionState = VideoInjectionState::Idle;
+    OffworldEventSource* mOffworldVideoInjectionEventSource = nullptr;
 };
 
 static AutomationControllerImpl* sInstance = nullptr;
@@ -679,15 +727,32 @@ ReplayResult AutomationControllerImpl::replayEvent(
     if (mPlayingFromFile) {
         return Err(ReplayError::PlaybackInProgress);
     }
+    pb::RecordedEvent recordedEvent;
+    if (!recordedEvent.ParseFromString(event)) {
+        VLOG(automation) << "RecordedEvent parse failed";
+        return Err(ReplayError::ParseError);
+    }
 
-    if (!mOffworldEventSource) {
+    switch (recordedEvent.stream_case()) {
+        case pb::RecordedEvent::StreamCase::kVideoInjection:
+            return addToOffworldVideoInjectionEventSource(pipe, event, asyncId);
+        default:
+            return addToOffworldPhysicalModelEventSource(pipe, event, asyncId);
+    }
+}
+
+ReplayResult AutomationControllerImpl::addToOffworldPhysicalModelEventSource(
+        android::AsyncMessagePipeHandle pipe,
+        android::base::StringView event,
+        uint32_t asyncId) {
+    if (!mOffworldPhysicalModelEventSource) {
         std::unique_ptr<OffworldEventSource> source(new OffworldEventSource(
                 pipe, event, asyncId, mSendMessageCallback));
 
         DurationNs nextCommandDelay;
         if (source->getNextCommandDelay(&nextCommandDelay)) {
             // Header parsed, initialize class state.
-            mOffworldEventSource = source.get();
+            mOffworldPhysicalModelEventSource = source.get();
             mPlaybackEventSource = std::move(source);
 
             mNextPlaybackCommandTime =
@@ -698,7 +763,28 @@ ReplayResult AutomationControllerImpl::replayEvent(
             return Err(ReplayError::ParseError);
         }
     } else {
-        if (!mOffworldEventSource->addEvents(pipe, event, asyncId)) {
+        if (!mOffworldPhysicalModelEventSource->addEvents(
+            pipe, event, asyncId)) {
+            LOG(INFO) << "Replay did not contain any commands";
+            return Err(ReplayError::ParseError);
+        }
+    }
+
+    return Ok();
+}
+
+ReplayResult AutomationControllerImpl::addToOffworldVideoInjectionEventSource(
+        android::AsyncMessagePipeHandle pipe,
+        android::base::StringView event,
+        uint32_t asyncId) {
+    if (!mOffworldVideoInjectionEventSource) {
+        std::unique_ptr<OffworldEventSource> source(new OffworldEventSource(
+                pipe, event, asyncId, mSendMessageCallback));
+
+        mOffworldVideoInjectionEventSource = source.get();
+    } else {
+        if (!mOffworldVideoInjectionEventSource->addEvents(
+            pipe, event, asyncId)) {
             LOG(INFO) << "Replay did not contain any commands";
             return Err(ReplayError::ParseError);
         }
@@ -771,8 +857,15 @@ void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
     } else {
         VLOG(automation) << "Playback hit EOF";
         mPlaybackEventSource.reset();
-        mOffworldEventSource = nullptr;
+        mOffworldPhysicalModelEventSource = nullptr;
     }
+}
+
+VideoInjectionResult AutomationControllerImpl::playbackVideo(
+    android::AsyncMessagePipeHandle pipe,
+    android::base::StringView command) {
+    AutoLock lock(mVideoInjectionLock);
+    return Ok();
 }
 
 }  // namespace automation
