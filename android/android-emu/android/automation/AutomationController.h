@@ -67,6 +67,17 @@ enum class ListenError {
 using ListenResult = base::Result<std::string, ListenError>;
 std::ostream& operator<<(std::ostream& os, const ListenError& value);
 
+enum class VideoPlaybackError {
+    InvalidFilename,
+    FileOpenError, 
+    InvalidCommand,
+    FileIsNotLoaded,
+    VideoIsNotPlaying,
+    InternalError, 
+};
+
+using VideoPlaybackResult = base::Result<void, VideoPlaybackError>;
+std::ostream& operator<<(std::ostream& os, const VideoPlaybackError& value);  
 //
 // Controls recording and playback of emulator automation events.
 //
@@ -157,6 +168,10 @@ public:
 
     // Called on pipe close, to cancel any pending operations.
     virtual void pipeClosed(android::AsyncMessagePipeHandle pipe) = 0;
+    
+    virtual VideoPlaybackResult playbackVideo(
+        android::AsyncMessagePipeHandle pipe,
+        android::base::StringView command) = 0;
 };
 
 }  // namespace automation

@@ -123,6 +123,33 @@ std::ostream& operator<<(std::ostream& os, const ListenError& value) {
     return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const VideoPlaybackError& value) {
+    switch (value) {
+        case VideoPlaybackError::InvalidFilename:
+            os << "Invalid filename";
+            break;
+        case VideoPlaybackError::FileOpenError:
+            os << "Could not open file";
+            break;
+        case VideoPlaybackError::InvalidCommand:
+            os << "Invalid command for video playback";
+            break;
+        case VideoPlaybackError::FileIsNotLoaded:
+            os << "Video file is not loaded.";
+            break;
+        case VideoPlaybackError::VideoIsNotPlaying:
+            os << "Video is not playing";
+            break;
+        case VideoPlaybackError::InternalError:
+            os << "Internal error";
+            break;
+            // Default intentionally omitted so that missing statements generate
+            // errors.
+    }
+
+    return os;
+}
+
 class ListenPipeStream : public android::base::Stream {
 public:
     ListenPipeStream(android::AsyncMessagePipeHandle pipe,
@@ -377,6 +404,9 @@ public:
     void stopListening() override;
 
     void pipeClosed(android::AsyncMessagePipeHandle pipe) override;
+
+    VideoPlaybackResult playbackVideo(android::AsyncMessagePipeHandle pipe,
+                                      StringView command) override;
 
 private:
     // Helper to replay the last event in the playback stream, must be called
@@ -773,6 +803,12 @@ void AutomationControllerImpl::replayNextEvent(const AutoLock& proofOfLock) {
         mPlaybackEventSource.reset();
         mOffworldEventSource = nullptr;
     }
+}
+
+VideoPlaybackResult AutomationControllerImpl::playbackVideo(
+    android::AsyncMessagePipeHandle pipe,
+    android::base::StringView command) {
+    return Ok();
 }
 
 }  // namespace automation

@@ -17,6 +17,7 @@ message RecordedEvent {
     oneof stream {
         PhysicalModelEvent physical_model = 50;
         TouchEvent touch = 51;
+        VideoPlaybackEvent video_playback = 52;
     }
 }
 
@@ -46,4 +47,34 @@ message PhysicalModelEvent {
 message TouchEvent {
     optional float x = 1;
     optional float y = 2;
+}
+
+message VideoPlaybackEvent {
+    message Load {
+        optional string video_file_path = 1;
+    }
+
+    message Play {
+        optional float offset_in_seconds = 1;
+        optional bool looping = 2;
+        optional float speed_factor = 3;
+    }
+
+    message Pause {
+        optional float offset_in_seconds = 1;
+    }
+
+    message Stop {
+        optional float delay_in_seconds = 1;
+    }
+    
+    message DisplayDefaultFrame {}
+
+    oneof command {
+        Load load = 50;
+        Play play = 51;
+        Pause pause = 52;
+        Stop stop = 53;
+        DisplayDefaultFrame display_default_frame = 54;
+    } 
 }
