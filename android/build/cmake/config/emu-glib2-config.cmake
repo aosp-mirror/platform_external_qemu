@@ -8,7 +8,6 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
 get_filename_component(
   PREBUILT_ROOT
   "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/${ANDROID_TARGET_TAG}" ABSOLUTE)
@@ -31,11 +30,12 @@ set(GLIB2_FOUND TRUE)
 if(NOT TARGET GLIB2::GLIB2)
   add_library(GLIB2::GLIB2 INTERFACE IMPORTED GLOBAL)
   set_target_properties(GLIB2::GLIB2 PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES "${GLIB2_INCLUDE_DIRS}"
-    INTERFACE_LINK_LIBRARIES "${GLIB2_LIBRARIES}"
-  )
+                        INTERFACE_INCLUDE_DIRECTORIES "${GLIB2_INCLUDE_DIRS}"
+                        INTERFACE_LINK_LIBRARIES "${GLIB2_LIBRARIES}")
+
 endif()
 
-
-
-set(PACKAGE_EXPORT "GLIB2_INCLUDE_DIR;GLIB2_INCLUDE_DIRS;GLIB2_LIBRARIES;GLIB2_FOUND")
+if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+  set(GLIB2_WINDOWS_DEPENDENCIES ${PREBUILT_ROOT}/lib/glib-2-vs11.dll>lib64/glib-2-vs11.dll)
+endif()
+set(PACKAGE_EXPORT "GLIB2_INCLUDE_DIR;GLIB2_WINDOWS_DEPENDENCIES;GLIB2_INCLUDE_DIRS;GLIB2_LIBRARIES;GLIB2_FOUND;")
