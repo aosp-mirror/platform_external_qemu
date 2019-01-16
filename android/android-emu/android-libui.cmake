@@ -75,13 +75,9 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/virtualscene-control-window.cpp
     android/skin/qt/VirtualSceneInfoDialog.cpp
     android/skin/qt/wavefront-obj-parser.cpp
-    android/skin/qt/video-player/Clock.cpp
-    android/skin/qt/video-player/FrameQueue.cpp
-    android/skin/qt/video-player/PacketQueue.cpp
-    android/skin/qt/video-player/VideoPlayer.cpp
-    android/skin/qt/video-player/VideoPlayerNotifier.cpp
-    android/skin/qt/video-player/VideoPlayerWidget.cpp
+    android/skin/qt/video-player/QtVideoPlayerNotifier.cpp
     android/skin/qt/video-player/VideoInfo.cpp
+    android/skin/qt/video-player/VideoPlayerWidget.cpp
     android/skin/LibuiAgent.cpp
     android/gpu_frame.cpp
     android/emulator-window.c
@@ -97,6 +93,11 @@ set(ANDROID_LIBUI_SRC_FILES
     android/recording/GifConverter.cpp
     android/recording/screen-recorder.cpp
     android/recording/video/GuestReadbackWorker.cpp
+    android/recording/video/player/Clock.cpp
+    android/recording/video/player/FrameQueue.cpp
+    android/recording/video/player/PacketQueue.cpp
+    android/recording/video/player/VideoPlayer.cpp
+    android/recording/video/player/VideoPlayerNotifier.cpp
     android/recording/video/VideoProducer.cpp
     android/recording/video/VideoFrameSharer.cpp)
 
@@ -173,7 +174,7 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/tool-window.h
     android/skin/qt/user-actions-counter.h
     android/skin/qt/virtualscene-control-window.h
-    android/skin/qt/video-player/VideoPlayerNotifier.h
+    android/skin/qt/video-player/QtVideoPlayerNotifier.h
     android/skin/qt/video-player/VideoPlayerWidget.h
     android/skin/qt/video-player/VideoInfo.h)
 

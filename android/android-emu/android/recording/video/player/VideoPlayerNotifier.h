@@ -28,55 +28,37 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 #pragma once
 
-#include <QObject>
-#include <QTimer>
+#include <functional>
+#include <memory>
 
 namespace android {
 namespace videoplayer {
 
 class VideoPlayer;
-class VideoPlayerWidget;
 
-// Qt related functions for the video player
-// to notifier updates to the caller and a timer for the player
-// to refresh video displays
-class VideoPlayerNotifier : public QObject {
-    Q_OBJECT
+// Abstract VideoPlayerNotifier class, backing AndroidEmu and Qt impls.
+class VideoPlayerNotifier {
 
 public:
-    VideoPlayerNotifier() = default;
 
     virtual ~VideoPlayerNotifier() = default;
 
-    // initialize the Qt timer, must be called from Qt UI thread
-    void initTimer();
-
-    // start the Qt timer, must be called from Qt UI thread
-    void startTimer(int delayMs);
-
-    // stop the Qt timer, must be called from Qt UI thread
-    void stopTimer();
+    using WidgetUpdateCallback = std::function<void()>;
 
     void setVideoPlayer(VideoPlayer* player) { mPlayer = player; }
 
-    void emitUpdateWidget() { emit updateWidget(); }
+    void onVideoRefresh();
 
-    void emitVideoFinished() { emit videoFinished(); }
+    virtual void initTimer() = 0;
+    virtual void startTimer(int delayMs) = 0;
+    virtual void stopTimer() = 0;
+    virtual void emitUpdateWidget() = 0;
+    virtual void emitVideoFinished() = 0;
 
-private:
+protected:
     VideoPlayer* mPlayer = nullptr;
-
-    QTimer mTimer;
-
-private slots:
-    void videoRefreshTimer();
-
-signals:
-    void updateWidget();
-    void videoFinished();
 };
 
 }  // namespace videoplayer
