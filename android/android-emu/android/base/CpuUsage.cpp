@@ -88,6 +88,15 @@ public:
         }
     }
 
+    float getSingleAreaUsage(int usageArea) {
+
+        if (usageArea < 0 || usageArea >= CpuUsage::UsageArea::Max) return 0.0f;
+
+        AutoLock lock(mLock);
+        if (!mMeasurements[usageArea].looper) return 0.0f;
+        return mMeasurements[usageArea].lastMeasurement.usage();
+    }
+
 private:
 
     void doMeasurement(int usageArea) {
@@ -158,6 +167,10 @@ void CpuUsage::forEachUsage(UsageArea area, CpuTimeReader readerFunc) {
     } else {
         fprintf(stderr, "%s: warning: invalid usage area %d detected.\n", __func__, area);
     }
+}
+
+float CpuUsage::getSingleAreaUsage(int area) {
+    return mImpl->getSingleAreaUsage(area);
 }
 
 std::string CpuUsage::printUsage() {
