@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b415ddb_be13ec3d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/perfstats-page.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-01-16T19:47:08Z",
+      "side": 1,
+      "message": "Do we need the \u003cQTimer\u003e here? It compiles without it.",
+      "revId": "6d57dd6dc55616bb106c3a939b5d8d58d018c96d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5c325bd5_b5b47b7a",
+        "filename": "android/android-emu/android/skin/qt/perf-stats-3d-widget.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-01-16T19:47:08Z",
+      "side": 1,
+      "message": "Maybe the lambda onBeginCollection and onEndCollection can be two static functions instead?",
+      "revId": "6d57dd6dc55616bb106c3a939b5d8d58d018c96d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
