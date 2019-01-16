@@ -13,8 +13,8 @@
 #include "ui_record-screen-page.h"
 
 #include "android/recording/screen-recorder.h"
+#include "android/recording/video/player/VideoPlayer.h"
 #include "android/skin/qt/video-player/VideoInfo.h"
-#include "android/skin/qt/video-player/VideoPlayer.h"
 #include "android/skin/qt/video-player/VideoPlayerWidget.h"
 
 #include <QTimer>

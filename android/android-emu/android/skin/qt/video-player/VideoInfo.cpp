@@ -32,7 +32,7 @@
 #include "android/skin/qt/video-player/VideoInfo.h"
 
 #include "android/base/memory/ScopedPtr.h"
-#include "android/skin/qt/video-player/PacketQueue.h"
+#include "android/recording/video/player/PacketQueue.h"
 #include "android/utils/debug.h"
 
 extern "C" {

@@ -29,9 +29,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "android/skin/qt/video-player/FrameQueue.h"
-#include "android/skin/qt/video-player/PacketQueue.h"
-#include "android/skin/qt/video-player/VideoPlayer.h"
+#include "android/recording/video/player/FrameQueue.h"
+#include "android/recording/video/player/PacketQueue.h"
+#include "android/recording/video/player/VideoPlayer.h"
 
 namespace android {
 namespace videoplayer {
