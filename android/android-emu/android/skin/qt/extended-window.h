@@ -92,6 +92,7 @@ private slots:
     void on_snapshotButton_clicked();
     void on_telephoneButton_clicked();
     void on_virtSensorsButton_clicked();
+    void on_perfstatsButton_clicked();
 
 private:
     void closeEvent(QCloseEvent* ce) override;
