@@ -25,6 +25,7 @@
 #include "android/console_internal.h"
 
 #include "android/android.h"
+#include "android/avd/BugreportInfo.h"
 #include "android/automation/AutomationController.h"
 #include "android/base/StringView.h"
 #include "android/base/misc/StringUtils.h"
@@ -60,6 +61,7 @@
 
 #include <atomic>
 #include <vector>
+#include <sstream>
 
 #include <assert.h>
 #include <ctype.h>
@@ -2537,6 +2539,19 @@ do_avd_resume( ControlClient  client, char*  args )
     return success ? 0 : -1;
 }
 
+static int
+do_avd_bugreport( ControlClient client, char* args )
+{
+    android::avd::BugreportInfo bugreport;
+    std::istringstream input(bugreport.dump());
+
+    for(std::string line; std::getline(input, line);) {
+        control_write(client, "%s\r\n", line.c_str());
+    }
+
+    return 0;
+}
+
 static const CommandDefRec  vm_commands[] =
 {
     { "stop", "stop the virtual device",
@@ -2572,6 +2587,9 @@ static const CommandDefRec  vm_commands[] =
     "'avd resume' resumes a previously-paused virtual device.\r\n",
     NULL, do_avd_resume, NULL },
 
+    { "bugreport", "generate bug report info.",
+    "'avd bugreport' will print out bug report information which is used for the filling the template in issue tracker.\r\n",
+    NULL, do_avd_bugreport, NULL},
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
