@@ -29,39 +29,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#pragma once
-
-#include "android/skin/qt/video-player/VideoPlayerNotifier.h"
+#include "android/skin/qt/video-player/QtVideoPlayerNotifier.h"
 #include "android/skin/qt/video-player/VideoPlayerWidget.h"
-#include "android/utils/compiler.h"
 
-#include <memory>
+#include "android/recording/video/player/VideoPlayer.h"
 
 namespace android {
 namespace videoplayer {
 
-// public APIs of the video player
-class VideoPlayer {
-protected:
-    VideoPlayer() = default;
+// Qt related functions for the video player
+// to notifier updates to the caller and a timer for the player
+// to refresh video displays
 
-public:
-    virtual ~VideoPlayer() = default;
+// initialize a Qt timer, must be called from Qt UI thread
+void QtVideoPlayerNotifier::initTimer() {
+    mTimer.setSingleShot(true);
+    QObject::connect(&mTimer, &QTimer::timeout, this,
+                     &QtVideoPlayerNotifier::videoRefreshTimer);
+}
 
-public:
-    // create a video player instance the input video file, the output widget to
-    // display, and the notifier to receive updates
-    static std::unique_ptr<VideoPlayer> create(
-            std::string videoFile,
-            VideoPlayerWidget* widget,
-            std::unique_ptr<VideoPlayerNotifier> notifier);
+// start the Qt timer, must be called from Qt UI thread
+void QtVideoPlayerNotifier::startTimer(int delayMs) {
+    mTimer.start(delayMs);
+}
 
-    virtual void start() = 0;
-    virtual void stop() = 0;
-    virtual bool isRunning() const = 0;
-    virtual void videoRefresh() = 0;
-    virtual void scheduleRefresh(int delayMs) = 0;
-};
+// stop a Qt timer, must be called from Qt UI thread
+void QtVideoPlayerNotifier::stopTimer() {
+    mTimer.stop();
+}
+
+void QtVideoPlayerNotifier::videoRefreshTimer() {
+    if (mPlayer) {
+        mPlayer->videoRefresh();
+    }
+}
 
 }  // namespace videoplayer
 }  // namespace android
