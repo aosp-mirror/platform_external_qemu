@@ -979,9 +979,14 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
             // If the -partition-size option is given that should override
             // whatever setting was in the config file.
             defaultBytes = defaultPartitionSize;
+            if (opts->partition_size) {
+                hw->disk_dataPartition_size = atoi(opts->partition_size);
+            } else {
+                hw->disk_dataPartition_size = defaultBytes;
+            }
+        } else {
+            hw->disk_dataPartition_size = defaultBytes;
         }
-
-        hw->disk_dataPartition_size = defaultBytes;
     }
 
     /** CACHE PARTITION **/
