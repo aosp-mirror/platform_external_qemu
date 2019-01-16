@@ -427,6 +427,15 @@ target_compile_definitions(qemu2-common PRIVATE "-DPOISON_CONFIG_ANDROID")
 target_link_libraries(qemu2-common PUBLIC android-qemu-deps)
 
 set(libqemu2-util_src ${libqemuutil_sources} ${libqemuutil_generated_sources})
+if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+  # So we have some linker issues on MSVC debug (b/122598666) where clang places things in the .pdata sections
+  # which the MSVC linker cannot handle.  We cannot use the lld-link.exe linker as it deadlocks for unknown.
+  # The workaround is to compile mail-loop.c with all optimizations enabled.
+  set_source_files_properties(util/main-loop.c PROPERTIES COMPILE_FLAGS "/O2")
+  set_source_files_properties(util/main-loop.c PROPERTIES COMPILE_DEFINITIONS "NDEBUG=1")
+endif()
+
+
 android_add_library(libqemu2-util)
 target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
 android_target_link_libraries(libqemu2-util windows PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
