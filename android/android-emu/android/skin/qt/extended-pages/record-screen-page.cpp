@@ -20,7 +20,7 @@
 #include "android/skin/qt/extended-pages/record-screen-page-tasks.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
-#include "android/skin/qt/video-player/VideoPlayerNotifier.h"
+#include "android/skin/qt/video-player/QtVideoPlayerNotifier.h"
 #include "android/utils/debug.h"
 
 #include <QDesktopServices>

@@ -31,6 +31,8 @@
 
 #pragma once
 
+#include "android/recording/video/player/VideoPlayerNotifier.h"
+
 #include <QObject>
 #include <QTimer>
 
@@ -43,7 +45,8 @@ class VideoPlayerWidget;
 // Qt related functions for the video player
 // to notifier updates to the caller and a timer for the player
 // to refresh video displays
-class VideoPlayerNotifier : public QObject {
+
+class VideoPlayerNotifier : public QObject, public VideoPlayerNotifier {
     Q_OBJECT
 
 public:
@@ -52,22 +55,19 @@ public:
     virtual ~VideoPlayerNotifier() = default;
 
     // initialize the Qt timer, must be called from Qt UI thread
-    void initTimer();
+    void initTimer() override;
 
     // start the Qt timer, must be called from Qt UI thread
-    void startTimer(int delayMs);
+    void startTimer(int delayMs) override;
 
     // stop the Qt timer, must be called from Qt UI thread
-    void stopTimer();
+    void stopTimer() override;
 
-    void setVideoPlayer(VideoPlayer* player) { mPlayer = player; }
+    void emitUpdateWidget() override { emit updateWidget(); }
 
-    void emitUpdateWidget() { emit updateWidget(); }
-
-    void emitVideoFinished() { emit videoFinished(); }
+    void emitVideoFinished() override { emit videoFinished(); }
 
 private:
-    VideoPlayer* mPlayer = nullptr;
 
     QTimer mTimer;
 

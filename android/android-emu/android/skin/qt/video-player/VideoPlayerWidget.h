@@ -11,19 +11,28 @@
 
 #pragma once
 
+#include "android/recording/video/player/VideoPlayerRenderTarget.h"
+
 #include <QtWidgets/QWidget>
 
 namespace android {
 namespace videoplayer {
 
-class VideoPlayerWidget : public QWidget {
+class VideoPlayerWidget : public QWidget, public VideoPlayerRenderTarget {
     Q_OBJECT
 
 public:
     VideoPlayerWidget(QWidget* parent = nullptr);
     ~VideoPlayerWidget();
 
-    void setPixelBuffer(const unsigned char* buf, size_t len) {
+    void syncRenderTargetSize(
+        float sampleAspectRatio,
+        int video_width,
+        int video_height,
+        int* resultRenderTargetWidth,
+        int* resultRenderTargetHeight) override;
+
+    void setPixelBuffer(const unsigned char* buf, size_t len) override {
         mBuffer = buf;
         mBufferLen = len;
     }

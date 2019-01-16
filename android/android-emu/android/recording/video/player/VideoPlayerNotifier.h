@@ -9,10 +9,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-// Portions of code is from a tutorial by dranger at gmail dot com:
-//   http://dranger.com/ffmpeg
-// licensed under the Creative Commons Attribution-Share Alike 2.5 License.
-
 // Copyright (c) 2003 Fabrice Bellard
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,43 +28,60 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 #pragma once
 
-#include "android/skin/qt/video-player/FrameQueue.h"
-#include "android/skin/qt/video-player/VideoPlayerWidget.h"
+#include <functional>
+#include <memory>
 
 namespace android {
+
+namespace base {
+
+class Looper;
+class WorkerThread;
+
+} // namespace base
+
 namespace videoplayer {
 
-// Class to grab any useful metadata from a video. Also grabs the first frame
-// of a video file for displaying to a widget.
-class VideoInfo : public QObject {
-    Q_OBJECT
+class VideoPlayer;
+
+// Abstract VideoPlayerNotifier class, backing AndroidEmu and Qt impls.
+class VideoPlayerNotifier {
 
 public:
-    VideoInfo(VideoPlayerWidget* widget, std::string videoFile);
-    virtual ~VideoInfo();
+    using WidgetUpdateCallback = std::function<void()>;
 
-    int getDurationSecs();
-    void show();
+    void setVideoPlayer(VideoPlayer* player) { mPlayer = player; }
 
-private:
-    void initialize();
-    static void adjustWindowSize(AVCodecContext* c,
-                                 VideoPlayerWidget* widget,
-                                 int* pWidth,
-                                 int* pHeight);
-    static int calculateDurationSecs(AVFormatContext* f);
+    void onVideoRefresh();
+
+    virtual void initTimer() = 0;
+    virtual void startTimer(int delayMs) = 0;
+    virtual void stopTimer() = 0;
+    virtual void emitUpdateWidget() = 0;
+    virtual void emitVideoFinished() = 0;
 
 private:
-    std::string mVideoFile;
-    VideoPlayerWidget* mWidget = nullptr;
-    Frame mPreviewFrame;
-    int mDurationSecs;
+    VideoPlayer* mPlayer = nullptr;
+};
 
-signals:
-    void updateWidget();
+// A video player class that starts (yet) another thread
+// for the notifier timer.
+class WorkerThreadVideoPlayerNotifier : public VideoPlayerNotifier {
+public:
+
+    WorkerThreadVideoPlayerNotifier();
+    ~WorkerThreadVideoPlayerNotifier();
+
+    void initTimer() override;
+    void startTimer(int delayMs) override;
+    void stopTimer() override;
+    void emitUpdateWidget() override;
+    void emitVideoFinished() override;
+
+private:
+    std::unique_ptr<base::WorkerThread> mWorkerThread;
 };
 
 }  // namespace videoplayer

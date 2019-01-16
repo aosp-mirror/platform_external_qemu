@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include "android/skin/qt/video-player/VideoPlayerNotifier.h"
-#include "android/skin/qt/video-player/VideoPlayerWidget.h"
+#include "android/recording/video/player/VideoPlayerNotifier.h"
+#include "android/recording/video/player/VideoPlayerRenderTarget.h"
 #include "android/utils/compiler.h"
 
 #include <memory>
@@ -53,7 +53,7 @@ public:
     // display, and the notifier to receive updates
     static std::unique_ptr<VideoPlayer> create(
             std::string videoFile,
-            VideoPlayerWidget* widget,
+            VideoPlayerRenderTarget* widget,
             std::unique_ptr<VideoPlayerNotifier> notifier);
 
     virtual void start() = 0;
