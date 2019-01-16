@@ -12,6 +12,7 @@
 #include "android/skin/qt/extended-pages/help-page.h"
 
 #include "android/android.h"
+#include "android/base/Uri.h"
 #include "android/base/system/System.h"
 #include "android/globals.h"
 #include "android/update-check/UpdateChecker.h"
@@ -23,11 +24,19 @@
 
 #include <cassert>
 
-const char DOCS_URL[] =
-    "http://developer.android.com/r/studio-ui/emulator.html";
-const char SEND_FEEDBACK_URL[] =
-    "https://issuetracker.google.com/issues/new?component=192727&template=872501";
+using android::base::Uri;
 
+static const char DOCS_URL[] =
+        "http://developer.android.com/r/studio-ui/emulator.html";
+
+static const char SEND_FEEDBACK_URL[] =
+        "https://issuetracker.google.com/issues/"
+        "new?component=192727&description=%s&&template=872501";
+
+static const char FEATURE_REQUEST_TEMPLATE[] =
+        R"(Feature Request:
+
+Use Case or Problem this feature helps you with:)";
 HelpPage::HelpPage(QWidget* parent) : QWidget(parent), mUi(new Ui::HelpPage) {
     mUi->setupUi(this);
 
@@ -143,7 +152,12 @@ void HelpPage::on_help_docs_clicked() {
 }
 
 void HelpPage::on_help_sendFeedback_clicked() {
-    QDesktopServices::openUrl(QUrl::fromEncoded(SEND_FEEDBACK_URL));
+    std::string encodedArgs = Uri::FormatEncodeArguments(
+            SEND_FEEDBACK_URL,
+            mBugreportInfo.dump() + FEATURE_REQUEST_TEMPLATE);
+    QUrl url(QString::fromStdString(encodedArgs));
+    if (url.isValid())
+        QDesktopServices::openUrl(url);
 }
 
 static const char* updateChannelName(android::studio::UpdateChannel channel) {
