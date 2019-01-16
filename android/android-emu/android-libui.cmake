@@ -56,6 +56,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/location-page-route-playback.cpp
     android/skin/qt/extended-pages/location-page.cpp
     android/skin/qt/extended-pages/microphone-page.cpp
+    android/skin/qt/extended-pages/perfstats-page.cpp
     android/skin/qt/extended-pages/record-screen-page.cpp
     android/skin/qt/extended-pages/rotary-input-dial.cpp
     android/skin/qt/extended-pages/rotary-input-page.cpp
@@ -68,6 +69,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/FramelessDetector.cpp
     android/skin/qt/ModalOverlay.cpp
     android/skin/qt/OverlayMessageCenter.cpp
+    android/skin/qt/perf-stats-3d-widget.cpp
     android/skin/qt/poster-image-well.cpp
     android/skin/qt/qt-ui-commands.cpp
     android/skin/qt/QtLooper.cpp
