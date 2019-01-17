@@ -128,6 +128,7 @@ def main(argv=None):
     version = sys.version_info
     logging.info('Running under Python {0[0]}.{0[1]}.{0[2]}, Platform: {1}'.format(
         version, platform.platform()))
+    logging.info('DIST_DIR: %s' % os.environ['DIST_DIR'])
 
     configure()
     if FLAGS.build == Make.config:
