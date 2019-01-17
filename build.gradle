@@ -52,6 +52,10 @@ task packageCodeCoverage(type: Zip) {
 
 sdk {
     common(mac, linux) {
+        item("$buildDefaultEmulator.output/perfgate") {
+            into ''
+            builtBy buildDefaultEmulator
+        }
         item("$buildDefaultEmulator.output/gradle-release") {
             into ''
             builtBy buildDefaultEmulator
