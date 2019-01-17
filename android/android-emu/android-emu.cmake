@@ -583,6 +583,7 @@ set(android-emu_unittests_src
     android/base/files/Stream_unittest.cpp
     android/base/files/StreamSerializing_unittest.cpp
     android/base/FunctionView_unittest.cpp
+    android/base/JsonWriter_unittest.cpp
     android/base/Log_unittest.cpp
     android/base/memory/LazyInstance_unittest.cpp
     android/base/memory/MemoryHints_unittest.cpp

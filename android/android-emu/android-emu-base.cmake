@@ -38,6 +38,7 @@ set(android-emu-base_src
     android/base/StringView.cpp
     android/base/SubAllocator.cpp
     android/base/synchronization/MessageChannel.cpp
+    android/base/JsonWriter.cpp
     android/base/Log.cpp
     android/base/memory/LazyInstance.cpp
     android/base/memory/MemoryHints.cpp
