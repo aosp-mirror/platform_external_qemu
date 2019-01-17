@@ -478,7 +478,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
        and the propertiy does not harm phone either */
     inject_timezone_boot_property();
 
-    /* initilize fingperprint here */
+    /* initialize fingerprint here */
     android_hw_fingerprint_init();
 
     android::crashreport::CrashReporter::get()->hangDetector().addWatchedLooper(

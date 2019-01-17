@@ -100,6 +100,7 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_ROTARY,        mExtendedUi->rotaryInputButton},
         {PANE_IDX_MICROPHONE,    mExtendedUi->microphoneButton},
         {PANE_IDX_FINGER,        mExtendedUi->fingerButton},
+        {PANE_IDX_FOLDABLE,      mExtendedUi->foldableButton},
         {PANE_IDX_VIRT_SENSORS,  mExtendedUi->virtSensorsButton},
         {PANE_IDX_SNAPSHOT,      mExtendedUi->snapshotButton},
         {PANE_IDX_BUGREPORT,     mExtendedUi->bugreportButton},
@@ -126,6 +127,26 @@ ExtendedWindow::ExtendedWindow(
     }
     mSidebarButtons.addButton(mExtendedUi->microphoneButton);
     mSidebarButtons.addButton(mExtendedUi->fingerButton);
+
+    if (avdInfo_getApiLevel(android_avdInfo) < 28       ||
+        !android_hw->hw_keyboard_lid                    ||
+        android_hw->hw_displayRegion_0_1_xOffset <    0 ||
+        android_hw->hw_displayRegion_0_1_yOffset <    0 ||
+        android_hw->hw_displayRegion_0_1_width   <    1 ||
+        android_hw->hw_displayRegion_0_1_height  <    1 ||
+        android_hw->hw_displayRegion_0_1_xOffset > 9999 ||
+        android_hw->hw_displayRegion_0_1_yOffset > 9999 ||
+        android_hw->hw_displayRegion_0_1_width   > 9999 ||
+        android_hw->hw_displayRegion_0_1_height  > 9999   )
+    {
+        // Foldable controls are available only if:
+        //    the API is 28+ (Pie+)  and
+        //    the device claims to have a "lid"  and
+        //    the devices has a secondary display region.
+        //
+        // That is not the case here, so disable the Foldable controls.
+        mExtendedUi->foldableButton->setVisible(false);
+    }
 
     // Currently, the camera page only contains options for the virtual scene
     // camera.  Hide the button if the virtual scene camera is not enabled.
@@ -209,6 +230,8 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
             CarDataPage::setCarDataAgent(agentPtr->car);
         }
     }
+
+    FoldablePage::earlyInitialization();
 }
 
 // static
@@ -301,6 +324,7 @@ void ExtendedWindow::on_cellularButton_clicked()     { adjustTabs(PANE_IDX_CELLU
 void ExtendedWindow::on_dpadButton_clicked()         { adjustTabs(PANE_IDX_DPAD); }
 void ExtendedWindow::on_rotaryInputButton_clicked()  { adjustTabs(PANE_IDX_ROTARY); }
 void ExtendedWindow::on_fingerButton_clicked()       { adjustTabs(PANE_IDX_FINGER); }
+void ExtendedWindow::on_foldableButton_clicked()     { adjustTabs(PANE_IDX_FOLDABLE); }
 void ExtendedWindow::on_helpButton_clicked()         { adjustTabs(PANE_IDX_HELP); }
 void ExtendedWindow::on_locationButton_clicked()     { adjustTabs(PANE_IDX_LOCATION); }
 void ExtendedWindow::on_microphoneButton_clicked()   { adjustTabs(PANE_IDX_MICROPHONE); }

@@ -48,6 +48,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/cellular-page.cpp
     android/skin/qt/extended-pages/dpad-page.cpp
     android/skin/qt/extended-pages/finger-page.cpp
+    android/skin/qt/extended-pages/foldable-page.cpp
     android/skin/qt/extended-pages/google-play-page.cpp
     android/skin/qt/extended-pages/help-page.cpp
     android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp
@@ -122,6 +123,7 @@ set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended-pages/cellular-page.ui
     android/skin/qt/extended-pages/dpad-page.ui
     android/skin/qt/extended-pages/finger-page.ui
+    android/skin/qt/extended-pages/foldable-page.ui
     android/skin/qt/extended-pages/google-play-page.ui
     android/skin/qt/extended-pages/help-page.ui
     android/skin/qt/extended-pages/microphone-page.ui
@@ -158,6 +160,7 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/extended-pages/cellular-page.h
     android/skin/qt/extended-pages/dpad-page.h
     android/skin/qt/extended-pages/finger-page.h
+    android/skin/qt/extended-pages/foldable-page.h
     android/skin/qt/extended-pages/google-play-page.h
     android/skin/qt/extended-pages/help-page.h
     android/skin/qt/extended-pages/location-page.h

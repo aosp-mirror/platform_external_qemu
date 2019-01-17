@@ -288,11 +288,11 @@ static void prepareDataFolder(const char* destDirectory,
     path_copy_dir(destDirectory, srcDirectory);
     std::string adbKeyPath = PathUtils::join(
             android::ConfigDirs::getUserDirectory(), "adbkey.pub");
-
+    
     bool adbKeyPresent =
         path_is_regular(adbKeyPath.c_str()) &&
         path_can_read(adbKeyPath.c_str());
-
+    
     if (!adbKeyPresent) {
         dwarning("cannot read adb public key file: %s", adbKeyPath.c_str());
         dwarning("trying again by copying from home dir");
