@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b35fc136_1cefdc00",
+        "filename": "android/android-emu/android/base/perflogger/Benchmark.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1094349
+      },
+      "writtenOn": "2019-01-17T18:31:33Z",
+      "side": 1,
+      "message": "qq: why not just pass in an initializer list in place? Same for below..",
+      "range": {
+        "startLine": 83,
+        "startChar": 29,
+        "endLine": 83,
+        "endChar": 36
+      },
+      "revId": "b460943fbbd044e48041ab89069646b1095c42cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e83cff39_151a6684",
+        "filename": "android/android-emu/android/base/perflogger/Benchmark.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1094349
+      },
+      "writtenOn": "2019-01-17T18:31:33Z",
+      "side": 1,
+      "message": "shouldn\u0027t this be a const ref too?",
+      "range": {
+        "startLine": 52,
+        "startChar": 54,
+        "endLine": 52,
+        "endChar": 75
+      },
+      "revId": "b460943fbbd044e48041ab89069646b1095c42cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "87cf181d_32014c06",
+        "filename": "android/android-emu/android/base/perflogger/Metric.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1094349
+      },
+      "writtenOn": "2019-01-17T18:31:33Z",
+      "side": 1,
+      "message": "nit: more whitespace issues",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 4
+      },
+      "revId": "b460943fbbd044e48041ab89069646b1095c42cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "16962ddb_01a6ff65",
+        "filename": "android/android-emu/android/base/perflogger/WindowDeviationAnalyzer.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1094349
+      },
+      "writtenOn": "2019-01-17T18:31:33Z",
+      "side": 1,
+      "message": "nit: whitespace",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 4
+      },
+      "revId": "b460943fbbd044e48041ab89069646b1095c42cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
