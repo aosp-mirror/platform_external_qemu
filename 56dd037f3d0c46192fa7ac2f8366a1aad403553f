@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "23f7b82f_24e8b4e0",
+        "filename": "android/android-emu/android/base/perflogger/Metric.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-01-17T16:11:55Z",
+      "side": 1,
+      "message": "In particular, we need to know what output directory to use, especially in a go/ab/emu-master-dev build bot environment, which is sometimes regular buildbot and sometimes gce, etc. Any advice?",
+      "revId": "56dd037f3d0c46192fa7ac2f8366a1aad403553f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
