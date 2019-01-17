@@ -38,12 +38,23 @@ public:
     JsonWriter& endArray();
 
     JsonWriter& name(const std::string& string);
+    JsonWriter& nameAsStr(int val);
+    JsonWriter& nameAsStr(long val);
+    JsonWriter& nameAsStr(float val);
+    JsonWriter& nameAsStr(double val);
+    JsonWriter& nameBoolAsStr(bool val);
 
     JsonWriter& value(const std::string& string);
     JsonWriter& value(int val);
     JsonWriter& value(long val);
     JsonWriter& value(float val);
+    JsonWriter& value(double val);
     JsonWriter& valueBool(bool val); // thx operator bool
+    JsonWriter& valueAsStr(int val);
+    JsonWriter& valueAsStr(long val);
+    JsonWriter& valueAsStr(float val);
+    JsonWriter& valueAsStr(double val);
+    JsonWriter& valueBoolAsStr(bool val);
     JsonWriter& valueNull();
 
 private:
