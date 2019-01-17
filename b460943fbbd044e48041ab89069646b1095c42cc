@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ebd44b63_f4179e4c",
+        "filename": "android/android-emu/android/base/perflogger/Benchmark.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-01-17T18:54:00Z",
+      "side": 1,
+      "message": "Not wanting to tickle mingw gcc. its known to just fail on various combinations of that, complex structs, some types, etc. faster to just not use the feature",
+      "parentUuid": "b35fc136_1cefdc00",
+      "range": {
+        "startLine": 83,
+        "startChar": 29,
+        "endLine": 83,
+        "endChar": 36
+      },
+      "revId": "b460943fbbd044e48041ab89069646b1095c42cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e83cff39_151a6684",
         "filename": "android/android-emu/android/base/perflogger/Benchmark.h",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2019-01-17T18:31:33Z",
       "side": 1,
       "message": "shouldn\u0027t this be a const ref too?",
+      "range": {
+        "startLine": 52,
+        "startChar": 54,
+        "endLine": 52,
+        "endChar": 75
+      },
+      "revId": "b460943fbbd044e48041ab89069646b1095c42cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "10649ab3_457ffbbe",
+        "filename": "android/android-emu/android/base/perflogger/Benchmark.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-01-17T18:54:00Z",
+      "side": 1,
+      "message": "It needs to be optional if there is no analyzer. Making it a pointer also saves us from extra header inclusions",
+      "parentUuid": "e83cff39_151a6684",
       "range": {
         "startLine": 52,
         "startChar": 54,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "ae654630_88f8acbe",
+        "filename": "android/android-emu/android/base/perflogger/Metric.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-01-17T18:54:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "87cf181d_32014c06",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 4
+      },
+      "revId": "b460943fbbd044e48041ab89069646b1095c42cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16962ddb_01a6ff65",
         "filename": "android/android-emu/android/base/perflogger/WindowDeviationAnalyzer.h",
         "patchSetId": 6
@@ -91,6 +163,30 @@
       "revId": "b460943fbbd044e48041ab89069646b1095c42cc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "98c7af26_0545081a",
+        "filename": "android/android-emu/android/base/perflogger/WindowDeviationAnalyzer.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-01-17T18:54:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "16962ddb_01a6ff65",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 4
+      },
+      "revId": "b460943fbbd044e48041ab89069646b1095c42cc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
