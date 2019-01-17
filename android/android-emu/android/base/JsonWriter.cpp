@@ -179,6 +179,14 @@ JsonWriter& JsonWriter::value(float val) {
     return *this;
 }
 
+JsonWriter& JsonWriter::value(double val) {
+    insertComma();
+    std::stringstream ss;
+    ss << val;
+    onValue(ss.str());
+    return *this;
+}
+
 JsonWriter& JsonWriter::valueBool(bool val) {
     insertComma();
     std::stringstream ss;
@@ -197,6 +205,40 @@ JsonWriter& JsonWriter::valueNull() {
     ss << "null";
     onValue(ss.str());
     return *this;
+}
+
+JsonWriter& JsonWriter::valueAsStr(int val) {
+    std::stringstream ss;
+    ss << val;
+    return value(ss.str());
+}
+
+JsonWriter& JsonWriter::valueAsStr(long val) {
+    std::stringstream ss;
+    ss << val;
+    return value(ss.str());
+}
+
+JsonWriter& JsonWriter::valueAsStr(float val) {
+    std::stringstream ss;
+    ss << val;
+    return value(ss.str());
+}
+
+JsonWriter& JsonWriter::valueAsStr(double val) {
+    std::stringstream ss;
+    ss << val;
+    return value(ss.str());
+}
+
+JsonWriter& JsonWriter::valueBoolAsStr(bool val) {
+    std::stringstream ss;
+    if (val) {
+        ss << "true";
+    } else {
+        ss << "false";
+    }
+    return value(ss.str());
 }
 
 } // namespace base

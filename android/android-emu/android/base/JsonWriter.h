@@ -43,7 +43,13 @@ public:
     JsonWriter& value(int val);
     JsonWriter& value(long val);
     JsonWriter& value(float val);
+    JsonWriter& value(double val);
     JsonWriter& valueBool(bool val); // thx operator bool
+    JsonWriter& valueAsStr(int val);
+    JsonWriter& valueAsStr(long val);
+    JsonWriter& valueAsStr(float val);
+    JsonWriter& valueAsStr(double val);
+    JsonWriter& valueBoolAsStr(bool val);
     JsonWriter& valueNull();
 
 private:
