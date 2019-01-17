@@ -70,6 +70,10 @@ sdk {
             into ''
             builtBy  packageCodeCoverage
         }
+        item("$buildDefaultEmulator.output/perfgate/cpu_test.json") {
+            into ''
+            builtBy buildDefaultEmulator
+        }
     }
 
     linux {
