@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>FoldablePage</class>
+ <widget class="QWidget" name="FoldablePage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>620</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QGroupBox" name="isOpenLabel">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>20</y>
+     <width>251</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+   </property>
+   <property name="title">
+    <string>Foldable is open</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string notr="true">Title</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="isOpen">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>40</y>
+     <width>211</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="accessibleDescription">
+    <string>Device is open</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Toggle</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="configurationGroup">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>94</y>
+     <width>280</width>
+     <height>281</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px</string>
+   </property>
+   <property name="title">
+    <string>Device configuration</string>
+   </property>
+   <widget class="QRadioButton" name="config_0">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Config 0</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>true</bool>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">configurationButtonGroup</string>
+    </attribute>
+   </widget>
+   <widget class="QRadioButton" name="config_1">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>60</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Config 1</string>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>true</bool>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">configurationButtonGroup</string>
+    </attribute>
+   </widget>
+   <widget class="QRadioButton" name="config_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>90</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Config 2</string>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>true</bool>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">configurationButtonGroup</string>
+    </attribute>
+   </widget>
+   <widget class="QRadioButton" name="config_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>120</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Config 3</string>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>true</bool>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">configurationButtonGroup</string>
+    </attribute>
+   </widget>
+   <widget class="QRadioButton" name="config_4">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>150</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Config 4</string>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>true</bool>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">configurationButtonGroup</string>
+    </attribute>
+   </widget>
+   <widget class="QRadioButton" name="config_5">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>180</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Config 5</string>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>true</bool>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">configurationButtonGroup</string>
+    </attribute>
+   </widget>
+   <widget class="QRadioButton" name="config_6">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>210</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Config 6</string>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>true</bool>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">configurationButtonGroup</string>
+    </attribute>
+   </widget>
+   <widget class="QRadioButton" name="config_7">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>240</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Config 7</string>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>true</bool>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">configurationButtonGroup</string>
+    </attribute>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="densityGroup">
+   <property name="geometry">
+    <rect>
+     <x>324</x>
+     <y>94</y>
+     <width>221</width>
+     <height>281</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px</string>
+   </property>
+   <property name="title">
+    <string>Pixel density</string>
+   </property>
+   <widget class="QRadioButton" name="density_0">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Density 0</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>true</bool>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">densityButtonGroup</string>
+    </attribute>
+   </widget>
+   <widget class="QRadioButton" name="density_1">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>60</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Density 1</string>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>true</bool>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">densityButtonGroup</string>
+    </attribute>
+   </widget>
+   <widget class="QRadioButton" name="density_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>90</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Density 2</string>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>true</bool>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">densityButtonGroup</string>
+    </attribute>
+   </widget>
+   <widget class="QRadioButton" name="density_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>120</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Density 3</string>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>true</bool>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">densityButtonGroup</string>
+    </attribute>
+   </widget>
+   <widget class="QRadioButton" name="density_4">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>150</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Density 4</string>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>true</bool>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">densityButtonGroup</string>
+    </attribute>
+   </widget>
+   <widget class="QRadioButton" name="density_5">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>180</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Density 5</string>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>true</bool>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">densityButtonGroup</string>
+    </attribute>
+   </widget>
+   <widget class="QRadioButton" name="density_6">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>210</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Density 6</string>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>true</bool>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">densityButtonGroup</string>
+    </attribute>
+   </widget>
+   <widget class="QRadioButton" name="density_7">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>240</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Density 7</string>
+    </property>
+    <property name="report_metrics" stdset="0">
+     <bool>true</bool>
+    </property>
+    <attribute name="buttonGroup">
+     <string notr="true">densityButtonGroup</string>
+    </attribute>
+   </widget>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
+ <connections/>
+ <buttongroups>
+  <buttongroup name="configurationButtonGroup"/>
+  <buttongroup name="densityButtonGroup"/>
+ </buttongroups>
+</ui>

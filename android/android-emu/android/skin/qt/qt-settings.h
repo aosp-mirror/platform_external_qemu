@@ -132,5 +132,9 @@ constexpr char PER_AVD_VIRTUAL_SCENE_POSTERS[] = "perAvd/virtualscene/posters";
 constexpr char PER_AVD_VIRTUAL_SCENE_POSTER_SIZES[] =
         "perAvd/virtualscene/poster_sizes";
 
+constexpr char PER_AVD_FOLDABLE_LID_IS_OPEN[] = "perAvd/foldable/lid_is_open";
+constexpr char PER_AVD_FOLDABLE_CONFIGURATION_INDEX[] = "perAvd/foldable/configuration_index";
+constexpr char PER_AVD_FOLDABLE_DENSITY_INDEX[] = "perAvd/foldable/density_index";
+
 }  // namespace Settings
 }  // namespace Ui

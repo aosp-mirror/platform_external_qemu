@@ -72,6 +72,7 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="RotaryInputPage" name="rotaryInputPage"/>
    <widget class="MicrophonePage" name="microphonePage"/>
    <widget class="FingerPage" name="finger_page"/>
+   <widget class="FoldablePage" name="foldablePage"/>
    <widget class="VirtualSensorsPage" name="virtualSensorsPage"/>
    <widget class="SnapshotPage" name="snapshotPage"/>
    <widget class="BugreportPage" name="bugreportPage"/>
@@ -764,6 +765,52 @@ padding: 10px 0px 10px 16px;</string>
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="foldableButton">
+        <property name="font">
+         <font>
+          <family>Roboto</family>
+         </font>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">/* overridden by stylesheet_template.css */
+border: none;
+text-align: left;
+padding: 10px 0px 10px 16px;</string>
+        </property>
+        <property name="text">
+         <string>  Foldable</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/light/foldable</normaloff>:/light/foldable</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <property name="report_metrics" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="themeIconName" stdset="0">
+         <string>foldable</string>
+        </property>
+        <property name="ColorGroup" stdset="0">
+         <string>MajorTab</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="virtSensorsButton">
         <property name="font">
          <font>
@@ -1274,6 +1321,12 @@ padding: 10px 0px 10px 16px;</string>
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>FoldablePage</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/extended-pages/foldable-page.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>HelpPage</class>
    <extends>QWidget</extends>
    <header>android/skin/qt/extended-pages/help-page.h</header>
@@ -1361,6 +1414,7 @@ padding: 10px 0px 10px 16px;</string>
   <tabstop>rotaryInputButton</tabstop>
   <tabstop>microphoneButton</tabstop>
   <tabstop>fingerButton</tabstop>
+  <tabstop>foldableButton</tabstop>
   <tabstop>virtSensorsButton</tabstop>
   <tabstop>snapshotButton</tabstop>
   <tabstop>bugreportButton</tabstop>

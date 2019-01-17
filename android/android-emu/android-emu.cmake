@@ -475,10 +475,10 @@ target_link_libraries(android-emu-shared
 android_target_link_libraries(android-emu-shared
                               windows
                               PRIVATE
-                              emulator-libmman-win32
+                              emulator-libmman-win32                              
                               d3d9::d3d9
                               # IID_IMFSourceReaderCallback
-                              mfuuid::mfuuid
+                              mfuuid::mfuuid                               
                               # For CoTaskMemFree used in camera-capture-windows.cpp
                               ole32::ole32
                               # For GetPerformanceInfo in CrashService_windows.cpp
