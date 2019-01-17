@@ -300,6 +300,24 @@ private:
                 sendResponse(createOkResponse());
                 break;
             }
+            case autor::FunctionCase::kVideoInjection: {
+                const uint32_t asyncId = mNextAsyncId;
+                auto result = getAutomationController().videoInjectionHandler(
+                    getHandle(), request.video_injection().command(), asyncId);
+
+                if (result.ok()) {
+                  mNextAsyncId++;  // Id consumed, increment for next call.
+                  offworld::Response response = createOkResponse();
+                  response.set_pending_async_id(asyncId);
+                  sendResponse(response);
+                } else {
+                  std::stringstream ss;
+                  ss << result.unwrapErr();
+                  sendError(offworld::Response::RESULT_ERROR_UNKNOWN,
+                            ss.str());
+                }
+                break;
+            }
             default:
                 LOG(ERROR) << "Unrecognized offworld automation message";
                 sendError(offworld::Response::RESULT_ERROR_NOT_IMPLEMENTED);

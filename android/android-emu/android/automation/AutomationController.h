@@ -18,6 +18,7 @@
 #include "android/base/Result.h"
 #include "android/base/async/Looper.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
+#include "android/automation/VideoInjectionManager.h"
 
 #include <memory>
 
@@ -102,6 +103,10 @@ public:
     // Advance the time if the AutomationController has been created.
     static void tryAdvanceTime();
 
+    static std::unique_ptr<pb::VideoInjectionCommand>
+    tryGetNextVideoInjectionCommand(
+        std::unique_ptr<VideoInjectionResult> previousResult);
+
     // Get the event sink for recording automation events.
     virtual AutomationEventSink& getEventSink() = 0;
 
@@ -114,6 +119,10 @@ public:
     //
     // Returns the current time.
     virtual DurationNs advanceTime() = 0;
+
+    virtual std::unique_ptr<pb::VideoInjectionCommand>
+    getNextVideoInjectionCommand(
+        std::unique_ptr<VideoInjectionResult> previousResult) = 0;
 
     // Start a recording to a file.
     virtual StartResult startRecording(android::base::StringView filename) = 0;
@@ -157,6 +166,11 @@ public:
 
     // Called on pipe close, to cancel any pending operations.
     virtual void pipeClosed(android::AsyncMessagePipeHandle pipe) = 0;
+
+    virtual VideoInjectionResult videoInjectionHandler(
+        android::AsyncMessagePipeHandle pipe,
+        android::base::StringView event,
+        uint32_t asyncId) = 0;
 };
 
 }  // namespace automation

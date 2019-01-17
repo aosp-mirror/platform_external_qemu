@@ -229,6 +229,7 @@ set(android-emu-common
 set(android_emu_dependent_src
     android/automation/AutomationController.cpp
     android/automation/AutomationEventSink.cpp
+    android/automation/VideoInjectionManager.cpp
     android/camera/camera-common.cpp
     android/camera/camera-format-converters.c
     android/camera/camera-list.cpp
@@ -471,10 +472,10 @@ target_link_libraries(android-emu-shared
 android_target_link_libraries(android-emu-shared
                               windows
                               PRIVATE
-                              emulator-libmman-win32                              
+                              emulator-libmman-win32
                               d3d9::d3d9
                               # IID_IMFSourceReaderCallback
-                              mfuuid::mfuuid                               
+                              mfuuid::mfuuid
                               # For CoTaskMemFree used in camera-capture-windows.cpp
                               ole32::ole32
                               # For GetPerformanceInfo in CrashService_windows.cpp

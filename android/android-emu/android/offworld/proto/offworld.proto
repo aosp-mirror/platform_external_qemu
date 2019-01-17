@@ -116,11 +116,16 @@ message AutomationRequest {
   message Listen {}
   message StopListening {}
 
+  message VideoInjection {
+    optional string command = 1;
+  }
+
   oneof function {
     ReplayInitialState replay_initial_state = 1;
     Replay replay = 2;
     Listen listen = 3;
     StopListening stop_listening = 4;
+    VideoInjection video_injection = 5;
   }
 }
 
@@ -204,8 +209,11 @@ message AutomationAsyncResponse {
     optional string event = 1;
   }
 
+  message VideoInjectionComplete {}
+
   oneof function {
     ReplayComplete replay_complete = 1;
     EventGenerated event_generated = 2;
+    VideoInjectionComplete video_injection_complete = 3;
   }
 }
