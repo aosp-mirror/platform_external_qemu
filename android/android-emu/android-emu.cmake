@@ -600,6 +600,7 @@ set(android-emu_unittests_src
     android/base/network/IpAddress_unittest.cpp
     android/base/network/NetworkUtils_unittest.cpp
     android/base/Optional_unittest.cpp
+    android/base/perflogger/Benchmark_unittest.cpp
     android/base/Pool_unittest.cpp
     android/base/ProcessControl_unittest.cpp
     android/base/Result_unittest.cpp
