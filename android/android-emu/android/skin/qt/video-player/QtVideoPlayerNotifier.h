@@ -9,10 +9,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-// Portions of code is from a tutorial by dranger at gmail dot com:
-//   http://dranger.com/ffmpeg
-// licensed under the Creative Commons Attribution-Share Alike 2.5 License.
-
 // Copyright (c) 2003 Fabrice Bellard
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,40 +31,52 @@
 
 #pragma once
 
-#include "android/recording/video/player/FrameQueue.h"
-#include "android/skin/qt/video-player/VideoPlayerWidget.h"
+#include "android/recording/video/player/VideoPlayerNotifier.h"
+
+#include <QObject>
+#include <QTimer>
 
 namespace android {
 namespace videoplayer {
 
-// Class to grab any useful metadata from a video. Also grabs the first frame
-// of a video file for displaying to a widget.
-class VideoInfo : public QObject {
+class VideoPlayer;
+class VideoPlayerWidget;
+
+// Qt related functions for the video player
+// to notifier updates to the caller and a timer for the player
+// to refresh video displays
+
+class QtVideoPlayerNotifier : public QObject, public VideoPlayerNotifier {
     Q_OBJECT
 
 public:
-    VideoInfo(VideoPlayerWidget* widget, std::string videoFile);
-    virtual ~VideoInfo();
+    QtVideoPlayerNotifier() = default;
 
-    int getDurationSecs();
-    void show();
+    virtual ~QtVideoPlayerNotifier() = default;
+
+    // initialize the Qt timer, must be called from Qt UI thread
+    void initTimer() override;
+
+    // start the Qt timer, must be called from Qt UI thread
+    void startTimer(int delayMs) override;
+
+    // stop the Qt timer, must be called from Qt UI thread
+    void stopTimer() override;
+
+    void emitUpdateWidget() override { emit updateWidget(); }
+
+    void emitVideoFinished() override { emit videoFinished(); }
 
 private:
-    void initialize();
-    static void adjustWindowSize(AVCodecContext* c,
-                                 VideoPlayerWidget* widget,
-                                 int* pWidth,
-                                 int* pHeight);
-    static int calculateDurationSecs(AVFormatContext* f);
 
-private:
-    std::string mVideoFile;
-    VideoPlayerWidget* mWidget = nullptr;
-    Frame mPreviewFrame;
-    int mDurationSecs;
+    QTimer mTimer;
+
+private slots:
+    void videoRefreshTimer();
 
 signals:
     void updateWidget();
+    void videoFinished();
 };
 
 }  // namespace videoplayer

@@ -29,61 +29,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "android/skin/qt/video-player/Clock.h"
-
-extern "C" {
-#include "libavutil/time.h"
-}
-
-#include <math.h>
+#include "android/recording/video/player/VideoPlayerNotifier.h"
+#include "android/recording/video/player/VideoPlayer.h"
 
 namespace android {
 namespace videoplayer {
 
-// Clock implementations
-void Clock::init(int* queue_serial) {
-    mSpeed = 1.0;
-    mPaused = false;
-    mQueueSerialPtr = queue_serial;
-    set(NAN, -1);
-}
-
-double Clock::getTime() {
-    if (*mQueueSerialPtr != mSerial) {
-        return NAN;
-    }
-    if (mPaused) {
-        return mPts;
-    } else {
-        double time = av_gettime_relative() / 1000000.0;
-        return mPtsDrift + time - (time - mLastUpdated) * (1.0 - mSpeed);
-    }
-}
-
-void Clock::set(double pts, int serial) {
-    double time = av_gettime_relative() / 1000000.0;
-    setAt(pts, serial, time);
-}
-
-void Clock::setAt(double pts, int serial, double time) {
-    mPts = pts;
-    mLastUpdated = time;
-    mPtsDrift = mPts - time;
-    mSerial = serial;
-}
-
-void Clock::setSpeed(double speed) {
-    double clock = this->getTime();
-    this->set(clock, mSerial);
-    mSpeed = speed;
-}
-
-void Clock::syncToSlave(Clock* slave) {
-    double clock = this->getTime();
-    double slave_clock = slave->getTime();
-    if (!isnan(slave_clock) &&
-        (isnan(clock) || fabs(clock - slave_clock) > AV_NOSYNC_THRESHOLD)) {
-        this->set(slave_clock, slave->mSerial);
+void VideoPlayerNotifier::onVideoRefresh() {
+    if (mPlayer) {
+        mPlayer->videoRefresh();
     }
 }
 
