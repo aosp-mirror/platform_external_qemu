@@ -25,6 +25,7 @@
 #include "android/snapshot/SnapshotAPI.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
+#include "android/videoinjection/VideoInjectionController.h"
 
 #include <atomic>
 #include <cassert>
@@ -37,6 +38,7 @@ using android::automation::AutomationController;
 using android::base::LazyInstance;
 using android::base::Lock;
 using android::base::Optional;
+using android::videoinjection::VideoInjectionController;
 
 namespace {
 
@@ -61,17 +63,23 @@ public:
         typedef android::AndroidAsyncMessagePipe::Service<OffworldPipe> Super;
 
     public:
-        Service(AutomationController& controller)
-            : Super("OffworldPipe"), mAutomationController(controller) {}
+        Service(AutomationController& automationController,
+                VideoInjectionController& videoInjectionController)
+            : Super("OffworldPipe"),
+              mAutomationController(automationController),
+              mVideoInjectionController(videoInjectionController) {}
         ~Service() {
             android::base::AutoLock lock(sOffworldLock);
             sOffworldInstance = nullptr;
         }
 
-        static Service* create(AutomationController& controller) {
+        static Service* create(
+            AutomationController& automationController,
+            VideoInjectionController& videoInjectionController) {
             android::base::AutoLock lock(sOffworldLock);
             CHECK(!sOffworldInstance) << "OffworldPipe already exists";
-            sOffworldInstance = new Service(controller);
+            sOffworldInstance = new Service(automationController,
+                                            videoInjectionController);
             return sOffworldInstance;
         }
 
@@ -94,6 +102,10 @@ public:
             return mAutomationController;
         }
 
+        VideoInjectionController& getVideoInjectionController() {
+            return mVideoInjectionController;
+        }
+
     private:
         // Since OffworldPipe::Service may be destroyed in unittests, we cannot
         // use LazyInstance. Instead store the pointer and clear it on destruct.
@@ -101,6 +113,7 @@ public:
         static android::base::StaticLock sOffworldLock;
 
         AutomationController& mAutomationController;
+        VideoInjectionController& mVideoInjectionController;
     };
 
     OffworldPipe(AndroidPipe::Service* service, PipeArgs&& pipeArgs)
@@ -109,6 +122,7 @@ public:
 
     virtual ~OffworldPipe() {
         getAutomationController().pipeClosed(getHandle());
+        getVideoInjectionController().pipeClosed(getHandle());
     }
 
     void onSave(android::base::Stream* stream) override {
@@ -166,6 +180,9 @@ private:
                         break;
                     case offworld::Request::ModuleCase::kAutomation:
                         handleAutomationRequest(request.automation());
+                        break;
+                    case offworld::Request::ModuleCase::kVideoInjection:
+                        handleVideoInjectionRequest(request.video_injection());
                         break;
                     default:
                         LOG(ERROR) << "Offworld lib received unrecognized "
@@ -254,13 +271,11 @@ private:
                 break;
             }
             case autor::FunctionCase::kReplay: {
-                const uint32_t asyncId = mNextAsyncId;
+                const uint32_t asyncId = mNextAsyncId++;
                 auto result = getAutomationController().replayEvent(
                         getHandle(), request.replay().event(), asyncId);
 
                 if (result.ok()) {
-                    mNextAsyncId++;  // Id consumed, increment for next call.
-
                     offworld::Response response = createOkResponse();
                     response.set_pending_async_id(asyncId);
                     sendResponse(response);
@@ -273,13 +288,11 @@ private:
                 break;
             }
             case autor::FunctionCase::kListen: {
-                const uint32_t asyncId = mNextAsyncId;
+                const uint32_t asyncId = mNextAsyncId++;
                 auto result =
                         getAutomationController().listen(getHandle(), asyncId);
 
                 if (result.ok()) {
-                    mNextAsyncId++;  // Id consumed, increment for next call.
-
                     offworld::Response response = createOkResponse();
                     response.set_pending_async_id(asyncId);
                     response.mutable_automation()
@@ -307,6 +320,26 @@ private:
         }
     }
 
+    void handleVideoInjectionRequest(
+        const offworld::VideoInjectionRequest& request) {
+
+        const uint32_t asyncId = mNextAsyncId++;
+        auto result = getVideoInjectionController().handleRequest(
+            getHandle(), request, asyncId);
+
+        if (result.ok()) {
+            offworld::Response response = createOkResponse();
+            response.set_pending_async_id(asyncId);
+            response.mutable_video_injection();
+            sendResponse(response);
+        } else {
+            std::stringstream ss;
+            ss << result.unwrapErr();
+            sendError(offworld::Response::RESULT_ERROR_UNKNOWN,
+                      ss.str());
+        }
+    }
+
     void sendResponse(const offworld::Response& response) {
         send(std::move(protoToVector(response)));
     }
@@ -325,10 +358,14 @@ private:
         return mService->getAutomationController();
     }
 
+    VideoInjectionController& getVideoInjectionController() {
+        return mService->getVideoInjectionController();
+    }
+
     Service* const mService;
 
     bool mHandshakeComplete = false;
-    uint32_t mNextAsyncId = 1;
+    std::atomic<std::uint32_t> mNextAsyncId { 1 };
 };
 
 OffworldPipe::Service* OffworldPipe::Service::sOffworldInstance = nullptr;
@@ -342,12 +379,17 @@ namespace offworld {
 void registerOffworldPipeService() {
     if (android::featurecontrol::isEnabled(android::featurecontrol::Offworld)) {
         registerAsyncMessagePipeService(
-                OffworldPipe::Service::create(AutomationController::get()));
+                OffworldPipe::Service::create(
+                    AutomationController::get(),
+                    VideoInjectionController::get()));
     }
 }
 
-void registerOffworldPipeServiceForTest(AutomationController* automation) {
-    registerAsyncMessagePipeService(OffworldPipe::Service::create(*automation));
+void registerOffworldPipeServiceForTest(
+    AutomationController* automationController,
+    VideoInjectionController* videoInjectionController) {
+    registerAsyncMessagePipeService(OffworldPipe::Service::create(
+        *automationController, *videoInjectionController));
 }
 
 // Send a response to an Offworld pipe.

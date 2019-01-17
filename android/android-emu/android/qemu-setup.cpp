@@ -50,6 +50,7 @@
 #include "android/utils/system.h"
 #include "android/utils/timezone.h"
 #include "android/version.h"
+#include "android/videoinjection/VideoInjectionController.h"
 
 #include <stdbool.h>
 
@@ -462,6 +463,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     /* initialize sensors, this must be done here due to timer issues */
     android_hw_sensors_init();
     android::automation::AutomationController::initialize();
+    android::videoinjection::VideoInjectionController::initialize();
     android::offworld::registerOffworldPipeService();
     android_host_memory_service_init();
 
@@ -490,5 +492,6 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
 
 void android_emulation_teardown() {
     android::automation::AutomationController::shutdown();
+    android::videoinjection::VideoInjectionController::shutdown();
     android::base::CpuUsage::get()->stop();
 }
