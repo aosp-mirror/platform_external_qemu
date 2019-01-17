@@ -10,19 +10,45 @@
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                "--gtest_break_on_failure"
+                "--gtest_break_on_failure",
+              //  "--gtest_filter=FileShareTest.shareRead"
             ],
-            // , "--gtest_filter=Lock.Synchronization"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [
                 {
                     // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
                     "name": "ASAN_OPTIONS",
-                    "value" : "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
+                    "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
                 }
             ],
-            "externalConsole": true
+            "externalConsole": false
+        },
+        {
+            "name": "(Windows) Emulator Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/qemu/windows-x86_64/qemu-system-x86_64",
+            "args": [
+                "@p-user",
+                "-verbose",
+                "-show-kernel"
+            ],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}\\build",
+            "environment": [
+                // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
+                {
+                    "name": "ASAN_OPTIONS",
+                    "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
+                },
+                // Note: path setting doesn't seem to work :-(
+                {
+                    "name": "PATH",
+                    "value": "${workspaceFolder}\\build\\lib64;${workspaceFolder}\\build\\lib64\\qt\\lib;;${workspaceFolder}\\build\\lib64\\gles_swiftshaders;"
+                }
+            ],
+            "externalConsole": false
         },
         {
             "name": "(Windows) Emulator Launch",
@@ -41,7 +67,7 @@
                     "name": "ANDROID_SDK_ROOT",
                     "value": "C:\\Users\\EmuTest2\\AppData\\Local\\Android\\Sdk"
                 },
-                // Make sure we suppress the standard asan warnings, otherwise we will crash fast. 
+                // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
                 {
                     "name": "ASAN_OPTIONS",
                     "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
