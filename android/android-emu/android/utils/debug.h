@@ -67,6 +67,8 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(virtualscene, "Virtual scene rendering")                      \
     _VERBOSE_TAG(automation, "Automation")                                     \
     _VERBOSE_TAG(offworld, "Offworld")                                         \
+    _VERBOSE_TAG(videoinjection, "Video injection")                            \
+
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
