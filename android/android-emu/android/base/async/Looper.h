@@ -40,7 +40,7 @@ public:
     typedef int64_t Duration;
     typedef uint64_t DurationNs;
 
-    enum {
+    enum Timeout : int64_t {
         kDurationInfinite = INT64_MAX,
     };
 
