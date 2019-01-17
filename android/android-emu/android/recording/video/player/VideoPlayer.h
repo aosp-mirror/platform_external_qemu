@@ -29,39 +29,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "android/skin/qt/video-player/VideoPlayerNotifier.h"
-#include "android/skin/qt/video-player/VideoPlayer.h"
-#include "android/skin/qt/video-player/VideoPlayerWidget.h"
+#pragma once
+
+#include "android/recording/video/player/VideoPlayerNotifier.h"
+#include "android/recording/video/player/VideoPlayerRenderTarget.h"
+#include "android/utils/compiler.h"
+
+#include <memory>
 
 namespace android {
 namespace videoplayer {
 
-// Qt related functions for the video player
-// to notifier updates to the caller and a timer for the player
-// to refresh video displays
+// public APIs of the video player
+class VideoPlayer {
+protected:
+    VideoPlayer() = default;
 
-// initialize a Qt timer, must be called from Qt UI thread
-void VideoPlayerNotifier::initTimer() {
-    mTimer.setSingleShot(true);
-    QObject::connect(&mTimer, &QTimer::timeout, this,
-                     &VideoPlayerNotifier::videoRefreshTimer);
-}
+public:
+    virtual ~VideoPlayer() = default;
 
-// start the Qt timer, must be called from Qt UI thread
-void VideoPlayerNotifier::startTimer(int delayMs) {
-    mTimer.start(delayMs);
-}
+public:
+    // create a video player instance the input video file, the output widget to
+    // display, and the notifier to receive updates
+    static std::unique_ptr<VideoPlayer> create(
+            std::string videoFile,
+            VideoPlayerRenderTarget* widget,
+            std::unique_ptr<VideoPlayerNotifier> notifier);
 
-// stop a Qt timer, must be called from Qt UI thread
-void VideoPlayerNotifier::stopTimer() {
-    mTimer.stop();
-}
-
-void VideoPlayerNotifier::videoRefreshTimer() {
-    if (mPlayer) {
-        mPlayer->videoRefresh();
-    }
-}
+    virtual void start() = 0;
+    virtual void stop() = 0;
+    virtual bool isRunning() const = 0;
+    virtual void videoRefresh() = 0;
+    virtual void scheduleRefresh(int delayMs) = 0;
+};
 
 }  // namespace videoplayer
 }  // namespace android

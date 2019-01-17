@@ -9,10 +9,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-// Portions of code is from a tutorial by dranger at gmail dot com:
-//   http://dranger.com/ffmpeg
-// licensed under the Creative Commons Attribution-Share Alike 2.5 License.
-
 // Copyright (c) 2003 Fabrice Bellard
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,43 +29,63 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#pragma once
+#include "android/recording/video/player/Clock.h"
 
-#include "android/recording/video/player/FrameQueue.h"
-#include "android/skin/qt/video-player/VideoPlayerWidget.h"
+extern "C" {
+#include "libavutil/time.h"
+}
+
+#include <math.h>
 
 namespace android {
 namespace videoplayer {
 
-// Class to grab any useful metadata from a video. Also grabs the first frame
-// of a video file for displaying to a widget.
-class VideoInfo : public QObject {
-    Q_OBJECT
+// Clock implementations
+void Clock::init(int* queue_serial) {
+    mSpeed = 1.0;
+    mPaused = false;
+    mQueueSerialPtr = queue_serial;
+    set(NAN, -1);
+}
 
-public:
-    VideoInfo(VideoPlayerWidget* widget, std::string videoFile);
-    virtual ~VideoInfo();
+double Clock::getTime() {
+    if (*mQueueSerialPtr != mSerial) {
+        return NAN;
+    }
+    if (mPaused) {
+        return mPts;
+    } else {
+        double time = av_gettime_relative() / 1000000.0;
+        return mPtsDrift + time - (time - mLastUpdated) * (1.0 - mSpeed);
+    }
+}
 
-    int getDurationSecs();
-    void show();
+void Clock::set(double pts, int serial) {
+    double time = av_gettime_relative() / 1000000.0;
+    setAt(pts, serial, time);
+}
 
-private:
-    void initialize();
-    static void adjustWindowSize(AVCodecContext* c,
-                                 VideoPlayerWidget* widget,
-                                 int* pWidth,
-                                 int* pHeight);
-    static int calculateDurationSecs(AVFormatContext* f);
+void Clock::setAt(double pts, int serial, double time) {
+    mPts = pts;
+    mLastUpdated = time;
+    mPtsDrift = mPts - time;
+    mSerial = serial;
+}
 
-private:
-    std::string mVideoFile;
-    VideoPlayerWidget* mWidget = nullptr;
-    Frame mPreviewFrame;
-    int mDurationSecs;
+void Clock::setSpeed(double speed) {
+    double clock = this->getTime();
+    this->set(clock, mSerial);
+    mSpeed = speed;
+}
 
-signals:
-    void updateWidget();
-};
+void Clock::syncToSlave(Clock* slave) {
+    double clock = this->getTime();
+    double slave_clock = slave->getTime();
+    if (!isnan(slave_clock) &&
+        (isnan(clock) || fabs(clock - slave_clock) > AV_NOSYNC_THRESHOLD)) {
+        this->set(slave_clock, slave->mSerial);
+    }
+}
 
 }  // namespace videoplayer
 }  // namespace android

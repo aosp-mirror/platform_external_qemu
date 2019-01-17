@@ -20,7 +20,7 @@
 #include "android/skin/qt/extended-pages/record-screen-page-tasks.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
-#include "android/skin/qt/video-player/VideoPlayerNotifier.h"
+#include "android/skin/qt/video-player/QtVideoPlayerNotifier.h"
 #include "android/utils/debug.h"
 
 #include <QDesktopServices>
@@ -236,8 +236,8 @@ void RecordScreenPage::updateElapsedTime() {
 void RecordScreenPage::on_rec_playStopButton_clicked() {
     if (mState == RecordUiState::Stopped) {
         auto videoPlayerNotifier =
-                std::unique_ptr<android::videoplayer::VideoPlayerNotifier>(
-                        new android::videoplayer::VideoPlayerNotifier());
+                std::unique_ptr<android::videoplayer::QtVideoPlayerNotifier>(
+                        new android::videoplayer::QtVideoPlayerNotifier());
         connect(videoPlayerNotifier.get(), SIGNAL(updateWidget()), this,
                 SLOT(updateVideoView()));
         connect(videoPlayerNotifier.get(), SIGNAL(videoFinished()), this,
