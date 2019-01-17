@@ -34,6 +34,7 @@
 #include "android/snapshot/SnapshotAPI.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/looper.h"
+#include "android/videoinjection/VideoInjectionController.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -51,6 +52,7 @@ using namespace android;
 using namespace android::offworld;
 using namespace android::base;
 using android::automation::AutomationController;
+using android::videoinjection::VideoInjectionController;
 
 using android::EqualsProto;
 using android::proto::Partially;
@@ -88,8 +90,11 @@ protected:
         mPhysicalModel.reset(physicalModel_new());
         mAutomationController = AutomationController::createForTest(
                 mPhysicalModel.get(), mLooper.get(), sendResponse);
+        mVideoInjectionController = VideoInjectionController::createForTest(
+                sendResponse);
 
-        registerOffworldPipeServiceForTest(mAutomationController.get());
+        registerOffworldPipeServiceForTest(
+            mAutomationController.get(), mVideoInjectionController.get());
 
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(&config, true, "host", "off", 0, false,
@@ -113,6 +118,7 @@ protected:
         AndroidPipe::initThreading(TestVmLock::getInstance());
         android_registerMainLooper(nullptr);
         mAutomationController.reset();
+        mVideoInjectionController.reset();
         mPhysicalModel.reset();
         mLooper.reset();
     }
@@ -298,6 +304,7 @@ protected:
     std::unique_ptr<TestLooper> mLooper;
     PhysicalModelPtr mPhysicalModel;
     std::unique_ptr<AutomationController> mAutomationController;
+    std::unique_ptr<VideoInjectionController> mVideoInjectionController;
 };
 
 TEST_F(OffworldPipeTest, Connect) {
@@ -515,4 +522,44 @@ TEST_F(OffworldPipeTest, AutomationAsyncIdSnapshot) {
                 EqualsProto("result: RESULT_NO_ERROR pending_async_id: 2"));
 
     mDevice->close(restoredPipe);
+}
+
+TEST_F(OffworldPipeTest, VideoInjection) {
+    void* pipe = openAndConnectOffworld();
+
+    writeRequest(
+        pipe,
+        "video_injection { display_default_frame {} } ");
+
+    EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+                Partially(EqualsProto(
+                    "result: RESULT_NO_ERROR pending_async_id: 1")));
+
+    writeRequest(
+        pipe,
+        "video_injection { display_default_frame {} }");
+
+    EXPECT_THAT(
+            readMessageBlocking<pb::Response>(pipe),
+            Partially(EqualsProto("result: RESULT_NO_ERROR pending_async_id: 2 "
+                                  "video_injection {sequence_id: 0}")));
+
+    writeRequest(
+        pipe,
+        "video_injection {sequence_id: 100 display_default_frame {} }");
+
+    EXPECT_THAT(
+            readMessageBlocking<pb::Response>(pipe),
+            Partially(EqualsProto("result: RESULT_NO_ERROR pending_async_id: 3 "
+                                  "video_injection {sequence_id: 100}")));
+
+    writeRequest(
+        pipe,
+        "video_injection { }");
+
+    EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+                Partially(EqualsProto("result: RESULT_ERROR_UNKNOWN "
+                                      "error_string: \"Invalid request\"")));
+
+    mDevice->close(pipe);
 }
