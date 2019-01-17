@@ -83,3 +83,4 @@ else()
 endif()
 
 include(emu-windows-libs)
+set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
