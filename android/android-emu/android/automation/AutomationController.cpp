@@ -359,6 +359,9 @@ public:
     void reset() override;
     DurationNs advanceTime() override;
 
+    std::unique_ptr<pb::VideoInjectionCommand>
+    getNextVideoInjectionCommand(VideoInjectionResult previousResult) override;
+
     StartResult startRecording(StringView filename) override;
     StopResult stopRecording() override;
 
@@ -377,6 +380,11 @@ public:
     void stopListening() override;
 
     void pipeClosed(android::AsyncMessagePipeHandle pipe) override;
+
+    VideoInjectionResult videoInjectionHandler(
+        android::AsyncMessagePipeHandle pipe,
+        StringView event,
+        uint32_t asyncId) override;
 
 private:
     // Helper to replay the last event in the playback stream, must be called
@@ -401,6 +409,9 @@ private:
     // Offworld state.
     OffworldEventSource* mOffworldEventSource = nullptr;
     std::unique_ptr<ListenPipeStream> mPipeListener;
+
+    // Video injection.
+    std::unique_ptr<VideoInjectionManager> mVideoInjectionManager;
 
     std::function<void(android::AsyncMessagePipeHandle,
                        const ::offworld::Response&)>
@@ -450,6 +461,16 @@ void AutomationController::tryAdvanceTime() {
     }
 }
 
+std::unique_ptr<pb::VideoInjectionCommand>
+AutomationController::tryGetNextVideoInjectionCommand(
+    VideoInjectionResult previousResult) {
+    if (sInstance) {
+        return sInstance->getNextVideoInjectionCommand(
+            std::move(previousResult));
+    }
+    return nullptr;
+}
+
 AutomationControllerImpl::AutomationControllerImpl(
         PhysicalModel* physicalModel,
         base::Looper* looper,
@@ -460,6 +481,7 @@ AutomationControllerImpl::AutomationControllerImpl(
       mLooper(looper),
       mSendMessageCallback(sendMessageCallback) {
     physicalModel_setAutomationController(physicalModel, this);
+    mVideoInjectionManager = VideoInjectionManager::create(sendMessageCallback);
 }
 
 AutomationControllerImpl::~AutomationControllerImpl() {
@@ -501,6 +523,17 @@ DurationNs AutomationControllerImpl::advanceTime() {
     physicalModel_setCurrentTime(mPhysicalModel, nowNs);
     return nowNs;
 }
+
+std::unique_ptr<pb::VideoInjectionCommand>
+AutomationControllerImpl::getNextVideoInjectionCommand(
+    VideoInjectionResult previousResult) {
+    AutoLock lock(mLock);
+    if (mShutdown) {
+        return nullptr;
+    }
+
+    return mVideoInjectionManager->getNextCommand(std::move(previousResult));
+};
 
 StartResult AutomationControllerImpl::startRecording(StringView filename) {
     AutoLock lock(mLock);
@@ -705,6 +738,14 @@ ReplayResult AutomationControllerImpl::replayEvent(
     }
 
     return Ok();
+}
+
+VideoInjectionResult AutomationControllerImpl::videoInjectionHandler(
+        android::AsyncMessagePipeHandle pipe,
+        StringView command,
+        uint32_t asyncId) {
+    AutoLock lock(mLock);
+    return mVideoInjectionManager->addCommand(pipe, command, asyncId);
 }
 
 ListenResult AutomationControllerImpl::listen(

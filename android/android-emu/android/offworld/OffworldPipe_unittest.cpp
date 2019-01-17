@@ -516,3 +516,33 @@ TEST_F(OffworldPipeTest, AutomationAsyncIdSnapshot) {
 
     mDevice->close(restoredPipe);
 }
+
+TEST_F(OffworldPipeTest, AutomationVideoInjection) {
+    void* pipe = openAndConnectOffworld();
+
+    writeRequest(
+        pipe,
+        "automation { video_injection { command: 'display_default_frame { } ' } }");
+
+    EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+                Partially(EqualsProto(
+                    "result: RESULT_NO_ERROR pending_async_id: 1")));
+
+    writeRequest(
+        pipe,
+        "automation { video_injection { command: 'display_default_frame { } ' } }");
+
+    EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+                Partially(EqualsProto(
+                    "result: RESULT_NO_ERROR pending_async_id: 2")));
+
+    writeRequest(
+        pipe,
+        "automation { video_injection { command: 'bad command' } }");
+
+    EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+                Partially(EqualsProto(
+                    "result: RESULT_ERROR_UNKNOWN")));
+
+    mDevice->close(pipe);
+}
