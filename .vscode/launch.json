@@ -9,16 +9,49 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
-            "args": ["--gtest_break_on_failure"],.
+            "args": [
+                "--gtest_break_on_failure"
+            ],
             // , "--gtest_filter=Lock.Synchronization"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "env": {
-                // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
-                "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
-            },
-            "environment": [],
+            "environment": [
+                {
+                    // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
+                    "name": "ASAN_OPTIONS",
+                    "value" : "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
+                }
+            ],
             "externalConsole": true
+        },
+        {
+            "name": "(Windows) Emulator Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/qemu/windows-x86_64/qemu-system-x86_64",
+            "args": [
+                "@p-user",
+                "-verbose",
+                "-show-kernel"
+            ],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}\\build",
+            "environment": [
+                {
+                    "name": "ANDROID_SDK_ROOT",
+                    "value": "C:\\Users\\EmuTest2\\AppData\\Local\\Android\\Sdk"
+                },
+                // Make sure we suppress the standard asan warnings, otherwise we will crash fast. 
+                {
+                    "name": "ASAN_OPTIONS",
+                    "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
+                },
+                {
+                    "name": "PATH",
+                    "value": "${workspaceFolder}\\build\\lib64;${workspaceFolder}\\build\\lib64\\qt\\lib;;${workspaceFolder}\\build\\lib64\\gles_swiftshaders;"
+                }
+            ],
+            "externalConsole": false
         },
         {
             "name": "(lldb) Debug Cmake Target",
@@ -59,13 +92,17 @@
             "program": "${command:cmake.launchTargetPath}",
             "pid": 0, // replace pid with your real pid
             // Ignore signal SIGUSR1
-            "postRunCommands": ["pro hand -p true -s false SIGUSR1"],
+            "postRunCommands": [
+                "pro hand -p true -s false SIGUSR1"
+            ],
         },
         {
             "name": "(lldb) Debug core dump",
             "type": "lldb",
             "request": "custom",
-            "targetCreateCommands": ["target create -c ${workspaceFolder}/core"],
+            "targetCreateCommands": [
+                "target create -c ${workspaceFolder}/core"
+            ],
         }
     ]
 }
