@@ -732,3 +732,26 @@ TEST_F(AutomationControllerTest, PlaybackBlocksReplay) {
     EXPECT_THAT(mController->replayEvent(pipe, events[0], 790),
                 IsErr(ReplayError::PlaybackInProgress));
 }
+
+TEST_F(AutomationControllerTest, VideoInjection) {
+    android::AsyncMessagePipeHandle pipe;
+    pipe.id = 123;
+
+    EXPECT_THAT(
+        mController->videoInjectionHandler(
+            pipe, "display_default_frame { }", 1),
+        IsOk());
+    EXPECT_THAT(
+        mController->videoInjectionHandler(
+            pipe, "stop { delay_in_seconds: 1.0 }", 1),
+        IsOk());
+    EXPECT_THAT(
+        *(mController->getNextVideoInjectionCommand(android::base::Ok())),
+        EqualsProto("display_default_frame {}"));
+    EXPECT_THAT(
+        *(mController->getNextVideoInjectionCommand(android::base::Ok())),
+        Partially(EqualsProto("stop { delay_in_seconds: 1.0 }")));
+    EXPECT_EQ(
+        mController->getNextVideoInjectionCommand(android::base::Ok()),
+        nullptr);
+}
