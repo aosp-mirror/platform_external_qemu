@@ -202,6 +202,8 @@ custom_decodes = {
 
     "vkCreateImage" : emit_global_state_wrapped_decoding,
     "vkDestroyImage" : emit_global_state_wrapped_decoding,
+    "vkGetImageMemoryRequirements" : emit_global_state_wrapped_decoding,
+    "vkCreateImageView" : emit_global_state_wrapped_decoding,
 
     "vkAllocateMemory" : emit_global_state_wrapped_decoding,
     "vkFreeMemory" : emit_global_state_wrapped_decoding,

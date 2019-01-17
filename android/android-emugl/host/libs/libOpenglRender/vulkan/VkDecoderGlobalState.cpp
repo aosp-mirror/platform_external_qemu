@@ -253,6 +253,16 @@ public:
         const VkAllocationCallbacks* pAllocator,
         VkImage* pImage) {
 
+        CompressedImageInfo cmpInfo = createCompressedImageInfo(
+            pCreateInfo->format
+        );
+        VkImageCreateInfo localInfo;
+        if (cmpInfo.isCompressed) {
+            localInfo = *pCreateInfo;
+            localInfo.format = cmpInfo.dstFormat;
+            pCreateInfo = &localInfo;
+        }
+
         AndroidNativeBufferInfo anbInfo;
         bool isAndroidNativeBuffer =
             parseAndroidNativeBufferInfo(pCreateInfo, &anbInfo);
@@ -305,6 +315,34 @@ public:
         }
 
         mImageInfo.erase(image);
+    }
+
+    VkResult on_vkCreateImageView(
+        VkDevice device,
+        const VkImageViewCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkImageView* pView) {
+
+        if (!pCreateInfo) {
+            return VK_ERROR_OUT_OF_HOST_MEMORY;
+        }
+        CompressedImageInfo cmpInfo = createCompressedImageInfo(
+            pCreateInfo->format
+        );
+        VkImageViewCreateInfo createInfo;
+        if (cmpInfo.isCompressed) {
+            createInfo = *pCreateInfo;
+            createInfo.format = cmpInfo.dstFormat;
+            pCreateInfo = &createInfo;
+        }
+        return m_vk->vkCreateImageView(device, pCreateInfo, pAllocator, pView);
+    }
+
+    void on_vkGetImageMemoryRequirements(
+        VkDevice device,
+        VkImage image,
+        VkMemoryRequirements* pMemoryRequirements) {
+        m_vk->vkGetImageMemoryRequirements(device, image, pMemoryRequirements);
     }
 
     VkResult on_vkAllocateMemory(
@@ -671,6 +709,39 @@ private:
         return false;
     }
 
+    struct CompressedImageInfo {
+        bool isCompressed = false;
+        VkFormat srcFormat;
+        VkFormat dstFormat = VK_FORMAT_R8G8B8A8_UNORM;
+    };
+
+    CompressedImageInfo createCompressedImageInfo(VkFormat srcFmt) {
+        CompressedImageInfo cmpInfo;
+        cmpInfo.srcFormat = srcFmt;
+        cmpInfo.isCompressed = true;
+        switch (srcFmt) {
+            case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
+                cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_UNORM;
+                break;
+            case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
+                cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_SRGB;
+                break;
+            case VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK:
+                cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_UNORM;
+                break;
+            case VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
+                cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_SRGB;
+                break;
+            default:
+                cmpInfo.isCompressed = false;
+                cmpInfo.dstFormat = srcFmt;
+                break;
+        }
+        return cmpInfo;
+    }
+
     VulkanDispatch* m_vk;
 
     Lock mLock;
@@ -706,6 +777,7 @@ private:
 
     struct ImageInfo {
         AndroidNativeBufferInfo anbInfo;
+        CompressedImageInfo cmpInfo;
     };
 
     std::unordered_map<VkPhysicalDevice, PhysicalDeviceInfo>
@@ -791,6 +863,21 @@ void VkDecoderGlobalState::on_vkDestroyImage(
     VkImage image,
     const VkAllocationCallbacks* pAllocator) {
     mImpl->on_vkDestroyImage(device, image, pAllocator);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateImageView(
+    VkDevice device,
+    const VkImageViewCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkImageView* pView) {
+    return mImpl->on_vkCreateImageView(device, pCreateInfo, pAllocator, pView);
+}
+
+void VkDecoderGlobalState::on_vkGetImageMemoryRequirements(
+    VkDevice device,
+    VkImage image,
+    VkMemoryRequirements* pMemoryRequirements) {
+    mImpl->on_vkGetImageMemoryRequirements(device, image, pMemoryRequirements);
 }
 
 VkResult VkDecoderGlobalState::on_vkAllocateMemory(
