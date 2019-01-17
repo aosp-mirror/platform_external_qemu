@@ -20,9 +20,12 @@
 #include "android/base/StringView.h"
 #include "android/base/files/PathUtils.h"
 #include "android/utils/file_io.h"
+#include "android/base/system/System.h"
 
 #ifdef _WIN32
 #include <windows.h>
+#include "android/base/system/Win32UnicodeString.h"
+#include "android/base/files/ScopedFileHandle.h"
 #undef ERROR
 #include <errno.h>
 #include <stdio.h>
@@ -86,14 +89,16 @@ public:
 
     // Create the path of a directory entry under the temporary directory.
     std::string makeSubPath(StringView subpath) {
-        return StringFormat("%s/%s", mPath, subpath);
+        std::string path =  StringFormat("%s%c%s", mPath, System::kDirSeparator, subpath);
+        return path;
     }
 
     // Create an empty directory under the temporary directory.
     bool makeSubDir(StringView subdir) {
         std::string path = makeSubPath(subdir);
 #ifdef _WIN32
-        if (mkdir(path.c_str()) < 0) {
+        const Win32UnicodeString pathW(path);
+        if (!CreateDirectoryW(pathW.c_str(), NULL)) {
             PLOG(ERROR) << "Can't create " << path.c_str() << ": ";
             return false;
         }
@@ -109,12 +114,21 @@ public:
     // Create an empty file under the temporary directory.
     bool makeSubFile(StringView file) {
         std::string path = makeSubPath(file);
+    #ifdef _WIN32
+        const Win32UnicodeString pathW(path);
+        ScopedFileHandle tmpfile(CreateFileW(pathW.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL));
+        if (!tmpfile.valid()) {
+           PLOG(ERROR) << "Can't create " << path.c_str() << ": ";
+           return false;
+        }
+    #else
         int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0744);
         if (fd < 0) {
             PLOG(ERROR) << "Can't create " << path.c_str() << ": ";
             return false;
         }
         ::close(fd);
+    #endif
         return true;
     }
 
@@ -133,7 +147,7 @@ private:
             if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) {
                 continue;
             }
-            std::string entry_path = StringFormat("%s/%s", path, entry->d_name);
+            std::string entry_path =  StringFormat("%s%c%s", path, System::kDirSeparator, entry->d_name);
 #ifdef _WIN32
             struct _stati64 stats;
             android_lstat(entry_path.c_str(), reinterpret_cast<struct stat*>(&stats));
@@ -146,11 +160,28 @@ private:
             if (S_ISDIR(stats.st_mode)) {
                 DeleteRecursive(entry_path);
             } else {
-                unlink(entry_path.c_str());
+                #ifdef _WIN32
+                  const Win32UnicodeString entry_pathW(entry_path);
+                  if (_wunlink(entry_pathW.c_str())) {
+                      PLOG(ERROR) << "Unable to unlink: " << entry_path.c_str() << ": ";
+                  }
+                #else
+                  unlink(entry_path.c_str());
+                #endif
             }
         }
         closedir(dir);
-        rmdir(path.c_str());
+        #ifdef _WIN32
+        {
+            const Win32UnicodeString pathW(path);
+            if (_wrmdir(pathW.c_str())) {
+                PLOG(ERROR) << "Unable to delete: " << path.c_str() << ": ";
+            }
+
+        }
+        #else
+          rmdir(path.c_str());
+        #endif
     }
 
 #ifdef _WIN32
@@ -200,10 +231,12 @@ private:
             int random = rand() % 1000000;
 
             snprintf(path_end - kSuffixLen, kSuffixLen + 1, "%0d", random);
-            if (mkdir(path) == 0) {
+            const Win32UnicodeString pathW(path);
+            if (CreateDirectoryW(pathW.c_str(), NULL)) {
                 return path;  // Success
             }
-            if (errno != EEXIST) {
+            DWORD err = GetLastError();
+            if (err != ERROR_ALREADY_EXISTS) {
                 return NULL;
             }
         }

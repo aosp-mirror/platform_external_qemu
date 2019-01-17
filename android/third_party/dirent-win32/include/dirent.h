@@ -17,6 +17,7 @@
 #   define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#include <stringapiset.h>
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -318,13 +319,6 @@ static int versionsort (const struct dirent **a, const struct dirent **b);
 static WIN32_FIND_DATAW *dirent_first (_WDIR *dirp);
 static WIN32_FIND_DATAW *dirent_next (_WDIR *dirp);
 
-static int dirent_mbstowcs_s(
-    size_t *pReturnValue,
-    wchar_t *wcstr,
-    size_t sizeInWords,
-    const char *mbstr,
-    size_t count);
-
 static int dirent_wcstombs_s(
     size_t *pReturnValue,
     char *mbstr,
@@ -620,7 +614,7 @@ dirent_first(
 /*
  * Get next directory entry (internal).
  *
- * Returns 
+ * Returns
  */
 static WIN32_FIND_DATAW*
 dirent_next(
@@ -663,7 +657,7 @@ dirent_next(
  */
 static DIR*
 opendir(
-    const char *dirname) 
+    const char *dirname)
 {
     struct DIR *dirp;
     int error;
@@ -677,14 +671,25 @@ opendir(
     /* Allocate memory for DIR structure */
     dirp = (DIR*) malloc (sizeof (struct DIR));
     if (dirp) {
-        wchar_t wname[PATH_MAX + 1];
-        size_t n;
+        wchar_t *wname = NULL;
+        int len;
+        // Ye olde windows double call to figure out what we need to reserve
+        len =  MultiByteToWideChar(CP_UTF8,  // CodePage
+                                             MB_ERR_INVALID_CHARS, // dwFlags
+                                             dirname,              // lpMultiByteStr
+                                            -1,                    // cbMultiByte (assume null terminated string)
+                                             NULL,                 // lpWideCharStr
+                                             0);                   // cchWideChar
 
-        /* Convert directory name to wide-character string */
-        error = dirent_mbstowcs_s(
-            &n, wname, PATH_MAX + 1, dirname, PATH_MAX + 1);
-        if (!error) {
-
+        // And use it..
+        wname = (wchar_t*) malloc(sizeof(wchar_t) * len);
+        len = MultiByteToWideChar(CP_UTF8,  // CodePage
+                            MB_ERR_INVALID_CHARS,        // dwFlags
+                            dirname,    // lpMultiByteStr
+                            -1,         // cbMultiByte (assume null terminated string)
+                            wname,      // lpWideCharStr
+                            len);       // cchWideChar
+        if (len) {
             /* Open directory stream using wide-character name */
             dirp->wdirp = _wopendir (wname);
             if (dirp->wdirp) {
@@ -704,7 +709,7 @@ opendir(
              */
             error = 1;
         }
-
+        free(wname);
     } else {
         /* Cannot allocate DIR structure */
         error = 1;
@@ -1036,47 +1041,17 @@ dirent_mbstowcs_s(
     const char *mbstr,
     size_t count)
 {
-    int error;
+    int error = 0;
 
-#if defined(_MSC_VER)  &&  _MSC_VER >= 1400
+    *pReturnValue = MultiByteToWideChar(CP_UTF8,  // CodePage
+                                             0,        // dwFlags
+                                             mbstr,      // lpMultiByteStr
+                                             0,      // cbMultiByte (assume null terminated string)
+                                             wcstr,     // lpWideCharStr
+                                             *pReturnValue);  // cchWideChar
 
-    /* Microsoft Visual Studio 2005 or later */
-    error = mbstowcs_s (pReturnValue, wcstr, sizeInWords, mbstr, count);
-
-#else
-
-    /* Older Visual Studio or non-Microsoft compiler */
-    size_t n;
-
-    /* Convert to wide-character string (or count characters) */
-    n = mbstowcs (wcstr, mbstr, sizeInWords);
-    if (!wcstr  ||  n < count) {
-
-        /* Zero-terminate output buffer */
-        if (wcstr  &&  sizeInWords) {
-            if (n >= sizeInWords) {
-                n = sizeInWords - 1;
-            }
-            wcstr[n] = 0;
-        }
-
-        /* Length of resulting multi-byte string WITH zero terminator */
-        if (pReturnValue) {
-            *pReturnValue = n + 1;
-        }
-
-        /* Success */
-        error = 0;
-
-    } else {
-
-        /* Could not convert string */
-        error = 1;
-
-    }
-
-#endif
-
+    if (*pReturnValue == 0)
+        error = GetLastError();
     return error;
 }
 
