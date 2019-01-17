@@ -31,7 +31,7 @@
 
 #pragma once
 
-#include "android/skin/qt/video-player/VideoPlayerWaitInfo.h"
+#include "android/recording/video/player/VideoPlayerWaitInfo.h"
 
 extern "C" {
 #include "libavcodec/avcodec.h"
