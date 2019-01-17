@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "57440611_6cba36f5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1081416
+      },
+      "writtenOn": "2019-01-17T17:22:37Z",
+      "side": 1,
+      "message": "This is a fine place to put the json.\n\nOn go/ab it should end up the DIST_DIR of the launchpad script (i.e. the script that go/ab calls to do a build/test run): https://cs.corp.google.com/android/tools/buildSrc/servers/build_tools.sh?q\u003dtools/buildSrc/servers/build_tools.sh\u0026dr\n\nIn the .sh script you should copy from temp dir to DIST_DIR. Then the json will show up in the \nArtifacts for each build on go/ab. And that is also where the infra will look for it to upload to Perfgate.",
+      "revId": "510b578962c0f691ac8bd8e02445ea8bffb67201",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "66c04e10_0ea29407",
+        "filename": "android/android-emu/android/base/perflogger/Benchmark_unittest.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1081416
+      },
+      "writtenOn": "2019-01-17T17:22:37Z",
+      "side": 1,
+      "message": "nit: whitespace",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 4
+      },
+      "revId": "510b578962c0f691ac8bd8e02445ea8bffb67201",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
