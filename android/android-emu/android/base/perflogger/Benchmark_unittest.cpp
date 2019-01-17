@@ -13,6 +13,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/FileUtils.h"
 #include "android/base/testing/TestTempDir.h"
+#include "android/base/testing/TestSystem.h"
 
 #include <gtest/gtest.h>
 
@@ -25,15 +26,16 @@ namespace perflogger {
 
 class BenchmarkTest : public ::testing::Test {
 protected:
-    void SetUp() override { mTempDir.reset(new TestTempDir("benchmarktest")); }
-    void TearDown() override { mTempDir.reset(); }
-    std::unique_ptr<TestTempDir> mTempDir;
+    void SetUp() override {
+        mTestOutputDir =
+        pj(TestSystem::getProgramDirectoryFromPlatform(),
+           "perfgate");
+    }
+    std::string mTestOutputDir;
 };
 
 // Tests construction/deconstruction
 TEST_F(BenchmarkTest, Basic) {
-    std::string testDir = mTempDir->makeSubPath("testDir");
-
     Benchmark::Metadata metadata;
 
     Benchmark benchNoCustomDir(
@@ -48,14 +50,14 @@ TEST_F(BenchmarkTest, Basic) {
     EXPECT_EQ("testBenchmarkDescription", benchNoCustomDir.getDescription());
 
     Benchmark benchCustomDir(
-        testDir,
+        mTestOutputDir,
         "testBenchmark",
         "testBenchmarkProject",
         "testBenchmarkDescription",
         metadata);
 
     EXPECT_TRUE(benchCustomDir.getCustomOutputDir());
-    EXPECT_EQ(testDir, *(benchCustomDir.getCustomOutputDir()));
+    EXPECT_EQ(mTestOutputDir, *(benchCustomDir.getCustomOutputDir()));
     EXPECT_EQ("testBenchmark", benchCustomDir.getName());
     EXPECT_EQ("testBenchmarkProject", benchCustomDir.getProjectName());
     EXPECT_EQ("testBenchmarkDescription", benchCustomDir.getDescription());
@@ -64,13 +66,11 @@ TEST_F(BenchmarkTest, Basic) {
 // Tests that a benchmark metric can be logged.
 TEST_F(BenchmarkTest, File) {
     std::string metricName = "cpu_test";
-
-    std::string testDir = mTempDir->makeSubPath("testDir");
-    std::string expectedPath = pj(testDir, metricName + ".json");
+    std::string expectedPath = pj(mTestOutputDir, metricName + ".json");
 
     {
         Benchmark::Metadata metadata;
-        Benchmark bench(testDir, "testBenchmark", "testBenchmarkProject",
+        Benchmark bench(mTestOutputDir, "testBenchmark", "testBenchmarkProject",
                         "testBenchmarkDescription", metadata);
 
         bench.log(metricName, 12345);

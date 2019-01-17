@@ -24,7 +24,7 @@ using namespace android::perflogger;
 
 Metric::Metric(const std::string& metricName)
     : mName(metricName),
-      mOutputDirectory(pj(System::get()->getTempDir(), "perflogger")) {}
+      mOutputDirectory(pj(System::get()->getProgramDirectory(), "perfgate")) {}
 
 Metric::Metric(const std::string& metricName, const std::string& outputDir)
     : mName(metricName), mOutputDirectory(outputDir) {}
