@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5efbe2f9_06754529",
+        "filename": "android/android-emugl/combined/combined_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 565,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-01-18T17:39:43Z",
+      "side": 1,
+      "message": "Note that this is needed or this test finishes basically instantly and we get highly skewed numbers",
+      "range": {
+        "startLine": 564,
+        "startChar": 0,
+        "endLine": 565,
+        "endChar": 15
+      },
+      "revId": "d09b9f4a992827fd560180c5cdbfad3bfd07c71c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
