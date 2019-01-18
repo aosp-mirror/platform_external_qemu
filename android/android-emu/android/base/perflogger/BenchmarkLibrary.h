@@ -1,4 +1,4 @@
-// Copyright 2018 The Android Open Source Project
+// Copyright 2019 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,30 +13,24 @@
 // limitations under the License.
 #pragma once
 
-#include <inttypes.h>
+#include "android/base/StringView.h"
 
 namespace android {
-namespace base {
+namespace perflogger {
 
-class Looper;
+// OpenGL benchmarks
+void logDrawCallOverheadTest(
+    base::StringView glVendor,
+    base::StringView glRenderer,
+    base::StringView glVersion,
+    // |variant|: drawArrays, drawElements, drawSwitchVao, drawSwitchVap
+    base::StringView variant,
+    // |indirectionLevel|: fullStack, decoder, or host
+    base::StringView indirectionLevel,
+    int count,
+    long rateHz,
+    long wallTime,
+    long threadCpuTimeUs);
 
-// CPU usage tracking
-struct CpuTime {
-    uint64_t wall_time_us = 0;
-    uint64_t user_time_us = 0;
-    uint64_t system_time_us = 0;
-
-    CpuTime& operator-=(const CpuTime& other);
-
-    uint64_t usageUs() const;
-    // Usage proportion; convert to percent by
-    // multiplying by 100.
-    float usage() const;
-    float usageUser() const;
-    float usageSystem() const;
-};
-
-CpuTime operator-(const CpuTime& a, const CpuTime& b);
-
-} // namespace base
+} // namespace perflogger
 } // namespace android

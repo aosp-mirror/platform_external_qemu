@@ -59,7 +59,7 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
                           System::get()->getProgramDirectory());
 
     android::featurecontrol::setEnabledOverride(
-            android::featurecontrol::GLESDynamicVersion, false);
+            android::featurecontrol::GLESDynamicVersion, true);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::GLDMA, false);
     android::featurecontrol::setEnabledOverride(
@@ -73,8 +73,11 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 
     EmuglConfig config;
 
+    bool useHostGpu =
+            System::get()->envGet("ANDROID_EMU_TEST_WITH_HOST_GPU") == "1";
+
     emuglConfig_init(&config, true /* gpu enabled */, "auto",
-                     "swiftshader_indirect", /* gpu mode, option */
+                     useHostGpu ? "host" : "swiftshader_indirect", /* gpu mode, option */
                      64,                     /* bitness */
                      true,                   /* no window */
                      false,                  /* blacklisted */
