@@ -35,13 +35,13 @@ function(toolchain_cmd HOST PARAM1 PARAM2)
     get_filename_component(GEN_SDK "${CMAKE_CURRENT_LIST_FILE}/../../../scripts/unix/gen-android-sdk-toolchain.sh" ABSOLUTE)
     get_filename_component(AOSP "${CMAKE_CURRENT_LIST_DIR}/../../../../.." ABSOLUTE)
 
-    message("Running ${GEN_SDK} '--host=${HOST}' '${PARAM1}' '${PARAM2}' '--aosp-dir=${AOSP}'--verbosity=${VERBOSITY}'")
+    message("Running ${GEN_SDK} '--host=${HOST}' '${PARAM1}' '${PARAM2}' '--aosp-dir=${AOSP}' '--verbosity=${VERBOSITY}'")
     execute_process(COMMAND ${GEN_SDK} "--host=${HOST}" "${PARAM1}" "${PARAM2}" "--aosp-dir=${AOSP}" "--verbosity=${VERBOSITY}"
         RESULT_VARIABLE GEN_SDK_RES
         OUTPUT_VARIABLE STD_OUT
         ERROR_VARIABLE STD_ERR)
     if(NOT "${GEN_SDK_RES}" STREQUAL "0")
-        message(FATAL_ERROR "Unable to retrieve sdk info from ${GEN_SDK} --host=${HOST} ${PARAM1} ${PARAM2}: ${STD_OUT}, ${STD_ERR}")
+        message(FATAL_ERROR "Unable to retrieve sdk info from ${GEN_SDK} --host=${HOST} ${PARAM1} ${PARAM2}: RES: ${GEN_SDK_RES}, STD: [${STD_OUT}], ERR: [${STD_ERR}]")
     endif()
     message("${STD_OUT}")
 
