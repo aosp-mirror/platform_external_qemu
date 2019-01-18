@@ -29,6 +29,10 @@ CpuTime& CpuTime::operator-=(const CpuTime& other) {
     return *this;
 }
 
+uint64_t CpuTime::usageUs() const {
+    return user_time_us + system_time_us;
+}
+
 float CpuTime::usage() const {
     if (!wall_time_us) return 0.0f;
     return (float)(user_time_us + system_time_us) / (float)(wall_time_us);

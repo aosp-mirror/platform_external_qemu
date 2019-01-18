@@ -2682,7 +2682,7 @@ void System::disableCopyOnWriteForPath(StringView path) {
 
 #ifdef __APPLE__
 void disableAppNap_macImpl(void);
-void cpuUsageCurrentThread_macImpl(uint64_t* wall, uint64_t* user, uint64_t* sys);
+void cpuUsageCurrentThread_macImpl(uint64_t* user, uint64_t* sys);
 #endif
 
 // static
@@ -2695,14 +2695,14 @@ void System::disableAppNap() {
 // static
 CpuTime System::cpuTime() {
     CpuTime res;
+
+    res.wall_time_us = kTickCount.getUs();
+
 #ifdef __APPLE__
     cpuUsageCurrentThread_macImpl(
-        &res.wall_time_us,
         &res.user_time_us,
         &res.system_time_us);
 #else
-
-    res.wall_time_us = System::get()->getHighResTimeUs();
 
 #ifdef __linux__
     struct rusage usage;
