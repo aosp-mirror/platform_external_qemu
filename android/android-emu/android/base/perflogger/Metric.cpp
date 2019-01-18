@@ -22,9 +22,16 @@
 using namespace android::base;
 using namespace android::perflogger;
 
+// static
+std::string Metric::getPreferredOutputDirectory() {
+    auto distDirEnv = System::getEnvironmentVariable("DIST_DIR");
+    if (distDirEnv != "") return distDirEnv;
+    return pj(System::get()->getProgramDirectory(), "perfgate");
+}
+
 Metric::Metric(const std::string& metricName)
     : mName(metricName),
-      mOutputDirectory(pj(System::get()->getTempDir(), "perflogger")) {}
+      mOutputDirectory(Metric::getPreferredOutputDirectory()) {}
 
 Metric::Metric(const std::string& metricName, const std::string& outputDir)
     : mName(metricName), mOutputDirectory(outputDir) {}
@@ -51,6 +58,8 @@ void Metric::setAnalyzers(Benchmark* benchmark,
 void Metric::commit() {
     if (mSamples.empty())
         return;
+
+    fprintf(stderr, "%s: out dir: %s\n", __func__, mOutputDirectory.c_str());
 
     std::string outputPath = pj(mOutputDirectory, mName + ".json");
     path_mkdir_if_needed(mOutputDirectory.c_str(), 0755);

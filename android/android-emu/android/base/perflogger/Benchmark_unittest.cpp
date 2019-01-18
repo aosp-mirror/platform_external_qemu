@@ -12,6 +12,7 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/FileUtils.h"
+#include "android/base/perflogger/Metric.h"
 #include "android/base/testing/TestTempDir.h"
 
 #include <gtest/gtest.h>
@@ -63,7 +64,7 @@ TEST_F(BenchmarkTest, Basic) {
 
 // Tests that a benchmark metric can be logged.
 TEST_F(BenchmarkTest, File) {
-    std::string metricName = "cpu_test";
+    std::string metricName = "benchmark_test";
 
     std::string testDir = mTempDir->makeSubPath("testDir");
     std::string expectedPath = pj(testDir, metricName + ".json");
@@ -83,6 +84,27 @@ TEST_F(BenchmarkTest, File) {
     // TODO: test validity of resulting JSON
     // For now, FYI it
     printf("Resulting JSON: [%s]\n", fileContents->c_str());
+}
+
+// Logs an actual metric JSON to the perfgate folder, whether that is
+// DIST_DIR or what.
+TEST_F(BenchmarkTest, PerfgateSmokeTest) {
+    std::string metricName = "perfgate_test";
+
+    std::string expectedPath =
+        pj(Metric::getPreferredOutputDirectory(), metricName + ".json");
+
+    {
+        Benchmark::Metadata metadata;
+        Benchmark bench("testBenchmark", "testBenchmarkProject",
+                        "testBenchmarkDescription", metadata);
+
+        bench.log(metricName, 1);
+    }
+
+    const auto fileContents = android::readFileIntoString(expectedPath);
+    EXPECT_TRUE(fileContents);
+    EXPECT_GT(fileContents->size(), 0);
 }
 
 } // namespace perflogger
