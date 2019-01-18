@@ -31,6 +31,8 @@ public:
         long data;
     };
 
+    static std::string getPreferredOutputDirectory();
+
     Metric(const std::string& metricName);
     Metric(const std::string& metricName, const std::string& outputDir);
 

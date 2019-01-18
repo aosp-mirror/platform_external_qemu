@@ -468,6 +468,12 @@ public:
     // in the current thread.
     static CpuTime cpuTime();
 
+    // Static version that sets or queries host environment variables
+    // regardless of being TestSystem.
+    static void setEnvironmentVariable(StringView varname, StringView varvalue);
+    static std::string getEnvironmentVariable(StringView varname);
+    static std::string getProgramDirectoryFromPlatform();
+
 protected:
     size_t mMemorySize = 0;
 
@@ -495,12 +501,6 @@ protected:
     static Optional<Duration> pathModificationTimeInternal(StringView path);
     static Optional<DiskKind> diskKindInternal(StringView path);
     static Optional<DiskKind> diskKindInternal(int fd);
-
-    // Static version that sets or queries host environment variables
-    // regardless of being TestSystem.
-    static void setEnvironmentVariable(StringView varname, StringView varvalue);
-    static std::string getEnvironmentVariable(StringView varname);
-    static std::string getProgramDirectoryFromPlatform();
 
 private:
     DISALLOW_COPY_AND_ASSIGN(System);
