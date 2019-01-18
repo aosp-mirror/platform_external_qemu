@@ -43,6 +43,7 @@ set(android-emu-base_src
     android/base/memory/LazyInstance.cpp
     android/base/memory/MemoryHints.cpp
     android/base/perflogger/Benchmark.cpp
+    android/base/perflogger/BenchmarkLibrary.cpp
     android/base/perflogger/Metric.cpp
     android/base/perflogger/WindowDeviationAnalyzer.cpp
     android/base/ProcessControl.cpp

@@ -26,7 +26,7 @@ using namespace android::perflogger;
 std::string Metric::getPreferredOutputDirectory() {
     auto distDirEnv = System::getEnvironmentVariable("DIST_DIR");
     if (distDirEnv != "") return distDirEnv;
-    return pj(System::get()->getProgramDirectory(), "perfgate");
+    return pj(System::getProgramDirectoryFromPlatform(), "perfgate");
 }
 
 Metric::Metric(const std::string& metricName)

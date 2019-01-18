@@ -15,6 +15,7 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
+#include "android/base/perflogger/BenchmarkLibrary.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/snapshot/TextureLoader.h"
@@ -26,6 +27,8 @@
 
 #include <gtest/gtest.h>
 #include <memory>
+
+#include <sys/time.h>
 
 using android::base::System;
 using android::base::StdioStream;
@@ -413,6 +416,169 @@ TEST_F(FrameBufferTest, ReplaceContentsTest) {
     EXPECT_TRUE(ImageMatches(mWidth, mHeight, 4, mWidth, forUpdate.data(), forRead.data()));
 
     mFb->closeColorBuffer(handle);
+}
+
+// Tests rate of draw calls with no guest/host communication, but with translator.
+static constexpr uint32_t kDrawCallLimit = 50000;
+
+TEST_F(FrameBufferTest, DrawCallRate) {
+    HandleType colorBuffer =
+        mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    HandleType context = mFb->createRenderContext(0, 0, GLESApi_3_0);
+    HandleType surface = mFb->createWindowSurface(0, mWidth, mHeight);
+
+    EXPECT_TRUE(mFb->bindContext(context, surface, surface));
+    EXPECT_TRUE(mFb->setWindowSurfaceColorBuffer(surface, colorBuffer));
+
+    auto gl = LazyLoadedGLESv2Dispatch::get();
+
+    constexpr char vshaderSrc[] = R"(#version 300 es
+    precision highp float;
+
+    layout (location = 0) in vec2 pos;
+    layout (location = 1) in vec3 color;
+
+    uniform mat4 transform;
+
+    out vec3 color_varying;
+
+    void main() {
+        gl_Position = transform * vec4(pos, 0.0, 1.0);
+        color_varying = (transform * vec4(color, 1.0)).xyz;
+    }
+    )";
+    constexpr char fshaderSrc[] = R"(#version 300 es
+    precision highp float;
+
+    in vec3 color_varying;
+
+    out vec4 fragColor;
+
+    void main() {
+        fragColor = vec4(color_varying, 1.0);
+    }
+    )";
+
+    GLuint program = compileAndLinkShaderProgram(vshaderSrc, fshaderSrc);
+
+    GLint transformLoc = gl->glGetUniformLocation(program, "transform");
+
+    struct VertexAttributes {
+        float position[2];
+        float color[3];
+    };
+
+    const VertexAttributes vertexAttrs[] = {
+        { { -0.5f, -0.5f,}, { 0.2, 0.1, 0.9, }, },
+        { { 0.5f, -0.5f,}, { 0.8, 0.3, 0.1,}, },
+        { { 0.0f, 0.5f,}, { 0.1, 0.9, 0.6,}, },
+    };
+
+    GLuint buffer;
+    gl->glGenBuffers(1, &buffer);
+    gl->glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    gl->glBufferData(GL_ARRAY_BUFFER, sizeof(vertexAttrs), vertexAttrs,
+                     GL_STATIC_DRAW);
+
+    gl->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
+                          sizeof(VertexAttributes), 0);
+    gl->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                              sizeof(VertexAttributes),
+                              (GLvoid*)offsetof(VertexAttributes, color));
+    gl->glEnableVertexAttribArray(0);
+    gl->glEnableVertexAttribArray(1);
+
+    gl->glUseProgram(program);
+
+    gl->glClearColor(0.2f, 0.2f, 0.3f, 0.0f);
+    gl->glViewport(0, 0, 1, 1);
+
+    float matrix[16] = {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f,
+    };
+
+    gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    uint32_t drawCount = 0;
+
+    auto cpuTimeStart = System::cpuTime();
+
+fprintf(stderr, "%s: transform loc %d\n", __func__, transformLoc);
+
+    while (drawCount < kDrawCallLimit) {
+        gl->glUniformMatrix4fv(transformLoc, 1, GL_FALSE, matrix);
+        gl->glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        gl->glDrawArrays(GL_TRIANGLES, 0, 3);
+        ++drawCount;
+    }
+
+    gl->glFinish();
+
+    auto cpuTime = System::cpuTime() - cpuTimeStart;
+
+    uint64_t duration_us = cpuTime.wall_time_us;
+    uint64_t duration_cpu_us = cpuTime.usageUs();
+
+    float ms = duration_us / 1000.0f;
+    float sec = duration_us / 1000000.0f;
+    float drawCallHz = (float)kDrawCallLimit / sec;
+
+    printf("Drew %u times in %f ms. Rate: %f Hz\n", kDrawCallLimit, ms, drawCallHz);
+
+    android::perflogger::logDrawCallOverheadTest(
+        (const char*)gl->glGetString(GL_VENDOR),
+        (const char*)gl->glGetString(GL_RENDERER),
+        (const char*)gl->glGetString(GL_VERSION),
+        "drawArrays", "decoder",
+        kDrawCallLimit,
+        (long)drawCallHz,
+        duration_us,
+        duration_cpu_us);
+
+    EXPECT_TRUE(mFb->bindContext(0, 0, 0));
+    mFb->closeColorBuffer(colorBuffer);
+    mFb->closeColorBuffer(colorBuffer);
+    mFb->DestroyWindowSurface(surface);
+}
+
+// Tests rate of draw calls with only the host driver and no translator.
+TEST_F(FrameBufferTest, HostDrawCallRate) {
+    HandleType colorBuffer =
+        mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
+    HandleType context = mFb->createRenderContext(0, 0, GLESApi_3_0);
+    HandleType surface = mFb->createWindowSurface(0, mWidth, mHeight);
+
+    EXPECT_TRUE(mFb->bindContext(context, surface, surface));
+    EXPECT_TRUE(mFb->setWindowSurfaceColorBuffer(surface, colorBuffer));
+
+    auto gl = LazyLoadedGLESv2Dispatch::get();
+
+    uint64_t duration_us, duration_cpu_us;
+    gl->glTestHostDriverPerformance(kDrawCallLimit, &duration_us, &duration_cpu_us);
+
+    float ms = duration_us / 1000.0f;
+    float sec = duration_us / 1000000.0f;
+    float drawCallHz = kDrawCallLimit / sec;
+
+    printf("Drew %u times in %f ms. Rate: %f Hz\n", kDrawCallLimit, ms, drawCallHz);
+
+    android::perflogger::logDrawCallOverheadTest(
+        (const char*)gl->glGetString(GL_VENDOR),
+        (const char*)gl->glGetString(GL_RENDERER),
+        (const char*)gl->glGetString(GL_VERSION),
+        "drawArrays", "host",
+        kDrawCallLimit,
+        (long)drawCallHz,
+        duration_us,
+        duration_cpu_us);
+
+    EXPECT_TRUE(mFb->bindContext(0, 0, 0));
+    mFb->closeColorBuffer(colorBuffer);
+    mFb->closeColorBuffer(colorBuffer);
+    mFb->DestroyWindowSurface(surface);
 }
 
 }  // namespace emugl
