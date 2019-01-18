@@ -21,7 +21,7 @@ if(ANDROID_TARGET_TAG MATCHES "windows.*" AND NOT MSVC)
                       PREFIX emugen
                       DOWNLOAD_COMMAND ""
                       SOURCE_DIR "${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/tools/emugen"
-                      CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-linux-x86_64.cmake"
+                      CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-${ANDROID_HOST_TAG}.cmake"
                       BUILD_BYPRODUCTS emugen
                       INSTALL_COMMAND "")
 else()
