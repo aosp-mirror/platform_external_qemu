@@ -10,6 +10,7 @@
   X(void, glShaderBinary, (GLsizei n, const GLuint* shaders, GLenum binaryformat, const GLvoid* binary, GLsizei length), (n, shaders, binaryformat, binary, length)) \
   X(void, glVertexAttribPointerWithDataSize, (GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize), (indx, size, type, normalized, stride, ptr, dataSize)) \
   X(void, glFramebufferTexture3DOES, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLint zoffset), (target, attachment, textarget, texture, level, zoffset)) \
+  X(void, glTestHostDriverPerformance, (GLuint count, uint64_t* duration_us, uint64_t* duration_cpu_us), (count, duration_us, duration_cpu_us)) \
 
 
 #endif  // GLES2_EXTENSIONS_FUNCTIONS_H

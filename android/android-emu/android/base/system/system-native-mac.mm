@@ -45,7 +45,6 @@ void disableAppNap_macImpl(void) {
 
 // based on https://stackoverflow.com/questions/13893134/get-current-pthread-cpu-usage-mac-os-x
 void cpuUsageCurrentThread_macImpl(
-    uint64_t* wall,
     uint64_t* user,
     uint64_t* sys) {
 
@@ -55,7 +54,6 @@ void cpuUsageCurrentThread_macImpl(
     thread_basic_info_data_t info;
 
     thread = mach_thread_self();
-    *wall = System::get()->getHighResTimeUs();
 
     count = THREAD_BASIC_INFO_COUNT;
     kr = thread_info(

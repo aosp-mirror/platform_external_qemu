@@ -27,6 +27,7 @@
 #include <GLES3/gl31.h>
 
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/system/System.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "OpenglCodecCommon/ErrorLog.h"
 #include "GLcommon/SaveableTexture.h"
@@ -49,6 +50,8 @@
 
 #include <numeric>
 #include <unordered_map>
+
+#include <sys/time.h>
 
 using android::base::c_str;
 
@@ -163,6 +166,7 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp) {
 
 GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
 GL_APICALL void  GL_APIENTRY glVertexAttribIPointerWithDataSize(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
+GL_APICALL void  GL_APIENTRY glTestHostDriverPerformance(GLuint count, uint64_t* duration_us, uint64_t* duration_cpu_us);
 
 
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName) {
@@ -179,6 +183,7 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
         (*s_glesExtensions)["glEGLImageTargetRenderbufferStorageOES"]=(__translatorMustCastToProperFunctionPointerType)glEGLImageTargetRenderbufferStorageOES;
         (*s_glesExtensions)["glVertexAttribPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glVertexAttribPointerWithDataSize;
         (*s_glesExtensions)["glVertexAttribIPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glVertexAttribIPointerWithDataSize;
+        (*s_glesExtensions)["glTestHostDriverPerformance"] = (__translatorMustCastToProperFunctionPointerType)glTestHostDriverPerformance;
     }
     __translatorMustCastToProperFunctionPointerType ret=NULL;
     ProcTableMap::iterator val = s_glesExtensions->find(procName);
@@ -3818,3 +3823,205 @@ GL_APICALL GLboolean GL_APIENTRY glIsVertexArrayOES(GLuint array) {
 #include "GLESv30Imp.cpp"
 #include "GLESv31Imp.cpp"
 
+namespace glperf {
+
+static GLuint compileShader(GLDispatch* gl,
+                                GLenum shaderType,
+                                const char* src) {
+
+    GLuint shader = gl->glCreateShader(shaderType);
+    gl->glShaderSource(shader, 1, (const GLchar* const*)&src, nullptr);
+    gl->glCompileShader(shader);
+
+    GLint compileStatus;
+    gl->glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+
+    if (compileStatus != GL_TRUE) {
+        GLsizei infoLogLength = 0;
+        gl->glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::vector<char> infoLog(infoLogLength + 1, 0);
+        gl->glGetShaderInfoLog(shader, infoLogLength, nullptr, infoLog.data());
+        fprintf(stderr, "Failed to compile shader. Info log: [%s]\n", infoLog.data());
+    }
+
+    return shader;
+}
+
+static GLint compileAndLinkShaderProgram(GLDispatch* gl,
+                                         const char* vshaderSrc,
+                                         const char* fshaderSrc) {
+    GLuint vshader = compileShader(gl, GL_VERTEX_SHADER, vshaderSrc);
+    GLuint fshader = compileShader(gl, GL_FRAGMENT_SHADER, fshaderSrc);
+
+    GLuint program = gl->glCreateProgram();
+    gl->glAttachShader(program, vshader);
+    gl->glAttachShader(program, fshader);
+    gl->glLinkProgram(program);
+
+    gl->glDeleteShader(vshader);
+    gl->glDeleteShader(fshader);
+
+    GLint linkStatus;
+    gl->glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+
+    gl->glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
+
+    if (linkStatus != GL_TRUE) {
+        GLsizei infoLogLength = 0;
+        gl->glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::vector<char> infoLog(infoLogLength + 1, 0);
+        gl->glGetProgramInfoLog(program, infoLogLength, nullptr,
+                            infoLog.data());
+        fprintf(stderr, "Failed to link program. Info log: [%s]\n", infoLog.data());
+    }
+
+    return program;
+}
+
+} // namespace glperf
+
+GL_APICALL void GL_APIENTRY
+glTestHostDriverPerformance(GLuint count,
+                            uint64_t* duration_us,
+                            uint64_t* duration_cpu_us) {
+    GET_CTX_V2();
+    auto gl = &(ctx->dispatcher());
+
+    constexpr char vshaderSrcEs[] = R"(#version 300 es
+    precision highp float;
+
+    layout (location = 0) in vec2 pos;
+    layout (location = 1) in vec3 color;
+
+    uniform mat4 transform;
+
+    out vec3 color_varying;
+
+    void main() {
+        gl_Position = transform * vec4(pos, 0.0, 1.0);
+        color_varying = (transform * vec4(color, 1.0)).xyz;
+    }
+    )";
+
+    constexpr char fshaderSrcEs[] = R"(#version 300 es
+    precision highp float;
+
+    in vec3 color_varying;
+
+    out vec4 fragColor;
+
+    void main() {
+        fragColor = vec4(color_varying, 1.0);
+    }
+    )";
+
+    constexpr char vshaderSrcCore[] = R"(#version 330 core
+    precision highp float;
+
+    layout (location = 0) in vec2 pos;
+    layout (location = 1) in vec3 color;
+
+    uniform mat4 transform;
+
+    out vec3 color_varying;
+
+    void main() {
+        gl_Position = transform * vec4(pos, 0.0, 1.0);
+        color_varying = (transform * vec4(color, 1.0)).xyz;
+    }
+    )";
+
+    constexpr char fshaderSrcCore[] = R"(#version 330 core
+    precision highp float;
+
+    in vec3 color_varying;
+
+    out vec4 fragColor;
+
+    void main() {
+        fragColor = vec4(color_varying, 1.0);
+    }
+    )";
+
+    GLuint program;
+
+    if (isGles2Gles()) {
+        program = glperf::compileAndLinkShaderProgram(gl, vshaderSrcEs,
+                                                      fshaderSrcEs);
+    } else {
+        program = glperf::compileAndLinkShaderProgram(gl, vshaderSrcCore,
+                                                      fshaderSrcCore);
+    }
+
+    GLint transformLoc = gl->glGetUniformLocation(program, "transform");
+
+    struct VertexAttributes {
+        float position[2];
+        float color[3];
+    };
+
+    const VertexAttributes vertexAttrs[] = {
+        { { -0.5f, -0.5f,}, { 0.2, 0.1, 0.9, }, },
+        { { 0.5f, -0.5f,}, { 0.8, 0.3, 0.1,}, },
+        { { 0.0f, 0.5f,}, { 0.1, 0.9, 0.6,}, },
+    };
+
+    GLuint buffer;
+    gl->glGenBuffers(1, &buffer);
+    gl->glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    gl->glBufferData(GL_ARRAY_BUFFER, sizeof(vertexAttrs), vertexAttrs,
+                     GL_STATIC_DRAW);
+
+    gl->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
+                          sizeof(VertexAttributes), 0);
+    gl->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                              sizeof(VertexAttributes),
+                              (GLvoid*)offsetof(VertexAttributes, color));
+
+    gl->glEnableVertexAttribArray(0);
+    gl->glEnableVertexAttribArray(1);
+
+    gl->glUseProgram(program);
+
+    gl->glClearColor(0.2f, 0.2f, 0.3f, 0.0f);
+    gl->glViewport(0, 0, 1, 1);
+
+    float matrix[16] = {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f,
+    };
+
+    gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    uint32_t drawCount = 0;
+
+    auto cpuTimeStart = android::base::System::cpuTime();
+
+fprintf(stderr, "%s: transform loc %d\n", __func__, transformLoc);
+fprintf(stderr, "%s: begin count %d\n", __func__, count);
+    while (drawCount < count) {
+        gl->glUniformMatrix4fv(transformLoc, 1, GL_FALSE, matrix);
+        gl->glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        gl->glDrawArrays(GL_TRIANGLES, 0, 3);
+        ++drawCount;
+    }
+
+    gl->glFinish();
+
+    auto cpuTime = android::base::System::cpuTime() - cpuTimeStart;
+
+    *duration_us = cpuTime.wall_time_us;
+    *duration_cpu_us = cpuTime.usageUs();
+
+    float ms = (*duration_us) / 1000.0f;
+    float sec = (*duration_us) / 1000000.0f;
+
+    printf("Drew %u times in %f ms. Rate: %f Hz\n", count, ms, count / sec);
+
+    gl->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    gl->glUseProgram(0);
+    gl->glDeleteProgram(program);
+    gl->glDeleteBuffers(1, &buffer);
+}
