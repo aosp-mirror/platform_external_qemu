@@ -437,7 +437,7 @@ prepare_build_for_darwin() {
 }
 
 prepare_build_for_linux() {
-    GCC_DIR="${PREBUILT_TOOLCHAIN_DIR}/lib/gcc/x86_64-linux/4.8/"
+    GCC_DIR="${PREBUILT_TOOLCHAIN_DIR}/lib/gcc/x86_64-linux/4.8.3/"
     CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for linux)
     CLANG_DIR=$(realpath $CLANG_BINDIR/..)
     GNU_CONFIG_HOST=x86_64-linux
@@ -450,8 +450,8 @@ prepare_build_for_linux() {
     # linking and merely translating a .c or .cpp file
     local GCC_LINK_FLAGS=
     var_append GCC_LINK_FLAGS "--gcc-toolchain=$PREBUILT_TOOLCHAIN_DIR"
-    var_append GCC_LINK_FLAGS "-B$PREBUILT_TOOLCHAIN_DIR/lib/gcc/x86_64-linux/4.8/"
-    var_append GCC_LINK_FLAGS "-L$PREBUILT_TOOLCHAIN_DIR/lib/gcc/x86_64-linux/4.8/"
+    var_append GCC_LINK_FLAGS "-B$PREBUILT_TOOLCHAIN_DIR/lib/gcc/x86_64-linux/4.8.3/"
+    var_append GCC_LINK_FLAGS "-L$PREBUILT_TOOLCHAIN_DIR/lib/gcc/x86_64-linux/4.8.3/"
     var_append GCC_LINK_FLAGS "-L$PREBUILT_TOOLCHAIN_DIR/x86_64-linux/lib64/"
     var_append GCC_LINK_FLAGS "-fuse-ld=${PREBUILT_TOOLCHAIN_DIR}/bin/x86_64-linux-ld"
     var_append GCC_LINK_FLAGS "-L${CLANG_BINDIR}/../lib64/clang/${CLANG_VERSION}/lib/linux/"
