@@ -27,6 +27,8 @@
 #include "emugl/common/feature_control.h"
 #include "emugl/common/vm_operations.h"
 
+#include "GLcommon/etc.h"
+
 #include <algorithm>
 #include <unordered_map>
 #include <vector>
@@ -250,6 +252,35 @@ public:
         m_vk->vkDestroyDevice(device, pAllocator);
     }
 
+    VkResult on_vkCreateBuffer(
+        VkDevice device,
+        const VkBufferCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkBuffer* pBuffer) {
+        VkResult result = m_vk->vkCreateBuffer(device, pCreateInfo, pAllocator, pBuffer);
+        if (result == VK_SUCCESS) {
+            mBufferInfo.emplace(*pBuffer, BufferInfo());
+        }
+        return result;
+    }
+
+    VkResult on_vkBindBufferMemory(
+        VkDevice device,
+        VkBuffer buffer,
+        VkDeviceMemory memory,
+        VkDeviceSize memoryOffset) {
+        VkResult result = m_vk->vkBindBufferMemory(device, buffer, memory, memoryOffset);
+        if (result == VK_SUCCESS) {
+            auto it = mBufferInfo.find(buffer);
+            if (it == mBufferInfo.end()) {
+                return result;
+            }
+            it->second.memory = memory;
+            it->second.memoryOffset = memoryOffset;
+        }
+        return result;
+    }
+
     VkResult on_vkCreateImage(
         VkDevice device,
         const VkImageCreateInfo* pCreateInfo,
@@ -370,6 +401,7 @@ public:
         const VkBufferImageCopy* pRegions) {
         AutoLock lock(mLock);
         auto it = mImageInfo.find(dstImage);
+        ETC2ImageFormat imgFmt = EtcRGB8; // TODO: fix this
 
         if (it == mImageInfo.end()) return;
         if (!it->second.cmpInfo.isCompressed) {
@@ -381,13 +413,14 @@ public:
         CompressedImageInfo& cmp = it->second.cmpInfo;
         std::vector<VkBufferImageCopy> regions(regionCount);
         VkDeviceSize offset = 0;
+        VkDeviceSize maxOffset = 0;
         const VkDeviceSize pixelSize = cmp.pixelSize();
         for (uint32_t r = 0; r < regionCount; r++) {
             VkBufferImageCopy& region = regions[r];
             region = pRegions[r];
             region.bufferOffset = offset;
             offset += cmp.alignSize(region.imageExtent.width)
-                    * cmp.alignSize(region.imageExtent.width)
+                    * cmp.alignSize(region.imageExtent.height)
                     * pixelSize;
             uint32_t width = cmp.mipmapWidth(region.imageSubresource.mipLevel);
             uint32_t height = cmp.mipmapHeight(region.imageSubresource.mipLevel);
@@ -395,6 +428,9 @@ public:
             // But data copying region might be slightly smaller 
             region.imageExtent.width = std::min(region.imageExtent.width, width);
             region.imageExtent.height = std::min(region.imageExtent.height, height);
+            // TODO: fix it
+            maxOffset = std::max(maxOffset, pRegions[r].bufferOffset +
+                    etc_get_encoded_data_size(imgFmt, region.imageExtent.width, region.imageExtent.height));
         }
 
         // Handle compresed textures
@@ -409,6 +445,9 @@ public:
         if (m_vk->vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
             fprintf(stderr, "create buffer failed!\n");
             return;
+        }
+        if (cmp.tmpBuffer) {
+            m_vk->vkDestroyBuffer(cmp.tmpBuffer);
         }
         cmp.tmpBuffer = buffer;
 
@@ -445,14 +484,51 @@ public:
             fprintf(stderr, "failed to allocate vertex buffer memory!");
             return;
         }
+        if (cmp.tmpMemory) {
+            m_vk->vkFreeMemory(cmp.tmpMemory);
+        }
         cmp.tmpMemory = memory;
 
         m_vk->vkBindBufferMemory(device, buffer, memory, 0);
 
         // TODO: decode the image
         // TODO: image source might not be defined at this stage. Move it to a better place.
-        //void* srcRawData;
-        //void* dstRawData;
+        auto bufferInfo = mBufferInfo.find(buffer)->second;
+        uint8_t* srcRawData;
+        uint8_t* dstRawData;
+        m_vk->vkMapMemory(device, bufferInfo.memory, bufferInfo.offset,
+            bufferInfo.size, 0, &srcRawData);
+        m_vk->vkMapMemory(device, memory, 0, VK_WHOLE_SIZE, 0,
+            &dstRawData);
+        for (uint32_t r = 0; r < regionCount; r++) {
+            const VkBufferImageCopy& dstRegion = regions[r];
+            const VkBufferImageCopy& srcRegion = pRegions[r];
+
+            vector<uint8_t> decompBuffer;
+            const uint8_t* srcPtr = srcRawData + srcRegion.bufferOffset;
+            uint8_t* dstPtr = dstRawData + dstRegion.bufferOffset;
+            VkExtent3D alignedSrcImgExtent = srcRegion.imageExtent;
+            alignedSrcImgExtent.width =
+                cmp.alignSize(alignedSrcImgExtent.width);
+            alignedSrcImgExtent.height =
+                cmp.alignSize(alignedSrcImgExtent.height);
+            if (dstRegion.imageExtent != alignedSrcImgExtent) {
+                decompBuffer.resize(alignedSrcImgExtent.width
+                    * alignedSrcImgExtent.height
+                    * pixelSize);
+                dstPtr = decompBuffer.data();
+            }
+            int err = etc2_decode_image(srcPtr, imgFmt, dstPtr,
+                    alignedSrcImgExtent.width, alignedSrcImgExtent.height,
+                    pixelSize * alignedSrcImgExtent.width);
+
+            if (decompBuffer.size() > 0) {
+                fprintf(stderr, "TODO: copy the buffer");
+            }
+        }
+        m_vk->vkUnmapMemory(device, bufferInfo.memory);
+        m_vk->vkUnmapMemory(device, memory);
+
         m_vk->vkCmdCopyBufferToImage(commandBuffer, buffer, dstImage, dstImageLayout, regionCount,
                 regions.data());
     }
@@ -920,6 +996,12 @@ private:
         uint32_t queueFamilyIndex;
     };
 
+    struct BufferInfo {
+        VkDeviceMemory memory = 0;
+        VkDeviceSize memoryOffset = 0;
+        VkDeviceSize size;
+    };
+
     struct ImageInfo {
         AndroidNativeBufferInfo anbInfo;
         CompressedImageInfo cmpInfo;
@@ -937,6 +1019,7 @@ private:
     // VkDevice, and the VkDevice corresponding to a VkQueue.
     std::unordered_map<VkDevice, VkPhysicalDevice> mDeviceToPhysicalDevice;
     std::unordered_map<VkQueue, QueueInfo> mQueueInfo;
+    std::unordered_map<VkBuffer, BufferInfo> mBufferInfo;
 
     std::unordered_map<VkDeviceMemory, MappedMemoryInfo> mMapInfo;
 };
@@ -994,6 +1077,22 @@ void VkDecoderGlobalState::on_vkDestroyDevice(
     VkDevice device,
     const VkAllocationCallbacks* pAllocator) {
     mImpl->on_vkDestroyDevice(device, pAllocator);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateBuffer(
+    VkDevice device,
+    const VkBufferCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkBuffer* pBuffer) {
+    mImpl->on_vkCreateBuffer(device, pCreateInfo, pAllocator, pBuffer);
+}
+
+VkResult VkDecoderGlobalState::on_vkBindBufferMemory(
+    VkDevice device,
+    VkBuffer buffer,
+    VkDeviceMemory memory,
+    VkDeviceSize memoryOffset) {
+    mImpl->on_vkBindBufferMemory(device, buffer, memory, memoryOffset);
 }
 
 VkResult VkDecoderGlobalState::on_vkCreateImage(
