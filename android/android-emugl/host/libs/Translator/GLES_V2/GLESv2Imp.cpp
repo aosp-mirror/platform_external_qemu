@@ -51,7 +51,12 @@
 #include <numeric>
 #include <unordered_map>
 
+
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <sys/time.h>
+#endif
 
 using android::base::c_str;
 
