@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "6824f806_5b888cf0",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-01-22T19:56:10Z",
+      "side": 1,
+      "message": "To contrast my previous comment about separating the API, I think it\u0027s fine to put the VideoInjectionController inside AutomationContrlller internally, since that serves as a convenient way to share state with the camera service.",
+      "range": {
+        "startLine": 484,
+        "startChar": 4,
+        "endLine": 484,
+        "endChar": 86
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7ec14e13_0ebf995e",
         "filename": "android/android-emu/android/automation/VideoInjectionController.h",
         "patchSetId": 6
@@ -43,6 +66,70 @@
         "endLine": 60,
         "endChar": 54
       },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a3509e7d_624b1cc8",
+        "filename": "android/android-emu/android/automation/VideoInjectionController.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-01-22T19:56:10Z",
+      "side": 1,
+      "message": "Yeah, this could be android::base::Optional.",
+      "parentUuid": "7ec14e13_0ebf995e",
+      "range": {
+        "startLine": 60,
+        "startChar": 3,
+        "endLine": 60,
+        "endChar": 54
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "240dfe9a_e4971f25",
+        "filename": "android/android-emu/android/offworld/proto/offworld.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-01-22T19:56:10Z",
+      "side": 1,
+      "message": "I recommend using the video injection proto directly here instead of serializing to a string.  The reason that automation was serialized to a string is that I intended the data to be opaque-- the only source that creates it is the emulator EventGenerated callback, and then it should be replayed as-is through the replay API.\n\nFor this, we need to craft commands in the client library, so having a layer of indirection doesn\u0027t help.",
+      "range": {
+        "startLine": 119,
+        "startChar": 2,
+        "endLine": 121,
+        "endChar": 3
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb26331a_d7e936bb",
+        "filename": "android/android-emu/android/offworld/proto/offworld.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-01-22T19:56:10Z",
+      "side": 1,
+      "message": "Having video playback within the Automation struct seems a bit ambiguous, since there are things like \"replay\" that don\u0027t pertain to video.  Consider hoisting this out to the same level as Snapshot/Automation, creating a VideoInjectionRequest/Response and adding it to the Request/Response module oneof instead.",
       "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
