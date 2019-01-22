@@ -15,7 +15,7 @@ set(android-emu-crash-service_windows-x86_64_src android/crashreport/CrashServic
 set(android-emu-crash-service_windows_msvc-x86_64_src android/crashreport/CrashService_windows.cpp)
 
 android_add_library(android-emu-crash-service)
-target_link_libraries(android-emu-crash-service PRIVATE breakpad_server CURL::libcurl)
+target_link_libraries(android-emu-crash-service PRIVATE android-base breakpad_server CURL::libcurl)
 # Windows-msvc specific dependencies. Need these for posix support.
 android_target_link_libraries(android-emu-crash-service windows_msvc PUBLIC
         msvc-posix-compat

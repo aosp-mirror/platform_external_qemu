@@ -14,6 +14,9 @@
 
 include(prebuilts)
 
+# Make sure we have the protobuf generator functions available.
+prebuilt(PROTOBUF)
+
 # This function is the same as target_compile_definitions
 # (https://cmake.org/cmake/help/v3.5/command/target_compile_definitions.html) The only difference is that the
 # definitions will only be applied if the OS parameter matches the ANDROID_TARGET_TAG or compiler variable.
@@ -266,7 +269,7 @@ function(android_add_protobuf name protofiles)
   set(${name}_src ${PROTO_SRCS} ${PROTO_HDRS})
   android_add_library(${name})
   target_include_directories(${name} PUBLIC ${PROTOBUF_INCLUDE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-  target_link_libraries(${name} PUBLIC ${PROTOBUF_LIBRARIES})
+  # target_link_libraries(${name} PUBLIC ${PROTOBUF_LIBRARIES})
   # Disable generation of information about every class with virtual functions for use by the C++ runtime type
   # identification features (dynamic_cast and typeid). If you don't use those parts of the language, you can save some
   # space by using this flag. Note that exception handling uses the same information, but it will generate it as needed.
@@ -483,11 +486,6 @@ function(android_copy_shared_lib TGT SHARED_LIB NAME)
                     $<TARGET_FILE_DIR:${TGT}>/lib64/${NAME}${CMAKE_SHARED_LIBRARY_SUFFIX})
 endfunction()
 
-function(android_log MSG)
-  if(ANDROID_LOG)
-    message(STATUS ${MSG})
-  endif()
-endfunction()
 
 function(android_validate_sha256 FILE EXPECTED)
   file(SHA256 ${FILE} CHECKSUM)

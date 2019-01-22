@@ -17,7 +17,7 @@ android_add_library(emulator-libext4_utils)
 target_include_directories(emulator-libext4_utils PUBLIC include)
 target_link_libraries(emulator-libext4_utils PRIVATE
                               ZLIB::ZLIB
-                              android-emu-base)
+                              android-base)
 target_link_libraries(emulator-libext4_utils
                               PUBLIC
                               emulator-libsparse
