@@ -15,6 +15,7 @@
 */
 #pragma once
 
+#include <stdint.h>
 #include "OpenGLESDispatch/gldefs.h"
 #include "OpenGLESDispatch/gles_functions.h"
 #include "KHR/khrplatform.h"
