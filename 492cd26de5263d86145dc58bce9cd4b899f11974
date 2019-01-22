@@ -25,6 +25,75 @@
     },
     {
       "key": {
+        "uuid": "ec7bd316_15f92e35",
+        "filename": "android/android-emu/android/automation/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-01-22T21:35:07Z",
+      "side": 1,
+      "message": "Is there a reason why this cannot be a const reference?",
+      "range": {
+        "startLine": 32,
+        "startChar": 4,
+        "endLine": 32,
+        "endChar": 45
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "44032ad2_094995fd",
+        "filename": "android/android-emu/android/automation/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-01-22T21:35:07Z",
+      "side": 1,
+      "message": "Consider adding a GUARDED_BY annotation via\nhttps://cs.corp.google.com/android/external/qemu/android/android-emugl/guest/utils/Mutex.h?rcl\u003d17cb0291cef7e30b7cb9fadaa6047b3fd6e25e98\u0026l\u003d43\n\nThis may require you to add REQUIRED annotations to functions that use mCommandContexts.",
+      "range": {
+        "startLine": 114,
+        "startChar": 15,
+        "endLine": 115,
+        "endChar": 48
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "871799aa_0af01c2d",
+        "filename": "android/android-emu/android/automation/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-01-22T21:35:07Z",
+      "side": 1,
+      "message": "Looking at other parts of the codebase, it may be worth trying std::make_unique",
+      "range": {
+        "startLine": 177,
+        "startChar": 2,
+        "endLine": 178,
+        "endChar": 59
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7ec14e13_0ebf995e",
         "filename": "android/android-emu/android/automation/VideoInjectionController.h",
         "patchSetId": 6
@@ -84,6 +153,30 @@
       "side": 1,
       "message": "Yeah, this could be android::base::Optional.",
       "parentUuid": "7ec14e13_0ebf995e",
+      "range": {
+        "startLine": 60,
+        "startChar": 3,
+        "endLine": 60,
+        "endChar": 54
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9118fec7_6441d9ac",
+        "filename": "android/android-emu/android/automation/VideoInjectionController.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-01-22T21:35:07Z",
+      "side": 1,
+      "message": "+1 to Optional.",
+      "parentUuid": "a3509e7d_624b1cc8",
       "range": {
         "startLine": 60,
         "startChar": 3,
