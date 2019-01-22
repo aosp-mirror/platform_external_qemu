@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7ec14e13_0ebf995e",
+        "filename": "android/android-emu/android/automation/VideoInjectionController.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-01-22T19:41:25Z",
+      "side": 1,
+      "message": "what are the reasons this has to be unique ptr instead of passing by value? I\u0027m asking because this pattern in our codebase is generally not seen before.",
+      "range": {
+        "startLine": 60,
+        "startChar": 3,
+        "endLine": 60,
+        "endChar": 54
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
