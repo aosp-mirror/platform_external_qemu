@@ -18,19 +18,7 @@ set(android-emu-common
     android/async-console.c
     android/async-socket.c
     android/async-socket-connector.c
-    android/async-utils.c
-    android/base/async/AsyncReader.cpp
-    android/base/async/AsyncSocketServer.cpp
-    android/base/async/AsyncWriter.cpp
-    android/base/async/DefaultLooper.cpp
-    android/base/async/Looper.cpp
-    android/base/async/ScopedSocketWatch.cpp
-    android/base/async/ThreadLooper.cpp
-    android/base/network/Dns.cpp
-    android/base/sockets/SocketDrainer.cpp
-    android/base/sockets/SocketUtils.cpp
-    android/base/sockets/SocketWaiter.cpp
-    android/base/threads/internal/ParallelTaskBase.cpp
+    android/async-utils.c`
     android/boot-properties.c
     android/car.cpp
     android/car-cluster.cpp
@@ -214,11 +202,6 @@ set(android-emu-common
     android/update-check/UpdateChecker.cpp
     android/update-check/VersionExtractor.cpp
     android/user-config.cpp
-    android/utils/dns.cpp
-    android/utils/Random.cpp
-    android/utils/sockets.c
-    android/utils/socket_drainer.cpp
-    android/utils/looper.cpp
     android/verified-boot/load_config.cpp
     android/wear-agent/android_wear_agent.cpp
     android/wear-agent/WearAgent.cpp
@@ -303,7 +286,7 @@ android_add_library(android-emu)
 target_link_libraries(android-emu
                               PUBLIC
                               emulator-libext4_utils
-                              android-emu-base
+                              android-base
                               emulator-libsparse
                               emulator-libselinux
                               emulator-libjpeg
@@ -435,7 +418,7 @@ android_add_shared_library(android-emu-shared)
 target_link_libraries(android-emu-shared
                               PRIVATE
                               emulator-libext4_utils
-                              android-emu-base
+                              android-base
                               emulator-libsparse
                               emulator-libselinux
                               emulator-libjpeg
@@ -471,10 +454,10 @@ target_link_libraries(android-emu-shared
 android_target_link_libraries(android-emu-shared
                               windows
                               PRIVATE
-                              emulator-libmman-win32                              
+                              emulator-libmman-win32
                               d3d9::d3d9
                               # IID_IMFSourceReaderCallback
-                              mfuuid::mfuuid                               
+                              mfuuid::mfuuid
                               # For CoTaskMemFree used in camera-capture-windows.cpp
                               ole32::ole32
                               # For GetPerformanceInfo in CrashService_windows.cpp
@@ -555,80 +538,11 @@ target_link_libraries(android-mock-vm-operations PRIVATE gmock)
 
 # The unit tests
 set(android-emu_unittests_src
+    android/base/testing/ProtobufMatchers.cpp # DO NOT DELETE FROM HERE!
     android/automation/AutomationController_unittest.cpp
     android/automation/AutomationEventSink_unittest.cpp
     android/avd/util_unittest.cpp
     android/avd/util_wrapper_unittest.cpp
-    android/base/ArraySize_unittest.cpp
-    android/base/AlignedBuf_unittest.cpp
-    android/base/ContiguousRangeMapper_unittest.cpp
-    android/base/async/Looper_unittest.cpp
-    android/base/async/AsyncSocketServer_unittest.cpp
-    android/base/async/RecurrentTask_unittest.cpp
-    android/base/async/ScopedSocketWatch_unittest.cpp
-    android/base/async/SubscriberList_unittest.cpp
-    android/base/containers/BufferQueue_unittest.cpp
-    android/base/containers/CircularBuffer_unittest.cpp
-    android/base/containers/Lookup_unittest.cpp
-    android/base/containers/SmallVector_unittest.cpp
-    android/base/containers/StaticMap_unittest.cpp
-    android/base/EintrWrapper_unittest.cpp
-    android/base/files/FileShareOpen_unittest.cpp
-    android/base/files/IniFile_unittest.cpp
-    android/base/files/InplaceStream_unittest.cpp
-    android/base/files/MemStream_unittest.cpp
-    android/base/files/PathUtils_unittest.cpp
-    android/base/files/ScopedFd_unittest.cpp
-    android/base/files/ScopedStdioFile_unittest.cpp
-    android/base/files/Stream_unittest.cpp
-    android/base/files/StreamSerializing_unittest.cpp
-    android/base/FunctionView_unittest.cpp
-    android/base/JsonWriter_unittest.cpp
-    android/base/Log_unittest.cpp
-    android/base/memory/LazyInstance_unittest.cpp
-    android/base/memory/MemoryHints_unittest.cpp
-    android/base/memory/MallocUsableSize_unittest.cpp
-    android/base/memory/OnDemand_unittest.cpp
-    android/base/memory/ScopedPtr_unittest.cpp
-    android/base/memory/SharedMemory_unittest.cpp
-    android/base/misc/FileUtils_unittest.cpp
-    android/base/misc/HttpUtils_unittest.cpp
-    android/base/misc/IpcPipe_unittest.cpp
-    android/base/misc/StringUtils_unittest.cpp
-    android/base/misc/Utf8Utils_unittest.cpp
-    android/base/network/Dns_unittest.cpp
-    android/base/network/IpAddress_unittest.cpp
-    android/base/network/NetworkUtils_unittest.cpp
-    android/base/Optional_unittest.cpp
-    android/base/perflogger/Benchmark_unittest.cpp
-    android/base/Pool_unittest.cpp
-    android/base/ProcessControl_unittest.cpp
-    android/base/Result_unittest.cpp
-    android/base/sockets/ScopedSocket_unittest.cpp
-    android/base/sockets/SocketDrainer_unittest.cpp
-    android/base/sockets/SocketUtils_unittest.cpp
-    android/base/sockets/SocketWaiter_unittest.cpp
-    android/base/StringFormat_unittest.cpp
-    android/base/StringParse_unittest.cpp
-    android/base/StringView_unittest.cpp
-    android/base/SubAllocator_unittest.cpp
-    android/base/synchronization/ConditionVariable_unittest.cpp
-    android/base/synchronization/Lock_unittest.cpp
-    android/base/synchronization/ReadWriteLock_unittest.cpp
-    android/base/synchronization/MessageChannel_unittest.cpp
-    android/base/system/System_unittest.cpp
-    android/base/testing/MockUtils_unittest.cpp
-    android/base/testing/ProtobufMatchers.cpp
-    android/base/testing/TestEvent_unittest.cpp
-    android/base/threads/Async_unittest.cpp
-    android/base/threads/FunctorThread_unittest.cpp
-    android/base/threads/ParallelTask_unittest.cpp
-    android/base/threads/Thread_unittest.cpp
-    android/base/threads/ThreadStore_unittest.cpp
-    android/base/TypeTraits_unittest.cpp
-    android/base/Uri_unittest.cpp
-    android/base/Uuid_unittest.cpp
-    android/base/Version_unittest.cpp
     android/camera/CameraFormatConverters_unittest.cpp
     android/cmdline-option_unittest.cpp
     android/CommonReportedInfo_unittest.cpp
@@ -707,21 +621,6 @@ set(android-emu_unittests_src
     android/telephony/TagLengthValue_unittest.cpp
     android/update-check/UpdateChecker_unittest.cpp
     android/update-check/VersionExtractor_unittest.cpp
-    android/utils/aconfig-file_unittest.cpp
-    android/utils/bufprint_unittest.cpp
-    android/utils/dirscanner_unittest.cpp
-    android/utils/dns_unittest.cpp
-    android/utils/eintr_wrapper_unittest.cpp
-    android/utils/file_data_unittest.cpp
-    android/utils/filelock_unittest.cpp
-    android/utils/format_unittest.cpp
-    android/utils/host_bitness_unittest.cpp
-    android/utils/path_unittest.cpp
-    android/utils/property_file_unittest.cpp
-    android/utils/Random_unittest.cpp
-    android/utils/string_unittest.cpp
-    android/utils/sockets_unittest.cpp
-    android/utils/x86_cpuid_unittest.cpp
     android/verified-boot/load_config_unittest.cpp
     android/virtualscene/TextureUtils_unittest.cpp
     android/wear-agent/PairUpWearPhone_unittest.cpp
