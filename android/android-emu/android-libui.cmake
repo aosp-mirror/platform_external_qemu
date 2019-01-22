@@ -234,7 +234,6 @@ endif()
 
 # Set the sources
 set(emulator-libui_src
-    ${ANDROID_HW_CONFIG_H}
     ${ANDROID_LIBUI_SRC_FILES}
     ${ANDROID_SKIN_QT_DYNAMIC_RESOURCES}
     ${ANDROID_SKIN_QT_MOC_SRC_FILES}

@@ -4,8 +4,6 @@ prebuilt(QT5)
 set(CRASH_WINDOWS_ICON ../images/emulator_icon.rc)
 set(android-emu-crash-service_src
     android/crashreport/CrashService_common.cpp
-    # Make sure we are depending on HW_CONFIG
-    ${ANDROID_HW_CONFIG_H}
     )
 
 set(android-emu-crash-service_linux-x86_64_src android/crashreport/CrashService_linux.cpp)
