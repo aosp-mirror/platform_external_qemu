@@ -22,6 +22,30 @@
       "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1e8890bf_43761531",
+        "filename": "android/android-emu/android/automation/VideoInjectionController.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-01-22T19:54:39Z",
+      "side": 1,
+      "message": "This method may return nullptr when there is no command in the queue. \n\nI could also return a \"NoOp Command\" instead. Does it make sense to you?",
+      "parentUuid": "7ec14e13_0ebf995e",
+      "range": {
+        "startLine": 60,
+        "startChar": 3,
+        "endLine": 60,
+        "endChar": 54
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
