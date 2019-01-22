@@ -10,6 +10,11 @@
 # specific language governing permissions and limitations under the License.
 
 # This contains a set of definitions to make working with prebuilts easier and manageable.
+function(android_log MSG)
+  if(ANDROID_LOG)
+    message(STATUS ${MSG})
+  endif()
+endfunction()
 
 set(PREBUILT_COMMON "BLUEZ;LZ4")
 if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")

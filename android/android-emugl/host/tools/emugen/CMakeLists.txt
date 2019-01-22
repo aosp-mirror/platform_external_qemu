@@ -25,7 +25,7 @@ endif()
 # Emugen executable (note not unicode safe!)
 set(emugen_src ApiGen.cpp EntryPoint.cpp main.cpp Parser.cpp strUtils.cpp TypeFactory.cpp)
 android_add_executable(emugen)
-target_include_directories(emugen PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)
+target_include_directories(emugen PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu-base)
 android_target_link_libraries(emugen windows_msvc-x86_64 PRIVATE msvc-posix-compat)
 
 # The unit tests

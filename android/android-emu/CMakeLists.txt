@@ -12,22 +12,8 @@ prebuilt(LIBXML2)
 prebuilt(PNG)
 prebuilt(UUID)
 
-# Add the protobuf dependencies
-add_subdirectory(android/metrics/proto)
-add_subdirectory(android/featurecontrol/proto)
-add_subdirectory(android/snapshot/proto)
-add_subdirectory(android/crashreport/proto)
-add_subdirectory(android/location/proto)
-add_subdirectory(android/emulation/proto)
-add_subdirectory(android/telephony/proto)
-add_subdirectory(android/verified-boot/proto)
-add_subdirectory(android/automation/proto)
-add_subdirectory(android/offworld/proto)
-add_subdirectory(android/darwinn/external/proto/platforms/darwinn/model/config)
-add_subdirectory(android/darwinn/proto)
 
-# Grab the other libraries.
-include(android-emu-base)
+# Grab the other libraries
 include(android-emu)
 include(android-libui)
 include(crash-service)
