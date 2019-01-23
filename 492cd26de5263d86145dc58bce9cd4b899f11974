@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0f894ffe_20539822",
+        "filename": "android/android-emu/android/automation/AutomationController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-01-23T20:53:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6824f806_5b888cf0",
+      "range": {
+        "startLine": 484,
+        "startChar": 4,
+        "endLine": 484,
+        "endChar": 86
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ec7bd316_15f92e35",
         "filename": "android/android-emu/android/automation/VideoInjectionController.cpp",
         "patchSetId": 6
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "797d1275_28f00223",
+        "filename": "android/android-emu/android/automation/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-01-23T20:53:49Z",
+      "side": 1,
+      "message": "For Result class, its unwrapErr method actually modify the object.",
+      "parentUuid": "ec7bd316_15f92e35",
+      "range": {
+        "startLine": 32,
+        "startChar": 4,
+        "endLine": 32,
+        "endChar": 45
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "44032ad2_094995fd",
         "filename": "android/android-emu/android/automation/VideoInjectionController.cpp",
         "patchSetId": 6
@@ -59,6 +107,30 @@
       "writtenOn": "2019-01-22T21:35:07Z",
       "side": 1,
       "message": "Consider adding a GUARDED_BY annotation via\nhttps://cs.corp.google.com/android/external/qemu/android/android-emugl/guest/utils/Mutex.h?rcl\u003d17cb0291cef7e30b7cb9fadaa6047b3fd6e25e98\u0026l\u003d43\n\nThis may require you to add REQUIRED annotations to functions that use mCommandContexts.",
+      "range": {
+        "startLine": 114,
+        "startChar": 15,
+        "endLine": 115,
+        "endChar": 48
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6bca92f1_2d18357c",
+        "filename": "android/android-emu/android/automation/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-01-23T20:53:49Z",
+      "side": 1,
+      "message": "In this class, there is a Lock which guards any scopes that touch this deque, as well as other logic. Do I need to use an extra mutex for the deque?",
+      "parentUuid": "44032ad2_094995fd",
       "range": {
         "startLine": 114,
         "startChar": 15,
@@ -91,6 +163,30 @@
       "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "abb61aed_068e7e5d",
+        "filename": "android/android-emu/android/automation/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-01-23T20:53:49Z",
+      "side": 1,
+      "message": "cleaner. Thanks!",
+      "parentUuid": "871799aa_0af01c2d",
+      "range": {
+        "startLine": 177,
+        "startChar": 2,
+        "endLine": 178,
+        "endChar": 59
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -189,6 +285,30 @@
     },
     {
       "key": {
+        "uuid": "b588d393_f0197f00",
+        "filename": "android/android-emu/android/automation/VideoInjectionController.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-01-23T20:53:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9118fec7_6441d9ac",
+      "range": {
+        "startLine": 60,
+        "startChar": 3,
+        "endLine": 60,
+        "endChar": 54
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "240dfe9a_e4971f25",
         "filename": "android/android-emu/android/offworld/proto/offworld.proto",
         "patchSetId": 6
@@ -212,6 +332,30 @@
     },
     {
       "key": {
+        "uuid": "1097761b_ea610ec1",
+        "filename": "android/android-emu/android/offworld/proto/offworld.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-01-23T20:53:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "240dfe9a_e4971f25",
+      "range": {
+        "startLine": 119,
+        "startChar": 2,
+        "endLine": 121,
+        "endChar": 3
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fb26331a_d7e936bb",
         "filename": "android/android-emu/android/offworld/proto/offworld.proto",
         "patchSetId": 6
@@ -226,6 +370,24 @@
       "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c5b08dc_22f95e26",
+        "filename": "android/android-emu/android/offworld/proto/offworld.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-01-23T20:53:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fb26331a_d7e936bb",
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
