@@ -129,7 +129,7 @@ def main(argv=None):
         version, platform.platform()))
 
     configure()
-    if FLAGS.build == Make.config:
+    if FLAGS.build == 'config':
         print('You can now build with: %s ' % ' '.join(get_build_cmd()))
         return
 
