@@ -581,7 +581,7 @@ int xen_be_register(const char *type, struct XenDevOps *ops)
 
     snprintf(path, sizeof(path), "device-model/%u/backends/%s", xen_domid,
              type);
-    xenstore_mkdir(path, XS_PERM_NONE);
+    xenstore_android_mkdir(path, XS_PERM_NONE);
 
     return xenstore_scan(type, xen_domid, ops);
 }

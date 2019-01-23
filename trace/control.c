@@ -224,7 +224,7 @@ static void trace_init_events(const char *fname)
 
     loc_push_none(&loc);
     loc_set_file(fname, 0);
-    fp = fopen(fname, "r");
+    fp = android_fopen(fname, "r");
     if (!fp) {
         error_report("%s", strerror(errno));
         exit(1);

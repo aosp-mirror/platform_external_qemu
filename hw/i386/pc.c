@@ -860,7 +860,7 @@ static void load_linux(PCMachineState *pcms,
     cmdline_size = (strlen(kernel_cmdline)+16) & ~15;
 
     /* load the kernel header */
-    f = fopen(kernel_filename, "rb");
+    f = android_fopen(kernel_filename, "rb");
     if (!f || !(kernel_size = get_file_size(f)) ||
         fread(header, 1, MIN(ARRAY_SIZE(header), kernel_size), f) !=
         MIN(ARRAY_SIZE(header), kernel_size)) {

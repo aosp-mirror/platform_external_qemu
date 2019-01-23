@@ -324,7 +324,7 @@ void do_m68k_semihosting(CPUM68KState *env, int nr)
                 /* FIXME - check error code? */
                 result = -1;
             } else {
-                result = unlink(p);
+                result =android_unlink(p);
                 unlock_user(p, arg0, 0);
             }
         }

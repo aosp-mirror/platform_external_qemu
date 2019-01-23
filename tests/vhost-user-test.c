@@ -538,10 +538,10 @@ static gboolean _test_server_free(TestServer *server)
         close(server->log_fd);
     }
 
-    unlink(server->socket_path);
+   android_unlink(server->socket_path);
     g_free(server->socket_path);
 
-    unlink(server->mig_path);
+   android_unlink(server->mig_path);
     g_free(server->mig_path);
 
     g_free(server->chr_name);
@@ -1025,7 +1025,7 @@ int main(int argc, char **argv)
     }
     g_main_loop_unref(loop);
 
-    ret = rmdir(tmpfs);
+    ret = android_rmdir(tmpfs);
     if (ret != 0) {
         g_test_message("unable to rmdir: path (%s): %s\n",
                        tmpfs, strerror(errno));

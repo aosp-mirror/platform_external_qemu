@@ -109,7 +109,7 @@ static bool parseQemuOptForQcow2(bool wipeData) {
          */
         reset_version_number_cache = true;
     } else {
-        FILE* vn_cache_file = fopen(sysimg_version_number_cache_path, "r");
+        FILE* vn_cache_file = android_fopen(sysimg_version_number_cache_path, "r");
         int sysimg_version_number = -1;
         /* If the file with version number contained an error, or the
          * saved version number doesn't match the current one, we'll
@@ -239,7 +239,7 @@ static bool parseQemuOptForQcow2(bool wipeData) {
 
     /* Update version number cache if necessary. */
     if (reset_version_number_cache) {
-        FILE* vn_cache_file = fopen(sysimg_version_number_cache_path, "w");
+        FILE* vn_cache_file = android_fopen(sysimg_version_number_cache_path, "w");
         if (vn_cache_file) {
             fprintf(vn_cache_file, "%d\n",
                     avdInfo_getSysImgIncrementalVersion(android_avdInfo));

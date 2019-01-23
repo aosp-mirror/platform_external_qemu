@@ -157,7 +157,7 @@ static int get_dns_addr_resolv_conf(int af, void *pdns_addr, void *cached_addr,
     void *tmp_addr = alloca(addrlen);
     unsigned if_index;
 
-    f = fopen("/etc/resolv.conf", "r");
+    f = android_fopen("/etc/resolv.conf", "r");
     if (!f)
         return -1;
 

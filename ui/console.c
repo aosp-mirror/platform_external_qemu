@@ -343,7 +343,7 @@ out:
 write_err:
     error_setg(errp, "failed to write to file '%s': %s", filename,
                strerror(errno));
-    unlink(filename);
+   android_unlink(filename);
     goto out;
 }
 

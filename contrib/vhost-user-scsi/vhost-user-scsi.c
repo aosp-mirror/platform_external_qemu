@@ -409,7 +409,7 @@ out:
     if (vdev_scsi) {
         g_main_loop_unref(vdev_scsi->loop);
         g_free(vdev_scsi);
-        unlink(unix_fn);
+       android_unlink(unix_fn);
     }
     if (csock >= 0) {
         close(csock);

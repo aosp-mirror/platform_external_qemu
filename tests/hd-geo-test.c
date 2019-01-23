@@ -435,7 +435,7 @@ int main(int argc, char **argv)
 
     for (i = 0; i < backend_last; i++) {
         if (img_file_name[i]) {
-            unlink(img_file_name[i]);
+           android_unlink(img_file_name[i]);
             free(img_file_name[i]);
         }
     }

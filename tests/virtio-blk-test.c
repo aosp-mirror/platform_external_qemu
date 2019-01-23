@@ -78,7 +78,7 @@ static QOSState *pci_test_start(void)
         exit(EXIT_FAILURE);
     }
     global_qtest = qs->qts;
-    unlink(tmp_path);
+   android_unlink(tmp_path);
     g_free(tmp_path);
     return qs;
 }
@@ -93,7 +93,7 @@ static void arm_test_start(void)
                                 "-drive if=none,id=drive0,file=%s,format=raw "
                                 "-device virtio-blk-device,drive=drive0",
                                 tmp_path);
-    unlink(tmp_path);
+   android_unlink(tmp_path);
     g_free(tmp_path);
 }
 

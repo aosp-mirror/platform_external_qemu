@@ -504,7 +504,7 @@ static void raw_close(BlockDriverState *bs)
 
     CloseHandle(s->hfile);
     if (bs->open_flags & BDRV_O_TEMPORARY) {
-        unlink(bs->filename);
+       android_unlink(bs->filename);
     }
 }
 

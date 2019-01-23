@@ -332,7 +332,7 @@ static FILE *ga_open_logfile(const char *logfile)
 {
     FILE *f;
 
-    f = fopen(logfile, "a");
+    f = android_fopen(logfile, "a");
     if (!f) {
         return NULL;
     }
@@ -370,7 +370,7 @@ static bool ga_open_pidfile(const char *pidfile)
     return true;
 
 fail:
-    unlink(pidfile);
+   android_unlink(pidfile);
     close(pidfd);
     return false;
 }
@@ -431,7 +431,7 @@ static bool ga_create_file(const char *path)
 
 static bool ga_delete_file(const char *path)
 {
-    int ret = unlink(path);
+    int ret =android_unlink(path);
     if (ret == -1) {
         g_warning("unable to delete file: %s: %s", path, strerror(errno));
         return false;
@@ -538,7 +538,7 @@ static void become_daemon(const char *pidfile)
 
 fail:
     if (pidfile) {
-        unlink(pidfile);
+       android_unlink(pidfile);
     }
     g_critical("failed to daemonize");
     exit(EXIT_FAILURE);
@@ -1456,7 +1456,7 @@ end:
     g_free(s->state_filepath_isfrozen);
 
     if (config->daemonize) {
-        unlink(config->pid_filepath);
+       android_unlink(config->pid_filepath);
     }
 
     config_free(config);

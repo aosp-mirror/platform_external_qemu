@@ -450,7 +450,6 @@ function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS
       -DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER})
   target_link_libraries(qemu-system-${ANDROID_AARCH}
                         PRIVATE android-qemu-deps
-                                -w
                                 ${QEMU_COMPLETE_LIB}
                                 libqemu2-glue
                                 libqemu2-util
@@ -463,8 +462,8 @@ function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS
        # Workaround b/121393952, msvc linker does not have notion of whole-archive.
        # so we need to use the general approach supported by newer cmake versions
        target_link_libraries(qemu-system-${ANDROID_AARCH} PRIVATE $<TARGET_OBJECTS:qemu2-common>)
-       set_target_properties(qemu-system-${ANDROID_AARCH}
-                             PROPERTIES LINK_FLAGS "/FORCE:multiple /NODEFAULTLIB:LIBCMT")
+       #set_target_properties(qemu-system-${ANDROID_AARCH}
+       #                      PROPERTIES LINK_FLAGS "/FORCE:multiple /NODEFAULTLIB:LIBCMT")
 
   endif()
   # Make the common dependency explicit, as some generators might not detect it properly (Xcode)
