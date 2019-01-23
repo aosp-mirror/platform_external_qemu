@@ -17,6 +17,7 @@
 #include "android/automation/AutomationController.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
 #include "android/offworld/proto/offworld.pb.h"
+#include "android/videoinjection/VideoInjectionController.h"
 
 namespace android {
 namespace offworld {
@@ -31,7 +32,8 @@ void registerOffworldPipeService();
 // Register the offworld pipe service for test, does not check
 // featurecontrol.
 void registerOffworldPipeServiceForTest(
-        automation::AutomationController* automation);
+        automation::AutomationController* automationController,
+        videoinjection::VideoInjectionController* videoInjectionController);
 
 // Send a response to an Offworld pipe.
 bool sendResponse(android::AsyncMessagePipeHandle pipe,
