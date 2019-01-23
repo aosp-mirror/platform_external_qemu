@@ -31,11 +31,7 @@ using android::base::TestSystem;
 using android::base::TestTempDir;
 
 static void make_dir(const std::string& path) {
-#ifdef _WIN32
-    EXPECT_EQ(0, ::mkdir(path.c_str()));
-#else
-    EXPECT_EQ(0, ::mkdir(path.c_str(), 0755));
-#endif
+    EXPECT_EQ(0, ::android_mkdir(path.c_str(), 0755));
 }
 
 static void make_subdir(const std::string& path, const char* subdir) {
