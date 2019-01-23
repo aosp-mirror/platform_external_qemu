@@ -12,6 +12,7 @@
 #include "android/virtualscene/TextureUtils.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/ScopedStdioFile.h"
+#include "android/utils/file_io.h"
 #include "android/base/system/System.h"
 
 #include <gtest/gtest.h>
@@ -109,7 +110,7 @@ static void loadGoldenBmp(StringView filename, TextureUtils::Result* result) {
 
     constexpr size_t kBmpHeaderSize = 54;
 
-    ScopedStdioFile fp(fopen(path.c_str(), "rb"));
+    ScopedStdioFile fp(android_fopen(path.c_str(), "rb"));
     ASSERT_TRUE(fp) << "Failed to open golden image: " << path;
 
     uint8_t header[kBmpHeaderSize];

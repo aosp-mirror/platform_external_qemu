@@ -214,7 +214,7 @@ void mkqcow2(const char *file, unsigned size_mb)
 
 void prepare_blkdebug_script(const char *debug_fn, const char *event)
 {
-    FILE *debug_file = fopen(debug_fn, "w");
+    FILE *debug_file = android_fopen(debug_fn, "w");
     int ret;
 
     fprintf(debug_file, "[inject-error]\n");

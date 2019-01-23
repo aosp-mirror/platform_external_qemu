@@ -181,9 +181,9 @@ static void test_machine(const void *data)
                                 "-no-shutdown -serial chardev:serial0 %s",
                                 codeparam, code ? codetmp : "",
                                 test->machine, serialtmp, test->extra);
-    unlink(serialtmp);
+   android_unlink(serialtmp);
     if (code) {
-        unlink(codetmp);
+       android_unlink(codetmp);
     }
 
     check_guest_output(test, ser_fd);

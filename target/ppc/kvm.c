@@ -1880,7 +1880,7 @@ static int read_cpuinfo(const char *field, char *value, int len)
     int field_len = strlen(field);
     char line[512];
 
-    f = fopen("/proc/cpuinfo", "r");
+    f = android_fopen("/proc/cpuinfo", "r");
     if (!f) {
         return -1;
     }
@@ -1947,7 +1947,7 @@ static int kvmppc_find_cpu_dt(char *buf, int buf_len)
         FILE *f;
         snprintf(buf, buf_len, "%s%s/clock-frequency", PROC_DEVTREE_CPU,
                  dirp->d_name);
-        f = fopen(buf, "r");
+        f = android_fopen(buf, "r");
         if (f) {
             snprintf(buf, buf_len, "%s%s", PROC_DEVTREE_CPU, dirp->d_name);
             fclose(f);
@@ -1973,7 +1973,7 @@ static uint64_t kvmppc_read_int_dt(const char *filename)
     FILE *f;
     int len;
 
-    f = fopen(filename, "rb");
+    f = android_fopen(filename, "rb");
     if (!f) {
         return -1;
     }

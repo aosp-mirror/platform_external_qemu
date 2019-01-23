@@ -316,9 +316,9 @@ static void probe_vmlinux_version_string(const char *kernelFilePath, char *dst,
     long kernelFileSize;
     uint8_t *kernelFileData;
 
-    FILE *f = fopen(kernelFilePath, "rb");
+    FILE *f = android_fopen(kernelFilePath, "rb");
     if (!f) {
-        FATAL("Failed to fopen() kernel file %s\n", kernelFilePath);
+        FATAL("Failed to android_fopen() kernel file %s\n", kernelFilePath);
     }
 
     do {

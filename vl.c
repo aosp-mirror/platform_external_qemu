@@ -4409,7 +4409,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                     if (strcmp(optarg, "-") == 0) {
                         fp = stdout;
                     } else {
-                        fp = fopen(optarg, "w");
+                        fp = android_fopen(optarg, "w");
                         if (fp == NULL) {
                             error_report("open %s: %s", optarg,
                                          strerror(errno));
@@ -4477,7 +4477,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                                  "option may be given");
                     return 1;
                 }
-                vmstate_dump_file = fopen(optarg, "w");
+                vmstate_dump_file = android_fopen(optarg, "w");
                 if (vmstate_dump_file == NULL) {
                     error_report("open %s: %s", optarg, strerror(errno));
                     return 1;

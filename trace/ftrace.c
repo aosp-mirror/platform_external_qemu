@@ -21,7 +21,7 @@ static int find_mount(char *mount_point, const char *fstype)
     FILE *fp;
     int ret = 0;
 
-    fp = fopen("/proc/mounts", "r");
+    fp = android_fopen("/proc/mounts", "r");
     if (fp == NULL) {
         return 0;
     }

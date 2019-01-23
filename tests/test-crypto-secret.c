@@ -74,7 +74,7 @@ static void test_secret_indirect_good(void)
     object_unparent(sec);
     g_free(pw);
     close(fd);
-    unlink(fname);
+   android_unlink(fname);
     g_free(fname);
 }
 
@@ -120,7 +120,7 @@ static void test_secret_indirect_emptyfile(void)
     object_unparent(sec);
     g_free(pw);
     close(fd);
-    unlink(fname);
+   android_unlink(fname);
     g_free(fname);
 }
 

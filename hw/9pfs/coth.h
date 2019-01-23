@@ -64,7 +64,7 @@ int coroutine_fn v9fs_co_lgetxattr(V9fsPDU *, V9fsPath *,
                                    V9fsString *, void *, size_t);
 int coroutine_fn v9fs_co_mknod(V9fsPDU *, V9fsFidState *, V9fsString *, uid_t,
                                gid_t, dev_t, mode_t, struct stat *);
-int coroutine_fn v9fs_co_mkdir(V9fsPDU *, V9fsFidState *, V9fsString *,
+int coroutine_fn v9fs_co_android_mkdir(V9fsPDU *, V9fsFidState *, V9fsString *,
                                mode_t, uid_t, gid_t, struct stat *);
 int coroutine_fn v9fs_co_remove(V9fsPDU *, V9fsPath *);
 int coroutine_fn v9fs_co_rename(V9fsPDU *, V9fsPath *, V9fsPath *);

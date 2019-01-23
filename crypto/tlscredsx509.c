@@ -495,7 +495,7 @@ qcrypto_tls_creds_x509_sanity_check(QCryptoTLSCredsX509 *creds,
 
     memset(cacerts, 0, sizeof(cacerts));
     if (certFile &&
-        access(certFile, R_OK) == 0) {
+        android_access(certFile, R_OK) == 0) {
         cert = qcrypto_tls_creds_load_cert(creds,
                                            certFile, isServer,
                                            errp);
@@ -503,7 +503,7 @@ qcrypto_tls_creds_x509_sanity_check(QCryptoTLSCredsX509 *creds,
             goto cleanup;
         }
     }
-    if (access(cacertFile, R_OK) == 0) {
+    if (android_access(cacertFile, R_OK) == 0) {
         if (qcrypto_tls_creds_load_ca_cert_list(creds,
                                                 cacertFile, cacerts,
                                                 MAX_CERTS, &ncacerts,

@@ -80,7 +80,7 @@ static int nvram_post_load(void *opaque, int version_id)
     }
 
     /* Write back nvram contents */
-    s->file = s->filename ? fopen(s->filename, "wb") : NULL;
+    s->file = s->filename ? android_fopen(s->filename, "wb") : NULL;
     if (s->file) {
         /* Write back contents, as 'wb' mode cleaned the file */
         if (fwrite(s->contents, s->chip_size, 1, s->file) != 1) {
@@ -126,7 +126,7 @@ static int nvram_sysbus_initfn(SysBusDevice *dev)
     sysbus_init_mmio(dev, &s->iomem);
 
     /* Read current file */
-    file = s->filename ? fopen(s->filename, "rb") : NULL;
+    file = s->filename ? android_fopen(s->filename, "rb") : NULL;
     if (file) {
         /* Read nvram contents */
         if (fread(s->contents, s->chip_size, 1, file) != 1) {

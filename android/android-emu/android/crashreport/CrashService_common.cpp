@@ -21,7 +21,7 @@
 #include "android/crashreport/CrashService.h"
 
 #include "android/crashreport/CrashReporter.h"
-
+#include "android/utils/file_io.h"
 #ifdef _WIN32
 #include "android/crashreport/CrashService_windows.h"
 #elif defined(__APPLE__)
@@ -148,7 +148,7 @@ std::string CrashService::getReport() {
     std::string reportFile(mDumpFile);
     reportFile += "report";
 
-    FILE* fp = fopen(reportFile.c_str(), "w+");
+    FILE* fp = android_fopen(reportFile.c_str(), "w+");
     if (!fp) {
         std::string errmsg;
         errmsg += "Error, Couldn't open " + reportFile +

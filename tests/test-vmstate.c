@@ -884,7 +884,7 @@ int main(int argc, char **argv)
     g_test_run();
 
     close(temp_fd);
-    unlink(temp_file);
+   android_unlink(temp_file);
 
     return 0;
 }

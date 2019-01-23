@@ -2417,7 +2417,7 @@ static int css_sch_get_chpids(SubchDev *sch, CssDevId *dev_id)
 
     fid_path = g_strdup_printf("/sys/bus/css/devices/%x.%x.%04x/chpids",
                                dev_id->cssid, dev_id->ssid, dev_id->devid);
-    fd = fopen(fid_path, "r");
+    fd = android_fopen(fid_path, "r");
     if (fd == NULL) {
         error_report("%s: open %s failed", __func__, fid_path);
         g_free(fid_path);
@@ -2451,7 +2451,7 @@ static int css_sch_get_path_masks(SubchDev *sch, CssDevId *dev_id)
 
     fid_path = g_strdup_printf("/sys/bus/css/devices/%x.%x.%04x/pimpampom",
                                dev_id->cssid, dev_id->ssid, dev_id->devid);
-    fd = fopen(fid_path, "r");
+    fd = android_fopen(fid_path, "r");
     if (fd == NULL) {
         error_report("%s: open %s failed", __func__, fid_path);
         g_free(fid_path);
@@ -2481,7 +2481,7 @@ static int css_sch_get_chpid_type(uint8_t chpid, uint32_t *type,
 
     fid_path = g_strdup_printf("/sys/devices/css%x/chp0.%02x/type",
                                dev_id->cssid, chpid);
-    fd = fopen(fid_path, "r");
+    fd = android_fopen(fid_path, "r");
     if (fd == NULL) {
         error_report("%s: open %s failed", __func__, fid_path);
         g_free(fid_path);

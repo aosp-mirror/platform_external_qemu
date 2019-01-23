@@ -717,7 +717,7 @@ void qtest_init(const char *qtest_chrdev, const char *qtest_log, Error **errp)
 
     if (qtest_log) {
         if (strcmp(qtest_log, "none") != 0) {
-            qtest_log_fp = fopen(qtest_log, "w+");
+            qtest_log_fp = android_fopen(qtest_log, "w+");
         }
     } else {
         qtest_log_fp = stderr;

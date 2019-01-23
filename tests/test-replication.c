@@ -164,12 +164,12 @@ static void prepare_imgs(void)
 static void cleanup_imgs(void)
 {
     /* Primary */
-    unlink(p_local_disk);
+   android_unlink(p_local_disk);
 
     /* Secondary */
-    unlink(s_local_disk);
-    unlink(s_active_disk);
-    unlink(s_hidden_disk);
+   android_unlink(s_local_disk);
+   android_unlink(s_active_disk);
+   android_unlink(s_hidden_disk);
 }
 
 static BlockBackend *start_primary(void)

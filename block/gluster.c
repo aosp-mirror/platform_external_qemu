@@ -1064,7 +1064,7 @@ static int qemu_gluster_co_create(BlockdevCreateOptions *options,
         goto out;
     }
 
-    fd = glfs_creat(glfs, opts->location->path,
+    fd = glfs_android_creat((glfs, opts->location->path,
                     O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, S_IRUSR | S_IWUSR);
     if (!fd) {
         ret = -errno;

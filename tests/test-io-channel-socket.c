@@ -414,8 +414,8 @@ static void test_io_channel_unix_fd_pass(void)
     object_unref(OBJECT(dst));
     qapi_free_SocketAddress(listen_addr);
     qapi_free_SocketAddress(connect_addr);
-    unlink(TEST_SOCKET);
-    unlink(TEST_FILE);
+   android_unlink(TEST_SOCKET);
+   android_unlink(TEST_FILE);
     close(testfd);
     for (i = 0; i < nfdrecv; i++) {
         close(fdrecv[i]);
@@ -439,7 +439,7 @@ static void test_io_channel_unix_listen_cleanup(void)
     memset(&un, 0, sizeof(un));
     un.sun_family = AF_UNIX;
     snprintf(un.sun_path, sizeof(un.sun_path), "%s", TEST_SOCKET);
-    unlink(TEST_SOCKET);
+   android_unlink(TEST_SOCKET);
     bind(sock, (struct sockaddr *)&un, sizeof(un));
     ioc->fd = sock;
     ioc->localAddrLen = sizeof(ioc->localAddr);
@@ -450,7 +450,7 @@ static void test_io_channel_unix_listen_cleanup(void)
     object_unref(OBJECT(ioc));
     g_assert(g_file_test(TEST_SOCKET, G_FILE_TEST_EXISTS));
 
-    unlink(TEST_SOCKET);
+   android_unlink(TEST_SOCKET);
 }
 
 #endif /* _WIN32 */

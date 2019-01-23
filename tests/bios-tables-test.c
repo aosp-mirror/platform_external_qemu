@@ -62,13 +62,13 @@ static void free_test_data(test_data *data)
         if (temp->aml_file &&
             !temp->tmp_files_retain &&
             g_strstr_len(temp->aml_file, -1, "aml-")) {
-            unlink(temp->aml_file);
+           android_unlink(temp->aml_file);
         }
         g_free(temp->aml_file);
         g_free(temp->asl);
         if (temp->asl_file &&
             !temp->tmp_files_retain) {
-            unlink(temp->asl_file);
+           android_unlink(temp->asl_file);
         }
         g_free(temp->asl_file);
     }

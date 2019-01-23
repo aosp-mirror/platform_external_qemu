@@ -313,7 +313,7 @@ void lm4549_init(lm4549_state *s, lm4549_callback data_req_cb, void* opaque)
     s->buffer_level = 0;
 
 #if defined(LM4549_DUMP_DAC_INPUT)
-    fp_dac_input = fopen("lm4549_dac_input.pcm", "wb");
+    fp_dac_input = android_fopen("lm4549_dac_input.pcm", "wb");
     if (!fp_dac_input) {
         hw_error("Unable to open lm4549_dac_input.pcm for writing\n");
     }
