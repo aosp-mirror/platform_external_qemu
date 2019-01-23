@@ -14,6 +14,8 @@
 #include "android/utils/looper.h"
 #include "android/utils/tempfile.h"
 #include "android/utils/socket_drainer.h"
+#include "android/utils/file_io.h"
+
 
 // The following unit tests only work on Linux and OS X, because they rely on "fork()"
 // system call, which is not supported by Windows yet.
@@ -33,7 +35,7 @@ namespace {
 const int kBigNumber = (1<<10);
 
 int writeToSocket(const char* filename, int socket_fd) {
-    FILE* ff = fopen(filename, "w");
+    FILE* ff = android_fopen(filename, "w");
     int i = 0;
     for (i = 0; i < kBigNumber; ++i) {
         ssize_t size = socketSend(socket_fd, "a", 1);
@@ -88,7 +90,7 @@ TEST(SocketDrainer, GracefulShutDownFromC) {
     wait(&childExitStatus);
 
     // find out how many bytes have been written
-    FILE* fchild = fopen(kChildFileName, "r");
+    FILE* fchild = android_fopen(kChildFileName, "r");
     int numWritten = 0;
     fscanf(fchild, "%d", &numWritten);
     tempfile_close(childFile);
@@ -128,7 +130,7 @@ TEST(SocketDrainer, GracefulShutDownFromCpp) {
     delete mainLooper;
     wait(&childExitStatus);
 
-    FILE* fchild = fopen(kChildFileName, "r");
+    FILE* fchild = android_fopen(kChildFileName, "r");
     int numWritten = 0;
     fscanf(fchild, "%d", &numWritten);
     tempfile_close(childFile);

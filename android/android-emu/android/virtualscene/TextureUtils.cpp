@@ -19,6 +19,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/ScopedStdioFile.h"
 #include "android/utils/debug.h"
+#include "android/utils/file_io.h"
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
@@ -89,7 +90,7 @@ Optional<TextureUtils::Result> TextureUtils::load(const char* filename) {
 }
 
 Optional<TextureUtils::Result> TextureUtils::loadPNG(const char* filename) {
-    ScopedStdioFile fp(fopen(filename, "rb"));
+    ScopedStdioFile fp(android_fopen(filename, "rb"));
     if (!fp) {
         E("%s: Failed to open file %s", __FUNCTION__, filename);
         return {};
@@ -203,7 +204,7 @@ struct ErrorManager {
 };
 
 Optional<TextureUtils::Result> TextureUtils::loadJPEG(const char* filename) {
-    ScopedStdioFile fp(fopen(filename, "rb"));
+    ScopedStdioFile fp(android_fopen(filename, "rb"));
     if (!fp) {
         E("%s: Failed to open file %s", __FUNCTION__, filename);
         return {};

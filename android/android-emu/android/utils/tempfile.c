@@ -146,7 +146,7 @@ tempfile_close(TempFile*  tempfile)
 #ifdef _WIN32
     DeleteFile(tempfile->name);
 #else
-    unlink(tempfile->name);
+   android_unlink(tempfile->name);
 #endif
 }
 

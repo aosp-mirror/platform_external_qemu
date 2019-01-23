@@ -57,7 +57,7 @@ TEST(tempfile, badClose) {
     const char* filename = "tempfile";
     const std::string filePath =
             android::base::PathUtils::join(gtestTmpDir, filename);
-    FILE* fd = fopen(filePath.c_str(), "w");
+    FILE* fd = android_fopen(filePath.c_str(), "w");
     fclose(fd);
     EXPECT_TRUE(fileExists(filePath));
     tempfile_unref_and_close(filePath.c_str());
