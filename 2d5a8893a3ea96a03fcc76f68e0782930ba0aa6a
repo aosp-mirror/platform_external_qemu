@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ea2e96e_5082bd96",
+        "filename": "android/android-emu/android/offworld/OffworldPipe.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-01-23T20:58:58Z",
+      "side": 1,
+      "message": "I\u0027m not entirely sure what set_sequence_id is in this context, is it to correlate requests/responses?  If so, the protocol has some assertions that you can use:\n\n1) For each Request, there is a synchronous response (the next Response will always belong to the previous Request).\n2) For async responses, a Response will be sent with a pending_async_id.  Any future async messages will have this async id which can be used to correlate.",
+      "range": {
+        "startLine": 344,
+        "startChar": 48,
+        "endLine": 344,
+        "endChar": 63
+      },
+      "revId": "2d5a8893a3ea96a03fcc76f68e0782930ba0aa6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
