@@ -173,7 +173,7 @@ TEST_F(AutomationControllerTest, PlaybackFileCorrupt) {
             System::get()->getHomeDirectory(), kFilename);
 
     std::unique_ptr<StdioStream> stream(
-            new StdioStream(fopen(path.c_str(), "wb"), StdioStream::kOwner));
+            new StdioStream(android_fopen(path.c_str(), "wb"), StdioStream::kOwner));
     ASSERT_TRUE(stream->get());
     stream->putBe32(0);
     stream->putString("Test string please ignore");

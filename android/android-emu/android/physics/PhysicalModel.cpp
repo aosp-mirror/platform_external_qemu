@@ -31,6 +31,8 @@
 #include "android/physics/GlmHelpers.h"
 #include "android/physics/InertialModel.h"
 #include "android/utils/stream.h"
+#include "android/utils/file_io.h"
+
 
 #include <cstdio>
 #include <mutex>
@@ -1082,7 +1084,7 @@ int PhysicalModelImpl::recordGroundTruth(const char* filename) {
     }
 
     mGroundTruthStream.reset(
-            new StdioStream(fopen(path.c_str(), "wb"), StdioStream::kOwner));
+            new StdioStream(android_fopen(path.c_str(), "wb"), StdioStream::kOwner));
     if (!mGroundTruthStream.get()) {
         E("%s: Error unable to open file %s for writing.  "
           "Physical motion ground truth will not be recorded.",

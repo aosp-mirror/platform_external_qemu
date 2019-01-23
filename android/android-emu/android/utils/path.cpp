@@ -130,7 +130,7 @@ path_parent( const char*  path, int  levels )
 /* try to make a directory. returns 0 on success, -1 on failure
  * (error code in errno) */
 APosixStatus
-path_mkdir( const char*  path, int  mode )
+path_android_mkdir( const char*  path, int  mode )
 {
     return HANDLE_EINTR(android_mkdir(path, mode));
 }
@@ -174,7 +174,7 @@ path_mkdir_recursive( char*  path, unsigned  len, int  mode )
     /* at this point, we now the parent exists */
     old_c     = path[len];
     path[len] = 0;
-    ret       = path_mkdir( path, mode );
+    ret       = path_android_mkdir( path, mode );
     path[len] = old_c;
 
     return ret;
@@ -188,7 +188,7 @@ path_mkdir_if_needed( const char*  path, int  mode )
     int  ret = 0;
 
     if (!path_exists(path)) {
-        ret = path_mkdir(path, mode);
+        ret = path_android_mkdir(path, mode);
 
         if (ret < 0 && errno == ENOENT) {
             char      temp[MAX_PATH];
@@ -365,7 +365,7 @@ path_empty_file( const char*  path )
 #else
     /* on Unix, only allow the owner to read/write, since the file *
      * may contain some personal data we don't want to see exposed */
-    int fd = creat(path, S_IRUSR | S_IWUSR);
+    int fd = android_creat(path, S_IRUSR | S_IWUSR);
 #endif
     if (fd >= 0) {
         close(fd);
@@ -393,7 +393,7 @@ APosixStatus path_copy_file_impl(const char*  dest, const char*  source) {
         fd = _wopen(wideDest, _O_CREAT | _O_TRUNC | _O_RDWR | _O_BINARY);
     }
 #else  // !_WIN32
-    const int fd = creat(dest, S_IRUSR | S_IWUSR);
+    const int fd = android_creat(dest, S_IRUSR | S_IWUSR);
     const int fs = open(source, S_IREAD);
 #endif  // !_WIN32
     if (fs >= 0 && fd >= 0) {
@@ -693,7 +693,7 @@ APosixStatus path_delete_dir(const char* path) {
     APosixStatus contentsDeleteStatus =
         path_delete_dir_contents(path);
 
-    auto res = rmdir(path);
+    auto res = android_rmdir(path);
     res = contentsDeleteStatus ? contentsDeleteStatus : res;
     return res;
 }

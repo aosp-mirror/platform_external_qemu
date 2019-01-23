@@ -10,6 +10,8 @@
 // GNU General Public License for more details.
 
 #include "android/base/files/ScopedStdioFile.h"
+#include "android/utils/file_io.h"
+
 
 #include <gtest/gtest.h>
 
@@ -29,13 +31,13 @@ TEST(ScopedStdioFile, DefaultConstructor) {
 }
 
 TEST(ScopedStdioFile, Constructor) {
-    ScopedStdioFile f(fopen(kNullFile, "rb"));
+    ScopedStdioFile f(android_fopen(kNullFile, "rb"));
     EXPECT_TRUE(f.get());
 }
 
 TEST(ScopedStdioFile, Release) {
     FILE* handle = NULL;
-    ScopedStdioFile f(fopen(kNullFile, "rb"));
+    ScopedStdioFile f(android_fopen(kNullFile, "rb"));
     EXPECT_TRUE(f.get());
     handle = f.release();
     EXPECT_FALSE(f.get());
@@ -45,7 +47,7 @@ TEST(ScopedStdioFile, Release) {
 
 TEST(ScopedStdioFile, Swap) {
     ScopedStdioFile f1;
-    ScopedStdioFile f2(fopen(kNullFile, "rb"));
+    ScopedStdioFile f2(android_fopen(kNullFile, "rb"));
     EXPECT_FALSE(f1.get());
     EXPECT_TRUE(f2.get());
     FILE* fp = f2.get();

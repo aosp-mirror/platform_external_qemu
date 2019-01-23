@@ -152,7 +152,7 @@ EXTERN(FILE *) write_stdout JPP((void));
 
 /* miscellaneous useful macros */
 
-#ifdef DONT_USE_B_MODE		/* define mode parameters for fopen() */
+#ifdef DONT_USE_B_MODE		/* define mode parameters for android_fopen() */
 #define READ_BINARY	"r"
 #define WRITE_BINARY	"w"
 #else

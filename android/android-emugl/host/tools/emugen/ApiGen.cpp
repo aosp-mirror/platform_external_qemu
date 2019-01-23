@@ -15,6 +15,7 @@
 */
 #include "ApiGen.h"
 #include "android/base/EnumFlags.h"
+#include "android/utils/file_io.h"
 #include "EntryPoint.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -843,7 +844,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
     for (size_t i = 0; i < n; i++) {
         EntryPoint *e = &at(i);
         if (e->unsupported()) {
-            fprintf(fp, 
+            fprintf(fp,
                     "\tthis->%s = (%s_%s_proc_t) &enc_unsupported;\n",
                     e->name().c_str(),
                     e->name().c_str(),

@@ -23,7 +23,7 @@ text_getc (FILE * file)
 /* A comment/newline sequence is returned as a newline */
 {
   register int ch;
-  
+
   ch = getc(file);
   if (ch == '#') {
     do {
@@ -41,7 +41,7 @@ read_text_integer (FILE * file, long * result, int * termchar)
 {
   register int ch;
   register long val;
-  
+
   /* Skip any leading whitespace, detect EOF */
   do {
     ch = text_getc(file);
@@ -50,7 +50,7 @@ read_text_integer (FILE * file, long * result, int * termchar)
       return FALSE;
     }
   } while (isspace(ch));
-  
+
   if (! isdigit(ch)) {
     *termchar = ch;
     return FALSE;
@@ -87,7 +87,7 @@ read_quant_tables (j_compress_ptr cinfo, char * filename,
   long val;
   unsigned int table[DCTSIZE2];
 
-  if ((fp = fopen(filename, "r")) == NULL) {
+  if ((fp = android_fopen(filename, "r")) == NULL) {
     fprintf(stderr, "Can't open table file %s\n", filename);
     return FALSE;
   }
@@ -179,7 +179,7 @@ read_scan_script (j_compress_ptr cinfo, char * filename)
 #define MAX_SCANS  100		/* quite arbitrary limit */
   jpeg_scan_info scans[MAX_SCANS];
 
-  if ((fp = fopen(filename, "r")) == NULL) {
+  if ((fp = android_fopen(filename, "r")) == NULL) {
     fprintf(stderr, "Can't open scan definition file %s\n", filename);
     return FALSE;
   }

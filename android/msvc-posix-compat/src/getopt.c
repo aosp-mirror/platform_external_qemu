@@ -49,6 +49,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "msvc-posix.h"
+#include "msvc-getopt.h"
 
 #include <errno.h>
 #include <stdarg.h>

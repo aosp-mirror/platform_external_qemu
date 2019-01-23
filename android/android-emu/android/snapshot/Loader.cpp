@@ -17,6 +17,7 @@
 #include "android/base/files/StdioStream.h"
 #include "android/snapshot/TextureLoader.h"
 #include "android/utils/path.h"
+#include "android/utils/file_io.h"
 
 using android::base::PathUtils;
 using android::base::StdioStream;
@@ -203,7 +204,7 @@ void Loader::synchronize(bool isOnExit) {
         }
 
         if (!mRamLoader->hasGaps()) {
-            const auto ram = fopen(
+            const auto ram = ::android_fopen(
                     PathUtils::join(mSnapshot.dataDir(), kRamFileName).c_str(), "rb");
 
             if (!ram) return;

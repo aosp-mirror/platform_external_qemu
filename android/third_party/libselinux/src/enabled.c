@@ -36,7 +36,7 @@ int is_selinux_enabled(void)
         }
 
 	/* Drop back to detecting it the long way. */
-	fp = fopen("/proc/filesystems", "r");
+	fp = android_fopen("/proc/filesystems", "r");
 	if (!fp)
 		return -1;
 

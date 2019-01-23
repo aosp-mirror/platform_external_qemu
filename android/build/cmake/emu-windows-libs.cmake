@@ -81,7 +81,7 @@ if(WIN32 AND MSVC)
   set_target_properties(diaguids::diaguids
                         PROPERTIES INTERFACE_LINK_LIBRARIES ${DIASDK_GUIDS_LIBRARY} INTERFACE_INCLUDE_DIRECTORIES
                                    ${DIASDK_INCLUDE_DIR})
-  
+
   # Find the ATL path, it will typically look something like this.
   #C:\Program Files (x86)\Microsoft Visual Studio\2017\xxx\VC\Tools\MSVC\14.16.27023\atlmfc\include
   find_path(ATL_INCLUDE_DIR # Set variable DIASDK_INCLUDE_DIR

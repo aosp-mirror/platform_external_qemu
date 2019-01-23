@@ -31,7 +31,7 @@
 #endif
 #endif
 
-#ifdef DONT_USE_B_MODE		/* define mode parameters for fopen() */
+#ifdef DONT_USE_B_MODE		/* define mode parameters for android_fopen() */
 #define READ_BINARY	"r"
 #else
 #ifdef VMS			/* VMS is very nonstandard */
@@ -468,7 +468,7 @@ main (int argc, char **argv)
     usage();
   }
   if (argn < argc) {
-    if ((infile = fopen(argv[argn], READ_BINARY)) == NULL) {
+    if ((infile = android_fopen(argv[argn], READ_BINARY)) == NULL) {
       fprintf(stderr, "%s: can't open %s\n", progname, argv[argn]);
       exit(EXIT_FAILURE);
     }

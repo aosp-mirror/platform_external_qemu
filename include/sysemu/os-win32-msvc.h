@@ -1456,4 +1456,6 @@ dirent_set_errno(
 #define gettimeofday(tv,tz) qemu_gettimeofday(tv)
 #define mkstemp qemu_mkstemp
 
+#include "msvc-files.h"
+
 #endif  // QEMU_OS_WIN32_MSVC_H

@@ -92,24 +92,17 @@ public:
     // Create an empty directory under the temporary directory.
     bool makeSubDir(StringView subdir) {
         std::string path = makeSubPath(subdir);
-#ifdef _WIN32
-        if (mkdir(path.c_str()) < 0) {
+        if (android_mkdir(path.c_str(), 0755) < 0) {
             PLOG(ERROR) << "Can't create " << path.c_str() << ": ";
             return false;
         }
-#else
-        if (mkdir(path.c_str(), 0755) < 0) {
-            PLOG(ERROR) << "Can't create " << path.c_str() << ": ";
-            return false;
-        }
-#endif
         return true;
     }
 
     // Create an empty file under the temporary directory.
     bool makeSubFile(StringView file) {
         std::string path = makeSubPath(file);
-        int fd = ::open(path.c_str(), O_WRONLY|O_CREAT, 0744);
+        int fd = ::android_open(path.c_str(), O_WRONLY|O_CREAT, 0744);
         if (fd < 0) {
             PLOG(ERROR) << "Can't create " << path.c_str() << ": ";
             return false;
@@ -146,11 +139,11 @@ private:
             if (S_ISDIR(stats.st_mode)) {
                 DeleteRecursive(entry_path);
             } else {
-                unlink(entry_path.c_str());
+               android_unlink(entry_path.c_str());
             }
         }
         closedir(dir);
-        rmdir(path.c_str());
+        android_rmdir(path.c_str());
     }
 
 #ifdef _WIN32
@@ -200,7 +193,7 @@ private:
             int random = rand() % 1000000;
 
             snprintf(path_end - kSuffixLen, kSuffixLen + 1, "%0d", random);
-            if (mkdir(path) == 0) {
+            if (android_mkdir(path, 0755) == 0) {
                 return path;  // Success
             }
             if (errno != EEXIST) {
