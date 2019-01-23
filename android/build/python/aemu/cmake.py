@@ -83,8 +83,7 @@ def configure():
     cmake_cmd += Toolchain.from_string(FLAGS.target).to_cmd()
     cmake_cmd += Crash.from_string(FLAGS.crash).to_cmd()
     cmake_cmd += BuildConfig.from_string(FLAGS.config).to_cmd()
-    if FLAGS.qtwebengine:
-        cmake_cmd += ['-DNO_QTWEBENGINE=1']
+    cmake_cmd += ['-DQTWEBENGINE=%s' % FLAGS.qtwebengine]
     if FLAGS.sdk_revision:
         cmake_cmd += ['-DOPTION_SDK_TOOLS_REVISION=%s' % FLAGS.sdk_revision]
     if FLAGS.sdk_build_number:
