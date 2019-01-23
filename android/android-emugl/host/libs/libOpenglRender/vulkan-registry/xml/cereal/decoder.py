@@ -96,10 +96,13 @@ def emit_decode_parameters(typeInfo, api, cgen):
     for p in paramsToRead:
         emit_unmarshal(typeInfo, p, cgen)
 
-def emit_dispatch_call(api, cgen):
+def emit_call_log(api, cgen):
     cgen.beginIf("m_logCalls")
     cgen.stmt("fprintf(stderr, \"call %s\\n\");" % api.name)
     cgen.endIf()
+
+def emit_dispatch_call(api, cgen):
+    emit_call_log(api, cgen)
     cgen.vkApiCall(api, customPrefix="m_vk->")
 
 def emit_global_state_wrapped_call(api, cgen):
@@ -134,6 +137,7 @@ def emit_default_decoding(typeInfo, api, cgen):
     emit_decode_finish(cgen)
 
 def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
+    emit_call_log(api, cgen)
     emit_decode_parameters(typeInfo, api, cgen)
     emit_global_state_wrapped_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)
@@ -142,6 +146,7 @@ def emit_global_state_wrapped_decoding(typeInfo, api, cgen):
 
 ## Custom decoding definitions##################################################
 def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
+    emit_call_log(api, cgen)
     emit_decode_parameters(typeInfo, api, cgen)
 
     cgen.beginIf("!m_state->usingDirectMapping()")
@@ -166,6 +171,7 @@ def decode_vkFlushMappedMemoryRanges(typeInfo, api, cgen):
     emit_decode_finish(cgen)
 
 def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
+    emit_call_log(api, cgen)
     emit_decode_parameters(typeInfo, api, cgen)
     emit_dispatch_call(api, cgen)
     emit_decode_parameters_writeback(typeInfo, api, cgen)

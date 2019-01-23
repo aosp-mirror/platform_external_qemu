@@ -95,6 +95,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_VERSION_1_0
             case OP_vkCreateInstance:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkCreateInstance\n");;
+                }
                 const VkInstanceCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkInstance* pInstance;
@@ -276,6 +280,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceProperties:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetPhysicalDeviceProperties\n");;
+                }
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceProperties* pProperties;
                 uint64_t cgen_var_15;
@@ -342,6 +350,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceMemoryProperties:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetPhysicalDeviceMemoryProperties\n");;
+                }
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceMemoryProperties* pMemoryProperties;
                 uint64_t cgen_var_21;
@@ -395,6 +407,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateDevice:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkCreateDevice\n");;
+                }
                 VkPhysicalDevice physicalDevice;
                 const VkDeviceCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -427,6 +443,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDestroyDevice:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkDestroyDevice\n");;
+                }
                 VkDevice device;
                 const VkAllocationCallbacks* pAllocator;
                 uint64_t cgen_var_28;
@@ -654,6 +674,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetDeviceQueue:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetDeviceQueue\n");;
+                }
                 VkDevice device;
                 uint32_t queueFamilyIndex;
                 uint32_t queueIndex;
@@ -740,6 +764,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkAllocateMemory:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkAllocateMemory\n");;
+                }
                 VkDevice device;
                 const VkMemoryAllocateInfo* pAllocateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -772,6 +800,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkFreeMemory:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkFreeMemory\n");;
+                }
                 VkDevice device;
                 VkDeviceMemory memory;
                 const VkAllocationCallbacks* pAllocator;
@@ -795,6 +827,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkMapMemory:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkMapMemory\n");;
+                }
                 VkDevice device;
                 VkDeviceMemory memory;
                 VkDeviceSize offset;
@@ -833,6 +869,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkUnmapMemory:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkUnmapMemory\n");;
+                }
                 VkDevice device;
                 VkDeviceMemory memory;
                 uint64_t cgen_var_66;
@@ -848,6 +888,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkFlushMappedMemoryRanges:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkFlushMappedMemoryRanges\n");;
+                }
                 VkDevice device;
                 uint32_t memoryRangeCount;
                 const VkMappedMemoryRange* pMemoryRanges;
@@ -890,6 +934,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkInvalidateMappedMemoryRanges:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkInvalidateMappedMemoryRanges\n");;
+                }
                 VkDevice device;
                 uint32_t memoryRangeCount;
                 const VkMappedMemoryRange* pMemoryRanges;
@@ -1758,6 +1806,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateImage:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkCreateImage\n");;
+                }
                 VkDevice device;
                 const VkImageCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -1790,6 +1842,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDestroyImage:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkDestroyImage\n");;
+                }
                 VkDevice device;
                 VkImage image;
                 const VkAllocationCallbacks* pAllocator;
@@ -7771,6 +7827,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_ANDROID_native_buffer
             case OP_vkGetSwapchainGrallocUsageANDROID:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetSwapchainGrallocUsageANDROID\n");;
+                }
                 VkDevice device;
                 VkFormat format;
                 VkImageUsageFlags imageUsage;
@@ -7792,6 +7852,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkAcquireImageANDROID:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkAcquireImageANDROID\n");;
+                }
                 VkDevice device;
                 VkImage image;
                 int nativeFenceFd;
@@ -7819,6 +7883,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkQueueSignalReleaseImageANDROID:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkQueueSignalReleaseImageANDROID\n");;
+                }
                 VkQueue queue;
                 uint32_t waitSemaphoreCount;
                 const VkSemaphore* pWaitSemaphores;
@@ -9716,6 +9784,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_GOOGLE_address_space
             case OP_vkMapMemoryIntoAddressSpaceGOOGLE:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkMapMemoryIntoAddressSpaceGOOGLE\n");;
+                }
                 VkDevice device;
                 VkDeviceMemory memory;
                 uint64_t* pAddress;
