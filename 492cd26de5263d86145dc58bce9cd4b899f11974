@@ -190,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "fcb57a08_885a3859",
+        "filename": "android/android-emu/android/automation/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-01-23T21:42:03Z",
+      "side": 1,
+      "message": "Too bad. The compiler for WIndows version does not recognize it. \nhttps://android-build.googleplex.com/builds/pending/P7534051/sdk_tools_linux/latest/view/logs/build_error.log",
+      "parentUuid": "abb61aed_068e7e5d",
+      "range": {
+        "startLine": 177,
+        "startChar": 2,
+        "endLine": 178,
+        "endChar": 59
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7ec14e13_0ebf995e",
         "filename": "android/android-emu/android/automation/VideoInjectionController.h",
         "patchSetId": 6
