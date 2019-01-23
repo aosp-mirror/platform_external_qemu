@@ -699,7 +699,7 @@ out:
     return err;
 }
 
-static int local_mkdir(FsContext *fs_ctx, V9fsPath *dir_path,
+static int local_android_mkdir(FsContext *fs_ctx, V9fsPath *dir_path,
                        const char *name, FsCred *credp)
 {
     int err = -1;

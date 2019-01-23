@@ -918,7 +918,7 @@ static void qdict_stress_test(void)
     QString *value;
     const char *test_file_path = "qdict-test-data.txt";
 
-    test_file = fopen(test_file_path, "r");
+    test_file = android_fopen(test_file_path, "r");
     g_assert(test_file != NULL);
 
     // Create the dict

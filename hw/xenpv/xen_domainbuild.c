@@ -6,7 +6,7 @@
 
 #include <xenguest.h>
 
-static int xenstore_domain_mkdir(char *path)
+static int xenstore_domain_android_mkdir(char *path)
 {
     struct xs_permissions perms_ro[] = {{
             .id    = 0, /* set owner: dom0 */
@@ -24,7 +24,7 @@ static int xenstore_domain_mkdir(char *path)
     char subpath[256];
     int i;
 
-    if (!xs_mkdir(xenstore, 0, path)) {
+    if (!xs_android_mkdir(xenstore, 0, path)) {
         fprintf(stderr, "%s: xs_mkdir %s: failed\n", __func__, path);
 	return -1;
     }
@@ -35,7 +35,7 @@ static int xenstore_domain_mkdir(char *path)
 
     for (i = 0; writable[i]; i++) {
         snprintf(subpath, sizeof(subpath), "%s/%s", path, writable[i]);
-        if (!xs_mkdir(xenstore, 0, subpath)) {
+        if (!xs_android_mkdir(xenstore, 0, subpath)) {
             fprintf(stderr, "%s: xs_mkdir %s: failed\n", __func__, subpath);
             return -1;
         }
@@ -57,7 +57,7 @@ int xenstore_domain_init1(const char *kernel, const char *ramdisk,
     dom = xs_get_domain_path(xenstore, xen_domid);
     snprintf(vm,  sizeof(vm),  "/vm/%s", uuid_string);
 
-    xenstore_domain_mkdir(dom);
+    xenstore_domain_android_mkdir(dom);
 
     xenstore_write_str(vm, "image/ostype",  "linux");
     if (kernel)

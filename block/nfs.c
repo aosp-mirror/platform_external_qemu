@@ -516,7 +516,7 @@ static int64_t nfs_client_open(NFSClient *client, BlockdevOptionsNfs *opts,
     }
 
     if (flags & O_CREAT) {
-        ret = nfs_creat(client->context, file, 0600, &client->fh);
+        ret = nfs_android_creat(client->context, file, 0600, &client->fh);
         if (ret < 0) {
             error_setg(errp, "Failed to create file: %s",
                        nfs_get_error(client->context));

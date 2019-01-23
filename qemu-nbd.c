@@ -1057,7 +1057,7 @@ int main(int argc, char **argv)
 
     blk_unref(blk);
     if (sockpath) {
-        unlink(sockpath);
+       android_unlink(sockpath);
     }
 
     qemu_opts_del(sn_opts);

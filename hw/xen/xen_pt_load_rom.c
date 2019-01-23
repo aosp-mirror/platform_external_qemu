@@ -40,7 +40,7 @@ void *pci_assign_dev_load_option_rom(PCIDevice *dev, struct Object *owner,
              domain, bus, slot, function);
 
     /* Write "1" to the ROM file to enable it */
-    fp = fopen(rom_file, "r+");
+    fp = android_fopen(rom_file, "r+");
     if (fp == NULL) {
         if (errno != ENOENT) {
             error_report("pci-assign: Cannot open %s: %s", rom_file, strerror(errno));

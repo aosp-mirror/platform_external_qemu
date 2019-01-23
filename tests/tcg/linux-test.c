@@ -89,15 +89,15 @@ void test_file(void)
     struct dirent *de;
 
     /* clean up, just in case */
-    unlink(TESTPATH "/file1");
-    unlink(TESTPATH "/file2");
-    unlink(TESTPATH "/file3");
-    rmdir(TESTPATH);
+   android_unlink(TESTPATH "/file1");
+   android_unlink(TESTPATH "/file2");
+   android_unlink(TESTPATH "/file3");
+   android_rmdir(TESTPATH);
 
     if (getcwd(cur_dir, sizeof(cur_dir)) == NULL)
         error("getcwd");
 
-    chk_error(mkdir(TESTPATH, 0755));
+    chk_error(android_mkdir(TESTPATH, 0755));
 
     chk_error(chdir(TESTPATH));
 

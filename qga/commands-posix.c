@@ -382,7 +382,7 @@ safe_open_or_create(const char *path, const char *mode, Error **errp)
 
             close(fd);
             if (oflag & O_CREAT) {
-                unlink(path);
+               android_unlink(path);
             }
         }
     }
@@ -745,7 +745,7 @@ static void build_fs_mount_list(FsMountList *mounts, Error **errp)
     unsigned int devmajor, devminor;
     int ret, dir_s, dir_e, type_s, type_e, dev_s, dev_e;
 
-    fp = fopen(mountinfo, "r");
+    fp = android_fopen(mountinfo, "r");
     if (!fp) {
         build_fs_mount_list_from_mtab(mounts, errp);
         return;
@@ -1652,7 +1652,7 @@ static int guest_get_network_stats(const char *name,
     FILE *fp;
     char *line = NULL, *colon;
     size_t n = 0;
-    fp = fopen(devinfo, "r");
+    fp = android_fopen(devinfo, "r");
     if (!fp) {
         return -1;
     }

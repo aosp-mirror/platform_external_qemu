@@ -380,7 +380,7 @@ writer_init( Writer*  w, const char*  fn )
     w->p   = w->buff;
     w->end = w->buff + sizeof(w->buff);
 
-    w->fd  = creat( fn, 0755 );
+    w->fd  = android_creat( fn, 0755 );
     if (w->fd < 0)
         return -1;
 

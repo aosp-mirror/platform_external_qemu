@@ -91,7 +91,7 @@ static kbd_layout_t *parse_keyboard_layout(const name2keysym_t *table,
 
     filename = qemu_find_file(QEMU_FILE_TYPE_KEYMAP, language);
     trace_keymap_parse(filename);
-    f = filename ? fopen(filename, "r") : NULL;
+    f = filename ? android_fopen(filename, "r") : NULL;
     g_free(filename);
     if (!f) {
         fprintf(stderr, "Could not read keymap file: '%s'\n", language);

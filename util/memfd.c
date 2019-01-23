@@ -131,7 +131,7 @@ void *qemu_memfd_alloc(const char *name, size_t size, unsigned int seals,
 
         fname = g_strdup_printf("%s/memfd-XXXXXX", tmpdir);
         mfd = mkstemp(fname);
-        unlink(fname);
+       android_unlink(fname);
         g_free(fname);
 
         if (mfd == -1 ||

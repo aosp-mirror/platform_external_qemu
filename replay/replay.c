@@ -243,7 +243,7 @@ static void replay_enable(const char *fname, int mode)
 
     atexit(replay_finish);
 
-    replay_file = fopen(fname, fmode);
+    replay_file = android_fopen(fname, fmode);
     if (replay_file == NULL) {
         fprintf(stderr, "Replay: open %s: %s\n", fname, strerror(errno));
         exit(1);

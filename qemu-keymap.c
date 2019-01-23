@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
             names.options = optarg;
             break;
         case 'f':
-            outfile = fopen(optarg, "w");
+            outfile = android_fopen(optarg, "w");
             if (outfile == NULL) {
                 fprintf(stderr, "open %s: %s\n", optarg, strerror(errno));
                 exit(1);

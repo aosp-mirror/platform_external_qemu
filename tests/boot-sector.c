@@ -161,5 +161,5 @@ void boot_sector_test(QTestState *qts)
 /* unlink boot disk file.  */
 void boot_sector_cleanup(const char *fname)
 {
-    unlink(fname);
+   android_unlink(fname);
 }

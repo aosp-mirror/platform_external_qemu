@@ -716,7 +716,7 @@ static int slirp_smb(SlirpState* s, const char *exported_dir,
     }
     smb_conf = g_strdup_printf("%s/%s", s->smb_dir, "smb.conf");
 
-    f = fopen(smb_conf, "w");
+    f = android_fopen(smb_conf, "w");
     if (!f) {
         slirp_smb_cleanup(s);
         error_setg(errp,

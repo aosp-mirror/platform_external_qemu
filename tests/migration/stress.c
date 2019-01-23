@@ -64,7 +64,7 @@ static int get_command_arg_str(const char *name,
                                char **val)
 {
     static char line[1024];
-    FILE *fp = fopen("/proc/cmdline", "r");
+    FILE *fp = android_fopen("/proc/cmdline", "r");
     char *start, *end;
 
     if (fp == NULL) {
@@ -262,7 +262,7 @@ static int stress(unsigned long long ramsizeGB, int ncpus)
 
 static int mount_misc(const char *fstype, const char *dir)
 {
-    if (mkdir(dir, 0755) < 0 && errno != EEXIST) {
+    if (android_mkdir(dir, 0755) < 0 && errno != EEXIST) {
         fprintf(stderr, "%s (%05d): ERROR: cannot create %s: %s\n",
                 argv0, gettid(), dir, strerror(errno));
         return -1;

@@ -58,7 +58,7 @@ void fileData_initEmpty(FileData* data) {
 
 
 int fileData_initFromFile(FileData* data, const char* filePath) {
-    FILE* f = fopen(filePath, "rb");
+    FILE* f = android_fopen(filePath, "rb");
     if (!f)
         return -errno;
 

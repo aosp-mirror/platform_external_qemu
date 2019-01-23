@@ -479,7 +479,7 @@ int main(int argc, char **argv)
     g_thread_join(thread);
     g_unlink(test.addr->u.q_unix.path);
     qapi_free_SocketAddress(test.addr);
-    g_rmdir(tmp_path);
+    g_android_rmdir(tmp_path);
     g_free(tmp_path);
     g_free(args);
     return ret;

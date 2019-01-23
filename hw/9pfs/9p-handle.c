@@ -237,7 +237,7 @@ static int handle_mknod(FsContext *fs_ctx, V9fsPath *dir_path,
     return ret;
 }
 
-static int handle_mkdir(FsContext *fs_ctx, V9fsPath *dir_path,
+static int handle_android_mkdir(FsContext *fs_ctx, V9fsPath *dir_path,
                        const char *name, FsCred *credp)
 {
     int dirfd, ret;

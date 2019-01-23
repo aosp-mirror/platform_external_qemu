@@ -2335,7 +2335,7 @@ void qmp_memsave(int64_t addr, int64_t size, const char *filename,
         return;
     }
 
-    f = fopen(filename, "wb");
+    f = android_fopen(filename, "wb");
     if (!f) {
         error_setg_file_open(errp, errno, filename);
         return;
@@ -2369,7 +2369,7 @@ void qmp_pmemsave(int64_t addr, int64_t size, const char *filename,
     uint32_t l;
     uint8_t buf[1024];
 
-    f = fopen(filename, "wb");
+    f = android_fopen(filename, "wb");
     if (!f) {
         error_setg_file_open(errp, errno, filename);
         return;

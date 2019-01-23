@@ -623,7 +623,7 @@ static int raw_open_common(BlockDriverState *bs, QDict *options,
     ret = 0;
 fail:
     if (filename && (bdrv_flags & BDRV_O_TEMPORARY)) {
-        unlink(filename);
+       android_unlink(filename);
     }
     qemu_opts_del(opts);
     return ret;
