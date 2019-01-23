@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "d2cfc233_b2508ae3",
+        "filename": "android/android-emu/android/automation/VideoInjectionController.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-01-23T22:21:56Z",
+      "side": 1,
+      "message": "Ideally if the annotations supported android::base::Lock, it would give Clang insight into how you\u0027re using your locks and expose potential deadlocks. Unfortunately it seems the annotations only work on mutexes.",
+      "parentUuid": "6bca92f1_2d18357c",
+      "range": {
+        "startLine": 114,
+        "startChar": 15,
+        "endLine": 115,
+        "endChar": 48
+      },
+      "revId": "492cd26de5263d86145dc58bce9cd4b899f11974",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "871799aa_0af01c2d",
         "filename": "android/android-emu/android/automation/VideoInjectionController.cpp",
         "patchSetId": 6
