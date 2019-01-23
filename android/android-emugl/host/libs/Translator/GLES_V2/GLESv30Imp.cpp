@@ -750,13 +750,17 @@ GL_APICALL void GL_APIENTRY glGenTransformFeedbacks(GLsizei n, GLuint * ids) {
         gles30usages->set_is_used(true);
         gles30usages->set_gen_transform_feedbacks(true);
     }
-    ctx->dispatcher().glGenTransformFeedbacks(n, ids);
+    for (int i = 0; i < n; i++) {
+        ids[i] = ctx->genTransformFeedbackName(0, true);
+    }
 }
 
 GL_APICALL void GL_APIENTRY glDeleteTransformFeedbacks(GLsizei n, const GLuint * ids) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
-    ctx->dispatcher().glDeleteTransformFeedbacks(n, ids);
+    for (GLsizei i = 0; i < n; i++) {
+        ctx->deleteTransformFeedback(ids[i]);
+    }
 }
 
 GL_APICALL void GL_APIENTRY glBindTransformFeedback(GLenum target, GLuint id) {
@@ -765,7 +769,9 @@ GL_APICALL void GL_APIENTRY glBindTransformFeedback(GLenum target, GLuint id) {
         gles30usages->set_is_used(true);
         gles30usages->set_gen_transform_feedbacks(true);
     }
-    ctx->dispatcher().glBindTransformFeedback(target, id);
+    ctx->bindTransformFeedback(id);
+    ctx->dispatcher().glBindTransformFeedback(
+            target, ctx->getTransformFeedbackGlobalName(id));
 }
 
 GL_APICALL void GL_APIENTRY glPauseTransformFeedback() {
