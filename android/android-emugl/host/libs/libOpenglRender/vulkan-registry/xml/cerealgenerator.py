@@ -185,6 +185,8 @@ class IOStream;
 #include "android/base/AlignedBuf.h"
 #include "android/base/Pool.h"
 
+#include <cutils/properties.h>
+
 #include "goldfish_vk_marshaling_guest.h"
 #include "goldfish_vk_deepcopy_guest.h"
 #include "goldfish_vk_handlemap_guest.h"
