@@ -78,6 +78,9 @@ NamedObject::NamedObject(GenNameInfo genNameInfo,
             case NamedObjectType::VERTEX_ARRAY_OBJECT:
                 GLEScontext::dispatcher().glGenVertexArrays(1, &m_globalName);
                 break;
+            case NamedObjectType::TRANSFORM_FEEDBACK:
+                GLEScontext::dispatcher().glGenTransformFeedbacks(1, &m_globalName);
+                break;
             default:
                 m_globalName = 0;
         }
@@ -116,6 +119,9 @@ NamedObject::~NamedObject() {
         break;
     case NamedObjectType::VERTEX_ARRAY_OBJECT:
         GLEScontext::dispatcher().glDeleteVertexArrays(1, &m_globalName);
+        break;
+    case NamedObjectType::TRANSFORM_FEEDBACK:
+        GLEScontext::dispatcher().glDeleteTransformFeedbacks(1, &m_globalName);
         break;
     default:
         break;

@@ -6,6 +6,7 @@ set(GLES_V2_translator_src
     SamplerData.cpp
     ShaderParser.cpp
     ShaderValidator.cpp
+    TransformFeedbackData.cpp
     ProgramData.cpp
     ANGLEShaderParser.cpp)
 android_add_shared_library(GLES_V2_translator)
