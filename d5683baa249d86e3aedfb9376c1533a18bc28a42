@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "854fd927_689267b2",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 797,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-01-23T00:59:14Z",
+      "side": 1,
+      "message": "is it necessary to move the m_transformFeedbackBuffer field to GLESv2Context? Can we keep ti in GLEScontext and save a virtual call for the buffer bind methods?",
+      "revId": "d5683baa249d86e3aedfb9376c1533a18bc28a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d1509bfb_ec2cad26",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/TransformFeedbackData.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-01-23T00:59:14Z",
+      "side": 1,
+      "message": "nit: remove comments/trailing whitespace when final",
+      "revId": "d5683baa249d86e3aedfb9376c1533a18bc28a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
