@@ -35,7 +35,7 @@ static void test_io_channel_file_helper(int flags)
     mode_t mask;
     int ret;
 
-    unlink(TEST_FILE);
+   android_unlink(TEST_FILE);
     src = QIO_CHANNEL(qio_channel_file_new_path(
                           TEST_FILE,
                           flags, TEST_MASK,
@@ -57,7 +57,7 @@ static void test_io_channel_file_helper(int flags)
     g_assert_cmpint(ret, >, -1);
     g_assert_cmpuint(TEST_MASK & ~mask, ==, st.st_mode & 0777);
 
-    unlink(TEST_FILE);
+   android_unlink(TEST_FILE);
     object_unref(OBJECT(src));
     object_unref(OBJECT(dst));
 }
@@ -86,7 +86,7 @@ static void test_io_channel_fd(void)
                     ==,
                     TYPE_QIO_CHANNEL_FILE);
 
-    unlink(TEST_FILE);
+   android_unlink(TEST_FILE);
     object_unref(OBJECT(ioc));
 }
 

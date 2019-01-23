@@ -252,7 +252,7 @@ main(int argc, char *argv[])
         }
 
         /* write pid file */
-        fp = fopen(args.pid_file, "w");
+        fp = android_fopen(args.pid_file, "w");
         if (fp == NULL) {
             fprintf(stderr, "cannot write pid file: %s\n", strerror(errno));
             goto err_close;

@@ -554,7 +554,7 @@ int get_tmp_filename(char *filename, int size)
         return -errno;
     }
     if (close(fd) != 0) {
-        unlink(filename);
+       android_unlink(filename);
         return -errno;
     }
     return 0;

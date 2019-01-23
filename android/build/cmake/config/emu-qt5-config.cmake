@@ -169,7 +169,7 @@ elseif(ANDROID_TARGET_OS STREQUAL "windows_msvc")
   #     qtmain.a --> WinMain() --> qMain() --> qt_main()
   #
   # Clang/VS doesn't support linking directly to dlls. We linking to the import libraries instead (.lib).
-  set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${PREBUILT_ROOT}/lib/qtmain.lib)
+  set(QT5_LIBRARIES ${PREBUILT_ROOT}/lib/qtmain.lib)
   # Obtained by running ListDlls.exe from sysinternals tool
   set(QT5_SHARED_DEPENDENCIES
       ${PREBUILT_ROOT}/bin/Qt5Svg.dll>lib64/qt/lib/Qt5Svg.dll;

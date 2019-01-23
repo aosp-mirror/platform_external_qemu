@@ -28,6 +28,7 @@
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
+#include "android/utils/file_io.h"
 
 #include <algorithm>
 #include <atomic>
@@ -367,7 +368,7 @@ void RamLoader::readBlockPages(base::Stream* stream,
           savedMemPath != activeMemPath))) {
         auto ramFilePath = PathUtils::join(getSnapshotBaseDir(), savedMemPath);
 
-        auto ramFilePtr = fopen(ramFilePath.c_str(), "rb");
+        auto ramFilePtr = android_fopen(ramFilePath.c_str(), "rb");
 
         if (!ramFilePtr) {
             mHasError = true;

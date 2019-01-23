@@ -377,6 +377,6 @@ int main(int argc, char **argv)
     ret = g_test_run();
 
     qtest_quit(global_qtest);
-    unlink(tmp_path);
+   android_unlink(tmp_path);
     return ret;
 }

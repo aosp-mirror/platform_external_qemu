@@ -5,7 +5,7 @@
     },
     {
         "name": "Linux",
-        "toolchainFile": "${workspaceFolder}/android/build/cmake/toolchain-linux-x86_64.cmake"
+        "toolchainFile": "/usr/local/google/home/jansene/src/emu-master-dev/external/qemu/android/build/cmake/toolchain-linux-x86_64.cmake"
     },
     {
         "name": "Linux -> (MingW)",

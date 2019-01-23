@@ -109,7 +109,7 @@ fixture_tear_down(TestFixture *fixture, gconstpointer data)
     g_unlink(tmp);
     g_free(tmp);
 
-    g_rmdir(fixture->test_dir);
+    g_android_rmdir(fixture->test_dir);
     g_free(fixture->test_dir);
 }
 
@@ -447,7 +447,7 @@ static void test_qga_file_ops(gconstpointer fix)
 
     /* check content */
     path = g_build_filename(fixture->test_dir, "foo", NULL);
-    f = fopen(path, "r");
+    f = android_fopen(path, "r");
     g_free(path);
     g_assert_nonnull(f);
     count = fread(tmp, 1, sizeof(tmp), f);

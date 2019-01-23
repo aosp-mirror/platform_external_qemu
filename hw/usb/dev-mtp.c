@@ -396,7 +396,7 @@ static MTPObject *usb_mtp_object_alloc(MTPState *s, uint32_t handle,
         goto ignore;
     }
 
-    if (access(o->path, R_OK) != 0) {
+    if (android_access(o->path, R_OK) != 0) {
         goto ignore;
     }
 
@@ -1209,7 +1209,7 @@ static int usb_mtp_deletefn(MTPState *s, MTPObject *o, uint32_t trans)
     }
 
     if (o->format == FMT_ASSOCIATION) {
-        if (rmdir(o->path)) {
+        if (android_rmdir(o->path)) {
             partial_delete = true;
         } else {
             usb_mtp_object_free_one(s, o);
@@ -1597,7 +1597,7 @@ static void usb_mtp_write_data(MTPState *s)
     if (s->dataset.filename) {
         path = g_strdup_printf("%s/%s", parent->path, s->dataset.filename);
         if (s->dataset.format == FMT_ASSOCIATION) {
-            d->fd = mkdir(path, mask);
+            d->fd = android_mkdir(path, mask);
             goto free;
         }
         if (s->dataset.size < d->length) {

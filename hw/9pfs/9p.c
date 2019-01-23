@@ -2186,7 +2186,7 @@ static void coroutine_fn v9fs_create(void *opaque)
         goto out;
     }
     if (perm & P9_STAT_MODE_DIR) {
-        err = v9fs_co_mkdir(pdu, fidp, &name, perm & 0777,
+        err = v9fs_co_android_mkdir(pdu, fidp, &name, perm & 0777,
                             fidp->uid, -1, &stbuf);
         if (err < 0) {
             goto out;
@@ -3151,7 +3151,7 @@ out_nofid:
     v9fs_string_free(&glock.client_id);
 }
 
-static void coroutine_fn v9fs_mkdir(void *opaque)
+static void coroutine_fn v9fs_android_mkdir(void *opaque)
 {
     V9fsPDU *pdu = opaque;
     size_t offset = 7;
@@ -3169,7 +3169,7 @@ static void coroutine_fn v9fs_mkdir(void *opaque)
     if (err < 0) {
         goto out_nofid;
     }
-    trace_v9fs_mkdir(pdu->tag, pdu->id, fid, name.data, mode, gid);
+    trace_v9fs_android_mkdir(pdu->tag, pdu->id, fid, name.data, mode, gid);
 
     if (name_is_illegal(name.data)) {
         err = -ENOENT;
@@ -3186,7 +3186,7 @@ static void coroutine_fn v9fs_mkdir(void *opaque)
         err = -ENOENT;
         goto out_nofid;
     }
-    err = v9fs_co_mkdir(pdu, fidp, &name, mode, fidp->uid, gid, &stbuf);
+    err = v9fs_co_android_mkdir(pdu, fidp, &name, mode, fidp->uid, gid, &stbuf);
     if (err < 0) {
         goto out;
     }

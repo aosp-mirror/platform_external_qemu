@@ -64,7 +64,7 @@ static V9fsSynthNode *v9fs_add_dir_node(V9fsSynthNode *parent, int mode,
     return node;
 }
 
-int qemu_v9fs_synth_mkdir(V9fsSynthNode *parent, int mode,
+int qemu_v9fs_synth_android_mkdir(V9fsSynthNode *parent, int mode,
                           const char *name, V9fsSynthNode **result)
 {
     int ret;
@@ -358,7 +358,7 @@ static int synth_mknod(FsContext *fs_ctx, V9fsPath *path,
     return -1;
 }
 
-static int synth_mkdir(FsContext *fs_ctx, V9fsPath *path,
+static int synth_android_mkdir(FsContext *fs_ctx, V9fsPath *path,
                        const char *buf, FsCred *credp)
 {
     errno = EPERM;
@@ -558,7 +558,7 @@ static int synth_init(FsContext *ctx, Error **errp)
         for (i = 0; i < P9_MAXWELEM; i++) {
             char *name = g_strdup_printf(QTEST_V9FS_SYNTH_WALK_FILE, i);
 
-            ret = qemu_v9fs_synth_mkdir(node, 0700, name, &node);
+            ret = qemu_v9fs_synth_android_mkdir(node, 0700, name, &node);
             assert(!ret);
             g_free(name);
         }

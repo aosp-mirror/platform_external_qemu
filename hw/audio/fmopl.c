@@ -1097,7 +1097,7 @@ FM_OPL *OPLCreate(int clock, int rate)
 #ifdef OPL_OUTPUT_LOG
 	if(!opl_dbg_fp)
 	{
-		opl_dbg_fp = fopen("opllog.opl","wb");
+		opl_dbg_fp = android_fopen("opllog.opl","wb");
 		opl_dbg_maxchip = 0;
 	}
 	if(opl_dbg_fp)

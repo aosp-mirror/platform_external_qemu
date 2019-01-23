@@ -66,7 +66,7 @@ static int parse_acl_file(const char *filename, ACLList *acl_list)
     char line[4096];
     ACLRule *acl_rule;
 
-    f = fopen(filename, "r");
+    f = android_fopen(filename, "r");
     if (f == NULL) {
         return -1;
     }

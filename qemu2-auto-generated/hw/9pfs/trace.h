@@ -677,14 +677,14 @@ static inline void trace_v9fs_getlock_return(uint16_t tag, uint8_t id, uint8_t t
 #define TRACE_V9FS_MKDIR_BACKEND_DSTATE() ( \
     false)
 
-static inline void _nocheck__trace_v9fs_mkdir(uint16_t tag, uint8_t id, int32_t fid, char* name, int mode, uint32_t gid)
+static inline void _nocheck__trace_v9fs_android_mkdir(uint16_t tag, uint8_t id, int32_t fid, char* name, int mode, uint32_t gid)
 {
 }
 
-static inline void trace_v9fs_mkdir(uint16_t tag, uint8_t id, int32_t fid, char* name, int mode, uint32_t gid)
+static inline void trace_v9fs_android_mkdir(uint16_t tag, uint8_t id, int32_t fid, char* name, int mode, uint32_t gid)
 {
     if (true) {
-        _nocheck__trace_v9fs_mkdir(tag, id, fid, name, mode, gid);
+        _nocheck__trace_v9fs_android_mkdir(tag, id, fid, name, mode, gid);
     }
 }
 

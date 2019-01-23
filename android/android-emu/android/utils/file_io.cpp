@@ -24,6 +24,9 @@
 #include <unistd.h>
 #endif
 
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #ifdef _WIN32
 #include <direct.h>
 #include <windows.h>
@@ -47,8 +50,9 @@ using android::base::ScopedCPtr;
 
 extern "C" {
 
+
 FILE* android_fopen(const char* path, const char* mode) {
-    return WIDEN_CALL_2(fopen, path, mode);
+    return g_fopen(path, mode);
 }
 
 FILE* android_popen(const char* path, const char* mode) {
@@ -89,37 +93,40 @@ int android_lstat(const char* path, struct stat* buf) {
 }
 
 int android_access(const char* path, int mode) {
-    return WIDEN_CALL_1(access, path, mode);
+    return g_access(path, mode);
 }
 
-#ifdef _WIN32
 // The Windows version does not have a mode parameter so just drop that name to
 // avoid compiler warnings about unused parameters
-int android_mkdir(const char* path, mode_t) {
-    return _wmkdir(Win32UnicodeString(path).c_str());
-}
-#else
 int android_mkdir(const char* path, mode_t mode) {
-    return mkdir(path, mode);
+    return g_mkdir(path, mode);
 }
-#endif
 
 int android_creat(const char* path, mode_t mode) {
 #ifndef _WIN32
     return android_open(path, O_CREAT | O_WRONLY | O_TRUNC, mode);
 #else
-    int res = WIDEN_CALL_1(creat, path, mode);
-    android::base::fdSetCloexec(res);
-    return res;
+    int fd = -1;
+    Win32UnicodeString unipath(path);
+    // Be careful here! The security model in windows is very different.
+    int md = mode & (_S_IREAD | _S_IWRITE);
+    _wsopen_s(&fd, unipath.c_str(), _O_CREAT | _O_BINARY | _O_TRUNC | _O_WRONLY, _SH_DENYNO, _S_IWRITE);
+    int err = errno;
+    printf("err = %x\n", err);
+    return fd;
 #endif
 }
 
 int android_unlink(const char* path) {
-    return WIDEN_CALL_1(unlink, path);
+    return g_unlink(path);
 }
 
 int android_chmod(const char* path, mode_t mode) {
-    return WIDEN_CALL_1(chmod, path, mode);
+    return g_chmod(path, mode);
+}
+
+int android_rmdir(const char* path) {
+    return g_rmdir(path);
 }
 
 // The code below uses the fact that GCC supports something called weak linking.

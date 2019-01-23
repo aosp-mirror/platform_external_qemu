@@ -457,7 +457,7 @@ void fips_set_state(bool requested)
 {
 #ifdef __linux__
     if (requested) {
-        FILE *fds = fopen("/proc/sys/crypto/fips_enabled", "r");
+        FILE *fds = android_fopen("/proc/sys/crypto/fips_enabled", "r");
         if (fds != NULL) {
             fips_enabled = (fgetc(fds) == '1');
             fclose(fds);

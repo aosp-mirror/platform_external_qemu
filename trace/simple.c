@@ -320,7 +320,7 @@ void st_set_trace_file_enabled(bool enable)
             .header_version = HEADER_VERSION,
         };
 
-        trace_fp = fopen(trace_file_name, "wb");
+        trace_fp = android_fopen(trace_file_name, "wb");
         if (!trace_fp) {
             return;
         }

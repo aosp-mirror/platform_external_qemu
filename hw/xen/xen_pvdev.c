@@ -57,7 +57,7 @@ void xen_config_cleanup(void)
     }
 }
 
-int xenstore_mkdir(char *path, int p)
+int xenstore_android_mkdir(char *path, int p)
 {
     struct xs_permissions perms[2] = {
         {
@@ -68,7 +68,7 @@ int xenstore_mkdir(char *path, int p)
         }
     };
 
-    if (!xs_mkdir(xenstore, 0, path)) {
+    if (!xs_android_mkdir(xenstore, 0, path)) {
         xen_pv_printf(NULL, 0, "xs_mkdir %s: failed\n", path);
         return -1;
     }

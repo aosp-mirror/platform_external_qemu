@@ -320,7 +320,7 @@ static char *create_blob_file(void)
         }
         close(fd);
         if (ret == -1) {
-            unlink(pathname);
+           android_unlink(pathname);
             g_free(pathname);
         }
     }
@@ -353,7 +353,7 @@ static void test_i440fx_firmware(FirmwareTestFixture *fixture,
      * filesystem. This is also the reason why we recreate the blob every time
      * this function is invoked.
      */
-    unlink(fw_pathname);
+   android_unlink(fw_pathname);
     g_free(fw_pathname);
 
     /* check below 4G */

@@ -76,7 +76,7 @@ static void test_parse_range(void)
     qemu_set_dfilter_ranges("0..0xffffffffffffffff", &err);
     g_assert(qemu_log_in_addr_range(0));
     g_assert(qemu_log_in_addr_range(UINT64_MAX));
- 
+
     qemu_set_dfilter_ranges("2..1", &err);
     error_free_or_abort(&err);
 
@@ -121,7 +121,7 @@ static void rmdir_full(gchar const *root)
         g_free(entry_path);
     }
     g_dir_close(root_gdir);
-    g_assert(g_rmdir(root) == 0);
+    g_assert(g_android_rmdir(root) == 0);
 }
 
 int main(int argc, char **argv)

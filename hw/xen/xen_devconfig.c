@@ -19,8 +19,8 @@ static int xen_config_dev_dirs(const char *ftype, const char *btype, int vdev,
     snprintf(be, len, "%s/backend/%s/%d/%d", dom, btype, xen_domid, vdev);
     free(dom);
 
-    xenstore_mkdir(fe, XS_PERM_READ | XS_PERM_WRITE);
-    xenstore_mkdir(be, XS_PERM_READ);
+    xenstore_android_mkdir(fe, XS_PERM_READ | XS_PERM_WRITE);
+    xenstore_android_mkdir(be, XS_PERM_READ);
     return 0;
 }
 

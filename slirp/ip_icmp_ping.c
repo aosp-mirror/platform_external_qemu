@@ -57,7 +57,7 @@ int ping_binary_send(struct socket* so, struct mbuf* m, int hlen) {
             return -1;
         snprintf(ping_cmd, sizeof(ping_cmd), "ping -c 1 -t %d %s 2>&1", ip->ip_ttl, dest_ip_addr);
     }
-    FILE* p = popen(ping_cmd, "r");
+    FILE* p = android_popen(ping_cmd, "r");
     if (!p) {
         error_report("Failed to popen: %s due to: %s", ping_cmd, strerror(errno));
         return -1;
