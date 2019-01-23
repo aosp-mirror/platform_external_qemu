@@ -112,9 +112,9 @@ protected:
 
     void saveSnapshot() {
         std::unique_ptr<StdioStream> m_stream(new StdioStream(
-                    fopen(mSnapshotFile.c_str(), "wb"), StdioStream::kOwner));
+                    android_fopen(mSnapshotFile.c_str(), "wb"), StdioStream::kOwner));
         std::shared_ptr<TextureSaver> m_texture_saver(new TextureSaver(StdioStream(
-                        fopen(mTextureFile.c_str(), "wb"), StdioStream::kOwner)));
+                        android_fopen(mTextureFile.c_str(), "wb"), StdioStream::kOwner)));
         mFb->onSave(m_stream.get(), m_texture_saver);
 
         m_stream->close();
@@ -126,9 +126,9 @@ protected:
         mFb->bindContext(0, 0, 0);
 
         std::unique_ptr<StdioStream> m_stream(new StdioStream(
-                    fopen(mSnapshotFile.c_str(), "rb"), StdioStream::kOwner));
+                    android_fopen(mSnapshotFile.c_str(), "rb"), StdioStream::kOwner));
         std::shared_ptr<TextureLoader> m_texture_loader(
-                new TextureLoader(StdioStream(fopen(mTextureFile.c_str(), "rb"),
+                new TextureLoader(StdioStream(android_fopen(mTextureFile.c_str(), "rb"),
                         StdioStream::kOwner)));
         mFb->onLoad(m_stream.get(), m_texture_loader);
         m_stream->close();

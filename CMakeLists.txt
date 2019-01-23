@@ -101,6 +101,9 @@ endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_definitions("-D__STDC_CONSTANT_MACROS" "-D_LIBCPP_VERSION=__GLIBCPP__")
 
+  # If macro expansion goes wrong, we like to see why
+  add_c_flag("-fmacro-backtrace-limit=0")
+
   # Clang goes balistic on our codebase, so let's just suppress all the things.
   add_c_flag("-Wno-mismatched-tags")
   add_c_flag("-Wno-\#warnings")
@@ -136,6 +139,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_c_flag("-Wno-unused-private-field")
   add_c_flag("-Wno-unused-value")
   add_c_flag("-Wswitch")
+  add_c_flag("-Wno-defaulted-function-deleted")
+  add_c_flag("-Werror")
 endif()
 
 if(MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -319,6 +324,7 @@ set(ANDROID_QEMU_COMMON_DEVICES "hw/pci/goldfish_address_space.c;hw/i386/pc_piix
 # Darwin definitions
 set(ANDROID_QEMU_i386_DEVICES_darwin-x86_64 "hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
 set(ANDROID_QEMU_arm_DEVICES_darwin-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
+target_compile_definitions(android-qemu-deps INTERFACE "-DANDROID_IO")
 android_target_compile_options(android-qemu-deps darwin-x86_64 INTERFACE
                                # Emit extra code to check for buffer overflows, such as stack smashing
                                # attacks. This is done by adding a guard variable to functions with
@@ -405,6 +411,7 @@ set(qemu2-common_src ${qemu2-shared_sources} ${qemu2-shared_generated_sources})
 if(MSVC)
   # Once we have a newer version of cmake we can generate the object library in a platform independent way b/121393952
   android_add_object_library(qemu2-common)
+  target_link_libraries(qemu2-common PUBLIC msvc-posix-compat)
 else()
   android_add_library(qemu2-common)
 endif()
@@ -424,11 +431,13 @@ endif()
 android_add_library(libqemu2-util)
 target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
 android_target_link_libraries(libqemu2-util windows PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
+android_target_link_libraries(libqemu2-util windows_msvc-x86_64 PUBLIC msvc-posix-compat)
 target_compile_definitions(libqemu2-util PRIVATE "-DPOISON_CONFIG_ANDROID")
 
 set(libqemustub_src ${libqemustub_sources} ${libqemuutil_generated_sources})
 android_add_library(libqemustub)
 target_link_libraries(libqemustub PRIVATE android-qemu-deps)
+android_target_link_libraries(libqemustub windows_msvc-x86_64 PUBLIC msvc-posix-compat)
 
 # Qemu-img
 set(qemu-img_src ${qemu-img_sources} block/qcow2-bitmap.c)

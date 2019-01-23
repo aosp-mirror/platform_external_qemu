@@ -13,14 +13,15 @@
 
 #include "android/base/files/ScopedFd.h"
 #include "android/utils/eintr_wrapper.h"
+#include "android/utils/file_io.h"
 #include "android/utils/tempfile.h"
 
 #include <fcntl.h>
 #include <gtest/gtest.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <limits>
 #include <string>
-#include <sys/types.h>
-#include <sys/stat.h>
 
 using android::base::ScopedFd;
 

@@ -13,6 +13,7 @@ else ()
             src/label_file.c
             src/label_android_property.c
             )
+    target_link_libraries(emulator-libselinux PRIVATE android-emu-base)
     target_include_directories(emulator-libselinux PUBLIC include)
     target_include_directories(emulator-libselinux PRIVATE .)
     if (APPLE)
