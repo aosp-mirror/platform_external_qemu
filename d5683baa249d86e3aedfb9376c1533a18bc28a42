@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "34153f1c_75512117",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 797,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-01-23T01:03:04Z",
+      "side": 1,
+      "message": "I will remove this function.",
+      "parentUuid": "854fd927_689267b2",
+      "revId": "d5683baa249d86e3aedfb9376c1533a18bc28a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d1509bfb_ec2cad26",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/TransformFeedbackData.cpp",
         "patchSetId": 1
@@ -33,6 +51,24 @@
       "revId": "d5683baa249d86e3aedfb9376c1533a18bc28a42",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2b994af0_fdb0b1af",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/TransformFeedbackData.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-01-23T01:03:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d1509bfb_ec2cad26",
+      "revId": "d5683baa249d86e3aedfb9376c1533a18bc28a42",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
