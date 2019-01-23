@@ -19,7 +19,7 @@
 #endif
 #include "callbacks.h"
 #include "label_internal.h"
-
+#include "android/utils/file_io.h"
 /*
  * Internals, mostly moved over from matchpathcon.c
  */
@@ -47,7 +47,7 @@ typedef struct stem {
 /* Our stored configuration */
 struct saved_data {
 	/*
-	 * The array of specifications, initially in the same order as in 
+	 * The array of specifications, initially in the same order as in
 	 * the specification file. Sorting occurs based on hasMetaChars.
 	 */
 	spec_t *spec_arr;
@@ -197,7 +197,7 @@ static void spec_hasMetaChars(struct spec *spec)
 	spec->hasMetaChars = 0;
 	spec->prefix_len = len;
 
-	/* Look at each character in the RE specification string for a 
+	/* Look at each character in the RE specification string for a
 	 * meta character. Return when any meta character reached. */
 	while (c != end) {
 		switch (*c) {
@@ -256,7 +256,7 @@ static int compile_regex(struct saved_data *data, spec_t *spec, char **errbuf)
 	*cp = '\0';
 
 	/* Compile the regular expression. */
-	regerr = regcomp(&spec->regex, anchored_regex, 
+	regerr = regcomp(&spec->regex, anchored_regex,
 			 REG_EXTENDED | REG_NOSUB);
 	if (regerr != 0) {
 		size_t errsz = 0;
@@ -388,7 +388,7 @@ static int process_line(struct selabel_handle *rec,
 			}
 		}
 
-		/* Determine if specification has 
+		/* Determine if specification has
 		 * any meta characters in the RE */
 		spec_hasMetaChars(&spec_arr[nspec]);
 	}
@@ -429,7 +429,7 @@ static int init(struct selabel_handle *rec, const struct selinux_opt *opts,
 		}
 
 	/* Open the specification file. */
-	if ((fp = fopen(path, "r")) == NULL)
+	if ((fp = android_fopen(path, "r")) == NULL)
 		return -1;
 
 	if (fstat(fileno(fp), &sb) < 0)
@@ -442,13 +442,13 @@ static int init(struct selabel_handle *rec, const struct selinux_opt *opts,
 	if (!baseonly) {
 		snprintf(homedir_path, sizeof(homedir_path), "%s.homedirs",
 			 path);
-		homedirfp = fopen(homedir_path, "r");
+		homedirfp = android_fopen(homedir_path, "r");
 
 		snprintf(local_path, sizeof(local_path), "%s.local", path);
-		localfp = fopen(local_path, "r");
+		localfp = android_fopen(local_path, "r");
 	}
 
-	/* 
+	/*
 	 * Perform two passes over the specification file.
 	 * The first pass counts the number of specifications and
 	 * performs simple validation of the input.  At the end
@@ -567,7 +567,7 @@ static void closef(struct selabel_handle *rec)
 		free(data->spec_arr);
 	if (data->stem_arr)
 		free(data->stem_arr);
-	
+
 	free(data);
 }
 
@@ -611,7 +611,7 @@ static struct selabel_lookup_rec *lookup_common(struct selabel_handle *rec,
 	file_stem = find_stem_from_file(data, &buf);
 	mode &= S_IFMT;
 
-	/* 
+	/*
 	 * Check for matching specifications in reverse order, so that
 	 * the last matching specification is used.
 	 */

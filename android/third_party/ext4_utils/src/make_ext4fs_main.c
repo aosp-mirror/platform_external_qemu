@@ -18,6 +18,7 @@
 #include <stdio.h>
 #ifdef _MSC_VER
 #include "msvc-posix.h"
+#include "msvc-getopt.h"
 #else
 #include <libgen.h>
 #include <unistd.h>

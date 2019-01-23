@@ -14,6 +14,7 @@
 #include "android/base/misc/FileUtils.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
+#include "android/utils/file_io.h"
 #include "android/console_auth.h"
 #include "android/console_auth_internal.h"
 #include "android/utils/Random.h"
@@ -93,7 +94,7 @@ bool tokenLoadOrCreate(const std::string& path, std::string* auth_token) {
     } else {
         if (!tokenGenerate(auth_token)) {
             fd.close();
-            unlink(path.c_str());
+           android_unlink(path.c_str());
             return false;
         }
         if (!android::writeStringToFile(fd.get(), *auth_token)) {
