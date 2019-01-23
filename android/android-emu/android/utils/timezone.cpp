@@ -14,6 +14,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
+#include "android/utils/file_io.h"
 #include "android/utils/eintr_wrapper.h"
 
 #include <string.h>
@@ -306,7 +307,7 @@ get_zoneinfo_timezone( void )
                 if (env == NULL)
                     env = zoneinfo_dir;
 
-                if ( access( env, R_OK ) != 0 ) {
+                if ( android_access( env, R_OK ) != 0 ) {
                     if ( env == zoneinfo_dir ) {
                         fprintf( stderr,
                                  "### WARNING: could not find %s directory. unable to determine host timezone\n", env );
@@ -328,11 +329,11 @@ get_zoneinfo_timezone( void )
 
             /* try to find the localtime file */
             const char* localtimePtr = LOCALTIME_FILE1;
-            if ( access( localtimePtr, R_OK ) != 0 ) {
+            if ( android_access( localtimePtr, R_OK ) != 0 ) {
                 char  *p = temp, *end = p + sizeof(temp);
 
                 p = bufprint( p, end, "%s/%s", tzdir.c_str(), "localtime" );
-                if (p >= end || access( temp, R_OK ) != 0 ) {
+                if (p >= end || android_access( temp, R_OK ) != 0 ) {
                     fprintf( stderr, "### WARNING: could not find %s or %s. unable to determine host timezone\n",
                                      LOCALTIME_FILE1, temp );
                     goto Exit;

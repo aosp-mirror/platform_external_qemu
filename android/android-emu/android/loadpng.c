@@ -1,5 +1,5 @@
 #include "android/loadpng.h"
-
+#include "android/utils/file_io.h"
 #include <png.h>
 
 #include <stdint.h>
@@ -37,7 +37,7 @@ void *loadpng(const char *fn, unsigned *_width, unsigned *_height)
         goto oops;
     }
 
-    fp = fopen(fn, "rb");
+    fp = android_fopen(fn, "rb");
     if(fp == 0) {
         LOG("%s: failed to open file\n", fn);
         return 0;
@@ -137,7 +137,7 @@ void savepng(const char* fn, unsigned int nChannels, unsigned int width,
             rotation == SKIN_ROTATION_180;
     unsigned int rows = isPortrait ? height : width;
     unsigned int cols = isPortrait ? width : height;
-    FILE *fp = fopen(fn, "wb");
+    FILE *fp = android_fopen(fn, "wb");
     if (!fp) {
         LOG("Unable to write to file %s.\n", fn);
         return;
@@ -231,7 +231,7 @@ void savebmp(const char* fn, unsigned int nChannels, unsigned int width,
         fprintf(stderr, "savebmp only support 1, 3 or 4 channel images\n");
         return;
     }
-    FILE *fp = fopen(fn, "wb");
+    FILE *fp = android_fopen(fn, "wb");
     if (!fp) {
         LOG("Unable to write to file %s.\n", fn);
         return;

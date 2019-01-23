@@ -246,7 +246,7 @@ AndroidCpuAcceleration ProbeKVM(std::string* status) {
       kvm_device = "/dev/kvm";
     }
     // Check that kvm device exists.
-    if (::access(kvm_device, F_OK)) {
+    if (::android_access(kvm_device, F_OK)) {
         // kvm device does not exist
         bool cpu_ok =
                 android_get_x86_cpuid_vmx_support() ||
@@ -263,7 +263,7 @@ AndroidCpuAcceleration ProbeKVM(std::string* status) {
     }
 
     // Check that kvm device can be opened.
-    if (::access(kvm_device, R_OK)) {
+    if (::android_access(kvm_device, R_OK)) {
         StringAppendFormat(status,
                            "This user doesn't have permissions to use KVM (%s)",
                            kvm_device);
@@ -764,14 +764,14 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
     }
 
     // 1) Check that /dev/HAX exists.
-    if (::access("/dev/HAX", F_OK)) {
+    if (::android_access("/dev/HAX", F_OK)) {
         status->assign(
             "HAXM is not installed on this machine (/dev/HAX is missing).");
         return ANDROID_CPU_ACCELERATION_DEV_NOT_FOUND;
     }
 
     // 2) Check that /dev/HAX can be opened.
-    if (::access("/dev/HAX", R_OK)) {
+    if (::android_access("/dev/HAX", R_OK)) {
         status->assign(
             "This user doesn't have permission to use HAX (/dev/HAX).");
         return ANDROID_CPU_ACCELERATION_DEV_PERMISSION;
