@@ -117,7 +117,7 @@ void* loadWebP(const char *fileName, unsigned *pWidth, unsigned *pHeight) {
     }
 
     // Read the first few bytes into memory
-    fp = fopen(fileName, "rb");
+    fp = android_fopen(fileName, "rb");
     if(fp == 0) {
         LOG("Failed to open file: %s\n", fileName);
         return 0;

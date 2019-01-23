@@ -14,6 +14,8 @@
 #include <cstring>
 #include "android/base/files/ScopedStdioFile.h"
 #include "android/utils/debug.h"
+#include "android/utils/file_io.h"
+
 #include "libdtb.h"
 
 namespace {
@@ -103,7 +105,7 @@ int createDtbFile(const Params& params, const std::string &dtbFilename) {
     initNode(lit_fstab, fstab_properties, &fstab, &vendor);
     initNode(lit_vendor, vendor_properties, &vendor, nullptr);
 
-    android::base::ScopedStdioFile file(::fopen(dtbFilename.c_str(), "wb"));
+    android::base::ScopedStdioFile file(::android_fopen(dtbFilename.c_str(), "wb"));
     if (file.get()) {
         struct dt_info dt;
         dt.dt = &root;
