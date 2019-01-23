@@ -741,7 +741,7 @@ clean:
         done
 	rm -f $(SUBDIR_DEVICES_MAK) config-all-devices.mak
 
-VERSION ?= $(shell cat VERSION)
+VERSION ?= $(shell cat QEMU_VERSION)
 
 dist: qemu-$(VERSION).tar.bz2
 
