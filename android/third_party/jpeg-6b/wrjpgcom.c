@@ -34,7 +34,7 @@ extern void * malloc ();
 #endif
 #endif
 
-#ifdef DONT_USE_B_MODE		/* define mode parameters for fopen() */
+#ifdef DONT_USE_B_MODE		/* define mode parameters for android_fopen() */
 #define READ_BINARY	"r"
 #define WRITE_BINARY	"w"
 #else
@@ -439,7 +439,7 @@ main (int argc, char **argv)
       keep_COM = 0;
     } else if (keymatch(arg, "cfile", 2)) {
       if (++argn >= argc) usage();
-      if ((comment_file = fopen(argv[argn], "r")) == NULL) {
+      if ((comment_file = android_fopen(argv[argn], "r")) == NULL) {
 	fprintf(stderr, "%s: can't open %s\n", progname, argv[argn]);
 	exit(EXIT_FAILURE);
       }
@@ -482,7 +482,7 @@ main (int argc, char **argv)
 
   /* Open the input file. */
   if (argn < argc) {
-    if ((infile = fopen(argv[argn], READ_BINARY)) == NULL) {
+    if ((infile = android_fopen(argv[argn], READ_BINARY)) == NULL) {
       fprintf(stderr, "%s: can't open %s\n", progname, argv[argn]);
       exit(EXIT_FAILURE);
     }
@@ -509,7 +509,7 @@ main (int argc, char **argv)
 	    progname);
     usage();
   }
-  if ((outfile = fopen(argv[argn+1], WRITE_BINARY)) == NULL) {
+  if ((outfile = android_fopen(argv[argn+1], WRITE_BINARY)) == NULL) {
     fprintf(stderr, "%s: can't open %s\n", progname, argv[argn+1]);
     exit(EXIT_FAILURE);
   }
