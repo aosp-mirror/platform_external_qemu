@@ -764,7 +764,7 @@ static int proxy_mknod(FsContext *fs_ctx, V9fsPath *dir_path,
     return retval;
 }
 
-static int proxy_mkdir(FsContext *fs_ctx, V9fsPath *dir_path,
+static int proxy_android_mkdir(FsContext *fs_ctx, V9fsPath *dir_path,
                        const char *name, FsCred *credp)
 {
     int retval;
@@ -1110,7 +1110,7 @@ static int connect_namedsocket(const char *path, Error **errp)
     }
 
     /* remove the socket for security reasons */
-    unlink(path);
+   android_unlink(path);
     return sockfd;
 }
 

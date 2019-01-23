@@ -38,7 +38,7 @@ static void test_io_channel_command_fifo(bool async)
         "/bin/socat", dstfifo, "-", NULL,
     };
 
-    unlink(TEST_FIFO);
+   android_unlink(TEST_FIFO);
     if (access("/bin/socat", X_OK) < 0) {
         return; /* Pretend success if socat is not present */
     }
@@ -59,7 +59,7 @@ static void test_io_channel_command_fifo(bool async)
     object_unref(OBJECT(src));
     object_unref(OBJECT(dst));
 
-    unlink(TEST_FIFO);
+   android_unlink(TEST_FIFO);
 }
 
 

@@ -77,15 +77,15 @@ static void test_tls_creds(const void *opaque)
     Error *err = NULL;
 
 #define CERT_DIR "tests/test-crypto-tlscredsx509-certs/"
-    mkdir(CERT_DIR, 0700);
+    android_mkdir(CERT_DIR, 0700);
 
-    unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_CA_CERT);
+   android_unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_CA_CERT);
     if (data->isServer) {
-        unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_SERVER_CERT);
-        unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_SERVER_KEY);
+       android_unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_SERVER_CERT);
+       android_unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_SERVER_KEY);
     } else {
-        unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_CLIENT_CERT);
-        unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_CLIENT_KEY);
+       android_unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_CLIENT_CERT);
+       android_unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_CLIENT_KEY);
     }
 
     if (access(data->cacrt, R_OK) == 0) {
@@ -127,13 +127,13 @@ static void test_tls_creds(const void *opaque)
         g_assert(creds != NULL);
     }
 
-    unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_CA_CERT);
+   android_unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_CA_CERT);
     if (data->isServer) {
-        unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_SERVER_CERT);
-        unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_SERVER_KEY);
+       android_unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_SERVER_CERT);
+       android_unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_SERVER_KEY);
     } else {
-        unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_CLIENT_CERT);
-        unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_CLIENT_KEY);
+       android_unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_CLIENT_CERT);
+       android_unlink(CERT_DIR QCRYPTO_TLS_CREDS_X509_CLIENT_KEY);
     }
     rmdir(CERT_DIR);
     if (creds) {
@@ -149,7 +149,7 @@ int main(int argc, char **argv)
     g_test_init(&argc, &argv, NULL);
     setenv("GNUTLS_FORCE_FIPS_MODE", "2", 1);
 
-    mkdir(WORKDIR, 0700);
+    android_mkdir(WORKDIR, 0700);
 
     test_tls_init(KEYFILE);
 
@@ -711,7 +711,7 @@ int main(int argc, char **argv)
     test_tls_discard_cert(&cacertlevel2areq);
     test_tls_discard_cert(&servercertlevel3areq);
     test_tls_discard_cert(&clientcertlevel2breq);
-    unlink(WORKDIR "cacertchain-ctx.pem");
+   android_unlink(WORKDIR "cacertchain-ctx.pem");
 
     test_tls_cleanup(KEYFILE);
     rmdir(WORKDIR);

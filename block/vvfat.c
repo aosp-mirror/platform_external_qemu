@@ -1658,7 +1658,7 @@ static void schedule_new_file(BDRVVVFATState* s,
     commit->action = ACTION_NEW_FILE;
 }
 
-static void schedule_mkdir(BDRVVVFATState* s, uint32_t cluster, char* path)
+static void schedule_android_mkdir(BDRVVVFATState* s, uint32_t cluster, char* path)
 {
     commit_t* commit = array_get_next(&(s->commits));
     commit->path = path;
@@ -2057,7 +2057,7 @@ static int check_directory_consistency(BDRVVVFATState *s,
             schedule_rename(s, cluster_num, g_strdup(path));
     } else
         /* new directory */
-        schedule_mkdir(s, cluster_num, g_strdup(path));
+        schedule_android_mkdir(s, cluster_num, g_strdup(path));
 
     lfn_init(&lfn);
     do {
@@ -2721,10 +2721,10 @@ static int handle_renames_and_mkdirs(BDRVVVFATState* s)
             int j, parent_path_len;
 
 #if defined(__MINGW32__) || defined(_MSC_VER)
-            if (mkdir(commit->path))
+            if (android_mkdir(commit->path))
                 return -5;
 #else
-            if (mkdir(commit->path, 0755))
+            if (android_mkdir(commit->path, 0755))
                 return -5;
 #endif
 
@@ -3191,7 +3191,7 @@ static int enable_write_target(BlockDriverState *bs, Error **errp)
     }
 
 #ifndef _WIN32
-    unlink(s->qcow_filename);
+   android_unlink(s->qcow_filename);
 #endif
 
     backing = bdrv_new_open_driver(&vvfat_write_target, NULL, BDRV_O_ALLOW_RDWR,

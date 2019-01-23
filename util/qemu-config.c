@@ -463,7 +463,7 @@ out:
 
 int qemu_read_config_file(const char *filename)
 {
-    FILE *f = fopen(filename, "r");
+    FILE *f = android_fopen(filename, "r");
     int ret;
 
     if (f == NULL) {

@@ -1466,7 +1466,7 @@ static int prepare_iso(size_t size, unsigned char **buf, char **name)
 
 static void remove_iso(int fd, char *name)
 {
-    unlink(name);
+   android_unlink(name);
     g_free(name);
     close(fd);
 }
@@ -1949,9 +1949,9 @@ int main(int argc, char **argv)
     ret = g_test_run();
 
     /* Cleanup */
-    unlink(tmp_path);
-    unlink(debug_path);
-    unlink(mig_socket);
+   android_unlink(tmp_path);
+   android_unlink(debug_path);
+   android_unlink(mig_socket);
 
     return ret;
 }

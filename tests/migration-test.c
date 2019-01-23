@@ -84,7 +84,7 @@ static const char *tmpfs;
 
 static void init_bootfile_x86(const char *bootpath)
 {
-    FILE *bootfile = fopen(bootpath, "wb");
+    FILE *bootfile = android_fopen(bootpath, "wb");
 
     g_assert_cmpint(fwrite(x86_bootsect, 512, 1, bootfile), ==, 1);
     fclose(bootfile);
@@ -115,7 +115,7 @@ static void init_bootfile_ppc(const char *bootpath)
 
     /* Write partition to the NVRAM file */
 
-    bootfile = fopen(bootpath, "wb");
+    bootfile = android_fopen(bootpath, "wb");
     g_assert_cmpint(fwrite(buf, MIN_NVRAM_SIZE, 1, bootfile), ==, 1);
     fclose(bootfile);
 }
@@ -128,7 +128,7 @@ static void init_bootfile_ppc(const char *bootpath)
 static void wait_for_serial(const char *side)
 {
     char *serialpath = g_strdup_printf("%s/%s", tmpfs, side);
-    FILE *serialfile = fopen(serialpath, "r");
+    FILE *serialfile = android_fopen(serialpath, "r");
     const char *arch = qtest_get_arch();
     int started = (strcmp(side, "src_serial") == 0 &&
                    strcmp(arch, "ppc64") == 0) ? 0 : 1;
@@ -306,7 +306,7 @@ static void cleanup(const char *filename)
 {
     char *path = g_strdup_printf("%s/%s", tmpfs, filename);
 
-    unlink(path);
+   android_unlink(path);
     g_free(path);
 }
 

@@ -32,7 +32,7 @@ int setup_fs(const char *blockdev)
     }
 
     snprintf(buf, sizeof(buf), "/sys/fs/ext4/%s", blockdev);
-    if (access(buf, F_OK) == 0) {
+    if (android_access(buf, F_OK) == 0) {
         fprintf(stderr,"device %s already has a filesystem\n", blockdev);
         return 0;
     }

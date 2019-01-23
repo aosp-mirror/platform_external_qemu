@@ -302,7 +302,7 @@ ivshmem_server_start(IvshmemServer *server)
         IVSHMEM_SERVER_DEBUG(server, "Using file-backed shared memory: %s\n",
                              server->shm_path);
         shm_fd = mkstemp(filename);
-        unlink(filename);
+       android_unlink(filename);
         g_free(filename);
     }
 
@@ -370,7 +370,7 @@ ivshmem_server_close(IvshmemServer *server)
         ivshmem_server_free_peer(server, peer);
     }
 
-    unlink(server->unix_sock_path);
+   android_unlink(server->unix_sock_path);
     close(server->sock_fd);
     close(server->shm_fd);
     server->sock_fd = -1;

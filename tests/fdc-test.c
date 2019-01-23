@@ -584,7 +584,7 @@ int main(int argc, char **argv)
 
     /* Cleanup */
     qtest_end();
-    unlink(test_image);
+   android_unlink(test_image);
 
     return ret;
 }

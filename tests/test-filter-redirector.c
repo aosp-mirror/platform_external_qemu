@@ -131,8 +131,8 @@ static void test_redirector_tx(void)
 
     g_free(recv_buf);
     close(recv_sock);
-    unlink(sock_path0);
-    unlink(sock_path1);
+   android_unlink(sock_path0);
+   android_unlink(sock_path1);
     qtest_end();
 }
 
@@ -198,8 +198,8 @@ static void test_redirector_rx(void)
 
     close(send_sock);
     g_free(recv_buf);
-    unlink(sock_path0);
-    unlink(sock_path1);
+   android_unlink(sock_path0);
+   android_unlink(sock_path1);
     qtest_end();
 }
 

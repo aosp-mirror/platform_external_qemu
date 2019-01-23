@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 #include "TypeFactory.h"
-
+#include "android/utils/file_io.h"
 #include "Parser.h"
 #include "VarType.h"
 #include "strUtils.h"
@@ -54,7 +54,7 @@ int TypeFactory::initFromFile(const std::string &filename)
         initBaseTypes();
     }
 
-    FILE *fp = fopen(filename.c_str(), "rt");
+    FILE *fp = android_fopen(filename.c_str(), "rt");
     if (fp == NULL) {
         perror(filename.c_str());
         return -1;

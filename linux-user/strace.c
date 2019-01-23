@@ -1294,7 +1294,7 @@ print_clone(const struct syscallname *name,
 
 #ifdef TARGET_NR_creat
 static void
-print_creat(const struct syscallname *name,
+print_android_creat((const struct syscallname *name,
     abi_long arg0, abi_long arg1, abi_long arg2,
     abi_long arg3, abi_long arg4, abi_long arg5)
 {
@@ -1921,7 +1921,7 @@ print_fstat(const struct syscallname *name,
 
 #ifdef TARGET_NR_mkdir
 static void
-print_mkdir(const struct syscallname *name,
+print_android_mkdir(const struct syscallname *name,
     abi_long arg0, abi_long arg1, abi_long arg2,
     abi_long arg3, abi_long arg4, abi_long arg5)
 {

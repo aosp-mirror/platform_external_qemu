@@ -30,7 +30,7 @@ static void test_fd_is_socket_bad(void)
     char *tmp = g_strdup("qemu-test-util-sockets-XXXXXX");
     int fd = mkstemp(tmp);
     if (fd != 0) {
-        unlink(tmp);
+       android_unlink(tmp);
     }
     g_free(tmp);
 

@@ -34,7 +34,7 @@
 #include "exec/poison.h"
 #endif
 #include "qemu/compiler.h"
-
+#include "qemu/android-io.h"
 /* Older versions of C++ don't get definitions of various macros from
  * stdlib.h unless we define these macros before first inclusion of
  * that system header.

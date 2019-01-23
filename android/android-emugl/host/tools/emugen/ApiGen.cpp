@@ -15,6 +15,7 @@
 */
 #include "ApiGen.h"
 #include "android/base/EnumFlags.h"
+#include "android/utils/file_io.h"
 #include "EntryPoint.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -68,7 +69,7 @@ void ApiGen::printHeader(FILE *fp) const
 
 int ApiGen::genProcTypes(const std::string &filename, SideType side)
 {
-    FILE *fp = fopen(filename.c_str(), "wt");
+    FILE *fp = android_fopen(filename.c_str(), "wt");
     if (fp == NULL) {
         perror(filename.c_str());
         return -1;
@@ -132,7 +133,7 @@ int ApiGen::genProcTypes(const std::string &filename, SideType side)
 
 int ApiGen::genFuncTable(const std::string &filename, SideType side)
 {
-    FILE *fp = fopen(filename.c_str(), "wt");
+    FILE *fp = android_fopen(filename.c_str(), "wt");
     if (fp == NULL) {
         perror(filename.c_str());
         return -1;
@@ -163,7 +164,7 @@ int ApiGen::genFuncTable(const std::string &filename, SideType side)
 
 int ApiGen::genContext(const std::string & filename, SideType side)
 {
-    FILE *fp = fopen(filename.c_str(), "wt");
+    FILE *fp = android_fopen(filename.c_str(), "wt");
     if (fp == NULL) {
         perror(filename.c_str());
         return -1;
@@ -232,7 +233,7 @@ int ApiGen::genEntryPoints(const std::string & filename, SideType side)
     }
 
 
-    FILE *fp = fopen(filename.c_str(), "wt");
+    FILE *fp = android_fopen(filename.c_str(), "wt");
     if (fp == NULL) {
         perror(filename.c_str());
         return errno;
@@ -301,7 +302,7 @@ int ApiGen::genEntryPoints(const std::string & filename, SideType side)
 
 int ApiGen::genOpcodes(const std::string &filename)
 {
-    FILE *fp = fopen(filename.c_str(), "wt");
+    FILE *fp = android_fopen(filename.c_str(), "wt");
     if (fp == NULL) {
         perror(filename.c_str());
         return errno;
@@ -321,7 +322,7 @@ int ApiGen::genOpcodes(const std::string &filename)
 }
 int ApiGen::genAttributesTemplate(const std::string &filename )
 {
-    FILE *fp = fopen(filename.c_str(), "wt");
+    FILE *fp = android_fopen(filename.c_str(), "wt");
     if (fp == NULL) {
         perror(filename.c_str());
         return -1;
@@ -340,7 +341,7 @@ int ApiGen::genAttributesTemplate(const std::string &filename )
 
 int ApiGen::genEncoderHeader(const std::string &filename)
 {
-    FILE *fp = fopen(filename.c_str(), "wt");
+    FILE *fp = android_fopen(filename.c_str(), "wt");
     if (fp == NULL) {
         perror(filename.c_str());
         return -1;
@@ -534,7 +535,7 @@ static void addGuestTimePrinting(const EntryPoint* e, bool hasTimeBeforeReadback
 
 int ApiGen::genEncoderImpl(const std::string &filename)
 {
-    FILE *fp = fopen(filename.c_str(), "wt");
+    FILE *fp = android_fopen(filename.c_str(), "wt");
     if (fp == NULL) {
         perror(filename.c_str());
         return -1;
@@ -843,7 +844,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
     for (size_t i = 0; i < n; i++) {
         EntryPoint *e = &at(i);
         if (e->unsupported()) {
-            fprintf(fp, 
+            fprintf(fp,
                     "\tthis->%s = (%s_%s_proc_t) &enc_unsupported;\n",
                     e->name().c_str(),
                     e->name().c_str(),
@@ -864,7 +865,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 
 int ApiGen::genDecoderHeader(const std::string &filename)
 {
-    FILE *fp = fopen(filename.c_str(), "wt");
+    FILE *fp = android_fopen(filename.c_str(), "wt");
     if (fp == NULL) {
         perror(filename.c_str());
         return -1;
@@ -901,7 +902,7 @@ int ApiGen::genDecoderHeader(const std::string &filename)
 
 int ApiGen::genContextImpl(const std::string &filename, SideType side)
 {
-    FILE *fp = fopen(filename.c_str(), "wt");
+    FILE *fp = android_fopen(filename.c_str(), "wt");
     if (fp == NULL) {
         perror(filename.c_str());
         return -1;
@@ -939,7 +940,7 @@ int ApiGen::genContextImpl(const std::string &filename, SideType side)
 
 int ApiGen::genDecoderImpl(const std::string &filename)
 {
-    FILE *fp = fopen(filename.c_str(), "wt");
+    FILE *fp = android_fopen(filename.c_str(), "wt");
     if (fp == NULL) {
         perror(filename.c_str());
         return -1;
@@ -1459,7 +1460,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
 int ApiGen::readSpec(const std::string & filename)
 {
-    FILE *specfp = fopen(filename.c_str(), "rt");
+    FILE *specfp = android_fopen(filename.c_str(), "rt");
     if (specfp == NULL) {
         return -1;
     }
@@ -1482,7 +1483,7 @@ int ApiGen::readAttributes(const std::string & attribFilename)
 {
     enum { ST_NAME, ST_ATT } state;
 
-    FILE *fp = fopen(attribFilename.c_str(), "rt");
+    FILE *fp = android_fopen(attribFilename.c_str(), "rt");
     if (fp == NULL) {
         perror(attribFilename.c_str());
         return -1;

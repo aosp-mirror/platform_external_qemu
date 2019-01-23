@@ -93,12 +93,12 @@ public:
     bool makeSubDir(StringView subdir) {
         std::string path = makeSubPath(subdir);
 #ifdef _WIN32
-        if (mkdir(path.c_str()) < 0) {
+        if (android_mkdir(path.c_str()) < 0) {
             PLOG(ERROR) << "Can't create " << path.c_str() << ": ";
             return false;
         }
 #else
-        if (mkdir(path.c_str(), 0755) < 0) {
+        if (android_mkdir(path.c_str(), 0755) < 0) {
             PLOG(ERROR) << "Can't create " << path.c_str() << ": ";
             return false;
         }
@@ -146,7 +146,7 @@ private:
             if (S_ISDIR(stats.st_mode)) {
                 DeleteRecursive(entry_path);
             } else {
-                unlink(entry_path.c_str());
+               android_unlink(entry_path.c_str());
             }
         }
         closedir(dir);
@@ -200,7 +200,7 @@ private:
             int random = rand() % 1000000;
 
             snprintf(path_end - kSuffixLen, kSuffixLen + 1, "%0d", random);
-            if (mkdir(path) == 0) {
+            if (android_mkdir(path) == 0) {
                 return path;  // Success
             }
             if (errno != EEXIST) {

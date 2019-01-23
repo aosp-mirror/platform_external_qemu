@@ -333,6 +333,7 @@ set(ANDROID_QEMU_COMMON_DEVICES "hw/pci/goldfish_address_space.c;hw/i386/pc_piix
 # Darwin definitions
 set(ANDROID_QEMU_i386_DEVICES_darwin-x86_64 "hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
 set(ANDROID_QEMU_arm_DEVICES_darwin-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
+target_compile_definitions(android-qemu-deps INTERFACE "-DANDROID_IO")
 android_target_compile_options(android-qemu-deps darwin-x86_64 INTERFACE
                                # Emit extra code to check for buffer overflows, such as stack smashing
                                # attacks. This is done by adding a guard variable to functions with
@@ -424,7 +425,7 @@ else()
   android_add_library(qemu2-common)
 endif()
 target_compile_definitions(qemu2-common PRIVATE "-DPOISON_CONFIG_ANDROID")
-target_link_libraries(qemu2-common PUBLIC android-qemu-deps)
+target_link_libraries(qemu2-common PUBLIC android-qemu-deps android-emu-base)
 
 set(libqemu2-util_src ${libqemuutil_sources} ${libqemuutil_generated_sources})
 if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
@@ -437,19 +438,19 @@ endif()
 
 
 android_add_library(libqemu2-util)
-target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
+target_link_libraries(libqemu2-util PRIVATE android-qemu-deps android-emu-base FDT)
 android_target_link_libraries(libqemu2-util windows PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
 target_compile_definitions(libqemu2-util PRIVATE "-DPOISON_CONFIG_ANDROID")
 
 set(libqemustub_src ${libqemustub_sources} ${libqemuutil_generated_sources})
 android_add_library(libqemustub)
-target_link_libraries(libqemustub PRIVATE android-qemu-deps)
+target_link_libraries(libqemustub PRIVATE android-qemu-deps android-emu-base)
 
 # Qemu-img
 set(qemu-img_src ${qemu-img_sources} block/qcow2-bitmap.c)
 set(qemu-img_linux-x86_64_src scsi/pr-manager.c)
 android_add_executable(qemu-img)
-target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub android-qemu-deps)
+target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub android-qemu-deps android-emu-base)
 install(TARGETS qemu-img RUNTIME DESTINATION .)
 
 # Create the qemu targets.

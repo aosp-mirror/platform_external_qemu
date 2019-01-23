@@ -26,6 +26,7 @@
 #include "android/base/threads/Thread.h"
 #include "android/utils/tempfile.h"
 #include "android/utils/path.h"
+#include "android/utils/file_io.h"
 
 #ifdef _WIN32
 #include "android/base/files/ScopedRegKey.h"
@@ -1266,7 +1267,7 @@ public:
         // The result of GetTempPath() is already user-dependent
         // so don't append the username or userid to the result.
         path.append(L"\\AndroidEmulator");
-        ::_wmkdir(path.c_str());
+        ::_wandroid_mkdir(path.c_str());
         return path.toString();
 #else   // !_WIN32
         std::string result;
@@ -1281,7 +1282,7 @@ public:
         } else {
             result = tmppath;
         }
-        ::mkdir(result.c_str(), 0744);
+        ::android_mkdir(result.c_str(), 0744);
         return result;
 #endif  // !_WIN32
     }
@@ -1598,7 +1599,7 @@ int pathAccess(StringView path, int mode) {
     }
     return _waccess(win32Path(path).c_str(), win32mode);
 #else   // !_WIN32
-    return HANDLE_EINTR(access(c_str(path), mode));
+    return HANDLE_EINTR(android_access(c_str(path), mode));
 #endif  // !_WIN32
 }
 

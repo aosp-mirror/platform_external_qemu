@@ -14,6 +14,7 @@
 #include "android/base/Log.h"
 #include "android/utils/debug.h"
 #include "android/base/files/ScopedStdioFile.h"
+#include "android/utils/file_io.h"
 
 #include "make_ext4fs.h"
 
@@ -42,7 +43,7 @@ bool android_pathIsExt4PartitionImage(const char* path) {
         return false;
     }
 
-    android::base::ScopedStdioFile file(::fopen(path, "rb"));
+    android::base::ScopedStdioFile file(::android_fopen(path, "rb"));
     if (!file.get()) {
         EXT4_PERROR << "Could not open file: " << path;
         return false;

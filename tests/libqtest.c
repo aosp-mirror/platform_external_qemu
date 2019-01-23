@@ -186,8 +186,8 @@ QTestState *qtest_init_without_qmp_handshake(bool use_oob,
      * stale old socket to avoid spurious test failures with
      * tests/libqtest.c:70:init_socket: assertion failed (ret != -1): (-1 != -1)
      */
-    unlink(socket_path);
-    unlink(qmp_socket_path);
+   android_unlink(socket_path);
+   android_unlink(qmp_socket_path);
 
     sock = init_socket(socket_path);
     qmpsock = init_socket(qmp_socket_path);
@@ -216,8 +216,8 @@ QTestState *qtest_init_without_qmp_handshake(bool use_oob,
     if (s->fd >= 0) {
         s->qmp_fd = socket_accept(qmpsock);
     }
-    unlink(socket_path);
-    unlink(qmp_socket_path);
+   android_unlink(socket_path);
+   android_unlink(qmp_socket_path);
     g_free(socket_path);
     g_free(qmp_socket_path);
 

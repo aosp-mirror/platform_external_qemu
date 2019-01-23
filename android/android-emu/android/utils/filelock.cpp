@@ -16,6 +16,7 @@
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/lock.h"
 #include "android/utils/path.h"
+#include "android/utils/file_io.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -457,7 +458,7 @@ filelock_release( FileLock*  lock )
         delete_file(android::base::Win32UnicodeString(lock->temp));
         delete_dir(android::base::Win32UnicodeString(lock->lock));
 #else
-        unlink( (char*)lock->lock );
+       android_unlink( (char*)lock->lock );
 #endif
         free((char*)lock->file);
         lock->file = lock->lock = lock->temp = nullptr;

@@ -17,6 +17,7 @@
 #include "android/base/files/FileShareOpenImpl.h"
 #include "android/base/StringFormat.h"
 #include "android/base/threads/Thread.h"
+#include "android/utils/file_io.h"
 
 void android::base::createFileForShare(const char* filename) {
     void* handle = internal::openFileForShare(filename);
@@ -122,7 +123,7 @@ FILE* android::base::fsopen(const char* filename,
         tmp = StringFormat("%se", mode);
         mode = tmp.c_str();
     }
-    FILE* file = fopen(filename, mode);
+    FILE* file = android_fopen(filename, mode);
     if (!file) {
         return nullptr;
     }
@@ -142,7 +143,7 @@ bool android::base::updateFileShare(FILE* file, FileShare fileshare) {
 }
 
 void* android::base::internal::openFileForShare(const char* filename) {
-    return fopen(filename, "a");
+    return android_fopen(filename, "a");
 }
 
 void android::base::internal::closeFileForShare(void* fileHandle) {

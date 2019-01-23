@@ -13,9 +13,9 @@
 
 #include "android/base/EintrWrapper.h"
 #include "android/filesystems/testing/TestSupport.h"
+#include "android/utils/file_io.h"
 
 #include <gtest/gtest.h>
-
 #include <stdio.h>
 
 namespace {
@@ -28,7 +28,7 @@ public:
         mTempFilePath(android::testing::CreateTempFilePath()) {}
 
     bool fillData(const void* data, size_t dataSize) {
-        FILE* file = ::fopen(mTempFilePath.c_str(), "wb");
+        FILE* file = ::android_fopen(mTempFilePath.c_str(), "wb");
         if (!file) {
             return false;
         }

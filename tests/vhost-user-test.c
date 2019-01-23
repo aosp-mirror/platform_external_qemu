@@ -538,10 +538,10 @@ static gboolean _test_server_free(TestServer *server)
         close(server->log_fd);
     }
 
-    unlink(server->socket_path);
+   android_unlink(server->socket_path);
     g_free(server->socket_path);
 
-    unlink(server->mig_path);
+   android_unlink(server->mig_path);
     g_free(server->mig_path);
 
     g_free(server->chr_name);

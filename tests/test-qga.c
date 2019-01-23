@@ -447,7 +447,7 @@ static void test_qga_file_ops(gconstpointer fix)
 
     /* check content */
     path = g_build_filename(fixture->test_dir, "foo", NULL);
-    f = fopen(path, "r");
+    f = android_fopen(path, "r");
     g_free(path);
     g_assert_nonnull(f);
     count = fread(tmp, 1, sizeof(tmp), f);
