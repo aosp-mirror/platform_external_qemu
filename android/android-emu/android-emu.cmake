@@ -254,6 +254,7 @@ set(android_emu_dependent_src
     android/sensors-port.c
     android/snapshot/SnapshotAPI.cpp
     android/test/checkboot.cpp
+    android/videoinjection/VideoInjectionController.cpp
     android/virtualscene/MeshSceneObject.cpp
     android/virtualscene/PosterInfo.cpp
     android/virtualscene/PosterSceneObject.cpp
@@ -471,10 +472,10 @@ target_link_libraries(android-emu-shared
 android_target_link_libraries(android-emu-shared
                               windows
                               PRIVATE
-                              emulator-libmman-win32                              
+                              emulator-libmman-win32
                               d3d9::d3d9
                               # IID_IMFSourceReaderCallback
-                              mfuuid::mfuuid                               
+                              mfuuid::mfuuid
                               # For CoTaskMemFree used in camera-capture-windows.cpp
                               ole32::ole32
                               # For GetPerformanceInfo in CrashService_windows.cpp
@@ -723,6 +724,7 @@ set(android-emu_unittests_src
     android/utils/sockets_unittest.cpp
     android/utils/x86_cpuid_unittest.cpp
     android/verified-boot/load_config_unittest.cpp
+    android/videoinjection/VideoInjectionController_unittest.cpp
     android/virtualscene/TextureUtils_unittest.cpp
     android/wear-agent/PairUpWearPhone_unittest.cpp
     android/wear-agent/testing/WearAgentTestUtils.cpp

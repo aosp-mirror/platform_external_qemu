@@ -71,6 +71,7 @@ message Request {
   oneof module {
     SnapshotRequest snapshot = 1;
     AutomationRequest automation = 2;
+    VideoInjectionRequest video_injection = 3;
   }
 }
 
@@ -124,6 +125,39 @@ message AutomationRequest {
   }
 }
 
+message VideoInjectionRequest {
+  optional uint32 sequence_id = 1;
+
+  message Load {
+      optional string video_file_path = 1;
+  }
+
+  message Play {
+      optional float offset_in_seconds = 1;
+      optional bool looping = 2;
+      optional float speed_factor = 3;
+  }
+
+  message Pause {
+      optional bool pause_now = 1;
+      optional float offset_in_seconds = 2;
+  }
+
+  message Stop {
+      optional float delay_in_seconds = 1;
+  }
+
+  message DisplayDefaultFrame {}
+
+  oneof function {
+      Load load = 50;
+      Play play = 51;
+      Pause pause = 52;
+      Stop stop = 53;
+      DisplayDefaultFrame display_default_frame = 54;
+  }
+}
+
 //
 // Responses
 //
@@ -147,6 +181,7 @@ message Response {
     // Sync.
     SnapshotResponse snapshot = 100;
     AutomationResponse automation = 101;
+    VideoInjectionResponse video_injection = 102;
 
     // Async.
     // Async response.
@@ -163,6 +198,7 @@ message AsyncResponse {
 
   oneof module {
     AutomationAsyncResponse automation = 100;
+    VideoInjectionAsyncResponse video_injection = 101;
   }
 }
 
@@ -196,6 +232,10 @@ message AutomationResponse {
   }
 }
 
+message VideoInjectionResponse {
+  optional uint32 sequence_id = 1;
+}
+
 message AutomationAsyncResponse {
   message ReplayComplete {}
 
@@ -208,4 +248,8 @@ message AutomationAsyncResponse {
     ReplayComplete replay_complete = 1;
     EventGenerated event_generated = 2;
   }
+}
+
+message VideoInjectionAsyncResponse {
+  optional uint32 sequence_id = 1;
 }
