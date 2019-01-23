@@ -16,6 +16,7 @@
 #include "android/base/files/ScopedStdioFile.h"
 #include "android/filesystems/testing/TestExt4ImageHeader.h"
 #include "android/filesystems/testing/TestSupport.h"
+#include "android/utils/file_io.h"
 
 #include <gtest/gtest.h>
 
@@ -53,7 +54,7 @@ protected:
         CHECK(maxBytes <= sizeof mImage);
         // TODO(digit): Replace with something else.
         mTempFilePath = CreateTempFilePath();
-        ScopedStdioFile file(fopen(mTempFilePath.c_str(), "wb"));
+        ScopedStdioFile file(android_fopen(mTempFilePath.c_str(), "wb"));
         PCHECK(file.get()) << "Could not create temporary file!";
         PCHECK(::fwrite(mImage, maxBytes, 1, file.get()) == 1)
                 << "Could not write " << maxBytes << " bytes to "

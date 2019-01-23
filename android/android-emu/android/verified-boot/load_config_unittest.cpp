@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "android/verified-boot/load_config.h"
+#include "android/utils/file_io.h"
 
 #include <gtest/gtest.h>
 
@@ -59,7 +60,7 @@ TEST(VerifiedBootLoadConfigTest, ReadFromFile) {
     EXPECT_EQ("dm=\"foo\"", params[0]);
     EXPECT_EQ("bar", params[1]);
 
-    unlink(path);
+    android_unlink(path);
 }
 
 // Pass a NULL to the file API

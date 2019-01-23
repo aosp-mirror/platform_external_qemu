@@ -13,6 +13,7 @@
 #include "android/utils/tempfile.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
+#include "android/utils/file_io.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -146,7 +147,7 @@ tempfile_close(TempFile*  tempfile)
 #ifdef _WIN32
     DeleteFile(tempfile->name);
 #else
-    unlink(tempfile->name);
+    android_unlink(tempfile->name);
 #endif
 }
 
