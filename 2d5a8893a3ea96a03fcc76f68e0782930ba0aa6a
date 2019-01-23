@@ -22,6 +22,30 @@
       "revId": "2d5a8893a3ea96a03fcc76f68e0782930ba0aa6a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "401a5e05_3b3a00c7",
+        "filename": "android/android-emu/android/offworld/OffworldPipe.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-01-23T21:20:29Z",
+      "side": 1,
+      "message": "The client can use this optional field to verify response in case there some internal issue in VideoInjectionController. For example, VideoInjectionControllerImpl::reset() is called and some requests got discarded.",
+      "parentUuid": "2ea2e96e_5082bd96",
+      "range": {
+        "startLine": 344,
+        "startChar": 48,
+        "endLine": 344,
+        "endChar": 63
+      },
+      "revId": "2d5a8893a3ea96a03fcc76f68e0782930ba0aa6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
