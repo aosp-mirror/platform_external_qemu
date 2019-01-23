@@ -22,7 +22,7 @@ NO_TESTS=
 OUT_DIR=objs
 HELP=
 OPT_INSTALL=
-NO_QTWEBENGINE=true
+QTWEBENGINE=false
 
 for OPT; do
     case $OPT in
@@ -50,7 +50,7 @@ for OPT; do
             WINTOOLCHAIN=true
             ;;
         --with-qtwebnengine)
-            NO_QTWEBENGINE=
+            QTWEBENGINE=true
             ;;
         --verbose)
             VERBOSE=$(( $VERBOSE + 1 ))

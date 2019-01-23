@@ -22,6 +22,7 @@ set(OPTION_CRASHUPLOAD "NONE" CACHE STRING "Destination of crash reports.")
 set(OPTION_SDK_TOOLS_REVISION "" CACHE STRING "The tools revision to use, if any")
 set(OPTION_SDK_TOOLS_BUILD_NUMBER "" CACHE STRING "The sdk buildnumber to use, if any.")
 set(OPTION_ASAN "" CACHE STRING "The list of build sanitizers to user")
+set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
 
 set_property(CACHE OPTION_CRASHUPLOAD PROPERTY STRINGS NONE STAGING PROD)
 
