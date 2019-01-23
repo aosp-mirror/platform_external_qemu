@@ -29,6 +29,7 @@ enum class NamedObjectType : short {
     SAMPLER,
     QUERY,
     VERTEX_ARRAY_OBJECT,
+    TRANSFORM_FEEDBACK,
     NUM_OBJECT_TYPES  // Must be last
 };
 
