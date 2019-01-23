@@ -172,7 +172,7 @@ if [ "$OPTION_WINTOOLCHAIN" ]; then
 fi
 
 if [ -z "$OPTION_WITH_QTWEBENGINE" -a "$(get_build_os)" = "linux" -a -z "$OPTION_MSVC" -a -z "$OPTION_MINGW" ]; then
-   CMAKE_PARAMS="${CMAKE_PARAMS}  -DNO_QTWEBENGINE=1"
+   CMAKE_PARAMS="${CMAKE_PARAMS}  -DQTWEBENGINE=TRUE"
 fi
 
 if [ "$OPTION_GENERATOR" = "ninja" ]; then

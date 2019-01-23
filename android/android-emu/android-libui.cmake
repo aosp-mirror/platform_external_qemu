@@ -199,7 +199,8 @@ set(ANDROID_SKIN_SOURCES
     android/skin/qt/QtLogger.cpp)
 
 # Set the target specific sources.
-if (NO_QTWEBENGINE)
+if (NOT QTWEBENGINE)
+  message(STATUS "Webengine disabled." )
   set(emulator-libui_darwin-x86_64_src
       android/skin/qt/mac-native-window.mm
       android/skin/qt/extended-pages/location-page_noMaps.ui)
@@ -215,6 +216,7 @@ if (NO_QTWEBENGINE)
   set(emulator-libui_linux-x86_64_src
       android/skin/qt/extended-pages/location-page_noMaps.ui)
 else ()
+  message(STATUS "Webengine enabled")
   set(emulator-libui_darwin-x86_64_src
       android/skin/qt/mac-native-window.mm
       android/skin/qt/websockets/websocketclientwrapper.cpp
@@ -248,13 +250,15 @@ set(emulator-libui_src
 
 android_add_library(emulator-libui)
 
-# TODO: Remove this and the "USE_WEBENGINE" defines once we have two things:
-#   1) Webengine working on all platforms
-#   2) --no-window mode has no dependency on Qt
-if (NOT NO_QTWEBENGINE)
-  # only mac and linux works, so enable for those platforms
-  android_target_compile_definitions(emulator-libui linux-x86_64 PRIVATE "-DUSE_WEBENGINE")
-  android_target_compile_definitions(emulator-libui darwin-x86_64 PRIVATE "-DUSE_WEBENGINE")
+# TODO: Remove this and the "USE_WEBENGINE" defines once we have:
+# --no-window mode has no dependency on Qt
+if (QTWEBENGINE AND NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")  
+    target_compile_definitions(emulator-libui PRIVATE "-DUSE_WEBENGINE")
+    target_link_libraries(emulator-libui PRIVATE
+                          Qt5::Network
+                          Qt5::WebEngineWidgets
+                          Qt5::WebChannel
+                          Qt5::WebSockets)
 endif()
 
 target_compile_options(emulator-libui PRIVATE "-DUSE_MMX=1" "-mmmx")
@@ -287,12 +291,6 @@ android_target_compile_options(emulator-libui
                                "-Wno-return-type-c-linkage"
                                "-Wno-invalid-constexpr")
 
-
-android_target_compile_options(emulator-libui
-                               windows_msvc-x86_64
-                               PRIVATE
-                               "-DUSE_WEBENGINE=1")
-
 # dependencies will remain internal, we should not be leaking out internal headers and defines.
 target_link_libraries(emulator-libui
                               PRIVATE
@@ -305,14 +303,6 @@ target_link_libraries(emulator-libui
                               Qt5::Svg
                               ZLIB::ZLIB)
 
-if (NOT NO_QTWEBENGINE AND NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
-    target_link_libraries(emulator-libui
-                              PRIVATE
-                              Qt5::Network
-                              Qt5::WebEngineWidgets
-                              Qt5::WebChannel
-                              Qt5::WebSockets)
-endif()
 
 # gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug. This implies a direct dependency to
 # libX11.so
