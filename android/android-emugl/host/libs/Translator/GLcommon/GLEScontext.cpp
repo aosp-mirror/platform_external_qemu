@@ -1160,9 +1160,9 @@ void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
     case GL_PIXEL_UNPACK_BUFFER:
         m_pixelUnpackBuffer = buffer;
         break;
-    case GL_TRANSFORM_FEEDBACK_BUFFER:
-        m_transformFeedbackBuffer = buffer;
-        break;
+    //case GL_TRANSFORM_FEEDBACK_BUFFER:
+        //m_transformFeedbackBuffer = buffer;
+        //break;
     case GL_UNIFORM_BUFFER:
         m_uniformBuffer = buffer;
         break;
@@ -1188,9 +1188,9 @@ void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer,
         GLintptr offset, GLsizeiptr size, GLintptr stride, bool isBindBase) {
     VertexAttribBindingVector* bindings = nullptr;
     switch (target) {
-    case GL_TRANSFORM_FEEDBACK_BUFFER:
-        bindings = &m_indexedTransformFeedbackBuffers;
-        break;
+    //case GL_TRANSFORM_FEEDBACK_BUFFER:
+    //    bindings = &m_indexedTransformFeedbackBuffers;
+    //    break;
     case GL_UNIFORM_BUFFER:
         bindings = &m_indexedUniformBuffers;
         break;
@@ -1247,8 +1247,8 @@ void GLEScontext::unbindBuffer(GLuint buffer) {
         m_pixelPackBuffer = 0;
     if (m_pixelUnpackBuffer == buffer)
         m_pixelUnpackBuffer = 0;
-    if (m_transformFeedbackBuffer == buffer)
-        m_transformFeedbackBuffer = 0;
+    //if (m_transformFeedbackBuffer == buffer)
+    //    m_transformFeedbackBuffer = 0;
     if (m_uniformBuffer == buffer)
         m_uniformBuffer = 0;
     if (m_atomicCounterBuffer == buffer)
@@ -1288,8 +1288,8 @@ bool GLEScontext::isBindedBuffer(GLenum target) {
         return m_pixelPackBuffer != 0;
     case GL_PIXEL_UNPACK_BUFFER:
         return m_pixelUnpackBuffer != 0;
-    case GL_TRANSFORM_FEEDBACK_BUFFER:
-        return m_transformFeedbackBuffer != 0;
+    //case GL_TRANSFORM_FEEDBACK_BUFFER:
+    //    return m_transformFeedbackBuffer != 0;
     case GL_UNIFORM_BUFFER:
         return m_uniformBuffer != 0;
     case GL_ATOMIC_COUNTER_BUFFER:
@@ -1319,8 +1319,8 @@ GLuint GLEScontext::getBuffer(GLenum target) {
         return m_pixelPackBuffer;
     case GL_PIXEL_UNPACK_BUFFER:
         return m_pixelUnpackBuffer;
-    case GL_TRANSFORM_FEEDBACK_BUFFER:
-        return m_transformFeedbackBuffer;
+    //case GL_TRANSFORM_FEEDBACK_BUFFER:
+    //    return m_transformFeedbackBuffer;
     case GL_UNIFORM_BUFFER:
         return m_uniformBuffer;
     case GL_ATOMIC_COUNTER_BUFFER:
@@ -1338,8 +1338,8 @@ GLuint GLEScontext::getBuffer(GLenum target) {
 
 GLuint GLEScontext::getIndexedBuffer(GLenum target, GLuint index) {
     switch (target) {
-    case GL_TRANSFORM_FEEDBACK_BUFFER:
-        return m_indexedTransformFeedbackBuffers[index].buffer;
+    //case GL_TRANSFORM_FEEDBACK_BUFFER:
+    //    return m_indexedTransformFeedbackBuffers[index].buffer;
     case GL_UNIFORM_BUFFER:
         return m_indexedUniformBuffers[index].buffer;
     case GL_ATOMIC_COUNTER_BUFFER:
