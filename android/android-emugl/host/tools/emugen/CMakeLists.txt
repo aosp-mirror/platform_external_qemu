@@ -23,14 +23,15 @@ if(NOT TARGET gmock_main)
                                      -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
 endif()
 
-# Emugen executable
+# Emugen executable (note not unicode safe!)
 set(emugen_src ApiGen.cpp EntryPoint.cpp main.cpp Parser.cpp strUtils.cpp TypeFactory.cpp)
 android_add_executable(emugen)
 target_include_directories(emugen PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)
+#target_link_libraries(emugen PUBLIC android-emu-base)
 android_target_link_libraries(emugen windows_msvc-x86_64 PRIVATE msvc-posix-compat)
 
 # The unit tests
 set(emugen_unittests_src Parser.cpp Parser_unittest.cpp)
 android_add_test(emugen_unittests)
-target_link_libraries(emugen_unittests PRIVATE gmock_main)
+target_link_libraries(emugen_unittests PRIVATE gmock_main android-emu-base)
 android_target_link_libraries(emugen windows_msvc-x86_64 PRIVATE msvc-posix-compat)

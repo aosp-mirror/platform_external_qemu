@@ -434,7 +434,7 @@ static void page_init(void)
 
         last_brk = (unsigned long)sbrk(0);
 
-        f = fopen("/compat/linux/proc/self/maps", "r");
+        f = android_fopen("/compat/linux/proc/self/maps", "r");
         if (f) {
             mmap_lock();
 

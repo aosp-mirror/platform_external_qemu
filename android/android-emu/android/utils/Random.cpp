@@ -13,6 +13,7 @@
 
 #include "android/base/files/ScopedStdioFile.h"
 #include "android/utils/debug.h"
+#include "android/utils/file_io.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -48,7 +49,7 @@ bool generateRandomBytes(char* buf, size_t buf_len) {
     }
     return true;
 #else
-    ScopedStdioFile fp(fopen("/dev/urandom", "rb"));
+    ScopedStdioFile fp(android_fopen("/dev/urandom", "rb"));
     if (fp.get() == nullptr) {
         E("Can't open /dev/urandom");
         return false;

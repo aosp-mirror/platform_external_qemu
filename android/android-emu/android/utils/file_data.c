@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "android/utils/file_io.h"
 
 // Use a magic value in the |flags| field to indicate that a FileData
 // value was properly initialized. Helps catch errors at runtime.
@@ -58,7 +59,7 @@ void fileData_initEmpty(FileData* data) {
 
 
 int fileData_initFromFile(FileData* data, const char* filePath) {
-    FILE* f = fopen(filePath, "rb");
+    FILE* f = android_fopen(filePath, "rb");
     if (!f)
         return -errno;
 

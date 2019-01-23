@@ -13,18 +13,31 @@
 
 #include "android/base/files/ScopedFd.h"
 #include "android/utils/eintr_wrapper.h"
+#include "android/utils/file_io.h"
 #include "android/utils/tempfile.h"
 
 #include <fcntl.h>
 #include <gtest/gtest.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <limits>
 #include <string>
-#include <sys/types.h>
-#include <sys/stat.h>
 
 using android::base::ScopedFd;
 
 namespace android {
+
+TEST(FileUtils, fopen) {
+    FILE* f = android_fopen(
+            "C:\\Users\\EmuTest2\\AppData\\Local\\Android\\Sdk\\system-"
+            "images\\android-28\\google_apis_playstore\\x86\\build.prop",
+            "rb");
+    if (f == NULL)
+        EXPECT_FALSE(TRUE);
+    if (fseek(f, 0, SEEK_END) < 0) {
+        FAIL();
+    }
+}
 
 TEST(FileUtils, stringToFile) {
     const char test_pattern[] = "test pattern";
