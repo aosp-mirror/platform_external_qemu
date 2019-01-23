@@ -34,18 +34,30 @@ using android::base::Pool;
 
 class VkEncoder::Impl {
 public:
-    Impl(IOStream* stream) : m_stream(stream) { }
+    Impl(IOStream* stream) : m_stream(stream), m_logEncodes(false) {
+        const char* emuVkLogEncodesPropName = "qemu.vk.log";
+        char encodeProp[PROPERTY_VALUE_MAX];
+        if (property_get(emuVkLogEncodesPropName, encodeProp, nullptr) > 0) {
+            m_logEncodes = atoi(encodeProp) > 0;
+        }
+    }
     VulkanCountingStream* countingStream() { return &m_countingStream; }
     VulkanStream* stream() { return &m_stream; }
     Pool* pool() { return &m_pool; }
     ResourceTracker* resources() { return ResourceTracker::get(); }
     Validation* validation() { return &m_validation; }
+
+    void log(const char* text) {
+        if (!m_logEncodes) return;
+        ALOGD(\"encoder log: %s\", text);
+    }
 private:
     VulkanCountingStream m_countingStream;
     VulkanStream m_stream;
     Pool m_pool { 8, 4096, 64 };
 
     Validation m_validation;
+    bool m_logEncodes;
 };
 
 VkEncoder::VkEncoder(IOStream *stream) :
@@ -241,6 +253,7 @@ class EncodingParameters(object):
                 self.toWrite.append(localCopyParam)
 
 def emit_parameter_encode_preamble_write(typeInfo, api, cgen):
+    cgen.stmt("mImpl->log(\"start %s\")" % api.name)
     emit_custom_pre_validate(typeInfo, api, cgen);
     emit_custom_resource_preprocess(typeInfo, api, cgen);
 
@@ -362,6 +375,7 @@ def emit_return_unmarshal(typeInfo, api, cgen):
     cgen.stmt("pool->freeAll()")
 
 def emit_return(typeInfo, api, cgen):
+    cgen.stmt("mImpl->log(\"finish %s\");" % api.name);
     if api.getRetTypeExpr() == "void":
         return
 
@@ -381,6 +395,7 @@ def emit_default_encoding(typeInfo, api, cgen):
 ## Custom encoding definitions##################################################
 
 def emit_only_goldfish_custom(typeInfo, api, cgen):
+    cgen.stmt("mImpl->log(\"custom start %s\");" % api.name)
     cgen.vkApiCall( \
         api,
         customPrefix="mImpl->resources()->on_",
