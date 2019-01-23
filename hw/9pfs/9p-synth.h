@@ -43,7 +43,7 @@ typedef struct V9fsSynthOpenState {
     struct dirent dent;
 } V9fsSynthOpenState;
 
-int qemu_v9fs_synth_mkdir(V9fsSynthNode *parent, int mode,
+int qemu_v9fs_synth_android_mkdir(V9fsSynthNode *parent, int mode,
                           const char *name, V9fsSynthNode **result);
 int qemu_v9fs_synth_add_file(V9fsSynthNode *parent, int mode,
                              const char *name, v9fs_synth_read read,

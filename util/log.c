@@ -62,7 +62,7 @@ void qemu_set_log(int log_flags)
     if (!qemu_logfile &&
         (is_daemonized() ? logfilename != NULL : qemu_loglevel)) {
         if (logfilename) {
-            qemu_logfile = fopen(logfilename, log_append ? "a" : "w");
+            qemu_logfile = android_fopen(logfilename, log_append ? "a" : "w");
             if (!qemu_logfile) {
                 perror(logfilename);
                 _exit(1);

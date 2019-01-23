@@ -139,7 +139,7 @@ static void write_pidfile(void)
     return;
 
 fail:
-    unlink(pidfile);
+   android_unlink(pidfile);
     close(pidfd);
     exit(EXIT_FAILURE);
 }

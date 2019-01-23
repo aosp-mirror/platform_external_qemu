@@ -20,7 +20,7 @@ extern bool xen_feature_grant_copy;
 extern DeviceState *xen_sysdev;
 extern BusState *xen_sysbus;
 
-int xenstore_mkdir(char *path, int p);
+int xenstore_android_mkdir(char *path, int p);
 int xenstore_write_be_str(struct XenDevice *xendev, const char *node, const char *val);
 int xenstore_write_be_int(struct XenDevice *xendev, const char *node, int ival);
 int xenstore_write_be_int64(struct XenDevice *xendev, const char *node, int64_t ival);

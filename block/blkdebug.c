@@ -235,7 +235,7 @@ static int read_config(BDRVBlkdebugState *s, const char *filename,
     Error *local_err = NULL;
 
     if (filename) {
-        f = fopen(filename, "r");
+        f = android_fopen(filename, "r");
         if (f == NULL) {
             error_setg_errno(errp, errno, "Could not read blkdebug config file");
             return -errno;

@@ -527,7 +527,7 @@ vubr_new(const char *path, bool client)
     len = sizeof(un.sun_family) + strlen(path);
 
     if (!client) {
-        unlink(path);
+       android_unlink(path);
 
         if (bind(dev->sock, (struct sockaddr *) &un, len) == -1) {
             vubr_die("bind");

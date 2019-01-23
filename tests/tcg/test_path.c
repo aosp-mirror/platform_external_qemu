@@ -35,44 +35,44 @@ void qemu_log(const char *fmt, ...)
 
 static void cleanup(void)
 {
-    unlink("/tmp/qemu-test_path/DIR1/DIR2/FILE");
-    unlink("/tmp/qemu-test_path/DIR1/DIR2/FILE2");
-    unlink("/tmp/qemu-test_path/DIR1/DIR2/FILE3");
-    unlink("/tmp/qemu-test_path/DIR1/DIR2/FILE4");
-    unlink("/tmp/qemu-test_path/DIR1/DIR2/FILE5");
-    rmdir("/tmp/qemu-test_path/DIR1/DIR2");
-    rmdir("/tmp/qemu-test_path/DIR1/DIR3");
-    rmdir("/tmp/qemu-test_path/DIR1");
-    rmdir("/tmp/qemu-test_path");
+   android_unlink("/tmp/qemu-test_path/DIR1/DIR2/FILE");
+   android_unlink("/tmp/qemu-test_path/DIR1/DIR2/FILE2");
+   android_unlink("/tmp/qemu-test_path/DIR1/DIR2/FILE3");
+   android_unlink("/tmp/qemu-test_path/DIR1/DIR2/FILE4");
+   android_unlink("/tmp/qemu-test_path/DIR1/DIR2/FILE5");
+   android_rmdir("/tmp/qemu-test_path/DIR1/DIR2");
+   android_rmdir("/tmp/qemu-test_path/DIR1/DIR3");
+   android_rmdir("/tmp/qemu-test_path/DIR1");
+   android_rmdir("/tmp/qemu-test_path");
 }
 
 static unsigned int do_test(void)
 {
-    if (mkdir("/tmp/qemu-test_path", 0700) != 0)
+    if (android_mkdir("/tmp/qemu-test_path", 0700) != 0)
 	return __LINE__;
 
-    if (mkdir("/tmp/qemu-test_path/DIR1", 0700) != 0)
+    if (android_mkdir("/tmp/qemu-test_path/DIR1", 0700) != 0)
 	return __LINE__;
 
-    if (mkdir("/tmp/qemu-test_path/DIR1/DIR2", 0700) != 0)
+    if (android_mkdir("/tmp/qemu-test_path/DIR1/DIR2", 0700) != 0)
 	return __LINE__;
 
-    if (mkdir("/tmp/qemu-test_path/DIR1/DIR3", 0700) != 0)
+    if (android_mkdir("/tmp/qemu-test_path/DIR1/DIR3", 0700) != 0)
 	return __LINE__;
 
-    if (close(creat("/tmp/qemu-test_path/DIR1/DIR2/FILE", 0600)) != 0)
+    if (close(android_creat(("/tmp/qemu-test_path/DIR1/DIR2/FILE", 0600)) != 0)
 	return __LINE__;
 
-    if (close(creat("/tmp/qemu-test_path/DIR1/DIR2/FILE2", 0600)) != 0)
+    if (close(android_creat(("/tmp/qemu-test_path/DIR1/DIR2/FILE2", 0600)) != 0)
 	return __LINE__;
 
-    if (close(creat("/tmp/qemu-test_path/DIR1/DIR2/FILE3", 0600)) != 0)
+    if (close(android_creat(("/tmp/qemu-test_path/DIR1/DIR2/FILE3", 0600)) != 0)
 	return __LINE__;
 
-    if (close(creat("/tmp/qemu-test_path/DIR1/DIR2/FILE4", 0600)) != 0)
+    if (close(android_creat(("/tmp/qemu-test_path/DIR1/DIR2/FILE4", 0600)) != 0)
 	return __LINE__;
 
-    if (close(creat("/tmp/qemu-test_path/DIR1/DIR2/FILE5", 0600)) != 0)
+    if (close(android_creat(("/tmp/qemu-test_path/DIR1/DIR2/FILE5", 0600)) != 0)
 	return __LINE__;
 
     init_paths("/tmp/qemu-test_path");

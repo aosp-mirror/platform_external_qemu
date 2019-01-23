@@ -73,7 +73,7 @@ static void test_mirror(void)
 
     g_free(recv_buf);
     close(recv_sock);
-    unlink(sock_path);
+   android_unlink(sock_path);
 }
 
 int main(int argc, char **argv)

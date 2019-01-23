@@ -85,7 +85,7 @@ void coroutine_fn v9fs_co_rewinddir(V9fsPDU *pdu, V9fsFidState *fidp)
         });
 }
 
-int coroutine_fn v9fs_co_mkdir(V9fsPDU *pdu, V9fsFidState *fidp,
+int coroutine_fn v9fs_co_android_mkdir(V9fsPDU *pdu, V9fsFidState *fidp,
                                V9fsString *name, mode_t mode, uid_t uid,
                                gid_t gid, struct stat *stbuf)
 {
@@ -104,7 +104,7 @@ int coroutine_fn v9fs_co_mkdir(V9fsPDU *pdu, V9fsFidState *fidp,
     v9fs_path_read_lock(s);
     v9fs_co_run_in_worker(
         {
-            err = s->ops->mkdir(&s->ctx, &fidp->path, name->data,  &cred);
+            err = s->ops->android_mkdir(&s->ctx, &fidp->path, name->data,  &cred);
             if (err < 0) {
                 err = -errno;
             } else {

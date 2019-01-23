@@ -1734,7 +1734,7 @@ static int file_ram_open(const char *path,
 
             fd = mkstemp(filename);
             if (fd >= 0) {
-                unlink(filename);
+               android_unlink(filename);
                 g_free(filename);
                 break;
             }
@@ -2258,7 +2258,7 @@ RAMBlock *qemu_ram_alloc_from_file(ram_addr_t size, MemoryRegion *mr,
     block = qemu_ram_alloc_from_fd(size, mr, share, fd, errp);
     if (!block) {
         if (created) {
-            unlink(mem_path);
+           android_unlink(mem_path);
         }
 #ifdef _WIN32
         _close(fd);
