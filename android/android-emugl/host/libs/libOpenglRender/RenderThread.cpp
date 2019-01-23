@@ -32,6 +32,8 @@
 #include "android/base/system/System.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/utils/path.h"
+#include "android/utils/file_io.h"
+
 
 #define EMUGL_DEBUG_LEVEL 0
 #include "emugl/common/debug.h"
@@ -259,7 +261,7 @@ intptr_t RenderThread::main() {
         size_t bsize = strlen(dump_dir) + 32;
         char* fname = new char[bsize];
         snprintf(fname, bsize, "%s" PATH_SEP "stream_%p", dump_dir, this);
-        dumpFP = fopen(fname, "wb");
+        dumpFP = android_fopen(fname, "wb");
         if (!dumpFP) {
             fprintf(stderr, "Warning: stream dump failed to open file %s\n",
                     fname);

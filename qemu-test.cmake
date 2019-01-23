@@ -5,7 +5,7 @@ set(libqemu-test_src
     ${ANDROID_AUTOGEN}/tests/test-qapi-events.c
     ${ANDROID_AUTOGEN}/tests/test-qapi-introspect.c)
 android_add_library(libqemu-test)
-target_link_libraries(libqemu-test PUBLIC android-qemu-deps)
+target_link_libraries(libqemu-test PUBLIC android-qemu-deps android-emu-base)
 
 set(libqemu-test-crypto_src
     tests/libqtest.c

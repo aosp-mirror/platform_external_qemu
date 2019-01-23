@@ -391,6 +391,7 @@ target_include_directories(android-emu PUBLIC
 
 android_target_compile_options(android-emu Clang PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
 android_target_compile_options(android-emu linux-x86_64 PRIVATE -idirafter ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
+android_target_compile_options(android-emu darwin-x86_64 PRIVATE -Wno-error -Wno-objc-method-access -Wno-missing-selector-name -Wno-receiver-expr -Wno-incomplete-implementation -Wno-incompatible-pointer-types)
 
 android_target_compile_definitions(android-emu
                                    darwin-x86_64
@@ -517,6 +518,7 @@ target_include_directories(android-emu-shared PUBLIC
 
 android_target_compile_options(android-emu-shared Clang PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
 android_target_compile_options(android-emu-shared linux-x86_64 PRIVATE -idirafter ${ANDROID_QEMU2_TOP_DIR}/linux-headers)
+android_target_compile_options(android-emu-shared darwin-x86_64 PRIVATE -Wno-error -Wno-objc-method-access -Wno-receiver-expr -Wno-incomplete-implementation -Wno-missing-selector-name -Wno-incompatible-pointer-types)
 
 # Definitions needed to compile our deps as static
 target_compile_definitions(android-emu-shared PUBLIC ${CURL_DEFINITIONS} ${LIBXML2_DEFINITIONS})

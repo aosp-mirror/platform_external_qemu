@@ -61,13 +61,13 @@ struct x86_cpuid builtin_cpus[] = {
         CPUID_MTRR | CPUID_CLFLUSH | CPUID_MCA |
         CPUID_PSE36 | CPUID_VME | CPUID_DTS | CPUID_ACPI | CPUID_SS |
         CPUID_HT | CPUID_TM | CPUID_PBE,
-        .ext_features = CPUID_EXT_SSE3 | CPUID_EXT_SSSE3 | 
+        .ext_features = CPUID_EXT_SSE3 | CPUID_EXT_SSSE3 |
         CPUID_EXT_DTES64 | CPUID_EXT_DSCPL |
         CPUID_EXT_CX16 | CPUID_EXT_XTPR | CPUID_EXT_PDCM | CPUID_EXT_HYPERVISOR,
         .ext2_features = CPUID_EXT2_LM | CPUID_EXT2_SYSCALL | CPUID_EXT2_NX,
         .ext3_features = CPUID_EXT3_LAHF_LM,
         .xlevel = 0x80000008,
-        .model_id = "Intel(R) Core(TM)2 Duo GETCPU     T7700  @ 2.40GHz",
+        .model_id = "Intel(R) Core(TM)2 Duo GETCPU   T7700  @ 2.40GHz",
     },
     {
         .name = "vmX",
