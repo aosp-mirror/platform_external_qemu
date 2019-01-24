@@ -31,6 +31,8 @@ NamedObjectType ObjectDataType2NamedObjectType(ObjectDataType objDataType) {
             return NamedObjectType::FRAMEBUFFER;
         case SAMPLER_DATA:
             return NamedObjectType::SAMPLER;
+        case TRANSFORMFEEDBACK_DATA:
+            return NamedObjectType::TRANSFORM_FEEDBACK;
         default:
             return NamedObjectType::NULLTYPE;
     }
