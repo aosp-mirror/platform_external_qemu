@@ -31,18 +31,15 @@ import shutil
 from aemu.process import run
 from aemu.definitions import Generator, Crash, BuildConfig, SymbolUris, Toolchain, get_qemu_root, get_cmake, Make, get_aosp_root, fixup_windows_clang
 from aemu.run_tests import run_tests
-from aemu.upload_symbols import upload_symbols
 
 FLAGS = flags.FLAGS
-flags.DEFINE_enum('symbol_dest', 'none', SymbolUris.values(),
-                  'Environment where we are uploading the symbols to. '
-                  'None will not upload any symbols.')
 flags.DEFINE_string('sdk_revision', None, 'The emulator sdk revision.')
 flags.DEFINE_string('sdk_build_number', None, 'The emulator sdk build number.')
 flags.DEFINE_enum('config', 'release', BuildConfig.values(),
                   'Whether we are building a release or debug configuration.')
 flags.DEFINE_enum('crash', 'none', Crash.values(),
-                  'Which crash server to use or none if you do not want crash uploads.')
+                  'Which crash server to use or none if you do not want crash uploads.'
+                  'enabling this will result in symbol processing and uploading during install.')
 flags.DEFINE_string('out', os.path.abspath('objs'),
                     'Use specific output directory.')
 flags.DEFINE_boolean('qtwebengine', False, 'Build with QtWebEngine support')
@@ -62,7 +59,6 @@ flags.DEFINE_boolean(
     'clean', True, 'Clean the destination build directory before configuring. '
     'Setting this to false will attempt an incremental build. '
     'Note that this can introduce cmake caching issues.')
-flags.DEFINE_boolean('symbols', False, 'Strip binaries and generate symbols after build.')
 
 
 def configure():
@@ -103,23 +99,7 @@ def configure():
 
 def get_build_cmd():
     '''Gets the command that will build all the sources.'''
-    return [get_cmake(), '--build', FLAGS.out, '--target', 'install']
-
-
-def strip_symbols(out_dir):
-    '''Strip all the symbols.'''
-    if platform.system() == 'Windows':
-        logging.error(
-            'Symbol stripping is not yet suppported on windows.. b/121210176')
-        return
-
-    # revert to old mechanism as we do not yet have support on all platforms.
-    cmd = [os.path.join(get_qemu_root(), 'android', 'scripts', 'unix', 'strip-symbols.sh'),
-           '--out-dir=%s' % out_dir]
-    if FLAGS.target == 'windows' or FLAGS.target == 'mingw':
-        cmd.append('--mingw')
-    run(cmd)
-
+    return [get_cmake(), '--build', FLAGS.out, '--target', 'install/strip']
 
 def main(argv=None):
     del argv  # Unused.
@@ -138,16 +118,6 @@ def main(argv=None):
 
     # Test.
     run_tests(FLAGS.out)
-
-    # Strip symbols
-    if FLAGS.symbols:
-        logging.info("Stripping symbols")
-        strip_symbols(FLAGS.out)
-
-    # Upload the symbols..
-    uri = SymbolUris.from_string(FLAGS.symbol_dest).value
-    if uri:
-        upload_symbols(FLAGS.out, uri)
 
     if platform.system() != 'Windows' and FLAGS.config == 'debug':
         overrides = open(os.path.join(

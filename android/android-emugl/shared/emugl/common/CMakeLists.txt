@@ -18,9 +18,7 @@ target_link_libraries(emugl_common PRIVATE android-emu-base)
 target_include_directories(emugl_common PRIVATE ${ANDROID_EMUGL_DIR}/host/include
                                    ${ANDROID_EMUGL_DIR}/shared)
 
-install(TARGETS emugl_common
-        RUNTIME DESTINATION lib64
-        LIBRARY DESTINATION lib64)
+android_install_shared(emugl_common)
 
 set(emugl_test_shared_library_src testing/test_shared_library.cpp)
 android_add_shared_library(emugl_test_shared_library)
