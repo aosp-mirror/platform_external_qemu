@@ -56,7 +56,7 @@ sdk {
             into ''
             builtBy buildDefaultEmulator
         }
-        item("$buildDefaultEmulator.output/build/debug_info/gradle-release") {
+        item("$buildDefaultEmulator.output/build/debug_info/") {
             into ''
             builtBy buildDefaultEmulator
             debug true
@@ -90,7 +90,7 @@ sdk {
             into ''
             builtBy buildWindowsEmulator
         }
-        item("$buildWindowsEmulator.output/build/debug_info/gradle-release") {
+        item("$buildWindowsEmulator.output/build/debug_info/") {
             into ''
             builtBy buildWindowsEmulator
             debug true
@@ -127,8 +127,8 @@ for (PlatformConfig platform : sdk.getPlatforms()) {
                 continue
             }
            debugItemPath = debugItemPath.replaceFirst("$buildDefaultEmulator.output",
-                                "$buildDefaultEmulator.output/build/debug_info/gradle-release")
-            
+                                "$buildDefaultEmulator.output/build/debug_info")
+
             if (debugItemPath.equals(itemPath)) {
                 continue
             }
