@@ -835,6 +835,8 @@ void GLESv2Context::bindIndexedBuffer(GLenum target,
 }
 
 void GLESv2Context::unbindBuffer(GLuint buffer) {
-    boundTransformFeedback()->unbindBuffer(buffer);
+    if (m_glesMajorVersion >= 3) {
+        boundTransformFeedback()->unbindBuffer(buffer);
+    }
     GLEScontext::unbindBuffer(buffer);
 }
