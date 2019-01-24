@@ -1203,6 +1203,12 @@ int AUD_write (SWVoiceOut *sw, void *buf, int size)
     return sw->hw->pcm_ops->write(sw, buf, size);
 }
 
+static bool allow_real_audio = false;
+
+void qemu_allow_real_audio(bool allow) {
+    allow_real_audio = allow;
+}
+
 int AUD_read (SWVoiceIn *sw, void *buf, int size)
 {
     if (!sw) {
@@ -1215,7 +1221,15 @@ int AUD_read (SWVoiceIn *sw, void *buf, int size)
         return 0;
     }
 
-    return sw->hw->pcm_ops->read(sw, buf, size);
+    int bytes =  sw->hw->pcm_ops->read(sw, buf, size);
+
+    if (!allow_real_audio) {
+        // TODO: Also a potential way to pipe fake audio input
+        // that is not just all zeroes.
+        memset(buf, 0x0, size);
+    }
+
+    return bytes;
 }
 
 int AUD_get_buffer_size_out (SWVoiceOut *sw)
