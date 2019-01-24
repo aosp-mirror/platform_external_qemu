@@ -12,7 +12,6 @@
             "args": [
                 "--gtest_break_on_failure"
             ],
-            // , "--gtest_filter=Lock.Synchronization"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [
@@ -60,6 +59,9 @@
             // Resolved by CMake Tools:
             "program": "${command:cmake.launchTargetPath}",
             "cwd": "${workspaceFolder}",
+            "args": [
+                "--gtest_break_on_failure"
+            ],
             "env": {
                 // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
                 "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
@@ -70,12 +72,15 @@
             "type": "lldb",
             "request": "launch",
             // Resolved by CMake Tools:
-            "program": "${command:cmake.launchTargetPath}",
+            "program": "${workspaceFolder}/build/emulator",
             "args": [
                 // You will likely have to change these for emulator launch..
-                "@P_64",
+                "@28_64",
                 "-verbose",
                 "-show-kernel"
+            ],
+            "postRunCommands": [
+                "pro handle -p true -s false SIGUSR1"
             ],
             "cwd": "${workspaceFolder}",
             "env": {
