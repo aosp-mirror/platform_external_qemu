@@ -29,6 +29,7 @@
 #define GL_DEPTH_CLAMP 0x864F
 
 class ProgramData;
+class TransformFeedbackData;
 
 class GLESv2Context : public GLEScontext{
 public:
@@ -93,7 +94,27 @@ public:
     void initEmulatedBuffers();
     void initEmulatedVAO();
 
+    unsigned int getTransformFeedbackGlobalName(ObjectLocalName p_localName);
+    ObjectLocalName genTransformFeedbackName(ObjectLocalName p_localName = 0,
+                                             bool genLocal = 0);
+    void bindTransformFeedback(ObjectLocalName p_localName);
+    ObjectLocalName getTransformFeedbackBinding();
+    bool hasBoundTransformFeedback(ObjectLocalName transformFeedback);
+    void deleteTransformFeedback(ObjectLocalName p_localName);
+    GLuint getIndexedBuffer(GLenum target, GLuint index) override;
+    void bindIndexedBuffer(GLenum target,
+                           GLuint index,
+                           GLuint buffer,
+                           GLintptr offset,
+                           GLsizeiptr size,
+                           GLintptr stride = 0,
+                           bool isBindBase = false) override;
+    void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer) override;
+    void unbindBuffer(GLuint buffer) override;
+
     static void setMaxGlesVersion(GLESVersion version);
+    TransformFeedbackData* boundTransformFeedback();
+
 protected:
     virtual void postLoadRestoreCtx();
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
@@ -114,6 +135,10 @@ private:
 
     std::vector<GLuint> m_emulatedClientVBOs;
     GLuint m_emulatedClientIBO = 0;
+
+    NameSpace* m_transformFeedbackNameSpace = nullptr;
+    ObjectLocalName m_bindTransformFeedback = 0;
+    bool m_transformFeedbackDeletePending = false;
 };
 
 #endif
