@@ -8,6 +8,4 @@ android_add_shared_library(GLES_CM_translator)
 target_compile_options(GLES_CM_translator PRIVATE -fvisibility=hidden)
 target_link_libraries(GLES_CM_translator PUBLIC GLcommon android-emu emugl_common)
 target_link_libraries(GLES_CM_translator PRIVATE emugl_base)
-install(TARGETS GLES_CM_translator
-        RUNTIME DESTINATION lib64 # We don't want windows to binplace dlls in the exe dir.
-        LIBRARY DESTINATION lib64)
+android_install_shared(GLES_CM_translator)
