@@ -32,6 +32,7 @@ private slots:
     void on_mic_hookButton_pressed();
     void on_mic_hookButton_released();
     void on_mic_inserted_toggled(bool checked);
+    void on_mic_allowRealAudio_toggled(bool checked);
     void on_mic_voiceAssistButton_pressed();
     void on_mic_voiceAssistButton_released();
 
