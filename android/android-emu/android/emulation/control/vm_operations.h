@@ -158,6 +158,8 @@ typedef struct QAndroidVmOperations {
     // QEMU snapshot save calls work.
     void (*setExiting)(void);
 
+    // Allow actual audio on host through to the guest.
+    void (*allowRealAudio)(bool allow);
 } QAndroidVmOperations;
 
 // gQAndroidVmOperations is defined in .cpp depending on the target it used for,

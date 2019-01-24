@@ -117,7 +117,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>168</y>
+     <y>242</y>
      <width>132</width>
      <height>36</height>
     </rect>
@@ -149,7 +149,7 @@
    <property name="geometry">
     <rect>
      <x>168</x>
-     <y>168</y>
+     <y>242</y>
      <width>132</width>
      <height>36</height>
     </rect>
@@ -174,12 +174,61 @@
     <bool>false</bool>
    </property>
   </widget>
+  <widget class="QGroupBox" name="mic_allowRealAudioLabel">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>168</y>
+     <width>251</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">border: 0px;</string>
+   </property>
+   <property name="title">
+    <string>Virtual headset uses host audio input</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string notr="true">Title</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="mic_allowRealAudio">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>186</y>
+     <width>211</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="accessibleDescription">
+    <string>Virtual headset plug inserted</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Toggle</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+  </widget>
   <zorder>mic_insertedLabel</zorder>
   <zorder>mic_hasMicLabel</zorder>
   <zorder>mic_voiceAssistButton</zorder>
   <zorder>mic_hookButton</zorder>
   <zorder>mic_inserted</zorder>
   <zorder>mic_hasMic</zorder>
+  <zorder>mic_allowRealAudioLabel</zorder>
+  <zorder>mic_allowRealAudio</zorder>
  </widget>
  <customwidgets>
   <customwidget>

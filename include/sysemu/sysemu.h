@@ -128,6 +128,10 @@ int qemu_delvm(const char* name, const QEMUMessageCallback* messages);
 // Callback for lazy loading of RAM for snapshots.
 void qemu_ram_load(void* hostRam, uint64_t size);
 
+// Disable or enable real audio input.
+// TODO: Also a potential way to pipe fake audio input
+void qemu_allow_real_audio(bool allow);
+
 /* Populates the passed array of strings with the snapshot names.
  * If |names_count| is not NULL, it must be the size of |names| array.
  * On exit, it is set to the total snapshot count, regardless of its
