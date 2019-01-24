@@ -87,6 +87,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   # Clang goes balistic on our codebase, so let's just suppress all the things.
   add_c_flag("-Wno-mismatched-tags")
   add_c_flag("-Wno-\#warnings")
+  add_c_flag("-Wno-nonportable-include-path") # Let's not break cross compilers.
   add_c_flag("-Wno-unused-variable")
   add_c_flag("-Wno-deprecated-declarations")
   add_c_flag("-Wno-c++14-extensions")
