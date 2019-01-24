@@ -18,7 +18,7 @@ function(android_find_windows_library NAME)
   endif()
 endfunction()
 
-set(WINDOWS_LIBS "ws2_32;d3d9;ole32;psapi;iphlpapi;wldap32;shell32;user32;advapi32;mfuuid;winmm;shlwapi;gdi32;dxguid")
+set(WINDOWS_LIBS "ws2_32;d3d9;ole32;psapi;iphlpapi;wldap32;shell32;user32;advapi32;mfuuid;winmm;shlwapi;gdi32;dxguid;dbghelp;mincore;imagehlp;diaguids;wininet")
 foreach(LIB ${WINDOWS_LIBS})
   android_find_windows_library(${LIB})
 endforeach()
