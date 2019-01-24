@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 # TODO: Remove this once we have -no-window working with absolutely no Qt dependencies
-if(NO_QTWEBENGINE AND ANDROID_TARGET_TAG MATCHES "linux-x86_64")
+if(NOT QTWEBENGINE AND ANDROID_TARGET_TAG MATCHES "linux-x86_64")
   get_filename_component(
     PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_TARGET_TAG}-nowebengine"
     ABSOLUTE)
@@ -118,7 +118,7 @@ if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
   add_qt_shared_lib(Widgets "-lQt5Widgets" "Qt5::Gui")
   add_qt_shared_lib(Svg "-lQt5Svg" "Qt5::Widgets")
 
-  if(NOT NO_QTWEBENGINE)
+  if(QTWEBENGINE)
     add_qt_shared_lib(Network "-lQt5Network" "Qt5::Core")
     add_qt_shared_lib(Qml "-lQt5Qml" "Qt5::Network")
     add_qt_shared_lib(WebChannel "-lQt5WebChannel" "Qt5::Qml")
@@ -272,7 +272,7 @@ elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
   add_qt_shared_lib(Widgets "-lQt5Widgets" "Qt5::Gui")
   add_qt_shared_lib(Svg "-lQt5Svg" "Qt5::Widgets")
 
-  if(NOT NO_QTWEBENGINE)
+  if(QTWEBENGINE)
     add_qt_shared_lib(Network "-lQt5Network" "Qt5::Core")
     add_qt_shared_lib(Qml "-lQt5Qml" "Qt5::Network")
     add_qt_shared_lib(WebChannel "-lQt5WebChannel" "Qt5::Qml")
