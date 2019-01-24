@@ -49,7 +49,11 @@ or path, *instead* of creating a toolchain. Valid values for <tool> are:
    c++             -> Print the c++ compiler name.
    ld, ar, as, ... -> Same for other tools.
    sysroot         -> Print the path to directory corresponding to the current
-                      toolchain."
+                      toolchain.
+
+Note: If you wish to cross compile to windows on darwin you will have to have a mingw
+installation (brew install mingw-w64)
+"
 
 aosp_dir_register_option
 aosp_register_clang_option
@@ -89,7 +93,6 @@ if [ "$PARAMETER_COUNT" != 1 ]; then
 fi
 
 INSTALL_DIR=$PARAMETER_1
-
 # Determine host system type.
 BUILD_HOST=$(get_build_os)
 BUILD_ARCH=$(get_build_arch)
@@ -175,7 +178,6 @@ gen_wrapper_program ()
     local FLAGS=""
     local POST_FLAGS=""
     local DST_PROG="$PROG"
-
     case $PROG in
       cc|gcc|cpp|clang)
           FLAGS=$FLAGS" $EXTRA_CFLAGS"
@@ -518,16 +520,18 @@ fetch_dependencies_msvc() {
 }
 
 get_clang_version() {
-    CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for linux)
+    CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for ${BUILD_HOST})
     CLANG_DIR=$(realpath $CLANG_BINDIR/..)
-    CLANG_VERSION=$(${CLANG_BINDIR}/clang -v 2>&1 | grep -P 'clang version \d+.\d+.\d' -o | grep -P '\d+.\d+.\d+' -o)
+    if [[ $BUILD_HOST == "darwin" ]]; then
+       CLANG_VERSION=$(${CLANG_BINDIR}/clang -v 2>&1 | egrep -E 'clang version \d+.\d+.\d' -o | egrep -E '\d+.\d+.\d+' -o)
+    else
+       CLANG_VERSION=$(${CLANG_BINDIR}/clang -v 2>&1 | grep -P 'clang version \d+.\d+.\d' -o | grep -P '\d+.\d+.\d+' -o)
+    fi
     echo $CLANG_VERSION
 }
 
 prepare_build_for_windows_msvc() {
-    # TODO(joshuaduong): Only linux enivronment is set up. Set up for
-    # mac/windows as well.
-    CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for linux)
+    CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for ${BUILD_HOST})
     CLANG_DIR=$(realpath $CLANG_BINDIR/..)
     CLANG_VERSION=$(get_clang_version)
 
@@ -649,6 +653,9 @@ print_info () {
     fi
     case $PRINT in
         binprefix)
+            if [[ $BUILD_HOST == "darwin" ]]; then
+                BINPREFIX=""
+            fi
             printf "%s\n" "$BINPREFIX"
             ;;
         sysroot)
@@ -697,6 +704,12 @@ prepare_build_for_host () {
             prepare_build_for_darwin
             ;;
         windows_msvc-*)
+            if [ $BUILD_HOST == "darwin" ]; then
+                which x86_64-w64-mingw32-gcc > /dev/null || panic "No mingw install available!"
+                TOOLCHAIN_PREFIX=x86_64-w64-mingw32-
+                DST_PREFIX=$(dirname $(which x86_64-w64-mingw32-gcc))
+                DST_PREFIX=${DST_PREFIX}/$TOOLCHAIN_PREFIX
+            fi
             prepare_build_for_windows_msvc
             ;;
         windows-*)
@@ -715,7 +728,6 @@ prepare_build_for_host () {
         var_append EXTRA_CXXFLAGS "-I$OPT_PREFIX/include"
         var_append EXTRA_LDFLAGS "-L$OPT_PREFIX/lib"
     fi
-
     if [ "$OPT_PRINT" ]; then
         print_info $OPT_PRINT
     elif [ "$OPT_FORCE_FETCH_WINTOOLCHAIN" ]; then
@@ -734,5 +746,4 @@ prepare_build_for_host () {
         esac
     fi
 }
-
 prepare_build_for_host $HOST
