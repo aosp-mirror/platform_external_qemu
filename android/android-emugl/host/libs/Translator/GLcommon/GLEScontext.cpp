@@ -1188,6 +1188,9 @@ void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer,
         GLintptr offset, GLsizeiptr size, GLintptr stride, bool isBindBase) {
     VertexAttribBindingVector* bindings = nullptr;
     switch (target) {
+    case GL_TRANSFORM_FEEDBACK_BUFFER:
+        bindings = &m_indexedTransformFeedbackBuffers;
+        break;
     case GL_UNIFORM_BUFFER:
         bindings = &m_indexedUniformBuffers;
         break;
@@ -1335,6 +1338,8 @@ GLuint GLEScontext::getBuffer(GLenum target) {
 
 GLuint GLEScontext::getIndexedBuffer(GLenum target, GLuint index) {
     switch (target) {
+    case GL_TRANSFORM_FEEDBACK_BUFFER:
+        return m_indexedTransformFeedbackBuffers[index].buffer;
     case GL_UNIFORM_BUFFER:
         return m_indexedUniformBuffers[index].buffer;
     case GL_ATOMIC_COUNTER_BUFFER:

@@ -229,20 +229,15 @@ public:
                                                   GLint* internalformat_out, GLenum* format_out);
 
     void bindBuffer(GLenum target,GLuint buffer);
-    virtual void bindIndexedBuffer(GLenum target,
-                                   GLuint index,
-                                   GLuint buffer,
-                                   GLintptr offset,
-                                   GLsizeiptr size,
-                                   GLintptr stride = 0,
-                                   bool isBindBase = false);
-    virtual void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer);
-    virtual void unbindBuffer(GLuint buffer);
+    void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer,
+        GLintptr offset, GLsizeiptr size, GLintptr stride = 0, bool isBindBase = false);
+    void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer);
+    void unbindBuffer(GLuint buffer);
     bool isBuffer(GLuint buffer);
     bool isBindedBuffer(GLenum target);
     GLvoid* getBindedBuffer(GLenum target);
     GLuint getBuffer(GLenum target);
-    virtual GLuint getIndexedBuffer(GLenum target, GLuint index);
+    GLuint getIndexedBuffer(GLenum target, GLuint index);
     void getBufferSize(GLenum target,GLint* param);
     void getBufferSizeById(GLuint buffer,GLint* param);
     void getBufferUsage(GLenum target,GLint* param);

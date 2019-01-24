@@ -30,19 +30,17 @@
 #include "android/base/system/System.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "OpenglCodecCommon/ErrorLog.h"
-#include "GLESv2Context.h"
-#include "GLESv2Validate.h"
-#include "GLcommon/FramebufferData.h"
-#include "GLcommon/GLutils.h"
 #include "GLcommon/SaveableTexture.h"
 #include "GLcommon/TextureData.h"
-#include "GLcommon/TextureUtils.h"
 #include "GLcommon/TranslatorIfaces.h"
-#include "OpenglCodecCommon/ErrorLog.h"
-#include "ProgramData.h"
+#include "GLESv2Context.h"
+#include "GLESv2Validate.h"
 #include "SamplerData.h"
 #include "ShaderParser.h"
-#include "TransformFeedbackData.h"
+#include "ProgramData.h"
+#include "GLcommon/TextureUtils.h"
+#include "GLcommon/GLutils.h"
+#include "GLcommon/FramebufferData.h"
 
 #include "emugl/common/crash_reporter.h"
 
@@ -1783,9 +1781,6 @@ static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc
     case GL_PIXEL_UNPACK_BUFFER_BINDING:
         *params = ctx->getBuffer(GL_PIXEL_UNPACK_BUFFER);
         break;
-    case GL_TRANSFORM_FEEDBACK_BINDING:
-        *params = ctx->getTransformFeedbackBinding();
-        break;
     case GL_TRANSFORM_FEEDBACK_BUFFER_BINDING:
         *params = ctx->getBuffer(GL_TRANSFORM_FEEDBACK_BUFFER);
         break;
@@ -1991,9 +1986,6 @@ GL_APICALL void  GL_APIENTRY glGetBooleanv(GLenum pname, GLboolean* params){
         break;
     case GL_PIXEL_UNPACK_BUFFER_BINDING:
         TO_GLBOOL(params, ctx->getBuffer(GL_PIXEL_UNPACK_BUFFER));
-        break;
-    case GL_TRANSFORM_FEEDBACK_BINDING:
-        TO_GLBOOL(params, ctx->getTransformFeedbackBinding());
         break;
     case GL_TRANSFORM_FEEDBACK_BUFFER_BINDING:
         TO_GLBOOL(params, ctx->getBuffer(GL_TRANSFORM_FEEDBACK_BUFFER));
