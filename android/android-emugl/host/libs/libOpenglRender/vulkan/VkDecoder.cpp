@@ -1081,6 +1081,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetImageMemoryRequirements:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetImageMemoryRequirements\n");;
+                }
                 VkDevice device;
                 VkImage image;
                 VkMemoryRequirements* pMemoryRequirements;
@@ -1092,11 +1096,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_81, (VkImage*)&image, 1);
                 vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements));
                 unmarshal_VkMemoryRequirements(vkReadStream, (VkMemoryRequirements*)(pMemoryRequirements));
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetImageMemoryRequirements\n");;
-                }
-                m_vk->vkGetImageMemoryRequirements(device, image, pMemoryRequirements);
+                m_state->on_vkGetImageMemoryRequirements(device, image, pMemoryRequirements);
                 marshal_VkMemoryRequirements(vkStream, (VkMemoryRequirements*)(pMemoryRequirements));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
@@ -1895,6 +1895,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateImageView:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkCreateImageView\n");;
+                }
                 VkDevice device;
                 const VkImageViewCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -1915,12 +1919,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_163;
                 vkReadStream->read((uint64_t*)&cgen_var_163, 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkImageView(&cgen_var_163, (VkImageView*)pView, 1);
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateImageView\n");;
-                }
                 VkResult vkCreateImageView_VkResult_return = (VkResult)0;
-                vkCreateImageView_VkResult_return = m_vk->vkCreateImageView(device, pCreateInfo, pAllocator, pView);
+                vkCreateImageView_VkResult_return = m_state->on_vkCreateImageView(device, pCreateInfo, pAllocator, pView);
                 uint64_t cgen_var_164;
                 vkStream->handleMapping()->mapHandles_VkImageView_u64(pView, &cgen_var_164, 1);
                 vkStream->write((uint64_t*)&cgen_var_164, 8);
@@ -3580,6 +3580,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCmdCopyBufferToImage:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkCmdCopyBufferToImage\n");;
+                }
                 VkCommandBuffer commandBuffer;
                 VkBuffer srcBuffer;
                 VkImage dstImage;
@@ -3602,11 +3606,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkBufferImageCopy(vkReadStream, (VkBufferImageCopy*)(pRegions + i));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCmdCopyBufferToImage\n");;
-                }
-                m_vk->vkCmdCopyBufferToImage(commandBuffer, srcBuffer, dstImage, dstImageLayout, regionCount, pRegions);
+                m_state->on_vkCmdCopyBufferToImage(commandBuffer, srcBuffer, dstImage, dstImageLayout, regionCount, pRegions);
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
                 break;
