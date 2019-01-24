@@ -16,11 +16,10 @@
 
 #include "GLESv2Context.h"
 
-#include "ProgramData.h"
+#include "android/base/files/StreamSerializing.h"
 #include "SamplerData.h"
 #include "ShaderParser.h"
-#include "TransformFeedbackData.h"
-#include "android/base/files/StreamSerializing.h"
+#include "ProgramData.h"
 
 #include "emugl/common/crash_reporter.h"
 
@@ -96,14 +95,6 @@ void GLESv2Context::init() {
 
         initEmulatedVAO();
         initEmulatedBuffers();
-        // init emulated transform feedback
-        if (m_glesMajorVersion >= 3) {
-            m_transformFeedbackNameSpace->genName(
-                    GenNameInfo(NamedObjectType::TRANSFORM_FEEDBACK), 0, false);
-            TransformFeedbackData* tf = new TransformFeedbackData();
-            tf->setMaxSize(getCaps()->maxTransformFeedbackSeparateAttribs);
-            m_transformFeedbackNameSpace->setObjectData(0, ObjectDataPtr(tf));
-        }
     }
     m_initialized = true;
 }
@@ -174,14 +165,6 @@ GLESv2Context::GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
         m_glesMajorVersion = maj;
         m_glesMinorVersion = min;
     }
-    ObjectData::loadObject_t loader = [this](NamedObjectType type,
-                                             long long unsigned int localName,
-                                             android::base::Stream* stream) {
-        return loadObject(type, localName, stream);
-    };
-    m_transformFeedbackNameSpace =
-            new NameSpace(NamedObjectType::TRANSFORM_FEEDBACK, globalNameSpace,
-                          stream, loader);
 }
 
 GLESv2Context::~GLESv2Context() {
@@ -196,7 +179,6 @@ GLESv2Context::~GLESv2Context() {
     }
 
     deleteVAO(0);
-    delete m_transformFeedbackNameSpace;
 }
 
 void GLESv2Context::onSave(android::base::Stream* stream) const {
@@ -213,7 +195,6 @@ void GLESv2Context::onSave(android::base::Stream* stream) const {
                 stream->putBe32(item.first);
                 stream->putBe32(item.second);
             });
-    m_transformFeedbackNameSpace->onSave(stream);
 }
 
 void GLESv2Context::postLoadRestoreCtx() {
@@ -363,21 +344,6 @@ void GLESv2Context::postLoadRestoreCtx() {
                     shareGroup()->getGlobalName(NamedObjectType::SAMPLER,
                         bindSampler.second));
         }
-        m_transformFeedbackNameSpace->postLoadRestore(
-                [this](NamedObjectType p_type, ObjectLocalName p_localName) {
-                    switch (p_type) {
-                        case NamedObjectType::FRAMEBUFFER:
-                            return getFBOGlobalName(p_localName);
-                        case NamedObjectType::TRANSFORM_FEEDBACK:
-                            return getTransformFeedbackGlobalName(p_localName);
-                        default:
-                            return m_shareGroup->getGlobalName(p_type,
-                                                               p_localName);
-                    }
-                });
-        dispatcher.glBindTransformFeedback(
-                GL_TRANSFORM_FEEDBACK,
-                getTransformFeedbackGlobalName(m_transformFeedbackBuffer));
     }
 
     GLEScontext::postLoadRestoreCtx();
@@ -405,8 +371,6 @@ ObjectDataPtr GLESv2Context::loadObject(NamedObjectType type,
                     assert(false);
                     return nullptr;
             }
-        case NamedObjectType::TRANSFORM_FEEDBACK:
-            return ObjectDataPtr(new TransformFeedbackData(stream));
         default:
             return nullptr;
     }
@@ -737,104 +701,4 @@ int GLESv2Context::getMaxTexUnits() {
 
 int GLESv2Context::getMaxCombinedTexUnits() {
     return getCaps()->maxCombinedTexImageUnits;
-}
-
-unsigned int GLESv2Context::getTransformFeedbackGlobalName(
-        ObjectLocalName p_localName) {
-    return m_transformFeedbackNameSpace->getGlobalName(p_localName);
-}
-
-bool GLESv2Context::hasBoundTransformFeedback(
-        ObjectLocalName transformFeedback) {
-    return transformFeedback &&
-           m_transformFeedbackNameSpace->getObjectDataPtr(transformFeedback)
-                   .get();
-}
-
-ObjectLocalName GLESv2Context::genTransformFeedbackName(
-        ObjectLocalName p_localName,
-        bool genLocal) {
-    return m_transformFeedbackNameSpace->genName(
-            GenNameInfo(NamedObjectType::TRANSFORM_FEEDBACK), p_localName,
-            genLocal);
-}
-
-void GLESv2Context::bindTransformFeedback(ObjectLocalName p_localName) {
-    if (m_transformFeedbackDeletePending &&
-        m_bindTransformFeedback != p_localName) {
-        m_transformFeedbackNameSpace->deleteName(m_bindTransformFeedback);
-        m_transformFeedbackDeletePending = false;
-    }
-    m_bindTransformFeedback = p_localName;
-    if (p_localName &&
-        !m_transformFeedbackNameSpace->getGlobalName(p_localName)) {
-        genTransformFeedbackName(p_localName, false);
-    }
-    if (p_localName &&
-        !m_transformFeedbackNameSpace->getObjectDataPtr(p_localName).get()) {
-        TransformFeedbackData* tf = new TransformFeedbackData();
-        tf->setMaxSize(getCaps()->maxTransformFeedbackSeparateAttribs);
-        m_transformFeedbackNameSpace->setObjectData(p_localName,
-                                                    ObjectDataPtr(tf));
-    }
-}
-
-ObjectLocalName GLESv2Context::getTransformFeedbackBinding() {
-    return m_bindTransformFeedback;
-}
-
-void GLESv2Context::deleteTransformFeedback(ObjectLocalName p_localName) {
-    // Note: GLES3.0 says it should be pending for delete if it is active
-    // GLES3.2 says report error in this situation
-    if (m_bindTransformFeedback == p_localName) {
-        m_transformFeedbackDeletePending = true;
-        return;
-    }
-    m_transformFeedbackNameSpace->deleteName(p_localName);
-}
-
-TransformFeedbackData* GLESv2Context::boundTransformFeedback() {
-    return (TransformFeedbackData*)m_transformFeedbackNameSpace
-            ->getObjectDataPtr(m_bindTransformFeedback)
-            .get();
-}
-
-GLuint GLESv2Context::getIndexedBuffer(GLenum target, GLuint index) {
-    switch (target) {
-        case GL_TRANSFORM_FEEDBACK_BUFFER:
-            return boundTransformFeedback()->getIndexedBuffer(index);
-        default:
-            return GLEScontext::getIndexedBuffer(target, index);
-    }
-}
-
-void GLESv2Context::bindIndexedBuffer(GLenum target,
-                                      GLuint index,
-                                      GLuint buffer,
-                                      GLintptr offset,
-                                      GLsizeiptr size,
-                                      GLintptr stride,
-                                      bool isBindBase) {
-    switch (target) {
-        case GL_TRANSFORM_FEEDBACK_BUFFER: {
-            TransformFeedbackData* tf = boundTransformFeedback();
-            tf->bindIndexedBuffer(index, buffer, offset, size, stride,
-                                  isBindBase);
-            break;
-        }
-        default:
-            GLEScontext::bindIndexedBuffer(target, index, buffer, offset, size,
-                                           stride, isBindBase);
-    }
-}
-
-void GLESv2Context::bindIndexedBuffer(GLenum target,
-                                      GLuint index,
-                                      GLuint buffer) {
-    GLEScontext::bindIndexedBuffer(target, index, buffer);
-}
-
-void GLESv2Context::unbindBuffer(GLuint buffer) {
-    boundTransformFeedback()->unbindBuffer(buffer);
-    GLEScontext::unbindBuffer(buffer);
 }

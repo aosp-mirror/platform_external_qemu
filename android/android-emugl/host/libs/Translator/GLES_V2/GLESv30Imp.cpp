@@ -735,13 +735,11 @@ GL_APICALL void GL_APIENTRY glTexStorage2D(GLenum target, GLsizei levels, GLenum
 GL_APICALL void GL_APIENTRY glBeginTransformFeedback(GLenum primitiveMode) {
     GET_CTX_V2();
     gles30usages->set_is_used(true);
-    ctx->boundTransformFeedback()->mIsActive = true;
     ctx->dispatcher().glBeginTransformFeedback(primitiveMode);
 }
 
 GL_APICALL void GL_APIENTRY glEndTransformFeedback() {
     GET_CTX_V2();
-    ctx->boundTransformFeedback()->mIsActive = false;
     ctx->dispatcher().glEndTransformFeedback();
 }
 
@@ -752,31 +750,13 @@ GL_APICALL void GL_APIENTRY glGenTransformFeedbacks(GLsizei n, GLuint * ids) {
         gles30usages->set_is_used(true);
         gles30usages->set_gen_transform_feedbacks(true);
     }
-    for (int i = 0; i < n; i++) {
-        ids[i] = ctx->genTransformFeedbackName(0, true);
-    }
+    ctx->dispatcher().glGenTransformFeedbacks(n, ids);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteTransformFeedbacks(GLsizei n, const GLuint * ids) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
-    ObjectLocalName boundTransformFeedback = ctx->getTransformFeedbackBinding();
-    TransformFeedbackData* tfData = ctx->boundTransformFeedback();
-    if (boundTransformFeedback) {
-        for (GLsizei i = 0; i < n; i++) {
-            SET_ERROR_IF(ids[i] == boundTransformFeedback && tfData->mIsActive,
-                         GL_INVALID_OPERATION);
-        }
-    }
-    for (GLsizei i = 0; i < n; i++) {
-        if (ids[i]) {
-            if (boundTransformFeedback == ids[i]) {
-                assert(!tfData->mIsActive);
-                ctx->bindTransformFeedback(0);
-            }
-            ctx->deleteTransformFeedback(ids[i]);
-        }
-    }
+    ctx->dispatcher().glDeleteTransformFeedbacks(n, ids);
 }
 
 GL_APICALL void GL_APIENTRY glBindTransformFeedback(GLenum target, GLuint id) {
@@ -785,10 +765,7 @@ GL_APICALL void GL_APIENTRY glBindTransformFeedback(GLenum target, GLuint id) {
         gles30usages->set_is_used(true);
         gles30usages->set_gen_transform_feedbacks(true);
     }
-    unsigned int globalName = ctx->getTransformFeedbackGlobalName(id);
-    SET_ERROR_IF(id != 0 && globalName == 0, GL_INVALID_OPERATION);
-    ctx->bindTransformFeedback(id);
-    ctx->dispatcher().glBindTransformFeedback(target, globalName);
+    ctx->dispatcher().glBindTransformFeedback(target, id);
 }
 
 GL_APICALL void GL_APIENTRY glPauseTransformFeedback() {
@@ -803,7 +780,8 @@ GL_APICALL void GL_APIENTRY glResumeTransformFeedback() {
 
 GL_APICALL GLboolean GL_APIENTRY glIsTransformFeedback(GLuint id) {
     GET_CTX_V2_RET(0);
-    return ctx->hasBoundTransformFeedback(id);
+    GLboolean glIsTransformFeedbackRET = ctx->dispatcher().glIsTransformFeedback(id);
+    return glIsTransformFeedbackRET;
 }
 
 extern "C" GL_APICALL void GL_APIENTRY glTransformFeedbackVaryings(GLuint program, GLsizei count, const char ** varyings, GLenum bufferMode) {
