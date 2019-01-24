@@ -112,8 +112,13 @@ endfunction(prebuilt pkg)
 
 # Installs the given src file into the given destination
 function(internal_android_install_file SRC DST_DIR)
+  # src could be a symlink, so let's resolve it.
   get_filename_component(REAL_SRC "${SRC}" REALPATH)
+
+  # The names without directories of the src and resolved src.
   get_filename_component(FNAME "${SRC}" NAME)
+  get_filename_component(FNAME_REAL "${REAL_SRC}" NAME)
+
   # Okay, we now need to determine if REAL_SRC is an executable, or file
   set(PYTHON_SCRIPT "import os; print os.path.isfile('${REAL_SRC}') and os.access('${REAL_SRC}', os.X_OK)")
   execute_process(COMMAND python -c "${PYTHON_SCRIPT}"
@@ -125,17 +130,29 @@ function(internal_android_install_file SRC DST_DIR)
   if(STD_OUT)
     android_log(STATUS "install(PROGRAMS ${SRC} ${REAL_SRC} DESTINATION ${DST_DIR})")
     install(PROGRAMS ${SRC} DESTINATION ${DST_DIR})
-    # Check if we have a symlink
+    android_strip_prebuilt("${DST_DIR}/${FNAME}")
+    # Check if we have a symlink, gradle doesn't support symlinks, so we are
+    # copying it 2x
     if(NOT ${SRC} STREQUAL ${REAL_SRC})
       android_log("${SRC} ==> ${REAL_SRC}")
       install(PROGRAMS ${REAL_SRC} DESTINATION ${DST_DIR})
+      android_strip_prebuilt("${DST_DIR}/${FNAME_REAL}")
     endif()
   else()
-    android_log("install(FILES ${SRC} ${REAL_SRC} DESTINATION ${DST_DIR})")
     install(FILES ${SRC} DESTINATION ${DST_DIR})
+    # Let's see if it is a shared library
+    if (${SRC} MATCHES ".+${CMAKE_SHARED_LIBRARY_SUFFIX}(\\.[0-9]+)$")
+        # Note we should eventually remove this: b/1381606
+        android_strip_prebuilt("${DST_DIR}/${FNAME}")
+    endif()
     if(NOT ${SRC} STREQUAL ${REAL_SRC})
       android_log("${SRC} ==> ${REAL_SRC}")
       install(FILES ${REAL_SRC} DESTINATION ${DST_DIR})
+      # Check if we have a symlink, gradle doesn't support symlinks, so we are
+      # copying it 2x
+      if (${REAL_SRC} MATCHES ".+${CMAKE_SHARED_LIBRARY_SUFFIX}(\\.[0-9]+)$")
+          android_strip_prebuilt("${DST_DIR}/${FNAME_REAL}")
+      endif()
     endif()
   endif()
 endfunction()
