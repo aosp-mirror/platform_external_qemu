@@ -36,15 +36,13 @@ set(Protobuf_IMPORT_DIRS "${PROTOBUF_IMPORT_DIRS}")
 
 if(ANDROID_TARGET_TAG MATCHES ".*windows.*")
   # We better be able to run the protoc tool when we are cross compiling...
-  get_filename_component(PROTO_EXEC_ROOT
-                         "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/protobuf/linux-x86_64"
-                         ABSOLUTE)
+  get_filename_component(PROTO_EXEC_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/protobuf/${ANDROID_HOST_TAG}" ABSOLUTE)
 
   # Let's not try to run elf on windows :-)
   if (NOT MSVC)
     set(PROTOBUF_PROTOC_EXECUTABLE "${PROTO_EXEC_ROOT}/bin/protoc")
     set(Protobuf_PROTOC_EXECUTABLE "${PROTOBUF_PROTOC_EXECUTABLE}")
-    message(STATUS "Cross compiling using linux protoc")
+    message(STATUS "Cross compiling using ${ANDROID_HOST_TAG} protoc")
   else()
     message(STATUS "Using windows protoc..")
     set(Protobuf_PROTOC_LIBRARIES "")
