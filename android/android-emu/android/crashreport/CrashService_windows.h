@@ -18,7 +18,9 @@
 #include "android/crashreport/CrashService.h"
 
 #include "client/windows/crash_generation/crash_generation_server.h"
-
+#ifdef _MSC_VER
+ #include "client/windows/crash_generation/client_info.h"
+#endif
 #include <memory>
 
 #include <windows.h>

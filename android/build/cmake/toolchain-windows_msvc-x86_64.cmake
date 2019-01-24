@@ -41,13 +41,16 @@ if(WIN32)
   set(CMAKE_C_COMPILER "${CLANG_DIR}/bin/clang-cl.exe")
   set(CMAKE_CXX_COMPILER "${CLANG_DIR}/bin/clang-cl.exe")
 
-  # Set the debug and release flags
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD")
+  # Set the debug flags
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -MD")
-  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD")
   set(CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -MD")
-  # Let's not go crazy over missing pdbs..
-  internal_set_env_cache(RUNTIME_OS_PROPERTIES "LINK_FLAGS>=/ignore:4099")
+  
+  # Set release flags such that we create pdbs..
+  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD -Zi")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD -Zi")
+  # See https://www.wintellect.com/correctly-creating-native-c-release-build-pdbs/
+  set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /IGNORE:4099 /DEBUG /NODEFAULTLIB:LIBCMT /OPT:REF /OPT:ICF" CACHE STRING "" FORCE)
+  set(CMAKE_EXE_LINKER_FLAGS "/IGNORE:4099 /DEBUG /NODEFAULTLIB:LIBCMT")
 
   # Make sure nobody is accidently trying to do a 32 bit build.
   if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
