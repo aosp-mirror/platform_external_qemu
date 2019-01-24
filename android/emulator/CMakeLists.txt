@@ -68,4 +68,4 @@ android_copy_shared_lib(emulator OpenglRender OpenglRender)
 # And set the os specific properties
 android_target_properties(emulator all "${RUNTIME_OS_PROPERTIES}")
 
-install(TARGETS emulator RUNTIME DESTINATION .)
+android_install_exe(emulator .)
