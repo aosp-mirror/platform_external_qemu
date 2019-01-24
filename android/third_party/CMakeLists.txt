@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+add_subdirectory(googletest)
 add_library(emulator-tinyobjloader ../../../tinyobjloader/tiny_obj_loader.cc)
 target_include_directories(emulator-tinyobjloader PUBLIC ../../../tinyobjloader)
 
@@ -30,6 +30,12 @@ endif()
 
 
 
+# Old windows version will use old breakpad version..
+if (ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
+  prebuilt(BREAKPAD)
+else()
+  add_subdirectory(breakpad)
+endif()
 add_subdirectory(jpeg-6b)
 add_subdirectory(libdtb)
 add_subdirectory(libselinux)
