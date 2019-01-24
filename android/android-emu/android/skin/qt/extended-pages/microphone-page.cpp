@@ -11,6 +11,7 @@
 
 #include "android/skin/qt/extended-pages/microphone-page.h"
 
+#include "android/emulation/control/vm_operations.h"
 #include "android/hw-events.h"
 #include "android/skin/event.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -70,6 +71,10 @@ void MicrophonePage::on_mic_inserted_toggled(bool checked) {
     forwardGenericEventToEmulator(EV_SW, SW_HEADPHONE_INSERT, phonesInserted);
     forwardGenericEventToEmulator(EV_SW, SW_MICROPHONE_INSERT, micInserted);
     forwardGenericEventToEmulator(EV_SYN, 0, 0);
+}
+
+void MicrophonePage::on_mic_allowRealAudio_toggled(bool checked) {
+    gQAndroidVmOperations->allowRealAudio(checked);
 }
 
 void MicrophonePage::on_mic_voiceAssistButton_pressed() {
