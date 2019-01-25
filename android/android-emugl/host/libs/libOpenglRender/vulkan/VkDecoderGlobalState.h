@@ -177,6 +177,16 @@ public:
        VkDeviceMemory memory,
        uint64_t* pAddress);
 
+       VkResult on_vkAllocateCommandBuffers(
+    VkDevice                                    device,
+    const VkCommandBufferAllocateInfo*          pAllocateInfo,
+    VkCommandBuffer*                            pCommandBuffers);
+
+
+void on_vkCmdExecuteCommands(
+    VkCommandBuffer                             commandBuffer,
+    uint32_t                                    commandBufferCount,
+    const VkCommandBuffer*                      pCommandBuffers);
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

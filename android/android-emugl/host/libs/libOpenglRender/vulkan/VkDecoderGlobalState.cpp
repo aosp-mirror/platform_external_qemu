@@ -31,6 +31,7 @@
 #include "GLcommon/etc.h"
 
 #include <algorithm>
+#include <functional>
 #include <unordered_map>
 #include <vector>
 
@@ -872,6 +873,21 @@ public:
         return VK_SUCCESS;
     }
 
+    void on_vkAllocateCommandBuffers(
+    VkDevice                                    device,
+    const VkCommandBufferAllocateInfo*          pAllocateInfo,
+    VkCommandBuffer*                            pCommandBuffers) {
+        return m_vk->on_vkAllocateCommandBuffers(device, pAllocateInfo, pCommandBuffers);
+    }
+
+    void on_vkCmdExecuteCommands(
+        VkCommandBuffer                             commandBuffer,
+    uint32_t                                    commandBufferCount,
+    const VkCommandBuffer*                      pCommandBuffers
+    ) {
+        m_vk->on_vkCmdExecuteCommands(commandBuffer, commandBufferCount, pCommandBuffers);
+    }
+
 private:
     bool isEmulatedExtension(const char* name) const {
         for (auto emulatedExt : kEmulatedExtensions) {
@@ -1044,12 +1060,20 @@ private:
         VkDevice device;
     };
 
+    typedef std::function<void()> PreprocessFunc;
+    struct CommandBufferInfo {
+        std::vector<PreprocessCommand> preprocessFuncs;
+        std::vector<VkCommandBuffer> subCmds;
+    };
+
     std::unordered_map<VkPhysicalDevice, PhysicalDeviceInfo>
         mPhysdevInfo;
     std::unordered_map<VkDevice, DeviceInfo>
         mDeviceInfo;
     std::unordered_map<VkImage, ImageInfo>
         mImageInfo;
+    std::unordered_map<VkCommandBuffer, CommandBufferInfo>
+        mCmdBufferInfo;
 
     // Back-reference to the physical device associated with a particular
     // VkDevice, and the VkDevice corresponding to a VkQueue.
@@ -1264,5 +1288,19 @@ VkResult VkDecoderGlobalState::on_vkMapMemoryIntoAddressSpaceGOOGLE(
     return mImpl->on_vkMapMemoryIntoAddressSpaceGOOGLE(
         device, memory, pAddress);
 }
+
+VkResult VkDecoderGlobalState::on_vkAllocateCommandBuffers(
+    VkDevice                                    device,
+    const VkCommandBufferAllocateInfo*          pAllocateInfo,
+    VkCommandBuffer*                            pCommandBuffers) {
+        return mImpl->on_vkAllocateCommandBuffers(device, pAllocateInfo, pCommandBuffers);
+    }
+
+void VkDecoderGlobalState::on_vkCmdExecuteCommands(
+    VkCommandBuffer                             commandBuffer,
+    uint32_t                                    commandBufferCount,
+    const VkCommandBuffer*                      pCommandBuffers) {
+        return mImpl->on_vkCmdExecuteCommands(commandBuffer, commandBufferCount, pCommandBuffers);
+    }
 
 } // namespace goldfish_vk
