@@ -1,0 +1,40 @@
+--- a/qtwebengine/src/3rdparty/chromium/build/config/compiler/BUILD.gn
++++ b/qtwebengine/src/3rdparty/chromium/build/config/compiler/BUILD.gn
+@@ -165,10 +165,18 @@
+ # source root and might have conflicting versions of some headers) can remove
+ # this and specify their own include paths.
+ config("default_include_dirs") {
+-  include_dirs = [
+-    root_gen_dir,
+-    "//",
+-  ]
++  if (is_linux) {
++    include_dirs = [
++      root_gen_dir,
++      "//",
++      qtwebengine_deps_dir,
++    ]
++  } else {
++    include_dirs = [
++      root_gen_dir,
++      "//",
++    ]
++  }
+ }
+ 
+ # compiler ---------------------------------------------------------------------
+--- a/qtwebengine/src/3rdparty/chromium/build/config/compiler/compiler.gni
++++ b/qtwebengine/src/3rdparty/chromium/build/config/compiler/compiler.gni
+@@ -216,6 +216,12 @@
+   }
+ }
+ 
++# A hack to include our custom toolchain includes for
++# qtwebengine dependencies, because it seems that the chromium toolchain assumes that some of the libraries are in the /usr/lib directory.
++if (is_linux) {
++  qtwebengine_deps_dir = getenv("QTWEBENGINE_DEPS_DIR") + "/include"
++}
++
+ # Assert that the configuration isn't going to hit https://crbug.com/648948.
+ assert(ignore_elf32_limitations || !is_android ||
+            (android_64bit_target_cpu && !build_apk_secondary_abi) ||

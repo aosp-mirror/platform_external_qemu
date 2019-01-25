@@ -1,0 +1,10 @@
+include_rules = [
+  "-components/printing",
+  "+components/printing/common",
+  "+content/public/common",
+  "+ipc",
+  "+printing",
+  "+third_party/WebKit/common",
+  "+third_party/WebKit/public",
+  "+ui/gfx"
+]

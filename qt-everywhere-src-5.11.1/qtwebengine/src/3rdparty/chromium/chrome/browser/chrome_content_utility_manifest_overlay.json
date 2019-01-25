@@ -1,0 +1,22 @@
+{
+  "name": "content_utility",
+  "interface_provider_specs": {
+    "service_manager:connector": {
+      "provides": {
+        "browser": [
+          "chrome::mojom::DialDeviceDescriptionParser",
+          "chrome::mojom::ProfileImport",
+          "chrome::mojom::ResourceUsageReporter",
+          "chrome::mojom::ShellHandler",
+          "extensions::mojom::ExtensionUnpacker",
+          "extensions::mojom::ManifestParser",
+          "extensions::mojom::MediaParser",
+          "payments::mojom::PaymentManifestParser",
+          "profiling::mojom::ProfilingClient",
+          "proxy_resolver::mojom::ProxyResolverFactory",
+          "safe_json::mojom::SafeJsonParser"
+        ]
+      }
+    }
+  }
+}

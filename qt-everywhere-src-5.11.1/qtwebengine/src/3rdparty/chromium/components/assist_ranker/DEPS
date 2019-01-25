@@ -1,0 +1,8 @@
+include_rules = [
+  "+components/data_use_measurement/core",
+  "+components/keyed_service/core",
+  "+components/metrics",
+  "+components/ukm",
+  "+net",
+  "+services/metrics/public",
+]

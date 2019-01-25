@@ -1,0 +1,59 @@
+<link rel="import" href="chrome://resources/html/polymer.html">
+
+<link rel="import" href="chrome://resources/cr_elements/cr_dialog/cr_dialog.html">
+<link rel="import" href="chrome://resources/html/assert.html">
+<link rel="import" href="chrome://resources/html/cr.html">
+<link rel="import" href="item_behavior.html">
+<link rel="import" href="navigation_helper.html">
+
+<dom-module id="extensions-options-dialog">
+  <template>
+    <style>
+      #icon {
+        -webkit-margin-end: 10px;
+        height: 32px;
+        width: 32px;
+      }
+
+      #icon-and-name-wrapper {
+        align-items: center;
+        display: flex;
+      }
+
+      ExtensionOptions {
+        display: block;
+        min-width: 300px;
+      }
+
+      dialog {
+        width: fit-content;
+        --cr-dialog-body: {
+          overflow: hidden;
+          padding: 0;
+        };
+
+        --cr-dialog-body-container: {
+          border: none;
+          min-height: initial;
+        };
+      }
+    </style>
+
+    <dialog is="cr-dialog" id="dialog" close-text="$i18n{close}"
+        on-close="onClose_">
+      <div slot="title">
+        <div id="icon-and-name-wrapper">
+          <img id="icon" src="[[data_.iconUrl]]"
+              alt$="[[appOrExtension(
+                  data.type,
+                  '$i18nPolymer{appIcon}',
+                  '$i18nPolymer{extensionIcon}')]]">
+          <span>[[data_.name]]</span>
+        </div>
+      </div>
+      <div slot="body" id="body">
+      </div>
+    </dialog>
+  </template>
+  <script src="options_dialog.js"></script>
+</dom-module>

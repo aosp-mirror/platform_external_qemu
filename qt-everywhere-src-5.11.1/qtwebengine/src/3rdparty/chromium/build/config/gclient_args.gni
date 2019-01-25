@@ -1,0 +1,3 @@
+checkout_libaom = false
+checkout_nacl = false
+checkout_oculus_sdk = false

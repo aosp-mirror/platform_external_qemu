@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>heif/col320x480.heic</file>
+    </qresource>
+</RCC>

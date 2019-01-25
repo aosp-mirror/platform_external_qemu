@@ -1,0 +1,18 @@
+﻿// © 2016 and later: Unicode, Inc. and others.
+// License & terms of use: http://www.unicode.org/copyright.html#License
+en_CA{
+    %%Parent{"en_001"}
+    Languages{
+        bn{"Bengali"}
+        mfe{"Mauritian"}
+        ro_MD{"Moldovan"}
+        tvl{"Tuvaluan"}
+    }
+    Types{
+        calendar{
+            dangi{"Korean Calendar"}
+            ethiopic{"Ethiopian Calendar"}
+        }
+    }
+    Version{"2.1.37.22"}
+}

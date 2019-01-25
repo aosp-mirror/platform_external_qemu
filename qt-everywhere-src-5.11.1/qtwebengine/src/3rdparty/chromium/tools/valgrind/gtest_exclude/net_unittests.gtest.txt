@@ -1,0 +1,5 @@
+# Very slow under Valgrind.
+CTLogVerifierTest.VerifiesValidConsistencyProofsFromReferenceGenerator
+
+# Hangs, see http://crbug.com/61908
+DirectoryListerTest.BigDirRecursiveTest

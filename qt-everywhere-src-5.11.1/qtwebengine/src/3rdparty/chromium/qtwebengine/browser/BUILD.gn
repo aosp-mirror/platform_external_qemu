@@ -1,0 +1,70 @@
+import("//chrome/common/features.gni")
+import("//tools/grit/grit_rule.gni")
+import("//services/catalog/public/tools/catalog.gni")
+import("//services/service_manager/public/service_manifest.gni")
+
+grit("qt_webengine_resources") {
+  source = "qt_webengine_resources.grd"
+  defines = chrome_grit_defines
+  deps = [ ":qtwebengine_content_packaged_services_manifest" ]
+  outputs = [
+    "grit/qt_webengine_resources.h",
+    "qt_webengine_resources.pak",
+  ]
+  output_dir = "$root_gen_dir/qtwebengine"
+}
+
+service_manifest("qtwebengine_manifest") {
+  source = "//qtwebengine/browser/qtwebengine_manifest.json"
+}
+
+service_manifest("qtwebengine_content_renderer_manifest_overlay") {
+  source = "//qtwebengine/browser/qtwebengine_content_renderer_manifest_overlay.json"
+}
+
+service_manifest("qtwebengine_content_packaged_services_manifest_overlay") {
+  source = "//qtwebengine/browser/qtwebengine_content_packaged_services_manifest_overlay.json"
+  packaged_services = [
+    ":qtwebengine_manifest",
+    "//components/printing/service:pdf_compositor_manifest"
+  ]
+}
+
+group("qtwebengine_content_manifest_overlays") {
+  deps = [
+    ":qtwebengine_content_packaged_services_manifest_overlay",
+    ":qtwebengine_content_renderer_manifest_overlay",
+  ]
+}
+
+service_manifest("qtwebengine_content_packaged_services_manifest") {
+  source_manifest = "//content/public/app:packaged_services_manifest"
+  overlays = [ ":qtwebengine_content_packaged_services_manifest_overlay" ]
+}
+
+service_manifest("qtwebengine_content_renderer_manifest") {
+  source_manifest = "//content/public/app:renderer_manifest"
+  overlays = [ ":qtwebengine_content_renderer_manifest_overlay" ]
+}
+
+group("service_manifests") {
+  deps = [
+    ":qtwebengine_content_renderer_manifest",
+  ]
+}
+
+qtwebengine_embedded_services = [
+  ":qtwebengine_content_renderer_manifest",
+]
+
+catalog("catalog") {
+  embedded_services = qtwebengine_embedded_services +
+                      [ ":qtwebengine_content_packaged_services_manifest" ]
+}
+
+group("resources") {
+  deps = [
+    ":qtwebengine_content_manifest_overlays",
+    ":qt_webengine_resources",    
+  ]
+}

@@ -1,0 +1,25 @@
+include_rules = [
+  "+cc/ipc",
+  "-components/viz/common/switches.h",
+  "+gpu/command_buffer/client",
+  "+gpu/command_buffer/common",
+  "+gpu/ipc/client",
+  "+gpu/ipc/common",
+  "+gpu/ipc/host",
+  "+mojo/public/cpp",
+  "+services/viz/privileged/interfaces",
+  "+services/viz/public/interfaces",
+  "+services/viz/public/interfaces/hit_test",
+]
+
+specific_include_rules = {
+  "host_frame_sink_manager*": [
+    "+components/viz/service/frame_sinks/compositor_frame_sink_support.h",
+    "+components/viz/service/frame_sinks/compositor_frame_sink_support_manager.h",
+    "+components/viz/service/frame_sinks/frame_sink_manager_impl.h",
+    "+components/viz/service/surfaces/surface_manager.h",
+  ],
+  ".*_unittest\.cc": [
+    "+components/viz/test",
+  ]
+}

@@ -1,0 +1,11 @@
+include_rules = [
+    "+base/unguessable_token.h",
+    "-bindings",
+    "-core",
+    "-modules",
+    "+v8",
+
+    # Allowed only inside INSIDE_BLINK
+    "+platform/heap",
+    "+platform/wtf",
+]

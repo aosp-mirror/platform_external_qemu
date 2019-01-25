@@ -1,0 +1,6 @@
+include_rules = [
+    "-modules",
+    "+modules/EventModules.h",
+    "+modules/EventTargetModules.h",
+    "+modules/mediasource",
+]

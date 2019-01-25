@@ -1,0 +1,17 @@
+AllDownloadItemNotifierTest.*
+DeviceStatusListenerTest.*
+DownloadDriverImplTest.*
+DownloadSchedulerImplTest.*
+DownloadServiceClientSetTest.*
+DownloadServiceControllerImplTest.*
+DownloadServiceImplTest.*
+DownloadServiceEntryUtilsTest.*
+DownloadServiceModelImplTest.*
+DownloadStoreTest.*
+FileMonitorTest.*
+InProgressConversionsTest.*
+InMemoryDownloadTest.*
+NavigationMonitorImplTest.*
+NetworkListenerTest.*
+ProtoConversionsTest.*
+ServiceConfigImplTest.*

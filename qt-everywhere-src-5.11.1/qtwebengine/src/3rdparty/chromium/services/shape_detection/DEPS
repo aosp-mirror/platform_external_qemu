@@ -1,0 +1,7 @@
+include_rules = [
+  "+jni",
+  "+skia/ext/skia_utils_mac.h",
+  "+third_party/skia/include",
+  "+ui/gfx/codec",
+  "+ui/gl/gl_switches.h"
+]

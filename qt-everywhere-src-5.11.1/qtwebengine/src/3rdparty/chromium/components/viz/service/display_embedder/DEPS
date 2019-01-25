@@ -1,0 +1,36 @@
+include_rules = [
+  "+cc/base",
+  "+cc/ipc",
+  "+cc/output",
+  "+cc/resources",
+  "+cc/scheduler",
+  "+gpu/GLES2",
+  "+gpu/command_buffer/client",
+  "+gpu/command_buffer/common",
+  "+gpu/command_buffer/service",
+  "+gpu/ipc/client",
+  "+gpu/ipc/common",
+  "+gpu/ipc/in_process_command_buffer.h",
+  "+gpu/ipc/service",
+  "+mojo/public/cpp/bindings",
+  "+mojo/public/cpp/system",
+  "+skia",
+  "+third_party/skia",
+  "+ui/accelerated_widget_mac",
+  "+ui/display",
+  "+ui/gl",
+  "+ui/latency",
+  "+ui/ozone/public",
+]
+
+specific_include_rules = {
+  ".*_unittest\.cc": [
+    "+cc/test",
+    "+third_party/khronos/GLES2",
+  ],
+  "software_output_device_ozone_unittest.cc": [
+    "+ui/compositor",
+    "+ui/gl",
+    "+ui/platform_window",
+  ],
+}

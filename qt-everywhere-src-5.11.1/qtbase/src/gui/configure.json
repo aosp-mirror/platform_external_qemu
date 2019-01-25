@@ -1,0 +1,1717 @@
+{
+    "module": "gui",
+    "depends": [
+        "core",
+        "network"
+    ],
+    "testDir": "../../config.tests",
+
+    "commandline": {
+        "options": {
+            "accessibility": "boolean",
+            "angle": "boolean",
+            "combined-angle-lib": "boolean",
+            "direct2d": "boolean",
+            "directfb": "boolean",
+            "directwrite": "boolean",
+            "egl": "boolean",
+            "eglfs": "boolean",
+            "evdev": "boolean",
+            "fontconfig": "boolean",
+            "freetype": { "type": "enum", "values": [ "no", "qt", "system" ] },
+            "gbm": "boolean",
+            "gif": "boolean",
+            "harfbuzz": { "type": "enum", "values": [ "no", "qt", "system" ] },
+            "ico": "boolean",
+            "imf": { "type": "boolean", "name": "qqnx_imf" },
+            "kms": "boolean",
+            "lgmon": "boolean",
+            "libinput": "boolean",
+            "libjpeg": { "type": "enum", "values": [ "no", "qt", "system" ] },
+            "libpng": { "type": "enum", "values": [ "no", "qt", "system" ] },
+            "linuxfb": "boolean",
+            "mirclient": "boolean",
+            "mtdev": "boolean",
+            "opengl": { "type": "optionalString", "values": [ "no", "yes", "desktop", "es2", "dynamic" ] },
+            "opengl-es-2": { "type": "void", "name": "opengl", "value": "es2" },
+            "opengles3": "boolean",
+            "openvg": "boolean",
+            "qpa": { "type": "string", "name": "qpa_default_platform" },
+            "qpa-platform-guard": "boolean",
+            "sm": { "type": "boolean", "name": "sessionmanager" },
+            "tslib": "boolean",
+            "vulkan": "boolean",
+            "xcb": { "type": "enum", "values": [ "no", "yes", "qt", "system" ] },
+            "xcb-native-painting": "boolean",
+            "xcb-xlib": "boolean",
+            "xinput2": "boolean",
+            "xkb": "boolean",
+            "xkbcommon": { "type": "enum", "values": [ "no", "qt", "system" ] },
+            "xkbcommon-evdev": "boolean",
+            "xkbcommon-x11": { "type": "enum", "name": "xkbcommon", "values": [ "no", "qt", "system" ] }
+        }
+    },
+
+    "libraries": {
+        "atspi": {
+            "label": "atspi",
+            "sources": [
+                { "type": "pkgConfig", "args": "atspi-2" }
+            ]
+        },
+        "bcm_host": {
+            "export": "",
+            "sources": [
+                "-lbcm_host"
+            ]
+        },
+        "direct2d": {
+            "label": "Direct 2D",
+            "export": "",
+            "test": {
+                "include": [ "d3d11_1.h", "d2d1_1.h", "d2d1_1helper.h", "dxgi1_2.h", "wrl.h", "dwrite.h" ],
+                "tail": "using Microsoft::WRL::ComPtr;",
+                "main": [
+                    "ComPtr<ID2D1Factory1> d2dFactory;",
+                    "D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, d2dFactory.ReleaseAndGetAddressOf());",
+                    "ComPtr<IDXGISurface1> surface;",
+                    "(void) surface;"
+                ]
+            },
+            "sources": [
+                "-ld2d1 -ldwrite -ld3d11"
+            ]
+        },
+        "directfb": {
+            "label": "DirectFB",
+            "test": {
+                "include": "directfb.h",
+                "tail": [
+                    "#ifdef __typeof__",
+                    "#  error DirectFB headers are unclean and cannot compile",
+                    "#endif"
+                ]
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "directfb" }
+            ]
+        },
+        "directwrite": {
+            "label": "DirectWrite",
+            "export": "",
+            "test": {
+                "include": [ "dwrite.h", "d2d1.h" ],
+                "main": [
+                    "IDWriteFactory *factory = 0;",
+                    "DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory),",
+                    "                    (IUnknown **)(&factory));"
+                ]
+            },
+            "sources": [
+                "-ldwrite"
+            ]
+        },
+        "drm": {
+            "label": "KMS",
+            "test": {
+                "include": [ "stdlib.h", "stdint.h" ],
+                "tail": [
+                    "extern \"C\" {",
+                    "#include <xf86drmMode.h>",
+                    "#include <xf86drm.h>",
+                    "}"
+                ],
+                "main": "(void) drmModeGetCrtc(0, 0);"
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "libdrm" },
+                { "libs": "-ldrm", "condition": "!config.integrity" },
+                { "libs": "-ldrm-nvdc -lposix -livfs -lnvll -lnvdc -lnvrm -lnvrm_graphics -lnvos -lnvtegrahv", "condition": "config.integrity" }
+            ]
+        },
+        "egl": {
+            "label": "EGL",
+            "test": {
+                "include": "EGL/egl.h",
+                "main": [
+                    "EGLint x = 0; EGLDisplay dpy = 0; EGLContext ctx = 0;",
+                    "eglDestroyContext(dpy, ctx);"
+                ]
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "egl" },
+                { "type": "makeSpec", "spec": "EGL" }
+            ]
+        },
+        "freetype": {
+            "label": "FreeType",
+            "test": {
+                "head": [
+                    "#include <ft2build.h>",
+                    "#include FT_FREETYPE_H",
+                    "#if ((FREETYPE_MAJOR*10000 + FREETYPE_MINOR*100 + FREETYPE_PATCH) < 20200)",
+                    "#  error This version of freetype is too old.",
+                    "#endif"
+                ],
+                "main": [
+                    "FT_Face face = 0;"
+                ]
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "freetype2" },
+                { "type": "freetype", "libs": "-lfreetype" }
+            ]
+        },
+        "fontconfig": {
+            "label": "Fontconfig",
+            "test": {
+                "head": [
+                    "#include <fontconfig/fontconfig.h>",
+                    "#ifndef FC_RGBA_UNKNOWN",
+                    "#  error This version of fontconfig is tool old, it is missing the FC_RGBA_UNKNOWN define",
+                    "#endif"
+                ],
+                "main": [
+                    "FcPattern *pattern = 0;"
+                ]
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "fontconfig" },
+                { "type": "freetype", "libs": "-lfontconfig" }
+            ],
+            "use": "freetype"
+        },
+        "gbm": {
+            "label": "GBM",
+            "test": {
+                "include": [ "stdlib.h", "stdint.h" ],
+                "tail": [
+                    "extern \"C\" {",
+                    "#include <gbm.h>",
+                    "}"
+                ],
+                "main": "gbm_surface *surface = 0;"
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "gbm" }
+            ]
+        },
+        "harfbuzz": {
+            "label": "HarfBuzz",
+            "test": {
+                "include": "harfbuzz/hb.h",
+                "tail": [
+                    "#if !HB_VERSION_ATLEAST(1, 6, 0)",
+                    "#  error This version of harfbuzz is too old.",
+                    "#endif"
+                ],
+                "main": [
+                    "hb_buffer_t *buffer = hb_buffer_create();",
+                    "const uint16_t string[] = { 'A', 'b', 'c' };",
+                    "hb_buffer_add_utf16(buffer, string, 3, 0, 3);",
+                    "hb_buffer_guess_segment_properties(buffer);",
+                    "hb_buffer_set_flags(buffer, hb_buffer_flags_t(HB_BUFFER_FLAG_PRESERVE_DEFAULT_IGNORABLES));",
+                    "hb_buffer_destroy(buffer);"
+                ]
+            },
+            "sources": [
+                "-lharfbuzz"
+            ]
+        },
+        "imf": {
+            "label": "IMF",
+            "export": "",
+            "test": {
+                "include": "imf/imf_client.h",
+                "main": "imf_client_init();"
+            },
+            "sources": [
+                "-linput_client"
+            ]
+        },
+        "lgmon": {
+            "label": "lgmon",
+            "test": {
+                "include": "lgmon.h",
+                "main": "lgmon_supported(getpid());"
+            },
+            "sources": [
+                "-llgmon"
+            ]
+        },
+        "libinput": {
+            "label": "libinput",
+            "test": {
+                "include": "libinput.h",
+                "main": "libinput_udev_create_context(NULL, NULL, NULL);"
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "libinput" }
+            ]
+        },
+        "integrityhid": {
+            "label": "integrityhid",
+            "test": {
+                "include": [ "stdlib.h", "stdint.h", "device/hiddriver.h" ],
+                "main": [
+                    "HIDDriver *driver;",
+                    "uintptr_t devicecontext;",
+                    "uint32_t device_id;",
+                    "gh_hid_enum_devices(driver, &device_id, &devicecontext);"
+                ]
+            },
+            "sources": [
+                { "libs": "-lhiddev -lusbhid -lusb" }
+            ]
+        },
+        "libjpeg": {
+            "label": "libjpeg",
+            "test": {
+                "include": [ "sys/types.h", "stdio.h" ],
+                "tail": [
+                    "extern \"C\" {",
+                    "#include <jpeglib.h>",
+                    "}",
+                    "",
+                    "j_compress_ptr cinfo;"
+                ],
+                "main": "jpeg_create_compress(cinfo);"
+            },
+            "sources": [
+                { "libs": "-llibjpeg", "condition": "config.msvc" },
+                { "libs": "-ljpeg", "condition": "!config.msvc" }
+            ]
+        },
+        "libpng": {
+            "label": "libpng",
+            "test": {
+                "include": "png.h",
+                "main": "(void) png_create_read_struct(PNG_LIBPNG_VER_STRING,0,0,0);"
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "libpng" },
+                { "libs": "-llibpng", "condition": "config.msvc" },
+                { "libs": "-lpng", "condition": "!config.msvc" }
+            ],
+            "use": [
+                { "lib": "zlib", "condition": "features.system-zlib" }
+            ]
+        },
+        "mirclient": {
+            "label": "Mir client libraries",
+            "test": {
+                "include": [ "mir_toolkit/mir_client_library.h", "ubuntu/application/lifecycle_delegate.h", "EGL/egl.h" ],
+                "tail": "static void surfaceCreateCallback(MirSurface*, void*) {}",
+                "main": [
+                    "u_application_lifecycle_delegate_new();",
+                    "mir_surface_create(0, surfaceCreateCallback, 0);"
+                ]
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "egl mirclient ubuntu-platform-api libcontent-hub >= 0.2.0" }
+            ]
+        },
+        "mtdev": {
+            "label": "mtdev",
+            "test": {
+                "include": "mtdev.h",
+                "main": [
+                    "mtdev m;",
+                    "mtdev_open(&m, 0);"
+                ]
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "mtdev" }
+            ]
+        },
+        "opengl": {
+            "label": "Desktop OpenGL",
+            "test": {
+                "head": [
+                    "#ifdef __APPLE__",
+                    "#  include <OpenGL/gl.h>",
+                    "#else",
+                    "#  define GL_GLEXT_PROTOTYPES",
+                    "#  include <GL/gl.h>",
+                    "#endif"
+                ],
+                "main": [
+                    "glBegin(GL_TRIANGLES);",
+                    "    glVertex2f(20.0f, 10.0f);",
+                    "    glVertex2f(10.0f, 30.0f);",
+                    "    glVertex2f(20.0f, 50.0f);",
+                    "glEnd();"
+                ]
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "gl", "condition": "!config.darwin" },
+                { "type": "makeSpec", "spec": "OPENGL" }
+            ]
+        },
+        "opengl_es2": {
+            "label": "OpenGL ES 2.0",
+            "test": {
+                "head": [
+                    "#ifdef __APPLE__",
+                    "#  include <OpenGLES/ES2/gl.h>",
+                    "#else",
+                    "#  define GL_GLEXT_PROTOTYPES",
+                    "#  include <GLES2/gl2.h>",
+                    "#endif"
+                ],
+                "main": [
+                    "glUniform1f(1, GLfloat(1.0));",
+                    "glClear(GL_COLOR_BUFFER_BIT);"
+                ]
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "glesv2", "condition": "!config.darwin" },
+                { "type": "makeSpec", "spec": "OPENGL_ES2" }
+            ]
+        },
+        "openvg": {
+            "label": "OpenVG",
+            "test": {
+                "include": "VG/openvg.h",
+                "main": "VGint i = 2; vgFlush();"
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "vg" },
+                { "type": "makeSpec", "spec": "OPENVG" }
+            ]
+        },
+        "tslib": {
+            "label": "tslib",
+            "test": {
+                "include": "tslib.h",
+                "main": "ts_open(\"foo\", 0);"
+            },
+            "sources": [
+                "-lts"
+            ]
+        },
+        "v4l2": {
+            "label": "V4L2",
+            "test": {
+                "include": [
+                    "cstddef"
+                ],
+                "tail": [
+                    "extern \"C\" {",
+                    "#include <mediactl/mediactl.h>",
+                    "#include <mediactl/v4l2subdev.h>",
+                    "}"
+                ],
+                "main": [
+                    "v4l2_format fmt;",
+                    "media_pad *pad = nullptr;",
+                    "media_device *device = media_device_new(\"/dev/media\");",
+                    "v4l2_subdev_set_format(nullptr, nullptr, 0, V4L2_SUBDEV_FORMAT_ACTIVE);"
+                ]
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "libv4l2 libmediactl" },
+                "-lmediactl -lv4l2 -lv4l2subdev"
+            ]
+        },
+        "vulkan": {
+            "label": "Vulkan",
+            "test": "qpa/vulkan",
+            "sources": [
+                { "type": "pkgConfig", "args": "vulkan" },
+                { "type": "makeSpec", "spec": "VULKAN" }
+            ]
+        },
+        "wayland_server": {
+            "label": "Wayland Server",
+            "test": {
+                "include": "wayland-server.h",
+                "main": "wl_display_create();"
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "wayland-server" }
+            ]
+        },
+        "x11sm": {
+            "label": "X11 session management",
+            "sources": [
+                { "type": "pkgConfig", "args": "sm ice" }
+            ]
+        },
+        "xcb": {
+            "label": "XCB >= 1.5 (core)",
+            "test": {
+                "include": "xcb/xcb.h",
+                "main": [
+                    "int primaryScreen = 0;",
+                    "(void)xcb_connect(\"\", &primaryScreen);",
+                    "// This won't compile unless libxcb >= 1.5 which defines XCB_ATOM_PRIMARY.",
+                    "int xcbAtomPrimary = XCB_ATOM_PRIMARY;"
+                ]
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "xcb >= 1.5" },
+                "-lxcb"
+            ]
+        },
+        "xcb_syslibs": {
+            "label": "XCB (extensions)",
+            "test": {
+                "include": [
+                    "xcb/xcb.h",
+                    "xcb/xfixes.h",
+                    "xcb/xcb_image.h",
+                    "xcb/xcb_keysyms.h",
+                    "xcb/xinerama.h",
+                    "xcb/sync.h",
+                    "xcb/randr.h",
+                    "xcb/shm.h"
+                ],
+                "tail": [
+                    "// This workaround can be removed for xcb-icccm > 3.8",
+                    "#define class class_name",
+                    "#include <xcb/xcb_icccm.h>",
+                    "#undef class"
+                ],
+                "main": [
+                    "int primaryScreen = 0;",
+                    "(void) xcb_connect(\"\", &primaryScreen);"
+                ]
+            },
+            "sources": [
+                { "type": "pkgConfig",
+                  "args": "xcb xcb-shm xcb-sync xcb-xfixes xcb-xinerama xcb-randr xcb-image xcb-keysyms xcb-icccm xcb-shape" },
+                "-lxcb -lxcb-shm -lxcb-sync -lxcb-xfixes -lxcb-xinerama -lxcb-randr -lxcb-image -lxcb-keysyms -lxcb-icccm -lxcb-shape"
+            ]
+        },
+        "xcb_xlib": {
+            "label": "XCB Xlib",
+            "test": {
+                "include": [ "xcb/xcb.h", "X11/Xlib.h", "X11/Xlib-xcb.h" ],
+                "main": [
+                    "Display *dpy = XOpenDisplay(\"\");",
+                    "(void) XGetXCBConnection(dpy);"
+                ]
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "x11-xcb x11 xcb" },
+                "-lxcb -lX11 -lX11-xcb"
+            ]
+        },
+        "xcb_xkb": {
+            "label": "XCB XKB >= 1.10",
+            "test": {
+                "head": [
+                    "// xkb.h is using a variable called 'explicit', which is a reserved keyword in C++",
+                    "#define explicit dont_use_cxx_explicit"
+                ],
+                "include": "xcb/xkb.h",
+                "tail": "#undef explicit",
+                "main": [
+                    "// This takes more arguments in xcb-xkb < 1.10.",
+                    "xcb_xkb_get_kbd_by_name_unchecked(NULL, 0, 0, 0, 0);"
+                ]
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "xcb-xkb >= 1.10 xcb" },
+                "-lxcb-xkb -lxcb"
+            ]
+        },
+        "xcb_render": {
+            "label": "XCB XRender",
+            "test": {
+                "include": [ "xcb/xcb.h", "xcb/render.h" ],
+                "tail": [
+                    "// 'template' is used as a function argument name in xcb_renderutil.h",
+                    "#define template template_param",
+                    "// extern \"C\" is missing, too",
+                    "extern \"C\" {",
+                    "#include <xcb/xcb_renderutil.h>",
+                    "}",
+                    "#undef template"
+                ],
+                "main": [
+                    "int primaryScreen = 0;",
+                    "xcb_generic_error_t *error = 0;",
+                    "xcb_connection_t *connection = xcb_connect(\"\", &primaryScreen);",
+                    "xcb_render_query_pict_formats_cookie_t formatsCookie =",
+                    "    xcb_render_query_pict_formats(connection);",
+                    "xcb_render_query_pict_formats_reply_t *formatsReply =",
+                    "    xcb_render_query_pict_formats_reply(",
+                    "            connection, formatsCookie, &error);",
+                    "xcb_render_util_find_standard_format(",
+                    "        formatsReply, XCB_PICT_STANDARD_ARGB_32);"
+                ]
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "xcb-renderutil xcb-render xcb" },
+                "-lxcb-render-util -lxcb-render -lxcb"
+            ]
+        },
+        "xcb_glx": {
+            "label": "XCB GLX",
+            "test": {
+                "include": [ "xcb/xcb.h", "xcb/glx.h" ],
+                "main": [
+                    "int primaryScreen = 0;",
+                    "xcb_connection_t *connection = xcb_connect(\"\", &primaryScreen);",
+                    "xcb_generic_error_t *error = 0;",
+                    "xcb_glx_query_version_cookie_t xglx_query_cookie = xcb_glx_query_version(",
+                    "        connection, XCB_GLX_MAJOR_VERSION, XCB_GLX_MINOR_VERSION);",
+                    "xcb_glx_query_version_reply(connection, xglx_query_cookie, &error);"
+                ]
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "xcb-glx xcb" },
+                "-lxcb-glx -lxcb"
+            ]
+        },
+        "xinput2": {
+            "label": "Xinput2",
+            "test": {
+                "include": [ "X11/Xlib.h", "X11/extensions/XInput2.h", "X11/extensions/Xge.h" ],
+                "tail": [
+                    "#ifndef XInput_2_0",
+                    "#  error Missing XInput_2_0 #define",
+                    "#endif"
+                ],
+                "main": [
+                    "// need XGenericEventCookie for XInput2 to work",
+                    "Display *dpy = 0;",
+                    "XEvent xevent;",
+                    "XIEvent *xievent = 0;",
+                    "XIDeviceEvent *xideviceevent = 0;",
+                    "XIHierarchyEvent *xihierarchyevent = 0;",
+                    "int deviceid = 0;",
+                    "int len = 0;",
+                    "(void) XGetEventData(dpy, &xevent.xcookie);",
+                    "XFreeEventData(dpy, &xevent.xcookie);",
+                    "(void) XIListProperties(dpy, deviceid, &len);"
+                ],
+                "qmake": "CONFIG += x11"
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "xi" },
+                "-lXi"
+            ]
+        },
+        "xkbcommon": {
+            "label": "xkbcommon",
+            "export": "xkbcommon_evdev",
+            "test": {
+                "include": [ "xkbcommon/xkbcommon.h", "xkbcommon/xkbcommon-keysyms.h", "xkbcommon/xkbcommon-names.h" ],
+                "main": "xkb_context_new(XKB_CONTEXT_NO_FLAGS);"
+            },
+            "sources": [
+                { "type": "pkgConfig", "args": "xkbcommon" }
+            ]
+        },
+        "xkbcommon_x11": {
+            "label": "xkbcommon-x11 >= 0.4.1",
+            "export": "xkbcommon",
+            "sources": [
+                { "type": "pkgConfig", "args": "xkbcommon xkbcommon-x11 >= 0.4.1" }
+            ]
+        },
+        "xrender": {
+            "label": "XRender for native painting",
+            "test": "x11/xrender",
+            "sources": [
+                "-lXrender"
+            ]
+        }
+    },
+
+    "testTypeAliases": {
+        "files": [ "directX" ]
+    },
+
+    "tests": {
+        "angle_d3d11_qdtd": {
+            "label": "D3D11_QUERY_DATA_TIMESTAMP_DISJOINT",
+            "type": "compile",
+            "test": {
+                "include": "d3d11.h",
+                "main": [
+                    "D3D11_QUERY_DATA_TIMESTAMP_DISJOINT qdtd;",
+                    "(void) qdtd;"
+                ]
+            }
+        },
+        "directwrite2": {
+            "label": "DirectWrite 2",
+            "type": "compile",
+            "test": {
+                "include": [ "dwrite_2.h", "d2d1.h" ],
+                "main": [
+                    "IUnknown *factory = 0;",
+                    "(void)(size_t(DWRITE_E_NOCOLOR) + sizeof(IDWriteFontFace2));",
+                    "DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory2),",
+                    "                    &factory);"
+                ]
+            },
+            "use": "directwrite"
+        },
+        "directx": {
+            "label": "DirectX SDK",
+            "type": "directX",
+            "files": [
+                "d3dcompiler.h",
+                "d3d11.lib",
+                "fxc.exe"
+            ]
+        },
+        "egl-x11": {
+            "label": "EGL on X11",
+            "type": "compile",
+            "test": {
+                "head": [
+                    "// Check if EGL is compatible with X. Some EGL implementations, typically on",
+                    "// embedded devices, are not intended to be used together with X. EGL support",
+                    "// has to be disabled in plugins like xcb in this case since the native display,",
+                    "// window and pixmap types will be different than what an X-based platform",
+                    "// plugin would expect."
+                ],
+                "include": [ "EGL/egl.h", "xcb/xcb.h", "X11/Xlib.h", "X11/Xlib-xcb.h" ],
+                "main": [
+                    "Display *dpy = EGL_DEFAULT_DISPLAY;",
+                    "EGLNativeDisplayType egldpy = XOpenDisplay(\"\");",
+                    "dpy = egldpy;",
+                    "EGLNativeWindowType w = XCreateWindow(dpy, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);",
+                    "XDestroyWindow(dpy, w);",
+                    "XCloseDisplay(dpy);"
+                ]
+            },
+            "use": "egl xcb_xlib"
+        },
+        "egl-brcm": {
+            "label": "Broadcom EGL (Raspberry Pi)",
+            "type": "compile",
+            "test": {
+                "include": [ "EGL/egl.h", "bcm_host.h" ],
+                "main": "vc_dispmanx_display_open(0);"
+            },
+            "use": "egl bcm_host"
+        },
+        "egl-egldevice": {
+            "label": "EGLDevice",
+            "type": "compile",
+            "test": {
+                "include": [ "EGL/egl.h", "EGL/eglext.h" ],
+                "main": [
+                    "EGLDeviceEXT device = 0;",
+                    "EGLStreamKHR stream = 0;",
+                    "EGLOutputLayerEXT layer = 0;",
+                    "(void) EGL_DRM_CRTC_EXT;"
+                ]
+            },
+            "use": "egl"
+        },
+        "egl-mali": {
+            "label": "Mali EGL",
+            "type": "compile",
+            "test": {
+                "include": [ "EGL/fbdev_window.h", "EGL/egl.h", "GLES2/gl2.h" ],
+                "main": "fbdev_window *w = 0;"
+            },
+            "use": "egl"
+        },
+        "egl-mali-2": {
+            "label": "Mali 2 EGL",
+            "type": "compile",
+            "test": {
+                "include": [ "EGL/egl.h", "GLES2/gl2.h" ],
+                "main": "mali_native_window *w = 0;"
+            },
+            "use": "egl"
+        },
+        "egl-viv": {
+            "label": "i.Mx6 EGL",
+            "type": "compile",
+            "test": {
+                "include": [ "EGL/egl.h", "EGL/eglvivante.h" ],
+                "main": [
+                    "#ifdef __INTEGRITY",
+                    "fbGetDisplay();",
+                    "#else",
+                    "// Do not rely on fbGetDisplay(), since the signature has changed over time.",
+                    "// Stick to fbGetDisplayByIndex().",
+                    "fbGetDisplayByIndex(0);",
+                    "#endif"
+                ],
+                "qmake": [
+                    "DEFINES += EGL_API_FB=1",
+                    "!integrity: DEFINES += LINUX=1"
+                ]
+            },
+            "use": "egl"
+        },
+        "egl-openwfd": {
+            "label": "OpenWFD EGL",
+            "type": "compile",
+            "test": {
+                "include": [ "wfd.h" ],
+                "main": [
+                    "wfdEnumerateDevices(nullptr, 0, nullptr);"
+                ]
+            },
+            "use": "egl"
+        },
+        "egl-rcar": {
+            "label": "RCAR EGL",
+            "type": "compile",
+            "test": {
+                "include": [ "EGL/egl.h" ],
+                "tail": [
+                    "extern \"C\" {",
+                    "extern unsigned long PVRGrfxServerInit(void);",
+                    "}"
+                ],
+                "main": [
+                    "PVRGrfxServerInit();"
+                ]
+            },
+            "use": "egl opengl_es2"
+        },
+        "evdev": {
+            "label": "evdev",
+            "type": "compile",
+            "test": {
+                "head": [
+                    "#if defined(__FreeBSD__)",
+                    "#  include <dev/evdev/input.h>",
+                    "#else",
+                    "#  include <linux/input.h>",
+                    "#  include <linux/kd.h>",
+                    "#endif",
+                    "enum {",
+                    "    e1 = ABS_PRESSURE,",
+                    "    e2 = ABS_X,",
+                    "    e3 = REL_X,",
+                    "    e4 = SYN_REPORT,",
+                    "};"
+                ],
+                "main": [
+                    "input_event buf[32];",
+                    "(void) buf;"
+                ]
+            }
+        },
+        "integrityfb": {
+            "label": "INTEGRITY framebuffer",
+            "type": "compile",
+            "test": {
+                "include": "device/fbdriver.h",
+                "main": "FBDriver *driver = 0;"
+            }
+        },
+        "libinput_axis_api": {
+            "label": "axis API in libinput",
+            "type": "compile",
+            "test": {
+                "include": "libinput.h",
+                "main": "libinput_event_pointer_has_axis(nullptr, LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL);"
+            },
+            "use": "libinput"
+        },
+        "linuxfb": {
+            "label": "LinuxFB",
+            "type": "compile",
+            "test": {
+                "include": [ "linux/fb.h", "sys/kd.h", "sys/ioctl.h" ],
+                "main": [
+                    "fb_fix_screeninfo finfo;",
+                    "fb_var_screeninfo vinfo;",
+                    "int fd = 3;",
+                    "ioctl(fd, FBIOGET_FSCREENINFO, &finfo);",
+                    "ioctl(fd, FBIOGET_VSCREENINFO, &vinfo);"
+                ]
+            }
+        },
+        "opengles3": {
+            "label": "OpenGL ES 3.0",
+            "type": "compile",
+            "test": {
+                "head": [
+                    "#ifdef __APPLE__",
+                    "#  include <OpenGLES/ES3/gl.h>",
+                    "#else",
+                    "#  define GL_GLEXT_PROTOTYPES",
+                    "#  include <GLES3/gl3.h>",
+                    "#endif"
+                ],
+                "main": [
+                    "static GLfloat f[6];",
+                    "glGetStringi(GL_EXTENSIONS, 0);",
+                    "glReadBuffer(GL_COLOR_ATTACHMENT1);",
+                    "glUniformMatrix2x3fv(0, 0, GL_FALSE, f);",
+                    "glMapBufferRange(GL_ARRAY_BUFFER, 0, 0, GL_MAP_READ_BIT);"
+                ]
+            },
+            "comment": [
+                "The library is expected to be the same as in ES 2.0 (libGLESv2).",
+                "The difference is the header and the presence of the functions in",
+                "the library."
+            ],
+            "use": "opengl_es2"
+        },
+        "opengles31": {
+            "label": "OpenGL ES 3.1",
+            "type": "compile",
+            "test": {
+                "include": "GLES3/gl31.h",
+                "main": [
+                    "glDispatchCompute(1, 1, 1);",
+                    "glProgramUniform1i(0, 0, 0);"
+                ]
+            },
+            "use": "opengl_es2"
+        },
+        "opengles32": {
+            "label": "OpenGL ES 3.2",
+            "type": "compile",
+            "test": "unix/opengles32",
+            "use": "opengl_es2"
+        },
+        "qpa_default_platform": {
+            "label": "default QPA platform",
+            "type": "qpaDefaultPlatform",
+            "log": "value"
+        },
+        "x11prefix": {
+            "label": "X11 prefix",
+            "type": "getPkgConfigVariable",
+            "pkg-config-args": "x11",
+            "pkg-config-variable": "prefix",
+            "value": "/usr",
+            "log": "value"
+        },
+        "xlib": {
+            "label": "XLib",
+            "type": "compile",
+            "test": {
+                "include": "X11/Xlib.h",
+                "main": [
+                    "Display *d = XOpenDisplay(NULL);",
+                    "XCloseDisplay(d);"
+                ],
+                "qmake": "CONFIG += x11"
+            }
+        }
+     },
+
+    "features": {
+        "accessibility-atspi-bridge": {
+            "label": "ATSPI Bridge",
+            "condition": "features.accessibility && features.xcb && features.dbus && libs.atspi",
+            "output": [ "privateFeature", "feature" ]
+        },
+        "angle": {
+            "label": "ANGLE",
+            "autoDetect": "features.opengles2 || features.opengl-dynamic",
+            "condition": "config.win32 && tests.directx",
+            "output": [
+                "publicFeature",
+                { "type": "define", "name": "QT_OPENGL_ES_2_ANGLE" }
+            ]
+        },
+        "angle_d3d11_qdtd": {
+            "label": "D3D11_QUERY_DATA_TIMESTAMP_DISJOINT",
+            "condition": "features.angle && tests.angle_d3d11_qdtd",
+            "output": [ "privateFeature" ]
+        },
+        "combined-angle-lib": {
+            "label": "Combined ANGLE Library",
+            "autoDetect": false,
+            "condition": "features.angle",
+            "output": [ "publicFeature" ]
+        },
+        "directfb": {
+            "label": "DirectFB",
+            "section": "Platform plugins",
+            "autoDetect": false,
+            "condition": "libs.directfb",
+            "output": [ "privateFeature" ]
+        },
+        "directwrite": {
+            "label": "DirectWrite",
+            "emitIf": "config.win32",
+            "condition": "libs.directwrite",
+            "output": [ "privateFeature" ]
+        },
+        "directwrite2": {
+            "label": "DirectWrite 2",
+            "emitIf": "config.win32",
+            "condition": "features.directwrite && tests.directwrite2",
+            "output": [ "privateFeature" ]
+        },
+        "direct2d": {
+            "label": "Direct 2D",
+            "section": "Platform plugins",
+            "condition": "config.win32 && !config.winrt && libs.direct2d",
+            "output": [ "privateFeature" ]
+        },
+        "evdev": {
+            "label": "evdev",
+            "condition": "tests.evdev",
+            "output": [ "privateFeature" ]
+        },
+        "freetype": {
+            "label": "FreeType",
+            "purpose": "Supports the FreeType 2 font engine (and its supported font formats).",
+            "section": "Fonts",
+            "output": [ "privateFeature", "feature" ]
+        },
+        "system-freetype": {
+            "label": "  Using system FreeType",
+            "enable": "input.freetype == 'system'",
+            "disable": "input.freetype == 'qt'",
+            "autoDetect": "!config.win32",
+            "condition": "features.freetype && libs.freetype",
+            "output": [ "privateFeature" ]
+        },
+        "fontconfig": {
+            "label": "Fontconfig",
+            "autoDetect": "!config.darwin",
+            "condition": "!config.win32 && features.system-freetype && libs.fontconfig",
+            "output": [ "privateFeature", "feature" ]
+        },
+        "gbm": {
+            "label": "GBM",
+            "condition": "libs.gbm",
+            "output": [ "publicQtConfig" ]
+        },
+        "harfbuzz": {
+            "label": "HarfBuzz",
+            "output": [ "privateFeature", "feature" ]
+        },
+        "system-harfbuzz": {
+            "label": "  Using system HarfBuzz",
+            "enable": "input.harfbuzz == 'system'",
+            "disable": "input.harfbuzz == 'qt'",
+            "autoDetect": "!config.darwin && !config.win32",
+            "condition": "features.harfbuzz && libs.harfbuzz",
+            "output": [ "privateFeature" ]
+        },
+        "qqnx_imf": {
+            "label": "IMF",
+            "emitIf": "config.qnx",
+            "condition": "libs.imf",
+            "output": [ "privateFeature" ]
+        },
+        "integrityfb": {
+            "label": "INTEGRITY framebuffer",
+            "section": "Platform plugins",
+            "condition": "config.integrity && tests.integrityfb",
+            "output": [ "privateFeature" ]
+        },
+        "kms": {
+            "label": "KMS",
+            "condition": "libs.drm",
+            "output": [ "publicQtConfig", "privateFeature" ]
+        },
+        "libinput": {
+            "label": "libinput",
+            "condition": "features.libudev && libs.libinput",
+            "output": [ "privateFeature" ]
+        },
+        "integrityhid": {
+            "label": "INTEGRITY HID",
+            "condition": "config.integrity && libs.integrityhid",
+            "output": [ "privateFeature" ]
+        },
+        "libinput-axis-api": {
+            "label": "axis API in libinput",
+            "condition": "features.libinput && tests.libinput_axis_api",
+            "output": [ "privateFeature" ]
+        },
+        "lgmon": {
+            "label": "lgmon",
+            "emitIf": "config.qnx",
+            "condition": "libs.lgmon",
+            "output": [ "privateConfig" ]
+        },
+        "linuxfb": {
+            "label": "LinuxFB",
+            "section": "Platform plugins",
+            "condition": "tests.linuxfb && features.regularexpression",
+            "output": [ "privateFeature" ]
+        },
+        "vsp2": {
+            "label": "VSP2",
+            "condition": "libs.v4l2",
+            "autoDetect": false,
+            "output": [ "privateFeature" ]
+        },
+        "vnc": {
+            "label": "VNC",
+            "section": "Platform plugins",
+            "condition": [
+                "config.unix && !config.android && !config.darwin",
+                "features.regularexpression && features.network"
+            ],
+            "output": [ "privateFeature" ]
+        },
+        "mirclient": {
+            "label": "Mir client",
+            "section": "Platform plugins",
+            "autoDetect": false,
+            "condition": "libs.mirclient",
+            "output": [ "privateFeature" ]
+        },
+        "mtdev": {
+            "label": "mtdev",
+            "condition": "libs.mtdev",
+            "output": [ "privateFeature" ]
+        },
+        "opengles2": {
+            "label": "OpenGL ES 2.0",
+            "enable": "input.opengl == 'es2'",
+            "disable": "input.opengl == 'desktop' || input.opengl == 'dynamic' || input.opengl == 'no'",
+            "condition": "config.win32 || (!config.watchos && !features.opengl-desktop && libs.opengl_es2)",
+            "output": [
+                "publicFeature",
+                "publicQtConfig",
+                { "type": "define", "name": "QT_OPENGL_ES" },
+                { "type": "define", "name": "QT_OPENGL_ES_2" }
+            ]
+        },
+        "opengles3": {
+            "label": "OpenGL ES 3.0",
+            "condition": "features.opengles2 && !features.angle && tests.opengles3",
+            "output": [
+                "publicFeature",
+                { "type": "define", "name": "QT_OPENGL_ES_3" }
+            ]
+        },
+        "opengles31": {
+            "label": "OpenGL ES 3.1",
+            "condition": "features.opengles3 && tests.opengles31",
+            "output": [
+                "publicFeature",
+                { "type": "define", "name": "QT_OPENGL_ES_3_1" }
+            ]
+        },
+        "opengles32": {
+            "label": "OpenGL ES 3.2",
+            "condition": "features.opengles31 && tests.opengles32",
+            "output": [
+                "publicFeature",
+                { "type": "define", "name": "QT_OPENGL_ES_3_2" }
+            ]
+        },
+        "opengl-desktop": {
+            "label": "Desktop OpenGL",
+            "enable": "input.opengl == 'desktop'",
+            "disable": "input.opengl == 'es2' || input.opengl == 'dynamic' || input.opengl == 'no'",
+            "condition": "(config.win32 && !config.winrt && !features.opengles2 && (config.msvc || libs.opengl))
+                          || (!config.watchos && !config.win32 && libs.opengl)"
+        },
+        "opengl-dynamic": {
+            "label": "Dynamic OpenGL",
+            "enable": "input.opengl == 'dynamic'",
+            "autoDetect": false,
+            "condition": "config.win32 && !config.winrt",
+            "output": [
+                { "type": "publicFeature", "name": "dynamicgl" },
+                { "type": "define", "name": "QT_OPENGL_DYNAMIC" }
+            ]
+        },
+        "opengl": {
+            "label": "OpenGL",
+            "condition": "features.opengl-desktop || features.opengl-dynamic || features.opengles2",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "vulkan": {
+            "label": "Vulkan",
+            "condition": "libs.vulkan",
+            "output": [ "publicFeature" ]
+        },
+        "openvg": {
+            "label": "OpenVG",
+            "condition": "libs.openvg",
+            "output": [ "publicFeature" ]
+        },
+        "egl": {
+            "label": "EGL",
+            "condition": "(features.opengl || features.openvg) && (features.angle || libs.egl)",
+            "output": [ "privateFeature", "feature" ]
+        },
+        "egl_x11": {
+            "label": "EGL on X11",
+            "condition": "features.egl && tests.egl-x11",
+            "output": [ "privateFeature" ]
+        },
+        "eglfs": {
+            "label": "EGLFS",
+            "section": "Platform plugins",
+            "condition": "!config.android && !config.darwin && !config.win32 && features.egl",
+            "output": [ "privateFeature" ]
+        },
+        "eglfs_brcm": {
+            "label": "EGLFS Raspberry Pi",
+            "condition": "features.eglfs && tests.egl-brcm",
+            "output": [ "privateFeature" ]
+        },
+        "eglfs_egldevice": {
+            "label": "EGLFS EGLDevice",
+            "condition": "features.eglfs && tests.egl-egldevice && features.kms",
+            "output": [ "privateFeature" ]
+        },
+        "eglfs_gbm": {
+            "label": "EGLFS GBM",
+            "condition": "features.eglfs && features.gbm && features.kms",
+            "output": [ "privateFeature" ]
+        },
+        "eglfs_vsp2": {
+            "label": "EGLFS VSP2",
+            "condition": "features.eglfs && features.gbm && features.kms && features.vsp2",
+            "output": [ "privateFeature" ]
+        },
+        "eglfs_mali": {
+            "label": "EGLFS Mali",
+            "condition": "features.eglfs && (tests.egl-mali || tests.egl-mali-2)",
+            "output": [ "privateFeature" ]
+        },
+        "eglfs_viv": {
+            "label": "EGLFS i.Mx6",
+            "condition": "features.eglfs && tests.egl-viv",
+            "output": [ "privateFeature" ]
+        },
+        "eglfs_rcar": {
+            "label": "EGLFS RCAR",
+            "condition": "config.integrity && features.eglfs && tests.egl-rcar",
+            "output": [ "privateFeature" ]
+        },
+        "eglfs_viv_wl": {
+            "label": "EGLFS i.Mx6 Wayland",
+            "condition": "features.eglfs_viv && libs.wayland_server",
+            "output": [ "privateFeature" ]
+        },
+        "eglfs_openwfd": {
+            "label": "EGLFS OpenWFD",
+            "condition": "config.integrity && features.eglfs && tests.egl-openwfd",
+            "output": [ "privateFeature" ]
+        },
+        "gif": {
+            "label": "GIF",
+            "condition": "features.imageformatplugin",
+            "output": [
+                "privateFeature",
+                { "type": "define", "negative": true, "name": "QT_NO_IMAGEFORMAT_GIF" }
+            ]
+        },
+        "ico": {
+            "label": "ICO",
+            "condition": "features.imageformatplugin",
+            "output": [ "privateFeature", "feature" ]
+        },
+        "jpeg": {
+            "label": "JPEG",
+            "disable": "input.libjpeg == 'no'",
+            "condition": "features.imageformatplugin",
+            "output": [
+                "privateFeature",
+                { "type": "define", "negative": true, "name": "QT_NO_IMAGEFORMAT_JPEG" }
+            ]
+        },
+        "system-jpeg": {
+            "label": "  Using system libjpeg",
+            "disable": "input.libjpeg == 'qt'",
+            "enable": "input.libjpeg == 'system'",
+            "condition": "features.jpeg && libs.libjpeg",
+            "output": [ "privateFeature" ]
+        },
+        "png": {
+            "label": "PNG",
+            "disable": "input.libpng == 'no'",
+            "output": [
+                "privateFeature",
+                { "type": "define", "negative": true, "name": "QT_NO_IMAGEFORMAT_PNG" }
+            ]
+        },
+        "system-png": {
+            "label": "  Using system libpng",
+            "disable": "input.libpng == 'qt'",
+            "enable": "input.libpng == 'system'",
+            "autoDetect": "features.system-zlib",
+            "condition": "features.png && libs.libpng",
+            "output": [ "privateFeature" ]
+        },
+        "qpa_default_platform": {
+            "label": "QPA default platform",
+            "condition": "features.gui",
+            "output": [
+                { "type": "define", "name": "QT_QPA_DEFAULT_PLATFORM_NAME", "value": "tests.qpa_default_platform.name" },
+                { "type": "varAssign", "public": true, "name": "QT_DEFAULT_QPA_PLUGIN", "value": "tests.qpa_default_platform.plugin",
+                  "condition": "!features.shared" }
+            ]
+        },
+        "sessionmanager": {
+            "label": "Session Management",
+            "purpose": "Provides an interface to the windowing system's session management.",
+            "section": "Kernel",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "tslib": {
+            "label": "tslib",
+            "condition": "libs.tslib",
+            "output": [ "privateFeature" ]
+        },
+        "tuiotouch": {
+            "label": "TuioTouch",
+            "purpose": "Provides the TuioTouch input plugin.",
+            "condition": "features.network && features.udpsocket",
+            "output": [ "privateFeature" ]
+        },
+        "xcb": {
+            "label": "XCB",
+            "section": "Platform plugins",
+            "autoDetect": "!config.darwin",
+            "enable": "input.xcb == 'system' || input.xcb == 'qt' || input.xcb == 'yes'",
+            "condition": "libs.xcb",
+            "output": [ "privateFeature" ]
+        },
+        "system-xcb": {
+            "label": "Using system-provided XCB libraries",
+            "enable": "input.xcb == 'system'",
+            "disable": "input.xcb == 'qt'",
+            "autoDetect": "!config.darwin",
+            "condition": "features.xcb && libs.xcb_syslibs",
+            "output": [ "privateFeature" ]
+        },
+        "x11-prefix": {
+            "label": "X11 prefix",
+            "emitIf": "features.xcb",
+            "output": [ { "type": "varAssign", "name": "QMAKE_X11_PREFIX", "value": "tests.x11prefix.value" } ]
+        },
+        "xcb-glx": {
+            "label": "XCB GLX",
+            "emitIf": "features.xcb",
+            "condition": "libs.xcb_glx",
+            "output": [ "privateFeature" ]
+        },
+        "xcb-native-painting": {
+            "label": "Native painting (experimental)",
+            "emitIf": "features.xcb",
+            "condition": "features.xcb-xlib && features.fontconfig && libs.xrender",
+            "output": [ "privateFeature" ]
+        },
+        "xrender": {
+            "label": "XRender for native painting",
+            "emitIf": "features.xcb && features.xcb-native-painting",
+            "condition": "features.xcb-native-painting",
+            "output": [ "privateFeature" ]
+        },
+        "xcb-render": {
+            "label": "XCB render",
+            "emitIf": "features.xcb",
+            "condition": "!features.system-xcb || libs.xcb_render",
+            "output": [ "privateFeature" ]
+        },
+        "xkb": {
+            "label": "XCB XKB",
+            "emitIf": "features.xcb",
+            "condition": "!features.system-xcb || libs.xcb_xkb",
+            "output": [ "privateFeature" ]
+        },
+        "xcb-xlib": {
+            "label": "XCB Xlib",
+            "emitIf": "features.xcb",
+            "condition": "features.xlib && libs.xcb_xlib",
+            "output": [ "privateFeature" ]
+        },
+        "xcb-sm": {
+            "label": "xcb-sm",
+            "emitIf": "features.xcb",
+            "condition": "features.sessionmanager && libs.x11sm",
+            "output": [ "privateFeature" ]
+        },
+        "xinput2": {
+            "label": "Xinput2",
+            "emitIf": "features.xcb",
+            "condition": "features.xcb-xlib && libs.xinput2",
+            "output": [ "privateFeature" ]
+        },
+        "xkbcommon-evdev": {
+            "label": "xkbcommon-evdev",
+            "condition": "libs.xkbcommon",
+            "output": [ "privateFeature" ]
+        },
+        "xkbcommon-system": {
+            "label": "Using system-provided xkbcommon",
+            "emitIf": "features.xcb",
+            "enable": "input.xkbcommon == 'system'",
+            "disable": "input.xkbcommon == 'qt' || input.xkbcommon == 'no'",
+            "condition": "libs.xkbcommon_x11",
+            "output": [ "privateFeature" ]
+        },
+        "xlib": {
+            "label": "XLib",
+            "autoDetect": "!config.darwin || features.xcb",
+            "condition": "tests.xlib",
+            "output": [ "privateFeature" ]
+        },
+        "texthtmlparser": {
+            "label": "HtmlParser",
+            "purpose": "Provides a parser for HTML.",
+            "section": "Kernel",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "textodfwriter": {
+            "label": "OdfWriter",
+            "purpose": "Provides an ODF writer.",
+            "section": "Kernel",
+            "condition": "features.xmlstreamwriter",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "cssparser": {
+            "label": "CssParser",
+            "purpose": "Provides a parser for Cascading Style Sheets.",
+            "section": "Kernel",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "draganddrop": {
+            "label": "Drag and Drop",
+            "purpose": "Supports the drag and drop mechansim.",
+            "section": "Kernel",
+            "condition": "features.imageformat_xpm",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "shortcut": {
+            "label": "QShortcut",
+            "purpose": "Provides keyboard accelerators and shortcuts.",
+            "section": "Kernel",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "action": {
+            "label": "QAction",
+            "purpose": "Provides widget actions.",
+            "section": "Kernel",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "cursor": {
+            "label": "QCursor",
+            "purpose": "Provides mouse cursors.",
+            "section": "Kernel",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "clipboard": {
+            "label": "QClipboard",
+            "purpose": "Provides cut and paste operations.",
+            "section": "Kernel",
+            "condition": "!config.integrity && !config.qnx",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "wheelevent": {
+            "label": "QWheelEvent",
+            "purpose": "Supports wheel events.",
+            "section": "Kernel",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "tabletevent": {
+            "label": "QTabletEvent",
+            "purpose": "Supports tablet events.",
+            "section": "Kernel",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "im": {
+            "label": "QInputContext",
+            "purpose": "Provides complex input methods.",
+            "section": "Kernel",
+            "condition": "features.library",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "highdpiscaling": {
+            "label": "High DPI Scaling",
+            "purpose": "Provides automatic scaling of DPI-unaware applications on high-DPI displays.",
+            "section": "Kernel",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "validator": {
+            "label": "QValidator",
+            "purpose": "Supports validation of input text.",
+            "section": "Widgets",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "standarditemmodel": {
+            "label": "QStandardItemModel",
+            "purpose": "Provides a generic model for storing custom data.",
+            "section": "ItemViews",
+            "condition": "features.itemmodel",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "imageformatplugin": {
+            "label": "QImageIOPlugin",
+            "purpose": "Provides a base for writing a image format plugins.",
+            "section": "Images",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "movie": {
+            "label": "QMovie",
+            "purpose": "Supports animated images.",
+            "section": "Images",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "imageformat_bmp": {
+            "label": "BMP Image Format",
+            "purpose": "Supports Microsoft's Bitmap image file format.",
+            "section": "Images",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "imageformat_ppm": {
+            "label": "PPM Image Format",
+            "purpose": "Supports the Portable Pixmap image file format.",
+            "section": "Images",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "imageformat_xbm": {
+            "label": "XBM Image Format",
+            "purpose": "Supports the X11 Bitmap image file format.",
+            "section": "Images",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "imageformat_xpm": {
+            "label": "XPM Image Format",
+            "purpose": "Supports the X11 Pixmap image file format.",
+            "section": "Images",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "imageformat_png": {
+            "label": "PNG Image Format",
+            "purpose": "Supports the Portable Network Graphics image file format.",
+            "section": "Images",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "imageformat_jpeg": {
+            "label": "JPEG Image Format",
+            "purpose": "Supports the Joint Photographic Experts Group image file format.",
+            "section": "Images",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "image_heuristic_mask": {
+            "label": "QImage::createHeuristicMask()",
+            "purpose": "Supports creating a 1-bpp heuristic mask for images.",
+            "section": "Images",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "image_text": {
+            "label": "Image Text",
+            "purpose": "Supports image file text strings.",
+            "section": "Images",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "picture": {
+            "label": "QPicture",
+            "purpose": "Supports recording and replaying QPainter commands.",
+            "section": "Painting",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "colornames": {
+            "label": "Color Names",
+            "purpose": "Supports color names such as \"red\", used by QColor and by some HTML documents.",
+            "section": "Painting",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "pdf": {
+            "label": "QPdf",
+            "purpose": "Provides a PDF backend for QPainter.",
+            "section": "Painting",
+            "condition": "features.temporaryfile",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "desktopservices": {
+            "label": "QDesktopServices",
+            "purpose": "Provides methods for accessing common desktop services.",
+            "section": "Utilities",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "systemtrayicon": {
+            "label": "QSystemTrayIcon",
+            "purpose": "Provides an icon for an application in the system tray.",
+            "section": "Utilities",
+            "condition": "features.temporaryfile",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "accessibility": {
+            "label": "Accessibility",
+            "purpose": "Provides accessibility support.",
+            "section": "Utilities",
+            "condition": "features.properties",
+            "output": [ "publicFeature", "feature" ]
+        },
+        "multiprocess": {
+            "label": "Multi process",
+            "description": "Provides support for detecting the desktop environment, launching external processes and opening URLs.",
+            "section": "Utilities",
+            "condition": "!config.integrity",
+            "output": [ "privateFeature" ]
+        },
+        "whatsthis": {
+            "label": "QWhatsThis",
+            "purpose": "Supports displaying \"What's this\" help.",
+            "section": "Widget Support",
+            "output": [ "publicFeature", "feature" ]
+        }
+    },
+
+    "earlyReport": [
+        {
+            "type": "error",
+            "condition": "input.xcb != '' && input.xcb != 'no' && input.xkbcommon == 'no'",
+            "message": "XCB plugin requires libxkbcommon. See -qt-xkbcommon-x11 and -system-xkbcommon-x11."
+        }
+    ],
+
+    "report": [
+        {
+            "type": "note",
+            "condition": "features.xcb && config.darwin",
+            "message": "XCB support on macOS is minimal and untested. Some features will
+not work properly or at all (e.g. OpenGL, desktop services or accessibility),
+or may depend on your system and XQuartz setup."
+        },
+        {
+            "type": "note",
+            "condition": "features.accessibility && features.xcb && !features.accessibility-atspi-bridge",
+            "message": "Disabling X11 Accessibility Bridge: D-Bus or AT-SPI is missing."
+        },
+        {
+            "type": "warning",
+            "condition": "input.qpa-platform-guard != ''",
+            "message": "The [-no]-qpa-platform-guard argument is deprecated and has no effect."
+        },
+        {
+            "type": "warning",
+            "condition": "features.gui && config.linux && !config.android && !features.xcb && !features.eglfs && !features.directfb && !features.linuxfb && !features.mirclient",
+            "message": "No QPA platform plugin enabled! This will
+produce a Qt that cannot run GUI applications.
+The dependencies needed for xcb to build are listed in
+src/plugins/platforms/xcb/README"
+        },
+        {
+            "type": "warning",
+            "condition": "config.win32 && (features.opengles2 || features.opengl-dynamic) && !features.angle",
+            "message": "Using OpenGL ES 2.0 on Windows without ANGLE.
+The build will most likely fail.
+Specify -opengl desktop to use regular OpenGL."
+        },
+        {
+            "type": "warning",
+            "condition": "config.darwin && features.system-harfbuzz",
+            "message": "On OS X, AAT is supported only with -qt-harfbuzz."
+        },
+        {
+            "type": "error",
+            "condition": "features.gui && !config.watchos && input.opengl != 'no' && !features.opengl-desktop && !features.opengles2 && !features.opengl-dynamic",
+            "message": "The OpenGL functionality tests failed!
+You might need to modify the include and library search paths by editing QMAKE_INCDIR_OPENGL[_ES2],
+QMAKE_LIBDIR_OPENGL[_ES2] and QMAKE_LIBS_OPENGL[_ES2] in the mkspec for your platform."
+        },
+        {
+            "type": "warning",
+            "condition": "!features.accessibility",
+            "message": "Accessibility disabled. This configuration of Qt is unsupported."
+        }
+    ],
+
+    "summary": [
+        {
+            "section": "Qt Gui",
+            "entries": [
+                "accessibility",
+                "freetype",
+                "system-freetype",
+                "harfbuzz",
+                "system-harfbuzz",
+                "fontconfig",
+                {
+                    "section": "Image formats",
+                    "entries": [
+                        "gif", "ico", "jpeg", "system-jpeg", "png", "system-png"
+                    ]
+                },
+                "egl",
+                "openvg",
+                {
+                    "section": "OpenGL",
+                    "entries": [
+                        {
+                            "type": "feature",
+                            "args": "angle",
+                            "condition": "config.win32"
+                        },
+                        {
+                            "type": "feature",
+                            "args": "combined-angle-lib",
+                            "condition": "features.angle"
+                        },
+                        "opengl-desktop",
+                        {
+                            "type": "feature",
+                            "args": "opengl-dynamic",
+                            "condition": "config.win32"
+                        },
+                        "opengles2",
+                        "opengles3",
+                        "opengles31",
+                        "opengles32"
+                    ]
+                },
+                "vulkan",
+                "sessionmanager"
+            ]
+        },
+        {
+            "section": "Features used by QPA backends",
+            "entries": [
+                "evdev",
+                "libinput",
+                "integrityhid",
+                "mtdev",
+                "tslib",
+                "xkbcommon-evdev"
+            ]
+        },
+        {
+            "section": "QPA backends",
+            "entries": [
+                "directfb", "eglfs",
+                {
+                    "section": "EGLFS details",
+                    "condition": "features.eglfs",
+                    "entries": [
+                        "eglfs_openwfd", "eglfs_viv", "eglfs_viv_wl", "eglfs_rcar", "eglfs_egldevice", "eglfs_gbm", "eglfs_vsp2", "eglfs_mali", "eglfs_brcm", "egl_x11"
+                    ]
+                },
+                "linuxfb", "vnc", "mirclient",
+                {
+                    "type": "feature",
+                    "condition": "config.integrity",
+                    "args": "integrityfb"
+                },
+                {
+                    "section": "QNX",
+                    "condition": "config.qnx",
+                    "entries": [
+                        "lgmon", "qqnx_imf"
+                    ]
+                },
+                {
+                    "section": "X11",
+                    "condition": "features.xcb",
+                    "entries": [
+                        "system-xcb", "egl_x11", "xinput2", "xkb", "xlib", "xcb-render", "xcb-glx", "xcb-xlib", "xkbcommon-system", "xcb-native-painting"
+                    ]
+                },
+                {
+                    "section": "Windows",
+                    "condition": "config.win32",
+                    "entries": [
+                        "direct2d", "directwrite", "directwrite2"
+                    ]
+                }
+            ]
+        }
+    ]
+}

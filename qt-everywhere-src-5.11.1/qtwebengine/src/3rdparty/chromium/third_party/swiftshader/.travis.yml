@@ -1,0 +1,23 @@
+language: cpp
+
+os:
+  - linux
+  - osx
+
+dist: trusty
+osx_image: xcode8
+sudo: false
+
+compiler:
+  - clang
+  - gcc
+
+env:
+  - REACTOR_BACKEND=LLVM
+  - REACTOR_BACKEND=Subzero
+
+script:
+  - $CXX --version
+  - mkdir build && cd build
+  - cmake -DREACTOR_BACKEND=$REACTOR_BACKEND ..
+  - make

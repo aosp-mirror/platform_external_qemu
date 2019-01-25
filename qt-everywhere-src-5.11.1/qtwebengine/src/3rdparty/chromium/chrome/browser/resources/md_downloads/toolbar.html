@@ -1,0 +1,58 @@
+<link rel="import" href="chrome://resources/html/polymer.html">
+
+<link rel="import" href="chrome://downloads/search_service.html">
+<link rel="import" href="chrome://downloads/browser_proxy.html">
+<link rel="import" href="chrome://resources/cr_elements/hidden_style_css.html">
+<link rel="import" href="chrome://resources/html/assert.html">
+<link rel="import" href="chrome://resources/html/cr.html">
+<link rel="import" href="chrome://resources/html/util.html">
+<link rel="import" href="chrome://resources/polymer/v1_0/iron-icon/iron-icon.html">
+<link rel="import" href="chrome://resources/polymer/v1_0/paper-icon-button/paper-icon-button-light.html">
+<link rel="import" href="chrome://resources/polymer/v1_0/paper-styles/color.html">
+<link rel="import" href="chrome://resources/cr_elements/cr_action_menu/cr_action_menu.html">
+<link rel="import" href="chrome://resources/cr_elements/cr_toolbar/cr_toolbar.html">
+<link rel="import" href="chrome://resources/cr_elements/icons.html">
+
+<dom-module id="downloads-toolbar">
+  <template>
+    <style include="cr-hidden-style">
+      :host {
+        align-items: center;
+        background: var(--google-blue-700);
+        color: white;
+        display: flex;
+        min-height: 56px;
+      }
+
+      #toolbar {
+        flex: 1;
+      }
+
+      #moreActions {
+        --iron-icon-height: 20px;
+        --iron-icon-width: 20px;
+        height: 32px;
+        padding: 6px;
+        width: 32px;
+      }
+    </style>
+    <cr-toolbar id="toolbar" page-name="$i18n{title}"
+        search-prompt="$i18n{search}" clear-label="$i18n{clearSearch}"
+        spinner-active="{{spinnerActive}}" on-search-changed="onSearchChanged_">
+      <button is="paper-icon-button-light" id="moreActions"
+          title="$i18n{moreActions}" class="dropdown-trigger"
+          on-tap="onMoreActionsTap_">
+        <iron-icon icon="cr:more-vert"></iron-icon>
+      </button>
+    </cr-toolbar>
+    <dialog is="cr-action-menu" id="moreActionsMenu">
+      <button class="dropdown-item clear-all" on-tap="onClearAllTap_">
+        $i18n{clearAll}
+      </div>
+      <button class="dropdown-item" on-tap="onOpenDownloadsFolderTap_">
+        $i18n{openDownloadsFolder}
+      </button>
+    </dialog>
+  </template>
+  <script src="chrome://downloads/toolbar.js"></script>
+</dom-module>

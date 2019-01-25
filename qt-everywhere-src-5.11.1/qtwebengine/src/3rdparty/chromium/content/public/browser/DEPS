@@ -1,0 +1,26 @@
+include_rules = [
+  "+components/viz/common",
+  "+device/geolocation/public/cpp",
+  "+device/usb/public/interfaces",
+  "+services/device/public/interfaces",
+  "+services/network/public/cpp",
+  "+services/service_manager/sandbox",
+  "+services/resource_coordinator/public",
+]
+
+specific_include_rules = {
+  ".*\.cc": [
+    "+content/browser",
+    "-content/browser/loader",
+
+    # TODO: content/browser/loader is being separated out of content, and this
+    # file will be moved elsewhere. See http://crbug.com/598073.
+    "!content/browser/loader/resource_dispatcher_host_impl.h",
+  ],
+
+  "desktop_capture\.h": [
+    # desktop_capture.h creates a DesktopCaptureOptions to share between
+    # content/browser and chrome/browser.
+    "+third_party/webrtc/modules/desktop_capture/desktop_capture_options.h",
+  ],
+}

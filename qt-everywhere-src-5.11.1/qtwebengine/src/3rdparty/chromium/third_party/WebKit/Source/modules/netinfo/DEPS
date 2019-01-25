@@ -1,0 +1,5 @@
+include_rules = [
+    "-modules",
+    "+modules/EventTargetModules.h",
+    "+modules/netinfo",
+]

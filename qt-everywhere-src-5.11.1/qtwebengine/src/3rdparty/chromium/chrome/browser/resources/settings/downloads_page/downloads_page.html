@@ -1,0 +1,62 @@
+<link rel="import" href="chrome://resources/html/polymer.html">
+
+<link rel="import" href="chrome://resources/html/util.html">
+<link rel="import" href="chrome://resources/html/web_ui_listener_behavior.html">
+<link rel="import" href="../controls/controlled_button.html">
+<link rel="import" href="../controls/settings_toggle_button.html">
+<link rel="import" href="../settings_shared_css.html">
+<link rel="import" href="downloads_browser_proxy.html">
+
+<dom-module id="settings-downloads-page">
+  <template>
+    <style include="settings-shared">
+      .block {
+        display: block;
+      }
+    </style>
+    <div class="settings-box first two-line">
+      <div class="start">
+        <div>$i18n{downloadLocation}</div>
+        <div class="secondary" no-search>
+<if expr="not chromeos">
+          [[prefs.download.default_directory.value]]
+</if>
+<if expr="chromeos">
+          [[getDownloadLocation_(prefs.download.default_directory.value)]]
+</if>
+        </div>
+      </div>
+      <div class="separator"></div>
+      <controlled-button class="secondary-button" id="changeDownloadsPath"
+          label="$i18n{changeDownloadLocation}"
+          on-tap="selectDownloadLocation_"
+          pref="[[prefs.download.default_directory]]"
+          end-justified>
+      </controlled-button>
+    </div>
+    <settings-toggle-button
+        pref="{{prefs.download.prompt_for_download}}"
+        label="$i18n{promptForDownload}">
+    </settings-toggle-button>
+<if expr="chromeos">
+    <settings-toggle-button class="continuation"
+        pref="{{prefs.gdata.disabled}}"
+        label="$i18n{disconnectGoogleDriveAccount}"
+        hidden="[[!pageVisibility.googleDrive]]">
+    </settings-toggle-button>
+</if>
+    <template is="dom-if" if="[[autoOpenDownloads_]]" restamp>
+      <div class="settings-box">
+        <div class="start">
+          $i18n{openFileTypesAutomatically}
+        </div>
+        <div class="separator"></div>
+        <paper-button id="resetAutoOpenFileTypes" class="secondary-button"
+            on-tap="onClearAutoOpenFileTypesTap_">
+          $i18n{clear}
+        </paper-button>
+      </div>
+    </template>
+  </template>
+  <script src="downloads_page.js"></script>
+</dom-module>

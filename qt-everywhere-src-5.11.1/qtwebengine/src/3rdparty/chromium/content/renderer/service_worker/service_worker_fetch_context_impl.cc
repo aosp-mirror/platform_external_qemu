@@ -1,0 +1,72 @@
+// Copyright 2017 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "content/renderer/service_worker/service_worker_fetch_context_impl.h"
+
+#include "base/feature_list.h"
+#include "content/public/common/content_features.h"
+#include "content/public/renderer/url_loader_throttle_provider.h"
+#include "content/renderer/loader/request_extra_data.h"
+#include "content/renderer/loader/resource_dispatcher.h"
+#include "content/renderer/loader/web_url_loader_impl.h"
+#include "content/renderer/loader/web_url_request_util.h"
+#include "ipc/ipc_message.h"
+
+namespace content {
+
+ServiceWorkerFetchContextImpl::ServiceWorkerFetchContextImpl(
+    const GURL& worker_script_url,
+    ChildURLLoaderFactoryGetter::Info url_loader_factory_getter_info,
+    int service_worker_provider_id,
+    std::unique_ptr<URLLoaderThrottleProvider> throttle_provider)
+    : worker_script_url_(worker_script_url),
+      url_loader_factory_getter_info_(
+          std::move(url_loader_factory_getter_info)),
+      service_worker_provider_id_(service_worker_provider_id),
+      throttle_provider_(std::move(throttle_provider)) {}
+
+ServiceWorkerFetchContextImpl::~ServiceWorkerFetchContextImpl() {}
+
+void ServiceWorkerFetchContextImpl::InitializeOnWorkerThread(
+    scoped_refptr<base::SingleThreadTaskRunner> loading_task_runner) {
+  resource_dispatcher_ =
+      std::make_unique<ResourceDispatcher>(std::move(loading_task_runner));
+
+  url_loader_factory_getter_ = url_loader_factory_getter_info_.Bind();
+}
+
+std::unique_ptr<blink::WebURLLoaderFactory>
+ServiceWorkerFetchContextImpl::CreateURLLoaderFactory() {
+  DCHECK(url_loader_factory_getter_);
+  return std::make_unique<content::WebURLLoaderFactoryImpl>(
+      resource_dispatcher_->GetWeakPtr(),
+      std::move(url_loader_factory_getter_));
+}
+
+void ServiceWorkerFetchContextImpl::WillSendRequest(
+    blink::WebURLRequest& request) {
+  RequestExtraData* extra_data = new RequestExtraData();
+  extra_data->set_service_worker_provider_id(service_worker_provider_id_);
+  extra_data->set_originated_from_service_worker(true);
+  extra_data->set_initiated_in_secure_context(true);
+  if (throttle_provider_) {
+    extra_data->set_url_loader_throttles(throttle_provider_->CreateThrottles(
+        MSG_ROUTING_NONE, request.Url(), WebURLRequestToResourceType(request)));
+  }
+  request.SetExtraData(extra_data);
+}
+
+bool ServiceWorkerFetchContextImpl::IsControlledByServiceWorker() const {
+  return false;
+}
+
+blink::WebURL ServiceWorkerFetchContextImpl::SiteForCookies() const {
+  // According to the spec, we can use the |worker_script_url_| for
+  // SiteForCookies, because "site for cookies" for the service worker is
+  // the service worker's origin's host's registrable domain.
+  // https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-07#section-2.1.2
+  return worker_script_url_;
+}
+
+}  // namespace content

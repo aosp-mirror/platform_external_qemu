@@ -1,0 +1,11 @@
+--- a/qtbase/qtbase.pro
++++ b/qtbase/qtbase.pro
+@@ -51,7 +51,7 @@
+ #syncqt
+ syncqt.path = $$[QT_HOST_BINS]
+ syncqt.files = $$PWD/bin/syncqt.pl
+-INSTALLS += syncqt
++#INSTALLS += syncqt
+ 
+ # If we are doing a prefix build, create a "module" pri which enables
+ # qtPrepareTool() to find the non-installed syncqt.

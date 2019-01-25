@@ -1,0 +1,15 @@
+include_rules = [
+  "+cc",
+  "+chromeos/system",
+  "+components/discardable_memory/service",
+  "+components/discardable_memory/public",
+  "+components/viz/common",
+  "+ipc",
+  "+mojo/common",
+  "+mojo/converters",
+  "+mojo/public",
+  "+services/catalog/public",
+  "+services/service_manager",
+  "+third_party/skia/include",
+  "+ui",
+]

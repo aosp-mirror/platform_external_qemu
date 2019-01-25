@@ -1,0 +1,33 @@
+{
+  "name": "content_gpu",
+  "display_name": "Content (GPU process)",
+  "interface_provider_specs": {
+    "service_manager:connector": {
+      "provides": {
+        "browser": [
+          "content::mojom::Child",
+          "content::mojom::ChildControl",
+          "content::mojom::ChildHistogramFetcher",
+          "content::mojom::ChildHistogramFetcherFactory",
+          "IPC::mojom::ChannelBootstrap",
+          "service_manager::mojom::ServiceFactory",
+          "viz::mojom::CompositingModeReporter",
+          "viz::mojom::VizMain"
+        ],
+        "service_manager:service_factory": [
+          "service_manager::mojom::ServiceFactory"
+        ]
+      },
+      "requires": {
+        "*": [ "app" ],
+        "content_browser": [
+          "dwrite_font_proxy",
+          "field_trials",
+          "gpu"
+        ],
+        "device": [ "device:power_monitor" ],
+        "metrics": [ "url_keyed_metrics" ]
+      }
+    }
+  }
+}

@@ -1,0 +1,76 @@
+# Copyright 2017 The Crashpad Authors. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("build/crashpad_buildconfig.gni")
+import("build/test.gni")
+
+config("crashpad_config") {
+  include_dirs = [ "." ]
+}
+
+if (crashpad_is_in_chromium) {
+  test("crashpad_tests") {
+    deps = [
+      "client:client_test",
+      "handler:handler_test",
+      "minidump:minidump_test",
+      "snapshot:snapshot_test",
+      "test:gmock_main",
+      "test:test_test",
+      "util:util_test",
+    ]
+  }
+} else {
+  test("crashpad_client_test") {
+    deps = [
+      "client:client_test",
+      "test:gmock_main",
+    ]
+  }
+
+  test("crashpad_handler_test") {
+    deps = [
+      "handler:handler_test",
+      "test:gtest_main",
+    ]
+  }
+
+  test("crashpad_minidump_test") {
+    deps = [
+      "minidump:minidump_test",
+      "test:gtest_main",
+    ]
+  }
+
+  test("crashpad_snapshot_test") {
+    deps = [
+      "snapshot:snapshot_test",
+      "test:gtest_main",
+    ]
+  }
+
+  test("crashpad_test_test") {
+    deps = [
+      "test:gmock_main",
+      "test:test_test",
+    ]
+  }
+
+  test("crashpad_util_test") {
+    deps = [
+      "test:gmock_main",
+      "util:util_test",
+    ]
+  }
+}

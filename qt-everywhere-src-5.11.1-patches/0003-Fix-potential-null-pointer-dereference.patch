@@ -1,0 +1,17 @@
+--- a/qtbase/src/gui/image/qimage.cpp
++++ b/qtbase/src/gui/image/qimage.cpp
+@@ -4519,6 +4519,9 @@
+ */
+ QImage QImage::smoothScaled(int w, int h) const {
+     QImage src = *this;
++    if (src.isNull()) {
++        return QImage();
++    }
+     switch (src.format()) {
+     case QImage::Format_RGB32:
+     case QImage::Format_ARGB32_Premultiplied:
+@@ -5273,3 +5276,4 @@
+ }
+ 
+ QT_END_NAMESPACE
++

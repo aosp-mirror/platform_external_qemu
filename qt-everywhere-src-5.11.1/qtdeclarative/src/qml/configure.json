@@ -1,0 +1,61 @@
+{
+    "module": "qml",
+    "depends": [
+        "core-private",
+        "network-private"
+    ],
+
+    "commandline": {
+        "options": {
+            "qml-network": "boolean",
+            "qml-debug": "boolean"
+        }
+    },
+
+    "features": {
+        "qml-network": {
+            "label": "QML network support",
+            "purpose": "Provides network transparency.",
+            "section": "QML",
+            "condition": "features.network",
+            "output": [ "publicFeature" ]
+        },
+        "qml-debug": {
+            "label": "QML debugging and profiling support",
+            "purpose": "Provides infrastructure and plugins for debugging and profiling.",
+            "section": "QML",
+            "output": [ "publicFeature" ]
+        },
+        "qml-profiler": {
+            "label": "Command line QML Profiler",
+            "purpose": "Supports retrieving QML tracing data from an application.",
+            "section": "QML",
+            "condition": [
+                "features.commandlineparser",
+                "features.localserver",
+                "features.process",
+                "features.qml-debug",
+                "features.qml-network",
+                "features.xmlstreamwriter"
+            ],
+            "output": [ "privateFeature" ]
+        },
+        "qml-delegate-model": {
+            "label": "QML delegate model",
+            "purpose": "Provides the DelegateModel QML type.",
+            "section": "QML",
+            "output": [ "privateFeature" ]
+        }
+    },
+
+    "summary": [
+        {
+            "section": "Qt QML",
+            "entries": [
+                "qml-network",
+                "qml-debug",
+                "qml-delegate-model"
+            ]
+        }
+    ]
+}

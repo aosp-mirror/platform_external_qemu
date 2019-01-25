@@ -1,0 +1,6 @@
+include_rules = [
+  "+mojo/common",
+  "+mojo/public",
+  "+ui/gfx/geometry/mojo",
+  "+ui/latency",
+]

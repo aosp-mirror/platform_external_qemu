@@ -1,0 +1,126 @@
+// Copyright 2017 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+syntax = "proto2";
+
+option optimize_for = LITE_RUNTIME;
+
+package smbprovider;
+
+// ErrorType matches 1:1 to FileSystemProvider#ProviderError in Chromium up
+// until ERROR_PROVIDER_ERROR_COUNT. The ErrorTypes past that are specific to
+// SmbProvider.
+enum ErrorType {
+  ERROR_NONE = 0;
+  ERROR_OK = 1;
+  ERROR_FAILED = 2;
+  ERROR_IN_USE = 3;
+  ERROR_EXISTS = 4;
+  ERROR_NOT_FOUND = 5;
+  ERROR_ACCESS_DENIED = 6;
+  ERROR_TOO_MANY_OPENED = 7;
+  ERROR_NO_MEMORY = 8;
+  ERROR_NO_SPACE = 9;
+  ERROR_NOT_A_DIRECTORY = 10;
+  ERROR_INVALID_OPERATION = 11;
+  ERROR_SECURITY = 12;
+  ERROR_ABORT = 13;
+  ERROR_NOT_A_FILE = 14;
+  ERROR_NOT_EMPTY = 15;
+  ERROR_INVALID_URL = 16;
+  ERROR_IO = 17;
+  // Count of ProviderError.
+  ERROR_PROVIDER_ERROR_COUNT = 18;
+  // The following errors are not ProviderErrors, instead they are specific to
+  // SmbProvider. The jump in int value is to account for possible future
+  // additions to ProviderError.
+  ERROR_DBUS_PARSE_FAILED = 50;
+}
+
+message DirectoryEntry {
+  optional bool is_directory = 1;
+  optional string name = 2;
+  // Size in bytes.
+  optional int64 size = 3;
+  // Seconds since unix epoch.
+  optional int64 last_modified_time = 4;
+}
+
+// DirectoryEntryList is included in responses to ReadDirectory D-Bus method
+// calls.
+message DirectoryEntryList {
+  repeated DirectoryEntry entries = 1;
+}
+
+// MountOptions is used for passing inputs into SmbProvider.Mount().
+message MountOptions {
+  // Path of the share to be mounted. (e.g. "smb://qnap/testshare")
+  optional string path = 1;
+}
+
+// UnmountOptions is used for passing inputs into SmbProvider.Unmount().
+message UnmountOptions {
+  // ID of the mount returned from Mount().
+  optional int32 mount_id = 1;
+}
+
+// Used for passing inputs into SmbProvider.ReadDirectory().
+message ReadDirectoryOptions {
+  // ID of the mount returned from Mount().
+  optional int32 mount_id = 1;
+  // Path of the directory to be read. The paths are relative to the mount root.
+  // (e.g. "/testfolder")
+  optional string directory_path = 2;
+}
+
+// Used for passing inputs into SmbProvider.GetMetadataEntry().
+message GetMetadataEntryOptions {
+  // ID of the mount returned from Mount().
+  optional int32 mount_id = 1;
+  // Path of the entry to be read. This can be a file or directory path.
+  // The paths are relative to the mount root. (e.g. "/testfolder/dog.jpg")
+  optional string entry_path = 2;
+}
+
+// Used for passing inputs into SmbProvider.OpenFile().
+message OpenFileOptions {
+  // ID of the mount returned from Mount().
+  optional int32 mount_id = 1;
+  // Path of the file to be opened. This must be a file path.
+  // Paths are relative to the mount root, e.g. "/animals/dog.jpg".
+  optional string file_path = 2;
+  // Boolean indicating write status. False indicates read only.
+  optional bool writeable = 3;
+}
+
+// Used for passing inputs into SmbProvider.CloseFile().
+message CloseFileOptions {
+  // ID of the mount returned from Mount().
+  optional int32 mount_id = 1;
+  // ID of the file returned from OpenFile().
+  optional int32 file_id = 2;
+}
+
+// Used for passing inputs into SmbProvider.ReadFile().
+message ReadFileOptions {
+  // ID of the mount returned from Mount().
+  optional int32 mount_id = 1;
+  // ID of the file returned from OpenFile().
+  optional int32 file_id = 2;
+  // Offset of the file to be read.
+  optional int64 offset = 3;
+  // Length in bytes to be read.
+  optional int32 length = 4;
+}
+
+// Used for passing inputs into SmbProvider.DeleteEntry().
+message DeleteEntryOptions {
+  // ID of the mount returned from Mount().
+  optional int32 mount_id = 1;
+  // Path of the entry to be deleted. This can be a file or directory path.
+  // The paths are relative to the mount root. (e.g. "/testfolder/dog.jpg")
+  optional string entry_path = 2;
+  // Boolean indicating whether the delete should be recursive for directories.
+  optional bool recursive = 3;
+}

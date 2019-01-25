@@ -1,0 +1,89 @@
+<link rel="import" href="chrome://resources/html/polymer.html">
+
+<link rel="import" href="chrome://resources/cr_elements/hidden_style_css.html">
+<link rel="import" href="chrome://resources/html/cr.html">
+<link rel="import" href="chrome://resources/html/load_time_data.html">
+<link rel="import" href="chrome://resources/polymer/v1_0/paper-styles/color.html">
+
+<dom-module id="extensions-code-section">
+  <template>
+    <style include="cr-hidden-style">
+      :host {
+        display: block;
+      }
+
+      #scroll-container {
+        border: 1px solid var(--paper-grey-500);
+        height: 100%;
+        overflow: auto;
+        position: relative;
+      }
+
+      #main {
+        color: var(--paper-grey-800);
+        display: flex;
+        font-family: monospace;
+        min-height: 100%;
+      }
+
+      #line-numbers {
+        background: var(--paper-grey-300);
+        border-right: 1px solid var(--paper-grey-500);
+        display: flex;
+        flex-direction: column;
+        padding: 0 8px;
+        text-align: right;
+      }
+
+      #source {
+        -webkit-margin-start: 4px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #line-numbers span,
+      #source span {
+        white-space: pre;
+      }
+
+      #no-code {
+        color: var(--paper-grey-800);
+        text-align: center;
+      }
+
+      .more-code {
+        color: var(--paper-grey-500);
+      }
+    </style>
+    <div id="scroll-container" hidden="[[!codeText_]]">
+      <div id="main">
+        <div id="line-numbers">
+          <div class="more-code before" hidden="[[!truncatedBefore_]]">
+            ...
+          </div>
+          <span>[[lineNumbers_]]</span>
+          <div class="more-code after" hidden="[[!truncatedAfter_]]">
+            ...
+          </div>
+        </div>
+        <div id="source">
+          <div class="more-code before" hidden="[[!truncatedBefore_]]">
+            [[getLinesNotShownLabel_(
+                truncatedBefore_,
+                '$i18nPolymer{errorLinesNotShownSingular}',
+                '$i18nPolymer{errorLinesNotShownPlural}')]]
+          </div>
+          <span>[[codeText_]]</span>
+          <div class="more-code after" hidden="[[!truncatedAfter_]]">
+            [[getLinesNotShownLabel_(
+                truncatedAfter_,
+                '$i18nPolymer{errorLinesNotShownSingular}',
+                '$i18nPolymer{errorLinesNotShownPlural}')]]
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="no-code" hidden="[[codeText_]]">[[couldNotDisplayCode]]</div>
+  </template>
+  <script src="code_section.js"></script>
+</dom-module>

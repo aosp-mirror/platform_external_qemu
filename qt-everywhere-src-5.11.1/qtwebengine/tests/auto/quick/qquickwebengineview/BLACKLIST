@@ -1,0 +1,11 @@
+[transparentWebEngineViews]
+windows
+
+[inputEventForwardingDisabledWhenActiveFocusOnPressDisabled]
+*
+
+[transparentWebEngineViews]
+*
+
+[basicRenderingSanity]
+*

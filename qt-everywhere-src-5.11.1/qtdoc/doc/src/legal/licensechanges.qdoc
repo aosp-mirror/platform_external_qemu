@@ -1,0 +1,151 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of the documentation of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+    \page license-changes.html
+    \title License Changes
+    \brief Information about changes of licenses in Qt and Third Party Modules
+    \ingroup licensing
+
+    Changes in Qt and \l{Licenses Used in Qt}{Third Party Modules}
+    released with Qt that are relevant to licensing.
+
+    \section1 Qt 5.11.1
+
+    \section2 Qt 3D Module
+
+    The use of the \e{Jet Propulsion Laboratory Photojournal} in
+    the module is actually limited to the planets-qml example. The attribution
+    has therefore been removed from the module's documentation.
+
+    \section2 Qt Documentation
+
+    Use of the \l{Titillium Web Font} in the Coffee demo is now documented.
+
+    \section2 Qt Image Formats
+
+    \l{WebP (libwebp)} got updated to version 1.0.0.
+
+    \section1 Qt 5.11.0
+
+    \section2 Qt 3D Module
+
+    \list
+        \li The \l{Open Asset Import Library} got updated to upstream version
+            4.1.0.
+        \li Examples use some assets from \l{Substance Share} that are available
+            under the \e {Creative Commons Attribution 4.0} license. This is now
+            documented.
+    \endlist
+
+
+    \section2 Qt Core Module
+    \list
+        \li \e{Parts of QTemporaryFile} got removed from documentation.
+            The corresponding code got removed already in Qt 5.10.0.
+
+        \li The copy of the \l{The Public Suffix List} got updated on
+            2018-01-04.
+
+        \li The concluded license for the
+            \l{Unicode Common Locale Data Repository (CLDR)} changed to
+            \e{Unicode License Agreement - Data Files and Software (2016)}.
+            In Qt 5.10 documentation, the component was labelled as
+            \e{Unicode CLDR (Unicode Common Locale Data Repository)}.
+
+        \li The use of the \l{Unicode Character Database (UCD)} under the
+            \e{Unicode License Agreement - Data Files and Software (2016)}.
+            is now documented.
+    \endlist
+
+    \section2 Qt D-Bus Module
+
+    Qt D-Bus uses code from \l{libdbus-1 headers} that are available under the
+    \e{Academic Free License v2.1, or GNU General Public License v2.0 or later}.
+    This is now documented.
+
+    \section2 Qt GUI Module
+
+    \list
+        \li \l{HarfBuzz-NG} got updated to upstream version 1.7.4.
+        \li \l{LibJPEG-turbo} got updated to upstream version 1.5.3.
+    \endlist
+
+    \section2 Qt Image Formats
+
+    \list
+        \li \l{TIFF Software Distribution (libtiff)} got updated to upstream
+            version 4.0.9.
+        \li \l{WebP (libwebp)} got updated to upstream version 0.6.1.
+    \endlist
+
+    \section2 Qt Quick Controls 2 Module
+
+    Use of \l{Shadow values from Angular Material} under \e{MIT License}
+    in the Material Style is now documented.
+
+    \section2 Qt SQL Module
+
+    \l{SQLite} got updated to upstream version 3.23.1.
+
+    \section2 Qt Test Module
+
+    The concluded license of \l{Linux Performance Events} changed to
+    \e{GNU General Public License v2.0 only with Linux Syscall Note}.
+
+    \section2 Qt WebEngine Module
+
+    \list
+        \li \l{(Components of) Bazel} got added under the
+            \e {Apache License 2.0}.
+        \li \l{Breakpad, An open-source multi-platform crash reporting system}
+            got added under a \e{New BSD, Apple PSL 2.0 and Apache 2.0} license.
+        \li \l{BoringSSL} got updated.
+        \li \l{CRC32C} got added under a \e{New BSD} license.
+        \li \e{Error Prone} got removed.
+        \li \l{Fiat-Crypto: Synthesizing Correct-by-Construction Code for
+            Cryptographic Primitives} got added under a \e{MIT} license.
+        \li \l{OpenVR SDK} got added under a \e{BSD 3-Clause} license.
+        \li \l{Perfetto} got added under a \e{Apache 2} license.
+        \li \e{The library to input, validate, and display addresses} got
+            removed.
+        \li \l{content_shell_fonts} got added under
+            \e{SIL OPEN FONT LICENSE, GPL v2, Bitstream Vera Fonts Copyright}.
+        \li \e{libcxx} got removed.
+        \li \e{libcxxabi} got removed.
+        \li \e{libunwind} got removed.
+        \li \e{libva} got removed.
+        \li \e{libxslt} got added under a \e{MIT} license.
+        \li \e{open-vcdiff} got removed.
+    \endlist
+
+    \section2 Qt XML Patterns Module
+
+    Use of \l{XML Schema}
+    under \e{W3C Software Notice and Document License (2015-05-13)}
+    is now documented.
+*/

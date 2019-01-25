@@ -1,0 +1,75 @@
+// Copyright 2017 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module ash.mojom;
+
+import "mojo/common/time.mojom";
+
+// Alert sent to the accessibility api.
+enum AccessibilityAlert {
+  // Default value, indicates no accessibility alert.
+  NONE,
+
+  // When caps lock is turned on.
+  CAPS_ON,
+
+  // When caps lock is turned off.
+  CAPS_OFF,
+
+  // When screen is turned on by tablet power button.
+  SCREEN_ON,
+
+  // When screen is turned off by tablet power button.
+  SCREEN_OFF,
+
+  // When window moved to above/below/left/right display by accelerators.
+  WINDOW_MOVED_TO_ABOVE_DISPLAY,
+  WINDOW_MOVED_TO_BELOW_DISPLAY,
+  WINDOW_MOVED_TO_LEFT_DISPLAY,
+  WINDOW_MOVED_TO_RIGHT_DISPLAY,
+
+  // When the user attempts a keyboard command that requires a window to work,
+  // and none is available.
+  WINDOW_NEEDED,
+
+  // When the user enters window overview mode.
+  WINDOW_OVERVIEW_MODE_ENTERED
+};
+
+// Interface for ash client (e.g. Chrome) to control and query accessibility
+// features.
+interface AccessibilityController {
+  // Sets the client interface.
+  SetClient(AccessibilityControllerClient client);
+
+  // Starts or stops darkening the screen (e.g. to allow chrome a11y extensions
+  // to darken the screen).
+  SetDarkenScreen(bool darken);
+};
+
+// Interface for ash to request accessibility service from its client (e.g.
+// Chrome).
+interface AccessibilityControllerClient {
+  // Triggers an accessibility alert to give the user feedback.
+  TriggerAccessibilityAlert(AccessibilityAlert alert);
+
+  // Plays an earcon. Earcons are brief and distinctive sounds that indicate
+  // that their mapped event has occurred. The |sound_key| enums can be found in
+  // chromeos/audio/chromeos_sounds.h. This method exists because the browser
+  // owns all media playback.
+  PlayEarcon(int32 sound_key);
+
+  // Initiates play of shutdown sound and returns sound duration. This method
+  // exists because the browser owns all media playback.
+  PlayShutdownSound() => (mojo.common.mojom.TimeDelta sound_duration);
+
+  // Forwards an accessibility gesture from the touch exploration controller to
+  // ChromeVox.
+  // TODO(warx): replace string with enum once ax_enums.idl is converted to
+  // mojom file.
+  HandleAccessibilityGesture(string gesture);
+
+  // Start or stop dictation (type what you speak).
+  ToggleDictation();
+};

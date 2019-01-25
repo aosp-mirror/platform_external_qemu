@@ -1,0 +1,12 @@
+--- a/qtwebengine/src/3rdparty/chromium/build/mac/should_use_hermetic_xcode.py
++++ b/qtwebengine/src/3rdparty/chromium/build/mac/should_use_hermetic_xcode.py
+@@ -32,7 +32,8 @@
+   if os.environ.get('FORCE_MAC_TOOLCHAIN') or allow_corp:
+     if not mac_toolchain.PlatformMeetsHermeticXcodeRequirements(sys.argv[1]):
+       return "2"
+-    return "1"
++    """ See https://github.com/Homebrew/homebrew-core/issues/21809 """
++    return "0"
+   else:
+     return "0"
+ 

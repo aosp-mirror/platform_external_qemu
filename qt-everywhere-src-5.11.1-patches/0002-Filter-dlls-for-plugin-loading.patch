@@ -1,0 +1,18 @@
+--- a/qtbase/src/corelib/plugin/qfactoryloader.cpp
++++ b/qtbase/src/corelib/plugin/qfactoryloader.cpp
+@@ -111,8 +111,14 @@
+             continue;
+ 
+         QStringList plugins = QDir(path).entryList(
+-#ifdef Q_OS_WIN
++#if defined(Q_OS_WIN)
+                     QStringList(QStringLiteral("*.dll")),
++#elif defined(Q_OS_MAC)
++                    QStringList(QStringLiteral("*.dylib*")),
++#elif defined(Q_OS_LIN)
++                    QStringList(QStringLiteral("*.so*")),
++#else
++                    QStringList(QStringLiteral("*")),
+ #endif
+                     QDir::Files);
+         QLibraryPrivate *library = 0;

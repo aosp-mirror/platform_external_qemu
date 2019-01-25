@@ -1,0 +1,5 @@
+include_rules = [
+  '+public',
+  '+third_party/skia/include',
+  '+v8',
+]

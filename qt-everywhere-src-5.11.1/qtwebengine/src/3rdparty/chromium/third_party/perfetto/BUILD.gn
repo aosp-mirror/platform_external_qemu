@@ -1,0 +1,56 @@
+# Copyright (C) 2017 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("gn/perfetto.gni")
+
+group("all") {
+  testonly = true  # allow to build also test targets
+  deps = [
+    ":perfetto_tests",
+    "src/ftrace_reader:ftrace_reader_demo",
+    "src/ipc/protoc_plugin:ipc_plugin($host_toolchain)",
+    "src/protozero/protoc_plugin($host_toolchain)",
+    "tools/ftrace_proto_gen:ftrace_proto_gen",
+    "tools/proto_to_cpp",
+  ]
+  if (!build_with_chromium) {
+    deps += [
+      ":perfetto_benchmarks",
+      "src/ftrace_reader:ftrace_reader_integrationtests",
+    ]
+  }
+}
+
+executable("perfetto_tests") {
+  testonly = true
+  deps = [
+    "gn:default_deps",
+    "src/base:base_unittests",
+    "src/ftrace_reader:ftrace_reader_unittests",
+    "src/ipc:perfetto_ipc_unittests",
+    "src/protozero:protozero_unittests",
+    "src/tracing:tracing_unittests",
+    "tools/sanitizers_unittests",
+  ]
+}
+
+if (!build_with_chromium) {
+  executable("perfetto_benchmarks") {
+    testonly = true
+    deps = [
+      "gn:default_deps",
+      "src/tracing:tracing_benchmarks",
+    ]
+  }
+}
