@@ -13,15 +13,13 @@
 // limitations under the License.
 #pragma once
 
+#include "VkCommonOperations.h"
+
 #include <vulkan/vulkan.h>
 
 #include "cereal/common/goldfish_vk_private_defs.h"
 
 #include <vector>
-
-#ifdef _WIN32
-typedef void* HANDLE;
-#endif
 
 namespace goldfish_vk {
 
@@ -31,15 +29,8 @@ class VulkanDispatch;
 // native buffers in the context of creating Android swapchain images that have
 // Android native buffer backing.
 
-// External memory objects are HANDLE on Windows and fd's on POSIX systems.
-#ifdef _WIN32
-typedef HANDLE VK_ANB_EXT_MEMORY_HANDLE;
-// corresponds to INVALID_HANDLE_VALUE
-#define VK_ANB_EXT_MEMORY_HANDLE_INVALID (VK_ANB_EXT_MEMORY_HANDLE)(uintptr_t)(-1);
-#else
-typedef int VK_ANB_EXT_MEMORY_HANDLE;
-#define VK_ANB_EXT_MEMORY_HANDLE_INVALID (-1)
-#endif
+// This is to be refactored to move to external memory only once we get that
+// working.
 
 struct AndroidNativeBufferInfo {
     VkDevice device = VK_NULL_HANDLE;
@@ -52,22 +43,27 @@ struct AndroidNativeBufferInfo {
     int format;
     int stride;
     uint32_t colorBufferHandle;
-
-    // To be populatd later as we go.
-    VkImage image = VK_NULL_HANDLE;
-    VkMemoryRequirements memReqs;
+    bool externallyBacked = false;
 
     // We will be using separate allocations for image versus staging memory,
     // because not all host Vulkan drivers will support directly rendering to
     // host visible memory in a layout that glTexSubImage2D can consume.
+
+    // If we are using external memory, these memories are imported
+    // to the current instance.
     VkDeviceMemory imageMemory = VK_NULL_HANDLE;
     VkDeviceMemory stagingMemory = VK_NULL_HANDLE;
+
     VkBuffer stagingBuffer = VK_NULL_HANDLE;
 
     uint32_t imageMemoryTypeIndex;
     uint32_t stagingMemoryTypeIndex;
 
     uint8_t* mappedStagingPtr = nullptr;
+
+    // To be populated later as we go.
+    VkImage image = VK_NULL_HANDLE;
+    VkMemoryRequirements memReqs;
 
     // The queue over which we send the buffer/image copy commands depends on
     // the queue over which vkQueueSignalReleaseImageANDROID happens.
@@ -103,11 +99,6 @@ struct AndroidNativeBufferInfo {
     // Track that here.
     bool everAcquired = false;
     QueueState acquireQueueState;
-
-    // TODO: Use external memory features when available.
-    bool externalMemorySupported = false;
-    VK_ANB_EXT_MEMORY_HANDLE externalMemory =
-        VK_ANB_EXT_MEMORY_HANDLE_INVALID;
 };
 
 bool parseAndroidNativeBufferInfo(
