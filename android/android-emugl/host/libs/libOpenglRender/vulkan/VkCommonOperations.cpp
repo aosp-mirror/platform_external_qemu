@@ -19,11 +19,12 @@
 
 #include "VulkanDispatch.h"
 
-#include <stdio.h>
-
 #include <iomanip>
 #include <ostream>
 #include <sstream>
+
+#include <stdio.h>
+#include <string.h>
 
 using android::base::LazyInstance;
 using android::base::StaticMap;
@@ -123,6 +124,187 @@ bool getStagingMemoryTypeIndex(
     *typeIndex = stagingMemoryTypeIndex;
 
     return true;
+}
+
+static VkEmulation* sVkEmulation = nullptr;
+
+static bool extensionsSupported(
+    const std::vector<VkExtensionProperties>& currentProps,
+    const std::vector<const char*>& wantedExtNames) {
+
+    std::vector<bool> foundExts(wantedExtNames.size(), false);
+
+    for (uint32_t i = 0; i < currentProps.size(); ++i) {
+        printf("%s: extension: %s\n", __func__, currentProps[i].extensionName);
+        for (size_t j = 0; j < wantedExtNames.size(); ++j) {
+            if (!strcmp(wantedExtNames[j], currentProps[i].extensionName)) {
+                foundExts[j] = true;
+            }
+        }
+    }
+
+    for (size_t i = 0; i < wantedExtNames.size(); ++i) {
+        bool found = foundExts[i];
+        printf("%s: needed extension: %s: found: %d\n", __func__,
+               wantedExtNames[i], found);
+        if (!found) {
+            printf("%s: %s not found, bailing\n", __func__,
+                   wantedExtNames[i]);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
+    if (sVkEmulation) return sVkEmulation;
+
+    sVkEmulation = new VkEmulation;
+
+    std::vector<const char*> externalMemoryInstanceExtNames = {
+        "VK_KHR_external_memory_capabilities",
+    };
+
+    std::vector<const char*> externalMemoryDeviceExtNames = {
+        // TODO: VK_KHR_dedicated_allocation
+        // TODO: VK_KHR_get_memory_requirements2
+        "VK_KHR_external_memory",
+#ifdef _WIN32
+        "VK_KHR_external_memory_win32",
+#else
+        "VK_KHR_external_memory_fd",
+#endif
+    };
+
+    uint32_t extCount = 0;
+    vk->vkEnumerateInstanceExtensionProperties(nullptr, &extCount, nullptr);
+    std::vector<VkExtensionProperties> exts(extCount);
+    vk->vkEnumerateInstanceExtensionProperties(nullptr, &extCount, exts.data());
+
+    bool externalMemoryCapabilitiesSupported =
+        extensionsSupported(exts, externalMemoryInstanceExtNames);
+
+    VkInstanceCreateInfo instCi = {
+        VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        0, 0, nullptr, 0, nullptr,
+        0, nullptr,
+    };
+
+    if (externalMemoryCapabilitiesSupported) {
+        instCi.enabledExtensionCount =
+            externalMemoryInstanceExtNames.size();
+        instCi.ppEnabledExtensionNames =
+            externalMemoryInstanceExtNames.data();
+    }
+
+    vk->vkCreateInstance(&instCi, nullptr, &sVkEmulation->instance);
+
+    uint32_t physdevCount = 0;
+    vk->vkEnumeratePhysicalDevices(sVkEmulation->instance, &physdevCount,
+                                   nullptr);
+    std::vector<VkPhysicalDevice> physdevs(physdevCount);
+    vk->vkEnumeratePhysicalDevices(sVkEmulation->instance, &physdevCount,
+                                   physdevs.data());
+
+    printf("Found %d Vulkan physical devices.\n", physdevCount);
+
+    std::vector<VkEmulation::DeviceSupportInfo> deviceInfos(physdevCount);
+
+    for (int i = 0; i < physdevCount; ++i) {
+        vk->vkGetPhysicalDeviceProperties(physdevs[i],
+                                          &deviceInfos[i].physdevProps);
+
+        printf("Considering Vulkan physical device %d: %s\n", i,
+               deviceInfos[i].physdevProps.deviceName);
+
+        uint32_t deviceExtensionCount = 0;
+        vk->vkEnumerateDeviceExtensionProperties(
+            physdevs[i], nullptr, &deviceExtensionCount, nullptr);
+        std::vector<VkExtensionProperties> deviceExts(deviceExtensionCount);
+        vk->vkEnumerateDeviceExtensionProperties(
+            physdevs[i], nullptr, &deviceExtensionCount, deviceExts.data());
+
+        deviceInfos[i].supportsExternalMemory =
+            extensionsSupported(deviceExts, externalMemoryDeviceExtNames);
+        
+        uint32_t queueFamilyCount = 0;
+        vk->vkGetPhysicalDeviceQueueFamilyProperties(
+                physdevs[i], &queueFamilyCount, nullptr);
+        std::vector<VkQueueFamilyProperties> queueFamilyProps(queueFamilyCount);
+        vk->vkGetPhysicalDeviceQueueFamilyProperties(
+                physdevs[i], &queueFamilyCount, queueFamilyProps.data());
+        
+        for (uint32_t j = 0; j < queueFamilyCount; ++j) {
+            auto count = queueFamilyProps[j].queueCount;
+            auto flags = queueFamilyProps[j].queueFlags;
+
+            bool hasGraphicsQueueFamily =
+                (count > 0 && (flags & VK_QUEUE_GRAPHICS_BIT));
+            bool hasComputeQueueFamily =
+                (count > 0 && (flags & VK_QUEUE_COMPUTE_BIT));
+
+            deviceInfos[i].hasGraphicsQueueFamily =
+                deviceInfos[i].hasGraphicsQueueFamily ||
+                hasGraphicsQueueFamily;
+
+            deviceInfos[i].hasComputeQueueFamily =
+                deviceInfos[i].hasComputeQueueFamily ||
+                hasComputeQueueFamily;
+
+            if (hasGraphicsQueueFamily) {
+                deviceInfos[i].graphicsQueueFamilyIndices.push_back(j);
+                printf("Graphics queue family index: %u\n", j);
+            }
+
+            if (hasComputeQueueFamily) {
+                deviceInfos[i].computeQueueFamilyIndices.push_back(j);
+                printf("Compute queue family index: %u\n", j);
+            }
+        }
+    }
+
+    // Of all the devices enumerated, find the best one.
+    std::vector<uint32_t> deviceScores(physdevCount, 0);
+
+    // Try to find a device with graphics queue as the highest priority,
+    // then ext memory, then compute.
+    for (uint32_t i = 0; i < physdevCount; ++i) {
+        uint32_t deviceScore = 0;
+        if (deviceInfos[i].hasGraphicsQueueFamily) deviceScore += 100;
+        if (deviceInfos[i].supportsExternalMemory) deviceScore += 10;
+        if (deviceInfos[i].hasComputeQueueFamily) deviceScore += 1;
+        deviceScores[i] = deviceScore;
+    }
+
+    bool foundDevice = false;
+    uint32_t maxScoringIndex = 0;
+    uint32_t maxScore = 0;
+
+    for (uint32_t i = 0; i < physdevCount; ++i) {
+        if (deviceScores[i] > maxScore) {
+            maxScoringIndex = i;
+            maxScore = deviceScores[i];
+            foundDevice = true;
+        }
+    }
+
+    sVkEmulation->deviceSupportInfo = foundDevice ?
+        deviceInfos[maxScoringIndex] :
+        VkEmulation::DeviceSupportInfo();
+    
+    if (foundDevice) {
+        printf("Vulkan device selected: %s\n",
+               sVkEmulation->deviceSupportInfo.physdevProps.deviceName);
+        printf("Has graphics queue: %d\n",
+               sVkEmulation->deviceSupportInfo.hasGraphicsQueueFamily);
+        printf("Has external memory support: %d\n",
+               sVkEmulation->deviceSupportInfo.supportsExternalMemory);
+        printf("Has compute queue: %d\n",
+               sVkEmulation->deviceSupportInfo.hasComputeQueueFamily);
+    }
+
+    return sVkEmulation;
 }
 
 } // namespace goldfish_vk
