@@ -67,6 +67,10 @@ VkResult prepareAndroidNativeBufferImage(
     out->stride = nativeBufferANDROID->stride;
     out->colorBufferHandle = *(nativeBufferANDROID->handle);
 
+    printf("%s: compatible? %d external image? %d\n", __func__,
+           isColorBufferVulkanCompatible(out->colorBufferHandle),
+           createOrGetGlobalVkEmulation(vk)->deviceInfo.supportsExternalMemory);
+
     // delete the info struct and pass to vkCreateImage, and also add
     // transfer src capability to allow us to copy to CPU.
     VkImageCreateInfo infoNoNative = *pCreateInfo;
