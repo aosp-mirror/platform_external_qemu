@@ -49,7 +49,9 @@ kEmulatedExtensions[] = {
 
 class VkDecoderGlobalState::Impl {
 public:
-    Impl() : m_vk(emugl::vkDispatch()) { }
+    Impl() :
+        m_vk(emugl::vkDispatch()),
+        m_emu(createOrGetGlobalVkEmulation(m_vk)) { }
     ~Impl() = default;
 
     // A list of extensions that should not be passed to the host driver.
@@ -1127,6 +1129,7 @@ private:
     }
 
     VulkanDispatch* m_vk;
+    VkEmulation* m_emu;
 
     Lock mLock;
 

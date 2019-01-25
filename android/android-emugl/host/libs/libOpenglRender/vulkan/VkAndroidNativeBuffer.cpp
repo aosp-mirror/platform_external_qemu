@@ -3,7 +3,6 @@
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-//
 // http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
@@ -67,129 +66,104 @@ VkResult prepareAndroidNativeBufferImage(
     out->stride = nativeBufferANDROID->stride;
     out->colorBufferHandle = *(nativeBufferANDROID->handle);
 
+    bool colorBufferVulkanCompatible =
+        isColorBufferVulkanCompatible(out->colorBufferHandle);
+    bool externalMemoryCompatible =
+        createOrGetGlobalVkEmulation(vk)->deviceInfo.supportsExternalMemory;
+
+    if (colorBufferVulkanCompatible &&
+        externalMemoryCompatible &&
+        setupVkColorBuffer(vk, out->colorBufferHandle)) {
+        out->externallyBacked = true;
+    }
+
     // delete the info struct and pass to vkCreateImage, and also add
     // transfer src capability to allow us to copy to CPU.
     VkImageCreateInfo infoNoNative = *pCreateInfo;
     infoNoNative.pNext = nullptr;
     infoNoNative.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 
-    VkResult createResult =
-        vk->vkCreateImage(
-            device, &infoNoNative, pAllocator, &out->image);
+    if (out->externallyBacked) {
+        // Create the image with extension structure about external backing.
+        VkExternalMemoryImageCreateInfo extImageCi = {
+            VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO, 0,
+            VK_EXT_MEMORY_HANDLE_TYPE_BIT,
+        };
 
-    if (createResult != VK_SUCCESS) return createResult;
+        infoNoNative.pNext = &extImageCi;
 
-    vk->vkGetImageMemoryRequirements(
-        device, out->image, &out->memReqs);
+        VkResult createResult =
+            vk->vkCreateImage(
+                device, &infoNoNative, pAllocator, &out->image);
 
-    bool stagingIndexRes =
-        getStagingMemoryTypeIndex(
-            vk, device, memProps, &out->stagingMemoryTypeIndex);
+        if (createResult != VK_SUCCESS) return createResult;
 
-    if (!stagingIndexRes) {
-        LOG(ERROR) <<
-            "VK_ANDROID_native_buffer: could not obtain "
-            "staging memory type index";
-        teardownAndroidNativeBufferImage(vk, out);
-        return VK_ERROR_OUT_OF_HOST_MEMORY;
-    }
+        // Now import the backing memory.
+        const auto& cbInfo = getColorBufferInfo(out->colorBufferHandle);
+        const auto& memInfo = cbInfo.memory;
 
-    uint32_t imageMemoryTypeIndex = 0;
-    bool imageMemoryTypeIndexFound = false;
-
-    for (uint32_t i = 0; i < VK_MAX_MEMORY_TYPES; ++i) {
-        bool supported =
-            out->memReqs.memoryTypeBits & (1 << i);
-        if (supported) {
-            imageMemoryTypeIndex = i;
-            imageMemoryTypeIndexFound = true;
-            break;
+        if (!importExternalMemory(vk, device, &memInfo, &out->imageMemory)) {
+            fprintf(stderr, "%s: Failed to import external memory\n", __func__);
+            return VK_ERROR_INITIALIZATION_FAILED;
         }
-    }
 
-    if (!imageMemoryTypeIndexFound) {
-        LOG(ERROR) <<
-            "VK_ANDROID_native_buffer: could not obtain "
-            "image memory type index";
-        teardownAndroidNativeBufferImage(vk, out);
-        return VK_ERROR_OUT_OF_DEVICE_MEMORY;
-    }
+        vk->vkGetImageMemoryRequirements(
+            device, out->image, &out->memReqs);
 
-    out->imageMemoryTypeIndex = imageMemoryTypeIndex;
+        if (out->memReqs.size < memInfo.size) {
+            out->memReqs.size = memInfo.size;
+        }
 
-    VkMemoryAllocateInfo allocInfo = {
-        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, 0,
-        out->memReqs.size,
-        out->stagingMemoryTypeIndex,
-    };
+    } else {
+        VkResult createResult =
+            vk->vkCreateImage(
+                device, &infoNoNative, pAllocator, &out->image);
 
-    if (VK_SUCCESS !=
-        vk->vkAllocateMemory(
-            device, &allocInfo, nullptr,
-            &out->stagingMemory)) {
-        LOG(ERROR) <<
-            "VK_ANDROID_native_buffer: could not allocate "
-            "staging memory. requested size: " <<
-                out->memReqs.size;
-        teardownAndroidNativeBufferImage(vk, out);
-        return VK_ERROR_OUT_OF_HOST_MEMORY;
-    }
+        if (createResult != VK_SUCCESS) return createResult;
 
-    allocInfo.memoryTypeIndex = out->imageMemoryTypeIndex;
+        vk->vkGetImageMemoryRequirements(
+            device, out->image, &out->memReqs);
 
-    if (VK_SUCCESS !=
-        vk->vkAllocateMemory(
-            device, &allocInfo, nullptr,
-            &out->imageMemory)) {
-        LOG(ERROR) <<
-            "VK_ANDROID_native_buffer: could not allocate "
-            "image memory. requested size: " <<
-                out->memReqs.size;
-        teardownAndroidNativeBufferImage(vk, out);
-        return VK_ERROR_OUT_OF_DEVICE_MEMORY;
-    }
+        uint32_t imageMemoryTypeIndex = 0;
+        bool imageMemoryTypeIndexFound = false;
 
-    VkBufferCreateInfo stagingBufferCreateInfo = {
-        VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, 0, 0,
-        out->memReqs.size,
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        out->sharingMode,
-        (uint32_t)out->queueFamilyIndices.size(),
-        out->queueFamilyIndices.size() ? out->queueFamilyIndices.data() : nullptr,
-    };
+        for (uint32_t i = 0; i < VK_MAX_MEMORY_TYPES; ++i) {
+            bool supported =
+                out->memReqs.memoryTypeBits & (1 << i);
+            if (supported) {
+                imageMemoryTypeIndex = i;
+                imageMemoryTypeIndexFound = true;
+                break;
+            }
+        }
 
-    if (VK_SUCCESS !=
-        vk->vkCreateBuffer(
-            device, &stagingBufferCreateInfo, nullptr,
-            &out->stagingBuffer)) {
-        LOG(ERROR) <<
-            "VK_ANDROID_native_buffer: could not create "
-            "staging buffer.";
-        teardownAndroidNativeBufferImage(vk, out);
-        return VK_ERROR_OUT_OF_HOST_MEMORY;
-    }
+        if (!imageMemoryTypeIndexFound) {
+            LOG(ERROR) <<
+                "VK_ANDROID_native_buffer: could not obtain "
+                "image memory type index";
+            teardownAndroidNativeBufferImage(vk, out);
+            return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+        }
 
-    if (VK_SUCCESS !=
-        vk->vkBindBufferMemory(
-            device, out->stagingBuffer, out->stagingMemory, 0)) {
-        LOG(ERROR) <<
-            "VK_ANDROID_native_buffer: could not bind "
-            "staging buffer to staging memory.";
-        teardownAndroidNativeBufferImage(vk, out);
-        return VK_ERROR_OUT_OF_HOST_MEMORY;
-    }
+        out->imageMemoryTypeIndex = imageMemoryTypeIndex;
 
-    if (VK_SUCCESS !=
-        vk->vkMapMemory(
-            device, out->stagingMemory, 0,
-            out->memReqs.size, 0,
-            (void**)&out->mappedStagingPtr)) {
-        LOG(ERROR) <<
-            "VK_ANDROID_native_buffer: could not map "
-            "staging buffer.";
-        teardownAndroidNativeBufferImage(vk, out);
-        return VK_ERROR_OUT_OF_HOST_MEMORY;
+        VkMemoryAllocateInfo allocInfo = {
+            VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, 0,
+            out->memReqs.size,
+            out->imageMemoryTypeIndex,
+        };
+
+        if (VK_SUCCESS !=
+            vk->vkAllocateMemory(
+                device, &allocInfo, nullptr,
+                &out->imageMemory)) {
+            LOG(ERROR) <<
+                "VK_ANDROID_native_buffer: could not allocate "
+                "image memory. requested size: " <<
+                    out->memReqs.size;
+            teardownAndroidNativeBufferImage(vk, out);
+            return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+        }
     }
 
     if (VK_SUCCESS !=
@@ -202,7 +176,85 @@ VkResult prepareAndroidNativeBufferImage(
         return VK_ERROR_OUT_OF_DEVICE_MEMORY;
     }
 
-    return createResult;
+    // Allocate a staging memory and set up the staging buffer.
+    // TODO: Make this shared as well if we can get that to
+    // work on Windows with NVIDIA.
+    {
+        bool stagingIndexRes =
+            getStagingMemoryTypeIndex(
+                vk, device, memProps, &out->stagingMemoryTypeIndex);
+
+        if (!stagingIndexRes) {
+            LOG(ERROR) <<
+                "VK_ANDROID_native_buffer: could not obtain "
+                "staging memory type index";
+            teardownAndroidNativeBufferImage(vk, out);
+            return VK_ERROR_OUT_OF_HOST_MEMORY;
+        }
+
+        VkMemoryAllocateInfo allocInfo = {
+            VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, 0,
+            out->memReqs.size,
+            out->stagingMemoryTypeIndex,
+        };
+
+        if (VK_SUCCESS !=
+            vk->vkAllocateMemory(
+                device, &allocInfo, nullptr,
+                &out->stagingMemory)) {
+            LOG(ERROR) <<
+                "VK_ANDROID_native_buffer: could not allocate "
+                "staging memory. requested size: " <<
+                    out->memReqs.size;
+            teardownAndroidNativeBufferImage(vk, out);
+            return VK_ERROR_OUT_OF_HOST_MEMORY;
+        }
+
+        VkBufferCreateInfo stagingBufferCreateInfo = {
+            VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, 0, 0,
+            out->memReqs.size,
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            out->sharingMode,
+            (uint32_t)out->queueFamilyIndices.size(),
+            out->queueFamilyIndices.size() ? out->queueFamilyIndices.data() : nullptr,
+        };
+
+        if (VK_SUCCESS !=
+            vk->vkCreateBuffer(
+                device, &stagingBufferCreateInfo, nullptr,
+                &out->stagingBuffer)) {
+            LOG(ERROR) <<
+                "VK_ANDROID_native_buffer: could not create "
+                "staging buffer.";
+            teardownAndroidNativeBufferImage(vk, out);
+            return VK_ERROR_OUT_OF_HOST_MEMORY;
+        }
+
+        if (VK_SUCCESS !=
+            vk->vkBindBufferMemory(
+                device, out->stagingBuffer, out->stagingMemory, 0)) {
+            LOG(ERROR) <<
+                "VK_ANDROID_native_buffer: could not bind "
+                "staging buffer to staging memory.";
+            teardownAndroidNativeBufferImage(vk, out);
+            return VK_ERROR_OUT_OF_HOST_MEMORY;
+        }
+
+        if (VK_SUCCESS !=
+            vk->vkMapMemory(
+                device, out->stagingMemory, 0,
+                out->memReqs.size, 0,
+                (void**)&out->mappedStagingPtr)) {
+            LOG(ERROR) <<
+                "VK_ANDROID_native_buffer: could not map "
+                "staging buffer.";
+            teardownAndroidNativeBufferImage(vk, out);
+            return VK_ERROR_OUT_OF_HOST_MEMORY;
+        }
+    }
+
+    return VK_SUCCESS;
 }
 
 void teardownAndroidNativeBufferImage(
@@ -228,6 +280,10 @@ void teardownAndroidNativeBufferImage(
     anbInfo->queueStates.clear();
 
     anbInfo->acquireQueueState.teardown(vk, device);
+
+    if (anbInfo->externallyBacked) {
+        teardownVkColorBuffer(vk, anbInfo->colorBufferHandle);
+    }
 
     *anbInfo = {};
 }

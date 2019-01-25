@@ -150,6 +150,7 @@ public:
     // Return ColorBuffer width and height in pixels
     GLuint getWidth() const { return m_width; }
     GLuint getHeight() const { return m_height; }
+    GLint getInternalFormat() const { return m_internalFormat; }
 
     // Read the ColorBuffer instance's pixel values into host memory.
     void readPixels(int x,

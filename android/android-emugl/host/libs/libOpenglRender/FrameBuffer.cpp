@@ -24,6 +24,7 @@
 #include "gles2_dec.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
+#include "vulkan/VkDecoderGlobalState.h"
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/CpuUsage.h"
@@ -550,6 +551,9 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         sInitialized.store(true, std::memory_order_release);
         sGlobals->condVar.broadcastAndUnlock(&lock);
     }
+
+    // Start up Vulkan emulation info
+    goldfish_vk::VkDecoderGlobalState::get();
 
     // Start up the single sync thread if GLAsyncSwap enabled
     if (emugl::emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap)) {
@@ -1426,6 +1430,26 @@ bool FrameBuffer::replaceColorBufferContents(
     }
 
     return (*c).second.cb->replaceContents(pixels, numBytes);
+}
+
+bool FrameBuffer::getColorBufferInfo(
+    HandleType p_colorbuffer, int* width, int* height, GLint* internalformat) {
+
+    AutoLock mutex(m_lock);
+
+    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+    if (c == m_colorbuffers.end()) {
+        // bad colorbuffer handle
+        return false;
+    }
+
+    auto cb = (*c).second.cb;
+
+    *width = cb->getWidth();
+    *height = cb->getHeight();
+    *internalformat = cb->getInternalFormat();
+
+    return true;
 }
 
 bool FrameBuffer::bindColorBufferToTexture(HandleType p_colorbuffer) {
