@@ -1004,6 +1004,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBindBufferMemory:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkBindBufferMemory\n");
+                    ;
+                }
                 VkDevice device;
                 VkBuffer buffer;
                 VkDeviceMemory memory;
@@ -1678,6 +1682,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateBuffer:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkCreateBuffer\n");
+                    ;
+                }
                 VkDevice device;
                 const VkBufferCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -2910,6 +2918,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkAllocateCommandBuffers:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkAllocateCommandBuffers\n");
+                    ;
+                }
                 VkDevice device;
                 const VkCommandBufferAllocateInfo* pAllocateInfo;
                 VkCommandBuffer* pCommandBuffers;
@@ -2926,12 +2938,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->read((uint64_t*)cgen_var_270, pAllocateInfo->commandBufferCount * 8);
                     vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(cgen_var_270, (VkCommandBuffer*)pCommandBuffers, pAllocateInfo->commandBufferCount);
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkAllocateCommandBuffers\n");;
-                }
                 VkResult vkAllocateCommandBuffers_VkResult_return = (VkResult)0;
-                vkAllocateCommandBuffers_VkResult_return = m_vk->vkAllocateCommandBuffers(device, pAllocateInfo, pCommandBuffers);
+                vkAllocateCommandBuffers_VkResult_return =
+                        m_state->on_vkAllocateCommandBuffers(
+                                device, pAllocateInfo, pCommandBuffers);
                 if (pAllocateInfo->commandBufferCount)
                 {
                     uint64_t* cgen_var_271;
@@ -4166,6 +4176,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCmdExecuteCommands:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkCmdExecuteCommands\n");
+                    ;
+                }
                 VkCommandBuffer commandBuffer;
                 uint32_t commandBufferCount;
                 const VkCommandBuffer* pCommandBuffers;
@@ -4181,11 +4195,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->read((uint64_t*)cgen_var_357, ((commandBufferCount)) * 8);
                     vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(cgen_var_357, (VkCommandBuffer*)pCommandBuffers, ((commandBufferCount)));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCmdExecuteCommands\n");;
-                }
-                m_vk->vkCmdExecuteCommands(commandBuffer, commandBufferCount, pCommandBuffers);
+                m_state->on_vkCmdExecuteCommands(
+                        commandBuffer, commandBufferCount, pCommandBuffers);
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
                 break;
