@@ -155,4 +155,8 @@ typedef struct QAndroidVmOperations {
     void (*allowRealAudio)(bool allow);
 } QAndroidVmOperations;
 
+// gQAndroidVmOperations is defined in .cpp depending on the target it used for,
+// e.g. QEMU, a host or tests.
+extern const QAndroidVmOperations* const gQAndroidVmOperations;
+
 ANDROID_END_HEADER

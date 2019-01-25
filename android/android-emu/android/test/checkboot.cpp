@@ -17,7 +17,6 @@
 #include "android/emulation/control/vm_operations.h"
 
 static int s_SleepTime = 0;
-extern const QAndroidVmOperations* const gQAndroidVmOperations;
 
 static void myTask(int * outResult) {
     *outResult = 0;

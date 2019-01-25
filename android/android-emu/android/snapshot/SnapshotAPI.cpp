@@ -9,6 +9,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/snapshot/SnapshotAPI.h"
+
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
@@ -27,8 +29,6 @@
 #include <memory>
 #include <sstream>
 #include <vector>
-
-extern const QAndroidVmOperations* const gQAndroidVmOperations;
 
 namespace {
 
