@@ -33,6 +33,15 @@ static void setIcdPath(const std::string& path) {
     System::get()->envSet("VK_ICD_FILENAMES", path);
 }
 
+static std::string icdJsonNameToProgramAndLauncherPaths(
+        const std::string& icdFilename) {
+
+    std::string suffix = pj("lib64", "vulkan", icdFilename);
+
+    return pj(System::get()->getProgramDirectory(), suffix) + ":" + 
+           pj(System::get()->getLauncherDirectory(), suffix);
+}
+
 static void initIcdPaths(bool forTesting) {
     auto androidIcd = System::get()->envGet("ANDROID_EMU_VK_ICD");
     if (forTesting || androidIcd == "swiftshader") {
@@ -45,20 +54,15 @@ static void initIcdPaths(bool forTesting) {
         // and MoltenVK depending on the environment variable setting.
 #ifdef __APPLE__
         if (androidIcd == "moltenvk") {
-            setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
-                          "vulkan", "MoltenVK_icd.json"));
+            setIcdPath(icdJsonNameToProgramAndLauncherPaths("MoltenVK_icd.json"));
         } else if (androidIcd == "portability") {
-            setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
-                          "vulkan", "portability-macos.json"));
+            setIcdPath(icdJsonNameToProgramAndLauncherPaths("portability-macos.json"));
         } else if (androidIcd == "portability-debug") {
-            setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
-                          "vulkan", "portability-macos-debug.json"));
+            setIcdPath(icdJsonNameToProgramAndLauncherPaths("portability-macos-debug.json"));
         } else if (androidIcd == "swiftshader") {
-            setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
-                          "vulkan", "vk_swiftshader_icd.json"));
+            setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
         } else {
-            setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
-                          "vulkan", "portability-macos.json"));
+            setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
         }
 #else
         // By default, on other platforms, just use whatever the system
@@ -94,6 +98,23 @@ static std::string getLoaderPath(bool forTesting) {
     }
 }
 
+static std::string getBackupLoaderPath(bool forTesting) {
+    auto androidIcd = System::get()->envGet("ANDROID_EMU_VK_ICD");
+    if (forTesting || androidIcd == "mock") {
+        return pj(System::get()->getLauncherDirectory(), "testlib64",
+                  VULKAN_LOADER_FILENAME);
+    } else {
+
+#ifdef __APPLE__
+        // on Mac, the loader isn't in the system libraries.
+        return pj(System::get()->getLauncherDirectory(), "lib64", "vulkan",
+                  VULKAN_LOADER_FILENAME);
+#else
+        return VULKAN_LOADER_FILENAME;
+#endif
+    }
+}
+
 class VulkanDispatchImpl {
 public:
     VulkanDispatchImpl() = default;
@@ -104,6 +125,15 @@ public:
         if (!mVulkanLoader) {
             auto loaderPath = getLoaderPath(mForTesting);
             mVulkanLoader = emugl::SharedLibrary::open(loaderPath.c_str());
+
+            if (!mVulkanLoader) {
+                loaderPath = getBackupLoaderPath(mForTesting);
+                mVulkanLoader = emugl::SharedLibrary::open(loaderPath.c_str());
+            }
+
+            if (!mVulkanLoader) {
+                fprintf(stderr, "%s: cannot find Vulkan loader\n", __func__);
+            }
         }
 #ifdef __linux__
         // On Linux, it might not be called libvulkan.so.
@@ -159,6 +189,10 @@ void VulkanDispatchImpl::initialize(bool forTesting) {
 VulkanDispatch* vkDispatch(bool forTesting) {
     sDispatchImpl->initialize(forTesting);
     return sDispatchImpl->dispatch();
+}
+
+bool vkDispatchValid(const VulkanDispatch* vk) {
+    return vk->vkEnumerateInstanceExtensionProperties != nullptr;
 }
 
 }
