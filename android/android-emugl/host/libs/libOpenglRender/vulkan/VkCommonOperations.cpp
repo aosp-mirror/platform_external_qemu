@@ -125,4 +125,9 @@ bool getStagingMemoryTypeIndex(
     return true;
 }
 
+VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
+    uint32_t extCount = 0;
+    std::vector<VkExtensionProperties> exts;
+}
+
 } // namespace goldfish_vk
