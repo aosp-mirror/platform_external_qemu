@@ -105,6 +105,7 @@ class CerealGenerator(OutputGenerator):
 set(OpenglRender_vulkan_cereal_src %s)
 android_add_library(OpenglRender_vulkan_cereal)
 target_compile_definitions(OpenglRender_vulkan_cereal PRIVATE -DVK_ANDROID_native_buffer -DVK_GOOGLE_address_space)
+android_target_compile_definitions(OpenglRender_vulkan_cereal windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
 target_link_libraries(OpenglRender_vulkan_cereal PRIVATE emugl_base)
 target_link_libraries(OpenglRender_vulkan_cereal PUBLIC android-emu-base)
 
