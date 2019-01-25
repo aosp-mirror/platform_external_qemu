@@ -36,8 +36,13 @@ static void setIcdPath(const std::string& path) {
 static void initIcdPaths(bool forTesting) {
     auto androidIcd = System::get()->envGet("ANDROID_EMU_VK_ICD");
     if (forTesting || androidIcd == "mock") {
+#ifdef __APPLE__
+        auto res = pj(System::get()->getProgramDirectory(), "lib64", "vulkan");
+        setIcdPath(pj(res, "vk_swiftshader_icd.json"));
+#else
         auto res = pj(System::get()->getProgramDirectory(), "testlib64");
         setIcdPath(pj(res, "VkICD_mock_icd.json"));
+#endif
         System::get()->envSet("ANDROID_EMU_VK_ICD", "mock");
     } else {
         // Mac: Use gfx-rs libportability-icd by default,

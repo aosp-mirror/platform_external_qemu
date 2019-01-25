@@ -19,11 +19,12 @@
 
 #include "VulkanDispatch.h"
 
-#include <stdio.h>
-
 #include <iomanip>
 #include <ostream>
 #include <sstream>
+
+#include <stdio.h>
+#include <string.h>
 
 using android::base::LazyInstance;
 using android::base::StaticMap;
@@ -123,6 +124,96 @@ bool getStagingMemoryTypeIndex(
     *typeIndex = stagingMemoryTypeIndex;
 
     return true;
+}
+
+static VkEmulation* sVkEmulation = nullptr;
+
+static bool extensionsSupported(
+    const std::vector<VkExtensionProperties>& currentProps,
+    const std::vector<const char*>& wantedExtNames) {
+
+    std::vector<bool> foundExts(wantedExtNames.size(), false);
+
+    for (uint32_t i = 0; i < currentProps.size(); ++i) {
+        printf("%s: extension: %s\n", __func__, currentProps[i].extensionName);
+        for (size_t j = 0; j < wantedExtNames.size(); ++j) {
+            if (!strcmp(wantedExtNames[j], currentProps[i].extensionName)) {
+                foundExts[j] = true;
+            }
+        }
+    }
+
+    for (size_t i = 0; i < wantedExtNames.size(); ++i) {
+        bool found = foundExts[i];
+        printf("%s: needed extension: %s: found: %d\n", __func__,
+               wantedExtNames[i], found);
+        if (!found) {
+            printf("%s: %s not found, bailing\n", __func__,
+                   wantedExtNames[i]);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static uint32_t findBestPhysicalDeviceIndex(VulkanDispatch*, VkInstance) {
+    // TODO: dual gpu use cases
+    return 0;
+}
+
+VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
+    if (sVkEmulation) return sVkEmulation;
+
+    sVkEmulation = new VkEmulation;
+
+    uint32_t extCount = 0;
+    std::vector<VkExtensionProperties> exts;
+    vk->vkEnumerateInstanceExtensionProperties(nullptr, &extCount, nullptr);
+    exts.resize(extCount);
+    vk->vkEnumerateInstanceExtensionProperties(nullptr, &extCount, exts.data());
+
+    std::vector<const char*> neededInstanceExtNames = {
+        "VK_KHR_external_memory_capabilities",
+    };
+
+    sVkEmulation->externalMemoryCapabilitiesSupported =
+        extensionsSupported(exts, neededInstanceExtNames);
+
+    VkInstanceCreateInfo instCi = {
+        VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        0, 0, nullptr, 0, nullptr,
+        0, nullptr,
+    };
+
+    if (sVkEmulation->externalMemoryCapabilitiesSupported) {
+        instCi.enabledExtensionCount =
+            neededInstanceExtNames.size();
+        instCi.ppEnabledExtensionNames =
+            neededInstanceExtNames.data();
+    }
+
+    vk->vkCreateInstance(&instCi, nullptr, &sVkEmulation->instance);
+    fprintf(stderr, "%s: inst: %p\n", __func__, sVkEmulation->instance);
+
+    uint32_t physdevCount = 0;
+    std::vector<VkPhysicalDevice> physdevs;
+    vk->vkEnumeratePhysicalDevices(sVkEmulation->instance, &physdevCount, nullptr);
+    physdevs.resize(physdevCount);
+    vk->vkEnumeratePhysicalDevices(sVkEmulation->instance, &physdevCount, physdevs.data());
+
+    if (physdevCount == 0) {
+        vk->vkDestroyInstance(sVkEmulation->instance, nullptr);
+        delete sVkEmulation;
+        printf("Vulkan physical device not found.\n");
+        return nullptr;
+    }
+
+    sVkEmulation->physdev =
+            physdevs[findBestPhysicalDeviceIndex(vk, sVkEmulation->instance)];
+    
+
+    return sVkEmulation;
 }
 
 } // namespace goldfish_vk
