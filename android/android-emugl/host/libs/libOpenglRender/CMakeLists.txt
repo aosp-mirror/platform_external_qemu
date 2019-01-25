@@ -32,7 +32,8 @@ set(OpenglRender_vulkan_src
     vulkan/VulkanHandleMapping.cpp
     vulkan/VulkanStream.cpp)
 android_add_library(OpenglRender_vulkan)
-target_link_libraries(OpenglRender_vulkan PUBLIC emugl_common PRIVATE emugl_base OpenglRender_vulkan_cereal GLcommon)
+target_link_libraries(OpenglRender_vulkan PUBLIC emugl_common PRIVATE emugl_base OpenglRender_vulkan_cereal CLcommon)
+android_target_compile_definitions(OpenglRender_vulkan windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
 target_compile_options(OpenglRender_vulkan PRIVATE -fvisibility=hidden)
 target_include_directories(
     OpenglRender_vulkan
@@ -193,7 +194,7 @@ target_link_libraries(OpenglRender_unittests
                               android-emu-base
                               gmock_main
                               OpenglRender_standalone_common)
-
+android_target_compile_definitions(OpenglRender_unittests windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
 add_opengl_dependencies(OpenglRender_unittests)
 
 # Unit tests
