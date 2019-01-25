@@ -19,11 +19,12 @@
 
 #include "VulkanDispatch.h"
 
-#include <stdio.h>
-
 #include <iomanip>
 #include <ostream>
 #include <sstream>
+
+#include <stdio.h>
+#include <string.h>
 
 using android::base::LazyInstance;
 using android::base::StaticMap;
@@ -123,6 +124,48 @@ bool getStagingMemoryTypeIndex(
     *typeIndex = stagingMemoryTypeIndex;
 
     return true;
+}
+
+static VkEmulation* sVkEmulation = nullptr;
+
+VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
+    if (sVkEmulation) return sVkEmulation;
+
+    sVkEmulation = new VkEmulation;
+
+    uint32_t extCount = 0;
+    std::vector<VkExtensionProperties> exts;
+    vk->vkEnumerateInstanceExtensionProperties(nullptr, &extCount, nullptr);
+    exts.resize(extCount);
+    vk->vkEnumerateInstanceExtensionProperties(nullptr, &extCount, exts.data());
+
+    std::vector<std::string> neededExtNames = {
+        "VK_KHR_external_memory",
+#ifdef _WIN32
+        "VK_KHR_external_memory_win32",
+#else
+        "VK_KHR_external_memory_fd",
+#endif
+    };
+
+    std::vector<bool> foundExts(neededExtNames.size(), false);
+
+    for (uint32_t i = 0; i < extCount; ++i) {
+        printf("%s: extension: %s\n", __func__, exts[i].extensionName);
+        for (size_t j = 0; j < neededExtNames.size(); ++j) {
+            if (!strcmp(neededExtNames[j].c_str(), exts[i].extensionName)) {
+                foundExts[j] = true;
+            }
+        }
+    }
+
+    for (size_t i = 0; i < neededExtNames.size(); ++i) {
+        bool found = foundExts[i];
+        printf("%s: needed extension: %s: found: %d\n", __func__,
+               neededExtNames[i].c_str(), found);
+    }
+
+    return sVkEmulation;
 }
 
 } // namespace goldfish_vk
