@@ -58,11 +58,14 @@ add_qt_target(rcc)
 function(add_qt_shared_lib target link target_deps)
   if(NOT TARGET Qt5::${target})
     add_library(Qt5::${target} INTERFACE IMPORTED GLOBAL)
+    if (QT5_LINK_PATH)
+      set(link "${link} ${QT5_LINK_PATH}")
+    endif()
     set_target_properties(Qt5::${target}
                           PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
                                      "${QT5_INCLUDE_DIRS}"
                                      INTERFACE_LINK_LIBRARIES
-                                     "-L${PREBUILT_ROOT}/lib ${link}"
+                                     "${link}"
                                      INTERFACE_COMPILE_DEFINITIONS
                                      "QT5_STATICLIB")
     # Update the dependencies
@@ -84,6 +87,7 @@ set(QT5_INCLUDE_DIRS
     ${PREBUILT_ROOT}/include/QtWebEngineWidgets
     ${PREBUILT_ROOT}/include/QtWebSockets)
 set(QT5_INCLUDE_DIR ${QT5_INCLUDE_DIRS})
+set(QT5_LINK_PATH "-L${PREBUILT_ROOT}/lib")
 set(QT5_DEFINITIONS "-DQT5_STATICLIB")
 set(QT5_FOUND TRUE)
 
@@ -169,7 +173,8 @@ elseif(ANDROID_TARGET_OS STREQUAL "windows_msvc")
   #     qtmain.a --> WinMain() --> qMain() --> qt_main()
   #
   # Clang/VS doesn't support linking directly to dlls. We linking to the import libraries instead (.lib).
-  set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${PREBUILT_ROOT}/lib/qtmain.lib)
+  set(QT5_LIBRARIES ${PREBUILT_ROOT}/lib/qtmain.lib)
+  set(QT5_LINK_PATH "")
   # Obtained by running ListDlls.exe from sysinternals tool
   set(QT5_SHARED_DEPENDENCIES
       ${PREBUILT_ROOT}/bin/Qt5Svg.dll>lib64/qt/lib/Qt5Svg.dll;
