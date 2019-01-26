@@ -29,7 +29,7 @@ if (OPTION_ASTC_TESTS)
 endif()
 
 
-
+add_subdirectory(lz4)
 add_subdirectory(jpeg-6b)
 add_subdirectory(libdtb)
 add_subdirectory(libselinux)
