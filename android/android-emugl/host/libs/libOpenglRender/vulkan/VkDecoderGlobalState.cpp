@@ -69,7 +69,10 @@ public:
         createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
         createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
 
-        return m_vk->vkCreateInstance(&createInfoFiltered, pAllocator, pInstance);
+        VkResult res = m_vk->vkCreateInstance(&createInfoFiltered, pAllocator, pInstance);
+        printf("%s: underlying driver vkCI result: %d\n", __func__, res);
+
+        return res;
     }
 
     void on_vkGetPhysicalDeviceFeatures(VkPhysicalDevice physicalDevice,
