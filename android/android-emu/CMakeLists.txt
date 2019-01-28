@@ -14,7 +14,6 @@ prebuilt(LIBXML2)
 prebuilt(PNG)
 prebuilt(PROTOBUF)
 prebuilt(UUID)
-prebuilt(ZLIB)
 
 # Add the protobuf dependencies
 add_subdirectory(android/metrics/proto)
