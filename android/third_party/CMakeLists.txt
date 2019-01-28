@@ -30,6 +30,8 @@ endif()
 
 
 add_subdirectory(lz4)
+# zlib
+add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../zlib zlib)
 add_subdirectory(jpeg-6b)
 add_subdirectory(libdtb)
 add_subdirectory(libselinux)
@@ -50,5 +52,5 @@ if("${ANDROID_TARGET_TAG}" MATCHES "windows.*")
   add_subdirectory(regex-win32)
   if("${ANDROID_TARGET_TAG}" MATCHES "windows_msvc.*")
     add_subdirectory(dirent-win32)
-  endif()
+ endif()
 endif()
