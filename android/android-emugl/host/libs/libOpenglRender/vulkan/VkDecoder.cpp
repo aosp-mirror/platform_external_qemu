@@ -209,6 +209,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFeatures:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkGetPhysicalDeviceFeatures\n");
+                    ;
+                }
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceFeatures* pFeatures;
                 uint64_t cgen_var_12;
@@ -216,11 +220,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_12, (VkPhysicalDevice*)&physicalDevice, 1);
                 vkReadStream->alloc((void**)&pFeatures, sizeof(VkPhysicalDeviceFeatures));
                 unmarshal_VkPhysicalDeviceFeatures(vkReadStream, (VkPhysicalDeviceFeatures*)(pFeatures));
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceFeatures\n");;
-                }
-                m_vk->vkGetPhysicalDeviceFeatures(physicalDevice, pFeatures);
+                m_state->on_vkGetPhysicalDeviceFeatures(physicalDevice,
+                                                        pFeatures);
                 marshal_VkPhysicalDeviceFeatures(vkStream, (VkPhysicalDeviceFeatures*)(pFeatures));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();

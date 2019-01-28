@@ -44,6 +44,10 @@ public:
         const VkAllocationCallbacks* pAllocator,
         VkInstance* pInstance);
 
+    // Override features
+    void on_vkGetPhysicalDeviceFeatures(VkPhysicalDevice physicalDevice,
+                                        VkPhysicalDeviceFeatures* pFeatures);
+
     // Override API version
     void on_vkGetPhysicalDeviceProperties(
             VkPhysicalDevice physicalDevice,
