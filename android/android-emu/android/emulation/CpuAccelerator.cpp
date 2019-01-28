@@ -72,8 +72,10 @@
 
 #if defined(_WIN32)
 #  define HAVE_WHPX 1
+#  define HAVE_GVM 1
 #else
 #  define HAVE_WHPX 0
+#  define HAVE_GVM 0
 #endif
 
 #if defined(__APPLE__)
@@ -133,6 +135,28 @@ struct GlobalState {
 GlobalState gGlobals = {false,  false,  CPU_ACCELERATOR_NONE,
                         {'\0'}, {'\0'}, ANDROID_CPU_ACCELERATION_ERROR,
                         {}};
+
+
+// Windows GVM hypervisor support
+
+#ifdef HAVE_GVM
+
+#include "android/base/system/System.h"
+
+using ::android::base::System;
+
+AndroidCpuAcceleration ProbeGVM(std::string* status) {
+    std::string IfGvm = System::get()->envGet("GVM_ENABLE");
+    if (IfGvm.compare("1"))
+        return ANDROID_CPU_ACCELERATION_ACCEL_NOT_INSTALLED;
+    StringAppendFormat(
+            status, "GVM is installed and usable.");
+    GlobalState* g = &gGlobals;
+    ::snprintf(g->version, sizeof(g->version), "1.0");
+    return ANDROID_CPU_ACCELERATION_READY;
+}
+
+#endif // HAVE_GVM
 
 
 // Windows Hypervisor Platform (WHPX) support
@@ -932,7 +956,7 @@ CpuAccelerator GetCurrentCpuAccelerator() {
         g->accel = CPU_ACCELERATOR_KVM;
         g->supported_accelerators[CPU_ACCELERATOR_KVM] = true;
     }
-#elif HAVE_HAX || HAVE_HVF || HAVE_WHPX
+#elif HAVE_HAX || HAVE_HVF || HAVE_WHPX || HAVE_GVM
     AndroidCpuAcceleration status_code = ProbeHAX(&status);
     if (status_code == ANDROID_CPU_ACCELERATION_READY) {
         g->accel = CPU_ACCELERATOR_HAX;
@@ -974,6 +998,16 @@ CpuAccelerator GetCurrentCpuAccelerator() {
 
     }
 #endif // HAVE_WHPX
+#if HAVE_GVM
+    std::string statusGvm;
+    AndroidCpuAcceleration status_code_gvm = ProbeGVM(&statusGvm);
+    if (status_code_gvm == ANDROID_CPU_ACCELERATION_READY) {
+        g->accel = CPU_ACCELERATOR_GVM;
+        g->supported_accelerators[CPU_ACCELERATOR_GVM] = true;
+        status_code = status_code_gvm;
+        status = std::move(statusGvm);
+    }
+#endif
 #if HAVE_HVF
     if (featurecontrol::isEnabled(featurecontrol::HVF)) {
         std::string statusHvf;
@@ -1207,6 +1241,8 @@ std::string CpuAcceleratorToString(CpuAccelerator type) {
             return "HVF";
         case CPU_ACCELERATOR_WHPX:
             return "WHPX";
+        case CPU_ACCELERATOR_GVM:
+            return "gvm";
         case CPU_ACCELERATOR_NONE:
         case CPU_ACCELERATOR_MAX:
             return "";

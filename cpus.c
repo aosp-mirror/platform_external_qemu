@@ -1831,7 +1831,6 @@ static void qemu_cpu_kick_thread(CPUState *cpu)
     }
     cpu->thread_kicked = true;
     if (gvm_enabled()) {
-        assert(!qemu_cpu_is_self(cpu));
         cpu_exit(cpu);
         gvm_raise_event(cpu);
         return;
