@@ -31,6 +31,7 @@
 #include "GLcommon/etc.h"
 
 #include <algorithm>
+#include <functional>
 #include <unordered_map>
 #include <vector>
 
@@ -261,6 +262,8 @@ public:
                 m_vk->vkCreateBuffer(device, pCreateInfo, pAllocator, pBuffer);
         if (result == VK_SUCCESS) {
             mBufferInfo.emplace(*pBuffer, BufferInfo());
+            mBufferInfo[*pBuffer].device = device;
+            mBufferInfo[*pBuffer].size = pCreateInfo->size;
         }
         return result;
     }
@@ -331,7 +334,6 @@ public:
         auto& imageInfo = mImageInfo[*pImage];
         imageInfo.anbInfo = anbInfo;
         imageInfo.cmpInfo = cmpInfo;
-        imageInfo.device = device;
 
         return createRes;
     }
@@ -352,11 +354,11 @@ public:
             teardownAndroidNativeBufferImage(m_vk, &info.anbInfo);
         } else {
             if (info.cmpInfo.isCompressed) {
-                if (info.cmpInfo.tmpBuffer) {
-                    m_vk->vkDestroyBuffer(device, info.cmpInfo.tmpBuffer, nullptr);
+                for (const auto& buffer : info.cmpInfo.tmpBuffer) {
+                    m_vk->vkDestroyBuffer(device, buffer, nullptr);
                 }
-                if (info.cmpInfo.tmpMemory) {
-                    m_vk->vkFreeMemory(device, info.cmpInfo.tmpMemory, nullptr);
+                for (const auto& memory : info.cmpInfo.tmpMemory) {
+                    m_vk->vkFreeMemory(device, memory, nullptr);
                 }
             }
             m_vk->vkDestroyImage(device, image, pAllocator);
@@ -409,44 +411,20 @@ public:
                     dstImageLayout, regionCount, pRegions);
             return;
         }
-        VkDevice device = it->second.device;
-        CompressedImageInfo& cmp = it->second.cmpInfo;
-        ETC2ImageFormat imgFmt;
-        switch (cmp.srcFormat) {
-            case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
-            case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
-                imgFmt = EtcRGB8;
-                break;
-            case VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK:
-            case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
-                imgFmt = EtcRGBA8;
-                break;
-            case VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK:
-            case VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK:
-                imgFmt = EtcRGB8A1;
-                break;
-            case VK_FORMAT_EAC_R11_UNORM_BLOCK:
-                imgFmt = EtcR11;
-                break;
-            case VK_FORMAT_EAC_R11_SNORM_BLOCK:
-                imgFmt = EtcSignedR11;
-                break;
-            case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
-                imgFmt = EtcRG11;
-                break;
-            case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
-                imgFmt = EtcSignedRG11;
-                break;
-            default:
-                fprintf(stderr,
-                        "TODO: unsupported compressed texture format %d\n",
-                        cmp.srcFormat);
-                break;
+        auto cmdBufferInfoIt = mCmdBufferInfo.find(commandBuffer);
+        if (cmdBufferInfoIt == mCmdBufferInfo.end()) {
+            return;
         }
+        auto bufferInfoIt = mBufferInfo.find(srcBuffer);
+        if (bufferInfoIt == mBufferInfo.end()) {
+            return;
+        }
+        VkDevice device = bufferInfoIt->second.device;
+        CompressedImageInfo& cmp = it->second.cmpInfo;
         // regions and buffers for the decompressed data
-        int decodedPixelSize = etc_get_decoded_pixel_size(imgFmt);
         std::vector<VkBufferImageCopy> regions(regionCount);
         VkDeviceSize offset = 0;
+        VkDeviceSize maxOffset = 0;
         const VkDeviceSize pixelSize = cmp.pixelSize();
         for (uint32_t r = 0; r < regionCount; r++) {
             VkBufferImageCopy& dstRegion = regions[r];
@@ -475,10 +453,7 @@ public:
             fprintf(stderr, "create buffer failed!\n");
             return;
         }
-        if (cmp.tmpBuffer) {
-            m_vk->vkDestroyBuffer(device, cmp.tmpBuffer, nullptr);
-        }
-        cmp.tmpBuffer = buffer;
+        cmp.tmpBuffer.push_back(buffer);
 
         VkMemoryRequirements memRequirements;
         m_vk->vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
@@ -513,65 +488,17 @@ public:
             fprintf(stderr, "failed to allocate vertex buffer memory!");
             return;
         }
-        if (cmp.tmpMemory) {
-            m_vk->vkFreeMemory(device, cmp.tmpMemory, nullptr);
-        }
-        cmp.tmpMemory = memory;
+        cmp.tmpMemory.push_back(memory);
 
         m_vk->vkBindBufferMemory(device, buffer, memory, 0);
-
-        // TODO: image source might not be defined at this stage. Move it to a better place.
-        auto srcBufferInfo = mBufferInfo.find(srcBuffer)->second;
-        uint8_t* srcRawData;
-        uint8_t* dstRawData;
-        m_vk->vkMapMemory(device, srcBufferInfo.memory,
-                          srcBufferInfo.memoryOffset, srcBufferInfo.size, 0,
-                          (void**)&srcRawData);
-        m_vk->vkMapMemory(device, memory, 0, VK_WHOLE_SIZE, 0,
-                          (void**)&dstRawData);
-
-        // The software decompression work
-        std::vector<uint8_t> decompBuffer;
-        for (uint32_t r = 0; r < regionCount; r++) {
-            const VkBufferImageCopy& dstRegion = regions[r];
-            const VkBufferImageCopy& srcRegion = pRegions[r];
-
-            const uint8_t* srcPtr = srcRawData + srcRegion.bufferOffset;
-            uint8_t* dstPtr = dstRawData + dstRegion.bufferOffset;
-            VkExtent3D alignedSrcImgExtent;
-            alignedSrcImgExtent.width =
-                    cmp.alignSize(srcRegion.imageExtent.width);
-            alignedSrcImgExtent.height =
-                    cmp.alignSize(srcRegion.imageExtent.height);
-            alignedSrcImgExtent.depth = 1;
-
-            decompBuffer.resize(alignedSrcImgExtent.width *
-                                alignedSrcImgExtent.height * decodedPixelSize);
-            int err = etc2_decode_image(
-                    srcPtr, imgFmt, decompBuffer.data(),
-                    alignedSrcImgExtent.width, alignedSrcImgExtent.height,
-                    decodedPixelSize * alignedSrcImgExtent.width);
-
-            for (int h = 0; h < dstRegion.imageExtent.height; h++) {
-                for (int w = 0; w < dstRegion.imageExtent.width; w++) {
-                    // RGB to RGBA
-                    const uint8_t* srcPixel =
-                            decompBuffer.data() +
-                            decodedPixelSize *
-                                    (w + h * alignedSrcImgExtent.width);
-                    uint8_t* dstPixel =
-                            dstPtr + 4 * (w + h * dstRegion.imageExtent.width);
-                    // In case the source is not an RGBA format, we set all
-                    // channels to default values (except for R channel)
-                    dstPixel[1] = 0;
-                    dstPixel[2] = 0;
-                    dstPixel[3] = 255;
-                    memcpy(dstPixel, srcPixel, decodedPixelSize);
-                }
-            }
-        }
-        m_vk->vkUnmapMemory(device, srcBufferInfo.memory);
-        m_vk->vkUnmapMemory(device, memory);
+        cmdBufferInfoIt->second.preprocessFuncs.push_back(
+                [this, cmp, srcBuffer, memory, regions,
+                 srcRegions = std::vector<VkBufferImageCopy>(
+                         pRegions, pRegions + regionCount)]() {
+                    decompressBufferToImage(cmp, srcBuffer, memory,
+                                            srcRegions.size(),
+                                            srcRegions.data(), regions.data());
+                });
 
         m_vk->vkCmdCopyBufferToImage(commandBuffer, buffer, dstImage, dstImageLayout, regionCount,
                 regions.data());
@@ -872,6 +799,66 @@ public:
         return VK_SUCCESS;
     }
 
+    VkResult on_vkAllocateCommandBuffers(
+            VkDevice device,
+            const VkCommandBufferAllocateInfo* pAllocateInfo,
+            VkCommandBuffer* pCommandBuffers) {
+        VkResult result = m_vk->vkAllocateCommandBuffers(device, pAllocateInfo,
+                                                 pCommandBuffers);
+        if (result != VK_SUCCESS) {
+            return result;
+        }
+        AutoLock lock(mLock);
+        mCmdBufferInfo.emplace(*pCommandBuffers, CommandBufferInfo());
+        return result;
+    }
+
+    void on_vkCmdExecuteCommands(VkCommandBuffer commandBuffer,
+                                 uint32_t commandBufferCount,
+                                 const VkCommandBuffer* pCommandBuffers) {
+        m_vk->vkCmdExecuteCommands(commandBuffer, commandBufferCount,
+                                      pCommandBuffers);
+        AutoLock lock(mLock);
+        CommandBufferInfo& cmdBuffer = mCmdBufferInfo[commandBuffer];
+        cmdBuffer.subCmds.insert(cmdBuffer.subCmds.end(),
+                pCommandBuffers, pCommandBuffers + commandBufferCount);
+    }
+
+    VkResult on_vkQueueSubmit(VkQueue queue,
+                          uint32_t submitCount,
+                          const VkSubmitInfo* pSubmits,
+                          VkFence fence) {
+        for (uint32_t i = 0; i < submitCount; i++) {
+            const VkSubmitInfo& submit = pSubmits[i];
+            for (uint32_t c = 0; c < submit.commandBufferCount; c++) {
+                executePreprocessRecursive(submit.pCommandBuffers[c]);
+            }
+        }
+        return m_vk->vkQueueSubmit(queue, submitCount, pSubmits, fence);
+    }
+
+    VkResult on_vkResetCommandBuffer(VkCommandBuffer commandBuffer,
+                                     VkCommandBufferResetFlags flags) {
+        VkResult result = m_vk->vkResetCommandBuffer(commandBuffer, flags);
+        if (VK_SUCCESS == result) {
+            AutoLock lock(mLock);
+            mCmdBufferInfo[commandBuffer] = {};
+        }
+        return result;
+    }
+
+    void on_vkFreeCommandBuffers(VkDevice device,
+                                 VkCommandPool commandPool,
+                                 uint32_t commandBufferCount,
+                                 const VkCommandBuffer* pCommandBuffers) {
+        AutoLock lock(mLock);
+        for (uint32_t i = 0; i < commandBufferCount; i++) {
+            mCmdBufferInfo.erase(pCommandBuffers[i]);
+        }
+        m_vk->vkFreeCommandBuffers(device, commandPool, commandBufferCount,
+                                   pCommandBuffers);
+    }
+
 private:
     bool isEmulatedExtension(const char* name) const {
         for (auto emulatedExt : kEmulatedExtensions) {
@@ -945,8 +932,8 @@ private:
         bool isCompressed = false;
         VkFormat srcFormat;
         VkFormat dstFormat = VK_FORMAT_R8G8B8A8_UNORM;
-        VkBuffer tmpBuffer = 0;
-        VkDeviceMemory tmpMemory = 0;
+        std::vector<VkBuffer> tmpBuffer = {};
+        std::vector<VkDeviceMemory> tmpMemory = {};
         VkExtent3D extent;
         uint32_t mipLevels = 1;
         uint32_t mipmapWidth(uint32_t level) {
@@ -966,6 +953,33 @@ private:
             return getLinearFormatPixelSize(dstFormat);
         }
     };
+
+    static ETC2ImageFormat getEtc2Format(VkFormat fmt) {
+        switch (fmt) {
+            case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
+                return EtcRGB8;
+            case VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
+                return EtcRGBA8;
+            case VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK:
+                return EtcRGB8A1;
+            case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+                return EtcR11;
+            case VK_FORMAT_EAC_R11_SNORM_BLOCK:
+                return EtcSignedR11;
+            case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+                return EtcRG11;
+            case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
+                return EtcSignedRG11;
+            default:
+                fprintf(stderr,
+                        "TODO: unsupported compressed texture format %d\n",
+                        fmt);
+                return EtcRGB8;
+        }
+    }
 
     CompressedImageInfo createCompressedImageInfo(VkFormat srcFmt) {
         CompressedImageInfo cmpInfo;
@@ -996,6 +1010,92 @@ private:
                 "rendering could be wrong.\n");
         }
         return cmpInfo;
+    }
+
+    void decompressBufferToImage(CompressedImageInfo cmp,
+                                 VkBuffer srcBuffer,
+                                 VkDeviceMemory dstMemory,
+                                 uint32_t regionCount,
+                                 const VkBufferImageCopy* srcRegions,
+                                 const VkBufferImageCopy* dstRegions) {
+        ETC2ImageFormat imgFmt = getEtc2Format(cmp.srcFormat);
+        // regions and buffers for the decompressed data
+        int decodedPixelSize = etc_get_decoded_pixel_size(imgFmt);
+
+        auto srcBufferInfoIt = mBufferInfo.find(srcBuffer);
+        if (srcBufferInfoIt == mBufferInfo.end()) {
+            return;
+        }
+        const auto& srcBufferInfo = srcBufferInfoIt->second;
+        VkDevice device = srcBufferInfo.device;
+        uint8_t* srcRawData;
+        uint8_t* dstRawData;
+        if (VK_SUCCESS !=
+            m_vk->vkMapMemory(device, srcBufferInfo.memory,
+                              srcBufferInfo.memoryOffset,
+                              srcBufferInfo.size, 0,
+                              (void**)&srcRawData)) {
+            fprintf(stderr,
+                    "WARNING: map memory failure. Textures might be broken\n");
+        }
+        m_vk->vkMapMemory(device, dstMemory, 0, VK_WHOLE_SIZE, 0,
+                          (void**)&dstRawData);
+
+        // The software decompression work
+        std::vector<uint8_t> decompBuffer;
+        for (uint32_t r = 0; r < regionCount; r++) {
+            const VkBufferImageCopy& dstRegion = dstRegions[r];
+            const VkBufferImageCopy& srcRegion = srcRegions[r];
+
+            const uint8_t* srcPtr = srcRawData + srcRegion.bufferOffset;
+            uint8_t* dstPtr = dstRawData + dstRegion.bufferOffset;
+            VkExtent3D alignedSrcImgExtent;
+            alignedSrcImgExtent.width =
+                    cmp.alignSize(srcRegion.imageExtent.width);
+            alignedSrcImgExtent.height =
+                    cmp.alignSize(srcRegion.imageExtent.height);
+            alignedSrcImgExtent.depth = 1;
+
+            decompBuffer.resize(alignedSrcImgExtent.width *
+                                alignedSrcImgExtent.height * decodedPixelSize);
+            int err = etc2_decode_image(
+                    srcPtr, imgFmt, decompBuffer.data(),
+                    alignedSrcImgExtent.width, alignedSrcImgExtent.height,
+                    decodedPixelSize * alignedSrcImgExtent.width);
+
+            for (int h = 0; h < dstRegion.imageExtent.height; h++) {
+                for (int w = 0; w < dstRegion.imageExtent.width; w++) {
+                    // RGB to RGBA
+                    const uint8_t* srcPixel =
+                            decompBuffer.data() +
+                            decodedPixelSize *
+                                    (w + h * alignedSrcImgExtent.width);
+                    uint8_t* dstPixel =
+                            dstPtr + 4 * (w + h * dstRegion.imageExtent.width);
+                    // In case the source is not an RGBA format, we set all
+                    // channels to default values (except for R channel)
+                    dstPixel[1] = 0;
+                    dstPixel[2] = 0;
+                    dstPixel[3] = 255;
+                    memcpy(dstPixel, srcPixel, decodedPixelSize);
+                }
+            }
+        }
+        m_vk->vkUnmapMemory(device, srcBufferInfo.memory);
+        m_vk->vkUnmapMemory(device, dstMemory);
+    }
+
+    void executePreprocessRecursive(VkCommandBuffer cmdBuffer) {
+        auto cmdBufferIt = mCmdBufferInfo.find(cmdBuffer);
+        if (cmdBufferIt == mCmdBufferInfo.end()) {
+            return;
+        }
+        for (const auto& func : cmdBufferIt->second.preprocessFuncs) {
+            func();
+        }
+        for (const auto& subCmd : cmdBufferIt->second.subCmds) {
+            executePreprocessRecursive(subCmd);
+        }
     }
 
     VulkanDispatch* m_vk;
@@ -1033,6 +1133,7 @@ private:
     };
 
     struct BufferInfo {
+        VkDevice device;
         VkDeviceMemory memory = 0;
         VkDeviceSize memoryOffset = 0;
         VkDeviceSize size;
@@ -1041,7 +1142,12 @@ private:
     struct ImageInfo {
         AndroidNativeBufferInfo anbInfo;
         CompressedImageInfo cmpInfo;
-        VkDevice device;
+    };
+
+    typedef std::function<void()> PreprocessFunc;
+    struct CommandBufferInfo {
+        std::vector<PreprocessFunc> preprocessFuncs = {};
+        std::vector<VkCommandBuffer> subCmds = {};
     };
 
     std::unordered_map<VkPhysicalDevice, PhysicalDeviceInfo>
@@ -1050,6 +1156,8 @@ private:
         mDeviceInfo;
     std::unordered_map<VkImage, ImageInfo>
         mImageInfo;
+    std::unordered_map<VkCommandBuffer, CommandBufferInfo> mCmdBufferInfo;
+    // TODO: release CommandBufferInfo when a command pool is reset/released
 
     // Back-reference to the physical device associated with a particular
     // VkDevice, and the VkDevice corresponding to a VkQueue.
@@ -1265,4 +1373,42 @@ VkResult VkDecoderGlobalState::on_vkMapMemoryIntoAddressSpaceGOOGLE(
         device, memory, pAddress);
 }
 
-} // namespace goldfish_vk
+VkResult VkDecoderGlobalState::on_vkAllocateCommandBuffers(
+        VkDevice device,
+        const VkCommandBufferAllocateInfo* pAllocateInfo,
+        VkCommandBuffer* pCommandBuffers) {
+    return mImpl->on_vkAllocateCommandBuffers(device, pAllocateInfo,
+                                              pCommandBuffers);
+}
+
+void VkDecoderGlobalState::on_vkCmdExecuteCommands(
+        VkCommandBuffer commandBuffer,
+        uint32_t commandBufferCount,
+        const VkCommandBuffer* pCommandBuffers) {
+    return mImpl->on_vkCmdExecuteCommands(commandBuffer, commandBufferCount,
+                                          pCommandBuffers);
+}
+
+VkResult VkDecoderGlobalState::on_vkQueueSubmit(VkQueue queue,
+                                            uint32_t submitCount,
+                                            const VkSubmitInfo* pSubmits,
+                                            VkFence fence) {
+    return mImpl->on_vkQueueSubmit(queue, submitCount, pSubmits, fence);
+}
+
+VkResult VkDecoderGlobalState::on_vkResetCommandBuffer(
+        VkCommandBuffer commandBuffer,
+        VkCommandBufferResetFlags flags) {
+    return mImpl->on_vkResetCommandBuffer(commandBuffer, flags);
+}
+
+void VkDecoderGlobalState::on_vkFreeCommandBuffers(
+        VkDevice device,
+        VkCommandPool commandPool,
+        uint32_t commandBufferCount,
+        const VkCommandBuffer* pCommandBuffers) {
+    return mImpl->on_vkFreeCommandBuffers(device, commandPool,
+                                          commandBufferCount, pCommandBuffers);
+}
+
+}  // namespace goldfish_vk
