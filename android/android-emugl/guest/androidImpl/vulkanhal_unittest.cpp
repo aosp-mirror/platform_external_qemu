@@ -102,6 +102,12 @@ protected:
         EXPECT_EQ(VK_SUCCESS, vkEnumerateInstanceExtensionProperties(
                                       nullptr, &extCount, exts.data()));
 
+        printf("%s: begin ext print\n", __func__);
+        for (uint32_t i = 0; i < extCount; ++i) {
+            printf("%s: %s\n", __func__, exts[i].extensionName);
+        }
+        printf("%s: end ext print\n", __func__);
+
         VkInstanceCreateInfo instCi = {
             VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
             0, 0, nullptr,
