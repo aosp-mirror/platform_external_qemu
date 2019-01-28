@@ -1588,6 +1588,8 @@ extern "C" int main(int argc, char** argv) {
        // acceleration backends (e.g., HyperV/KVM on Windows,
        // KVM on Mac, etc.)
 
+    if (accelerator == ANDROID_CPU_ACCELERATOR_GVM)
+        args.add2("-machine", "kernel_irqchip=off");
     AFREE(accel_status);
 #else   // !TARGET_X86_64 && !TARGET_I386
     args.add2("-machine", "type=ranchu");
