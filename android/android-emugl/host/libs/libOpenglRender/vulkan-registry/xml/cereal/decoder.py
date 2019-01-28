@@ -222,6 +222,13 @@ custom_decodes = {
     "vkFlushMappedMemoryRanges" : decode_vkFlushMappedMemoryRanges,
     "vkInvalidateMappedMemoryRanges" : decode_vkInvalidateMappedMemoryRanges,
 
+    "vkAllocateCommandBuffers" : emit_global_state_wrapped_decoding,
+    "vkCmdExecuteCommands" : emit_global_state_wrapped_decoding,
+    "vkQueueSubmit" : emit_global_state_wrapped_decoding,
+    "vkResetCommandBuffer" : emit_global_state_wrapped_decoding,
+    "vkFreeCommandBuffers" : emit_global_state_wrapped_decoding,
+
+
     # VK_ANDROID_native_buffer
     "vkGetSwapchainGrallocUsageANDROID" : emit_global_state_wrapped_decoding,
     "vkGetSwapchainGrallocUsage2ANDROID" : emit_global_state_wrapped_decoding,
