@@ -1002,6 +1002,7 @@ VkResult CreateInstance(const VkInstanceCreateInfo* pCreateInfo,
 
         FreeInstanceData(data, data_allocator);
 
+        printf("Failed in InstanceDriverTable\n");
         return VK_ERROR_INCOMPATIBLE_DRIVER;
     }
 
@@ -1011,6 +1012,7 @@ VkResult CreateInstance(const VkInstanceCreateInfo* pCreateInfo,
         data->driver.DestroyInstance(instance, pAllocator);
         FreeInstanceData(data, data_allocator);
 
+        printf("Failed in InstanceDriverTable\n");
         return VK_ERROR_INCOMPATIBLE_DRIVER;
     }
 
@@ -1074,6 +1076,7 @@ VkResult CreateDevice(VkPhysicalDevice physicalDevice,
 
         FreeDeviceData(data, data_allocator);
 
+        printf("Failed in DeviceDriverTable\n");
         return VK_ERROR_INCOMPATIBLE_DRIVER;
     }
 
@@ -1090,6 +1093,7 @@ VkResult CreateDevice(VkPhysicalDevice physicalDevice,
         data->driver.DestroyDevice(dev, pAllocator);
         FreeDeviceData(data, data_allocator);
 
+        printf("Failed in ANB Query\n");
         return VK_ERROR_INCOMPATIBLE_DRIVER;
     }
 

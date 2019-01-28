@@ -30,16 +30,19 @@ using android::base::System;
 namespace emugl {
 
 static void setIcdPath(const std::string& path) {
+    printf("%s: %s\n", __func__, path.c_str());
     System::get()->envSet("VK_ICD_FILENAMES", path);
 }
 
 static void initIcdPaths(bool forTesting) {
     auto androidIcd = System::get()->envGet("ANDROID_EMU_VK_ICD");
-    if (forTesting || androidIcd == "mock") {
-        auto res = pj(System::get()->getProgramDirectory(), "testlib64");
-        setIcdPath(pj(res, "VkICD_mock_icd.json"));
-        System::get()->envSet("ANDROID_EMU_VK_ICD", "mock");
+    if (forTesting || androidIcd == "swiftshader") {
+        auto res = pj(System::get()->getProgramDirectory(), "lib64", "vulkan");
+        printf("Using Swiftshader ICD\n");
+        setIcdPath(pj(res, "vk_swiftshader_icd.json"));
+        System::get()->envSet("ANDROID_EMU_VK_ICD", "swiftshader");
     } else {
+        printf("Not using Swiftshader ICD\n");
         // Mac: Use gfx-rs libportability-icd by default,
         // and switch between that, its debug variant,
         // and MoltenVK depending on the environment variable setting.
@@ -53,14 +56,13 @@ static void initIcdPaths(bool forTesting) {
         } else if (androidIcd == "portability-debug") {
             setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
                           "vulkan", "portability-macos-debug.json"));
-        } else if (androidIcd == "mock") {
-            setIcdPath(pj(System::get()->getProgramDirectory(), "testlib64",
-                          "VkICD_mock_icd.json"));
+        } else if (androidIcd == "swiftshader") {
+            setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
+                          "vulkan", "vk_swiftshader_icd.json"));
         } else {
             setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
                           "vulkan", "portability-macos.json"));
         }
-        // TODO: Once Swiftshader is working, set the ICD accordingly.
 #else
         // By default, on other platforms, just use whatever the system
         // is packing.
