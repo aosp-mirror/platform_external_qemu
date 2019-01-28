@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e9f7b23f_9b618700",
+        "filename": "android/android-emu/android/camera/camera-virtualscene-utils.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-01-28T19:47:50Z",
+      "side": 1,
+      "message": "This will cause collisions in the header, most of the time these are declared in the .cpp file.  However, if it\u0027s not too much work consider including \"android/base/Log.h\" in the .cpp file and using the new LOG() macros:\n\nE(\"msg\") -\u003e LOG(ERROR) \u003c\u003c \"msg\"\nW(\"msg\") -\u003e LOG(WARNING) \u003c\u003c \"msg\"\nD(\"msg\") -\u003e VLOG(camera) \u003c\u003c \"msg\"\n\nSearch for examples, the new macros don\u0027t need the __FUNCTION__ anymore either.",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 38
+      },
+      "revId": "979809212ba1c2bf485c7aa0233343c4d73e81f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c71243b1_7fa9ac80",
+        "filename": "android/android-emu/android/camera/camera-virtualscene-utils.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-01-28T19:47:50Z",
+      "side": 1,
+      "message": "Renderer is slightly ambiguous, maybe CameraRenderer?",
+      "range": {
+        "startLine": 75,
+        "startChar": 6,
+        "endLine": 75,
+        "endChar": 14
+      },
+      "revId": "979809212ba1c2bf485c7aa0233343c4d73e81f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "be976d0d_611e45e7",
+        "filename": "android/android-emu/android/camera/camera-virtualscene-utils.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-01-28T19:47:50Z",
+      "side": 1,
+      "message": "It seems like this should still exist within camera-virtualscene directly, instead of utils.  I see the two camera types creating their own custom Renderer in their own module.",
+      "range": {
+        "startLine": 86,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 2
+      },
+      "revId": "979809212ba1c2bf485c7aa0233343c4d73e81f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d98b01c_f983131a",
+        "filename": "android/android-emu/android/camera/camera-virtualscene-utils.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-01-28T19:47:50Z",
+      "side": 1,
+      "message": "Maybe this should be named differently, maybe RenderedCameraDevice? This is no longer virtualscene-specific.",
+      "range": {
+        "startLine": 106,
+        "startChar": 6,
+        "endLine": 106,
+        "endChar": 30
+      },
+      "revId": "979809212ba1c2bf485c7aa0233343c4d73e81f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
