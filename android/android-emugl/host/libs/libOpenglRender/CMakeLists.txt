@@ -32,7 +32,7 @@ set(OpenglRender_vulkan_src
     vulkan/VulkanHandleMapping.cpp
     vulkan/VulkanStream.cpp)
 android_add_library(OpenglRender_vulkan)
-target_link_libraries(OpenglRender_vulkan PUBLIC emugl_common PRIVATE emugl_base OpenglRender_vulkan_cereal)
+target_link_libraries(OpenglRender_vulkan PUBLIC emugl_common PRIVATE emugl_base OpenglRender_vulkan_cereal GLcommon)
 target_compile_options(OpenglRender_vulkan PRIVATE -fvisibility=hidden)
 target_include_directories(
     OpenglRender_vulkan
