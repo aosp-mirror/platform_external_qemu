@@ -219,7 +219,6 @@ set(
 
 prebuilt(CURL)
 prebuilt(GLIB2)
-prebuilt(ZLIB)
 prebuilt(FDT)
 prebuilt(PIXMAN)
 if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
@@ -300,7 +299,7 @@ if(NOT MSVC)
                                    "-fno-common")
 endif()
 # Make sure we make our dependent libraries available.
-target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN ZLIB::ZLIB)
+target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN zlib)
 
 if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
   # no virglrenderer available for windows_msvc
