@@ -1,7 +1,6 @@
 # The list of dependencies.
 prebuilt(QT5)
 prebuilt(FFMPEG)
-prebuilt(ZLIB)
 
 set(ANDROID_LIBUI_SRC_FILES
     android/skin/charmap.c
@@ -301,7 +300,7 @@ target_link_libraries(emulator-libui
                               Qt5::Widgets
                               Qt5::Gui
                               Qt5::Svg
-                              ZLIB::ZLIB)
+                              zlib)
 
 
 # gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug. This implies a direct dependency to
