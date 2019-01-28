@@ -187,7 +187,7 @@
     <string notr="true">border: 0px;</string>
    </property>
    <property name="title">
-    <string>Virtual headset uses host audio input</string>
+    <string>Virtual microphone uses host audio input</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string notr="true">Title</string>
