@@ -334,7 +334,7 @@ target_link_libraries(android-emu
                               OpenSSL::Crypto
                               LibXml2::LibXml2
                               PNG::PNG
-                              LZ4::LZ4
+                              lz4
                               ZLIB::ZLIB
 )
 
@@ -464,7 +464,7 @@ target_link_libraries(android-emu-shared
                               CURL::libcurl
                               LibXml2::LibXml2
                               PNG::PNG
-                              LZ4::LZ4
+                              lz4
                               ZLIB::ZLIB)
 
 # Here are the windows library and link dependencies. They are public and will propagate onwards to others that depend
