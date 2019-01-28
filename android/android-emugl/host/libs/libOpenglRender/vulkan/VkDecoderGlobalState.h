@@ -71,6 +71,16 @@ public:
         VkDevice device,
         const VkAllocationCallbacks* pAllocator);
 
+    VkResult on_vkCreateBuffer(VkDevice device,
+                               const VkBufferCreateInfo* pCreateInfo,
+                               const VkAllocationCallbacks* pAllocator,
+                               VkBuffer* pBuffer);
+
+    VkResult on_vkBindBufferMemory(VkDevice device,
+                                   VkBuffer buffer,
+                                   VkDeviceMemory memory,
+                                   VkDeviceSize memoryOffset);
+
     VkResult on_vkCreateImage(
         VkDevice device,
         const VkImageCreateInfo* pCreateInfo,

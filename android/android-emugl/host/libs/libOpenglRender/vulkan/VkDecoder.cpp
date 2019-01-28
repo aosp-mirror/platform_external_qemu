@@ -1018,12 +1018,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_74, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_74, (VkDeviceMemory*)&memory, 1);
                 vkReadStream->read((VkDeviceSize*)&memoryOffset, sizeof(VkDeviceSize));
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkBindBufferMemory\n");;
-                }
                 VkResult vkBindBufferMemory_VkResult_return = (VkResult)0;
-                vkBindBufferMemory_VkResult_return = m_vk->vkBindBufferMemory(device, buffer, memory, memoryOffset);
+                vkBindBufferMemory_VkResult_return =
+                        m_state->on_vkBindBufferMemory(device, buffer, memory,
+                                                       memoryOffset);
                 vkStream->write(&vkBindBufferMemory_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
@@ -1700,12 +1698,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_140;
                 vkReadStream->read((uint64_t*)&cgen_var_140, 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_140, (VkBuffer*)pBuffer, 1);
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateBuffer\n");;
-                }
                 VkResult vkCreateBuffer_VkResult_return = (VkResult)0;
-                vkCreateBuffer_VkResult_return = m_vk->vkCreateBuffer(device, pCreateInfo, pAllocator, pBuffer);
+                vkCreateBuffer_VkResult_return = m_state->on_vkCreateBuffer(
+                        device, pCreateInfo, pAllocator, pBuffer);
                 uint64_t cgen_var_141;
                 vkStream->handleMapping()->mapHandles_VkBuffer_u64(pBuffer, &cgen_var_141, 1);
                 vkStream->write((uint64_t*)&cgen_var_141, 8);
