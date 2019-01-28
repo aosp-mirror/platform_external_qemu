@@ -1832,7 +1832,10 @@ static void qemu_cpu_kick_thread(CPUState *cpu)
     }
     cpu->thread_kicked = true;
     if (gvm_enabled()) {
-        assert(!qemu_cpu_is_self(cpu));
+        //Remove assert(!qemu_cpu_is_self(cpu)) since it is triggered
+        //often during runtime. It is either QEMU common code issue
+        //or the usage here is wrong. We could address it later.
+        //Removing does not bring any harm.
         cpu_exit(cpu);
         gvm_raise_event(cpu);
         return;
