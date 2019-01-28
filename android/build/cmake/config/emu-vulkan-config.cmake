@@ -14,7 +14,13 @@ get_filename_component(
   ABSOLUTE)
 
 if(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
-  set(VULKAN_TEST_DEPENDENCIES "${PREBUILT_ROOT}/libvulkan.so>testlib64/libvulkan.so"
+  set(VULKAN_TEST_DEPENDENCIES
+      # Loader (for testing)
+      "${PREBUILT_ROOT}/libvulkan.so>testlib64/libvulkan.so"
+      # Swiftshader
+      "${PREBUILT_ROOT}/icds/libvk_swiftshader.so>lib64/vulkan/libvk_swiftshader.so"
+      "${PREBUILT_ROOT}/icds/vk_swiftshader_icd.json>lib64/vulkan/vk_swiftshader_icd.json"
+      # Mock ICD
       "${PREBUILT_ROOT}/icds/libVkICD_mock_icd.so>testlib64/libVkICD_mock_icd.so"
       "${PREBUILT_ROOT}/icds/VkICD_mock_icd.json>testlib64/VkICD_mock_icd.json"
       # for translating shaders to SPIRV
@@ -41,7 +47,13 @@ if(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
       "${PREBUILT_ROOT}/layers/VkLayer_threading.json>testlib64/layers/VkLayer_threading.json"
       "${PREBUILT_ROOT}/layers/VkLayer_unique_objects.json>testlib64/layers/VkLayer_unique_objects.json")
 elseif(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
-  set(VULKAN_TEST_DEPENDENCIES "${PREBUILT_ROOT}/libvulkan.dylib>testlib64/libvulkan.dylib"
+  set(VULKAN_TEST_DEPENDENCIES
+      # Loader (for testing)
+      "${PREBUILT_ROOT}/libvulkan.dylib>testlib64/libvulkan.dylib"
+      # Swiftshader
+      "${PREBUILT_ROOT}/icds/libvk_swiftshader.dylib>lib64/vulkan/libvk_swiftshader.dylib"
+      "${PREBUILT_ROOT}/icds/vk_swiftshader_icd.json>lib64/vulkan/vk_swiftshader_icd.json"
+      # Mock ICD
       "${PREBUILT_ROOT}/icds/libVkICD_mock_icd.dylib>testlib64/libVkICD_mock_icd.dylib"
       "${PREBUILT_ROOT}/icds/VkICD_mock_icd.json>testlib64/VkICD_mock_icd.json"
       # for translating shaders to SPIRV
@@ -72,7 +84,13 @@ elseif(ANDROID_TARGET_TAG MATCHES "windows.*")
   get_filename_component(PREBUILT_ROOT
                          "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/vulkan/windows-x86_64"
                          ABSOLUTE)
-  set(VULKAN_TEST_DEPENDENCIES "${PREBUILT_ROOT}/vulkan-1.dll>testlib64/vulkan-1.dll"
+  set(VULKAN_TEST_DEPENDENCIES
+      # Loader (for testing)
+      "${PREBUILT_ROOT}/vulkan-1.dll>testlib64/vulkan-1.dll"
+      # Swiftshader
+      "${PREBUILT_ROOT}/icds/vk_swiftshader.dll>lib64/vulkan/vk_swiftshader.dll"
+      "${PREBUILT_ROOT}/icds/vk_swiftshader_icd.json>lib64/vulkan/vk_swiftshader_icd.json"
+      # Mock ICD
       "${PREBUILT_ROOT}/icds/VkICD_mock_icd.dll>testlib64/VkICD_mock_icd.dll"
       "${PREBUILT_ROOT}/icds/VkICD_mock_icd.json>testlib64/VkICD_mock_icd.json"
       # for translating shaders to SPIRV
