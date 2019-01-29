@@ -150,7 +150,7 @@ public:
             if (featuresFiltered.textureCompressionETC2) {
                 VkPhysicalDeviceFeatures physicalFeatures;
                 m_vk->vkGetPhysicalDeviceFeatures(physicalDevice,
-                                                &physicalFeatures);
+                                                  &physicalFeatures);
                 if (!physicalFeatures.textureCompressionETC2) {
                     emulateTextureEtc2 = true;
                     featuresFiltered.textureCompressionETC2 = false;
@@ -314,17 +314,24 @@ public:
         const VkAllocationCallbacks* pAllocator,
         VkImage* pImage) {
 
-        CompressedImageInfo cmpInfo = createCompressedImageInfo(
-            pCreateInfo->format
-        );
+        auto deviceInfoIt = mDeviceInfo.find(device);
+        if (deviceInfoIt == mDeviceInfo.end()) {
+            return VK_ERROR_OUT_OF_HOST_MEMORY;
+        }
+        CompressedImageInfo cmpInfo = {};
         VkImageCreateInfo localInfo;
-        if (cmpInfo.isCompressed) {
-            localInfo = *pCreateInfo;
-            localInfo.format = cmpInfo.dstFormat;
-            pCreateInfo = &localInfo;
+        if (deviceInfoIt->second.emulateTextureEtc2) {
+            cmpInfo = createCompressedImageInfo(
+                pCreateInfo->format
+            );
+            if (cmpInfo.isCompressed) {
+                localInfo = *pCreateInfo;
+                localInfo.format = cmpInfo.dstFormat;
+                pCreateInfo = &localInfo;
 
-            cmpInfo.extent = pCreateInfo->extent;
-            cmpInfo.mipLevels = pCreateInfo->mipLevels;
+                cmpInfo.extent = pCreateInfo->extent;
+                cmpInfo.mipLevels = pCreateInfo->mipLevels;
+            }
         }
 
         AndroidNativeBufferInfo anbInfo;
@@ -399,14 +406,20 @@ public:
         if (!pCreateInfo) {
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
-        CompressedImageInfo cmpInfo = createCompressedImageInfo(
-            pCreateInfo->format
-        );
+        auto deviceInfoIt = mDeviceInfo.find(device);
+        if (deviceInfoIt == mDeviceInfo.end()) {
+            return VK_ERROR_OUT_OF_HOST_MEMORY;
+        }
         VkImageViewCreateInfo createInfo;
-        if (cmpInfo.isCompressed) {
-            createInfo = *pCreateInfo;
-            createInfo.format = cmpInfo.dstFormat;
-            pCreateInfo = &createInfo;
+        if (deviceInfoIt->second.emulateTextureEtc2) {
+            CompressedImageInfo cmpInfo = createCompressedImageInfo(
+                pCreateInfo->format
+            );
+            if (cmpInfo.isCompressed) {
+                createInfo = *pCreateInfo;
+                createInfo.format = cmpInfo.dstFormat;
+                pCreateInfo = &createInfo;
+            }
         }
         return m_vk->vkCreateImageView(device, pCreateInfo, pAllocator, pView);
     }
@@ -1076,6 +1089,9 @@ private:
 
             const uint8_t* srcPtr = srcRawData + srcRegion.bufferOffset;
             uint8_t* dstPtr = dstRawData + dstRegion.bufferOffset;
+            assert(srcRegion.bufferOffset + etc_get_encoded_data_size(imgFmt,
+                srcRegion.imageExtent.width, srcRegion.imageExtent.height)
+                <= srcBufferInfo.size);
             VkExtent3D alignedSrcImgExtent;
             alignedSrcImgExtent.width =
                     cmp.alignSize(srcRegion.imageExtent.width);
