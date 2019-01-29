@@ -31,6 +31,7 @@ endif()
 
 add_subdirectory(zlib)
 add_subdirectory(protobuf)
+add_subdirectory(libpng)
 add_subdirectory(lz4)
 add_subdirectory(libcurl)
 add_subdirectory(jpeg-6b)
