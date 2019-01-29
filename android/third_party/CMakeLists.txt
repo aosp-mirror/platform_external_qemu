@@ -28,7 +28,7 @@ if (OPTION_ASTC_TESTS)
   endforeach()
 endif()
 
-
+add_subdirectory(libpng)
 add_subdirectory(lz4)
 add_subdirectory(jpeg-6b)
 add_subdirectory(libdtb)
