@@ -8,7 +8,6 @@ list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 android_generate_hw_config()
 # Dependencies
 prebuilt(E2FSPROGS)
-prebuilt(BREAKPAD)
 prebuilt(CURL)
 prebuilt(LIBXML2)
 prebuilt(PNG)

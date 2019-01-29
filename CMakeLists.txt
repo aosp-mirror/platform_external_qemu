@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 if(MSVC)
-  list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/android/build/cmake")
+  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/android/build/cmake")
   include("toolchain-windows_msvc-x86_64")
 endif()
 
@@ -26,6 +26,21 @@ set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
 
 set_property(CACHE OPTION_CRASHUPLOAD PROPERTY STRINGS NONE STAGING PROD)
 
+# Symbol extraction is not supported when cross compiling.
+if(NOT ANDROID_SYMBOL_URL)
+  set(ANDROID_EXTRACT_SYMBOLS FALSE)
+else()
+  set(ANDROID_EXTRACT_SYMBOLS TRUE)
+  set(ANDROID_SYMBOL_DIR ${CMAKE_BINARY_DIR}/build/debug_info)
+  file(MAKE_DIRECTORY ${ANDROID_SYMBOL_DIR})
+  message(STATUS "Uploading symbols to ${ANDROID_SYMBOL_URL}")
+endif()
+
+if (ANDROID_EXTRACT_SYMBOLS AND NOT ANDROID_HOST_TAG STREQUAL ANDROID_TARGET_TAG)
+  message(WARNING "Symbol extraction not supported when cross compiling from ${ANDROID_HOST_TAG} -> ${ANDROID_TARGET_TAG}.")
+endif()
+
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # So we are using some C++14 features..
@@ -37,6 +52,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib64)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/archives)
+set(CMAKE_PDB_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/debug_info)
 
 # Feeling courageous? Set this to $ANDROID_SDK_ROOT
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/gradle-release)
@@ -49,7 +65,7 @@ prebuilt(Threads)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions("-DANDROID_DEBUG")
 
-  if (MSVC)
+  if(MSVC)
     # Clang will be running in cl compatibility mode.
     add_c_flag("/Od /RTC1 /EHsc")
   else()
@@ -57,21 +73,22 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   endif()
 
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-      if(NOT OPTION_ASAN)
-        set(OPTION_ASAN address)
-      endif()
-
-      if (NOT MSVC)
-        # Build an instrumented version of the code  that generates coverage mapping to enable code coverage analysis
-        set(ANDROID_CODE_COVERAGE TRUE)
-        add_c_flag("-fcoverage-mapping")
-        add_c_flag("-fprofile-instr-generate")
-        add_c_flag("-fprofile-arcs")
-        add_c_flag("-ftest-coverage")
-        add_c_flag("--coverage")
-      endif()
+    if(NOT OPTION_ASAN)
+      set(OPTION_ASAN address)
     endif()
+
+    if(NOT MSVC)
+      # Build an instrumented version of the code  that generates coverage mapping to enable code coverage analysis
+      set(ANDROID_CODE_COVERAGE TRUE)
+      add_c_flag("-fcoverage-mapping")
+      add_c_flag("-fprofile-instr-generate")
+      add_c_flag("-fprofile-arcs")
+      add_c_flag("-ftest-coverage")
+      add_c_flag("--coverage")
+    endif()
+  endif()
 else()
+  set(CMAKE_INSTALL_DO_STRIP TRUE)
   add_definitions("-DNDEBUG=1")
   if(ANDROID_TARGET_TAG MATCHES "windows.*")
     add_c_flag("-O2")
@@ -121,7 +138,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_c_flag("-Wswitch")
 endif()
 
-if (MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if(MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_c_flag("-Wno-microsoft-enum-forward-reference")
   add_c_flag("-Wno-address-of-packed-member")
   add_c_flag("-Wno-incompatible-ms-struct")
@@ -146,10 +163,10 @@ endif()
 
 if(NOT MSVC)
   # Compiling with -fno-exceptions disables exceptions support and uses the variant of C++ libraries without exceptions.
-  # Use of try, catch, or throw results in an error message. Linking objects that have been compiled with -fno-exceptions
-  # automatically selects the libraries without exceptions. You can use the linker option --no_exceptions to diagnose
-  # whether the objects being linked contain exceptions. If an exception propagates into a function that has been compiled
-  # without exceptions support, then the program terminates.
+  # Use of try, catch, or throw results in an error message. Linking objects that have been compiled with -fno-
+  # exceptions automatically selects the libraries without exceptions. You can use the linker option --no_exceptions to
+  # diagnose whether the objects being linked contain exceptions. If an exception propagates into a function that has
+  # been compiled without exceptions support, then the program terminates.
   add_cxx_flag("-fno-exceptions")
   add_cxx_flag("-Wno-invalid-offsetof")
 endif()
@@ -204,7 +221,7 @@ prebuilt(GLIB2)
 prebuilt(ZLIB)
 prebuilt(FDT)
 prebuilt(PIXMAN)
-if (NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
+if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
   prebuilt(VIRGLRENDERER)
 endif()
 prebuilt(TCMALLOC)
@@ -229,104 +246,71 @@ android_add_interface(android-qemu-deps)
 # additions here.
 target_include_directories(
   android-qemu-deps
-  INTERFACE
-  tcg
-  tcg/i386
-  accel/tcg
-  include
-  disas/libvixl
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  qemu2-auto-generated
-  ../../prebuilts/android-emulator-build/qemu-android-deps/${ANDROID_TARGET_TAG}/include
-  android-qemu2-glue/config/${ANDROID_TARGET_TAG}/)
+  INTERFACE tcg
+            tcg/i386
+            accel/tcg
+            include
+            disas/libvixl
+            ${CMAKE_CURRENT_SOURCE_DIR}
+            qemu2-auto-generated
+            ../../prebuilts/android-emulator-build/qemu-android-deps/${ANDROID_TARGET_TAG}/include
+            android-qemu2-glue/config/${ANDROID_TARGET_TAG}/)
 
 # These are the rules that every qemu component needs, regardless of the platform you are compiling on. Please document
 # any flags you set as not everyone is a compiler expert!
 target_compile_definitions(android-qemu-deps INTERFACE
-                                   # Enable faster migration code when saving RAM to a snapshot
-                                   "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION")
-if (NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
-    target_compile_definitions(android-qemu-deps INTERFACE
-                                   # Enable VIRGL
-                                   "-DCONFIG_VIRGL")
+                           # Enable faster migration code when saving RAM to a snapshot
+                           "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION")
+if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
+  target_compile_definitions(android-qemu-deps INTERFACE
+                             # Enable VIRGL
+                             "-DCONFIG_VIRGL")
 endif()
 
+target_compile_options(android-qemu-deps
+                       INTERFACE "-Werror=implicit-function-declaration" "-Wno-unused-function"
+                                 # Do not allow the compiler to assume the strictest aliasing rules
+                                 # applicable to the language being compiled. For C (and C++), this activates
+                                 # optimizations based on the type of expressions. In particular, an object
+                                 # of one type is assumed never to reside at the same address as an object of
+                                 # a different type, unless the types are almost the same.  Supposedly this
+                                 # can introduce weird failures esp. on older gcc versions (MINGW)
+                                 # (See http://thiemonagel.de/2010/01/no-strict-aliasing/)
+                                 "-fno-strict-aliasing")
 
-target_compile_options(android-qemu-deps INTERFACE "-Werror=implicit-function-declaration"
-                               "-Wno-unused-function"
-                               # Do not allow the compiler to assume the strictest aliasing rules
-                               # applicable to the language being compiled. For C (and C++), this activates
-                               # optimizations based on the type of expressions. In particular, an object
-                               # of one type is assumed never to reside at the same address as an object of
-                               # a different type, unless the types are almost the same.  Supposedly this
-                               # can introduce weird failures esp. on older gcc versions (MINGW)
-                               # (See http://thiemonagel.de/2010/01/no-strict-aliasing/)
-                               "-fno-strict-aliasing")
-
-if (NOT MSVC)
-  target_compile_options(android-qemu-deps INTERFACE
-                               # This option instructs the compiler to assume that signed arithmetic
-                               # overflow of addition, subtraction and multiplication wraps around using
-                               # twos-complement representation. This flag enables some optimizations and
-                               # disables others. The options -ftrapv and -fwrapv override each other, so
-                               # using -ftrapv -fwrapv on the command-line results in -fwrapv being
-                               # effective. Qemu is using this, so we use it as well.
-                               "-fwrapv"
-                               # The -fno-common option specifies that the compiler should instead place
-                               # uninitialized global variables in the data section of the object file.
-                               # This inhibits the merging of tentative definitions by the linker so you
-                               # get a multiple-definition error if the same variable is defined in more
-                               # than one compilation unit. Compiling with -fno-common is useful on targets
-                               # for which it provides better performance, or if you wish to verify that
-                               # the program will work on other systems that always treat uninitialized
-                               # variable definitions this way.
-                               # Remove this and you'll get all sorts of fun linker issues.
-                               "-fno-common")
+if(NOT MSVC)
+  target_compile_options(android-qemu-deps
+                         INTERFACE # This option instructs the compiler to assume that signed arithmetic
+                                   # overflow of addition, subtraction and multiplication wraps around using
+                                   # twos-complement representation. This flag enables some optimizations and
+                                   # disables others. The options -ftrapv and -fwrapv override each other, so
+                                   # using -ftrapv -fwrapv on the command-line results in -fwrapv being
+                                   # effective. Qemu is using this, so we use it as well.
+                                   "-fwrapv"
+                                   # The -fno-common option specifies that the compiler should instead place
+                                   # uninitialized global variables in the data section of the object file.
+                                   # This inhibits the merging of tentative definitions by the linker so you
+                                   # get a multiple-definition error if the same variable is defined in more
+                                   # than one compilation unit. Compiling with -fno-common is useful on targets
+                                   # for which it provides better performance, or if you wish to verify that
+                                   # the program will work on other systems that always treat uninitialized
+                                   # variable definitions this way.
+                                   # Remove this and you'll get all sorts of fun linker issues.
+                                   "-fno-common")
 endif()
 # Make sure we make our dependent libraries available.
 target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN ZLIB::ZLIB)
 
-if (NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
-    # no virglrenderer available for windows_msvc
-    target_link_libraries(android-qemu-deps INTERFACE VIRGL::VIRGL)
+if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
+  # no virglrenderer available for windows_msvc
+  target_link_libraries(android-qemu-deps INTERFACE VIRGL::VIRGL)
 endif()
 
 # We only support usb on mac/lin
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE USB::USB)
 android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE USB::USB)
 
-
 # Now we add the normal android libs, so we can use them
-
-# Let's not install gtest..
-set(INSTALL_GTEST OFF CACHE BOOL "Never install gtest" FORCE)
-
-if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
-  # Including the top-level CMakeLists.txt file doesn't work because the Windows SDK
-  # library requires C++14 support. So let's just include this manually.
-
-  set(gtest_disable_pthreads ON CACHE BOOL "Disable uses of pthreads in gtest.")
-  # All right, we must make sure we don't start adding the /MT flag
-  if (MSVC)
-    set(gtest_force_shared_crt ON CACHE BOOL "Use shared (DLL) run-time lib even when Google Test is built as static lib." FORCE)
-  endif()
-  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../googletest/googlemock googlemock)
-  if(MSVC)
-    # Okay, google test is not happy under msvc compile
-    target_compile_definitions(gmock_main PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
-    target_compile_definitions(gmock PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
-    target_compile_definitions(gtest PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
-  endif()
-else()
-  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../googletest googletest)
-endif()
-
-if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
-    # Don't include the custom TempDir function. It is for Android only.
-	target_compile_definitions(gtest PRIVATE
-            -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
-endif ()
-
 add_subdirectory(android)
 add_subdirectory(android-qemu2-glue)
 
@@ -367,9 +351,8 @@ android_target_compile_options(android-qemu-deps
                                INTERFACE
                                "-Werror=implicit-function-declaration"
                                "-Wno-unused-variable"
-                               "-mcx16"
-                               )
-if (NOT MSVC)
+                               "-mcx16")
+if(NOT MSVC)
   android_target_compile_options(android-qemu-deps windows_msvc INTERFACE "-mms-bitfields")
 endif()
 android_target_compile_options(android-qemu-deps
@@ -390,7 +373,8 @@ android_target_compile_definitions(android-qemu-deps
                                    "-D__USE_MINGW_ANSI_STDIO=1")
 
 # Linux settings
-set(ANDROID_QEMU_i386_DEVICES_linux-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
+set(ANDROID_QEMU_i386_DEVICES_linux-x86_64
+    "hvf-stub.c;accel/stubs/hax-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
 set(ANDROID_QEMU_arm_DEVICES_linux-x86_64 "hvf-stub.c;accel/stubs/hax-stub.c")
 android_target_include_directories(android-qemu-deps linux-x86_64 INTERFACE linux-headers)
 android_target_compile_options(android-qemu-deps linux-x86_64 INTERFACE
@@ -419,8 +403,7 @@ include(cmake-main.${ANDROID_TARGET_TAG}.inc)
 
 set(qemu2-common_src ${qemu2-shared_sources} ${qemu2-shared_generated_sources})
 if(MSVC)
-  # Once we have a newer version of cmake we can generate the object library in a platform
-  # independent way b/121393952
+  # Once we have a newer version of cmake we can generate the object library in a platform independent way b/121393952
   android_add_object_library(qemu2-common)
 else()
   android_add_library(qemu2-common)
@@ -452,7 +435,7 @@ set(qemu-img_src ${qemu-img_sources} block/qcow2-bitmap.c)
 set(qemu-img_linux-x86_64_src scsi/pr-manager.c)
 android_add_executable(qemu-img)
 target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub android-qemu-deps)
-install(TARGETS qemu-img RUNTIME DESTINATION .)
+android_install_exe(qemu-img .)
 
 # Create the qemu targets.
 android_add_qemu_executable(i386 i386 x86 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}" i386)
