@@ -9,7 +9,6 @@ android_generate_hw_config()
 # Dependencies
 prebuilt(E2FSPROGS)
 prebuilt(LIBXML2)
-prebuilt(PNG)
 prebuilt(UUID)
 
 # Add the protobuf dependencies
