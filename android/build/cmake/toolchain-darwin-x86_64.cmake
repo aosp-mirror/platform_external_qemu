@@ -29,5 +29,5 @@ toolchain_generate("${ANDROID_TARGET_TAG}")
 
 # Always consider the source to be darwin.
 add_definitions(-D_DARWIN_C_SOURCE=1)
-
+set(CMAKE_STRIP_CMD "${CMAKE_STRIP} -S")
 # No magical includes or dependencies for darwin..

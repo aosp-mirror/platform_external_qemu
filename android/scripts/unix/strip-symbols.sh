@@ -97,7 +97,7 @@ build_symbols () {
         $SYMTOOL $BINARY > $SYMBOL_DIR/$BINARY.sym 2> $SYMBOL_DIR/$BINARY.err ||
             warn "Failed to create symbol file for $BINARY"
         # And strip the binary
-        run strip -S $BINARY || panic "Could not strip $BINARY"
+        run strip -S $BINARY || panic "Could not strip $BINARY"A
     else
         case $HOST in
             linux*)
@@ -146,6 +146,7 @@ process_dir() {
     done
 }
 
+warn "The cmake build is capable of stripping during release, there's no need to run this."
 OLD_DIR=$PWD
 run cd $OPT_OUT
 process_dir $OPT_INSTALL

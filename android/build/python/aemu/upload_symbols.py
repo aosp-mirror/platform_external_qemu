@@ -20,35 +20,21 @@ from __future__ import print_function
 
 import sys
 import urlfetch
-from itertools import chain
-import os
-import glob
 import time
-
-
-from absl import app
-from absl import flags
-from absl import logging
-
-from aemu.definitions import  recursive_iglob
 
 PRODUCT = 'AndroidEmulator'
 
 
-
 def upload_symbol(symbol_file, uri):
-    logging.info('Checking %s', symbol_file)
     with open(symbol_file, 'r') as f:
         info = f.readline().split()
 
-
     if len(info) != 5 or info[0] != 'MODULE':
-        logging.error('Corrupt symbol file: %s, %s',
-                      symbol_file, info)
-        return
+        print('Corrupt symbol file: %s, %s',
+              symbol_file, info)
+        return 1
 
     module, os, arch, dbg_id, dbg_file = info
-    logging.info("Processing: %s, %s, %s, %s, %s", module, os, arch, dbg_id, dbg_file)
 
     start = time.time()
     req = urlfetch.post(
@@ -64,19 +50,18 @@ def upload_symbol(symbol_file, uri):
             'symbolFile': open(symbol_file, 'rb')
         }
     )
-    if req.status == 200:
-        logging.info("%s -> %s in %s seconds.",
-                     symbol_file, uri, time.time() - start)
+    if req.status != 200:
+        print("Failure: %s -X-> %s, status: %d in %s seconds." % (
+              symbol_file, uri, req.status, time.time() - start))
+        return 1
+    print("%s -> %s in %s seconds." % (
+          symbol_file, uri, time.time() - start))
+    return 0
+
+
+if __name__ == '__main__':
+    if len(sys.argv) != 3:
+        print("Usage %s [symbol] [uri]" % sys.argv[0])
+        sys.exit(1)
     else:
-        logging.error("Failure: %s -X-> %s, status: %d in %s seconds.",
-                      symbol_file, uri, req.status, time.time() - start)
-
-
-def upload_symbols(out_dir, uri):
-    for symbol_file in recursive_iglob(out_dir, [lambda fn: fn.endswith('.sym')]):
-        try:
-            upload_symbol(symbol_file, uri)
-        except urlfetch.UrlfetchException as e:
-            logging.error(e)
-
-
+        sys.exit(upload_symbol(sys.argv[1], sys.argv[2]))

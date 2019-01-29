@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+add_subdirectory(googletest)
 add_library(emulator-tinyobjloader ../../../tinyobjloader/tiny_obj_loader.cc)
 target_include_directories(emulator-tinyobjloader PUBLIC ../../../tinyobjloader)
 
@@ -41,6 +41,13 @@ add_subdirectory(tinyepoxy)
 add_subdirectory(libkeymaster3)
 add_subdirectory(ext4_utils)
 add_subdirectory(google-benchmark)
+
+# Old windows version will use old breakpad version..
+if (ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
+  prebuilt(BREAKPAD)
+else()
+  add_subdirectory(breakpad)
+endif()
 
 add_library(picosha2 INTERFACE)
 target_include_directories(picosha2 INTERFACE picosha2)
