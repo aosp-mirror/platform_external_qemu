@@ -13,7 +13,7 @@ if(NOT TARGET gmock_main)
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/android/third_party/googletest googletest)
 endif()
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Configure the compiler for breakpad:
@@ -280,6 +280,9 @@ android_target_compile_definitions(breakpad_processor linux-x86_64 PUBLIC -DHAVE
 android_target_compile_definitions(breakpad_processor darwin-x86_64 PUBLIC -DHAVE_MACH_O_NLIST_H)
 
 function(add_proc_test name)
+  if (NOT ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
+    return()
+  endif()
   set(${name}_src ${BREAKPAD_SRC}/processor/${name}.cc)
   android_add_test(${name})
   target_link_libraries(${name} PRIVATE breakpad_processor gmock_main)
