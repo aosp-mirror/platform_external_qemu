@@ -72,6 +72,12 @@ public:
         return m_vk->vkCreateInstance(&createInfoFiltered, pAllocator, pInstance);
     }
 
+    void on_vkGetPhysicalDeviceFeatures(VkPhysicalDevice physicalDevice,
+                                        VkPhysicalDeviceFeatures* pFeatures) {
+        m_vk->vkGetPhysicalDeviceFeatures(physicalDevice, pFeatures);
+        pFeatures->textureCompressionETC2 = true;
+    }
+
     void on_vkGetPhysicalDeviceProperties(
             VkPhysicalDevice physicalDevice,
             VkPhysicalDeviceProperties* pProperties) {
@@ -136,6 +142,21 @@ public:
 
         // Run the underlying API call, filtering extensions.
         VkDeviceCreateInfo createInfoFiltered = *pCreateInfo;
+        bool emulateTextureEtc2 = false;
+        if (pCreateInfo->pEnabledFeatures) {
+            VkPhysicalDeviceFeatures featuresFiltered =
+                    *pCreateInfo->pEnabledFeatures;
+            if (featuresFiltered.textureCompressionETC2) {
+                VkPhysicalDeviceFeatures physicalFeatures;
+                m_vk->vkGetPhysicalDeviceFeatures(physicalDevice,
+                                                &physicalFeatures);
+                if (!physicalFeatures.textureCompressionETC2) {
+                    emulateTextureEtc2 = true;
+                    featuresFiltered.textureCompressionETC2 = false;
+                }
+            }
+            createInfoFiltered.pEnabledFeatures = &featuresFiltered;
+        }
         createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
         createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
 
@@ -174,6 +195,7 @@ public:
         // Fill out information about the logical device here.
         auto& deviceInfo = mDeviceInfo[*pDevice];
         deviceInfo.physicalDevice = physicalDevice;
+        deviceInfo.emulateTextureEtc2 = emulateTextureEtc2;
 
         // First, get information about the queue families used by this device.
         std::unordered_map<uint32_t, uint32_t> queueFamilyIndexCounts;
@@ -404,9 +426,18 @@ public:
         const VkBufferImageCopy* pRegions) {
         AutoLock lock(mLock);
         auto it = mImageInfo.find(dstImage);
-
         if (it == mImageInfo.end()) return;
-        if (!it->second.cmpInfo.isCompressed) {
+        auto bufferInfoIt = mBufferInfo.find(srcBuffer);
+        if (bufferInfoIt == mBufferInfo.end()) {
+            return;
+        }
+        VkDevice device = bufferInfoIt->second.device;
+        auto deviceInfoIt = mDeviceInfo.find(device);
+        if (deviceInfoIt == mDeviceInfo.end()) {
+            return;
+        }
+        if (!it->second.cmpInfo.isCompressed ||
+            !deviceInfoIt->second.emulateTextureEtc2) {
             m_vk->vkCmdCopyBufferToImage(commandBuffer, srcBuffer, dstImage,
                     dstImageLayout, regionCount, pRegions);
             return;
@@ -415,11 +446,6 @@ public:
         if (cmdBufferInfoIt == mCmdBufferInfo.end()) {
             return;
         }
-        auto bufferInfoIt = mBufferInfo.find(srcBuffer);
-        if (bufferInfoIt == mBufferInfo.end()) {
-            return;
-        }
-        VkDevice device = bufferInfoIt->second.device;
         CompressedImageInfo& cmp = it->second.cmpInfo;
         // regions and buffers for the decompressed data
         std::vector<VkBufferImageCopy> regions(regionCount);
@@ -1124,6 +1150,7 @@ private:
 
     struct DeviceInfo {
         std::unordered_map<uint32_t, std::vector<VkQueue>> queues;
+        bool emulateTextureEtc2 = false;
         VkPhysicalDevice physicalDevice;
     };
 
@@ -1186,6 +1213,12 @@ VkResult VkDecoderGlobalState::on_vkCreateInstance(
     const VkAllocationCallbacks* pAllocator,
     VkInstance* pInstance) {
     return mImpl->on_vkCreateInstance(pCreateInfo, pAllocator, pInstance);
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceFeatures(
+        VkPhysicalDevice physicalDevice,
+        VkPhysicalDeviceFeatures* pFeatures) {
+    mImpl->on_vkGetPhysicalDeviceFeatures(physicalDevice, pFeatures);
 }
 
 void VkDecoderGlobalState::on_vkGetPhysicalDeviceProperties(
