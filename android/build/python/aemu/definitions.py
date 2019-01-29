@@ -170,3 +170,9 @@ class SymbolUris(ArgEnum):
     staging = 'https://clients2.google.com/cr/staging_symbol'
     prod = 'https://clients2.google.com/cr/symbol'
     none = None
+
+
+    def to_cmd(self):
+        if self.value: 
+            return ['-DANDROID_SYMBOL_URL=%s' % self.value]
+        return []

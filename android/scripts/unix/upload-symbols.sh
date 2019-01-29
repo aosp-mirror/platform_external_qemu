@@ -124,5 +124,6 @@ process_dir () {
     done
 }
 
+warn "Symbol processing is now done in the cmake build, there is no need to run this as part of the normal build. This is only needed for prebuilts."
 log_invocation
 process_dir

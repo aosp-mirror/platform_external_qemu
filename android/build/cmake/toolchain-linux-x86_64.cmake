@@ -44,3 +44,5 @@ endif()
 # locate packages. We don't want to do any package resolution
 # with mingw, so we explicitly disable it.
 set(CMAKE_FIND_ROOT_PATH  "${ANDROID_SYSROOT}")
+set(CMAKE_STRIP_CMD "${CMAKE_STRIP} -s")
+
