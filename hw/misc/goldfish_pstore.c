@@ -112,10 +112,10 @@ Error:
       error_report_err(local_err);
   }
 
-  if (file) {
-    qemu_fclose(file);
-  }
-  close(fd);
+  qemu_fclose(file);
+  #ifndef _MSC_VER
+     close(fd);
+  #endif
 }
 
 static void goldfish_pstore_realize(DeviceState *dev, Error **errp) {
