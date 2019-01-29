@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a1c5892f_47947d00",
+        "filename": "android/third_party/libsparse/CMakeLists.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-01-29T19:03:33Z",
+      "side": 1,
+      "message": "Whitespace",
+      "revId": "bf2bad9f80852e6f70876f09e242715c2570f712",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
