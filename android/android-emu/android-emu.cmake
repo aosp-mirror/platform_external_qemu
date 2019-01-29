@@ -335,7 +335,7 @@ target_link_libraries(android-emu
                               OpenSSL::SSL
                               OpenSSL::Crypto
                               LibXml2::LibXml2
-                              PNG::PNG
+                              png
                               lz4
                               zlib
 )
@@ -466,7 +466,7 @@ target_link_libraries(android-emu-shared
                               breakpad_client
                               CURL::libcurl
                               LibXml2::LibXml2
-                              PNG::PNG
+                              png
                               lz4
                               zlib)
 
@@ -548,11 +548,9 @@ target_include_directories(android-mock-vm-operations
                                    ${BREAKPAD_INCLUDE_DIRS}
                                    ${CURL_INCLUDE_DIRS}
                                    ${LIBXML2_INCLUDE_DIRS}
-                                   ${LIBPNG_INCLUDE_DIRS}
                                    ${LZ4_INCLUDE_DIRS}
                                    ${PROTOBUF_INCLUDE_DIRS}
                                    ${LZ4_INCLUDE_DIRS}
-                                   ${PNG_INCLUDE_DIRS}
                                    ${DARWINN_INCLUDE_DIRS})
 target_link_libraries(android-mock-vm-operations PRIVATE gmock)
 
@@ -758,11 +756,7 @@ target_include_directories(android-emu_unittests
                                    ${BREAKPAD_INCLUDE_DIRS}
                                    ${CURL_INCLUDE_DIRS}
                                    ${LIBXML2_INCLUDE_DIRS}
-                                   ${LIBPNG_INCLUDE_DIRS}
-                                   ${LZ4_INCLUDE_DIRS}
                                    ${PROTOBUF_INCLUDE_DIRS}
-                                   ${LZ4_INCLUDE_DIRS}
-                                   ${PNG_INCLUDE_DIRS}
                                    ${DARWINN_INCLUDE_DIRS})
 
 target_compile_definitions(android-emu_unittests PRIVATE -DGTEST_HAS_RTTI=0)
