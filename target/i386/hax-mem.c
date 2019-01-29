@@ -304,7 +304,7 @@ void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add
 
         // Restore the partially overlapped region.
         remaining_start = overlap_start > slot_start ? slot_start : overlap_end;
-        remaining_end = overlap_end < slot_end ? slot_end : overlap_start;
+        remaining_end = overlap_end < slot_end ? slot_end : overlap_end;
 
         if (hax_set_ram(
                 remaining_start,
