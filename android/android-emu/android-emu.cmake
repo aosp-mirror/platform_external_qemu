@@ -335,7 +335,7 @@ target_link_libraries(android-emu
                               OpenSSL::SSL
                               OpenSSL::Crypto
                               LibXml2::LibXml2
-                              PNG::PNG
+                              png
                               lz4
                               zlib
 )
@@ -469,7 +469,7 @@ target_link_libraries(android-emu-shared
                               OpenSSL::SSL
                               OpenSSL::Crypto
                               LibXml2::LibXml2
-                              PNG::PNG
+                              png
                               lz4
                               zlib)
 
@@ -744,10 +744,7 @@ android_add_test(android-emu_unittests)
 
 # Setup the targets compile config etc..
 android_target_compile_options(android-emu_unittests Clang PRIVATE -O0 -Wno-invalid-constexpr)
-target_include_directories(android-emu_unittests
-                                   PRIVATE
-                                   ../android-emugl/host/include/
-                                  )
+target_include_directories(android-emu_unittests PRIVATE ../android-emugl/host/include/)
 
 target_compile_definitions(android-emu_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 
