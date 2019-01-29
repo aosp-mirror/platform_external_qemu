@@ -28,7 +28,7 @@ if (OPTION_ASTC_TESTS)
   endforeach()
 endif()
 
-
+add_subdirectory(libpng)
 add_subdirectory(lz4)
 # zlib
 add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../zlib zlib)

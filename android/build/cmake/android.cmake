@@ -192,6 +192,21 @@ function(android_add_interface name)
   add_library(${name} INTERFACE)
 endfunction()
 
+function(android_add_default_test_properties name)
+  # Configure the test to run with asan..
+  file(READ "${ANDROID_QEMU2_TOP_DIR}/android/asan_overrides" ASAN_OVERRIDES)
+  set_property(TEST ${name} PROPERTY ENVIRONMENT "ASAN_OPTIONS=${ASAN_OVERRIDES}")
+  set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "LLVM_PROFILE_FILE=$<TARGET_FILE_NAME:${name}>.profraw")
+  set_property(TEST ${name} PROPERTY TIMEOUT 300)
+
+  if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+    # Let's include the .dll path for our test runner
+    string(REPLACE "/" "\\" WIN_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_swiftshader;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_mesa;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/qt/lib")
+    set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "PATH=${WIN_PATH};$ENV{PATH}")
+  endif()
+
+endfunction()
+
 # Adds a test target. It will create and register the test with the given name
 #
 # The variable ${name}_src should have the set of sources The variable ${name}_${ANDROID_TARGET_TAG}_src should have the
@@ -209,22 +224,18 @@ function(android_add_test name)
     return()
   endif()
 
-  # Configure the test to run with asan..
-  file(READ "${ANDROID_QEMU2_TOP_DIR}/android/asan_overrides" ASAN_OVERRIDES)
   add_test(NAME ${name}
            COMMAND $<TARGET_FILE:${name}> --gtest_output=xml:$<TARGET_FILE_NAME:${name}>.xml
            WORKING_DIRECTORY $<TARGET_FILE_DIR:${name}>)
-  set_property(TEST ${name} PROPERTY ENVIRONMENT "ASAN_OPTIONS=${ASAN_OVERRIDES}")
-  set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "LLVM_PROFILE_FILE=$<TARGET_FILE_NAME:${name}>.profraw")
 
-  if(MSVC)
-    # Let's include the .dll path for our test runner and set a timeout so we are guaranteed to complete the tests
-    string(REPLACE "/" "\\" WIN_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_swiftshader;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_mesa;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/qt/lib")
-    set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "PATH=${WIN_PATH};$ENV{PATH}")
-    set_property(TEST ${name} PROPERTY TIMEOUT 300)
+  # Let's not optimize our tests.
+  if (ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+      target_compile_options(${name} PRIVATE -Od)
+  else()
+      target_compile_options(${name} PRIVATE -O0)
   endif()
 
-
+  android_add_default_test_properties(${name})
 endfunction()
 
 # Adds an executable target. The RUNTIME_OS_DEPENDENCIES and RUNTIME_OS_PROPERTIES will registed for the given target,
@@ -497,4 +508,91 @@ function(android_validate_sha256 FILE EXPECTED)
         "Checksum mismatch for ${FILE} = ${CHECKSUM}, expecting ${EXPECTED}, you need to regenerate the cmake files by executing 'make' in ${DEST}"
       )
   endif()
+endfunction()
+
+# Uploads the symbols to the breakpad crash server
+function(android_upload_symbols TGT)
+  if(NOT ANDROID_EXTRACT_SYMBOLS)
+    return()
+  endif()
+  set(STDOUT "/dev/stdout")
+  if (WIN32)
+    set(STDOUT "CON")
+  endif()
+  set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
+  install(
+    CODE
+    "execute_process(COMMAND \"${PYTHON_EXECUTABLE}\"
+                             \"${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/upload_symbols.py\"
+                             \"${DEST}\"
+                             \"${ANDROID_SYMBOL_URL}\"
+                             OUTPUT_FILE ${STDOUT} ERROR_QUIET)"
+  )
+endfunction()
+
+# Installs the given target executable into the given destinations. Symbols will be extracted during build, and uploaded
+# during install.
+function(android_install_exe TGT DST)
+  install(TARGETS ${TGT} RUNTIME DESTINATION ${DST})
+
+  # Make it available on the build server
+  android_extract_symbols(${TGT})
+  android_upload_symbols(${TGT})
+endfunction()
+
+# Installs the given shared library. The shared library will end up in ../lib64 Symbols will be extracted during build,
+# and uploaded during install.
+function(android_install_shared TGT)
+  install(TARGETS ${TGT}
+          RUNTIME DESTINATION lib64 # We don't want windows to binplace dlls in the exe dir
+          LIBRARY DESTINATION lib64)
+  android_extract_symbols(${TGT})
+  android_upload_symbols(${TGT})
+endfunction()
+
+# Strips the given prebuilt executable during install..
+function(android_strip_prebuilt FNAME)
+  # MSVC stores debug info in seperate file, so no need to strip
+  if(NOT ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+    install(CODE "if(CMAKE_INSTALL_DO_STRIP) \n
+                        execute_process(COMMAND ${CMAKE_STRIP} \"$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${FNAME}\")\n
+                      endif()\n
+                     ")
+  endif()
+endfunction()
+
+# Extracts symbols from a file that is not built. This is mainly here if we wish to extract symbols for a prebuilt file.
+function(android_extract_symbols_file FNAME)
+  get_filename_component(BASENAME ${FNAME} NAME)
+  set(DEST "${ANDROID_SYMBOL_DIR}/${BASENAME}.sym")
+
+  if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+    # In msvc we need the pdb to generate the symbols, pdbs are not yet available for The prebuilts. b/122728651
+    message(WARNING "Extracting symbols requires access to the pdb for ${FNAME}, ignoring for now.")
+    return()
+  endif()
+  install(
+    CODE
+    "execute_process(COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/dump_syms ${FNAME} OUTPUT_FILE ${DEST} RESULT_VARIABLE RES ERROR_QUIET) \n
+                 message(STATUS \"Extracted symbols for ${FNAME} ${RES}\")")
+  install(
+    CODE
+    "execute_process(COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sym_upload ${DEST} ${ANDROID_SYMBOL_URL}  OUTPUT_VARIABLE RES ERROR_QUIET) \n
+                 message(STATUS \"Uploaded symbols for ${FNAME} --> ${ANDROID_SYMBOL_URL} ${RES}\")")
+endfunction()
+
+# Extracts the symbols from the given target if extraction is requested. TODO: We need generator expressions to move
+# this to the install phase. Which are available in cmake 3.13
+function(android_extract_symbols TGT)
+  if(NOT ANDROID_EXTRACT_SYMBOLS)
+    # Note: we do not need to extract symbols on windows for uploading.
+    return()
+  endif()
+
+  set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
+  add_custom_command(TARGET ${TGT} POST_BUILD
+                     COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST}
+                     DEPENDS dump_syms
+                     COMMENT "Extracting symbols for ${TGT}"
+                     VERBATIM)
 endfunction()
