@@ -11,7 +11,7 @@
             "program": "${command:cmake.launchTargetPath}",
             "args": [
                 "--gtest_break_on_failure",
-               "--gtest_filter=ScreenCapturerTest.*"
+                "--gtest_filter=ScreenCapturerTest.*"
             ],
             // , "--gtest_filter=Lock.Synchronization"],
             "stopAtEntry": false,
@@ -30,12 +30,10 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/qemu/windows-x86_64/qemu-system-x86_64",
-            //"program": "${workspaceFolder}/build/android-emu_unittests",
             "args": [
-             //   "--gtest_filter=FileUtils.fopen"
-               "@p-user",
-               "-verbose",
-               "-show-kernel"
+                "@p-user",
+                "-verbose",
+                "-show-kernel"
             ],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}\\build",
@@ -50,12 +48,15 @@
                     "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
                 },
                 {
+                    // You will need to set a global search path :-(, this 
+                    // doesn't seem to be used during launch.
                     "name": "PATH",
                     "value": "${workspaceFolder}\\build\\lib64;${workspaceFolder}\\build\\lib64\\qt\\lib;;${workspaceFolder}\\build\\lib64\\gles_swiftshaders;"
                 }
             ],
-            "externalConsole": false,
-            "symbolSearchPath": "srv*https://msdl.microsoft.com/download/symbols;https://msdl.microsoft.com/download/symbols"
+            "externalConsole": true,
+            // Uncommenting this Will fetch the windows symbols, note that this is VERY slow.
+            // "symbolSearchPath": "https://msdl.microsoft.com/download/symbols"
         },
         {
             "name": "(lldb) Debug Cmake Target",
