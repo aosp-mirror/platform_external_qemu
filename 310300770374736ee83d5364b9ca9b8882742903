@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6c7de045_3fdc1763",
+        "filename": "android/third_party/libpng/CMakeLists.txt",
+        "patchSetId": 4
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-01-29T22:26:32Z",
+      "side": 1,
+      "message": "Can you see if you can use in-source zlib?",
+      "range": {
+        "startLine": 4,
+        "startChar": 1,
+        "endLine": 4,
+        "endChar": 14
+      },
+      "revId": "310300770374736ee83d5364b9ca9b8882742903",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
