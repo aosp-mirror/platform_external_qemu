@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1decf816_56ee37f8",
+        "filename": "hw/misc/goldfish_pstore.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-01-29T04:38:01Z",
+      "side": 1,
+      "message": "Do we still need the null check for non-windows?",
+      "range": {
+        "startLine": 115,
+        "startChar": 2,
+        "endLine": 115,
+        "endChar": 13
+      },
+      "revId": "b6c8d638020dcdfdab44d10372c97d6ebeeb55df",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
