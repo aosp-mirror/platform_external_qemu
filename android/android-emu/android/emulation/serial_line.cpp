@@ -16,7 +16,12 @@
 using android::SerialLine;
 
 static SerialLine* asClass(CSerialLine* sl) {
+#ifdef _MSC_VER
+    // Our vtable becomes corrupted by a static_cast in msvc.
+    return reinterpret_cast<SerialLine*>(reinterpret_cast<void*>(sl));
+#else
     return static_cast<SerialLine*>(sl);
+#endif
 }
 
 int android_serialline_write(CSerialLine* sl, const uint8_t* data, int len) {
