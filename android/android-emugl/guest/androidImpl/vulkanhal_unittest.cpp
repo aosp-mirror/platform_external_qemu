@@ -116,10 +116,14 @@ protected:
 
         std::vector<const char*> enabledExtensions;
 
-        if (hasGetPhysicalDeviceProperties2 &&
-            hasExternalMemoryCapabilities) {
+        if (hasGetPhysicalDeviceProperties2) {
             enabledExtensions.push_back("VK_KHR_get_physical_device_properties2");
+            mInstanceHasGetPhysicalDeviceProperties2Support = true;
+        }
+
+        if (hasExternalMemoryCapabilities) {
             enabledExtensions.push_back("VK_KHR_external_memory_capabilities");
+            mInstanceHasExternalMemorySupport = true;
         }
 
         const char* const* enabledExtensionNames =
@@ -271,6 +275,7 @@ protected:
 
     struct gralloc_implementation mGralloc;
 
+    bool mInstanceHasGetPhysicalDeviceProperties2Support = false;
     bool mInstanceHasExternalMemorySupport = false;
     bool mDeviceHasExternalMemorySupport = false;
     bool mDeviceHasAHBSupport = false;
@@ -394,6 +399,32 @@ TEST_F(VulkanHalTest, AndroidNativeImageQueueSignal) {
 
 // Tests VK_KHR_get_physical_device_properties2
 TEST_F(VulkanHalTest, GetPhysicalDeviceProperties2) {
+    if (!mInstanceHasGetPhysicalDeviceProperties2Support) {
+        printf("Warning: Not testing VK_KHR_physical_device_properties2, not "
+               "supported\n");
+        return;
+    }
+
+    // vkGetPhysicalDeviceProperties2KHR
+    PFN_vkGetPhysicalDeviceProperties2KHR physProps2KHRFunc =
+            (PFN_vkGetPhysicalDeviceProperties2KHR)vkGetInstanceProcAddr(
+                    mInstance, "vkGetPhysicalDeviceProperties2KHR");
+    
+    EXPECT_NE(nullptr, physProps2KHRFunc);
+
+    VkPhysicalDeviceProperties2KHR props2 = {
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2, 0,
+    };
+
+    physProps2KHRFunc(mPhysicalDevice, &props2);
+
+    VkPhysicalDeviceProperties props;
+    vkGetPhysicalDeviceProperties(mPhysicalDevice, &props);
+
+    EXPECT_EQ(props.vendorID, props2.properties.vendorID);
+    EXPECT_EQ(props.deviceID, props2.properties.deviceID);
+
+    // vkGetPhysicalDeviceProperties2KHR
 }
 
 }  // namespace aemu
