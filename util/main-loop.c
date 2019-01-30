@@ -148,6 +148,7 @@ void qemu_notify_event(void)
 }
 
 static GArray *gpollfds;
+static GArray *slirp_gpollfds;
 
 int qemu_init_main_loop(Error **errp)
 {
@@ -169,6 +170,7 @@ int qemu_init_main_loop(Error **errp)
     }
     qemu_notify_bh = qemu_bh_new(notify_event_cb, NULL);
     gpollfds = g_array_new(FALSE, FALSE, sizeof(GPollFD));
+    slirp_gpollfds = g_array_new(FALSE, FALSE, sizeof(GPollFD));
     src = aio_get_g_source(qemu_aio_context);
     g_source_set_name(src, "aio-context");
     g_source_attach(src, NULL);
@@ -185,6 +187,9 @@ static int max_priority;
 #ifndef _WIN32
 static int glib_pollfds_idx;
 static int glib_n_poll_fds;
+
+static int slirp_glib_pollfds_idx;
+static int slirp_glib_n_poll_fds;
 
 static void glib_pollfds_fill(int64_t *cur_timeout)
 {
@@ -206,6 +211,17 @@ static void glib_pollfds_fill(int64_t *cur_timeout)
                                  glib_n_poll_fds);
     } while (n != glib_n_poll_fds);
 
+    slirp_glib_pollfds_idx = slirp_gpollfds->len;
+    n = slirp_glib_n_poll_fds;
+    do {
+        GPollFD *pfds;
+        slirp_glib_n_poll_fds = n;
+        g_array_set_size(slirp_gpollfds, slirp_glib_pollfds_idx + slirp_glib_n_poll_fds);
+        pfds = &g_array_index(slirp_gpollfds, GPollFD, slirp_glib_pollfds_idx);
+        n = g_main_context_query(context, max_priority, &timeout, pfds,
+                                 slirp_glib_n_poll_fds);
+    } while (n != slirp_glib_n_poll_fds);
+
     if (timeout < 0) {
         timeout_ns = -1;
     } else {
@@ -223,6 +239,12 @@ static void glib_pollfds_poll(void)
     if (g_main_context_check(context, max_priority, pfds, glib_n_poll_fds)) {
         g_main_context_dispatch(context);
     }
+
+    pfds = &g_array_index(slirp_gpollfds, GPollFD, slirp_glib_pollfds_idx);
+
+    if (g_main_context_check(context, max_priority, pfds, slirp_glib_n_poll_fds)) {
+        g_main_context_dispatch(context);
+    }
 }
 
 #define MAX_MAIN_LOOP_SPIN (1000)
@@ -230,7 +252,7 @@ static void glib_pollfds_poll(void)
 static int os_host_main_loop_wait(int64_t timeout)
 {
     GMainContext *context = g_main_context_default();
-    int ret;
+    int ret, ret2;
     static int spin_counter;
 
     g_main_context_acquire(context);
@@ -265,6 +287,7 @@ static int os_host_main_loop_wait(int64_t timeout)
     replay_mutex_unlock();
 
     ret = qemu_poll_ns((GPollFD *)gpollfds->data, gpollfds->len, timeout);
+    ret2 = qemu_poll_ns2((GPollFD *)slirp_gpollfds->data, slirp_gpollfds->len, timeout);
 
     replay_mutex_lock();
     qemu_mutex_lock_iothread();
@@ -273,7 +296,11 @@ static int os_host_main_loop_wait(int64_t timeout)
 
     g_main_context_release(context);
 
-    return ret;
+
+    if (ret < 0) return ret;
+    if (ret2 < 0) return ret2;
+
+    return ret + ret2;
 }
 #else
 /***********************************************************/
@@ -514,8 +541,9 @@ void main_loop_wait(int nonblocking)
 
     /* poll any events */
     g_array_set_size(gpollfds, 0); /* reset for new iteration */
+    g_array_set_size(slirp_gpollfds, 0); /* reset for new iteration */
     /* XXX: separate device handlers from system ones */
-    slirp_pollfds_fill(gpollfds, &timeout);
+    slirp_pollfds_fill(slirp_gpollfds, &timeout);
 
     if (timeout == UINT32_MAX) {
         timeout_ns = -1;
@@ -546,7 +574,7 @@ void main_loop_wait(int nonblocking)
 #endif
 
 #ifdef CONFIG_SLIRP
-    slirp_pollfds_poll(gpollfds, (ret < 0));
+    slirp_pollfds_poll(slirp_gpollfds, (ret < 0));
 #endif
 
     if (main_loop_poll_callback)

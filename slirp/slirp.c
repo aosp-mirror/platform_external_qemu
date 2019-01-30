@@ -597,6 +597,7 @@ void slirp_pollfds_fill(GArray *pollfds, uint32_t *timeout)
              * we have something to send
              */
             if (CONN_CANFSEND(so) && so->so_rcv.sb_cc) {
+                fprintf(stderr, "%s: connected, can send\n", __func__);
                 events |= G_IO_OUT | G_IO_ERR;
             }
 
