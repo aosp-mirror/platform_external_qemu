@@ -52,17 +52,21 @@ log $LOCAL_HOST_SYSTEMS
 
 CLANG_REV=4679922
 
+HOST_OS="linux"
+
 for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     case $SYSTEM in
         linux*)
             log "LINUX"
             export CC=$AOSP_DIR/prebuilts/clang/host/linux-x86/clang-$CLANG_REV/bin/clang
             export CXX=$AOSP_DIR/prebuilts/clang/host/linux-x86/clang-$CLANG_REV/bin/clang++
+            HOST_OS="linux"
             ;;
         darwin*)
             log "DARWIN"
             export CC=$AOSP_DIR/prebuilts/clang/host/darwin-x86/clang-$CLANG_REV/bin/clang
             export CXX=$AOSP_DIR/prebuilts/clang/host/darwin-x86/clang-$CLANG_REV/bin/clang++
+            HOST_OS="darwin"
             ;;
     esac
 done
@@ -96,6 +100,7 @@ cmake $DEQP_BUILD_DIR $DEQP_DIR \
     -DAEMU_INCLUDE_DIR=$EMU_DIR/android/android-emugl/combined \
     -DAEMU_LIBRARY_DIR=$EMU_OUTPUT_DIR/lib64 \
     -DAEMU_SANITIZER=$SANITIZER \
+    -DCMAKE_TOOLCHAIN_FILE=$EMU_DIR/android/build/cmake/toolchain-$HOST_OS-x86_64.cmake \
 
 make -j $NUM_JOBS
 
