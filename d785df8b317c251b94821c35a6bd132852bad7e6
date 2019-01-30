@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "314d4345_2429e9f8",
+        "filename": "android/android-emu/android/camera/camera-virtualscene-utils.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-01-30T22:45:07Z",
+      "side": 1,
+      "message": "The windows build failed because it couldn\u0027t find std::unique_ptr.  To fix, you should be able to #include \u003cmemory\u003e here.",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 8
+      },
+      "revId": "d785df8b317c251b94821c35a6bd132852bad7e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
