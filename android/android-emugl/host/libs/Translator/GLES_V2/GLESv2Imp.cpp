@@ -174,7 +174,8 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp) {
 GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
 GL_APICALL void  GL_APIENTRY glVertexAttribIPointerWithDataSize(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
 GL_APICALL void  GL_APIENTRY glTestHostDriverPerformance(GLuint count, uint64_t* duration_us, uint64_t* duration_cpu_us);
-
+GL_APICALL void  GL_APIENTRY glDrawArraysNullAEMU(GLenum mode, GLint first, GLsizei count);
+GL_APICALL void  GL_APIENTRY glDrawElementsNullAEMU(GLenum mode, GLsizei count, GLenum type, const void* indices);
 
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName) {
     GET_CTX_RET(NULL)
@@ -191,6 +192,8 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
         (*s_glesExtensions)["glVertexAttribPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glVertexAttribPointerWithDataSize;
         (*s_glesExtensions)["glVertexAttribIPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glVertexAttribIPointerWithDataSize;
         (*s_glesExtensions)["glTestHostDriverPerformance"] = (__translatorMustCastToProperFunctionPointerType)glTestHostDriverPerformance;
+        (*s_glesExtensions)["glDrawArraysNullAEMU"] = (__translatorMustCastToProperFunctionPointerType)glDrawArraysNullAEMU;
+        (*s_glesExtensions)["glDrawElementsNullAEMU"] = (__translatorMustCastToProperFunctionPointerType)glDrawElementsNullAEMU;
     }
     __translatorMustCastToProperFunctionPointerType ret=NULL;
     ProcTableMap::iterator val = s_glesExtensions->find(procName);
@@ -1305,6 +1308,24 @@ GL_APICALL void  GL_APIENTRY glDrawArrays(GLenum mode, GLint first, GLsizei coun
     }
 }
 
+GL_APICALL void  GL_APIENTRY glDrawArraysNullAEMU(GLenum mode, GLint first, GLsizei count) {
+    GET_CTX_V2();
+    SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
+    SET_ERROR_IF(!GLESv2Validate::drawMode(mode),GL_INVALID_ENUM);
+
+    if (ctx->vertexAttributesBufferBacked()) {
+        s_glDrawPre(ctx, mode);
+        // No host driver draw
+        s_glDrawPost(ctx, mode);
+    } else {
+        // TODO: Null draw with emulations
+        ctx->drawWithEmulations(
+                GLESv2Context::DrawCallCmd::Arrays,
+                mode, first, count,
+                0, nullptr, 0, 0, 0 /* type, indices, primcount, start, end unused */);
+    }
+}
+
 GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices) {
     GET_CTX_V2();
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
@@ -1314,6 +1335,24 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
         ctx->vertexAttributesBufferBacked()) {
         s_glDrawPre(ctx, mode, type);
         ctx->dispatcher().glDrawElements(mode, count, type, indices);
+        s_glDrawPost(ctx, mode);
+    } else {
+        ctx->drawWithEmulations(
+                GLESv2Context::DrawCallCmd::Elements,
+                mode, 0 /* first (unused) */, count, type, indices,
+                0, 0, 0 /* primcount, start, end (unused) */);
+    }
+}
+
+GL_APICALL void  GL_APIENTRY glDrawElementsNullAEMU(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices) {
+    GET_CTX_V2();
+    SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
+    SET_ERROR_IF(!(GLESv2Validate::drawMode(mode) && GLESv2Validate::drawType(type)),GL_INVALID_ENUM);
+
+    if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
+        ctx->vertexAttributesBufferBacked()) {
+        s_glDrawPre(ctx, mode, type);
+        // No host driver draw
         s_glDrawPost(ctx, mode);
     } else {
         ctx->drawWithEmulations(
