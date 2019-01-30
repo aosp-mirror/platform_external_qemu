@@ -296,7 +296,7 @@ void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add
 
         // This is not the split region, so we can use the following
         // calculation of overlap interval and remaining interval.
-        overlap_start = start > slot_start ? slot_start : start;
+        overlap_start = start < slot_start ? slot_start : start;
         overlap_end = end > slot_end ? slot_end : end;
 
         // This region is totally overlapped; we may not want to restore it.
@@ -304,7 +304,11 @@ void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add
 
         // Restore the partially overlapped region.
         remaining_start = overlap_start > slot_start ? slot_start : overlap_end;
-        remaining_end = overlap_end < slot_end ? slot_end : overlap_end;
+        remaining_end = overlap_end < slot_end ? slot_end : overlap_start;
+
+        if (remaining_start >= remaining_end) {
+            qemu_abort("%s: FATAL: Invalid slot to restore\n", __func__);
+        }
 
         if (hax_set_ram(
                 remaining_start,
