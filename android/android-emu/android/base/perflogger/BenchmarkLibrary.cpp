@@ -29,7 +29,7 @@ void logDrawCallOverheadTest(
 
     // |variant|: drawArrays, drawElements, drawSwitchVao, drawSwitchVap
     base::StringView variant,
-    // |indirectionLevel|: fullStack, decoder, or host
+    // |indirectionLevel|: fullStack, fullStackOverheadOnly, decoder, or host
     base::StringView indirectionLevel,
     int count,
     long rateHz,

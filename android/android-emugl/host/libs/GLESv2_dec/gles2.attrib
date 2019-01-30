@@ -1448,3 +1448,15 @@ glGetnUniformfvEXT
 glGetnUniformivEXT
     dir params out
     len params bufSize
+
+glDrawElementsNullAEMU
+    flag unsupported
+
+glDrawElementsDataNullAEMU
+    len data datalen
+    flag custom_decoder
+    flag not_api
+
+glDrawElementsOffsetNullAEMU
+    flag custom_decoder
+    flag not_api

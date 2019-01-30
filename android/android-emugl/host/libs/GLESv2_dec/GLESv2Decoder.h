@@ -59,6 +59,8 @@ private:
 
     static void gles2_APIENTRY s_glDrawElementsOffset(void *self, GLenum mode, GLsizei count, GLenum type, GLuint offset);
     static void gles2_APIENTRY s_glDrawElementsData(void *self, GLenum mode, GLsizei count, GLenum type, void * data, GLuint datalen);
+    static void gles2_APIENTRY s_glDrawElementsOffsetNullAEMU(void *self, GLenum mode, GLsizei count, GLenum type, GLuint offset);
+    static void gles2_APIENTRY s_glDrawElementsDataNullAEMU(void *self, GLenum mode, GLsizei count, GLenum type, void * data, GLuint datalen);
     static int  gles2_APIENTRY s_glFinishRoundTrip(void *self);
 
     static void gles2_APIENTRY s_glMapBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* mapped);

@@ -26,3 +26,7 @@ void glGetnUniformivEXT(GLuint program, GLint location, GLsizei bufSize, GLint *
 # The following extensions are used by GLESv1Dispatch and GLESv2Dispatch, but not by GLDispatch
 void glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image);
 void glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image);
+
+# For benchmarking draw call overhead
+void glDrawArraysNullAEMU(GLenum mode, GLint first, GLsizei count);
+void glDrawElementsNullAEMU(GLenum mode, GLsizei count, GLenum type, const void *indices);
