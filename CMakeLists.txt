@@ -36,8 +36,9 @@ else()
   message(STATUS "Uploading symbols to ${ANDROID_SYMBOL_URL}")
 endif()
 
-if (ANDROID_EXTRACT_SYMBOLS AND NOT ANDROID_HOST_TAG STREQUAL ANDROID_TARGET_TAG)
-  message(WARNING "Symbol extraction not supported when cross compiling from ${ANDROID_HOST_TAG} -> ${ANDROID_TARGET_TAG}.")
+if (ANDROID_EXTRACT_SYMBOLS AND NOT ANDROID_HOST_TAG STREQUAL ANDROID_TARGET_TAG AND NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
+  message(WARNING "Symbol extraction not supported when cross compiling from ${ANDROID_HOST_TAG} -> ${ANDROID_TARGET_TAG}, disabling.")
+  set(ANDROID_EXTRACT_SYMBOLS FALSE)
 endif()
 
 
