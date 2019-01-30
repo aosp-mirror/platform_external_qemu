@@ -29,6 +29,13 @@
 #include "sysemu/sysemu.h"
 #include "sysemu/cpus.h"
 
+#ifdef __APPLE__
+#include <poll.h>
+#include <sys/types.h> 
+#include <sys/event.h> 
+#include <sys/time.h>
+#endif
+
 #ifdef CONFIG_POSIX
 #include <pthread.h>
 #endif
@@ -334,7 +341,57 @@ int qemu_poll_ns(GPollFD *fds, guint nfds, int64_t timeout)
         return ppoll((struct pollfd *)fds, nfds, &ts, NULL);
     }
 #else
-    return g_poll(fds, nfds, qemu_timeout_ns_to_ms(timeout));
+
+    static struct kevent chlist[4096];
+    static struct kevent evlist[4096];
+    static struct timespec ktimeout;
+    int64_t tvsec = timeout / 1000000000LL;
+    /* Avoid possibly overflowing and specifying a negative number of
+     * seconds, which would turn a very long timeout into a busy-wait.
+     */
+    if (tvsec > (int64_t)INT32_MAX) {
+        tvsec = INT32_MAX;
+    }
+    ktimeout.tv_sec = tvsec;
+    ktimeout.tv_nsec = timeout % 1000000000LL;
+
+    static int kq = -1;
+
+    if (kq == -1) {
+        printf("Getting kqueue\n");
+        kq = kqueue();
+    }
+
+    for (guint i = 0; i < nfds; ++i) {
+        EV_SET(chlist + i, fds[i].fd,  0, EV_ADD, 0, 0, 0);
+        if (fds[i].events & POLLIN) {
+            chlist[i].filter |= EVFILT_READ;
+        }
+        if (fds[i].events & POLLIN) {
+            chlist[i].filter |= EVFILT_READ;
+        }
+    }
+
+    int nev = kevent(kq, chlist, nfds, evlist, nfds, &ktimeout);
+
+    if (nev == -1) {
+        printf("Fail kevent");
+        return -1;
+    }
+
+    for (guint i = 0; i < nfds; ++i) {
+        for (int j = 0; j < nev; ++j) {
+            if ((int)evlist[j].ident == fds[i].fd) {
+                if (evlist[j].filter | EVFILT_READ) {
+                    fds[i].revents |= POLLIN;
+                }
+                if (evlist[j].filter | EVFILT_WRITE) {
+                    fds[i].revents |= POLLOUT;
+                }
+            }
+        }
+    }
+    return nev;
 #endif
 }
 
