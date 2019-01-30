@@ -92,6 +92,8 @@ ENCODER_CUSTOM_RESOURCE_POSTPROCESS = [
     "vkCreateDevice",
     "vkMapMemoryIntoAddressSpaceGOOGLE",
     "vkGetPhysicalDeviceMemoryProperties",
+    "vkGetPhysicalDeviceMemoryProperties2",
+    "vkGetPhysicalDeviceMemoryProperties2KHR",
 ]
 
 ENCODER_EXPLICIT_FLUSHED_APIS = [
@@ -514,8 +516,6 @@ def unwrap_vkAcquireImageANDROID_nativeFenceFd():
 
 custom_encodes = {
     "vkEnumerateInstanceVersion" : emit_only_resource_event,
-    "vkEnumerateDeviceExtensionProperties" : emit_only_resource_event,
-    "vkGetPhysicalDeviceProperties2" : emit_only_resource_event,
     "vkMapMemory" : emit_only_resource_event,
     "vkUnmapMemory" : emit_only_resource_event,
     "vkFlushMappedMemoryRanges" : encode_vkFlushMappedMemoryRanges,

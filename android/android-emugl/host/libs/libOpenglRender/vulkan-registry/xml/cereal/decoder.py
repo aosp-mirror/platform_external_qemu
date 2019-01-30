@@ -1,11 +1,13 @@
 from .common.codegen import CodeGen, VulkanWrapperGenerator, VulkanAPIWrapper
 from .common.vulkantypes import \
-        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
+        VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, DISPATCHABLE_HANDLE_TYPES
 
 from .marshaling import VulkanMarshalingCodegen
 
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
+
+from copy import copy
 
 decoder_decl_preamble = """
 
@@ -43,6 +45,7 @@ private:
     VkDecoderGlobalState* m_state;
     VulkanStream m_vkStream { nullptr };
     VulkanMemReadingStream m_vkMemReadingStream { nullptr };
+    BoxedHandleUnwrapMapping m_boxedHandleUnwrapMapping;
 };
 
 VkDecoder::VkDecoder() :
@@ -77,6 +80,23 @@ def emit_unmarshal(typeInfo, param, cgen):
         direction="read",
         dynAlloc=True))
 
+def emit_dispatch_unmarshal(typeInfo, param, cgen):
+    cgen.stmt("// Begin manual dispatchable handle unboxing for %s" % param.paramName)
+    cgen.stmt("%s->unsetHandleMapping()" % READ_STREAM)
+    iterateVulkanType(typeInfo, param, VulkanMarshalingCodegen(
+        cgen,
+        READ_STREAM,
+        param.paramName,
+        API_PREFIX_UNMARSHAL,
+        direction="read",
+        dynAlloc=True))
+    cgen.stmt("auto unboxed_%s = unbox_%s(%s)" %
+              (param.paramName, param.typeName, param.paramName))
+    cgen.stmt("auto vk = dispatch_%s(%s)" %
+              (param.typeName, param.paramName))
+    cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
+    cgen.stmt("// End manual dispatchable handle unboxing for %s" % param.paramName)
+
 def emit_marshal(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, VulkanMarshalingCodegen(
         cgen,
@@ -93,8 +113,22 @@ def emit_decode_parameters(typeInfo, api, cgen):
 
     for p in paramsToRead:
         emit_param_decl_for_reading(p, cgen)
+
+    i = 0
     for p in paramsToRead:
-        emit_unmarshal(typeInfo, p, cgen)
+        if i == 0 and p.typeName in DISPATCHABLE_HANDLE_TYPES:
+            emit_dispatch_unmarshal(typeInfo, p, cgen)
+        else:
+            if param.possiblyOutput():
+                cgen.stmt("// Begin manual dispatchable handle unboxing for %s" % param.paramName)
+                cgen.stmt("%s->unsetHandleMapping()" % READ_STREAM)
+
+            emit_unmarshal(typeInfo, p, cgen)
+
+            if param.possiblyOutput():
+                cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
+                cgen.stmt("// End manual dispatchable handle unboxing for %s" % param.paramName)
+        i += 1
 
 def emit_call_log(api, cgen):
     cgen.beginIf("m_logCalls")
@@ -103,7 +137,14 @@ def emit_call_log(api, cgen):
 
 def emit_dispatch_call(api, cgen):
     emit_call_log(api, cgen)
-    cgen.vkApiCall(api, customPrefix="m_vk->")
+    customParams = []
+    for (i, p) in enumerate(api.parameters):
+        customParam = p.paramName
+        if i == 0 and p.typeName in DISPATCHABLE_HANDLE_TYPES:
+            customParam = "unboxed_%s" % p.paramName
+        customParams.append(customParam)
+        
+    cgen.vkApiCall(api, customPrefix="vk->", customParameters=customParams)
 
 def emit_global_state_wrapped_call(api, cgen):
     cgen.vkApiCall(api, customPrefix="m_state->on_")
@@ -198,12 +239,21 @@ def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
 
 custom_decodes = {
     "vkCreateInstance" : emit_global_state_wrapped_decoding,
+    "vkDestroyInstance" : emit_global_state_wrapped_decoding,
+    "vkEnumeratePhysicalDevices" : emit_global_state_wrapped_decoding,
 
     "vkGetPhysicalDeviceFeatures" : emit_global_state_wrapped_decoding,
+    "vkGetPhysicalDeviceFeatures2" : emit_global_state_wrapped_decoding,
+    "vkGetPhysicalDeviceFeatures2KHR" : emit_global_state_wrapped_decoding,
     "vkGetPhysicalDeviceProperties" : emit_global_state_wrapped_decoding,
+    "vkGetPhysicalDeviceProperties2" : emit_global_state_wrapped_decoding,
+    "vkGetPhysicalDeviceProperties2KHR" : emit_global_state_wrapped_decoding,
     "vkGetPhysicalDeviceMemoryProperties" : emit_global_state_wrapped_decoding,
+    "vkGetPhysicalDeviceMemoryProperties2" : emit_global_state_wrapped_decoding,
+    "vkGetPhysicalDeviceMemoryProperties2KHR" : emit_global_state_wrapped_decoding,
 
     "vkCreateBuffer" : emit_global_state_wrapped_decoding,
+    "vkDestroyBuffer" : emit_global_state_wrapped_decoding,
     "vkBindBufferMemory" : emit_global_state_wrapped_decoding,
 
     "vkCreateDevice" : emit_global_state_wrapped_decoding,
@@ -272,6 +322,8 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("VulkanStream* %s = stream()" % WRITE_STREAM)
         self.cgen.stmt("VulkanMemReadingStream* %s = readStream()" % READ_STREAM)
         self.cgen.stmt("%s->setBuf((uint8_t*)(ptr + 8))" % READ_STREAM)
+        self.cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
+        self.cgen.stmt("auto vk = m_vk")
 
         self.cgen.line("switch (opcode)")
         self.cgen.beginBlock() # switch stmt
