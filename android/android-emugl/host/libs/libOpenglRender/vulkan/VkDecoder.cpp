@@ -209,9 +209,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFeatures:
             {
-                if (m_logCalls) {
-                    fprintf(stderr, "call vkGetPhysicalDeviceFeatures\n");
-                    ;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetPhysicalDeviceFeatures\n");;
                 }
                 VkPhysicalDevice physicalDevice;
                 VkPhysicalDeviceFeatures* pFeatures;
@@ -220,8 +220,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->handleMapping()->mapHandles_u64_VkPhysicalDevice(&cgen_var_12, (VkPhysicalDevice*)&physicalDevice, 1);
                 vkReadStream->alloc((void**)&pFeatures, sizeof(VkPhysicalDeviceFeatures));
                 unmarshal_VkPhysicalDeviceFeatures(vkReadStream, (VkPhysicalDeviceFeatures*)(pFeatures));
-                m_state->on_vkGetPhysicalDeviceFeatures(physicalDevice,
-                                                        pFeatures);
+                m_state->on_vkGetPhysicalDeviceFeatures(physicalDevice, pFeatures);
                 marshal_VkPhysicalDeviceFeatures(vkStream, (VkPhysicalDeviceFeatures*)(pFeatures));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
@@ -2952,9 +2951,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkFreeCommandBuffers:
             {
-                if (m_logCalls) {
-                    fprintf(stderr, "call vkFreeCommandBuffers\n");
-                    ;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkFreeCommandBuffers\n");;
                 }
                 VkDevice device;
                 VkCommandPool commandPool;
@@ -2980,9 +2979,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(cgen_var_275, (VkCommandBuffer*)pCommandBuffers, ((commandBufferCount)));
                     }
                 }
-                m_state->on_vkFreeCommandBuffers(device, commandPool,
-                                                 commandBufferCount,
-                                                 pCommandBuffers);
+                m_state->on_vkFreeCommandBuffers(device, commandPool, commandBufferCount, pCommandBuffers);
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
                 break;
@@ -3026,9 +3023,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkResetCommandBuffer:
             {
-                if (m_logCalls) {
-                    fprintf(stderr, "call vkResetCommandBuffer\n");
-                    ;
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkResetCommandBuffer\n");;
                 }
                 VkCommandBuffer commandBuffer;
                 VkCommandBufferResetFlags flags;
@@ -3037,8 +3034,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_278, (VkCommandBuffer*)&commandBuffer, 1);
                 vkReadStream->read((VkCommandBufferResetFlags*)&flags, sizeof(VkCommandBufferResetFlags));
                 VkResult vkResetCommandBuffer_VkResult_return = (VkResult)0;
-                vkResetCommandBuffer_VkResult_return =
-                        m_state->on_vkResetCommandBuffer(commandBuffer, flags);
+                vkResetCommandBuffer_VkResult_return = m_state->on_vkResetCommandBuffer(commandBuffer, flags);
                 vkStream->write(&vkResetCommandBuffer_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();

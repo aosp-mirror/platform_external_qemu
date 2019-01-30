@@ -19,18 +19,6 @@ set(android-emu-common
     android/async-socket.c
     android/async-socket-connector.c
     android/async-utils.c
-    android/base/async/AsyncReader.cpp
-    android/base/async/AsyncSocketServer.cpp
-    android/base/async/AsyncWriter.cpp
-    android/base/async/DefaultLooper.cpp
-    android/base/async/Looper.cpp
-    android/base/async/ScopedSocketWatch.cpp
-    android/base/async/ThreadLooper.cpp
-    android/base/network/Dns.cpp
-    android/base/sockets/SocketDrainer.cpp
-    android/base/sockets/SocketUtils.cpp
-    android/base/sockets/SocketWaiter.cpp
-    android/base/threads/internal/ParallelTaskBase.cpp
     android/boot-properties.c
     android/car.cpp
     android/car-cluster.cpp
@@ -215,10 +203,6 @@ set(android-emu-common
     android/update-check/VersionExtractor.cpp
     android/user-config.cpp
     android/utils/dns.cpp
-    android/utils/Random.cpp
-    android/utils/sockets.c
-    android/utils/socket_drainer.cpp
-    android/utils/looper.cpp
     android/verified-boot/load_config.cpp
     android/wear-agent/android_wear_agent.cpp
     android/wear-agent/WearAgent.cpp
@@ -436,7 +420,7 @@ android_add_shared_library(android-emu-shared)
 target_link_libraries(android-emu-shared
                               PRIVATE
                               emulator-libext4_utils
-                              android-emu-base
+                              android-emu-base-shared
                               emulator-libsparse
                               emulator-libselinux
                               emulator-libjpeg
@@ -480,8 +464,6 @@ android_target_link_libraries(android-emu-shared
                               ole32::ole32
                               # For GetPerformanceInfo in CrashService_windows.cpp
                               psapi::psapi
-                              # Winsock functions
-                              ws2_32::ws2_32
                               # GetNetworkParams() for android/utils/dns.c
                               iphlpapi::iphlpapi
 )

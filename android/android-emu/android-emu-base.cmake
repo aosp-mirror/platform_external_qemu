@@ -5,7 +5,19 @@
 prebuilt(UUID)
 
 # Source configuration, the following set is shared amongst all targets
-set(android-emu-base_src
+set(ANDROID_EMU_BASE_SOURCES
+    android/base/async/AsyncReader.cpp
+    android/base/async/AsyncSocketServer.cpp
+    android/base/async/AsyncWriter.cpp
+    android/base/async/DefaultLooper.cpp
+    android/base/async/Looper.cpp
+    android/base/async/ScopedSocketWatch.cpp
+    android/base/async/ThreadLooper.cpp
+    android/base/network/Dns.cpp
+    android/base/sockets/SocketDrainer.cpp
+    android/base/sockets/SocketUtils.cpp
+    android/base/sockets/SocketWaiter.cpp
+    android/base/threads/internal/ParallelTaskBase.cpp
     android/base/AlignedBuf.cpp
     android/base/Backtrace.cpp
     android/base/ContiguousRangeMapper.cpp
@@ -96,10 +108,14 @@ set(android-emu-base_src
     android/utils/uri.cpp
     android/utils/utf8_utils.cpp
     android/utils/vector.c
-    android/utils/x86_cpuid.cpp)
+    android/utils/x86_cpuid.cpp
+    android/utils/Random.cpp
+    android/utils/sockets.c
+    android/utils/socket_drainer.cpp
+    android/utils/looper.cpp)
 
 # Windows 32-bit specific sources, these are only included in the windows 32 bit build
-set(android-emu-base_windows_src
+set(ANDROID_EMU_BASE_WINDOWS_SOURCES
     android/base/files/preadwrite.cpp
     android/base/memory/SharedMemory_win32.cpp
     android/base/threads/Thread_win32.cpp
@@ -109,10 +125,21 @@ set(android-emu-base_windows_src
     android/utils/win32_unicode.cpp)
 
 # Mac specific sources, only included in the darwin build.
-set(android-emu-base_darwin-x86_64_src android/base/memory/SharedMemory_posix.cpp
-    android/base/threads/Thread_pthread.cpp android/base/system/system-native-mac.mm)
+set(ANDROID_EMU_BASE_DARWIN_SOURCES
+    android/base/memory/SharedMemory_posix.cpp
+    android/base/threads/Thread_pthread.cpp
+    android/base/system/system-native-mac.mm)
 
 # Linux specific sources.
+set(ANDROID_EMU_BASE_LINUX_SOURCES
+    android/base/memory/SharedMemory_posix.cpp
+    android/base/threads/Thread_pthread.cpp)
+
+# The static library (to be removed)
+
+set(android-emu-base_src ${ANDROID_EMU_BASE_SOURCES})
+set(android-emu-base_windows_src ${ANDROID_EMU_BASE_WINDOWS_SOURCES})
+set(android-emu-base_darwin-x86_64_src ${ANDROID_EMU_BASE_DARWIN_SOURCES})
 set(android-emu-base_linux-x86_64_src android/base/memory/SharedMemory_posix.cpp
     android/base/threads/Thread_pthread.cpp)
 
@@ -120,9 +147,7 @@ set(android-emu-base_linux-x86_64_src android/base/memory/SharedMemory_posix.cpp
 android_add_library(android-emu-base)
 
 # Windows-msvc specific dependencies. Need these for posix support.
-android_target_link_libraries(android-emu-base windows_msvc PUBLIC
-        msvc-posix-compat
-        dirent-win32)
+android_target_link_libraries(android-emu-base windows_msvc PUBLIC msvc-posix-compat dirent-win32)
 
 # Anyone who takes a dependency gets to use our header files.
 target_include_directories(android-emu-base PUBLIC .)
@@ -156,3 +181,49 @@ android_target_compile_options(android-emu-base Clang
 set(android-emu_benchmark_src android/base/synchronization/Lock_benchmark.cpp)
 android_add_executable(android-emu_benchmark)
 target_link_libraries(android-emu_benchmark PRIVATE android-emu-base emulator-gbench)
+
+# The shared library
+set(android-emu-base-shared_src ${ANDROID_EMU_BASE_SOURCES})
+set(android-emu-base-shared_src ${ANDROID_EMU_BASE_SOURCES})
+set(android-emu-base-shared_windows_src ${ANDROID_EMU_BASE_WINDOWS_SOURCES})
+set(android-emu-base-shared_darwin-x86_64_src ${ANDROID_EMU_BASE_DARWIN_SOURCES})
+set(android-emu-base-shared_linux-x86_64_src android/base/memory/SharedMemory_posix.cpp
+    android/base/threads/Thread_pthread.cpp)
+
+# Let's add in the library
+android_add_shared_library(android-emu-base-shared)
+
+# Windows-msvc specific dependencies. Need these for posix support.
+android_target_link_libraries(android-emu-base-shared windows_msvc PUBLIC msvc-posix-compat dirent-win32)
+
+# Anyone who takes a dependency gets to use our header files.
+target_include_directories(android-emu-base-shared PUBLIC .)
+
+# Library dependencies, these are public so they will propagate, if you link against the base you will link against LZ4
+# & UUID
+target_link_libraries(android-emu-base-shared PRIVATE lz4 UUID::UUID)
+android_target_link_libraries(android-emu-base-shared linux-x86_64 PUBLIC -ldl Threads::Threads -lrt)
+android_target_link_libraries(android-emu-base-shared windows-x86_64 PUBLIC psapi::psapi Threads::Threads iphlpapi::iphlpapi)
+android_target_link_libraries(android-emu-base-shared
+                              darwin-x86_64
+                              PUBLIC
+                              "-framework Foundation"
+                              "-framework ApplicationServices"
+                              "-framework IOKit")
+android_target_link_libraries(android-emu-base-shared windows PRIVATE ws2_32::ws2_32)
+android_target_compile_definitions(android-emu-base-shared
+                                   darwin-x86_64
+                                   PRIVATE
+                                   "-D_DARWIN_C_SOURCE=1"
+                                   "-Dftello64=ftell"
+                                   "-Dfseeko64=fseek")
+
+# Compiler flags, not that these should never propagate (i.e. set to public) as we really want to limit the usage of
+# these flags.
+target_compile_options(android-emu-base-shared
+                       PRIVATE
+                       -fvisibility=default)
+android_target_compile_options(android-emu-base-shared Clang
+                               PRIVATE
+                               "-Wno-parentheses"
+                               "-Wno-invalid-constexpr")
