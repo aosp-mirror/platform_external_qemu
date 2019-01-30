@@ -211,7 +211,9 @@ VulkanDispatch* vkDispatch(bool forTesting) {
 }
 
 bool vkDispatchValid(const VulkanDispatch* vk) {
-    return vk->vkEnumerateInstanceExtensionProperties != nullptr;
+    return vk->vkEnumerateInstanceExtensionProperties != nullptr ||
+           vk->vkGetInstanceProcAddr != nullptr ||
+           vk->vkGetDeviceProcAddr != nullptr;
 }
 
 }

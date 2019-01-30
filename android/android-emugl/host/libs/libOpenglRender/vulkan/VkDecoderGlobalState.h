@@ -13,6 +13,9 @@
 // limitations under the License.
 #pragma once
 
+#include "VulkanHandleMapping.h"
+#include "VulkanDispatch.h"
+
 #include <vulkan/vulkan.h>
 
 #include <memory>
@@ -39,10 +42,26 @@ public:
     // per process
     static VkDecoderGlobalState* get();
 
+    // Fast way to get dispatch tables associated with a Vulkan object.
+    // VkInstance
+    // VkPhysicalDevice
+    // VkDevice
+    // VkQueue
+    // VkCommandBuffer
+
     VkResult on_vkCreateInstance(
         const VkInstanceCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkInstance* pInstance);
+
+    void on_vkDestroyInstance(
+        VkInstance instance,
+        const VkAllocationCallbacks* pAllocator);
+
+    VkResult on_vkEnumeratePhysicalDevices(
+        VkInstance instance,
+        uint32_t* physicalDeviceCount,
+        VkPhysicalDevice* physicalDevices);
 
     // Override features
     void on_vkGetPhysicalDeviceFeatures(VkPhysicalDevice physicalDevice,
@@ -52,6 +71,12 @@ public:
     void on_vkGetPhysicalDeviceProperties(
             VkPhysicalDevice physicalDevice,
             VkPhysicalDeviceProperties* pProperties);
+    void on_vkGetPhysicalDeviceProperties2(
+            VkPhysicalDevice physicalDevice,
+            VkPhysicalDeviceProperties2* pProperties);
+    void on_vkGetPhysicalDeviceProperties2KHR(
+            VkPhysicalDevice physicalDevice,
+            VkPhysicalDeviceProperties2* pProperties);
 
     // Override memory types advertised from host
     //
@@ -79,6 +104,10 @@ public:
                                const VkBufferCreateInfo* pCreateInfo,
                                const VkAllocationCallbacks* pAllocator,
                                VkBuffer* pBuffer);
+
+    void on_vkDestroyBuffer(VkDevice device,
+                            VkBuffer buffer,
+                            const VkAllocationCallbacks* pAllocator);
 
     VkResult on_vkBindBufferMemory(VkDevice device,
                                    VkBuffer buffer,
@@ -220,5 +249,114 @@ private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
 };
+
+#define DEFINE_BOXED_DISPATCHABLE_HANDLE_TYPE(type) \
+struct BoxedDispatchable_##type { \
+    type underlying; \
+    VulkanDispatch* dispatch; \
+}; \
+static inline BoxedDispatchable_##type* new_boxed_##type( \
+    type underlying, VulkanDispatch* otherDispatch = nullptr) { \
+    BoxedDispatchable_##type* res = new BoxedDispatchable_##type; \
+    res->underlying = underlying; \
+    res->dispatch = otherDispatch ? otherDispatch : new VulkanDispatch; \
+    return res; \
+} \
+static inline void delete_boxed_##type( \
+    BoxedDispatchable_##type* boxed, bool ownDispatch = true) { \
+    if (ownDispatch) delete boxed->dispatch; boxed->dispatch = nullptr; \
+    delete boxed; \
+} \
+static inline void delete_boxed_##type(type boxed) { \
+    delete_boxed_##type((BoxedDispatchable_##type*)boxed); \
+} \
+static inline type unbox_##type(type x) { \
+    return ((BoxedDispatchable_##type*)(x))->underlying; \
+} \
+static inline VulkanDispatch* dispatch_##type(type x) { \
+    return ((BoxedDispatchable_##type*)(x))->dispatch; \
+} \
+
+GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_TYPE)
+
+#define MAKE_HANDLE_MAPPING_FOREACH(type_name, map_impl, map_to_u64_impl, map_from_u64_impl) \
+    void mapHandles_##type_name(type_name* handles, size_t count) override { \
+        for (size_t i = 0; i < count; ++i) { \
+            map_impl; \
+        } \
+    } \
+    void mapHandles_##type_name##_u64(const type_name* handles, uint64_t* handle_u64s, size_t count) override { \
+        for (size_t i = 0; i < count; ++i) { \
+            map_to_u64_impl; \
+        } \
+    } \
+    void mapHandles_u64_##type_name(const uint64_t* handle_u64s, type_name* handles, size_t count) override { \
+        for (size_t i = 0; i < count; ++i) { \
+            map_from_u64_impl; \
+        } \
+    } \
+
+#define BOXED_DISPATCHABLE_UNWRAP_IMPL(type_name) \
+    MAKE_HANDLE_MAPPING_FOREACH(type_name, \
+        handles[i] = ((BoxedDispatchable_##type_name*)(handles[i]))->underlying;, \
+        handle_u64s[i] = (uint64_t)((BoxedDispatchable_##type_name*)(handles[i]))->underlying, \
+        handles[i] = (type_name)((BoxedDispatchable_##type_name*)(handle_u64s[i]))->underlying)
+
+#define BOXED_NON_DISPATCHABLE_UNWRAP_IMPL(type_name) \
+    MAKE_HANDLE_MAPPING_FOREACH(type_name, \
+        (void)handles[i], \
+        handle_u64s[i] = (uint64_t)(uintptr_t)handles[i], \
+        handles[i] = (type_name)(uintptr_t)handle_u64s[i])
+
+class BoxedHandleUnwrapMapping : public VulkanHandleMapping {
+public:
+    virtual ~BoxedHandleUnwrapMapping() { }
+    GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(BOXED_DISPATCHABLE_UNWRAP_IMPL)
+    GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(BOXED_NON_DISPATCHABLE_UNWRAP_IMPL)
+};
+
+// We currently don't need a BoxedHandleWrapMapping because there are, now, no
+// APIs where dispatchable handle types are created and not touched by us: all are wrapped:
+// vkCreateInstance
+// vkEnumeratePhysicalDevices
+// vkCreateDevice
+// vkGetDeviceQueue
+// vkAllocateCommandBuffers
+
+/*
+
+VkPhysicalDeviceFeatures2KHR
+
+VkPhysicalDeviceProperties2KHR
+
+VkFormatProperties2KHR
+
+VkImageFormatProperties2KHR
+
+VkPhysicalDeviceImageFormatInfo2KHR
+
+VkQueueFamilyProperties2KHR
+
+VkPhysicalDeviceMemoryProperties2KHR
+
+VkSparseImageFormatProperties2KHR
+
+VkPhysicalDeviceSparseImageFormatInfo2KHR
+
+vkGetPhysicalDeviceFeatures2KHR
+
+vkGetPhysicalDeviceProperties2KHR
+
+vkGetPhysicalDeviceFormatProperties2KHR
+
+vkGetPhysicalDeviceImageFormatProperties2KHR
+
+vkGetPhysicalDeviceQueueFamilyProperties2KHR
+
+vkGetPhysicalDeviceMemoryProperties2KHR
+
+vkGetPhysicalDeviceSparseImageFormatProperties2KHR
+
+*/
 
 } // namespace goldfish_vk

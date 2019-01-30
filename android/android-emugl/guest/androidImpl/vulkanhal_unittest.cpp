@@ -116,10 +116,14 @@ protected:
 
         std::vector<const char*> enabledExtensions;
 
-        if (hasGetPhysicalDeviceProperties2 &&
-            hasExternalMemoryCapabilities) {
+        if (hasGetPhysicalDeviceProperties2) {
             enabledExtensions.push_back("VK_KHR_get_physical_device_properties2");
+            mInstanceHasGetPhysicalDeviceProperties2Support = true;
+        }
+
+        if (hasExternalMemoryCapabilities) {
             enabledExtensions.push_back("VK_KHR_external_memory_capabilities");
+            mInstanceHasExternalMemorySupport = true;
         }
 
         const char* const* enabledExtensionNames =
@@ -271,6 +275,7 @@ protected:
 
     struct gralloc_implementation mGralloc;
 
+    bool mInstanceHasGetPhysicalDeviceProperties2Support = false;
     bool mInstanceHasExternalMemorySupport = false;
     bool mDeviceHasExternalMemorySupport = false;
     bool mDeviceHasAHBSupport = false;
@@ -392,8 +397,89 @@ TEST_F(VulkanHalTest, AndroidNativeImageQueueSignal) {
     destroyAndroidNativeImage(buffer, image);
 }
 
-// Tests VK_KHR_get_physical_device_properties2
+// Tests VK_KHR_get_physical_device_properties2:
+// new API: vkGetPhysicalDeviceProperties2KHR
 TEST_F(VulkanHalTest, GetPhysicalDeviceProperties2) {
+    if (!mInstanceHasGetPhysicalDeviceProperties2Support) {
+        printf("Warning: Not testing VK_KHR_physical_device_properties2, not "
+               "supported\n");
+        return;
+    }
+
+    PFN_vkGetPhysicalDeviceProperties2KHR physProps2KHRFunc =
+            (PFN_vkGetPhysicalDeviceProperties2KHR)vkGetInstanceProcAddr(
+                    mInstance, "vkGetPhysicalDeviceProperties2KHR");
+
+    EXPECT_NE(nullptr, physProps2KHRFunc);
+
+    VkPhysicalDeviceProperties2KHR props2 = {
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2, 0,
+    };
+
+    physProps2KHRFunc(mPhysicalDevice, &props2);
+
+    VkPhysicalDeviceProperties props;
+    vkGetPhysicalDeviceProperties(mPhysicalDevice, &props);
+
+    EXPECT_EQ(props.vendorID, props2.properties.vendorID);
+    EXPECT_EQ(props.deviceID, props2.properties.deviceID);
+}
+
+// Tests VK_KHR_get_physical_device_properties2:
+// new API: vkGetPhysicalDeviceFeatures2KHR
+TEST_F(VulkanHalTest, GetPhysicalDeviceFeatures2KHR) {
+    if (!mInstanceHasGetPhysicalDeviceProperties2Support) {
+        printf("Warning: Not testing VK_KHR_physical_device_properties2, not "
+               "supported\n");
+        return;
+    }
+
+    PFN_vkGetPhysicalDeviceFeatures2KHR physDeviceFeatures =
+            (PFN_vkGetPhysicalDeviceFeatures2KHR)vkGetInstanceProcAddr(
+                    mInstance, "vkGetPhysicalDeviceFeatures2KHR");
+
+    EXPECT_NE(nullptr, physDeviceFeatures);
+
+    VkPhysicalDeviceFeatures2 features2 = {
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, 0,
+    };
+
+    physDeviceFeatures(mPhysicalDevice, &features2);
+}
+
+// Tests VK_KHR_get_physical_device_properties2:
+// new API: vkGetPhysicalDeviceImageFormatProperties2KHR
+TEST_F(VulkanHalTest, GetPhysicalDeviceImageFormatProperties2KHR) {
+    if (!mInstanceHasGetPhysicalDeviceProperties2Support) {
+        printf("Warning: Not testing VK_KHR_physical_device_properties2, not "
+               "supported\n");
+        return;
+    }
+
+    PFN_vkGetPhysicalDeviceImageFormatProperties2KHR
+            physDeviceImageFormatPropertiesFunc =
+                    (PFN_vkGetPhysicalDeviceImageFormatProperties2KHR)
+                            vkGetInstanceProcAddr(mInstance,
+                                                  "vkGetPhysicalDeviceImageForm"
+                                                  "atProperties2KHR");
+
+    EXPECT_NE(nullptr, physDeviceImageFormatPropertiesFunc);
+
+    VkPhysicalDeviceImageFormatInfo2 imageFormatInfo = {
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2, 0,
+        VK_FORMAT_R8G8B8A8_UNORM,
+        VK_IMAGE_TYPE_2D,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_SAMPLED_BIT,
+        0,
+    };
+
+    VkImageFormatProperties2 res = {
+        VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2, 0,
+    };
+
+    EXPECT_EQ(VK_SUCCESS, physDeviceImageFormatPropertiesFunc(
+                                  mPhysicalDevice, &imageFormatInfo, &res));
 }
 
 }  // namespace aemu
