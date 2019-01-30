@@ -28,6 +28,8 @@
   X(void, glGetnUniformivEXT, (GLuint program, GLint location, GLsizei bufSize, GLint * params), (program, location, bufSize, params)) \
   X(void, glEGLImageTargetTexture2DOES, (GLenum target, GLeglImageOES image), (target, image)) \
   X(void, glEGLImageTargetRenderbufferStorageOES, (GLenum target, GLeglImageOES image), (target, image)) \
+  X(void, glDrawArraysNullAEMU, (GLenum mode, GLint first, GLsizei count), (mode, first, count)) \
+  X(void, glDrawElementsNullAEMU, (GLenum mode, GLsizei count, GLenum type, const void * indices), (mode, count, type, indices)) \
 
 
 #endif  // GLES_EXTENSIONS_FUNCTIONS_H

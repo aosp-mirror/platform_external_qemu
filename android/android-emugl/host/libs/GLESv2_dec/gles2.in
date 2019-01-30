@@ -575,3 +575,9 @@ GL_ENTRY(GLenum, glGetGraphicsResetStatusEXT, void)
 GL_ENTRY(void, glReadnPixelsEXT, GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, GLvoid *data)
 GL_ENTRY(void, glGetnUniformfvEXT, GLuint program, GLint location, GLsizei bufSize, GLfloat *params)
 GL_ENTRY(void, glGetnUniformivEXT, GLuint program, GLint location, GLsizei bufSize, GLint *params)
+
+# Performance measurement
+GL_ENTRY(void, glDrawArraysNullAEMU, GLenum mode, GLint first, GLsizei count);
+GL_ENTRY(void, glDrawElementsNullAEMU, GLenum mode, GLsizei count, GLenum type, const GLvoid* indices);
+GL_ENTRY(void, glDrawElementsOffsetNullAEMU, GLenum mode, GLsizei count, GLenum type, GLuint offset);
+GL_ENTRY(void, glDrawElementsDataNullAEMU, GLenum mode, GLsizei count, GLenum type, void *data, GLuint datalen);
