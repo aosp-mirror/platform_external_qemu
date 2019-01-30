@@ -188,7 +188,7 @@ set(OpenglRender_unittests_src
 android_add_executable(OpenglRender_unittests)
 target_link_libraries(OpenglRender_unittests
                               PRIVATE
-                              android-emu-base
+                              android-emu-base-shared
                               gmock_main
                               OpenglRender_standalone_common)
 
@@ -217,7 +217,7 @@ target_link_libraries(HelloTriangle
                               PUBLIC
                               OpenglRender_standalone_common
                               OpenglCodecCommon
-                              android-emu-base
+                              android-emu-base-shared
                               emugl_common
                               gmock_main
                               OpenglRender
@@ -234,7 +234,7 @@ target_link_libraries(HelloSurfaceFlinger
                               PUBLIC
                               OpenglRender_standalone_common
                               OpenglCodecCommon
-                              android-emu-base
+                              android-emu-base-shared
                               emugl_common
                               gmock_main
                               OpenglRender
@@ -251,7 +251,7 @@ target_link_libraries(CreateDestroyContext
                               PUBLIC
                               OpenglRender_standalone_common
                               OpenglCodecCommon
-                              android-emu-base
+                              android-emu-base-shared
                               emugl_common
                               gmock_main
                               OpenglRender
@@ -268,7 +268,7 @@ target_link_libraries(HelloHostComposition
                               PUBLIC
                               OpenglRender_standalone_common
                               OpenglCodecCommon
-                              android-emu-base
+                              android-emu-base-shared
                               emugl_common
                               gmock_main
                               OpenglRender
@@ -285,7 +285,7 @@ target_link_libraries(HelloVulkan
                       PUBLIC
                       OpenglRender_standalone_common
                       OpenglCodecCommon
-                      android-emu-base
+                      android-emu-base-shared
                       emugl_common
                       gmock_main
                       OpenglRender
