@@ -20,5 +20,6 @@ using goldfish_vk::VulkanDispatch;
 namespace emugl {
 
 VulkanDispatch* vkDispatch(bool forTesting = false);
+bool vkDispatchValid(const VulkanDispatch* vk);
 
 } // namespace emugl

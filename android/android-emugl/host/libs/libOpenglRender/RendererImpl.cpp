@@ -15,6 +15,9 @@
 
 #include "RenderChannelImpl.h"
 
+#include "android/base/system/System.h"
+#include "android/utils/debug.h"
+
 #include "emugl/common/logging.h"
 #include "ErrorLog.h"
 #include "FenceSync.h"
@@ -97,6 +100,10 @@ RendererImpl::~RendererImpl() {
 }
 
 bool RendererImpl::initialize(int width, int height, bool useSubWindow, bool egl2egl) {
+    if (android::base::System::get()->envGet("ANDROID_EMUGL_VERBOSE") == "1") {
+        base_enable_verbose_logs();
+    }
+
     if (mRenderWindow) {
         return false;
     }
