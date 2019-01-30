@@ -7,7 +7,7 @@ set(cutils_src androidImpl/Ashmem.cpp androidImpl/Properties.cpp androidImpl/Gra
 android_add_shared_library(cutils)
 target_include_directories(cutils PRIVATE ${ANDROID_EMUGL_DIR}/host/include .)
 target_include_directories(cutils PUBLIC .)
-target_link_libraries(cutils PUBLIC android-emu-base)
+target_link_libraries(cutils PUBLIC android-emu-base-shared)
 target_link_libraries(cutils PRIVATE emugl_base)
 android_target_compile_options(cutils Clang PRIVATE -fvisibility=default -Wno-invalid-constexpr)
 
@@ -28,7 +28,7 @@ set(gui_src
     sync/sync.cpp
     )
 android_add_shared_library(gui)
-target_link_libraries(gui PUBLIC android-emu-base)
+target_link_libraries(gui PUBLIC android-emu-base-shared)
 target_include_directories(gui PUBLIC ${ANDROID_EMUGL_DIR}/guest)
 target_compile_options(gui PRIVATE -fvisibility=default)
 target_link_libraries(gui PRIVATE emugl_base)
