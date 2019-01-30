@@ -29,6 +29,13 @@
 #include "sysemu/sysemu.h"
 #include "sysemu/cpus.h"
 
+#ifdef __APPLE__
+#include <poll.h>
+#include <sys/types.h> 
+#include <sys/event.h> 
+#include <sys/time.h>
+#endif
+
 #ifdef CONFIG_POSIX
 #include <pthread.h>
 #endif
@@ -334,7 +341,92 @@ int qemu_poll_ns(GPollFD *fds, guint nfds, int64_t timeout)
         return ppoll((struct pollfd *)fds, nfds, &ts, NULL);
     }
 #else
-    return g_poll(fds, nfds, qemu_timeout_ns_to_ms(timeout));
+
+    static struct kevent chlist[4096];
+    static struct kevent evlist[4096];
+    static int krevents[4096];
+    static struct timespec ktimeout;
+    static int kq = -1;
+
+    int evcount = 0;
+    int64_t tvsec = timeout / 1000000000LL;
+
+    /* Avoid possibly overflowing and specifying a negative number of
+     * seconds, which would turn a very long timeout into a busy-wait.
+     */
+    if (tvsec > (int64_t)INT32_MAX) {
+        tvsec = INT32_MAX;
+    }
+    ktimeout.tv_sec = tvsec;
+    ktimeout.tv_nsec = timeout % 1000000000LL;
+
+    if (kq == -1) {
+        printf("Getting kqueue\n");
+        kq = kqueue();
+    }
+
+    int flags = EV_ADD | EV_ONESHOT | EV_CLEAR;
+
+    for (guint i = 0; i < nfds; ++i) {
+
+        if (fds[i].fd < 0) continue;
+
+        if (fds[i].events & (G_IO_IN | G_IO_PRI | G_IO_HUP)) {
+            if (fds[i].events & G_IO_PRI) {
+                EV_SET(&chlist[evcount++], fds[i].fd, EVFILT_READ, flags, EV_OOBAND, 0, &fds[i]);
+            } else {
+                EV_SET(&chlist[evcount++], fds[i].fd, EVFILT_READ, flags, 0, 0, &fds[i]);
+            }
+        }
+
+        if (fds[i].events & G_IO_OUT) {
+            EV_SET(&chlist[evcount++], fds[i].fd, EVFILT_WRITE, flags, 0, 0, &fds[i]);
+        }
+    }
+
+    for (int i = 0; i < evcount; ++i) {
+        EV_SET(&evlist[i], 0, 0, 0, 0, 0, 0);
+    }
+
+    int nev = kevent(kq, chlist, evcount, evlist, evcount, &ktimeout);
+
+    if (nev == -1) {
+        printf("Fail kevent");
+        return -1;
+    }
+
+    for (int i = 0; i < nfds; ++i) {
+        fds[i].revents = 0;
+    }
+
+    for (int i = 0; i < nfds; ++i) {
+        krevents[i] = 0;
+    }
+
+    for (int i = 0; i < nev; ++i) {
+        GPollFD* fd = (GPollFD*)evlist[i].udata;
+
+        switch (evlist[i].filter) {
+        case EVFILT_READ:
+            fd->revents |= G_IO_IN;
+            break;
+        case EVFILT_WRITE:
+            fd->revents |= G_IO_OUT;
+            break;
+        default:
+            break;
+        }
+
+        if (evlist[i].flags & EV_OOBAND) {
+            fd->revents |= G_IO_PRI;
+        }
+
+        if (evlist[i].flags & EV_EOF) {
+            fd->revents |= G_IO_HUP;
+        }
+    }
+
+    return nev;
 #endif
 }
 
