@@ -58,6 +58,7 @@
 #endif
 
 #ifdef __APPLE__
+#include <Carbon/Carbon.h>
 #include <signal.h>
 #endif
 
@@ -200,16 +201,31 @@ extern void skin_winsys_get_monitor_rect(SkinRect *rect)
     QRect qrect;
     QSemaphore semaphore;
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
-    if (window == NULL) {
-        D("%s: Could not get window handle", __FUNCTION__);
-        return;
+    if (window != NULL) {
+        // Use Qt to get the monitor dimensions
+        window->getScreenDimensions(&qrect, &semaphore);
+        semaphore.acquire();
+        rect->pos.x = qrect.left();
+        rect->pos.y = qrect.top();
+        rect->size.w = qrect.width();
+        rect->size.h = qrect.height();
+    } else {
+        // Qt isn't set up yet. Use platform-specific code.
+        rect->pos.x = 0;
+        rect->pos.y = 0;
+#if defined(_WIN32)
+        rect->size.w = (int)GetSystemMetrics(SM_CXSCREEN);
+        rect->size.h = (int)GetSystemMetrics(SM_CYSCREEN);
+#elif defined(__APPLE__)
+        int displayId = CGMainDisplayID();
+        rect->size.w = CGDisplayPixelsWide(displayId);
+        rect->size.h = CGDisplayPixelsHigh(displayId);
+#else // Linux
+        Screen* defaultScreen = DefaultScreenOfDisplay(XOpenDisplay(NULL));
+        rect->size.w = defaultScreen->width;
+        rect->size.h = defaultScreen->height;
+#endif
     }
-    window->getScreenDimensions(&qrect, &semaphore);
-    semaphore.acquire();
-    rect->pos.x = qrect.left();
-    rect->pos.y = qrect.top();
-    rect->size.w = qrect.width();
-    rect->size.h = qrect.height();
     D("%s: (%d,%d) %dx%d", __FUNCTION__, rect->pos.x, rect->pos.y,
       rect->size.w, rect->size.h);
 }
