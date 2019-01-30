@@ -265,8 +265,7 @@ function(android_add_protobuf name protofiles)
   protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${protofiles})
   set(${name}_src ${PROTO_SRCS} ${PROTO_HDRS})
   android_add_library(${name})
-  target_include_directories(${name} PUBLIC ${PROTOBUF_INCLUDE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-  target_link_libraries(${name} PUBLIC ${PROTOBUF_LIBRARIES})
+  target_link_libraries(${name} PUBLIC libprotobuf)
   # Disable generation of information about every class with virtual functions for use by the C++ runtime type
   # identification features (dynamic_cast and typeid). If you don't use those parts of the language, you can save some
   # space by using this flag. Note that exception handling uses the same information, but it will generate it as needed.
