@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "android/utils/debug.h"
+
 #include "OpenglRender/render_api_types.h"
 
 #ifdef _MSC_VER
@@ -47,6 +49,7 @@ EMUGL_COMMON_API void set_emugl_cxt_logger(emugl_logger_t f);
 
 #define GL_CXT_LOG(...)                       \
     do {                                      \
+        dprint(__VA_ARGS__);                  \
         emugl::emugl_cxt_logger(__VA_ARGS__); \
     } while (0)
 
