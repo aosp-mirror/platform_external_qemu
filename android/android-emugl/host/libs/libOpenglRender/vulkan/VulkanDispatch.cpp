@@ -15,9 +15,11 @@
 #include "VulkanDispatch.h"
 
 #include "android/base/files/PathUtils.h"
+#include "android/base/Log.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/utils/path.h"
 
 #include "emugl/common/shared_library.h"
 
@@ -30,37 +32,55 @@ using android::base::System;
 namespace emugl {
 
 static void setIcdPath(const std::string& path) {
+    if (path_exists(path.c_str())) {
+        LOG(VERBOSE) << "setIcdPath: path exists: " << path;
+    } else {
+        LOG(VERBOSE) << "setIcdPath: path doesn't exist: " << path;
+    }
     System::get()->envSet("VK_ICD_FILENAMES", path);
+}
+
+static std::string icdJsonNameToProgramAndLauncherPaths(
+        const std::string& icdFilename) {
+
+    std::string suffix = pj("lib64", "vulkan", icdFilename);
+
+    return pj(System::get()->getProgramDirectory(), suffix) + ":" +
+           pj(System::get()->getLauncherDirectory(), suffix);
 }
 
 static void initIcdPaths(bool forTesting) {
     auto androidIcd = System::get()->envGet("ANDROID_EMU_VK_ICD");
-    if (forTesting || androidIcd == "mock") {
-        auto res = pj(System::get()->getProgramDirectory(), "testlib64");
-        setIcdPath(pj(res, "VkICD_mock_icd.json"));
-        System::get()->envSet("ANDROID_EMU_VK_ICD", "mock");
+    if (forTesting || androidIcd == "swiftshader") {
+        auto res = pj(System::get()->getProgramDirectory(), "lib64", "vulkan");
+        LOG(VERBOSE) << "In test environment or ICD set to swiftshader, using "
+                        "Swiftshader ICD";
+        auto libPath = pj(System::get()->getProgramDirectory(), "lib64", "vulkan", "libvk_swiftshader.so");;
+        if (path_exists(libPath.c_str())) {
+            LOG(VERBOSE) << "Swiftshader library exists";
+        } else {
+            LOG(VERBOSE) << "Swiftshader library doesn't";
+        }
+        setIcdPath(pj(res, "vk_swiftshader_icd.json"));
+        System::get()->envSet("ANDROID_EMU_VK_ICD", "swiftshader");
     } else {
+        LOG(VERBOSE) << "Not in test environment. ICD (blank for default): ["
+                     << androidIcd << "]";
         // Mac: Use gfx-rs libportability-icd by default,
         // and switch between that, its debug variant,
         // and MoltenVK depending on the environment variable setting.
 #ifdef __APPLE__
         if (androidIcd == "moltenvk") {
-            setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
-                          "vulkan", "MoltenVK_icd.json"));
+            setIcdPath(icdJsonNameToProgramAndLauncherPaths("MoltenVK_icd.json"));
         } else if (androidIcd == "portability") {
-            setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
-                          "vulkan", "portability-macos.json"));
+            setIcdPath(icdJsonNameToProgramAndLauncherPaths("portability-macos.json"));
         } else if (androidIcd == "portability-debug") {
-            setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
-                          "vulkan", "portability-macos-debug.json"));
-        } else if (androidIcd == "mock") {
-            setIcdPath(pj(System::get()->getProgramDirectory(), "testlib64",
-                          "VkICD_mock_icd.json"));
+            setIcdPath(icdJsonNameToProgramAndLauncherPaths("portability-macos-debug.json"));
+        } else if (androidIcd == "swiftshader") {
+            setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
         } else {
-            setIcdPath(pj(System::get()->getProgramDirectory(), "lib64",
-                          "vulkan", "portability-macos.json"));
+            setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
         }
-        // TODO: Once Swiftshader is working, set the ICD accordingly.
 #else
         // By default, on other platforms, just use whatever the system
         // is packing.
@@ -80,14 +100,37 @@ static void initIcdPaths(bool forTesting) {
 #endif
 static std::string getLoaderPath(bool forTesting) {
     auto androidIcd = System::get()->envGet("ANDROID_EMU_VK_ICD");
+    if (forTesting || androidIcd == "swiftshader") {
+
+        auto path = pj(System::get()->getProgramDirectory(), "testlib64",
+                  VULKAN_LOADER_FILENAME);
+        LOG(VERBOSE) << "In test environment or using Swiftshader. Using loader: " << path;
+        return path;
+    } else {
+
+#ifdef __APPLE__
+        // on Mac, the loader isn't in the system libraries.
+        auto path = pj(System::get()->getProgramDirectory(), "lib64", "vulkan",
+                  VULKAN_LOADER_FILENAME);
+        LOG(VERBOSE) << "Not in test environment. Using loader: " << path;
+        return path;
+#else
+        LOG(VERBOSE) << "Not in test environment. Using loader: " << VULKAN_LOADER_FILENAME;
+        return VULKAN_LOADER_FILENAME;
+#endif
+    }
+}
+
+static std::string getBackupLoaderPath(bool forTesting) {
+    auto androidIcd = System::get()->envGet("ANDROID_EMU_VK_ICD");
     if (forTesting || androidIcd == "mock") {
-        return pj(System::get()->getProgramDirectory(), "testlib64",
+        return pj(System::get()->getLauncherDirectory(), "testlib64",
                   VULKAN_LOADER_FILENAME);
     } else {
 
 #ifdef __APPLE__
         // on Mac, the loader isn't in the system libraries.
-        return pj(System::get()->getProgramDirectory(), "lib64", "vulkan",
+        return pj(System::get()->getLauncherDirectory(), "lib64", "vulkan",
                   VULKAN_LOADER_FILENAME);
 #else
         return VULKAN_LOADER_FILENAME;
@@ -105,6 +148,11 @@ public:
         if (!mVulkanLoader) {
             auto loaderPath = getLoaderPath(mForTesting);
             mVulkanLoader = emugl::SharedLibrary::open(loaderPath.c_str());
+
+            if (!mVulkanLoader) {
+                loaderPath = getBackupLoaderPath(mForTesting);
+                mVulkanLoader = emugl::SharedLibrary::open(loaderPath.c_str());
+            }
         }
 #ifdef __linux__
         // On Linux, it might not be called libvulkan.so.
@@ -160,6 +208,10 @@ void VulkanDispatchImpl::initialize(bool forTesting) {
 VulkanDispatch* vkDispatch(bool forTesting) {
     sDispatchImpl->initialize(forTesting);
     return sDispatchImpl->dispatch();
+}
+
+bool vkDispatchValid(const VulkanDispatch* vk) {
+    return vk->vkEnumerateInstanceExtensionProperties != nullptr;
 }
 
 }
