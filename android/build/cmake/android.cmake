@@ -220,7 +220,7 @@ function(android_add_test name)
     # Let's include the .dll path for our test runner and set a timeout so we are guaranteed to complete the tests
     string(REPLACE "/" "\\" WIN_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_swiftshader;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_mesa;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/qt/lib")
     set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "PATH=${WIN_PATH};$ENV{PATH}")
-    set_property(TEST ${name} PROPERTY TIMEOUT 300)
+    set_property(TEST ${name} PROPERTY TIMEOUT 600)
   else()
       # Let's not optimize our tests.
       target_compile_options(${name} PRIVATE -O0)
@@ -515,7 +515,7 @@ function(android_upload_symbols TGT)
     "execute_process(COMMAND \"${PYTHON_EXECUTABLE}\"
                              \"${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/upload_symbols.py\"
                              \"${DEST}\"
-                             \"${ANDROID_SYMBOL_URL}\" 
+                             \"${ANDROID_SYMBOL_URL}\"
                              OUTPUT_FILE ${STDOUT} ERROR_QUIET)"
   )
 endfunction()
