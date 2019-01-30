@@ -45,6 +45,18 @@ void init_vulkan_dispatch_from_system_loader(
     DlSymFunc dlSymFunc,
     VulkanDispatch* dispatch_out);
 
+
+void init_vulkan_dispatch_from_instance(
+    VulkanDispatch* vk,
+    VkInstance instance,
+    VulkanDispatch* dispatch_out);
+
+
+void init_vulkan_dispatch_from_device(
+    VulkanDispatch* vk,
+    VkDevice device,
+    VulkanDispatch* dispatch_out);
+
 struct VulkanDispatch {
 #ifdef VK_VERSION_1_0
 PFN_vkCreateInstance vkCreateInstance;
