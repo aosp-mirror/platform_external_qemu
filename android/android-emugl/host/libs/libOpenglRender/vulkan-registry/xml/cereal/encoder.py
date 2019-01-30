@@ -514,8 +514,6 @@ def unwrap_vkAcquireImageANDROID_nativeFenceFd():
 
 custom_encodes = {
     "vkEnumerateInstanceVersion" : emit_only_resource_event,
-    "vkEnumerateDeviceExtensionProperties" : emit_only_resource_event,
-    "vkGetPhysicalDeviceProperties2" : emit_only_resource_event,
     "vkMapMemory" : emit_only_resource_event,
     "vkUnmapMemory" : emit_only_resource_event,
     "vkFlushMappedMemoryRanges" : encode_vkFlushMappedMemoryRanges,
