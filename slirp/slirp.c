@@ -751,6 +751,7 @@ void slirp_pollfds_poll(GArray *pollfds, int select_error)
                  * test for G_IO_IN below if this succeeds
                  */
                 if (revents & G_IO_PRI) {
+                        printf("%s: sorecvoob\n", __func__);
                     ret = sorecvoob(so);
                     if (ret < 0) {
                         /* Socket error might have resulted in the socket being
@@ -766,13 +767,16 @@ void slirp_pollfds_poll(GArray *pollfds, int select_error)
                      * Check for incoming connections
                      */
                     if (so->so_state & SS_FACCEPTCONN) {
+                        printf("%s: tcp_connect\n", __func__);
                         tcp_connect(so);
                         continue;
                     } /* else */
+                        printf("%s: soread\n", __func__);
                     ret = soread(so);
 
                     /* Output it if we read something */
                     if (ret > 0) {
+                        printf("%s: tcp_output\n", __func__);
                         tcp_output(sototcpcb(so));
                     }
                     if (ret < 0) {
@@ -787,6 +791,7 @@ void slirp_pollfds_poll(GArray *pollfds, int select_error)
                  */
                 if (!(so->so_state & SS_NOFDREF) &&
                         (revents & (G_IO_OUT | G_IO_ERR))) {
+                        printf("%s: g_io_out\n", __func__);
                     /*
                      * Check for non-blocking, still-connecting sockets
                      */
@@ -815,6 +820,7 @@ void slirp_pollfds_poll(GArray *pollfds, int select_error)
                                   so->so_ffamily);
                         /* continue; */
                     } else {
+                        printf("%s: sowrite\n", __func__);
                         ret = sowrite(so);
                         if (ret > 0) {
                             /* Call tcp_output in case we need to send a window
