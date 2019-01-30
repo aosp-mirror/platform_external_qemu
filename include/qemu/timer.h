@@ -789,6 +789,7 @@ int qemu_timeout_ns_to_ms(int64_t ns);
  * Returns: number of fds ready
  */
 int qemu_poll_ns(GPollFD *fds, guint nfds, int64_t timeout);
+int qemu_poll_ns_main_loop(GPollFD *fds, guint nfds, int64_t timeout);
 
 /**
  * qemu_soonest_timeout:
