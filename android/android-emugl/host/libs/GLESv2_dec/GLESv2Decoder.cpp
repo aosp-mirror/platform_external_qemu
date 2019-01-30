@@ -115,6 +115,8 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
 
     glDrawElementsOffset = s_glDrawElementsOffset;
     glDrawElementsData = s_glDrawElementsData;
+    glDrawElementsOffsetNullAEMU = s_glDrawElementsOffsetNullAEMU;
+    glDrawElementsDataNullAEMU = s_glDrawElementsDataNullAEMU;
     glFinishRoundTrip = s_glFinishRoundTrip;
     glMapBufferRangeAEMU = s_glMapBufferRangeAEMU;
     glUnmapBufferAEMU = s_glUnmapBufferAEMU;
@@ -326,6 +328,19 @@ void GLESv2Decoder::s_glDrawElementsOffset(void *self, GLenum mode, GLsizei coun
 {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glDrawElements(mode, count, type, SafePointerFromUInt(offset));
+}
+
+void GLESv2Decoder::s_glDrawElementsDataNullAEMU(void *self, GLenum mode, GLsizei count, GLenum type, void * data, GLuint datalen)
+{
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDrawElementsNullAEMU(mode, count, type, data);
+}
+
+
+void GLESv2Decoder::s_glDrawElementsOffsetNullAEMU(void *self, GLenum mode, GLsizei count, GLenum type, GLuint offset)
+{
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glDrawElementsNullAEMU(mode, count, type, SafePointerFromUInt(offset));
 }
 
 void GLESv2Decoder::s_glMapBufferRangeAEMU(void* self, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* mapped)

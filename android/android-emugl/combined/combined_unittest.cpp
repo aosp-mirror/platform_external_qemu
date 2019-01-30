@@ -592,3 +592,126 @@ TEST_F(CombinedGoldfishOpenglTest, DrawCallRate) {
         duration_us,
         duration_cpu_us);
 }
+
+extern "C" void glDrawArraysNullAEMU(GLenum mode, GLint first, GLsizei count);
+
+// Test draw call rate without drawing on the host driver, which gives numbers
+// closer to pure emulator overhead. This is a perfgate benchmark
+TEST_F(CombinedGoldfishOpenglTest, DrawCallRateOverheadOnly) {
+        constexpr char vshaderSrc[] = R"(#version 300 es
+    precision highp float;
+
+    layout (location = 0) in vec2 pos;
+    layout (location = 1) in vec3 color;
+
+    uniform mat4 transform;
+
+    out vec3 color_varying;
+
+    void main() {
+        gl_Position = transform * vec4(pos, 0.0, 1.0);
+        color_varying = (transform * vec4(color, 1.0)).xyz;
+    }
+    )";
+    constexpr char fshaderSrc[] = R"(#version 300 es
+    precision highp float;
+
+    in vec3 color_varying;
+
+    out vec4 fragColor;
+
+    void main() {
+        fragColor = vec4(color_varying, 1.0);
+    }
+    )";
+
+    GLuint program = compileAndLinkShaderProgram(vshaderSrc, fshaderSrc);
+
+    GLint transformLoc = glGetUniformLocation(program, "transform");
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    struct VertexAttributes {
+        float position[2];
+        float color[3];
+    };
+
+    const VertexAttributes vertexAttrs[] = {
+        { { -0.5f, -0.5f,}, { 0.2, 0.1, 0.9, }, },
+        { { 0.5f, -0.5f,}, { 0.8, 0.3, 0.1,}, },
+        { { 0.0f, 0.5f,}, { 0.1, 0.9, 0.6,}, },
+    };
+
+    GLuint buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexAttrs), vertexAttrs,
+                     GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
+                          sizeof(VertexAttributes), 0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                              sizeof(VertexAttributes),
+                              (GLvoid*)offsetof(VertexAttributes, color));
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    glUseProgram(program);
+
+    glClearColor(0.2f, 0.2f, 0.3f, 0.0f);
+    glViewport(0, 0, 1, 1);
+
+    float matrix[16] = {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f,
+    };
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    uint32_t drawCount = 0;
+    static constexpr uint32_t kDrawCallLimit = 2000000;
+
+    auto cpuTimeStart = System::cpuTime();
+
+    while (drawCount < kDrawCallLimit) {
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, matrix);
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glDrawArraysNullAEMU(GL_TRIANGLES, 0, 3);
+        ++drawCount;
+    }
+
+    // Need a round trip at the end to get an accurate measurement
+    glFinish();
+
+    auto cpuTime = System::cpuTime() - cpuTimeStart;
+
+    uint64_t duration_us = cpuTime.wall_time_us;
+    uint64_t duration_cpu_us = cpuTime.usageUs();
+
+    float ms = duration_us / 1000.0f;
+    float sec = duration_us / 1000000.0f;
+
+    float drawCallHz = kDrawCallLimit / sec;
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDeleteBuffers(1, &buffer);
+    glUseProgram(0);
+    glDeleteProgram(program);
+
+    printf("Drew %u times in %f ms. Rate: %f Hz\n", kDrawCallLimit, ms,
+           drawCallHz);
+
+    android::perflogger::logDrawCallOverheadTest(
+        (const char*)glGetString(GL_VENDOR),
+        (const char*)glGetString(GL_RENDERER),
+        (const char*)glGetString(GL_VERSION),
+        "drawArrays", "fullStackOverheadOnly",
+        kDrawCallLimit,
+        (long)drawCallHz,
+        duration_us,
+        duration_cpu_us);
+}
