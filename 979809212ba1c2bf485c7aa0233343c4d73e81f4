@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a5b9fb1e_2506c981",
+        "filename": "android/android-emu/android/camera/camera-virtualscene-utils.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-01-30T21:29:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e9f7b23f_9b618700",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 38
+      },
+      "revId": "979809212ba1c2bf485c7aa0233343c4d73e81f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c71243b1_7fa9ac80",
         "filename": "android/android-emu/android/camera/camera-virtualscene-utils.h",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "979809212ba1c2bf485c7aa0233343c4d73e81f4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7e9caed8_f72dd40b",
+        "filename": "android/android-emu/android/camera/camera-virtualscene-utils.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-01-30T21:29:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c71243b1_7fa9ac80",
+      "range": {
+        "startLine": 75,
+        "startChar": 6,
+        "endLine": 75,
+        "endChar": 14
+      },
+      "revId": "979809212ba1c2bf485c7aa0233343c4d73e81f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "81e8f6a4_8bbfb0b9",
+        "filename": "android/android-emu/android/camera/camera-virtualscene-utils.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-01-30T21:29:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "be976d0d_611e45e7",
+      "range": {
+        "startLine": 86,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 2
+      },
+      "revId": "979809212ba1c2bf485c7aa0233343c4d73e81f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5d98b01c_f983131a",
         "filename": "android/android-emu/android/camera/camera-virtualscene-utils.h",
         "patchSetId": 2
@@ -91,6 +163,30 @@
       "revId": "979809212ba1c2bf485c7aa0233343c4d73e81f4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4098f4bc_3daf8e21",
+        "filename": "android/android-emu/android/camera/camera-virtualscene-utils.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-01-30T21:29:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5d98b01c_f983131a",
+      "range": {
+        "startLine": 106,
+        "startChar": 6,
+        "endLine": 106,
+        "endChar": 30
+      },
+      "revId": "979809212ba1c2bf485c7aa0233343c4d73e81f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
