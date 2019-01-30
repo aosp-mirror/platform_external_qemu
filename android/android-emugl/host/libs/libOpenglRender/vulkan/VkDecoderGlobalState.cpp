@@ -47,6 +47,8 @@ kEmulatedExtensions[] = {
     "VK_ANDROID_native_buffer",
 };
 
+static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 0, 65);
+
 class VkDecoderGlobalState::Impl {
 public:
     Impl() :
@@ -71,7 +73,58 @@ public:
         createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
         createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
 
-        return m_vk->vkCreateInstance(&createInfoFiltered, pAllocator, pInstance);
+        VkResult res = m_vk->vkCreateInstance(&createInfoFiltered, pAllocator, pInstance);
+
+        if (res != VK_SUCCESS) return res;
+
+        AutoLock lock(mLock);
+
+        InstanceInfo info;
+        for (uint32_t i = 0; i < createInfoFiltered.enabledExtensionCount;
+             ++i) {
+            info.enabledExtensionNames.push_back(
+                    createInfoFiltered.ppEnabledExtensionNames[i]);
+        }
+        mInstanceInfo[*pInstance] = info;
+        return res;
+    }
+
+    void on_vkDestroyInstance(VkInstance instance, const VkAllocationCallbacks* pAllocator) {
+        m_vk->vkDestroyInstance(instance, pAllocator);
+
+        AutoLock lock(mLock);
+
+        mInstanceInfo.erase(instance);
+
+        auto it = mPhysicalDeviceToInstance.begin();
+
+        while (it != mPhysicalDeviceToInstance.end()) {
+            if (it->second == instance) {
+                it = mPhysicalDeviceToInstance.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    VkResult on_vkEnumeratePhysicalDevices(
+        VkInstance instance,
+        uint32_t* physicalDeviceCount,
+        VkPhysicalDevice* physicalDevices) {
+        
+        auto res = m_vk->vkEnumeratePhysicalDevices(instance, physicalDeviceCount, physicalDevices);
+
+        if (res != VK_SUCCESS) return res;
+
+        AutoLock lock(mLock);
+
+        if (physicalDeviceCount && physicalDevices) {
+            for (uint32_t i = 0; i < *physicalDeviceCount; ++i) {
+                mPhysicalDeviceToInstance[physicalDevices[i]] = instance;
+            }
+        }
+
+        return res;
     }
 
     void on_vkGetPhysicalDeviceFeatures(VkPhysicalDevice physicalDevice,
@@ -86,10 +139,43 @@ public:
         m_vk->vkGetPhysicalDeviceProperties(
             physicalDevice, pProperties);
 
-        static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 0, 65);
-
         if (pProperties->apiVersion > kMaxSafeVersion) {
             pProperties->apiVersion = kMaxSafeVersion;
+        }
+    }
+
+    void on_vkGetPhysicalDeviceProperties2(
+            VkPhysicalDevice physicalDevice,
+            VkPhysicalDeviceProperties2* pProperties) {
+
+        AutoLock lock(mLock);
+
+        auto physdevInfo =
+                android::base::find(mPhysdevInfo, physicalDevice);
+        if (!physdevInfo) return;
+
+        auto instance = mPhysicalDeviceToInstance[physicalDevice];
+
+        if (physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+            m_vk->vkGetPhysicalDeviceProperties2(physicalDevice, pProperties);
+        } else if (hasInstanceExtension(instance, "VK_KHR_get_physical_device_properties2")) {
+            if (!m_vkGetPhysicalDeviceProperties2KHR) {
+                m_vkGetPhysicalDeviceProperties2KHR =
+                        (PFN_vkGetPhysicalDeviceProperties2KHR)
+                                m_vk->vkGetInstanceProcAddr(
+                                        instance,
+                                        "VK_KHR_get_physical_device_"
+                                        "properties2");
+            }
+
+            m_vkGetPhysicalDeviceProperties2KHR(physicalDevice, pProperties);
+        } else {
+            *pProperties = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2, 0, };
+            m_vk->vkGetPhysicalDeviceProperties(physicalDevice, &pProperties->properties);
+        }
+
+        if (pProperties->properties.apiVersion > kMaxSafeVersion) {
+            pProperties->properties.apiVersion = kMaxSafeVersion;
         }
     }
 
@@ -179,9 +265,11 @@ public:
         if (it == mPhysdevInfo.end()) {
             auto& physdevInfo = mPhysdevInfo[physicalDevice];
 
-            VkPhysicalDeviceMemoryProperties props;
-            m_vk->vkGetPhysicalDeviceMemoryProperties(physicalDevice, &props);
-            physdevInfo.memoryProperties = props;
+            m_vk->vkGetPhysicalDeviceProperties(physicalDevice,
+                                                &physdevInfo.props);
+
+            m_vk->vkGetPhysicalDeviceMemoryProperties(
+                    physicalDevice, &physdevInfo.memoryProperties);
 
             uint32_t queueFamilyPropCount = 0;
 
@@ -711,6 +799,19 @@ public:
                 android::featurecontrol::GLDirectMem);
     }
 
+    bool hasInstanceExtension(VkInstance instance, const std::string& name) {
+        AutoLock lock(mLock);
+
+        auto info = android::base::find(mInstanceInfo, instance);
+        if (!info) return false;
+
+        for (const auto& enabledName : info->enabledExtensionNames) {
+            if (name == enabledName) return true;
+        }
+
+        return false;
+    }
+
     // VK_ANDROID_native_buffer
     VkResult on_vkGetSwapchainGrallocUsageANDROID(
         VkDevice device,
@@ -1238,7 +1339,12 @@ private:
         uint64_t sizeToPage = 0;
     };
 
+    struct InstanceInfo {
+        std::vector<std::string> enabledExtensionNames;
+    };
+
     struct PhysicalDeviceInfo {
+        VkPhysicalDeviceProperties props;
         VkPhysicalDeviceMemoryProperties memoryProperties;
         std::vector<VkQueueFamilyProperties> queueFamilyProperties;
     };
@@ -1266,6 +1372,8 @@ private:
         CompressedImageInfo cmpInfo;
     };
 
+    std::unordered_map<VkInstance, InstanceInfo>
+        mInstanceInfo;
     std::unordered_map<VkPhysicalDevice, PhysicalDeviceInfo>
         mPhysdevInfo;
     std::unordered_map<VkDevice, DeviceInfo>
@@ -1279,10 +1387,16 @@ private:
     // Back-reference to the physical device associated with a particular
     // VkDevice, and the VkDevice corresponding to a VkQueue.
     std::unordered_map<VkDevice, VkPhysicalDevice> mDeviceToPhysicalDevice;
+    std::unordered_map<VkPhysicalDevice, VkInstance> mPhysicalDeviceToInstance;
+
     std::unordered_map<VkQueue, QueueInfo> mQueueInfo;
     std::unordered_map<VkBuffer, BufferInfo> mBufferInfo;
 
     std::unordered_map<VkDeviceMemory, MappedMemoryInfo> mMapInfo;
+
+    // Instance extensions and function pointers
+    std::vector<VkExtensionProperties> mInstanceExtensions;
+    PFN_vkGetPhysicalDeviceProperties2KHR m_vkGetPhysicalDeviceProperties2KHR = 0;
 };
 
 VkDecoderGlobalState::VkDecoderGlobalState()
@@ -1305,6 +1419,19 @@ VkResult VkDecoderGlobalState::on_vkCreateInstance(
     return mImpl->on_vkCreateInstance(pCreateInfo, pAllocator, pInstance);
 }
 
+void VkDecoderGlobalState::on_vkDestroyInstance(
+        VkInstance instance,
+        const VkAllocationCallbacks* pAllocator) {
+    mImpl->on_vkDestroyInstance(instance, pAllocator);
+}
+
+VkResult VkDecoderGlobalState::on_vkEnumeratePhysicalDevices(
+    VkInstance instance,
+    uint32_t* physicalDeviceCount,
+    VkPhysicalDevice* physicalDevices) {
+    return mImpl->on_vkEnumeratePhysicalDevices(instance, physicalDeviceCount, physicalDevices);
+}
+
 void VkDecoderGlobalState::on_vkGetPhysicalDeviceFeatures(
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceFeatures* pFeatures) {
@@ -1315,6 +1442,18 @@ void VkDecoderGlobalState::on_vkGetPhysicalDeviceProperties(
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceProperties* pProperties) {
     mImpl->on_vkGetPhysicalDeviceProperties(physicalDevice, pProperties);
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceProperties2(
+        VkPhysicalDevice physicalDevice,
+        VkPhysicalDeviceProperties2* pProperties) {
+    mImpl->on_vkGetPhysicalDeviceProperties2(physicalDevice, pProperties);
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceProperties2KHR(
+        VkPhysicalDevice physicalDevice,
+        VkPhysicalDeviceProperties2* pProperties) {
+    mImpl->on_vkGetPhysicalDeviceProperties2(physicalDevice, pProperties);
 }
 
 void VkDecoderGlobalState::on_vkGetPhysicalDeviceMemoryProperties(

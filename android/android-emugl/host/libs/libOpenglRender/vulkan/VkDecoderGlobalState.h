@@ -44,6 +44,15 @@ public:
         const VkAllocationCallbacks* pAllocator,
         VkInstance* pInstance);
 
+    void on_vkDestroyInstance(
+        VkInstance instance,
+        const VkAllocationCallbacks* pAllocator);
+
+    VkResult on_vkEnumeratePhysicalDevices(
+        VkInstance instance,
+        uint32_t* physicalDeviceCount,
+        VkPhysicalDevice* physicalDevices);
+
     // Override features
     void on_vkGetPhysicalDeviceFeatures(VkPhysicalDevice physicalDevice,
                                         VkPhysicalDeviceFeatures* pFeatures);
@@ -52,6 +61,12 @@ public:
     void on_vkGetPhysicalDeviceProperties(
             VkPhysicalDevice physicalDevice,
             VkPhysicalDeviceProperties* pProperties);
+    void on_vkGetPhysicalDeviceProperties2(
+            VkPhysicalDevice physicalDevice,
+            VkPhysicalDeviceProperties2* pProperties);
+    void on_vkGetPhysicalDeviceProperties2KHR(
+            VkPhysicalDevice physicalDevice,
+            VkPhysicalDeviceProperties2* pProperties);
 
     // Override memory types advertised from host
     //
