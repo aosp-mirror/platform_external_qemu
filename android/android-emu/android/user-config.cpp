@@ -61,8 +61,14 @@ struct AUserConfig {
 #define  KEY_FRAME_H   "frame.h"
 #define  KEY_UUID      "uuid"
 
-#define  DEFAULT_X 100
-#define  DEFAULT_Y 100
+#define  DEFAULT_X        100
+#define  DEFAULT_Y        100
+#define  DEFAULT_W        365 // Arbitrary, but reasonable
+#define  DEFAULT_H        676
+#define  DEFAULT_FRAME_X  DEFAULT_X
+#define  DEFAULT_FRAME_Y  DEFAULT_Y
+#define  DEFAULT_FRAME_W  DEFAULT_W
+#define  DEFAULT_FRAME_H  DEFAULT_H
 
 void auserConfig_free( AUserConfig* uconfig) {
     if (uconfig->iniPath) {
@@ -73,7 +79,7 @@ void auserConfig_free( AUserConfig* uconfig) {
 
 /* Create a new AUserConfig object from a given AvdInfo */
 AUserConfig*
-auserConfig_new( AvdInfo* info, SkinRect* monitorRect, int screenWidth, int screenHeight )
+auserConfig_new( AvdInfo*  info )
 {
     char          inAndroidBuild = avdInfo_inAndroidBuild(info);
     char          needUUID = 1;
@@ -140,23 +146,7 @@ auserConfig_new( AvdInfo* info, SkinRect* monitorRect, int screenWidth, int scre
                      uc->iniPath);
         }
     }
-    // Set the default width and height to half the monitor size
-    int default_w = monitorRect->size.w / 2;
-    int default_h = monitorRect->size.h / 2;
-    if (default_w < 100) default_w = 100;
-    if (default_h < 100) default_h = 100;
-    if (screenWidth > 0 && screenHeight > 0) {
-        // Reduce one side of the default size to make it match the device's aspect ratio
-        double defaultSizeAspectRatio = ((double)default_w)   / default_h;
-        double deviceAspectRatio      = ((double)screenWidth) / screenHeight;
-        if (defaultSizeAspectRatio < deviceAspectRatio) {
-            // Reduce the height
-            default_h = default_w / deviceAspectRatio;
-        } else {
-            // Reduce the width
-            default_w = default_h * deviceAspectRatio;
-        }
-    }
+
     if (ini != NULL) {
         uc->windowX = iniFile_getInteger(ini, KEY_WINDOW_X, DEFAULT_X);
         DD("    found %s = %d", KEY_WINDOW_X, uc->windowX);
@@ -164,22 +154,22 @@ auserConfig_new( AvdInfo* info, SkinRect* monitorRect, int screenWidth, int scre
         uc->windowY = iniFile_getInteger(ini, KEY_WINDOW_Y, DEFAULT_Y);
         DD("    found %s = %d", KEY_WINDOW_Y, uc->windowY);
 
-        uc->windowW = iniFile_getInteger(ini, KEY_WINDOW_W, default_w);
+        uc->windowW = iniFile_getInteger(ini, KEY_WINDOW_W, DEFAULT_W);
         DD("    found %s = %d", KEY_WINDOW_W, uc->windowW);
 
-        uc->windowH = iniFile_getInteger(ini, KEY_WINDOW_H, default_h);
+        uc->windowH = iniFile_getInteger(ini, KEY_WINDOW_H, DEFAULT_H);
         DD("    found %s = %d", KEY_WINDOW_H, uc->windowH);
 
-        uc->frameX = iniFile_getInteger(ini, KEY_FRAME_X, DEFAULT_X);
+        uc->frameX = iniFile_getInteger(ini, KEY_FRAME_X, DEFAULT_FRAME_X);
         DD("    found %s = %d", KEY_FRAME_X, uc->frameX);
 
-        uc->frameY = iniFile_getInteger(ini, KEY_FRAME_Y, DEFAULT_Y);
+        uc->frameY = iniFile_getInteger(ini, KEY_FRAME_Y, DEFAULT_FRAME_Y);
         DD("    found %s = %d", KEY_FRAME_Y, uc->frameY);
 
-        uc->frameW = iniFile_getInteger(ini, KEY_FRAME_W, default_w);
+        uc->frameW = iniFile_getInteger(ini, KEY_FRAME_W, DEFAULT_FRAME_W);
         DD("    found %s = %d", KEY_FRAME_W, uc->frameW);
 
-        uc->frameH = iniFile_getInteger(ini, KEY_FRAME_H, default_h);
+        uc->frameH = iniFile_getInteger(ini, KEY_FRAME_H, DEFAULT_FRAME_H);
         DD("    found %s = %d", KEY_FRAME_H, uc->frameH);
 
         if (iniFile_hasKey(ini, KEY_UUID)) {
@@ -193,12 +183,12 @@ auserConfig_new( AvdInfo* info, SkinRect* monitorRect, int screenWidth, int scre
     else {
         uc->windowX  = DEFAULT_X;
         uc->windowY  = DEFAULT_Y;
-        uc->windowW  = default_w;
-        uc->windowH  = default_h;
-        uc->frameX   = DEFAULT_X;
-        uc->frameY   = DEFAULT_Y;
-        uc->frameW   = default_w;
-        uc->frameH   = default_h;
+        uc->windowW  = DEFAULT_W;
+        uc->windowH  = DEFAULT_H;
+        uc->frameX   = DEFAULT_FRAME_X;
+        uc->frameY   = DEFAULT_FRAME_Y;
+        uc->frameW   = DEFAULT_FRAME_W;
+        uc->frameH   = DEFAULT_FRAME_H;
         uc->changed  = 1;
     }
 
