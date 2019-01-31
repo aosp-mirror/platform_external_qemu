@@ -1908,6 +1908,10 @@ static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc
             *params = 128;
         break;
 
+    case GL_MAX_VERTEX_ATTRIBS:
+        *params = kMaxVertexAttributes;
+        break;
+
     case GL_MAX_VARYING_VECTORS:
         if(es2)
             getter(pname,params);
