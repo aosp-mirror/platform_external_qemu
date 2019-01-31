@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2b22460_9ba3bfe2",
+        "filename": "android-qemu2-glue/drive-share.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-01-31T18:16:28Z",
+      "side": 1,
+      "message": "Do we still need android_? Shouldn\u0027t it be included by qemu/osdep.h now?",
+      "range": {
+        "startLine": 113,
+        "startChar": 30,
+        "endLine": 113,
+        "endChar": 43
+      },
+      "revId": "0f5d5cb697ec936ac52f2766a8bd0d0c51dfbc4d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e860539_929750f0",
+        "filename": "android/android-emu/android/automation/AutomationController_unittest.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-01-31T18:16:28Z",
+      "side": 1,
+      "message": "msvc-files.h?",
+      "range": {
+        "startLine": 176,
+        "startChar": 28,
+        "endLine": 176,
+        "endChar": 41
+      },
+      "revId": "0f5d5cb697ec936ac52f2766a8bd0d0c51dfbc4d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
