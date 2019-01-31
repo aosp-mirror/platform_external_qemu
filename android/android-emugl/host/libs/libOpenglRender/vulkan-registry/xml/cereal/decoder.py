@@ -228,7 +228,9 @@ custom_decodes = {
     "vkQueueSubmit" : emit_global_state_wrapped_decoding,
     "vkResetCommandBuffer" : emit_global_state_wrapped_decoding,
     "vkFreeCommandBuffers" : emit_global_state_wrapped_decoding,
-
+    "vkCreateCommandPool" : emit_global_state_wrapped_decoding,
+    "vkDestroyCommandPool" : emit_global_state_wrapped_decoding,
+    "vkResetCommandPool" : emit_global_state_wrapped_decoding,
 
     # VK_ANDROID_native_buffer
     "vkGetSwapchainGrallocUsageANDROID" : emit_global_state_wrapped_decoding,
