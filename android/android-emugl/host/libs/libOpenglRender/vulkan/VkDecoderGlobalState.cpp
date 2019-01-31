@@ -143,9 +143,10 @@ public:
         // Run the underlying API call, filtering extensions.
         VkDeviceCreateInfo createInfoFiltered = *pCreateInfo;
         bool emulateTextureEtc2 = false;
+        VkPhysicalDeviceFeatures featuresFiltered;
+
         if (pCreateInfo->pEnabledFeatures) {
-            VkPhysicalDeviceFeatures featuresFiltered =
-                    *pCreateInfo->pEnabledFeatures;
+            featuresFiltered = *pCreateInfo->pEnabledFeatures;
             if (featuresFiltered.textureCompressionETC2) {
                 VkPhysicalDeviceFeatures physicalFeatures;
                 m_vk->vkGetPhysicalDeviceFeatures(physicalDevice,
@@ -857,7 +858,7 @@ public:
         for (uint32_t i = 0; i < submitCount; i++) {
             const VkSubmitInfo& submit = pSubmits[i];
             for (uint32_t c = 0; c < submit.commandBufferCount; c++) {
-                executePreprocessRecursive(submit.pCommandBuffers[c]);
+                executePreprocessRecursive(0, submit.pCommandBuffers[c]);
             }
         }
         return m_vk->vkQueueSubmit(queue, submitCount, pSubmits, fence);
@@ -1111,7 +1112,7 @@ private:
         m_vk->vkUnmapMemory(device, dstMemory);
     }
 
-    void executePreprocessRecursive(VkCommandBuffer cmdBuffer) {
+    void executePreprocessRecursive(int level, VkCommandBuffer cmdBuffer) {
         auto cmdBufferIt = mCmdBufferInfo.find(cmdBuffer);
         if (cmdBufferIt == mCmdBufferInfo.end()) {
             return;
@@ -1119,9 +1120,10 @@ private:
         for (const auto& func : cmdBufferIt->second.preprocessFuncs) {
             func();
         }
-        for (const auto& subCmd : cmdBufferIt->second.subCmds) {
-            executePreprocessRecursive(subCmd);
-        }
+        // TODO: fix
+        // for (const auto& subCmd : cmdBufferIt->second.subCmds) {
+            // executePreprocessRecursive(level + 1, subCmd);
+        // }
     }
 
     VulkanDispatch* m_vk;
