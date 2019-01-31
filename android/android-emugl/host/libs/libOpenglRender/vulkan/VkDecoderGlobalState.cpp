@@ -150,7 +150,7 @@ public:
             if (featuresFiltered.textureCompressionETC2) {
                 VkPhysicalDeviceFeatures physicalFeatures;
                 m_vk->vkGetPhysicalDeviceFeatures(physicalDevice,
-                                                &physicalFeatures);
+                                                  &physicalFeatures);
                 if (!physicalFeatures.textureCompressionETC2) {
                     emulateTextureEtc2 = true;
                     featuresFiltered.textureCompressionETC2 = false;
@@ -314,17 +314,24 @@ public:
         const VkAllocationCallbacks* pAllocator,
         VkImage* pImage) {
 
-        CompressedImageInfo cmpInfo = createCompressedImageInfo(
-            pCreateInfo->format
-        );
+        auto deviceInfoIt = mDeviceInfo.find(device);
+        if (deviceInfoIt == mDeviceInfo.end()) {
+            return VK_ERROR_OUT_OF_HOST_MEMORY;
+        }
+        CompressedImageInfo cmpInfo = {};
         VkImageCreateInfo localInfo;
-        if (cmpInfo.isCompressed) {
-            localInfo = *pCreateInfo;
-            localInfo.format = cmpInfo.dstFormat;
-            pCreateInfo = &localInfo;
+        if (deviceInfoIt->second.emulateTextureEtc2) {
+            cmpInfo = createCompressedImageInfo(
+                pCreateInfo->format
+            );
+            if (cmpInfo.isCompressed) {
+                localInfo = *pCreateInfo;
+                localInfo.format = cmpInfo.dstFormat;
+                pCreateInfo = &localInfo;
 
-            cmpInfo.extent = pCreateInfo->extent;
-            cmpInfo.mipLevels = pCreateInfo->mipLevels;
+                cmpInfo.extent = pCreateInfo->extent;
+                cmpInfo.mipLevels = pCreateInfo->mipLevels;
+            }
         }
 
         AndroidNativeBufferInfo anbInfo;
@@ -399,14 +406,20 @@ public:
         if (!pCreateInfo) {
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
-        CompressedImageInfo cmpInfo = createCompressedImageInfo(
-            pCreateInfo->format
-        );
+        auto deviceInfoIt = mDeviceInfo.find(device);
+        if (deviceInfoIt == mDeviceInfo.end()) {
+            return VK_ERROR_OUT_OF_HOST_MEMORY;
+        }
         VkImageViewCreateInfo createInfo;
-        if (cmpInfo.isCompressed) {
-            createInfo = *pCreateInfo;
-            createInfo.format = cmpInfo.dstFormat;
-            pCreateInfo = &createInfo;
+        if (deviceInfoIt->second.emulateTextureEtc2) {
+            CompressedImageInfo cmpInfo = createCompressedImageInfo(
+                pCreateInfo->format
+            );
+            if (cmpInfo.isCompressed) {
+                createInfo = *pCreateInfo;
+                createInfo.format = cmpInfo.dstFormat;
+                pCreateInfo = &createInfo;
+            }
         }
         return m_vk->vkCreateImageView(device, pCreateInfo, pAllocator, pView);
     }
@@ -836,7 +849,54 @@ public:
             return result;
         }
         AutoLock lock(mLock);
-        mCmdBufferInfo.emplace(*pCommandBuffers, CommandBufferInfo());
+        for (uint32_t i = 0; i < pAllocateInfo->commandBufferCount; i++) {
+            mCmdBufferInfo.emplace(pCommandBuffers[i], CommandBufferInfo());
+            mCmdBufferInfo[pCommandBuffers[i]].cmdPool =
+                    pAllocateInfo->commandPool;
+        }
+        return result;
+    }
+
+    VkResult on_vkCreateCommandPool(VkDevice device,
+                                    const VkCommandPoolCreateInfo* pCreateInfo,
+                                    const VkAllocationCallbacks* pAllocator,
+                                    VkCommandPool* pCommandPool) {
+        VkResult result = m_vk->vkCreateCommandPool(device, pCreateInfo,
+                                                    pAllocator, pCommandPool);
+        if (result != VK_SUCCESS) {
+            return result;
+        }
+        AutoLock lock(mLock);
+        mCmdPoolInfo.emplace(*pCommandPool, CommandPoolInfo());
+
+        return result;
+    }
+
+    void on_vkDestroyCommandPool(VkDevice device,
+                                 VkCommandPool commandPool,
+                                 const VkAllocationCallbacks* pAllocator) {
+        m_vk->vkDestroyCommandPool(device, commandPool, pAllocator);
+        AutoLock lock(mLock);
+        const auto ite = mCmdPoolInfo.find(commandPool);
+        if (ite != mCmdPoolInfo.end()) {
+            removeCommandBufferInfo(ite->second.cmdBuffers);
+            mCmdPoolInfo.erase(ite);
+        }
+    }
+
+    VkResult on_vkResetCommandPool(VkDevice device,
+                                   VkCommandPool commandPool,
+                                   VkCommandPoolResetFlags flags) {
+        VkResult result =
+                m_vk->vkResetCommandPool(device, commandPool, flags);
+        if (result != VK_SUCCESS) {
+            return result;
+        }
+        AutoLock lock(mLock);
+        const auto ite = mCmdPoolInfo.find(commandPool);
+        if (ite != mCmdPoolInfo.end()) {
+            removeCommandBufferInfo(ite->second.cmdBuffers);
+        }
         return result;
     }
 
@@ -878,12 +938,21 @@ public:
                                  VkCommandPool commandPool,
                                  uint32_t commandBufferCount,
                                  const VkCommandBuffer* pCommandBuffers) {
-        AutoLock lock(mLock);
-        for (uint32_t i = 0; i < commandBufferCount; i++) {
-            mCmdBufferInfo.erase(pCommandBuffers[i]);
-        }
         m_vk->vkFreeCommandBuffers(device, commandPool, commandBufferCount,
                                    pCommandBuffers);
+        AutoLock lock(mLock);
+        for (uint32_t i = 0; i < commandBufferCount; i++) {
+            const auto& cmdBufferInfoIt =
+                    mCmdBufferInfo.find(pCommandBuffers[i]);
+            if (cmdBufferInfoIt != mCmdBufferInfo.end()) {
+                const auto& cmdPoolInfoIt =
+                        mCmdPoolInfo.find(cmdBufferInfoIt->second.cmdPool);
+                if (cmdPoolInfoIt != mCmdPoolInfo.end()) {
+                    cmdPoolInfoIt->second.cmdBuffers.erase(pCommandBuffers[i]);
+                }
+                mCmdBufferInfo.erase(cmdBufferInfoIt);
+            }
+        }
     }
 
 private:
@@ -1076,6 +1145,9 @@ private:
 
             const uint8_t* srcPtr = srcRawData + srcRegion.bufferOffset;
             uint8_t* dstPtr = dstRawData + dstRegion.bufferOffset;
+            assert(srcRegion.bufferOffset + etc_get_encoded_data_size(imgFmt,
+                srcRegion.imageExtent.width, srcRegion.imageExtent.height)
+                <= srcBufferInfo.size);
             VkExtent3D alignedSrcImgExtent;
             alignedSrcImgExtent.width =
                     cmp.alignSize(srcRegion.imageExtent.width);
@@ -1126,6 +1198,24 @@ private:
         // }
     }
 
+    typedef std::function<void()> PreprocessFunc;
+    struct CommandBufferInfo {
+        std::vector<PreprocessFunc> preprocessFuncs = {};
+        std::vector<VkCommandBuffer> subCmds = {};
+        VkCommandPool cmdPool = nullptr;
+    };
+
+    struct CommandPoolInfo {
+        std::unordered_set<VkCommandBuffer> cmdBuffers = {};
+    };
+
+    void removeCommandBufferInfo(
+            const std::unordered_set<VkCommandBuffer>& cmdBuffers) {
+        for (const auto& cmdBuffer : cmdBuffers) {
+            mCmdBufferInfo.erase(cmdBuffer);
+        }
+    }
+
     VulkanDispatch* m_vk;
 
     Lock mLock;
@@ -1173,12 +1263,6 @@ private:
         CompressedImageInfo cmpInfo;
     };
 
-    typedef std::function<void()> PreprocessFunc;
-    struct CommandBufferInfo {
-        std::vector<PreprocessFunc> preprocessFuncs = {};
-        std::vector<VkCommandBuffer> subCmds = {};
-    };
-
     std::unordered_map<VkPhysicalDevice, PhysicalDeviceInfo>
         mPhysdevInfo;
     std::unordered_map<VkDevice, DeviceInfo>
@@ -1186,6 +1270,7 @@ private:
     std::unordered_map<VkImage, ImageInfo>
         mImageInfo;
     std::unordered_map<VkCommandBuffer, CommandBufferInfo> mCmdBufferInfo;
+    std::unordered_map<VkCommandPool, CommandPoolInfo> mCmdPoolInfo;
     // TODO: release CommandBufferInfo when a command pool is reset/released
 
     // Back-reference to the physical device associated with a particular
@@ -1414,6 +1499,29 @@ VkResult VkDecoderGlobalState::on_vkAllocateCommandBuffers(
         VkCommandBuffer* pCommandBuffers) {
     return mImpl->on_vkAllocateCommandBuffers(device, pAllocateInfo,
                                               pCommandBuffers);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateCommandPool(
+        VkDevice device,
+        const VkCommandPoolCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkCommandPool* pCommandPool) {
+    return mImpl->on_vkCreateCommandPool(device, pCreateInfo, pAllocator,
+                                         pCommandPool);
+}
+
+void VkDecoderGlobalState::on_vkDestroyCommandPool(
+        VkDevice device,
+        VkCommandPool commandPool,
+        const VkAllocationCallbacks* pAllocator) {
+    mImpl->on_vkDestroyCommandPool(device, commandPool, pAllocator);
+}
+
+VkResult VkDecoderGlobalState::on_vkResetCommandPool(
+        VkDevice device,
+        VkCommandPool commandPool,
+        VkCommandPoolResetFlags flags) {
+    return mImpl->on_vkResetCommandPool(device, commandPool, flags);
 }
 
 void VkDecoderGlobalState::on_vkCmdExecuteCommands(
