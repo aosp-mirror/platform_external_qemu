@@ -16,6 +16,24 @@
       "revId": "cd22d0ed61721adbf931e8cf33b9adf33efec580",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "04d3c6a1_722e0a88",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 953,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-01-31T02:22:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d1f3eb2c_b77f88df",
+      "revId": "cd22d0ed61721adbf931e8cf33b9adf33efec580",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
