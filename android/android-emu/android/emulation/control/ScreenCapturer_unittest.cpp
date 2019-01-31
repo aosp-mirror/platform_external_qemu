@@ -14,8 +14,6 @@
 
 #include "android/emulation/control/ScreenCapturer.h"
 
-#include <cstdio>
-
 #include "OpenglRender/RenderChannel.h"
 #include "OpenglRender/Renderer.h"
 #include "android/base/Compiler.h"
@@ -26,8 +24,11 @@
 #include "android/emulation/proto/observation.pb.h"
 #include "android/loadpng.h"
 
+#include <cstdio>
+#include <fstream>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <iostream>
 #include <string>
 
 using android::base::System;
@@ -350,16 +351,12 @@ TEST_F(ScreenCapturerTest, pbFileSuccess) {
                                   tmp_file.c_str()));
 
     // Check that the file is not empty and contains a serialized Observation.
-    file = std::fopen(tmp_file.c_str(), "r");
-    EXPECT_THAT(file, testing::NotNull()) << "Failed to open " << tmp_file;
-    std::vector<char> buffer(10000000);  // 1e7 bytes.
-    const int num_bytes_read =
-            std::fread(buffer.data(), sizeof(char), 1000000, file);
-    EXPECT_THAT(num_bytes_read, Gt(0));
-    EXPECT_THAT(std::fclose(file), testing::Eq(0));
+    std::ifstream infile(tmp_file.c_str(), std::ios::binary);
+    EXPECT_FALSE(!infile) << "Failed to open " << tmp_file;
 
     android::emulation::Observation observation;
-    observation.ParseFromArray(buffer.data(), num_bytes_read);
+    EXPECT_TRUE(observation.ParseFromIstream(&infile))
+            << "Failed to parse Observation proto";
     EXPECT_THAT(observation.ByteSize(), Gt(0));
     const android::emulation::Observation::Image& image = observation.screen();
     EXPECT_THAT(image.width(), Gt(0));
