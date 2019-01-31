@@ -102,11 +102,36 @@ protected:
         EXPECT_EQ(VK_SUCCESS, vkEnumerateInstanceExtensionProperties(
                                       nullptr, &extCount, exts.data()));
 
+        bool hasGetPhysicalDeviceProperties2 = false;
+        bool hasExternalMemoryCapabilities = false;
+
+        for (const auto& prop : exts) {
+            if (!strcmp("VK_KHR_get_physical_device_properties2", prop.extensionName)) {
+                hasGetPhysicalDeviceProperties2 = true;
+            }
+            if (!strcmp("VK_KHR_external_memory_capabilities", prop.extensionName)) {
+                hasExternalMemoryCapabilities = true;
+            }
+        }
+
+        std::vector<const char*> enabledExtensions;
+
+        if (hasGetPhysicalDeviceProperties2 &&
+            hasExternalMemoryCapabilities) {
+            enabledExtensions.push_back("VK_KHR_get_physical_device_properties2");
+            enabledExtensions.push_back("VK_KHR_external_memory_capabilities");
+        }
+
+        const char* const* enabledExtensionNames =
+                enabledExtensions.size() > 0 ? enabledExtensions.data()
+                                             : nullptr;
+
         VkInstanceCreateInfo instCi = {
             VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
             0, 0, nullptr,
             0, nullptr,
-            0, nullptr,
+            (uint32_t)enabledExtensions.size(),
+            enabledExtensionNames,
         };
 
         EXPECT_EQ(VK_SUCCESS, vkCreateInstance(&instCi, nullptr, &mInstance));
@@ -246,6 +271,10 @@ protected:
 
     struct gralloc_implementation mGralloc;
 
+    bool mInstanceHasExternalMemorySupport = false;
+    bool mDeviceHasExternalMemorySupport = false;
+    bool mDeviceHasAHBSupport = false;
+
     VkInstance mInstance;
     VkPhysicalDevice mPhysicalDevice;
     VkDevice mDevice;
@@ -343,6 +372,7 @@ TEST_F(VulkanHalTest, AndroidNativeImageCreation) {
     destroyAndroidNativeImage(buffer, image);
 }
 
+// Tests the path to sync Android native buffers with Gralloc buffers.
 TEST_F(VulkanHalTest, AndroidNativeImageQueueSignal) {
     VkImage image;
     buffer_handle_t buffer;
@@ -360,6 +390,10 @@ TEST_F(VulkanHalTest, AndroidNativeImageQueueSignal) {
     }
 
     destroyAndroidNativeImage(buffer, image);
+}
+
+// Tests VK_KHR_get_physical_device_properties2
+TEST_F(VulkanHalTest, GetPhysicalDeviceProperties2) {
 }
 
 }  // namespace aemu
