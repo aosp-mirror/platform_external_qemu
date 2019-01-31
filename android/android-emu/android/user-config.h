@@ -13,7 +13,6 @@
 #pragma once
 
 #include "android/avd/info.h"
-#include "android/skin/rect.h"
 #include "android/utils/compiler.h"
 #include <stdint.h>
 
@@ -32,7 +31,7 @@ ANDROID_BEGIN_HEADER
 typedef struct AUserConfig   AUserConfig;
 
 /* Create a new AUserConfig object from a given AvdInfo */
-AUserConfig*   auserConfig_new( AvdInfo*  info, SkinRect* monitorRect, int screenWidth, int screenHeight );
+AUserConfig*   auserConfig_new( AvdInfo*  info );
 void           auserConfig_free( AUserConfig* uconfig );
 
 /* Retrieve the unique UID for this AVD */
