@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b73dd4d7_a23e0e35",
+        "filename": ".vscode/cmake-kits.json",
+        "patchSetId": 15
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-01-31T22:50:44Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "36df8824_2782807a",
+      "range": {
+        "startLine": 8,
+        "startChar": 26,
+        "endLine": 8,
+        "endChar": 89
+      },
+      "revId": "0441a514fe5d7f70993b33bc0c76b3458cd89208",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "347059fa_cdee833d",
         "filename": ".vscode/launch.json",
         "patchSetId": 15
@@ -68,6 +92,30 @@
       "revId": "0441a514fe5d7f70993b33bc0c76b3458cd89208",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "27b5a1e3_4c786441",
+        "filename": "android/android-emu/android/utils/file_io.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-01-31T22:50:44Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "22438c21_31571ea4",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 2
+      },
+      "revId": "0441a514fe5d7f70993b33bc0c76b3458cd89208",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {

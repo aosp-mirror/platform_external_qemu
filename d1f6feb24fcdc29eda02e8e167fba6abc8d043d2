@@ -22,6 +22,30 @@
       "revId": "d1f6feb24fcdc29eda02e8e167fba6abc8d043d2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1a3f762f_a52a1b2d",
+        "filename": "target/i386/hvf-utils/x86_cpuid.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-01-31T22:50:44Z",
+      "side": 0,
+      "message": "Yes, we are out of bounds of the array, so something is getting overwritten. I fixed this as warnings are now treated as errors.",
+      "parentUuid": "88abd932_b317d32a",
+      "range": {
+        "startLine": 70,
+        "startChar": 50,
+        "endLine": 70,
+        "endChar": 55
+      },
+      "revId": "d1f6feb24fcdc29eda02e8e167fba6abc8d043d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
