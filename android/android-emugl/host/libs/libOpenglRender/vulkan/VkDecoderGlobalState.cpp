@@ -286,7 +286,7 @@ public:
         VkResult result =
                 m_vk->vkCreateBuffer(device, pCreateInfo, pAllocator, pBuffer);
         if (result == VK_SUCCESS) {
-            mBufferInfo.emplace(*pBuffer, BufferInfo());
+            mBufferInfo[*pBuffer] = BufferInfo();
             mBufferInfo[*pBuffer].device = device;
             mBufferInfo[*pBuffer].size = pCreateInfo->size;
         }
@@ -852,7 +852,7 @@ public:
         }
         AutoLock lock(mLock);
         for (uint32_t i = 0; i < pAllocateInfo->commandBufferCount; i++) {
-            mCmdBufferInfo.emplace(pCommandBuffers[i], CommandBufferInfo());
+            mCmdBufferInfo[pCommandBuffers[i]] = CommandBufferInfo();
             mCmdBufferInfo[pCommandBuffers[i]].cmdPool =
                     pAllocateInfo->commandPool;
         }
@@ -869,7 +869,7 @@ public:
             return result;
         }
         AutoLock lock(mLock);
-        mCmdPoolInfo.emplace(*pCommandPool, CommandPoolInfo());
+        mCmdPoolInfo[*pCommandPool] = CommandPoolInfo();
 
         return result;
     }
