@@ -203,6 +203,19 @@ public:
                                  uint32_t commandBufferCount,
                                  const VkCommandBuffer* pCommandBuffers);
 
+    VkResult on_vkCreateCommandPool(VkDevice device,
+                                    const VkCommandPoolCreateInfo* pCreateInfo,
+                                    const VkAllocationCallbacks* pAllocator,
+                                    VkCommandPool* pCommandPool);
+
+    void on_vkDestroyCommandPool(VkDevice device,
+                                 VkCommandPool commandPool,
+                                 const VkAllocationCallbacks* pAllocator);
+
+    VkResult on_vkResetCommandPool(VkDevice device,
+                                   VkCommandPool commandPool,
+                                   VkCommandPoolResetFlags flags);
+
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

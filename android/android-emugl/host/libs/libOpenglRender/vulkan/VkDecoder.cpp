@@ -2830,6 +2830,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateCommandPool:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkCreateCommandPool\n");
+                    ;
+                }
                 VkDevice device;
                 const VkCommandPoolCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -2850,12 +2854,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 uint64_t cgen_var_262;
                 vkReadStream->read((uint64_t*)&cgen_var_262, 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkCommandPool(&cgen_var_262, (VkCommandPool*)pCommandPool, 1);
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateCommandPool\n");;
-                }
                 VkResult vkCreateCommandPool_VkResult_return = (VkResult)0;
-                vkCreateCommandPool_VkResult_return = m_vk->vkCreateCommandPool(device, pCreateInfo, pAllocator, pCommandPool);
+                vkCreateCommandPool_VkResult_return =
+                        m_state->on_vkCreateCommandPool(
+                                device, pCreateInfo, pAllocator, pCommandPool);
                 uint64_t cgen_var_263;
                 vkStream->handleMapping()->mapHandles_VkCommandPool_u64(pCommandPool, &cgen_var_263, 1);
                 vkStream->write((uint64_t*)&cgen_var_263, 8);
@@ -2866,6 +2868,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDestroyCommandPool:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkDestroyCommandPool\n");
+                    ;
+                }
                 VkDevice device;
                 VkCommandPool commandPool;
                 const VkAllocationCallbacks* pAllocator;
@@ -2882,17 +2888,18 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkDestroyCommandPool\n");;
-                }
-                m_vk->vkDestroyCommandPool(device, commandPool, pAllocator);
+                m_state->on_vkDestroyCommandPool(device, commandPool,
+                                                 pAllocator);
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
                 break;
             }
             case OP_vkResetCommandPool:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkResetCommandPool\n");
+                    ;
+                }
                 VkDevice device;
                 VkCommandPool commandPool;
                 VkCommandPoolResetFlags flags;
@@ -2903,12 +2910,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint64_t*)&cgen_var_268, 1 * 8);
                 vkReadStream->handleMapping()->mapHandles_u64_VkCommandPool(&cgen_var_268, (VkCommandPool*)&commandPool, 1);
                 vkReadStream->read((VkCommandPoolResetFlags*)&flags, sizeof(VkCommandPoolResetFlags));
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkResetCommandPool\n");;
-                }
                 VkResult vkResetCommandPool_VkResult_return = (VkResult)0;
-                vkResetCommandPool_VkResult_return = m_vk->vkResetCommandPool(device, commandPool, flags);
+                vkResetCommandPool_VkResult_return =
+                        m_state->on_vkResetCommandPool(device, commandPool,
+                                                       flags);
                 vkStream->write(&vkResetCommandPool_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
