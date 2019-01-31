@@ -313,6 +313,11 @@ public:
         const void *pixels,
         size_t numBytes);
 
+    bool getColorBufferInfo(HandleType p_colorbuffer,
+                            int* width,
+                            int* height,
+                            GLint* internalformat);
+
     // Display the content of a given ColorBuffer into the framebuffer's
     // sub-window. |p_colorbuffer| is a handle value.
     // |needLockAndBind| is used to indicate whether the operation requires
