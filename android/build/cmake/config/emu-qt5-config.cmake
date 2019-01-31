@@ -31,6 +31,7 @@ else()
 endif()
 
 set(QT_VERSION_MAJOR 5)
+set(QT_VERSION_MINOR 11)
 set(CMAKE_AUTOMOC TRUE)
 set(CMAKE_AUTOUIC TRUE)
 set(CMAKE_AUTORCC TRUE)
@@ -38,7 +39,7 @@ set(CMAKE_AUTORCC TRUE)
 # Registers the uic/rcc/moc targets if needed..
 function(add_qt_target target)
   if(MSVC)
-   set(EXE_SUFFIX ".exe")
+    set(EXE_SUFFIX ".exe")
   endif()
   if(NOT TARGET Qt5::${target})
     set(QT_EXECUTABLE ${HOST_PREBUILT_ROOT}/bin/${target}${EXE_SUFFIX})
@@ -58,7 +59,7 @@ add_qt_target(rcc)
 function(add_qt_shared_lib target link target_deps)
   if(NOT TARGET Qt5::${target})
     add_library(Qt5::${target} INTERFACE IMPORTED GLOBAL)
-    if (QT5_LINK_PATH)
+    if(QT5_LINK_PATH)
       set(link "${link} ${QT5_LINK_PATH}")
     endif()
     set_target_properties(Qt5::${target}
@@ -215,7 +216,6 @@ elseif(ANDROID_TARGET_OS STREQUAL "windows_msvc")
   add_qt_shared_lib(WebSockets "${PREBUILT_ROOT}/lib/Qt5WebSockets.lib" "Qt5::WebEngineCore;Qt5::Qml")
   add_qt_shared_lib(WebEngineWidgets "${PREBUILT_ROOT}/lib/Qt5WebEngineWidgets.lib" "Qt5::WebEngineCore;Qt5::Qml")
 
-
 elseif(ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
   # On Windows, linking to mingw32 is required. The library is provided by the toolchain, and depends on a main()
   # function provided by qtmain which itself depends on qMain(). These must appear in emulator-libui_unittests LDFLAGS
@@ -325,7 +325,19 @@ endif()
 
 set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5Widgets -lQt5Gui -lQt5Core -lQt5Svg)
 
-set(
-  PACKAGE_EXPORT
-  "QT5_INCLUDE_DIR;QT5_INCLUDE_DIRS;QT5_LIBRARIES;QT5_FOUND;QT5_DEFINITIONS;CMAKE_AUTOMOC;CMAKE_AUTOUIC;CMAKE_AUTORCC;QT_MOC_EXECUTABLE;QT_UIC_EXECUTABLE;QT_RCC_EXECUTABLE;QT_VERSION_MAJOR;QT5_SHARED_DEPENDENCIES;QT5_SHARED_PROPERTIES"
-  )
+set(PACKAGE_EXPORT
+    QT5_INCLUDE_DIR
+    QT5_INCLUDE_DIRS
+    QT5_LIBRARIES
+    QT5_FOUND
+    QT5_DEFINITIONS
+    CMAKE_AUTOMOC
+    CMAKE_AUTOUIC
+    CMAKE_AUTORCC
+    QT_MOC_EXECUTABLE
+    QT_UIC_EXECUTABLE
+    QT_RCC_EXECUTABLE
+    QT_VERSION_MAJOR
+    QT5_SHARED_DEPENDENCIES
+    QT5_SHARED_PROPERTIES
+    QT_VERSION_MINOR)
