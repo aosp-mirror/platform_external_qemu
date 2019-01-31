@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "249416ca_056ef4e4",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1440047
+      },
+      "writtenOn": "2019-01-31T23:02:01Z",
+      "side": 1,
+      "message": "Oh, that\u0027s cool, I didn\u0027t know about SerializeToOstream(). The code is much shorter now. Thanks!",
+      "parentUuid": "a21c82c1_1182dffd",
+      "range": {
+        "startLine": 136,
+        "startChar": 3,
+        "endLine": 136,
+        "endChar": 68
+      },
+      "revId": "dd9e70f2402e3b01b4303fcfc48b61eb70b1d562",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aafa1f73_0aa59144",
         "filename": "android/android-emu/android/emulation/control/ScreenCapturer_unittest.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "efc3ca61_679d31cf",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1440047
+      },
+      "writtenOn": "2019-01-31T23:02:01Z",
+      "side": 1,
+      "message": "I manually moved them down because clang-format didn\u0027t do it. Thanks for pointing it out.",
+      "parentUuid": "aafa1f73_0aa59144",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 17
+      },
+      "revId": "dd9e70f2402e3b01b4303fcfc48b61eb70b1d562",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f22798ad_144dcdba",
         "filename": "android/android-emu/android/emulation/control/ScreenCapturer_unittest.cpp",
         "patchSetId": 1
@@ -62,6 +110,24 @@
       "revId": "dd9e70f2402e3b01b4303fcfc48b61eb70b1d562",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac1bf06b_e1f2e26e",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1440047
+      },
+      "writtenOn": "2019-01-31T23:02:01Z",
+      "side": 1,
+      "message": "Thanks! Much better!",
+      "parentUuid": "f22798ad_144dcdba",
+      "revId": "dd9e70f2402e3b01b4303fcfc48b61eb70b1d562",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
