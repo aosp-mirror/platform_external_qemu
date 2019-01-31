@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "aafa1f73_0aa59144",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-01-31T22:29:44Z",
+      "side": 1,
+      "message": "nit: move #include\u003c\u003e after #include\"\" ?\nor just clang-format it:\n\ncd android\ngit clang-format HEAD~\ngit commit -a --amend\nrepo upload",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 17
+      },
+      "revId": "dd9e70f2402e3b01b4303fcfc48b61eb70b1d562",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f22798ad_144dcdba",
         "filename": "android/android-emu/android/emulation/control/ScreenCapturer_unittest.cpp",
         "patchSetId": 1
