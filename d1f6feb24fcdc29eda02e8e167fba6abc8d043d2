@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88abd932_b317d32a",
+        "filename": "target/i386/hvf-utils/x86_cpuid.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-01-31T19:29:26Z",
+      "side": 0,
+      "message": "is it ok to cut down 2 spaces?",
+      "range": {
+        "startLine": 70,
+        "startChar": 50,
+        "endLine": 70,
+        "endChar": 55
+      },
+      "revId": "d1f6feb24fcdc29eda02e8e167fba6abc8d043d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

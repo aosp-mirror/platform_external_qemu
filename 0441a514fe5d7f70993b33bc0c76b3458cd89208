@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "36df8824_2782807a",
+        "filename": ".vscode/cmake-kits.json",
+        "patchSetId": 15
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-01-31T19:29:26Z",
+      "side": 1,
+      "message": "revert this?",
+      "range": {
+        "startLine": 8,
+        "startChar": 26,
+        "endLine": 8,
+        "endChar": 89
+      },
+      "revId": "0441a514fe5d7f70993b33bc0c76b3458cd89208",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "347059fa_cdee833d",
+        "filename": ".vscode/launch.json",
+        "patchSetId": 15
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-01-31T19:29:26Z",
+      "side": 1,
+      "message": "revert most part of this file?",
+      "range": {
+        "startLine": 14,
+        "startChar": 15,
+        "endLine": 14,
+        "endChar": 16
+      },
+      "revId": "0441a514fe5d7f70993b33bc0c76b3458cd89208",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "22438c21_31571ea4",
+        "filename": "android/android-emu/android/utils/file_io.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-01-31T19:29:26Z",
+      "side": 1,
+      "message": "nit: space. Also please fix indentation in this function.",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 2
+      },
+      "revId": "0441a514fe5d7f70993b33bc0c76b3458cd89208",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e217f20_f8b03f50",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 461,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-01-31T19:29:26Z",
+      "side": 1,
+      "message": "nit: indentation off by one space",
+      "range": {
+        "startLine": 461,
+        "startChar": 7,
+        "endLine": 461,
+        "endChar": 21
+      },
+      "revId": "0441a514fe5d7f70993b33bc0c76b3458cd89208",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2219d39a_ca8fe31b",
+        "filename": "android/android-emu/android/utils/tempfile.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-01-31T19:29:26Z",
+      "side": 1,
+      "message": "nit: indentation off by 1 space",
+      "range": {
+        "startLine": 150,
+        "startChar": 0,
+        "endLine": 150,
+        "endChar": 3
+      },
+      "revId": "0441a514fe5d7f70993b33bc0c76b3458cd89208",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
