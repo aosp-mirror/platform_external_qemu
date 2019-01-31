@@ -67,11 +67,21 @@ void BufferBinding::onSave(android::base::Stream* stream) const {
 
 VAOState::VAOState(android::base::Stream* stream) {
     element_array_buffer_binding = stream->getBe32();
-    arraysMap = new ArraysMap();
-    size_t mapSize = stream->getBe32();
-    for (size_t i = 0; i < mapSize; i++) {
-        GLuint id = stream->getBe32();
-        arraysMap->emplace(id, new GLESpointer(stream));
+
+    vertexAttribInfo.clear();
+    for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
+        vertexAttribInfo.emplace_back(stream);
+    }
+
+    uint64_t arraysMapPtr = stream->getBe64();
+
+    if (arraysMapPtr) {
+        arraysMap = new ArraysMap();
+        size_t mapSize = stream->getBe32();
+        for (size_t i = 0; i < mapSize; i++) {
+            GLuint id = stream->getBe32();
+            arraysMap->emplace(id, new GLESpointer(stream));
+        }
     }
 
     loadContainer(stream, bindingState);
@@ -81,12 +91,19 @@ VAOState::VAOState(android::base::Stream* stream) {
 
 void VAOState::onSave(android::base::Stream* stream) const {
     stream->putBe32(element_array_buffer_binding);
-    assert(arraysMap);
-    stream->putBe32(arraysMap->size());
-    for (const auto& ite : *arraysMap) {
-        stream->putBe32(ite.first);
-        assert(ite.second);
-        ite.second->onSave(stream);
+    for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
+        vertexAttribInfo[i].onSave(stream);
+    }
+
+    stream->putBe64((uint64_t)(uintptr_t)arraysMap);
+
+    if (arraysMap) {
+        stream->putBe32(arraysMap->size());
+        for (const auto& ite : *arraysMap) {
+            stream->putBe32(ite.first);
+            assert(ite.second);
+            ite.second->onSave(stream);
+        }
     }
 
     saveContainer(stream, bindingState);
@@ -296,10 +313,12 @@ void GLEScontext::removeVertexArrayObject(GLuint array) {
 
     ArraysMap* map = m_vaoStateMap[array].arraysMap;
 
-    for (auto elem : *map) {
-        delete elem.second;
+    if (map) {
+        for (auto elem : *map) {
+            delete elem.second;
+        }
+        delete map;
     }
-    delete map;
 
     m_vaoStateMap.erase(array);
 }
@@ -322,14 +341,15 @@ GLuint GLEScontext::getVertexArrayObject() const {
 }
 
 bool GLEScontext::vertexAttributesBufferBacked() {
-    int numVtxAttrib = std::min(s_glSupport.maxVertexAttribs,
-            static_cast<int>(m_currVaoState.bufferBindings().size()));
-    for (int i = 0; i < numVtxAttrib; i++) {
-        if (m_currVaoState[i]->isEnable() &&
-            !m_currVaoState.bufferBindings()[m_currVaoState[i]->getBindingIndex()].buffer) {
+    const auto& info = m_currVaoState.attribInfo_const();
+    for (uint32_t i = 0; i  < kMaxVertexAttributes; ++i) {
+        const auto& pointerInfo = info[i];
+        if (pointerInfo.isEnable() &&
+            !m_currVaoState.bufferBindings()[pointerInfo.getBindingIndex()].buffer) {
             return false;
         }
     }
+
     return true;
 }
 
@@ -905,10 +925,20 @@ ObjectDataPtr GLEScontext::loadObject(NamedObjectType type,
 
 const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data, GLsizei dataSize, bool normalize, bool isInt) {
     GLuint bufferName = m_arrayBuffer;
-    auto vertexAttrib = m_currVaoState.find(arrType);
-    if (vertexAttrib == m_currVaoState.end()) {
-        return nullptr;
+    GLESpointer* glesPointer = nullptr;
+
+    if (m_currVaoState.it->second.legacy) {
+        auto vertexAttrib = m_currVaoState.find(arrType);
+        if (vertexAttrib == m_currVaoState.end()) {
+            return nullptr;
+        }
+        glesPointer = m_currVaoState[arrType];
+    } else {
+        uint32_t attribIndex = (uint32_t)arrType;
+        if (attribIndex > kMaxVertexAttributes) return nullptr;
+        glesPointer = m_currVaoState.attribInfo().data() + (uint32_t)arrType;
     }
+
     if(bufferName) {
         unsigned int offset = SafeUIntFromPointer(data);
         GLESbuffer* vbo = static_cast<GLESbuffer*>(
@@ -921,10 +951,12 @@ const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsi
 #endif
             return nullptr;
         }
-        m_currVaoState[arrType]->setBuffer(size,type,stride,vbo,bufferName,offset,normalize, isInt);
+
+        glesPointer->setBuffer(size,type,stride,vbo,bufferName,offset,normalize, isInt);
+
         return  static_cast<const unsigned char*>(vbo->getData()) +  offset;
     }
-    m_currVaoState[arrType]->setArray(size,type,stride,data,dataSize,normalize,isInt);
+    glesPointer->setArray(size,type,stride,data,dataSize,normalize,isInt);
     return data;
 }
 
@@ -941,7 +973,12 @@ void GLEScontext::enableArr(GLenum arr,bool enable) {
 }
 
 bool GLEScontext::isArrEnabled(GLenum arr) {
-    return m_currVaoState[arr]->isEnable();
+    if (m_currVaoState.it->second.legacy) {
+        return m_currVaoState[arr]->isEnable();
+    } else {
+        if ((uint32_t)arr > kMaxVertexAttributes) return false;
+        return m_currVaoState.attribInfo()[(uint32_t)arr].isEnable();
+    }
 }
 
 const GLESpointer* GLEScontext::getPointer(GLenum arrType) {
@@ -1629,6 +1666,11 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     const char* cstring = (const char*)extensionString;
 
     s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&s_glSupport.maxVertexAttribs);
+
+    if (s_glSupport.maxVertexAttribs > kMaxVertexAttributes) {
+        s_glSupport.maxVertexAttribs = kMaxVertexAttributes;
+    }
+
     s_glDispatch.glGetIntegerv(GL_MAX_CLIP_PLANES,&s_glSupport.maxClipPlane);
     s_glDispatch.glGetIntegerv(GL_MAX_LIGHTS,&s_glSupport.maxLights);
     s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_SIZE,&s_glSupport.maxTexSize);

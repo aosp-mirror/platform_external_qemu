@@ -216,6 +216,22 @@ void GLESv2Context::onSave(android::base::Stream* stream) const {
     m_transformFeedbackNameSpace->onSave(stream);
 }
 
+void GLESv2Context::addVertexArrayObject(GLuint array) {
+    m_vaoStateMap[array] = VAOState(0, nullptr, kMaxVertexAttributes);
+}
+
+void GLESv2Context::enableArr(GLenum arrType, bool enable) {
+    uint32_t index = (uint32_t)arrType;
+    if (index > kMaxVertexAttributes) return;
+    m_currVaoState.attribInfo()[index].enable(enable);
+}
+
+const GLESpointer* GLESv2Context::getPointer(GLenum arrType) {
+    uint32_t index = (uint32_t)arrType;
+    if (index > kMaxVertexAttributes) return nullptr;
+    return m_currVaoState.attribInfo().data() + index;
+}
+
 void GLESv2Context::postLoadRestoreCtx() {
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     m_useProgramData = shareGroup()->getObjectDataPtr(
@@ -235,17 +251,18 @@ void GLESv2Context::postLoadRestoreCtx() {
         if (m_glesMajorVersion >= 3) {
             dispatcher.glBindVertexArray(getVAOGlobalName(vaoIte.first));
         }
-        for (const auto& glesPointerIte : *vaoIte.second.arraysMap) {
-            GLESpointer* glesPointer = glesPointerIte.second;
+        for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
+            GLESpointer* glesPointer =
+                (GLESpointer*)(vaoIte.second.vertexAttribInfo.data() + i);
 
             // don't skip enabling if the guest assumes it was enabled.
             if (glesPointer->isEnable()) {
-                dispatcher.glEnableVertexAttribArray(glesPointerIte.first);
+                dispatcher.glEnableVertexAttribArray(i);
             }
 
             // attribute 0 are bound right before draw, no need to bind it here
             if (glesPointer->getAttribType() == GLESpointer::VALUE
-                    && glesPointerIte.first == 0) {
+                    && i == 0) {
                 break;
             }
             switch (glesPointer->getAttribType()) {
@@ -260,13 +277,13 @@ void GLESv2Context::postLoadRestoreCtx() {
                     dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
                             globalBufferName);
                     if (glesPointer->isIntPointer()) {
-                        dispatcher.glVertexAttribIPointer(glesPointerIte.first,
+                        dispatcher.glVertexAttribIPointer(i,
                                 glesPointer->getSize(),
                                 glesPointer->getType(),
                                 glesPointer->getStride(),
                                 (GLvoid*)(size_t)glesPointer->getBufferOffset());
                     } else {
-                        dispatcher.glVertexAttribPointer(glesPointerIte.first,
+                        dispatcher.glVertexAttribPointer(i,
                                 glesPointer->getSize(),
                                 glesPointer->getType(), glesPointer->isNormalize(),
                                 glesPointer->getStride(),
@@ -277,19 +294,19 @@ void GLESv2Context::postLoadRestoreCtx() {
                 case GLESpointer::VALUE:
                     switch (glesPointer->getValueCount()) {
                         case 1:
-                            dispatcher.glVertexAttrib1fv(glesPointerIte.first,
+                            dispatcher.glVertexAttrib1fv(i,
                                     glesPointer->getValues());
                             break;
                         case 2:
-                            dispatcher.glVertexAttrib2fv(glesPointerIte.first,
+                            dispatcher.glVertexAttrib2fv(i,
                                     glesPointer->getValues());
                             break;
                         case 3:
-                            dispatcher.glVertexAttrib3fv(glesPointerIte.first,
+                            dispatcher.glVertexAttrib3fv(i,
                                     glesPointer->getValues());
                             break;
                         case 4:
-                            dispatcher.glVertexAttrib4fv(glesPointerIte.first,
+                            dispatcher.glVertexAttrib4fv(i,
                                     glesPointer->getValues());
                             break;
                     }
@@ -593,12 +610,9 @@ void GLESv2Context::drawWithEmulations(
 }
 
 void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) {
-    ArraysMap::iterator it;
-
     //going over all clients arrays Pointers
-    for ( it=m_currVaoState.begin() ; it != m_currVaoState.end(); ++it) {
-        GLenum array_id = (*it).first;
-        GLESpointer* p = (*it).second;
+    for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
+        GLESpointer* p = m_currVaoState.attribInfo().data() + i;
         if (!p->isEnable() || p->getAttribType() == GLESpointer::VALUE) {
             continue;
         }
@@ -606,7 +620,7 @@ void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
         setupArrWithDataSize(
             p->getDataSize(),
             p->getArrayData(),
-            array_id,
+            i,
             p->getType(),
             p->getSize(),
             p->getStride(),
@@ -651,17 +665,14 @@ void GLESv2Context::setVertexAttribDivisor(GLuint bindingindex, GLuint divisor) 
 }
 
 void GLESv2Context::setVertexAttribBindingIndex(GLuint attribindex, GLuint bindingindex) {
-    auto vertexAttrib = m_currVaoState.find(attribindex);
-    if (vertexAttrib != m_currVaoState.end()) {
-        vertexAttrib->second->setBindingIndex(bindingindex);
-    }
+    if (attribindex > kMaxVertexAttributes) return;
+
+    m_currVaoState.attribInfo()[attribindex].setBindingIndex(bindingindex);
 }
 
 void GLESv2Context::setVertexAttribFormat(GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint reloffset, bool isInt) {
-    auto vertexAttrib = m_currVaoState.find(attribindex);
-    if (vertexAttrib != m_currVaoState.end()) {
-        vertexAttrib->second->setFormat(size, type, normalized == GL_TRUE, reloffset, isInt);
-    }
+    if (attribindex > kMaxVertexAttributes) return;
+    m_currVaoState.attribInfo()[attribindex].setFormat(size, type, normalized == GL_TRUE, reloffset, isInt);
 }
 
 void GLESv2Context::setBindSampler(GLuint unit, GLuint sampler) {
