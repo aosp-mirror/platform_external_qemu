@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9e64bc4_839bec5e",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-01-31T02:04:25Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 352,
+        "startChar": 0,
+        "endLine": 352,
+        "endChar": 4
+      },
+      "revId": "6e672cf9e74ffe1b631ce8c64db12924cc055e84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "93b61c88_2a8429a7",
+        "filename": "android/android-emugl/shared/OpenglCodecCommon/GLDecoderContextData.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-01-31T02:04:25Z",
+      "side": 1,
+      "message": "nit: indentation",
+      "range": {
+        "startLine": 49,
+        "startChar": 8,
+        "endLine": 49,
+        "endChar": 11
+      },
+      "revId": "6e672cf9e74ffe1b631ce8c64db12924cc055e84",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
