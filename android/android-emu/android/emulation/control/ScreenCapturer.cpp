@@ -14,8 +14,6 @@
 
 #include "android/emulation/control/ScreenCapturer.h"
 
-#include <sys/fcntl.h>
-#include <sys/stat.h>
 #include <cstdio>
 #include <vector>
 
