@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a21c82c1_1182dffd",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-01-31T22:28:19Z",
+      "side": 1,
+      "message": "Can we use fstream and SerializeToOstream instead?",
+      "range": {
+        "startLine": 136,
+        "startChar": 3,
+        "endLine": 136,
+        "endChar": 68
+      },
+      "revId": "dd9e70f2402e3b01b4303fcfc48b61eb70b1d562",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f22798ad_144dcdba",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-01-31T22:28:19Z",
+      "side": 1,
+      "message": "Same here, ParseFromIstream",
+      "revId": "dd9e70f2402e3b01b4303fcfc48b61eb70b1d562",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
