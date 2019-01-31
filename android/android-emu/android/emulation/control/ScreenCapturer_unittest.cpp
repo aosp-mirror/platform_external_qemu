@@ -14,18 +14,25 @@
 
 #include "android/emulation/control/ScreenCapturer.h"
 
-#include "android/base/Compiler.h"
-#include "android/base/system/System.h"
-#include "android/base/testing/TestSystem.h"
-#include "android/loadpng.h"
+#include <cstdio>
+
 #include "OpenglRender/RenderChannel.h"
 #include "OpenglRender/Renderer.h"
+#include "android/base/Compiler.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/system/System.h"
+#include "android/base/testing/TestSystem.h"
+#include "android/base/testing/TestTempDir.h"
+#include "android/emulation/proto/observation.pb.h"
+#include "android/loadpng.h"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <string>
 
 using android::base::System;
 using android::emulation::captureScreenshot;
+using ::testing::Gt;
 
 extern "C" EmulatorWindow* emulator_window_get(void) {
     return NULL;
@@ -327,4 +334,38 @@ TEST_F(ScreenCapturerTest, saveAndLoadRotation270) {
     uint8_t* pixels = (uint8_t*)loadScreenshot(screenshotName.c_str(), 2, 2);
     verifyframebuffer4Pixels(SKIN_ROTATION_270, pixels);
     free(pixels);
+}
+
+TEST_F(ScreenCapturerTest, pbFileSuccess) {
+    MockRenderer renderer(true);
+    // Create a temporary file with a .pb extension.
+    const std::string tmp_file = android::base::PathUtils::join(
+            System::get()->getTempDir(), "normal_file.pb");
+    FILE* file = std::fopen(tmp_file.c_str(), "w");
+    EXPECT_THAT(file, testing::NotNull()) << "Failed to open " << tmp_file;
+    EXPECT_THAT(std::fclose(file), testing::Eq(0));
+
+    // Capture the screenshot.
+    EXPECT_TRUE(captureScreenshot(&renderer, nullptr, SKIN_ROTATION_0,
+                                  tmp_file.c_str()));
+
+    // Check that the file is not empty and contains a serialized Observation.
+    file = std::fopen(tmp_file.c_str(), "r");
+    EXPECT_THAT(file, testing::NotNull()) << "Failed to open " << tmp_file;
+    std::vector<char> buffer(10000000);  // 1e7 bytes.
+    const int num_bytes_read =
+            std::fread(buffer.data(), sizeof(char), 1000000, file);
+    EXPECT_THAT(num_bytes_read, Gt(0));
+    EXPECT_THAT(std::fclose(file), testing::Eq(0));
+
+    android::emulation::Observation observation;
+    observation.ParseFromArray(buffer.data(), num_bytes_read);
+    EXPECT_THAT(observation.ByteSize(), Gt(0));
+    const android::emulation::Observation::Image& image = observation.screen();
+    EXPECT_THAT(image.width(), Gt(0));
+    EXPECT_THAT(image.height(), Gt(0));
+    EXPECT_THAT(image.num_channels(), Gt(0));
+    EXPECT_THAT(image.data(), testing::Not(testing::IsEmpty()));
+
+    remove(tmp_file.c_str());  // Cleanup temporary file.
 }
