@@ -50,10 +50,17 @@
 
 static AUserConfig*  userConfig;
 
+static AConfig* s_skinConfig = NULL;
+static char* s_skinPath = NULL;
+static int s_deviceLcdWidth = 0;
+static int s_deviceLcdHeight = 0;
+
 bool
 user_config_init( void )
 {
-    userConfig = auserConfig_new( android_avdInfo );
+    SkinRect mmmRect;
+    skin_winsys_get_monitor_rect(&mmmRect);
+    userConfig = auserConfig_new(android_avdInfo, &mmmRect, s_deviceLcdWidth, s_deviceLcdHeight);
     return userConfig != NULL;
 }
 
@@ -111,9 +118,6 @@ user_config_get_window_geo( int* window_x, int* window_y,
 /*****                                                             *****/
 /***********************************************************************/
 /***********************************************************************/
-
-static AConfig* s_skinConfig = NULL;
-static char* s_skinPath = NULL;
 
 /* list of skin aliases */
 static const struct {
@@ -305,6 +309,8 @@ DEFAULT_SKIN:
 bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,
                                         AvdInfo* avd,
                                         AndroidHwConfig* hw) {
+    s_deviceLcdWidth = hw->hw_lcd_width;
+    s_deviceLcdHeight = hw->hw_lcd_height;
     if (skin_charmap_setup(opts->charmap)) {
         return false;
     }
