@@ -113,9 +113,15 @@ public:
     void unbindBuffer(GLuint buffer) override;
 
     static void setMaxGlesVersion(GLESVersion version);
+
     TransformFeedbackData* boundTransformFeedback();
 
+    void enableArr(GLenum arr, bool enable) override;
+    const GLESpointer* getPointer(GLenum arrType) override;
+
 protected:
+    void addVertexArrayObject(GLuint array) override;
+
     virtual void postLoadRestoreCtx();
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
 private:

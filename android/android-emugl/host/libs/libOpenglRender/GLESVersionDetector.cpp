@@ -154,6 +154,7 @@ GLESDispatchMaxVersion calcMaxVersionFromDispatch(EGLDisplay dpy) {
 // just whether to use them)
 bool shouldEnableCoreProfile() {
     int dispatchMaj, dispatchMin;
+
     emugl::getGlesVersion(&dispatchMaj, &dispatchMin);
     return emugl::getRenderer() == SELECTED_RENDERER_HOST &&
            dispatchMaj > 2;
