@@ -6,7 +6,7 @@ set(darwinn_src ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/dar
 
 android_add_library(darwinn)
 target_compile_options(darwinn PUBLIC ${DARWINN_COMPILE_DEFINITIONS})
-target_link_libraries(darwinn PUBLIC darwinnmodelconfig darwinnpipe protobuf::libprotobuf)
+target_link_libraries(darwinn PUBLIC darwinnmodelconfig darwinnpipe libprotobuf)
 target_include_directories(darwinn PUBLIC ${DARWINN_INCLUDE_DIRS})
 
 set(darwinn_unittests_src
