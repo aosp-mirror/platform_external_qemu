@@ -114,6 +114,14 @@ public:
                                         base::System::Duration timeout_ms,
                                         bool want_output = true) = 0;
 
+    // Queue a command to be sent over ADB.
+    // If the command fails, it is retried until either it
+    // succeeds or we give up.
+    // The caller has no control over our "give up" criteria.
+    // The caller gets no feedback on when the command was
+    // sent, nor on whether the command succeeded or failed.
+    virtual void enqueueCommand(const std::vector<std::string>& args) = 0;
+
     // Creates a new instance of the AdbInterface.
     static std::unique_ptr<AdbInterface> create(android::base::Looper* looper);
 };
