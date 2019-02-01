@@ -273,6 +273,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFormatProperties:
             {
+                if (m_logCalls) {
+                    fprintf(stderr,
+                            "call vkGetPhysicalDeviceFormatProperties\n");
+                    ;
+                }
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkFormatProperties* pFormatProperties;
@@ -296,11 +301,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkFormatProperties(vkReadStream, (VkFormatProperties*)(pFormatProperties));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pFormatProperties;
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceFormatProperties\n");;
-                }
-                vk->vkGetPhysicalDeviceFormatProperties(unboxed_physicalDevice, format, pFormatProperties);
+                m_state->on_vkGetPhysicalDeviceFormatProperties(
+                        physicalDevice, format, pFormatProperties);
                 marshal_VkFormatProperties(vkStream, (VkFormatProperties*)(pFormatProperties));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
@@ -308,6 +310,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceImageFormatProperties:
             {
+                if (m_logCalls) {
+                    fprintf(stderr,
+                            "call vkGetPhysicalDeviceImageFormatProperties\n");
+                    ;
+                }
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkImageType type;
@@ -355,12 +362,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkImageFormatProperties(vkReadStream, (VkImageFormatProperties*)(pImageFormatProperties));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pImageFormatProperties;
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceImageFormatProperties\n");;
-                }
                 VkResult vkGetPhysicalDeviceImageFormatProperties_VkResult_return = (VkResult)0;
-                vkGetPhysicalDeviceImageFormatProperties_VkResult_return = vk->vkGetPhysicalDeviceImageFormatProperties(unboxed_physicalDevice, format, type, tiling, usage, flags, pImageFormatProperties);
+                vkGetPhysicalDeviceImageFormatProperties_VkResult_return =
+                        m_state->on_vkGetPhysicalDeviceImageFormatProperties(
+                                physicalDevice, format, type, tiling, usage,
+                                flags, pImageFormatProperties);
                 marshal_VkImageFormatProperties(vkStream, (VkImageFormatProperties*)(pImageFormatProperties));
                 vkStream->write(&vkGetPhysicalDeviceImageFormatProperties_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
@@ -5988,6 +5994,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFormatProperties2:
             {
+                if (m_logCalls) {
+                    fprintf(stderr,
+                            "call vkGetPhysicalDeviceFormatProperties2\n");
+                    ;
+                }
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkFormatProperties2* pFormatProperties;
@@ -6011,11 +6022,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkFormatProperties2(vkReadStream, (VkFormatProperties2*)(pFormatProperties));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pFormatProperties;
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceFormatProperties2\n");;
-                }
-                vk->vkGetPhysicalDeviceFormatProperties2(unboxed_physicalDevice, format, pFormatProperties);
+                m_state->on_vkGetPhysicalDeviceFormatProperties2(
+                        physicalDevice, format, pFormatProperties);
                 marshal_VkFormatProperties2(vkStream, (VkFormatProperties2*)(pFormatProperties));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
@@ -6023,6 +6031,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceImageFormatProperties2:
             {
+                if (m_logCalls) {
+                    fprintf(stderr,
+                            "call vkGetPhysicalDeviceImageFormatProperties2\n");
+                    ;
+                }
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo;
                 VkImageFormatProperties2* pImageFormatProperties;
@@ -6047,12 +6060,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkImageFormatProperties2(vkReadStream, (VkImageFormatProperties2*)(pImageFormatProperties));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pImageFormatProperties;
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceImageFormatProperties2\n");;
-                }
                 VkResult vkGetPhysicalDeviceImageFormatProperties2_VkResult_return = (VkResult)0;
-                vkGetPhysicalDeviceImageFormatProperties2_VkResult_return = vk->vkGetPhysicalDeviceImageFormatProperties2(unboxed_physicalDevice, pImageFormatInfo, pImageFormatProperties);
+                vkGetPhysicalDeviceImageFormatProperties2_VkResult_return =
+                        m_state->on_vkGetPhysicalDeviceImageFormatProperties2(
+                                physicalDevice, pImageFormatInfo,
+                                pImageFormatProperties);
                 marshal_VkImageFormatProperties2(vkStream, (VkImageFormatProperties2*)(pImageFormatProperties));
                 vkStream->write(&vkGetPhysicalDeviceImageFormatProperties2_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
@@ -8448,6 +8460,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFormatProperties2KHR:
             {
+                if (m_logCalls) {
+                    fprintf(stderr,
+                            "call vkGetPhysicalDeviceFormatProperties2KHR\n");
+                    ;
+                }
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkFormatProperties2* pFormatProperties;
@@ -8471,11 +8488,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkFormatProperties2(vkReadStream, (VkFormatProperties2*)(pFormatProperties));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pFormatProperties;
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceFormatProperties2KHR\n");;
-                }
-                vk->vkGetPhysicalDeviceFormatProperties2KHR(unboxed_physicalDevice, format, pFormatProperties);
+                m_state->on_vkGetPhysicalDeviceFormatProperties2KHR(
+                        physicalDevice, format, pFormatProperties);
                 marshal_VkFormatProperties2(vkStream, (VkFormatProperties2*)(pFormatProperties));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
@@ -8483,6 +8497,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceImageFormatProperties2KHR:
             {
+                if (m_logCalls) {
+                    fprintf(stderr,
+                            "call "
+                            "vkGetPhysicalDeviceImageFormatProperties2KHR\n");
+                    ;
+                }
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo;
                 VkImageFormatProperties2* pImageFormatProperties;
@@ -8507,12 +8527,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkImageFormatProperties2(vkReadStream, (VkImageFormatProperties2*)(pImageFormatProperties));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pImageFormatProperties;
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceImageFormatProperties2KHR\n");;
-                }
                 VkResult vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return = (VkResult)0;
-                vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return = vk->vkGetPhysicalDeviceImageFormatProperties2KHR(unboxed_physicalDevice, pImageFormatInfo, pImageFormatProperties);
+                vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return =
+                        m_state->on_vkGetPhysicalDeviceImageFormatProperties2KHR(
+                                physicalDevice, pImageFormatInfo,
+                                pImageFormatProperties);
                 marshal_VkImageFormatProperties2(vkStream, (VkImageFormatProperties2*)(pImageFormatProperties));
                 vkStream->write(&vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
