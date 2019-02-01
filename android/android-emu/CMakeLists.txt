@@ -11,7 +11,6 @@ prebuilt(E2FSPROGS)
 prebuilt(CURL)
 prebuilt(LIBXML2)
 prebuilt(PNG)
-prebuilt(PROTOBUF)
 prebuilt(UUID)
 prebuilt(ZLIB)
 
