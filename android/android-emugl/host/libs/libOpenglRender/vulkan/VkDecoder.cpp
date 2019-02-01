@@ -229,6 +229,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFormatProperties:
             {
+                if (m_logCalls) {
+                    fprintf(stderr,
+                            "call vkGetPhysicalDeviceFormatProperties\n");
+                    ;
+                }
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkFormatProperties* pFormatProperties;
@@ -238,11 +243,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((VkFormat*)&format, sizeof(VkFormat));
                 vkReadStream->alloc((void**)&pFormatProperties, sizeof(VkFormatProperties));
                 unmarshal_VkFormatProperties(vkReadStream, (VkFormatProperties*)(pFormatProperties));
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceFormatProperties\n");;
-                }
-                m_vk->vkGetPhysicalDeviceFormatProperties(physicalDevice, format, pFormatProperties);
+                m_state->on_vkGetPhysicalDeviceFormatProperties(
+                        physicalDevice, format, pFormatProperties);
                 marshal_VkFormatProperties(vkStream, (VkFormatProperties*)(pFormatProperties));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
