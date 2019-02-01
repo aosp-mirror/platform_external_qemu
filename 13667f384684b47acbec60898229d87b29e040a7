@@ -22,6 +22,30 @@
       "revId": "13667f384684b47acbec60898229d87b29e040a7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d125f3f7_1efb2802",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2019-02-01T17:18:30Z",
+      "side": 1,
+      "message": "That\u0027s a good idea.\nNot sure if I\u0027d want this code to detect and combine, but if a caller has multiple command, it would make sense for them to combine them.\nI\u0027ll look at that.",
+      "parentUuid": "1bd5bc77_aa25411f",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 0
+      },
+      "revId": "13667f384684b47acbec60898229d87b29e040a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
