@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "97265fe9_e5332719",
+        "filename": "android/android-emu/android/utils/file_data.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-02-01T18:39:12Z",
+      "side": 1,
+      "message": "nit: group the #include \"\" together?",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 34
+      },
+      "revId": "072c1c145d98020eb89ace72f2f760b69b732636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d4c46c9d_5c67f8a8",
+        "filename": "android/android-emu/android/verified-boot/load_config_unittest.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-02-01T18:39:12Z",
+      "side": 1,
+      "message": "nit: indentation",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 3
+      },
+      "revId": "072c1c145d98020eb89ace72f2f760b69b732636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f396c894_6f743d8b",
+        "filename": "android/third_party/jpeg-6b/jmem-android.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-02-01T18:39:12Z",
+      "side": 1,
+      "message": "nit: indentation",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 3
+      },
+      "revId": "072c1c145d98020eb89ace72f2f760b69b732636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dfd1f4d9_58b5d5fb",
+        "filename": "android/third_party/jpeg-6b/jmemname.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-02-01T18:39:12Z",
+      "side": 1,
+      "message": "nit: indentation",
+      "range": {
+        "startLine": 233,
+        "startChar": 1,
+        "endLine": 233,
+        "endChar": 15
+      },
+      "revId": "072c1c145d98020eb89ace72f2f760b69b732636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
