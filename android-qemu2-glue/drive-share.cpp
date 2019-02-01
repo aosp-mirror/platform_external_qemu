@@ -28,6 +28,7 @@
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
 #include "android/utils/tempfile.h"
+#include "android/utils/file_io.h"
 
 extern "C" {
 #include "block/block.h"
