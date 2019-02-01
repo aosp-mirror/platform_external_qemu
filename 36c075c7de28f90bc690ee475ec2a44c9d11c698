@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "895e8759_b7e9cdc3",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-02-01T19:29:26Z",
+      "side": 1,
+      "message": "the |arraysMap| looks like something that may or may not need to be deleted. Can you change it to unique_ptr to make it safer? I don\u0027t even see its dtor here, so can\u0027t tell if it leaks or not",
+      "range": {
+        "startLine": 86,
+        "startChar": 8,
+        "endLine": 86,
+        "endChar": 17
+      },
+      "revId": "36c075c7de28f90bc690ee475ec2a44c9d11c698",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
