@@ -393,7 +393,7 @@ set(dump_syms_linux-x86_64_src ${BREAKPAD_SRC}/tools/linux/dump_syms/dump_syms.c
 set(dump_syms_darwin-x86_64_src ${BREAKPAD_SRC}/common/mac/dump_syms.cc ${BREAKPAD_SRC}/tools/mac/dump_syms/dump_syms_tool.cc)
 android_add_executable(dump_syms)
 target_link_libraries(dump_syms PRIVATE breakpad_common)
-android_target_link_libraries(dump_syms windows_msvc-x86_64 PRIVATE shell32::shell32 diaguids::diaguids)
+android_target_link_libraries(dump_syms windows_msvc-x86_64 PRIVATE shell32::shell32 diaguids::diaguids atl::atl)
 android_target_compile_definitions(dump_syms linux-x86_64 PUBLIC -DHAVE_A_OUT_H)
 android_target_compile_definitions(dump_syms darwin-x86_64 PUBLIC -DHAVE_MACH_O_NLIST_H)
 
