@@ -95,8 +95,9 @@ public:
                                 System::Duration timeout_ms,
                                 bool want_output = true) final;
 
-    void enqueueCommand(const std::vector<std::string>& args) final;
-
+    void enqueueCommand(const std::vector<std::string>& args,
+                        void(*resultCallback)(const OptionalAdbCommandResult&) = nullptr
+                        ) final;
 private:
     explicit AdbInterfaceImpl(Looper* looper,
                               AdbLocator* locator,
@@ -124,7 +125,8 @@ struct AdbCommandQueueStatics {
     bool                 didInitialCommand = false;
     android::base::Lock  adbLock;
 
-    std::queue<std::vector<std::string>> commandQueue;
+    std::queue<std::pair<std::vector<std::string>,
+                         void(*)(const OptionalAdbCommandResult&)>> commandQueue;
 };
 
 static base::LazyInstance<AdbCommandQueueStatics> sStatics = LAZY_INSTANCE_INIT;
@@ -146,8 +148,13 @@ static void adbResultHandler(const OptionalAdbCommandResult& result) {
     {
         // Either this command was successful or it's
         // time to give up.
-        // Either way, retire this command.
-        (void)sStatics->commandQueue.pop();
+        // Either way, invoke the callback and retire this command.
+        auto theCallback = sStatics->commandQueue.front().second;
+        if (theCallback) {
+            // Give this final result to the caller
+            (*theCallback)(result);
+        }
+        sStatics->commandQueue.pop();
         if (sStatics->commandQueue.size() == 0) {
             // The queue is now empty. We're done.
             sStatics->adbLock.unlock();
@@ -157,7 +164,7 @@ static void adbResultHandler(const OptionalAdbCommandResult& result) {
     }
     // Send or resend an ADB command
     sStatics->adbInterface->
-            runAdbCommand(sStatics->commandQueue.front(), adbResultHandler, 5000);
+            runAdbCommand(sStatics->commandQueue.front().first, adbResultHandler, 5000);
     sStatics->adbLock.unlock();
 }
 
@@ -309,15 +316,15 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
     return command;
 }
 
-void AdbInterfaceImpl::enqueueCommand(const std::vector<std::string>& args) {
-
+void AdbInterfaceImpl::enqueueCommand(const std::vector<std::string>& args,
+                                      void(*resultCallback)(const OptionalAdbCommandResult&))
+{
     sStatics->adbLock.lock();
 
     if (sStatics->adbInterface == nullptr) {
         sStatics->adbInterface = this;
     }
-
-    sStatics->commandQueue.push(args);
+    sStatics->commandQueue.push(make_pair(args, resultCallback));
     if (sStatics->commandQueue.size() == 1) {
         // We were idle. Start up.
         // Set the retry count for this command.
