@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "76f0f4c1_08e0accf",
+        "filename": "android/android-emugl/guest/androidImpl/AndroidVulkanDispatch.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-02-01T20:19:09Z",
+      "side": 1,
+      "message": "better to use #elif defined _WIND32?",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 6
+      },
+      "revId": "2cb733dd64b971fb3b898d5f11ddd0ed9bc1d498",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "59cd3f6f_69496356",
+        "filename": "android/android-emugl/guest/androidImpl/AndroidVulkanDispatch.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-02-01T20:19:09Z",
+      "side": 1,
+      "message": "nit: is this generated? if not, then clang-format the super long lines?",
+      "range": {
+        "startLine": 49,
+        "startChar": 82,
+        "endLine": 49,
+        "endChar": 108
+      },
+      "revId": "2cb733dd64b971fb3b898d5f11ddd0ed9bc1d498",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2a5c45e5_b03920a1",
+        "filename": "android/android-emugl/guest/androidImpl/vulkanhal_unittest.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-02-01T20:19:09Z",
+      "side": 1,
+      "message": "do we worry about running it on windows?",
+      "range": {
+        "startLine": 49,
+        "startChar": 8,
+        "endLine": 49,
+        "endChar": 77
+      },
+      "revId": "2cb733dd64b971fb3b898d5f11ddd0ed9bc1d498",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
