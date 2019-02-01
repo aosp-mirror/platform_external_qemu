@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1db54ba9_761d70c8",
+        "filename": "android/android-emugl/guest/androidImpl/AndroidVulkanDispatch.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-01T20:39:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "76f0f4c1_08e0accf",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 6
+      },
+      "revId": "2cb733dd64b971fb3b898d5f11ddd0ed9bc1d498",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "59cd3f6f_69496356",
         "filename": "android/android-emugl/guest/androidImpl/AndroidVulkanDispatch.cpp",
         "patchSetId": 13
@@ -45,6 +69,30 @@
       "revId": "2cb733dd64b971fb3b898d5f11ddd0ed9bc1d498",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "13ac8f74_f63957cc",
+        "filename": "android/android-emugl/guest/androidImpl/AndroidVulkanDispatch.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-01T20:39:17Z",
+      "side": 1,
+      "message": "This is generated; copypasted from goldfish_vk_dispatch. Hopefully this doesn\u0027t need to happen very often.",
+      "parentUuid": "59cd3f6f_69496356",
+      "range": {
+        "startLine": 49,
+        "startChar": 82,
+        "endLine": 49,
+        "endChar": 108
+      },
+      "revId": "2cb733dd64b971fb3b898d5f11ddd0ed9bc1d498",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
