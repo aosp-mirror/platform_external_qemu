@@ -216,6 +216,76 @@ public:
         pFeatures->features.textureCompressionETC2 = true;
     }
 
+    void on_vkGetPhysicalDeviceFormatProperties(
+            VkPhysicalDevice boxed_physicalDevice,
+            VkFormat format,
+            VkFormatProperties* pFormatProperties) {
+        auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
+        auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
+        getPhysicalDeviceFormatPropertiesCore<VkFormatProperties>(
+                [vk](VkPhysicalDevice physicalDevice, VkFormat format,
+                     VkFormatProperties* pFormatProperties) {
+                    vk->vkGetPhysicalDeviceFormatProperties(
+                            physicalDevice, format, pFormatProperties);
+                },
+                vk, physicalDevice, format, pFormatProperties);
+    }
+
+    void on_vkGetPhysicalDeviceFormatProperties2(
+            VkPhysicalDevice boxed_physicalDevice,
+            VkFormat format,
+            VkFormatProperties2* pFormatProperties) {
+        auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
+        auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
+
+        AutoLock lock(mLock);
+
+        auto physdevInfo = android::base::find(mPhysdevInfo, physicalDevice);
+        if (!physdevInfo)
+            return;
+
+        auto instance = mPhysicalDeviceToInstance[physicalDevice];
+
+        if (physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+            getPhysicalDeviceFormatPropertiesCore<VkFormatProperties2>(
+                    [vk](VkPhysicalDevice physicalDevice, VkFormat format,
+                         VkFormatProperties2* pFormatProperties) {
+                        vk->vkGetPhysicalDeviceFormatProperties2(
+                                physicalDevice, format, pFormatProperties);
+                    },
+                    vk, physicalDevice, format, pFormatProperties);
+        } else if (hasInstanceExtension(
+                           instance,
+                           "VK_KHR_get_physical_device_properties2")) {
+            getPhysicalDeviceFormatPropertiesCore<VkFormatProperties2>(
+                    [vk](VkPhysicalDevice physicalDevice, VkFormat format,
+                         VkFormatProperties2* pFormatProperties) {
+                        vk->vkGetPhysicalDeviceFormatProperties2KHR(
+                                physicalDevice, format, pFormatProperties);
+                    },
+
+                    vk, physicalDevice, format, pFormatProperties);
+        } else {
+            // No instance extension, fake it!!!!
+            if (pFormatProperties->pNext) {
+                fprintf(stderr,
+                        "%s: Warning: Trying to use extension struct in "
+                        "vkGetPhysicalDeviceFormatProperties2 without having "
+                        "enabled the extension!!!!11111\n",
+                        __func__);
+            }
+            pFormatProperties->sType = VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2;
+            getPhysicalDeviceFormatPropertiesCore<VkFormatProperties>(
+                    [vk](VkPhysicalDevice physicalDevice, VkFormat format,
+                         VkFormatProperties* pFormatProperties) {
+                        vk->vkGetPhysicalDeviceFormatProperties(
+                                physicalDevice, format, pFormatProperties);
+                    },
+                    vk, physicalDevice, format,
+                    &pFormatProperties->formatProperties);
+        }
+    }
+
     void on_vkGetPhysicalDeviceProperties(
             VkPhysicalDevice boxed_physicalDevice,
             VkPhysicalDeviceProperties* pProperties) {
@@ -1462,16 +1532,86 @@ private:
             case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
                 cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_SRGB;
                 break;
+            case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+            case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+                cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_UNORM;
+                break;
+            case VK_FORMAT_EAC_R11_SNORM_BLOCK:
+            case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
+                cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_SRGB;
+                break;
             default:
                 cmpInfo.isCompressed = false;
                 cmpInfo.dstFormat = srcFmt;
                 break;
         }
         if (cmpInfo.isCompressed) {
-            fprintf(stderr, "WARNING: compressed texutre is not yet suppoted, "
-                "rendering could be wrong.\n");
+            fprintf(stderr,
+                    "WARNING: compressed texutre is experimental, "
+                    "rendering could be wrong.\n");
         }
         return cmpInfo;
+    }
+
+    static const VkFormatFeatureFlags kEmulatedEtc2BufferFeatureMask =
+            VK_FORMAT_FEATURE_TRANSFER_DST_BIT |
+            VK_FORMAT_FEATURE_BLIT_SRC_BIT |
+            VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT;
+
+    void maskFormatPropertiesForEmulatedEtc2(
+            VkFormatProperties* pFormatProperties) {
+        pFormatProperties->bufferFeatures &= kEmulatedEtc2BufferFeatureMask;
+    }
+
+    void maskFormatPropertiesForEmulatedEtc2(
+            VkFormatProperties2* pFormatProperties) {
+        pFormatProperties->formatProperties.bufferFeatures &=
+                kEmulatedEtc2BufferFeatureMask;
+    }
+
+    template <class VkFormatProperties1or2>
+    void getPhysicalDeviceFormatPropertiesCore(
+            std::function<
+                    void(VkPhysicalDevice, VkFormat, VkFormatProperties1or2*)>
+                    getPhysicalDeviceFormatPropertiesFunc,
+            goldfish_vk::VulkanDispatch* vk,
+            VkPhysicalDevice physicalDevice,
+            VkFormat format,
+            VkFormatProperties1or2* pFormatProperties) {
+        switch (format) {
+            case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
+            case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+            case VK_FORMAT_EAC_R11_SNORM_BLOCK:
+            case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+            case VK_FORMAT_EAC_R11G11_SNORM_BLOCK: {
+                printf("emulate etc2\n");
+                VkPhysicalDeviceFeatures feature;
+                vk->vkGetPhysicalDeviceFeatures(physicalDevice, &feature);
+                if (feature.textureCompressionETC2) {
+                    printf("hardware support etc2\n");
+                    // Hardware supported ETC2
+                    getPhysicalDeviceFormatPropertiesFunc(
+                            physicalDevice, format, pFormatProperties);
+                    return;
+                }
+                // Emulate ETC formats
+                CompressedImageInfo cmpInfo = createCompressedImageInfo(format);
+                getPhysicalDeviceFormatPropertiesFunc(
+                        physicalDevice, cmpInfo.dstFormat, pFormatProperties);
+                printf("emulate etc2\n");
+                maskFormatPropertiesForEmulatedEtc2(pFormatProperties);
+                break;
+            }
+            default:
+                getPhysicalDeviceFormatPropertiesFunc(physicalDevice, format,
+                                                      pFormatProperties);
+                break;
+        }
     }
 
     void decompressBufferToImage(CompressedImageInfo cmp,
@@ -1715,6 +1855,30 @@ void VkDecoderGlobalState::on_vkGetPhysicalDeviceFeatures2KHR(
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceFeatures2KHR* pFeatures) {
     mImpl->on_vkGetPhysicalDeviceFeatures2(physicalDevice, pFeatures);
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceFormatProperties(
+        VkPhysicalDevice physicalDevice,
+        VkFormat format,
+        VkFormatProperties* pFormatProperties) {
+    mImpl->on_vkGetPhysicalDeviceFormatProperties(physicalDevice, format,
+                                                  pFormatProperties);
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceFormatProperties2(
+        VkPhysicalDevice physicalDevice,
+        VkFormat format,
+        VkFormatProperties2* pFormatProperties) {
+    mImpl->on_vkGetPhysicalDeviceFormatProperties2(physicalDevice, format,
+                                                   pFormatProperties);
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceFormatProperties2KHR(
+        VkPhysicalDevice physicalDevice,
+        VkFormat format,
+        VkFormatProperties2* pFormatProperties) {
+    mImpl->on_vkGetPhysicalDeviceFormatProperties2(physicalDevice, format,
+                                                   pFormatProperties);
 }
 
 void VkDecoderGlobalState::on_vkGetPhysicalDeviceProperties(
