@@ -245,6 +245,7 @@ custom_decodes = {
     "vkGetPhysicalDeviceFeatures" : emit_global_state_wrapped_decoding,
     "vkGetPhysicalDeviceFeatures2" : emit_global_state_wrapped_decoding,
     "vkGetPhysicalDeviceFeatures2KHR" : emit_global_state_wrapped_decoding,
+    "vkGetPhysicalDeviceFormatProperties" : emit_global_state_wrapped_decoding,
     "vkGetPhysicalDeviceProperties" : emit_global_state_wrapped_decoding,
     "vkGetPhysicalDeviceProperties2" : emit_global_state_wrapped_decoding,
     "vkGetPhysicalDeviceProperties2KHR" : emit_global_state_wrapped_decoding,

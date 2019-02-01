@@ -74,6 +74,12 @@ public:
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceFeatures2* pFeatures);
 
+    // Override format features
+    void on_vkGetPhysicalDeviceFormatProperties(
+            VkPhysicalDevice physicalDevice,
+            VkFormat format,
+            VkFormatProperties* pFormatProperties);
+
     // Override API version
     void on_vkGetPhysicalDeviceProperties(
         VkPhysicalDevice physicalDevice,
