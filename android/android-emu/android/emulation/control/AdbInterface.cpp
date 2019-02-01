@@ -23,6 +23,7 @@
 #include "android/base/Uuid.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/ScopedFd.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/FileUtils.h"
 #include "android/base/sockets/ScopedSocket.h"
@@ -38,10 +39,10 @@
 
 #include <cstdio>
 #include <fstream>
+#include <queue>
 #include <string>
 #include <utility>
 
-using android::base::AutoLock;
 using android::base::Looper;
 using android::base::Optional;
 using android::base::ParallelTask;
@@ -94,6 +95,8 @@ public:
                                 System::Duration timeout_ms,
                                 bool want_output = true) final;
 
+    void enqueueCommand(const std::vector<std::string>& args) final;
+
 private:
     explicit AdbInterfaceImpl(Looper* looper,
                               AdbLocator* locator,
@@ -113,6 +116,49 @@ private:
 
 std::unique_ptr<AdbInterface> AdbInterface::create(Looper* looper) {
     return AdbInterface::Builder().setLooper(looper).build();
+}
+
+struct AdbCommandQueueStatics {
+    AdbInterface*        adbInterface = nullptr;
+    int                  retryCountdown = 0;
+    bool                 didInitialCommand = false;
+    android::base::Lock  adbLock;
+
+    std::queue<std::vector<std::string>> commandQueue;
+};
+
+static base::LazyInstance<AdbCommandQueueStatics> sStatics = LAZY_INSTANCE_INIT;
+
+static constexpr int INITIAL_ADB_RETRY_LIMIT = 50;   // Max # retries for first ADB request
+static constexpr int SUBSEQUENT_ADB_RETRY_LIMIT = 5; // Max # retries for subsquent ADB requests
+
+// This call-back is invoked when results are received from
+// a queued ADB command.
+// If this command succeeded, we send the next queued command.
+// If this command has failed a small number of times, we resend
+// it. If it has failed a large number of times, we discard it
+// and move on.
+static void adbResultHandler(const OptionalAdbCommandResult& result) {
+    sStatics->adbLock.lock();
+
+    if (--(sStatics->retryCountdown) <= 0 ||
+            (result && (result->exit_code == 0)))
+    {
+        // Either this command was successful or it's
+        // time to give up.
+        // Either way, retire this command.
+        (void)sStatics->commandQueue.pop();
+        if (sStatics->commandQueue.size() == 0) {
+            // The queue is now empty. We're done.
+            sStatics->adbLock.unlock();
+            return;
+        }
+        sStatics->retryCountdown = SUBSEQUENT_ADB_RETRY_LIMIT;
+    }
+    // Send or resend an ADB command
+    sStatics->adbInterface->
+            runAdbCommand(sStatics->commandQueue.front(), adbResultHandler, 5000);
+    sStatics->adbLock.unlock();
 }
 
 // A locator that will scan the filesystem for available ADB installs
@@ -261,6 +307,31 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
     command->start();
 
     return command;
+}
+
+void AdbInterfaceImpl::enqueueCommand(const std::vector<std::string>& args) {
+
+    sStatics->adbLock.lock();
+
+    if (sStatics->adbInterface == nullptr) {
+        sStatics->adbInterface = this;
+    }
+
+    sStatics->commandQueue.push(args);
+    if (sStatics->commandQueue.size() == 1) {
+        // We were idle. Start up.
+        // Set the retry count for this command.
+        // If this is the very first command, use a longer
+        // retry, because ADB may still be launching.
+        sStatics->retryCountdown = sStatics->didInitialCommand ?
+                SUBSEQUENT_ADB_RETRY_LIMIT : INITIAL_ADB_RETRY_LIMIT;
+        sStatics->didInitialCommand = true;
+
+        // Send this command (the only one we have)
+        sStatics->adbInterface->
+                runAdbCommand(args, adbResultHandler, 5000);
+    }
+    sStatics->adbLock.unlock();
 }
 
 AdbCommand::AdbCommand(Looper* looper,
