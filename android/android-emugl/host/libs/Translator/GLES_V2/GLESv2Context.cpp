@@ -431,10 +431,7 @@ ObjectDataPtr GLESv2Context::loadObject(NamedObjectType type,
 
 void GLESv2Context::setAttribValue(int idx, unsigned int count,
         const GLfloat* val) {
-    auto vertexAttrib = m_currVaoState.find(idx);
-    if (vertexAttrib != m_currVaoState.end()) {
-        vertexAttrib->second->setValue(count, val);
-    }
+    m_currVaoState.attribInfo()[idx].setValue(count, val);
 }
 
 void GLESv2Context::setAttribute0value(float x, float y, float z, float w)
