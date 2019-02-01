@@ -60,6 +60,7 @@ if(WIN32 AND MSVC)
                          ABSOLUTE CACHE)
   get_filename_component(VS15_E_PATH32 "$ENV{${PROGRAMFILES_X86}}/Microsoft Visual Studio/2017/Enterprise/Common7/IDE"
                          ABSOLUTE CACHE)
+  get_filename_component(VCTOOLS_PATH "$ENV{VCToolsInstallDir}" ABSOLUTE CACHE)
 
   # Find the DIA SDK path, it will typically look something like this. C:\Program Files (x86)\Microsoft Visual
   # Studio\2017\Enterprise\DIA SDK\include C:\Program Files (x86)\Microsoft Visual Studio 14.0\DIA SDK\include\dia2.h
@@ -75,9 +76,28 @@ if(WIN32 AND MSVC)
 
   find_library(DIASDK_GUIDS_LIBRARY NAMES diaguids.lib HINTS ${DIASDK_INCLUDE_DIR}/../lib/amd64)
 
+
   # add_library(${NAME}::${NAME} INTERFACE IMPORTED GLOBAL)
   set_target_properties(diaguids::diaguids
                         PROPERTIES INTERFACE_LINK_LIBRARIES ${DIASDK_GUIDS_LIBRARY} INTERFACE_INCLUDE_DIRECTORIES
                                    ${DIASDK_INCLUDE_DIR})
+  
+  # Find the ATL path, it will typically look something like this.
+  #C:\Program Files (x86)\Microsoft Visual Studio\2017\xxx\VC\Tools\MSVC\14.16.27023\atlmfc\include
+  find_path(ATL_INCLUDE_DIR # Set variable DIASDK_INCLUDE_DIR
+            atlbase.h # Find a path with atlbase.h
+            HINTS "${VS15_C_PATH32}/../../VC/TOOLS/MSVC/14.16.27023/atlmfc/include"
+            HINTS "${VS15_P_PATH32}/../../VC/TOOLS/MSVC/14.16.27023/atlmfc/include"
+            HINTS "${VS15_E_PATH32}/../../VC/TOOLS/MSVC/14.16.27023/atlmfc/include"
+            HINTS "${VCTOOLS_PATH}/atlmfc/include"
+            DOC "path to ATL header files")
+  message(STATUS "Found ATL Include: ${ATL_INCLUDE_DIR}")
+
+  find_library(ATL_LIBRARY NAMES atls.lib HINTS ${ATL_INCLUDE_DIR}/../lib/x64)
+
+  add_library(atl::atl INTERFACE IMPORTED GLOBAL)
+  set_target_properties(atl::atl
+                        PROPERTIES INTERFACE_LINK_LIBRARIES ${ATL_LIBRARY} INTERFACE_INCLUDE_DIRECTORIES
+                                   ${ATL_INCLUDE_DIR})
 
 endif()
