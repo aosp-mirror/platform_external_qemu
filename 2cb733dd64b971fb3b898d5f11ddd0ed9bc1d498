@@ -68,6 +68,30 @@
       "revId": "2cb733dd64b971fb3b898d5f11ddd0ed9bc1d498",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c8645123_ba2d8a2c",
+        "filename": "android/android-emugl/guest/androidImpl/vulkanhal_unittest.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-01T20:24:36Z",
+      "side": 1,
+      "message": "The host-side goldfish-opengl is not built for windows yet. Waiting for msvc build to drop.",
+      "parentUuid": "2a5c45e5_b03920a1",
+      "range": {
+        "startLine": 49,
+        "startChar": 8,
+        "endLine": 49,
+        "endChar": 77
+      },
+      "revId": "2cb733dd64b971fb3b898d5f11ddd0ed9bc1d498",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
