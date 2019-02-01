@@ -82,6 +82,8 @@ VAOState::VAOState(android::base::Stream* stream) {
             GLuint id = stream->getBe32();
             arraysMap->emplace(id, new GLESpointer(stream));
         }
+    } else {
+        arraysMap = nullptr;
     }
 
     loadContainer(stream, bindingState);
@@ -603,6 +605,7 @@ GLEScontext::~GLEScontext() {
                 delete elem.second;
             }
             delete map;
+            vao.second.arraysMap = nullptr;
         }
     }
 
