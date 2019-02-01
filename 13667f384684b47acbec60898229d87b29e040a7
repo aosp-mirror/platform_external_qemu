@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1bd5bc77_aa25411f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-01T15:38:16Z",
+      "side": 1,
+      "message": "Quite cool! One suggestion here: if it\u0027s a series of adb shell commands we\u0027re sending, we could reduce the number of ADB command send/receives by batching them up with \" \u0026\u0026 \"",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 0
+      },
+      "revId": "13667f384684b47acbec60898229d87b29e040a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
