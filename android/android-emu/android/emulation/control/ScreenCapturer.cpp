@@ -14,14 +14,20 @@
 
 #include "android/emulation/control/ScreenCapturer.h"
 
-#include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/emulation/proto/observation.pb.h"
 #include "android/emulator-window.h"
 #include "android/loadpng.h"
 #include "android/opengles.h"
+#include "android/utils/string.h"
+
+#include <fstream>
+#include <iostream>
+#include <vector>
 
 namespace android {
 namespace emulation {
@@ -105,6 +111,28 @@ bool captureScreenshot(emugl::Renderer* renderer,
     if (width == 0 || height == 0) {
         return false;
     }
+
+    // If the given directory path is actually a filename with a protobuf
+    // extension, write a serialized Observation instead.
+    if (str_ends_with(outputDirectoryPath.data(), ".pb")) {
+        std::ofstream file(outputDirectoryPath.data(), std::ios_base::binary);
+        if (!file) {
+            LOG(ERROR) << "Failed to open " << outputDirectoryPath;
+            return false;
+        }
+
+        Observation observation;
+        observation.set_timestamp_us(
+                android::base::System::get()->getUnixTimeUs());
+        Observation::Image* screen = observation.mutable_screen();
+        screen->set_width(width);
+        screen->set_height(height);
+        screen->set_num_channels(nChannels);
+        screen->set_data(pixels, pixelBuffer.size());
+        observation.SerializeToOstream(&file);
+        return true;
+    }
+
     // the file name is ~25 characters
     char fileName[100];
     int fileNameSize = snprintf(fileName, sizeof(fileName), "Screenshot_%lld.png",
