@@ -104,8 +104,11 @@ def get_build_cmd():
     '''Gets the command that will build all the sources.'''
     target = 'install'
     # Stripping is meaning less in windows world.
-    if FLAGS.symbols and platform.system().lower() != 'windows':
-        target += '/strip'
+
+    # We disable stripping for now as it seems to break end-to-end
+    # tests.
+    # if FLAGS.symbols and platform.system().lower() != 'windows':
+    #   target += '/strip'
     return [get_cmake(), '--build', FLAGS.out, '--target', target]
 
 def main(argv=None):
