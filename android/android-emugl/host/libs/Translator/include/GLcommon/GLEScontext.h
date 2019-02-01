@@ -26,6 +26,7 @@
 #include "ObjectNameSpace.h"
 #include "ShareGroup.h"
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -137,7 +138,7 @@ struct VAOState {
     bool bufferBacked;
     bool everBound;
     bool legacy = false;
-    ArraysMap* arraysMap;
+    std::unique_ptr<ArraysMap> arraysMap;
     void onSave(android::base::Stream* stream) const;
 };
 
@@ -167,7 +168,7 @@ struct VAOStateRef {
         return it->second.arraysMap->find(arrType);
     }
     GLESpointer*& operator[](size_t k) {
-        ArraysMap* map = it->second.arraysMap;
+        ArraysMap* map = it->second.arraysMap.get();
         return (*map)[k];
     }
     VertexAttribBindingVector& bufferBindings() {

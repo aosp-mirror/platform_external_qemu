@@ -76,14 +76,14 @@ VAOState::VAOState(android::base::Stream* stream) {
     uint64_t arraysMapPtr = stream->getBe64();
 
     if (arraysMapPtr) {
-        arraysMap = new ArraysMap();
+        arraysMap.reset(new ArraysMap());
         size_t mapSize = stream->getBe32();
         for (size_t i = 0; i < mapSize; i++) {
             GLuint id = stream->getBe32();
             arraysMap->emplace(id, new GLESpointer(stream));
         }
     } else {
-        arraysMap = nullptr;
+        arraysMap.reset();
     }
 
     loadContainer(stream, bindingState);
@@ -97,7 +97,11 @@ void VAOState::onSave(android::base::Stream* stream) const {
         vertexAttribInfo[i].onSave(stream);
     }
 
-    stream->putBe64((uint64_t)(uintptr_t)arraysMap);
+    if (arraysMap) {
+        stream->putBe64((uint64_t)(uintptr_t)arraysMap.get());
+    } else {
+        stream->putBe64(0);
+    }
 
     if (arraysMap) {
         stream->putBe32(arraysMap->size());
@@ -313,13 +317,12 @@ void GLEScontext::removeVertexArrayObject(GLuint array) {
         setVertexArrayObject(0);
     }
 
-    ArraysMap* map = m_vaoStateMap[array].arraysMap;
+    auto& state = m_vaoStateMap[array];
 
-    if (map) {
-        for (auto elem : *map) {
+    if (state.arraysMap) {
+        for (auto elem : *(state.arraysMap)) {
             delete elem.second;
         }
-        delete map;
     }
 
     m_vaoStateMap.erase(array);
@@ -599,13 +602,11 @@ GLEScontext::~GLEScontext() {
     m_defaultReadFBO = 0;
 
     for (auto&& vao : m_vaoStateMap) {
-        ArraysMap* map = vao.second.arraysMap;
-        if (map) {
-            for (auto elem : *map) {
+        if (vao.second.arraysMap) {
+            for (auto elem : *(vao.second.arraysMap)) {
                 delete elem.second;
             }
-            delete map;
-            vao.second.arraysMap = nullptr;
+            vao.second.arraysMap.reset();
         }
     }
 
