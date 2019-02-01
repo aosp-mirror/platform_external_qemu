@@ -200,6 +200,7 @@ custom_decodes = {
     "vkCreateInstance" : emit_global_state_wrapped_decoding,
 
     "vkGetPhysicalDeviceFeatures" : emit_global_state_wrapped_decoding,
+    "vkGetPhysicalDeviceFormatProperties" : emit_global_state_wrapped_decoding,
     "vkGetPhysicalDeviceProperties" : emit_global_state_wrapped_decoding,
     "vkGetPhysicalDeviceMemoryProperties" : emit_global_state_wrapped_decoding,
 

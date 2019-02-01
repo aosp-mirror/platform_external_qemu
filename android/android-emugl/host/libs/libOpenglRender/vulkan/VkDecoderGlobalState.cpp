@@ -80,6 +80,46 @@ public:
         pFeatures->textureCompressionETC2 = true;
     }
 
+    void on_vkGetPhysicalDeviceFormatProperties(
+            VkPhysicalDevice physicalDevice,
+            VkFormat format,
+            VkFormatProperties* pFormatProperties) {
+        switch (format) {
+            case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
+            case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+            case VK_FORMAT_EAC_R11_SNORM_BLOCK:
+            case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+            case VK_FORMAT_EAC_R11G11_SNORM_BLOCK: {
+                VkPhysicalDeviceFeatures feature;
+                m_vk->vkGetPhysicalDeviceFeatures(physicalDevice, &feature);
+                if (feature.textureCompressionETC2) {
+                    // Hardware supported ETC2
+                    m_vk->vkGetPhysicalDeviceFormatProperties(
+                            physicalDevice, format, pFormatProperties);
+                    return;
+                }
+                // Emulate ETC formats
+                CompressedImageInfo cmpInfo = createCompressedImageInfo(format);
+                m_vk->vkGetPhysicalDeviceFormatProperties(
+                        physicalDevice, cmpInfo.dstFormat, pFormatProperties);
+                pFormatProperties->bufferFeatures &=
+                        VK_FORMAT_FEATURE_TRANSFER_DST_BIT |
+                        VK_FORMAT_FEATURE_BLIT_SRC_BIT |
+                        VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT;
+                break;
+            }
+            default:
+                m_vk->vkGetPhysicalDeviceFormatProperties(
+                        physicalDevice, format, pFormatProperties);
+                break;
+        }
+    }
+
     void on_vkGetPhysicalDeviceProperties(
             VkPhysicalDevice physicalDevice,
             VkPhysicalDeviceProperties* pProperties) {
@@ -1098,14 +1138,23 @@ private:
             case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
                 cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_SRGB;
                 break;
+            case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+            case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+                cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_UNORM;
+                break;
+            case VK_FORMAT_EAC_R11_SNORM_BLOCK:
+            case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
+                cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_SRGB;
+                break;
             default:
                 cmpInfo.isCompressed = false;
                 cmpInfo.dstFormat = srcFmt;
                 break;
         }
         if (cmpInfo.isCompressed) {
-            fprintf(stderr, "WARNING: compressed texutre is not yet suppoted, "
-                "rendering could be wrong.\n");
+            fprintf(stderr,
+                    "WARNING: compressed texutre is experimental, "
+                    "rendering could be wrong.\n");
         }
         return cmpInfo;
     }
@@ -1309,6 +1358,14 @@ void VkDecoderGlobalState::on_vkGetPhysicalDeviceFeatures(
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceFeatures* pFeatures) {
     mImpl->on_vkGetPhysicalDeviceFeatures(physicalDevice, pFeatures);
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceFormatProperties(
+        VkPhysicalDevice physicalDevice,
+        VkFormat format,
+        VkFormatProperties* pFormatProperties) {
+    mImpl->on_vkGetPhysicalDeviceFormatProperties(physicalDevice, format,
+                                                  pFormatProperties);
 }
 
 void VkDecoderGlobalState::on_vkGetPhysicalDeviceProperties(
