@@ -614,6 +614,7 @@ static void gvm_set_phys_mem(GVMMemoryListener *kml,
     void *ram = NULL;
     unsigned delta;
 
+    if (memory_region_is_user_backed(mr)) return;
     /* gvm works in page size chunks, but the function may be called
        with sub-page size and unaligned start address. Pad the start
        address to next and truncate size to previous page boundary. */
