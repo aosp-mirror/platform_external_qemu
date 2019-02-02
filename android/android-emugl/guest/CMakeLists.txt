@@ -3,7 +3,7 @@ set(utils_src androidImpl/libutils_placeholder.cpp)
 android_add_shared_library(utils)
 
 # The cutils library.
-set(cutils_src androidImpl/Ashmem.cpp androidImpl/Properties.cpp androidImpl/GrallocDispatch.cpp)
+set(cutils_src androidImpl/Ashmem.cpp androidImpl/Properties.cpp androidImpl/GrallocDispatch.cpp androidImpl/AndroidVulkanDispatch.cpp)
 android_add_shared_library(cutils)
 target_include_directories(cutils PRIVATE ${ANDROID_EMUGL_DIR}/host/include .)
 target_include_directories(cutils PUBLIC .)
@@ -71,7 +71,7 @@ target_include_directories(
     ${ANDROID_EMUGL_DIR}/guest/grallocusage)
 target_link_libraries(
     vulkanhal_unittests PRIVATE
-    grallocusage vulkan_android aemugraphics PRIVATE
+    grallocusage aemugraphics PRIVATE
     gtest_main)
 android_target_dependency(vulkanhal_unittests all EMULATOR_FEATURE_DEPENDENCIES)
 android_target_dependency(vulkanhal_unittests all SWIFTSHADER_DEPENDENCIES)

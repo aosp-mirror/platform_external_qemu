@@ -1,0 +1,36 @@
+From f1cf127b427b32c9292dcc2e556c4a2c4a996355 Mon Sep 17 00:00:00 2001
+From: Lingfeng Yang <lfy@google.com>
+Date: Fri, 1 Feb 2019 08:49:03 -0800
+Subject: [PATCH] Fix stack underflow in incremental present test
+
+Change-Id: I4814945391bb840bfe1630fd01b14be54c2abe4b
+---
+ .../modules/vulkan/wsi/vktWsiIncrementalPresentTests.cpp     | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/external/vulkancts/modules/vulkan/wsi/vktWsiIncrementalPresentTests.cpp b/external/vulkancts/modules/vulkan/wsi/vktWsiIncrementalPresentTests.cpp
+index a8aee88..b5559d4 100644
+--- a/external/vulkancts/modules/vulkan/wsi/vktWsiIncrementalPresentTests.cpp
++++ b/external/vulkancts/modules/vulkan/wsi/vktWsiIncrementalPresentTests.cpp
+@@ -1012,6 +1012,9 @@ std::vector<vk::VkSwapchainCreateInfoKHR> generateSwapchainConfigs (vk::VkSurfac
+ 				if ((alpha & properties.supportedCompositeAlpha) == 0)
+ 					continue;
+ 
++                // Just leak it
++                uint32_t* queueFamilyIndexPtr = new uint32_t;
++                *queueFamilyIndexPtr = queueFamilyIndex;
+ 				const vk::VkSurfaceTransformFlagBitsKHR	preTransform	= (vk::VkSurfaceTransformFlagBitsKHR)transform;
+ 				const vk::VkCompositeAlphaFlagBitsKHR	compositeAlpha	= (vk::VkCompositeAlphaFlagBitsKHR)alpha;
+ 				const vk::VkFormat						imageFormat		= formats[formatNdx].format;
+@@ -1030,7 +1033,7 @@ std::vector<vk::VkSwapchainCreateInfoKHR> generateSwapchainConfigs (vk::VkSurfac
+ 					imageUsage,
+ 					vk::VK_SHARING_MODE_EXCLUSIVE,
+ 					1u,
+-					&queueFamilyIndex,
++					queueFamilyIndexPtr,
+ 					preTransform,
+ 					compositeAlpha,
+ 					presentMode,
+-- 
+2.20.1.611.gfbb209baf1-goog
+
