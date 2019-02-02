@@ -88,6 +88,10 @@ class VulkanFuncTable(VulkanWrapperGenerator):
             self.cgen.beginIf("!strcmp(name, \"%s\")" % e.name)
             if e.name in EXCLUDED_APIS:
                 self.cgen.stmt("return nullptr")
+            elif f == "VK_VERSION_1_1":
+                self.cgen.stmt("return nullptr")
+            elif f != "VK_VERSION_1_0":
+                self.cgen.stmt("return nullptr")
             else:
                 self.cgen.stmt("return (void*)%s" % ("entry_" + e.name))
             self.cgen.endIf()
@@ -97,4 +101,99 @@ class VulkanFuncTable(VulkanWrapperGenerator):
 
         self.cgen.stmt("return nullptr")
         self.cgen.endBlock()
+        self.module.appendImpl(self.cgen.swapCode())
+
+        getInstanceProcAddressDecl = "void* goldfish_vulkan_get_instance_proc_address(VkInstance instance, const char* name)"
+        self.module.appendHeader(getInstanceProcAddressDecl + ";\n")
+        self.module.appendImpl(getInstanceProcAddressDecl)
+        self.cgen.beginBlock()
+
+        self.cgen.stmt(
+            "auto resources = ResourceTracker::get()")
+        self.cgen.stmt(
+            "bool has1_1OrHigher = resources->getApiVersionFromInstance(instance) >= VK_API_VERSION_1_1")
+
+        prevFeature = None
+        for e, f in zip(self.entries, self.entryFeatures):
+            featureEndif = prevFeature is not None and (f != prevFeature)
+            featureif = not featureEndif and (f != prevFeature)
+
+            if featureEndif:
+                self.cgen.leftline("#endif")
+                self.cgen.leftline("#ifdef %s" % f)
+            
+            if featureif:
+                self.cgen.leftline("#ifdef %s" % f)
+
+            self.cgen.beginIf("!strcmp(name, \"%s\")" % e.name)
+
+            entryPointExpr = "(void*)%s" % ("entry_" + e.name)
+
+            if e.name in EXCLUDED_APIS:
+                self.cgen.stmt("return nullptr")
+            elif f == "VK_VERSION_1_1":
+                self.cgen.stmt( \
+                    "return has1_1OrHigher ? %s : nullptr" % \
+                    entryPointExpr)
+            elif f != "VK_VERSION_1_0":
+                self.cgen.stmt( \
+                    "bool hasExt = resources->hasInstanceExtension(instance, \"%s\")"  % f)
+                self.cgen.stmt("return hasExt ? %s : nullptr" % entryPointExpr)
+            else:
+                self.cgen.stmt("return %s" % entryPointExpr)
+            self.cgen.endIf()
+            prevFeature = f
+
+        self.cgen.leftline("#endif")
+
+        self.cgen.stmt("return nullptr")
+        self.cgen.endBlock()
+        self.module.appendImpl(self.cgen.swapCode())
+
+        getDeviceProcAddressDecl = "void* goldfish_vulkan_get_device_proc_address(VkDevice device, const char* name)"
+        self.module.appendHeader(getDeviceProcAddressDecl + ";\n")
+        self.module.appendImpl(getDeviceProcAddressDecl)
+        self.cgen.beginBlock()
+
+        self.cgen.stmt(
+            "auto resources = ResourceTracker::get()")
+        self.cgen.stmt(
+            "bool has1_1OrHigher = resources->getApiVersionFromDevice(device) >= VK_API_VERSION_1_1")
+
+        prevFeature = None
+        for e, f in zip(self.entries, self.entryFeatures):
+            featureEndif = prevFeature is not None and (f != prevFeature)
+            featureif = not featureEndif and (f != prevFeature)
+
+            if featureEndif:
+                self.cgen.leftline("#endif")
+                self.cgen.leftline("#ifdef %s" % f)
+            
+            if featureif:
+                self.cgen.leftline("#ifdef %s" % f)
+
+            self.cgen.beginIf("!strcmp(name, \"%s\")" % e.name)
+
+            entryPointExpr = "(void*)%s" % ("entry_" + e.name)
+
+            if e.name in EXCLUDED_APIS:
+                self.cgen.stmt("return nullptr")
+            elif f == "VK_VERSION_1_1":
+                self.cgen.stmt( \
+                    "return has1_1OrHigher ? %s : nullptr" % \
+                    entryPointExpr)
+            elif f != "VK_VERSION_1_0":
+                self.cgen.stmt( \
+                    "bool hasExt = resources->hasDeviceExtension(device, \"%s\")"  % f)
+                self.cgen.stmt("return hasExt ? %s : nullptr" % entryPointExpr)
+            else:
+                self.cgen.stmt("return %s" % entryPointExpr)
+            self.cgen.endIf()
+            prevFeature = f
+
+        self.cgen.leftline("#endif")
+
+        self.cgen.stmt("return nullptr")
+        self.cgen.endBlock()
+
         self.module.appendImpl(self.cgen.swapCode())
