@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "922ceca8_dbc70e5d",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 436,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-02-02T01:20:24Z",
+      "side": 0,
+      "message": "what was the crash here? I don\u0027t see suspicious accesses that could crash, unless of course .find() vs attribInfp()[idx] use different containers :)",
+      "range": {
+        "startLine": 434,
+        "startChar": 0,
+        "endLine": 436,
+        "endChar": 6
+      },
+      "revId": "5f7775d921f8bda3b8e50a7939a7532bafc1c0cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
