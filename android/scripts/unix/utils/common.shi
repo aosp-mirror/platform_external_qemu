@@ -287,6 +287,7 @@ get_build_os () {
 # Valid return values are:
 #     x86
 #     x86_64
+#     aarch64
 get_build_arch () {
     local TEST
     if [ -z "$_SHU_BUILD_ARCH" ]; then
@@ -296,7 +297,7 @@ get_build_arch () {
                 # Kernel bitness might not match user space, so test
                 # the bitness of our shell to know what the user is
                 # really running.
-                TEST=$(/usr/bin/file -L $SHELL 2>/dev/null | grep 'x86[_-]64')
+                TEST=$(/usr/bin/file -L $SHELL 2>/dev/null | grep 'x86[_-]64' || true)
                 if [ "$TEST" ]; then
                     _SHU_BUILD_ARCH=x86_64
                 fi
