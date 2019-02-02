@@ -498,4 +498,20 @@ TEST_F(VulkanHalTest, GetPhysicalDeviceImageFormatProperties2KHR) {
                                   mPhysicalDevice, &imageFormatInfo, &res));
 }
 
+// Tests that if we create an instance and the API version is less than 1.1,
+// we return null for 1.1 core API calls.
+TEST_F(VulkanHalTest, Hide1_1FunctionPointers) {
+    VkPhysicalDeviceProperties props;
+
+    vk->vkGetPhysicalDeviceProperties(mPhysicalDevice, &props);
+
+    if (props.apiVersion < VK_API_VERSION_1_1) {
+        EXPECT_EQ(nullptr,
+                  vk->vkGetDeviceProcAddr(mDevice, "vkTrimCommandPool"));
+    } else {
+        EXPECT_NE(nullptr,
+                  vk->vkGetDeviceProcAddr(mDevice, "vkTrimCommandPool"));
+    }
+}
+
 }  // namespace aemu
