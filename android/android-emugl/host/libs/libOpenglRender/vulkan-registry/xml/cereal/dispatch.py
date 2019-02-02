@@ -123,12 +123,36 @@ class VulkanDispatch(VulkanWrapperGenerator):
         self.featureForCodegen = ""
 
     def onBegin(self):
+
+        # The first way is to use just the loader to get symbols. This doesn't
+        # necessarily work with extensions because at that point the dispatch
+        # table needs to be specific to a particular Vulkan instance or device.
+
         self.cgenHeader.line("""
 void init_vulkan_dispatch_from_system_loader(
     DlOpenFunc dlOpenFunc,
     DlSymFunc dlSymFunc,
     VulkanDispatch* dispatch_out);
 """)
+
+        # The second way is to initialize the table from a given Vulkan
+        # instance or device. Provided the instance or device was created with
+        # the right extensions, we can obtain function pointers to extension
+        # functions this way.
+
+        self.cgenHeader.line("""
+void init_vulkan_dispatch_from_instance(
+    VulkanDispatch* vk,
+    VkInstance instance,
+    VulkanDispatch* dispatch_out);
+""")
+        self.cgenHeader.line("""
+void init_vulkan_dispatch_from_device(
+    VulkanDispatch* vk,
+    VkDevice device,
+    VulkanDispatch* dispatch_out);
+""")
+
         self.cgenHeader.line("struct VulkanDispatch {")
         self.module.appendHeader(self.cgenHeader.swapCode())
 
@@ -150,10 +174,21 @@ void init_vulkan_dispatch_from_system_loader(
             "out->%s = (%s)dlSymFunc(lib, \"%s\")" % \
             (apiname, typedecl, apiname))
 
+    def makeGetInstanceProcAddrCall(self, cgen, dispatch, instance, apiname, typedecl):
+        cgen.stmt( \
+            "out->%s = (%s)%s->vkGetInstanceProcAddr(%s, \"%s\")" % \
+            (apiname, typedecl, dispatch, instance, apiname))
+
+    def makeGetDeviceProcAddrCall(self, cgen, dispatch, device, apiname, typedecl):
+        cgen.stmt( \
+            "out->%s = (%s)%s->vkGetDeviceProcAddr(%s, \"%s\")" % \
+            (apiname, typedecl, dispatch, device, apiname))
+
     def onEnd(self):
         self.cgenHeader.line("};")
         self.module.appendHeader(self.cgenHeader.swapCode())
 
+        # Getting dispatch tables from the loader
         self.cgenImpl.line("""
 void init_vulkan_dispatch_from_system_loader(
     DlOpenFunc dlOpenFunc,
@@ -161,7 +196,7 @@ void init_vulkan_dispatch_from_system_loader(
     VulkanDispatch* out)""")
 
         self.cgenImpl.beginBlock()
-        
+
         self.cgenImpl.stmt("memset(out, 0x0, sizeof(VulkanDispatch))")
 
         self.cgenImpl.stmt("void* lib = dlOpenFunc()")
@@ -181,6 +216,57 @@ void init_vulkan_dispatch_from_system_loader(
 
         self.syncFeature(self.cgenImpl, "")
         self.cgenImpl.endBlock()
+
+        # Getting instance dispatch tables
+        self.cgenImpl.line("""
+void init_vulkan_dispatch_from_instance(
+    VulkanDispatch* vk,
+    VkInstance instance,
+    VulkanDispatch* out)""")
+
+        self.cgenImpl.beginBlock()
+
+        self.cgenImpl.stmt("memset(out, 0x0, sizeof(VulkanDispatch))")
+
+        apis = \
+            self.apisToGet["global"] + \
+            self.apisToGet["global-instance"] + \
+            self.apisToGet["instance"] + \
+            self.apisToGet["device"]
+
+        for vulkanApi, typeDecl, feature in apis:
+            self.syncFeature(self.cgenImpl, feature)
+            self.makeGetInstanceProcAddrCall(
+                self.cgenImpl, "vk", "instance", vulkanApi.name, typeDecl)
+
+        self.syncFeature(self.cgenImpl, "")
+        self.cgenImpl.endBlock()
+
+        # Getting device dispatch tables
+        self.cgenImpl.line("""
+void init_vulkan_dispatch_from_device(
+    VulkanDispatch* vk,
+    VkDevice device,
+    VulkanDispatch* out)""")
+
+        self.cgenImpl.beginBlock()
+
+        self.cgenImpl.stmt("memset(out, 0x0, sizeof(VulkanDispatch))")
+
+        apis = \
+            self.apisToGet["global"] + \
+            self.apisToGet["global-instance"] + \
+            self.apisToGet["instance"] + \
+            self.apisToGet["device"]
+
+        for vulkanApi, typeDecl, feature in apis:
+            self.syncFeature(self.cgenImpl, feature)
+            self.makeGetDeviceProcAddrCall(
+                self.cgenImpl, "vk", "device", vulkanApi.name, typeDecl)
+
+        self.syncFeature(self.cgenImpl, "")
+        self.cgenImpl.endBlock()
+
         self.module.appendImpl(self.cgenImpl.swapCode())
 
     def onBeginFeature(self, featureName):
@@ -269,7 +355,7 @@ void init_vulkan_dispatch_from_system_loader(
     VulkanDispatch* out)""")
 
         self.cgenImpl.beginBlock()
-        
+
         self.cgenImpl.stmt("out->instance = nullptr")
         self.cgenImpl.stmt("out->physicalDevice = nullptr")
         self.cgenImpl.stmt("out->physicalDeviceQueueFamilyInfoCount = 0")

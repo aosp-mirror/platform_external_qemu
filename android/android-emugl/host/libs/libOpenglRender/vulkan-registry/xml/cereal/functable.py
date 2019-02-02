@@ -4,6 +4,8 @@ from .common.vulkantypes import \
 from .common.vulkantypes import EXCLUDED_APIS
 
 RESOURCE_TRACKER_ENTRIES = [
+    "vkEnumerateInstanceExtensionProperties",
+    "vkEnumerateDeviceExtensionProperties",
     "vkAllocateMemory",
     "vkFreeMemory",
 ]

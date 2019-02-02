@@ -402,11 +402,11 @@ static std::vector<VkEmulation::ImageSupportInfo> getBasicImageSupportList() {
 }
 
 VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
+    if (sVkEmulation) return sVkEmulation;
+
     if (!emugl::vkDispatchValid(vk)) {
         return nullptr;
     }
-
-    if (sVkEmulation) return sVkEmulation;
 
     sVkEmulation = new VkEmulation;
 
