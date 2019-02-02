@@ -89,6 +89,7 @@ ENCODER_CUSTOM_RESOURCE_PREPROCESS = [
 ]
 
 ENCODER_CUSTOM_RESOURCE_POSTPROCESS = [
+    "vkCreateInstance",
     "vkCreateDevice",
     "vkMapMemoryIntoAddressSpaceGOOGLE",
     "vkGetPhysicalDeviceMemoryProperties",
