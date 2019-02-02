@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "72e7a4dc_dd836d4f",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-02-02T01:27:16Z",
+      "side": 1,
+      "message": "nit: not needed in ctor",
+      "range": {
+        "startLine": 85,
+        "startChar": 5,
+        "endLine": 87,
+        "endChar": 5
+      },
+      "revId": "c89982456163cc2ee6ececb288e0eb558a91eb69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c79b0aa4_6d6649c6",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-02-02T01:27:16Z",
+      "side": 1,
+      "message": "this makes me uncomfortable. Why not \"putBe64(arraysMap ? 1 : 0)\" ? yes, still whole 8 bytes but at least it\u0027s clear this is a flag and not some pointer value that happens to be read back as flag.",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 104,
+        "endChar": 5
+      },
+      "revId": "c89982456163cc2ee6ececb288e0eb558a91eb69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "828cf881_45c8a98b",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-02-02T01:27:16Z",
+      "side": 1,
+      "message": "nit: I believe the () aren\u0027t needed here and in the next foreach",
+      "revId": "c89982456163cc2ee6ececb288e0eb558a91eb69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2d14254c_5772e2b9",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLEScontext.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-02-02T01:27:16Z",
+      "side": 1,
+      "message": "btw, what makes it so important to have it dynamically allocated, by the way? is \u0027map \u003d\u003d null\u0027 state somehow different from \u0027map.empty()\u0027?",
+      "range": {
+        "startLine": 141,
+        "startChar": 4,
+        "endLine": 141,
+        "endChar": 40
+      },
+      "revId": "c89982456163cc2ee6ececb288e0eb558a91eb69",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
