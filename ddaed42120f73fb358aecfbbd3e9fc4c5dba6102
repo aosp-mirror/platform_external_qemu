@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b49ccfbc_3398b1a1",
+        "filename": "android/scripts/unix/gen-android-sdk-toolchain.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 708,
+      "author": {
+        "id": 1439078
+      },
+      "writtenOn": "2019-02-03T18:44:40Z",
+      "side": 1,
+      "message": "This is the other place with double bracket \u0027[[\u0027.",
+      "revId": "ddaed42120f73fb358aecfbbd3e9fc4c5dba6102",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
