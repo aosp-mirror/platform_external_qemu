@@ -84,7 +84,7 @@ aosp_dir_parse_option () {
 
 # Returns the linux glibc version
 aosp_linux_glibc_version () {
-   printf "glibc2.15-4.8"
+   printf "glibc2.17-4.8"
 }
 
 
