@@ -567,7 +567,7 @@ fetch_dependencies_msvc() {
 get_clang_version() {
     CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for ${BUILD_HOST})
     CLANG_DIR=$(realpath $CLANG_BINDIR/..)
-    if [[ $BUILD_HOST == "darwin" ]]; then
+    if [ $BUILD_HOST == "darwin" ]; then
        CLANG_VERSION=$(${CLANG_BINDIR}/clang -v 2>&1 | egrep -E 'clang version \d+.\d+.\d' -o | egrep -E '\d+.\d+.\d+' -o)
     else
        CLANG_VERSION=$(${CLANG_BINDIR}/clang -v 2>&1 | grep -P 'clang version \d+.\d+.\d' -o | grep -P '\d+.\d+.\d+' -o)
