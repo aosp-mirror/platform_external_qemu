@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "f644ecd7_c27a17d2",
+        "filename": "android/scripts/unix/gen-android-sdk-toolchain.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 620,
+      "author": {
+        "id": 1439078
+      },
+      "writtenOn": "2019-02-03T05:47:40Z",
+      "side": 1,
+      "message": "This was in the error report, not introduced by me.  that is why I feel so strange.  Checking on the \"Blame\", this was introduced by Erwin Johnson on Jan 23rd.  I think it is probably better for him to fix this.",
+      "revId": "9aa8760182fbffe0f968b099c89cded6549f5e0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f3010364_9a93d17e",
         "filename": "android/scripts/unix/gen-android-sdk-toolchain.sh",
         "patchSetId": 1
@@ -19,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "18fabbde_591a2a32",
+        "filename": "android/scripts/unix/gen-android-sdk-toolchain.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 671,
+      "author": {
+        "id": 1439078
+      },
+      "writtenOn": "2019-02-03T05:47:40Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "f3010364_9a93d17e",
+      "revId": "9aa8760182fbffe0f968b099c89cded6549f5e0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f30e313a_c146c949",
         "filename": "android/scripts/unix/gen-android-sdk-toolchain.sh",
         "patchSetId": 1
@@ -30,6 +65,24 @@
       "writtenOn": "2019-02-03T05:33:26Z",
       "side": 1,
       "message": "Could this [[ be the issue?",
+      "revId": "9aa8760182fbffe0f968b099c89cded6549f5e0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c4ea7951_c06aaf2d",
+        "filename": "android/scripts/unix/gen-android-sdk-toolchain.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 778,
+      "author": {
+        "id": 1439078
+      },
+      "writtenOn": "2019-02-03T05:47:40Z",
+      "side": 1,
+      "message": "I can certainly change it to single bracket, but the error was on line 620.",
+      "parentUuid": "f30e313a_c146c949",
       "revId": "9aa8760182fbffe0f968b099c89cded6549f5e0f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
