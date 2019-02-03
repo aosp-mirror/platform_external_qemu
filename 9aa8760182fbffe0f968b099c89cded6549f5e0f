@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "462ec19b_9199d64d",
+        "filename": "android/scripts/unix/gen-android-sdk-toolchain.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 620,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-03T06:29:15Z",
+      "side": 1,
+      "message": "Ok, I\u0027ve put up another CL that changes that to single [, but it did not fix the local failure on my machine.",
+      "parentUuid": "f644ecd7_c27a17d2",
+      "revId": "9aa8760182fbffe0f968b099c89cded6549f5e0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f3010364_9a93d17e",
         "filename": "android/scripts/unix/gen-android-sdk-toolchain.sh",
         "patchSetId": 1
