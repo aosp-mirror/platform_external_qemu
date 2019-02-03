@@ -26,6 +26,7 @@
 #include "SyncThread.h"
 #include "ChecksumCalculatorThreadInfo.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
+#include "vulkan/VkDecoderGlobalState.h"
 
 #include "android/utils/debug.h"
 #include "android/base/StringView.h"
@@ -178,6 +179,9 @@ static constexpr android::base::StringView kHostCompositionV1 = "ANDROID_EMU_hos
 
 static constexpr android::base::StringView kGLESNoHostError = "ANDROID_EMU_gles_no_host_error";
 
+// Vulkan
+static constexpr android::base::StringView kVulkanFeatureStr = "ANDROID_EMU_vulkan";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -243,8 +247,19 @@ static bool shouldEnableAsyncSwap() {
            sizeof(void*) == 8;
 }
 
-static bool shouleEnableHostCompose() {
+static bool shouldEnableHostComposition() {
     return emugl_feature_is_enabled(android::featurecontrol::HostComposition);
+}
+
+static bool shouldEnableVulkan() {
+    auto supportInfo =
+        goldfish_vk::VkDecoderGlobalState::get()->
+            getHostFeatureSupport();
+    bool flagEnabled =
+        emugl_feature_is_enabled(android::featurecontrol::Vulkan);
+    // TODO: Restrict further to devices supporting external memory.
+    return supportInfo.supportsVulkan &&
+           flagEnabled;
 }
 
 android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion version) {
@@ -347,7 +362,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         emugl_feature_is_enabled(android::featurecontrol::GLDMA2);
     bool directMemEnabled =
         emugl_feature_is_enabled(android::featurecontrol::GLDirectMem);
-    bool hostCompositionEnabled = shouleEnableHostCompose();
+    bool hostCompositionEnabled = shouldEnableHostComposition();
+    bool vulkanEnabled = shouldEnableVulkan();
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -381,6 +397,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 
     if (hostCompositionEnabled && name == GL_EXTENSIONS) {
         glStr += kHostCompositionV1;
+        glStr += " ";
+    }
+
+    if (vulkanEnabled && name == GL_EXTENSIONS) {
+        glStr += kVulkanFeatureStr;
         glStr += " ";
     }
 
