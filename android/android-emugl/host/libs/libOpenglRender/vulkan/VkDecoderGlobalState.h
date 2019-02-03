@@ -191,6 +191,18 @@ public:
     VkDeviceSize getDeviceMemorySize(VkDeviceMemory memory);
     bool usingDirectMapping() const;
 
+    struct HostFeatureSupport {
+        bool supportsVulkan = false;
+        bool supportsVulkan1_1 = false;
+        bool supportsExternalMemory = false;
+        uint32_t apiVersion = 0;
+        uint32_t driverVersion = 0;
+        uint32_t deviceID = 0;
+        uint32_t vendorID = 0;
+    };
+
+    HostFeatureSupport getHostFeatureSupport() const;
+
     // VK_ANDROID_native_buffer
     VkResult on_vkGetSwapchainGrallocUsageANDROID(
         VkDevice device,
