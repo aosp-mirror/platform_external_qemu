@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "256054f6_4de58dca",
+        "filename": "android/scripts/unix/utils/aosp_dir.shi",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-03T06:29:55Z",
+      "side": 1,
+      "message": "We use just $HOST_OS to branch on this, so we can\u0027t quite use this yet.",
+      "revId": "5e06add6a11d9a2036f039f694c7ba742feb9d23",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
