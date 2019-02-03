@@ -1157,7 +1157,8 @@ message EmulatorFeatureFlagState {
     WIFI_CONFIGURABLE = 38;
     GL_DIRECT_MEM = 39;
     VIDEO_PLAYBACK = 40;
-    // Next tag: 41
+    VULKAN = 41;
+    // Next tag: 42
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

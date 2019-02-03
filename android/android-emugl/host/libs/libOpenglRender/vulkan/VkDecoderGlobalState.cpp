@@ -994,6 +994,31 @@ public:
                 android::featurecontrol::GLDirectMem);
     }
 
+    HostFeatureSupport getHostFeatureSupport() const {
+        HostFeatureSupport res;
+
+        if (!m_vk) return res;
+
+        auto emu = createOrGetGlobalVkEmulation(m_vk);
+
+        res.supportsVulkan = emu && emu->live;
+
+        if (!res.supportsVulkan) return res;
+
+        const auto& props = emu->deviceInfo.physdevProps;
+
+        res.supportsVulkan1_1 =
+            props.apiVersion >= VK_API_VERSION_1_1;
+        res.supportsExternalMemory =
+            emu->deviceInfo.supportsExternalMemory;
+
+        res.apiVersion = props.apiVersion;
+        res.driverVersion = props.driverVersion;
+        res.deviceID = props.deviceID;
+        res.vendorID = props.vendorID;
+        return res;
+    }
+
     bool hasInstanceExtension(VkInstance instance, const std::string& name) {
         auto info = android::base::find(mInstanceInfo, instance);
         if (!info) return false;
@@ -1863,6 +1888,11 @@ VkDeviceSize VkDecoderGlobalState::getDeviceMemorySize(VkDeviceMemory memory) {
 
 bool VkDecoderGlobalState::usingDirectMapping() const {
     return mImpl->usingDirectMapping();
+}
+
+VkDecoderGlobalState::HostFeatureSupport
+VkDecoderGlobalState::getHostFeatureSupport() const {
+    return mImpl->getHostFeatureSupport();
 }
 
 // VK_ANDROID_native_buffer
