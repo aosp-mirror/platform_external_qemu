@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "95b8f5be_d051ec9b",
+        "filename": "android/scripts/unix/utils/aosp_dir.shi",
+        "patchSetId": 5
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-03T19:49:29Z",
+      "side": 1,
+      "message": "This is going to fail build; please don\u0027t use this",
+      "range": {
+        "startLine": 110,
+        "startChar": 0,
+        "endLine": 110,
+        "endChar": 21
+      },
+      "revId": "a0862fd0d5ba15e1fb72e8283a66c16c3883e73e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
