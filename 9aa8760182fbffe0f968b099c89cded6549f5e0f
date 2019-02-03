@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f3010364_9a93d17e",
+        "filename": "android/scripts/unix/gen-android-sdk-toolchain.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 671,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-03T05:33:26Z",
+      "side": 1,
+      "message": "Try following the [ here.",
+      "revId": "9aa8760182fbffe0f968b099c89cded6549f5e0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f30e313a_c146c949",
+        "filename": "android/scripts/unix/gen-android-sdk-toolchain.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 778,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-03T05:33:26Z",
+      "side": 1,
+      "message": "Could this [[ be the issue?",
+      "revId": "9aa8760182fbffe0f968b099c89cded6549f5e0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
