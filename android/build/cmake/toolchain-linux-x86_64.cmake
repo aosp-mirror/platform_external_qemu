@@ -37,7 +37,12 @@ if ("${RUNTIME_OS_DEPENDENCIES}" STREQUAL "")
     internal_set_env_cache(RUNTIME_OS_DEPENDENCIES "${STD_OUT}>lib64/${RESOLVED_FILENAME};${STD_OUT}>lib64/${LINKED_FILENAME}")
 
     # Configure the RPATH be dynamic..
-    internal_set_env_cache(RUNTIME_OS_PROPERTIES "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64'")
+    #
+    # FIXME: Remove --disable-new-dtags. Binutils now uses RUNPATH for
+    # searching for shared objects by default, which doesn't apply to
+    # transitive shared object dependencies. These shared objects should
+    # ideally specify their own rpaths.
+    internal_set_env_cache(RUNTIME_OS_PROPERTIES "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64' -Wl,--disable-new-dtags")
 endif()
 
 # here is the target environment located, used to
