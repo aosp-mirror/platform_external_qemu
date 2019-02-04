@@ -144,11 +144,6 @@ public:
         const VkAllocationCallbacks* pAllocator,
         VkImageView* pView);
 
-    void on_vkGetImageMemoryRequirements(
-        VkDevice device,
-        VkImage image,
-        VkMemoryRequirements* pMemoryRequirements);
-
     void on_vkCmdCopyBufferToImage(
         VkCommandBuffer commandBuffer,
         VkBuffer srcBuffer,

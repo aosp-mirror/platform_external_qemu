@@ -1436,10 +1436,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetImageMemoryRequirements:
             {
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetImageMemoryRequirements\n");;
-                }
                 VkDevice device;
                 VkImage image;
                 VkMemoryRequirements* pMemoryRequirements;
@@ -1465,7 +1461,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 unmarshal_VkMemoryRequirements(vkReadStream, (VkMemoryRequirements*)(pMemoryRequirements));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pMemoryRequirements;
-                m_state->on_vkGetImageMemoryRequirements(device, image, pMemoryRequirements);
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetImageMemoryRequirements\n");;
+                }
+                vk->vkGetImageMemoryRequirements(unboxed_device, image, pMemoryRequirements);
                 marshal_VkMemoryRequirements(vkStream, (VkMemoryRequirements*)(pMemoryRequirements));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
