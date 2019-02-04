@@ -100,7 +100,7 @@ select_file_name (char * fname)
   for (;;) {
     next_file_num++;		/* advance counter */
     sprintf(fname, TEMP_FILE_NAME, TEMP_DIRECTORY, next_file_num);
-    if ((tfile = fopen(fname, READ_BINARY)) == NULL) {
+    if ((tfile = android_fopen(fname, READ_BINARY)) == NULL) {
       /* fopen could have failed for a reason other than the file not
        * being there; for example, file there but unreadable.
        * If <errno.h> isn't available, then we cannot test the cause.
@@ -230,11 +230,11 @@ METHODDEF(void)
 close_backing_store (j_common_ptr cinfo, backing_store_ptr info)
 {
   fclose(info->temp_file);	/* close the file */
-  unlink(info->temp_name);	/* delete the file */
-/* If your system doesn't have unlink(), use remove() instead.
- * remove() is the ANSI-standard name for this function, but if
- * your system was ANSI you'd be using jmemansi.c, right?
- */
+  android_unlink(info->temp_name);	/* delete the file */
+  /* If your system doesn't haveandroid_unlink(), use remove() instead.
+   * remove() is the ANSI-standard name for this function, but if
+   * your system was ANSI you'd be using jmemansi.c, right?
+   */
   TRACEMSS(cinfo, 1, JTRC_TFILE_CLOSE, info->temp_name);
 }
 
@@ -248,7 +248,7 @@ jpeg_open_backing_store (j_common_ptr cinfo, backing_store_ptr info,
 			 long total_bytes_needed)
 {
   select_file_name(info->temp_name);
-  if ((info->temp_file = fopen(info->temp_name, RW_BINARY)) == NULL)
+  if ((info->temp_file = android_fopen(info->temp_name, RW_BINARY)) == NULL)
     ERREXITS(cinfo, JERR_TFILE_CREATE, info->temp_name);
   info->read_backing_store = read_backing_store;
   info->write_backing_store = write_backing_store;

@@ -141,7 +141,7 @@
  */
 #undef NEED_SIGNAL_CATCHER
 
-/* By default, we open image files with fopen(...,"rb") or fopen(...,"wb").
+/* By default, we open image files with android_fopen(...,"rb") or android_fopen(...,"wb").
  * This is necessary on systems that distinguish text files from binary files,
  * and is harmless on most systems that don't.  If you have one of the rare
  * systems that complains about the "b" spec, define this symbol.

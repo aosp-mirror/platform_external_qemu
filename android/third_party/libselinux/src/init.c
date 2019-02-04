@@ -22,6 +22,7 @@
 #include "dso.h"
 #include "policy.h"
 #include "selinux_internal.h"
+#include "android/utils/file_io.h"
 
 char *selinux_mnt = NULL;
 int selinux_page_size = 0;
@@ -48,10 +49,10 @@ static void init_selinuxmnt(void)
 			selinux_mnt = strdup(SELINUXMNT);
 			return;
 		}
-	} 
+	}
 
 	/* Drop back to detecting it the long way. */
-	fp = fopen("/proc/filesystems", "r");
+	fp = android_fopen("/proc/filesystems", "r");
 	if (!fp)
 		return;
 
@@ -62,14 +63,14 @@ static void init_selinuxmnt(void)
 		}
 	}
 
-	if (!exists) 
+	if (!exists)
 		goto out;
 
 	fclose(fp);
 
 	/* At this point, the usual spot doesn't have an selinuxfs so
 	 * we look around for it */
-	fp = fopen("/proc/mounts", "r");
+	fp = android_fopen("/proc/mounts", "r");
 	if (!fp)
 		goto out;
 

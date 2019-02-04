@@ -152,7 +152,7 @@ static int armCPUInfo(CPUFeature feature) {
   {
     int has_neon = 0;
     char line[200];
-    FILE* const cpuinfo = fopen("/proc/cpuinfo", "r");
+    FILE* const cpuinfo = android_fopen("/proc/cpuinfo", "r");
     if (cpuinfo == NULL) return 0;
     while (fgets(line, sizeof(line), cpuinfo)) {
       if (!strncmp(line, "Features", 8)) {

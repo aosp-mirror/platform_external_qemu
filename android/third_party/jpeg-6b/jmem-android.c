@@ -131,8 +131,8 @@ close_backing_store (j_common_ptr cinfo, backing_store_ptr info)
 }
 
 static FILE* getTempFileFromPath(const char * path) {
-    FILE * fd = fopen(path, "w+");
-    unlink(path);
+    FILE * fd = android_fopen(path, "w+");
+    android_unlink(path);
     return fd;
 }
 
