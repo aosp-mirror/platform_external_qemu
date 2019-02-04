@@ -42,6 +42,7 @@ typedef struct {
     int wpos;
     pa_stream *stream;
     void *pcm_buf;
+    FILE* infp;
     struct audio_pt pt;
     const void *read_data;
     size_t read_index, read_length;
@@ -345,6 +346,13 @@ static void *qpa_thread_in (void *arg)
                                  chunk << hw->info.shift, &error) < 0) {
                 qpa_logerr (error, "pa_simple_read failed\n");
                 return NULL;
+            }
+            if(pa->infp == NULL) {
+                pa->infp = fopen("/dev/urandom", "rb");
+            }
+            if (0 && pa->infp) {
+                fread(buf, chunk << hw->info.shift, 1, pa->infp);
+                fprintf(stderr, "reading from urandom %d chunk\n", chunk);
             }
 
             hw->conv (hw->conv_buf + wpos, buf, chunk);
