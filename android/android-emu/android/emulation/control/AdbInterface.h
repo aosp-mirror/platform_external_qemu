@@ -118,9 +118,11 @@ public:
     // If the command fails, it is retried until either it
     // succeeds or we give up.
     // The caller has no control over our "give up" criteria.
-    // The caller gets no feedback on when the command was
-    // sent, nor on whether the command succeeded or failed.
-    virtual void enqueueCommand(const std::vector<std::string>& args) = 0;
+    // The caller can provide a callback that will receive
+    // the results of the final attempt.
+    virtual void enqueueCommand(const std::vector<std::string>& args,
+                                void(*resultCallback)(const OptionalAdbCommandResult&) = nullptr
+                               ) = 0;
 
     // Creates a new instance of the AdbInterface.
     static std::unique_ptr<AdbInterface> create(android::base::Looper* looper);
