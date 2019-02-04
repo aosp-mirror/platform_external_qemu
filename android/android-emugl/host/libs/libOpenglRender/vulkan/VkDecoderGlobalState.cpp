@@ -691,17 +691,6 @@ public:
         return vk->vkCreateImageView(device, pCreateInfo, pAllocator, pView);
     }
 
-    void on_vkGetImageMemoryRequirements(
-        VkDevice boxed_device,
-        VkImage image,
-        VkMemoryRequirements* pMemoryRequirements) {
-
-        auto device = unbox_VkDevice(boxed_device);
-        auto vk = dispatch_VkDevice(boxed_device);
-
-        vk->vkGetImageMemoryRequirements(device, image, pMemoryRequirements);
-    }
-
     void on_vkCmdCopyBufferToImage(
         VkCommandBuffer boxed_commandBuffer,
         VkBuffer srcBuffer,
@@ -1829,13 +1818,6 @@ VkResult VkDecoderGlobalState::on_vkCreateImageView(
     const VkAllocationCallbacks* pAllocator,
     VkImageView* pView) {
     return mImpl->on_vkCreateImageView(device, pCreateInfo, pAllocator, pView);
-}
-
-void VkDecoderGlobalState::on_vkGetImageMemoryRequirements(
-    VkDevice device,
-    VkImage image,
-    VkMemoryRequirements* pMemoryRequirements) {
-    mImpl->on_vkGetImageMemoryRequirements(device, image, pMemoryRequirements);
 }
 
 void VkDecoderGlobalState::on_vkCmdCopyBufferToImage(
