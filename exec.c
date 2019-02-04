@@ -2389,6 +2389,19 @@ void qemu_user_backed_ram_unmap(uint64_t gpa, uint64_t size)
     s_user_backed_ram_unmap(gpa, size);
 }
 
+static struct qemu_address_space_device_control_ops*
+qemu_address_space_device_control_ops = 0;
+
+void qemu_set_address_space_device_control_ops(
+    struct qemu_address_space_device_control_ops* ops) {
+    qemu_address_space_device_control_ops = ops;
+}
+
+struct qemu_address_space_device_control_ops*
+qemu_get_address_space_device_control_ops() {
+    return qemu_address_space_device_control_ops;
+}
+
 static void reclaim_ramblock(RAMBlock *block)
 {
     if (block->flags & RAM_PREALLOC) {
@@ -3945,6 +3958,13 @@ void cpu_physical_memory_unmap(void *buffer, hwaddr len,
                                int is_write, hwaddr access_len)
 {
     return address_space_unmap(&address_space_memory, buffer, len, is_write, access_len);
+}
+
+void *cpu_physical_memory_get_addr(hwaddr addr) {
+    hwaddr len = 4096;
+    void* hva = cpu_physical_memory_map(addr, &len, 1);
+    cpu_physical_memory_unmap(hva, len, 1, len);
+    return hva;
 }
 
 #define ARG1_DECL                AddressSpace *as

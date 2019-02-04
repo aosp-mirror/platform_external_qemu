@@ -560,6 +560,10 @@ static bool vm_resume() {
     return err == nullptr;;
 }
 
+static void* physical_memory_get_addr(uint64_t gpa) {
+    return cpu_physical_memory_get_addr(gpa);
+}
+
 static const QAndroidVmOperations sQAndroidVmOperations = {
         .vmStop = qemu_vm_stop,
         .vmStart = qemu_vm_start,
@@ -580,6 +584,8 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .setFailureReason = set_failure_reason,
         .setExiting = set_exiting,
         .allowRealAudio = allow_real_audio,
+        .physicalMemoryGetAddr = physical_memory_get_addr,
 };
+
 const QAndroidVmOperations* const gQAndroidVmOperations =
         &sQAndroidVmOperations;

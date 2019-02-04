@@ -98,6 +98,12 @@ void *cpu_physical_memory_map(hwaddr addr,
                               int is_write);
 void cpu_physical_memory_unmap(void *buffer, hwaddr len,
                                int is_write, hwaddr access_len);
+// Similar to cpu_physical_memory_map/unmap, but does not
+// cause a refcount change. Must be page aligned and
+// there must be at least one page serviceable from
+// |addr|.
+void *cpu_physical_memory_get_addr(hwaddr addr);
+
 void cpu_register_map_client(QEMUBH *bh);
 void cpu_unregister_map_client(QEMUBH *bh);
 
