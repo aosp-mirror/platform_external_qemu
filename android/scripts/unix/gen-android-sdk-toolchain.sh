@@ -121,7 +121,7 @@ aosp_dir_parse_option
 # Handle --host option.
 if [ "$OPT_HOST" ]; then
     case $OPT_HOST in
-        linux-x86_64|darwin-x86_64|windows-x86_64|windows_msvc-x86_64)
+        linux-x86_64|linux-aarch64|darwin-x86_64|windows-x86_64|windows_msvc-x86_64)
             ;;
         *)
             panic "Invalid --host value: $OPT_HOST"
@@ -436,7 +436,7 @@ prepare_build_for_darwin() {
     fi
 }
 
-prepare_build_for_linux() {
+prepare_build_for_linux_x86_64() {
     GCC_DIR="${PREBUILT_TOOLCHAIN_DIR}/lib/gcc/x86_64-linux/4.8.3/"
     CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for linux)
     CLANG_DIR=$(realpath $CLANG_BINDIR/..)
@@ -498,6 +498,56 @@ prepare_build_for_linux() {
     var_append POST_LDFLAGS "-lm"
     var_append POST_LDFLAGS "-lgcc"
     var_append POST_LDFLAGS "-lgcc_s"
+}
+
+prepare_build_for_linux_aarch64() {
+    GCC_DIR="/usr/"
+    CLANG_BINDIR=
+    CLANG_DIR=
+    GNU_CONFIG_HOST=aarch64-linux
+    CLANG_VERSION=
+    SYSROOT="/"
+
+    # Clang will invoke the linker, but will not correctly infer the
+    # -gcc-toolchain, so we have to manually configure the various paths.
+    # Note that this can result in warnings of unused flags if we are not
+    # linking and merely translating a .c or .cpp file
+    local GCC_LINK_FLAGS=
+
+    if [ $(get_verbosity) -gt 3 ]; then
+      # This will get pretty crazy, but useful if you want to debug linker issues.
+      var_append GCC_LINK_FLAGS "-Wl,-verbose"
+      var_append GCC_LINK_FLAGS "-v"
+    else
+      var_append GCC_LINK_FLAGS ""
+    fi
+
+
+    EXTRA_CFLAGS=
+    var_append EXTRA_CFLAGS ${GCC_LINK_FLAGS}
+
+
+    EXTRA_CXXFLAGS=
+    var_append EXTRA_CXXFLAGS ${GCC_LINK_FLAGS}
+
+    if [ "$OPT_CXX11" ]; then
+        var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
+    fi
+
+    # Make sure we can find libgcc on aarch64
+    EXTRA_LDFLAGS="-L/usr/lib/gcc/aarch64-linux-gnu/5"
+
+    # If we manually call the linker we need to pass in the correct default libs
+    # we link against. These have to go last!
+    POST_LDFLAGS=
+    var_append POST_LDFLAGS "-lc"
+    var_append POST_LDFLAGS "-lc++"
+    var_append POST_LDFLAGS "-lm"
+    var_append POST_LDFLAGS "-lgcc"
+    var_append POST_LDFLAGS "-lgcc_s"
+
+    # aarch64 use host toolchain.  no prefix needed.
+    DST_PREFIX=
 }
 
 prepare_build_for_windows () {
@@ -725,11 +775,15 @@ print_info () {
             printf "%s\n" "$CLANG_VERSION"
             ;;
         libcplusplus)
-          printf "%s\n" "$CLANG_DIR/lib64/libc++.so"
-          ;;
+            if [ "$BUILD_HOST" = "linux" -a "$BUILD_ARCH" = "aarch64" ]; then
+                printf "%s\n" "/usr/lib/aarch64-linux-gnu/libc++.so"
+            else
+                printf "%s\n" "$CLANG_DIR/lib64/libc++.so"
+            fi
+            ;;
         libasan-dir)
-          printf "%s" "$CLANG_DIR/lib64/clang/5.0/lib/linux/"
-          ;;
+            printf "%s" "$CLANG_DIR/lib64/clang/5.0/lib/linux/"
+            ;;
         *)
             printf "%s\n" "${BINPREFIX}$PRINT"
             ;;
@@ -750,7 +804,7 @@ prepare_build_for_host () {
 
     case $CURRENT_HOST in
         linux-*)
-            prepare_build_for_linux
+            prepare_build_for_linux_$(get_build_arch)
             ;;
         darwin-*)
             prepare_build_for_darwin
@@ -792,7 +846,7 @@ prepare_build_for_host () {
 
         # Create pkgconfig link for other scripts.
         case $CURRENT_HOST in
-            linux-*)
+            linux-x86*)
                 ln -sfn "$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/lib/pkgconfig" "$INSTALL_DIR/pkgconfig"
                 ;;
         esac
