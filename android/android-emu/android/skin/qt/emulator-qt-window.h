@@ -26,6 +26,7 @@
 #include "android/skin/qt/emulator-overlay.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/skin/qt/tool-window-2.h"
 #include "android/skin/qt/ui-event-recorder.h"
 #include "android/skin/qt/user-actions-counter.h"
 #include "android/skin/image.h"
@@ -208,7 +209,8 @@ public:
 
     android::emulation::AdbInterface* getAdbInterface() const;
     bool isInZoomMode() const;
-    ToolWindow* toolWindow() const;
+    ToolWindow*  toolWindow () const;
+    ToolWindow2* toolWindow2() const;
     EmulatorContainer* containerWindow();
     void showZoomIfNotUserHidden();
     QSize containerSize() const;
@@ -216,6 +218,8 @@ public:
 
     void doResize(const QSize& size,
                   bool isKbdShortcut = false);
+    void exposeMaskWindowFrame();
+    void resizeAndChangeAspectRatio(int changeType);
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
                           const QPoint& pos,
@@ -399,7 +403,8 @@ private:
     bool mShouldShowSnapshotModalOverlay = false;
     android::base::Lock mSnapshotStateLock;
 
-    ToolWindow* mToolWindow;
+    ToolWindow*  mToolWindow;
+    ToolWindow2* mToolWindow2;
     EmulatorContainer mContainer;
     EmulatorOverlay mOverlay;
     QRect mDeviceGeometry;

@@ -1850,6 +1850,35 @@ skin_window_set_onion( SkinWindow*   window,
 void
 skin_window_set_scale(SkinWindow* window, double scale)
 {
+#if 1 // TODO: This is a hack to change the size of 'window->layout'
+    if (scale >= 12340.0) {
+        int origX = window->layout.displays[0].rect.pos.x;
+        int origY = window->layout.displays[0].rect.pos.y;
+        int origW = window->layout.rect.size.w;
+        int origH = window->layout.rect.size.h;
+
+        int newX = origX;
+        int newY = origY;
+        int newW = origW;
+        int newH = origH;
+
+        switch ((int)scale) { // I sure hope this converts to 'int' cleanly!
+            default:
+            case 12340: newX -= newW / 4; newW /= 2;              break; // Half width
+            case 12341: newX =  0;        newW *= 2;              break; // Double width (restore)
+
+            case 12342: newY -= newH / 8; newH = (newH * 3) / 4;  break; // 3/4 height
+            case 12343: newY =  0;        newH = (newH * 4) / 3;  break; // 4/3 height (restore)
+        }
+
+        window->layout.displays[0].rect.pos.x = newX;
+        window->layout.displays[0].rect.pos.y = newY;
+
+        window->layout.rect.size.w = newW;
+        window->layout.rect.size.h = newH;
+        return;
+    }
+#endif
     window->scale = scale;
 
     // The scroll bars *will* be gone if this function is called, so make sure
