@@ -16,6 +16,7 @@
 #include "android/utils/misc.h"
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
+#include "android/utils/file_io.h"
 #include <stdio.h>
 #include <errno.h>
 
@@ -562,7 +563,7 @@ parse_kcm_file(const char* kcm_file_path, SkinCharmap* char_map) {
     char_map->num_entries = 0;
     char_map->entries = 0;
 
-    kcm_file = fopen(kcm_file_path, "r");
+    kcm_file = android_fopen(kcm_file_path, "r");
     if (NULL == kcm_file) {
         derror("Unable to open charmap file %s : %s",
                kcm_file_path, strerror(errno));

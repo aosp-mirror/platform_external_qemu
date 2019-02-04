@@ -10,6 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "android/tcpdump.h"
+#include "android/utils/file_io.h"
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef _MSC_VER
@@ -86,7 +87,7 @@ qemu_tcpdump_start( const char*  filepath )
     if (filepath == NULL)
         return -1;
 
-    capture_file = fopen(filepath, "wb");
+    capture_file = android_fopen(filepath, "wb");
     if (capture_file == NULL)
         return -1;
 

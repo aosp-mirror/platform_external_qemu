@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "android/base/JsonWriter.h"
-
+#include "android/utils/file_io.h"
 #include <sstream>
 
 #include <stdio.h>
@@ -27,7 +27,9 @@ JsonWriter::JsonWriter(const std::string& outputPath) {
     // unicode strings and widen the call to fopen first.  At the moment, this
     // depends on our weakly linked android_fopen along with
     // Win32UnicodeString to do the right thing on Windows.
-    mFp = fopen(outputPath.c_str(), "w");
+    // Note that we have to open the files in binary mode as we don't want windows
+    // to re-encode the text we are writing.
+    mFp = android_fopen(outputPath.c_str(), "wb");
     mNeedClose = true;
 }
 
