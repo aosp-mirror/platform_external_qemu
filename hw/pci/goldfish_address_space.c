@@ -332,6 +332,15 @@ static void address_space_allocator_reset(
 
 #endif
 
+struct goldfish_address_space_ping {
+	uint64_t offset;
+	uint64_t size;
+	uint64_t metadata;
+	uint64_t wait_offset;
+    uint32_t wait_flags;
+    uint32_t direction;
+};
+
 enum address_space_register_id {
 	ADDRESS_SPACE_REGISTER_COMMAND = 0,
 	ADDRESS_SPACE_REGISTER_STATUS = 4,
@@ -340,11 +349,18 @@ enum address_space_register_id {
 	ADDRESS_SPACE_REGISTER_BLOCK_SIZE_HIGH = 16,
 	ADDRESS_SPACE_REGISTER_BLOCK_OFFSET_LOW = 20,
 	ADDRESS_SPACE_REGISTER_BLOCK_OFFSET_HIGH = 24,
+    ADDRESS_SPACE_REGISTER_PING = 28,
+    ADDRESS_SPACE_REGISTER_PING_INFO_ADDR_LOW = 32,
+    ADDRESS_SPACE_REGISTER_PING_INFO_ADDR_HIGH = 36,
+    ADDRESS_SPACE_REGISTER_HANDLE = 40,
 };
 
 enum address_space_command_id {
 	ADDRESS_SPACE_COMMAND_ALLOCATE_BLOCK = 1,
 	ADDRESS_SPACE_COMMAND_DEALLOCATE_BLOCK = 2,
+    ADDRESS_SPACE_COMMAND_GEN_HANDLE = 3,
+    ADDRESS_SPACE_COMMAND_DESTROY_HANDLE = 4,
+    ADDRESS_SPACE_COMMAND_TELL_PING_INFO_ADDR = 5,
 };
 
 struct address_space_registers {
@@ -355,6 +371,10 @@ struct address_space_registers {
     uint32_t size_high;
     uint32_t offset_low;
     uint32_t offset_high;
+    uint32_t ping; // unused
+    uint32_t ping_info_addr_low;
+    uint32_t ping_info_addr_high;
+    uint32_t handle;
 };
 
 /* We need to cover 'size' bytes given at any offset with aligned pages. */
@@ -438,6 +458,19 @@ static uint32_t address_space_run_command(struct address_space_state *state,
 
     case ADDRESS_SPACE_COMMAND_DEALLOCATE_BLOCK:
         return address_space_deallocate_block(state);
+    case ADDRESS_SPACE_COMMAND_GEN_HANDLE:
+        fprintf(stderr, "%s: gen handle\n", __func__);
+        state->registers.handle = 9001;
+        break;
+    case ADDRESS_SPACE_COMMAND_DESTROY_HANDLE:
+        fprintf(stderr, "%s: destroy handle\n", __func__);
+        break;
+    case ADDRESS_SPACE_COMMAND_TELL_PING_INFO_ADDR:
+        fprintf(stderr, "%s: tell ping info addr handle %u high 0x%x low 0x%x\n", __func__,
+                state->registers.handle,
+                state->registers.ping_info_addr_high,
+                state->registers.ping_info_addr_low);
+        break;
     }
 
     return ENOSYS;
@@ -472,6 +505,20 @@ static uint64_t address_space_control_read(void *opaque,
 
     case ADDRESS_SPACE_REGISTER_BLOCK_OFFSET_HIGH:
         return state->registers.offset_high;
+
+    case ADDRESS_SPACE_REGISTER_PING:
+        fprintf(stderr, "%s: warning: kernel tried to read PING register!\n", __func__);
+        return state->registers.ping;
+
+    case ADDRESS_SPACE_REGISTER_PING_INFO_ADDR_LOW:
+        fprintf(stderr, "%s: read ping info addr low 0x%x\n", __func__, (state->registers.ping_info_addr_low));
+        return state->registers.ping_info_addr_low;
+    case ADDRESS_SPACE_REGISTER_PING_INFO_ADDR_HIGH:
+        fprintf(stderr, "%s: read ping info addr high 0x%x\n", __func__, (state->registers.ping_info_addr_high));
+        return state->registers.ping_info_addr_high;
+    case ADDRESS_SPACE_REGISTER_HANDLE:
+        fprintf(stderr, "%s: read handle 0x%x\n", __func__, (state->registers.handle));
+        return state->registers.handle;
     }
 
 bad_access:
@@ -516,6 +563,25 @@ static void address_space_control_write(void *opaque,
     case ADDRESS_SPACE_REGISTER_BLOCK_OFFSET_HIGH:
         state->registers.offset_high = val;
         break;
+
+    case ADDRESS_SPACE_REGISTER_PING:
+        fprintf(stderr, "%s: write ping 0x%x\n", __func__, (uint32_t)val);
+        state->registers.ping = (uint32_t)val;
+        break;
+
+    case ADDRESS_SPACE_REGISTER_PING_INFO_ADDR_LOW:
+        fprintf(stderr, "%s: write ping info addr low 0x%x\n", __func__, (uint32_t)val);
+        state->registers.ping_info_addr_low = (uint32_t)val;
+        break;
+    case ADDRESS_SPACE_REGISTER_PING_INFO_ADDR_HIGH:
+        fprintf(stderr, "%s: write ping info addr high 0x%x\n", __func__, (uint32_t)val);
+        state->registers.ping_info_addr_high = (uint32_t)val;
+        break;
+    case ADDRESS_SPACE_REGISTER_HANDLE:
+        fprintf(stderr, "%s: write handle 0x%x\n", __func__, (uint32_t)val);
+        state->registers.handle = (uint32_t)val;
+        break;
+
     }
 }
 
