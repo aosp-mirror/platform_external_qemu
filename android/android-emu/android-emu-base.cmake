@@ -3,6 +3,7 @@
 
 # Dependencies
 prebuilt(UUID)
+prebuilt(GLIB2) # Acts as windows stdio compatibility layer.
 
 # Source configuration, the following set is shared amongst all targets
 set(android-emu-base_src

@@ -260,7 +260,7 @@ static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
 
     /* In verbose mode, dump the file's content */
     if (VERBOSE_CHECK(init)) {
-        auto file = makeCustomScopedPtr(fopen(coreHwIniPath, "rt"), fclose);
+        auto file = makeCustomScopedPtr(android_fopen(coreHwIniPath, "rt"), fclose);
         if (file.get() == NULL) {
             derror("Could not open hardware configuration file: "
                    "%s\n",
@@ -288,11 +288,11 @@ static void prepareDataFolder(const char* destDirectory,
     path_copy_dir(destDirectory, srcDirectory);
     std::string adbKeyPath = PathUtils::join(
             android::ConfigDirs::getUserDirectory(), "adbkey.pub");
-    
+
     bool adbKeyPresent =
         path_is_regular(adbKeyPath.c_str()) &&
         path_can_read(adbKeyPath.c_str());
-    
+
     if (!adbKeyPresent) {
         dwarning("cannot read adb public key file: %s", adbKeyPath.c_str());
         dwarning("trying again by copying from home dir");
@@ -659,14 +659,12 @@ static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
     return false;
 }
 
-
 extern "C" AndroidProxyCB* gAndroidProxyCB;
 extern "C" int main(int argc, char** argv) {
     if (argc < 1) {
         fprintf(stderr, "Invalid invocation (no program path)\n");
         return 1;
     }
-
     process_early_setup(argc, argv);
     android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
 

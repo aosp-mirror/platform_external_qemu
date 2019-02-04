@@ -285,7 +285,7 @@ int selinux_android_seapp_context_reload(void)
 
 	set_policy_index();
 
-	fp = fopen(seapp_contexts_file[policy_index], "r");
+	fp = android_fopen(seapp_contexts_file[policy_index], "r");
 	if (!fp) {
 		selinux_log(SELINUX_ERROR, "%s:  could not open any seapp_contexts file", __FUNCTION__);
 		return -1;
@@ -481,7 +481,7 @@ err:
 	ret = -1;
 	goto out;
 oom:
-	selinux_log(SELINUX_ERROR, 
+	selinux_log(SELINUX_ERROR,
 		    "%s:  Out of memory\n", __FUNCTION__);
 	free_seapp_contexts();
 	ret = -1;
@@ -780,7 +780,7 @@ err:
 		selinux_log(SELINUX_ERROR,
 				"%s:  Error setting context for system server: %s\n",
 				__FUNCTION__, strerror(errno));
-	else 
+	else
 		selinux_log(SELINUX_ERROR,
 				"%s:  Error setting context for app with uid %d, seinfo %s: %s\n",
 				__FUNCTION__, uid, seinfo, strerror(errno));
@@ -898,7 +898,7 @@ static void package_info_init(void)
     unsigned int hash;
     unsigned long lineno = 1;
 
-    fp = fopen(PACKAGES_LIST_FILE, "r");
+    fp = android_fopen(PACKAGES_LIST_FILE, "r");
     if (!fp) {
         selinux_log(SELINUX_ERROR, "SELinux:  Could not open %s:  %s.\n",
                     PACKAGES_LIST_FILE, strerror(errno));
@@ -1358,7 +1358,7 @@ int selinux_android_load_policy(void)
 		if (errno == ENOENT) {
 			/* Fall back to legacy mountpoint. */
 			mnt = OLDSELINUXMNT;
-			rc = mkdir(mnt, 0755);
+			rc = android_mkdir(mnt, 0755);
 			if (rc == -1 && errno != EEXIST) {
 				selinux_log(SELINUX_ERROR,"SELinux:  Could not mkdir:  %s\n",
 					strerror(errno));

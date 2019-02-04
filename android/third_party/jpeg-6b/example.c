@@ -6,7 +6,7 @@
  * conjunction with the documentation file libjpeg.doc.
  *
  * This code will not do anything useful as-is, but it may be helpful as a
- * skeleton for constructing routines that call the JPEG library.  
+ * skeleton for constructing routines that call the JPEG library.
  *
  * We present these routines in the same coding style used in the JPEG code
  * (ANSI function definitions, etc); but you are of course free to code your
@@ -108,10 +108,10 @@ write_JPEG_file (char * filename, int quality)
 
   /* Here we use the library-supplied code to send compressed data to a
    * stdio stream.  You can also write your own code to do something else.
-   * VERY IMPORTANT: use "b" option to fopen() if you are on a machine that
+   * VERY IMPORTANT: use "b" option to android_fopen() if you are on a machine that
    * requires it in order to write binary files.
    */
-  if ((outfile = fopen(filename, "wb")) == NULL) {
+  if ((outfile = android_fopen(filename, "wb")) == NULL) {
     fprintf(stderr, "can't open %s\n", filename);
     exit(1);
   }
@@ -299,11 +299,11 @@ read_JPEG_file (char * filename)
 
   /* In this example we want to open the input file before doing anything else,
    * so that the setjmp() error recovery below can assume the file is open.
-   * VERY IMPORTANT: use "b" option to fopen() if you are on a machine that
+   * VERY IMPORTANT: use "b" option to android_fopen() if you are on a machine that
    * requires it in order to read binary files.
    */
 
-  if ((infile = fopen(filename, "rb")) == NULL) {
+  if ((infile = android_fopen(filename, "rb")) == NULL) {
     fprintf(stderr, "can't open %s\n", filename);
     return 0;
   }
@@ -356,7 +356,7 @@ read_JPEG_file (char * filename)
    * output image dimensions available, as well as the output colormap
    * if we asked for color quantization.
    * In this example, we need to make an output work buffer of the right size.
-   */ 
+   */
   /* JSAMPLEs per row in output buffer */
   row_stride = cinfo.output_width * cinfo.output_components;
   /* Make a one-row-high sample array that will go away when done with image */

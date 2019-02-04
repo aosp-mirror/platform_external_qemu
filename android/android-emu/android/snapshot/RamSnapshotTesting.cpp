@@ -12,6 +12,7 @@
 #include "android/snapshot/RamSnapshotTesting.h"
 
 #include "android/base/files/StdioStream.h"
+#include "android/utils/file_io.h"
 
 #include <cstdlib>
 #include <random>
@@ -72,7 +73,7 @@ void saveRamSingleBlock(const RamSaver::Flags flags,
 
 void loadRamSingleBlock(const RamBlock& block,
                         android::base::StringView filename) {
-    auto ram = fopen(c_str(filename), "rb");
+    auto ram = android_fopen(c_str(filename), "rb");
 
     RamLoader::RamBlockStructure emptyRamBlockStructure = {};
 
@@ -90,7 +91,7 @@ void incrementalSaveSingleBlock(const RamSaver::Flags flags,
                                 const RamBlock& blockToLoad,
                                 const RamBlock& blockToSave,
                                 android::base::StringView filename) {
-    auto ram = fopen(c_str(filename), "rb");
+    auto ram = android_fopen(c_str(filename), "rb");
 
     RamLoader::RamBlockStructure emptyRamBlockStructure = {};
 

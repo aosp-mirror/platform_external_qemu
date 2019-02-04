@@ -73,6 +73,7 @@
 #include <string.h>
 #ifdef _MSC_VER
 #include "msvc-posix.h"
+#include "msvc-getopt.h"
 #else
 #include <getopt.h>
 #include <unistd.h>

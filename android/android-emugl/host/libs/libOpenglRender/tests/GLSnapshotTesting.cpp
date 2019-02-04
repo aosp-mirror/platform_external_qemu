@@ -214,10 +214,10 @@ void SnapshotTest::saveSnapshot(const std::string streamFile,
     const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
 
     std::unique_ptr<StdioStream> m_stream(new StdioStream(
-            fopen(streamFile.c_str(), "wb"), StdioStream::kOwner));
+            android_fopen(streamFile.c_str(), "wb"), StdioStream::kOwner));
     auto egl_stream = static_cast<EGLStream>(m_stream.get());
     std::unique_ptr<TextureSaver> m_texture_saver(new TextureSaver(StdioStream(
-            fopen(textureFile.c_str(), "wb"), StdioStream::kOwner)));
+            android_fopen(textureFile.c_str(), "wb"), StdioStream::kOwner)));
 
     egl->eglPreSaveContext(m_display, m_context, egl_stream);
     egl->eglSaveAllImages(m_display, egl_stream, &m_texture_saver);
@@ -243,10 +243,10 @@ void SnapshotTest::loadSnapshot(const std::string streamFile,
     const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
 
     std::unique_ptr<StdioStream> m_stream(new StdioStream(
-            fopen(streamFile.c_str(), "rb"), StdioStream::kOwner));
+            android_fopen(streamFile.c_str(), "rb"), StdioStream::kOwner));
     auto egl_stream = static_cast<EGLStream>(m_stream.get());
     std::shared_ptr<TextureLoader> m_texture_loader(
-            new TextureLoader(StdioStream(fopen(textureFile.c_str(), "rb"),
+            new TextureLoader(StdioStream(android_fopen(textureFile.c_str(), "rb"),
                                           StdioStream::kOwner)));
 
     egl->eglLoadAllImages(m_display, egl_stream, &m_texture_loader);

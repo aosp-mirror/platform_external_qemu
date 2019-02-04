@@ -23,7 +23,7 @@ if(NOT TARGET gmock_main)
                                      -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
 endif()
 
-# Emugen executable
+# Emugen executable (note not unicode safe!)
 set(emugen_src ApiGen.cpp EntryPoint.cpp main.cpp Parser.cpp strUtils.cpp TypeFactory.cpp)
 android_add_executable(emugen)
 target_include_directories(emugen PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)
