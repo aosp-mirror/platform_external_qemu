@@ -20,6 +20,7 @@
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/shortcut-key-store.h"
 #include "android/skin/qt/size-tweaker.h"
+#include "android/skin/qt/tool-window-2.h"
 #include "android/skin/qt/ui-event-recorder.h"
 #include "android/skin/qt/user-actions-counter.h"
 #include "android/skin/qt/virtualscene-control-window.h"
@@ -60,11 +61,27 @@ class ToolWindow : public QFrame {
         T* const mWindow;
     };
 
+    template <typename T>
+    class DualWindowHolder final {
+        DISALLOW_COPY_AND_ASSIGN(DualWindowHolder);
+        using OnCreatedCallback = void (ToolWindow::*)(T*);
+
+    public:
+        DualWindowHolder(ToolWindow* tw, ToolWindow2* tw2, OnCreatedCallback onCreated);
+        ~DualWindowHolder();
+        T* operator->() const { return mWindow; }
+        T* get() const { return mWindow; }
+
+    private:
+        T* const mWindow;
+    };
+
 public:
     ToolWindow(EmulatorQtWindow* emulatorWindow,
                QWidget* parent,
                UIEventRecorderPtr event_recorder,
-               UserActionsCounterPtr user_actions_counter);
+               UserActionsCounterPtr user_actions_counter,
+               ToolWindow2* tw2);
     ~ToolWindow();
 
     void allowExtWindowCreation();
@@ -99,7 +116,8 @@ public:
 
     // The designers want a gap between the main emulator
     // window and the tool bar. This is how big that gap is.
-    static const int toolGap = 10;
+    static const int TOOL_GAP_FRAMED    = 0;
+    static const int TOOL_GAP_FRAMELESS = 4;
 
     bool shouldClose();
 
@@ -115,6 +133,7 @@ signals:
 private:
     void handleUICommand(QtUICommand cmd, bool down);
     void forwardGenericEventToEmulator(int type, int code, int value);
+    void ensureExtendedWindowExists();
 
     // Handle a full key press (down + up) in a single call.
     void handleUICommand(QtUICommand cmd) {
@@ -142,8 +161,9 @@ private:
     virtual void hideEvent(QHideEvent* event) override;
 
     EmulatorQtWindow* mEmulatorWindow;
-    android::base::MemberOnDemandT<WindowHolder<ExtendedWindow>,
+    android::base::MemberOnDemandT<DualWindowHolder<ExtendedWindow>,
                                    ToolWindow*,
+                                   ToolWindow2*,
                                    void (ToolWindow::*)(ExtendedWindow*)>
             mExtendedWindow;
     android::base::MemberOnDemandT<WindowHolder<VirtualSceneControlWindow>,
@@ -159,15 +179,18 @@ private:
     QString mDetectedAdbPath;
     UIEventRecorderPtr mUIEventRecorder;
     UserActionsCounterPtr mUserActionsCounter;
-    SizeTweaker mSizeTweaker;
     bool mTopSwitched = false;
+    int mMinimumToolBarHeight = 512;
 
     bool mIsExiting = false;
     bool mAskedWhetherToSaveSnapshot = false;
     bool mAllowExtWindow = false;
     bool mClipboardSupported = false;
 
+    ToolWindow2* mToolWindow2 = nullptr;
     static const UiEmuAgent* sUiEmuAgent;
+
+    friend class ToolWindow2;
 
 public slots:
     void raise();
@@ -186,8 +209,6 @@ private slots:
     void on_power_button_released();
     void on_overview_button_pressed();
     void on_overview_button_released();
-    void on_prev_layout_button_clicked();
-    void on_next_layout_button_clicked();
     void on_scrShot_button_clicked();
     void on_volume_down_button_pressed();
     void on_volume_down_button_released();

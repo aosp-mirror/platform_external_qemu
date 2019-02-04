@@ -38,6 +38,7 @@
 
 class EmulatorQtWindow;
 class ToolWindow;
+class ToolWindow2;
 class GeoDataLoaderThread;
 class VirtualSceneControlWindow;
 
@@ -50,7 +51,7 @@ class ExtendedWindow : public QFrame
     Q_OBJECT
 
 public:
-    ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW);
+    ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW, ToolWindow2* tW2);
 
     ~ExtendedWindow();
 
@@ -101,7 +102,8 @@ private:
     void showEvent(QShowEvent* e) override;
 
     EmulatorQtWindow* mEmulatorWindow;
-    ToolWindow* mToolWindow;
+    ToolWindow*  mToolWindow;
+    ToolWindow2* mToolWindow2;
     std::map<ExtendedWindowPane, QPushButton*> mPaneButtonMap;
     const ShortcutKeyStore<QtUICommand>* mQtUIShortcuts;
     std::unique_ptr<Ui::ExtendedControls> mExtendedUi;

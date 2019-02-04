@@ -28,6 +28,10 @@
         <!-- Main list of tool buttons -->
         <file alias="back">images/light/System_Back_678.svg</file>
         <file alias="close">images/light/ic_close_678_48px.svg</file>
+        <file alias="compress_horiz">images/light/ic_compare_arrows_678_48dp.svg</file>
+        <file alias="compress_vert">images/light/ic_compress_678_48dp.svg</file>
+        <file alias="expand_horiz">images/light/ic_swap_horiz_678_48dp.svg</file>
+        <file alias="expand_vert">images/light/ic_height_678_48dp.svg</file>
         <file alias="help">images/light/ic_help_678_48dp.svg</file>
         <file alias="home">images/light/System_Home_678.svg</file>
         <file alias="laptop_mode">images/light/laptop_mode.svg</file>
@@ -152,6 +156,10 @@
         <file alias="arrow_up">images/dark/ic_keyboard_arrow_up_BCC_48dp.svg</file>
         <file alias="back">images/dark/System_Back_white.svg</file>
         <file alias="close">images/dark/ic_close_48px.svg</file>
+        <file alias="expand_horiz">images/dark/ic_swap_horiz_white_48dp.svg</file>
+        <file alias="expand_vert">images/dark/ic_height_white_48dp.svg</file>
+        <file alias="compress_horiz">images/dark/ic_compare_arrows_white_48dp.svg</file>
+        <file alias="compress_vert">images/dark/ic_compress_white_48dp.svg</file>
         <file alias="help">images/dark/ic_help_677_48dp.svg</file>
         <file alias="home">images/dark/System_Home_white.svg</file>
         <file alias="laptop_mode">images/dark/laptop_mode_dark.svg</file>

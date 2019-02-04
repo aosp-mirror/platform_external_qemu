@@ -47,6 +47,7 @@
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/skin/qt/tool-window-2.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
@@ -87,22 +88,38 @@ ToolWindow::WindowHolder<T>::~WindowHolder() {
     mWindow->deleteLater();
 }
 
+template <typename T>
+ToolWindow::DualWindowHolder<T>::DualWindowHolder(ToolWindow*   tw,
+                                                  ToolWindow2*  tw2,
+                                                  OnCreatedCallback onCreated)
+    : mWindow(new T(tw->mEmulatorWindow, tw, tw2)) {
+    (tw ->*onCreated)(mWindow);
+}
+
+template <typename T>
+ToolWindow::DualWindowHolder<T>::~DualWindowHolder() {
+    // The window may have slots with subscribers, so use deleteLater() instead
+    // of a regular delete for it.
+    mWindow->deleteLater();
+}
+
 const UiEmuAgent* ToolWindow::sUiEmuAgent = nullptr;
 static ToolWindow* sToolWindow = nullptr;
 
 ToolWindow::ToolWindow(EmulatorQtWindow* window,
                        QWidget* parent,
                        ToolWindow::UIEventRecorderPtr event_recorder,
-                       ToolWindow::UserActionsCounterPtr user_actions_counter)
+                       ToolWindow::UserActionsCounterPtr user_actions_counter,
+                       ToolWindow2* tw2)
     : QFrame(parent),
       mEmulatorWindow(window),
-      mExtendedWindow(this, &ToolWindow::onExtendedWindowCreated),
+      mExtendedWindow(this, tw2, &ToolWindow ::onExtendedWindowCreated),
       mVirtualSceneControlWindow(this,
                                  &ToolWindow::onVirtualSceneWindowCreated),
       mToolsUi(new Ui::ToolControls),
       mUIEventRecorder(event_recorder),
       mUserActionsCounter(user_actions_counter),
-      mSizeTweaker(this) {
+      mToolWindow2(tw2) {
 // "Tool" type windows live in another layer on top of everything in OSX, which
 // is undesirable because it means the extended window must be on top of the
 // emulator window. However, on Windows and Linux, "Tool" type windows are the
@@ -208,11 +225,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         }
     }
 
-    if (android_hw->hw_arc) {
-        // Chrome OS doesn't support rotation now.
-        mToolsUi->prev_layout_button->setHidden(true);
-        mToolsUi->next_layout_button->setHidden(true);
-    } else {
+    if (!android_hw->hw_arc) {
         // Android doesn't support tablet mode now.
         mToolsUi->tablet_mode_button->setHidden(true);
     }
@@ -221,6 +234,11 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     auto closeBtn = mToolsUi->winButtonsLayout->takeAt(0);
     mToolsUi->winButtonsLayout->insertItem(1, closeBtn);
 #endif
+    // How big is the toolbar naturally? This is just tall enough
+    // to show all the buttons, so we should never shrink it
+    // smaller than this.
+    mMinimumToolBarHeight = this->size().height();
+
     sToolWindow = this;
 }
 
@@ -236,8 +254,10 @@ void ToolWindow::raise() {
     if (mTopSwitched) {
         mExtendedWindow.get()->raise();
         mExtendedWindow.get()->activateWindow();
+        mToolWindow2->activateWindow();
         mTopSwitched = false;
     }
+    mToolWindow2->activateWindow();
 }
 
 void ToolWindow::allowExtWindowCreation() {
@@ -323,7 +343,10 @@ void ToolWindow::hideEvent(QHideEvent*) {
 
 void ToolWindow::show() {
     QFrame::show();
-    setFixedSize(size());
+
+    // Ensure that Qt does not treat the tool bar
+    // as fixed size
+    setMaximumSize(62, 99999);
 
     if (mIsVirtualSceneWindowVisibleOnShow) {
         mVirtualSceneControlWindow.get()->show();
@@ -334,12 +357,16 @@ void ToolWindow::show() {
     }
 }
 
-void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
-
-    // Many UI commands require extended window. Construct it here.
+void ToolWindow::ensureExtendedWindowExists() {
     if (mAllowExtWindow && !mIsExiting) {
         mExtendedWindow.get();
     }
+}
+
+void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
+
+    // Many UI commands require the extended window
+    ensureExtendedWindowExists();
 
     switch (cmd) {
         case QtUICommand::SHOW_PANE_LOCATION:
@@ -590,10 +617,24 @@ void ToolWindow::dockMainWindow() {
     // Align vertically to its contents.
     // If we're frameless, adjust for a transparent border
     // around the skin.
+    bool hasFrame;
+    mEmulatorWindow->windowHasFrame(&hasFrame);
+    int toolGap = hasFrame ? TOOL_GAP_FRAMED : TOOL_GAP_FRAMELESS;
+
     move(parentWidget()->frameGeometry().right()
-             + toolGap - mEmulatorWindow->getRightTransparency(),
+             + toolGap - mEmulatorWindow->getRightTransparency() + 1,
          parentWidget()->geometry().top()
              + mEmulatorWindow->getTopTransparency());
+
+    // Set the height to match the main window
+    QSize size = this->size();
+    int newHeight = parentWidget()->geometry().height()
+                    - mEmulatorWindow->getTopTransparency()
+                    - mEmulatorWindow->getBottomTransparency() + 1;
+    if (newHeight < mMinimumToolBarHeight) newHeight = mMinimumToolBarHeight;
+
+    size.setHeight(newHeight);
+    resize(size);
 
     mVirtualSceneControlWindow.ifExists(
             [&] { mVirtualSceneControlWindow.get()->dockMainWindow(); });
@@ -842,6 +883,7 @@ void ToolWindow::on_minimize_button_clicked() {
     this->showMinimized();
 #endif
 
+    mToolWindow2->showMinimized();
     mEmulatorWindow->showMinimized();
 }
 
@@ -890,16 +932,6 @@ void ToolWindow::on_overview_button_pressed() {
 void ToolWindow::on_overview_button_released() {
     mEmulatorWindow->activateWindow();
     handleUICommand(QtUICommand::OVERVIEW, false);
-}
-
-void ToolWindow::on_prev_layout_button_clicked() {
-    mEmulatorWindow->activateWindow();
-    handleUICommand(QtUICommand::ROTATE_LEFT);
-}
-
-void ToolWindow::on_next_layout_button_clicked() {
-    mEmulatorWindow->activateWindow();
-    handleUICommand(QtUICommand::ROTATE_RIGHT);
 }
 
 void ToolWindow::on_scrShot_button_clicked() {

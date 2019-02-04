@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>60</width>
-    <height>516</height>
+    <height>436</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>60</width>
-    <height>516</height>
+    <height>256</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>60</width>
-    <height>516</height>
+    <height>9999</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -42,22 +42,16 @@ color: #f0f0f0</string>
    <property name="sizeConstraint">
     <enum>QLayout::SetFixedSize</enum>
    </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
     <layout class="QHBoxLayout" name="winButtonsLayout">
      <property name="spacing">
       <number>1</number>
+     </property>
+     <property name="sizeConstraint">
+      <enum>QLayout::SetFixedSize</enum>
      </property>
      <property name="leftMargin">
       <number>6</number>
@@ -153,6 +147,9 @@ color: #f0f0f0</string>
     <layout class="QVBoxLayout" name="controlsLayout">
      <property name="spacing">
       <number>10</number>
+     </property>
+     <property name="sizeConstraint">
+      <enum>QLayout::SetMinAndMaxSize</enum>
      </property>
      <property name="leftMargin">
       <number>10</number>
@@ -348,100 +345,6 @@ color: #f0f0f0</string>
        </property>
        <property name="uiCommand" stdset="0">
         <string>VOLUME_DOWN</string>
-       </property>
-       <property name="ToolWindowButton" stdset="0">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="prev_layout_button">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>34</width>
-         <height>34</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Rotate</string>
-       </property>
-       <property name="text">
-        <string notr="true"/>
-       </property>
-       <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/light/screen_rotation_left</normaloff>:/light/screen_rotation_left</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="flat">
-        <bool>true</bool>
-       </property>
-       <property name="report_metrics" stdset="0">
-        <bool>false</bool>
-       </property>
-       <property name="themeIconName" stdset="0">
-        <string notr="true">screen_rotation_left</string>
-       </property>
-       <property name="uiCommand" stdset="0">
-        <string>ROTATE_LEFT</string>
-       </property>
-       <property name="ToolWindowButton" stdset="0">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="next_layout_button">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>34</width>
-         <height>34</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Rotate</string>
-       </property>
-       <property name="text">
-        <string notr="true"/>
-       </property>
-       <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/light/screen_rotation_right</normaloff>:/light/screen_rotation_right</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="flat">
-        <bool>true</bool>
-       </property>
-       <property name="report_metrics" stdset="0">
-        <bool>false</bool>
-       </property>
-       <property name="themeIconName" stdset="0">
-        <string notr="true">screen_rotation_right</string>
-       </property>
-       <property name="uiCommand" stdset="0">
-        <string>ROTATE_RIGHT</string>
        </property>
        <property name="ToolWindowButton" stdset="0">
         <bool>true</bool>
@@ -729,6 +632,19 @@ color: #f0f0f0</string>
         <bool>true</bool>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
