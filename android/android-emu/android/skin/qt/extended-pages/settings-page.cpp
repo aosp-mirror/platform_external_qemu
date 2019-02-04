@@ -105,6 +105,19 @@ SettingsPage::SettingsPage(QWidget* parent)
     mUi->set_onTop->setCheckState(onTopOnly ? Qt::Checked : Qt::Unchecked);
 #endif
 
+    printf("apiLevel %d\n", avdInfo_getApiLevel(android_avdInfo));
+    //TODO: find out why 28 instead of 29 here
+    if (avdInfo_getApiLevel(android_avdInfo) < 28) {
+        mUi->set_foldableDisplayTitle->hide();
+        mUi->set_foldableDisplay->hide();
+    }
+    else {
+        bool foldableEnabled =
+            settings.value(Ui::Settings::FOLDABLE_ENABLE, false).toBool();
+        mUi->set_foldableDisplay->setCheckState(
+            foldableEnabled? Qt::Checked : Qt::Unchecked);
+    }
+
     initProxy();
 
     // Crash reporting
@@ -462,6 +475,13 @@ void SettingsPage::on_set_onTop_toggled(bool checked) {
     settings.setValue(Ui::Settings::ALWAYS_ON_TOP, checked);
 
     emit(onTopChanged(checked));
+}
+
+void SettingsPage::on_set_foldableDisplay_toggled(bool checked) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::FOLDABLE_ENABLE, checked);
+
+    emit(foldableDisplayChanged(checked));
 }
 
 void SettingsPage::on_set_frameAlways_toggled(bool checked) {

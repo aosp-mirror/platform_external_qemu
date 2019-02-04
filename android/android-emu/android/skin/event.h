@@ -41,6 +41,7 @@ typedef enum {
     kEventZoomedWindowResized,
     kEventToggleTrackball,
     kEventWindowChanged,
+    kEventSetDisplayRegion,
 } SkinEventType;
 
 typedef enum {
@@ -81,6 +82,13 @@ typedef struct {
 } SkinEventLayoutRotateData;
 
 typedef struct {
+    int xOffset;
+    int yOffset;
+    int width;
+    int height;
+} SkinEventDisplayRegion;
+
+typedef struct {
     int x; // Send current window coordinates to maintain window location
     int y;
     int scroll_h; // Height of the horizontal scrollbar, needed for OSX
@@ -110,6 +118,7 @@ typedef struct {
         SkinEventTextInputData text;
         SkinEventWindowData window;
         SkinEventLayoutRotateData layout_rotation;
+        SkinEventDisplayRegion display_region;
     } u;
 } SkinEvent;
 

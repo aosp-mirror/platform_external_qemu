@@ -46,6 +46,7 @@ constexpr char SHOW_VIRTUALSCENE_INFO[] = "showVirtualSceneInfo";
 constexpr char ADB_PATH[] = "set/adbPath";
 constexpr char AUTO_FIND_ADB[] = "set/autoFindAdb";
 constexpr char ALWAYS_ON_TOP[] = "set/alwaysOnTop";
+constexpr char FOLDABLE_ENABLE[] = "set/foldable";
 constexpr char FORWARD_SHORTCUTS_TO_DEVICE[] = "set/forwardShortcutsToDevice";
 constexpr char FRAME_ALWAYS[] = "set/frameAlways4"; // Do not use "set/frameAlways": the current
                                                     // version is 4
