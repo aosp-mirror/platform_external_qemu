@@ -44,6 +44,7 @@ set(android-emu-common
     android/cros.c
     android/curl-support.c
     android/emuctl-client.cpp
+    android/emulation/address_space_device.cpp
     android/emulation/AdbDebugPipe.cpp
     android/emulation/AdbGuestPipe.cpp
     android/emulation/AdbHostListener.cpp

@@ -206,6 +206,7 @@ extern KVMState *kvm_state;
 
 /* external API */
 
+void* kvm_gpa2hva(uint64_t, bool*);
 bool kvm_has_free_slot(MachineState *ms);
 bool kvm_has_sync_mmu(void);
 int kvm_has_vcpu_events(void);
