@@ -276,6 +276,10 @@ if [ "$TARGET_OS" = "windows-x86_64" ]; then
         echo files=find $OPT_OUT/gradle-release -name '*.exe'-or -name '*.dll'
         files=$(find $OPT_OUT/gradle-release -name '*.exe' -or -name '*.dll')
         for file in $files; do
+            if [ -f $OPT_OUT/toolchain/x86_64-w64-mingw32-objdump ]; then
+                $OPT_OUT/toolchain/x86_64-w64-mingw32-objdump -x $file | grep -q CodeView || warn " !!! No CodeView entry in $file, breakpad traces will be incomplete. !!!"
+            fi
+
             log "Checking $file for dependencies"
             needed=$($OPT_OUT/toolchain/x86_64-w64-mingw32-objdump -x $file | grep "DLL Name" | awk '{ print $3 }')
             cache="KERNEL32.DLL KERNEL32.dll msvcrt.dll PSAPI.DLL SHELL32.DLL SHELL32.dll USER32.DLL ntdll.dll USER32.dll NETAPI32.dll "
@@ -294,6 +298,7 @@ if [ "$TARGET_OS" = "windows-x86_64" ]; then
                     fi
                 fi
             done
+
         done
         log "Dependencies are looking good!"
     else
