@@ -23,6 +23,7 @@
 #include "android/cmdline-option.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/emulation/address_space_device.h"
 #include "android/snapshot/interface.h"
 
 #include "android/featurecontrol/FeatureControl.h"
@@ -58,6 +59,7 @@ extern "C" {
 #include "sysemu/device_tree.h"
 #include "sysemu/ranchu.h"
 #include "sysemu/rng-random-generic.h"
+#include "sysemu/sysemu.h"
 
 // TODO: Remove op_http_proxy global variable.
 extern char* op_http_proxy;
@@ -147,6 +149,10 @@ bool qemu_android_emulation_early_setup() {
     if (!qemu_android_sync_init(vmLock)) {
         return false;
     }
+
+    qemu_set_address_space_device_control_ops(
+        (struct qemu_address_space_device_control_ops*)
+        create_or_get_address_space_device_control_ops());
 
     androidSnapshot_initialize(gQAndroidVmOperations,
                                gQAndroidEmulatorWindowAgent);

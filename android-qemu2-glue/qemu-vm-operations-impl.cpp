@@ -492,7 +492,10 @@ static void set_snapshot_callbacks(void* opaque,
             set_memory_mapping_funcs(NULL, NULL, hax_gpa_protect, NULL,
                                      hax_gpa_protection_supported);
             break;
-        default:
+        default: // KVM
+#ifdef __linux__
+            set_address_translation_funcs(0, kvm_gpa2hva);
+#endif
             break;
         }
 
@@ -560,6 +563,13 @@ static bool vm_resume() {
     return err == nullptr;;
 }
 
+static void* physical_memory_get_addr(uint64_t gpa) {
+    if (!gpa2hva_call) return nullptr;
+    bool found;
+    void* res = gpa2hva_call(gpa, &found);
+    return found ? res : nullptr;
+}
+
 static const QAndroidVmOperations sQAndroidVmOperations = {
         .vmStop = qemu_vm_stop,
         .vmStart = qemu_vm_start,
@@ -580,6 +590,8 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .setFailureReason = set_failure_reason,
         .setExiting = set_exiting,
         .allowRealAudio = allow_real_audio,
+        .physicalMemoryGetAddr = physical_memory_get_addr,
 };
+
 const QAndroidVmOperations* const gQAndroidVmOperations =
         &sQAndroidVmOperations;
