@@ -30,8 +30,12 @@ toolchain_generate("${ANDROID_TARGET_TAG}")
 
 list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/bin/libwinpthread-1.dll>lib64/libwinpthread-1.dll")
 list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/lib/libgcc_s_seh-1.dll>lib64/libgcc_s_seh-1.dll")
+list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-m64 -static-libgcc")
 
-list(APPEND RUNTIME_OS_PROPERTIES "LINK_FLAGS=-m64 -static-libgcc -Xlinker --build-id -mcx16")
+
+# Make sure we add a build-id section for every compiled component.
+set(CMAKE_C_FLAGS "-m64 -Xlinker --build-id -mcx16")
+set(CMAKE_CXX_FLAGS "-m64 -Xlinker --build-id -mcx16")
 
 # here is the target environment located, used to
 # locate packages. We don't want to do any package resolution
