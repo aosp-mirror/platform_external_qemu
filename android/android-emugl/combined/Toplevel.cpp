@@ -146,6 +146,8 @@ private:
                 android::featurecontrol::RefCountPipe, true);
         android::featurecontrol::setEnabledOverride(
                 android::featurecontrol::GLDirectMem, true);
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::Vulkan, true);
         EmuglConfig config;
 
         emuglConfig_init(
