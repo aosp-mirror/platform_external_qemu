@@ -78,6 +78,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/size-tweaker.cpp
     android/skin/qt/stylesheet.cpp
     android/skin/qt/tool-window.cpp
+    android/skin/qt/tool-window-2.cpp
     android/skin/qt/ui-event-recorder.cpp
     android/skin/qt/user-actions-counter.cpp
     android/skin/qt/virtualscene-control-window.cpp
@@ -181,6 +182,7 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/screen-mask.h
     android/skin/qt/size-tweaker.h
     android/skin/qt/tool-window.h
+    android/skin/qt/tool-window-2.h
     android/skin/qt/user-actions-counter.h
     android/skin/qt/virtualscene-control-window.h
     android/skin/qt/video-player/QtVideoPlayerNotifier.h
@@ -252,7 +254,7 @@ android_add_library(emulator-libui)
 
 # TODO: Remove this and the "USE_WEBENGINE" defines once we have:
 # --no-window mode has no dependency on Qt
-if (QTWEBENGINE AND NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")  
+if (QTWEBENGINE AND NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
     target_compile_definitions(emulator-libui PRIVATE "-DUSE_WEBENGINE")
     target_link_libraries(emulator-libui PRIVATE
                           Qt5::Network

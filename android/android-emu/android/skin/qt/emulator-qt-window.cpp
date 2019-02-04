@@ -292,6 +292,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mLooper(android::qt::createLooper()),
       mStartupDialog(this),
       mToolWindow(nullptr),
+      mToolWindow2(nullptr),
       mContainer(this),
       mOverlay(this, &mContainer),
       mZoomFactor(1.0),
@@ -414,8 +415,13 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
             settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool() : true;
     mPreviouslyFramed = mFrameAlways;
 
+    mToolWindow2 = new ToolWindow2(this, &mContainer, mEventLogger,
+                                   mUserActionsCounter);
+
     mToolWindow = new ToolWindow(this, &mContainer, mEventLogger,
-                                 mUserActionsCounter);
+                                 mUserActionsCounter, mToolWindow2);
+
+    mToolWindow2->setMainToolWindow(mToolWindow);
 
     this->setAcceptDrops(true);
 
@@ -616,6 +622,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         if (mToolWindow) {
                             mToolWindow->setEnabled(false);
                         }
+                        if (mToolWindow2) {
+                            mToolWindow2->setEnabled(false);
+                        }
                         if (SnapshotPage::get()) {
                             SnapshotPage::get()->setOperationInProgress(true);
                         }
@@ -627,6 +636,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         mContainer.hideModalOverlay();
                         if (mToolWindow) {
                             mToolWindow->setEnabled(true);
+                        }
+                        if (mToolWindow2) {
+                            mToolWindow2->setEnabled(true);
                         }
                         if (SnapshotPage::get()) {
                             SnapshotPage::get()->setOperationInProgress(false);
@@ -655,6 +667,10 @@ EmulatorQtWindow::~EmulatorQtWindow() {
     if (mToolWindow) {
         delete mToolWindow;
         mToolWindow = NULL;
+    }
+    if (mToolWindow2) {
+        delete mToolWindow2;
+        mToolWindow2 = NULL;
     }
 
     mStartupDialog.ifExists([&] {
@@ -820,6 +836,9 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
     if (mToolWindow) {
         mToolWindow->setEnabled(false);
     }
+    if (mToolWindow2) {
+        mToolWindow2->setEnabled(false);
+    }
 
     const bool alreadyClosed = mClosed;
     mClosed = true;
@@ -875,6 +894,9 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         if (mToolWindow) {
             mToolWindow->hide();
             mToolWindow->closeExtendedWindow();
+        }
+        if (mToolWindow2) {
+            mToolWindow2->hide();
         }
         mContainer.hide();
         mOverlay.hide();
@@ -1083,6 +1105,7 @@ void EmulatorQtWindow::maskWindowFrame() {
     }
     mContainer.show();
     mToolWindow->dockMainWindow();
+    mToolWindow2->dockMainWindow();
 
     if (haveFrame != mPreviouslyFramed) {
         // We are switching between framed and frameless. We need to
@@ -1175,6 +1198,7 @@ void EmulatorQtWindow::paintEvent(QPaintEvent*) {
 void EmulatorQtWindow::raise() {
     mContainer.raise();
     mToolWindow->raise();
+    mToolWindow2->raise();
 }
 
 void EmulatorQtWindow::show() {
@@ -1184,6 +1208,7 @@ void EmulatorQtWindow::show() {
     mContainer.show();
     QFrame::show();
     mToolWindow->show();
+    mToolWindow2->show();
 
     QObject::connect(window()->windowHandle(), &QWindow::screenChanged, this,
                      &EmulatorQtWindow::onScreenChanged);
@@ -1201,6 +1226,7 @@ void EmulatorQtWindow::show() {
 void EmulatorQtWindow::setOnTop(bool onTop) {
     setFrameOnTop(&mContainer, onTop);
     setFrameOnTop(mToolWindow, onTop);
+    setFrameOnTop(mToolWindow2, onTop);
 }
 
 void EmulatorQtWindow::setFrameAlways(bool frameAlways)
@@ -1332,6 +1358,10 @@ void EmulatorQtWindow::slot_clearInstance() {
         delete mToolWindow;
         mToolWindow = NULL;
     }
+    if (mToolWindow2) {
+        delete mToolWindow2;
+        mToolWindow2 = NULL;
+    }
 #endif
 
     skin_winsys_save_window_geo();
@@ -1442,8 +1472,6 @@ void EmulatorQtWindow::slot_getWindowPos(int* xx,
 void EmulatorQtWindow::slot_windowHasFrame(bool* outValue, QSemaphore* semaphore) {
     QSemaphoreReleaser semReleaser(semaphore);
     *outValue = hasFrame();
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_getFramePos(int* xx,
@@ -2064,6 +2092,118 @@ void EmulatorQtWindow::doResize(const QSize& size,
     maskWindowFrame();
 }
 
+void EmulatorQtWindow::exposeMaskWindowFrame() {
+    maskWindowFrame();
+}
+
+void EmulatorQtWindow::resizeAndChangeAspectRatioNew(bool isFolded) {
+    QRect windowGeo = this->geometry();
+    QSize backingSize = mBackingSurface->bitmap->size();
+    float scale = (float)windowGeo.width() / (float)backingSize.width();
+    int displayXOffset = isFolded ? android_hw->hw_displayRegion_0_1_xOffset : 0;
+    int displayYOffset = isFolded ? android_hw->hw_displayRegion_0_1_yOffset : 0;
+    int displayXFolded = android_hw->hw_displayRegion_0_1_width;
+    int displayYFolded = android_hw->hw_displayRegion_0_1_height;
+    int displayX = android_hw->hw_lcd_width;
+    int displayY = android_hw->hw_lcd_height;
+
+//    if (mOrientation == SKIN_ROTATION_90 || mOrientation == SKIN_ROTATION_270) {
+//        // Rotate 'changeType'
+//        changeType += 2;
+//        if (changeType > 3) changeType -= 4;
+//    }
+    if (isFolded) {
+            windowGeo.setWidth((int)(displayXFolded * scale));
+            windowGeo.setHeight((int)(displayYFolded * scale));
+            backingSize.setWidth(displayXFolded);
+            backingSize.setHeight(displayYFolded);
+    }
+    else {
+        windowGeo.setWidth((int)(android_hw->hw_lcd_width * scale));
+        windowGeo.setHeight((int)(android_hw->hw_lcd_height * scale));
+        backingSize.setWidth(android_hw->hw_lcd_width);
+        backingSize.setHeight(android_hw->hw_lcd_height);
+    }
+   setDisplayRegion(displayXOffset, displayYOffset, backingSize.width(), backingSize.height());
+
+    EmulatorWindow* eW = emulator_window_get();
+    if (eW && eW->ui) {
+        skin_ui_update_display(eW->ui, windowGeo.x(), windowGeo.y(), windowGeo.width(), windowGeo.height());
+    }
+
+    delete mBackingSurface->bitmap;
+    mBackingSurface->bitmap = new SkinSurfaceBitmap(backingSize.width(), backingSize.height());
+
+    int originalWidth = mBackingSurface->bitmap->size().width();
+    int originalHeight = mBackingSurface->bitmap->size().height();
+
+    double widthScale  = (double)windowGeo.width()  / (double)originalWidth;
+    double heightScale = (double)windowGeo.height() / (double)originalHeight;
+
+    simulateSetScale(std::max(.2, std::min(widthScale, heightScale)));
+
+    QRect containerGeo = mContainer.geometry();
+    mContainer.setGeometry(containerGeo.x(), containerGeo.y(), windowGeo.width(), windowGeo.height());
+}
+
+
+// TODO: Needs to use the actual folded and un-folded sizes, rather
+//       than using a hard-coded scale factor.
+void EmulatorQtWindow::resizeAndChangeAspectRatio(int changeType) {
+    QRect windowGeo = this->geometry();
+    QSize backingSize = mBackingSurface->bitmap->size();
+    int displayXOffset = 0;
+    int displayYOffset = 0;
+
+    if (mOrientation == SKIN_ROTATION_90 || mOrientation == SKIN_ROTATION_270) {
+        // Rotate 'changeType'
+        changeType += 2;
+        if (changeType > 3) changeType -= 4;
+    }
+
+    switch (changeType) {
+        default:
+        case 0:  // Reduce width
+            windowGeo.setWidth((windowGeo.width() * 3) / 4);
+            displayXOffset = -backingSize.width() / 8;
+            backingSize.setWidth((backingSize.width() * 3) / 4);
+            break;
+        case 1:  // Restore width
+            windowGeo.setWidth((windowGeo.width() * 4) / 3);
+            backingSize.setWidth((backingSize.width() * 4) / 3);
+            break;
+        case 2:  // Reduce height
+            windowGeo.setHeight((windowGeo.height() * 3) / 4);
+            displayYOffset = -backingSize.height() / 8;
+            backingSize.setHeight((backingSize.height() * 3) / 4);
+            break;
+        case 3:  // Restore height
+            windowGeo.setHeight((windowGeo.height() * 4) / 3);
+            backingSize.setHeight((backingSize.height() * 4) / 3);
+            break;
+    }
+    setDisplayRegion(displayXOffset, displayYOffset, backingSize.width(), backingSize.height());
+
+    EmulatorWindow* eW = emulator_window_get();
+    if (eW && eW->ui) {
+        skin_ui_update_display(eW->ui, windowGeo.x(), windowGeo.y(), windowGeo.width(), windowGeo.height());
+    }
+
+    delete mBackingSurface->bitmap;
+    mBackingSurface->bitmap = new SkinSurfaceBitmap(backingSize.width(), backingSize.height());
+
+    int originalWidth = mBackingSurface->bitmap->size().width();
+    int originalHeight = mBackingSurface->bitmap->size().height();
+
+    double widthScale  = (double)windowGeo.width()  / (double)originalWidth;
+    double heightScale = (double)windowGeo.height() / (double)originalHeight;
+
+    simulateSetScale(std::max(.2, std::min(widthScale, heightScale)));
+
+    QRect containerGeo = mContainer.geometry();
+    mContainer.setGeometry(containerGeo.x(), containerGeo.y(), windowGeo.width(), windowGeo.height());
+}
+
 SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
         QMouseEvent* event) const {
     return (event->button() == Qt::RightButton) ? kMouseButtonRight
@@ -2177,6 +2317,15 @@ void EmulatorQtWindow::simulateScrollBarChanged(int x, int y) {
     queueSkinEvent(event);
 }
 
+void EmulatorQtWindow::setDisplayRegion(int xOffset, int yOffset, int width, int height) {
+    SkinEvent* event = createSkinEvent(kEventSetDisplayRegion);
+    event->u.display_region.xOffset = xOffset;
+    event->u.display_region.yOffset = yOffset;
+    event->u.display_region.width   = width;
+    event->u.display_region.height  = height;
+    queueSkinEvent(event);
+}
+
 void EmulatorQtWindow::simulateSetScale(double scale) {
     // Avoid zoom and scale events clobbering each other if the user rapidly
     // changes zoom levels
@@ -2274,6 +2423,10 @@ bool EmulatorQtWindow::isInZoomMode() const {
 
 ToolWindow* EmulatorQtWindow::toolWindow() const {
     return mToolWindow;
+}
+
+ToolWindow2* EmulatorQtWindow::toolWindow2() const {
+    return mToolWindow2;
 }
 
 EmulatorContainer* EmulatorQtWindow::containerWindow() {
