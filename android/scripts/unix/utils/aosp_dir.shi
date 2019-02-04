@@ -111,6 +111,10 @@ aosp_prebuilt_clang_dir_for () {
             local CLANG_VERSION="$(aosp_clang_version)"
             printf "prebuilts/clang/host/linux-x86/$CLANG_VERSION/bin"
             ;;
+        linux-aarch64)
+            echo "No clang support for linux-aarch64 yet"
+            exit 1
+            ;;
         darwin*)
             local CLANG_VERSION="$(aosp_clang_version)"
             printf "prebuilts/clang/host/darwin-x86/$CLANG_VERSION/bin"
@@ -128,9 +132,13 @@ aosp_prebuilt_clang_dir_for () {
 # $1: System name (e.g. 'linux' or 'linux-x86_64')
 aosp_prebuilt_toolchain_subdir_for () {
     case $1 in
-        linux*)
+        linux-x86_64)
             local GLIBC="$(aosp_linux_glibc_version)"
             printf "prebuilts/gcc/linux-x86/host/x86_64-linux-$GLIBC"
+            ;;
+        linux-aarch64)
+            # we use native toolchain for linux-aarch64
+            printf ""
             ;;
         darwin*)
             local CLANG_VERSION="$(aosp_clang_version)"
@@ -153,9 +161,13 @@ aosp_prebuilt_breakpad_subdir_for () {
 # $1: System name (e.g. 'linux-x86' or 'linux-x86_64')
 aosp_prebuilt_toolchain_sysroot_subdir_for () {
     case $1 in
-        linux*)
+        linux-x86_64)
             local GLIBC="$(aosp_linux_glibc_version)"
             printf "prebuilts/gcc/linux-x86/host/x86_64-linux-$GLIBC/x86_64-linux"
+            ;;
+        linux-aarch64)
+            # we use native toolchain for linux-aarch64
+            printf ""
             ;;
         darwin*)
             # We use the developer machine's system SDK.
@@ -169,8 +181,12 @@ aosp_prebuilt_toolchain_sysroot_subdir_for () {
 
 aosp_prebuilt_toolchain_prefix_for () {
     case $1 in
-        linux*)
+        linux-x86_64)
             printf "x86_64-linux-"
+            ;;
+        linux-aarch64)
+            # we use native toolchain for linux-aarch64
+            printf ""
             ;;
         darwin*)
             printf ""
