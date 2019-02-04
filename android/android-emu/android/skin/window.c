@@ -1848,6 +1848,19 @@ skin_window_set_onion( SkinWindow*   window,
 }
 
 void
+skin_window_set_layout_region(SkinWindow* window, int xOffset, int yOffset, int width, int height)
+{
+    int displayIdx;
+    for (displayIdx = 0; displayIdx < window->layout.num_displays; displayIdx++) {
+        window->layout.displays[displayIdx].rect.pos.x = xOffset;
+        window->layout.displays[displayIdx].rect.pos.y = yOffset;
+    }
+
+    window->layout.rect.size.w = width;
+    window->layout.rect.size.h = height;
+}
+
+void
 skin_window_set_scale(SkinWindow* window, double scale)
 {
     window->scale = scale;

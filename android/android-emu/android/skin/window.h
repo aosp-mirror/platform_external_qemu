@@ -66,6 +66,10 @@ extern void             skin_window_set_onion( SkinWindow*   window,
                                                SkinRotation  rotation,
                                                int           alpha );
 
+extern void             skin_window_set_layout_region(SkinWindow* window,
+                                                      int         xOffset, int yOffset,
+                                                      int         width,   int height);
+
 extern void             skin_window_set_scale( SkinWindow*  window,
                                                double       scale );
 
