@@ -847,6 +847,7 @@ extern void skin_winsys_error_dialog(const char* message, const char* title) {
 
 void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
     ToolWindow::earlyInitialization(agent);
+    ToolWindow2::earlyInitialization();
 
     // Set more early init stuff here:
     // 1. Clipboard sharing
