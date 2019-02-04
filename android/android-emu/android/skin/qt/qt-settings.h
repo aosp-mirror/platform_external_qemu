@@ -110,6 +110,10 @@ constexpr char LOCATION_RECENT_VELOCITY[] = "loc/recent_velocity";
 
 constexpr char SCREENREC_SAVE_PATH[] = "rec/savePath";
 
+// Foldable Display
+constexpr char FOLDABLE_ENABLE[] = "set/foldable";
+constexpr char FOLDABLE_IS_FOLDED[] = "is_folded";
+
 // ***** These settings apply only to the current AVD *****
 
 constexpr char PER_AVD_SETTINGS_NAME[] = "/AVD.conf";
