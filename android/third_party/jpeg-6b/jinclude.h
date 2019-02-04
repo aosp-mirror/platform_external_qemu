@@ -44,6 +44,7 @@
 #endif
 
 #include <stdio.h>
+#include "android/utils/file_io.h"
 
 /*
  * We need memory copying and zeroing functions, plus strncpy().

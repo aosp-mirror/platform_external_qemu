@@ -28,6 +28,11 @@
 #define EXT4_ERROR   LOG_IF(ERROR, DEBUG_EXT4)
 #define EXT4_PERROR  PLOG_IF(ERROR, DEBUG_EXT4)
 
+
+// We cannot directly include "msvc-posix.h" as it will break
+// the logging macros.
+extern "C" FILE* android_fopen(const char* path, const char* mode);
+
 struct Ext4Magic {
     static const size_t kOffset = 0x438U;
     static const size_t kSize = 2U;
@@ -42,7 +47,7 @@ bool android_pathIsExt4PartitionImage(const char* path) {
         return false;
     }
 
-    android::base::ScopedStdioFile file(::fopen(path, "rb"));
+    android::base::ScopedStdioFile file(::android_fopen(path, "rb"));
     if (!file.get()) {
         EXT4_PERROR << "Could not open file: " << path;
         return false;

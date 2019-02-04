@@ -14,7 +14,7 @@
 #include "android/utils/compiler.h"
 
 #ifdef _MSC_VER
-#include "msvc-posix.h"
+  #include "msvc-posix.h"
 #endif
 
 #include <stdio.h>
@@ -50,6 +50,8 @@ int android_creat(const char* path, mode_t mode);
 
 int android_unlink(const char* path);
 int android_chmod(const char* path, mode_t mode);
+
+int android_rmdir(const char* path);
 
 ANDROID_END_HEADER
 

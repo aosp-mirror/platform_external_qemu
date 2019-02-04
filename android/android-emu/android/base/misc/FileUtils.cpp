@@ -63,7 +63,6 @@ bool writeStringToFile(int fd, const std::string& file_contents) {
 
     ssize_t result = HANDLE_EINTR(
             _write(fd, file_contents.c_str(), file_contents.size()));
-
 #else
     ssize_t result = HANDLE_EINTR(
             write(fd, file_contents.c_str(), file_contents.size()));

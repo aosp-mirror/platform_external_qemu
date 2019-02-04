@@ -85,7 +85,7 @@ extern ABool  path_can_write( const char*  path );
 extern ABool  path_can_exec( const char* path );
 
 /* try to make a directory */
-extern APosixStatus   path_mkdir( const char*  path, int  mode );
+extern APosixStatus   path_android_mkdir( const char*  path, int  mode );
 
 /* ensure that a given directory exists, create it if not,
    0 on success, -1 on error */
@@ -157,7 +157,7 @@ extern char*  path_get_absolute( const char* path );
  **
  **  path_copy_file() copies one file into another.
  **
- **  path_delete_file() is equivalent to unlink() on Unix, on Windows,
+ **  path_delete_file() is equivalent toandroid_unlink() on Unix, on Windows,
  **  it will handle the case where _unlink() fails because the file is
  **  read-only by trying to change its access rights then calling _unlink()
  **  again.

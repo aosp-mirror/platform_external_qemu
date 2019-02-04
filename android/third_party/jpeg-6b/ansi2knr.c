@@ -355,13 +355,13 @@ main(argc, argv)
 		out = stdout;
 		break;
 	case 3:
-		out = fopen(argv[2], "w");
+		out = android_fopen(argv[2], "w");
 		if ( out == NULL )
 		   {	fprintf(stderr, "Cannot open output file %s\n", argv[2]);
 			exit(1);
 		   }
 	   }
-	in = fopen(argv[1], "r");
+	in = android_fopen(argv[1], "r");
 	if ( in == NULL )
 	   {	fprintf(stderr, "Cannot open input file %s\n", argv[1]);
 		exit(1);

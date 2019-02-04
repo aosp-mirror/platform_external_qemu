@@ -27,7 +27,9 @@
 #ifdef _WIN32
 #include <direct.h>
 #include <windows.h>
-
+#include <share.h>
+#include "android/base/files/PathUtils.h"
+using android::base::PathUtils;
 using android::base::Win32UnicodeString;
 using android::base::ScopedCPtr;
 #endif
@@ -48,7 +50,23 @@ using android::base::ScopedCPtr;
 extern "C" {
 
 FILE* android_fopen(const char* path, const char* mode) {
+#if _MSC_VER
+    Win32UnicodeString wmode(mode);
+    auto normalized = PathUtils::recompose(PathUtils::decompose(path));
+    Win32UnicodeString wpath(normalized);
+
+    const wchar_t* wide_path = wpath.c_str();
+    const wchar_t* wide_mode = wmode.c_str();
+
+    FILE* res = NULL;
+    int err = _wfopen_s(&res, wide_path, wide_mode);
+    if (err != 0) {
+        printf("Failed to open %s, err: %d\n", path, err);
+    }
+    return res;
+#else
     return WIDEN_CALL_2(fopen, path, mode);
+#endif
 }
 
 FILE* android_popen(const char* path, const char* mode) {
@@ -108,9 +126,11 @@ int android_creat(const char* path, mode_t mode) {
 #ifndef _WIN32
     return android_open(path, O_CREAT | O_WRONLY | O_TRUNC, mode);
 #else
-    int res = WIDEN_CALL_1(creat, path, mode);
-    android::base::fdSetCloexec(res);
-    return res;
+    int fd = -1;
+    Win32UnicodeString unipath(path);
+    // Be careful here! The security model in windows is very different.
+    _wsopen_s(&fd, unipath.c_str(), _O_CREAT | _O_BINARY | _O_TRUNC | _O_WRONLY, _SH_DENYNO, _S_IWRITE);
+    return fd;
 #endif
 }
 
@@ -122,6 +142,9 @@ int android_chmod(const char* path, mode_t mode) {
     return WIDEN_CALL_1(chmod, path, mode);
 }
 
+int android_rmdir(const char* path) {
+    return WIDEN_CALL_1(rmdir, path);
+}
 // The code below uses the fact that GCC supports something called weak linking.
 // Several functions in glibc are weakly linked which means that if the same
 // function name is found in the application binary that function will be used
@@ -203,4 +226,3 @@ FILE* __cdecl fopen(const char* path, const char* mode) {
 #endif  // _WIN32 && !_MSC_VER
 
 }  // extern "C"
-
