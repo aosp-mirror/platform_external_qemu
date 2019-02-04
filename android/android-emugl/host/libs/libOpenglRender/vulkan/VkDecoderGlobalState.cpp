@@ -732,8 +732,12 @@ public:
         const VkDeviceSize pixelSize = cmp.pixelSize();
         for (uint32_t r = 0; r < regionCount; r++) {
             VkBufferImageCopy& dstRegion = regions[r];
-            dstRegion = pRegions[r];
             dstRegion.bufferOffset = offset;
+            dstRegion.bufferRowLength = 0;
+            dstRegion.bufferImageHeight = 0;
+            dstRegion.imageSubresource = pRegions[r].imageSubresource;
+            dstRegion.imageOffset = pRegions[r].imageOffset;
+            dstRegion.imageExtent = pRegions[r].imageExtent;
             uint32_t width =
                     cmp.mipmapWidth(dstRegion.imageSubresource.mipLevel);
             uint32_t height =
