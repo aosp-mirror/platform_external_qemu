@@ -85,6 +85,18 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             chmod a+x configure install-sh
         ) || panic "Could not set 'configure' and 'install-sh' as executables"
 
+        # The prebuilt configuration caueses below problem when
+        # host automake version differs from the previous prebuilt ones.  
+        # Rebuild the configuration again on the spot for linux systems
+        #    .../missing: line 81: aclocal-1.14: command not found
+        if [ $(get_build_os) = "linux" ]; then
+            (
+            PKG_SRC_DIR=$(builder_src_dir)/$(package_list_get_src_dir protobuf)
+            cd "$PKG_SRC_DIR"
+            ./autogen.sh
+            ) || panic "Could not run autogen.sh to re-generate 'configure' and 'install-sh' etc"
+        fi
+
         case $SYSTEM in
             linux*)
                 # Passing in $ORIGIN does not work due to multiple variable
