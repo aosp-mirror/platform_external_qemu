@@ -200,17 +200,18 @@ extern void skin_winsys_get_monitor_rect(SkinRect *rect)
 {
     D("skin_winsys_get_monitor_rect: begin\n");
     QRect qrect;
-    QSemaphore semaphore;
     D("skin_winsys_get_monitor_rect: get Qt window\n");
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     D("skin_winsys_get_monitor_rect: get Qt window (done)\n");
     if (window != NULL) {
         // Use Qt to get the monitor dimensions
+        QSemaphore semaphore;
         D("skin_winsys_get_monitor_rect: get screen dimensions\n");
         window->getScreenDimensions(&qrect, &semaphore);
         D("skin_winsys_get_monitor_rect: get screen dimensions (done)\n");
         D("skin_winsys_get_monitor_rect: acquiring semaphore...\n");
         semaphore.acquire();
+        D("skin_winsys_get_monitor_rect: acquiring semaphore (done)");
         rect->pos.x = qrect.left();
         rect->pos.y = qrect.top();
         rect->size.w = qrect.width();
@@ -393,13 +394,13 @@ extern void skin_winsys_get_frame_size(int *w, int *h)
 
 extern bool skin_winsys_window_has_frame()
 {
-    QSemaphore semaphore;
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return false;
     }
     bool hasFrame;
+    QSemaphore semaphore;
     window->windowHasFrame(&hasFrame, &semaphore);
     semaphore.acquire();
 

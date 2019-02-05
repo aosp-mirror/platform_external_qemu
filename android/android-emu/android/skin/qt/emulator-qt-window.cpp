@@ -1344,56 +1344,55 @@ void EmulatorQtWindow::slot_blit(SkinSurfaceBitmap* src,
                                  QPoint dstPos,
                                  QPainter::CompositionMode op,
                                  QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     if (mBackingSurface && dst == mBackingSurface->bitmap) {
         mBackingBitmapChanged = true;
     }
     dst->drawFrom(src, dstPos, srcRect, op);
-    if (semaphore) {
-        semaphore->release();
-    }
 }
 
 void EmulatorQtWindow::slot_fill(SkinSurface* s,
                                  QRect rect,
                                  QColor color,
                                  QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     if (mBackingSurface && s == mBackingSurface) {
         mBackingBitmapChanged = true;
     }
     s->bitmap->fill(rect, color);
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_getDevicePixelRatio(double* out_dpr,
                                                 QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     *out_dpr = devicePixelRatioF();
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_getScreenDimensions(QRect* out_rect,
                                                 QSemaphore* semaphore) {
+    D("slot_getScreenDimensions: begin");
+    QSemaphoreReleaser semReleaser(semaphore);
+    out_rect->setRect(0, 0, 1920, 1080); // Arbitrary default
+
+    D("slot_getScreenDimensions: Getting screen geometry");
     QRect rect = ((QApplication*)QApplication::instance())
                          ->desktop()
                          ->screenGeometry();
+    D("slot_getScreenDimensions: Getting screen geometry (done)");
     out_rect->setX(rect.x());
     out_rect->setY(rect.y());
 
     // Always report slightly smaller-than-actual dimensions to prevent odd
-    // resizing behavior,
-    // which can happen if things like the OSX dock are not taken into account.
-    // The difference
-    // below is specifically to take into account the OSX dock.
+    // resizing behavior, which can happen if things like the OSX dock are
+    // not taken into account. The difference below is specifically to take
+    // into account the OSX dock.
     out_rect->setWidth(rect.width() * .95);
 #ifdef __APPLE__
     out_rect->setHeight(rect.height() * .85);
 #else  // _WIN32 || __linux__
     out_rect->setHeight(rect.height() * .95);
 #endif
-
-    if (semaphore != NULL)
-        semaphore->release();
+    D("slot_getScreenDimensions: end");
 }
 
 WId EmulatorQtWindow::getWindowId() {
@@ -1409,24 +1408,22 @@ WId EmulatorQtWindow::getWindowId() {
 void EmulatorQtWindow::slot_getWindowSize(int* ww,
                                           int* hh,
                                           QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     QRect geom = mContainer.geometry();
 
     *ww = geom.width();
     *hh = geom.height();
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 // Get the size of the window, including the frame (if any)
 void EmulatorQtWindow::slot_getFrameSize(int* ww,
                                          int* hh,
                                          QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     QRect frameGeom = mContainer.frameGeometry();
 
     *ww = frameGeom.width();
     *hh = frameGeom.height();
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_getWindowPos(int* xx,
@@ -1435,15 +1432,15 @@ void EmulatorQtWindow::slot_getWindowPos(int* xx,
     // Note that mContainer.x() == mContainer.frameGeometry().x(), which
     // is NOT what we want.
 
+    QSemaphoreReleaser semReleaser(semaphore);
     QRect geom = mContainer.geometry();
 
     *xx = geom.x();
     *yy = geom.y();
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_windowHasFrame(bool* outValue, QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     *outValue = hasFrame();
     if (semaphore != NULL)
         semaphore->release();
@@ -1455,14 +1452,14 @@ void EmulatorQtWindow::slot_getFramePos(int* xx,
     // Note that mContainer.x() == mContainer.frameGeometry().x(), which
     // is what we want.
 
+    QSemaphoreReleaser semReleaser(semaphore);
     *xx = mContainer.x();
     *yy = mContainer.y();
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_isWindowFullyVisible(bool* out_value,
                                                  QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     QDesktopWidget* desktop =
             ((QApplication*)QApplication::instance())->desktop();
     int screenNum =
@@ -1475,22 +1472,17 @@ void EmulatorQtWindow::slot_isWindowFullyVisible(bool* out_value,
         QRect screenGeo = desktop->screenGeometry(screenNum);
         *out_value = screenGeo.contains(mContainer.geometry());
     }
-
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_isWindowOffScreen(bool* out_value,
                                               QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     QDesktopWidget* desktop =
             ((QApplication*)QApplication::instance())->desktop();
     int screenNum =
             desktop->screenNumber(&mContainer);  // Screen holding the app
 
     *out_value = (screenNum < 0);
-
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::pollEvent(SkinEvent* event,
@@ -1566,25 +1558,24 @@ void EmulatorQtWindow::slot_updateRotation(SkinRotation rotation) {
 
 void EmulatorQtWindow::slot_releaseBitmap(SkinSurface* s,
                                           QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     if (mBackingSurface == s) {
         mBackingSurface = NULL;
         mBackingBitmapChanged = true;
     }
     delete s->bitmap;
     delete s;
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_requestClose(QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     crashhandler_exitmode(__FUNCTION__);
     mContainer.close();
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_requestUpdate(QRect rect,
                                           QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     if (!mBackingSurface)
         return;
 
@@ -1593,86 +1584,75 @@ void EmulatorQtWindow::slot_requestUpdate(QRect rect,
             rect.width() * mBackingSurface->w / mBackingSurface->bitmap->size().width(),
             rect.height() * mBackingSurface->h / mBackingSurface->bitmap->size().height());
     update(r);
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_setDeviceGeometry(QRect rect,
                                               QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     mDeviceGeometry = rect;
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_setWindowPos(int x, int y, QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     mContainer.move(x, y);
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_setWindowSize(int w, int h, QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     mContainer.resize(w, h);
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_paintWindowOverlayForResize(int mouseX, int mouseY, QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     mOverlay.paintForResize(mouseX, mouseY);
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_clearWindowOverlay(QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     mOverlay.hide();
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_setWindowOverlayForResize(int whichCorner, QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     mOverlay.showForResize(whichCorner);
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_setWindowCursorResize(int whichCorner, QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     mContainer.setCursor((whichCorner == 0 || whichCorner == 2) ?
                               Qt::SizeFDiagCursor : Qt::SizeBDiagCursor);
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_setWindowCursorNormal(QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     mContainer.setCursor(Qt::ArrowCursor);
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_setWindowIcon(const unsigned char* data,
                                           int size,
                                           QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     QPixmap image;
     image.loadFromData(data, size);
     QIcon icon(image);
     QApplication::setWindowIcon(icon);
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_setWindowTitle(QString title,
                                            QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     mContainer.setWindowTitle(title);
 
     // This is the first time that we know the android_serial_number_port
     // has been set. This port ensures AdbInterface can identify the correct
     // device if there is more than one.
     (*mAdbInterface)->setSerialNumberPort(android_serial_number_port);
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
                                        QRect rect,
                                        QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     if (mClosed) {
         return;
     }
@@ -1736,9 +1716,6 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
         checkAdbVersionAndWarn();
         mFirstShowWindowCall = false;
     }
-
-    if (semaphore != NULL)
-        semaphore->release();
 }
 
 void EmulatorQtWindow::onScreenChanged(QScreen* newScreen) {
@@ -2277,9 +2254,8 @@ void EmulatorQtWindow::setForwardShortcutsToDevice(int index) {
 
 void EmulatorQtWindow::slot_runOnUiThread(RunOnUiThreadFunc f,
                                           QSemaphore* semaphore) {
+    QSemaphoreReleaser semReleaser(semaphore);
     f();
-    if (semaphore)
-        semaphore->release();
 }
 
 bool EmulatorQtWindow::hasFrame() const {
