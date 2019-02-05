@@ -545,6 +545,7 @@ prepare_build_for_linux_aarch64() {
     var_append POST_LDFLAGS "-lm"
     var_append POST_LDFLAGS "-lgcc"
     var_append POST_LDFLAGS "-lgcc_s"
+    var_append POST_LDFLAGS "-ldl"
 
     # aarch64 use host toolchain.  no prefix needed.
     DST_PREFIX=
