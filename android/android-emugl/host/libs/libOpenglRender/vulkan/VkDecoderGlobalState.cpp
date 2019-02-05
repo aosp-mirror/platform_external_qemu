@@ -1462,6 +1462,15 @@ private:
             case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
                 cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_SRGB;
                 break;
+            case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+            case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+                cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_UNORM;
+                break;
+            case VK_FORMAT_EAC_R11_SNORM_BLOCK:
+            case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
+                // Consider using higher precision for those formats?
+                cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_SNORM;
+                break;
             default:
                 cmpInfo.isCompressed = false;
                 cmpInfo.dstFormat = srcFmt;
@@ -1543,7 +1552,37 @@ private:
                     dstPixel[1] = 0;
                     dstPixel[2] = 0;
                     dstPixel[3] = 255;
-                    memcpy(dstPixel, srcPixel, decodedPixelSize);
+                    switch (cmp.srcFormat) {
+                        case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+                            dstPixel[1] =
+                                    uint8_t((*reinterpret_cast<const float*>(
+                                                    srcPixel + 4)) *
+                                            255);
+                        // falldown
+                        case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+                            dstPixel[0] =
+                                    uint8_t((*reinterpret_cast<const float*>(
+                                                    srcPixel)) *
+                                            255);
+                            break;
+
+                        case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
+                            reinterpret_cast<int8_t*>(dstPixel)[1] =
+                                    int8_t((*reinterpret_cast<const float*>(
+                                                   srcPixel + 4)) *
+                                           127.0f);
+                        // falldown
+                        case VK_FORMAT_EAC_R11_SNORM_BLOCK:
+                            reinterpret_cast<int8_t*>(dstPixel)[0] =
+                                    int8_t((*reinterpret_cast<const float*>(
+                                                   srcPixel)) *
+                                           127.0f);
+                            dstPixel[3] = 127;
+                            break;
+
+                        default:
+                            memcpy(dstPixel, srcPixel, decodedPixelSize);
+                    }
                 }
             }
         }
