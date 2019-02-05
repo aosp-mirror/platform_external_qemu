@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "82c0ef35_47166b96",
+        "filename": "android/scripts/unix/build-protobuf.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-05T16:23:52Z",
+      "side": 1,
+      "message": "nit: trailing whitespace",
+      "range": {
+        "startLine": 89,
+        "startChar": 72,
+        "endLine": 89,
+        "endChar": 74
+      },
+      "revId": "6ae08d7855d72701aa49d40884422e2fe5218405",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
