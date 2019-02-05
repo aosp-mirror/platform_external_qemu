@@ -31,6 +31,7 @@
 #include "hw/s390x/adapter.h"
 #include "exec/gdbstub.h"
 #include "sysemu/kvm_int.h"
+#include "sysemu/kvm.h"
 #include "sysemu/cpus.h"
 #include "qemu/bswap.h"
 #include "exec/memory.h"
@@ -209,6 +210,25 @@ static KVMSlot *kvm_lookup_matching_slot(KVMMemoryListener *kml,
 
         if (start_addr == mem->start_addr && size == mem->memory_size) {
             return mem;
+        }
+    }
+
+    return NULL;
+}
+
+void* kvm_gpa2hva(uint64_t gpa, bool *found) {
+    int i = 0;
+    KVMState *s = kvm_state;
+    KVMMemoryListener* kml = &s->memory_listener;
+
+    *found = false;
+
+    for (i = 0; i < s->nr_slots; i++) {
+        KVMSlot *mem = &kml->slots[i];
+        if (gpa >= mem->start_addr && 
+            gpa < mem->start_addr + mem->memory_size) {
+            *found = true;
+            return (void*)((char*)(mem->ram) + (gpa - mem->start_addr));
         }
     }
 

@@ -237,6 +237,7 @@ set(android_emu_dependent_src
     android/camera/camera-videoplayback.cpp
     android/camera/camera-virtualscene.cpp
     android/camera/camera-virtualscene-utils.cpp
+    android/emulation/address_space_device.cpp
     android/emulation/control/ScreenCapturer.cpp
     android/emulation/FakeRotatingCameraSensor.cpp
     android/emulation/HostMemoryService.cpp
