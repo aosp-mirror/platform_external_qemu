@@ -29,9 +29,15 @@ shell_import utils/package_builder.shi
 # (version 1.42.7) do not export the ext2fs_close_free function that was
 # added to a later version of e2fsprogs (at version 1.42.11), and no early
 # enough executable version of e2fsprogs is readily available from Cygwin.
-case $(get_build_os) in
-    linux)
+case $(get_build_os)-$(get_build_arch) in
+    linux-x86_64)
         DEFAULT_HOST_SYSTEMS="linux-x86_64,windows-x86"
+        ;;
+    linux-aarch64)
+        DEFAULT_HOST_SYSTEMS="linux-aarch64"
+        ;;
+    *)
+        panic "Unsupported build system : [$(get_build_os)-$(get_build_arch)]"
         ;;
 esac
 
