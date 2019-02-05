@@ -29,6 +29,9 @@
 #define AUDIO_CAP "wav"
 #include "audio_int.h"
 
+
+extern bool qemu_wav_audio_rewind_input_wave();
+
 typedef struct WAVVoiceIn {
     HWVoiceIn hw;
     FILE *infp;
@@ -120,6 +123,10 @@ static int wav_run_in (HWVoiceIn *hw)
     while (to_grab) {
         int chunk = audio_MIN (to_grab, hw->samples - wpos);
         void *buf = advance(wavin->pcm_buf, wpos);
+
+        if (qemu_wav_audio_rewind_input_wave()) {
+            fseek(wavin->infp, 44, SEEK_SET);
+        }
 
         if(fread(buf, chunk << hw->info.shift, 1, wavin->infp) != 1) {
             // reached EOF, rewind
@@ -372,13 +379,13 @@ static struct audio_option wav_options[] = {
         .name  = "PATH",
         .tag   = AUD_OPT_STR,
         .valp  = &glob_conf.wav_path,
-        .descr = "Path to wave file"
+        .descr = "Path to output wave file"
     },
     {
         .name  = "IN_PATH",
         .tag   = AUD_OPT_STR,
         .valp  = &glob_conf.in_wav_path,
-        .descr = "Path to wave file"
+        .descr = "Path to input wave file"
     },
     { /* End of list */ }
 };
