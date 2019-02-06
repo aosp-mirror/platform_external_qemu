@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f09096c7_8de2eed8",
+        "filename": "android/data/advancedFeatures.ini",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-06T00:29:04Z",
+      "side": 1,
+      "message": "FYI, instead of doing this, you can launch the emulator with the \"-feature VideoPlayback\" flag.",
+      "range": {
+        "startLine": 181,
+        "startChar": 0,
+        "endLine": 181,
+        "endChar": 18
+      },
+      "revId": "c6e413de563645edfb8d05044e50a44c1c1c8429",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
