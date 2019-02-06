@@ -187,6 +187,7 @@ Optional<::offworld::VideoInjectionRequest>
 VideoInjectionController::tryGetNextRequest(
     VideoInjectionResult previousResult) {
     if (sInstance) {
+        LOG(INFO) << "instance found, getting request";
         return sInstance->getNextRequest(
             std::move(previousResult));
     }
@@ -230,6 +231,7 @@ VideoInjectionControllerImpl::getNextRequest(
     VideoInjectionResult previousResult) {
     AutoLock lock(mLock);
     if (mShutdown) {
+        LOG(ERROR) << "Attempting to get request from shutdown controller";
         return {};
     }
 
@@ -246,9 +248,11 @@ VideoInjectionControllerImpl::getNextRequest(
     }
 
     if (mRequestContexts.empty()) {
+        LOG(INFO) << "Empty queue, no requests found";
         mRequestPending = false;
         return {};
     } else {
+        LOG(INFO) << "Requests in queue, getting next request";
         mRequestPending = true;
         return mRequestContexts.front().request;
     }
