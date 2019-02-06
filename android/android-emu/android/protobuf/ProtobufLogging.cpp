@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "google/protobuf/stubs/common.h"
+#include "google/protobuf/stubs/logging.h"
 
 namespace android {
 namespace protobuf {
