@@ -1,0 +1,31 @@
+#include "android/camera/camera-videoplayback-renderer.h"
+
+#include "android/base/Log.h"
+
+namespace android {
+namespace videoplayback {
+
+DefaultFrameRendererImpl::DefaultFrameRendererImpl(const GLESv2Dispatch* gles2,
+                                                   int width,
+                                                   int height)
+    : mGles2(gles2), mRenderWidth(width), mRenderHeight(width) {}
+
+bool DefaultFrameRendererImpl::initialize() {
+    return true;
+}
+
+void DefaultFrameRendererImpl::render() {
+    mGles2->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    mGles2->glViewport(0, 0, mRenderWidth, mRenderHeight);
+
+    mGles2->glClearColor(1.0f, 0.6f, 0.0f, 1.0f);
+    mGles2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mGles2->glFrontFace(GL_CW);
+    mGles2->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    mGles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    mGles2->glBindTexture(GL_TEXTURE_2D, 0);
+    mGles2->glUseProgram(0);
+}
+
+}  // namespace videoplayback
+}  // namespace android
