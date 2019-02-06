@@ -25,9 +25,9 @@ using namespace android::base;
 namespace {
 
 static offworld::Response createAsyncResponse(
-    uint32_t asyncId,
-    uint32_t sequenceId,
-    android::videoinjection::VideoInjectionResult result) {
+        uint32_t asyncId,
+        uint32_t sequenceId,
+        android::videoinjection::VideoInjectionResult result) {
     offworld::Response response;
     if (result.ok()) {
         response.set_result(offworld::Response::RESULT_NO_ERROR);
@@ -93,24 +93,23 @@ struct RequestContext {
 class VideoInjectionControllerImpl : public VideoInjectionController {
 public:
     VideoInjectionControllerImpl(
-        std::function<void(android::AsyncMessagePipeHandle,
-                           const ::offworld::Response&)>
-                sendMessageCallback)
+            std::function<void(android::AsyncMessagePipeHandle,
+                               const ::offworld::Response&)>
+                    sendMessageCallback)
         : mSendMessageCallback(sendMessageCallback) {}
 
-    ~VideoInjectionControllerImpl() {};
+    ~VideoInjectionControllerImpl(){};
 
     void shutdown();
 
     void reset() override;
 
     Optional<::offworld::VideoInjectionRequest> getNextRequest(
-        VideoInjectionResult previousResult) override;
+            VideoInjectionResult previousResult) override;
 
-    VideoInjectionResult handleRequest(
-        android::AsyncMessagePipeHandle pipe,
-        ::offworld::VideoInjectionRequest event,
-        uint32_t asyncId) override;
+    VideoInjectionResult handleRequest(android::AsyncMessagePipeHandle pipe,
+                                       ::offworld::VideoInjectionRequest event,
+                                       uint32_t asyncId) override;
 
     void pipeClosed(android::AsyncMessagePipeHandle pipe) override;
 
@@ -129,8 +128,8 @@ static VideoInjectionControllerImpl* sInstance = nullptr;
 void VideoInjectionController::initialize() {
     CHECK(!sInstance)
             << "VideoInjectionController::initialize() called more than once";
-    sInstance = new VideoInjectionControllerImpl(
-        android::offworld::sendResponse);
+    sInstance =
+            new VideoInjectionControllerImpl(android::offworld::sendResponse);
 }
 
 void VideoInjectionController::shutdown() {
@@ -159,9 +158,8 @@ void VideoInjectionControllerImpl::reset() {
         RequestContext requestContext = std::move(mRequestContexts.front());
         mRequestContexts.pop_front();
         ::offworld::Response response = createAsyncResponse(
-            requestContext.asyncId,
-            requestContext.request.sequence_id(),
-            Err(VideoInjectionError::InternalError));
+                requestContext.asyncId, requestContext.request.sequence_id(),
+                Err(VideoInjectionError::InternalError));
         if (requestContext.pipe) {
             mSendMessageCallback(*requestContext.pipe, response);
         }
@@ -185,18 +183,17 @@ VideoInjectionController::createForTest(
 
 Optional<::offworld::VideoInjectionRequest>
 VideoInjectionController::tryGetNextRequest(
-    VideoInjectionResult previousResult) {
+        VideoInjectionResult previousResult) {
     if (sInstance) {
-        return sInstance->getNextRequest(
-            std::move(previousResult));
+        return sInstance->getNextRequest(std::move(previousResult));
     }
     return {};
 }
 
 VideoInjectionResult VideoInjectionControllerImpl::handleRequest(
-    android::AsyncMessagePipeHandle pipe,
-    ::offworld::VideoInjectionRequest request,
-    uint32_t asyncId) {
+        android::AsyncMessagePipeHandle pipe,
+        ::offworld::VideoInjectionRequest request,
+        uint32_t asyncId) {
     AutoLock lock(mLock);
     if (mShutdown) {
         return Err(VideoInjectionError::InternalError);
@@ -217,8 +214,8 @@ VideoInjectionResult VideoInjectionControllerImpl::handleRequest(
 }
 
 void VideoInjectionControllerImpl::pipeClosed(
-    android::AsyncMessagePipeHandle pipe) {
-    for (RequestContext &r : mRequestContexts) {
+        android::AsyncMessagePipeHandle pipe) {
+    for (RequestContext& r : mRequestContexts) {
         if (*(r.pipe) == pipe) {
             r.pipe = {};
         }
@@ -227,9 +224,10 @@ void VideoInjectionControllerImpl::pipeClosed(
 
 Optional<::offworld::VideoInjectionRequest>
 VideoInjectionControllerImpl::getNextRequest(
-    VideoInjectionResult previousResult) {
+        VideoInjectionResult previousResult) {
     AutoLock lock(mLock);
     if (mShutdown) {
+        LOG(ERROR) << "Attempting to get request from shutdown controller";
         return {};
     }
 
@@ -237,9 +235,8 @@ VideoInjectionControllerImpl::getNextRequest(
         RequestContext requestContext = std::move(mRequestContexts.front());
         mRequestContexts.pop_front();
         ::offworld::Response response = createAsyncResponse(
-            requestContext.asyncId,
-            requestContext.request.sequence_id(),
-            std::move(previousResult));
+                requestContext.asyncId, requestContext.request.sequence_id(),
+                std::move(previousResult));
         if (requestContext.pipe) {
             mSendMessageCallback(*requestContext.pipe, response);
         }
@@ -250,7 +247,8 @@ VideoInjectionControllerImpl::getNextRequest(
         return {};
     } else {
         mRequestPending = true;
-        return mRequestContexts.front().request;
+        return makeOptional<::offworld::VideoInjectionRequest>(
+                mRequestContexts.front().request);
     }
 }
 
