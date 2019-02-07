@@ -701,7 +701,7 @@ prepare_build_for_windows_msvc() {
     var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/winrt"
     var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/shared"
     var_append EXTRA_CFLAGS "-isystem \"$MSVC_DIR/DIA SDK/include\""
-    
+
 
     var_append EXTRA_CFLAGS ${CLANG_LINK_FLAGS}
 

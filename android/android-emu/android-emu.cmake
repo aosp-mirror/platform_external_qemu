@@ -331,13 +331,13 @@ target_link_libraries(android-emu
                               offworld
                               # Prebuilt libraries
                               breakpad_client
-                              CURL::libcurl
+                              curl
                               OpenSSL::SSL
                               OpenSSL::Crypto
                               LibXml2::LibXml2
                               PNG::PNG
                               lz4
-                              ZLIB::ZLIB
+                              zlib
 )
 
 # Here are the windows library and link dependencies. They are public and will propagate onwards to others that depend
@@ -387,7 +387,8 @@ target_include_directories(android-emu PUBLIC
                                    # this has to be sorted out,
                                    ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
                                    # If you use our library, you get access to our headers.
-                                   ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+                                   ${CMAKE_CURRENT_SOURCE_DIR}
+                                   ${CMAKE_CURRENT_BINARY_DIR}
                                    ${DARWINN_INCLUDE_DIRS})
 
 android_target_compile_options(android-emu Clang PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
@@ -464,11 +465,13 @@ target_link_libraries(android-emu-shared
                               offworld
                               # Prebuilt libraries
                               breakpad_client
-                              CURL::libcurl
+                              curl
+                              OpenSSL::SSL
+                              OpenSSL::Crypto
                               LibXml2::LibXml2
                               PNG::PNG
                               lz4
-                              ZLIB::ZLIB)
+                              zlib)
 
 # Here are the windows library and link dependencies. They are public and will propagate onwards to others that depend
 # on android-emu-shared
@@ -542,20 +545,7 @@ set(android-mock-vm-operations_src
 android_add_library(android-mock-vm-operations)
 
 android_target_compile_options(android-mock-vm-operations Clang PRIVATE -O0 -Wno-invalid-constexpr)
-target_include_directories(android-mock-vm-operations
-                                   PRIVATE
-                                   ../android-emugl/host/include/
-                                   ${BREAKPAD_INCLUDE_DIRS}
-                                   ${CURL_INCLUDE_DIRS}
-                                   ${LIBXML2_INCLUDE_DIRS}
-                                   ${LIBPNG_INCLUDE_DIRS}
-                                   ${LZ4_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS}
-                                   ${PROTOBUF_INCLUDE_DIRS}
-                                   ${LZ4_INCLUDE_DIRS}
-                                   ${PNG_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS}
-                                   ${DARWINN_INCLUDE_DIRS})
+target_include_directories(android-mock-vm-operations PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(android-mock-vm-operations PRIVATE gmock)
 
 # The unit tests
@@ -757,17 +747,7 @@ android_target_compile_options(android-emu_unittests Clang PRIVATE -O0 -Wno-inva
 target_include_directories(android-emu_unittests
                                    PRIVATE
                                    ../android-emugl/host/include/
-                                   ${BREAKPAD_INCLUDE_DIRS}
-                                   ${CURL_INCLUDE_DIRS}
-                                   ${LIBXML2_INCLUDE_DIRS}
-                                   ${LIBPNG_INCLUDE_DIRS}
-                                   ${LZ4_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS}
-                                   ${PROTOBUF_INCLUDE_DIRS}
-                                   ${LZ4_INCLUDE_DIRS}
-                                   ${PNG_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS}
-                                   ${DARWINN_INCLUDE_DIRS})
+                                  )
 
 target_compile_definitions(android-emu_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 

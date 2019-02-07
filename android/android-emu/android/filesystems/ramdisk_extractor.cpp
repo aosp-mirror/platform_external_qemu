@@ -15,6 +15,7 @@
 #include "android/base/Log.h"
 
 #include <inttypes.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
