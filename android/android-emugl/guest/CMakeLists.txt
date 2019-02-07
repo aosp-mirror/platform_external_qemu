@@ -40,6 +40,7 @@ target_link_libraries(gui_unittests PUBLIC gui emugl_base gtest gtest_main)
 
 set(grallocusage_src libgrallocusage/GrallocUsageConversion.cpp)
 android_add_shared_library(grallocusage)
+target_include_directories(grallocusage PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(grallocusage PUBLIC emugl_base)
 
 set(vulkan_android_src
