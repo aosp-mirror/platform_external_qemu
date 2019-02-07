@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "13506d5b_a5e2aaa3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2237,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-02-07T20:07:26Z",
+      "side": 1,
+      "message": "nit: name it as ForProcess?",
+      "revId": "71a68efdb32b50c3ca55f145e6d267f00518ee2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
