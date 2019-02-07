@@ -66,6 +66,10 @@ struct RenderThreadInfo {
 
     // The unique id of owner guest process of this render thread
     uint64_t                        m_puid = 0;
+    // Handle to address space device context
+    // representing the guest process.
+    uint32_t                        m_puid2 = 0;
+    bool                            m_puid2Valid = false;
 
     // Functions to save / load a snapshot
     // They must be called after Framebuffer snapshot

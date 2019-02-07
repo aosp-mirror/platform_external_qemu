@@ -13,6 +13,8 @@
 // limitations under the License.
 #include "VkDecoderGlobalState.h"
 
+#include "FrameBuffer.h"
+
 #include "VkAndroidNativeBuffer.h"
 #include "VkFormatUtils.h"
 #include "VulkanDispatch.h"
@@ -95,15 +97,24 @@ public:
 
         *pInstance = (VkInstance)info.boxed;
 
+        auto fb = FrameBuffer::getFB();
+        if (!fb) return res;
+
+        fb->registerProcessCleanupCallback(
+            boxed->underlying,
+            [this, boxed] {
+                vkDestroyInstanceImpl(boxed->underlying, nullptr);
+            });
+
         return res;
     }
 
-    void on_vkDestroyInstance(VkInstance boxed_instance, const VkAllocationCallbacks* pAllocator) {
-        auto instance = unbox_VkInstance(boxed_instance);
+    void vkDestroyInstanceImpl(VkInstance instance, const VkAllocationCallbacks* pAllocator) {
+        AutoLock lock(mLock);
+
+        teardownInstanceLocked(instance);
 
         m_vk->vkDestroyInstance(instance, pAllocator);
-
-        AutoLock lock(mLock);
 
         auto it = mPhysicalDeviceToInstance.begin();
 
@@ -118,6 +129,17 @@ public:
         auto instInfo = android::base::find(mInstanceInfo, instance);
         delete_boxed_VkInstance(instInfo->boxed);
         mInstanceInfo.erase(instance);
+    }
+
+    void on_vkDestroyInstance(VkInstance boxed_instance, const VkAllocationCallbacks* pAllocator) {
+        auto instance = unbox_VkInstance(boxed_instance);
+
+        vkDestroyInstanceImpl(instance, pAllocator);
+
+        auto fb = FrameBuffer::getFB();
+        if (!fb) return;
+
+        fb->unregisterProcessCleanupCallback(instance);
     }
 
     VkResult on_vkEnumeratePhysicalDevices(
@@ -482,13 +504,7 @@ public:
         *pQueue = (VkQueue)queueInfo->boxed;
     }
 
-    void on_vkDestroyDevice(
-        VkDevice boxed_device,
-        const VkAllocationCallbacks* pAllocator) {
-
-        auto device = unbox_VkDevice(boxed_device);
-
-        AutoLock lock(mLock);
+    void destroyDeviceLocked(VkDevice device, const VkAllocationCallbacks* pAllocator) {
         auto it = mDeviceInfo.find(device);
         if (it == mDeviceInfo.end()) return;
 
@@ -507,6 +523,17 @@ public:
         m_vk->vkDestroyDevice(device, pAllocator);
 
         delete_boxed_VkDevice(it->second.boxed);
+    }
+
+    void on_vkDestroyDevice(
+        VkDevice boxed_device,
+        const VkAllocationCallbacks* pAllocator) {
+
+        auto device = unbox_VkDevice(boxed_device);
+
+        AutoLock lock(mLock);
+
+        destroyDeviceLocked(device, pAllocator);
 
         mDeviceInfo.erase(device);
         mDeviceToPhysicalDevice.erase(device);
@@ -867,6 +894,7 @@ public:
         mMapInfo[*pMemory] = MappedMemoryInfo();
         auto& mapInfo = mMapInfo[*pMemory];
         mapInfo.size = pAllocateInfo->allocationSize;
+        mapInfo.device = device;
 
         VkMemoryPropertyFlags flags =
                 physdevInfo->
@@ -894,6 +922,35 @@ public:
         return result;
     }
 
+    void freeMemoryLocked(
+        VulkanDispatch* vk,
+        VkDevice device,
+        VkDeviceMemory memory,
+        const VkAllocationCallbacks* pAllocator) {
+
+        auto info = android::base::find(mMapInfo, memory);
+
+        if (!info) {
+            // Invalid usage.
+            return;
+        }
+
+        if (info->directMapped) {
+            printf("%s: unmap: [0x%llx 0x%llx]\n", __func__,
+                   (unsigned long long)info->guestPhysAddr,
+                   (unsigned long long)info->guestPhysAddr + info->sizeToPage);
+            get_emugl_vm_operations().unmapUserBackedRam(
+                info->guestPhysAddr,
+                info->sizeToPage);
+        }
+
+        if (info->ptr) {
+            vk->vkUnmapMemory(device, memory);
+        }
+
+        vk->vkFreeMemory(device, memory, pAllocator);
+    }
+
     void on_vkFreeMemory(
         VkDevice boxed_device,
         VkDeviceMemory memory,
@@ -904,26 +961,9 @@ public:
 
         AutoLock lock(mLock);
 
-        auto info = android::base::find(mMapInfo, memory);
-
-        if (!info) {
-            // Invalid usage.
-            return;
-        }
-
-        if (info->directMapped) {
-            get_emugl_vm_operations().unmapUserBackedRam(
-                info->guestPhysAddr,
-                info->sizeToPage);
-        }
-
-        if (info->ptr) {
-            vk->vkUnmapMemory(device, memory);
-        }
+        freeMemoryLocked(vk, device, memory, pAllocator);
 
         mMapInfo.erase(memory);
-
-        vk->vkFreeMemory(device, memory, pAllocator);
     }
 
     VkResult on_vkMapMemory(VkDevice,
@@ -1150,6 +1190,10 @@ public:
             ((info->size + pageOffset + PAGE_SIZE - 1) >>
                  PAGE_BITS) << PAGE_BITS;
 
+        printf("%s: map: %p -> [0x%llx 0x%llx]\n", __func__,
+               info->pageAlignedHva,
+               (unsigned long long)info->guestPhysAddr,
+               (unsigned long long)info->guestPhysAddr + info->sizeToPage);
         get_emugl_vm_operations().mapUserBackedRam(
             info->guestPhysAddr,
             info->pageAlignedHva,
@@ -1604,6 +1648,43 @@ private:
         // }
     }
 
+    void teardownInstanceLocked(VkInstance instance) {
+
+        std::vector<VkDevice> devicesToDestroy;
+        std::vector<VulkanDispatch*> devicesToDestroyDispatches;
+
+        for (auto it : mDeviceToPhysicalDevice) {
+            auto otherInstance = android::base::find(mPhysicalDeviceToInstance, it.second);
+            if (!otherInstance) continue;
+
+            if (instance == *otherInstance) {
+                devicesToDestroy.push_back(it.first);
+                devicesToDestroyDispatches.push_back(mDeviceInfo[it.first].boxed->dispatch);
+            }
+        }
+
+        for (uint32_t i = 0; i < devicesToDestroy.size(); ++i) {
+            auto it = mMapInfo.begin();
+            while (it != mMapInfo.end()) {
+                if (it->second.device == devicesToDestroy[i]) {
+                    auto mem = it->first;
+                    freeMemoryLocked(devicesToDestroyDispatches[i],
+                        devicesToDestroy[i],
+                        mem, nullptr);
+                    it = mMapInfo.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+        }
+
+        for (uint32_t i = 0; i < devicesToDestroy.size(); ++i) {
+            destroyDeviceLocked(devicesToDestroy[i], nullptr);
+            mDeviceInfo.erase(devicesToDestroy[i]);
+            mDeviceToPhysicalDevice.erase(devicesToDestroy[i]);
+        }
+    }
+
     typedef std::function<void()> PreprocessFunc;
     struct CommandBufferInfo {
         std::vector<PreprocessFunc> preprocessFuncs = {};
@@ -1641,6 +1722,7 @@ private:
         uint64_t guestPhysAddr = 0;
         void* pageAlignedHva = nullptr;
         uint64_t sizeToPage = 0;
+        VkDevice device = VK_NULL_HANDLE;
     };
 
     struct InstanceInfo {

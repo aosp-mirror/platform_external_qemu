@@ -18,6 +18,7 @@
 #include "android/base/misc/StringUtils.h"
 #include "android/base/StringFormat.h"
 #include "android/base/StringView.h"
+#include "android/emulation/AddressSpaceService.h"
 #include "android/emulation/control/callbacks.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/CpuAccelerator.h"
@@ -570,6 +571,14 @@ static void* physical_memory_get_addr(uint64_t gpa) {
     return found ? res : nullptr;
 }
 
+static void address_space_device_set_context_object(uint32_t handle, void* opaque) {
+    android::emulation::setAddressSpaceContextObject(handle, opaque);
+}
+
+static void* address_space_device_get_context_object(uint32_t handle) {
+    return android::emulation::getAddressSpaceContextObject(handle);
+}
+
 static const QAndroidVmOperations sQAndroidVmOperations = {
         .vmStop = qemu_vm_stop,
         .vmStart = qemu_vm_start,
@@ -591,6 +600,8 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .setExiting = set_exiting,
         .allowRealAudio = allow_real_audio,
         .physicalMemoryGetAddr = physical_memory_get_addr,
+        .addressSpaceDeviceSetContextObject = address_space_device_set_context_object,
+        .addressSpaceDeviceGetContextObject = address_space_device_get_context_object,
 };
 
 const QAndroidVmOperations* const gQAndroidVmOperations =

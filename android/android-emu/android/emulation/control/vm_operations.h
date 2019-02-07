@@ -163,6 +163,12 @@ typedef struct QAndroidVmOperations {
 
     // Get the host address of a guest physical address, if any.
     void* (*physicalMemoryGetAddr)(uint64_t gpa);
+
+    // Set address space context object
+    void (*addressSpaceDeviceSetContextObject)(uint32_t handle, void* opaque);
+
+    // Get address space context object
+    void* (*addressSpaceDeviceGetContextObject)(uint32_t handle);
 } QAndroidVmOperations;
 
 // gQAndroidVmOperations is defined in .cpp depending on the target it used for,

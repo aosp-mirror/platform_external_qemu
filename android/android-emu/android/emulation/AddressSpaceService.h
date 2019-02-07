@@ -27,8 +27,8 @@ namespace emulation {
 // From there, it's all up to the individual device types.
 
 enum AddressSpaceDeviceType {
-    // Covers renderControl, opengles, and vulkan
-    Graphics = 0,
+    // For cleaning up stuff once a guest process exits
+    Cleanup = 0,
     // (audio/video codec devices)
     Media = 1,
     Sensors = 2,
@@ -48,11 +48,19 @@ struct AddressSpaceDevicePingInfo {
 };
 
 struct AddressSpaceContextDescription {
+    ~AddressSpaceContextDescription() {
+        if (onDestroy) onDestroy();
+    }
     uint32_t handle = 0;
     AddressSpaceDevicePingInfo* pingInfo = nullptr;
     AddressSpaceDeviceType deviceType =
         AddressSpaceDeviceType::Max;
+    void* opaque = nullptr;
+    std::function<void()> onDestroy = {};
 };
+
+void setAddressSpaceContextObject(uint32_t handle, void* opaque);
+void* getAddressSpaceContextObject(uint32_t handle);
 
 } // namespace emulation
 } // namespace android
