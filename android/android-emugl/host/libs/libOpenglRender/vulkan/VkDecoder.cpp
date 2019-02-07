@@ -2604,6 +2604,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDestroyImageView:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkDestroyImageView\n");
+                    ;
+                }
                 VkDevice device;
                 VkImageView imageView;
                 const VkAllocationCallbacks* pAllocator;
@@ -2626,11 +2630,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkDestroyImageView\n");;
-                }
-                vk->vkDestroyImageView(unboxed_device, imageView, pAllocator);
+                m_state->on_vkDestroyImageView(device, imageView, pAllocator);
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
                 break;
@@ -3197,6 +3197,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateSampler:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkCreateSampler\n");
+                    ;
+                }
                 VkDevice device;
                 const VkSamplerCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -3235,12 +3239,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->handleMapping()->mapHandles_u64_VkSampler(&cgen_var_215, (VkSampler*)pSampler, 1);
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pSampler;
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateSampler\n");;
-                }
                 VkResult vkCreateSampler_VkResult_return = (VkResult)0;
-                vkCreateSampler_VkResult_return = vk->vkCreateSampler(unboxed_device, pCreateInfo, pAllocator, pSampler);
+                vkCreateSampler_VkResult_return = m_state->on_vkCreateSampler(
+                        device, pCreateInfo, pAllocator, pSampler);
                 uint64_t cgen_var_216;
                 vkStream->handleMapping()->mapHandles_VkSampler_u64(pSampler, &cgen_var_216, 1);
                 vkStream->write((uint64_t*)&cgen_var_216, 8);
@@ -3251,6 +3252,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDestroySampler:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkDestroySampler\n");
+                    ;
+                }
                 VkDevice device;
                 VkSampler sampler;
                 const VkAllocationCallbacks* pAllocator;
@@ -3273,11 +3278,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
                     unmarshal_VkAllocationCallbacks(vkReadStream, (VkAllocationCallbacks*)(pAllocator));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkDestroySampler\n");;
-                }
-                vk->vkDestroySampler(unboxed_device, sampler, pAllocator);
+                m_state->on_vkDestroySampler(device, sampler, pAllocator);
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
                 break;
@@ -3580,6 +3581,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkUpdateDescriptorSets:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkUpdateDescriptorSets\n");
+                    ;
+                }
                 VkDevice device;
                 uint32_t descriptorWriteCount;
                 const VkWriteDescriptorSet* pDescriptorWrites;
@@ -3606,11 +3611,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     unmarshal_VkCopyDescriptorSet(vkReadStream, (VkCopyDescriptorSet*)(pDescriptorCopies + i));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkUpdateDescriptorSets\n");;
-                }
-                vk->vkUpdateDescriptorSets(unboxed_device, descriptorWriteCount, pDescriptorWrites, descriptorCopyCount, pDescriptorCopies);
+                m_state->on_vkUpdateDescriptorSets(
+                        device, descriptorWriteCount, pDescriptorWrites,
+                        descriptorCopyCount, pDescriptorCopies);
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
                 break;

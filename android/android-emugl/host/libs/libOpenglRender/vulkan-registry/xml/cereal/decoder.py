@@ -261,9 +261,14 @@ custom_decodes = {
     "vkDestroyDevice" : emit_global_state_wrapped_decoding,
 
     "vkCreateImage" : emit_global_state_wrapped_decoding,
-    "vkDestroyImage" : emit_global_state_wrapped_decoding,
     "vkCreateImageView" : emit_global_state_wrapped_decoding,
+    "vkCreateSampler" : emit_global_state_wrapped_decoding,
+    "vkDestroyImage" : emit_global_state_wrapped_decoding,
+    "vkDestroyImageView" : emit_global_state_wrapped_decoding,
+    "vkDestroySampler" : emit_global_state_wrapped_decoding,
     "vkCmdCopyBufferToImage" : emit_global_state_wrapped_decoding,
+
+    "vkUpdateDescriptorSets" : emit_global_state_wrapped_decoding,
 
     "vkAllocateMemory" : emit_global_state_wrapped_decoding,
     "vkFreeMemory" : emit_global_state_wrapped_decoding,
