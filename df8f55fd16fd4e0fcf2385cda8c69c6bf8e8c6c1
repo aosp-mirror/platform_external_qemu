@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c43122d2_642de4cf",
+        "filename": "util/qemu-timer.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-02-07T23:13:53Z",
+      "side": 1,
+      "message": "ldiv?",
+      "range": {
+        "startLine": 357,
+        "startChar": 32,
+        "endLine": 357,
+        "endChar": 33
+      },
+      "revId": "df8f55fd16fd4e0fcf2385cda8c69c6bf8e8c6c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4f673f74_dad5dd2d",
+        "filename": "util/qemu-timer.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-02-07T23:13:53Z",
+      "side": 1,
+      "message": "Does it have to be static (should this be mutex protected then)? Could you please consider allocating this on heap as one piece for all these arrays?",
+      "range": {
+        "startLine": 372,
+        "startChar": 4,
+        "endLine": 372,
+        "endChar": 10
+      },
+      "revId": "df8f55fd16fd4e0fcf2385cda8c69c6bf8e8c6c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
