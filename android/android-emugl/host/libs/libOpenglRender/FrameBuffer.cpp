@@ -1326,6 +1326,17 @@ void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, bool forced) {
             m_procOwnedRenderContext.erase(procIte);
         }
     }
+
+    // Run other cleanup callbacks
+    {
+        auto procIte = m_procOwnedCleanupCallbacks.find(puid);
+        if (procIte != m_procOwnedCleanupCallbacks.end()) {
+            for (auto it : procIte->second) {
+                it.second();
+            }
+            m_procOwnedCleanupCallbacks.erase(procIte);
+        }
+    }
 }
 
 void FrameBuffer::markOpened(ColorBufferRef* cbRef) {
@@ -2221,4 +2232,22 @@ ColorBufferPtr FrameBuffer::findColorBuffer(HandleType p_colorbuffer) {
     else {
         return c->second.cb;
     }
+}
+
+void FrameBuffer::registerCleanupCallbackForThread(void* key, std::function<void()> cb) {
+    AutoLock mutex(m_lock);
+    RenderThreadInfo* tInfo = RenderThreadInfo::get();
+    if (!tInfo) return;
+
+    auto& callbackMap = m_procOwnedCleanupCallbacks[tInfo->m_puid];
+    callbackMap[key] = cb;
+}
+
+void FrameBuffer::unregisterCleanupCallbackForThread(void* key) {
+    AutoLock mutex(m_lock);
+    RenderThreadInfo* tInfo = RenderThreadInfo::get();
+    if (!tInfo) return;
+
+    auto& callbackMap = m_procOwnedCleanupCallbacks[tInfo->m_puid];
+    callbackMap.erase(key);
 }
