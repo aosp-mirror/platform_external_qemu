@@ -910,7 +910,7 @@ public:
         std::vector<VkBufferImageCopy> regions(regionCount);
         VkDeviceSize offset = 0;
         VkDeviceSize maxOffset = 0;
-        const VkDeviceSize pixelSize = cmp.pixelSize();
+        const VkDeviceSize dstPixelSize = cmp.dstPixelSize();
         for (uint32_t r = 0; r < regionCount; r++) {
             VkBufferImageCopy& dstRegion = regions[r];
             dstRegion.bufferOffset = offset;
@@ -928,7 +928,7 @@ public:
             dstRegion.imageExtent.height =
                     std::min(dstRegion.imageExtent.height, height);
             offset += dstRegion.imageExtent.width *
-                      dstRegion.imageExtent.height * pixelSize;
+                      dstRegion.imageExtent.height * dstPixelSize;
         }
 
         VkBufferCreateInfo bufferInfo = {};
@@ -1592,7 +1592,7 @@ private:
                 return inputSize;
             }
         }
-        VkDeviceSize pixelSize() {
+        VkDeviceSize dstPixelSize() {
             return getLinearFormatPixelSize(dstFormat);
         }
         bool needEmulatedAlpha() {
@@ -1602,10 +1602,6 @@ private:
             switch (srcFormat) {
                 case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
                 case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
-                case VK_FORMAT_EAC_R11_UNORM_BLOCK:
-                case VK_FORMAT_EAC_R11_SNORM_BLOCK:
-                case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
-                case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
                     return true;
                 default:
                     return false;
@@ -1660,13 +1656,12 @@ private:
                 cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_SRGB;
                 break;
             case VK_FORMAT_EAC_R11_UNORM_BLOCK:
-            case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
-                cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_UNORM;
-                break;
             case VK_FORMAT_EAC_R11_SNORM_BLOCK:
+                cmpInfo.dstFormat = VK_FORMAT_R32_SFLOAT;
+                break;
+            case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
             case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
-                // Consider using higher precision for those formats?
-                cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_SNORM;
+                cmpInfo.dstFormat = VK_FORMAT_R32G32_SFLOAT;
                 break;
             default:
                 cmpInfo.isCompressed = false;
@@ -1734,7 +1729,7 @@ private:
                     srcPtr, imgFmt, decompBuffer.data(),
                     alignedSrcImgExtent.width, alignedSrcImgExtent.height,
                     decodedPixelSize * alignedSrcImgExtent.width);
-
+            int dstPixelSize = getLinearFormatPixelSize(cmp.dstFormat);
             for (int h = 0; h < dstRegion.imageExtent.height; h++) {
                 for (int w = 0; w < dstRegion.imageExtent.width; w++) {
                     // RGB to RGBA
@@ -1743,41 +1738,19 @@ private:
                             decodedPixelSize *
                                     (w + h * alignedSrcImgExtent.width);
                     uint8_t* dstPixel =
-                            dstPtr + 4 * (w + h * dstRegion.imageExtent.width);
+                            dstPtr +
+                            dstPixelSize *
+                                    (w + h * dstRegion.imageExtent.width);
                     // In case the source is not an RGBA format, we set all
                     // channels to default values (except for R channel)
-                    dstPixel[1] = 0;
-                    dstPixel[2] = 0;
-                    dstPixel[3] = 255;
                     switch (cmp.srcFormat) {
-                        case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
-                            dstPixel[1] =
-                                    uint8_t((*reinterpret_cast<const float*>(
-                                                    srcPixel + 4)) *
-                                            255);
-                        // falldown
-                        case VK_FORMAT_EAC_R11_UNORM_BLOCK:
-                            dstPixel[0] =
-                                    uint8_t((*reinterpret_cast<const float*>(
-                                                    srcPixel)) *
-                                            255);
+                        case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
+                        case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
+                            dstPixel[3] = 255;
+                            memcpy(dstPixel, srcPixel, decodedPixelSize);
                             break;
-
-                        case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
-                            reinterpret_cast<int8_t*>(dstPixel)[1] =
-                                    int8_t((*reinterpret_cast<const float*>(
-                                                   srcPixel + 4)) *
-                                           127.0f);
-                        // falldown
-                        case VK_FORMAT_EAC_R11_SNORM_BLOCK:
-                            reinterpret_cast<int8_t*>(dstPixel)[0] =
-                                    int8_t((*reinterpret_cast<const float*>(
-                                                   srcPixel)) *
-                                           127.0f);
-                            dstPixel[3] = 127;
-                            break;
-
                         default:
+                            assert(dstPixelSize == decodedPixelSize);
                             memcpy(dstPixel, srcPixel, decodedPixelSize);
                     }
                 }
