@@ -30,6 +30,7 @@ android_target_compile_options(cutils Clang PRIVATE -fvisibility=default -Wno-in
 
 set(grallocusage_src libgrallocusage/GrallocUsageConversion.cpp)
 android_add_shared_library(grallocusage)
+target_include_directories(grallocusage PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(grallocusage PUBLIC emugl_base)
 
 # The gui library

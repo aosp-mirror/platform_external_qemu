@@ -28,5 +28,6 @@ set(GLES12Translator_src
 android_add_shared_library(GLES12Translator)
 target_compile_options(GLES12Translator PRIVATE -fvisibility=hidden)
 target_link_libraries(GLES12Translator PRIVATE emugl_base)
+target_include_directories(GLES12Translator PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(GLES12Translator PUBLIC GLESv1_dec OpenglCodecCommon emugl_common)
 android_install_shared(GLES12Translator)

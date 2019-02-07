@@ -7,7 +7,7 @@ set(darwinn_src ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/darwinn/dar
 android_add_library(darwinn)
 target_compile_options(darwinn PUBLIC ${DARWINN_COMPILE_DEFINITIONS})
 target_link_libraries(darwinn PUBLIC darwinnmodelconfig darwinnpipe libprotobuf)
-target_include_directories(darwinn PUBLIC ${DARWINN_INCLUDE_DIRS})
+target_include_directories(darwinn PUBLIC ${DARWINN_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 set(darwinn_unittests_src
     # This file seems to be necessary to make the unittest program compile
