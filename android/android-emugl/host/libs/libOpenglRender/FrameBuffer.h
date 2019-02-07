@@ -36,6 +36,7 @@
 
 #include <EGL/egl.h>
 
+#include <functional>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -445,6 +446,9 @@ public:
     void onLastColorBufferRef(uint32_t handle);
     ColorBuffer::Helper* getColorBufferHelper() { return m_colorBufferHelper; }
     ColorBufferPtr findColorBuffer(HandleType p_colorbuffer);
+
+    void registerCleanupCallbackForThread(void* key, std::function<void()> callback);
+    void unregisterCleanupCallbackForThread(void* key);
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);

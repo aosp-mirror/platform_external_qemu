@@ -13,8 +13,10 @@
 // limitations under the License.
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/AddressSpaceService.h"
+#include "android/emulation/CleanupDevice.h"
 #include "android/emulation/control/vm_operations.h"
 
+#include "android/base/containers/Lookup.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 
@@ -102,7 +104,14 @@ public:
 
             // TODO: Do initialization
             switch (contextDesc.deviceType) {
-            case AddressSpaceDeviceType::Graphics:
+            case AddressSpaceDeviceType::Cleanup:
+            {
+                auto cleanup = new CleanupDevice;
+                contextDesc.opaque = (void*)cleanup;
+                contextDesc.onDestroy = [cleanup] {
+                    delete cleanup; };
+                break;
+            }
             case AddressSpaceDeviceType::Media:
             case AddressSpaceDeviceType::Sensors:
             case AddressSpaceDeviceType::Power:
@@ -116,7 +125,17 @@ public:
 
             // TODO: Do "perform" depending on data/size/metadata/etc
             switch (contextDesc.deviceType) {
-            case AddressSpaceDeviceType::Graphics:
+            case AddressSpaceDeviceType::Cleanup:
+            {
+                switch (metadata) {
+                    case CleanupDevice::Command::GetHandle:
+                        contextDesc.pingInfo->metadata = (uint64_t)(handle);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            }
             case AddressSpaceDeviceType::Media:
             case AddressSpaceDeviceType::Sensors:
             case AddressSpaceDeviceType::Power:
@@ -129,6 +148,21 @@ public:
         }
     }
 
+    void setObject(uint32_t handle, void* opaque) {
+        auto context = android::base::find(mContexts, handle);
+
+        if (!context) return;
+
+        context->opaque = opaque;
+    }
+
+    void* getObject(uint32_t handle) {
+        auto context = android::base::find(mContexts, handle);
+
+        if (!context) return nullptr;
+
+        return context->opaque;
+    }
 private:
     Lock mLock;
     uint32_t mHandleIndex = 0;
@@ -160,6 +194,21 @@ static void sAddressSpaceDevicePing(uint32_t handle) {
 }
 
 } // namespace
+
+// Interface for host
+namespace android {
+namespace emulation {
+
+void setAddressSpaceContextObject(uint32_t handle, void* opaque) {
+    sAddressSpaceDeviceState->setObject(handle, opaque);
+}
+
+void* getAddressSpaceContextObject(uint32_t handle) {
+    return sAddressSpaceDeviceState->getObject(handle);
+}
+
+} // namespace emulation
+} // namespace android
 
 extern "C" {
 
