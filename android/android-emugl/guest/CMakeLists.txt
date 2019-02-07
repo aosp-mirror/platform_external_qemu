@@ -59,6 +59,14 @@ set(gui_unittests_src androidImpl/libgui_unittest.cpp)
 android_add_test(gui_unittests)
 target_link_libraries(gui_unittests PUBLIC gui emugl_base gtest gtest_main)
 
+<<<<<<< HEAD
+=======
+set(grallocusage_src libgrallocusage/GrallocUsageConversion.cpp)
+android_add_shared_library(grallocusage)
+target_include_directories(grallocusage PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(grallocusage PUBLIC emugl_base)
+
+>>>>>>> 02a4836f1e... Build Curl & Zlib from source
 set(vulkan_android_src
     libvulkan/api.cpp
     libvulkan/api_gen.cpp

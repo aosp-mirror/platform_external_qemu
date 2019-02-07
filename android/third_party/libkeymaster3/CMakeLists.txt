@@ -1,6 +1,4 @@
 cmake_minimum_required(VERSION 3.5)
-PREBUILT(CURL)
-
 add_library(emulator-libkeymaster3
         aes_key.cpp
         aes_operation.cpp
