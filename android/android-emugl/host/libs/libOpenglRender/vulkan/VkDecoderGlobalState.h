@@ -144,6 +144,26 @@ public:
         const VkAllocationCallbacks* pAllocator,
         VkImageView* pView);
 
+    void on_vkDestroyImageView(VkDevice device,
+                               VkImageView imageView,
+                               const VkAllocationCallbacks* pAllocator);
+
+    VkResult on_vkCreateSampler(VkDevice device,
+                                const VkSamplerCreateInfo* pCreateInfo,
+                                const VkAllocationCallbacks* pAllocator,
+                                VkSampler* pSampler);
+
+    void on_vkDestroySampler(VkDevice device,
+                             VkSampler sampler,
+                             const VkAllocationCallbacks* pAllocator);
+
+    void on_vkUpdateDescriptorSets(
+            VkDevice device,
+            uint32_t descriptorWriteCount,
+            const VkWriteDescriptorSet* pDescriptorWrites,
+            uint32_t descriptorCopyCount,
+            const VkCopyDescriptorSet* pDescriptorCopies);
+
     void on_vkCmdCopyBufferToImage(
         VkCommandBuffer commandBuffer,
         VkBuffer srcBuffer,
