@@ -331,13 +331,13 @@ target_link_libraries(android-emu
                               offworld
                               # Prebuilt libraries
                               breakpad_client
-                              CURL::libcurl
+                              curl
                               OpenSSL::SSL
                               OpenSSL::Crypto
                               LibXml2::LibXml2
                               PNG::PNG
                               lz4
-                              ZLIB::ZLIB
+                              zlib
 )
 
 # Here are the windows library and link dependencies. They are public and will propagate onwards to others that depend
@@ -464,11 +464,11 @@ target_link_libraries(android-emu-shared
                               offworld
                               # Prebuilt libraries
                               breakpad_client
-                              CURL::libcurl
+                              curl
                               LibXml2::LibXml2
                               PNG::PNG
                               lz4
-                              ZLIB::ZLIB)
+                              zlib)
 
 # Here are the windows library and link dependencies. They are public and will propagate onwards to others that depend
 # on android-emu-shared
@@ -550,11 +550,9 @@ target_include_directories(android-mock-vm-operations
                                    ${LIBXML2_INCLUDE_DIRS}
                                    ${LIBPNG_INCLUDE_DIRS}
                                    ${LZ4_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS}
                                    ${PROTOBUF_INCLUDE_DIRS}
                                    ${LZ4_INCLUDE_DIRS}
                                    ${PNG_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS}
                                    ${DARWINN_INCLUDE_DIRS})
 target_link_libraries(android-mock-vm-operations PRIVATE gmock)
 
@@ -762,11 +760,9 @@ target_include_directories(android-emu_unittests
                                    ${LIBXML2_INCLUDE_DIRS}
                                    ${LIBPNG_INCLUDE_DIRS}
                                    ${LZ4_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS}
                                    ${PROTOBUF_INCLUDE_DIRS}
                                    ${LZ4_INCLUDE_DIRS}
                                    ${PNG_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS}
                                    ${DARWINN_INCLUDE_DIRS})
 
 target_compile_definitions(android-emu_unittests PRIVATE -DGTEST_HAS_RTTI=0)
