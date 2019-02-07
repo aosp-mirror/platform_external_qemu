@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2b21edf_d74f48a2",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1336,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-02-07T21:04:05Z",
+      "side": 1,
+      "message": "\u0026\nI don\u0027t think we want to copy the lambda.",
+      "range": {
+        "startLine": 1336,
+        "startChar": 21,
+        "endLine": 1336,
+        "endChar": 22
+      },
+      "revId": "6d148c924feab29f199908cb2fb761ed76f051ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7d07c1d0_65b58064",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2254,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2019-02-07T21:04:05Z",
+      "side": 1,
+      "message": "Do we want to put a warning/crash here if nothing is erased?",
+      "range": {
+        "startLine": 2254,
+        "startChar": 16,
+        "endLine": 2254,
+        "endChar": 21
+      },
+      "revId": "6d148c924feab29f199908cb2fb761ed76f051ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
