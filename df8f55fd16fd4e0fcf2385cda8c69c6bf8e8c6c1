@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "78a7b9c8_0ba2e5be",
+        "filename": "util/qemu-timer.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-07T23:38:30Z",
+      "side": 1,
+      "message": "Done (deferred to standard qemu_poll if not mac)",
+      "parentUuid": "c43122d2_642de4cf",
+      "range": {
+        "startLine": 357,
+        "startChar": 32,
+        "endLine": 357,
+        "endChar": 33
+      },
+      "revId": "df8f55fd16fd4e0fcf2385cda8c69c6bf8e8c6c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f673f74_dad5dd2d",
         "filename": "util/qemu-timer.c",
         "patchSetId": 7
@@ -45,6 +69,30 @@
       "revId": "df8f55fd16fd4e0fcf2385cda8c69c6bf8e8c6c1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a0769f42_b2f2e335",
+        "filename": "util/qemu-timer.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-07T23:38:30Z",
+      "side": 1,
+      "message": "This is meant to only work with the main loop (changed the function name), so it doesn\u0027t need a mutex, and won\u0027t be thread safe. Also, changed to dynamic allocation.",
+      "parentUuid": "4f673f74_dad5dd2d",
+      "range": {
+        "startLine": 372,
+        "startChar": 4,
+        "endLine": 372,
+        "endChar": 10
+      },
+      "revId": "df8f55fd16fd4e0fcf2385cda8c69c6bf8e8c6c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
