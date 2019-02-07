@@ -32,10 +32,12 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/emulation/CleanupDevice.h"
 
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/misc.h"
+#include "emugl/common/vm_operations.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -2221,4 +2223,38 @@ ColorBufferPtr FrameBuffer::findColorBuffer(HandleType p_colorbuffer) {
     else {
         return c->second.cb;
     }
+}
+
+void FrameBuffer::registerCleanupCallbackForThread(void* key, std::function<void()> cb) {
+    AutoLock mutex(m_lock);
+    RenderThreadInfo* tInfo = RenderThreadInfo::get();
+    if (!tInfo) return;
+    if (!tInfo->m_puid2Valid) return;
+
+    android::emulation::CleanupDevice* cleanupDevice =
+        (android::emulation::CleanupDevice*)
+        get_emugl_vm_operations().addressSpaceDeviceGetContextObject(tInfo->m_puid2);
+
+    if (!cleanupDevice) {
+        fprintf(stderr, "%s: cleanupdevice not alloced\n", __func__);
+    }
+
+    cleanupDevice->addCallback(key, cb);
+}
+
+void FrameBuffer::unregisterCleanupCallbackForThread(void* key) {
+    AutoLock mutex(m_lock);
+    RenderThreadInfo* tInfo = RenderThreadInfo::get();
+    if (!tInfo) return;
+    if (!tInfo->m_puid2Valid) return;
+
+    android::emulation::CleanupDevice* cleanupDevice =
+        (android::emulation::CleanupDevice*)
+        get_emugl_vm_operations().addressSpaceDeviceGetContextObject(tInfo->m_puid2);
+
+    if (!cleanupDevice) {
+        fprintf(stderr, "%s: cleanupdevice not alloced\n", __func__);
+    }
+
+    cleanupDevice->removeCallback(key);
 }
