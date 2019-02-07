@@ -529,11 +529,13 @@ VkResult syncImageToColorBuffer(
         case VK_FORMAT_R8G8B8_UNORM:
             bpp = 3;
             break;
-        default:
         case VK_FORMAT_R8G8B8A8_UNORM:
             bpp = 4;
             break;
+        default:
+            break;
     }
+    fprintf(stderr, "%s: bpp: %u\n", __func__, bpp);
     VkBufferImageCopy region = {
         0 /* buffer offset */,
         anbInfo->extent.width,

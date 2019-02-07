@@ -36,6 +36,7 @@
 #include "emugl/common/dma_device.h"
 #include "emugl/common/misc.h"
 #include "emugl/common/thread.h"
+#include "emugl/common/vm_operations.h"
 #include "math.h"
 
 #include <atomic>
@@ -181,6 +182,9 @@ static constexpr android::base::StringView kGLESNoHostError = "ANDROID_EMU_gles_
 
 // Vulkan
 static constexpr android::base::StringView kVulkanFeatureStr = "ANDROID_EMU_vulkan";
+
+// Setpuid2
+static constexpr android::base::StringView kSetPuid2FeatureStr = "ANDROID_EMU_setpuid2";
 
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
@@ -429,6 +433,9 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         }
 
         glStr += maxVersionToFeatureString(guestExtVer);
+        glStr += " ";
+
+        glStr += kSetPuid2FeatureStr;
         glStr += " ";
     }
 
@@ -969,6 +976,14 @@ static int rcCompose(uint32_t bufferSize, void* buffer) {
     return fb->compose(bufferSize, buffer);
 }
 
+static void rcSetPuid2(uint32_t handle) {
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    tInfo->m_puid2 = handle;
+    tInfo->m_puid2Valid = true;
+    auto obj = get_emugl_vm_operations().addressSpaceDeviceGetContextObject(handle);
+    fprintf(stderr, "%s: obj: %p handle: %u\n", __func__, obj, handle);
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1009,4 +1024,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateColorBufferDMA = rcCreateColorBufferDMA;
     dec->rcWaitSyncKHR = rcWaitSyncKHR;
     dec->rcCompose = rcCompose;
+    dec->rcSetPuid2 = rcSetPuid2;
 }

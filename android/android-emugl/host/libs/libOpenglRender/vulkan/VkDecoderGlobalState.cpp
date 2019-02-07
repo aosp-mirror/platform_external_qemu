@@ -13,6 +13,8 @@
 // limitations under the License.
 #include "VkDecoderGlobalState.h"
 
+#include "FrameBuffer.h"
+
 #include "VkAndroidNativeBuffer.h"
 #include "VkFormatUtils.h"
 #include "VulkanDispatch.h"
@@ -95,6 +97,13 @@ public:
 
         *pInstance = (VkInstance)info.boxed;
 
+        auto fb = FrameBuffer::getFB();
+        if (!fb) return res;
+
+        fb->registerCleanupCallbackForThread(
+            boxed->underlying,
+            [] { fprintf(stderr, "should clean up an instance"); });
+
         return res;
     }
 
@@ -118,6 +127,11 @@ public:
         auto instInfo = android::base::find(mInstanceInfo, instance);
         delete_boxed_VkInstance(instInfo->boxed);
         mInstanceInfo.erase(instance);
+
+        auto fb = FrameBuffer::getFB();
+        if (!fb) return;
+
+        fb->unregisterCleanupCallbackForThread(instance);
     }
 
     VkResult on_vkEnumeratePhysicalDevices(
@@ -912,6 +926,9 @@ public:
         }
 
         if (info->directMapped) {
+            fprintf(stderr, "%s: unmap: [0x%llx 0x%llx]\n", __func__,
+                    (unsigned long long)info->guestPhysAddr,
+                    (unsigned long long)info->guestPhysAddr + info->sizeToPage);
             get_emugl_vm_operations().unmapUserBackedRam(
                 info->guestPhysAddr,
                 info->sizeToPage);
@@ -1150,6 +1167,10 @@ public:
             ((info->size + pageOffset + PAGE_SIZE - 1) >>
                  PAGE_BITS) << PAGE_BITS;
 
+            fprintf(stderr, "%s: map: %p -> [0x%llx 0x%llx]\n", __func__,
+                    info->pageAlignedHva,
+                    (unsigned long long)info->guestPhysAddr,
+                    (unsigned long long)info->guestPhysAddr + info->sizeToPage);
         get_emugl_vm_operations().mapUserBackedRam(
             info->guestPhysAddr,
             info->pageAlignedHva,
