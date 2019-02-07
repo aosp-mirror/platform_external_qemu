@@ -33,6 +33,8 @@
 
 #include <algorithm>
 #include <functional>
+#include <list>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -666,18 +668,20 @@ public:
         const VkImageViewCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkImageView* pView) {
-
         auto device = unbox_VkDevice(boxed_device);
         auto vk = dispatch_VkDevice(boxed_device);
 
         if (!pCreateInfo) {
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
+
+        AutoLock lock(mLock);
         auto deviceInfoIt = mDeviceInfo.find(device);
         if (deviceInfoIt == mDeviceInfo.end()) {
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
         VkImageViewCreateInfo createInfo;
+        bool needEmulatedAlpha = false;
         if (deviceInfoIt->second.emulateTextureEtc2) {
             CompressedImageInfo cmpInfo = createCompressedImageInfo(
                 pCreateInfo->format
@@ -686,9 +690,186 @@ public:
                 createInfo = *pCreateInfo;
                 createInfo.format = cmpInfo.dstFormat;
                 pCreateInfo = &createInfo;
+                needEmulatedAlpha = cmpInfo.needEmulatedAlpha();
             }
         }
-        return vk->vkCreateImageView(device, pCreateInfo, pAllocator, pView);
+        VkResult result =
+                vk->vkCreateImageView(device, pCreateInfo, pAllocator, pView);
+        if (result != VK_SUCCESS) {
+            return result;
+        }
+
+        auto& imageViewInfo = mImageViewInfo[*pView];
+        imageViewInfo.needEmulatedAlpha = needEmulatedAlpha;
+        return result;
+    }
+
+    void on_vkDestroyImageView(VkDevice boxed_device,
+                               VkImageView imageView,
+                               const VkAllocationCallbacks* pAllocator) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        vk->vkDestroyImageView(device, imageView, pAllocator);
+        AutoLock lock(mLock);
+        mImageViewInfo.erase(imageView);
+    }
+
+    VkResult on_vkCreateSampler(VkDevice boxed_device,
+                                const VkSamplerCreateInfo* pCreateInfo,
+                                const VkAllocationCallbacks* pAllocator,
+                                VkSampler* pSampler) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+        VkResult result =
+                vk->vkCreateSampler(device, pCreateInfo, pAllocator, pSampler);
+        if (result != VK_SUCCESS) {
+            return result;
+        }
+        AutoLock lock(mLock);
+        auto& samplerInfo = mSamplerInfo[*pSampler];
+        samplerInfo.createInfo = *pCreateInfo;
+        // We emulate RGB with RGBA for some compressed textures, which does not
+        // handle translarent border correctly.
+        samplerInfo.needEmulatedAlpha =
+                (pCreateInfo->addressModeU ==
+                         VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER ||
+                 pCreateInfo->addressModeV ==
+                         VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER ||
+                 pCreateInfo->addressModeW ==
+                         VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER) &&
+                (pCreateInfo->borderColor ==
+                         VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK ||
+                 pCreateInfo->borderColor ==
+                         VK_BORDER_COLOR_INT_TRANSPARENT_BLACK);
+        return result;
+    }
+
+    void on_vkDestroySampler(VkDevice boxed_device,
+                             VkSampler sampler,
+                             const VkAllocationCallbacks* pAllocator) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+        vk->vkDestroySampler(device, sampler, pAllocator);
+        AutoLock lock(mLock);
+        const auto& samplerInfoIt = mSamplerInfo.find(sampler);
+        if (samplerInfoIt != mSamplerInfo.end()) {
+            if (samplerInfoIt->second.emulatedborderSampler != VK_NULL_HANDLE) {
+                vk->vkDestroySampler(
+                        device, samplerInfoIt->second.emulatedborderSampler,
+                        nullptr);
+            }
+            mSamplerInfo.erase(samplerInfoIt);
+        }
+    }
+
+    void on_vkUpdateDescriptorSets(
+            VkDevice boxed_device,
+            uint32_t descriptorWriteCount,
+            const VkWriteDescriptorSet* pDescriptorWrites,
+            uint32_t descriptorCopyCount,
+            const VkCopyDescriptorSet* pDescriptorCopies) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        AutoLock lock(mLock);
+        bool needEmulateWriteDescriptor = false;
+        // c++ seems to allow for 0-size array allocation
+        std::unique_ptr<bool[]> descriptorWritesNeedDeepCopy(
+                new bool[descriptorCopyCount]);
+        for (uint32_t i = 0; i < descriptorWriteCount; i++) {
+            const VkWriteDescriptorSet& descriptorWrite = pDescriptorWrites[i];
+            descriptorWritesNeedDeepCopy[i] = false;
+            if (descriptorWrite.descriptorType !=
+                VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) {
+                continue;
+            }
+            for (uint32_t j = 0; j < descriptorWrite.descriptorCount; j++) {
+                const VkDescriptorImageInfo& imageInfo =
+                        descriptorWrite.pImageInfo[j];
+                const auto& viewIt = mImageViewInfo.find(imageInfo.imageView);
+                if (viewIt == mImageViewInfo.end()) {
+                    continue;
+                }
+                const auto& samplerIt = mSamplerInfo.find(imageInfo.sampler);
+                if (samplerIt == mSamplerInfo.end()) {
+                    continue;
+                }
+                if (viewIt->second.needEmulatedAlpha &&
+                    samplerIt->second.needEmulatedAlpha) {
+                    needEmulateWriteDescriptor = true;
+                    descriptorWritesNeedDeepCopy[i] = true;
+                    break;
+                }
+            }
+        }
+        if (!needEmulateWriteDescriptor) {
+            vk->vkUpdateDescriptorSets(device, descriptorWriteCount,
+                                       pDescriptorWrites, descriptorCopyCount,
+                                       pDescriptorCopies);
+            return;
+        }
+        std::list<std::unique_ptr<VkDescriptorImageInfo[]>> imageInfoPool;
+        std::unique_ptr<VkWriteDescriptorSet[]> descriptorWrites(
+                new VkWriteDescriptorSet[descriptorWriteCount]);
+        for (uint32_t i = 0; i < descriptorWriteCount; i++) {
+            const VkWriteDescriptorSet& srcDescriptorWrite =
+                    pDescriptorWrites[i];
+            VkWriteDescriptorSet& dstDescriptorWrite = descriptorWrites[i];
+            // Shallow copy first
+            dstDescriptorWrite = srcDescriptorWrite;
+            if (!descriptorWritesNeedDeepCopy[i]) {
+                continue;
+            }
+            // Deep copy
+            assert(dstDescriptorWrite.descriptorType ==
+                   VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+            imageInfoPool.emplace_back(
+                    new VkDescriptorImageInfo[dstDescriptorWrite
+                                                      .descriptorCount]);
+            VkDescriptorImageInfo* imageInfos = imageInfoPool.back().get();
+            memcpy(imageInfos, srcDescriptorWrite.pImageInfo,
+                   dstDescriptorWrite.descriptorCount *
+                           sizeof(VkDescriptorImageInfo));
+            dstDescriptorWrite.pImageInfo = imageInfos;
+            for (uint32_t j = 0; j < dstDescriptorWrite.descriptorCount; j++) {
+                VkDescriptorImageInfo& imageInfo = imageInfos[j];
+                const auto& viewIt = mImageViewInfo.find(imageInfo.imageView);
+                if (viewIt == mImageViewInfo.end()) {
+                    continue;
+                }
+                const auto& samplerIt = mSamplerInfo.find(imageInfo.sampler);
+                if (samplerIt == mSamplerInfo.end()) {
+                    continue;
+                }
+                if (viewIt->second.needEmulatedAlpha &&
+                    samplerIt->second.needEmulatedAlpha) {
+                    SamplerInfo& samplerInfo = samplerIt->second;
+                    if (samplerInfo.emulatedborderSampler == VK_NULL_HANDLE) {
+                        // create the emulated sampler
+                        VkSamplerCreateInfo createInfo = samplerInfo.createInfo;
+                        switch (createInfo.borderColor) {
+                            case VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK:
+                                createInfo.borderColor =
+                                        VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
+                                break;
+                            case VK_BORDER_COLOR_INT_TRANSPARENT_BLACK:
+                                createInfo.borderColor =
+                                        VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+                                break;
+                            default:
+                                break;
+                        }
+                        vk->vkCreateSampler(device, &createInfo, nullptr,
+                                            &samplerInfo.emulatedborderSampler);
+                    }
+                    imageInfo.sampler = samplerInfo.emulatedborderSampler;
+                }
+            }
+        }
+        vk->vkUpdateDescriptorSets(device, descriptorWriteCount,
+                                   descriptorWrites.get(), descriptorCopyCount,
+                                   pDescriptorCopies);
     }
 
     void on_vkCmdCopyBufferToImage(
@@ -1414,6 +1595,22 @@ private:
         VkDeviceSize pixelSize() {
             return getLinearFormatPixelSize(dstFormat);
         }
+        bool needEmulatedAlpha() {
+            if (!isCompressed) {
+                return false;
+            }
+            switch (srcFormat) {
+                case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
+                case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+                case VK_FORMAT_EAC_R11_SNORM_BLOCK:
+                case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+                case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     };
 
     static ETC2ImageFormat getEtc2Format(VkFormat fmt) {
@@ -1682,6 +1879,16 @@ private:
         CompressedImageInfo cmpInfo;
     };
 
+    struct ImageViewInfo {
+        bool needEmulatedAlpha = false;
+    };
+
+    struct SamplerInfo {
+        bool needEmulatedAlpha = false;
+        VkSamplerCreateInfo createInfo = {};
+        VkSampler emulatedborderSampler = VK_NULL_HANDLE;
+    };
+
     std::unordered_map<VkInstance, InstanceInfo>
         mInstanceInfo;
     std::unordered_map<VkPhysicalDevice, PhysicalDeviceInfo>
@@ -1690,6 +1897,8 @@ private:
         mDeviceInfo;
     std::unordered_map<VkImage, ImageInfo>
         mImageInfo;
+    std::unordered_map<VkImageView, ImageViewInfo> mImageViewInfo;
+    std::unordered_map<VkSampler, SamplerInfo> mSamplerInfo;
     std::unordered_map<VkCommandBuffer, CommandBufferInfo> mCmdBufferInfo;
     std::unordered_map<VkCommandPool, CommandPoolInfo> mCmdPoolInfo;
     // TODO: release CommandBufferInfo when a command pool is reset/released
@@ -1861,6 +2070,39 @@ VkResult VkDecoderGlobalState::on_vkCreateImageView(
     const VkAllocationCallbacks* pAllocator,
     VkImageView* pView) {
     return mImpl->on_vkCreateImageView(device, pCreateInfo, pAllocator, pView);
+}
+
+void VkDecoderGlobalState::on_vkDestroyImageView(
+        VkDevice device,
+        VkImageView imageView,
+        const VkAllocationCallbacks* pAllocator) {
+    mImpl->on_vkDestroyImageView(device, imageView, pAllocator);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateSampler(
+        VkDevice device,
+        const VkSamplerCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkSampler* pSampler) {
+    return mImpl->on_vkCreateSampler(device, pCreateInfo, pAllocator, pSampler);
+}
+
+void VkDecoderGlobalState::on_vkDestroySampler(
+        VkDevice device,
+        VkSampler sampler,
+        const VkAllocationCallbacks* pAllocator) {
+    mImpl->on_vkDestroySampler(device, sampler, pAllocator);
+}
+
+void VkDecoderGlobalState::on_vkUpdateDescriptorSets(
+        VkDevice device,
+        uint32_t descriptorWriteCount,
+        const VkWriteDescriptorSet* pDescriptorWrites,
+        uint32_t descriptorCopyCount,
+        const VkCopyDescriptorSet* pDescriptorCopies) {
+    mImpl->on_vkUpdateDescriptorSets(device, descriptorWriteCount,
+                                     pDescriptorWrites, descriptorCopyCount,
+                                     pDescriptorCopies);
 }
 
 void VkDecoderGlobalState::on_vkCmdCopyBufferToImage(
