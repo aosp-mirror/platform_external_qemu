@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "944d7140_5c1d875e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/cereal/transform.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-02-08T19:22:34Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 84,
+        "startChar": 0,
+        "endLine": 84,
+        "endChar": 4
+      },
+      "revId": "f711c3dc59e0a5294e50ff34e82421a023169da4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
