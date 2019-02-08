@@ -81,7 +81,7 @@ function(android_yasm_compile)
     if (NOT YASM_EXECUTABLE)
         # Make sure we (cross) compile yasm only once.
         android_compile_for_host(yasm ${ANDROID_QEMU2_TOP_DIR}/../yasm YASM_EXECUTABLE)
-        set(YASM_EXECUTABLE "${YASM_EXECUTABLE}")
+        set(YASM_EXECUTABLE "${YASM_EXECUTABLE}" CACHE STRING "" FORCE)
         message(STATUS "Compiling using ${YASM_EXECUTABLE}")
     endif()
 
