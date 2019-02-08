@@ -192,7 +192,7 @@ class IOStream;
 #include "goldfish_vk_deepcopy_guest.h"
 #include "goldfish_vk_handlemap_guest.h"
 #include "goldfish_vk_private_defs.h"
-#include "goldfish_vk_transform.h"
+#include "goldfish_vk_transform_guest.h"
 """
         functableImplInclude = """
 #include "VkEncoder.h"
@@ -241,9 +241,18 @@ using android::base::Pool;
 #include "goldfish_vk_private_defs.h"
 #include "VulkanHandleMapping.h"
 """
+        transformIncludeGuest = """
+#include "goldfish_vk_private_defs.h"
+"""
         transformInclude = """
 #include "goldfish_vk_private_defs.h"
+#include "goldfish_vk_extension_structs.h"
+"""
+        transformImplIncludeGuest = """
 #include "ResourceTracker.h"
+"""
+        transformImplInclude = """
+#include "VkDecoderGlobalState.h"
 """
         poolIncludeGuest = """
 #include "goldfish_vk_private_defs.h"
@@ -316,6 +325,7 @@ using DlSymFunc = void* (void*, const char*);
         decoderImplIncludes = """
 #include "common/goldfish_vk_marshaling.h"
 #include "common/goldfish_vk_private_defs.h"
+#include "common/goldfish_vk_transform.h"
 
 #include "android/base/system/System.h"
 
@@ -368,9 +378,9 @@ using DlSymFunc = void* (void*, const char*);
         self.addGuestEncoderModule("goldfish_vk_handlemap_guest",
                                    extraHeader=commonCerealIncludesGuest + handleMapIncludeGuest,
                                    extraImpl=commonCerealImplIncludesGuest)
-        self.addGuestEncoderModule("goldfish_vk_transform",
-                                   extraHeader=commonCerealIncludesGuest + transformInclude,
-                                   extraImpl=commonCerealImplIncludesGuest)
+        self.addGuestEncoderModule("goldfish_vk_transform_guest",
+                                   extraHeader=commonCerealIncludesGuest + transformIncludeGuest,
+                                   extraImpl=commonCerealImplIncludesGuest + transformImplIncludeGuest)
 
         self.addGuestHalModule("func_table", extraImpl=functableImplInclude)
 
@@ -391,6 +401,9 @@ using DlSymFunc = void* (void*, const char*);
         self.addModule("common", "goldfish_vk_dispatch",
                        extraHeader=dispatchHeaderDefs,
                        extraImpl=dispatchImplIncludes)
+        self.addModule("common", "goldfish_vk_transform",
+                       extraHeader=transformInclude,
+                       extraImpl=transformImplInclude)
         self.addHostModule("VkDecoder",
                            extraHeader=decoderHeaderIncludes,
                            extraImpl=decoderImplIncludes,
@@ -401,7 +414,7 @@ using DlSymFunc = void* (void*, const char*);
         self.addWrapper(cereal.VulkanMarshaling, "goldfish_vk_marshaling_guest")
         self.addWrapper(cereal.VulkanDeepcopy, "goldfish_vk_deepcopy_guest")
         self.addWrapper(cereal.VulkanHandleMap, "goldfish_vk_handlemap_guest")
-        self.addWrapper(cereal.VulkanTransform, "goldfish_vk_transform")
+        self.addWrapper(cereal.VulkanTransform, "goldfish_vk_transform_guest")
         self.addWrapper(cereal.VulkanFuncTable, "func_table")
         self.addWrapper(cereal.VulkanExtensionStructs, "goldfish_vk_extension_structs")
         self.addWrapper(cereal.VulkanMarshaling, "goldfish_vk_marshaling")
@@ -409,6 +422,7 @@ using DlSymFunc = void* (void*, const char*);
         self.addWrapper(cereal.VulkanDeepcopy, "goldfish_vk_deepcopy")
         self.addWrapper(cereal.VulkanHandleMap, "goldfish_vk_handlemap")
         self.addWrapper(cereal.VulkanDispatch, "goldfish_vk_dispatch")
+        self.addWrapper(cereal.VulkanTransform, "goldfish_vk_transform", resourceTrackerTypeName="VkDecoderGlobalState")
         self.addWrapper(cereal.VulkanDecoder, "VkDecoder")
 
         self.guestAndroidMkCppFiles = ""
@@ -498,11 +512,11 @@ using DlSymFunc = void* (void*, const char*);
 %s
 """ % namespaceEnd
 
-    def addWrapper(self, moduleType, moduleName):
+    def addWrapper(self, moduleType, moduleName, **kwargs):
         self.wrappers.append( \
             moduleType( \
                 self.modules[moduleName],
-                self.typeInfo))
+                self.typeInfo, **kwargs))
 
     def forEachModule(self, func):
         for moduleName in self.moduleList:

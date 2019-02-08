@@ -2330,4 +2330,38 @@ void VkDecoderGlobalState::on_vkFreeCommandBuffers(
                                           commandBufferCount, pCommandBuffers);
 }
 
+void VkDecoderGlobalState::deviceMemoryTransform_tohost(
+    VkDeviceMemory* memory, uint32_t memoryCount,
+    VkDeviceSize* offset, uint32_t offsetCount,
+    VkDeviceSize* size, uint32_t sizeCount,
+    uint32_t* typeIndex, uint32_t typeIndexCount,
+    uint32_t* typeBits, uint32_t typeBitsCount) {
+    // Not used currently
+    (void)memory; (void)memoryCount;
+    (void)offset; (void)offsetCount;
+    (void)size; (void)sizeCount;
+    (void)typeIndex; (void)typeIndexCount;
+    (void)typeBits; (void)typeBitsCount;
+}
+
+void VkDecoderGlobalState::deviceMemoryTransform_fromhost(
+    VkDeviceMemory* memory, uint32_t memoryCount,
+    VkDeviceSize* offset, uint32_t offsetCount,
+    VkDeviceSize* size, uint32_t sizeCount,
+    uint32_t* typeIndex, uint32_t typeIndexCount,
+    uint32_t* typeBits, uint32_t typeBitsCount) {
+    // Not used currently
+    (void)memory; (void)memoryCount;
+    (void)offset; (void)offsetCount;
+    (void)size; (void)sizeCount;
+    (void)typeIndex; (void)typeIndexCount;
+    (void)typeBits; (void)typeBitsCount;
+}
+
+#define DEFINE_TRANSFORMED_TYPE_IMPL(type) \
+    void VkDecoderGlobalState::transformImpl_##type##_tohost(const type*, uint32_t) { } \
+    void VkDecoderGlobalState::transformImpl_##type##_fromhost(const type*, uint32_t) { } \
+
+LIST_TRANSFORMED_TYPES(DEFINE_TRANSFORMED_TYPE_IMPL)
+
 }  // namespace goldfish_vk

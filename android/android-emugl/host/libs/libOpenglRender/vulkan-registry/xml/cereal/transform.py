@@ -15,7 +15,7 @@
 
 from .common.codegen import CodeGen
 from .common.vulkantypes import \
-        VulkanCompoundType, VulkanAPI, makeVulkanTypeSimple, vulkanTypeNeedsTransform, vulkanTypeGetNeededTransformTypes, VulkanTypeIterator, iterateVulkanType, vulkanTypeforEachSubType
+        VulkanCompoundType, VulkanAPI, makeVulkanTypeSimple, vulkanTypeNeedsTransform, vulkanTypeGetNeededTransformTypes, VulkanTypeIterator, iterateVulkanType, vulkanTypeforEachSubType, TRANSFORMED_TYPES
 
 from .wrapperdefs import VulkanWrapperGenerator
 from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE
@@ -73,6 +73,18 @@ def deviceMemoryTransform(resourceTrackerVarName, structOrApiInfo, getExpr, getL
             cgen.stmt("%s->deviceMemoryTransform_fromhost(%s)" % \
                 (resourceTrackerVarName, callParams))
 
+def directTransform(resourceTrackerVarName, vulkanType, getExpr, getLen, cgen, variant="tohost"):
+    access = getExpr(vulkanType)
+    lenAccess = getLen(vulkanType)
+
+    if lenAccess:
+        finalLenAccess = lenAccess
+    else:
+        finalLenAccess = "1"
+    
+    cgen.stmt("%s->transformImpl_%s_%s(%s, %s)" % (resourceTrackerVarName,
+                                                   vulkanType.typeName, variant, access, finalLenAccess))
+
 def genTransformsForVulkanType(resourceTrackerVarName, structOrApiInfo, getExpr, getLen, cgen, variant="tohost"):
     for transform in vulkanTypeGetNeededTransformTypes(structOrApiInfo):
         if transform == "devicememory":
@@ -82,7 +94,7 @@ def genTransformsForVulkanType(resourceTrackerVarName, structOrApiInfo, getExpr,
                 getExpr, getLen, cgen, variant=variant)
 
 class TransformCodegen(VulkanTypeIterator):
-    def __init__(self, cgen, inputVar, resourceTrackerVarName, prefix):
+    def __init__(self, cgen, inputVar, resourceTrackerVarName, prefix, variant):
         self.cgen = cgen
         self.inputVar = inputVar
         self.prefix = prefix
@@ -99,6 +111,8 @@ class TransformCodegen(VulkanTypeIterator):
         self.lenAccessor = makeLengthAccess(self.inputVar)
 
         self.checked = False
+
+        self.variant = variant
 
     def makeCastExpr(self, vulkanType):
         return "(%s)" % (
@@ -140,6 +154,10 @@ class TransformCodegen(VulkanTypeIterator):
             self.cgen.beginFor(forInit, forCond, forIncr)
 
         accessCasted = self.asNonConstCast(access, vulkanType)
+
+        if vulkanType.isTransformed:
+            directTransform(self.resourceTrackerVarName, vulkanType, self.exprAccessor, self.lenAccessor, self.cgen, variant=self.variant)
+
         self.cgen.funcCall(None, self.prefix + vulkanType.typeName,
                            [self.resourceTrackerVarName, accessCasted])
 
@@ -175,7 +193,7 @@ class TransformCodegen(VulkanTypeIterator):
 
 
 class VulkanTransform(VulkanWrapperGenerator):
-    def __init__(self, module, typeInfo):
+    def __init__(self, module, typeInfo, resourceTrackerTypeName="ResourceTracker", resourceTrackerVarName="resourceTracker"):
         VulkanWrapperGenerator.__init__(self, module, typeInfo)
 
         self.codegen = CodeGen()
@@ -187,9 +205,10 @@ class VulkanTransform(VulkanWrapperGenerator):
         self.variants = [self.tohostpart, self.fromhostpart]
 
         self.toTransformVar = "toTransform"
-        self.resourceTrackerVarName = "resourceTracker"
+        self.resourceTrackerTypeName = resourceTrackerTypeName
+        self.resourceTrackerVarName = resourceTrackerVarName
         self.transformParam = \
-            makeVulkanTypeSimple(False, "ResourceTracker", 1,
+            makeVulkanTypeSimple(False, self.resourceTrackerTypeName, 1,
                                  self.resourceTrackerVarName)
         self.voidType = makeVulkanTypeSimple(False, "void", 0)
 
@@ -206,6 +225,16 @@ class VulkanTransform(VulkanWrapperGenerator):
 
     def onBegin(self,):
         VulkanWrapperGenerator.onBegin(self)
+        # Set up a convenience macro fro the transformed structs
+        # and forward-declare the resource tracker class
+        self.codegen.stmt("class %s" % self.resourceTrackerTypeName)
+        self.codegen.line("#define LIST_TRANSFORMED_TYPES(f) \\")
+        for name in TRANSFORMED_TYPES:
+            self.codegen.line("f(%s) \\" % name)
+        self.codegen.line("")
+
+        self.module.appendHeader(self.codegen.swapCode())
+
         for prototype in self.extensionTransformPrototypes:
             self.module.appendImpl(self.codegen.makeFuncDecl(
                 prototype))
@@ -234,7 +263,8 @@ class VulkanTransform(VulkanWrapperGenerator):
                     None,
                     self.toTransformVar,
                     self.resourceTrackerVarName,
-                    self.transformPrefix + variant + "_")
+                    self.transformPrefix + variant + "_",
+                    variant)
 
                 def funcDefGenerator(cgen):
                     transformer.cgen = cgen
@@ -268,6 +298,8 @@ class VulkanTransform(VulkanWrapperGenerator):
 
         for (variant, prototype) in zip(self.variants, self.extensionTransformPrototypes):
             def forEachExtensionTransform(ext, castedAccess, cgen):
+                if ext.isTransformed:
+                    directTransform(self.resourceTrackerVarName, ext, lambda _ : castedAccess, lambda _ : "1", cgen, variant);
                 cgen.funcCall(None, self.transformPrefix + variant + "_" + ext.name,
                               [self.resourceTrackerVarName, castedAccess])
 
