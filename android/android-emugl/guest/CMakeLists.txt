@@ -3,7 +3,12 @@ set(utils_src androidImpl/libutils_placeholder.cpp)
 android_add_shared_library(utils)
 
 # The cutils library.
-set(cutils_src androidImpl/Ashmem.cpp androidImpl/Properties.cpp androidImpl/GrallocDispatch.cpp androidImpl/AndroidVulkanDispatch.cpp)
+set(cutils_src
+    androidImpl/Ashmem.cpp
+    androidImpl/Properties.cpp
+    androidImpl/GrallocDispatch.cpp
+    androidImpl/AndroidVulkanDispatch.cpp
+    androidImpl/trace-host.cpp)
 android_add_shared_library(cutils)
 target_include_directories(cutils PRIVATE ${ANDROID_EMUGL_DIR}/host/include .)
 target_include_directories(cutils PUBLIC .)
@@ -17,12 +22,18 @@ android_add_shared_library(log)
 target_include_directories(log PRIVATE android/android-emugl/guest android/android-emu)
 target_link_libraries(log PRIVATE emugl_base)
 
+set(grallocusage_src libgrallocusage/GrallocUsageConversion.cpp)
+android_add_shared_library(grallocusage)
+target_link_libraries(grallocusage PUBLIC emugl_base)
+
 # The gui library
 set(gui_src
     androidImpl/AndroidBufferQueue.cpp
     androidImpl/ANativeWindow.cpp
     androidImpl/AndroidWindow.cpp
     androidImpl/AndroidWindowBuffer.cpp
+    androidImpl/Gralloc2.cpp
+    androidImpl/GraphicBufferMapper.cpp
     androidImpl/SurfaceFlinger.cpp
     androidImpl/Vsync.cpp
     sync/sync.cpp
@@ -31,16 +42,12 @@ android_add_shared_library(gui)
 target_link_libraries(gui PUBLIC android-emu-base)
 target_include_directories(gui PUBLIC ${ANDROID_EMUGL_DIR}/guest)
 target_compile_options(gui PRIVATE -fvisibility=default)
-target_link_libraries(gui PRIVATE emugl_base)
+target_link_libraries(gui PRIVATE cutils log emugl_base grallocusage)
 
 # The unit tests
 set(gui_unittests_src androidImpl/libgui_unittest.cpp)
 android_add_test(gui_unittests)
 target_link_libraries(gui_unittests PUBLIC gui emugl_base gtest gtest_main)
-
-set(grallocusage_src libgrallocusage/GrallocUsageConversion.cpp)
-android_add_shared_library(grallocusage)
-target_link_libraries(grallocusage PUBLIC emugl_base)
 
 set(vulkan_android_src
     libvulkan/api.cpp
