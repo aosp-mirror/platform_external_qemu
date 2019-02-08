@@ -9,26 +9,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_definitions(emugl_base INTERFACE "-DEMUGL_DEBUG=1")
 endif()
 
-
-if(ANDROID_TARGET_TAG MATCHES "windows.*" AND NOT MSVC)
-  message(STATUS "Including emugen as an external project")
-  include(ExternalProject)
-
-  # If we are cross compiling we will need to build it for our actual OS we are currently running on, which we assume to
-  # be linux.
-  set(EMUGEN_EXE ${CMAKE_CURRENT_BINARY_DIR}/emugen/src/emugen-build/emugen)
-  externalproject_add(emugen
-                      PREFIX emugen
-                      DOWNLOAD_COMMAND ""
-                      SOURCE_DIR "${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/tools/emugen"
-                      CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-${ANDROID_HOST_TAG}.cmake"
-                      BUILD_BYPRODUCTS emugen
-                      INSTALL_COMMAND "")
-else()
-  # Include the emugen executable..
-  add_subdirectory("host/tools/emugen")
-  set(EMUGEN_EXE emugen)
-endif()
+# Compile emugen for the current host.
+android_compile_for_host(emugen ${CMAKE_CURRENT_LIST_DIR}/host/tools/emugen EMUGEN_EXE)
 
 # This will generate the source files by executing the emugen builder.
 function(generate_emugen SRC NAME)
@@ -43,7 +25,7 @@ function(generate_emugen SRC NAME)
   add_custom_command(PRE_BUILD
                      OUTPUT ${GENERATED_SRC}
                      COMMAND ${EMUGEN_EXE} -D ${CMAKE_CURRENT_BINARY_DIR} -i ${DIR} ${NAME}
-                     DEPENDS emugen)
+                     DEPENDS ${EMUGEN_EXE})
 
   set(${NAME}-SOURCES ${GENERATED_SRC} PARENT_SCOPE)
 endfunction()
