@@ -950,12 +950,17 @@ public:
                     cmp.mipmapWidth(dstRegion.imageSubresource.mipLevel);
             uint32_t height =
                     cmp.mipmapHeight(dstRegion.imageSubresource.mipLevel);
+            uint32_t depth =
+                    cmp.mipmapDepth(dstRegion.imageSubresource.mipLevel);
             dstRegion.imageExtent.width =
                     std::min(dstRegion.imageExtent.width, width);
             dstRegion.imageExtent.height =
                     std::min(dstRegion.imageExtent.height, height);
+            dstRegion.imageExtent.depth =
+                    std::min(dstRegion.imageExtent.depth, depth);
             offset += dstRegion.imageExtent.width *
-                      dstRegion.imageExtent.height * dstPixelSize;
+                      dstRegion.imageExtent.height *
+                      dstRegion.imageExtent.depth * dstPixelSize;
         }
 
         VkBufferCreateInfo bufferInfo = {};
@@ -1629,6 +1634,9 @@ private:
         uint32_t mipmapHeight(uint32_t level) {
             return std::max<uint32_t>(extent.height >> level, 1);
         }
+        uint32_t mipmapDepth(uint32_t level) {
+            return std::max<uint32_t>(extent.depth >> level, 1);
+        }
         uint32_t alignSize(uint32_t inputSize) {
             if (isCompressed) {
                 return (inputSize + 3) & (~0x3);
@@ -1765,37 +1773,46 @@ private:
                     cmp.alignSize(srcRegion.imageExtent.width);
             alignedSrcImgExtent.height =
                     cmp.alignSize(srcRegion.imageExtent.height);
-            alignedSrcImgExtent.depth = 1;
+            // not used
+            alignedSrcImgExtent.depth = srcRegion.imageExtent.depth;
 
             decompBuffer.resize(alignedSrcImgExtent.width *
                                 alignedSrcImgExtent.height * decodedPixelSize);
-            int err = etc2_decode_image(
-                    srcPtr, imgFmt, decompBuffer.data(),
-                    alignedSrcImgExtent.width, alignedSrcImgExtent.height,
-                    decodedPixelSize * alignedSrcImgExtent.width);
-            int dstPixelSize = getLinearFormatPixelSize(cmp.dstFormat);
-            for (int h = 0; h < dstRegion.imageExtent.height; h++) {
-                for (int w = 0; w < dstRegion.imageExtent.width; w++) {
-                    // RGB to RGBA
-                    const uint8_t* srcPixel =
-                            decompBuffer.data() +
-                            decodedPixelSize *
-                                    (w + h * alignedSrcImgExtent.width);
-                    uint8_t* dstPixel =
-                            dstPtr +
-                            dstPixelSize *
-                                    (w + h * dstRegion.imageExtent.width);
-                    // In case the source is not an RGBA format, we set all
-                    // channels to default values (except for R channel)
-                    switch (cmp.srcFormat) {
-                        case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
-                        case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
-                            dstPixel[3] = 255;
-                            memcpy(dstPixel, srcPixel, decodedPixelSize);
-                            break;
-                        default:
-                            assert(dstPixelSize == decodedPixelSize);
-                            memcpy(dstPixel, srcPixel, decodedPixelSize);
+            for (uint32_t d = 0; d < dstRegion.imageExtent.depth; d++) {
+                int err = etc2_decode_image(
+                        srcPtr + d * etc_get_encoded_data_size(
+                                             imgFmt, alignedSrcImgExtent.width,
+                                             alignedSrcImgExtent.height),
+                        imgFmt, decompBuffer.data(), alignedSrcImgExtent.width,
+                        alignedSrcImgExtent.height,
+                        decodedPixelSize * alignedSrcImgExtent.width);
+                int dstPixelSize = getLinearFormatPixelSize(cmp.dstFormat);
+                for (int h = 0; h < dstRegion.imageExtent.height; h++) {
+                    for (int w = 0; w < dstRegion.imageExtent.width; w++) {
+                        // RGB to RGBA
+                        const uint8_t* srcPixel =
+                                decompBuffer.data() +
+                                decodedPixelSize *
+                                        (w + h * alignedSrcImgExtent.width);
+                        uint8_t* dstPixel =
+                                dstPtr +
+                                dstPixelSize *
+                                        (w +
+                                         (h +
+                                          d * dstRegion.imageExtent.height) *
+                                                 dstRegion.imageExtent.width);
+                        // In case the source is not an RGBA format, we set all
+                        // channels to default values (except for R channel)
+                        switch (cmp.srcFormat) {
+                            case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
+                            case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
+                                dstPixel[3] = 255;
+                                memcpy(dstPixel, srcPixel, decodedPixelSize);
+                                break;
+                            default:
+                                assert(dstPixelSize == decodedPixelSize);
+                                memcpy(dstPixel, srcPixel, decodedPixelSize);
+                        }
                     }
                 }
             }
