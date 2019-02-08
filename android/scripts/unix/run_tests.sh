@@ -306,41 +306,6 @@ if [ "$TARGET_OS" = "windows-x86_64" ]; then
     fi
 fi
 
-
-if [ "$RUN_EMUGEN_TESTS" ]; then
-    EMUGEN_UNITTESTS=$OPT_OUT/$EMUGEN_DIR/emugen_unittests
-    if [ ! -f "$EMUGEN_UNITTESTS" ]; then
-        warn "FAIL: Missing binary: $EMUGEN_UNITTESTS"
-        FAILURES="$FAILURES emugen_unittests-binary"
-    else
-        log "Running emugen_unittests."
-        run $EMUGEN_UNITTESTS ||
-            FAILURES="$FAILURES emugen_unittests"
-    fi
-    log "Running emugen regression test suite."
-    # Note that the binary is always built for the 'build' machine type,
-    # I.e. if --mingw is used, it's still a Linux executable.
-    EMUGEN=$OPT_OUT/$EMUGEN_DIR/emugen
-    if [ ! -f "$EMUGEN" ]; then
-        echo "FAIL: Missing 'emugen' binary: $EMUGEN"
-        FAILURES="$FAILURES emugen-binary"
-    else
-        # The first case is for a remote build with package-release.sh
-        TEST_SCRIPT=$PROGDIR/../../opengl/host/tools/emugen/tests/run-tests.sh
-        if [ ! -f "$TEST_SCRIPT" ]; then
-            # This is the usual location.
-            TEST_SCRIPT=$QEMU2_TOP_DIR/android/android-emugl/host/tools/emugen/tests/run-tests.sh
-        fi
-        if [ ! -f "$TEST_SCRIPT" ]; then
-            echo " FAIL: Missing script: $TEST_SCRIPT"
-            FAILURES="$FAILURES emugen-test-script"
-        else
-            run $TEST_SCRIPT --emugen=$EMUGEN ||
-                FAILURES="$FAILURES emugen-test-suite"
-        fi
-    fi
-fi
-
 # Check the gen-entries.py script.
 if [ "$RUN_GEN_ENTRIES_TESTS" ]; then
     log "Running gen-entries.py test suite."

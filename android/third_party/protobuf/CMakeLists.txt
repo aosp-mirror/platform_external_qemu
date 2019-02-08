@@ -197,26 +197,8 @@ if(ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
   target_compile_options(protoc PRIVATE ${protobuf_PRIVATE_COMPILE_OPTS})
   set(PROTOBUF_PROTOC_EXECUTABLE "$<TARGET_FILE:protoc>" CACHE PATH "Protocol buffer executable" FORCE)
 else()
-  message(STATUS "Including protoc as cross compiled external project")
-  include(ExternalProject)
-  externalproject_add(
-    protoc_cross
-    PREFIX
-    protoc_cross
-    DOWNLOAD_COMMAND
-    ""
-    SOURCE_DIR
-    "${CMAKE_CURRENT_LIST_DIR}"
-    CMAKE_ARGS
-    "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-${ANDROID_HOST_TAG}.cmake"
-    BUILD_BYPRODUCTS
-    ${CMAKE_CURRENT_BINARY_DIR}/protoc_cross/src/protoc_cross-build/protoc
-    INSTALL_COMMAND
-    "")
-  # We need this property to survive outside of our project.
-  set(PROTOBUF_PROTOC_EXECUTABLE ${CMAKE_CURRENT_BINARY_DIR}/protoc_cross/src/protoc_cross-build/protoc
-      CACHE PATH "Protocol buffer executable"
-      FORCE)
+  android_compile_for_host(protoc ${CMAKE_CURRENT_LIST_DIR} PROTOBUF_EXE)
+  set(PROTOBUF_PROTOC_EXECUTABLE ${PROTOBUF_EXE} CACHE PATH "Protocol buffer executable" FORCE)
 endif()
 
 set(PROTOBUF_LIBRARY "${PROTO_DESC}")
