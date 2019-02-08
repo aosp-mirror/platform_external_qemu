@@ -43,15 +43,16 @@ function(android_compile_for_host EXE SOURCE OUT_PATH)
 
     # If we are cross compiling we will need to build it for our actual OS we are currently running on.
     get_filename_component(BUILD_PRODUCT ${CMAKE_CURRENT_BINARY_DIR}/${EXE}_ext_cross/src/${EXE}_ext_cross-build/${EXE} ABSOLUTE)
-    set(EMUGEN_EXE ${CMAKE_CURRENT_BINARY_DIR}/emugen/src/emugen-build/emugen)
-    externalproject_add(${EXE}_ext_cross
-          PREFIX ${EXE}_ext_cross
-          DOWNLOAD_COMMAND ""
-          SOURCE_DIR ${SOURCE}
-          CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-${ANDROID_HOST_TAG}.cmake"
-          BUILD_BYPRODUCTS ${BUILD_PRODUCT}
-          TEST_BEFORE_INSTALL True
-          INSTALL_COMMAND "")
+    if (NOT TARGET ${EXE}_ext_cross)
+      externalproject_add(${EXE}_ext_cross
+            PREFIX ${EXE}_ext_cross
+            DOWNLOAD_COMMAND ""
+            SOURCE_DIR ${SOURCE}
+            CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-${ANDROID_HOST_TAG}.cmake"
+            BUILD_BYPRODUCTS ${BUILD_PRODUCT}
+            TEST_BEFORE_INSTALL True
+            INSTALL_COMMAND "")
+    endif()
     set(${OUT_PATH} ${BUILD_PRODUCT} PARENT_SCOPE)
    endif()
 endfunction()
@@ -76,12 +77,11 @@ function(android_yasm_compile)
     set(multiValueArgs INCLUDES SOURCES)
     cmake_parse_arguments(android_yasm_compile "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
-
     # Configure yasm
     if (NOT YASM_EXECUTABLE)
         # Make sure we (cross) compile yasm only once.
-        android_compile_for_host(yasm ${ANDROID_QEMU2_TOP_DIR}/../yasm YASM_EXECUTABLE)
-        set(YASM_EXECUTABLE "${YASM_EXECUTABLE}")
+        android_compile_for_host(yasm ${ANDROID_QEMU2_TOP_DIR}/../yasm YASM_EXE)
+        set(YASM_EXECUTABLE ${YASM_EXE} CACHE FILEPATH "" FORCE )
         message(STATUS "Compiling using ${YASM_EXECUTABLE}")
     endif()
 
