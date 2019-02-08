@@ -332,8 +332,8 @@ target_link_libraries(android-emu
                               # Prebuilt libraries
                               breakpad_client
                               curl
-                              OpenSSL::SSL
-                              OpenSSL::Crypto
+                              ssl
+                              crypto
                               LibXml2::LibXml2
                               PNG::PNG
                               lz4
@@ -387,7 +387,7 @@ target_include_directories(android-emu PUBLIC
                                    # this has to be sorted out,
                                    ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
                                    # If you use our library, you get access to our headers.
-                                   ${CMAKE_CURRENT_SOURCE_DIR}                                   
+                                   ${CMAKE_CURRENT_SOURCE_DIR}
                                    ${CMAKE_CURRENT_BINARY_DIR}
                                    ${DARWINN_INCLUDE_DIRS})
 
@@ -466,8 +466,8 @@ target_link_libraries(android-emu-shared
                               # Prebuilt libraries
                               breakpad_client
                               curl
-                              OpenSSL::SSL
-                              OpenSSL::Crypto
+                              ssl
+                              crypto
                               LibXml2::LibXml2
                               PNG::PNG
                               lz4
