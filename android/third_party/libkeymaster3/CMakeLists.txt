@@ -55,7 +55,7 @@ add_library(emulator-libkeymaster3
 
 target_include_directories(emulator-libkeymaster3 PUBLIC .)
 target_include_directories(emulator-libkeymaster3 PRIVATE src include)
-target_link_libraries(emulator-libkeymaster3 PRIVATE android-emu-base OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(emulator-libkeymaster3 PRIVATE android-emu-base ssl crypto)
 
 if ("${ANDROID_TARGET_TAG}" MATCHES "windows.*")
     # Workaround some gcc/mingw issues
