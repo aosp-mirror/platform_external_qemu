@@ -285,6 +285,21 @@ public:
                                    VkCommandPool commandPool,
                                    VkCommandPoolResetFlags flags);
 
+    // Transformations
+
+    void deviceMemoryTransform_tohost(
+        VkDeviceMemory* memory, uint32_t memoryCount,
+        VkDeviceSize* offset, uint32_t offsetCount,
+        VkDeviceSize* size, uint32_t sizeCount,
+        uint32_t* typeIndex, uint32_t typeIndexCount,
+        uint32_t* typeBits, uint32_t typeBitsCount);
+    void deviceMemoryTransform_fromhost(
+        VkDeviceMemory* memory, uint32_t memoryCount,
+        VkDeviceSize* offset, uint32_t offsetCount,
+        VkDeviceSize* size, uint32_t sizeCount,
+        uint32_t* typeIndex, uint32_t typeIndexCount,
+        uint32_t* typeBits, uint32_t typeBitsCount);
+
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;
