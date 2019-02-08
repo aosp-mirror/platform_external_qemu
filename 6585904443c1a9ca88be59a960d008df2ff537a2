@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "73ed3c38_fda8baee",
+        "filename": "util/qemu-timer.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-02-08T06:31:55Z",
+      "side": 1,
+      "message": "most of these statics aren\u0027t used across calls, and can be local. I\u0027d also prefer to have the |kq| as a parameter (maybe inout) instead of a local static",
+      "range": {
+        "startLine": 355,
+        "startChar": 0,
+        "endLine": 364,
+        "endChar": 23
+      },
+      "revId": "6585904443c1a9ca88be59a960d008df2ff537a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
