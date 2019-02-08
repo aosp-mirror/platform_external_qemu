@@ -29,6 +29,12 @@
 #include "sysemu/sysemu.h"
 #include "sysemu/cpus.h"
 
+#ifdef __APPLE__
+#include <sys/types.h>
+#include <sys/event.h>
+#include <sys/time.h>
+#endif
+
 #ifdef CONFIG_POSIX
 #include <pthread.h>
 #endif
@@ -311,7 +317,6 @@ int qemu_timeout_ns_to_ms(int64_t ns)
     return (int) ms;
 }
 
-
 /* qemu implementation of g_poll which uses a nanosecond timeout but is
  * otherwise identical to g_poll
  */
@@ -334,7 +339,122 @@ int qemu_poll_ns(GPollFD *fds, guint nfds, int64_t timeout)
         return ppoll((struct pollfd *)fds, nfds, &ts, NULL);
     }
 #else
-    return g_poll(fds, nfds, qemu_timeout_ns_to_ms(timeout));
+   return g_poll(fds, nfds, qemu_timeout_ns_to_ms(timeout));
+#endif
+}
+
+/* 
+ * qemu implementation of g_poll which uses a nanosecond timeout but is
+ * otherwise identical to g_poll. specialized for main loop, since macOS works
+ * better with kqueue, and it's hard to coordinate across different threads
+ * polling with just one global kqueue.
+ */
+int qemu_poll_ns_main_loop(GPollFD *fds, guint nfds, int64_t timeout)
+{
+#ifdef __APPLE__
+    // Using static buffers for kevent lists. This is not thread safe.
+    static struct kevent* chlist = 0;
+    static struct kevent* evlist = 0;
+    static int evlist_capacity = 0;
+
+    static const int k_max_ev_per_fd = 2;
+    static const int k_capacity_growth_factor = 2;
+
+    static struct timespec ktimeout;
+    static int kq = -1;
+
+    int evcount = 0;
+    int64_t tvsec = timeout / 1000000000LL;
+    int flags, nev, nfdsDone;
+
+    if (nfds > evlist_capacity) {
+        evlist_capacity = nfds * k_max_ev_per_fd * k_capacity_growth_factor;
+        if (chlist) free(chlist);
+        if (evlist) free(evlist);
+        chlist = malloc(sizeof(struct kevent) * evlist_capacity);
+        evlist = malloc(sizeof(struct kevent) * evlist_capacity);
+    }
+
+    /* Avoid possibly overflowing and specifying a negative number of
+     * seconds, which would turn a very long timeout into a busy-wait.
+     */
+    if (tvsec > (int64_t)INT32_MAX) {
+        tvsec = INT32_MAX;
+    }
+    ktimeout.tv_sec = tvsec;
+    ktimeout.tv_nsec = timeout % 1000000000LL;
+
+    if (kq == -1) {
+        kq = kqueue();
+    }
+
+    flags = EV_ADD | EV_ONESHOT | EV_CLEAR;
+
+    for (guint i = 0; i < nfds; ++i) {
+
+        if (fds[i].events & (G_IO_IN | G_IO_PRI | G_IO_HUP)) {
+            if (fds[i].events & G_IO_PRI) {
+                EV_SET(&chlist[evcount++], fds[i].fd, EVFILT_READ, flags, EV_OOBAND, 0, &fds[i]);
+            } else {
+                EV_SET(&chlist[evcount++], fds[i].fd, EVFILT_READ, flags, 0, 0, &fds[i]);
+            }
+        }
+
+        if (fds[i].events & G_IO_OUT) {
+            EV_SET(&chlist[evcount++], fds[i].fd, EVFILT_WRITE, flags, 0, 0, &fds[i]);
+        }
+    }
+
+    nev = kevent(kq, chlist, evcount, evlist, evcount, timeout < 0 ? NULL : &ktimeout);
+
+    if (nev == -1) {
+        printf("Fail kevent");
+        return -1;
+    }
+
+    nfdsDone = 0;
+    for (guint i = 0; i < nfds; ++i) {
+        fds[i].revents = 0;
+    }
+
+    for (int i = 0; i < nev; ++i) {
+        GPollFD* fd = (GPollFD*)evlist[i].udata;
+
+        if (!fd) continue;
+
+        switch (evlist[i].filter) {
+        case EVFILT_READ:
+            fd->revents |= G_IO_IN;
+            break;
+        case EVFILT_WRITE:
+            fd->revents |= G_IO_OUT;
+            break;
+        default:
+            break;
+        }
+
+        if (evlist[i].flags & EV_OOBAND) {
+            fd->revents |= G_IO_PRI;
+        }
+
+        if (evlist[i].flags & EV_EOF) {
+            fd->revents |= G_IO_HUP;
+        }
+
+        if (evlist[i].flags & EV_ERROR) {
+            fd->revents |= G_IO_ERR;
+        }
+    }
+
+    for (guint i = 0; i < nfds; ++i) {
+        if (fds[i].revents) {
+            ++nfdsDone;
+        }
+    }
+
+    return nfdsDone;
+#else
+    return qemu_poll_ns(fds, nfds, timeout);
 #endif
 }
 
