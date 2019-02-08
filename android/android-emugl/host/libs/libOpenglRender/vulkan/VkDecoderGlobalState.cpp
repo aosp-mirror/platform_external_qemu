@@ -51,7 +51,10 @@ namespace goldfish_vk {
 // These will mainly include Vulkan features that we emulate ourselves.
 static constexpr const char* const
 kEmulatedExtensions[] = {
+    "VK_KHR_external_memory_capabilities",
+    "VK_KHR_external_memory",
     "VK_ANDROID_native_buffer",
+    "VK_ANDROID_external_memory_android_hardware_buffer",
 };
 
 static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 0, 65);

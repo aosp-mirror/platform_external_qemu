@@ -154,7 +154,9 @@ LOCAL_CFLAGS += \\
     -DVK_USE_PLATFORM_ANDROID_KHR \\
     -DVK_NO_PROTOTYPES \\
 
-LOCAL_SRC_FILES := HostVisibleMemoryVirtualization.cpp \\
+LOCAL_SRC_FILES := ExtensionStructs.cpp \\
+    ExternalMemory.cpp \\
+    HostVisibleMemoryVirtualization.cpp \\
     Resources.cpp \\
     Validation.cpp \\
     VulkanStream.cpp \\
