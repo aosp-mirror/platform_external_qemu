@@ -152,6 +152,17 @@ DEVICE_MEMORY_INFO_KEYS = [
     "devicememorytypebits",
 ]
 
+TRANSFORMED_TYPES = [
+    "VkExternalMemoryProperties",
+    "VkPhysicalDeviceExternalImageFormatInfo",
+    "VkPhysicalDeviceExternalBufferInfo",
+    "VkExternalMemoryImageCreateInfo",
+    "VkExternalMemoryBufferCreateInfo",
+    "VkExportMemoryAllocateInfo",
+    "VkExternalImageFormatProperties",
+    "VkExternalBufferProperties",
+]
+
 # Holds information about a Vulkan type instance (i.e., not a type definition).
 # Type instances are used as struct field definitions or function parameters,
 # to be later fed to code generation.
@@ -164,6 +175,8 @@ class VulkanType(object):
     def __init__(self):
         self.parent = None
         self.typeName = ""
+
+        self.isTransformed = False
 
         self.paramName = None
 
@@ -348,6 +361,9 @@ def makeVulkanTypeFromXMLTag(typeInfo, tag):
             # Now we know enough to fill some stuff in
             res.typeName = duringTypePart
 
+            if res.typeName in TRANSFORMED_TYPES:
+                res.isTransformed = True
+
             # This only handles pointerIndirectionLevels == 2
             # along with optional constant pointer for the inner part.
             for c in afterTypePart:
@@ -465,6 +481,7 @@ class VulkanCompoundType(object):
 
     def __init__(self, name, members, isUnion=False, structEnumExpr=None, structExtendsExpr=None, feature=None):
         self.name = name
+        self.typeName = name
         self.members = members
 
         self.isUnion = isUnion
@@ -474,6 +491,8 @@ class VulkanCompoundType(object):
 
         self.deviceMemoryInfoParameterIndices = \
             initDeviceMemoryInfoParameterIndices(self.members)
+
+        self.isTransformed = name in TRANSFORMED_TYPES
 
         self.copy = None
 
@@ -504,6 +523,8 @@ class VulkanAPI(object):
             initDeviceMemoryInfoParameterIndices(self.parameters)
 
         self.copy = None
+
+        self.isTransformed = name in TRANSFORMED_TYPES
 
         if origName:
             self.origName = origName

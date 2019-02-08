@@ -228,4 +228,22 @@ bool setupVkColorBuffer(VulkanDispatch* vk, uint32_t colorBufferHandle);
 bool teardownVkColorBuffer(VulkanDispatch* vk, uint32_t colorBufferHandle);
 VkEmulation::ColorBufferInfo getColorBufferInfo(uint32_t colorBufferHandle);
 
+VkExternalMemoryHandleTypeFlags
+transformExternalMemoryHandleTypeFlags_tohost(
+    VkExternalMemoryHandleTypeFlags bits);
+
+VkExternalMemoryHandleTypeFlags
+transformExternalMemoryHandleTypeFlags_fromhost(
+    VkExternalMemoryHandleTypeFlags hostBits,
+    VkExternalMemoryHandleTypeFlags wantedGuestHandleType);
+
+VkExternalMemoryProperties
+transformExternalMemoryProperties_tohost(
+    VkExternalMemoryProperties props);
+
+VkExternalMemoryProperties
+transformExternalMemoryProperties_fromhost(
+    VkExternalMemoryProperties props,
+    VkExternalMemoryHandleTypeFlags wantedGuestHandleType);
+
 } // namespace goldfish_vk

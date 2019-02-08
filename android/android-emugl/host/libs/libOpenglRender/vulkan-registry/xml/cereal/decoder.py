@@ -3,6 +3,7 @@ from .common.vulkantypes import \
         VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, DISPATCHABLE_HANDLE_TYPES
 
 from .marshaling import VulkanMarshalingCodegen
+from .transform import TransformCodegen, genTransformsForVulkanType
 
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
@@ -97,6 +98,13 @@ def emit_dispatch_unmarshal(typeInfo, param, cgen):
     cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
     cgen.stmt("// End manual dispatchable handle unboxing for %s" % param.paramName)
 
+def emit_transform(typeInfo, param, cgen, variant="tohost"):
+    res = \
+        iterateVulkanType(typeInfo, param, TransformCodegen( \
+            cgen, param.paramName, "m_state", "transform_%s_" % variant, variant))
+    if not res:
+        cgen.stmt("(void)%s" % param.paramName)
+
 def emit_marshal(typeInfo, param, cgen):
     iterateVulkanType(typeInfo, param, VulkanMarshalingCodegen(
         cgen,
@@ -130,6 +138,9 @@ def emit_decode_parameters(typeInfo, api, cgen):
                 cgen.stmt("// End manual dispatchable handle unboxing for %s" % param.paramName)
         i += 1
 
+    for p in paramsToRead:
+        emit_transform(typeInfo, p, cgen, variant="tohost");
+
 def emit_call_log(api, cgen):
     cgen.beginIf("m_logCalls")
     cgen.stmt("fprintf(stderr, \"call %s\\n\");" % api.name)
@@ -143,7 +154,7 @@ def emit_dispatch_call(api, cgen):
         if i == 0 and p.typeName in DISPATCHABLE_HANDLE_TYPES:
             customParam = "unboxed_%s" % p.paramName
         customParams.append(customParam)
-        
+
     cgen.vkApiCall(api, customPrefix="vk->", customParameters=customParams)
 
 def emit_global_state_wrapped_call(api, cgen):
@@ -157,6 +168,7 @@ def emit_decode_parameters_writeback(typeInfo, api, cgen):
             paramsToWrite.append(param)
 
     for p in paramsToWrite:
+        emit_transform(typeInfo, p, cgen, variant="fromhost")
         emit_marshal(typeInfo, p, cgen)
 
 def emit_decode_return_writeback(api, cgen):

@@ -16,6 +16,7 @@
 #include "FrameBuffer.h"
 
 #include "VkAndroidNativeBuffer.h"
+#include "VkCommonOperations.h"
 #include "VkFormatUtils.h"
 #include "VulkanDispatch.h"
 
@@ -1546,6 +1547,70 @@ public:
         }
     }
 
+    // TODO: Support more than one kind of guest external memory handle type
+#define GUEST_EXTERNAL_MEMORY_HANDLE_TYPE VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID
+
+    // Transforms
+
+    void transformImpl_VkExternalMemoryProperties_tohost(
+        const VkExternalMemoryProperties* props, uint32_t count) {
+        VkExternalMemoryProperties* mut =
+            (VkExternalMemoryProperties*)props;
+        for (uint32_t i = 0; i < count; ++i) {
+            mut[i] = transformExternalMemoryProperties_tohost(mut[i]);
+        }
+    }
+    void transformImpl_VkExternalMemoryProperties_fromhost(
+        const VkExternalMemoryProperties* props, uint32_t count) {
+        VkExternalMemoryProperties* mut =
+            (VkExternalMemoryProperties*)props;
+        for (uint32_t i = 0; i < count; ++i) {
+            mut[i] = transformExternalMemoryProperties_fromhost(mut[i], GUEST_EXTERNAL_MEMORY_HANDLE_TYPE);
+        }
+    }
+
+#define DEFINE_EXTERNAL_HANDLE_TYPE_TRANSFORM(type, field) \
+    void transformImpl_##type##_tohost(const type* props, uint32_t count) { \
+        type* mut = (type*)props; \
+        for (uint32_t i = 0; i < count; ++i) { \
+            mut[i].field = (VkExternalMemoryHandleTypeFlagBits) \
+                transformExternalMemoryHandleTypeFlags_tohost( \
+                    mut[i].field); \
+        } \
+    } \
+    void transformImpl_##type##_fromhost(const type* props, uint32_t count) { \
+        type* mut = (type*)props; \
+        for (uint32_t i = 0; i < count; ++i) { \
+            mut[i].field = (VkExternalMemoryHandleTypeFlagBits) \
+                transformExternalMemoryHandleTypeFlags_fromhost( \
+                    mut[i].field, GUEST_EXTERNAL_MEMORY_HANDLE_TYPE); \
+        } \
+    } \
+
+#define DEFINE_EXTERNAL_MEMORY_PROPERTIES_TRANSFORM(type) \
+    void transformImpl_##type##_tohost(const type* props, uint32_t count) { \
+        type* mut = (type*)props; \
+        for (uint32_t i = 0; i < count; ++i) { \
+            mut[i].externalMemoryProperties = transformExternalMemoryProperties_tohost( \
+                    mut[i].externalMemoryProperties); \
+        } \
+    } \
+    void transformImpl_##type##_fromhost(const type* props, uint32_t count) { \
+        type* mut = (type*)props; \
+        for (uint32_t i = 0; i < count; ++i) { \
+            mut[i].externalMemoryProperties = transformExternalMemoryProperties_fromhost( \
+                    mut[i].externalMemoryProperties, GUEST_EXTERNAL_MEMORY_HANDLE_TYPE); \
+        } \
+    } \
+
+    DEFINE_EXTERNAL_HANDLE_TYPE_TRANSFORM(VkPhysicalDeviceExternalImageFormatInfo, handleType)
+    DEFINE_EXTERNAL_HANDLE_TYPE_TRANSFORM(VkPhysicalDeviceExternalBufferInfo, handleType)
+    DEFINE_EXTERNAL_HANDLE_TYPE_TRANSFORM(VkExternalMemoryImageCreateInfo, handleTypes)
+    DEFINE_EXTERNAL_HANDLE_TYPE_TRANSFORM(VkExternalMemoryBufferCreateInfo, handleTypes)
+    DEFINE_EXTERNAL_HANDLE_TYPE_TRANSFORM(VkExportMemoryAllocateInfo, handleTypes)
+    DEFINE_EXTERNAL_MEMORY_PROPERTIES_TRANSFORM(VkExternalImageFormatProperties)
+    DEFINE_EXTERNAL_MEMORY_PROPERTIES_TRANSFORM(VkExternalBufferProperties)
+
 private:
     bool isEmulatedExtension(const char* name) const {
         for (auto emulatedExt : kEmulatedExtensions) {
@@ -2329,5 +2394,43 @@ void VkDecoderGlobalState::on_vkFreeCommandBuffers(
     return mImpl->on_vkFreeCommandBuffers(device, commandPool,
                                           commandBufferCount, pCommandBuffers);
 }
+
+void VkDecoderGlobalState::deviceMemoryTransform_tohost(
+    VkDeviceMemory* memory, uint32_t memoryCount,
+    VkDeviceSize* offset, uint32_t offsetCount,
+    VkDeviceSize* size, uint32_t sizeCount,
+    uint32_t* typeIndex, uint32_t typeIndexCount,
+    uint32_t* typeBits, uint32_t typeBitsCount) {
+    // Not used currently
+    (void)memory; (void)memoryCount;
+    (void)offset; (void)offsetCount;
+    (void)size; (void)sizeCount;
+    (void)typeIndex; (void)typeIndexCount;
+    (void)typeBits; (void)typeBitsCount;
+}
+
+void VkDecoderGlobalState::deviceMemoryTransform_fromhost(
+    VkDeviceMemory* memory, uint32_t memoryCount,
+    VkDeviceSize* offset, uint32_t offsetCount,
+    VkDeviceSize* size, uint32_t sizeCount,
+    uint32_t* typeIndex, uint32_t typeIndexCount,
+    uint32_t* typeBits, uint32_t typeBitsCount) {
+    // Not used currently
+    (void)memory; (void)memoryCount;
+    (void)offset; (void)offsetCount;
+    (void)size; (void)sizeCount;
+    (void)typeIndex; (void)typeIndexCount;
+    (void)typeBits; (void)typeBitsCount;
+}
+
+#define DEFINE_TRANSFORMED_TYPE_IMPL(type) \
+    void VkDecoderGlobalState::transformImpl_##type##_tohost(const type* val, uint32_t count) { \
+        mImpl->transformImpl_##type##_tohost(val, count); \
+    } \
+    void VkDecoderGlobalState::transformImpl_##type##_fromhost(const type* val, uint32_t count) { \
+        mImpl->transformImpl_##type##_tohost(val, count); \
+    } \
+
+LIST_TRANSFORMED_TYPES(DEFINE_TRANSFORMED_TYPE_IMPL)
 
 }  // namespace goldfish_vk

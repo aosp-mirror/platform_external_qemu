@@ -21,6 +21,7 @@
 #include <memory>
 
 #include "cereal/common/goldfish_vk_private_defs.h"
+#include "cereal/common/goldfish_vk_transform.h"
 
 namespace goldfish_vk {
 
@@ -284,6 +285,27 @@ public:
     VkResult on_vkResetCommandPool(VkDevice device,
                                    VkCommandPool commandPool,
                                    VkCommandPoolResetFlags flags);
+
+    // Transformations
+
+    void deviceMemoryTransform_tohost(
+        VkDeviceMemory* memory, uint32_t memoryCount,
+        VkDeviceSize* offset, uint32_t offsetCount,
+        VkDeviceSize* size, uint32_t sizeCount,
+        uint32_t* typeIndex, uint32_t typeIndexCount,
+        uint32_t* typeBits, uint32_t typeBitsCount);
+    void deviceMemoryTransform_fromhost(
+        VkDeviceMemory* memory, uint32_t memoryCount,
+        VkDeviceSize* offset, uint32_t offsetCount,
+        VkDeviceSize* size, uint32_t sizeCount,
+        uint32_t* typeIndex, uint32_t typeIndexCount,
+        uint32_t* typeBits, uint32_t typeBitsCount);
+
+#define DEFINE_TRANSFORMED_TYPE_PROTOTYPE(type) \
+    void transformImpl_##type##_tohost(const type*, uint32_t); \
+    void transformImpl_##type##_fromhost(const type*, uint32_t); \
+    
+LIST_TRANSFORMED_TYPES(DEFINE_TRANSFORMED_TYPE_PROTOTYPE)
 
 private:
     class Impl;
