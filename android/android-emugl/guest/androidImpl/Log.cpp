@@ -14,6 +14,7 @@
 #include <cstdarg>
 
 #include <stdio.h>
+#include <inttypes.h>
 
 #include "AndroidHostCommon.h"
 
@@ -34,4 +35,12 @@ EXPORT void __android_log_assert(const char* cond, const char* tag, const char* 
     // Placeholder
 }
 
+EXPORT int __android_log_error_write(
+    int tag, const char* subTag, int32_t uid,
+    const char* data, uint32_t dataLen) {
+    printf("android_log_error_write: "
+           "tag: %d subtag: [%s] uid: %d datalen: %u data: [%s]\n",
+           tag, subTag, uid, dataLen, data);
 }
+
+} // extern "C"
