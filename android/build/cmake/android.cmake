@@ -11,8 +11,39 @@
 # This contains a set of functions to make working with different targets a lot easier. The idea is that you can now set
 # properties that define your lib/executable through variables that follow the following naming conventions
 #
-
 include(prebuilts)
+
+# Cross compiles the given cmake project if needed.
+#
+# EXE the name of the target we are interested in. This is
+# the main build product you want to use.
+# SOURCE the location of the CMakeList.txt describing the
+# project.
+# OUT_PATH Name of the variable that will contain the resulting
+# executable.
+function(android_compile_for_host EXE SOURCE OUT_PATH)
+  if(ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
+    # We can add this project without any translation..
+    add_subdirectory(${SOURCE} ${EXE}_ext)
+    set(${OUT_PATH} ${EXE} PARENT_SCOPE)
+  else()
+    message(STATUS "Cross compiling ${EXE} for host ${ANDROID_HOST_TAG}")
+    include(ExternalProject)
+
+    # If we are cross compiling we will need to build it for our actual OS we are currently running on.
+    get_filename_component(BUILD_PRODUCT ${CMAKE_CURRENT_BINARY_DIR}/${EXE}_ext_cross/src/${EXE}_ext_cross-build/${EXE} ABSOLUTE)
+    set(EMUGEN_EXE ${CMAKE_CURRENT_BINARY_DIR}/emugen/src/emugen-build/emugen)
+    externalproject_add(${EXE}_ext_cross
+          PREFIX ${EXE}_ext_cross
+          DOWNLOAD_COMMAND ""
+          SOURCE_DIR ${SOURCE}
+          CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-${ANDROID_HOST_TAG}.cmake"
+          BUILD_BYPRODUCTS ${BUILD_PRODUCT}
+          TEST_BEFORE_INSTALL True
+          INSTALL_COMMAND "")
+    set(${OUT_PATH} ${BUILD_PRODUCT} PARENT_SCOPE)
+   endif()
+endfunction()
 
 # This function is the same as target_compile_definitions
 # (https://cmake.org/cmake/help/v3.5/command/target_compile_definitions.html) The only difference is that the
