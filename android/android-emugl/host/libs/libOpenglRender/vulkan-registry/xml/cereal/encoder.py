@@ -204,7 +204,7 @@ def emit_deepcopy(typeInfo, param, cgen):
 def emit_transform(typeInfo, param, cgen, variant="tohost"):
     res = \
         iterateVulkanType(typeInfo, param, TransformCodegen( \
-            cgen, param.paramName, "mImpl->resources()", "transform_%s_" % variant))
+            cgen, param.paramName, "mImpl->resources()", "transform_%s_" % variant, variant))
     if not res:
         cgen.stmt("(void)%s" % param.paramName)
 
