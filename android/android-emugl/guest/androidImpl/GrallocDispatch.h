@@ -144,4 +144,9 @@ void load_gralloc_module(
 void unload_gralloc_module(
     const struct gralloc_implementation* impl);
 
+void set_global_gralloc_module(struct gralloc_implementation* impl);
+
+struct gralloc_implementation*
+get_global_gralloc_module(void);
+
 } // extern "C"

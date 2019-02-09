@@ -2,27 +2,48 @@
 set(utils_src androidImpl/libutils_placeholder.cpp)
 android_add_shared_library(utils)
 
-# The cutils library.
-set(cutils_src androidImpl/Ashmem.cpp androidImpl/Properties.cpp androidImpl/GrallocDispatch.cpp androidImpl/AndroidVulkanDispatch.cpp)
-android_add_shared_library(cutils)
-target_include_directories(cutils PRIVATE ${ANDROID_EMUGL_DIR}/host/include .)
-target_include_directories(cutils PUBLIC .)
-target_link_libraries(cutils PUBLIC android-emu-base)
-target_link_libraries(cutils PRIVATE emugl_base)
-android_target_compile_options(cutils Clang PRIVATE -fvisibility=default -Wno-invalid-constexpr)
-
 # A small logging library
 set(log_src androidImpl/Log.cpp)
 android_add_shared_library(log)
 target_include_directories(log PRIVATE android/android-emugl/guest android/android-emu)
 target_link_libraries(log PRIVATE emugl_base)
 
+# The cutils library.
+set(cutils_src
+    androidImpl/Ashmem.cpp
+    androidImpl/Properties.cpp
+    androidImpl/GrallocDispatch.cpp
+    androidImpl/AndroidVulkanDispatch.cpp
+    androidImpl/native_handle.cpp
+    androidImpl/RefBase.cpp
+    androidImpl/SharedBuffer.cpp
+    androidImpl/String8.cpp
+    androidImpl/String16.cpp
+    androidImpl/trace-host.cpp
+    androidImpl/Unicode.cpp)
+android_add_shared_library(cutils)
+target_include_directories(cutils PRIVATE ${ANDROID_EMUGL_DIR}/host/include .)
+target_include_directories(cutils PUBLIC .)
+target_link_libraries(cutils PUBLIC android-emu-base)
+target_link_libraries(cutils PRIVATE log emugl_base)
+android_target_compile_options(cutils Clang PRIVATE -fvisibility=default -Wno-invalid-constexpr)
+
+set(grallocusage_src libgrallocusage/GrallocUsageConversion.cpp)
+android_add_shared_library(grallocusage)
+target_link_libraries(grallocusage PUBLIC emugl_base)
+
 # The gui library
 set(gui_src
+    androidImpl/AHardwareBuffer.cpp
     androidImpl/AndroidBufferQueue.cpp
     androidImpl/ANativeWindow.cpp
     androidImpl/AndroidWindow.cpp
     androidImpl/AndroidWindowBuffer.cpp
+    androidImpl/Gralloc2.cpp
+    androidImpl/GraphicBuffer.cpp
+    androidImpl/GraphicBufferAllocator.cpp
+    androidImpl/GraphicBufferMapper.cpp
+    androidImpl/PixelFormat.cpp
     androidImpl/SurfaceFlinger.cpp
     androidImpl/Vsync.cpp
     sync/sync.cpp
@@ -31,16 +52,12 @@ android_add_shared_library(gui)
 target_link_libraries(gui PUBLIC android-emu-base)
 target_include_directories(gui PUBLIC ${ANDROID_EMUGL_DIR}/guest)
 target_compile_options(gui PRIVATE -fvisibility=default)
-target_link_libraries(gui PRIVATE emugl_base)
+target_link_libraries(gui PRIVATE cutils log emugl_base grallocusage)
 
 # The unit tests
 set(gui_unittests_src androidImpl/libgui_unittest.cpp)
 android_add_test(gui_unittests)
 target_link_libraries(gui_unittests PUBLIC gui emugl_base gtest gtest_main)
-
-set(grallocusage_src libgrallocusage/GrallocUsageConversion.cpp)
-android_add_shared_library(grallocusage)
-target_link_libraries(grallocusage PUBLIC emugl_base)
 
 set(vulkan_android_src
     libvulkan/api.cpp

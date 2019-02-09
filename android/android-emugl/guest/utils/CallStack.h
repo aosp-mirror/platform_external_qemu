@@ -17,13 +17,22 @@
 #ifndef ANDROID_CALLSTACK_H
 #define ANDROID_CALLSTACK_H
 
+#ifndef FALLTHROUGH_INTENDED
+#define FALLTHROUGH_INTENDED [[clang::fallthrough]]  // NOLINT
+#endif
+
+#define BACKTRACE_CURRENT_THREAD 0
+
 #include <android/log.h>
-#include <backtrace/backtrace_constants.h>
+#include <log/log.h>
+// #include <backtrace/backtrace_constants.h>
 #include <utils/String8.h>
-#include <utils/Vector.h>
+// #include <utils/Vector.h>
 
 #include <stdint.h>
 #include <sys/types.h>
+
+#include <vector>
 
 namespace android {
 
@@ -64,7 +73,7 @@ public:
     size_t size() const { return mFrameLines.size(); }
 
 private:
-    Vector<String8> mFrameLines;
+    std::vector<String8> mFrameLines;
 };
 
 }  // namespace android
