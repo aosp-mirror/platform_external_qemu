@@ -13,6 +13,30 @@
 #
 include(prebuilts)
 
+function(android_yasm_compile)
+    set(options)
+    set(oneValueArgs TARGET)
+    set(multiValueArgs INCLUDES SOURCES)
+    cmake_parse_arguments(android_yasm_compile "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+    android_compile_for_host(yasm ${ANDROID_QEMU2_TOP_DIR}/../yasm YASM_EXE)
+    set(LIBNAME ${android_yasm_compile_TARGET})
+    set(ASM_INC "")
+    foreach(INCLUDE ${android_yasm_compile_INCLUDES})
+        set(ASM_INC ${ASM_INC} -I ${INCLUDE})
+    endforeach()
+    foreach(asm ${android_yasm_compile_SOURCES})
+        get_filename_component(asm_base ${asm} NAME_WE)
+        set(DST ${CMAKE_CURRENT_BINARY_DIR}/${asm_base}.o)
+        add_custom_command(OUTPUT ${DST}
+                           COMMAND ${YASM_EXE} -f ${ANDROID_YASM_TYPE} -o ${DST} ${asm} ${ASM_INC}
+                           VERBATIM
+                           DEPENDS ${YASM_EXE})
+        list(APPEND ${LIBNAME}_asm_o ${DST})
+    endforeach()
+    add_library(${LIBNAME} ${${LIBNAME}_asm_o})
+    set_target_properties(${LIBNAME} PROPERTIES LINKER_LANGUAGE CXX)
+endfunction()
+
 # Cross compiles the given cmake project if needed.
 #
 # EXE the name of the target we are interested in. This is

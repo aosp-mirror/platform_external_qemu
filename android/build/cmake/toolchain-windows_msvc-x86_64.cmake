@@ -44,7 +44,7 @@ if(WIN32)
   # Set the debug flags
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -MD")
   set(CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -MD")
-  
+
   # Set release flags such that we create pdbs..
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD -Zi")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD -Zi")
@@ -86,4 +86,5 @@ else()
 endif()
 
 include(emu-windows-libs)
+set(ANDROID_YASM_TYPE win64)
 set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
