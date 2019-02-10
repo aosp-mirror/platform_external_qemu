@@ -51,6 +51,7 @@ set(CMAKE_FIND_ROOT_PATH  "${ANDROID_SYSROOT}")
 
 # Configure how we strip executables.
 set(CMAKE_STRIP_CMD "${CMAKE_STRIP} -s")
+set(ANDROID_YASM_TYPE elf64)
 
 # And the asm type if we are compiling with yasm
 set(ANDROID_YASM_TYPE elf64)
