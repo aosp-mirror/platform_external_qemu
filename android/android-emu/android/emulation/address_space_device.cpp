@@ -13,6 +13,7 @@
 // limitations under the License.
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/AddressSpaceService.h"
+#include "android/emulation/address_space_host_media.h"
 #include "android/emulation/address_space_host_memory_allocator.h"
 #include "android/emulation/control/vm_operations.h"
 
@@ -29,7 +30,7 @@ using android::base::Stream;
 
 using namespace android::emulation;
 
-#define AS_DEVICE_DEBUG 0
+#define AS_DEVICE_DEBUG 1
 
 #if AS_DEVICE_DEBUG
 #define AS_DEVICE_DPRINT(fmt,...) fprintf(stderr, "%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
@@ -102,7 +103,7 @@ public:
             const AddressSpaceDeviceType device_type =
                 static_cast<AddressSpaceDeviceType>(pingInfo->metadata);
 
-            contextDesc.device_context = buildAddressSpaceDeviceContext(device_type);
+            contextDesc.device_context = buildAddressSpaceDeviceContext(device_type, phys_addr);
         }
     }
 
@@ -145,7 +146,7 @@ public:
             case 1: {
                     const auto device_type =
                         static_cast<AddressSpaceDeviceType>(stream->getBe32());
-                    context = buildAddressSpaceDeviceContext(device_type);
+                    context = buildAddressSpaceDeviceContext(device_type, pingInfoGpa);
                     if (!context || !context->load(stream)) {
                         return false;
                     }
@@ -179,14 +180,15 @@ private:
     Contexts mContexts;
 
     std::unique_ptr<AddressSpaceDeviceContext>
-    buildAddressSpaceDeviceContext(const AddressSpaceDeviceType device_type) {
+    buildAddressSpaceDeviceContext(const AddressSpaceDeviceType device_type,
+                                   const uint64_t phys_addr) {
         typedef std::unique_ptr<AddressSpaceDeviceContext> DeviceContextPtr;
 
         switch (device_type) {
         case AddressSpaceDeviceType::Graphics:
             return nullptr;
         case AddressSpaceDeviceType::Media:
-            return nullptr;
+            return DeviceContextPtr(new AddressSpaceHostMediaContext(phys_addr));
         case AddressSpaceDeviceType::Sensors:
             return nullptr;
         case AddressSpaceDeviceType::Power:
