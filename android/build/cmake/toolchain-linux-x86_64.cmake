@@ -50,4 +50,4 @@ endif()
 # with mingw, so we explicitly disable it.
 set(CMAKE_FIND_ROOT_PATH  "${ANDROID_SYSROOT}")
 set(CMAKE_STRIP_CMD "${CMAKE_STRIP} -s")
-
+set(ANDROID_YASM_TYPE elf64)
