@@ -1,5 +1,5 @@
 # This file defines android-emu library
-
+prebuilt(VPX)
 # Add darwinn external libraries and includes
 include(android/darwinn/darwinn.cmake)
 android_generate_hw_config()
@@ -80,6 +80,8 @@ set(android-emu-common
     android/emulation/hostdevices/HostGoldfishPipe.cpp
     android/emulation/address_space_device.cpp
     android/emulation/address_space_host_memory_allocator.cpp
+    android/emulation/address_space_host_media.cpp
+    android/emulation/MediaVpxDecoder.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/LogcatPipe.cpp
     android/emulation/nand_limits.c
@@ -314,6 +316,7 @@ android_add_library(android-emu)
 # ideally would like to keep this list small.
 target_link_libraries(android-emu
                               PUBLIC
+                              VPX::VPX
                               emulator-libext4_utils
                               android-emu-base
                               emulator-libsparse
