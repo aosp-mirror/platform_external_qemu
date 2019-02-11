@@ -407,7 +407,7 @@ android_target_compile_options(android-qemu-deps linux-x86_64 INTERFACE
                                "-Wno-tautological-pointer-compare"
                                "-Wno-unused-variable")
 android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE "${TCMALLOC_LIBRARIES} -lpulse -lutil")
-android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE "-framework CoreAudio")
+android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE "${TCMALLOC_LIBRARIES} -framework CoreAudio")
 android_target_link_libraries(android-qemu-deps windows_msvc-x86_64 INTERFACE msvc-posix-compat)
 
 set(ANDROID_AUTOGEN "qemu2-auto-generated")
