@@ -1,5 +1,5 @@
 # This file defines android-emu library
-
+prebuilt(VPX)
 # Add darwinn external libraries and includes
 include(android/darwinn/darwinn.cmake)
 android_generate_hw_config()
@@ -239,6 +239,7 @@ set(android_emu_dependent_src
     android/camera/camera-virtualscene.cpp
     android/camera/camera-virtualscene-utils.cpp
     android/emulation/address_space_device.cpp
+    android/emulation/MediaVpxDecoder.cpp
     android/emulation/control/ScreenCapturer.cpp
     android/emulation/FakeRotatingCameraSensor.cpp
     android/emulation/HostMemoryService.cpp
@@ -306,6 +307,7 @@ android_add_library(android-emu)
 # ideally would like to keep this list small.
 target_link_libraries(android-emu
                               PUBLIC
+                              VPX::VPX
                               emulator-libext4_utils
                               android-emu-base
                               emulator-libsparse
