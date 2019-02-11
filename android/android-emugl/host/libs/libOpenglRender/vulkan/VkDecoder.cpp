@@ -294,6 +294,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFormatProperties:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetPhysicalDeviceFormatProperties\n");;
+                }
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkFormatProperties* pFormatProperties;
@@ -321,11 +325,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkFormatProperties(m_state, (VkFormatProperties*)(pFormatProperties));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceFormatProperties\n");;
-                }
-                vk->vkGetPhysicalDeviceFormatProperties(unboxed_physicalDevice, format, pFormatProperties);
+                m_state->on_vkGetPhysicalDeviceFormatProperties(physicalDevice, format, pFormatProperties);
                 if (pFormatProperties)
                 {
                     transform_fromhost_VkFormatProperties(m_state, (VkFormatProperties*)(pFormatProperties));
@@ -337,6 +337,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceImageFormatProperties:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetPhysicalDeviceImageFormatProperties\n");;
+                }
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkImageType type;
@@ -388,12 +392,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkImageFormatProperties(m_state, (VkImageFormatProperties*)(pImageFormatProperties));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceImageFormatProperties\n");;
-                }
                 VkResult vkGetPhysicalDeviceImageFormatProperties_VkResult_return = (VkResult)0;
-                vkGetPhysicalDeviceImageFormatProperties_VkResult_return = vk->vkGetPhysicalDeviceImageFormatProperties(unboxed_physicalDevice, format, type, tiling, usage, flags, pImageFormatProperties);
+                vkGetPhysicalDeviceImageFormatProperties_VkResult_return = m_state->on_vkGetPhysicalDeviceImageFormatProperties(physicalDevice, format, type, tiling, usage, flags, pImageFormatProperties);
                 if (pImageFormatProperties)
                 {
                     transform_fromhost_VkImageFormatProperties(m_state, (VkImageFormatProperties*)(pImageFormatProperties));
@@ -6704,6 +6704,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFormatProperties2:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetPhysicalDeviceFormatProperties2\n");;
+                }
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkFormatProperties2* pFormatProperties;
@@ -6731,11 +6735,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkFormatProperties2(m_state, (VkFormatProperties2*)(pFormatProperties));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceFormatProperties2\n");;
-                }
-                vk->vkGetPhysicalDeviceFormatProperties2(unboxed_physicalDevice, format, pFormatProperties);
+                m_state->on_vkGetPhysicalDeviceFormatProperties2(physicalDevice, format, pFormatProperties);
                 if (pFormatProperties)
                 {
                     transform_fromhost_VkFormatProperties2(m_state, (VkFormatProperties2*)(pFormatProperties));
@@ -6747,6 +6747,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceImageFormatProperties2:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetPhysicalDeviceImageFormatProperties2\n");;
+                }
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo;
                 VkImageFormatProperties2* pImageFormatProperties;
@@ -6779,12 +6783,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkImageFormatProperties2(m_state, (VkImageFormatProperties2*)(pImageFormatProperties));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceImageFormatProperties2\n");;
-                }
                 VkResult vkGetPhysicalDeviceImageFormatProperties2_VkResult_return = (VkResult)0;
-                vkGetPhysicalDeviceImageFormatProperties2_VkResult_return = vk->vkGetPhysicalDeviceImageFormatProperties2(unboxed_physicalDevice, pImageFormatInfo, pImageFormatProperties);
+                vkGetPhysicalDeviceImageFormatProperties2_VkResult_return = m_state->on_vkGetPhysicalDeviceImageFormatProperties2(physicalDevice, pImageFormatInfo, pImageFormatProperties);
                 if (pImageFormatProperties)
                 {
                     transform_fromhost_VkImageFormatProperties2(m_state, (VkImageFormatProperties2*)(pImageFormatProperties));
@@ -9512,6 +9512,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceFormatProperties2KHR:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetPhysicalDeviceFormatProperties2KHR\n");;
+                }
                 VkPhysicalDevice physicalDevice;
                 VkFormat format;
                 VkFormatProperties2* pFormatProperties;
@@ -9539,11 +9543,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkFormatProperties2(m_state, (VkFormatProperties2*)(pFormatProperties));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceFormatProperties2KHR\n");;
-                }
-                vk->vkGetPhysicalDeviceFormatProperties2KHR(unboxed_physicalDevice, format, pFormatProperties);
+                m_state->on_vkGetPhysicalDeviceFormatProperties2KHR(physicalDevice, format, pFormatProperties);
                 if (pFormatProperties)
                 {
                     transform_fromhost_VkFormatProperties2(m_state, (VkFormatProperties2*)(pFormatProperties));
@@ -9555,6 +9555,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceImageFormatProperties2KHR:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetPhysicalDeviceImageFormatProperties2KHR\n");;
+                }
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo;
                 VkImageFormatProperties2* pImageFormatProperties;
@@ -9587,12 +9591,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkImageFormatProperties2(m_state, (VkImageFormatProperties2*)(pImageFormatProperties));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceImageFormatProperties2KHR\n");;
-                }
                 VkResult vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return = (VkResult)0;
-                vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return = vk->vkGetPhysicalDeviceImageFormatProperties2KHR(unboxed_physicalDevice, pImageFormatInfo, pImageFormatProperties);
+                vkGetPhysicalDeviceImageFormatProperties2KHR_VkResult_return = m_state->on_vkGetPhysicalDeviceImageFormatProperties2KHR(physicalDevice, pImageFormatInfo, pImageFormatProperties);
                 if (pImageFormatProperties)
                 {
                     transform_fromhost_VkImageFormatProperties2(m_state, (VkImageFormatProperties2*)(pImageFormatProperties));

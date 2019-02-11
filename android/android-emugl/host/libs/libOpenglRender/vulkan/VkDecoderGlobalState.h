@@ -75,6 +75,38 @@ public:
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceFeatures2* pFeatures);
 
+    // Override image format properties
+    VkResult on_vkGetPhysicalDeviceImageFormatProperties(
+            VkPhysicalDevice physicalDevice,
+            VkFormat format,
+            VkImageType type,
+            VkImageTiling tiling,
+            VkImageUsageFlags usage,
+            VkImageCreateFlags flags,
+            VkImageFormatProperties* pImageFormatProperties);
+    VkResult on_vkGetPhysicalDeviceImageFormatProperties2(
+            VkPhysicalDevice physicalDevice,
+            const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo,
+            VkImageFormatProperties2* pImageFormatProperties);
+    VkResult on_vkGetPhysicalDeviceImageFormatProperties2KHR(
+            VkPhysicalDevice physicalDevice,
+            const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo,
+            VkImageFormatProperties2* pImageFormatProperties);
+
+    // Override format features
+    void on_vkGetPhysicalDeviceFormatProperties(
+            VkPhysicalDevice physicalDevice,
+            VkFormat format,
+            VkFormatProperties* pFormatProperties);
+    void on_vkGetPhysicalDeviceFormatProperties2(
+            VkPhysicalDevice physicalDevice,
+            VkFormat format,
+            VkFormatProperties2* pFormatProperties);
+    void on_vkGetPhysicalDeviceFormatProperties2KHR(
+            VkPhysicalDevice physicalDevice,
+            VkFormat format,
+            VkFormatProperties2* pFormatProperties);
+
     // Override API version
     void on_vkGetPhysicalDeviceProperties(
         VkPhysicalDevice physicalDevice,
