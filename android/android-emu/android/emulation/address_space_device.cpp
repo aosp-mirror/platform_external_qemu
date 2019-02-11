@@ -13,6 +13,7 @@
 // limitations under the License.
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/AddressSpaceService.h"
+#include "android/base/AlignedBuf.h"
 #include "android/emulation/control/vm_operations.h"
 
 #include "android/base/memory/LazyInstance.h"
@@ -63,6 +64,7 @@ public:
     }
 
     void ping(uint32_t handle) {
+        AS_DEVICE_DPRINT("ping is called with handle %u", handle);
         AutoLock lock(mLock);
         auto& contextDesc = mContexts[handle];
 
@@ -76,6 +78,21 @@ public:
             pingInfo->wait_phys_addr,
             pingInfo->wait_flags,
             pingInfo->direction);
+    }
+
+    static void* my_page_allocator(uint64_t phys_addr, int num_pages) {
+        const int alignment = 4096;
+        void* myptr = android::aligned_buf_alloc(alignment, num_pages * 4096);
+        gQAndroidVmOperations->mapUserBackedRam(phys_addr, myptr, num_pages * 4096);
+        return myptr;
+    }
+
+    static void* my_host_address(uint64_t guest_phys_addr) {
+        void* ptr =  gQAndroidVmOperations->physicalMemoryGetAddr(guest_phys_addr);
+        return ptr;
+    }
+
+    void handle_media_request(uint64_t metadata, void* addr) {
     }
 
     void perform(uint32_t handle,
@@ -103,7 +120,13 @@ public:
             // TODO: Do initialization
             switch (contextDesc.deviceType) {
             case AddressSpaceDeviceType::Graphics:
+                break;
             case AddressSpaceDeviceType::Media:
+                {
+                    void* myptr = my_page_allocator(phys_addr, 10);
+                    AS_DEVICE_DPRINT("got media request to allocate host memory: guest addr 0x%llx, 0x%llx", phys_addr, myptr);
+                }
+                break;
             case AddressSpaceDeviceType::Sensors:
             case AddressSpaceDeviceType::Power:
             case AddressSpaceDeviceType::GenericPipe:
@@ -117,7 +140,10 @@ public:
             // TODO: Do "perform" depending on data/size/metadata/etc
             switch (contextDesc.deviceType) {
             case AddressSpaceDeviceType::Graphics:
+                break;
             case AddressSpaceDeviceType::Media:
+                handle_media_request(metadata, my_host_address(phys_addr));
+                break;
             case AddressSpaceDeviceType::Sensors:
             case AddressSpaceDeviceType::Power:
             case AddressSpaceDeviceType::GenericPipe:
