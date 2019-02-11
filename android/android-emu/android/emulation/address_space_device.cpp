@@ -13,6 +13,7 @@
 // limitations under the License.
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/AddressSpaceService.h"
+#include "android/base/AlignedBuf.h"
 #include "android/emulation/control/vm_operations.h"
 
 #include "android/base/memory/LazyInstance.h"
@@ -63,6 +64,7 @@ public:
     }
 
     void ping(uint32_t handle) {
+        AS_DEVICE_DPRINT("ping is called with handle %u", handle);
         AutoLock lock(mLock);
         auto& contextDesc = mContexts[handle];
 
@@ -103,7 +105,14 @@ public:
             // TODO: Do initialization
             switch (contextDesc.deviceType) {
             case AddressSpaceDeviceType::Graphics:
-            case AddressSpaceDeviceType::Media:
+                break;
+            case AddressSpaceDeviceType::Media: 
+                {
+                void* myptr = android::aligned_buf_alloc(4096, 4096);
+                AS_DEVICE_DPRINT("got media first time in init fromguest 0x%llx, 0x%llx", phys_addr, myptr);
+                gQAndroidVmOperations->mapUserBackedRam(phys_addr, myptr, 4096);
+                }
+                break;
             case AddressSpaceDeviceType::Sensors:
             case AddressSpaceDeviceType::Power:
             case AddressSpaceDeviceType::GenericPipe:
@@ -118,6 +127,11 @@ public:
             switch (contextDesc.deviceType) {
             case AddressSpaceDeviceType::Graphics:
             case AddressSpaceDeviceType::Media:
+                if(metadata == 1) {
+                char* pch =  (char*)(gQAndroidVmOperations->physicalMemoryGetAddr(phys_addr));
+                fprintf(stderr, "%s\n", pch);
+                }
+                break;
             case AddressSpaceDeviceType::Sensors:
             case AddressSpaceDeviceType::Power:
             case AddressSpaceDeviceType::GenericPipe:
