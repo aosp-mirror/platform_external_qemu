@@ -32,8 +32,11 @@ endfunction()
 function(android_compile_for_host EXE SOURCE OUT_PATH)
   if(ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
     # We can add this project without any translation..
-    add_subdirectory(${SOURCE} ${EXE}_ext)
-    set(${OUT_PATH} ${EXE} PARENT_SCOPE)
+    message(STATUS "Adding ${EXE} as subproject, not cross compiling.")
+    if (NOT TARGET ${EXE})
+        add_subdirectory(${SOURCE} ${EXE}_ext)
+        set(${OUT_PATH} "$<TARGET_FILE:${EXE}>" PARENT_SCOPE)
+    endif()
   else()
     message(STATUS "Cross compiling ${EXE} for host ${ANDROID_HOST_TAG}")
     include(ExternalProject)
@@ -52,6 +55,60 @@ function(android_compile_for_host EXE SOURCE OUT_PATH)
     set(${OUT_PATH} ${BUILD_PRODUCT} PARENT_SCOPE)
    endif()
 endfunction()
+
+# Enable the compilation of .asm files using Yasm. This will include the YASM
+# project if needed to compile the assembly files.
+#
+# The following parameters are accepted
+#
+# ``TARGET`` The library target to generate.
+# ``INCLUDES`` Optional list of include paths to pass to yasm
+# ``SOURCES`` List of source files to be compiled.
+#
+# For example:
+# android_yasm_compile(TARGET foo_asm INCLUDES /tmp/foo /tmp/more_foo SOURCES /tmp/bar /tmp/z)
+#
+# Yasm will be compiled for the HOST platform if needed.
+function(android_yasm_compile)
+    # Parse arguments
+    set(options)
+    set(oneValueArgs TARGET)
+    set(multiValueArgs INCLUDES SOURCES)
+    cmake_parse_arguments(android_yasm_compile "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+
+    # Configure yasm
+    if (NOT YASM_EXECUTABLE)
+        # Make sure we (cross) compile yasm only once.
+        android_compile_for_host(yasm ${ANDROID_QEMU2_TOP_DIR}/../yasm YASM_EXECUTABLE)
+        set(YASM_EXECUTABLE "${YASM_EXECUTABLE}")
+        message(STATUS "Compiling using ${YASM_EXECUTABLE}")
+    endif()
+
+    # Setup the includes.
+    set(LIBNAME ${android_yasm_compile_TARGET})
+    set(ASM_INC "")
+    foreach(INCLUDE ${android_yasm_compile_INCLUDES})
+        set(ASM_INC ${ASM_INC} -I ${INCLUDE})
+    endforeach()
+
+    # Configure the yasm compile command.
+    foreach(asm ${android_yasm_compile_SOURCES})
+        get_filename_component(asm_base ${asm} NAME_WE)
+        set(DST ${CMAKE_CURRENT_BINARY_DIR}/${asm_base}.o)
+        add_custom_command(OUTPUT ${DST}
+                           COMMAND ${YASM_EXECUTABLE} -f ${ANDROID_YASM_TYPE} -o ${DST} ${asm} ${ASM_INC}
+                           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                           VERBATIM
+                           DEPENDS ${YASM_EXECUTABLE} ${asm})
+        list(APPEND ${LIBNAME}_asm_o ${DST})
+    endforeach()
+
+    # Make the library available
+    add_library(${LIBNAME} ${${LIBNAME}_asm_o})
+    set_target_properties(${LIBNAME} PROPERTIES LINKER_LANGUAGE CXX)
+endfunction()
+
 
 # This function is the same as target_compile_definitions
 # (https://cmake.org/cmake/help/v3.5/command/target_compile_definitions.html) The only difference is that the
