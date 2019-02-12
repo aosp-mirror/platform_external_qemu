@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e0f814b_b7053c0d",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-12T07:53:43Z",
+      "side": 1,
+      "message": "lets also add a null check for android_hw (I think that can come up when trying to run the emulator the -fuchsia way)",
+      "range": {
+        "startLine": 223,
+        "startChar": 8,
+        "endLine": 223,
+        "endChar": 19
+      },
+      "revId": "5371ebddeb52ac145771cb8c7fe3b9b4d103ffa9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
