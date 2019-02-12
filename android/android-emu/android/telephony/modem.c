@@ -712,7 +712,6 @@ int amodem_state_load(AModem modem, SysFile* file, int version_id)
         // we will by default set radio state on in this case.
         modem->radio_state = A_RADIO_STATE_ON;
     }
-    modem->snapshotTimeUpdateRequested = 1;
 
     return 0; // >=0 Happy
 }
@@ -2455,7 +2454,7 @@ handleAnswer( const char*  cmd, AModem  modem )
     return NULL;
 }
 
-int android_snapshot_update_time = 1;
+int android_snapshot_update_time = 0;
 static time_t android_last_signal_time = 0;
 
 static bool wakeup_from_sleep() {
@@ -2889,4 +2888,10 @@ const char*  amodem_send( AModem  modem, const char*  cmd )
             REPLY( answer );
         }
     }
+}
+
+const char* amodem_send_unsol_nitz( AModem  modem )
+{
+    amodem_addTimeUpdate(modem);
+    REPLY(amodem_end_line(modem));
 }
