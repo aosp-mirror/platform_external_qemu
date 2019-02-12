@@ -223,7 +223,8 @@ private:
                 break;
             }
             case sr::FunctionCase::kDoneInstance: {
-                android::snapshot::doneInstance(getHandle());
+                android::snapshot::doneInstance(getHandle(),
+                        request.done_instance().metadata());
                 break;
             }
             default:

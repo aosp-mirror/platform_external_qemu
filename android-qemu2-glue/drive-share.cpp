@@ -399,6 +399,13 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
     }
     blk_remove_bs(blk);
     aio_context_release(aioCtx);
+    if (param->shareMode == android::base::FileShare::Write) {
+        // Updating from read to write, delete temp  files from the previous
+        // read
+        const char* oldPath = qemu_opt_get(opts, "file");
+        D("Closing old image %s\n", oldPath);
+        tempfile_unref_and_close(oldPath);
+    }
     std::string path = initDrivePath(id, param->shareMode, opts);
     if (needCreateTmp(id, param->shareMode, opts) && isCache) {
         mirrorTmpCache(path.c_str(),
@@ -427,11 +434,9 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
     drive_opts = qemu_opts_create(&qemu_common_drive_opts, id, 1, nullptr);
     qemu_opts_absorb_qdict(drive_opts, bs_opts, errp);
 
-    bool read_only = qemu_opt_get_bool(legacy_opts, BDRV_OPT_READ_ONLY, false);
     qdict_set_default_str(bs_opts, BDRV_OPT_CACHE_DIRECT, "off");
     qdict_set_default_str(bs_opts, BDRV_OPT_CACHE_NO_FLUSH, "off");
-    qdict_set_default_str(bs_opts, BDRV_OPT_READ_ONLY,
-                          read_only ? "on" : "off");
+    qdict_set_default_str(bs_opts, BDRV_OPT_READ_ONLY, "off");
     qdict_del(bs_opts, "id");
 
     BlockDriverState* bs = bdrv_open(path.c_str(), nullptr, bs_opts, 0, errp);
