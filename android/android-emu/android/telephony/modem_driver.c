@@ -141,11 +141,10 @@ modem_driver_init(int base_port, ModemDriver* dm, CSerialLine* sl, int sim_prese
                                    modem_driver_read);
 }
 
+static ModemDriver  modem_driver[1];
 
 void android_modem_init( int  base_port, int sim_present )
 {
-    static ModemDriver  modem_driver[1];
-
     android_telephony_debug_modem = VERBOSE_CHECK(modem);
     android_telephony_debug_radio = VERBOSE_CHECK(radio);
     android_telephony_debug_socket = VERBOSE_CHECK(socket);
@@ -154,6 +153,17 @@ void android_modem_init( int  base_port, int sim_present )
         modem_driver_init(base_port, modem_driver, android_modem_serial_line, sim_present);
         android_modem = modem_driver->modem;
     }
+}
+
+void android_modem_driver_send_nitz_now() {
+    ModemDriver* md = modem_driver;
+    // It might be uninitialized in offworld unit tests
+    if (!md->modem) {
+        return;
+    }
+    const char*  answer = amodem_send_unsol_nitz(md->modem);
+    android_serialline_write(md->serial_line, (const uint8_t*)answer, strlen(answer));
+    android_serialline_write(md->serial_line, (const uint8_t*)"\r", 1);
 }
 
 AModem android_modem_get() {
