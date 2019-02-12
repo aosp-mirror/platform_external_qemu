@@ -29,7 +29,9 @@
 
 #include "android/async-utils.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/emulation/CrossSessionSocket.h"
 #include "android/emulation/android_pipe_host.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/looper.h"
 #include "android/utils/sockets.h"
@@ -99,6 +101,7 @@ struct SocketPipe {
     int wakeWanted = 0;
     LoopIo* io = nullptr;
     AsyncConnector connector[1] = {};
+    android::emulation::CrossSessionSocket socket;
 };
 
 static void socketPipe_free(SocketPipe* pipe) {
@@ -106,10 +109,10 @@ static void socketPipe_free(SocketPipe* pipe) {
 
     /* Close the socket */
     if (pipe->io) {
-        fd = loopIo_fd(pipe->io);
         loopIo_free(pipe->io);
-        socket_close(fd);
     }
+    android::emulation::CrossSessionSocket::recycleSocket(
+            std::move(pipe->socket));
 
     /* Release the pipe object */
     delete pipe;
@@ -230,6 +233,7 @@ static void* socketPipe_initFromAddress(void* hwpipe,
             socketPipe_free(pipe);
             return NULL;
         }
+        pipe->socket = android::emulation::CrossSessionSocket(fd);
         if (status == ASYNC_COMPLETE) {
             pipe->state = STATE_CONNECTED;
             socketPipe_resetState(pipe);
@@ -372,15 +376,12 @@ static int socketPipe_sendBuffers(void* opaque,
         // On Windows hosts, solution #1 (spin on EAGAIN) must be used.
 #ifndef _WIN32
         // Solution #2: Allow only one successful send()
-        int  len = HANDLE_EINTR(send(loopIo_fd(pipe->io),
-                                     buff->data + buffStart,
-                                     avail,
-                                     0));
+        int len = HANDLE_EINTR(
+                send(pipe->socket.fd(), buff->data + buffStart, avail, 0));
 #else
         // Solution #1: Spin on EAGAIN (WSAEWOULDBLOCK)
-        int  len = qemu_windows_send(loopIo_fd(pipe->io),
-                                     buff->data + buffStart,
-                                 avail);
+        int len = qemu_windows_send(pipe->socket.fd(), buff->data + buffStart,
+                                    avail);
 #endif
 
         /* the write succeeded */
@@ -440,15 +441,11 @@ static int socketPipe_recvBuffers(void* opaque,
         // pipe corruption can potentially happen here too.
         // We use the same solutions to be safe.
 #ifndef _WIN32
-        int  len = HANDLE_EINTR(recv(loopIo_fd(pipe->io),
-                                buff->data + buffStart,
-                                avail,
-                                0));
+        int len = HANDLE_EINTR(
+                recv(pipe->socket.fd(), buff->data + buffStart, avail, 0));
 #else
-        int  len = qemu_windows_recv(loopIo_fd(pipe->io),
-                                     buff->data + buffStart,
-                                     avail,
-                                     true);
+        int len = qemu_windows_recv(pipe->socket.fd(), buff->data + buffStart,
+                                    avail, true);
 #endif
 
         /* the read succeeded */
@@ -535,19 +532,75 @@ void* socketPipe_initUnix(void* hwpipe, void* _looper, const char* args) {
     return ret;
 }
 
-static const AndroidPipeFuncs s_unix_pipe_funcs = {
+static void socketPipe_save(void* service_pipe, Stream* file) {
+    auto pipe = static_cast<SocketPipe*>(service_pipe);
+    auto stream = reinterpret_cast<android::base::Stream*>(file);
+    if (pipe->socket.valid()) {
+        // TODO: handle STATE_CONNECTING
+        CHECK(STATE_CONNECTING != pipe->state);
+        pipe->socket.drainSocket(android::emulation::CrossSessionSocket::
+                                         DrainBehavior::AppendToBuffer);
+        android::emulation::CrossSessionSocket::registerForRecycle(
+                pipe->socket.fd());
+        if (pipe->socket.hasStaleData()) {
+            // kick the pipe to read the stale data
+            socketPipe_io_func(pipe, pipe->socket.fd(), LOOP_IO_READ);
+        }
+    }
+
+    stream->putBe32(pipe->state);
+    stream->putBe32(pipe->wakeWanted);
+    stream->putBe32(pipe->connector->error);
+    stream->putBe32(pipe->connector->state);
+    stream->putBe32(pipe->socket.fd());
+    pipe->socket.onSave(stream);
+}
+
+static void* socketPipe_load(void* hwpipe,
+                             void* serviceOpaque,
+                             const char* args,
+                             Stream* file) {
+    auto stream = reinterpret_cast<android::base::Stream*>(file);
+    SocketPipe* pipe = new SocketPipe;
+    pipe->state = static_cast<State>(stream->getBe32());
+    // TODO: handle STATE_CONNECTING
+    CHECK(STATE_CONNECTING != pipe->state);
+    pipe->wakeWanted = stream->getBe32();
+    pipe->connector->error = stream->getBe32();
+    pipe->connector->state = stream->getBe32();
+    int fd = stream->getBe32();
+    if (fd > 0) {
+        pipe->socket =
+                android::emulation::CrossSessionSocket::reclaimSocket(fd);
+        pipe->io = loopIo_new(static_cast<Looper*>(serviceOpaque), fd,
+                              socketPipe_io_func, pipe);
+        pipe->connector->io = pipe->io;
+    }
+    pipe->hwpipe = hwpipe;
+    socketPipe_resetState(pipe);
+    return pipe;
+}
+
+static AndroidPipeFuncs s_unix_pipe_funcs = {
         socketPipe_initUnix,
         socketPipe_closeFromGuest,
         socketPipe_sendBuffers,
         socketPipe_recvBuffers,
         socketPipe_poll,
         socketPipe_wakeOn,
-        NULL, /* we can't save these */
-        NULL, /* we can't load these */
+        // Save & load will be enabled based on
+        // android::featurecontrol::Feature::SnapshotAdb
+        nullptr,
+        nullptr,
 };
 
 void android_unix_pipes_init(void) {
     Looper* looper = looper_getForThread();
+    if (android::featurecontrol::isEnabled(
+                android::featurecontrol::Feature::SnapshotAdb)) {
+        s_unix_pipe_funcs.save = socketPipe_save;
+        s_unix_pipe_funcs.load = socketPipe_load;
+    }
     android_pipe_add_type("unix", looper, &s_unix_pipe_funcs);
 }
 
