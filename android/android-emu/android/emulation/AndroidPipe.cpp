@@ -431,6 +431,9 @@ AndroidPipe* loadPipeFromStreamCommon(BaseStream* stream,
         DD("%s: loading state for [%s] hwpipe=%p", __FUNCTION__,
            service->name().c_str(), hwPipe);
         pipe = service->load(hwPipe, args ? args->c_str() : nullptr, stream);
+        if (!pipe) {
+            *pForceClose = 1;
+        }
     } else {
         DD("%s: force-closing hwpipe=%p", __FUNCTION__, hwPipe);
         *pForceClose = 1;
