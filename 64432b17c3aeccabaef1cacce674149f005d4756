@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "90c14bdb_1a166638",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 6
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-02-12T20:22:17Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 390,
+        "startChar": 62,
+        "endLine": 390,
+        "endChar": 63
+      },
+      "revId": "64432b17c3aeccabaef1cacce674149f005d4756",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
