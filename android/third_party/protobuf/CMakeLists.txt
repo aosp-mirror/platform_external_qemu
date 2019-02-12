@@ -4,14 +4,10 @@ project(protobuf)
 include(android)
 include(prebuilts)
 
-# We might not be using prebuilts
-# TODO(jansene): Remove once joshua's zlib changes are in our tree.
-if(TARGET zlib)
-  add_library(ZLIB::ZLIB alias zlib)
-else()
-  prebuilt(ZLIB)
+if(NOT TARGET zlib)
+   # Cross build needs zlib for protoc.
+   add_subdirectory(../zlib zlib)
 endif()
-
 
 set(protobuf_PUBLIC_COMPILE_DEFS -DGOOGLE_PROTOBUF_CMAKE_BUILD -DGOOGLE_PROTOBUF_NO_RTTI)
 if(NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
@@ -81,7 +77,7 @@ android_target_link_libraries(libprotobuf_lite linux-x86_64 PRIVATE m)
 target_compile_definitions(libprotobuf_lite PUBLIC ${protobuf_PUBLIC_COMPILE_DEFS})
 target_compile_definitions(libprotobuf_lite PRIVATE ${protobuf_PRIVATE_COMPILE_DEFS})
 target_compile_options(libprotobuf_lite PRIVATE ${protobuf_PRIVATE_COMPILE_OPTS})
-target_link_libraries(libprotobuf_lite PRIVATE ZLIB::ZLIB)
+target_link_libraries(libprotobuf_lite PRIVATE zlib)
 # Let's not name things liblibxx etc
 set_target_properties(libprotobuf_lite PROPERTIES PREFIX "")
 
@@ -150,7 +146,7 @@ android_add_library(libprotobuf)
 target_compile_definitions(libprotobuf PUBLIC ${protobuf_PUBLIC_COMPILE_DEFS})
 target_compile_definitions(libprotobuf PRIVATE ${protobuf_PRIVATE_COMPILE_DEFS})
 target_compile_options(libprotobuf PRIVATE ${protobuf_PRIVATE_COMPILE_OPTS})
-target_link_libraries(libprotobuf PRIVATE ZLIB::ZLIB)
+target_link_libraries(libprotobuf PRIVATE zlib)
 target_link_libraries(libprotobuf PUBLIC libprotobuf_lite)
 # Let's not name things liblibxx etc
 set_target_properties(libprotobuf PROPERTIES PREFIX "")
