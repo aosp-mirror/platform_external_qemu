@@ -20,8 +20,6 @@
 #include "android/emulation/AdbTypes.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/CrossSessionSocket.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/featurecontrol/feature_control.h"
 
 #include <unordered_map>
 #include <utility>
