@@ -237,6 +237,7 @@ android_emu_LOCAL_SRC_FILES := \
     android/emulation/control/LineConsumer.cpp \
     android/emulation/control/AdbBugReportServices.cpp \
     android/emulation/CpuAccelerator.cpp \
+    android/emulation/CrossSessionSocket.cpp \
     android/emulation/DmaMap.cpp \
     android/emulation/GoldfishDma.cpp \
     android/emulation/GoldfishSyncCommandQueue.cpp \
@@ -728,6 +729,7 @@ LOCAL_SRC_FILES := \
   android/emulation/control/ScreenCapturer_unittest.cpp \
   android/emulation/control/LineConsumer_unittest.cpp \
   android/emulation/CpuAccelerator_unittest.cpp \
+  android/emulation/CrossSessionSocket_unittest.cpp \
   android/emulation/Hypervisor_unittest.cpp \
   android/emulation/hostpipe/HostGoldfishPipe_unittest.cpp \
   android/emulation/ParameterList_unittest.cpp \
