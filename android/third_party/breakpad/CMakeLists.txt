@@ -167,6 +167,9 @@ android_target_compile_definitions(breakpad_common darwin-x86_64 PUBLIC -DHAVE_M
 android_target_compile_definitions(breakpad_common windows PRIVATE -DUNICODE -D_UNICODE)
 android_target_link_libraries(breakpad_common linux-x86_64 PRIVATE dl)
 android_target_link_libraries(breakpad_common
+                              windows_msvc-x86_64
+                              PRIVATE atl::atl)
+android_target_link_libraries(breakpad_common
                               windows
                               PRIVATE
                               wininet::wininet

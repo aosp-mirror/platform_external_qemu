@@ -143,7 +143,11 @@ int android_chmod(const char* path, mode_t mode) {
 }
 
 int android_rmdir(const char* path) {
+#ifdef _MSC_VER
+   return RemoveDirectoryW(Win32UnicodeString(path).c_str());
+#else
     return WIDEN_CALL_1(rmdir, path);
+#endif
 }
 // The code below uses the fact that GCC supports something called weak linking.
 // Several functions in glibc are weakly linked which means that if the same

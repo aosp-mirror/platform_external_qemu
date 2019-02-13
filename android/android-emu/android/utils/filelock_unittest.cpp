@@ -11,6 +11,7 @@
 
 #include "android/utils/filelock.h"
 
+#include "android/base/ArraySize.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/utils/path.h"
@@ -106,7 +107,7 @@ public:
             ASSERT_NE(GetModuleFileName(NULL, exePath, MAX_PATH), MAX_PATH);
             char cmdBuffer[MAX_PATH * 2 + 100];
             ASSERT_GT(sizeof(cmdBuffer),
-                      snprintf(cmdBuffer, MAX_PATH,
+                      snprintf(cmdBuffer, ARRAY_SIZE(cmdBuffer),
                                "%s --gtest_filter=%s.%s --child --read=%p "
                                "--write=%p "
                                "--file-lock-path=\"%s\"",
