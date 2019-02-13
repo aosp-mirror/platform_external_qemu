@@ -50,10 +50,22 @@ namespace goldfish_vk {
 
 // A list of extensions that should not be passed to the host driver.
 // These will mainly include Vulkan features that we emulate ourselves.
-static constexpr const char* const
-kEmulatedExtensions[] = {
-    "VK_ANDROID_native_buffer",
+static constexpr const char* const kEmulatedExtensions[] = {
+        "VK_ANDROID_native_buffer",
+        "VK_KHR_external_semaphore_capabilities",
 };
+
+static constexpr int kEmulatedExtensionCount =
+        sizeof(kEmulatedExtensions) / sizeof(kEmulatedExtensions[0]);
+
+static constexpr const char* const kEmulatedDeviceExtensions[] = {
+        "VK_KHR_external_semaphore",
+        "VK_KHR_external_semaphore_fd",
+};
+
+static constexpr int kEmulatedDeviceExtensionCount =
+        sizeof(kEmulatedDeviceExtensions) /
+        sizeof(kEmulatedDeviceExtensions[0]);
 
 static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 0, 65);
 
@@ -145,6 +157,23 @@ public:
         fb->unregisterProcessCleanupCallback(instance);
     }
 
+    VkResult on_vkEnumerateInstanceExtensionProperties(
+            const char* pLayerName,
+            uint32_t* pPropertyCount,
+            VkExtensionProperties* pProperties) {
+        uint32_t propertySize = *pPropertyCount;
+        VkResult result = m_vk->vkEnumerateInstanceExtensionProperties(
+                pLayerName, pPropertyCount, pProperties);
+        // TODO: Fixme: pLayerName is non-null when encoder passes a null to it
+        if ((result != VK_SUCCESS && result != VK_INCOMPLETE) ||
+            (pLayerName && pLayerName[0])) {
+            return result;
+        }
+        insertExtensionProperties(pPropertyCount, pProperties, propertySize,
+                                  kEmulatedExtensions, kEmulatedExtensionCount);
+        return result;
+    }
+
     VkResult on_vkEnumeratePhysicalDevices(
         VkInstance boxed_instance,
         uint32_t* physicalDeviceCount,
@@ -152,7 +181,7 @@ public:
 
         auto instance = unbox_VkInstance(boxed_instance);
         auto vk = dispatch_VkInstance(boxed_instance);
-        
+
         auto res = vk->vkEnumeratePhysicalDevices(instance, physicalDeviceCount, physicalDevices);
 
         if (res != VK_SUCCESS) return res;
@@ -197,6 +226,27 @@ public:
         }
 
         return res;
+    }
+
+    VkResult on_vkEnumerateDeviceExtensionProperties(
+            VkPhysicalDevice boxed_physicalDevice,
+            const char* pLayerName,
+            uint32_t* pPropertyCount,
+            VkExtensionProperties* pProperties) {
+        auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
+        auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
+        uint32_t propertySize = *pPropertyCount;
+        VkResult result = vk->vkEnumerateDeviceExtensionProperties(
+                physicalDevice, pLayerName, pPropertyCount, pProperties);
+        printf("result %d layername %p\n", result, pLayerName);
+        if ((result != VK_SUCCESS && result != VK_INCOMPLETE) ||
+            (pLayerName && pLayerName[0])) {
+            return result;
+        }
+        insertExtensionProperties(pPropertyCount, pProperties, propertySize,
+                                  kEmulatedDeviceExtensions,
+                                  kEmulatedDeviceExtensionCount);
+        return result;
     }
 
     void on_vkGetPhysicalDeviceFeatures(VkPhysicalDevice boxed_physicalDevice,
@@ -1690,6 +1740,35 @@ public:
         }
     }
 
+    void on_vkGetPhysicalDeviceExternalSemaphoreProperties(
+            VkPhysicalDevice boxed_physicalDevice,
+            const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
+            VkExternalSemaphoreProperties* pExternalSemaphoreProperties) {
+        auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
+        auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
+
+        if (!physicalDevice)
+            return;
+        switch (pExternalSemaphoreInfo->handleType) {
+            case VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT:
+                pExternalSemaphoreProperties->exportFromImportedHandleTypes =
+                        VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT;
+                pExternalSemaphoreProperties->compatibleHandleTypes =
+                        VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT;
+                pExternalSemaphoreProperties->externalSemaphoreFeatures =
+                        VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT |
+                        VK_EXTERNAL_SEMAPHORE_FEATURE_IMPORTABLE_BIT;
+                return;
+
+            default:
+                break;
+        }
+
+        pExternalSemaphoreProperties->exportFromImportedHandleTypes = 0;
+        pExternalSemaphoreProperties->compatibleHandleTypes = 0;
+        pExternalSemaphoreProperties->externalSemaphoreFeatures = 0;
+    }
+
     // TODO: Support more than one kind of guest external memory handle type
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPE VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID
 
@@ -1773,6 +1852,30 @@ private:
             }
         }
         return res;
+    }
+
+    VkResult insertExtensionProperties(uint32_t* pPropertyCount,
+                                       VkExtensionProperties* pProperties,
+                                       uint32_t propertySize,
+                                       const char* const* emulatedExtensions,
+                                       int emulatedExtensionCount) {
+        if (!pProperties) {
+            *pPropertyCount += emulatedExtensionCount;
+            return VK_INCOMPLETE;
+        }
+        uint32_t totalPropertyCount = *pPropertyCount + emulatedExtensionCount;
+        uint32_t realPropertyCount = std::min(totalPropertyCount, propertySize);
+        for (int i = *pPropertyCount; i < realPropertyCount; i++) {
+            strcpy(pProperties[i].extensionName,
+                   emulatedExtensions[i - *pPropertyCount]);
+            pProperties[i].specVersion = 1;
+        }
+        *pPropertyCount = realPropertyCount;
+        if (realPropertyCount != totalPropertyCount) {
+            return VK_INCOMPLETE;
+        } else {
+            return VK_SUCCESS;
+        }
     }
 
     VkPhysicalDeviceMemoryProperties* memPropsOfDeviceLocked(VkDevice device) {
@@ -2279,11 +2382,28 @@ void VkDecoderGlobalState::on_vkDestroyInstance(
     mImpl->on_vkDestroyInstance(instance, pAllocator);
 }
 
+VkResult VkDecoderGlobalState::on_vkEnumerateInstanceExtensionProperties(
+        const char* pLayerName,
+        uint32_t* pPropertyCount,
+        VkExtensionProperties* pProperties) {
+    return mImpl->on_vkEnumerateInstanceExtensionProperties(
+            pLayerName, pPropertyCount, pProperties);
+}
+
 VkResult VkDecoderGlobalState::on_vkEnumeratePhysicalDevices(
     VkInstance instance,
     uint32_t* physicalDeviceCount,
     VkPhysicalDevice* physicalDevices) {
     return mImpl->on_vkEnumeratePhysicalDevices(instance, physicalDeviceCount, physicalDevices);
+}
+
+VkResult VkDecoderGlobalState::on_vkEnumerateDeviceExtensionProperties(
+        VkPhysicalDevice physicalDevice,
+        const char* pLayerName,
+        uint32_t* pPropertyCount,
+        VkExtensionProperties* pProperties) {
+    return mImpl->on_vkEnumerateDeviceExtensionProperties(
+            physicalDevice, pLayerName, pPropertyCount, pProperties);
 }
 
 void VkDecoderGlobalState::on_vkGetPhysicalDeviceFeatures(
@@ -2663,6 +2783,24 @@ void VkDecoderGlobalState::on_vkFreeCommandBuffers(
         const VkCommandBuffer* pCommandBuffers) {
     return mImpl->on_vkFreeCommandBuffers(device, commandPool,
                                           commandBufferCount, pCommandBuffers);
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceExternalSemaphoreProperties(
+        VkPhysicalDevice physicalDevice,
+        const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
+        VkExternalSemaphoreProperties* pExternalSemaphoreProperties) {
+    return mImpl->on_vkGetPhysicalDeviceExternalSemaphoreProperties(
+            physicalDevice, pExternalSemaphoreInfo,
+            pExternalSemaphoreProperties);
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
+        VkPhysicalDevice physicalDevice,
+        const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
+        VkExternalSemaphoreProperties* pExternalSemaphoreProperties) {
+    return mImpl->on_vkGetPhysicalDeviceExternalSemaphoreProperties(
+            physicalDevice, pExternalSemaphoreInfo,
+            pExternalSemaphoreProperties);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(
