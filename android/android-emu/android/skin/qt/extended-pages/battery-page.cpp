@@ -59,8 +59,8 @@ BatteryPage::BatteryPage(QWidget* parent)
         int chargeLevel = settings.value(Ui::Settings::BATTERY_CHARGE_LEVEL, 100).toInt();
 
         BatteryCharger batteryCharger = (BatteryCharger)settings.value(
-                                                      Ui::Settings::BATTERY_CHARGER_TYPE,
-                                                      BATTERY_CHARGER_AC).toInt();
+                                                      Ui::Settings::BATTERY_CHARGER_TYPE2,
+                                                      BATTERY_CHARGER_NONE).toInt();
         int chargerIdx = mUi->bat_healthBox->findData(batteryCharger);
         if (chargerIdx < 0) chargerIdx = 0;  // In case the saved value wasn't found in the pull-down
 
@@ -116,7 +116,7 @@ void BatteryPage::setBatteryAgent(const QAndroidBatteryAgent* agent) {
         }
 
         BatteryCharger batteryCharger = (BatteryCharger)settings.value(
-                                                      Ui::Settings::BATTERY_CHARGER_TYPE,
+                                                      Ui::Settings::BATTERY_CHARGER_TYPE2,
                                                       BATTERY_CHARGER_AC).toInt();
         if (sBatteryAgent->setCharger) {
             sBatteryAgent->setCharger(batteryCharger);
@@ -155,7 +155,7 @@ void BatteryPage::on_bat_chargerBox_activated(int index) {
             mUi->bat_statusBox->itemData(index).toInt());
 
     QSettings settings;
-    settings.setValue(Ui::Settings::BATTERY_CHARGER_TYPE, bCharger);
+    settings.setValue(Ui::Settings::BATTERY_CHARGER_TYPE2, bCharger);
 
     android::RecursiveScopedVmLock vmlock;
     if (bCharger >= 0 && bCharger < BATTERY_CHARGER_NUM_ENTRIES) {

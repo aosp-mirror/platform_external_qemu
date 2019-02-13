@@ -110,6 +110,10 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         params.addFormat("qemu.gles=%d", gles);
     }
 
+    // To save battery, set the screen off timeout to a high value.
+    // Using int32_max here. The unit is milliseconds.
+    params.addFormat("qemu.settings.system.screen_off_timeout=2147483647"); // 596 hours
+
     if (isQemu2 && android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData)) {
         params.add("qemu.encrypt=1");
     }

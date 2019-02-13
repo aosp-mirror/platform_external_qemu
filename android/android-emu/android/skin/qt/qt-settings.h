@@ -55,10 +55,11 @@ constexpr char SAVE_PATH[] = "set/savePath";
 constexpr char UI_THEME[] = "set/theme";
 constexpr char DISABLE_MOUSE_WHEEL[] = "set/disableMouseWheel";
 
-constexpr char BATTERY_CHARGE_LEVEL[] = "battery/charge_level";
-constexpr char BATTERY_CHARGER_TYPE[] = "battery/charger_type";
-constexpr char BATTERY_HEALTH[]       = "battery/health";
-constexpr char BATTERY_STATUS[]       = "battery/status";
+constexpr char BATTERY_CHARGE_LEVEL[]  = "battery/charge_level";
+constexpr char BATTERY_CHARGER_TYPE[]  = "battery/charger_type";
+constexpr char BATTERY_CHARGER_TYPE2[] = "battery/charger_type2";
+constexpr char BATTERY_HEALTH[]        = "battery/health";
+constexpr char BATTERY_STATUS[]        = "battery/status";
 
 constexpr char CELLULAR_NETWORK_TYPE[]    = "cell/network_type";
 constexpr char CELLULAR_SIGNAL_STRENGTH[] = "cell/signal_strength";
