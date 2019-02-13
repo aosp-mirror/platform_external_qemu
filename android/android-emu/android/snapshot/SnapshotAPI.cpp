@@ -85,7 +85,9 @@ offworld::Response createForkIdResponse(int forkId,
     auto forkReadOnlyInstance = response.mutable_snapshot()
             ->mutable_fork_read_only_instances();
     forkReadOnlyInstance->set_instance_id(forkId);
-    forkReadOnlyInstance->set_metadata(metadata);
+    if (metadata != nullptr) {
+        forkReadOnlyInstance->set_metadata(metadata);
+    }
     return response;
 }
 
