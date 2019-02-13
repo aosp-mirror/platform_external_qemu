@@ -659,6 +659,189 @@ static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
     return false;
 }
 
+static int startEmulatorWithMinConfig(
+    int argc,
+    char** argv,
+    const char* avdName,
+    int apiLevel,
+    const char* abi,
+    const char* arch,
+    bool isGoogleApis,
+    AvdFlavor flavor,
+    const char* gpuMode,
+    bool noWindow,
+    int lcdWidth,
+    int lcdHeight,
+    int lcdDensity,
+    const char* lcdInitialOrientation,
+    AndroidOptions* optsToOverride,
+    AndroidHwConfig* hwConfigToOverride,
+    AvdInfo** avdInfoToOverride) {
+
+    android_qemu_mode = 0;
+    min_config_qemu_mode = 1;
+
+    auto opts = optsToOverride;
+    auto hw = hwConfigToOverride;
+
+    opts->avd = strdup(avdName);
+    opts->gpu = strdup(gpuMode);
+    opts->no_window = noWindow;
+
+    *avdInfoToOverride =
+        avdInfo_newCustom(
+            avdName, apiLevel,
+            abi, arch,
+            isGoogleApis, flavor);
+
+    AvdInfo* avd = *avdInfoToOverride;
+
+    hw->hw_initialOrientation = strdup(lcdInitialOrientation);
+    hw->hw_gpu_enabled = true;
+    hw->hw_gpu_mode = strdup(gpuMode);
+    hw->hw_lcd_width = lcdWidth;
+    hw->hw_lcd_height = lcdHeight;
+    hw->hw_lcd_density = lcdDensity;
+
+    if (gQAndroidBatteryAgent &&
+        gQAndroidBatteryAgent->setHasBattery) {
+        gQAndroidBatteryAgent->setHasBattery(false);
+    }
+
+    gQAndroidLocationAgent->gpsSetPassiveUpdate(false);
+
+    // Setup GPU acceleration. This needs to go along with user interface
+    // initialization, because we need the selected backend from Qt settings.
+    const UiEmuAgent uiEmuAgent = {
+            gQAndroidBatteryAgent,
+            gQAndroidCellularAgent,
+            gQAndroidClipboardAgent,
+            gQAndroidDisplayAgent,
+            gQAndroidEmulatorWindowAgent,
+            gQAndroidFingerAgent,
+            gQAndroidLocationAgent,
+            gQAndroidHttpProxyAgent,
+            gQAndroidRecordScreenAgent,
+            gQAndroidSensorsAgent,
+            gQAndroidTelephonyAgent,
+            gQAndroidUserEventAgent,
+            gQAndroidVirtualSceneAgent,
+            gQCarDataAgent,
+            nullptr  // For now there's no uses of SettingsAgent, so we
+                     // don't set it.
+    };
+
+    android::base::Thread::maskAllSignals();
+    skin_winsys_init_args(argc, argv);
+    if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
+        fprintf(stderr, "%s: warning: user interface init failed\n",
+                __func__);
+    }
+
+    // Register the quit callback
+    android::base::registerEmulatorQuitCallback([] {
+        android::base::ThreadLooper::runOnMainLooper([] {
+            skin_winsys_quit_request();
+        });
+    });
+
+#if (SNAPSHOT_PROFILE > 1)
+    printf("skin_winsys_init and UI finishing at uptime %" PRIu64 " ms\n",
+           get_uptime_ms());
+#endif
+
+    // Use advancedFeatures to override renderer if the user has
+    // selected in UI that the preferred renderer is "autoselected".
+    WinsysPreferredGlesBackend uiPreferredGlesBackend =
+            skin_winsys_get_preferred_gles_backend();
+
+#ifndef _WIN32
+    if (uiPreferredGlesBackend == WINSYS_GLESBACKEND_PREFERENCE_ANGLE ||
+        uiPreferredGlesBackend == WINSYS_GLESBACKEND_PREFERENCE_ANGLE9) {
+        uiPreferredGlesBackend = WINSYS_GLESBACKEND_PREFERENCE_AUTO;
+        skin_winsys_set_preferred_gles_backend(uiPreferredGlesBackend);
+    }
+#endif
+
+    // Feature flags-related last-microsecond renderer changes
+    {
+        // Should enable OpenGL ES 3.x?
+        if (skin_winsys_get_preferred_gles_apilevel() ==
+            WINSYS_GLESAPILEVEL_PREFERENCE_MAX) {
+            fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion,
+                                                 true);
+        }
+
+        if (skin_winsys_get_preferred_gles_apilevel() ==
+                    WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
+            fc::setEnabledOverride(fc::GLESDynamicVersion, false);
+        }
+
+        if (fc::isEnabled(fc::ForceANGLE)) {
+            uiPreferredGlesBackend =
+                    skin_winsys_override_glesbackend_if_auto(
+                            WINSYS_GLESBACKEND_PREFERENCE_ANGLE);
+        }
+
+        if (fc::isEnabled(fc::ForceSwiftshader)) {
+            uiPreferredGlesBackend =
+                    skin_winsys_override_glesbackend_if_auto(
+                            WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
+        }
+    }
+
+    RendererConfig rendererConfig;
+    configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
+                           uiPreferredGlesBackend, &rendererConfig);
+
+    // Gpu configuration is set, now initialize the screen recorder
+    // and screenshot callback
+    bool isGuestMode =
+            (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
+    screen_recorder_init(hw->hw_lcd_width, hw->hw_lcd_height,
+                         isGuestMode ? uiEmuAgent.display : nullptr);
+    android_registerScreenshotFunc([](const char* dirname) {
+        android::emulation::captureScreenshot(dirname, nullptr);
+    });
+
+    /* Disable the GLAsyncSwap for ANGLE so far */
+    bool shouldDisableAsyncSwap =
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE ||
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
+    // Features to disable or enable depending on rendering backend
+    // and gpu make/model/version
+    shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3) ||
+                              System::get()->getProgramBitness() == 32;
+    shouldDisableAsyncSwap = shouldDisableAsyncSwap ||
+                             async_query_host_gpu_SyncBlacklisted();
+
+    if (shouldDisableAsyncSwap) {
+        fc::setEnabledOverride(fc::GLAsyncSwap, false);
+    }
+
+    android_report_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
+
+    // Generate a hardware-qemu.ini for this AVD.
+    if (VERBOSE_CHECK(init)) {
+        printf("QEMU options list:\n");
+        for (int i = 0; i < argc; i++) {
+            printf("emulator: argv[%02d] = \"%s\"\n", i, argv[i]);
+        }
+    }
+
+    skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, argc,
+                             argv);
+    android::crashreport::CrashReporter::get()->hangDetector().pause(false);
+    skin_winsys_enter_main_loop(opts->no_window);
+    android::crashreport::CrashReporter::get()->hangDetector().pause(true);
+
+    stopRenderer();
+    emulator_finiUserInterface();
+
+    process_late_teardown();
+    return 0;
+}
+
 extern "C" AndroidProxyCB* gAndroidProxyCB;
 extern "C" int main(int argc, char** argv) {
     if (argc < 1) {
@@ -707,10 +890,22 @@ extern "C" int main(int argc, char** argv) {
                 } else {
                     dataDir += "/lib/pc-bios";
                 }
+
                 args.add({"-L", dataDir});
                 for (int n = 1; n < argc; ++n) {
                     args.add(argv[n]);
                 }
+
+                return startEmulatorWithMinConfig(
+                    args.size(),
+                    args.array(),
+                    "custom", 28, "x86_64", "x86_64", true, AVD_PHONE,
+                    // TODO: Have a way to communicate GPU mode via plain QEMU command line args
+                    "host", opts->no_window,
+                    // LCD width, height, DPI, orientation
+                    1280, 720, 96, "landscape",
+                    opts, hw, &android_avdInfo);
+
             } else {
                 for (int n = 1; n <= argc; ++n) {
                     args.add(argv[n - 1]);
