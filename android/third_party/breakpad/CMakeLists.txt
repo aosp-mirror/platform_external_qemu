@@ -168,7 +168,7 @@ android_target_compile_definitions(breakpad_common windows PRIVATE -DUNICODE -D_
 android_target_link_libraries(breakpad_common linux-x86_64 PRIVATE dl)
 android_target_link_libraries(breakpad_common
                               windows_msvc-x86_64
-                              PRIVATE atl::atl)
+                              PRIVATE atls::atls)
 android_target_link_libraries(breakpad_common
                               windows
                               PRIVATE
@@ -398,7 +398,7 @@ android_add_executable(dump_syms)
 target_link_libraries(dump_syms PRIVATE breakpad_common)
 android_target_link_libraries(dump_syms windows_msvc-x86_64 PRIVATE shell32::shell32 diaguids::diaguids)
 if (HOST_TARGET_TAG STREQUAL "windows_msvc-x86_64")
-    android_target_link_libraries(dump_syms windows_msvc-x86_64 PRIVATE atl::atl)
+    android_target_link_libraries(dump_syms windows_msvc-x86_64 PRIVATE atls::atls)
 endif()
 android_target_compile_definitions(dump_syms linux-x86_64 PUBLIC -DHAVE_A_OUT_H)
 android_target_compile_definitions(dump_syms darwin-x86_64 PUBLIC -DHAVE_MACH_O_NLIST_H)
