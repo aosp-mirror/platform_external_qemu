@@ -24,7 +24,12 @@ target_include_directories(GLcommon PUBLIC
     ${ANDROID_EMUGL_DIR}/shared
     ${ANDROID_EMUGL_DIR}/host/include)
 target_link_libraries(GLcommon PUBLIC android-emu-base astc-codec)
-target_compile_options(GLcommon PRIVATE -fvisibility=hidden)
+# Set fvisibility as default to export all symbol names for debugging purpose.
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  target_compile_options(GLcommon PRIVATE -fvisibility=default)
+else()
+  target_compile_options(GLcommon PRIVATE -fvisibility=hidden)
+endif()
 target_link_libraries(GLcommon PRIVATE emugl_base)
 android_target_link_libraries(GLcommon linux-x86_64 PRIVATE "-ldl" "-Wl,-Bsymbolic")
 android_target_link_libraries(GLcommon windows PRIVATE "gdi32::gdi32" "-Wl,--add-stdcall-alias")
