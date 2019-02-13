@@ -1,6 +1,7 @@
 #!/bin/bash
 # For debugging emulator Vulkan driver on the host side.
-BINDIR=objs
+#BINDIR=objs
+BINDIR=~/master/external/qemu/objs
 LAYERDIR=$BINDIR/testlib64/layers
 export LD_LIBRARY_PATH=$LAYERDIR
 export VK_LAYER_PATH=$LAYERDIR

@@ -253,7 +253,9 @@ def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
 custom_decodes = {
     "vkCreateInstance" : emit_global_state_wrapped_decoding,
     "vkDestroyInstance" : emit_global_state_wrapped_decoding,
+    "vkEnumerateInstanceExtensionProperties" : emit_global_state_wrapped_decoding,
     "vkEnumeratePhysicalDevices" : emit_global_state_wrapped_decoding,
+    "vkEnumerateDeviceExtensionProperties" : emit_global_state_wrapped_decoding,
 
     "vkGetPhysicalDeviceFeatures" : emit_global_state_wrapped_decoding,
     "vkGetPhysicalDeviceFeatures2" : emit_global_state_wrapped_decoding,
@@ -271,6 +273,9 @@ custom_decodes = {
     "vkGetPhysicalDeviceMemoryProperties" : emit_global_state_wrapped_decoding,
     "vkGetPhysicalDeviceMemoryProperties2" : emit_global_state_wrapped_decoding,
     "vkGetPhysicalDeviceMemoryProperties2KHR" : emit_global_state_wrapped_decoding,
+
+    "vkGetPhysicalDeviceExternalSemaphoreProperties" : emit_global_state_wrapped_decoding,
+    "vkGetPhysicalDeviceExternalSemaphorePropertiesKHR" : emit_global_state_wrapped_decoding,
 
     "vkCreateBuffer" : emit_global_state_wrapped_decoding,
     "vkDestroyBuffer" : emit_global_state_wrapped_decoding,
@@ -314,6 +319,8 @@ custom_decodes = {
     "vkGetSwapchainGrallocUsage2ANDROID" : emit_global_state_wrapped_decoding,
     "vkAcquireImageANDROID" : emit_global_state_wrapped_decoding,
     "vkQueueSignalReleaseImageANDROID" : emit_global_state_wrapped_decoding,
+
+    "vkImportSemaphoreFdKHR" : emit_global_state_wrapped_decoding,
 
     # VK_GOOGLE_address_space
     "vkMapMemoryIntoAddressSpaceGOOGLE" : emit_global_state_wrapped_decoding,

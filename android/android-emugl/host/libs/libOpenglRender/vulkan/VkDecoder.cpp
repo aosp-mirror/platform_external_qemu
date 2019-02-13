@@ -704,6 +704,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkEnumerateInstanceExtensionProperties:
             {
+                if (m_logCalls) {
+                    fprintf(stderr,
+                            "call vkEnumerateInstanceExtensionProperties\n");
+                    ;
+                }
                 const char* pLayerName;
                 uint32_t* pPropertyCount;
                 VkExtensionProperties* pProperties;
@@ -744,12 +749,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkExtensionProperties(m_state, (VkExtensionProperties*)(pProperties + i));
                     }
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkEnumerateInstanceExtensionProperties\n");;
-                }
                 VkResult vkEnumerateInstanceExtensionProperties_VkResult_return = (VkResult)0;
-                vkEnumerateInstanceExtensionProperties_VkResult_return = vk->vkEnumerateInstanceExtensionProperties(pLayerName, pPropertyCount, pProperties);
+                vkEnumerateInstanceExtensionProperties_VkResult_return =
+                        m_state->on_vkEnumerateInstanceExtensionProperties(
+                                pLayerName, pPropertyCount, pProperties);
                 // WARNING PTR CHECK
                 uint64_t cgen_var_32 = (uint64_t)(uintptr_t)pPropertyCount;
                 vkStream->putBe64(cgen_var_32);
@@ -781,6 +784,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkEnumerateDeviceExtensionProperties:
             {
+                if (m_logCalls) {
+                    fprintf(stderr,
+                            "call vkEnumerateDeviceExtensionProperties\n");
+                    ;
+                }
                 VkPhysicalDevice physicalDevice;
                 const char* pLayerName;
                 uint32_t* pPropertyCount;
@@ -831,12 +839,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkExtensionProperties(m_state, (VkExtensionProperties*)(pProperties + i));
                     }
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkEnumerateDeviceExtensionProperties\n");;
-                }
                 VkResult vkEnumerateDeviceExtensionProperties_VkResult_return = (VkResult)0;
-                vkEnumerateDeviceExtensionProperties_VkResult_return = vk->vkEnumerateDeviceExtensionProperties(unboxed_physicalDevice, pLayerName, pPropertyCount, pProperties);
+                vkEnumerateDeviceExtensionProperties_VkResult_return =
+                        m_state->on_vkEnumerateDeviceExtensionProperties(
+                                physicalDevice, pLayerName, pPropertyCount,
+                                pProperties);
                 // WARNING PTR CHECK
                 uint64_t cgen_var_37 = (uint64_t)(uintptr_t)pPropertyCount;
                 vkStream->putBe64(cgen_var_37);
@@ -7408,6 +7415,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceExternalSemaphoreProperties:
             {
+                if (m_logCalls) {
+                    fprintf(stderr,
+                            "call "
+                            "vkGetPhysicalDeviceExternalSemaphoreProperties\n");
+                    ;
+                }
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo;
                 VkExternalSemaphoreProperties* pExternalSemaphoreProperties;
@@ -7440,11 +7453,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkExternalSemaphoreProperties(m_state, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceExternalSemaphoreProperties\n");;
-                }
-                vk->vkGetPhysicalDeviceExternalSemaphoreProperties(unboxed_physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
+                m_state->on_vkGetPhysicalDeviceExternalSemaphoreProperties(
+                        physicalDevice, pExternalSemaphoreInfo,
+                        pExternalSemaphoreProperties);
                 if (pExternalSemaphoreProperties)
                 {
                     transform_fromhost_VkExternalSemaphoreProperties(m_state, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
@@ -10279,6 +10290,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_external_semaphore_capabilities
             case OP_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR:
             {
+                if (m_logCalls) {
+                    fprintf(stderr,
+                            "call "
+                            "vkGetPhysicalDeviceExternalSemaphorePropertiesKHR"
+                            "\n");
+                    ;
+                }
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo;
                 VkExternalSemaphoreProperties* pExternalSemaphoreProperties;
@@ -10311,11 +10329,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkExternalSemaphoreProperties(m_state, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceExternalSemaphorePropertiesKHR\n");;
-                }
-                vk->vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(unboxed_physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
+                m_state->on_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
+                        physicalDevice, pExternalSemaphoreInfo,
+                        pExternalSemaphoreProperties);
                 if (pExternalSemaphoreProperties)
                 {
                     transform_fromhost_VkExternalSemaphoreProperties(m_state, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
@@ -10405,6 +10421,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_external_semaphore_fd
             case OP_vkImportSemaphoreFdKHR:
             {
+                if (m_logCalls) {
+                    fprintf(stderr, "call vkImportSemaphoreFdKHR\n");
+                    ;
+                }
                 VkDevice device;
                 const VkImportSemaphoreFdInfoKHR* pImportSemaphoreFdInfo;
                 // Begin manual dispatchable handle unboxing for device;
@@ -10422,12 +10442,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkImportSemaphoreFdInfoKHR(m_state, (VkImportSemaphoreFdInfoKHR*)(pImportSemaphoreFdInfo));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkImportSemaphoreFdKHR\n");;
-                }
                 VkResult vkImportSemaphoreFdKHR_VkResult_return = (VkResult)0;
-                vkImportSemaphoreFdKHR_VkResult_return = vk->vkImportSemaphoreFdKHR(unboxed_device, pImportSemaphoreFdInfo);
+                vkImportSemaphoreFdKHR_VkResult_return =
+                        m_state->on_vkImportSemaphoreFdKHR(
+                                device, pImportSemaphoreFdInfo);
                 vkStream->write(&vkImportSemaphoreFdKHR_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
