@@ -4608,8 +4608,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     }
 
 #ifdef CONFIG_ANDROID
-
-    if (android_qemu_mode) {
+    if (android_qemu_mode || min_config_qemu_mode) {
         // setup device-tree callback
 #if defined(TARGET_AARCH64) || defined(TARGET_ARM) || defined(TARGET_MIPS)
         qemu_device_tree_setup_callback(ranchu_device_tree_setup);
@@ -4625,7 +4624,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         socket_drainer_start(looper_getForThread());
         android_wear_agent_start(looper_getForThread());
         android_registerMainLooper(looper_getForThread());
+    }
 
+    if (android_qemu_mode) {
         if (!android_hw_file) {
             error_report("Missing -android-hw <file> option!");
             return 1;
@@ -4754,8 +4755,13 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             snprintf(temp, sizeof(temp), "%d", lcd_density);
             boot_property_add("qemu.sf.lcd_density", temp);
         }
-
     }
+
+    if (min_config_qemu_mode) {
+        goldfish_fb_set_display_depth(32);
+        goldfish_fb_set_use_host_gpu(1);
+    }
+
 #endif // CONFIG_ANDROID
 
     if (qemu_opts_foreach(qemu_find_opts("sandbox"),
@@ -5446,7 +5452,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     }
 
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode) {
+    if (android_qemu_mode || min_config_qemu_mode) {
         if (!qemu_android_emulation_setup()) {
             return 1;
         }
