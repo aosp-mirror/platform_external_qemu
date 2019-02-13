@@ -29,6 +29,7 @@ if (OPTION_ASTC_TESTS)
 endif()
 
 
+add_subdirectory(qt)
 add_subdirectory(zlib)
 add_subdirectory(protobuf)
 add_subdirectory(lz4)
