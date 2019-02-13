@@ -59,10 +59,21 @@ public:
         VkInstance instance,
         const VkAllocationCallbacks* pAllocator);
 
+    VkResult on_vkEnumerateInstanceExtensionProperties(
+            const char* pLayerName,
+            uint32_t* pPropertyCount,
+            VkExtensionProperties* pProperties);
+
     VkResult on_vkEnumeratePhysicalDevices(
         VkInstance instance,
         uint32_t* physicalDeviceCount,
         VkPhysicalDevice* physicalDevices);
+
+    VkResult on_vkEnumerateDeviceExtensionProperties(
+            VkPhysicalDevice boxed_physicalDevice,
+            const char* pLayerName,
+            uint32_t* pPropertyCount,
+            VkExtensionProperties* pProperties);
 
     // Override features
     void on_vkGetPhysicalDeviceFeatures(
@@ -317,6 +328,16 @@ public:
     VkResult on_vkResetCommandPool(VkDevice device,
                                    VkCommandPool commandPool,
                                    VkCommandPoolResetFlags flags);
+
+    void on_vkGetPhysicalDeviceExternalSemaphoreProperties(
+            VkPhysicalDevice physicalDevice,
+            const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
+            VkExternalSemaphoreProperties* pExternalSemaphoreProperties);
+
+    void on_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
+            VkPhysicalDevice physicalDevice,
+            const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
+            VkExternalSemaphoreProperties* pExternalSemaphoreProperties);
 
     // Transformations
 

@@ -907,6 +907,7 @@ VkResult LayerChain::ValidateExtensions(const char* const* extension_names,
         if (!IsLayerExtension(name) && !IsDriverExtension(name)) {
             logger_.Err(VK_NULL_HANDLE,
                         "Failed to enable missing instance extension %s", name);
+            printf("Failed to enable missing instance extension %s\n", name);
             return VK_ERROR_EXTENSION_NOT_PRESENT;
         }
 
@@ -945,6 +946,7 @@ VkResult LayerChain::ValidateExtensions(VkPhysicalDevice physical_dev,
         if (!IsLayerExtension(name) && !IsDriverExtension(name)) {
             logger_.Err(physical_dev,
                         "Failed to enable missing device extension %s", name);
+            printf("Failed to enable missing device extension %s\n", name);
             return VK_ERROR_EXTENSION_NOT_PRESENT;
         }
 
@@ -1193,8 +1195,10 @@ void DestroyDevice(VkDevice device, const VkAllocationCallbacks* pAllocator) {
 
 VkResult EnumerateInstanceLayerProperties(uint32_t* pPropertyCount,
                                           VkLayerProperties* pProperties) {
-    if (!EnsureInitialized())
+    if (!EnsureInitialized()) {
+        printf("EnumerateInstanceLayerProperties uninitialized!\n");
         return VK_ERROR_INITIALIZATION_FAILED;
+    }
 
     uint32_t count = GetLayerCount();
 
