@@ -7408,6 +7408,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetPhysicalDeviceExternalSemaphoreProperties:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetPhysicalDeviceExternalSemaphoreProperties\n");;
+                }
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo;
                 VkExternalSemaphoreProperties* pExternalSemaphoreProperties;
@@ -7440,11 +7444,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkExternalSemaphoreProperties(m_state, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceExternalSemaphoreProperties\n");;
-                }
-                vk->vkGetPhysicalDeviceExternalSemaphoreProperties(unboxed_physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
+                m_state->on_vkGetPhysicalDeviceExternalSemaphoreProperties(physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
                 if (pExternalSemaphoreProperties)
                 {
                     transform_fromhost_VkExternalSemaphoreProperties(m_state, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
@@ -10279,6 +10279,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_external_semaphore_capabilities
             case OP_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetPhysicalDeviceExternalSemaphorePropertiesKHR\n");;
+                }
                 VkPhysicalDevice physicalDevice;
                 const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo;
                 VkExternalSemaphoreProperties* pExternalSemaphoreProperties;
@@ -10311,11 +10315,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkExternalSemaphoreProperties(m_state, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetPhysicalDeviceExternalSemaphorePropertiesKHR\n");;
-                }
-                vk->vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(unboxed_physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
+                m_state->on_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(physicalDevice, pExternalSemaphoreInfo, pExternalSemaphoreProperties);
                 if (pExternalSemaphoreProperties)
                 {
                     transform_fromhost_VkExternalSemaphoreProperties(m_state, (VkExternalSemaphoreProperties*)(pExternalSemaphoreProperties));
@@ -10405,6 +10405,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_external_semaphore_fd
             case OP_vkImportSemaphoreFdKHR:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkImportSemaphoreFdKHR\n");;
+                }
                 VkDevice device;
                 const VkImportSemaphoreFdInfoKHR* pImportSemaphoreFdInfo;
                 // Begin manual dispatchable handle unboxing for device;
@@ -10422,12 +10426,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkImportSemaphoreFdInfoKHR(m_state, (VkImportSemaphoreFdInfoKHR*)(pImportSemaphoreFdInfo));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkImportSemaphoreFdKHR\n");;
-                }
                 VkResult vkImportSemaphoreFdKHR_VkResult_return = (VkResult)0;
-                vkImportSemaphoreFdKHR_VkResult_return = vk->vkImportSemaphoreFdKHR(unboxed_device, pImportSemaphoreFdInfo);
+                vkImportSemaphoreFdKHR_VkResult_return = m_state->on_vkImportSemaphoreFdKHR(device, pImportSemaphoreFdInfo);
                 vkStream->write(&vkImportSemaphoreFdKHR_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
@@ -10435,6 +10435,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkGetSemaphoreFdKHR:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkGetSemaphoreFdKHR\n");;
+                }
                 VkDevice device;
                 const VkSemaphoreGetFdInfoKHR* pGetFdInfo;
                 int* pFd;
@@ -10463,12 +10467,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkSemaphoreGetFdInfoKHR(m_state, (VkSemaphoreGetFdInfoKHR*)(pGetFdInfo));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkGetSemaphoreFdKHR\n");;
-                }
                 VkResult vkGetSemaphoreFdKHR_VkResult_return = (VkResult)0;
-                vkGetSemaphoreFdKHR_VkResult_return = vk->vkGetSemaphoreFdKHR(unboxed_device, pGetFdInfo, pFd);
+                vkGetSemaphoreFdKHR_VkResult_return = m_state->on_vkGetSemaphoreFdKHR(device, pGetFdInfo, pFd);
                 vkStream->write((int*)pFd, sizeof(int));
                 vkStream->write(&vkGetSemaphoreFdKHR_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
