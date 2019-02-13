@@ -7,6 +7,9 @@ android_add_interface(emugl_base)
 target_compile_definitions(emugl_base INTERFACE "-DEMUGL_BUILD=1")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_definitions(emugl_base INTERFACE "-DEMUGL_DEBUG=1")
+  set(ANDROID_EMUGL_SHARED_FIVISIBILITY "-fvisibility=default")
+else()
+  set(ANDROID_EMUGL_SHARED_FIVISIBILITY "-fvisibility=hidden")
 endif()
 
 # Compile emugen for the current host.
