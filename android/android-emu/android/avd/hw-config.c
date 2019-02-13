@@ -153,18 +153,21 @@ androidHwConfig_done( AndroidHwConfig* config )
 int
 androidHwConfig_isScreenNoTouch( AndroidHwConfig* config )
 {
+    if (!config->hw_screen) return 0;
     return strcmp(config->hw_screen, "no-touch") == 0;
 }
 
 int
 androidHwConfig_isScreenTouch( AndroidHwConfig* config )
 {
+    if (!config->hw_screen) return 0;
     return strcmp(config->hw_screen, "touch") == 0;
 }
 
 int
 androidHwConfig_isScreenMultiTouch( AndroidHwConfig* config )
 {
+    if (!config->hw_screen) return 0;
     return strcmp(config->hw_screen, "multi-touch") == 0;
 }
 
