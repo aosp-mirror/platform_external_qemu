@@ -89,7 +89,12 @@ target_link_libraries(OpenglRender
                               OpenGLESDispatch
                               GLSnapshot)
 target_compile_definitions(OpenglRender PRIVATE -DVK_ANDROID_native_buffer)
-target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
+# Set fvisibility as default to export all symbol names for debugging purpose.
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  target_compile_options(OpenglRender PRIVATE -fvisibility=default)
+else()
+  target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
+endif()
 target_link_libraries(OpenglRender PRIVATE emugl_base)
 target_include_directories(
     OpenglRender
