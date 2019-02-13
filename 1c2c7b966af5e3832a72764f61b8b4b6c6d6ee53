@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "83e145fc_07135797",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 776,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-02-13T18:55:06Z",
+      "side": 1,
+      "message": "Program bitness should never be 32, so we can safely remove it.",
+      "revId": "1c2c7b966af5e3832a72764f61b8b4b6c6d6ee53",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
