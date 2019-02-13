@@ -127,8 +127,10 @@ bool qemu_android_emulation_early_setup() {
     // Ensure charpipes i/o are handled properly.
     main_loop_register_poll_callback(qemu_charpipe_poll);
 
-    // Register qemud-related snapshot callbacks.
-    android_qemu2_qemud_init();
+    if (android_qemu_mode) {
+        // Register qemud-related snapshot callbacks.
+        android_qemu2_qemud_init();
+    }
 
     // Ensure the VmLock implementation is setup.
     VmLock* vmLock = new qemu2::VmLock();
@@ -196,6 +198,8 @@ bool qemu_android_emulation_setup() {
         return false;
     }
 
+    if (!android_qemu_mode) return true;
+
     android::base::ScopedCPtr<const char> arch(
                 avdInfo_getTargetCpuArch(android_avdInfo));
     const bool isX86 =
@@ -222,7 +226,6 @@ bool qemu_android_emulation_setup() {
                         },
                         "The goldfish event queue is overflowing, the system is no longer responding.");
     }
-
     return true;
 }
 

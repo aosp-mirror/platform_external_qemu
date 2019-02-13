@@ -467,11 +467,13 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android::offworld::registerOffworldPipeService();
     android_host_memory_service_init();
 
-    AvdFlavor flavor = avdInfo_getAvdFlavor(android_avdInfo);
-    /* initialize the car data emulation if the system image is a Android Auto build */
-    if (flavor == AVD_ANDROID_AUTO) {
-        android_car_init();
-        android_car_cluster_init();
+    if (android_qemu_mode) {
+        AvdFlavor flavor = avdInfo_getAvdFlavor(android_avdInfo);
+        /* initialize the car data emulation if the system image is a Android Auto build */
+        if (flavor == AVD_ANDROID_AUTO) {
+            android_car_init();
+            android_car_cluster_init();
+        }
     }
 
     /* for TV/Wear/... and anything that does not use ril, this is needed
