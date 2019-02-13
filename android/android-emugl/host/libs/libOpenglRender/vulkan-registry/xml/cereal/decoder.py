@@ -272,6 +272,9 @@ custom_decodes = {
     "vkGetPhysicalDeviceMemoryProperties2" : emit_global_state_wrapped_decoding,
     "vkGetPhysicalDeviceMemoryProperties2KHR" : emit_global_state_wrapped_decoding,
 
+    "vkGetPhysicalDeviceExternalSemaphoreProperties" : emit_global_state_wrapped_decoding,
+    "vkGetPhysicalDeviceExternalSemaphorePropertiesKHR" : emit_global_state_wrapped_decoding,
+
     "vkCreateBuffer" : emit_global_state_wrapped_decoding,
     "vkDestroyBuffer" : emit_global_state_wrapped_decoding,
 
@@ -314,6 +317,10 @@ custom_decodes = {
     "vkGetSwapchainGrallocUsage2ANDROID" : emit_global_state_wrapped_decoding,
     "vkAcquireImageANDROID" : emit_global_state_wrapped_decoding,
     "vkQueueSignalReleaseImageANDROID" : emit_global_state_wrapped_decoding,
+
+    "vkGetSemaphoreFdKHR" : emit_global_state_wrapped_decoding,
+    "vkImportSemaphoreFdKHR" : emit_global_state_wrapped_decoding,
+    "vkDestroySemaphore" : vkDestroySemaphore,
 
     # VK_GOOGLE_address_space
     "vkMapMemoryIntoAddressSpaceGOOGLE" : emit_global_state_wrapped_decoding,
