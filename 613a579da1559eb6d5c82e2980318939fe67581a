@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a1855aef_3e7b7e12",
+        "filename": "android/third_party/libunwind/CMakeLists.txt",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-02-13T23:57:02Z",
+      "side": 1,
+      "message": "@jansene\nI think the reason why windows build wouldn\u0027t work is that this execute_process fails to run on Linux for windows. Do we expect \"*.ext\" to run under mingw?",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 46
+      },
+      "revId": "613a579da1559eb6d5c82e2980318939fe67581a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
