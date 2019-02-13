@@ -1194,7 +1194,9 @@ static void build_goldfish_aml(Aml *table)
                               GOLDFISH_ROTARY_IOMEM_SIZE,
                               GOLDFISH_ROTARY_IRQ);
 
-    build_android_dt_aml(scope, "ANDT", "ANDR0001", "android device tree");
+    if (android_qemu_mode) {
+        build_android_dt_aml(scope, "ANDT", "ANDR0001", "android device tree");
+    }
     aml_append(table, scope);
 }
 #endif  /* CONFIG_ANDROID */
@@ -2012,7 +2014,7 @@ build_dsdt(GArray *table_data, BIOSLinker *linker,
         build_q35_pci0_int(dsdt);
     }
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode) {
+    if (android_qemu_mode || min_config_qemu_mode) {
         build_goldfish_aml(dsdt);
     }
 #endif
