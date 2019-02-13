@@ -418,4 +418,13 @@ bool avdInfo_sysImgGuestRenderingBlacklisted(const AvdInfo* i);
 void avdInfo_replaceDataPartitionSizeInConfigIni(AvdInfo* i, int64_t sizeBytes);
 
 bool avdInfo_isMarshmallowOrHigher(AvdInfo* i);
+
+AvdInfo* avdInfo_newCustom(
+    const char* name,
+    int apiLevel,
+    const char* abi,
+    const char* arch,
+    bool isGoogleApis,
+    AvdFlavor flavor);
+
 ANDROID_END_HEADER
