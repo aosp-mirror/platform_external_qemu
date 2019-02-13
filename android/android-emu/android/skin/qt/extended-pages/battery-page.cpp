@@ -117,7 +117,7 @@ void BatteryPage::setBatteryAgent(const QAndroidBatteryAgent* agent) {
 
         BatteryCharger batteryCharger = (BatteryCharger)settings.value(
                                                       Ui::Settings::BATTERY_CHARGER_TYPE2,
-                                                      BATTERY_CHARGER_AC).toInt();
+                                                      BATTERY_CHARGER_NONE).toInt();
         if (sBatteryAgent->setCharger) {
             sBatteryAgent->setCharger(batteryCharger);
         }
