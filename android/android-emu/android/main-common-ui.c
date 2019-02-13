@@ -55,12 +55,25 @@ static char* s_skinPath = NULL;
 static int s_deviceLcdWidth = 0;
 static int s_deviceLcdHeight = 0;
 
+bool emulator_initMinimalSkinConfig(
+    int lcd_width, int lcd_height,
+    const SkinRect* rect,
+    AUserConfig** userConfig_out);
+
 bool
 user_config_init( void )
 {
     SkinRect mmmRect;
     skin_winsys_get_monitor_rect(&mmmRect);
-    userConfig = auserConfig_new(android_avdInfo, &mmmRect, s_deviceLcdWidth, s_deviceLcdHeight);
+    if (min_config_qemu_mode) {
+        emulator_initMinimalSkinConfig(
+            android_hw->hw_lcd_width,
+            android_hw->hw_lcd_height,
+            &mmmRect,
+            &userConfig);
+    } else {
+        userConfig = auserConfig_new(android_avdInfo, &mmmRect, s_deviceLcdWidth, s_deviceLcdHeight);
+    }
     return userConfig != NULL;
 }
 
@@ -305,6 +318,99 @@ DEFAULT_SKIN:
     goto FOUND_SKIN;
 }
 
+void create_minimal_skin_config(
+    int lcd_width, int lcd_height,
+    AConfig** skinConfig,
+    char** skinPath) {
+    char      tmp[1024];
+    AConfig*  root;
+    const char* path = NULL;
+    AConfig*  n;
+
+    root = aconfig_node("", "");
+
+    int width = lcd_width;
+    int height = lcd_height;
+    int bpp   = 32;
+    snprintf(tmp, sizeof tmp,
+            "display {\n  width %d\n  height %d\n bpp %d}\n",
+            width, height,bpp);
+    aconfig_load(root, strdup(tmp));
+    path = ":";
+    D("found magic skin width=%d height=%d bpp=%d\n", width, height, bpp);
+
+    /* the default network speed and latency can now be specified by the device skin */
+    n = aconfig_find(root, "network");
+    if (n != NULL) {
+        android_skin_net_speed = aconfig_str(n, "speed", 0);
+        android_skin_net_delay = aconfig_str(n, "delay", 0);
+    }
+
+    /* extract framebuffer information from the skin.
+     *
+     * for version 1 of the skin format, they are in the top-level
+     * 'display' element.
+     *
+     * for version 2 of the skin format, they are under parts.device.display
+     */
+    n = aconfig_find(root, "display");
+    if (n == NULL) {
+        n = aconfig_find(root, "parts");
+        if (n != NULL) {
+            n = aconfig_find(n, "device");
+            if (n != NULL) {
+                n = aconfig_find(n, "display");
+            }
+        }
+    }
+
+    if (n != NULL) {
+        int  width  = aconfig_int(n, "width", lcd_width);
+        int  height = aconfig_int(n, "height", lcd_height);
+        int  depth  = aconfig_int(n, "bpp", 32);
+
+        if (width > 0 && height > 0) {
+            /* The emulated framebuffer wants a width that is a multiple of 2 */
+            if ((width & 1) != 0) {
+                width  = (width + 1) & ~1;
+                D("adjusting LCD dimensions to (%dx%dx)", width, height);
+            }
+
+            /* only depth values of 16 and 32 are correct. 16 is the default. */
+            if (depth != 32 && depth != 16) {
+                depth = 16;
+                D("adjusting LCD bit depth to %d", depth);
+            }
+
+        }
+        else {
+            D("ignoring invalid skin LCD dimensions (%dx%dx%d)",
+              width, height, depth);
+        }
+    }
+
+    *skinConfig = root;
+    *skinPath   = strdup(path);
+    return;
+}
+
+bool emulator_initMinimalSkinConfig(
+    int lcd_width, int lcd_height,
+    const SkinRect* rect,
+    AUserConfig** userConfig_out) {
+
+    s_deviceLcdWidth = lcd_width;
+    s_deviceLcdHeight = lcd_height;
+
+    create_minimal_skin_config(
+        lcd_width, lcd_height,
+        &s_skinConfig, &s_skinPath);
+
+    *userConfig_out =
+        auserConfig_new_custom(
+            android_avdInfo, rect,
+            s_deviceLcdWidth, s_deviceLcdHeight);
+}
 
 bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,
                                         AvdInfo* avd,

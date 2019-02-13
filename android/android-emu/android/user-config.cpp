@@ -71,6 +71,32 @@ void auserConfig_free( AUserConfig* uconfig) {
     delete uconfig;
 }
 
+AUserConfig*
+auserConfig_new_custom(
+    AvdInfo* info,
+    const SkinRect* monitorRect,
+    int screenWidth, int screenHeight ) {
+
+    std::unique_ptr<AUserConfig> uc(new AUserConfig());
+    memset(uc.get(), 0, sizeof(*uc));
+    int default_w = (monitorRect->size.w * 3) / 4;
+    int default_h = (monitorRect->size.h * 3) / 4;
+    if (default_w < 100) default_w = 100;
+    if (default_h < 100) default_h = 100;
+    uc->windowX  = DEFAULT_X;
+    uc->windowY  = DEFAULT_Y;
+    uc->windowW  = default_w;
+    uc->windowH  = default_h;
+    uc->frameX   = DEFAULT_X;
+    uc->frameY   = DEFAULT_Y;
+    uc->frameW   = default_w;
+    uc->frameH   = default_h;
+    uc->changed  = 1;
+    uc->uuid = 0;
+
+    return uc.release();
+}
+
 /* Create a new AUserConfig object from a given AvdInfo */
 AUserConfig*
 auserConfig_new( AvdInfo* info, SkinRect* monitorRect, int screenWidth, int screenHeight )
