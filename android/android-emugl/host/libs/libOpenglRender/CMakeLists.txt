@@ -34,7 +34,7 @@ set(OpenglRender_vulkan_src
 android_add_library(OpenglRender_vulkan)
 target_link_libraries(OpenglRender_vulkan PUBLIC emugl_common PRIVATE emugl_base OpenglRender_vulkan_cereal GLcommon)
 android_target_compile_definitions(OpenglRender_vulkan windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
-target_compile_options(OpenglRender_vulkan PRIVATE -fvisibility=hidden)
+target_compile_options(OpenglRender_vulkan PRIVATE -fvisibility=default)
 target_include_directories(
     OpenglRender_vulkan
     PUBLIC
@@ -89,7 +89,7 @@ target_link_libraries(OpenglRender
                               OpenGLESDispatch
                               GLSnapshot)
 target_compile_definitions(OpenglRender PRIVATE -DVK_ANDROID_native_buffer)
-target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
+target_compile_options(OpenglRender PRIVATE -rdynamic -fvisibility=default)
 target_link_libraries(OpenglRender PRIVATE emugl_base)
 target_include_directories(
     OpenglRender
@@ -146,7 +146,7 @@ target_link_libraries(OpenglRender_standalone_common
                               OSWindow
                               android-mock-vm-operations)
 target_link_libraries(OpenglRender_standalone_common PRIVATE emugl_base ANGLE::ANGLE)
-target_compile_options(OpenglRender_standalone_common PRIVATE -fvisibility=hidden)
+target_compile_options(OpenglRender_standalone_common PRIVATE -fvisibility=default)
 target_include_directories(OpenglRender_standalone_common
                                    PUBLIC
                                    ${ANDROID_EMUGL_DIR}/host/include/OpenglRender
