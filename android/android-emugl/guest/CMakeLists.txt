@@ -27,11 +27,13 @@ target_include_directories(cutils PUBLIC .)
 target_link_libraries(cutils PUBLIC android-emu-base)
 target_link_libraries(cutils PRIVATE log emugl_base)
 android_target_compile_options(cutils Clang PRIVATE -fvisibility=default -Wno-invalid-constexpr)
+target_compile_definitions(cutils PRIVATE -D__ANDROID_API__=28)
 
 set(grallocusage_src libgrallocusage/GrallocUsageConversion.cpp)
 android_add_shared_library(grallocusage)
 target_include_directories(grallocusage PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(grallocusage PUBLIC emugl_base)
+target_compile_definitions(grallocusage PRIVATE -D__ANDROID_API__=28)
 
 # The gui library
 set(gui_src
@@ -53,6 +55,7 @@ android_add_shared_library(gui)
 target_link_libraries(gui PUBLIC android-emu-base)
 target_include_directories(gui PUBLIC ${ANDROID_EMUGL_DIR}/guest)
 target_compile_options(gui PRIVATE -fvisibility=default)
+target_compile_definitions(gui PRIVATE -D__ANDROID_API__=28)
 target_link_libraries(gui PRIVATE cutils log emugl_base grallocusage)
 
 # The unit tests
@@ -74,7 +77,8 @@ android_add_shared_library(vulkan_android)
 target_compile_definitions(vulkan_android PRIVATE
    -DLOG_TAG=\"vulkan\"
    -DVK_USE_PLATFORM_ANDROID_KHR
-   -DVK_NO_PROTOTYPES)
+   -DVK_NO_PROTOTYPES
+   -D__ANDROID_API__=28)
 target_include_directories(vulkan_android PRIVATE ${ANDROID_EMUGL_DIR}/host/include)
 target_compile_options(vulkan_android PRIVATE -fvisibility=hidden -fstrict-aliasing)
 target_link_libraries(vulkan_android PRIVATE grallocusage)
@@ -91,6 +95,7 @@ target_link_libraries(
     vulkanhal_unittests PRIVATE
     grallocusage aemugraphics PRIVATE
     gtest_main)
+target_compile_definitions(vulkanhal_unittests PRIVATE -D__ANDROID_API__=28)
 android_target_dependency(vulkanhal_unittests all EMULATOR_FEATURE_DEPENDENCIES)
 android_target_dependency(vulkanhal_unittests all SWIFTSHADER_DEPENDENCIES)
 android_target_properties(vulkanhal_unittests darwin-x86_64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")

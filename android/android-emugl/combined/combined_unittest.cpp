@@ -28,6 +28,7 @@
 #include "GoldfishOpenglTestEnv.h"
 #include "GrallocDispatch.h"
 
+#include <android/hardware_buffer.h>
 #include <hardware/gralloc.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -97,6 +98,7 @@ protected:
                               "gralloc.ranchu" LIBSUFFIX);
 
         load_gralloc_module(grallocPath.c_str(), &mGralloc);
+        set_global_gralloc_module(&mGralloc);
 
         EXPECT_NE(nullptr, mGralloc.fb_dev);
         EXPECT_NE(nullptr, mGralloc.alloc_dev);
@@ -714,4 +716,43 @@ TEST_F(CombinedGoldfishOpenglTest, DrawCallRateOverheadOnly) {
         (long)drawCallHz,
         duration_us,
         duration_cpu_us);
+}
+
+TEST_F(CombinedGoldfishOpenglTest, AndroidHardwareBuffer) {
+    uint64_t usage =
+        AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE |
+        AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN |
+        AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+    uint64_t cpuUsage =
+        AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN |
+        AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+
+    AHardwareBuffer_Desc desc = {
+        kWindowSize, kWindowSize, 1,
+        AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,
+        usage,
+        4, // stride ignored for allocate; don't check this
+    };
+
+    AHardwareBuffer* buf;
+    AHardwareBuffer_allocate(&desc, &buf);
+
+    AHardwareBuffer_Desc outDesc;
+    AHardwareBuffer_describe(buf, &outDesc);
+
+    EXPECT_EQ(desc.width, outDesc.width);
+    EXPECT_EQ(desc.height, outDesc.height);
+    EXPECT_EQ(desc.layers, outDesc.layers);
+    EXPECT_EQ(desc.format, outDesc.format);
+    EXPECT_EQ(desc.usage, outDesc.usage);
+
+    void* outVirtualAddress;
+
+    ARect rect = { 0, 0, kWindowSize, kWindowSize, };
+
+    EXPECT_EQ(0, AHardwareBuffer_lock(
+        buf, cpuUsage, -1, &rect, &outVirtualAddress));
+    EXPECT_EQ(0, AHardwareBuffer_unlock(buf, nullptr));
+
+    AHardwareBuffer_release(buf);
 }
