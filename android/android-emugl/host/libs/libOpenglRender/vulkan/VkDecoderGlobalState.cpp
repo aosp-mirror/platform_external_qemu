@@ -50,9 +50,10 @@ namespace goldfish_vk {
 
 // A list of extensions that should not be passed to the host driver.
 // These will mainly include Vulkan features that we emulate ourselves.
-static constexpr const char* const
-kEmulatedExtensions[] = {
-    "VK_ANDROID_native_buffer",
+static constexpr const char* const kEmulatedExtensions[] = {
+        "VK_ANDROID_native_buffer",
+        "VK_KHR_external_semaphore",
+        "VK_KHR_external_semaphore_fd",
 };
 
 static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 0, 65);
@@ -73,12 +74,18 @@ public:
             filteredExtensionNames(
                 pCreateInfo->enabledExtensionCount,
                 pCreateInfo->ppEnabledExtensionNames);
+        printf("on_vkCreateInstance\n");
+        for (int i = 0; i < pCreateInfo->enabledExtensionCount; i++) {
+            printf("%s ", pCreateInfo->ppEnabledExtensionNames[i]);
+        }
+        printf("\n");
 
         VkInstanceCreateInfo createInfoFiltered = *pCreateInfo;
         createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
         createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
 
         VkResult res = m_vk->vkCreateInstance(&createInfoFiltered, pAllocator, pInstance);
+        printf("on_vkCreateInstanceResult %d\n", res);
 
         if (res != VK_SUCCESS) return res;
 
@@ -197,6 +204,17 @@ public:
         }
 
         return res;
+    }
+
+    VkResult on_vkEnumerateDeviceExtensionProperties(
+            VkPhysicalDevice boxed_physicalDevice,
+            const char* pLayerName,
+            uint32_t* pPropertyCount,
+            VkExtensionProperties* pProperties) {
+        auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
+        auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
+        return vk->on_vkEnumerateDeviceExtensionProperties(
+                physicalDevice, pLayerName, pPropertyCount, pProperties);
     }
 
     void on_vkGetPhysicalDeviceFeatures(VkPhysicalDevice boxed_physicalDevice,
@@ -2284,6 +2302,15 @@ VkResult VkDecoderGlobalState::on_vkEnumeratePhysicalDevices(
     uint32_t* physicalDeviceCount,
     VkPhysicalDevice* physicalDevices) {
     return mImpl->on_vkEnumeratePhysicalDevices(instance, physicalDeviceCount, physicalDevices);
+}
+
+VkResult VkDecoderGlobalState::on_vkEnumerateDeviceExtensionProperties(
+        VkPhysicalDevice physicalDevice,
+        const char* pLayerName,
+        uint32_t* pPropertyCount,
+        VkExtensionProperties* pProperties) {
+    return mImpl->on_vkEnumerateDeviceExtensionProperties(
+            physicalDevice, pLayerName, pPropertyCount, pProperties);
 }
 
 void VkDecoderGlobalState::on_vkGetPhysicalDeviceFeatures(

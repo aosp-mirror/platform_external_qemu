@@ -781,6 +781,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkEnumerateDeviceExtensionProperties:
             {
+                if (m_logCalls) {
+                    fprintf(stderr,
+                            "call vkEnumerateDeviceExtensionProperties\n");
+                    ;
+                }
                 VkPhysicalDevice physicalDevice;
                 const char* pLayerName;
                 uint32_t* pPropertyCount;
@@ -831,12 +836,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkExtensionProperties(m_state, (VkExtensionProperties*)(pProperties + i));
                     }
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkEnumerateDeviceExtensionProperties\n");;
-                }
                 VkResult vkEnumerateDeviceExtensionProperties_VkResult_return = (VkResult)0;
-                vkEnumerateDeviceExtensionProperties_VkResult_return = vk->vkEnumerateDeviceExtensionProperties(unboxed_physicalDevice, pLayerName, pPropertyCount, pProperties);
+                vkEnumerateDeviceExtensionProperties_VkResult_return =
+                        m_state->on_vkEnumerateDeviceExtensionProperties(
+                                physicalDevice, pLayerName, pPropertyCount,
+                                pProperties);
                 // WARNING PTR CHECK
                 uint64_t cgen_var_37 = (uint64_t)(uintptr_t)pPropertyCount;
                 vkStream->putBe64(cgen_var_37);
