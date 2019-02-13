@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "688818f9_c4387d64",
+        "filename": "hw/i386/pc_q35.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-02-13T18:49:42Z",
+      "side": 1,
+      "message": "Do we need to protect this with #ifdef CONFIG_ANDROID?",
+      "revId": "b475160d688aae35f0f12973ebe721fc2a0a2af9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
