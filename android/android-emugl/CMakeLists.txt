@@ -41,7 +41,12 @@ function(generate_emugen_lib LIBNAME LOCATION NAME SOURCES)
                                     host/libs/libGLSnapshot
                                     shared/OpenglCodecCommon
                                     ${CMAKE_CURRENT_BINARY_DIR})
-  target_compile_options(${LIBNAME} PRIVATE -fvisibility=hidden)
+  # Set fvisibility as default to export all symbol names for debugging purpose.
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_options(${LIBNAME} PRIVATE -fvisibility=default)
+  else()
+    target_compile_options(${LIBNAME} PRIVATE -fvisibility=hidden)
+  endif()
   target_link_libraries(${LIBNAME} PUBLIC android-emu GLSnapshot)
   target_link_libraries(${LIBNAME} PRIVATE emugl_base)
 endfunction()

@@ -1,7 +1,12 @@
 set(OpenglCodecCommon_src glUtils.cpp ChecksumCalculator.cpp ChecksumCalculatorThreadInfo.cpp)
 android_add_library(OpenglCodecCommon)
 
-target_compile_options(OpenglCodecCommon PRIVATE -fvisibility=hidden)
+# Set fvisibility as default to export all symbol names for debugging purpose.
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  target_compile_options(OpenglCodecCommon PRIVATE -fvisibility=default)
+else()
+  target_compile_options(OpenglCodecCommon PRIVATE -fvisibility=hidden)
+endif()
 target_link_libraries(OpenglCodecCommon PRIVATE emugl_base)
 target_link_libraries(OpenglCodecCommon PUBLIC emugl_common android-emu-base)
 target_include_directories(OpenglCodecCommon
