@@ -18,11 +18,8 @@ get_filename_component(PREBUILT_ROOT
                        "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/e2fsprogs/${TARGET_TAG}"
                        ABSOLUTE)
 
-# binplace in bin64/bin
-set(DST_DIR "bin")
-if(ANDROID_TARGET_TAG MATCHES ".*x86_64")
-  set(DST_DIR "bin64")
-endif()
+# binplace in bin64
+set(DST_DIR "bin64")
 
 if(ANDROID_TARGET_TAG MATCHES "windows.*")
   set(E2FSPROGS_FILES
