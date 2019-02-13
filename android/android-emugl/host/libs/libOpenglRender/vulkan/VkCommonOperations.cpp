@@ -53,7 +53,7 @@ sKnownStagingTypeIndices = LAZY_INSTANCE_INIT;
 
 static android::base::StaticLock sVkEmulationLock;
 
-static VK_EXT_MEMORY_HANDLE dupExternalMemory(VK_EXT_MEMORY_HANDLE h) {
+VK_EXT_MEMORY_HANDLE dupExternalMemory(VK_EXT_MEMORY_HANDLE h) {
 #ifdef _WIN32
     auto myProcessHandle = GetCurrentProcess();
     VK_EXT_MEMORY_HANDLE res;
