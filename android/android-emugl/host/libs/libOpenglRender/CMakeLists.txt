@@ -89,7 +89,12 @@ target_link_libraries(OpenglRender
                               OpenGLESDispatch
                               GLSnapshot)
 target_compile_definitions(OpenglRender PRIVATE -DVK_ANDROID_native_buffer)
-target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
+# Set fvisibility as default to export all symbol names for debugging purpose.
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  target_compile_options(OpenglRender PRIVATE -rdynamic -fvisibility=default)
+else()
+  target_compile_options(OpenglRender PRIVATE -rdynamic -fvisibility=hidden)
+endif()
 target_link_libraries(OpenglRender PRIVATE emugl_base)
 target_include_directories(
     OpenglRender
@@ -146,7 +151,12 @@ target_link_libraries(OpenglRender_standalone_common
                               OSWindow
                               android-mock-vm-operations)
 target_link_libraries(OpenglRender_standalone_common PRIVATE emugl_base ANGLE::ANGLE)
-target_compile_options(OpenglRender_standalone_common PRIVATE -fvisibility=hidden)
+# Set fvisibility as default to export all symbol names for debugging purpose.
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  target_compile_options(OpenglRender_standalone_common PRIVATE -fvisibility=default)
+else()
+  target_compile_options(OpenglRender_standalone_common PRIVATE -fvisibility=hidden)
+endif()
 target_include_directories(OpenglRender_standalone_common
                                    PUBLIC
                                    ${ANDROID_EMUGL_DIR}/host/include/OpenglRender

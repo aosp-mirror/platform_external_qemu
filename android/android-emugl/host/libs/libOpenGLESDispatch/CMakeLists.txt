@@ -1,5 +1,10 @@
 set(OpenGLESDispatch_src EGLDispatch.cpp GLESv2Dispatch.cpp GLESv1Dispatch.cpp OpenGLDispatchLoader.cpp)
 android_add_library(OpenGLESDispatch)
-target_compile_options(OpenGLESDispatch PRIVATE -fvisibility=hidden)
+# Set fvisibility as default to export all symbol names for debugging purpose.
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  target_compile_options(OpenGLESDispatch PRIVATE -fvisibility=default)
+else()
+  target_compile_options(OpenGLESDispatch PRIVATE -fvisibility=hidden)
+endif()
 target_link_libraries(OpenGLESDispatch PRIVATE emugl_base)
 target_link_libraries(OpenGLESDispatch PUBLIC GLESv2_dec OpenglCodecCommon emugl_common GLESv1_dec)

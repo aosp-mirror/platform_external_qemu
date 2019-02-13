@@ -26,7 +26,12 @@ set(GLES12Translator_src
     common/etc1.cpp
     common/RefBase.cpp)
 android_add_shared_library(GLES12Translator)
-target_compile_options(GLES12Translator PRIVATE -fvisibility=hidden)
+# Set fvisibility as default to export all symbol names for debugging purpose.
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  target_compile_options(GLES12Translator PRIVATE -fvisibility=default)
+else()
+  target_compile_options(GLES12Translator PRIVATE -fvisibility=hidden)
+endif()
 target_link_libraries(GLES12Translator PRIVATE emugl_base)
 target_include_directories(GLES12Translator PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(GLES12Translator PUBLIC GLESv1_dec OpenglCodecCommon emugl_common)

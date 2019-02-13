@@ -5,7 +5,12 @@ set(GLES_CM_translator_src
     GLEScmContext.cpp
     GLEScmValidate.cpp)
 android_add_shared_library(GLES_CM_translator)
-target_compile_options(GLES_CM_translator PRIVATE -fvisibility=hidden)
+# Set fvisibility as default to export all symbol names for debugging purpose.
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  target_compile_options(GLES_CM_translator PRIVATE -fvisibility=default)
+else()
+  target_compile_options(GLES_CM_translator PRIVATE -fvisibility=hidden)
+endif()
 target_link_libraries(GLES_CM_translator PUBLIC GLcommon android-emu emugl_common)
 target_link_libraries(GLES_CM_translator PRIVATE emugl_base)
 android_install_shared(GLES_CM_translator)
