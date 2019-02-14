@@ -3580,23 +3580,27 @@ int bdrv_check(BlockDriverState *bs,
 int bdrv_change_backing_file(BlockDriverState *bs,
     const char *backing_file, const char *backing_fmt)
 {
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
     BlockDriver *drv = bs->drv;
     int ret;
 
     if (!drv) {
         return -ENOMEDIUM;
     }
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
 
     /* Backing file format doesn't make sense without a backing file */
     if (backing_fmt && !backing_file) {
         return -EINVAL;
     }
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
 
     if (drv->bdrv_change_backing_file != NULL) {
         ret = drv->bdrv_change_backing_file(bs, backing_file, backing_fmt);
     } else {
         ret = -ENOTSUP;
     }
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
 
     if (ret == 0) {
         pstrcpy(bs->backing_file, sizeof(bs->backing_file), backing_file ?: "");

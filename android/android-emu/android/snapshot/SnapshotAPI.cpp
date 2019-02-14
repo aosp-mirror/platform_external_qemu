@@ -161,8 +161,10 @@ void gotoCheckpoint(
 
         const AndroidSnapshotStatus result =
                 androidSnapshot_load(snapshotName.c_str());
+        printf("snapshot load result %d\n", result);
         gQAndroidVmOperations->vmStart();
         if (result != AndroidSnapshotStatus::SNAPSHOT_STATUS_OK) {
+            printf("snapshot load failed\n");
             android::offworld::sendResponse(pipe, createErrorResponse());
         }
     });
@@ -178,6 +180,11 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
 
     sSnapshotCrossSession->sForkTotal = forkTotal;
     sSnapshotCrossSession->sForkId = 0;
+
+    if (forkTotal <= 1) {
+        android::offworld::sendResponse(pipe, createForkIdResponse(0));
+        return;
+    }
 
     sSnapshotCrossSession->mPipesAwaitingResponse[pipe] = RequestType::Fork;
     sSnapshotCrossSession->mOverrideResponse[RequestType::Fork] =
@@ -200,8 +207,10 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
         assert(res);
         const AndroidSnapshotStatus result =
                 androidSnapshot_load(android::snapshot::kDefaultBootSnapshot);
+        printf("snapshot load result %d\n", result);
         gQAndroidVmOperations->vmStart();
         if (result != AndroidSnapshotStatus::SNAPSHOT_STATUS_OK) {
+            printf("snapshot load failed\n");
             android::offworld::sendResponse(pipe, createErrorResponse());
         }
     });

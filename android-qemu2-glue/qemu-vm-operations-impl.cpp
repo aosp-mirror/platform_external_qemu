@@ -244,6 +244,7 @@ static bool qemu_snapshot_remap(bool shared,
     // ram.
     // If it doesn't have a backing file then we will create a default_boot
     // snapshot.
+    printf("remap snapshot file name %s\n", android::snapshot::Snapshotter::get().loadedSnapshotFile().c_str());
     if (android::snapshot::Snapshotter::get().loadedSnapshotFile() != "" &&
         android::snapshot::Snapshotter::get().loadedSnapshotFile() !=
                 "default_boot") {
