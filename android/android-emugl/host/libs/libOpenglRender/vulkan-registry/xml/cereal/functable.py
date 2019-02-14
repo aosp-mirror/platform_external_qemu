@@ -8,6 +8,22 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkEnumerateDeviceExtensionProperties",
     "vkAllocateMemory",
     "vkFreeMemory",
+    "vkCreateImage",
+    "vkDestroyImage",
+    "vkGetImageMemoryRequirements",
+    "vkGetImageMemoryRequirements2",
+    "vkGetImageMemoryRequirements2KHR",
+    "vkBindImageMemory",
+    "vkBindImageMemory2",
+    "vkBindImageMemory2KHR",
+    "vkCreateBuffer",
+    "vkDestroyBuffer",
+    "vkGetBufferMemoryRequirements",
+    "vkGetBufferMemoryRequirements2",
+    "vkGetBufferMemoryRequirements2KHR",
+    "vkBindBufferMemory",
+    "vkBindBufferMemory2",
+    "vkBindBufferMemory2KHR",
 ]
 
 SUCCESS_VAL = {
