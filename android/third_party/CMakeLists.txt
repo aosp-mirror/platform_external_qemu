@@ -62,3 +62,7 @@ if("${ANDROID_TARGET_TAG}" MATCHES "windows.*")
     add_subdirectory(dirent-win32)
  endif()
 endif()
+
+if("${ANDROID_TARGET_TAG}" STREQUAL "linux-x86_64" OR "${ANDROID_TARGET_TAG}" STREQUAL "darwin-x86_64")
+  add_subdirectory(libunwind)
+endif()
