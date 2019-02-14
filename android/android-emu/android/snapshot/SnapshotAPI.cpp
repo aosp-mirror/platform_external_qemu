@@ -179,6 +179,11 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
     sSnapshotCrossSession->sForkTotal = forkTotal;
     sSnapshotCrossSession->sForkId = 0;
 
+    if (forkTotal <= 1) {
+        android::offworld::sendResponse(pipe, createForkIdResponse(0));
+        return;
+    }
+
     sSnapshotCrossSession->mPipesAwaitingResponse[pipe] = RequestType::Fork;
     sSnapshotCrossSession->mOverrideResponse[RequestType::Fork] =
             createForkIdResponse(0);
