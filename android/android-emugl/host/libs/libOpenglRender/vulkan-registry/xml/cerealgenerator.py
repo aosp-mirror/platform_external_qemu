@@ -165,7 +165,8 @@ LOCAL_SRC_FILES := HostVisibleMemoryVirtualization.cpp \\
 ifeq (true,$(GOLDFISH_OPENGL_BUILD_FOR_HOST))
 $(call emugl-export,SHARED_LIBRARIES,libgui)
 else
-$(call emugl-export,SHARED_LIBRARIES,libsync)
+$(call emugl-export,SHARED_LIBRARIES,libsync libnativewindow)
+LOCAL_STATIC_LIBRARIES += libarect
 endif
 
 $(call emugl-end-module)
