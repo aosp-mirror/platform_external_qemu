@@ -2230,6 +2230,7 @@ static size_t header_ext_add(char *buf, uint32_t magic, const void *s,
  */
 int qcow2_update_header(BlockDriverState *bs)
 {
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
     BDRVQcow2State *s = bs->opaque;
     QCowHeader *header;
     char *buf;
@@ -2308,6 +2309,7 @@ int qcow2_update_header(BlockDriverState *bs)
     }
 
     /* Backing file format header extension */
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
     if (s->image_backing_format) {
         ret = header_ext_add(buf, QCOW2_EXT_MAGIC_BACKING_FORMAT,
                              s->image_backing_format,
@@ -2320,6 +2322,7 @@ int qcow2_update_header(BlockDriverState *bs)
         buf += ret;
         buflen -= ret;
     }
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
 
     /* Full disk encryption header pointer extension */
     if (s->crypto_header.offset != 0) {
@@ -2336,6 +2339,7 @@ int qcow2_update_header(BlockDriverState *bs)
         buf += ret;
         buflen -= ret;
     }
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
 
     /* Feature table */
     if (s->qcow_version >= 3) {
@@ -2365,6 +2369,7 @@ int qcow2_update_header(BlockDriverState *bs)
         buf += ret;
         buflen -= ret;
     }
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
 
     /* Bitmap extension */
     if (s->nb_bitmaps > 0) {
@@ -2384,6 +2389,7 @@ int qcow2_update_header(BlockDriverState *bs)
         buf += ret;
         buflen -= ret;
     }
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
 
     /* Keep unknown header extensions */
     QLIST_FOREACH(uext, &s->unknown_header_ext, next) {
@@ -2395,6 +2401,7 @@ int qcow2_update_header(BlockDriverState *bs)
         buf += ret;
         buflen -= ret;
     }
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
 
     /* End of header extensions */
     ret = header_ext_add(buf, QCOW2_EXT_MAGIC_END, NULL, 0, buflen);
@@ -2420,12 +2427,14 @@ int qcow2_update_header(BlockDriverState *bs)
         header->backing_file_offset = cpu_to_be64(buf - ((char*) header));
         header->backing_file_size   = cpu_to_be32(backing_file_len);
     }
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
 
     /* Write the new header */
     ret = bdrv_pwrite(bs->file, 0, header, s->cluster_size);
     if (ret < 0) {
         goto fail;
     }
+    printf("%s: %s %d\n", __func__, __FILE__, __LINE__);
 
     ret = 0;
 fail:
