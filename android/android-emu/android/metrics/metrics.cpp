@@ -404,6 +404,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::WIFI_CONFIGURABLE;
         case android::featurecontrol::Vulkan:
             return android_studio::EmulatorFeatureFlagState::VULKAN;
+        case android::featurecontrol::MacroUi:
+            return android_studio::EmulatorFeatureFlagState::MACRO_UI;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
