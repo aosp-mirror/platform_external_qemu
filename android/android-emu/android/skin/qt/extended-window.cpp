@@ -159,9 +159,19 @@ ExtendedWindow::ExtendedWindow(
         mExtendedUi->googlePlayButton->setVisible(true);
     }
 
-    if (android::featurecontrol::isEnabled(android::featurecontrol::ScreenRecording)) {
+    const bool screenRecording = android::featurecontrol::isEnabled(
+            android::featurecontrol::ScreenRecording);
+    const bool macroUi = android::featurecontrol::isEnabled(
+            android::featurecontrol::MacroUi);
+    if (screenRecording || macroUi) {
         mSidebarButtons.addButton(mExtendedUi->recordScreenButton);
         mExtendedUi->recordScreenButton->setVisible(true);
+
+        if (macroUi) {
+            mExtendedUi->recordScreenButton->setText(
+                    tr("  Record and Playback"));
+            mExtendedUi->recordAndPlaybackPage->enableMacroUi();
+        }
     }
 
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
@@ -357,7 +367,7 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
     mExtendedUi->rotaryInputPage->updateTheme();
     mExtendedUi->location_page->updateTheme();
     mExtendedUi->bugreportPage->updateTheme();
-    mExtendedUi->recordScreenPage->updateTheme();
+    mExtendedUi->recordAndPlaybackPage->updateTheme();
 
     // Force a re-draw to make the new style take effect
     this->style()->unpolish(mExtendedUi->stackedWidget);

@@ -75,7 +75,7 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="VirtualSensorsPage" name="virtualSensorsPage"/>
    <widget class="SnapshotPage" name="snapshotPage"/>
    <widget class="BugreportPage" name="bugreportPage"/>
-   <widget class="RecordScreenPage" name="recordScreenPage"/>
+   <widget class="RecordAndPlaybackPage" name="recordAndPlaybackPage"/>
    <widget class="GooglePlayPage" name="googlePlayPage"/>
    <widget class="SettingsPage" name="settingsPage"/>
    <widget class="HelpPage" name="helpPage"/>
@@ -1322,9 +1322,9 @@ padding: 10px 0px 10px 16px;</string>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>RecordScreenPage</class>
+   <class>RecordAndPlaybackPage</class>
    <extends>QWidget</extends>
-   <header>android/skin/qt/extended-pages/record-screen-page.h</header>
+   <header>android/skin/qt/extended-pages/record-and-playback-page.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
