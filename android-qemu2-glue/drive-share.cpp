@@ -45,7 +45,7 @@ extern "C" {
 #include "sysemu/sysemu.h"
 }
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG
 #define D(...) printf(__VA_ARGS__)
@@ -282,13 +282,17 @@ static bool createEmptySnapshot(BlockDriverState* bs,
 
 static std::string initDrivePath(const char* id,
                                  android::base::FileShare shareMode,
-                                 QemuOpts* opts) {
+                                 QemuOpts* opts,
+                                 bool skipInitQCow2) {
     assert(sDriveShare->srcImagePaths.count(id));
     if (needCreateTmp(id, shareMode, opts)) {
         // Create a temp qcow2-on-qcow2
         Error* img_creation_error = NULL;
         TempFile* img = tempfile_create_with_ext(".qcow2");
         const char* imgPath = tempfile_path(img);
+        if (skipInitQCow2) {
+            return imgPath;
+        }
         bdrv_img_create(imgPath, QCOW2_SUFFIX,
                         sDriveShare->srcImagePaths[id].c_str(), "qcow2",
                         nullptr, -1, 0, true, &img_creation_error);
@@ -309,9 +313,23 @@ static void mirrorTmpCache(const char* dst, const char* src) {
     // Thus we directly copy the qcow2 file.
     // TODO (yahan@): figure out why
     path_copy_file(dst, src);
-    QDict *options = qdict_new();
-    qdict_put(options, "driver", qstring_from_str(QCOW2_SUFFIX));
     Error *local_err = NULL;
+    QDict* bs_opts = qdict_new();
+    qdict_set_default_str(bs_opts, BDRV_OPT_CACHE_DIRECT, "off");
+    qdict_set_default_str(bs_opts, BDRV_OPT_CACHE_NO_FLUSH, "off");
+    qdict_set_default_str(bs_opts, BDRV_OPT_READ_ONLY, "off");
+    Error* errp;
+    BlockDriverState* bs = bdrv_open(dst, nullptr, bs_opts, 0, &errp);
+    if (!bs) {
+        error_setg(&errp, "drive %s open failure", dst);
+    }
+    int res = bdrv_change_backing_file(bs,
+            android_hw->disk_cachePartition_path, NULL);
+    D("cache changing backing file result: %d\n", res);
+    bdrv_unref(bs);
+
+    /*QDict *options = qdict_new();
+    qdict_put(options, "driver", qstring_from_str(QCOW2_SUFFIX));
     BlockBackend *blk = blk_new_open(dst,
             NULL, options, BDRV_O_RDWR | BDRV_O_NO_BACKING,
             &local_err);
@@ -321,8 +339,10 @@ static void mirrorTmpCache(const char* dst, const char* src) {
         BlockDriverState* bs = blk_bs(blk);
         bdrv_change_backing_file(bs,
                 android_hw->disk_cachePartition_path, NULL);
+        blk_flush(blk);
+        bdrv_unref(bs);
         blk_unref(blk);
-    }
+    }*/
 }
 
 // This is for C-style function pointer
@@ -331,7 +351,7 @@ static int drive_init(void* opaque, QemuOpts* opts, Error** errp) {
     DriveInitParam* param = (DriveInitParam*)opaque;
     const char* id = opts->id;
     if (id) {
-        std::string path = initDrivePath(id, param->shareMode, opts);
+        std::string path = initDrivePath(id, param->shareMode, opts, false);
         qemu_opt_set(opts, "file", path.c_str(), errp);
         if (needCreateTmp(id, param->shareMode, opts) && param->snapshotName) {
             if (strcmp(id, "cache")) {
@@ -374,6 +394,7 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
         D("%s dont need remount\n", id);
         return 0;
     }
+    D("%s: %s %d\n", __func__, __FILE__, __LINE__);
     DriveInitParam* param = (DriveInitParam*)opaque;
     const char* snapshotName = param->snapshotName;
     BlockBackend* blk = blk_by_name(id);
@@ -381,6 +402,7 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
         error_setg(errp, "%s not found", id);
         return 1;
     }
+    D("%s: %s %d\n", __func__, __FILE__, __LINE__);
 
     BlockDriverState* oldbs = blk_bs(blk);
     AioContext* aioCtx = bdrv_get_aio_context(oldbs);
@@ -399,6 +421,7 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
     }
     blk_remove_bs(blk);
     aio_context_release(aioCtx);
+    D("%s: %s %d\n", __func__, __FILE__, __LINE__);
     if (param->shareMode == android::base::FileShare::Write) {
         // Updating from read to write, delete temp  files from the previous
         // read
@@ -406,11 +429,15 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
         D("Closing old image %s\n", oldPath);
         tempfile_unref_and_close(oldPath);
     }
-    std::string path = initDrivePath(id, param->shareMode, opts);
+    D("%s: %s %d\n", __func__, __FILE__, __LINE__);
+    // Don't write file contents if it is for cache
+    std::string path = initDrivePath(id, param->shareMode, opts, isCache);
+    D("%s: %s %d\n", __func__, __FILE__, __LINE__);
     if (needCreateTmp(id, param->shareMode, opts) && isCache) {
         mirrorTmpCache(path.c_str(),
                     sDriveShare->srcImagePaths[id].c_str());
     }
+    D("%s: %s %d\n", __func__, __FILE__, __LINE__);
 
     // Mount the drive
     qemu_opt_set(opts, "file", path.c_str(), errp);
@@ -421,6 +448,7 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
     // (drive_new also sets dinfo and error handlings. We will not touch dinfo
     // and we don't set error handlings. We also skip the renaming in drive_new
     // because it should have been renamed in the first time of initialization.)
+    D("%s: %s %d\n", __func__, __FILE__, __LINE__);
     QDict* bs_opts = qdict_new();
     qemu_opts_to_qdict(opts, bs_opts);
     QemuOpts* legacy_opts =
@@ -431,6 +459,7 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
         qemu_opts_del(drive_opts);
         drive_opts = nullptr;
     }
+    D("%s: %s %d\n", __func__, __FILE__, __LINE__);
     drive_opts = qemu_opts_create(&qemu_common_drive_opts, id, 1, nullptr);
     qemu_opts_absorb_qdict(drive_opts, bs_opts, errp);
 
@@ -438,6 +467,7 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
     qdict_set_default_str(bs_opts, BDRV_OPT_CACHE_NO_FLUSH, "off");
     qdict_set_default_str(bs_opts, BDRV_OPT_READ_ONLY, "off");
     qdict_del(bs_opts, "id");
+    D("%s: %s %d\n", __func__, __FILE__, __LINE__);
 
     BlockDriverState* bs = bdrv_open(path.c_str(), nullptr, bs_opts, 0, errp);
     if (!bs) {
@@ -498,6 +528,7 @@ static bool updateDriveShareMode(const char* snapshotName,
     int res = qemu_opts_foreach(qemu_find_opts("drive"), drive_reinit, &param,
                                 &error);
     if (res) {
+        printf("failure: %s\n", error_get_pretty(error));
         error_report("%s", error_get_pretty(error));
         return false;
     }
