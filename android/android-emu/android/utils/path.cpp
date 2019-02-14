@@ -54,6 +54,7 @@
 #endif
 
 #define  D(...)  VERBOSE_PRINT(init,__VA_ARGS__)
+//#define  D(...) printf(__VA_ARGS__);
 
 #ifdef _WIN32
 using android::base::arraySize;
@@ -395,6 +396,7 @@ APosixStatus path_copy_file_impl(const char*  dest, const char*  source) {
 #else  // !_WIN32
     const int fd = creat(dest, S_IRUSR | S_IWUSR);
     const int fs = open(source, S_IREAD);
+    printf("src %s: %d, dst %s: %d\n", source, fs, dest, fd);
 #endif  // !_WIN32
     if (fs >= 0 && fd >= 0) {
 #ifdef __linux__

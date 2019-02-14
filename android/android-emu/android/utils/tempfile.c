@@ -26,7 +26,8 @@
 #  include <unistd.h>
 #endif
 
-#define  D(...)  ((void)0)
+//#define  D(...)  ((void)0)
+#define  D(...)  printf(__VA_ARGS__);
 
 /** TEMP FILE SUPPORT
  **
@@ -119,6 +120,7 @@ tempfile_create_with_ext( const char* ext )
     tempfile = malloc( sizeof(*tempfile) + strlen(tempname) + 1 );
     tempfile->name = (char*)(tempfile + 1);
     strcpy( (char*)tempfile->name, tempname );
+    D("temp file name: %s\n", tempfile->name);
 
     tempfile->next = _all_tempfiles;
     _all_tempfiles = tempfile;
