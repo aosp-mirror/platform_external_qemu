@@ -219,11 +219,6 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
         }
     }
 
-    // Apply overrides from the hw config.
-    if (android_hw && android_hw->hw_featureflags) {
-        parseAndApplyOverrides(android_hw->hw_featureflags);
-    }
-
     // Enumerate the command line and environment variables to add overrides.
     const auto envVar =
             android::base::System::get()->envGet("ANDROID_EMULATOR_FEATURES");
