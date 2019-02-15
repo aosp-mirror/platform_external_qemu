@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "45bff497_38070051",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-02-15T16:08:08Z",
+      "side": 1,
+      "message": "this does not work on playstore image reliably, tested on windows",
+      "range": {
+        "startLine": 593,
+        "startChar": 4,
+        "endLine": 595,
+        "endChar": 48
+      },
+      "revId": "f3e7d95d0fe4010d0f41313f704ff9839be40b3f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
