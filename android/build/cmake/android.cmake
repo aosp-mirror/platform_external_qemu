@@ -246,6 +246,7 @@ function(android_add_test name)
            WORKING_DIRECTORY $<TARGET_FILE_DIR:${name}>)
   set_property(TEST ${name} PROPERTY ENVIRONMENT "ASAN_OPTIONS=${ASAN_OVERRIDES}")
   set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "LLVM_PROFILE_FILE=$<TARGET_FILE_NAME:${name}>.profraw")
+  set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ANDROID_LLVM_SYMBOLIZER}")
 
   if(MSVC)
     # Let's include the .dll path for our test runner and set a timeout so we are guaranteed to complete the tests

@@ -1,5 +1,5 @@
 /build*/
-/objs/*
+/objs*
 /config-devices.*
 /config-all-devices.*
 /config-all-disas.*
