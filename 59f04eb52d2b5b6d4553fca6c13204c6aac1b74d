@@ -22,6 +22,30 @@
       "revId": "59f04eb52d2b5b6d4553fca6c13204c6aac1b74d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6fa187c5_ba1b029d",
+        "filename": ".gitignore",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-02-15T08:03:31Z",
+      "side": 1,
+      "message": "I can remove this I just noticed that I can use build-xxx for cross builds",
+      "parentUuid": "fb8c0fcd_9d59743c",
+      "range": {
+        "startLine": 2,
+        "startChar": 5,
+        "endLine": 2,
+        "endChar": 6
+      },
+      "revId": "59f04eb52d2b5b6d4553fca6c13204c6aac1b74d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
