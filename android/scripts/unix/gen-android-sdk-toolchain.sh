@@ -332,6 +332,11 @@ gen_wrapper_toolchain () {
         *mingw*)
             PROGRAMS="$PROGRAMS windres"
             ;;
+        *)
+            # We are doing clang on a posix system.. So lets
+            # Symlink symbolizer, asan really wants this to be named llvm-symbolizer..
+            ln -sf ${CLANG_BINDIR}/llvm-symbolizer ${DST_DIR}/llvm-symbolizer
+            ;;
     esac
 
     case "$CURRENT_HOST" in
@@ -359,6 +364,7 @@ gen_wrapper_toolchain () {
         gen_wrapper_program $PROG "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR"
     done
 
+    # Setup additional host specific things
     case "$CURRENT_HOST" in
         windows-x86_64|linux-x86_64)
             gen_dbg_splitter "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR"
