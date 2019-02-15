@@ -124,6 +124,7 @@ public:
         while (it != mPhysicalDeviceToInstance.end()) {
             if (it->second == instance) {
                 it = mPhysicalDeviceToInstance.erase(it);
+                mPhysdevInfo.erase(it->first);
             } else {
                 ++it;
             }
@@ -166,31 +167,32 @@ public:
 
                 auto& physdevInfo = mPhysdevInfo[physicalDevices[i]];
 
-
+                if (!physdevInfo.boxed) {
                     physdevInfo.boxed =
                             new_boxed_VkPhysicalDevice(physicalDevices[i], vk);
+                }
 
-                    vk->vkGetPhysicalDeviceProperties(physicalDevices[i],
-                                                      &physdevInfo.props);
+                vk->vkGetPhysicalDeviceProperties(physicalDevices[i],
+                                                  &physdevInfo.props);
 
-                    // if (physdevInfo.props.apiVersion > kMaxSafeVersion) {
-                        // physdevInfo.props.apiVersion = kMaxSafeVersion;
-                    // }
+                // if (physdevInfo.props.apiVersion > kMaxSafeVersion) {
+                // physdevInfo.props.apiVersion = kMaxSafeVersion;
+                // }
 
-                    vk->vkGetPhysicalDeviceMemoryProperties(
-                            physicalDevices[i], &physdevInfo.memoryProperties);
+                vk->vkGetPhysicalDeviceMemoryProperties(
+                        physicalDevices[i], &physdevInfo.memoryProperties);
 
-                    uint32_t queueFamilyPropCount = 0;
+                uint32_t queueFamilyPropCount = 0;
 
-                    vk->vkGetPhysicalDeviceQueueFamilyProperties(
-                            physicalDevices[i], &queueFamilyPropCount, nullptr);
+                vk->vkGetPhysicalDeviceQueueFamilyProperties(
+                        physicalDevices[i], &queueFamilyPropCount, nullptr);
 
-                    physdevInfo.queueFamilyProperties.resize(
-                            (size_t)queueFamilyPropCount);
+                physdevInfo.queueFamilyProperties.resize(
+                        (size_t)queueFamilyPropCount);
 
-                    vk->vkGetPhysicalDeviceQueueFamilyProperties(
-                            physicalDevices[i], &queueFamilyPropCount,
-                            physdevInfo.queueFamilyProperties.data());
+                vk->vkGetPhysicalDeviceQueueFamilyProperties(
+                        physicalDevices[i], &queueFamilyPropCount,
+                        physdevInfo.queueFamilyProperties.data());
 
                 physicalDevices[i] = (VkPhysicalDevice)physdevInfo.boxed;
             }

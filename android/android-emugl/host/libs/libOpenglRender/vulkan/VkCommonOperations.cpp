@@ -722,6 +722,19 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         return sVkEmulation;
     }
 
+    VkFenceCreateInfo fenceCi = {
+        VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, 0, 0,
+    };
+
+    VkResult fenceCreateRes = vk->vkCreateFence(
+        sVkEmulation->device, &fenceCi, nullptr,
+        &sVkEmulation->commandBufferFence);
+
+    if (fenceCreateRes != VK_SUCCESS) {
+        LOG(VERBOSE) << "Failed to create fence for command buffer. Error: " << fenceCreateRes;
+        return sVkEmulation;
+    }
+
     // At this point, the global emulation state's logical device can alloc
     // memory and send commands. However, it can't really do much yet to
     // communicate the results without the staging buffer. Set that up here.
@@ -1059,6 +1072,7 @@ bool setupVkColorBuffer(VulkanDispatch* vk, uint32_t colorBufferHandle) {
          res.tiling,
          res.usageFlags,
          VK_SHARING_MODE_EXCLUSIVE, 0, nullptr,
+         VK_IMAGE_LAYOUT_UNDEFINED,
     };
 
     VkResult createRes = vk->vkCreateImage(sVkEmulation->device, &imageCi,
@@ -1083,6 +1097,14 @@ bool setupVkColorBuffer(VulkanDispatch* vk, uint32_t colorBufferHandle) {
 
     if (!allocRes) {
         LOG(VERBOSE) << "Failed to allocate ColorBuffer with Vulkan backing.";
+    }
+
+    VkResult bindImageMemoryRes =
+        vk->vkBindImageMemory(sVkEmulation->device, res.image, res.memory.memory, 0);
+    
+    if (bindImageMemoryRes != VK_SUCCESS) {
+        fprintf(stderr, "%s: Failed to bind image memory. %d\n", __func__,
+        bindImageMemoryRes);
     }
 
     sVkEmulation->colorBuffers[colorBufferHandle] = res;
@@ -1118,6 +1140,294 @@ VkEmulation::ColorBufferInfo getColorBufferInfo(uint32_t colorBufferHandle) {
 
     res = *infoPtr;
     return res;
+}
+
+bool updateColorBufferFromVkImage(VulkanDispatch* vk, uint32_t colorBufferHandle) {
+    AutoLock lock(sVkEmulationLock);
+
+    auto infoPtr = android::base::find(sVkEmulation->colorBuffers, colorBufferHandle);
+
+    if (!infoPtr) {
+        fprintf(stderr, "%s: error: ColorBuffer 0x%x not found\n", __func__, colorBufferHandle);
+        return false;
+    }
+
+    if (!infoPtr->image) {
+        fprintf(stderr, "%s: error: ColorBuffer 0x%x has no VkImage\n", __func__, colorBufferHandle);
+        return false;
+    }
+
+    // Record our synchronization commands.
+    VkCommandBufferBeginInfo beginInfo = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, 0,
+        VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+        nullptr /* no inheritance info */,
+    };
+
+    vk->vkBeginCommandBuffer(
+        sVkEmulation->commandBuffer,
+        &beginInfo);
+
+    // From the spec: If an application does not need the contents of a resource
+    // to remain valid when transferring from one queue family to another, then
+    // the ownership transfer should be skipped.
+
+    // We definitely need to transition the image to
+    // VK_TRANSFER_SRC_OPTIMAL and back.
+
+    VkImageMemoryBarrier presentToTransferSrc = {
+        VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, 0,
+        0,
+        VK_ACCESS_HOST_READ_BIT,
+        infoPtr->currentLayout,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        VK_QUEUE_FAMILY_IGNORED,
+        VK_QUEUE_FAMILY_IGNORED,
+        infoPtr->image,
+        {
+            VK_IMAGE_ASPECT_COLOR_BIT,
+            0, 1, 0, 1,
+        },
+    };
+
+    vk->vkCmdPipelineBarrier(
+        sVkEmulation->commandBuffer,
+        VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+        VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+        0,
+        0, nullptr,
+        0, nullptr,
+        1, &presentToTransferSrc);
+    
+    infoPtr->currentLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+
+    // Copy to staging buffer
+    uint32_t bpp = 4; /* format always rgba8...not */
+    switch (infoPtr->format) {
+        case VK_FORMAT_R5G6B5_UNORM_PACK16:
+            bpp = 2;
+            break;
+        case VK_FORMAT_R8G8B8_UNORM:
+            bpp = 3;
+            break;
+        default:
+        case VK_FORMAT_R8G8B8A8_UNORM:
+            bpp = 4;
+            break;
+    }
+    VkBufferImageCopy region = {
+        0 /* buffer offset */,
+        infoPtr->extent.width,
+        infoPtr->extent.height,
+        {
+            VK_IMAGE_ASPECT_COLOR_BIT,
+            0, 0, 1,
+        },
+        { 0, 0, 0 },
+        infoPtr->extent,
+    };
+
+    vk->vkCmdCopyImageToBuffer(
+        sVkEmulation->commandBuffer,
+        infoPtr->image,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        sVkEmulation->staging.buffer,
+        1, &region);
+
+    vk->vkEndCommandBuffer(sVkEmulation->commandBuffer);
+
+    VkSubmitInfo submitInfo = {
+        VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
+        0, nullptr,
+        nullptr,
+        1, &sVkEmulation->commandBuffer,
+        0, nullptr,
+    };
+
+    vk->vkQueueSubmit(
+        sVkEmulation->queue,
+        1, &submitInfo,
+        sVkEmulation->commandBufferFence);
+
+    static constexpr uint64_t ANB_MAX_WAIT_NS =
+        5ULL * 1000ULL * 1000ULL * 1000ULL;
+
+    vk->vkWaitForFences(
+        sVkEmulation->device, 1, &sVkEmulation->commandBufferFence,
+        VK_TRUE, ANB_MAX_WAIT_NS);
+    vk->vkResetFences(
+        sVkEmulation->device, 1, &sVkEmulation->commandBufferFence);
+
+    VkMappedMemoryRange toInvalidate = {
+        VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE, 0,
+        sVkEmulation->staging.memory.memory,
+        0, VK_WHOLE_SIZE,
+    };
+
+    vk->vkInvalidateMappedMemoryRanges(
+        sVkEmulation->device, 1, &toInvalidate);
+
+    FrameBuffer::getFB()->
+        replaceColorBufferContents(
+            colorBufferHandle,
+            sVkEmulation->staging.memory.mappedPtr,
+            bpp * infoPtr->extent.width * infoPtr->extent.height);
+
+    return true;
+}
+
+bool updateVkImageFromColorBuffer(VulkanDispatch* vk, uint32_t colorBufferHandle) {
+    AutoLock lock(sVkEmulationLock);
+
+    auto infoPtr = android::base::find(sVkEmulation->colorBuffers, colorBufferHandle);
+
+    if (!infoPtr) {
+
+        return false;
+    }
+
+    size_t cbNumBytes = 0;
+    bool readRes = FrameBuffer::getFB()->
+        readColorBufferContents(
+            colorBufferHandle, &cbNumBytes, nullptr);
+    
+    if (!readRes) {
+        fprintf(stderr, "%s: Failed to read color buffer 0x%x\n",
+                __func__, colorBufferHandle);
+        return false;
+    }
+
+    if (cbNumBytes > sVkEmulation->staging.memory.size) {
+        fprintf(stderr,
+            "%s: Not enough space to read to staging buffer. "
+            "Wanted: 0x%llx Have: 0x%llx\n", __func__,
+            (unsigned long long)cbNumBytes,
+            (unsigned long long)(sVkEmulation->staging.memory.size));
+        return false;
+    }
+
+    readRes = FrameBuffer::getFB()->
+        readColorBufferContents(
+            colorBufferHandle, &cbNumBytes,
+            sVkEmulation->staging.memory.mappedPtr);
+
+    if (!readRes) {
+        fprintf(stderr, "%s: Failed to read color buffer 0x%x (at glReadPixels)\n",
+                __func__, colorBufferHandle);
+        return false;
+    }
+
+    // Record our synchronization commands.
+    VkCommandBufferBeginInfo beginInfo = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, 0,
+        VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+        nullptr /* no inheritance info */,
+    };
+
+    vk->vkBeginCommandBuffer(
+        sVkEmulation->commandBuffer,
+        &beginInfo);
+
+    // From the spec: If an application does not need the contents of a resource
+    // to remain valid when transferring from one queue family to another, then
+    // the ownership transfer should be skipped.
+
+    // We definitely need to transition the image to
+    // VK_TRANSFER_SRC_OPTIMAL and back.
+
+    VkImageMemoryBarrier presentToTransferSrc = {
+        VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, 0,
+        0,
+        VK_ACCESS_HOST_READ_BIT,
+        infoPtr->currentLayout,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        VK_QUEUE_FAMILY_IGNORED,
+        VK_QUEUE_FAMILY_IGNORED,
+        infoPtr->image,
+        {
+            VK_IMAGE_ASPECT_COLOR_BIT,
+            0, 1, 0, 1,
+        },
+    };
+
+    infoPtr->currentLayout =
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+
+    vk->vkCmdPipelineBarrier(
+        sVkEmulation->commandBuffer,
+        VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+        VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+        0,
+        0, nullptr,
+        0, nullptr,
+        1, &presentToTransferSrc);
+
+    // Copy to staging buffer
+    uint32_t bpp = 4; /* format always rgba8...not */
+    switch (infoPtr->format) {
+        case VK_FORMAT_R5G6B5_UNORM_PACK16:
+            bpp = 2;
+            break;
+        case VK_FORMAT_R8G8B8_UNORM:
+            bpp = 3;
+            break;
+        default:
+        case VK_FORMAT_R8G8B8A8_UNORM:
+            bpp = 4;
+            break;
+    }
+    VkBufferImageCopy region = {
+        0 /* buffer offset */,
+        infoPtr->extent.width,
+        infoPtr->extent.height,
+        {
+            VK_IMAGE_ASPECT_COLOR_BIT,
+            0, 0, 1,
+        },
+        { 0, 0, 0 },
+        infoPtr->extent,
+    };
+
+    vk->vkCmdCopyBufferToImage(
+        sVkEmulation->commandBuffer,
+        sVkEmulation->staging.buffer,
+        infoPtr->image,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        1, &region);
+
+    vk->vkEndCommandBuffer(sVkEmulation->commandBuffer);
+
+    VkSubmitInfo submitInfo = {
+        VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
+        0, nullptr,
+        nullptr,
+        1, &sVkEmulation->commandBuffer,
+        0, nullptr,
+    };
+
+    vk->vkQueueSubmit(
+        sVkEmulation->queue,
+        1, &submitInfo,
+        sVkEmulation->commandBufferFence);
+
+    static constexpr uint64_t ANB_MAX_WAIT_NS =
+        5ULL * 1000ULL * 1000ULL * 1000ULL;
+
+    vk->vkWaitForFences(
+        sVkEmulation->device, 1, &sVkEmulation->commandBufferFence,
+        VK_TRUE, ANB_MAX_WAIT_NS);
+    vk->vkResetFences(
+        sVkEmulation->device, 1, &sVkEmulation->commandBufferFence);
+
+    VkMappedMemoryRange toInvalidate = {
+        VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE, 0,
+        sVkEmulation->staging.memory.memory,
+        0, VK_WHOLE_SIZE,
+    };
+
+    vk->vkInvalidateMappedMemoryRanges(
+        sVkEmulation->device, 1, &toInvalidate);
+    return true;
 }
 
 VkExternalMemoryHandleTypeFlags

@@ -316,6 +316,16 @@ public:
         HandleType p_colorbuffer,
         const void *pixels,
         size_t numBytes);
+    // Reads back the color buffer to |pixels|
+    // if |pixels| is not null.
+    // Always returns in |numBytes| how many bytes were
+    // planned to be transmitted.
+    // |numBytes| is not an input parameter;
+    // fewer or more bytes cannot be specified.
+    bool readColorBufferContents(
+        HandleType p_colorbuffer,
+        size_t* numBytes,
+        void *pixels);
 
     bool getColorBufferInfo(HandleType p_colorbuffer,
                             int* width,

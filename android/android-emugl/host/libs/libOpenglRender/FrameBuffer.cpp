@@ -1443,6 +1443,20 @@ bool FrameBuffer::replaceColorBufferContents(
     return (*c).second.cb->replaceContents(pixels, numBytes);
 }
 
+bool FrameBuffer::readColorBufferContents(
+    HandleType p_colorbuffer, size_t* numBytes, void* pixels) {
+
+    AutoLock mutex(m_lock);
+
+    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+    if (c == m_colorbuffers.end()) {
+        // bad colorbuffer handle
+        return false;
+    }
+
+    return (*c).second.cb->readContents(numBytes, pixels);
+}
+
 bool FrameBuffer::getColorBufferInfo(
     HandleType p_colorbuffer, int* width, int* height, GLint* internalformat) {
 

@@ -163,6 +163,8 @@ protected:
         physdevs.resize(physdevCount);
         EXPECT_EQ(VK_SUCCESS, vk->vkEnumeratePhysicalDevices(mInstance, &physdevCount,
                                                          physdevs.data()));
+        EXPECT_EQ(VK_SUCCESS, vk->vkEnumeratePhysicalDevices(mInstance, &physdevCount,
+                                                         physdevs.data()));
 
         uint32_t bestPhysicalDevice = 0;
         bool queuesGood = false;
