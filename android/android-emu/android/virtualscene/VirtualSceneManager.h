@@ -93,6 +93,16 @@ public:
     //          clamped between the poster's minimum size and 1.
     static void setPosterScale(const char* posterName, float scale);
 
+    // Enables/Disables the TV animation.
+    //
+    // |state| - State of the TV animation. 1 for ON, 0 for OFF.
+    static void setAnimationState(bool state);
+
+    // Get the TV animation state.
+    //
+    // Returns 1 for ON, 0 for OFF.
+    static bool getAnimationState();
+
 private:
     static android::base::StaticLock mLock;
     static VirtualSceneManagerImpl* mImpl;

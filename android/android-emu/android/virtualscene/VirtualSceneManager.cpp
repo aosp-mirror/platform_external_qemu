@@ -109,6 +109,9 @@ public:
         mPosterSettings[posterName].mScale = scale;
     }
 
+    // Enable/Disable TV animation.
+    void setAnimationState(bool state) { animationState = state; }
+
     const std::vector<PosterInfo> getPosterLocations() const {
         return mPosterLocations;
     }
@@ -118,9 +121,12 @@ public:
         return mPosterSettings;
     }
 
+    bool getAnimationState() { return animationState; }
+
 private:
     std::vector<PosterInfo> mPosterLocations;
     std::unordered_map<std::string, PosterSetting> mPosterSettings;
+    bool animationState = 1;
 };
 
 static LazyInstance<Settings> sSettings = LAZY_INSTANCE_INIT;
@@ -216,8 +222,9 @@ int64_t VirtualSceneManagerImpl::render() {
     }
 
     const int64_t timestamp = mScene->update();
-    mRenderer->render(mScene->getRenderableObjects(),
-                      timestamp / 1000000000.0f);
+    mRenderer->render(
+            mScene->getRenderableObjects(),
+            (sSettings->getAnimationState() ? timestamp : 0) / 1000000000.0f);
     return timestamp;
 }
 
@@ -365,6 +372,16 @@ void VirtualSceneManager::setPosterScale(const char* posterName, float scale) {
     if (mImpl) {
         mImpl->updatePosterScale(posterName, scale);
     }
+}
+
+void VirtualSceneManager::setAnimationState(bool state) {
+    AutoLock lock(mLock);
+    sSettings->setAnimationState(state);
+}
+
+bool VirtualSceneManager::getAnimationState() {
+    AutoLock lock(mLock);
+    sSettings->getAnimationState();
 }
 
 }  // namespace virtualscene

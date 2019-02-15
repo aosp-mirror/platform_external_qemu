@@ -132,6 +132,8 @@ constexpr char PER_AVD_LOC_PLAYBACK_SPEED[] = "perAvd/loc/playback_speed";
 constexpr char PER_AVD_VIRTUAL_SCENE_POSTERS[] = "perAvd/virtualscene/posters";
 constexpr char PER_AVD_VIRTUAL_SCENE_POSTER_SIZES[] =
         "perAvd/virtualscene/poster_sizes";
+constexpr char PER_AVD_VIRTUAL_SCENE_ANIMATION[] =
+        "perAvd/virtualscene/animation";
 
 }  // namespace Settings
 }  // namespace Ui
