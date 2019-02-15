@@ -133,5 +133,20 @@ constexpr char PER_AVD_VIRTUAL_SCENE_POSTERS[] = "perAvd/virtualscene/posters";
 constexpr char PER_AVD_VIRTUAL_SCENE_POSTER_SIZES[] =
         "perAvd/virtualscene/poster_sizes";
 
+constexpr char PER_AVD_BATTERY_CHARGE_LEVEL[]  = "perAvd/battery/charge_level";
+constexpr char PER_AVD_BATTERY_CHARGER_TYPE2[] = "perAvd/battery/charger_type2";
+constexpr char PER_AVD_BATTERY_HEALTH[]        = "perAvd/battery/health";
+constexpr char PER_AVD_BATTERY_STATUS[]        = "perAvd/battery/status";
+
+constexpr char PER_AVD_CELLULAR_NETWORK_TYPE[]    = "perAvd/cell/network_type";
+constexpr char PER_AVD_CELLULAR_SIGNAL_STRENGTH[] = "perAvd/cell/signal_strength";
+constexpr char PER_AVD_CELLULAR_VOICE_STATUS[]    = "perAvd/cell/voice_status";
+constexpr char PER_AVD_CELLULAR_DATA_STATUS[]     = "perAvd/cell/data_status";
+
+// ?? Microphone?
+// ?? Virtual sensors?
+
+
+
 }  // namespace Settings
 }  // namespace Ui
