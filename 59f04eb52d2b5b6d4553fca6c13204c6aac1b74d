@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fb8c0fcd_9d59743c",
+        "filename": ".gitignore",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-02-15T01:38:03Z",
+      "side": 1,
+      "message": "Is it intentional?",
+      "range": {
+        "startLine": 2,
+        "startChar": 5,
+        "endLine": 2,
+        "endChar": 6
+      },
+      "revId": "59f04eb52d2b5b6d4553fca6c13204c6aac1b74d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
