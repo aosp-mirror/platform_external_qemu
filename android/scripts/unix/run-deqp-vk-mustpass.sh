@@ -40,7 +40,11 @@ OPT_BUILD_DIR=$DEQP_BUILD_DIR
 package_builder_process_options deqp
 
 DEQP_DIR=$AOSP_DIR/external/deqp
-VK_CTS_MUSTPASS_CASELIST=$AOSP_DIR/external/deqp/android/cts/master/vk-master.txt
+
+# TODO: Use the upstream one
+# VK_CTS_MUSTPASS_CASELIST=$AOSP_DIR/external/deqp/android/cts/master/vk-master.txt
+VK_CTS_MUSTPASS_CASELIST=$AOSP_DIR/external/qemu/android/scripts/unix/vk-master-emu-expected.txt
+
 DEQP_BUILD_DIR=$AOSP_DIR/external/deqp/build
 DEQP_VK_EXEC_DIR=$DEQP_BUILD_DIR/external/vulkancts/modules/vulkan/
 DEQP_TESTLOG_DST=$AOSP_DIR/external/qemu/dEQP-Log.qpa
