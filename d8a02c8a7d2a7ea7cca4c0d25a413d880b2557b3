@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c62fd287_9d841a33",
+        "filename": "android/android-emugl/guest/CMakeLists.txt",
+        "patchSetId": 10
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-15T03:04:04Z",
+      "side": 1,
+      "message": "FVISIBILITY",
+      "revId": "d8a02c8a7d2a7ea7cca4c0d25a413d880b2557b3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
