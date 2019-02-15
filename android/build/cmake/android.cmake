@@ -313,8 +313,7 @@ endfunction()
 #
 # This file will be placed on the current binary dir, so it can be included if this directory is on the include path.
 function(android_generate_hw_config)
-  add_custom_command(POST_BUILD
-                     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h
                      COMMAND python ${ANDROID_QEMU2_TOP_DIR}/android/scripts/gen-hw-config.py
                              ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini
                              ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h

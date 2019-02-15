@@ -2,7 +2,7 @@
 
 # Add darwinn external libraries and includes
 include(android/darwinn/darwinn.cmake)
-
+android_generate_hw_config()
 # This is the set of sources that are common in both the shared libary and the archive. We currently have to split them
 # up due to dependencies on external variables/functions that are implemented in other libraries.
 set(android-emu-common

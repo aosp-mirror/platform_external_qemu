@@ -206,9 +206,6 @@ if (NOT QTWEBENGINE)
   set(emulator-libui_windows-x86_64_src
       android/skin/qt/windows-native-window.cpp
       android/skin/qt/extended-pages/location-page_noMaps.ui)
-  set(emulator-libui_windows-x86_src
-      android/skin/qt/windows-native-window.cpp
-      android/skin/qt/extended-pages/location-page_noMaps.ui)
   set(emulator-libui_windows_msvc-x86_64_src
       android/skin/qt/windows-native-window.cpp
       android/skin/qt/extended-pages/location-page_noMaps.ui)
@@ -222,9 +219,6 @@ else ()
       android/skin/qt/websockets/websockettransport.cpp
       android/skin/qt/extended-pages/location-page.ui)
   set(emulator-libui_windows-x86_64_src
-      android/skin/qt/windows-native-window.cpp
-      android/skin/qt/extended-pages/location-page_noMaps.ui)
-  set(emulator-libui_windows-x86_src
       android/skin/qt/windows-native-window.cpp
       android/skin/qt/extended-pages/location-page_noMaps.ui)
   set(emulator-libui_windows_msvc-x86_64_src
@@ -251,7 +245,7 @@ android_add_library(emulator-libui)
 
 # TODO: Remove this and the "USE_WEBENGINE" defines once we have:
 # --no-window mode has no dependency on Qt
-if (QTWEBENGINE AND NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")  
+if (QTWEBENGINE AND NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
     target_compile_definitions(emulator-libui PRIVATE "-DUSE_WEBENGINE")
     target_link_libraries(emulator-libui PRIVATE
                           Qt5::Network
@@ -318,9 +312,9 @@ set(emulator-libui_unittests_src
     android/recording/test/DummyAudioProducer.cpp
     android/recording/test/DummyVideoProducer.cpp
     android/recording/FfmpegRecorder.cpp
-    android/recording/test/FfmpegRecorder_unittest.cpp)
-set(emulator-libui_unittests_windows_src
-    android/skin/qt/qtmain_dummy_test.cpp)
+    android/recording/test/FfmpegRecorder_unittest.cpp
+)
+set(emulator-libui_unittests_windows_src android/skin/qt/qtmain_dummy_test.cpp)
 android_add_test(emulator-libui_unittests)
 
 target_compile_options(emulator-libui_unittests PRIVATE -O0 -UNDEBUG)
@@ -342,4 +336,4 @@ android_target_properties(emulator-libui_unittests all "${QT5_SHARED_PROPERTIES}
 # Make sure we disable rtti in gtest
 target_compile_definitions(emulator-libui_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 
-target_link_libraries(emulator-libui_unittests PRIVATE emulator-libui android-mock-vm-operations OpenGLESDispatch FFMPEG::FFMPEG gmock_main)
+target_link_libraries(emulator-libui_unittests PRIVATE gmock_main emulator-libui android-mock-vm-operations OpenGLESDispatch FFMPEG::FFMPEG)
