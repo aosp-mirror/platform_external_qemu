@@ -89,7 +89,7 @@ target_link_libraries(OpenglRender
                               OpenGLESDispatch
                               GLSnapshot)
 target_compile_definitions(OpenglRender PRIVATE -DVK_ANDROID_native_buffer)
-target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
+target_compile_options(OpenglRender PRIVATE "${ANDROID_EMUGL_SHARED_FVISIBILITY}")
 target_link_libraries(OpenglRender PRIVATE emugl_base)
 target_include_directories(
     OpenglRender

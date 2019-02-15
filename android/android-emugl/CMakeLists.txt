@@ -9,6 +9,14 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_definitions(emugl_base INTERFACE "-DEMUGL_DEBUG=1")
 endif()
 
+# We set fvisibility to default for shared libraries on Linux/Windws for debugging purpose.
+# TODO: fix unit tests failures on Mac OS before we turn it on
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
+  set(ANDROID_EMUGL_SHARED_FVISIBILITY "-fvisibility=default")
+else()
+  set(ANDROID_EMUGL_SHARED_FVISIBILITY "-fvisibility=hidden")
+endif()
+
 # Compile emugen for the current host.
 android_compile_for_host(emugen ${CMAKE_CURRENT_LIST_DIR}/host/tools/emugen EMUGEN_EXE)
 
