@@ -896,6 +896,8 @@ extern "C" int main(int argc, char** argv) {
                     args.add(argv[n]);
                 }
 
+                fc::setEnabledOverride(fc::Vulkan, true);
+
                 return startEmulatorWithMinConfig(
                     args.size(),
                     args.array(),
