@@ -144,7 +144,8 @@ int android_chmod(const char* path, mode_t mode) {
 
 int android_rmdir(const char* path) {
 #ifdef _MSC_VER
-   return RemoveDirectoryW(Win32UnicodeString(path).c_str());
+   // Callers expect 0 on success, win api returns true on success.
+   return !RemoveDirectoryW(Win32UnicodeString(path).c_str());
 #else
     return WIDEN_CALL_1(rmdir, path);
 #endif
