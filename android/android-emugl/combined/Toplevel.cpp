@@ -81,9 +81,13 @@ public:
     }
 
     ~Impl() {
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         teardownDisplay();
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         teardownGralloc();
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         teardownAndroidEmugl();
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     }
 
     AndroidWindow* createAppWindowAndSetCurrent(int width, int height) {
@@ -114,18 +118,28 @@ public:
     }
 
     void teardownDisplay() {
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         if (!mSf) return;
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         mSf->join();
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         AutoLock lock(mLock);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         mSf.reset();
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
         for (auto buffer : mComposeBuffers) {
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
             destroyGrallocBuffer(buffer.handle);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         }
 
         for (auto buffer : mAppBuffers) {
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
             destroyGrallocBuffer(buffer.handle);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         }
     }
 
@@ -196,10 +210,15 @@ private:
     }
 
     void teardownAndroidEmugl() {
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         AndroidPipe::Service::resetAll();
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         android_finishOpenglesRenderer();
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         android_hideOpenglesWindow();
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         android_stopOpenglesRenderer(true);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     }
 
     void setupGralloc() {
@@ -210,7 +229,11 @@ private:
         set_global_gralloc_module(&mGralloc);
     }
 
-    void teardownGralloc() { unload_gralloc_module(&mGralloc); }
+    void teardownGralloc() {
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+        unload_gralloc_module(&mGralloc);
+        fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+    }
 
     buffer_handle_t createGrallocBuffer(
             int usage = GRALLOC_USAGE_HW_RENDER,
