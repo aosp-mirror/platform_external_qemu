@@ -161,8 +161,16 @@ protected:
         EXPECT_EQ(VK_SUCCESS,
                   vk->vkEnumeratePhysicalDevices(mInstance, &physdevCount, nullptr));
         physdevs.resize(physdevCount);
-        EXPECT_EQ(VK_SUCCESS, vk->vkEnumeratePhysicalDevices(mInstance, &physdevCount,
-                                                         physdevs.data()));
+        EXPECT_EQ(VK_SUCCESS,
+                  vk->vkEnumeratePhysicalDevices(mInstance, &physdevCount,
+                                                 physdevs.data()));
+        std::vector<VkPhysicalDevice> physdevsSecond(physdevCount);
+        EXPECT_EQ(VK_SUCCESS,
+                  vk->vkEnumeratePhysicalDevices(mInstance, &physdevCount,
+                                                 physdevsSecond.data()));
+        // Check that a second call to vkEnumeratePhysicalDevices
+        // retrieves the same physical device handles.
+        EXPECT_EQ(physdevs, physdevsSecond);
 
         uint32_t bestPhysicalDevice = 0;
         bool queuesGood = false;
