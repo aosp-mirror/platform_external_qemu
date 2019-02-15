@@ -79,7 +79,7 @@ static void initIcdPaths(bool forTesting) {
         } else if (androidIcd == "swiftshader") {
             setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
         } else {
-            setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
+            setIcdPath(icdJsonNameToProgramAndLauncherPaths("portability-macos.json"));
         }
 #else
         // By default, on other platforms, just use whatever the system
