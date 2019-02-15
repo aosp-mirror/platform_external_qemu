@@ -178,6 +178,9 @@ public:
     // that is allocated and filled with the same format.
     bool replaceContents(const void* pixels, size_t numBytes);
 
+    // Reads back entire contents, tightly packed rows.
+    bool readContents(size_t* numBytes, void* pixels);
+
     // Draw a ColorBuffer instance, i.e. blit it to the current guest
     // framebuffer object / window surface. This doesn't display anything.
     bool draw();

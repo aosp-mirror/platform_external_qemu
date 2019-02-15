@@ -26,6 +26,7 @@
 #include "SyncThread.h"
 #include "ChecksumCalculatorThreadInfo.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
+#include "vulkan/VkCommonOperations.h"
 #include "vulkan/VkDecoderGlobalState.h"
 
 #include "android/utils/debug.h"
@@ -643,6 +644,10 @@ static int rcFlushWindowColorBuffer(uint32_t windowSurface)
         return -1;
     }
 
+    // Update to Vulkan if necessary
+    updateVkImageFromColorBuffer(
+        fb->getWindowSurfaceColorBufferHandle(colorBuffer));
+
     GRSYNC_DPRINT("unlock gralloc cb lock }");
 
     return 0;
@@ -706,6 +711,9 @@ static void rcFBPost(uint32_t colorBuffer)
         return;
     }
 
+    // Update from Vulkan if necessary
+    updateColorBufferFromVkImage(colorBuffer);
+
     fb->post(colorBuffer);
 }
 
@@ -721,6 +729,9 @@ static void rcBindTexture(uint32_t colorBuffer)
         return;
     }
 
+    // Update from Vulkan if necessary
+    updateColorBufferFromVkImage(colorBuffer);
+
     fb->bindColorBufferToTexture(colorBuffer);
 }
 
@@ -730,6 +741,9 @@ static void rcBindRenderbuffer(uint32_t colorBuffer)
     if (!fb) {
         return;
     }
+
+    // Update from Vulkan if necessary
+    updateColorBufferFromVkImage(colorBuffer);
 
     fb->bindColorBufferToRenderbuffer(colorBuffer);
 }
@@ -754,6 +768,9 @@ static void rcReadColorBuffer(uint32_t colorBuffer,
         return;
     }
 
+    // Update from Vulkan if necessary
+    updateColorBufferFromVkImage(colorBuffer);
+
     fb->readColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 }
 
@@ -774,6 +791,9 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
 
     GRSYNC_DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();
+
+    // Update to Vulkan if necessary
+    updateVkImageFromColorBuffer(colorBuffer);
 
     return 0;
 }
@@ -797,6 +817,10 @@ static int rcUpdateColorBufferDMA(uint32_t colorBuffer,
 
     GRSYNC_DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();
+
+    // Update to Vulkan if necessary
+    updateVkImageFromColorBuffer(colorBuffer);
+
     return 0;
 }
 
