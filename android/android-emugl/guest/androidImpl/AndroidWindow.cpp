@@ -24,13 +24,11 @@
 #define AW_DEBUG 1
 
 #define E(fmt,...) \
-    fprintf(stderr, "%s: " fmt "\n @: %s\n", __func__, ##__VA_ARGS__, \
-            android::base::bt().c_str()); \
+    fprintf(stderr, "%s: " fmt "\n", __func__, ##__VA_ARGS__); \
 
 #if AW_DEBUG
 #define D(fmt,...) \
-    fprintf(stderr, "%s: " fmt "\n @: %s\n", __func__, ##__VA_ARGS__, \
-            android::base::bt().c_str());  \
+    fprintf(stderr, "%s: " fmt "\n", __func__, ##__VA_ARGS__); \
 
 #else
 #define D(fmt,...)

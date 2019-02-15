@@ -26,6 +26,7 @@
 #include "SyncThread.h"
 #include "ChecksumCalculatorThreadInfo.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
+#include "vulkan/VkCommonOperations.h"
 #include "vulkan/VkDecoderGlobalState.h"
 
 #include "android/utils/debug.h"
@@ -638,10 +639,19 @@ static int rcFlushWindowColorBuffer(uint32_t windowSurface)
         GRSYNC_DPRINT("unlock gralloc cb lock");
         return -1;
     }
+
+    // Update from Vulkan if necessary
+    goldfish_vk::updateColorBufferFromVkImage(
+        fb->getWindowSurfaceColorBufferHandle(windowSurface));
+
     if (!fb->flushWindowSurfaceColorBuffer(windowSurface)) {
         GRSYNC_DPRINT("unlock gralloc cb lock }");
         return -1;
     }
+
+    // Update to Vulkan if necessary
+    goldfish_vk::updateVkImageFromColorBuffer(
+        fb->getWindowSurfaceColorBufferHandle(windowSurface));
 
     GRSYNC_DPRINT("unlock gralloc cb lock }");
 
@@ -706,6 +716,9 @@ static void rcFBPost(uint32_t colorBuffer)
         return;
     }
 
+    // Update from Vulkan if necessary
+    goldfish_vk::updateColorBufferFromVkImage(colorBuffer);
+
     fb->post(colorBuffer);
 }
 
@@ -721,6 +734,9 @@ static void rcBindTexture(uint32_t colorBuffer)
         return;
     }
 
+    // Update from Vulkan if necessary
+    goldfish_vk::updateColorBufferFromVkImage(colorBuffer);
+
     fb->bindColorBufferToTexture(colorBuffer);
 }
 
@@ -730,6 +746,9 @@ static void rcBindRenderbuffer(uint32_t colorBuffer)
     if (!fb) {
         return;
     }
+
+    // Update from Vulkan if necessary
+    goldfish_vk::updateColorBufferFromVkImage(colorBuffer);
 
     fb->bindColorBufferToRenderbuffer(colorBuffer);
 }
@@ -754,6 +773,9 @@ static void rcReadColorBuffer(uint32_t colorBuffer,
         return;
     }
 
+    // Update from Vulkan if necessary
+    goldfish_vk::updateColorBufferFromVkImage(colorBuffer);
+
     fb->readColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 }
 
@@ -770,10 +792,17 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
         return -1;
     }
 
+    // Since this is a modify operation, also read the current contents
+    // of the VkImage, if any.
+    goldfish_vk::updateColorBufferFromVkImage(colorBuffer);
+
     fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 
     GRSYNC_DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();
+
+    // Update to Vulkan if necessary
+    goldfish_vk::updateVkImageFromColorBuffer(colorBuffer);
 
     return 0;
 }
@@ -792,11 +821,19 @@ static int rcUpdateColorBufferDMA(uint32_t colorBuffer,
         return -1;
     }
 
+    // Since this is a modify operation, also read the current contents
+    // of the VkImage, if any.
+    goldfish_vk::updateColorBufferFromVkImage(colorBuffer);
+
     fb->updateColorBuffer(colorBuffer, x, y, width, height,
                           format, type, pixels);
 
     GRSYNC_DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();
+
+    // Update to Vulkan if necessary
+    goldfish_vk::updateVkImageFromColorBuffer(colorBuffer);
+
     return 0;
 }
 

@@ -448,6 +448,18 @@ bool ColorBuffer::replaceContents(const void* newContents, size_t numBytes) {
     return true;
 }
 
+bool ColorBuffer::readContents(size_t* numBytes, void* pixels) {
+    RecursiveScopedHelperContext context(m_helper);
+
+    *numBytes = m_numBytes;
+
+    if (!pixels) return true;
+
+    readPixels(0, 0, m_width, m_height, m_format, m_type, pixels);
+
+    return true;
+}
+
 bool ColorBuffer::blitFromCurrentReadBuffer() {
 
     RenderThreadInfo* tInfo = RenderThreadInfo::get();

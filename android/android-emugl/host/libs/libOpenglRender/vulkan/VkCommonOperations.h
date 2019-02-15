@@ -63,6 +63,11 @@ struct VkEmulation {
     VkPhysicalDevice physdev = VK_NULL_HANDLE;
     VkDevice device = VK_NULL_HANDLE;
 
+    // Global, instance and device dispatch tables.
+    VulkanDispatch* gvk = nullptr;
+    VulkanDispatch* ivk = nullptr;
+    VulkanDispatch* dvk = nullptr;
+
     bool instanceSupportsExternalMemoryCapabilities = false;
     PFN_vkGetPhysicalDeviceImageFormatProperties2KHR
             getImageFormatProperties2Func = nullptr;
@@ -73,6 +78,7 @@ struct VkEmulation {
     uint32_t queueFamilyIndex = 0;
     VkCommandPool commandPool = VK_NULL_HANDLE;
     VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+    VkFence commandBufferFence = VK_NULL_HANDLE;
 
     struct ImageSupportInfo {
         // Input parameters
@@ -170,6 +176,8 @@ struct VkEmulation {
 
         VkImage image = VK_NULL_HANDLE;
         VkMemoryRequirements memReqs;
+
+        VkImageLayout currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     };
 
     // Track what is supported on whatever device was selected.
@@ -212,7 +220,8 @@ struct VkEmulation {
 };
 
 VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk);
-void teardownGlobalVkEmulation(VulkanDispatch* vk);
+VkEmulation* getGlobalVkEmulation();
+void teardownGlobalVkEmulation();
 
 bool allocExternalMemory(VulkanDispatch* vk, VkEmulation::ExternalMemoryInfo* info, bool actuallyExternal = true);
 void freeExternalMemory(VulkanDispatch* vk, VkEmulation::ExternalMemoryInfo* info);
@@ -222,11 +231,15 @@ bool importExternalMemory(VulkanDispatch* vk,
                           const VkEmulation::ExternalMemoryInfo* info,
                           VkDeviceMemory* out);
 
+// ColorBuffer operations
+
 bool isColorBufferVulkanCompatible(uint32_t colorBufferHandle);
 
-bool setupVkColorBuffer(VulkanDispatch* vk, uint32_t colorBufferHandle);
-bool teardownVkColorBuffer(VulkanDispatch* vk, uint32_t colorBufferHandle);
+bool setupVkColorBuffer(uint32_t colorBufferHandle);
+bool teardownVkColorBuffer(uint32_t colorBufferHandle);
 VkEmulation::ColorBufferInfo getColorBufferInfo(uint32_t colorBufferHandle);
+bool updateColorBufferFromVkImage(uint32_t colorBufferHandle);
+bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle);
 
 VkExternalMemoryHandleTypeFlags
 transformExternalMemoryHandleTypeFlags_tohost(

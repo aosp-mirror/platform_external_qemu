@@ -24,6 +24,7 @@
 #include "gles2_dec.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
+#include "vulkan/VkCommonOperations.h"
 #include "vulkan/VkDecoderGlobalState.h"
 
 #include "android/base/containers/Lookup.h"
@@ -1362,6 +1363,16 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
     return true;
 }
 
+HandleType FrameBuffer::getWindowSurfaceColorBufferHandle(HandleType p_surface) {
+    AutoLock mutex(m_lock);
+
+    auto it = m_windowSurfaceToColorBuffer.find(p_surface);
+
+    if (it == m_windowSurfaceToColorBuffer.end()) return 0;
+
+    return it->second;
+}
+
 bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
                                               HandleType p_colorbuffer) {
     AutoLock mutex(m_lock);
@@ -1387,6 +1398,9 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
     }
     c->second.refcount++;
     (*w).second.second = p_colorbuffer;
+
+    m_windowSurfaceToColorBuffer[p_surface] = p_colorbuffer;
+
     return true;
 }
 
@@ -1441,6 +1455,20 @@ bool FrameBuffer::replaceColorBufferContents(
     }
 
     return (*c).second.cb->replaceContents(pixels, numBytes);
+}
+
+bool FrameBuffer::readColorBufferContents(
+    HandleType p_colorbuffer, size_t* numBytes, void* pixels) {
+
+    AutoLock mutex(m_lock);
+
+    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+    if (c == m_colorbuffers.end()) {
+        // bad colorbuffer handle
+        return false;
+    }
+
+    return (*c).second.cb->readContents(numBytes, pixels);
 }
 
 bool FrameBuffer::getColorBufferInfo(
@@ -1994,6 +2022,8 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
 }
 
 void FrameBuffer::onLastColorBufferRef(uint32_t handle) {
+    // Teardown Vulkan image if necessary
+    goldfish_vk::teardownVkColorBuffer(handle);
     AutoLock mutex(m_lock);
     m_colorbuffers.erase((HandleType)handle);
 }
