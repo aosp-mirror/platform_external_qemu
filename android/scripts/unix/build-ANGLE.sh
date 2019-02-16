@@ -99,6 +99,9 @@ build_angle_package () {
     # The first sync fails, however the second will work
     run gclient sync || run gclient sync &&
 
+    # apply patch for linux-aarch64 host build
+    run patch -p1 -i "linux-aarch64/angle-depo_tools-ninja-aarch64.patch" &&
+
     # ninja is provided for each platform in the previously cloned depot_tools
     run ninja -C out/Debug
 
