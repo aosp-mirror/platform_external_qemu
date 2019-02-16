@@ -4,7 +4,7 @@
 # Dependencies
 prebuilt(UUID)
 prebuilt(GLIB2) # Acts as windows stdio compatibility layer.
-
+prebuilt(TCMALLOC)
 
 # Source configuration, the following set is shared amongst all targets
 set(android-emu-base_src
@@ -43,6 +43,7 @@ set(android-emu-base_src
     android/base/Log.cpp
     android/base/memory/LazyInstance.cpp
     android/base/memory/MemoryHints.cpp
+    android/base/memory/MemoryUsage.cpp
     android/base/perflogger/Benchmark.cpp
     android/base/perflogger/BenchmarkLibrary.cpp
     android/base/perflogger/Metric.cpp
@@ -132,14 +133,15 @@ target_include_directories(android-emu-base PUBLIC .)
 # Library dependencies, these are public so they will propagate, if you link against the base you will link against LZ4
 # & UUID
 target_link_libraries(android-emu-base PRIVATE lz4 UUID::UUID)
-android_target_link_libraries(android-emu-base linux-x86_64 PUBLIC -ldl Threads::Threads -lrt unwind_static)
+android_target_link_libraries(android-emu-base linux-x86_64 PUBLIC -ldl Threads::Threads -lrt unwind_static TCMALLOC::TCMALLOC)
 android_target_link_libraries(android-emu-base windows-x86_64 PUBLIC psapi::psapi Threads::Threads iphlpapi::iphlpapi)
 android_target_link_libraries(android-emu-base
                               darwin-x86_64
                               PUBLIC
                               "-framework Foundation"
                               "-framework ApplicationServices"
-                              "-framework IOKit")
+                              "-framework IOKit"
+                              TCMALLOC::TCMALLOC)
 android_target_compile_definitions(android-emu-base
                                    darwin-x86_64
                                    PRIVATE
