@@ -43,7 +43,7 @@ def log_std_out(proc):
             if is_windows:
                 # 2 problems on windows, output of \r, and error 0 when writing to log concurrently
                 # So we will just directly print vs, going to logging infra structure.
-                print (line.replace('\r', ''))
+                print (line.strip())
             else:
                 logging.info(line)
 
