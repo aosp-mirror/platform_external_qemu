@@ -55,10 +55,10 @@ package_builder_parse_package_list
 ###
 ###  Download the source tarball if needed.
 ###
-QT_SRC_NAME=qt-everywhere-src-5.11.1
+QT_SRC_NAME=qt-everywhere-src-5.12.1
 QT_SRC_PACKAGE=$QT_SRC_NAME.tar.xz
-QT_SRC_URL=http://download.qt.io/archive/qt/5.11/5.11.1/single/$QT_SRC_PACKAGE
-QT_SRC_PACKAGE_SHA1=0ac866442a960d4038a51ba3096b2cc5d796b5ee
+QT_SRC_URL=http://download.qt.io/archive/qt/5.12/5.12.1/single/$QT_SRC_PACKAGE
+QT_SRC_PACKAGE_SHA1=SHA1=9377d37cdde14ba2009d4f2077986a8910d03ee7
 
 QT_SRC_PATCH_FOLDER=${QT_SRC_NAME}-patches
 QT_ARCHIVE_DIR=$(builder_archive_dir)
@@ -144,6 +144,20 @@ build_qt_package () {
     panic "Could not build and install $1"
 }
 
+# Our custom qtwebengine dependencies folder also contains some dependencies for
+# non-webengine build, so let's include it.
+configure_qtwebengine_pkg_config () {
+    # Two things are happening here:
+    #  1) Copy the .pc files from qtwebengine-deps to
+    #  toolchain-wrapper/qtwebengine-pkgconfig,
+    #  2) modify the .pc file prefixes to point to the lib folder in
+    #  qtwebengine-deps
+    local QTWEBENGINE_DEPS_DIR="$PREBUILTS_DIR/common/qtwebengine-deps/linux-x86_64"
+    local TOOLCHAIN_PKGCONFIG_DIR="$_SHU_BUILDER_BUILD_DIR/toolchain-wrapper/qtwebengine-pkgconfig"
+    run mkdir $TOOLCHAIN_PKGCONFIG_DIR
+    run cp $QTWEBENGINE_DEPS_DIR/lib/pkgconfig/*.pc "$TOOLCHAIN_PKGCONFIG_DIR"
+    run sed -i "s|\${qtwebengine_deps_dir}|$QTWEBENGINE_DEPS_DIR|g" $TOOLCHAIN_PKGCONFIG_DIR/*.pc
+}
 
 if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     # Perform remote Darwin build first.
@@ -178,7 +192,28 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 builder_prepare_for_host "$SYSTEM" "$AOSP_DIR"
                 ;;
             *)
+                case $SYSTEM in
+                    linux-x86_64)
+                        _SHU_BUILDER_BUILD_DIR=$TEMP_DIR/build-$SYSTEM
+                        # make sure our .pc files are found first because
+                        # glibc's xcb library is too old (1.8). Qt 5.12.1
+                        # requires > 1.9.
+                        EXTRA_PKG_CONFIG_PATH=$_SHU_BUILDER_BUILD_DIR/toolchain-wrapper/qtwebengine-pkgconfig
+                        ;;
+                    *)
+                        ;;
+                esac
                 builder_prepare_for_host_no_binprefix "$SYSTEM" "$AOSP_DIR"
+                ;;
+        esac
+
+        case $SYSTEM in
+            linux-x86_64)
+                # Add custom pkg-config files pointing to our qtwebengine-deps
+                # folder.
+                configure_qtwebengine_pkg_config
+                ;;
+            *)
                 ;;
         esac
 
@@ -208,6 +243,14 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 -nomake tests \
                 -no-strip \
 
+        # This will add <qtlibinfix> to all the shared library names, i.e.,
+        # libQt5*.so --> libQt5*<qtlibinfix>.so
+        # We don't want to use the default names on Windows in case the user has
+        # some other version of Qt loaded in memory from a different application
+        # (DLL hell).
+        var_append EXTRA_CONFIGURE_FLAGS \
+                -qtlibinfix AndroidEmu
+
         if [ "$(get_verbosity)" -gt 2 ]; then
             var_append EXTRA_CONFIGURE_FLAGS "-v"
         fi
@@ -225,6 +268,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             windows*)
                 case $SYSTEM in
                     windows-x86_64)
+                        var_append EXTRA_CONFIGURE_FLAGS \
+                                -no-opengl
                         BINPREFIX=x86_64-w64-mingw32-
                         ;;
                     *)
@@ -273,7 +318,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             export CPPFLAGS &&
             export LD_LIBRARY_PATH &&
             export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
-            export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
+            export PKG_CONFIG_PATH="$EXTRA_PKG_CONFIG_PATH:$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
             run "$(builder_src_dir)"/$QT_SRC_NAME/configure \
                 -prefix $_SHU_BUILDER_PREFIX \
                 $EXTRA_CONFIGURE_FLAGS
