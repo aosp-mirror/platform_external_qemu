@@ -696,9 +696,13 @@ static int startEmulatorWithMinConfig(
 
     AvdInfo* avd = *avdInfoToOverride;
 
-    hw->hw_initialOrientation = strdup(lcdInitialOrientation);
+    // Initialize the hw config to default values, so that code paths that
+    // still rely on android_hw aren't reading uninitialized memory.
+    androidHwConfig_init(hw, 0);
+
+    str_reset(&hw->hw_initialOrientation, lcdInitialOrientation);
     hw->hw_gpu_enabled = true;
-    hw->hw_gpu_mode = strdup(gpuMode);
+    str_reset(&hw->hw_gpu_mode, gpuMode);
     hw->hw_lcd_width = lcdWidth;
     hw->hw_lcd_height = lcdHeight;
     hw->hw_lcd_density = lcdDensity;

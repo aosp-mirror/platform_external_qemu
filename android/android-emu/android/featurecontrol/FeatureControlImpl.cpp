@@ -220,7 +220,7 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
     }
 
     // Apply overrides from the hw config.
-    if (android_hw && android_hw->hw_featureflags) {
+    if (android_hw->hw_featureflags) {
         parseAndApplyOverrides(android_hw->hw_featureflags);
     }
 
