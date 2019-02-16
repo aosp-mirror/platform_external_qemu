@@ -223,6 +223,22 @@ function(android_add_interface name)
   add_library(${name} INTERFACE)
 endfunction()
 
+
+function(android_add_default_test_properties name)
+  # Configure the test to run with asan..
+  file(READ "${ANDROID_QEMU2_TOP_DIR}/android/asan_overrides" ASAN_OVERRIDES)
+  set_property(TEST ${name} PROPERTY ENVIRONMENT "ASAN_OPTIONS=${ASAN_OVERRIDES}")
+  set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "LLVM_PROFILE_FILE=$<TARGET_FILE_NAME:${name}>.profraw")
+  set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ANDROID_LLVM_SYMBOLIZER}")
+  set_property(TEST ${name} PROPERTY TIMEOUT 600)
+
+  if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+    # Let's include the .dll path for our test runner
+    string(REPLACE "/" "\\" WIN_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_swiftshader;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_mesa;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/qt/lib")
+    set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "PATH=${WIN_PATH};$ENV{PATH}")
+  endif()
+endfunction()
+
 # Adds a test target. It will create and register the test with the given name
 #
 # The variable ${name}_src should have the set of sources The variable ${name}_${ANDROID_TARGET_TAG}_src should have the
@@ -239,24 +255,18 @@ function(android_add_test name)
     return()
   endif()
 
-  # Configure the test to run with asan..
-  file(READ "${ANDROID_QEMU2_TOP_DIR}/android/asan_overrides" ASAN_OVERRIDES)
   add_test(NAME ${name}
            COMMAND $<TARGET_FILE:${name}> --gtest_output=xml:$<TARGET_FILE_NAME:${name}>.xml
            WORKING_DIRECTORY $<TARGET_FILE_DIR:${name}>)
-  set_property(TEST ${name} PROPERTY ENVIRONMENT "ASAN_OPTIONS=${ASAN_OVERRIDES}")
-  set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "LLVM_PROFILE_FILE=$<TARGET_FILE_NAME:${name}>.profraw")
-  set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ANDROID_LLVM_SYMBOLIZER}")
 
-  if(MSVC)
-    # Let's include the .dll path for our test runner and set a timeout so we are guaranteed to complete the tests
-    string(REPLACE "/" "\\" WIN_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_swiftshader;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_mesa;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/qt/lib")
-    set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "PATH=${WIN_PATH};$ENV{PATH}")
-    set_property(TEST ${name} PROPERTY TIMEOUT 600)
+  # Let's not optimize our tests.
+  if (ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+      target_compile_options(${name} PRIVATE -Od)
   else()
-      # Let's not optimize our tests.
       target_compile_options(${name} PRIVATE -O0)
   endif()
+
+  android_add_default_test_properties(${name})
 endfunction()
 
 # Adds an executable target. The RUNTIME_OS_DEPENDENCIES and RUNTIME_OS_PROPERTIES will registed for the given target,
