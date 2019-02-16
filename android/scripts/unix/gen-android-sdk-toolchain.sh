@@ -215,6 +215,10 @@ gen_wrapper_program ()
                 DST_PROG=llvm-ar
                 DST_PREFIX=$CLANG_BINDIR/
                 ;;
+            objcopy)
+                DST_PROG=llvm-objcopy
+                DST_PREFIX=$CLANG_BINDIR/
+                ;;
         esac
     fi
 
@@ -275,9 +279,9 @@ gen_dbg_splitter() {
 $EXTRA_ENV_SETUP
 target=\$(basename \$1)
 mkdir -p build/debug_info
-${DST_PREFIX}objcopy --only-keep-debug  "\$1" "build/debug_info/\$target.debug"
-${DST_PREFIX}objcopy --strip-unneeded  "\$1"
-${DST_PREFIX}objcopy --add-gnu-debuglink="build/debug_info/\$target.debug" "\$1"
+objcopy --only-keep-debug  "\$1" "build/debug_info/\$target.debug"
+objcopy --strip-unneeded  "\$1"
+objcopy --add-gnu-debuglink="build/debug_info/\$target.debug" "\$1"
 
 EOF
  chmod +x "$DST_FILE"
@@ -361,7 +365,7 @@ gen_wrapper_toolchain () {
     done
 
     for PROG in $PROGRAMS; do
-        gen_wrapper_program $PROG "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR"
+        gen_wrapper_program $PROG "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR" "$CLANG_BINDIR"
     done
 
     # Setup additional host specific things
@@ -459,7 +463,7 @@ prepare_build_for_linux_x86_64() {
     var_append GCC_LINK_FLAGS "-B$PREBUILT_TOOLCHAIN_DIR/lib/gcc/x86_64-linux/4.8.3/"
     var_append GCC_LINK_FLAGS "-L$PREBUILT_TOOLCHAIN_DIR/lib/gcc/x86_64-linux/4.8.3/"
     var_append GCC_LINK_FLAGS "-L$PREBUILT_TOOLCHAIN_DIR/x86_64-linux/lib64/"
-    var_append GCC_LINK_FLAGS "-fuse-ld=${PREBUILT_TOOLCHAIN_DIR}/bin/x86_64-linux-ld"
+    var_append GCC_LINK_FLAGS "-fuse-ld=lld"
     var_append GCC_LINK_FLAGS "-L${CLANG_BINDIR}/../lib64/clang/${CLANG_VERSION}/lib/linux/"
     var_append GCC_LINK_FLAGS "-L${CLANG_BINDIR}/../lib64/"
     var_append GCC_LINK_FLAGS "--sysroot=${SYSROOT}"
