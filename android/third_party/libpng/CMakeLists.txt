@@ -25,13 +25,16 @@ set(png_src
 # TODO(jansene): We can likely turn this into a shared library. Which would save around 280kb per executable.
 android_add_library(png)
 target_compile_options(png
-                       PRIVATE -std=gnu89 -Wall -Werror -Wno-unused-parameter
+                       PRIVATE -std=gnu89 -Wall -Wno-unused-parameter
                                -Wno-tautological-constant-out-of-range-compare)
 target_compile_definitions(png PRIVATE -DPNG_INTEL_SSE_OPT=1)
 target_include_directories(png PUBLIC ${PNG_SRC_DIR})
 target_link_libraries(png PUBLIC zlib)
 android_target_link_libraries(png linux-x86_64 PRIVATE m)
 android_target_compile_options(png darwin-x86_64 PRIVATE -Wno-unguarded-availability-new)
+android_target_compile_options(png windows_msvc-x86_64 PRIVATE -Wno-nonportable-system-include-path
+                                                               -Wno-unused-macros -Wno-sign-conversion -Wno-float-equal
+                                                               -Wno-language-extension-token -Wno-reserved-id-macro)
 
 function(png_add_test)
   # We cannot run tests when we are cross compiling.
