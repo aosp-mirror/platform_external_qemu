@@ -13,7 +13,7 @@ get_filename_component(
   PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/tcmalloc/${ANDROID_TARGET_TAG}"
   ABSOLUTE)
 if(NOT ANDROID_TARGET_TAG MATCHES "windows.*")
-  set(TCMALLOC_INCLUDE_DIR "")
+  set(TCMALLOC_INCLUDE_DIR "${PREBUILT_ROOT}/include")
   set(TCMALLOC_INCLUDE_DIRS ${TCMALLOC_INCLUDE_DIR})
   set(TCMALLOC_LIBRARIES -ltcmalloc_minimal -L${PREBUILT_ROOT}/lib)
   if(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")

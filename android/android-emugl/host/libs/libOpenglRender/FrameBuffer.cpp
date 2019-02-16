@@ -26,10 +26,11 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "vulkan/VkDecoderGlobalState.h"
 
-#include "android/base/containers/Lookup.h"
 #include "android/base/CpuUsage.h"
+#include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/memory/MemoryUsage.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 
@@ -1853,14 +1854,15 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
             float dt = (float)(currTime - m_statsStartTime) / 1000.0f;
             auto usage = System::get()->getMemUsage();
             m_statsStartTime = currTime;
-
+            auto memoryUsage = emugl::getMemoryUsage();
+            std::string memoryStats = memoryUsage->printUsage();
             auto cpuUsage = emugl::getCpuUsage();
             std::string lastStats =
                 cpuUsage ? cpuUsage->printUsage() : "";
-            printf("FPS: %5.3f resident memory: %f mb %s\n",
+            printf("FPS: %5.3f resident memory: %f mb %s \n%s\n",
                    (float)m_statsNumFrames / dt,
-                   (float)usage.resident / 1048576.0f,
-                   lastStats.c_str());
+                   (float)usage.resident / 1048576.0f, lastStats.c_str(),
+                   memoryStats.c_str());
 
             m_statsNumFrames = 0;
         }
