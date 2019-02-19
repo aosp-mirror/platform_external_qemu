@@ -132,6 +132,8 @@ constexpr char PER_AVD_LOC_PLAYBACK_SPEED[] = "perAvd/loc/playback_speed";
 constexpr char PER_AVD_VIRTUAL_SCENE_POSTERS[] = "perAvd/virtualscene/posters";
 constexpr char PER_AVD_VIRTUAL_SCENE_POSTER_SIZES[] =
         "perAvd/virtualscene/poster_sizes";
+constexpr char PER_AVD_VIRTUAL_SCENE_TV_ANIMATION[] =
+        "perAvd/virtualscene/tv_animation";
 
 constexpr char PER_AVD_BATTERY_CHARGE_LEVEL[]  = "perAvd/battery/charge_level";
 constexpr char PER_AVD_BATTERY_CHARGER_TYPE2[] = "perAvd/battery/charger_type2";
