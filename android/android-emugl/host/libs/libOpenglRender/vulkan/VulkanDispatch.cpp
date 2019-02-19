@@ -79,7 +79,8 @@ static void initIcdPaths(bool forTesting) {
         } else if (androidIcd == "swiftshader") {
             setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
         } else {
-            setIcdPath(icdJsonNameToProgramAndLauncherPaths("portability-macos.json"));
+            // go/ab likes swiftshader better
+            setIcdPath(icdJsonNameToProgramAndLauncherPaths("vk_swiftshader_icd.json"));
         }
 #else
         // By default, on other platforms, just use whatever the system
