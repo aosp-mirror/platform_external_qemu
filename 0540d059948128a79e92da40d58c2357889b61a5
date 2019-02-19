@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "32811bcd_e0aec9a1",
+        "filename": "android/android-emu/android/emulation/control/virtual_scene_agent.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-19T22:02:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fca5338b_5f3b49f7",
+      "range": {
+        "startLine": 67,
+        "startChar": 42,
+        "endLine": 67,
+        "endChar": 64
+      },
+      "revId": "0540d059948128a79e92da40d58c2357889b61a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2504af2e_6c8d7036",
         "filename": "android/android-emu/android/skin/qt/extended-pages/camera-virtualscene-subpage.ui",
         "patchSetId": 4
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "c6d91101_48b5debf",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/camera-virtualscene-subpage.ui",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-19T22:02:22Z",
+      "side": 1,
+      "message": "These were different, thanks for the catch.",
+      "parentUuid": "2504af2e_6c8d7036",
+      "revId": "0540d059948128a79e92da40d58c2357889b61a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b7550e28_7faddf7b",
         "filename": "android/android-emu/android/skin/qt/qt-settings.h",
         "patchSetId": 4
@@ -56,6 +98,24 @@
       "revId": "0540d059948128a79e92da40d58c2357889b61a5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "75cdcb0a_3512164f",
+        "filename": "android/android-emu/android/skin/qt/qt-settings.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-19T22:02:22Z",
+      "side": 1,
+      "message": "Sure!",
+      "parentUuid": "b7550e28_7faddf7b",
+      "revId": "0540d059948128a79e92da40d58c2357889b61a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -99,6 +159,48 @@
     },
     {
       "key": {
+        "uuid": "e1b9539e_d2bb8fff",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneManager.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-19T22:02:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f029817e_9553df40",
+      "revId": "0540d059948128a79e92da40d58c2357889b61a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8182e457_ed994c05",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneManager.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-19T22:02:22Z",
+      "side": 1,
+      "message": "okay,thanks!",
+      "parentUuid": "5f3d8ab3_daa64746",
+      "range": {
+        "startLine": 129,
+        "startChar": 9,
+        "endLine": 129,
+        "endChar": 23
+      },
+      "revId": "0540d059948128a79e92da40d58c2357889b61a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8540ed52_44ada9ec",
         "filename": "android/android-emu/android/virtualscene/VirtualSceneManager.h",
         "patchSetId": 4
@@ -119,6 +221,30 @@
       "revId": "0540d059948128a79e92da40d58c2357889b61a5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e9d35e31_340bd0a4",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneManager.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-19T22:02:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8540ed52_44ada9ec",
+      "range": {
+        "startLine": 98,
+        "startChar": 42,
+        "endLine": 98,
+        "endChar": 64
+      },
+      "revId": "0540d059948128a79e92da40d58c2357889b61a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
