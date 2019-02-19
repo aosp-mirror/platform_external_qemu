@@ -89,6 +89,7 @@ target_link_libraries(OpenglRender
                               OpenGLESDispatch
                               GLSnapshot)
 target_compile_definitions(OpenglRender PRIVATE -DVK_ANDROID_native_buffer)
+android_target_compile_definitions(OpenglRender windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
 target_compile_options(OpenglRender PRIVATE "${ANDROID_EMUGL_SHARED_FVISIBILITY}")
 target_link_libraries(OpenglRender PRIVATE emugl_base)
 target_include_directories(
@@ -147,6 +148,7 @@ target_link_libraries(OpenglRender_standalone_common
                               android-mock-vm-operations)
 target_link_libraries(OpenglRender_standalone_common PRIVATE emugl_base ANGLE::ANGLE)
 target_compile_options(OpenglRender_standalone_common PRIVATE -fvisibility=hidden)
+android_target_compile_definitions(OpenglRender_standalone_common windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
 target_include_directories(OpenglRender_standalone_common
                                    PUBLIC
                                    ${ANDROID_EMUGL_DIR}/host/include/OpenglRender

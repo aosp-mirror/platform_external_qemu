@@ -267,6 +267,10 @@ public:
     // Returns true on success, false on failure.
     bool  flushWindowSurfaceColorBuffer(HandleType p_surface);
 
+    // Retrieves the color buffer handle associated with |p_surface|.
+    // Returns 0 if there is no such handle.
+    HandleType getWindowSurfaceColorBufferHandle(HandleType p_surface);
+
     // Bind the current context's EGL_TEXTURE_2D texture to a ColorBuffer
     // instance's EGLImage. This is intended to implement
     // glEGLImageTargetTexture2DOES() for all GLES versions.
@@ -316,6 +320,16 @@ public:
         HandleType p_colorbuffer,
         const void *pixels,
         size_t numBytes);
+    // Reads back the color buffer to |pixels|
+    // if |pixels| is not null.
+    // Always returns in |numBytes| how many bytes were
+    // planned to be transmitted.
+    // |numBytes| is not an input parameter;
+    // fewer or more bytes cannot be specified.
+    bool readColorBufferContents(
+        HandleType p_colorbuffer,
+        size_t* numBytes,
+        void *pixels);
 
     bool getColorBufferInfo(HandleType p_colorbuffer,
                             int* width,
@@ -504,6 +518,7 @@ private:
     RenderContextMap m_contexts;
     WindowSurfaceMap m_windows;
     ColorBufferMap m_colorbuffers;
+    std::unordered_map<HandleType, HandleType> m_windowSurfaceToColorBuffer;
 
     // A collection of color buffers that were closed without any usages
     // (|opened| == false).
