@@ -64,6 +64,24 @@ void CameraVirtualSceneSubpage::on_imageTable_scaleChanged(float value) {
     changePosterScale("table", value);
 }
 
+void CameraVirtualSceneSubpage::on_toggleTV_toggled(bool value) {
+    // Persist to settings.
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        const QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+        avdSpecificSettings.setValue(
+                Ui::Settings::PER_AVD_VIRTUAL_SCENE_TV_ANIMATION, value);
+    }
+
+    // Update the scene.
+    if (sVirtualSceneAgent) {
+        sVirtualSceneAgent->setAnimationState(value);
+    }
+}
+
 void CameraVirtualSceneSubpage::reportInteraction() {
     if (!mHadFirstInteraction) {
         mHadFirstInteraction = true;
@@ -154,6 +172,9 @@ void CameraVirtualSceneSubpage::loadUi() {
                     self->mUi->imageTable->setMinMaxSize(minWidth, maxWidth);
                 }
             });
+
+    // Set UI display to correct state.
+    mUi->toggleTV->setChecked(sVirtualSceneAgent->getAnimationState());
 }
 
 // static
@@ -172,6 +193,10 @@ void CameraVirtualSceneSubpage::loadInitialSettings() {
                 avdSpecificSettings
                         .value(Ui::Settings::PER_AVD_VIRTUAL_SCENE_POSTER_SIZES)
                         .toMap();
+        const bool savedAnimationState =
+                avdSpecificSettings
+                        .value(Ui::Settings::PER_AVD_VIRTUAL_SCENE_TV_ANIMATION)
+                        .toBool();
 
         // Send the saved posters to the virtual scene.  This is called early
         // during emulator startup.  If a poster has been set via a command line
@@ -194,5 +219,8 @@ void CameraVirtualSceneSubpage::loadInitialSettings() {
                 }
             }
         }
+
+        // Set animation state.
+        sVirtualSceneAgent->setAnimationState(savedAnimationState);
     }
 }
