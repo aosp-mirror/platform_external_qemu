@@ -611,16 +611,16 @@ EOF
     # the generated binaries can run, using Wine of course.
     # Mingw's thread support library needs to be added to Wine path to make this
     # happen.
-    local EXTRA_WINEPATH=
-    if type "winepath" > /dev/null; then
-        case $_SHU_BUILDER_CURRENT_HOST in
-            windows-x86_64)
-                EXTRA_WINEPATH=`winepath -w \
-                    "$AOSP_DIR/$(aosp_prebuilt_toolchain_sysroot_subdir_for $_SHU_BUILDER_CURRENT_HOST)/bin"`
-                ;;
-        esac
-        log "$_SHU_BUILDER_CURRENT_TEXT EXTRA_WINEPATH=$EXTRA_WINEPATH"
-    fi
+#    local EXTRA_WINEPATH=
+#    if type "winepath" > /dev/null; then
+#        case $_SHU_BUILDER_CURRENT_HOST in
+#            windows-x86_64)
+#                EXTRA_WINEPATH=`winepath -w \
+#                    "$AOSP_DIR/$(aosp_prebuilt_toolchain_sysroot_subdir_for $_SHU_BUILDER_CURRENT_HOST)/bin"`
+#                ;;
+#        esac
+#        log "$_SHU_BUILDER_CURRENT_TEXT EXTRA_WINEPATH=$EXTRA_WINEPATH"
+#    fi
 
     TOOLCHAIN_WRAPPER_DIR=$_SHU_BUILDER_BUILD_DIR/toolchain-wrapper
     log "$_SHU_BUILDER_CURRENT_TEXT Generating $_SHU_BUILDER_GNU_CONFIG_HOST wrapper toolchain in $TOOLCHAIN_WRAPPER_DIR"

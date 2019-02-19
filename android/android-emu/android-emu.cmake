@@ -373,6 +373,12 @@ android_target_link_libraries(android-emu
                               "-framework Accelerate" # Of course, our camera needs it!
                               "-framework CoreMedia" # Also for the camera.
                               "-framework CoreVideo" # Also for the camera.
+                              "-framework AudioToolbox"
+                              "-framework AudioUnit"
+                              "-framework CoreAudio"
+                              "-framework Security"
+                              "-framework CoreServices"
+                              "-framework CoreFoundation"
                               "-framework IOKit"
                               "-weak_framework Hypervisor"
                               "-framework OpenGL")

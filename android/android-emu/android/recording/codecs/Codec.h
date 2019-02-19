@@ -67,7 +67,14 @@ public:
 protected:
     explicit Codec(AVCodecID id, CodecParams&& params)
         : mCodecId(id), mParams(std::move(params)) {
+            if (id == AV_CODEC_ID_H264) {
+        mCodec = avcodec_find_encoder_by_name("h264_videotoolbox");
+        if (!mCodec) {
+            fprintf(stderr, "cannot find videotoolbox encoder\n");
+        }
+            } else {
         mCodec = avcodec_find_encoder(mCodecId);
+            }
         assert(mCodec);
     }
 

@@ -126,6 +126,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 "$INSTALL_DIR/$SYSTEM/lib"
 
         copy_directory \
+                "$(builder_install_prefix)/bin" \
+                "$INSTALL_DIR/$SYSTEM/bin"
+        copy_directory \
                 "$(builder_install_prefix)/include" \
                 "$INSTALL_DIR/$SYSTEM/include"
 
