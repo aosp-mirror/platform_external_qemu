@@ -135,6 +135,7 @@ function(toolchain_generate TARGET_OS)
     set(CMAKE_OBJCOPY ${COMPILER_PREFIX}objcopy CACHE PATH "Objcopy")
     set(CMAKE_STRIP ${COMPILER_PREFIX}strip CACHE PATH "strip")
     set(ANDROID_SYSROOT ${ANDROID_SYSROOT} CACHE PATH "Sysroot")
+    set(ANDROID_LLVM_SYMBOLIZER ${PROJECT_BINARY_DIR}/toolchain/llvm-symbolizer CACHE PATH "symbolizer")
 endfunction()
 
 function(get_host_tag RET_VAL)

@@ -12,8 +12,16 @@
 #pragma once
 
 #include "android/emulation/control/vm_operations.h"
+#include <gtest/gtest.h>
 
 #ifdef _WIN32
 extern "C" int qt_main(int, char**) { return 0; }
 extern "C" void qemu_system_shutdown_request(QemuShutdownCause reason) {}
 #endif  // _WIN32
+
+// For the msvc build we set the entry point in winsys_qt, resulting in NOPS for our
+// unit test. we will use the linker to provide is with a different entry point.
+int gtest_main(int argc, char** argv) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}

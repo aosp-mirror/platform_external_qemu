@@ -315,51 +315,6 @@
      <string>D</string>
     </property>
    </item>
-   <item>
-    <property name="text">
-     <string>D1</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D2</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D3</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D4</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D5</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D6</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D7</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D8</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D9</string>
-    </property>
-   </item>
   </widget>
   <widget class="QGroupBox" name="groupBox_7">
    <property name="geometry">

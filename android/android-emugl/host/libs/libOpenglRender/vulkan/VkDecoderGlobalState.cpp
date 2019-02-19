@@ -13,7 +13,10 @@
 // limitations under the License.
 #include "VkDecoderGlobalState.h"
 
+#include "FrameBuffer.h"
+
 #include "VkAndroidNativeBuffer.h"
+#include "VkCommonOperations.h"
 #include "VkFormatUtils.h"
 #include "VulkanDispatch.h"
 
@@ -33,6 +36,8 @@
 
 #include <algorithm>
 #include <functional>
+#include <list>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -95,15 +100,24 @@ public:
 
         *pInstance = (VkInstance)info.boxed;
 
+        auto fb = FrameBuffer::getFB();
+        if (!fb) return res;
+
+        fb->registerProcessCleanupCallback(
+            boxed->underlying,
+            [this, boxed] {
+                vkDestroyInstanceImpl(boxed->underlying, nullptr);
+            });
+
         return res;
     }
 
-    void on_vkDestroyInstance(VkInstance boxed_instance, const VkAllocationCallbacks* pAllocator) {
-        auto instance = unbox_VkInstance(boxed_instance);
+    void vkDestroyInstanceImpl(VkInstance instance, const VkAllocationCallbacks* pAllocator) {
+        AutoLock lock(mLock);
+
+        teardownInstanceLocked(instance);
 
         m_vk->vkDestroyInstance(instance, pAllocator);
-
-        AutoLock lock(mLock);
 
         auto it = mPhysicalDeviceToInstance.begin();
 
@@ -118,6 +132,17 @@ public:
         auto instInfo = android::base::find(mInstanceInfo, instance);
         delete_boxed_VkInstance(instInfo->boxed);
         mInstanceInfo.erase(instance);
+    }
+
+    void on_vkDestroyInstance(VkInstance boxed_instance, const VkAllocationCallbacks* pAllocator) {
+        auto instance = unbox_VkInstance(boxed_instance);
+
+        vkDestroyInstanceImpl(instance, pAllocator);
+
+        auto fb = FrameBuffer::getFB();
+        if (!fb) return;
+
+        fb->unregisterProcessCleanupCallback(instance);
     }
 
     VkResult on_vkEnumeratePhysicalDevices(
@@ -214,6 +239,147 @@ public:
         }
 
         pFeatures->features.textureCompressionETC2 = true;
+    }
+
+    VkResult on_vkGetPhysicalDeviceImageFormatProperties(
+            VkPhysicalDevice boxed_physicalDevice,
+            VkFormat format,
+            VkImageType type,
+            VkImageTiling tiling,
+            VkImageUsageFlags usage,
+            VkImageCreateFlags flags,
+            VkImageFormatProperties* pImageFormatProperties) {
+        auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
+        auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
+        if (needEmulatedEtc2(physicalDevice, vk)) {
+            CompressedImageInfo cmpInfo = createCompressedImageInfo(format);
+            format = cmpInfo.dstFormat;
+        }
+        return vk->vkGetPhysicalDeviceImageFormatProperties(
+                physicalDevice, format, type, tiling, usage, flags,
+                pImageFormatProperties);
+    }
+
+    VkResult on_vkGetPhysicalDeviceImageFormatProperties2(
+            VkPhysicalDevice boxed_physicalDevice,
+            const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo,
+            VkImageFormatProperties2* pImageFormatProperties) {
+        auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
+        auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
+        VkPhysicalDeviceImageFormatInfo2 imageFormatInfo;
+        if (needEmulatedEtc2(physicalDevice, vk)) {
+            CompressedImageInfo cmpInfo =
+                    createCompressedImageInfo(pImageFormatInfo->format);
+            if (cmpInfo.isCompressed) {
+                imageFormatInfo = *pImageFormatInfo;
+                pImageFormatInfo = &imageFormatInfo;
+                imageFormatInfo.format = cmpInfo.dstFormat;
+            }
+        }
+        AutoLock lock(mLock);
+
+        auto physdevInfo = android::base::find(mPhysdevInfo, physicalDevice);
+        if (!physdevInfo) {
+            return VK_ERROR_OUT_OF_HOST_MEMORY;
+        }
+
+        auto instance = mPhysicalDeviceToInstance[physicalDevice];
+        if (physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+            return vk->vkGetPhysicalDeviceImageFormatProperties2(
+                    physicalDevice, pImageFormatInfo, pImageFormatProperties);
+        } else if (hasInstanceExtension(
+                           instance,
+                           "VK_KHR_get_physical_device_properties2")) {
+            return vk->vkGetPhysicalDeviceImageFormatProperties2KHR(
+                    physicalDevice, pImageFormatInfo, pImageFormatProperties);
+        } else {
+            // No instance extension, fake it!!!!
+            if (pImageFormatProperties->pNext) {
+                fprintf(stderr,
+                        "%s: Warning: Trying to use extension struct in "
+                        "VkPhysicalDeviceFeatures2 without having enabled "
+                        "the extension!!!!11111\n",
+                        __func__);
+            }
+            *pImageFormatProperties = {
+                    VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2,
+                    0,
+            };
+            return vk->vkGetPhysicalDeviceImageFormatProperties(
+                    physicalDevice, pImageFormatInfo->format,
+                    pImageFormatInfo->type, pImageFormatInfo->tiling,
+                    pImageFormatInfo->usage, pImageFormatInfo->flags,
+                    &pImageFormatProperties->imageFormatProperties);
+        }
+    }
+
+    void on_vkGetPhysicalDeviceFormatProperties(
+            VkPhysicalDevice boxed_physicalDevice,
+            VkFormat format,
+            VkFormatProperties* pFormatProperties) {
+        auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
+        auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
+        getPhysicalDeviceFormatPropertiesCore<VkFormatProperties>(
+                [vk](VkPhysicalDevice physicalDevice, VkFormat format,
+                     VkFormatProperties* pFormatProperties) {
+                    vk->vkGetPhysicalDeviceFormatProperties(
+                            physicalDevice, format, pFormatProperties);
+                },
+                vk, physicalDevice, format, pFormatProperties);
+    }
+
+    void on_vkGetPhysicalDeviceFormatProperties2(
+            VkPhysicalDevice boxed_physicalDevice,
+            VkFormat format,
+            VkFormatProperties2* pFormatProperties) {
+        auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
+        auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
+
+        AutoLock lock(mLock);
+
+        auto physdevInfo = android::base::find(mPhysdevInfo, physicalDevice);
+        if (!physdevInfo)
+            return;
+
+        auto instance = mPhysicalDeviceToInstance[physicalDevice];
+
+        if (physdevInfo->props.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+            getPhysicalDeviceFormatPropertiesCore<VkFormatProperties2>(
+                    [vk](VkPhysicalDevice physicalDevice, VkFormat format,
+                         VkFormatProperties2* pFormatProperties) {
+                        vk->vkGetPhysicalDeviceFormatProperties2(
+                                physicalDevice, format, pFormatProperties);
+                    },
+                    vk, physicalDevice, format, pFormatProperties);
+        } else if (hasInstanceExtension(
+                           instance,
+                           "VK_KHR_get_physical_device_properties2")) {
+            getPhysicalDeviceFormatPropertiesCore<VkFormatProperties2>(
+                    [vk](VkPhysicalDevice physicalDevice, VkFormat format,
+                         VkFormatProperties2* pFormatProperties) {
+                        vk->vkGetPhysicalDeviceFormatProperties2KHR(
+                                physicalDevice, format, pFormatProperties);
+                    },
+                    vk, physicalDevice, format, pFormatProperties);
+        } else {
+            // No instance extension, fake it!!!!
+            if (pFormatProperties->pNext) {
+                fprintf(stderr,
+                        "%s: Warning: Trying to use extension struct in "
+                        "vkGetPhysicalDeviceFormatProperties2 without having "
+                        "enabled the extension!!!!11111\n",
+                        __func__);
+            }
+            pFormatProperties->sType = VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2;
+            getPhysicalDeviceFormatPropertiesCore<VkFormatProperties>(
+                    [vk](VkPhysicalDevice physicalDevice, VkFormat format,
+                         VkFormatProperties* pFormatProperties) {
+                        vk->vkGetPhysicalDeviceFormatProperties(
+                                physicalDevice, format, pFormatProperties);
+                    },
+                    vk, physicalDevice, format,
+                    &pFormatProperties->formatProperties);
+        }
     }
 
     void on_vkGetPhysicalDeviceProperties(
@@ -379,10 +545,7 @@ public:
         if (pCreateInfo->pEnabledFeatures) {
             featuresFiltered = *pCreateInfo->pEnabledFeatures;
             if (featuresFiltered.textureCompressionETC2) {
-                VkPhysicalDeviceFeatures physicalFeatures;
-                vk->vkGetPhysicalDeviceFeatures(physicalDevice,
-                                                  &physicalFeatures);
-                if (!physicalFeatures.textureCompressionETC2) {
+                if (needEmulatedEtc2(physicalDevice, vk)) {
                     emulateTextureEtc2 = true;
                     featuresFiltered.textureCompressionETC2 = false;
                 }
@@ -482,13 +645,7 @@ public:
         *pQueue = (VkQueue)queueInfo->boxed;
     }
 
-    void on_vkDestroyDevice(
-        VkDevice boxed_device,
-        const VkAllocationCallbacks* pAllocator) {
-
-        auto device = unbox_VkDevice(boxed_device);
-
-        AutoLock lock(mLock);
+    void destroyDeviceLocked(VkDevice device, const VkAllocationCallbacks* pAllocator) {
         auto it = mDeviceInfo.find(device);
         if (it == mDeviceInfo.end()) return;
 
@@ -507,6 +664,17 @@ public:
         m_vk->vkDestroyDevice(device, pAllocator);
 
         delete_boxed_VkDevice(it->second.boxed);
+    }
+
+    void on_vkDestroyDevice(
+        VkDevice boxed_device,
+        const VkAllocationCallbacks* pAllocator) {
+
+        auto device = unbox_VkDevice(boxed_device);
+
+        AutoLock lock(mLock);
+
+        destroyDeviceLocked(device, pAllocator);
 
         mDeviceInfo.erase(device);
         mDeviceToPhysicalDevice.erase(device);
@@ -666,18 +834,20 @@ public:
         const VkImageViewCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkImageView* pView) {
-
         auto device = unbox_VkDevice(boxed_device);
         auto vk = dispatch_VkDevice(boxed_device);
 
         if (!pCreateInfo) {
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
+
+        AutoLock lock(mLock);
         auto deviceInfoIt = mDeviceInfo.find(device);
         if (deviceInfoIt == mDeviceInfo.end()) {
             return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
         VkImageViewCreateInfo createInfo;
+        bool needEmulatedAlpha = false;
         if (deviceInfoIt->second.emulateTextureEtc2) {
             CompressedImageInfo cmpInfo = createCompressedImageInfo(
                 pCreateInfo->format
@@ -686,9 +856,186 @@ public:
                 createInfo = *pCreateInfo;
                 createInfo.format = cmpInfo.dstFormat;
                 pCreateInfo = &createInfo;
+                needEmulatedAlpha = cmpInfo.needEmulatedAlpha();
             }
         }
-        return vk->vkCreateImageView(device, pCreateInfo, pAllocator, pView);
+        VkResult result =
+                vk->vkCreateImageView(device, pCreateInfo, pAllocator, pView);
+        if (result != VK_SUCCESS) {
+            return result;
+        }
+
+        auto& imageViewInfo = mImageViewInfo[*pView];
+        imageViewInfo.needEmulatedAlpha = needEmulatedAlpha;
+        return result;
+    }
+
+    void on_vkDestroyImageView(VkDevice boxed_device,
+                               VkImageView imageView,
+                               const VkAllocationCallbacks* pAllocator) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        vk->vkDestroyImageView(device, imageView, pAllocator);
+        AutoLock lock(mLock);
+        mImageViewInfo.erase(imageView);
+    }
+
+    VkResult on_vkCreateSampler(VkDevice boxed_device,
+                                const VkSamplerCreateInfo* pCreateInfo,
+                                const VkAllocationCallbacks* pAllocator,
+                                VkSampler* pSampler) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+        VkResult result =
+                vk->vkCreateSampler(device, pCreateInfo, pAllocator, pSampler);
+        if (result != VK_SUCCESS) {
+            return result;
+        }
+        AutoLock lock(mLock);
+        auto& samplerInfo = mSamplerInfo[*pSampler];
+        samplerInfo.createInfo = *pCreateInfo;
+        // We emulate RGB with RGBA for some compressed textures, which does not
+        // handle translarent border correctly.
+        samplerInfo.needEmulatedAlpha =
+                (pCreateInfo->addressModeU ==
+                         VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER ||
+                 pCreateInfo->addressModeV ==
+                         VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER ||
+                 pCreateInfo->addressModeW ==
+                         VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER) &&
+                (pCreateInfo->borderColor ==
+                         VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK ||
+                 pCreateInfo->borderColor ==
+                         VK_BORDER_COLOR_INT_TRANSPARENT_BLACK);
+        return result;
+    }
+
+    void on_vkDestroySampler(VkDevice boxed_device,
+                             VkSampler sampler,
+                             const VkAllocationCallbacks* pAllocator) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+        vk->vkDestroySampler(device, sampler, pAllocator);
+        AutoLock lock(mLock);
+        const auto& samplerInfoIt = mSamplerInfo.find(sampler);
+        if (samplerInfoIt != mSamplerInfo.end()) {
+            if (samplerInfoIt->second.emulatedborderSampler != VK_NULL_HANDLE) {
+                vk->vkDestroySampler(
+                        device, samplerInfoIt->second.emulatedborderSampler,
+                        nullptr);
+            }
+            mSamplerInfo.erase(samplerInfoIt);
+        }
+    }
+
+    void on_vkUpdateDescriptorSets(
+            VkDevice boxed_device,
+            uint32_t descriptorWriteCount,
+            const VkWriteDescriptorSet* pDescriptorWrites,
+            uint32_t descriptorCopyCount,
+            const VkCopyDescriptorSet* pDescriptorCopies) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        AutoLock lock(mLock);
+        bool needEmulateWriteDescriptor = false;
+        // c++ seems to allow for 0-size array allocation
+        std::unique_ptr<bool[]> descriptorWritesNeedDeepCopy(
+                new bool[descriptorWriteCount]);
+        for (uint32_t i = 0; i < descriptorWriteCount; i++) {
+            const VkWriteDescriptorSet& descriptorWrite = pDescriptorWrites[i];
+            descriptorWritesNeedDeepCopy[i] = false;
+            if (descriptorWrite.descriptorType !=
+                VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) {
+                continue;
+            }
+            for (uint32_t j = 0; j < descriptorWrite.descriptorCount; j++) {
+                const VkDescriptorImageInfo& imageInfo =
+                        descriptorWrite.pImageInfo[j];
+                const auto& viewIt = mImageViewInfo.find(imageInfo.imageView);
+                if (viewIt == mImageViewInfo.end()) {
+                    continue;
+                }
+                const auto& samplerIt = mSamplerInfo.find(imageInfo.sampler);
+                if (samplerIt == mSamplerInfo.end()) {
+                    continue;
+                }
+                if (viewIt->second.needEmulatedAlpha &&
+                    samplerIt->second.needEmulatedAlpha) {
+                    needEmulateWriteDescriptor = true;
+                    descriptorWritesNeedDeepCopy[i] = true;
+                    break;
+                }
+            }
+        }
+        if (!needEmulateWriteDescriptor) {
+            vk->vkUpdateDescriptorSets(device, descriptorWriteCount,
+                                       pDescriptorWrites, descriptorCopyCount,
+                                       pDescriptorCopies);
+            return;
+        }
+        std::list<std::unique_ptr<VkDescriptorImageInfo[]>> imageInfoPool;
+        std::unique_ptr<VkWriteDescriptorSet[]> descriptorWrites(
+                new VkWriteDescriptorSet[descriptorWriteCount]);
+        for (uint32_t i = 0; i < descriptorWriteCount; i++) {
+            const VkWriteDescriptorSet& srcDescriptorWrite =
+                    pDescriptorWrites[i];
+            VkWriteDescriptorSet& dstDescriptorWrite = descriptorWrites[i];
+            // Shallow copy first
+            dstDescriptorWrite = srcDescriptorWrite;
+            if (!descriptorWritesNeedDeepCopy[i]) {
+                continue;
+            }
+            // Deep copy
+            assert(dstDescriptorWrite.descriptorType ==
+                   VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+            imageInfoPool.emplace_back(
+                    new VkDescriptorImageInfo[dstDescriptorWrite
+                                                      .descriptorCount]);
+            VkDescriptorImageInfo* imageInfos = imageInfoPool.back().get();
+            memcpy(imageInfos, srcDescriptorWrite.pImageInfo,
+                   dstDescriptorWrite.descriptorCount *
+                           sizeof(VkDescriptorImageInfo));
+            dstDescriptorWrite.pImageInfo = imageInfos;
+            for (uint32_t j = 0; j < dstDescriptorWrite.descriptorCount; j++) {
+                VkDescriptorImageInfo& imageInfo = imageInfos[j];
+                const auto& viewIt = mImageViewInfo.find(imageInfo.imageView);
+                if (viewIt == mImageViewInfo.end()) {
+                    continue;
+                }
+                const auto& samplerIt = mSamplerInfo.find(imageInfo.sampler);
+                if (samplerIt == mSamplerInfo.end()) {
+                    continue;
+                }
+                if (viewIt->second.needEmulatedAlpha &&
+                    samplerIt->second.needEmulatedAlpha) {
+                    SamplerInfo& samplerInfo = samplerIt->second;
+                    if (samplerInfo.emulatedborderSampler == VK_NULL_HANDLE) {
+                        // create the emulated sampler
+                        VkSamplerCreateInfo createInfo = samplerInfo.createInfo;
+                        switch (createInfo.borderColor) {
+                            case VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK:
+                                createInfo.borderColor =
+                                        VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
+                                break;
+                            case VK_BORDER_COLOR_INT_TRANSPARENT_BLACK:
+                                createInfo.borderColor =
+                                        VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+                                break;
+                            default:
+                                break;
+                        }
+                        vk->vkCreateSampler(device, &createInfo, nullptr,
+                                            &samplerInfo.emulatedborderSampler);
+                    }
+                    imageInfo.sampler = samplerInfo.emulatedborderSampler;
+                }
+            }
+        }
+        vk->vkUpdateDescriptorSets(device, descriptorWriteCount,
+                                   descriptorWrites.get(), descriptorCopyCount,
+                                   pDescriptorCopies);
     }
 
     void on_vkCmdCopyBufferToImage(
@@ -729,7 +1076,7 @@ public:
         std::vector<VkBufferImageCopy> regions(regionCount);
         VkDeviceSize offset = 0;
         VkDeviceSize maxOffset = 0;
-        const VkDeviceSize pixelSize = cmp.pixelSize();
+        const VkDeviceSize dstPixelSize = cmp.dstPixelSize();
         for (uint32_t r = 0; r < regionCount; r++) {
             VkBufferImageCopy& dstRegion = regions[r];
             dstRegion.bufferOffset = offset;
@@ -742,12 +1089,17 @@ public:
                     cmp.mipmapWidth(dstRegion.imageSubresource.mipLevel);
             uint32_t height =
                     cmp.mipmapHeight(dstRegion.imageSubresource.mipLevel);
+            uint32_t depth =
+                    cmp.mipmapDepth(dstRegion.imageSubresource.mipLevel);
             dstRegion.imageExtent.width =
                     std::min(dstRegion.imageExtent.width, width);
             dstRegion.imageExtent.height =
                     std::min(dstRegion.imageExtent.height, height);
+            dstRegion.imageExtent.depth =
+                    std::min(dstRegion.imageExtent.depth, depth);
             offset += dstRegion.imageExtent.width *
-                      dstRegion.imageExtent.height * pixelSize;
+                      dstRegion.imageExtent.height *
+                      dstRegion.imageExtent.depth * dstPixelSize;
         }
 
         VkBufferCreateInfo bufferInfo = {};
@@ -867,6 +1219,7 @@ public:
         mMapInfo[*pMemory] = MappedMemoryInfo();
         auto& mapInfo = mMapInfo[*pMemory];
         mapInfo.size = pAllocateInfo->allocationSize;
+        mapInfo.device = device;
 
         VkMemoryPropertyFlags flags =
                 physdevInfo->
@@ -894,6 +1247,35 @@ public:
         return result;
     }
 
+    void freeMemoryLocked(
+        VulkanDispatch* vk,
+        VkDevice device,
+        VkDeviceMemory memory,
+        const VkAllocationCallbacks* pAllocator) {
+
+        auto info = android::base::find(mMapInfo, memory);
+
+        if (!info) {
+            // Invalid usage.
+            return;
+        }
+
+        if (info->directMapped) {
+            printf("%s: unmap: [0x%llx 0x%llx]\n", __func__,
+                   (unsigned long long)info->guestPhysAddr,
+                   (unsigned long long)info->guestPhysAddr + info->sizeToPage);
+            get_emugl_vm_operations().unmapUserBackedRam(
+                info->guestPhysAddr,
+                info->sizeToPage);
+        }
+
+        if (info->ptr) {
+            vk->vkUnmapMemory(device, memory);
+        }
+
+        vk->vkFreeMemory(device, memory, pAllocator);
+    }
+
     void on_vkFreeMemory(
         VkDevice boxed_device,
         VkDeviceMemory memory,
@@ -904,26 +1286,9 @@ public:
 
         AutoLock lock(mLock);
 
-        auto info = android::base::find(mMapInfo, memory);
-
-        if (!info) {
-            // Invalid usage.
-            return;
-        }
-
-        if (info->directMapped) {
-            get_emugl_vm_operations().unmapUserBackedRam(
-                info->guestPhysAddr,
-                info->sizeToPage);
-        }
-
-        if (info->ptr) {
-            vk->vkUnmapMemory(device, memory);
-        }
+        freeMemoryLocked(vk, device, memory, pAllocator);
 
         mMapInfo.erase(memory);
-
-        vk->vkFreeMemory(device, memory, pAllocator);
     }
 
     VkResult on_vkMapMemory(VkDevice,
@@ -1150,6 +1515,10 @@ public:
             ((info->size + pageOffset + PAGE_SIZE - 1) >>
                  PAGE_BITS) << PAGE_BITS;
 
+        printf("%s: map: %p -> [0x%llx 0x%llx]\n", __func__,
+               info->pageAlignedHva,
+               (unsigned long long)info->guestPhysAddr,
+               (unsigned long long)info->guestPhysAddr + info->sizeToPage);
         get_emugl_vm_operations().mapUserBackedRam(
             info->guestPhysAddr,
             info->pageAlignedHva,
@@ -1321,6 +1690,70 @@ public:
         }
     }
 
+    // TODO: Support more than one kind of guest external memory handle type
+#define GUEST_EXTERNAL_MEMORY_HANDLE_TYPE VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID
+
+    // Transforms
+
+    void transformImpl_VkExternalMemoryProperties_tohost(
+        const VkExternalMemoryProperties* props, uint32_t count) {
+        VkExternalMemoryProperties* mut =
+            (VkExternalMemoryProperties*)props;
+        for (uint32_t i = 0; i < count; ++i) {
+            mut[i] = transformExternalMemoryProperties_tohost(mut[i]);
+        }
+    }
+    void transformImpl_VkExternalMemoryProperties_fromhost(
+        const VkExternalMemoryProperties* props, uint32_t count) {
+        VkExternalMemoryProperties* mut =
+            (VkExternalMemoryProperties*)props;
+        for (uint32_t i = 0; i < count; ++i) {
+            mut[i] = transformExternalMemoryProperties_fromhost(mut[i], GUEST_EXTERNAL_MEMORY_HANDLE_TYPE);
+        }
+    }
+
+#define DEFINE_EXTERNAL_HANDLE_TYPE_TRANSFORM(type, field) \
+    void transformImpl_##type##_tohost(const type* props, uint32_t count) { \
+        type* mut = (type*)props; \
+        for (uint32_t i = 0; i < count; ++i) { \
+            mut[i].field = (VkExternalMemoryHandleTypeFlagBits) \
+                transformExternalMemoryHandleTypeFlags_tohost( \
+                    mut[i].field); \
+        } \
+    } \
+    void transformImpl_##type##_fromhost(const type* props, uint32_t count) { \
+        type* mut = (type*)props; \
+        for (uint32_t i = 0; i < count; ++i) { \
+            mut[i].field = (VkExternalMemoryHandleTypeFlagBits) \
+                transformExternalMemoryHandleTypeFlags_fromhost( \
+                    mut[i].field, GUEST_EXTERNAL_MEMORY_HANDLE_TYPE); \
+        } \
+    } \
+
+#define DEFINE_EXTERNAL_MEMORY_PROPERTIES_TRANSFORM(type) \
+    void transformImpl_##type##_tohost(const type* props, uint32_t count) { \
+        type* mut = (type*)props; \
+        for (uint32_t i = 0; i < count; ++i) { \
+            mut[i].externalMemoryProperties = transformExternalMemoryProperties_tohost( \
+                    mut[i].externalMemoryProperties); \
+        } \
+    } \
+    void transformImpl_##type##_fromhost(const type* props, uint32_t count) { \
+        type* mut = (type*)props; \
+        for (uint32_t i = 0; i < count; ++i) { \
+            mut[i].externalMemoryProperties = transformExternalMemoryProperties_fromhost( \
+                    mut[i].externalMemoryProperties, GUEST_EXTERNAL_MEMORY_HANDLE_TYPE); \
+        } \
+    } \
+
+    DEFINE_EXTERNAL_HANDLE_TYPE_TRANSFORM(VkPhysicalDeviceExternalImageFormatInfo, handleType)
+    DEFINE_EXTERNAL_HANDLE_TYPE_TRANSFORM(VkPhysicalDeviceExternalBufferInfo, handleType)
+    DEFINE_EXTERNAL_HANDLE_TYPE_TRANSFORM(VkExternalMemoryImageCreateInfo, handleTypes)
+    DEFINE_EXTERNAL_HANDLE_TYPE_TRANSFORM(VkExternalMemoryBufferCreateInfo, handleTypes)
+    DEFINE_EXTERNAL_HANDLE_TYPE_TRANSFORM(VkExportMemoryAllocateInfo, handleTypes)
+    DEFINE_EXTERNAL_MEMORY_PROPERTIES_TRANSFORM(VkExternalImageFormatProperties)
+    DEFINE_EXTERNAL_MEMORY_PROPERTIES_TRANSFORM(VkExternalBufferProperties)
+
 private:
     bool isEmulatedExtension(const char* name) const {
         for (auto emulatedExt : kEmulatedExtensions) {
@@ -1404,6 +1837,9 @@ private:
         uint32_t mipmapHeight(uint32_t level) {
             return std::max<uint32_t>(extent.height >> level, 1);
         }
+        uint32_t mipmapDepth(uint32_t level) {
+            return std::max<uint32_t>(extent.depth >> level, 1);
+        }
         uint32_t alignSize(uint32_t inputSize) {
             if (isCompressed) {
                 return (inputSize + 3) & (~0x3);
@@ -1411,10 +1847,29 @@ private:
                 return inputSize;
             }
         }
-        VkDeviceSize pixelSize() {
+        VkDeviceSize dstPixelSize() {
             return getLinearFormatPixelSize(dstFormat);
         }
+        bool needEmulatedAlpha() {
+            if (!isCompressed) {
+                return false;
+            }
+            switch (srcFormat) {
+                case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
+                case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     };
+
+    static bool needEmulatedEtc2(VkPhysicalDevice physicalDevice,
+                                 goldfish_vk::VulkanDispatch* vk) {
+        VkPhysicalDeviceFeatures feature;
+        vk->vkGetPhysicalDeviceFeatures(physicalDevice, &feature);
+        return !feature.textureCompressionETC2;
+    }
 
     static ETC2ImageFormat getEtc2Format(VkFormat fmt) {
         switch (fmt) {
@@ -1462,16 +1917,81 @@ private:
             case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
                 cmpInfo.dstFormat = VK_FORMAT_R8G8B8A8_SRGB;
                 break;
+            case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+            case VK_FORMAT_EAC_R11_SNORM_BLOCK:
+                cmpInfo.dstFormat = VK_FORMAT_R32_SFLOAT;
+                break;
+            case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+            case VK_FORMAT_EAC_R11G11_SNORM_BLOCK:
+                cmpInfo.dstFormat = VK_FORMAT_R32G32_SFLOAT;
+                break;
             default:
                 cmpInfo.isCompressed = false;
                 cmpInfo.dstFormat = srcFmt;
                 break;
         }
         if (cmpInfo.isCompressed) {
-            fprintf(stderr, "WARNING: compressed texutre is not yet suppoted, "
-                "rendering could be wrong.\n");
+            fprintf(stderr,
+                    "WARNING: compressed texutre is experimental, "
+                    "rendering could be wrong.\n");
         }
         return cmpInfo;
+    }
+
+    static const VkFormatFeatureFlags kEmulatedEtc2BufferFeatureMask =
+            VK_FORMAT_FEATURE_TRANSFER_DST_BIT |
+            VK_FORMAT_FEATURE_BLIT_SRC_BIT |
+            VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT;
+
+    void maskFormatPropertiesForEmulatedEtc2(
+            VkFormatProperties* pFormatProperties) {
+        pFormatProperties->bufferFeatures &= kEmulatedEtc2BufferFeatureMask;
+    }
+
+    void maskFormatPropertiesForEmulatedEtc2(
+            VkFormatProperties2* pFormatProperties) {
+        pFormatProperties->formatProperties.bufferFeatures &=
+                kEmulatedEtc2BufferFeatureMask;
+    }
+
+    template <class VkFormatProperties1or2>
+    void getPhysicalDeviceFormatPropertiesCore(
+            std::function<
+                    void(VkPhysicalDevice, VkFormat, VkFormatProperties1or2*)>
+                    getPhysicalDeviceFormatPropertiesFunc,
+            goldfish_vk::VulkanDispatch* vk,
+            VkPhysicalDevice physicalDevice,
+            VkFormat format,
+            VkFormatProperties1or2* pFormatProperties) {
+        switch (format) {
+            case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK:
+            case VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK:
+            case VK_FORMAT_EAC_R11_UNORM_BLOCK:
+            case VK_FORMAT_EAC_R11_SNORM_BLOCK:
+            case VK_FORMAT_EAC_R11G11_UNORM_BLOCK:
+            case VK_FORMAT_EAC_R11G11_SNORM_BLOCK: {
+                if (!needEmulatedEtc2(physicalDevice, vk)) {
+                    // Hardware supported ETC2
+                    getPhysicalDeviceFormatPropertiesFunc(
+                            physicalDevice, format, pFormatProperties);
+                    return;
+                }
+                // Emulate ETC formats
+                CompressedImageInfo cmpInfo = createCompressedImageInfo(format);
+                getPhysicalDeviceFormatPropertiesFunc(
+                        physicalDevice, cmpInfo.dstFormat, pFormatProperties);
+                maskFormatPropertiesForEmulatedEtc2(pFormatProperties);
+                break;
+            }
+            default:
+                getPhysicalDeviceFormatPropertiesFunc(physicalDevice, format,
+                                                      pFormatProperties);
+                break;
+        }
     }
 
     void decompressBufferToImage(CompressedImageInfo cmp,
@@ -1520,30 +2040,47 @@ private:
                     cmp.alignSize(srcRegion.imageExtent.width);
             alignedSrcImgExtent.height =
                     cmp.alignSize(srcRegion.imageExtent.height);
-            alignedSrcImgExtent.depth = 1;
+            // not used
+            alignedSrcImgExtent.depth = srcRegion.imageExtent.depth;
 
             decompBuffer.resize(alignedSrcImgExtent.width *
                                 alignedSrcImgExtent.height * decodedPixelSize);
-            int err = etc2_decode_image(
-                    srcPtr, imgFmt, decompBuffer.data(),
-                    alignedSrcImgExtent.width, alignedSrcImgExtent.height,
-                    decodedPixelSize * alignedSrcImgExtent.width);
-
-            for (int h = 0; h < dstRegion.imageExtent.height; h++) {
-                for (int w = 0; w < dstRegion.imageExtent.width; w++) {
-                    // RGB to RGBA
-                    const uint8_t* srcPixel =
-                            decompBuffer.data() +
-                            decodedPixelSize *
-                                    (w + h * alignedSrcImgExtent.width);
-                    uint8_t* dstPixel =
-                            dstPtr + 4 * (w + h * dstRegion.imageExtent.width);
-                    // In case the source is not an RGBA format, we set all
-                    // channels to default values (except for R channel)
-                    dstPixel[1] = 0;
-                    dstPixel[2] = 0;
-                    dstPixel[3] = 255;
-                    memcpy(dstPixel, srcPixel, decodedPixelSize);
+            for (uint32_t d = 0; d < dstRegion.imageExtent.depth; d++) {
+                int err = etc2_decode_image(
+                        srcPtr + d * etc_get_encoded_data_size(
+                                             imgFmt, alignedSrcImgExtent.width,
+                                             alignedSrcImgExtent.height),
+                        imgFmt, decompBuffer.data(), alignedSrcImgExtent.width,
+                        alignedSrcImgExtent.height,
+                        decodedPixelSize * alignedSrcImgExtent.width);
+                int dstPixelSize = getLinearFormatPixelSize(cmp.dstFormat);
+                for (int h = 0; h < dstRegion.imageExtent.height; h++) {
+                    for (int w = 0; w < dstRegion.imageExtent.width; w++) {
+                        // RGB to RGBA
+                        const uint8_t* srcPixel =
+                                decompBuffer.data() +
+                                decodedPixelSize *
+                                        (w + h * alignedSrcImgExtent.width);
+                        uint8_t* dstPixel =
+                                dstPtr +
+                                dstPixelSize *
+                                        (w +
+                                         (h +
+                                          d * dstRegion.imageExtent.height) *
+                                                 dstRegion.imageExtent.width);
+                        // In case the source is not an RGBA format, we set all
+                        // channels to default values (except for R channel)
+                        switch (cmp.srcFormat) {
+                            case VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK:
+                            case VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK:
+                                dstPixel[3] = 255;
+                                memcpy(dstPixel, srcPixel, decodedPixelSize);
+                                break;
+                            default:
+                                assert(dstPixelSize == decodedPixelSize);
+                                memcpy(dstPixel, srcPixel, decodedPixelSize);
+                        }
+                    }
                 }
             }
         }
@@ -1563,6 +2100,43 @@ private:
         // for (const auto& subCmd : cmdBufferIt->second.subCmds) {
             // executePreprocessRecursive(level + 1, subCmd);
         // }
+    }
+
+    void teardownInstanceLocked(VkInstance instance) {
+
+        std::vector<VkDevice> devicesToDestroy;
+        std::vector<VulkanDispatch*> devicesToDestroyDispatches;
+
+        for (auto it : mDeviceToPhysicalDevice) {
+            auto otherInstance = android::base::find(mPhysicalDeviceToInstance, it.second);
+            if (!otherInstance) continue;
+
+            if (instance == *otherInstance) {
+                devicesToDestroy.push_back(it.first);
+                devicesToDestroyDispatches.push_back(mDeviceInfo[it.first].boxed->dispatch);
+            }
+        }
+
+        for (uint32_t i = 0; i < devicesToDestroy.size(); ++i) {
+            auto it = mMapInfo.begin();
+            while (it != mMapInfo.end()) {
+                if (it->second.device == devicesToDestroy[i]) {
+                    auto mem = it->first;
+                    freeMemoryLocked(devicesToDestroyDispatches[i],
+                        devicesToDestroy[i],
+                        mem, nullptr);
+                    it = mMapInfo.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+        }
+
+        for (uint32_t i = 0; i < devicesToDestroy.size(); ++i) {
+            destroyDeviceLocked(devicesToDestroy[i], nullptr);
+            mDeviceInfo.erase(devicesToDestroy[i]);
+            mDeviceToPhysicalDevice.erase(devicesToDestroy[i]);
+        }
     }
 
     typedef std::function<void()> PreprocessFunc;
@@ -1602,6 +2176,7 @@ private:
         uint64_t guestPhysAddr = 0;
         void* pageAlignedHva = nullptr;
         uint64_t sizeToPage = 0;
+        VkDevice device = VK_NULL_HANDLE;
     };
 
     struct InstanceInfo {
@@ -1643,6 +2218,16 @@ private:
         CompressedImageInfo cmpInfo;
     };
 
+    struct ImageViewInfo {
+        bool needEmulatedAlpha = false;
+    };
+
+    struct SamplerInfo {
+        bool needEmulatedAlpha = false;
+        VkSamplerCreateInfo createInfo = {};
+        VkSampler emulatedborderSampler = VK_NULL_HANDLE;
+    };
+
     std::unordered_map<VkInstance, InstanceInfo>
         mInstanceInfo;
     std::unordered_map<VkPhysicalDevice, PhysicalDeviceInfo>
@@ -1651,6 +2236,8 @@ private:
         mDeviceInfo;
     std::unordered_map<VkImage, ImageInfo>
         mImageInfo;
+    std::unordered_map<VkImageView, ImageViewInfo> mImageViewInfo;
+    std::unordered_map<VkSampler, SamplerInfo> mSamplerInfo;
     std::unordered_map<VkCommandBuffer, CommandBufferInfo> mCmdBufferInfo;
     std::unordered_map<VkCommandPool, CommandPoolInfo> mCmdPoolInfo;
     // TODO: release CommandBufferInfo when a command pool is reset/released
@@ -1715,6 +2302,57 @@ void VkDecoderGlobalState::on_vkGetPhysicalDeviceFeatures2KHR(
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceFeatures2KHR* pFeatures) {
     mImpl->on_vkGetPhysicalDeviceFeatures2(physicalDevice, pFeatures);
+}
+
+VkResult VkDecoderGlobalState::on_vkGetPhysicalDeviceImageFormatProperties(
+        VkPhysicalDevice physicalDevice,
+        VkFormat format,
+        VkImageType type,
+        VkImageTiling tiling,
+        VkImageUsageFlags usage,
+        VkImageCreateFlags flags,
+        VkImageFormatProperties* pImageFormatProperties) {
+    return mImpl->on_vkGetPhysicalDeviceImageFormatProperties(
+            physicalDevice, format, type, tiling, usage, flags,
+            pImageFormatProperties);
+}
+VkResult VkDecoderGlobalState::on_vkGetPhysicalDeviceImageFormatProperties2(
+        VkPhysicalDevice physicalDevice,
+        const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo,
+        VkImageFormatProperties2* pImageFormatProperties) {
+    return mImpl->on_vkGetPhysicalDeviceImageFormatProperties2(
+            physicalDevice, pImageFormatInfo, pImageFormatProperties);
+}
+VkResult VkDecoderGlobalState::on_vkGetPhysicalDeviceImageFormatProperties2KHR(
+        VkPhysicalDevice physicalDevice,
+        const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo,
+        VkImageFormatProperties2* pImageFormatProperties) {
+    return mImpl->on_vkGetPhysicalDeviceImageFormatProperties2(
+            physicalDevice, pImageFormatInfo, pImageFormatProperties);
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceFormatProperties(
+        VkPhysicalDevice physicalDevice,
+        VkFormat format,
+        VkFormatProperties* pFormatProperties) {
+    mImpl->on_vkGetPhysicalDeviceFormatProperties(physicalDevice, format,
+                                                  pFormatProperties);
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceFormatProperties2(
+        VkPhysicalDevice physicalDevice,
+        VkFormat format,
+        VkFormatProperties2* pFormatProperties) {
+    mImpl->on_vkGetPhysicalDeviceFormatProperties2(physicalDevice, format,
+                                                   pFormatProperties);
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceFormatProperties2KHR(
+        VkPhysicalDevice physicalDevice,
+        VkFormat format,
+        VkFormatProperties2* pFormatProperties) {
+    mImpl->on_vkGetPhysicalDeviceFormatProperties2(physicalDevice, format,
+                                                   pFormatProperties);
 }
 
 void VkDecoderGlobalState::on_vkGetPhysicalDeviceProperties(
@@ -1822,6 +2460,39 @@ VkResult VkDecoderGlobalState::on_vkCreateImageView(
     const VkAllocationCallbacks* pAllocator,
     VkImageView* pView) {
     return mImpl->on_vkCreateImageView(device, pCreateInfo, pAllocator, pView);
+}
+
+void VkDecoderGlobalState::on_vkDestroyImageView(
+        VkDevice device,
+        VkImageView imageView,
+        const VkAllocationCallbacks* pAllocator) {
+    mImpl->on_vkDestroyImageView(device, imageView, pAllocator);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateSampler(
+        VkDevice device,
+        const VkSamplerCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkSampler* pSampler) {
+    return mImpl->on_vkCreateSampler(device, pCreateInfo, pAllocator, pSampler);
+}
+
+void VkDecoderGlobalState::on_vkDestroySampler(
+        VkDevice device,
+        VkSampler sampler,
+        const VkAllocationCallbacks* pAllocator) {
+    mImpl->on_vkDestroySampler(device, sampler, pAllocator);
+}
+
+void VkDecoderGlobalState::on_vkUpdateDescriptorSets(
+        VkDevice device,
+        uint32_t descriptorWriteCount,
+        const VkWriteDescriptorSet* pDescriptorWrites,
+        uint32_t descriptorCopyCount,
+        const VkCopyDescriptorSet* pDescriptorCopies) {
+    mImpl->on_vkUpdateDescriptorSets(device, descriptorWriteCount,
+                                     pDescriptorWrites, descriptorCopyCount,
+                                     pDescriptorCopies);
 }
 
 void VkDecoderGlobalState::on_vkCmdCopyBufferToImage(
@@ -1993,5 +2664,43 @@ void VkDecoderGlobalState::on_vkFreeCommandBuffers(
     return mImpl->on_vkFreeCommandBuffers(device, commandPool,
                                           commandBufferCount, pCommandBuffers);
 }
+
+void VkDecoderGlobalState::deviceMemoryTransform_tohost(
+    VkDeviceMemory* memory, uint32_t memoryCount,
+    VkDeviceSize* offset, uint32_t offsetCount,
+    VkDeviceSize* size, uint32_t sizeCount,
+    uint32_t* typeIndex, uint32_t typeIndexCount,
+    uint32_t* typeBits, uint32_t typeBitsCount) {
+    // Not used currently
+    (void)memory; (void)memoryCount;
+    (void)offset; (void)offsetCount;
+    (void)size; (void)sizeCount;
+    (void)typeIndex; (void)typeIndexCount;
+    (void)typeBits; (void)typeBitsCount;
+}
+
+void VkDecoderGlobalState::deviceMemoryTransform_fromhost(
+    VkDeviceMemory* memory, uint32_t memoryCount,
+    VkDeviceSize* offset, uint32_t offsetCount,
+    VkDeviceSize* size, uint32_t sizeCount,
+    uint32_t* typeIndex, uint32_t typeIndexCount,
+    uint32_t* typeBits, uint32_t typeBitsCount) {
+    // Not used currently
+    (void)memory; (void)memoryCount;
+    (void)offset; (void)offsetCount;
+    (void)size; (void)sizeCount;
+    (void)typeIndex; (void)typeIndexCount;
+    (void)typeBits; (void)typeBitsCount;
+}
+
+#define DEFINE_TRANSFORMED_TYPE_IMPL(type) \
+    void VkDecoderGlobalState::transformImpl_##type##_tohost(const type* val, uint32_t count) { \
+        mImpl->transformImpl_##type##_tohost(val, count); \
+    } \
+    void VkDecoderGlobalState::transformImpl_##type##_fromhost(const type* val, uint32_t count) { \
+        mImpl->transformImpl_##type##_tohost(val, count); \
+    } \
+
+LIST_TRANSFORMED_TYPES(DEFINE_TRANSFORMED_TYPE_IMPL)
 
 }  // namespace goldfish_vk

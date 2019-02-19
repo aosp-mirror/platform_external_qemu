@@ -18,6 +18,7 @@ function(android_find_windows_library NAME)
 endfunction()
 
 set(WINDOWS_LIBS
+    atls
     ws2_32
     d3d9
     ole32
@@ -77,7 +78,6 @@ if(WIN32 AND MSVC)
   find_library(DIASDK_GUIDS_LIBRARY NAMES diaguids.lib HINTS ${DIASDK_INCLUDE_DIR}/../lib/amd64)
 
 
-  # add_library(${NAME}::${NAME} INTERFACE IMPORTED GLOBAL)
   set_target_properties(diaguids::diaguids
                         PROPERTIES INTERFACE_LINK_LIBRARIES ${DIASDK_GUIDS_LIBRARY} INTERFACE_INCLUDE_DIRECTORIES
                                    ${DIASDK_INCLUDE_DIR})
@@ -95,8 +95,7 @@ if(WIN32 AND MSVC)
 
   find_library(ATL_LIBRARY NAMES atls.lib HINTS ${ATL_INCLUDE_DIR}/../lib/x64)
 
-  add_library(atl::atl INTERFACE IMPORTED GLOBAL)
-  set_target_properties(atl::atl
+  set_target_properties(atls::atls
                         PROPERTIES INTERFACE_LINK_LIBRARIES ${ATL_LIBRARY} INTERFACE_INCLUDE_DIRECTORIES
                                    ${ATL_INCLUDE_DIR})
 

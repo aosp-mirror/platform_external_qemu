@@ -207,6 +207,7 @@ private:
                               "gralloc.ranchu" LIBSUFFIX);
 
         load_gralloc_module(grallocPath.c_str(), &mGralloc);
+        set_global_gralloc_module(&mGralloc);
     }
 
     void teardownGralloc() { unload_gralloc_module(&mGralloc); }

@@ -46,4 +46,7 @@ extern int guest_boot_completed;
 /* are we using the emulator in the android mode or plain qemu? */
 extern int android_qemu_mode;
 
+/* are we using android-emu libraries for a minimal configuration? */
+extern int min_config_qemu_mode;
+
 ANDROID_END_HEADER

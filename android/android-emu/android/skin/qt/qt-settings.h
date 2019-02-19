@@ -55,10 +55,11 @@ constexpr char SAVE_PATH[] = "set/savePath";
 constexpr char UI_THEME[] = "set/theme";
 constexpr char DISABLE_MOUSE_WHEEL[] = "set/disableMouseWheel";
 
-constexpr char BATTERY_CHARGE_LEVEL[] = "battery/charge_level";
-constexpr char BATTERY_CHARGER_TYPE[] = "battery/charger_type";
-constexpr char BATTERY_HEALTH[]       = "battery/health";
-constexpr char BATTERY_STATUS[]       = "battery/status";
+constexpr char BATTERY_CHARGE_LEVEL[]  = "battery/charge_level";
+constexpr char BATTERY_CHARGER_TYPE[]  = "battery/charger_type";
+constexpr char BATTERY_CHARGER_TYPE2[] = "battery/charger_type2";
+constexpr char BATTERY_HEALTH[]        = "battery/health";
+constexpr char BATTERY_STATUS[]        = "battery/status";
 
 constexpr char CELLULAR_NETWORK_TYPE[]    = "cell/network_type";
 constexpr char CELLULAR_SIGNAL_STRENGTH[] = "cell/signal_strength";
@@ -131,6 +132,16 @@ constexpr char PER_AVD_LOC_PLAYBACK_SPEED[] = "perAvd/loc/playback_speed";
 constexpr char PER_AVD_VIRTUAL_SCENE_POSTERS[] = "perAvd/virtualscene/posters";
 constexpr char PER_AVD_VIRTUAL_SCENE_POSTER_SIZES[] =
         "perAvd/virtualscene/poster_sizes";
+
+constexpr char PER_AVD_BATTERY_CHARGE_LEVEL[]  = "perAvd/battery/charge_level";
+constexpr char PER_AVD_BATTERY_CHARGER_TYPE2[] = "perAvd/battery/charger_type2";
+constexpr char PER_AVD_BATTERY_HEALTH[]        = "perAvd/battery/health";
+constexpr char PER_AVD_BATTERY_STATUS[]        = "perAvd/battery/status";
+
+constexpr char PER_AVD_CELLULAR_NETWORK_TYPE[]    = "perAvd/cell/network_type";
+constexpr char PER_AVD_CELLULAR_SIGNAL_STRENGTH[] = "perAvd/cell/signal_strength";
+constexpr char PER_AVD_CELLULAR_VOICE_STATUS[]    = "perAvd/cell/voice_status";
+constexpr char PER_AVD_CELLULAR_DATA_STATUS[]     = "perAvd/cell/data_status";
 
 }  // namespace Settings
 }  // namespace Ui

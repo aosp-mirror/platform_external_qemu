@@ -53,6 +53,11 @@
 #include "qemu/error-report.h"
 #include "sysemu/numa.h"
 
+#ifdef CONFIG_ANDROID
+#include "android/globals.h"
+#include "hw/acpi/goldfish_defs.h"
+#endif
+
 /* ICH9 AHCI has 6 ports */
 #define MAX_SATA_PORTS     6
 
@@ -226,6 +231,29 @@ static void pc_q35_init(MachineState *machine)
     }
 
     pc_register_ferr_irq(pcms->gsi[13]);
+
+#ifdef CONFIG_ANDROID
+    sysbus_create_simple("goldfish_battery", GOLDFISH_BATTERY_IOMEM_BASE,
+                         pcms->gsi[GOLDFISH_BATTERY_IRQ]);
+    sysbus_create_simple("goldfish-events", GOLDFISH_EVENTS_IOMEM_BASE,
+                         pcms->gsi[GOLDFISH_EVENTS_IRQ]);
+    sysbus_create_simple("goldfish_pipe", GOLDFISH_PIPE_IOMEM_BASE,
+                         pcms->gsi[GOLDFISH_PIPE_IRQ]);
+    sysbus_create_simple("goldfish_fb", GOLDFISH_FB_IOMEM_BASE,
+                         pcms->gsi[GOLDFISH_FB_IRQ]);
+    sysbus_create_simple("goldfish_audio", GOLDFISH_AUDIO_IOMEM_BASE,
+                         pcms->gsi[GOLDFISH_AUDIO_IRQ]);
+    sysbus_create_simple("goldfish_rtc", GOLDFISH_RTC_IOMEM_BASE,
+                         pcms->gsi[GOLDFISH_RTC_IRQ]);
+    sysbus_create_simple("goldfish_sync", GOLDFISH_SYNC_IOMEM_BASE,
+                         pcms->gsi[GOLDFISH_SYNC_IRQ]);
+    sysbus_create_simple("goldfish_rotary", GOLDFISH_ROTARY_IOMEM_BASE,
+                         pcms->gsi[GOLDFISH_ROTARY_IRQ]);
+    g_assert(pci_create_simple(host_bus,
+                               PCI_DEVFN(GOLDFISH_ADDRESS_SPACE_PCI_SLOT,
+                                         GOLDFISH_ADDRESS_SPACE_PCI_FUNCTION),
+                               GOLDFISH_ADDRESS_SPACE_NAME));
+#endif
 
     assert(pcms->vmport != ON_OFF_AUTO__MAX);
     if (pcms->vmport == ON_OFF_AUTO_AUTO) {

@@ -146,6 +146,9 @@ struct AvdInfo {
     /* image files */
     char*     imagePath [ AVD_IMAGE_MAX ];
     char      imageState[ AVD_IMAGE_MAX ];
+
+    /* skip checks */
+    bool noChecks;
 };
 
 
@@ -921,6 +924,7 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
 
     ANEW0(i);
     str_reset(&i->deviceName, name);
+    i->noChecks = false;
 
     if ( _avdInfo_getSdkRoot(i) < 0     ||
          _avdInfo_getRootIni(i) < 0     ||
@@ -1911,4 +1915,26 @@ void avdInfo_replaceDataPartitionSizeInConfigIni(AvdInfo* i, int64_t sizeBytes) 
 
 bool avdInfo_isMarshmallowOrHigher(AvdInfo* i) {
     return i->isMarshmallowOrHigher;
+}
+
+AvdInfo* avdInfo_newCustom(
+    const char* name,
+    int apiLevel,
+    const char* abi,
+    const char* arch,
+    bool isGoogleApis,
+    AvdFlavor flavor) {
+
+    AvdInfo* i;
+    ANEW0(i);
+    str_reset(&i->deviceName, name);
+    i->noChecks = true;
+
+    i->apiLevel = apiLevel;
+    i->targetAbi = strdup(abi);
+    i->targetArch = strdup(arch);
+    i->isGoogleApis = isGoogleApis;
+    i->flavor = flavor;
+
+    return i;
 }

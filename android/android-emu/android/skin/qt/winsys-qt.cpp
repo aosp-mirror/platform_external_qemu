@@ -198,32 +198,59 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
 
 extern void skin_winsys_get_monitor_rect(SkinRect *rect)
 {
-    QRect qrect;
-    QSemaphore semaphore;
+    D("skin_winsys_get_monitor_rect: begin\n");
+    bool haveScreenRect = false;
+    D("skin_winsys_get_monitor_rect: get Qt window\n");
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    D("skin_winsys_get_monitor_rect: get Qt window (done)\n");
     if (window != NULL) {
         // Use Qt to get the monitor dimensions
+        QRect qrect;
+        QSemaphore semaphore;
+        D("skin_winsys_get_monitor_rect: get screen dimensions\n");
         window->getScreenDimensions(&qrect, &semaphore);
-        semaphore.acquire();
-        rect->pos.x = qrect.left();
-        rect->pos.y = qrect.top();
-        rect->size.w = qrect.width();
-        rect->size.h = qrect.height();
-    } else {
-        // Qt isn't set up yet. Use platform-specific code.
+        D("skin_winsys_get_monitor_rect: get screen dimensions (done)\n");
+        D("skin_winsys_get_monitor_rect: acquiring semaphore...\n");
+        if (semaphore.tryAcquire(1, 2000)) {
+            // We got the semaphore within 2 seconds
+            D("skin_winsys_get_monitor_rect: acquiring semaphore (done)");
+            rect->pos.x = qrect.left();
+            rect->pos.y = qrect.top();
+            rect->size.w = qrect.width();
+            rect->size.h = qrect.height();
+            haveScreenRect = true;
+        } else {
+            // The semaphore timed out. Fall through to use the
+            // platform-specific queries.
+            D("skin_winsys_get_monitor_rect: semaphore timed out!");
+        }
+    }
+    if (!haveScreenRect) {
+        // Either the Qt window isn't available or it failed to release the
+        // semaphore. Use platform-specific queries.
         rect->pos.x = 0;
         rect->pos.y = 0;
+        D("skin_winsys_get_monitor_rect: Begin calling platform specific display queries.\n");
 #if defined(_WIN32)
+        D("skin_winsys_get_monitor_rect: Windows: GetSystemMetrics(SM_CXSCREEN)\n");
         rect->size.w = (int)GetSystemMetrics(SM_CXSCREEN);
+        D("skin_winsys_get_monitor_rect: Windows: GetSystemMetrics(SM_CYSCREEN)\n");
         rect->size.h = (int)GetSystemMetrics(SM_CYSCREEN);
 #elif defined(__APPLE__)
+        D("skin_winsys_get_monitor_rect: macOS: CGMainDisplayID()\n");
         int displayId = CGMainDisplayID();
+        D("skin_winsys_get_monitor_rect: macOS: CGDisplayPixelsWide()\n");
         rect->size.w = CGDisplayPixelsWide(displayId);
+        D("skin_winsys_get_monitor_rect: macOS: CGDisplayPixelsHigh()\n");
         rect->size.h = CGDisplayPixelsHigh(displayId);
 #else // Linux
+        D("skin_winsys_get_monitor_rect: Linux: XOpenDisplay(NULL)\n");
         Display* defaultDisplay = XOpenDisplay(NULL);
+        D("skin_winsys_get_monitor_rect: Linux: XOpenDisplay(NULL) (done)\n");
         if (defaultDisplay) {
+            D("skin_winsys_get_monitor_rect: Linux: DefaultScreenOfDisplay(defaultDisplay)\n");
             Screen* defaultScreen = DefaultScreenOfDisplay(defaultDisplay);
+            D("skin_winsys_get_monitor_rect: Linux: DefaultScreenOfDisplay(defaultDisplay) (done)\n");
             if (defaultScreen) {
                 rect->size.w = defaultScreen->width;
                 rect->size.h = defaultScreen->height;
@@ -376,13 +403,13 @@ extern void skin_winsys_get_frame_size(int *w, int *h)
 
 extern bool skin_winsys_window_has_frame()
 {
-    QSemaphore semaphore;
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return false;
     }
     bool hasFrame;
+    QSemaphore semaphore;
     window->windowHasFrame(&hasFrame, &semaphore);
     semaphore.acquire();
 

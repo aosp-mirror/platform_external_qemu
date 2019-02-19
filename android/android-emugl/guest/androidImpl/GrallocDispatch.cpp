@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include <string.h>
 
+static struct gralloc_implementation* s_global_gralloc_impl = 0;
+
 extern "C" {
 
 EXPORT void load_gralloc_module(
@@ -28,7 +30,7 @@ EXPORT void load_gralloc_module(
 
     memset(impl_out, 0x0, sizeof(*impl_out));
 
-    impl_out->lib = dlopen(path, RTLD_NOW);
+    impl_out->lib = dlopen(path, RTLD_LAZY);
 
     if (!impl_out->lib) {
         fprintf(stderr, "%s: failed to load gralloc module from %s\n",
@@ -72,6 +74,20 @@ EXPORT void unload_gralloc_module(
     dlclose(impl->lib);
 
     ashmem_teardown();
+
+    if (s_global_gralloc_impl == impl) {
+        s_global_gralloc_impl = 0;
+    }
+}
+
+EXPORT void set_global_gralloc_module(
+    struct gralloc_implementation* impl) {
+    s_global_gralloc_impl = impl;
+}
+
+EXPORT struct gralloc_implementation*
+get_global_gralloc_module(void) {
+    return s_global_gralloc_impl;
 }
 
 } // extern "C"

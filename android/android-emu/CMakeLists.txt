@@ -8,12 +8,8 @@ list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 android_generate_hw_config()
 # Dependencies
 prebuilt(E2FSPROGS)
-prebuilt(CURL)
 prebuilt(LIBXML2)
-prebuilt(PNG)
-prebuilt(PROTOBUF)
 prebuilt(UUID)
-prebuilt(ZLIB)
 
 # Add the protobuf dependencies
 add_subdirectory(android/metrics/proto)

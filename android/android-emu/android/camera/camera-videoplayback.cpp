@@ -18,7 +18,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/camera/camera-format-converters.h"
-#include "android/camera/camera-videoplayback-renderer.h"
+#include "android/camera/camera-videoplayback-default-renderer.h"
 #include "android/camera/camera-virtualscene-utils.h"
 
 #include <vector>

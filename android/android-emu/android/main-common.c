@@ -85,6 +85,7 @@ const char *savevm_on_exit = NULL;
 int guest_data_partition_mounted = 0;
 int guest_boot_completed = 0;
 int android_qemu_mode = 1;
+int min_config_qemu_mode = 0;
 
 bool emulator_has_network_option = false;
 

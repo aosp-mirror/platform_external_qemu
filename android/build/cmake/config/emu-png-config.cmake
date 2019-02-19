@@ -9,14 +9,13 @@
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-prebuilt(ZLIB)
 get_filename_component(
   PREBUILT_ROOT
   "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/${ANDROID_TARGET_TAG}" ABSOLUTE)
 
 set(PNG_INCLUDE_DIR "${PREBUILT_ROOT}/include")
 set(PNG_INCLUDE_DIRS "${PREBUILT_ROOT}/include")
-set(PNG_LIBRARIES "${PREBUILT_ROOT}/lib/libpng${CMAKE_STATIC_LIBRARY_SUFFIX};${ZLIB_LIBRARIES}")
+set(PNG_LIBRARIES "${PREBUILT_ROOT}/lib/libpng${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set(PNG_FOUND TRUE)
 
 android_add_prebuilt_library(PNG PNG "${PREBUILT_ROOT}/lib/libpng" "${PNG_INCLUDE_DIR}" "" "")

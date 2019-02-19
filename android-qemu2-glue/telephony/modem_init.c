@@ -27,6 +27,7 @@ static void modem_state_save(QEMUFile* file, void* opaque)
     Stream* const s = stream_from_qemufile(file);
     amodem_state_save((AModem)opaque, (SysFile*)s);
     stream_free(s);
+    android_modem_driver_send_nitz_now();
 }
 
 static int modem_state_load(QEMUFile* file, void* opaque, int version_id)
@@ -34,7 +35,7 @@ static int modem_state_load(QEMUFile* file, void* opaque, int version_id)
     Stream* const s = stream_from_qemufile(file);
     const int res = amodem_state_load((AModem)opaque, (SysFile*)s, version_id);
     stream_free(s);
-
+    android_modem_driver_send_nitz_now();
     return res;
 }
 

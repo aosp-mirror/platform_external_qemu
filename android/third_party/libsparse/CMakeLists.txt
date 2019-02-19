@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
 
-prebuilt(ZLIB)
-
 add_library(emulator-libsparse
         src/backed_block.c
         src/output_file.c
@@ -13,7 +11,7 @@ add_library(emulator-libsparse
 
 target_include_directories(emulator-libsparse PUBLIC include)
 target_include_directories(emulator-libsparse PRIVATE src)
-target_link_libraries(emulator-libsparse PRIVATE ZLIB::ZLIB)
+target_link_libraries(emulator-libsparse PRIVATE zlib)
 android_target_link_libraries(emulator-libsparse windows PRIVATE emulator-libmman-win32)
 android_target_link_libraries(emulator-libsparse windows_msvc PUBLIC msvc-posix-compat)
 

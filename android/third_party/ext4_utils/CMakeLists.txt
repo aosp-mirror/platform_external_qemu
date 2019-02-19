@@ -1,4 +1,3 @@
-prebuilt(ZLIB)
 set(emulator-libext4_utils_src
     src/allocate.c
     src/contents.c
@@ -16,7 +15,7 @@ android_add_library(emulator-libext4_utils)
 
 target_include_directories(emulator-libext4_utils PUBLIC include)
 target_link_libraries(emulator-libext4_utils PRIVATE
-                              ZLIB::ZLIB
+                              zlib
                               android-emu-base)
 target_link_libraries(emulator-libext4_utils
                               PUBLIC

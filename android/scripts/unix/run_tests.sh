@@ -276,6 +276,10 @@ if [ "$TARGET_OS" = "windows-x86_64" ]; then
         echo files=find $OPT_OUT/gradle-release -name '*.exe'-or -name '*.dll'
         files=$(find $OPT_OUT/gradle-release -name '*.exe' -or -name '*.dll')
         for file in $files; do
+            if [ -f $OPT_OUT/toolchain/x86_64-w64-mingw32-objdump ]; then
+                $OPT_OUT/toolchain/x86_64-w64-mingw32-objdump -x $file | grep -q CodeView || warn " !!! No CodeView entry in $file, breakpad traces will be incomplete. !!!"
+            fi
+
             log "Checking $file for dependencies"
             needed=$($OPT_OUT/toolchain/x86_64-w64-mingw32-objdump -x $file | grep "DLL Name" | awk '{ print $3 }')
             cache="KERNEL32.DLL KERNEL32.dll msvcrt.dll PSAPI.DLL SHELL32.DLL SHELL32.dll USER32.DLL ntdll.dll USER32.dll NETAPI32.dll "
@@ -294,45 +298,11 @@ if [ "$TARGET_OS" = "windows-x86_64" ]; then
                     fi
                 fi
             done
+
         done
         log "Dependencies are looking good!"
     else
         warn "No release found in $OPT_OUT, not validating dependencies."
-    fi
-fi
-
-
-if [ "$RUN_EMUGEN_TESTS" ]; then
-    EMUGEN_UNITTESTS=$OPT_OUT/$EMUGEN_DIR/emugen_unittests
-    if [ ! -f "$EMUGEN_UNITTESTS" ]; then
-        warn "FAIL: Missing binary: $EMUGEN_UNITTESTS"
-        FAILURES="$FAILURES emugen_unittests-binary"
-    else
-        log "Running emugen_unittests."
-        run $EMUGEN_UNITTESTS ||
-            FAILURES="$FAILURES emugen_unittests"
-    fi
-    log "Running emugen regression test suite."
-    # Note that the binary is always built for the 'build' machine type,
-    # I.e. if --mingw is used, it's still a Linux executable.
-    EMUGEN=$OPT_OUT/$EMUGEN_DIR/emugen
-    if [ ! -f "$EMUGEN" ]; then
-        echo "FAIL: Missing 'emugen' binary: $EMUGEN"
-        FAILURES="$FAILURES emugen-binary"
-    else
-        # The first case is for a remote build with package-release.sh
-        TEST_SCRIPT=$PROGDIR/../../opengl/host/tools/emugen/tests/run-tests.sh
-        if [ ! -f "$TEST_SCRIPT" ]; then
-            # This is the usual location.
-            TEST_SCRIPT=$QEMU2_TOP_DIR/android/android-emugl/host/tools/emugen/tests/run-tests.sh
-        fi
-        if [ ! -f "$TEST_SCRIPT" ]; then
-            echo " FAIL: Missing script: $TEST_SCRIPT"
-            FAILURES="$FAILURES emugen-test-script"
-        else
-            run $TEST_SCRIPT --emugen=$EMUGEN ||
-                FAILURES="$FAILURES emugen-test-suite"
-        fi
     fi
 fi
 

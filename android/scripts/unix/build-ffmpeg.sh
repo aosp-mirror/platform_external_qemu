@@ -85,6 +85,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         linux-x86_64)
             MY_FLAGS="--extra-ldflags=\"-ldl\""
             ;;
+        linux-aarch64)
+            MY_FLAGS="--extra-ldflags=\"-ldl\""
+            ;;
         windows-x86_64)
             MY_FLAGS="--target-os=mingw32 --arch=x86_64 --enable-cross-compile --cc=gcc "
             ;;

@@ -37,12 +37,7 @@ CarSensorData::CarSensorData(QWidget* parent)
 
 static const enum VehicleGear sComboBoxGearValues[] = {
         VehicleGear::GEAR_NEUTRAL, VehicleGear::GEAR_REVERSE,
-        VehicleGear::GEAR_PARK,    VehicleGear::GEAR_DRIVE,
-        VehicleGear::GEAR_1,       VehicleGear::GEAR_2,
-        VehicleGear::GEAR_3,       VehicleGear::GEAR_4,
-        VehicleGear::GEAR_5,       VehicleGear::GEAR_6,
-        VehicleGear::GEAR_7,       VehicleGear::GEAR_8,
-        VehicleGear::GEAR_9};
+        VehicleGear::GEAR_PARK,    VehicleGear::GEAR_DRIVE};
 
 static const enum VehicleIgnitionState sComboBoxIgnitionStates[] = {
         VehicleIgnitionState::UNDEFINED, VehicleIgnitionState::LOCK,
@@ -65,7 +60,7 @@ void CarSensorData::sendGearChangeMsg(const int gear, const string& gearName) {
 
     EmulatorMessage emulatorMsg = makeSetPropMsg();
     VehiclePropValue* value = emulatorMsg.add_value();
-    value->set_prop(static_cast<int32_t>(VehicleProperty::CURRENT_GEAR));
+    value->set_prop(static_cast<int32_t>(VehicleProperty::GEAR_SELECTION));
     value->add_int32_values(gear);
     string log = "Gear changed to " + gearName;
     mSendEmulatorMsg(emulatorMsg, log);

@@ -58,8 +58,8 @@ RESET=`tput sgr0`
 
 install_simple_package() {
   # Installs a package that does not need any special configuration
-  local PKG=$1
-  local FLAGS=$2
+  local PKG="$1"
+  local FLAGS="$2"
   dump "$(builder_text) Building ${PKG}"
   builder_unpack_package_source ${PKG}
   builder_build_autotools_package ${PKG} ${FLAGS}
@@ -70,6 +70,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     (
         case $SYSTEM in
         linux-x86_64)
+            ;;
+        linux-aarch64)
             ;;
         *)
             echo "${RED}Ignoring unsupported system ${SYSTEM}.${RESET}"

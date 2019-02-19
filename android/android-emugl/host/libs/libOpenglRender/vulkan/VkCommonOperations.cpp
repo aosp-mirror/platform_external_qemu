@@ -1120,4 +1120,67 @@ VkEmulation::ColorBufferInfo getColorBufferInfo(uint32_t colorBufferHandle) {
     return res;
 }
 
+VkExternalMemoryHandleTypeFlags
+transformExternalMemoryHandleTypeFlags_tohost(
+    VkExternalMemoryHandleTypeFlags bits) {
+
+    VkExternalMemoryHandleTypeFlags res = bits;
+
+    // Transform Android/Linux bits to host bits.
+    if (bits & VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT) {
+        res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
+        res |= VK_EXT_MEMORY_HANDLE_TYPE_BIT;
+    }
+
+    if (bits & VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID) {
+        res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID;
+        res |= VK_EXT_MEMORY_HANDLE_TYPE_BIT;
+    }
+    return res;
+}
+
+VkExternalMemoryHandleTypeFlags
+transformExternalMemoryHandleTypeFlags_fromhost(
+    VkExternalMemoryHandleTypeFlags hostBits,
+    VkExternalMemoryHandleTypeFlags wantedGuestHandleType) {
+
+    VkExternalMemoryHandleTypeFlags res = hostBits;
+
+    if (res & VK_EXT_MEMORY_HANDLE_TYPE_BIT) {
+        res &= ~VK_EXT_MEMORY_HANDLE_TYPE_BIT;
+        res |= wantedGuestHandleType;
+    }
+
+    return res;
+}
+
+VkExternalMemoryProperties
+transformExternalMemoryProperties_tohost(
+    VkExternalMemoryProperties props) {
+    VkExternalMemoryProperties res = props;
+    res.exportFromImportedHandleTypes =
+        transformExternalMemoryHandleTypeFlags_tohost(
+            props.exportFromImportedHandleTypes);
+    res.compatibleHandleTypes =
+        transformExternalMemoryHandleTypeFlags_tohost(
+            props.compatibleHandleTypes);
+    return res;
+}
+
+VkExternalMemoryProperties
+transformExternalMemoryProperties_fromhost(
+    VkExternalMemoryProperties props,
+    VkExternalMemoryHandleTypeFlags wantedGuestHandleType) {
+    VkExternalMemoryProperties res = props;
+    res.exportFromImportedHandleTypes =
+        transformExternalMemoryHandleTypeFlags_fromhost(
+            props.exportFromImportedHandleTypes,
+            wantedGuestHandleType);
+    res.compatibleHandleTypes =
+        transformExternalMemoryHandleTypeFlags_fromhost(
+            props.compatibleHandleTypes,
+            wantedGuestHandleType);
+    return res;
+}
+
 } // namespace goldfish_vk
