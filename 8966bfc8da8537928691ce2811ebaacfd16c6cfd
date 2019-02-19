@@ -117,6 +117,30 @@
       "revId": "8966bfc8da8537928691ce2811ebaacfd16c6cfd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "264f9187_8b280df6",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneManager.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-19T23:25:05Z",
+      "side": 1,
+      "message": "My bad, thanks!",
+      "parentUuid": "dfe6a1ff_22f71ac5",
+      "range": {
+        "startLine": 115,
+        "startChar": 27,
+        "endLine": 115,
+        "endChar": 28
+      },
+      "revId": "8966bfc8da8537928691ce2811ebaacfd16c6cfd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
