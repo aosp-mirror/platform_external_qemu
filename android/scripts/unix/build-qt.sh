@@ -444,9 +444,18 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                     run install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/rcc"
                     run install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/uic"
                     ;;
+                linux-x86_64)
+                    # Use "ldd <binary>" to check if binaries like bin/moc can find
+                    # libc++.so.1
+                    # The following requires "patchelf" on your system to add rpaths
+                    # to the binaries (sudo apt-get install patchelf).
+                    run patchelf --set-rpath '$ORIGIN/../lib' "$(builder_install_prefix)/bin/moc"
+                    run patchelf --set-rpath '$ORIGIN/../lib' "$(builder_install_prefix)/bin/rcc"
+                    run patchelf --set-rpath '$ORIGIN/../lib' "$(builder_install_prefix)/bin/uic"
+                    run patchelf --set-rpath '$ORIGIN/../lib' "$(builder_install_prefix)/libexec/QtWebEngineProcess"
+                    ;;
             esac
         ) || panic "Unable to change rpaths"
-
 
         # Copy binaries necessary for the build itself as well as static
         # libraries.
