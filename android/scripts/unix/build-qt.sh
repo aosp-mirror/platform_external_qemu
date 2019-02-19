@@ -401,29 +401,51 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         # Let's fix up the rpaths in darwin. This allows binaries that link
         # against qt to launch directly if they contain a proper rpath. This
         # removes the need to set DYLD_LIBRARY_PATH properly.
-        case $SYSTEM in
-            darwin*)
-                for lib in $QT_SHARED_LIBS; do
-                    idfix=$(basename $lib)
-                    install_name_tool -id "@rpath/$idfix" $lib
-                    tofix=$(otool -L $lib | grep $fix | cut -f1 -d ' ')
-                    for fix in $QT_SHARED_LIBS; do
-                        name=$(basename $fix)
-                        install_name_tool -change $fix "@rpath/$name" $lib
+        (
+            # We don't want any symlinks here
+            QT_HARD_SHARED_LIBS=$(cd "$(builder_install_prefix)" && \
+                    find . -type f -name "$QT_DLL_FILTER" 2>/dev/null)
+            run cd "$(builder_install_prefix)"
+            case $SYSTEM in
+                darwin*)
+                    for lib in $QT_HARD_SHARED_LIBS; do
+                        echo "Fixing $lib"
+                        idfix=$(basename $lib)
+                        echo "\t$(otool -DX $lib) ==> @rpath/$idfix"
+                        run install_name_tool -id "@rpath/$idfix" $lib
+                        # change whatever Qt libs this lib uses to rpaths
+                        tofix=$(otool -LX $lib | grep "libQt.*.dylib" | cut -f1 -d ' ')
+                        for fix in $tofix; do
+                            fix_basename=$(basename $fix)
+                            echo "\t$fix ==> @rpath/$fix_basename"
+                            run install_name_tool -change "$fix" "@rpath/$fix_basename" $lib
+                        done
                     done
-                done
-                    for fix in $QT_SHARED_LIBS; do
-                        name=$(basename $fix)
-                        install_name_tool -change $fix "@rpath/$name" "$(builder_install_prefix)/bin/moc"
-                        install_name_tool -change $fix "@rpath/$name" "$(builder_install_prefix)/bin/rcc"
-                        install_name_tool -change $fix "@rpath/$name" "$(builder_install_prefix)/bin/uic"
+
+                    # Also need to change the shared Qt libs used to rpaths in the executables we use
+                    var_append fix_bins \
+                            "$(builder_install_prefix)/bin/moc" \
+                            "$(builder_install_prefix)/bin/rcc" \
+                            "$(builder_install_prefix)/bin/uic" \
+                            "$(builder_install_prefix)/libexec/QtWebEngineProcess"
+
+                    for bin in $fix_bins; do
+                        echo "Fixing $bin"
+                        # change whatever Qt libs this binary uses to rpaths
+                        tofix=$(otool -LX $lib | grep "libQt.*.dylib" | cut -f1 -d ' ')
+                        for fix in $tofix; do
+                            fix_basename=$(basename $fix)
+                            echo "\t$fix ==> @rpath/$fix_basename"
+                            run install_name_tool -change "$fix" "@rpath/$fix_basename" $bin
+                        done
                     done
                     # setup the rpaths so we can use them without setting environment variables.
-                    install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/moc"
-                    install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/rcc"
-                    install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/uic"
-                ;;
-        esac
+                    run install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/moc"
+                    run install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/rcc"
+                    run install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/uic"
+                    ;;
+            esac
+        ) || panic "Unable to change rpaths"
 
 
         # Copy binaries necessary for the build itself as well as static
