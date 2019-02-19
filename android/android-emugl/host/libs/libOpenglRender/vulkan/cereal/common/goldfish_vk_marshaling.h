@@ -3353,5 +3353,9 @@ void unmarshal_VkCheckpointDataNV(
 #ifdef VK_GOOGLE_address_space
 #define OP_vkMapMemoryIntoAddressSpaceGOOGLE 20317
 #endif
+#ifdef VK_GOOGLE_color_buffer
+#define OP_vkRegisterImageColorBufferGOOGLE 20318
+#define OP_vkRegisterBufferColorBufferGOOGLE 20319
+#endif
 
 } // namespace goldfish_vk

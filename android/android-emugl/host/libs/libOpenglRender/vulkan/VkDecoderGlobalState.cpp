@@ -1531,6 +1531,26 @@ public:
         return VK_SUCCESS;
     }
 
+    VkResult on_vkRegisterImageColorBufferGOOGLE(
+       VkDevice device, VkImage image, uint32_t colorBuffer) {
+
+        (void)image;
+
+        bool success = setupVkColorBuffer(colorBuffer);
+
+        return success ? VK_SUCCESS : VK_ERROR_OUT_OF_DEVICE_MEMORY;
+    }
+
+    VkResult on_vkRegisterBufferColorBufferGOOGLE(
+       VkDevice device, VkBuffer buffer, uint32_t colorBuffer) {
+        
+        (void)buffer;
+
+        bool success = setupVkColorBuffer(colorBuffer);
+
+        return success ? VK_SUCCESS : VK_ERROR_OUT_OF_DEVICE_MEMORY;
+    }
+
     VkResult on_vkAllocateCommandBuffers(
             VkDevice boxed_device,
             const VkCommandBufferAllocateInfo* pAllocateInfo,
@@ -2602,6 +2622,19 @@ VkResult VkDecoderGlobalState::on_vkMapMemoryIntoAddressSpaceGOOGLE(
     VkDevice device, VkDeviceMemory memory, uint64_t* pAddress) {
     return mImpl->on_vkMapMemoryIntoAddressSpaceGOOGLE(
         device, memory, pAddress);
+}
+
+// VK_GOOGLE_color_buffer
+VkResult VkDecoderGlobalState::on_vkRegisterImageColorBufferGOOGLE(
+   VkDevice device, VkImage image, uint32_t colorBuffer) {
+    return mImpl->on_vkRegisterImageColorBufferGOOGLE(
+        device, image, colorBuffer);
+}
+
+VkResult VkDecoderGlobalState::on_vkRegisterBufferColorBufferGOOGLE(
+   VkDevice device, VkBuffer buffer, uint32_t colorBuffer) {
+    return mImpl->on_vkRegisterBufferColorBufferGOOGLE(
+        device, buffer, colorBuffer);
 }
 
 VkResult VkDecoderGlobalState::on_vkAllocateCommandBuffers(

@@ -13365,6 +13365,8 @@ void unmarshal_VkCheckpointDataNV(
 #endif
 #ifdef VK_GOOGLE_address_space
 #endif
+#ifdef VK_GOOGLE_color_buffer
+#endif
 void marshal_extension_struct(
     VulkanStream* vkStream,
     const void* structExtension)
