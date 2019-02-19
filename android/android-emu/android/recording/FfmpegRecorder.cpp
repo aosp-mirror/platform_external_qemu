@@ -461,7 +461,7 @@ bool FfmpegRecorderImpl::addAudioTrack(
       __func__, c->sample_fmt, c->channels, ost->stream->time_base.den);
 
     uint32_t nbSamples;
-    if (codec->getCodec()->capabilities & CODEC_CAP_VARIABLE_FRAME_SIZE) {
+    if (codec->getCodec()->capabilities & AV_CODEC_CAP_VARIABLE_FRAME_SIZE) {
         nbSamples = 10000;
     } else {
         nbSamples = c->frame_size;
@@ -757,6 +757,8 @@ bool FfmpegRecorderImpl::writeAudioFrame(AVFrame* frame) {
 
     return frame || gotPacket;
 }
+
+#define AVFMT_RAWPICTURE 0x0020
 
 bool FfmpegRecorderImpl::writeVideoFrame(AVFrame* frame) {
     int ret;

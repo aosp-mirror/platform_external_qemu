@@ -24,7 +24,7 @@ VP9Codec::VP9Codec(CodecParams&& p,
                                uint32_t fbWidth,
                                uint32_t fbHeight,
                                AVPixelFormat fbFormat)
-    : Codec(AV_CODEC_ID_VP9, std::move(p)),
+    : Codec(AV_CODEC_ID_H264, std::move(p)),
       mFbWidth(fbWidth),
       mFbHeight(fbHeight),
       mFbFormat(fbFormat) {}
@@ -56,7 +56,7 @@ bool VP9Codec::configAndOpenEncoder(const AVFormatContext* oc,
         c->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     }
 
-    if (mCodec->capabilities & CODEC_CAP_EXPERIMENTAL) {
+    if (mCodec->capabilities & AV_CODEC_CAP_EXPERIMENTAL) {
         c->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
     }
 
