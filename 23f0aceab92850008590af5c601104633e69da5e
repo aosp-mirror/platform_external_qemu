@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "38e92124_40ea2b52",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-19T19:06:50Z",
+      "side": 1,
+      "message": "it might pass on host but not on guest since the fd\u0027s will be in a different space; we\u0027ll porbably need to have some goldfish address space device for wrapping vulkan opaque fds or something",
+      "revId": "23f0aceab92850008590af5c601104633e69da5e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cb4a9e9c_e438cb89",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-19T19:06:50Z",
+      "side": 1,
+      "message": "Ouch",
+      "revId": "23f0aceab92850008590af5c601104633e69da5e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
