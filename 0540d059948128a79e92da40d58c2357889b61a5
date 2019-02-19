@@ -2,6 +2,46 @@
   "comments": [
     {
       "key": {
+        "uuid": "fca5338b_5f3b49f7",
+        "filename": "android/android-emu/android/emulation/control/virtual_scene_agent.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-19T21:41:43Z",
+      "side": 1,
+      "message": "This should be true/false.",
+      "range": {
+        "startLine": 67,
+        "startChar": 42,
+        "endLine": 67,
+        "endChar": 64
+      },
+      "revId": "0540d059948128a79e92da40d58c2357889b61a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2504af2e_6c8d7036",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/camera-virtualscene-subpage.ui",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-19T21:41:43Z",
+      "side": 1,
+      "message": "This removed block looks like it was setting margins.  Is the page the same before/after this change?\n\nYou can compare with the emulator launched from Android Studio.",
+      "revId": "0540d059948128a79e92da40d58c2357889b61a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b7550e28_7faddf7b",
         "filename": "android/android-emu/android/skin/qt/qt-settings.h",
         "patchSetId": 4
@@ -13,6 +53,69 @@
       "writtenOn": "2019-02-19T21:32:17Z",
       "side": 1,
       "message": "Could this term include \"TV\" or something so it\u0027s clear that it\u0027s the animation coming from the TV inside the virtual scene?",
+      "revId": "0540d059948128a79e92da40d58c2357889b61a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f029817e_9553df40",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneManager.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-19T21:41:43Z",
+      "side": 1,
+      "message": "true",
+      "revId": "0540d059948128a79e92da40d58c2357889b61a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5f3d8ab3_daa64746",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneManager.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-19T21:41:43Z",
+      "side": 1,
+      "message": "Per the emulators coding style, go/emu-style, this should be mAnimationState",
+      "range": {
+        "startLine": 129,
+        "startChar": 9,
+        "endLine": 129,
+        "endChar": 23
+      },
+      "revId": "0540d059948128a79e92da40d58c2357889b61a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8540ed52_44ada9ec",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneManager.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-19T21:41:43Z",
+      "side": 1,
+      "message": "Ditto, true/false.  Maybe this can be: True to enable TV animation.",
+      "range": {
+        "startLine": 98,
+        "startChar": 42,
+        "endLine": 98,
+        "endChar": 64
+      },
       "revId": "0540d059948128a79e92da40d58c2357889b61a5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
