@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0be0e49a_07367812",
+        "filename": "android/android-emu/android/emulation/control/virtual_scene_agent.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2019-02-19T23:54:58Z",
+      "side": 1,
+      "message": "nit: should be imperative.  \"Enable/Disable the TV animation\"",
+      "range": {
+        "startLine": 65,
+        "startChar": 7,
+        "endLine": 65,
+        "endChar": 23
+      },
+      "revId": "641a331e662d011e9fc9b5202245d5d549ac84ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
