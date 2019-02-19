@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b7550e28_7faddf7b",
+        "filename": "android/android-emu/android/skin/qt/qt-settings.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-19T21:32:17Z",
+      "side": 1,
+      "message": "Could this term include \"TV\" or something so it\u0027s clear that it\u0027s the animation coming from the TV inside the virtual scene?",
+      "revId": "0540d059948128a79e92da40d58c2357889b61a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
