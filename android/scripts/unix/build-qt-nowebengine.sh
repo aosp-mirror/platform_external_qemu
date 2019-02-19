@@ -418,11 +418,11 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         case $SYSTEM in
             windows*)
-                # libqtmain.a is needed on Windows to implement WinMain et al.
+                # libqtmainAndroidEmu.a is needed on Windows to implement WinMain et al.
                 copy_directory_files \
                         "$(builder_install_prefix)" \
                         "$INSTALL_DIR/$SYSTEM" \
-                        lib/libqtmain.a
+                        lib/libqtmainAndroidEmu.a
                 ;;
             linux*)
                 # Copy over libc++.so, so we can use it during build.
