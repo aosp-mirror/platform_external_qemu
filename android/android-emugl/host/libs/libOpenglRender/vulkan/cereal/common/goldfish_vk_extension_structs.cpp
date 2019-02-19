@@ -276,6 +276,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_GOOGLE_address_space
 #endif
+#ifdef VK_GOOGLE_color_buffer
+#endif
 uint32_t goldfish_vk_struct_type(
     const void* structExtension)
 {

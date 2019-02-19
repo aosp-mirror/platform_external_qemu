@@ -812,6 +812,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 }
 
 VkEmulation* getGlobalVkEmulation() {
+    if (sVkEmulation && !sVkEmulation->live) return nullptr;
     return sVkEmulation;
 }
 

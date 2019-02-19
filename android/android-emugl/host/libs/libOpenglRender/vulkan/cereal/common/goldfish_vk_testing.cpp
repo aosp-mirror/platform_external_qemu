@@ -6228,6 +6228,8 @@ void checkEqual_VkCheckpointDataNV(
 #endif
 #ifdef VK_GOOGLE_address_space
 #endif
+#ifdef VK_GOOGLE_color_buffer
+#endif
 void checkEqual_extension_struct(
     const void* structExtension,
     const void* structExtension2,

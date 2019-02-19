@@ -283,6 +283,12 @@ public:
        VkDeviceMemory memory,
        uint64_t* pAddress);
 
+    // VK_GOOGLE_color_buffer
+    VkResult on_vkRegisterImageColorBufferGOOGLE(
+       VkDevice device, VkImage image, uint32_t colorBuffer);
+    VkResult on_vkRegisterBufferColorBufferGOOGLE(
+       VkDevice device, VkBuffer buffer, uint32_t colorBuffer);
+
     VkResult on_vkAllocateCommandBuffers(
             VkDevice device,
             const VkCommandBufferAllocateInfo* pAllocateInfo,
