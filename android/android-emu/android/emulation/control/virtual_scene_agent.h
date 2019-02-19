@@ -61,6 +61,16 @@ typedef struct QAndroidVirtualSceneAgent {
     // |scale| - Poster scale, a value between 0 and 1. The value will be
     //          clamped between the poster's minimum size and 1.
     void (*setPosterScale)(const char* posterName, float scale);
+
+    // Enables/Disables the TV animation.
+    //
+    // |state| - State of the TV animation. 1 for ON, 0 for OFF.
+    void (*setAnimationState)(bool state);
+
+    // Get the TV animation state.
+    //
+    // Returns 1 for ON, 0 for OFF.
+    bool (*getAnimationState)();
 } QAndroidVirtualSceneAgent;
 
 ANDROID_END_HEADER
