@@ -3354,6 +3354,14 @@ void unmarshal_VkCheckpointDataNV(
 #define OP_vkMapMemoryIntoAddressSpaceGOOGLE 20317
 #endif
 #ifdef VK_GOOGLE_color_buffer
+void marshal_VkImportColorBufferGOOGLE(
+    VulkanStream* vkStream,
+    const VkImportColorBufferGOOGLE* forMarshaling);
+
+void unmarshal_VkImportColorBufferGOOGLE(
+    VulkanStream* vkStream,
+    VkImportColorBufferGOOGLE* forUnmarshaling);
+
 #define OP_vkRegisterImageColorBufferGOOGLE 20318
 #define OP_vkRegisterBufferColorBufferGOOGLE 20319
 #endif

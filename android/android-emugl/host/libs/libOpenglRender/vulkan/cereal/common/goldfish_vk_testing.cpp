@@ -6229,6 +6229,19 @@ void checkEqual_VkCheckpointDataNV(
 #ifdef VK_GOOGLE_address_space
 #endif
 #ifdef VK_GOOGLE_color_buffer
+void checkEqual_VkImportColorBufferGOOGLE(
+    const VkImportColorBufferGOOGLE* a,
+    const VkImportColorBufferGOOGLE* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->colorBuffer) == (b->colorBuffer))) { onFail("a->colorBuffer (Error: Value not equal)"); };
+}
+
 #endif
 void checkEqual_extension_struct(
     const void* structExtension,

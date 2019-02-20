@@ -3045,6 +3045,14 @@ void transform_fromhost_VkCheckpointDataNV(
 #ifdef VK_GOOGLE_address_space
 #endif
 #ifdef VK_GOOGLE_color_buffer
+void transform_tohost_VkImportColorBufferGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportColorBufferGOOGLE* toTransform);
+
+void transform_fromhost_VkImportColorBufferGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportColorBufferGOOGLE* toTransform);
+
 #endif
 
 } // namespace goldfish_vk

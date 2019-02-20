@@ -2003,6 +2003,11 @@ void deepcopy_VkCheckpointDataNV(
 #ifdef VK_GOOGLE_address_space
 #endif
 #ifdef VK_GOOGLE_color_buffer
+void deepcopy_VkImportColorBufferGOOGLE(
+    Pool* pool,
+    const VkImportColorBufferGOOGLE* from,
+    VkImportColorBufferGOOGLE* to);
+
 #endif
 
 } // namespace goldfish_vk
