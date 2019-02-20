@@ -455,7 +455,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
     VkResult res = gvk->vkCreateInstance(&instCi, nullptr, &sVkEmulation->instance);
 
     if (res != VK_SUCCESS) {
-        LOG(VERBOSE) << "Failed to create Vulkan instance.";
+        LOG(ERROR) << "Failed to create Vulkan instance.";
         return sVkEmulation;
     }
 
@@ -657,7 +657,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
                         &sVkEmulation->device);
 
     if (res != VK_SUCCESS) {
-        LOG(VERBOSE) << "Failed to create Vulkan device.";
+        LOG(ERROR) << "Failed to create Vulkan device.";
         return sVkEmulation;
     }
 
@@ -674,7 +674,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
                 dvk->vkGetDeviceProcAddr(
                     sVkEmulation->device, "vkGetImageMemoryRequirements2KHR"));
         if (!sVkEmulation->deviceInfo.getImageMemoryRequirements2Func) {
-            LOG(VERBOSE) << "Cannot find vkGetImageMemoryRequirements2KHR";
+            LOG(ERROR) << "Cannot find vkGetImageMemoryRequirements2KHR";
             return sVkEmulation;
         }
         sVkEmulation->deviceInfo.getBufferMemoryRequirements2Func =
@@ -682,7 +682,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
                 dvk->vkGetDeviceProcAddr(
                     sVkEmulation->device, "vkGetBufferMemoryRequirements2KHR"));
         if (!sVkEmulation->deviceInfo.getBufferMemoryRequirements2Func) {
-            LOG(VERBOSE) << "Cannot find vkGetBufferMemoryRequirements2KHR";
+            LOG(ERROR) << "Cannot find vkGetBufferMemoryRequirements2KHR";
             return sVkEmulation;
         }
 #ifdef _WIN32
@@ -697,7 +697,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
                                                 "vkGetMemoryFdKHR"));
 #endif
         if (!sVkEmulation->deviceInfo.getMemoryHandleFunc) {
-            LOG(VERBOSE) << "Cannot find vkGetMemory(Fd|Win32Handle)KHR";
+            LOG(ERROR) << "Cannot find vkGetMemory(Fd|Win32Handle)KHR";
             return sVkEmulation;
         }
     }
@@ -724,7 +724,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
             sVkEmulation->device, &poolCi, nullptr, &sVkEmulation->commandPool);
 
     if (poolCreateRes != VK_SUCCESS) {
-        LOG(VERBOSE) << "Failed to create command pool. Error: " << poolCreateRes;
+        LOG(ERROR) << "Failed to create command pool. Error: " << poolCreateRes;
         return sVkEmulation;
     }
 
@@ -737,7 +737,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
             sVkEmulation->device, &cbAi, &sVkEmulation->commandBuffer);
 
     if (cbAllocRes != VK_SUCCESS) {
-        LOG(VERBOSE) << "Failed to allocate command buffer. Error: " << cbAllocRes;
+        LOG(ERROR) << "Failed to allocate command buffer. Error: " << cbAllocRes;
         return sVkEmulation;
     }
 
@@ -750,7 +750,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         &sVkEmulation->commandBufferFence);
 
     if (fenceCreateRes != VK_SUCCESS) {
-        LOG(VERBOSE) << "Failed to create fence for command buffer. Error: " << fenceCreateRes;
+        LOG(ERROR) << "Failed to create fence for command buffer. Error: " << fenceCreateRes;
         return sVkEmulation;
     }
 
@@ -774,7 +774,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
                                &sVkEmulation->staging.buffer);
 
     if (bufCreateRes != VK_SUCCESS) {
-        LOG(VERBOSE) << "Failed to create staging buffer index";
+        LOG(ERROR) << "Failed to create staging buffer index";
         return sVkEmulation;
     }
 
@@ -789,19 +789,29 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
             &sVkEmulation->staging.memory.typeIndex);
 
     if (!gotStagingTypeIndex) {
-        LOG(VERBOSE) << "Failed to determine staging memory type index";
+        LOG(ERROR) << "Failed to determine staging memory type index";
         return sVkEmulation;
     }
 
     if (!((1 << sVkEmulation->staging.memory.typeIndex) &
           memReqs.memoryTypeBits)) {
-        LOG(VERBOSE) << "Failed: Inconsistent determination of memory type "
+        LOG(ERROR) << "Failed: Inconsistent determination of memory type "
                         "index for staging buffer";
         return sVkEmulation;
     }
 
     if (!allocExternalMemory(dvk, &sVkEmulation->staging.memory, false /* not external */)) {
-        LOG(VERBOSE) << "Failed to allocate memory for staging buffer";
+        LOG(ERROR) << "Failed to allocate memory for staging buffer";
+        return sVkEmulation;
+    }
+
+    VkResult stagingBufferBindRes = dvk->vkBindBufferMemory(
+        sVkEmulation->device,
+        sVkEmulation->staging.buffer,
+        sVkEmulation->staging.memory.memory, 0);
+
+    if (stagingBufferBindRes != VK_SUCCESS) {
+        LOG(ERROR) << "Failed to bind memory for staging buffer";
         return sVkEmulation;
     }
 
