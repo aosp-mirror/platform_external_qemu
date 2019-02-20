@@ -104,7 +104,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
 
     switch (mState) {
         case RecordUiState::Ready:
-            mUi->rec_recordOverlayWidget->show();
+            mUi->subpage->setCurrentIndex(0);
             mUi->rec_timeElapsedWidget->hide();
             mUi->rec_playStopButton->hide();
             mUi->rec_formatSwitch->hide();
@@ -112,7 +112,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_timeResLabel->hide();
             mUi->rec_recordButton->setText(tr(START_RECORDING));
             mUi->rec_recordButton->show();
-            mUi->videoWidget->setVisible(false);
+            mUi->rec_playerOverlayWidget->setVisible(false);
             break;
         case RecordUiState::Starting: {
             SettingsTheme theme = getSelectedTheme();
@@ -131,7 +131,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
         }
         case RecordUiState::Recording:
             mUi->rec_recordDotLabel->setPixmap(QPixmap(QString::fromUtf8(":/light/recordCircle")));
-            mUi->rec_recordOverlayWidget->show();
+            mUi->subpage->setCurrentIndex(0);
             mUi->rec_timeElapsedLabel->setText(tr(SECONDS_RECORDING).arg(0));
             mUi->rec_timeElapsedWidget->show();
             mUi->rec_playStopButton->hide();
@@ -140,7 +140,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_timeResLabel->hide();
             mUi->rec_recordButton->setText(tr(STOP_RECORDING));
             mUi->rec_recordButton->show();
-            mUi->videoWidget->setVisible(false);
+            mUi->rec_playerOverlayWidget->setVisible(false);
 
             // Update every second
             mSec = 0;
@@ -165,13 +165,14 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             break;
         }
         case RecordUiState::Playing:
-            mUi->rec_recordOverlayWidget->hide();
+            mUi->subpage->setCurrentIndex(1);
             // Change the icon on the play/stop button.
             mUi->rec_playStopButton->show();
             mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("stop"));
             mUi->rec_playStopButton->setProperty("themeIconName", "stop");
             break;
         case RecordUiState::Stopped:
+            mUi->subpage->setCurrentIndex(0);
             mUi->rec_recordOverlayWidget->show();
             mUi->rec_timeElapsedWidget->hide();
             mUi->rec_playStopButton->show();
@@ -201,7 +202,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
                             .arg(android_hw->hw_lcd_height));
             // Display preview frame
             mVideoInfo->show();
-            mUi->videoWidget->setVisible(true);
+            mUi->rec_playerOverlayWidget->setVisible(true);
             break;
         case RecordUiState::Converting: {
             SettingsTheme theme = getSelectedTheme();

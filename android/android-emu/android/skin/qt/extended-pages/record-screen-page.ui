@@ -13,134 +13,143 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QWidget" name="rec_recordOverlayWidget" native="true">
+  <widget class="QStackedWidget" name="subpage">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>24</y>
-     <width>582</width>
-     <height>536</height>
+     <x>0</x>
+     <y>0</y>
+     <width>602</width>
+     <height>560</height>
     </rect>
    </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Overlay</string>
-   </property>
-   <widget class="RaisedMaterialButton" name="rec_recordButton">
+   <widget class="QWidget" name="rec_recordOverlayWidget">
     <property name="geometry">
-     <rect>
-      <x>225</x>
-      <y>240</y>
-      <width>132</width>
-      <height>36</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="font">
-     <font>
-      <family>Roboto</family>
-      <pointsize>10</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>START RECORDING</string>
-    </property>
-    <property name="flat">
-     <bool>true</bool>
+      <rect>
+      <x>20</x>
+      <y>24</y>
+      <width>582</width>
+      <height>536</height>
+      </rect>
     </property>
     <property name="ColorGroup" stdset="0">
-     <string>Button</string>
+     <string>Overlay</string>
     </property>
-    <property name="report_metrics" stdset="0">
-     <bool>false</bool>
-    </property>
+    <widget class="RaisedMaterialButton" name="rec_recordButton">
+     <property name="geometry">
+      <rect>
+       <x>225</x>
+       <y>240</y>
+       <width>132</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>START RECORDING</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QWidget" name="rec_timeElapsedWidget" native="true">
+     <property name="geometry">
+      <rect>
+       <x>141</x>
+       <y>218</y>
+       <width>300</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background:rgba(0,0,0,0);</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <property name="horizontalSpacing">
+       <number>0</number>
+      </property>
+      <item row="0" column="0">
+       <layout class="QGridLayout" name="gridLayout_2">
+        <property name="horizontalSpacing">
+         <number>10</number>
+        </property>
+        <property name="verticalSpacing">
+         <number>0</number>
+        </property>
+        <item row="0" column="1">
+         <widget class="QLabel" name="rec_timeElapsedLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>15s Recording...</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="rec_recordDotLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>8</width>
+            <height>8</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap resource="../resources.qrc">:/light/recordCircle</pixmap>
+          </property>
+          <property name="scaledContents">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
    </widget>
-   <widget class="QWidget" name="rec_timeElapsedWidget" native="true">
-    <property name="geometry">
-     <rect>
-      <x>141</x>
-      <y>218</y>
-      <width>300</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background:rgba(0,0,0,0);</string>
-    </property>
-    <layout class="QGridLayout" name="gridLayout_3">
-     <property name="leftMargin">
-      <number>0</number>
-     </property>
-     <property name="topMargin">
-      <number>0</number>
-     </property>
-     <property name="rightMargin">
-      <number>0</number>
-     </property>
-     <property name="bottomMargin">
-      <number>0</number>
-     </property>
-     <property name="horizontalSpacing">
-      <number>0</number>
-     </property>
-     <item row="0" column="0">
-      <layout class="QGridLayout" name="gridLayout_2">
-       <property name="horizontalSpacing">
-        <number>10</number>
-       </property>
-       <property name="verticalSpacing">
-        <number>0</number>
-       </property>
-       <item row="0" column="1">
-        <widget class="QLabel" name="rec_timeElapsedLabel">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>15s Recording...</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="rec_recordDotLabel">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>8</width>
-           <height>8</height>
-          </size>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap resource="../resources.qrc">:/light/recordCircle</pixmap>
-         </property>
-         <property name="scaledContents">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </widget>
-  </widget>
-  <widget class="QWidget" name="rec_playerOverlayWidget" native="true">
+   <widget class="QWidget" name="rec_playerOverlayWidget" native="true">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -185,6 +194,7 @@
      </widget>
     </item>
    </layout>
+  </widget>
   </widget>
   <widget class="QWidget" name="widget" native="true">
    <property name="geometry">
@@ -358,8 +368,8 @@
    </layout>
   </widget>
   <zorder>widget</zorder>
+  <zorder>subpage</zorder>
   <zorder>rec_playerOverlayWidget</zorder>
-  <zorder>rec_recordOverlayWidget</zorder>
  </widget>
  <customwidgets>
   <customwidget>
