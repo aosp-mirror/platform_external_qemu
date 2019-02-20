@@ -6229,6 +6229,36 @@ void checkEqual_VkCheckpointDataNV(
 #ifdef VK_GOOGLE_address_space
 #endif
 #ifdef VK_GOOGLE_color_buffer
+void checkEqual_VkImportColorBufferGOOGLE(
+    const VkImportColorBufferGOOGLE* a,
+    const VkImportColorBufferGOOGLE* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->colorBuffer) == (b->colorBuffer))) { onFail("a->colorBuffer (Error: Value not equal)"); };
+}
+
+void checkEqual_VkImportPhysicalAddressGOOGLE(
+    const VkImportPhysicalAddressGOOGLE* a,
+    const VkImportPhysicalAddressGOOGLE* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->physicalAddress) == (b->physicalAddress))) { onFail("a->physicalAddress (Error: Value not equal)"); };
+    if (!((a->size) == (b->size))) { onFail("a->size (Error: Value not equal)"); };
+    if (!((a->format) == (b->format))) { onFail("a->format (Error: Value not equal)"); };
+    if (!((a->tiling) == (b->tiling))) { onFail("a->tiling (Error: Value not equal)"); };
+    if (!((a->tilingParameter) == (b->tilingParameter))) { onFail("a->tilingParameter (Error: Value not equal)"); };
+}
+
 #endif
 void checkEqual_extension_struct(
     const void* structExtension,
