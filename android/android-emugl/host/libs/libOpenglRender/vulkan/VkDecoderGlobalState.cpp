@@ -19,6 +19,7 @@
 #include "VkCommonOperations.h"
 #include "VkFormatUtils.h"
 #include "VulkanDispatch.h"
+#include "vk_util.h"
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/memory/LazyInstance.h"
@@ -152,7 +153,7 @@ public:
 
         auto instance = unbox_VkInstance(boxed_instance);
         auto vk = dispatch_VkInstance(boxed_instance);
-        
+
         auto res = vk->vkEnumeratePhysicalDevices(instance, physicalDeviceCount, physicalDevices);
 
         if (res != VK_SUCCESS) return res;
@@ -1209,6 +1210,8 @@ public:
             info->sizeToPage);
 
         info->directMapped = true;
+
+        return true;
     }
 
     VkResult on_vkAllocateMemory(
@@ -1220,8 +1223,80 @@ public:
         auto device = unbox_VkDevice(boxed_device);
         auto vk = dispatch_VkDevice(boxed_device);
 
+        if (!pAllocateInfo) return VK_ERROR_INITIALIZATION_FAILED;
+
+        VkMemoryAllocateInfo allocInfo = *pAllocateInfo;
+
+        vk_struct_common* structChain =
+            vk_init_struct_chain((vk_struct_common*)(&allocInfo));
+
+        VkExportMemoryAllocateInfo exportAllocInfo;
+        VkImportColorBufferGOOGLE importCbInfo;
+        VkImportPhysicalAddressGOOGLE importPhysAddrInfo;
+        VkMemoryDedicatedAllocateInfo dedicatedAllocInfo;
+
+        // handle type should already be converted in unmarshaling
+        VkExportMemoryAllocateInfo* exportAllocInfoPtr =
+            (VkExportMemoryAllocateInfo*)
+                vk_find_struct((vk_struct_common*)pAllocateInfo,
+                    VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO);
+
+        if (exportAllocInfoPtr) {
+            fprintf(stderr,
+                    "%s: Fatal: Export allocs are to be handled "
+                    "on the guest side / VkCommonOperations.\n",
+                    __func__);
+            abort();
+        }
+
+        VkImportColorBufferGOOGLE* importCbInfoPtr =
+            (VkImportColorBufferGOOGLE*)
+                vk_find_struct((vk_struct_common*)pAllocateInfo,
+                    VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE);
+
+        if (importCbInfoPtr) {
+            // TODO: Implement what happens on importing a color bufer:
+            // - setup Vk for the color buffer
+            // - associate device memory with the color buffer
+        }
+
+        VkImportPhysicalAddressGOOGLE* importPhysAddrInfoPtr =
+            (VkImportPhysicalAddressGOOGLE*)
+                vk_find_struct((vk_struct_common*)pAllocateInfo,
+                    VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE);
+
+        if (importPhysAddrInfoPtr) {
+            // TODO: Implement what happens on importing a physical address:
+            // 1 - perform action of vkMapMemoryIntoAddressSpaceGOOGLE if
+            //     host visible
+            // 2 - create color buffer, setup Vk for it,
+            //     and associate it with the physical address
+        }
+
+        VkMemoryDedicatedAllocateInfo* dedicatedAllocInfoPtr =
+            (VkMemoryDedicatedAllocateInfo*)
+                vk_find_struct((vk_struct_common*)pAllocateInfo,
+                VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO);
+
+        if (dedicatedAllocInfoPtr) {
+            dedicatedAllocInfo = *dedicatedAllocInfoPtr;
+            structChain =
+                vk_append_struct(
+                    (vk_struct_common*)structChain,
+                    (vk_struct_common*)&dedicatedAllocInfo);
+        }
+
+        // TODO: Import the corresponding host-side external memory handle.
+#ifdef _WIN32
+        VkImportMemoryWin32HandleInfoKHR importWin32HandleInfo;
+        (void)importWin32HandleInfo;
+#else
+        VkImportMemoryFdInfoKHR importFdInfo;
+        (void)importFdInfo;
+#endif
+
         VkResult result =
-            vk->vkAllocateMemory(device, pAllocateInfo, pAllocator, pMemory);
+            vk->vkAllocateMemory(device, &allocInfo, pAllocator, pMemory);
 
         if (result != VK_SUCCESS) {
             return result;
@@ -1254,7 +1329,7 @@ public:
         // thing.
 
         // First, check validity of the user's type index.
-        if (pAllocateInfo->memoryTypeIndex >=
+        if (allocInfo.memoryTypeIndex >=
             physdevInfo->memoryProperties.memoryTypeCount) {
             // Continue allowing invalid behavior.
             return VK_ERROR_INCOMPATIBLE_DRIVER;
@@ -1262,18 +1337,18 @@ public:
 
         mMapInfo[*pMemory] = MappedMemoryInfo();
         auto& mapInfo = mMapInfo[*pMemory];
-        mapInfo.size = pAllocateInfo->allocationSize;
+        mapInfo.size = allocInfo.allocationSize;
         mapInfo.device = device;
 
         VkMemoryPropertyFlags flags =
                 physdevInfo->
                     memoryProperties
-                        .memoryTypes[pAllocateInfo->memoryTypeIndex]
+                        .memoryTypes[allocInfo.memoryTypeIndex]
                         .propertyFlags;
 
         bool hostVisible =
             flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-        
+
         if (!hostVisible) return result;
 
         VkResult mapResult =
@@ -1556,7 +1631,7 @@ public:
 
     VkResult on_vkRegisterBufferColorBufferGOOGLE(
        VkDevice device, VkBuffer buffer, uint32_t colorBuffer) {
-        
+
         (void)buffer;
 
         bool success = setupVkColorBuffer(colorBuffer);

@@ -1471,6 +1471,23 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle) {
     return true;
 }
 
+VK_EXT_MEMORY_HANDLE getColorBufferExtMemoryHandle(uint32_t colorBuffer) {
+    if (!sVkEmulation || !sVkEmulation->live) return VK_EXT_MEMORY_HANDLE_INVALID;
+
+    auto vk = sVkEmulation->dvk;
+
+    AutoLock lock(sVkEmulationLock);
+
+    auto infoPtr = android::base::find(sVkEmulation->colorBuffers, colorBuffer);
+
+    if (!infoPtr) {
+        // Color buffer not found; this is usually OK.
+        return VK_EXT_MEMORY_HANDLE_INVALID;
+    }
+
+    return infoPtr->memory.exportedHandle;
+}
+
 VkExternalMemoryHandleTypeFlags
 transformExternalMemoryHandleTypeFlags_tohost(
     VkExternalMemoryHandleTypeFlags bits) {
