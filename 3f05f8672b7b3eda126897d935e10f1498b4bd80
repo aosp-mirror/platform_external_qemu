@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7582380c_dba549b6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-20T22:00:04Z",
+      "side": 1,
+      "message": "nit: remove print",
+      "revId": "3f05f8672b7b3eda126897d935e10f1498b4bd80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ab1094dc_01a424dc",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-20T22:00:04Z",
+      "side": 1,
+      "message": "nit: else on same line as }",
+      "revId": "3f05f8672b7b3eda126897d935e10f1498b4bd80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6aeec9a9_ace49a57",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-20T22:00:04Z",
+      "side": 1,
+      "message": "nit: else on same line as } (and elsewhere)",
+      "revId": "3f05f8672b7b3eda126897d935e10f1498b4bd80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "28303f25_5e9b13bd",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-20T22:00:04Z",
+      "side": 1,
+      "message": "nit: extra space",
+      "revId": "3f05f8672b7b3eda126897d935e10f1498b4bd80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "023d7bf2_c738de31",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-20T22:00:04Z",
+      "side": 1,
+      "message": "nit: don\u0027t need else to be on a separate line here",
+      "revId": "3f05f8672b7b3eda126897d935e10f1498b4bd80",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
