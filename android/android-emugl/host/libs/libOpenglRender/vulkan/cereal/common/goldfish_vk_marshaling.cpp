@@ -13366,6 +13366,70 @@ void unmarshal_VkCheckpointDataNV(
 #ifdef VK_GOOGLE_address_space
 #endif
 #ifdef VK_GOOGLE_color_buffer
+void marshal_VkImportColorBufferGOOGLE(
+    VulkanStream* vkStream,
+    const VkImportColorBufferGOOGLE* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size = goldfish_vk_extension_struct_size(forMarshaling->pNext);
+    vkStream->putBe32(pNext_size);
+    if (pNext_size)
+    {
+        vkStream->write((void*)forMarshaling->pNext, sizeof(VkStructureType));
+        marshal_extension_struct(vkStream, forMarshaling->pNext);
+    }
+    vkStream->write((uint32_t*)&forMarshaling->colorBuffer, sizeof(uint32_t));
+}
+
+void unmarshal_VkImportColorBufferGOOGLE(
+    VulkanStream* vkStream,
+    VkImportColorBufferGOOGLE* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->colorBuffer, sizeof(uint32_t));
+}
+
+void marshal_VkImportPhysicalAddressGOOGLE(
+    VulkanStream* vkStream,
+    const VkImportPhysicalAddressGOOGLE* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size = goldfish_vk_extension_struct_size(forMarshaling->pNext);
+    vkStream->putBe32(pNext_size);
+    if (pNext_size)
+    {
+        vkStream->write((void*)forMarshaling->pNext, sizeof(VkStructureType));
+        marshal_extension_struct(vkStream, forMarshaling->pNext);
+    }
+    vkStream->write((uint64_t*)&forMarshaling->physicalAddress, sizeof(uint64_t));
+}
+
+void unmarshal_VkImportPhysicalAddressGOOGLE(
+    VulkanStream* vkStream,
+    VkImportPhysicalAddressGOOGLE* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, pNext_size);
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint64_t*)&forUnmarshaling->physicalAddress, sizeof(uint64_t));
+}
+
 #endif
 void marshal_extension_struct(
     VulkanStream* vkStream,

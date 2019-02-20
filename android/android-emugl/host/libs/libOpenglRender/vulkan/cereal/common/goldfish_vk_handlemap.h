@@ -1658,6 +1658,14 @@ void handlemap_VkCheckpointDataNV(
 #ifdef VK_GOOGLE_address_space
 #endif
 #ifdef VK_GOOGLE_color_buffer
+void handlemap_VkImportColorBufferGOOGLE(
+    VulkanHandleMapping* handlemap,
+    VkImportColorBufferGOOGLE* toMap);
+
+void handlemap_VkImportPhysicalAddressGOOGLE(
+    VulkanHandleMapping* handlemap,
+    VkImportPhysicalAddressGOOGLE* toMap);
+
 #endif
 
 } // namespace goldfish_vk

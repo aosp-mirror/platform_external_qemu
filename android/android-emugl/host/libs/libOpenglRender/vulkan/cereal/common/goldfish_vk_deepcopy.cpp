@@ -6347,6 +6347,38 @@ void deepcopy_VkCheckpointDataNV(
 #ifdef VK_GOOGLE_address_space
 #endif
 #ifdef VK_GOOGLE_color_buffer
+void deepcopy_VkImportColorBufferGOOGLE(
+    Pool* pool,
+    const VkImportColorBufferGOOGLE* from,
+    VkImportColorBufferGOOGLE* to)
+{
+    (void)pool;
+    *to = *from;
+    size_t pNext_size = goldfish_vk_extension_struct_size(from->pNext);
+    to->pNext = nullptr;
+    if (pNext_size)
+    {
+        to->pNext = (void*)pool->alloc(pNext_size);
+        deepcopy_extension_struct(pool, from->pNext, (void*)(to->pNext));
+    }
+}
+
+void deepcopy_VkImportPhysicalAddressGOOGLE(
+    Pool* pool,
+    const VkImportPhysicalAddressGOOGLE* from,
+    VkImportPhysicalAddressGOOGLE* to)
+{
+    (void)pool;
+    *to = *from;
+    size_t pNext_size = goldfish_vk_extension_struct_size(from->pNext);
+    to->pNext = nullptr;
+    if (pNext_size)
+    {
+        to->pNext = (void*)pool->alloc(pNext_size);
+        deepcopy_extension_struct(pool, from->pNext, (void*)(to->pNext));
+    }
+}
+
 #endif
 void deepcopy_extension_struct(
     Pool* pool,

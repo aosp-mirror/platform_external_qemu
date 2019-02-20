@@ -2004,6 +2004,16 @@ void checkEqual_VkCheckpointDataNV(
 #ifdef VK_GOOGLE_address_space
 #endif
 #ifdef VK_GOOGLE_color_buffer
+void checkEqual_VkImportColorBufferGOOGLE(
+    const VkImportColorBufferGOOGLE* a,
+    const VkImportColorBufferGOOGLE* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkImportPhysicalAddressGOOGLE(
+    const VkImportPhysicalAddressGOOGLE* a,
+    const VkImportPhysicalAddressGOOGLE* b,
+    OnFailCompareFunc onFail);
+
 #endif
 
 } // namespace goldfish_vk
