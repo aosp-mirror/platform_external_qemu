@@ -3212,6 +3212,20 @@ server.
             <member><type>VkPipelineStageFlagBits</type>   <name>stage</name></member>
             <member noautovalidity="true"><type>void</type>* <name>pCheckpointMarker</name></member>
         </type>
+        <type category="struct" name="VkImportColorBufferGOOGLE">
+            <member values="VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE"><type>VkStructureType</type> <name>sType</name></member>
+            <member><type>void</type>*                  <name>pNext</name></member>
+            <member><type>uint32_t</type>   <name>colorBuffer</name></member>
+        </type>
+        <type category="struct" name="VkImportPhysicalAddressGOOGLE">
+            <member values="VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE"><type>VkStructureType</type> <name>sType</name></member>
+            <member><type>void</type>*                  <name>pNext</name></member>
+            <member><type>uint64_t</type>   <name>physicalAddress</name></member>
+            <member><type>VkDeviceSize</type>   <name>size</name></member>
+            <member><type>VkFormat</type>   <name>format</name></member>
+            <member><type>VkImageTiling</type>   <name>tiling</name></member>
+            <member><type>uint32_t</type>   <name>tilingParameter</name></member>
+        </type>
     </types>
 
     <comment>Vulkan enumerant (token) definitions</comment>
@@ -9106,6 +9120,10 @@ server.
                 <enum value="0"                                             name="VK_GOOGLE_COLOR_BUFFER_SPEC_VERSION"/>
                 <enum value="219"                                           name="VK_GOOGLE_COLOR_BUFFER_NUMBER"/>
                 <enum value="&quot;VK_GOOGLE_color_buffer&quot;"            name="VK_GOOGLE_COLOR_BUFFER_EXTENSION_NAME"/>
+                <enum offset="0" extends="VkStructureType"                  name="VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE"/>
+                <enum offset="1" extends="VkStructureType"                  name="VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE"/>
+                <type name="VkImportColorBufferGOOGLE"/>
+                <type name="VkImportPhysicalAddressGOOGLE"/>
                 <command name="vkRegisterImageColorBufferGOOGLE"/>
                 <command name="vkRegisterBufferColorBufferGOOGLE"/>
             </require>
