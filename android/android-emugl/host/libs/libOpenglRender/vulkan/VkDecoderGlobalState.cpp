@@ -19,6 +19,7 @@
 #include "VkCommonOperations.h"
 #include "VkFormatUtils.h"
 #include "VulkanDispatch.h"
+#include "vk_util.h"
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/memory/LazyInstance.h"
@@ -1221,6 +1222,55 @@ public:
 
         auto device = unbox_VkDevice(boxed_device);
         auto vk = dispatch_VkDevice(boxed_device);
+
+        if (!pAllocateInfo) return VK_ERROR_INITIALIZATION_FAILED;
+
+        VkMemoryAllocateInfo allocInfo = *pAllocateInfo;
+
+        vk_struct_common* currentStructChainEnd =
+            (vk_struct_common*)&allocInfo;
+        currentStructChainEnd->pNext = nullptr;
+
+        VkExportMemoryAllocateInfo exportAllocInfo;
+        VkImportColorBufferGOOGLE importCbInfo;
+        VkImportPhysicalAddressGOOGLE importPhysAddrInfo;
+        VkMemoryDedicatedAllocateInfo dedicatedAllocInfo;
+
+        // handle type should already be converted in unmarshaling
+        VkExportMemoryAllocateInfo* exportAllocInfoPtr =
+            (VkExportMemoryAllocateInfo*)
+                vk_find_struct((vk_struct_common*)pAllocateInfo,
+                    VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO);
+
+        VkImportColorBufferGOOGLE* importCbInfoPtr =
+            (VkImportColorBufferGOOGLE*)
+                vk_find_struct((vk_struct_common*)pAllocateInfo,
+                    VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE);
+
+        VkImportPhysicalAddressGOOGLE* importPhysAddrInfoPtr =
+            (VkImportPhysicalAddressGOOGLE*)
+                vk_find_struct((vk_struct_common*)pAllocateInfo,
+                    VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE);
+
+        VkMemoryDedicatedAllocateInfo* dedicatedAllocInfoPtr =
+            (VkMemoryDedicatedAllocateInfo*)
+                vk_find_struct((vk_struct_common*)pAllocateInfo,
+                VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO);
+        
+        if (dedicatedAllocInfoPtr) {
+            dedicatedAllocInfo = *dedicatedAllocInfoPtr;
+            currentStructChainEnd->pNext =
+                (vk_struct_common*)(&dedicatedAllocInfo);
+            currentStructChainEnd =
+                (vk_struct_common*)(&dedicatedAllocInfo);
+            currentStructChainEnd->pNext = nullptr;
+        }
+
+#ifdef _WIN32
+        VkImportMemoryWin32HandleInfo importWin32HandleInfo;
+#else
+        VkImportMemoryFdInfo importFdInfo;
+#endif
 
         VkResult result =
             vk->vkAllocateMemory(device, pAllocateInfo, pAllocator, pMemory);

@@ -240,6 +240,7 @@ bool teardownVkColorBuffer(uint32_t colorBufferHandle);
 VkEmulation::ColorBufferInfo getColorBufferInfo(uint32_t colorBufferHandle);
 bool updateColorBufferFromVkImage(uint32_t colorBufferHandle);
 bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle);
+VK_EXT_MEMORY_HANDLE getColorBufferExtMemoryHandle(uint32_t colorBufferHandle);
 
 VkExternalMemoryHandleTypeFlags
 transformExternalMemoryHandleTypeFlags_tohost(
