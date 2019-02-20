@@ -624,6 +624,10 @@ PFN_vkGetQueueCheckpointDataNV vkGetQueueCheckpointDataNV;
 #ifdef VK_GOOGLE_address_space
 PFN_vkMapMemoryIntoAddressSpaceGOOGLE vkMapMemoryIntoAddressSpaceGOOGLE;
 #endif
+#ifdef VK_GOOGLE_color_buffer
+PFN_vkRegisterImageColorBufferGOOGLE vkRegisterImageColorBufferGOOGLE;
+PFN_vkRegisterBufferColorBufferGOOGLE vkRegisterBufferColorBufferGOOGLE;
+#endif
 };
 
 } // namespace goldfish_vk

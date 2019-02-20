@@ -15072,6 +15072,66 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 break;
             }
 #endif
+#ifdef VK_GOOGLE_color_buffer
+            case OP_vkRegisterImageColorBufferGOOGLE:
+            {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkRegisterImageColorBufferGOOGLE\n");;
+                }
+                VkDevice device;
+                VkImage image;
+                uint32_t colorBuffer;
+                // Begin manual dispatchable handle unboxing for device;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_809;
+                vkReadStream->read((uint64_t*)&cgen_var_809, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_809, (VkDevice*)&device, 1);
+                auto unboxed_device = unbox_VkDevice(device);
+                auto vk = dispatch_VkDevice(device);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for device;
+                uint64_t cgen_var_810;
+                vkReadStream->read((uint64_t*)&cgen_var_810, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_810, (VkImage*)&image, 1);
+                vkReadStream->read((uint32_t*)&colorBuffer, sizeof(uint32_t));
+                VkResult vkRegisterImageColorBufferGOOGLE_VkResult_return = (VkResult)0;
+                vkRegisterImageColorBufferGOOGLE_VkResult_return = m_state->on_vkRegisterImageColorBufferGOOGLE(device, image, colorBuffer);
+                vkStream->write(&vkRegisterImageColorBufferGOOGLE_VkResult_return, sizeof(VkResult));
+                vkReadStream->clearPool();
+                vkStream->commitWrite();
+                break;
+            }
+            case OP_vkRegisterBufferColorBufferGOOGLE:
+            {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkRegisterBufferColorBufferGOOGLE\n");;
+                }
+                VkDevice device;
+                VkBuffer buffer;
+                uint32_t colorBuffer;
+                // Begin manual dispatchable handle unboxing for device;
+                vkReadStream->unsetHandleMapping();
+                uint64_t cgen_var_811;
+                vkReadStream->read((uint64_t*)&cgen_var_811, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkDevice(&cgen_var_811, (VkDevice*)&device, 1);
+                auto unboxed_device = unbox_VkDevice(device);
+                auto vk = dispatch_VkDevice(device);
+                vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
+                // End manual dispatchable handle unboxing for device;
+                uint64_t cgen_var_812;
+                vkReadStream->read((uint64_t*)&cgen_var_812, 1 * 8);
+                vkReadStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_812, (VkBuffer*)&buffer, 1);
+                vkReadStream->read((uint32_t*)&colorBuffer, sizeof(uint32_t));
+                VkResult vkRegisterBufferColorBufferGOOGLE_VkResult_return = (VkResult)0;
+                vkRegisterBufferColorBufferGOOGLE_VkResult_return = m_state->on_vkRegisterBufferColorBufferGOOGLE(device, buffer, colorBuffer);
+                vkStream->write(&vkRegisterBufferColorBufferGOOGLE_VkResult_return, sizeof(VkResult));
+                vkReadStream->clearPool();
+                vkStream->commitWrite();
+                break;
+            }
+#endif
             default:
             {
                 return ptr - (unsigned char *)buf;
