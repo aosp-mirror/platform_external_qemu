@@ -53,12 +53,7 @@ RecordScreenPage::RecordScreenPage(QWidget* parent)
     int width = mUi->rec_formatSwitch->minimumSizeHint().width();
     mUi->rec_formatSwitch->setMinimumWidth(width);
 
-    // Create widget for video player
-    mVideoWidget.reset(new android::videoplayer::VideoPlayerWidget(this));
-    mUi->rec_playerOverlayLayout->addWidget(mVideoWidget.get());
-    // Need to call show() on the parent widget to notify mVideoWidget to resize
-    // to match the size of rec_playerOverlayWidget.
-    mUi->rec_playerOverlayWidget->show();
+    mUi->videoWidget->show();
 
     setRecordUiState(RecordUiState::Ready);
 
@@ -107,7 +102,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
 
     switch (mState) {
         case RecordUiState::Ready:
-            mUi->rec_recordOverlayWidget->show();
+            mUi->stackedWidget->setCurrentIndex(0);
             mUi->rec_timeElapsedWidget->hide();
             mUi->rec_playStopButton->hide();
             mUi->rec_formatSwitch->hide();
@@ -115,7 +110,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_timeResLabel->hide();
             mUi->rec_recordButton->setText(tr(START_RECORDING));
             mUi->rec_recordButton->show();
-            mVideoWidget->setVisible(false);
+            mUi->videoWidget->setVisible(false);
             break;
         case RecordUiState::Starting: {
             SettingsTheme theme = getSelectedTheme();
@@ -134,7 +129,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
         }
         case RecordUiState::Recording:
             mUi->rec_recordDotLabel->setPixmap(QPixmap(QString::fromUtf8(":/light/recordCircle")));
-            mUi->rec_recordOverlayWidget->show();
+            mUi->stackedWidget->setCurrentIndex(0);
             mUi->rec_timeElapsedLabel->setText(tr(SECONDS_RECORDING).arg(0));
             mUi->rec_timeElapsedWidget->show();
             mUi->rec_playStopButton->hide();
@@ -143,7 +138,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_timeResLabel->hide();
             mUi->rec_recordButton->setText(tr(STOP_RECORDING));
             mUi->rec_recordButton->show();
-            mVideoWidget->setVisible(false);
+            mUi->videoWidget->setVisible(false);
 
             // Update every second
             mSec = 0;
@@ -168,14 +163,14 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             break;
         }
         case RecordUiState::Playing:
-            mUi->rec_recordOverlayWidget->hide();
+            mUi->stackedWidget->setCurrentIndex(1);
             // Change the icon on the play/stop button.
             mUi->rec_playStopButton->show();
             mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("stop"));
             mUi->rec_playStopButton->setProperty("themeIconName", "stop");
             break;
         case RecordUiState::Stopped:
-            mUi->rec_recordOverlayWidget->show();
+            mUi->stackedWidget->setCurrentIndex(1);
             mUi->rec_timeElapsedWidget->hide();
             mUi->rec_playStopButton->show();
             mUi->rec_formatSwitch->show();
@@ -204,7 +199,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
                             .arg(android_hw->hw_lcd_height));
             // Display preview frame
             mVideoInfo->show();
-            mVideoWidget->setVisible(true);
+            mUi->videoWidget->setVisible(true);
             break;
         case RecordUiState::Converting: {
             SettingsTheme theme = getSelectedTheme();
@@ -243,7 +238,7 @@ void RecordScreenPage::on_rec_playStopButton_clicked() {
         connect(videoPlayerNotifier.get(), SIGNAL(videoFinished()), this,
                 SLOT(videoPlayingFinished()));
         mVideoPlayer = android::videoplayer::VideoPlayer::create(
-                mTmpFilePath, mVideoWidget.get(),
+                mTmpFilePath, mUi->videoWidget,
                 std::move(videoPlayerNotifier));
 
         mVideoPlayer->scheduleRefresh(20);
@@ -399,7 +394,7 @@ void RecordScreenPage::slot_recordingStatusChange(RecordingStatus status) {
             // Setup the preview frame. Needs to be initialized before
             // setRecordUiState() or the preview frame will not be shown.
             mVideoInfo.reset(new android::videoplayer::VideoInfo(
-                    mVideoWidget.get(), mTmpFilePath));
+                    mUi->videoWidget, mTmpFilePath));
             connect(mVideoInfo.get(), SIGNAL(updateWidget()), this,
                     SLOT(updateVideoView()));
             setRecordUiState(RecordUiState::Stopped);
@@ -454,7 +449,7 @@ void ConvertingTask::run() {
 }
 
 void RecordScreenPage::updateVideoView() {
-    mVideoWidget->repaint();
+    mUi->videoWidget->repaint();
 }
 
 void RecordScreenPage::videoPlayingFinished() {
