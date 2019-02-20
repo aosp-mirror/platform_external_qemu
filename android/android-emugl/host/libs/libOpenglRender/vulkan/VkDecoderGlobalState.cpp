@@ -1167,6 +1167,50 @@ public:
                 regions.data());
     }
 
+    bool mapHostVisibleMemoryToGuestPhysicalAddressLocked(
+        VulkanDispatch* vk,
+        VkDevice device,
+        VkDeviceMemory memory,
+        uint64_t physAddr) {
+
+        if (!emugl::emugl_feature_is_enabled(
+                android::featurecontrol::GLDirectMem)) {
+            emugl::emugl_crash_reporter(
+                "FATAL: Tried to use direct mapping "
+                "while GLDirectMem is not enabled!");
+        }
+
+        auto info = android::base::find(mMapInfo, memory);
+
+        if (!info) return false;
+
+        info->guestPhysAddr = physAddr;
+
+        constexpr size_t PAGE_BITS = 12;
+        constexpr size_t PAGE_SIZE = 1u << PAGE_BITS;
+        constexpr size_t PAGE_OFFSET_MASK = PAGE_SIZE - 1;
+
+        uintptr_t addr = reinterpret_cast<uintptr_t>(info->ptr);
+        uintptr_t pageOffset = addr & PAGE_OFFSET_MASK;
+
+        info->pageAlignedHva =
+            reinterpret_cast<void*>(addr - pageOffset);
+        info->sizeToPage =
+            ((info->size + pageOffset + PAGE_SIZE - 1) >>
+                 PAGE_BITS) << PAGE_BITS;
+
+        printf("%s: map: %p -> [0x%llx 0x%llx]\n", __func__,
+               info->pageAlignedHva,
+               (unsigned long long)info->guestPhysAddr,
+               (unsigned long long)info->guestPhysAddr + info->sizeToPage);
+        get_emugl_vm_operations().mapUserBackedRam(
+            info->guestPhysAddr,
+            info->pageAlignedHva,
+            info->sizeToPage);
+
+        info->directMapped = true;
+    }
+
     VkResult on_vkAllocateMemory(
         VkDevice boxed_device,
         const VkMemoryAllocateInfo* pAllocateInfo,
@@ -1229,16 +1273,12 @@ public:
 
         bool hostVisible =
             flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-        bool shouldMapIndirect =
-            hostVisible &&
-            !emugl::emugl_feature_is_enabled(android::featurecontrol::GLDirectMem);
-
-        if (!shouldMapIndirect) return result;
+        
+        if (!hostVisible) return result;
 
         VkResult mapResult =
             vk->vkMapMemory(device, *pMemory, 0,
                             mapInfo.size, 0, &mapInfo.ptr);
-
 
         if (mapResult != VK_SUCCESS) {
             return VK_ERROR_OUT_OF_HOST_MEMORY;
@@ -1492,39 +1532,12 @@ public:
 
         auto info = android::base::find(mMapInfo, memory);
 
-        if (!info) {
-            return VK_ERROR_INITIALIZATION_FAILED;
+        if (!mapHostVisibleMemoryToGuestPhysicalAddressLocked(
+            vk, device, memory, *pAddress)) {
+            return VK_ERROR_OUT_OF_HOST_MEMORY;
         }
 
-        vk->vkMapMemory(
-            device, memory, 0,
-            info->size, 0, &info->ptr);
-
-        info->guestPhysAddr = *pAddress;
-
-        constexpr size_t PAGE_BITS = 12;
-        constexpr size_t PAGE_SIZE = 1u << PAGE_BITS;
-        constexpr size_t PAGE_OFFSET_MASK = PAGE_SIZE - 1;
-
-        uintptr_t addr = reinterpret_cast<uintptr_t>(info->ptr);
-        uintptr_t pageOffset = addr & PAGE_OFFSET_MASK;
-
-        info->pageAlignedHva =
-            reinterpret_cast<void*>(addr - pageOffset);
-        info->sizeToPage =
-            ((info->size + pageOffset + PAGE_SIZE - 1) >>
-                 PAGE_BITS) << PAGE_BITS;
-
-        printf("%s: map: %p -> [0x%llx 0x%llx]\n", __func__,
-               info->pageAlignedHva,
-               (unsigned long long)info->guestPhysAddr,
-               (unsigned long long)info->guestPhysAddr + info->sizeToPage);
-        get_emugl_vm_operations().mapUserBackedRam(
-            info->guestPhysAddr,
-            info->pageAlignedHva,
-            info->sizeToPage);
-
-        info->directMapped = true;
+        if (!info) return VK_ERROR_INITIALIZATION_FAILED;
 
         *pAddress = (uint64_t)(uintptr_t)info->ptr;
 
