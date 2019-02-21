@@ -417,6 +417,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                         tofix=$(otool -LX $lib | grep "libQt.*.dylib" | cut -f1 -d ' ')
                         for fix in $tofix; do
                             fix_basename=$(basename $fix)
+                            # Always point to the hard-link (libQt5*.<3-digit-ver>.dylib)
+                            qt_version="5.12.1"
+                            fix_basename="${fix_basename%%.*}.$qt_version.dylib"
                             echo "\t$fix ==> @rpath/$fix_basename"
                             run install_name_tool -change "$fix" "@rpath/$fix_basename" $lib
                         done
