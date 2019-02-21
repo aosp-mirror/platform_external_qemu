@@ -678,8 +678,10 @@ int main(int argc, char** argv)
      * and modify either LD_LIBRARY_PATH or PATH accordingly
      */
 
+#ifndef CONFIG_HEADLESS
     /* Add <lib>/qt/ to the library search path. */
     androidQtSetupEnv(wantedBitness, progDir.data());
+#endif
 
 #ifdef _WIN32
     // Take care of quoting all parameters before sending them to execv().
@@ -777,11 +779,17 @@ static char* getQemuExecutablePath(const char* progDir,
         APANIC("QEMU2 emulator does not support %s CPU architecture", avdArch);
     }
 
+#ifdef CONFIG_HEADLESS
+#define QEMU_BINARY_PATTERN "qemu-system-%s%s-headless"
+#else
+#define QEMU_BINARY_PATTERN "qemu-system-%s%s"
+#endif
+
     char fullPath[PATH_MAX];
     char* fullPathEnd = fullPath + sizeof(fullPath);
     char* tail = bufprint(fullPath,
                           fullPathEnd,
-                          "%s" PATH_SEP "qemu" PATH_SEP "%s-%s" PATH_SEP "qemu-system-%s%s",
+                          "%s" PATH_SEP "qemu" PATH_SEP "%s-%s" PATH_SEP QEMU_BINARY_PATTERN,
                           progDir,
                           kHostOs,
                           hostArch,
