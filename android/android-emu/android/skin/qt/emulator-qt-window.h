@@ -163,7 +163,6 @@ signals:
     void getDevicePixelRatio(double* out_dpr, QSemaphore* semaphore = NULL);
     void getScreenDimensions(QRect* out_rect, QSemaphore* semaphore = NULL);
     void getFramePos(int* x, int* y, QSemaphore* semaphore = NULL);
-    void getFrameSize(int* w, int* h, QSemaphore* semaphore = NULL);
     void windowHasFrame(bool* outValue, QSemaphore* semaphore = NULL);
     void getWindowPos(int* x, int* y, QSemaphore* semaphore = NULL);
     void getWindowSize(int* w, int* h, QSemaphore* semaphore = NULL);
@@ -272,7 +271,6 @@ private slots:
     void slot_getScreenDimensions(QRect* out_rect,
                                   QSemaphore* semaphore = NULL);
     void slot_getFramePos(int* x, int* y, QSemaphore* semaphore = NULL);
-    void slot_getFrameSize(int* w, int* h, QSemaphore* semaphore = NULL);
     void slot_windowHasFrame(bool* outValue, QSemaphore* semaphore = NULL);
     void slot_getWindowPos(int* x, int* y, QSemaphore* semaphore = NULL);
     void slot_getWindowSize(int* w, int* h, QSemaphore* semaphore = NULL);

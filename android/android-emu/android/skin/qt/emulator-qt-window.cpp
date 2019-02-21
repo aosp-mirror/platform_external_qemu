@@ -432,8 +432,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      &EmulatorQtWindow::slot_getScreenDimensions);
     QObject::connect(this, &EmulatorQtWindow::getFramePos, this,
                      &EmulatorQtWindow::slot_getFramePos);
-    QObject::connect(this, &EmulatorQtWindow::getFrameSize, this,
-                     &EmulatorQtWindow::slot_getFrameSize);
     QObject::connect(this, &EmulatorQtWindow::windowHasFrame, this,
                      &EmulatorQtWindow::slot_windowHasFrame);
     QObject::connect(this, &EmulatorQtWindow::getWindowPos, this,
@@ -1338,7 +1336,7 @@ void EmulatorQtWindow::slot_clearInstance() {
     }
 #endif
 
-    skin_winsys_save_window_geo();
+    skin_winsys_save_window_pos();
     sInstance.get().reset();
 }
 
@@ -1417,17 +1415,6 @@ void EmulatorQtWindow::slot_getWindowSize(int* ww,
 
     *ww = geom.width();
     *hh = geom.height();
-}
-
-// Get the size of the window, including the frame (if any)
-void EmulatorQtWindow::slot_getFrameSize(int* ww,
-                                         int* hh,
-                                         QSemaphore* semaphore) {
-    QSemaphoreReleaser semReleaser(semaphore);
-    QRect frameGeom = mContainer.frameGeometry();
-
-    *ww = frameGeom.width();
-    *hh = frameGeom.height();
 }
 
 void EmulatorQtWindow::slot_getWindowPos(int* xx,
