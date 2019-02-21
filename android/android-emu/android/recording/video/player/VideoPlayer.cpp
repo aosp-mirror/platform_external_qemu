@@ -634,40 +634,8 @@ void VideoPlayerImpl::adjustWindowSize(AVCodecContext* c,
         aspect_ratio = (float)c->width / (float)c->height;
     }
 
-    mRenderTarget->syncRenderTargetSize(
+    mRenderTarget->getRenderTargetSize(
         aspect_ratio, c->width, c->height, pWidth, pHeight);
-
-    /*
-    float aspect_ratio;
-
-    if (c->sample_aspect_ratio.num == 0) {
-        aspect_ratio = 0;
-    } else {
-        aspect_ratio = av_q2d(c->sample_aspect_ratio) * c->width / c->height;
-    }
-
-    if (aspect_ratio <= 0.0) {
-        aspect_ratio = (float)c->width / (float)c->height;
-    }
-
-    int h = mWidget->height();
-    int w = ((int)(h * aspect_ratio)) & -3;
-    if (w > mWidget->width()) {
-        w = mWidget->width();
-        h = ((int)(w / aspect_ratio)) & -3;
-    }
-
-    int x = (mWidget->width() - w) / 2;
-    int y = (mWidget->height() - h) / 2;
-
-    if (mWidget->width() != w || mWidget->height() != h) {
-        mWidget->move(x, y);
-        mWidget->setFixedSize(w, h);
-    }
-
-    *pWidth = w;
-    *pHeight = h;
-    */
 }
 
 AvSyncMaster VideoPlayerImpl::getMasterSyncType() {

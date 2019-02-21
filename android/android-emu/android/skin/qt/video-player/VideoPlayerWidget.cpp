@@ -10,8 +10,8 @@
 // GNU General Public License for more details.
 
 #include "android/skin/qt/video-player/VideoPlayerWidget.h"
-#include "QtGui/qimage.h"
-#include "QtGui/qpainter.h"
+#include <QtGui/QImage>
+#include <QtGui/QPainter>
 
 namespace android {
 namespace videoplayer {
@@ -21,7 +21,7 @@ VideoPlayerWidget::VideoPlayerWidget(QWidget* parent)
 
 VideoPlayerWidget::~VideoPlayerWidget() {}
 
-void VideoPlayerWidget::syncRenderTargetSize(
+void VideoPlayerWidget::getRenderTargetSize(
         float sampleAspectRatio,
         int video_width,
         int video_height,
@@ -35,14 +35,6 @@ void VideoPlayerWidget::syncRenderTargetSize(
         h = ((int)(w / sampleAspectRatio)) & -3;
     }
 
-    int x = (width() - w) / 2;
-    int y = (height() - h) / 2;
-
-    if (width() != w || height() != h) {
-        move(x, y);
-        setFixedSize(w, h);
-    }
-
     *resultRenderTargetWidth = w;
     *resultRenderTargetHeight = h;
 }
@@ -52,7 +44,11 @@ void VideoPlayerWidget::paintEvent(QPaintEvent* e) {
 
     if (mBuffer != nullptr && mBufferLen > 0) {
         QImage image = QImage::fromData(mBuffer, mBufferLen, "PPM");
-        painter.drawImage(QPoint(0, 0), image);
+        QRect rect = image.rect();
+        QRect destinationRect(0, 0, painter.device()->width(),
+                      painter.device()->height());
+        rect.moveCenter(destinationRect.center());
+        painter.drawImage(rect.topLeft(), image);
     }
 }
 

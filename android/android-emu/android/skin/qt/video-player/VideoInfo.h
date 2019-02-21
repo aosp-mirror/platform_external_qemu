@@ -55,10 +55,10 @@ public:
 
 private:
     void initialize();
-    static void adjustWindowSize(AVCodecContext* c,
-                                 VideoPlayerWidget* widget,
-                                 int* pWidth,
-                                 int* pHeight);
+    static void getDestinationSize(AVCodecContext* c,
+                                   VideoPlayerWidget* widget,
+                                   int* pWidth,
+                                   int* pHeight);
     static int calculateDurationSecs(AVFormatContext* f);
 
 private:

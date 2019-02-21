@@ -25,12 +25,11 @@ public:
     VideoPlayerWidget(QWidget* parent = nullptr);
     ~VideoPlayerWidget();
 
-    void syncRenderTargetSize(
-        float sampleAspectRatio,
-        int video_width,
-        int video_height,
-        int* resultRenderTargetWidth,
-        int* resultRenderTargetHeight) override;
+    void getRenderTargetSize(float sampleAspectRatio,
+                             int video_width,
+                             int video_height,
+                             int* resultRenderTargetWidth,
+                             int* resultRenderTargetHeight) override;
 
     void setPixelBuffer(const unsigned char* buf, size_t len) override {
         mBuffer = buf;

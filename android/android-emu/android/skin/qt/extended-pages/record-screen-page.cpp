@@ -384,6 +384,9 @@ void RecordScreenPage::slot_recordingStatusChange(RecordingStatus status) {
             break;
         case RECORD_STOPPED:
             mVideoPlayer.reset();
+            // Show the playback page so that we can calculate the size of the
+            // preview frame.
+            mUi->subpage->setCurrentIndex(1);
             // Setup the preview frame. Needs to be initialized before
             // setRecordUiState() or the preview frame will not be shown.
             mVideoInfo.reset(new android::videoplayer::VideoInfo(
