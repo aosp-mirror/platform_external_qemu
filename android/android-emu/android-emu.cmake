@@ -361,7 +361,7 @@ android_target_link_libraries(android-emu
 android_target_link_libraries(android-emu windows_msvc-x86_64 PUBLIC msvc-posix-compat)
 
 # These are the libs needed for android-emu on linux.
-android_target_link_libraries(android-emu linux-x86_64 PUBLIC darwinn -lrt -lX11 -lGL -lc++)
+android_target_link_libraries(android-emu linux-x86_64 PUBLIC darwinn -lrt -lc++)
 
 # Here are the darwin library and link dependencies. They are public and will propagate onwards to others that depend on
 # android-emu. You should really only add things that are crucial for this library to link
