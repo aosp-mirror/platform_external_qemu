@@ -54,6 +54,8 @@ namespace goldfish_vk {
 static constexpr const char* const
 kEmulatedExtensions[] = {
     "VK_ANDROID_native_buffer",
+    "VK_KHR_external_memory_fuchsia",
+    "VK_KHR_external_semaphore_fuchsia",
 };
 
 static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 0, 65);
