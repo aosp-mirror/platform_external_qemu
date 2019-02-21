@@ -60,31 +60,39 @@ EmulatorNoQtNoWindow* EmulatorNoQtNoWindow::getInstance() {
 
 static std::function<void()> sQemuMainLoop;
 
-#ifdef _WIN32
-    static DWORD WINAPI threadWrapper(void* ignored)
+#if defined(__WIN32) || defined(_MSC_VER)
+
+static DWORD  threadId;
+static HANDLE threadHandle;
+static DWORD WINAPI threadWrapper(void* ignored)
+{
+    sQemuMainLoop();
+    return 0;
+}
+
 #else
-    static void*        threadWrapper(void* ignored)
+
+static pthread_t eventThread;
+static void*        threadWrapper(void* ignored)
+{
+    sQemuMainLoop();
+    return 0;
+}
+
 #endif
-    {
-        sQemuMainLoop();
-        return 0;
-    }
 
 void EmulatorNoQtNoWindow::startThread(std::function<void()> looperFunction) {
-
-    pthread_t eventThread;
 
     sQemuMainLoop = looperFunction;
 
     // Spawn a thread to run the QEMU main loop
-#ifdef __WIN32
-    DWORD  threadId;
-    HANDLE threadHandle = CreateThread(nullptr,        // Default security attributes
-                                       0,              // Default stack size
-                                       threadWrapper,
-                                       nullptr,        // Argument to the thread
-                                       0,              // Default creation flags
-                                       &threadId);
+#if defined(__WIN32) || defined(_MSC_VER)
+    threadHandle = CreateThread(nullptr,        // Default security attributes
+                                0,              // Default stack size
+                                threadWrapper,
+                                nullptr,        // Argument to the thread
+                                0,              // Default creation flags
+                                &threadId);
     if (threadHandle == nullptr) {
         fprintf(stderr, "%s %s: CreateThread() failed!\n", __FILE__, __FUNCTION__);
     }
@@ -97,9 +105,18 @@ void EmulatorNoQtNoWindow::startThread(std::function<void()> looperFunction) {
 #endif
 }
 
+void EmulatorNoQtNoWindow::waitThread() {
+#if defined(__WIN32) || defined(_MSC_VER)
+    WaitForSingleObject(threadHandle, INFINITE);
+#else
+    pthread_join(eventThread, nullptr);
+#endif
+}
+
 extern "C" void qemu_system_shutdown_request(QemuShutdownCause cause);
 
 void EmulatorNoQtNoWindow::requestClose() {
+
     // We don't want to restore to a state where the
     // framework is shut down by 'adb reboot -p',
     // so skip saving when we're doing a reboot.

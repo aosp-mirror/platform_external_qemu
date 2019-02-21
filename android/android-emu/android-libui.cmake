@@ -3,6 +3,47 @@ prebuilt(QT5)
 prebuilt(FFMPEG)
 prebuilt(ZLIB)
 
+set(ANDROID_LIBUI_HEADLESS_SRC_FILES
+    android/skin/charmap.c
+    android/skin/rect.c
+    android/skin/generic-event.cpp
+    android/skin/generic-event-buffer.cpp
+    android/skin/image.c
+    android/skin/trackball.c
+    android/skin/keyboard.c
+    android/skin/keycode.c
+    android/skin/keycode-buffer.c
+    android/skin/file.c
+    android/skin/window.c
+    android/skin/resource.c
+    android/skin/ui.c
+    android/skin/winsys-headless.cpp
+    android/skin/event-headless.cpp
+    android/skin/surface-headless.cpp
+    android/skin/qt/emulator-no-qt-no-window.cpp
+    android/skin/LibuiAgent.cpp
+    android/gpu_frame.cpp
+    android/emulator-window.c
+    android/emulation/control/ScreenCapturer.cpp
+    android/window-agent-headless-impl.cpp
+    android/main-common-ui.c
+    android/resource.c
+    android/recording/audio/AudioProducer.cpp
+    android/recording/codecs/audio/VorbisCodec.cpp
+    android/recording/codecs/video/VP9Codec.cpp
+    android/recording/FfmpegRecorder.cpp
+    android/recording/Frame.cpp
+    android/recording/GifConverter.cpp
+    android/recording/screen-recorder.cpp
+    android/recording/video/GuestReadbackWorker.cpp
+    android/recording/video/player/Clock.cpp
+    android/recording/video/player/FrameQueue.cpp
+    android/recording/video/player/PacketQueue.cpp
+    android/recording/video/player/VideoPlayer.cpp
+    android/recording/video/player/VideoPlayerNotifier.cpp
+    android/recording/video/VideoProducer.cpp
+    android/recording/video/VideoFrameSharer.cpp)
+
 set(ANDROID_LIBUI_SRC_FILES
     android/skin/charmap.c
     android/skin/rect.c
@@ -259,3 +300,57 @@ set(emulator-libui_includes_public ${PROTOBUF_INCLUDE_DIRS}
     ${ANDROID_QEMU2_TOP_DIR}/../libyuv/files/include)
 
 add_android_library(emulator-libui)
+
+set(emulator-libui-headless_src
+    ${ANDROID_HW_CONFIG_H}
+    ${ANDROID_LIBUI_HEADLESS_SRC_FILES})
+
+set(emulator-libui-headless_includes_private
+    .
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/host/include
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emugl/shared
+    ${FFMPEG_INCLUDE_DIRS})
+
+set(emulator-libui-headless_compile_options_private "-DCONFIG_HEADLESS -DUSE_MMX=1" "-mmmx")
+
+# Target specific compiler flags for windows
+set(emulator-libui-headless_windows-x86_64_compile_options_private "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
+set(emulator-libui-headless_windows-x86_compile_options_private "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
+
+# Linux compiler settings
+set(emulator-libui-headless_linux-x86_64_compile_options_private
+    "-Wno-reserved-user-defined-literal"
+    "-Wno-pointer-bool-conversion"
+    "-Wno-deprecated-declarations"
+    "-Wno-inconsistent-missing-override"
+    "-Wno-return-type-c-linkage"
+    "-Wno-invalid-constexpr"
+    "-fPIC")
+
+# Mac Os compiler settings
+set(emulator-libui-headless_darwin-x86_64_compile_options_private
+    "-Wno-reserved-user-defined-literal"
+    "-Wno-pointer-bool-conversion"
+    "-Wno-deprecated-declarations"
+    "-Wno-inconsistent-missing-override"
+    "-Wno-return-type-c-linkage"
+    "-Wno-invalid-constexpr"
+    "-fPIC")
+
+# These dependencies are ignored in the franken build, once we switch over
+# we can remove the includes below, as all the dependencies will propagate.
+set(emulator-libui-headless_libs_public
+    android-emu
+    emulator-libyuv
+    libOpenGLESDispatch
+    libemugl_common
+    ${FFMPEG_LIBRARIES}
+    ${ZLIB_LIBRARIES})
+
+# Remove these later:
+set(emulator-libui-headless_includes_public ${PROTOBUF_INCLUDE_DIRS}
+    ${ANDROID_QEMU2_TOP_DIR}/../libyuv/files/include)
+
+add_android_library(emulator-libui-headless)

@@ -197,16 +197,20 @@ include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
 
 QEMU2_TARGET := x86
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
+include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-headless-target.mk
 
 QEMU2_TARGET := x86_64
 include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
+include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-headless-target.mk
 
 ifeq (,$(CONFIG_MIN_BUILD))
     QEMU2_TARGET := arm
     include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
+    include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-headless-target.mk
 
     QEMU2_TARGET := arm64
     include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-target.mk
+    include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-headless-target.mk
 
     ifeq (true,$(BUILD_ENABLE_MIPS))
       QEMU2_TARGET := mips

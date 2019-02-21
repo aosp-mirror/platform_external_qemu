@@ -167,6 +167,7 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
         auto noQtNoWindow = EmulatorNoQtNoWindow::getInstance();
         if (noQtNoWindow) {
             noQtNoWindow->requestClose();
+            noQtNoWindow->waitThread();
         }
         D("Finished QEMU main loop\n");
     } else {
@@ -400,6 +401,7 @@ extern void skin_winsys_quit_request()
     if (auto window = EmulatorQtWindow::getInstance()) {
         window->requestClose();
     } else if (auto nowindow = EmulatorNoQtNoWindow::getInstance()){
+        (void)nowindow;
         sMainLoopShouldExit = true;
 #ifdef _WIN32
         if ( !SetEvent(sWakeEvent) ) {
