@@ -180,6 +180,7 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
         auto noQtNoWindow = EmulatorNoQtNoWindow::getInstance();
         if (noQtNoWindow) {
             noQtNoWindow->requestClose();
+            noQtNoWindow->waitThread();
         }
         D("Finished QEMU main loop\n");
     } else {
