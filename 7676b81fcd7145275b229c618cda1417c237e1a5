@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "50dd0367_96b9d106",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1202,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-21T01:05:23Z",
+      "side": 1,
+      "message": "Let\u0027s leave it in for now until things are closer to final since it\u0027s a pretty critical set of vulkan init.",
+      "parentUuid": "2aa575dc_2210b1bd",
+      "range": {
+        "startLine": 1202,
+        "startChar": 8,
+        "endLine": 1202,
+        "endChar": 14
+      },
+      "revId": "7676b81fcd7145275b229c618cda1417c237e1a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f8c9f559_35708ae3",
         "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
         "patchSetId": 2
