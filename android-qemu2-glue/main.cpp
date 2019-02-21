@@ -901,6 +901,7 @@ extern "C" int main(int argc, char** argv) {
                 }
 
                 fc::setEnabledOverride(fc::Vulkan, true);
+                fc::setEnabledOverride(fc::GLDirectMem, true);
 
                 return startEmulatorWithMinConfig(
                     args.size(),
