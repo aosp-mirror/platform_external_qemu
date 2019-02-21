@@ -515,6 +515,12 @@ def unwrap_vkAcquireImageANDROID_nativeFenceFd():
                   (orig.paramName, local.paramName))
     return { "nativeFenceFd" : { "mapOp" : mapOp } }
 
+def unwrap_vkQueueSubmit():
+    def mapOp(cgen, orig, local):
+        cgen.stmt("mImpl->resources()->unwrap_vkQueueSubmit(submitCount, %s, %s)" %
+                  (orig.paramName, local.paramName))
+    return { "pSubmits" : { "mapOp" : mapOp } }
+
 custom_encodes = {
     "vkEnumerateInstanceVersion" : emit_only_resource_event,
     "vkMapMemory" : emit_only_resource_event,
@@ -523,6 +529,7 @@ custom_encodes = {
     "vkInvalidateMappedMemoryRanges" : encode_vkInvalidateMappedMemoryRanges,
     "vkCreateImage" : emit_with_custom_unwrap(unwrap_VkNativeBufferANDROID()),
     "vkAcquireImageANDROID" : emit_with_custom_unwrap(unwrap_vkAcquireImageANDROID_nativeFenceFd()),
+    "vkQueueSubmit" : emit_with_custom_unwrap(unwrap_vkQueueSubmit()),
 }
 
 class VulkanEncoder(VulkanWrapperGenerator):
