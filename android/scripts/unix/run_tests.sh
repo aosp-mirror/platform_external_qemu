@@ -283,7 +283,7 @@ if [ "$TARGET_OS" = "windows-x86_64" ]; then
             log "Checking $file for dependencies"
             needed=$($OPT_OUT/toolchain/x86_64-w64-mingw32-objdump -x $file | grep "DLL Name" | awk '{ print $3 }')
             cache="KERNEL32.DLL KERNEL32.dll msvcrt.dll PSAPI.DLL SHELL32.DLL SHELL32.dll USER32.DLL ntdll.dll USER32.dll NETAPI32.dll "
-            cache="${cache} ADVAPI32.dll WS2_32.dll GDI32.dll dbghelp.dll RPCRT4.dll OLEAUT32.dll IPHLPAPI.DLL imagehelp.dll WINMM.dll "
+            cache="${cache} ADVAPI32.dll WS2_32.dll GDI32.dll dbghelp.dll RPCRT4.dll OLEAUT32.dll IPHLPAPI.DLL imagehelp.dll WINMM.dll WTSAPI32.dll "
             cache="${cache} d3d9.dll IMM32.dll VERSION.dll imagehlp.dll UxTheme.dll dwmapi.dll USERENV.dll ole32.dll OPENGL32.dll MPR.dll"
             for need in $needed; do
                 libs=$(find $OPT_OUT/gradle-release -name $need);
