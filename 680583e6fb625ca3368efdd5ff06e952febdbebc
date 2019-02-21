@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "70964c42_5516182e",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-default-renderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-02-21T21:24:44Z",
+      "side": 1,
+      "message": "Missing the copyright doc.",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 5
+      },
+      "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8092181a_cddacdea",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-default-renderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-02-21T21:24:44Z",
+      "side": 1,
+      "message": "Could you add a to-do here for the implementation of multiplexer, since this logic will be moved there?",
+      "range": {
+        "startLine": 23,
+        "startChar": 2,
+        "endLine": 26,
+        "endChar": 3
+      },
+      "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "94d2b7c6_6041c62a",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-default-renderer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-02-21T21:24:44Z",
+      "side": 1,
+      "message": "nit: 2019",
+      "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ddea6465_cddbe4f4",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-default-renderer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-02-21T21:24:44Z",
+      "side": 1,
+      "message": "In your design doc, there will be renderers other than DefaultFrameRenderer, videoRenderer for instance. \n\nCould you have an abstract class for all of them, something like PlaybackCameraRenderer?\n\nAlso I think the *impl class should not be declared/defined in the header file, in which you expose the *impl to public (anti-pattern). One solution maybe move DefaultFrameRenderer here from camera-videoplayback.cpp\n\nAs in your design, in the next steps, you may use multiplexer as factory, since it knows everything.",
+      "range": {
+        "startLine": 32,
+        "startChar": 6,
+        "endLine": 32,
+        "endChar": 30
+      },
+      "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
