@@ -2,6 +2,47 @@
 prebuilt(QT5)
 prebuilt(FFMPEG)
 
+set(ANDROID_LIBUI_HEADLESS_SRC_FILES
+    android/skin/charmap.c
+    android/skin/rect.c
+    android/skin/generic-event.cpp
+    android/skin/generic-event-buffer.cpp
+    android/skin/image.c
+    android/skin/trackball.c
+    android/skin/keyboard.c
+    android/skin/keycode.c
+    android/skin/keycode-buffer.c
+    android/skin/file.c
+    android/skin/window.c
+    android/skin/resource.c
+    android/skin/ui.c
+    android/skin/winsys-headless.cpp
+    android/skin/event-headless.cpp
+    android/skin/surface-headless.cpp
+    android/skin/qt/emulator-no-qt-no-window.cpp
+    android/skin/LibuiAgent.cpp
+    android/gpu_frame.cpp
+    android/emulator-window.c
+    android/emulation/control/ScreenCapturer.cpp
+    android/window-agent-headless-impl.cpp
+    android/main-common-ui.c
+    android/resource.c
+    android/recording/audio/AudioProducer.cpp
+    android/recording/codecs/audio/VorbisCodec.cpp
+    android/recording/codecs/video/VP9Codec.cpp
+    android/recording/FfmpegRecorder.cpp
+    android/recording/Frame.cpp
+    android/recording/GifConverter.cpp
+    android/recording/screen-recorder.cpp
+    android/recording/video/GuestReadbackWorker.cpp
+    android/recording/video/player/Clock.cpp
+    android/recording/video/player/FrameQueue.cpp
+    android/recording/video/player/PacketQueue.cpp
+    android/recording/video/player/VideoPlayer.cpp
+    android/recording/video/player/VideoPlayerNotifier.cpp
+    android/recording/video/VideoProducer.cpp
+    android/recording/video/VideoFrameSharer.cpp)
+
 set(ANDROID_LIBUI_SRC_FILES
     android/skin/charmap.c
     android/skin/rect.c
@@ -337,3 +378,55 @@ android_target_properties(emulator-libui_unittests all "${QT5_SHARED_PROPERTIES}
 target_compile_definitions(emulator-libui_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 
 target_link_libraries(emulator-libui_unittests PRIVATE gmock_main emulator-libui android-mock-vm-operations OpenGLESDispatch FFMPEG::FFMPEG)
+
+# Version of libui without Qt
+
+set(emulator-libui-headless_src
+    ${ANDROID_HW_CONFIG_H}
+    ${ANDROID_LIBUI_HEADLESS_SRC_FILES})
+
+android_add_library(emulator-libui-headless)
+android_target_link_libraries(emulator-libui-headless windows_msvc PUBLIC
+        msvc-posix-compat
+        dirent-win32)
+
+target_compile_definitions(emulator-libui-headless PRIVATE -DCONFIG_HEADLESS)
+
+target_compile_options(emulator-libui-headless PRIVATE "-DUSE_MMX=1" "-mmmx")
+
+# Target specific compiler flags for windows, since we include FFMPEG C sources from C++ we need to make sure this flag
+# is set for c++ sources.
+if(NOT MSVC)
+  android_target_compile_options(emulator-libui-headless windows PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-Wno-literal-suffix>")
+endif()
+
+# Linux compiler settings
+android_target_compile_options(emulator-libui-headless
+                               linux-x86_64
+                               PRIVATE
+                               "-Wno-reserved-user-defined-literal"
+                               "-Wno-pointer-bool-conversion"
+                               "-Wno-deprecated-declarations"
+                               "-Wno-inconsistent-missing-override"
+                               "-Wno-return-type-c-linkage"
+                               "-Wno-invalid-constexpr")
+
+# Mac Os compiler settings
+android_target_compile_options(emulator-libui-headless
+                               darwin-x86_64
+                               PRIVATE
+                               "-Wno-reserved-user-defined-literal"
+                               "-Wno-pointer-bool-conversion"
+                               "-Wno-deprecated-declarations"
+                               "-Wno-inconsistent-missing-override"
+                               "-Wno-return-type-c-linkage"
+                               "-Wno-invalid-constexpr")
+
+# dependencies will remain internal, we should not be leaking out internal headers and defines.
+target_link_libraries(emulator-libui-headless
+                              PRIVATE
+                              android-emu
+                              emulator-libyuv
+                              FFMPEG::FFMPEG
+                              zlib)
+

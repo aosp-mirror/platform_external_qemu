@@ -517,6 +517,51 @@ function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS
   android_install_exe(qemu-system-${ANDROID_AARCH} "./qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
 endfunction()
 
+function(android_add_qemu_headless_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS CPU)
+  # Workaround b/121393952, older cmake does not have proper object archives
+  if (NOT MSVC)
+    android_complete_archive(QEMU_COMPLETE_LIB "qemu2-common")
+  endif()
+  add_executable(qemu-system-${ANDROID_AARCH}-headless
+                 android-qemu2-glue/main.cpp
+                 vl.c
+                 ${STUBS}
+                 ${qemu-system-${QEMU_AARCH}_sources}
+                 ${qemu-system-${QEMU_AARCH}_generated_sources})
+  target_include_directories(qemu-system-${ANDROID_AARCH}-headless
+                             PRIVATE android-qemu2-glue/config/target-${CONFIG_AARCH} target/${CPU})
+  target_compile_definitions(qemu-system-${ANDROID_AARCH}-headless
+                             PRIVATE
+                             -DNEED_CPU_H
+                             -DCONFIG_ANDROID
+                             -DCONFIG_HEADLESS
+                             -DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}
+                             -DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER})
+  target_link_libraries(qemu-system-${ANDROID_AARCH}-headless
+                        PRIVATE android-qemu-deps
+                                ${QEMU_COMPLETE_LIB}
+                                libqemu2-glue
+                                libqemu2-util
+                                android-emu
+                                emulator-libui-headless
+                                OpenGLESDispatch
+                                ${VIRGLRENDERER_LIBRARIES}
+                                android-qemu-deps)
+  if(MSVC)
+    # Workaround b/121393952, msvc linker does not have notion of whole-archive. so we need to use the general approach
+    # supported by newer cmake versions
+    target_link_libraries(qemu-system-${ANDROID_AARCH}-headless PRIVATE $<TARGET_OBJECTS:qemu2-common>)
+    set_target_properties(qemu-system-${ANDROID_AARCH}-headless PROPERTIES LINK_FLAGS "/FORCE:multiple /NODEFAULTLIB:LIBCMT")
+  endif()
+  # Make the common dependency explicit, as some generators might not detect it properly (Xcode)
+  add_dependencies(qemu-system-${ANDROID_AARCH}-headless qemu2-common)
+  # XCode bin places this not where we want this...
+  set_target_properties(qemu-system-${ANDROID_AARCH}-headless
+                        PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                                   "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
+  android_install_exe(qemu-system-${ANDROID_AARCH} "./qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
+endfunction()
+
 # Copies a
 function(android_copy_shared_lib TGT SHARED_LIB NAME)
   android_copy_file(${TGT} $<TARGET_FILE:${SHARED_LIB}>
