@@ -250,7 +250,8 @@ VideoInjectionControllerImpl::getNextRequest(
         return {};
     } else {
         mRequestPending = true;
-        return mRequestContexts.front().request;
+        return makeOptional<::offworld::VideoInjectionRequest>(
+            mRequestContexts.front().request);
     }
 }
 
