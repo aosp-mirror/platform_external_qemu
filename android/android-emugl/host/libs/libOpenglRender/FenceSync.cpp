@@ -100,7 +100,6 @@ FenceSync::FenceSync(bool hasNativeFence,
 
     // assumes that there is a valid + current OpenGL context
     assert(RenderThreadInfo::get());
-    assert(RenderThreadInfo::get()->currContext.get());
 
     mDisplay = FrameBuffer::getFB()->getDisplay();
     mSync = s_egl.eglCreateSyncKHR(mDisplay,
