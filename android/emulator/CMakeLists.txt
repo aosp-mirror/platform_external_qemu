@@ -7,6 +7,10 @@ set(WINDOWS_ICON ../images/emulator_icon.rc)
 add_executable(emulator main-emulator.cpp ${WINDOWS_ICON})
 target_link_libraries(emulator PRIVATE android-emu)
 
+add_executable(emulator-headless main-emulator.cpp ${WINDOWS_ICON})
+target_link_libraries(emulator-headless PRIVATE android-emu)
+target_compile_definitions(emulator-headless PRIVATE -DCONFIG_HEADLESS)
+
 # Make sure we have the qemu dependencies available
 add_dependencies(emulator qemu-system-i386 qemu-system-x86_64 qemu-system-armel qemu-system-aarch64)
 

@@ -458,6 +458,8 @@ android_add_qemu_executable(i386 i386 x86 "${ANDROID_QEMU_i386_DEVICES_${ANDROID
 android_add_qemu_executable(x86_64 x86_64 x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}" i386)
 android_add_qemu_executable(aarch64 aarch64 arm64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}" arm)
 android_add_qemu_executable(armel arm arm "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}" arm)
+android_add_qemu_headless_executable(x86_64 x86_64 x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}" i386)
+android_add_qemu_headless_executable(aarch64 aarch64 arm64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}" arm)
 
 # The tests currently work on linux only.
 if(ANDROID_TARGET_TAG MATCHES "linux.*")
