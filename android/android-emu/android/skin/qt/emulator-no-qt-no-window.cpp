@@ -48,6 +48,9 @@ EmulatorNoQtNoWindow::EmulatorNoQtNoWindow()
     if (android_hw->test_quitAfterBootTimeOut > 0) {
         android_test_start_boot_complete_timer(android_hw->test_quitAfterBootTimeOut);
     }
+    mAdbInterface->enqueueCommand(
+        { "shell", "settings", "put", "system",
+          "screen_off_timeout", "2147483647" });
 }
 
 EmulatorNoQtNoWindow::Ptr EmulatorNoQtNoWindow::getInstancePtr() {

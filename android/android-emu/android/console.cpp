@@ -2519,6 +2519,20 @@ do_avd_heartbeat( ControlClient  client, char*  args )
     return 0;
 }
 
+static bool s_rewind_audio_requested = false;
+extern "C" int qemu_wav_audio_rewind_input_wave() {
+    bool ret = s_rewind_audio_requested;
+    s_rewind_audio_requested = false;
+    return ret;
+}
+
+static int
+do_avd_rewind_audio( ControlClient  client, char*  args )
+{
+    s_rewind_audio_requested = true;
+    return 0;
+}
+
 static int
 do_avd_name( ControlClient  client, char*  args )
 {
@@ -2570,6 +2584,10 @@ static const CommandDefRec  vm_commands[] =
     { "heartbeat", "query the heart beat number of the guest system",
     "'avd heartbeat' will report the number of heart beats from guest system running inside this avd\r\n",
     NULL, do_avd_heartbeat, NULL },
+
+    { "rewindaudio", "rewind the input audio to the beginning",
+    "'avd rewindaudio' will rewind the input of audio to beginning(applicable only to wav audio driver)\r\n",
+    NULL, do_avd_rewind_audio, NULL },
 
     { "name", "query virtual device name",
     "'avd name' will return the name of this virtual device\r\n",

@@ -2,7 +2,7 @@
 
 # Add darwinn external libraries and includes
 include(android/darwinn/darwinn.cmake)
-
+android_generate_hw_config()
 # This is the set of sources that are common in both the shared libary and the archive. We currently have to split them
 # up due to dependencies on external variables/functions that are implemented in other libraries.
 set(android-emu-common
@@ -238,6 +238,7 @@ set(android_emu_dependent_src
     android/camera/camera-videoplayback-renderer.cpp
     android/camera/camera-virtualscene.cpp
     android/camera/camera-virtualscene-utils.cpp
+    android/emulation/address_space_device.cpp
     android/emulation/control/ScreenCapturer.cpp
     android/emulation/FakeRotatingCameraSensor.cpp
     android/emulation/HostMemoryService.cpp
@@ -331,13 +332,13 @@ target_link_libraries(android-emu
                               offworld
                               # Prebuilt libraries
                               breakpad_client
-                              CURL::libcurl
+                              curl
                               OpenSSL::SSL
                               OpenSSL::Crypto
                               LibXml2::LibXml2
-                              PNG::PNG
+                              png
                               lz4
-                              ZLIB::ZLIB
+                              zlib
 )
 
 # Here are the windows library and link dependencies. They are public and will propagate onwards to others that depend
@@ -387,7 +388,8 @@ target_include_directories(android-emu PUBLIC
                                    # this has to be sorted out,
                                    ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
                                    # If you use our library, you get access to our headers.
-                                   ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+                                   ${CMAKE_CURRENT_SOURCE_DIR}
+                                   ${CMAKE_CURRENT_BINARY_DIR}
                                    ${DARWINN_INCLUDE_DIRS})
 
 android_target_compile_options(android-emu Clang PRIVATE -Wno-extern-c-compat -Wno-invalid-constexpr -fvisibility=default)
@@ -464,11 +466,13 @@ target_link_libraries(android-emu-shared
                               offworld
                               # Prebuilt libraries
                               breakpad_client
-                              CURL::libcurl
+                              curl
+                              OpenSSL::SSL
+                              OpenSSL::Crypto
                               LibXml2::LibXml2
-                              PNG::PNG
+                              png
                               lz4
-                              ZLIB::ZLIB)
+                              zlib)
 
 # Here are the windows library and link dependencies. They are public and will propagate onwards to others that depend
 # on android-emu-shared
@@ -542,20 +546,7 @@ set(android-mock-vm-operations_src
 android_add_library(android-mock-vm-operations)
 
 android_target_compile_options(android-mock-vm-operations Clang PRIVATE -O0 -Wno-invalid-constexpr)
-target_include_directories(android-mock-vm-operations
-                                   PRIVATE
-                                   ../android-emugl/host/include/
-                                   ${BREAKPAD_INCLUDE_DIRS}
-                                   ${CURL_INCLUDE_DIRS}
-                                   ${LIBXML2_INCLUDE_DIRS}
-                                   ${LIBPNG_INCLUDE_DIRS}
-                                   ${LZ4_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS}
-                                   ${PROTOBUF_INCLUDE_DIRS}
-                                   ${LZ4_INCLUDE_DIRS}
-                                   ${PNG_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS}
-                                   ${DARWINN_INCLUDE_DIRS})
+target_include_directories(android-mock-vm-operations PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(android-mock-vm-operations PRIVATE gmock)
 
 # The unit tests
@@ -754,20 +745,7 @@ android_add_test(android-emu_unittests)
 
 # Setup the targets compile config etc..
 android_target_compile_options(android-emu_unittests Clang PRIVATE -O0 -Wno-invalid-constexpr)
-target_include_directories(android-emu_unittests
-                                   PRIVATE
-                                   ../android-emugl/host/include/
-                                   ${BREAKPAD_INCLUDE_DIRS}
-                                   ${CURL_INCLUDE_DIRS}
-                                   ${LIBXML2_INCLUDE_DIRS}
-                                   ${LIBPNG_INCLUDE_DIRS}
-                                   ${LZ4_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS}
-                                   ${PROTOBUF_INCLUDE_DIRS}
-                                   ${LZ4_INCLUDE_DIRS}
-                                   ${PNG_INCLUDE_DIRS}
-                                   ${ZLIB_INCLUDE_DIRS}
-                                   ${DARWINN_INCLUDE_DIRS})
+target_include_directories(android-emu_unittests PRIVATE ../android-emugl/host/include/)
 
 target_compile_definitions(android-emu_unittests PRIVATE -DGTEST_HAS_RTTI=0)
 
@@ -814,7 +792,7 @@ android_copy_test_dir(android-emu_unittests test-sdk test-sdk)
 android_copy_file(android-emu_unittests  "${CMAKE_CURRENT_SOURCE_DIR}/android/emulation/CpuAccelerator_unittest.dat" "$<TARGET_FILE_DIR:android-emu_unittests>/android/android-emu/android/emulation/CpuAccelerator_unittest.dat")
 android_copy_file(android-emu_unittests  "${CMAKE_CURRENT_SOURCE_DIR}/android/emulation/CpuAccelerator_unittest.dat2" "$<TARGET_FILE_DIR:android-emu_unittests>/android/android-emu/android/emulation/CpuAccelerator_unittest.dat2")
 
-android_target_dependency(android-emu_unittests all release E2FSPROGS_DEPENDENCIES)
+android_target_dependency(android-emu_unittests all E2FSPROGS_DEPENDENCIES)
 
 # Boo! We depend on makeext
 add_custom_command(TARGET android-emu_unittests POST_BUILD

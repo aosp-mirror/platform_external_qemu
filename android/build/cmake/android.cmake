@@ -11,8 +11,39 @@
 # This contains a set of functions to make working with different targets a lot easier. The idea is that you can now set
 # properties that define your lib/executable through variables that follow the following naming conventions
 #
-
 include(prebuilts)
+
+# Cross compiles the given cmake project if needed.
+#
+# EXE the name of the target we are interested in. This is
+# the main build product you want to use.
+# SOURCE the location of the CMakeList.txt describing the
+# project.
+# OUT_PATH Name of the variable that will contain the resulting
+# executable.
+function(android_compile_for_host EXE SOURCE OUT_PATH)
+  if(ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
+    # We can add this project without any translation..
+    add_subdirectory(${SOURCE} ${EXE}_ext)
+    set(${OUT_PATH} ${EXE} PARENT_SCOPE)
+  else()
+    message(STATUS "Cross compiling ${EXE} for host ${ANDROID_HOST_TAG}")
+    include(ExternalProject)
+
+    # If we are cross compiling we will need to build it for our actual OS we are currently running on.
+    get_filename_component(BUILD_PRODUCT ${CMAKE_CURRENT_BINARY_DIR}/${EXE}_ext_cross/src/${EXE}_ext_cross-build/${EXE} ABSOLUTE)
+    set(EMUGEN_EXE ${CMAKE_CURRENT_BINARY_DIR}/emugen/src/emugen-build/emugen)
+    externalproject_add(${EXE}_ext_cross
+          PREFIX ${EXE}_ext_cross
+          DOWNLOAD_COMMAND ""
+          SOURCE_DIR ${SOURCE}
+          CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-${ANDROID_HOST_TAG}.cmake"
+          BUILD_BYPRODUCTS ${BUILD_PRODUCT}
+          TEST_BEFORE_INSTALL True
+          INSTALL_COMMAND "")
+    set(${OUT_PATH} ${BUILD_PRODUCT} PARENT_SCOPE)
+   endif()
+endfunction()
 
 # This function is the same as target_compile_definitions
 # (https://cmake.org/cmake/help/v3.5/command/target_compile_definitions.html) The only difference is that the
@@ -192,6 +223,22 @@ function(android_add_interface name)
   add_library(${name} INTERFACE)
 endfunction()
 
+
+function(android_add_default_test_properties name)
+  # Configure the test to run with asan..
+  file(READ "${ANDROID_QEMU2_TOP_DIR}/android/asan_overrides" ASAN_OVERRIDES)
+  set_property(TEST ${name} PROPERTY ENVIRONMENT "ASAN_OPTIONS=${ASAN_OVERRIDES}")
+  set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "LLVM_PROFILE_FILE=$<TARGET_FILE_NAME:${name}>.profraw")
+  set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ANDROID_LLVM_SYMBOLIZER}")
+  set_property(TEST ${name} PROPERTY TIMEOUT 600)
+
+  if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+    # Let's include the .dll path for our test runner
+    string(REPLACE "/" "\\" WIN_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_swiftshader;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_mesa;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/qt/lib")
+    set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "PATH=${WIN_PATH};$ENV{PATH}")
+  endif()
+endfunction()
+
 # Adds a test target. It will create and register the test with the given name
 #
 # The variable ${name}_src should have the set of sources The variable ${name}_${ANDROID_TARGET_TAG}_src should have the
@@ -208,23 +255,18 @@ function(android_add_test name)
     return()
   endif()
 
-  # Configure the test to run with asan..
-  file(READ "${ANDROID_QEMU2_TOP_DIR}/android/asan_overrides" ASAN_OVERRIDES)
   add_test(NAME ${name}
            COMMAND $<TARGET_FILE:${name}> --gtest_output=xml:$<TARGET_FILE_NAME:${name}>.xml
            WORKING_DIRECTORY $<TARGET_FILE_DIR:${name}>)
-  set_property(TEST ${name} PROPERTY ENVIRONMENT "ASAN_OPTIONS=${ASAN_OVERRIDES}")
-  set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "LLVM_PROFILE_FILE=$<TARGET_FILE_NAME:${name}>.profraw")
 
-  if(MSVC)
-    # Let's include the .dll path for our test runner and set a timeout so we are guaranteed to complete the tests
-    string(REPLACE "/" "\\" WIN_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_swiftshader;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_mesa;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/qt/lib")
-    set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "PATH=${WIN_PATH};$ENV{PATH}")
-    set_property(TEST ${name} PROPERTY TIMEOUT 600)
+  # Let's not optimize our tests.
+  if (ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+      target_compile_options(${name} PRIVATE -Od)
   else()
-      # Let's not optimize our tests.
       target_compile_options(${name} PRIVATE -O0)
   endif()
+
+  android_add_default_test_properties(${name})
 endfunction()
 
 # Adds an executable target. The RUNTIME_OS_DEPENDENCIES and RUNTIME_OS_PROPERTIES will registed for the given target,
@@ -265,8 +307,7 @@ function(android_add_protobuf name protofiles)
   protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${protofiles})
   set(${name}_src ${PROTO_SRCS} ${PROTO_HDRS})
   android_add_library(${name})
-  target_include_directories(${name} PUBLIC ${PROTOBUF_INCLUDE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-  target_link_libraries(${name} PUBLIC ${PROTOBUF_LIBRARIES})
+  target_link_libraries(${name} PUBLIC libprotobuf)
   # Disable generation of information about every class with virtual functions for use by the C++ runtime type
   # identification features (dynamic_cast and typeid). If you don't use those parts of the language, you can save some
   # space by using this flag. Note that exception handling uses the same information, but it will generate it as needed.
@@ -282,8 +323,7 @@ endfunction()
 #
 # This file will be placed on the current binary dir, so it can be included if this directory is on the include path.
 function(android_generate_hw_config)
-  add_custom_command(POST_BUILD
-                     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h
                      COMMAND python ${ANDROID_QEMU2_TOP_DIR}/android/scripts/gen-hw-config.py
                              ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini
                              ${CMAKE_CURRENT_BINARY_DIR}/android/avd/hw-config-defs.h

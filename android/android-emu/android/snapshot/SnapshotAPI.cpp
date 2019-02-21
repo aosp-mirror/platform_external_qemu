@@ -21,7 +21,6 @@
 #include "android/offworld/OffworldPipe.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
-#include "android/telephony/modem_driver.h"
 
 #include <atomic>
 #include <cassert>
@@ -86,7 +85,9 @@ offworld::Response createForkIdResponse(int forkId,
     auto forkReadOnlyInstance = response.mutable_snapshot()
             ->mutable_fork_read_only_instances();
     forkReadOnlyInstance->set_instance_id(forkId);
-    forkReadOnlyInstance->set_metadata(metadata);
+    if (metadata != nullptr) {
+        forkReadOnlyInstance->set_metadata(metadata);
+    }
     return response;
 }
 
@@ -127,7 +128,6 @@ void createCheckpoint(AsyncMessagePipeHandle pipe,
     android::base::ThreadLooper::runOnMainLooper([pipe, snapshotName]() {
         const AndroidSnapshotStatus result =
                 androidSnapshot_save(snapshotName.c_str());
-        android_modem_driver_send_nitz_now();
         gQAndroidVmOperations->vmStart();
 
         sSnapshotCrossSession->mPipesAwaitingResponse.erase(pipe);
@@ -161,7 +161,6 @@ void gotoCheckpoint(
 
         const AndroidSnapshotStatus result =
                 androidSnapshot_load(snapshotName.c_str());
-        android_modem_driver_send_nitz_now();
         gQAndroidVmOperations->vmStart();
         if (result != AndroidSnapshotStatus::SNAPSHOT_STATUS_OK) {
             android::offworld::sendResponse(pipe, createErrorResponse());
@@ -179,6 +178,11 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
 
     sSnapshotCrossSession->sForkTotal = forkTotal;
     sSnapshotCrossSession->sForkId = 0;
+
+    if (forkTotal <= 1) {
+        android::offworld::sendResponse(pipe, createForkIdResponse(0));
+        return;
+    }
 
     sSnapshotCrossSession->mPipesAwaitingResponse[pipe] = RequestType::Fork;
     sSnapshotCrossSession->mOverrideResponse[RequestType::Fork] =
@@ -201,7 +205,6 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
         assert(res);
         const AndroidSnapshotStatus result =
                 androidSnapshot_load(android::snapshot::kDefaultBootSnapshot);
-        android_modem_driver_send_nitz_now();
         gQAndroidVmOperations->vmStart();
         if (result != AndroidSnapshotStatus::SNAPSHOT_STATUS_OK) {
             android::offworld::sendResponse(pipe, createErrorResponse());
@@ -232,7 +235,6 @@ void doneInstance(android::AsyncMessagePipeHandle pipe,
             LOG_IF(WARNING, !res) << "Share mode update failure";
             res = gQAndroidVmOperations->snapshotRemap(
                     mode == android::base::FileShare::Write, nullptr, nullptr);
-            android_modem_driver_send_nitz_now();
             gQAndroidVmOperations->vmStart();
         });
     } else if (sSnapshotCrossSession->sForkId ==

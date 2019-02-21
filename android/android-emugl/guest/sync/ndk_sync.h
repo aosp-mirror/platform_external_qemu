@@ -26,6 +26,7 @@
 #ifndef ANDROID_SYNC_H
 #define ANDROID_SYNC_H
 
+#include <android/versioning.h>
 #include <inttypes.h>
 #include <sys/cdefs.h>
 

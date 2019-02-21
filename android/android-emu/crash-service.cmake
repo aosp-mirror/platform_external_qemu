@@ -1,6 +1,5 @@
 # This file defines emulator crash service
 prebuilt(QT5)
-prebuilt(CURL)
 
 set(CRASH_WINDOWS_ICON ../images/emulator_icon.rc)
 set(android-emu-crash-service_src
@@ -15,7 +14,8 @@ set(android-emu-crash-service_windows-x86_64_src android/crashreport/CrashServic
 set(android-emu-crash-service_windows_msvc-x86_64_src android/crashreport/CrashService_windows.cpp)
 
 android_add_library(android-emu-crash-service)
-target_link_libraries(android-emu-crash-service PRIVATE breakpad_server CURL::libcurl)
+target_include_directories(android-emu-crash-service PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(android-emu-crash-service PRIVATE breakpad_server curl android-emu)
 # Windows-msvc specific dependencies. Need these for posix support.
 android_target_link_libraries(android-emu-crash-service windows_msvc PUBLIC
         msvc-posix-compat
@@ -59,6 +59,7 @@ set(emulator_crashreport_unittests_windows_msvc-x86_64_src android/crashreport/C
 
 android_add_test(emulator_crashreport_unittests)
 target_link_libraries(emulator_crashreport_unittests PRIVATE android-emu libqemu2-glue breakpad_server gtest_main)
+target_include_directories(emulator_crashreport_unittests PRIVATE .)
 # Windows-msvc specific dependencies. Need these for posix support.
 android_target_link_libraries(emulator_crashreport_unittests windows_msvc PUBLIC
         msvc-posix-compat

@@ -68,8 +68,10 @@ def get_visual_studio():
     TODO(jansene): Use https://github.com/Microsoft/vswhere vs this here'''
     candidates = recursive_iglob(os.path.join(os.sep, "Program Files (x86)", "Microsoft Visual Studio",
                                   "2017"), [lambda f: f.endswith('vcvars64.bat')])
-    vs_release = next(candidates, None)
-    logging.info("Using visual studio %s", vs_release)
+    # Create a preference ordering, we prefer not to use build tools..
+    pref = sorted(candidates, reverse=True)
+    vs_release = next(iter(pref), None)
+    logging.info("Using visual studio %s", vs_release) 
     return vs_release
 
 def fixup_windows_clang():

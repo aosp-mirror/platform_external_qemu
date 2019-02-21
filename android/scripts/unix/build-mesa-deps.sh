@@ -87,6 +87,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             *-x86_64)
                 LLVM_TARGETS=x86_64
                 ;;
+            linux-aarch64)
+                LLVM_TARGETS=aarch64
+                ;;
             *)
                 panic "Unknown system CPU architecture: $SYSTEM"
         esac

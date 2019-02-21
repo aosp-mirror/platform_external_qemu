@@ -108,6 +108,22 @@ typedef struct {
     QEMUCallbackSet delvm;
 } QEMUSnapshotCallbacks;
 
+typedef uint32_t (*qemu_address_space_device_gen_handle_t)(void);
+typedef void (*qemu_address_space_device_destroy_handle_t)(uint32_t);
+typedef void (*qemu_address_space_device_tell_ping_info_t)(uint32_t handle, uint64_t gpa);
+typedef void (*qemu_address_space_device_ping_t)(uint32_t handle);
+
+struct qemu_address_space_device_control_ops {
+    qemu_address_space_device_gen_handle_t gen_handle;
+    qemu_address_space_device_destroy_handle_t destroy_handle;
+    qemu_address_space_device_tell_ping_info_t tell_ping_info;
+    qemu_address_space_device_ping_t ping;
+};
+
+void qemu_set_address_space_device_control_ops(struct qemu_address_space_device_control_ops* ops);
+struct qemu_address_space_device_control_ops*
+qemu_get_address_space_device_control_ops(void);
+
 void qemu_set_snapshot_callbacks(const QEMUSnapshotCallbacks* callbacks);
 
 typedef void (*QEMURamLoadCallback)(void*, uint64_t);

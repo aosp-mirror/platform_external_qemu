@@ -197,3 +197,6 @@ docker-src.*
 *.ast_raw
 *.depend_raw
 .vs/
+/.gradle
+/.settings
+/.project

@@ -21,6 +21,7 @@
 #include <memory>
 
 #include "cereal/common/goldfish_vk_private_defs.h"
+#include "cereal/common/goldfish_vk_transform.h"
 
 namespace goldfish_vk {
 
@@ -73,6 +74,38 @@ public:
     void on_vkGetPhysicalDeviceFeatures2KHR(
         VkPhysicalDevice physicalDevice,
         VkPhysicalDeviceFeatures2* pFeatures);
+
+    // Override image format properties
+    VkResult on_vkGetPhysicalDeviceImageFormatProperties(
+            VkPhysicalDevice physicalDevice,
+            VkFormat format,
+            VkImageType type,
+            VkImageTiling tiling,
+            VkImageUsageFlags usage,
+            VkImageCreateFlags flags,
+            VkImageFormatProperties* pImageFormatProperties);
+    VkResult on_vkGetPhysicalDeviceImageFormatProperties2(
+            VkPhysicalDevice physicalDevice,
+            const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo,
+            VkImageFormatProperties2* pImageFormatProperties);
+    VkResult on_vkGetPhysicalDeviceImageFormatProperties2KHR(
+            VkPhysicalDevice physicalDevice,
+            const VkPhysicalDeviceImageFormatInfo2* pImageFormatInfo,
+            VkImageFormatProperties2* pImageFormatProperties);
+
+    // Override format features
+    void on_vkGetPhysicalDeviceFormatProperties(
+            VkPhysicalDevice physicalDevice,
+            VkFormat format,
+            VkFormatProperties* pFormatProperties);
+    void on_vkGetPhysicalDeviceFormatProperties2(
+            VkPhysicalDevice physicalDevice,
+            VkFormat format,
+            VkFormatProperties2* pFormatProperties);
+    void on_vkGetPhysicalDeviceFormatProperties2KHR(
+            VkPhysicalDevice physicalDevice,
+            VkFormat format,
+            VkFormatProperties2* pFormatProperties);
 
     // Override API version
     void on_vkGetPhysicalDeviceProperties(
@@ -143,6 +176,26 @@ public:
         const VkImageViewCreateInfo* pCreateInfo,
         const VkAllocationCallbacks* pAllocator,
         VkImageView* pView);
+
+    void on_vkDestroyImageView(VkDevice device,
+                               VkImageView imageView,
+                               const VkAllocationCallbacks* pAllocator);
+
+    VkResult on_vkCreateSampler(VkDevice device,
+                                const VkSamplerCreateInfo* pCreateInfo,
+                                const VkAllocationCallbacks* pAllocator,
+                                VkSampler* pSampler);
+
+    void on_vkDestroySampler(VkDevice device,
+                             VkSampler sampler,
+                             const VkAllocationCallbacks* pAllocator);
+
+    void on_vkUpdateDescriptorSets(
+            VkDevice device,
+            uint32_t descriptorWriteCount,
+            const VkWriteDescriptorSet* pDescriptorWrites,
+            uint32_t descriptorCopyCount,
+            const VkCopyDescriptorSet* pDescriptorCopies);
 
     void on_vkCmdCopyBufferToImage(
         VkCommandBuffer commandBuffer,
@@ -264,6 +317,27 @@ public:
     VkResult on_vkResetCommandPool(VkDevice device,
                                    VkCommandPool commandPool,
                                    VkCommandPoolResetFlags flags);
+
+    // Transformations
+
+    void deviceMemoryTransform_tohost(
+        VkDeviceMemory* memory, uint32_t memoryCount,
+        VkDeviceSize* offset, uint32_t offsetCount,
+        VkDeviceSize* size, uint32_t sizeCount,
+        uint32_t* typeIndex, uint32_t typeIndexCount,
+        uint32_t* typeBits, uint32_t typeBitsCount);
+    void deviceMemoryTransform_fromhost(
+        VkDeviceMemory* memory, uint32_t memoryCount,
+        VkDeviceSize* offset, uint32_t offsetCount,
+        VkDeviceSize* size, uint32_t sizeCount,
+        uint32_t* typeIndex, uint32_t typeIndexCount,
+        uint32_t* typeBits, uint32_t typeBitsCount);
+
+#define DEFINE_TRANSFORMED_TYPE_PROTOTYPE(type) \
+    void transformImpl_##type##_tohost(const type*, uint32_t); \
+    void transformImpl_##type##_fromhost(const type*, uint32_t); \
+    
+LIST_TRANSFORMED_TYPES(DEFINE_TRANSFORMED_TYPE_PROTOTYPE)
 
 private:
     class Impl;

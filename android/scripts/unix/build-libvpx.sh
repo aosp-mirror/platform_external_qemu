@@ -71,6 +71,9 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         linux-x86_64)
             MY_FLAGS="--target=x86_64-linux-gcc"
             ;;
+        linux-aarch64)
+            MY_FLAGS="--target=arm64-linux-gcc"
+            ;;
         windows-x86_64)
             MY_FLAGS="--target=x86_64-win64-gcc"
             ;;

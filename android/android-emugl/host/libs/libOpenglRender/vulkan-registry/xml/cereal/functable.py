@@ -6,8 +6,25 @@ from .common.vulkantypes import EXCLUDED_APIS
 RESOURCE_TRACKER_ENTRIES = [
     "vkEnumerateInstanceExtensionProperties",
     "vkEnumerateDeviceExtensionProperties",
+    "vkEnumeratePhysicalDevices",
     "vkAllocateMemory",
     "vkFreeMemory",
+    "vkCreateImage",
+    "vkDestroyImage",
+    "vkGetImageMemoryRequirements",
+    "vkGetImageMemoryRequirements2",
+    "vkGetImageMemoryRequirements2KHR",
+    "vkBindImageMemory",
+    "vkBindImageMemory2",
+    "vkBindImageMemory2KHR",
+    "vkCreateBuffer",
+    "vkDestroyBuffer",
+    "vkGetBufferMemoryRequirements",
+    "vkGetBufferMemoryRequirements2",
+    "vkGetBufferMemoryRequirements2KHR",
+    "vkBindBufferMemory",
+    "vkBindBufferMemory2",
+    "vkBindBufferMemory2KHR",
 ]
 
 SUCCESS_VAL = {

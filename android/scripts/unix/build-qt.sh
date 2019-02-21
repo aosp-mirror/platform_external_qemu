@@ -55,10 +55,10 @@ package_builder_parse_package_list
 ###
 ###  Download the source tarball if needed.
 ###
-QT_SRC_NAME=qt-everywhere-src-5.11.1
+QT_SRC_NAME=qt-everywhere-src-5.12.1
 QT_SRC_PACKAGE=$QT_SRC_NAME.tar.xz
-QT_SRC_URL=http://download.qt.io/archive/qt/5.11/5.11.1/single/$QT_SRC_PACKAGE
-QT_SRC_PACKAGE_SHA1=0ac866442a960d4038a51ba3096b2cc5d796b5ee
+QT_SRC_URL=http://download.qt.io/archive/qt/5.12/5.12.1/single/$QT_SRC_PACKAGE
+QT_SRC_PACKAGE_SHA1=SHA1=9377d37cdde14ba2009d4f2077986a8910d03ee7
 
 QT_SRC_PATCH_FOLDER=${QT_SRC_NAME}-patches
 QT_ARCHIVE_DIR=$(builder_archive_dir)
@@ -144,6 +144,18 @@ build_qt_package () {
     panic "Could not build and install $1"
 }
 
+configure_qtwebengine_pkg_config () {
+    # Two things are happening here:
+    #  1) Copy the .pc files from qtwebengine-deps to
+    #  toolchain-wrapper/qtwebengine-pkgconfig,
+    #  2) modify the .pc file prefixes to point to the lib folder in
+    #  qtwebengine-deps
+    local QTWEBENGINE_DEPS_DIR="$PREBUILTS_DIR/common/qtwebengine-deps/linux-x86_64"
+    local TOOLCHAIN_PKGCONFIG_DIR="$_SHU_BUILDER_BUILD_DIR/toolchain-wrapper/qtwebengine-pkgconfig"
+    run mkdir $TOOLCHAIN_PKGCONFIG_DIR
+    run cp $QTWEBENGINE_DEPS_DIR/lib/pkgconfig/*.pc "$TOOLCHAIN_PKGCONFIG_DIR"
+    run sed -i "s|\${qtwebengine_deps_dir}|$QTWEBENGINE_DEPS_DIR|g" $TOOLCHAIN_PKGCONFIG_DIR/*.pc
+}
 
 if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     # Perform remote Darwin build first.
@@ -178,7 +190,33 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 builder_prepare_for_host "$SYSTEM" "$AOSP_DIR"
                 ;;
             *)
+                case $SYSTEM in
+                    linux-x86_64)
+                        _SHU_BUILDER_BUILD_DIR=$TEMP_DIR/build-$SYSTEM
+                        # make sure our .pc files are found first because
+                        # glibc's xcb library is too old (1.8). Qt 5.12.1
+                        # requires > 1.9.
+                        EXTRA_PKG_CONFIG_PATH=$_SHU_BUILDER_BUILD_DIR/toolchain-wrapper/qtwebengine-pkgconfig
+                        ;;
+                    *)
+                        ;;
+                esac
                 builder_prepare_for_host_no_binprefix "$SYSTEM" "$AOSP_DIR"
+                ;;
+        esac
+
+        case $SYSTEM in
+            linux-x86_64)
+                # This variable needs to be exported during the build for linux as
+                # there's a patch in qt's chromium build system to add custom search
+                # paths for dependencies that chromium thinks is in the standard
+                # directory (/usr/include).
+                QTWEBENGINE_DEPS_DIR="$PREBUILTS_DIR/common/qtwebengine-deps/linux-x86_64"
+                # Add custom pkg-config files pointing to our qtwebengine-deps
+                # folder.
+                configure_qtwebengine_pkg_config
+                ;;
+            *)
                 ;;
         esac
 
@@ -213,15 +251,19 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 -skip qtlocation \
                 -no-strip \
 
+        # This will add <qtlibinfix> to all the shared library names, i.e.,
+        # libQt5*.so --> libQt5*<qtlibinfix>.so
+        # We don't want to use the default names on Windows in case the user has
+        # some other version of Qt loaded in memory from a different application
+        # (DLL hell).
+        var_append EXTRA_CONFIGURE_FLAGS \
+                -qtlibinfix AndroidEmu
+
+
         if [ "$(get_verbosity)" -gt 2 ]; then
             var_append EXTRA_CONFIGURE_FLAGS "-v"
         fi
 
-        # This variable needs to be exported during the build for linux as
-        # there's a patch in qt's chromium build system to add custom search
-        # paths for dependencies that chromium thinks is in the standard
-        # directory (/usr/include).
-        QTWEBENGINE_DEPS_DIR="$PREBUILTS_DIR/common/qtwebengine-deps/linux-x86_64"
         # QtWebEngine needs <KHR/khrplatform.h>, so just include it from the
         # swiftshader code inside of qt's chromium
         KHR_INCLUDE="$(builder_src_dir)/$QT_SRC_NAME/qtwebengine/src/3rdparty/chromium/third_party/swiftshader/include"
@@ -233,7 +275,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 fi
                 var_append CPPFLAGS "-I$KHR_INCLUDE"
                 var_append CPPFLAGS "-I$QTWEBENGINE_DEPS_DIR/include"
-                var_append EXTRA_PKG_CONFIGS "$QTWEBENGINE_DEPS_DIR/lib/pkgconfig"
+                var_append CFLAGS -fPIC
+                var_append CXXFLAGS -fPIC
                 var_append QMAKE_CXXFLAGS $CPPFLAGS
                 var_append EXTRA_CONFIGURE_FLAGS \
                         -qt-xcb \
@@ -247,6 +290,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             windows*)
                 case $SYSTEM in
                     windows-x86_64)
+                        var_append EXTRA_CONFIGURE_FLAGS \
+                                -no-opengl
                         BINPREFIX=x86_64-w64-mingw32-
                         ;;
                     *)
@@ -296,7 +341,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             export LD_LIBRARY_PATH &&
             export GN_HOST_TOOLCHAIN_EXTRA_CPPFLAGS &&
             export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
-            export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH:$EXTRA_PKG_CONFIGS" &&
+            export PKG_CONFIG_PATH="$EXTRA_PKG_CONFIG_PATH:$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
             run "$(builder_src_dir)"/$QT_SRC_NAME/configure \
                 -prefix $_SHU_BUILDER_PREFIX \
                 $EXTRA_CONFIGURE_FLAGS
@@ -324,7 +369,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             export QTWEBENGINE_DEPS_DIR &&
             export LD_LIBRARY_PATH &&
             export PKG_CONFIG_LIBDIR="$_SHU_BUILDER_PREFIX/lib/pkgconfig" &&
-            export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH:$EXTRA_PKG_CONFIGS" &&
+            export PKG_CONFIG_PATH="$EXTRA_PKG_CONFIG_PATH:$PKG_CONFIG_LIBDIR:$_SHU_BUILDER_PKG_CONFIG_PATH" &&
             run make $QT_MAKE_FLAGS $QT_TARGET_BUILD_MODULES
         ) || panic "Could not build Qt binaries!"
 
@@ -356,29 +401,51 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         # Let's fix up the rpaths in darwin. This allows binaries that link
         # against qt to launch directly if they contain a proper rpath. This
         # removes the need to set DYLD_LIBRARY_PATH properly.
-        case $SYSTEM in
-            darwin*)
-                for lib in $QT_SHARED_LIBS; do
-                    idfix=$(basename $lib)
-                    install_name_tool -id "@rpath/$idfix" $lib
-                    tofix=$(otool -L $lib | grep $fix | cut -f1 -d ' ')
-                    for fix in $QT_SHARED_LIBS; do
-                        name=$(basename $fix)
-                        install_name_tool -change $fix "@rpath/$name" $lib
+        (
+            # We don't want any symlinks here
+            QT_HARD_SHARED_LIBS=$(cd "$(builder_install_prefix)" && \
+                    find . -type f -name "$QT_DLL_FILTER" 2>/dev/null)
+            run cd "$(builder_install_prefix)"
+            case $SYSTEM in
+                darwin*)
+                    for lib in $QT_HARD_SHARED_LIBS; do
+                        echo "Fixing $lib"
+                        idfix=$(basename $lib)
+                        echo "\t$(otool -DX $lib) ==> @rpath/$idfix"
+                        run install_name_tool -id "@rpath/$idfix" $lib
+                        # change whatever Qt libs this lib uses to rpaths
+                        tofix=$(otool -LX $lib | grep "libQt.*.dylib" | cut -f1 -d ' ')
+                        for fix in $tofix; do
+                            fix_basename=$(basename $fix)
+                            echo "\t$fix ==> @rpath/$fix_basename"
+                            run install_name_tool -change "$fix" "@rpath/$fix_basename" $lib
+                        done
                     done
-                done
-                    for fix in $QT_SHARED_LIBS; do
-                        name=$(basename $fix)
-                        install_name_tool -change $fix "@rpath/$name" "$(builder_install_prefix)/bin/moc"
-                        install_name_tool -change $fix "@rpath/$name" "$(builder_install_prefix)/bin/rcc"
-                        install_name_tool -change $fix "@rpath/$name" "$(builder_install_prefix)/bin/uic"
+
+                    # Also need to change the shared Qt libs used to rpaths in the executables we use
+                    var_append fix_bins \
+                            "$(builder_install_prefix)/bin/moc" \
+                            "$(builder_install_prefix)/bin/rcc" \
+                            "$(builder_install_prefix)/bin/uic" \
+                            "$(builder_install_prefix)/libexec/QtWebEngineProcess"
+
+                    for bin in $fix_bins; do
+                        echo "Fixing $bin"
+                        # change whatever Qt libs this binary uses to rpaths
+                        tofix=$(otool -LX $lib | grep "libQt.*.dylib" | cut -f1 -d ' ')
+                        for fix in $tofix; do
+                            fix_basename=$(basename $fix)
+                            echo "\t$fix ==> @rpath/$fix_basename"
+                            run install_name_tool -change "$fix" "@rpath/$fix_basename" $bin
+                        done
                     done
                     # setup the rpaths so we can use them without setting environment variables.
-                    install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/moc"
-                    install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/rcc"
-                    install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/uic"
-                ;;
-        esac
+                    run install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/moc"
+                    run install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/rcc"
+                    run install_name_tool -add_rpath "@loader_path/../lib" "$(builder_install_prefix)/bin/uic"
+                    ;;
+            esac
+        ) || panic "Unable to change rpaths"
 
 
         # Copy binaries necessary for the build itself as well as static

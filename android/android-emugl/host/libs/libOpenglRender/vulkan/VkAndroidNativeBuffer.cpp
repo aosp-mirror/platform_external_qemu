@@ -521,7 +521,19 @@ VkResult syncImageToColorBuffer(
         1, &presentToTransferSrc);
 
     // Copy to staging buffer
-    uint32_t bpp = 4; /* format always rgba8 */
+    uint32_t bpp = 4; /* format always rgba8...not */
+    switch (anbInfo->vkFormat) {
+        case VK_FORMAT_R5G6B5_UNORM_PACK16:
+            bpp = 2;
+            break;
+        case VK_FORMAT_R8G8B8_UNORM:
+            bpp = 3;
+            break;
+        default:
+        case VK_FORMAT_R8G8B8A8_UNORM:
+            bpp = 4;
+            break;
+    }
     VkBufferImageCopy region = {
         0 /* buffer offset */,
         anbInfo->extent.width,

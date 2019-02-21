@@ -3,16 +3,25 @@
 #include "hw/acpi/goldfish_defs.h"
 #include "hw/sysbus.h"
 #include "hw/pci/pci.h"
+#include "sysemu/sysemu.h"
 
 #define ANDROID_EMU_ADDRESS_SPACE_ASSERT_FUNC g_assert
 #define ANDROID_EMU_ADDRESS_SPACE_MALLOC0_FUNC g_malloc0
 #define ANDROID_EMU_ADDRESS_SPACE_REALLOC_FUNC g_realloc
 #define ANDROID_EMU_ADDRESS_SPACE_FREE_FUNC g_free
 
+#define AS_DEBUG 0
+
+#if AS_DEBUG
+#define AS_DPRINT(fmt,...) fprintf(stderr, "%s:%d " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
+#else
+#define AS_DPRINT(fmt,...)
+#endif
+
+
 #ifdef CONFIG_ANDROID
 
 #include "android/base/address_space.h"
-
 
 #else
 
@@ -332,6 +341,15 @@ static void address_space_allocator_reset(
 
 #endif
 
+struct goldfish_address_space_ping {
+	uint64_t offset;
+	uint64_t size;
+	uint64_t metadata;
+	uint64_t wait_offset;
+    uint32_t wait_flags;
+    uint32_t direction;
+};
+
 enum address_space_register_id {
 	ADDRESS_SPACE_REGISTER_COMMAND = 0,
 	ADDRESS_SPACE_REGISTER_STATUS = 4,
@@ -340,11 +358,18 @@ enum address_space_register_id {
 	ADDRESS_SPACE_REGISTER_BLOCK_SIZE_HIGH = 16,
 	ADDRESS_SPACE_REGISTER_BLOCK_OFFSET_LOW = 20,
 	ADDRESS_SPACE_REGISTER_BLOCK_OFFSET_HIGH = 24,
+    ADDRESS_SPACE_REGISTER_PING = 28,
+    ADDRESS_SPACE_REGISTER_PING_INFO_ADDR_LOW = 32,
+    ADDRESS_SPACE_REGISTER_PING_INFO_ADDR_HIGH = 36,
+    ADDRESS_SPACE_REGISTER_HANDLE = 40,
 };
 
 enum address_space_command_id {
 	ADDRESS_SPACE_COMMAND_ALLOCATE_BLOCK = 1,
 	ADDRESS_SPACE_COMMAND_DEALLOCATE_BLOCK = 2,
+    ADDRESS_SPACE_COMMAND_GEN_HANDLE = 3,
+    ADDRESS_SPACE_COMMAND_DESTROY_HANDLE = 4,
+    ADDRESS_SPACE_COMMAND_TELL_PING_INFO_ADDR = 5,
 };
 
 struct address_space_registers {
@@ -355,6 +380,10 @@ struct address_space_registers {
     uint32_t size_high;
     uint32_t offset_low;
     uint32_t offset_high;
+    uint32_t ping; // unused
+    uint32_t ping_info_addr_low;
+    uint32_t ping_info_addr_high;
+    uint32_t handle;
 };
 
 /* We need to cover 'size' bytes given at any offset with aligned pages. */
@@ -438,6 +467,31 @@ static uint32_t address_space_run_command(struct address_space_state *state,
 
     case ADDRESS_SPACE_COMMAND_DEALLOCATE_BLOCK:
         return address_space_deallocate_block(state);
+    case ADDRESS_SPACE_COMMAND_GEN_HANDLE:
+        AS_DPRINT("gen handle");
+        state->registers.handle =
+            qemu_get_address_space_device_control_ops()->gen_handle();
+        break;
+    case ADDRESS_SPACE_COMMAND_DESTROY_HANDLE:
+        qemu_get_address_space_device_control_ops()->destroy_handle(
+            state->registers.handle);
+        break;
+    case ADDRESS_SPACE_COMMAND_TELL_PING_INFO_ADDR:
+        AS_DPRINT("tell ping info addr handle %u high 0x%x low 0x%x",
+                  state->registers.handle,
+                  state->registers.ping_info_addr_high,
+                  state->registers.ping_info_addr_low);
+        {
+            uint64_t high =
+                ((uint64_t)state->registers.ping_info_addr_high) << 32ULL;
+            uint64_t low =
+                ((uint64_t)state->registers.ping_info_addr_low);
+            uint64_t phys = high | low;
+            AS_DPRINT("tell ping info: ping info phys: 0x%llxn", (unsigned long long)phys);
+            qemu_get_address_space_device_control_ops()->tell_ping_info(
+                state->registers.handle, phys);
+        }
+        break;
     }
 
     return ENOSYS;
@@ -472,6 +526,20 @@ static uint64_t address_space_control_read(void *opaque,
 
     case ADDRESS_SPACE_REGISTER_BLOCK_OFFSET_HIGH:
         return state->registers.offset_high;
+
+    case ADDRESS_SPACE_REGISTER_PING:
+        fprintf(stderr, "%s: warning: kernel tried to read PING register!\n", __func__);
+        return state->registers.ping;
+
+    case ADDRESS_SPACE_REGISTER_PING_INFO_ADDR_LOW:
+        AS_DPRINT("read ping info addr low 0x%x", state->registers.ping_info_addr_low);
+        return state->registers.ping_info_addr_low;
+    case ADDRESS_SPACE_REGISTER_PING_INFO_ADDR_HIGH:
+        AS_DPRINT("read ping info addr high 0x%x", state->registers.ping_info_addr_high);
+        return state->registers.ping_info_addr_high;
+    case ADDRESS_SPACE_REGISTER_HANDLE:
+        AS_DPRINT("read handle 0x%x", state->registers.handle);
+        return state->registers.handle;
     }
 
 bad_access:
@@ -516,6 +584,25 @@ static void address_space_control_write(void *opaque,
     case ADDRESS_SPACE_REGISTER_BLOCK_OFFSET_HIGH:
         state->registers.offset_high = val;
         break;
+
+    case ADDRESS_SPACE_REGISTER_PING:
+        AS_DPRINT("ping for handle: %u", (uint32_t)val);
+        qemu_get_address_space_device_control_ops()->ping(val);
+        break;
+
+    case ADDRESS_SPACE_REGISTER_PING_INFO_ADDR_LOW:
+        AS_DPRINT("write ping info addr low 0x%x", (uint32_t)val);
+        state->registers.ping_info_addr_low = (uint32_t)val;
+        break;
+    case ADDRESS_SPACE_REGISTER_PING_INFO_ADDR_HIGH:
+        AS_DPRINT("write ping info addr high 0x%x", (uint32_t)val);
+        state->registers.ping_info_addr_high = (uint32_t)val;
+        break;
+    case ADDRESS_SPACE_REGISTER_HANDLE:
+        AS_DPRINT("write handle 0x%x", (uint32_t)val);
+        state->registers.handle = (uint32_t)val;
+        break;
+
     }
 }
 

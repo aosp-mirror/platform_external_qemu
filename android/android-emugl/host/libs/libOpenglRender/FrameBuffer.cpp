@@ -1326,6 +1326,17 @@ void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, bool forced) {
             m_procOwnedRenderContext.erase(procIte);
         }
     }
+
+    // Run other cleanup callbacks
+    {
+        auto procIte = m_procOwnedCleanupCallbacks.find(puid);
+        if (procIte != m_procOwnedCleanupCallbacks.end()) {
+            for (auto it : procIte->second) {
+                it.second();
+            }
+            m_procOwnedCleanupCallbacks.erase(procIte);
+        }
+    }
 }
 
 void FrameBuffer::markOpened(ColorBufferRef* cbRef) {
@@ -2195,7 +2206,7 @@ bool FrameBuffer::onLoad(Stream* stream,
 
     {
         ScopedBind scopedBind(m_colorBufferHelper);
-        for (auto it : m_colorbuffers) {
+        for (auto& it : m_colorbuffers) {
             if (it.second.cb) {
                 it.second.cb->touch();
             }
@@ -2221,4 +2232,29 @@ ColorBufferPtr FrameBuffer::findColorBuffer(HandleType p_colorbuffer) {
     else {
         return c->second.cb;
     }
+}
+
+void FrameBuffer::registerProcessCleanupCallback(void* key, std::function<void()> cb) {
+    AutoLock mutex(m_lock);
+    RenderThreadInfo* tInfo = RenderThreadInfo::get();
+    if (!tInfo) return;
+
+    auto& callbackMap = m_procOwnedCleanupCallbacks[tInfo->m_puid];
+    callbackMap[key] = cb;
+}
+
+void FrameBuffer::unregisterProcessCleanupCallback(void* key) {
+    AutoLock mutex(m_lock);
+    RenderThreadInfo* tInfo = RenderThreadInfo::get();
+    if (!tInfo) return;
+
+    auto& callbackMap = m_procOwnedCleanupCallbacks[tInfo->m_puid];
+    if (callbackMap.find(key) == callbackMap.end()) {
+        fprintf(
+            stderr,
+            "%s: warning: tried to erase nonexistent key %p "
+            "associated with process %llu\n",
+            __func__, key, (unsigned long long)(tInfo->m_puid));
+    }
+    callbackMap.erase(key);
 }

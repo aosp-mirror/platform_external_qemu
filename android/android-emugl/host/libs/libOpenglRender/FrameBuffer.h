@@ -36,6 +36,7 @@
 
 #include <EGL/egl.h>
 
+#include <functional>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -69,6 +70,9 @@ typedef std::unordered_map<uint64_t, ColorBufferSet> ProcOwnedColorBuffers;
 
 typedef std::unordered_set<HandleType> EGLImageSet;
 typedef std::unordered_map<uint64_t, EGLImageSet> ProcOwnedEGLImages;
+
+typedef std::unordered_map<void*, std::function<void()>> CallbackMap;
+typedef std::unordered_map<uint64_t, CallbackMap> ProcOwnedCleanupCallbacks;
 
 // A structure used to list the capabilities of the underlying EGL
 // implementation that the FrameBuffer instance depends on.
@@ -446,6 +450,9 @@ public:
     ColorBuffer::Helper* getColorBufferHelper() { return m_colorBufferHelper; }
     ColorBufferPtr findColorBuffer(HandleType p_colorbuffer);
 
+    void registerProcessCleanupCallback(void* key, std::function<void()> callback);
+    void unregisterProcessCleanupCallback(void* key);
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
@@ -550,6 +557,7 @@ private:
     ProcOwnedColorBuffers m_procOwnedColorBuffers;
     ProcOwnedEGLImages m_procOwnedEGLImages;
     ProcOwnedRenderContexts m_procOwnedRenderContext;
+    ProcOwnedCleanupCallbacks m_procOwnedCleanupCallbacks;
 
     // Flag set when emulator is shutting down.
     bool m_shuttingDown = false;

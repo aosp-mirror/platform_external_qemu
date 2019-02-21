@@ -33,6 +33,7 @@ typedef struct AUserConfig   AUserConfig;
 
 /* Create a new AUserConfig object from a given AvdInfo */
 AUserConfig*   auserConfig_new( AvdInfo*  info, SkinRect* monitorRect, int screenWidth, int screenHeight );
+AUserConfig*   auserConfig_new_custom( AvdInfo*  info, const SkinRect* monitorRect, int screenWidth, int screenHeight );
 void           auserConfig_free( AUserConfig* uconfig );
 
 /* Retrieve the unique UID for this AVD */
