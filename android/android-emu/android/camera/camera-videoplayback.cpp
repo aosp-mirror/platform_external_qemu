@@ -18,6 +18,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/camera/camera-format-converters.h"
+#include "android/camera/camera-videoplayback-default-renderer.h"
 
 #include <vector>
 
@@ -30,6 +31,8 @@
 
 namespace android {
 namespace videoplayback {
+
+using android::virtualscene::RenderedCameraDevice;
 
 /*******************************************************************************
  *                     VideoPlaybackCameraDevice routines
@@ -48,14 +51,22 @@ public:
     VideoPlaybackCameraDevice();
 
     CameraDevice* getCameraDevice() { return &mHeader; }
+    RenderedCameraDevice* getDefaultCameraDevice() {
+      return mRenderedCamera.get();
+    }
 
 private:
     // Common camera header.
     CameraDevice mHeader;
+    std::unique_ptr<RenderedCameraDevice> mRenderedCamera;
 };
 
 VideoPlaybackCameraDevice::VideoPlaybackCameraDevice() {
     mHeader.opaque = this;
+    auto renderer =
+        std::unique_ptr<DefaultFrameRenderer>(new DefaultFrameRenderer());
+    mRenderedCamera = std::unique_ptr<RenderedCameraDevice>(
+        new RenderedCameraDevice(std::move(renderer)));
 }
 }  // namespace videoplayback
 }  // namespace android
@@ -64,6 +75,7 @@ VideoPlaybackCameraDevice::VideoPlaybackCameraDevice() {
  *                     CameraDevice API
  ******************************************************************************/
 
+using android::videoplayback::DefaultFrameRenderer;
 using android::videoplayback::VideoPlaybackCameraDevice;
 
 static VideoPlaybackCameraDevice* toVideoPlaybackCameraDevice(
@@ -94,6 +106,9 @@ int camera_videoplayback_start_capturing(CameraDevice* ccd,
         return -1;
     }
 
+    cd->getDefaultCameraDevice()->startCapturing(pixel_format, frame_width,
+                                                 frame_height);
+
     return 0;
 }
 
@@ -103,6 +118,8 @@ int camera_videoplayback_stop_capturing(CameraDevice* ccd) {
         E("%s: Invalid camera device descriptor", __FUNCTION__);
         return -1;
     }
+
+    cd->getDefaultCameraDevice()->stopCapturing();
 
     return 0;
 }
@@ -119,7 +136,8 @@ int camera_videoplayback_read_frame(CameraDevice* ccd,
         return -1;
     }
 
-    return 0;
+    return cd->getDefaultCameraDevice()->readFrame(
+        result_frame, r_scale, g_scale, b_scale, exp_comp);
 }
 
 void camera_videoplayback_close(CameraDevice* ccd) {
