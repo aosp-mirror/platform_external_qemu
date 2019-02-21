@@ -69,6 +69,30 @@
       "revId": "7676b81fcd7145275b229c618cda1417c237e1a5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1e9e3d34_8b3d037d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1276,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-21T01:07:10Z",
+      "side": 1,
+      "message": "Fixed in the next CL: https://android-review.googlesource.com/c/platform/external/qemu/+/907746",
+      "parentUuid": "f8c9f559_35708ae3",
+      "range": {
+        "startLine": 1276,
+        "startChar": 0,
+        "endLine": 1276,
+        "endChar": 8
+      },
+      "revId": "7676b81fcd7145275b229c618cda1417c237e1a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
