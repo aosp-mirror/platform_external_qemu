@@ -2092,11 +2092,6 @@ private:
                 cmpInfo.dstFormat = srcFmt;
                 break;
         }
-        if (cmpInfo.isCompressed) {
-            fprintf(stderr,
-                    "WARNING: compressed texutre is experimental, "
-                    "rendering could be wrong.\n");
-        }
         return cmpInfo;
     }
 
