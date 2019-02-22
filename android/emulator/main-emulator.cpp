@@ -780,7 +780,7 @@ static char* getQemuExecutablePath(const char* progDir,
     }
 
 #ifdef CONFIG_HEADLESS
-#define QEMU_BINARY_PATTERN "qemu-system-%s%s-headless"
+#define QEMU_BINARY_PATTERN "qemu-system-%s-headless%s"
 #else
 #define QEMU_BINARY_PATTERN "qemu-system-%s%s"
 #endif
