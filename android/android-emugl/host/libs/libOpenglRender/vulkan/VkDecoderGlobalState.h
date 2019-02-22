@@ -159,6 +159,12 @@ public:
                                    VkBuffer buffer,
                                    VkDeviceMemory memory,
                                    VkDeviceSize memoryOffset);
+    VkResult on_vkBindBufferMemory2(VkDevice device,
+                                    uint32_t bindInfoCount,
+                                    const VkBindBufferMemoryInfo* pBindInfos);
+    VkResult on_vkBindBufferMemory2KHR(VkDevice device,
+                                       uint32_t bindInfoCount,
+                                       const VkBindBufferMemoryInfo* pBindInfos);
 
     VkResult on_vkCreateImage(
         VkDevice device,

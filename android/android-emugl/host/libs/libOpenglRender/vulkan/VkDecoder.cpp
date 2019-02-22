@@ -6184,6 +6184,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkBindBufferMemory2:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkBindBufferMemory2\n");;
+                }
                 VkDevice device;
                 uint32_t bindInfoCount;
                 const VkBindBufferMemoryInfo* pBindInfos;
@@ -6209,12 +6213,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkBindBufferMemoryInfo(m_state, (VkBindBufferMemoryInfo*)(pBindInfos + i));
                     }
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkBindBufferMemory2\n");;
-                }
                 VkResult vkBindBufferMemory2_VkResult_return = (VkResult)0;
-                vkBindBufferMemory2_VkResult_return = vk->vkBindBufferMemory2(unboxed_device, bindInfoCount, pBindInfos);
+                vkBindBufferMemory2_VkResult_return = m_state->on_vkBindBufferMemory2(device, bindInfoCount, pBindInfos);
                 vkStream->write(&vkBindBufferMemory2_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
@@ -11845,6 +11845,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_KHR_bind_memory2
             case OP_vkBindBufferMemory2KHR:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkBindBufferMemory2KHR\n");;
+                }
                 VkDevice device;
                 uint32_t bindInfoCount;
                 const VkBindBufferMemoryInfo* pBindInfos;
@@ -11870,12 +11874,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                         transform_tohost_VkBindBufferMemoryInfo(m_state, (VkBindBufferMemoryInfo*)(pBindInfos + i));
                     }
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkBindBufferMemory2KHR\n");;
-                }
                 VkResult vkBindBufferMemory2KHR_VkResult_return = (VkResult)0;
-                vkBindBufferMemory2KHR_VkResult_return = vk->vkBindBufferMemory2KHR(unboxed_device, bindInfoCount, pBindInfos);
+                vkBindBufferMemory2KHR_VkResult_return = m_state->on_vkBindBufferMemory2KHR(device, bindInfoCount, pBindInfos);
                 vkStream->write(&vkBindBufferMemory2KHR_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
