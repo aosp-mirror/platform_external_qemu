@@ -1728,6 +1728,12 @@ extern "C" int main(int argc, char** argv) {
                 fc::setEnabledOverride(fc::GLESDynamicVersion, false);
             }
 
+            // In build environment, enable gles3 if possible
+            if (avdInfo_inAndroidBuild(avd)) {
+                fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion,
+                                                     true);
+            }
+
             if (fc::isEnabled(fc::ForceANGLE)) {
                 uiPreferredGlesBackend =
                         skin_winsys_override_glesbackend_if_auto(
