@@ -281,7 +281,7 @@ private:
     GpsFixArray          mGpsFixesArray;
     int                  mGpsNextPopulateIndex = 0;
 
-    GeoDataLoaderThread* mGeoDataLoader;
+    std::unique_ptr<GeoDataLoaderThread> mGeoDataLoader;
     QTimer mTimer;
     bool mNowPlaying = false;
     bool mNowLoadingGeoData = false;
