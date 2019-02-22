@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "81dd396b_f838a374",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 701,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-22T01:00:13Z",
+      "side": 1,
+      "message": "Another way to get around it might be to to bury the ToolWindow one level further as an EmulatorQtWindow method, so its qtWindow-\u003etouchExtendedWindow().",
+      "revId": "8df83fb4b7e21665dd7fbb3f2c01b0f9d20a0453",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
