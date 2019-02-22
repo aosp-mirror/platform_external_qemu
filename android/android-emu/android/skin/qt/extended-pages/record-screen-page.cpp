@@ -159,7 +159,6 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
                 mUi->rec_recordDotLabel->setMovie(movie);
             }
             mUi->rec_timeElapsedLabel->setText(tr(FINISHING_ENCODING));
-            mUi->rec_recordButton->hide();
             // Set back to webm format
             mUi->rec_formatSwitch->setCurrentIndex(0);
             break;
@@ -170,9 +169,10 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_playStopButton->show();
             mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("stop"));
             mUi->rec_playStopButton->setProperty("themeIconName", "stop");
+            mUi->rec_recordAgainOverlay->hide();
             break;
         case RecordUiState::Stopped:
-            mUi->subpage->setCurrentIndex(0);
+            mUi->subpage->setCurrentIndex(1);
             mUi->rec_recordOverlayWidget->show();
             mUi->rec_timeElapsedWidget->hide();
             mUi->rec_playStopButton->show();
@@ -186,8 +186,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
                             .arg(android_hw->hw_lcd_width)
                             .arg(android_hw->hw_lcd_height));
             mUi->rec_timeResLabel->show();
-            mUi->rec_recordButton->setText(tr(RECORD_AGAIN));
-            mUi->rec_recordButton->show();
+            mUi->rec_recordAgainOverlay->show();
             mUi->rec_playStopButton->setEnabled(true);
             mUi->rec_formatSwitch->setEnabled(true);
             mUi->rec_saveButton->setEnabled(true);
@@ -215,7 +214,7 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             }
             mUi->rec_timeElapsedLabel->setText(tr(CONVERTING_TO_GIF));
             mUi->rec_timeElapsedWidget->show();
-            mUi->rec_recordButton->hide();
+            mUi->rec_recordAgainOverlay->hide();
             mUi->rec_playStopButton->setEnabled(false);
             mUi->rec_formatSwitch->setEnabled(false);
             mUi->rec_saveButton->setEnabled(false);
@@ -296,6 +295,10 @@ void RecordScreenPage::on_rec_recordButton_clicked() {
     }
 
     setRecordUiState(newState);
+}
+
+void RecordScreenPage::on_rec_recordAgainButton_clicked() {
+    on_rec_recordButton_clicked();
 }
 
 void RecordScreenPage::on_rec_saveButton_clicked() {

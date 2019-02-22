@@ -51,6 +51,7 @@ signals:
 private slots:
     void on_rec_playStopButton_clicked();
     void on_rec_recordButton_clicked();
+    void on_rec_recordAgainButton_clicked();
     void on_rec_saveButton_clicked();
     void updateElapsedTime();
     void slot_recordingStatusChange(RecordingStatus status);

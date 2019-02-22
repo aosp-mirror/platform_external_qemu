@@ -22,15 +22,10 @@
      <height>560</height>
     </rect>
    </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
    <widget class="QWidget" name="rec_recordOverlayWidget">
-    <property name="geometry">
-      <rect>
-      <x>20</x>
-      <y>24</y>
-      <width>582</width>
-      <height>536</height>
-      </rect>
-    </property>
     <property name="ColorGroup" stdset="0">
      <string>Overlay</string>
     </property>
@@ -149,54 +144,126 @@
      </layout>
     </widget>
    </widget>
-   <widget class="QWidget" name="rec_playerOverlayWidget" native="true">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>24</y>
-     <width>582</width>
-     <height>516</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Overlay</string>
-   </property>
-   <layout class="QHBoxLayout" name="rec_playerOverlayLayout">
-    <property name="spacing">
-     <number>0</number>
+   <widget class="QWidget" name="rec_playerOverlayWidget">
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
     </property>
-    <property name="leftMargin">
-     <number>0</number>
+    <property name="ColorGroup" stdset="0">
+     <string>Overlay</string>
     </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
-     <number>0</number>
-    </property>
-    <item>
-     <widget class="android::videoplayer::VideoPlayerWidget" name="videoWidget" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-     </widget>
-    </item>
-   </layout>
+    <layout class="QHBoxLayout" name="rec_playerOverlayLayout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="android::videoplayer::VideoPlayerWidget" name="videoWidget" native="true">
+        <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+        </sizepolicy>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0">
+        <property name="spacing">
+          <number>0</number>
+        </property>
+        <property name="leftMargin">
+          <number>0</number>
+        </property>
+        <property name="topMargin">
+          <number>0</number>
+        </property>
+        <property name="rightMargin">
+          <number>0</number>
+        </property>
+        <property name="bottomMargin">
+          <number>0</number>
+        </property>
+        <item>
+          <widget class="QWidget" name="rec_recordAgainOverlay" native="true">
+          <property name="ColorGroup" stdset="0">
+            <string>Overlay</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0">
+            <property name="spacing">
+            <number>0</number>
+            </property>
+            <property name="sizeConstraint">
+            <enum>QLayout::SetDefaultConstraint</enum>
+            </property>
+            <property name="leftMargin">
+            <number>0</number>
+            </property>
+            <property name="topMargin">
+            <number>0</number>
+            </property>
+            <property name="rightMargin">
+            <number>0</number>
+            </property>
+            <property name="bottomMargin">
+            <number>0</number>
+            </property>
+            <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+            <widget class="RaisedMaterialButton" name="rec_recordAgainButton">
+              <property name="sizePolicy">
+              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+              </sizepolicy>
+              </property>
+              <property name="minimumSize">
+              <size>
+                <width>132</width>
+                <height>36</height>
+              </size>
+              </property>
+              <property name="font">
+              <font>
+                <family>Roboto</family>
+                <pointsize>10</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+              </font>
+              </property>
+              <property name="text">
+              <string>RECORD AGAIN</string>
+              </property>
+              <property name="flat">
+              <bool>true</bool>
+              </property>
+              <property name="ColorGroup" stdset="0">
+              <string>Button</string>
+              </property>
+              <property name="report_metrics" stdset="0">
+              <bool>false</bool>
+              </property>
+            </widget>
+            </item>
+          </layout>
+          </widget>
+        </item>
+        </layout>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
-  </widget>
-  <widget class="QWidget" name="widget" native="true">
+  <widget class="QWidget" name="playbackWidget" native="true">
    <property name="geometry">
     <rect>
      <x>161</x>
@@ -367,9 +434,8 @@
     </item>
    </layout>
   </widget>
-  <zorder>widget</zorder>
+  <zorder>playbackWidget</zorder>
   <zorder>subpage</zorder>
-  <zorder>rec_playerOverlayWidget</zorder>
  </widget>
  <customwidgets>
   <customwidget>
