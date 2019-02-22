@@ -523,7 +523,8 @@ emulator_window_set_device_coarse_orientation(SkinRotation orientation,
 
 bool
 emulator_window_rotate_90(bool clockwise) {
-    if (qemulator->ui) {
+    if (qemulator->ui &&
+        skin_winsys_touch_qt_extended_virtual_sensors()) {
         const SkinLayout* layout = clockwise ?
                 skin_ui_get_next_layout(qemulator->ui) :
                 skin_ui_get_prev_layout(qemulator->ui);

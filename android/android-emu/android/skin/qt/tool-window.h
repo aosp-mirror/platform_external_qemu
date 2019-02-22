@@ -107,6 +107,7 @@ public:
         return mClipboardSupported;
     }
     void forwardKeyToEmulator(uint32_t keycode, bool down);
+    void touchExtendedWindow() { mExtendedWindow.get(); }
 
 signals:
     void guestClipboardChanged(QString text);
