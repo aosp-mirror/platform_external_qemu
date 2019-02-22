@@ -12,12 +12,17 @@
 get_filename_component(
   PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/tcmalloc/${ANDROID_TARGET_TAG}"
   ABSOLUTE)
-if(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
-  set(TCMALLOC_INCLUDE_DIR "")
+if(NOT ANDROID_TARGET_TAG MATCHES "windows.*")
+  set(TCMALLOC_INCLUDE_DIR "${PREBUILT_ROOT}/include")
   set(TCMALLOC_INCLUDE_DIRS ${TCMALLOC_INCLUDE_DIR})
-  set(TCMALLOC_LIBRARIES -ltcmalloc_minimal -L${PREBUILT_ROOT}/lib64)
-  set(TCMALLOC_OS_DEPENDENCIES "${PREBUILT_ROOT}/lib64/libtcmalloc_minimal.so.4>lib64/libtcmalloc_minimal.so.4")
-  add_library(TCMALLOC::TCMALLOC STATIC IMPORTED)
+  set(TCMALLOC_LIBRARIES -ltcmalloc_minimal -L${PREBUILT_ROOT}/lib)
+  if(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
+    set(TCMALLOC_OS_DEPENDENCIES "${PREBUILT_ROOT}/lib/libtcmalloc_minimal.so.4>lib64/libtcmalloc_minimal.so.4")
+  elseif(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
+    set(TCMALLOC_OS_DEPENDENCIES "${PREBUILT_ROOT}/lib/libtcmalloc_minimal.4.dylib>lib64/libtcmalloc_minimal.4.dylib")
+  endif()
+
+  add_library(TCMALLOC::TCMALLOC INTERFACE IMPORTED GLOBAL)
   set_target_properties(TCMALLOC::TCMALLOC PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${TCMALLOC_INCLUDE_DIRS}"
     INTERFACE_LINK_LIBRARIES "${TCMALLOC_LIBRARIES}"
