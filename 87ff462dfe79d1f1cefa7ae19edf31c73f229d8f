@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a73f11c_0e6997a1",
+        "filename": "android/android-emu/android/skin/surface-headless.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-02-22T01:03:30Z",
+      "side": 1,
+      "message": "nit: turn off debug?",
+      "range": {
+        "startLine": 23,
+        "startChar": 16,
+        "endLine": 23,
+        "endChar": 17
+      },
+      "revId": "87ff462dfe79d1f1cefa7ae19edf31c73f229d8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fbd958bb_91b7953a",
+        "filename": "android/android-emu/android/skin/surface-headless.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-02-22T01:03:30Z",
+      "side": 1,
+      "message": "nit: no new line for { ? or clang-format this file?\n(The emulator code format is chaotic...)",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 1
+      },
+      "revId": "87ff462dfe79d1f1cefa7ae19edf31c73f229d8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b9ae56ad_1f5a9235",
+        "filename": "android/android-emu/android/skin/surface-headless.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-02-22T01:03:30Z",
+      "side": 1,
+      "message": "it doesn\u0027t look like you need to use a template here? maybe just use function pointer?",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 31
+      },
+      "revId": "87ff462dfe79d1f1cefa7ae19edf31c73f229d8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b4d16699_b05769d3",
+        "filename": "android/android-emu/android/skin/surface-headless.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-02-22T01:03:30Z",
+      "side": 1,
+      "message": "nit: line too long?",
+      "revId": "87ff462dfe79d1f1cefa7ae19edf31c73f229d8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dc6bdcfe_50ecf396",
+        "filename": "android/android-emu/android/skin/winsys-headless.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-02-22T01:03:30Z",
+      "side": 1,
+      "message": "nit: no line break before { ?",
+      "revId": "87ff462dfe79d1f1cefa7ae19edf31c73f229d8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
