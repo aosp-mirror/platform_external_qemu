@@ -232,10 +232,10 @@ LocationPage::LocationPage(QWidget *parent) :
         mUi->loc_pathTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         QString location_data_file =
             getLocationPlaybackFilePathFromSettings();
-        mGeoDataLoader = GeoDataLoaderThread::newInstance(
+        mGeoDataLoader.reset(GeoDataLoaderThread::newInstance(
                 this,
                 SLOT(geoDataThreadStarted()),
-                SLOT(startupGeoDataThreadFinished(QString, bool, QString)));
+                SLOT(startupGeoDataThreadFinished(QString, bool, QString))));
         mGeoDataLoader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
 
         using android::metrics::PeriodicReporter;
@@ -327,9 +327,9 @@ void LocationPage::on_loc_GpxKmlButton_clicked()
     // Asynchronously parse the file with geo data.
     // If the file is big enough, parsing it synchronously will cause a noticeable
     // hiccup in the UI.
-    mGeoDataLoader = GeoDataLoaderThread::newInstance(this,
+    mGeoDataLoader.reset(GeoDataLoaderThread::newInstance(this,
                                                       SLOT(geoDataThreadStarted()),
-                                                      SLOT(geoDataThreadFinished(QString, bool, QString)));
+                                                      SLOT(geoDataThreadFinished(QString, bool, QString))));
     mGeoDataLoader->loadGeoDataFromFile(fileName, &mGpsFixesArray);
 }
 
@@ -770,7 +770,7 @@ void LocationPage::finishGeoDataLoading(
         bool ok,
         const QString& error_message,
         bool ignore_error) {
-    mGeoDataLoader = nullptr;
+    mGeoDataLoader.reset();
     if (!ok) {
         if (!ignore_error) {
             showErrorDialog(error_message, tr("Geo Data Parser"));
