@@ -105,6 +105,25 @@ SettingsPage::SettingsPage(QWidget* parent)
     mUi->set_onTop->setCheckState(onTopOnly ? Qt::Checked : Qt::Unchecked);
 #endif
 
+    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
+    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
+    int width   = android_hw->hw_displayRegion_0_1_width;
+    int height  = android_hw->hw_displayRegion_0_1_height;
+    if (xOffset < 0 || xOffset > 9999 ||
+        yOffset < 0 || yOffset > 9999 ||
+        width   < 1 || width   > 9999 ||
+        height  < 1 || height  > 9999 ||
+        //TODO: 29 needed
+        avdInfo_getApiLevel(android_avdInfo) < 28) {
+        mUi->set_foldableDisplayTitle->hide();
+        mUi->set_foldableDisplay->hide();
+    } else {
+        bool foldableEnabled =
+            settings.value(Ui::Settings::FOLDABLE_ENABLE, false).toBool();
+        mUi->set_foldableDisplay->setCheckState(
+            foldableEnabled? Qt::Checked : Qt::Unchecked);
+    }
+
     initProxy();
 
     // Crash reporting
@@ -462,6 +481,13 @@ void SettingsPage::on_set_onTop_toggled(bool checked) {
     settings.setValue(Ui::Settings::ALWAYS_ON_TOP, checked);
 
     emit(onTopChanged(checked));
+}
+
+void SettingsPage::on_set_foldableDisplay_toggled(bool checked) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::FOLDABLE_ENABLE, checked);
+
+    emit(foldableDisplayChanged(checked));
 }
 
 void SettingsPage::on_set_frameAlways_toggled(bool checked) {

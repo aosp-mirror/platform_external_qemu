@@ -337,6 +337,17 @@ bool skin_ui_process_events(SkinUI* ui) {
                ev.u.rotary_input.delta);
             skin_window_process_event(ui->window, &ev);
             break;
+
+        case kEventSetDisplayRegion:
+            DE("EVENT: kEventSetDisplayRegion (%d, %d) %d x %d\n",
+               ev.u.display_region.xOffset, ev.u.display_region.yOffset,
+               ev.u.display_region.width, ev.u.display_region.height);
+
+            skin_window_set_layout_region(ui->window,
+                                          ev.u.display_region.xOffset, ev.u.display_region.yOffset,
+                                          ev.u.display_region.width,   ev.u.display_region.height);
+            break;
+
         case kEventSetScale:
             DE("EVENT: kEventSetScale scale=%f\n", ev.u.window.scale);
             ignoreScroll = true;
