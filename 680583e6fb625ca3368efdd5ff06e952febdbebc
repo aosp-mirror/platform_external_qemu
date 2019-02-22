@@ -84,6 +84,24 @@
     },
     {
       "key": {
+        "uuid": "0f5e6bab_14af172a",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-default-renderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-22T01:54:42Z",
+      "side": 1,
+      "message": "Oh, I meant doing it directly at declaration time.\n\nclass DefaultFrameRendererImpl {\npublic:\n    // Snip...\nprivate:\n    bool mDisplayDefault \u003d false;  // \u003c-- here\n};\n\nIn the constructor, it\u0027s easy to miss the line that initializes it, especially in the case of multiple constructors.  Initializing it at the member declaration time guarantees it is set.",
+      "parentUuid": "7299a4e3_3c572338",
+      "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8092181a_cddacdea",
         "filename": "android/android-emu/android/camera/camera-videoplayback-default-renderer.cpp",
         "patchSetId": 1
