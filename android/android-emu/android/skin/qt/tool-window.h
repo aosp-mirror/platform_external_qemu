@@ -127,7 +127,7 @@ public:
     void forwardKeyToEmulator(uint32_t keycode, bool down);
     void showRotateButton();
     void hideRotateButton();
-
+    void touchExtendedWindow();
 
 signals:
     void guestClipboardChanged(QString text);
