@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c1e337dd_d6714b57",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-default-renderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-02-22T01:29:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "70964c42_5516182e",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 5
+      },
+      "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1f3c0cb3_7d581f5a",
         "filename": "android/android-emu/android/camera/camera-videoplayback-default-renderer.cpp",
         "patchSetId": 1
@@ -39,6 +63,24 @@
       "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7299a4e3_3c572338",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-default-renderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-02-22T01:29:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1f3c0cb3_7d581f5a",
+      "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "18ade7ec_3a074311",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-default-renderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-02-22T01:29:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8092181a_cddacdea",
+      "range": {
+        "startLine": 23,
+        "startChar": 2,
+        "endLine": 26,
+        "endChar": 3
+      },
+      "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "94d2b7c6_6041c62a",
         "filename": "android/android-emu/android/camera/camera-videoplayback-default-renderer.h",
         "patchSetId": 1
@@ -79,6 +145,24 @@
       "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "50b1e2b6_19a4584d",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-default-renderer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-02-22T01:29:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "94d2b7c6_6041c62a",
+      "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -105,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "d585697c_1dd7773e",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-default-renderer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-02-22T01:29:52Z",
+      "side": 1,
+      "message": "I think the virtualscene::CameraRenderer is a sufficient abstract class for all of them for now. I don\u0027t expect them to have any extra features.\n\nI properly set up a PIMPL pattern for now, but I agree the multiplexer will likely use a factory in the future.",
+      "parentUuid": "ddea6465_cddbe4f4",
+      "range": {
+        "startLine": 32,
+        "startChar": 6,
+        "endLine": 32,
+        "endChar": 30
+      },
+      "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0f699ccc_a0d49ff3",
         "filename": "android/android-emu/android/camera/camera-videoplayback-default-renderer.h",
         "patchSetId": 1
@@ -125,6 +233,30 @@
       "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf59a655_282ee804",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-default-renderer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-02-22T01:29:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0f699ccc_a0d49ff3",
+      "range": {
+        "startLine": 46,
+        "startChar": 9,
+        "endLine": 46,
+        "endChar": 23
+      },
+      "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -151,6 +283,30 @@
     },
     {
       "key": {
+        "uuid": "a69d31de_d17a20dc",
+        "filename": "android/android-emu/android/camera/camera-videoplayback.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-02-22T01:29:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8c098a17_1ce463f9",
+      "range": {
+        "startLine": 62,
+        "startChar": 42,
+        "endLine": 62,
+        "endChar": 57
+      },
+      "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1184ab94_7e3c70c4",
         "filename": "android/android-emu/android/camera/camera-videoplayback.cpp",
         "patchSetId": 1
@@ -174,6 +330,30 @@
     },
     {
       "key": {
+        "uuid": "128fad2b_b844e064",
+        "filename": "android/android-emu/android/camera/camera-videoplayback.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-02-22T01:29:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1184ab94_7e3c70c4",
+      "range": {
+        "startLine": 72,
+        "startChar": 4,
+        "endLine": 72,
+        "endChar": 8
+      },
+      "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bad3a19_099af4de",
         "filename": "android/android-emu/android/camera/camera-videoplayback.cpp",
         "patchSetId": 1
@@ -194,6 +374,30 @@
       "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6b7882f7_2be34a1c",
+        "filename": "android/android-emu/android/camera/camera-videoplayback.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-02-22T01:29:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bad3a19_099af4de",
+      "range": {
+        "startLine": 76,
+        "startChar": 7,
+        "endLine": 76,
+        "endChar": 19
+      },
+      "revId": "680583e6fb625ca3368efdd5ff06e952febdbebc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
