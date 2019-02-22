@@ -663,10 +663,14 @@ function(android_extract_symbols TGT)
     # Note: we do not need to extract symbols on windows for uploading.
     return()
   endif()
+  set(DEV_NULL "/dev/null")
+  if (WIN32)
+      set(DEV_NULL "nul")
+  endif()
 
   set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
   add_custom_command(TARGET ${TGT} POST_BUILD
-                     COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST}
+                     COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST} 2> ${DEV_NULL}
                      DEPENDS dump_syms
                      COMMENT "Extracting symbols for ${TGT}"
                      VERBATIM)
