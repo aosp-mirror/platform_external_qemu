@@ -1051,3 +1051,7 @@ void ToolWindow::showRotateButton() {
     mToolsUi->prev_layout_button->show();
     mToolsUi->next_layout_button->show();
 }
+
+void ToolWindow::touchExtendedWindow() {
+    mExtendedWindow.get();
+}

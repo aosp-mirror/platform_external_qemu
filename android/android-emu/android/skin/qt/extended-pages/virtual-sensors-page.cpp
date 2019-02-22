@@ -17,6 +17,7 @@
 #include "android/physics/GlmHelpers.h"
 #include "android/skin/ui.h"
 
+#include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/stylesheet.h"
 
 #include <QDesktopServices>
@@ -86,6 +87,10 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
             this, SLOT(updateSensorValuesInUI()));
     mAccelerationTimer.setInterval(33);
     mAccelerationTimer.stop();
+
+    connect(this, SIGNAL(coarseOrientationChanged(SkinRotation)),
+            EmulatorQtWindow::getInstance(),
+            SLOT(rotateSkin(SkinRotation)));
 
     using android::metrics::PeriodicReporter;
     mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
