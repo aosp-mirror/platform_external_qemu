@@ -715,6 +715,16 @@ public:
         mBufferInfo.erase(buffer);
     }
 
+    void setBufferMemoryBindInfoLocked(
+        VkBuffer buffer, VkDeviceMemory memory, VkDeviceSize memoryOffset) {
+        auto it = mBufferInfo.find(buffer);
+        if (it == mBufferInfo.end()) {
+            return;
+        }
+        it->second.memory = memory;
+        it->second.memoryOffset = memoryOffset;
+    }
+
     VkResult on_vkBindBufferMemory(VkDevice boxed_device,
                                    VkBuffer buffer,
                                    VkDeviceMemory memory,
@@ -727,14 +737,56 @@ public:
 
         if (result == VK_SUCCESS) {
             AutoLock lock(mLock);
-            auto it = mBufferInfo.find(buffer);
-            if (it == mBufferInfo.end()) {
-                return result;
-            }
-            it->second.memory = memory;
-            it->second.memoryOffset = memoryOffset;
+            setBufferMemoryBindInfoLocked(buffer, memory, memoryOffset);
         }
         return result;
+    }
+
+    VkResult on_vkBindBufferMemory2(VkDevice boxed_device,
+                                    uint32_t bindInfoCount,
+                                    const VkBindBufferMemoryInfo* pBindInfos) {
+
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        VkResult result =
+                vk->vkBindBufferMemory2(device, bindInfoCount, pBindInfos);
+        
+        if (result == VK_SUCCESS) {
+            AutoLock lock(mLock);
+            for (uint32_t i = 0; i < bindInfoCount; ++i) {
+                setBufferMemoryBindInfoLocked(
+                    pBindInfos[i].buffer,
+                    pBindInfos[i].memory,
+                    pBindInfos[i].memoryOffset);
+            }
+        }
+
+        return result;
+    }
+
+    VkResult on_vkBindBufferMemory2KHR(VkDevice boxed_device,
+                                       uint32_t bindInfoCount,
+                                       const VkBindBufferMemoryInfo* pBindInfos) {
+
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        VkResult result =
+                vk->vkBindBufferMemory2KHR(device, bindInfoCount, pBindInfos);
+        
+        if (result == VK_SUCCESS) {
+            AutoLock lock(mLock);
+            for (uint32_t i = 0; i < bindInfoCount; ++i) {
+                setBufferMemoryBindInfoLocked(
+                    pBindInfos[i].buffer,
+                    pBindInfos[i].memory,
+                    pBindInfos[i].memoryOffset);
+            }
+        }
+
+        return result;
+
     }
 
     VkResult on_vkCreateImage(
@@ -2547,6 +2599,18 @@ VkResult VkDecoderGlobalState::on_vkBindBufferMemory(
         VkDeviceMemory memory,
         VkDeviceSize memoryOffset) {
     return mImpl->on_vkBindBufferMemory(device, buffer, memory, memoryOffset);
+}
+
+VkResult VkDecoderGlobalState::on_vkBindBufferMemory2(VkDevice device,
+                                uint32_t bindInfoCount,
+                                const VkBindBufferMemoryInfo* pBindInfos) {
+    return mImpl->on_vkBindBufferMemory2(device, bindInfoCount, pBindInfos);
+}
+
+VkResult VkDecoderGlobalState::on_vkBindBufferMemory2KHR(VkDevice device,
+                                   uint32_t bindInfoCount,
+                                   const VkBindBufferMemoryInfo* pBindInfos) {
+    return mImpl->on_vkBindBufferMemory2KHR(device, bindInfoCount, pBindInfos);
 }
 
 VkResult VkDecoderGlobalState::on_vkCreateImage(

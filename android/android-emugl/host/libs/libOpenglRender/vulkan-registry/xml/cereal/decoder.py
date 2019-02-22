@@ -273,7 +273,10 @@ custom_decodes = {
 
     "vkCreateBuffer" : emit_global_state_wrapped_decoding,
     "vkDestroyBuffer" : emit_global_state_wrapped_decoding,
+
     "vkBindBufferMemory" : emit_global_state_wrapped_decoding,
+    "vkBindBufferMemory2" : emit_global_state_wrapped_decoding,
+    "vkBindBufferMemory2KHR" : emit_global_state_wrapped_decoding,
 
     "vkCreateDevice" : emit_global_state_wrapped_decoding,
     "vkGetDeviceQueue" : emit_global_state_wrapped_decoding,
