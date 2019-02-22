@@ -559,7 +559,7 @@ function(android_add_qemu_headless_executable ANDROID_AARCH QEMU_AARCH CONFIG_AA
   set_target_properties(qemu-system-${ANDROID_AARCH}-headless
                         PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                                    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
-  android_install_exe(qemu-system-${ANDROID_AARCH} "./qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
+  android_install_exe(qemu-system-${ANDROID_AARCH}-headless "./qemu/${ANDROID_TARGET_OS_FLAVOR}-x86_64")
 endfunction()
 
 # Copies a
