@@ -393,6 +393,8 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) { }
 
 void skin_winsys_report_entering_main_loop(void) { }
 
+extern void skin_winsys_touch_qt_extended_virtual_sensors(void) { }
+
 // Other skin functions (Just fix link errors for now)
 
 extern "C" int sim_is_present() {

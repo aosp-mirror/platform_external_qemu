@@ -621,6 +621,20 @@ extern void skin_winsys_spawn_thread(bool no_window,
     }
 }
 
+extern void skin_winsys_touch_qt_extended_virtual_sensors(void) {
+    EmulatorQtWindow* qtWindow = EmulatorQtWindow::getInstance();
+    if (qtWindow == nullptr) return;
+
+    qtWindow->runOnUiThread([qtWindow]() {
+        ToolWindow* toolWindow = qtWindow->toolWindow();
+        if (toolWindow == nullptr) {
+            D("%s: toolWindow null", __FUNCTION__);
+            return;
+        }
+        toolWindow->touchExtendedWindow();
+    });
+}
+
 void skin_winsys_setup_library_paths() {
     // Make Qt look at the libraries within this installation
     // Despite the fact that we added the plugins directory to the environment
