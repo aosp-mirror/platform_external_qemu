@@ -19,21 +19,19 @@
 // changes in the video dimensions.
 class VideoPlayerRenderTarget {
 public:
-
     // An interaction between the render target (whether it is a raw buffer, Qt
     // widget, or GL texture, VkImage, or whatever) and the video player.
     //
-    // The video player calls syncRenderTargetSize passing in the raw video
+    // The video player calls getRenderTargetSize passing in the raw video
     // dimensions, then gets the render target's size as the output.
     //
     // It is possible that the render target size differs from the input size,
-    // and that the render target itself may change to accomodate the video.
-    virtual void syncRenderTargetSize(
-            float sampleAspectRatio,
-            int video_width,
-            int video_height,
-            int* resultRenderTargetWidth,
-            int* resultRenderTargetHeight) = 0;
+    // and that the render target itself may change to accommodate the video.
+    virtual void getRenderTargetSize(float sampleAspectRatio,
+                                     int video_width,
+                                     int video_height,
+                                     int* resultRenderTargetWidth,
+                                     int* resultRenderTargetHeight) = 0;
 
     // The video player calls setPixelBuffer to communicate the actual decoded
     // result to the render target.

@@ -15,7 +15,6 @@
 #include "android/recording/screen-recorder.h"
 #include "android/recording/video/player/VideoPlayer.h"
 #include "android/skin/qt/video-player/VideoInfo.h"
-#include "android/skin/qt/video-player/VideoPlayerWidget.h"
 
 #include <QTimer>
 #include <QWidget>
@@ -52,6 +51,7 @@ signals:
 private slots:
     void on_rec_playStopButton_clicked();
     void on_rec_recordButton_clicked();
+    void on_rec_recordAgainButton_clicked();
     void on_rec_saveButton_clicked();
     void updateElapsedTime();
     void slot_recordingStatusChange(RecordingStatus status);
@@ -71,7 +71,6 @@ private:
 
     std::string mTmpFilePath;
     std::unique_ptr<Ui::RecordScreenPage> mUi;
-    std::unique_ptr<android::videoplayer::VideoPlayerWidget> mVideoWidget;
     std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
     std::unique_ptr<android::videoplayer::VideoInfo> mVideoInfo;
     RecordUiState mState;
