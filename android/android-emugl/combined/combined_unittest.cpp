@@ -338,7 +338,7 @@ TEST_F(CombinedGoldfishOpenglTest, ShowWindow) {
     if (useWindow) android_hideOpenglesWindow();
 }
 
-TEST_F(CombinedGoldfishOpenglTest, ThreadCleanup) {
+TEST_F(CombinedGoldfishOpenglTest, DISABLED_ThreadCleanup) {
     // initial clean up.
     eglRelease();
     android::opengl::getOpenGLObjectCounts(&mBeforeTest);
