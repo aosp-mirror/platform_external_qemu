@@ -516,6 +516,7 @@ emulator_window_rotate_90(bool clockwise) {
                 skin_ui_get_next_layout(qemulator->ui) :
                 skin_ui_get_prev_layout(qemulator->ui);
         emulator_window_set_device_coarse_orientation(layout->orientation, 0.f);
+        skin_winsys_touch_qt_extended_virtual_sensors();
         return true;
     }
     return false;
