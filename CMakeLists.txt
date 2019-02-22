@@ -18,7 +18,7 @@ message(STATUS "Using toolchain for ${ANDROID_TARGET_TAG}")
 include(android)
 include(prebuilts)
 
-set(OPTION_CRASHUPLOAD "NONE" CACHE STRING "Destination of crash reports.")
+set(OPTION_CRASHUPLOAD "POROD" CACHE STRING "Destination of crash reports.")
 set(OPTION_SDK_TOOLS_REVISION "" CACHE STRING "The tools revision to use, if any")
 set(OPTION_SDK_TOOLS_BUILD_NUMBER "" CACHE STRING "The sdk buildnumber to use, if any.")
 set(OPTION_ASAN "" CACHE STRING "The list of build sanitizers to user")
@@ -160,6 +160,7 @@ if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
   add_c_flag("-MD")
 endif()
 
+add_c_flag("-g")
 # Disable generation of information about every class with virtual functions for use by the C++ runtime type
 # identification features (dynamic_cast and typeid). If you don't use those parts of the language, you can save some
 # space by using this flag. Note that exception handling uses the same information, but it will generate it as needed.
