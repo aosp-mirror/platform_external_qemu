@@ -44,6 +44,12 @@ using android::base::PathUtils;
 const char RecordScreenPage::kTmpMediaName[] = "tmp.webm";
 const QAndroidRecordScreenAgent* RecordScreenPage::sRecordScreenAgent = nullptr;
 
+static void setRetainSize(QWidget* widget) {
+    QSizePolicy policy = widget->sizePolicy();
+    policy.setRetainSizeWhenHidden(true);
+    widget->setSizePolicy(policy);
+}
+
 RecordScreenPage::RecordScreenPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::RecordScreenPage) {
     mUi->setupUi(this);
@@ -53,9 +59,8 @@ RecordScreenPage::RecordScreenPage(QWidget* parent)
     int width = mUi->rec_formatSwitch->minimumSizeHint().width();
     mUi->rec_formatSwitch->setMinimumWidth(width);
 
-    // Need to call show() on the parent widget to notify videoWidget to resize
-    // to match the size of rec_playerOverlayWidget.
-    mUi->rec_playerOverlayWidget->show();
+    setRetainSize(mUi->rec_recordButton);
+    setRetainSize(mUi->rec_timeElapsedWidget);
 
     setRecordUiState(RecordUiState::Ready);
 
@@ -106,13 +111,8 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
         case RecordUiState::Ready:
             mUi->subpage->setCurrentIndex(0);
             mUi->rec_timeElapsedWidget->hide();
-            mUi->rec_playStopButton->hide();
-            mUi->rec_formatSwitch->hide();
-            mUi->rec_saveButton->hide();
-            mUi->rec_timeResLabel->hide();
             mUi->rec_recordButton->setText(tr(START_RECORDING));
             mUi->rec_recordButton->show();
-            mUi->rec_playerOverlayWidget->setVisible(false);
             break;
         case RecordUiState::Starting: {
             SettingsTheme theme = getSelectedTheme();
@@ -134,13 +134,8 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->subpage->setCurrentIndex(0);
             mUi->rec_timeElapsedLabel->setText(tr(SECONDS_RECORDING).arg(0));
             mUi->rec_timeElapsedWidget->show();
-            mUi->rec_playStopButton->hide();
-            mUi->rec_formatSwitch->hide();
-            mUi->rec_saveButton->hide();
-            mUi->rec_timeResLabel->hide();
             mUi->rec_recordButton->setText(tr(STOP_RECORDING));
             mUi->rec_recordButton->show();
-            mUi->rec_playerOverlayWidget->setVisible(false);
 
             // Update every second
             mSec = 0;
@@ -166,18 +161,12 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
         case RecordUiState::Playing:
             mUi->subpage->setCurrentIndex(1);
             // Change the icon on the play/stop button.
-            mUi->rec_playStopButton->show();
             mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("stop"));
             mUi->rec_playStopButton->setProperty("themeIconName", "stop");
             mUi->rec_recordAgainOverlay->hide();
             break;
         case RecordUiState::Stopped:
             mUi->subpage->setCurrentIndex(1);
-            mUi->rec_recordOverlayWidget->show();
-            mUi->rec_timeElapsedWidget->hide();
-            mUi->rec_playStopButton->show();
-            mUi->rec_formatSwitch->show();
-            mUi->rec_saveButton->show();
             // Get the video duration from the video's metadata.
             mSec = mVideoInfo->getDurationSecs();
             mUi->rec_timeResLabel->setText(
@@ -185,7 +174,6 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
                             .arg(mSec)
                             .arg(android_hw->hw_lcd_width)
                             .arg(android_hw->hw_lcd_height));
-            mUi->rec_timeResLabel->show();
             mUi->rec_recordAgainOverlay->show();
             mUi->rec_playStopButton->setEnabled(true);
             mUi->rec_formatSwitch->setEnabled(true);
@@ -201,7 +189,6 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
                             .arg(android_hw->hw_lcd_height));
             // Display preview frame
             mVideoInfo->show();
-            mUi->rec_playerOverlayWidget->setVisible(true);
             break;
         case RecordUiState::Converting: {
             SettingsTheme theme = getSelectedTheme();
