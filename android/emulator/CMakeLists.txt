@@ -13,6 +13,7 @@ target_compile_definitions(emulator-headless PRIVATE -DCONFIG_HEADLESS)
 
 # Make sure we have the qemu dependencies available
 add_dependencies(emulator qemu-system-i386 qemu-system-x86_64 qemu-system-armel qemu-system-aarch64)
+add_dependencies(emulator-headless qemu-system-x86_64-headless qemu-system-aarch64-headless)
 
 set(PC_BIOS "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/qemu-kernel/x86/pc-bios")
 set(EMULATOR_BIOS_DEPENDENCIES
@@ -73,3 +74,4 @@ android_copy_shared_lib(emulator OpenglRender OpenglRender)
 android_target_properties(emulator all "${RUNTIME_OS_PROPERTIES}")
 
 android_install_exe(emulator .)
+android_install_exe(emulator-headless .)
