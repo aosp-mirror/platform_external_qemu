@@ -272,7 +272,7 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
             self.cgen.stmt("%s = %s->getBe32()" % \
                 (sizeVar, self.streamVarName))
 
-        if self.direction == "read":
+        if self.direction == "read" and self.dynAlloc:
             self.cgen.stmt("%s = nullptr" % access)
 
         self.cgen.beginIf(sizeVar)
@@ -286,7 +286,14 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         else:
             castedAccessExpr = access
 
-        self.genStreamCall(vulkanType, access, "sizeof(VkStructureType)")
+        if self.dynAlloc or self.direction == "write":
+            self.genStreamCall(vulkanType, access, "sizeof(VkStructureType)")
+        else:
+            self.cgen.stmt("uint64_t pNext_placeholder")
+            placeholderAccess = "(&pNext_placeholder)"
+            self.genStreamCall(vulkanType, placeholderAccess, "sizeof(VkStructureType)")
+
+
         self.cgen.funcCall(None, self.marshalPrefix + "extension_struct",
                            [self.streamVarName, castedAccessExpr])
 
@@ -358,7 +365,7 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 UNMARSHAL_INPUT_VAR_NAME,
                 API_PREFIX_UNMARSHAL,
                 direction = "read",
-                dynAlloc = True)
+                dynAlloc = self.variant != "guest")
 
         self.knownDefs = {}
 
