@@ -1,0 +1,303 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cf76530f_6c6c4648",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-23T00:54:13Z",
+      "side": 1,
+      "message": "2019 ;-)",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a0bff84_fb72bc83",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-23T00:54:13Z",
+      "side": 1,
+      "message": "Can you run this through clang-format?",
+      "range": {
+        "startLine": 36,
+        "startChar": 4,
+        "endLine": 36,
+        "endChar": 107
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "95f7f1cc_65542c1a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-23T00:54:13Z",
+      "side": 1,
+      "message": "I recommend adding \"const\" whenever possible",
+      "range": {
+        "startLine": 36,
+        "startChar": 4,
+        "endLine": 36,
+        "endChar": 15
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3cc8ce53_7a85a6ae",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-23T00:54:13Z",
+      "side": 1,
+      "message": "This ends up copying the string, either use:\n\nconst std::string\u0026 macroName\nor\nconst auto\u0026 macroName",
+      "range": {
+        "startLine": 40,
+        "startChar": 9,
+        "endLine": 40,
+        "endChar": 20
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e3d1a080_ad5b48e0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-23T00:54:13Z",
+      "side": 1,
+      "message": "This looks okay here, but note that we need to be careful to avoid memory leaks as soon as we can remove items from this list.",
+      "range": {
+        "startLine": 41,
+        "startChar": 47,
+        "endLine": 41,
+        "endChar": 71
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a54251b_4a7293dc",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-23T00:54:13Z",
+      "side": 1,
+      "message": "Would it be possible to call stopPlayback() instead?  reset() is pretty heavyweight, and we\u0027ll still reset back to the initial position when starting a new recording.",
+      "range": {
+        "startLine": 55,
+        "startChar": 4,
+        "endLine": 55,
+        "endChar": 40
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a1871f85_1a59df11",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-23T00:54:13Z",
+      "side": 1,
+      "message": "Since this directory has come up in multiple places, maybe this should move to a helper function",
+      "range": {
+        "startLine": 62,
+        "startChar": 36,
+        "endLine": 62,
+        "endChar": 113
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "447952ed_e2b54b01",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-23T00:54:13Z",
+      "side": 1,
+      "message": "Handle the results and display errors?  Or an IOU bug would be fine too",
+      "range": {
+        "startLine": 63,
+        "startChar": 9,
+        "endLine": 63,
+        "endChar": 15
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "73b3b42e_430ae978",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-saved-item.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-23T00:54:13Z",
+      "side": 1,
+      "message": "I recommend making this a \"const char*\" so we don\u0027t necessarily need to allocate/copy a string to pass it in.",
+      "range": {
+        "startLine": 19,
+        "startChar": 35,
+        "endLine": 19,
+        "endChar": 46
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9d777c7d_ea67b9f2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-saved-item.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-23T00:54:13Z",
+      "side": 1,
+      "message": "Similarly, I would make the assumption that if the caller wants a copy, they can do it themselves-- I\u0027d return a \"const char*\", which is what constData() returns.",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 43
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c4269ed4_84c2c26b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-saved-item.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-23T00:54:13Z",
+      "side": 1,
+      "message": "QString() here is *probably* optional, I bet C++ can implicitly call the constructor",
+      "range": {
+        "startLine": 28,
+        "startChar": 30,
+        "endLine": 28,
+        "endChar": 38
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c3a9560b_5c3e752e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-saved-item.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-23T00:54:13Z",
+      "side": 1,
+      "message": "Use #pragma once instead",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 30
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a741d24a_f7a1b801",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-saved-item.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-02-23T00:54:13Z",
+      "side": 1,
+      "message": "QFormLayout seems odd here, could this be a QVBoxLayout?",
+      "range": {
+        "startLine": 16,
+        "startChar": 17,
+        "endLine": 16,
+        "endChar": 28
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
