@@ -473,6 +473,7 @@ public:
     static void setEnvironmentVariable(StringView varname, StringView varvalue);
     static std::string getEnvironmentVariable(StringView varname);
     static std::string getProgramDirectoryFromPlatform();
+    static WallDuration getSystemTimeUs();
 
 protected:
     size_t mMemorySize = 0;
