@@ -555,6 +555,21 @@ public:
             }
             createInfoFiltered.pEnabledFeatures = &featuresFiltered;
         }
+
+        vk_foreach_struct(ext, pCreateInfo->pNext) {
+            switch (ext->sType) {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2:
+                    if (needEmulatedEtc2(physicalDevice, vk)) {
+                        VkPhysicalDeviceFeatures2* features2 =
+                            (VkPhysicalDeviceFeatures2*)ext;
+                        features2->features.textureCompressionETC2 = false;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
         createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
         createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
 
