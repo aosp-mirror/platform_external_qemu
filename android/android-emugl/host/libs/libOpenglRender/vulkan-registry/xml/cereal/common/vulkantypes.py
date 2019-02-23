@@ -63,6 +63,7 @@ NON_DISPATCHABLE_HANDLE_TYPES = [
     "VkEvent",
     "VkQueryPool",
     "VkSamplerYcbcrConversion",
+    "VkSamplerYcbcrConversionKHR",
     "VkDescriptorUpdateTemplate",
     "VkSurfaceKHR",
     "VkSwapchainKHR",
@@ -302,12 +303,22 @@ class VulkanType(object):
 
     def isCreatedBy(self, api):
         if self.typeName in HANDLE_INFO.keys():
-            return HANDLE_INFO[self.typeName].isCreateApi(api.name)
+            nonKhrRes = HANDLE_INFO[self.typeName].isCreateApi(api.name)
+            if nonKhrRes:
+                return True
+            if len(api.name) > 3 and "KHR" == api.name[-3:]:
+                return HANDLE_INFO[self.typeName].isCreateApi(api.name[:-3])
+
         return False
 
     def isDestroyedBy(self, api):
         if self.typeName in HANDLE_INFO.keys():
-            return HANDLE_INFO[self.typeName].isDestroyApi(api.name)
+            nonKhrRes = HANDLE_INFO[self.typeName].isDestroyApi(api.name)
+            if nonKhrRes:
+                return True
+            if len(api.name) > 3 and "KHR" == api.name[-3:]:
+                return HANDLE_INFO[self.typeName].isDestroyApi(api.name[:-3])
+            
         return False
 
     def isSimpleValueType(self, typeInfo):
