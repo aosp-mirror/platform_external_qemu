@@ -9,6 +9,7 @@ from .transform import TransformCodegen, genTransformsForVulkanType
 
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
+from .wrapperdefs import VULKAN_STREAM_TYPE_GUEST
 
 encoder_decl_preamble = """
 class VkEncoder {
@@ -42,18 +43,18 @@ public:
         }
     }
     VulkanCountingStream* countingStream() { return &m_countingStream; }
-    VulkanStream* stream() { return &m_stream; }
+    %s* stream() { return &m_stream; }
     Pool* pool() { return &m_pool; }
     ResourceTracker* resources() { return ResourceTracker::get(); }
     Validation* validation() { return &m_validation; }
 
     void log(const char* text) {
         if (!m_logEncodes) return;
-        ALOGD(\"encoder log: %s\", text);
+        ALOGD(\"encoder log: %%s\", text);
     }
 private:
     VulkanCountingStream m_countingStream;
-    VulkanStream m_stream;
+    %s m_stream;
     Pool m_pool { 8, 4096, 64 };
 
     Validation m_validation;
@@ -71,7 +72,7 @@ VkEncoder::VkEncoder(IOStream *stream) :
     VkResult goldfish_vk_validateResult = validate; \\
     if (goldfish_vk_validateResult != VK_SUCCESS) return; \\
 
-"""
+""" % (VULKAN_STREAM_TYPE_GUEST, VULKAN_STREAM_TYPE_GUEST)
 
 COUNTING_STREAM = "countingStream"
 STREAM = "stream"
