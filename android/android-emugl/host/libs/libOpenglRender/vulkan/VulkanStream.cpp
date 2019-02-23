@@ -16,6 +16,7 @@
 #include "IOStream.h"
 
 #include "android/base/Pool.h"
+#include "android/base/Tracing.h"
 
 #include <vector>
 
@@ -53,6 +54,7 @@ public:
 
     ssize_t read(void *buffer, size_t size) override {
         commitWrite();
+        android::base::ScopedTrace("VulkanStream readback");
         if (!mStream->readFully(buffer, size)) {
             E("FATAL: Could not read back %zu bytes", size);
             abort();
@@ -90,6 +92,7 @@ private:
     }
 
     void commitWrite() {
+        android::base::ScopedTrace("VulkanStream host write");
         if (!valid()) {
             E("FATAL: Tried to commit write to vulkan pipe with invalid pipe!");
             abort();
