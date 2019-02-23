@@ -2338,6 +2338,11 @@ std::string System::getProgramDirectoryFromPlatform() {
     return res;
 }
 
+// static
+System::WallDuration System::getSystemTimeUs() {
+    return kTickCount.getUs();
+}
+
 std::string toString(OsType osType) {
     switch (osType) {
     case OsType::Windows:

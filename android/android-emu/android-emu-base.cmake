@@ -52,6 +52,7 @@ set(android-emu-base_src
     android/base/threads/Async.cpp
     android/base/threads/FunctorThread.cpp
     android/base/threads/ThreadStore.cpp
+    android/base/Tracing.cpp
     android/base/Uri.cpp
     android/base/Uuid.cpp
     android/base/Version.cpp
