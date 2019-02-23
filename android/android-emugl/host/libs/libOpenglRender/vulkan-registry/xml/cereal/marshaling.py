@@ -25,6 +25,7 @@ from .wrapperdefs import STREAM_RET_TYPE
 from .wrapperdefs import MARSHAL_INPUT_VAR_NAME
 from .wrapperdefs import UNMARSHAL_INPUT_VAR_NAME
 from .wrapperdefs import PARAMETERS_MARSHALING
+from .wrapperdefs import PARAMETERS_MARSHALING_GUEST
 from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE, EXTENSION_SIZE_API_NAME
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
@@ -331,11 +332,16 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
 
 class VulkanMarshaling(VulkanWrapperGenerator):
 
-    def __init__(self, module, typeInfo):
+    def __init__(self, module, typeInfo, variant="host"):
         VulkanWrapperGenerator.__init__(self, module, typeInfo)
 
         self.cgenHeader = CodeGen()
         self.cgenImpl = CodeGen()
+        self.variant = variant
+        if self.variant == "guest":
+            self.marshalingParams = PARAMETERS_MARSHALING_GUEST
+        else:
+            self.marshalingParams = PARAMETERS_MARSHALING
 
         self.writeCodegen = \
             VulkanMarshalingCodegen(
@@ -364,13 +370,13 @@ class VulkanMarshaling(VulkanWrapperGenerator):
         self.extensionMarshalPrototype = \
             VulkanAPI(API_PREFIX_MARSHAL + "extension_struct",
                       STREAM_RET_TYPE,
-                      PARAMETERS_MARSHALING +
+                      self.marshalingParams +
                       [STRUCT_EXTENSION_PARAM])
 
         self.extensionUnmarshalPrototype = \
             VulkanAPI(API_PREFIX_UNMARSHAL + "extension_struct",
                       STREAM_RET_TYPE,
-                      PARAMETERS_MARSHALING +
+                      self.marshalingParams +
                       [STRUCT_EXTENSION_PARAM_FOR_WRITE])
 
     def onBegin(self,):
@@ -390,7 +396,7 @@ class VulkanMarshaling(VulkanWrapperGenerator):
 
             structInfo = self.typeInfo.structs[name]
 
-            marshalParams = PARAMETERS_MARSHALING + \
+            marshalParams = self.marshalingParams + \
                 [makeVulkanTypeSimple(True, name, 1, MARSHAL_INPUT_VAR_NAME)]
             marshalPrototype = \
                 VulkanAPI(API_PREFIX_MARSHAL + name,
@@ -414,7 +420,7 @@ class VulkanMarshaling(VulkanWrapperGenerator):
             unmarshalPrototype = \
                 VulkanAPI(API_PREFIX_UNMARSHAL + name,
                           STREAM_RET_TYPE,
-                          PARAMETERS_MARSHALING + [makeVulkanTypeSimple(False, name, 1, UNMARSHAL_INPUT_VAR_NAME)])
+                          self.marshalingParams + [makeVulkanTypeSimple(False, name, 1, UNMARSHAL_INPUT_VAR_NAME)])
 
             def structUnmarshalingDef(cgen):
                 self.readCodegen.cgen = cgen
