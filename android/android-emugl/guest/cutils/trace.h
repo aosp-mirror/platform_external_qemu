@@ -158,6 +158,7 @@ static inline void atrace_init()
 static inline uint64_t atrace_get_enabled_tags()
 {
     atrace_init();
+    fprintf(stderr, "%s: tags; 0x%llx\n", __func__, (unsigned long long)atrace_enabled_tags);
     return atrace_enabled_tags;
 }
 
