@@ -7,6 +7,7 @@ from .transform import TransformCodegen, genTransformsForVulkanType
 
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
+from .wrapperdefs import VULKAN_STREAM_TYPE
 
 from copy import copy
 
@@ -35,7 +36,7 @@ using android::base::System;
 class VkDecoder::Impl {
 public:
     Impl() : m_logCalls(System::get()->envGet("ANDROID_EMU_VK_LOG_CALLS") == "1"), m_vk(vkDispatch()), m_state(VkDecoderGlobalState::get()) { }
-    VulkanStream* stream() { return &m_vkStream; }
+    %s* stream() { return &m_vkStream; }
     VulkanMemReadingStream* readStream() { return &m_vkMemReadingStream; }
 
     size_t decode(void* buf, size_t bufsize, IOStream* stream);
@@ -44,7 +45,7 @@ private:
     bool m_logCalls;
     VulkanDispatch* m_vk;
     VkDecoderGlobalState* m_state;
-    VulkanStream m_vkStream { nullptr };
+    %s m_vkStream { nullptr };
     VulkanMemReadingStream m_vkMemReadingStream { nullptr };
     BoxedHandleUnwrapMapping m_boxedHandleUnwrapMapping;
 };
@@ -59,7 +60,7 @@ size_t VkDecoder::decode(void* buf, size_t bufsize, IOStream* stream) {
 }
 
 // VkDecoder::Impl::decode to follow
-"""
+""" % (VULKAN_STREAM_TYPE, VULKAN_STREAM_TYPE)
 
 READ_STREAM = "vkReadStream"
 WRITE_STREAM = "vkStream"

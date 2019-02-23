@@ -60,6 +60,8 @@ class VulkanFuncTable(VulkanWrapperGenerator):
         cgen.line("static " + self.cgen.makeFuncProto(api_entry))
         cgen.beginBlock()
 
+        cgen.stmt("AEMU_SCOPED_TRACE(\"%s\")" % api.name)
+
         cgen.stmt("auto vkEnc = HostConnection::get()->vkEncoder()")
 
         callLhs = None
