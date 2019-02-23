@@ -98,6 +98,8 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/microphone-page.cpp
     android/skin/qt/extended-pages/perfstats-page.cpp
     android/skin/qt/extended-pages/record-and-playback-page.cpp
+    android/skin/qt/extended-pages/record-macro-page.cpp
+    android/skin/qt/extended-pages/record-macro-saved-item.cpp
     android/skin/qt/extended-pages/record-screen-page.cpp
     android/skin/qt/extended-pages/rotary-input-dial.cpp
     android/skin/qt/extended-pages/rotary-input-page.cpp
@@ -168,6 +170,8 @@ set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended-pages/help-page.ui
     android/skin/qt/extended-pages/microphone-page.ui
     android/skin/qt/extended-pages/record-and-playback-page.ui
+    android/skin/qt/extended-pages/record-macro-page.ui
+    android/skin/qt/extended-pages/record-macro-saved-item.ui
     android/skin/qt/extended-pages/record-screen-page.ui
     android/skin/qt/extended-pages/rotary-input-page.ui
     android/skin/qt/extended-pages/settings-page.ui
@@ -206,6 +210,8 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/extended-pages/location-page.h
     android/skin/qt/extended-pages/microphone-page.h
     android/skin/qt/extended-pages/record-and-playback-page.h
+    android/skin/qt/extended-pages/record-macro-page.h
+    android/skin/qt/extended-pages/record-macro-saved-item.h
     android/skin/qt/extended-pages/record-screen-page-tasks.h
     android/skin/qt/extended-pages/record-screen-page.h
     android/skin/qt/extended-pages/rotary-input-dial.h
