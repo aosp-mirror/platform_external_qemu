@@ -30,7 +30,12 @@
    </property>
    <widget class="RecordScreenPage" name="recordScreen">
     <attribute name="title">
-     <string>Screen record</string>
+     <string>Screen Record</string>
+    </attribute>
+   </widget>
+   <widget class="RecordMacroPage" name="recordMacro">
+    <attribute name="title">
+     <string>Macro Record</string>
     </attribute>
    </widget>
   </widget>
@@ -40,6 +45,12 @@
    <class>RecordScreenPage</class>
    <extends>QWidget</extends>
    <header>android/skin/qt/extended-pages/record-screen-page.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RecordMacroPage</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/extended-pages/record-macro-page.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
