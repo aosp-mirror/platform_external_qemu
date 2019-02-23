@@ -553,8 +553,28 @@ public:
                     featuresFiltered.textureCompressionETC2 = false;
                 }
             }
+            fprintf(stderr, "%s:has features\n", __func__);
             createInfoFiltered.pEnabledFeatures = &featuresFiltered;
+        } else {
+            fprintf(stderr, "%s:no features\n", __func__);
+            createInfoFiltered.pEnabledFeatures = nullptr;
         }
+
+        vk_foreach_struct(ext, pCreateInfo->pNext) {
+            switch (ext->sType) {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2:
+                    if (needEmulatedEtc2(physicalDevice, vk)) {
+                        VkPhysicalDeviceFeatures2* features2 =
+                            (VkPhysicalDeviceFeatures2*)ext;
+                        features2->features.textureCompressionETC2 = false;
+                    }
+                    break;
+                default:
+                    fprintf(stderr, "%s: some other struct %u\n", __func__, ext->sType);
+                    break;
+            }
+        }
+
         createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
         createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
 
