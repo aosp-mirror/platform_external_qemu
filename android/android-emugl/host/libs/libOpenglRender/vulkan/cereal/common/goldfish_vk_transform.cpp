@@ -2827,7 +2827,7 @@ void transform_tohost_VkBindImageMemoryInfo(
 {
     (void)resourceTracker;
     (void)toTransform;
-    resourceTracker->deviceMemoryTransform_tohost((VkDeviceMemory*)&toTransform->memory, 1, (VkDeviceSize*)nullptr, 0, (VkDeviceSize*)&toTransform->memoryOffset, 1, (uint32_t*)nullptr, 0, (uint32_t*)nullptr, 0);
+    resourceTracker->deviceMemoryTransform_tohost((VkDeviceMemory*)&toTransform->memory, 1, (VkDeviceSize*)&toTransform->memoryOffset, 1, (VkDeviceSize*)nullptr, 0, (uint32_t*)nullptr, 0, (uint32_t*)nullptr, 0);
     if (toTransform->pNext)
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
@@ -2840,7 +2840,7 @@ void transform_fromhost_VkBindImageMemoryInfo(
 {
     (void)resourceTracker;
     (void)toTransform;
-    resourceTracker->deviceMemoryTransform_fromhost((VkDeviceMemory*)&toTransform->memory, 1, (VkDeviceSize*)nullptr, 0, (VkDeviceSize*)&toTransform->memoryOffset, 1, (uint32_t*)nullptr, 0, (uint32_t*)nullptr, 0);
+    resourceTracker->deviceMemoryTransform_fromhost((VkDeviceMemory*)&toTransform->memory, 1, (VkDeviceSize*)&toTransform->memoryOffset, 1, (VkDeviceSize*)nullptr, 0, (uint32_t*)nullptr, 0, (uint32_t*)nullptr, 0);
     if (toTransform->pNext)
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
