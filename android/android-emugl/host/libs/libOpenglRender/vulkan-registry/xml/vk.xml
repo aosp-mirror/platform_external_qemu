@@ -2311,7 +2311,7 @@ server.
             <member>const <type>void</type>*                      <name>pNext</name></member>
             <member><type>VkImage</type>                          <name>image</name></member>
             <member noautovalidity="true" devicememoryhandle="1"><type>VkDeviceMemory</type>                   <name>memory</name></member>
-            <member devicememorysize="1"><type>VkDeviceSize</type>                     <name>memoryOffset</name></member>
+            <member devicememoryoffset="1"><type>VkDeviceSize</type>                     <name>memoryOffset</name></member>
         </type>
         <type category="struct" name="VkBindImageMemoryInfoKHR"                                alias="VkBindImageMemoryInfo"/>
         <type category="struct" name="VkBindImageMemoryDeviceGroupInfo" structextends="VkBindImageMemoryInfo">
