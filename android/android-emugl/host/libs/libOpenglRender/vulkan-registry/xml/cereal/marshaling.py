@@ -358,7 +358,7 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 UNMARSHAL_INPUT_VAR_NAME,
                 API_PREFIX_UNMARSHAL,
                 direction = "read",
-                dynAlloc = True)
+                dynAlloc = self.variant != "guest")
 
         self.knownDefs = {}
 
