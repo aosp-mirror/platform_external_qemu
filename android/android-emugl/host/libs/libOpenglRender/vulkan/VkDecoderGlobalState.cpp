@@ -560,6 +560,7 @@ public:
             switch (ext->sType) {
                 case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2:
                     if (needEmulatedEtc2(physicalDevice, vk)) {
+                        emulateTextureEtc2 = true;
                         VkPhysicalDeviceFeatures2* features2 =
                             (VkPhysicalDeviceFeatures2*)ext;
                         features2->features.textureCompressionETC2 = false;
