@@ -27,6 +27,7 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkBindBufferMemory2KHR",
     "vkCreateSemaphore",
     "vkDestroySemaphore",
+    "vkQueueSubmit",
 ]
 
 SUCCESS_VAL = {
