@@ -463,9 +463,10 @@ static uint32_t address_space_run_command(struct address_space_state *state,
 {
     switch (cmd) {
     case ADDRESS_SPACE_COMMAND_ALLOCATE_BLOCK:
+        AS_DPRINT("allocate block");
         return address_space_allocate_block(state);
-
     case ADDRESS_SPACE_COMMAND_DEALLOCATE_BLOCK:
+        AS_DPRINT("deallocate block");
         return address_space_deallocate_block(state);
     case ADDRESS_SPACE_COMMAND_GEN_HANDLE:
         AS_DPRINT("gen handle");
@@ -473,6 +474,7 @@ static uint32_t address_space_run_command(struct address_space_state *state,
             qemu_get_address_space_device_control_ops()->gen_handle();
         break;
     case ADDRESS_SPACE_COMMAND_DESTROY_HANDLE:
+        AS_DPRINT("destroy handle");
         qemu_get_address_space_device_control_ops()->destroy_handle(
             state->registers.handle);
         break;
@@ -616,11 +618,13 @@ static const MemoryRegionOps address_space_control_ops = {
 
 static void address_space_pci_reset(DeviceState *dev)
 {
+    AS_DPRINT("reset device");
     struct address_space_state* address_space = GOLDFISH_ADDRESS_SPACE(dev);
 }
 
 static void address_space_pci_set_config(PCIDevice *dev)
 {
+    AS_DPRINT("set pci config");
     pci_set_word(dev->config + PCI_VENDOR_ID,
                  GOLDFISH_ADDRESS_SPACE_PCI_VENDOR_ID);
     pci_set_word(dev->config + PCI_DEVICE_ID,
@@ -641,6 +645,8 @@ static void address_space_pci_set_config(PCIDevice *dev)
 #define DEFAULT_GUEST_PAGE_SIZE 4096
 
 static void address_space_pci_realize(PCIDevice *dev, Error **errp) {
+    AS_DPRINT("realize");
+
     struct address_space_state* state = GOLDFISH_ADDRESS_SPACE(dev);
 
     address_space_pci_set_config(dev);
@@ -692,6 +698,7 @@ static const VMStateDescription vmstate_address_space_pci = {
     .version_id = 1,
     .minimum_version_id = 1,
     .fields = (VMStateField[]) {
+        VMSTATE_PCI_DEVICE(parent_obj, struct address_space_state),
         VMSTATE_END_OF_LIST()
     }
 };
