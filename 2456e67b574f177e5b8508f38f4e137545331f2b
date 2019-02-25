@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a1023200_2e3b3134",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-25T22:14:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf76530f_6c6c4648",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a0bff84_fb72bc83",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
         "patchSetId": 1
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "eb503c22_ecc64c41",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-25T22:14:22Z",
+      "side": 1,
+      "message": "I\u0027ll follow the Jeff const guidelines.",
+      "parentUuid": "95f7f1cc_65542c1a",
+      "range": {
+        "startLine": 36,
+        "startChar": 4,
+        "endLine": 36,
+        "endChar": 15
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3cc8ce53_7a85a6ae",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
         "patchSetId": 1
@@ -91,6 +139,30 @@
       "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7c4c724a_d642e2f0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-25T22:14:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3cc8ce53_7a85a6ae",
+      "range": {
+        "startLine": 40,
+        "startChar": 9,
+        "endLine": 40,
+        "endChar": 20
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -140,6 +212,30 @@
     },
     {
       "key": {
+        "uuid": "cd2b0b41_4f3793bd",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-25T22:14:22Z",
+      "side": 1,
+      "message": "Yup, it has the same effect. done.",
+      "parentUuid": "5a54251b_4a7293dc",
+      "range": {
+        "startLine": 55,
+        "startChar": 4,
+        "endLine": 55,
+        "endChar": 40
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a1871f85_1a59df11",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
         "patchSetId": 1
@@ -163,6 +259,30 @@
     },
     {
       "key": {
+        "uuid": "0222d1ef_dee8a0ac",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-25T22:14:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a1871f85_1a59df11",
+      "range": {
+        "startLine": 62,
+        "startChar": 36,
+        "endLine": 62,
+        "endChar": 113
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "447952ed_e2b54b01",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
         "patchSetId": 1
@@ -174,6 +294,30 @@
       "writtenOn": "2019-02-23T00:54:13Z",
       "side": 1,
       "message": "Handle the results and display errors?  Or an IOU bug would be fine too",
+      "range": {
+        "startLine": 63,
+        "startChar": 9,
+        "endLine": 63,
+        "endChar": 15
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4ccd64cf_79888097",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-25T22:14:22Z",
+      "side": 1,
+      "message": "Tried a QMessageBox approach, were you thinking of something like this?",
+      "parentUuid": "447952ed_e2b54b01",
       "range": {
         "startLine": 63,
         "startChar": 9,
@@ -209,6 +353,30 @@
     },
     {
       "key": {
+        "uuid": "bedd6256_daaf6b9c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-saved-item.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-25T22:14:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "73b3b42e_430ae978",
+      "range": {
+        "startLine": 19,
+        "startChar": 35,
+        "endLine": 19,
+        "endChar": 46
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9d777c7d_ea67b9f2",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-saved-item.cpp",
         "patchSetId": 1
@@ -229,6 +397,30 @@
       "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4a9cc96f_931daf0a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-saved-item.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-25T22:14:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9d777c7d_ea67b9f2",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 43
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -255,6 +447,30 @@
     },
     {
       "key": {
+        "uuid": "62982980_1cac8e04",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-saved-item.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-25T22:14:22Z",
+      "side": 1,
+      "message": "Done. You are right, I just followed the documentation process without actually checking first. Thanks!",
+      "parentUuid": "c4269ed4_84c2c26b",
+      "range": {
+        "startLine": 28,
+        "startChar": 30,
+        "endLine": 28,
+        "endChar": 38
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c3a9560b_5c3e752e",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-saved-item.h",
         "patchSetId": 1
@@ -278,6 +494,30 @@
     },
     {
       "key": {
+        "uuid": "6a5fc235_5409d624",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-saved-item.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-25T22:14:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c3a9560b_5c3e752e",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 30
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a741d24a_f7a1b801",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-saved-item.ui",
         "patchSetId": 1
@@ -298,6 +538,30 @@
       "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9a7c502a_9b5c364c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-saved-item.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-25T22:14:22Z",
+      "side": 1,
+      "message": "I used QFormLayout since I was planning on adding more stuff, but it is not useful right now, so changing it to QVBoxLayout",
+      "parentUuid": "a741d24a_f7a1b801",
+      "range": {
+        "startLine": 16,
+        "startChar": 17,
+        "endLine": 16,
+        "endChar": 28
+      },
+      "revId": "2456e67b574f177e5b8508f38f4e137545331f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
