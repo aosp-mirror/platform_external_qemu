@@ -22,6 +22,30 @@
       "revId": "1f35149b3ff4b1919c90f5de399589f12e4434f3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "341f1e4d_0d1f86fe",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-02-25T23:41:19Z",
+      "side": 1,
+      "message": "Done, removed. I left it before in case it was something the users should know. Thanks!",
+      "parentUuid": "8a4c28d9_7b6428b3",
+      "range": {
+        "startLine": 71,
+        "startChar": 21,
+        "endLine": 71,
+        "endChar": 27
+      },
+      "revId": "1f35149b3ff4b1919c90f5de399589f12e4434f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
