@@ -72,7 +72,8 @@ struct FontSizeMapLoader {
     FontSizeMapLoader() {
 // Windows takes care of the font sizes, and if we try loading them from the
 // system here the result is actually worse compared to hardcoded 8/10pt.
-#ifndef _WIN32
+//#ifndef _WIN32
+#if 0
         QFont font; // Default ctor populates all values from the system.
         if (font.pointSizeF() > 0) {
             const auto largeSize = font.pointSizeF();
@@ -92,8 +93,8 @@ struct FontSizeMapLoader {
 #endif // !_WIN32
         {
             fontMap = {
-                {kFontMediumName, "8pt"},
-                {kFontLargeName, "10pt"},
+                {kFontMediumName, "11px"},
+                {kFontLargeName, "14px"},
             };
         }
 
