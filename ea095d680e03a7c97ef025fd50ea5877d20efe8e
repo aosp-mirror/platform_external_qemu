@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "69bee9f9_a27d4104",
+        "filename": "CMakeLists.txt",
+        "patchSetId": 10
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-26T16:32:19Z",
+      "side": 1,
+      "message": "PROD?",
+      "range": {
+        "startLine": 21,
+        "startChar": 24,
+        "endLine": 21,
+        "endChar": 29
+      },
+      "revId": "ea095d680e03a7c97ef025fd50ea5877d20efe8e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3f35f40b_69980b40",
+        "filename": "android/build/cmake/toolchain-windows-x86_64.cmake",
+        "patchSetId": 10
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-26T16:32:19Z",
+      "side": 1,
+      "message": "Awesome find Erwin, the test will be really useful too!",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 30
+      },
+      "revId": "ea095d680e03a7c97ef025fd50ea5877d20efe8e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
