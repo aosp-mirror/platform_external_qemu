@@ -30,6 +30,29 @@
   X(void, glEGLImageTargetRenderbufferStorageOES, (GLenum target, GLeglImageOES image), (target, image)) \
   X(void, glDrawArraysNullAEMU, (GLenum mode, GLint first, GLsizei count), (mode, first, count)) \
   X(void, glDrawElementsNullAEMU, (GLenum mode, GLsizei count, GLenum type, const void * indices), (mode, count, type, indices)) \
+  X(void, glGetUnsignedBytevEXT, (GLenum pname, GLubyte* data), (pname, data)) \
+  X(void, glGetUnsignedBytei_vEXT, (GLenum target, GLuint index, GLubyte* data), (target, index, data)) \
+  X(void, glImportMemoryFdEXT, (GLuint memory, GLuint64 size, GLenum handleType, GLint fd), (memory, size, handleType, fd)) \
+  X(void, glImportMemoryWin32HandleEXT, (GLuint memory, GLuint64 size, GLenum handleType, void* handle), (memory, size, handleType, handle)) \
+  X(void, glDeleteMemoryObjectsEXT, (GLsizei n, const GLuint * memoryObjects), (n, memoryObjects)) \
+  X(GLboolean, glIsMemoryObjectEXT, (GLuint memoryObject), (memoryObject)) \
+  X(void, glCreateMemoryObjectsEXT, (GLsizei n, GLuint * memoryObjects), (n, memoryObjects)) \
+  X(void, glMemoryObjectParameterivEXT, (GLuint memoryObject, GLenum pname, const GLint * params), (memoryObject, pname, params)) \
+  X(void, glGetMemoryObjectParameterivEXT, (GLuint memoryObject, GLenum pname, GLint * params), (memoryObject, pname, params)) \
+  X(void, glTexStorageMem2DEXT, (GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLuint memory, GLuint64 offset), (target, levels, internalFormat, width, height, memory, offset)) \
+  X(void, glTexStorageMem2DMultisampleEXT, (GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height, GLboolean fixedSampleLocations, GLuint memory, GLuint64 offset), (target, samples, internalFormat, width, height, fixedSampleLocations, memory, offset)) \
+  X(void, glTexStorageMem3DEXT, (GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLuint memory, GLuint64 offset), (target, levels, internalFormat, width, height, depth, memory, offset)) \
+  X(void, glTexStorageMem3DMultisampleEXT, (GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedSampleLocations, GLuint memory, GLuint64 offset), (target, samples, internalFormat, width, height, depth, fixedSampleLocations, memory, offset)) \
+  X(void, glBufferStorageMemEXT, (GLenum target, GLsizeiptr size, GLuint memory, GLuint64 offset), (target, size, memory, offset)) \
+  X(void, glImportSemaphoreFdEXT, (GLuint semaphore, GLenum handleType, GLint fd), (semaphore, handleType, fd)) \
+  X(void, glImportSemaphoreWin32HandleEXT, (GLuint semaphore, GLenum handleType, void* handle), (semaphore, handleType, handle)) \
+  X(void, glGenSemaphoresEXT, (GLsizei n, GLuint * semaphores), (n, semaphores)) \
+  X(void, glDeleteSemaphoresEXT, (GLsizei n, const GLuint * semaphores), (n, semaphores)) \
+  X(GLboolean, glIsSemaphoreEXT, (GLuint semaphore), (semaphore)) \
+  X(void, glSemaphoreParameterui64vEXT, (GLuint semaphore, GLenum pname, const GLuint64 * params), (semaphore, pname, params)) \
+  X(void, glGetSemaphoreParameterui64vEXT, (GLuint semaphore, GLenum pname, GLuint64 * params), (semaphore, pname, params)) \
+  X(void, glWaitSemaphoreEXT, (GLuint semaphore, GLuint numBufferBarriers, const GLuint * buffers, GLuint numTextureBarriers, const GLuint * textures, const GLenum * srcLayouts), (semaphore, numBufferBarriers, buffers, numTextureBarriers, textures, srcLayouts)) \
+  X(void, glSignalSemaphoreEXT, (GLuint semaphore, GLuint numBufferBarriers, const GLuint * buffers, GLuint numTextureBarriers, const GLuint * textures, const GLenum * dstLayouts), (semaphore, numBufferBarriers, buffers, numTextureBarriers, textures, dstLayouts)) \
 
 
 #endif  // GLES_EXTENSIONS_FUNCTIONS_H

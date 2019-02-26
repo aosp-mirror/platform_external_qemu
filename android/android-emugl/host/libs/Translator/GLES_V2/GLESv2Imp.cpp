@@ -82,6 +82,7 @@ static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
 static void restoreTexture(SaveableTexture* texture);
 static void blitFromCurrentReadBufferANDROID(EGLImage image);
 static void fillGLESUsages(android_studio::EmulatorGLESUsages* usage);
+static bool vulkanInteropSupported();
 static GLsync internal_glFenceSync(GLenum condition, GLbitfield flags);
 static GLenum internal_glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
 static void internal_glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
@@ -117,6 +118,7 @@ static GLESiface s_glesIface = {
     .deleteRbo = deleteRenderbufferGlobal,
     .blitFromCurrentReadBufferANDROID = blitFromCurrentReadBufferANDROID,
     .fillGLESUsages = fillGLESUsages,
+    .vulkanInteropSupported = vulkanInteropSupported,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -177,6 +179,39 @@ GL_APICALL void  GL_APIENTRY glTestHostDriverPerformance(GLuint count, uint64_t*
 GL_APICALL void  GL_APIENTRY glDrawArraysNullAEMU(GLenum mode, GLint first, GLsizei count);
 GL_APICALL void  GL_APIENTRY glDrawElementsNullAEMU(GLenum mode, GLsizei count, GLenum type, const void* indices);
 
+// Vulkan/GL interop
+// https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_external_objects.txt
+// Common between GL_EXT_memory_object and GL_EXT_semaphore
+GL_APICALL void GL_APIENTRY glGetUnsignedBytevEXT(GLenum pname, GLubyte* data);
+GL_APICALL void GL_APIENTRY glGetUnsignedBytei_vEXT(GLenum target, GLuint index, GLubyte* data);
+
+// GL_EXT_memory_object
+GL_APICALL void GL_APIENTRY glImportMemoryFdEXT(GLuint memory, GLuint64 size, GLenum handleType, GLint fd);
+GL_APICALL void GL_APIENTRY glImportMemoryWin32HandleEXT(GLuint memory, GLuint64 size, GLenum handleType, void* handle);
+GL_APICALL void GL_APIENTRY glDeleteMemoryObjectsEXT(GLsizei n, const GLuint *memoryObjects); 
+GL_APICALL GLboolean GL_APIENTRY glIsMemoryObjectEXT(GLuint memoryObject);
+GL_APICALL void GL_APIENTRY glCreateMemoryObjectsEXT(GLsizei n, GLuint *memoryObjects);
+GL_APICALL void GL_APIENTRY glMemoryObjectParameterivEXT(GLuint memoryObject, GLenum pname, const GLint *params);
+GL_APICALL void GL_APIENTRY glGetMemoryObjectParameterivEXT(GLuint memoryObject, GLenum pname, GLint *params);
+GL_APICALL void GL_APIENTRY glTexStorageMem2DEXT(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLuint memory, GLuint64 offset);
+GL_APICALL void GL_APIENTRY glTexStorageMem2DMultisampleEXT(GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height, GLboolean fixedSampleLocations, GLuint memory, GLuint64 offset);
+GL_APICALL void GL_APIENTRY glTexStorageMem3DEXT(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLuint memory, GLuint64 offset);
+GL_APICALL void GL_APIENTRY glTexStorageMem3DMultisampleEXT(GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedSampleLocations, GLuint memory, GLuint64 offset);
+GL_APICALL void GL_APIENTRY glBufferStorageMemEXT(GLenum target, GLsizeiptr size, GLuint memory, GLuint64 offset);
+
+// Not included: direct-state-access, 1D function pointers
+
+// GL_EXT_semaphore
+GL_APICALL void GL_APIENTRY glImportSemaphoreFdEXT(GLuint semaphore, GLenum handleType, GLint fd);
+GL_APICALL void GL_APIENTRY glImportSemaphoreWin32HandleEXT(GLuint semaphore, GLenum handleType, void* handle);
+GL_APICALL void GL_APIENTRY glGenSemaphoresEXT(GLsizei n, GLuint *semaphores);
+GL_APICALL void GL_APIENTRY glDeleteSemaphoresEXT(GLsizei n, const GLuint *semaphores);
+GL_APICALL GLboolean glIsSemaphoreEXT(GLuint semaphore);
+GL_APICALL void GL_APIENTRY glSemaphoreParameterui64vEXT(GLuint semaphore, GLenum pname, const GLuint64 *params);
+GL_APICALL void GL_APIENTRY glGetSemaphoreParameterui64vEXT(GLuint semaphore, GLenum pname, GLuint64 *params);
+GL_APICALL void GL_APIENTRY glWaitSemaphoreEXT(GLuint semaphore, GLuint numBufferBarriers, const GLuint *buffers, GLuint numTextureBarriers, const GLuint *textures, const GLenum *srcLayouts);
+GL_APICALL void GL_APIENTRY glSignalSemaphoreEXT(GLuint semaphore, GLuint numBufferBarriers, const GLuint *buffers, GLuint numTextureBarriers, const GLuint *textures, const GLenum *dstLayouts);
+
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName) {
     GET_CTX_RET(NULL)
     ctx->getGlobalLock();
@@ -194,6 +229,30 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
         (*s_glesExtensions)["glTestHostDriverPerformance"] = (__translatorMustCastToProperFunctionPointerType)glTestHostDriverPerformance;
         (*s_glesExtensions)["glDrawArraysNullAEMU"] = (__translatorMustCastToProperFunctionPointerType)glDrawArraysNullAEMU;
         (*s_glesExtensions)["glDrawElementsNullAEMU"] = (__translatorMustCastToProperFunctionPointerType)glDrawElementsNullAEMU;
+
+        (*s_glesExtensions)["glGetUnsignedBytevEXT"] = (__translatorMustCastToProperFunctionPointerType)glGetUnsignedBytevEXT;
+        (*s_glesExtensions)["glGetUnsignedBytei_vEXT"] = (__translatorMustCastToProperFunctionPointerType)glGetUnsignedBytei_vEXT;
+        (*s_glesExtensions)["glImportMemoryFdEXT"] = (__translatorMustCastToProperFunctionPointerType)glImportMemoryFdEXT;
+        (*s_glesExtensions)["glImportMemoryWin32HandleEXT"] = (__translatorMustCastToProperFunctionPointerType)glImportMemoryWin32HandleEXT;
+        (*s_glesExtensions)["glDeleteMemoryObjectsEXT"] = (__translatorMustCastToProperFunctionPointerType)glDeleteMemoryObjectsEXT;
+        (*s_glesExtensions)["glIsMemoryObjectEXT"] = (__translatorMustCastToProperFunctionPointerType)glIsMemoryObjectEXT;
+        (*s_glesExtensions)["glCreateMemoryObjectsEXT"] = (__translatorMustCastToProperFunctionPointerType)glCreateMemoryObjectsEXT;
+        (*s_glesExtensions)["glMemoryObjectParameterivEXT"] = (__translatorMustCastToProperFunctionPointerType)glMemoryObjectParameterivEXT;
+        (*s_glesExtensions)["glGetMemoryObjectParameterivEXT"] = (__translatorMustCastToProperFunctionPointerType)glGetMemoryObjectParameterivEXT;
+        (*s_glesExtensions)["glTexStorageMem2DEXT"] = (__translatorMustCastToProperFunctionPointerType)glTexStorageMem2DEXT;
+        (*s_glesExtensions)["glTexStorageMem2DMultisampleEXT"] = (__translatorMustCastToProperFunctionPointerType)glTexStorageMem2DMultisampleEXT;
+        (*s_glesExtensions)["glTexStorageMem3DEXT"] = (__translatorMustCastToProperFunctionPointerType)glTexStorageMem3DEXT;
+        (*s_glesExtensions)["glTexStorageMem3DMultisampleEXT"] = (__translatorMustCastToProperFunctionPointerType)glTexStorageMem3DMultisampleEXT;
+        (*s_glesExtensions)["glBufferStorageMemEXT"] = (__translatorMustCastToProperFunctionPointerType)glBufferStorageMemEXT;
+        (*s_glesExtensions)["glImportSemaphoreFdEXT"] = (__translatorMustCastToProperFunctionPointerType)glImportSemaphoreFdEXT;
+        (*s_glesExtensions)["glImportSemaphoreWin32HandleEXT"] = (__translatorMustCastToProperFunctionPointerType)glImportSemaphoreWin32HandleEXT;
+        (*s_glesExtensions)["glGenSemaphoresEXT"] = (__translatorMustCastToProperFunctionPointerType)glGenSemaphoresEXT;
+        (*s_glesExtensions)["glDeleteSemaphoresEXT"] = (__translatorMustCastToProperFunctionPointerType)glDeleteSemaphoresEXT;
+        (*s_glesExtensions)["glIsSemaphoreEXT"] = (__translatorMustCastToProperFunctionPointerType)glIsSemaphoreEXT;
+        (*s_glesExtensions)["glSemaphoreParameterui64vEXT"] = (__translatorMustCastToProperFunctionPointerType)glSemaphoreParameterui64vEXT;
+        (*s_glesExtensions)["glGetSemaphoreParameterui64vEXT"] = (__translatorMustCastToProperFunctionPointerType)glGetSemaphoreParameterui64vEXT;
+        (*s_glesExtensions)["glWaitSemaphoreEXT"] = (__translatorMustCastToProperFunctionPointerType)glWaitSemaphoreEXT;
+        (*s_glesExtensions)["glSignalSemaphoreEXT"] = (__translatorMustCastToProperFunctionPointerType)glSignalSemaphoreEXT;
     }
     __translatorMustCastToProperFunctionPointerType ret=NULL;
     ProcTableMap::iterator val = s_glesExtensions->find(procName);
@@ -236,6 +295,10 @@ GLESiface* __translator_getIfaces(EGLiface* eglIface) {
 
 static void fillGLESUsages(android_studio::EmulatorGLESUsages* usage) {
     usage->mutable_gles_3_0_usages()->CopyFrom(*gles30usages);
+}
+
+static bool vulkanInteropSupported() {
+    return GLEScontext::vulkanInteropSupported();
 }
 
 static void blitFromCurrentReadBufferANDROID(EGLImage image) {
@@ -4080,4 +4143,126 @@ fprintf(stderr, "%s: begin count %d\n", __func__, count);
     gl->glUseProgram(0);
     gl->glDeleteProgram(program);
     gl->glDeleteBuffers(1, &buffer);
+}
+
+// Vulkan/GL interop
+// https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_external_objects.txt
+// Common between GL_EXT_memory_object and GL_EXT_semaphore
+GL_APICALL void GL_APIENTRY glGetUnsignedBytevEXT(GLenum pname, GLubyte* data) {
+    GET_CTX_V2();
+    ctx->dispatcher().glGetUnsignedBytevEXT(pname, data);
+}
+
+GL_APICALL void GL_APIENTRY glGetUnsignedBytei_vEXT(GLenum target, GLuint index, GLubyte* data) {
+    GET_CTX_V2();
+    ctx->dispatcher().glGetUnsignedBytei_vEXT(target, index, data);
+}
+
+// GL_EXT_memory_object
+GL_APICALL void GL_APIENTRY glImportMemoryFdEXT(GLuint memory, GLuint64 size, GLenum handleType, GLint fd) {
+    GET_CTX_V2();
+    ctx->dispatcher().glImportMemoryFdEXT(memory, size, handleType, fd);
+}
+
+GL_APICALL void GL_APIENTRY glImportMemoryWin32HandleEXT(GLuint memory, GLuint64 size, GLenum handleType, void* handle) {
+    GET_CTX_V2();
+    ctx->dispatcher().glImportMemoryWin32HandleEXT(memory, size, handleType, handle);
+}
+
+GL_APICALL void GL_APIENTRY glDeleteMemoryObjectsEXT(GLsizei n, const GLuint *memoryObjects) {
+    GET_CTX_V2();
+    ctx->dispatcher().glDeleteMemoryObjectsEXT(n, memoryObjects);
+}
+
+GL_APICALL GLboolean GL_APIENTRY glIsMemoryObjectEXT(GLuint memoryObject) {
+    GET_CTX_V2_RET(GL_FALSE);
+    return ctx->dispatcher().glIsMemoryObjectEXT(memoryObject);
+}
+
+GL_APICALL void GL_APIENTRY glCreateMemoryObjectsEXT(GLsizei n, GLuint *memoryObjects) {
+    GET_CTX_V2();
+    ctx->dispatcher().glCreateMemoryObjectsEXT(n, memoryObjects);
+}
+
+GL_APICALL void GL_APIENTRY glMemoryObjectParameterivEXT(GLuint memoryObject, GLenum pname, const GLint *params) {
+    GET_CTX_V2();
+    ctx->dispatcher().glMemoryObjectParameterivEXT(memoryObject, pname, params);
+}
+
+GL_APICALL void GL_APIENTRY glGetMemoryObjectParameterivEXT(GLuint memoryObject, GLenum pname, GLint *params) {
+    GET_CTX_V2();
+    ctx->dispatcher().glGetMemoryObjectParameterivEXT(memoryObject, pname, params);
+}
+
+GL_APICALL void GL_APIENTRY glTexStorageMem2DEXT(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLuint memory, GLuint64 offset) {
+    GET_CTX_V2();
+    ctx->dispatcher().glTexStorageMem2DEXT(target, levels, internalFormat, width, height, memory, offset);
+}
+
+GL_APICALL void GL_APIENTRY glTexStorageMem2DMultisampleEXT(GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height, GLboolean fixedSampleLocations, GLuint memory, GLuint64 offset) {
+    GET_CTX_V2();
+    ctx->dispatcher().glTexStorageMem2DMultisampleEXT(target, samples, internalFormat, width, height, fixedSampleLocations, memory, offset);
+}
+
+GL_APICALL void GL_APIENTRY glTexStorageMem3DEXT(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLuint memory, GLuint64 offset) {
+    GET_CTX_V2();
+    ctx->dispatcher().glTexStorageMem3DEXT(target, levels, internalFormat, width, height, depth, memory, offset);
+}
+
+GL_APICALL void GL_APIENTRY glTexStorageMem3DMultisampleEXT(GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedSampleLocations, GLuint memory, GLuint64 offset) {
+    GET_CTX_V2();
+    ctx->dispatcher().glTexStorageMem3DMultisampleEXT(target, samples, internalFormat, width, height, depth, fixedSampleLocations, memory, offset);
+}
+
+GL_APICALL void GL_APIENTRY glBufferStorageMemEXT(GLenum target, GLsizeiptr size, GLuint memory, GLuint64 offset) {
+    GET_CTX_V2();
+    ctx->dispatcher().glBufferStorageMemEXT(target, size, memory, offset);
+}
+
+// Not included: direct-state-access, 1D function pointers
+
+// GL_EXT_semaphore
+GL_APICALL void GL_APIENTRY glImportSemaphoreFdEXT(GLuint semaphore, GLenum handleType, GLint fd) {
+    GET_CTX_V2();
+    ctx->dispatcher().glImportSemaphoreFdEXT(semaphore, handleType, fd);
+}
+
+GL_APICALL void GL_APIENTRY glImportSemaphoreWin32HandleEXT(GLuint semaphore, GLenum handleType, void* handle) {
+    GET_CTX_V2();
+    ctx->dispatcher().glImportSemaphoreWin32HandleEXT(semaphore, handleType, handle);
+}
+
+GL_APICALL void GL_APIENTRY glGenSemaphoresEXT(GLsizei n, GLuint *semaphores) {
+    GET_CTX_V2();
+    ctx->dispatcher().glGenSemaphoresEXT(n, semaphores);
+}
+
+GL_APICALL void GL_APIENTRY glDeleteSemaphoresEXT(GLsizei n, const GLuint *semaphores) {
+    GET_CTX_V2();
+    ctx->dispatcher().glDeleteSemaphoresEXT(n, semaphores);
+}
+
+GL_APICALL GLboolean glIsSemaphoreEXT(GLuint semaphore) {
+    GET_CTX_V2_RET(GL_FALSE);
+    return ctx->dispatcher().glIsSemaphoreEXT(semaphore);
+}
+
+GL_APICALL void GL_APIENTRY glSemaphoreParameterui64vEXT(GLuint semaphore, GLenum pname, const GLuint64 *params) {
+    GET_CTX_V2();
+    ctx->dispatcher().glSemaphoreParameterui64vEXT(semaphore, pname, params);
+}
+
+GL_APICALL void GL_APIENTRY glGetSemaphoreParameterui64vEXT(GLuint semaphore, GLenum pname, GLuint64 *params) {
+    GET_CTX_V2();
+    ctx->dispatcher().glGetSemaphoreParameterui64vEXT(semaphore, pname, params);
+}
+
+GL_APICALL void GL_APIENTRY glWaitSemaphoreEXT(GLuint semaphore, GLuint numBufferBarriers, const GLuint *buffers, GLuint numTextureBarriers, const GLuint *textures, const GLenum *srcLayouts) {
+    GET_CTX_V2();
+    ctx->dispatcher().glWaitSemaphoreEXT(semaphore, numBufferBarriers, buffers, numTextureBarriers, textures, srcLayouts);
+}
+
+GL_APICALL void GL_APIENTRY glSignalSemaphoreEXT(GLuint semaphore, GLuint numBufferBarriers, const GLuint *buffers, GLuint numTextureBarriers, const GLuint *textures, const GLenum *dstLayouts) {
+    GET_CTX_V2();
+    ctx->dispatcher().glSignalSemaphoreEXT(semaphore, numBufferBarriers, buffers, numTextureBarriers, textures, dstLayouts);
 }

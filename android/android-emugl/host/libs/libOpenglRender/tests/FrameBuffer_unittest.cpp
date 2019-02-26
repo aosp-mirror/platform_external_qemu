@@ -586,4 +586,17 @@ TEST_F(FrameBufferTest, HostDrawCallRate) {
     mFb->DestroyWindowSurface(surface);
 }
 
+// Tests Vulkan interop query.
+TEST_F(FrameBufferTest, VulkanInteropQuery) {
+    auto egl = LazyLoadedEGLDispatch::get();
+
+    EXPECT_NE(nullptr, egl->eglQueryVulkanInteropSupportANDROID);
+
+    EGLBoolean supported =
+        egl->eglQueryVulkanInteropSupportANDROID();
+
+    // Disregard the result for now 
+    (void)supported;
+}
+
 }  // namespace emugl

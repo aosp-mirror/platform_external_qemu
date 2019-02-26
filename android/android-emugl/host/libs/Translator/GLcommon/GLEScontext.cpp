@@ -1759,6 +1759,13 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     if (!(Version((const char*)glVersion) < Version("3.0")) || strstr(cstring,"GL_OES_rgb8_rgba8")!=NULL)
         s_glSupport.GL_OES_RGB8_RGBA8 = true;
 
+    if (strstr(cstring, "GL_EXT_memory_object") != NULL) {
+        s_glSupport.GL_EXT_memory_object = true;
+    }
+
+    if (strstr(cstring, "GL_EXT_semaphore") != NULL) {
+        s_glSupport.GL_EXT_semaphore = true;
+    }
 }
 
 void GLEScontext::buildStrings(const char* baseVendor,
