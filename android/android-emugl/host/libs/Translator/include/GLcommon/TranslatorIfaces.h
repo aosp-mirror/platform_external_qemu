@@ -95,6 +95,7 @@ typedef struct {
     void                                            (*deleteRbo)(GLuint);
     void                                            (*blitFromCurrentReadBufferANDROID)(EGLImage);
     void                                            (*fillGLESUsages)(android_studio::EmulatorGLESUsages*);
+    bool                                            (*vulkanInteropSupported)();
 } GLESiface;
 
 class GlLibrary;

@@ -30,3 +30,36 @@ void glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image);
 # For benchmarking draw call overhead
 void glDrawArraysNullAEMU(GLenum mode, GLint first, GLsizei count);
 void glDrawElementsNullAEMU(GLenum mode, GLsizei count, GLenum type, const void *indices);
+
+# Vulkan/GL interop
+# https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_external_objects.txt
+# Common between GL_EXT_memory_object and GL_EXT_semaphore
+void glGetUnsignedBytevEXT(GLenum pname, GLubyte* data);
+void glGetUnsignedBytei_vEXT(GLenum target, GLuint index, GLubyte* data);
+
+# GL_EXT_memory_object
+void glImportMemoryFdEXT(GLuint memory, GLuint64 size, GLenum handleType, GLint fd);
+void glImportMemoryWin32HandleEXT(GLuint memory, GLuint64 size, GLenum handleType, void* handle);
+void glDeleteMemoryObjectsEXT(GLsizei n, const GLuint *memoryObjects); 
+GLboolean glIsMemoryObjectEXT(GLuint memoryObject);
+void glCreateMemoryObjectsEXT(GLsizei n, GLuint *memoryObjects);
+void glMemoryObjectParameterivEXT(GLuint memoryObject, GLenum pname, const GLint *params);
+void glGetMemoryObjectParameterivEXT(GLuint memoryObject, GLenum pname, GLint *params);
+void glTexStorageMem2DEXT(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLuint memory, GLuint64 offset);
+void glTexStorageMem2DMultisampleEXT(GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height, GLboolean fixedSampleLocations, GLuint memory, GLuint64 offset);
+void glTexStorageMem3DEXT(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLuint memory, GLuint64 offset);
+void glTexStorageMem3DMultisampleEXT(GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedSampleLocations, GLuint memory, GLuint64 offset);
+void glBufferStorageMemEXT(GLenum target, GLsizeiptr size, GLuint memory, GLuint64 offset);
+
+# Not included: direct-state-access, 1D function pointers
+
+# GL_EXT_semaphore
+void glImportSemaphoreFdEXT(GLuint semaphore, GLenum handleType, GLint fd);
+void glImportSemaphoreWin32HandleEXT(GLuint semaphore, GLenum handleType, void* handle);
+void glGenSemaphoresEXT(GLsizei n, GLuint *semaphores);
+void glDeleteSemaphoresEXT(GLsizei n, const GLuint *semaphores);
+GLboolean glIsSemaphoreEXT(GLuint semaphore);
+void glSemaphoreParameterui64vEXT(GLuint semaphore, GLenum pname, const GLuint64 *params);
+void glGetSemaphoreParameterui64vEXT(GLuint semaphore, GLenum pname, GLuint64 *params);
+void glWaitSemaphoreEXT(GLuint semaphore, GLuint numBufferBarriers, const GLuint *buffers, GLuint numTextureBarriers, const GLuint *textures, const GLenum *srcLayouts);
+void glSignalSemaphoreEXT(GLuint semaphore, GLuint numBufferBarriers, const GLuint *buffers, GLuint numTextureBarriers, const GLuint *textures, const GLenum *dstLayouts);

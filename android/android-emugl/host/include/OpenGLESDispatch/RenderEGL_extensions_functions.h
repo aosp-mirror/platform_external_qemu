@@ -19,6 +19,7 @@
   X(void*, eglSetImageFenceANDROID, (EGLDisplay display, EGLImageKHR image)) \
   X(void, eglWaitImageFenceANDROID, (EGLDisplay display, void* fence)) \
   X(void, eglAddLibrarySearchPathANDROID, (const char* path)) \
+  X(EGLBoolean, eglQueryVulkanInteropSupportANDROID, ()) \
 
 
 #endif  // RENDER_EGL_EXTENSIONS_FUNCTIONS_H

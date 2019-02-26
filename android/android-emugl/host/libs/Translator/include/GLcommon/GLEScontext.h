@@ -99,6 +99,9 @@ struct GLSupport {
     bool GL_OES_RGB8_RGBA8 = false;
 
     bool GL_EXT_color_buffer_float = false;
+
+    bool GL_EXT_memory_object = false;
+    bool GL_EXT_semaphore = false;
 };
 
 struct ArrayData {
@@ -271,6 +274,11 @@ public:
     void getGlobalLock();
     void releaseGlobalLock();
     virtual GLSupport*  getCaps(){return &s_glSupport;};
+    static GLSupport* getCapsGlobal(){return &s_glSupport;};
+    static bool vulkanInteropSupported() {
+        return s_glSupport.GL_EXT_memory_object &&
+               s_glSupport.GL_EXT_semaphore;
+    }
     virtual ~GLEScontext();
     virtual int getMaxTexUnits() = 0;
     virtual int getMaxCombinedTexUnits() { return getMaxTexUnits(); }
