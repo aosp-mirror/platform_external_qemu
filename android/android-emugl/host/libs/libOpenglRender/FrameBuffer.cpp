@@ -547,14 +547,15 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     //
     s_theFrameBuffer = fb.release();
     {
-        // Nothing else to do - we're ready to rock!
         AutoLock lock(sGlobals->lock);
         sInitialized.store(true, std::memory_order_release);
         sGlobals->condVar.broadcastAndUnlock(&lock);
     }
 
     // Start up Vulkan emulation info
-    goldfish_vk::VkDecoderGlobalState::get();
+    if (emugl::emugl_feature_is_enabled(android::featurecontrol::Vulkan)) {
+        goldfish_vk::VkDecoderGlobalState::get();
+    }
 
     // Start up the single sync thread if GLAsyncSwap enabled
     if (emugl::emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap)) {
@@ -562,6 +563,8 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     }
 
     GL_LOG("basic EGL initialization successful");
+
+    // Nothing else to do - we're ready to rock!
     return true;
 }
 
