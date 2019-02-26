@@ -99,6 +99,9 @@ struct GLSupport {
     bool GL_OES_RGB8_RGBA8 = false;
 
     bool GL_EXT_color_buffer_float = false;
+
+    bool GL_EXT_memory_object = false;
+    bool GL_EXT_semaphore = false;
 };
 
 struct ArrayData {
