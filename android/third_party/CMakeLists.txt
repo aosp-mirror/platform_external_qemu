@@ -45,6 +45,7 @@ add_subdirectory(tinyepoxy)
 add_subdirectory(libkeymaster3)
 add_subdirectory(ext4_utils)
 add_subdirectory(google-benchmark)
+add_subdirectory(mksdcard)
 
 # Old windows version will use old breakpad version..
 if (ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
