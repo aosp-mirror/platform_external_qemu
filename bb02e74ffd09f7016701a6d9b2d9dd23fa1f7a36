@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "18560aa8_a7d57531",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 550,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-02-26T17:19:48Z",
+      "side": 1,
+      "message": "this comment looks like there\u0027s nothing else to be initalized, but apparently there\u0027s more and more going on later. is that ok?",
+      "range": {
+        "startLine": 550,
+        "startChar": 0,
+        "endLine": 550,
+        "endChar": 52
+      },
+      "revId": "bb02e74ffd09f7016701a6d9b2d9dd23fa1f7a36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
