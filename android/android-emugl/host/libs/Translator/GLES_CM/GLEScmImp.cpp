@@ -61,6 +61,7 @@ static GLEScontext* createGLESContext(int maj, int min,
         GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 static void fillGLESUsages(android_studio::EmulatorGLESUsages* usage);
+static bool vulkanInteropSupported();
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -92,6 +93,7 @@ static GLESiface  s_glesIface = {
     .deleteRbo                        = NULL,
     .blitFromCurrentReadBufferANDROID = NULL,
     .fillGLESUsages = fillGLESUsages,
+    .vulkanInteropSupported = vulkanInteropSupported,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -163,6 +165,10 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp) {
 
 static void fillGLESUsages(android_studio::EmulatorGLESUsages* usage) {
     usage->mutable_gles_1_usages()->CopyFrom(*gles1usages);
+}
+
+static bool vulkanInteropSupported() {
+    return GLEScontext::vulkanInteropSupported();
 }
 
 GL_API void GL_APIENTRY  glColorPointerWithDataSize( GLint size, GLenum type,

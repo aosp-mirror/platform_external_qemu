@@ -332,6 +332,9 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
          emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
          emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT);
 
+    fb->m_vulkanInteropSupported =
+        s_egl.eglQueryVulkanInteropSupportANDROID();
+
     //
     // if GLES2 plugin has loaded - try to make GLES2 context and
     // get GLES2 extension string

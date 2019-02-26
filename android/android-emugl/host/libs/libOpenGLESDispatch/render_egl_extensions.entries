@@ -18,3 +18,4 @@ void eglBlitFromCurrentReadBufferANDROID(EGLDisplay display, EGLImageKHR image);
 void* eglSetImageFenceANDROID(EGLDisplay display, EGLImageKHR image);
 void eglWaitImageFenceANDROID(EGLDisplay display, void* fence);
 void eglAddLibrarySearchPathANDROID(const char* path);
+EGLBoolean eglQueryVulkanInteropSupportANDROID(void);

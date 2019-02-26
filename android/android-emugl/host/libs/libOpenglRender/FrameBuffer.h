@@ -629,5 +629,6 @@ private:
     void sendPostWorkerCmd(Post post);
 
     bool m_fastBlitSupported = false;
+    bool m_vulkanInteropSupported = false;
 };
 #endif
