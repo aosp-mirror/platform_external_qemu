@@ -54,6 +54,7 @@ namespace goldfish_vk {
 static constexpr const char* const
 kEmulatedExtensions[] = {
     "VK_ANDROID_native_buffer",
+    "VK_ANDROID_external_memory_android_hardware_buffer",
     "VK_KHR_external_memory_fuchsia",
     "VK_KHR_external_semaphore_fuchsia",
 };
@@ -531,15 +532,6 @@ public:
                 pCreateInfo->enabledExtensionCount,
                 pCreateInfo->ppEnabledExtensionNames);
 
-
-        for (uint32_t i = 0; i < pCreateInfo->enabledExtensionCount; ++i) {
-            auto extName =
-                pCreateInfo->ppEnabledExtensionNames[i];
-            if (!isEmulatedExtension(extName)) {
-                finalExts.push_back(extName);
-            }
-        }
-
         // Run the underlying API call, filtering extensions.
         VkDeviceCreateInfo createInfoFiltered = *pCreateInfo;
         bool emulateTextureEtc2 = false;
@@ -627,6 +619,7 @@ public:
         }
 
         // Box the device.
+        fprintf(stderr, "%s: about to box device %p\n", __func__, *pDevice);
         *pDevice = (VkDevice)deviceInfo.boxed;
         return VK_SUCCESS;
     }
@@ -1319,30 +1312,6 @@ public:
             abort();
         }
 
-        VkImportColorBufferGOOGLE* importCbInfoPtr =
-            (VkImportColorBufferGOOGLE*)
-                vk_find_struct((vk_struct_common*)pAllocateInfo,
-                    VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE);
-
-        if (importCbInfoPtr) {
-            // TODO: Implement what happens on importing a color bufer:
-            // - setup Vk for the color buffer
-            // - associate device memory with the color buffer
-        }
-
-        VkImportPhysicalAddressGOOGLE* importPhysAddrInfoPtr =
-            (VkImportPhysicalAddressGOOGLE*)
-                vk_find_struct((vk_struct_common*)pAllocateInfo,
-                    VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE);
-
-        if (importPhysAddrInfoPtr) {
-            // TODO: Implement what happens on importing a physical address:
-            // 1 - perform action of vkMapMemoryIntoAddressSpaceGOOGLE if
-            //     host visible
-            // 2 - create color buffer, setup Vk for it,
-            //     and associate it with the physical address
-        }
-
         VkMemoryDedicatedAllocateInfo* dedicatedAllocInfoPtr =
             (VkMemoryDedicatedAllocateInfo*)
                 vk_find_struct((vk_struct_common*)pAllocateInfo,
@@ -1356,17 +1325,75 @@ public:
                     (vk_struct_common*)&dedicatedAllocInfo);
         }
 
-        // TODO: Import the corresponding host-side external memory handle.
-#ifdef _WIN32
-        VkImportMemoryWin32HandleInfoKHR importWin32HandleInfo;
-        (void)importWin32HandleInfo;
-#else
-        VkImportMemoryFdInfoKHR importFdInfo;
-        (void)importFdInfo;
-#endif
+        VkImportPhysicalAddressGOOGLE* importPhysAddrInfoPtr =
+            (VkImportPhysicalAddressGOOGLE*)
+                vk_find_struct((vk_struct_common*)pAllocateInfo,
+                    VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE);
 
+        if (importPhysAddrInfoPtr) {
+            fprintf(stderr, "%s: should import phys here\n", __func__);
+            // TODO: Implement what happens on importing a physical address:
+            // 1 - perform action of vkMapMemoryIntoAddressSpaceGOOGLE if
+            //     host visible
+            // 2 - create color buffer, setup Vk for it,
+            //     and associate it with the physical address
+        }
+
+        VkImportColorBufferGOOGLE* importCbInfoPtr =
+            (VkImportColorBufferGOOGLE*)
+                vk_find_struct((vk_struct_common*)pAllocateInfo,
+                    VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE);
+
+#ifdef _WIN32
+        VkImportMemoryWin32HandleInfoKHR importInfo {
+            VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR, 0,
+            VK_EXT_MEMORY_HANDLE_TYPE_BIT,
+            VK_EXT_MEMORY_HANDLE_INVALID, "",
+        };
+#else
+        VkImportMemoryFdInfoKHR importInfo {
+            VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR, 0,
+            VK_EXT_MEMORY_HANDLE_TYPE_BIT,
+            VK_EXT_MEMORY_HANDLE_INVALID,
+        };
+#endif
+        if (importCbInfoPtr) {
+            fprintf(stderr, "%s: importing color buffer 0x%x\n", __func__, importCbInfoPtr->colorBuffer);
+
+            // Ensure color buffer has Vulkan backing.
+            setupVkColorBuffer(importCbInfoPtr->colorBuffer, nullptr, &allocInfo.allocationSize);
+
+            VK_EXT_MEMORY_HANDLE cbExtMemoryHandle =
+                getColorBufferExtMemoryHandle(importCbInfoPtr->colorBuffer);
+
+            if (cbExtMemoryHandle == VK_EXT_MEMORY_HANDLE_INVALID) {
+                fprintf(stderr,
+                    "%s: VK_ERROR_OUT_OF_DEVICE_MEMORY: "
+                    "colorBuffer 0x%x does not have Vulkan external memory backing\n", __func__,
+                    importCbInfoPtr->colorBuffer);
+                return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+            }
+
+            cbExtMemoryHandle = dupExternalMemory(cbExtMemoryHandle);
+            fprintf(stderr, "%s: duped handle for color buffer 0x%x\n", __func__, importCbInfoPtr->colorBuffer);
+
+#ifdef _WIN32
+            importInfo.handle = cbExtMemoryHandle;
+#else
+            importInfo.fd = cbExtMemoryHandle;
+#endif
+            structChain =
+                vk_append_struct(
+                    (vk_struct_common*)structChain,
+                    (vk_struct_common*)&importInfo);
+        }
+
+            fprintf(stderr, "%s: device %p running allocate memory. size %zu\n", __func__, 
+            device, 
+            (size_t)(allocInfo.allocationSize));
         VkResult result =
             vk->vkAllocateMemory(device, &allocInfo, pAllocator, pMemory);
+            fprintf(stderr, "%s: ran allocate memory\n", __func__);
 
         if (result != VK_SUCCESS) {
             return result;
@@ -1948,6 +1975,13 @@ private:
             auto extName = extNames[i];
             if (!isEmulatedExtension(extName)) {
                 res.push_back(extName);
+            }
+            if (!strcmp("VK_ANDROID_external_memory_android_hardware_buffer", extName)) {
+#ifdef _WIN32
+                res.push_back("VK_KHR_external_memory_win32");
+#else
+                res.push_back("VK_KHR_external_memory_fd");
+#endif
             }
         }
         return res;

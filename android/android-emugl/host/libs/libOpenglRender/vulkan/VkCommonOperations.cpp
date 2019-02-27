@@ -53,7 +53,7 @@ sKnownStagingTypeIndices = LAZY_INSTANCE_INIT;
 
 static android::base::StaticLock sVkEmulationLock;
 
-static VK_EXT_MEMORY_HANDLE dupExternalMemory(VK_EXT_MEMORY_HANDLE h) {
+VK_EXT_MEMORY_HANDLE dupExternalMemory(VK_EXT_MEMORY_HANDLE h) {
 #ifdef _WIN32
     auto myProcessHandle = GetCurrentProcess();
     VK_EXT_MEMORY_HANDLE res;
@@ -1051,6 +1051,8 @@ bool importExternalMemoryDedicatedImage(
 
 static VkFormat glFormat2VkFormat(GLint internalformat) {
     switch (internalformat) {
+        case GL_LUMINANCE:
+            return VK_FORMAT_R8_UNORM;
         case GL_RGB:
         case GL_RGB8:
             return VK_FORMAT_R8G8B8_UNORM;
@@ -1107,7 +1109,7 @@ static uint32_t lastGoodTypeIndex(uint32_t indices) {
     return 0;
 }
 
-bool setupVkColorBuffer(uint32_t colorBufferHandle, bool* exported) {
+bool setupVkColorBuffer(uint32_t colorBufferHandle, bool* exported, VkDeviceSize* allocSize) {
     if (!isColorBufferVulkanCompatible(colorBufferHandle)) return false;
 
     auto vk = sVkEmulation->dvk;
@@ -1223,6 +1225,7 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle, bool* exported) {
     }
 
     if (exported) *exported = res.glExported;
+    if (allocSize) *allocSize = res.memory.size;
 
     sVkEmulation->colorBuffers[colorBufferHandle] = res;
 

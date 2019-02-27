@@ -819,6 +819,16 @@ size_t goldfish_vk_extension_struct_size(
             return sizeof(VkQueueFamilyCheckpointPropertiesNV);
         }
 #endif
+#ifdef VK_GOOGLE_color_buffer
+        case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
+        {
+            return sizeof(VkImportColorBufferGOOGLE);
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
+        {
+            return sizeof(VkImportPhysicalAddressGOOGLE);
+        }
+#endif
         default:
         {
             return (size_t)0;
