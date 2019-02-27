@@ -53,8 +53,8 @@ public:
 
     static void earlyInitialization();
     static void onMainLoopStart();
+    static bool shouldHide();
 
-    bool hidden() const { return mHide; }
     void show();
     void forceShow();
     void forceHide();
@@ -120,7 +120,6 @@ private:
 
     bool mIsExiting = false;
     bool mAllowExtWindow = false;
-    bool mHide = false;
 
     ToolWindow* mToolWindow = nullptr;
 
