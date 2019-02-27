@@ -13,7 +13,7 @@ target_include_directories(emulator-libsparse PUBLIC include)
 target_include_directories(emulator-libsparse PRIVATE src)
 target_link_libraries(emulator-libsparse PRIVATE zlib)
 android_target_link_libraries(emulator-libsparse windows PRIVATE emulator-libmman-win32)
-android_target_link_libraries(emulator-libsparse windows_msvc PUBLIC msvc-posix-compat)
+android_target_link_libraries(emulator-libsparse windows_msvc-x86_64 PUBLIC msvc-posix-compat)
 
 if (ANDROID_TARGET_TAG MATCHES "windows.*")
     # Work around some gcc/mingw issues

@@ -7,4 +7,4 @@ set(msvc-posix-compat_src
         src/gettimeofday.c)
 android_add_library(msvc-posix-compat)
 target_link_libraries(msvc-posix-compat android-emu-base)
-android_target_include_directories(msvc-posix-compat windows_msvc PUBLIC include/)
+android_target_include_directories(msvc-posix-compat windows_msvc-x86_64 PUBLIC include/)
