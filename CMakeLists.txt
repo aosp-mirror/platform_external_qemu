@@ -61,7 +61,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/archives)
 set(CMAKE_PDB_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/debug_info)
 
 # Feeling courageous? Set this to $ANDROID_SDK_ROOT
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/gradle-release)
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/distribution/emulator)
 
 # Pthreads from the prebuilts please!
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
