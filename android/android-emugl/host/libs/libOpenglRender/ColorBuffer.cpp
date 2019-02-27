@@ -28,6 +28,8 @@
 
 #include "emugl/common/misc.h"
 
+#include <GLES2/gl2ext.h>
+
 #include <stdio.h>
 #include <string.h>
 
@@ -99,7 +101,8 @@ static bool sGetFormatParameters(
     GLint internalFormat,
     GLenum* texFormat,
     GLenum* pixelType,
-    int* bytesPerPixel) {
+    int* bytesPerPixel,
+    GLint* sizedInternalFormat) {
 
     switch (internalFormat) {
         case GL_RGB:
@@ -107,11 +110,13 @@ static bool sGetFormatParameters(
             *texFormat = GL_RGB;
             *pixelType = GL_UNSIGNED_BYTE;
             *bytesPerPixel = 3;
+            *sizedInternalFormat = GL_RGB8;
             return true;
         case GL_RGB565_OES:
             *texFormat = GL_RGB;
             *pixelType = GL_UNSIGNED_SHORT_5_6_5;
             *bytesPerPixel = 2;
+            *sizedInternalFormat = GL_RGB565;
             return true;
         case GL_RGBA:
         case GL_RGBA8:
@@ -120,31 +125,37 @@ static bool sGetFormatParameters(
             *texFormat = GL_RGBA;
             *pixelType = GL_UNSIGNED_BYTE;
             *bytesPerPixel = 4;
+            *sizedInternalFormat = GL_RGBA8;
             return true;
         case GL_UNSIGNED_INT_10_10_10_2_OES:
             *texFormat = GL_RGBA;
             *pixelType = GL_UNSIGNED_SHORT;
             *bytesPerPixel = 4;
+            *sizedInternalFormat = GL_UNSIGNED_INT_10_10_10_2_OES;
             return true;
         case GL_RGB10_A2:
             *texFormat = GL_RGBA;
             *pixelType = GL_UNSIGNED_INT_2_10_10_10_REV;
             *bytesPerPixel = 4;
+            *sizedInternalFormat = GL_RGB10_A2;
             return true;
         case GL_RGB16F:
             *texFormat = GL_RGB;
             *pixelType = GL_HALF_FLOAT;
             *bytesPerPixel = 6;
+            *sizedInternalFormat = GL_RGB16F;
             return true;
         case GL_RGBA16F:
             *texFormat = GL_RGBA;
             *pixelType = GL_HALF_FLOAT;
             *bytesPerPixel = 8;
+            *sizedInternalFormat = GL_RGBA16F;
             return true;
         case GL_LUMINANCE:
             *texFormat = GL_LUMINANCE;
             *pixelType = GL_UNSIGNED_SHORT;
             *bytesPerPixel = 2;
+            *sizedInternalFormat = GL_R8;
             return true;
         default:
             fprintf(stderr, "%s: Unknown format 0x%x\n",
@@ -165,10 +176,12 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     GLenum texFormat = 0;
     GLenum pixelType = GL_UNSIGNED_BYTE;
     int bytesPerPixel = 4;
+    GLint p_sizedInternalFormat = GL_RGBA8;
 
     if (!sGetFormatParameters(
             p_internalFormat,
-            &texFormat, &pixelType, &bytesPerPixel)) {
+            &texFormat, &pixelType, &bytesPerPixel,
+            &p_sizedInternalFormat)) {
         fprintf(stderr, "ColorBuffer::create invalid format 0x%x\n",
                 p_internalFormat);
         return NULL;
@@ -227,6 +240,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     cb->m_width = p_width;
     cb->m_height = p_height;
     cb->m_internalFormat = p_internalFormat;
+    cb->m_sizedInternalFormat = p_sizedInternalFormat;
     cb->m_format = texFormat;
     cb->m_type = pixelType;
 
@@ -296,6 +310,10 @@ ColorBuffer::~ColorBuffer() {
     GLuint tex[2] = {m_tex, m_blitTex};
     s_gles2.glDeleteTextures(2, tex);
 
+    if (m_memoryObject) {
+        s_gles2.glDeleteMemoryObjectsEXT(1, &m_memoryObject);
+    }
+
     delete m_resizer;
 }
 
@@ -328,8 +346,9 @@ void ColorBuffer::reformat(GLint internalformat) {
 
     GLenum texFormat = internalformat;
     GLenum pixelType = GL_UNSIGNED_BYTE;
+    GLint sizedInternalFormat = GL_RGBA8;
     int bpp = 4;
-    if (!sGetFormatParameters(internalformat, &texFormat, &pixelType, &bpp)) {
+    if (!sGetFormatParameters(internalformat, &texFormat, &pixelType, &bpp, &sizedInternalFormat)) {
         fprintf(stderr, "%s: WARNING: reformat failed. internal format: 0x%x\n",
                 __func__, internalformat);
     }
@@ -360,6 +379,7 @@ void ColorBuffer::reformat(GLint internalformat) {
     m_internalFormat = internalformat;
     m_format = texFormat;
     m_type = pixelType;
+    m_sizedInternalFormat = sizedInternalFormat;
 
     m_numBytes = bpp * m_width * m_height;
 }
@@ -813,5 +833,57 @@ GLuint ColorBuffer::getTexture() {
 }
 
 void ColorBuffer::postLayer(ComposeLayer* l, int frameWidth, int frameHeight) {
+    if (m_inUse) fprintf(stderr, "%s: cb in use\n", __func__);
     m_helper->getTextureDraw()->drawLayer(l, frameWidth, frameHeight, m_width, m_height, m_tex);
+}
+
+bool ColorBuffer::importMemory(
+#ifdef _WIN32
+        void* handle,
+#else
+        int handle,
+#endif
+        uint64_t size,
+        bool dedicated,
+        bool linearTiling) {
+    RecursiveScopedHelperContext context(m_helper);
+    s_gles2.glCreateMemoryObjectsEXT(1, &m_memoryObject);
+    if (dedicated) {
+        static const GLint DEDICATED_FLAG = GL_TRUE;
+        s_gles2.glMemoryObjectParameterivEXT(m_memoryObject,
+                                             GL_DEDICATED_MEMORY_OBJECT_EXT,
+                                             &DEDICATED_FLAG);
+    }
+
+#ifdef _WIN32
+    s_gles2.glImportMemoryWin32HandleEXT(m_memoryObject, size, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, handle);
+#else
+    s_gles2.glImportMemoryFdEXT(m_memoryObject, size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, handle);
+#endif
+
+    GLuint glTiling = linearTiling ? GL_LINEAR_TILING_EXT : GL_OPTIMAL_TILING_EXT;
+
+    s_gles2.glDeleteTextures(1, &m_tex);
+    s_gles2.glGenTextures(1, &m_tex);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+
+    // HOST needed because we do not expose this to guest
+    s_gles2.glTexParameteriHOST(GL_TEXTURE_2D, GL_TEXTURE_TILING_EXT, glTiling);
+
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    s_gles2.glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, m_sizedInternalFormat, m_width, m_height, m_memoryObject, 0);
+
+    s_egl.eglDestroyImageKHR(m_display, m_eglImage);
+    m_eglImage = s_egl.eglCreateImageKHR(
+            m_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
+            (EGLClientBuffer)SafePointerFromUInt(m_tex), NULL);
+
+    return true;
+}
+
+void ColorBuffer::setInUse(bool inUse) {
+    m_inUse = inUse;
 }

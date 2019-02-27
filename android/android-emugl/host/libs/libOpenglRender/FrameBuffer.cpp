@@ -332,9 +332,6 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
          emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
          emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT);
 
-    fb->m_vulkanInteropSupported =
-        s_egl.eglQueryVulkanInteropSupportANDROID();
-
     //
     // if GLES2 plugin has loaded - try to make GLES2 context and
     // get GLES2 extension string
@@ -545,6 +542,9 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         return false;
     }
 
+
+    fb->m_vulkanInteropSupported =
+        s_egl.eglQueryVulkanInteropSupportANDROID();
     //
     // Keep the singleton framebuffer pointer
     //
@@ -569,6 +569,44 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
 
     // Nothing else to do - we're ready to rock!
     return true;
+}
+
+bool FrameBuffer::importMemoryToColorBuffer(
+#ifdef _WIN32
+        void* handle,
+#else
+        int handle,
+#endif
+        uint64_t size,
+        bool dedicated,
+        bool linearTiling,
+        uint32_t colorBufferHandle) {
+    AutoLock mutex(m_lock);
+
+    ColorBufferMap::iterator c(m_colorbuffers.find(colorBufferHandle));
+    if (c == m_colorbuffers.end()) {
+        // bad colorbuffer handle
+        ERR("FB: importMemoryToColorBuffer cb handle %#x not found\n", colorBufferHandle);
+        return false;
+    }
+
+    return (*c).second.cb->importMemory(handle, size, dedicated, linearTiling);
+}
+
+void FrameBuffer::setColorBufferInUse(
+    uint32_t colorBufferHandle,
+    bool inUse) {
+
+    AutoLock mutex(m_lock);
+
+    ColorBufferMap::iterator c(m_colorbuffers.find(colorBufferHandle));
+    if (c == m_colorbuffers.end()) {
+        // bad colorbuffer handle
+        ERR("FB: setColorBufferInUse cb handle %#x not found\n", colorBufferHandle);
+        return;
+    }
+
+    (*c).second.cb->setInUse(inUse);
 }
 
 void FrameBuffer::disableFastBlit() {

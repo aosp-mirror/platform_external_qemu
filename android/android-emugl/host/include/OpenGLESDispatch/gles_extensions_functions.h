@@ -44,6 +44,7 @@
   X(void, glTexStorageMem3DEXT, (GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLuint memory, GLuint64 offset), (target, levels, internalFormat, width, height, depth, memory, offset)) \
   X(void, glTexStorageMem3DMultisampleEXT, (GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedSampleLocations, GLuint memory, GLuint64 offset), (target, samples, internalFormat, width, height, depth, fixedSampleLocations, memory, offset)) \
   X(void, glBufferStorageMemEXT, (GLenum target, GLsizeiptr size, GLuint memory, GLuint64 offset), (target, size, memory, offset)) \
+  X(void, glTexParameteriHOST, (GLenum target, GLenum pname, GLint param), (target, pname, param)) \
   X(void, glImportSemaphoreFdEXT, (GLuint semaphore, GLenum handleType, GLint fd), (semaphore, handleType, fd)) \
   X(void, glImportSemaphoreWin32HandleEXT, (GLuint semaphore, GLenum handleType, void* handle), (semaphore, handleType, handle)) \
   X(void, glGenSemaphoresEXT, (GLsizei n, GLuint * semaphores), (n, semaphores)) \
