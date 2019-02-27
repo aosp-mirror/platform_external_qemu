@@ -109,6 +109,13 @@ def recursive_iglob(rootdir, pattern_fns):
                 if pattern_fn(fname):
                     yield fname
 
+def read_simple_properties(fname):
+    res = {}
+    with open(fname, 'r') as props:
+        for line in props.readlines():
+            k, v = line.split('=')
+            res[k.strip()] = v.strip()
+    return res
 
 class ArgEnum(Enum):
     '''A class that can parse argument enums'''
