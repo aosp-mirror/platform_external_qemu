@@ -84,6 +84,7 @@ protected:
                               "gralloc.ranchu" LIBSUFFIX);
 
         load_gralloc_module(grallocPath.c_str(), &mGralloc);
+        set_global_gralloc_module(&mGralloc);
 
         EXPECT_NE(nullptr, mGralloc.fb_dev);
         EXPECT_NE(nullptr, mGralloc.alloc_dev);
@@ -174,8 +175,20 @@ protected:
 
         uint32_t bestPhysicalDevice = 0;
         bool queuesGood = false;
+        bool hasAndroidNativeBuffer = false;
+        bool hasExternalMemorySupport = false;
 
         for (uint32_t i = 0; i < physdevCount; ++i) {
+
+            queuesGood = false;
+            hasAndroidNativeBuffer = false;
+            hasExternalMemorySupport = false;
+
+            bool hasGetMemoryRequirements2 = false;
+            bool hasDedicatedAllocation = false;
+            bool hasExternalMemoryBaseExtension = false;
+            bool hasExternalMemoryPlatformExtension = false;
+
             uint32_t queueFamilyCount = 0;
             std::vector<VkQueueFamilyProperties> queueFamilyProps;
             vk->vkGetPhysicalDeviceQueueFamilyProperties(
@@ -195,12 +208,57 @@ protected:
                 }
             }
 
-            if (queuesGood) {
+            uint32_t devExtCount = 0;
+            std::vector<VkExtensionProperties> availableDeviceExtensions;
+            vk->vkEnumerateDeviceExtensionProperties(physdevs[i], nullptr,
+                                                     &devExtCount, nullptr);
+            availableDeviceExtensions.resize(devExtCount);
+            vk->vkEnumerateDeviceExtensionProperties(
+                    physdevs[i], nullptr, &devExtCount, availableDeviceExtensions.data());
+            
+            for (uint32_t j = 0; j < devExtCount; ++j) {
+                if (!strcmp("VK_KHR_swapchain",
+                            availableDeviceExtensions[j].extensionName)) {
+                    hasAndroidNativeBuffer = true;
+                }
+                if (!strcmp("VK_KHR_get_memory_requirements2",
+                            availableDeviceExtensions[j].extensionName)) {
+                    hasGetMemoryRequirements2 = true;
+                }
+                if (!strcmp("VK_KHR_dedicated_allocation",
+                            availableDeviceExtensions[j].extensionName)) {
+                    hasDedicatedAllocation = true;
+                }
+                if (!strcmp("VK_KHR_external_memory",
+                            availableDeviceExtensions[j].extensionName)) {
+                    hasExternalMemoryBaseExtension = true;
+                }
+                static const char* externalMemoryPlatformExtension =
+                    "VK_ANDROID_external_memory_android_hardware_buffer";
+
+                if (!strcmp(externalMemoryPlatformExtension,
+                            availableDeviceExtensions[j].extensionName)) {
+                    hasExternalMemoryPlatformExtension = true;
+                }
+            }
+
+            hasExternalMemorySupport =
+                (hasGetMemoryRequirements2 &&
+                 hasDedicatedAllocation &&
+                 hasExternalMemoryBaseExtension &&
+                 hasExternalMemoryPlatformExtension);
+
+            if (queuesGood && hasExternalMemorySupport) {
+                bestPhysicalDevice = i;
                 break;
             }
         }
 
         EXPECT_TRUE(queuesGood);
+        EXPECT_TRUE(hasAndroidNativeBuffer);
+
+        mDeviceHasExternalMemorySupport =
+            hasExternalMemorySupport;
 
         mPhysicalDevice = physdevs[bestPhysicalDevice];
 
@@ -208,15 +266,30 @@ protected:
         vk->vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &memProps);
 
         bool foundHostVisibleMemoryTypeIndex = false;
+        bool foundDeviceLocalMemoryTypeIndex = false;
 
         for (uint32_t i = 0; i < memProps.memoryTypeCount; ++i) {
             if (memProps.memoryTypes[i].propertyFlags &
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
                 mHostVisibleMemoryTypeIndex = i;
                 foundHostVisibleMemoryTypeIndex = true;
+            }
+
+            if (memProps.memoryTypes[i].propertyFlags &
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) {
+                mDeviceLocalMemoryTypeIndex = i;
+                foundDeviceLocalMemoryTypeIndex = true;
+            }
+
+            if (foundHostVisibleMemoryTypeIndex &&
+                foundDeviceLocalMemoryTypeIndex) {
                 break;
             }
         }
+
+        EXPECT_TRUE(
+            foundHostVisibleMemoryTypeIndex &&
+            foundDeviceLocalMemoryTypeIndex);
 
         EXPECT_TRUE(foundHostVisibleMemoryTypeIndex);
 
@@ -235,6 +308,20 @@ protected:
             0, nullptr,  // no extensions
             nullptr,  // no features
         };
+
+        std::vector<const char*> externalMemoryExtensions = {
+            "VK_KHR_get_memory_requirements2",
+            "VK_KHR_dedicated_allocation",
+            "VK_KHR_external_memory",
+            "VK_ANDROID_external_memory_android_hardware_buffer",
+        };
+
+        if (mDeviceHasExternalMemorySupport) {
+            dCi.enabledExtensionCount =
+                (uint32_t)externalMemoryExtensions.size();
+            dCi.ppEnabledExtensionNames =
+            externalMemoryExtensions.data();
+        }
 
         EXPECT_EQ(VK_SUCCESS, vk->vkCreateDevice(physdevs[bestPhysicalDevice], &dCi,
                                              nullptr, &mDevice));
@@ -302,13 +389,13 @@ protected:
     bool mInstanceHasGetPhysicalDeviceProperties2Support = false;
     bool mInstanceHasExternalMemorySupport = false;
     bool mDeviceHasExternalMemorySupport = false;
-    bool mDeviceHasAHBSupport = false;
 
     VkInstance mInstance;
     VkPhysicalDevice mPhysicalDevice;
     VkDevice mDevice;
     VkQueue mQueue;
     uint32_t mHostVisibleMemoryTypeIndex;
+    uint32_t mDeviceLocalMemoryTypeIndex;
     uint32_t mGraphicsQueueFamily;
 };
 
@@ -520,6 +607,29 @@ TEST_F(VulkanHalTest, Hide1_1FunctionPointers) {
         EXPECT_NE(nullptr,
                   vk->vkGetDeviceProcAddr(mDevice, "vkTrimCommandPool"));
     }
+}
+
+// Tests VK_ANDROID_external_memory_android_hardware_buffer's allocation API.
+TEST_F(VulkanHalTest, AndroidHardwareBufferAllocate_ExportDeviceLocal) {
+    if (!mDeviceHasExternalMemorySupport) return;
+
+    const VkDeviceSize kAllocSize = 4096;
+
+    VkExportMemoryAllocateInfo exportAi = {
+        VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO, 0,
+        VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID,
+    };
+
+    VkMemoryAllocateInfo allocInfo = {
+        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, &exportAi,
+        kAllocSize,
+        mDeviceLocalMemoryTypeIndex,
+    };
+
+    VkDeviceMemory memory;
+    VkResult res = vk->vkAllocateMemory(mDevice, &allocInfo, nullptr, &memory);
+
+    vk->vkFreeMemory(mDevice, memory, nullptr);
 }
 
 }  // namespace aemu

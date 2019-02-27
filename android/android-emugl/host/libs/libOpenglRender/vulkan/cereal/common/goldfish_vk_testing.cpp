@@ -6905,6 +6905,18 @@ void checkEqual_extension_struct(
             break;
         }
 #endif
+#ifdef VK_GOOGLE_color_buffer
+        case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
+        {
+            checkEqual_VkImportColorBufferGOOGLE(reinterpret_cast<const VkImportColorBufferGOOGLE*>(structExtension), reinterpret_cast<const VkImportColorBufferGOOGLE*>(structExtension2), onFail);
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
+        {
+            checkEqual_VkImportPhysicalAddressGOOGLE(reinterpret_cast<const VkImportPhysicalAddressGOOGLE*>(structExtension), reinterpret_cast<const VkImportPhysicalAddressGOOGLE*>(structExtension2), onFail);
+            break;
+        }
+#endif
         default:
         {
             return;

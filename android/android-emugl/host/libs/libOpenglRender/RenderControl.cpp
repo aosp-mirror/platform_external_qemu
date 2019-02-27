@@ -583,6 +583,7 @@ static void rcDestroyWindowSurface(uint32_t windowSurface)
 static uint32_t rcCreateColorBuffer(uint32_t width,
                                     uint32_t height, GLenum internalFormat)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return 0;

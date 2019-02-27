@@ -3212,12 +3212,12 @@ server.
             <member><type>VkPipelineStageFlagBits</type>   <name>stage</name></member>
             <member noautovalidity="true"><type>void</type>* <name>pCheckpointMarker</name></member>
         </type>
-        <type category="struct" name="VkImportColorBufferGOOGLE">
+        <type category="struct" name="VkImportColorBufferGOOGLE" structextends="VkMemoryAllocateInfo">
             <member values="VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE"><type>VkStructureType</type> <name>sType</name></member>
             <member><type>void</type>*                  <name>pNext</name></member>
             <member><type>uint32_t</type>   <name>colorBuffer</name></member>
         </type>
-        <type category="struct" name="VkImportPhysicalAddressGOOGLE">
+        <type category="struct" name="VkImportPhysicalAddressGOOGLE" structextends="VkMemoryAllocateInfo">
             <member values="VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE"><type>VkStructureType</type> <name>sType</name></member>
             <member><type>void</type>*                  <name>pNext</name></member>
             <member><type>uint64_t</type>   <name>physicalAddress</name></member>
