@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3d8bfe2f_c9bb4b75",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-02-27T04:45:37Z",
+      "side": 1,
+      "message": "Should we use the real extension on host, so we don\u0027t have to fake it? (Same for the device extensions)",
+      "range": {
+        "startLine": 59,
+        "startChar": 5,
+        "endLine": 59,
+        "endChar": 45
+      },
+      "revId": "e18cf9f95ed94b999c17a9ebdcaaac0b314bf986",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
