@@ -169,4 +169,4 @@ target_include_directories(curl
                                    ${CURL_SRC_DIR})
 target_include_directories(curl PUBLIC ${CURL_SRC_DIR}/../include)
 target_link_libraries(curl PRIVATE OpenSSL::SSL OpenSSL::Crypto zlib)
-android_target_link_libraries(curl windows_mscv-x86_64 PRIVATE wldap32::wldap32 gdi32::gdi32)
+android_target_link_libraries(curl windows_msvc-x86_64 PRIVATE wldap32::wldap32 gdi32::gdi32 normaliz::normaliz)
