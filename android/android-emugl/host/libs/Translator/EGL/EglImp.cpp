@@ -18,14 +18,16 @@
 #define EGLAPI __declspec(dllexport)
 #endif
 
-#include "android/base/files/Stream.h"
-#include "ThreadInfo.h"
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/GLutils.h"
 #include "GLcommon/TextureData.h"
 #include "GLcommon/TranslatorIfaces.h"
-#include "emugl/common/shared_library.h"
 #include "OpenglCodecCommon/ErrorLog.h"
+#include "ThreadInfo.h"
+#include "android/base/files/Stream.h"
+#include "android/base/memory/MemoryUsage.h"
+#include "emugl/common/misc.h"
+#include "emugl/common/shared_library.h"
 
 #include "EglWindowSurface.h"
 #include "EglPbufferSurface.h"
@@ -174,14 +176,17 @@ EGLAPI void EGLAPIENTRY eglFillUsages(void* usages);
         }                                                    \
         return ret;
 
-#define VALIDATE_DISPLAY_RETURN(EGLDisplay,ret)              \
-        EglDisplay* dpy = g_eglInfo->getDisplay(EGLDisplay); \
-        if(!dpy){                                            \
-            RETURN_ERROR(ret,EGL_BAD_DISPLAY);               \
-        }                                                    \
-        if(!dpy->isInitialize()) {                           \
-            RETURN_ERROR(ret,EGL_NOT_INITIALIZED);           \
-        }
+#define VALIDATE_DISPLAY_RETURN(EGLDisplay, ret)                           \
+    if (emugl::getMemoryUsage() && strncmp(__FUNCTION__, "egl", 3) == 0) { \
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);        \
+    }                                                                      \
+    EglDisplay* dpy = g_eglInfo->getDisplay(EGLDisplay);                   \
+    if (!dpy) {                                                            \
+        RETURN_ERROR(ret, EGL_BAD_DISPLAY);                                \
+    }                                                                      \
+    if (!dpy->isInitialize()) {                                            \
+        RETURN_ERROR(ret, EGL_NOT_INITIALIZED);                            \
+    }
 
 #define VALIDATE_CONFIG_RETURN(EGLConfig,ret)                \
         EglConfig* cfg = dpy->getConfig(EGLConfig);          \
@@ -338,6 +343,8 @@ static bool unbindAuxiliaryContext() {
 }
 
 EGLAPI EGLint EGLAPIENTRY eglGetError(void) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     CURRENT_THREAD();
     EGLint err = tls_thread->getError();
     tls_thread->setError(EGL_SUCCESS);
@@ -345,6 +352,8 @@ EGLAPI EGLint EGLAPIENTRY eglGetError(void) {
 }
 
 EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplay(EGLNativeDisplayType display_id) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     EglDisplay* dpy = NULL;
     EglOS::Display* internalDisplay = NULL;
 
@@ -389,6 +398,8 @@ static __translator_getGLESIfaceFunc loadIfaces(const char* libName,
 #define LIB_GLES_V2_NAME EMUGL_LIBNAME("GLES_V2_translator")
 
 EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, EGLint *minor) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
 
     initGlobalInfo();
 
@@ -1321,6 +1332,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSwapBuffers(EGLDisplay display, EGLSurface surf
 }
 
 EGLAPI EGLContext EGLAPIENTRY eglGetCurrentContext(void) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     emugl::Mutex::AutoLock mutex(s_eglLock);
     ThreadInfo* thread = getThreadInfo();
     EglDisplay* dpy    = static_cast<EglDisplay*>(thread->eglDisplay);
@@ -1338,6 +1351,8 @@ EGLAPI EGLContext EGLAPIENTRY eglGetCurrentContext(void) {
 }
 
 EGLAPI EGLSurface EGLAPIENTRY eglGetCurrentSurface(EGLint readdraw) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     emugl::Mutex::AutoLock mutex(s_eglLock);
     if (!EglValidate::surfaceTarget(readdraw)) {
         return EGL_NO_SURFACE;
@@ -1367,11 +1382,15 @@ EGLAPI EGLSurface EGLAPIENTRY eglGetCurrentSurface(EGLint readdraw) {
 }
 
 EGLAPI EGLDisplay EGLAPIENTRY eglGetCurrentDisplay(void) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     ThreadInfo* thread = getThreadInfo();
     return (thread->eglContext.get()) ? thread->eglDisplay : EGL_NO_DISPLAY;
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglBindAPI(EGLenum api) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     if(!EglValidate::supportedApi(api)) {
         RETURN_ERROR(EGL_FALSE,EGL_BAD_PARAMETER);
     }
@@ -1381,11 +1400,15 @@ EGLAPI EGLBoolean EGLAPIENTRY eglBindAPI(EGLenum api) {
 }
 
 EGLAPI EGLenum EGLAPIENTRY eglQueryAPI(void) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     CURRENT_THREAD();
     return tls_thread->getApi();
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglReleaseThread(void) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     ThreadInfo* thread  = getThreadInfo();
     EglDisplay* dpy     = static_cast<EglDisplay*>(thread->eglDisplay);
     return eglMakeCurrent(dpy,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);
@@ -1484,6 +1507,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR
 
 
 EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint* attrib_list) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     // swiftshader_indirect does not work with eglCreateSyncKHR
     // Disable it before we figure out a proper fix in swiftshader
     // BUG: 65587659
@@ -1496,6 +1521,8 @@ EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, con
 }
 
 EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     emugl::Mutex::AutoLock mutex(s_eglLock);
     if (g_eglInfo->isEgl2Egl()) {
         return EGL_CONDITION_SATISFIED_KHR;
@@ -1523,6 +1550,8 @@ EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, 
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     if (g_eglInfo->isEgl2Egl()) {
         return EGL_TRUE;
     }
@@ -1538,6 +1567,8 @@ EGLAPI EGLint EGLAPIENTRY eglGetMaxGLESVersion(EGLDisplay display) {
 }
 
 EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     if (g_eglInfo->isEgl2Egl()) {
         return EGL_TRUE;
     }
@@ -1547,6 +1578,8 @@ EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint
 }
 
 EGLAPI void EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay dpy, EGLImageKHR image) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->blitFromCurrentReadBufferANDROID((GLeglImageOES)image);
 }
@@ -1560,6 +1593,8 @@ EGLAPI void EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay dpy, EGLI
 // reading, so we call eglSetImageFenceANDROID at the end of writing operations
 // in Thread A, and then wait on the fence in Thread B.
 EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay dpy, EGLImageKHR image) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     unsigned int imagehndl = SafeUIntFromPointer(image);
     ImagePtr img = getEGLImage(imagehndl);
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
@@ -1575,15 +1610,21 @@ EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay dpy, EGLImageKHR ima
 }
 
 EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay dpy, void* fence) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->waitSync((GLsync)fence, 0, -1);
 }
 
 EGLAPI void EGLAPIENTRY eglAddLibrarySearchPathANDROID(const char* path) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     emugl::SharedLibrary::addLibrarySearchPath(path);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglQueryVulkanInteropSupportANDROID(void) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     return iface->vulkanInteropSupported() ? EGL_TRUE : EGL_FALSE;
 }
@@ -1683,10 +1724,14 @@ EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream
 }
 
 EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     EglGlobalInfo::setEgl2Egl(enable);
 }
 
 EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     // The "version" here follows the convention of eglGetMaxGLESVesion
     // 0: es2 1: es3.0 2: es3.1 3: es3.2
     GLESVersion glesVersion = GLES_2_0;
@@ -1716,6 +1761,8 @@ EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version) {
 }
 
 EGLAPI void EGLAPIENTRY eglFillUsages(void* usages) {
+    if (emugl::getMemoryUsage())
+        emugl::getMemoryUsage()->addToGroup("EMUGL", __FUNCTION__);
     if (g_eglInfo->getIface(GLES_1_1) &&
             g_eglInfo->getIface(GLES_1_1)->fillGLESUsages) {
         g_eglInfo->getIface(GLES_1_1)->fillGLESUsages(

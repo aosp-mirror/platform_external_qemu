@@ -28,6 +28,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
+#include "android/base/Backtrace.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "OpenglCodecCommon/ErrorLog.h"
 #include "GLESv2Context.h"
@@ -623,6 +624,7 @@ GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuff
 }
 
 GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
+
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::textureTarget(ctx, target), GL_INVALID_ENUM);
 
