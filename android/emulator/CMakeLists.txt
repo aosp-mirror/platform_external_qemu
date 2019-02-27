@@ -98,3 +98,15 @@ android_target_properties(emulator all "${RUNTIME_OS_PROPERTIES}")
 
 android_install_exe(emulator .)
 android_install_exe(emulator-headless .)
+
+# Install files we need.
+install(FILES ${ANDROID_QEMU2_TOP_DIR}/android-info.txt DESTINATION .)
+
+# Note, these files are identical..
+if(ANDROID_TARGET_TAG MATCHES "windows.*")
+  install(FILES ${ANDROID_QEMU2_TOP_DIR}/win.source.properties DESTINATION . RENAME source.properties)
+elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
+  install(FILES ${ANDROID_QEMU2_TOP_DIR}/source.properties DESTINATION .)
+elseif(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
+  install(FILES ${ANDROID_QEMU2_TOP_DIR}/win.source.properties DESTINATION . RENAME source.properties)
+endif()
