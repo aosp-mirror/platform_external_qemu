@@ -6,30 +6,14 @@ set(WINDOWS_ICON ../images/emulator_icon.rc)
 
 add_executable(emulator main-emulator.cpp ${WINDOWS_ICON})
 target_link_libraries(emulator PRIVATE android-emu)
-target_compile_definitions(emulator
-                           PRIVATE
-                           "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
-                           "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
-                           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
-
 
 add_executable(emulator-headless main-emulator.cpp ${WINDOWS_ICON})
 target_link_libraries(emulator-headless PRIVATE android-emu)
-target_compile_definitions(emulator-headless
-                           PRIVATE
-                           -DCONFIG_HEADLESS
-                           "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
-                           "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
-                           "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
+target_compile_definitions(emulator-headless PRIVATE -DCONFIG_HEADLESS)
 
 # Make sure we have the qemu dependencies available
-add_dependencies(emulator
-                 qemu-system-i386
-                 qemu-system-x86_64
-                 qemu-system-armel
-                 qemu-system-aarch64
-                 emulator-crash-service)
-add_dependencies(emulator-headless qemu-system-x86_64-headless qemu-system-aarch64-headless emulator-crash-service)
+add_dependencies(emulator qemu-system-i386 qemu-system-x86_64 qemu-system-armel qemu-system-aarch64)
+add_dependencies(emulator-headless qemu-system-x86_64-headless qemu-system-aarch64-headless)
 
 set(PC_BIOS "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/qemu-kernel/x86/pc-bios")
 set(EMULATOR_BIOS_DEPENDENCIES
@@ -46,8 +30,7 @@ set(EMULATOR_BIOS_DEPENDENCIES
 
 set(EMULATOR_KEYMAP_DEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/pc-bios/keymaps/*>>lib/pc-bios/keymaps")
 set(CERT_DEPEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/android/data/ca-bundle.pem>lib/ca-bundle.pem")
-set(EMULATOR_HW_DEPENDENCIES
-    "${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini>lib/hardware-properties.ini")
+set(EMULATOR_HW_DEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini>lib/hardware-properties.ini")
 
 # Install all the depencies in the right place during build
 android_target_dependency(emulator all QT5_SHARED_DEPENDENCIES)

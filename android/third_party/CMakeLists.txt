@@ -46,13 +46,12 @@ add_subdirectory(libkeymaster3)
 add_subdirectory(ext4_utils)
 add_subdirectory(google-benchmark)
 
-# Old windows & linux version will use old breakpad version, until we track down
-# crash detection bugs under linux.
-if (ANDROID_TARGET_TAG STREQUAL "windows-x86_64" OR ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
+# Old windows version will use old breakpad version..
+if (ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
   prebuilt(BREAKPAD)
 else()
   add_subdirectory(breakpad)
- endif()
+endif()
 
 add_library(picosha2 INTERFACE)
 target_include_directories(picosha2 INTERFACE picosha2)
