@@ -24,6 +24,10 @@ set(OPTION_SDK_TOOLS_BUILD_NUMBER "" CACHE STRING "The sdk buildnumber to use, i
 set(OPTION_ASAN "" CACHE STRING "The list of build sanitizers to user")
 set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
 
+
+string(STRIP "${OPTION_SDK_TOOLS_BUILD_NUMBER}" OPTION_SDK_TOOLS_BUILD_NUMBER)
+string(STRIP "${OPTION_SDK_TOOLS_REVISION}" OPTION_SDK_TOOLS_REVISION)
+
 set_property(CACHE OPTION_CRASHUPLOAD PROPERTY STRINGS NONE STAGING PROD)
 
 # Symbol extraction is not supported when cross compiling.
@@ -160,6 +164,7 @@ if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
   add_c_flag("-MD")
 endif()
 
+add_c_flag("-g")
 # Disable generation of information about every class with virtual functions for use by the C++ runtime type
 # identification features (dynamic_cast and typeid). If you don't use those parts of the language, you can save some
 # space by using this flag. Note that exception handling uses the same information, but it will generate it as needed.
