@@ -32,6 +32,8 @@
 constexpr float kMetersPerInch = 0.0254f;
 constexpr uint64_t kMinInteractionTimeMilliseconds = 500;
 
+int kAccelerometerTabIndex = 0;
+
 const QAndroidSensorsAgent* VirtualSensorsPage::sSensorsAgent = nullptr;
 
 VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
@@ -107,6 +109,10 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
     }
 
     updateSensorValuesInUI();
+
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+        mUi->tabWidget->removeTab(kAccelerometerTabIndex);
+    }
 }
 
 VirtualSensorsPage::~VirtualSensorsPage() {
