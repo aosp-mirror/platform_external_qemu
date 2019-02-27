@@ -184,6 +184,9 @@ ExtendedWindow::ExtendedWindow(
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         mSidebarButtons.addButton(mExtendedUi->carDataButton);
         mExtendedUi->carDataButton->setVisible(true);
+        mExtendedUi->fingerButton->setVisible(false);
+        mExtendedUi->batteryButton->setVisible(false);
+        mExtendedUi->dpadButton->setVisible(false);
     }
 
 #ifdef __APPLE__

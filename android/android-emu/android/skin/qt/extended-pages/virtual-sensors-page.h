@@ -18,6 +18,8 @@
 #include "android/physics/physical_state_agent.h"
 #include "android/skin/file.h"
 #include "android/skin/rect.h"
+#include "android/avd/info.h"
+#include "android/globals.h"
 
 #include <QDoubleValidator>
 #include <QElapsedTimer>
