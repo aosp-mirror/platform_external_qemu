@@ -13,19 +13,8 @@
 // limitations under the License.
 #include "android/base/Backtrace.h"
 
-#if defined(__WIN32) || defined(_MSC_VER)
-namespace android {
-namespace base {
-
-std::string bt() {
-    return "<bt not implemented>";
-}
-
-}  // namespace base
-}  // namespace android
-
-#else
-
+// TODO: figure out linux, msvc clang build might allow this
+#ifdef __APPLE__
 #include <iomanip>
 #include <sstream>
 #include <stdlib.h>
@@ -33,12 +22,18 @@ std::string bt() {
 #include <errno.h>
 #include <libunwind.h>
 #include <stdio.h>
+#endif
+
 namespace android {
 namespace base {
 
 // Implementation from:
 // https://eli.thegreenplace.net/2015/programmatic-access-to-the-call-stack-in-c/
 
+// TODO: figure out linux, only works with macOS SDK atm
+#ifndef __APPLE__
+std::string bt() { return "<bt not implemented>"; }
+#else
 
 #define E(fmt,...) \
     fprintf(stderr, "%s: " fmt "\n", __func__, ##__VA_ARGS__);
@@ -73,14 +68,13 @@ std::string bt() {
             ss << " (" << nameptr << ")+" << std::hex << offset << "\n";
             free(demangled);
         } else {
-            ss << (" -- error: unable to obtain symbol name for this frame\n");
+            printf(" -- error: unable to obtain symbol name for this frame\n");
         }
     }
 
     return ss.str();
 }
-
-}  // namespace base
-}  // namespace android
-
 #endif
+
+} // namespace android
+} // namespace base
