@@ -22,6 +22,30 @@
       "revId": "e18cf9f95ed94b999c17a9ebdcaaac0b314bf986",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dfa9a614_a0b5079a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-02-27T18:32:11Z",
+      "side": 1,
+      "message": "Good point, will do.",
+      "parentUuid": "3d8bfe2f_c9bb4b75",
+      "range": {
+        "startLine": 59,
+        "startChar": 5,
+        "endLine": 59,
+        "endChar": 45
+      },
+      "revId": "e18cf9f95ed94b999c17a9ebdcaaac0b314bf986",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
