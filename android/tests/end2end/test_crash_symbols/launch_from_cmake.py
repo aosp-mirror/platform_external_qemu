@@ -15,13 +15,10 @@
 # limitations under the License.
 """Test launcher for cmake that installs all the dependencies that are needed."""
 
-import pip
+from setuptools.command import easy_install
 
 def install(package):
-    if hasattr(pip, 'main'):
-        pip.main(['install', '--user', package])
-    else:
-        pip._internal.main(['install', '--user', package])
+    easy_install.main(['install', '--user', package])
 
 
 def install_and_import(module, package=None):
