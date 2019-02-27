@@ -98,10 +98,10 @@ struct GLSupport {
     bool GL_OES_TEXTURE_NPOT = false;
     bool GL_OES_RGB8_RGBA8 = false;
 
-    bool GL_EXT_color_buffer_float = false;
+    bool ext_GL_EXT_color_buffer_float = false;
 
-    bool GL_EXT_memory_object = false;
-    bool GL_EXT_semaphore = false;
+    bool ext_GL_EXT_memory_object = false;
+    bool ext_GL_EXT_semaphore = false;
 };
 
 struct ArrayData {
@@ -276,8 +276,8 @@ public:
     virtual GLSupport*  getCaps(){return &s_glSupport;};
     static GLSupport* getCapsGlobal(){return &s_glSupport;};
     static bool vulkanInteropSupported() {
-        return s_glSupport.GL_EXT_memory_object &&
-               s_glSupport.GL_EXT_semaphore;
+        return s_glSupport.ext_GL_EXT_memory_object &&
+               s_glSupport.ext_GL_EXT_semaphore;
     }
     virtual ~GLEScontext();
     virtual int getMaxTexUnits() = 0;

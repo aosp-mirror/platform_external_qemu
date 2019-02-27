@@ -235,6 +235,16 @@ public:
     void postLayer(ComposeLayer* l, int frameWidth, int frameHeight);
     GLuint getTexture();
 
+    bool importMemory(
+#ifdef _WIN32
+        void* handle,
+#else
+        int handle,
+#endif
+        uint64_t size,
+        bool dedicated,
+        bool linearTiling);
+
 public:
     void restore();
 
@@ -277,6 +287,9 @@ private:
 
     GLenum m_asyncReadbackType = GL_UNSIGNED_BYTE;
     size_t m_numBytes = 0;
+
+    bool m_importedMemory = false;
+    GLuint m_memoryObject = 0;
 };
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;

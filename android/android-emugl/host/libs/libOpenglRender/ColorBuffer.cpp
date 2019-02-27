@@ -28,6 +28,8 @@
 
 #include "emugl/common/misc.h"
 
+#include <GLES2/gl2ext.h>
+
 #include <stdio.h>
 #include <string.h>
 
@@ -295,6 +297,10 @@ ColorBuffer::~ColorBuffer() {
 
     GLuint tex[2] = {m_tex, m_blitTex};
     s_gles2.glDeleteTextures(2, tex);
+
+    if (m_memoryObject) {
+        s_gles2.glDeleteMemoryObjectsEXT(1, &m_memoryObject);
+    }
 
     delete m_resizer;
 }
@@ -814,4 +820,63 @@ GLuint ColorBuffer::getTexture() {
 
 void ColorBuffer::postLayer(ComposeLayer* l, int frameWidth, int frameHeight) {
     m_helper->getTextureDraw()->drawLayer(l, frameWidth, frameHeight, m_width, m_height, m_tex);
+}
+
+bool ColorBuffer::importMemory(
+#ifdef _WIN32
+        void* handle,
+#else
+        int handle,
+#endif
+        uint64_t size,
+        bool dedicated,
+        bool linearTiling) {
+    RecursiveScopedHelperContext context(m_helper);
+
+    GLint err;
+
+    err = s_gles2.glGetError(); if (err) fprintf(stderr, "%s:%d err 0x%x\n", __func__, __LINE__, err);
+
+    s_gles2.glCreateMemoryObjectsEXT(1, &m_memoryObject);
+    err = s_gles2.glGetError(); if (err) fprintf(stderr, "%s:%d err 0x%x\n", __func__, __LINE__, err);
+
+fprintf(stderr, "%s: obj: %u size: %llu\n", __func__, m_memoryObject, (unsigned long long)size);
+
+    if (dedicated) {
+        static const GLint DEDICATED_FLAG = GL_TRUE;
+        s_gles2.glMemoryObjectParameterivEXT(m_memoryObject,
+                                             GL_DEDICATED_MEMORY_OBJECT_EXT,
+                                             &DEDICATED_FLAG);
+    }
+
+    err = s_gles2.glGetError(); if (err) fprintf(stderr, "%s:%d err 0x%x\n", __func__, __LINE__, err);
+#ifdef _WIN32
+    s_gles2.glImportMemoryWin32HandleEXT(m_memoryObject, size, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, handle);
+#else
+    s_gles2.glImportMemoryFdEXT(m_memoryObject, size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, handle);
+#endif
+    err = s_gles2.glGetError(); if (err) fprintf(stderr, "%s:%d err 0x%x\n", __func__, __LINE__, err);
+
+    GLuint glTiling = linearTiling ? GL_LINEAR_TILING_EXT : GL_OPTIMAL_TILING_EXT;
+
+    s_gles2.glDeleteTextures(1, &m_tex);
+    s_gles2.glGenTextures(1, &m_tex);
+    err = s_gles2.glGetError(); if (err) fprintf(stderr, "%s:%d err 0x%x\n", __func__, __LINE__, err);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+    err = s_gles2.glGetError(); if (err) fprintf(stderr, "%s:%d err 0x%x\n", __func__, __LINE__, err);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_TILING_EXT, glTiling);
+    err = s_gles2.glGetError(); if (err) fprintf(stderr, "%s:%d err 0x%x\n", __func__, __LINE__, err);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    s_gles2.glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, GL_RGBA8, m_width, m_height, m_memoryObject, 0);
+    err = s_gles2.glGetError(); if (err) fprintf(stderr, "%s:%d err 0x%x\n", __func__, __LINE__, err);
+
+    s_egl.eglDestroyImageKHR(m_display, m_eglImage);
+    m_eglImage = s_egl.eglCreateImageKHR(
+            m_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
+            (EGLClientBuffer)SafePointerFromUInt(m_tex), NULL);
+
+    return true;
 }
