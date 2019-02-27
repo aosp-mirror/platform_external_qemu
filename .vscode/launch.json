@@ -29,18 +29,20 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/qemu/windows-x86_64/qemu-system-x86_64",
             "args": [
-                "@p-user",
+                "@P_64",
                 "-verbose",
                 "-show-kernel"
             ],
-            "stopAtEntry": true,
+            "stopAtEntry": false,
             "cwd": "${workspaceFolder}\\build",
+            "env" : {
+            },
             "environment": [
                 {
                     "name": "ANDROID_SDK_ROOT",
                     "value": "C:\\Users\\EmuTest2\\AppData\\Local\\Android\\Sdk"
                 },
-                // Make sure we suppress the standard asan warnings, otherwise we will crash fast. 
+                // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
                 {
                     "name": "ASAN_OPTIONS",
                     "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"

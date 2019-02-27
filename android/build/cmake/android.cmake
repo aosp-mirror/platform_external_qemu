@@ -13,6 +13,14 @@
 #
 include(prebuilts)
 
+# Checks to make sure the TAG is valid.
+function(_check_target_tag TAG)
+  set(VALID_TARGETS windows windows-x86_64 windows_msvc-x86_64 linux-x86_64 darwin-x86_64 all)
+  if(NOT (TAG IN_LIST VALID_TARGETS))
+     message(FATAL_ERROR "The target ${TAG} does not exist, has to be one of: ${VALID_TARGETS}")
+  endif()
+endfunction()
+
 # Cross compiles the given cmake project if needed.
 #
 # EXE the name of the target we are interested in. This is
@@ -49,6 +57,7 @@ endfunction()
 # (https://cmake.org/cmake/help/v3.5/command/target_compile_definitions.html) The only difference is that the
 # definitions will only be applied if the OS parameter matches the ANDROID_TARGET_TAG or compiler variable.
 function(android_target_compile_definitions TGT OS MODIFIER ITEMS)
+  _check_target_tag(${OS})
   if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR OS STREQUAL "all" OR OS MATCHES "${CMAKE_CXX_COMPILER_ID}")
     target_compile_definitions(${TGT} ${MODIFIER} ${ITEMS})
     foreach(DEF ${ARGN})
@@ -65,6 +74,7 @@ function(android_target_link_libraries TGT OS MODIFIER ITEMS)
     message(
       FATAL_ERROR "Currently cannot link more than 49 dependecies due to some weirdness with calling target_link_libs")
   endif()
+  _check_target_tag(${OS})
   if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR OS STREQUAL "all" OR OS MATCHES "${CMAKE_CXX_COMPILER_ID}")
     # HACK ATTACK! We cannot properly expand unknown linker args as they are treated in a magical fashion. Some
     # arguments need to be "grouped" together somehow (for example optimized;lib) since we cannot resolve this properly
@@ -81,6 +91,7 @@ endfunction()
 # (https://cmake.org/cmake/help/v3.5/command/target_include_directories.html) The only difference is that the
 # definitions will only be applied if the OS parameter matches the ANDROID_TARGET_TAG variable.
 function(android_target_include_directories TGT OS MODIFIER ITEMS)
+  _check_target_tag(${OS})
   if(ANDROID_TARGET_TAG MATCHES "${OS}.*" OR OS STREQUAL "all" OR OS MATCHES "${CMAKE_CXX_COMPILER_ID}")
     target_include_directories(${TGT} ${MODIFIER} ${ITEMS})
     foreach(DIR ${ARGN})
