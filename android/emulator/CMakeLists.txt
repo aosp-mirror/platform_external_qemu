@@ -30,7 +30,8 @@ set(EMULATOR_BIOS_DEPENDENCIES
 
 set(EMULATOR_KEYMAP_DEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/pc-bios/keymaps/*>>lib/pc-bios/keymaps")
 set(CERT_DEPEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/android/data/ca-bundle.pem>lib/ca-bundle.pem")
-set(EMULATOR_HW_DEPENDENCIES "${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini>lib/hardware-properties.ini")
+set(EMULATOR_HW_DEPENDENCIES
+    "${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini>lib/hardware-properties.ini")
 
 # Install all the depencies in the right place during build
 android_target_dependency(emulator all QT5_SHARED_DEPENDENCIES)
@@ -77,3 +78,15 @@ android_target_properties(emulator all "${RUNTIME_OS_PROPERTIES}")
 
 android_install_exe(emulator .)
 android_install_exe(emulator-headless .)
+
+# Install files we need.
+install(FILES ${ANDROID_QEMU2_TOP_DIR}/android-info.txt DESTINATION .)
+
+# Note, these files are identical..
+if(ANDROID_TARGET_TAG MATCHES "windows.*")
+  install(FILES ${ANDROID_QEMU2_TOP_DIR}/win.source.properties DESTINATION . RENAME source.properties)
+elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
+  install(FILES ${ANDROID_QEMU2_TOP_DIR}/source.properties DESTINATION .)
+elseif(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
+  install(FILES ${ANDROID_QEMU2_TOP_DIR}/win.source.properties DESTINATION . RENAME source.properties)
+endif()
