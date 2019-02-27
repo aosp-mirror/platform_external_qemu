@@ -190,7 +190,6 @@ android_target_link_libraries(breakpad_common
                               wininet::wininet
                               diaguids::diaguids
                               dbghelp::dbghelp
-                              mincore::mincore
                               imagehlp::imagehlp)
 set(breakpad_common_unittests_src
     ${BREAKPAD_SRC}/common/byte_cursor_unittest.cc
