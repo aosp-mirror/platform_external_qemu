@@ -30,7 +30,7 @@ EXPORT void load_gralloc_module(
 
     memset(impl_out, 0x0, sizeof(*impl_out));
 
-    impl_out->lib = dlopen(path, RTLD_LAZY);
+    impl_out->lib = dlopen(path, RTLD_NOW);
 
     if (!impl_out->lib) {
         fprintf(stderr, "%s: failed to load gralloc module from %s\n",

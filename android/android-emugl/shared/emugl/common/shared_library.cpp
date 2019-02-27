@@ -194,29 +194,29 @@ SharedLibrary* SharedLibrary::do_open(const char* libraryName,
     // On OSX, some libraries don't include an extension (notably OpenGL)
     // On OSX we try to open |libraryName| first.  If that doesn't exist,
     // we try |libraryName|.dylib
-    void* lib = dlopen(libraryName, RTLD_LAZY);
+    void* lib = dlopen(libraryName, RTLD_NOW);
     if (lib == NULL) {
-        lib = dlopen(libPath, RTLD_LAZY);
+        lib = dlopen(libPath, RTLD_NOW);
 
         sSearchPaths->forEachPath([&lib, libraryName, libPath](const std::string& path) {
             if (!lib) {
                 auto libName = PathUtils::join(path, libraryName);
-                lib = dlopen(libName.c_str(), RTLD_LAZY);
+                lib = dlopen(libName.c_str(), RTLD_NOW);
                 if (!lib) {
                     auto libPathName = PathUtils::join(path, libPath);
-                    lib = dlopen(libPathName.c_str(), RTLD_LAZY);
+                    lib = dlopen(libPathName.c_str(), RTLD_NOW);
                 }
             }
         });
     }
 #else
-    void* lib = dlopen(libPath, RTLD_LAZY);
+    void* lib = dlopen(libPath, RTLD_NOW);
 #endif
 
     sSearchPaths->forEachPath([&lib, libPath](const std::string& path) {
         if (!lib) {
             auto libPathName = PathUtils::join(path, libPath);
-            lib = dlopen(libPathName.c_str(), RTLD_LAZY);
+            lib = dlopen(libPathName.c_str(), RTLD_NOW);
         }
     });
 
