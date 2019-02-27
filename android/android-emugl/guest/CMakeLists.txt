@@ -80,8 +80,7 @@ target_compile_definitions(vulkan_android PRIVATE
    -DVK_NO_PROTOTYPES
    -D__ANDROID_API__=28)
 target_include_directories(vulkan_android PRIVATE ${ANDROID_EMUGL_DIR}/host/include)
-
-target_compile_options(vulkan_android PRIVATE ${ANDROID_EMUGL_SHARED_FVISIBILITY} -fstrict-aliasing)
+target_compile_options(vulkan_android PRIVATE -fvisibility=hidden -fstrict-aliasing)
 target_link_libraries(vulkan_android PRIVATE grallocusage)
 target_link_libraries(vulkan_android PUBLIC emugl_base log gui cutils utils)
 
