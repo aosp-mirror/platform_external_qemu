@@ -1754,17 +1754,17 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     if (::isCoreProfile() ||
         strstr(cstring,"GL_ARB_color_buffer_float")!=NULL ||
         strstr(cstring,"GL_EXT_color_buffer_float")!=NULL)
-        s_glSupport.GL_EXT_color_buffer_float = true;
+        s_glSupport.ext_GL_EXT_color_buffer_float = true;
 
     if (!(Version((const char*)glVersion) < Version("3.0")) || strstr(cstring,"GL_OES_rgb8_rgba8")!=NULL)
         s_glSupport.GL_OES_RGB8_RGBA8 = true;
 
     if (strstr(cstring, "GL_EXT_memory_object") != NULL) {
-        s_glSupport.GL_EXT_memory_object = true;
+        s_glSupport.ext_GL_EXT_memory_object = true;
     }
 
     if (strstr(cstring, "GL_EXT_semaphore") != NULL) {
-        s_glSupport.GL_EXT_semaphore = true;
+        s_glSupport.ext_GL_EXT_semaphore = true;
     }
 }
 

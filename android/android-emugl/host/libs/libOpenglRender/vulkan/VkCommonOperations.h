@@ -109,8 +109,6 @@ struct VkEmulation {
         bool hasGraphicsQueueFamily = false;
         bool hasComputeQueueFamily = false;
         bool supportsExternalMemory = false;
-
-        // TODO: Use OpenGL interop features where it makes sense
         bool glInteropSupported = false;
 
         std::vector<uint32_t> graphicsQueueFamilyIndices;
@@ -178,6 +176,8 @@ struct VkEmulation {
         VkMemoryRequirements memReqs;
 
         VkImageLayout currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+        bool glExported = false;
     };
 
     // Track what is supported on whatever device was selected.
@@ -230,12 +230,18 @@ bool importExternalMemory(VulkanDispatch* vk,
                           VkDevice targetDevice,
                           const VkEmulation::ExternalMemoryInfo* info,
                           VkDeviceMemory* out);
+bool importExternalMemoryDedicatedImage(
+    VulkanDispatch* vk,
+    VkDevice targetDevice,
+    const VkEmulation::ExternalMemoryInfo* info,
+    VkImage image,
+    VkDeviceMemory* out);
 
 // ColorBuffer operations
 
 bool isColorBufferVulkanCompatible(uint32_t colorBufferHandle);
 
-bool setupVkColorBuffer(uint32_t colorBufferHandle);
+bool setupVkColorBuffer(uint32_t colorBufferHandle, bool* exported = nullptr);
 bool teardownVkColorBuffer(uint32_t colorBufferHandle);
 VkEmulation::ColorBufferInfo getColorBufferInfo(uint32_t colorBufferHandle);
 bool updateColorBufferFromVkImage(uint32_t colorBufferHandle);

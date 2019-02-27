@@ -198,7 +198,8 @@ GL_APICALL void GL_APIENTRY glTexStorageMem2DMultisampleEXT(GLenum target, GLsiz
 GL_APICALL void GL_APIENTRY glTexStorageMem3DEXT(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLuint memory, GLuint64 offset);
 GL_APICALL void GL_APIENTRY glTexStorageMem3DMultisampleEXT(GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedSampleLocations, GLuint memory, GLuint64 offset);
 GL_APICALL void GL_APIENTRY glBufferStorageMemEXT(GLenum target, GLsizeiptr size, GLuint memory, GLuint64 offset);
-
+GL_APICALL void GL_APIENTRY glTexParameteriHOST(GLenum target, GLenum pname, GLint param);
+ 
 // Not included: direct-state-access, 1D function pointers
 
 // GL_EXT_semaphore
@@ -244,6 +245,7 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
         (*s_glesExtensions)["glTexStorageMem3DEXT"] = (__translatorMustCastToProperFunctionPointerType)glTexStorageMem3DEXT;
         (*s_glesExtensions)["glTexStorageMem3DMultisampleEXT"] = (__translatorMustCastToProperFunctionPointerType)glTexStorageMem3DMultisampleEXT;
         (*s_glesExtensions)["glBufferStorageMemEXT"] = (__translatorMustCastToProperFunctionPointerType)glBufferStorageMemEXT;
+        (*s_glesExtensions)["glTexParameteriHOST"] = (__translatorMustCastToProperFunctionPointerType)glTexParameteriHOST;
         (*s_glesExtensions)["glImportSemaphoreFdEXT"] = (__translatorMustCastToProperFunctionPointerType)glImportSemaphoreFdEXT;
         (*s_glesExtensions)["glImportSemaphoreWin32HandleEXT"] = (__translatorMustCastToProperFunctionPointerType)glImportSemaphoreWin32HandleEXT;
         (*s_glesExtensions)["glGenSemaphoresEXT"] = (__translatorMustCastToProperFunctionPointerType)glGenSemaphoresEXT;
@@ -3392,6 +3394,7 @@ GL_APICALL void  GL_APIENTRY glTexParameteri(GLenum target, GLenum pname, GLint 
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
                    GLESv2Validate::textureParams(ctx, pname)),
                  GL_INVALID_ENUM);
+
     TextureData *texData = getTextureTargetData(target);
     if (texData) {
         texData->setTexParam(pname, param);
@@ -4217,6 +4220,11 @@ GL_APICALL void GL_APIENTRY glTexStorageMem3DMultisampleEXT(GLenum target, GLsiz
 GL_APICALL void GL_APIENTRY glBufferStorageMemEXT(GLenum target, GLsizeiptr size, GLuint memory, GLuint64 offset) {
     GET_CTX_V2();
     ctx->dispatcher().glBufferStorageMemEXT(target, size, memory, offset);
+}
+
+GL_APICALL void GL_APIENTRY glTexParameteriHOST(GLenum target, GLenum pname, GLint param) {
+    GET_CTX_V2();
+    ctx->dispatcher().glTexParameteri(target, pname, param);
 }
 
 // Not included: direct-state-access, 1D function pointers

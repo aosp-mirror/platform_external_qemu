@@ -53,6 +53,22 @@ sKnownStagingTypeIndices = LAZY_INSTANCE_INIT;
 
 static android::base::StaticLock sVkEmulationLock;
 
+static VK_EXT_MEMORY_HANDLE dupExternalMemory(VK_EXT_MEMORY_HANDLE h) {
+#ifdef _WIN32
+    auto myProcessHandle = GetCurrentProcess();
+    VK_EXT_MEMORY_HANDLE res;
+    DuplicateHandle(
+        myProcessHandle, h, // source process and handle
+        myProcessHandle, &res, // target process and pointer to handle
+        0 /* desired access (ignored) */,
+        true /* inherit */,
+        DUPLICATE_SAME_ACCESS /* same access option */);
+    return res;
+#else
+    return dup(h);
+#endif
+}
+
 bool getStagingMemoryTypeIndex(
     VulkanDispatch* vk,
     VkDevice device,
@@ -515,6 +531,8 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
             physdevs[i], nullptr, &deviceExtensionCount, deviceExts.data());
 
         deviceInfos[i].supportsExternalMemory = false;
+        deviceInfos[i].glInteropSupported =
+            FrameBuffer::getFB()->isVulkanInteropSupported();
 
         if (sVkEmulation->instanceSupportsExternalMemoryCapabilities) {
             deviceInfos[i].supportsExternalMemory = extensionsSupported(
@@ -978,7 +996,53 @@ bool importExternalMemory(VulkanDispatch* vk,
     VkResult res = vk->vkAllocateMemory(targetDevice, &allocInfo, nullptr, out);
 
     if (res != VK_SUCCESS) {
-        LOG(VERBOSE) << "importExternalMemory: Failed with " << res;
+        LOG(ERROR) << "importExternalMemory: Failed with " << res;
+        return false;
+    }
+
+    return true;
+}
+
+bool importExternalMemoryDedicatedImage(
+    VulkanDispatch* vk,
+    VkDevice targetDevice,
+    const VkEmulation::ExternalMemoryInfo* info,
+    VkImage image,
+    VkDeviceMemory* out) {
+
+    VkMemoryDedicatedAllocateInfo dedicatedInfo = {
+        VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO, 0,
+        image,
+        VK_NULL_HANDLE,
+    };
+
+#ifdef _WIN32
+    VkImportMemoryWin32HandleInfoKHR importInfo = {
+        VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR,
+        &dedicatedInfo,
+        VK_EXT_MEMORY_HANDLE_TYPE_BIT,
+        info->exportedHandle,
+        0,
+    };
+#else
+    VkImportMemoryFdInfoKHR importInfo = {
+        VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR,
+        &dedicatedInfo,
+        VK_EXT_MEMORY_HANDLE_TYPE_BIT,
+        info->exportedHandle,
+    };
+#endif
+    VkMemoryAllocateInfo allocInfo = {
+        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        &importInfo,
+        info->size,
+        info->typeIndex,
+    };
+
+    VkResult res = vk->vkAllocateMemory(targetDevice, &allocInfo, nullptr, out);
+
+    if (res != VK_SUCCESS) {
+        LOG(ERROR) << "importExternalMemoryDedicatedImage: Failed with " << res;
         return false;
     }
 
@@ -1043,7 +1107,7 @@ static uint32_t lastGoodTypeIndex(uint32_t indices) {
     return 0;
 }
 
-bool setupVkColorBuffer(uint32_t colorBufferHandle) {
+bool setupVkColorBuffer(uint32_t colorBufferHandle, bool* exported) {
     if (!isColorBufferVulkanCompatible(colorBufferHandle)) return false;
 
     auto vk = sVkEmulation->dvk;
@@ -1144,7 +1208,21 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle) {
     if (bindImageMemoryRes != VK_SUCCESS) {
         fprintf(stderr, "%s: Failed to bind image memory. %d\n", __func__,
         bindImageMemoryRes);
+        return bindImageMemoryRes;
     }
+
+    if (sVkEmulation->deviceInfo.supportsExternalMemory &&
+        sVkEmulation->deviceInfo.glInteropSupported &&
+        FrameBuffer::getFB()->importMemoryToColorBuffer(
+            dupExternalMemory(res.memory.exportedHandle),
+            res.memory.size,
+            false /* dedicated */,
+            res.tiling == VK_IMAGE_TILING_LINEAR,
+            colorBufferHandle)) {
+        res.glExported = true;
+    }
+
+    if (exported) *exported = res.glExported;
 
     sVkEmulation->colorBuffers[colorBufferHandle] = res;
 
@@ -1202,6 +1280,11 @@ bool updateColorBufferFromVkImage(uint32_t colorBufferHandle) {
     if (!infoPtr->image) {
         fprintf(stderr, "%s: error: ColorBuffer 0x%x has no VkImage\n", __func__, colorBufferHandle);
         return false;
+    }
+
+    if (infoPtr->glExported) {
+        // No sync needed if exported to GL
+        return true;
     }
 
     // Record our synchronization commands.
@@ -1335,6 +1418,11 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle) {
     if (!infoPtr) {
         // Color buffer not found; this is usually OK.
         return false;
+    }
+
+    if (infoPtr->glExported) {
+        // No sync needed if exported to GL
+        return true;
     }
 
     size_t cbNumBytes = 0;
