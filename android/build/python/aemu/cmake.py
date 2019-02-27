@@ -29,13 +29,15 @@ import platform
 import shutil
 
 from aemu.process import run
-from aemu.definitions import Generator, Crash, BuildConfig, SymbolUris, Toolchain, get_qemu_root, get_cmake, Make, get_aosp_root, fixup_windows_clang
+from aemu.definitions import Generator, Crash, BuildConfig, SymbolUris, Toolchain, get_qemu_root, get_cmake, Make, get_aosp_root, fixup_windows_clang, read_simple_properties
 from aemu.run_tests import run_tests
+from aemu.distribution import create_distribution
 
 FLAGS = flags.FLAGS
 flags.DEFINE_enum('symbol_dest', 'none', SymbolUris.values(),
                   'Endpoint to send the symbols to.')
-flags.DEFINE_string('sdk_revision', None, 'The emulator sdk revision.')
+flags.DEFINE_string('sdk_revision', None,
+                    '## DEPRECATED ##, it will automatically use the one defined in source.properties')
 flags.DEFINE_string('sdk_build_number', None, 'The emulator sdk build number.')
 flags.DEFINE_enum('config', 'release', BuildConfig.values(),
                   'Whether we are building a release or debug configuration.')
@@ -44,7 +46,9 @@ flags.DEFINE_enum('crash', 'none', Crash.values(),
                   'enabling this will result in symbol processing and uploading during install.')
 flags.DEFINE_string('out', os.path.abspath('objs'),
                     'Use specific output directory.')
+flags.DEFINE_string('dist', None, 'Create distribution in directory')
 flags.DEFINE_boolean('qtwebengine', False, 'Build with QtWebEngine support')
+flags.DEFINE_boolean('tests', True, 'Run all the tests')
 flags.DEFINE_list(
     'sanitizer', [], 'List of sanitizers ([address, thread]) to enable in the built binaries.')
 flags.DEFINE_enum('generator', 'ninja', Generator.values(),
@@ -61,7 +65,9 @@ flags.DEFINE_boolean(
     'clean', True, 'Clean the destination build directory before configuring. '
     'Setting this to false will attempt an incremental build. '
     'Note that this can introduce cmake caching issues.')
-flags.DEFINE_boolean('symbols', False, 'Strip binaries and generate symbols after build.')
+flags.DEFINE_boolean(
+    'symbols', False, 'Strip binaries and generate symbols after build.')
+
 
 def configure():
     """Configures the cmake project."""
@@ -83,11 +89,17 @@ def configure():
     cmake_cmd += SymbolUris.from_string(FLAGS.symbol_dest).to_cmd()
     cmake_cmd += BuildConfig.from_string(FLAGS.config).to_cmd()
     cmake_cmd += ['-DQTWEBENGINE=%s' % FLAGS.qtwebengine]
+
     if FLAGS.sdk_revision:
-        cmake_cmd += ['-DOPTION_SDK_TOOLS_REVISION=%s' % FLAGS.sdk_revision]
+        sdk_revision = FLAGS.sdk_revision
+    else:
+        sdk_revision = read_simple_properties(os.path.join(
+            get_aosp_root(), 'external', 'qemu', 'source.properties'))['Pkg.Revision']
+    cmake_cmd += ['-DOPTION_SDK_TOOLS_REVISION=%s' % sdk_revision]
+
     if FLAGS.sdk_build_number:
         cmake_cmd += ['-DOPTION_SDK_TOOLS_BUILD_NUMBER=%s' %
-                  FLAGS.sdk_build_number]
+                      FLAGS.sdk_build_number]
     if FLAGS.sanitizer:
         cmake_cmd += ['-DOPTION_ASAN=%s' % (','.join(FLAGS.sanitizer))]
 
@@ -100,6 +112,7 @@ def configure():
 
     run(cmake_cmd, FLAGS.out)
 
+
 def get_build_cmd():
     '''Gets the command that will build all the sources.'''
     target = 'install'
@@ -107,6 +120,7 @@ def get_build_cmd():
     if FLAGS.symbols and platform.system().lower() != 'windows':
         target += '/strip'
     return [get_cmake(), '--build', FLAGS.out, '--target', target]
+
 
 def main(argv=None):
     del argv  # Unused.
@@ -124,7 +138,20 @@ def main(argv=None):
     run(get_build_cmd())
 
     # Test.
-    run_tests(FLAGS.out)
+    if FLAGS.tests:
+        run_tests(FLAGS.out)
+
+    # Create a distribution if needed.
+    if FLAGS.dist:
+        data = {'aosp': get_aosp_root(),
+                'target': FLAGS.target,
+                'sdk_build_number': FLAGS.sdk_build_number,
+                'config' : FLAGS.config
+                }
+        if FLAGS.target == 'mingw':
+            data['target'] = 'windows'
+
+        create_distribution(FLAGS.dist, FLAGS.out, data)
 
     if platform.system() != 'Windows' and FLAGS.config == 'debug':
         overrides = open(os.path.join(
