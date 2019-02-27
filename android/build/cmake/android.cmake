@@ -591,7 +591,7 @@ function(android_upload_symbols TGT)
     return()
   endif()
   set(STDOUT "/dev/stdout")
-  if (ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64" AND ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
+  if (WIN32)
     set(STDOUT "CON")
   endif()
   set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
@@ -648,7 +648,7 @@ function(android_extract_symbols_file FNAME)
   endif()
   install(
     CODE
-    "execute_process(COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/dump_syms -g ${FNAME} OUTPUT_FILE ${DEST} RESULT_VARIABLE RES ERROR_QUIET) \n
+    "execute_process(COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/dump_syms ${FNAME} OUTPUT_FILE ${DEST} RESULT_VARIABLE RES ERROR_QUIET) \n
                  message(STATUS \"Extracted symbols for ${FNAME} ${RES}\")")
   install(
     CODE
@@ -663,14 +663,10 @@ function(android_extract_symbols TGT)
     # Note: we do not need to extract symbols on windows for uploading.
     return()
   endif()
-  set(DEV_NULL "/dev/null")
-  if (ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64" AND ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
-      set(DEV_NULL "nul")
-  endif()
 
   set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
   add_custom_command(TARGET ${TGT} POST_BUILD
-                     COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST} 2> ${DEV_NULL}
+                     COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST}
                      DEPENDS dump_syms
                      COMMENT "Extracting symbols for ${TGT}"
                      VERBATIM)
