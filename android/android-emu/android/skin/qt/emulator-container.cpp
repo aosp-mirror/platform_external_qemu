@@ -342,6 +342,7 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
         mEmulatorWindow->toolWindow()->show();
         mEmulatorWindow->toolWindow2()->show();
         mEmulatorWindow->toolWindow()->dockMainWindow();
+        mEmulatorWindow->toolWindow2()->dockMainWindow();
         if (mModalOverlay) {
             mModalOverlay->showNormal();
         }

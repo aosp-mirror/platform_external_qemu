@@ -104,24 +104,6 @@ ToolWindow2::ToolWindow2(EmulatorQtWindow* window,
     }
     sToolWindow2 = this;
 
-    QSettings settings;
-    bool foldableEnabled = settings.value(Ui::Settings::FOLDABLE_ENABLE, false).toBool();
-    D("foldableEnabled %d\n", foldableEnabled);
-
-    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
-    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
-    int width   = android_hw->hw_displayRegion_0_1_width;
-    int height  = android_hw->hw_displayRegion_0_1_height;
-    if (xOffset < 0 || xOffset > 9999 ||
-        yOffset < 0 || yOffset > 9999 ||
-        width   < 1 || width   > 9999 ||
-        height  < 1 || height  > 9999 ||
-        !foldableEnabled              ||
-        //TODO: need 29
-        avdInfo_getApiLevel(android_avdInfo) < 28) {
-        mHide = true;
-    }
-
     //TODO: disable rotation for V1 release
     mTools2Ui->rotateLeft ->setVisible(false);
     mTools2Ui->rotateRight->setVisible(false);
@@ -147,18 +129,16 @@ void ToolWindow2::mousePressEvent(QMouseEvent* event) {
 }
 
 void ToolWindow2::show() {
-    if (!mHide) {
+    if (!shouldHide()) {
         QFrame::show();
     }
 }
 
 void ToolWindow2::forceShow() {
-    mHide = false;
     QFrame::show();
 }
 
 void ToolWindow2::forceHide() {
-    mHide = true;
     QFrame::hide();
 }
 
@@ -328,24 +308,17 @@ void ToolWindow2::earlyInitialization() {
 
 //static
 void ToolWindow2::sendFoldedArea() {
-    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
-    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
-    int width   = android_hw->hw_displayRegion_0_1_width;
-    int height  = android_hw->hw_displayRegion_0_1_height;
-
-    if (xOffset < 0 || xOffset > 9999 ||
-        yOffset < 0 || yOffset > 9999 ||
-        width   < 1 || width   > 9999 ||
-        height  < 1 || height  > 9999 ||
-        //TODO: need 29
-        avdInfo_getApiLevel(android_avdInfo) < 28)
-    {
+    if (shouldHide()) {
         return;
     }
 
     EmulatorQtWindow* emuQtWindow = EmulatorQtWindow::getInstance();
     if (emuQtWindow == nullptr) return;
 
+    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
+    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
+    int width   = android_hw->hw_displayRegion_0_1_width;
+    int height  = android_hw->hw_displayRegion_0_1_height;
     char foldedArea[64];
     sprintf(foldedArea, "folded-area %d,%d,%d,%d",
             xOffset,
@@ -358,4 +331,25 @@ void ToolWindow2::sendFoldedArea() {
                 if (result && result->exit_code == 0) {
                     D("foldable-page: 'fold-area' command succeeded\n");
                 }});
+}
+
+//static
+bool ToolWindow2::shouldHide() {
+    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
+    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
+    int width   = android_hw->hw_displayRegion_0_1_width;
+    int height  = android_hw->hw_displayRegion_0_1_height;
+    QSettings settings;
+    bool foldableEnabled = settings.value(Ui::Settings::FOLDABLE_ENABLE, false).toBool();
+
+    if (xOffset < 0 || xOffset > 9999 ||
+        yOffset < 0 || yOffset > 9999 ||
+        width   < 1 || width   > 9999 ||
+        height  < 1 || height  > 9999 ||
+        !foldableEnabled              ||
+        //TODO: need 29
+        avdInfo_getApiLevel(android_avdInfo) < 28) {
+        return true;
+    }
+    return false;
 }

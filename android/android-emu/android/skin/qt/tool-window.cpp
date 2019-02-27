@@ -122,7 +122,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
       mUserActionsCounter(user_actions_counter),
       mToolWindow2(tw2) {
 
-      if (mToolWindow2 && !mToolWindow2->hidden()) {
+      if (mToolWindow2 && !ToolWindow2::shouldHide()) {
           sDualWindow = true;
       }
 
@@ -280,10 +280,10 @@ void ToolWindow::raise() {
     if (mTopSwitched) {
         mExtendedWindow.get()->raise();
         mExtendedWindow.get()->activateWindow();
-        mToolWindow2->activateWindow();
+        mToolWindow2->raise();
         mTopSwitched = false;
     }
-    mToolWindow2->activateWindow();
+    mToolWindow2->raise();
 }
 
 void ToolWindow::allowExtWindowCreation() {
