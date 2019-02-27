@@ -214,6 +214,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     s_gles2.glGenTextures(1, &cb->m_tex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
 
+    fprintf(stderr, "%s: w h %u %u\n", __func__, p_width, p_height);
+
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, p_internalFormat, p_width, p_height,
                          0, texFormat, pixelType,
                          initialImage.get());
