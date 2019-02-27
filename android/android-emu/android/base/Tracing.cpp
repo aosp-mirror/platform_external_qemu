@@ -157,7 +157,7 @@ void ScopedTrace::beginTraceImpl(const char* name) {
     }
 }
 
-void ScopedTrace::endTraceImpl() {
+void ScopedTrace::endTraceImpl(const char*) {
     if (CC_UNLIKELY(shouldEnableTracing())) {
         indentTrace_end();
     }
