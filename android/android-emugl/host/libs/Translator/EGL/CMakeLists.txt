@@ -20,7 +20,8 @@ android_add_shared_library(EGL_translator)
 
 target_link_libraries(EGL_translator PUBLIC GLcommon emugl_common)
 target_link_libraries(EGL_translator PRIVATE emugl_base android-emu-base astc-codec)
-target_compile_options(EGL_translator PRIVATE "${ANDROID_EMUGL_SHARED_FVISIBILITY}")
+target_compile_options(EGL_translator PRIVATE -fvisibility=hidden)
+
 # OS specific link dependencies
 android_target_link_libraries(EGL_translator darwin-x86_64 PUBLIC "-framework AppKit")
 android_target_link_libraries(EGL_translator linux-x86_64 PUBLIC "-lGL -lX11 -ldl -lpthread")

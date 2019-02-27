@@ -88,9 +88,8 @@ target_link_libraries(OpenglRender
                               OpenglRender_vulkan
                               OpenGLESDispatch
                               GLSnapshot)
-target_compile_definitions(OpenglRender PRIVATE -DVK_ANDROID_native_buffer)
 android_target_compile_definitions(OpenglRender windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
-target_compile_options(OpenglRender PRIVATE "${ANDROID_EMUGL_SHARED_FVISIBILITY}")
+target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
 target_link_libraries(OpenglRender PRIVATE emugl_base)
 target_include_directories(
     OpenglRender
