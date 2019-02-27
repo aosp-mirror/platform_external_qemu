@@ -37,7 +37,6 @@ private:
     const GLESv2Dispatch* const mGles2;
     const int mRenderWidth;
     const int mRenderHeight;
-    bool mDisplayDefault = false;
 };
 
 DefaultFrameRendererImpl::DefaultFrameRendererImpl(const GLESv2Dispatch* gles2,
@@ -51,19 +50,9 @@ bool DefaultFrameRendererImpl::initialize() {
 }
 
 void DefaultFrameRendererImpl::render() {
-    // TODO(josephhlee): Move this to the Renderer multiplexer.
-    if (videoinjection::VideoInjectionController::tryGetNextRequest(
-                base::Ok())) {
-        mDisplayDefault = true;
-    }
     mGles2->glBindFramebuffer(GL_FRAMEBUFFER, 0);
     mGles2->glViewport(0, 0, mRenderWidth, mRenderHeight);
-
-    if (mDisplayDefault) {
-        mGles2->glClearColor(1.0f, 0.6f, 0.0f, 1.0f);
-    } else {
-        mGles2->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    }
+    mGles2->glClearColor(1.0f, 0.6f, 0.0f, 1.0f);
     mGles2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     mGles2->glFrontFace(GL_CW);
     mGles2->glBindBuffer(GL_ARRAY_BUFFER, 0);
