@@ -79,7 +79,7 @@ VkResult prepareAndroidNativeBufferImage(
 
     if (colorBufferVulkanCompatible &&
         externalMemoryCompatible &&
-        setupVkColorBuffer(out->colorBufferHandle)) {
+        setupVkColorBuffer(out->colorBufferHandle, &out->isGlTexture)) {
         out->externallyBacked = true;
     }
 
@@ -108,16 +108,16 @@ VkResult prepareAndroidNativeBufferImage(
         const auto& cbInfo = getColorBufferInfo(out->colorBufferHandle);
         const auto& memInfo = cbInfo.memory;
 
-        if (!importExternalMemory(vk, device, &memInfo, &out->imageMemory)) {
-            fprintf(stderr, "%s: Failed to import external memory\n", __func__);
-            return VK_ERROR_INITIALIZATION_FAILED;
-        }
-
         vk->vkGetImageMemoryRequirements(
             device, out->image, &out->memReqs);
 
         if (out->memReqs.size < memInfo.size) {
             out->memReqs.size = memInfo.size;
+        }
+
+        if (!importExternalMemory(vk, device, &memInfo, &out->imageMemory)) {
+            fprintf(stderr, "%s: Failed to import external memory\n", __func__);
+            return VK_ERROR_INITIALIZATION_FAILED;
         }
 
     } else {
@@ -390,6 +390,11 @@ void AndroidNativeBufferInfo::QueueState::setup(
         &cbAllocInfo,
         &cb);
 
+    vk->vkAllocateCommandBuffers(
+        device,
+        &cbAllocInfo,
+        &cb2);
+
     VkFenceCreateInfo fenceCreateInfo = {
         VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, 0, 0,
     };
@@ -424,11 +429,18 @@ VkResult setAndroidNativeImageSemaphoreSignaled(
     VkFence fence,
     AndroidNativeBufferInfo* anbInfo) {
 
+    auto fb = FrameBuffer::getFB();
+
+    fb->setColorBufferInUse(anbInfo->colorBufferHandle, true);
+
+    fb->lock();
+
     bool firstTimeSetup =
         !anbInfo->everSynced &&
         !anbInfo->everAcquired;
 
     anbInfo->everAcquired = true;
+        // fprintf(stderr, "%s: call\n", __func__);
 
     if (firstTimeSetup) {
 
@@ -441,20 +453,60 @@ VkResult setAndroidNativeImageSemaphoreSignaled(
 
         vk->vkQueueSubmit(defaultQueue, 1, &submitInfo, fence);
     } else {
+        const AndroidNativeBufferInfo::QueueState& queueState =
+                anbInfo->queueStates[anbInfo->lastUsedQueueFamilyIndex];
 
-        const AndroidNativeBufferInfo::QueueState&
-            queueState = anbInfo->queueStates[anbInfo->lastUsedQueueFamilyIndex];
+        VkCommandBufferBeginInfo beginInfo = {
+                VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+                0,
+                VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+                nullptr /* no inheritance info */,
+        };
+
+        vk->vkBeginCommandBuffer(queueState.cb2, &beginInfo);
+
+        VkImageMemoryBarrier backToPresentSrc = {
+                VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+                0,
+                VK_ACCESS_HOST_READ_BIT,
+                0,
+                VK_IMAGE_LAYOUT_GENERAL,
+                VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                VK_QUEUE_FAMILY_IGNORED,
+                VK_QUEUE_FAMILY_IGNORED,
+                anbInfo->image,
+                {
+                        VK_IMAGE_ASPECT_COLOR_BIT,
+                        0,
+                        1,
+                        0,
+                        1,
+                },
+        };
+
+        vk->vkCmdPipelineBarrier(queueState.cb2,
+                                 VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+                                 VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0,
+                                 nullptr, 0, nullptr, 1, &backToPresentSrc);
+
+        vk->vkEndCommandBuffer(queueState.cb2);
 
         VkSubmitInfo submitInfo = {
-            VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
-            0, nullptr, nullptr,
-            0, nullptr,
-            1, &semaphore,
+                VK_STRUCTURE_TYPE_SUBMIT_INFO,
+                0,
+                0,
+                nullptr,
+                nullptr,
+                1,
+                &queueState.cb2,
+                1,
+                &semaphore,
         };
 
         vk->vkQueueSubmit(queueState.queue, 1, &submitInfo, fence);
-
     }
+
+    fb->unlock();
 
     return VK_SUCCESS;
 }
@@ -467,6 +519,9 @@ VkResult syncImageToColorBuffer(
     const VkSemaphore* pWaitSemaphores,
     int* pNativeFenceFd,
     AndroidNativeBufferInfo* anbInfo) {
+
+    auto fb = FrameBuffer::getFB();
+    fb->lock();
 
     // Implicitly synchronized
     *pNativeFenceFd = -1;
@@ -486,6 +541,35 @@ VkResult syncImageToColorBuffer(
             vk, anbInfo->device, queue, queueFamilyIndex);
     }
 
+    // If GL texture, just do an empty submit
+    // if (anbInfo->isGlTexture) {
+    //     fprintf(stderr, "%s: is gl texture, empty submit\n", __func__);
+    //     std::vector<VkPipelineStageFlags> pipelineStageFlags;
+    //     pipelineStageFlags.resize(waitSemaphoreCount, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+
+    //     VkSubmitInfo submitInfo = {
+    //         VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
+    //         waitSemaphoreCount, pWaitSemaphores,
+    //         pipelineStageFlags.data(),
+    //         0, nullptr,
+    //         0, nullptr,
+    //     };
+
+    //     vk->vkQueueSubmit(queueState.queue, 1, &submitInfo, queueState.fence);
+
+    //     static constexpr uint64_t ANB_MAX_WAIT_NS =
+    //             5ULL * 1000ULL * 1000ULL * 1000ULL;
+
+    //     vk->vkWaitForFences(anbInfo->device, 1, &queueState.fence, VK_TRUE,
+    //                         ANB_MAX_WAIT_NS);
+    //     vk->vkResetFences(anbInfo->device, 1, &queueState.fence);
+
+    //     return VK_SUCCESS;
+
+    // } else {
+    //     fprintf(stderr, "%s: is not gl texture, empty submit\n", __func__);
+    // }
+
     // Record our synchronization commands.
     VkCommandBufferBeginInfo beginInfo = {
         VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, 0,
@@ -502,70 +586,72 @@ VkResult syncImageToColorBuffer(
     // We definitely need to transition the image to
     // VK_TRANSFER_SRC_OPTIMAL and back.
 
-    VkImageMemoryBarrier presentToTransferSrc = {
-        VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, 0,
-        0,
-        VK_ACCESS_HOST_READ_BIT,
-        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-        VK_QUEUE_FAMILY_IGNORED,
-        VK_QUEUE_FAMILY_IGNORED,
-        anbInfo->image,
-        {
-            VK_IMAGE_ASPECT_COLOR_BIT,
-            0, 1, 0, 1,
-        },
-    };
+    // VkImageMemoryBarrier presentToTransferSrc = {
+    //     VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, 0,
+    //     0,
+    //     VK_ACCESS_SHADER_READ_BIT,
+    //     VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+    //     VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+    //     VK_QUEUE_FAMILY_IGNORED,
+    //     VK_QUEUE_FAMILY_IGNORED,
+    //     anbInfo->image,
+    //     {
+    //         VK_IMAGE_ASPECT_COLOR_BIT,
+    //         0, 1, 0, 1,
+    //     },
+    // };
 
-    vk->vkCmdPipelineBarrier(
-        queueState.cb,
-        VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-        VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-        0,
-        0, nullptr,
-        0, nullptr,
-        1, &presentToTransferSrc);
+    // vk->vkCmdPipelineBarrier(
+    //     queueState.cb,
+    //     VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+    //     VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+    //     0,
+    //     0, nullptr,
+    //     0, nullptr,
+    //     1, &presentToTransferSrc);
 
-    // Copy to staging buffer
-    uint32_t bpp = 4; /* format always rgba8...not */
-    switch (anbInfo->vkFormat) {
-        case VK_FORMAT_R5G6B5_UNORM_PACK16:
-            bpp = 2;
-            break;
-        case VK_FORMAT_R8G8B8_UNORM:
-            bpp = 3;
-            break;
-        default:
-        case VK_FORMAT_R8G8B8A8_UNORM:
-            bpp = 4;
-            break;
-    }
-    VkBufferImageCopy region = {
-        0 /* buffer offset */,
-        anbInfo->extent.width,
-        anbInfo->extent.height,
-        {
-            VK_IMAGE_ASPECT_COLOR_BIT,
-            0, 0, 1,
-        },
-        { 0, 0, 0 },
-        anbInfo->extent,
-    };
+    // // Copy to staging buffer
+    // uint32_t bpp = 4; /* format always rgba8...not */
+    // switch (anbInfo->vkFormat) {
+    //     case VK_FORMAT_R5G6B5_UNORM_PACK16:
+    //         bpp = 2;
+    //         break;
+    //     case VK_FORMAT_R8G8B8_UNORM:
+    //         bpp = 3;
+    //         break;
+    //     default:
+    //     case VK_FORMAT_R8G8B8A8_UNORM:
+    //         bpp = 4;
+    //         break;
+    // }
 
-    vk->vkCmdCopyImageToBuffer(
-        queueState.cb,
-        anbInfo->image,
-        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-        anbInfo->stagingBuffer,
-        1, &region);
+    // if (!anbInfo->isGlTexture) {
+    //     VkBufferImageCopy region = {
+    //         0 /* buffer offset */,
+    //         anbInfo->extent.width,
+    //         anbInfo->extent.height,
+    //         {
+    //             VK_IMAGE_ASPECT_COLOR_BIT,
+    //             0, 0, 1,
+    //         },
+    //         { 0, 0, 0 },
+    //         anbInfo->extent,
+    //     };
+
+    //     vk->vkCmdCopyImageToBuffer(
+    //         queueState.cb,
+    //         anbInfo->image,
+    //         VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+    //         anbInfo->stagingBuffer,
+    //         1, &region);
+    // }
 
     // Transfer back to present src.
     VkImageMemoryBarrier backToPresentSrc = {
         VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, 0,
-        VK_ACCESS_HOST_READ_BIT,
-        0,
-        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        VK_ACCESS_HOST_READ_BIT, 0,
         VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+        VK_IMAGE_LAYOUT_GENERAL,
         VK_QUEUE_FAMILY_IGNORED,
         VK_QUEUE_FAMILY_IGNORED,
         anbInfo->image,
@@ -606,22 +692,25 @@ VkResult syncImageToColorBuffer(
         anbInfo->device, 1, &queueState.fence, VK_TRUE, ANB_MAX_WAIT_NS);
     vk->vkResetFences(anbInfo->device, 1, &queueState.fence);
 
-    VkMappedMemoryRange toInvalidate = {
-        VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE, 0,
-        anbInfo->stagingMemory,
-        0, VK_WHOLE_SIZE,
-    };
+    // VkMappedMemoryRange toInvalidate = {
+    //     VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE, 0,
+    //     anbInfo->stagingMemory,
+    //     0, VK_WHOLE_SIZE,
+    // };
 
-    vk->vkInvalidateMappedMemoryRanges(
-        anbInfo->device, 1, &toInvalidate);
+    // vk->vkInvalidateMappedMemoryRanges(
+    //     anbInfo->device, 1, &toInvalidate);
 
-    uint32_t colorBufferHandle = anbInfo->colorBufferHandle;
+    // uint32_t colorBufferHandle = anbInfo->colorBufferHandle;
 
-    FrameBuffer::getFB()->
-        replaceColorBufferContents(
-            colorBufferHandle,
-            anbInfo->mappedStagingPtr,
-            bpp * anbInfo->extent.width * anbInfo->extent.height);
+    // FrameBuffer::getFB()->
+    //     replaceColorBufferContents(
+    //         colorBufferHandle,
+    //         anbInfo->mappedStagingPtr,
+    //         bpp * anbInfo->extent.width * anbInfo->extent.height);
+
+    fb->unlock();
+    fb->setColorBufferInUse(anbInfo->colorBufferHandle, false);
 
     return VK_SUCCESS;
 }

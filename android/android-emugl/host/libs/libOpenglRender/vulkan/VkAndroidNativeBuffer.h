@@ -44,6 +44,7 @@ struct AndroidNativeBufferInfo {
     int stride;
     uint32_t colorBufferHandle;
     bool externallyBacked = false;
+    bool isGlTexture = false;
 
     // We will be using separate allocations for image versus staging memory,
     // because not all host Vulkan drivers will support directly rendering to
@@ -73,6 +74,7 @@ struct AndroidNativeBufferInfo {
         VkQueue queue = VK_NULL_HANDLE;
         VkCommandPool pool = VK_NULL_HANDLE;
         VkCommandBuffer cb = VK_NULL_HANDLE;
+        VkCommandBuffer cb2 = VK_NULL_HANDLE;
         VkFence fence = VK_NULL_HANDLE;
         uint32_t queueFamilyIndex = 0;
         void setup(

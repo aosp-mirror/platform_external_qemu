@@ -3389,9 +3389,15 @@ GL_APICALL void  GL_APIENTRY glTexParameterfv(GLenum target, GLenum pname, const
 
 GL_APICALL void  GL_APIENTRY glTexParameteri(GLenum target, GLenum pname, GLint param){
     GET_CTX_V2();
+    if (pname == GL_TEXTURE_TILING_EXT) {
+        ctx->dispatcher().glTexParameteri(target,pname,param);
+        return;
+    }
+
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
                    GLESv2Validate::textureParams(ctx, pname)),
                  GL_INVALID_ENUM);
+
     TextureData *texData = getTextureTargetData(target);
     if (texData) {
         texData->setTexParam(pname, param);

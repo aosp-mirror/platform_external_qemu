@@ -450,6 +450,19 @@ public:
     int getZrot() const { return m_zRot; }
 
     bool isFastBlitSupported() const { return m_fastBlitSupported; }
+    bool isVulkanInteropSupported() const { return m_vulkanInteropSupported; }
+    bool importMemoryToColorBuffer(
+#ifdef _WIN32
+        void* handle,
+#else
+        int handle,
+#endif
+        uint64_t size,
+        bool dedicated,
+        bool linearTiling,
+        uint32_t colorBufferHandle);
+    void setColorBufferInUse(uint32_t colorBufferHandle, bool inUse);
+
     // Used during tests to disable fast blit.
     void disableFastBlit();
 

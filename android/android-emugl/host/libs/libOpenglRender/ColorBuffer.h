@@ -235,6 +235,18 @@ public:
     void postLayer(ComposeLayer* l, int frameWidth, int frameHeight);
     GLuint getTexture();
 
+    bool importMemory(
+#ifdef _WIN32
+        void* handle,
+#else
+        int handle,
+#endif
+        uint64_t size,
+        bool dedicated,
+        bool linearTiling);
+    void setInUse(bool inUse);
+    bool isInUse() const { return m_inUse; }
+
 public:
     void restore();
 
@@ -251,6 +263,7 @@ private:
     GLuint m_height = 0;
     GLuint m_fbo = 0;
     GLenum m_internalFormat = 0;
+    GLenum m_sizedInternalFormat = 0;
 
     // |m_format| and |m_type| are for reformatting purposes only
     // to work around bugs in the guest. No need to snapshot those.
@@ -277,6 +290,10 @@ private:
 
     GLenum m_asyncReadbackType = GL_UNSIGNED_BYTE;
     size_t m_numBytes = 0;
+
+    bool m_importedMemory = false;
+    GLuint m_memoryObject = 0;
+    bool m_inUse = false;
 };
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;
