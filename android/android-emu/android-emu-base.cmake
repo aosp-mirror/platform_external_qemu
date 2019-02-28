@@ -4,6 +4,7 @@
 # Dependencies
 prebuilt(UUID)
 prebuilt(GLIB2) # Acts as windows stdio compatibility layer.
+prebuilt(LIBUNWIND)
 
 # Source configuration, the following set is shared amongst all targets
 set(android-emu-base_src
@@ -132,7 +133,7 @@ target_include_directories(android-emu-base PUBLIC .)
 # Library dependencies, these are public so they will propagate, if you link against the base you will link against LZ4
 # & UUID
 target_link_libraries(android-emu-base PRIVATE lz4 UUID::UUID)
-android_target_link_libraries(android-emu-base linux-x86_64 PUBLIC -ldl Threads::Threads -lrt)
+android_target_link_libraries(android-emu-base linux-x86_64 PUBLIC LIBUNWIND::LIBUNWIND -ldl Threads::Threads -lrt)
 android_target_link_libraries(android-emu-base windows-x86_64 PUBLIC psapi::psapi Threads::Threads iphlpapi::iphlpapi)
 android_target_link_libraries(android-emu-base
                               darwin-x86_64
