@@ -126,6 +126,9 @@ public:
 
     // Creates a new instance of the AdbInterface.
     static std::unique_ptr<AdbInterface> create(android::base::Looper* looper);
+    // Creates global interface.
+    static AdbInterface* createGlobal(android::base::Looper* looper);
+    static AdbInterface* getGlobal();
 };
 
 class AdbInterfaceImpl;

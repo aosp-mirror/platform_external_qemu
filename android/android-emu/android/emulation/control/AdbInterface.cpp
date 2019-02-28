@@ -116,8 +116,29 @@ private:
     bool mAdbVersionCurrent = false;
 };
 
+// static 
 std::unique_ptr<AdbInterface> AdbInterface::create(Looper* looper) {
-    return AdbInterface::Builder().setLooper(looper).build();
+    auto res = AdbInterface::Builder().setLooper(looper).build();
+    return res;
+}
+
+static AdbInterface* sAdbInterface = nullptr;
+
+// static
+AdbInterface* AdbInterface::createGlobal(Looper* looper) {
+
+    if (sAdbInterface) return sAdbInterface;
+
+    auto res = AdbInterface::Builder().setLooper(looper).build();
+    sAdbInterface = res.get();
+    res.release();
+
+    return sAdbInterface;
+}
+
+// static
+AdbInterface* AdbInterface::getGlobal() {
+    return sAdbInterface;
 }
 
 struct AdbCommandQueueStatics {

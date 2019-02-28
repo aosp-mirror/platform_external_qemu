@@ -344,12 +344,12 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                       1000)),
       mUserActionsCounter(new android::qt::UserActionsCounter(&mEventCapturer)),
       mAdbInterface([this] {
-          return android::emulation::AdbInterface::create(mLooper);
+          return android::emulation::AdbInterface::createGlobal(mLooper);
       }),
-      mApkInstaller([this] { return mAdbInterface->get(); }),
+      mApkInstaller([this] { return (*mAdbInterface); }),
       mFilePusher([this] {
           return std::make_tuple(
-                  mAdbInterface->get(),
+                  (*mAdbInterface),
                   [this](StringView filePath, FilePusher::Result result) {
                       adbPushDone(filePath, result);
                   },
@@ -592,7 +592,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
         }
     }
 
-    ScreenMask::loadMask(mAdbInterface->get());
+    ScreenMask::loadMask((*mAdbInterface));
 
     (*mAdbInterface)->enqueueCommand(
         { "shell", "settings", "put", "system",
@@ -1766,7 +1766,7 @@ void EmulatorQtWindow::showEvent(QShowEvent* event) {
     }
     if (mFirstShowEvent) {
         // moved from android_metrics_start() in metrics.cpp
-        android_metrics_start_adb_liveness_checker(mAdbInterface->get());
+        android_metrics_start_adb_liveness_checker((*mAdbInterface));
         if (android_hw->test_quitAfterBootTimeOut > 0) {
             android_test_start_boot_complete_timer(android_hw->test_quitAfterBootTimeOut);
         }
@@ -2394,7 +2394,7 @@ QRect EmulatorQtWindow::deviceGeometry() const {
 }
 
 android::emulation::AdbInterface* EmulatorQtWindow::getAdbInterface() const {
-    return mAdbInterface->get();
+    return (*mAdbInterface);
 }
 
 void EmulatorQtWindow::toggleZoomMode() {
