@@ -71,12 +71,12 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::Vulkan, true);
 
-    emugl::vkDispatch(true /* get the test ICD */);
-
-    EmuglConfig config;
-
     bool useHostGpu =
             System::get()->envGet("ANDROID_EMU_TEST_WITH_HOST_GPU") == "1";
+
+    emugl::vkDispatch(!useHostGpu /* use test ICD if not with host gpu */);
+
+    EmuglConfig config;
 
     emuglConfig_init(&config, true /* gpu enabled */, "auto",
                      useHostGpu ? "host" : "swiftshader_indirect", /* gpu mode, option */

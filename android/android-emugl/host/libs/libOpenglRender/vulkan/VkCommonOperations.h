@@ -48,6 +48,8 @@ typedef int VK_EXT_MEMORY_HANDLE;
 #define VK_EXT_MEMORY_HANDLE_TYPE_BIT VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT
 #endif
 
+VK_EXT_MEMORY_HANDLE dupExternalMemory(VK_EXT_MEMORY_HANDLE);
+
 // Global state that holds a global Vulkan instance along with globally
 // exported memory allocations + images. This is in order to service things
 // like AndroidHardwareBuffer/FuchsiaImagePipeHandle. Each such allocation is
@@ -241,7 +243,7 @@ bool importExternalMemoryDedicatedImage(
 
 bool isColorBufferVulkanCompatible(uint32_t colorBufferHandle);
 
-bool setupVkColorBuffer(uint32_t colorBufferHandle, bool* exported = nullptr);
+bool setupVkColorBuffer(uint32_t colorBufferHandle, bool* exported = nullptr, VkDeviceSize* allocSize = nullptr);
 bool teardownVkColorBuffer(uint32_t colorBufferHandle);
 VkEmulation::ColorBufferInfo getColorBufferInfo(uint32_t colorBufferHandle);
 bool updateColorBufferFromVkImage(uint32_t colorBufferHandle);

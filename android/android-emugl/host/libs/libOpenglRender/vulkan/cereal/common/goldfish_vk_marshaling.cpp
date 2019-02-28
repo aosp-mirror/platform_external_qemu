@@ -14083,6 +14083,18 @@ void marshal_extension_struct(
             break;
         }
 #endif
+#ifdef VK_GOOGLE_color_buffer
+        case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
+        {
+            marshal_VkImportColorBufferGOOGLE(vkStream, reinterpret_cast<const VkImportColorBufferGOOGLE*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
+        {
+            marshal_VkImportPhysicalAddressGOOGLE(vkStream, reinterpret_cast<const VkImportPhysicalAddressGOOGLE*>(structExtension));
+            break;
+        }
+#endif
         default:
         {
             return;
@@ -14731,6 +14743,18 @@ void unmarshal_extension_struct(
         case VK_STRUCTURE_TYPE_QUEUE_FAMILY_CHECKPOINT_PROPERTIES_NV:
         {
             unmarshal_VkQueueFamilyCheckpointPropertiesNV(vkStream, reinterpret_cast<VkQueueFamilyCheckpointPropertiesNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_GOOGLE_color_buffer
+        case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
+        {
+            unmarshal_VkImportColorBufferGOOGLE(vkStream, reinterpret_cast<VkImportColorBufferGOOGLE*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
+        {
+            unmarshal_VkImportPhysicalAddressGOOGLE(vkStream, reinterpret_cast<VkImportPhysicalAddressGOOGLE*>(structExtension_out));
             break;
         }
 #endif

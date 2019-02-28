@@ -54,6 +54,7 @@ namespace goldfish_vk {
 static constexpr const char* const
 kEmulatedExtensions[] = {
     "VK_ANDROID_native_buffer",
+    "VK_ANDROID_external_memory_android_hardware_buffer",
     "VK_KHR_external_memory_fuchsia",
     "VK_KHR_external_semaphore_fuchsia",
 };
@@ -530,15 +531,6 @@ public:
             filteredExtensionNames(
                 pCreateInfo->enabledExtensionCount,
                 pCreateInfo->ppEnabledExtensionNames);
-
-
-        for (uint32_t i = 0; i < pCreateInfo->enabledExtensionCount; ++i) {
-            auto extName =
-                pCreateInfo->ppEnabledExtensionNames[i];
-            if (!isEmulatedExtension(extName)) {
-                finalExts.push_back(extName);
-            }
-        }
 
         // Run the underlying API call, filtering extensions.
         VkDeviceCreateInfo createInfoFiltered = *pCreateInfo;
@@ -1948,6 +1940,13 @@ private:
             auto extName = extNames[i];
             if (!isEmulatedExtension(extName)) {
                 res.push_back(extName);
+            }
+            if (!strcmp("VK_ANDROID_external_memory_android_hardware_buffer", extName)) {
+#ifdef _WIN32
+                res.push_back("VK_KHR_external_memory_win32");
+#else
+                res.push_back("VK_KHR_external_memory_fd");
+#endif
             }
         }
         return res;
