@@ -33,10 +33,10 @@ class Emulator(object):
 
     def __init__(self, emulator_exe, max_boot, sdk_root=None, avd_home=None, avd=None):
         self.max_boot = max_boot
-        self.sdk_root = sdk_root or os.environ.get('ANDROID_SDK_ROOT')
+        self.sdk_root = os.path.abspath(sdk_root or os.environ.get('ANDROID_SDK_ROOT'))
         self.emulator = emulator_exe or os.path.join(self.sdk_root, 'emulator', 'emulator')
-        self.avd_home = avd_home or os.environ.get('ANDROID_HOME',  os.path.join(
-            os.path.expanduser('~'), '.android'))
+        self.avd_home = os.path.abspath(avd_home or os.environ.get('ANDROID_HOME',  os.path.join(
+            os.path.expanduser('~'), '.android')))
         self.avd = avd or self.get_avd()
         self.adb_port = self._unsafe_get_free_tcp_port()
         self.console_port = self._unsafe_get_free_tcp_port()
