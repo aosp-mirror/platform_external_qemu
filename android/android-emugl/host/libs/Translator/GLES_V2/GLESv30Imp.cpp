@@ -152,98 +152,98 @@ GL_APICALL void GL_APIENTRY glGetActiveUniformBlockName(GLuint program, GLuint u
 
 GL_APICALL void GL_APIENTRY glUniform1ui(GLint location, GLuint v0) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniform1ui(hostLoc, v0);
 }
 
 GL_APICALL void GL_APIENTRY glUniform2ui(GLint location, GLuint v0, GLuint v1) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniform2ui(hostLoc, v0, v1);
 }
 
 GL_APICALL void GL_APIENTRY glUniform3ui(GLint location, GLuint v0, GLuint v1, GLuint v2) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniform3ui(hostLoc, v0, v1, v2);
 }
 
 extern "C" GL_APICALL void GL_APIENTRY glUniform4ui(GLint location, GLint v0, GLuint v1, GLuint v2, GLuint v3) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniform4ui(hostLoc, v0, v1, v2, v3);
 }
 
 GL_APICALL void GL_APIENTRY glUniform1uiv(GLint location, GLsizei count, const GLuint * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniform1uiv(hostLoc, count, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniform2uiv(GLint location, GLsizei count, const GLuint * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniform2uiv(hostLoc, count, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniform3uiv(GLint location, GLsizei count, const GLuint * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniform3uiv(hostLoc, count, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniform4uiv(GLint location, GLsizei count, const GLuint * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniform4uiv(hostLoc, count, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix2x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniformMatrix2x3fv(hostLoc, count, transpose, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix3x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniformMatrix3x2fv(hostLoc, count, transpose, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix2x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniformMatrix2x4fv(hostLoc, count, transpose, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix4x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniformMatrix4x2fv(hostLoc, count, transpose, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix3x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniformMatrix3x4fv(hostLoc, count, transpose, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix4x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniformMatrix4x3fv(hostLoc, count, transpose, value);
 }
@@ -264,7 +264,7 @@ GL_APICALL void GL_APIENTRY glGetUniformuiv(GLuint program, GLint location, GLui
 #if !defined(TOLERATE_PROGRAM_LINK_ERROR) || !TOLERATE_PROGRAM_LINK_ERROR
         SET_ERROR_IF(!pData->getLinkStatus(), GL_INVALID_OPERATION);
 #endif
-        int hostLoc = s_getHostLocOrSetError(location);
+        int hostLoc = s_getHostLocOrSetError(ctx, location);
         SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
         ctx->dispatcher().glGetUniformuiv(globalProgramName, hostLoc, params);
     }
