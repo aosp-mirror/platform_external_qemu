@@ -404,7 +404,7 @@ function(get_git_version VER)
                   ERROR_VARIABLE STD_ERR)
   if(NOT "${GIT_RES}" STREQUAL "0")
     message(WARNING "Unable to retrieve git version from ${ANDROID_QEMU2_TOP_DIR}, out: ${STD_OUT}, err: ${STD_ERR}")
-    if (NOT MSVC)
+    if (NOT ANDROID_HOST_TAG STREQUAL "windows_msvc-x86_64")
       execute_process(COMMAND "date" "+%Y-%m-%d"
                       WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
                       RESULT_VARIABLE DATE_RES
@@ -457,7 +457,7 @@ endfunction()
 function(android_complete_archive LIBCMD LIBNAME)
   if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
     set(${LIBCMD} "-Wl,-force_load,$<TARGET_FILE:${LIBNAME}>" PARENT_SCOPE)
-  elseif(MSVC)
+  elseif(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
     set(${LIBCMD} "")
   else()
     set(${LIBCMD} "-Wl,-whole-archive" ${LIBNAME} "-Wl,-no-whole-archive" PARENT_SCOPE)
@@ -475,7 +475,7 @@ endfunction()
 # (Maybe on one day we will standardize all the naming, between qemu and configs and cpus..)
 function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS CPU)
   # Workaround b/121393952, older cmake does not have proper object archives
-  if (NOT MSVC)
+  if (NOT ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
     android_complete_archive(QEMU_COMPLETE_LIB "qemu2-common")
   endif()
   add_executable(qemu-system-${ANDROID_AARCH}
@@ -502,7 +502,7 @@ function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS
                                 OpenGLESDispatch
                                 ${VIRGLRENDERER_LIBRARIES}
                                 android-qemu-deps)
-  if(MSVC)
+  if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
     # Workaround b/121393952, msvc linker does not have notion of whole-archive. so we need to use the general approach
     # supported by newer cmake versions
     target_link_libraries(qemu-system-${ANDROID_AARCH} PRIVATE $<TARGET_OBJECTS:qemu2-common>)
@@ -519,7 +519,7 @@ endfunction()
 
 function(android_add_qemu_headless_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS CPU)
   # Workaround b/121393952, older cmake does not have proper object archives
-  if (NOT MSVC)
+  if (NOT ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
     android_complete_archive(QEMU_COMPLETE_LIB "qemu2-common")
   endif()
   add_executable(qemu-system-${ANDROID_AARCH}-headless
@@ -547,7 +547,7 @@ function(android_add_qemu_headless_executable ANDROID_AARCH QEMU_AARCH CONFIG_AA
                                 OpenGLESDispatch
                                 ${VIRGLRENDERER_LIBRARIES}
                                 android-qemu-deps)
-  if(MSVC)
+  if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
     # Workaround b/121393952, msvc linker does not have notion of whole-archive. so we need to use the general approach
     # supported by newer cmake versions
     target_link_libraries(qemu-system-${ANDROID_AARCH}-headless PRIVATE $<TARGET_OBJECTS:qemu2-common>)

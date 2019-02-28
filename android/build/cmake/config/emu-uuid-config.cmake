@@ -21,7 +21,7 @@ elseif (ANDROID_TARGET_TAG MATCHES "linux.*")
     set(UUID_LIBRARIES "${PREBUILT_ROOT}/lib/libuuid${CMAKE_STATIC_LIBRARY_SUFFIX}")
 elseif (ANDROID_TARGET_TAG MATCHES "windows.*")
     # In windows you include rpc.h
-    if(MSVC)
+    if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
         set(UUID_LIBRARIES "rpcrt4")
     else()
         set(UUID_LIBRARIES "-lrpcrt4")

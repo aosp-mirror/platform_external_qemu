@@ -269,7 +269,7 @@ append_if(LIBUNWIND_C_FLAGS LIBUNWIND_HAS_FUNWIND_TABLES -funwind-tables)
 string(TOUPPER "${CMAKE_BUILD_TYPE}" uppercase_CMAKE_BUILD_TYPE)
 if (LIBUNWIND_ENABLE_ASSERTIONS)
   # MSVC doesn't like _DEBUG on release builds. See PR 4379.
-  if (NOT MSVC)
+  if (NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
     list(APPEND LIBUNWIND_COMPILE_FLAGS -D_DEBUG)
   endif()
 
@@ -295,7 +295,7 @@ if (NOT LIBUNWIND_ENABLE_THREADS)
 endif()
 
 # This is the _ONLY_ place where add_definitions is called.
-if (MSVC)
+if (ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
@@ -331,7 +331,7 @@ if (NOT LIBUNWIND_CXX_INCLUDE_PATHS STREQUAL "")
 endif()
 
 # Get sources
-set(LIBUNWIND_SOURCE_DIR 
+set(LIBUNWIND_SOURCE_DIR
     "${ANDROID_QEMU2_TOP_DIR}/../libunwind_llvm/src")
 set(LIBUNWIND_CXX_SOURCES
     "${LIBUNWIND_SOURCE_DIR}/libunwind.cpp"

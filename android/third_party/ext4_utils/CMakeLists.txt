@@ -21,7 +21,7 @@ target_link_libraries(emulator-libext4_utils
                               PUBLIC
                               emulator-libsparse
                               emulator-libselinux)
-if(NOT MSVC)
+if(NOT ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
     target_compile_options(emulator-libext4_utils PRIVATE -Wno-error)
 endif()
 
