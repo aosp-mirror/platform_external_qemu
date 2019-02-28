@@ -255,6 +255,16 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         // Android doesn't support tablet mode now.
         mToolsUi->tablet_mode_button->setHidden(true);
     }
+
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+        // Android Auto doesn't supoort rotate, home, back, recent
+        mToolsUi->prev_layout_button->setHidden(true);
+        mToolsUi->next_layout_button->setHidden(true);
+        mToolsUi->back_button->setHidden(true);
+        mToolsUi->home_button->setHidden(true);
+        mToolsUi->overview_button->setHidden(true);
+    }
+
 #ifndef Q_OS_MAC
     // Swap minimize and close buttons on non-apple OSes
     auto closeBtn = mToolsUi->winButtonsLayout->takeAt(0);
