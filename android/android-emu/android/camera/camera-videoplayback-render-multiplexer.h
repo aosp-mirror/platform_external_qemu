@@ -40,7 +40,6 @@ class RenderMultiplexer : public virtualscene::CameraRenderer {
   void uninitialize() override;
   int64_t render() override;
  private:
-  int64_t renderState();
   std::unique_ptr<DefaultFrameRenderer> mDefaultRenderer;
   virtualscene::CameraRenderer* mCurrentRenderer = nullptr;
   bool mInitialized = false;
