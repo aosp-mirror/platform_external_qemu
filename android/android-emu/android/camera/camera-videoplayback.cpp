@@ -18,7 +18,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/camera/camera-format-converters.h"
-#include "android/camera/camera-videoplayback-default-renderer.h"
+#include "android/camera/camera-videoplayback-render-multiplexer.h"
 
 #include <vector>
 
@@ -51,7 +51,7 @@ public:
     VideoPlaybackCameraDevice();
 
     CameraDevice* getCameraDevice() { return &mHeader; }
-    RenderedCameraDevice* getDefaultCameraDevice() {
+    RenderedCameraDevice* getMultiplexedCameraDevice() {
       return mRenderedCamera.get();
     }
 
@@ -64,7 +64,7 @@ private:
 VideoPlaybackCameraDevice::VideoPlaybackCameraDevice() {
     mHeader.opaque = this;
     auto renderer =
-        std::unique_ptr<DefaultFrameRenderer>(new DefaultFrameRenderer());
+        std::unique_ptr<RenderMultiplexer>(new RenderMultiplexer());
     mRenderedCamera = std::unique_ptr<RenderedCameraDevice>(
         new RenderedCameraDevice(std::move(renderer)));
 }
@@ -106,8 +106,8 @@ int camera_videoplayback_start_capturing(CameraDevice* ccd,
         return -1;
     }
 
-    cd->getDefaultCameraDevice()->startCapturing(pixel_format, frame_width,
-                                                 frame_height);
+    cd->getMultiplexedCameraDevice()->startCapturing(pixel_format, frame_width,
+                                                     frame_height);
 
     return 0;
 }
@@ -119,7 +119,7 @@ int camera_videoplayback_stop_capturing(CameraDevice* ccd) {
         return -1;
     }
 
-    cd->getDefaultCameraDevice()->stopCapturing();
+    cd->getMultiplexedCameraDevice()->stopCapturing();
 
     return 0;
 }
@@ -136,7 +136,7 @@ int camera_videoplayback_read_frame(CameraDevice* ccd,
         return -1;
     }
 
-    return cd->getDefaultCameraDevice()->readFrame(
+    return cd->getMultiplexedCameraDevice()->readFrame(
         result_frame, r_scale, g_scale, b_scale, exp_comp);
 }
 
