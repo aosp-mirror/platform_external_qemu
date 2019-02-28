@@ -164,8 +164,13 @@ void* LoadLibrary(const android_dlextinfo& dlextinfo,
     auto progDir = System::get()->getProgramDirectory();
     auto expectedLibPath = pj(progDir, "lib64", name);
 
-    return android_dlopen_ext(expectedLibPath.c_str(), RTLD_LOCAL | RTLD_NOW,
-                              &dlextinfo);
+    auto res = android_dlopen_ext(expectedLibPath.c_str(), RTLD_LOCAL | RTLD_NOW,
+                                  &dlextinfo);
+    if (!res) {
+        fprintf(stderr, "%s: failed. dlerror; [%s]\n", __func__, dlerror());
+    }
+
+    return res;
 }
 
 const std::array<const char*, 2> HAL_SUBNAME_KEY_PROPERTIES = {{
