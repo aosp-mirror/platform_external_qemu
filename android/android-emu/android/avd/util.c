@@ -243,13 +243,14 @@ bool propertyFile_isUserBuild(const FileData* data) {
     return isUser;
 }
 
-
 bool propertyFile_findProductName(const FileData* data,
                                   const char* productNames[],
                                   int count,
                                   bool prefix) {
-    char* prop = propertyFile_getValue((const char*)data->data, data->size,
-                                       "ro.product.name");
+    const char* props[] = {"ro.product.name", "ro.product.system.name"};
+    char *prop = propertyFile_getAnyValue((const char*)data->data, data->size,
+                                          props, ARRAY_SIZE(props));
+
     if (!prop) {
         return false;
     }

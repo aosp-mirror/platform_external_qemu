@@ -150,3 +150,28 @@ TEST(PropertyFile, Iterator) {
 
     EXPECT_FALSE(propertyFileIterator_next(iter));
 }
+
+TEST(PropertyFile, ReturnValueOfAnyProperty) {
+    static const char kFile1[] = "bar=zoo\n";
+    static const char kFile2[] = "foo=zoo\n";
+    static const char* propNames[] = {"foo", "bar"};
+    String value1(propertyFile_getAnyValue(kFile1, sizeof kFile1,
+                                           propNames, 2));
+    String value2(propertyFile_getAnyValue(kFile2, sizeof kFile2,
+                                           propNames, 2));
+    EXPECT_STREQ("zoo", value1.str());
+    EXPECT_STREQ("zoo", value2.str());
+}
+
+TEST(PropertyFile, ReturnLatestOfAnyProperty) {
+    static const char kFile[] = "foo=1\nbar=2\nfoo=3\nbar=4\nsdk=5\n";
+    static const char* propNames1[] = {"foo", "bar"};
+    static const char* propNames2[] = {"bar", "foo"};
+    static const char* propNames3[] = {"sdk", "foo"};
+    String fooBar(propertyFile_getAnyValue(kFile, sizeof kFile, propNames1, 2));
+    String barFoo(propertyFile_getAnyValue(kFile, sizeof kFile, propNames2, 2));
+    String sdkFoo(propertyFile_getAnyValue(kFile, sizeof kFile, propNames3, 2));
+    EXPECT_STREQ("4", fooBar.str());
+    EXPECT_STREQ("4", barFoo.str());
+    EXPECT_STREQ("5", sdkFoo.str());
+}
