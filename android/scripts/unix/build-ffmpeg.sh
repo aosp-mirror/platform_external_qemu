@@ -83,17 +83,17 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
 
         case $SYSTEM in
         linux-x86_64)
-            MY_FLAGS="--extra-ldflags=\"-ldl\""
+            MY_FLAGS="--extra-ldflags=\"-ldl\" --disable-xlib"
             ;;
         linux-aarch64)
-            MY_FLAGS="--extra-ldflags=\"-ldl\""
+            MY_FLAGS="--extra-ldflags=\"-ldl\" --disable-xlib"
             ;;
         windows-x86_64)
             MY_FLAGS="--target-os=mingw32 --arch=x86_64 --enable-cross-compile --cc=gcc "
             ;;
         darwin-*)
             # Use host compiler.
-            MY_FLAGS=--disable-iconv
+            MY_FLAGS="--disable-iconv"
             ;;
         *)
             panic "Host system '$CURRENT_HOST' is not supported by this script!"
@@ -108,6 +108,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --extra-ldflags=\"-L$PREBUILTS_DIR/common/libvpx/$SYSTEM/lib\" \
                 --enable-static \
                 --disable-doc \
+                --disable-programs \
                 --enable-gpl \
                 --enable-asm \
                 --enable-yasm \
@@ -117,7 +118,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --enable-libvpx \
                 --disable-protocol=tls \
                 --disable-protocol=tls_securetransport \
-                --disable-openssl
+                --disable-openssl \
+                --disable-sdl2
 
         # Copy binaries necessary for the build itself as well as static
         # libraries.
