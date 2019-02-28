@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "be66fdf9_cb1ff6ef",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-02-28T23:43:34Z",
+      "side": 1,
+      "message": "I think it would be better to hide than to remove (just in case something else references tabs by position).\nAlso, can we reference the tab by name rather than by index? (I\u0027m worried that someone would try to add a tab in front of the current ones and we would be hiding/removing the wrong tab).",
+      "revId": "aa92d2722f04c516147a34256966a989851aba9c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
