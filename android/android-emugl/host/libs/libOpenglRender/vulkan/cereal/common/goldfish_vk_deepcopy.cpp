@@ -7025,6 +7025,18 @@ void deepcopy_extension_struct(
             break;
         }
 #endif
+#ifdef VK_GOOGLE_color_buffer
+        case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
+        {
+            deepcopy_VkImportColorBufferGOOGLE(pool, reinterpret_cast<const VkImportColorBufferGOOGLE*>(structExtension), reinterpret_cast<VkImportColorBufferGOOGLE*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
+        {
+            deepcopy_VkImportPhysicalAddressGOOGLE(pool, reinterpret_cast<const VkImportPhysicalAddressGOOGLE*>(structExtension), reinterpret_cast<VkImportPhysicalAddressGOOGLE*>(structExtension_out));
+            break;
+        }
+#endif
         default:
         {
             return;
