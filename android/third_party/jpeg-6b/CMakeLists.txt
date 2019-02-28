@@ -50,7 +50,7 @@ add_library(emulator-libjpeg
     jutils.c
 )
 target_include_directories(emulator-libjpeg PUBLIC .)
-if (NOT MSVC)
+if (NOT ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
     target_compile_options(emulator-libjpeg PRIVATE
         -O3
         -fstrict-aliasing

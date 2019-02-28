@@ -7,11 +7,11 @@ if ("${ANDROID_TARGET_OS}" STREQUAL "windows_msvc")
 
   set(gtest_disable_pthreads ON CACHE BOOL "Disable uses of pthreads in gtest.")
   # All right, we must make sure we don't start adding the /MT flag
-  if (MSVC)
+  if (ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
     set(gtest_force_shared_crt ON CACHE BOOL "Use shared (DLL) run-time lib even when Google Test is built as static lib." FORCE)
   endif()
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../googletest/googlemock googlemock)
-  if(MSVC)
+  if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
     # Okay, google test is not happy under msvc compile
     target_compile_definitions(gmock_main PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
     target_compile_definitions(gmock PUBLIC -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)

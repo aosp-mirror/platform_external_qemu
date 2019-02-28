@@ -6,7 +6,7 @@ target_include_directories(emulator-libdtb PUBLIC include)
 target_include_directories(emulator-libdtb PRIVATE .)
 target_compile_definitions(emulator-libdtb PRIVATE -DHOST)
 
-if (NOT MSVC)
+if (NOT ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
   target_compile_options(emulator-libdtb PRIVATE -Wno-error)
 endif()
 
