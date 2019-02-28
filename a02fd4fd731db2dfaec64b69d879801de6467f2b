@@ -16,6 +16,24 @@
       "revId": "a02fd4fd731db2dfaec64b69d879801de6467f2b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bb507951_d707a7db",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-02-28T21:51:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1905a786_76d4e53d",
+      "revId": "a02fd4fd731db2dfaec64b69d879801de6467f2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
