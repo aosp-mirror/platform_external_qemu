@@ -19,12 +19,15 @@
 #include "AndroidVulkanDispatch.h"
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_android.h>
 #include <vulkan/vk_android_native_buffer.h>
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/opengles.h"
+
+#include <android/hardware_buffer.h>
 
 #include <atomic>
 #include <memory>
@@ -84,6 +87,7 @@ protected:
                               "gralloc.ranchu" LIBSUFFIX);
 
         load_gralloc_module(grallocPath.c_str(), &mGralloc);
+        set_global_gralloc_module(&mGralloc);
 
         EXPECT_NE(nullptr, mGralloc.fb_dev);
         EXPECT_NE(nullptr, mGralloc.alloc_dev);
@@ -174,8 +178,20 @@ protected:
 
         uint32_t bestPhysicalDevice = 0;
         bool queuesGood = false;
+        bool hasAndroidNativeBuffer = false;
+        bool hasExternalMemorySupport = false;
 
         for (uint32_t i = 0; i < physdevCount; ++i) {
+
+            queuesGood = false;
+            hasAndroidNativeBuffer = false;
+            hasExternalMemorySupport = false;
+
+            bool hasGetMemoryRequirements2 = false;
+            bool hasDedicatedAllocation = false;
+            bool hasExternalMemoryBaseExtension = false;
+            bool hasExternalMemoryPlatformExtension = false;
+
             uint32_t queueFamilyCount = 0;
             std::vector<VkQueueFamilyProperties> queueFamilyProps;
             vk->vkGetPhysicalDeviceQueueFamilyProperties(
@@ -195,12 +211,56 @@ protected:
                 }
             }
 
-            if (queuesGood) {
+            uint32_t devExtCount = 0;
+            std::vector<VkExtensionProperties> availableDeviceExtensions;
+            vk->vkEnumerateDeviceExtensionProperties(physdevs[i], nullptr,
+                                                     &devExtCount, nullptr);
+            availableDeviceExtensions.resize(devExtCount);
+            vk->vkEnumerateDeviceExtensionProperties(
+                    physdevs[i], nullptr, &devExtCount, availableDeviceExtensions.data());
+            for (uint32_t j = 0; j < devExtCount; ++j) {
+                if (!strcmp("VK_KHR_swapchain",
+                            availableDeviceExtensions[j].extensionName)) {
+                    hasAndroidNativeBuffer = true;
+                }
+                if (!strcmp("VK_KHR_get_memory_requirements2",
+                            availableDeviceExtensions[j].extensionName)) {
+                    hasGetMemoryRequirements2 = true;
+                }
+                if (!strcmp("VK_KHR_dedicated_allocation",
+                            availableDeviceExtensions[j].extensionName)) {
+                    hasDedicatedAllocation = true;
+                }
+                if (!strcmp("VK_KHR_external_memory",
+                            availableDeviceExtensions[j].extensionName)) {
+                    hasExternalMemoryBaseExtension = true;
+                }
+                static const char* externalMemoryPlatformExtension =
+                    "VK_ANDROID_external_memory_android_hardware_buffer";
+
+                if (!strcmp(externalMemoryPlatformExtension,
+                            availableDeviceExtensions[j].extensionName)) {
+                    hasExternalMemoryPlatformExtension = true;
+                }
+            }
+
+            hasExternalMemorySupport =
+                (hasGetMemoryRequirements2 &&
+                 hasDedicatedAllocation &&
+                 hasExternalMemoryBaseExtension &&
+                 hasExternalMemoryPlatformExtension);
+
+            if (queuesGood && hasExternalMemorySupport) {
+                bestPhysicalDevice = i;
                 break;
             }
         }
 
         EXPECT_TRUE(queuesGood);
+        EXPECT_TRUE(hasAndroidNativeBuffer);
+
+        mDeviceHasExternalMemorySupport =
+            hasExternalMemorySupport;
 
         mPhysicalDevice = physdevs[bestPhysicalDevice];
 
@@ -208,15 +268,30 @@ protected:
         vk->vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &memProps);
 
         bool foundHostVisibleMemoryTypeIndex = false;
+        bool foundDeviceLocalMemoryTypeIndex = false;
 
         for (uint32_t i = 0; i < memProps.memoryTypeCount; ++i) {
             if (memProps.memoryTypes[i].propertyFlags &
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
                 mHostVisibleMemoryTypeIndex = i;
                 foundHostVisibleMemoryTypeIndex = true;
+            }
+
+            if (memProps.memoryTypes[i].propertyFlags &
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) {
+                mDeviceLocalMemoryTypeIndex = i;
+                foundDeviceLocalMemoryTypeIndex = true;
+            }
+
+            if (foundHostVisibleMemoryTypeIndex &&
+                foundDeviceLocalMemoryTypeIndex) {
                 break;
             }
         }
+
+        EXPECT_TRUE(
+            foundHostVisibleMemoryTypeIndex &&
+            foundDeviceLocalMemoryTypeIndex);
 
         EXPECT_TRUE(foundHostVisibleMemoryTypeIndex);
 
@@ -235,6 +310,20 @@ protected:
             0, nullptr,  // no extensions
             nullptr,  // no features
         };
+
+        std::vector<const char*> externalMemoryExtensions = {
+            "VK_KHR_get_memory_requirements2",
+            "VK_KHR_dedicated_allocation",
+            "VK_KHR_external_memory",
+            "VK_ANDROID_external_memory_android_hardware_buffer",
+        };
+
+        if (mDeviceHasExternalMemorySupport) {
+            dCi.enabledExtensionCount =
+                (uint32_t)externalMemoryExtensions.size();
+            dCi.ppEnabledExtensionNames =
+            externalMemoryExtensions.data();
+        }
 
         EXPECT_EQ(VK_SUCCESS, vk->vkCreateDevice(physdevs[bestPhysicalDevice], &dCi,
                                              nullptr, &mDevice));
@@ -302,13 +391,13 @@ protected:
     bool mInstanceHasGetPhysicalDeviceProperties2Support = false;
     bool mInstanceHasExternalMemorySupport = false;
     bool mDeviceHasExternalMemorySupport = false;
-    bool mDeviceHasAHBSupport = false;
 
     VkInstance mInstance;
     VkPhysicalDevice mPhysicalDevice;
     VkDevice mDevice;
     VkQueue mQueue;
     uint32_t mHostVisibleMemoryTypeIndex;
+    uint32_t mDeviceLocalMemoryTypeIndex;
     uint32_t mGraphicsQueueFamily;
 };
 
@@ -522,4 +611,293 @@ TEST_F(VulkanHalTest, Hide1_1FunctionPointers) {
     }
 }
 
+// Tests VK_ANDROID_external_memory_android_hardware_buffer's properties API
+TEST_F(VulkanHalTest, AndroidHardwareBuffer_Properties) {
+    if (!mDeviceHasExternalMemorySupport) return;
+
+    uint64_t usage =
+        AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE |
+        AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN |
+        AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+    uint64_t cpuUsage =
+        AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN |
+        AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+
+    AHardwareBuffer_Desc desc = {
+        kWindowSize, kWindowSize, 1,
+        AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,
+        usage,
+        4, // stride ignored for allocate; don't check this
+    };
+
+    AHardwareBuffer* buf = nullptr;
+    AHardwareBuffer_allocate(&desc, &buf);
+
+    EXPECT_NE(nullptr, buf);
+
+    VkAndroidHardwareBufferPropertiesANDROID ahbProps = {
+        VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_FORMAT_PROPERTIES_ANDROID, 0,
+    };
+
+    PFN_vkGetAndroidHardwareBufferPropertiesANDROID getPropsFunc =
+    (PFN_vkGetAndroidHardwareBufferPropertiesANDROID)vk->vkGetDeviceProcAddr(
+        mDevice, "vkGetAndroidHardwareBufferPropertiesANDROID");
+    EXPECT_NE(nullptr, getPropsFunc);
+
+    EXPECT_EQ(VK_SUCCESS, getPropsFunc(mDevice, buf, &ahbProps));
+    
+    EXPECT_NE(0, ahbProps.memoryTypeBits);
+    EXPECT_NE(0, ahbProps.allocationSize);
+
+    AHardwareBuffer_release(buf);
+}
+
+
+// Tests VK_ANDROID_external_memory_android_hardware_buffer's allocation API.
+// The simplest: export allocate device local memory.
+TEST_F(VulkanHalTest, AndroidHardwareBufferAllocate_ExportDeviceLocal) {
+    if (!mDeviceHasExternalMemorySupport) return;
+
+    const VkDeviceSize kAllocSize = 4096;
+
+    VkExportMemoryAllocateInfo exportAi = {
+        VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO, 0,
+        VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID,
+    };
+
+    VkMemoryAllocateInfo allocInfo = {
+        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, &exportAi,
+        kAllocSize,
+        mDeviceLocalMemoryTypeIndex,
+    };
+
+    VkDeviceMemory memory;
+    VkResult res = vk->vkAllocateMemory(mDevice, &allocInfo, nullptr, &memory);
+    EXPECT_EQ(VK_SUCCESS, res);
+
+    AHardwareBuffer* exportedAhb = nullptr;
+
+    VkMemoryGetAndroidHardwareBufferInfoANDROID getAhbInfo = {
+        VK_STRUCTURE_TYPE_MEMORY_GET_ANDROID_HARDWARE_BUFFER_INFO_ANDROID, 0,
+        memory,
+    };
+
+    EXPECT_EQ(VK_SUCCESS,
+        vk->vkGetMemoryAndroidHardwareBufferANDROID(mDevice, &getAhbInfo, &exportedAhb));
+
+    EXPECT_NE(nullptr, exportedAhb);
+
+    vk->vkFreeMemory(mDevice, memory, nullptr);
+}
+
+// Test AHB allocation via import.
+TEST_F(VulkanHalTest, AndroidHardwareBufferAllocate_ImportDeviceLocal) {
+    if (!mDeviceHasExternalMemorySupport) return;
+
+    uint64_t usage =
+        AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE |
+        AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN |
+        AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+    uint64_t cpuUsage =
+        AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN |
+        AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+
+    AHardwareBuffer_Desc desc = {
+        kWindowSize, kWindowSize, 1,
+        AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,
+        usage,
+        4, // stride ignored for allocate; don't check this
+    };
+
+    AHardwareBuffer* buf = nullptr;
+    AHardwareBuffer_allocate(&desc, &buf);
+
+    EXPECT_NE(nullptr, buf);
+
+    VkImportAndroidHardwareBufferInfoANDROID importInfo = {
+        VK_STRUCTURE_TYPE_IMPORT_ANDROID_HARDWARE_BUFFER_INFO_ANDROID,
+        0, buf,
+    };
+
+    VkMemoryAllocateInfo allocInfo = {
+        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, &importInfo,
+        4 * kWindowSize * kWindowSize,
+        mDeviceLocalMemoryTypeIndex,
+    };
+
+    VkDeviceMemory memory;
+    VkResult res = vk->vkAllocateMemory(mDevice, &allocInfo, nullptr, &memory);
+
+    EXPECT_EQ(VK_SUCCESS, res);
+
+    vk->vkFreeMemory(mDevice, memory, nullptr);
+
+    AHardwareBuffer_release(buf);
+}
+
+// Test AHB allocation via export, but with a dedicated allocation (image).
+TEST_F(VulkanHalTest, AndroidHardwareBufferAllocate_Dedicated_Export) {
+    if (!mDeviceHasExternalMemorySupport) return;
+
+    VkExternalMemoryImageCreateInfo extMemImgCi = {
+        VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO, 0,
+        VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID,
+    };
+
+    VkImageCreateInfo testImageCi = {
+        VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        (const void*)&extMemImgCi, 0,
+        VK_IMAGE_TYPE_2D, VK_FORMAT_R8G8B8A8_UNORM,
+        { kWindowSize, kWindowSize, 1, }, 1, 1,
+        VK_SAMPLE_COUNT_1_BIT,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_SHARING_MODE_EXCLUSIVE,
+        0, nullptr /* shared queue families */,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+    };
+
+    VkImage testAhbImage;
+
+    EXPECT_EQ(VK_SUCCESS,
+        vk->vkCreateImage(
+            mDevice, &testImageCi, nullptr, &testAhbImage));
+
+    EXPECT_NE((VkImage)VK_NULL_HANDLE, testAhbImage);
+
+    VkMemoryDedicatedAllocateInfo dedicatedAi = {
+        VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO, 0,
+        testAhbImage, VK_NULL_HANDLE,
+    };
+
+    VkMemoryRequirements memReqs;
+    vk->vkGetImageMemoryRequirements(
+        mDevice, testAhbImage, &memReqs);
+
+    VkDeviceSize neededSize = memReqs.size;
+
+    uint32_t memoryTypeIndex = 0;
+    EXPECT_NE(0, memReqs.memoryTypeBits);
+
+    for (uint32_t i = 0; i < VK_MAX_MEMORY_TYPES; ++i) {
+        if (memReqs.memoryTypeBits & (1 << i)) {
+            memoryTypeIndex = i;
+            break;
+        }
+    }
+
+    VkExportMemoryAllocateInfo exportAi = {
+        VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO, &dedicatedAi,
+        VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID,
+    };
+
+    VkMemoryAllocateInfo allocInfo = {
+        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, &exportAi,
+        memReqs.size,
+        memoryTypeIndex,
+    };
+
+    VkDeviceMemory memory;
+    VkResult res = vk->vkAllocateMemory(mDevice, &allocInfo, nullptr, &memory);
+    EXPECT_EQ(VK_SUCCESS, res);
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkBindImageMemory(mDevice, testAhbImage, memory, 0));
+
+    vk->vkFreeMemory(mDevice, memory, nullptr);
+    vk->vkDestroyImage(mDevice, testAhbImage, nullptr);
+}
+
+// Test AHB allocation via import, but with a dedicated allocation (image).
+TEST_F(VulkanHalTest, AndroidHardwareBufferAllocate_Dedicated_Import) {
+    if (!mDeviceHasExternalMemorySupport) return;
+
+    uint64_t usage =
+        AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE |
+        AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN |
+        AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+    uint64_t cpuUsage =
+        AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN |
+        AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
+
+    AHardwareBuffer_Desc desc = {
+        kWindowSize, kWindowSize, 1,
+        AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,
+        usage,
+        4, // stride ignored for allocate; don't check this
+    };
+
+    AHardwareBuffer* buf = nullptr;
+    AHardwareBuffer_allocate(&desc, &buf);
+
+    EXPECT_NE(nullptr, buf);
+
+    VkExternalMemoryImageCreateInfo extMemImgCi = {
+        VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO, 0,
+        VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID,
+    };
+
+    VkImageCreateInfo testImageCi = {
+        VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        (const void*)&extMemImgCi, 0,
+        VK_IMAGE_TYPE_2D, VK_FORMAT_R8G8B8A8_UNORM,
+        { kWindowSize, kWindowSize, 1, }, 1, 1,
+        VK_SAMPLE_COUNT_1_BIT,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_SHARING_MODE_EXCLUSIVE,
+        0, nullptr /* shared queue families */,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+    };
+
+    VkImage testAhbImage;
+
+    EXPECT_EQ(VK_SUCCESS,
+        vk->vkCreateImage(
+            mDevice, &testImageCi, nullptr, &testAhbImage));
+
+    EXPECT_NE((VkImage)VK_NULL_HANDLE, testAhbImage);
+
+    VkMemoryDedicatedAllocateInfo dedicatedAi = {
+        VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO, 0,
+        testAhbImage, VK_NULL_HANDLE,
+    };
+
+    VkMemoryRequirements memReqs;
+    vk->vkGetImageMemoryRequirements(
+        mDevice, testAhbImage, &memReqs);
+
+    VkDeviceSize neededSize = memReqs.size;
+
+    uint32_t memoryTypeIndex = 0;
+    EXPECT_NE(0, memReqs.memoryTypeBits);
+
+    for (uint32_t i = 0; i < VK_MAX_MEMORY_TYPES; ++i) {
+        if (memReqs.memoryTypeBits & (1 << i)) {
+            memoryTypeIndex = i;
+            break;
+        }
+    }
+
+    VkImportAndroidHardwareBufferInfoANDROID importInfo = {
+        VK_STRUCTURE_TYPE_IMPORT_ANDROID_HARDWARE_BUFFER_INFO_ANDROID,
+        &dedicatedAi, buf,
+    };
+
+    VkMemoryAllocateInfo allocInfo = {
+        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, &importInfo,
+        memReqs.size,
+        memoryTypeIndex,
+    };
+
+    VkDeviceMemory memory;
+    VkResult res = vk->vkAllocateMemory(mDevice, &allocInfo, nullptr, &memory);
+    EXPECT_EQ(VK_SUCCESS, res);
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkBindImageMemory(mDevice, testAhbImage, memory, 0));
+
+    vk->vkFreeMemory(mDevice, memory, nullptr);
+    vk->vkDestroyImage(mDevice, testAhbImage, nullptr);
+
+    AHardwareBuffer_release(buf);
+}
 }  // namespace aemu
