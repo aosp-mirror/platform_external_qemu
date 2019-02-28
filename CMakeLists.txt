@@ -71,19 +71,19 @@ prebuilt(Threads)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions("-DANDROID_DEBUG")
 
-  if(MSVC)
+  if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
     # Clang will be running in cl compatibility mode.
     add_c_flag("/Od /RTC1 /EHsc")
   else()
     add_c_flag("-O0 -g3")
   endif()
 
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ANDROID_HOST_TAG STREQUAL "windows_msvc-x86_64")
     if(NOT OPTION_ASAN)
       set(OPTION_ASAN address)
     endif()
 
-    if(NOT MSVC)
+    if(NOT ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
       # Build an instrumented version of the code  that generates coverage mapping to enable code coverage analysis
       set(ANDROID_CODE_COVERAGE TRUE)
       add_c_flag("-fcoverage-mapping")
@@ -172,11 +172,11 @@ add_c_flag("-g")
 # void * or to unambiguous base classes.
 #
 # For msvc build, the msvc C++ headers are using RTTI features (typeid) so have cannot disable it.
-if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*" AND NOT MSVC)
+if(NOT ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
   add_cxx_flag("-fno-rtti")
 endif()
 
-if(NOT MSVC)
+if(NOT ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
   # Compiling with -fno-exceptions disables exceptions support and uses the variant of C++ libraries without exceptions.
   # Use of try, catch, or throw results in an error message. Linking objects that have been compiled with -fno-
   # exceptions automatically selects the libraries without exceptions. You can use the linker option --no_exceptions to
@@ -204,7 +204,7 @@ add_definitions("-D_GNU_SOURCE=1")
 # Enable large-file support (i.e. make off_t a 64-bit value).
 add_definitions("-D_FILE_OFFSET_BITS=64" "-D_LARGEFILE_SOURCE")
 
-if(OPTION_ASAN AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT MSVC)
+if(OPTION_ASAN AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ANDROID_TARGET_TAG STREQUAL "windows-msvc-x86_64")
   message(STATUS "Enabling ASAN with: ${OPTION_ASAN}")
   add_c_flag("-fsanitize=${OPTION_ASAN}")
   add_c_flag("-g3")
@@ -292,7 +292,7 @@ target_compile_options(android-qemu-deps
                                  # (See http://thiemonagel.de/2010/01/no-strict-aliasing/)
                                  "-fno-strict-aliasing")
 
-if(NOT MSVC)
+if(NOT ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
   target_compile_options(android-qemu-deps
                          INTERFACE # This option instructs the compiler to assume that signed arithmetic
                                    # overflow of addition, subtraction and multiplication wraps around using
@@ -369,9 +369,8 @@ android_target_compile_options(android-qemu-deps
                                "-Werror=implicit-function-declaration"
                                "-Wno-unused-variable"
                                "-mcx16")
-if(NOT MSVC)
-  android_target_compile_options(android-qemu-deps windows_msvc INTERFACE "-mms-bitfields")
-endif()
+
+android_target_compile_options(android-qemu-deps windows_msvc-x86-64 INTERFACE "-mms-bitfields")
 android_target_compile_options(android-qemu-deps
                                windows-x86
                                INTERFACE
@@ -420,7 +419,7 @@ set(ANDROID_QEMU2_TOP_DIR ${ANDROID_QEMU2_TOP_DIR})
 include(cmake-main.${ANDROID_TARGET_TAG}.inc)
 
 set(qemu2-common_src ${qemu2-shared_sources} ${qemu2-shared_generated_sources})
-if(MSVC)
+if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
   # Once we have a newer version of cmake we can generate the object library in a platform independent way b/121393952
   android_add_object_library(qemu2-common)
   target_link_libraries(qemu2-common PUBLIC msvc-posix-compat)

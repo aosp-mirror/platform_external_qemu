@@ -38,7 +38,7 @@ set(CMAKE_AUTORCC TRUE)
 
 # Registers the uic/rcc/moc targets if needed..
 function(add_qt_target target)
-  if(MSVC)
+  if(ANDROID_HOST_TAG STREQUAL "windows_msvc-x86_64")
     set(EXE_SUFFIX ".exe")
   endif()
   if(NOT TARGET Qt5::${target})

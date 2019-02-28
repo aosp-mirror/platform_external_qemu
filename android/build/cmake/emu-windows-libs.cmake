@@ -4,7 +4,8 @@
 # This function will declare the library ${NAME}::${NAME} that you can
 # take a dependency on, turning it into to the correct dependency.
 function(android_find_windows_library NAME)
-  if(MSVC)
+  #if (ANDROID_HOST_TAG STREQUAL "windows_msvc-x86_64")
+  if (MSVC)
     find_library(${NAME}_LIBRARIES ${NAME})
   else()
     set(${NAME}_LIBRARIES "${NAME}")
