@@ -99,7 +99,7 @@ private:
     explicit EmulatorNoQtNoWindow();
 
     android::base::Looper* mLooper;
-    std::unique_ptr<android::emulation::AdbInterface> mAdbInterface;
+    android::emulation::AdbInterface* mAdbInterface;
 };
 
 #ifdef CONFIG_HEADLESS

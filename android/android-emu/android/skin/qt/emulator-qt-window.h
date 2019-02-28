@@ -468,8 +468,8 @@ private:
 
     std::shared_ptr<android::qt::UserActionsCounter> mUserActionsCounter;
     android::base::MemberOnDemandT<
-            std::unique_ptr<android::emulation::AdbInterface>,
-            std::unique_ptr<android::emulation::AdbInterface>>
+            android::emulation::AdbInterface*,
+            android::emulation::AdbInterface*>
             mAdbInterface;
     android::emulation::AdbCommandPtr mApkInstallCommand;
     android::base::MemberOnDemandT<android::emulation::ApkInstaller,

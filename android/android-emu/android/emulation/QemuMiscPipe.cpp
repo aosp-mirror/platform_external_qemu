@@ -11,6 +11,7 @@
 
 #include "android/emulation/QemuMiscPipe.h"
 #include "android/base/files/MemStream.h"
+#include "android/emulation/control/AdbInterface.h"
 #include "android/emulation/AndroidMessagePipe.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/utils/debug.h"
@@ -73,9 +74,25 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
         printf("emulator: INFO: boot completed\n");
         printf("emulator: INFO: boot time %lld ms\n", (long long)get_uptime_ms());
         fflush(stdout);
+
         guest_boot_completed = 1;
+
         if (android_hw->test_quitAfterBootTimeOut > 0) {
             gQAndroidVmOperations->vmShutdown();
+        } else {
+            auto adbInterface = emulation::AdbInterface::getGlobal();
+            if (!adbInterface) return;
+
+            printf("emulator: Increasing screen off timeout "
+                   "and revoking microphone permissions for Google App\n");
+
+            adbInterface->enqueueCommand(
+                { "shell", "settings", "put", "system",
+                  "screen_off_timeout", "2147483647" });
+            adbInterface->enqueueCommand(
+                { "shell", "pm", "revoke",
+                  "com.google.android.googlequicksearchbox",
+                  "android.permission.RECORD_AUDIO" });
         }
 
         return;
