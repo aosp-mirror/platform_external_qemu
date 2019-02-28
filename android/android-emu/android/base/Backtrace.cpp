@@ -33,12 +33,13 @@ std::string bt() {
 #include <errno.h>
 #include <libunwind.h>
 #include <stdio.h>
+
+
 namespace android {
 namespace base {
 
 // Implementation from:
 // https://eli.thegreenplace.net/2015/programmatic-access-to-the-call-stack-in-c/
-
 
 #define E(fmt,...) \
     fprintf(stderr, "%s: " fmt "\n", __func__, ##__VA_ARGS__);
@@ -73,14 +74,15 @@ std::string bt() {
             ss << " (" << nameptr << ")+" << std::hex << offset << "\n";
             free(demangled);
         } else {
-            ss << (" -- error: unable to obtain symbol name for this frame\n");
+            printf(" -- error: unable to obtain symbol name for this frame\n");
         }
     }
 
     return ss.str();
 }
 
-}  // namespace base
-}  // namespace android
+
+} // namespace android
+} // namespace base
 
 #endif
