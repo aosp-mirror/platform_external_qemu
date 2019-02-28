@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d809d1b3_9ba132f0",
+        "filename": "android/android-emu/android/camera/camera-videoplayback-render-multiplexer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-02-28T18:12:02Z",
+      "side": 1,
+      "message": "I come from Java world. I am curious if we can use some polymorphism here. \n\nSomething like VideoPlaybackRender mRender; VideoPlaybackRender is the interface or abstract class.\nThen set mRender in the switch clauses:\nmRender \u003d defaultRenderer;\n\nso we don\u0027t need to have switch statements in other places.",
+      "range": {
+        "startLine": 55,
+        "startChar": 7,
+        "endLine": 55,
+        "endChar": 54
+      },
+      "revId": "8aec78447052558142122d447ff123769734c635",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "960a876e_47a60e15",
+        "filename": "android/android-emu/android/camera/camera-videoplayback.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1373621
+      },
+      "writtenOn": "2019-02-28T18:12:02Z",
+      "side": 1,
+      "message": "indentation",
+      "range": {
+        "startLine": 110,
+        "startChar": 48,
+        "endLine": 110,
+        "endChar": 62
+      },
+      "revId": "8aec78447052558142122d447ff123769734c635",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
