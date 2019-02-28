@@ -78,21 +78,23 @@ def check_minidump(minidump):
 
     # There are 2 ways in which we can detect a crash.
 
-    # 1. Immediate,
+    # 1. Immediate. Note that our symbols might have mangled C++
+    # functions, which can be mangled differently from compiler
+    # to compiler.
     IMMEDIATE_CRASH = [
-        r'.*0.*!android::crashreport::CrashReporter::GenerateDumpAndDie.*',
-        r'.*1.*!crashhandler_die.*',
-        r'.*2.*!crash.*',
-        r'.*3.*!do_crash.*',
-        r'.*4.*!control_client_do_command.*',
-        r'.*5.*!control_client_read.*',
+        r'.*0.*!.*GenerateDumpAndDie.*',
+        r'.*1.*!.*crashhandler_die.*',
+        r'.*2.*!.*crash.*',
+        r'.*3.*!.*do_crash.*',
+        r'.*4.*!.*control_client_do_command.*',
+        r'.*5.*!.*control_client_read.*',
     ]
 
     # 2. Through our hang detector (happens regularly on windows).
     HANG_DETECTED = [
-        r'.*3.*!android::crashreport::HangDetector::workerThread.*',
-        r'.*4.*!.*android::base::FunctorThread::FunctorThread.*HangDetector.*',
-        r'.*5.*!android::base::Thread.*']
+        r'.*3.*!.*workerThread.*',
+        r'.*4.*!.*HangDetector.*',
+        r'.*5.*!.*Thread.*']
 
     if not (all([check_trace(syms, sym) for sym in IMMEDIATE_CRASH]) or
             all([check_trace(syms, sym) for sym in HANG_DETECTED])):
