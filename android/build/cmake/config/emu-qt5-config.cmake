@@ -92,7 +92,7 @@ set(QT5_LINK_PATH "-L${PREBUILT_ROOT}/lib")
 set(QT5_DEFINITIONS "-DQT5_STATICLIB")
 set(QT5_FOUND TRUE)
 
-if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
+if(DARWIN_X86_64)
   set(QT_LIB_VERSION 5.12.1)
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
   set(
@@ -165,7 +165,7 @@ if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
     "INSTALL_RPATH>=@loader_path/lib64/qt/libexec;INSTALL_RPATH>=@loader_path/lib64/qt/lib;INSTALL_RPATH>=@loader_path/lib64/qt/plugins"
     )
   set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5NetworkAndroidEmu -lQt5WebChannelAndroidEmu -lQt5WebEngineWidgetsAndroidEmu -lQt5WebSockets)
-elseif(ANDROID_TARGET_OS STREQUAL "windows_msvc")
+elseif(WINDOWS_MSVC_X86_64)
   # On Windows, Qt provides us with a qtmain.lib which helps us write a cross-platform main() function (because WinMain() is the entry point
   # to a GUI application on Windows). Exactly how qtmain does this is it defines WinMain() for us, and inside WinMain(), it calls a function
   # that we provide. For mingw, this function is qMain(), and for msvc, it's just main() (see qt-src/.../qtmain_lib.cpp for more info).
@@ -217,7 +217,7 @@ elseif(ANDROID_TARGET_OS STREQUAL "windows_msvc")
   add_qt_shared_lib(WebSockets "${PREBUILT_ROOT}/lib/Qt5WebSocketsAndroidEmu.lib" "Qt5::WebEngineCore;Qt5::Qml")
   add_qt_shared_lib(WebEngineWidgets "${PREBUILT_ROOT}/lib/Qt5WebEngineWidgetsAndroidEmu.lib" "Qt5::WebEngineCore;Qt5::Qml")
 
-elseif(ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
+elseif(WINDOWS_X86_64)
   # On Windows, linking to mingw32 is required. The library is provided by the toolchain, and depends on a main()
   # function provided by qtmain which itself depends on qMain(). These must appear in emulator-libui_unittests LDFLAGS
   # and not LDLIBS since qMain() is provided by object/libraries that appear after these in the link command-line.
@@ -243,7 +243,7 @@ elseif(ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
   add_qt_shared_lib(Gui "-lQt5GuiAndroidEmu" "Qt5::Core")
   add_qt_shared_lib(Widgets "-lQt5WidgetsAndroidEmu" "Qt5::Gui")
   add_qt_shared_lib(Svg "-lQt5SvgAndroidEmu" "Qt5::Widgets")
-elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
+elseif(LINUX_X86_64)
   set(QT5_LIBRARIES -L${PREBUILT_ROOT}/lib ${QT5_LIBRARIES})
   # LD_DEBUG=libs ./emulator @P_64 2>&1 | grep qt | grep init
   set(
