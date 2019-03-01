@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "abeb3001_b8ff6fae",
+        "filename": "android/android-emu/android/base/memory/MemoryUsage.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-01T05:15:02Z",
+      "side": 1,
+      "message": "const std::string\u0026?",
+      "range": {
+        "startLine": 28,
+        "startChar": 20,
+        "endLine": 28,
+        "endChar": 55
+      },
+      "revId": "ec1b9dc0125575145439b342630c993768184e08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e76a2f5a_b68f44a6",
+        "filename": "android/android-emu/android/qemu-setup.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 492,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-01T05:15:02Z",
+      "side": 1,
+      "message": "I like having a different env var for this more because it allows the fps display and memory usage tracing to be turned on and off independently. Should we introduce a different env variable for it? Is the current solution low overhead enough to be on all the time?",
+      "range": {
+        "startLine": 492,
+        "startChar": 8,
+        "endLine": 492,
+        "endChar": 71
+      },
+      "revId": "ec1b9dc0125575145439b342630c993768184e08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "da813963_c9f25323",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1355,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-01T05:15:02Z",
+      "side": 1,
+      "message": "Can we introduce a separate macro for this liek MEM_TRACE(\"EMUGL\") that does the memory usage add to group with less repetition?",
+      "revId": "ec1b9dc0125575145439b342630c993768184e08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
