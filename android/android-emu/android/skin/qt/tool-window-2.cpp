@@ -339,6 +339,7 @@ bool ToolWindow2::shouldHide() {
     int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
     int width   = android_hw->hw_displayRegion_0_1_width;
     int height  = android_hw->hw_displayRegion_0_1_height;
+    int foldable  = android_hw->hw_foldable;
     QSettings settings;
     bool foldableEnabled = settings.value(Ui::Settings::FOLDABLE_ENABLE, false).toBool();
 
@@ -347,6 +348,7 @@ bool ToolWindow2::shouldHide() {
         width   < 1 || width   > 9999 ||
         height  < 1 || height  > 9999 ||
         !foldableEnabled              ||
+        !foldable                     ||
         //TODO: need 29
         avdInfo_getApiLevel(android_avdInfo) < 28) {
         return true;
