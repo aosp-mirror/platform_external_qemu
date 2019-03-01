@@ -1,5 +1,20 @@
 apply plugin: 'sdk-files'
 
+/***
+  DEPRECATED!  DEPRECATED!  DEPRECATED!  DEPRECATED!
+
+  WARNING THIS FILE IS NO LONGER BEING USED AND WILL BE REMOVED IN THE NEAR FUTURE
+  INSTEAD MODIFY:
+
+  android/build/python/aemu/distribution.py
+
+  OR BETTER:
+
+  Modify the CMakeLists.txt such that the install(xxx) binplaces what you want
+  to have end up in the release
+
+  DEPRECATED!  DEPRECATED!  DEPRECATED!  DEPRECATED!
+**/
 import com.android.tools.internal.emulator.BuildEmulator
 
 // Get SDK revision to define emulator revision
@@ -52,7 +67,7 @@ task packageCodeCoverage(type: Zip) {
 
 sdk {
     common(mac, linux) {
-        item("$buildDefaultEmulator.output/gradle-release") {
+        item("$buildDefaultEmulator.output/distribution/emulator") {
             into ''
             builtBy buildDefaultEmulator
         }
@@ -86,7 +101,7 @@ sdk {
     }
 
     windows {
-        item("$buildWindowsEmulator.output/gradle-release") {
+        item("$buildWindowsEmulator.output/distribution/emulator") {
             into ''
             builtBy buildWindowsEmulator
         }

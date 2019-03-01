@@ -71,7 +71,7 @@ def get_visual_studio():
     # Create a preference ordering, we prefer not to use build tools..
     pref = sorted(candidates, reverse=True)
     vs_release = next(iter(pref), None)
-    logging.info("Using visual studio %s", vs_release) 
+    logging.info("Using visual studio %s", vs_release)
     return vs_release
 
 def fixup_windows_clang():
@@ -109,6 +109,13 @@ def recursive_iglob(rootdir, pattern_fns):
                 if pattern_fn(fname):
                     yield fname
 
+def read_simple_properties(fname):
+    res = {}
+    with open(fname, 'r') as props:
+        for line in props.readlines():
+            k, v = line.split('=')
+            res[k.strip()] = v.strip()
+    return res
 
 class ArgEnum(Enum):
     '''A class that can parse argument enums'''
@@ -175,6 +182,6 @@ class SymbolUris(ArgEnum):
 
 
     def to_cmd(self):
-        if self.value: 
+        if self.value:
             return ['-DANDROID_SYMBOL_URL=%s' % self.value]
         return []
