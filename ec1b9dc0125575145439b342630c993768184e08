@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6006be97_1f8dead0",
+        "filename": "android/android-emu/android/base/memory/MemoryUsage.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-03-01T18:37:05Z",
+      "side": 1,
+      "message": "I agree binary_search is a good approach. I haven\u0027t implemented the optimization yet. So far the overhead is less than 0.5s for 15s cold boot. I will experiment to see if binary_search brings the overhead down.",
+      "parentUuid": "c8c4e2bc_b7ade05f",
+      "revId": "ec1b9dc0125575145439b342630c993768184e08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "abeb3001_b8ff6fae",
         "filename": "android/android-emu/android/base/memory/MemoryUsage.h",
         "patchSetId": 7
