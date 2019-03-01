@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "002a33f6_1488363a",
+        "filename": "android/build/python/aemu/cmake.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-01T17:05:55Z",
+      "side": 1,
+      "message": "nit: remove trailing whitespace (and check throughout)",
+      "revId": "bc788835319f08ee9795ae79bb02fbe9812f7c57",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
