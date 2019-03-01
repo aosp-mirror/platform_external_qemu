@@ -129,7 +129,7 @@ message VideoInjectionRequest {
   optional uint32 sequence_id = 1;
 
   message Load {
-      optional string video_file_path = 1;
+      optional bytes video_data = 1;
   }
 
   message Play {
