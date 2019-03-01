@@ -28,6 +28,14 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkCreateSemaphore",
     "vkDestroySemaphore",
     "vkQueueSubmit",
+    # Warning: These need to be defined in vk.xml (currently no-op) {
+    "vkGetMemoryFuchsiaHandleKHR",
+    "vkGetMemoryFuchsiaHandlePropertiesKHR",
+    "vkGetSemaphoreFuchsiaHandleKHR",
+    "vkImportSemaphoreFuchsiaHandleKHR",
+    # } end Warning: These need to be defined in vk.xml (currently no-op)
+    "vkGetAndroidHardwareBufferPropertiesANDROID",
+    "vkGetMemoryAndroidHardwareBufferANDROID",
 ]
 
 SUCCESS_VAL = {
