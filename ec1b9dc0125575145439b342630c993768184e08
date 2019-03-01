@@ -131,6 +131,30 @@
     },
     {
       "key": {
+        "uuid": "3b29b609_7ec4269e",
+        "filename": "android/android-emu/android/qemu-setup.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 492,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-01T18:44:30Z",
+      "side": 1,
+      "message": "sounds good",
+      "parentUuid": "b11f95d1_1e1708fe",
+      "range": {
+        "startLine": 492,
+        "startChar": 8,
+        "endLine": 492,
+        "endChar": 71
+      },
+      "revId": "ec1b9dc0125575145439b342630c993768184e08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "da813963_c9f25323",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
         "patchSetId": 7
@@ -178,6 +202,24 @@
       "side": 1,
       "message": "Actually, we could do something in each function\n \"static std::once_flag once_flag;\n std::call_once(once_flag, [] {})\"\nWrap this in a macro.",
       "parentUuid": "29d30801_7550742c",
+      "revId": "ec1b9dc0125575145439b342630c993768184e08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0fe5b30_6b0c097c",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1355,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-01T18:44:30Z",
+      "side": 1,
+      "message": "Sounds good! Make sure it works on Windows though as that\u0027s GCC and I\u0027m not sure it has that C++ feautre. if it doesn\u0027t, maybe a static LazyInstance per function with class that does addtogroup in its ctor",
+      "parentUuid": "26cf4cba_a71a2706",
       "revId": "ec1b9dc0125575145439b342630c993768184e08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
