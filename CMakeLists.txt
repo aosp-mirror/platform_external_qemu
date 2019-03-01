@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
 
-if(MSVC)
-  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/android/build/cmake")
-  include("toolchain-windows_msvc-x86_64")
-endif()
-
 message(STATUS "Compiling for target: ${ANDROID_TARGET_TAG}")
 if(NOT DEFINED ANDROID_TARGET_TAG)
   message(STATUS "ANDROID_TARGET_TAG is undefined [${ANDROID_TARGET_TAG}]")
@@ -13,7 +8,12 @@ if(NOT DEFINED ANDROID_TARGET_TAG)
       "You need to invoke the cmake generator with a proper toolchain from android/build/cmake, pass: -DCMAKE_TOOLCHAIN_FILE=./android/build/cmake/toolchain-xxxx.cmake to cmake"
     )
 endif()
-message(STATUS "Using toolchain for ${ANDROID_TARGET_TAG}")
+
+if (CROSSCOMPILE)
+  message(STATUS "Cross compiling from ${ANDROID_HOST_TAG} to ${ANDROID_TARGET_TAG}")
+else()
+  message(STATUS "Using toolchain for ${ANDROID_TARGET_TAG}")
+endif()
 
 include(android)
 include(prebuilts)
@@ -40,7 +40,7 @@ else()
   message(STATUS "Uploading symbols to ${ANDROID_SYMBOL_URL}")
 endif()
 
-if (ANDROID_EXTRACT_SYMBOLS AND NOT ANDROID_HOST_TAG STREQUAL ANDROID_TARGET_TAG AND NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
+if (ANDROID_EXTRACT_SYMBOLS AND NOT ANDROID_HOST_TAG STREQUAL ANDROID_TARGET_TAG AND NOT WINDOWS_X86_64)
   message(WARNING "Symbol extraction not supported when cross compiling from ${ANDROID_HOST_TAG} -> ${ANDROID_TARGET_TAG}, disabling.")
   set(ANDROID_EXTRACT_SYMBOLS FALSE)
 endif()
@@ -71,7 +71,7 @@ prebuilt(Threads)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions("-DANDROID_DEBUG")
 
-  if(MSVC)
+  if(WINDOWS_MSVC_X86_64)
     # Clang will be running in cl compatibility mode.
     add_c_flag("/Od /RTC1 /EHsc")
   else()
@@ -83,7 +83,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
       set(OPTION_ASAN address)
     endif()
 
-    if(NOT MSVC)
+    if(NOT WINDOWS_MSVC_X86_64)
       # Build an instrumented version of the code  that generates coverage mapping to enable code coverage analysis
       set(ANDROID_CODE_COVERAGE TRUE)
       add_c_flag("-fcoverage-mapping")
@@ -96,7 +96,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 else()
   set(CMAKE_INSTALL_DO_STRIP TRUE)
   add_definitions("-DNDEBUG=1")
-  if(ANDROID_TARGET_TAG MATCHES "windows.*")
+  if(WINDOWS_X86_64 OR WINDOWS_MSVC_X86_64)
     add_c_flag("-O2 -g3")
   else()
     add_c_flag("-O3 -g3")
@@ -149,7 +149,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_c_flag("-Wno-return-type")
 endif()
 
-if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+if(WINDOWS_MSVC_X86_64)
   add_c_flag("-Wno-microsoft-enum-forward-reference")
   add_c_flag("-Wno-address-of-packed-member")
   add_c_flag("-Wno-incompatible-ms-struct")
@@ -172,7 +172,7 @@ add_c_flag("-g")
 # void * or to unambiguous base classes.
 #
 # For msvc build, the msvc C++ headers are using RTTI features (typeid) so have cannot disable it.
-if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*" AND NOT MSVC)
+if(NOT WINDOWS_MSVC_X86_64 AND NOT MSVC)
   add_cxx_flag("-fno-rtti")
 endif()
 
@@ -241,7 +241,7 @@ prebuilt(TCMALLOC)
 prebuilt(OpenSSL)
 
 # There is no USB support on windows, so we will not try to resolve it.
-if(NOT ANDROID_TARGET_TAG MATCHES "windows.*")
+if(NOT (WINDOWS_X86_64 OR WINDOWS_MSVC_X86_64))
   prebuilt(USB)
 endif()
 
@@ -431,7 +431,7 @@ target_compile_definitions(qemu2-common PRIVATE "-DPOISON_CONFIG_ANDROID")
 target_link_libraries(qemu2-common PUBLIC android-qemu-deps)
 
 set(libqemu2-util_src ${libqemuutil_sources} ${libqemuutil_generated_sources})
-if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+if(WINDOWS_MSVC_X86_64)
   # So we have some linker issues on MSVC debug (b/122598666) where clang places things in the .pdata sections
   # which the MSVC linker cannot handle.  We cannot use the lld-link.exe linker as it deadlocks for unknown.
   # The workaround is to compile mail-loop.c with all optimizations enabled.
