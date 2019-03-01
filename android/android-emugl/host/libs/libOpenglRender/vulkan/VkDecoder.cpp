@@ -2093,6 +2093,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkCreateSemaphore:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkCreateSemaphore\n");;
+                }
                 VkDevice device;
                 const VkSemaphoreCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
@@ -2139,12 +2143,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkCreateSemaphore\n");;
-                }
                 VkResult vkCreateSemaphore_VkResult_return = (VkResult)0;
-                vkCreateSemaphore_VkResult_return = vk->vkCreateSemaphore(unboxed_device, pCreateInfo, pAllocator, pSemaphore);
+                vkCreateSemaphore_VkResult_return = m_state->on_vkCreateSemaphore(device, pCreateInfo, pAllocator, pSemaphore);
                 uint64_t cgen_var_111;
                 vkStream->handleMapping()->mapHandles_VkSemaphore_u64(pSemaphore, &cgen_var_111, 1);
                 vkStream->write((uint64_t*)&cgen_var_111, 8);
@@ -2155,6 +2155,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
             }
             case OP_vkDestroySemaphore:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkDestroySemaphore\n");;
+                }
                 VkDevice device;
                 VkSemaphore semaphore;
                 const VkAllocationCallbacks* pAllocator;
@@ -2181,11 +2185,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 {
                     transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
                 }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkDestroySemaphore\n");;
-                }
-                vk->vkDestroySemaphore(unboxed_device, semaphore, pAllocator);
+                m_state->on_vkDestroySemaphore(device, semaphore, pAllocator);
                 vkReadStream->clearPool();
                 vkStream->commitWrite();
                 break;
