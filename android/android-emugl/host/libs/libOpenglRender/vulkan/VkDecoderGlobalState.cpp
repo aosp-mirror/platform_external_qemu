@@ -992,6 +992,50 @@ public:
         }
     }
 
+    VkResult on_vkImportSemaphoreFdKHR(
+            VkDevice boxed_device,
+            const VkImportSemaphoreFdInfoKHR* pImportSemaphoreFdInfo) {
+        VkImportSemaphoreFdInfoKHR importInfo = *pImportSemaphoreFdInfo;
+#ifndef _WIN32
+        // TODO: win32 support
+        importInfo.fd = dup(pImportSemaphoreFdInfo->fd);
+#endif
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+        return vk->vkImportSemaphoreFdKHR(device, &importInfo);
+    }
+
+    VkResult on_vkGetSemaphoreFdKHR(
+            VkDevice boxed_device,
+            const VkSemaphoreGetFdInfoKHR* pGetFdInfo,
+            int* pFd) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+        VkResult result = vk->vkGetSemaphoreFdKHR(device, pGetFdInfo, pFd);
+        if (result != VK_SUCCESS) {
+            return result;
+        }
+        AutoLock lock(mLock);
+        mSemaphoreInfo[pGetFdInfo->semaphore].externalFd = *pFd;
+        return result;
+    }
+
+    void on_vkDestroySemaphore(
+            VkDevice boxed_device,
+            VkSemaphore semaphore,
+            const VkAllocationCallbacks* pAllocator) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+#ifndef _WIN32
+        AutoLock lock(mLock);
+        const auto& ite = mSemaphoreInfo.find(semaphore);
+        if (ite != mSemaphoreInfo.end() && ite->second.externalFd) {
+            close(ite->second.externalFd);
+        }
+#endif
+        vk->vkDestroySemaphore(device, semaphore, pAllocator);
+    }
     void on_vkUpdateDescriptorSets(
             VkDevice boxed_device,
             uint32_t descriptorWriteCount,
@@ -1860,6 +1904,37 @@ public:
         }
     }
 
+    void on_vkGetPhysicalDeviceExternalSemaphoreProperties(
+            VkPhysicalDevice boxed_physicalDevice,
+            const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
+            VkExternalSemaphoreProperties* pExternalSemaphoreProperties) {
+        auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
+        auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
+
+        if (!physicalDevice) {
+            return;
+        }
+        // Cannot forward this call to driver because nVidia linux driver crahses on it.
+        switch (pExternalSemaphoreInfo->handleType) {
+            case VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT:
+                pExternalSemaphoreProperties->exportFromImportedHandleTypes =
+                        VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT;
+                pExternalSemaphoreProperties->compatibleHandleTypes =
+                        VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT;
+                pExternalSemaphoreProperties->externalSemaphoreFeatures =
+                        VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT |
+                        VK_EXTERNAL_SEMAPHORE_FEATURE_IMPORTABLE_BIT;
+                return;
+
+            default:
+                break;
+        }
+
+        pExternalSemaphoreProperties->exportFromImportedHandleTypes = 0;
+        pExternalSemaphoreProperties->compatibleHandleTypes = 0;
+        pExternalSemaphoreProperties->externalSemaphoreFeatures = 0;
+    }
+
     // TODO: Support more than one kind of guest external memory handle type
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPE VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID
 
@@ -2400,6 +2475,10 @@ private:
         VkSampler emulatedborderSampler = VK_NULL_HANDLE;
     };
 
+    struct SemaphoreInfo {
+        int externalFd = 0;
+    };
+
     std::unordered_map<VkInstance, InstanceInfo>
         mInstanceInfo;
     std::unordered_map<VkPhysicalDevice, PhysicalDeviceInfo>
@@ -2423,6 +2502,8 @@ private:
     std::unordered_map<VkBuffer, BufferInfo> mBufferInfo;
 
     std::unordered_map<VkDeviceMemory, MappedMemoryInfo> mMapInfo;
+
+    std::unordered_map<VkSemaphore, SemaphoreInfo> mSemaphoreInfo;
 };
 
 VkDecoderGlobalState::VkDecoderGlobalState()
@@ -2668,6 +2749,26 @@ void VkDecoderGlobalState::on_vkDestroySampler(
     mImpl->on_vkDestroySampler(device, sampler, pAllocator);
 }
 
+VkResult VkDecoderGlobalState::on_vkImportSemaphoreFdKHR(
+        VkDevice device,
+        const VkImportSemaphoreFdInfoKHR* pImportSemaphoreFdInfo) {
+    return mImpl->on_vkImportSemaphoreFdKHR(device, pImportSemaphoreFdInfo);
+}
+
+VkResult VkDecoderGlobalState::on_vkGetSemaphoreFdKHR(
+        VkDevice device,
+        const VkSemaphoreGetFdInfoKHR* pGetFdInfo,
+        int* pFd) {
+    return mImpl->on_vkGetSemaphoreFdKHR(device, pGetFdInfo, pFd);
+}
+
+void VkDecoderGlobalState::on_vkDestroySemaphore(
+        VkDevice device,
+        VkSemaphore semaphore,
+        const VkAllocationCallbacks* pAllocator) {
+    mImpl->on_vkDestroySemaphore(device, semaphore, pAllocator);
+}
+
 void VkDecoderGlobalState::on_vkUpdateDescriptorSets(
         VkDevice device,
         uint32_t descriptorWriteCount,
@@ -2860,6 +2961,24 @@ void VkDecoderGlobalState::on_vkFreeCommandBuffers(
         const VkCommandBuffer* pCommandBuffers) {
     return mImpl->on_vkFreeCommandBuffers(device, commandPool,
                                           commandBufferCount, pCommandBuffers);
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceExternalSemaphoreProperties(
+        VkPhysicalDevice physicalDevice,
+        const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
+        VkExternalSemaphoreProperties* pExternalSemaphoreProperties) {
+    return mImpl->on_vkGetPhysicalDeviceExternalSemaphoreProperties(
+            physicalDevice, pExternalSemaphoreInfo,
+            pExternalSemaphoreProperties);
+}
+
+void VkDecoderGlobalState::on_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
+        VkPhysicalDevice physicalDevice,
+        const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
+        VkExternalSemaphoreProperties* pExternalSemaphoreProperties) {
+    return mImpl->on_vkGetPhysicalDeviceExternalSemaphoreProperties(
+            physicalDevice, pExternalSemaphoreInfo,
+            pExternalSemaphoreProperties);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(
