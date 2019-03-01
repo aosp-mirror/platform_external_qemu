@@ -11,19 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# The toolchain files get processed multiple times during compile detection
+# keep these files simple, and do not setup libraries or anything else.
+# merely tags, compiler toolchain and flags should be set here.
+
 get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
 list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 # cmake will look for WinMSVCCrossCompile in Platform/WinMSVCCrossCompile.cmake
 list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}/Modules")
 
 include(toolchain)
-
-# First we create the toolchain
-get_host_tag(ANDROID_HOST_TAG)
-set(ANDROID_TARGET_TAG "windows_msvc-x86_64")
-set(ANDROID_TARGET_OS "windows_msvc")
-set(ANDROID_TARGET_OS_FLAVOR "windows")
-set(CMAKE_SYSTEM_PROCESSOR AMD64)
+# First we setup all the tags.
+toolchain_configure_tags("windows_msvc-x86_64")
 
 get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../../" ABSOLUTE)
 
@@ -84,7 +84,9 @@ if(WIN32)
 
   # Including windows.h will cause issues with std::min/std::max
   add_definitions(-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -D_USE_MATH_DEFINES -DWIN32_LEAN_AND_MEAN)
+  toolchain_configure_tags("windows_msvc-x86_64")
 else()
+
   set(CMAKE_SYSTEM_NAME WinMSVCCrossCompile)
   toolchain_generate("${ANDROID_TARGET_TAG}")
   # need to set ar to llvm-ar to unpack windows static libs
@@ -102,6 +104,6 @@ else()
   add_definitions(-DWINDOWS_CROSS_COMPILE)
 endif()
 
-include(emu-windows-libs)
+# And the asm type if we are compiling with yasm
 set(ANDROID_YASM_TYPE win64)
 set(CMAKE_SHARED_LIBRARY_PREFIX "lib")

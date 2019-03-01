@@ -21,7 +21,7 @@ get_filename_component(PREBUILT_ROOT
 # binplace in bin64
 set(DST_DIR "bin64")
 
-if(ANDROID_TARGET_TAG MATCHES "windows.*")
+if(WINDOWS)
   set(E2FSPROGS_FILES
       cygblkid-1.dll
       cygcom_err-2.dll

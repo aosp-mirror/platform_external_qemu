@@ -12,17 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# The toolchain files get processed multiple times during compile detection
+# keep these files simple, and do not setup libraries or anything else.
+# merely tags, compiler toolchain and flags should be set here.
+
 # Note! This file can get included many times, so we use some tricks to
 # Only calculate the settings once.
 get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
 list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 include(toolchain)
 
-# First we create the toolchain
-get_host_tag(ANDROID_HOST_TAG)
-set(ANDROID_TARGET_TAG "linux-x86_64")
-set(ANDROID_TARGET_OS "linux")
-set(ANDROID_TARGET_OS_FLAVOR "linux")
+# First we setup all the tags and configure the toolchain
+toolchain_configure_tags("linux-x86_64")
 get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../" ABSOLUTE)
 toolchain_generate("${ANDROID_TARGET_TAG}")
 
@@ -45,9 +46,11 @@ if ("${RUNTIME_OS_DEPENDENCIES}" STREQUAL "")
     internal_set_env_cache(RUNTIME_OS_PROPERTIES "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64' -Wl,--disable-new-dtags")
 endif()
 
-# here is the target environment located, used to
-# locate packages. We don't want to do any package resolution
-# with mingw, so we explicitly disable it.
+# We don't want to do any package resolution
 set(CMAKE_FIND_ROOT_PATH  "${ANDROID_SYSROOT}")
+
+# Configure how we strip executables.
 set(CMAKE_STRIP_CMD "${CMAKE_STRIP} -s")
+
+# And the asm type if we are compiling with yasm
 set(ANDROID_YASM_TYPE elf64)

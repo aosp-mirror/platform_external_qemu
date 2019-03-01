@@ -13,26 +13,24 @@ get_filename_component(
   PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/e2fsprogs/${ANDROID_TARGET_TAG}"
   ABSOLUTE)
 
-if (ANDROID_TARGET_TAG MATCHES "darwin.*")
-    # Apple does its own thing, the headers should be on the path, so no need to set them explicitly.
-elseif (ANDROID_TARGET_TAG MATCHES "linux.*")
-    set(UUID_INCLUDE_DIR "${PREBUILT_ROOT}/include")
-    set(UUID_INCLUDE_DIRS "${UUID_INCLUDE_DIR}")
-    set(UUID_LIBRARIES "${PREBUILT_ROOT}/lib/libuuid${CMAKE_STATIC_LIBRARY_SUFFIX}")
-elseif (ANDROID_TARGET_TAG MATCHES "windows.*")
-    # In windows you include rpc.h
-    if(MSVC)
-        set(UUID_LIBRARIES "rpcrt4")
-    else()
-        set(UUID_LIBRARIES "-lrpcrt4")
-    endif()
-endif ()
+if(DARWIN_X86_64)
+  # Apple does its own thing, the headers should be on the path, so no need to set them explicitly.
+elseif(LINUX_X86_64)
+  set(UUID_INCLUDE_DIR "${PREBUILT_ROOT}/include")
+  set(UUID_INCLUDE_DIRS "${UUID_INCLUDE_DIR}")
+  set(UUID_LIBRARIES "${PREBUILT_ROOT}/lib/libuuid${CMAKE_STATIC_LIBRARY_SUFFIX}")
+elseif(WINDOWS)
+  if (MSVC)
+    set(UUID_LIBRARIES "rpcrt4")
+  else()
+    set(UUID_LIBRARIES "-lrpcrt4")
+  endif()
+endif()
 if(NOT TARGET UUID::UUID)
-    add_library(UUID::UUID INTERFACE IMPORTED GLOBAL)
-    set_target_properties(UUID::UUID PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES "${UUID_INCLUDE_DIRS}"
-    INTERFACE_LINK_LIBRARIES "${UUID_LIBRARIES}"
-    )
+  add_library(UUID::UUID INTERFACE IMPORTED GLOBAL)
+  set_target_properties(UUID::UUID PROPERTIES
+                                   INTERFACE_INCLUDE_DIRECTORIES "${UUID_INCLUDE_DIRS}"
+                                   INTERFACE_LINK_LIBRARIES "${UUID_LIBRARIES}")
 endif()
 set(PACKAGE_EXPORT "UUID_INCLUDE_DIR;UUID_INCLUDE_DIRS;UUID_LIBRARIES;UUID_FOUND")
 set(UUID_FOUND TRUE)
