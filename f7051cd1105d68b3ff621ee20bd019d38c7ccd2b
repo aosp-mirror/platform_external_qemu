@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e37f289_7f244fc6",
+        "filename": "android/third_party/breakpad/CMakeLists.txt",
+        "patchSetId": 5
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-01T20:04:09Z",
+      "side": 1,
+      "message": "mincore.lib an umbrella library, which basically aggregates those api-ms-*.lib apiset libraries.  These were introduced in Windows 8, which is why it won\u0027t work on all machines, and they function as aliases so that apps targeting them can run on non-desktop versions of windows.  If the API existed before Windows 8, it\u0027s possible to reference it from the original lib instead of using the apiset version.\n\nI\u0027m not sure what specific API needs to be linked in, but I\u0027m guessing that it will be in \"version.lib\".  Can you try linking \"version\" instead?",
+      "range": {
+        "startLine": 431,
+        "startChar": 39,
+        "endLine": 431,
+        "endChar": 73
+      },
+      "revId": "f7051cd1105d68b3ff621ee20bd019d38c7ccd2b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
