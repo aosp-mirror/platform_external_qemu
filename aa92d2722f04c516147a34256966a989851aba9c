@@ -16,6 +16,24 @@
       "revId": "aa92d2722f04c516147a34256966a989851aba9c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac80db75_b6415eff",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-01T00:48:24Z",
+      "side": 1,
+      "message": "Tab is not widget, so we cannot reference it by name, only index. There are 2 ways to hide a tab. one is removeTab(index). Another one is disable the tab and then change the style. Current code might be the easiest way to implement.",
+      "parentUuid": "be66fdf9_cb1ff6ef",
+      "revId": "aa92d2722f04c516147a34256966a989851aba9c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
