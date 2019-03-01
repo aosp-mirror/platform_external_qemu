@@ -35,7 +35,6 @@
 #define  D(...)   ((void)0)
 #endif
 
-
 namespace {
 
 void ChangeIcon(QPushButton* button, const char* icon, const char* tip) {
@@ -103,10 +102,6 @@ ToolWindow2::ToolWindow2(EmulatorQtWindow* window,
         mTools2Ui->rotateRight->setVisible(false);
     }
     sToolWindow2 = this;
-
-    //TODO: disable rotation for V1 release
-    mTools2Ui->rotateLeft ->setVisible(false);
-    mTools2Ui->rotateRight->setVisible(false);
 
     // Always assume unfolded starting status
     mTools2Ui->compressHoriz->setVisible(true);
@@ -224,10 +219,9 @@ void ToolWindow2::onMainLoopStart() {
 void ToolWindow2::on_expandHoriz_clicked() {
     mTools2Ui->compressHoriz->setVisible(true);
     mTools2Ui->expandHoriz  ->setVisible(false);
+    mIsFolded = false;
 
-    if (android_hw->hw_fold_adjust) {
-        mEmulatorWindow->resizeAndChangeAspectRatio(false);
-    }
+    mEmulatorWindow->resizeAndChangeAspectRatio(false);
 
     D("sending SW_LID false\n");
     forwardGenericEventToEmulator(EV_SW, SW_LID, false);
@@ -237,10 +231,9 @@ void ToolWindow2::on_expandHoriz_clicked() {
 void ToolWindow2::on_compressHoriz_clicked() {
     mTools2Ui->compressHoriz->setVisible(false);
     mTools2Ui->expandHoriz  ->setVisible(true);
+    mIsFolded = true;
 
-    if (android_hw->hw_fold_adjust) {
-        mEmulatorWindow->resizeAndChangeAspectRatio(true);
-    }
+    mEmulatorWindow->resizeAndChangeAspectRatio(true);
 
     sendFoldedArea();
 
@@ -252,11 +245,17 @@ void ToolWindow2::on_compressHoriz_clicked() {
 void ToolWindow2::on_rotateLeft_clicked() {
     ensureExtendedWindowExists();
     emulator_window_rotate_90(false); // False = left
+    if (mIsFolded) {
+        mEmulatorWindow->resizeAndChangeAspectRatio(true);
+    }
 }
 
 void ToolWindow2::on_rotateRight_clicked() {
     ensureExtendedWindowExists();
     emulator_window_rotate_90(true); // True = right
+    if (mIsFolded) {
+        mEmulatorWindow->resizeAndChangeAspectRatio(true);
+    }
 }
 
 void ToolWindow2::paintEvent(QPaintEvent*) {
@@ -370,4 +369,12 @@ void ToolWindow2::setFoldEnabled(bool enabled) {
         QSettings settings;
         settings.setValue(Ui::Settings::FOLDABLE_ENABLE, enabled);
     }
+}
+
+//static
+bool ToolWindow2::isFolded() {
+    if (sToolWindow2) {
+        return sToolWindow2->mIsFolded;
+    }
+    return false;
 }

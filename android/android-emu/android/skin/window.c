@@ -1065,11 +1065,30 @@ struct SkinWindow {
 
 static void
 add_finger_event(SkinWindow* window,
+                 FingerState* finger,
                  unsigned x,
                  unsigned y,
                  unsigned state)
 {
-    window->win_funcs->mouse_event(x, y, state);
+    unsigned posX = x;
+    unsigned posY = y;
+
+    if (skin_winsys_is_folded()) {
+        switch (finger->display->rotation) {
+        case SKIN_ROTATION_0:
+        case SKIN_ROTATION_180:
+            posX = x + finger->display->rect.pos.x;
+            posY = y + finger->display->rect.pos.y;
+            break;
+        case SKIN_ROTATION_90:
+        case SKIN_ROTATION_270:
+            posX = x + finger->display->rect.pos.y;
+            posY = y + finger->display->rect.pos.x;
+           break;
+        }
+    }
+
+    window->win_funcs->mouse_event(posX, posY, state);
 }
 
 static void
@@ -1927,6 +1946,11 @@ static void
 skin_window_map_to_scale( SkinWindow*  window, int  *x, int  *y )
 {
     skin_surface_reverse_map(window->surface, x, y);
+    int xOffset = 0;
+    int yOffset = 0;
+
+    *x = *x - xOffset;
+    *y = *y - yOffset;
 }
 
 void
@@ -1972,6 +1996,7 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
             // The click is inside the touch screen
             finger->tracking = 1;
             add_finger_event(window,
+                             finger,
                              finger->pos.x,
                              finger->pos.y,
                              button_state);
@@ -2086,6 +2111,7 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
             skin_window_move_mouse( window, finger, mx, my );
             finger->tracking = 0;
             add_finger_event(window,
+                             finger,
                              finger->pos.x,
                              finger->pos.y,
                              button_state);
@@ -2128,6 +2154,7 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
             skin_window_move_mouse( window, finger, mx, my );
             if ( finger->tracking ) {
                 add_finger_event(window,
+                                 finger,
                                  finger->pos.x,
                                  finger->pos.y,
                                  button_state);
