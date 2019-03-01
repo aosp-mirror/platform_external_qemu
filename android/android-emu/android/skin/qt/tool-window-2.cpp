@@ -229,9 +229,6 @@ void ToolWindow2::on_expandHoriz_clicked() {
         mEmulatorWindow->resizeAndChangeAspectRatio(false);
     }
 
-    QSettings settings;
-    settings.setValue(Ui::Settings::FOLDABLE_IS_FOLDED, false);
-
     D("sending SW_LID false\n");
     forwardGenericEventToEmulator(EV_SW, SW_LID, false);
     forwardGenericEventToEmulator(EV_SYN, 0, 0);
@@ -244,9 +241,6 @@ void ToolWindow2::on_compressHoriz_clicked() {
     if (android_hw->hw_fold_adjust) {
         mEmulatorWindow->resizeAndChangeAspectRatio(true);
     }
-
-    QSettings settings;
-    settings.setValue(Ui::Settings::FOLDABLE_IS_FOLDED, true);
 
     sendFoldedArea();
 
@@ -339,17 +333,41 @@ bool ToolWindow2::shouldHide() {
     int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
     int width   = android_hw->hw_displayRegion_0_1_width;
     int height  = android_hw->hw_displayRegion_0_1_height;
-    QSettings settings;
-    bool foldableEnabled = settings.value(Ui::Settings::FOLDABLE_ENABLE, false).toBool();
 
     if (xOffset < 0 || xOffset > 9999 ||
         yOffset < 0 || yOffset > 9999 ||
         width   < 1 || width   > 9999 ||
         height  < 1 || height  > 9999 ||
-        !foldableEnabled              ||
+        !getFoldEnabled()             ||
         //TODO: need 29
         avdInfo_getApiLevel(android_avdInfo) < 28) {
         return true;
     }
     return false;
+}
+
+//static
+bool ToolWindow2::getFoldEnabled() {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        return avdSpecificSettings.value(Ui::Settings::PER_AVD_FOLDABLE_ENABLE, false).toBool();
+    }
+    QSettings settings;
+    return settings.value(Ui::Settings::FOLDABLE_ENABLE, false).toBool();
+}
+
+//static
+void ToolWindow2::setFoldEnabled(bool enabled) {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_FOLDABLE_ENABLE, enabled);
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        settings.setValue(Ui::Settings::FOLDABLE_ENABLE, enabled);
+    }
 }

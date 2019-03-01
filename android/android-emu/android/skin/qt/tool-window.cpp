@@ -142,19 +142,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mToolsUi->winButtonsLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->controlsLayout->setAlignment(Qt::AlignCenter);
 
-    QSettings settings;
-    bool foldableEnabled = settings.value(Ui::Settings::FOLDABLE_ENABLE, false).toBool();
-    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
-    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
-    int width   = android_hw->hw_displayRegion_0_1_width;
-    int height  = android_hw->hw_displayRegion_0_1_height;
-    if (xOffset >= 0 && xOffset <= 9999 &&
-        yOffset >= 0 && yOffset <= 9999 &&
-        width   >= 1 && width   <= 9999 &&
-        height  >= 1 && height  <= 9999 &&
-        foldableEnabled &&
-        //TODO: need 29
-        avdInfo_getApiLevel(android_avdInfo) >= 28) {
+    if (!ToolWindow2::shouldHide()) {
         hideRotateButton();
     }
 

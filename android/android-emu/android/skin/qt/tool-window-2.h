@@ -54,6 +54,8 @@ public:
     static void earlyInitialization();
     static void onMainLoopStart();
     static bool shouldHide();
+    static bool getFoldEnabled();
+    static void setFoldEnabled(bool enabled);
 
     void show();
     void forceShow();
