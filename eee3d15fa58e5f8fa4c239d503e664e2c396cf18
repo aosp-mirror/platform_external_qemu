@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "41e181e1_57ae10b9",
+        "filename": "android/android-emu/android/emulation/MediaVpxDecoder.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-03-01T06:30:12Z",
+      "side": 1,
+      "message": "todo: need to store some mImg fields in the output area; there is\nno need to copy everything from mImg, just the information needed\nin the vp9 decoder proxy in the guest",
+      "range": {
+        "startLine": 226,
+        "startChar": 4,
+        "endLine": 226,
+        "endChar": 45
+      },
+      "revId": "eee3d15fa58e5f8fa4c239d503e664e2c396cf18",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
