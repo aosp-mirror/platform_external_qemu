@@ -148,7 +148,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
     int width   = android_hw->hw_displayRegion_0_1_width;
     int height  = android_hw->hw_displayRegion_0_1_height;
-    if (xOffset >= 0 && xOffset <= 9999 &&
+    int foldable = android_hw->hw_foldable;
+    if (!foldable ||
+        xOffset >= 0 && xOffset <= 9999 &&
         yOffset >= 0 && yOffset <= 9999 &&
         width   >= 1 && width   <= 9999 &&
         height  >= 1 && height  <= 9999 &&
