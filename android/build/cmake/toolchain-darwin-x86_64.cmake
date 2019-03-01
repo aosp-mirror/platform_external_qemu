@@ -19,6 +19,11 @@ include(toolchain)
 # First we create the toolchain
 get_host_tag(ANDROID_HOST_TAG)
 set(ANDROID_TARGET_TAG "darwin-x86_64")
+
+if (NOT NOT CROSSCOMPILE)
+   set(CROSSCOMPILE TRUE)
+endif()
+set(DARWIN_X86_64 TRUE)
 set(ANDROID_TARGET_OS "darwin")
 set(ANDROID_TARGET_OS_FLAVOR "darwin")
 

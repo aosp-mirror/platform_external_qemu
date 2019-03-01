@@ -30,7 +30,7 @@ endfunction()
 # OUT_PATH Name of the variable that will contain the resulting
 # executable.
 function(android_compile_for_host EXE SOURCE OUT_PATH)
-  if(ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
+  if(NOT CROSSCOMPILE)
     # We can add this project without any translation..
     add_subdirectory(${SOURCE} ${EXE}_ext)
     set(${OUT_PATH} ${EXE} PARENT_SCOPE)
@@ -116,7 +116,7 @@ endfunction()
 # For example: set(foo_src a.c b.c)  <-- sources for foo target set(foo_windows_src d.c) <-- sources only for the
 # windows target set(foo_darwin-x86_64_src d.c) <-- sources only for the darwin-x86_64 target
 function(android_add_library name)
-  if((ANDROID_TARGET_TAG MATCHES "windows_msvc.*") AND (DEFINED ${name}_windows_msvc_src))
+  if((WINDOWS_MSVC_X86_64) AND (DEFINED ${name}_windows_msvc_src))
     list(APPEND ${name}_src ${${name}_windows_msvc_src})
   endif()
   if((ANDROID_TARGET_TAG MATCHES "windows.*") AND (DEFINED ${name}_windows_src))
@@ -134,7 +134,7 @@ endfunction()
 #
 # An object library is not a "real" library, but just a collection objects that can be included in a dependency.
 function(android_add_object_library name)
-  if((ANDROID_TARGET_TAG MATCHES "windows_msvc.*") AND (DEFINED ${name}_windows_msvc_src))
+  if((WINDOWS_MSVC_X86_64) AND (DEFINED ${name}_windows_msvc_src))
     list(APPEND ${name}_src ${${name}_windows_msvc_src})
   endif()
   if((ANDROID_TARGET_TAG MATCHES "windows.*") AND (DEFINED ${name}_windows_src))
@@ -243,7 +243,7 @@ function(android_add_default_test_properties name)
   set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "ASAN_SYMBOLIZER_PATH=${ANDROID_LLVM_SYMBOLIZER}")
   set_property(TEST ${name} PROPERTY TIMEOUT 600)
 
-  if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+  if(WINDOWS_MSVC_X86_64)
     # Let's include the .dll path for our test runner
     string(REPLACE "/" "\\" WIN_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_swiftshader;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_mesa;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/qt/lib")
     set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "PATH=${WIN_PATH};$ENV{PATH}")
@@ -262,7 +262,7 @@ function(android_add_test name)
   android_add_executable(${name})
 
   # We cannot run tests when we are cross compiling.
-  if(NOT ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
+  if(CROSSCOMPILE)
     return()
   endif()
 
@@ -271,7 +271,7 @@ function(android_add_test name)
            WORKING_DIRECTORY $<TARGET_FILE_DIR:${name}>)
 
   # Let's not optimize our tests.
-  if (ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+  if (WINDOWS_MSVC_X86_64)
       target_compile_options(${name} PRIVATE -Od)
   else()
       target_compile_options(${name} PRIVATE -O0)
@@ -386,9 +386,6 @@ endfunction()
 # Append the given flags to the existing CMAKE_C_FLAGS. Be careful as these flags are global and used for every target!
 # Note this will not do anything under vs for now
 function(add_c_flag FLGS)
-  if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    message(WARNING "Not adding ${FLGS} under visual studio compiler")
-  endif()
   foreach(FLAG ${FLGS})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FLAG}" PARENT_SCOPE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAG}" PARENT_SCOPE)
@@ -396,9 +393,6 @@ function(add_c_flag FLGS)
 endfunction()
 
 function(add_cxx_flag FLGS)
-  if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    message(WARNING "Not adding ${FLGS} under visual studio compiler")
-  endif()
   foreach(FLAG ${FLGS})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAG}" PARENT_SCOPE)
   endforeach()
@@ -440,11 +434,6 @@ endfunction()
 
 # VER The variable to set the sha in Sets ${VER} The latest sha as reported by git
 function(get_git_sha VER)
-  if (MSVC)
-    # Mission abort!
-    set(${VER} "Visual Studio, unknown SHA")
-    return()
-  endif()
   execute_process(COMMAND "git" "log" "-n" "1" "--pretty=format:'%H'"
                   WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
                   RESULT_VARIABLE GIT_RES
@@ -466,7 +455,7 @@ endfunction()
 # . LIBNAME The archive that needs to be included
 # completely
 function(android_complete_archive LIBCMD LIBNAME)
-  if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
+  if(DARWIN_X86_64)
     set(${LIBCMD} "-Wl,-force_load,$<TARGET_FILE:${LIBNAME}>" PARENT_SCOPE)
   elseif(MSVC)
     set(${LIBCMD} "")
@@ -484,7 +473,7 @@ endfunction()
 # CPU The target cpu architecture used by qemu
 #
 # (Maybe on one day we will standardize all the naming, between qemu and configs and cpus..)
-function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS CPU)
+function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS CPU)  
   # Workaround b/121393952, older cmake does not have proper object archives
   if (NOT MSVC)
     android_complete_archive(QEMU_COMPLETE_LIB "qemu2-common")
@@ -518,7 +507,7 @@ function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS
     # supported by newer cmake versions
     target_link_libraries(qemu-system-${ANDROID_AARCH} PRIVATE $<TARGET_OBJECTS:qemu2-common>)
     set_target_properties(qemu-system-${ANDROID_AARCH} PROPERTIES LINK_FLAGS "/FORCE:multiple /NODEFAULTLIB:LIBCMT")
-  endif()
+  endif()  
   # Make the common dependency explicit, as some generators might not detect it properly (Xcode)
   add_dependencies(qemu-system-${ANDROID_AARCH} qemu2-common)
   # XCode bin places this not where we want this...
@@ -602,7 +591,7 @@ function(android_upload_symbols TGT)
     return()
   endif()
   set(STDOUT "/dev/stdout")
-  if (ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64" AND ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
+  if (WINDOWS_MSVC_X86_64 AND NOT CROSSCOMPILE)
     set(STDOUT "CON")
   endif()
   set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
@@ -639,7 +628,7 @@ endfunction()
 # Strips the given prebuilt executable during install..
 function(android_strip_prebuilt FNAME)
   # MSVC stores debug info in seperate file, so no need to strip
-  if(NOT ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+  if(NOT WINDOWS_MSVC_X86_64)
     install(CODE "if(CMAKE_INSTALL_DO_STRIP) \n
                         execute_process(COMMAND ${CMAKE_STRIP} \"$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/${FNAME}\")\n
                       endif()\n
@@ -652,7 +641,7 @@ function(android_extract_symbols_file FNAME)
   get_filename_component(BASENAME ${FNAME} NAME)
   set(DEST "${ANDROID_SYMBOL_DIR}/${BASENAME}.sym")
 
-  if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+  if(WINDOWS_MSVC_X86_64)
     # In msvc we need the pdb to generate the symbols, pdbs are not yet available for The prebuilts. b/122728651
     message(WARNING "Extracting symbols requires access to the pdb for ${FNAME}, ignoring for now.")
     return()
@@ -675,7 +664,7 @@ function(android_extract_symbols TGT)
     return()
   endif()
   set(DEV_NULL "/dev/null")
-  if (ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64" AND ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
+  if (WINDOWS_MSVC_X86_64 AND NOT CROSSCOMPILE)
       set(DEV_NULL "nul")
   endif()
 

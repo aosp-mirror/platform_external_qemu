@@ -21,6 +21,11 @@ include(toolchain)
 # First we create the toolchain
 get_host_tag(ANDROID_HOST_TAG)
 set(ANDROID_TARGET_TAG "linux-x86_64")
+
+if (NOT ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
+   set(CROSSCOMPILE TRUE)
+endif()
+set(LINUX_X86_64 TRUE)
 set(ANDROID_TARGET_OS "linux")
 set(ANDROID_TARGET_OS_FLAVOR "linux")
 get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../" ABSOLUTE)

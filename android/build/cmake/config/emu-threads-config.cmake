@@ -14,7 +14,7 @@ if (NOT TARGET Threads::Threads)
   add_library(Threads::Threads INTERFACE IMPORTED)
 endif()
 
-if(ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
+if(WINDOWS_X86_64)
   # Let's statically link the mingw thread library.. (Leaving out -lstdc++ will make it dynamic)
   set_property(TARGET Threads::Threads PROPERTY INTERFACE_LINK_LIBRARIES "-Wl,-Bstatic;-lstdc++;-lwinpthread;-Wl,-Bdynamic")
 else()

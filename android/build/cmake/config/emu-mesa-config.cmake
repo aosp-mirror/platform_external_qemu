@@ -14,9 +14,9 @@ get_filename_component(PREBUILT_ROOT
 
 set(MESA_FOUND TRUE)
 
-if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
+if(DARWIN_X86_64)
   # No mesa on mac
-elseif(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
+elseif(LINUX_X86_64)
   set(MESA_DEPENDENCIES
     ${PREBUILT_ROOT}/libGL.so>lib64/gles_mesa/libGL.so;
     ${PREBUILT_ROOT}/libGL.so.1>lib64/gles_mesa/libGL.so.1)

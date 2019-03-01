@@ -10,10 +10,10 @@ if(NOT TARGET zlib)
 endif()
 
 set(protobuf_PUBLIC_COMPILE_DEFS -DGOOGLE_PROTOBUF_CMAKE_BUILD -DGOOGLE_PROTOBUF_NO_RTTI)
-if(NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
+if(NOT WINDOWS_X86_64)
   list(APPEND protobuf_PUBLIC_COMPILE_DEFS -DHAVE_ZLIB)
 endif()
-if(NOT ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+if(NOT WINDOWS_MSVC_X86_64)
   list(APPEND protobuf_PRIVATE_COMPILE_DEFS -DHAVE_PTHREAD)
 endif()
 
@@ -70,7 +70,7 @@ set(libprotobuf_lite_src
     ${protobuf_source_dir}/src/google/protobuf/wire_format_lite.cc)
 
 android_add_library(libprotobuf_lite)
-if(NOT ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+if(NOT WINDOWS_MSVC_X86_64)
   target_link_libraries(libprotobuf_lite PRIVATE Threads::Threads)
 endif()
 android_target_link_libraries(libprotobuf_lite linux-x86_64 PRIVATE m)
@@ -152,7 +152,7 @@ target_link_libraries(libprotobuf PUBLIC zlib  libprotobuf_lite)
 # Let's not name things liblibxx etc
 set_target_properties(libprotobuf PROPERTIES PREFIX "")
 
-if(ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
+if(NOT CROSSCOMPILE)
   set(libprotoc_src
       # AUTOGEN(protoc_lib_srcs)
       ${protobuf_source_dir}/src/google/protobuf/compiler/code_generator.cc
