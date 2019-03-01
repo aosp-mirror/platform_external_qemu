@@ -276,9 +276,7 @@ extern void skin_surface_reverse_map(SkinSurface *surface, int *x, int *y)
 {
     int new_x = *x * surface->bitmap->size().width() / surface->w;
     int new_y = *y * surface->bitmap->size().height() / surface->h;
-#if 0
     D("skin_surface_reverse_map %d: %d,%d to %d,%d", surface->id, *x, *y, new_x, new_y);
-#endif
     *x = new_x;
     *y = new_y;
 }

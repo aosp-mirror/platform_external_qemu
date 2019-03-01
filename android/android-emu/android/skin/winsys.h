@@ -159,6 +159,7 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent);
 
 void skin_winsys_report_entering_main_loop(void);
 
+bool skin_winsys_is_folded(void);
 #ifdef __cplusplus
 }
 #endif

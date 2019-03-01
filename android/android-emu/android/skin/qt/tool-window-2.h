@@ -56,6 +56,7 @@ public:
     static bool shouldHide();
     static bool getFoldEnabled();
     static void setFoldEnabled(bool enabled);
+    static bool isFolded();
 
     void show();
     void forceShow();
@@ -122,6 +123,7 @@ private:
 
     bool mIsExiting = false;
     bool mAllowExtWindow = false;
+    bool mIsFolded = false;
 
     ToolWindow* mToolWindow = nullptr;
 

@@ -804,6 +804,10 @@ void skin_winsys_report_entering_main_loop(void) {
     ToolWindow::onMainLoopStart();
 }
 
+extern bool skin_winsys_is_folded() {
+    return ToolWindow2::isFolded();
+}
+
 #ifdef _WIN32
 extern "C" int qt_main(int, char**);
 
