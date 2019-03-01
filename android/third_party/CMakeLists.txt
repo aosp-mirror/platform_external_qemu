@@ -3,12 +3,12 @@ add_library(emulator-tinyobjloader ../../../tinyobjloader/tiny_obj_loader.cc)
 target_include_directories(emulator-tinyobjloader PUBLIC ../../../tinyobjloader)
 
 # We cannot run the the tests when we are cross compiling
-if(ANDROID_TARGET_TAG MATCHES "windows.*")
+if((WINDOWS_X86_64 OR WINDOWS_MSVC_X86_64))
   set(OPTION_ASTC_TESTS OFF CACHE BOOL "No tests astc when cross-compiling" FORCE)
 endif()
 # Include astc-codec as a subproject.
 
-if(ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
+if(WINDOWS_MSVC_X86_64)
   # astc-codec defines CMAKE_CXX_STANDARD=11, which won't work with msvc. We did the same for googletest.
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../astc-codec/src/base astc-codec-base)
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../astc-codec/src/decoder astc-codec-decoder)
@@ -49,7 +49,7 @@ add_subdirectory(mksdcard)
 
 # Old windows & linux version will use old breakpad version, until we track down
 # crash detection bugs under linux.
-if (ANDROID_TARGET_TAG STREQUAL "windows-x86_64" OR ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
+if (WINDOWS_X86_64 OR LINUX_X86_64)
   prebuilt(BREAKPAD)
 else()
   add_subdirectory(breakpad)

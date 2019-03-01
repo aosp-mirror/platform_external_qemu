@@ -12,7 +12,7 @@
 # This contains a set of definitions to make working with prebuilts easier and manageable.
 
 set(PREBUILT_COMMON "BLUEZ;LZ4")
-if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
+if(NOT WINDOWS_MSVC_X86_64)
   list(APPEND PREBUILT_COMMON "X264")
 endif()
 
