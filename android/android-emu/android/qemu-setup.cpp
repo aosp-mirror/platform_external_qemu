@@ -13,11 +13,12 @@
 #include "android/adb-server.h"
 #include "android/android.h"
 #include "android/automation/AutomationController.h"
-#include "android/base/async/ThreadLooper.h"
 #include "android/base/CpuUsage.h"
+#include "android/base/async/ThreadLooper.h"
+#include "android/base/memory/MemoryTracker.h"
 #include "android/boot-properties.h"
-#include "android/car.h"
 #include "android/car-cluster.h"
+#include "android/car.h"
 #include "android/clipboard-pipe.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
@@ -488,7 +489,9 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android::base::CpuUsage::get()->addLooper(
                 (int)android::base::CpuUsage::UsageArea::MainLoop,
                 android::base::ThreadLooper::get());
-
+    if (!android::base::System::get()->envGet("SHOW_PERF_STATS").empty()) {
+        android::base::MemoryTracker::get()->start();
+    }
     return true;
 }
 
@@ -496,4 +499,5 @@ void android_emulation_teardown() {
     android::automation::AutomationController::shutdown();
     android::videoinjection::VideoInjectionController::shutdown();
     android::base::CpuUsage::get()->stop();
+    android::base::MemoryTracker::get()->stop();
 }

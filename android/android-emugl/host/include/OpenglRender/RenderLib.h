@@ -26,6 +26,7 @@ namespace android {
 namespace base {
 
 class CpuUsage;
+class MemoryTracker;
 
 } // namespace base
 } // namespace android
@@ -70,7 +71,8 @@ public:
 
     virtual void setVmOps(const QAndroidVmOperations &vm_operations) = 0;
 
-    virtual void setCpuUsage(android::base::CpuUsage* usage) = 0;
+    virtual void setUsageTracker(android::base::CpuUsage* cpuUsage,
+                                 android::base::MemoryTracker* memUsage) = 0;
 
     virtual void* getGL(void) = 0;
 

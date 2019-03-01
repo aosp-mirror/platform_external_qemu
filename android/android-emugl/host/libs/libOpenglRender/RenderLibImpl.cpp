@@ -87,8 +87,10 @@ void RenderLibImpl::setVmOps(const QAndroidVmOperations &vm_operations) {
     set_emugl_vm_operations(vm_operations);
 }
 
-void RenderLibImpl::setCpuUsage(android::base::CpuUsage* usage) {
-    emugl::setCpuUsage(usage);
+void RenderLibImpl::setUsageTracker(android::base::CpuUsage* cpuUsage,
+                                    android::base::MemoryTracker* memUsage) {
+    emugl::setCpuUsage(cpuUsage);
+    emugl::setMemoryTracker(memUsage);
 }
 
 void* RenderLibImpl::getGL(void) {

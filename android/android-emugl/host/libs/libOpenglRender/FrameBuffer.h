@@ -519,6 +519,7 @@ private:
     bool m_eglContextInitialized = false;
 
     bool m_fpsStats = false;
+    bool m_perfStats = false;
     int m_statsNumFrames = 0;
     long long m_statsStartTime = 0;
 
