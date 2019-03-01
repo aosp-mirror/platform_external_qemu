@@ -108,11 +108,13 @@ class Emulator(object):
         use_shell = (platform.system() == 'Windows')
         local_env = os.environ.copy()
         if self.avd_home:
+            # Setup android sdk/avd etc.
             local_env['ANDROID_SDK_HOME'] = self.avd_home
+            local_env.pop('ANDROID_AVD_HOME', None)
         if self.sdk_root:
             local_env['ANDROID_SDK_ROOT'] = self.sdk_root
 
-        logging.info("Launching %s", cmd)
+        logging.info("Launching %s with: %s", cmd, local_env)
         self.proc = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
