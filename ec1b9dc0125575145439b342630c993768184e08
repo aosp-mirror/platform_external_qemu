@@ -223,6 +223,24 @@
       "revId": "ec1b9dc0125575145439b342630c993768184e08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b5a5536_4aadf240",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1355,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-03-01T22:39:34Z",
+      "side": 1,
+      "message": "Currently, this tracker won\u0027t be implemented on Windows because I am still working on the alternatives of libunwind on Windows. So, the std::call_once should not be placed into the source code atm.",
+      "parentUuid": "e0fe5b30_6b0c097c",
+      "revId": "ec1b9dc0125575145439b342630c993768184e08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
