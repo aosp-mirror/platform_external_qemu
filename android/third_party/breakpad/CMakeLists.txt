@@ -17,7 +17,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Configure the compiler for breakpad:
-if(APPLE OR ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
+if(DARWIN_X86_64)
   add_c_flag("-fexceptions")
   add_c_flag("-frtti")
   add_c_flag("-fmessage-length=0")
@@ -29,13 +29,13 @@ if(APPLE OR ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
   add_c_flag("-Wno-unused-command-line-argument")
   # Optimizations will cause the compiler to optimize away some crucial breakpad behavior, so let's not do that.
   add_c_flag("-O0")
-elseif(UNIX OR ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
+elseif(LINUX_X86_64)
   add_c_flag("-fexceptions")
   add_c_flag("-frtti")
-elseif(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64" OR MSVC)
+elseif(WINDOWS_MSVC_X86_64)
 
 else()
-  message(FATAL_ERROR "Only darwin, linux or windows using clang msvc are supported.")
+  message(FATAL_ERROR "Only darwin, linux or windows using clang msvc are supported, not ${ANDROID_TARGET_TAG}.")
 endif()
 
   set(ANDROID_BREAKPAD_WINDOWS_DEFS
@@ -296,7 +296,7 @@ android_target_compile_definitions(breakpad_processor linux-x86_64 PUBLIC -DHAVE
 android_target_compile_definitions(breakpad_processor darwin-x86_64 PUBLIC -DHAVE_MACH_O_NLIST_H)
 
 function(add_proc_test name)
-  if(NOT ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
+  if(CROSSCOMPILE)
     return()
   endif()
   set(${name}_src ${BREAKPAD_SRC}/processor/${name}.cc)
@@ -412,7 +412,7 @@ set(dump_syms_darwin-x86_64_src ${BREAKPAD_SRC}/common/mac/dump_syms.cc
 android_add_executable(dump_syms)
 target_link_libraries(dump_syms PRIVATE breakpad_common)
 android_target_link_libraries(dump_syms windows_msvc-x86_64 PRIVATE shell32::shell32 diaguids::diaguids)
-if(HOST_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+if(ANDROID_HOST_TAG STREQUAL "windows_msvc-x86_64")
   android_target_link_libraries(dump_syms windows_msvc-x86_64 PRIVATE atls::atls)
 endif()
 android_target_compile_definitions(dump_syms linux-x86_64 PUBLIC -DHAVE_A_OUT_H)
@@ -436,7 +436,7 @@ android_target_compile_definitions(sym_upload linux-x86_64 PUBLIC -DHAVE_A_OUT_H
 android_target_compile_definitions(sym_upload darwin-x86_64 PRIVATE -DOBJC_OLD_DISPATCH_PROTOTYPES=0)
 android_target_compile_definitions(sym_upload windows PRIVATE -DUNICODE -D_UNICODE)
 
-if(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
+if(LINUX_X86_64)
   set(linux_dumper_unittest_helper_src ${BREAKPAD_SRC}/client/linux/minidump_writer/linux_dumper_unittest_helper.cc)
   android_add_executable(linux_dumper_unittest_helper)
   target_link_libraries(linux_dumper_unittest_helper
@@ -476,7 +476,7 @@ if(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
     add_dependencies(linux_client_unittests linux_dumper_unittest_helper)
     add_proc_test(exploitability_unittest)
   endif()
-elseif(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+elseif(WINDOWS_MSVC_X86_64)
   set(windows_client_unittests_src
       ${BREAKPAD_SRC}/client/windows/unittests/exception_handler_test.cc
       ${BREAKPAD_SRC}/client/windows/unittests/exception_handler_death_test.cc

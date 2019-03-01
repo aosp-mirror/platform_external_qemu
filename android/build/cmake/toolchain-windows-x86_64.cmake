@@ -12,21 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# The toolchain files can get processed multiple times during compile detection
+# keep these files simple, and do not setup libraries or anything else.
+# merely tags, compiler toolchain and flags should be set here.
+
 get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
 list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 include(toolchain)
 
-# First we create the toolchain
-get_host_tag(ANDROID_HOST_TAG)
-set (ANDROID_TARGET_TAG "windows-x86_64")
-set (ANDROID_TARGET_OS "windows")
-set (ANDROID_TARGET_OS_FLAVOR "windows")
-#set(CMAKE_SYSTEM_NAME Windows)
+# First we setup all the tags.
+toolchain_configure_tags("windows-x86_64")
+
 SET(CMAKE_SYSTEM_NAME Windows)
 get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../../" ABSOLUTE)
 
 # Cmake goes crazy if we set AR manually.. so let's not do that.
-toolchain_generate("${ANDROID_TARGET_TAG}")
+toolchain_generate("windows-x86_64")
 
 list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/bin/libwinpthread-1.dll>lib64/libwinpthread-1.dll")
 list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/lib/libgcc_s_seh-1.dll>lib64/libgcc_s_seh-1.dll")
@@ -38,8 +39,6 @@ add_compile_options(-falign-functions)
 add_compile_options( -ftracer)
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--build-id -static-libgcc" CACHE STRING "" FORCE)
 set(CMAKE_EXE_LINKER_FLAGS "-Wl,--build-id -static-libgcc" CACHE STRING "" FORCE)
-
-
 
 # here is the target environment located, used to
 # locate packages. We don't want to do any package resolution
@@ -59,6 +58,3 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE NEVER)
 set(CMAKE_STRIP_CMD "${CMAKE_STRIP} -s")
 set(ANDROID_YASM_TYPE win64)
-
-include(emu-windows-libs)
-
