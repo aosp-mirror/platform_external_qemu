@@ -17,7 +17,7 @@ android_add_library(android-emu-crash-service)
 target_include_directories(android-emu-crash-service PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(android-emu-crash-service PRIVATE breakpad_server curl android-emu)
 # Windows-msvc specific dependencies. Need these for posix support.
-android_target_link_libraries(android-emu-crash-service windows_msvc PUBLIC
+android_target_link_libraries(android-emu-crash-service windows_msvc-x86_64 PUBLIC
         msvc-posix-compat
         dirent-win32)
 
@@ -61,6 +61,6 @@ android_add_test(emulator_crashreport_unittests)
 target_link_libraries(emulator_crashreport_unittests PRIVATE android-emu libqemu2-glue breakpad_server gtest_main)
 target_include_directories(emulator_crashreport_unittests PRIVATE .)
 # Windows-msvc specific dependencies. Need these for posix support.
-android_target_link_libraries(emulator_crashreport_unittests windows_msvc PUBLIC
+android_target_link_libraries(emulator_crashreport_unittests windows_msvc-x86_64 PUBLIC
         msvc-posix-compat
         dirent-win32)

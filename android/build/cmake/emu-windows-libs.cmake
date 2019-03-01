@@ -36,8 +36,9 @@ set(WINDOWS_LIBS
     wininet
     diaguids
     dbghelp
-    imagehlp
-    mincore)
+    normaliz
+    mincore
+    imagehlp)
 foreach(LIB ${WINDOWS_LIBS})
   android_find_windows_library(${LIB})
 endforeach()

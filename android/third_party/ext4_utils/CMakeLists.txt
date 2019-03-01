@@ -39,5 +39,5 @@ target_compile_definitions(emulator_make_ext4fs PRIVATE -DHOST)
 
 # Windows specific settings
 android_target_link_libraries(emulator_make_ext4fs windows PUBLIC emulator-libmman-win32)
-android_target_link_libraries(emulator_make_ext4fs windows_msvc PUBLIC msvc-posix-compat)
+android_target_link_libraries(emulator_make_ext4fs windows_msvc-x86_64 PUBLIC msvc-posix-compat)
 android_target_compile_definitions(emulator_make_ext4fs windows PRIVATE -DUSE_MINGW=1)
