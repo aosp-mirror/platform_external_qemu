@@ -57,18 +57,14 @@ target_include_directories(emulator-libkeymaster3 PUBLIC .)
 target_include_directories(emulator-libkeymaster3 PRIVATE src include)
 target_link_libraries(emulator-libkeymaster3 PRIVATE android-emu-base ssl crypto)
 
-if ("${ANDROID_TARGET_TAG}" MATCHES "windows.*")
+if (WINDOWS_X86_64)
     # Workaround some gcc/mingw issues
-    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-        target_compile_definitions(emulator-libkeymaster3 PRIVATE -DUSE_MINGW=1)
-    endif ()
-    if ("${ANDROID_TARGET_TAG}" MATCHES "windows_msvc.*")
-        target_link_libraries(emulator-libkeymaster3 PRIVATE msvc-posix-compat)
-        target_compile_options(emulator-libkeymaster3 PRIVATE "-mssse3")
-    endif ()
-endif ()
+    target_compile_definitions(emulator-libkeymaster3 PRIVATE -DUSE_MINGW=1)
+endif()
 
-if (NOT DEFINED ANDROID_QEMU2_TOP_DIR)
-  add_dependencies(emulator-libkeymaster3 boringssl)
-endif ()
+if (WINDOWS_MSVC_X86_64)
+    target_link_libraries(emulator-libkeymaster3 PRIVATE msvc-posix-compat)
+    target_compile_options(emulator-libkeymaster3 PRIVATE "-mssse3")
+endif()
+
 

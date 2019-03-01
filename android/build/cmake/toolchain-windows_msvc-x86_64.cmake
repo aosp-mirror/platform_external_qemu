@@ -18,11 +18,8 @@ list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}/Modules")
 
 include(toolchain)
 
-# First we create the toolchain
-get_host_tag(ANDROID_HOST_TAG)
-set(ANDROID_TARGET_TAG "windows_msvc-x86_64")
-set(ANDROID_TARGET_OS "windows_msvc")
-set(ANDROID_TARGET_OS_FLAVOR "windows")
+# First we setup all the tags.
+toolchain_configure_tags("windows_msvc-x86_64")
 set(CMAKE_SYSTEM_PROCESSOR AMD64)
 
 get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../../" ABSOLUTE)
@@ -102,6 +99,9 @@ else()
   add_definitions(-DWINDOWS_CROSS_COMPILE)
 endif()
 
+# Make sure the standard set of windows libraries are available as targets
 include(emu-windows-libs)
+
+# And the asm type if we are compiling with yasm
 set(ANDROID_YASM_TYPE win64)
 set(CMAKE_SHARED_LIBRARY_PREFIX "lib")

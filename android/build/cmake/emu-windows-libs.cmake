@@ -11,7 +11,6 @@ function(android_find_windows_library NAME)
   endif()
 
   if(NOT TARGET ${NAME}::${NAME})
-    message(STATUS "Discovering ${NAME} : ${${NAME}_LIBRARIES}")
     add_library(${NAME}::${NAME} INTERFACE IMPORTED GLOBAL)
     set_target_properties(${NAME}::${NAME} PROPERTIES INTERFACE_LINK_LIBRARIES ${${NAME}_LIBRARIES})
   endif()

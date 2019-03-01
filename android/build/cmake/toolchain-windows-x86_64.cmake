@@ -16,17 +16,14 @@ get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
 list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
 include(toolchain)
 
-# First we create the toolchain
-get_host_tag(ANDROID_HOST_TAG)
-set (ANDROID_TARGET_TAG "windows-x86_64")
-set (ANDROID_TARGET_OS "windows")
-set (ANDROID_TARGET_OS_FLAVOR "windows")
-#set(CMAKE_SYSTEM_NAME Windows)
+# First we setup all the tags.
+toolchain_configure_tags("windows-x86_64")
+
 SET(CMAKE_SYSTEM_NAME Windows)
 get_filename_component(ANDROID_QEMU2_TOP_DIR "${CMAKE_CURRENT_LIST_FILE}/../../../../" ABSOLUTE)
 
 # Cmake goes crazy if we set AR manually.. so let's not do that.
-toolchain_generate("${ANDROID_TARGET_TAG}")
+toolchain_generate("windows-x86_64")
 
 list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/bin/libwinpthread-1.dll>lib64/libwinpthread-1.dll")
 list(APPEND RUNTIME_OS_DEPENDENCIES "${ANDROID_SYSROOT}/lib/libgcc_s_seh-1.dll>lib64/libgcc_s_seh-1.dll")

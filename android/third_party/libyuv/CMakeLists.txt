@@ -50,12 +50,8 @@ add_library(emulator-libyuv
 target_include_directories(emulator-libyuv PUBLIC ${src}/../include)
 target_compile_options(emulator-libyuv PRIVATE -fno-strict-aliasing)
 
-
-if (WIN32 OR ("${LOCAL_OS}" STREQUAL "windows"))
+if (WINDOWS_X86_64)
     # Work around some gcc/mingw issues
-    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-        # Assembly not worning with mingw, maybe on VS?
-        target_compile_definitions(emulator-libyuv PRIVATE -DLIBYUV_DISABLE_X86)
-    endif ()
+    target_compile_definitions(emulator-libyuv PRIVATE -DLIBYUV_DISABLE_X86)
 endif ()
 
