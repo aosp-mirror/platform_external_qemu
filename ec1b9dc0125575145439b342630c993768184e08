@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "673226f0_18f04227",
+        "filename": "android/android-emu/android/base/memory/MemoryUsage.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-03-01T05:22:32Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "abeb3001_b8ff6fae",
+      "range": {
+        "startLine": 28,
+        "startChar": 20,
+        "endLine": 28,
+        "endChar": 55
+      },
+      "revId": "ec1b9dc0125575145439b342630c993768184e08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e76a2f5a_b68f44a6",
         "filename": "android/android-emu/android/qemu-setup.cpp",
         "patchSetId": 7
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "b11f95d1_1e1708fe",
+        "filename": "android/android-emu/android/qemu-setup.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 492,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-03-01T05:22:32Z",
+      "side": 1,
+      "message": "1, It makes more sense to create a different env variable that group cpu usage and mem usage together to me. \n2, Current solution seems to be very low overhead at least on Linux. less than 0.5 second overhead for a 15 seconds cold boot.",
+      "parentUuid": "e76a2f5a_b68f44a6",
+      "range": {
+        "startLine": 492,
+        "startChar": 8,
+        "endLine": 492,
+        "endChar": 71
+      },
+      "revId": "ec1b9dc0125575145439b342630c993768184e08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "da813963_c9f25323",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
         "patchSetId": 7
@@ -59,6 +107,24 @@
       "writtenOn": "2019-03-01T05:15:02Z",
       "side": 1,
       "message": "Can we introduce a separate macro for this liek MEM_TRACE(\"EMUGL\") that does the memory usage add to group with less repetition?",
+      "revId": "ec1b9dc0125575145439b342630c993768184e08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "29d30801_7550742c",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1355,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-03-01T05:22:32Z",
+      "side": 1,
+      "message": "I will make some Macro like MEM_TRACE(\"EMUGL\"). What would be even better implementation is some C++ magic so that this line of code only runs once. The constraint is that we need to put this line of code inside the function we want to register. Thus, the tracker will be able to infer what is the instruction pointer and how big the function is. Just passing function address won\u0027t solve the problem. But it only needs to run once. Repetitive checks are unnecessary.",
+      "parentUuid": "da813963_c9f25323",
       "revId": "ec1b9dc0125575145439b342630c993768184e08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
