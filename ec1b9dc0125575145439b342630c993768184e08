@@ -128,6 +128,24 @@
       "revId": "ec1b9dc0125575145439b342630c993768184e08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "26cf4cba_a71a2706",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1355,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-03-01T05:33:07Z",
+      "side": 1,
+      "message": "Actually, we could do something in each function\n \"static std::once_flag once_flag;\n std::call_once(once_flag, [] {})\"\nWrap this in a macro.",
+      "parentUuid": "29d30801_7550742c",
+      "revId": "ec1b9dc0125575145439b342630c993768184e08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
