@@ -35,17 +35,15 @@ def _reader(pipe, queue):
 def log_std_out(proc):
     """Logs the output of the given process."""
     q = Queue()
-    is_windows = (platform.system() == 'Windows')
     Thread(target=_reader, args=[proc.stdout, q]).start()
     Thread(target=_reader, args=[proc.stderr, q]).start()
     for _ in range(2):
         for _, line in iter(q.get, None):
-            if is_windows:
-                # 2 problems on windows, output of \r, and error 0 when writing to log concurrently
-                # So we will just directly print vs, going to logging infra structure.
-                print (line.strip())
-            else:
+            try:
                 logging.info(line)
+            except IOError:
+                # We sometimes see IOError, errno = 0 on windows.
+                pass
 
 
 
