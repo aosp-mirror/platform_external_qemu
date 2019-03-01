@@ -30,6 +30,7 @@ if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
   # Well, macos needs something extra as well
   list(APPEND FFMPEG_LIBRARIES "-framework VideoToolbox")
   list(APPEND FFMPEG_LIBRARIES "-framework VideoDecodeAcceleration")
+  list(APPEND FFMPEG_LIBRARIES "-framework AudioToolbox")
   list(APPEND FFMPEG_LIBRARIES "-lbz2")
 endif()
 set(FFMPEG_FOUND TRUE)
