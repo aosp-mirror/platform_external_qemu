@@ -228,6 +228,37 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
 
     $(call end-emulator-program)
 
+    $(call start-emulator-program, emulator-headless)
+
+    LOCAL_SRC_FILES := \
+        android/emulator/main-emulator.cpp \
+
+    LOCAL_CFLAGS += -DCONFIG_HEADLESS
+
+    LOCAL_C_INCLUDES += $(ANDROID_EMU_INCLUDES)
+
+    # Need the build number as well
+    LOCAL_CFLAGS += $(EMULATOR_VERSION_CFLAGS)
+
+    LOCAL_STATIC_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
+
+    LOCAL_LDLIBS += $(ANDROID_EMU_LDLIBS)
+
+    # Ensure this is always built, even if 32-bit binaries are disabled.
+    LOCAL_IGNORE_BITNESS := true
+
+    $(call if-target-any-windows,$(eval $(call insert-windows-icon)),)
+
+    # To avoid runtime linking issues on Linux and Windows, a custom copy of the
+    # C++ standard library is copied to $(BUILD_OBJS_DIR)/lib[64], a path that is added
+    # to the runtime library search path by the top-level 'emulator' launcher
+    # program before it spawns the emulation engine. However, 'emulator' cannot
+    # use these versions of the library, so statically link it against the
+    # executable instead.
+    $(call local-link-static-c++lib)
+
+    $(call end-emulator-program)
+
     ##############################################################################
     ###
     ###  emulator-check: a standalone question answering service

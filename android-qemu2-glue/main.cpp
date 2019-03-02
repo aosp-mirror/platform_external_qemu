@@ -619,11 +619,14 @@ static void enter_qemu_main_loop(int argc, char** argv) {
     }
 }
 
-#if defined(_WIN32)
+#ifdef CONFIG_HEADLESS
+#else
+#if defined(_WIN32) || defined(_MSC_VER)
 // On Windows, link against qtmain.lib which provides a WinMain()
 // implementation, that later calls qMain().
 #define main qt_main
-#endif
+#endif // windows
+#endif // !CONFIG_HEADLESS
 
 static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
     ScopedCPtr<char> userdata_dir(path_dirname(hw->disk_dataPartition_path));

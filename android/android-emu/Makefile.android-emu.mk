@@ -78,7 +78,7 @@ LOCAL_C_INCLUDES := \
     $(LIBUUID_INCLUDES) \
     $(LZ4_INCLUDES) \
 
-PRODUCED_STATIC_LIBS=android-emu-base emulator-libui
+PRODUCED_STATIC_LIBS=android-emu-base emulator-libui emulator-libui-headless
 PRODUCED_PROTO_LIBS=metrics featurecontrol snapshot crashreport location emulation telephony verified-boot automation offworld
 
 #  emulator-libui linker flags & settings
@@ -558,6 +558,8 @@ ANDROID_EMU_STATIC_LIBRARIES_DEPS := \
     emulator-zlib \
     emulator-murmurhash \
     emulator-tinyepoxy \
+    libOpenGLESDispatch \
+    libemugl_common \
     $(ALL_PROTOBUF_LIBS) \
 	$(PROTOBUF_STATIC_LIBRARIES) \
 

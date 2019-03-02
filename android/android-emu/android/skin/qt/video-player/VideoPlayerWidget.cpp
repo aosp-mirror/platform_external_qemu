@@ -21,6 +21,32 @@ VideoPlayerWidget::VideoPlayerWidget(QWidget* parent)
 
 VideoPlayerWidget::~VideoPlayerWidget() {}
 
+void VideoPlayerWidget::syncRenderTargetSize(
+        float sampleAspectRatio,
+        int video_width,
+        int video_height,
+        int* resultRenderTargetWidth,
+        int* resultRenderTargetHeight) {
+
+    int h = height();
+    int w = ((int)(h * sampleAspectRatio)) & -3;
+    if (w > width()) {
+        w = width();
+        h = ((int)(w / sampleAspectRatio)) & -3;
+    }
+
+    int x = (width() - w) / 2;
+    int y = (height() - h) / 2;
+
+    if (width() != w || height() != h) {
+        move(x, y);
+        setFixedSize(w, h);
+    }
+
+    *resultRenderTargetWidth = w;
+    *resultRenderTargetHeight = h;
+}
+
 void VideoPlayerWidget::paintEvent(QPaintEvent* e) {
     QPainter painter(this);
 

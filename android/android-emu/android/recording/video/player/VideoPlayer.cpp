@@ -29,15 +29,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "android/skin/qt/video-player/VideoPlayer.h"
+#include "android/recording/video/player/VideoPlayer.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/base/threads/Thread.h"
 #include "android/emulation/AudioOutputEngine.h"
-#include "android/skin/qt/video-player/Clock.h"
-#include "android/skin/qt/video-player/FrameQueue.h"
-#include "android/skin/qt/video-player/PacketQueue.h"
+#include "android/recording/video/player/Clock.h"
+#include "android/recording/video/player/FrameQueue.h"
+#include "android/recording/video/player/PacketQueue.h"
 #include "android/utils/debug.h"
 
 extern "C" {
@@ -158,7 +158,7 @@ enum class AvSyncMaster {
 class VideoPlayerImpl : public VideoPlayer {
 public:
     VideoPlayerImpl(std::string videoFile,
-                    VideoPlayerWidget* widget,
+                    VideoPlayerRenderTarget* renderTarget,
                     std::unique_ptr<VideoPlayerNotifier> notifier);
     virtual ~VideoPlayerImpl();
 
@@ -220,7 +220,7 @@ public:
 
 private:
     std::string mVideoFile;
-    VideoPlayerWidget* mWidget = nullptr;
+    VideoPlayerRenderTarget* mRenderTarget = nullptr;
     std::unique_ptr<VideoPlayerNotifier> mNotifier;
 
     // this is a real time stream, e.g., rtsp
@@ -576,14 +576,14 @@ void VideoDecoder::workerThreadFunc() {
 
 // VideoPlayer implementations
 
-// create a video player instance the input video file, the output widget to
+// create a video player instance the input video file, the output renderTarget to
 // display, and the notifier to receive updates
 std::unique_ptr<VideoPlayer> VideoPlayer::create(
         std::string videoFile,
-        VideoPlayerWidget* widget,
+        VideoPlayerRenderTarget* renderTarget,
         std::unique_ptr<VideoPlayerNotifier> notifier) {
     std::unique_ptr<VideoPlayerImpl> player;
-    player.reset(new VideoPlayerImpl(videoFile, widget, std::move(notifier)));
+    player.reset(new VideoPlayerImpl(videoFile, renderTarget, std::move(notifier)));
     return std::move(player);
 }
 
@@ -595,10 +595,10 @@ std::unique_ptr<VideoPlayer> VideoPlayer::create(
 // VideoPlayerImpl implementations
 
 VideoPlayerImpl::VideoPlayerImpl(std::string videoFile,
-                                 VideoPlayerWidget* widget,
+                                 VideoPlayerRenderTarget* renderTarget,
                                  std::unique_ptr<VideoPlayerNotifier> notifier)
     : mVideoFile(videoFile),
-      mWidget(widget),
+      mRenderTarget(renderTarget),
       mNotifier(std::move(notifier)),
       mRunning(true),
       mWorkerThread([this]() { workerThreadFunc(); }) {
@@ -621,6 +621,23 @@ VideoPlayerImpl::~VideoPlayerImpl() {
 void VideoPlayerImpl::adjustWindowSize(AVCodecContext* c,
                                        int* pWidth,
                                        int* pHeight) {
+
+    float aspect_ratio;
+
+    if (c->sample_aspect_ratio.num == 0) {
+        aspect_ratio = 0;
+    } else {
+        aspect_ratio = av_q2d(c->sample_aspect_ratio) * c->width / c->height;
+    }
+
+    if (aspect_ratio <= 0.0) {
+        aspect_ratio = (float)c->width / (float)c->height;
+    }
+
+    mRenderTarget->syncRenderTargetSize(
+        aspect_ratio, c->width, c->height, pWidth, pHeight);
+
+    /*
     float aspect_ratio;
 
     if (c->sample_aspect_ratio.num == 0) {
@@ -650,6 +667,7 @@ void VideoPlayerImpl::adjustWindowSize(AVCodecContext* c,
 
     *pWidth = w;
     *pHeight = h;
+    */
 }
 
 AvSyncMaster VideoPlayerImpl::getMasterSyncType() {
@@ -784,7 +802,7 @@ int VideoPlayerImpl::queuePicture(AVFrame* src_frame,
 
 // render the video
 void VideoPlayerImpl::displayVideoFrame(Frame* vp) {
-    mWidget->setPixelBuffer(vp->buf, vp->len);
+    mRenderTarget->setPixelBuffer(vp->buf, vp->len);
 
     mNotifier->emitUpdateWidget();
 }
@@ -1392,7 +1410,7 @@ void VideoPlayerImpl::cleanup() {
         // mVideoFrameQueue.reset();
     }
 
-    mWidget->setPixelBuffer(nullptr, 0);
+    mRenderTarget->setPixelBuffer(nullptr, 0);
 
     if (mImgConvertCtx != nullptr) {
         sws_freeContext(mImgConvertCtx);

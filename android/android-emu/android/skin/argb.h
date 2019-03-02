@@ -13,8 +13,12 @@
 
 #ifndef ARGB_T_DEFINED
 #define ARGB_T_DEFINED
+
+#include <inttypes.h>
+
 #if USE_MMX
 #include <mmintrin.h>
+
 
 typedef __m64   mmx_t;
 typedef  mmx_t  argb_t;

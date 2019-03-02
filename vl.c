@@ -5588,6 +5588,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #endif
     main_loop();
 
+
 #ifdef CONFIG_ANDROID
     android_report_session_phase(ANDROID_SESSION_PHASE_EXIT);
     crashhandler_exitmode("after main_loop");
