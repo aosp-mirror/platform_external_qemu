@@ -14,6 +14,7 @@
 #include "android/avd/generate.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/FileUtils.h"
+#include "android/base/Uuid.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
@@ -46,6 +47,8 @@ protected:
             prevEnvAndroidHome = System::get()->envGet("ANDROID_HOME");
             mCollectedPrevEnv = true;
         }
+        mLogLevel = getMinLogLevel();
+        setMinLogLevel(LOG_VERBOSE);
 
         System::get()->envSet("ANDROID_SDK_ROOT", "");
         System::get()->envSet("ANDROID_SDK_HOME", "");
@@ -55,6 +58,7 @@ protected:
     }
 
     void TearDown() override {
+        setMinLogLevel(mLogLevel);
         mTempDir.reset();
 
         for (const auto& dir: mCustomDirs) {
@@ -109,10 +113,17 @@ protected:
         int timeoutMs,
         std::string* kernelOutput = nullptr) {
 
+
+        // DO NOT SUBMIT THIS!
+        auto ps = System::get()->runCommandWithResult({ "ps", "aux"});
+        if (ps)
+            LOG(VERBOSE) << "procs: " << ps;
+        else
+            LOG(VERBOSE) << "procs: NO RESULT!";
         auto dir = System::get()->getLauncherDirectory();
 
-        auto outFilePath = pj(dir, "emuOutput.txt");
-        auto outKernelPath = pj(dir, "emuKernelOutput.txt");
+        auto outFilePath = pj(mTempDir->path(), Uuid::generate().toString() + "emuOutput.txt");
+        auto outKernelPath = pj(mTempDir->path(), Uuid::generate().toString() + "emuKernelOutput.txt");
 
         path_delete_file(outFilePath.c_str());
         path_delete_file(outKernelPath.c_str());
@@ -173,6 +184,12 @@ protected:
 
         path_delete_file(outFilePath.c_str());
         path_delete_file(outKernelPath.c_str());
+
+        ps = System::get()->runCommandWithResult({ "ps", "aux"});
+        if (ps)
+            LOG(VERBOSE) << "procs: " << ps;
+        else
+            LOG(VERBOSE) << "procs: NO RESULT!";
 
         if (output) {
             return *output;
@@ -255,6 +272,7 @@ private:
     std::string prevEnvSdkHome;
     std::string prevEnvAndroidHome;
     std::vector<std::string> mCustomDirs;
+    LogSeverity mLogLevel = LOG_FATAL;
 
     std::string testdataSdkDir() {
         return pj(System::get()->getProgramDirectory(),
