@@ -22,7 +22,7 @@ namespace android {
 namespace recording {
 
 VorbisCodec::VorbisCodec(CodecParams&& p,
-                                     AVSampleFormat inSampleFmt)
+                         AVSampleFormat inSampleFmt)
     : Codec(AV_CODEC_ID_VORBIS, std::move(p)),
       mInSampleFmt(inSampleFmt) {}
 
@@ -30,9 +30,9 @@ VorbisCodec::~VorbisCodec() {}
 
 // Configures the encoder. Returns true if successful, false otherwise.
 bool VorbisCodec::configAndOpenEncoder(const AVFormatContext* oc,
-                                             AVStream* stream) const {
+                                       AVCodecContext* c,
+                                       AVStream* stream) const {
     stream->id = oc->nb_streams - 1;
-    AVCodecContext* c = stream->codec;
 
     c->sample_fmt =
             mCodec->sample_fmts ? mCodec->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
@@ -61,7 +61,13 @@ bool VorbisCodec::configAndOpenEncoder(const AVFormatContext* oc,
     }
     c->channels = av_get_channel_layout_nb_channels(c->channel_layout);
 
-    stream->time_base = (AVRational){1, 1000000};
+    // If you use a .WEBM container, the stream time base will automatically get changed
+    // to a millisecond time base. Even so, let's explicitly set it anyways just in case
+    // webm changes the format down the road.
+    stream->time_base = (AVRational){1, 1000};
+    // This time base should match up with the timebase we use when we get the timestamp
+    // for the frames (getHighResTimeUs()). In this case, it's the microsecond time base.
+    c->time_base = (AVRational){1, 1000000};
 
     if (oc->oformat->flags & AVFMT_GLOBALHEADER) {
         c->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
