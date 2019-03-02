@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9cf03ecc_f332210e",
+        "filename": "android/build/cmake/android.cmake",
+        "patchSetId": 3
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-02T00:41:10Z",
+      "side": 1,
+      "message": "nit: spaces",
+      "range": {
+        "startLine": 465,
+        "startChar": 85,
+        "endLine": 465,
+        "endChar": 87
+      },
+      "revId": "666d206c7cbe9c29e74335f103fe79dc5514fd74",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e925b4a4_64586bae",
+        "filename": "android/build/cmake/android.cmake",
+        "patchSetId": 3
+      },
+      "lineNbr": 499,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-02T00:41:10Z",
+      "side": 1,
+      "message": "spaces",
+      "range": {
+        "startLine": 499,
+        "startChar": 9,
+        "endLine": 499,
+        "endChar": 11
+      },
+      "revId": "666d206c7cbe9c29e74335f103fe79dc5514fd74",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
