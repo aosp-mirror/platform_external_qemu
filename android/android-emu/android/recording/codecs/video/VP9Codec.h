@@ -36,6 +36,7 @@ public:
 
     // Configures the encoder. Returns true if successful, false otherwise.
     virtual bool configAndOpenEncoder(const AVFormatContext* oc,
+                                      AVCodecContext* c,
                                       AVStream* stream) const override;
     // Configures and initializes the rescaling context.
     virtual bool initSwxContext(const AVCodecContext* c,
