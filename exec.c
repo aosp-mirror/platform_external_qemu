@@ -90,6 +90,8 @@ AddressSpace address_space_memory;
 MemoryRegion io_mem_rom, io_mem_notdirty;
 static MemoryRegion io_mem_unassigned;
 
+static bool ram_blocks_exiting = false;
+
 /* RAM is pre-allocated and passed into qemu_ram_alloc_from_ptr */
 #define RAM_PREALLOC   (1 << 0)
 
@@ -2353,7 +2355,7 @@ void qemu_ram_free(RAMBlock *block)
         return;
     }
 
-    if (block->host) {
+    if (block->host && !ram_blocks_exiting) {
         ram_block_notify_remove(block->host, block->max_length);
     }
 
@@ -2363,8 +2365,17 @@ void qemu_ram_free(RAMBlock *block)
     /* Write list before version */
     smp_wmb();
     ram_list.version++;
-    call_rcu(block, reclaim_ramblock, rcu);
+    if (ram_blocks_exiting) {
+        reclaim_ramblock(block);
+    } else {
+        call_rcu(block, reclaim_ramblock, rcu);
+    }
     qemu_mutex_unlock_ramlist();
+}
+
+void qemu_set_ram_blocks_exiting()
+{
+    ram_blocks_exiting = true;
 }
 
 #ifndef _WIN32
