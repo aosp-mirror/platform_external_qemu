@@ -2099,34 +2099,50 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
     int displayY = android_hw->hw_lcd_height;
 
     if (isFolded) {
-            windowGeo.setWidth((int)(displayXFolded * scale));
-            windowGeo.setHeight((int)(displayYFolded * scale));
-            backingSize.setWidth(displayXFolded);
-            backingSize.setHeight(displayYFolded);
             switch(mOrientation) {
                 default:
+                case SKIN_ROTATION_180:
+                    displayXOffset = displayXOffset + displayXFolded - displayX;
+                    displayYOffset = displayYOffset + displayYFolded - displayY;
                 case SKIN_ROTATION_0:
-                    displayXOffset = android_hw->hw_displayRegion_0_1_xOffset;
-                    displayYOffset = android_hw->hw_displayRegion_0_1_yOffset;
+                    windowGeo.setWidth((int)(displayXFolded * scale));
+                    windowGeo.setHeight((int)(displayYFolded * scale));
+                    backingSize.setWidth(displayXFolded);
+                    backingSize.setHeight(displayYFolded);
                     break;
                 case SKIN_ROTATION_90:
-                    printf("SKIN_ROTATION_90\n");
-                    break;
-                case SKIN_ROTATION_180:
-                    displayXOffset = android_hw->hw_displayRegion_0_1_xOffset + displayXFolded - displayX;
-                    displayYOffset = android_hw->hw_displayRegion_0_1_yOffset + displayYFolded - displayY;
-                    printf("SKIN_ROTATION_180\n");
+                    displayXOffset = displayYOffset + displayYFolded - displayY;
+                    backingSize.setWidth(displayYFolded);
+                    backingSize.setHeight(displayXFolded);
+                    windowGeo.setWidth((int)(displayYFolded * scale));
+                    windowGeo.setHeight((int)(displayXFolded * scale));
                     break;
                 case SKIN_ROTATION_270:
-                    printf("SKIN_ROTATION_90\n");
+                    displayYOffset = displayXOffset + displayXFolded - displayX;
+                    backingSize.setWidth(displayYFolded);
+                    backingSize.setHeight(displayXFolded);
+                    windowGeo.setWidth((int)(displayYFolded * scale));
+                    windowGeo.setHeight((int)(displayXFolded * scale));
                     break;
             }
-    }
-    else {
-        windowGeo.setWidth((int)(android_hw->hw_lcd_width * scale));
-        windowGeo.setHeight((int)(android_hw->hw_lcd_height * scale));
-        backingSize.setWidth(android_hw->hw_lcd_width);
-        backingSize.setHeight(android_hw->hw_lcd_height);
+    } else {
+        switch(mOrientation) {
+            default:
+            case SKIN_ROTATION_0:
+            case SKIN_ROTATION_180:
+                windowGeo.setWidth((int)(android_hw->hw_lcd_width * scale));
+                windowGeo.setHeight((int)(android_hw->hw_lcd_height * scale));
+                backingSize.setWidth(android_hw->hw_lcd_width);
+                backingSize.setHeight(android_hw->hw_lcd_height);
+                break;
+            case SKIN_ROTATION_90:
+            case SKIN_ROTATION_270:
+                windowGeo.setWidth((int)(android_hw->hw_lcd_height * scale));
+                windowGeo.setHeight((int)(android_hw->hw_lcd_width * scale));
+                backingSize.setWidth(android_hw->hw_lcd_height);
+                backingSize.setHeight(android_hw->hw_lcd_width);
+                break;
+        }
     }
     setDisplayRegion(displayXOffset, displayYOffset, backingSize.width(), backingSize.height());
 
@@ -2144,7 +2160,7 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
     double widthScale  = (double)windowGeo.width()  / (double)originalWidth;
     double heightScale = (double)windowGeo.height() / (double)originalHeight;
 
-    simulateSetScale(std::max(.2, std::min(widthScale, heightScale)));
+    simulateSetScale(std::max(.2, (double)scale));
 
     QRect containerGeo = mContainer.geometry();
     mContainer.setGeometry(containerGeo.x(), containerGeo.y(), windowGeo.width(), windowGeo.height());
@@ -2629,6 +2645,10 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     SkinEvent* event = createSkinEvent(kEventLayoutRotate);
     event->u.layout_rotation.rotation = rot;
     queueSkinEvent(event);
+
+    if (ToolWindow2::isFolded()) {
+        resizeAndChangeAspectRatio(true);
+    }
 }
 
 void EmulatorQtWindow::setVisibleExtent(QBitmap bitMap) {

@@ -192,10 +192,6 @@ ExtendedWindow::ExtendedWindow(
     }
 #endif
 
-    connect(mExtendedUi->virtualSensorsPage,
-            SIGNAL(coarseOrientationChanged(SkinRotation)),
-            eW,
-            SLOT(rotateSkin(SkinRotation)));
     connect(mExtendedUi->location_page,
             SIGNAL(targetHeadingChanged(double)),
             mExtendedUi->virtualSensorsPage,

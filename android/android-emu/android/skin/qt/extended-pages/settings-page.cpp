@@ -109,9 +109,7 @@ SettingsPage::SettingsPage(QWidget* parent)
     int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
     int width   = android_hw->hw_displayRegion_0_1_width;
     int height  = android_hw->hw_displayRegion_0_1_height;
-    int foldable = android_hw->hw_foldable;
-    if (!foldable ||
-        xOffset < 0 || xOffset > 9999 ||
+    if (xOffset < 0 || xOffset > 9999 ||
         yOffset < 0 || yOffset > 9999 ||
         width   < 1 || width   > 9999 ||
         height  < 1 || height  > 9999 ||
@@ -121,7 +119,7 @@ SettingsPage::SettingsPage(QWidget* parent)
         mUi->set_foldableDisplay->hide();
     } else {
         bool foldableEnabled =
-            settings.value(Ui::Settings::FOLDABLE_ENABLE, false).toBool();
+            ToolWindow2::getFoldEnabled();
         mUi->set_foldableDisplay->setCheckState(
             foldableEnabled? Qt::Checked : Qt::Unchecked);
     }
@@ -486,8 +484,7 @@ void SettingsPage::on_set_onTop_toggled(bool checked) {
 }
 
 void SettingsPage::on_set_foldableDisplay_toggled(bool checked) {
-    QSettings settings;
-    settings.setValue(Ui::Settings::FOLDABLE_ENABLE, checked);
+    ToolWindow2::setFoldEnabled(checked);
 
     emit(foldableDisplayChanged(checked));
 }

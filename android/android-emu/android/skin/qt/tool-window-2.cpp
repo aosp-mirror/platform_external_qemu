@@ -35,7 +35,6 @@
 #define  D(...)   ((void)0)
 #endif
 
-
 namespace {
 
 void ChangeIcon(QPushButton* button, const char* icon, const char* tip) {
@@ -103,10 +102,6 @@ ToolWindow2::ToolWindow2(EmulatorQtWindow* window,
         mTools2Ui->rotateRight->setVisible(false);
     }
     sToolWindow2 = this;
-
-    //TODO: disable rotation for V1 release
-    mTools2Ui->rotateLeft ->setVisible(false);
-    mTools2Ui->rotateRight->setVisible(false);
 
     // Always assume unfolded starting status
     mTools2Ui->compressHoriz->setVisible(true);
@@ -224,13 +219,9 @@ void ToolWindow2::onMainLoopStart() {
 void ToolWindow2::on_expandHoriz_clicked() {
     mTools2Ui->compressHoriz->setVisible(true);
     mTools2Ui->expandHoriz  ->setVisible(false);
+    mIsFolded = false;
 
-    if (android_hw->hw_fold_adjust) {
-        mEmulatorWindow->resizeAndChangeAspectRatio(false);
-    }
-
-    QSettings settings;
-    settings.setValue(Ui::Settings::FOLDABLE_IS_FOLDED, false);
+    mEmulatorWindow->resizeAndChangeAspectRatio(false);
 
     D("sending SW_LID false\n");
     forwardGenericEventToEmulator(EV_SW, SW_LID, false);
@@ -240,13 +231,9 @@ void ToolWindow2::on_expandHoriz_clicked() {
 void ToolWindow2::on_compressHoriz_clicked() {
     mTools2Ui->compressHoriz->setVisible(false);
     mTools2Ui->expandHoriz  ->setVisible(true);
+    mIsFolded = true;
 
-    if (android_hw->hw_fold_adjust) {
-        mEmulatorWindow->resizeAndChangeAspectRatio(true);
-    }
-
-    QSettings settings;
-    settings.setValue(Ui::Settings::FOLDABLE_IS_FOLDED, true);
+    mEmulatorWindow->resizeAndChangeAspectRatio(true);
 
     sendFoldedArea();
 
@@ -258,11 +245,17 @@ void ToolWindow2::on_compressHoriz_clicked() {
 void ToolWindow2::on_rotateLeft_clicked() {
     ensureExtendedWindowExists();
     emulator_window_rotate_90(false); // False = left
+    if (mIsFolded) {
+        mEmulatorWindow->resizeAndChangeAspectRatio(true);
+    }
 }
 
 void ToolWindow2::on_rotateRight_clicked() {
     ensureExtendedWindowExists();
     emulator_window_rotate_90(true); // True = right
+    if (mIsFolded) {
+        mEmulatorWindow->resizeAndChangeAspectRatio(true);
+    }
 }
 
 void ToolWindow2::paintEvent(QPaintEvent*) {
@@ -339,19 +332,49 @@ bool ToolWindow2::shouldHide() {
     int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
     int width   = android_hw->hw_displayRegion_0_1_width;
     int height  = android_hw->hw_displayRegion_0_1_height;
-    int foldable  = android_hw->hw_foldable;
-    QSettings settings;
-    bool foldableEnabled = settings.value(Ui::Settings::FOLDABLE_ENABLE, false).toBool();
 
     if (xOffset < 0 || xOffset > 9999 ||
         yOffset < 0 || yOffset > 9999 ||
         width   < 1 || width   > 9999 ||
         height  < 1 || height  > 9999 ||
-        !foldableEnabled              ||
-        !foldable                     ||
+        !getFoldEnabled()             ||
         //TODO: need 29
         avdInfo_getApiLevel(android_avdInfo) < 28) {
         return true;
+    }
+    return false;
+}
+
+//static
+bool ToolWindow2::getFoldEnabled() {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        return avdSpecificSettings.value(Ui::Settings::PER_AVD_FOLDABLE_ENABLE, false).toBool();
+    }
+    QSettings settings;
+    return settings.value(Ui::Settings::FOLDABLE_ENABLE, false).toBool();
+}
+
+//static
+void ToolWindow2::setFoldEnabled(bool enabled) {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_FOLDABLE_ENABLE, enabled);
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        settings.setValue(Ui::Settings::FOLDABLE_ENABLE, enabled);
+    }
+}
+
+//static
+bool ToolWindow2::isFolded() {
+    if (sToolWindow2) {
+        return sToolWindow2->mIsFolded;
     }
     return false;
 }
