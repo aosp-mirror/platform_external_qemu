@@ -29,13 +29,13 @@ from absl import logging
 from aemu.definitions import get_ctest, get_qemu_root, EXE_POSTFIX
 from aemu.process import run
 
-def run_tests(out_dir):
+def run_tests(out_dir, jobs):
     if platform.system() == 'Windows':
         run_binary_exists(out_dir)
         run_emugen_test(out_dir)
-        run_ctest(out_dir)
+        run_ctest(out_dir, jobs)
     else:
-        run([os.path.join(get_qemu_root(), 'android', 'scripts', 'unix', 'run_tests.sh'), '--out-dir=%s' % out_dir, '--verbose', '--verbose'])
+        run([os.path.join(get_qemu_root(), 'android', 'scripts', 'unix', 'run_tests.sh'), '--out-dir=%s' % out_dir, '--verbose', '--verbose', '-j', jobs])
 
 
 def run_binary_exists(out_dir):
@@ -43,8 +43,8 @@ def run_binary_exists(out_dir):
         raise Exception('Emulator binary is missing')
 
 
-def run_ctest(out_dir):
-    cmd = [get_ctest(), '--output-on-failure']
+def run_ctest(out_dir, jobs):
+    cmd = [get_ctest(), '-j', jobs, '--output-on-failure', '--force-new-ctest-process']
     run(cmd, out_dir)
 
 

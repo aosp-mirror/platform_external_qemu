@@ -1096,6 +1096,7 @@ public:
         auto tmpfd =
                 android::base::ScopedFd(mkstemp((char*)temp_file_path.data()));
         if (!tmpfd.valid()) {
+            LOG(VERBOSE) << "Unable to make temporary file: " << temp_filename_pattern;
             return {};
         }
         //
@@ -1128,6 +1129,16 @@ public:
         // Sanity check.
         if (commandLine.empty()) {
             return false;
+        }
+        if (LOG_IS_ON(VERBOSE)) {
+            LOG(VERBOSE) << "Running: ";
+            for(auto cmd : commandLine) {
+              LOG(VERBOSE) << "  " << cmd;
+            }
+            LOG(VERBOSE) << "With env: ";
+            for(auto env : envGetAll()) {
+                LOG(VERBOSE) << "  " << env;
+            }
         }
 
 #ifdef _WIN32
