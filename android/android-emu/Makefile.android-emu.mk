@@ -109,6 +109,7 @@ EMULATOR_LIBUI_STATIC_LIBRARIES += \
 # ffmpeg mac dependency
 ifeq ($(BUILD_TARGET_OS),darwin)
     EMULATOR_LIBUI_LDLIBS += -lbz2
+    EMULATOR_LIBUI_HEADLESS_LDLIBS += -lbz2
 endif
 
 $(call end-cmake-project)
