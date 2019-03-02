@@ -74,7 +74,7 @@ namespace {
 struct VideoOutputStream {
     // These two pointers are owned by the output context
     AVStream* stream = nullptr;
-    AVCodecContext* codecCtx = nullptr;
+    AVScopedPtr<AVCodecContext> codecCtx;
     AVScopedPtr<AVFrame> frame;
     AVScopedPtr<AVFrame> tmpFrame;
     AVScopedPtr<SwsContext> swsCtx;
@@ -86,7 +86,7 @@ struct VideoOutputStream {
 struct AudioOutputStream {
     // These two pointers are owned by the output context
     AVStream* stream = nullptr;
-    AVCodecContext* codecCtx = nullptr;
+    AVScopedPtr<AVCodecContext> codecCtx;
     AVScopedPtr<AVFrame> frame;
     AVScopedPtr<AVFrame> tmpFrame;
     AVScopedPtr<SwrContext> swrCtx;
@@ -95,7 +95,9 @@ struct AudioOutputStream {
 
     uint64_t frameCount = 0;
     uint64_t writeFrameCount = 0;
-    uint64_t last_tsUs = 0;
+    // The timestamp of the next audio frame, expressed as an elapsed time difference
+    // from |mStartTimeUs|.
+    uint64_t next_tsUs = 0;
 };
 
 class FfmpegRecorderImpl : public FfmpegRecorder {
@@ -133,7 +135,7 @@ private:
     bool encodeVideoFrame(const Frame* videoFrame);
 
     // Interleave the packets
-    bool writeFrame(AVStream* stream, AVPacket* pkt);
+    bool writeFrame(const AVCodecContext* c, AVStream* stream, AVPacket* pkt);
 
     // Open audio context and allocate audio frames
     bool openAudioContext(AVCodec* codec, AVDictionary* optArgs);
@@ -169,6 +171,23 @@ private:
                           const AVPacket* pkt,
                           AVMediaType type);
 
+    // Ordered by verbosity
+    enum class AvLogLevel {
+        Quiet = AV_LOG_QUIET,
+        Panic = AV_LOG_PANIC,
+        Fatal = AV_LOG_FATAL,
+        Error = AV_LOG_ERROR,
+        Warning = AV_LOG_WARNING,
+        Info = AV_LOG_INFO,
+        Verbose = AV_LOG_VERBOSE,
+        Debug = AV_LOG_DEBUG,
+        Trace = AV_LOG_TRACE,
+    };
+    // Enable ffmpeg logging. Useful for tracking down bugs in ffmpeg.
+    static void enableFfmpegLogging(AvLogLevel level);
+    // Callback for av_log_set_callback() to get logging info
+    static void avLoggingCallback(void *ptr, int level, const char *fmt, va_list vargs);
+
 private:
     std::string mEncodedOutputPath;
     AVScopedPtr<AVFormatContext> mOutputContext;
@@ -197,6 +216,8 @@ FfmpegRecorderImpl::FfmpegRecorderImpl(
     : mFbWidth(fbWidth), mFbHeight(fbHeight) {
     assert(mFbWidth > 0 && mFbHeight > 0);
     mValid = initOutputContext(filename, containerFormat);
+
+    enableFfmpegLogging(AvLogLevel::Trace);
 }
 
 FfmpegRecorderImpl::~FfmpegRecorderImpl() {
@@ -211,12 +232,12 @@ bool FfmpegRecorderImpl::initOutputContext(
         android::base::StringView filename,
         android::base::StringView containerFormat) {
     if (mStarted) {
-        LOG(ERROR) << __func__ << ": Recording already started";
+        LOG(ERROR) << ": Recording already started";
         return false;
     }
     if (filename.empty() || containerFormat.empty()) {
         LOG(ERROR) << __func__
-                   << ": No output filename or container format supplied";
+                   << "No output filename or container format supplied";
         return false;
     }
 
@@ -232,7 +253,7 @@ bool FfmpegRecorderImpl::initOutputContext(
                                    android::base::c_str(containerFormat),
                                    mEncodedOutputPath.c_str());
     if (outputCtx == nullptr) {
-        LOG(ERROR) << __func__ << ": avformat_alloc_output_context2 failed";
+        LOG(ERROR) << "avformat_alloc_output_context2 failed";
         return false;
     }
     mOutputContext = makeAVScopedPtr(outputCtx);
@@ -243,9 +264,8 @@ bool FfmpegRecorderImpl::initOutputContext(
         int ret = avio_open(&mOutputContext->pb, mEncodedOutputPath.c_str(),
                             AVIO_FLAG_WRITE);
         if (ret < 0) {
-            LOG(ERROR) << __func__ << ": Could not open [" << mEncodedOutputPath
-                       << "]: ";
-            avErr2Str(ret);
+            LOG(ERROR) << "Could not open [" << mEncodedOutputPath
+                       << "]: " << avErr2Str(ret);
             return false;
         }
     }
@@ -338,14 +358,14 @@ bool FfmpegRecorderImpl::stop() {
             AVPacket pkt = {0};
             int gotPacket = 0;
             av_init_packet(&pkt);
-            int ret = avcodec_encode_video2(mVideoStream.stream->codec, &pkt,
+            int ret = avcodec_encode_video2(mVideoStream.codecCtx.get(), &pkt,
                                             nullptr, &gotPacket);
             if (ret < 0 || !gotPacket) {
                 break;
             }
-            D("%s: Writing frame %ld\n", __func__,
-              mVideoStream.writeFrameCount++);
-            writeFrame(mVideoStream.stream, &pkt);
+            VLOG(record) << "Writing video frame "
+                         << mVideoStream.writeFrameCount++;
+            writeFrame(mVideoStream.codecCtx.get(), mVideoStream.stream, &pkt);
         }
     }
 
@@ -360,7 +380,8 @@ bool FfmpegRecorderImpl::stop() {
                 // compute the time delta between frames
                 auto avframe = mAudioStream.frame.get();
                 uint64_t deltaUs = (uint64_t)(((float)avframe->nb_samples / avframe->sample_rate) * 1000000);
-                f.tsUs = mAudioStream.last_tsUs + deltaUs;
+                f.tsUs = mAudioStream.next_tsUs;
+                mAudioStream.next_tsUs += deltaUs;
                 f.format.audioFormat = mAudioProducer->getFormat().audioFormat;
                 encodeAudioFrame(&f);
             }
@@ -371,14 +392,14 @@ bool FfmpegRecorderImpl::stop() {
             AVPacket pkt = {0};
             int gotPacket;
             av_init_packet(&pkt);
-            int ret = avcodec_encode_audio2(mAudioStream.stream->codec, &pkt,
+            int ret = avcodec_encode_audio2(mAudioStream.codecCtx.get(), &pkt,
                                             NULL, &gotPacket);
             if (ret < 0 || !gotPacket) {
                 break;
             }
-            D("%s: Writing audio frame %d\n", __func__,
-              mAudioStream.writeFrameCount++);
-            writeFrame(mAudioStream.stream, &pkt);
+            VLOG(record) << "Writing audio frame "
+                         << mAudioStream.writeFrameCount++;
+            writeFrame(mAudioStream.codecCtx.get(), mAudioStream.stream, &pkt);
         }
     }
 
@@ -415,24 +436,23 @@ bool FfmpegRecorderImpl::addAudioTrack(
         const Codec<SwrContext>* codec) {
     assert(mValid && codec != nullptr && producer != nullptr);
     if (mStarted) {
-        LOG(ERROR) << __func__ << ": Muxer already started";
+        LOG(ERROR) << "Muxer already started";
         return false;
     }
     if (mHasAudioTrack) {
-        LOG(ERROR) << __func__ << ": An audio track was already added";
+        LOG(ERROR) << "An audio track was already added";
         return false;
     }
 
     if (codec->getCodec()->type != AVMEDIA_TYPE_AUDIO) {
-        LOG(ERROR) << __func__ << " "
-                   << avcodec_get_name(codec->getCodecId())
+        LOG(ERROR) << avcodec_get_name(codec->getCodecId())
                    << " is not an audio codec.";
         return false;
     }
 
     auto params = codec->getCodecParams();
-    D("%s(bitrate=[%u], sample_rate=[%u])\n", __func__, params->bitrate,
-      params->sample_rate);
+    VLOG(record) << "bitrate=[" << params->bitrate << "], sample_rate=["
+                 << params->sample_rate << "])";
 
     attachAudioProducer(std::move(producer));
 
@@ -449,21 +469,40 @@ bool FfmpegRecorderImpl::addAudioTrack(
     }
     ost->stream = stream;
 
-    if (!codec->configAndOpenEncoder(oc, ost->stream)) {
+    // allocate an AVCodecContext and set its fields to default values.
+    // avcodec_alloc_context3() will allocate private data and initialize
+    // defaults for the given codec, so make sure that:
+    //   1) avcodec_open2() is not called with a different codec,
+    //   2) the AVCodecContext is freed with avcodec_free_context().
+    AVCodecContext* c = avcodec_alloc_context3(codec->getCodec());
+    if (c == nullptr) {
+        LOG(ERROR) << "avcodec_alloc_context3 failed [codec="
+                   << avcodec_get_name(codec->getCodecId()) << "]";
+        return false;
+    }
+    ost->codecCtx = makeAVScopedPtr(c);
+
+    if (!codec->configAndOpenEncoder(oc, c, ost->stream)) {
         LOG(ERROR) << "Unable to open video codec context ["
                    << avcodec_get_name(codec->getCodecId()) << "]";
         return false;
     }
-    AVCodecContext* c = ost->stream->codec;
-    ost->codecCtx = c;
 
-    D("%s: c->sample_fmt=%d, c->channels=%d, ost->st->time_base.den=%d\n",
-      __func__, c->sample_fmt, c->channels, ost->stream->time_base.den);
+    /* copy the stream parameters to the muxer */
+    if (avcodec_parameters_from_context(ost->stream->codecpar, c) < 0) {
+        LOG(ERROR) << "Could not copy the stream parameters";
+        return false;
+    }
+
+    VLOG(record) << "c->sample_fmt=" << c->sample_fmt
+                 << ", c->channels=" << c->channels
+                 << ", ost->st->time_base.den=" << ost->stream->time_base.den;
 
     uint32_t nbSamples;
     if (codec->getCodec()->capabilities & CODEC_CAP_VARIABLE_FRAME_SIZE) {
         nbSamples = 10000;
     } else {
+        VLOG(record) << "setting nbSamples=" << c->frame_size;
         nbSamples = c->frame_size;
     }
 
@@ -501,7 +540,7 @@ bool FfmpegRecorderImpl::addAudioTrack(
 
     // Setup frame for leftover audio data
     auto frameSize =
-            ost->frame->nb_samples * ost->stream->codec->channels *
+            ost->frame->nb_samples * ost->codecCtx->channels *
             getAudioFormatSize(mAudioProducer->getFormat().audioFormat);
     ost->audioLeftover.reserve(frameSize);
 
@@ -514,17 +553,16 @@ bool FfmpegRecorderImpl::addVideoTrack(
         const Codec<SwsContext*>* codec) {
     assert(mValid && codec != nullptr && producer != nullptr);
     if (mStarted) {
-        LOG(ERROR) << __func__ << ": Muxer already started";
+        LOG(ERROR) << "Muxer already started";
         return false;
     }
     if (mHasVideoTrack) {
-        LOG(ERROR) << __func__ << ": A video track was already added";
+        LOG(ERROR) << "A video track was already added";
         return false;
     }
 
     if (codec->getCodec()->type != AVMEDIA_TYPE_VIDEO) {
-        LOG(ERROR) << __func__ << " "
-                   << avcodec_get_name(codec->getCodecId())
+        LOG(ERROR) << avcodec_get_name(codec->getCodecId())
                    << " is not a video codec.";
         return false;
     }
@@ -535,10 +573,10 @@ bool FfmpegRecorderImpl::addVideoTrack(
     AVFormatContext* oc = mOutputContext.get();
 
     auto codecParams = codec->getCodecParams();
-    D("%s(width=[%u], height=[%u], bitRate=[%u], fps=[%u], "
-      "intraSpacing=[%d])\n",
-      __func__, codecParams->width, codecParams->height, codecParams->bitrate,
-      codecParams->fps, codecParams->intra_spacing);
+    VLOG(record) << "width=[" << codecParams->width << "], height=["
+                 << codecParams->height << "], bitRate=["
+                 << codecParams->bitrate << "], fps=[" << codecParams->fps
+                 << "], intraSpacing=[" << codecParams->intra_spacing << "])";
 
     ost->frameCount = 0;
     ost->writeFrameCount = 0;
@@ -550,13 +588,30 @@ bool FfmpegRecorderImpl::addVideoTrack(
     }
     ost->stream = stream;
 
-    if (!codec->configAndOpenEncoder(oc, ost->stream)) {
+    // allocate an AVCodecContext and set its fields to default values.
+    // avcodec_alloc_context3() will allocate private data and initialize
+    // defaults for the given codec, so make sure that:
+    //   1) avcodec_open2() is not called with a different codec,
+    //   2) the AVCodecContext is freed with avcodec_free_context().
+    AVCodecContext* c = avcodec_alloc_context3(codec->getCodec());
+    if (c == nullptr) {
+        LOG(ERROR) << ": avcodec_alloc_context3 failed [codec="
+                   << avcodec_get_name(codec->getCodecId()) << "]";
+        return false;
+    }
+    ost->codecCtx = makeAVScopedPtr(c);
+
+    if (!codec->configAndOpenEncoder(oc, c, ost->stream)) {
         LOG(ERROR) << "Unable to open video codec context ["
                    << avcodec_get_name(codec->getCodecId()) << "]";
         return false;
     }
-    AVCodecContext* c = ost->stream->codec;
-    ost->codecCtx = c;
+
+    /* copy the stream parameters to the muxer */
+    if (avcodec_parameters_from_context(ost->stream->codecpar, c) < 0) {
+        LOG(ERROR) << "Could not copy the stream parameters";
+        return false;
+    }
 
     // allocate and init a re-usable frame
     auto frame = allocVideoFrame(c->pix_fmt, c->width, c->height);
@@ -602,12 +657,16 @@ bool FfmpegRecorderImpl::encodeAudioFrame(const Frame* frame) {
         return false;
     }
 
+    ost->next_tsUs = frame->tsUs - mStartTimeUs;
     AVFrame* avframe = ost->tmpFrame.get();
     auto frameSize = ost->audioLeftover.capacity();
 
     // we need to split into frames
     auto remaining = frame->dataVec.size();
     auto buf = static_cast<const uint8_t*>(frame->dataVec.data());
+    // frame_size is also number of samples. frameDurationUs is the duration, in microseconds,
+    // for a frame in this codec configuration.
+    uint64_t frameDurationUs = (uint64_t)((double)ost->codecCtx->frame_size / ost->codecCtx->sample_rate * 1000000);
 
     // If we have leftover data, fill the rest of the frame and send to the
     // encoder.
@@ -617,12 +676,14 @@ bool FfmpegRecorderImpl::encodeAudioFrame(const Frame* frame) {
             ost->audioLeftover.insert(ost->audioLeftover.end(), buf,
                                       buf + bufUsed);
             memcpy(avframe->data[0], ost->audioLeftover.data(), frameSize);
-            uint64_t elapsedUS = frame->tsUs - mStartTimeUs;
-            int64_t pts =
-                    (int64_t)(((double)elapsedUS * ost->stream->time_base.den) /
-                              1000000.00);
-            avframe->pts = pts;
-            ost->last_tsUs = frame->tsUs;
+            // We need to guesstimate the timestamp from the last encoded timestamp, because the frame
+            // size required by the codec may be smaller than the incoming frame size. In the case of
+            // using vorbis with the matroska muxer in ffmpeg 3.4.5, the codec wants 64 samples per frame,
+            // but |frame| is giving us 512 samples. We are making an assumption here that the audio
+            // coming in is given to us at a constant rate. It we have any moments of no data, we may
+            // experience some audio lag.
+            avframe->pts = (int64_t)ost->next_tsUs;
+            ost->next_tsUs += frameDurationUs;
             writeAudioFrame(avframe);
             buf += bufUsed;
             remaining -= bufUsed;
@@ -636,11 +697,11 @@ bool FfmpegRecorderImpl::encodeAudioFrame(const Frame* frame) {
 
     while (remaining >= frameSize) {
         memcpy(avframe->data[0], buf, frameSize);
-        uint64_t elapsedUS = frame->tsUs - mStartTimeUs;
-        int64_t pts = (int64_t)(
-                ((double)elapsedUS * ost->stream->time_base.den) / 1000000.00);
-        avframe->pts = pts;
-        ost->last_tsUs = frame->tsUs;
+        // We need to guesstimate the timestamp from the last encode timestamp, because the frame
+        // size required by the codec may be smaller than the incoming frame size. We'll Assume that the audio
+        // starts at time=0ms.
+        avframe->pts = (int64_t)ost->next_tsUs;
+        ost->next_tsUs += frameDurationUs;
         writeAudioFrame(avframe);
         buf += frameSize;
         remaining -= frameSize;
@@ -669,13 +730,15 @@ bool FfmpegRecorderImpl::encodeVideoFrame(const Frame* frame) {
     auto data = frame->dataVec.data();
     sws_scale(ost->swsCtx.get(), (const uint8_t* const*)&data, linesize, 0,
               mFbHeight, ost->frame->data, ost->frame->linesize);
-    D("Time to sws_scale: [%lld ms]\n",
-      (long long)(android::base::System::get()->getHighResTimeUs() - startUs) /
-              1000);
+    VLOG(record)
+            << "Time to sws_scale: ["
+            << (long long)(android::base::System::get()->getHighResTimeUs() -
+                           startUs) /
+                       1000
+            << " ms]";
 
     uint64_t elapsedUS = frame->tsUs - mStartTimeUs;
-    ost->frame->pts = (int64_t)(
-            ((double)elapsedUS * ost->stream->time_base.den) / 1000000.00);
+    ost->frame->pts = (int64_t)(elapsedUS);
 
     bool ret = writeVideoFrame(ost->frame.get());
     mHasVideoFrames = true;
@@ -683,11 +746,14 @@ bool FfmpegRecorderImpl::encodeVideoFrame(const Frame* frame) {
     return ret;
 }
 
-bool FfmpegRecorderImpl::writeFrame(AVStream* stream, AVPacket* pkt) {
-    pkt->dts = AV_NOPTS_VALUE;
+bool FfmpegRecorderImpl::writeFrame(const AVCodecContext* c, AVStream* stream, AVPacket* pkt) {
     pkt->stream_index = stream->index;
 
-    logPacket(mOutputContext.get(), pkt, stream->codec->codec->type);
+    // Use the container's time_base. For the screen recorder, the codec's time base
+    // should be set to a millisecond timebase, because the pts we set on the frame is a number
+    // of milliseconds.
+    av_packet_rescale_ts(pkt, c->time_base, stream->time_base);
+    logPacket(mOutputContext.get(), pkt, c->codec->type);
 
     // Write the compressed frame to the media file.
     AutoLock lock(mLock);
@@ -700,7 +766,7 @@ bool FfmpegRecorderImpl::writeFrame(AVStream* stream, AVPacket* pkt) {
 bool FfmpegRecorderImpl::writeAudioFrame(AVFrame* frame) {
     int dstNbSamples;
     int ret;
-    AVCodecContext* c = mAudioStream.stream->codec;
+    AVCodecContext* c = mAudioStream.codecCtx.get();
 
     if (frame) {
         // convert samples from native format to destination codec format, using
@@ -709,6 +775,8 @@ bool FfmpegRecorderImpl::writeAudioFrame(AVFrame* frame) {
                 swr_get_delay(mAudioStream.swrCtx.get(), c->sample_rate) +
                         frame->nb_samples,
                 c->sample_rate, c->sample_rate, AV_ROUND_UP);
+        VLOG(record) << "dstNbSamples=[" << dstNbSamples
+                     << "], frame->nb_samples=[" << frame->nb_samples << "]";
         av_assert0(dstNbSamples == frame->nb_samples);
 
         // when we pass a frame to the encoder, it may keep a reference to it
@@ -737,7 +805,7 @@ bool FfmpegRecorderImpl::writeAudioFrame(AVFrame* frame) {
     AVPacket pkt;
     int gotPacket;
 
-    D("Encoding audio frame %d\n", mAudioStream.frameCount++);
+    VLOG(record) << "Encoding audio frame " << mAudioStream.frameCount++;
     av_init_packet(&pkt);
     pkt.data = NULL;  // data and size must be 0
     pkt.size = 0;
@@ -748,7 +816,7 @@ bool FfmpegRecorderImpl::writeAudioFrame(AVFrame* frame) {
     }
 
     if (gotPacket && pkt.size > 0) {
-        if (!writeFrame(mAudioStream.stream, &pkt)) {
+        if (!writeFrame(mAudioStream.codecCtx.get(), mAudioStream.stream, &pkt)) {
             LOG(ERROR) << "Error while writing audio frame: [" << avErr2Str(ret)
                        << "]";
             return false;
@@ -763,7 +831,7 @@ bool FfmpegRecorderImpl::writeVideoFrame(AVFrame* frame) {
     AVCodecContext* c;
     int gotPacket = 0;
 
-    c = mVideoStream.stream->codec;
+    c = mVideoStream.codecCtx.get();
 
     if (mOutputContext->oformat->flags & AVFMT_RAWPICTURE) {
         // a hack to avoid data copy with some raw video muxers
@@ -793,13 +861,16 @@ bool FfmpegRecorderImpl::writeVideoFrame(AVFrame* frame) {
         pkt.data = nullptr;  // data and size must be 0
         pkt.size = 0;
         // encode the frame
-        D("Encoding video frame %ld\n", mVideoStream.frameCount++);
+        VLOG(record) << "Encoding video frame " << mVideoStream.frameCount++;
         auto startUs = android::base::System::get()->getHighResTimeUs();
         ret = avcodec_encode_video2(c, &pkt, frame, &gotPacket);
-        D("Time to avcodec_encode_video2: [%lld ms]\n",
-          (long long)(android::base::System::get()->getHighResTimeUs() -
-                      startUs) /
-                  1000);
+        VLOG(record) << "Time to avcodec_encode_video2: ["
+                     << (long long)(android::base::System::get()
+                                            ->getHighResTimeUs() -
+                                    startUs) /
+                                1000
+                     << " ms]";
+
         if (ret < 0) {
             LOG(ERROR) << "Error encoding video frame: [" << avErr2Str(ret)
                        << "]";
@@ -807,7 +878,7 @@ bool FfmpegRecorderImpl::writeVideoFrame(AVFrame* frame) {
         }
 
         if (gotPacket && pkt.size > 0) {
-            ret = writeFrame(mVideoStream.stream, &pkt) ? 0 : -1;
+            ret = writeFrame(mVideoStream.codecCtx.get(), mVideoStream.stream, &pkt) ? 0 : -1;
         } else {
             ret = 0;
         }
@@ -870,7 +941,10 @@ AVFrame* FfmpegRecorderImpl::allocVideoFrame(enum AVPixelFormat pixFmt,
     // allocate the buffers for the frame data
     ret = av_frame_get_buffer(picture, 32);
     if (ret < 0) {
-        LOG(ERROR) << "Could not allocate video frame data.";
+        LOG(ERROR) << "Could not allocate video frame data ("
+                   << "pixFmt=" << pixFmt
+                   << ",w=" << width
+                   << ",h=" << height << ")";
         return nullptr;
     }
 
@@ -884,12 +958,14 @@ bool FfmpegRecorderImpl::openAudioContext(AVCodec* codec,
 }
 
 void FfmpegRecorderImpl::closeAudioContext() {
+    mAudioStream.codecCtx.reset();
     mAudioStream.frame.reset();
     mAudioStream.tmpFrame.reset();
     mAudioStream.swrCtx.reset();
 }
 
 void FfmpegRecorderImpl::closeVideoContext() {
+    mVideoStream.codecCtx.reset();
     mVideoStream.frame.reset();
     mVideoStream.tmpFrame.reset();
     mVideoStream.swsCtx.reset();
@@ -917,13 +993,29 @@ void FfmpegRecorderImpl::logPacket(const AVFormatContext* fmtCtx,
                                    const AVPacket* pkt,
                                    AVMediaType type) {
     AVRational* time_base = &fmtCtx->streams[pkt->stream_index]->time_base;
-    D("pts:%s pts_time:%s dts:%s dts_time:%s duration:%s "
-      "duration_time:%s "
-      "stream_index:%d\n",
-      avTs2Str(pkt->pts).c_str(), avTs2TimeStr(pkt->pts, time_base).c_str(),
-      avTs2Str(pkt->dts).c_str(), avTs2TimeStr(pkt->dts, time_base).c_str(),
-      avTs2Str(pkt->duration).c_str(),
-      avTs2TimeStr(pkt->duration, time_base).c_str(), pkt->stream_index);
+    VLOG(record) << "pts:" << avTs2Str(pkt->pts).c_str()
+                 << " pts_time:" << avTs2TimeStr(pkt->pts, time_base).c_str()
+                 << " dts:" << avTs2Str(pkt->dts).c_str()
+                 << " dts_time:" << avTs2TimeStr(pkt->dts, time_base).c_str()
+                 << " duration:" << avTs2Str(pkt->duration).c_str()
+                 << " duration_time:"
+                 << avTs2TimeStr(pkt->duration, time_base).c_str()
+                 << " stream_index:" << pkt->stream_index;
+}
+
+// static
+void FfmpegRecorderImpl::enableFfmpegLogging(AvLogLevel level) {
+    av_log_set_level(static_cast<int>(level));
+    av_log_set_callback(avLoggingCallback);
+}
+
+// static
+void FfmpegRecorderImpl::avLoggingCallback(void* ptr, int level, const char* fmt, va_list vargs) {
+    if (VERBOSE_CHECK(record)) {
+        // It seems ffmpeg doesn't silence repeated warnings. So let's just
+        // capture it here and ignore it if we aren't debugging it.
+        vprintf(fmt, vargs);
+    }
 }
 }  // namespace
 
