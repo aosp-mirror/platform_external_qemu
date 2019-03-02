@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c3cf3e7_3b3f1488",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2105,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-02T01:27:41Z",
+      "side": 1,
+      "message": "D(\"SKIN_...\")\n\n.. I think we have a debug macro for rotation that you can put it under.",
+      "range": {
+        "startLine": 2105,
+        "startChar": 20,
+        "endLine": 2105,
+        "endChar": 50
+      },
+      "revId": "574ae20571281664066ed73b79a98f9113e74a04",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd7989b9_8d3c7f9a",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2115,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-02T01:27:41Z",
+      "side": 1,
+      "message": "D(..)",
+      "range": {
+        "startLine": 2115,
+        "startChar": 20,
+        "endLine": 2115,
+        "endChar": 26
+      },
+      "revId": "574ae20571281664066ed73b79a98f9113e74a04",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b39826e0_e57f4dcf",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2123,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-02T01:27:41Z",
+      "side": 1,
+      "message": "D(..)",
+      "range": {
+        "startLine": 2123,
+        "startChar": 20,
+        "endLine": 2123,
+        "endChar": 26
+      },
+      "revId": "574ae20571281664066ed73b79a98f9113e74a04",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
