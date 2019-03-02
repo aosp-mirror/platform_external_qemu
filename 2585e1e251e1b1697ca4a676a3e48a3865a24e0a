@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b78cf3d_e552bb9f",
+        "filename": "android/tests/end2end/test_crash_symbols/emulator.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-03-02T07:09:16Z",
+      "side": 1,
+      "message": "I think this is not very useful env.\nprobably you mean ANDROID_HOME ?",
+      "range": {
+        "startLine": 113,
+        "startChar": 27,
+        "endLine": 113,
+        "endChar": 43
+      },
+      "revId": "2585e1e251e1b1697ca4a676a3e48a3865a24e0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
