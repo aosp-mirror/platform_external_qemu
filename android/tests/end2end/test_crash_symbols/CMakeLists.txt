@@ -1,6 +1,7 @@
 # Only schedule the test if we are not cross compiling and have symbols enabled.
 if(ANDROID_EXTRACT_SYMBOLS
    AND ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG
+   AND (NOT ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64") # b/126964544
    AND (NOT OPTION_CRASHUPLOAD STREQUAL "NONE"))
 
   get_filename_component(PREBUILT_ROOT "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/testdata"

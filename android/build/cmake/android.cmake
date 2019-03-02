@@ -612,7 +612,8 @@ function(android_upload_symbols TGT)
                              \"${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/upload_symbols.py\"
                              \"${DEST}\"
                              \"${ANDROID_SYMBOL_URL}\"
-                             OUTPUT_FILE ${STDOUT} ERROR_QUIET)"
+                             OUTPUT_FILE ${STDOUT}
+                             ERROR_FILE ${STDOUT})"
   )
 endfunction()
 
