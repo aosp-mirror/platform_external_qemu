@@ -83,7 +83,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
       set(OPTION_ASAN address)
     endif()
 
-    if(NOT MSVC)
+    if(NOT ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
       # Build an instrumented version of the code  that generates coverage mapping to enable code coverage analysis
       set(ANDROID_CODE_COVERAGE TRUE)
       add_c_flag("-fcoverage-mapping")
@@ -204,7 +204,7 @@ add_definitions("-D_GNU_SOURCE=1")
 # Enable large-file support (i.e. make off_t a 64-bit value).
 add_definitions("-D_FILE_OFFSET_BITS=64" "-D_LARGEFILE_SOURCE")
 
-if(OPTION_ASAN AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT MSVC)
+if(OPTION_ASAN AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
   message(STATUS "Enabling ASAN with: ${OPTION_ASAN}")
   add_c_flag("-fsanitize=${OPTION_ASAN}")
   add_c_flag("-g3")
