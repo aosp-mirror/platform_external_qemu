@@ -14,6 +14,7 @@
 #include "android/avd/generate.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/FileUtils.h"
+#include "android/base/Uuid.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
@@ -111,8 +112,8 @@ protected:
 
         auto dir = System::get()->getLauncherDirectory();
 
-        auto outFilePath = pj(dir, "emuOutput.txt");
-        auto outKernelPath = pj(dir, "emuKernelOutput.txt");
+        auto outFilePath = pj(mTempDir->path(), Uuid::generate().toString() + "emuOutput.txt");
+        auto outKernelPath = pj(mTempDir->path(), Uuid::generate().toString() + "emuKernelOutput.txt");
 
         path_delete_file(outFilePath.c_str());
         path_delete_file(outKernelPath.c_str());
