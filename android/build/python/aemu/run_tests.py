@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import multiprocessing
 import os
 import platform
 import sys
@@ -44,7 +45,7 @@ def run_binary_exists(out_dir):
 
 
 def run_ctest(out_dir):
-    cmd = [get_ctest(), '--output-on-failure']
+    cmd = [get_ctest(), '-j', multiprocessing.cpu_count(), '--output-on-failure']
     run(cmd, out_dir)
 
 
