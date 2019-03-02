@@ -33,24 +33,41 @@ if(WIN32)
   message(STATUS "Configuring native windows build using clang-cl: ${CLANG_VER}")
   get_filename_component(CLANG_DIR "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/clang/host/windows-x86/${CLANG_VER}"
                          REALPATH)
-  if(NOT EXISTS "${CLANG_DIR}/bin/clang-cl.exe")
-    message(FATAL_ERROR
-        "${CLANG_DIR}/bin/clang-cl.exe does not exists, will not be able to compile properly. Make sure the symlink ${CLANG_DIR}/bin/clang-cl.exe <===> ${CLANG_DIR}/bin/clang.exe exists!"
-     )
+  set(CLANG_CL ${CLANG_DIR}/bin/clang-cl.exe)
+  if(NOT EXISTS "${CLANG_CL}")
+    message(
+      FATAL_ERROR
+        "${CLANG_CL} does not exists, will not be able to compile properly. Make sure the symlink ${CLANG_CL} <===> ${CLANG_DIR}/bin/clang.exe exists!"
+      )
   endif()
-  set(CMAKE_C_COMPILER "${CLANG_DIR}/bin/clang-cl.exe")
-  set(CMAKE_CXX_COMPILER "${CLANG_DIR}/bin/clang-cl.exe")
+  find_program(CLCACHE clcache)
+  # cl cache only works reasonable in debug builds due to usage of /Zi flag in release builds.
+  if(CLCACHE AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(WARNING "Enabling clcache with ${CLANG_CL}, with $ENV{CLCACHE_DIR}. Make sure to set CLCACHE_DIR to point outside of your user env. For example CLCACHE_DIR=C:\\clcache")
+
+    # Create a clcache wrapper.
+    file(WRITE ${CMAKE_BINARY_DIR}/clang_cl.bat "@echo off\r\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/clang_cl.bat "${CLCACHE} ${CLANG_CL} %*")
+
+    set(CMAKE_C_COMPILER "${CMAKE_BINARY_DIR}/clang_cl.bat")
+    set(CMAKE_CXX_COMPILER "${CMAKE_C_COMPILER}")
+  else()
+    set(CMAKE_C_COMPILER "${CLANG_CL}")
+    set(CMAKE_CXX_COMPILER "${CLANG_CL}")
+  endif()
   set(ANDROID_LLVM_SYMBOLIZER "${CLANG_DIR}/bin/llvm-symbolizer.exe")
-
-  # Set the debug flags
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -MD")
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -MD")
-
+  # Set the debug flags, erasing whatever cmake stuffs in there.
+  # We are going to produce "fat" binaries with all debug information in there.
+  set(CMAKE_CXX_FLAGS_DEBUG "-MD -Z7")
+  set(CMAKE_C_FLAGS_DEBUG "-MD -Z7")
   # Set release flags such that we create pdbs..
-  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD -Zi")
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -MD -Zi")
+  set(CMAKE_C_FLAGS_RELEASE "-MD -Zi")
+  set(CMAKE_CXX_FLAGS_RELEASE "-MD -Zi")
+
   # See https://www.wintellect.com/correctly-creating-native-c-release-build-pdbs/
-  set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /IGNORE:4099 /DEBUG /NODEFAULTLIB:LIBCMT /OPT:REF /OPT:ICF" CACHE STRING "" FORCE)
+  set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "/IGNORE:4099 /DEBUG /NODEFAULTLIB:LIBCMT /OPT:REF /OPT:ICF"
+      CACHE STRING ""
+      FORCE)
   set(CMAKE_EXE_LINKER_FLAGS "/IGNORE:4099 /DEBUG /NODEFAULTLIB:LIBCMT")
 
   # Make sure nobody is accidently trying to do a 32 bit build.
@@ -58,11 +75,10 @@ if(WIN32)
     # message(FATAL_ERROR "Please configure the compiler for a x64 build!")
   endif()
 
-  # The Mt.exe file is a tool that generates signed files and catalogs.
-  # This normally gets invoked at the end of executable creation, however
-  # anti virus software can easily interfer resulting in build breaks,
-  # so lets just not do it.
-  set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
+  # The Mt.exe file is a tool that generates signed files and catalogs. This normally gets invoked at the end of
+  # executable creation, however anti virus software can easily interfer resulting in build breaks, so lets just not do
+  # it.
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
   set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /MANIFEST:NO")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /MANIFEST:NO")
 
