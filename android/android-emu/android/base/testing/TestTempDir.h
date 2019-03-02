@@ -18,6 +18,7 @@
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
 #include "android/base/StringView.h"
+#include "android/base/Uuid.h"
 #include "android/base/files/PathUtils.h"
 #include "android/utils/file_io.h"
 
@@ -60,6 +61,9 @@ public:
             temp_dir += debugName;
             temp_dir += ".";
         }
+        // On windows it can happen that we reuse existing temp 
+        // directories
+        temp_dir += Uuid::generate().toString();
         temp_dir += "XXXXXX";
         if (mkdtemp(&temp_dir[0])) {
           // Fix any Win32/Linux naming issues
