@@ -29,11 +29,12 @@ namespace recording {
 class VorbisCodec : public Codec<SwrContext> {
 public:
     explicit VorbisCodec(CodecParams&& params,
-                               AVSampleFormat inSampleFmt);
+                         AVSampleFormat inSampleFmt);
     virtual ~VorbisCodec();
 
     // Configures the encoder. Returns true if successful, false otherwise.
     virtual bool configAndOpenEncoder(const AVFormatContext* oc,
+                                      AVCodecContext* c,
                                       AVStream* stream) const override;
     // Configures and initializes the resampling context.
     virtual bool initSwxContext(const AVCodecContext* c,
