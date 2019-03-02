@@ -25,8 +25,10 @@ from absl import flags
 from absl import logging
 
 import os
+import multiprocessing
 import platform
 import shutil
+
 
 from aemu.process import run
 from aemu.definitions import Generator, Crash, BuildConfig, Toolchain, get_qemu_root, get_cmake, Make, get_aosp_root, fixup_windows_clang, read_simple_properties
@@ -47,6 +49,8 @@ flags.DEFINE_string('out', os.path.abspath('objs'),
 flags.DEFINE_string('dist', None, 'Create distribution in directory')
 flags.DEFINE_boolean('qtwebengine', False, 'Build with QtWebEngine support')
 flags.DEFINE_boolean('tests', True, 'Run all the tests')
+flags.DEFINE_integer('test_jobs', multiprocessing.cpu_count(),
+                     'Specifies  the number of tests to run simultaneously')
 flags.DEFINE_list(
     'sanitizer', [], 'List of sanitizers ([address, thread]) to enable in the built binaries.')
 flags.DEFINE_enum('generator', 'ninja', Generator.values(),
@@ -142,7 +146,7 @@ def main(argv=None):
 
     # Test.
     if FLAGS.tests:
-        run_tests(FLAGS.out)
+        run_tests(FLAGS.out, FLAGS.test_jobs)
 
     # Create a distribution if needed.
     if FLAGS.dist:
