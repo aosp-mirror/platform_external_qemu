@@ -1296,6 +1296,7 @@ public:
         VkImportColorBufferGOOGLE importCbInfo;
         VkImportPhysicalAddressGOOGLE importPhysAddrInfo;
         VkMemoryDedicatedAllocateInfo dedicatedAllocInfo;
+        VkEmulation::ExternalMemoryInfo externalMemoryInfo;
 
         // handle type should already be converted in unmarshaling
         VkExportMemoryAllocateInfo* exportAllocInfoPtr =
@@ -1317,9 +1318,7 @@ public:
                     VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE);
 
         if (importCbInfoPtr) {
-            // TODO: Implement what happens on importing a color bufer:
-            // - setup Vk for the color buffer
-            // - associate device memory with the color buffer
+            externalMemoryInfo = getColorBufferInfo(importCbInfoPtr->colorBuffer).memory;
         }
 
         VkImportPhysicalAddressGOOGLE* importPhysAddrInfoPtr =
@@ -1357,11 +1356,19 @@ public:
         (void)importFdInfo;
 #endif
 
-        VkResult result =
-            vk->vkAllocateMemory(device, &allocInfo, pAllocator, pMemory);
+        VkResult result = VK_SUCCESS;
+        if (externalMemoryInfo.actuallyExternal) {
+            if (!importExternalMemory(vk, device, &externalMemoryInfo, pMemory)) {
+                fprintf(stderr, "%s: Failed to import external memory\n", __func__);
+                return VK_ERROR_INITIALIZATION_FAILED;
+            }
+        } else {
+            result =
+                vk->vkAllocateMemory(device, &allocInfo, pAllocator, pMemory);
 
-        if (result != VK_SUCCESS) {
-            return result;
+            if (result != VK_SUCCESS) {
+                return result;
+            }
         }
 
         AutoLock lock(mLock);

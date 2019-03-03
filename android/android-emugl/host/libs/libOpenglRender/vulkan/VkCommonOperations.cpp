@@ -983,7 +983,7 @@ bool importExternalMemory(VulkanDispatch* vk,
     VkImportMemoryFdInfoKHR importInfo = {
         VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR, 0,
         VK_EXT_MEMORY_HANDLE_TYPE_BIT,
-        info->exportedHandle,
+        dupExternalMemory(info->exportedHandle),
     };
 #endif
     VkMemoryAllocateInfo allocInfo = {
