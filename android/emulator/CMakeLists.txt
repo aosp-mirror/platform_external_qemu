@@ -13,8 +13,10 @@ target_compile_definitions(emulator
                            "-DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}"
                            "-DANDROID_SDK_TOOLS_BUILD_NUMBER=${OPTION_SDK_TOOLS_BUILD_NUMBER}")
 
-
-add_executable(emulator-headless main-emulator.cpp ${WINDOWS_ICON})
+set(emulator-headless_src
+    main-emulator.cpp
+    ${WINDOWS_ICON})
+android_add_executable(emulator-headless)
 target_link_libraries(emulator-headless PRIVATE android-emu)
 target_compile_definitions(emulator-headless
                            PRIVATE
