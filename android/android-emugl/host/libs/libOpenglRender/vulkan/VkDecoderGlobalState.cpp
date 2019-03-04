@@ -1355,15 +1355,17 @@ public:
             abort();
         }
 
-        VkImportColorBufferGOOGLE* importCbInfoPtr =
-            (VkImportColorBufferGOOGLE*)
+        VkMemoryDedicatedAllocateInfo* dedicatedAllocInfoPtr =
+            (VkMemoryDedicatedAllocateInfo*)
                 vk_find_struct((vk_struct_common*)pAllocateInfo,
-                    VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE);
+                VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO);
 
-        if (importCbInfoPtr) {
-            // TODO: Implement what happens on importing a color bufer:
-            // - setup Vk for the color buffer
-            // - associate device memory with the color buffer
+        if (dedicatedAllocInfoPtr) {
+            dedicatedAllocInfo = *dedicatedAllocInfoPtr;
+            structChain =
+                vk_append_struct(
+                    (vk_struct_common*)structChain,
+                    (vk_struct_common*)&dedicatedAllocInfo);
         }
 
         VkImportPhysicalAddressGOOGLE* importPhysAddrInfoPtr =
@@ -1379,27 +1381,55 @@ public:
             //     and associate it with the physical address
         }
 
-        VkMemoryDedicatedAllocateInfo* dedicatedAllocInfoPtr =
-            (VkMemoryDedicatedAllocateInfo*)
+        VkImportColorBufferGOOGLE* importCbInfoPtr =
+            (VkImportColorBufferGOOGLE*)
                 vk_find_struct((vk_struct_common*)pAllocateInfo,
-                VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO);
+                    VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE);
 
-        if (dedicatedAllocInfoPtr) {
-            dedicatedAllocInfo = *dedicatedAllocInfoPtr;
+#ifdef _WIN32
+        VkImportMemoryWin32HandleInfoKHR importInfo {
+            VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR, 0,
+            VK_EXT_MEMORY_HANDLE_TYPE_BIT,
+            VK_EXT_MEMORY_HANDLE_INVALID, L"",
+        };
+#else
+        VkImportMemoryFdInfoKHR importInfo {
+            VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR, 0,
+            VK_EXT_MEMORY_HANDLE_TYPE_BIT,
+            VK_EXT_MEMORY_HANDLE_INVALID,
+        };
+#endif
+        if (importCbInfoPtr) {
+            // Ensure color buffer has Vulkan backing.
+            setupVkColorBuffer(
+                importCbInfoPtr->colorBuffer,
+                nullptr,
+                // Modify the allocation size to suit the resulting image memory size.
+                &allocInfo.allocationSize);
+
+            VK_EXT_MEMORY_HANDLE cbExtMemoryHandle =
+                getColorBufferExtMemoryHandle(importCbInfoPtr->colorBuffer);
+
+            if (cbExtMemoryHandle == VK_EXT_MEMORY_HANDLE_INVALID) {
+                fprintf(stderr,
+                    "%s: VK_ERROR_OUT_OF_DEVICE_MEMORY: "
+                    "colorBuffer 0x%x does not have Vulkan external memory backing\n", __func__,
+                    importCbInfoPtr->colorBuffer);
+                return VK_ERROR_OUT_OF_DEVICE_MEMORY;
+            }
+
+            cbExtMemoryHandle = dupExternalMemory(cbExtMemoryHandle);
+
+#ifdef _WIN32
+            importInfo.handle = cbExtMemoryHandle;
+#else
+            importInfo.fd = cbExtMemoryHandle;
+#endif
             structChain =
                 vk_append_struct(
                     (vk_struct_common*)structChain,
-                    (vk_struct_common*)&dedicatedAllocInfo);
+                    (vk_struct_common*)&importInfo);
         }
-
-        // TODO: Import the corresponding host-side external memory handle.
-#ifdef _WIN32
-        VkImportMemoryWin32HandleInfoKHR importWin32HandleInfo;
-        (void)importWin32HandleInfo;
-#else
-        VkImportMemoryFdInfoKHR importFdInfo;
-        (void)importFdInfo;
-#endif
 
         VkResult result =
             vk->vkAllocateMemory(device, &allocInfo, pAllocator, pMemory);
