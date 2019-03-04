@@ -163,6 +163,9 @@ typedef struct QAndroidVmOperations {
 
     // Get the host address of a guest physical address, if any.
     void* (*physicalMemoryGetAddr)(uint64_t gpa);
+
+    // Query whether host audio is allowed.
+    bool (*isRealAudioAllowed)(void);
 } QAndroidVmOperations;
 
 // gQAndroidVmOperations is defined in .cpp depending on the target it used for,

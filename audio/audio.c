@@ -1209,6 +1209,10 @@ void qemu_allow_real_audio(bool allow) {
     allow_real_audio = allow;
 }
 
+bool qemu_is_real_audio_allowed() {
+    return allow_real_audio;
+}
+
 int AUD_read (SWVoiceIn *sw, void *buf, int size)
 {
     if (!sw) {

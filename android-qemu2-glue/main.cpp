@@ -1073,6 +1073,9 @@ extern "C" int main(int argc, char** argv) {
     if (opts->audio && !strcmp(opts->audio, "none"))
         args.add("-no-audio");
 
+    if (opts->allow_host_audio)
+        args.add("-allow-host-audio");
+
     bool badSnapshots = false;
 
     // Check situations where snapshots should be turned off
