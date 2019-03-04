@@ -83,12 +83,15 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             auto adbInterface = emulation::AdbInterface::getGlobal();
             if (!adbInterface) return;
 
-            printf("emulator: Increasing screen off timeout "
+            printf("emulator: Increasing screen off timeout, "
+                    "logcat buffer size to 2M "
                    "and revoking microphone permissions for Google App\n");
 
             adbInterface->enqueueCommand(
                 { "shell", "settings", "put", "system",
                   "screen_off_timeout", "2147483647" });
+            adbInterface->enqueueCommand(
+                { "shell", "logcat", "-G", "2M" });
             adbInterface->enqueueCommand(
                 { "shell", "pm", "revoke",
                   "com.google.android.googlequicksearchbox",
