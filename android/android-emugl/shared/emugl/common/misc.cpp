@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/base/CpuUsage.h"
-
 #include "emugl/common/misc.h"
+
+#include "android/base/CpuUsage.h"
+#include "android/base/memory/MemoryTracker.h"
 
 #include <cstring>
 
@@ -25,6 +26,7 @@ static int s_glesMajorVersion = 2;
 static int s_glesMinorVersion = 0;
 
 android::base::CpuUsage* s_cpu_usage = nullptr;
+android::base::MemoryTracker* s_mem_usage = nullptr;
 
 static SelectedRenderer s_renderer =
     SELECTED_RENDERER_HOST;
@@ -74,4 +76,12 @@ void emugl::setCpuUsage(android::base::CpuUsage* usage) {
 
 android::base::CpuUsage* emugl::getCpuUsage() {
     return s_cpu_usage;
+}
+
+void emugl::setMemoryTracker(android::base::MemoryTracker* usage) {
+    s_mem_usage = usage;
+}
+
+android::base::MemoryTracker* emugl::getMemoryTracker() {
+    return s_mem_usage;
 }

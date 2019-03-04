@@ -44,7 +44,8 @@ public:
 
     virtual void setVmOps(const QAndroidVmOperations &vm_operations) override;
 
-    virtual void setCpuUsage(android::base::CpuUsage* usage) override;
+    virtual void setUsageTracker(android::base::CpuUsage* cpuUsage,
+                                 android::base::MemoryTracker* memUsage) override;
 
     virtual void* getGL(void) override;
 

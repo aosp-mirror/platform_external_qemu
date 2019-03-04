@@ -27,10 +27,11 @@
 #include "vulkan/VkCommonOperations.h"
 #include "vulkan/VkDecoderGlobalState.h"
 
-#include "android/base/containers/Lookup.h"
 #include "android/base/CpuUsage.h"
+#include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/memory/MemoryTracker.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 
@@ -637,6 +638,7 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_windowHeight(p_height),
       m_useSubWindow(useSubWindow),
       m_fpsStats(getenv("SHOW_FPS_STATS") != nullptr),
+      m_perfStats(!android::base::System::get()->envGet("SHOW_PERF_STATS").empty()),
       m_colorBufferHelper(new ColorBufferHelper(this)),
       m_refCountPipeEnabled(emugl::emugl_feature_is_enabled(
               android::featurecontrol::RefCountPipe)),
@@ -1916,25 +1918,32 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
     }
 
     //
-    // output FPS and memory usage statistics
+    // output FPS and performance usage statistics
     //
-    if (m_fpsStats) {
+    if (m_fpsStats || m_perfStats) {
         long long currTime = System::get()->getHighResTimeUs() / 1000;
         m_statsNumFrames++;
         if (currTime - m_statsStartTime >= 1000) {
-            float dt = (float)(currTime - m_statsStartTime) / 1000.0f;
-            auto usage = System::get()->getMemUsage();
+            if (m_fpsStats) {
+                float dt = (float)(currTime - m_statsStartTime) / 1000.0f;
+                printf("FPS: %5.3f \n", (float)m_statsNumFrames / dt); 
+                m_statsNumFrames = 0;   
+            }
             m_statsStartTime = currTime;
-
-            auto cpuUsage = emugl::getCpuUsage();
-            std::string lastStats =
-                cpuUsage ? cpuUsage->printUsage() : "";
-            printf("FPS: %5.3f resident memory: %f mb %s\n",
-                   (float)m_statsNumFrames / dt,
-                   (float)usage.resident / 1048576.0f,
-                   lastStats.c_str());
-
-            m_statsNumFrames = 0;
+            if (m_perfStats) {
+                auto usage = System::get()->getMemUsage();
+                std::string memoryStats =
+                    emugl::getMemoryTracker()
+                            ? emugl::getMemoryTracker()->printUsage()
+                            : "";
+                auto cpuUsage = emugl::getCpuUsage();
+                std::string lastStats =
+                    cpuUsage ? cpuUsage->printUsage() : "";
+                
+                printf("Resident memory: %f mb %s \n%s\n",
+                    (float)usage.resident / 1048576.0f, lastStats.c_str(),
+                    memoryStats.c_str());
+            }
         }
     }
 

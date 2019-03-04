@@ -30,6 +30,7 @@ namespace android {
 namespace base {
 
 class CpuUsage;
+class MemoryTracker;
 
 } // namespace base
 } // namespace android
@@ -55,4 +56,8 @@ namespace emugl {
     // CPU usage get/set.
     EMUGL_COMMON_API void setCpuUsage(android::base::CpuUsage* usage);
     EMUGL_COMMON_API android::base::CpuUsage* getCpuUsage();
+
+    // Memory usage get/set
+    EMUGL_COMMON_API void setMemoryTracker(android::base::MemoryTracker* usage);
+    EMUGL_COMMON_API android::base::MemoryTracker* getMemoryTracker();
 }
