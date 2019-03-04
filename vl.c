@@ -4484,6 +4484,10 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 }
                 break;
 #ifdef CONFIG_ANDROID
+            case QEMU_OPTION_allow_host_audio:
+                printf("Warning: Allowing host microphone input.\n");
+                qemu_allow_real_audio(true);
+                break;
             case QEMU_OPTION_boot_property:
                 save_cmd_property((char*)optarg);
                 break;

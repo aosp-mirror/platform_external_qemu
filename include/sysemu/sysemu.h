@@ -147,6 +147,7 @@ void qemu_ram_load(void* hostRam, uint64_t size);
 // Disable or enable real audio input.
 // TODO: Also a potential way to pipe fake audio input
 void qemu_allow_real_audio(bool allow);
+bool qemu_is_real_audio_allowed(void);
 
 /* Populates the passed array of strings with the snapshot names.
  * If |names_count| is not NULL, it must be the size of |names| array.

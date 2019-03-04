@@ -544,6 +544,10 @@ static void allow_real_audio(bool allow) {
     qemu_allow_real_audio(allow);
 }
 
+static bool is_real_audio_allowed() {
+    return qemu_is_real_audio_allowed();
+}
+
 static void system_reset_request() {
     qemu_system_reset_request(SHUTDOWN_CAUSE_GUEST_RESET);
 }
@@ -591,6 +595,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .setExiting = set_exiting,
         .allowRealAudio = allow_real_audio,
         .physicalMemoryGetAddr = physical_memory_get_addr,
+        .isRealAudioAllowed = is_real_audio_allowed,
 };
 
 const QAndroidVmOperations* const gQAndroidVmOperations =

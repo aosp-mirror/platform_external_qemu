@@ -4785,6 +4785,14 @@ STEXI
 Run Fuchsia kernel/image. Only standard QEMU options are allowed after -fuchsia, and emulator does not start Android virtual devices automatically.
 ETEXI
 
+DEF("allow-host-audio", 0, QEMU_OPTION_allow_host_audio,
+"-allow-host-audio Allows sending of audio from audio input devices. Otherwise, zeroes out audio.", QEMU_ARCH_ALL)
+STEXI
+@item -allow-host-audio
+@findex -allow-host-audio
+Allows sending of audio from audio input devices. Otherwise, zeroes out audio.
+ETEXI
+
 #endif  // CONFIG_ANDROID
 
 HXCOMM This is the last statement. Insert new options before this line!

@@ -211,6 +211,8 @@ CFG_PARAM(acpi_config, "<file>", "specify acpi device proprerties (hierarchical 
 
 OPT_FLAG(fuchsia, "Run Fuchsia image. Bypasses android-specific setup; args after are treated as standard QEMU args")
 
+OPT_FLAG(allow_host_audio, "Allows sending of audio from audio input devices. Otherwise, zeroes out audio.")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG
