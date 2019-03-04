@@ -90,6 +90,8 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 { "shell", "settings", "put", "system",
                   "screen_off_timeout", "2147483647" });
             adbInterface->enqueueCommand(
+                { "shell", "logcat", "-G", "2M" });
+            adbInterface->enqueueCommand(
                 { "shell", "pm", "revoke",
                   "com.google.android.googlequicksearchbox",
                   "android.permission.RECORD_AUDIO" });
