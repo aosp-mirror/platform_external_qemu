@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2273cff0_972a2744",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1321,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-04T09:36:12Z",
+      "side": 1,
+      "message": "May consider using setupVkColorBuffer as in https://android-review.googlesource.com/c/platform/external/qemu/+/914361/6/android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp setupVkColorBuffer tries to install vulkan device memory to the color buffer, but if already installed, just returns",
+      "revId": "146c4be703c1b39cc472883121b22caba65f971b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
