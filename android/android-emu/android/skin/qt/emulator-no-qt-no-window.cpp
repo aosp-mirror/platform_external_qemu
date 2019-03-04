@@ -51,6 +51,8 @@ EmulatorNoQtNoWindow::EmulatorNoQtNoWindow()
     mAdbInterface->enqueueCommand(
         { "shell", "settings", "put", "system",
           "screen_off_timeout", "2147483647" });
+    mAdbInterface->enqueueCommand(
+        { "shell", "logcat", "-G", "2M" });
 }
 
 EmulatorNoQtNoWindow::Ptr EmulatorNoQtNoWindow::getInstancePtr() {
