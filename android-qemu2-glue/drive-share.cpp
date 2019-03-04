@@ -45,7 +45,7 @@ extern "C" {
 #include "sysemu/sysemu.h"
 }
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG
 #define D(...) printf(__VA_ARGS__)
@@ -387,7 +387,7 @@ static int drive_init(void* opaque, QemuOpts* opts, Error** errp) {
 static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
     const char* id = opts->id;
     D("Re-init drive %s\n", id);
-    if (!needRemount(opts)) {
+    if (!needRemount(opts) || 0 == strcmp(id, "system") || 0 == strcmp(id, "vendor")) {
         D("%s dont need remount\n", id);
         return 0;
     }

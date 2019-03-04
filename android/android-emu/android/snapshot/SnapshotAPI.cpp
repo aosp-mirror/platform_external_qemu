@@ -194,6 +194,7 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
         // It must happen before changing disk backend
         bool res =
                 gQAndroidVmOperations->snapshotRemap(false, nullptr, nullptr);
+        printf("done snapshot remap\n");
         LOG_IF(WARNING, !res) << "RAM share mode update failure";
 
         // Update share mode flag and disk backend
