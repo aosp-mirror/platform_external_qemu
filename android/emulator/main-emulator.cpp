@@ -347,6 +347,12 @@ int main(int argc, char** argv)
             continue;
         }
 
+        if (!strcmp(opt,"-allow-host-audio")) {
+            nn++;
+            continue;
+        }
+
+
         if (!strcmp(opt,"-ranchu")) {
             // Nothing: the option is deprecated and defaults to auto-detect.
             continue;

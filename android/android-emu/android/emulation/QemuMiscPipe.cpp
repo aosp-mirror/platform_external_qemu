@@ -84,14 +84,25 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             if (!adbInterface) return;
 
             printf("emulator: Increasing screen off timeout, "
-                    "logcat buffer size to 2M "
-                   "and revoking microphone permissions for Google App\n");
+                    "logcat buffer size to 2M.\n");
 
             adbInterface->enqueueCommand(
                 { "shell", "settings", "put", "system",
                   "screen_off_timeout", "2147483647" });
             adbInterface->enqueueCommand(
                 { "shell", "logcat", "-G", "2M" });
+
+            // If we allowed host audio, don't revoke
+            // microphone perms.
+            if (gQAndroidVmOperations->isRealAudioAllowed()) {
+                printf("emulator: Not revoking microphone permissions "
+                       "for Google App.\n");
+                return;
+            } else {
+                printf("emulator: Revoking microphone permissions "
+                       "for Google App.\n");
+            }
+
             adbInterface->enqueueCommand(
                 { "shell", "pm", "revoke",
                   "com.google.android.googlequicksearchbox",
