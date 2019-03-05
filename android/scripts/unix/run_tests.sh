@@ -234,7 +234,7 @@ if [ "$TARGET_OS" = "linux-x86_64" ]; then
    if [ -d $OPT_OUT/gradle-release ]; then
         log "Checking that linux binaries have all needed dependencies in the lib64 dir"
         # Make sure we can load all dependencies of every dylib/executable we have.
-        cache=$(ldconfig --print-cache | awk '{ print $1; }')
+        cache=$(/sbin/ldconfig --print-cache | awk '{ print $1; }')
         files=$(find $OPT_OUT/gradle-release \( -type f -and \( -executable -or -name '*.so.*' \) \))
         for file in $files; do
             log2 "Checking $file for dependencies on ld path, or our tree.."
