@@ -102,7 +102,10 @@ static bool sGetFormatParameters(
     GLenum* texFormat,
     GLenum* pixelType,
     int* bytesPerPixel,
-    GLint* sizedInternalFormat) {
+    GLint* sizedInternalFormat,
+    bool* isBlob) {
+
+    *isBlob = false;
 
     switch (internalFormat) {
         case GL_RGB:
@@ -156,6 +159,7 @@ static bool sGetFormatParameters(
             *pixelType = GL_UNSIGNED_SHORT;
             *bytesPerPixel = 2;
             *sizedInternalFormat = GL_R8;
+            *isBlob = true;
             return true;
         default:
             fprintf(stderr, "%s: Unknown format 0x%x\n",
@@ -177,11 +181,13 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     GLenum pixelType = GL_UNSIGNED_BYTE;
     int bytesPerPixel = 4;
     GLint p_sizedInternalFormat = GL_RGBA8;
+    bool isBlob = false;;
 
     if (!sGetFormatParameters(
             p_internalFormat,
             &texFormat, &pixelType, &bytesPerPixel,
-            &p_sizedInternalFormat)) {
+            &p_sizedInternalFormat,
+            &isBlob)) {
         fprintf(stderr, "ColorBuffer::create invalid format 0x%x\n",
                 p_internalFormat);
         return NULL;
@@ -350,7 +356,8 @@ void ColorBuffer::reformat(GLint internalformat) {
     GLenum pixelType = GL_UNSIGNED_BYTE;
     GLint sizedInternalFormat = GL_RGBA8;
     int bpp = 4;
-    if (!sGetFormatParameters(internalformat, &texFormat, &pixelType, &bpp, &sizedInternalFormat)) {
+    bool isBlob = false;
+    if (!sGetFormatParameters(internalformat, &texFormat, &pixelType, &bpp, &sizedInternalFormat, &isBlob)) {
         fprintf(stderr, "%s: WARNING: reformat failed. internal format: 0x%x\n",
                 __func__, internalformat);
     }
