@@ -217,6 +217,7 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         TelephonyPage::setTelephonyAgent(agentPtr->telephony);
         CameraPage::setVirtualSceneAgent(agentPtr->virtualScene);
         VirtualSensorsPage::setSensorsAgent(agentPtr->sensors);
+        RecordMacroPage::setAutomationAgent(agentPtr->automation);
         RecordScreenPage::setRecordScreenAgent(agentPtr->record);
         if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
             CarDataPage::setCarDataAgent(agentPtr->car);

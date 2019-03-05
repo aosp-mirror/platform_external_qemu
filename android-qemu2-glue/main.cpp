@@ -11,12 +11,12 @@
 
 #include "android/android.h"
 #include "android/avd/hw-config.h"
-#include "android/base/async/ThreadLooper.h"
 #include "android/base/Log.h"
+#include "android/base/ProcessControl.h"
 #include "android/base/StringFormat.h"
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
-#include "android/base/ProcessControl.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Thread.h"
 #include "android/boot-properties.h"
@@ -30,6 +30,7 @@
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/control/ScreenCapturer.h"
+#include "android/emulation/control/automation_agent.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/error-messages.h"
 #include "android/featurecontrol/FeatureControl.h"
@@ -720,6 +721,7 @@ static int startEmulatorWithMinConfig(
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.
     const UiEmuAgent uiEmuAgent = {
+            gQAndroidAutomationAgent,
             gQAndroidBatteryAgent,
             gQAndroidCellularAgent,
             gQAndroidClipboardAgent,
@@ -1656,6 +1658,7 @@ extern "C" int main(int argc, char** argv) {
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.
     const UiEmuAgent uiEmuAgent = {
+            gQAndroidAutomationAgent,
             gQAndroidBatteryAgent,
             gQAndroidCellularAgent,
             gQAndroidClipboardAgent,
