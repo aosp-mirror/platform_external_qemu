@@ -40,7 +40,14 @@ private slots:
 private:
     std::unique_ptr<Ui::CarSensorData> mUi;
     EmulatorMsgCallback mSendEmulatorMsg;
+    const float MILES_PER_HOUR_TO_METERS_PER_SEC = 1.60934f*1000.0f/(60.0f*60.0f);
+    const float KILOMETERS_PER_HOUR_TO_METERS_PER_SEC = 1000.0f/(60.0f*60.0f);
+    enum SpeedUnitSelection {
+        MILES_PER_HOUR = 0,
+        KILOMETERS_PER_HOUR = 1
+    };
     void sendGearChangeMsg(const int gear, const std::string& gearName);
     void sendIgnitionChangeMsg(const int ignition,
                                const std::string& ignitionName);
+    float getSpeedMetersPerSecond(int speed, int unitIndex);
 };
