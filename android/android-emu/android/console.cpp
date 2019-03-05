@@ -2555,6 +2555,22 @@ do_avd_resume( ControlClient  client, char*  args )
 }
 
 static int
+do_avd_hostmicon( ControlClient  client, char*  args )
+{
+    (void)args;
+    vmopers(client)->allowRealAudio(true /* pass through host mic data */);
+    return 0;
+}
+
+static int
+do_avd_hostmicoff( ControlClient  client, char*  args )
+{
+    (void)args;
+    vmopers(client)->allowRealAudio(false /* send 0 instead of host mic data */);
+    return 0;
+}
+
+static int
 do_avd_bugreport( ControlClient client, char* args )
 {
     android::avd::BugreportInfo bugreport;
@@ -2601,6 +2617,14 @@ static const CommandDefRec  vm_commands[] =
     "'avd pause' pauses the virtual device. This is useful for saving system resources\r\n"
     "when the virtual device is not immediately needed.",
     NULL, do_avd_pause, NULL },
+
+    { "hostmicon", "activate the host audio input device",
+    "'avd hostmicon' allows real audio to go through the guest microphone input.\r\n",
+    NULL, do_avd_hostmicon, NULL },
+
+    { "hostmicoff", "deactivate the host audio input device",
+    "'avd hostmicoff' sends zeroes to the guest microphone input regardless of host microphone signals.\r\n",
+    NULL, do_avd_hostmicoff, NULL },
 
     { "resume", "resume the virtual device",
     "'avd resume' resumes a previously-paused virtual device.\r\n",
