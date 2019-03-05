@@ -2085,7 +2085,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                     fprintf(stderr, "call vkWaitForFences\n");;
                 }
                 VkResult vkWaitForFences_VkResult_return = (VkResult)0;
+
+                for (uint32_t i = 0; i < fenceCount; ++i) {
+                    fprintf(stderr, "%s: wait fence %p\n", __func__, pFences[i]);
+                }
                 vkWaitForFences_VkResult_return = vk->vkWaitForFences(unboxed_device, fenceCount, pFences, waitAll, timeout);
+                fprintf(stderr, "%s: vkWaitForFences done\n", __func__);
                 vkStream->write(&vkWaitForFences_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
                 vkStream->commitWrite();

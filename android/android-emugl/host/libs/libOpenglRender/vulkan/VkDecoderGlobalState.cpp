@@ -1969,7 +1969,26 @@ public:
         AutoLock lock(mLock);
 
         for (uint32_t i = 0; i < submitCount; i++) {
-            const VkSubmitInfo& submit = pSubmits[i];
+            VkSubmitInfo& submit = (VkSubmitInfo&)pSubmits[i];
+            if (submit.waitSemaphoreCount == 0 &&
+                submit.pWaitDstStageMask) {
+                fprintf(stderr, "%s: goofed on dst stage mask\n", __func__);
+                submit.pWaitDstStageMask = 0;
+
+                }
+
+            if (submit.waitSemaphoreCount == 0 &&
+                submit.pWaitSemaphores != 0) {
+                fprintf(stderr, "%s: goofed on wait semaphore ptr\n", __func__);
+                submit.pWaitSemaphores = 0;
+            }
+
+            if (submit.signalSemaphoreCount == 0 &&
+                submit.pSignalSemaphores != 0) {
+                fprintf(stderr, "%s: goofed on signal semaphore ptr\n", __func__);
+                submit.pSignalSemaphores = 0;
+            }
+
             for (uint32_t c = 0; c < submit.commandBufferCount; c++) {
                 executePreprocessRecursive(0, submit.pCommandBuffers[c]);
             }
@@ -2042,7 +2061,15 @@ public:
                         VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT |
                         VK_EXTERNAL_SEMAPHORE_FEATURE_IMPORTABLE_BIT;
                 return;
-
+            case VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT:
+                pExternalSemaphoreProperties->exportFromImportedHandleTypes =
+                        VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
+                pExternalSemaphoreProperties->compatibleHandleTypes =
+                        VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
+                pExternalSemaphoreProperties->externalSemaphoreFeatures =
+                        VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT |
+                        VK_EXTERNAL_SEMAPHORE_FEATURE_IMPORTABLE_BIT;
+                return;
             default:
                 break;
         }
