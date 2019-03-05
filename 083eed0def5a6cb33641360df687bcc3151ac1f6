@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "7967210d_60299363",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1290474
+      },
+      "writtenOn": "2019-03-05T11:34:19Z",
+      "side": 1,
+      "message": "By the way, you can use syntax like:\n\nBug: 1234\n\nTo attach your commit to a bug. It\u0027ll automatically update the bug when you merge the change.",
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "35386342_8df3981a",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
         "patchSetId": 2
