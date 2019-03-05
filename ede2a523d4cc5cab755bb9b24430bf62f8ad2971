@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f15bee6e_131e6223",
+        "filename": "android-qemu2-glue/qemu-automation-agent-impl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-05T06:52:14Z",
+      "side": 1,
+      "message": "small nit for later on: if namespaces are repeated like this a lot for function names esp., we tend to do\n\nnamespace android {\nnamespace automation {\n...\n} // namespace android\n} // namespace automation\n\nto make things look more compact.",
+      "revId": "ede2a523d4cc5cab755bb9b24430bf62f8ad2971",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
