@@ -255,6 +255,30 @@
     },
     {
       "key": {
+        "uuid": "831c1076_91907097",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1272573
+      },
+      "writtenOn": "2019-03-05T05:10:01Z",
+      "side": 1,
+      "message": "How about inlining this too? It\u0027s just used in one place, I don\u0027t think this needs to be in the global preprocessor namespace.",
+      "parentUuid": "262091b2_7ebbff32",
+      "range": {
+        "startLine": 20,
+        "startChar": 18,
+        "endLine": 20,
+        "endChar": 25
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a4e04727_570d2799",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
         "patchSetId": 2
@@ -289,6 +313,30 @@
       "writtenOn": "2019-03-05T02:28:25Z",
       "side": 1,
       "message": "These seems somewhat broad, unnamespaced #defines. I imagine we\u0027ll be including this header file in a bunch of places. I imagine some of these could override/conflict with other #defines. In android code, is there a standard prefixing arrangement to avoid this?\n\nAlternatively, can we use newer C++ features to define these constants than the old C-preprocessor #define, say, C++ enums?",
+      "range": {
+        "startLine": 23,
+        "startChar": 8,
+        "endLine": 23,
+        "endChar": 19
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b3a91444_7d70b726",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1272573
+      },
+      "writtenOn": "2019-03-05T05:10:01Z",
+      "side": 1,
+      "message": "After looking at the code underneath, looks like these are only used in one place. How about just inlining these. Moving them to constants hurts readability (they\u0027re in a different file, in the global preprocessor namespace, and have no comments).",
+      "parentUuid": "860fcf5b_f56b1ab8",
       "range": {
         "startLine": 23,
         "startChar": 8,
