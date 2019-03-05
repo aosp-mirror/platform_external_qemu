@@ -22,6 +22,30 @@
       "revId": "d71f6eeb6b496bf5dfe5081c99a225b4c68c11f0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2c82880_e0f5117a",
+        "filename": "android-qemu2-glue/qemu-automation-agent-impl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-03-05T02:24:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0625d46d_5be269f4",
+      "range": {
+        "startLine": 16,
+        "startChar": 33,
+        "endLine": 16,
+        "endChar": 48
+      },
+      "revId": "d71f6eeb6b496bf5dfe5081c99a225b4c68c11f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
