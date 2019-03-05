@@ -16,6 +16,24 @@
       "revId": "ede2a523d4cc5cab755bb9b24430bf62f8ad2971",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "422b867b_4918e4bc",
+        "filename": "android-qemu2-glue/qemu-automation-agent-impl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-03-05T19:27:14Z",
+      "side": 1,
+      "message": "Thanks for the tip, I\u0027ll change it whenever I touch this file this week.",
+      "parentUuid": "f15bee6e_131e6223",
+      "revId": "ede2a523d4cc5cab755bb9b24430bf62f8ad2971",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
