@@ -16,6 +16,13 @@
 #include <functional>
 #include <memory>
 
+#define MPH_TO_MS 0.44704
+#define KMS_To_MS 0.27778
+#define ERROR_SPEED -1
+#define MILE_PER_HOUR 0
+#define KM_PER_HOUR 1
+#define M_PER_SEC 2
+
 struct QCarDataAgent;
 namespace emulator {
 class EmulatorMessage;
@@ -43,4 +50,5 @@ private:
     void sendGearChangeMsg(const int gear, const std::string& gearName);
     void sendIgnitionChangeMsg(const int ignition,
                                const std::string& ignitionName);
+    float getStandardSpeed(int speed, int unitIndex);
 };

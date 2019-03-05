@@ -80,17 +80,29 @@ void CarSensorData::sendIgnitionChangeMsg(const int ignition,
     mSendEmulatorMsg(emulatorMsg, log);
 }
 
+float CarSensorData::getStandardSpeed(int speed, int unitIndex){
+    switch(unitIndex){
+        case MILE_PER_HOUR: return (float)speed * MPH_TO_MS;
+        case KM_PER_HOUR : return (float)speed * KMS_To_MS;
+        case M_PER_SEC : return (float)speed;
+        default : return (float)ERROR_SPEED;
+    }
+}
+
 void CarSensorData::on_car_speedSlider_valueChanged(int speed) {
     // TODO: read static configs from vehical Hal to determine what unit to use,
     // mph or kmph
-    mUi->car_speedLabel->setText(QString::number(speed) + " MPH");
+    mUi->car_speedLabel->setText(QString::number(speed));
+    float standardSpeed = getStandardSpeed(speed, mUi->comboBox_speedUnit->currentIndex());
     if (mSendEmulatorMsg != nullptr) {
         EmulatorMessage emulatorMsg = makeSetPropMsg();
         VehiclePropValue* value = emulatorMsg.add_value();
         value->set_prop(
                 static_cast<int32_t>(VehicleProperty::PERF_VEHICLE_SPEED));
-        value->add_float_values(speed);
-        string log = "Speed changed to " + std::to_string(speed);
+        value->add_float_values(standardSpeed);
+        string log = "";
+        if(standardSpeed == (float)ERROR_SPEED) log = "Speed Error, should not happen";
+        else log = "Speed changed to " + std::to_string(standardSpeed);
         mSendEmulatorMsg(emulatorMsg, log);
     }
 }
