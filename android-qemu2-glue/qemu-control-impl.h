@@ -38,7 +38,11 @@ ANDROID_BEGIN_HEADER
 // This file contains handles to globally allocated objects implementing various
 // interfaces required by AndroidEmu library in emulation/control/*.
 
-// Defined in .../emulation/control/batter_agent.h
+// Defined in .../emulation/control/automation_agent.h
+typedef struct QAndroidAutomationAgent QAndroidAutomationAgent;
+extern const QAndroidAutomationAgent* const gQAndroidAutomationAgent;
+
+// Defined in .../emulation/control/battery_agent.h
 extern const QAndroidBatteryAgent* const gQAndroidBatteryAgent;
 
 // Defined in android/qemu-cellular-agent.c

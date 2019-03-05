@@ -16,11 +16,15 @@
 #include <QWidget>
 #include <memory>
 
+struct QAndroidAutomationAgent;
+
 class RecordMacroPage : public QWidget {
     Q_OBJECT
 
 public:
     explicit RecordMacroPage(QWidget* parent = 0);
+
+    static void setAutomationAgent(const QAndroidAutomationAgent* agent);
 
 private slots:
     void on_playButton_clicked();
@@ -31,4 +35,6 @@ private:
     std::string getMacrosDirectory();
 
     std::unique_ptr<Ui::RecordMacroPage> mUi;
+
+    static const QAndroidAutomationAgent* sAutomationAgent;
 };
