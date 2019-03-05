@@ -27,6 +27,12 @@
 #endif
 
 namespace android {
+namespace opengl {
+
+class GLObjectCounter;
+
+}
+
 namespace base {
 
 class CpuUsage;
@@ -52,6 +58,11 @@ namespace emugl {
     // Extension string query
     EMUGL_COMMON_API bool hasExtension(const char* extensionsStr,
                       const char* wantedExtension);
+
+    // GL object counter get/set
+    EMUGL_COMMON_API void setGLObjectCounter(
+            android::opengl::GLObjectCounter* counter);
+    EMUGL_COMMON_API android::opengl::GLObjectCounter* getGLObjectCounter();
 
     // CPU usage get/set.
     EMUGL_COMMON_API void setCpuUsage(android::base::CpuUsage* usage);

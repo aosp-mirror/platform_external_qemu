@@ -11,12 +11,13 @@
 #include "android/opengl/GLObjectCounter.h"
 
 #include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
 
-using android::base::AutoLock;
-using android::base::Lock;
+#include <atomic>
 
-enum class NamedObjectType : short {
+namespace android {
+namespace opengl {
+
+enum class NamedObjectType : int {
     NULLTYPE,
     VERTEXBUFFER,
     TEXTURE,
@@ -29,38 +30,104 @@ enum class NamedObjectType : short {
     NUM_OBJECT_TYPES  // Must be last
 };
 
-static constexpr int toIndex(NamedObjectType type) {
-    return static_cast<int>(type);
-}
-
-struct OpenGLObjectCounter {
-    Lock mLock;
-    int mCounter[toIndex(NamedObjectType::NUM_OBJECT_TYPES)]{0};
+struct NamedObjectCounter {
+    std::atomic<size_t> mVertexBuffer{0};
+    std::atomic<size_t> mTexture{0};
+    std::atomic<size_t> mRenderBuffer{0};
+    std::atomic<size_t> mFrameBuffer{0};
+    std::atomic<size_t> mShaderOrProgram{0};
+    std::atomic<size_t> mSampler{0};
+    std::atomic<size_t> mQuery{0};
+    std::atomic<size_t> mVertexArrayBuffer{0};
 };
 
-static android::base::LazyInstance<OpenGLObjectCounter> sGlobal;
-
-void opengl_object_count_inc(int type) {
-    if (type > toIndex(NamedObjectType::NULLTYPE) &&
-        type < toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
-        AutoLock lock(sGlobal->mLock);
-        sGlobal->mCounter[type] += 1;
+class GLObjectCounter::Impl {
+public:
+    void incCount(int type) {
+        switch ((NamedObjectType)type) {
+            case NamedObjectType::VERTEXBUFFER:
+                mCounter.mVertexBuffer += 1;
+                break;
+            case NamedObjectType::TEXTURE:
+                mCounter.mTexture += 1;
+                break;
+            case NamedObjectType::FRAMEBUFFER:
+                mCounter.mFrameBuffer += 1;
+                break;
+            case NamedObjectType::SHADER_OR_PROGRAM:
+                mCounter.mShaderOrProgram += 1;
+                break;
+            case NamedObjectType::SAMPLER:
+                mCounter.mSampler += 1;
+                break;
+            case NamedObjectType::QUERY:
+                mCounter.mQuery += 1;
+                break;
+            case NamedObjectType::VERTEX_ARRAY_OBJECT:
+                mCounter.mVertexArrayBuffer += 1;
+                break;
+            default:
+                break;
+        }
     }
-}
-void opengl_object_count_dec(int type) {
-    if (type > toIndex(NamedObjectType::NULLTYPE) &&
-        type < toIndex(NamedObjectType::NUM_OBJECT_TYPES)) {
-        AutoLock lock(sGlobal->mLock);
-        sGlobal->mCounter[type] -= 1;
-    }
-}
-namespace android {
-namespace opengl {
 
-void getOpenGLObjectCounts(std::vector<int>* vec) {
-    AutoLock lock(sGlobal->mLock);
-    *vec = std::vector<int>(std::begin(sGlobal->mCounter),
-                            std::end(sGlobal->mCounter));
+    void decCount(int type) {
+        switch ((NamedObjectType)type) {
+            case NamedObjectType::VERTEXBUFFER:
+                mCounter.mVertexBuffer -= 1;
+                break;
+            case NamedObjectType::TEXTURE:
+                mCounter.mTexture -= 1;
+                break;
+            case NamedObjectType::FRAMEBUFFER:
+                mCounter.mFrameBuffer -= 1;
+                break;
+            case NamedObjectType::SHADER_OR_PROGRAM:
+                mCounter.mShaderOrProgram -= 1;
+                break;
+            case NamedObjectType::SAMPLER:
+                mCounter.mSampler -= 1;
+                break;
+            case NamedObjectType::QUERY:
+                mCounter.mQuery -= 1;
+                break;
+            case NamedObjectType::VERTEX_ARRAY_OBJECT:
+                mCounter.mVertexArrayBuffer -= 1;
+                break;
+            default:
+                break;
+        }
+    }
+
+    std::vector<size_t> getCounts() {
+        return {mCounter.mVertexBuffer.load(), mCounter.mTexture.load(),
+                mCounter.mFrameBuffer.load(),  mCounter.mShaderOrProgram.load(),
+                mCounter.mSampler.load(),      mCounter.mQuery.load(),
+                mCounter.mVertexBuffer.load()};
+    }
+
+private:
+    NamedObjectCounter mCounter;
+};
+
+static android::base::LazyInstance<GLObjectCounter> sGlobal;
+
+GLObjectCounter::GLObjectCounter() : mImpl(new GLObjectCounter::Impl()) {}
+
+void GLObjectCounter::incCount(int type) {
+    mImpl->incCount(type);
+}
+
+void GLObjectCounter::decCount(int type) {
+    mImpl->decCount(type);
+}
+
+std::vector<size_t> GLObjectCounter::getCounts() {
+    return mImpl->getCounts();
+}
+
+GLObjectCounter* GLObjectCounter::get() {
+    return sGlobal.ptr();
 }
 
 }  // namespace opengl

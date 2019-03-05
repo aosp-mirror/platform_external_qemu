@@ -101,7 +101,8 @@ set(android-emu-base_src
     android/utils/uri.cpp
     android/utils/utf8_utils.cpp
     android/utils/vector.c
-    android/utils/x86_cpuid.cpp)
+    android/utils/x86_cpuid.cpp
+    android/opengl/GLObjectCounter.cpp)
 
 # Windows 32-bit specific sources, these are only included in the windows 32 bit build
 set(android-emu-base_windows_src
