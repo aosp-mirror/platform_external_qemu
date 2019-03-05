@@ -370,6 +370,30 @@
     },
     {
       "key": {
+        "uuid": "686caa36_19029b87",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1020283
+      },
+      "writtenOn": "2019-03-05T19:21:56Z",
+      "side": 1,
+      "message": "https://www.quora.com/What-happens-to-a-speedometer-when-you-drive-in-reverse\nThe speeedometer will show an absolute value of the speed in both direction.",
+      "parentUuid": "a4e04727_570d2799",
+      "range": {
+        "startLine": 21,
+        "startChar": 8,
+        "endLine": 21,
+        "endChar": 19
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "860fcf5b_f56b1ab8",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
         "patchSetId": 2
@@ -432,6 +456,76 @@
         "startLine": 99,
         "startChar": 13,
         "endLine": 99,
+        "endChar": 16
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a0466d87_3bc2b39d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1020283
+      },
+      "writtenOn": "2019-03-05T19:21:56Z",
+      "side": 1,
+      "message": "lets make this \"mph\"",
+      "parentUuid": "f6b9f154_caa0c7cc",
+      "range": {
+        "startLine": 99,
+        "startChar": 13,
+        "endLine": 99,
+        "endChar": 16
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ad2cbac5_61b48258",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1020283
+      },
+      "writtenOn": "2019-03-05T19:21:56Z",
+      "side": 1,
+      "message": "kmph",
+      "range": {
+        "startLine": 104,
+        "startChar": 13,
+        "endLine": 104,
+        "endChar": 17
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5bef2e5e_d1200675",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1020283
+      },
+      "writtenOn": "2019-03-05T19:21:56Z",
+      "side": 1,
+      "message": "do we need this ? I know dean suggested this - but what will be its use case ?",
+      "range": {
+        "startLine": 109,
+        "startChar": 13,
+        "endLine": 109,
         "endChar": 16
       },
       "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
