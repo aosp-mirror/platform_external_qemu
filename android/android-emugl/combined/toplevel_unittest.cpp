@@ -15,8 +15,8 @@
 
 #include "Toplevel.h"
 
+#include "android/base/GLObjectCounter.h"
 #include "android/base/system/System.h"
-#include "android/opengl/GLObjectCounter.h"
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -29,14 +29,14 @@ using android::base::System;
 namespace aemu {
 
 TEST(Toplevel, Basic) {
-    std::vector<int> beforeTest, afterTest;
+    std::vector<size_t> beforeTest, afterTest;
     System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR", System::get()->getProgramDirectory());
     auto t(std::make_unique<Toplevel>());
 
     // When framebuffer is finalized, not all gl resources will be released even
     // when Toplevel object is destroyed. The workaround is to get the gl object
     // counts after the Toplevel is created.
-    android::opengl::getOpenGLObjectCounts(&beforeTest);
+    beforeTest = android::base::GLObjectCounter::get()->getCounts();
 
     auto win = t->createWindow();
     EGLDisplay d = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -101,7 +101,7 @@ TEST(Toplevel, Basic) {
 
     t.reset();
 
-    android::opengl::getOpenGLObjectCounts(&afterTest);
+    afterTest = android::base::GLObjectCounter::get()->getCounts();
     for (int i = 0; i < beforeTest.size(); i++) {
         EXPECT_TRUE(beforeTest[i] >= afterTest[i]);
     }
