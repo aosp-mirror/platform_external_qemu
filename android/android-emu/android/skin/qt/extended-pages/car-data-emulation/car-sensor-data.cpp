@@ -81,16 +81,19 @@ void CarSensorData::sendIgnitionChangeMsg(const int ignition,
 }
 
 void CarSensorData::on_car_speedSlider_valueChanged(int speed) {
-    // TODO: read static configs from vehical Hal to determine what unit to use,
-    // mph or kmph
-    mUi->car_speedLabel->setText(QString::number(speed) + " MPH");
+    mUi->car_speedLabel->setText(QString::number(speed));
+    float speedMetersPerSecond = (float)speed * 
+        ((mUi->comboBox_speedUnit->currentIndex() == MILES_PER_HOUR) 
+            ? MILES_PER_HOUR_TO_METERS_PER_SEC
+            : KILOMETERS_PER_HOUR_TO_METERS_PER_SEC);
+    
     if (mSendEmulatorMsg != nullptr) {
         EmulatorMessage emulatorMsg = makeSetPropMsg();
         VehiclePropValue* value = emulatorMsg.add_value();
         value->set_prop(
                 static_cast<int32_t>(VehicleProperty::PERF_VEHICLE_SPEED));
-        value->add_float_values(speed);
-        string log = "Speed changed to " + std::to_string(speed);
+        value->add_float_values(speedMetersPerSecond);
+        string log = "Speed changed to " + std::to_string(speedMetersPerSecond);
         mSendEmulatorMsg(emulatorMsg, log);
     }
 }
