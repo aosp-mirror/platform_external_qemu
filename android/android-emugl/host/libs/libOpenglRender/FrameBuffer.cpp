@@ -32,6 +32,7 @@
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/MemoryTracker.h"
+#include "android/base/GLObjectCounter.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 
@@ -1928,6 +1929,7 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
                 float dt = (float)(currTime - m_statsStartTime) / 1000.0f;
                 printf("FPS: %5.3f \n", (float)m_statsNumFrames / dt); 
                 m_statsNumFrames = 0;   
+                fprintf(stderr, "%s\n", emugl::getGLObjectCounter()->printUsage().c_str());
             }
             m_statsStartTime = currTime;
             if (m_perfStats) {
