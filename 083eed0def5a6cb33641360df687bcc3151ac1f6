@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c1a24de0_b9dc2dd2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7967210d_60299363",
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "35386342_8df3981a",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
         "patchSetId": 2
@@ -65,6 +83,54 @@
     },
     {
       "key": {
+        "uuid": "c39070de_328db2c7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "19cbfd07_022d5e7f",
+      "range": {
+        "startLine": 83,
+        "startChar": 21,
+        "endLine": 83,
+        "endChar": 37
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18a70ac7_0a787f05",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "35386342_8df3981a",
+      "range": {
+        "startLine": 83,
+        "startChar": 63,
+        "endLine": 83,
+        "endChar": 64
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ec39a41_51bb2d44",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
         "patchSetId": 2
@@ -88,6 +154,30 @@
     },
     {
       "key": {
+        "uuid": "d8612d7c_8fe8156d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ec39a41_51bb2d44",
+      "range": {
+        "startLine": 86,
+        "startChar": 24,
+        "endLine": 86,
+        "endChar": 25
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "75ae337c_53e9a8d3",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
         "patchSetId": 2
@@ -102,6 +192,24 @@
       "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3ab82e80_41d9465d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "75ae337c_53e9a8d3",
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -125,6 +233,30 @@
       "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d72f207_e819853b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6e5e7623_95a7d1b8",
+      "range": {
+        "startLine": 96,
+        "startChar": 10,
+        "endLine": 96,
+        "endChar": 23
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -191,6 +323,72 @@
     },
     {
       "key": {
+        "uuid": "756d44cd_1bfa806f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eb7a2df1_b3359419",
+      "range": {
+        "startLine": 104,
+        "startChar": 46,
+        "endLine": 104,
+        "endChar": 48
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "690aacaa_5307f7d2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aba4fc56_32f379a7",
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0fc4344b_d77a90e8",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1fd4807f_e6181a71",
+      "range": {
+        "startLine": 104,
+        "startChar": 8,
+        "endLine": 104,
+        "endChar": 11
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bb6fe8ce_f21e5cbb",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
         "patchSetId": 2
@@ -211,6 +409,30 @@
       "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e094f51d_fdc89f53",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bb6fe8ce_f21e5cbb",
+      "range": {
+        "startLine": 105,
+        "startChar": 8,
+        "endLine": 105,
+        "endChar": 12
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -251,6 +473,48 @@
       "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "63df62ea_f42a84e4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "16b4bcd6_bc0176ee",
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "92efd07f_7ca38bac",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "53fad047_4f9cab5c",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 25
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -344,6 +608,78 @@
       "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f04e8898_e4a66f81",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bdcf6078_020a00d5",
+      "range": {
+        "startLine": 20,
+        "startChar": 8,
+        "endLine": 20,
+        "endChar": 11
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2cc6bc6_bfa3b1de",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9b948a90_f8b1bc33",
+      "range": {
+        "startLine": 20,
+        "startChar": 12,
+        "endLine": 20,
+        "endChar": 14
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3e53df8a_f9e77c97",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "262091b2_7ebbff32",
+      "range": {
+        "startLine": 20,
+        "startChar": 18,
+        "endLine": 20,
+        "endChar": 25
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -441,6 +777,30 @@
     },
     {
       "key": {
+        "uuid": "141bd5ca_7095d8fe",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "860fcf5b_f56b1ab8",
+      "range": {
+        "startLine": 23,
+        "startChar": 8,
+        "endLine": 23,
+        "endChar": 19
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f6b9f154_caa0c7cc",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.ui",
         "patchSetId": 2
@@ -488,6 +848,30 @@
     },
     {
       "key": {
+        "uuid": "be4b1d98_59a17df9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f6b9f154_caa0c7cc",
+      "range": {
+        "startLine": 99,
+        "startChar": 13,
+        "endLine": 99,
+        "endChar": 16
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ad2cbac5_61b48258",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.ui",
         "patchSetId": 2
@@ -511,6 +895,30 @@
     },
     {
       "key": {
+        "uuid": "d5c44929_30ccb35b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ad2cbac5_61b48258",
+      "range": {
+        "startLine": 104,
+        "startChar": 13,
+        "endLine": 104,
+        "endChar": 17
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5bef2e5e_d1200675",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.ui",
         "patchSetId": 2
@@ -531,6 +939,30 @@
       "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "64366bf0_a89953f5",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-05T21:19:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5bef2e5e_d1200675",
+      "range": {
+        "startLine": 109,
+        "startChar": 13,
+        "endLine": 109,
+        "endChar": 16
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
