@@ -4199,6 +4199,14 @@ GL_APICALL void GL_APIENTRY glGetMemoryObjectParameterivEXT(GLuint memoryObject,
 
 GL_APICALL void GL_APIENTRY glTexStorageMem2DEXT(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLuint memory, GLuint64 offset) {
     GET_CTX_V2();
+    gles30usages->set_is_used(true);
+    GLint err = GL_NO_ERROR;
+    GLenum format, type;
+    GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalFormat, &format, &type);
+    sPrepareTexImage2D(target, 0, (GLint)internalFormat, width, height, 0, format, type, 0, NULL, &type, (GLint*)&internalFormat, &err);
+    SET_ERROR_IF(err != GL_NO_ERROR, err);
+    TextureData *texData = getTextureTargetData(target);
+    texData->texStorageLevels = levels;
     ctx->dispatcher().glTexStorageMem2DEXT(target, levels, internalFormat, width, height, memory, offset);
 }
 

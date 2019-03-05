@@ -45,6 +45,7 @@ public:
         }
 
         *ptrAddr = mPool.alloc(bytes);
+        memset(*ptrAddr, 0x0, bytes);
     }
 
     ssize_t write(const void *buffer, size_t size) override {

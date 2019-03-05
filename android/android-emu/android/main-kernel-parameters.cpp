@@ -130,7 +130,8 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     if (android::featurecontrol::isEnabled(
             android::featurecontrol::GLESDynamicVersion)) {
-        params.addFormat("qemu.uirenderer=%s", "skiagl");
+        // params.addFormat("qemu.uirenderer=%s", "skiagl");
+        params.addFormat("qemu.uirenderer=%s", "skiavk");
     }
 
     // 2. Calculate additional memory for software renderers (e.g., SwiftShader)
