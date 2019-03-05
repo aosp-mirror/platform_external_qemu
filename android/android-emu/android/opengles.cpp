@@ -13,6 +13,7 @@
 #include "android/opengles.h"
 
 #include "android/base/CpuUsage.h"
+#include "android/base/GLObjectCounter.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/MemoryTracker.h"
 #include "android/base/system/System.h"
@@ -21,7 +22,6 @@
 #include "android/emulation/RefcountPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
-#include "android/opengl/GLObjectCounter.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/logger.h"
 #include "android/snapshot/PathUtils.h"
@@ -219,10 +219,7 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     logfuncs.coarse = android_opengl_logger_write;
     logfuncs.fine = android_opengl_cxt_logger_write;
     sRenderLib->setLogger(logfuncs);
-    emugl_counter_struct countfuncs;
-    countfuncs.inc = opengl_object_count_inc;
-    countfuncs.dec = opengl_object_count_dec;
-    sRenderLib->setGLObjCounter(countfuncs);
+    sRenderLib->setGLObjectCounter(android::base::GLObjectCounter::get());
     emugl_dma_ops dma_ops;
     dma_ops.add_buffer = android_goldfish_dma_ops.add_buffer;
     dma_ops.remove_buffer = android_goldfish_dma_ops.remove_buffer;
