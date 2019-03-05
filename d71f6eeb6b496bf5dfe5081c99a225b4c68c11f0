@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0625d46d_5be269f4",
+        "filename": "android-qemu2-glue/qemu-automation-agent-impl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-05T02:19:31Z",
+      "side": 1,
+      "message": "You should make these functions static so that their name can\u0027t collide with other functions in different files.",
+      "range": {
+        "startLine": 16,
+        "startChar": 33,
+        "endLine": 16,
+        "endChar": 48
+      },
+      "revId": "d71f6eeb6b496bf5dfe5081c99a225b4c68c11f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
