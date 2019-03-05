@@ -237,6 +237,23 @@
     },
     {
       "key": {
+        "uuid": "16b4bcd6_bc0176ee",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-05T11:51:38Z",
+      "side": 1,
+      "message": "Maybe use a constant inside the class, so they are namespaced?\nSimilar to: https://android.googlesource.com/platform/external/qemu/+/refs/changes/74/918274/2/android/android-emu/android/skin/qt/extended-pages/location-page.h#199",
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9b948a90_f8b1bc33",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
         "patchSetId": 2
