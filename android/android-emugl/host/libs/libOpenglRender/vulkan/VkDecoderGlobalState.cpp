@@ -992,17 +992,82 @@ public:
         }
     }
 
+    VkResult on_vkCreateSemaphore(
+        VkDevice boxed_device,
+        const VkSemaphoreCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkSemaphore* pSemaphore) {
+
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        VkSemaphoreCreateInfo finalCreateInfo = *pCreateInfo;
+
+        vk_struct_common* structChain =
+            vk_init_struct_chain(
+                (vk_struct_common*)&finalCreateInfo);
+
+
+        VkExportSemaphoreCreateInfo* exportCiPtr =
+            (VkExportSemaphoreCreateInfo*)
+            vk_find_struct(
+                (vk_struct_common*)pCreateInfo,
+                VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO);
+
+        if (exportCiPtr) {
+
+#ifdef _WIN32
+            if (exportCiPtr->handleTypes) {
+                exportCiPtr->handleTypes =
+                    VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR;
+            }
+#endif
+
+            structChain =
+                vk_append_struct(
+                    (vk_struct_common*)structChain,
+                    (vk_struct_common*)exportCiPtr);
+        }
+
+
+        return vk->vkCreateSemaphore(device, &finalCreateInfo, pAllocator, pSemaphore);
+    }
+
     VkResult on_vkImportSemaphoreFdKHR(
             VkDevice boxed_device,
             const VkImportSemaphoreFdInfoKHR* pImportSemaphoreFdInfo) {
-        VkImportSemaphoreFdInfoKHR importInfo = *pImportSemaphoreFdInfo;
-#ifndef _WIN32
-        // TODO: win32 support
-        importInfo.fd = dup(pImportSemaphoreFdInfo->fd);
-#endif
+
         auto device = unbox_VkDevice(boxed_device);
         auto vk = dispatch_VkDevice(boxed_device);
+
+#ifdef _WIN32
+        AutoLock lock(mLock);
+
+        auto infoPtr = android::base::find(
+            mSemaphoreInfo, pImportSemaphoreFdInfo->semaphore);
+
+        if (!infoPtr) {
+            return VK_ERROR_INVALID_EXTERNAL_HANDLE;
+        }
+
+        VK_EXT_MEMORY_HANDLE handle =
+            dupExternalMemory(infoPtr->externalHandle);
+
+        VkImportSemaphoreWin32HandleInfoKHR win32ImportInfo = {
+            VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_WIN32_HANDLE_INFO_KHR, 0,
+            pImportSemaphoreFdInfo->semaphore,
+            pImportSemaphoreFdInfo->flags,
+            VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT_KHR,
+            handle, L"",
+        };
+
+        return vk->vkImportSemaphoreWin32HandleKHR(
+            device, &win32ImportInfo);
+#else
+        VkImportSemaphoreFdInfoKHR importInfo = *pImportSemaphoreFdInfo;
+        importInfo.fd = dup(pImportSemaphoreFdInfo->fd);
         return vk->vkImportSemaphoreFdKHR(device, &importInfo);
+#endif
     }
 
     VkResult on_vkGetSemaphoreFdKHR(
@@ -1011,12 +1076,33 @@ public:
             int* pFd) {
         auto device = unbox_VkDevice(boxed_device);
         auto vk = dispatch_VkDevice(boxed_device);
-        VkResult result = vk->vkGetSemaphoreFdKHR(device, pGetFdInfo, pFd);
+#ifdef _WIN32
+        VkSemaphoreGetWin32HandleInfoKHR getWin32 = {
+            VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR, 0,
+            pGetFdInfo->semaphore,
+            VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT,
+        };
+        VK_EXT_MEMORY_HANDLE handle;
+        VkResult result = vk->vkGetSemaphoreWin32HandleKHR(device, &getWin32, &handle);
         if (result != VK_SUCCESS) {
             return result;
         }
         AutoLock lock(mLock);
-        mSemaphoreInfo[pGetFdInfo->semaphore].externalFd = *pFd;
+        mSemaphoreInfo[pGetFdInfo->semaphore].externalHandle = handle;
+        int nextId = genSemaphoreId();
+        mExternalSemaphoresById[nextId] = pGetFdInfo->semaphore;
+        *pFd = nextId;
+#else
+        VkResult result = vk->vkGetSemaphoreFdKHR(device, pGetFdInfo, pFd);
+        if (result != VK_SUCCESS) {
+            return result;
+        }
+
+        AutoLock lock(mLock);
+
+        mSemaphoreInfo[pGetFdInfo->semaphore].externalHandle = *pFd;
+        // No next id; its already an fd
+#endif
         return result;
     }
 
@@ -1030,8 +1116,9 @@ public:
 #ifndef _WIN32
         AutoLock lock(mLock);
         const auto& ite = mSemaphoreInfo.find(semaphore);
-        if (ite != mSemaphoreInfo.end() && ite->second.externalFd) {
-            close(ite->second.externalFd);
+        if (ite != mSemaphoreInfo.end() &&
+            (ite->second.externalHandle != VK_EXT_MEMORY_HANDLE_INVALID)) {
+            close(ite->second.externalHandle);
         }
 #endif
         vk->vkDestroySemaphore(device, semaphore, pAllocator);
@@ -2506,7 +2593,9 @@ private:
     };
 
     struct SemaphoreInfo {
-        int externalFd = 0;
+        int externalHandleId = 0;
+        VK_EXT_MEMORY_HANDLE externalHandle =
+            VK_EXT_MEMORY_HANDLE_INVALID;
     };
 
     std::unordered_map<VkInstance, InstanceInfo>
@@ -2534,6 +2623,18 @@ private:
     std::unordered_map<VkDeviceMemory, MappedMemoryInfo> mMapInfo;
 
     std::unordered_map<VkSemaphore, SemaphoreInfo> mSemaphoreInfo;
+#ifdef _WIN32
+    int mSemaphoreId = 1;
+    int genSemaphoreId() {
+        if (mSemaphoreId == -1) {
+            mSemaphoreId = 1;
+        }
+        int res = mSemaphoreId;
+        ++mSemaphoreId;
+        return res;
+    }
+    std::unordered_map<int, VkSemaphore> mExternalSemaphoresById;
+#endif
 };
 
 VkDecoderGlobalState::VkDecoderGlobalState()
@@ -2777,6 +2878,14 @@ void VkDecoderGlobalState::on_vkDestroySampler(
         VkSampler sampler,
         const VkAllocationCallbacks* pAllocator) {
     mImpl->on_vkDestroySampler(device, sampler, pAllocator);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateSemaphore(
+    VkDevice device,
+    const VkSemaphoreCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkSemaphore* pSemaphore) {
+    return mImpl->on_vkCreateSemaphore(device, pCreateInfo, pAllocator, pSemaphore);
 }
 
 VkResult VkDecoderGlobalState::on_vkImportSemaphoreFdKHR(

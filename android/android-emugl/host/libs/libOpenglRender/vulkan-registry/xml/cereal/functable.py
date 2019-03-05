@@ -28,6 +28,8 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkCreateSemaphore",
     "vkDestroySemaphore",
     "vkQueueSubmit",
+    "vkImportSemaphoreFdKHR",
+    "vkGetSemaphoreFdKHR",
     # Warning: These need to be defined in vk.xml (currently no-op) {
     "vkGetMemoryFuchsiaHandleKHR",
     "vkGetMemoryFuchsiaHandlePropertiesKHR",

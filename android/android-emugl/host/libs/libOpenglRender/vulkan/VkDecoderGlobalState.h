@@ -331,16 +331,20 @@ public:
                                    VkCommandPoolResetFlags flags);
 
     void on_vkGetPhysicalDeviceExternalSemaphoreProperties(
-            VkPhysicalDevice physicalDevice,
-            const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
-            VkExternalSemaphoreProperties* pExternalSemaphoreProperties);
+        VkPhysicalDevice physicalDevice,
+        const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
+        VkExternalSemaphoreProperties* pExternalSemaphoreProperties);
 
     void on_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(
-            VkPhysicalDevice physicalDevice,
-            const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
-            VkExternalSemaphoreProperties* pExternalSemaphoreProperties);
+        VkPhysicalDevice physicalDevice,
+        const VkPhysicalDeviceExternalSemaphoreInfo* pExternalSemaphoreInfo,
+        VkExternalSemaphoreProperties* pExternalSemaphoreProperties);
 
-    // Transformations
+    VkResult on_vkCreateSemaphore(
+        VkDevice device,
+        const VkSemaphoreCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkSemaphore* pSemaphore);
     VkResult on_vkImportSemaphoreFdKHR(
             VkDevice device,
             const VkImportSemaphoreFdInfoKHR* pImportSemaphoreFdInfo);
@@ -352,6 +356,8 @@ public:
             VkDevice boxed_device,
             VkSemaphore semaphore,
             const VkAllocationCallbacks* pAllocator);
+
+    // Transformations
     void deviceMemoryTransform_tohost(
         VkDeviceMemory* memory, uint32_t memoryCount,
         VkDeviceSize* offset, uint32_t offsetCount,
