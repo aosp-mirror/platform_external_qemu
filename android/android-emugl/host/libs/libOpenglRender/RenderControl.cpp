@@ -869,9 +869,10 @@ static void rcSelectChecksumHelper(uint32_t protocol, uint32_t reserved) {
 static void rcTriggerWait(uint64_t eglsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline) {
-    // We don't use per render thread sync threads anymore.
-    // Ignore but not remove (for backward compat)
-    (void)thread_ptr;
+    if (thread_ptr == 1) {
+        // just signal right away for now
+        SyncThread::get()->triggerWait(0, timeline);
+    }
 
     FenceSync* fenceSync = (FenceSync*)(uintptr_t)eglsync_ptr;
     EGLSYNC_DPRINT("eglsync=0x%llx "
