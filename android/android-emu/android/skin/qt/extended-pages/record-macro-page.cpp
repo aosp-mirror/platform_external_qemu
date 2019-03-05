@@ -11,10 +11,10 @@
 
 #include "android/skin/qt/extended-pages/record-macro-page.h"
 
-#include "android/automation/AutomationController.h"
 #include "android/base/StringFormat.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
+#include "android/emulation/control/automation_agent.h"
 #include "android/skin/qt/extended-pages/record-macro-saved-item.h"
 #include "android/skin/qt/qt-settings.h"
 
@@ -23,12 +23,18 @@
 #include <sstream>
 
 using namespace android::base;
-using namespace android::automation;
+
+const QAndroidAutomationAgent* RecordMacroPage::sAutomationAgent = nullptr;
 
 RecordMacroPage::RecordMacroPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::RecordMacroPage()) {
     mUi->setupUi(this);
     loadUi();
+}
+
+// static
+void RecordMacroPage::setAutomationAgent(const QAndroidAutomationAgent* agent) {
+    sAutomationAgent = agent;
 }
 
 void RecordMacroPage::loadUi() {
@@ -55,7 +61,7 @@ void RecordMacroPage::loadUi() {
 
 void RecordMacroPage::on_playButton_clicked() {
     // Stop and reset automation.
-    AutomationController::get().stopPlayback();
+    sAutomationAgent->stopPlayback();
 
     // Get macro name from item widget.
     QListWidgetItem* listItem = mUi->macroList->selectedItems().first();
@@ -65,7 +71,7 @@ void RecordMacroPage::on_playButton_clicked() {
     const std::string macroAbsolutePath =
             PathUtils::join(getMacrosDirectory(), macroName);
 
-    auto result = AutomationController::get().startPlayback(macroAbsolutePath);
+    auto result = sAutomationAgent->startPlayback(macroAbsolutePath);
     if (result.err()) {
         std::ostringstream errString;
         errString << result.unwrapErr();

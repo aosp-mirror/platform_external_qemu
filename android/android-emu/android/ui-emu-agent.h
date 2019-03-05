@@ -15,6 +15,7 @@
 // Agent iterfaces for sending commands from the UI to the emulator
 
 typedef struct UiEmuAgent {
+    const struct QAndroidAutomationAgent* automation;
     const struct QAndroidBatteryAgent* battery;
     const struct QAndroidCellularAgent* cellular;
     const struct QAndroidClipboardAgent* clipboard;
