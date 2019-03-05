@@ -294,6 +294,8 @@ private:
     bool m_importedMemory = false;
     GLuint m_memoryObject = 0;
     bool m_inUse = false;
+    bool m_isBuffer = false;
+    GLuint m_buf = 0;
 };
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;
