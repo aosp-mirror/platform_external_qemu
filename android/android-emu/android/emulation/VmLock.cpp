@@ -27,6 +27,10 @@ VmLock* VmLock::get() {
     return sInstance;
 }
 
+bool VmLock::hasInstance() {
+    return sInstance != nullptr;
+}
+
 VmLock* VmLock::set(VmLock* vmLock) {
     VmLock* result = sInstance;
     sInstance = vmLock;

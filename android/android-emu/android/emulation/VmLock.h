@@ -63,6 +63,10 @@ public:
     // a single instance.
     static VmLock* get();
 
+    // Returns whether or not there is a VmLock.
+    // Does not instantiate a VmLock.
+    static bool hasInstance();
+
     // Set new VmLock instance. Return old value, which cannot be nullptr and
     // can be deleted by the caller. If |vmLock| is nullptr, a new default
     // instance is created. NOTE: not thread-safe with regards to get().
@@ -107,6 +111,34 @@ public:
 
 private:
     VmLock* mVmLock;
+};
+
+// Convenience class to perform scoped VM locking (but does not try
+// to lock twice), but no-ops if there is no instance.
+class RecursiveScopedVmLockIfInstance {
+    DISALLOW_COPY_ASSIGN_AND_MOVE(RecursiveScopedVmLockIfInstance);
+public:
+    RecursiveScopedVmLockIfInstance() {
+        if (!VmLock::hasInstance()) return;
+
+        VmLock* vmLock = VmLock::get();
+
+        if (vmLock->isLockedBySelf()) {
+            mVmLock = nullptr;
+        } else {
+            mVmLock = vmLock;
+            vmLock->lock();
+        }
+    }
+
+    ~RecursiveScopedVmLockIfInstance() {
+        if (mVmLock) {
+            mVmLock->unlock();
+        }
+    }
+
+private:
+    VmLock* mVmLock = nullptr;;
 };
 
 // Another convenience class for a code that may run either under a lock or not

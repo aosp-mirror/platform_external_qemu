@@ -22,7 +22,7 @@ set(libqemu2-glue_src
     looper-qemu.cpp
     net-android.cpp
     proxy/slirp_proxy.cpp
-    qemu-battery-agent-impl.c
+    qemu-battery-agent-impl.cpp
     qemu-cellular-agent-impl.c
     qemu-clipboard-agent-impl.cpp
     qemu-display-agent-impl.cpp

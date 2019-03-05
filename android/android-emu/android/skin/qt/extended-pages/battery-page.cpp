@@ -105,7 +105,6 @@ void BatteryPage::setBatteryAgent(const QAndroidBatteryAgent* agent) {
 
     // The VM lock is needed because the battery agent touches the
     // goldfish battery virtual device explicitly
-    android::RecursiveScopedVmLock vmlock;
     sBatteryAgent = agent;
 
     if (sBatteryAgent) {
@@ -143,7 +142,6 @@ void BatteryPage::on_bat_chargerBox_activated(int index) {
 
     saveCharger(bCharger);
 
-    android::RecursiveScopedVmLock vmlock;
     if (bCharger >= 0 && bCharger < BATTERY_CHARGER_NUM_ENTRIES) {
         if (sBatteryAgent && sBatteryAgent->setCharger) {
             sBatteryAgent->setCharger(bCharger);
@@ -157,7 +155,6 @@ void BatteryPage::on_bat_levelSlider_valueChanged(int value) {
 
     saveChargeLevel(value);
 
-    android::RecursiveScopedVmLock vmlock;
     if (sBatteryAgent && sBatteryAgent->setChargeLevel) {
         sBatteryAgent->setChargeLevel(value);
     }
@@ -169,7 +166,6 @@ void BatteryPage::on_bat_healthBox_activated(int index) {
 
     saveHealth(bHealth);
 
-    android::RecursiveScopedVmLock vmlock;
     if (bHealth >= 0 && bHealth < BATTERY_HEALTH_NUM_ENTRIES) {
         if (sBatteryAgent && sBatteryAgent->setHealth) {
             sBatteryAgent->setHealth(bHealth);
@@ -183,7 +179,6 @@ void BatteryPage::on_bat_statusBox_activated(int index) {
 
     saveStatus(bStatus);
 
-    android::RecursiveScopedVmLock vmlock;
     if (bStatus >= 0 && bStatus < BATTERY_STATUS_NUM_ENTRIES) {
         if (sBatteryAgent && sBatteryAgent->setStatus) {
             sBatteryAgent->setStatus(bStatus);
