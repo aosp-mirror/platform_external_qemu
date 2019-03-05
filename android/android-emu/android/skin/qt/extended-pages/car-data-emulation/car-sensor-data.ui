@@ -70,9 +70,45 @@
      </rect>
     </property>
     <property name="text">
-     <string>0 MPH</string>
+     <string>0</string>
     </property>
    </widget>
+  </widget>
+  <widget class="QComboBox" name="comboBox_speedUnit">
+   <property name="geometry">
+    <rect>
+     <x>500</x>
+     <y>20</y>
+     <width>60</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">padding: 3px 3px 3px 3px;</string>
+   </property>
+   <property name="currentIndex">
+    <number>2</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>MPH</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>km/h</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>m/s</string>
+    </property>
+   </item>
   </widget>
   <widget class="QGroupBox" name="groupBox_3">
    <property name="geometry">
