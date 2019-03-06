@@ -778,6 +778,30 @@
     },
     {
       "key": {
+        "uuid": "8aa286f6_6a00f5b8",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1272573
+      },
+      "writtenOn": "2019-03-06T03:50:04Z",
+      "side": 1,
+      "message": "There are a lot of \u0027should\u0027 and \u0027shouldn\u0027t\u0027s above, but I don\u0027t think that\u0027s supported by any docs?\n\nIf the value is negative, the speedometer would show the absolute value of the speed.\n\nFiled b/127573221. It\u0027s extremely unclear to me what the right behaviour is here from the docs. So let\u0027s clear that up. For now, if the jeep treats this as always being positive, I\u0027m OK to assume it\u0027s always positive here.\n\nSGTM to remove the error entirely. I like what you\u0027ve done here.",
+      "parentUuid": "371fce9d_73241605",
+      "range": {
+        "startLine": 21,
+        "startChar": 8,
+        "endLine": 21,
+        "endChar": 19
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "860fcf5b_f56b1ab8",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
         "patchSetId": 2
