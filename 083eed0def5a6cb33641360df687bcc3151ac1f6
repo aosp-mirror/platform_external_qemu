@@ -730,6 +730,30 @@
     },
     {
       "key": {
+        "uuid": "c4ff5606_06de78f7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1272573
+      },
+      "writtenOn": "2019-03-06T00:18:55Z",
+      "side": 1,
+      "message": "I\u0027m not asking about the speedometer in the car, I\u0027m asking about the documented behaviour of this VHAL property - speedometer behaviour is irrelevant.\n\nIn any case, see my other comment, I think we can do away with in-band error handling entirely by inlining the getCarSpeedMetersPerSecond method.",
+      "parentUuid": "686caa36_19029b87",
+      "range": {
+        "startLine": 21,
+        "startChar": 8,
+        "endLine": 21,
+        "endChar": 19
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "860fcf5b_f56b1ab8",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
         "patchSetId": 2
