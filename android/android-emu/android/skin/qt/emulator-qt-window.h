@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "android/avd/info.h"
 #include "android/base/containers/CircularBuffer.h"
 #include "android/base/memory/OnDemand.h"
 #include "android/base/StringView.h"
@@ -20,6 +21,7 @@
 #include "android/emulation/control/FilePusher.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/globals.h"
+#include "android/skin/qt/instrumentclusterwindow.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/skin/event.h"
 #include "android/skin/qt/emulator-container.h"
@@ -210,6 +212,7 @@ public:
     bool isInZoomMode() const;
     ToolWindow*  toolWindow () const;
     ToolWindow2* toolWindow2() const;
+    InstrumentClusterWindow* instrumentClusterWindow() const;
     EmulatorContainer* containerWindow();
     void showZoomIfNotUserHidden();
     QSize containerSize() const;
@@ -404,6 +407,7 @@ private:
 
     ToolWindow*  mToolWindow;
     ToolWindow2* mToolWindow2;
+    InstrumentClusterWindow* mInstrumentClusterWindow;
     EmulatorContainer mContainer;
     EmulatorOverlay mOverlay;
     QRect mDeviceGeometry;
