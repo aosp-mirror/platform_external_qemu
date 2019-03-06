@@ -13,6 +13,8 @@
 
 #include "ui_record-macro-page.h"
 
+#include "android/recording/video/player/VideoPlayer.h"
+
 #include <QWidget>
 #include <memory>
 
@@ -22,6 +24,8 @@ class RecordMacroPage : public QWidget {
     Q_OBJECT
 
 public:
+    enum class MacroUiState { Waiting, Selected, Playing };
+
     explicit RecordMacroPage(QWidget* parent = 0);
 
     static void setAutomationAgent(const QAndroidAutomationAgent* agent);
@@ -29,12 +33,21 @@ public:
 private slots:
     void on_playButton_clicked();
     void on_macroList_itemClicked(QListWidgetItem* item);
+    void on_macroList_itemSelectionChanged();
+    void updateVideoView();
 
 private:
     void loadUi();
     std::string getMacrosDirectory();
+    std::string getMacroPreviewsDirectory();
+    void setMacroUiState(MacroUiState state);
+    void showPreview(std::string previewName);
 
+    bool mMacroPlaying;
+    std::string mTmpMacroName;
+    std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
     std::unique_ptr<Ui::RecordMacroPage> mUi;
+    MacroUiState mState;
 
     static const QAndroidAutomationAgent* sAutomationAgent;
 };
