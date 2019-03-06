@@ -252,6 +252,10 @@ int main(int argc, char** argv)
     /* Test-only actions */
     bool isLauncherTest = false;
     const char* launcherTestArg = nullptr;
+    /*
+     * Always override LC_ALL = C. Fixes b/123689918
+     */
+    System::get()->envSet("LC_ALL", "C");
 
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
