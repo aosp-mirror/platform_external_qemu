@@ -59,6 +59,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/ui.c
     android/skin/qt/event-qt.cpp
     android/skin/qt/init-qt.cpp
+    android/skin/qt/instrumentclusterwindow.cpp
     android/skin/qt/surface-qt.cpp
     android/skin/qt/winsys-qt.cpp
     android/skin/qt/accelerometer-3d-widget.cpp
