@@ -754,6 +754,30 @@
     },
     {
       "key": {
+        "uuid": "371fce9d_73241605",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-06T02:36:50Z",
+      "side": 1,
+      "message": "This VHAL property shouldn\u0027t be negative. If it\u0027s negative, what will speedometer show? When the car is in reverse, the gear should be R and velocity is still positive.\n\nHow about remove the error handling. It\u0027s redundant here, since we can trust the currentINdex() will only return 0 and 1. \n\nThanks for pointing out all the flaws, it\u0027s my first time to code a real feature with C++.",
+      "parentUuid": "c4ff5606_06de78f7",
+      "range": {
+        "startLine": 21,
+        "startChar": 8,
+        "endLine": 21,
+        "endChar": 19
+      },
+      "revId": "083eed0def5a6cb33641360df687bcc3151ac1f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "860fcf5b_f56b1ab8",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
         "patchSetId": 2
