@@ -1,0 +1,234 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "224bc038_22d0f470",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1272573
+      },
+      "writtenOn": "2019-03-06T00:15:00Z",
+      "side": 1,
+      "message": "How about inlining this into on_car_speedSlider_valueChanged, because then you don\u0027t need to convert your error into the float domain.\n\nIf you inline this, you could log an error and early-return directly in the default switch-case instead of sending INT_MAX as a speed.",
+      "range": {
+        "startLine": 83,
+        "startChar": 21,
+        "endLine": 83,
+        "endChar": 44
+      },
+      "revId": "fb45221044e6878f9c58addee9a33db6f16f9022",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "22179630_911dc534",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1272573
+      },
+      "writtenOn": "2019-03-06T00:15:00Z",
+      "side": 1,
+      "message": "delete spaces here",
+      "range": {
+        "startLine": 85,
+        "startChar": 27,
+        "endLine": 85,
+        "endChar": 28
+      },
+      "revId": "fb45221044e6878f9c58addee9a33db6f16f9022",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "283b304a_54f278d2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1272573
+      },
+      "writtenOn": "2019-03-06T00:15:00Z",
+      "side": 1,
+      "message": "You say \u0027should not happen\u0027, but you\u0027re still publishing the speed as if it\u0027s legit - how about dropping the speed and not sending a message, instead of sending corrupt data?",
+      "range": {
+        "startLine": 105,
+        "startChar": 14,
+        "endLine": 105,
+        "endChar": 46
+      },
+      "revId": "fb45221044e6878f9c58addee9a33db6f16f9022",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b44514fc_e9b08fc4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1272573
+      },
+      "writtenOn": "2019-03-06T00:15:00Z",
+      "side": 1,
+      "message": "Are there any tests of this that need to be updated? Should there be?",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 38
+      },
+      "revId": "fb45221044e6878f9c58addee9a33db6f16f9022",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cdb2f9b9_03f22f16",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1272573
+      },
+      "writtenOn": "2019-03-06T00:15:00Z",
+      "side": 1,
+      "message": "extra brackets not required",
+      "range": {
+        "startLine": 44,
+        "startChar": 52,
+        "endLine": 44,
+        "endChar": 53
+      },
+      "revId": "fb45221044e6878f9c58addee9a33db6f16f9022",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f2735439_05bcda57",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1272573
+      },
+      "writtenOn": "2019-03-06T00:15:00Z",
+      "side": 1,
+      "message": "nobody uses meters per hour, do you mean meters_per_second",
+      "range": {
+        "startLine": 44,
+        "startChar": 34,
+        "endLine": 44,
+        "endChar": 49
+      },
+      "revId": "fb45221044e6878f9c58addee9a33db6f16f9022",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7e55698f_0cb4ca65",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1272573
+      },
+      "writtenOn": "2019-03-06T00:15:00Z",
+      "side": 1,
+      "message": "as above, do you mean meters_per_second",
+      "range": {
+        "startLine": 45,
+        "startChar": 39,
+        "endLine": 45,
+        "endChar": 54
+      },
+      "revId": "fb45221044e6878f9c58addee9a33db6f16f9022",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b373fce2_7a29950f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1272573
+      },
+      "writtenOn": "2019-03-06T00:15:00Z",
+      "side": 1,
+      "message": "extra brackets not required",
+      "range": {
+        "startLine": 45,
+        "startChar": 57,
+        "endLine": 45,
+        "endChar": 58
+      },
+      "revId": "fb45221044e6878f9c58addee9a33db6f16f9022",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "32910998_25cc805b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1272573
+      },
+      "writtenOn": "2019-03-06T00:15:00Z",
+      "side": 1,
+      "message": "INT_MAX isn\u0027t exactly representable as a float - floats don\u0027t have enough mantissa bits (23) to fit the bits of INT_MAX (31).\n\nSee other comment: I think my inlining the getSpeedMetersPerSecond method you can avoid the need for in-band error handling at all.",
+      "range": {
+        "startLine": 46,
+        "startChar": 30,
+        "endLine": 46,
+        "endChar": 44
+      },
+      "revId": "fb45221044e6878f9c58addee9a33db6f16f9022",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ab83175_c9f00161",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1272573
+      },
+      "writtenOn": "2019-03-06T00:15:00Z",
+      "side": 1,
+      "message": "Enums should be CapitalizedLikeThis, right, because they\u0027re a type? http://go/cstyle#Type_Names",
+      "range": {
+        "startLine": 47,
+        "startChar": 9,
+        "endLine": 47,
+        "endChar": 27
+      },
+      "revId": "fb45221044e6878f9c58addee9a33db6f16f9022",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
