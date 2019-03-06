@@ -293,6 +293,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mStartupDialog(this),
       mToolWindow(nullptr),
       mToolWindow2(nullptr),
+      mInstrumentClusterWindow(nullptr),
       mContainer(this),
       mOverlay(this, &mContainer),
       mZoomFactor(1.0),
@@ -422,6 +423,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                                  mUserActionsCounter, mToolWindow2);
 
     mToolWindow2->setMainToolWindow(mToolWindow);
+
+    mInstrumentClusterWindow = new InstrumentClusterWindow(this, &mContainer);
 
     this->setAcceptDrops(true);
 
@@ -629,6 +632,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         if (mToolWindow2) {
                             mToolWindow2->setEnabled(false);
                         }
+                        if (mInstrumentClusterWindow) {
+                            mInstrumentClusterWindow->setEnabled(false);
+                        }
                         if (SnapshotPage::get()) {
                             SnapshotPage::get()->setOperationInProgress(true);
                         }
@@ -643,6 +649,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         }
                         if (mToolWindow2) {
                             mToolWindow2->setEnabled(true);
+                        }
+                        if (mInstrumentClusterWindow) {
+                            mInstrumentClusterWindow->setEnabled(true);
                         }
                         if (SnapshotPage::get()) {
                             SnapshotPage::get()->setOperationInProgress(false);
@@ -675,6 +684,10 @@ EmulatorQtWindow::~EmulatorQtWindow() {
     if (mToolWindow2) {
         delete mToolWindow2;
         mToolWindow2 = NULL;
+    }
+    if (mInstrumentClusterWindow) {
+        delete mInstrumentClusterWindow;
+        mInstrumentClusterWindow = NULL;
     }
 
     mStartupDialog.ifExists([&] {
@@ -843,6 +856,9 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
     if (mToolWindow2) {
         mToolWindow2->setEnabled(false);
     }
+    if (mInstrumentClusterWindow) {
+        mInstrumentClusterWindow->setEnabled(false);
+    }
 
     const bool alreadyClosed = mClosed;
     mClosed = true;
@@ -901,6 +917,9 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         }
         if (mToolWindow2) {
             mToolWindow2->hide();
+        }
+        if (mInstrumentClusterWindow) {
+            mInstrumentClusterWindow->hide();
         }
         mContainer.hide();
         mOverlay.hide();
@@ -1110,6 +1129,7 @@ void EmulatorQtWindow::maskWindowFrame() {
     mContainer.show();
     mToolWindow->dockMainWindow();
     mToolWindow2->dockMainWindow();
+    mInstrumentClusterWindow->dockMainWindow();
 
     if (haveFrame != mPreviouslyFramed) {
         // We are switching between framed and frameless. We need to
@@ -1203,6 +1223,7 @@ void EmulatorQtWindow::raise() {
     mContainer.raise();
     mToolWindow->raise();
     mToolWindow2->raise();
+    mInstrumentClusterWindow->raise();
 }
 
 void EmulatorQtWindow::show() {
@@ -1213,6 +1234,7 @@ void EmulatorQtWindow::show() {
     QFrame::show();
     mToolWindow->show();
     mToolWindow2->show();
+    mInstrumentClusterWindow->show();
 
     QObject::connect(window()->windowHandle(), &QWindow::screenChanged, this,
                      &EmulatorQtWindow::onScreenChanged);
@@ -1231,6 +1253,7 @@ void EmulatorQtWindow::setOnTop(bool onTop) {
     setFrameOnTop(&mContainer, onTop);
     setFrameOnTop(mToolWindow, onTop);
     setFrameOnTop(mToolWindow2, onTop);
+    setFrameOnTop(mInstrumentClusterWindow, onTop);
 }
 
 void EmulatorQtWindow::setFrameAlways(bool frameAlways)
@@ -1365,6 +1388,10 @@ void EmulatorQtWindow::slot_clearInstance() {
     if (mToolWindow2) {
         delete mToolWindow2;
         mToolWindow2 = NULL;
+    }
+    if (mInstrumentClusterWindow) {
+        delete mInstrumentClusterWindow;
+        mInstrumentClusterWindow = NULL;
     }
 #endif
 
@@ -2393,6 +2420,9 @@ ToolWindow2* EmulatorQtWindow::toolWindow2() const {
     return mToolWindow2;
 }
 
+InstrumentClusterWindow* EmulatorQtWindow::instrumentClusterWindow() const{
+    return mInstrumentClusterWindow;
+}
 EmulatorContainer* EmulatorQtWindow::containerWindow() {
     return &mContainer;
 }

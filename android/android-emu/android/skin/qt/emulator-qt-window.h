@@ -27,6 +27,8 @@
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/skin/qt/tool-window-2.h"
+#include "android/skin/qt/instrumentclusterwindow.h"
+
 #include "android/skin/qt/ui-event-recorder.h"
 #include "android/skin/qt/user-actions-counter.h"
 #include "android/skin/image.h"
@@ -210,6 +212,7 @@ public:
     bool isInZoomMode() const;
     ToolWindow*  toolWindow () const;
     ToolWindow2* toolWindow2() const;
+    InstrumentClusterWindow* instrumentClusterWindow() const;
     EmulatorContainer* containerWindow();
     void showZoomIfNotUserHidden();
     QSize containerSize() const;
@@ -404,6 +407,7 @@ private:
 
     ToolWindow*  mToolWindow;
     ToolWindow2* mToolWindow2;
+    InstrumentClusterWindow* mInstrumentClusterWindow;
     EmulatorContainer mContainer;
     EmulatorOverlay mOverlay;
     QRect mDeviceGeometry;

@@ -122,6 +122,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/stylesheet.cpp
     android/skin/qt/tool-window.cpp
     android/skin/qt/tool-window-2.cpp
+    android/skin/qt/instrumentclusterwindow.cpp
     android/skin/qt/ui-event-recorder.cpp
     android/skin/qt/user-actions-counter.cpp
     android/skin/qt/virtualscene-control-window.cpp
