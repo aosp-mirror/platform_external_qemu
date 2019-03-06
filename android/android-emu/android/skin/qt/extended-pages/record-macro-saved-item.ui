@@ -2,18 +2,25 @@
 <ui version="4.0">
  <class>RecordMacroSavedItem</class>
  <widget class="QWidget" name="RecordMacroSavedItem">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>493</width>
-    <height>100</height>
-   </rect>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>6</number>
+   </property>
+   <property name="bottomMargin">
+    <number>6</number>
+   </property>
    <item>
     <widget class="QLabel" name="name">
      <property name="sizePolicy">
@@ -26,6 +33,8 @@
       <font>
        <family>DejaVu Sans</family>
        <pointsize>11</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
       </font>
      </property>
      <property name="lineWidth">
@@ -41,6 +50,12 @@
    </item>
    <item>
     <widget class="QLabel" name="displayInfo">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>16777214</height>
+      </size>
+     </property>
      <property name="font">
       <font>
        <italic>true</italic>
