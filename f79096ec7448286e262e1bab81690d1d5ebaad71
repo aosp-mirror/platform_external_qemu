@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f4e5b447_f77d39ba",
+        "filename": "android/android-emu/android/base/GLObjectCounter.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-03-06T22:13:57Z",
+      "side": 1,
+      "message": "is it better if you make this a fixed size array? it looks like a lot of switch everywhere",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 46
+      },
+      "revId": "f79096ec7448286e262e1bab81690d1d5ebaad71",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
