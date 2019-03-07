@@ -503,7 +503,6 @@ static const int dpad_map[Q_KEY_CODE__MAX] = {
 static void goldfish_evdev_handle_keyevent(DeviceState *dev, QemuConsole *src,
                                            InputEvent *evt)
 {
-
     GoldfishEvDevState *s = GOLDFISHEVDEV(dev, TYPE_GOLDFISHEVDEV);
     int lkey = 0;
     int mod;
@@ -882,6 +881,12 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
     if (s->have_keyboard && s->have_keyboard_lid) {
         goldfish_events_set_bit(s, EV_SW, SW_LID);
     }
+
+#ifdef _WIN32
+    InitializeSRWLock(&s->lock);
+#else
+    pthread_mutex_init(&s->lock, 0);
+#endif
 
     /* Register global variable. */
     assert(s_evdev == NULL);
