@@ -9,6 +9,8 @@
 #include "qemu/log.h"
 #include "hw/sysbus.h"
 
+#include <sys/time.h>
+
 /* Protected by s->lock. */
 static int get_page_len(GoldfishEvDevState *s)
 {
@@ -51,12 +53,36 @@ static int get_page_data(GoldfishEvDevState *s, int offset)
 static unsigned dequeue_event(GoldfishEvDevState *s)
 {
     unsigned n;
+    unsigned int ev_index;
+    uint64_t ev_time_us;
+    struct timeval tv;
+    float duration_ms;
+    if (s->measure_latency) {
+        gettimeofday(&tv, 0);
+        ev_time_us = tv.tv_usec + tv.tv_sec * 1000000ULL;
+    }
 
     if (s->first == s->last) {
         return 0;
     }
 
+    ev_index = s->first;
     n = s->events[s->first];
+
+    if (s->measure_latency) {
+        s->dequeue_times_us[ev_index] = ev_time_us;
+        duration_ms =
+            (s->dequeue_times_us[ev_index] -
+             s->enqueue_times_us[ev_index]) / 1000.0f;
+
+#define LONG_EVENT_PROCESSING_THRESHOLD_MS 2.0f // 2 ms is quite long to handle interrupt
+
+        if (duration_ms > LONG_EVENT_PROCESSING_THRESHOLD_MS) {
+            fprintf(stderr, "%s: warning: long input event processing: "
+                            "event %u processed in %f ms\n", __func__,
+                            ev_index, duration_ms);
+        }
+    }
 
     s->first = (s->first + 1) & (MAX_EVENTS - 1);
 
@@ -121,6 +147,12 @@ void goldfish_enqueue_event(GoldfishEvDevState *s,
         g_events_dropped++;
         fprintf(stderr, "##KBD: Full queue, dropping event, current drop count: %d\n", g_events_dropped);
     } else {
+        unsigned int ev_index_0;
+        unsigned int ev_index_1;
+        unsigned int ev_index_2;
+        uint64_t ev_time_us = 0;
+        struct timeval tv;
+
         g_events_dropped = 0;
         if (s->state == STATE_LIVE) {
             qemu_irq_lower(s->irq);
@@ -129,12 +161,25 @@ void goldfish_enqueue_event(GoldfishEvDevState *s,
             s->state = STATE_BUFFERED;
         }
 
+        ev_index_0 = s->last;
         s->events[s->last] = type;
         s->last = (s->last + 1) & (MAX_EVENTS-1);
+
+        ev_index_1 = s->last;
         s->events[s->last] = code;
         s->last = (s->last + 1) & (MAX_EVENTS-1);
+
+        ev_index_2 = s->last;
         s->events[s->last] = value;
         s->last = (s->last + 1) & (MAX_EVENTS-1);
+
+        if (s->measure_latency) {
+            gettimeofday(&tv, 0);
+            ev_time_us = tv.tv_usec + tv.tv_sec * 1000000ULL;
+            s->enqueue_times_us[ev_index_0] = ev_time_us;
+            s->enqueue_times_us[ev_index_1] = ev_time_us;
+            s->enqueue_times_us[ev_index_2] = ev_time_us;
+        }
     }
 
     goldfish_evdev_unlock(s);
