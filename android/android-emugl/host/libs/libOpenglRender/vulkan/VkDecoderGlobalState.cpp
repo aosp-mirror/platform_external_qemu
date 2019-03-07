@@ -57,6 +57,7 @@ kEmulatedExtensions[] = {
     "VK_ANDROID_external_memory_android_hardware_buffer",
     "VK_KHR_external_memory_fuchsia",
     "VK_KHR_external_semaphore_fuchsia",
+    "VK_KHR_external_semaphore_fd",
 };
 
 static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 0, 65);
@@ -2042,7 +2043,15 @@ public:
                         VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT |
                         VK_EXTERNAL_SEMAPHORE_FEATURE_IMPORTABLE_BIT;
                 return;
-
+            case VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT:
+                pExternalSemaphoreProperties->exportFromImportedHandleTypes =
+                        VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
+                pExternalSemaphoreProperties->compatibleHandleTypes =
+                        VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
+                pExternalSemaphoreProperties->externalSemaphoreFeatures =
+                        VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT |
+                        VK_EXTERNAL_SEMAPHORE_FEATURE_IMPORTABLE_BIT;
+                return;
             default:
                 break;
         }
@@ -2138,6 +2147,15 @@ private:
                 res.push_back("VK_KHR_external_memory_win32");
 #else
                 res.push_back("VK_KHR_external_memory_fd");
+#endif
+            }
+            // External semaphore maps to the win32 version on windows,
+            // continues with external semaphore fd on non-windows
+            if (!strcmp("VK_KHR_external_semaphore_fd", extName)) {
+#ifdef _WIN32
+                res.push_back("VK_KHR_external_semaphore_win32");
+#else
+                res.push_back("VK_KHR_external_semaphore_fd");
 #endif
             }
         }
