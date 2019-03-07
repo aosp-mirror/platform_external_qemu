@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d357e27f_8412a4fb",
+        "filename": "android/android-emu/android/snapshot/SnapshotAPI.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-03-07T21:58:20Z",
+      "side": 1,
+      "message": "There are never supposed to be 2 pipes waiting for the snapshot response simultaneously. (There can be multiple open pipes, but only one of them can be waiting for a response at any time. Trying to trigger snapshots from 2 different threads is too dangerous.) I want to enforce this behavior, let me take a closer look and see what I can do.",
+      "parentUuid": "b47183ae_e61f0fa7",
+      "range": {
+        "startLine": 269,
+        "startChar": 4,
+        "endLine": 269,
+        "endChar": 70
+      },
+      "revId": "4c9ad6d74b06cf38668892cf10c5a56e4204c3e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d716d41a_d91c7d39",
         "filename": "android/android-emu/android/snapshot/SnapshotAPI.cpp",
         "patchSetId": 1
