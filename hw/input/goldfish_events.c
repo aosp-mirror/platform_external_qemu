@@ -888,6 +888,15 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
     pthread_mutex_init(&s->lock, 0);
 #endif
 
+    s->measure_latency = false;
+    {
+        char* android_emu_trace_env_var =
+            getenv("ANDROID_EMU_TRACING");
+        s->measure_latency =
+            android_emu_trace_env_var &&
+            !strcmp("1", android_emu_trace_env_var);
+    }
+
     /* Register global variable. */
     assert(s_evdev == NULL);
     assert(s->state == 0);

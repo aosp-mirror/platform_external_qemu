@@ -203,6 +203,11 @@ typedef struct GoldfishEvDevState {
     uint32_t last;
     uint32_t state;
 
+    /* Latency measurement */
+    bool measure_latency;
+    uint32_t enqueue_times_us[MAX_EVENTS];
+    uint32_t dequeue_times_us[MAX_EVENTS];
+
     uint32_t modifier_state;
 
     /* All data below here is set up at realize and not modified thereafter */
