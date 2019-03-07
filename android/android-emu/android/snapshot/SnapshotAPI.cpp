@@ -16,6 +16,7 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
+#include "android/globals.h"
 #include "android/metrics/MetricsLogging.h"
 #include "android/multi-instance.h"
 #include "android/offworld/OffworldPipe.h"
@@ -60,6 +61,7 @@ offworld::Response createNoErrorResponse() {
 }
 
 offworld::Response createErrorResponse() {
+    LOG(WARNING) << "Respond snapshot error";
     offworld::Response response;
     response.set_result(offworld::Response::RESULT_ERROR_UNKNOWN);
     return response;
@@ -126,6 +128,7 @@ void createCheckpoint(AsyncMessagePipeHandle pipe,
 
     gQAndroidVmOperations->vmStop();
     android::base::ThreadLooper::runOnMainLooper([pipe, snapshotName]() {
+        android_snapshot_update_timer = 0;
         const AndroidSnapshotStatus result =
                 androidSnapshot_save(snapshotName.c_str());
         gQAndroidVmOperations->vmStart();
@@ -151,6 +154,7 @@ void gotoCheckpoint(
     gQAndroidVmOperations->vmStop();
     android::base::ThreadLooper::runOnMainLooper([pipe, snapshotName,
                                                   shareMode]() {
+        android_snapshot_update_timer = 0;
         if (shareMode) {
             bool res = android::multiinstance::updateInstanceShareMode(
                     snapshotName.c_str(), *shareMode);
@@ -192,6 +196,7 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
     android::base::ThreadLooper::runOnMainLooper([pipe]() {
         // snapshotRemap triggers a snapshot save.
         // It must happen before changing disk backend
+        android_snapshot_update_timer = 0;
         bool res =
                 gQAndroidVmOperations->snapshotRemap(false, nullptr, nullptr);
         LOG_IF(WARNING, !res) << "RAM share mode update failure";
@@ -207,6 +212,7 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
                 androidSnapshot_load(android::snapshot::kDefaultBootSnapshot);
         gQAndroidVmOperations->vmStart();
         if (result != AndroidSnapshotStatus::SNAPSHOT_STATUS_OK) {
+            sSnapshotCrossSession->mPipesAwaitingResponse.erase(pipe);
             android::offworld::sendResponse(pipe, createErrorResponse());
         }
     });
@@ -230,6 +236,7 @@ void doneInstance(android::AsyncMessagePipeHandle pipe,
                         ? android::base::FileShare::Read
                         : android::base::FileShare::Write;
         android::base::ThreadLooper::runOnMainLooper([mode]() {
+            android_snapshot_update_timer = 0;
             bool res = android::multiinstance::updateInstanceShareMode(
                     android::snapshot::kDefaultBootSnapshot, mode);
             LOG_IF(WARNING, !res) << "Share mode update failure";
@@ -259,6 +266,8 @@ void doneInstance(android::AsyncMessagePipeHandle pipe,
 void onOffworldSave(base::Stream* stream) {
     stream->putBe32(
             uint32_t(sSnapshotCrossSession->mPipesAwaitingResponse.size()));
+    LOG(VERBOSE) << "Snapshot save pipe count " << sSnapshotCrossSession->mPipesAwaitingResponse.size();
+    assert(sSnapshotCrossSession->mPipesAwaitingResponse.size() <= 1);
     for (auto it : sSnapshotCrossSession->mPipesAwaitingResponse) {
         stream->putBe32(it.first.id);
         stream->putBe32(uint32_t(it.second));
@@ -269,6 +278,8 @@ void onOffworldLoad(base::Stream* stream) {
     sSnapshotCrossSession->mPipesAwaitingResponse.clear();
 
     const uint32_t pipeCount = stream->getBe32();
+    LOG(VERBOSE) << "Snapshot load pipe count " << pipeCount;
+    assert(pipeCount <= 1);
     for (uint32_t i = 0; i < pipeCount; ++i) {
         AsyncMessagePipeHandle pipe;
         pipe.id = static_cast<int>(stream->getBe32());
