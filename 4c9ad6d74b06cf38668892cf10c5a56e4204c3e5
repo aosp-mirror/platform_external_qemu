@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "8b401410_d928c833",
+        "filename": "android/android-emu/android/snapshot/SnapshotAPI.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-03-07T22:09:59Z",
+      "side": 1,
+      "message": "I took a deeper look, and here is what we want to avoid vs what is allowed\n\nTry to avoid:\n\na. user opens 2 pipes and call snapshot save from both of them simultanously\n\nAllowed:\n\nb. user opens multiple pipes (for snapshot or AR);\nc. user calls snapshot on one pipe, wait for its completion, then call snapshot again on the same or different pipe;\nd. GC hasn\u0027t cleaned up the pipe before user opens a different pipe and calls snapshot\n\nI believe sSnapshotCrossSession-\u003emPipesAwaitingResponse would only have more than 1 element when (a) happens. In other situations, sSnapshotCrossSession-\u003emPipesAwaitingResponse will be cleaned up before snapshot save returns to the guest (or it won\u0027t be touched at all if no snapshot save command is sent).\n\nDoes it sound OK?",
+      "parentUuid": "d357e27f_8412a4fb",
+      "range": {
+        "startLine": 269,
+        "startChar": 4,
+        "endLine": 269,
+        "endChar": 70
+      },
+      "revId": "4c9ad6d74b06cf38668892cf10c5a56e4204c3e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d716d41a_d91c7d39",
         "filename": "android/android-emu/android/snapshot/SnapshotAPI.cpp",
         "patchSetId": 1
