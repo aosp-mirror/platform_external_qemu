@@ -9,6 +9,7 @@
 #include "qemu/log.h"
 #include "hw/sysbus.h"
 
+/* Protected by s->lock. */
 static int get_page_len(GoldfishEvDevState *s)
 {
     int page = s->page;
@@ -25,6 +26,7 @@ static int get_page_len(GoldfishEvDevState *s)
     return 0;
 }
 
+/* Protected by s->lock. */
 static int get_page_data(GoldfishEvDevState *s, int offset)
 {
     int page_len = get_page_len(s);
@@ -45,6 +47,7 @@ static int get_page_data(GoldfishEvDevState *s, int offset)
     return 0;
 }
 
+/* Protected by s->lock. */
 static unsigned dequeue_event(GoldfishEvDevState *s)
 {
     unsigned n;
@@ -87,10 +90,27 @@ int goldfish_event_drop_count() {
     return g_events_dropped;
 }
 
+void goldfish_evdev_lock(GoldfishEvDevState* s) {
+#ifdef _WIN32
+    AcquireSRWLockExclusive(&s->lock);
+#else
+    pthread_mutex_lock(&s->lock);
+#endif
+}
+
+void goldfish_evdev_unlock(GoldfishEvDevState* s) {
+#ifdef _WIN32
+    ReleaseSRWLockExclusive(&s->lock);
+#else
+    pthread_mutex_unlock(&s->lock);
+#endif
+}
 
 void goldfish_enqueue_event(GoldfishEvDevState *s,
                    unsigned int type, unsigned int code, int value)
 {
+    goldfish_evdev_lock(s);
+
     int  enqueued = s->last - s->first;
 
     if (enqueued < 0) {
@@ -100,29 +120,32 @@ void goldfish_enqueue_event(GoldfishEvDevState *s,
     if (enqueued + 3 > MAX_EVENTS) {
         g_events_dropped++;
         fprintf(stderr, "##KBD: Full queue, dropping event, current drop count: %d\n", g_events_dropped);
-        return;
-    }
-
-    g_events_dropped = 0;
-    if (s->state == STATE_LIVE) {
-        qemu_irq_lower(s->irq);
-        qemu_irq_raise(s->irq);
     } else {
-        s->state = STATE_BUFFERED;
+        g_events_dropped = 0;
+        if (s->state == STATE_LIVE) {
+            qemu_irq_lower(s->irq);
+            qemu_irq_raise(s->irq);
+        } else {
+            s->state = STATE_BUFFERED;
+        }
+
+        s->events[s->last] = type;
+        s->last = (s->last + 1) & (MAX_EVENTS-1);
+        s->events[s->last] = code;
+        s->last = (s->last + 1) & (MAX_EVENTS-1);
+        s->events[s->last] = value;
+        s->last = (s->last + 1) & (MAX_EVENTS-1);
     }
 
-    s->events[s->last] = type;
-    s->last = (s->last + 1) & (MAX_EVENTS-1);
-    s->events[s->last] = code;
-    s->last = (s->last + 1) & (MAX_EVENTS-1);
-    s->events[s->last] = value;
-    s->last = (s->last + 1) & (MAX_EVENTS-1);
-
+    goldfish_evdev_unlock(s);
 }
 
 uint64_t goldfish_events_read(void *opaque, hwaddr offset, unsigned size)
 {
     GoldfishEvDevState *s = (GoldfishEvDevState *)opaque;
+    uint64_t res = 0;
+
+    goldfish_evdev_lock(s);
 
     /* This gross hack below is used to ensure that we
      * only raise the IRQ when the kernel driver is
@@ -139,24 +162,33 @@ uint64_t goldfish_events_read(void *opaque, hwaddr offset, unsigned size)
 
     switch (offset) {
     case REG_READ:
-        return dequeue_event(s);
+        res = dequeue_event(s);
+        break;
     case REG_LEN:
-        return get_page_len(s);
+        res = get_page_len(s);
+        break;
     default:
         if (offset >= REG_DATA) {
-            return get_page_data(s, offset - REG_DATA);
+            res = get_page_data(s, offset - REG_DATA);
         }
         qemu_log_mask(LOG_GUEST_ERROR,
                       "goldfish events device read: bad offset %x\n",
                       (int)offset);
-        return 0;
+        break;
     }
+
+    goldfish_evdev_unlock(s);
+
+    return res;
 }
 
 void goldfish_events_write(void *opaque, hwaddr offset,
                   uint64_t val, unsigned size)
 {
     GoldfishEvDevState *s = (GoldfishEvDevState *)opaque;
+
+    goldfish_evdev_lock(s);
+
     switch (offset) {
     case REG_SET_PAGE:
         s->page = val;
@@ -167,6 +199,7 @@ void goldfish_events_write(void *opaque, hwaddr offset,
                       (int)offset);
         break;
     }
+    goldfish_evdev_unlock(s);
 }
 
 /* set bits [bitl..bith] in the ev_bits[type] array
@@ -176,11 +209,15 @@ void goldfish_events_set_bits(GoldfishEvDevState *s, int type, int bitl, int bit
     uint8_t *bits;
     uint8_t maskl, maskh;
     int il, ih;
+
+    goldfish_evdev_lock(s);
+
     il = bitl / 8;
     ih = bith / 8;
     if (ih >= s->ev_bits[type].len) {
         bits = g_malloc0(ih + 1);
         if (bits == NULL) {
+            goldfish_evdev_unlock(s);
             return;
         }
         memcpy(bits, s->ev_bits[type].bits, s->ev_bits[type].len);
@@ -201,6 +238,8 @@ void goldfish_events_set_bits(GoldfishEvDevState *s, int type, int bitl, int bit
         }
     }
     bits[ih] |= maskh;
+
+    goldfish_evdev_unlock(s);
 }
 
 void goldfish_events_set_bit(GoldfishEvDevState *s, int  type, int  bit)
@@ -211,10 +250,12 @@ void goldfish_events_set_bit(GoldfishEvDevState *s, int  type, int  bit)
 void
 goldfish_events_clr_bit(GoldfishEvDevState *s, int type, int bit)
 {
+    goldfish_evdev_lock(s);
     int ii = bit / 8;
     if (ii < s->ev_bits[type].len) {
         uint8_t *bits = s->ev_bits[type].bits;
         uint8_t  mask = 0x01U << (bit & 7);
         bits[ii] &= ~mask;
     }
+    goldfish_evdev_unlock(s);
 }

@@ -26,6 +26,12 @@
 #include "hw/input/android_keycodes.h"
 #include "hw/input/linux_keycodes.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <pthread.h>
+#endif
+
 #define MAX_EVENTS (256 * 4)
 
 /* Event types (as per Linux input event layer) */
@@ -210,6 +216,11 @@ typedef struct GoldfishEvDevState {
 
     int32_t *abs_info;
     size_t abs_info_count;
+#ifdef _WIN32
+    SRWLOCK lock;
+#else
+    pthread_mutex_t lock;
+#endif
 } GoldfishEvDevState;
 
 #define GOLDFISHEVDEV_VM_STATE_DESCRIPTION(device_name) \
