@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b47183ae_e61f0fa7",
+        "filename": "android/android-emu/android/snapshot/SnapshotAPI.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-07T20:56:55Z",
+      "side": 1,
+      "message": "See below, this is possible.  It\u0027s possible to have multiple Offworld connections, in several cases:\n1. The user opens two Offworld Snapshot pipes.\n2. A test creates an Offworld Snapshot, then another test runs while the previous instance hasn\u0027t been GC\u0027d yet.\n3. The test creates an Offworld Snapshot pipe as well as an Offworld Automation pipe (counts as two connections).\n\nConnections are cheap, and the original requirement for having one pipe was lifted when I updated Offworld to use AsyncAndroidMessagePipeClient.",
+      "range": {
+        "startLine": 269,
+        "startChar": 4,
+        "endLine": 269,
+        "endChar": 70
+      },
+      "revId": "4c9ad6d74b06cf38668892cf10c5a56e4204c3e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d716d41a_d91c7d39",
+        "filename": "android/android-emu/android/snapshot/SnapshotAPI.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-07T20:56:55Z",
+      "side": 1,
+      "message": "This is definitely possible, it is possible to open multiple Offworld connections.",
+      "revId": "4c9ad6d74b06cf38668892cf10c5a56e4204c3e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
