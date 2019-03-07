@@ -39,3 +39,16 @@ extern int guest_data_partition_mounted;
 
 /* this indicates that guest has boot completed */
 extern int guest_boot_completed;
+<<<<<<< HEAD   (c6cf22 Merge "Merge cherrypicks of [928858] into emu-3.1-release" i)
+=======
+
+/* are we using the emulator in the android mode or plain qemu? */
+extern int android_qemu_mode;
+
+/* are we using android-emu libraries for a minimal configuration? */
+extern int min_config_qemu_mode;
+
+extern int android_snapshot_update_timer;
+
+ANDROID_END_HEADER
+>>>>>>> CHANGE (0445a3 Do not update timer in snapshot test runner)
