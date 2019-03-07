@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "5521ff89_06092fa9",
+        "filename": "android/android-emu/android/snapshot/SnapshotAPI.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-03-07T22:26:09Z",
+      "side": 1,
+      "message": "The Optional\u003c\u003e is a great idea. Let\u0027s leave it for future work.",
+      "parentUuid": "9c33e3cf_07e9b6e3",
+      "range": {
+        "startLine": 269,
+        "startChar": 4,
+        "endLine": 269,
+        "endChar": 70
+      },
+      "revId": "4c9ad6d74b06cf38668892cf10c5a56e4204c3e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d716d41a_d91c7d39",
         "filename": "android/android-emu/android/snapshot/SnapshotAPI.cpp",
         "patchSetId": 1
