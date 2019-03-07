@@ -212,6 +212,24 @@
     },
     {
       "key": {
+        "uuid": "42bca4e0_3c3eb378",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-07T22:51:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5337a64d_412b7768",
+      "revId": "354c392779a17cf03b920566408580b755dc68be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "27f12571_665b762c",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.h",
         "patchSetId": 2
