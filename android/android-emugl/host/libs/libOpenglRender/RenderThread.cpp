@@ -30,10 +30,10 @@
 #include "../../../shared/OpenglCodecCommon/ChecksumCalculatorThreadInfo.h"
 
 #include "android/base/system/System.h"
+#include "android/base/Tracing.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/utils/path.h"
 #include "android/utils/file_io.h"
-
 
 #define EMUGL_DEBUG_LEVEL 0
 #include "emugl/common/debug.h"
@@ -349,49 +349,65 @@ intptr_t RenderThread::main() {
             // To fix, this driver workaround avoids calling
             // any sort of GLES call when we are creating/destroying EGL
             // contexts.
-            FrameBuffer::getFB()->lockContextStructureRead();
-            size_t last = tInfo.m_glDec.decode(
-                    readBuf.buf(), readBuf.validData(), &stream, &checksumCalc);
-            if (last > 0) {
-                progress = true;
-                readBuf.consume(last);
+            {
+                AEMU_SCOPED_THRESHOLD_TRACE("lockContextStructureRead");
+                FrameBuffer::getFB()->lockContextStructureRead();
+            }
+            size_t last;
+
+            {
+                AEMU_SCOPED_THRESHOLD_TRACE("glDec.decode");
+                last = tInfo.m_glDec.decode(
+                        readBuf.buf(), readBuf.validData(), &stream, &checksumCalc);
+                if (last > 0) {
+                    progress = true;
+                    readBuf.consume(last);
+                }
             }
 
             //
             // try to process some of the command buffer using the GLESv2
             // decoder
             //
-            last = tInfo.m_gl2Dec.decode(readBuf.buf(), readBuf.validData(),
-                                         &stream, &checksumCalc);
-            FrameBuffer::getFB()->unlockContextStructureRead();
+            {
+                AEMU_SCOPED_THRESHOLD_TRACE("gl2Dec.decode");
+                last = tInfo.m_gl2Dec.decode(readBuf.buf(), readBuf.validData(),
+                                             &stream, &checksumCalc);
 
-            if (last > 0) {
-                progress = true;
-                readBuf.consume(last);
+                if (last > 0) {
+                    progress = true;
+                    readBuf.consume(last);
+                }
             }
 
+            FrameBuffer::getFB()->unlockContextStructureRead();
             //
             // try to process some of the command buffer using the
             // renderControl decoder
             //
-            last = tInfo.m_rcDec.decode(readBuf.buf(), readBuf.validData(),
-                                        &stream, &checksumCalc);
-            if (last > 0) {
-                readBuf.consume(last);
-                progress = true;
+            {
+                AEMU_SCOPED_THRESHOLD_TRACE("rcDec.decode");
+                last = tInfo.m_rcDec.decode(readBuf.buf(), readBuf.validData(),
+                                            &stream, &checksumCalc);
+                if (last > 0) {
+                    readBuf.consume(last);
+                    progress = true;
+                }
             }
 
             //
             // try to process some of the command buffer using the
             // Vulkan decoder
             //
-            last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
-                                        &stream);
-            if (last > 0) {
-                readBuf.consume(last);
-                progress = true;
+            {
+                AEMU_SCOPED_THRESHOLD_TRACE("vkDec.decode");
+                last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
+                                            &stream);
+                if (last > 0) {
+                    readBuf.consume(last);
+                    progress = true;
+                }
             }
-
         } while (progress);
     }
 
