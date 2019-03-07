@@ -9,7 +9,11 @@
 #include "qemu/log.h"
 #include "hw/sysbus.h"
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <sys/time.h>
+#endif
 
 /* Protected by s->lock. */
 static int get_page_len(GoldfishEvDevState *s)

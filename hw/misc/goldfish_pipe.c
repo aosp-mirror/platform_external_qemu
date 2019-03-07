@@ -41,7 +41,12 @@
 
 #include <assert.h>
 #include <glib.h>
+
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <sys/time.h>
+#endif
 
 /* Set to > 0 for debug output */
 #define PIPE_DEBUG 0
