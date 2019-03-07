@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "9c33e3cf_07e9b6e3",
+        "filename": "android/android-emu/android/snapshot/SnapshotAPI.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-07T22:22:57Z",
+      "side": 1,
+      "message": "Ok, I was wrong-- I was still paging this back in.\n\nYes, this is an assertion that is valid, even if there are multiple offworld connections.\n\nThis is used purely to make sure that we respond to any createCheckpoint/fork requests after resuming the snapshot.  In fact, if you want to go further and change mPipesAwaitingResponse to an Optional\u003c\u003e that would be easier to track.",
+      "parentUuid": "8b401410_d928c833",
+      "range": {
+        "startLine": 269,
+        "startChar": 4,
+        "endLine": 269,
+        "endChar": 70
+      },
+      "revId": "4c9ad6d74b06cf38668892cf10c5a56e4204c3e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d716d41a_d91c7d39",
         "filename": "android/android-emu/android/snapshot/SnapshotAPI.cpp",
         "patchSetId": 1
@@ -87,6 +111,24 @@
       "revId": "4c9ad6d74b06cf38668892cf10c5a56e4204c3e5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7f7cadef_8145e4d2",
+        "filename": "android/android-emu/android/snapshot/SnapshotAPI.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-07T22:22:57Z",
+      "side": 1,
+      "message": "Nevermind, this is tracking pipesAwaitingResponse instead of the total count of pipes.",
+      "parentUuid": "d716d41a_d91c7d39",
+      "revId": "4c9ad6d74b06cf38668892cf10c5a56e4204c3e5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
