@@ -190,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "18102d52_508070a4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-07T22:44:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "81f659e9_7321a482",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 38
+      },
+      "revId": "fb45221044e6878f9c58addee9a33db6f16f9022",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cdb2f9b9_03f22f16",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h",
         "patchSetId": 3
