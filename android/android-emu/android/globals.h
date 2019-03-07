@@ -39,3 +39,5 @@ extern int guest_data_partition_mounted;
 
 /* this indicates that guest has boot completed */
 extern int guest_boot_completed;
+
+extern int android_snapshot_update_timer;
