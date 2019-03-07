@@ -49,4 +49,6 @@ extern int android_qemu_mode;
 /* are we using android-emu libraries for a minimal configuration? */
 extern int min_config_qemu_mode;
 
+extern int android_snapshot_update_timer;
+
 ANDROID_END_HEADER
