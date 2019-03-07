@@ -41,6 +41,7 @@
 
 #include <assert.h>
 #include <glib.h>
+#include <sys/time.h>
 
 /* Set to > 0 for debug output */
 #define PIPE_DEBUG 0
@@ -347,6 +348,14 @@ struct PipeDevice {
     uint64_t channel;
     uint32_t wakes;
     uint64_t params_addr;
+
+    // Benchmarking
+    bool measure_latency;
+    uint64_t write_start_us;
+    uint64_t write_end_us;
+    uint64_t wake_us;
+    uint64_t read_start_us;
+    uint64_t read_end_us;
 };
 
 
@@ -1127,9 +1136,30 @@ static void pipe_dev_write_v1(PipeDevice* dev,
     }
 }
 
+static uint64_t pipe_dev_curr_time_us() {
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    return tv.tv_usec + tv.tv_sec * 1000000ULL;
+}
+
+#define LONG_PIPE_TRANSACTION_THRESHOLD_MS 1.0f
+
+static void pipe_dev_warn_long_duration(
+    const char* tag, uint64_t start_us, uint64_t end_us) {
+    float ms = (end_us - start_us) / 1000.0f;
+    if (ms > LONG_PIPE_TRANSACTION_THRESHOLD_MS) {
+        fprintf(stderr, "%s: high latency for [%s]: %f ms\n",
+                __func__, tag, ms);
+    }
+}
+
 static void pipe_dev_write_v2(PipeDevice* dev,
                                   hwaddr offset,
                                   uint64_t value) {
+    if (dev->measure_latency) {
+        dev->write_start_us = pipe_dev_curr_time_us();
+    }
+
     switch (offset) {
         case PIPE_REG_SIGNAL_BUFFER_HIGH:
             dev->signalled_pipe_buffer_addr = value << 32;
@@ -1175,6 +1205,14 @@ static void pipe_dev_write_v2(PipeDevice* dev,
                           " value=%" PRIu64 "/0x%" PRIx64 "\n",
                           __func__, offset, value, value);
             break;
+    }
+
+    if (dev->measure_latency) {
+        dev->write_end_us = pipe_dev_curr_time_us();
+        pipe_dev_warn_long_duration(
+            "pipe_write",
+            dev->write_start_us,
+            dev->write_end_us);
     }
 }
 
@@ -1237,6 +1275,12 @@ static uint64_t pipe_dev_read_v1(PipeDevice* dev, hwaddr offset)
 }
 
 static uint64_t pipe_dev_read_v2(PipeDevice* dev, hwaddr offset) {
+    uint64_t res = 0;
+
+    if (dev->measure_latency) {
+        dev->read_start_us = pipe_dev_curr_time_us();
+    }
+
     switch (offset) {
         case PIPE_REG_GET_SIGNALLED: {
             int count = 0;
@@ -1251,14 +1295,28 @@ static uint64_t pipe_dev_read_v2(PipeDevice* dev, hwaddr offset) {
             if (!dev->wanted_pipes_first) {
                 qemu_set_irq(dev->ps->irq, 0);  // we've passed all wanted pipes
             }
-            return count;
+            res = count;
+            break;
         }
         default:
             qemu_log_mask(LOG_GUEST_ERROR, "%s: unknown register %" HWADDR_PRId
                                            " (0x%" HWADDR_PRIx ")\n",
                           __func__, offset, offset);
     }
-    return 0;
+
+    if (dev->measure_latency) {
+        dev->read_end_us = pipe_dev_curr_time_us();
+        pipe_dev_warn_long_duration(
+            "pipe_read",
+            dev->read_start_us,
+            dev->read_end_us);
+        pipe_dev_warn_long_duration(
+            "pipe_wake",
+            dev->wake_us,
+            dev->read_start_us);
+    }
+
+    return res;
 }
 
 static const MemoryRegionOps goldfish_pipe_iomem_ops = {
@@ -1695,6 +1753,15 @@ static void goldfish_pipe_realize(DeviceState* dev, Error** errp) {
     sysbus_init_mmio(sbdev, &s->iomem);
     sysbus_init_irq(sbdev, &s->irq);
 
+    s->dev->measure_latency = false;
+    {
+        char* android_emu_trace_env_var =
+            getenv("ANDROID_EMU_TRACING");
+        s->dev->measure_latency =
+            android_emu_trace_env_var &&
+            !strcmp("1", android_emu_trace_env_var);
+    }
+
     register_savevm_with_post_load(
             dev, "goldfish_pipe", 0, GOLDFISH_PIPE_SAVE_VERSION,
             goldfish_pipe_save, goldfish_pipe_load, goldfish_pipe_post_load, s);
@@ -1719,6 +1786,10 @@ void goldfish_pipe_signal_wake(GoldfishHwPipe *pipe,
     /* Raise IRQ to indicate there are items on our list ! */
     qemu_set_irq(dev->ps->irq, 1);
     DD("%s: raising IRQ", __func__);
+
+    if (dev->measure_latency) {
+        dev->wake_us = pipe_dev_curr_time_us();
+    }
 }
 
 /* Function to look up hwpipe by pipe id and vice versa. */
