@@ -1,0 +1,9 @@
+Code-Review+2: Weilun Du <wdu@google.com>
+Verified+1: Weilun Du <wdu@google.com>
+Autosubmit+1: Weilun Du <wdu@google.com>
+Presubmit-Ready+1: Weilun Du <wdu@google.com>
+Submitted-by: Weilun Du <wdu@google.com>
+Submitted-at: Fri, 08 Mar 2019 17:46:39 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/923757
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
