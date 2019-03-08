@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed28e49a_e9c34f79",
+        "filename": "android/android-emu/android/base/memory/MemoryTracker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-03-08T01:33:53Z",
+      "side": 1,
+      "message": "can you sort it after adding all groups? or maybe just use a binary tree (std::set)",
+      "range": {
+        "startLine": 84,
+        "startChar": 8,
+        "endLine": 86,
+        "endChar": 11
+      },
+      "revId": "7eb55c03c58c5b3c2fc1d1f35e7bf6e8e3ce40cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
