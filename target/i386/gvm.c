@@ -2658,7 +2658,6 @@ void gvm_arch_init_irq_routing(GVMState *s)
      * we can use msi via irqfd and GSI routing.
      */
 #if 0
-    gvm_msi_via_irqfd_allowed = true;
     gvm_gsi_routing_allowed = true;
 
     if (gvm_irqchip_is_split()) {

@@ -38,15 +38,9 @@ extern bool gvm_allowed;
 extern bool gvm_kernel_irqchip;
 extern bool gvm_async_interrupts_allowed;
 extern bool gvm_halt_in_kernel_allowed;
-extern bool gvm_eventfds_allowed;
-extern bool gvm_irqfds_allowed;
-extern bool gvm_resamplefds_allowed;
-extern bool gvm_msi_via_irqfd_allowed;
 extern bool gvm_gsi_routing_allowed;
 extern bool gvm_gsi_direct_mapping;
 extern bool gvm_readonly_mem_allowed;
-extern bool gvm_direct_msi_allowed;
-extern bool gvm_ioeventfd_any_length_allowed;
 
 #if defined CONFIG_GVM
 #define gvm_enabled()           (gvm_allowed)
@@ -82,42 +76,6 @@ extern bool gvm_ioeventfd_any_length_allowed;
 #define gvm_halt_in_kernel() (gvm_halt_in_kernel_allowed)
 
 /**
- * gvm_eventfds_enabled:
- *
- * Returns: true if we can use eventfds to receive notifications
- * from a GVM CPU (ie the kernel supports eventds and we are running
- * with a configuration where it is meaningful to use them).
- */
-#define gvm_eventfds_enabled() (gvm_eventfds_allowed)
-
-/**
- * gvm_irqfds_enabled:
- *
- * Returns: true if we can use irqfds to inject interrupts into
- * a GVM CPU (ie the kernel supports irqfds and we are running
- * with a configuration where it is meaningful to use them).
- */
-#define gvm_irqfds_enabled() (gvm_irqfds_allowed)
-
-/**
- * gvm_resamplefds_enabled:
- *
- * Returns: true if we can use resamplefds to inject interrupts into
- * a GVM CPU (ie the kernel supports resamplefds and we are running
- * with a configuration where it is meaningful to use them).
- */
-#define gvm_resamplefds_enabled() (gvm_resamplefds_allowed)
-
-/**
- * gvm_msi_via_irqfd_enabled:
- *
- * Returns: true if we can route a PCI MSI (Message Signaled Interrupt)
- * to a GVM CPU via an irqfd. This requires that the kernel supports
- * this and that we're running in a configuration that permits it.
- */
-#define gvm_msi_via_irqfd_enabled() (gvm_msi_via_irqfd_allowed)
-
-/**
  * gvm_gsi_routing_enabled:
  *
  * Returns: true if GSI routing is enabled (ie the kernel supports
@@ -140,34 +98,16 @@ extern bool gvm_ioeventfd_any_length_allowed;
  */
 #define gvm_readonly_mem_enabled() (gvm_readonly_mem_allowed)
 
-/**
- * gvm_direct_msi_enabled:
- *
- * Returns: true if GVM allows direct MSI injection.
- */
-#define gvm_direct_msi_enabled() (gvm_direct_msi_allowed)
-
-/**
- * gvm_ioeventfd_any_length_enabled:
- * Returns: true if GVM allows any length io eventfd.
- */
-#define gvm_ioeventfd_any_length_enabled() (gvm_ioeventfd_any_length_allowed)
-
 #else
 #define gvm_enabled()           (0)
 #define gvm_irqchip_in_kernel() (false)
 #define gvm_irqchip_is_split() (false)
 #define gvm_async_interrupts_enabled() (false)
 #define gvm_halt_in_kernel() (false)
-#define gvm_eventfds_enabled() (false)
-#define gvm_irqfds_enabled() (false)
-#define gvm_resamplefds_enabled() (false)
-#define gvm_msi_via_irqfd_enabled() (false)
 #define gvm_gsi_routing_allowed() (false)
 #define gvm_gsi_direct_mapping() (false)
 #define gvm_readonly_mem_enabled() (false)
 #define gvm_direct_msi_enabled() (false)
-#define gvm_ioeventfd_any_length_enabled() (false)
 #endif
 
 struct gvm_run;
