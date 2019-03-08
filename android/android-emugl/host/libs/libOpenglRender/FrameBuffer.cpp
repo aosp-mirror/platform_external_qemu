@@ -1316,6 +1316,26 @@ void FrameBuffer::eraseDelayedCloseColorBufferLocked(
 void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
     AutoLock mutex(m_lock);
     cleanupProcGLObjects_locked(puid);
+
+    // Run other cleanup callbacks
+    // Avoid deadlock by first storing a separate list of callbacks
+    std::vector<std::function<void()>> callbacks;
+
+    {
+        auto procIte = m_procOwnedCleanupCallbacks.find(puid);
+        if (procIte != m_procOwnedCleanupCallbacks.end()) {
+            for (auto it : procIte->second) {
+                callbacks.push_back(it.second);
+            }
+            m_procOwnedCleanupCallbacks.erase(procIte);
+        }
+    }
+
+    mutex.unlock();
+
+    for (auto cb : callbacks) {
+        cb();
+    }
 }
 
 void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, bool forced) {
@@ -1371,17 +1391,6 @@ void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, bool forced) {
                 m_contexts.erase(ctx);
             }
             m_procOwnedRenderContext.erase(procIte);
-        }
-    }
-
-    // Run other cleanup callbacks
-    {
-        auto procIte = m_procOwnedCleanupCallbacks.find(puid);
-        if (procIte != m_procOwnedCleanupCallbacks.end()) {
-            for (auto it : procIte->second) {
-                it.second();
-            }
-            m_procOwnedCleanupCallbacks.erase(procIte);
         }
     }
 }
