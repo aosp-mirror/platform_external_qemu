@@ -95,7 +95,6 @@ bool gvm_gsi_routing_allowed;
 bool gvm_gsi_direct_mapping;
 bool gvm_allowed;
 bool gvm_readonly_mem_allowed;
-bool gvm_direct_msi_allowed;
 
 static const GVMCapabilityInfo gvm_required_capabilites[] = {
     GVM_CAP_LAST_INFO
@@ -786,10 +785,8 @@ void gvm_init_irq_routing(GVMState *s)
     s->irq_routes = g_malloc0(sizeof(*s->irq_routes));
     s->nr_allocated_irq_routes = 0;
 
-    if (!gvm_direct_msi_allowed) {
-        for (i = 0; i < GVM_MSI_HASHTAB_SIZE; i++) {
-            QTAILQ_INIT(&s->msi_hashtab[i]);
-        }
+    for (i = 0; i < GVM_MSI_HASHTAB_SIZE; i++) {
+        QTAILQ_INIT(&s->msi_hashtab[i]);
     }
 
     gvm_arch_init_irq_routing(s);
@@ -929,7 +926,7 @@ static int gvm_irqchip_get_virq(GVMState *s)
      * number can succeed even though a new route entry cannot be added.
      * When this happens, flush dynamic MSI entries to free IRQ route entries.
      */
-    if (!gvm_direct_msi_allowed && s->irq_routes->nr == s->gsi_count) {
+    if (s->irq_routes->nr == s->gsi_count) {
         gvm_flush_dynamic_msi_routes(s);
     }
 
@@ -961,17 +958,6 @@ int gvm_irqchip_send_msi(GVMState *s, MSIMessage msg)
 {
     struct gvm_msi msi;
     GVMMSIRoute *route;
-
-    if (gvm_direct_msi_allowed) {
-        msi.address_lo = (uint32_t)msg.address;
-        msi.address_hi = msg.address >> 32;
-        msi.data = le32_to_cpu(msg.data);
-        msi.flags = 0;
-        memset(msi.pad, 0, sizeof(msi.pad));
-
-        return gvm_vm_ioctl(s, GVM_SIGNAL_MSI,
-                &msi, sizeof(msi), NULL, 0);
-    }
 
     route = gvm_lookup_msi_route(s, msg);
     if (!route) {
@@ -1290,10 +1276,6 @@ static int gvm_init(MachineState *ms)
 
 #ifdef GVM_CAP_DEBUGREGS
     s->debugregs = gvm_check_extension(s, GVM_CAP_DEBUGREGS);
-#endif
-
-#ifdef GVM_CAP_IRQ_ROUTING
-    gvm_direct_msi_allowed = (gvm_check_extension(s, GVM_CAP_SIGNAL_MSI) > 0);
 #endif
 
     s->intx_set_mask = gvm_check_extension(s, GVM_CAP_PCI_2_3);

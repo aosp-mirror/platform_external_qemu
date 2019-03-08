@@ -737,9 +737,6 @@ struct gvm_enable_cap {
 #define GVM_CAP_SYNC_REGS 74
 #define GVM_CAP_PCI_2_3 75
 #define GVM_CAP_GVMCLOCK_CTRL 76
-#define GVM_CAP_SIGNAL_MSI 77
-#define GVM_CAP_PPC_GET_SMMU_INFO 78
-#define GVM_CAP_PPC_ALLOC_HTAB 80
 #define GVM_CAP_READONLY_MEM 81
 #define GVM_CAP_IRQFD_RESAMPLE 82
 #define GVM_CAP_ARM_PSCI 87
@@ -1007,8 +1004,6 @@ enum gvm_device_type {
 /* Available with GVM_CAP_TSC_CONTROL */
 #define GVM_SET_TSC_KHZ           __IO(GVMIO,  0xa2)
 #define GVM_GET_TSC_KHZ           __IO(GVMIO,  0xa3)
-/* Available with GVM_CAP_SIGNAL_MSI */
-#define GVM_SIGNAL_MSI            __IOW(GVMIO,  0xa5, struct gvm_msi)
 
 /*
  * ioctls for vcpu fds
