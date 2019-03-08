@@ -181,6 +181,7 @@ static void _emulator_window_on_gpu_frame(void* context,
                                           int width,
                                           int height,
                                           const void* pixels) {
+    D("_emulator_window_on_gpu_frame enter\n");
     EmulatorWindow* emulator = (EmulatorWindow*)context;
     // This function is called from an EmuGL thread, which cannot
     // call the skin_ui_update_gpu_frame() function. Create a GpuFrame
@@ -312,6 +313,8 @@ emulator_window_fb_update( void*   _emulator, int  x, int  y, int  w, int  h )
 {
     EmulatorWindow*  emulator = _emulator;
 
+    D("%s\n", __FUNCTION__);
+
     if (emulator->opts->no_window) {
         return;
     }
@@ -328,6 +331,7 @@ emulator_window_fb_update( void*   _emulator, int  x, int  y, int  w, int  h )
 static void
 emulator_window_fb_rotate( void*  _emulator, int  rotation )
 {
+    D("%s\n", __FUNCTION__);
     EmulatorWindow*  emulator = _emulator;
 
     emulator_window_setup( emulator );

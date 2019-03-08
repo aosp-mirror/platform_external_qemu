@@ -669,7 +669,7 @@ static void adisplay_redraw(ADisplay* disp,
 #if 0
     fprintf(stderr, "--- display redraw r.pos(%d,%d) r.size(%d,%d) "
             "disp.pos(%d,%d) disp.size(%d,%d) datasize(%d,%d) rect.pos(%d,%d) rect.size(%d,%d)\n",
-            r.pos.x - disp->rect.pos.x, r.pos.y - disp->rect.pos.y,
+            r.pos.x, r.pos.y,
             r.size.w, r.size.h, disp->rect.pos.x, disp->rect.pos.y,
             disp->rect.size.w, disp->rect.size.h, disp->datasize.w, disp->datasize.h,
             rect->pos.x, rect->pos.y, rect->size.w, rect->size.h );
