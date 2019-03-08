@@ -1650,8 +1650,6 @@ void pc_basic_device_init(ISABus *isa_bus, qemu_irq *gsi,
     if (!xen_enabled() && has_pit) {
         if (kvm_pit_in_kernel()) {
             pit = kvm_pit_init(isa_bus, 0x40);
-        } else if (gvm_pit_in_kernel()) {
-            pit = gvm_pit_init(isa_bus, 0x0);
         } else {
             pit = i8254_pit_init(isa_bus, 0x40, pit_isa_irq, pit_alt_irq);
         }
