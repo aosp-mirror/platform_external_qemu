@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a1030f38_51fcb2c9",
+        "filename": "android/android-emu/android/recording/FfmpegRecorder.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-08T00:23:14Z",
+      "side": 1,
+      "message": "Can we enable this with VERBOSE_CHECK(record) ?",
+      "range": {
+        "startLine": 219,
+        "startChar": 0,
+        "endLine": 219,
+        "endChar": 45
+      },
+      "revId": "05f343f422ec20b8e6ea9b3e88178d0c8a51661b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c663724c_5d2faa6d",
+        "filename": "android/android-emu/android/recording/FfmpegRecorder.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-08T00:23:14Z",
+      "side": 1,
+      "message": "With the LOG() macros, the file/line number are automatically logged-- consider removing __func__",
+      "range": {
+        "startLine": 480,
+        "startChar": 22,
+        "endLine": 480,
+        "endChar": 30
+      },
+      "revId": "05f343f422ec20b8e6ea9b3e88178d0c8a51661b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "00ee6ee1_7aaac705",
+        "filename": "android/android-emu/android/recording/FfmpegRecorder.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 775,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-08T00:23:14Z",
+      "side": 1,
+      "message": "If you want to update this to use the new LOG macro, this could be VLOG(record)",
+      "range": {
+        "startLine": 775,
+        "startChar": 8,
+        "endLine": 775,
+        "endChar": 9
+      },
+      "revId": "05f343f422ec20b8e6ea9b3e88178d0c8a51661b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
