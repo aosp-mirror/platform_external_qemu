@@ -2679,7 +2679,6 @@ void gvm_arch_init_irq_routing(GVMState *s)
     // since it is unlikely to implement split irqchip for gvm at
     // the moment.
 #if 0
-    gvm_msi_via_irqfd_allowed = true;
     gvm_gsi_routing_allowed = true;
 
     if (gvm_irqchip_is_split()) {
