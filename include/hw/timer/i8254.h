@@ -48,7 +48,6 @@ typedef struct PITChannelInfo {
 
 #define TYPE_I8254 "isa-pit"
 #define TYPE_KVM_I8254 "kvm-pit"
-#define TYPE_GVM_I8254 "gvm-pit"
 
 static inline ISADevice *i8254_pit_init(ISABus *bus, int base, int isa_irq,
                                         qemu_irq alt_irq)
@@ -72,19 +71,6 @@ static inline ISADevice *kvm_pit_init(ISABus *bus, int base)
     ISADevice *d;
 
     d = isa_create(bus, TYPE_KVM_I8254);
-    dev = DEVICE(d);
-    qdev_prop_set_uint32(dev, "iobase", base);
-    qdev_init_nofail(dev);
-
-    return d;
-}
-
-static inline ISADevice *gvm_pit_init(ISABus *bus, int base)
-{
-    DeviceState *dev;
-    ISADevice *d;
-
-    d = isa_create(bus, TYPE_GVM_I8254);
     dev = DEVICE(d);
     qdev_prop_set_uint32(dev, "iobase", base);
     qdev_init_nofail(dev);
