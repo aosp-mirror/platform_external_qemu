@@ -26,6 +26,7 @@ set(android-emu-base_src
     android/base/files/StdioStream.cpp
     android/base/files/Stream.cpp
     android/base/files/StreamSerializing.cpp
+    android/base/GLObjectCounter.cpp
     android/base/misc/FileUtils.cpp
     android/base/misc/HttpUtils.cpp
     android/base/misc/IpcPipe.cpp

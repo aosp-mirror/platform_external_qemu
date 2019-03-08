@@ -21,7 +21,6 @@
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/dma_device.h"
 #include "emugl/common/feature_control.h"
-#include "emugl/common/gl_object_counter.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/misc.h"
 #include "emugl/common/sync_device.h"
@@ -48,8 +47,9 @@ void RenderLibImpl::setLogger(emugl_logger_struct logger) {
     set_emugl_cxt_logger(logger.fine);
 }
 
-void RenderLibImpl::setGLObjCounter(emugl_counter_struct counter) {
-    set_emugl_gl_object_counter(counter);
+void RenderLibImpl::setGLObjectCounter(
+        android::base::GLObjectCounter* counter) {
+    emugl::setGLObjectCounter(counter);
 }
 
 void RenderLibImpl::setCrashReporter(emugl_crash_reporter_t reporter) {
