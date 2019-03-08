@@ -69,9 +69,7 @@
 #define __GVM_HAVE_USER_NMI
 #define __GVM_HAVE_GUEST_DEBUG
 #define __GVM_HAVE_MSIX
-#define __GVM_HAVE_MCE
 #define __GVM_HAVE_PIT_STATE2
-#define __GVM_HAVE_XEN_HVM
 #define __GVM_HAVE_VCPU_EVENTS
 #define __GVM_HAVE_DEBUGREGS
 #define __GVM_HAVE_XSAVE
@@ -295,23 +293,6 @@ struct gvm_guest_debug_arch {
 	__u64 debugreg[8];
 };
 
-struct gvm_pit_state {
-	struct gvm_pit_channel_state channels[3];
-};
-
-#define GVM_PIT_FLAGS_HPET_LEGACY  0x00000001
-
-struct gvm_pit_state2 {
-	struct gvm_pit_channel_state channels[3];
-	__u32 flags;
-	__u32 reserved[9];
-};
-
-struct gvm_reinject_control {
-	__u8 pit_reinject;
-	__u8 reserved[31];
-};
-
 /* When set in flags, include corresponding fields on GVM_SET_VCPU_EVENTS */
 #define GVM_VCPUEVENT_VALID_NMI_PENDING	0x00000001
 #define GVM_VCPUEVENT_VALID_SIPI_VECTOR	0x00000002
@@ -446,40 +427,11 @@ struct gvm_irqchip {
 	__u32 pad;
         union {
 		char dummy[512];  /* reserving space */
-#ifdef __GVM_HAVE_PIT
-		struct gvm_pic_state pic;
-#endif
+                struct gvm_pic_state pic;
 #ifdef __GVM_HAVE_IOAPIC
 		struct gvm_ioapic_state ioapic;
 #endif
 	} chip;
-};
-
-/* for GVM_CREATE_PIT2 */
-struct gvm_pit_config {
-	__u32 flags;
-	__u32 pad[15];
-};
-
-#define GVM_PIT_SPEAKER_DUMMY     1
-
-struct gvm_hyperv_exit {
-#define GVM_EXIT_HYPERV_SYNIC          1
-#define GVM_EXIT_HYPERV_HCALL          2
-	__u32 type;
-	union {
-		struct {
-			__u32 msr;
-			__u64 control;
-			__u64 evt_page;
-			__u64 msg_page;
-		} synic;
-		struct {
-			__u64 input;
-			__u64 result;
-			__u64 params[2];
-		} hcall;
-	} u;
 };
 
 #define GVM_EXIT_UNKNOWN          0
@@ -612,8 +564,6 @@ struct gvm_run {
 		struct {
 			__u8 vector;
 		} eoi;
-		/* GVM_EXIT_HYPERV */
-		struct gvm_hyperv_exit hyperv;
 		/* Fix the size of the union. */
 		char padding[256];
 	};
@@ -632,30 +582,6 @@ struct gvm_run {
 		char padding[2048];
 	} s;
 };
-
-/* for GVM_REGISTER_COALESCED_MMIO / GVM_UNREGISTER_COALESCED_MMIO */
-
-struct gvm_coalesced_mmio_zone {
-	__u64 addr;
-	__u32 size;
-	__u32 pad;
-};
-
-struct gvm_coalesced_mmio {
-	__u64 phys_addr;
-	__u32 len;
-	__u32 pad;
-	__u8  data[8];
-};
-
-struct gvm_coalesced_mmio_ring {
-	__u32 first, last;
-	struct gvm_coalesced_mmio coalesced_mmio[0];
-};
-
-#define GVM_COALESCED_MMIO_MAX \
-	((PAGE_SIZE - sizeof(struct gvm_coalesced_mmio_ring)) / \
-	 sizeof(struct gvm_coalesced_mmio))
 
 /* for GVM_TRANSLATE */
 struct gvm_translation {
@@ -768,32 +694,18 @@ struct gvm_enable_cap {
 #define GVM_CAP_CLOCKSOURCE 8
 #define GVM_CAP_NR_VCPUS 9       /* returns recommended max vcpus per vm */
 #define GVM_CAP_NR_MEMSLOTS 10   /* returns max memory slots per vm */
-#define GVM_CAP_PIT 11
 #define GVM_CAP_NOP_IO_DELAY 12
-#define GVM_CAP_COALESCED_MMIO 15
 #define GVM_CAP_SYNC_MMU 16  /* Changes to host mmap are reflected in guest */
 #define GVM_CAP_IOMMU 18
 #define GVM_CAP_USER_NMI 22
 #ifdef __GVM_HAVE_GUEST_DEBUG
 #define GVM_CAP_SET_GUEST_DEBUG 23
 #endif
-#ifdef __GVM_HAVE_PIT
-#define GVM_CAP_REINJECT_CONTROL 24
-#endif
 #define GVM_CAP_IRQ_ROUTING 25
 #define GVM_CAP_IRQ_INJECT_STATUS 26
 #define GVM_CAP_ASSIGN_DEV_IRQ 29
-#ifdef __GVM_HAVE_PIT
-#define GVM_CAP_PIT2 33
-#endif
 #define GVM_CAP_SET_BOOT_CPU_ID 34
-#ifdef __GVM_HAVE_PIT_STATE2
-#define GVM_CAP_PIT_STATE2 35
-#endif
 #define GVM_CAP_SET_IDENTITY_MAP_ADDR 37
-#ifdef __GVM_HAVE_XEN_HVM
-#define GVM_CAP_XEN_HVM 38
-#endif
 #define GVM_CAP_ADJUST_CLOCK 39
 #ifdef __GVM_HAVE_VCPU_EVENTS
 #define GVM_CAP_VCPU_EVENTS 41
@@ -1083,65 +995,20 @@ enum gvm_device_type {
 #define GVM_IRQ_LINE              __IOW(GVMIO,  0x61, struct gvm_irq_level)
 #define GVM_GET_IRQCHIP           __IOWR(GVMIO, 0x62, struct gvm_irqchip)
 #define GVM_SET_IRQCHIP           __IOR(GVMIO,  0x63, struct gvm_irqchip)
-#define GVM_CREATE_PIT            __IO(GVMIO,   0x64)
-#define GVM_GET_PIT               __IOWR(GVMIO, 0x65, struct gvm_pit_state)
-#define GVM_SET_PIT               __IOR(GVMIO,  0x66, struct gvm_pit_state)
 #define GVM_IRQ_LINE_STATUS       __IOWR(GVMIO, 0x67, struct gvm_irq_level)
-#define GVM_REGISTER_COALESCED_MMIO \
-			__IOW(GVMIO,  0x67, struct gvm_coalesced_mmio_zone)
-#define GVM_UNREGISTER_COALESCED_MMIO \
-			__IOW(GVMIO,  0x68, struct gvm_coalesced_mmio_zone)
-#define GVM_ASSIGN_PCI_DEVICE     __IOR(GVMIO,  0x69, \
-				       struct gvm_assigned_pci_dev)
 #define GVM_SET_GSI_ROUTING       __IOW(GVMIO,  0x6a, struct gvm_irq_routing)
 /* deprecated, replaced by GVM_ASSIGN_DEV_IRQ */
 #define GVM_ASSIGN_IRQ            __GVM_DEPRECATED_VM_R_0x70
 #define GVM_ASSIGN_DEV_IRQ        __IOW(GVMIO,  0x70, struct gvm_assigned_irq)
 #define GVM_REINJECT_CONTROL      __IO(GVMIO,   0x71)
-#define GVM_DEASSIGN_PCI_DEVICE   __IOW(GVMIO,  0x72, \
-				       struct gvm_assigned_pci_dev)
-#define GVM_ASSIGN_SET_MSIX_NR    __IOW(GVMIO,  0x73, \
-				       struct gvm_assigned_msix_nr)
-#define GVM_ASSIGN_SET_MSIX_ENTRY __IOW(GVMIO,  0x74, \
-				       struct gvm_assigned_msix_entry)
-#define GVM_DEASSIGN_DEV_IRQ      __IOW(GVMIO,  0x75, struct gvm_assigned_irq)
-#define GVM_CREATE_PIT2		  __IOW(GVMIO,  0x77, struct gvm_pit_config)
 #define GVM_SET_BOOT_CPU_ID       __IO(GVMIO,   0x78)
-#define GVM_XEN_HVM_CONFIG        __IOW(GVMIO,  0x7a, struct gvm_xen_hvm_config)
 #define GVM_SET_CLOCK             __IOW(GVMIO,  0x7b, struct gvm_clock_data)
 #define GVM_GET_CLOCK             __IOR(GVMIO,  0x7c, struct gvm_clock_data)
-/* Available with GVM_CAP_PIT_STATE2 */
-#define GVM_GET_PIT2              __IOR(GVMIO,  0x9f, struct gvm_pit_state2)
-#define GVM_SET_PIT2              __IOW(GVMIO,  0xa0, struct gvm_pit_state2)
-/* Available with GVM_CAP_PPC_GET_PVINFO */
-#define GVM_PPC_GET_PVINFO	  __IOW(GVMIO,  0xa1, struct gvm_ppc_pvinfo)
 /* Available with GVM_CAP_TSC_CONTROL */
 #define GVM_SET_TSC_KHZ           __IO(GVMIO,  0xa2)
 #define GVM_GET_TSC_KHZ           __IO(GVMIO,  0xa3)
-/* Available with GVM_CAP_PCI_2_3 */
-#define GVM_ASSIGN_SET_INTX_MASK  __IOW(GVMIO,  0xa4, \
-				       struct gvm_assigned_pci_dev)
 /* Available with GVM_CAP_SIGNAL_MSI */
 #define GVM_SIGNAL_MSI            __IOW(GVMIO,  0xa5, struct gvm_msi)
-#define GVM_CREATE_SPAPR_TCE	  __IOW(GVMIO,  0xa8, struct gvm_create_spapr_tce)
-#define GVM_CREATE_SPAPR_TCE_64	  __IOW(GVMIO,  0xa8, \
-				       struct gvm_create_spapr_tce_64)
-/* Available with GVM_CAP_RMA */
-#define GVM_ALLOCATE_RMA	  __IOR(GVMIO,  0xa9, struct gvm_allocate_rma)
-/* Available with GVM_CAP_PPC_HTAB_FD */
-#define GVM_PPC_GET_HTAB_FD	  __IOW(GVMIO,  0xaa, struct gvm_get_htab_fd)
-/* Available with GVM_CAP_ARM_SET_DEVICE_ADDR */
-#define GVM_ARM_SET_DEVICE_ADDR	  __IOW(GVMIO,  0xab, struct gvm_arm_device_addr)
-/* Available with GVM_CAP_PPC_RTAS */
-#define GVM_PPC_RTAS_DEFINE_TOKEN __IOW(GVMIO,  0xac, struct gvm_rtas_token_args)
-
-/* ioctl for vm fd */
-#define GVM_CREATE_DEVICE	  __IOWR(GVMIO,  0xe0, struct gvm_create_device)
-
-/* ioctls for fds returned by GVM_CREATE_DEVICE */
-#define GVM_SET_DEVICE_ATTR	  __IOW(GVMIO,  0xe1, struct gvm_device_attr)
-#define GVM_GET_DEVICE_ATTR	  __IOW(GVMIO,  0xe2, struct gvm_device_attr)
-#define GVM_HAS_DEVICE_ATTR	  __IOW(GVMIO,  0xe3, struct gvm_device_attr)
 
 /*
  * ioctls for vcpu fds
@@ -1199,56 +1066,6 @@ enum gvm_device_type {
 #define GVM_GET_REG_LIST	  __IOWR(GVMIO, 0xb0, struct gvm_reg_list)
 /* Available with GVM_CAP_X86_SMM */
 #define GVM_SMI                   __IO(GVMIO,   0xb7)
-
-#define GVM_DEV_ASSIGN_ENABLE_IOMMU	(1 << 0)
-#define GVM_DEV_ASSIGN_PCI_2_3		(1 << 1)
-#define GVM_DEV_ASSIGN_MASK_INTX	(1 << 2)
-
-struct gvm_assigned_pci_dev {
-	__u32 assigned_dev_id;
-	__u32 busnr;
-	__u32 devfn;
-	__u32 flags;
-	__u32 segnr;
-	union {
-		__u32 reserved[11];
-	};
-};
-
-#define GVM_DEV_IRQ_HOST_INTX    (1 << 0)
-#define GVM_DEV_IRQ_HOST_MSI     (1 << 1)
-#define GVM_DEV_IRQ_HOST_MSIX    (1 << 2)
-
-#define GVM_DEV_IRQ_GUEST_INTX   (1 << 8)
-#define GVM_DEV_IRQ_GUEST_MSI    (1 << 9)
-#define GVM_DEV_IRQ_GUEST_MSIX   (1 << 10)
-
-#define GVM_DEV_IRQ_HOST_MASK	 0x00ff
-#define GVM_DEV_IRQ_GUEST_MASK   0xff00
-
-struct gvm_assigned_irq {
-	__u32 assigned_dev_id;
-	__u32 host_irq; /* ignored (legacy field) */
-	__u32 guest_irq;
-	__u32 flags;
-	union {
-		__u32 reserved[12];
-	};
-};
-
-struct gvm_assigned_msix_nr {
-	__u32 assigned_dev_id;
-	__u16 entry_nr;
-	__u16 padding;
-};
-
-#define GVM_MAX_MSIX_PER_DEV		256
-struct gvm_assigned_msix_entry {
-	__u32 assigned_dev_id;
-	__u32 gsi;
-	__u16 entry; /* The index of entry in the MSI-X table */
-	__u16 padding[3];
-};
 
 #define GVM_X2APIC_API_USE_32BIT_IDS            (1ULL << 0)
 #define GVM_X2APIC_API_DISABLE_BROADCAST_QUIRK  (1ULL << 1)
