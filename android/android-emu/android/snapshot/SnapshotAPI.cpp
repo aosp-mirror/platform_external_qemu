@@ -19,6 +19,7 @@
 #include "android/offworld/OffworldPipe.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
+#include "android/opengl/emugl_config.h"
 
 #include <atomic>
 #include <cassert>
@@ -119,6 +120,12 @@ namespace snapshot {
 
 void createCheckpoint(AsyncMessagePipeHandle pipe,
                       android::base::StringView name) {
+    // BUG: 127849628
+    if (!emuglConfig_current_renderer_supports_snapshot()) {
+        android::offworld::sendResponse(pipe, createErrorResponse());
+        return;
+    }
+
     const std::string snapshotName = name;
 
     sSnapshotCrossSession->mPipesAwaitingResponse[pipe] =
@@ -171,7 +178,8 @@ void gotoCheckpoint(
 void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
                            int forkTotal) {
     if (android::multiinstance::getInstanceShareMode() !=
-        android::base::FileShare::Write) {
+        android::base::FileShare::Write ||
+        !emuglConfig_current_renderer_supports_snapshot()) {
         android::offworld::sendResponse(pipe, createErrorResponse());
         return;
     }
