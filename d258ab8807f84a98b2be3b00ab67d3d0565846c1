@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ac8cecd9_f7f2af8a",
+        "filename": "android/android-emu/android-libui.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2019-03-08T15:36:55Z",
+      "side": 1,
+      "message": "It looks like these should be in alphabetical order",
+      "range": {
+        "startLine": 125,
+        "startChar": 4,
+        "endLine": 125,
+        "endChar": 47
+      },
+      "revId": "d258ab8807f84a98b2be3b00ab67d3d0565846c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "683d9a41_1eb48e5d",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 427,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2019-03-08T15:36:55Z",
+      "side": 1,
+      "message": "Would it be good to make this conditional?\nDo we have a property that tells us that the AVD is Auto?",
+      "range": {
+        "startLine": 427,
+        "startChar": 31,
+        "endLine": 427,
+        "endChar": 59
+      },
+      "revId": "d258ab8807f84a98b2be3b00ab67d3d0565846c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dd632911_eb2a27a4",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2019-03-08T15:36:55Z",
+      "side": 1,
+      "message": "Alphabetize and remove blank line",
+      "range": {
+        "startLine": 30,
+        "startChar": 9,
+        "endLine": 31,
+        "endChar": 0
+      },
+      "revId": "d258ab8807f84a98b2be3b00ab67d3d0565846c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
