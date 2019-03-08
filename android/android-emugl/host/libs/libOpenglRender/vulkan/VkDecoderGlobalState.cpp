@@ -66,7 +66,7 @@ class VkDecoderGlobalState::Impl {
 public:
     Impl() :
         m_vk(emugl::vkDispatch()),
-        m_emu(createOrGetGlobalVkEmulation(m_vk)) { }
+        m_emu(getGlobalVkEmulation()) { }
     ~Impl() = default;
 
     VkResult on_vkCreateInstance(
