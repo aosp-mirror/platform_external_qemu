@@ -147,9 +147,16 @@ void CarPropertyTable::processMsg(EmulatorMessage emulatorMsg) {
         for (int valIndex = 0; valIndex < emulatorMsg.value_size(); valIndex++) {
             VehiclePropValue val = emulatorMsg.value(valIndex);
             if (!propMap.count(val.prop())) {
-                // Some received constants aren't on the list, so just listing
-                // their raw value as their label.
-                propMap[val.prop()] = { QString::number(val.prop()) };
+                // Some received constants are vendor id and aren't on the list. 
+                // so if constants is vendor id, transfer raw value to hex and 
+                // build as vender label like Vendor(id: XXX) where XXX is hex 
+                // representation of the property. If not, show raw value.
+                if (carpropertyutils::isVendor(val.prop())) {
+                    propMap[val.prop()] = { carpropertyutils::vendorIdToString(val.prop()) };
+                } else {
+                    propMap[val.prop()] = { QString::number(val.prop()) };
+                }
+                
             }
             PropertyDescription propDesc = propMap[val.prop()];
 

@@ -17,14 +17,20 @@
 #include <QObject>
 #include <QSettings>
 #include <QDoubleValidator>
+#include <sstream>
+#include <iomanip>
+
 #define D(...) VERBOSE_PRINT(car, __VA_ARGS__)
 
 using std::map;
 using std::vector;
+using std::stringstream;
+using std::hex;
 using emulator::EmulatorMessage;
 using emulator::MsgType;
 using emulator::Status;
 using emulator::VehicleProperty;
+using emulator::VehiclePropertyGroup;
 using emulator::VehiclePropValue;
 using emulator::VehicleGear;
 using emulator::VehicleIgnitionState;
@@ -486,6 +492,12 @@ QString carpropertyutils::floatVecToString(PropertyDescription prop, vector<floa
     return concat;
 }
 
+QString carpropertyutils::int32ToHexString(int32_t val) {
+    stringstream valStringStream;
+    valStringStream << hex << val;
+    return QObject::tr(valStringStream.str().c_str());
+}
+
 QString carpropertyutils::multiDetailToString(map<int, QString> lookupTable, int value) {
     QString details;
     for (const auto &locDetail : lookupTable) {
@@ -529,4 +541,14 @@ QString carpropertyutils::apPowerStateReportToString(vector<int32_t> vals) {
         output += "Time to turn on AP: " + QString::number(vals[1]) + " s";
     }
     return QObject::tr(output.toLocal8Bit().data());
+}
+
+QString carpropertyutils::vendorIdToString(int32_t val){
+    QString vendorLabel = "Vendor(id: 0x" + int32ToHexString(val) + ")";
+    return QObject::tr(vendorLabel.toLocal8Bit().data());
+}
+
+bool carpropertyutils::isVendor(int32_t val) {
+    return (val & (int32_t)VehiclePropertyGroup::VENDOR)
+            == (int32_t)VehiclePropertyGroup::VENDOR;
 }

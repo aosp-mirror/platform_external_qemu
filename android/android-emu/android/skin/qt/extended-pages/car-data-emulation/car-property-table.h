@@ -40,7 +40,8 @@ namespace carpropertyutils {
     QString int64VecToString(PropertyDescription prop, std::vector<int64_t> vals);
     QString floatToString(PropertyDescription prop, float val);
     QString floatVecToString(PropertyDescription prop, std::vector<float> vals);
-
+    QString int32ToHexString(int32_t val);
+ 
     QString getValueString(emulator::VehiclePropValue val);
     QString getAreaString(emulator::VehiclePropValue val);
 
@@ -49,6 +50,9 @@ namespace carpropertyutils {
     QString heatingCoolingToString(int32_t val);
     QString apPowerStateReqToString(std::vector<int32_t> vals);
     QString apPowerStateReportToString(std::vector<int32_t> vals);
+    QString vendorIdToString(int32_t val);
+    bool isVendor(int32_t val);
+
 }  // namespace carpropertyutils
 
 // Table displaying properties of the emulated car & their values.
