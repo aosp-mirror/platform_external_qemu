@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "25a83304_09616f5e",
+        "filename": "android/android-emu/android/base/memory/MemoryTracker.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-03-08T17:49:08Z",
+      "side": 1,
+      "message": "From the std::set compare function, it seems sorting by ending address",
+      "revId": "aff19c855a2279ce53bd305d4c941ddfacfc8684",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
