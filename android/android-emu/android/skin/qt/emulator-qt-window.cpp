@@ -2148,20 +2148,6 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
     }
     setDisplayRegion(displayXOffset, displayYOffset, backingSize.width(), backingSize.height());
 
-    EmulatorWindow* eW = emulator_window_get();
-    if (eW && eW->ui) {
-        skin_ui_update_display(eW->ui, windowGeo.x(), windowGeo.y(), windowGeo.width(), windowGeo.height());
-    }
-
-    delete mBackingSurface->bitmap;
-    mBackingSurface->bitmap = new SkinSurfaceBitmap(backingSize.width(), backingSize.height());
-
-    int originalWidth = mBackingSurface->bitmap->size().width();
-    int originalHeight = mBackingSurface->bitmap->size().height();
-
-    double widthScale  = (double)windowGeo.width()  / (double)originalWidth;
-    double heightScale = (double)windowGeo.height() / (double)originalHeight;
-
     simulateSetScale(std::max(.2, (double)scale));
 
     QRect containerGeo = mContainer.geometry();
