@@ -16,6 +16,24 @@
       "revId": "a91251a89e653c40ef067436527a11abe61293e9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dff9e9ca_88fe09b3",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 2153,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2019-03-08T02:01:49Z",
+      "side": 1,
+      "message": "I think it\u0027s OK to remove that. It does seem to be redundant with what happens when this calls simulateSetScale().",
+      "parentUuid": "6c8ecc84_2afe090d",
+      "revId": "a91251a89e653c40ef067436527a11abe61293e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
