@@ -13,7 +13,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 
-#if defined(__linux__) || defined(__APPLE__)
+#if defined(__linux__)
 #include <malloc_extension_c.h>
 #include <malloc_hook.h>
 
@@ -46,7 +46,7 @@ struct FuncRange {
 
 class MemoryTracker::Impl {
 public:
-#if defined(__linux__) || defined(__APPLE__)
+#if defined(__linux__)
     Impl()
         : mData([](const FuncRange* a, const FuncRange* b) {
               return a->mAddr + a->mLength < b->mAddr + b->mLength;
@@ -103,8 +103,6 @@ public:
         void* results[kStackTraceLimit];
 #if defined(__linux__)
         int ret = unw_backtrace(results, kStackTraceLimit);
-#else
-        int ret = backtrace(results, kStackTraceLimit);
 #endif
         for (int i = 5; i < ret; i++) {
             intptr_t addr = (intptr_t)results[i];
@@ -129,8 +127,6 @@ public:
         void* results[kStackTraceLimit];
 #if defined(__linux__)
         int ret = unw_backtrace(results, kStackTraceLimit);
-#else
-        int ret = backtrace(results, kStackTraceLimit);
 #endif
         for (int i = 5; i < ret; i++) {
             intptr_t addr = (intptr_t)results[i];
@@ -251,7 +247,7 @@ static LazyInstance<MemoryTracker> sMemoryTracker = LAZY_INSTANCE_INIT;
 
 // static
 MemoryTracker* MemoryTracker::get() {
-#if defined(__linux__) || defined(__APPLE__)
+#if defined(__linux__)
     return sMemoryTracker.ptr();
 #else
     return nullptr;

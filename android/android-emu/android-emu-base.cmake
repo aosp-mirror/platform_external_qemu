@@ -140,7 +140,6 @@ android_target_link_libraries(android-emu-base windows-x86_64 PUBLIC psapi::psap
 android_target_link_libraries(android-emu-base
                               darwin-x86_64
                               PUBLIC
-                              TCMALLOC::TCMALLOC
                               "-framework Foundation"
                               "-framework ApplicationServices"
                               "-framework IOKit")
