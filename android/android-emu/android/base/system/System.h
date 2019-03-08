@@ -365,6 +365,9 @@ public:
     // Return the path of a temporary directory appropriate for the system.
     virtual std::string getTempDir() const = 0;
 
+    // Return if enable the crash reporting
+    virtual bool getEnableCrashReporting() const = 0;
+
     // /////////////////////////////////////////////////////////////////////////
     // Time related functions.
     // /////////////////////////////////////////////////////////////////////////
