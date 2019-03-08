@@ -25,7 +25,6 @@ static bool s_isPhone = false;
 static int s_glesMajorVersion = 2;
 static int s_glesMinorVersion = 0;
 
-android::base::GLObjectCounter* s_gl_object_counter = nullptr;
 android::base::CpuUsage* s_cpu_usage = nullptr;
 android::base::MemoryTracker* s_mem_usage = nullptr;
 
@@ -69,14 +68,6 @@ bool emugl::hasExtension(const char* extensionsStr, const char* wantedExtension)
         return true;
     }
     return false;
-}
-
-void emugl::setGLObjectCounter(android::base::GLObjectCounter* counter) {
-    s_gl_object_counter = counter;
-}
-
-android::base::GLObjectCounter* emugl::getGLObjectCounter() {
-    return s_gl_object_counter;
 }
 
 void emugl::setCpuUsage(android::base::CpuUsage* usage) {

@@ -13,11 +13,11 @@
 // limitations under the License.
 #include <gtest/gtest.h>
 
-#include "android/base/GLObjectCounter.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/perflogger/BenchmarkLibrary.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
+#include "android/opengl/GLObjectCounter.h"
 #include "android/opengles.h"
 
 #include "AndroidBufferQueue.h"
@@ -76,14 +76,15 @@ protected:
     void SetUp() override {
         setupGralloc();
         setupEGLAndMakeCurrent();
-        mBeforeTest = android::base::GLObjectCounter::get()->getCounts();
+        android::opengl::getOpenGLObjectCounts(&mBeforeTest);
     }
 
     void TearDown() override {
         if (eglGetCurrentContext() != EGL_NO_CONTEXT) {
             glFinish(); // sync the pipe
         }
-        mAfterTest = android::base::GLObjectCounter::get()->getCounts();
+
+        android::opengl::getOpenGLObjectCounts(&mAfterTest);
         for (int i = 0; i < mBeforeTest.size(); i++) {
             EXPECT_TRUE(mBeforeTest[i] >= mAfterTest[i]) <<
                 "Leaked objects of type " << i;
@@ -236,8 +237,8 @@ protected:
 
     struct gralloc_implementation mGralloc;
     EGLState mEGL;
-    std::vector<size_t> mBeforeTest;
-    std::vector<size_t> mAfterTest;
+    std::vector<int> mBeforeTest;
+    std::vector<int> mAfterTest;
 };
 
 // static
@@ -340,7 +341,7 @@ TEST_F(CombinedGoldfishOpenglTest, ShowWindow) {
 TEST_F(CombinedGoldfishOpenglTest, DISABLED_ThreadCleanup) {
     // initial clean up.
     eglRelease();
-    mBeforeTest = android::base::GLObjectCounter::get()->getCounts();
+    android::opengl::getOpenGLObjectCounts(&mBeforeTest);
     for (int i = 0; i < 100; i++) {
         std::unique_ptr<FunctorThread> th(new FunctorThread([this]() {
             setupEGLAndMakeCurrent();

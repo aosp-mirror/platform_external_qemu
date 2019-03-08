@@ -30,8 +30,7 @@ public:
     virtual void setAvdInfo(bool phone, int api) override;
     virtual void getGlesVersion(int* maj, int* min) override;
     virtual void setLogger(emugl_logger_struct logger) override;
-    virtual void setGLObjectCounter(
-            android::base::GLObjectCounter* counter) override;
+    virtual void setGLObjCounter(emugl_counter_struct counter) override;
     virtual void setCrashReporter(emugl_crash_reporter_t reporter) override;
     virtual void setFeatureController(emugl_feature_is_enabled_t featureController) override;
     virtual void setSyncDevice(emugl_sync_create_timeline_t,

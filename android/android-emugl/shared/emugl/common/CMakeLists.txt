@@ -7,7 +7,8 @@ set(emugl_common_src
     misc.cpp
     shared_library.cpp
     stringparsing.cpp
-    sync_device.cpp)
+    sync_device.cpp
+    gl_object_counter.cpp)
 
 android_add_shared_library(emugl_common)
 android_target_compile_definitions(emugl_common windows_msvc-x86_64 PRIVATE "-DBUILDING_EMUGL_COMMON_SHARED")
