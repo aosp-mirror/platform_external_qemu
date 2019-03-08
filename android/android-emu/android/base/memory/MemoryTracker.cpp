@@ -19,8 +19,8 @@
 
 #include <execinfo.h>
 #include <libunwind.h>
+#include <set>
 #include <sstream>
-#include <unordered_map>
 #include <vector>
 #endif
 
@@ -39,7 +39,7 @@ struct MallocStats {
 
 struct FuncRange {
     std::string mName;
-    void* mAddr;
+    intptr_t mAddr;
     size_t mLength;
     MallocStats mStats;
 };
@@ -47,29 +47,34 @@ struct FuncRange {
 class MemoryTracker::Impl {
 public:
 #if defined(__linux__) || defined(__APPLE__)
-    bool addToGroup(const std::string& group, const std::string& func) {
-        if (!enabled)  return false;
+    Impl()
+        : mData([](const FuncRange* a, const FuncRange* b) {
+              return a->mAddr + a->mLength < b->mAddr + b->mLength;
+          }) {}
 
+    bool addToGroup(const std::string& group, const std::string& func) {
         std::string key = group + func;
-        if (mData.find(group + func) != mData.end()) {
+        if (mRegisterFuncs.find(group + func) != mRegisterFuncs.end()) {
             return false;
         }
+
         unw_cursor_t cursor;
         unw_context_t uc;
         unw_getcontext(&uc);
         unw_init_local(&cursor, &uc);
         /* We step for 3 times because, in <GLcommon/GLESmacros.h>, addToGroup()
-        is invoked by MEM_TRACE_IF using std::call_once().
-        This approach to reduce unnecessary checks and potential
-        race conditions. The typical backtrace looks like:
-        10c121b2c (android::base::MemoryTracker::addToGroup()
-        10c0cebb6 (void std::__1::__call_once_proxy<std::__1::tuple<>>(void*))
-        7fff4e9f336e (std::__1::__call_once(unsigned long volatile&, void*, void (*)(void*)))
-        10c0cc489 (eglClientWaitSyncKHR)+89
-        where eglClientWaitSyncKHR is what we want to register. Do not change the
-        number of times unw_step() unless the implementation for MEM_TRACE_IF in
-        <GLcommon/GLESmacros.h> has changed.
-        */
+         * is invoked by MEM_TRACE_IF using std::call_once().
+         * This approach to reduce unnecessary checks and potential
+         * race conditions. The typical backtrace looks like:
+         * 10c121b2c (android::base::MemoryTracker::addToGroup()
+         * 10c0cebb6 (void
+         * std::__1::__call_once_proxy<std::__1::tuple<>>(void*)) 7fff4e9f336e
+         * (std::__1::__call_once(unsigned long volatile&, void*, void
+         * (*)(void*))) 10c0cc489 (eglClientWaitSyncKHR)+89 where
+         * eglClientWaitSyncKHR is what we want to register. Do not change the
+         * number of times unw_step() unless the implementation for MEM_TRACE_IF
+         * in <GLcommon/GLESmacros.h> has changed.
+         */
         unw_step(&cursor);
         unw_step(&cursor);
         unw_step(&cursor);
@@ -77,16 +82,18 @@ public:
         if (0 != unw_get_proc_info(&cursor, &info)) {
             return false;
         }
-        mData.emplace(key, new FuncRange{func, (void*)info.start_ip,
-                                         info.end_ip - info.start_ip});
+        mRegisterFuncs.insert(key);
+        mData.insert(new FuncRange{key, (intptr_t)info.start_ip,
+                                   info.end_ip - info.start_ip});
+
         return true;
     }
 
     void aggregate(std::string label, MallocStats* ms) {
         for (auto& it : mData) {
-            if (it.first.compare(0, label.size(), label) == 0) {
-                ms->mAllocated += it.second->mStats.mAllocated.load();
-                ms->mLive += it.second->mStats.mLive.load();
+            if (it->mName.compare(0, label.size(), label) == 0) {
+                ms->mAllocated += it->mStats.mAllocated.load();
+                ms->mLive += it->mStats.mLive.load();
             }
         }
     }
@@ -99,20 +106,21 @@ public:
 #else
         int ret = backtrace(results, kStackTraceLimit);
 #endif
-        bool found = false;
         for (int i = 5; i < ret; i++) {
-            for (auto& it : mData) {
-                if ((intptr_t)results[i] >= (intptr_t)it.second->mAddr &&
-                    (intptr_t)results[i] - (intptr_t)it.second->mAddr <
-                            it.second->mLength) {
-                    it.second->mStats.mAllocated += size;
-                    it.second->mStats.mLive += size;
-                    found = true;
-                    break;
-                }
-            }
-            if (found)
+            intptr_t addr = (intptr_t)results[i];
+            /*
+             * The invariant is that all registered functions will be sorted
+             * based on the starting address. We can use binary search to test
+             * if an address falls within a specific function and reduce the
+             * look up time.
+             */
+            FuncRange func{"", addr, 0};
+            auto it = mData.upper_bound(&func);
+            if (it != mData.end() && (*it)->mAddr <= addr) {
+                (*it)->mStats.mAllocated += size;
+                (*it)->mStats.mLive += size;
                 break;
+            }
         }
     }
 
@@ -124,19 +132,14 @@ public:
 #else
         int ret = backtrace(results, kStackTraceLimit);
 #endif
-        bool found = false;
         for (int i = 5; i < ret; i++) {
-            for (auto& it : mData) {
-                if ((intptr_t)results[i] >= (intptr_t)it.second->mAddr &&
-                    (intptr_t)results[i] - (intptr_t)it.second->mAddr <
-                            it.second->mLength) {
-                    it.second->mStats.mLive -= size;
-                    found = true;
-                    break;
-                }
-            }
-            if (found)
+            intptr_t addr = (intptr_t)results[i];
+            FuncRange func{"", addr, 0};
+            auto it = mData.upper_bound(&func);
+            if (it != mData.end() && (*it)->mAddr <= addr) {
+                (*it)->mStats.mLive -= size;
                 break;
+            }
         }
     }
 
@@ -158,8 +161,8 @@ public:
         // sorted by live memory
         if (verbosity) {
             std::vector<FuncRange*> allStats;
-            for (auto& it : mData) {
-                allStats.push_back(it.second);
+            for (auto it : mData) {
+                allStats.push_back(it);
             }
             std::sort(allStats.begin(), allStats.end(),
                       [](FuncRange* a, FuncRange* b) {
@@ -205,7 +208,8 @@ public:
 
 private:
     bool enabled = false;
-    std::unordered_map<std::string, FuncRange*> mData;
+    std::set<FuncRange*, bool (*)(const FuncRange*, const FuncRange*)> mData;
+    std::set<std::string> mRegisterFuncs;
     static const int kStackTraceLimit = 32;
 #else
     bool addToGroup(std::string group, std::string func) {
