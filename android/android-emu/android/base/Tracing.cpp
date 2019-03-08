@@ -12,7 +12,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "Tracing.h"
+#include "android/base/Tracing.h"
 
 #include "android/base/system/System.h"
 #include "android/base/memory/LazyInstance.h"
@@ -41,8 +41,6 @@ public:
         float ms = ((float)us) / 1000.0f;
         mNames[mIndentLevel] = name;
 
-        ensureIndentLevel(mIndentLevel);
-
         printf("tid:0x%016llx:%s%s @ %f ms {\n",
                (unsigned long long)getCurrentThreadId(),
                mIndents[mIndentLevel].c_str(),
@@ -50,6 +48,9 @@ public:
                ms);
 
         ++mIndentLevel;
+
+        ensureIndentLevel(mIndentLevel);
+
     }
 
     void end() {
@@ -97,9 +98,84 @@ private:
     std::vector<std::string> mNames;
 };
 
+class ThresholdPrinter {
+public:
+    ThresholdPrinter() {
+        ensureIndentLevel(kDefaultIndentLevels);
+    }
+
+    void begin(const char* name, uint64_t thresholdUs) {
+        auto us = System::getSystemTimeUs();
+
+        mTimes[mIndentLevel] = us;
+        mThresholds[mIndentLevel] = thresholdUs;
+        float ms = ((float)us) / 1000.0f;
+        mNames[mIndentLevel] = name;
+
+        ++mIndentLevel;
+
+        ensureIndentLevel(mIndentLevel);
+    }
+
+    void end() {
+        --mIndentLevel;
+
+        auto us = System::getSystemTimeUs();
+
+        mTimes[mIndentLevel] = us - mTimes[mIndentLevel];
+
+        if (mTimes[mIndentLevel] > mThresholds[mIndentLevel]) {
+            float thresholdMs = mThresholds[mIndentLevel] / 1000.0f;
+            float ms = mTimes[mIndentLevel] / 1000.0f;
+            printf("tid:0x%016llx:%s [%s] over threshold %f ms: %f ms\n",
+                   (unsigned long long)getCurrentThreadId(),
+                   mIndents[mIndentLevel].c_str(),
+                   mNames[mIndentLevel].c_str(),
+                   thresholdMs, ms);
+        }
+    }
+
+private:
+    void ensureIndentLevel(size_t level) {
+        if (mIndents.size() < level) {
+            size_t prev_size = mIndents.size();
+            mIndents.resize(level * 2);
+            for (size_t i = prev_size;
+                 i < mIndents.size(); ++i) {
+                std::string s;
+                for (size_t j = 0; j < i; ++j) {
+                    s += kIndentString;
+                }
+                mIndents[i] = s;
+            }
+        }
+
+        if (mTimes.size() < level) {
+            mTimes.resize(level * 2, 0);
+        }
+
+        if (mThresholds.size() < level) {
+            mThresholds.resize(level * 2, 0);
+        }
+
+        if (mNames.size() < level) {
+            mNames.resize(level * 2);
+        }
+    }
+
+    size_t mIndentLevel = 0;
+    std::vector<std::string> mIndents;
+    std::vector<System::WallDuration> mTimes;
+    std::vector<System::WallDuration> mThresholds;
+    std::vector<std::string> mNames;
+};
+
 typedef ThreadStore<IndentPrinter> IndentPrinterStore;
+typedef ThreadStore<ThresholdPrinter> ThresholdPrinterStore;
 
 static LazyInstance<IndentPrinterStore> sIndentPrinterStore =
+    LAZY_INSTANCE_INIT;
+static LazyInstance<ThresholdPrinterStore> sThresholdPrinterStore =
     LAZY_INSTANCE_INIT;
 
 static IndentPrinter* indentPrinter_getForThread() {
@@ -120,6 +196,26 @@ static void indentTrace_begin(const char* name) {
 
 static void indentTrace_end() {
     indentPrinter_getForThread()->end();
+}
+
+static ThresholdPrinter* thresholdPrinter_getForThread() {
+    auto state = sThresholdPrinterStore.ptr();
+
+    auto printer = state->get();
+    if (!printer) {
+        printer = new ThresholdPrinter;
+        state->set(printer);
+    }
+
+    return state->get();
+}
+
+static void thresholdTrace_begin(const char* name, uint64_t thresholdUs) {
+    thresholdPrinter_getForThread()->begin(name, thresholdUs);
+}
+
+static void thresholdTrace_end() {
+    thresholdPrinter_getForThread()->end();
 }
 
 class TraceConfig {
@@ -172,6 +268,30 @@ void beginTrace(const char* name) {
 void endTrace() {
     if (CC_UNLIKELY(shouldEnableTracing())) {
         indentTrace_end();
+    }
+}
+
+void ScopedThresholdTrace::beginTraceImpl(const char* name, uint64_t thresholdUs) {
+    if (CC_UNLIKELY(shouldEnableTracing())) {
+        thresholdTrace_begin(name, thresholdUs);
+    }
+}
+
+void ScopedThresholdTrace::endTraceImpl(const char*) {
+    if (CC_UNLIKELY(shouldEnableTracing())) {
+        thresholdTrace_end();
+    }
+}
+
+void beginThresholdTrace(const char* name, uint64_t thresholdUs) {
+    if (CC_UNLIKELY(shouldEnableTracing())) {
+        thresholdTrace_begin(name, thresholdUs);
+    }
+}
+
+void endThresholdTrace() {
+    if (CC_UNLIKELY(shouldEnableTracing())) {
+        thresholdTrace_end();
     }
 }
 
