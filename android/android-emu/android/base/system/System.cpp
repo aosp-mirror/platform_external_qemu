@@ -1287,6 +1287,10 @@ public:
 #endif  // !_WIN32
     }
 
+    bool getEnableCrashReporting() const override {
+        return true;  // TODO
+    }
+
 #ifndef _WIN32
     bool runCommandPosix(const std::vector<std::string>& commandLine,
             RunOptions options,
