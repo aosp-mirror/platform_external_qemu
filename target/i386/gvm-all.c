@@ -39,11 +39,6 @@
 #include "gvm_i386.h"
 
 
-/* GVM uses PAGE_SIZE in its definition of GVM_COALESCED_MMIO_MAX. We
- * need to use the real host PAGE_SIZE, as that's what GVM will use.
- */
-#define PAGE_SIZE getpagesize()
-
 #ifdef DEBUG_GVM
 #define DPRINTF(fmt, ...) \
     do { fprintf(stderr, fmt, ## __VA_ARGS__); } while (0)
@@ -67,9 +62,6 @@ struct GVMState
     int nr_slots;
     HANDLE fd;
     HANDLE vmfd;
-    int coalesced_mmio;
-    struct gvm_coalesced_mmio_ring *coalesced_mmio_ring;
-    bool coalesced_flush_in_progress;
     int vcpu_events;
     int robust_singlestep;
     int debugregs;
@@ -341,11 +333,6 @@ int gvm_init_vcpu(CPUState *cpu)
         goto err;
     }
 
-    if (s->coalesced_mmio && !s->coalesced_mmio_ring) {
-        s->coalesced_mmio_ring =
-            (void *)cpu->gvm_run + s->coalesced_mmio * PAGE_SIZE;
-    }
-
     ret = gvm_arch_init_vcpu(cpu);
 err:
     return ret;
@@ -513,42 +500,6 @@ static int gvm_physical_sync_dirty_bitmap(GVMMemoryListener *kml,
     g_free(d.dirty_bitmap);
 
     return ret;
-}
-
-static void gvm_coalesce_mmio_region(MemoryListener *listener,
-                                     MemoryRegionSection *secion,
-                                     hwaddr start, hwaddr size)
-{
-    GVMState *s = gvm_state;
-
-    if (s->coalesced_mmio) {
-        struct gvm_coalesced_mmio_zone zone;
-
-        zone.addr = start;
-        zone.size = size;
-        zone.pad = 0;
-
-        (void)gvm_vm_ioctl(s, GVM_REGISTER_COALESCED_MMIO,
-                &zone, sizeof(zone), NULL, 0);
-    }
-}
-
-static void gvm_uncoalesce_mmio_region(MemoryListener *listener,
-                                       MemoryRegionSection *secion,
-                                       hwaddr start, hwaddr size)
-{
-    GVMState *s = gvm_state;
-
-    if (s->coalesced_mmio) {
-        struct gvm_coalesced_mmio_zone zone;
-
-        zone.addr = start;
-        zone.size = size;
-        zone.pad = 0;
-
-        (void)gvm_vm_ioctl(s, GVM_UNREGISTER_COALESCED_MMIO,
-                &zone, sizeof(zone), NULL, 0);
-    }
 }
 
 int gvm_check_extension(GVMState *s, unsigned int extension)
@@ -1330,9 +1281,6 @@ static int gvm_init(MachineState *ms)
         goto err;
     }
 
-    s->coalesced_mmio = gvm_check_extension(s, GVM_CAP_COALESCED_MMIO);
-
-
 #ifdef GVM_CAP_VCPU_EVENTS
     s->vcpu_events = gvm_check_extension(s, GVM_CAP_VCPU_EVENTS);
 #endif
@@ -1370,9 +1318,6 @@ static int gvm_init(MachineState *ms)
     }
 
     gvm_state = s;
-
-    s->memory_listener.listener.coalesced_mmio_add = gvm_coalesce_mmio_region;
-    s->memory_listener.listener.coalesced_mmio_del = gvm_uncoalesce_mmio_region;
 
     gvm_memory_listener_register(s, &s->memory_listener,
                                  &address_space_memory, 0);
@@ -1436,32 +1381,6 @@ static int gvm_handle_internal_error(CPUState *cpu, struct gvm_run *run)
      * something went wrong.
      */
     return -1;
-}
-
-void gvm_flush_coalesced_mmio_buffer(void)
-{
-    GVMState *s = gvm_state;
-
-    if (s->coalesced_flush_in_progress) {
-        return;
-    }
-
-    s->coalesced_flush_in_progress = true;
-
-    if (s->coalesced_mmio_ring) {
-        struct gvm_coalesced_mmio_ring *ring = s->coalesced_mmio_ring;
-        while (ring->first != ring->last) {
-            struct gvm_coalesced_mmio *ent;
-
-            ent = &ring->coalesced_mmio[ring->first];
-
-            cpu_physical_memory_write(ent->phys_addr, ent->data, ent->len);
-            smp_wmb();
-            ring->first = (ring->first + 1) % GVM_COALESCED_MMIO_MAX;
-        }
-    }
-
-    s->coalesced_flush_in_progress = false;
 }
 
 void gvm_raise_event(CPUState *cpu)

@@ -25,8 +25,6 @@
 
 #ifdef CONFIG_GVM
 
-#define gvm_pit_in_kernel() \
-    (gvm_irqchip_in_kernel())
 #define gvm_pic_in_kernel()  \
     (gvm_irqchip_in_kernel())
 #define gvm_ioapic_in_kernel() \
@@ -34,7 +32,6 @@
 
 #else
 
-#define gvm_pit_in_kernel()      0
 #define gvm_pic_in_kernel()      0
 #define gvm_ioapic_in_kernel()   0
 
