@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6c8ecc84_2afe090d",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 2153,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-03-08T00:03:42Z",
+      "side": 1,
+      "message": "@jim, seems line 2146 - 2152 can be commented out without any impact. I verified locally.It looks like simulateSetScale() in line 2160 calls simulateSetScale(), then calls skin_window_resize(). In this skin_window_resize(), it will create/modify the mBackingSurface, and call adisplay_redraw().",
+      "revId": "a91251a89e653c40ef067436527a11abe61293e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
