@@ -81,15 +81,6 @@ static bool has_msr_smbase;
 static bool has_msr_bndcfgs;
 //static bool has_msr_gvm_steal_time;
 static int lm_capable_kernel;
-static bool has_msr_hv_hypercall;
-static bool has_msr_hv_vapic;
-static bool has_msr_hv_tsc;
-static bool has_msr_hv_crash;
-static bool has_msr_hv_reset;
-static bool has_msr_hv_vpindex;
-static bool has_msr_hv_runtime;
-static bool has_msr_hv_synic;
-static bool has_msr_hv_stimer;
 static bool has_msr_mtrr;
 static bool has_msr_xss;
 
@@ -727,30 +718,6 @@ static int gvm_get_supported_msrs(GVMState *s)
                     has_msr_xss = true;
                     continue;
                 }
-                if (gvm_msr_list->indices[i] == HV_X64_MSR_CRASH_CTL) {
-                    has_msr_hv_crash = true;
-                    continue;
-                }
-                if (gvm_msr_list->indices[i] == HV_X64_MSR_RESET) {
-                    has_msr_hv_reset = true;
-                    continue;
-                }
-                if (gvm_msr_list->indices[i] == HV_X64_MSR_VP_INDEX) {
-                    has_msr_hv_vpindex = true;
-                    continue;
-                }
-                if (gvm_msr_list->indices[i] == HV_X64_MSR_VP_RUNTIME) {
-                    has_msr_hv_runtime = true;
-                    continue;
-                }
-                if (gvm_msr_list->indices[i] == HV_X64_MSR_SCONTROL) {
-                    has_msr_hv_synic = true;
-                    continue;
-                }
-                if (gvm_msr_list->indices[i] == HV_X64_MSR_STIMER0_CONFIG) {
-                    has_msr_hv_stimer = true;
-                    continue;
-                }
             }
         }
 
@@ -1282,62 +1249,6 @@ static int gvm_put_msrs(X86CPU *cpu, int level)
             gvm_msr_entry_add(cpu, MSR_CORE_PERF_GLOBAL_CTRL,
                               env->msr_global_ctrl);
         }
-        if (has_msr_hv_hypercall) {
-            gvm_msr_entry_add(cpu, HV_X64_MSR_GUEST_OS_ID,
-                              env->msr_hv_guest_os_id);
-            gvm_msr_entry_add(cpu, HV_X64_MSR_HYPERCALL,
-                              env->msr_hv_hypercall);
-        }
-        if (has_msr_hv_vapic) {
-            gvm_msr_entry_add(cpu, HV_X64_MSR_APIC_ASSIST_PAGE,
-                              env->msr_hv_vapic);
-        }
-        if (has_msr_hv_tsc) {
-            gvm_msr_entry_add(cpu, HV_X64_MSR_REFERENCE_TSC, env->msr_hv_tsc);
-        }
-        if (has_msr_hv_crash) {
-            int j;
-
-            for (j = 0; j < HV_CRASH_PARAMS; j++)
-                gvm_msr_entry_add(cpu, HV_X64_MSR_CRASH_P0 + j,
-                                  env->msr_hv_crash_params[j]);
-
-            gvm_msr_entry_add(cpu, HV_X64_MSR_CRASH_CTL,
-                              HV_CRASH_CTL_NOTIFY);
-        }
-        if (has_msr_hv_runtime) {
-            gvm_msr_entry_add(cpu, HV_X64_MSR_VP_RUNTIME, env->msr_hv_runtime);
-        }
-        if (cpu->hyperv_synic) {
-            int j;
-
-            gvm_msr_entry_add(cpu, HV_X64_MSR_SCONTROL,
-                              env->msr_hv_synic_control);
-            gvm_msr_entry_add(cpu, HV_X64_MSR_SVERSION,
-                              HV_SYNIC_VERSION);
-            gvm_msr_entry_add(cpu, HV_X64_MSR_SIEFP,
-                              env->msr_hv_synic_evt_page);
-            gvm_msr_entry_add(cpu, HV_X64_MSR_SIMP,
-                              env->msr_hv_synic_msg_page);
-
-            for (j = 0; j < ARRAY_SIZE(env->msr_hv_synic_sint); j++) {
-                gvm_msr_entry_add(cpu, HV_X64_MSR_SINT0 + j,
-                                  env->msr_hv_synic_sint[j]);
-            }
-        }
-        if (has_msr_hv_stimer) {
-            int j;
-
-            for (j = 0; j < ARRAY_SIZE(env->msr_hv_stimer_config); j++) {
-                gvm_msr_entry_add(cpu, HV_X64_MSR_STIMER0_CONFIG + j * 2,
-                                env->msr_hv_stimer_config[j]);
-            }
-
-            for (j = 0; j < ARRAY_SIZE(env->msr_hv_stimer_count); j++) {
-                gvm_msr_entry_add(cpu, HV_X64_MSR_STIMER0_COUNT + j * 2,
-                                env->msr_hv_stimer_count[j]);
-            }
-        }
         if (has_msr_mtrr) {
             uint64_t phys_mask = MAKE_64BIT_MASK(0, cpu->phys_bits);
 
@@ -1679,45 +1590,6 @@ static int gvm_get_msrs(X86CPU *cpu)
         }
     }
 
-    if (has_msr_hv_hypercall) {
-        gvm_msr_entry_add(cpu, HV_X64_MSR_HYPERCALL, 0);
-        gvm_msr_entry_add(cpu, HV_X64_MSR_GUEST_OS_ID, 0);
-    }
-    if (has_msr_hv_vapic) {
-        gvm_msr_entry_add(cpu, HV_X64_MSR_APIC_ASSIST_PAGE, 0);
-    }
-    if (has_msr_hv_tsc) {
-        gvm_msr_entry_add(cpu, HV_X64_MSR_REFERENCE_TSC, 0);
-    }
-    if (has_msr_hv_crash) {
-        int j;
-
-        for (j = 0; j < HV_CRASH_PARAMS; j++) {
-            gvm_msr_entry_add(cpu, HV_X64_MSR_CRASH_P0 + j, 0);
-        }
-    }
-    if (has_msr_hv_runtime) {
-        gvm_msr_entry_add(cpu, HV_X64_MSR_VP_RUNTIME, 0);
-    }
-    if (cpu->hyperv_synic) {
-        uint32_t msr;
-
-        gvm_msr_entry_add(cpu, HV_X64_MSR_SCONTROL, 0);
-        gvm_msr_entry_add(cpu, HV_X64_MSR_SVERSION, 0);
-        gvm_msr_entry_add(cpu, HV_X64_MSR_SIEFP, 0);
-        gvm_msr_entry_add(cpu, HV_X64_MSR_SIMP, 0);
-        for (msr = HV_X64_MSR_SINT0; msr <= HV_X64_MSR_SINT15; msr++) {
-            gvm_msr_entry_add(cpu, msr, 0);
-        }
-    }
-    if (has_msr_hv_stimer) {
-        uint32_t msr;
-
-        for (msr = HV_X64_MSR_STIMER0_CONFIG; msr <= HV_X64_MSR_STIMER3_COUNT;
-             msr++) {
-            gvm_msr_entry_add(cpu, msr, 0);
-        }
-    }
     if (has_msr_mtrr) {
         gvm_msr_entry_add(cpu, MSR_MTRRdefType, 0);
         gvm_msr_entry_add(cpu, MSR_MTRRfix64K_00000, 0);
@@ -1887,50 +1759,6 @@ static int gvm_get_msrs(X86CPU *cpu)
             break;
         case MSR_P6_EVNTSEL0 ... MSR_P6_EVNTSEL0 + MAX_GP_COUNTERS - 1:
             env->msr_gp_evtsel[index - MSR_P6_EVNTSEL0] = msrs[i].data;
-            break;
-        case HV_X64_MSR_HYPERCALL:
-            env->msr_hv_hypercall = msrs[i].data;
-            break;
-        case HV_X64_MSR_GUEST_OS_ID:
-            env->msr_hv_guest_os_id = msrs[i].data;
-            break;
-        case HV_X64_MSR_APIC_ASSIST_PAGE:
-            env->msr_hv_vapic = msrs[i].data;
-            break;
-        case HV_X64_MSR_REFERENCE_TSC:
-            env->msr_hv_tsc = msrs[i].data;
-            break;
-        case HV_X64_MSR_CRASH_P0 ... HV_X64_MSR_CRASH_P4:
-            env->msr_hv_crash_params[index - HV_X64_MSR_CRASH_P0] = msrs[i].data;
-            break;
-        case HV_X64_MSR_VP_RUNTIME:
-            env->msr_hv_runtime = msrs[i].data;
-            break;
-        case HV_X64_MSR_SCONTROL:
-            env->msr_hv_synic_control = msrs[i].data;
-            break;
-        case HV_X64_MSR_SIEFP:
-            env->msr_hv_synic_evt_page = msrs[i].data;
-            break;
-        case HV_X64_MSR_SIMP:
-            env->msr_hv_synic_msg_page = msrs[i].data;
-            break;
-        case HV_X64_MSR_SINT0 ... HV_X64_MSR_SINT15:
-            env->msr_hv_synic_sint[index - HV_X64_MSR_SINT0] = msrs[i].data;
-            break;
-        case HV_X64_MSR_STIMER0_CONFIG:
-        case HV_X64_MSR_STIMER1_CONFIG:
-        case HV_X64_MSR_STIMER2_CONFIG:
-        case HV_X64_MSR_STIMER3_CONFIG:
-            env->msr_hv_stimer_config[(index - HV_X64_MSR_STIMER0_CONFIG)/2] =
-                                msrs[i].data;
-            break;
-        case HV_X64_MSR_STIMER0_COUNT:
-        case HV_X64_MSR_STIMER1_COUNT:
-        case HV_X64_MSR_STIMER2_COUNT:
-        case HV_X64_MSR_STIMER3_COUNT:
-            env->msr_hv_stimer_count[(index - HV_X64_MSR_STIMER0_COUNT)/2] =
-                                msrs[i].data;
             break;
         case MSR_MTRRdefType:
             env->mtrr_deftype = msrs[i].data;
