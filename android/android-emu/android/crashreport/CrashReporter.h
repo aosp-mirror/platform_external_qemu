@@ -75,6 +75,8 @@ public:
     // Returns false if already attached or if attach fails.
     virtual bool attachCrashHandler(
             const CrashSystem::CrashPipe& crashpipe) = 0;
+    // Attach a simple crash handler that does not talk to other processes
+    virtual bool attachSimpleCrashHandler() = 0;
 
     // Waits for a platform dependent pipe to become valid or timeout occurs.
     // Returns false if timeout occurs.
