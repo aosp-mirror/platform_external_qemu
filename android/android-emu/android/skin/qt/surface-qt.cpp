@@ -70,7 +70,7 @@ extern void skin_surface_unrefp(SkinSurface* *psurface)
 
 extern int skin_surface_width(SkinSurface *s)
 {
-    D("skin_surface_width %d", s->id);
+    D("skin_surface_width %d", s->w);
     return s->w;
 }
 
@@ -100,6 +100,7 @@ extern SkinSurface *skin_surface_create(int w, int h, int original_w, int origin
         s->w = w;
         s->h = h;
         s->isRound = 0;
+        D("skin_surface_create bitmap(%dx%d) w %d h %d id %d\n", original_w, original_h,s->w, s->h, next_id);
     });
 }
 
@@ -108,6 +109,7 @@ extern SkinSurface* skin_surface_create_from_data(const void* data, int size) {
         s->bitmap = new SkinSurfaceBitmap((const unsigned char*)data, size);
         s->w = s->bitmap->size().width();
         s->h = s->bitmap->size().height();
+        D("skin_surface_create_from_data w %d h %did %d\n", s->w, s->h, next_id);
         s->isRound = 0;
     });
 }
@@ -117,6 +119,7 @@ extern SkinSurface* skin_surface_create_from_file(const char* path) {
         s->bitmap = new SkinSurfaceBitmap(path);
         s->w = s->bitmap->size().width();
         s->h = s->bitmap->size().height();
+        D("skin_surface_create_from_file %s w %d h %did %d\n", path, s->w, s->h, next_id);
         s->isRound = 0;
     });
 }
@@ -139,6 +142,7 @@ extern SkinSurface* skin_surface_create_derived(SkinSurface* source,
 extern SkinSurface* skin_surface_resize(SkinSurface *surface, int w, int h,
                                         int original_w, int original_h)
 {
+    D("skin_surface_resize w %d h %d\n", w, h);
     if ( surface == NULL ) {
         return skin_surface_create(w, h, original_w, original_h);
     } else if (surface->bitmap->size() == QSize(original_w, original_h)) {
@@ -176,7 +180,7 @@ extern void skin_surface_update(SkinSurface *surface, SkinRect *rect)
 extern void skin_surface_blit(SkinSurface *dst, SkinPos *pos, SkinSurface *src, SkinRect *rect, SkinBlitOp op)
 {
 #if 0
-    D("skin_surface_blit from %d (%d, %d) to %d: %d,%d,%d,%d", src->id, rect->pos.x, rect->pos.y, dst->id, rect->pos.x, rect->pos.y, rect->size.w, rect->size.h);
+    D("skin_surface_blit from %d (%d, %d, %d, %d) to %d: %d,%d", src->id, rect->pos.x, rect->pos.y, rect->size.w, rect->size, dst->id, pos->x, pos->y);
 #endif
     QRect qrect(rect->pos.x, rect->pos.y, rect->size.w, rect->size.h);
     QPoint qpos(pos->x, pos->y);
