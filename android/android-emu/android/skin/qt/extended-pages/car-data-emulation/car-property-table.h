@@ -41,6 +41,8 @@ namespace carpropertyutils {
     QString floatToString(PropertyDescription prop, float val);
     QString floatVecToString(PropertyDescription prop, std::vector<float> vals);
 
+    std::string int32ToHexString(int32_t val);
+
     QString getValueString(emulator::VehiclePropValue val);
     QString getAreaString(emulator::VehiclePropValue val);
 

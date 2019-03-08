@@ -17,10 +17,16 @@
 #include <QObject>
 #include <QSettings>
 #include <QDoubleValidator>
+#include <sstream>
+#include <iomanip>
+
 #define D(...) VERBOSE_PRINT(car, __VA_ARGS__)
 
 using std::map;
 using std::vector;
+using std::stringstream;
+using std::hex;
+using std::string;
 using emulator::EmulatorMessage;
 using emulator::MsgType;
 using emulator::Status;
@@ -529,4 +535,10 @@ QString carpropertyutils::apPowerStateReportToString(vector<int32_t> vals) {
         output += "Time to turn on AP: " + QString::number(vals[1]) + " s";
     }
     return QObject::tr(output.toLocal8Bit().data());
+}
+
+string carpropertyutils::int32ToHexString(int32_t val){
+    stringstream valStringStream;
+    valStringStream << hex << val;
+    return valStringStream.str();
 }
