@@ -1451,13 +1451,19 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
     if (sg.get() != NULL) {
         NamedObjectPtr globalTexObject = sg->getNamedObject(NamedObjectType::TEXTURE,
                                                             SafeUIntFromPointer(buffer));
-        if (!globalTexObject) return EGL_NO_IMAGE_KHR;
+        if (!globalTexObject) {
+            fprintf(stderr, "%s: no global tex obj\n", __func__);
+            return EGL_NO_IMAGE_KHR;
+        }
 
         ImagePtr img( new EglImage() );
         if (img.get() != NULL) {
             auto objData = sg->getObjectData(
                     NamedObjectType::TEXTURE, SafeUIntFromPointer(buffer));
-            if (!objData) return EGL_NO_IMAGE_KHR;
+            if (!objData) {
+            fprintf(stderr, "%s: no shared group obj data\n", __func__);
+                return EGL_NO_IMAGE_KHR;
+            }
 
             TextureData *texData = (TextureData *)objData;
             if(!texData->width || !texData->height) return EGL_NO_IMAGE_KHR;

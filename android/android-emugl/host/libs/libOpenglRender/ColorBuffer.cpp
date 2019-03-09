@@ -15,7 +15,9 @@
 */
 #include "ColorBuffer.h"
 
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/Tracing.h"
 
 #include "DispatchTables.h"
 #include "GLcommon/GLutils.h"
@@ -32,6 +34,8 @@
 #include <GLES2/gl2ext.h>
 
 #include <vulkan/VulkanDispatch.h>
+#include <unordered_map>
+#include <vector>
 
 #include <stdio.h>
 #include <string.h>
@@ -173,6 +177,378 @@ static bool sGetFormatParameters(
     }
 }
 
+class TexturePool {
+
+public:
+    using TextureKey = uint64_t;
+    struct TextureKeyBits {
+        uint16_t width;
+        uint16_t height;
+        uint16_t format;
+        uint16_t unused;
+    };
+
+    struct TextureStorageInfo {
+        GLuint texture = 0;
+        GLuint memoryObject = 0;
+        goldfish_vk::VkEmulation::ColorBufferInfo vkCbInfo;
+    };
+
+    using SameTextureCollection = std::unordered_map<GLuint, TextureStorageInfo>;
+
+    bool createTexture(
+        int width, int height, GLenum format,
+        GLuint* outTexture,
+        goldfish_vk::VkEmulation::ColorBufferInfo* vkCbInfo_out = nullptr,
+        GLuint* memoryObject_out = nullptr) {
+
+        if (width >= (1 << 16)) {
+            // fprintf(stderr, "ColorBuffer createTexture invalid width %d\n", width);
+            return false;
+        }
+
+        if (height >= (1 << 16)) {
+            // fprintf(stderr, "ColorBuffer createTexture invalid height %d\n", height);
+            return false;
+        }
+
+        GLenum texFormat = 0;
+        GLenum pixelType = GL_UNSIGNED_BYTE;
+        int bytesPerPixel = 4;
+        GLint sizedInternalFormat = GL_RGBA8;
+        bool isBlob = false;
+
+        if (!sGetFormatParameters(
+                format,
+                &texFormat, &pixelType, &bytesPerPixel,
+                &sizedInternalFormat,
+                &isBlob)) {
+            // fprintf(stderr, "ColorBuffer createTexture invalid format 0x%x\n", format);
+            return false;
+        }
+
+        TextureKeyBits keyBits = {
+            (uint16_t)width,
+            (uint16_t)height,
+            (uint16_t)format,
+            0,
+        };
+
+        uint64_t textureKey = *(uint64_t*)(&keyBits);
+
+        auto& currentFree = mFreeTextures[textureKey];
+
+        if (!currentFree.empty()) {
+            AEMU_SCOPED_THRESHOLD_TRACE("colorBufferReuse");
+            auto it = currentFree.begin();
+            TextureStorageInfo existingStorage = it->second;
+            *outTexture = existingStorage.texture;
+            if (vkCbInfo_out) *vkCbInfo_out = existingStorage.vkCbInfo;
+            if (memoryObject_out) *memoryObject_out = existingStorage.memoryObject;
+            currentFree.erase(it);
+
+            // fprintf(stderr, "%s: reuse\n", __func__);
+
+            auto& live = mLiveTextures[textureKey];
+            live[existingStorage.texture] =
+                existingStorage;
+            return true;
+        }
+
+        AEMU_SCOPED_THRESHOLD_TRACE("colorBufferNew");
+        const unsigned long bufsize =
+            ((unsigned long)bytesPerPixel) * width * height;
+
+        GLuint res_texture = 0;
+        GLuint res_memoryObject = 0;
+        goldfish_vk::VkEmulation::ColorBufferInfo res_vkCbInfo;
+
+        if (emugl_feature_is_enabled(android::featurecontrol::Vulkan)) {
+            auto vkEmu = goldfish_vk::getGlobalVkEmulation();
+
+            res_texture = 0;
+
+            if (!vkCbInfo_out ||
+                !vkEmu->deviceInfo.supportsExternalMemory ||
+                !vkEmu->deviceInfo.glInteropSupported) {
+                createGlBacking(width, height, format, &res_texture);
+            }
+
+            if (vkCbInfo_out) {
+                GLuint interopTexture;
+                bool success = createVulkanBacking(
+                    width, height, format, res_texture,
+                    &res_vkCbInfo,
+                    &interopTexture,
+                    &res_memoryObject);
+                // fprintf(stderr, "%s: res tex %u\n", __func__, res_texture);
+
+                if (success) {
+                    res_texture = interopTexture;
+                }
+
+                if (!success && vkEmu->deviceInfo.glInteropSupported) {
+                    createGlBacking(width, height, format, &res_texture);
+                }
+            }
+        }
+
+        TextureStorageInfo res_storageInfo = {
+            res_texture,
+            res_memoryObject,
+            res_vkCbInfo,
+        };
+
+        auto& live = mLiveTextures[textureKey];
+        live[res_texture] = res_storageInfo;
+
+        if (outTexture) *outTexture = res_texture;
+        if (vkCbInfo_out) *vkCbInfo_out = res_vkCbInfo;
+        if (memoryObject_out) *memoryObject_out = res_memoryObject;
+
+        return true;
+    }
+
+    bool deleteTexture(int width, int height, GLenum format, GLuint texture) {
+        TextureKeyBits keyBits = {
+            (uint16_t)width,
+            (uint16_t)height,
+            (uint16_t)format,
+            0,
+        };
+
+        uint64_t textureKey = *(uint64_t*)(&keyBits);
+
+        auto& live = mLiveTextures[textureKey];
+        TextureStorageInfo toFree = live[texture];
+        live.erase(texture);
+
+        auto& currentFree = mFreeTextures[textureKey];
+        currentFree[texture] = toFree;
+
+        return true;
+    }
+
+private:
+    void createGlBacking(int width, int height, GLenum format, GLuint* texture_out) {
+
+        GLenum texFormat = 0;
+        GLenum pixelType = GL_UNSIGNED_BYTE;
+        int bytesPerPixel = 4;
+        GLint sizedInternalFormat = GL_RGBA8;
+        bool isBlob = false;
+
+        if (!sGetFormatParameters(
+                format,
+                &texFormat, &pixelType, &bytesPerPixel,
+                &sizedInternalFormat,
+                &isBlob)) {
+            fprintf(stderr, "ColorBuffer createTexture invalid format 0x%x\n",
+                    format);
+            return false;
+        }
+
+        GLint prevUnpackAlignment;
+        s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpackAlignment);
+        s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        s_gles2.glGenTextures(1, texture_out);
+        s_gles2.glBindTexture(GL_TEXTURE_2D, *texture_out);
+
+        s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, format, width, height,
+                             0, texFormat, pixelType, 0);
+
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
+    }
+
+    bool createVulkanBacking(int width, int height, GLenum format,
+        GLuint prevTexture,
+        goldfish_vk::VkEmulation::ColorBufferInfo* vkCbInfo_out,
+        GLuint* texture_out,
+        GLuint* memoryObject_out) {
+
+        VkFormat vkFormat = goldfish_vk::glFormat2VkFormat((int)format);
+        goldfish_vk::VkEmulation::ColorBufferInfo res;
+
+        res.frameworkFormat = 0;
+        res.frameworkStride = 0;
+
+        res.extent = { (uint32_t)width, (uint32_t)height, 1 };
+        res.format = vkFormat;
+        res.type = VK_IMAGE_TYPE_2D;
+        res.tiling = VK_IMAGE_TILING_OPTIMAL;
+        res.usageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                         VK_IMAGE_USAGE_SAMPLED_BIT |
+                         VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+                         VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        res.createFlags = 0;
+
+        res.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+        // Create the image. If external memory is supported, make it external.
+        VkExternalMemoryImageCreateInfo extImageCi = {
+            VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO, 0,
+            VK_EXT_MEMORY_HANDLE_TYPE_BIT,
+        };
+
+        VkExternalMemoryImageCreateInfo* extImageCiPtr = nullptr;
+
+        auto vkEmu = goldfish_vk::getGlobalVkEmulation();
+        auto vk = vkEmu->dvk;
+
+        if (vkEmu->deviceInfo.supportsExternalMemory) {
+            extImageCiPtr = &extImageCi;
+        }
+
+        VkImageCreateInfo imageCi = {
+             VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, extImageCiPtr,
+             res.createFlags,
+             res.type,
+             res.format,
+             res.extent,
+             1, 1,
+             VK_SAMPLE_COUNT_1_BIT,
+             res.tiling,
+             res.usageFlags,
+             VK_SHARING_MODE_EXCLUSIVE, 0, nullptr,
+             VK_IMAGE_LAYOUT_UNDEFINED,
+        };
+
+        VkResult createRes = vk->vkCreateImage(vkEmu->device, &imageCi,
+                                               nullptr, &res.image);
+        if (createRes != VK_SUCCESS) {
+            LOG(VERBOSE) << "Failed to create Vulkan image for ColorBuffer";
+            return false;
+        }
+
+        vk->vkGetImageMemoryRequirements(vkEmu->device, res.image,
+                                         &res.memReqs);
+
+        res.memory.size = res.memReqs.size;
+        res.memory.typeIndex = goldfish_vk::lastGoodTypeIndex(res.memReqs.memoryTypeBits);
+
+        LOG(VERBOSE) << "ColorBuffer Vulkan backing: "
+                     << "allocation size and type index: " << res.memory.size
+                     << ", " << res.memory.typeIndex;
+
+        bool allocRes = allocExternalMemory(vk, &res.memory);
+
+        if (!allocRes) {
+            LOG(VERBOSE) << "Failed to allocate ColorBuffer with Vulkan backing.";
+            return false;
+        }
+
+        VkResult bindImageMemoryRes =
+            vk->vkBindImageMemory(vkEmu->device, res.image, res.memory.memory, 0);
+
+        if (bindImageMemoryRes != VK_SUCCESS) {
+            fprintf(stderr, "%s: Failed to bind image memory. %d\n", __func__,
+            bindImageMemoryRes);
+            return false;
+        }
+
+        if (vkEmu->deviceInfo.supportsExternalMemory &&
+            vkEmu->deviceInfo.glInteropSupported &&
+            vk2glTexture(
+                goldfish_vk::dupExternalMemory(res.memory.exportedHandle),
+                res.memory.size,
+                false /* dedicated */,
+                res.tiling == VK_IMAGE_TILING_LINEAR,
+                width,
+                height,
+                format,
+                prevTexture,
+                texture_out,
+                memoryObject_out)) {
+            fprintf(stderr, "%s: texture out: %u\n", __func__, *texture_out);
+            res.glExported = true;
+        }
+
+        if (vkCbInfo_out) *vkCbInfo_out = res;
+
+        return true;
+    }
+
+    bool vk2glTexture(
+#ifdef _WIN32
+        void* handle,
+#else
+        int handle,
+#endif
+        uint64_t size,
+        bool dedicated,
+        bool linearTiling,
+        int width,
+        int height,
+        GLint format,
+        GLuint prevTexture,
+        GLuint* newTexture_out,
+        GLuint* memoryObject_out) {
+        s_gles2.glCreateMemoryObjectsEXT(1, memoryObject_out);
+        if (dedicated) {
+            static const GLint DEDICATED_FLAG = GL_TRUE;
+            s_gles2.glMemoryObjectParameterivEXT(*memoryObject_out,
+                                                 GL_DEDICATED_MEMORY_OBJECT_EXT,
+                                                 &DEDICATED_FLAG);
+        }
+
+#ifdef _WIN32
+        s_gles2.glImportMemoryWin32HandleEXT(*memoryObject_out, size, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, handle);
+#else
+        s_gles2.glImportMemoryFdEXT(*memoryObject_out, size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, handle);
+#endif
+    
+        GLuint glTiling = linearTiling ? GL_LINEAR_TILING_EXT : GL_OPTIMAL_TILING_EXT;
+    
+        if (prevTexture) s_gles2.glDeleteTextures(1, &prevTexture);
+        s_gles2.glGenTextures(1, newTexture_out);
+        s_gles2.glBindTexture(GL_TEXTURE_2D, *newTexture_out);
+    
+        // HOST needed because we do not expose this to guest
+        s_gles2.glTexParameteriHOST(GL_TEXTURE_2D, GL_TEXTURE_TILING_EXT, glTiling);
+    
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        GLenum texFormat = 0;
+        GLenum pixelType = GL_UNSIGNED_BYTE;
+        int bytesPerPixel = 4;
+        GLint p_sizedInternalFormat = GL_RGBA8;
+        bool isBlob = false;;
+
+        if (!sGetFormatParameters(
+                format,
+                &texFormat, &pixelType, &bytesPerPixel,
+                &p_sizedInternalFormat,
+                &isBlob)) {
+            fprintf(stderr, "vk2glTexture invalid format 0x%x\n",
+                    format);
+            return false;
+        }
+
+        s_gles2.glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, p_sizedInternalFormat, width, height, *memoryObject_out, 0);
+        s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
+   
+        fprintf(stderr, "%s: res tex %u\n", __func__, *newTexture_out);
+
+        return true;
+    }
+
+    std::vector<char> mInitialImagePool;
+    std::unordered_map<TextureKey, SameTextureCollection> mFreeTextures;
+    std::unordered_map<TextureKey, SameTextureCollection> mLiveTextures;
+};
+
+static android::base::LazyInstance<TexturePool> sTexturePool =
+    LAZY_INSTANCE_INIT;
+
 // static
 ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  int p_width,
@@ -182,6 +558,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  HandleType hndl,
                                  Helper* helper,
                                  bool fastBlitSupported) {
+    fprintf(stderr, "%s: w h f %d %d 0x%x\n", __func__, p_width,p_height, p_internalFormat);
     GLenum texFormat = 0;
     GLenum pixelType = GL_UNSIGNED_BYTE;
     int bytesPerPixel = 4;
@@ -198,55 +575,22 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
         return NULL;
     }
 
-    const unsigned long bufsize = ((unsigned long)bytesPerPixel) * p_width
-            * p_height;
-    android::base::ScopedCPtr<char> initialImage(
-                static_cast<char*>(::malloc(bufsize)));
-    if (!initialImage) {
-        fprintf(stderr,
-                "error: failed to allocate initial memory for ColorBuffer "
-                "of size %dx%dx%d (%lu KB)\n",
-                p_width, p_height, bytesPerPixel * 8, bufsize / 1024);
-        return nullptr;
-    }
-    memset(initialImage.get(), 0xff, bufsize);
-
     RecursiveScopedHelperContext context(helper);
+
     if (!context.isOk()) {
         return NULL;
     }
 
     ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
 
-    GLint prevUnpackAlignment;
-    s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpackAlignment);
-    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    s_gles2.glGenTextures(1, &cb->m_tex);
-    s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
-
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, p_internalFormat, p_width, p_height,
-                         0, texFormat, pixelType,
-                         initialImage.get());
-    initialImage.reset();
-
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    //
-    // create another texture for that colorbuffer for blit
-    //
-    s_gles2.glGenTextures(1, &cb->m_blitTex);
-    s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_blitTex);
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, p_internalFormat, p_width, p_height,
-                         0, texFormat, pixelType, NULL);
-
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    sTexturePool->createTexture(p_width, p_height, p_internalFormat, &cb->m_tex, &cb->m_vkColorBufferInfo, &cb->m_memoryObject);
+    cb->m_eglImage = s_egl.eglCreateImageKHR(
+            p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
+            (EGLClientBuffer)SafePointerFromUInt(cb->m_tex), NULL);
+    sTexturePool->createTexture(p_width, p_height, p_internalFormat, &cb->m_blitTex, &cb->m_blitVkColorBufferInfo, &cb->m_blitMemoryObject);
+    cb->m_blitEGLImage = s_egl.eglCreateImageKHR(
+            p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
+            (EGLClientBuffer)SafePointerFromUInt(cb->m_blitTex), NULL);
 
     cb->m_width = p_width;
     cb->m_height = p_height;
@@ -255,15 +599,15 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     cb->m_format = texFormat;
     cb->m_type = pixelType;
 
-    cb->m_eglImage = s_egl.eglCreateImageKHR(
-            p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
-            (EGLClientBuffer)SafePointerFromUInt(cb->m_tex), NULL);
+    {
+        AEMU_SCOPED_THRESHOLD_TRACE("colorBufferCreateEGLImage");
 
-    cb->m_blitEGLImage = s_egl.eglCreateImageKHR(
-            p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
-            (EGLClientBuffer)SafePointerFromUInt(cb->m_blitTex), NULL);
+    }
 
-    cb->m_resizer = new TextureResize(p_width, p_height);
+    {
+        AEMU_SCOPED_THRESHOLD_TRACE("colorBufferCreateTextureResize");
+        cb->m_resizer = new TextureResize(p_width, p_height);
+    }
 
     cb->m_frameworkFormat = p_frameworkFormat;
     switch (cb->m_frameworkFormat) {
@@ -287,14 +631,13 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
         cb->m_asyncReadbackType = GL_UNSIGNED_INT_8_8_8_8_REV;
     }
 
+    const unsigned long bufsize = ((unsigned long)bytesPerPixel) * p_width
+            * p_height;
     cb->m_numBytes = (size_t)bufsize;
 
-    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
-
-    s_gles2.glFinish();
-
-    if (emugl_feature_is_enabled(android::featurecontrol::Vulkan)) {
-        cb->createVulkanBacking(nullptr);
+    if (emugl_feature_is_enabled(android::featurecontrol::Vulkan) &&
+        cb->m_internalFormat != GL_RGB) {
+        goldfish_vk::registerVkColorBuffer(cb->getHndl(), cb->m_vkColorBufferInfo);
     }
 
     return cb;
@@ -323,16 +666,21 @@ ColorBuffer::~ColorBuffer() {
 
     m_yuv_converter.reset();
 
-    GLuint tex[2] = {m_tex, m_blitTex};
-    s_gles2.glDeleteTextures(2, tex);
+    sTexturePool->deleteTexture(m_width, m_height, m_internalFormat, m_tex);
+    sTexturePool->deleteTexture(m_width, m_height, m_internalFormat, m_blitTex);
 
-    if (m_memoryObject) {
-        s_gles2.glDeleteMemoryObjectsEXT(1, &m_memoryObject);
+    if (emugl_feature_is_enabled(android::featurecontrol::Vulkan) &&
+            m_internalFormat != GL_RGB) {
+        goldfish_vk::unregisterVkColorBuffer(getHndl());
     }
 
-    if (emugl_feature_is_enabled(android::featurecontrol::Vulkan)) {
-        teardownVulkanBacking(nullptr);
-    }
+    // if (*newTexture_out) {
+    //     s_gles2.glDeleteMemoryObjectsEXT(1, &m_memoryObject);
+    // }
+
+    // if (emugl_feature_is_enabled(android::featurecontrol::Vulkan)) {
+    //     teardownVulkanBacking(nullptr);
+    // }
 
     delete m_resizer;
 }
@@ -363,6 +711,16 @@ void ColorBuffer::readPixels(int x,
 }
 
 void ColorBuffer::reformat(GLint internalformat) {
+    fprintf(stderr, "%s: call\n", __func__);
+
+    sTexturePool->deleteTexture(m_width, m_height, m_internalFormat, m_tex);
+    sTexturePool->deleteTexture(m_width, m_height, m_internalFormat, m_blitTex);
+
+    // EGL images need to be recreated because the EGL_KHR_image_base spec
+    // states that respecifying an image (i.e. glTexImage2D) will generally
+    // result in orphaning of the EGL image.
+    s_egl.eglDestroyImageKHR(m_display, m_eglImage);
+    s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
 
     GLenum texFormat = internalformat;
     GLenum pixelType = GL_UNSIGNED_BYTE;
@@ -374,26 +732,20 @@ void ColorBuffer::reformat(GLint internalformat) {
                 __func__, internalformat);
     }
 
-    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
-                         0, texFormat, pixelType, nullptr);
+    sTexturePool->createTexture(m_width, m_height, internalformat, &m_tex, &m_vkColorBufferInfo, &m_memoryObject);
+    sTexturePool->createTexture(m_width, m_height, internalformat, &m_blitTex, &m_blitVkColorBufferInfo, &m_blitMemoryObject);
 
-    s_gles2.glBindTexture(GL_TEXTURE_2D, m_blitTex);
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
-                         0, texFormat, pixelType, nullptr);
+    fprintf(stderr, "%s: tex blit tex %u %u\n", __func__, m_tex, m_blitTex);
 
-    // EGL images need to be recreated because the EGL_KHR_image_base spec
-    // states that respecifying an image (i.e. glTexImage2D) will generally
-    // result in orphaning of the EGL image.
-    s_egl.eglDestroyImageKHR(m_display, m_eglImage);
     m_eglImage = s_egl.eglCreateImageKHR(
             m_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
             (EGLClientBuffer)SafePointerFromUInt(m_tex), NULL);
 
-    s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
     m_blitEGLImage = s_egl.eglCreateImageKHR(
             m_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
             (EGLClientBuffer)SafePointerFromUInt(m_blitTex), NULL);
+    if (!m_eglImage) { fprintf(stderr, "%s: egl img null\n", __func__); }
+    if (!m_blitEGLImage) { fprintf(stderr, "%s: blit egl img null\n", __func__); }
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
 

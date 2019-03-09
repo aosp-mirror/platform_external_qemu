@@ -297,9 +297,11 @@ private:
 
     // Vulkan info
     goldfish_vk::VkEmulation::ColorBufferInfo m_vkColorBufferInfo;
+    goldfish_vk::VkEmulation::ColorBufferInfo m_blitVkColorBufferInfo;
 
     bool m_importedMemory = false;
     GLuint m_memoryObject = 0;
+    GLuint m_blitMemoryObject = 0;
     bool m_inUse = false;
     bool m_isBuffer = false;
     GLuint m_buf = 0;
