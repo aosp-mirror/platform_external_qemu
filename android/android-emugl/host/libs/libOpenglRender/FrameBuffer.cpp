@@ -2076,7 +2076,7 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
 
 void FrameBuffer::onLastColorBufferRef(uint32_t handle) {
     // Teardown Vulkan image if necessary
-    goldfish_vk::teardownVkColorBuffer(handle);
+    // goldfish_vk::teardownVkColorBuffer(handle);
     AutoLock mutex(m_lock);
     m_colorbuffers.erase((HandleType)handle);
 }

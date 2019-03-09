@@ -15,7 +15,9 @@
 */
 #include "ColorBuffer.h"
 
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/Tracing.h"
 
 #include "DispatchTables.h"
 #include "GLcommon/GLutils.h"
@@ -29,6 +31,9 @@
 #include "emugl/common/misc.h"
 
 #include <GLES2/gl2ext.h>
+
+#include <unordered_map>
+#include <vector>
 
 #include <stdio.h>
 #include <string.h>
@@ -168,6 +173,118 @@ static bool sGetFormatParameters(
     }
 }
 
+class TexturePool {
+
+public:
+    using TextureKey = uint64_t;
+    struct TextureKeyBits {
+        uint16_t width;
+        uint16_t height;
+        uint16_t format;
+        uint16_t unused;
+    };
+
+    using SameTextureCollection = std::vector<GLuint>;
+
+    bool createTexture(int width, int height, GLenum format, GLuint* res) {
+        if (width >= (1 << 16)) {
+            fprintf(stderr, "ColorBuffer createTexture invalid width %d\n", width);
+            return false;
+        }
+
+        if (height >= (1 << 16)) {
+            fprintf(stderr, "ColorBuffer createTexture invalid height %d\n", height);
+            return false;
+        }
+
+        GLenum texFormat = 0;
+        GLenum pixelType = GL_UNSIGNED_BYTE;
+        int bytesPerPixel = 4;
+        GLint sizedInternalFormat = GL_RGBA8;
+        bool isBlob = false;
+
+        if (!sGetFormatParameters(
+                format,
+                &texFormat, &pixelType, &bytesPerPixel,
+                &sizedInternalFormat,
+                &isBlob)) {
+            fprintf(stderr, "ColorBuffer createTexture invalid format 0x%x\n",
+                    format);
+            return false;
+        }
+
+        TextureKeyBits keyBits = {
+            (uint16_t)width,
+            (uint16_t)height,
+            (uint16_t)format,
+            0,
+        };
+
+        uint64_t textureKey = *(uint64_t*)(&keyBits);
+
+        auto& currentFree = mFreeTextures[textureKey];
+
+        if (!currentFree.empty()) {
+            AEMU_SCOPED_THRESHOLD_TRACE("colorBufferReuse");
+            *res = currentFree.back();
+            currentFree.pop_back();
+            // s_gles2.glBindTexture(GL_TEXTURE_2D, *res);
+            // s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, texFormat, pixelType, mInitialImagePool.data());
+            return true;
+        }
+
+        AEMU_SCOPED_THRESHOLD_TRACE("colorBufferNew");
+        const unsigned long bufsize =
+            ((unsigned long)bytesPerPixel) * width * height;
+        
+        if (mInitialImagePool.size() < bufsize) {
+            mInitialImagePool.resize(bufsize * 2, 0);
+        }
+
+        GLint prevUnpackAlignment;
+        s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpackAlignment);
+        s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        s_gles2.glGenTextures(1, res);
+        s_gles2.glBindTexture(GL_TEXTURE_2D, *res);
+
+        s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, format, width, height,
+                             0, texFormat, pixelType,
+                             mInitialImagePool.data());
+
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
+
+        return true;
+    }
+
+    bool deleteTexture(int width, int height, GLenum format, GLuint texture) {
+        TextureKeyBits keyBits = {
+            (uint16_t)width,
+            (uint16_t)height,
+            (uint16_t)format,
+            0,
+        };
+
+        uint64_t textureKey = *(uint64_t*)(&keyBits);
+
+        auto& currentFree = mFreeTextures[textureKey];
+        currentFree.push_back(texture);
+
+        return true;
+    }
+
+    std::vector<char> mInitialImagePool;
+    std::unordered_map<TextureKey, SameTextureCollection> mFreeTextures;
+};
+
+static android::base::LazyInstance<TexturePool> sTexturePool =
+    LAZY_INSTANCE_INIT;
+
 // static
 ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  int p_width,
@@ -193,55 +310,16 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
         return NULL;
     }
 
-    const unsigned long bufsize = ((unsigned long)bytesPerPixel) * p_width
-            * p_height;
-    android::base::ScopedCPtr<char> initialImage(
-                static_cast<char*>(::malloc(bufsize)));
-    if (!initialImage) {
-        fprintf(stderr,
-                "error: failed to allocate initial memory for ColorBuffer "
-                "of size %dx%dx%d (%lu KB)\n",
-                p_width, p_height, bytesPerPixel * 8, bufsize / 1024);
-        return nullptr;
-    }
-    memset(initialImage.get(), 0xff, bufsize);
-
     RecursiveScopedHelperContext context(helper);
+
     if (!context.isOk()) {
         return NULL;
     }
 
     ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
 
-    GLint prevUnpackAlignment;
-    s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpackAlignment);
-    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    s_gles2.glGenTextures(1, &cb->m_tex);
-    s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
-
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, p_internalFormat, p_width, p_height,
-                         0, texFormat, pixelType,
-                         initialImage.get());
-    initialImage.reset();
-
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    //
-    // create another texture for that colorbuffer for blit
-    //
-    s_gles2.glGenTextures(1, &cb->m_blitTex);
-    s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_blitTex);
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, p_internalFormat, p_width, p_height,
-                         0, texFormat, pixelType, NULL);
-
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    sTexturePool->createTexture(p_width, p_height, p_internalFormat, &cb->m_tex);
+    sTexturePool->createTexture(p_width, p_height, p_internalFormat, &cb->m_blitTex);
 
     cb->m_width = p_width;
     cb->m_height = p_height;
@@ -250,6 +328,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     cb->m_format = texFormat;
     cb->m_type = pixelType;
 
+    {
+        AEMU_SCOPED_THRESHOLD_TRACE("colorBufferCreateEGLImage");
     cb->m_eglImage = s_egl.eglCreateImageKHR(
             p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
             (EGLClientBuffer)SafePointerFromUInt(cb->m_tex), NULL);
@@ -257,8 +337,12 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     cb->m_blitEGLImage = s_egl.eglCreateImageKHR(
             p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
             (EGLClientBuffer)SafePointerFromUInt(cb->m_blitTex), NULL);
+    }
 
-    cb->m_resizer = new TextureResize(p_width, p_height);
+    {
+        AEMU_SCOPED_THRESHOLD_TRACE("colorBufferCreateTextureResize");
+        cb->m_resizer = new TextureResize(p_width, p_height);
+    }
 
     cb->m_frameworkFormat = p_frameworkFormat;
     switch (cb->m_frameworkFormat) {
@@ -282,11 +366,10 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
         cb->m_asyncReadbackType = GL_UNSIGNED_INT_8_8_8_8_REV;
     }
 
+    const unsigned long bufsize = ((unsigned long)bytesPerPixel) * p_width
+            * p_height;
     cb->m_numBytes = (size_t)bufsize;
 
-    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
-
-    s_gles2.glFinish();
     return cb;
 }
 
@@ -313,8 +396,8 @@ ColorBuffer::~ColorBuffer() {
 
     m_yuv_converter.reset();
 
-    GLuint tex[2] = {m_tex, m_blitTex};
-    s_gles2.glDeleteTextures(2, tex);
+    sTexturePool->deleteTexture(m_width, m_height, m_internalFormat, m_tex);
+    sTexturePool->deleteTexture(m_width, m_height, m_internalFormat, m_blitTex);
 
     if (m_memoryObject) {
         s_gles2.glDeleteMemoryObjectsEXT(1, &m_memoryObject);
@@ -349,6 +432,16 @@ void ColorBuffer::readPixels(int x,
 }
 
 void ColorBuffer::reformat(GLint internalformat) {
+    fprintf(stderr, "%s: call\n", __func__);
+
+    sTexturePool->deleteTexture(m_width, m_height, m_internalFormat, m_tex);
+    sTexturePool->deleteTexture(m_width, m_height, m_internalFormat, m_blitTex);
+
+    // EGL images need to be recreated because the EGL_KHR_image_base spec
+    // states that respecifying an image (i.e. glTexImage2D) will generally
+    // result in orphaning of the EGL image.
+    s_egl.eglDestroyImageKHR(m_display, m_eglImage);
+    s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
 
     GLenum texFormat = internalformat;
     GLenum pixelType = GL_UNSIGNED_BYTE;
@@ -360,23 +453,13 @@ void ColorBuffer::reformat(GLint internalformat) {
                 __func__, internalformat);
     }
 
-    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
-                         0, texFormat, pixelType, nullptr);
+    sTexturePool->createTexture(m_width, m_height, internalformat, &m_tex);
+    sTexturePool->createTexture(m_width, m_height, internalformat, &m_blitTex);
 
-    s_gles2.glBindTexture(GL_TEXTURE_2D, m_blitTex);
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
-                         0, texFormat, pixelType, nullptr);
-
-    // EGL images need to be recreated because the EGL_KHR_image_base spec
-    // states that respecifying an image (i.e. glTexImage2D) will generally
-    // result in orphaning of the EGL image.
-    s_egl.eglDestroyImageKHR(m_display, m_eglImage);
     m_eglImage = s_egl.eglCreateImageKHR(
             m_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
             (EGLClientBuffer)SafePointerFromUInt(m_tex), NULL);
 
-    s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
     m_blitEGLImage = s_egl.eglCreateImageKHR(
             m_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
             (EGLClientBuffer)SafePointerFromUInt(m_blitTex), NULL);
