@@ -40,6 +40,14 @@ public:
         RGBA32,  // Matches GL_RGBA.
     };
 
+    enum class Orientation {
+        TopDown,
+        BottomUp,
+        Qt = TopDown,
+        OpenGL = BottomUp,  // glTexImage2D's data layout's orientation is
+                            // bottom up by default
+    };
+
     struct Result {
         // Pixel data.
         std::vector<uint8_t> mBuffer;
@@ -61,30 +69,42 @@ public:
     // Loads an image from disk, converting to either RGB or RGBA if necessary.
     // The format loaded is determined by the file's extension.
     //
-    // The image is oriented bottom-up to match glTexImage2D's data layout.
+    // The image is oriented bottom-up by default to match glTexImage2D's data
+    // layout.
     //
     // |filename| - Filename to load.
+    // |orientation| - Image orientation, match OpenGL by default.
     //
     // If the load was successful, returns a Result.
-    static android::base::Optional<Result> load(const char* filename);
+    static android::base::Optional<Result> load(
+            const char* filename,
+            Orientation orientation = Orientation::OpenGL);
 
     // Loads a PNG from disk, converting to either RGB or RGBA if necessary.
     //
-    // The image is oriented bottom-up to match glTexImage2D's data layout.
+    // The image is oriented bottom-up by default to match glTexImage2D's data
+    // layout.
     //
     // |filename| - Filename to load.
+    // |orientation| - Image orientation, match OpenGL by default.
     //
     // If the load was successful, returns a Result.
-    static android::base::Optional<Result> loadPNG(const char* filename);
+    static android::base::Optional<Result> loadPNG(
+            const char* filename,
+            Orientation orientation = Orientation::OpenGL);
 
     // Loads a JPEG from disk.
     //
-    // The image is oriented bottom-up to match glTexImage2D's data layout.
+    // The image is oriented bottom-up by default to match glTexImage2D's data
+    // layout.
     //
     // |filename| - Filename to load.
+    // |orientation| - Image orientation, match OpenGL by default.
     //
     // If the load was successful, returns a Result.
-    static android::base::Optional<Result> loadJPEG(const char* filename);
+    static android::base::Optional<Result> loadJPEG(
+            const char* filename,
+            Orientation orientation = Orientation::OpenGL);
 };
 
 }  // namespace virtualscene
