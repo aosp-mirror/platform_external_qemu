@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a60ba235_71392c77",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-09T11:20:17Z",
+      "side": 1,
+      "message": "Eventually I would like this to come from the AVD skin profile. \nNot all cars will have an Android powered-cluster. \nBut this is okay for now.",
+      "revId": "9fd112b7bdd99c5f94fb431b0eaa52bf1bc8f046",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "841b81ea_dbbdef16",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-09T11:20:17Z",
+      "side": 1,
+      "message": "Let\u0027s rename the class and variable to \"CarClusterWindow\" and \"mCarClusterWindow\".\n\"InstrumentCluster\" is a terminology that only android-automotive team knows about. Adding \"Car\" prefix will help to understand that this is a car specific feature.",
+      "revId": "9fd112b7bdd99c5f94fb431b0eaa52bf1bc8f046",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "422163c3_e1c81f4b",
+        "filename": "android/android-emu/android/skin/qt/instrumentclusterwindow.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-09T11:20:17Z",
+      "side": 1,
+      "message": "Do we need this method?",
+      "revId": "9fd112b7bdd99c5f94fb431b0eaa52bf1bc8f046",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "560fd4cc_c7bb028a",
+        "filename": "android/android-emu/android/skin/qt/instrumentclusterwindow.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-09T11:20:17Z",
+      "side": 1,
+      "message": "Let\u0027s add some documentation to this class, explaining that this window shows an emulation of the car\u0027s instruments, which will show some car sensors (such as current gear), turn-by-turn navigation, media and incoming calls.",
+      "revId": "9fd112b7bdd99c5f94fb431b0eaa52bf1bc8f046",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
