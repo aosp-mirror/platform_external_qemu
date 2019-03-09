@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b85a1eaa_dbdb22a5",
+        "filename": "android/android-emu/android-libui.cmake",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-09T00:27:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ac8cecd9_f7f2af8a",
+      "range": {
+        "startLine": 125,
+        "startChar": 4,
+        "endLine": 125,
+        "endChar": 47
+      },
+      "revId": "d258ab8807f84a98b2be3b00ab67d3d0565846c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "683d9a41_1eb48e5d",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "174f7910_1834523b",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 427,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-09T00:27:38Z",
+      "side": 1,
+      "message": "yes, we can use android_avdInfo, also add null check to avoid crash when emulator is not for android auto",
+      "parentUuid": "683d9a41_1eb48e5d",
+      "range": {
+        "startLine": 427,
+        "startChar": 31,
+        "endLine": 427,
+        "endChar": 59
+      },
+      "revId": "d258ab8807f84a98b2be3b00ab67d3d0565846c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dd632911_eb2a27a4",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
         "patchSetId": 1
@@ -68,6 +116,30 @@
       "revId": "d258ab8807f84a98b2be3b00ab67d3d0565846c1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "737fde22_701b6ddf",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-09T00:27:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dd632911_eb2a27a4",
+      "range": {
+        "startLine": 30,
+        "startChar": 9,
+        "endLine": 31,
+        "endChar": 0
+      },
+      "revId": "d258ab8807f84a98b2be3b00ab67d3d0565846c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
