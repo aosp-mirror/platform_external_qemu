@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "8d643399_82297181",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-03-11T05:13:40Z",
+      "side": 1,
+      "message": "Also, there are cases where the file format is \"webp\" that TextureUtils won\u0027t handle atm. So it would suffice to fix the case for load png only.",
+      "parentUuid": "92c97020_d8634fdb",
+      "range": {
+        "startLine": 137,
+        "startChar": 17,
+        "endLine": 137,
+        "endChar": 23
+      },
+      "revId": "b13723ce20f0989e74f22d25d7b622d233f74c21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "19da72e7_4bc38e13",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
