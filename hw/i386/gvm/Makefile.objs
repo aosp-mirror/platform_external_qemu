@@ -1,1 +1,1 @@
-obj-y += clock.o apic.o i8259.o ioapic.o
+obj-y += apic.o i8259.o ioapic.o
