@@ -192,29 +192,6 @@ static struct gvm_cpuid2 *get_supported_cpuid(GVMState *s)
     return cpuid;
 }
 
-static const struct gvm_para_features {
-    int cap;
-    int feature;
-} para_features[] = {
-    { GVM_CAP_CLOCKSOURCE, GVM_FEATURE_CLOCKSOURCE },
-    { GVM_CAP_NOP_IO_DELAY, GVM_FEATURE_NOP_IO_DELAY },
-    { GVM_CAP_ASYNC_PF, GVM_FEATURE_ASYNC_PF },
-};
-
-static int get_para_features(GVMState *s)
-{
-    int i, features = 0;
-
-    for (i = 0; i < ARRAY_SIZE(para_features); i++) {
-        if (gvm_check_extension(s, para_features[i].cap)) {
-            features |= (1 << para_features[i].feature);
-        }
-    }
-
-    return features;
-}
-
-
 /* Returns the value for a specific register on the cpuid entry
  */
 static uint32_t cpuid_entry_get_reg(struct gvm_cpuid_entry2 *entry, int reg)
@@ -312,11 +289,6 @@ uint32_t gvm_arch_get_supported_cpuid(GVMState *s, uint32_t function,
             //ret &= ~(1U << GVM_FEATURE_PV_UNHALT);
             ret &= ~(1U << 7);
         }
-    }
-
-    /* fallback for older kernels */
-    if ((function == GVM_CPUID_FEATURES) && !found) {
-        ret = get_para_features(s);
     }
 
     return ret;
