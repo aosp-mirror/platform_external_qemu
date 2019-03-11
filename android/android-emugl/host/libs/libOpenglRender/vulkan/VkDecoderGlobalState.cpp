@@ -1488,13 +1488,6 @@ public:
         };
 #endif
         if (importCbInfoPtr) {
-            // Ensure color buffer has Vulkan backing.
-            setupVkColorBuffer(
-                importCbInfoPtr->colorBuffer,
-                nullptr,
-                // Modify the allocation size to suit the resulting image memory size.
-                &allocInfo.allocationSize);
-
             VK_EXT_MEMORY_HANDLE cbExtMemoryHandle =
                 getColorBufferExtMemoryHandle(importCbInfoPtr->colorBuffer);
 
@@ -1846,21 +1839,21 @@ public:
     VkResult on_vkRegisterImageColorBufferGOOGLE(
        VkDevice device, VkImage image, uint32_t colorBuffer) {
 
+        (void)device;
         (void)image;
+        (void)colorBuffer;
 
-        bool success = setupVkColorBuffer(colorBuffer);
-
-        return success ? VK_SUCCESS : VK_ERROR_OUT_OF_DEVICE_MEMORY;
+        return VK_SUCCESS;
     }
 
     VkResult on_vkRegisterBufferColorBufferGOOGLE(
        VkDevice device, VkBuffer buffer, uint32_t colorBuffer) {
 
+        (void)device;
         (void)buffer;
+        (void)colorBuffer;
 
-        bool success = setupVkColorBuffer(colorBuffer);
-
-        return success ? VK_SUCCESS : VK_ERROR_OUT_OF_DEVICE_MEMORY;
+        return VK_SUCCESS;
     }
 
     VkResult on_vkAllocateCommandBuffers(

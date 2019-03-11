@@ -26,6 +26,7 @@
 #include "FrameworkFormats.h"
 #include "Hwc2.h"
 #include "RenderContext.h"
+#include "vulkan/VkCommonOperations.h"
 
 #include <memory>
 
@@ -235,6 +236,9 @@ public:
     void postLayer(ComposeLayer* l, int frameWidth, int frameHeight);
     GLuint getTexture();
 
+    bool createVulkanBacking(goldfish_vk::VkEmulation::ColorBufferInfo* out);
+    bool teardownVulkanBacking(goldfish_vk::VkEmulation::ColorBufferInfo* out);
+
     bool importMemory(
 #ifdef _WIN32
         void* handle,
@@ -290,6 +294,9 @@ private:
 
     GLenum m_asyncReadbackType = GL_UNSIGNED_BYTE;
     size_t m_numBytes = 0;
+
+    // Vulkan info
+    goldfish_vk::VkEmulation::ColorBufferInfo m_vkColorBufferInfo;
 
     bool m_importedMemory = false;
     GLuint m_memoryObject = 0;
