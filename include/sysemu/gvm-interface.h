@@ -691,10 +691,8 @@ struct gvm_enable_cap {
 #define GVM_CAP_HLT	  1
 #define GVM_CAP_MMU_SHADOW_CACHE_CONTROL 2
 #define GVM_CAP_VAPIC 6
-#define GVM_CAP_CLOCKSOURCE 8
 #define GVM_CAP_NR_VCPUS 9       /* returns recommended max vcpus per vm */
 #define GVM_CAP_NR_MEMSLOTS 10   /* returns max memory slots per vm */
-#define GVM_CAP_NOP_IO_DELAY 12
 #define GVM_CAP_SYNC_MMU 16  /* Changes to host mmap are reflected in guest */
 #define GVM_CAP_IOMMU 18
 #define GVM_CAP_USER_NMI 22
@@ -710,9 +708,6 @@ struct gvm_enable_cap {
 #ifdef __GVM_HAVE_VCPU_EVENTS
 #define GVM_CAP_VCPU_EVENTS 41
 #endif
-#define GVM_CAP_HYPERV 44
-#define GVM_CAP_HYPERV_VAPIC 45
-#define GVM_CAP_HYPERV_SPIN 46
 #define GVM_CAP_PCI_SEGMENT 47
 #define GVM_CAP_INTR_SHADOW 49
 #ifdef __GVM_HAVE_DEBUGREGS
@@ -729,33 +724,16 @@ struct gvm_enable_cap {
 #define GVM_CAP_ASYNC_PF 59
 #define GVM_CAP_TSC_CONTROL 60
 #define GVM_CAP_GET_TSC_KHZ 61
-#define GVM_CAP_PPC_BOOKE_SREGS 62
-#define GVM_CAP_SPAPR_TCE 63
 #define GVM_CAP_MAX_VCPUS 66       /* returns max vcpus per vm */
 #define GVM_CAP_SW_TLB 69
 #define GVM_CAP_TSC_DEADLINE_TIMER 72
 #define GVM_CAP_SYNC_REGS 74
 #define GVM_CAP_PCI_2_3 75
-#define GVM_CAP_GVMCLOCK_CTRL 76
 #define GVM_CAP_READONLY_MEM 81
-#define GVM_CAP_IRQFD_RESAMPLE 82
-#define GVM_CAP_ARM_PSCI 87
-#define GVM_CAP_ARM_SET_DEVICE_ADDR 88
-#define GVM_CAP_DEVICE_CTRL 89
-#define GVM_CAP_IRQ_MPIC 90
-#define GVM_CAP_PPC_RTAS 91
-#define GVM_CAP_IRQ_XICS 92
-#define GVM_CAP_ARM_EL1_32BIT 93
-#define GVM_CAP_SPAPR_MULTITCE 94
 #define GVM_CAP_EXT_EMUL_CPUID 95
-#define GVM_CAP_HYPERV_TIME 96
 #define GVM_CAP_IOAPIC_POLARITY_IGNORED 97
 #define GVM_CAP_ENABLE_CAP_VM 98
-#define GVM_CAP_IOEVENTFD_NO_LENGTH 100
 #define GVM_CAP_VM_ATTRIBUTES 101
-#define GVM_CAP_ARM_PSCI_0_2 102
-#define GVM_CAP_PPC_FIXUP_HCALL 103
-#define GVM_CAP_PPC_ENABLE_HCALL 104
 #define GVM_CAP_CHECK_EXTENSION_VM 105
 #define GVM_CAP_DISABLE_QUIRKS 116
 #define GVM_CAP_X86_SMM 117
@@ -764,9 +742,6 @@ struct gvm_enable_cap {
 #define GVM_CAP_GUEST_DEBUG_HW_WPS 120
 #define GVM_CAP_SPLIT_IRQCHIP 121
 #define GVM_CAP_IOEVENTFD_ANY_LENGTH 122
-#define GVM_CAP_HYPERV_SYNIC 123
-#define GVM_CAP_SPAPR_TCE_64 125
-#define GVM_CAP_ARM_PMU_V3 126
 #define GVM_CAP_VCPU_ATTRIBUTES 127
 #define GVM_CAP_MAX_VCPU_ID 128
 #define GVM_CAP_X2APIC_API 129
