@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "92c97020_d8634fdb",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-03-11T03:44:38Z",
+      "side": 1,
+      "message": "There are a few other ctor where QImageReader is needed. Ideally, QT should be built without any dependencies on system libs. Thus, we won\u0027t run into this type of problem in theory if we fix QT prebuilt in the future and this code should no longer be used in my opinion. I prefer not to refactor all ctors to load with our own libpng.",
+      "parentUuid": "8589901d_23a4913e",
+      "range": {
+        "startLine": 137,
+        "startChar": 17,
+        "endLine": 137,
+        "endChar": 23
+      },
+      "revId": "b13723ce20f0989e74f22d25d7b622d233f74c21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "19da72e7_4bc38e13",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "b13723ce20f0989e74f22d25d7b622d233f74c21",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "54239fbf_2d7f0919",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-03-11T03:44:38Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "19da72e7_4bc38e13",
+      "range": {
+        "startLine": 154,
+        "startChar": 8,
+        "endLine": 154,
+        "endChar": 61
+      },
+      "revId": "b13723ce20f0989e74f22d25d7b622d233f74c21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -76,6 +124,30 @@
       "writtenOn": "2019-03-09T02:24:04Z",
       "side": 1,
       "message": "I\u0027m not a fan of boolean parameters, since it is not obvious what this is doing at the call site.  Would it be possible to change this to an enum?  I\u0027m thinking something like this:\n\nenum class Orientation {\n    TopDown,\n    BottomUp,\n    Qt \u003d TopDown,\n    OpenGL \u003d BottomUp,\n};\n\nThen you can have the parameter be OpenGL by default:\nOrientation orientation \u003d Orientation::OpenGL",
+      "range": {
+        "startLine": 71,
+        "startChar": 48,
+        "endLine": 71,
+        "endChar": 68
+      },
+      "revId": "b13723ce20f0989e74f22d25d7b622d233f74c21",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "040865e5_aecf6fbc",
+        "filename": "android/android-emu/android/virtualscene/TextureUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2019-03-11T03:44:38Z",
+      "side": 1,
+      "message": "Agree, that\u0027s a cleaner way to do this.",
+      "parentUuid": "f20420b0_a93833e5",
       "range": {
         "startLine": 71,
         "startChar": 48,
