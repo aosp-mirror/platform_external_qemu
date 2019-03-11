@@ -25,14 +25,8 @@
  */
 #define GVM_CPUID_SIGNATURE      0
 #define GVM_CPUID_FEATURES       0
-#define GVM_FEATURE_CLOCKSOURCE  0
-#define GVM_FEATURE_NOP_IO_DELAY 0
 #define GVM_FEATURE_MMU_OP       0
-#define GVM_FEATURE_CLOCKSOURCE2 0
-#define GVM_FEATURE_ASYNC_PF     0
-#define GVM_FEATURE_STEAL_TIME   0
 #define GVM_FEATURE_PV_EOI       0
-#define GVM_FEATURE_CLOCKSOURCE_STABLE_BIT 0
 
 extern bool gvm_allowed;
 extern bool gvm_kernel_irqchip;
