@@ -50,6 +50,7 @@
 #include "android/ui-emu-agent.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/filelock.h"
+#include "android/virtualscene/TextureUtils.h"
 
 #if defined(__APPLE__)
 #include "android/skin/qt/mac-native-window.h"
@@ -109,6 +110,7 @@ using android::base::System;
 using android::crashreport::CrashReporter;
 using android::emulation::ApkInstaller;
 using android::emulation::FilePusher;
+using android::virtualscene::TextureUtils;
 using std::string;
 using std::vector;
 
@@ -132,6 +134,29 @@ SkinSurfaceBitmap::SkinSurfaceBitmap(int w, int h) : cachedSize(w, h) {}
 
 SkinSurfaceBitmap::SkinSurfaceBitmap(const char* path) : reader(path) {
     cachedSize = reader.size();
+    // When loading png file from a file path, QT's QImage class will use its
+    // own libpng which introduces unexpected dependencies on libz from system
+    // lib. Thus, causing crash for certain png file. (b/127953242) To
+    // workaround, we use an inplementation which is based on libpng built from
+    // source and it doesn't introduce unexpected dependencies.
+    // This code path will be executed iff the file format is png.
+    if (PathUtils::extension(path) == ".png") {
+        auto result =
+                TextureUtils::loadPNG(reader.fileName().toStdString().c_str(),
+                                      TextureUtils::Orientation::Qt);
+        if (result) {
+            QImage::Format format =
+                    (result->mFormat == TextureUtils::Format::RGB24)
+                            ? QImage::Format_RGB888
+                            : QImage::Format_RGBA8888;
+            image = QImage(reinterpret_cast<const unsigned char*>(
+                                   result->mBuffer.data()),
+                           result->mWidth, result->mHeight, format);
+
+            image = image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+            resetReader();
+        }
+    }
 }
 
 SkinSurfaceBitmap::SkinSurfaceBitmap(const unsigned char* data, int size) {
