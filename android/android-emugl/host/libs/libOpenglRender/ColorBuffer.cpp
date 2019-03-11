@@ -26,9 +26,12 @@
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#include "emugl/common/feature_control.h"
 #include "emugl/common/misc.h"
 
 #include <GLES2/gl2ext.h>
+
+#include <vulkan/VulkanDispatch.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -38,6 +41,8 @@
 #else
 #define DEBUG_CB_FBO 1
 #endif
+
+using emugl::emugl_feature_is_enabled;
 
 namespace {
 
@@ -287,6 +292,11 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
 
     s_gles2.glFinish();
+
+    if (emugl_feature_is_enabled(android::featurecontrol::Vulkan)) {
+        cb->createVulkanBacking(nullptr);
+    }
+
     return cb;
 }
 
@@ -318,6 +328,10 @@ ColorBuffer::~ColorBuffer() {
 
     if (m_memoryObject) {
         s_gles2.glDeleteMemoryObjectsEXT(1, &m_memoryObject);
+    }
+
+    if (emugl_feature_is_enabled(android::featurecontrol::Vulkan)) {
+        teardownVulkanBacking(nullptr);
     }
 
     delete m_resizer;
@@ -842,6 +856,120 @@ GLuint ColorBuffer::getTexture() {
 void ColorBuffer::postLayer(ComposeLayer* l, int frameWidth, int frameHeight) {
     if (m_inUse) fprintf(stderr, "%s: cb in use\n", __func__);
     m_helper->getTextureDraw()->drawLayer(l, frameWidth, frameHeight, m_width, m_height, m_tex);
+}
+
+bool ColorBuffer::createVulkanBacking(goldfish_vk::VkEmulation::ColorBufferInfo* out) {
+
+    VkFormat vkFormat = goldfish_vk::glFormat2VkFormat(m_internalFormat);
+
+    goldfish_vk::VkEmulation::ColorBufferInfo res;
+
+    res.handle = getHndl();
+
+    // TODO
+    res.frameworkFormat = 0;
+    res.frameworkStride = 0;
+
+    res.extent = { (uint32_t)m_width, (uint32_t)m_height, 1 };
+    res.format = vkFormat;
+    res.type = VK_IMAGE_TYPE_2D;
+    res.tiling = VK_IMAGE_TILING_OPTIMAL;
+    res.usageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                     VK_IMAGE_USAGE_SAMPLED_BIT |
+                     VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+                     VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    res.createFlags = 0;
+
+    res.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    // Create the image. If external memory is supported, make it external.
+    VkExternalMemoryImageCreateInfo extImageCi = {
+        VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO, 0,
+        VK_EXT_MEMORY_HANDLE_TYPE_BIT,
+    };
+
+    VkExternalMemoryImageCreateInfo* extImageCiPtr = nullptr;
+
+    auto vkEmu = goldfish_vk::getGlobalVkEmulation();
+    auto vk = vkEmu->dvk;
+
+    if (vkEmu->deviceInfo.supportsExternalMemory) {
+        extImageCiPtr = &extImageCi;
+    }
+
+    VkImageCreateInfo imageCi = {
+         VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, extImageCiPtr,
+         res.createFlags,
+         res.type,
+         res.format,
+         res.extent,
+         1, 1,
+         VK_SAMPLE_COUNT_1_BIT,
+         res.tiling,
+         res.usageFlags,
+         VK_SHARING_MODE_EXCLUSIVE, 0, nullptr,
+         VK_IMAGE_LAYOUT_UNDEFINED,
+    };
+
+    VkResult createRes = vk->vkCreateImage(vkEmu->device, &imageCi,
+                                           nullptr, &res.image);
+    if (createRes != VK_SUCCESS) {
+        LOG(VERBOSE) << "Failed to create Vulkan image for ColorBuffer "
+                     << getHndl();
+        return false;
+    }
+
+    vk->vkGetImageMemoryRequirements(vkEmu->device, res.image,
+                                     &res.memReqs);
+
+    res.memory.size = res.memReqs.size;
+    res.memory.typeIndex = goldfish_vk::lastGoodTypeIndex(res.memReqs.memoryTypeBits);
+
+    LOG(VERBOSE) << "ColorBuffer " << getHndl()
+                 << "allocation size and type index: " << res.memory.size
+                 << ", " << res.memory.typeIndex;
+
+    bool allocRes = allocExternalMemory(vk, &res.memory);
+
+    if (!allocRes) {
+        LOG(VERBOSE) << "Failed to allocate ColorBuffer with Vulkan backing.";
+        return false;
+    }
+
+    VkResult bindImageMemoryRes =
+        vk->vkBindImageMemory(vkEmu->device, res.image, res.memory.memory, 0);
+
+    if (bindImageMemoryRes != VK_SUCCESS) {
+        fprintf(stderr, "%s: Failed to bind image memory. %d\n", __func__,
+        bindImageMemoryRes);
+        return false;
+    }
+
+    if (vkEmu->deviceInfo.supportsExternalMemory &&
+        vkEmu->deviceInfo.glInteropSupported &&
+        importMemory(
+            goldfish_vk::dupExternalMemory(res.memory.exportedHandle),
+            res.memory.size,
+            false /* dedicated */,
+            res.tiling == VK_IMAGE_TILING_LINEAR)) {
+        res.glExported = true;
+    }
+
+    m_vkColorBufferInfo = res;
+    if (out) *out = m_vkColorBufferInfo;
+
+    goldfish_vk::registerVkColorBuffer(getHndl(), m_vkColorBufferInfo);
+    return true;
+}
+
+bool ColorBuffer::teardownVulkanBacking(goldfish_vk::VkEmulation::ColorBufferInfo* out) {
+    auto vkEmu = goldfish_vk::getGlobalVkEmulation();
+    auto vk = vkEmu->dvk;
+    vk->vkDestroyImage(vkEmu->device, m_vkColorBufferInfo.image, nullptr);
+    goldfish_vk::freeExternalMemory(vk, &m_vkColorBufferInfo.memory);
+    if (out) *out = m_vkColorBufferInfo;
+    goldfish_vk::unregisterVkColorBuffer(getHndl());
+    return true;
 }
 
 bool ColorBuffer::importMemory(

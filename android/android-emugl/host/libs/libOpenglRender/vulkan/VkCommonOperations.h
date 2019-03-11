@@ -238,13 +238,15 @@ bool importExternalMemoryDedicatedImage(
     const VkEmulation::ExternalMemoryInfo* info,
     VkImage image,
     VkDeviceMemory* out);
+VkFormat glFormat2VkFormat(int internalformat);
+uint32_t lastGoodTypeIndex(uint32_t indices);
 
 // ColorBuffer operations
 
 bool isColorBufferVulkanCompatible(uint32_t colorBufferHandle);
 
-bool setupVkColorBuffer(uint32_t colorBufferHandle, bool* exported = nullptr, VkDeviceSize* allocSize = nullptr);
-bool teardownVkColorBuffer(uint32_t colorBufferHandle);
+void registerVkColorBuffer(uint32_t colorBufferHandle, const VkEmulation::ColorBufferInfo& info);
+void unregisterVkColorBuffer(uint32_t colorBufferHandle);
 VkEmulation::ColorBufferInfo getColorBufferInfo(uint32_t colorBufferHandle);
 bool updateColorBufferFromVkImage(uint32_t colorBufferHandle);
 bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle);

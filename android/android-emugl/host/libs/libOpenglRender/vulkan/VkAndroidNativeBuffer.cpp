@@ -78,8 +78,7 @@ VkResult prepareAndroidNativeBufferImage(
     }
 
     if (colorBufferVulkanCompatible &&
-        externalMemoryCompatible &&
-        setupVkColorBuffer(out->colorBufferHandle, &out->isGlTexture)) {
+        externalMemoryCompatible) {
         out->externallyBacked = true;
     }
 
@@ -286,10 +285,6 @@ void teardownAndroidNativeBufferImage(
     anbInfo->queueStates.clear();
 
     anbInfo->acquireQueueState.teardown(vk, device);
-
-    if (anbInfo->externallyBacked) {
-        teardownVkColorBuffer(anbInfo->colorBufferHandle);
-    }
 
     *anbInfo = {};
 }
