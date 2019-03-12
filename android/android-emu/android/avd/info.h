@@ -229,6 +229,11 @@ char*  avdInfo_getSystemImageDevicePathInGuest( const AvdInfo*  i );
 */
 char*  avdInfo_getVendorImageDevicePathInGuest( const AvdInfo*  i );
 
+/*
+  for xish: pci/pci0000:00/0000:00:03.0
+  for armish: platform/%s.virtio_mmio
+   */
+char*  avdInfo_getDynamicPartitionBootDevice( const AvdInfo*  i );
 
 char*  avdInfo_getDataImagePath( const AvdInfo*  i );
 char*  avdInfo_getDefaultDataImagePath( const AvdInfo*  i );
