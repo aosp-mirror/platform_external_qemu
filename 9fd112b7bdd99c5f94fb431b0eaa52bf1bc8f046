@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "22b990d9_550ca011",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-12T00:37:18Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a60ba235_71392c77",
+      "revId": "9fd112b7bdd99c5f94fb431b0eaa52bf1bc8f046",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "841b81ea_dbbdef16",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
         "patchSetId": 4
@@ -33,6 +51,24 @@
       "revId": "9fd112b7bdd99c5f94fb431b0eaa52bf1bc8f046",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aa3e5bdb_6716ecf9",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-12T00:37:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "841b81ea_dbbdef16",
+      "revId": "9fd112b7bdd99c5f94fb431b0eaa52bf1bc8f046",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "1510e7b4_e705e9ef",
+        "filename": "android/android-emu/android/skin/qt/instrumentclusterwindow.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-12T00:37:18Z",
+      "side": 1,
+      "message": "We don\u0027t need it for now, but it might be needed if we decided to make the carcluster window keep with main window like toolbar.\nAlso we, need to decided the size and position of the cluster window.",
+      "parentUuid": "422163c3_e1c81f4b",
+      "revId": "9fd112b7bdd99c5f94fb431b0eaa52bf1bc8f046",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "560fd4cc_c7bb028a",
         "filename": "android/android-emu/android/skin/qt/instrumentclusterwindow.h",
         "patchSetId": 4
@@ -67,6 +121,24 @@
       "revId": "9fd112b7bdd99c5f94fb431b0eaa52bf1bc8f046",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "687ad64a_0e7f9bb9",
+        "filename": "android/android-emu/android/skin/qt/instrumentclusterwindow.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-12T00:37:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "560fd4cc_c7bb028a",
+      "revId": "9fd112b7bdd99c5f94fb431b0eaa52bf1bc8f046",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
