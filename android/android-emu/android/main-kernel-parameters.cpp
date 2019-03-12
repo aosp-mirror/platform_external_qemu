@@ -180,7 +180,8 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         params.add("mac80211_hwsim.channels=2");
     }
 
-    if (isQemu2 && isX86ish) {
+    const bool isDynamicPartition = android::featurecontrol::isEnabled(android::featurecontrol::DynamicPartition);
+    if (isQemu2 && isX86ish && !isDynamicPartition) {
         // x86 and x86_64 platforms use an alternative Android DT directory that
         // mimics the layout of /proc/device-tree/firmware/android/
         params.addFormat("androidboot.android_dt_dir=%s",
@@ -199,6 +200,8 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
             if (!verifiedBootParameters || verifiedBootParameters->empty()) {
                 params.add("root=/dev/vda1");
             }
+        } else if (isDynamicPartition){
+            params.add("androidboot.boot_devices=pci0000:00/0000:00:03.0");
         }
     }
 
