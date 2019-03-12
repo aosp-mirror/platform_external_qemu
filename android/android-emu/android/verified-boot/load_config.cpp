@@ -33,7 +33,7 @@ using ::google::protobuf::io::ColumnNumber;
 using ::google::protobuf::io::FileInputStream;
 using ::google::protobuf::io::ZeroCopyInputStream;
 
-static const int kMaxSupportedMajorVersion = 1;
+static const int kMaxSupportedMajorVersion = 2;
 
 namespace {
 
@@ -139,7 +139,7 @@ static Status checkVersion(const VerifiedBootConfig& config) {
 //   dm="...".
 static Status buildDMParam(const VerifiedBootConfig& config,
                            std::string* dm_param) {
-    if (config.dm_param_size() < 1) {
+    if (config.dm_param_size() < 1 && config.major_version() == 1) {
         LOG(WARNING) << "Verified boot config  does not contain any dm_param "
                      << "options";
         return Status::MissingDMParam;

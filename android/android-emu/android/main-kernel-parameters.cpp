@@ -183,9 +183,9 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     if (isQemu2 && isX86ish) {
         // x86 and x86_64 platforms use an alternative Android DT directory that
         // mimics the layout of /proc/device-tree/firmware/android/
-        params.addFormat("androidboot.android_dt_dir=%s",
-            (android::featurecontrol::isEnabled(android::featurecontrol::KernelDeviceTreeBlobSupport) ?
-                kSysfsAndroidDtDirDtb : kSysfsAndroidDtDir));
+        //params.addFormat("androidboot.android_dt_dir=%s",
+        //    (android::featurecontrol::isEnabled(android::featurecontrol::KernelDeviceTreeBlobSupport) ?
+        //        kSysfsAndroidDtDirDtb : kSysfsAndroidDtDir));
     }
 
     if (isQemu2) {
@@ -199,6 +199,8 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
             if (!verifiedBootParameters || verifiedBootParameters->empty()) {
                 params.add("root=/dev/vda1");
             }
+        } else {
+            params.add("androidboot.boot_devices=pci0000:00/0000:00:03.0");
         }
     }
 
