@@ -48,6 +48,29 @@
     },
     {
       "key": {
+        "uuid": "5c41eadb_fe13b6fd",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2019-03-12T00:17:08Z",
+      "side": 1,
+      "message": "When does this actually happen? I\u0027m not sure how you get an itemSelectionChanged but not an itemClicked... is it like when select some other thing in the UI?\n\nMight be worth a comment.",
+      "range": {
+        "startLine": 112,
+        "startChar": 22,
+        "endLine": 112,
+        "endChar": 57
+      },
+      "revId": "d8b7af89eb31b6fbbe57dc6d412bc209d2b80184",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d8b97d51_dc379781",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
         "patchSetId": 1
@@ -64,6 +87,29 @@
         "startChar": 34,
         "endLine": 153,
         "endChar": 45
+      },
+      "revId": "d8b7af89eb31b6fbbe57dc6d412bc209d2b80184",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9ad4ff6a_9d37b14e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2019-03-12T00:17:08Z",
+      "side": 1,
+      "message": "does the video just keep playing in the background/disabled after it has started once, or does it get cleaned up somehow when not in the Playing state?",
+      "range": {
+        "startLine": 167,
+        "startChar": 4,
+        "endLine": 167,
+        "endChar": 26
       },
       "revId": "d8b7af89eb31b6fbbe57dc6d412bc209d2b80184",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
