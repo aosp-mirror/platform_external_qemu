@@ -17,6 +17,7 @@
 #include "android/emulation/control/automation_agent.h"
 #include "android/skin/qt/extended-pages/record-macro-saved-item.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/video-player/QtVideoPlayerNotifier.h"
 
 #include <QMessageBox>
 #include <iostream>
@@ -57,6 +58,8 @@ void RecordMacroPage::loadUi() {
         mUi->macroList->addItem(listItem);
         mUi->macroList->setItemWidget(listItem, macroSavedItem);
     }
+
+    setMacroUiState(MacroUiState::Waiting);
 }
 
 void RecordMacroPage::on_playButton_clicked() {
@@ -83,16 +86,86 @@ void RecordMacroPage::on_playButton_clicked() {
         msgBox.setDefaultButton(QMessageBox::Save);
 
         int ret = msgBox.exec();
+        return;
     }
+
+    mCurrentMacroName = macroName;
+    mMacroPlaying = true;
+    setMacroUiState(MacroUiState::Playing);
 }
 
-// TODO(dteran): We want to know the item that is clicked to eventually show a
-// preview of the macro.
-void RecordMacroPage::on_macroList_itemClicked(QListWidgetItem* item) {
-    mUi->playButton->setEnabled(true);
+void RecordMacroPage::on_macroList_itemPressed(QListWidgetItem* listItem) {
+    RecordMacroSavedItem* macroSavedItem = qobject_cast<RecordMacroSavedItem*>(
+            mUi->macroList->itemWidget(listItem));
+    const std::string macroName = macroSavedItem->getName();
+
+    if (mMacroPlaying && mCurrentMacroName == macroName) {
+        setMacroUiState(MacroUiState::Playing);
+    } else {
+        setMacroUiState(MacroUiState::Selected);
+    }
+
+    showPreview(macroName);
+}
+
+// For dragging and clicking outside the items in the item list.
+void RecordMacroPage::on_macroList_itemSelectionChanged() {
+    setMacroUiState(MacroUiState::Waiting);
 }
 
 std::string RecordMacroPage::getMacrosDirectory() {
     return PathUtils::join(System::get()->getLauncherDirectory(), "resources",
                            "macros");
+}
+
+std::string RecordMacroPage::getMacroPreviewsDirectory() {
+    return PathUtils::join(System::get()->getLauncherDirectory(), "resources",
+                           "macroPreviews");
+}
+
+void RecordMacroPage::setMacroUiState(MacroUiState state) {
+    mState = state;
+
+    switch (mState) {
+        case MacroUiState::Waiting: {
+            mUi->previewLabel->setText("Select a macro to preview");
+            mUi->previewLabel->show();
+            mUi->previewOverlay->show();
+            mUi->playButton->setEnabled(false);
+            break;
+        }
+        case MacroUiState::Selected: {
+            mUi->previewLabel->hide();
+            mUi->previewOverlay->hide();
+            mUi->playButton->setEnabled(true);
+            break;
+        }
+        case MacroUiState::Playing: {
+            mUi->previewLabel->setText("Macro playing on the Emulator");
+            mUi->previewLabel->show();
+            mUi->previewOverlay->show();
+            mUi->playButton->setEnabled(true);
+            break;
+        }
+    }
+}
+
+void RecordMacroPage::showPreview(const std::string& previewName) {
+    const std::string previewPath =
+            PathUtils::join(getMacroPreviewsDirectory(), previewName + ".gif");
+
+    auto videoPlayerNotifier =
+            std::unique_ptr<android::videoplayer::QtVideoPlayerNotifier>(
+                    new android::videoplayer::QtVideoPlayerNotifier());
+    connect(videoPlayerNotifier.get(), SIGNAL(updateWidget()), this,
+            SLOT(updateVideoView()));
+    mVideoPlayer = android::videoplayer::VideoPlayer::create(
+            previewPath, mUi->videoWidget, std::move(videoPlayerNotifier));
+
+    mVideoPlayer->scheduleRefresh(20);
+    mVideoPlayer->start();
+}
+
+void RecordMacroPage::updateVideoView() {
+    mUi->videoWidget->repaint();
 }
