@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "d63c528b_19d44a02",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-12T00:21:55Z",
+      "side": 1,
+      "message": "FYI, this is Qt\u0027s auto-connection feature: https://doc.qt.io/qt-5/designer-using-a-ui-file.html#widgets-and-dialogs-with-auto-connect",
+      "parentUuid": "5c41eadb_fe13b6fd",
+      "range": {
+        "startLine": 112,
+        "startChar": 22,
+        "endLine": 112,
+        "endChar": 57
+      },
+      "revId": "d8b7af89eb31b6fbbe57dc6d412bc209d2b80184",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d8b97d51_dc379781",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
         "patchSetId": 1
