@@ -1813,10 +1813,20 @@ extern "C" int main(int argc, char** argv) {
         // If this is not a playstore image, then -writable_system will
         // disable verified boot.
         std::vector<std::string> verified_boot_params;
-        if (feature_is_enabled(kFeature_PlayStoreImage) || !android_op_writable_system) {
+        if (feature_is_enabled(kFeature_PlayStoreImage) || !android_op_writable_system
+                || feature_is_enabled(kFeature_DynamicPartition)) {
           android::verifiedboot::getParametersFromFile(
                   avdInfo_getVerifiedBootParamsPath(avd),  // NULL here is OK
                   &verified_boot_params);
+          if (feature_is_enabled(kFeature_DynamicPartition)) {
+              std::string boot_dev("androidboot.boot_devices=");
+              boot_dev.append(avdInfo_getDynamicPartitionBootDevice(avd));
+              verified_boot_params.push_back(boot_dev);
+          }
+          if (android_op_writable_system) {
+              // unlocked state
+              verified_boot_params.push_back("androidboot.verifiedbootstate=orange");
+          }
         }
 
         ScopedCPtr<char> kernel_parameters(emulator_getKernelParameters(
