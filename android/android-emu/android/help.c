@@ -1664,6 +1664,7 @@ help_sim_access_rules_file(stralloc_t* out)
 #define help_acpi_config NULL
 #define help_fuchsia NULL
 #define help_allow_host_audio NULL
+#define help_perf_stat NULL
 
 typedef struct {
     const char*  name;

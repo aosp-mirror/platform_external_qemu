@@ -3272,6 +3272,8 @@ static int qemu_read_default_config_file(void)
 
 static int is_opengl_alive = 1;
 
+static int run_perf_stat = 0;
+
 static void android_check_for_updates()
 {
     android_checkForUpdates(QEMU_CORE_VERSION);
@@ -3297,10 +3299,9 @@ static void android_devices_teardown()
 
 static void android_init_metrics()
 {
-    android_metrics_start(EMULATOR_VERSION_STRING,
-                          EMULATOR_FULL_VERSION_STRING,
-                          QEMU_VERSION,
-                          android_base_port);
+    android_metrics_start(EMULATOR_VERSION_STRING, EMULATOR_FULL_VERSION_STRING,
+                        QEMU_VERSION, android_base_port,
+                        android_verbose || run_perf_stat == 1);
     android_metrics_report_common_info(is_opengl_alive);
 }
 
@@ -4569,6 +4570,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             case QEMU_OPTION_read_only:
               read_only = true;
               break;
+
+            case QEMU_OPTION_perf_stat:
+              run_perf_stat = 1;
 #endif  // CONFIG_ANDROID
             default:
                 os_parse_cmd_args(popt->index, optarg);

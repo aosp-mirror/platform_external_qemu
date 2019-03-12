@@ -14,10 +14,16 @@
 
 #include "android/metrics/PerfStatReporter.h"
 
-#include "android/base/CpuUsage.h"
 #include "android/CommonReportedInfo.h"
+#include "android/base/CpuUsage.h"
+#include "android/base/files/StdioStream.h"
+#include "android/cmdline-option.h"
+#include "android/globals.h"
+#include "android/metrics/MetricsWriter.h"
 #include "android/metrics/PeriodicReporter.h"
+#include "android/metrics/TextMetricsWriter.h"
 
+#include "android/metrics/proto/clientanalytics.pb.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/utils/debug.h"
 
@@ -33,6 +39,7 @@ namespace metrics {
 using android::base::CpuTime;
 using android::base::CpuUsage;
 using android::base::Lock;
+using android::base::StdioStream;
 using android::base::System;
 using std::shared_ptr;
 
@@ -49,14 +56,20 @@ PerfStatReporter::PerfStatReporter(
         android::base::Looper::Duration checkIntervalMs)
     : mCurrPerfStats(new android_studio::EmulatorPerformanceStats),
       mLooper(looper),
+      mWriter(TextMetricsWriter::create(StdioStream(stdout))),
       mCheckIntervalMs(checkIntervalMs),
       // We use raw pointer to |this| instead of a shared_ptr to avoid cicrular
       // ownership. mRecurrentTask promises to cancel any outstanding tasks when
       // it's destructed.
-      mRecurrentTask(looper,
-                     [this]() { refreshPerfStats(); return true; },
-                     mCheckIntervalMs) {
-
+      mRecurrentTask(
+              looper,
+              [this]() {
+                  refreshPerfStats();
+                  if (android_cmdLineOptions->perf_stat)
+                      dump();
+                  return true;
+              },
+              mCheckIntervalMs) {
     // Also start up a periodic reporter that takes whatever is in the
     // current struct.
     using android::metrics::PeriodicReporter;
@@ -99,6 +112,18 @@ void PerfStatReporter::fillProto(android_studio::EmulatorPerformanceStats* perfS
 
 static void fillProtoMemUsage(android_studio::EmulatorPerformanceStats* stats_out);
 static void fillProtoCpuUsage(android_studio::EmulatorPerformanceStats* stats_out);
+
+void PerfStatReporter::dump() {
+    wireless_android_play_playlog::LogEvent logEvent;
+
+    const auto timeMs = System::get()->getUnixTimeUs() / 1000;
+    logEvent.set_event_time_ms(timeMs);
+    android_studio::AndroidStudioEvent event;
+    android_studio::EmulatorPerformanceStats* perfStatProto =
+            event.mutable_emulator_performance_stats();
+    *perfStatProto = *mCurrPerfStats;
+    mWriter->write(event, &logEvent);
+}
 
 void PerfStatReporter::refreshPerfStats() {
     android::base::AutoLock lock(mLock);
