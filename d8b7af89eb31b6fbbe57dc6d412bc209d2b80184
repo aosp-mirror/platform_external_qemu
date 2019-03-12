@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2643fcb_e1455436",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-12T00:07:03Z",
+      "side": 1,
+      "message": "Per my comment on the header file, the \"mMacroPlaying\" line can be removed.  Since the setMacroUiState has side-effects setting up the UI, that makes sense to keep.",
+      "range": {
+        "startLine": 62,
+        "startChar": 4,
+        "endLine": 63,
+        "endChar": 43
+      },
+      "revId": "d8b7af89eb31b6fbbe57dc6d412bc209d2b80184",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d1cbbd54_366a9ac0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-12T00:07:03Z",
+      "side": 1,
+      "message": "Current macro name, maybe?",
+      "range": {
+        "startLine": 93,
+        "startChar": 4,
+        "endLine": 93,
+        "endChar": 17
+      },
+      "revId": "d8b7af89eb31b6fbbe57dc6d412bc209d2b80184",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d8b97d51_dc379781",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-12T00:07:03Z",
+      "side": 1,
+      "message": "This seems fine as a std::string, since the input is already in std::string form.  However, I recommend making it \"const std::string\u0026\" to avoid a copy.\n\nYou won\u0027t be able to do +\u003d, but you can add a \".gif\" when passing it to PathUtils:\n\n    const std::string previewPath \u003d\n            PathUtils::join(getMacroPreviewsDirectory(), previewName + \".gif\");",
+      "range": {
+        "startLine": 153,
+        "startChar": 34,
+        "endLine": 153,
+        "endChar": 45
+      },
+      "revId": "d8b7af89eb31b6fbbe57dc6d412bc209d2b80184",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eaf988f9_d71540c2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-12T00:07:03Z",
+      "side": 1,
+      "message": "I recommend doing inline member initialization for any primitive types that won\u0027t default-initialize (instead of doing it in the constructor).\n\nFor example, this could be:\nbool mMacroPlaying \u003d false;\nMacroUiState mState \u003d MacroUiState::Waiting;\n\nThe other fields, like std::string and std::unique_ptr have default constructors, so they don\u0027t need to be explicitly initialized.\n\nThe benefit is that doing it here guarantees it is set, it\u0027s easy to make a mistake and forget the constructor.",
+      "range": {
+        "startLine": 46,
+        "startChar": 22,
+        "endLine": 46,
+        "endChar": 23
+      },
+      "revId": "d8b7af89eb31b6fbbe57dc6d412bc209d2b80184",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
