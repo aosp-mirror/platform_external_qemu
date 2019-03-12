@@ -3,7 +3,7 @@ syntax = "proto2";
 package emulator_features;
 
 // Must match emulator's featurecontrol defs.
-// Next tag: 35
+// Next tag: 45
 enum Feature {
     GLPipeChecksum = 0;
     GrallocSync = 1;
@@ -67,4 +67,6 @@ enum Feature {
     VideoPlayback = 34;
 
     CarPropertyTable = 43;
+
+    DynamicPartition = 44;
 }

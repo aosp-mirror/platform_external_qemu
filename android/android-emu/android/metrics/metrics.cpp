@@ -381,6 +381,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::WINDOWS_HYPERVISOR_PLATFORM;
         case android::featurecontrol::KernelDeviceTreeBlobSupport:
             return android_studio::EmulatorFeatureFlagState::KERNEL_DEVICE_TREE_BLOB_SUPPORT;
+        case android::featurecontrol::DynamicPartition:
+            return android_studio::EmulatorFeatureFlagState::DYNAMIC_PARTITION;
         case android::featurecontrol::LocationUiV2:
             return android_studio::EmulatorFeatureFlagState::LOCATION_UI_V2;
         case android::featurecontrol::SnapshotAdb:

@@ -1452,6 +1452,24 @@ avdInfo_getVendorImageDevicePathInGuest( const AvdInfo*  i )
 }
 
 char*
+avdInfo_getDynamicPartitionBootDevice( const AvdInfo*  i )
+{
+    if (is_x86ish(i)) {
+        return strdup("pci0000:00/0000:00:03.0");
+    }
+
+    char* system_path = get_device_path(i, "system");
+    if (!system_path) {
+        return NULL;
+    }
+
+    char* bootdev = strdup(system_path + strlen("/dev/block/platform/"));
+    char* end = strstr(bootdev, "/by-name/system");
+    *end = '\0';
+    return bootdev;
+}
+
+char*
 avdInfo_getSystemImageDevicePathInGuest( const AvdInfo*  i )
 {
     if (feature_is_enabled(kFeature_SystemAsRoot)) {
