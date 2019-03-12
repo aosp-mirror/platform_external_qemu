@@ -261,6 +261,30 @@
     },
     {
       "key": {
+        "uuid": "00e26de6_cf272fbb",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2019-03-12T01:14:48Z",
+      "side": 1,
+      "message": "Sounds fine to me.",
+      "parentUuid": "7652add8_49e2192a",
+      "range": {
+        "startLine": 167,
+        "startChar": 4,
+        "endLine": 167,
+        "endChar": 26
+      },
+      "revId": "d8b7af89eb31b6fbbe57dc6d412bc209d2b80184",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eaf988f9_d71540c2",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.h",
         "patchSetId": 1
