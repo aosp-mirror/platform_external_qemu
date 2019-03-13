@@ -35,7 +35,10 @@ CarClusterWidget::CarClusterWidget(QWidget* parent)
     : QWidget(parent),
       mWorkerThread([this](CarClusterWidget::FrameInfo &&frameInfo) {
           return workerProcessFrame(frameInfo);
-      }) {
+      }),
+      mCarClusterStartMsgThread([this](CarClusterWidget::ResendInfo &&resendInfo) {
+          return workerResend(resendInfo);
+      }){
       instance = this;
 
       avcodec_register_all();
@@ -54,6 +57,9 @@ CarClusterWidget::CarClusterWidget(QWidget* parent)
       connect(this, SIGNAL(sendImage(QImage)),
                 this, SLOT(updatePixmap(QImage)), Qt::QueuedConnection);
       mWorkerThread.start();
+      mCarClusterStartMsgThread.start();
+      mCarClusterStartMsgThread.enqueue({RESENT_INTERVEL});
+      sendCarClusterMsg(PIPE_STOP);
 
       set_car_cluster_call_back(processFrame);
 }
@@ -63,6 +69,8 @@ CarClusterWidget::~CarClusterWidget() {
     mWorkerThread.enqueue({});
     mWorkerThread.join();
 
+    stopSendStartRequest();
+    sendCarClusterMsg(PIPE_STOP);
     av_free(mFrame);
     avcodec_close(mCodecCtx);
     avcodec_free_context(&mCodecCtx);
@@ -78,8 +86,8 @@ void CarClusterWidget::paintEvent(QPaintEvent* event) {
         painter.fillRect(rect(), Qt::black);
         painter.setPen(Qt::white);
         painter.drawText(rect(), Qt::AlignCenter,
-                         tr("Failed to get image, "
-                            "possibly due to failed connection, bad frame, etc."));
+                         tr("Waiting for connection, "
+                            "please wait for android to start completely"));
     } else {
         painter.drawPixmap(rect(), mPixmap);
     }
@@ -89,10 +97,22 @@ void CarClusterWidget::processFrame(const uint8_t* frame, int frameSize) {
     instance->mWorkerThread.enqueue({frameSize, std::vector<uint8_t>(frame, frame + frameSize)});
 }
 
+WorkerProcessingResult CarClusterWidget::workerResend(ResendInfo& resendInfo){
+    if(!resendInfo.time) {
+        return WorkerProcessingResult::Stop;
+    }
+    sendCarClusterMsg(PIPE_START);
+    android::base::System::get()->sleepUs(resendInfo.time);
+    instance->mCarClusterStartMsgThread.enqueue({resendInfo.time});
+    return WorkerProcessingResult::Continue;
+}
+
 WorkerProcessingResult CarClusterWidget::workerProcessFrame(FrameInfo& frameInfo) {
     if (!frameInfo.size) {
         return WorkerProcessingResult::Stop;
     }
+
+    stopSendStartRequest();
     int rgbStride[1] = {4 * FRAME_WIDTH};
 
     AVPacket packet;
@@ -113,6 +133,7 @@ WorkerProcessingResult CarClusterWidget::workerProcessFrame(FrameInfo& frameInfo
     }
 
     av_free_packet(&packet);
+
     return WorkerProcessingResult::Continue;
 }
 
@@ -121,6 +142,7 @@ void CarClusterWidget::showEvent(QShowEvent* event) {
 }
 
 void CarClusterWidget::hideEvent(QHideEvent* event) {
+    stopSendStartRequest();
     sendCarClusterMsg(PIPE_STOP);
 }
 
@@ -136,4 +158,11 @@ void CarClusterWidget::updatePixmap(const QImage& image) {
 void CarClusterWidget::sendCarClusterMsg(uint8_t flag) {
       uint8_t msg[1] = {flag};
       android_send_car_cluster_data(msg, 1);
+}
+
+void CarClusterWidget::stopSendStartRequest(){
+    if(mCarClusterStartMsgThread.isStarted()){
+        mCarClusterStartMsgThread.enqueue({});
+        mCarClusterStartMsgThread.join();
+    }
 }

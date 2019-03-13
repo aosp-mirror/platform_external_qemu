@@ -16,7 +16,15 @@
 #include <QWidget>
 #include <QImage>
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
+#include <sys/time.h>
+#endif
+
+#include "android/base/system/System.h"
 #include "android/base/threads/WorkerThread.h"
+
 
 extern "C" {
 #include "libswscale/swscale.h"
@@ -54,8 +62,18 @@ private:
         std::vector<uint8_t> frameData;
     };
 
+    struct ResendInfo {
+        int64_t time;
+    };
+
     android::base::WorkerThread<FrameInfo> mWorkerThread;
     android::base::WorkerProcessingResult workerProcessFrame(FrameInfo& frameInfo);
+
+    android::base::WorkerThread<ResendInfo> mCarClusterStartMsgThread;
+    android::base::WorkerProcessingResult workerResend(ResendInfo& resendInfo);
+    const int64_t RESENT_INTERVEL = 1000000LL;
+
+    void stopSendStartRequest();
 
     QPixmap mPixmap;
 
