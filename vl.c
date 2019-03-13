@@ -3427,6 +3427,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #endif
 
 #ifdef CONFIG_ANDROID
+    is_qemu_2 = 1;
     if (android_qemu_mode) {
         android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
     }
