@@ -123,7 +123,8 @@ namespace snapshot {
 void createCheckpoint(AsyncMessagePipeHandle pipe,
                       android::base::StringView name) {
     // BUG: 127849628
-    if (!emuglConfig_current_renderer_supports_snapshot()) {
+    if (!emuglConfig_current_renderer_supports_snapshot()   ||
+            !is_qemu_2) {
         android::offworld::sendResponse(pipe, createErrorResponse());
         return;
     }
@@ -183,7 +184,8 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
                            int forkTotal) {
     if (android::multiinstance::getInstanceShareMode() !=
         android::base::FileShare::Write ||
-        !emuglConfig_current_renderer_supports_snapshot()) {
+        !emuglConfig_current_renderer_supports_snapshot() ||
+        !is_qemu_2) {
         android::offworld::sendResponse(pipe, createErrorResponse());
         return;
     }
