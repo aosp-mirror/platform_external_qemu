@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6114cadb_f0543095",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-13T22:33:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d639d88d_34a27d77",
+      "range": {
+        "startLine": 38,
+        "startChar": 9,
+        "endLine": 38,
+        "endChar": 10
+      },
+      "revId": "35825d1d8c7eda17b2d84f74d31c3d969c159caf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "04feece6_eb6e75bc",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
         "patchSetId": 2
@@ -39,6 +63,24 @@
       "revId": "35825d1d8c7eda17b2d84f74d31c3d969c159caf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b34a1317_96518d4e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-13T22:33:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04feece6_eb6e75bc",
+      "revId": "35825d1d8c7eda17b2d84f74d31c3d969c159caf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -62,6 +104,30 @@
       "revId": "35825d1d8c7eda17b2d84f74d31c3d969c159caf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "655887c6_1088fd1d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-13T22:33:39Z",
+      "side": 1,
+      "message": "In case of FunctorThread, do you mean wait()? It doesn\u0027t have join(), and in workerThread, join is a wrapper of wait",
+      "parentUuid": "75533313_814fee07",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 136,
+        "endChar": 33
+      },
+      "revId": "35825d1d8c7eda17b2d84f74d31c3d969c159caf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
