@@ -24,12 +24,13 @@ set(FFMPEG_LIBAVUTIL "${PREBUILT_ROOT}/lib/libavutil${CMAKE_STATIC_LIBRARY_SUFFI
 set(FFMPEG_LIBRARIES "${PREBUILT_ROOT}/lib/libavformat${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libavfilter${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libavcodec${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libswresample${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libswscale${CMAKE_STATIC_LIBRARY_SUFFIX};${PREBUILT_ROOT}/lib/libavutil${CMAKE_STATIC_LIBRARY_SUFFIX};${X264_LIBRARIES};${VPX_LIBRARIES}")
 if(ANDROID_TARGET_TAG MATCHES "windows-*")
   # We need winsock for avformat, so make that dependency explicit
-  list(APPEND FFMPEG_LIBRARIES ws2_32::ws2_32)
+  list(APPEND FFMPEG_LIBRARIES ws2_32::ws2_32 secur32::secur32)
 endif()
 if(ANDROID_TARGET_TAG STREQUAL "darwin-x86_64")
   # Well, macos needs something extra as well
   list(APPEND FFMPEG_LIBRARIES "-framework VideoToolbox")
   list(APPEND FFMPEG_LIBRARIES "-framework VideoDecodeAcceleration")
+  list(APPEND FFMPEG_LIBRARIES "-framework AudioToolbox")
   list(APPEND FFMPEG_LIBRARIES "-lbz2")
 endif()
 set(FFMPEG_FOUND TRUE)

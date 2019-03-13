@@ -28,6 +28,7 @@ set(WINDOWS_LIBS
     shell32
     user32
     advapi32
+    secur32
     mfuuid
     winmm
     shlwapi

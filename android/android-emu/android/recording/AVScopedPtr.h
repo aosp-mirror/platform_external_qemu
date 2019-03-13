@@ -66,16 +66,19 @@ struct AVDeleter<AVPacket> : std::true_type {
     };
 };
 
+// Initialized from avcodec_alloc_context3()
+template <>  // explicit specialization for T = AVCodecContext
+struct AVDeleter<AVCodecContext> : std::true_type {
+    static void deleteFunc(void* ctx) {
+        auto ptr = static_cast<AVCodecContext*>(ctx);
+        avcodec_free_context(&ptr);
+    };
+};
+
 template <>  // explicit specialization for T = AVFormatContext
 struct AVDeleter<AVFormatContext> : std::true_type {
     static void deleteFunc(void* oc) {
         auto ocp = static_cast<AVFormatContext*>(oc);
-        for (int i = 0; i < ocp->nb_streams; ++i) {
-            // Allocated from avcodec_open2
-            if (ocp->streams[i]->codec->codec) {
-                avcodec_close(ocp->streams[i]->codec);
-            }
-        }
         if (ocp->iformat) {
             // input context
             avformat_close_input(&ocp);
