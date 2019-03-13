@@ -2118,8 +2118,11 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
     QRect windowGeo = this->geometry();
     QSize backingSize = mBackingSurface->bitmap->size();
     float scale = (float)windowGeo.width() / (float)backingSize.width();
-    int displayXOffset = isFolded ? android_hw->hw_displayRegion_0_1_xOffset : 0;
-    int displayYOffset = isFolded ? android_hw->hw_displayRegion_0_1_yOffset : 0;
+    int displayXOffset = 0;
+    int displayYOffset = 0;
+//  TODO: non-0 offset
+//    int displayXOffset = isFolded ? android_hw->hw_displayRegion_0_1_xOffset : 0;
+//    int displayYOffset = isFolded ? android_hw->hw_displayRegion_0_1_yOffset : 0;
     int displayXFolded = android_hw->hw_displayRegion_0_1_width;
     int displayYFolded = android_hw->hw_displayRegion_0_1_height;
     int displayX = android_hw->hw_lcd_width;
