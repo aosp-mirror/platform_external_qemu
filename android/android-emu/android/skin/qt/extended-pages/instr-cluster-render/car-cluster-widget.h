@@ -16,6 +16,8 @@
 #include <QWidget>
 #include <QImage>
 
+#include "android/base/system/System.h"
+#include "android/base/threads/FunctorThread.h"
 #include "android/base/threads/WorkerThread.h"
 
 extern "C" {
@@ -24,6 +26,9 @@ extern "C" {
 #include "libavformat/avformat.h"
 #include "libavutil/log.h"
 }
+
+using android::base::System;
+using android::base::FunctorThread;
 
 class CarClusterWidget : public QWidget
 {
@@ -64,6 +69,9 @@ private:
     AVFrame* mFrame;
 
     SwsContext* mCtx;
+
+    FunctorThread mCarClusterStartMsgThread;
+    std::atomic<bool> mCarClusterStartFlag;
 
     uint8_t* mRgbData;
 };
