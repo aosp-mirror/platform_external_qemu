@@ -20,4 +20,4 @@ int android_net_min_latency = 0;
 int android_net_max_latency = 0;
 int android_net_disable = 0;
 int android_snapshot_update_timer = 1;
-int is_qemu_2 = 0;
+int engine_supports_snapshot = 0;
