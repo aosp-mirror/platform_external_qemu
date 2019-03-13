@@ -3420,6 +3420,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #endif
 
 #ifdef CONFIG_ANDROID
+    is_qemu_2 = 1;
     android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
     char* android_op_dns_server = NULL;
 #endif
