@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a6a48eae_4d37d84e",
+        "filename": "android/android-emu/android/globals.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-03-13T20:35:42Z",
+      "side": 1,
+      "message": "what about naming it \u0027engine_supports_snapshot\u0027 or similarly? this way it can both be generic to stay for longer and look more in line with the current emugl snapshot support checks",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 21
+      },
+      "revId": "44a5621bc5574d84d42fb7a973f04608a8695e2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
