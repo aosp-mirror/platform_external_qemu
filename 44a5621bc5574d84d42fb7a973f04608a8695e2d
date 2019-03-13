@@ -22,6 +22,30 @@
       "revId": "44a5621bc5574d84d42fb7a973f04608a8695e2d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e020993_0f25b7a5",
+        "filename": "android/android-emu/android/globals.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-03-13T21:09:41Z",
+      "side": 1,
+      "message": "Good idea",
+      "parentUuid": "a6a48eae_4d37d84e",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 21
+      },
+      "revId": "44a5621bc5574d84d42fb7a973f04608a8695e2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
