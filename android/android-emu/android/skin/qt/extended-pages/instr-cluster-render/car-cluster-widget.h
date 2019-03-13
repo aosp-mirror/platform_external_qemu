@@ -15,8 +15,15 @@
 #include <QPixmap>
 #include <QWidget>
 #include <QImage>
+#include <sys/time.h>
 
+
+#include "android/base/system/System.h"
+#include "android/base/threads/FunctorThread.h"
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/threads/WorkerThread.h"
+
 
 extern "C" {
 #include "libswscale/swscale.h"
@@ -65,5 +72,12 @@ private:
 
     SwsContext* mCtx;
 
+    android::base::FunctorThread mCarClusterStartMsgThread;
+    std::atomic<bool> mCarClusterStartFlag;
+    android::base::ConditionVariable mCarClusterStartCV;
+    android::base::Lock mCarClusterStartLock;
+
     uint8_t* mRgbData;
+
+    android::base::System::Duration nextRefreshAbsolute();
 };
