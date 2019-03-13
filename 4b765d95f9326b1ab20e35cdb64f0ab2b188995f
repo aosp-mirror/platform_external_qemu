@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cc002a80_cd5e45dc",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-13T22:46:08Z",
+      "side": 1,
+      "message": "Should you trigger the mCarClusterStartCV.signal() here also to unblock the timer?\nIf so, maybe you want to extract these three lines to a private method.",
+      "revId": "4b765d95f9326b1ab20e35cdb64f0ab2b188995f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "077890a5_ca1ca28c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-13T22:46:08Z",
+      "side": 1,
+      "message": "Should this be in the \".cpp\" file? I\u0027m not entirely sure but this is a pattern I\u0027ve seen in other classes. I wonder if keeping it here could mess up other files if this .h is included somewhere else.\n\nAgain, not my area of expertise so I\u0027m just wondering.",
+      "revId": "4b765d95f9326b1ab20e35cdb64f0ab2b188995f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
