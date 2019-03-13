@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "01638a53_e8b6c909",
+        "filename": "android/android-emu/android/skin/qt/car-cluster-window.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-13T23:36:42Z",
+      "side": 1,
+      "message": "Please fix spelling errors:\n- space between \"window\" and \"is\"\n- remove space at the end.\n- \".\" after \"window\"\n- \"emulator\" instead of \"emualtor\"\n- remove \"the\" before \"car sensors\"\n- \"turn\" instead of \"tryn\".\nLet\u0027s remove the TODO for now.",
+      "revId": "1589fdaac58b491356b58e1fe9d00a3e0d6d3805",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "23923647_0aa87e7b",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 662,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-13T23:36:42Z",
+      "side": 1,
+      "message": "Nit: Remove spaces (same in the other lines below)",
+      "revId": "1589fdaac58b491356b58e1fe9d00a3e0d6d3805",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
