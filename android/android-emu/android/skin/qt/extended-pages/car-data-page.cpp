@@ -69,6 +69,8 @@ void CarDataPage::onReceiveData(const char* msg, int length) {
     }
     mUi->car_property_table->processMsg(emulatorMsg);
     D(printMsg.c_str());
+    printf("receive new data\n");
+
 }
 
 // static
