@@ -35,7 +35,13 @@ CarClusterWidget::CarClusterWidget(QWidget* parent)
     : QWidget(parent),
       mWorkerThread([this](CarClusterWidget::FrameInfo &&frameInfo) {
           return workerProcessFrame(frameInfo);
-      }) {
+      }), 
+      mCarClusterStartMsgThread([this]{
+          while(!mCarClusterStartFlag){
+              sendCarClusterMsg(PIPE_START);
+              System::get()->sleepUs(1000000ULL);
+          }
+      }){
       instance = this;
 
       avcodec_register_all();
@@ -69,6 +75,8 @@ CarClusterWidget::~CarClusterWidget() {
 
     sws_freeContext(mCtx);
 
+    mCarClusterStartFlag = true;
+
     delete[] mRgbData;
 }
 
@@ -78,8 +86,8 @@ void CarClusterWidget::paintEvent(QPaintEvent* event) {
         painter.fillRect(rect(), Qt::black);
         painter.setPen(Qt::white);
         painter.drawText(rect(), Qt::AlignCenter,
-                         tr("Failed to get image, "
-                            "possibly due to failed connection, bad frame, etc."));
+                         tr("Waiting for connection, "
+                            "please wait for android to start completely"));
     } else {
         painter.drawPixmap(rect(), mPixmap);
     }
@@ -113,14 +121,18 @@ WorkerProcessingResult CarClusterWidget::workerProcessFrame(FrameInfo& frameInfo
     }
 
     av_free_packet(&packet);
+
+    mCarClusterStartFlag = true;
     return WorkerProcessingResult::Continue;
 }
 
 void CarClusterWidget::showEvent(QShowEvent* event) {
-    sendCarClusterMsg(PIPE_START);
+    mCarClusterStartFlag = false;
+    mCarClusterStartMsgThread.start();
 }
 
 void CarClusterWidget::hideEvent(QHideEvent* event) {
+    mCarClusterStartFlag = true;
     sendCarClusterMsg(PIPE_STOP);
 }
 
