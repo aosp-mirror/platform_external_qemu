@@ -3420,7 +3420,14 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #endif
 
 #ifdef CONFIG_ANDROID
+<<<<<<< HEAD   (b3c307 Merge "Merge cherrypicks of [929587] into emu-3.1-release" i)
     android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
+=======
+    is_qemu_2 = 1;
+    if (android_qemu_mode) {
+        android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
+    }
+>>>>>>> CHANGE (44a562 Add a flag to indicate qemu2)
     char* android_op_dns_server = NULL;
 #endif
     module_call_init(MODULE_INIT_TRACE);

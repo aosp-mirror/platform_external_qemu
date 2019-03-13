@@ -41,3 +41,12 @@ extern int guest_data_partition_mounted;
 extern int guest_boot_completed;
 
 extern int android_snapshot_update_timer;
+<<<<<<< HEAD   (b3c307 Merge "Merge cherrypicks of [929587] into emu-3.1-release" i)
+=======
+
+/* are we using qemu 2? */
+/* remove this flag once we deprecate qemu1 on both dev and release branches. */
+extern int is_qemu_2;
+
+ANDROID_END_HEADER
+>>>>>>> CHANGE (44a562 Add a flag to indicate qemu2)
