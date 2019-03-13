@@ -29,6 +29,7 @@
 #include "android/emulation/hostpipe/HostGoldfishPipe.h"
 #include "android/emulation/testing/MockAndroidVmOperations.h"
 #include "android/emulation/testing/TestVmLock.h"
+#include "android/globals.h"
 #include "android/opengl/emugl_config.h"
 #include "android/physics/PhysicalModel.h"
 #include "android/snapshot/SnapshotAPI.h"
@@ -77,6 +78,7 @@ typedef std::unique_ptr<PhysicalModel, PhysicalModelDeleter> PhysicalModelPtr;
 class OffworldPipeTest : public ::testing::Test {
 protected:
     void SetUp() override {
+        engine_supports_snapshot = 1;
         AndroidPipe::Service::resetAll();
         mDevice = HostGoldfishPipeDevice::get();
         mLooper = std::unique_ptr<base::TestLooper>(new base::TestLooper());
