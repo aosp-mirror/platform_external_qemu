@@ -45,7 +45,22 @@ static constexpr int TYPE_COLUMN = 6;
 static map<QString, int> tableIndex;
 
 CarPropertyTable::CarPropertyTable(QWidget* parent)
-    : QWidget(parent), mUi(new Ui::CarPropertyTable) {
+    : QWidget(parent), mUi(new Ui::CarPropertyTable),
+    mCarPropertyTableRefreshThread([this]{
+        while(mCarPropertyTableFlag){
+            while(!mCarPropertyTableRefreshFlag) {
+                if (mSendEmulatorMsg != nullptr) { 
+                    sendGetAllPropertiesRequest();
+                    printf("get the data from vhal\n");
+                }
+                android::base::AutoLock lock(mCarPropertyTableRefreshLock);
+                mCarPropertyTableRefreshCV.timedWait(&mCarPropertyTableRefreshLock,
+                                            nextRefreshAbsolute());
+            }
+            android::base::AutoLock lock(mCarPropertyTableRefreshLock);
+            mCarPropertyTableReuseCV.wait(&mCarPropertyTableRefreshLock);
+        }
+    }) {
     mUi->setupUi(this);
 
     QStringList colHeaders;
@@ -64,6 +79,10 @@ CarPropertyTable::CarPropertyTable(QWidget* parent)
     connect(mUi->table->horizontalHeader(), SIGNAL(sectionClicked(int)),
              this, SLOT(sortTable(int)), Qt::QueuedConnection);
 };
+
+CarPropertyTable::~CarPropertyTable() {
+    stopCarPropertyTableRefreshThread();
+}
 
 QString CarPropertyTable::getLabel(int row) {
     return mUi->table->item(row, LABEL_COLUMN)->text();
@@ -339,10 +358,42 @@ void CarPropertyTable::sendGetAllPropertiesRequest() {
 }
 
 void CarPropertyTable::showEvent(QShowEvent*) {
-    // Update data when we open the tab
-    if (mSendEmulatorMsg != nullptr) { sendGetAllPropertiesRequest(); }
+    // start asking data
+    setCarPropertyTableRefreshThread();
+}
+
+void CarPropertyTable::hideEvent(QHideEvent*) {
+    // stop asking data
+    pauseCarPropertyTableRefreshThread();
 }
 
 void CarPropertyTable::setSendEmulatorMsgCallback(CarSensorData::EmulatorMsgCallback&& func) {
     mSendEmulatorMsg = std::move(func);
+}
+
+android::base::System::Duration CarPropertyTable::nextRefreshAbsolute() {
+      struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    return (tv.tv_sec + 1) * 1000000LL + tv.tv_usec;
+}
+
+void CarPropertyTable::setCarPropertyTableRefreshThread(){
+    mCarPropertyTableRefreshFlag = false;
+    mCarPropertyTableFlag = true;
+    mCarPropertyTableRefreshCV.signal();
+    mCarPropertyTableReuseCV.signal();
+    mCarPropertyTableRefreshThread.start();
+}
+
+void CarPropertyTable::stopCarPropertyTableRefreshThread(){
+    mCarPropertyTableFlag = false;
+    mCarPropertyTableRefreshFlag = true;
+    mCarPropertyTableRefreshCV.signal();
+    mCarPropertyTableReuseCV.signal();
+    mCarPropertyTableRefreshThread.wait();
+}
+
+void CarPropertyTable::pauseCarPropertyTableRefreshThread(){
+    mCarPropertyTableRefreshFlag = true;
+    mCarPropertyTableRefreshCV.signal();
 }
