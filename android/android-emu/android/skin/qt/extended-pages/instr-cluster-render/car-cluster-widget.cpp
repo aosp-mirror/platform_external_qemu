@@ -35,7 +35,15 @@ CarClusterWidget::CarClusterWidget(QWidget* parent)
     : QWidget(parent),
       mWorkerThread([this](CarClusterWidget::FrameInfo &&frameInfo) {
           return workerProcessFrame(frameInfo);
-      }) {
+      }),
+      mCarClusterStartMsgThread([this]{
+          while(!mCarClusterStartFlag){
+              sendCarClusterMsg(PIPE_START);
+              AutoLock lock(mCarClusterStartLock);
+              mCarClusterStartCV.timedWait(&mCarClusterStartLock, 
+                                           nextRefreshAbsolute());
+          }
+      }){
       instance = this;
 
       avcodec_register_all();
@@ -69,6 +77,9 @@ CarClusterWidget::~CarClusterWidget() {
 
     sws_freeContext(mCtx);
 
+    mCarClusterStartFlag = true;
+    mCarClusterStartMsgThread.wait();
+
     delete[] mRgbData;
 }
 
@@ -78,8 +89,8 @@ void CarClusterWidget::paintEvent(QPaintEvent* event) {
         painter.fillRect(rect(), Qt::black);
         painter.setPen(Qt::white);
         painter.drawText(rect(), Qt::AlignCenter,
-                         tr("Failed to get image, "
-                            "possibly due to failed connection, bad frame, etc."));
+                         tr("Waiting for connection, "
+                            "please wait for android to start completely"));
     } else {
         painter.drawPixmap(rect(), mPixmap);
     }
@@ -113,14 +124,20 @@ WorkerProcessingResult CarClusterWidget::workerProcessFrame(FrameInfo& frameInfo
     }
 
     av_free_packet(&packet);
+
+    mCarClusterStartFlag = true;
     return WorkerProcessingResult::Continue;
 }
 
 void CarClusterWidget::showEvent(QShowEvent* event) {
-    sendCarClusterMsg(PIPE_START);
+    mCarClusterStartFlag = false;
+    mCarClusterStartMsgThread.start();
 }
 
 void CarClusterWidget::hideEvent(QHideEvent* event) {
+    mCarClusterStartFlag = true;
+    mCarClusterStartMsgThread.wait();
+    mCarClusterStartCV.signal();
     sendCarClusterMsg(PIPE_STOP);
 }
 
@@ -136,4 +153,10 @@ void CarClusterWidget::updatePixmap(const QImage& image) {
 void CarClusterWidget::sendCarClusterMsg(uint8_t flag) {
       uint8_t msg[1] = {flag};
       android_send_car_cluster_data(msg, 1);
+}
+
+System::Duration CarClusterWidget::nextRefreshAbsolute() {
+      struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    return (tv.tv_sec + 1) * 1000000LL + tv.tv_usec;
 }

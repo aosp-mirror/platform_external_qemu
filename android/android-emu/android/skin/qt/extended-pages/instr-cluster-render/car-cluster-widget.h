@@ -15,8 +15,15 @@
 #include <QPixmap>
 #include <QWidget>
 #include <QImage>
+#include <sys/time.h>
 
+
+#include "android/base/system/System.h"
+#include "android/base/threads/FunctorThread.h"
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/threads/WorkerThread.h"
+
 
 extern "C" {
 #include "libswscale/swscale.h"
@@ -24,6 +31,12 @@ extern "C" {
 #include "libavformat/avformat.h"
 #include "libavutil/log.h"
 }
+
+using android::base::System;
+using android::base::FunctorThread;
+using android::base::AutoLock;
+using android::base::ConditionVariable;
+using android::base::Lock;
 
 class CarClusterWidget : public QWidget
 {
@@ -65,5 +78,12 @@ private:
 
     SwsContext* mCtx;
 
+    FunctorThread mCarClusterStartMsgThread;
+    std::atomic<bool> mCarClusterStartFlag;
+    ConditionVariable mCarClusterStartCV;
+    Lock mCarClusterStartLock;
+
     uint8_t* mRgbData;
+
+    System::Duration nextRefreshAbsolute();
 };
