@@ -11,6 +11,11 @@
 #pragma once
 
 #include "ui_car-property-table.h"
+#include "android/base/system/System.h"
+#include "android/base/threads/FunctorThread.h"
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/utils/debug.h"
 
 // TODO: (b/120444474) rename ERROR_INVALID_OPERATION & remove this undef
 #undef ERROR_INVALID_OPERATION
@@ -20,6 +25,10 @@
 #include "android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h"
 #include <map>
 #include <vector>
+#include <sys/time.h>
+
+using android::base::System;
+using android::base::FunctorThread;
 
 namespace carpropertyutils {
     struct PropertyDescription {
@@ -61,6 +70,7 @@ class CarPropertyTable : public QWidget {
 
 public:
     explicit CarPropertyTable(QWidget* parent = nullptr);
+    ~CarPropertyTable();
     void processMsg(emulator::EmulatorMessage emulatorMsg);
     void setSendEmulatorMsgCallback(CarSensorData::EmulatorMsgCallback&&);
 
@@ -71,6 +81,7 @@ signals:
 
 protected:
     void showEvent(QShowEvent* event);
+    void hideEvent(QHideEvent* event);
 
 private slots:
     void updateTable(int row, int col, QTableWidgetItem* info);
@@ -89,6 +100,18 @@ private:
     int getPropertyId(int row);
     int getAreaId(int row);
     int getType(int row);
+
+    FunctorThread mCarPropertyTableRefreshThread;
+    std::atomic<bool> mCarPropertyTableRefreshFlag;
+    std::atomic<bool> mCarPropertyTableFlag;
+
+    android::base::ConditionVariable mCarPropertyTableRefreshCV;
+    android::base::ConditionVariable mCarPropertyTableReuseCV;
+    android::base::Lock mCarPropertyTableRefreshLock;
+    android::base::System::Duration nextRefreshAbsolute();
+    void setCarPropertyTableRefreshThread();
+    void stopCarPropertyTableRefreshThread();
+    void pauseCarPropertyTableRefreshThread();
 
     QTableWidgetItem* createTableTextItem(QString info);
     QTableWidgetItem* createTableBoolItem(bool val);
