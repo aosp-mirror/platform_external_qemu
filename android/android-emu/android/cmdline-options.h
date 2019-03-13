@@ -213,6 +213,7 @@ OPT_FLAG(fuchsia, "Run Fuchsia image. Bypasses android-specific setup; args afte
 
 OPT_FLAG(allow_host_audio, "Allows sending of audio from audio input devices. Otherwise, zeroes out audio.")
 
+OPT_FLAG(perf_stat, "Run periodic perf stat reporter in the background.")
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

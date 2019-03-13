@@ -79,7 +79,8 @@ static android::base::LazyInstance<InstanceData> sGlobalData = {};
 bool android_metrics_start(const char* emulatorVersion,
                            const char* emulatorFullVersion,
                            const char* qemuVersion,
-                           int controlConsolePort) {
+                           int controlConsolePort,
+                           bool runPerfStat) {
     MetricsReporter::start(android::base::Uuid::generate().toString(),
                            emulatorVersion, emulatorFullVersion, qemuVersion);
     PeriodicReporter::start(&MetricsReporter::get(),
@@ -98,11 +99,13 @@ bool android_metrics_start(const char* emulatorVersion,
                 return true;
             });
 
-    // For now only report memory usage on console when we are logging verbosely
-    if (android_verbose) {
-      sGlobalData->perfStatReporter = android::metrics::PerfStatReporter::create(
-          android::base::ThreadLooper::get(), 1000);
-      sGlobalData->perfStatReporter->start();
+    // Only report perf stats on console when we are logging verbosely or
+    // -perf-stat option is enabled.
+    if (runPerfStat) {
+        sGlobalData->perfStatReporter =
+                android::metrics::PerfStatReporter::create(
+                        android::base::ThreadLooper::get(), 1000);
+        sGlobalData->perfStatReporter->start();
     }
     return true;
 }
