@@ -124,7 +124,7 @@ void createCheckpoint(AsyncMessagePipeHandle pipe,
                       android::base::StringView name) {
     // BUG: 127849628
     if (!emuglConfig_current_renderer_supports_snapshot()   ||
-            !is_qemu_2) {
+            !engine_supports_snapshot) {
         android::offworld::sendResponse(pipe, createErrorResponse());
         return;
     }
@@ -185,7 +185,7 @@ void forkReadOnlyInstances(android::AsyncMessagePipeHandle pipe,
     if (android::multiinstance::getInstanceShareMode() !=
         android::base::FileShare::Write ||
         !emuglConfig_current_renderer_supports_snapshot() ||
-        !is_qemu_2) {
+        !engine_supports_snapshot) {
         android::offworld::sendResponse(pipe, createErrorResponse());
         return;
     }
