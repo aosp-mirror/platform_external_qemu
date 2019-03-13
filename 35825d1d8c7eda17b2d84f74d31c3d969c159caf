@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d639d88d_34a27d77",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-03-13T17:04:00Z",
+      "side": 1,
+      "message": "nit: trailing space\n+ please format the code",
+      "range": {
+        "startLine": 38,
+        "startChar": 9,
+        "endLine": 38,
+        "endChar": 10
+      },
+      "revId": "35825d1d8c7eda17b2d84f74d31c3d969c159caf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "04feece6_eb6e75bc",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-03-13T17:04:00Z",
+      "side": 1,
+      "message": "join the thread explicitly here to make sure it won\u0027t try sending anything when the object\u0027s destroyed",
+      "revId": "35825d1d8c7eda17b2d84f74d31c3d969c159caf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "75533313_814fee07",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2019-03-13T17:04:00Z",
+      "side": 1,
+      "message": "this is a race condition - the thread could be right before the sendCarClusterMsg() call now and would send it after the stop from here. It would be more correct to have a condition variable instead of a plain sleep in the thread, signal it here and then join() the thread before sending \u0027stop\u0027",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 136,
+        "endChar": 33
+      },
+      "revId": "35825d1d8c7eda17b2d84f74d31c3d969c159caf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
