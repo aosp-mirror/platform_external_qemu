@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a24c766d_4e61f68e",
+        "filename": "android/android-emu/android/offworld/OffworldPipe_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-13T22:14:07Z",
+      "side": 1,
+      "message": "Should this be reset in TearDown?",
+      "range": {
+        "startLine": 82,
+        "startChar": 8,
+        "endLine": 82,
+        "endChar": 32
+      },
+      "revId": "578e6a368296e7c863b63e480c2f9dfaaee7a91e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
