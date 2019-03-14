@@ -95,13 +95,11 @@ extern bool gvm_readonly_mem_allowed;
 #else
 #define gvm_enabled()           (0)
 #define gvm_irqchip_in_kernel() (false)
-#define gvm_irqchip_is_split() (false)
 #define gvm_async_interrupts_enabled() (false)
 #define gvm_halt_in_kernel() (false)
 #define gvm_gsi_routing_allowed() (false)
 #define gvm_gsi_direct_mapping() (false)
 #define gvm_readonly_mem_enabled() (false)
-#define gvm_direct_msi_enabled() (false)
 #endif
 
 struct gvm_run;
@@ -331,16 +329,7 @@ void gvm_irqchip_commit_routes(GVMState *s);
 void gvm_irqchip_release_virq(GVMState *s, int virq);
 
 int gvm_irqchip_add_adapter_route(GVMState *s, AdapterInfo *adapter);
-int gvm_irqchip_add_hv_sint_route(GVMState *s, uint32_t vcpu, uint32_t sint);
 
-int gvm_irqchip_add_irqfd_notifier_gsi(GVMState *s, EventNotifier *n,
-                                       EventNotifier *rn, int virq);
-int gvm_irqchip_remove_irqfd_notifier_gsi(GVMState *s, EventNotifier *n,
-                                          int virq);
-int gvm_irqchip_add_irqfd_notifier(GVMState *s, EventNotifier *n,
-                                   EventNotifier *rn, qemu_irq irq);
-int gvm_irqchip_remove_irqfd_notifier(GVMState *s, EventNotifier *n,
-                                      qemu_irq irq);
 void gvm_irqchip_set_qemuirq_gsi(GVMState *s, qemu_irq irq, int gsi);
 void gvm_pc_gsi_handler(void *opaque, int n, int level);
 void gvm_pc_setup_irq_routing(bool pci_enabled);

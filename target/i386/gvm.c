@@ -2669,12 +2669,7 @@ void gvm_arch_init_irq_routing(GVMState *s)
 
 int gvm_arch_irqchip_create(MachineState *ms, GVMState *s)
 {
-    if (machine_kernel_irqchip_split(ms)) {
-        error_report("Do not support split irqchip mode for GVM");
-        exit(1);
-    } else {
-        return 0;
-    }
+    return 0;
 }
 
 int gvm_arch_fixup_msi_route(struct gvm_irq_routing_entry *route,

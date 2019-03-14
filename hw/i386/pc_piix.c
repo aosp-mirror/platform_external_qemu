@@ -241,10 +241,8 @@ static void pc_init1(MachineState *machine,
 
     if (kvm_pic_in_kernel()) {
         i8259 = kvm_i8259_init(isa_bus);
-#if 0 // Disable in-kernel irqchip til hypervisor side is ready
     } else if (gvm_pic_in_kernel()) {
         i8259 = gvm_i8259_init(isa_bus);
-#endif
     } else if (xen_enabled()) {
         i8259 = xen_interrupt_controller_init();
     } else {

@@ -1089,12 +1089,6 @@ static void gvm_irqchip_create(MachineState *machine, GVMState *s)
 {
     int ret;
 
-    if (gvm_check_extension(s, GVM_CAP_IRQCHIP)) {
-        ;
-    } else {
-        return;
-    }
-
     /* First probe and see if there's a arch-specific hook to create the
      * in-kernel irqchip for us */
     ret = gvm_arch_irqchip_create(machine, s);
