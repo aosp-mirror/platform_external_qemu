@@ -443,6 +443,7 @@ void ProgramData::restore(ObjectLocalName localName,
             if  (strncmp(attribLocs.first.c_str(), "gl_", 3) == 0) {
                 continue;
             }
+            fprintf(stderr, "%s: bind loc %u to %s\n", __func__, attribLocs.second, attribLocs.first.c_str());
             dispatcher.glBindAttribLocation(globalName, attribLocs.second,
                     attribLocs.first.c_str());
         }
@@ -459,12 +460,13 @@ void ProgramData::restore(ObjectLocalName localName,
         }
         dispatcher.glLinkProgram(globalName);
         dispatcher.glUseProgram(globalName);
-#ifdef DEBUG
         for (const auto& attribLocs : linkedAttribLocs) {
-            assert(dispatcher.glGetAttribLocation(globalName,
-                attribLocs.first.c_str()) == attribLocs.second);
+            if(dispatcher.glGetAttribLocation(globalName,
+                attribLocs.first.c_str()) != attribLocs.second) {
+                fprintf(stderr, "%s: mismatch on attrib %s\n", __func__,
+                        attribLocs.first.c_str());
+            }
         }
-#endif // DEBUG
         for (const auto& uniform : mUniNameToGuestLoc) {
             GLint hostLoc = dispatcher.glGetUniformLocation(
                     globalName, c_str(getTranslatedName(uniform.first)));

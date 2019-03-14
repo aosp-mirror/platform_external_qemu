@@ -53,10 +53,16 @@ void BufferBinding::onLoad(android::base::Stream* stream) {
     size = stream->getBe32();
     stride = stream->getBe32();
     divisor = stream->getBe32();
+    if (divisor) {
+    fprintf(stderr, "%s: load buffer binding. divisor: %u\n", __func__, (uint32_t)divisor);
+    }
     isBindBase = stream->getByte();
 }
 
 void BufferBinding::onSave(android::base::Stream* stream) const {
+    if (divisor) {
+    fprintf(stderr, "%s: save buffer binding. divisor: %u\n", __func__, (uint32_t)divisor);
+    }
     stream->putBe32(buffer);
     stream->putBe32(offset);
     stream->putBe32(size);
@@ -92,6 +98,7 @@ VAOState::VAOState(android::base::Stream* stream) {
 }
 
 void VAOState::onSave(android::base::Stream* stream) const {
+    fprintf(stderr, "VAOState::%s: call. save ibo %u\n", __func__, element_array_buffer_binding);
     stream->putBe32(element_array_buffer_binding);
     for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
         vertexAttribInfo[i].onSave(stream);
@@ -775,7 +782,9 @@ void GLEScontext::postLoadRestoreCtx() {
         this->dispatcher().glBindBuffer(target,
                 m_shareGroup->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer));
     };
+    fprintf(stderr, "%s: bind local array buffer %u\n", __func__, m_arrayBuffer);
     bindBuffer(GL_ARRAY_BUFFER, m_arrayBuffer);
+    fprintf(stderr, "%s: bind local element array buffer %u\n", __func__, m_currVaoState.iboId());
     bindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_currVaoState.iboId());
 
     // framebuffer binding

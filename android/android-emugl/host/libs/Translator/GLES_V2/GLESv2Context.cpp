@@ -123,10 +123,11 @@ void GLESv2Context::initDefaultFBO(
 
 
 void GLESv2Context::initEmulatedVAO() {
-    if (!isCoreProfile()) return;
+    // if (!isCoreProfile()) return;
 
     // Create emulated default VAO
     genVAOName(0, false);
+    fprintf(stderr, "%s: global vao: %u\n", __func__, getVAOGlobalName(0));
     dispatcher().glBindVertexArray(getVAOGlobalName(0));
 }
 
@@ -246,9 +247,14 @@ void GLESv2Context::postLoadRestoreCtx() {
     // vertex attribute pointers
     for (const auto& vaoIte : m_vaoStateMap) {
         if (vaoIte.first != 0) {
+            fprintf(stderr, "%s: init vao %u\n", __func__, vaoIte.first);
             genVAOName(vaoIte.first, false);
+        } else {
+            fprintf(stderr, "%s: should reinit emulated vao\n", __func__);
+            initEmulatedVAO();
         }
         if (m_glesMajorVersion >= 3) {
+            fprintf(stderr, "%s: restore vao %u global %u\n", __func__, (uint32_t)vaoIte.first, getVAOGlobalName(vaoIte.first));
             dispatcher.glBindVertexArray(getVAOGlobalName(vaoIte.first));
         }
         for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
@@ -274,21 +280,38 @@ void GLESv2Context::postLoadRestoreCtx() {
                         continue;
                     }
                     glesPointer->restoreBufferObj(getBufferObj);
+                    fprintf(stderr, "%s: restoring buffer %u\n", __func__,
+                            glesPointer->getBufferName());
+                    GLint prevBuf = 0;
+                    dispatcher.glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
+                            &prevBuf);
                     dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
                             globalBufferName);
                     if (glesPointer->isIntPointer()) {
+                        fprintf(stderr, "%s: was int ptr\n", __func__);
                         dispatcher.glVertexAttribIPointer(i,
                                 glesPointer->getSize(),
                                 glesPointer->getType(),
                                 glesPointer->getStride(),
                                 (GLvoid*)(size_t)glesPointer->getBufferOffset());
                     } else {
+                        fprintf(stderr, "%s: had vap i %d sz %d type 0x%x norm %d stride %d off %d\n",
+                                __func__,
+                                i,
+                                (int)glesPointer->getSize(),
+                                (int)glesPointer->getType(),
+                                (int)glesPointer->isNormalize(),
+                                (int)glesPointer->getStride(),
+                                (int)glesPointer->getBufferOffset());
+
                         dispatcher.glVertexAttribPointer(i,
                                 glesPointer->getSize(),
                                 glesPointer->getType(), glesPointer->isNormalize(),
                                 glesPointer->getStride(),
                                 (GLvoid*)(size_t)glesPointer->getBufferOffset());
                     }
+                    dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
+                            prevBuf);
                     break;
                 }
                 case GLESpointer::VALUE:
@@ -312,6 +335,7 @@ void GLESv2Context::postLoadRestoreCtx() {
                     }
                     break;
                 case GLESpointer::ARRAY:
+                    fprintf(stderr, "%s: was client arr\n", __func__);
                     // client arrays are set up right before draw calls
                     // so we do nothing here
                     break;
@@ -320,11 +344,16 @@ void GLESv2Context::postLoadRestoreCtx() {
         for (size_t i = 0; i < vaoIte.second.bindingState.size(); i++) {
             const BufferBinding& bufferBinding = vaoIte.second.bindingState[i];
             if (bufferBinding.divisor) {
+                fprintf(stderr, "%s: index %zu has divisor %u\n", __func__, i, (uint32_t)bufferBinding.divisor);
                 dispatcher.glVertexAttribDivisor(i, bufferBinding.divisor);
+            } else {
+                fprintf(stderr, "%s: index %zu does not has divisor %u\n", __func__, i, 0);
             }
         }
     }
+    fprintf(stderr, "%s: done restoring vaos\n", __func__);
     if (m_glesMajorVersion >= 3) {
+        fprintf(stderr, "%s: bind vao %u\n", __func__, m_currVaoState.vaoId());
         dispatcher.glBindVertexArray(getVAOGlobalName(m_currVaoState.vaoId()));
         auto bindBufferRangeFunc =
                 [this](GLenum target,
@@ -656,8 +685,10 @@ void GLESv2Context::setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
 
 void GLESv2Context::setVertexAttribDivisor(GLuint bindingindex, GLuint divisor) {
     if (bindingindex >= m_currVaoState.bufferBindings().size()) {
+        fprintf(stderr, "%s: failed to set binding index %u\n", __func__, bindingindex);
         return;
     }
+    fprintf(stderr, "%s: set index %u divisor %u\n", __func__, bindingindex, divisor);
     m_currVaoState.bufferBindings()[bindingindex].divisor = divisor;
 }
 

@@ -135,6 +135,9 @@ void ShaderParser::setSrc(GLsizei count, const GLchar* const* strings, const GLi
                 (length && length[i] >= 0) ? length[i] : strlen(strings[i]);
         m_src.append(strings[i], strings[i] + strLen);
     }
+
+    fprintf(stderr, "%s: [%s]\n", __func__, m_src.c_str());
+
     // Store original source as some 'parsing' functions actually modify m_src.
     // Note: assign() call is a workaround for the reference-counting
     //  std::string in GCC's STL - we need a deep copy here.

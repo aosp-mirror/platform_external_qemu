@@ -70,11 +70,17 @@ GLESbuffer::GLESbuffer(android::base::Stream* stream) : ObjectData(stream) {
 void GLESbuffer::onSave(android::base::Stream* stream,
         unsigned int globalName) const {
     ObjectData::onSave(stream, globalName);
+    bool trace = false;
+    if (m_size == 1920 || m_size == 180) {
+        fprintf(stderr, "%s: saving problem buffer\n", __func__);
+        trace = true;
+    }
     stream->putBe32(m_size);
     stream->putBe32(m_usage);
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     bool mapSuccess = false;
     if (!needRestore() && dispatcher.glMapBufferRange && m_size != 0) {
+        if (trace) fprintf(stderr, "%s: using map buffer range\n", __func__);
         // If glMapBufferRange is supported, m_data might be inconsistent
         // with GPU memory (because we did not update m_data when glUnmapBuffer)
         // Thus we directly load buffer data from GPU memory
@@ -92,11 +98,32 @@ void GLESbuffer::onSave(android::base::Stream* stream,
         // It is supposed to be fixed, but for safety we keep the fallback path
         // here.
         if (data) {
+            if (trace) fprintf(stderr, "%s: map range success!\n", __func__);
+            if (trace) {
+                if (m_size == 1920) {
+                    float* elts = (float*)data;
+                    uint32_t numElts = m_size / 4;
+                    for (uint32_t i = 0; i < numElts; ++i) {
+                        fprintf(stderr, "%s: saving %f\n", __func__, elts[i]);
+                        if (i > 100) break;
+                    }
+                }
+                if (m_size == 180) {
+                    uint16_t* elts = (uint16_t*)data;
+                    uint32_t numElts = m_size / 2;
+                    for (uint32_t i = 0; i < numElts; ++i) {
+                        fprintf(stderr, "%s: half saving %d\n", __func__, (int)elts[i]);
+                        if (i > 100) break;
+                    }
+                }
+            }
             stream->write(data, m_size);
             bool success = dispatcher.glUnmapBuffer(GL_ARRAY_BUFFER);
             assert(success);
             (void)success;
             mapSuccess = true;
+        } else {
+            if (trace) fprintf(stderr, "%s: map range failed!\n", __func__);
         }
         dispatcher.glBindBuffer(GL_ARRAY_BUFFER, prevBuffer);
     }
@@ -114,10 +141,36 @@ void GLESbuffer::onSave(android::base::Stream* stream,
 
 void GLESbuffer::restore(ObjectLocalName localName,
         const getGlobalName_t& getGlobalName) {
+    fprintf(stderr, "%s: restore buffer local %u\n", __func__, (uint32_t)localName);
     ObjectData::restore(localName, getGlobalName);
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     int globalName = getGlobalName(NamedObjectType::VERTEXBUFFER, localName);
     // We bind to GL_ARRAY_BUFFER just for uploading buffer data
+    GLint prevBuf = 0;
+    dispatcher.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &prevBuf);
     dispatcher.glBindBuffer(GL_ARRAY_BUFFER, globalName);
+    if (m_size == 1920) {
+        fprintf(stderr, "%s: problem buffer\n", __func__);
+                float* elts = (float*)m_data;
+                uint32_t numElts = m_size / 4;
+                for (uint32_t i = 0; i < numElts; ++i) {
+                    fprintf(stderr, "%s: restoring %f\n", __func__, elts[i]);
+                    if (i > 100) break;
+                    // elts[i] = -elts[i] * 0.5f;
+                }
+        dispatcher.glBufferData(GL_ARRAY_BUFFER, m_size, m_data, m_usage);
+    } else if (m_size == 180) {
+                    uint16_t* elts = (uint16_t*)m_data;
+                    uint32_t numElts = m_size / 2;
+                    for (uint32_t i = 0; i < numElts; ++i) {
+                        fprintf(stderr, "%s: half restoring %d\n", __func__, (int)elts[i]);
+                        if (i > 100) break;
+                    }
+        dispatcher.glBufferData(GL_ARRAY_BUFFER, m_size, m_data, m_usage);
+    }
+    else 
+    {
     dispatcher.glBufferData(GL_ARRAY_BUFFER, m_size, m_data, m_usage);
+    }
+    dispatcher.glBindBuffer(GL_ARRAY_BUFFER, prevBuf);
 }

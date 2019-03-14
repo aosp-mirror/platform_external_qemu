@@ -48,6 +48,7 @@ void saveNameMap(android::base::Stream* stream, const NameMap& nameMap) {
     stream->putBe32(nameMap.size());
     for (const auto& ite : nameMap) {
         stream->putBe32(ite.first);
+        fprintf(stderr, "%s: save name %u\n", __func__, (uint32_t)ite.first);
         ite.second.onSave(stream);
     }
 }

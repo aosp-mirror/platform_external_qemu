@@ -407,6 +407,7 @@ GL_APICALL void  GL_APIENTRY glAttachShader(GLuint program, GLuint shader){
 }
 
 GL_APICALL void  GL_APIENTRY glBindAttribLocation(GLuint program, GLuint index, const GLchar* name){
+    fprintf(stderr, "%s: index %u name %s\n", __func__, index, name);
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::attribName(name),GL_INVALID_OPERATION);
     SET_ERROR_IF(!GLESv2Validate::attribIndex(index, ctx->getCaps()->maxVertexAttribs),GL_INVALID_VALUE);
@@ -707,6 +708,25 @@ GL_APICALL void  GL_APIENTRY glBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB, G
 }
 
 GL_APICALL void  GL_APIENTRY glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage){
+    if (size == 180 || size == 1920) {
+        fprintf(stderr, "%s: problem buffer %u\n", __func__, (uint32_t)size);
+        if (size == 1920) {
+            float* elts = (float*)data;
+            uint32_t numFloats = 1920 / 4;
+            for (uint32_t i = 0; i < numFloats; ++i) {
+                fprintf(stderr, "%s: float: %f\n", __func__, elts[i]);
+                if (i > 100) break;
+            }
+        }
+        if (size == 180) {
+                    uint16_t* elts = (uint16_t*)data;
+                    uint32_t numElts = size / 2;
+                    for (uint32_t i = 0; i < numElts; ++i) {
+                        fprintf(stderr, "%s: half: %d\n", __func__, (int)elts[i]);
+                        if (i > 100) break;
+                    }
+        }
+    }
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target), GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->isBindedBuffer(target),GL_INVALID_OPERATION);
@@ -3775,6 +3795,10 @@ static void s_glPrepareVertexAttribPointer(GLESv2Context* ctx, GLuint index, GLi
     ctx->bindIndexedBuffer(0, index, ctx->getBuffer(GL_ARRAY_BUFFER), (GLintptr)ptr, 0, effectiveStride);
     ctx->setVertexAttribFormat(index, size, type, normalized, 0, isInt);
     // Still needed to deal with client arrays
+    fprintf(stderr, "%s: set ptr: buffer %u, offset %u\n", __func__,
+            ctx->getBuffer(GL_ARRAY_BUFFER),
+            (uint32_t)(uintptr_t)ptr);
+
     ctx->setPointer(index, size, type, stride, ptr, dataSize, normalized, isInt);
 }
 

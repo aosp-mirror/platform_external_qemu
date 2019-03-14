@@ -151,7 +151,7 @@ private:
     std::unordered_map<int, int> mGuestLocToHostLoc;
 
     int mCurrUniformBaseLoc = 0;
-    bool mUseUniformLocationVirtualization = true;
+    bool mUseUniformLocationVirtualization = false;
     bool mUseDirectDriverUniformInfo = false;
 };
 #endif
