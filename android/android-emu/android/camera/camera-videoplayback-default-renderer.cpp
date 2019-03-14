@@ -50,6 +50,7 @@ bool DefaultFrameRendererImpl::initialize() {
 }
 
 void DefaultFrameRendererImpl::render() {
+    LOG(INFO) << "Default Renderer: rendering";
     mGles2->glBindFramebuffer(GL_FRAMEBUFFER, 0);
     mGles2->glViewport(0, 0, mRenderWidth, mRenderHeight);
     mGles2->glClearColor(1.0f, 0.6f, 0.0f, 1.0f);
