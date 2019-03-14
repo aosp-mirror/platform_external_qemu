@@ -38,7 +38,6 @@
 #include "hw/pci/msi.h"
 #include "migration/migration.h"
 #include "exec/memattrs.h"
-#include "trace.h"
 
 #ifdef DEBUG_GVM
 #define DPRINTF(fmt, ...) \
@@ -2676,5 +2675,114 @@ int gvm_arch_irqchip_create(MachineState *ms, GVMState *s)
     } else {
         return 0;
     }
+}
+
+int gvm_arch_fixup_msi_route(struct gvm_irq_routing_entry *route,
+                             uint64_t address, uint32_t data, PCIDevice *dev)
+{
+    X86IOMMUState *iommu = x86_iommu_get_default();
+
+    if (iommu) {
+        int ret;
+        MSIMessage src, dst;
+        X86IOMMUClass *class = X86_IOMMU_GET_CLASS(iommu);
+
+        src.address = route->u.msi.address_hi;
+        src.address <<= VTD_MSI_ADDR_HI_SHIFT;
+        src.address |= route->u.msi.address_lo;
+        src.data = route->u.msi.data;
+
+        ret = class->int_remap(iommu, &src, &dst, dev ? \
+                               pci_requester_id(dev) : \
+                               X86_IOMMU_SID_INVALID);
+        if (ret) {
+            return 1;
+        }
+
+        route->u.msi.address_hi = dst.address >> VTD_MSI_ADDR_HI_SHIFT;
+        route->u.msi.address_lo = dst.address & VTD_MSI_ADDR_LO_MASK;
+        route->u.msi.data = dst.data;
+    }
+
+    return 0;
+}
+
+typedef struct MSIRouteEntry MSIRouteEntry;
+
+struct MSIRouteEntry {
+    PCIDevice *dev;             /* Device pointer */
+    int vector;                 /* MSI/MSIX vector index */
+    int virq;                   /* Virtual IRQ index */
+    QLIST_ENTRY(MSIRouteEntry) list;
+};
+
+/* List of used GSI routes */
+static QLIST_HEAD(, MSIRouteEntry) msi_route_list = \
+    QLIST_HEAD_INITIALIZER(msi_route_list);
+
+static void gvm_update_msi_routes_all(void *private, bool global,
+                                      uint32_t index, uint32_t mask)
+{
+    int cnt = 0;
+    MSIRouteEntry *entry;
+    MSIMessage msg;
+    /* TODO: explicit route update */
+    QLIST_FOREACH(entry, &msi_route_list, list) {
+        cnt++;
+        msg = pci_get_msi_message(entry->dev, entry->vector);
+        gvm_irqchip_update_msi_route(gvm_state, entry->virq,
+                                     msg, entry->dev);
+    }
+    gvm_irqchip_commit_routes(gvm_state);
+}
+
+int gvm_arch_add_msi_route_post(struct gvm_irq_routing_entry *route,
+                                int vector, PCIDevice *dev)
+{
+    static bool notify_list_inited = false;
+    MSIRouteEntry *entry;
+
+    if (!dev) {
+        /* These are (possibly) IOAPIC routes only used for split
+         * kernel irqchip mode, while what we are housekeeping are
+         * PCI devices only. */
+        return 0;
+    }
+
+    entry = g_new0(MSIRouteEntry, 1);
+    entry->dev = dev;
+    entry->vector = vector;
+    entry->virq = route->gsi;
+    QLIST_INSERT_HEAD(&msi_route_list, entry, list);
+
+    if (!notify_list_inited) {
+        /* For the first time we do add route, add ourselves into
+         * IOMMU's IEC notify list if needed. */
+        X86IOMMUState *iommu = x86_iommu_get_default();
+        if (iommu) {
+            x86_iommu_iec_register_notifier(iommu,
+                                            gvm_update_msi_routes_all,
+                                            NULL);
+        }
+        notify_list_inited = true;
+    }
+    return 0;
+}
+
+int gvm_arch_release_virq_post(int virq)
+{
+    MSIRouteEntry *entry, *next;
+    QLIST_FOREACH_SAFE(entry, &msi_route_list, list, next) {
+        if (entry->virq == virq) {
+            QLIST_REMOVE(entry, list);
+            break;
+        }
+    }
+    return 0;
+}
+
+int gvm_arch_msi_data_to_gsi(uint32_t data)
+{
+    abort();
 }
 

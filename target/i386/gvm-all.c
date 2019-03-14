@@ -805,7 +805,6 @@ void gvm_irqchip_commit_routes(GVMState *s)
     }
 
     s->irq_routes->flags = 0;
-    //trace_gvm_irqchip_commit_routes();
     ret = gvm_vm_ioctl(s, GVM_SET_GSI_ROUTING,
             s->irq_routes, sizeof(*s->irq_routes), NULL, 0);
     assert(ret == 0);
@@ -892,7 +891,7 @@ void gvm_irqchip_release_virq(GVMState *s, int virq)
         }
     }
     clear_gsi(s, virq);
-    //gvm_arch_release_virq_post(virq);
+    gvm_arch_release_virq_post(virq);
 }
 
 static unsigned int gvm_hash_msi(uint32_t data)
@@ -988,11 +987,6 @@ int gvm_irqchip_send_msi(GVMState *s, MSIMessage msg)
     return gvm_set_irq(s, route->kroute.gsi, 1);
 }
 
-    // Disable msr route which requires in-kernel irqchip til hypervisor
-    // side is ready. The final decision might be remove it completely.
-    // But I would like to keep msi if it is possible and does not
-    // require huge effort.
-#if 0
 int gvm_irqchip_add_msi_route(GVMState *s, int vector, PCIDevice *dev)
 {
     struct gvm_irq_routing_entry kroute = {};
@@ -1027,8 +1021,6 @@ int gvm_irqchip_add_msi_route(GVMState *s, int vector, PCIDevice *dev)
         return -EINVAL;
     }
 
-    //trace_gvm_irqchip_add_msi_route(virq);
-
     gvm_add_routing_entry(s, &kroute);
     gvm_arch_add_msi_route_post(&kroute, vector, dev);
     gvm_irqchip_commit_routes(s);
@@ -1059,11 +1051,8 @@ int gvm_irqchip_update_msi_route(GVMState *s, int virq, MSIMessage msg,
         return -EINVAL;
     }
 
-    //trace_gvm_irqchip_update_msi_route(virq);
-
     return gvm_update_routing_entry(s, &kroute);
 }
-#endif
 
 #else /* !GVM_CAP_IRQ_ROUTING */
 
