@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ac0633db_d6d8ce03",
+        "filename": "read-snapshot.txt",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-14T00:59:25Z",
+      "side": 1,
+      "message": "Was this file added intentionally?",
+      "revId": "184d4c148401de1457c0e48256a2a6ad6f9a2ae5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
