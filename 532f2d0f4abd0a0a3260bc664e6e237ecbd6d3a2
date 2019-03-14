@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "00b9a09f_81fbca9d",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-03-14T21:41:45Z",
+      "side": 1,
+      "message": "Not sure if this bug worth the snapshot version bump?",
+      "range": {
+        "startLine": 341,
+        "startChar": 32,
+        "endLine": 341,
+        "endChar": 34
+      },
+      "revId": "532f2d0f4abd0a0a3260bc664e6e237ecbd6d3a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
