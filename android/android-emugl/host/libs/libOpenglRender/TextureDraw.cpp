@@ -309,6 +309,7 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
 
     // setup the |translation| uniform value.
     s_gles2.glUniform2f(mTranslationSlot, dx, dy);
+    s_gles2.glUniform2f(mScaleSlot, 0.5, 1.0);
 
 #ifndef NDEBUG
     // Validate program, just to be sure.

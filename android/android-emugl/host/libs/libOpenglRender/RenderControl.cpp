@@ -510,7 +510,7 @@ static EGLint rcGetFBParam(EGLint param)
 
     switch(param) {
         case FB_WIDTH:
-            ret = fb->getWidth();
+            ret = fb->getWidth()/2;
             break;
         case FB_HEIGHT:
             ret = fb->getHeight();

@@ -36,11 +36,14 @@ void PostWorker::post(ColorBuffer* cb) {
     // finally, compute translation values
     float dx = px * fx;
     float dy = py * fy;
-
+    printf("viewportWidth %d widnowWidth %d dpr %f fx %f px %f dx %f",
+           m_viewportWidth, windowWidth, dpr, fx, px, dx);
     //
     // render the color buffer to the window and apply the overlay
     //
-    cb->postWithOverlay(tex, zRot, dx, dy);
+    //cb->postWithOverlay(tex, zRot, dx, dy);
+    cb->postWithOverlay(tex, zRot, -0.5, dy);
+    cb->postWithOverlay(tex, zRot, 0.5, dy);
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
 }
 
@@ -78,7 +81,7 @@ void PostWorker::compose(ComposeDevice* p) {
     ComposeLayer* l = (ComposeLayer*)p->layer;
     GLint vport[4] = { 0, };
     s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
-    s_gles2.glViewport(0, 0, mFb->getWidth(),mFb->getHeight());
+    s_gles2.glViewport(0, 0, mFb->getWidth()/2,mFb->getHeight());
     if (!m_composeFbo) {
         s_gles2.glGenFramebuffers(1, &m_composeFbo);
     }
@@ -117,11 +120,11 @@ void PostWorker::composeLayer(ComposeLayer* l) {
             ERR("%s: fail to find colorbuffer %d\n", __FUNCTION__, l->cbHandle);
             return;
         }
-        cb->postLayer(l, mFb->getWidth(), mFb->getHeight());
+        cb->postLayer(l, mFb->getWidth()/2, mFb->getHeight());
     }
     else {
         // no Colorbuffer associated with SOLID_COLOR mode
-        mFb->getTextureDraw()->drawLayer(l, mFb->getWidth(), mFb->getHeight(),
+        mFb->getTextureDraw()->drawLayer(l, mFb->getWidth()/2, mFb->getHeight(),
                                          1, 1, 0);
     }
 }
