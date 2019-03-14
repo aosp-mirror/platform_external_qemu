@@ -398,6 +398,8 @@ void ColorBuffer::subUpdate(int x,
                             GLenum p_format,
                             GLenum p_type,
                             void* pixels) {
+    const GLenum p_unsizedFormat = sGetUnsizedColorBufferFormat(p_format);
+
     RecursiveScopedHelperContext context(m_helper);
 
     if (!context.isOk()) {
@@ -429,7 +431,7 @@ void ColorBuffer::subUpdate(int x,
         s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
         s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, p_format,
+        s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, p_unsizedFormat,
                                 p_type, pixels);
     }
 
