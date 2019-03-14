@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e81d29bc_86ebd7e3",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-14T22:02:15Z",
+      "side": 1,
+      "message": "So we might be able to get away with replacing the flag, cv, and lock with a single MessageChannel. See \n\nhttps://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/android-emu/android/opengl/GpuFrameBridge.cpp\n\nfor an example.\n\nSince things also seem to be message driven fundamentally, we can also replace the functorthread/messagechannel with a single WorkerThread object.\n\nSee\n\nhttps://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp#693\n\nand\n\nhttps://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/android-emugl/host/libs/libOpenglRender/PostWorker.cpp\n\nfor examples.",
+      "range": {
+        "startLine": 138,
+        "startChar": 0,
+        "endLine": 140,
+        "endChar": 37
+      },
+      "revId": "9304d5d2f88b4cd2bcf1eda0b0a97cd1751ad04e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2d9cc395_4d92c237",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-14T22:02:15Z",
+      "side": 1,
+      "message": "Can use android::base::System::get()-\u003egetUnixTimeUs();",
+      "revId": "9304d5d2f88b4cd2bcf1eda0b0a97cd1751ad04e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "11b99be3_7edbb21c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-14T22:02:15Z",
+      "side": 1,
+      "message": "Needs to be:\n\n#ifdef _MSC_VER\n#include \"msvc-posix.h\"\n#else\n#include \u003csys/time.h\u003e\n#endif\n\nor msvc build breaks",
+      "revId": "9304d5d2f88b4cd2bcf1eda0b0a97cd1751ad04e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
