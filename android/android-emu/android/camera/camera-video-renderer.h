@@ -19,37 +19,47 @@
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/utils/compiler.h"
-#include "android/recording/video/player/VideoPlayer.h"
 #include "android/videoinjection/VideoInjectionController.h"
-#include "android/camera/camera-video-renderer.h"
-#include "android/camera/camera-videoplayback-default-renderer.h"
+#include "android/recording/video/player/VideoPlayerRenderTarget.h"
 #include "android/camera/camera-virtualscene-utils.h"
 
 namespace android {
 namespace videoplayback {
 
-// Render Multiplexer chooses which renderer to use for the Virtual Scene camera
-// based on incoming requests from the Video Injection Controller. If no
-// requests are made, the Render Multiplexer uses the most recent renderer
-// requested. The Render Multiplexer starts with the Default Frame Renderer as
-// its initial renderer.
-class RenderMultiplexer : public virtualscene::CameraRenderer {
+class VideoplaybackRenderTarget : public VideoPlayerRenderTarget {
+public:
+    VideoplaybackRenderTarget(const GLESv2Dispatch* gles2,
+                              int width,
+                              int height);
+    void getRenderTargetSize(float sampleAspectRatio,
+                             int video_width,
+                             int video_height,
+                             int* resultRenderTargetWidth,
+                             int* resultRenderTargetHeight) override;
+    void setPixelBuffer(const unsigned char* buf, size_t len) override;
+
+    void renderBuffer();
+
+private:
+    const unsigned char* mBuffer = nullptr;
+    size_t mBufferLen;
+    const GLESv2Dispatch* const mGles2;
+    int mRenderWidth;
+    int mRenderHeight;
+};  // class VideoplaybackRenderTarget
+
+class VideoRenderer: public virtualscene::CameraRenderer {
  public:
-  RenderMultiplexer() = default;
-  ~RenderMultiplexer() = default;
+  VideoRenderer();
+  ~VideoRenderer();
   bool initialize(const GLESv2Dispatch* gles2,
                   int width,
                   int height) override;
   void uninitialize() override;
   int64_t render() override;
+  VideoPlayerRenderTarget* renderTarget() { return mRenderTarget.get(); }
  private:
-  void loadVideo(const char* video_data);
-
-  std::unique_ptr<DefaultFrameRenderer> mDefaultRenderer;
-  std::unique_ptr<VideoRenderer> mVideoRenderer;
-  std::unique_ptr<videoplayer::VideoPlayer> mPlayer;
-  virtualscene::CameraRenderer* mCurrentRenderer = nullptr;
-  bool mInitialized = false;
+  std::unique_ptr<VideoplaybackRenderTarget> mRenderTarget;
 };
 
 }  // namespace videoplayback
