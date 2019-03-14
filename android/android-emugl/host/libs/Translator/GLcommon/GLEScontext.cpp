@@ -1228,7 +1228,6 @@ static void sClearIndexedBufferBinding(GLuint id, std::vector<BufferBinding>& bi
             bindings[i].size = 0;
             bindings[i].stride = 0;
             bindings[i].buffer = 0;
-            bindings[i].divisor = 0;
             bindings[i].isBindBase = false;
         }
     }
