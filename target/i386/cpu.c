@@ -23,8 +23,10 @@
 #include "cpu.h"
 #include "exec/exec-all.h"
 #include "sysemu/kvm.h"
+#include "sysemu/gvm.h"
 #include "sysemu/cpus.h"
 #include "kvm_i386.h"
+#include "gvm_i386.h"
 #include "sev_i386.h"
 
 #include "qemu/error-report.h"
@@ -3879,6 +3881,8 @@ APICCommonClass *apic_get_class(void)
 
     if (kvm_apic_in_kernel()) {
         apic_type = "kvm-apic";
+    } else if (gvm_apic_in_kernel()) {
+        apic_type = "gvm-apic";
     } else if (xen_enabled()) {
         apic_type = "xen-apic";
     }
