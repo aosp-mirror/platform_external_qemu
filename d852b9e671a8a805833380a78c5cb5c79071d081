@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4ffe461d_cbaa6e41",
+        "filename": "android/android-emu/android/skin/qt/car-cluster-window.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-14T21:56:16Z",
+      "side": 1,
+      "message": "nit: space after //",
+      "revId": "d852b9e671a8a805833380a78c5cb5c79071d081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2e6edb9e_b8de1447",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-14T21:56:16Z",
+      "side": 1,
+      "message": "Is it possible to remove the include of info.h here? It can build up compile times",
+      "revId": "d852b9e671a8a805833380a78c5cb5c79071d081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
