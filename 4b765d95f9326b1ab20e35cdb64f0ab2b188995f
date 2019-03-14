@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "90142a41_d8833fd7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-14T00:53:47Z",
+      "side": 1,
+      "message": "There is a timeout in thread, so we don\u0027t need a signal there.",
+      "parentUuid": "cc002a80_cd5e45dc",
+      "revId": "4b765d95f9326b1ab20e35cdb64f0ab2b188995f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "077890a5_ca1ca28c",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.h",
         "patchSetId": 5
@@ -33,6 +51,24 @@
       "revId": "4b765d95f9326b1ab20e35cdb64f0ab2b188995f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1dd2830d_d742044e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-14T00:53:47Z",
+      "side": 1,
+      "message": "Delete the using and append them to var declaration, keep consistent with mWorkerThread in the same file.",
+      "parentUuid": "077890a5_ca1ca28c",
+      "revId": "4b765d95f9326b1ab20e35cdb64f0ab2b188995f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
