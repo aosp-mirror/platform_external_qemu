@@ -16,6 +16,24 @@
       "revId": "184d4c148401de1457c0e48256a2a6ad6f9a2ae5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f926de65_e4eca49f",
+        "filename": "read-snapshot.txt",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-14T01:47:53Z",
+      "side": 1,
+      "message": "Deleted",
+      "parentUuid": "ac0633db_d6d8ce03",
+      "revId": "184d4c148401de1457c0e48256a2a6ad6f9a2ae5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
