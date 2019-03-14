@@ -723,7 +723,6 @@ struct gvm_enable_cap {
 #endif
 #define GVM_CAP_ASYNC_PF 59
 #define GVM_CAP_TSC_CONTROL 60
-#define GVM_CAP_GET_TSC_KHZ 61
 #define GVM_CAP_MAX_VCPUS 66       /* returns max vcpus per vm */
 #define GVM_CAP_SW_TLB 69
 #define GVM_CAP_TSC_DEADLINE_TIMER 72
@@ -976,9 +975,6 @@ enum gvm_device_type {
 #define GVM_SET_BOOT_CPU_ID       __IO(GVMIO,   0x78)
 #define GVM_SET_CLOCK             __IOW(GVMIO,  0x7b, struct gvm_clock_data)
 #define GVM_GET_CLOCK             __IOR(GVMIO,  0x7c, struct gvm_clock_data)
-/* Available with GVM_CAP_TSC_CONTROL */
-#define GVM_SET_TSC_KHZ           __IO(GVMIO,  0xa2)
-#define GVM_GET_TSC_KHZ           __IO(GVMIO,  0xa3)
 
 /*
  * ioctls for vcpu fds

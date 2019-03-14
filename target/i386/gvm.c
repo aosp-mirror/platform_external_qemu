@@ -312,42 +312,6 @@ unsigned long gvm_arch_vcpu_id(CPUState *cs)
 #define GVM_CPUID_SIGNATURE_NEXT                0x40000100
 #endif
 
-static int gvm_arch_set_tsc_khz(CPUState *cs)
-{
-    X86CPU *cpu = X86_CPU(cs);
-    CPUX86State *env = &cpu->env;
-    int r;
-
-    if (!env->tsc_khz) {
-        return 0;
-    }
-
-    r = gvm_check_extension(cs->gvm_state, GVM_CAP_TSC_CONTROL) ?
-        gvm_vcpu_ioctl(cs, GVM_SET_TSC_KHZ,
-                &env->tsc_khz, sizeof(env->tsc_khz),
-                NULL, 0) :
-        -ENOTSUP;
-    if (r < 0) {
-        /* When GVM_SET_TSC_KHZ fails, it's an error only if the current
-         * TSC frequency doesn't match the one we want.
-         */
-        int cur_freq = 0;
-        r = gvm_check_extension(cs->gvm_state, GVM_CAP_GET_TSC_KHZ) ?
-                       gvm_vcpu_ioctl(cs, GVM_GET_TSC_KHZ,
-                               NULL, 0, &cur_freq, sizeof(cur_freq)) :
-                       -ENOTSUP;
-        if (cur_freq <= 0 || cur_freq != env->tsc_khz) {
-            error_report("warning: TSC frequency mismatch between "
-                         "VM (%" PRId64 " kHz) and host (%d kHz), "
-                         "and TSC scaling unavailable",
-                         env->tsc_khz, cur_freq);
-            return r;
-        }
-    }
-
-    return 0;
-}
-
 static Error *invtsc_mig_blocker;
 
 #define GVM_MAX_CPUID_ENTRIES  100
@@ -552,32 +516,6 @@ int gvm_arch_init_vcpu(CPUState *cs)
     if (r) {
         return r;
     }
-
-    // Disable complex tsc frequency support which is only seen
-    // (to me) in KVM and is used for live migration.
-    // We may simply remove it later but let's keep it til we
-    // make final decision.
-#if 0
-    r = gvm_arch_set_tsc_khz(cs);
-    if (r < 0) {
-        return r;
-    }
-
-    /* vcpu's TSC frequency is either specified by user, or following
-     * the value used by GVM if the former is not present. In the
-     * latter case, we query it from GVM and record in env->tsc_khz,
-     * so that vcpu's TSC frequency can be migrated later via this field.
-     */
-    if (!env->tsc_khz) {
-        r = gvm_check_extension(cs->gvm_state, GVM_CAP_GET_TSC_KHZ) ?
-            gvm_vcpu_ioctl(cs, GVM_GET_TSC_KHZ,
-                    NULL, 0, &env->tsc_khz, sizeof(env->tsc_khz)) :
-            -ENOTSUP;
-        if (!r) {
-            env->tsc_khz = 0;
-        }
-    }
-#endif
 
     if (has_xsave) {
         env->gvm_xsave_buf = qemu_memalign(4096, sizeof(struct gvm_xsave));
@@ -2044,15 +1982,6 @@ int gvm_arch_put_registers(CPUState *cpu, int level)
         if (ret < 0) {
             return ret;
         }
-    }
-
-    if (level == GVM_PUT_FULL_STATE) {
-        /* We don't check for gvm_arch_set_tsc_khz() errors here,
-         * because TSC frequency mismatch shouldn't abort migration,
-         * unless the user explicitly asked for a more strict TSC
-         * setting (e.g. using an explicit "tsc-freq" option).
-         */
-        gvm_arch_set_tsc_khz(cpu);
     }
 
     ret = gvm_getput_regs(x86_cpu, 1);
