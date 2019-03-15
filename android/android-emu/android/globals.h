@@ -41,3 +41,9 @@ extern int guest_data_partition_mounted;
 extern int guest_boot_completed;
 
 extern int android_snapshot_update_timer;
+
+/* are we using qemu 2? */
+/* remove this flag once we deprecate qemu1 on both dev and release branches. */
+extern int engine_supports_snapshot;
+
+ANDROID_END_HEADER
