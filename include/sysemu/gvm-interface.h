@@ -62,14 +62,12 @@
 #define VE_VECTOR 20
 
 /* Select x86 specific features in <linux/gvm.h> */
-#define __GVM_HAVE_PIT
 #define __GVM_HAVE_IOAPIC
 #define __GVM_HAVE_IRQ_LINE
 #define __GVM_HAVE_MSI
 #define __GVM_HAVE_USER_NMI
 #define __GVM_HAVE_GUEST_DEBUG
 #define __GVM_HAVE_MSIX
-#define __GVM_HAVE_PIT_STATE2
 #define __GVM_HAVE_VCPU_EVENTS
 #define __GVM_HAVE_DEBUGREGS
 #define __GVM_HAVE_XSAVE
@@ -219,24 +217,7 @@ struct gvm_msr_list {
 	__u32 indices[0];
 };
 
-
 struct gvm_cpuid_entry {
-	__u32 function;
-	__u32 eax;
-	__u32 ebx;
-	__u32 ecx;
-	__u32 edx;
-	__u32 padding;
-};
-
-/* for GVM_SET_CPUID */
-struct gvm_cpuid {
-	__u32 nent;
-	__u32 padding;
-	struct gvm_cpuid_entry entries[0];
-};
-
-struct gvm_cpuid_entry2 {
 	__u32 function;
 	__u32 index;
 	__u32 flags;
@@ -251,28 +232,11 @@ struct gvm_cpuid_entry2 {
 #define GVM_CPUID_FLAG_STATEFUL_FUNC		(1 << 1)
 #define GVM_CPUID_FLAG_STATE_READ_NEXT		(1 << 2)
 
-/* for GVM_SET_CPUID2 */
-struct gvm_cpuid2 {
+/* for GVM_SET_CPUID */
+struct gvm_cpuid {
 	__u32 nent;
 	__u32 padding;
-	struct gvm_cpuid_entry2 entries[0];
-};
-
-/* for GVM_GET_PIT and GVM_SET_PIT */
-struct gvm_pit_channel_state {
-	__u32 count; /* can be 65536 */
-	__u16 latched_count;
-	__u8 count_latched;
-	__u8 status_latched;
-	__u8 status;
-	__u8 read_state;
-	__u8 write_state;
-	__u8 write_latch;
-	__u8 rw_mode;
-	__u8 mode;
-	__u8 bcd;
-	__u8 gate;
-	__s64 count_load_time;
+	struct gvm_cpuid_entry entries[0];
 };
 
 struct gvm_debug_exit_arch {
@@ -682,8 +646,8 @@ struct gvm_enable_cap {
  * Get size for mmap(vcpu_fd)
  */
 #define GVM_GET_VCPU_MMAP_SIZE    __IO(GVMIO,   0x04) /* in bytes */
-#define GVM_GET_SUPPORTED_CPUID   __IOWR(GVMIO, 0x05, struct gvm_cpuid2)
-#define GVM_GET_EMULATED_CPUID	  __IOWR(GVMIO, 0x09, struct gvm_cpuid2)
+#define GVM_GET_SUPPORTED_CPUID   __IOWR(GVMIO, 0x05, struct gvm_cpuid)
+#define GVM_GET_EMULATED_CPUID	  __IOWR(GVMIO, 0x09, struct gvm_cpuid)
 /*
  * Extension capability list.
  */
@@ -725,7 +689,6 @@ struct gvm_enable_cap {
 #define GVM_CAP_TSC_CONTROL 60
 #define GVM_CAP_MAX_VCPUS 66       /* returns max vcpus per vm */
 #define GVM_CAP_SW_TLB 69
-#define GVM_CAP_TSC_DEADLINE_TIMER 72
 #define GVM_CAP_SYNC_REGS 74
 #define GVM_CAP_PCI_2_3 75
 #define GVM_CAP_READONLY_MEM 81
@@ -989,13 +952,12 @@ enum gvm_device_type {
 #define GVM_INTERRUPT             __IOW(GVMIO,  0x86, struct gvm_interrupt)
 #define GVM_GET_MSRS              __IOWR(GVMIO, 0x88, struct gvm_msrs)
 #define GVM_SET_MSRS              __IOW(GVMIO,  0x89, struct gvm_msrs)
-#define GVM_SET_CPUID             __IOW(GVMIO,  0x8a, struct gvm_cpuid)
 #define GVM_GET_FPU               __IOR(GVMIO,  0x8c, struct gvm_fpu)
 #define GVM_SET_FPU               __IOW(GVMIO,  0x8d, struct gvm_fpu)
 #define GVM_GET_LAPIC             __IOR(GVMIO,  0x8e, struct gvm_lapic_state)
 #define GVM_SET_LAPIC             __IOW(GVMIO,  0x8f, struct gvm_lapic_state)
-#define GVM_SET_CPUID2            __IOW(GVMIO,  0x90, struct gvm_cpuid2)
-#define GVM_GET_CPUID2            __IOWR(GVMIO, 0x91, struct gvm_cpuid2)
+#define GVM_SET_CPUID             __IOW(GVMIO,  0x90, struct gvm_cpuid)
+#define GVM_GET_CPUID             __IOWR(GVMIO, 0x91, struct gvm_cpuid)
 /* Available with GVM_CAP_VAPIC */
 #define GVM_TPR_ACCESS_REPORTING  __IOWR(GVMIO, 0x92, struct gvm_tpr_access_ctl)
 /* Available with GVM_CAP_VAPIC */

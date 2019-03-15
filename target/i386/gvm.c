@@ -89,7 +89,7 @@ static uint32_t num_architectural_pmu_counters;
 static int has_xsave;
 static int has_xcrs;
 
-static struct gvm_cpuid2 *cpuid_cache;
+static struct gvm_cpuid *cpuid_cache;
 
 bool gvm_has_smm(void)
 {
@@ -147,9 +147,9 @@ void gvm_synchronize_all_tsc(void)
     }
 }
 
-static struct gvm_cpuid2 *try_get_cpuid(GVMState *s, int max)
+static struct gvm_cpuid *try_get_cpuid(GVMState *s, int max)
 {
-    struct gvm_cpuid2 *cpuid;
+    struct gvm_cpuid *cpuid;
     int r, size;
 
     size = sizeof(*cpuid) + max * sizeof(*cpuid->entries);
@@ -176,9 +176,9 @@ static struct gvm_cpuid2 *try_get_cpuid(GVMState *s, int max)
 /* Run GVM_GET_SUPPORTED_CPUID ioctl(), allocating a buffer large enough
  * for all entries.
  */
-static struct gvm_cpuid2 *get_supported_cpuid(GVMState *s)
+static struct gvm_cpuid *get_supported_cpuid(GVMState *s)
 {
-    struct gvm_cpuid2 *cpuid;
+    struct gvm_cpuid *cpuid;
     int max = 1;
 
     if (cpuid_cache != NULL) {
@@ -193,7 +193,7 @@ static struct gvm_cpuid2 *get_supported_cpuid(GVMState *s)
 
 /* Returns the value for a specific register on the cpuid entry
  */
-static uint32_t cpuid_entry_get_reg(struct gvm_cpuid_entry2 *entry, int reg)
+static uint32_t cpuid_entry_get_reg(struct gvm_cpuid_entry *entry, int reg)
 {
     uint32_t ret = 0;
     switch (reg) {
@@ -213,9 +213,9 @@ static uint32_t cpuid_entry_get_reg(struct gvm_cpuid_entry2 *entry, int reg)
     return ret;
 }
 
-/* Find matching entry for function/index on gvm_cpuid2 struct
+/* Find matching entry for function/index on gvm_cpuid struct
  */
-static struct gvm_cpuid_entry2 *cpuid_find_entry(struct gvm_cpuid2 *cpuid,
+static struct gvm_cpuid_entry *cpuid_find_entry(struct gvm_cpuid *cpuid,
                                                  uint32_t function,
                                                  uint32_t index)
 {
@@ -233,14 +233,14 @@ static struct gvm_cpuid_entry2 *cpuid_find_entry(struct gvm_cpuid2 *cpuid,
 uint32_t gvm_arch_get_supported_cpuid(GVMState *s, uint32_t function,
                                       uint32_t index, int reg)
 {
-    struct gvm_cpuid2 *cpuid;
+    struct gvm_cpuid *cpuid;
     uint32_t ret = 0;
     uint32_t cpuid_1_edx;
     bool found = false;
 
     cpuid = get_supported_cpuid(s);
 
-    struct gvm_cpuid_entry2 *entry = cpuid_find_entry(cpuid, function, index);
+    struct gvm_cpuid_entry *entry = cpuid_find_entry(cpuid, function, index);
     if (entry) {
         found = true;
         ret = cpuid_entry_get_reg(entry, reg);
@@ -248,22 +248,11 @@ uint32_t gvm_arch_get_supported_cpuid(GVMState *s, uint32_t function,
 
     /* Fixups for the data returned by GVM, below */
 
-    if (function == 1 && reg == R_EDX) {
-        /* GVM before 2.6.30 misreports the following features */
-        ret |= CPUID_MTRR | CPUID_PAT | CPUID_MCE | CPUID_MCA;
-    } else if (function == 1 && reg == R_ECX) {
+    if (function == 1 && reg == R_ECX) {
         /* We can set the hypervisor flag, even if GVM does not return it on
          * GET_SUPPORTED_CPUID
          */
         ret |= CPUID_EXT_HYPERVISOR;
-        /* tsc-deadline flag is not returned by GET_SUPPORTED_CPUID, but it
-         * can be enabled if the kernel has GVM_CAP_TSC_DEADLINE_TIMER,
-         * and the irqchip is in the kernel.
-         */
-        if (gvm_irqchip_in_kernel() &&
-                gvm_check_extension(s, GVM_CAP_TSC_DEADLINE_TIMER)) {
-            ret |= CPUID_EXT_TSC_DEADLINE_TIMER;
-        }
 
         /* x2apic is reported by GET_SUPPORTED_CPUID, but it can't be enabled
          * without the in-kernel irqchip
@@ -279,15 +268,6 @@ uint32_t gvm_arch_get_supported_cpuid(GVMState *s, uint32_t function,
          */
         cpuid_1_edx = gvm_arch_get_supported_cpuid(s, 1, 0, R_EDX);
         ret |= cpuid_1_edx & CPUID_EXT2_AMD_ALIASES;
-    } else if (function == GVM_CPUID_FEATURES && reg == R_EAX) {
-        /* gvm_pv_unhalt is reported by GET_SUPPORTED_CPUID, but it can't
-         * be enabled without the in-kernel irqchip
-         */
-        if (!gvm_irqchip_in_kernel()) {
-            //XXX
-            //ret &= ~(1U << GVM_FEATURE_PV_UNHALT);
-            ret &= ~(1U << 7);
-        }
     }
 
     return ret;
@@ -319,14 +299,14 @@ static Error *invtsc_mig_blocker;
 int gvm_arch_init_vcpu(CPUState *cs)
 {
     struct {
-        struct gvm_cpuid2 cpuid;
-        struct gvm_cpuid_entry2 entries[GVM_MAX_CPUID_ENTRIES];
+        struct gvm_cpuid cpuid;
+        struct gvm_cpuid_entry entries[GVM_MAX_CPUID_ENTRIES];
     } QEMU_PACKED cpuid_data;
     X86CPU *cpu = X86_CPU(cs);
     CPUX86State *env = &cpu->env;
     uint32_t limit, i, j, cpuid_i;
     uint32_t unused;
-    struct gvm_cpuid_entry2 *c;
+    struct gvm_cpuid_entry *c;
     // Disable KVM PV Features: we may decide to totally remove
     // it later but now let's just keep the code.
 #if 0
@@ -510,7 +490,7 @@ int gvm_arch_init_vcpu(CPUState *cs)
     }
 
     cpuid_data.cpuid.padding = 0;
-    r = gvm_vcpu_ioctl(cs, GVM_SET_CPUID2,
+    r = gvm_vcpu_ioctl(cs, GVM_SET_CPUID,
             &cpuid_data, sizeof(cpuid_data),
             NULL, 0);
     if (r) {
