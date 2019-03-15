@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fde75235_f2817ff8",
+        "filename": "android/android-emu/android/skin/qt/car-cluster-window.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-15T01:23:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4ffe461d_cbaa6e41",
+      "revId": "d852b9e671a8a805833380a78c5cb5c79071d081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2e6edb9e_b8de1447",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
         "patchSetId": 9
@@ -33,6 +51,24 @@
       "revId": "d852b9e671a8a805833380a78c5cb5c79071d081",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e03da1ad_404c837a",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-15T01:23:37Z",
+      "side": 1,
+      "message": "Moved to emulator-qt-window.cpp, hope that works",
+      "parentUuid": "2e6edb9e_b8de1447",
+      "revId": "d852b9e671a8a805833380a78c5cb5c79071d081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
