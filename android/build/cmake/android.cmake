@@ -610,8 +610,8 @@ function(android_upload_symbols TGT)
     CODE
     "execute_process(COMMAND \"${PYTHON_EXECUTABLE}\"
                              \"${ANDROID_QEMU2_TOP_DIR}/android/build/python/aemu/upload_symbols.py\"
-                             \"${DEST}\"
-                             \"${ANDROID_SYMBOL_URL}\"
+                             \"--symbol_file\" \"${DEST}\"
+                             \"--environment\" \"${OPTION_CRASHUPLOAD}\"
                              OUTPUT_FILE ${STDOUT}
                              ERROR_FILE ${STDOUT})"
   )

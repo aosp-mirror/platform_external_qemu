@@ -37,7 +37,7 @@ install_deps() {
 
 exists python || panic "No python interpreter available, please install python!"
 install_deps absl absl-py
-install_deps urlfetch urlfetch
+install_deps requests requests
 install_deps enum enum34
 
 python $PROGDIR/build/python/cmake.py --noshowprefixforinfo  $*
