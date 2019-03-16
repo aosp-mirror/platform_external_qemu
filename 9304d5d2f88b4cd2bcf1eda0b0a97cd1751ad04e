@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ff16fc7a_5d28d2ee",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-16T01:03:21Z",
+      "side": 1,
+      "message": "Changed to WorkerThread. Yurii once suggest me to use cv rather than sleep in the thread. If cv is somehow being replaced by workerthread, what is the right way to implement sleep here? I use sleep for now.",
+      "parentUuid": "e81d29bc_86ebd7e3",
+      "range": {
+        "startLine": 138,
+        "startChar": 0,
+        "endLine": 140,
+        "endChar": 37
+      },
+      "revId": "9304d5d2f88b4cd2bcf1eda0b0a97cd1751ad04e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d9cc395_4d92c237",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
         "patchSetId": 9
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "a9bef023_94d22d6d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-16T01:03:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2d9cc395_4d92c237",
+      "revId": "9304d5d2f88b4cd2bcf1eda0b0a97cd1751ad04e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11b99be3_7edbb21c",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.h",
         "patchSetId": 9
@@ -56,6 +98,24 @@
       "revId": "9304d5d2f88b4cd2bcf1eda0b0a97cd1751ad04e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "879115a5_e24a99fd",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-16T01:03:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11b99be3_7edbb21c",
+      "revId": "9304d5d2f88b4cd2bcf1eda0b0a97cd1751ad04e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
