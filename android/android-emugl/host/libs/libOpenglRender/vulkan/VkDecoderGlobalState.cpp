@@ -58,6 +58,7 @@ kEmulatedExtensions[] = {
     "VK_KHR_external_memory_fuchsia",
     "VK_KHR_external_semaphore_fuchsia",
     "VK_KHR_external_semaphore_fd",
+    "VK_FUCHSIA_buffer_collection",
 };
 
 static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 0, 65);
