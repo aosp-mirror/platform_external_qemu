@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b5e563c7_d3116828",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-18T23:31:04Z",
+      "side": 1,
+      "message": "do we need cv signal and wait here? GEnerally, not sure why we keep stopping and restarting the thread while that\u0027s supposed to be taken care of via a single thread starting on construction with a while (true) + msg receive",
+      "range": {
+        "startLine": 153,
+        "startChar": 0,
+        "endLine": 153,
+        "endChar": 37
+      },
+      "revId": "2ff3246a1d72fea7362474f7d94c10557cadfaf8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
