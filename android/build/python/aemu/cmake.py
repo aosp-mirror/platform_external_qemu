@@ -34,8 +34,6 @@ from aemu.run_tests import run_tests
 from aemu.distribution import create_distribution
 
 FLAGS = flags.FLAGS
-flags.DEFINE_enum('symbol_dest', 'none', SymbolUris.values(),
-                  'Endpoint to send the symbols to.')
 flags.DEFINE_string('sdk_revision', None,
                     '## DEPRECATED ##, it will automatically use the one defined in source.properties')
 flags.DEFINE_string('sdk_build_number', None, 'The emulator sdk build number.')
@@ -65,9 +63,6 @@ flags.DEFINE_boolean(
     'clean', True, 'Clean the destination build directory before configuring. '
     'Setting this to false will attempt an incremental build. '
     'Note that this can introduce cmake caching issues.')
-flags.DEFINE_boolean(
-    'symbols', False, 'Strip binaries and generate symbols after build.')
-
 
 def configure():
     """Configures the cmake project."""
@@ -86,7 +81,7 @@ def configure():
     # Setup the right toolchain/compiler configuration.
     cmake_cmd += Toolchain.from_string(FLAGS.target).to_cmd()
     cmake_cmd += Crash.from_string(FLAGS.crash).to_cmd()
-    cmake_cmd += SymbolUris.from_string(FLAGS.symbol_dest).to_cmd()
+    cmake_cmd += SymbolUris.from_string(FLAGS.crash).to_cmd()
     cmake_cmd += BuildConfig.from_string(FLAGS.config).to_cmd()
     cmake_cmd += ['-DQTWEBENGINE=%s' % FLAGS.qtwebengine]
 
@@ -117,7 +112,7 @@ def get_build_cmd():
     '''Gets the command that will build all the sources.'''
     target = 'install'
     # Stripping is meaning less in windows world.
-    if FLAGS.symbols and platform.system().lower() != 'windows':
+    if FLAGS.crash != 'none' and platform.system().lower() != 'windows':
         target += '/strip'
     return [get_cmake(), '--build', FLAGS.out, '--target', target]
 
