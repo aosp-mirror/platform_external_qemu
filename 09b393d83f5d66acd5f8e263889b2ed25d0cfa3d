@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bd93ef33_2fb77032",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 402,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-18T23:35:41Z",
+      "side": 1,
+      "message": "again, the prop table refresh thread should not be creatd and destroyed frequently like it is here, and live longer for the duration of the CarPropertyTable class",
+      "range": {
+        "startLine": 392,
+        "startChar": 0,
+        "endLine": 402,
+        "endChar": 1
+      },
+      "revId": "09b393d83f5d66acd5f8e263889b2ed25d0cfa3d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
