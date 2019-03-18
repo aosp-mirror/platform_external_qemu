@@ -690,7 +690,13 @@ GLuint ColorBuffer::scale() {
     return m_resizer->update(m_tex);
 }
 
-void ColorBuffer::waitSync() {
+void ColorBuffer::setSync(bool debug) {
+    m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
+    if (debug) fprintf(stderr, "%s: %u to %p\n", __func__, getHndl(), m_sync);
+}
+
+void ColorBuffer::waitSync(bool debug) {
+    if (debug) fprintf(stderr, "%s: %u sync %p\n", __func__, getHndl(), m_sync);
     if (m_sync) {
         s_egl.eglWaitImageFenceANDROID(m_display, m_sync);
     }
@@ -843,6 +849,7 @@ GLuint ColorBuffer::getTexture() {
 
 void ColorBuffer::postLayer(ComposeLayer* l, int frameWidth, int frameHeight) {
     if (m_inUse) fprintf(stderr, "%s: cb in use\n", __func__);
+    waitSync();
     m_helper->getTextureDraw()->drawLayer(l, frameWidth, frameHeight, m_width, m_height, m_tex);
 }
 
