@@ -40,44 +40,12 @@ public:
     CarClusterWidget(QWidget* parent = 0);
     ~CarClusterWidget();
 
-    static void processFrame(const uint8_t* frame, int frameSize);
-
-signals:
-    void sendImage(const QImage &image);
+    void updatePixmap(const QImage& image);
 
 protected:
     void paintEvent(QPaintEvent* event);
-    void showEvent(QShowEvent* event);
-    void hideEvent(QHideEvent* event);
-
-private slots:
-    void updatePixmap(const QImage& image);
 
 private:
     static void sendCarClusterMsg(uint8_t flag);
-
-    struct FrameInfo {
-        int size;
-        std::vector<uint8_t> frameData;
-    };
-
-    android::base::WorkerThread<FrameInfo> mWorkerThread;
-    android::base::WorkerProcessingResult workerProcessFrame(FrameInfo& frameInfo);
-
     QPixmap mPixmap;
-
-    AVCodec* mCodec;
-    AVCodecContext* mCodecCtx;
-    AVFrame* mFrame;
-
-    SwsContext* mCtx;
-
-    android::base::FunctorThread mCarClusterStartMsgThread;
-    std::atomic<bool> mCarClusterStartFlag;
-    android::base::ConditionVariable mCarClusterStartCV;
-    android::base::Lock mCarClusterStartLock;
-
-    uint8_t* mRgbData;
-
-    android::base::System::Duration nextRefreshAbsolute();
 };
