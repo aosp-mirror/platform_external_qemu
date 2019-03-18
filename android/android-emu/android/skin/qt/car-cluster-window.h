@@ -36,8 +36,13 @@ public:
     void show();
     void hide();
 
+    void hideEvent(QHideEvent* event);
+    void showEvent(QShowEvent* event);
+    bool isDismissed();
+
 private:
     EmulatorQtWindow* mEmulatorWindow;
     std::unique_ptr<Ui::CarClusterWindow> mCarClusterWindowUi;
+    bool mIsDismissed;
 };
 

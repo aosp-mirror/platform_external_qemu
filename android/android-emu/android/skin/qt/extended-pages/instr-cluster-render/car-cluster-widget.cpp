@@ -31,57 +31,9 @@ static constexpr int FRAME_HEIGHT = 720;
 
 static CarClusterWidget* instance;
 
-CarClusterWidget::CarClusterWidget(QWidget* parent)
-    : QWidget(parent),
-      mWorkerThread([this](CarClusterWidget::FrameInfo &&frameInfo) {
-          return workerProcessFrame(frameInfo);
-      }),
-      mCarClusterStartMsgThread([this]{
-          while(!mCarClusterStartFlag){
-              sendCarClusterMsg(PIPE_START);
-              android::base::AutoLock lock(mCarClusterStartLock);
-              mCarClusterStartCV.timedWait(&mCarClusterStartLock,
-                                           nextRefreshAbsolute());
-          }
-      }){
-      instance = this;
+CarClusterWidget::CarClusterWidget(QWidget* parent) : QWidget(parent) {}
 
-      avcodec_register_all();
-
-      mCodec = avcodec_find_decoder(AV_CODEC_ID_H264);
-      mCodecCtx = avcodec_alloc_context3(mCodec);
-      avcodec_open2(mCodecCtx,mCodec,0);
-      mFrame = av_frame_alloc();
-
-      mCtx = sws_getContext(FRAME_WIDTH, FRAME_HEIGHT, AV_PIX_FMT_YUV420P,
-                     FRAME_WIDTH, FRAME_HEIGHT, AV_PIX_FMT_RGB32, SWS_BICUBIC,
-                     NULL, NULL, NULL);
-
-      mRgbData = new uint8_t[4 * FRAME_WIDTH * FRAME_HEIGHT];
-
-      connect(this, SIGNAL(sendImage(QImage)),
-                this, SLOT(updatePixmap(QImage)), Qt::QueuedConnection);
-      mWorkerThread.start();
-
-      set_car_cluster_call_back(processFrame);
-}
-
-CarClusterWidget::~CarClusterWidget() {
-    // Send message to worker thread to stop processing
-    mWorkerThread.enqueue({});
-    mWorkerThread.join();
-
-    av_free(mFrame);
-    avcodec_close(mCodecCtx);
-    avcodec_free_context(&mCodecCtx);
-
-    sws_freeContext(mCtx);
-
-    mCarClusterStartFlag = true;
-    mCarClusterStartMsgThread.wait();
-
-    delete[] mRgbData;
-}
+CarClusterWidget::~CarClusterWidget() {}
 
 void CarClusterWidget::paintEvent(QPaintEvent* event) {
     QPainter painter(this);
@@ -96,51 +48,6 @@ void CarClusterWidget::paintEvent(QPaintEvent* event) {
     }
 }
 
-void CarClusterWidget::processFrame(const uint8_t* frame, int frameSize) {
-    instance->mWorkerThread.enqueue({frameSize, std::vector<uint8_t>(frame, frame + frameSize)});
-}
-
-WorkerProcessingResult CarClusterWidget::workerProcessFrame(FrameInfo& frameInfo) {
-    if (!frameInfo.size) {
-        return WorkerProcessingResult::Stop;
-    }
-    int rgbStride[1] = {4 * FRAME_WIDTH};
-
-    AVPacket packet;
-    av_init_packet(&packet);
-    packet.data = frameInfo.frameData.data();
-    packet.size = (int) frameInfo.size;
-    int frameFinished = 0;
-
-    // TODO: Find better way to silence ffmpeg warning on first packets
-    av_log_set_level(AV_LOG_FATAL);
-    int nres = avcodec_decode_video2(mCodecCtx,mFrame,&frameFinished,&packet);
-    av_log_set_level(AV_LOG_INFO);
-
-    if (frameFinished > 0) {
-        sws_scale(mCtx, mFrame->extended_data, mFrame->linesize,
-                    0, FRAME_HEIGHT, &mRgbData, rgbStride);
-        emit sendImage(QImage(mRgbData, FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_RGB32));
-    }
-
-    av_free_packet(&packet);
-
-    mCarClusterStartFlag = true;
-    return WorkerProcessingResult::Continue;
-}
-
-void CarClusterWidget::showEvent(QShowEvent* event) {
-    mCarClusterStartFlag = false;
-    mCarClusterStartMsgThread.start();
-}
-
-void CarClusterWidget::hideEvent(QHideEvent* event) {
-    mCarClusterStartFlag = true;
-    mCarClusterStartCV.signal();
-    mCarClusterStartMsgThread.wait();
-    sendCarClusterMsg(PIPE_STOP);
-}
-
 void CarClusterWidget::updatePixmap(const QImage& image) {
     mPixmap.convertFromImage(image);
     if (mPixmap.isNull()) {
@@ -148,15 +55,4 @@ void CarClusterWidget::updatePixmap(const QImage& image) {
     }
     mPixmap = mPixmap.scaled(size());
     repaint();
-}
-
-void CarClusterWidget::sendCarClusterMsg(uint8_t flag) {
-      uint8_t msg[1] = {flag};
-      android_send_car_cluster_data(msg, 1);
-}
-
-android::base::System::Duration CarClusterWidget::nextRefreshAbsolute() {
-      struct timeval tv;
-    gettimeofday(&tv, nullptr);
-    return (tv.tv_sec + 1) * 1000000LL + tv.tv_usec;
 }
