@@ -64,3 +64,25 @@ rcCompose
     dir buffer in
     len buffer bufferSize
     flag flushOnEncode
+
+rcCreateDisplay
+    dir displayId out
+    len displayId sizeof(uint32_t)
+
+rcGetDisplayColorBuffer
+    dir colorBuffer out
+    len colorBuffer sizeof(uint32_t)
+
+rcGetColorBufferDisplay
+    dir displayId out
+    len displayId sizeof(uint32_t)
+
+rcGetDisplayPose
+    dir x out
+    len x sizeof(uint32_t)
+    dir y out
+    len y sizeof(uint32_t)
+    dir w out
+    len w sizeof(uint32_t)
+    dir h out
+    len h sizeof(uint32_t)
