@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "50521e8b_feef1923",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-18T17:42:35Z",
+      "side": 1,
+      "message": "There seems to be a logging tag in place for car stuff (android/utils/debug.h). Consider using the logging APIs in android/base/Log.h. For example,\n\nVLOG(car) \u003c\u003c \"get the data from vhal\";\n\nTo show the log, just pass \"-debug car\" when you boot the emulator.",
+      "range": {
+        "startLine": 54,
+        "startChar": 20,
+        "endLine": 54,
+        "endChar": 26
+      },
+      "revId": "5b04ac58cb039736d2f2d39116cdaf4b7579c00d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "96e0fb66_1d23ef4b",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
         "patchSetId": 3
