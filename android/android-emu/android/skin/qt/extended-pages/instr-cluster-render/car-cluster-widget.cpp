@@ -23,82 +23,9 @@
 
 using android::base::WorkerProcessingResult;
 
-static constexpr uint8_t PIPE_START = 1;
-static constexpr uint8_t PIPE_STOP = 2;
+CarClusterWidget::CarClusterWidget(QWidget* parent) : QWidget(parent) {}
 
-static constexpr int FRAME_WIDTH = 1280;
-static constexpr int FRAME_HEIGHT = 720;
-
-static constexpr int REFRESH_START = 1;
-static constexpr int REFRESH_STOP = 2;
-
-static CarClusterWidget* instance;
-
-static constexpr int64_t REFRESH_INTERVEL = 1000000LL;
-
-CarClusterWidget::CarClusterWidget(QWidget* parent)
-    : QWidget(parent),
-      mWorkerThread([this](CarClusterWidget::FrameInfo&& frameInfo) {
-          return workerProcessFrame(frameInfo);
-      }),
-      mCarClusterStartMsgThread([this] {
-          while (true) {
-              int msg;
-              mRefreshMsg.tryReceive(&msg);
-              if (msg == REFRESH_STOP) {
-                  break;
-              }
-              android::base::AutoLock lock(mCarClusterStartLock);
-              sendCarClusterMsg(PIPE_START);
-
-              mCarClusterStartCV.timedWait(&mCarClusterStartLock,
-                                           nextRefreshAbsolute());
-          }
-      }) {
-    instance = this;
-
-    avcodec_register_all();
-
-    mCodec = avcodec_find_decoder(AV_CODEC_ID_H264);
-    mCodecCtx = avcodec_alloc_context3(mCodec);
-    avcodec_open2(mCodecCtx, mCodec, 0);
-    mFrame = av_frame_alloc();
-
-    mCtx = sws_getContext(FRAME_WIDTH, FRAME_HEIGHT, AV_PIX_FMT_YUV420P,
-                          FRAME_WIDTH, FRAME_HEIGHT, AV_PIX_FMT_RGB32,
-                          SWS_BICUBIC, NULL, NULL, NULL);
-
-    mRgbData = new uint8_t[4 * FRAME_WIDTH * FRAME_HEIGHT];
-
-    connect(this, SIGNAL(sendImage(QImage)), this, SLOT(updatePixmap(QImage)),
-            Qt::QueuedConnection);
-
-
-    mWorkerThread.start();
-
-    sendCarClusterMsg(PIPE_STOP);
-    mRefreshMsg.trySend(REFRESH_START);
-    mCarClusterStartMsgThread.start();
-
-    set_car_cluster_call_back(processFrame);
-}
-
-CarClusterWidget::~CarClusterWidget() {
-    // Send message to worker thread to stop processing
-    mWorkerThread.enqueue({});
-    mWorkerThread.join();
-
-    av_free(mFrame);
-    avcodec_close(mCodecCtx);
-    avcodec_free_context(&mCodecCtx);
-
-    sws_freeContext(mCtx);
-    mRefreshMsg.trySend(REFRESH_STOP);
-    mCarClusterStartMsgThread.wait();
-    sendCarClusterMsg(PIPE_STOP);
-
-    delete[] mRgbData;
-}
+CarClusterWidget::~CarClusterWidget() {}
 
 void CarClusterWidget::paintEvent(QPaintEvent* event) {
     QPainter painter(this);
@@ -113,38 +40,6 @@ void CarClusterWidget::paintEvent(QPaintEvent* event) {
     }
 }
 
-void CarClusterWidget::processFrame(const uint8_t* frame, int frameSize) {
-    instance->mWorkerThread.enqueue({frameSize, std::vector<uint8_t>(frame, frame + frameSize)});
-}
-
-WorkerProcessingResult CarClusterWidget::workerProcessFrame(FrameInfo& frameInfo) {
-    if (!frameInfo.size) {
-        return WorkerProcessingResult::Stop;
-    }
-
-    int rgbStride[1] = {4 * FRAME_WIDTH};
-    AVPacket packet;
-    av_init_packet(&packet);
-    packet.data = frameInfo.frameData.data();
-    packet.size = (int) frameInfo.size;
-    int frameFinished = 0;
-
-    // TODO: Find better way to silence ffmpeg warning on first packets
-    av_log_set_level(AV_LOG_FATAL);
-    int nres = avcodec_decode_video2(mCodecCtx,mFrame,&frameFinished,&packet);
-    av_log_set_level(AV_LOG_INFO);
-
-    if (frameFinished > 0) {
-        sws_scale(mCtx, mFrame->extended_data, mFrame->linesize,
-                    0, FRAME_HEIGHT, &mRgbData, rgbStride);
-        emit sendImage(QImage(mRgbData, FRAME_WIDTH, FRAME_HEIGHT, QImage::Format_RGB32));
-    }
-
-    av_free_packet(&packet);
-    mRefreshMsg.trySend(REFRESH_STOP);
-    return WorkerProcessingResult::Continue;
-}
-
 void CarClusterWidget::updatePixmap(const QImage& image) {
     mPixmap.convertFromImage(image);
     if (mPixmap.isNull()) {
@@ -152,13 +47,4 @@ void CarClusterWidget::updatePixmap(const QImage& image) {
     }
     mPixmap = mPixmap.scaled(size());
     repaint();
-}
-
-void CarClusterWidget::sendCarClusterMsg(uint8_t flag) {
-      uint8_t msg[1] = {flag};
-      android_send_car_cluster_data(msg, 1);
-}
-
-android::base::System::Duration CarClusterWidget::nextRefreshAbsolute() {
-    return android::base::System::get()->getUnixTimeUs() + REFRESH_INTERVEL;
 }
