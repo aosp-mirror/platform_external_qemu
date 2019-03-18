@@ -924,6 +924,16 @@ public:
                 needEmulatedAlpha = cmpInfo.needEmulatedAlpha();
             }
         }
+        auto imageInfoIt = mImageInfo.find(pCreateInfo->image);
+        if (imageInfoIt == mImageInfo.end()) {
+            return VK_ERROR_OUT_OF_HOST_MEMORY;
+        }
+        if (imageInfoIt->second.anbInfo.externallyBacked) {
+            createInfo = *pCreateInfo;
+            createInfo.format = imageInfoIt->second.anbInfo.vkFormat;
+            pCreateInfo = &createInfo;
+        }
+
         VkResult result =
                 vk->vkCreateImageView(device, pCreateInfo, pAllocator, pView);
         if (result != VK_SUCCESS) {
