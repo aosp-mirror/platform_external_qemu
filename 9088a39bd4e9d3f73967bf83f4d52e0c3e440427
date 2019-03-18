@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d7379654_c95e668c",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1309,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-18T21:38:26Z",
+      "side": 1,
+      "message": "System::getEnvironmentVariable",
+      "range": {
+        "startLine": 1309,
+        "startChar": 43,
+        "endLine": 1309,
+        "endChar": 49
+      },
+      "revId": "9088a39bd4e9d3f73967bf83f4d52e0c3e440427",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "df6c26d6_c1084ac9",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1309,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-18T21:38:26Z",
+      "side": 1,
+      "message": "ANDROID_EMU_",
+      "range": {
+        "startLine": 1309,
+        "startChar": 52,
+        "endLine": 1309,
+        "endChar": 59
+      },
+      "revId": "9088a39bd4e9d3f73967bf83f4d52e0c3e440427",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ee16dce9_e63ee08c",
+        "filename": "android/android-emu/android/crashreport/CrashReporter.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-18T21:38:26Z",
+      "side": 1,
+      "message": "handler",
+      "range": {
+        "startLine": 78,
+        "startChar": 29,
+        "endLine": 78,
+        "endChar": 35
+      },
+      "revId": "9088a39bd4e9d3f73967bf83f4d52e0c3e440427",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
