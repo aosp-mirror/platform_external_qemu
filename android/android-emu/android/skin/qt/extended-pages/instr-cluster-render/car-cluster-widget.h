@@ -44,29 +44,21 @@ public:
     CarClusterWidget(QWidget* parent = 0);
     ~CarClusterWidget();
 
-    static void processFrame(const uint8_t* frame, int frameSize);
-
-signals:
-    void sendImage(const QImage &image);
+    void updatePixmap(const QImage& image);
 
 protected:
     void paintEvent(QPaintEvent* event);
+<<<<<<< HEAD
 
 private slots:
     void updatePixmap(const QImage& image);
+=======
+>>>>>>> 5ad87fcc03... Show Car Cluster window after connection is set
 
 private:
     static void sendCarClusterMsg(uint8_t flag);
-
-    struct FrameInfo {
-        int size;
-        std::vector<uint8_t> frameData;
-    };
-
-    android::base::WorkerThread<FrameInfo> mWorkerThread;
-    android::base::WorkerProcessingResult workerProcessFrame(FrameInfo& frameInfo);
-
     QPixmap mPixmap;
+<<<<<<< HEAD
     AVCodec* mCodec;
     AVCodecContext* mCodecCtx;
     AVFrame* mFrame;
@@ -80,3 +72,6 @@ private:
     uint8_t* mRgbData;
     android::base::System::Duration nextRefreshAbsolute();
 };
+=======
+};
+>>>>>>> 5ad87fcc03... Show Car Cluster window after connection is set
