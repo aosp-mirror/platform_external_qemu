@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "365bceb2_a6a4c43b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-18T22:23:25Z",
+      "side": 1,
+      "message": "Change back to FunctorThread and use message channel to send the stop message",
+      "parentUuid": "ef2a6240_543c768e",
+      "range": {
+        "startLine": 138,
+        "startChar": 0,
+        "endLine": 140,
+        "endChar": 37
+      },
+      "revId": "9304d5d2f88b4cd2bcf1eda0b0a97cd1751ad04e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d9cc395_4d92c237",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
         "patchSetId": 9
