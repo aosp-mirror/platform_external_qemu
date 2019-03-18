@@ -36,3 +36,10 @@ GL_ENTRY(int, rcUpdateColorBufferDMA, uint32_t colorbuffer, GLint x, GLint y, GL
 GL_ENTRY(uint32_t, rcCreateColorBufferDMA, uint32_t width, uint32_t height, GLenum internalFormat, int frameworkFormat)
 GL_ENTRY(void, rcWaitSyncKHR, uint64_t sync, EGLint flags);
 GL_ENTRY(GLint, rcCompose, uint32_t bufferSize, void *buffer);
+GL_ENTRY(GLint, rcCreateDisplay, uint32_t* displayId);
+GL_ENTRY(GLint, rcDestroyDisplay, uint32_t displayId);
+GL_ENTRY(GLint, rcSetDisplayColorBuffer, uint32_t displayId, uint32_t colorBuffer);
+GL_ENTRY(GLint, rcGetDisplayColorBuffer, uint32_t displayId, uint32_t* colorBuffer);
+GL_ENTRY(GLint, rcGetColorBufferDisplay, uint32_t colorBuffer, uint32_t* displayId);
+GL_ENTRY(GLint, rcGetDisplayPose, uint32_t displayId, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h);
+GL_ENTRY(GLint, rcSetDisplayPose, uint32_t displayId, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
