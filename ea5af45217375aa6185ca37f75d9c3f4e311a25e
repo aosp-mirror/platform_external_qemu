@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "248c568f_ab1e06aa",
+        "filename": "android/android-emu/android/skin/qt/car-cluster-window.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2019-03-18T17:32:28Z",
+      "side": 1,
+      "message": "\u0027git clang-format\u0027. See android/docs/ANDROID-CODING-STYLE.TXT (line 524) for info on setting up \u0027get clang-format\u0027.",
+      "range": {
+        "startLine": 32,
+        "startChar": 4,
+        "endLine": 33,
+        "endChar": 45
+      },
+      "revId": "ea5af45217375aa6185ca37f75d9c3f4e311a25e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
