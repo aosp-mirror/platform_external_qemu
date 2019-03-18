@@ -1041,6 +1041,45 @@ static int rcCompose(uint32_t bufferSize, void* buffer) {
     return fb->compose(bufferSize, buffer);
 }
 
+static int rcCreateDisplay(uint32_t* displayId) {
+    (void)displayId;
+}
+
+static int rcDestroyDisplay(uint32_t displayId) {
+    (void)displayId;
+}
+
+static int rcSetDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer) {
+    (void)displayId;
+    (void)colorBuffer;
+}
+
+static int rcGetDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer) {
+    (void)displayId;
+    (void)colorBuffer;
+}
+
+static int rcGetColorBufferDisplay(uint32_t colorBuffer, uint32_t* displayId) {
+    (void)colorBuffer;
+    (void)displayId;
+}
+
+static int rcGetDisplayPose(uint32_t displayId, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h) {
+    (void)displayId;
+    (void)x;
+    (void)y;
+    (void)w;
+    (void)h;
+}
+
+static int rcSetDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+    (void)displayId;
+    (void)x;
+    (void)y;
+    (void)w;
+    (void)h;
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
