@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "ef2a6240_543c768e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-18T16:58:41Z",
+      "side": 1,
+      "message": "cv can be better because it can be used to wait to the next deadline rather than sleep for a certain duration. It looks like this is such that we can\u0027t quite use WorkerThread, but we can use a FunctorThread with a lock/cv in it that uses timedWait to wait to the next deadline. See HangDetector.cpp for an example.\n\nhttps://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev/android/android-emu/android/crashreport/HangDetector.cpp#182\n\nThat way, we also don\u0027t have to use two WorkerThread\u0027s, and can use a single FunctorThread.\n\nHowever, MessageChannel is still beneficial to capture the concept of sending messages without having to interact with the lock/cv.\n\nThe FunctorThread way is now something like this:\n\nwhile (true) {\nmessages.receive(\u0026msgInfo);\nnextDeadline \u003d msgInfo.nextDeadline;\nlock();\ncv.timedWait(nextDeadline);\nswitch (msgInfo.command) {\n/* do frame processing stuff here */\n}\n}",
+      "parentUuid": "ff16fc7a_5d28d2ee",
+      "range": {
+        "startLine": 138,
+        "startChar": 0,
+        "endLine": 140,
+        "endChar": 37
+      },
+      "revId": "9304d5d2f88b4cd2bcf1eda0b0a97cd1751ad04e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2d9cc395_4d92c237",
         "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
         "patchSetId": 9
