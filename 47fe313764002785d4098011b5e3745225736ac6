@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a720e927_a54dddae",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2019-03-19T19:11:15Z",
+      "side": 1,
+      "message": "if we always turn on blend as line 374, then no need to track the blend state during composition",
+      "revId": "47fe313764002785d4098011b5e3745225736ac6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
