@@ -52,7 +52,7 @@ public:
     }
 
 protected:
-    const System::Duration kMaxBlockingTimeUs = 5 * 60 * 1000 * 1000;
+    const System::Duration kMaxBlockingTimeUs = 30 * 1000 * 1000;
     Lock mLock;
     android::base::ConditionVariable mHangCondition;
     bool mHangDetected{false};
@@ -60,6 +60,10 @@ protected:
 };
 
 TEST_F(HangDetectorTest, PredicateTriggersHang) {
+    if (android::base::IsDebuggerAttached()) {
+       printf("This test cannot be run under a debugger.");
+       return;
+    }
     mHangDetector.addPredicateCheck([] { return true; }, "Always dead");
     waitUntilUnlocked();
 }
