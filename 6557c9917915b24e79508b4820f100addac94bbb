@@ -1,0 +1,291 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "338aa796_88bcbd03",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-19T23:18:13Z",
+      "side": 1,
+      "message": "Nit: For new files, I\u0027ve typically been naming them to match the class, such as VideoPlaybackRenderTarget.  The other naming is mostly just legacy files.",
+      "range": {
+        "startLine": 17,
+        "startChar": 32,
+        "endLine": 17,
+        "endChar": 61
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fc951746_608330b8",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-19T23:18:13Z",
+      "side": 1,
+      "message": "Not used?",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 16
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "99a30456_04901cb9",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-19T23:18:13Z",
+      "side": 1,
+      "message": "This should be static if it is only used in this file.",
+      "range": {
+        "startLine": 57,
+        "startChar": 7,
+        "endLine": 57,
+        "endChar": 20
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "be212af8_40e69dfb",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-19T23:18:13Z",
+      "side": 1,
+      "message": "I recommend using unsigned int whenever possible.",
+      "range": {
+        "startLine": 87,
+        "startChar": 8,
+        "endLine": 87,
+        "endChar": 11
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f29f42b0_a1ab6fe9",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-19T23:18:13Z",
+      "side": 1,
+      "message": "Prefer C++ casts, since they are more explicit:  static_cast\u003cint\u003e(...)",
+      "range": {
+        "startLine": 99,
+        "startChar": 16,
+        "endLine": 99,
+        "endChar": 21
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9d30bdbc_f2dc5f74",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-19T23:18:13Z",
+      "side": 1,
+      "message": "This always rounds down, is that intended?  Maybe this should be: (height * sampleAspectRatio + 0.5f)",
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6b08e246_75ffb1b7",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-19T23:18:13Z",
+      "side": 1,
+      "message": "Make sure everything is cleaned up on destruction.",
+      "range": {
+        "startLine": 121,
+        "startChar": 11,
+        "endLine": 121,
+        "endChar": 18
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8fcf6150_4838de98",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-19T23:18:13Z",
+      "side": 1,
+      "message": "You only need to do this once, not every frame.  Same for the other data, and even generating textures.",
+      "range": {
+        "startLine": 158,
+        "startChar": 8,
+        "endLine": 159,
+        "endChar": 45
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a6f93a9d_459340ed",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-19T23:18:13Z",
+      "side": 1,
+      "message": "Similar to above, this is creating a new texture each frame and never disposing it, so we\u0027ll quickly run out of memory.  You can just overwrite the data in a single texture.",
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ee62f305_ff5a2546",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-19T23:18:13Z",
+      "side": 1,
+      "message": "What\u0027s the lifetime of this buffer, and who owns the destruction?",
+      "range": {
+        "startLine": 37,
+        "startChar": 22,
+        "endLine": 37,
+        "endChar": 58
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cb31c396_e7eac0fc",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-utils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-19T23:18:13Z",
+      "side": 1,
+      "message": "Regex is fairly expensive, especially given the size of the data since it will search the entire string.  Can this be implemented as a loop over the characters instead of regex?\n\nAlternatively, it looks like this comes from VideoPlayerImpl::queuePicture, which stores the values that are being parsed here into Frame*, including a headerlen so it can be easily skipped over.  Could they be accessed directly from the Frame* and the header skipped instead?",
+      "range": {
+        "startLine": 29,
+        "startChar": 4,
+        "endLine": 32,
+        "endChar": 70
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c61ef9bb_bcb35fdf",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-utils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-19T23:18:13Z",
+      "side": 1,
+      "message": "Instead of int, I recommend android::base::Optional\u003csize_t\u003e",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 3
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "02ef431a_638a9f85",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-utils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-19T23:18:13Z",
+      "side": 1,
+      "message": "size_t here too",
+      "range": {
+        "startLine": 34,
+        "startChar": 61,
+        "endLine": 34,
+        "endChar": 64
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
