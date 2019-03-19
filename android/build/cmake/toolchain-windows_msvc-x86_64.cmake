@@ -103,4 +103,5 @@ else()
 endif()
 
 include(emu-windows-libs)
+set(ANDROID_YASM_TYPE win64)
 set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
