@@ -394,6 +394,7 @@ udp_listen(Slirp *slirp, uint32_t haddr, u_int hport, uint32_t laddr,
 	}
 
 	getsockname(so->s,(struct sockaddr *)&addr,&addrlen);
+	printf("udp_listen %s\n", sockaddr_to_string((struct sockaddr_storage*)&addr));
 	so->fhost.sin = addr;
 	sotranslate_accept(so);
 	so->so_lfamily = AF_INET;

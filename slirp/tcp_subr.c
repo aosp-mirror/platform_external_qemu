@@ -543,6 +543,7 @@ void tcp_connect(struct socket *inso)
     socket_set_nodelay(s);
 
     so->fhost.ss = addr;
+	printf("tcp_connect %s\n", sockaddr_to_string(&addr));
     sotranslate_accept(so);
 
     /* Close the accept() socket, set right state */

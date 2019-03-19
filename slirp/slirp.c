@@ -1505,7 +1505,7 @@ static const VMStateDescription vmstate_slirp_socket_addr = {
         VMSTATE_UINT16_TEST(sin.sin_port, union slirp_sockaddr,
                             slirp_family_inet),
 
-#if 0
+#if 1
         /* Untested: Needs checking by someone with IPv6 test */
         VMSTATE_BUFFER_TEST(sin6.sin6_addr, union slirp_sockaddr,
                             slirp_family_inet6),
@@ -1574,11 +1574,122 @@ static const VMStateDescription vmstate_slirp = {
     }
 };
 
+static void print_slirp_connection_info(Slirp *slirp)
+{
+    const char * const tcpstates[] = {
+        [TCPS_CLOSED]       = "CLOSED",
+        [TCPS_LISTEN]       = "LISTEN",
+        [TCPS_SYN_SENT]     = "SYN_SENT",
+        [TCPS_SYN_RECEIVED] = "SYN_RCVD",
+        [TCPS_ESTABLISHED]  = "ESTABLISHED",
+        [TCPS_CLOSE_WAIT]   = "CLOSE_WAIT",
+        [TCPS_FIN_WAIT_1]   = "FIN_WAIT_1",
+        [TCPS_CLOSING]      = "CLOSING",
+        [TCPS_LAST_ACK]     = "LAST_ACK",
+        [TCPS_FIN_WAIT_2]   = "FIN_WAIT_2",
+        [TCPS_TIME_WAIT]    = "TIME_WAIT",
+    };
+    struct in_addr dst_addr;
+    struct sockaddr src_addr;
+    struct sockaddr_storage src;
+    struct sockaddr_storage dst;
+    socklen_t src_len;
+    uint32_t src_port;
+    uint32_t dst_port;
+    struct socket *so;
+    const char *state;
+    char buf[20];
+
+    printf("  Protocol[State]    FD  Source Address  Port   "
+                        "Dest. Address  Port RecvQ SendQ\n");
+
+    for (so = slirp->tcb.so_next; so != &slirp->tcb; so = so->so_next) {
+        if (so->so_state & SS_HOSTFWD) {
+            state = "HOST_FORWARD";
+        } else if (so->so_tcpcb) {
+            state = tcpstates[so->so_tcpcb->t_state];
+        } else {
+            state = "NONE";
+        }
+        if (so->so_state & (SS_HOSTFWD | SS_INCOMING)) {
+            src = so->fhost.ss;
+            src_len = sizeof(src);
+            getsockname(so->s, (struct sockaddr *)&src, &src_len);
+            dst = so->lhost.ss;
+            //dst_addr = so->so_laddr;
+            dst_port = ntohs(so->so_lport);
+            if (so->fhost.ss.ss_family == AF_INET6) {
+                dst_port = ntohl(so->so_lport6);
+            }
+        } else {
+            //src.sin_addr = so->so_laddr;
+            //src.sin_port = so->so_lport;
+            //dst_addr = so->so_faddr;
+            dst_port = ntohs(so->so_fport);
+            if (so->fhost.ss.ss_family == AF_INET6) {
+                dst_port = ntohl(so->so_fport6);
+            }
+            src = so->lhost.ss;
+            dst = so->fhost.ss;
+        }
+        if (src.ss_family == AF_INET) {
+            src_port = ntohs(((struct sockaddr_in*)&src)->sin_port);
+        } else {
+            src_port = ntohl(((struct sockaddr_in6*)&src)->sin6_port);
+        }
+        snprintf(buf, sizeof(buf), "  TCP[%s]", state);
+        printf("%-19s %3d %15s %5d ", buf, so->s,
+                       //src.sin_addr.s_addr ? inet_ntoa(src.sin_addr) : "*",
+                       sockaddr_to_string(&src),
+                       src_port);
+        printf("%15s %5d %5d %5d\n",
+                       sockaddr_to_string(&dst),
+                       dst_port,
+                       so->so_rcv.sb_cc, so->so_snd.sb_cc);
+    }
+
+    for (so = slirp->udb.so_next; so != &slirp->udb; so = so->so_next) {
+        if (so->so_state & SS_HOSTFWD) {
+            snprintf(buf, sizeof(buf), "  UDP[HOST_FORWARD]");
+            src_len = sizeof(src);
+            getsockname(so->s, (struct sockaddr *)&src, &src_len);
+            dst_addr = so->so_laddr;
+            dst_port = so->so_lport;
+        } else {
+            snprintf(buf, sizeof(buf), "  UDP[%d sec]",
+                         (so->so_expire - curtime) / 1000);
+            ((struct sockaddr_in*)&src)->sin_addr = so->so_laddr;
+            ((struct sockaddr_in*)&src)->sin_port = so->so_lport;
+            dst_addr = so->so_faddr;
+            dst_port = so->so_fport;
+        }
+        printf("%-19s %3d %15s %5d ", buf, so->s,
+                       ((struct sockaddr_in*)&src)->sin_addr.s_addr ? inet_ntoa(((struct sockaddr_in*)&src)->sin_addr) : "*",
+                       ntohs(((struct sockaddr_in*)&src)->sin_port));
+        printf("%15s %5d %5d %5d\n",
+                       inet_ntoa(dst_addr), ntohs(dst_port),
+                       so->so_rcv.sb_cc, so->so_snd.sb_cc);
+    }
+
+    for (so = slirp->icmp.so_next; so != &slirp->icmp; so = so->so_next) {
+        snprintf(buf, sizeof(buf), "  ICMP[%d sec]",
+                     (so->so_expire - curtime) / 1000);
+        ((struct sockaddr_in*)&src)->sin_addr = so->so_laddr;
+        dst_addr = so->so_faddr;
+        printf("%-19s %3d %15s  -    ", buf, so->s,
+                       ((struct sockaddr_in*)&src)->sin_addr.s_addr ? inet_ntoa(((struct sockaddr_in*)&src)->sin_addr) : "*");
+        printf("%15s  -    %5d %5d\n", inet_ntoa(dst_addr),
+                       so->so_rcv.sb_cc, so->so_snd.sb_cc);
+    }
+}
+
 static void slirp_state_save(QEMUFile *f, void *opaque)
 {
     Slirp *slirp = opaque;
     struct ex_list *ex_ptr;
 
+    printf("slirp_state_save\n");
+    print_slirp_connection_info(slirp);
     for (ex_ptr = slirp->exec_list; ex_ptr; ex_ptr = ex_ptr->ex_next)
         if (ex_ptr->ex_pty == 3) {
             struct socket *so;
@@ -1592,6 +1703,51 @@ static void slirp_state_save(QEMUFile *f, void *opaque)
         }
     qemu_put_byte(f, 0);
 
+    // Save all ipv4 addresses
+    {
+        struct socket* so = slirp->udb.so_next;
+        while (so != &slirp->udb) {
+            qemu_put_byte(f, 42);
+            vmstate_save_state(f, &vmstate_slirp_socket, so, NULL);
+            so = so->so_next;
+        }
+        qemu_put_byte(f, 0);
+    }
+
+    {
+        struct socket* so = slirp->tcb.so_next;
+        while (so != &slirp->tcb) {
+            qemu_put_byte(f, 42);
+            vmstate_save_state(f, &vmstate_slirp_socket, so, NULL);
+            so = so->so_next;
+        }
+        qemu_put_byte(f, 0);
+    }
+
+    {
+        struct socket* so = slirp->icmp.so_next;
+        while (so != &slirp->icmp) {
+            qemu_put_byte(f, 42);
+            vmstate_save_state(f, &vmstate_slirp_socket, so, NULL);
+            so = so->so_next;
+        }
+        qemu_put_byte(f, 0);
+    }
+
+    // Save all ipv6 addresses
+    {
+        qemu_put_byte(f, slirp->in6_enabled);
+        if (slirp->in6_enabled) {
+            struct socket* so = slirp->tcb.so_next;
+            while (so != &slirp->tcb) {
+                qemu_put_byte(f, 42);
+                vmstate_save_state(f, &vmstate_slirp_socket, so, NULL);
+                so = so->so_next;
+            }
+            qemu_put_byte(f, 0);
+        }
+    }
+
     vmstate_save_state(f, &vmstate_slirp, slirp, NULL);
 }
 
@@ -1600,6 +1756,12 @@ static int slirp_state_load(QEMUFile *f, void *opaque, int version_id)
 {
     Slirp *slirp = opaque;
     struct ex_list *ex_ptr;
+
+    printf("slirp_state_load_before\n");
+    print_slirp_connection_info(slirp);
+    //ip_cleanup(slirp);
+    //ip6_cleanup(slirp);
+    //m_cleanup(slirp);
 
     while (qemu_get_byte(f)) {
         int ret;
@@ -1630,5 +1792,8 @@ static int slirp_state_load(QEMUFile *f, void *opaque, int version_id)
         so->extra = (void *)ex_ptr->ex_exec;
     }
 
-    return vmstate_load_state(f, &vmstate_slirp, slirp, version_id);
+    int ret = vmstate_load_state(f, &vmstate_slirp, slirp, version_id);
+    printf("slirp_state_load_after\n");
+    print_slirp_connection_info(slirp);
+    return ret;
 }

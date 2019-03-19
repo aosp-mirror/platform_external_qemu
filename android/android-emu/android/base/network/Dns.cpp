@@ -40,6 +40,30 @@
 // Set to 1 to increase verbosity of debug messages.
 #define DEBUG 0
 
+static const char* sockaddr_to_string_dns(const struct sockaddr_storage* ss) {
+    static char result[128];
+    char temp[128];
+    int port = 0;
+    switch (ss->ss_family) {
+        case AF_INET: {
+            struct sockaddr_in *sin = (struct sockaddr_in *)ss;
+            inet_ntop(AF_INET, &sin->sin_addr, temp, sizeof(temp));
+            port = ntohs(sin->sin_port);
+            break;
+        }
+        case AF_INET6: {
+            struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)ss;
+            inet_ntop(AF_INET6, &sin6->sin6_addr, temp, sizeof(temp));
+            port = ntohs(sin6->sin6_port);
+            break;
+        }
+        default:
+            return NULL;
+    }
+    snprintf(result, sizeof(result), "%s:%d", temp, port);
+    return result;
+}
+
 namespace android {
 namespace base {
 
@@ -102,6 +126,7 @@ public:
             // and SOCK_RAW. Ignore the ones that are not SOCK_STREAM
             // since we don't expect a machine to have different IP
             // addresses for TCP and UDP.
+            printf("dns %s -> %s\n", hostname.c_str(), sockaddr_to_string_dns((struct sockaddr_storage *)r->ai_addr));
             if (r->ai_socktype != SOCK_STREAM) {
                 continue;
             }
