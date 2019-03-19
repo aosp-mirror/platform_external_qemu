@@ -4793,12 +4793,12 @@ STEXI
 Allows sending of audio from audio input devices. Otherwise, zeroes out audio.
 ETEXI
 
-DEF("perf-stat", 0, QEMU_OPTION_perf_stat,
-"-perf-stat Run periodic perf stat reporter in the background.", QEMU_ARCH_ALL)
+DEF("perf-stat", HAS_ARG, QEMU_OPTION_perf_stat,
+"-perf-stat <file> Run periodic perf stat reporter in the background and write output to specified file.", QEMU_ARCH_ALL)
 STEXI
 @item -perf-stat
 @findex -perf-stat
-Run periodic perf stat reporter in the background.
+Run periodic perf stat reporter in the background and write output to specified file.
 ETEXI
 
 #endif  // CONFIG_ANDROID

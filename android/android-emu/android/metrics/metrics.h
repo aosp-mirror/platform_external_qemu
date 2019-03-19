@@ -28,8 +28,7 @@ ANDROID_BEGIN_HEADER
 bool android_metrics_start(const char* emulatorVersion,
                            const char* emulatorFullVersion,
                            const char* qemuVersion,
-                           int controlConsolePort,
-                           bool runPerfStat);
+                           int controlConsolePort);
 
 // A set of reasons for stopping metrics.
 typedef enum {

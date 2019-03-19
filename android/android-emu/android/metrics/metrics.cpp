@@ -79,8 +79,7 @@ static android::base::LazyInstance<InstanceData> sGlobalData = {};
 bool android_metrics_start(const char* emulatorVersion,
                            const char* emulatorFullVersion,
                            const char* qemuVersion,
-                           int controlConsolePort,
-                           bool runPerfStat) {
+                           int controlConsolePort) {
     MetricsReporter::start(android::base::Uuid::generate().toString(),
                            emulatorVersion, emulatorFullVersion, qemuVersion);
     PeriodicReporter::start(&MetricsReporter::get(),
@@ -99,9 +98,9 @@ bool android_metrics_start(const char* emulatorVersion,
                 return true;
             });
 
-    // Only report perf stats on console when we are logging verbosely or
+    // Report perf stats when we are logging verbosely or
     // -perf-stat option is enabled.
-    if (runPerfStat) {
+    if (android_verbose || android_cmdLineOptions->perf_stat != nullptr) {
         sGlobalData->perfStatReporter =
                 android::metrics::PerfStatReporter::create(
                         android::base::ThreadLooper::get(), 1000);

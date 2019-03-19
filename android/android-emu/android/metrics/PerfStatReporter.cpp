@@ -26,6 +26,7 @@
 #include "android/metrics/proto/clientanalytics.pb.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/utils/debug.h"
+#include "android/utils/file_io.h"
 
 #define  D(...)  do {  if (VERBOSE_CHECK(memory)) dprint(__VA_ARGS__); } while (0)
 
@@ -56,7 +57,12 @@ PerfStatReporter::PerfStatReporter(
         android::base::Looper::Duration checkIntervalMs)
     : mCurrPerfStats(new android_studio::EmulatorPerformanceStats),
       mLooper(looper),
-      mWriter(TextMetricsWriter::create(StdioStream(stdout))),
+      mWriter((android_cmdLineOptions->perf_stat != nullptr)
+                      ? TextMetricsWriter::create(base::StdioStream(
+                                android_fopen(android_cmdLineOptions->perf_stat,
+                                              "w"),
+                                base::StdioStream::kOwner))
+                      : nullptr),
       mCheckIntervalMs(checkIntervalMs),
       // We use raw pointer to |this| instead of a shared_ptr to avoid cicrular
       // ownership. mRecurrentTask promises to cancel any outstanding tasks when
@@ -65,8 +71,7 @@ PerfStatReporter::PerfStatReporter(
               looper,
               [this]() {
                   refreshPerfStats();
-                  if (android_cmdLineOptions->perf_stat)
-                      dump();
+                  dump();
                   return true;
               },
               mCheckIntervalMs) {
@@ -114,15 +119,17 @@ static void fillProtoMemUsage(android_studio::EmulatorPerformanceStats* stats_ou
 static void fillProtoCpuUsage(android_studio::EmulatorPerformanceStats* stats_out);
 
 void PerfStatReporter::dump() {
-    wireless_android_play_playlog::LogEvent logEvent;
+    if (mWriter != nullptr) {
+        wireless_android_play_playlog::LogEvent logEvent;
 
-    const auto timeMs = System::get()->getUnixTimeUs() / 1000;
-    logEvent.set_event_time_ms(timeMs);
-    android_studio::AndroidStudioEvent event;
-    android_studio::EmulatorPerformanceStats* perfStatProto =
-            event.mutable_emulator_performance_stats();
-    *perfStatProto = *mCurrPerfStats;
-    mWriter->write(event, &logEvent);
+        const auto timeMs = System::get()->getUnixTimeUs() / 1000;
+        logEvent.set_event_time_ms(timeMs);
+        android_studio::AndroidStudioEvent event;
+        android_studio::EmulatorPerformanceStats* perfStatProto =
+                event.mutable_emulator_performance_stats();
+        fillProto(perfStatProto);
+        mWriter->write(event, &logEvent);
+    }
 }
 
 void PerfStatReporter::refreshPerfStats() {
