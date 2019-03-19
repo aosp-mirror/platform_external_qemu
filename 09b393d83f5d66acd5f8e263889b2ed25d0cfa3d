@@ -22,6 +22,30 @@
       "revId": "09b393d83f5d66acd5f8e263889b2ed25d0cfa3d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "38589438_03617925",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 402,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-19T08:27:39Z",
+      "side": 1,
+      "message": "Thanks for point out. I agree with the create. But for destroy, I won\u0027t say destroy here is so frequently. In CarPropertyTable, the table are keep updating the data, so the thread will start since the first time table tab is been clicked and keep alive until the class is been destroyed. So stopCarPropertyTableRefreshThread() is only be called in deconstructor, and deconstructor is called when emulator is closed. pauseCarPropertyTableRefreshThread() when the table is been hide.",
+      "parentUuid": "bd93ef33_2fb77032",
+      "range": {
+        "startLine": 392,
+        "startChar": 0,
+        "endLine": 402,
+        "endChar": 1
+      },
+      "revId": "09b393d83f5d66acd5f8e263889b2ed25d0cfa3d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1067bf00_a1ed5f49",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-19T08:27:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "50521e8b_feef1923",
+      "range": {
+        "startLine": 54,
+        "startChar": 20,
+        "endLine": 54,
+        "endChar": 26
+      },
+      "revId": "5b04ac58cb039736d2f2d39116cdaf4b7579c00d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "96e0fb66_1d23ef4b",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
         "patchSetId": 3
@@ -72,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "0dd0e649_3fd5942f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-19T08:27:39Z",
+      "side": 1,
+      "message": "As the other CL, still use FunctorThread, use massagechannel to send action info to make thread do different thing.",
+      "parentUuid": "a0075e6f_cc6a5d4f",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 8
+      },
+      "revId": "5b04ac58cb039736d2f2d39116cdaf4b7579c00d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9079543e_c020099b",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
         "patchSetId": 3
@@ -92,6 +140,30 @@
       "revId": "5b04ac58cb039736d2f2d39116cdaf4b7579c00d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af219226_1f56960f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-19T08:27:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9079543e_c020099b",
+      "range": {
+        "startLine": 375,
+        "startChar": 0,
+        "endLine": 377,
+        "endChar": 52
+      },
+      "revId": "5b04ac58cb039736d2f2d39116cdaf4b7579c00d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
