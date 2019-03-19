@@ -381,6 +381,10 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
     }
 
     if (wantOverlay && mMaskIsValid) {
+        if (mBlendResetNeeded) {
+            s_gles2.glEnable(GL_BLEND);
+            mBlendResetNeeded = false;
+        }
         s_gles2.glBindTexture(GL_TEXTURE_2D, mMaskTexture);
         s_gles2.glDrawElements(GL_TRIANGLES, kIndicesPerDraw, GL_UNSIGNED_BYTE,
                                (const GLvoid*)indexShift);
@@ -525,6 +529,7 @@ void TextureDraw::drawLayer(ComposeLayer* l, int frameWidth, int frameHeight,
     switch(l->blendMode) {
         case HWC2_BLEND_MODE_NONE:
             s_gles2.glDisable(GL_BLEND);
+            mBlendResetNeeded = true;
             break;
         case HWC2_BLEND_MODE_PREMULTIPLIED:
             break;
@@ -599,13 +604,13 @@ void TextureDraw::drawLayer(ComposeLayer* l, int frameWidth, int frameHeight,
     }
     if (l->blendMode != HWC2_BLEND_MODE_PREMULTIPLIED) {
         s_gles2.glEnable(GL_BLEND);
+        mBlendResetNeeded = false;
         s_gles2.glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     }
 }
 
 // Do Post right after drawing each layer, so keep using this program
 void TextureDraw::cleanupForDrawLayer() {
-    s_gles2.glDisable(GL_BLEND);
     s_gles2.glUniform1f(mAlpha, 1.0);
     s_gles2.glUniform1i(mComposeMode, HWC2_COMPOSITION_DEVICE);
     s_gles2.glUniform2f(mTranslationSlot, 0.0, 0.0);
