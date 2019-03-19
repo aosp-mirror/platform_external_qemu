@@ -324,7 +324,7 @@ function(android_add_test name)
   endif()
 
   add_test(NAME ${name}
-           COMMAND $<TARGET_FILE:${name}> --gtest_output=xml:$<TARGET_FILE_NAME:${name}>.xml
+           COMMAND $<TARGET_FILE:${name}> --gtest_output=xml:$<TARGET_FILE_NAME:${name}>.xml --gtest_catch_exceptions=0 
            WORKING_DIRECTORY $<TARGET_FILE_DIR:${name}>)
 
   # Let's not optimize our tests.

@@ -107,7 +107,7 @@ public:
     bool timedWait(StaticLock *userLock, System::Duration waitUntilUs) {
         const auto now = System::get()->getUnixTimeUs();
         const auto timeout =
-                std::max<System::Duration>(0, waitUntilUs  - now) / 1000;
+                std::max<System::Duration>(1, waitUntilUs  - now) / 1000;
         return ::SleepConditionVariableSRW(
                     &mCond, &userLock->mLock, timeout, 0) != 0;
     }
