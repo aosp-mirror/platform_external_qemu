@@ -87,6 +87,11 @@ soqfree(struct socket *so, struct quehead *qh)
 void
 sofree(struct socket *so)
 {
+  char* fhost_name = strdup(sockaddr_to_string(&so->fhost.ss));
+  char* lhost_name = strdup(sockaddr_to_string(&so->lhost.ss));
+  printf("sofree fhost %s lhost %s\n", fhost_name, lhost_name);
+  free(fhost_name);
+  free(lhost_name);
   Slirp *slirp = so->slirp;
 
   soqfree(so, &slirp->if_fastq);
@@ -854,6 +859,7 @@ void sotranslate_out(struct socket *so, struct sockaddr_storage *addr)
     Slirp *slirp = so->slirp;
     struct sockaddr_in *sin = (struct sockaddr_in *)addr;
     struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)addr;
+	const char* tmp = NULL;
 
     switch (addr->ss_family) {
     case AF_INET:
@@ -865,9 +871,9 @@ void sotranslate_out(struct socket *so, struct sockaddr_storage *addr)
             }
         }
 
-        DEBUG_MISC((dfd, " addr.sin_port=%d, "
-            "addr.sin_addr.s_addr=%.16s\n",
-            ntohs(sin->sin_port), inet_ntoa(sin->sin_addr)));
+        //printf(" addr.sin_port=%d, "
+        //    "addr.sin_addr.s_addr=%.16s\n",
+        //    ntohs(sin->sin_port), inet_ntoa(sin->sin_addr));
         break;
 
     case AF_INET6:
@@ -879,6 +885,10 @@ void sotranslate_out(struct socket *so, struct sockaddr_storage *addr)
                 sin6->sin6_addr = in6addr_loopback;
             }
         }
+		//tmp = sockaddr_to_string(addr);
+		//printf(" addr.sin_port=%d, "
+        //    "addr.sin6_addr.s_addr=%s\n",
+        //    ntohs(sin->sin_port), tmp);
         break;
 
     default:

@@ -75,8 +75,8 @@ tcp_output(struct tcpcb *tp)
 	unsigned optlen, hdrlen;
 	int idle, sendalot;
 
-	DEBUG_CALL("tcp_output");
-	DEBUG_ARG("tp = %lx", (long )tp);
+	//DEBUG_CALL("tcp_output");
+	//DEBUG_ARG("tp = %lx", (long )tp);
 
 	/*
 	 * Determine length of data that should be transmitted,

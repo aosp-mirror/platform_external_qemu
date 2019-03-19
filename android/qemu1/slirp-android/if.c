@@ -242,7 +242,7 @@ if_start(void)
 {
 	struct mbuf *ifm, *ifqt;
 
-	DEBUG_CALL("if_start");
+	//DEBUG_CALL("if_start");
 
 	if (if_queued == 0)
 	   return; /* Nothing to do */

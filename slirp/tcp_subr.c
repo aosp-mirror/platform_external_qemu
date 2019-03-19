@@ -440,8 +440,8 @@ int tcp_fconnect(struct socket *so, unsigned short af)
 {
   int ret=0;
 
-  DEBUG_CALL("tcp_fconnect");
-  DEBUG_ARG("so = %p", so);
+  printf("tcp_fconnect");
+  printf("so = %p", so);
 
   struct sockaddr_storage addr;
   addr = so->fhost.ss;
@@ -453,6 +453,7 @@ int tcp_fconnect(struct socket *so, unsigned short af)
 	soisfconnecting(so);
 	so->s = -1;
 	so->so_state |= SS_PROXIFIED;
+	printf("tcp_fconnect proxified\n");
 	return 0;
   }
 
@@ -476,6 +477,7 @@ int tcp_fconnect(struct socket *so, unsigned short af)
      */
     soisfconnecting(so);
   }
+  printf("tcp_fconnect result %d", ret);
 
   return(ret);
 }
@@ -540,6 +542,7 @@ void tcp_connect(struct socket *inso)
     socket_set_nodelay(s);
 
     so->fhost.ss = addr;
+	printf("tcp_connect %s\n", sockaddr_to_string(&addr));
     sotranslate_accept(so);
 
     /* Close the accept() socket, set right state */
