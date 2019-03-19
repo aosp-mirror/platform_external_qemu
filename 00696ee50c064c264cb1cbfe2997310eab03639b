@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d2b6585e_db625731",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2395,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-03-19T19:29:28Z",
+      "side": 1,
+      "message": "you can add a displayId field to colorBuffer, to avoid the search.",
+      "range": {
+        "startLine": 2390,
+        "startChar": 0,
+        "endLine": 2395,
+        "endChar": 5
+      },
+      "revId": "00696ee50c064c264cb1cbfe2997310eab03639b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
