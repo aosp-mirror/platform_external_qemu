@@ -84,6 +84,7 @@ private:
 
 FrameBuffer* FrameBuffer::s_theFrameBuffer = NULL;
 HandleType FrameBuffer::s_nextHandle = 0;
+uint32_t FrameBuffer::s_nextDisplayId = 1;
 
 static const GLint gles2ContextAttribsESOrGLCompat[] =
    { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
@@ -2353,4 +2354,70 @@ void FrameBuffer::unregisterProcessCleanupCallback(void* key) {
             __func__, key, (unsigned long long)(tInfo->m_puid));
     }
     callbackMap.erase(key);
+}
+
+int FrameBuffer::createDisplay(uint32_t* displayId) {
+    if (displayId == nullptr) {
+        ERR("%s: null displayId", __FUNCTION__);
+        return -1;
+    }
+    *displayId = s_nextDisplayId++;
+    m_displays.emplace(*displayId, DisplayInfo());
+    return 0;
+}
+
+int FrameBuffer::destroyDisplay(uint32_t displayId) {
+    m_displays.erase(displayId);
+    return 0;
+}
+
+int FrameBuffer::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer) {
+    if (m_displays.find(displayId) == m_displays.end()) {
+        return -1;
+    }
+    if (m_colorbuffers.find(colorBuffer) == m_colorbuffers.end()) {
+        return -1;
+    }
+    m_displays[displayId].cb = colorBuffer;
+    return 0;
+}
+
+int FrameBuffer::getDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer) {
+    if (m_displays.find(displayId) == m_displays.end()) {
+        return -1;
+    }
+    *colorBuffer = m_displays[displayId].cb;
+    return 0;
+}
+
+int FrameBuffer::getColorBufferDisplay(uint32_t colorBuffer, uint32_t* displayId) {
+    for (auto iter = m_displays.begin(); iter != m_displays.end(); ++iter) {
+        if (iter->second.cb == colorBuffer) {
+            *displayId = iter->first;
+            return 0;
+        }
+    }
+    return -1;
+}
+
+int FrameBuffer::getDisplayPose(uint32_t displayId, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h) {
+    if (m_displays.find(displayId) == m_displays.end()) {
+        return -1;
+    }
+    *x = m_displays[displayId].pos_x;
+    *y = m_displays[displayId].pos_y;
+    *w = m_displays[displayId].width;
+    *h = m_displays[displayId].height;
+    return 0;
+}
+
+int FrameBuffer::setDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+    if (m_displays.find(displayId) == m_displays.end()) {
+        return -1;
+    }
+    m_displays[displayId].pos_x = x;
+    m_displays[displayId].pos_y = y;
+    m_displays[displayId].width = w;
+    m_displays[displayId].height = h;
+    return 0;
 }
