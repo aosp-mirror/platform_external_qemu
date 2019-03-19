@@ -16,7 +16,7 @@ RecordMacroSavedItem::RecordMacroSavedItem(QWidget* parent)
     mUi->setupUi(this);
 }
 
-void RecordMacroSavedItem::setName(const char* name) {
+void RecordMacroSavedItem::setName(QString name) {
     mUi->name->setText(name);
 }
 
@@ -24,6 +24,6 @@ std::string RecordMacroSavedItem::getName() const {
     return mUi->name->text().toUtf8().constData();
 }
 
-void RecordMacroSavedItem::setDisplayInfo(const char* displayInfo) {
+void RecordMacroSavedItem::setDisplayInfo(QString displayInfo) {
     mUi->displayInfo->setText(displayInfo);
 }
