@@ -16,6 +16,24 @@
       "revId": "47fe313764002785d4098011b5e3745225736ac6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "09784ee8_1c84b6f7",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/TextureDraw.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-19T19:16:05Z",
+      "side": 1,
+      "message": "what about drawLayer() with \"None\" blend mode though",
+      "parentUuid": "a720e927_a54dddae",
+      "revId": "47fe313764002785d4098011b5e3745225736ac6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
