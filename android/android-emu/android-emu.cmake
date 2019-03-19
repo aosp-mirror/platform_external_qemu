@@ -259,6 +259,7 @@ set(android_emu_dependent_src
     android/snapshot/SnapshotAPI.cpp
     android/test/checkboot.cpp
     android/videoinjection/VideoInjectionController.cpp
+    android/videoplayback/VideoplaybackRenderTarget.cpp
     android/virtualscene/MeshSceneObject.cpp
     android/virtualscene/PosterInfo.cpp
     android/virtualscene/PosterSceneObject.cpp

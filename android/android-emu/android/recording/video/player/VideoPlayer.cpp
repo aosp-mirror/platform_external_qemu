@@ -775,7 +775,11 @@ int VideoPlayerImpl::queuePicture(AVFrame* src_frame,
 
 // render the video
 void VideoPlayerImpl::displayVideoFrame(Frame* vp) {
-    mRenderTarget->setPixelBuffer(vp->buf, vp->len);
+    VideoPlayerRenderTarget::FrameInfo frameInfo;
+    frameInfo.headerlen = vp->headerlen;
+    frameInfo.width = vp->width;
+    frameInfo.height = vp->height;
+    mRenderTarget->setPixelBuffer(frameInfo, vp->buf, vp->len);
 
     mNotifier->emitUpdateWidget();
 }
@@ -1420,7 +1424,8 @@ void VideoPlayerImpl::cleanup() {
         // mVideoFrameQueue.reset();
     }
 
-    mRenderTarget->setPixelBuffer(nullptr, 0);
+    VideoPlayerRenderTarget::FrameInfo dummyInfo;
+    mRenderTarget->setPixelBuffer(dummyInfo, nullptr, 0);
 
     if (mImgConvertCtx != nullptr) {
         sws_freeContext(mImgConvertCtx);
