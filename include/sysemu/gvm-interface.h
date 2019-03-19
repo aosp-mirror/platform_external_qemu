@@ -419,7 +419,6 @@ struct gvm_irqchip {
 #define GVM_EXIT_EPR              23
 #define GVM_EXIT_SYSTEM_EVENT     24
 #define GVM_EXIT_IOAPIC_EOI       26
-#define GVM_EXIT_HYPERV           27
 
 /* For GVM_EXIT_INTERNAL_ERROR */
 /* Emulate instruction failed. */
@@ -433,7 +432,7 @@ struct gvm_irqchip {
 struct gvm_run {
 	/* in */
 	__u8 request_interrupt_window;
-    __u8 user_event_pending;
+	__u8 user_event_pending;
 	__u8 padding1[6];
 
 	/* out */
@@ -576,12 +575,6 @@ struct gvm_dirty_log {
 	};
 };
 
-/* for GVM_SET_SIGNAL_MASK */
-struct gvm_signal_mask {
-	__u32 len;
-	__u8  sigset[0];
-};
-
 /* for GVM_TPR_ACCESS_REPORTING */
 struct gvm_tpr_access_ctl {
 	__u32 enabled;
@@ -668,7 +661,6 @@ struct gvm_enable_cap {
 #define GVM_CAP_ASSIGN_DEV_IRQ 29
 #define GVM_CAP_SET_BOOT_CPU_ID 34
 #define GVM_CAP_SET_IDENTITY_MAP_ADDR 37
-#define GVM_CAP_ADJUST_CLOCK 39
 #ifdef __GVM_HAVE_VCPU_EVENTS
 #define GVM_CAP_VCPU_EVENTS 41
 #endif
@@ -757,42 +749,6 @@ struct gvm_irq_routing {
 
 #endif
 
-#ifdef GVM_CAP_MCE
-/* x86 MCE */
-struct gvm_x86_mce {
-	__u64 status;
-	__u64 addr;
-	__u64 misc;
-	__u64 mcg_status;
-	__u8 bank;
-	__u8 pad1[7];
-	__u64 pad2[3];
-};
-#endif
-
-#ifdef GVM_CAP_XEN_HVM
-struct gvm_xen_hvm_config {
-	__u32 flags;
-	__u32 msr;
-	__u64 blob_addr_32;
-	__u64 blob_addr_64;
-	__u8 blob_size_32;
-	__u8 blob_size_64;
-	__u8 pad2[30];
-};
-#endif
-
-/* For GVM_CAP_ADJUST_CLOCK */
-
-/* Do not use 1, GVM_CHECK_EXTENSION returned it before we had flags.  */
-#define GVM_CLOCK_TSC_STABLE		2
-
-struct gvm_clock_data {
-	__u64 clock;
-	__u32 flags;
-	__u32 pad[9];
-};
-
 /* For GVM_CAP_SW_TLB */
 
 #define GVM_MMU_FSL_BOOKE_NOHV		0
@@ -858,53 +814,6 @@ struct gvm_msi {
 	__u8  pad[12];
 };
 
-struct gvm_arm_device_addr {
-	__u64 id;
-	__u64 addr;
-};
-
-/*
- * Device control API, available with GVM_CAP_DEVICE_CTRL
- */
-#define GVM_CREATE_DEVICE_TEST		1
-
-struct gvm_create_device {
-	__u32	type;	/* in: GVM_DEV_TYPE_xxx */
-	__u32	fd;	/* out: device handle */
-	__u32	flags;	/* in: GVM_CREATE_DEVICE_xxx */
-};
-
-struct gvm_device_attr {
-	__u32	flags;		/* no flags currently defined */
-	__u32	group;		/* device-defined */
-	__u64	attr;		/* group-defined */
-	__u64	addr;		/* userspace address of attr data */
-};
-
-#define  GVM_DEV_VFIO_GROUP			1
-#define   GVM_DEV_VFIO_GROUP_ADD			1
-#define   GVM_DEV_VFIO_GROUP_DEL			2
-
-enum gvm_device_type {
-	GVM_DEV_TYPE_FSL_MPIC_20	= 1,
-#define GVM_DEV_TYPE_FSL_MPIC_20	GVM_DEV_TYPE_FSL_MPIC_20
-	GVM_DEV_TYPE_FSL_MPIC_42,
-#define GVM_DEV_TYPE_FSL_MPIC_42	GVM_DEV_TYPE_FSL_MPIC_42
-	GVM_DEV_TYPE_XICS,
-#define GVM_DEV_TYPE_XICS		GVM_DEV_TYPE_XICS
-	GVM_DEV_TYPE_VFIO,
-#define GVM_DEV_TYPE_VFIO		GVM_DEV_TYPE_VFIO
-	GVM_DEV_TYPE_ARM_VGIC_V2,
-#define GVM_DEV_TYPE_ARM_VGIC_V2	GVM_DEV_TYPE_ARM_VGIC_V2
-	GVM_DEV_TYPE_FLIC,
-#define GVM_DEV_TYPE_FLIC		GVM_DEV_TYPE_FLIC
-	GVM_DEV_TYPE_ARM_VGIC_V3,
-#define GVM_DEV_TYPE_ARM_VGIC_V3	GVM_DEV_TYPE_ARM_VGIC_V3
-	GVM_DEV_TYPE_ARM_VGIC_ITS,
-#define GVM_DEV_TYPE_ARM_VGIC_ITS	GVM_DEV_TYPE_ARM_VGIC_ITS
-	GVM_DEV_TYPE_MAX,
-};
-
 /*
  * ioctls for VM fds
  */
@@ -936,8 +845,6 @@ enum gvm_device_type {
 #define GVM_ASSIGN_DEV_IRQ        __IOW(GVMIO,  0x70, struct gvm_assigned_irq)
 #define GVM_REINJECT_CONTROL      __IO(GVMIO,   0x71)
 #define GVM_SET_BOOT_CPU_ID       __IO(GVMIO,   0x78)
-#define GVM_SET_CLOCK             __IOW(GVMIO,  0x7b, struct gvm_clock_data)
-#define GVM_GET_CLOCK             __IOR(GVMIO,  0x7c, struct gvm_clock_data)
 
 /*
  * ioctls for vcpu fds
@@ -987,11 +894,6 @@ enum gvm_device_type {
 #define GVM_SET_XCRS		  __IOW(GVMIO,  0xa7, struct gvm_xcrs)
 /* Available with GVM_CAP_SW_TLB */
 #define GVM_DIRTY_TLB		  __IOW(GVMIO,  0xaa, struct gvm_dirty_tlb)
-/* VM is being stopped by host */
-#define GVM_GVMCLOCK_CTRL	  __IO(GVMIO,   0xad)
-#define GVM_ARM_VCPU_INIT	  __IOW(GVMIO,  0xae, struct gvm_vcpu_init)
-#define GVM_ARM_PREFERRED_TARGET  __IOR(GVMIO,  0xaf, struct gvm_vcpu_init)
-#define GVM_GET_REG_LIST	  __IOWR(GVMIO, 0xb0, struct gvm_reg_list)
 /* Available with GVM_CAP_X86_SMM */
 #define GVM_SMI                   __IO(GVMIO,   0xb7)
 
