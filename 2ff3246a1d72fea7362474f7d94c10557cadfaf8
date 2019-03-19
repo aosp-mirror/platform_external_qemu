@@ -22,6 +22,30 @@
       "revId": "2ff3246a1d72fea7362474f7d94c10557cadfaf8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "59070726_1538307a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-19T09:24:05Z",
+      "side": 1,
+      "message": "Thanks for point out, will move start() to constructor and remove the wait() here. One thing I should mention is, the thread will be close when the connection is built.",
+      "parentUuid": "b5e563c7_d3116828",
+      "range": {
+        "startLine": 153,
+        "startChar": 0,
+        "endLine": 153,
+        "endChar": 37
+      },
+      "revId": "2ff3246a1d72fea7362474f7d94c10557cadfaf8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
