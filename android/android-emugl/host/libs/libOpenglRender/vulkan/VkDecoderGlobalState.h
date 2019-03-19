@@ -43,6 +43,9 @@ public:
     // per process
     static VkDecoderGlobalState* get();
 
+    VkResult on_vkEnumerateInstanceVersion(
+        uint32_t* pApiVersion);
+
     // Fast way to get dispatch tables associated with a Vulkan object.
     // VkInstance
     // VkPhysicalDevice

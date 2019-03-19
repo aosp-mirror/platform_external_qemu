@@ -251,6 +251,7 @@ def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     emit_decode_finish(cgen)
 
 custom_decodes = {
+    "vkEnumerateInstanceVersion" : emit_global_state_wrapped_decoding,
     "vkCreateInstance" : emit_global_state_wrapped_decoding,
     "vkDestroyInstance" : emit_global_state_wrapped_decoding,
     "vkEnumeratePhysicalDevices" : emit_global_state_wrapped_decoding,

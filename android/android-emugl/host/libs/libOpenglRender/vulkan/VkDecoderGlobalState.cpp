@@ -61,7 +61,8 @@ kEmulatedExtensions[] = {
     "VK_FUCHSIA_buffer_collection",
 };
 
-static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 0, 65);
+static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 1, 0);
+static constexpr uint32_t kMinVersion = VK_MAKE_VERSION(1, 0, 0);
 
 class VkDecoderGlobalState::Impl {
 public:
@@ -69,6 +70,15 @@ public:
         m_vk(emugl::vkDispatch()),
         m_emu(getGlobalVkEmulation()) { }
     ~Impl() = default;
+
+    VkResult on_vkEnumerateInstanceVersion(
+        uint32_t* pApiVersion) {
+        if (m_vk->vkEnumerateInstanceVersion) {
+            return m_vk->vkEnumerateInstanceVersion(pApiVersion);
+        }
+        *pApiVersion = kMinVersion;
+        return VK_SUCCESS;
+    }
 
     VkResult on_vkCreateInstance(
         const VkInstanceCreateInfo* pCreateInfo,
@@ -2677,6 +2687,11 @@ static LazyInstance<VkDecoderGlobalState> sGlobalDecoderState =
 // static
 VkDecoderGlobalState* VkDecoderGlobalState::get() {
     return sGlobalDecoderState.ptr();
+}
+
+VkResult VkDecoderGlobalState::on_vkEnumerateInstanceVersion(
+    uint32_t* pApiVersion) {
+    return mImpl->on_vkEnumerateInstanceVersion(pApiVersion);
 }
 
 VkResult VkDecoderGlobalState::on_vkCreateInstance(

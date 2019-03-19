@@ -6163,6 +6163,10 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
 #ifdef VK_VERSION_1_1
             case OP_vkEnumerateInstanceVersion:
             {
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "call vkEnumerateInstanceVersion\n");;
+                }
                 uint32_t* pApiVersion;
                 // Begin manual dispatchable handle unboxing for pApiVersion;
                 vkReadStream->unsetHandleMapping();
@@ -6170,12 +6174,8 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream)
                 vkReadStream->read((uint32_t*)pApiVersion, sizeof(uint32_t));
                 vkReadStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 // End manual dispatchable handle unboxing for pApiVersion;
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "call vkEnumerateInstanceVersion\n");;
-                }
                 VkResult vkEnumerateInstanceVersion_VkResult_return = (VkResult)0;
-                vkEnumerateInstanceVersion_VkResult_return = vk->vkEnumerateInstanceVersion(pApiVersion);
+                vkEnumerateInstanceVersion_VkResult_return = m_state->on_vkEnumerateInstanceVersion(pApiVersion);
                 vkStream->write((uint32_t*)pApiVersion, sizeof(uint32_t));
                 vkStream->write(&vkEnumerateInstanceVersion_VkResult_return, sizeof(VkResult));
                 vkReadStream->clearPool();
