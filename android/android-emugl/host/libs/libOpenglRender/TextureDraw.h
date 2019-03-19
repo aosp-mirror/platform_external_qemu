@@ -82,6 +82,7 @@ private:
     bool   mHaveNewMask;
     bool   mMaskIsValid;
     const unsigned char* mMaskPixels;
+    bool   mBlendResetNeeded = false;
 };
 
 #endif  // TEXTURE_DRAW_H
