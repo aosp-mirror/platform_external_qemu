@@ -259,6 +259,8 @@ set(android_emu_dependent_src
     android/snapshot/SnapshotAPI.cpp
     android/test/checkboot.cpp
     android/videoinjection/VideoInjectionController.cpp
+    android/videoplayback/VideoplaybackRenderTarget.cpp
+    android/videoplayback/VideoplaybackUtils.cpp
     android/virtualscene/MeshSceneObject.cpp
     android/virtualscene/PosterInfo.cpp
     android/virtualscene/PosterSceneObject.cpp
@@ -721,6 +723,7 @@ set(android-emu_unittests_src
     android/utils/x86_cpuid_unittest.cpp
     android/verified-boot/load_config_unittest.cpp
     android/videoinjection/VideoInjectionController_unittest.cpp
+    android/videoplayback/VideoplaybackUtils_unittest.cpp
     android/virtualscene/TextureUtils_unittest.cpp
     android/wear-agent/PairUpWearPhone_unittest.cpp
     android/wear-agent/testing/WearAgentTestUtils.cpp
