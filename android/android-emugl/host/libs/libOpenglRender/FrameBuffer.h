@@ -480,6 +480,13 @@ public:
 
     void registerProcessCleanupCallback(void* key, std::function<void()> callback);
     void unregisterProcessCleanupCallback(void* key);
+    int createDisplay(uint32_t *displayId);
+    int destroyDisplay(uint32_t displayId);
+    int setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer);
+    int getDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer);
+    int getColorBufferDisplay(uint32_t colorBuffer, uint32_t* displayId);
+    int getDisplayPose(uint32_t displayId, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h);
+    int setDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
@@ -509,6 +516,7 @@ private:
 private:
     static FrameBuffer *s_theFrameBuffer;
     static HandleType s_nextHandle;
+    static uint32_t s_nextDisplayId;
     int m_x = 0;
     int m_y = 0;
     int m_framebufferWidth = 0;
@@ -535,6 +543,16 @@ private:
     WindowSurfaceMap m_windows;
     ColorBufferMap m_colorbuffers;
     std::unordered_map<HandleType, HandleType> m_windowSurfaceToColorBuffer;
+
+    struct DisplayInfo {
+        uint32_t cb;
+        uint32_t pos_x;
+        uint32_t pos_y;
+        uint32_t width;
+        uint32_t height;
+        DisplayInfo() : cb(0), pos_x(0), pos_y(0), width(0), height(0) {}
+    };
+    std::unordered_map<uint32_t, DisplayInfo> m_displays;
 
     // A collection of color buffers that were closed without any usages
     // (|opened| == false).
