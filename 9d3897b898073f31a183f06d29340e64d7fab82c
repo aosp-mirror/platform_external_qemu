@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a34cb5a_7c545159",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-19T22:09:53Z",
+      "side": 1,
+      "message": "Let\u0027s document what these constants are. We might even want to reference the path and class in AOSP where these constants are defined (so future developer can trace them if they need to change them).",
+      "revId": "9d3897b898073f31a183f06d29340e64d7fab82c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e7e620b7_e58296a9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-19T22:09:53Z",
+      "side": 1,
+      "message": "Maybe it would be better naming these \"COMMAND_\" or \"MSG_\"? (MSG_START, MSG_STOP, MSG_RESTART) for example.",
+      "revId": "9d3897b898073f31a183f06d29340e64d7fab82c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "82ce2621_932c3979",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-19T22:09:53Z",
+      "side": 1,
+      "message": "Maybe add \"using\" to avoid repeating \"android::base::\" every time?",
+      "revId": "9d3897b898073f31a183f06d29340e64d7fab82c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "32cfafb5_e5a1eba4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-19T22:09:53Z",
+      "side": 1,
+      "message": "Can we use \"using android::base::System\"?",
+      "revId": "9d3897b898073f31a183f06d29340e64d7fab82c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
