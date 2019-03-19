@@ -392,6 +392,8 @@ public:
 
     virtual std::string getTempDir() const override { return "/tmp"; }
 
+    bool getEnableCrashReporting() const override { return true; }
+
     virtual time_t getUnixTime() const override {
         return getUnixTimeUs() / 1000000;
     }

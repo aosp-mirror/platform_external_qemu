@@ -247,6 +247,22 @@ static bool extractFullPath(std::string* cmd) {
 
 namespace {
 
+bool parseBooleanValue(const char *value, bool def) {
+    if (0 == strcmp(value, "1")) return true;
+    if (0 == strcmp(value, "y")) return true;
+    if (0 == strcmp(value, "yes")) return true;
+    if (0 == strcmp(value, "Y")) return true;
+    if (0 == strcmp(value, "YES")) return true;
+
+    if (0 == strcmp(value, "0")) return false;
+    if (0 == strcmp(value, "n")) return false;
+    if (0 == strcmp(value, "no")) return false;
+    if (0 == strcmp(value, "N")) return false;
+    if (0 == strcmp(value, "NO")) return false;
+
+    return def;
+}
+
 class HostSystem : public System {
 public:
     HostSystem() : mProgramDir(), mHomeDir(), mAppDataDir() {}
@@ -1285,6 +1301,18 @@ public:
         ::android_mkdir(result.c_str(), 0744);
         return result;
 #endif  // !_WIN32
+    }
+
+    bool getEnableCrashReporting() const override {
+        const bool defaultValue = true;
+
+        const std::string enableCrashReporting = envGet("ANDROID_EMU_ENABLE_CRASH_REPORTING");
+
+        if (enableCrashReporting.empty()) {
+            return defaultValue;
+        } else {
+            return parseBooleanValue(enableCrashReporting.c_str(), defaultValue);
+        }
     }
 
 #ifndef _WIN32

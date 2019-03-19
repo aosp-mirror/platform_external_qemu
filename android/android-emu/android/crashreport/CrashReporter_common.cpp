@@ -282,15 +282,7 @@ using android::crashreport::CrashSystem;
 
 extern "C" {
 
-bool crashhandler_init() {
-    if (CrashSystem::CrashType::CRASHUPLOAD == CrashSystem::CrashType::NONE) {
-        return false;
-    }
-
-    if (!CrashSystem::get()->validatePaths()) {
-        return false;
-    }
-
+static bool crashhandler_init_full() {
     CrashSystem::CrashPipe crashpipe(CrashSystem::get()->getCrashPipe());
 
     const std::string procident = CrashSystem::get()->getProcessId();
@@ -321,6 +313,22 @@ bool crashhandler_init() {
     }
 
     return CrashReporter::get()->attachCrashHandler(crashpipe);
+}
+
+bool crashhandler_init() {
+    if (CrashSystem::CrashType::CRASHUPLOAD == CrashSystem::CrashType::NONE) {
+        return false;
+    }
+
+    if (!CrashSystem::get()->validatePaths()) {
+        return false;
+    }
+
+    if (android::base::System::get()->getEnableCrashReporting()) {
+        return crashhandler_init_full();
+    } else {
+        return CrashReporter::get()->attachSimpleCrashHandler();
+    }
 }
 
 void crashhandler_cleanup() {
