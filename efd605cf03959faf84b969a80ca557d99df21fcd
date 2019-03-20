@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b2d32676_493393c9",
+        "filename": "android-qemu2-glue/adbkey.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-20T23:13:53Z",
+      "side": 1,
+      "message": "success is ret \u003d\u003d 1?",
+      "range": {
+        "startLine": 105,
+        "startChar": 2,
+        "endLine": 105,
+        "endChar": 12
+      },
+      "revId": "efd605cf03959faf84b969a80ca557d99df21fcd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cba4e34b_3edbe069",
+        "filename": "android-qemu2-glue/adbkey.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-20T23:13:53Z",
+      "side": 1,
+      "message": "should this be \u003d\u003d 1?\n\nNote that we can just inline generate_key in here to be less ambiguous",
+      "range": {
+        "startLine": 116,
+        "startChar": 12,
+        "endLine": 116,
+        "endChar": 39
+      },
+      "revId": "efd605cf03959faf84b969a80ca557d99df21fcd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c4c4a1d4_72b366cc",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-20T23:13:53Z",
+      "side": 1,
+      "message": "not clear if those are success or failure paths",
+      "range": {
+        "startLine": 332,
+        "startChar": 6,
+        "endLine": 334,
+        "endChar": 9
+      },
+      "revId": "efd605cf03959faf84b969a80ca557d99df21fcd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
