@@ -33,9 +33,9 @@ public:
                       mHangCondition.signalAndUnlock(&lock);
                   },
                   {
-                          .hangLoopIterationTimeoutMs = 1,
-                          .taskProcessingTimeoutMs = 1,
-                          .hangCheckTimeoutMs = 1,
+                          .hangLoopIterationTimeoutMs = 100,
+                          .taskProcessingTimeoutMs = 10,
+                          .hangCheckTimeoutMs = 10,
                   }) {
         android_avdInfo = nullptr;
     }
