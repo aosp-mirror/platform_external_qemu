@@ -126,12 +126,14 @@ static std::string getBackupLoaderPath(bool forTesting) {
                   VULKAN_LOADER_FILENAME);
     } else {
 
-#ifdef __APPLE__
-        // on Mac, the loader isn't in the system libraries.
-        return pj(System::get()->getLauncherDirectory(), "lib64", "vulkan",
-                  VULKAN_LOADER_FILENAME);
-#else
+#ifdef _WIN32
+        LOG(VERBOSE) << "Not in test environment. Using loader: " << VULKAN_LOADER_FILENAME;
         return VULKAN_LOADER_FILENAME;
+#else
+        auto path = pj(System::get()->getLauncherDirectory(), "lib64", "vulkan",
+                  VULKAN_LOADER_FILENAME);
+        LOG(VERBOSE) << "Not in test environment. Using loader: " << path;
+        return path;
 #endif
     }
 }
@@ -156,7 +158,10 @@ public:
         // On Linux, it might not be called libvulkan.so.
         // Try libvulkan.so.1 if that doesn't work.
         if (!mVulkanLoader) {
-            mVulkanLoader = emugl::SharedLibrary::open("libvulkan.so.1");
+            auto altPath = pj(System::get()->getLauncherDirectory(),
+                "lib64", "vulkan", "libvulkan.so.1");
+            mVulkanLoader =
+                emugl::SharedLibrary::open(altPath.c_str());
         }
 #endif
         return (void*)mVulkanLoader;
