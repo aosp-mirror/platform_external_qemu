@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "277ce906_1cd9bde2",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-20T18:59:18Z",
+      "side": 1,
+      "message": "is framebuffer 0 being used to draw? in that case, device pixel ratio might cause stuff to be doubled in one space while normal in another (I\u0027m not sure what\u0027s going on with the qt-based egl path; e.g. in the perfstats page, on dpr \u003d 2 on macos, there are very clearly 4x the pixels used in the graph versus on dpr \u003d 1).\n\nTo fix this, we might be able to just use an offscreen, nonzero FBO to render. Then glViewport(0, 0, mRenderWidth, mRenderHeight) can be used.",
+      "parentUuid": "e2884e57_87a8fd8e",
+      "range": {
+        "startLine": 170,
+        "startChar": 4,
+        "endLine": 172,
+        "endChar": 66
+      },
+      "revId": "dc3c56688fca09f735f9e69b16905e02b909e604",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "aad26088_18ef70c1",
         "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
         "patchSetId": 2
