@@ -495,6 +495,30 @@
     },
     {
       "key": {
+        "uuid": "50b2cf40_2ac867aa",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-utils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-20T00:51:55Z",
+      "side": 1,
+      "message": "You can always update VideoPlayerRenderTarget :-)\n\nTo make things easier, I would update it to include an info struct:\n\n    struct FrameInfo {\n        size_t headerlen;\n        size_t width;\n        size_t height;\n    };\n\n    virtual void setPixelBuffer(\n            const FrameInfo\u0026 info,\n            const unsigned char* buf,\n            size_t len) \u003d 0;",
+      "parentUuid": "2dd5a8b5_27056437",
+      "range": {
+        "startLine": 29,
+        "startChar": 4,
+        "endLine": 32,
+        "endChar": 70
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c61ef9bb_bcb35fdf",
         "filename": "android/android-emu/android/videoplayback/videoplayback-utils.h",
         "patchSetId": 1
