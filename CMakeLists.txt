@@ -126,6 +126,7 @@ target_include_directories(
   PRIVATE android-qemu2-glue/config/${LOCAL_TARGET_TAG}/
           ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/target-x86_64
           ${INCLUDES}
+          ${CURL_INCLUDE_DIRS}
           include)
 
 add_library(libqemu2-util ${libqemuutil_sources}
