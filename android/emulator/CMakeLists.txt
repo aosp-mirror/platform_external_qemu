@@ -44,6 +44,7 @@ set(EMULATOR_BIOS_DEPENDENCIES
     "${PC_BIOS}/bios-256k.bin>lib/pc-bios/bios-256k.bin"
     "${PC_BIOS}/efi-virtio.rom>lib/pc-bios/efi-virtio.rom"
     "${PC_BIOS}/efi-e1000.rom>lib/pc-bios/efi-e1000.rom"
+    "${PC_BIOS}/efi-e1000e.rom>lib/pc-bios/efi-e1000e.rom"
     "${PC_BIOS}/kvmvapic.bin>lib/pc-bios/kvmvapic.bin"
     "${PC_BIOS}/linuxboot.bin>lib/pc-bios/linuxboot.bin"
     "${PC_BIOS}/multiboot.bin>lib/pc-bios/multiboot.bin"
