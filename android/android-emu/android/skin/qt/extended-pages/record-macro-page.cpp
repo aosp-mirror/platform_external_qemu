@@ -15,7 +15,6 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/automation_agent.h"
-#include "android/skin/qt/extended-pages/record-macro-saved-item.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/video-player/QtVideoPlayerNotifier.h"
 
@@ -50,7 +49,7 @@ void RecordMacroPage::loadUi() {
     for (const auto& macroName : macroFileNames) {
         RecordMacroSavedItem* macroSavedItem = new RecordMacroSavedItem();
         macroSavedItem->setName(macroName.c_str());
-        macroSavedItem->setDisplayInfo("Preset macro");
+        macroSavedItem->setDisplayInfo(tr("Preset macro"));
 
         QListWidgetItem* listItem = new QListWidgetItem(mUi->macroList);
         listItem->setSizeHint(macroSavedItem->sizeHint());
@@ -62,50 +61,28 @@ void RecordMacroPage::loadUi() {
     setMacroUiState(MacroUiState::Waiting);
 }
 
-void RecordMacroPage::on_playButton_clicked() {
+void RecordMacroPage::on_playStopButton_clicked() {
     // Stop and reset automation.
     sAutomationAgent->stopPlayback();
 
-    // Get macro name from item widget.
     QListWidgetItem* listItem = mUi->macroList->selectedItems().first();
-    RecordMacroSavedItem* macroSavedItem = qobject_cast<RecordMacroSavedItem*>(
-            mUi->macroList->itemWidget(listItem));
-    const std::string macroName = macroSavedItem->getName();
-    const std::string macroAbsolutePath =
-            PathUtils::join(getMacrosDirectory(), macroName);
-
-    auto result = sAutomationAgent->startPlayback(macroAbsolutePath);
-    if (result.err()) {
-        std::ostringstream errString;
-        errString << result.unwrapErr();
-
-        QMessageBox msgBox;
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setText("An error ocurred.");
-        msgBox.setInformativeText(errString.str().c_str());
-        msgBox.setDefaultButton(QMessageBox::Save);
-
-        int ret = msgBox.exec();
-        return;
+    if (mState == MacroUiState::Playing) {
+        stopButtonClicked(listItem);
+    } else {
+        playButtonClicked(listItem);
     }
-
-    mCurrentMacroName = macroName;
-    mMacroPlaying = true;
-    setMacroUiState(MacroUiState::Playing);
 }
 
 void RecordMacroPage::on_macroList_itemPressed(QListWidgetItem* listItem) {
-    RecordMacroSavedItem* macroSavedItem = qobject_cast<RecordMacroSavedItem*>(
-            mUi->macroList->itemWidget(listItem));
+    RecordMacroSavedItem* macroSavedItem = getItemWidget(listItem);
     const std::string macroName = macroSavedItem->getName();
 
     if (mMacroPlaying && mCurrentMacroName == macroName) {
         setMacroUiState(MacroUiState::Playing);
     } else {
         setMacroUiState(MacroUiState::Selected);
+        showPreview(macroName);
     }
-
-    showPreview(macroName);
 }
 
 // For dragging and clicking outside the items in the item list.
@@ -131,23 +108,83 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->previewLabel->setText("Select a macro to preview");
             mUi->previewLabel->show();
             mUi->previewOverlay->show();
-            mUi->playButton->setEnabled(false);
+            mUi->playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
+            mUi->playStopButton->setProperty("themeIconName", "play_arrow");
+            mUi->playStopButton->setText(tr("Play"));
+            mUi->playStopButton->setEnabled(false);
             break;
         }
         case MacroUiState::Selected: {
             mUi->previewLabel->hide();
             mUi->previewOverlay->hide();
-            mUi->playButton->setEnabled(true);
+            mUi->playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
+            mUi->playStopButton->setProperty("themeIconName", "play_arrow");
+            mUi->playStopButton->setText(tr("Play"));
+            mUi->playStopButton->setEnabled(true);
             break;
         }
         case MacroUiState::Playing: {
             mUi->previewLabel->setText("Macro playing on the Emulator");
             mUi->previewLabel->show();
             mUi->previewOverlay->show();
-            mUi->playButton->setEnabled(true);
+            mUi->playStopButton->setIcon(getIconForCurrentTheme("stop"));
+            mUi->playStopButton->setProperty("themeIconName", "stop");
+            mUi->playStopButton->setText(tr("Stop"));
+            mUi->playStopButton->setEnabled(true);
             break;
         }
     }
+}
+
+void RecordMacroPage::playButtonClicked(QListWidgetItem* listItem) {
+    RecordMacroSavedItem* macroSavedItem = getItemWidget(listItem);
+    macroSavedItem->setDisplayInfo(tr("Now playing..."));
+    mVideoPlayer->stop();
+
+    const std::string macroName = macroSavedItem->getName();
+    const std::string macroAbsolutePath =
+            PathUtils::join(getMacrosDirectory(), macroName);
+
+    auto result = sAutomationAgent->startPlayback(macroAbsolutePath);
+    if (result.err()) {
+        std::ostringstream errString;
+        errString << result.unwrapErr();
+
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText(tr("An error ocurred."));
+        msgBox.setInformativeText(errString.str().c_str());
+        msgBox.setDefaultButton(QMessageBox::Save);
+
+        int ret = msgBox.exec();
+        return;
+    }
+
+    // Disable all other macro items.
+    for (int i = 0; i < mUi->macroList->count(); ++i) {
+        QListWidgetItem* item = mUi->macroList->item(i);
+        if (item != listItem) {
+            item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+        }
+    }
+
+    mCurrentMacroName = macroName;
+    mMacroPlaying = true;
+    setMacroUiState(MacroUiState::Playing);
+}
+
+void RecordMacroPage::stopButtonClicked(QListWidgetItem* listItem) {
+    RecordMacroSavedItem* macroSavedItem = getItemWidget(listItem);
+    macroSavedItem->setDisplayInfo(tr("Preset macro"));
+
+    // Enable all macro items.
+    for (int i = 0; i < mUi->macroList->count(); ++i) {
+        QListWidgetItem* item = mUi->macroList->item(i);
+        item->setFlags(item->flags() | Qt::ItemIsEnabled);
+    }
+
+    mMacroPlaying = false;
+    setMacroUiState(MacroUiState::Waiting);
 }
 
 void RecordMacroPage::showPreview(const std::string& previewName) {
@@ -164,6 +201,12 @@ void RecordMacroPage::showPreview(const std::string& previewName) {
 
     mVideoPlayer->scheduleRefresh(20);
     mVideoPlayer->start();
+}
+
+RecordMacroSavedItem* RecordMacroPage::getItemWidget(
+        QListWidgetItem* listItem) {
+    return qobject_cast<RecordMacroSavedItem*>(
+            mUi->macroList->itemWidget(listItem));
 }
 
 void RecordMacroPage::updateVideoView() {

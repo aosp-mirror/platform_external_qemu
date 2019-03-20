@@ -26,9 +26,9 @@ class RecordMacroSavedItem : public QWidget {
 public:
     explicit RecordMacroSavedItem(QWidget* parent = 0);
 
-    void setName(const char* name);
+    void setName(QString name);
     std::string getName() const;
-    void setDisplayInfo(const char* displayInfo);
+    void setDisplayInfo(QString displayInfo);
 
 private:
     std::unique_ptr<Ui::RecordMacroSavedItem> mUi;

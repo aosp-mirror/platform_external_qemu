@@ -60,6 +60,9 @@
     color: %%TEXT_COLOR%%;
     background-color: %%BKG_COLOR%%;
 }
+QListWidget QLabel {
+    background-color: transparent;
+}
 QGroupBox::title { margin-top: 4px; margin-left: 0px }
 QTextEdit:disabled, QLineEdit:disabled { border: 0px }
 QTextEdit, QLineEdit {
