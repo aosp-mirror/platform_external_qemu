@@ -74,6 +74,7 @@ extern "C" {
 #include "hw/misc/goldfish_pstore.h"
 }
 
+#include "android-qemu2-glue/adbkey.h"
 #include "android-qemu2-glue/dtb.h"
 #include "android-qemu2-glue/emulation/serial_line.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
@@ -281,53 +282,67 @@ static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
     return 0;
 }
 
+// Get adbkey path, return "" if failed
+// adbKeyFileName could be "adbkey" or "adbkey.pub"
+static std::string getAdbKeyPath(const char* adbKeyFileName) {
+    std::string adbKeyPath = PathUtils::join(
+            android::ConfigDirs::getUserDirectory(), adbKeyFileName);
+    if (path_is_regular(adbKeyPath.c_str()) &&
+        path_can_read(adbKeyPath.c_str())) {
+        return adbKeyPath;
+    }
+    D("cannot read adb key file: %s", adbKeyPath.c_str());
+    D("trying again by copying from home dir");
+
+    auto home = System::get()->getHomeDirectory();
+    if (home.empty()) {
+        home = System::get()->getTempDir();
+        if (home.empty()) {
+            home = "/tmp";
+        }
+    }
+
+    auto guessedSrcAdbKeyPub =
+            PathUtils::join(home, ".android", adbKeyFileName);
+    path_copy_file(adbKeyPath.c_str(), guessedSrcAdbKeyPub.c_str());
+
+    if (path_is_regular(adbKeyPath.c_str()) &&
+        path_can_read(adbKeyPath.c_str())) {
+        return adbKeyPath;
+    }
+    D("cannot read adb key file (failed): %s", adbKeyPath.c_str());
+    return "";
+}
+
 static void prepareDataFolder(const char* destDirectory,
                               const char* srcDirectory) {
     // The adb_keys file permission will also be set in guest system.
     // Referencing system/core/rootdir/init.usb.rc
     static const int kAdbKeyDirFilePerm = 02750;
     path_copy_dir(destDirectory, srcDirectory);
-    std::string adbKeyPath = PathUtils::join(
-            android::ConfigDirs::getUserDirectory(), "adbkey.pub");
+    std::string adbKeyPubPath = getAdbKeyPath("adbkey.pub");
+    std::string adbKeyPrivPath = getAdbKeyPath("adbkey");
 
-    bool adbKeyPresent =
-        path_is_regular(adbKeyPath.c_str()) &&
-        path_can_read(adbKeyPath.c_str());
+    if (adbKeyPubPath == "" && adbKeyPrivPath == "") {
+        return;
+    }
+    std::string guestAdbKeyDir = PathUtils::join(destDirectory, "misc", "adb");
+    std::string guestAdbKeyPath = PathUtils::join(guestAdbKeyDir, "adb_keys");
 
-    if (!adbKeyPresent) {
-        dwarning("cannot read adb public key file: %s", adbKeyPath.c_str());
-        dwarning("trying again by copying from home dir");
-
-        auto home = System::get()->getHomeDirectory();
-        if (home.empty()) {
-            home = System::get()->getTempDir();
-            if (home.empty()) {
-                home = "/tmp";
-            }
+    path_mkdir_if_needed(guestAdbKeyDir.c_str(), kAdbKeyDirFilePerm);
+    if (adbKeyPubPath == "") {
+        // generate from private key
+        std::string pubKey;
+        if (pubkey_from_privkey(adbKeyPrivPath, &pubKey)) {
+            FILE* pubKeyFile = fopen(guestAdbKeyPath.c_str(), "w");
+            fprintf(pubKeyFile, "%s", pubKey.c_str());
+            fclose(pubKeyFile);
+            D("Fall back to adbkey %s successfully\n", adbKeyPrivPath.c_str());
         }
-
-        auto guessedSrcAdbKeyPub = PathUtils::join(home, ".android", "adbkey.pub");
-        path_copy_file(
-            adbKeyPath.c_str(),
-            guessedSrcAdbKeyPub.c_str());
-
-        adbKeyPresent =
-            path_is_regular(adbKeyPath.c_str()) &&
-            path_can_read(adbKeyPath.c_str());
-    }
-
-    if (adbKeyPresent) {
-        std::string guestAdbKeyDir =
-                PathUtils::join(destDirectory, "misc", "adb");
-        std::string guestAdbKeyPath =
-                PathUtils::join(guestAdbKeyDir, "adb_keys");
-
-        path_mkdir_if_needed(guestAdbKeyDir.c_str(), kAdbKeyDirFilePerm);
-        path_copy_file(guestAdbKeyPath.c_str(), adbKeyPath.c_str());
-        android_chmod(guestAdbKeyPath.c_str(), 0640);
     } else {
-        dwarning("cannot read adb public key file (failed): %s", adbKeyPath.c_str());
+        path_copy_file(guestAdbKeyPath.c_str(), adbKeyPubPath.c_str());
     }
+    android_chmod(guestAdbKeyPath.c_str(), 0640);
 }
 
 static bool creatUserDataExt4Img(AndroidHwConfig* hw,
