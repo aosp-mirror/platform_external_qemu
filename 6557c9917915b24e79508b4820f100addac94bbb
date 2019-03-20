@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5d3640b9_f254de90",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-20T00:38:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "338aa796_88bcbd03",
+      "range": {
+        "startLine": 17,
+        "startChar": 32,
+        "endLine": 17,
+        "endChar": 61
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fc951746_608330b8",
         "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "6557c9917915b24e79508b4820f100addac94bbb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ba159d86_8c92afff",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-20T00:38:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fc951746_608330b8",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 16
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "634f26f3_b72b7b67",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-20T00:38:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "99a30456_04901cb9",
+      "range": {
+        "startLine": 57,
+        "startChar": 7,
+        "endLine": 57,
+        "endChar": 20
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "be212af8_40e69dfb",
         "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
         "patchSetId": 1
@@ -91,6 +163,30 @@
       "revId": "6557c9917915b24e79508b4820f100addac94bbb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "64d5f997_23357d49",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-20T00:38:31Z",
+      "side": 1,
+      "message": "Unfortunately this is defined by the base class:\nhttps://cs.corp.google.com/android/external/qemu/android/android-emu/android/recording/video/player/VideoPlayerRenderTarget.h",
+      "parentUuid": "be212af8_40e69dfb",
+      "range": {
+        "startLine": 87,
+        "startChar": 8,
+        "endLine": 87,
+        "endChar": 11
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -134,6 +230,48 @@
     },
     {
       "key": {
+        "uuid": "dc53b0a8_83fc229a",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-20T00:38:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f29f42b0_a1ab6fe9",
+      "range": {
+        "startLine": 99,
+        "startChar": 16,
+        "endLine": 99,
+        "endChar": 21
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5b4bb27_8f3742cb",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-20T00:38:31Z",
+      "side": 1,
+      "message": "Done. I agree it should round up.",
+      "parentUuid": "9d30bdbc_f2dc5f74",
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b08e246_75ffb1b7",
         "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
         "patchSetId": 1
@@ -154,6 +292,30 @@
       "revId": "6557c9917915b24e79508b4820f100addac94bbb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1774d2aa_181eacaa",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-20T00:38:31Z",
+      "side": 1,
+      "message": "Done. Please let me know if I am missing anything.",
+      "parentUuid": "6b08e246_75ffb1b7",
+      "range": {
+        "startLine": 121,
+        "startChar": 11,
+        "endLine": 121,
+        "endChar": 18
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -180,6 +342,30 @@
     },
     {
       "key": {
+        "uuid": "f8cea050_033a625e",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-20T00:38:31Z",
+      "side": 1,
+      "message": "Thanks for pointing this out. My OpenGL is pretty rusty so it\u0027s good that you\u0027re taking a look at this.",
+      "parentUuid": "8fcf6150_4838de98",
+      "range": {
+        "startLine": 158,
+        "startChar": 8,
+        "endLine": 159,
+        "endChar": 45
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a6f93a9d_459340ed",
         "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
         "patchSetId": 1
@@ -194,6 +380,24 @@
       "revId": "6557c9917915b24e79508b4820f100addac94bbb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cb3c8274_d89d4168",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-20T00:38:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a6f93a9d_459340ed",
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -220,6 +424,30 @@
     },
     {
       "key": {
+        "uuid": "d6db6368_9e13e740",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-render-target.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-20T00:38:31Z",
+      "side": 1,
+      "message": "As far as I can tell, VideoPlayer, which calls this method, retains ownership of buffer and is responsible for its destruction.",
+      "parentUuid": "ee62f305_ff5a2546",
+      "range": {
+        "startLine": 37,
+        "startChar": 22,
+        "endLine": 37,
+        "endChar": 58
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cb31c396_e7eac0fc",
         "filename": "android/android-emu/android/videoplayback/videoplayback-utils.cpp",
         "patchSetId": 1
@@ -240,6 +468,30 @@
       "revId": "6557c9917915b24e79508b4820f100addac94bbb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2dd5a8b5_27056437",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-utils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-20T00:38:31Z",
+      "side": 1,
+      "message": "Unfortunately the interface with VideoPlayer is a little bit wonky. The VideoPlayerRenderTarget only gets the image data passed to it via setPixelBuffer() and the only public VideoPlayer methods are things like start() and stop(), so I can\u0027t be clever and attempt to recover frame data from the owner of the VideoPlayer instance and send it to the render target when calling renderBuffer().\n\nImplemented a single loop to read the header. In the worst case it will still read the whole buffer when there are too few tokens in the buffer, but in the average case it will properly short-circuit once all the expected header tokens are processed.",
+      "parentUuid": "cb31c396_e7eac0fc",
+      "range": {
+        "startLine": 29,
+        "startChar": 4,
+        "endLine": 32,
+        "endChar": 70
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -286,6 +538,54 @@
       "revId": "6557c9917915b24e79508b4820f100addac94bbb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a21f55b6_b9333c2b",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-utils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-20T00:38:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "02ef431a_638a9f85",
+      "range": {
+        "startLine": 34,
+        "startChar": 61,
+        "endLine": 34,
+        "endChar": 64
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "97ff2464_09e16ca9",
+        "filename": "android/android-emu/android/videoplayback/videoplayback-utils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-20T00:38:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c61ef9bb_bcb35fdf",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 3
+      },
+      "revId": "6557c9917915b24e79508b4820f100addac94bbb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
