@@ -588,7 +588,7 @@ else
 fi
 
 if [ "$PCBIOS_PROBE" = "yes" ]; then
-    PCBIOS_DIR=$AOSP_PREBUILTS_DIR/qemu-kernel/x86/pc-bios
+    PCBIOS_DIR=$AOSP_ROOT_DIR/external/qemu/pc-bios
     if [ ! -d "$PCBIOS_DIR" ]; then
         log2 "PC Bios    : Probing $PCBIOS_DIR (missing)"
         PCBIOS_DIR=../pc-bios
