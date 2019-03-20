@@ -12,8 +12,11 @@
 #include "android/skin/qt/extended-pages/settings-page.h"
 
 #include "android/base/files/PathUtils.h"
+#include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/extended-pages/perfstats-page.h"
 #include "android/skin/qt/FramelessDetector.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/stylesheet.h"
 
 #ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove when Snapshot controls are fully enabled
 #include "android/base/async/ThreadLooper.h"
@@ -637,6 +640,16 @@ void SettingsPage::on_set_resetNotifications_pressed() {
     settings.remove(Ui::Settings::SHOW_GPU_WARNING);
     settings.remove(Ui::Settings::SHOW_ADB_WARNING);
     settings.remove(Ui::Settings::SHOW_VIRTUALSCENE_INFO);
+}
+
+void SettingsPage::on_perfstatsButton_pressed() {
+    const double densityFactor = devicePixelRatioF();
+    QString styleString = Ui::fontStylesheet(densityFactor > 1.5);
+    styleString += Ui::stylesheetForTheme(getSelectedTheme());
+
+    auto page = new PerfStatsPage(nullptr);
+    page->setStyleSheet(styleString);
+    page->show();
 }
 
 void SettingsPage::on_set_clipboardSharing_toggled(bool checked) {

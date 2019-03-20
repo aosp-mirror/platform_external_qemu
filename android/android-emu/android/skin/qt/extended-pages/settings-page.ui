@@ -26,7 +26,7 @@
     <cursorShape>ArrowCursor</cursorShape>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>2</number>
    </property>
    <widget class="QWidget" name="tab_1">
     <attribute name="title">
@@ -1264,7 +1264,7 @@
      <property name="editable">
       <bool>false</bool>
      </property>
-     <property name="currentText" stdset="0">
+     <property name="currentText">
       <string>Autodetect based on host (default)</string>
      </property>
      <property name="report_metrics" stdset="0">
@@ -1316,7 +1316,7 @@
      <property name="editable">
       <bool>false</bool>
      </property>
-     <property name="currentText" stdset="0">
+     <property name="currentText">
       <string>Autoselect</string>
      </property>
      <property name="report_metrics" stdset="0">
@@ -1337,6 +1337,35 @@
        <string>Compatibility (OpenGL ES 1.1/2.0)</string>
       </property>
      </item>
+    </widget>
+    <widget class="RaisedMaterialButton" name="perfstatsButton">
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>486</y>
+       <width>280</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>PERFORMANCE STATS</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
     </widget>
    </widget>
   </widget>

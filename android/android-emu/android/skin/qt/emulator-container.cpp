@@ -200,14 +200,23 @@ void EmulatorContainer::changeEvent(QEvent* event) {
                 // toolbar's minimize button (which is possible on some
                 // window managers), remember to hide the toolbar (which
                 // will also hide the extended window, if it exists).
-                mEmulatorWindow->toolWindow()->hide();
-                if (mModalOverlay) {
-                    mModalOverlay->hide();
-                }
-                if (mVirtualSceneInfo) {
-                    mVirtualSceneInfo->hide();
-                }
-                mMessages->hide();
+                // showMinimized();
+                // bug: 128977914
+                // This code is super risky to run because even though
+                // the window state returns minimized, we could be
+                // in the process of restoring from minimize,
+                // which ends up hiding a bunch of stuff again
+                // when the emulator restores.
+                // Instead, opt for the lesser evil of leaving tool
+                // windows and other objects visible.
+                // mEmulatorWindow->toolWindow()->hide();
+                // if (mModalOverlay) {
+                //     mModalOverlay->hide();
+                // }
+                // if (mVirtualSceneInfo) {
+                //     mVirtualSceneInfo->hide();
+                // }
+                // mMessages->hide();
             }
 
             break;
@@ -308,12 +317,12 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
     // way to achieve this on OS X is apparently to make the tool window a
     // "child" of the main window (using OS X's native API).
     Q_ASSERT(mEmulatorWindow->toolWindow());
-    mEmulatorWindow->toolWindow()
-            ->showNormal();  // force creation of native window id
+    mEmulatorWindow->toolWindow()->showNormal();  // force creation of native window id
     WId tool_wid = mEmulatorWindow->toolWindow()->effectiveWinId();
-    Q_ASSERT(tool_wid && wid);
     tool_wid = (WId)getNSWindow((void*)tool_wid);
-    nsWindowAdopt((void*)wid, (void*)tool_wid);
+    if (wid && tool_wid) {
+        nsWindowAdopt((void*)wid, (void*)tool_wid);
+    }
 #endif  // __APPLE__
 
     // showEvent() gets called when the emulator is minimized because we are
