@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "bd89f347_2cff8bcb",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-20T19:02:08Z",
+      "side": 1,
+      "message": "Oh, it should actually be around the string literals.  Qt has a pre-processing step called moc, which needs the strings in-place since it isn\u0027t doing it at runtime.  See https://wiki.qt.io/QtInternationalization",
+      "parentUuid": "26ae2e39_fabe374d",
+      "range": {
+        "startLine": 108,
+        "startChar": 39,
+        "endLine": 108,
+        "endChar": 66
+      },
+      "revId": "e649367746911f4bd5c07dab1c721c2c7b057e81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2c9bef0d_c7d587d3",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
         "patchSetId": 1
