@@ -489,9 +489,13 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android::base::CpuUsage::get()->addLooper(
                 (int)android::base::CpuUsage::UsageArea::MainLoop,
                 android::base::ThreadLooper::get());
-    if (!android::base::System::get()->envGet("SHOW_PERF_STATS").empty()) {
-        android::base::MemoryTracker::get()->start();
+
+    auto memTracker = android::base::MemoryTracker::get();
+    if (memTracker &&
+        !android::base::System::get()->envGet("SHOW_PERF_STATS").empty()) {
+        memTracker->start();
     }
+
     return true;
 }
 
@@ -499,5 +503,7 @@ void android_emulation_teardown() {
     android::automation::AutomationController::shutdown();
     android::videoinjection::VideoInjectionController::shutdown();
     android::base::CpuUsage::get()->stop();
-    android::base::MemoryTracker::get()->stop();
+    auto memTracker = android::base::MemoryTracker::get();
+    if (memTracker)
+        memTracker->stop();
 }
