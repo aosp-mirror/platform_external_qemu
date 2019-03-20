@@ -200,14 +200,23 @@ void EmulatorContainer::changeEvent(QEvent* event) {
                 // toolbar's minimize button (which is possible on some
                 // window managers), remember to hide the toolbar (which
                 // will also hide the extended window, if it exists).
-                mEmulatorWindow->toolWindow()->hide();
-                if (mModalOverlay) {
-                    mModalOverlay->hide();
-                }
-                if (mVirtualSceneInfo) {
-                    mVirtualSceneInfo->hide();
-                }
-                mMessages->hide();
+                // showMinimized();
+                // bug: 128977914
+                // This code is super risky to run because even though
+                // the window state returns minimized, we could be
+                // in the process of restoring from minimize,
+                // which ends up hiding a bunch of stuff again
+                // when the emulator restores.
+                // Instead, opt for the lesser evil of leaving tool
+                // windows and other objects visible.
+                // mEmulatorWindow->toolWindow()->hide();
+                // if (mModalOverlay) {
+                //     mModalOverlay->hide();
+                // }
+                // if (mVirtualSceneInfo) {
+                //     mVirtualSceneInfo->hide();
+                // }
+                // mMessages->hide();
             }
 
             break;
