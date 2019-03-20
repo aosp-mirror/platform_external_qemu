@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4454bae_95ba85d6",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-20T18:53:45Z",
+      "side": 1,
+      "message": "This could be rounded too",
+      "range": {
+        "startLine": 102,
+        "startChar": 42,
+        "endLine": 102,
+        "endChar": 59
+      },
+      "revId": "dc3c56688fca09f735f9e69b16905e02b909e604",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "31345d31_d7c3df0a",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-20T18:53:45Z",
+      "side": 1,
+      "message": "Compiling the shader and creating the program is also a one-time thing.  Before use just issue the glUseProgram call again.  I recommend taking a look at how filament draws a fullscreen quad to see which which things can be reused and what needs to be deleted: https://github.com/google/filament/blob/master/filament/src/driver/opengl/OpenGLBlitter.cpp",
+      "range": {
+        "startLine": 160,
+        "startChar": 4,
+        "endLine": 168,
+        "endChar": 43
+      },
+      "revId": "dc3c56688fca09f735f9e69b16905e02b909e604",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2884e57_87a8fd8e",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-20T18:53:45Z",
+      "side": 1,
+      "message": "Frank, this seems strange-- but I don\u0027t see anything obviously wrong.  What do you think?",
+      "range": {
+        "startLine": 170,
+        "startChar": 4,
+        "endLine": 172,
+        "endChar": 66
+      },
+      "revId": "dc3c56688fca09f735f9e69b16905e02b909e604",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aad26088_18ef70c1",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2019-03-20T18:53:45Z",
+      "side": 1,
+      "message": "If I remember correctly the program will destroy these given that they were glDeleteShader\u0027d before",
+      "range": {
+        "startLine": 205,
+        "startChar": 4,
+        "endLine": 206,
+        "endChar": 52
+      },
+      "revId": "dc3c56688fca09f735f9e69b16905e02b909e604",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
