@@ -11,6 +11,9 @@
 
 #include "android-qemu2-glue/android_pubkey.h"
 
+#include "android/utils/debug.h"
+#include "android/utils/file_io.h"
+
 #include <openssl/base64.h>
 #include <openssl/evp.h>
 #include <openssl/pem.h>
@@ -63,6 +66,56 @@ static std::shared_ptr<RSA> read_key_file(const std::string& file) {
     }
 
     return std::shared_ptr<RSA>(key, RSA_free);
+}
+
+static bool generate_key(const std::string& file) {
+    VERBOSE_PRINT(init, "generate_key(%s)...", file.c_str());
+
+    mode_t old_mask;
+    FILE* f = nullptr;
+    bool ret = 0;
+
+    EVP_PKEY* pkey = EVP_PKEY_new();
+    BIGNUM* exponent = BN_new();
+    RSA* rsa = RSA_new();
+    if (!pkey || !exponent || !rsa) {
+        dwarning("Failed to allocate key");
+        goto out;
+    }
+
+    BN_set_word(exponent, RSA_F4);
+    RSA_generate_key_ex(rsa, 2048, exponent, nullptr);
+    EVP_PKEY_set1_RSA(pkey, rsa);
+
+    f = fopen(file.c_str(), "w");
+    if (!f) {
+        dwarning("Failed to open %s", file.c_str());
+        goto out;
+    }
+
+    if (!PEM_write_PrivateKey(f, pkey, nullptr, nullptr, 0, nullptr, nullptr)) {
+        dwarning("Failed to write key");
+        goto out;
+    }
+
+    fclose(f);
+    f = NULL;
+    android_chmod(file.c_str(), 0777);
+
+    ret = true;
+
+out:
+    if (f) {
+        fclose(f);
+    }
+    EVP_PKEY_free(pkey);
+    RSA_free(rsa);
+    BN_free(exponent);
+    return ret;
+}
+
+bool adb_auth_keygen(const char* filename) {
+    return generate_key(filename);
 }
 
 bool pubkey_from_privkey(const std::string& path, std::string* out) {
