@@ -1078,9 +1078,6 @@ extern "C" int main(int argc, char** argv) {
     if (opts->allow_host_audio)
         args.add("-allow-host-audio");
 
-    if (opts->perf_stat)
-        args.add("-perf-stat");
-
     bool badSnapshots = false;
 
     // Check situations where snapshots should be turned off
