@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "00427c3c_08103500",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-20T00:22:31Z",
+      "side": 1,
+      "message": "Nit: \"Andoird\" -\u003e \"Android\"",
+      "revId": "4ce7540b7d7e55f259054a3426f33359a719c636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "25f17741_e5bedca0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-20T00:22:31Z",
+      "side": 1,
+      "message": "\"android\" -\u003e \"Android\"",
+      "revId": "4ce7540b7d7e55f259054a3426f33359a719c636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dc53bdd9_4786018c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-20T00:22:31Z",
+      "side": 1,
+      "message": "Nit: space after \".\"",
+      "revId": "4ce7540b7d7e55f259054a3426f33359a719c636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f55987c_27f8dcdf",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-20T00:22:31Z",
+      "side": 1,
+      "message": "\"android\" -\u003e \"Android\"",
+      "revId": "4ce7540b7d7e55f259054a3426f33359a719c636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "54bab33d_363eec80",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-20T00:22:31Z",
+      "side": 1,
+      "message": "Nit: \"respond\" -\u003e \"response\". \n\"android\" -\u003e \"Android\"\n\"Car Cluster component\" -\u003e \"car cluster service\".",
+      "revId": "4ce7540b7d7e55f259054a3426f33359a719c636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "31d88f2e_7aa2d34a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-20T00:22:31Z",
+      "side": 1,
+      "message": "Nit: remove double space",
+      "revId": "4ce7540b7d7e55f259054a3426f33359a719c636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fa959b05_fba4911f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1286929
+      },
+      "writtenOn": "2019-03-20T00:22:31Z",
+      "side": 1,
+      "message": "\"android\" -\u003e \"Android\"",
+      "revId": "4ce7540b7d7e55f259054a3426f33359a719c636",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
