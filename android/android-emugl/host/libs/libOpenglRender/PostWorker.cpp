@@ -24,6 +24,7 @@ void PostWorker::post(ColorBuffer* cb) {
     float py = mFb->getPy();
     int zRot = mFb->getZrot();
 
+    cb->waitSync();
     GLuint tex = cb->scale();
 
     // Find the x and y values at the origin when "fully scrolled."
@@ -104,6 +105,7 @@ void PostWorker::compose(ComposeDevice* p) {
         composeLayer(l);
     }
 
+    mFb->findColorBuffer(p->targetHandle)->setSync();
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
     s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
     mFb->getTextureDraw()->cleanupForDrawLayer();

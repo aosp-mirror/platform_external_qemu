@@ -227,12 +227,14 @@ public:
     void postLayer(ComposeLayer* l, int frameWidth, int frameHeight);
     GLuint getTexture();
 
+    void setSync(bool debug = false);
+    void waitSync(bool debug = false);
+
 public:
     void restore();
 
 private:
     ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper);
-    void waitSync();
 
 private:
     GLuint m_tex = 0;
