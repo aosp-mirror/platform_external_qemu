@@ -60,6 +60,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/archives)
 set(CMAKE_PDB_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/debug_info)
 
+# We want to make sure all the cross targets end up in a unique location
+set(ANDROID_CROSS_BUILD_DIRECTORY ${CMAKE_BINARY_DIR}/build/${ANDROID_HOST_TAG})
+
 # Feeling courageous? Set this to $ANDROID_SDK_ROOT
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/distribution/emulator)
 

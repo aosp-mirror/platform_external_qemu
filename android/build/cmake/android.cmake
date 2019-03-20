@@ -32,20 +32,20 @@ endfunction()
 function(android_compile_for_host EXE SOURCE OUT_PATH)
   if(ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
     # We can add this project without any translation..
-    message(STATUS "Adding ${EXE} as subproject, not cross compiling.")
     if (NOT TARGET ${EXE})
+        message(STATUS "Adding ${EXE} as subproject, not cross compiling.")
         add_subdirectory(${SOURCE} ${EXE}_ext)
-        set(${OUT_PATH} "$<TARGET_FILE:${EXE}>" PARENT_SCOPE)
     endif()
+    set(${OUT_PATH} "$<TARGET_FILE:${EXE}>" PARENT_SCOPE)
   else()
-    message(STATUS "Cross compiling ${EXE} for host ${ANDROID_HOST_TAG}")
     include(ExternalProject)
 
     # If we are cross compiling we will need to build it for our actual OS we are currently running on.
-    get_filename_component(BUILD_PRODUCT ${CMAKE_CURRENT_BINARY_DIR}/${EXE}_ext_cross/src/${EXE}_ext_cross-build/${EXE} ABSOLUTE)
+    get_filename_component(BUILD_PRODUCT ${ANDROID_CROSS_BUILD_DIRECTORY}/${EXE}_ext_cross/src/${EXE}_ext_cross-build/${EXE} ABSOLUTE)
     if (NOT TARGET ${EXE}_ext_cross)
+      message(STATUS "Cross compiling ${EXE} for host ${ANDROID_HOST_TAG}")
       externalproject_add(${EXE}_ext_cross
-            PREFIX ${EXE}_ext_cross
+            PREFIX ${ANDROID_CROSS_BUILD_DIRECTORY}/${EXE}_ext_cross
             DOWNLOAD_COMMAND ""
             SOURCE_DIR ${SOURCE}
             CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE=${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/toolchain-${ANDROID_HOST_TAG}.cmake"
@@ -78,12 +78,7 @@ function(android_yasm_compile)
     cmake_parse_arguments(android_yasm_compile "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
     # Configure yasm
-    if (NOT YASM_EXECUTABLE)
-        # Make sure we (cross) compile yasm only once.
-        android_compile_for_host(yasm ${ANDROID_QEMU2_TOP_DIR}/../yasm YASM_EXE)
-        set(YASM_EXECUTABLE ${YASM_EXE} CACHE FILEPATH "" FORCE )
-        message(STATUS "Compiling using ${YASM_EXECUTABLE}")
-    endif()
+    android_compile_for_host(yasm ${ANDROID_QEMU2_TOP_DIR}/../yasm YASM_EXECUTABLE)
 
     # Setup the includes.
     set(LIBNAME ${android_yasm_compile_TARGET})
@@ -324,7 +319,7 @@ function(android_add_test name)
   endif()
 
   add_test(NAME ${name}
-           COMMAND $<TARGET_FILE:${name}> --gtest_output=xml:$<TARGET_FILE_NAME:${name}>.xml --gtest_catch_exceptions=0 
+           COMMAND $<TARGET_FILE:${name}> --gtest_output=xml:$<TARGET_FILE_NAME:${name}>.xml --gtest_catch_exceptions=0
            WORKING_DIRECTORY $<TARGET_FILE_DIR:${name}>)
 
   # Let's not optimize our tests.
