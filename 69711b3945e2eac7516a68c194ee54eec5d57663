@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f8a21b1e_51b43b3d",
+        "filename": "android/android-emu/android/base/synchronization/ConditionVariable.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-20T00:27:24Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 110,
+        "startChar": 43,
+        "endLine": 110,
+        "endChar": 44
+      },
+      "revId": "69711b3945e2eac7516a68c194ee54eec5d57663",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
