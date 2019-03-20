@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "937b7da2_eb872006",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-20T00:03:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a34cb5a_7c545159",
+      "revId": "9d3897b898073f31a183f06d29340e64d7fab82c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e7e620b7_e58296a9",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.cpp",
         "patchSetId": 5
@@ -33,6 +51,24 @@
       "revId": "9d3897b898073f31a183f06d29340e64d7fab82c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "de0aaed9_120b5065",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-20T00:03:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e7e620b7_e58296a9",
+      "revId": "9d3897b898073f31a183f06d29340e64d7fab82c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "d83d0cf1_24a4f72d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-20T00:03:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "82ce2621_932c3979",
+      "revId": "9d3897b898073f31a183f06d29340e64d7fab82c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "32cfafb5_e5a1eba4",
         "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.cpp",
         "patchSetId": 5
@@ -67,6 +121,24 @@
       "revId": "9d3897b898073f31a183f06d29340e64d7fab82c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "acfc6b47_94bc8c8a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1455398
+      },
+      "writtenOn": "2019-03-20T00:03:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "32cfafb5_e5a1eba4",
+      "revId": "9d3897b898073f31a183f06d29340e64d7fab82c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
