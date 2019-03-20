@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "c5625c57_bcd00602",
+        "filename": "android-qemu2-glue/adbkey.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-20T03:07:14Z",
+      "side": 1,
+      "message": "nit: |out| parameter last",
+      "range": {
+        "startLine": 16,
+        "startChar": 25,
+        "endLine": 16,
+        "endChar": 67
+      },
+      "revId": "cf6fa239e2c9a192c69dd16ba628797dcd8403f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "dc1bfbbb_10b9af81",
         "filename": "android-qemu2-glue/android_pubkey.cpp",
         "patchSetId": 2
@@ -18,6 +41,29 @@
         "startChar": 2,
         "endLine": 110,
         "endChar": 8
+      },
+      "revId": "cf6fa239e2c9a192c69dd16ba628797dcd8403f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f228dc1e_ddb10a12",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-20T03:07:14Z",
+      "side": 1,
+      "message": "let\u0027s put a more descriptive message here / switch to verbose print",
+      "range": {
+        "startLine": 339,
+        "startChar": 8,
+        "endLine": 339,
+        "endChar": 50
       },
       "revId": "cf6fa239e2c9a192c69dd16ba628797dcd8403f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
