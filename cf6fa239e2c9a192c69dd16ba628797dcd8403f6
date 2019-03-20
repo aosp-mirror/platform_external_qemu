@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc1bfbbb_10b9af81",
+        "filename": "android-qemu2-glue/android_pubkey.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2019-03-20T02:35:14Z",
+      "side": 1,
+      "message": "add some error messages",
+      "range": {
+        "startLine": 110,
+        "startChar": 2,
+        "endLine": 110,
+        "endChar": 8
+      },
+      "revId": "cf6fa239e2c9a192c69dd16ba628797dcd8403f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
