@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e48b24c4_2e24c2fb",
+        "filename": "android/build/python/aemu/upload_symbols.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-20T15:54:21Z",
+      "side": 1,
+      "message": "nonblocking note for when we switch to windows native build: ~, .file ok on windows?",
+      "range": {
+        "startLine": 49,
+        "startChar": 15,
+        "endLine": 49,
+        "endChar": 16
+      },
+      "revId": "b9ab3943bba43cfe59faa38a08dce6db4d04930e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e6cdd97_9f82e172",
+        "filename": "android/build/python/aemu/upload_symbols.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-20T15:54:21Z",
+      "side": 1,
+      "message": "nit: trailing space",
+      "revId": "b9ab3943bba43cfe59faa38a08dce6db4d04930e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
