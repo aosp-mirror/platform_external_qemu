@@ -4,6 +4,8 @@ android_generate_hw_config()
 
 set(libqemu2-glue_src
     ${ANDROID_HW_CONFIG_H}
+    adbkey.cpp
+    android_pubkey.cpp
     android_qemud.cpp
     audio-capturer.cpp
     audio-output.cpp
