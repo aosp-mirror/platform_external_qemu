@@ -246,13 +246,14 @@ public:
         bool linearTiling);
     void setInUse(bool inUse);
     bool isInUse() const { return m_inUse; }
+    void setSync(bool debug = false);
+    void waitSync(bool debug = false);
 
 public:
     void restore();
 
 private:
     ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper);
-    void waitSync();
 
 private:
     GLuint m_tex = 0;
