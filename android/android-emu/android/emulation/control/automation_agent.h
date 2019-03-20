@@ -15,17 +15,21 @@
 
 ANDROID_BEGIN_HEADER
 
+using namespace android::base;
+
 typedef struct QAndroidAutomationAgent {
+    // Reset the current state and cancel any recordings or playback.
+    // Called on snapshot restore, since playback cannot be trivially resumed.
+    void (*reset)();
+
     // Start a recording to a file.
-    android::automation::StartResult (*startRecording)(
-            android::base::StringView filename);
+    android::automation::StartResult (*startRecording)(StringView filename);
 
     // Stops a recording to a file.
     android::automation::StopResult (*stopRecording)();
 
     // Start a playback from a file.
-    android::automation::StartResult (*startPlayback)(
-            android::base::StringView filename);
+    android::automation::StartResult (*startPlayback)(StringView filename);
 
     // Stop playback from a file.
     android::automation::StopResult (*stopPlayback)();

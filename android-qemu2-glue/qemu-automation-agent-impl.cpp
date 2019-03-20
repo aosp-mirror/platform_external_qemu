@@ -11,27 +11,31 @@
 
 #include "android/emulation/control/automation_agent.h"
 
-using android::automation::AutomationController;
+namespace android {
+namespace automation {
 
-static android::automation::StartResult start_recording(
-        android::base::StringView filename) {
+static void reset() {
+    return AutomationController::get().reset();
+}
+
+static StartResult start_recording(android::base::StringView filename) {
     return AutomationController::get().startRecording(filename);
 }
 
-static android::automation::StopResult stop_recording() {
+static StopResult stop_recording() {
     return AutomationController::get().stopRecording();
 }
 
-static android::automation::StartResult start_playback(
-        android::base::StringView filename) {
+static StartResult start_playback(android::base::StringView filename) {
     return AutomationController::get().startPlayback(filename);
 }
 
-static android::automation::StopResult stop_playback() {
+static StopResult stop_playback() {
     return AutomationController::get().stopPlayback();
 }
 
 static const QAndroidAutomationAgent sQAndroidAutomationAgent = {
+        .reset = reset,
         .startRecording = start_recording,
         .stopRecording = stop_recording,
         .startPlayback = start_playback,
@@ -39,3 +43,6 @@ static const QAndroidAutomationAgent sQAndroidAutomationAgent = {
 
 extern "C" const QAndroidAutomationAgent* const gQAndroidAutomationAgent =
         &sQAndroidAutomationAgent;
+
+}  // namespace automation
+}  // namespace android
