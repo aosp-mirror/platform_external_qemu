@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "26ae2e39_fabe374d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-03-20T00:16:36Z",
+      "side": 1,
+      "message": "okay, changed all strings displayed to the user. Change in record-macro-saved-item.cpp. Thanks!",
+      "parentUuid": "66d8b235_da3cd953",
+      "range": {
+        "startLine": 108,
+        "startChar": 39,
+        "endLine": 108,
+        "endChar": 66
+      },
+      "revId": "e649367746911f4bd5c07dab1c721c2c7b057e81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2c9bef0d_c7d587d3",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "91eae818_33fda32e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-03-20T00:16:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2c9bef0d_c7d587d3",
+      "range": {
+        "startLine": 155,
+        "startChar": 33,
+        "endLine": 155,
+        "endChar": 40
+      },
+      "revId": "e649367746911f4bd5c07dab1c721c2c7b057e81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cd651eb2_7cd4ac6b",
         "filename": "android/android-emu/android/skin/qt/styles/stylesheet_template.css",
         "patchSetId": 1
@@ -68,6 +116,30 @@
       "revId": "e649367746911f4bd5c07dab1c721c2c7b057e81",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ff24e854_af6ae6b5",
+        "filename": "android/android-emu/android/skin/qt/styles/stylesheet_template.css",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-03-20T00:16:36Z",
+      "side": 1,
+      "message": "I followed the suggestion here. Checked other extended pages to see if there was any change. I\u0027ll keep an eye open before removing the feature flag.",
+      "parentUuid": "cd651eb2_7cd4ac6b",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 6
+      },
+      "revId": "e649367746911f4bd5c07dab1c721c2c7b057e81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
