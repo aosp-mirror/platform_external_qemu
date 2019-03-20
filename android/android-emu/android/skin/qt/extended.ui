@@ -80,7 +80,6 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="SettingsPage" name="settingsPage"/>
    <widget class="HelpPage" name="helpPage"/>
    <widget class="CarDataPage" name="carDataPage"/>
-   <widget class="PerfStatsPage" name="perfstatsPage"/>
    <widget class="QWidget" name="page">
     <widget class="QGroupBox" name="locationGroup_4">
      <property name="geometry">
@@ -337,7 +336,7 @@ font-family: &quot;Roboto&quot;</string>
      <number>0</number>
     </property>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
       <property name="spacing">
        <number>0</number>
       </property>
@@ -1176,54 +1175,6 @@ padding: 10px 0px 10px 16px;</string>
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="perfstatsButton">
-        <property name="font">
-         <font>
-          <family>Roboto</family>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">/* overridden by stylesheet_template.css */
-border: none;
-text-align: left;
-padding: 10px 0px 10px 16px;</string>
-        </property>
-        <property name="text">
-         <string>  Performance Stats</string>
-        </property>
-        <property name="icon">
-         <iconset resource="resources.qrc">
-          <normaloff>:/light/bugreport</normaloff>:/light/bugreport</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-        <property name="report_metrics" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="themeIconName" stdset="0">
-         <string>bugreport</string>
-        </property>
-        <property name="ColorGroup" stdset="0">
-         <string>MajorTab</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
     <item>
@@ -1343,12 +1294,6 @@ padding: 10px 0px 10px 16px;</string>
    <class>SnapshotPage</class>
    <extends>QWidget</extends>
    <header>android/skin/qt/extended-pages/snapshot-page.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>PerfStatsPage</class>
-   <extends>QWidget</extends>
-   <header>android/skin/qt/extended-pages/perfstats-page.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

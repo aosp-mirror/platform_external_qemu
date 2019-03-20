@@ -58,6 +58,7 @@ private slots:
     void on_set_glesBackendPrefComboBox_currentIndexChanged(int index);
     void on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index);
     void on_set_resetNotifications_pressed();
+    void on_perfstatsButton_pressed();
 #ifndef SNAPSHOT_CONTROLS  // TODO:jameskaye Remove when Snapshot controls are fully enabled
     void on_set_saveSnapNowButton_clicked();
     void on_set_loadSnapNowButton_clicked();
