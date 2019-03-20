@@ -1717,7 +1717,7 @@ public:
 
         if (!m_vk) return res;
 
-        auto emu = createOrGetGlobalVkEmulation(m_vk);
+        auto emu = getGlobalVkEmulation();
 
         res.supportsVulkan = emu && emu->live;
 
