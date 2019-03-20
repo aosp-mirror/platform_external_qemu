@@ -17,6 +17,9 @@ if(ANDROID_TARGET_TAG STREQUAL "linux-x86_64")
   set(VULKAN_TEST_DEPENDENCIES
       # Loader (for testing)
       "${PREBUILT_ROOT}/libvulkan.so>testlib64/libvulkan.so"
+      # Loader (for real)
+      "${PREBUILT_ROOT}/libvulkan.so>lib64/vulkan/libvulkan.so"
+      "${PREBUILT_ROOT}/libvulkan.so>lib64/vulkan/libvulkan.so.1"
       # Swiftshader
       "${PREBUILT_ROOT}/icds/libvk_swiftshader.so>lib64/vulkan/libvk_swiftshader.so"
       "${PREBUILT_ROOT}/icds/vk_swiftshader_icd.json>lib64/vulkan/vk_swiftshader_icd.json"

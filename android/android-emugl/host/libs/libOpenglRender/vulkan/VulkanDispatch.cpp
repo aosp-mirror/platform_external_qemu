@@ -100,24 +100,21 @@ static void initIcdPaths(bool forTesting) {
 
 #endif
 static std::string getLoaderPath(bool forTesting) {
-    auto androidIcd = System::get()->envGet("ANDROID_EMU_VK_ICD");
-    if (forTesting || androidIcd == "swiftshader") {
+    if (forTesting) {
 
         auto path = pj(System::get()->getProgramDirectory(), "testlib64",
                   VULKAN_LOADER_FILENAME);
         LOG(VERBOSE) << "In test environment or using Swiftshader. Using loader: " << path;
         return path;
     } else {
-
-#ifdef __APPLE__
-        // on Mac, the loader isn't in the system libraries.
+#ifdef _WIN32
+        LOG(VERBOSE) << "Not in test environment. Using loader: " << VULKAN_LOADER_FILENAME;
+        return VULKAN_LOADER_FILENAME;
+#else
         auto path = pj(System::get()->getProgramDirectory(), "lib64", "vulkan",
                   VULKAN_LOADER_FILENAME);
         LOG(VERBOSE) << "Not in test environment. Using loader: " << path;
         return path;
-#else
-        LOG(VERBOSE) << "Not in test environment. Using loader: " << VULKAN_LOADER_FILENAME;
-        return VULKAN_LOADER_FILENAME;
 #endif
     }
 }

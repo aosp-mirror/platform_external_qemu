@@ -558,7 +558,8 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
 
     // Start up Vulkan emulation info
     if (emugl::emugl_feature_is_enabled(android::featurecontrol::Vulkan)) {
-        goldfish_vk::VkDecoderGlobalState::get();
+        auto dispatch = emugl::vkDispatch(false /* not for testing */);
+        goldfish_vk::createOrGetGlobalVkEmulation(dispatch);
     }
 
     // Start up the single sync thread if GLAsyncSwap enabled
