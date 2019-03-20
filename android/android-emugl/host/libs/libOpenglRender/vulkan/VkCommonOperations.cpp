@@ -420,6 +420,8 @@ static std::vector<VkEmulation::ImageSupportInfo> getBasicImageSupportList() {
 }
 
 VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
+    AutoLock lock(sVkEmulationLock);
+
     if (sVkEmulation) return sVkEmulation;
 
     if (!emugl::vkDispatchValid(vk)) {
