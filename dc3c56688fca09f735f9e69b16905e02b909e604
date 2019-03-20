@@ -25,6 +25,23 @@
     },
     {
       "key": {
+        "uuid": "90212e58_fc731a34",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-20T19:28:22Z",
+      "side": 1,
+      "message": "tex coords go from 0 to 1 not -1 to 1, which might also be a factor here",
+      "revId": "dc3c56688fca09f735f9e69b16905e02b909e604",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "31345d31_d7c3df0a",
         "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
         "patchSetId": 2
@@ -107,6 +124,30 @@
       "side": 1,
       "message": "The code that calls this is missing, but I assume it is called through RenderedCameraDevice, which creates an EGL context and a pbuffer surface.  It looks like virtualscene is doing roughly the same thing (indirectly through the RenderTarget abstraction):\n\n// Used to do the final blit to the FB\nstd::unique_ptr\u003cRenderTarget\u003e RenderTarget::createDefault(\n        Renderer\u0026 renderer,\n        const GLESv2Dispatch* gles2,\n        uint32_t width,\n        uint32_t height) {\n    return std::unique_ptr\u003cRenderTarget\u003e(\n            new RenderTarget(renderer, gles2, /* framebuffer */ 0, 0, Texture(), width, height));\n}\n\nvoid RenderTarget::bind() const {\n    mGles2-\u003eglBindFramebuffer(GL_FRAMEBUFFER,\n                              mFramebuffer);  // For createDefault(), this is 0\n    mGles2-\u003eglViewport(0, 0, mWidth, mHeight);\n}",
       "parentUuid": "277ce906_1cd9bde2",
+      "range": {
+        "startLine": 170,
+        "startChar": 4,
+        "endLine": 172,
+        "endChar": 66
+      },
+      "revId": "dc3c56688fca09f735f9e69b16905e02b909e604",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b4a0a193_f9f8858c",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-20T19:28:22Z",
+      "side": 1,
+      "message": "ok, then I\u0027m not sure what\u0027s going on. Since the virtualscene camera code and this code are using some common pieces, perhaps we can try to compare? E.g., for a given camera in the guest, it has some resolution W x H, and virtualscene will have W1 x H1 and the rendering here will have W2 x H2. Presumably, all 3 are the same numbers.\n\nwe can also do a local test with glReadPixels mRenderWidth mRenderHeight to see if that agrees.",
+      "parentUuid": "da858a92_ccac4ee8",
       "range": {
         "startLine": 170,
         "startChar": 4,
