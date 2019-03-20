@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b89ea6f9_8958d8b1",
+        "filename": "android/build/python/aemu/upload_symbols.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-03-20T16:54:07Z",
+      "side": 1,
+      "message": "expanduser is the (confusing) but platform independent way in python to resolve the home directory. In Python3 they fixed it with Path.home()",
+      "parentUuid": "e48b24c4_2e24c2fb",
+      "range": {
+        "startLine": 49,
+        "startChar": 15,
+        "endLine": 49,
+        "endChar": 16
+      },
+      "revId": "b9ab3943bba43cfe59faa38a08dce6db4d04930e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4e6cdd97_9f82e172",
         "filename": "android/build/python/aemu/upload_symbols.py",
         "patchSetId": 2
@@ -39,6 +63,24 @@
       "revId": "b9ab3943bba43cfe59faa38a08dce6db4d04930e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7c5fa435_af4cda4d",
+        "filename": "android/build/python/aemu/upload_symbols.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2019-03-20T16:54:07Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "4e6cdd97_9f82e172",
+      "revId": "b9ab3943bba43cfe59faa38a08dce6db4d04930e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
