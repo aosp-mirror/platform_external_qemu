@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "eee47f4f_b3e16a40",
+        "filename": "android-qemu2-glue/adbkey.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-03-20T17:12:52Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c5625c57_bcd00602",
+      "range": {
+        "startLine": 16,
+        "startChar": 25,
+        "endLine": 16,
+        "endChar": 67
+      },
+      "revId": "cf6fa239e2c9a192c69dd16ba628797dcd8403f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dc1bfbbb_10b9af81",
         "filename": "android-qemu2-glue/android_pubkey.cpp",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "cf6fa239e2c9a192c69dd16ba628797dcd8403f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b0fde576_ae073df0",
+        "filename": "android-qemu2-glue/android_pubkey.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-03-20T17:12:52Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "dc1bfbbb_10b9af81",
+      "range": {
+        "startLine": 110,
+        "startChar": 2,
+        "endLine": 110,
+        "endChar": 8
+      },
+      "revId": "cf6fa239e2c9a192c69dd16ba628797dcd8403f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "fd660751_169ecc6d",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-03-20T17:12:52Z",
+      "side": 1,
+      "message": "This is already doing that; the adbkey.pub is created in the AVD\u0027s data folder. Every new AVD / wipe-data will regenerate one.",
+      "parentUuid": "dc747590_0ddd8be0",
+      "range": {
+        "startLine": 316,
+        "startChar": 12,
+        "endLine": 316,
+        "endChar": 29
+      },
+      "revId": "cf6fa239e2c9a192c69dd16ba628797dcd8403f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f228dc1e_ddb10a12",
         "filename": "android-qemu2-glue/main.cpp",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2019-03-20T03:07:14Z",
       "side": 1,
       "message": "let\u0027s put a more descriptive message here / switch to verbose print",
+      "range": {
+        "startLine": 339,
+        "startChar": 8,
+        "endLine": 339,
+        "endChar": 50
+      },
+      "revId": "cf6fa239e2c9a192c69dd16ba628797dcd8403f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "95ae8b79_b47264a9",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2019-03-20T17:12:52Z",
+      "side": 1,
+      "message": "oh this is a real file print, not stderr...",
+      "parentUuid": "f228dc1e_ddb10a12",
       "range": {
         "startLine": 339,
         "startChar": 8,
