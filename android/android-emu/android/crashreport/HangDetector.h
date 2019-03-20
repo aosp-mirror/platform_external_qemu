@@ -37,6 +37,8 @@ namespace crashreport {
 // it needs to schedule a new task on a looper, or, if a task was scheduled for
 // a while an didn't finish in time, to call the |hangCallback|.
 //
+// Note: Be careful with the timing.hangLoopIterationTimeoutMs. Setting it too
+// aggressively can prevent the hang detector from functioning properly.
 class HangDetector {
     DISALLOW_COPY_AND_ASSIGN(HangDetector);
 
