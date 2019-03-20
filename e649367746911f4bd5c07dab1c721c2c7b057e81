@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "d32618f6_1ad727e7",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1447633
+      },
+      "writtenOn": "2019-03-20T20:20:12Z",
+      "side": 1,
+      "message": "Made a few changes to use tr() but it gives back a QString. Modified other files for this, Qstring is Copy On Write so should not create copies, I think",
+      "parentUuid": "bd89f347_2cff8bcb",
+      "range": {
+        "startLine": 108,
+        "startChar": 39,
+        "endLine": 108,
+        "endChar": 66
+      },
+      "revId": "e649367746911f4bd5c07dab1c721c2c7b057e81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2c9bef0d_c7d587d3",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-macro-page.cpp",
         "patchSetId": 1
