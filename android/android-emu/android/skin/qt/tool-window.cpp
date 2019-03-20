@@ -468,11 +468,6 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                 showOrRaiseExtendedWindow(PANE_IDX_HELP);
             }
             break;
-        case QtUICommand::SHOW_PANE_PERFSTATS:
-            if (down) {
-                showOrRaiseExtendedWindow(PANE_IDX_PERFSTATS);
-            }
-            break;
         case QtUICommand::TAKE_SCREENSHOT:
             if (down) {
                 mEmulatorWindow->screenshot();
@@ -909,7 +904,9 @@ void ToolWindow::on_minimize_button_clicked() {
     this->showMinimized();
 #endif
 
-    mToolWindow2->showMinimized();
+    if (!ToolWindow2::shouldHide()) {
+        mToolWindow2->showMinimized();
+    }
     mEmulatorWindow->showMinimized();
 }
 

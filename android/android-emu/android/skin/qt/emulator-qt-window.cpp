@@ -1302,21 +1302,11 @@ void EmulatorQtWindow::showMinimized() {
 #endif // !_WIN32
     mContainer.showMinimized();
     mWindowIsMinimized = true;
-
-    // Pause the virtual machine to avoid using CPU while
-    // we're minimized.
-    android::base::ThreadLooper::runOnMainLooper([] {
-        gQAndroidVmOperations->vmPause();
-    });
 }
 
 bool EmulatorQtWindow::event(QEvent* ev) {
     if (ev->type() == QEvent::WindowActivate && mWindowIsMinimized) {
-        // We just un-minimized. Resume the VM.
         mWindowIsMinimized = false;
-        android::base::ThreadLooper::runOnMainLooper([] {
-            gQAndroidVmOperations->vmResume();
-        });
 
 #ifndef _WIN32
         // When we minimized, we re-enabled the window frame (because Mac won't un-minimize

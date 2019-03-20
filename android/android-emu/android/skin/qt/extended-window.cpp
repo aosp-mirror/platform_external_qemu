@@ -114,7 +114,6 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_HELP,          mExtendedUi->helpButton},
         {PANE_IDX_RECORD_SCREEN, mExtendedUi->recordScreenButton},
         {PANE_IDX_GOOGLE_PLAY,   mExtendedUi->googlePlayButton},
-        {PANE_IDX_PERFSTATS,    mExtendedUi->perfstatsButton},
     };
 
     setObjectName("ExtendedControls");
@@ -155,7 +154,6 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->bugreportButton);
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
-    mSidebarButtons.addButton(mExtendedUi->perfstatsButton);
 
     if (android::featurecontrol::isEnabled(android::featurecontrol::PlayStoreImage) &&
         android_hw->PlayStore_enabled)
@@ -328,7 +326,6 @@ void ExtendedWindow::on_snapshotButton_clicked()     { adjustTabs(PANE_IDX_SNAPS
 void ExtendedWindow::on_recordScreenButton_clicked() { adjustTabs(PANE_IDX_RECORD_SCREEN); }
 void ExtendedWindow::on_googlePlayButton_clicked()   { adjustTabs(PANE_IDX_GOOGLE_PLAY); }
 void ExtendedWindow::on_carDataButton_clicked()      { adjustTabs(PANE_IDX_CAR); }
-void ExtendedWindow::on_perfstatsButton_clicked()    { adjustTabs(PANE_IDX_PERFSTATS); }
 
 void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     auto it = mPaneButtonMap.find(thisIndex);
