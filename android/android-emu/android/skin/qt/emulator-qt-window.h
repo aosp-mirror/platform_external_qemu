@@ -20,6 +20,8 @@
 #include "android/emulation/control/FilePusher.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/globals.h"
+#include "android/skin/qt/car-cluster-window.h"
+#include "android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/skin/event.h"
 #include "android/skin/qt/emulator-container.h"
@@ -210,6 +212,9 @@ public:
     bool isInZoomMode() const;
     ToolWindow*  toolWindow () const;
     ToolWindow2* toolWindow2() const;
+    CarClusterWindow* carClusterWindow() const;
+    CarClusterConnector* carClusterConnector() const;
+
     EmulatorContainer* containerWindow();
     void showZoomIfNotUserHidden();
     QSize containerSize() const;
@@ -404,6 +409,9 @@ private:
 
     ToolWindow*  mToolWindow;
     ToolWindow2* mToolWindow2;
+    CarClusterWindow* mCarClusterWindow;
+    CarClusterConnector *mCarClusterConnector;
+
     EmulatorContainer mContainer;
     EmulatorOverlay mOverlay;
     QRect mDeviceGeometry;
