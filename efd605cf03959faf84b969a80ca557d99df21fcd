@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "29c0f7e9_22cb58da",
+        "filename": "android-qemu2-glue/adbkey.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2019-03-21T04:24:39Z",
+      "side": 1,
+      "message": "ah thats ok then :)",
+      "parentUuid": "d40a69ee_5a1f33c4",
+      "range": {
+        "startLine": 116,
+        "startChar": 12,
+        "endLine": 116,
+        "endChar": 39
+      },
+      "revId": "efd605cf03959faf84b969a80ca557d99df21fcd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c4c4a1d4_72b366cc",
         "filename": "android-qemu2-glue/main.cpp",
         "patchSetId": 1
