@@ -166,6 +166,12 @@ typedef struct QAndroidVmOperations {
 
     // Query whether host audio is allowed.
     bool (*isRealAudioAllowed)(void);
+
+    // Set the UI display region
+    void (*setUIDisplayRegion)(int, int, int, int);
+
+    // Set the UI scale
+    void (*setUIScale)(int);
 } QAndroidVmOperations;
 
 // gQAndroidVmOperations is defined in .cpp depending on the target it used for,

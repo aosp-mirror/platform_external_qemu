@@ -130,6 +130,8 @@ extern bool skin_event_poll(SkinEvent* event);
 // position even if there is no click.
 extern void skin_enable_mouse_tracking(bool enable);
 
+extern void skin_event_add(SkinEvent *ev);
+
 #ifdef __cplusplus
 }
 #endif

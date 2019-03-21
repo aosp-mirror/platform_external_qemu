@@ -22,6 +22,7 @@
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "android/emulation/VmLock.h"
+#include "android/skin/event.h"
 #include "android/snapshot/common.h"
 #include "android/snapshot/interface.h"
 #include "android/snapshot/MemoryWatch.h"
@@ -574,6 +575,23 @@ static void* physical_memory_get_addr(uint64_t gpa) {
     return found ? res : nullptr;
 }
 
+static void set_ui_display_region(int x_offset, int y_offset, int w, int h) {
+    SkinEvent* event = new SkinEvent();
+    event->type = kEventSetDisplayRegion;
+    event->u.display_region.xOffset = x_offset;
+    event->u.display_region.yOffset = y_offset;
+    event->u.display_region.width   = w;
+    event->u.display_region.height  = h;
+    skin_event_add(event);
+}
+
+static void set_ui_scale(int scale) {
+    SkinEvent* event = new SkinEvent();
+    event->type = kEventSetScale;
+    event->u.window.scale = scale;
+    skin_event_add(event);
+}
+
 static const QAndroidVmOperations sQAndroidVmOperations = {
         .vmStop = qemu_vm_stop,
         .vmStart = qemu_vm_start,
@@ -596,6 +614,8 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .allowRealAudio = allow_real_audio,
         .physicalMemoryGetAddr = physical_memory_get_addr,
         .isRealAudioAllowed = is_real_audio_allowed,
+        .setUIDisplayRegion = set_ui_display_region,
+        .setUIScale = set_ui_scale,
 };
 
 const QAndroidVmOperations* const gQAndroidVmOperations =
