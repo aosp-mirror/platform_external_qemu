@@ -201,6 +201,7 @@ public:
         }
 
         pipeName = mBuffer + 5;
+
         pipeArgs = strchr(pipeName, ':');
 
         Service* svc = nullptr;

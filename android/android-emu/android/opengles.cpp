@@ -177,6 +177,7 @@ BAD_EXIT:
 int
 android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int guestApiLevel,
                               const QAndroidVmOperations *vm_operations,
+                              const QAndroidEmulatorWindowAgent *window_agent,
                               int* glesMajorVersion_out,
                               int* glesMinorVersion_out)
 {
@@ -225,6 +226,7 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     dma_ops.unlock = android_goldfish_dma_ops.unlock;
     sRenderLib->setDmaOps(dma_ops);
     sRenderLib->setVmOps(*vm_operations);
+    sRenderLib->setWindowOps(*window_agent);
     sRenderLib->setUsageTracker(android::base::CpuUsage::get(),
                                 android::base::MemoryTracker::get());
 

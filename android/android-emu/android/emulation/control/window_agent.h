@@ -58,6 +58,12 @@ typedef struct QAndroidEmulatorWindowAgent {
                                            int timeoutMs);
     // Fold/Unfold device
     void (*fold)(bool is_fold);
+    // Set the UI display region
+    void (*setUIDisplayRegion)(int, int, int, int);
+
+    // Set the UI scale
+    void (*setMultiDisplay)(int, int, int, int, int, bool);
+
 } QAndroidEmulatorWindowAgent;
 
 // Defined in android/window-agent-impl.cpp

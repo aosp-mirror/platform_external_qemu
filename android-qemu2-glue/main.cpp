@@ -32,6 +32,7 @@
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/automation_agent.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/emulation/control/window_agent.h"
 #include "android/error-messages.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/feature_control.h"
@@ -828,6 +829,7 @@ static int startEmulatorWithMinConfig(
 
     RendererConfig rendererConfig;
     configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
+                           gQAndroidEmulatorWindowAgent,
                            uiPreferredGlesBackend, &rendererConfig);
 
     // Gpu configuration is set, now initialize the screen recorder
@@ -1794,6 +1796,7 @@ extern "C" int main(int argc, char** argv) {
 
         RendererConfig rendererConfig;
         configAndStartRenderer(avd, opts, hw, gQAndroidVmOperations,
+                               gQAndroidEmulatorWindowAgent,
                                uiPreferredGlesBackend, &rendererConfig);
 
         // Gpu configuration is set, now initialize the screen recorder
