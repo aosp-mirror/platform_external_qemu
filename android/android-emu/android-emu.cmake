@@ -334,8 +334,8 @@ target_link_libraries(android-emu
                               # Prebuilt libraries
                               breakpad_client
                               curl
-                              ssl
-                              crypto
+                              OpenSSL::SSL
+                              OpenSSL::Crypto
                               LibXml2::LibXml2
                               png
                               lz4
@@ -468,8 +468,8 @@ target_link_libraries(android-emu-shared
                               # Prebuilt libraries
                               breakpad_client
                               curl
-                              ssl
-                              crypto
+                              OpenSSL::SSL
+                              OpenSSL::Crypto
                               LibXml2::LibXml2
                               png
                               lz4
