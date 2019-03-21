@@ -1,4 +1,4 @@
-set(aemugraphics_src ClientComposer.cpp Display.cpp GoldfishOpenglTestEnv.cpp Toplevel.cpp)
+set(aemugraphics_src ClientComposer.cpp Display.cpp GoldfishOpenglTestEnv.cpp Toplevel.cpp window-agent-mock-impl.cpp)
 android_add_shared_library(aemugraphics)
 target_compile_options(aemugraphics PRIVATE -fvisibility=default)
 
@@ -22,7 +22,7 @@ target_link_libraries(aemugraphics
                               gui
                               OpenglSystemCommon
                               EGL_emulation
-                              GLESv2_emulation
+			      GLESv2_emulation
                               emugl_base
                               OpenglRender_standalone_common)
 android_target_link_libraries(aemugraphics darwin-x86_64 PUBLIC "-framework CoreFoundation"
