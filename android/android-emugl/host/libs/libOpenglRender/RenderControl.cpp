@@ -1058,6 +1058,7 @@ static int rcCompose(uint32_t bufferSize, void* buffer) {
 }
 
 static int rcCreateDisplay(uint32_t* displayId) {
+    printf("Huan %s\n", __FUNCTION__);
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return -1;
@@ -1112,6 +1113,7 @@ static int rcGetDisplayPose(uint32_t displayId, uint32_t* x, uint32_t* y, uint32
 }
 
 static int rcSetDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+    printf("enter rcSetDisplayPose\n");
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return -1;
@@ -1160,4 +1162,11 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateColorBufferDMA = rcCreateColorBufferDMA;
     dec->rcWaitSyncKHR = rcWaitSyncKHR;
     dec->rcCompose = rcCompose;
+    dec->rcCreateDisplay = rcCreateDisplay;
+    dec->rcDestroyDisplay = rcDestroyDisplay;
+    dec->rcSetDisplayColorBuffer = rcSetDisplayColorBuffer;
+    dec->rcGetDisplayColorBuffer = rcGetDisplayColorBuffer;
+    dec->rcGetColorBufferDisplay = rcGetColorBufferDisplay;
+    dec->rcGetDisplayPose = rcGetDisplayPose;
+    dec->rcSetDisplayPose = rcSetDisplayPose;
 }

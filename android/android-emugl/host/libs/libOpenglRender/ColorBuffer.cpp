@@ -39,6 +39,16 @@
 #define DEBUG_CB_FBO 1
 #endif
 
+#include "FrameBuffer.h"
+#define MD_DEBUG \
+    FrameBuffer* fb = FrameBuffer::getFB(); \
+    for (auto iter = fb->m_displays.begin(); iter != fb->m_displays.end(); ++iter) { \
+      if (iter->second.cb == mHndl) { \
+          printf("%s: cb %d\n", __FUNCTION__, mHndl); \
+      } \
+    }
+
+
 namespace {
 
 // Lazily create and bind a framebuffer object to the current host context.
@@ -104,7 +114,6 @@ static bool sGetFormatParameters(
     int* bytesPerPixel,
     GLint* sizedInternalFormat,
     bool* isBlob) {
-
     *isBlob = false;
 
     switch (internalFormat) {
@@ -294,6 +303,8 @@ ColorBuffer::ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper)
     : m_display(display), m_helper(helper), mHndl(hndl) {}
 
 ColorBuffer::~ColorBuffer() {
+    MD_DEBUG
+
     RecursiveScopedHelperContext context(m_helper);
 
     if (m_blitEGLImage) {
@@ -330,11 +341,11 @@ void ColorBuffer::readPixels(int x,
                              GLenum p_format,
                              GLenum p_type,
                              void* pixels) {
+MD_DEBUG
     RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {
         return;
     }
-
     p_format = sGetUnsizedColorBufferFormat(p_format);
 
     touch();
@@ -349,7 +360,7 @@ void ColorBuffer::readPixels(int x,
 }
 
 void ColorBuffer::reformat(GLint internalformat) {
-
+MD_DEBUG
     GLenum texFormat = internalformat;
     GLenum pixelType = GL_UNSIGNED_BYTE;
     GLint sizedInternalFormat = GL_RGBA8;
@@ -399,7 +410,7 @@ void ColorBuffer::subUpdate(int x,
                             GLenum p_type,
                             void* pixels) {
     const GLenum p_unsizedFormat = sGetUnsizedColorBufferFormat(p_format);
-
+MD_DEBUG
     RecursiveScopedHelperContext context(m_helper);
 
     if (!context.isOk()) {
@@ -443,7 +454,7 @@ void ColorBuffer::subUpdate(int x,
 
 bool ColorBuffer::replaceContents(const void* newContents, size_t numBytes) {
     RecursiveScopedHelperContext context(m_helper);
-
+MD_DEBUG
     if (!context.isOk()) {
         fprintf(stderr, "%s: Failed: Could not get current context\n", __func__);
         return false;
@@ -479,7 +490,7 @@ bool ColorBuffer::replaceContents(const void* newContents, size_t numBytes) {
 
 bool ColorBuffer::readContents(size_t* numBytes, void* pixels) {
     RecursiveScopedHelperContext context(m_helper);
-
+MD_DEBUG
     *numBytes = m_numBytes;
 
     if (!pixels) return true;
@@ -490,7 +501,7 @@ bool ColorBuffer::readContents(size_t* numBytes, void* pixels) {
 }
 
 bool ColorBuffer::blitFromCurrentReadBuffer() {
-
+    MD_DEBUG
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
     if (!tInfo->currContext.get()) {
         // no Current context
@@ -650,9 +661,11 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
 }
 
 bool ColorBuffer::bindToTexture() {
+    MD_DEBUG
     if (!m_eglImage) {
         return false;
     }
+
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
     if (!tInfo->currContext.get()) {
         return false;
@@ -668,6 +681,7 @@ bool ColorBuffer::bindToTexture() {
 }
 
 bool ColorBuffer::bindToRenderbuffer() {
+    MD_DEBUG
     if (!m_eglImage) {
         return false;
     }
@@ -687,15 +701,18 @@ bool ColorBuffer::bindToRenderbuffer() {
 }
 
 GLuint ColorBuffer::scale() {
-    return m_resizer->update(m_tex);
+    return m_tex;
+//  return m_resizer->update(m_tex);
 }
 
 void ColorBuffer::setSync(bool debug) {
+MD_DEBUG
     m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
     if (debug) fprintf(stderr, "%s: %u to %p\n", __func__, getHndl(), m_sync);
 }
 
 void ColorBuffer::waitSync(bool debug) {
+MD_DEBUG
     if (debug) fprintf(stderr, "%s: %u sync %p\n", __func__, getHndl(), m_sync);
     if (m_sync) {
         s_egl.eglWaitImageFenceANDROID(m_display, m_sync);
@@ -704,23 +721,25 @@ void ColorBuffer::waitSync(bool debug) {
 
 bool ColorBuffer::post(GLuint tex, float rotation, float dx, float dy) {
     // NOTE: Do not call m_helper->setupContext() here!
+    MD_DEBUG
     waitSync();
     return m_helper->getTextureDraw()->draw(tex, rotation, dx, dy);
 }
 
 bool ColorBuffer::postWithOverlay(GLuint tex, float rotation, float dx, float dy) {
     // NOTE: Do not call m_helper->setupContext() here!
+MD_DEBUG
     waitSync();
     return m_helper->getTextureDraw()->drawWithOverlay(tex, rotation, dx, dy);
 }
 
 void ColorBuffer::readback(unsigned char* img) {
+    MD_DEBUG
     RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {
         return;
     }
     touch();
-
     waitSync();
 
     if (bindFbo(&m_fbo, m_tex)) {
@@ -730,12 +749,12 @@ void ColorBuffer::readback(unsigned char* img) {
 }
 
 void ColorBuffer::readbackAsync(GLuint buffer) {
+MD_DEBUG
     RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {
         return;
     }
     touch();
-
     waitSync();
 
     if (bindFbo(&m_fbo, m_tex)) {
@@ -747,12 +766,12 @@ void ColorBuffer::readbackAsync(GLuint buffer) {
 }
 
 void ColorBuffer::readbackAsync(GLuint buffer1, GLuint buffer2, unsigned char* img) {
+MD_DEBUG
     RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {
         return;
     }
     touch();
-
     waitSync();
 
     if (bindFbo(&m_fbo, m_tex)) {
@@ -772,6 +791,7 @@ void ColorBuffer::readbackAsync(GLuint buffer1, GLuint buffer2, unsigned char* i
 }
 
 HandleType ColorBuffer::getHndl() const {
+MD_DEBUG
     return mHndl;
 }
 
@@ -843,11 +863,13 @@ void ColorBuffer::restore() {
 
 
 GLuint ColorBuffer::getTexture() {
+MD_DEBUG
     touch();
     return m_tex;
 }
 
 void ColorBuffer::postLayer(ComposeLayer* l, int frameWidth, int frameHeight) {
+MD_DEBUG
     if (m_inUse) fprintf(stderr, "%s: cb in use\n", __func__);
     waitSync();
     m_helper->getTextureDraw()->drawLayer(l, frameWidth, frameHeight, m_width, m_height, m_tex);

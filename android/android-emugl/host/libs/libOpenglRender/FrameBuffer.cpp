@@ -38,6 +38,8 @@
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/misc.h"
+#include "emugl/common/vm_operations.h"
+#include "emugl/common/window_operations.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -84,7 +86,7 @@ private:
 
 FrameBuffer* FrameBuffer::s_theFrameBuffer = NULL;
 HandleType FrameBuffer::s_nextHandle = 0;
-uint32_t FrameBuffer::s_nextDisplayId = 1;
+uint32_t FrameBuffer::s_nextDisplayId = 1;  /* start from 1, 0 is for default Android display */
 
 static const GLint gles2ContextAttribsESOrGLCompat[] =
    { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
@@ -2095,6 +2097,8 @@ void FrameBuffer::onLastColorBufferRef(uint32_t handle) {
     m_colorbuffers.erase((HandleType)handle);
 }
 
+bool gMultiDisplaySet = 1;
+
 bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
     ComposeDevice* p = (ComposeDevice*)buffer;
     AutoLock mutex(m_lock);
@@ -2105,6 +2109,17 @@ bool FrameBuffer::compose(uint32_t bufferSize, void* buffer) {
     sendPostWorkerCmd(composeCmd);
 
     post(p->targetHandle, false);
+
+    //Test:
+    if (!gMultiDisplaySet) {
+        gMultiDisplaySet = 1;
+        mutex.unlock();
+        uint32_t id;
+        createDisplay(&id);
+        setDisplayPose(id, 0, 0, 600, 800);
+        createDisplay(&id);
+        setDisplayPose(id, 0, 0, 768, 1024);
+    }
     return true;
 }
 
@@ -2363,19 +2378,24 @@ int FrameBuffer::createDisplay(uint32_t* displayId) {
     }
     *displayId = s_nextDisplayId++;
     m_displays.emplace(*displayId, DisplayInfo());
+    printf("create display %d\n", *displayId);
     return 0;
 }
 
 int FrameBuffer::destroyDisplay(uint32_t displayId) {
     m_displays.erase(displayId);
+    updateDisplayPositions(displayId);
     return 0;
 }
 
 int FrameBuffer::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer) {
+    printf("%s: display %d cb %d\n", __FUNCTION__, displayId, colorBuffer);
     if (m_displays.find(displayId) == m_displays.end()) {
+        printf("cannot find display %d\n", displayId);
         return -1;
     }
     if (m_colorbuffers.find(colorBuffer) == m_colorbuffers.end()) {
+        printf("cannot find cb %d\n", colorBuffer);
         return -1;
     }
     m_displays[displayId].cb = colorBuffer;
@@ -2383,6 +2403,7 @@ int FrameBuffer::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer)
 }
 
 int FrameBuffer::getDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer) {
+    printf("%s: display %d cb %p\n", __FUNCTION__, displayId, colorBuffer);
     if (m_displays.find(displayId) == m_displays.end()) {
         return -1;
     }
@@ -2412,12 +2433,53 @@ int FrameBuffer::getDisplayPose(uint32_t displayId, uint32_t* x, uint32_t* y, ui
 }
 
 int FrameBuffer::setDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
+    printf("setDisplayPose, %d %d %d %d %d\n", displayId, x, y, w, h);
     if (m_displays.find(displayId) == m_displays.end()) {
         return -1;
     }
-    m_displays[displayId].pos_x = x;
-    m_displays[displayId].pos_y = y;
+    //TODO: assume displays in a row
+    int32_t pos_x, pos_y;
+    getCombinedDisplaySize(&pos_x, &pos_y, true);
+    m_displays[displayId].pos_x = pos_x;
+    m_displays[displayId].pos_y = pos_y;
     m_displays[displayId].width = w;
     m_displays[displayId].height = h;
+
+    get_emugl_window_operations().setMultiDisplay(0, 0, 0, getWidth(), getHeight(), true);
+    get_emugl_window_operations().setMultiDisplay(displayId, pos_x, pos_y, w, h, true);
+
+    int width, height;
+    getCombinedDisplaySize(&width, &height, true);
+
+    //TODO: need unlock before calling
+    get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
     return 0;
+}
+
+void FrameBuffer::getCombinedDisplaySize(int* w, int* h, bool androidWindow) {
+    // Simple version, displays in a row
+    int max_h = androidWindow ? getHeight() : 0;
+    int total_w = androidWindow ? getWidth() : 0;
+    for (auto iter = m_displays.begin(); iter != m_displays.end(); ++iter) {
+        if (iter->second.height > max_h) {
+            max_h = iter->second.height;
+        }
+        total_w += iter->second.width;
+    }
+    *w = total_w;
+    *h = max_h;
+}
+
+void FrameBuffer::updateDisplayPositions(uint32_t displayId) {
+    uint32_t x = 0;
+    for (auto iter = m_displays.begin(); iter != m_displays.end(); ++iter) {
+        if (iter->first > displayId) {
+            iter->second.pos_x = x;
+        }
+        x += iter->second.width;
+    }
+
+    int width, height;
+    getCombinedDisplaySize(&width, &height, true);
+    get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
 }

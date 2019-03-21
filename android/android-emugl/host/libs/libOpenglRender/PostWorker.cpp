@@ -24,9 +24,6 @@ void PostWorker::post(ColorBuffer* cb) {
     float py = mFb->getPy();
     int zRot = mFb->getZrot();
 
-    cb->waitSync();
-    GLuint tex = cb->scale();
-
     // Find the x and y values at the origin when "fully scrolled."
     // Multiply by 2 because the texture goes from -1 to 1, not 0 to 1.
     // Multiply the windowing coordinates by DPR because they ignore
@@ -38,10 +35,36 @@ void PostWorker::post(ColorBuffer* cb) {
     float dx = px * fx;
     float dy = py * fy;
 
+    int totalW, totalH, nextW;
+    mFb->getCombinedDisplaySize(&totalW, &totalH, true);
+    s_gles2.glViewport(0, 0, m_viewportWidth * mFb->getWidth() / totalW,
+                       m_viewportHeight * mFb->getHeight() / totalH);
+    nextW = m_viewportWidth * mFb->getWidth() / totalW;
+
+    cb->waitSync();
+    GLuint tex = cb->scale();
+
     //
     // render the color buffer to the window and apply the overlay
     //
     cb->postWithOverlay(tex, zRot, dx, dy);
+
+    // then post the multi windows
+    for (auto iter = mFb->m_displays.begin(); iter != mFb->m_displays.end(); ++iter) {
+        if (iter->second.width == 0 || iter->second.height == 0) {
+            continue;
+        }
+        s_gles2.glViewport(nextW, 0, m_viewportWidth * iter->second.width / totalW,
+                           m_viewportWidth * iter->second.height / totalH);
+        nextW += m_viewportWidth * iter->second.width / totalW;
+        ColorBufferPtr multiDisplayCb = mFb->findColorBuffer(iter->second.cb);
+        if (multiDisplayCb == nullptr) {
+            printf("fail to find cb %d\n", iter->second.cb);
+        } else {
+            multiDisplayCb->postWithOverlay(multiDisplayCb->getTexture(), zRot, dx, dy);
+        }
+    }
+
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
 }
 

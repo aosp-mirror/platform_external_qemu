@@ -201,6 +201,14 @@ public:
         }
 
         pipeName = mBuffer + 5;
+
+        //debug hack
+        char* hack = "opengles";
+        if (strcmp(pipeName, "openglesHuan") == 0) {
+            printf("Huan: this is my pipe\n");
+            pipeName = hack;
+        }
+
         pipeArgs = strchr(pipeName, ':');
 
         Service* svc = nullptr;

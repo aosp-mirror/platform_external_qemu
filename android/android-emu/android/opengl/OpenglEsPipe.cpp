@@ -386,7 +386,7 @@ public:
             ptr += buffers[n].size;
         }
 
-        D("%s: sending %d bytes to host", __func__, count);
+        D("%s: %p sending %d bytes to host", __func__, this, count);
         // Send it through the channel.
         auto result = mChannel->tryWrite(std::move(outBuffer));
         if (result != IoResult::Ok) {
