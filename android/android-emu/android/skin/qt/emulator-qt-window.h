@@ -12,9 +12,9 @@
 
 #pragma once
 
+#include "android/base/StringView.h"
 #include "android/base/containers/CircularBuffer.h"
 #include "android/base/memory/OnDemand.h"
-#include "android/base/StringView.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/emulation/control/ApkInstaller.h"
 #include "android/emulation/control/FilePusher.h"
@@ -22,14 +22,16 @@
 #include "android/globals.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/skin/event.h"
+#include "android/skin/image.h"
+#include "android/skin/qt/car-cluster-window.h"
 #include "android/skin/qt/emulator-container.h"
 #include "android/skin/qt/emulator-overlay.h"
 #include "android/skin/qt/error-dialog.h"
-#include "android/skin/qt/tool-window.h"
+#include "android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h"
 #include "android/skin/qt/tool-window-2.h"
+#include "android/skin/qt/tool-window.h"
 #include "android/skin/qt/ui-event-recorder.h"
 #include "android/skin/qt/user-actions-counter.h"
-#include "android/skin/image.h"
 #include "android/skin/surface.h"
 #include "android/skin/winsys.h"
 
@@ -210,6 +212,9 @@ public:
     bool isInZoomMode() const;
     ToolWindow*  toolWindow () const;
     ToolWindow2* toolWindow2() const;
+    CarClusterWindow* carClusterWindow() const;
+    CarClusterConnector* carClusterConnector() const;
+
     EmulatorContainer* containerWindow();
     void showZoomIfNotUserHidden();
     QSize containerSize() const;
@@ -404,6 +409,9 @@ private:
 
     ToolWindow*  mToolWindow;
     ToolWindow2* mToolWindow2;
+    CarClusterWindow* mCarClusterWindow;
+    CarClusterConnector* mCarClusterConnector;
+
     EmulatorContainer mContainer;
     EmulatorOverlay mOverlay;
     QRect mDeviceGeometry;

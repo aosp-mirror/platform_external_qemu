@@ -13,6 +13,7 @@
 #include "android/skin/qt/emulator-qt-window.h"
 
 #include "android/android.h"
+#include "android/avd/info.h"
 #include "android/base/Optional.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
@@ -318,6 +319,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mStartupDialog(this),
       mToolWindow(nullptr),
       mToolWindow2(nullptr),
+      mCarClusterWindow(nullptr),
+      mCarClusterConnector(nullptr),
       mContainer(this),
       mOverlay(this, &mContainer),
       mZoomFactor(1.0),
@@ -330,13 +333,14 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mSkinGapBottom(0),
       mSkinGapLeft(0),
       mMainLoopThread(nullptr),
-      mWin32WarningBox(QMessageBox::Information,
-                       tr("Windows 32-bit Deprecation"),
-                       tr("We strongly recommend using the 64-bit version "
-                          "of the Windows emulator; the 32-bit version is deprecated "
-                          "and will be removed soon."),
-                       QMessageBox::Ok,
-                       this),
+      mWin32WarningBox(
+              QMessageBox::Information,
+              tr("Windows 32-bit Deprecation"),
+              tr("We strongly recommend using the 64-bit version "
+                 "of the Windows emulator; the 32-bit version is deprecated "
+                 "and will be removed soon."),
+              QMessageBox::Ok,
+              this),
       mAvdWarningBox(QMessageBox::Information,
                      tr("Recommended AVD"),
                      tr("Running an x86 based Android Virtual Device (AVD) is "
@@ -447,6 +451,11 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                                  mUserActionsCounter, mToolWindow2);
 
     mToolWindow2->setMainToolWindow(mToolWindow);
+
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+        mCarClusterWindow = new CarClusterWindow(this, &mContainer);
+        mCarClusterConnector = new CarClusterConnector(mCarClusterWindow);
+    }
 
     this->setAcceptDrops(true);
 
@@ -654,6 +663,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         if (mToolWindow2) {
                             mToolWindow2->setEnabled(false);
                         }
+                        if (mCarClusterWindow) {
+                            mCarClusterWindow->setEnabled(false);
+                        }
                         if (SnapshotPage::get()) {
                             SnapshotPage::get()->setOperationInProgress(true);
                         }
@@ -668,6 +680,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         }
                         if (mToolWindow2) {
                             mToolWindow2->setEnabled(true);
+                        }
+                        if (mCarClusterWindow) {
+                            mCarClusterWindow->setEnabled(true);
                         }
                         if (SnapshotPage::get()) {
                             SnapshotPage::get()->setOperationInProgress(false);
@@ -700,6 +715,16 @@ EmulatorQtWindow::~EmulatorQtWindow() {
     if (mToolWindow2) {
         delete mToolWindow2;
         mToolWindow2 = NULL;
+    }
+
+    if (mCarClusterWindow) {
+        delete mCarClusterWindow;
+        mCarClusterWindow = NULL;
+    }
+
+    if (mCarClusterConnector) {
+        delete mCarClusterConnector;
+        mCarClusterConnector = NULL;
     }
 
     mStartupDialog.ifExists([&] {
@@ -869,6 +894,10 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         mToolWindow2->setEnabled(false);
     }
 
+    if (mCarClusterWindow) {
+        mCarClusterWindow->setEnabled(false);
+    }
+
     const bool alreadyClosed = mClosed;
     mClosed = true;
     crashhandler_exitmode(__FUNCTION__);
@@ -926,6 +955,9 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         }
         if (mToolWindow2) {
             mToolWindow2->hide();
+        }
+        if (mCarClusterWindow) {
+            mCarClusterWindow->hide();
         }
         mContainer.hide();
         mOverlay.hide();
@@ -1228,6 +1260,9 @@ void EmulatorQtWindow::raise() {
     mContainer.raise();
     mToolWindow->raise();
     mToolWindow2->raise();
+    if (mCarClusterWindow) {
+        mCarClusterWindow->raise();
+    }
 }
 
 void EmulatorQtWindow::show() {
@@ -1238,6 +1273,9 @@ void EmulatorQtWindow::show() {
     QFrame::show();
     mToolWindow->show();
     mToolWindow2->show();
+    if (mCarClusterWindow) {
+        mCarClusterConnector->startSendingStartRequest();
+    }
 
     QObject::connect(window()->windowHandle(), &QWindow::screenChanged, this,
                      &EmulatorQtWindow::onScreenChanged);
@@ -1256,6 +1294,9 @@ void EmulatorQtWindow::setOnTop(bool onTop) {
     setFrameOnTop(&mContainer, onTop);
     setFrameOnTop(mToolWindow, onTop);
     setFrameOnTop(mToolWindow2, onTop);
+    if (mCarClusterWindow) {
+        setFrameOnTop(mCarClusterWindow, onTop);
+    }
 }
 
 void EmulatorQtWindow::setFrameAlways(bool frameAlways)
@@ -1380,6 +1421,10 @@ void EmulatorQtWindow::slot_clearInstance() {
     if (mToolWindow2) {
         delete mToolWindow2;
         mToolWindow2 = NULL;
+    }
+    if (mCarClusterWindow) {
+        delete mCarClusterWindow;
+        mCarClusterWindow = NULL;
     }
 #endif
 
@@ -2395,6 +2440,14 @@ ToolWindow* EmulatorQtWindow::toolWindow() const {
 
 ToolWindow2* EmulatorQtWindow::toolWindow2() const {
     return mToolWindow2;
+}
+
+CarClusterWindow* EmulatorQtWindow::carClusterWindow() const {
+    return mCarClusterWindow;
+}
+
+CarClusterConnector* EmulatorQtWindow::carClusterConnector() const {
+    return mCarClusterConnector;
 }
 
 EmulatorContainer* EmulatorQtWindow::containerWindow() {
