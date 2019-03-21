@@ -15,6 +15,7 @@
 #include <stddef.h>
 
 #include "android/emulation/control/vm_operations.h"
+#include "android/emulation/control/window_agent.h"
 #include "android/utils/compiler.h"
 
 #ifdef __cplusplus
@@ -40,6 +41,7 @@ int android_initOpenglesEmulation(void);
 int android_startOpenglesRenderer(int width, int height,
                                   bool isPhone, int guestApiLevel,
                                   const QAndroidVmOperations *vm_operations,
+                                  const QAndroidEmulatorWindowAgent *window_agent,
                                   int* glesMajorVersion_out,
                                   int* glesMinorVersion_out);
 

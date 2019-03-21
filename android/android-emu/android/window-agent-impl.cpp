@@ -15,6 +15,7 @@
 #include "android/emulation/control/window_agent.h"
 
 #include "android/emulator-window.h"
+#include "android/skin/event.h"
 #include "android/skin/qt/emulator-container.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/utils/debug.h"
@@ -100,7 +101,30 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         return win->isFolded();
                     }
                     return false;
-                }
+                },
+
+        .setUIDisplayRegion =
+                [](int x_offset, int y_offset, int w, int h) {
+                        SkinEvent* event = new SkinEvent();
+                        event->type = kEventSetDisplayRegionAndUpdate;
+                        event->u.display_region.xOffset = x_offset;
+                        event->u.display_region.yOffset = y_offset;
+                        event->u.display_region.width   = w;
+                        event->u.display_region.height  = h;
+                        skin_event_add(event);
+                },
+        .setMultiDisplay =
+                [](int id, int x, int y, int w, int h, bool add) {
+                    SkinEvent* event = new SkinEvent();
+                    event->type = kEventSetMultiDisplay;
+                    event->u.multi_display.id = id;
+                    event->u.multi_display.xOffset = x;
+                    event->u.multi_display.yOffset = y;
+                    event->u.multi_display.width = w;
+                    event->u.multi_display.height = h;
+                    event->u.multi_display.add= add;
+                    skin_event_add(event);
+                },
 };
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
