@@ -23,7 +23,7 @@ set(OPTION_SDK_TOOLS_REVISION "" CACHE STRING "The tools revision to use, if any
 set(OPTION_SDK_TOOLS_BUILD_NUMBER "" CACHE STRING "The sdk buildnumber to use, if any.")
 set(OPTION_ASAN "" CACHE STRING "The list of build sanitizers to user")
 set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
-
+set(QEMU_UPSTREAM FALSE CACHE BOOL "True if the upstream version of qemu should be build.")
 
 string(STRIP "${OPTION_SDK_TOOLS_BUILD_NUMBER}" OPTION_SDK_TOOLS_BUILD_NUMBER)
 string(STRIP "${OPTION_SDK_TOOLS_REVISION}" OPTION_SDK_TOOLS_REVISION)
@@ -40,11 +40,15 @@ else()
   message(STATUS "Uploading symbols to ${ANDROID_SYMBOL_URL}")
 endif()
 
-if (ANDROID_EXTRACT_SYMBOLS AND NOT ANDROID_HOST_TAG STREQUAL ANDROID_TARGET_TAG AND NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
-  message(WARNING "Symbol extraction not supported when cross compiling from ${ANDROID_HOST_TAG} -> ${ANDROID_TARGET_TAG}, disabling.")
+if(ANDROID_EXTRACT_SYMBOLS
+   AND NOT ANDROID_HOST_TAG STREQUAL ANDROID_TARGET_TAG
+   AND NOT ANDROID_TARGET_TAG STREQUAL "windows-x86_64")
+  message(
+    WARNING
+      "Symbol extraction not supported when cross compiling from ${ANDROID_HOST_TAG} -> ${ANDROID_TARGET_TAG}, disabling."
+    )
   set(ANDROID_EXTRACT_SYMBOLS FALSE)
 endif()
-
 
 # Make sure targets have complete control of include order.
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
@@ -235,6 +239,7 @@ set(
   )
 
 prebuilt(GLIB2)
+prebuilt(SDL2)
 prebuilt(FDT)
 prebuilt(PIXMAN)
 if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
@@ -434,13 +439,12 @@ target_link_libraries(qemu2-common PUBLIC android-qemu-deps)
 
 set(libqemu2-util_src ${libqemuutil_sources} ${libqemuutil_generated_sources})
 if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
-  # So we have some linker issues on MSVC debug (b/122598666) where clang places things in the .pdata sections
-  # which the MSVC linker cannot handle.  We cannot use the lld-link.exe linker as it deadlocks for unknown.
-  # The workaround is to compile mail-loop.c with all optimizations enabled.
+  # So we have some linker issues on MSVC debug (b/122598666) where clang places things in the .pdata sections which the
+  # MSVC linker cannot handle.  We cannot use the lld-link.exe linker as it deadlocks for unknown. The workaround is to
+  # compile mail-loop.c with all optimizations enabled.
   set_source_files_properties(util/main-loop.c PROPERTIES COMPILE_FLAGS "-O2")
   set_source_files_properties(util/main-loop.c PROPERTIES COMPILE_DEFINITIONS "NDEBUG=1")
 endif()
-
 
 android_add_library(libqemu2-util)
 target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
@@ -467,6 +471,15 @@ android_add_qemu_executable(aarch64 aarch64 arm64 "${ANDROID_QEMU_arm_DEVICES_${
 android_add_qemu_executable(armel arm arm "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}" arm)
 android_add_qemu_headless_executable(x86_64 x86_64 x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}" i386)
 android_add_qemu_headless_executable(aarch64 aarch64 arm64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}" arm)
+
+# and the upstream qemu targets, if desired.
+if(QEMU_UPSTREAM)
+  message(STATUS "Building upstream qemu.")
+  android_add_qemu_upstream_executable(i386 i386 x86 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}" i386)
+  android_add_qemu_upstream_executable(x86_64 x86_64 x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}" i386)
+  android_add_qemu_upstream_executable(aarch64 aarch64 arm64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}" arm)
+  android_add_qemu_upstream_executable(armel arm arm "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}" arm)
+endif()
 
 # The tests currently work on linux only.
 if(ANDROID_TARGET_TAG MATCHES "linux.*")
