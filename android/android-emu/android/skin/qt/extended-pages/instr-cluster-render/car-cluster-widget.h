@@ -16,6 +16,17 @@
 #include <QWidget>
 #include <QImage>
 
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
+#include <sys/time.h>
+#endif
+
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/base/synchronization/MessageChannel.h"
+#include "android/base/system/System.h"
+#include "android/base/threads/FunctorThread.h"
 #include "android/base/threads/WorkerThread.h"
 
 extern "C" {
@@ -33,37 +44,12 @@ public:
     CarClusterWidget(QWidget* parent = 0);
     ~CarClusterWidget();
 
-    static void processFrame(const uint8_t* frame, int frameSize);
-
-signals:
-    void sendImage(const QImage &image);
+    void updatePixmap(const QImage& image);
 
 protected:
     void paintEvent(QPaintEvent* event);
-    void showEvent(QShowEvent* event);
-    void hideEvent(QHideEvent* event);
-
-private slots:
-    void updatePixmap(const QImage& image);
 
 private:
     static void sendCarClusterMsg(uint8_t flag);
-
-    struct FrameInfo {
-        int size;
-        std::vector<uint8_t> frameData;
-    };
-
-    android::base::WorkerThread<FrameInfo> mWorkerThread;
-    android::base::WorkerProcessingResult workerProcessFrame(FrameInfo& frameInfo);
-
     QPixmap mPixmap;
-
-    AVCodec* mCodec;
-    AVCodecContext* mCodecCtx;
-    AVFrame* mFrame;
-
-    SwsContext* mCtx;
-
-    uint8_t* mRgbData;
 };
