@@ -57,6 +57,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/window.c
     android/skin/resource.c
     android/skin/ui.c
+    android/skin/qt/car-cluster-window.cpp
     android/skin/qt/event-qt.cpp
     android/skin/qt/init-qt.cpp
     android/skin/qt/surface-qt.cpp
@@ -81,6 +82,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/extended-pages/bug-report-page.cpp
     android/skin/qt/extended-pages/camera-page.cpp
     android/skin/qt/extended-pages/camera-virtualscene-subpage.cpp
+    android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.cpp
     android/skin/qt/extended-pages/car-data-emulation/car-property-table.cpp
     android/skin/qt/extended-pages/car-data-emulation/car-property-utils.cpp
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp
