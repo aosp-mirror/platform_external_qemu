@@ -317,12 +317,24 @@ static void prepareDataFolder(const char* destDirectory,
     // The adb_keys file permission will also be set in guest system.
     // Referencing system/core/rootdir/init.usb.rc
     static const int kAdbKeyDirFilePerm = 02750;
+    const char* kPrivateKeyFileName = "adbkey";
+    const char* kPublicKeyFileName = "adbkey.pub";
     path_copy_dir(destDirectory, srcDirectory);
-    std::string adbKeyPubPath = getAdbKeyPath("adbkey.pub");
-    std::string adbKeyPrivPath = getAdbKeyPath("adbkey");
+    std::string adbKeyPubPath = getAdbKeyPath(kPublicKeyFileName);
+    std::string adbKeyPrivPath = getAdbKeyPath(kPrivateKeyFileName);
 
     if (adbKeyPubPath == "" && adbKeyPrivPath == "") {
-        return;
+        std::string path = PathUtils::join(
+                android::ConfigDirs::getUserDirectory(), kPrivateKeyFileName);
+        // try to generate the private key
+        if (!adb_auth_keygen(path.c_str())) {
+            dwarning("adbkey generation failed");
+            return;
+        }
+        adbKeyPrivPath = getAdbKeyPath(kPrivateKeyFileName);
+        if (adbKeyPrivPath == "") {
+            return;
+        }
     }
     std::string guestAdbKeyDir = PathUtils::join(destDirectory, "misc", "adb");
     std::string guestAdbKeyPath = PathUtils::join(guestAdbKeyDir, "adb_keys");
