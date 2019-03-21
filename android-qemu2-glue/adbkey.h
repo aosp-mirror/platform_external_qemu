@@ -13,4 +13,5 @@
 
 #include <string>
 
+bool adb_auth_keygen(const char* filename);
 bool pubkey_from_privkey(const std::string& path, std::string* out);
