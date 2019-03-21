@@ -527,7 +527,43 @@ function(android_complete_archive LIBCMD LIBNAME)
   endif()
 endfunction()
 
-# Constructs the qemu executable.
+# Constructs the upstream qemu executable.
+#
+# ANDROID_AARCH The android architecture name
+# QEMU_AARCH The qemu architecture name.
+# CONFIG_AARCH The configuration architecture used.
+# STUBS The set of stub sources to use.
+# CPU The target cpu architecture used by qemu
+#
+# (Maybe on one day we will standardize all the naming, between qemu and configs and cpus..)
+function(android_add_qemu_upstream_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS CPU)
+  android_complete_archive(QEMU_UPSTREAM_COMPLETE_LIB "qemu2-common")
+  set(qemu-upstream-${ANDROID_AARCH}_src vl.c ${STUBS} ${qemu-system-${QEMU_AARCH}_sources}
+                 ${qemu-system-${QEMU_AARCH}_generated_sources})
+  android_add_executable(qemu-upstream-${ANDROID_AARCH})
+  target_compile_definitions(qemu-upstream-${ANDROID_AARCH} PRIVATE -DNEED_CPU_H)
+
+  target_include_directories(qemu-upstream-${ANDROID_AARCH}
+                             PRIVATE android-qemu2-glue/config/target-${CONFIG_AARCH} target/${CPU})
+  target_link_libraries(qemu-upstream-${ANDROID_AARCH}
+                        PRIVATE android-qemu-deps
+                                ${QEMU_UPSTREAM_COMPLETE_LIB}
+                                android-emu
+                                libqemu2-glue
+                                libqemu2-util
+                                SDL2::SDL2
+                                android-qemu-deps)
+
+  if(MSVC)
+    # Workaround b/121393952, msvc linker does not have notion of whole-archive. so we need to use the general approach
+    # supported by newer cmake versions
+    target_link_libraries(qemu-system-${ANDROID_AARCH} PRIVATE $<TARGET_OBJECTS:qemu2-common>)
+    set_target_properties(qemu-system-${ANDROID_AARCH} PROPERTIES LINK_FLAGS "/FORCE:multiple /NODEFAULTLIB:LIBCMT")
+  endif()
+endfunction()
+
+
+# Constructs the upstream qemu executable.
 #
 # ANDROID_AARCH The android architecture name
 # QEMU_AARCH The qemu architecture name.
@@ -538,7 +574,7 @@ endfunction()
 # (Maybe on one day we will standardize all the naming, between qemu and configs and cpus..)
 function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS CPU)
   # Workaround b/121393952, older cmake does not have proper object archives
-  if (NOT MSVC)
+  if(NOT MSVC)
     android_complete_archive(QEMU_COMPLETE_LIB "qemu2-common")
   endif()
   add_executable(qemu-system-${ANDROID_AARCH}
@@ -563,8 +599,8 @@ function(android_add_qemu_executable ANDROID_AARCH QEMU_AARCH CONFIG_AARCH STUBS
                                 emulator-libui
                                 android-emu
                                 OpenGLESDispatch
-                                ${VIRGLRENDERER_LIBRARIES}
                                 android-qemu-deps)
+
   if(MSVC)
     # Workaround b/121393952, msvc linker does not have notion of whole-archive. so we need to use the general approach
     # supported by newer cmake versions
