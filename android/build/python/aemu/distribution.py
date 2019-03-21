@@ -47,7 +47,7 @@ zip_sets = {
             'build/debug_info', r'.*'
         ],
         # Look for all files under {out}/distribution
-        'sdk-repo-{target}-emulator-{sdk_build_number}.zip': ['distribution', r'.*']
+        'sdk-repo-{target}-emulator-{sdk_build_number}.zip': ['distribution', r'.*'],
     }
 }
 

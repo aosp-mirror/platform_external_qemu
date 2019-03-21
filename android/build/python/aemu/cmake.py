@@ -63,6 +63,10 @@ flags.DEFINE_boolean(
     'clean', True, 'Clean the destination build directory before configuring. '
     'Setting this to false will attempt an incremental build. '
     'Note that this can introduce cmake caching issues.')
+flags.DEFINE_multi_string('cmake_option', [], 'Options that should be passed '
+                          'on directly to cmake. These will be passed on directly '
+                          'to the underlying cmake project. For example: '
+                          '--cmake_option QEMU_UPSTREAM=FALSE')
 
 def configure():
     """Configures the cmake project."""
@@ -84,6 +88,11 @@ def configure():
     cmake_cmd += SymbolUris.from_string(FLAGS.crash).to_cmd()
     cmake_cmd += BuildConfig.from_string(FLAGS.config).to_cmd()
     cmake_cmd += ['-DQTWEBENGINE=%s' % FLAGS.qtwebengine]
+
+    if FLAGS.cmake_option:
+        flags = ['-D%s' % x for x in FLAGS.cmake_option]
+        logging.warn('Dangerously adding the following flags to cmake: %s', flags)
+        cmake_cmd += flags
 
     if FLAGS.sdk_revision:
         sdk_revision = FLAGS.sdk_revision
@@ -141,7 +150,7 @@ def main(argv=None):
         data = {'aosp': get_aosp_root(),
                 'target': FLAGS.target,
                 'sdk_build_number': FLAGS.sdk_build_number,
-                'config' : FLAGS.config
+                'config': FLAGS.config
                 }
         if FLAGS.target == 'mingw':
             data['target'] = 'windows'
