@@ -241,7 +241,6 @@ if(NOT ANDROID_TARGET_TAG MATCHES "windows_msvc.*")
   prebuilt(VIRGLRENDERER)
 endif()
 prebuilt(TCMALLOC)
-prebuilt(OpenSSL)
 
 # There is no USB support on windows, so we will not try to resolve it.
 if(NOT ANDROID_TARGET_TAG MATCHES "windows.*")

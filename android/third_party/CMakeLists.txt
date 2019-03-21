@@ -53,7 +53,16 @@ if (ANDROID_TARGET_TAG STREQUAL "windows-x86_64" OR ANDROID_TARGET_TAG STREQUAL 
   prebuilt(BREAKPAD)
 else()
   add_subdirectory(breakpad)
- endif()
+endif()
+
+# Only use boringssl for msvc, due to   b/129081460
+if(ANDROID_TARGET_TAG STREQUAL "windows_msvc-x86_64")
+  add_subdirectory(boringssl)
+else()
+  # Use prebuilt due to b/129076232
+  message(STATUS "Using prebuilt openssl..")
+  prebuilt(OpenSSL)
+endif()
 
 add_library(picosha2 INTERFACE)
 target_include_directories(picosha2 INTERFACE picosha2)
