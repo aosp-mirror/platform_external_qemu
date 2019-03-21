@@ -104,7 +104,6 @@ static bool sGetFormatParameters(
     int* bytesPerPixel,
     GLint* sizedInternalFormat,
     bool* isBlob) {
-
     *isBlob = false;
 
     switch (internalFormat) {
@@ -340,7 +339,6 @@ void ColorBuffer::readPixels(int x,
     if (!context.isOk()) {
         return;
     }
-
     p_format = sGetUnsizedColorBufferFormat(p_format);
 
     touch();
@@ -355,7 +353,6 @@ void ColorBuffer::readPixels(int x,
 }
 
 void ColorBuffer::reformat(GLint internalformat) {
-
     GLenum texFormat = internalformat;
     GLenum pixelType = GL_UNSIGNED_BYTE;
     GLint sizedInternalFormat = GL_RGBA8;
@@ -405,7 +402,6 @@ void ColorBuffer::subUpdate(int x,
                             GLenum p_type,
                             void* pixels) {
     const GLenum p_unsizedFormat = sGetUnsizedColorBufferFormat(p_format);
-
     RecursiveScopedHelperContext context(m_helper);
 
     if (!context.isOk()) {
@@ -449,7 +445,6 @@ void ColorBuffer::subUpdate(int x,
 
 bool ColorBuffer::replaceContents(const void* newContents, size_t numBytes) {
     RecursiveScopedHelperContext context(m_helper);
-
     if (!context.isOk()) {
         fprintf(stderr, "%s: Failed: Could not get current context\n", __func__);
         return false;
@@ -485,7 +480,6 @@ bool ColorBuffer::replaceContents(const void* newContents, size_t numBytes) {
 
 bool ColorBuffer::readContents(size_t* numBytes, void* pixels) {
     RecursiveScopedHelperContext context(m_helper);
-
     *numBytes = m_numBytes;
 
     if (!pixels) return true;
@@ -496,7 +490,6 @@ bool ColorBuffer::readContents(size_t* numBytes, void* pixels) {
 }
 
 bool ColorBuffer::blitFromCurrentReadBuffer() {
-
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
     if (!tInfo->currContext.get()) {
         // no Current context
@@ -659,6 +652,7 @@ bool ColorBuffer::bindToTexture() {
     if (!m_eglImage) {
         return false;
     }
+
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
     if (!tInfo->currContext.get()) {
         return false;
@@ -726,7 +720,6 @@ void ColorBuffer::readback(unsigned char* img) {
         return;
     }
     touch();
-
     waitSync();
 
     if (bindFbo(&m_fbo, m_tex)) {
@@ -741,7 +734,6 @@ void ColorBuffer::readbackAsync(GLuint buffer) {
         return;
     }
     touch();
-
     waitSync();
 
     if (bindFbo(&m_fbo, m_tex)) {
@@ -758,7 +750,6 @@ void ColorBuffer::readbackAsync(GLuint buffer1, GLuint buffer2, unsigned char* i
         return;
     }
     touch();
-
     waitSync();
 
     if (bindFbo(&m_fbo, m_tex)) {
