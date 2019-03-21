@@ -34,6 +34,22 @@
      <string>Car sensor data</string>
     </attribute>
    </widget>
+   <!-- Instrument Cluster Tab -->
+   <widget class="QWidget" name="instr_cluster_tab">
+    <attribute name="title">
+     <string>Instrument cluster</string>
+    </attribute>
+    <widget class="CarClusterWidget" name="render_window" native="true">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>620</width>
+       <height>349</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
    <!-- Car Property Table Tab -->
    <widget class="CarPropertyTable" name="car_property_table">
     <attribute name="title">
@@ -48,6 +64,11 @@
    <class>CarSensorData</class>
    <extends>QWidget</extends>
    <header>android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h</header>
+  </customwidget>
+  <customwidget>
+    <class>CarClusterWidget</class>
+    <extends>QWidget</extends>
+    <header>android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.h</header>
   </customwidget>
   <customwidget>
    <class>CarPropertyTable</class>

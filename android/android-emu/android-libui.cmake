@@ -57,7 +57,6 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/window.c
     android/skin/resource.c
     android/skin/ui.c
-    android/skin/qt/car-cluster-window.cpp
     android/skin/qt/event-qt.cpp
     android/skin/qt/init-qt.cpp
     android/skin/qt/surface-qt.cpp
