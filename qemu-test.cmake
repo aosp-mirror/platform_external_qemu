@@ -14,7 +14,7 @@ set(libqemu-test-crypto_src
     ${ANDROID_AUTOGEN}/tests/test-qapi-events.c
     ${ANDROID_AUTOGEN}/tests/test-qapi-introspect.c)
 android_add_library(libqemu-test-crypto)
-target_link_libraries(libqemu-test-crypto PRIVATE libqemu-test crypto)
+target_link_libraries(libqemu-test-crypto PRIVATE libqemu-test OpenSSL::Crypto)
 
 # Adds a qemu test, note that these test should never bring in an android dependency
 function(add_qtest NAME DEPENDENCY)
