@@ -320,7 +320,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mToolWindow(nullptr),
       mToolWindow2(nullptr),
       mCarClusterWindow(nullptr),
-      mCarClusterConnector(nullptr),
       mContainer(this),
       mOverlay(this, &mContainer),
       mZoomFactor(1.0),
@@ -453,7 +452,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         mCarClusterWindow = new CarClusterWindow(this, &mContainer);
-        mCarClusterConnector = new CarClusterConnector(mCarClusterWindow);
     }
 
     this->setAcceptDrops(true);
@@ -719,11 +717,6 @@ EmulatorQtWindow::~EmulatorQtWindow() {
     if (mCarClusterWindow) {
         delete mCarClusterWindow;
         mCarClusterWindow = NULL;
-    }
-
-    if (mCarClusterConnector) {
-        delete mCarClusterConnector;
-        mCarClusterConnector = NULL;
     }
 
     mStartupDialog.ifExists([&] {
@@ -1272,7 +1265,9 @@ void EmulatorQtWindow::show() {
     QFrame::show();
     mToolWindow->show();
     mToolWindow2->show();
-    mCarClusterConnector->startSendingStartRequest();
+    if (mCarClusterWindow) {
+        mCarClusterWindow->show();
+    }
 
     QObject::connect(window()->windowHandle(), &QWindow::screenChanged, this,
                      &EmulatorQtWindow::onScreenChanged);
@@ -2449,10 +2444,6 @@ ToolWindow2* EmulatorQtWindow::toolWindow2() const {
 
 CarClusterWindow* EmulatorQtWindow::carClusterWindow() const{
     return mCarClusterWindow;
-}
-
-CarClusterConnector* EmulatorQtWindow::carClusterConnector() const{
-    return mCarClusterConnector;
 }
 
 EmulatorContainer* EmulatorQtWindow::containerWindow() {
