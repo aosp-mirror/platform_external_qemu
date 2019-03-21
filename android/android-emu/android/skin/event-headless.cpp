@@ -37,3 +37,5 @@ extern bool skin_event_poll(SkinEvent* event) {
 extern void skin_enable_mouse_tracking(bool enable) {
     (void)enable;
 }
+
+extern void skin_event_add(SkinEvent* event) { }

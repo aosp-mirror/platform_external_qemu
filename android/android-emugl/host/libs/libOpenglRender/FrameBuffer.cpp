@@ -38,9 +38,12 @@
 #include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/misc.h"
+#include "emugl/common/vm_operations.h"
 
 #include <stdio.h>
 #include <string.h>
+
+#define MAX_NUM_MULTI_DISPLAY 10
 
 using android::base::AutoLock;
 using android::base::LazyInstance;
@@ -84,7 +87,7 @@ private:
 
 FrameBuffer* FrameBuffer::s_theFrameBuffer = NULL;
 HandleType FrameBuffer::s_nextHandle = 0;
-uint32_t FrameBuffer::s_nextDisplayId = 1;
+uint32_t FrameBuffer::s_nextDisplayId = 1;  /* start from 1, 0 is for default Android display */
 
 static const GLint gles2ContextAttribsESOrGLCompat[] =
    { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
@@ -2388,22 +2391,47 @@ void FrameBuffer::unregisterProcessCleanupCallback(void* key) {
 }
 
 int FrameBuffer::createDisplay(uint32_t* displayId) {
+    AutoLock mutex(m_lock);
     if (displayId == nullptr) {
         ERR("%s: null displayId", __FUNCTION__);
         return -1;
     }
+    if (m_displays.size() > MAX_NUM_MULTI_DISPLAY) {
+        ERR("%s: cannot create more displays, exceeding limits %d",
+            __FUNCTION__, MAX_NUM_MULTI_DISPLAY);
+        return -1;
+    }
     *displayId = s_nextDisplayId++;
     m_displays.emplace(*displayId, DisplayInfo());
+    DBG("create display %d\n", *displayId);
     return 0;
 }
 
 int FrameBuffer::destroyDisplay(uint32_t displayId) {
-    m_displays.erase(displayId);
+    int width, height;
+    {
+        AutoLock mutex(m_lock);
+        m_displays.erase(displayId);
+        // shift the displays
+        uint32_t x = 0;
+        for (auto iter = m_displays.begin(); iter != m_displays.end(); ++iter) {
+            if (iter->first > displayId) {
+                iter->second.pos_x = x;
+            }
+            x += iter->second.width;
+        }
+        getCombinedDisplaySize(&width, &height, true);
+    }
+    // unlock before calling setUIDisplayRegion
+    emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
     return 0;
 }
 
 int FrameBuffer::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer) {
+    DBG("%s: display %d cb %d\n", __FUNCTION__, displayId, colorBuffer);
+    AutoLock mutex(m_lock);
     if (m_displays.find(displayId) == m_displays.end()) {
+        ERR("cannot find display %d\n", displayId);
         return -1;
     }
     ColorBufferMap::iterator c(m_colorbuffers.find(colorBuffer));
@@ -2416,6 +2444,8 @@ int FrameBuffer::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer)
 }
 
 int FrameBuffer::getDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer) {
+    DBG("%s: display %d cb %p\n", __FUNCTION__, displayId, colorBuffer);
+    AutoLock mutex(m_lock);
     if (m_displays.find(displayId) == m_displays.end()) {
         return -1;
     }
@@ -2424,6 +2454,7 @@ int FrameBuffer::getDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer
 }
 
 int FrameBuffer::getColorBufferDisplay(uint32_t colorBuffer, uint32_t* displayId) {
+    AutoLock mutex(m_lock);
     ColorBufferMap::iterator c(m_colorbuffers.find(colorBuffer));
     if (c == m_colorbuffers.end()) {
         return -1;
@@ -2433,6 +2464,7 @@ int FrameBuffer::getColorBufferDisplay(uint32_t colorBuffer, uint32_t* displayId
 }
 
 int FrameBuffer::getDisplayPose(uint32_t displayId, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h) {
+    AutoLock mutex(m_lock);
     if (m_displays.find(displayId) == m_displays.end()) {
         return -1;
     }
@@ -2444,12 +2476,51 @@ int FrameBuffer::getDisplayPose(uint32_t displayId, uint32_t* x, uint32_t* y, ui
 }
 
 int FrameBuffer::setDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
-    if (m_displays.find(displayId) == m_displays.end()) {
-        return -1;
+    int width, height;
+    {
+        AutoLock mutex(m_lock);
+        if (m_displays.find(displayId) == m_displays.end()) {
+            return -1;
+        }
+        if (x == 0 && y ==0) {
+            // ignore x/y, replace display. Assume displays in a row
+            int32_t pos_x, pos_y;
+            getCombinedDisplaySize(&pos_x, &pos_y, true);
+            m_displays[displayId].pos_x = pos_x;
+            m_displays[displayId].pos_y = 0;
+            m_displays[displayId].width = w;
+            m_displays[displayId].height = h;
+        } else {
+            m_displays[displayId].pos_x = x;
+            m_displays[displayId].pos_y = y;
+            m_displays[displayId].width = w;
+            m_displays[displayId].height = h;
+        }
+        getCombinedDisplaySize(&width, &height, true);
+        // (0, 0) at left-top for QT window, at left-bottom for FrameBuffer.
+        emugl::get_emugl_window_operations().setMultiDisplay(0, 0, height - getHeight(),
+                                                             getWidth(), getHeight(),
+                                                              true);
+        emugl::get_emugl_window_operations().setMultiDisplay(displayId,
+                                                             m_displays[displayId].pos_x,
+                                                             height - h,
+                                                             w, h, true);
     }
-    m_displays[displayId].pos_x = x;
-    m_displays[displayId].pos_y = y;
-    m_displays[displayId].width = w;
-    m_displays[displayId].height = h;
+    // unlock before calling setUIDisplayRegion
+    emugl::get_emugl_window_operations().setUIDisplayRegion(0, 0, width, height);
     return 0;
+}
+
+void FrameBuffer::getCombinedDisplaySize(int* w, int* h, bool androidWindow) {
+    // Simple version, displays in a row
+    int max_h = androidWindow ? getHeight() : 0;
+    int total_w = androidWindow ? getWidth() : 0;
+    for (auto iter = m_displays.begin(); iter != m_displays.end(); ++iter) {
+        if (iter->second.height > max_h) {
+            max_h = iter->second.height;
+        }
+        total_w += iter->second.width;
+    }
+    *w = total_w;
+    *h = max_h;
 }
