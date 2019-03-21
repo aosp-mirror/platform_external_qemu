@@ -84,6 +84,10 @@ void RenderLibImpl::setVmOps(const QAndroidVmOperations &vm_operations) {
     set_emugl_vm_operations(vm_operations);
 }
 
+void RenderLibImpl::setWindowOps(const QAndroidEmulatorWindowAgent &window_operations) {
+    set_emugl_window_operations(window_operations);
+}
+
 void RenderLibImpl::setUsageTracker(android::base::CpuUsage* cpuUsage,
                                     android::base::MemoryTracker* memUsage) {
     emugl::setCpuUsage(cpuUsage);

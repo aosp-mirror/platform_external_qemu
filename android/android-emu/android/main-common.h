@@ -88,7 +88,8 @@ typedef struct {
 
 bool configAndStartRenderer(
          AvdInfo* avd, AndroidOptions* opt, AndroidHwConfig* hw,
-         const QAndroidVmOperations *vm_operations,
+         const struct QAndroidVmOperations *vm_operations,
+         const struct QAndroidEmulatorWindowAgent *window_agent,
          enum WinsysPreferredGlesBackend uiPreferredBackend,
          RendererConfig* config_out);
 
