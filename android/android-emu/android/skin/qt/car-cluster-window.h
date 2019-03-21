@@ -17,8 +17,6 @@
 #include <QFrame>
 #include <QWidget>
 
-#include <memory>
-
 class EmulatorQtWindow;
 class ExtendedWindow;
 
@@ -35,12 +33,7 @@ public:
     void show();
     void hide();
 
-    void hideEvent(QHideEvent* event);
-    void showEvent(QShowEvent* event);
-    bool isDismissed();
-
 private:
-    bool mIsDismissed;
     EmulatorQtWindow* mEmulatorWindow;
     std::unique_ptr<Ui::CarClusterWindow> mCarClusterWindowUi;
 };

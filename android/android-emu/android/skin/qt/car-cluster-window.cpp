@@ -16,7 +16,6 @@ CarClusterWindow::CarClusterWindow(EmulatorQtWindow* window, QWidget* parent)
       mCarClusterWindowUi(new Ui::CarClusterWindow),
       mEmulatorWindow(window) {
     mCarClusterWindowUi->setupUi(this);
-    mIsDismissed = false;
 }
 
 CarClusterWindow::~CarClusterWindow()
@@ -29,16 +28,4 @@ void CarClusterWindow::show(){
 
 void CarClusterWindow::hide(){
     QFrame::hide();
-}
-
-void CarClusterWindow::hideEvent(QHideEvent* event) {
-    mIsDismissed = true;
-}
-
-void CarClusterWindow::showEvent(QShowEvent* event) {
-    mIsDismissed = false;
-}
-
-bool CarClusterWindow::isDismissed() {
-    return mIsDismissed;
 }
