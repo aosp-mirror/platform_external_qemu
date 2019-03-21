@@ -12,12 +12,4 @@
 get_filename_component(
   PREBUILT_ROOT
   "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qemu-android-deps/${ANDROID_TARGET_TAG}" ABSOLUTE)
-
-set(SDL2_INCLUDE_DIRS "${PREBUILT_ROOT}/include")
-set(SDL2_INCLUDE_DIR "${PREBUILT_ROOT}/include")
-set(SDL2_LIBRARIES "${PREBUILT_ROOT}/lib/SDL2${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set(SDL_FOUND TRUE)
-
-android_add_prebuilt_library(SDL2 SDL2 "${PREBUILT_ROOT}/lib/SDL2" "${PREBUILT_ROOT}/include/" "" "")
-
-set(PACKAGE_EXPORT "SDL2_INCLUDE_DIR;SDL2_INCLUDE_DIRS;SDL2_LIBRARIES;SDL2_FOUND")
+android_add_prebuilt_library(SDL2 SDL2 "${PREBUILT_ROOT}/lib/libSDL2" "${PREBUILT_ROOT}/include/SDL2" "" "")
