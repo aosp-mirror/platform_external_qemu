@@ -41,7 +41,14 @@ void PostWorker::post(ColorBuffer* cb) {
     //
     // render the color buffer to the window and apply the overlay
     //
+    s_gles2.glViewport(0, 0, m_viewportWidth , m_viewportHeight);
+
     cb->postWithOverlay(tex, zRot, dx, dy);
+
+    s_gles2.glViewport(m_viewportWidth, 0, m_viewportWidth , m_viewportHeight);
+
+    cb->postWithOverlay(tex, zRot, dx, dy);
+
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
 }
 
@@ -50,6 +57,7 @@ void PostWorker::post(ColorBuffer* cb) {
 // when the refresh is a display change, for instance)
 // and resets the posting viewport.
 void PostWorker::viewport(int width, int height) {
+
     // rebind the subwindow eglSurface unconditionally---
     // this could be from a display change
     m_initialized = mBindSubwin();
