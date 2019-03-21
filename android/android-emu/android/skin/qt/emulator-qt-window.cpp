@@ -2200,11 +2200,15 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
     SkinEvent* skin_event = createSkinEvent(type);
     skin_event->u.mouse.button = button;
     skin_event->u.mouse.skip_sync = skipSync;
-    skin_event->u.mouse.x = pos.x();
+    if (pos.x() <= mBackingSurface->w / 2) {
+        skin_event->u.mouse.x = pos.x();
+    } else {
+        skin_event->u.mouse.x = pos.x() - mBackingSurface->w / 2;
+    }
+
     skin_event->u.mouse.y = pos.y();
     skin_event->u.mouse.x_global = gPos.x();
     skin_event->u.mouse.y_global = gPos.y();
-
     skin_event->u.mouse.xrel = pos.x() - mPrevMousePosition.x();
     skin_event->u.mouse.yrel = pos.y() - mPrevMousePosition.y();
     mPrevMousePosition = pos;

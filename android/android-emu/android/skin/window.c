@@ -1649,7 +1649,7 @@ skin_window_scroll_updated( SkinWindow* window, int dx, int xmax, int dy, int ym
 static void
 skin_window_resize( SkinWindow*  window, int resize_container )
 {
-    int           layout_w = window->layout.rect.size.w;
+    int           layout_w = window->layout.rect.size.w * 2;
     int           layout_h = window->layout.rect.size.h;
     int           window_w = layout_w;
     int           window_h = layout_h;

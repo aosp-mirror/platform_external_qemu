@@ -765,6 +765,8 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                  float zRot,
                                  bool deleteExisting) {
     GL_LOG("Begin setupSubWindow");
+    ww = 2 * ww;
+
     if (!m_useSubWindow) {
         ERR("%s: Cannot create native sub-window in this configuration\n",
             __FUNCTION__);
