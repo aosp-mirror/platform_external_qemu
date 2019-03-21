@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c4ed5c1e_75107816",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-21T21:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b4454bae_95ba85d6",
+      "range": {
+        "startLine": 102,
+        "startChar": 42,
+        "endLine": 102,
+        "endChar": 59
+      },
+      "revId": "dc3c56688fca09f735f9e69b16905e02b909e604",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "90212e58_fc731a34",
         "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
         "patchSetId": 2
@@ -39,6 +63,24 @@
       "revId": "dc3c56688fca09f735f9e69b16905e02b909e604",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bc6b92fc_8313cadb",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-21T21:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "90212e58_fc731a34",
+      "revId": "dc3c56688fca09f735f9e69b16905e02b909e604",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -62,6 +104,30 @@
       "revId": "dc3c56688fca09f735f9e69b16905e02b909e604",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a2f4db71_c72f6b6d",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-21T21:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "31345d31_d7c3df0a",
+      "range": {
+        "startLine": 160,
+        "startChar": 4,
+        "endLine": 168,
+        "endChar": 43
+      },
+      "revId": "dc3c56688fca09f735f9e69b16905e02b909e604",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -160,6 +226,30 @@
     },
     {
       "key": {
+        "uuid": "94e6ec67_903c05f3",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-21T21:33:52Z",
+      "side": 1,
+      "message": "I\u0027ll change it to what we expect and revisit this in the next CL.",
+      "parentUuid": "b4a0a193_f9f8858c",
+      "range": {
+        "startLine": 170,
+        "startChar": 4,
+        "endLine": 172,
+        "endChar": 66
+      },
+      "revId": "dc3c56688fca09f735f9e69b16905e02b909e604",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "aad26088_18ef70c1",
         "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
         "patchSetId": 2
@@ -180,6 +270,30 @@
       "revId": "dc3c56688fca09f735f9e69b16905e02b909e604",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a1faa3b1_be435a08",
+        "filename": "android/android-emu/android/videoplayback/VideoplaybackRenderTarget.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1414904
+      },
+      "writtenOn": "2019-03-21T21:33:52Z",
+      "side": 1,
+      "message": "Using the example you provided above, I moved all of this to an uninitialize method and detach+delete the shaders there.",
+      "parentUuid": "aad26088_18ef70c1",
+      "range": {
+        "startLine": 205,
+        "startChar": 4,
+        "endLine": 206,
+        "endChar": 52
+      },
+      "revId": "dc3c56688fca09f735f9e69b16905e02b909e604",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
