@@ -16,17 +16,6 @@
 #include <QWidget>
 #include <QImage>
 
-#ifdef _MSC_VER
-#include "msvc-posix.h"
-#else
-#include <sys/time.h>
-#endif
-
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/system/System.h"
-#include "android/base/threads/FunctorThread.h"
 #include "android/base/threads/WorkerThread.h"
 
 extern "C" {
@@ -51,6 +40,8 @@ signals:
 
 protected:
     void paintEvent(QPaintEvent* event);
+    void showEvent(QShowEvent* event);
+    void hideEvent(QHideEvent* event);
 
 private slots:
     void updatePixmap(const QImage& image);
@@ -67,16 +58,12 @@ private:
     android::base::WorkerProcessingResult workerProcessFrame(FrameInfo& frameInfo);
 
     QPixmap mPixmap;
+
     AVCodec* mCodec;
     AVCodecContext* mCodecCtx;
     AVFrame* mFrame;
+
     SwsContext* mCtx;
 
-    android::base::FunctorThread mCarClusterStartMsgThread;
-    android::base::ConditionVariable mCarClusterStartCV;
-    android::base::Lock mCarClusterStartLock;
-    android::base::MessageChannel<int, 2> mRefreshMsg;
-
     uint8_t* mRgbData;
-    android::base::System::Duration nextRefreshAbsolute();
 };
