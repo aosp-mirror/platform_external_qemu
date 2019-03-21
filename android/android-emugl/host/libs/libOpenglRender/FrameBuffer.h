@@ -37,6 +37,7 @@
 #include <EGL/egl.h>
 
 #include <functional>
+#include <map>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -487,6 +488,16 @@ public:
     int getColorBufferDisplay(uint32_t colorBuffer, uint32_t* displayId);
     int getDisplayPose(uint32_t displayId, uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h);
     int setDisplayPose(uint32_t displayId, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+    void getCombinedDisplaySize(int* w, int* h, bool androidWindow);
+    struct DisplayInfo {
+        uint32_t cb;
+        uint32_t pos_x;
+        uint32_t pos_y;
+        uint32_t width;
+        uint32_t height;
+        DisplayInfo() : cb(0), pos_x(0), pos_y(0), width(0), height(0) {}
+    };
+    std::map<uint32_t, DisplayInfo> m_displays;
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
@@ -543,16 +554,6 @@ private:
     WindowSurfaceMap m_windows;
     ColorBufferMap m_colorbuffers;
     std::unordered_map<HandleType, HandleType> m_windowSurfaceToColorBuffer;
-
-    struct DisplayInfo {
-        uint32_t cb;
-        uint32_t pos_x;
-        uint32_t pos_y;
-        uint32_t width;
-        uint32_t height;
-        DisplayInfo() : cb(0), pos_x(0), pos_y(0), width(0), height(0) {}
-    };
-    std::unordered_map<uint32_t, DisplayInfo> m_displays;
 
     // A collection of color buffers that were closed without any usages
     // (|opened| == false).

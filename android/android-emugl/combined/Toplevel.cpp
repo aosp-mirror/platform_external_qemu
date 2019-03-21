@@ -19,6 +19,7 @@
 #include "android/base/system/System.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/emulation/control/window_agent.h"
 #include "android/emulation/hostpipe/HostGoldfishPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/opengl/emugl_config.h"
@@ -170,6 +171,7 @@ private:
 
         android_startOpenglesRenderer(kWindowSize, kWindowSize, 1, 28,
                                       gQAndroidVmOperations,
+                                      gQAndroidEmulatorWindowAgent,
                                       &maj, &min);
 
         char* vendor = nullptr;

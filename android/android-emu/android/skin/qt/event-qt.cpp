@@ -41,3 +41,9 @@ extern void skin_enable_mouse_tracking(bool enable) {
         window->setMouseTracking(enable);
     }
 }
+
+extern void skin_event_add(SkinEvent* event) {
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (!window) return;
+    window->queueSkinEvent(event);
+}
