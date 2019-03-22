@@ -16,6 +16,8 @@
 #undef ERROR_INVALID_OPERATION
 #include "android/emulation/proto/VehicleHalProto.pb.h"
 #include <QWidget>
+#include <QFont>
+
 #include <string>
 #include "android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h"
 #include <map>
@@ -91,7 +93,9 @@ private:
     int getType(int row);
 
     QTableWidgetItem* createTableTextItem(QString info);
-    QTableWidgetItem* createTableBoolItem(bool val);
+    QTableWidgetItem* createTableTextItemWithFont(QString info, bool writable);
+    QFont nonWritableFont;
+
 
     void updateIndex();
 
