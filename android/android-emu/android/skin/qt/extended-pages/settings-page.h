@@ -11,12 +11,13 @@
 
 #pragma once
 
-#include "android/settings-agent.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "ui_settings-page.h"
 #include <QString>
 #include <QWidget>
 #include <memory>
+#include "android/settings-agent.h"
+#include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/extended-pages/perfstats-page.h"
+#include "ui_settings-page.h"
 
 struct QAndroidHttpProxyAgent;
 
@@ -92,5 +93,6 @@ private:
 
     android::emulation::AdbInterface* mAdb;
     std::unique_ptr<Ui::SettingsPage> mUi;
+    std::unique_ptr<PerfStatsPage> mPerfStatsPage;
     bool    mDisableANGLE = false;
 };

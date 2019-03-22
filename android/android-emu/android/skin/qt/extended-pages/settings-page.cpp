@@ -13,7 +13,6 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/extended-pages/perfstats-page.h"
 #include "android/skin/qt/FramelessDetector.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
@@ -647,9 +646,9 @@ void SettingsPage::on_perfstatsButton_pressed() {
     QString styleString = Ui::fontStylesheet(densityFactor > 1.5);
     styleString += Ui::stylesheetForTheme(getSelectedTheme());
 
-    auto page = new PerfStatsPage(nullptr);
-    page->setStyleSheet(styleString);
-    page->show();
+    mPerfStatsPage.reset(new PerfStatsPage(nullptr));
+    mPerfStatsPage->setStyleSheet(styleString);
+    mPerfStatsPage->show();
 }
 
 void SettingsPage::on_set_clipboardSharing_toggled(bool checked) {
