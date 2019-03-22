@@ -1,0 +1,45 @@
+// Copyright (C) 2019 The Android Open Source Project
+//
+// This software is licensed under the terms of the GNU General Public
+// License version 2, as published by the Free Software Foundation, and
+// may be copied, distributed, and modified under those terms.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+#pragma once
+
+#include <QDialog>
+#include <QSet>
+#include <QVector>
+#include <QPair>
+#include <QtWidgets>
+
+
+class QCheckBox;
+class QLabel;
+class QDialogButtonBox;
+
+
+
+class CheckboxDialog : public QDialog
+{
+       Q_OBJECT
+public:
+    CheckboxDialog(QWidget* parent = 0,
+                   std::map<int32_t, QString>* lookupTable = 0,
+                   QSet<QString>* checkedTitleSet = 0,
+                   const QString& label = "null");
+    std::vector<int32_t>* getVec();
+
+
+public slots:
+    void confirm();
+private:
+
+    QLabel *mLabel;
+    QVector<QPair<QCheckBox*, int32_t>*> mCheckboxsVec;
+    std::vector<int32_t> *mCheckedValues;
+    QDialogButtonBox *mButtonBox;
+};
