@@ -128,15 +128,15 @@ def emit_decode_parameters(typeInfo, api, cgen):
         if i == 0 and p.typeName in DISPATCHABLE_HANDLE_TYPES:
             emit_dispatch_unmarshal(typeInfo, p, cgen)
         else:
-            if param.possiblyOutput():
-                cgen.stmt("// Begin manual dispatchable handle unboxing for %s" % param.paramName)
+            if p.possiblyOutput():
+                cgen.stmt("// Begin manual dispatchable handle unboxing for %s" % p.paramName)
                 cgen.stmt("%s->unsetHandleMapping()" % READ_STREAM)
 
             emit_unmarshal(typeInfo, p, cgen)
 
-            if param.possiblyOutput():
+            if p.possiblyOutput():
                 cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
-                cgen.stmt("// End manual dispatchable handle unboxing for %s" % param.paramName)
+                cgen.stmt("// End manual dispatchable handle unboxing for %s" % p.paramName)
         i += 1
 
     for p in paramsToRead:
