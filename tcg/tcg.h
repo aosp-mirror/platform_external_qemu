@@ -241,7 +241,7 @@ typedef struct TCGRelocation {
     int type;
     tcg_insn_unit *ptr;
     intptr_t addend;
-} TCGRelocation; 
+} TCGRelocation;
 
 typedef struct TCGLabel {
     unsigned has_value : 1;
@@ -603,7 +603,7 @@ typedef uint16_t TCGLifeData;
 /* The layout here is designed to avoid a bitfield crossing of
    a 32-bit boundary, which would cause GCC to add extra padding.  */
 typedef struct TCGOp {
-    TCGOpcode opc   : 8;        /*  8 */
+    uint8_t opc   : 8;        /*  8 */
 
     /* Parameters for this opcode.  See below.  */
     unsigned param1 : 4;        /* 12 */
