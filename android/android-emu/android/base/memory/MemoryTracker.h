@@ -13,6 +13,7 @@
 
 #include "android/base/Compiler.h"
 
+#include <atomic>
 #include <memory>
 #include <string>
 
@@ -38,12 +39,21 @@ class MemoryTracker {
     DISALLOW_COPY_ASSIGN_AND_MOVE(MemoryTracker);
 
 public:
+    struct MallocStats {
+        std::atomic<int64_t> mAllocated{0};
+        std::atomic<int64_t> mLive{0};
+        std::atomic<int64_t> mPeak{0};
+    };
+
     static MemoryTracker* get();
     MemoryTracker();
     bool addToGroup(const std::string& group, const std::string& func);
     std::string printUsage(int verbosity = 0);
     void start();
     void stop();
+    bool isEnabled();
+    std::unique_ptr<MemoryTracker::MallocStats> getUsage(
+            const std::string& group);
 
 private:
     class Impl;

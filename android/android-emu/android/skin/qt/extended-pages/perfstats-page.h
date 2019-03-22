@@ -17,7 +17,7 @@
 
 #include <memory>
 
-class PerfStatsPage : public QWidget
+class PerfStatsPage : public QFrame
 {
     Q_OBJECT
 
