@@ -56,6 +56,7 @@ public:
     virtual void stopTimer() = 0;
     virtual void emitUpdateWidget() = 0;
     virtual void emitVideoFinished() = 0;
+    virtual void emitVideoStopped() = 0;
 
 protected:
     VideoPlayer* mPlayer = nullptr;
